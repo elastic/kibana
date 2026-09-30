@@ -38,6 +38,9 @@ import { withApmSpan } from '../../utils/with_apm_span';
  */
 const MAX_IDS = 1000;
 
+/** Maximum number of distinct transaction name groups returned in Phase 2. */
+const MAX_TRANSACTION_GROUPS = 100;
+
 export function getConnectionTransactions({
   apmEventClient,
   sourceServiceName,
@@ -221,7 +224,7 @@ export function getConnectionTransactions({
         transaction_groups: {
           terms: {
             field: TRANSACTION_NAME,
-            size: 100,
+            size: MAX_TRANSACTION_GROUPS,
           },
           aggs: {
             ...outcomes,

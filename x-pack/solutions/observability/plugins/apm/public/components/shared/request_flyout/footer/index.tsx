@@ -13,7 +13,6 @@ import { ActionsContextMenu, type ActionGroups } from '../../actions_context_men
 import { useDiscoverHref } from '../../links/discover_links/use_discover_href';
 import { useApmRouter } from '../../../../hooks/use_apm_router';
 import { APM_EBT_ACTIONS } from '../../../app/ebt_constants';
-import { SERVICE_MAP_EBT_ELEMENTS } from '../../../app/service_map/ebt_constants';
 import { REQUEST_FLYOUT_EBT_ELEMENTS } from '../ebt_constants';
 import { useRequestFlyoutContext } from '../request_flyout_context';
 
@@ -81,7 +80,7 @@ export function RequestFlyoutFooter() {
         href: discoverHref,
         ebt: {
           action: APM_EBT_ACTIONS.EXPLORE_TRACES,
-          element: SERVICE_MAP_EBT_ELEMENTS.CONNECTION_POPOVER,
+          element: REQUEST_FLYOUT_EBT_ELEMENTS.ACTIONS_MENU,
         },
       });
     }
