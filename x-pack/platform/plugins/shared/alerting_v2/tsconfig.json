@@ -107,6 +107,7 @@
     "@kbn/share-plugin",
     "@kbn/deeplinks-analytics",
     "@kbn/deeplinks-agent-builder",
+    "@kbn/deeplinks-observability",
     "@kbn/unified-doc-viewer-plugin",
     "@kbn/core-user-profile-browser",
     "@kbn/datemath",
@@ -120,6 +121,7 @@
     "@kbn/agent-builder-sml-plugin",
     "@kbn/core-saved-objects-api-server",
     "@kbn/core-elasticsearch-server",
+    "@kbn/core-elasticsearch-server-utils",
     "@kbn/core-user-profile-browser",
     "@kbn/workflows-ui",
     "@kbn/core-spaces-common",
@@ -151,7 +153,9 @@
     "@kbn/security-plugin-types-server",
     "@kbn/core-test-helpers-model-versions",
     "@kbn/content-list-common",
-    "@kbn/core-ui-settings-server"
+    "@kbn/core-ui-settings-server",
+    "@kbn/licensing-plugin",
+    "@kbn/licensing-types"
   ],
   "exclude": ["target/**/*", ".storybook/**/*.js"]
 }

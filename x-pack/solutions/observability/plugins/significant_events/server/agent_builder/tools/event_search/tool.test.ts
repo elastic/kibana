@@ -94,7 +94,7 @@ describe('event_search tool', () => {
     });
 
     const getScopedClients = jest.fn().mockResolvedValue({
-      getEventClient: jest.fn().mockReturnValue({}),
+      getEventSearchClient: jest.fn().mockReturnValue({}),
       licensing: {},
       uiSettingsClient: {},
     });
@@ -150,7 +150,7 @@ describe('event_search tool', () => {
     });
 
     const getScopedClients = jest.fn().mockResolvedValue({
-      getEventClient: jest.fn().mockReturnValue({}),
+      getEventSearchClient: jest.fn().mockReturnValue({}),
       licensing: {},
       uiSettingsClient: {},
     });

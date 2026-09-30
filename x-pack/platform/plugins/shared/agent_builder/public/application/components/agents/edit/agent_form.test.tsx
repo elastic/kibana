@@ -185,7 +185,7 @@ describe('AgentForm', () => {
   it('displays the Managed badge in edit mode when the agent has a non-chat type', () => {
     (useAgentEdit as jest.Mock).mockReturnValue({
       state: editModeState,
-      agentType: 'platform.sig_events.investigation-type',
+      agentType: 'platform.nightshift.investigation-type',
       isLoading: false,
       isSubmitting: false,
       submit: mockSubmit,

@@ -28,10 +28,8 @@ jest.mock('@kbn/alerting-v2-rule-form', () => ({
 }));
 
 jest.mock('@kbn/alerting-v2-schemas', () => ({
-  getBreachEsqlQuery: (query: unknown) =>
-    typeof query === 'object' && query !== null && 'breach' in (query as Record<string, unknown>)
-      ? (query as Record<string, unknown>).breach
-      : '',
+  getBreachEsqlQuery: (query: { base?: string; breach?: { segment: string } } | null) =>
+    query?.breach ? `${query.base} | ${query.breach.segment}` : query?.base ?? '',
   getRecoverEsqlQuery: () => undefined,
 }));
 
@@ -40,6 +38,9 @@ jest.mock('./use_create_rule', () => ({
 }));
 jest.mock('./use_update_rule', () => ({
   useUpdateRule: () => ({ mutate: mockUpdateMutate, isLoading: false }),
+}));
+jest.mock('./use_is_action_policies_license_valid', () => ({
+  useIsActionPoliciesLicenseValid: () => true,
 }));
 
 const mockNavigateToUrl = jest.fn();
@@ -181,8 +182,7 @@ describe('useComposeDiscoverFlyout — builder-to-ES|QL confirmation', () => {
   const builderRule = {
     id: 'rule-builder',
     metadata: { name: 'Builder rule', builder_type: 'threshold' },
-    query: { format: 'standalone', breach: 'FROM logs-* | STATS count() | WHERE count > 5' },
-    recovery_strategy: null,
+    query: { base: 'FROM logs-* | STATS count() | WHERE count > 5' },
     time_field: '@timestamp',
   } as unknown as RuleApiResponse;
 
