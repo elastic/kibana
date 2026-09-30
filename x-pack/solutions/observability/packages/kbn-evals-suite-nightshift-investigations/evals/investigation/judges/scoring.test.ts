@@ -14,6 +14,7 @@ import {
   composeAnswerText,
   composeDecisionTreesText,
   composeEvidenceText,
+  composeTrajectoryText,
   extractReferenceAnswer,
   goalScorePassed,
   normalizeDecisionTreeHelpfulnessScore,
@@ -154,7 +155,7 @@ describe('composeAnswerText', () => {
 });
 
 describe('composeEvidenceText', () => {
-  it('renders hypothesis evidence and recommendations', () => {
+  it('renders hypothesis evidence and recommendations, tagged with their hypothesis', () => {
     const report = {
       hypotheses: [
         {
@@ -163,12 +164,47 @@ describe('composeEvidenceText', () => {
           status: 'confirmed',
           evidence: [{ description: 'ES rejected bulk writes', esql_query: 'FROM logs-*' }],
         },
+        {
+          candidate: 'network',
+          confidence: 0.1,
+          status: 'rejected',
+          evidence: [{ description: 'packet loss briefly spiked' }],
+        },
       ],
       recommendations: [{ title: 'Raise write queue size', confidence: 0.8 }],
     } as unknown as InvestigationStructuredOutput;
     const text = composeEvidenceText(report);
-    expect(text).toContain('ES rejected bulk writes');
+    expect(text).toContain('[confirmed] throttling: ES rejected bulk writes');
     expect(text).toContain('esql: FROM logs-*');
+    expect(text).toContain('[rejected] network: packet loss briefly spiked');
     expect(text).toContain('recommendation: Raise write queue size');
+  });
+});
+
+describe('composeTrajectoryText', () => {
+  it('returns an empty string when there is no trajectory', () => {
+    expect(composeTrajectoryText(undefined)).toBe('');
+    expect(composeTrajectoryText([])).toBe('');
+  });
+
+  it('numbers each step with its tool id, params and result, in order', () => {
+    const text = composeTrajectoryText([
+      {
+        tool_id: 'nightshift_sandbox_view_file',
+        params: { file_path: 'decision-trees/decision_tree_high-cpu.md' },
+        result: '## Symptom: high CPU',
+      },
+      {
+        tool_id: 'nightshift_sandbox_bash',
+        params: { command: 'esql ...' },
+        result: 'exit_code: 0',
+      },
+    ]);
+    expect(text.indexOf('1. nightshift_sandbox_view_file')).toBeLessThan(
+      text.indexOf('2. nightshift_sandbox_bash')
+    );
+    expect(text).toContain('decision_tree_high-cpu.md');
+    expect(text).toContain('## Symptom: high CPU');
+    expect(text).toContain('exit_code: 0');
   });
 });

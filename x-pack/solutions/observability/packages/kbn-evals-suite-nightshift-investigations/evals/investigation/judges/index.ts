@@ -194,7 +194,7 @@ export const createAntiLeakageEvaluator = (deps: JudgeDeps): InvestigationEvalua
       deps,
       ANTI_LEAKAGE_EVALUATOR,
       AntiLeakageJudgePrompt,
-      { question: judge.question, evidence: judge.evidence }
+      { question: judge.question, trajectory: judge.trajectory }
     );
     return {
       score: result.leaked_root_cause ? 0 : 1,
@@ -222,21 +222,26 @@ export const createTruthfulnessEvaluator = (deps: JudgeDeps): InvestigationEvalu
         metadata: { raw_score: null },
       };
     }
-    const { score: rawScore, summary } = await invokeJudge<{ score: number; summary: string }>(
-      deps,
-      TRUTHFULNESS_EVALUATOR,
-      TruthfulnessJudgePrompt,
-      {
-        question: judge.question,
-        answer: judge.answer,
-        evidence: judge.evidence,
-      }
-    );
+    const result = await invokeJudge<{
+      score: number;
+      did_real_work: boolean;
+      evidence_source: string;
+      summary: string;
+    }>(deps, TRUTHFULNESS_EVALUATOR, TruthfulnessJudgePrompt, {
+      question: judge.question,
+      answer: judge.answer,
+      evidence: judge.evidence,
+      trajectory: judge.trajectory,
+    });
     return {
-      score: normalizeTruthfulnessScore(rawScore),
-      label: 'truthfulness',
-      explanation: summary,
-      metadata: { raw_score: rawScore },
+      score: normalizeTruthfulnessScore(result.score),
+      label: result.did_real_work ? 'real_work' : 'no_real_work',
+      explanation: result.summary,
+      metadata: {
+        raw_score: result.score,
+        did_real_work: result.did_real_work,
+        evidence_source: result.evidence_source,
+      },
     };
   },
 });
@@ -276,7 +281,7 @@ export const createDecisionTreeHelpfulnessEvaluator = (
       question: judge.question,
       decisionTrees: judge.decisionTrees,
       answer: judge.answer,
-      evidence: judge.evidence,
+      trajectory: judge.trajectory,
     });
     return {
       score: normalizeDecisionTreeHelpfulnessScore(result.helpfulness_score),

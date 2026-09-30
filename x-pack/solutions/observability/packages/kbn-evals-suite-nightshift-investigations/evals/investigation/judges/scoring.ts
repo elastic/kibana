@@ -6,7 +6,12 @@
  */
 
 import type { InvestigationStructuredOutput } from '@kbn/nightshift-investigations-plugin/common';
-import type { AccessedDecisionTree, InvestigationExample, InvestigationTaskOutput } from '../types';
+import type {
+  AccessedDecisionTree,
+  InvestigationExample,
+  InvestigationTaskOutput,
+  TrajectoryStep,
+} from '../types';
 
 /**
  * Deductive's goal judge scores 1-5 and treats >= 4 as a pass (see
@@ -126,9 +131,10 @@ export const composeAnswerText = (report: InvestigationStructuredOutput | undefi
 };
 
 /**
- * Compose an evidence/trajectory-style text from the structured report. Deductive judges also see a
- * truncated tool-call trajectory; the closest persisted analogue is the evidence attached to each
- * hypothesis, plus the recommendations the agent derived.
+ * Compose the report's own evidence text, per-hypothesis evidence tagged with that hypothesis's
+ * candidate and status so a judge cannot attribute a rejected/secondary hypothesis's evidence to
+ * the primary conclusion, plus the recommendations the agent derived. This is the model's own
+ * *selected* evidence, not what it actually accessed — see `composeTrajectoryText` for that.
  */
 export const composeEvidenceText = (report: InvestigationStructuredOutput | undefined): string => {
   if (!report) return '';
@@ -136,13 +142,31 @@ export const composeEvidenceText = (report: InvestigationStructuredOutput | unde
   for (const hypothesis of report.hypotheses ?? []) {
     for (const evidence of hypothesis.evidence ?? []) {
       const query = evidence.esql_query ? ` [esql: ${evidence.esql_query}]` : '';
-      lines.push(`- ${evidence.description}${query}`);
+      lines.push(
+        `- [${hypothesis.status}] ${hypothesis.candidate}: ${evidence.description}${query}`
+      );
     }
   }
   for (const recommendation of report.recommendations ?? []) {
     lines.push(`- recommendation: ${recommendation.title}`);
   }
   return lines.join('\n');
+};
+
+/**
+ * Render the investigation's actual tool-call trajectory: what it called, with what arguments,
+ * and what came back, in order. Unlike `composeEvidenceText` (the model's own selected evidence),
+ * this is the real accessed history, so judges that must verify what the agent actually saw —
+ * rca_anti_leakage, truthfulness, decision_tree_helpfulness — use this instead.
+ */
+export const composeTrajectoryText = (trajectory: TrajectoryStep[] | undefined): string => {
+  if (!trajectory || trajectory.length === 0) return '';
+  return trajectory
+    .map(
+      ({ tool_id: toolId, params, result }, index) =>
+        `${index + 1}. ${toolId}(${JSON.stringify(params)})\n   → ${result}`
+    )
+    .join('\n');
 };
 
 /**
@@ -165,7 +189,10 @@ export interface JudgeInputs {
   question: string;
   reference?: string;
   answer: string;
+  /** The report's own selected evidence, tagged by hypothesis. */
   evidence: string;
+  /** The actual tool-call trajectory: what the agent really accessed, in order. */
+  trajectory: string;
   category?: string;
   executionError?: string;
   decisionTrees: string;
@@ -182,6 +209,7 @@ export const buildJudgeInputs = (
   reference: extractReferenceAnswer(expected),
   answer: composeAnswerText(output.structured_report),
   evidence: composeEvidenceText(output.structured_report),
+  trajectory: composeTrajectoryText(output.tool_call_trajectory),
   category: typeof metadata?.category === 'string' ? metadata.category : undefined,
   executionError: output.execution_error,
   decisionTrees: composeDecisionTreesText(output.decision_trees_accessed),
