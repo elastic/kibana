@@ -135,9 +135,7 @@ const getNodeToolbarButton = (nodeId: string, testSubjectId: string) => {
     return within(portal).queryByTestId(testSubjectId);
   }
   // Entity nodes: toolbar items live in an absolutely-positioned div inside the node element
-  const nodeElement = document.querySelector<HTMLElement>(
-    `.react-flow__node[data-id="${nodeId}"]`
-  );
+  const nodeElement = document.querySelector<HTMLElement>(`.react-flow__node[data-id="${nodeId}"]`);
   return nodeElement ? within(nodeElement).queryByTestId(testSubjectId) : null;
 };
 

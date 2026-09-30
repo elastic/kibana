@@ -650,9 +650,7 @@ const EntityCardHeaderContent: React.FC<EntityCardHeaderContentProps> = ({
       )}
     </IconBox>
 
-    {isGrouped && (
-      <CountBadge data-test-subj={GRAPH_TAG_COUNT_ID}>{countDisplay}</CountBadge>
-    )}
+    {isGrouped && <CountBadge data-test-subj={GRAPH_TAG_COUNT_ID}>{countDisplay}</CountBadge>}
 
     <EntityInfo data-test-subj={GRAPH_ENTITY_NODE_DETAILS_ID}>
       {isGrouped ? (
@@ -918,7 +916,6 @@ export const EntityCardNode = memo<NodeProps>((props: NodeProps) => {
       onMouseEnter={showToolbar}
       onMouseLeave={hideToolbar}
     >
-
       {/* The entity card is shorter than the full NODE_HEIGHT reservation.
           justify-content: center vertically centres the card in the container
           so top: 50% on the handles lands at the card's true visual centre —
