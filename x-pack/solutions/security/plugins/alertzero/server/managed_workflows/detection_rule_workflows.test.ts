@@ -808,7 +808,7 @@ describe('detection rule workflows', () => {
 
       // No agent runs in the investigation to reference an attachment, so without
       // `render_inline` the analyst only finds these in the attachment list.
-      it.each(['attach_rule', 'refresh_rule_attachment', 'attach_exception'])(
+      it.each(['attach_rule', 'refresh_rule_attachment', 'attach_exception', 'attach_alerts'])(
         'renders %s inline in the investigation',
         (stepName) => {
           const step = reviewSteps.find(({ name }) => name === stepName)!;
@@ -844,6 +844,23 @@ describe('detection rule workflows', () => {
           'Added by the rule tuning workflow after {{ inputs.fp_count }} false positives were reviewed.'
         );
         expect(reviewSteps.indexOf(attach)).toBeLessThan(reviewSteps.indexOf(propose));
+      });
+
+      // The proposal text no longer links alert ids. The attachment takes the
+      // first 20, which is the most `security.alerts` accepts.
+      it('attaches the first 20 false-positive alerts', () => {
+        const attach = reviewSteps.find(({ name }) => name === 'attach_alerts')!;
+
+        expect(review.consts?.alerts_per_attachment).toBe(20);
+        expect(attach.type).toBe('ai.attachment.add');
+        expect(attach.with?.type).toBe('security.alerts');
+        expect(attach.with?.id).toBe('fp-alerts');
+        expect((attach.with?.data as { alertIds?: string }).alertIds).toBe(
+          '${{ inputs.alert_ids | slice: 0, consts.alerts_per_attachment }}'
+        );
+        expect(reviewSteps.indexOf(attach)).toBeGreaterThan(
+          reviewSteps.findIndex(({ name }) => name === 'attach_rule')
+        );
       });
 
       // Both backtests run inside one preview worker execution, and the proposal
@@ -915,8 +932,11 @@ describe('detection rule workflows', () => {
       // Appended with `trigger_mode: never` so the note does not run the investigation
       // agent. A direct request rather than the journal note workflow keeps the
       // proposal gate the only synchronous child in its wake-up cycle.
-      it('posts the diagnosis reasoning to the investigation without running the agent', () => {
-        const note = reviewSteps.find(({ name }) => name === 'post_reasoning')!;
+      it.each([
+        ['post_fp_pattern', '{{ steps.diagnose_rule.output.structured_output.fp_pattern }}'],
+        ['post_reasoning', '{{ steps.diagnose_rule.output.structured_output.reasoning }}'],
+      ])('posts %s to the investigation without running the agent', (stepName, field) => {
+        const note = reviewSteps.find(({ name }) => name === stepName)!;
         const body = note.with?.body as Record<string, string>;
 
         expect(note.type).toBe('kibana.request');
@@ -928,42 +948,58 @@ describe('detection rule workflows', () => {
           '{{ steps.create_investigation.output.conversation_id }}'
         );
         expect(body.trigger_mode).toBe('never');
-        expect(body.input).toContain(
-          '{{ steps.diagnose_rule.output.structured_output.reasoning }}'
-        );
+        expect(body.input).toContain(field);
         expect(reviewSteps.indexOf(note)).toBeLessThan(
           reviewSteps.findIndex(({ name }) => name === 'compose_proposal')
         );
       });
 
-      // The proposal only carries the reasoning when the note did not land, so a
-      // failed post cannot drop it from everything the analyst sees.
+      // The proposal only carries a note when that post did not land, so a failed
+      // post cannot drop it from everything the analyst sees.
       it.each([
-        ['leaves the reasoning out of the proposal when the note landed', {}, false],
+        ['reasoning', 'post_reasoning', '**Reasoning**', '1. Unique reasoning', 'reasoning'],
         [
-          'keeps the reasoning in the proposal when the note failed',
-          { error: { message: 'boom' } },
-          true,
+          'false positive pattern',
+          'post_fp_pattern',
+          '**False positive pattern**',
+          'svc_backup on backup-01',
+          'fp_pattern',
         ],
-      ])('%s', (_scenario, postReasoning, expectReasoning) => {
-        const compose = reviewSteps.find(({ name }) => name === 'compose_proposal')!;
-        const comment = createWorkflowLiquidEngine().parseAndRenderSync(
-          String((compose.with as Record<string, string>).comment),
-          {
-            inputs: { fp_count: 2, alert_ids: ['a', 'b'] },
-            steps: {
-              diagnose_rule: {
-                output: {
-                  structured_output: { change_type: 'manual', reasoning: '1. Unique reasoning' },
+      ])(
+        'keeps the %s in the proposal only when the note failed',
+        (_label, stepName, heading, text, field) => {
+          const compose = reviewSteps.find(({ name }) => name === 'compose_proposal')!;
+          const commentTemplate = String((compose.with as Record<string, string>).comment);
+          const render = (step: Record<string, unknown>) =>
+            createWorkflowLiquidEngine().parseAndRenderSync(commentTemplate, {
+              inputs: { fp_count: 2, alert_ids: ['a', 'b'] },
+              steps: {
+                diagnose_rule: {
+                  output: { structured_output: { change_type: 'manual', [field]: text } },
                 },
+                [stepName]: step,
               },
-              post_reasoning: postReasoning,
-            },
-          }
-        );
+            });
 
-        expect(comment.includes('**Reasoning**')).toBe(expectReasoning);
-        expect(comment.includes('1. Unique reasoning')).toBe(expectReasoning);
+          const landed = render({});
+          const failed = render({ error: { message: 'boom' } });
+
+          expect(landed.includes(heading)).toBe(false);
+          expect(landed.includes(text)).toBe(false);
+          expect(failed.includes(heading)).toBe(true);
+          expect(failed.includes(text)).toBe(true);
+        }
+      );
+
+      it('leaves the investigation link and the recommended action out of the proposals', () => {
+        const entry = reviewSteps.find(({ name }) => name === 'propose_entry')!;
+        const compose = reviewSteps.find(({ name }) => name === 'compose_proposal')!;
+        const entryComment = String((entry.with?.inputs as { comment: string }).comment);
+        const proposalComment = String((compose.with as Record<string, string>).comment);
+
+        expect(entryComment).not.toContain('investigation_line');
+        expect(proposalComment).not.toContain('investigation_line');
+        expect(proposalComment).not.toContain('Recommended action');
       });
 
       // A skipped step renders as nil, so `nil == 'succeeded'` is false and the

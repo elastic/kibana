@@ -126,6 +126,9 @@ consts:
   applied_tag: detection-watch:tuning-applied
   acknowledged_tag: detection-watch:tuning-acknowledged
   no_items: []
+  # Mirrors ALERTS_BATCH_MAX_SIZE. `security.alerts` rejects a longer `alertIds`
+  # list. The attachment shows the first 20 ids. The proposal text does not.
+  alerts_per_attachment: 20
 steps:
   # Fetched by saved-object id, which pins the exact rule incarnation that produced
   # the harvested alerts: a rule deleted and recreated under the same signature 404s
@@ -180,14 +183,29 @@ steps:
     on-failure:
       continue: true
 
+  # By value: the first 20 harvested false-positive ids. The schema rejects a
+  # longer list. A fixed id makes a retry of this run 409 instead of appending
+  # a second copy.
+  - name: attach_alerts
+    type: ai.attachment.add
+    if: "${{ steps.create_investigation.output.conversation_id != null }}"
+    with:
+      conversation_id: "{{ steps.create_investigation.output.conversation_id }}"
+      id: fp-alerts
+      type: security.alerts
+      data:
+        alertIds: "${{ inputs.alert_ids | slice: 0, consts.alerts_per_attachment }}"
+      description: "False-positive alerts under review for rule: {{ steps.fetch_rule.output.name }}"
+      render_inline: true
+    on-failure:
+      continue: true
+
   # Evidence shared by both proposal comments below.
   - name: compose_evidence
     type: data.set
     with:
       rule_line: "**Rule:** [{{ steps.fetch_rule.output.name }}](/s/{{ workflow.spaceId }}/app/security/rules/id/{{ inputs.rule_uuid }}) (`{{ inputs.rule_uuid }}`)"
-      investigation_line: "**Investigation:** [Rule tuning: {{ steps.fetch_rule.output.name }}](/s/{{ workflow.spaceId }}/app/agent_builder/conversations/{{ steps.create_investigation.output.conversation_id }})"
       fp_summary: "{% if inputs.total_alert_count > 0 %}{{ inputs.total_fp_count }} of {{ inputs.total_alert_count }} alerts ({{ inputs.total_fp_count | times: 100 | divided_by: inputs.total_alert_count }}%) in the last {{ inputs.analysis_window_days | default: consts.analysis_window_days }} days were closed as false positives; {{ inputs.fp_count }} of them are not reviewed yet.{% else %}{{ inputs.fp_count }} alerts were closed as false positives in the last {{ inputs.analysis_window_days | default: consts.analysis_window_days }} days.{% endif %}"
-      sample_alerts: "{% for alert_id in inputs.alert_ids limit: 5 %}[{{ alert_id }}](/s/{{ workflow.spaceId }}/app/security/alerts/redirect/{{ alert_id }}?index=.alerts-security.alerts-{{ workflow.spaceId }}){% unless forloop.last %}, {% endunless %}{% endfor %}"
 
   # Manual autonomy entry gate: the sweep's findings are reported and nothing else
   # happens until an analyst approves the review. No action, so approval is the whole
@@ -209,13 +227,9 @@ steps:
           **Review rule for tuning?**
 
           {{ steps.compose_evidence.output.rule_line }}
-          {{ steps.compose_evidence.output.investigation_line }}
 
           **Why this rule was picked**
           {{ steps.compose_evidence.output.fp_summary }}
-
-          **Sample alerts**
-          {{ steps.compose_evidence.output.sample_alerts }}
 
           **On approval**
           The agent diagnoses these false positives and proposes a tuning change, which returns as a second proposal for your approval before anything is applied to the rule. Dismissing marks these alerts reviewed and ends the review.
@@ -641,13 +655,35 @@ steps:
       proposed_is_aborted: "${{ steps.run_previews.output.proposed_is_aborted | default: false }}"
       proposed_error_text: "{{ steps.run_previews.output.proposed_error_text }}"
 
-  # The diagnosis reasoning goes to the investigation as a note rather than into the
-  # proposal, which keeps only what the decision needs. `trigger_mode: never` appends
-  # a user_message without running the investigation agent. Called directly rather
-  # than through the journal note workflow, because this run allows one synchronous
-  # child per wake-up cycle and the proposal gate below is that child. User messages
-  # render as plain text, so no markdown. If the note fails, compose_proposal keeps
-  # the reasoning so the analyst still sees it.
+  # Diagnosis notes go to the investigation rather than into the proposal, which
+  # keeps only what the decision needs. `trigger_mode: never` appends a user_message
+  # without running the investigation agent. Called directly rather than through the
+  # journal note workflow, because this run allows one synchronous child per wake-up
+  # cycle and the proposal gate below is that child. User messages render as plain
+  # text, so no markdown. If a note fails, compose_proposal keeps that text so the
+  # analyst still sees it.
+  - name: post_fp_pattern
+    type: kibana.request
+    if: >-
+      ${{ steps.create_investigation.output.conversation_id != null
+        and steps.diagnose_rule.output.structured_output.fp_pattern != blank }}
+    with:
+      method: POST
+      path: "/s/{{ workflow.spaceId }}/api/chat/converse"
+      headers:
+        kbn-xsrf: string
+        elastic-api-version: "2023-10-31"
+        Content-Type: application/json
+      body:
+        conversation_id: "{{ steps.create_investigation.output.conversation_id }}"
+        input: |-
+          False positive pattern for {{ steps.fetch_rule.output.name }}:
+
+          {{ steps.diagnose_rule.output.structured_output.fp_pattern }}
+        trigger_mode: never
+    on-failure:
+      continue: true
+
   - name: post_reasoning
     type: kibana.request
     if: >-
@@ -682,8 +718,6 @@ steps:
         **{{ steps.diagnose_rule.output.structured_output.title | default: "Rule tuning review" }}**
 
         {{ steps.compose_evidence.output.rule_line }}
-        **Recommended action:** {% case steps.diagnose_rule.output.structured_output.change_type %}{% when "query" %}Edit rule query{% when "exception" %}Create exception{% when "risk_score" %}Edit rule settings (risk score and severity){% when "threshold" %}Edit rule settings (threshold){% when "schedule" %}Edit rule settings (schedule){% else %}Manual change, no automated action{% endcase %}
-        {{ steps.compose_evidence.output.investigation_line }}
 
         **Why this rule needs tuning**
         {{ steps.compose_evidence.output.fp_summary }}
@@ -693,17 +727,16 @@ steps:
 
         **Summary**
         {{ steps.diagnose_rule.output.structured_output.summary }}
+        {% if steps.post_fp_pattern.error %}
 
         **False positive pattern**
         {{ steps.diagnose_rule.output.structured_output.fp_pattern }}
+        {% endif %}
         {% if steps.post_reasoning.error %}
 
         **Reasoning**
         {{ steps.diagnose_rule.output.structured_output.reasoning }}
         {% endif %}
-
-        **Sample alerts**
-        {{ steps.compose_evidence.output.sample_alerts }}
 
         **Proposed change**
         {% case steps.diagnose_rule.output.structured_output.change_type %}
