@@ -6,6 +6,7 @@
  */
 
 import { EuiProvider } from '@elastic/eui';
+import { MockAppHeaderProvider } from '@kbn/app-header/mocks';
 import type { CoreStart } from '@kbn/core/public';
 import { coreMock, scopedHistoryMock } from '@kbn/core/public/mocks';
 import { contentListQueryClient } from '@kbn/content-list-provider';
@@ -73,23 +74,25 @@ const mockContextEngineHttpGet = (
 
 const renderWithProviders = (core: CoreStart) =>
   render(
-    <I18nProvider>
-      <EuiProvider>
-        <KibanaContextProvider
-          services={{
-            ...core,
-            history: scopedHistoryMock.create(),
-            appChrome: createAppChromeMock(),
-          }}
-        >
-          <QueryClientProvider client={createTestQueryClient()}>
-            <MemoryRouter>
-              <ContextLandingPage />
-            </MemoryRouter>
-          </QueryClientProvider>
-        </KibanaContextProvider>
-      </EuiProvider>
-    </I18nProvider>
+    <MockAppHeaderProvider chrome={core.chrome}>
+      <I18nProvider>
+        <EuiProvider>
+          <KibanaContextProvider
+            services={{
+              ...core,
+              history: scopedHistoryMock.create(),
+              appChrome: createAppChromeMock(),
+            }}
+          >
+            <QueryClientProvider client={createTestQueryClient()}>
+              <MemoryRouter>
+                <ContextLandingPage />
+              </MemoryRouter>
+            </QueryClientProvider>
+          </KibanaContextProvider>
+        </EuiProvider>
+      </I18nProvider>
+    </MockAppHeaderProvider>
   );
 
 describe('ContextLandingPage', () => {

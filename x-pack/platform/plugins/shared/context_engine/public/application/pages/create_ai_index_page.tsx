@@ -92,7 +92,6 @@ export const CreateAiIndexPage = () => {
           event.preventDefault();
           navigateToContextEngine(CONTEXT_ENGINE_PATHS.landing);
         }}
-        element={CONTEXT_ENGINE_UI_EBT.element.aiIndexCreatePage}
         pageTitle={createPageTitle}
         description={createPageDescription}
       />
