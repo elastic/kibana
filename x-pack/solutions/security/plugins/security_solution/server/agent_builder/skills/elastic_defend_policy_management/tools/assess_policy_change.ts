@@ -365,6 +365,7 @@ export const createAssessPolicyChangeTool = ({
       'plus policy identity and version, enrolled-agent blast-radius source, population, and complete status map, ' +
       'globalBlockers as whole-policy blockers distinct from per-path eligibility, ' +
       'and per-path eligibility computed from registry license, current license, product features, and environment. ' +
+      'If any requested operation is rejected, assessment halts without making changes and returns error rejected_operations with structured rejections identifying each rejected operation index, path, reason, and acceptedValues where applicable. ' +
       'Uses status.all as the enrolled-agent headline only when that key is present. ' +
       'Each returned section can be bounded; when a section is truncated its *_value_truncated is true and *_value_total is the complete count, and an empty truncated section is not a no-op and is not evidence of no impact. Section-level *_value_truncated uses *_value_total and means the section is incomplete; a value_truncation summary on a requested operation or a from_truncation or to_truncation summary on a row means that displayed value is partial, with truncation sites listed at paths relative to that value, string, array, and object truncation distinguished, and entries capped at 50 with entries_truncated true disclosing further sites. ' +
       'Does not write policies.',

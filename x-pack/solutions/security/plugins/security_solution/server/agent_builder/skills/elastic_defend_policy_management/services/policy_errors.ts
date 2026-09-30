@@ -106,8 +106,8 @@ export class PolicyWriteUnverifiedError extends Error {
   public readonly before: PolicyWriteIdentity;
   public readonly observed?: PolicyWriteIdentity;
 
-  constructor(before: PolicyWriteIdentity, observed?: PolicyWriteIdentity) {
-    super(POLICY_ERROR_MESSAGES.write_unverified);
+  constructor(before: PolicyWriteIdentity, observed?: PolicyWriteIdentity, cause?: unknown) {
+    super(POLICY_ERROR_MESSAGES.write_unverified, cause !== undefined ? { cause } : undefined);
     this.name = 'PolicyWriteUnverifiedError';
     this.before = before;
     if (observed !== undefined) {

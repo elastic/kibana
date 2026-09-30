@@ -15,6 +15,7 @@ import type { StartServicesAccessor } from '@kbn/core/server';
 import { httpServerMock, loggingSystemMock } from '@kbn/core/server/mocks';
 import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 import { z } from '@kbn/zod/v4';
+import { DeviceControlAccessLevel } from '../../../../../common/endpoint/types';
 import { createMockEndpointAppContextService } from '../../../../endpoint/mocks';
 import {
   EndpointAuthorizationError,
@@ -23,12 +24,10 @@ import {
 } from '../../../../endpoint/errors';
 import { createToolHandlerContext } from '../../../__mocks__/test_helpers';
 import {
-  DEVICE_POPUP_ENABLED_UNSUPPORTED_MESSAGE,
   POLICY_CHANGE_PREPARATION_ERROR_CODE,
   POLICY_CHANGE_SCHEMA_MESSAGE,
   PolicyChangePreparationError,
-  nonWritablePathMessage,
-  unknownCurrentValueMessage,
+  PolicyChangeRejectedError,
 } from '../domain/impact';
 import type { EndpointPolicyManagementService } from '../services/endpoint_policy_management_service';
 import { createEndpointPolicyManagementService } from '../services/endpoint_policy_management_service';
@@ -156,24 +155,8 @@ describe('classifyPolicyError', () => {
     expect(classifyPolicyError(new EndpointHttpError('missing', 404))).toBe('not_found');
   });
 
-  it('classifies expected PolicyChangePreparationError codes and ignores raw messages', () => {
+  it('classifies preparation codes and rejected operations, ignoring raw messages', () => {
     const leakyPath = 'linux.advanced.artifacts.global.channel';
-    expect(
-      classifyPolicyError(
-        new PolicyChangePreparationError(
-          POLICY_CHANGE_PREPARATION_ERROR_CODE.non_writable_path,
-          nonWritablePathMessage(leakyPath)
-        )
-      )
-    ).toBe('non_writable_path');
-    expect(
-      classifyPolicyError(
-        new PolicyChangePreparationError(
-          POLICY_CHANGE_PREPARATION_ERROR_CODE.unsupported_operation,
-          DEVICE_POPUP_ENABLED_UNSUPPORTED_MESSAGE
-        )
-      )
-    ).toBe('unsupported_operation');
     expect(
       classifyPolicyError(
         new PolicyChangePreparationError(
@@ -182,14 +165,6 @@ describe('classifyPolicyError', () => {
         )
       )
     ).toBe('invalid_input');
-    expect(
-      classifyPolicyError(
-        new PolicyChangePreparationError(
-          POLICY_CHANGE_PREPARATION_ERROR_CODE.unknown_current_value,
-          unknownCurrentValueMessage(leakyPath)
-        )
-      )
-    ).toBe('unknown_current_value');
     expect(
       classifyPolicyError(
         new PolicyChangePreparationError('unknown_code' as 'invalid_input', leakyPath)
@@ -361,7 +336,7 @@ describe('createPolicyTool', () => {
     expect((result.data as ErrorResultData).metadata).not.toHaveProperty('observed');
     expect(serialized).not.toContain('proposedConfig');
     expect(serialized).not.toContain('config');
-    expect(logger.debug).toHaveBeenCalledWith(`Error in ${TOOL_ID}: write_unverified`);
+    expect(logger.warn).toHaveBeenCalledWith(`Write unverified in ${TOOL_ID} for policy policy-1`);
     expect(logger.error).not.toHaveBeenCalled();
   });
 
@@ -411,67 +386,78 @@ describe('createPolicyTool', () => {
       },
     });
     expect(serialized).not.toContain('proposedConfig');
-    expect(logger.debug).toHaveBeenCalledWith(`Error in ${TOOL_ID}: write_unverified`);
+    expect(logger.warn).toHaveBeenCalledWith(`Write unverified in ${TOOL_ID} for policy policy-1`);
     expect(logger.error).not.toHaveBeenCalled();
   });
 
-  it.each([
-    [
-      'non_writable_path',
-      new PolicyChangePreparationError(
-        POLICY_CHANGE_PREPARATION_ERROR_CODE.non_writable_path,
-        nonWritablePathMessage('linux.advanced.artifacts.global.channel')
-      ),
-      ['linux.advanced.artifacts.global.channel', 'Path is not a writable policy field'],
-    ],
-    [
-      'unsupported_operation',
-      new PolicyChangePreparationError(
-        POLICY_CHANGE_PREPARATION_ERROR_CODE.unsupported_operation,
-        DEVICE_POPUP_ENABLED_UNSUPPORTED_MESSAGE
-      ),
-      ['device_control.enabled'],
-    ],
-    [
-      'invalid_input',
-      new PolicyChangePreparationError(
-        POLICY_CHANGE_PREPARATION_ERROR_CODE.invalid_input,
-        POLICY_CHANGE_SCHEMA_MESSAGE
-      ),
-      [],
-    ],
-    [
-      'unknown_current_value',
-      new PolicyChangePreparationError(
-        POLICY_CHANGE_PREPARATION_ERROR_CODE.unknown_current_value,
-        unknownCurrentValueMessage('windows.advanced.malware.mode')
-      ),
-      ['windows.advanced.malware.mode', 'current value is not present in the live policy'],
-    ],
-  ] as const)(
-    'returns a canned %s refusal without raw preparation text or paths and debug-logs it',
-    async (errorClass, thrown, leakedFragments) => {
-      const logger = createLogger();
-      const run = jest.fn(async () => {
-        throw thrown;
-      });
-      const { result } = await getHandlerResult(run, { logger });
-      const serialized = JSON.stringify(result.data);
+  it('returns rejected_operations with paths, reasons, and accepted values verbatim', async () => {
+    const logger = createLogger();
+    const thrown = new PolicyChangeRejectedError([
+      {
+        operationIndexes: [0],
+        path: 'windows.antivirus_registration.enabled',
+        reason: 'derived_setting',
+      },
+      {
+        operationIndexes: [1],
+        path: 'windows.device_control.usb_storage',
+        reason: 'invalid_value',
+        acceptedValues: {
+          type: 'enum',
+          values: [
+            DeviceControlAccessLevel.audit,
+            DeviceControlAccessLevel.read_only,
+            DeviceControlAccessLevel.no_execute,
+            DeviceControlAccessLevel.deny_all,
+          ],
+        },
+      },
+    ]);
+    const run = jest.fn(async () => {
+      throw thrown;
+    });
+    const { result } = await getHandlerResult(run, { logger });
+    const serialized = JSON.stringify(result.data);
 
-      expect(result.type).toBe(ToolResultType.error);
-      expect(result.data).toEqual({
-        message: POLICY_TOOL_ERROR_MESSAGES[errorClass],
-        metadata: { error: errorClass },
-      });
-      expect(result.data).not.toHaveProperty('stack');
-      expect(serialized).not.toContain(thrown.message);
-      for (const fragment of leakedFragments) {
-        expect(serialized).not.toContain(fragment);
-      }
-      expect(logger.debug).toHaveBeenCalledWith(`Error in ${TOOL_ID}: ${errorClass}`);
-      expect(logger.error).not.toHaveBeenCalled();
-    }
-  );
+    expect(result.type).toBe(ToolResultType.error);
+    expect(result.data).toEqual({
+      message: POLICY_TOOL_ERROR_MESSAGES.rejected_operations,
+      metadata: {
+        error: 'rejected_operations',
+        rejections: thrown.rejections,
+        rejections_total: 2,
+      },
+    });
+    expect(result.data).not.toHaveProperty('stack');
+    expect(serialized).not.toContain('Path is not a writable policy field');
+    expect(serialized).not.toContain('current value is not present in the live policy');
+    expect(logger.debug).toHaveBeenCalledWith(`Error in ${TOOL_ID}: rejected_operations`);
+    expect(logger.warn).not.toHaveBeenCalled();
+    expect(logger.error).not.toHaveBeenCalled();
+  });
+
+  it('returns a canned invalid_input refusal without raw preparation text and debug-logs it', async () => {
+    const logger = createLogger();
+    const thrown = new PolicyChangePreparationError(
+      POLICY_CHANGE_PREPARATION_ERROR_CODE.invalid_input,
+      POLICY_CHANGE_SCHEMA_MESSAGE
+    );
+    const run = jest.fn(async () => {
+      throw thrown;
+    });
+    const { result } = await getHandlerResult(run, { logger });
+    const serialized = JSON.stringify(result.data);
+
+    expect(result.type).toBe(ToolResultType.error);
+    expect(result.data).toEqual({
+      message: POLICY_TOOL_ERROR_MESSAGES.invalid_input,
+      metadata: { error: 'invalid_input' },
+    });
+    expect(result.data).not.toHaveProperty('stack');
+    expect(serialized).not.toContain(thrown.message);
+    expect(logger.debug).toHaveBeenCalledWith(`Error in ${TOOL_ID}: invalid_input`);
+    expect(logger.error).not.toHaveBeenCalled();
+  });
 
   it('error-logs unknown faults and returns a stable non-sensitive message', async () => {
     const logger = createLogger();

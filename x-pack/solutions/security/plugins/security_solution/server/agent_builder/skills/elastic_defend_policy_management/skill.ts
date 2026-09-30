@@ -60,11 +60,11 @@ Load when the user is **deciding** what an Elastic Defend policy should be:
 - Comparing policies
 - Reading current assigned-versus-applied rollout status
 - Assessing the impact of a proposed change
-- Applying a previously assessed tier-1 change after user confirmation
+- Applying a previously assessed policy change after user confirmation
 - Planning a rollout
 
 Live list, get, compare, rollout status, and proposed-change assessment are available in the current
-space. A confirmed tier-1 change may be applied only through the gated apply workflow below. Follow
+space. A confirmed policy change may be applied only through the gated apply workflow below; writable scope covers operations the assess tool accepts and reports eligible. Follow
 Never state a number that did not come from a tool for counts.
 
 ## When not to use this skill
@@ -124,9 +124,10 @@ returned.
 Whenever a returned truncation marker is true, state that the displayed result is partial and do not claim completeness, unchanged state, a no-op, or the absence of an undisplayed path beyond the returned rows. When \`name_string_truncated\` is true, later get, compare, rollout status, or assess \`idOrName\` calls must pass \`policy.id\`, not the presented \`name\`; apply \`idOrName\` calls have the same stable-id requirement; the truncated name is not an exact stored name.
 
 ### Hand off advanced writes to the UI
-For an advanced setting the user wants to change: explain it, state the tradeoff, give the exact
-key and suggested value from retrieved documentation, and hand off advanced writes to the UI. Do
-not apply advanced settings. Advanced writes are unavailable and must not be inferred; use the UI handoff.
+"Advanced Policy Settings" means only \`*.advanced.*\` paths. Hand off only those settings, and only when a returned fact identifies the path as advanced: reason \`advanced_setting\` in any returned result (assess rejection, compare row, or field-reference result) or a field-reference entry with \`tier: 2\`. For such an advanced setting the user wants to change: explain it, state the tradeoff, give the exact key and suggested value from retrieved documentation, and hand off advanced writes to the UI. Do not apply advanced settings; use the UI handoff.
+
+### Report not_supported_by_skill as a policy-UI-only setting
+For any returned reason \`not_supported_by_skill\` — from field reference, assess, apply, or compare — say the setting can be changed in the policy UI but not through this skill.
 
 ### Keep OS tuning inside package-policy guidance
 For an OS-tuning or baseline answer, use current-turn Integration Knowledge only for package-policy guidance and use the field-reference result for exact setting existence, defaults, and legal values. Values restated from a returned baseline config or a returned compare row with a baseline side need no additional field-reference lookup; all other setting assertions retain their grounding requirements. Do not compose host prerequisites, installation or permission steps, troubleshooting, incident remediation, artifact or exception guidance, or deployment-role taxonomies into the answer. A retrieved related-troubleshooting section is routing context, not policy-setting guidance. If retrieved sources conflict or do not support a claim, omit the disputed claim and state that grounded guidance is unavailable. Keep each OS section to supported settings, values, behavior, and tradeoffs.
@@ -177,9 +178,15 @@ or retrieved documentation and must not be inferred. Values restated from a retu
 Call the matching live tool only when the user already named the policy, explicitly asked to compare
 policies, explicitly asked for current rollout status, requested a bounded proposed-change assessment,
 requested a deployment baseline for a supported named preset, or requested apply after a successful matching assessment.
+Assess and apply take one policy at a time; for several policies, assess and confirm each separately, and never claim multi-policy changes are unsupported.
 A used, unused, or undetermined usage question — for a named policy or current-space-wide — routes to
 \`${LIST_POLICIES_TOOL_ID}\` with \`includeEndpointUsage: true\`. Setting existence still requires the
-field-reference tool. Values restated from a returned baseline config or a returned compare row with a baseline side need no additional field-reference lookup; all other setting assertions retain their grounding requirements. For tier-1 apply requests, follow Apply a confirmed tier-1 change. For advanced writes, follow Hand off advanced writes to the UI.
+field-reference tool. Values restated from a returned baseline config or a returned compare row with a baseline side need no additional field-reference lookup; all other setting assertions retain their grounding requirements. For apply requests, follow Apply a confirmed policy change. For advanced writes, follow Hand off advanced writes to the UI.
+
+### Compare, align, or revert policies
+To make one policy match another policy or a baseline, always run \`${COMPARE_POLICIES_TOOL_ID}\` for that pair and build operations only from returned compare rows with \`writable: true\`. Never build operations from \`get_policy\` or baseline values directly. When a row carries \`absent_side\`, copy it only into the side that lacks the value; if the policy being changed already has the value and the other side is the one that lacks it, do not copy it, because the other policy does not set that setting and the policy being changed keeps its value. When you copy a one-sided \`*.device_control.usb_storage\` row, also include the matching one-sided \`*.device_control.enabled\` row for the same operating system with value \`true\` in the same operations. If \`value_truncated\` is true on the compare result, say that writable rows may be missing and offer to compare again after applying; do not answer that the proposal covers only the returned rows. If the user asks to make two live policies match and did not say which one to keep, ask which policy to change before assessing.
+
+Do not submit \`writable: false\` rows as operations. Report \`advanced_setting\`, \`not_user_editable\`, \`unknown_path\`, and \`not_supported_by_skill\` rows as not changeable through this skill with the returned reason. For \`missing_on_one_side\` rows, say one policy does not have this setting and the skill cannot add it. For \`derived_setting\` rows, explain that the setting is not directly writable but can change as a side effect of another change (for example antivirus registration follows the Windows malware mode); do not submit it as an operation, and check the assessment's \`sideEffects\` before saying it will stay different or will match. For \`coupled_only\` rows, device-control notification enablement changes through the \`*.device_control.enabled\` or \`*.device_control.usb_storage\` path; use that path when it matches the user's intent.
 
 ### Assess a proposed change before reporting impact
 If the user asks what a bounded proposed change would do to a policy, call only
@@ -203,7 +210,14 @@ omitted keys into an all-others-are-zero sentence. Do not add paths, defaults, o
 states, or alert-field claims that the assess result did not return. Restate per-path eligibility only as the assess tool computed it; do not infer eligibility. Report returned global blockers once as whole-policy blockers; do not attribute them to unrelated changed paths or reinterpret them as per-path eligibility.
 In the assessment-report phase, never claim a change is safe, unsafe, recommended, ready to apply, or unchanged since assessment.
 
-### Apply a confirmed tier-1 change
+When assess or apply returns a \`rejected_operations\` error, report each returned rejection with its \`path\` and \`reason\`. Never generalize a rejection to other paths or a setting family. After a rejection, you may assess the remaining operations without the rejected ones, and you must tell the user what was removed. Correcting rejections can reveal a later \`conflicting_operations\` or \`invalid_combination\` rejection; report it the same way. A rejection with empty \`operationIndexes\` means the stored policy already has an invalid combination: do not remove operations; tell the user to fix it in the policy UI.
+Handle specific rejection reasons as follows:
+- \`invalid_value\`: Tell the user the accepted values from \`acceptedValues\` and ask which to use; do not guess.
+- \`coupled_only\`: Device-control notification enablement changes through the \`*.device_control.enabled\` or \`*.device_control.usb_storage\` path; use that path when it matches the user's intent.
+- \`current_value_missing\`: Explain that this policy does not have this setting yet, so it cannot be set through this skill; do not generalize to other policies. For \`*.device_control.usb_storage\`, say that Device Control is not set up on this policy and offer to turn it on in the same request; say that turning it on sets up Device Control on Windows and macOS with default values, and that the confirmation card shows every change.
+- \`derived_setting\`: Explain that the setting is not directly writable but can change as a side effect of another change; do not submit it as an operation, and check the assessment's \`sideEffects\` before saying it will stay different or will match.
+
+### Apply a confirmed policy change
 After a successful assessment, if the user requests applying the same policy operations in this conversation, call \`${APPLY_POLICY_CHANGE_TOOL_ID}\` with that assessment's version, never its revision and never a replacement get version. Every apply invocation requires a successful preview and fresh user confirmation before the handler can write. A user request to apply only if they confirm is a request to start this gated flow: call the apply tool so it presents the confirmation card; do not ask for or wait for a separate free-text confirmation. The write can occur only after the user accepts that card. Do not apply advanced settings: follow Hand off advanced writes to the UI. Agent-policy assignments remain Fleet-owned and outside this skill.
 
 The assessment report is assess-only and uses no extra inline or knowledge tool; that restriction ends when the user subsequently requests the gated apply. Apply is not a readiness or rollout claim.
@@ -211,6 +225,8 @@ The assessment report is assess-only and uses no extra inline or knowledge tool;
 Always report returned before and after version and revision. Report returned requestedChanges, sideEffects, residual, and apply enrollment as observed facts only. \`requestedChanges\` are the assessed and confirmed proposal rows submitted to Fleet and \`sideEffects\` are assessment-predicted effects; neither proves final state, while \`after\` and \`residual\` describe the policy Fleet returned. Report returned rows and values only, disclose independent section and per-value truncation, and never reconstruct historical residuals from a later get. Do not claim safe, unsafe, recommended, ready, or host rollout. Unchanged since assessment is allowed only after a successful apply whose before.version matches the assessed expected version, and only for that pre-write interval.
 
 A version_conflict means this apply invocation made no write. Report the conflict and stop the apply workflow. Do not reassess, call apply again, or present another confirmation card unless the user makes a new request to apply after seeing the conflict. That later request requires a new successful assessment and fresh confirmation. A write_unverified outcome is unknown; any observed identity is current identity, not success or attribution. Read the original policy id and reassess only to report current observed state; if that read fails, stop. Do not call apply again or present another confirmation card unless the user then makes a new request to apply. Never retry automatically.
+
+An apply error result without \`metadata.error\`, when no confirmation card was shown for that call, means nothing was written. This covers a failed preview, a framework parameter-validation error, and a non-interactive auto-decline; do not claim which one unless the returned text says so. Report the returned message plainly and do not claim success. If the text names a Policy Management error (for example \`PolicyVersionConflictError\`), follow that error's rule. Otherwise do not call apply again, including to correct parameters. A new attempt needs a new user request and a fresh assessment.
 
 ### Guided detect-to-prevent and staged rollout
 Search \`${platformCoreTools.integrationKnowledge}\` semantically using detect versus prevent,
@@ -227,7 +243,7 @@ separate guidance phase grounded in retrieved integration knowledge. In the guid
 \`from\` is the live current state and assess \`to\` is proposed only. Do not describe \`to\` as current,
 applied, in effect, or the rollout starting point. The staged sequence starts from assess \`from\`.
 
-Users execute advanced policy settings and assignment changes in the Elastic Defend policy UI. The confirmed tier-1 apply workflow may write only the assessed policy change. Keep protection-mode transition, cohort assignment, and artifact freshness distinct.
+Users execute advanced policy settings and assignment changes in the Elastic Defend policy UI. The confirmed apply workflow may write only the assessed policy change. Keep protection-mode transition, cohort assignment, and artifact freshness distinct.
 Omit unsourced defaults, counts, percentages, durations, intervals, and artifact or exception-list names.
 Never emit field names, paths, rollout-status health, or applied-state verdicts.
 Restate assess-returned eligibility only as the assess tool computed it; do not infer deployment eligibility from retrieved documentation.
