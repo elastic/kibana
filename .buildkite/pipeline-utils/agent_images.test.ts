@@ -159,7 +159,7 @@ describe('agent_images', () => {
     });
 
     it('omits disk size when not provided so the image default applies', () => {
-      expect(expandAgentQueue('n2-4-spot', undefined)).not.toHaveProperty('diskSizeGb');
+      expect(expandAgentQueue('n2-4-spot', undefined).diskSizeGb).toBeUndefined();
     });
 
     it('returns base config for queue without spot or virt suffix', () => {

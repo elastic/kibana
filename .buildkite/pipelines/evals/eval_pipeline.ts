@@ -10,6 +10,7 @@
 import { execFileSync } from 'child_process';
 import Fs from 'fs';
 import Path from 'path';
+import { DEFAULT_AGENT_IMAGE_CONFIG } from '../../pipeline-utils/agent_images.ts';
 
 const EVALS_SUITES_METADATA_RELATIVE_PATH = '.buildkite/pipelines/evals/evals.suites.json';
 
@@ -148,6 +149,14 @@ function normalizeEvaluationConnectorId(raw: string): string {
 }
 
 /**
+ * Boot disk (GB) for eval agents. These steps spell out their own agent block, so they do not
+ * inherit the repo-wide agent defaults. `undefined` uses the agent image default; set a number
+ * (here or in `DEFAULT_AGENT_IMAGE_CONFIG`) to override it. Keep `EVAL_AGENT_DISK_SIZE_GB` in
+ * `steps/evals/run_suite.sh` and `llm_evals.yml` in sync.
+ */
+const EVAL_AGENT_DISK_SIZE_GB = DEFAULT_AGENT_IMAGE_CONFIG.diskSizeGb;
+
+/**
  * Whether heavy eval steps run on preemptible (spot) agents. Defaults to `true` (weekly/on-demand);
  * PR evals set `EVAL_PREEMPTIBLE=0` so a lost worker/timeout doesn't silently re-run the suite.
  */
@@ -215,6 +224,7 @@ function buildEvalsYaml({
         `          imageProject: elastic-images-prod`,
         `          provider: gcp`,
         `          machineType: n2-standard-8`,
+        ...(EVAL_AGENT_DISK_SIZE_GB ? [`          diskSizeGb: ${EVAL_AGENT_DISK_SIZE_GB}`] : []),
         ...(preemptible ? [`          preemptible: true`] : []),
         `        retry:`,
         `          automatic:`,
