@@ -27,9 +27,8 @@ import type { PanelResolutionRequestBase } from '../../../resolve_panel';
  */
 export interface VisPanelResolutionRequest extends PanelResolutionRequestBase {
   /**
-   * Which engine renders the panel. Honored when adding a new panel (defaults to
-   * Lens when omitted); ignored on edits, which keep the existing panel's
-   * renderer.
+   * Which engine renders the panel; Lens when omitted. On edits, `edit_panels`
+   * sets it from the existing panel, and the resolver trusts it.
    */
   renderer?: 'lens' | 'vega';
   /** Natural language description of the desired visualization. */

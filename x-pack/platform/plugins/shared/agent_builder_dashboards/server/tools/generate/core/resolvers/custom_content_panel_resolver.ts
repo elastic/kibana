@@ -53,7 +53,8 @@ const resolveCustomContentState = async (
 /**
  * Resolves custom content panel requests. New panels get a template generated
  * from the request; edits refine the existing panel's template, keeping its
- * ES|QL query unless the request replaces or removes it.
+ * ES|QL query unless the request replaces or removes it. On edits, `edit_panels`
+ * has already checked that the existing panel is custom content.
  */
 export const createCustomContentPanelResolver = ({
   resolveTemplate,
@@ -61,15 +62,7 @@ export const createCustomContentPanelResolver = ({
   resolveTemplate: ResolveCustomContentTemplate;
 }) => {
   return async (request: CustomContentPanelResolutionRequest): Promise<PanelContentAttempt> => {
-    const { operationType, identifier, existingPanel } = request;
-
-    if (existingPanel && existingPanel.type !== CUSTOM_CONTENT_EMBEDDABLE_TYPE) {
-      return createPanelFailureResult(
-        operationType,
-        identifier,
-        `Panel "${existingPanel.id}" with type "${existingPanel.type}" cannot be edited as custom content. Use the panel's own renderer.`
-      );
-    }
+    const { operationType, identifier } = request;
 
     try {
       return {

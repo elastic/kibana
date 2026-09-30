@@ -6,9 +6,6 @@
  */
 
 import type { AttachmentPanel } from '@kbn/agent-builder-dashboards-common';
-import { VEGA_VIS_TYPE } from '@kbn/agent-builder-visualizations-common';
-import { CUSTOM_CONTENT_EMBEDDABLE_TYPE } from '@kbn/custom-content-common';
-import { LENS_EMBEDDABLE_TYPE } from '@kbn/lens-common';
 import { z } from '@kbn/zod/v4';
 import {
   createPanelFailureResult,
@@ -21,27 +18,13 @@ import {
   buildConfigPanelContent,
   editPanelItemSchema,
   findConfigPanelType,
+  findPanelRenderer,
   getConfigPanelEditError,
   type EditPanelItem,
   type EditPanelRequestInput,
   type PanelResolutionRequest,
 } from './panels';
 import { defineOperation } from './types';
-
-type RequestRenderer = NonNullable<EditPanelRequestInput['renderer']>;
-
-const EMBEDDABLE_TYPE_BY_RENDERER: Record<RequestRenderer, string> = {
-  lens: LENS_EMBEDDABLE_TYPE,
-  vega: VEGA_VIS_TYPE,
-  custom_content: CUSTOM_CONTENT_EMBEDDABLE_TYPE,
-};
-
-const RENDERER_BY_EMBEDDABLE_TYPE = new Map(
-  Object.entries(EMBEDDABLE_TYPE_BY_RENDERER).map(([renderer, embeddableType]) => [
-    embeddableType,
-    renderer as RequestRenderer,
-  ])
-);
 
 /** An edit that passed validation; request edits carry their resolution request. */
 type ValidEdit =
@@ -60,13 +43,14 @@ const getUneditablePanelError = ({ id, type }: AttachmentPanel): string => {
  * omit the renderer, which the existing panel then decides. Custom content
  * edits must name it: without it the edit is parsed as a Lens edit, which lacks
  * custom content's fields. An explicit renderer that disagrees with the panel
- * fails instead of being rewritten.
+ * fails instead of being rewritten. This is the only place an edit's renderer is
+ * decided; the resolvers trust the one on the request.
  */
 const toPanelResolutionRequest = (
   panelInput: EditPanelRequestInput,
   existingPanel: AttachmentPanel
 ): { request: PanelResolutionRequest } | { error: string } => {
-  const renderer = RENDERER_BY_EMBEDDABLE_TYPE.get(existingPanel.type);
+  const renderer = findPanelRenderer(existingPanel.type);
   if (!renderer) {
     return { error: getUneditablePanelError(existingPanel) };
   }

@@ -9,25 +9,27 @@ import type { AttachmentStateManager } from '@kbn/agent-builder-server/attachmen
 import { getLatestVersion } from '@kbn/agent-builder-common/attachments';
 import {
   VISUALIZATION_ATTACHMENT_TYPE,
-  VEGA_VIS_TYPE,
+  getEffectiveRenderer,
   isCustomContentVisualization,
   type VisualizationAttachmentData,
 } from '@kbn/agent-builder-visualizations-common';
-import { CUSTOM_CONTENT_EMBEDDABLE_TYPE, toEsqlQueryState } from '@kbn/custom-content-common';
-import { LENS_EMBEDDABLE_TYPE } from '@kbn/lens-common';
+import { toEsqlQueryState } from '@kbn/custom-content-common';
 import {
   createPanelFailureResult,
   type InlinePanelOperationType,
   type PanelContent,
   type PanelContentAttempt,
 } from '../resolve_panel';
+import { EMBEDDABLE_TYPE_BY_RENDERER } from '../operations/panels';
 
 /** Maps a stored visualization payload onto the embeddable that renders it. */
 const toPanelContent = (data: VisualizationAttachmentData): PanelContent => {
-  // Custom content is matched first so the Lens fallback cannot swallow it.
+  const type = EMBEDDABLE_TYPE_BY_RENDERER[getEffectiveRenderer(data)];
+
+  // Custom content stores markup rather than a chart config, so its panel config is rebuilt.
   if (isCustomContentVisualization(data)) {
     return {
-      type: CUSTOM_CONTENT_EMBEDDABLE_TYPE,
+      type,
       config: {
         template: data.visualization.template,
         esql_query: toEsqlQueryState(data.esql),
@@ -35,11 +37,7 @@ const toPanelContent = (data: VisualizationAttachmentData): PanelContent => {
     };
   }
 
-  if (data.renderer === 'vega') {
-    return { type: VEGA_VIS_TYPE, config: data.visualization };
-  }
-
-  return { type: LENS_EMBEDDABLE_TYPE, config: data.visualization };
+  return { type, config: data.visualization };
 };
 
 /**

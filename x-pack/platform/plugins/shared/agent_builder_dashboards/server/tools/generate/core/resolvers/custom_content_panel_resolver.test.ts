@@ -150,17 +150,5 @@ describe('createCustomContentPanelResolver', () => {
       );
       expect(result).toMatchObject({ panelContent: { config: { esql_query: undefined } } });
     });
-
-    it('fails without calling the model when the existing panel is not custom content', async () => {
-      const result = await resolve(
-        editRequest({ id: 'panel-1', type: 'lens', config: {}, grid }, { nlQuery: 'Updated' })
-      );
-
-      expect(resolveTemplate).not.toHaveBeenCalled();
-      expect(result).toMatchObject({
-        type: 'failure',
-        failure: { type: 'edit_panels', identifier: 'panel-1' },
-      });
-    });
   });
 });

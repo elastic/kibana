@@ -10,10 +10,7 @@ import {
   buildVegaConfig,
   type VisualizationConfig,
 } from '@kbn/agent-builder-visualizations-server';
-import {
-  VEGA_VIS_TYPE,
-  type VisualizationRenderer,
-} from '@kbn/agent-builder-visualizations-common';
+import { VEGA_VIS_TYPE } from '@kbn/agent-builder-visualizations-common';
 import type { ModelProvider, ToolEventEmitter } from '@kbn/agent-builder-server';
 import type { AttachmentPanel } from '@kbn/agent-builder-dashboards-common';
 import type { IScopedClusterClient } from '@kbn/core-elasticsearch-server';
@@ -30,28 +27,6 @@ export interface VisPanelResolverDeps {
   events: ToolEventEmitter;
   esClient: IScopedClusterClient;
 }
-
-/**
- * Resolve the renderer for a vis panel request. Edits keep the existing panel's
- * renderer (inferred from its embeddable type); new panels honor the caller's
- * choice and default to Lens (the common case) when it is omitted. Returns
- * `undefined` for an existing panel whose type neither renderer can edit.
- */
-const resolveRenderer = (
-  existingPanel: AttachmentPanel | undefined,
-  requestedRenderer: VisualizationRenderer | undefined
-): VisualizationRenderer | undefined => {
-  if (existingPanel) {
-    if (existingPanel.type === LENS_EMBEDDABLE_TYPE) {
-      return 'lens';
-    }
-    if (existingPanel.type === VEGA_VIS_TYPE) {
-      return 'vega';
-    }
-    return undefined;
-  }
-  return requestedRenderer ?? 'lens';
-};
 
 /** Pull the serialized Vega spec out of an existing Vega panel's attachment config. */
 const getExistingVegaSpec = (existingPanel: AttachmentPanel | undefined): string | undefined => {
@@ -70,6 +45,9 @@ const getExistingVegaSpec = (existingPanel: AttachmentPanel | undefined): string
  * (`buildVegaConfig`), and returns it to the core through the type-agnostic
  * {@link PanelContentAttempt} contract.
  *
+ * It trusts the request's `renderer` (Lens when omitted). On edits,
+ * `edit_panels` sets it from the existing panel and rejects panels neither
+ * renderer can edit, so the existing panel always matches the renderer.
  */
 export const createVisPanelResolver = ({
   logger,
@@ -84,21 +62,12 @@ export const createVisPanelResolver = ({
     index,
     chartType,
     esql,
-    renderer: requestedRenderer,
+    renderer = 'lens',
     preserveESQL,
     applyChartRules,
     existingPanel,
   }: VisPanelResolutionRequest): Promise<PanelContentAttempt> => {
     try {
-      const renderer = resolveRenderer(existingPanel, requestedRenderer);
-      if (!renderer) {
-        return createPanelFailureResult(
-          operationType,
-          identifier,
-          `Panel "${identifier}" with type "${existingPanel?.type}" is not supported for inline visualization editing.`
-        );
-      }
-
       if (renderer === 'vega') {
         if (applyChartRules) {
           throw new Error('Presentation enhancement is only supported for ES|QL Lens panels.');
@@ -130,10 +99,7 @@ export const createVisPanelResolver = ({
         };
       }
 
-      const existingConfig =
-        existingPanel?.type === LENS_EMBEDDABLE_TYPE
-          ? (existingPanel?.config as VisualizationConfig)
-          : undefined;
+      const existingConfig = existingPanel?.config as VisualizationConfig | undefined;
 
       const result = await buildLensConfig({
         nlQuery,

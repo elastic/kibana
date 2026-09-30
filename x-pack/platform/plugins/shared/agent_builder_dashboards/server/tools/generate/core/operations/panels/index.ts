@@ -6,6 +6,9 @@
  */
 
 import type { AttachmentPanel } from '@kbn/agent-builder-dashboards-common';
+import { VEGA_VIS_TYPE } from '@kbn/agent-builder-visualizations-common';
+import { CUSTOM_CONTENT_EMBEDDABLE_TYPE } from '@kbn/custom-content-common';
+import { LENS_EMBEDDABLE_TYPE } from '@kbn/lens-common';
 import { z } from '@kbn/zod/v4';
 import type { PanelContent, PanelContentAttempt } from '../../resolve_panel';
 import type { ConfigPanelTypeDefinition } from './config_panel_type';
@@ -49,8 +52,8 @@ import { attachmentPanelInputSchema } from './attachment_source';
  * - `'attachment'`: an existing visualization attachment from the conversation.
  *
  * Each renderer's module owns its request schemas and resolution-request shape;
- * this barrel combines them into the per-operation item schemas and the
- * `ResolvePanelContent` contract.
+ * this barrel combines them into the per-operation item schemas, the
+ * `ResolvePanelContent` contract, and the renderer-to-embeddable-type mapping.
  */
 export { attachmentPanelInputSchema } from './attachment_source';
 export type { AttachmentPanelInput } from './attachment_source';
@@ -181,6 +184,31 @@ export type EditPanelRequestInput = Extract<EditPanelItem, { source: 'request' }
 export type PanelResolutionRequest =
   | VisPanelResolutionRequest
   | CustomContentPanelResolutionRequest;
+
+/** Engine that renders a `source: 'request'` panel. */
+export type PanelRenderer = NonNullable<PanelResolutionRequest['renderer']>;
+
+/**
+ * Embeddable type each renderer's panels are stored as. This is the only mapping
+ * between renderers and panel types: `edit_panels` uses it to decide an existing
+ * panel's renderer once, and resolvers trust the `renderer` they receive.
+ */
+export const EMBEDDABLE_TYPE_BY_RENDERER: Readonly<Record<PanelRenderer, string>> = {
+  lens: LENS_EMBEDDABLE_TYPE,
+  vega: VEGA_VIS_TYPE,
+  custom_content: CUSTOM_CONTENT_EMBEDDABLE_TYPE,
+};
+
+const RENDERER_BY_EMBEDDABLE_TYPE = new Map(
+  Object.entries(EMBEDDABLE_TYPE_BY_RENDERER).map(([renderer, embeddableType]) => [
+    embeddableType,
+    renderer as PanelRenderer,
+  ])
+);
+
+/** Finds the renderer whose panels are stored as the given embeddable type, if any. */
+export const findPanelRenderer = (embeddableType: string): PanelRenderer | undefined =>
+  RENDERER_BY_EMBEDDABLE_TYPE.get(embeddableType);
 
 /**
  * Contract for inline panel content resolution. The generate core consumes this
