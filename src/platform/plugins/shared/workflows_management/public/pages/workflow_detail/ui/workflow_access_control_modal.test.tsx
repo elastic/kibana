@@ -8,7 +8,7 @@
  */
 
 import { EuiProvider } from '@elastic/eui';
-import { render, screen, waitFor } from '@testing-library/react';
+import { act, render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import React from 'react';
 import { WorkflowAccessControlModal } from './workflow_access_control_modal';
@@ -43,7 +43,7 @@ describe('WorkflowAccessControlModal', () => {
     const workflow = createMockWorkflowDetailDto({
       owner_id: 'owner',
       access_control: { access_mode: 'private', entries: [] },
-      permissions: { read: true, edit: true, execute: false, manage: true },
+      permissions: { read: true, edit: false, execute: false, manage: true },
     });
     const savedAccess = {
       owner_id: 'owner',
@@ -51,7 +51,7 @@ describe('WorkflowAccessControlModal', () => {
         access_mode: 'private',
         entries: [{ type: 'user', id: 'admin', role: 'executor' }],
       },
-      permissions: { read: true, edit: true, execute: true, manage: true },
+      permissions: { read: true, edit: false, execute: true, manage: true },
     };
     mockHttp.put.mockResolvedValue(savedAccess);
     const store = createMockStore();
@@ -77,6 +77,47 @@ describe('WorkflowAccessControlModal', () => {
     });
     expect(store.getState().detail.workflow?.owner_id).toBe('owner');
   });
+
+  it.each(['owner', undefined])(
+    'waits for the current profile before showing the notice (%s)',
+    async (uid) => {
+      let resolveProfile: (
+        profile: { uid: string; user: { username: string } } | null
+      ) => void = () => {};
+      mockUserProfile.getCurrent.mockReturnValue(
+        new Promise((resolve) => {
+          resolveProfile = resolve;
+        })
+      );
+      const workflow = createMockWorkflowDetailDto({
+        owner_id: 'owner',
+        permissions: { read: true, edit: false, execute: false, manage: true },
+      });
+      render(
+        <TestWrapper>
+          <EuiProvider>
+            <WorkflowAccessControlModal workflow={workflow} onClose={jest.fn()} />
+          </EuiProvider>
+        </TestWrapper>
+      );
+      expect(
+        screen.queryByText("You are editing another user's access settings")
+      ).not.toBeInTheDocument();
+      await act(async () => {
+        resolveProfile(uid ? { uid, user: { username: uid } } : null);
+      });
+      if (uid) {
+        await waitFor(() => expect(mockUserProfile.getCurrent).toHaveBeenCalled());
+        expect(
+          screen.queryByText("You are editing another user's access settings")
+        ).not.toBeInTheDocument();
+      } else {
+        expect(
+          await screen.findByText("You are editing another user's access settings")
+        ).toBeInTheDocument();
+      }
+    }
+  );
 
   it.each(['owner', undefined])(
     'saves access without reloading the workflow or replacing draft YAML (owner_id=%s)',

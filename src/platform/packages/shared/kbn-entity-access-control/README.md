@@ -29,9 +29,10 @@ can add that restriction without changing the stored shape.
 
 ## Administrator access
 
-`isEntityAccessControlAdmin(core, request)` uses Core Security to check for the
-exact `superuser` role. Routes must use full authentication. API keys, custom roles
-with equivalent privileges, and unauthenticated requests do not get the override.
+`await isEntityAccessControlAdmin(core, request)` checks an unregistered Elasticsearch
+application privilege. Wildcard application grants, including Stack superusers and Serverless project admins, qualify. Ordinary
+feature grants do not. Routes must use full authentication. API keys and
+unauthenticated requests do not get the override. Failed privilege checks deny it.
 
 Pass the result as `isAdmin` to `hasEntityAccess` and `buildEntityReadAccessQuery`
 to allow private access and owner-only operations. Omit it for operations that
@@ -40,7 +41,7 @@ Never accept `isAdmin` from request input or an ACL entry. Feature and space che
 still apply when the ACL filter returns `match_all`.
 
 ```ts
-const isAdmin = isEntityAccessControlAdmin(core, request);
+const isAdmin = await isEntityAccessControlAdmin(core, request);
 const canManage = hasEntityAccess({
   accessControl: entity.access_control,
   ownerId: entity.owner_id,
@@ -58,7 +59,9 @@ override, and denial without repeating the permission check. Use `denied` for a
 failed ACL check, `admin_override` only when access needs the override, and
 `update` after an ACL write succeeds. Pass the
 entity type, ID, and operation. For updates, pass the previous and current owner
-and ACL. The helper records these fields, not the entity contents. Core Security
+and ACL. The helper records a summary and one event per added, removed, or changed user.
+It records visibility and owner changes, omits unchanged entries, and does not
+include entity contents. Core Security
 adds the caller and request context when a request is provided.
 
 Actions use `<entityType>_access_control_<action>` and respect the existing Kibana

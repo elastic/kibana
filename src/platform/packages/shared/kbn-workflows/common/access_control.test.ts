@@ -80,14 +80,14 @@ describe('workflow ACL permissions', () => {
       )
     ).toEqual({ read: true, execute: false, edit: false, manage: false });
   });
-  it('lets administrators manage access without granting execution', () => {
+  it('lets administrators manage access without granting edits or execution', () => {
     expect(
       getWorkflowPermissions(
         { owner_id: 'offboarded-owner', access_control: { access_mode: 'private', entries: [] } },
         undefined,
         true
       )
-    ).toEqual({ read: true, execute: false, edit: true, manage: true });
+    ).toEqual({ read: true, execute: false, edit: false, manage: true });
   });
 
   it.each(['viewer', 'executor', 'editor'] as const)(
@@ -104,6 +104,7 @@ describe('workflow ACL permissions', () => {
         'admin',
         true
       );
+      expect(permissions.edit).toBe(role === 'editor');
       expect(permissions.execute).toBe(role !== 'viewer');
       expect(permissions.manage).toBe(true);
     }

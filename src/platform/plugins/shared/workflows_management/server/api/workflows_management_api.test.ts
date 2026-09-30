@@ -1797,7 +1797,7 @@ steps:
 
         const access = await mockWorkflowsService.getAccessControl();
         expect(access.assertAccess).toHaveBeenCalledWith(workflow, operation, mockRequest, {
-          auditOverride: false,
+          allowAdminOverride: false,
         });
       }
     );
@@ -2130,6 +2130,17 @@ steps:
       const workflow = await mockWorkflowsService.getWorkflow('workflow-123', 'default');
       if (!workflow) throw new Error('Missing workflow fixture');
       const core = coreMock.createStart();
+      jest
+        .mocked(
+          core.elasticsearch.client.asScoped(mockRequest).asCurrentUser.security.hasPrivileges
+        )
+        .mockResolvedValue({
+          has_all_requested: isAdmin,
+          username: 'user',
+          application: {},
+          cluster: {},
+          index: {},
+        });
       core.userProfile.getCurrentProfileId.mockResolvedValue('outsider');
       jest
         .spyOn(core.security.authc, 'getCurrentUser')

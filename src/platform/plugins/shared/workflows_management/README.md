@@ -427,27 +427,31 @@ Builder conversations: `access_mode` and `entries` with `type`, profile `id`,
 
 | Role | View | Run | Edit and delete | Change access |
 | --- | --- | --- | --- | --- |
-| Superuser | Yes | Requires owner or ACL access | Yes | Yes |
+| Administrator | Yes | Requires owner or ACL access | Requires owner or Editor access | Yes |
 | Owner | Yes | Yes | Yes | Yes |
 | Editor | Yes | Yes | Yes | No |
 | Executor | Yes | Yes | No | No |
 | Viewer | Yes | No | No | No |
 
 These permissions also require the corresponding feature privileges in the space.
-The shared `@kbn/entity-access-control` administrator override requires the exact
-`superuser` role. Workflows All and custom roles with equivalent privileges do
-not grant the override. API keys continue to use the normal ACL checks.
-Superusers can recover access after an owner is offboarded. Updating access
-preserves the existing owner. A superuser who first sets access on an ownerless
-legacy workflow becomes its owner. To run a private workflow owned by someone
-else, a superuser must add themselves as Executor or Editor. Draft and step tests
-require Editor. The access dialog shows a notice when a superuser edits another
-user's ACL. Background execution keeps its normal ACL checks.
+The shared `@kbn/entity-access-control` administrator check uses wildcard
+application privileges, including Stack superusers and Serverless project admins.
+Custom roles with those wildcard grants also qualify. Workflows All does not.
+API keys continue to use the normal ACL checks.
+Administrators can view private workflows and recover access after an owner is
+offboarded. Updating access preserves the existing owner. An administrator who
+first sets access on an ownerless legacy workflow becomes its owner.
+Administrators must add themselves as Executor to run a private workflow, or
+Editor to edit it or test draft YAML and steps. The access dialog shows a notice
+when an administrator edits another user's ACL. Background execution keeps its
+normal ACL checks.
 
-With Kibana audit logging enabled, `workflow_access_control_update` records the
-previous and stored owner, visibility, and grants. `workflow_access_control_denied`
-records failed ACL checks, including execution checks. `workflow_access_control_admin_override`
-records use of the superuser override for an explicit workflow operation.
+With Kibana audit logging enabled, `workflow_access_control_update` records a
+summary of each access update and one event per added, removed, or changed user.
+It records visibility and owner changes without repeating unchanged grants.
+`workflow_access_control_denied` records failed ACL checks, including execution
+checks. `workflow_access_control_admin_override` records administrative access
+when viewing a workflow or managing its ACL.
 Searches, lists, batch lookups, filters, and result mapping do not emit ACL events.
 Write prechecks audit denials. The check on the stored document audits overrides.
 A rejected scheduled run emits a denial on each tick until access is restored or
@@ -482,7 +486,7 @@ Execution checks use the current ACL and the execution identity.
 
 Soft deletion retains the workflow document and its ACL for execution and change
 history reads.
-The owner and administrators can hard-delete a private workflow. The request must
+Only the owner can hard-delete a private workflow. The request must
 include `force=true&acknowledgeAclLoss=true`. Public workflows retain feature RBAC and
 require no ACL acknowledgment. Their documents are removed before best-effort
 history cleanup, and cleanup failures do not fail deletion.

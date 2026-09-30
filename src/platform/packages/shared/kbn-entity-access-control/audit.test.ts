@@ -7,12 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { coreMock, httpServerMock } from '@kbn/core/server/mocks';
+import { httpServerMock } from '@kbn/core-http-server-mocks';
+import { securityServiceMock } from '@kbn/core-security-server-mocks';
 import { logEntityAccessControl } from './audit';
 
 describe('entity access control audit', () => {
   it.each(['denied', 'admin_override'] as const)('records %s with caller context', (action) => {
-    const core = coreMock.createStart();
+    const core = { security: securityServiceMock.createStart() };
     const request = httpServerMock.createKibanaRequest();
     logEntityAccessControl(core, request, {
       entityType: 'connector',
@@ -35,7 +36,7 @@ describe('entity access control audit', () => {
   });
 
   it('records access changes without entity contents', () => {
-    const core = coreMock.createStart();
+    const core = { security: securityServiceMock.createStart() };
     const previous = { owner_id: 'owner', yaml: 'secret' };
     const current = {
       ...previous,
@@ -70,8 +71,72 @@ describe('entity access control audit', () => {
       })
     );
     const message = jest.mocked(core.security.audit.withoutRequest.log).mock.calls[0][0]?.message;
-    expect(message).toContain('"previous":{"owner_id":"owner"}');
+    expect(message).toContain('"entry_count":1');
+    expect(message).not.toContain('owner_id');
     expect(message).not.toContain('secret');
     expect(message).not.toContain('yaml');
+  });
+  it('records additions, removals, role changes and visibility without unchanged users', () => {
+    const core = { security: securityServiceMock.createStart() };
+    const entry = (id: string, role = 'viewer') => ({
+      type: 'user' as const,
+      id,
+      role,
+      added_at: '2026-09-30',
+    });
+    logEntityAccessControl(core, undefined, {
+      entityType: 'workflow',
+      entityId: 'id',
+      action: 'update',
+      previous: {
+        owner_id: 'old-owner',
+        access_control: {
+          access_mode: 'public',
+          entries: [entry('removed'), entry('changed'), entry('unchanged')],
+        },
+      },
+      current: {
+        owner_id: 'new-owner',
+        access_control: {
+          access_mode: 'private',
+          entries: [entry('added'), entry('changed', 'editor'), entry('unchanged')],
+        },
+      },
+    });
+    const messages = core.security.audit.withoutRequest.log.mock.calls.map(
+      ([event]) => event?.message
+    );
+    expect(messages).toHaveLength(4);
+    expect(messages[0]).toContain('"previous_access_mode":"public"');
+    expect(messages[0]).toContain('"previous_owner_id":"old-owner","owner_id":"new-owner"');
+    expect(messages[1]).toContain('"user_id":"removed","previous_role":"viewer","role":null');
+    expect(messages[2]).toContain('"user_id":"changed","previous_role":"viewer","role":"editor"');
+    expect(messages[3]).toContain('"user_id":"added","previous_role":null,"role":"viewer"');
+    expect(messages.join()).not.toContain('unchanged');
+  });
+
+  it('keeps each event small when all 100 long principal IDs change', () => {
+    const core = { security: securityServiceMock.createStart() };
+    const entries = Array.from({ length: 100 }, (_, index) => ({
+      type: 'user' as const,
+      id: String(index).padEnd(1024, 'x'),
+      role: 'viewer',
+      added_at: '2026-09-30',
+    }));
+    logEntityAccessControl(core, undefined, {
+      entityType: 'workflow',
+      entityId: 'id',
+      action: 'update',
+      previous: { access_control: { access_mode: 'private', entries } },
+      current: {
+        access_control: {
+          access_mode: 'private',
+          entries: entries.map((entry) => ({ ...entry, role: 'editor' })),
+        },
+      },
+    });
+    const calls = core.security.audit.withoutRequest.log.mock.calls;
+    expect(calls).toHaveLength(101);
+    for (const [event] of calls) expect(Buffer.byteLength(event?.message ?? '')).toBeLessThan(2048);
   });
 });

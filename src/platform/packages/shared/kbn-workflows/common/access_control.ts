@@ -36,7 +36,7 @@ export interface WorkflowAccessSubject {
   owner_id?: string;
 }
 
-const ADMIN_OVERRIDE_OPERATIONS = new Set<WorkflowAccessOperation>(['read', 'edit', 'manage']);
+const ADMIN_OVERRIDE_OPERATIONS = new Set<WorkflowAccessOperation>(['read', 'manage']);
 const operationRoles: Record<WorkflowAccessOperation, readonly WorkflowAccessControlRole[]> = {
   read: WORKFLOW_ACCESS_CONTROL_ROLES,
   execute: ['executor', 'editor'],

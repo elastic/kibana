@@ -112,7 +112,7 @@ describe('AccessControlForm', () => {
             onChange={onChange}
             ownerId="owner"
             currentUserId={currentUserId}
-            isAdmin
+            canManage
             profiles={[]}
             suggestedProfiles={[
               { uid: 'admin', enabled: true, user: { username: 'admin' }, data: {} },
@@ -145,7 +145,7 @@ describe('AccessControlForm', () => {
           onChange={jest.fn()}
           ownerId="current"
           currentUserId="current"
-          isAdmin
+          canManage
           profiles={[]}
           suggestedProfiles={[]}
           onSearch={jest.fn()}

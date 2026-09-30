@@ -101,6 +101,7 @@ export const assertWorkflowOperation = (
 };
 
 export class WorkflowAccessControlService {
+  private readonly adminChecks = new WeakMap<KibanaRequest, Promise<boolean>>();
   private readonly profileIds = new WeakMap<KibanaRequest, Promise<string | undefined>>();
   private readonly executionFilters = new WeakMap<
     KibanaRequest,
@@ -115,6 +116,16 @@ export class WorkflowAccessControlService {
     >,
     private readonly authz?: SecurityPluginStart['authz']
   ) {}
+
+  private async isAdmin(request?: KibanaRequest): Promise<boolean> {
+    if (!request) return false;
+    let check = this.adminChecks.get(request);
+    if (!check) {
+      check = isEntityAccessControlAdmin(this.core, request);
+      this.adminChecks.set(request, check);
+    }
+    return check;
+  }
 
   async getProfileId(request: KibanaRequest): Promise<string | undefined> {
     let profileId = this.profileIds.get(request);
@@ -136,7 +147,7 @@ export class WorkflowAccessControlService {
     const decisions = getWorkflowAccessDecisions(
       workflow,
       profileId,
-      allowAdminOverride && isEntityAccessControlAdmin(this.core, request)
+      allowAdminOverride && (await this.isAdmin(request))
     );
     if (
       decisions.manage !== 'allowed' &&
@@ -205,7 +216,7 @@ export class WorkflowAccessControlService {
   }
 
   async readFilter(request?: KibanaRequest) {
-    const isAdmin = isEntityAccessControlAdmin(this.core, request);
+    const isAdmin = await this.isAdmin(request);
     return buildEntityReadAccessQuery({
       isAdmin,
       profileId: request ? await this.getProfileId(request) : undefined,
@@ -236,7 +247,7 @@ export class WorkflowAccessControlService {
     spaceId: string,
     request?: KibanaRequest
   ): Promise<estypes.QueryDslQueryContainer> {
-    if (isEntityAccessControlAdmin(this.core, request)) return { match_all: {} };
+    if (await this.isAdmin(request)) return { match_all: {} };
     const profileId = request ? await this.getProfileId(request) : undefined;
     const client = this.core.elasticsearch.client.asInternalUser;
     let pitId: string;

@@ -69,7 +69,11 @@ export const WorkflowAccessControlModal = ({
   const [value, setValue] = useState<AccessControlInput<WorkflowAccessControlRole>>(
     workflow.access_control ?? { access_mode: 'public', entries: [] }
   );
-  const { data: currentProfile, isError: isCurrentProfileError } = useQuery({
+  const {
+    data: currentProfile,
+    isError: isCurrentProfileError,
+    isLoading: isCurrentProfileLoading,
+  } = useQuery({
     queryKey: ['workflowAccessCurrentProfile'],
     queryFn: () => userProfile.getCurrent<UserProfileWithAvatar['data']>({ dataPath: 'avatar' }),
   });
@@ -177,7 +181,7 @@ export const WorkflowAccessControlModal = ({
           onChange={setValue}
           ownerId={ownerId}
           currentUserId={currentProfile?.uid}
-          isAdmin={workflow.permissions?.manage}
+          canManage={!isCurrentProfileLoading && workflow.permissions?.manage}
           profiles={currentProfile ? [...profiles, currentProfile] : profiles}
           suggestedProfiles={suggestedProfiles}
           onSearch={setSearch}
@@ -187,7 +191,7 @@ export const WorkflowAccessControlModal = ({
           allowPublicEntries={false}
           privateDescription={i18n.translate('workflows.access.privateDescription', {
             defaultMessage:
-              'Only the owner, selected users, and superusers have access. The superuser role does not grant permission to run this workflow.',
+              'Only the owner, selected users, and administrators can view this workflow. Administrators must add themselves to edit or run it.',
           })}
           publicDescription={i18n.translate('workflows.access.publicDescription', {
             defaultMessage:

@@ -45,6 +45,16 @@ describe('WorkflowAccessControlService', () => {
   beforeEach(() => {
     request = httpServerMock.createKibanaRequest();
     core = coreMock.createStart();
+    jest
+      .mocked(core.elasticsearch.client.asScoped(request).asCurrentUser.security.hasPrivileges)
+      .mockImplementation(async () => ({
+        has_all_requested:
+          core.security.authc.getCurrentUser(request)?.roles.includes('superuser') ?? false,
+        username: 'user',
+        application: {},
+        cluster: {},
+        index: {},
+      }));
     core.userProfile.getCurrentProfileId.mockResolvedValue('owner');
     document = makeDocument();
     authz = securityMock.createStart().authz;
@@ -104,6 +114,9 @@ describe('WorkflowAccessControlService', () => {
         const result = await service.toDto({ ...document, id: String(index) }, request);
         expect(result.permissions.read).toBe(true);
       }
+      expect(
+        core.elasticsearch.client.asScoped(request).asCurrentUser.security.hasPrivileges
+      ).toHaveBeenCalledTimes(1);
       expect(core.security.audit.asScoped(request).log).not.toHaveBeenCalled();
     });
 
@@ -135,11 +148,11 @@ describe('WorkflowAccessControlService', () => {
       jest
         .spyOn(core.security.authc, 'getCurrentUser')
         .mockReturnValue(securityServiceMock.createMockAuthenticatedUser({ roles: ['superuser'] }));
-      await service.assertAccess({ ...document, id: 'id' }, 'edit', request, {
+      await service.assertAccess({ ...document, id: 'id' }, 'manage', request, {
         auditOverride: false,
       });
       expect(core.security.audit.asScoped(request).log).not.toHaveBeenCalled();
-      assertWorkflowOperation(document, 'edit', 'admin', true, {
+      assertWorkflowOperation(document, 'manage', 'admin', true, {
         core,
         request,
         id: 'id',
@@ -171,7 +184,7 @@ describe('WorkflowAccessControlService', () => {
         request
       );
       const audit = core.security.audit.asScoped(request).log;
-      expect(audit).toHaveBeenCalledTimes(1);
+      expect(audit).toHaveBeenCalledTimes(2);
       expect(audit).toHaveBeenCalledWith(
         expect.objectContaining({
           event: expect.objectContaining({
@@ -180,12 +193,9 @@ describe('WorkflowAccessControlService', () => {
           }),
         })
       );
-      const message = jest.mocked(audit).mock.calls[0][0]?.message;
-      expect(message).toContain(
-        '"previous":{"owner_id":"owner","access_control":{"access_mode":"private","entries":[]}}'
-      );
-      expect(message).toContain(
-        '"current":{"owner_id":"owner","access_control":{"access_mode":"private","entries":[{"type":"user","id":"reader","role":"viewer"'
+      expect(jest.mocked(audit).mock.calls[0][0]?.message).toContain('"entry_count":1');
+      expect(jest.mocked(audit).mock.calls[1][0]?.message).toContain(
+        '"user_id":"reader","previous_role":null,"role":"viewer"'
       );
     });
 
@@ -236,7 +246,7 @@ describe('WorkflowAccessControlService', () => {
       const result = await service.toDto(document, request);
       expect(result.owner_id).toBe('owner');
       expect(result.access_control).toEqual(document.access_control);
-      expect(result.permissions).toEqual({ read: true, execute: false, edit: true, manage: true });
+      expect(result.permissions).toEqual({ read: true, execute: false, edit: false, manage: true });
       expect(await service.readFilter(request)).toEqual({ match_all: {} });
       expect(await service.executionFilter('default', request)).toEqual({ match_all: {} });
       expect(core.elasticsearch.client.asInternalUser.openPointInTime).not.toHaveBeenCalled();
@@ -245,7 +255,7 @@ describe('WorkflowAccessControlService', () => {
     it('does not use the override for execution or draft tests', async () => {
       await expect(
         service.assertAccess({ ...document, id: 'id' }, 'edit', request)
-      ).resolves.toBeUndefined();
+      ).rejects.toBeInstanceOf(WorkflowAccessDeniedError);
       await expect(
         service.assertAccess({ ...document, id: 'id' }, 'execute', request)
       ).rejects.toBeInstanceOf(WorkflowAccessDeniedError);

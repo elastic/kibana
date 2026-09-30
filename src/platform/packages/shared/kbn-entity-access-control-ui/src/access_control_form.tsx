@@ -47,7 +47,7 @@ export interface AccessControlFormProps<Role extends string> {
   publicDescription: string;
   privateDescription?: string;
   allowPublicEntries?: boolean;
-  isAdmin?: boolean;
+  canManage?: boolean;
   isDisabled?: boolean;
   isSearching?: boolean;
 }
@@ -84,7 +84,7 @@ export const AccessControlForm = <Role extends string>({
   publicDescription,
   privateDescription = defaultPrivateDescription,
   allowPublicEntries = true,
-  isAdmin = false,
+  canManage = false,
   isDisabled = false,
   isSearching = false,
 }: AccessControlFormProps<Role>): React.ReactElement => {
@@ -93,7 +93,7 @@ export const AccessControlForm = <Role extends string>({
   const profileById = new Map(
     [...profiles, ...suggestedProfiles].map((profile) => [profile.uid, profile])
   );
-  const isManagingAnotherOwner = Boolean(isAdmin && ownerId && ownerId !== currentUserId);
+  const isManagingAnotherOwner = Boolean(canManage && ownerId && ownerId !== currentUserId);
   const excludedIds = new Set([
     ownerId,
     ...(isManagingAnotherOwner ? [] : [currentUserId]),

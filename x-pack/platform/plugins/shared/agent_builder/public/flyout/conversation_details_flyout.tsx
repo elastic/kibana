@@ -32,6 +32,7 @@ import type { ConversationsService } from '../services/conversations/conversatio
 import type { ConversationTemplatesService } from '../services/conversation_templates';
 import { useConversation } from '../application/hooks/use_conversation';
 import { useAgentBuilderServices } from '../application/hooks/use_agent_builder_service';
+import { flyoutMenuRowStyles } from './flyout_menu_row_styles';
 
 export const FLYOUT_TITLE = i18n.translate('xpack.agentBuilder.conversationDetailsFlyout.title', {
   defaultMessage: 'Chat info',
@@ -267,16 +268,27 @@ export const ConversationDetailsFlyout = ({ onClose }: ConversationDetailsFlyout
   const { conversation, isLoading } = useConversation();
   const { conversationTemplatesService } = useAgentBuilderServices();
 
+  const trailingActions = useMemo(() => {
+    if (!conversation?.template_id) {
+      return undefined;
+    }
+    const definition = conversationTemplatesService.getTemplateUIDefinition(
+      conversation.template_id
+    );
+    return definition?.detailsFlyout?.trailingActions?.({ conversation });
+  }, [conversation, conversationTemplatesService]);
+
   return (
     <EuiFlyout
       onClose={onClose}
       session="start"
       historyKey={CONVERSATION_DETAILS_FLYOUT_HISTORY_KEY}
       flyoutMenuDisplayMode="always"
-      flyoutMenuProps={{ title: FLYOUT_TITLE }}
+      flyoutMenuProps={{ title: FLYOUT_TITLE, trailingActions }}
       size="s"
       type="push"
       paddingSize="m"
+      css={flyoutMenuRowStyles}
       role="region"
       aria-labelledby={titleId}
       data-test-subj="agentBuilderConversationDetailsFlyout-live"

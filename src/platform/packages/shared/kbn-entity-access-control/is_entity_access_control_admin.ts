@@ -7,14 +7,34 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { CoreStart, KibanaRequest } from '@kbn/core/server';
+import type { ElasticsearchServiceStart } from '@kbn/core-elasticsearch-server';
+import type { KibanaRequest } from '@kbn/core-http-server';
+import type { SecurityServiceStart } from '@kbn/core-security-server';
 
-/** Checks whether the authenticated caller has the reserved superuser role. */
-export const isEntityAccessControlAdmin = (
-  core: Pick<CoreStart, 'security'>,
+/** Checks administrative application privileges without granting API keys an override. */
+export const isEntityAccessControlAdmin = async (
+  core: { security: SecurityServiceStart; elasticsearch: ElasticsearchServiceStart },
   request?: KibanaRequest
-): boolean => {
+): Promise<boolean> => {
   if (!request) return false;
   const user = core.security.authc.getCurrentUser(request);
-  return user?.roles?.includes('superuser') === true && user.authentication_type !== 'api_key';
+  if (!user || user.authentication_type === 'api_key') return false;
+
+  try {
+    const { has_all_requested: isAdmin } = await core.elasticsearch.client
+      .asScoped(request)
+      .asCurrentUser.security.hasPrivileges({
+        application: [
+          {
+            application: 'kibana-.kibana',
+            resources: ['*'],
+            // Unregistered so ordinary feature grants do not confer ACL administration.
+            privileges: ['entity_access_control:admin'],
+          },
+        ],
+      });
+    return isAdmin;
+  } catch {
+    return false;
+  }
 };

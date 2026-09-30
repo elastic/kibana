@@ -7,7 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { CoreStart, KibanaRequest } from '@kbn/core/server';
+import type { KibanaRequest } from '@kbn/core-http-server';
+import type { SecurityServiceStart } from '@kbn/core-security-server';
 import type { AccessControl } from './types';
 
 interface AccessControlState {
@@ -24,43 +25,70 @@ type AccessControlAuditParams = {
   | { action: 'update'; previous: AccessControlState; current: AccessControlState }
 );
 
-const messages: Record<AccessControlAuditParams['action'], string> = {
-  update: 'Changed entity access control',
-  denied: 'Entity access denied by ACL',
-  admin_override: 'Entity access allowed by administrator override',
-};
-
 /** Records ACL changes and authorization decisions without entity contents. */
 export const logEntityAccessControl = (
-  core: Pick<CoreStart, 'security'>,
+  core: { security: SecurityServiceStart },
   request: KibanaRequest | undefined,
   params: AccessControlAuditParams
 ): void => {
   const { entityType, entityId, spaceId, action } = params;
-  const details =
-    action === 'update'
-      ? {
-          previous: {
-            owner_id: params.previous.owner_id,
-            access_control: params.previous.access_control,
-          },
-          current: {
-            owner_id: params.current.owner_id,
-            access_control: params.current.access_control,
-          },
-        }
-      : { operation: params.operation };
   const logger = request
     ? core.security.audit.asScoped(request)
     : core.security.audit.withoutRequest;
-  logger.log({
-    message: `${messages[action]} ${JSON.stringify({ entityType, entityId, ...details })}`,
-    event: {
-      action: `${entityType}_access_control_${action}`,
-      category: ['iam'],
-      type: [action === 'update' ? 'change' : 'access'],
-      outcome: action === 'denied' ? 'failure' : 'success',
-    },
-    ...(spaceId ? { kibana: { space_id: spaceId } } : {}),
-  });
+  const log = (message: string): void => {
+    logger.log({
+      message,
+      event: {
+        action: `${entityType}_access_control_${action}`,
+        category: ['iam'],
+        type: [action === 'update' ? 'change' : 'access'],
+        outcome: action === 'denied' ? 'failure' : 'success',
+      },
+      ...(spaceId ? { kibana: { space_id: spaceId } } : {}),
+    });
+  };
+  if (action !== 'update') {
+    const message =
+      action === 'denied'
+        ? 'Entity access denied by ACL'
+        : 'Entity access allowed by administrator override';
+    log(`${message} ${JSON.stringify({ entityType, entityId, operation: params.operation })}`);
+    return;
+  }
+
+  const { previous, current } = params;
+  const previousEntries = new Map(
+    previous.access_control?.entries.map((entry) => [entry.id, entry])
+  );
+  const currentEntries = new Map(current.access_control?.entries.map((entry) => [entry.id, entry]));
+  log(
+    `Changed entity access control ${JSON.stringify({
+      entityType,
+      entityId,
+      access_mode: current.access_control?.access_mode,
+      entry_count: currentEntries.size,
+      ...(previous.access_control?.access_mode !== current.access_control?.access_mode
+        ? { previous_access_mode: previous.access_control?.access_mode ?? null }
+        : {}),
+      ...(previous.owner_id !== current.owner_id
+        ? { previous_owner_id: previous.owner_id ?? null, owner_id: current.owner_id ?? null }
+        : {}),
+    })}`
+  );
+
+  // One event per changed user bounds message size without dropping grant or revocation details.
+  for (const id of new Set([...previousEntries.keys(), ...currentEntries.keys()])) {
+    const previousRole = previousEntries.get(id)?.role;
+    const role = currentEntries.get(id)?.role;
+    if (previousRole === role) continue;
+    log(
+      `Changed entity access for user ${JSON.stringify({
+        entityType,
+        entityId,
+        user_id: id,
+        previous_role: previousRole ?? null,
+        role: role ?? null,
+      })}`
+    );
+  }
 };

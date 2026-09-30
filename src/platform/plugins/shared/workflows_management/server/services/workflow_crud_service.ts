@@ -29,6 +29,7 @@ import {
   toCustomTriggerSchemaConfigs,
   type UpdatedWorkflowResponseDto,
   type WorkflowDetailDto,
+  WORKFLOWS_CORE_SELF_CLIENT_ENABLED_FLAG,
   type WorkflowYaml,
 } from '@kbn/workflows';
 import { buildWorkflowFilters, GLOBAL_WORKFLOW_SPACE_ID } from '@kbn/workflows/server';
@@ -138,6 +139,14 @@ type SuccessfullyWrittenBulkEntry = BulkWorkflowEntry & {
 
 export class WorkflowCrudService {
   constructor(private readonly deps: WorkflowCrudDeps) {}
+
+  private async shouldWarnIgnoredKibanaFetcher(): Promise<boolean> {
+    return (
+      (await this.deps
+        .getCoreStart()
+        .featureFlags?.getBooleanValue(WORKFLOWS_CORE_SELF_CLIENT_ENABLED_FLAG, false)) ?? false
+    );
+  }
 
   async logWorkflowChangesAfterWrite(params: {
     workflows: Array<{ id: string; document: WorkflowProperties }>;
@@ -464,6 +473,8 @@ export class WorkflowCrudService {
       now: params.now,
       spaceId: params.spaceId,
       triggerDefinitions,
+      logger: this.deps.logger,
+      warnIgnoredKibanaFetcher: await this.shouldWarnIgnoredKibanaFetcher(),
     });
     const profileId = params.request
       ? (await this.deps
@@ -648,6 +659,8 @@ export class WorkflowCrudService {
       spaceId,
       triggerDefinitions,
       nameFallback: options?.nameFallback,
+      logger: this.deps.logger,
+      warnIgnoredKibanaFetcher: await this.shouldWarnIgnoredKibanaFetcher(),
     });
 
     const profileId =
@@ -723,6 +736,7 @@ export class WorkflowCrudService {
     const profileId = await this.deps.getCoreStart().userProfile.getCurrentProfileId({ request });
     const now = new Date();
     const triggerDefinitions = this.deps.workflowsExtensions?.getAllTriggerDefinitions() ?? [];
+    const warnIgnoredKibanaFetcher = await this.shouldWarnIgnoredKibanaFetcher();
 
     const created: WorkflowDetailDto[] = [];
     const failed: BulkFailureEntry[] = [];
@@ -743,6 +757,8 @@ export class WorkflowCrudService {
           now,
           spaceId,
           triggerDefinitions,
+          logger: this.deps.logger,
+          warnIgnoredKibanaFetcher,
         });
 
         if (profileId) {
@@ -918,7 +934,6 @@ export class WorkflowCrudService {
     const authenticatedUser = getAuthenticatedUser(request, this.deps.getSecurity());
     const profileId =
       (await this.deps.getCoreStart().userProfile.getCurrentProfileId({ request })) ?? undefined;
-    const isAdmin = isEntityAccessControlAdmin(this.deps.getCoreStart(), request);
     const now = new Date();
     const validationErrors: string[] = [];
     let shouldUpdateScheduler = false;
@@ -938,6 +953,9 @@ export class WorkflowCrudService {
               workflowYaml,
               zodSchema,
               triggerDefinitions,
+              logger: this.deps.logger,
+              warnIgnoredKibanaFetcher: await this.shouldWarnIgnoredKibanaFetcher(),
+              workflowId: id,
             }),
           }
         : undefined;
@@ -951,7 +969,7 @@ export class WorkflowCrudService {
           existingSource,
           'edit',
           profileId,
-          isAdmin,
+          false,
           this.accessAuditContext(request, id, spaceId)
         );
         let updatedData: Partial<WorkflowProperties> = {
@@ -1117,8 +1135,7 @@ export class WorkflowCrudService {
     const profileId = request
       ? (await this.deps.getCoreStart().userProfile.getCurrentProfileId({ request })) ?? undefined
       : undefined;
-    const isAdmin = isEntityAccessControlAdmin(this.deps.getCoreStart(), request);
-    const deletionOptions = { ...options, profileId, isAdmin, request };
+    const deletionOptions = { ...options, profileId, request };
     const bindings = this.deps.getServiceAccountBindings?.();
     if (!bindings) return this.deleteWorkflowDocuments(ids, spaceId, deletionOptions);
     const result: DeleteWorkflowsResponse = {
@@ -1166,7 +1183,7 @@ export class WorkflowCrudService {
           versioned.source,
           getWorkflowDeleteOperation(versioned.source, options?.force),
           profileId,
-          isAdmin,
+          false,
           { ...this.accessAuditContext(request, id, spaceId), auditOverride: false }
         );
         const accountId = versioned.source.definition?.settings?.run_as;
@@ -1275,7 +1292,6 @@ export class WorkflowCrudService {
       force?: boolean;
       acknowledgeAclLoss?: boolean;
       profileId?: string;
-      isAdmin?: boolean;
       request?: KibanaRequest;
     },
     versionedWorkflow?: VersionedWorkflowDocument,
@@ -1313,7 +1329,7 @@ export class WorkflowCrudService {
           workflow,
           getWorkflowDeleteOperation(workflow, options?.force),
           options?.profileId,
-          options?.isAdmin,
+          false,
           this.accessAuditContext(options?.request, id, spaceId)
         ),
       storage: this.deps.workflowStorage,
@@ -1337,7 +1353,7 @@ export class WorkflowCrudService {
     const profileId = request
       ? (await this.deps.getCoreStart().userProfile.getCurrentProfileId({ request })) ?? undefined
       : undefined;
-    const isAdmin = isEntityAccessControlAdmin(this.deps.getCoreStart(), request);
+    const isAdmin = await isEntityAccessControlAdmin(this.deps.getCoreStart(), request);
     let canModifyBoundWorkflows = !request;
     if (request && this.deps.getServiceAccountBindings?.()?.isEnabled()) {
       const privileges = await this.deps
@@ -1500,7 +1516,6 @@ export class WorkflowCrudService {
 
     const client = this.deps.workflowStorage.getClient();
     const { profileId } = params;
-    const isAdmin = isEntityAccessControlAdmin(this.deps.getCoreStart(), params.request);
     const { refreshed: occHits } = await fetchOccHitsByIds(
       client,
       entries.map((entry) => entry.id)
@@ -1607,7 +1622,7 @@ export class WorkflowCrudService {
                 existing,
                 'edit',
                 profileId,
-                isAdmin,
+                false,
                 this.accessAuditContext(params.request, entry.id, spaceId)
               );
               return this.buildBulkOverwriteDocument(prepared, existing);
@@ -1639,7 +1654,7 @@ export class WorkflowCrudService {
             occHit._source,
             'edit',
             profileId,
-            isAdmin,
+            false,
             this.accessAuditContext(params.request, entry.id, occHit._source.spaceId)
           );
           const document = await this.writeWorkflowDocumentWithOcc(entry.id, spaceId, {
