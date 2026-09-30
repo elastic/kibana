@@ -7,6 +7,7 @@
 
 import { elasticsearchServiceMock, savedObjectsClientMock } from '@kbn/core/server/mocks';
 
+import { agentPolicyService } from '../agent_policy';
 import { packagePolicyService } from '../package_policy';
 import { getInstallation, getInstallations, getPackageInfo } from '../epm/packages';
 
@@ -15,6 +16,7 @@ import {
   setupUpgradeManagedPackagePolicies,
 } from './managed_package_policies';
 
+jest.mock('../agent_policy');
 jest.mock('../package_policy');
 jest.mock('../epm/packages');
 jest.mock('../epm/packages/deprecation_helpers');
@@ -38,6 +40,8 @@ describe('upgradeManagedPackagePolicies', () => {
   afterEach(() => {
     jest.clearAllMocks();
     jest.mocked(packagePolicyService.fetchAllItems).mockReset();
+    jest.mocked(packagePolicyService.getUpgradeDryRunDiff).mockReset();
+    jest.mocked(packagePolicyService.upgrade).mockReset();
   });
 
   it('should not upgrade policies for installed package', async () => {
@@ -63,6 +67,7 @@ describe('upgradeManagedPackagePolicies', () => {
       updated_by: '',
       created_at: '',
       created_by: '',
+      policy_ids: ['agent-policy-1'],
       package: {
         name: 'managed-package',
         title: 'Managed Package',
@@ -81,6 +86,9 @@ describe('upgradeManagedPackagePolicies', () => {
       diff: [{ id: 'foo' }, { id: 'bar' }],
       hasErrors: false,
     });
+    (packagePolicyService.upgrade as jest.Mock).mockResolvedValueOnce([
+      { id: 'managed-package-id', success: true },
+    ]);
 
     (getInstallation as jest.Mock).mockResolvedValueOnce({
       id: 'test-installation',
@@ -97,10 +105,101 @@ describe('upgradeManagedPackagePolicies', () => {
       soClient,
       esClient,
       'managed-package-id',
-      { force: true },
+      { force: true, bumpRevision: false },
       packagePolicy,
       '1.0.0'
     );
+    expect(agentPolicyService.bumpRevision).toHaveBeenCalledTimes(1);
+    expect(agentPolicyService.bumpRevision).toHaveBeenCalledWith(
+      soClient,
+      esClient,
+      'agent-policy-1'
+    );
+  });
+
+  it('should bump each agent policy revision once after all package policies are upgraded', async () => {
+    const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+    const soClient = savedObjectsClientMock.create();
+    const makePackagePolicy = (id: string, policyIds: string[]) => ({
+      id,
+      inputs: {},
+      policy_ids: policyIds,
+      package: { name: 'managed-package', title: 'Managed Package', version: '0.0.1' },
+    });
+
+    (packagePolicyService.fetchAllItems as jest.Mock).mockResolvedValueOnce(
+      (async function* () {
+        yield [
+          makePackagePolicy('pp-1', ['agent-policy-1']),
+          makePackagePolicy('pp-2', ['agent-policy-1']),
+        ];
+        yield [makePackagePolicy('pp-3', ['agent-policy-1', 'agent-policy-2'])];
+      })()
+    );
+    (packagePolicyService.getUpgradeDryRunDiff as jest.Mock).mockResolvedValue({
+      diff: [],
+      hasErrors: false,
+    });
+    (packagePolicyService.upgrade as jest.Mock).mockImplementation(async (_so, _es, id) => [
+      { id, success: true },
+    ]);
+    (getInstallation as jest.Mock).mockResolvedValueOnce({
+      id: 'test-installation',
+      version: '1.0.0',
+      keep_policies_up_to_date: true,
+    });
+
+    await upgradeManagedPackagePolicies(soClient, esClient, 'pkgname');
+
+    expect(packagePolicyService.upgrade).toHaveBeenCalledTimes(3);
+    expect(agentPolicyService.bumpRevision).toHaveBeenCalledTimes(2);
+    expect(agentPolicyService.bumpRevision).toHaveBeenCalledWith(
+      soClient,
+      esClient,
+      'agent-policy-1'
+    );
+    expect(agentPolicyService.bumpRevision).toHaveBeenCalledWith(
+      soClient,
+      esClient,
+      'agent-policy-2'
+    );
+  });
+
+  it('should not bump agent policies whose package policy upgrade failed', async () => {
+    const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+    const soClient = savedObjectsClientMock.create();
+
+    (packagePolicyService.fetchAllItems as jest.Mock).mockResolvedValueOnce(
+      (async function* () {
+        yield [
+          {
+            id: 'failing-package-policy',
+            inputs: {},
+            policy_ids: ['agent-policy-1'],
+            package: { name: 'managed-package', title: 'Managed Package', version: '0.0.1' },
+          },
+        ];
+      })()
+    );
+    (packagePolicyService.getUpgradeDryRunDiff as jest.Mock).mockResolvedValueOnce({
+      diff: [],
+      hasErrors: false,
+    });
+    (packagePolicyService.upgrade as jest.Mock).mockResolvedValueOnce([
+      { id: 'failing-package-policy', success: false, body: { message: 'upgrade failed' } },
+    ]);
+    (getInstallation as jest.Mock).mockResolvedValueOnce({
+      id: 'test-installation',
+      version: '1.0.0',
+      keep_policies_up_to_date: true,
+    });
+
+    const results = await upgradeManagedPackagePolicies(soClient, esClient, 'pkgname');
+
+    expect(results).toEqual([
+      { packagePolicyId: 'failing-package-policy', diff: [], errors: ['upgrade failed'] },
+    ]);
+    expect(agentPolicyService.bumpRevision).not.toHaveBeenCalled();
   });
 
   it('should not upgrade policy if newer than installed package version', async () => {

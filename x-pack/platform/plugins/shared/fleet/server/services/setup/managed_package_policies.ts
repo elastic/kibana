@@ -6,6 +6,7 @@
  */
 
 import type { ElasticsearchClient, SavedObjectsClientContract } from '@kbn/core/server';
+import pMap from 'p-map';
 import semverLt from 'semver/functions/lt';
 import type {
   ConcreteTaskInstance,
@@ -16,7 +17,11 @@ import type {
 import type { UpgradePackagePolicyDryRunResponseItem } from '../../../common/types';
 import { AUTO_UPDATE_PACKAGES } from '../../../common/constants';
 
-import { PACKAGES_SAVED_OBJECT_TYPE, PACKAGE_POLICY_SAVED_OBJECT_TYPE } from '../../constants';
+import {
+  MAX_CONCURRENT_AGENT_POLICIES_OPERATIONS_10,
+  PACKAGES_SAVED_OBJECT_TYPE,
+  PACKAGE_POLICY_SAVED_OBJECT_TYPE,
+} from '../../constants';
 
 import type { Installation, PackagePolicy } from '../../types';
 
@@ -27,6 +32,7 @@ import {
   getInstallations,
   getPackageInfo,
 } from '../epm/packages';
+import { agentPolicyService } from '../agent_policy';
 import { packagePolicyService } from '../package_policy';
 import { runWithCache } from '../epm/packages/cache';
 import { hasNewDeprecations, getDeprecationDetails } from '../epm/packages/deprecation_helpers';
@@ -180,13 +186,29 @@ export const upgradeManagedPackagePolicies = async (
   );
 
   let upgradedCount = 0;
-  for await (const packagePolicies of packagePoliciesFinder) {
-    for (const packagePolicy of packagePolicies) {
-      if (isPolicyVersionLtInstalledVersion(packagePolicy, installedPackage)) {
-        await upgradePackagePolicy(soClient, esClient, packagePolicy, installedPackage, results);
-        upgradedCount++;
+  // Deploying after every package policy rebuilds the full agent policy each time, which is
+  // prohibitively slow for agent policies with hundreds of package policies. Bump once instead.
+  const agentPolicyIdsToBump = new Set<string>();
+  try {
+    for await (const packagePolicies of packagePoliciesFinder) {
+      for (const packagePolicy of packagePolicies) {
+        if (isPolicyVersionLtInstalledVersion(packagePolicy, installedPackage)) {
+          const upgraded = await upgradePackagePolicy(
+            soClient,
+            esClient,
+            packagePolicy,
+            installedPackage,
+            results
+          );
+          if (upgraded) {
+            packagePolicy.policy_ids?.forEach((id) => agentPolicyIdsToBump.add(id));
+          }
+          upgradedCount++;
+        }
       }
     }
+  } finally {
+    await bumpAgentPoliciesRevision(soClient, esClient, [...agentPolicyIdsToBump]);
   }
 
   if (upgradedCount > 0) {
@@ -199,6 +221,27 @@ export const upgradeManagedPackagePolicies = async (
 
   return results;
 };
+
+async function bumpAgentPoliciesRevision(
+  soClient: SavedObjectsClientContract,
+  esClient: ElasticsearchClient,
+  agentPolicyIds: string[]
+) {
+  const logger = appContextService.getLogger();
+  await pMap(
+    agentPolicyIds,
+    async (agentPolicyId) => {
+      try {
+        await agentPolicyService.bumpRevision(soClient, esClient, agentPolicyId);
+      } catch (error) {
+        logger.error(
+          `[UpgradeManagedPackagePoliciesTask] Failed to bump revision of agent policy ${agentPolicyId}: ${error.message}`
+        );
+      }
+    },
+    { concurrency: MAX_CONCURRENT_AGENT_POLICIES_OPERATIONS_10 }
+  );
+}
 
 async function getPackagePoliciesNotMatchingVersion(
   soClient: SavedObjectsClientContract,
@@ -338,7 +381,7 @@ async function upgradePackagePolicy(
   packagePolicy: PackagePolicy,
   installedPackage: Installation,
   results: UpgradeManagedPackagePoliciesResult[]
-) {
+): Promise<boolean> {
   // Since upgrades don't report diffs/errors, we need to perform a dry run first in order
   // to notify the user of any granular policy upgrade errors that occur during Fleet's
   // preconfiguration check
@@ -361,7 +404,7 @@ async function upgradePackagePolicy(
       );
 
     results.push({ packagePolicyId: packagePolicy.id, diff: dryRunResults.diff, errors });
-    return;
+    return false;
   }
 
   try {
@@ -369,16 +412,26 @@ async function upgradePackagePolicy(
     // the public legacy policy APIs, not this managed/keep_policies_up_to_date auto-upgrade — which
     // is the only automatic upgrader for those packages. Same engine the agentless API uses, and the
     // periodic deployment-sync task reconciles the workload by revision.
-    await packagePolicyService.upgrade(
+    const [upgradeResult] = await packagePolicyService.upgrade(
       soClient,
       esClient,
       packagePolicy.id,
-      { force: true },
+      { force: true, bumpRevision: false },
       packagePolicy,
       installedPackage.version
     );
+    if (upgradeResult && !upgradeResult.success) {
+      results.push({
+        packagePolicyId: packagePolicy.id,
+        diff: dryRunResults.diff,
+        errors: [upgradeResult.body?.message],
+      });
+      return false;
+    }
     results.push({ packagePolicyId: packagePolicy.id, diff: dryRunResults.diff, errors: [] });
+    return true;
   } catch (error) {
     results.push({ packagePolicyId: packagePolicy.id, diff: dryRunResults.diff, errors: [error] });
+    return false;
   }
 }

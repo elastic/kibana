@@ -472,7 +472,7 @@ export async function _packagePoliciesUpgrade({
   esClient: ElasticsearchClient;
   packagePolicyService: PackagePolicyClient;
   id: string;
-  options?: { user?: AuthenticatedUser; force?: boolean };
+  options?: { user?: AuthenticatedUser; force?: boolean; bumpRevision?: boolean };
   packagePolicy?: PackagePolicy;
   pkgVersion?: string;
 }): Promise<UpgradePackagePolicyResponse> {
