@@ -92,15 +92,7 @@ export interface Workspace {
   nodes: WorkspaceNode[];
   edges: WorkspaceEdge[];
   blocklistedNodes: BlockListedNode[];
-  deleteNodes: (nodeIds: string[]) => void;
-  blocklistNodes: (nodeIds: string[]) => void;
-  groupNodes: (parentId: string, nodeIds: string[]) => void;
-  ungroup: (node: WorkspaceNode | undefined) => void;
-  mergeIds: (term1: string, term2: string) => void;
   changeHandler: () => void;
-  unblockNode: (node: BlockListedNode) => void;
-  unblockAll: () => void;
-  clearGraph: () => void;
 
   /**
    * Flatten grouped nodes and return a flat array of nodes
