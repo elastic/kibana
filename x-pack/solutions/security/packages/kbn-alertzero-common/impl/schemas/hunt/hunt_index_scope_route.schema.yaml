@@ -1,0 +1,34 @@
+openapi: 3.0.0
+info:
+  title: AlertZero Hunt index scope API endpoint
+  version: '1'
+paths:
+  /internal/alertzero/hunt/index_scope:
+    get:
+      x-codegen-enabled: true
+      x-labels: [ess, serverless]
+      operationId: HuntIndexScope
+      description: >-
+        Index-scope projection over resolveIndexScope, one entry per technology
+        (or the single requested one), for the given space. Not the same as
+        Security Solution threat-intel readiness (`/internal/threat_intel/readiness`)
+        or SIEM Readiness; this only reports which hunt telemetry indices exist.
+      summary: Hunt index scope per technology
+      tags:
+        - AlertZero API
+      parameters:
+        - name: technology
+          in: query
+          required: false
+          schema:
+            $ref: '../components/hunt.schema.yaml#/components/schemas/HuntTechnology'
+          description: Limit the index-scope check to a single technology
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '../components/hunt.schema.yaml#/components/schemas/ResolvedIndexScope'

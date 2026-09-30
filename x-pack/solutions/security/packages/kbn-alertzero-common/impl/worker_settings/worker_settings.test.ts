@@ -11,6 +11,7 @@ import {
   SYSTEM_SECURITY_WORKER_DETECTION_RULE_TUNING_ID,
   SYSTEM_SECURITY_WORKER_FLOOR_ALERT_TRIAGE_ID,
   SYSTEM_SECURITY_WORKER_FLOOR_ATTACK_DISCOVERY_ID,
+  SYSTEM_SECURITY_WORKER_FORENSICS_ENDPOINT_ANALYSIS_ID,
   SYSTEM_SECURITY_WORKER_IDS,
 } from '../../constants';
 import { WorkerSettings } from '../schemas';
@@ -23,6 +24,7 @@ import {
   projectStoredAutonomyLevel,
 } from './contract';
 import {
+  RULE_TUNING_DEFAULT_EXTRAS,
   WORKER_SETTINGS_DECLARATIONS,
   createDefaultWorkerSettings,
   getAllowedAutonomyLevels,
@@ -60,14 +62,18 @@ describe('Worker settings declarations', () => {
     }
   );
 
-  it('nests Rule Tuning fields under extras and omits extras elsewhere', () => {
+  it('nests Worker-specific fields under extras', () => {
     expect(createDefaultWorkerSettings(RULE_TUNING)).toEqual({
       workerId: RULE_TUNING,
       autonomy: 'manual',
       scheduleInterval: '2h',
-      extras: { analysisWindowDays: 14 },
+      extras: { analysisWindowDays: 7, fpCountThreshold: 10, fpRateThresholdPct: 50 },
     });
-    expect(createDefaultWorkerSettings(TRIAGE)).toEqual({ workerId: TRIAGE, autonomy: 'manual' });
+    expect(createDefaultWorkerSettings(TRIAGE)).toEqual({
+      workerId: TRIAGE,
+      autonomy: 'manual',
+      extras: { autoCloseConfidenceScoreMinThreshold: 0.85 },
+    });
     expect(createDefaultWorkerSettings(ATTACK_DISCOVERY)).not.toHaveProperty('extras');
   });
 
@@ -106,7 +112,12 @@ describe('Worker settings declarations', () => {
         workerId: RULE_TUNING,
         autonomy: 'manual',
         scheduleInterval: '2h',
-        extras: { analysisWindowDays: 14, previewDepth: 3 },
+        extras: {
+          analysisWindowDays: 7,
+          fpCountThreshold: 10,
+          fpRateThresholdPct: 50,
+          previewDepth: 3,
+        },
       })
     ).toMatch(/extras.*previewDepth/);
   });
@@ -117,10 +128,49 @@ describe('Worker settings declarations', () => {
         workerId: RULE_TUNING,
         autonomy: 'manual',
         scheduleInterval: '2h',
-        extras: { analysisWindowDays },
+        extras: { ...RULE_TUNING_DEFAULT_EXTRAS, analysisWindowDays },
       })
     ).toContain('extras.analysisWindowDays');
   });
+
+  it.each([1, 101, 10.5])('rejects fpCountThreshold %s', (fpCountThreshold) => {
+    expect(
+      issuesOf(RULE_TUNING, {
+        workerId: RULE_TUNING,
+        autonomy: 'manual',
+        scheduleInterval: '2h',
+        extras: { ...RULE_TUNING_DEFAULT_EXTRAS, fpCountThreshold },
+      })
+    ).toContain('extras.fpCountThreshold');
+  });
+
+  it.each([-1, 101, 50.5])('rejects fpRateThresholdPct %s', (fpRateThresholdPct) => {
+    expect(
+      issuesOf(RULE_TUNING, {
+        workerId: RULE_TUNING,
+        autonomy: 'manual',
+        scheduleInterval: '2h',
+        extras: { ...RULE_TUNING_DEFAULT_EXTRAS, fpRateThresholdPct },
+      })
+    ).toContain('extras.fpRateThresholdPct');
+  });
+
+  it.each(['fpCountThreshold', 'fpRateThresholdPct'] as const)(
+    'rejects an extras replacement missing %s, naming it',
+    (missing) => {
+      const extras: Record<string, number> = { ...RULE_TUNING_DEFAULT_EXTRAS };
+      delete extras[missing];
+
+      expect(
+        issuesOf(RULE_TUNING, {
+          workerId: RULE_TUNING,
+          autonomy: 'manual',
+          scheduleInterval: '2h',
+          extras,
+        })
+      ).toContain(`extras.${missing}`);
+    }
+  );
 });
 
 describe('allowed autonomy levels', () => {
@@ -153,14 +203,18 @@ describe('allowed autonomy levels', () => {
   // Worker, not a UI choice. Asserting the registered sets keeps a later "allow everything"
   // edit from silently re-opening a level the gate cannot run.
   it('narrows the registered Workers to the levels their gates support', () => {
+    // One skippable gate each, so one level that gates it and one that does not.
     expect(getAllowedAutonomyLevels(ATTACK_DISCOVERY)).toEqual(['manual', 'supervised']);
+    expect(getAllowedAutonomyLevels(SYSTEM_SECURITY_WORKER_FORENSICS_ENDPOINT_ANALYSIS_ID)).toEqual(
+      ['manual', 'supervised']
+    );
+    expect(getAllowedAutonomyLevels(TRIAGE)).toEqual(['manual', 'supervised']);
+    // Review-gated throughout, so no unattended level at all.
     expect(getAllowedAutonomyLevels(RULE_TUNING)).toEqual(['manual', 'assisted']);
     expect(getAllowedAutonomyLevels(SYSTEM_SECURITY_WORKER_DETECTION_RULE_CREATION_ID)).toEqual([
       'manual',
       'assisted',
     ]);
-    // Triage and threat hunt keep the full dial.
-    expect(getAllowedAutonomyLevels(TRIAGE)).toEqual(['manual', 'assisted', 'supervised']);
   });
 
   it('rejects a PATCH naming a level the Worker does not allow', () => {

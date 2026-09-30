@@ -10,6 +10,19 @@
 import expect from '@kbn/expect';
 import type { FtrProviderContext } from '../../../ftr_provider_context';
 
+/**
+ * Migration recommendation: MIGRATE TO SCOUT. This is one create, edit, and delete journey for a
+ * persisted runtime field. It uses the real _field_preview route against logstash data, the
+ * change-type confirmation modal, and a format that must survive a reload. The data_view_field_editor
+ * client-integration Jest tests (field_editor_flyout_content.test.ts,
+ * field_editor_flyout_preview.test.ts) mock the preview response and never persist anything. The
+ * serverless FTR suite at x-pack/platform/test/serverless/functional/test_suites/management/
+ * data_views/_runtime_fields.ts is a near-identical copy (only navigation differs), so it is not
+ * independent coverage. Migrate this once as a deployment-agnostic Scout spec, ideally merged
+ * with _runtime_fields_composite.ts into one runtime_fields.spec.ts using steps, then delete both
+ * FTR copies. The group1 _index_pattern_filter.ts runtime test also creates a runtime field through
+ * the UI. Keep that one focused on the schema filter and do not repeat the create assertions.
+ */
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const kibanaServer = getService('kibanaServer');
   const log = getService('log');
@@ -38,6 +51,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     describe('create runtime field', function describeIndexTests() {
       const fieldName = 'atest';
 
+      /**
+       * Migration recommendation: MIGRATE TO SCOUT. Proves the preview renders from real
+       * Elasticsearch data and that saving increments the persisted field count.
+       */
       it('should create runtime field', async function () {
         await PageObjects.settings.navigateTo();
         await PageObjects.settings.clickKibanaIndexPatterns();
@@ -52,7 +69,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         );
 
         await log.debug('check that field preview is rendered');
-        expect(await testSubjects.exists('fieldPreviewItem', { timeout: 1500 })).to.be(true);
+        await testSubjects.existOrFail('fieldPreviewItem', { timeout: 5000 });
 
         await PageObjects.settings.clickSaveField();
 
@@ -63,6 +80,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         });
       });
 
+      /**
+       * Migration recommendation: MIGRATE TO SCOUT. Changing type, script, and format on a saved
+       * field goes through the `changeWarning` + confirm-save modal before persisting. Replace
+       * the bare `testSubjects.find('changeWarning')` with an explicit visibility assertion.
+       */
       it('should modify runtime field', async function () {
         await PageObjects.settings.filterField(fieldName);
         await testSubjects.click('editFieldFormat');
@@ -78,6 +100,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.settings.confirmSave();
       });
 
+      /**
+       * Migration recommendation: MIGRATE TO SCOUT. Reopening the flyout must load the `bytes`
+       * format from the saved data view. Fold this in as a step of the modify test.
+       */
       it('verify field format', async function () {
         await testSubjects.click('editFieldFormat');
         const select = await testSubjects.find('editorSelectedFormatId');
@@ -85,6 +111,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.settings.closeIndexPatternFieldEditor();
       });
 
+      /**
+       * Migration recommendation: MIGRATE TO SCOUT. Deleting a persisted runtime field from the
+       * list. This test has no assertion today, so the Scout version should check that the field
+       * is gone and the fields tab count went back to its starting value.
+       */
       it('should delete runtime field', async function () {
         await testSubjects.click('deleteField');
         await PageObjects.settings.confirmDelete();

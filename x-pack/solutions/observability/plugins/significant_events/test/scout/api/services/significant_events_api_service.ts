@@ -5,10 +5,15 @@
  * 2.0.
  */
 
+import { setTimeout as delay } from 'timers/promises';
 import { NIGHTSHIFT_ENABLED_FLAG } from '@kbn/nightshift-shared';
 import type { KbnClient, ScoutLogger } from '@kbn/scout-oblt';
 import { measurePerformanceAsync } from '@kbn/scout-oblt';
 import { COMMON_API_HEADERS } from '../fixtures/constants';
+
+// Matches global.setup.ts: a runtime flag override takes ~10s to reach every Cloud node.
+const RESUME_PROPAGATION_TIMEOUT_MS = 30_000;
+const RESUME_RETRY_INTERVAL_MS = 1_000;
 
 export interface SignificantEventsTestApiService {
   runSignificantEventsDiscovery: () => Promise<{ executionId: string }>;
@@ -19,6 +24,7 @@ export interface SignificantEventsTestApiService {
   }>;
   enableSignificantEvents: () => Promise<void>;
   disableSignificantEvents: () => Promise<void>;
+  resumeSignificantEvents: () => Promise<void>;
 }
 
 export function getSignificantEventsTestApiService({
@@ -62,6 +68,37 @@ export function getSignificantEventsTestApiService({
         'significantEventsTestApi.disableSignificantEvents',
         async () => {
           await setAvailability(false);
+        }
+      );
+    },
+
+    // Turning the flag off pauses Significant Events deployment-wide and turning it back on does
+    // not resume, so suites that flip the flag resume here to leave the deployment running.
+    // Resume is gated by the flag, so it retries while a just-enabled override is still
+    // propagating to every Cloud node.
+    async resumeSignificantEvents() {
+      await measurePerformanceAsync(
+        log,
+        'significantEventsTestApi.resumeSignificantEvents',
+        async () => {
+          const deadline = Date.now() + RESUME_PROPAGATION_TIMEOUT_MS;
+          while (true) {
+            const { status } = await kbnClient.request({
+              method: 'POST',
+              path: '/internal/significant_events/maintenance/_resume',
+              headers: COMMON_API_HEADERS,
+              ignoreErrors: [403],
+            });
+            if (status !== 403) {
+              return;
+            }
+            if (Date.now() >= deadline) {
+              throw new Error(
+                `Resume still rejected (403) ${RESUME_PROPAGATION_TIMEOUT_MS}ms after enabling the flag`
+              );
+            }
+            await delay(RESUME_RETRY_INTERVAL_MS);
+          }
         }
       );
     },

@@ -7,12 +7,14 @@
 
 import { EuiHorizontalRule, EuiLink, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
+import { getEbtProps } from '@kbn/ebt-click';
 import { ContentList, ContentListFooter, ContentListToolbar } from '@kbn/content-list';
 import { ContentListClientProvider, createFilterControl } from '@kbn/content-list-provider-client';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 import React from 'react';
+import { CONTEXT_ENGINE_UI_EBT } from '../../common/telemetry';
 import {
   AiIndexCardGrid,
   AiIndexListError,
@@ -61,7 +63,14 @@ const ContextLandingPageContent = ({
             defaultMessage="Turn raw source data into distilled context agents can use to solve problems faster. {learnMoreLink}"
             values={{
               learnMoreLink: (
-                <EuiLink href={contextEngineLinks.overview} target="_blank">
+                <EuiLink
+                  href={contextEngineLinks.overview}
+                  target="_blank"
+                  {...getEbtProps({
+                    element: CONTEXT_ENGINE_UI_EBT.element.aiIndexListPage,
+                    action: CONTEXT_ENGINE_UI_EBT.action.navigation.LEARN_MORE_DOCS,
+                  })}
+                >
                   {i18n.translate('xpack.contextEngine.landing.learnMore', {
                     defaultMessage: 'Learn more',
                   })}

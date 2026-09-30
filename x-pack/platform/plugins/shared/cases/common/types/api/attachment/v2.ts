@@ -6,15 +6,20 @@
  */
 
 import * as rt from 'io-ts';
-import { MAX_BULK_CREATE_ATTACHMENTS } from '../../../constants';
+import {
+  MAX_BULK_CREATE_ATTACHMENTS,
+  MAX_COMMENTS_PER_PAGE,
+  MAX_ATTACHMENT_TYPE_LENGTH,
+  MAX_ATTACHMENT_TYPES_PER_QUERY,
+} from '../../../constants';
 import type { BulkGetAttachmentsRequest } from './v1';
-import { UnifiedAttachmentPayloadRt } from '../../domain/attachment/v2';
-import { limitedArraySchema } from '../../../schema';
+import { UnifiedAttachmentRt, UnifiedAttachmentPayloadRt } from '../../domain/attachment/v2';
+import { limitedArraySchema, limitedStringSchema, paginationSchema } from '../../../schema';
 export type { BulkGetAttachmentsRequest as BulkGetAttachmentsRequestV2 };
 
-export const UnifiedAttachmentPatchRequestRt = rt.intersection([
+export const UnifiedAttachmentPutRequestRt = rt.intersection([
   UnifiedAttachmentPayloadRt,
-  rt.strict({ id: rt.string, version: rt.string }),
+  rt.strict({ version: rt.string }),
 ]);
 
 export const BulkCreateUnifiedAttachmentsRequestRt = limitedArraySchema({
@@ -24,6 +29,43 @@ export const BulkCreateUnifiedAttachmentsRequestRt = limitedArraySchema({
   fieldName: 'attachments',
 });
 
+const AttachmentTypeStringRt = limitedStringSchema({
+  fieldName: 'type',
+  min: 1,
+  max: MAX_ATTACHMENT_TYPE_LENGTH,
+});
+const AttachmentTypeQueryParamRt = rt.union([
+  AttachmentTypeStringRt,
+  limitedArraySchema({
+    codec: AttachmentTypeStringRt,
+    min: 1,
+    max: MAX_ATTACHMENT_TYPES_PER_QUERY,
+    fieldName: 'type',
+  }),
+]);
+
+export const UnifiedAttachmentsFindQueryParamsRt = rt.intersection([
+  rt.exact(
+    rt.partial({
+      sortOrder: rt.union([rt.literal('desc'), rt.literal('asc')]),
+      type: AttachmentTypeQueryParamRt,
+    })
+  ),
+  paginationSchema({ maxPerPage: MAX_COMMENTS_PER_PAGE }),
+]);
+
+export const UnifiedAttachmentsFindResponseRt = rt.strict({
+  data: rt.array(UnifiedAttachmentRt),
+  page: rt.number,
+  per_page: rt.number,
+  total: rt.number,
+});
+
+export type UnifiedAttachmentPutRequest = rt.TypeOf<typeof UnifiedAttachmentPutRequestRt>;
 export type BulkCreateUnifiedAttachmentsRequest = rt.TypeOf<
   typeof BulkCreateUnifiedAttachmentsRequestRt
 >;
+export type UnifiedAttachmentsFindQueryParams = rt.TypeOf<
+  typeof UnifiedAttachmentsFindQueryParamsRt
+>;
+export type UnifiedAttachmentsFindResponse = rt.TypeOf<typeof UnifiedAttachmentsFindResponseRt>;

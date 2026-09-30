@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { shouldClearSession, hydrateOnboardingSession } from './onboarding_app';
+import { getCloudService, shouldClearSession, hydrateOnboardingSession } from './onboarding_app';
 
 jest.mock('@kbn/fleet-plugin/public', () => ({
   sendGetCloudOnboardingDeployment: jest.fn(),
@@ -86,6 +86,108 @@ describe('hydrateOnboardingSession', () => {
     expect(auth?.authMethod).toBe('static_keys');
     expect(auth?.connectorId).toBeUndefined();
   });
+
+  // §0.1 — Guard: agent-based hydration must NOT seed agentPolicyId (singular).
+  // If it does, handleDeploy's "agentPolicyId ? [agentPolicyId] : selectedAgentPolicyIds" ternary
+  // narrows a multi-policy resume to the first policy only. It also makes isPolicyCreated truthy,
+  // re-opening the credential-gate bug that §A fixes via the isNextReady isPolicyCreated branch.
+  it('agent-based resume with policies: sets agentHostsMode:existing, selectedAgentPolicyIds, agentCredentialMethod — never agentPolicyId', async () => {
+    mockSendGet.mockResolvedValue({
+      item: makeItem({
+        connectorId: undefined,
+        mechanisms: ['agent_based'],
+        agentPolicyIds: ['policy-a', 'policy-b'],
+        authMethod: 'assume_role',
+      }),
+    });
+    await hydrateOnboardingSession(INTEGRATION_ID, DEPLOYMENT_ID);
+    const auth = JSON.parse(
+      sessionStorage.getItem(`onboarding.${INTEGRATION_ID}.authenticateAndDeployStep`) ?? 'null'
+    );
+    expect(auth).toMatchObject({
+      deploymentMethod: 'agent_based',
+      agentHostsMode: 'existing',
+      selectedAgentPolicyIds: ['policy-a', 'policy-b'],
+      agentCredentialMethod: 'assume_role',
+    });
+    // Regression guard: singular agentPolicyId must NOT be seeded.
+    expect(auth).not.toHaveProperty('agentPolicyId');
+  });
+
+  it('agent-based resume with no policies: sets agentHostsMode:new', async () => {
+    mockSendGet.mockResolvedValue({
+      item: makeItem({
+        connectorId: undefined,
+        mechanisms: ['agent_based'],
+        agentPolicyIds: [],
+        authMethod: 'static_keys',
+      }),
+    });
+    await hydrateOnboardingSession(INTEGRATION_ID, DEPLOYMENT_ID);
+    const auth = JSON.parse(
+      sessionStorage.getItem(`onboarding.${INTEGRATION_ID}.authenticateAndDeployStep`) ?? 'null'
+    );
+    expect(auth).toMatchObject({ deploymentMethod: 'agent_based', agentHostsMode: 'new' });
+    expect(auth).not.toHaveProperty('agentPolicyId');
+  });
+
+  // §0.2 — Guard: policyIdsByInstance must be empty for non-succeeded deploys.
+  // Fabricating completion for services that failed would prevent the retry path from running.
+  it('agent-based resume with status:succeeded populates policyIdsByInstance', async () => {
+    mockSendGet.mockResolvedValue({
+      item: makeItem({
+        connectorId: undefined,
+        mechanisms: ['agent_based'],
+        status: 'succeeded',
+        services: ['aws.cloudtrail', 'aws.vpcflow'],
+        packagePolicyIds: ['pkg-1', 'pkg-2'],
+      }),
+    });
+    await hydrateOnboardingSession(INTEGRATION_ID, DEPLOYMENT_ID);
+    const review = JSON.parse(
+      sessionStorage.getItem(`onboarding.${INTEGRATION_ID}.detectAndReviewStep`) ?? 'null'
+    );
+    expect(review?.policyIdsByInstance).toMatchObject({
+      'aws.cloudtrail': expect.any(String),
+      'aws.vpcflow': expect.any(String),
+    });
+  });
+
+  it('agent-based resume with status:failed leaves policyIdsByInstance empty', async () => {
+    mockSendGet.mockResolvedValue({
+      item: makeItem({
+        connectorId: undefined,
+        mechanisms: ['agent_based'],
+        status: 'failed',
+        services: ['aws.cloudtrail'],
+        packagePolicyIds: ['pkg-1'],
+      }),
+    });
+    await hydrateOnboardingSession(INTEGRATION_ID, DEPLOYMENT_ID);
+    const review = JSON.parse(
+      sessionStorage.getItem(`onboarding.${INTEGRATION_ID}.detectAndReviewStep`) ?? 'null'
+    );
+    expect(review?.policyIdsByInstance).toEqual({});
+  });
+
+  it('restores ecfStacks into detectAndReviewStep so isMethodLocked stays true on ECF resume', async () => {
+    const ecfStacks = [{ stackName: 'my-stack', region: 'us-east-1', status: 'CREATE_COMPLETE' }];
+    mockSendGet.mockResolvedValue({ item: makeItem({ ecfStacks }) });
+    await hydrateOnboardingSession(INTEGRATION_ID, DEPLOYMENT_ID);
+    const detect = JSON.parse(
+      sessionStorage.getItem(`onboarding.${INTEGRATION_ID}.detectAndReviewStep`) ?? 'null'
+    );
+    expect(detect?.ecfStacks).toEqual(ecfStacks);
+  });
+
+  it('omits ecfStacks from detectAndReviewStep when item has none', async () => {
+    mockSendGet.mockResolvedValue({ item: makeItem({ ecfStacks: undefined }) });
+    await hydrateOnboardingSession(INTEGRATION_ID, DEPLOYMENT_ID);
+    const detect = JSON.parse(
+      sessionStorage.getItem(`onboarding.${INTEGRATION_ID}.detectAndReviewStep`) ?? 'null'
+    );
+    expect(detect?.ecfStacks).toBeUndefined();
+  });
 });
 
 describe('shouldClearSession', () => {
@@ -118,5 +220,50 @@ describe('shouldClearSession', () => {
 
   it('returns the integration id when other query params are present but deploymentId is not', () => {
     expect(shouldClearSession(tileEntry({ search: '?foo=bar' }))).toBe('aws');
+  });
+});
+
+describe('getCloudService', () => {
+  const cloudSetup = {
+    isCloudEnabled: true,
+    isServerlessEnabled: false,
+    organizationId: '2070044029',
+    csp: 'aws',
+    region: 'eu-west-1',
+    cloudHost: 'eu-west-1.aws.qa.cld.elstc.co',
+    serverless: {},
+  } as any;
+  const cloudStart = {
+    isCloudEnabled: true,
+    isServerlessEnabled: false,
+    cloudId: 'qa:abc',
+    deploymentUrl: 'https://console.qa.cld.elstc.co/deployments/1f2e3d4c',
+    serverless: {},
+  } as any;
+
+  it('returns undefined when the cloud plugin is not available', () => {
+    expect(getCloudService(undefined, undefined)).toBeUndefined();
+    expect(getCloudService(cloudSetup, undefined)).toBeUndefined();
+  });
+
+  it('exposes the setup-only deployment metadata alongside the start contract', () => {
+    const cloud = getCloudService(cloudSetup, cloudStart);
+    expect(cloud).toMatchObject({
+      organizationId: '2070044029',
+      csp: 'aws',
+      region: 'eu-west-1',
+      cloudHost: 'eu-west-1.aws.qa.cld.elstc.co',
+      cloudId: 'qa:abc',
+      deploymentUrl: 'https://console.qa.cld.elstc.co/deployments/1f2e3d4c',
+    });
+  });
+
+  it('lets the start contract win on shared keys', () => {
+    const cloud = getCloudService({ ...cloudSetup, cloudId: 'stale' }, cloudStart);
+    expect(cloud?.cloudId).toBe('qa:abc');
+  });
+
+  it('works without a setup contract', () => {
+    expect(getCloudService(undefined, cloudStart)).toEqual(cloudStart);
   });
 });

@@ -1,0 +1,73 @@
+{
+  "sha1": "e8aecee577ef9630b2a4769cbae979ad9969a886",
+  "testChannels": [
+    "ci-on-commit"
+  ],
+  "tests": [
+    {
+      "id": "7924d4cfcfa01df-ad4fe42cbd758f7",
+      "title": "Ingest ES data for Discover search session integration tests",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout_test_plugins/ui/parallel_tests/global.setup.ts",
+        "line": 7,
+        "column": 1
+      }
+    },
+    {
+      "id": "bb2fea14a3c6365-5e2be2b9d3b270a",
+      "title": "Discover search session lifecycle Starts on data view select",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout_test_plugins/ui/parallel_tests/discover_search_session_integration.spec.ts",
+        "line": 57,
+        "column": 50
+      }
+    },
+    {
+      "id": "bb2fea14a3c6365-57c56b7e8ae0bd7",
+      "title": "Discover search session lifecycle Starts on a refresh",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout_test_plugins/ui/parallel_tests/discover_search_session_integration.spec.ts",
+        "line": 69,
+        "column": 22
+      }
+    },
+    {
+      "id": "bb2fea14a3c6365-ea8a3e24bfa1a5d",
+      "title": "Discover search session lifecycle Starts a new session on sort",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout_test_plugins/ui/parallel_tests/discover_search_session_integration.spec.ts",
+        "line": 72,
+        "column": 87
+      }
+    },
+    {
+      "id": "bb2fea14a3c6365-35290f7e396782e",
+      "title": "Discover search session lifecycle Starts a new session on filter change",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout_test_plugins/ui/parallel_tests/discover_search_session_integration.spec.ts",
+        "line": 77,
+        "column": 94
+      }
+    }
+  ]
+}

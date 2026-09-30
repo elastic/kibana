@@ -16,8 +16,11 @@ import {
   clearAllYamlProviders,
   interceptMonacoYamlProvider,
 } from './intercept_monaco_yaml_provider';
+import { createMockWorkflowContextRegistry } from '../../../../../common/lib/create_workflow_context_registry.mock';
 
 import { isDeprecatedStepType } from '../../../../../common/schema';
+
+const emptyRegistry = createMockWorkflowContextRegistry();
 
 // Mock dependencies
 jest.mock('./suggestions/get_suggestions', () => ({
@@ -74,13 +77,13 @@ describe('getCompletionItemProvider', () => {
 
   describe('provider structure', () => {
     it('should have correct provider ID', () => {
-      const provider = getCompletionItemProvider(getState);
+      const provider = getCompletionItemProvider(emptyRegistry, getState);
 
       expect((provider as any).__providerId).toBe(WORKFLOW_COMPLETION_PROVIDER_ID);
     });
 
     it('should have correct trigger characters', () => {
-      const provider = getCompletionItemProvider(getState);
+      const provider = getCompletionItemProvider(emptyRegistry, getState);
       expect(provider.triggerCharacters).toEqual([
         '@',
         '.',
@@ -103,7 +106,7 @@ describe('getCompletionItemProvider', () => {
       const { buildAutocompleteContext } = require('./context/build_autocomplete_context');
       buildAutocompleteContext.mockReturnValueOnce(null);
 
-      const provider = getCompletionItemProvider(getState);
+      const provider = getCompletionItemProvider(emptyRegistry, getState);
       const result = await provider.provideCompletionItems!(
         mockModel,
         mockPosition,
@@ -144,7 +147,7 @@ describe('getCompletionItemProvider', () => {
 
       monaco.languages.registerCompletionItemProvider(YAML_LANG_ID, yamlProvider);
 
-      const provider = getCompletionItemProvider(getState);
+      const provider = getCompletionItemProvider(emptyRegistry, getState);
       const result = await provider.provideCompletionItems!(
         mockModel,
         mockPosition,
@@ -190,7 +193,7 @@ describe('getCompletionItemProvider', () => {
 
       monaco.languages.registerCompletionItemProvider(YAML_LANG_ID, yamlProvider);
 
-      const provider = getCompletionItemProvider(getState);
+      const provider = getCompletionItemProvider(emptyRegistry, getState);
       const result = await provider.provideCompletionItems!(
         mockModel,
         mockPosition,
@@ -238,7 +241,7 @@ describe('getCompletionItemProvider', () => {
       );
       monaco.languages.registerCompletionItemProvider(YAML_LANG_ID, yamlProvider);
 
-      const provider = getCompletionItemProvider(getState);
+      const provider = getCompletionItemProvider(emptyRegistry, getState);
       const result = await provider.provideCompletionItems!(
         mockModel,
         mockPosition,
@@ -278,7 +281,7 @@ describe('getCompletionItemProvider', () => {
 
       monaco.languages.registerCompletionItemProvider(YAML_LANG_ID, yamlProvider);
 
-      const provider = getCompletionItemProvider(getState);
+      const provider = getCompletionItemProvider(emptyRegistry, getState);
       const result = await provider.provideCompletionItems!(
         mockModel,
         mockPosition,
@@ -327,7 +330,7 @@ describe('getCompletionItemProvider', () => {
       monaco.languages.registerCompletionItemProvider(YAML_LANG_ID, yamlProviderPlain);
       monaco.languages.registerCompletionItemProvider(YAML_LANG_ID, yamlProviderSnippet);
 
-      const provider = getCompletionItemProvider(getState);
+      const provider = getCompletionItemProvider(emptyRegistry, getState);
       const result = await provider.provideCompletionItems!(
         mockModel,
         mockPosition,
@@ -370,7 +373,7 @@ describe('getCompletionItemProvider', () => {
 
       monaco.languages.registerCompletionItemProvider(YAML_LANG_ID, yamlProvider);
 
-      const provider = getCompletionItemProvider(getState);
+      const provider = getCompletionItemProvider(emptyRegistry, getState);
       const result = await provider.provideCompletionItems!(
         mockModel,
         mockPosition,
@@ -410,7 +413,7 @@ describe('getCompletionItemProvider', () => {
 
       monaco.languages.registerCompletionItemProvider(YAML_LANG_ID, yamlProvider);
 
-      const provider = getCompletionItemProvider(getState);
+      const provider = getCompletionItemProvider(emptyRegistry, getState);
       const result = await provider.provideCompletionItems!(
         mockModel,
         mockPosition,
@@ -451,7 +454,7 @@ describe('getCompletionItemProvider', () => {
       monaco.languages.registerCompletionItemProvider(YAML_LANG_ID, provider1);
       monaco.languages.registerCompletionItemProvider(YAML_LANG_ID, provider2);
 
-      const provider = getCompletionItemProvider(getState);
+      const provider = getCompletionItemProvider(emptyRegistry, getState);
       const result = await provider.provideCompletionItems!(
         mockModel,
         mockPosition,
@@ -491,7 +494,7 @@ describe('getCompletionItemProvider', () => {
       monaco.languages.registerCompletionItemProvider(YAML_LANG_ID, provider1);
       monaco.languages.registerCompletionItemProvider(YAML_LANG_ID, provider2);
 
-      const provider = getCompletionItemProvider(getState);
+      const provider = getCompletionItemProvider(emptyRegistry, getState);
       const result = await provider.provideCompletionItems!(
         mockModel,
         mockPosition,
@@ -521,7 +524,7 @@ describe('getCompletionItemProvider', () => {
       monaco.languages.registerCompletionItemProvider(YAML_LANG_ID, provider1);
       monaco.languages.registerCompletionItemProvider(YAML_LANG_ID, provider2);
 
-      const provider = getCompletionItemProvider(getState);
+      const provider = getCompletionItemProvider(emptyRegistry, getState);
       const result = await provider.provideCompletionItems!(
         mockModel,
         mockPosition,
@@ -548,7 +551,7 @@ describe('getCompletionItemProvider', () => {
         provider as monaco.languages.CompletionItemProvider
       );
 
-      const completionProvider = getCompletionItemProvider(getState);
+      const completionProvider = getCompletionItemProvider(emptyRegistry, getState);
       const result = await completionProvider.provideCompletionItems!(
         mockModel,
         mockPosition,
@@ -589,7 +592,7 @@ describe('getCompletionItemProvider', () => {
 
       monaco.languages.registerCompletionItemProvider(YAML_LANG_ID, yamlProvider);
 
-      const provider = getCompletionItemProvider(getState);
+      const provider = getCompletionItemProvider(emptyRegistry, getState);
       const result = await provider.provideCompletionItems!(
         mockModel,
         mockPosition,
@@ -630,7 +633,7 @@ describe('getCompletionItemProvider', () => {
 
       monaco.languages.registerCompletionItemProvider(YAML_LANG_ID, yamlProvider);
 
-      const provider = getCompletionItemProvider(getState);
+      const provider = getCompletionItemProvider(emptyRegistry, getState);
       const result = await provider.provideCompletionItems!(
         mockModel,
         mockPosition,
@@ -658,7 +661,7 @@ describe('getCompletionItemProvider', () => {
       monaco.languages.registerCompletionItemProvider(YAML_LANG_ID, provider1);
       monaco.languages.registerCompletionItemProvider(YAML_LANG_ID, provider2);
 
-      const completionProvider = getCompletionItemProvider(getState);
+      const completionProvider = getCompletionItemProvider(emptyRegistry, getState);
       const result = await completionProvider.provideCompletionItems!(
         mockModel,
         mockPosition,

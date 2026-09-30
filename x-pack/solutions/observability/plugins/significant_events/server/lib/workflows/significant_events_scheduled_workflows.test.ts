@@ -76,16 +76,19 @@ const findStep = (steps: ParsedWorkflowStep[], name: string): ParsedWorkflowStep
   return undefined;
 };
 
-const createMockManagementApi = (overrides: Record<string, jest.Mock> = {}) => ({
-  getWorkflow: jest.fn().mockResolvedValue({
-    id: SIGNIFICANT_EVENTS_SCHEDULED_DETECTION_WORKFLOW_ID,
-    enabled: false,
-  }),
-  updateWorkflow: jest.fn().mockResolvedValue({}),
-  getWorkflowExecutions: jest.fn().mockResolvedValue({ results: [], total: 0 }),
-  cancelWorkflowExecution: jest.fn().mockResolvedValue(undefined),
-  ...overrides,
-});
+const createMockManagementApi = (overrides: Record<string, jest.Mock> = {}) => {
+  const api = {
+    getWorkflow: jest.fn().mockResolvedValue({
+      id: SIGNIFICANT_EVENTS_SCHEDULED_DETECTION_WORKFLOW_ID,
+      enabled: false,
+    }),
+    updateWorkflow: jest.fn().mockResolvedValue({}),
+    getWorkflowExecutions: jest.fn().mockResolvedValue({ results: [], total: 0 }),
+    cancelWorkflowExecution: jest.fn().mockResolvedValue(undefined),
+    ...overrides,
+  };
+  return { ...api, getClient: jest.fn(() => api) };
+};
 
 const createMockManagedWorkflowsClient = () => ({
   install: jest.fn().mockResolvedValue(undefined),

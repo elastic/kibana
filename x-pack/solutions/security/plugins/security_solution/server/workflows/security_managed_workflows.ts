@@ -21,8 +21,8 @@ import { enumerateSpaceIds } from './lib/enumerate_space_ids';
 
 /**
  * Single plugin-start entry for securitySolution managed workflows: install alert
- * analysis (always), install or uninstall threat-intel workflows when the supply
- * flag is on/off, then call `ready()` exactly once. Replaces the two prior
+ * analysis (always), install or uninstall threat-intel workflows when AlertZero
+ * is on/off, then call `ready()` exactly once. Replaces the two prior
  * AndMarkReady helpers that each called `ready()` and raced each other.
  */
 export const installSecurityManagedWorkflowsAndMarkReady = async ({
@@ -34,10 +34,15 @@ export const installSecurityManagedWorkflowsAndMarkReady = async ({
 }: {
   workflowsExtensions: WorkflowsExtensionsServerPluginStart;
   logger: Logger;
+  /**
+   * True when `xpack.alertzero.enabled` is on (captured from the optional
+   * alertzero setup contract). When false, any previously installed TI
+   * managed workflows are uninstalled.
+   */
   threatIntelSupplyEnabled: boolean;
   /**
    * Resolves after TI bootstrap (templates, migrations, seed). Only awaited when
-   * the supply flag is on; ignored otherwise.
+   * supply is enabled; ignored otherwise.
    */
   bootstrapReady: Promise<void>;
   core: Pick<CoreStart, 'savedObjects'>;

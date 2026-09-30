@@ -10,6 +10,7 @@ import type {
   AgentsServiceStartContract,
   AttachmentServiceStartContract,
   ConversationsServiceStartContract,
+  ConversationEventsServiceStartContract,
   ConversationTemplateServiceStartContract,
   RendererServiceStartContract,
   ToolServiceStartContract,
@@ -30,6 +31,8 @@ export type AttachmentServiceStartContractMock = jest.Mocked<AttachmentServiceSt
 export type ConversationTemplateServiceStartContractMock =
   jest.Mocked<ConversationTemplateServiceStartContract>;
 export type RendererServiceStartContractMock = jest.Mocked<RendererServiceStartContract>;
+export type ConversationEventsServiceStartContractMock =
+  jest.Mocked<ConversationEventsServiceStartContract>;
 export type ConversationsServiceStartContractMock = jest.Mocked<ConversationsServiceStartContract>;
 export type ToolServiceStartContractMock = jest.Mocked<ToolServiceStartContract>;
 
@@ -38,6 +41,7 @@ export type AgentBuilderPluginStartMock = jest.Mocked<AgentBuilderPluginStart> &
   attachments: AttachmentServiceStartContractMock;
   conversationTemplates: ConversationTemplateServiceStartContractMock;
   renderers: RendererServiceStartContractMock;
+  conversationEvents: ConversationEventsServiceStartContractMock;
   tools: ToolServiceStartContractMock;
 };
 
@@ -79,6 +83,15 @@ const createRendererStartMock = (): RendererServiceStartContractMock => {
   };
 };
 
+const createConversationEventsStartMock = (): ConversationEventsServiceStartContractMock => {
+  return {
+    register: jest.fn(),
+    getUiDefinition: jest.fn(),
+    has: jest.fn(),
+    list: jest.fn().mockReturnValue([]),
+  };
+};
+
 const createToolStartMock = (): ToolServiceStartContractMock => {
   return {
     get: jest.fn(),
@@ -98,6 +111,7 @@ const createStartContractMock = (): AgentBuilderPluginStartMock => {
     attachments: createAttachmentStartMock(),
     conversationTemplates: createConversationTemplatesStartMock(),
     renderers: createRendererStartMock(),
+    conversationEvents: createConversationEventsStartMock(),
     tools: createToolStartMock(),
     conversations: createConversationsStartMock(),
     events: {

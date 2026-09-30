@@ -27,6 +27,7 @@ import type { EntityAnalyticsRoutesDeps } from '../../types';
 import type { ConfigType } from '../../../../config';
 
 import { TYPE, VERSION, TIMEOUT, SCOPE, INTERVAL } from '../constants';
+import { buildEaExecutionContext, EA_EXECUTION_CONTEXT_NAMES } from '../../execution_context';
 import {
   defaultState,
   stateSchemaByVersion,
@@ -162,16 +163,23 @@ const createPrivilegeMonitoringTaskRunnerFactory =
       run: async () => {
         const [core] = await deps.getStartServices();
         const config = deps.config;
-        return runPrivilegeMonitoringTask({
-          isCancelled,
-          logger: deps.logger,
-          telemetry: deps.telemetry,
-          taskInstance,
-          experimentalFeatures: deps.experimentalFeatures,
-          core,
-          config,
-          getPrivilegedUserMonitoringDataClient: deps.getPrivilegedUserMonitoringDataClient,
-        });
+        return core.executionContext.withContext(
+          buildEaExecutionContext(
+            EA_EXECUTION_CONTEXT_NAMES.PRIVILEGE_MONITORING_TASK,
+            taskInstance.id
+          ),
+          () =>
+            runPrivilegeMonitoringTask({
+              isCancelled,
+              logger: deps.logger,
+              telemetry: deps.telemetry,
+              taskInstance,
+              experimentalFeatures: deps.experimentalFeatures,
+              core,
+              config,
+              getPrivilegedUserMonitoringDataClient: deps.getPrivilegedUserMonitoringDataClient,
+            })
+        );
       },
       cancel: async () => {
         cancelled = true;
