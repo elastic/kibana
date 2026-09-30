@@ -33,7 +33,8 @@ consts:
   body_field: body
   # The agreed corpus filter, as a complete ES|QL line. Set to "" to take the whole index.
   corpus_filter: "| WHERE published_at >= NOW() - 365 days"
-  # Upper bound on documents summarised in one run. Each costs a model call.
+  # The KI budget: one model call and one KI per document, 100 at most during onboarding. A
+  # one-KI-per-claim variant multiplies it by the claims per document.
   max_documents: 50
   # Bodies are truncated before they reach the prompt so one long document cannot exhaust the
   # context window and silently drop the rest of the batch.
@@ -83,11 +84,7 @@ steps:
 
       - name: summarize_document
         type: ai.prompt
-        # The default model for every prompt step. Change it to another AI connector id if the
-        # user asks for one; leave it in place otherwise.
-        connector-id: .google-gemini-3.5-flash-chat_completion
-        # Transient connector errors, rate limits and structured-output parse failures are
-        # retried; a prompt that can never satisfy its schema still fails every attempt.
+        connector-id-by-feature: context_engine_prompt
         on-failure:
           retry:
             max-attempts: 3
@@ -130,8 +127,8 @@ steps:
             - esql_example: the same query with real values substituted and a small LIMIT.
             - returns: a short description of what the query returns.
 
-            At least one pattern retrieves this exact document; the others reach the documents
-            around it — same topic, same period, whatever the corpus makes sensible.
+            When you return patterns, at least one retrieves this exact document; the others reach
+            the documents around it — same topic, same period, whatever the corpus makes sensible.
 
             ES|QL correctness rules — esql_template and esql_example are both executed by the
             verifier, so both must be valid and runnable:
@@ -180,7 +177,7 @@ steps:
             required:
               ["display_name", "summary", "topics", "answers_questions", "when_to_use", "access_patterns"]
 
-      # Built once so verify_ki and create_ki see exactly the same document.
+      # Built once, then handed to create_ki to verify and write.
       - name: assemble_ki
         type: data.set
         with:
@@ -238,33 +235,28 @@ steps:
               esql: "${{ steps.summarize_document.output.content.access_patterns | map: 'esql_example' | default: nil }}"
               topics: "${{ steps.summarize_document.output.content.topics }}"
 
-      - name: verify_ki
-        type: context-engine.verifyKi
+      # `ki_id` pairs the index with the source document id, so a re-run replaces that
+      # document's KI rather than appending a second copy, and two indices holding the same
+      # document id do not collide. On a data-stream destination a re-run appends a new revision
+      # instead.
+      - name: create_ki
+        type: context-engine.createKi
         with:
+          ai_index_id: "{{ consts.ai_index_id }}"
+          ki_id: "{{ consts.source_index }}-{{ steps.document_context.output.doc_id }}"
+          ki: "${{ steps.assemble_ki.output.ki }}"
           verifiers:
             - esql-valid-syntax
             - esql-valid-runtime
-          ki: "${{ steps.assemble_ki.output.ki }}"
 
       - name: check_verification
         type: if
-        condition: "steps.verify_ki.output.passed : true"
+        condition: "steps.create_ki.output.verification.passed : false"
         steps:
-          # `ki_id` pairs the index with the source document id, so a re-run replaces that
-          # document's KI on an index destination (a data stream appends a newer revision of it)
-          # rather than writing a second KI, and two indices holding the same document id do not
-          # collide.
-          - name: create_ki
-            type: context-engine.createKi
-            with:
-              ai_index_id: "{{ consts.ai_index_id }}"
-              ki_id: "{{ consts.source_index }}-{{ steps.document_context.output.doc_id }}"
-              ki: "${{ steps.assemble_ki.output.ki }}"
-        else:
           - name: log_verification_failure
             type: console
             with:
               message: |
                 KI verification failed for document
                 {{ steps.document_context.output.doc_id }}.
-                Results: {{ steps.verify_ki.output.results | json }}
+                Results: {{ steps.create_ki.output.verification.results | json }}

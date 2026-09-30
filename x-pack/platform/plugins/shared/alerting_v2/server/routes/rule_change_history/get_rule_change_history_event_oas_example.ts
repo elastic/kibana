@@ -17,7 +17,7 @@ const { version: _occVersion, ...RULE_SNAPSHOT } = RULE_RESPONSE;
 
 export const GET_RULE_CHANGE_HISTORY_EVENT_RESPONSE: RuleChangeHistoryDetail = {
   id: '0194f0c8-aaaa-7bbb-8ccc-ddddeeeeffff',
-  timestamp: '2026-01-15T12:05:00.000Z',
+  created_at: '2026-01-15T12:05:00.000Z',
   actor: { name: 'elastic', profile_id: 'u_profile_1' },
   action: 'rule_update',
   changes: {
@@ -25,7 +25,7 @@ export const GET_RULE_CHANGE_HISTORY_EVENT_RESPONSE: RuleChangeHistoryDetail = {
     summary: { metadata: { name: 'Host CPU high' } },
   },
   is_current: true,
-  metadata: { version: 2 },
+  version: 2,
   snapshot: {
     ...RULE_SNAPSHOT,
     metadata: {
@@ -38,12 +38,12 @@ export const GET_RULE_CHANGE_HISTORY_EVENT_RESPONSE: RuleChangeHistoryDetail = {
 
 const INVALID_PATH_PARAMETERS_RESPONSE = invalidResponseExample({
   summary: INVALID_SCHEMA_OR_PARAMETERS_DESCRIPTION,
-  message: 'event_id: Too small: expected string to have >=1 characters',
+  message: 'change_id: Too small: expected string to have >=1 characters',
   details: {
     errors: {
       errors: [],
       properties: {
-        event_id: { errors: ['Too small: expected string to have >=1 characters'] },
+        change_id: { errors: ['Too small: expected string to have >=1 characters'] },
       },
     },
   },

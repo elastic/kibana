@@ -10,12 +10,30 @@ export {
   ApprovalContent,
   type ApprovalContentProps,
   type ApprovalAction,
+  type ApprovalDecision,
   type AlwaysAllowOption,
+  type DeclineParams,
 } from './src/approval_content';
-export { getProposalTone, isProposalExpired } from './src/proposal_helpers';
-export { toActionImpactItems } from './src/to_action_impact_items';
+export {
+  getApprovalOutcomeBadge,
+  type ApprovalOutcomeBadge,
+  type ApprovalOutcomeStatus,
+  type ApprovalPhase,
+} from './src/approval_outcome';
+export {
+  ProposedActionStatusBadge,
+  type ProposedActionStatusBadgeProps,
+} from './src/needs_review_badge';
+export {
+  getProposalCaption,
+  getProposalDecision,
+  getProposalTone,
+  isProposalExpired,
+} from './src/proposal_helpers';
 export type { ApprovalProposal } from './src/types';
 export {
-  type ActionImpactContent,
-  type ActionImpactSectionProps,
-} from './src/action_impact_section';
+  DISMISS_REASON_LABELS,
+  DISMISS_REASON_OPTIONS,
+  formatDismissReason,
+} from './src/dismiss_reason';
+export { DeclineReasonForm, type DeclineReasonFormProps } from './src/decline_reason_form';

@@ -383,8 +383,15 @@ export const ConnectorIconsMap: Map<
     '.urlscan_io',
     lazy(() => import(/* webpackChunkName: "connectorIconUrlscanIo" */ './specs/urlscan_io/icon')),
   ],
+  [
+    '.bitbucket',
+    lazy(() => import(/* webpackChunkName: "connectorIconBitbucket" */ './specs/bitbucket/icon')),
+  ],
+  [
+    '.azure_aks',
+    lazy(() => import(/* webpackChunkName: "connectorIconAzureAks" */ './specs/azure_aks/icon')),
+  ],
   ['.misp', lazy(() => import(/* webpackChunkName: "connectorIconMisp" */ './specs/misp/icon'))],
-
   [
     '.google_threat_intelligence',
     lazy(
@@ -401,5 +408,20 @@ export const ConnectorIconsMap: Map<
   [
     '.threatq',
     lazy(() => import(/* webpackChunkName: "connectorIconThreatQ" */ './specs/threatq/icon')),
+  ],
+
+  [
+    '.elasticsearch',
+    lazy(
+      () =>
+        import(/* webpackChunkName: "connectorIconelasticsearch" */ './specs/elasticsearch/icon')
+    ),
+  ],
+  [
+    '.azure_functions',
+    lazy(
+      () =>
+        import(/* webpackChunkName: "connectorIconazurefunctions" */ './specs/azure_functions/icon')
+    ),
   ],
 ]);

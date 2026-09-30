@@ -142,6 +142,7 @@ it('executes the manual investigation and preserves the report and references to
     conversation_round_count: 1,
   });
   expect(result.execution_error).toBeUndefined();
+  expect(result.structured_report).not.toHaveProperty('trigger_feedback');
 });
 
 it.each([

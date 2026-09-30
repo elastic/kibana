@@ -112,6 +112,63 @@ actual documented behavior — flag them even without live access to the API, ba
   third-party OpenAPI mirror can be confidently wrong; those aren't a substitute for the vendor's own
   parameter table (look for an explicit "Query String(s)" vs. "Request Body" heading on the vendor's own
   endpoint reference page).
+- **Credential in a custom header + automatic redirects**: Flag any handler that sends a credential in a
+  vendor-specific header (`x-api-key`, `x-functions-key`, `private-token`, etc.) without
+  `maxRedirects: 0`. Axios follows redirects by default and strips only the *standard* authorization
+  headers on a cross-host redirect, so a service that answers with an auth redirect forwards a live
+  credential to the target host. This is a credential-leak path, not a robustness nit — treat it as high
+  severity. No test that mocks the HTTP client will surface it. The 3xx should come back as a result with
+  its `Location` intact, which needs a `validateStatus` accepting 3xx *as well* — `maxRedirects: 0` alone
+  leaves Axios's default `validateStatus` to reject it, so the handler throws and the caller never sees
+  the `Location`. `jenkins.ts` sets both and is the in-repo precedent.
+- **Non-2xx responses swallowed as exceptions**: Axios rejects every non-2xx status, so an action that
+  proxies a call to caller-controlled code or a caller-named route takes the `catch` path when the service
+  deliberately answers `400`, `409`, or `500`. The caller then gets a connector error instead of the
+  status, headers, and error body it needs. Flag any such action with no `validateStatus` predicate.
+- **A status code used as the sole evidence for a classification**: Applies **only to an action that
+  already proxies meaningful non-2xx answers** — the action in the row above, whose contract is to hand
+  the caller whatever the service said. Within such an action, flag a `validateStatus` predicate (or
+  `catch` branch) that excludes specific statuses on the grounds of what they "mean" — typically 401/403
+  treated as a bad credential. A service whose own code enforces user authorization returns those
+  statuses too, and the status alone cannot distinguish the two, so the service's intended authorization
+  response becomes unreadable. Inside that action every HTTP status should be returned as a result; only
+  transport failures, which carry no status, are exceptions.
+
+  Do not apply this rule to any other action. An ordinary `GET` that 401s has failed, and a connectivity
+  `test` handler whose authentication fails **must** fail — its whole purpose is to report whether the
+  credential works, so returning a 401 as a successful result reports a broken connector as healthy.
+  Flag the reverse there: a `test` handler or plain read with a `validateStatus` that accepts 401/403.
+- **Unfollowed pagination continuation links**: Flag any list action that returns
+  `response.data.value`/`.items`/`.results` without following the vendor's continuation field
+  (`nextLink`, `next`, `next_cursor`, a `Link` header). A partial inventory presented as complete is worse
+  for an agent than an error. Check every list action *and* the connectivity `test` handler if it reports
+  a count. Where a helper exists, confirm it caps the page count and reports the cap in the result (e.g.
+  `truncated: true`), and that it preserves the continuation URL's own query string rather than
+  re-applying `params` — that corrupts a URL already carrying an api-version and a skip token.
+
+  Check first which kind of continuation the vendor returns, because the two are handled oppositely. A
+  URL continuation (`nextLink`, `next`, a `Link` header) is resolved and requested, with the caller's
+  `params` dropped. An opaque cursor token (`next_cursor`, `nextPageToken`) is re-sent as the parameter
+  the vendor names, *with* the original `params`, since the filters are not encoded in the token. Flag a
+  helper that passes a cursor token to `new URL()` — a token has no path, so it resolves to a sibling
+  endpoint the connector never called, and the list stops after the first page.
+- **A cross-host continuation link followed with the authenticated client**: Treat this as high severity.
+  A vendor-supplied `nextLink` is caller-untrusted data, and `ctx.client` carries the connector's
+  credentials. Axios strips a standard authorization header on a cross-host *redirect*, but an explicit
+  new request gets no such protection, so an attacker-influenced link sends the credentials to the host
+  it names and can reach an internal address. Flag any pagination helper that passes a continuation URL
+  to `ctx.client` with no origin check against the request it sent (or an explicitly allowed host).
+  Check how the link is parsed, too: a bare `new URL(nextLink)` throws on the relative link (`?page=2`,
+  `/items?page=2`) a `Link` header commonly carries, so it stops pagination at page one for those
+  vendors. The helper should resolve the link against the request URL and use the resolved URL for the
+  next request, which handles both forms and still compares the right origin.
+
+  Then check *which* base it resolves against. `new URL(url, baseURL)` is not the URL Axios requested:
+  Axios concatenates `baseURL` and `url` rather than resolving them, so a `baseURL` with a path
+  (`https://api.example/v1`) plus `url: '/items'` is requested as `/v1/items` but resolves as `/items`.
+  A relative continuation link measured against that base paginates at an endpoint the connector never
+  called, and returns nothing or the wrong collection without erroring. `ctx.client.getUri({ url,
+  params })` returns the effective URL and is the correct base.
 - **"At least one of" update inputs**: If every field on an update-action's input schema is optional, check
   for a `.refine()` (or equivalent) requiring at least one to be set. Without it, a call with no fields set
   silently no-ops instead of erroring.
@@ -151,6 +208,26 @@ actual documented behavior — flag them even without live access to the API, ba
 
 ### LLM Descriptions and Skill Content
 
+- **`scope` classified from the action name instead of the documented side effect**: Every `isTool: true`
+  action needs an explicit `scope`, and it must reflect what the request does to the service. `scope` is
+  the signal an orchestration layer uses to decide whether an action is safe during read-only
+  exploration, so a mutating operation marked `read` is the worst case.
+
+  A read-sounding name is not evidence of a read: `listSyncFunctionTriggers` is a `POST` that
+  re-synchronizes an app's deployed trigger metadata, and shipped as `scope: 'read'`.
+
+  A `POST` is not evidence of a mutation either. A GraphQL query, a search route with a body, and a
+  bulk-read endpoint are all read-only `POST`s, and many shipped specs correctly pair `scope: 'read'`
+  with one. Relabelling those `destroy` would hide safe queries from read-only exploration — the
+  opposite failure.
+
+  So treat a `scope: 'read'` on a `POST`/`PUT`/`PATCH` as a prompt to check the vendor's documented
+  behaviour for that route, and flag it only when the documentation says the call changes state.
+- **A disproven vendor behaviour fixed in only one place**: When the diff (or its commit history) shows
+  that live testing disproved a documented response shape, check that *every* place encoding the old
+  assumption was corrected — the action `description`, the `scope`, the test mock, the auth `helpText`,
+  the `skill` text, and the docs page. A description rewritten alone, with the scope and mock left behind,
+  has shipped before. Grep the connector directory and its docs page for the disproven claim.
 - **`isTool`**: Actions intended for AI agent use should set `isTool: true` (the default is `false`, which hides the
   action from Agent Builder). Most actions should be tools. Flag actions that are missing `isTool: true` unless there
   is a clear reason to hide them (e.g. destructive or admin-only operations).
@@ -187,6 +264,18 @@ actual documented behavior — flag them even without live access to the API, ba
   not just `stack: preview`. The version must be ≥ every other version referenced anywhere in the doc
   (a new connector cannot have been available before any feature it references). Flag any doc where it
   is missing or where the version is lower than another version referenced in the same file.
+- **Stated availability must match `supportedFeatureIds`**: A doc page for a connector shipping
+  `supportedFeatureIds: ['agentBuilder']` must say so — recent connector pages state what the connector
+  can be used with, because it is common for one to work with only Agent Builder or only Workflows. Flag a
+  page that promises workflow support the spec does not declare, including in the opening sentence ("a
+  workflow or agent can..."). `gitlab-action-type.md` carries the expected note.
+- **Internal vocabulary in a user-facing page**: Flag "custom connector", "MCP-native", "connector spec",
+  "stack connector" and similar. These describe our implementation, not anything a reader can act on — a
+  reader cannot tell what a *non*-custom connector would be. The page should say what the connector does.
+- **A paragraph interrupting a Markdown table**: A note inserted between two rows terminates the table,
+  and every row after it renders as raw pipe-delimited text with no header of its own. Flag any prose
+  between table rows; a note about one action belongs below the final row. Count the rows against the
+  number of actions the spec exposes to confirm the table is contiguous.
 - `docs/reference/toc.yml` entry exists in the correct section and matches alphabetical order in that section.
 - **Icon**: Connector has an icon (ConnectorIconsMap entry and icon component or asset). The SVG
   must be the vendor's official brand mark — sourced from the vendor's press kit, brand guidelines
@@ -251,6 +340,29 @@ Report documentation issues alongside code issues.
   `mockCallTool` and `mockListTools` so handlers do not require a real MCP transport. The mock should
   route through `withMcpClient` so that `callToolJson`/`callToolContent` calls are also captured.
   Flag test files that skip this mock, instantiate a real MCP client, or leave handlers untested.
+- **Stale mocks and tests that assert nothing**: Flag a mock whose response shape contradicts what the
+  handler or its description now claims — typically left behind when live testing disproved a vendor's
+  documented response and only the description was corrected. Flag any test that awaits a handler without
+  asserting on the returned value: it passes with a wrong mock in place, so a regression that re-promises
+  the obsolete shape goes unnoticed.
+- **Edges live testing cannot reach**: A `## Validated` table proves the happy path against one real
+  account; it does not cover the paths review keeps finding. Each edge below is owed only when the
+  connector has the thing it tests — read the left column first and skip the row if the answer is no. A
+  connector with none of them (an MCP-only spec, or one with plain `GET` reads) owes none of these, and
+  asking anyway invites an author to invent a test for behaviour the connector does not have.
+
+  | Only if the spec has | Flag a suite with no case for |
+  | --- | --- |
+  | an action that proxies a call whose non-2xx answers are meaningful | that non-2xx returned as a result, with its error body |
+  | a request sending a credential in a custom header | a 3xx, asserting `maxRedirects: 0` and the returned `Location` |
+  | a list action following a continuation link | a multi-page response, and the page cap reporting `truncated` |
+  | a list action following a continuation link | an off-origin link — absolute *and* protocol-relative (`//evil.example/items`) — asserting pagination stops with no authenticated follow-up request |
+  | an input with a size or byte bound | an over-sized input rejected at the schema boundary, **including a non-ASCII case** for a byte bound |
+  | a regex constraining a URL path | both the accept and the reject cases, table-driven |
+
+  Do not read the first row as a reason to make every error a result. An ordinary `GET` that 404s or 500s
+  is an error, and should stay one; the row applies to an action whose non-2xx answer is part of what the
+  caller asked for.
 
 ### Security
 
@@ -268,6 +380,23 @@ Report documentation issues alongside code issues.
   at a glance, but an array of 100,000 short, individually-valid strings is still an unbounded-input DoS
   vector — especially if the array is later joined into a URL query string, since that also risks an
   oversized upstream request.
+- **Unbounded free-form JSON bodies**: A field typed `z.unknown()`/`z.any()` — a request body forwarded
+  verbatim to the service — has no shape to constrain but is still allocated and serialized on the Kibana
+  server before being sent. Flag one with no `.refine()` bounding its serialized size. The refine should
+  also reject a value that cannot be serialized at all (a cycle, a `BigInt`) rather than letting it fail
+  opaquely inside the HTTP client.
+- **A byte bound measured in `String.length`**: Flag `JSON.stringify(value).length <= N` (or
+  `str.length <= N`) where the limit is stated in bytes. `.length` counts UTF-16 code units, so a "1 MiB"
+  cap passes roughly 1 M CJK characters and sends roughly 3 MiB upstream, defeating the cap for every
+  non-ASCII payload. It should be `Buffer.byteLength(serialized, 'utf8')`. Check for a non-ASCII boundary
+  test too — an ASCII-only test passes either way.
+- **A URL path pattern reviewed in only one direction**: A regex constraining a value interpolated into a
+  URL has two jobs — accept every legitimate value and reject every escape — and can fail at both at
+  once. Check both sets. A narrow allowlist like `[A-Za-z0-9._~/-]` rejects a correctly percent-encoded
+  segment (`api/users/alice%40example.com`) *and* accepts `//evil.com/x`, which a client reads as a
+  protocol-relative URL to another host. Expect the RFC 3986 `pchar` set minus `:`, plus `%XX` triplets,
+  with a leading `//` excluded; allowing `:` lets `http://evil.com` parse as a relative path. Flag a
+  pattern whose tests only assert what it accepts.
 - **SSRF**: Any URL field in connector config or workflow action input (e.g. `base_url`, `endpoint`, `webhook_url`)
   must be validated. URLs should be allowlisted, restricted to HTTPS, or otherwise prevented from being user-controlled
   in a way that could trigger requests to internal/private hosts. Flag any case where a user-supplied URL flows

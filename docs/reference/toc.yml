@@ -83,9 +83,12 @@ toc:
           - file: connectors-kibana/argocd-action-type.md
           - file: connectors-kibana/aws-cloudwatch-action-type.md
           - file: connectors-kibana/aws-x-ray-action-type.md
+          - file: connectors-kibana/azure-aks-action-type.md
           - file: connectors-kibana/azure-blob-action-type.md
+          - file: connectors-kibana/azure-functions-action-type.md
           - file: connectors-kibana/azure-monitor-action-type.md
           - file: connectors-kibana/bigquery-action-type.md
+          - file: connectors-kibana/bitbucket-action-type.md
           - file: connectors-kibana/box-action-type.md
           - file: connectors-kibana/brave-search-action-type.md
           - file: connectors-kibana/buildkite-action-type.md
@@ -95,6 +98,7 @@ toc:
           - file: connectors-kibana/datadog-action-type.md
           - file: connectors-kibana/dropbox-action-type.md
           - file: connectors-kibana/dynatrace-action-type.md
+          - file: connectors-kibana/elasticsearch-action-type.md
           - file: connectors-kibana/figma-action-type.md
           - file: connectors-kibana/firecrawl-action-type.md
           - file: connectors-kibana/gcp-iam-action-type.md

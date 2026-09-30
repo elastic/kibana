@@ -17,6 +17,7 @@ import {
   getWorkflowIdleTimeoutResumeAtAfterLoop,
   handleExecutionDelay,
 } from './handle_execution_delay';
+import { ResumeTaskSchedulingError } from './resume_task_scheduling_error';
 import type { WorkflowExecutionLoopParams } from './types';
 import { DEFAULT_WORKFLOW_TIMEOUT } from '../default_workflow_settings';
 import {
@@ -41,6 +42,7 @@ const makeParams = (
     workflowExecutionState: {
       updateWorkflowExecution: jest.fn(),
       getLatestStepExecution: jest.fn().mockReturnValue(undefined),
+      getStepExecutionsByStepId: jest.fn().mockReturnValue([]),
     },
     workflowExecutionRepository: {
       getWorkflowExecutionById: jest.fn().mockResolvedValue(undefined),
@@ -244,13 +246,14 @@ describe('handleExecutionDelay', () => {
               return undefined;
             }
           );
-          (params.workflowExecutionState.getLatestStepExecution as jest.Mock).mockImplementation(
-            (stepId: string) => {
-              if (stepId === 'timedParent') {
-                return { startedAt: '2025-06-01T12:00:00.000Z' };
-              }
-              return undefined;
-            }
+          (params.workflowExecutionState.getStepExecutionsByStepId as jest.Mock).mockImplementation(
+            (stepId: string) =>
+              stepId === 'timedParent'
+                ? [
+                    { stepType: 'step_level_timeout', startedAt: '2025-06-01T12:00:00.000Z' },
+                    { stepType: 'foreach', startedAt: '2025-06-01T12:00:05.000Z' },
+                  ]
+                : []
           );
 
           const stepRuntime = makeStepRuntime({
@@ -271,6 +274,59 @@ describe('handleExecutionDelay', () => {
         }
       }
     );
+    it('should schedule idle resume from the rendered step timeout frozen on zone state', async () => {
+      jest.useFakeTimers();
+      try {
+        jest.setSystemTime(new Date('2025-06-01T12:00:10.000Z'));
+        const params = makeParams({
+          currentStackFrames: [
+            {
+              stepId: 'timedParent',
+              nestedScopes: [
+                { nodeId: 'enterTimeoutZone_timedParent', nodeType: 'enter-timeout-zone' },
+              ],
+            },
+          ],
+        });
+        (params.workflowExecutionGraph.getNode as jest.Mock).mockImplementation((nodeId: string) =>
+          nodeId === 'enterTimeoutZone_timedParent'
+            ? {
+                id: 'enterTimeoutZone_timedParent',
+                type: 'enter-timeout-zone',
+                stepId: 'timedParent',
+                stepType: 'step_level_timeout',
+                timeout: '{{ inputs.stepTimeout }}',
+              }
+            : undefined
+        );
+        (params.workflowExecutionState.getStepExecutionsByStepId as jest.Mock).mockImplementation(
+          (stepId: string) =>
+            stepId === 'timedParent'
+              ? [
+                  {
+                    stepType: 'step_level_timeout',
+                    startedAt: '2025-06-01T12:00:00.000Z',
+                    state: { resolvedTimeout: '45s' },
+                  },
+                  { stepType: 'foreach', startedAt: '2025-06-01T12:00:05.000Z', state: {} },
+                ]
+              : []
+        );
+
+        const stepRuntime = makeStepRuntime({
+          stepExecution: { status: ExecutionStatus.WAITING_FOR_INPUT } as any,
+        });
+
+        await handleExecutionDelay(params, stepRuntime);
+
+        const call = (
+          params.workflowTaskManager.scheduleWorkflowGlobalTimeoutResumeTask as jest.Mock
+        ).mock.calls[0][0];
+        expect(call.resumeAt.toISOString()).toBe('2025-06-01T12:00:45.000Z');
+      } finally {
+        jest.useRealTimers();
+      }
+    });
   });
 
   describe('WAITING_FOR_CHILD step (sync child workflow)', () => {
@@ -721,10 +777,11 @@ describe('handleExecutionDelay', () => {
   });
 
   describe('TM scheduling errors', () => {
-    it('propagates scheduleResumeTask failure', async () => {
+    it('propagates scheduleResumeTask failure as a ResumeTaskSchedulingError', async () => {
       const params = makeParams();
+      const schedulingError = new Error('task manager unavailable');
       (params.workflowTaskManager.scheduleResumeTask as jest.Mock).mockRejectedValue(
-        new Error('task manager unavailable')
+        schedulingError
       );
       const resumeAt = new Date(Date.now() + 8000).toISOString();
       const stepRuntime = makeStepRuntime({
@@ -735,9 +792,13 @@ describe('handleExecutionDelay', () => {
         } as any,
       });
 
-      await expect(handleExecutionDelay(params, stepRuntime)).rejects.toThrow(
-        'task manager unavailable'
+      const error = await handleExecutionDelay(params, stepRuntime).catch((e) => e);
+
+      expect(error).toBeInstanceOf(ResumeTaskSchedulingError);
+      expect(error.message).toBe(
+        'Failed to schedule workflow resume task: task manager unavailable'
       );
+      expect(error.cause).toBe(schedulingError);
     });
   });
 });
