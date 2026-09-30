@@ -7,13 +7,18 @@ source .buildkite/scripts/common/util.sh
 BASE_ES_SERVERLESS_REPO=docker.elastic.co/elasticsearch-ci/elasticsearch-serverless
 TARGET_IMAGE=docker.elastic.co/kibana-ci/elasticsearch-serverless:latest-verified
 
-SOURCE_IMAGE_OR_TAG=$1
+SOURCE_IMAGE_OR_TAG=${1:-}
 if [[ $SOURCE_IMAGE_OR_TAG =~ :[a-zA-Z0-9_.-]+$ ]]; then
   # $SOURCE_IMAGE_OR_TAG was a full image
   SOURCE_IMAGE=$SOURCE_IMAGE_OR_TAG
 else
   # $SOURCE_IMAGE_OR_TAG was an image tag
   SOURCE_IMAGE="$BASE_ES_SERVERLESS_REPO:$SOURCE_IMAGE_OR_TAG"
+fi
+
+if [[ ! "$SOURCE_IMAGE" =~ ^docker\.elastic\.co/elasticsearch-ci/elasticsearch-serverless:[A-Za-z0-9_.-]+$ ]]; then
+  echo "Refusing to promote $SOURCE_IMAGE: expected a tagged $BASE_ES_SERVERLESS_REPO image"
+  exit 1
 fi
 
 if [[ "${PUBLISH_DOCKER_TAG:-}" =~ ^(1|true)$ ]]; then
