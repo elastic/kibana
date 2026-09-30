@@ -13,7 +13,6 @@ import {
   EuiPanel,
   EuiSkeletonText,
   EuiSpacer,
-  EuiText,
   EuiTitle,
 } from '@elastic/eui';
 import { getEbtProps } from '@kbn/ebt-click';
@@ -22,6 +21,8 @@ import React from 'react';
 import { CONTEXT_ENGINE_UI_EBT } from '../../../../common/telemetry';
 import type { GetAiIndexResponse } from '../../../../common/http_api/ai_indices';
 import { useTracesEditor } from '../../hooks/use_traces_editor';
+import { AiIndexDetailPanelDescription } from './ai_index_detail_panel_description';
+import { AiIndexDetailPanelEmptyPrompt } from './ai_index_detail_panel_empty_prompt';
 import { TraceDisplay } from '../trace_display';
 import { TraceSelector } from '../trace_selector';
 
@@ -37,6 +38,9 @@ export const TracesPanel = ({ isLoading, aiIndex, onSaved, isManaged }: TracesPa
     aiIndex,
     onSaved,
   });
+  const isEditingActive = editing !== undefined && !editing.isSaving;
+  const hasTrace = currentTrace !== undefined;
+  const isSaving = editing?.isSaving ?? false;
 
   return (
     <EuiPanel hasBorder paddingSize="l" data-test-subj="contextTracesPanel">
@@ -50,41 +54,66 @@ export const TracesPanel = ({ isLoading, aiIndex, onSaved, isManaged }: TracesPa
               />
             </h2>
           </EuiTitle>
-          <EuiSpacer size="xs" />
-          <EuiText size="s" color="subdued">
-            <p>
+          <AiIndexDetailPanelDescription>
+            {!isLoading && !hasTrace ? (
+              <FormattedMessage
+                id="xpack.contextEngine.aiIndexDetail.traces.descriptionEmpty"
+                defaultMessage="Add traces to identify gaps in the context agents retrieve from this AI index."
+              />
+            ) : (
               <FormattedMessage
                 id="xpack.contextEngine.aiIndexDetail.traces.description"
-                defaultMessage="Traces this AI index learns from. Knowledge Indicators are tuned against the questions agents actually ask."
+                defaultMessage="Traces used to identify gaps in the context agents retrieve from this AI index."
               />
-            </p>
-          </EuiText>
+            )}
+          </AiIndexDetailPanelDescription>
         </EuiFlexItem>
-        {!editing && !isManaged && !isLoading && (
+        {!isEditingActive && !isManaged && !isLoading && (
           <EuiFlexItem grow={false}>
-            <EuiButtonEmpty
-              size="s"
-              iconType="pencil"
-              onClick={startEditing}
-              isDisabled={aiIndex === undefined}
-              data-test-subj="contextEditTracesButton"
-              {...getEbtProps({
-                element: CONTEXT_ENGINE_UI_EBT.element.aiIndexDetailPageTracesPanel,
-                action: CONTEXT_ENGINE_UI_EBT.action.traces.EDIT,
-              })}
-            >
-              <FormattedMessage
-                id="xpack.contextEngine.aiIndexDetail.traces.editButton"
-                defaultMessage="Edit"
-              />
-            </EuiButtonEmpty>
+            {hasTrace ? (
+              <EuiButtonEmpty
+                size="s"
+                iconType="pencil"
+                onClick={startEditing}
+                isLoading={isSaving}
+                isDisabled={aiIndex === undefined}
+                data-test-subj="contextEditTracesButton"
+                {...getEbtProps({
+                  element: CONTEXT_ENGINE_UI_EBT.element.aiIndexDetailPageTracesPanel,
+                  action: CONTEXT_ENGINE_UI_EBT.action.traces.EDIT,
+                })}
+              >
+                <FormattedMessage
+                  id="xpack.contextEngine.aiIndexDetail.traces.editButton"
+                  defaultMessage="Edit"
+                />
+              </EuiButtonEmpty>
+            ) : (
+              <EuiButtonEmpty
+                size="s"
+                iconType="plusCircle"
+                onClick={startEditing}
+                isLoading={isSaving}
+                isDisabled={aiIndex === undefined}
+                data-test-subj="contextAddTracesButton"
+                {...getEbtProps({
+                  element: CONTEXT_ENGINE_UI_EBT.element.aiIndexDetailPageTracesPanel,
+                  action: CONTEXT_ENGINE_UI_EBT.action.traces.EDIT,
+                })}
+              >
+                <FormattedMessage
+                  id="xpack.contextEngine.aiIndexDetail.traces.addButton"
+                  defaultMessage="Add traces"
+                />
+              </EuiButtonEmpty>
+            )}
           </EuiFlexItem>
         )}
       </EuiFlexGroup>
       <EuiSpacer size="m" />
       {isLoading ? (
         <EuiSkeletonText lines={2} />
-      ) : editing ? (
+      ) : isEditingActive ? (
         <>
           <TraceSelector
             value={editing.draft}
@@ -96,7 +125,6 @@ export const TracesPanel = ({ isLoading, aiIndex, onSaved, isManaged }: TracesPa
             <EuiFlexItem grow={false}>
               <EuiButtonEmpty
                 onClick={editing.cancel}
-                isDisabled={editing.isSaving}
                 data-test-subj="contextTracesCancelButton"
                 {...getEbtProps({
                   element: CONTEXT_ENGINE_UI_EBT.element.aiIndexDetailPageTracesPanel,
@@ -132,9 +160,11 @@ export const TracesPanel = ({ isLoading, aiIndex, onSaved, isManaged }: TracesPa
       ) : currentTrace ? (
         <TraceDisplay trace={currentTrace} />
       ) : (
-        <EuiText size="s" color="subdued">
-          <p data-test-subj="contextTracesReadOnlyValue">
-            {isManaged ? (
+        <AiIndexDetailPanelEmptyPrompt
+          iconType="chartWaterfall"
+          dataTestSubj="contextAiIndexTracesEmpty"
+          title={
+            isManaged ? (
               <FormattedMessage
                 id="xpack.contextEngine.aiIndexDetail.traces.emptyManaged"
                 defaultMessage="No agent traces configured."
@@ -142,11 +172,11 @@ export const TracesPanel = ({ isLoading, aiIndex, onSaved, isManaged }: TracesPa
             ) : (
               <FormattedMessage
                 id="xpack.contextEngine.aiIndexDetail.traces.empty"
-                defaultMessage="No agent traces configured. Point this index at an Elastic agent from Agent Builder, or a data stream carrying OTel GenAI spans."
+                defaultMessage="No agent traces yet"
               />
-            )}
-          </p>
-        </EuiText>
+            )
+          }
+        />
       )}
     </EuiPanel>
   );

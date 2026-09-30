@@ -8,7 +8,10 @@
 import { injectable } from 'inversify';
 import type { MetricCollectorWriter, MetricRecorder, MetricRecorderContext } from '../types';
 import { RULE_EXECUTION_COUNTERS } from '../counters';
-import { alertEventType, type AlertEvent } from '../../../../resources/datastreams/alert_events';
+import {
+  alertEventType,
+  type AlertEventDocument,
+} from '../../../../resources/datastreams/alert_events';
 
 /**
  * Domain-aware {@link MetricRecorder} that translates a bulk-write
@@ -27,7 +30,7 @@ import { alertEventType, type AlertEvent } from '../../../../resources/datastrea
  *   from `docs`, so it is correctly not counted.
  *
  * Observes only `store_alert_events`, so the docs array is always an
- * `AlertEvent[]` at runtime (the emission-meta type widens to
+ * `AlertEventDocument[]` at runtime (the emission-meta type widens to
  * `Record<string, unknown>` at the framework layer for reasons independent
  * of this recorder — see `EmissionObservations`). The narrow cast at
  * consumption is honest: the recorder's `observes` contract pins the
@@ -44,7 +47,7 @@ export class PersistedRuleEventsRecorder implements MetricRecorder {
       return;
     }
 
-    const persistedDocs = bulkIndexResult.docs as readonly AlertEvent[];
+    const persistedDocs = bulkIndexResult.docs as readonly AlertEventDocument[];
 
     collector.increment(RULE_EXECUTION_COUNTERS.ruleEventsGenerated, persistedDocs.length);
 
