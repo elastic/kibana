@@ -16,6 +16,7 @@ import { licenseService as licenseServiceMocked } from '../../../../../../common
 import type { AdvancedSectionProps } from './advanced_section';
 import { AdvancedSection } from './advanced_section';
 import userEvent from '@testing-library/user-event';
+import { cloneDeep } from 'lodash';
 import { AdvancedPolicySchema } from '../../../../../../../common/endpoint/service/policy/advanced_policy_schema';
 import { within } from '@testing-library/react';
 import { set } from '@kbn/safer-lodash-set';
@@ -237,19 +238,7 @@ describe('Policy Advanced Settings section', () => {
       renderResult.rerender(<AdvancedSection {...formProps} />);
     };
 
-    it('adds connection_delay only when it is set and removes it when cleared', async () => {
-      await render(true);
-
-      const initialLinuxAdvanced = formProps.policy.linux.advanced;
-      const initialMacAdvanced = formProps.policy.mac.advanced;
-      expect(initialLinuxAdvanced).toEqual({
-        capture_env_vars: 'LD_PRELOAD,LD_LIBRARY_PATH',
-      } as typeof initialLinuxAdvanced);
-      expect(initialMacAdvanced).toEqual({
-        capture_env_vars: 'DYLD_INSERT_LIBRARIES,DYLD_FRAMEWORK_PATH,DYLD_LIBRARY_PATH,LD_PRELOAD',
-      } as typeof initialMacAdvanced);
-      expect(formProps.policy.windows.advanced).toBeUndefined();
-
+    const setConnectionDelayOnEveryOs = async () => {
       let policy = formProps.policy;
       for (const key of connectionDelayKeys) {
         (formProps.onChange as jest.Mock).mockClear();
@@ -258,19 +247,31 @@ describe('Policy Advanced Settings section', () => {
         policy = updatedPolicyFromLastChange();
         rerenderWithPolicy(policy);
       }
+      return policy;
+    };
 
-      expect(policy.linux.advanced).toEqual({
-        ...initialLinuxAdvanced,
-        agent: { connection_delay: '66' },
-      } as typeof policy.linux.advanced);
-      expect(policy.mac.advanced).toEqual({
-        ...initialMacAdvanced,
-        agent: { connection_delay: '66' },
-      } as typeof policy.mac.advanced);
-      expect(policy.windows.advanced).toEqual({
-        agent: { connection_delay: '66' },
-      });
+    it('writes connection_delay for every OS without dropping existing advanced settings', async () => {
+      await render(true);
 
+      expect(formProps.policy.linux.advanced).not.toHaveProperty('agent');
+      expect(formProps.policy.mac.advanced).not.toHaveProperty('agent');
+      expect(formProps.policy.windows.advanced).toBeUndefined();
+
+      const expectedPolicy = cloneDeep(formProps.policy);
+      for (const key of connectionDelayKeys) {
+        set(expectedPolicy, key, '66');
+      }
+
+      expect(await setConnectionDelayOnEveryOs()).toEqual(expectedPolicy);
+    });
+
+    it('removes connection_delay when cleared', async () => {
+      await render(true);
+      const policyBeforeEdit = cloneDeep(formProps.policy);
+
+      await setConnectionDelayOnEveryOs();
+
+      let policy = formProps.policy;
       for (const key of connectionDelayKeys) {
         (formProps.onChange as jest.Mock).mockClear();
         await userEvent.clear(renderResult.getByTestId(key));
@@ -278,8 +279,8 @@ describe('Policy Advanced Settings section', () => {
         rerenderWithPolicy(policy);
       }
 
-      expect(policy.linux.advanced).toEqual(initialLinuxAdvanced);
-      expect(policy.mac.advanced).toEqual(initialMacAdvanced);
+      expect(policy.linux.advanced).toEqual(policyBeforeEdit.linux.advanced);
+      expect(policy.mac.advanced).toEqual(policyBeforeEdit.mac.advanced);
       expect(policy.windows.advanced).toBeUndefined();
     });
   });
