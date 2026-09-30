@@ -85,12 +85,12 @@ function toUserFacingError(error: unknown, channel?: string): unknown {
   }
 }
 
-/** Posts through the Relay, returning the timestamp as `ts` so callers can thread on it as usual. */
+/** Posts through the Relay, returning the timestamp as `ts` and `timestamp` so callers can thread on either. */
 export async function relaySendMessage(
   connection: SlackRelayConnection,
   ctx: ActionContext,
   input: SlackSendMessageInput
-): Promise<{ ok: true; channel: string; ts: string }> {
+): Promise<{ ok: true; channel: string; ts: string; timestamp: string }> {
   if (input.unfurlLinks !== undefined || input.unfurlMedia !== undefined) {
     ctx.log.debug(
       'Slack sendMessage: unfurl options are not supported through the Elastic Slack app and were ignored'
@@ -112,7 +112,7 @@ export async function relaySendMessage(
       ...(input.threadTs ? { threadTs: input.threadTs } : {}),
     });
 
-    return { ok: true, channel: resolvedChannel, ts: ref };
+    return { ok: true, channel: resolvedChannel, ts: ref, timestamp: ref };
   } catch (error) {
     ctx.log.error(`Slack sendMessage through relay failed: ${(error as Error).message}`);
     throw toUserFacingError(error, channel);

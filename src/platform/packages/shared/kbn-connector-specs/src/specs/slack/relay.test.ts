@@ -95,6 +95,7 @@ describe('relaySendMessage', () => {
       ok: true,
       channel: CHANNEL_ID,
       ts: '1700.0001',
+      timestamp: '1700.0001',
     });
     expect(trigger).toHaveBeenCalledWith({
       tenantKey: 'team-A',
@@ -118,6 +119,7 @@ describe('relaySendMessage', () => {
       ok: true,
       channel: CHANNEL_ID,
       ts: '1700.0003',
+      timestamp: '1700.0003',
     });
     expect(trigger).toHaveBeenCalledWith({
       tenantKey: 'team-A',

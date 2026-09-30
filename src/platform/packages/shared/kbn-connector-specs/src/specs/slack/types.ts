@@ -642,6 +642,9 @@ export interface SlackFilesInfoResponse extends SlackErrorFields {
   response_metadata?: { next_cursor?: string };
 }
 
+// Slack truncates message text beyond 40,000 characters.
+const SLACK_MAX_MESSAGE_TEXT_LENGTH = 40_000;
+
 export const SlackSendMessageInputSchema = lazySchema(() =>
   z.object({
     channel: z
@@ -651,7 +654,7 @@ export const SlackSendMessageInputSchema = lazySchema(() =>
       .describe(
         'Conversation ID (C.../G.../D...) or, on the Elastic Slack app, a connected channel name (e.g. "#general"). Use listChannels or resolveChannelId to look up an ID.'
       ),
-    text: z.string().min(1).max(2000).describe('The message text to send'),
+    text: z.string().min(1).max(SLACK_MAX_MESSAGE_TEXT_LENGTH).describe('The message text to send'),
     threadTs: z
       .string()
       .max(SLACK_MAX_TIMESTAMP_LENGTH)
@@ -671,11 +674,16 @@ export type SlackSendMessageInput = z.infer<typeof SlackSendMessageInputSchema>;
 // =============================================================================
 
 // Shared Block Kit block type — an array of arbitrary Slack Block Kit block objects.
-// Constrained to prevent DoS: each key max 200 chars, max 50 blocks per message.
+// Constrained to prevent DoS: each key max 200 chars, max 50 blocks, and a cap on the serialized payload.
+const SLACK_MAX_BLOCKS_PAYLOAD_LENGTH = 100_000;
+
 const slackBlocksField = () =>
   z
     .array(z.record(z.string().max(200), z.unknown()))
     .max(50)
+    .refine((blocks) => JSON.stringify(blocks).length <= SLACK_MAX_BLOCKS_PAYLOAD_LENGTH, {
+      message: `Serialized blocks must not exceed ${SLACK_MAX_BLOCKS_PAYLOAD_LENGTH} characters.`,
+    })
     .describe(
       'Array of Slack Block Kit block objects (e.g. section, actions, image). See https://api.slack.com/reference/block-kit/blocks for the full schema. Max 50 blocks per message.'
     );
@@ -838,50 +846,66 @@ const SLACK_MAX_FILENAME_LENGTH = 255;
 const SLACK_MAX_UPLOAD_TITLE_LENGTH = 500;
 const SLACK_MAX_UPLOAD_COMMENT_LENGTH = 2000;
 
+const BASE64_PATTERN = /^[A-Za-z0-9+/]*={0,2}$/;
+
+/** Strips an optional `data:...;base64,` prefix and whitespace so the payload can be decoded strictly. */
+export const normalizeBase64 = (content: string): string =>
+  content.replace(/^data:[^,]*;base64,/i, '').replace(/\s+/g, '');
+
+const isValidBase64 = (content: string): boolean => {
+  const normalized = normalizeBase64(content);
+  return normalized.length % 4 === 0 && BASE64_PATTERN.test(normalized);
+};
+
 // https://api.slack.com/methods/files.getUploadURLExternal (v2 upload flow)
 export const SlackUploadFileInputSchema = lazySchema(() =>
-  z.object({
-    filename: z
-      .string()
-      .min(1)
-      .max(SLACK_MAX_FILENAME_LENGTH)
-      .describe('Name of the file to upload (e.g. "incident-report.txt", "screenshot.png").'),
-    content: z
-      .string()
-      .min(1)
-      .max(SLACK_MAX_FILE_CONTENT_LENGTH)
-      .describe(
-        'File content to upload. For text files (logs, reports, code), pass the raw text. For binary files, pass base64-encoded content and set encoding to "base64". Max ~2 MB (1.5 MB binary).'
-      ),
-    encoding: z
-      .enum(['utf8', 'base64'])
-      .default('utf8')
-      .describe(
-        'Encoding of the content field. Use "utf8" (default) for plain text; use "base64" for binary files.'
-      ),
-    channel: z
-      .string()
-      .max(SLACK_MAX_ID_LENGTH)
-      .optional()
-      .describe(
-        'Conversation ID to share the uploaded file into (e.g. C...). Omit to upload without sharing.'
-      ),
-    title: z
-      .string()
-      .max(SLACK_MAX_UPLOAD_TITLE_LENGTH)
-      .optional()
-      .describe('Display title for the file in Slack.'),
-    initialComment: z
-      .string()
-      .max(SLACK_MAX_UPLOAD_COMMENT_LENGTH)
-      .optional()
-      .describe('Message text to accompany the file when it is shared into a channel.'),
-    threadTs: z
-      .string()
-      .max(SLACK_MAX_TIMESTAMP_LENGTH)
-      .optional()
-      .describe('Thread timestamp to share the file into a thread.'),
-  })
+  z
+    .object({
+      filename: z
+        .string()
+        .min(1)
+        .max(SLACK_MAX_FILENAME_LENGTH)
+        .describe('Name of the file to upload (e.g. "incident-report.txt", "screenshot.png").'),
+      content: z
+        .string()
+        .min(1)
+        .max(SLACK_MAX_FILE_CONTENT_LENGTH)
+        .describe(
+          'File content to upload. For text files (logs, reports, code), pass the raw text. For binary files, pass base64-encoded content and set encoding to "base64". Max ~2 MB (1.5 MB binary).'
+        ),
+      encoding: z
+        .enum(['utf8', 'base64'])
+        .default('utf8')
+        .describe(
+          'Encoding of the content field. Use "utf8" (default) for plain text; use "base64" for binary files.'
+        ),
+      channel: z
+        .string()
+        .max(SLACK_MAX_ID_LENGTH)
+        .optional()
+        .describe(
+          'Conversation ID to share the uploaded file into (e.g. C...). Omit to upload without sharing.'
+        ),
+      title: z
+        .string()
+        .max(SLACK_MAX_UPLOAD_TITLE_LENGTH)
+        .optional()
+        .describe('Display title for the file in Slack.'),
+      initialComment: z
+        .string()
+        .max(SLACK_MAX_UPLOAD_COMMENT_LENGTH)
+        .optional()
+        .describe('Message text to accompany the file when it is shared into a channel.'),
+      threadTs: z
+        .string()
+        .max(SLACK_MAX_TIMESTAMP_LENGTH)
+        .optional()
+        .describe('Thread timestamp to share the file into a thread.'),
+    })
+    .refine((v) => v.encoding !== 'base64' || isValidBase64(v.content), {
+      message: 'content is not valid base64.',
+      path: ['content'],
+    })
 );
 export type SlackUploadFileInput = z.infer<typeof SlackUploadFileInputSchema>;
 

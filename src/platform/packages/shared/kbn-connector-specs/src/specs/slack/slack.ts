@@ -69,6 +69,7 @@ import {
   type SlackSendMessageInput,
   type SlackUpdateMessageInput,
   type SlackUploadFileInput,
+  normalizeBase64,
   type SlackWhoAmIInput,
 } from './types';
 
@@ -1175,9 +1176,8 @@ export const Slack: ConnectorSpec = {
             );
           }
 
-          // Normalize to { timestamp } so the caller can use it as threadTs for replies.
-          // This distinguishes V2 from V1 slack_api which returned the raw Slack envelope.
-          return { timestamp: response.data.ts };
+          // Keep the Slack envelope for existing callers and add `timestamp` as the value to use as threadTs.
+          return { ...response.data, timestamp: response.data.ts };
         } catch (error) {
           const err = error as AxiosError<unknown>;
           ctx.log.error(
@@ -1195,9 +1195,11 @@ export const Slack: ConnectorSpec = {
       isTool: true,
       scope: 'write',
       description:
-        'Post a rich Block Kit message to a Slack channel or DM. Use this instead of sendMessage when you need formatted cards, buttons, images, or interactive elements. Accepts a blocks[] array following the Slack Block Kit schema. Returns the message timestamp, which can be used as threadTs for replies.',
+        'Post a rich Block Kit message to a Slack channel or DM. Use this instead of sendMessage when you need formatted cards, sections, fields, images, or link buttons. Do not include buttons, select menus, or other interactive elements that expect a response: clicks are not received by this connector. Link buttons with a url are fine. Accepts a blocks[] array following the Slack Block Kit schema. Returns the message timestamp, which can be used as threadTs for replies.',
       input: SlackSendBlockKitMessageInputSchema,
       handler: async (ctx, input) => {
+        slackRelay.assertNotSupported(ctx, 'sendBlockKitMessage');
+
         const typedInput: SlackSendBlockKitMessageInput =
           SlackSendBlockKitMessageInputSchema.parse(input);
 
@@ -1251,9 +1253,11 @@ export const Slack: ConnectorSpec = {
       isTool: true,
       scope: 'read',
       description:
-        'Fetch threaded replies for a message in a Slack channel or DM. Pass the channel ID and the parent message timestamp (threadTs). Returns replies newest-first; pass nextCursor to fetch older pages.',
+        'Fetch threaded replies for a message in a Slack channel or DM. Pass the channel ID and the parent message timestamp (threadTs). Returns replies oldest-first (the parent message is first); pass nextCursor to fetch the next page.',
       input: SlackGetConversationRepliesInputSchema,
       handler: async (ctx, input) => {
+        slackRelay.assertNotSupported(ctx, 'getConversationReplies');
+
         const typedInput: SlackGetConversationRepliesInput =
           SlackGetConversationRepliesInputSchema.parse(input);
 
@@ -1324,11 +1328,13 @@ export const Slack: ConnectorSpec = {
     // https://api.slack.com/methods/chat.update
     updateMessage: {
       isTool: true,
-      scope: 'write',
+      scope: 'destroy',
       description:
         'Edit an existing Slack message in-place. Use this to update an alert card as its state transitions (e.g. open → acknowledged → resolved) without posting new messages. Requires the channel ID and the message timestamp (ts) from the original sendMessage or sendBlockKitMessage response.',
       input: SlackUpdateMessageInputSchema,
       handler: async (ctx, input) => {
+        slackRelay.assertNotSupported(ctx, 'updateMessage');
+
         const typedInput: SlackUpdateMessageInput = SlackUpdateMessageInputSchema.parse(input);
 
         const payload: Record<string, unknown> = {
@@ -1336,7 +1342,12 @@ export const Slack: ConnectorSpec = {
           ts: typedInput.ts,
         };
         if (typedInput.text !== undefined) payload.text = typedInput.text;
-        if (typedInput.blocks !== undefined) payload.blocks = typedInput.blocks;
+        if (typedInput.blocks !== undefined) {
+          payload.blocks = typedInput.blocks;
+        } else if (typedInput.text !== undefined) {
+          // chat.update keeps the existing blocks when `blocks` is omitted, so clear them to show the new text.
+          payload.blocks = [];
+        }
 
         try {
           ctx.log.debug(
@@ -1388,6 +1399,8 @@ export const Slack: ConnectorSpec = {
         'Add an emoji reaction to a Slack message. Use as a lightweight acknowledgement signal (e.g. adding "eyes" when an alert is seen, "white_check_mark" when resolved). Requires the channel ID, message timestamp, and emoji name (without colons).',
       input: SlackAddReactionInputSchema,
       handler: async (ctx, input) => {
+        slackRelay.assertNotSupported(ctx, 'addReaction');
+
         const typedInput: SlackAddReactionInput = SlackAddReactionInputSchema.parse(input);
 
         const payload: Record<string, unknown> = {
@@ -1438,15 +1451,17 @@ export const Slack: ConnectorSpec = {
       isTool: true,
       scope: 'write',
       description:
-        'Upload a file to Slack and optionally share it into a channel or thread. Supports text and binary content (use encoding="base64" for binary). Uses the Slack v2 upload flow (getUploadURLExternal + PUT + completeUploadExternal). WARNING: file content is included in the action payload — only call this when you have a concrete file to share (e.g. an incident report, log snippet, or screenshot).',
+        'Upload a file to Slack and optionally share it into a channel or thread. Supports text and binary content (use encoding="base64" for binary). Uses the Slack v2 upload flow (getUploadURLExternal + POST + completeUploadExternal). WARNING: file content is included in the action payload — only call this when you have a concrete file to share (e.g. an incident report, log snippet, or screenshot).',
       input: SlackUploadFileInputSchema,
       handler: async (ctx, input) => {
+        slackRelay.assertNotSupported(ctx, 'uploadFile');
+
         const typedInput: SlackUploadFileInput = SlackUploadFileInputSchema.parse(input);
 
         // Decode content to a Buffer for accurate byte-length calculation.
         const contentBuffer =
           typedInput.encoding === 'base64'
-            ? Buffer.from(typedInput.content, 'base64')
+            ? Buffer.from(normalizeBase64(typedInput.content), 'base64')
             : Buffer.from(typedInput.content, 'utf8');
         const contentLength = contentBuffer.length;
 
@@ -1479,9 +1494,9 @@ export const Slack: ConnectorSpec = {
 
         const { upload_url: uploadUrl, file_id: fileId } = uploadUrlResponse.data;
 
-        // Step 2: PUT the file content to the pre-signed upload URL.
-        ctx.log.debug(`Slack uploadFile step 2 — PUT content to upload URL`);
-        await ctx.client.put(uploadUrl, contentBuffer, {
+        // Step 2: POST the file content to the pre-signed upload URL.
+        ctx.log.debug(`Slack uploadFile step 2 — POST content to upload URL`);
+        await ctx.client.post(uploadUrl, contentBuffer, {
           headers: { 'Content-Type': 'application/octet-stream' },
           maxBodyLength: Infinity,
           maxContentLength: Infinity,
@@ -1532,12 +1547,14 @@ export const Slack: ConnectorSpec = {
 
     // https://api.slack.com/methods/chat.postMessage (interactive Block Kit for HITL)
     askQuestion: {
-      isTool: true,
+      isTool: false,
       scope: 'write',
       description:
         'Post an interactive question to a Slack channel or user with button response options. Returns the message timestamp so the question can be tracked. NOTE: resolving the human response requires an inbound Slack interactivity callback — the response half is not yet handled by this connector. Use this to send the prompt now and wire the response via an external event trigger when available.',
       input: SlackAskQuestionInputSchema,
       handler: async (ctx, input) => {
+        slackRelay.assertNotSupported(ctx, 'askQuestion');
+
         const typedInput: SlackAskQuestionInput = SlackAskQuestionInputSchema.parse(input);
 
         // Build a Block Kit message with a section for the question and an actions block with buttons.
@@ -1548,12 +1565,12 @@ export const Slack: ConnectorSpec = {
           },
           {
             type: 'actions',
-            elements: typedInput.buttons.map((btn) => {
+            elements: typedInput.buttons.map((btn, index) => {
               const element: Record<string, unknown> = {
                 type: 'button',
                 text: { type: 'plain_text', text: btn.text, emoji: true },
                 value: btn.value,
-                action_id: `ask_question_${btn.value.slice(0, 50)}`,
+                action_id: `ask_question_${index}`,
               };
               if (btn.style) element.style = btn.style;
               return element;
@@ -1636,7 +1653,6 @@ export const Slack: ConnectorSpec = {
       }
       return {};
     },
-    enabled: true,
   },
 
   skill: [
@@ -1645,8 +1661,8 @@ export const Slack: ConnectorSpec = {
     'To list Slack channels or answer which channels exist, use listChannels. When the response has hasMore true, call listChannels again with the nextCursor from the previous response until you have enough context.',
     'When sending to a channel whose name you know but whose ID you do not, call resolveChannelId to get the channel ID, then pass it to sendMessage.',
     'Do not use resolveChannelId to discover channels—for example, do not use contains with a very short partial name to probe the workspace. Use listChannels for discovery instead.',
-    'sendMessage returns { timestamp } which you can use as threadTs in a follow-up sendMessage, sendBlockKitMessage, or askQuestion to post a reply in the same thread.',
-    'Use sendBlockKitMessage instead of sendMessage when the message needs formatted cards, buttons, sections, or images. Block Kit is the only way to attach interactive elements like approval buttons.',
+    'sendMessage returns the Slack response plus a timestamp field. Use timestamp as threadTs in a follow-up sendMessage or sendBlockKitMessage to post a reply in the same thread.',
+    'Use sendBlockKitMessage instead of sendMessage when the message needs formatted cards, sections, fields, images, or link buttons. Do not add buttons or menus that expect a response, because clicks are not received by this connector.',
     'To update an existing message (e.g. change alert state from "open" to "acknowledged"), use updateMessage with the channel ID and the timestamp from the original sendMessage/sendBlockKitMessage response. This edits the message in-place rather than posting a new one.',
     'addReaction adds a lightweight emoji acknowledgement to a message. Use it as a quick ack signal (e.g. "eyes" when seen, "white_check_mark" when resolved) without cluttering the channel with new messages.',
     'To read threaded replies on a message, use getConversationReplies with the channel ID and the parent message timestamp. Returns the full thread including the parent message itself.',
@@ -1657,7 +1673,6 @@ export const Slack: ConnectorSpec = {
     'When a user identity comes back from one action as an ID (e.g. a message author_user_id) and you need their email or profile, resolve it via listUsers or by feeding a known email to lookupUserByEmail.',
     'For Slack files: use uploadFile to attach text or binary content (log snippets, reports, screenshots) to a channel; set encoding="base64" for binary content. Use getFileInfo with a file ID (F...) when a message references a file you need metadata for, and listFiles when browsing or scoping by channel/user/time range.',
     'For incident war-room orchestration: createConversation creates a new channel, then inviteToConversation adds the responders, and sendMessage or sendBlockKitMessage posts the initial alert briefing.',
-    'askQuestion posts an interactive prompt with button options to a Slack channel or user. The message timestamp is returned for tracking. To act on the button click, wire an external interactivity callback (the response half is not yet built into this connector).',
-    'V1 migration note: V1 slack_api.postMessage returned the raw Slack envelope ({ok, channel, ts, message}). V2 sendMessage returns { timestamp } (normalized ts). Replace V1 message field references with text, channels[] with a resolved channelId (use resolveChannelId since V2 requires an ID), and raw ts with the normalized timestamp.',
+    'V1 migration note: V1 slack_api.postMessage returned the raw Slack envelope ({ok, channel, ts, message}). V2 sendMessage still returns the Slack envelope and adds a timestamp alias of ts. Replace V1 message field references with text, and channels[] with a resolved channelId (use resolveChannelId since V2 requires an ID).',
   ].join('\n'),
 };
