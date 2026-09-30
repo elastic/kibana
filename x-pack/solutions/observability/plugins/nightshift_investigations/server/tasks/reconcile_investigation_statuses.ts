@@ -11,13 +11,13 @@ import { isInvestigationWorkflowExecution } from '../lib/managed_workflows/is_in
 import { InvestigationStaleWriteError } from '../storage';
 import type { InvestigationPatch } from '../storage';
 import {
-  CONTINUED_INVESTIGATION_TIMEOUT_ERROR,
-  CONTINUED_INVESTIGATION_TIMEOUT_MS,
   EXECUTION_LOOKUP_BATCH_SIZE,
   FALLBACK_ERRORS,
   MAX_CANDIDATES,
   NON_TERMINAL_INVESTIGATION_STATUSES,
   PAGE_SIZE,
+  UNTRACKED_RUN_TIMEOUT_ERROR,
+  UNTRACKED_RUN_TIMEOUT_MS,
 } from './investigation_reconciliation_types';
 import type {
   ExecutionSummary,
@@ -120,6 +120,16 @@ const getReopenedAt = (
   return Date.parse(execution.finishedAt) < startedAtMs ? startedAtMs : undefined;
 };
 
+/** Fails a run no execution can settle once it outlives the workflow timeout. */
+const failUntrackedRun = (runStartedAt: number, now: number): ReconciliationOutcome | undefined =>
+  now - runStartedAt > UNTRACKED_RUN_TIMEOUT_MS
+    ? {
+        reconciledStatus: 'failed',
+        completedAt: new Date(now).toISOString(),
+        errorMessage: UNTRACKED_RUN_TIMEOUT_ERROR,
+      }
+    : undefined;
+
 const toReconciliationOutcome = ({
   execution,
   startedAt,
@@ -129,19 +139,17 @@ const toReconciliationOutcome = ({
   startedAt: string | undefined;
   now: number;
 }): ReconciliationOutcome | undefined => {
-  if (!execution || !isInvestigationWorkflowExecution(execution)) {
+  if (!execution) {
+    // Only a record that has started running; a pending one may still be waiting for its run.
+    return startedAt === undefined ? undefined : failUntrackedRun(Date.parse(startedAt), now);
+  }
+  if (!isInvestigationWorkflowExecution(execution)) {
     return undefined;
   }
 
   const reopenedAt = getReopenedAt(execution, startedAt);
   if (reopenedAt !== undefined) {
-    return now - reopenedAt > CONTINUED_INVESTIGATION_TIMEOUT_MS
-      ? {
-          reconciledStatus: 'failed',
-          completedAt: new Date(now).toISOString(),
-          errorMessage: CONTINUED_INVESTIGATION_TIMEOUT_ERROR,
-        }
-      : undefined;
+    return failUntrackedRun(reopenedAt, now);
   }
 
   const reconciledStatus = toInvestigationStatus(execution.status);
@@ -160,9 +168,10 @@ const toReconciliationOutcome = ({
 /**
  * Corrects investigations left in a non-terminal status by a workflow execution that has already
  * settled — the engine cancels or times out a run before its `persist_investigation_*` step can
- * write the outcome. Executions from removed workflows and missing execution documents are left
- * untouched. A reopened investigation is failed only once it outlives the workflow timeout. Only
- * the status is corrected; no lifecycle trigger is emitted.
+ * write the outcome. Executions from removed workflows are left untouched. A running investigation
+ * with no execution to settle it, because it was reopened or its execution is missing, is failed
+ * only once it outlives the workflow timeout. Only the status is corrected; no lifecycle trigger
+ * is emitted.
  */
 export const reconcileInvestigationStatuses = async ({
   investigationSweepRepository,
