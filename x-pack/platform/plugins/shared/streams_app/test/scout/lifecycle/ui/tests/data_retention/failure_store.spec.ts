@@ -233,6 +233,33 @@ test.describe('Stream data retention - updating failure store', () => {
   );
 
   test(
+    'should reconcile an unchanged failure store definition',
+    { tag: tags.stateful.classic },
+    async ({ page, pageObjects, apiServices, esClient }) => {
+      await pinFailureStore(apiServices, 'logs-generic-default', { disabled: {} });
+      await esClient.indices.putDataStreamOptions(
+        {
+          name: 'logs-generic-default',
+          failure_store: {
+            enabled: true,
+          },
+        },
+        { meta: true }
+      );
+      await pinFailureStore(apiServices, 'logs-generic-default', { disabled: {} });
+
+      await pageObjects.streams.gotoDataRetentionTab('logs-generic-default');
+
+      await expect(
+        page.getByTestId(RETENTION_TEST_IDS.failureStoreRetentionMetric).getByText('∞')
+      ).toBeVisible();
+      await expect(
+        page.getByTestId(RETENTION_TEST_IDS.failureStoreRetentionMetricSubtitle)
+      ).toContainText('1 data phase');
+    }
+  );
+
+  test(
     'should set failure store retention to different value than main retention',
     { tag: [...tags.stateful.classic, ...tags.serverless.observability.complete] },
     async ({ page, pageObjects, apiServices, config }) => {
