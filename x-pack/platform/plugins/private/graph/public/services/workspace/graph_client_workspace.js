@@ -297,11 +297,6 @@ function GraphWorkspace(options) {
     return neighbourNodes;
   };
 
-  //Creates a query that represents a node - either simple term query or boolean if grouped
-  this.buildNodeQuery = function (topLevelNode) {
-    return buildNodeQuery(self.returnUnpackedGroupeds([topLevelNode]));
-  };
-
   //====== Layout functions ========
 
   /**
@@ -663,7 +658,7 @@ function GraphWorkspace(options) {
     }
     nodes.forEach((node) => {
       if (node.parent === undefined) {
-        shoulds.push(self.buildNodeQuery(node));
+        shoulds.push(buildNodeQuery(self.returnUnpackedGroupeds([node])));
       }
     });
     return {
@@ -718,7 +713,7 @@ function GraphWorkspace(options) {
     // array. The result bucket describing the relationship between
     // the first 2 nodes in the array will therefore be labelled "0|1"
     const searchReq = buildFillConnectionsRequest(
-      nodesForLinking.map((node) => self.buildNodeQuery(node))
+      nodesForLinking.map((node) => buildNodeQuery(self.returnUnpackedGroupeds([node])))
     );
 
     // Search for connections between the selected nodes.
@@ -922,7 +917,7 @@ function GraphWorkspace(options) {
     });
 
     const allQueries = nodes.map(function (node) {
-      return self.buildNodeQuery(node);
+      return buildNodeQuery(self.returnUnpackedGroupeds([node]));
     });
 
     const allQuery = {
