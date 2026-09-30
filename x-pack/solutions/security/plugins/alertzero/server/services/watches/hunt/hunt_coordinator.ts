@@ -840,7 +840,7 @@ const huntCoordinatorCore = async (
         row_limit: scope.row_limit,
         // Every reader downstream (the allowlist, the schema probe, the publish/execute
         // gates, the hit bar) treats this as the set Tier 2 may read.
-        required_indices: targets.tier2_targets,
+        allowed_indices: targets.tier2_targets,
       },
       esClient
     );

@@ -72,7 +72,7 @@ const t1566Candidate = { technique_id: 'T1566', evidence_quote: 'phishing', llm_
 const executeParams = {
   text: REPORT_TEXT,
   window: { from: 'now-30d', to: 'now' },
-  required_indices: ['logs-aws.*'],
+  allowed_indices: ['logs-aws.*'],
   row_limit: 25,
 };
 
@@ -211,7 +211,7 @@ describe('huntBehavior', () => {
     ]);
   });
 
-  it('ignores matched_indices and targets the full required_indices union, even when a matched index sits inside it', async () => {
+  it('ignores matched_indices and targets the full allowed_indices union, even when a matched index sits inside it', async () => {
     // Decided (Q2): one query over the union for the demo. Narrowing to whichever
     // concrete index Tier 1's per-index buckets happened to hit is exactly what this
     // must not do — a coincidental IOC match landing in an unrelated dataset that
@@ -221,7 +221,7 @@ describe('huntBehavior', () => {
       logger,
       {
         text: REPORT_TEXT,
-        required_indices: ['logs-aws.*', 'logs-endpoint.events.*'],
+        allowed_indices: ['logs-aws.*', 'logs-endpoint.events.*'],
         article_context: {
           matched_indices: ['.ds-logs-aws.cloudtrail-default-2026.09.01-000001', '.kibana'],
         },
@@ -239,7 +239,7 @@ describe('huntBehavior', () => {
       logger,
       {
         text: REPORT_TEXT,
-        required_indices: ['logs-*'],
+        allowed_indices: ['logs-*'],
         article_context: {
           matched_indices: [
             '.ds-logs-aws.cloudtrail-default-2026.09.01-000001',
@@ -252,14 +252,14 @@ describe('huntBehavior', () => {
     expect(generateEsqlMock).toHaveBeenCalledWith(expect.objectContaining({ index: 'logs-*' }));
   });
 
-  it('strips exclusion entries from required_indices before building the FROM target', async () => {
+  it('strips exclusion entries from allowed_indices before building the FROM target', async () => {
     // Exclusion entries (`-logs-elastic_agent*`) belong to the search, not to a FROM.
     await huntBehavior(
       buildMockModel([t1078Candidate]),
       logger,
       {
         text: REPORT_TEXT,
-        required_indices: ['logs-*', '-logs-elastic_agent*', '-logs-fleet_server*'],
+        allowed_indices: ['logs-*', '-logs-elastic_agent*', '-logs-fleet_server*'],
       },
       esClient
     );
@@ -270,7 +270,7 @@ describe('huntBehavior', () => {
     await huntBehavior(
       buildMockModel([t1078Candidate]),
       logger,
-      { text: REPORT_TEXT, required_indices: ['logs-aws.*', 'logs-okta.*'] },
+      { text: REPORT_TEXT, allowed_indices: ['logs-aws.*', 'logs-okta.*'] },
       esClient
     );
     expect(generateEsqlMock).toHaveBeenCalledWith(
@@ -326,11 +326,11 @@ describe('huntBehavior', () => {
     expect(rule.endsWith(`\n${GROUNDED_ESQL}`)).toBe(true);
   });
 
-  it('refuses every generated query when required_indices is empty', async () => {
+  it('refuses every generated query when allowed_indices is empty', async () => {
     const result = await huntBehavior(
       buildMockModel([t1078Candidate]),
       logger,
-      { text: REPORT_TEXT, required_indices: [] },
+      { text: REPORT_TEXT, allowed_indices: [] },
       esClient
     );
 
@@ -381,7 +381,7 @@ describe('huntBehavior', () => {
     const result = await huntBehavior(
       buildMockModel([t1078Candidate]),
       logger,
-      { text: REPORT_TEXT, required_indices: ['logs-aws.*'], row_limit: 25 },
+      { text: REPORT_TEXT, allowed_indices: ['logs-aws.*'], row_limit: 25 },
       esClient
     );
     expect(result.has_hit).toBe(false);
@@ -391,7 +391,7 @@ describe('huntBehavior', () => {
     const result = await huntBehavior(
       buildMockModel([t1078Candidate]),
       logger,
-      { text: REPORT_TEXT, required_indices: ['logs-aws.*'], row_limit: 25 },
+      { text: REPORT_TEXT, allowed_indices: ['logs-aws.*'], row_limit: 25 },
       esClient
     );
     expect(executeEsqlMock).not.toHaveBeenCalled();

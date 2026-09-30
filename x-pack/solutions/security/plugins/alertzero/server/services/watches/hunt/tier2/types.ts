@@ -49,8 +49,11 @@ export interface HuntBehaviorParams {
   size?: number;
   /** Scope row bound when `size` is absent. */
   row_limit?: number;
-  /** Required index patterns that set the Tier 2 hit bar. */
-  required_indices?: string[];
+  /**
+   * The index patterns Tier 2 may read: the FROM target, the probe and publish/execute allowlist,
+   * and the hit bar. Empty allows nothing, so every generated query is refused.
+   */
+  allowed_indices?: string[];
 }
 
 /** A candidate behavior that passed ATT&CK catalog validation. */

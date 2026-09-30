@@ -97,7 +97,7 @@ export const registerHuntBehaviorRoute = ({
               llm_confidence_threshold,
               iocs,
               article_context,
-              required_indices: indexPatterns,
+              allowed_indices: indexPatterns,
             },
             esClient
           );

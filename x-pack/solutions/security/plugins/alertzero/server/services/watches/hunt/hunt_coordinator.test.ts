@@ -289,7 +289,7 @@ describe('huntCoordinator', () => {
     expect(result.index_patterns).toEqual(INDEX_PATTERNS);
   });
 
-  it('reports the stage 2 union with its sources, and hands it to huntBehavior as required_indices', async () => {
+  it('reports the stage 2 union with its sources, and hands it to huntBehavior as allowed_indices', async () => {
     const { resolveHuntScope: mockScope } = jest.requireMock('./common/resolve_index_scope');
     const { huntBehavior: mockT2 } = jest.requireMock('./tier2/hunt_behavior');
     mockScope.mockResolvedValueOnce({
@@ -321,7 +321,7 @@ describe('huntCoordinator', () => {
       mockModel,
       logger,
       expect.objectContaining({
-        required_indices: ['logs-aws.cloudtrail-*', 'logs-endpoint.events.process-default*'],
+        allowed_indices: ['logs-aws.cloudtrail-*', 'logs-endpoint.events.process-default*'],
       }),
       esClient
     );
@@ -1055,7 +1055,7 @@ describe('huntCoordinator', () => {
         window: { from: 'now-7d', to: 'now' },
         size: 40,
         row_limit: 100,
-        required_indices: ['logs-aws.cloudtrail-*'],
+        allowed_indices: ['logs-aws.cloudtrail-*'],
         article_context: expect.objectContaining({
           matched_indices: ['logs-aws.cloudtrail-*'],
           sample_events: [expect.stringContaining('provider=sts.amazonaws.com')],
@@ -1207,7 +1207,7 @@ describe('huntCoordinator', () => {
         mockModel,
         logger,
         expect.objectContaining({
-          required_indices: result.tier2_targets,
+          allowed_indices: result.tier2_targets,
           article_context: expect.objectContaining({
             matched_indices: ['.ds-logs-okta.system-default-2026.09.01-000001'],
           }),
@@ -1333,7 +1333,7 @@ describe('huntCoordinator', () => {
       expect(mockT2).toHaveBeenCalledWith(
         mockModel,
         logger,
-        expect.objectContaining({ required_indices: ['logs-aws.cloudtrail-*'] }),
+        expect.objectContaining({ allowed_indices: ['logs-aws.cloudtrail-*'] }),
         esClient
       );
     });
