@@ -6,7 +6,7 @@ exports[`FilterStatusButton renders without errors for valid props 1`] = `
 >
   <button
     aria-pressed="true"
-    class="euiButton euiFilterButton euiFilterButton-isSelected euiFilterButton-hasActiveFilters euiFilterButton-isToggle emotion-euiButtonDisplay-s-defaultMinWidth-base-text-euiFilterButton-hasActiveFilters-toggle-isSelected"
+    class="euiButton euiFilterButton euiFilterButton-isSelected euiFilterButton-hasActiveFilters euiFilterButton-isToggle emotion-euiButtonDisplay-s-base-text-euiFilterButton-hasActiveFilters-toggle-isSelected"
     data-test-subj="foo"
     id="filter-button_generated-id"
     type="button"

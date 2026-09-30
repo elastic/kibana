@@ -43,7 +43,7 @@ export const AlertsTabContent = () => {
 
   const { alertStatus, setAlertStatus, alertsEsQueryByStatus } = useAlertsQuery();
   const [isAlertFlyoutVisible, { toggle: toggleAlertFlyout }] = useBoolean(false);
-  const createAlertRuleButtonRef = useRef<HTMLButtonElement>(null);
+  const createAlertRuleButtonRef = useRef<HTMLButtonElement | HTMLAnchorElement>(null);
 
   const { onDateRangeChange, searchCriteria } = useUnifiedSearchContext();
 
