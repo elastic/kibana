@@ -753,11 +753,22 @@ export const createSignificantEventsMaintenanceService = ({
         failures: sweep.failures,
       });
       pausedSettings = pausedFeatures.pausedSettings;
-      // The recorded continuous document is what Resume restores the space setting
-      // from, so a space whose setting was on stays recorded even when the sweep
-      // could not disable its document.
+      // Only keep continuous documents that are legitimate restore records: those
+      // the settings read confirmed were on (continuousOnboardingTargets), and
+      // those already recorded from a prior pause (existing.disabledWorkflows).
+      // Documents the sweep disabled by drift (enabled document, setting was never
+      // on and no prior record) are dropped so Resume cannot write the setting to
+      // true for a space that never had it on.
+      const continuousTargetKeys = new Set([
+        ...pausedFeatures.continuousOnboardingTargets.map(workflowKey),
+        ...(existing?.disabledWorkflows ?? [])
+          .filter((w) => isContinuousOnboardingWorkflowId(w.id))
+          .map(workflowKey),
+      ]);
       disabledWorkflows = mergeWorkflowTargets(
-        disabledWorkflows,
+        disabledWorkflows.filter(
+          (w) => !isContinuousOnboardingWorkflowId(w.id) || continuousTargetKeys.has(workflowKey(w))
+        ),
         pausedFeatures.continuousOnboardingTargets
       );
     } else {

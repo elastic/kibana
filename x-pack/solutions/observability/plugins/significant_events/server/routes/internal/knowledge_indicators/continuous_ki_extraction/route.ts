@@ -30,7 +30,7 @@ const putContinuousKIExtractionSettingsRoute = createServerRoute({
     access: 'internal',
     summary: 'Update continuous KI extraction settings',
     description:
-      'Updates the continuous KI onboarding settings (enabled, interval) of the current space and installs or removes the space onboarding workflow accordingly.',
+      'Updates the continuous KI onboarding settings (enabled, interval) of the current space and enables or disables the space onboarding workflow accordingly.',
   },
   security: {
     authz: {

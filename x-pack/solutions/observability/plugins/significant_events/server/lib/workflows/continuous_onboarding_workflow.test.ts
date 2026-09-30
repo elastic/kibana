@@ -192,19 +192,20 @@ describe('createContinuousOnboardingWorkflowService', () => {
     expect(managementApi.updateWorkflow).not.toHaveBeenCalled();
   });
 
-  it('throws and keeps the document when disabling fails', async () => {
+  it('throws when disabling fails', async () => {
     getWorkflow.mockResolvedValue({ enabled: true });
     managementApi.updateWorkflow.mockRejectedValue(new Error('update failed'));
 
     await expect(
       createService().ensureWorkflow({ enabled: false, request, spaceId })
     ).rejects.toThrow('update failed');
-    expect(managedWorkflowsClient.uninstall).not.toHaveBeenCalled();
   });
 
-  it('resolves with a warning when the uninstall fails after disabling', async () => {
+  it('disables and drains the space document but keeps it when turned off', async () => {
     getWorkflow.mockResolvedValue({ enabled: true });
-    managedWorkflowsClient.uninstall.mockRejectedValue(new Error('uninstall failed'));
+    (managementApi.getWorkflowExecutions as jest.Mock)
+      .mockResolvedValueOnce({ results: [{ id: 'exec-1' }], total: 1 })
+      .mockResolvedValue({ results: [], total: 0 });
 
     await createService().ensureWorkflow({ enabled: false, request, spaceId });
 
@@ -214,10 +215,8 @@ describe('createContinuousOnboardingWorkflowService', () => {
       spaceId,
       request
     );
-    expect(managedWorkflowsClient.uninstall).toHaveBeenCalledWith(
-      SIGNIFICANT_EVENTS_KI_CONTINUOUS_ONBOARDING_WORKFLOW_ID,
-      managedWorkflowOptions
-    );
-    expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('uninstall failed'));
+    expect(managementApi.cancelWorkflowExecution).toHaveBeenCalledWith('exec-1', spaceId, request);
+    expect(managedWorkflowsClient.install).not.toHaveBeenCalled();
+    expect(managedWorkflowsClient.uninstall).not.toHaveBeenCalled();
   });
 });

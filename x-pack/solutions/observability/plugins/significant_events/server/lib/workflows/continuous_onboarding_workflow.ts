@@ -20,8 +20,9 @@ export interface ContinuousOnboardingWorkflowService {
    *
    * - Enabling installs the `<id>-<spaceId>` document and enables it (which
    *   schedules its trigger).
-   * - Disabling disables the document, cancels any in-flight executions, then
-   *   uninstalls it, so the document only exists while the feature is on.
+   * - Disabling disables the document and cancels any in-flight executions. The
+   *   document is kept so its execution history survives, and the next enable
+   *   reuses it.
    *
    * Should be invoked only on an actual enabled-state transition.
    */
@@ -136,8 +137,8 @@ export const createContinuousOnboardingWorkflowService = ({
         return;
       }
 
-      // Disabling: stop scheduling new runs and drain in-flight work, then remove
-      // the document. A failed disable throws before the uninstall.
+      // Disabling: stop scheduling new runs and drain in-flight work. The document
+      // stays: uninstalling force-deletes it, which purges its execution history.
       await setManagedEnabled({ enabled: false, workflowId, spaceId, request });
 
       await cancelAndAwaitTermination({ workflowId, spaceId, request }).catch((err) =>
@@ -147,22 +148,6 @@ export const createContinuousOnboardingWorkflowService = ({
       await streamsKIsOnboardingClient
         .cancelAllRunning({ request })
         .catch((err) => log.warn(`Failed to cancel running onboarding workflows: ${err}`));
-
-      // The document is already disabled and drained, so a failed uninstall must not
-      // fail the request: the caller would roll the setting back to on while nothing
-      // runs. A leftover disabled document is reused by the next enable.
-      await getManagedWorkflowsClient()
-        .then((managedWorkflowsClient) =>
-          managedWorkflowsClient.uninstall(
-            SIGNIFICANT_EVENTS_KI_CONTINUOUS_ONBOARDING_WORKFLOW_ID,
-            managedWorkflowOptions
-          )
-        )
-        .catch((err) =>
-          log.warn(
-            `Failed to uninstall continuous onboarding workflow ${workflowId} in space ${spaceId}: ${err}`
-          )
-        );
 
       log.info(`Disabled continuous KI onboarding workflow in space ${spaceId}`);
     },
