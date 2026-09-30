@@ -35,6 +35,11 @@ export interface RuleFormServices {
   dashboard?: DashboardStart;
   cps?: CPSPluginStart;
   minimumScheduleInterval?: string;
+  createActionPolicyFormFlyout?: React.ComponentType<{
+    onClose: () => void;
+    onSuccess: () => void;
+  }>;
+  canCreateActionPolicy?: boolean;
   /**
    * ES|QL help/docs menu, injected by the host plugin from `@kbn/esql`. Absent →
    * the sandbox renders no menu.
