@@ -124,9 +124,10 @@ export const WorkspaceRoute = ({
             // console.log(newNodes);
           },
           changeHandler: () =>
-            storeRef.current?.dispatch(workspaceLayoutChanged(Boolean(workspaceRef.current?.isLayoutRunning()))),
+            storeRef.current?.dispatch(
+              workspaceLayoutChanged(Boolean(workspaceRef.current?.isLayoutRunning()))
+            ),
           topologyChangeHandler: notifyWorkspaceChanged,
-          graphExploreProxy: callNodeProxy,
           searchProxy: callSearchNodeProxy,
           exploreControls,
           layoutController,

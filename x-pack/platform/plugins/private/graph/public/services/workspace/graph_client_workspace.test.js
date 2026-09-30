@@ -8,12 +8,20 @@
 import { createWorkspaceState } from '../../state_management/workspace';
 import { createWorkspace } from './graph_client_workspace';
 import { GraphLayoutController } from './graph_layout_controller';
+import { transformExpandResponse, transformSearchResponse } from './graph_response_transformers';
 
 describe('graphui-workspace', function () {
   describe('createWorkspace()', function () {
     // var fooResource=null;
     let mockedResult = null;
     let init = null;
+    const mergeSearchResult = (workspace) => {
+      workspace.mergeGraph(transformSearchResponse(mockedResult, workspace.options.vertex_fields));
+    };
+    const mergeExpandResult = (workspace) => {
+      workspace.mergeGraph(transformExpandResponse(mockedResult, workspace.options.vertex_fields));
+    };
+
     beforeEach(function () {
       //Setup logic here
       // fooResource={"foo":"bar"};
@@ -147,7 +155,7 @@ describe('graphui-workspace', function () {
           },
         ],
       };
-      workspace.simpleSearch('myquery', undefined, 2);
+      mergeSearchResult(workspace);
 
       expect(workspace.nodes.length).toEqual(2);
       expect(workspace.edges.length).toEqual(1);
@@ -188,7 +196,7 @@ describe('graphui-workspace', function () {
           },
         ],
       };
-      workspace.simpleSearch('myquery', undefined, 2);
+      mergeSearchResult(workspace);
 
       expect(workspace.nodes.length).toEqual(2);
       expect(workspace.edges.length).toEqual(1);
@@ -218,7 +226,7 @@ describe('graphui-workspace', function () {
           },
         ],
       };
-      workspace.expandNodes([]);
+      mergeExpandResult(workspace);
       expect(workspace.nodes.length).toEqual(3); //we already had b from initial query
       expect(workspace.edges.length).toEqual(2);
     });
@@ -250,7 +258,7 @@ describe('graphui-workspace', function () {
           },
         ],
       };
-      workspace.simpleSearch('myquery', undefined, 2);
+      mergeSearchResult(workspace);
 
       expect(workspace.nodes.length).toEqual(2);
 
@@ -305,7 +313,7 @@ describe('graphui-workspace', function () {
           },
         ],
       };
-      workspace.simpleSearch('myquery', undefined, 2);
+      mergeSearchResult(workspace);
 
       expect(workspace.nodes.length).toEqual(2);
 
