@@ -125,6 +125,9 @@ describe('utils', () => {
           },
         ],
       },
+      extractObservablesSource: {
+        buckets: [],
+      },
       status: {
         buckets: [
           {

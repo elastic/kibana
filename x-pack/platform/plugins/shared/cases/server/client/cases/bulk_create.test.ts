@@ -217,6 +217,7 @@ describe('bulkCreate', () => {
               "owner": "securitySolution",
               "settings": Object {
                 "extractObservables": true,
+                "extractObservablesSource": "explicit",
                 "syncAlerts": true,
               },
               "severity": "low",
@@ -349,6 +350,7 @@ describe('bulkCreate', () => {
               "owner": "securitySolution",
               "settings": Object {
                 "extractObservables": true,
+                "extractObservablesSource": "explicit",
                 "syncAlerts": true,
               },
               "severity": "low",

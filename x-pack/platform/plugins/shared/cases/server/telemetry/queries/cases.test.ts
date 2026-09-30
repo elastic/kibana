@@ -155,6 +155,9 @@ describe('getCasesTelemetryData', () => {
             },
           ],
         },
+        extractObservablesSource: {
+          buckets: [],
+        },
         status: {
           buckets: [
             {
