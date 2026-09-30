@@ -274,10 +274,6 @@ function GraphWorkspace(options) {
     self.runLayout();
   };
 
-  this.deleteSelection = function () {
-    self.deleteNodes(self.selectedNodes.map(({ id }) => id));
-  };
-
   this.selectNeighbours = function () {
     const newSelections = [];
     self.edges.forEach((edge) => {
@@ -530,13 +526,6 @@ function GraphWorkspace(options) {
     self.runLayout();
   };
 
-  this.groupSelections = function (node) {
-    self.groupNodes(
-      node.id,
-      self.selectedNodes.map(({ id }) => id)
-    );
-  };
-
   this.mergeNeighbours = function (node) {
     const neighbours = self.getNeighbours(node);
     const ops = [];
@@ -612,10 +601,6 @@ function GraphWorkspace(options) {
     self.arrRemoveAll(self.edges, danglingEdges);
     self.selectedNodes = [];
     self.runLayout();
-  };
-
-  this.blocklistSelection = function () {
-    self.blocklistNodes(self.selectedNodes.map(({ id }) => id));
   };
 
   // A "simple search" operation that requires no parameters from the client.
@@ -860,17 +845,6 @@ function GraphWorkspace(options) {
     const startNodes =
       selectedNodes.length > 0 ? self.returnUnpackedGroupeds(selectedNodes) : self.nodes;
     self.expand(startNodes.slice(), targetOptions);
-  };
-
-  this.expandSelecteds = function (targetOptions = {}) {
-    self.expandNodes(
-      self.selectedNodes.map(({ id }) => id),
-      targetOptions
-    );
-  };
-
-  this.expandGraph = function () {
-    self.expandSelecteds();
   };
 
   //Find new nodes to link to existing selected nodes
@@ -1257,13 +1231,6 @@ function GraphWorkspace(options) {
         edges: connections,
       });
     });
-  };
-
-  this.fillInGraph = function (maxNewEdges = 10) {
-    self.fillConnections(
-      self.selectedNodes.map(({ id }) => id),
-      maxNewEdges
-    );
   };
 
   // Provide a "fuzzy find similar" query that can find similar docs but preferably
