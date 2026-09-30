@@ -41,7 +41,7 @@ export interface EventLoopWatchdogConfigType {
   maxCandidates: number;
   /**
    * Only blocks lasting at least this long are CPU-profiled, since starting the profiler stalls
-   * the main thread.
+   * the main thread. Values below `threshold` behave like `threshold`.
    */
   profileAfter: Duration;
   /** Maximum duration of one CPU-profile capture. */
@@ -91,9 +91,9 @@ const configSchema = schema.object({
     liveNoticeInterval: boundedDuration('5s', 100, 5 * MINUTE),
     maxLiveNoticesPerBlock: boundedInteger(12, 1, 100),
     maxCandidates: boundedInteger(10, 1, 100),
-    profileAfter: boundedDuration('2s', 100, 5 * MINUTE),
+    profileAfter: boundedDuration('500ms', 100, 5 * MINUTE),
     maxProfileDuration: boundedDuration('10s', 100, MINUTE),
-    profileCooldown: boundedDuration('10m', 0, 60 * MINUTE),
+    profileCooldown: boundedDuration('1m', 0, 60 * MINUTE),
   }),
 });
 

@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { describeCpuRatio, formatCandidates, formatReportMessage } from './format';
+import { formatCandidates, formatLiveNoticeMessage, formatReportMessage } from './format';
 import type { BlockReport } from './types';
 
 const candidate = {
@@ -21,7 +21,7 @@ describe('formatCandidates', () => {
   it('lists candidates and omitted counts', () => {
     expect(formatCandidates([], 0)).toBe('none tracked');
     expect(formatCandidates([candidate], 2)).toBe(
-      'task alerting:.es-query [t1] (started 40ms before the block) and 2 more'
+      'task alerting:.es-query [t1] started 40ms before the block and 2 more'
     );
   });
 });
@@ -38,9 +38,25 @@ describe('formatReportMessage', () => {
     omittedCandidates: 0,
   };
 
-  it('summarises duration, CPU ratio, candidates and suppressed blocks', () => {
+  it('summarises duration, candidates and suppressed blocks', () => {
     expect(formatReportMessage(report)).toMatchInlineSnapshot(
-      `"Event loop was blocked for ~1200ms (process CPU ratio 0.98: likely CPU-bound work on the main thread). Candidates (in flight, not necessarily the cause): task alerting:.es-query [t1] (started 40ms before the block). 3 earlier block(s) were not reported."`
+      `"Event loop blocked for ~1200ms. Candidates: task alerting:.es-query [t1] started 40ms before the block. 3 earlier block(s) were not reported."`
+    );
+  });
+});
+
+describe('formatLiveNoticeMessage', () => {
+  it('summarises elapsed time, notice count and candidates', () => {
+    expect(
+      formatLiveNoticeMessage({
+        elapsedMs: 5000,
+        count: 1,
+        maxCount: 12,
+        candidates: [candidate],
+        omittedCandidates: 0,
+      })
+    ).toMatchInlineSnapshot(
+      `"Event loop still blocked after 5000ms, notice 1/12. Candidates: task alerting:.es-query [t1] started 40ms before the block"`
     );
   });
 });
@@ -95,15 +111,5 @@ describe('formatReportMessage with a profile', () => {
     expect(message).toContain(
       'Profile inconclusive (profiler start acknowledged after ~900ms): r.'
     );
-  });
-});
-
-describe('describeCpuRatio', () => {
-  it.each([
-    [1.1, 'likely CPU-bound work on the main thread'],
-    [0.05, 'likely waiting on a synchronous syscall or I/O'],
-    [0.5, 'mixed CPU work and waiting'],
-  ])('describes %s', (ratio, description) => {
-    expect(describeCpuRatio(ratio)).toBe(description);
   });
 });

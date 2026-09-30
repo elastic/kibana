@@ -167,8 +167,9 @@ export class ExecutionContextService
       // settles and a rejection the caller drops is still reported as unhandled instead of being
       // swallowed by the bookkeeping. Callers of tracked contexts therefore receive a native
       // promise rather than the original object. This is intentional: only contexts the observer
-      // opts into are affected (today Task Manager task runs, whose only caller awaits the result
-      // from an async function), and any observer must keep that property.
+      // opts into are affected (today Task Manager task runs and a few nested alerting contexts,
+      // whose callers await the result from an async function), and any observer must keep that
+      // property.
       return Promise.resolve(result).then(
         (value) => {
           onActivityEnd();

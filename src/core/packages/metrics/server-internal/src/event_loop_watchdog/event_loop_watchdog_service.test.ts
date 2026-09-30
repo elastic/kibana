@@ -7,12 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { BehaviorSubject } from 'rxjs';
+import { BehaviorSubject, NEVER, Subject } from 'rxjs';
 import type { InternalThreadsStart } from '@kbn/core-threads-server-internal';
 import moment from 'moment';
 import { mockCoreContext } from '@kbn/core-base-server-mocks';
 import { executionContextServiceMock } from '@kbn/core-execution-context-server-mocks';
 import { coreFeatureFlagsMock } from '@kbn/core-feature-flags-server-mocks';
+import type { KibanaRequest, OnPreAuthHandler } from '@kbn/core-http-server';
+import { httpServerMock, httpServiceMock } from '@kbn/core-http-server-mocks';
 import { MockEventLoopWatchdog, mockWatchdog } from './event_loop_watchdog_service.test.mocks';
 import {
   EVENT_LOOP_WATCHDOG_FEATURE_FLAG,
@@ -46,8 +48,39 @@ describe('EventLoopWatchdogService', () => {
 
   it('registers the execution context observer during setup', () => {
     const executionContext = executionContextServiceMock.createInternalSetupContract();
-    service.setup({ executionContext });
+    service.setup({ executionContext, http: httpServiceMock.createInternalSetupContract() });
     expect(executionContext.registerActivityObserver).toHaveBeenCalledWith(expect.any(Function));
+  });
+
+  it('tracks HTTP requests by route pattern until they complete', async () => {
+    const http = httpServiceMock.createInternalSetupContract();
+    service.setup({
+      executionContext: executionContextServiceMock.createInternalSetupContract(),
+      http,
+    });
+    const [[handler]] = http.registerOnPreAuth.mock.calls as Array<[OnPreAuthHandler]>;
+
+    const completed$ = new Subject<void>();
+    const request: KibanaRequest = {
+      ...httpServerMock.createKibanaRequest({
+        method: 'get',
+        path: '/api/things/42',
+        routePath: '/api/things/{id}',
+      }),
+      events: { completed$, aborted$: NEVER },
+    };
+    const toolkit = httpServiceMock.createOnPreAuthToolkit();
+    await handler(request, httpServerMock.createLifecycleResponseFactory(), toolkit);
+    expect(toolkit.next).toHaveBeenCalledTimes(1);
+
+    await service.start({ featureFlags, threads });
+    const [[{ registry }]] = MockEventLoopWatchdog.mock.calls;
+    expect(registry.setListener(undefined)).toEqual([
+      [0, expect.objectContaining({ kind: 'http', type: 'GET /api/things/{id}', id: request.id })],
+    ]);
+
+    completed$.next();
+    expect(registry.size).toBe(0);
   });
 
   it('follows the feature flag, defaulting to disabled', async () => {
@@ -88,13 +121,14 @@ describe('EventLoopWatchdogService', () => {
 });
 
 describe('toWatchdogOptions profiling', () => {
-  it('defaults to profiling blocks of at least 2s with a long cooldown', () => {
+  it('defaults to profiling blocks from the threshold with a one minute cooldown', () => {
     const { eventLoopWatchdog } = opsConfig.schema.validate({});
     expect(toWatchdogOptions({ eventLoopWatchdog })).toEqual(
       expect.objectContaining({
-        profileAfterMs: 2_000,
+        thresholdMs: 500,
+        profileAfterMs: 500,
         maxProfileDurationMs: 10_000,
-        profileCooldownMs: 600_000,
+        profileCooldownMs: 60_000,
       })
     );
   });

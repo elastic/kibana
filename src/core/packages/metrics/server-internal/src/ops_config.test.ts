@@ -17,9 +17,9 @@ describe('ops config: eventLoopWatchdog', () => {
     expect(eventLoopWatchdog.liveNoticeInterval.asMilliseconds()).toBe(5_000);
     expect(eventLoopWatchdog.maxLiveNoticesPerBlock).toBe(12);
     expect(eventLoopWatchdog.maxCandidates).toBe(10);
-    expect(eventLoopWatchdog.profileAfter.asMilliseconds()).toBe(2_000);
+    expect(eventLoopWatchdog.profileAfter.asMilliseconds()).toBe(500);
     expect(eventLoopWatchdog.maxProfileDuration.asMilliseconds()).toBe(10_000);
-    expect(eventLoopWatchdog.profileCooldown.asMilliseconds()).toBe(600_000);
+    expect(eventLoopWatchdog.profileCooldown.asMilliseconds()).toBe(60_000);
   });
 
   it('accepts values within bounds', () => {

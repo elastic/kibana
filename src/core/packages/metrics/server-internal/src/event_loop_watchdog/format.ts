@@ -22,7 +22,7 @@ export const formatCandidates = (candidates: Candidate[], omitted: number): stri
   const listed = candidates
     .map(
       ({ kind, type, id, startedBeforeBlockMs }) =>
-        `${kind} ${type} [${id}] (started ${startedBeforeBlockMs}ms before the block)`
+        `${kind} ${type} [${id}] started ${startedBeforeBlockMs}ms before the block`
     )
     .join(', ');
   return omitted > 0 ? `${listed} and ${omitted} more` : listed;
@@ -35,17 +35,10 @@ export const formatLiveNoticeMessage = ({
   candidates,
   omittedCandidates,
 }: LiveNotice): string =>
-  `Event loop still blocked after ${elapsedMs}ms (notice ${count}/${maxCount}). Candidates (in flight, not necessarily the cause): ${formatCandidates(
+  `Event loop still blocked after ${elapsedMs}ms, notice ${count}/${maxCount}. Candidates: ${formatCandidates(
     candidates,
     omittedCandidates
   )}`;
-
-/** Interprets the process CPU ratio of a block; it includes other threads, hence "likely". */
-export const describeCpuRatio = (cpuRatio: number): string => {
-  if (cpuRatio >= 0.8) return 'likely CPU-bound work on the main thread';
-  if (cpuRatio <= 0.2) return 'likely waiting on a synchronous syscall or I/O';
-  return 'mixed CPU work and waiting';
-};
 
 const formatProfile = (profile: ProfileSummary): string => {
   const { verdict, reason, frames, startAckLatencyMs } = profile;
@@ -72,7 +65,6 @@ const formatProfile = (profile: ProfileSummary): string => {
 
 export const formatReportMessage = ({
   blockedMs,
-  cpuRatio,
   candidates,
   omittedCandidates,
   suppressedBlocks,
@@ -81,12 +73,7 @@ export const formatReportMessage = ({
   const suppressed =
     suppressedBlocks > 0 ? ` ${suppressedBlocks} earlier block(s) were not reported.` : '';
   return (
-    `Event loop was blocked for ~${blockedMs}ms (process CPU ratio ${cpuRatio}: ${describeCpuRatio(
-      cpuRatio
-    )}).${profile ? formatProfile(profile) : ''}` +
-    ` Candidates (in flight, not necessarily the cause): ${formatCandidates(
-      candidates,
-      omittedCandidates
-    )}.${suppressed}`
+    `Event loop blocked for ~${blockedMs}ms.${profile ? formatProfile(profile) : ''}` +
+    ` Candidates: ${formatCandidates(candidates, omittedCandidates)}.${suppressed}`
   );
 };

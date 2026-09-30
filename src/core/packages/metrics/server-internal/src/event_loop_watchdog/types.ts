@@ -40,15 +40,18 @@ export interface WatchdogWorkerData {
   sanitizeRoot: string;
 }
 
+/** Execution context types tracked as nested units of work (e.g. inside a task run). */
+export type NestedActivityKind = 'alert' | 'alerting_v2';
+
 /**
  * An allowlisted description of in-flight work that may explain a block. Contains no task
  * params, credentials, user-provided names, URLs or bodies.
  */
 export interface Activity {
-  kind: 'task';
-  /** e.g. the task type */
+  kind: 'task' | 'http' | NestedActivityKind;
+  /** e.g. the task type, `<METHOD> <route path>`, or the execution context name */
   type: string;
-  /** Opaque identifier, e.g. the task id */
+  /** Opaque identifier, e.g. the task id, request id, or execution context id */
   id: string;
   startedAt: number;
 }

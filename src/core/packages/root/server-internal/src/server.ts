@@ -354,7 +354,6 @@ export class Server {
       pluginDependencies: new Map([...pluginTree.asOpaqueIds]),
     });
     const executionContextSetup = this.executionContext.setup();
-    this.eventLoopWatchdog.setup({ executionContext: executionContextSetup });
     const docLinksSetup = this.docLinks.setup();
     const securitySetup = this.security.setup();
     const userProfileSetup = this.userProfile.setup();
@@ -370,6 +369,7 @@ export class Server {
       executionContext: executionContextSetup,
       userActivity: userActivitySetup,
     });
+    this.eventLoopWatchdog.setup({ executionContext: executionContextSetup, http: httpSetup });
 
     // setup i18n prior to any other service, to have translations ready
     const i18nServiceSetup = await this.i18n.setup({ http: httpSetup, pluginPaths });

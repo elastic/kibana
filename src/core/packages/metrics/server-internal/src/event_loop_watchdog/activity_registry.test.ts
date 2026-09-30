@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { ActivityRegistry, toActivity } from './activity_registry';
+import { ActivityRegistry, toActivity, toHttpActivity } from './activity_registry';
 
 const taskContext = { type: 'task manager', name: 'run alerting:.es-query', id: 'task-1' };
 
@@ -21,10 +21,20 @@ describe('toActivity', () => {
     ).toEqual({ kind: 'task', type: 'alerting:.es-query', id: 'task-1', startedAt: 123 });
   });
 
+  it.each(['alert', 'alerting_v2'])(
+    'maps nested %s contexts to allowlisted fields only',
+    (type) => {
+      expect(
+        toActivity({ type, name: 'execute .es-query', id: 'rule-1', description: 'rule name' }, 5)
+      ).toEqual({ kind: type, type: 'execute .es-query', id: 'rule-1', startedAt: 5 });
+    }
+  );
+
   it('ignores other contexts', () => {
     expect(toActivity({ type: 'application', name: 'run x', id: '1' })).toBeUndefined();
     expect(toActivity({ type: 'task manager', name: 'mark task', id: '1' })).toBeUndefined();
     expect(toActivity({ type: 'task manager', name: 'run x' })).toBeUndefined();
+    expect(toActivity({ type: 'alert', id: '1' })).toBeUndefined();
   });
 
   it('replaces control characters that could forge log lines', () => {
@@ -38,7 +48,41 @@ describe('toActivity', () => {
   });
 });
 
+describe('toHttpActivity', () => {
+  it('uses the method, route pattern and request id', () => {
+    expect(
+      toHttpActivity({ id: 'req-1', route: { method: 'post', routePath: '/api/x/{id}' } }, 7)
+    ).toEqual({ kind: 'http', type: 'POST /api/x/{id}', id: 'req-1', startedAt: 7 });
+  });
+
+  it('never falls back to the URL path when the route pattern is unknown', () => {
+    expect(toHttpActivity({ id: 'r', route: { method: 'get' } }).type).toBe('GET unknown-route');
+  });
+
+  it('sanitises the request id', () => {
+    const { id } = toHttpActivity({
+      id: 'a\nb',
+      route: { method: 'get', routePath: '/' },
+    });
+    expect(id).toBe('a?b');
+  });
+});
+
 describe('ActivityRegistry', () => {
+  it('tracks activities passed directly until ended', () => {
+    const registry = new ActivityRegistry();
+    const listener = { onStart: jest.fn(), onEnd: jest.fn() };
+    registry.setListener(listener);
+
+    const end = registry.track(
+      toHttpActivity({ id: 'r', route: { method: 'get', routePath: '/' } })
+    );
+    expect(listener.onStart).toHaveBeenCalledWith(0, expect.objectContaining({ kind: 'http' }));
+    end();
+    expect(listener.onEnd).toHaveBeenCalledWith(0);
+    expect(registry.size).toBe(0);
+  });
+
   it('tracks activities before a listener is set and snapshots them', () => {
     const registry = new ActivityRegistry();
     const end = registry.observe(taskContext);

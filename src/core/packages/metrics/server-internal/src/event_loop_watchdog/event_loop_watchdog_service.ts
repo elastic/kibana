@@ -13,9 +13,10 @@ import type { Logger, LogLevelId } from '@kbn/logging';
 import type { CoreContext } from '@kbn/core-base-server-internal';
 import type { InternalExecutionContextSetup } from '@kbn/core-execution-context-server-internal';
 import type { FeatureFlagsStart } from '@kbn/core-feature-flags-server';
+import type { InternalHttpServiceSetup } from '@kbn/core-http-server-internal';
 import type { InternalThreadsStart, WorkerLoggingConfig } from '@kbn/core-threads-server-internal';
 import { OPS_CONFIG_PATH, type OpsConfigType } from '../ops_config';
-import { ActivityRegistry } from './activity_registry';
+import { ActivityRegistry, toHttpActivity } from './activity_registry';
 import { EventLoopWatchdog } from './event_loop_watchdog';
 import type { WatchdogOptions } from './types';
 
@@ -27,6 +28,7 @@ const LOGGER_CONTEXT = ['metrics', 'event_loop_watchdog'] as const;
 
 export interface EventLoopWatchdogSetupDeps {
   executionContext: InternalExecutionContextSetup;
+  http: Pick<InternalHttpServiceSetup, 'registerOnPreAuth'>;
 }
 
 export interface EventLoopWatchdogStartDeps {
@@ -109,8 +111,8 @@ export const toWatchdogOptions = ({
 };
 
 /**
- * Core-owned event-loop watchdog: tracks candidate activities from execution contexts at all
- * times and runs the watchdog worker while the feature flag is enabled.
+ * Core-owned event-loop watchdog: tracks candidate activities from execution contexts and HTTP
+ * requests at all times and runs the watchdog worker while the feature flag is enabled.
  * @internal
  */
 export class EventLoopWatchdogService {
@@ -123,8 +125,14 @@ export class EventLoopWatchdogService {
     this.logger = coreContext.logger.get(...LOGGER_CONTEXT);
   }
 
-  public setup({ executionContext }: EventLoopWatchdogSetupDeps): void {
+  public setup({ executionContext, http }: EventLoopWatchdogSetupDeps): void {
     executionContext.registerActivityObserver(this.registry.observe);
+    // onPreAuth is the first stage where the route (and so its path pattern) is known
+    http.registerOnPreAuth((request, response, toolkit) => {
+      const end = this.registry.track(toHttpActivity(request));
+      request.events.completed$.subscribe(end);
+      return toolkit.next();
+    });
   }
 
   public async start({ featureFlags, threads }: EventLoopWatchdogStartDeps): Promise<void> {
