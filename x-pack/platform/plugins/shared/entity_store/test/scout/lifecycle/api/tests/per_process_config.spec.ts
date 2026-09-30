@@ -66,13 +66,28 @@ apiTest.describe(
       }
     };
 
-    apiTest.beforeAll(async ({ samlAuth }) => {
+    /**
+     * Puts the non-priority process back in the started state. The stop cases below remove its
+     * task, so any case that needs it running arranges it here rather than paying for a full
+     * reinstall. The route skips a process that is already started, so this is cheap to repeat.
+     */
+    const startNonPriority = async (apiClient: ApiClientFixture) => {
+      const response = await apiClient.put(ENTITY_STORE_ROUTES.internal.START, {
+        headers: internalHeaders,
+        responseType: 'json',
+        body: { entityTypes: ['user'], process: 'nonPriority' },
+      });
+      expect(response.statusCode).toBe(200);
+    };
+
+    // Installing all four entity types costs an uninstall, a five-poll wait and an install. Doing
+    // that once per case dominated the runtime of this file, and nothing here needs a pristine
+    // store: the cases that mutate task state arrange what they need through the API instead.
+    apiTest.beforeAll(async ({ samlAuth, kbnClient, apiClient, apiServices }) => {
       const credentials = await samlAuth.asInteractiveUser('admin');
       publicHeaders = { ...credentials.cookieHeader, ...PUBLIC_HEADERS };
       internalHeaders = { ...credentials.cookieHeader, ...INTERNAL_HEADERS };
-    });
 
-    apiTest.beforeEach(async ({ kbnClient, apiClient, apiServices }) => {
       await kbnClient.uiSettings.update({ [FF_ENABLE_ENTITY_STORE_V2]: true });
       await apiServices.core.settings({
         'feature_flags.overrides': { [FF_DUAL_PROCESS_ENABLED]: true },
@@ -83,7 +98,15 @@ apiTest.describe(
       expect((await installAllEntityTypes(apiClient, publicHeaders)).statusCode).toBe(201);
     });
 
-    apiTest.afterEach(async ({ apiClient, apiServices, kbnClient }) => {
+    // Three cases below turn the dual-process flag off, so it is restored per case. The V2 UI
+    // setting is never changed by a case, so it stays in beforeAll.
+    apiTest.beforeEach(async ({ apiServices }) => {
+      await apiServices.core.settings({
+        'feature_flags.overrides': { [FF_DUAL_PROCESS_ENABLED]: true },
+      });
+    });
+
+    apiTest.afterAll(async ({ apiClient, apiServices, kbnClient }) => {
       await uninstallAllEntityTypes(apiClient, publicHeaders).catch(() => {});
       // Remove the override rather than writing `false`: the deployment may have the flag on,
       // and writing a value would hand the next suite a state it never asked for.
@@ -107,7 +130,12 @@ apiTest.describe(
     });
 
     apiTest('a later global update does not clear the per-type override', async ({ apiClient }) => {
-      await setEngineConfig(apiClient, { nonPriorityOverride: { samplingRate: 0.5 } });
+      // Layer 5 would win over the global frequency asserted below, so clear it rather than
+      // depending on no earlier case having written one.
+      await setEngineConfig(apiClient, {
+        logExtraction: { frequency: null },
+        nonPriorityOverride: { samplingRate: 0.5 },
+      });
 
       const update = await apiClient.put(ENTITY_STORE_ROUTES.public.UPDATE, {
         headers: publicHeaders,
@@ -119,6 +147,14 @@ apiTest.describe(
       const engine = await userEngine(apiClient);
       expect(engine.nonPriority?.samplingRate).toBe(0.5);
       expect(engine.frequency).toBe('7m');
+
+      // The global layer outlives this case now that the store is installed once for the file.
+      // Only a full uninstall drops it, so clear the field here instead of leaving 7m behind.
+      await apiClient.put(ENTITY_STORE_ROUTES.public.UPDATE, {
+        headers: publicHeaders,
+        responseType: 'json',
+        body: { logExtraction: { frequency: null } },
+      });
     });
 
     apiTest('null clears one field and leaves the rest alone', async ({ apiClient }) => {
@@ -148,6 +184,7 @@ apiTest.describe(
     apiTest(
       'stopping the non-priority process leaves the priority task scheduled',
       async ({ apiClient, kbnClient }) => {
+        await startNonPriority(apiClient);
         expect(await taskExists(kbnClient, NON_PRIORITY_TASK_ID)).toBe(true);
 
         const stop = await apiClient.put(ENTITY_STORE_ROUTES.internal.STOP, {
@@ -200,6 +237,8 @@ apiTest.describe(
     apiTest(
       'acts on the gated types when no entity types are given',
       async ({ apiClient, kbnClient }) => {
+        await startNonPriority(apiClient);
+
         const stop = await apiClient.put(ENTITY_STORE_ROUTES.internal.STOP, {
           headers: internalHeaders,
           responseType: 'json',
@@ -213,6 +252,9 @@ apiTest.describe(
     );
 
     apiTest('runs a forced extraction as the requested process', async ({ apiClient }) => {
+      // A stopped non-priority process reports a skipped run, not a successful one.
+      await startNonPriority(apiClient);
+
       const toDateISO = new Date().toISOString();
       const fromDateISO = new Date(Date.now() - 60 * 60 * 1000).toISOString();
 
