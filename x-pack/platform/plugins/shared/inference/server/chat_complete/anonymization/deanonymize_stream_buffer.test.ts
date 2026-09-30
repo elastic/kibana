@@ -47,10 +47,9 @@ describe('DeanonymizeStreamBuffer', () => {
   });
 
   it('resolves a mask correctly even when it streams in completely alone, one character at a time', () => {
-    // This is the regression case for the original MIN_HOLDBACK_LENGTH = 2 design: if
-    // a mask's very first character is ever flushed in isolation, alignment with the
-    // mask's start is permanently lost and it leaks through unresolved for the rest of
-    // the stream. MIN_HOLDBACK_LENGTH = 1 fixes this by always holding a lone leading
+    // Regression case: if a mask's very first character is ever flushed in isolation,
+    // alignment with the mask's start is permanently lost and it leaks through unresolved
+    // for the rest of the stream. The buffer avoids this by always holding a lone trailing
     // character that matches a known mask's first character.
     const value = 'jorge@gmail.com';
     const mask = createMask('EMAIL', value);

@@ -166,8 +166,7 @@ describe('deanonymizeMessage', () => {
     const fullContent = `Your email is ${mask}.`;
     // Split into realistic tokenizer-sized fragments, several of which land mid-mask,
     // including one boundary that leaves only a single dangling character of the mask
-    // ("E") — the exact case that used to permanently break alignment before
-    // MIN_HOLDBACK_LENGTH was fixed to 1.
+    // ("E") — the exact case that breaks alignment if a lone leading character is flushed.
     const chunks = [
       'Your email is ',
       mask.slice(0, 1),

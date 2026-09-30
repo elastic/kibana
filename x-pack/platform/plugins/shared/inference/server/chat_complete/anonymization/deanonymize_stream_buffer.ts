@@ -8,17 +8,6 @@
 import type { Anonymization } from '@kbn/inference-common';
 import { indexEntitiesByMask, replaceMasks } from './deanonymize';
 
-// Minimum tail length before we consider it a potential split mask. This must be 1, not
-// higher: if a mask's very first character (e.g. 'E' for an EMAIL_... mask) is ever
-// flushed in isolation, the buffer permanently loses alignment with that mask's start —
-// every later character is then checked as a suffix of a *new* accumulation that can
-// never match a prefix anchored at the mask's true beginning, so the raw mask leaks
-// through unresolved for the rest of the stream. Holding a lone leading character costs
-// at most one extra chunk of latency on an ordinary word that happens to start with the
-// same letter as a known mask (resolved as soon as the next chunk confirms or refutes
-// the match); losing alignment costs a visibly wrong, permanently un-deanonymized value.
-const MIN_HOLDBACK_LENGTH = 1;
-
 interface MaskIndex {
   /** Every known mask for this call. */
   masks: readonly string[];
@@ -52,8 +41,12 @@ function longestHeldSuffixLength(
   value: string,
   { masks, firstChars, maxHeldLength }: MaskIndex
 ): number {
+  // Every tail position is a candidate, including a lone trailing character: if a mask's first
+  // character were flushed on its own, the buffer would lose alignment with that mask and the
+  // raw mask would leak for the rest of the stream. Holding an ordinary word that shares a first
+  // character with a mask only costs one extra chunk of latency.
   const earliestStart = Math.max(0, value.length - maxHeldLength);
-  for (let start = earliestStart; start <= value.length - MIN_HOLDBACK_LENGTH; start += 1) {
+  for (let start = earliestStart; start < value.length; start += 1) {
     if (!firstChars.has(value[start])) {
       continue;
     }
