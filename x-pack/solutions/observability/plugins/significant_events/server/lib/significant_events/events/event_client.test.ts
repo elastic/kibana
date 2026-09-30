@@ -223,7 +223,7 @@ describe('EventClient', () => {
       );
     });
 
-    it('returns the lineage creation timestamp before time and current-state filtering', async () => {
+    it('returns the lineage creation timestamp before latest-state and time filtering', async () => {
       const createdAt = '2026-01-01T00:00:00.000Z';
       const latest = {
         ...createEvent(),
@@ -251,12 +251,38 @@ describe('EventClient', () => {
         .find((q) => !q.includes('STATS total'));
       expect(dataQuery).toContain('INLINE STATS created_at = MIN(@timestamp) BY event_id');
       expect(dataQuery!.indexOf('INLINE STATS created_at')).toBeLessThan(
-        dataQuery!.indexOf('@timestamp >= TO_DATETIME')
+        dataQuery!.indexOf('INLINE STATS latest_ts')
       );
       expect(dataQuery!.indexOf('INLINE STATS created_at')).toBeLessThan(
         dataQuery!.indexOf('status IN')
       );
       expect(dataQuery).toContain('SORT @timestamp DESC, _id ASC');
+    });
+
+    it('selects events whose lifetime overlaps the time range after latest-state reduction', async () => {
+      const { client, query } = createSearchClient({ hits: [], total: 0 });
+
+      await client.findLatestByCurrentStatePaginated({
+        from: '2026-01-02T00:00:00.000Z',
+        to: '2026-01-02T23:59:59.999Z',
+        status: ['closed'],
+      });
+
+      const dataQuery = query.mock.calls
+        .map((call) => (call[0] as { query: string }).query)
+        .find((q) => !q.includes('STATS total'));
+      const latestPerGroupIdx = dataQuery!.indexOf('INLINE STATS latest_ts');
+      const createdBeforeToIdx = dataQuery!.indexOf('created_at <= TO_DATETIME');
+      const activeOrUpdatedIdx = dataQuery!.indexOf(
+        '(status IN ("open")) OR @timestamp >= TO_DATETIME'
+      );
+      const statusIdx = dataQuery!.indexOf('status IN ("closed")');
+
+      expect(createdBeforeToIdx).toBeGreaterThan(latestPerGroupIdx);
+      expect(activeOrUpdatedIdx).toBeGreaterThan(createdBeforeToIdx);
+      expect(statusIdx).toBeGreaterThan(activeOrUpdatedIdx);
+      // Upper bound only applies to creation, so a later update still surfaces as current state.
+      expect(dataQuery).not.toContain('@timestamp <=');
     });
 
     it('filters open state after latest-per-slug reduction', async () => {

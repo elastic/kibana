@@ -29,6 +29,7 @@ import {
   type PaginatedResponse,
 } from '../query_utils';
 import {
+  applyLifetimeOverlap,
   applyTimeRange,
   executeCountQuery,
   executeEsqlQuery,
@@ -263,12 +264,9 @@ export class RuleEventsClient implements SignificantEventsReadClient {
     options: RuleEventsCurrentStateSearchOptions
   ): ComposerQuery {
     // `created_at` reflects the earliest (historical) `@timestamp` for the series, so it must be
-    // computed before `applyTimeRange` narrows the row set — otherwise a `from` bound would hide
-    // the series' true creation time.
+    // computed before any filter narrows the row set.
     let query = buildBaseQuery(this.clients.space)
       .pipe`INLINE STATS created_at = MIN(@timestamp) BY ${esql.col(GROUP_HASH_FIELD)}`;
-
-    query = applyTimeRange({ query, from: options.from, to: options.to });
 
     // Free-text search runs pre-latest (against the full lineage); status/severity run post-latest
     // (against only the current state) so a stale revision cannot make a closed series look open.
@@ -278,6 +276,18 @@ export class RuleEventsClient implements SignificantEventsReadClient {
     }
 
     query = pickLatestPerGroup(query, GROUP_HASH_FIELD);
+
+    // The time range selects series active during it, always shown in their current state.
+    query = applyLifetimeOverlap({
+      query,
+      from: options.from,
+      to: options.to,
+      activeWhere: esql.exp`${esql.col(
+        'episode.status'
+      )} IN (${SIGNIFICANT_EVENT_ACTIVE_STATUS_OPTIONS.map((status) =>
+        esql.str(SIGNIFICANT_EVENTS_STATUS_MAP[status])
+      )})`,
+    });
 
     if (options.status?.length) {
       // `episode.status` — the nested field `AlertEventsClient.createAlertEvent` persists the

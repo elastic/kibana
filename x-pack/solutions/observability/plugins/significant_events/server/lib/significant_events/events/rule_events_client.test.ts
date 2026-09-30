@@ -222,29 +222,51 @@ describe('RuleEventsClient', () => {
       );
     });
 
-    it('orders stages: created_at -> time range -> free-text -> latest-per-group -> status', async () => {
+    it('orders stages: created_at -> free-text -> latest-per-group -> time range -> status', async () => {
       const { client, query } = createClient(async (request) =>
         request.query.includes('STATS total') ? countResponse(0) : sourceResponse([])
       );
 
       await client.findLatestByCurrentStatePaginated({
         from: '2026-01-01T00:00:00.000Z',
+        to: '2026-01-02T00:00:00.000Z',
         search: 'checkout',
-        status: ['open'],
+        status: ['closed'],
       });
 
       const q = lastQuery(query, (query_) => !query_.includes('STATS total'));
       const createdAtIdx = q.indexOf('INLINE STATS created_at');
-      const timeRangeIdx = q.indexOf('@timestamp >= TO_DATETIME');
       const freeTextIdx = q.indexOf('FIELD_EXTRACT');
       const latestPerGroupIdx = q.indexOf('INLINE STATS latest_ts');
-      const statusIdx = q.indexOf('`episode.status` IN');
+      const createdBeforeToIdx = q.indexOf('created_at <= TO_DATETIME');
+      const activeOrUpdatedIdx = q.indexOf(
+        '(`episode.status` IN ("active")) OR @timestamp >= TO_DATETIME'
+      );
+      const statusIdx = q.indexOf('`episode.status` IN ("inactive")');
 
       expect(createdAtIdx).toBeGreaterThanOrEqual(0);
-      expect(timeRangeIdx).toBeGreaterThan(createdAtIdx);
-      expect(freeTextIdx).toBeGreaterThan(timeRangeIdx);
+      expect(freeTextIdx).toBeGreaterThan(createdAtIdx);
       expect(latestPerGroupIdx).toBeGreaterThan(freeTextIdx);
-      expect(statusIdx).toBeGreaterThan(latestPerGroupIdx);
+      expect(createdBeforeToIdx).toBeGreaterThan(latestPerGroupIdx);
+      expect(activeOrUpdatedIdx).toBeGreaterThan(createdBeforeToIdx);
+      expect(statusIdx).toBeGreaterThan(activeOrUpdatedIdx);
+    });
+
+    it('does not bound versions by time before picking the latest per series', async () => {
+      const { client, query } = createClient(async (request) =>
+        request.query.includes('STATS total') ? countResponse(0) : sourceResponse([])
+      );
+
+      await client.findLatestByCurrentStatePaginated({
+        from: '2026-01-01T00:00:00.000Z',
+        to: '2026-01-02T00:00:00.000Z',
+      });
+
+      const q = lastQuery(query, (query_) => !query_.includes('STATS total'));
+      const latestPerGroupIdx = q.indexOf('INLINE STATS latest_ts');
+
+      expect(q.indexOf('@timestamp >=')).toBeGreaterThan(latestPerGroupIdx);
+      expect(q).not.toContain('@timestamp <=');
     });
 
     it('returns hits decorated with the lineage creation timestamp', async () => {
