@@ -18,11 +18,13 @@ import {
   EuiSkeletonText,
   EuiSpacer,
   EuiTitle,
+  useEuiTheme,
 } from '@elastic/eui';
 import { getEbtProps } from '@kbn/ebt-click';
 import { WORKFLOWS_APP_ID } from '@kbn/deeplinks-workflows';
 import { i18n } from '@kbn/i18n';
 import React, { useState } from 'react';
+import { css } from '@emotion/react';
 import { CONTEXT_ENGINE_APP_ID } from '../../../../common/features';
 import { CONTEXT_ENGINE_UI_EBT } from '../../../../common/telemetry';
 import { MAX_AI_INDEX_AUTOMATIONS } from '../../../../common/constants';
@@ -71,6 +73,7 @@ export const AutomationsPanel = ({
   } = useWorkflowSummaries(workflowIds);
   const { canSuggest, suggestAutomation } = useSuggestAutomation({ aiIndex, isManaged, onSaved });
   const [isAddMenuOpen, setIsAddMenuOpen] = useState(false);
+  const { euiTheme } = useEuiTheme();
 
   const returnSearch = aiIndex ? `?${getWorkflowReturnSearch(aiIndex.id)}` : '';
 
@@ -128,16 +131,22 @@ export const AutomationsPanel = ({
         action: CONTEXT_ENGINE_UI_EBT.action.automations.CREATE,
       })}
     >
-      <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
-        <EuiFlexItem grow={false}>
-          {i18n.translate('xpack.contextEngine.aiIndexDetail.automations.createButton', {
-            defaultMessage: 'Create workflow',
-          })}
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <EuiIcon type="external" size="s" color="subdued" aria-hidden={true} />
-        </EuiFlexItem>
-      </EuiFlexGroup>
+      {/* We can't use the `external` prop because the menu item is a button and not a link  */}
+      <>
+        {i18n.translate('xpack.contextEngine.aiIndexDetail.automations.createButton', {
+          defaultMessage: 'Create workflow',
+        })}
+
+        <EuiIcon
+          type="external"
+          size="m"
+          color={euiTheme.colors.textDisabled}
+          css={css`
+            margin-left: ${euiTheme.size.xs};
+          `}
+          aria-hidden={true}
+        />
+      </>
     </EuiContextMenuItem>,
   ];
 
