@@ -122,7 +122,12 @@ export interface RegisteredManagedWorkflowsLifecycleApi {
    */
   install: <TId extends ManagedWorkflowId>(
     id: TId,
-    options: ManagedWorkflowInstallOptions<TId>
+    options: ManagedWorkflowInstallOptions<TId>,
+    /**
+     * Present when a user save changes `run_as`. Startup installs omit it. Binding and unbinding
+     * a service account require this authenticated request.
+     */
+    request?: KibanaRequest
   ) => Promise<void>;
   uninstall: <TId extends ManagedWorkflowId>(
     id: TId,

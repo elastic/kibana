@@ -20,7 +20,7 @@ export const ALERTZERO_WORKER_DETECTION_RULE_CREATION_WORKFLOW = {
   id: ALERTZERO_WORKER_DETECTION_RULE_CREATION_WORKFLOW_ID,
   management: ALERTZERO_WORKER_MANAGEMENT,
   pluginId: ALERTZERO_MANAGED_WORKFLOW_PLUGIN_ID,
-  version: 1,
+  version: 2,
   yamlTemplate: (values: CommonWorkerTemplateValues): string =>
     renderCommonWorkerYaml(DETECTION_RULE_CREATION_YAML, values),
 } as const satisfies ManagedWorkflowDefinition<CommonWorkerTemplateValues>;

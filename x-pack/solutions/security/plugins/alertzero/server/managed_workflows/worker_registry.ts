@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { KibanaRequest } from '@kbn/core/server';
 import type { SYSTEM_SECURITY_WORKER_IDS } from '@kbn/alertzero-common';
 import {
   SYSTEM_SECURITY_WORKER_CATALOG,
@@ -31,6 +32,8 @@ interface RegisteredWorkerInstallOptions {
   workflowIdSuffix?: string;
   values?: ManagedWorkflowTemplateValues;
   expectedDocumentVersion?: number | null;
+  /** Required when the rendered YAML sets or clears `run_as`, so the space binding can change. */
+  request?: KibanaRequest;
 }
 
 /** The runtime registry guarantees that template values came from the definition with this id. */
@@ -39,11 +42,13 @@ export const installRegisteredWorker = async (
   registration: WorkerRegistration,
   options: RegisteredWorkerInstallOptions
 ): Promise<void> => {
+  const { request, ...installOptions } = options;
   const install = client.install as (
     id: RegisteredWorkerId,
-    installOptions: RegisteredWorkerInstallOptions
+    installOptions: Omit<RegisteredWorkerInstallOptions, 'request'>,
+    request?: KibanaRequest
   ) => Promise<void>;
-  await install(registration.id, options);
+  await install(registration.id, installOptions, request);
 };
 
 class WorkerRegistry {

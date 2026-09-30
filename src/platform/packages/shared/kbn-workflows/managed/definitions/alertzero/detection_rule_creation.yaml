@@ -5,6 +5,7 @@ enabled: false
 tags:
   - watch
   - watch-detection
+__WORKER_RUN_AS_BLOCK__
 triggers:
   - type: manual
 consts:

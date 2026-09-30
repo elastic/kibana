@@ -12,15 +12,33 @@ import type { ManagedWorkflowTemplateValues } from '../../types';
 export interface CommonWorkerTemplateValues extends ManagedWorkflowTemplateValues {
   settingsVersion: number;
   autonomyLevel: 'manual' | 'assisted' | 'supervised';
+  /** Omitted to run as the current user, which drops `settings.run_as` from the YAML. */
+  serviceAccountId?: string;
 }
+
+const RUN_AS_LINE_PLACEHOLDER = '  __WORKER_RUN_AS_LINE__\n';
+const RUN_AS_BLOCK_PLACEHOLDER = '__WORKER_RUN_AS_BLOCK__\n';
+
+/** `run_as` is optional. A missing id removes the line; an empty value is not valid YAML. */
+const renderRunAs = (serviceAccountId: string | undefined): { line: string; block: string } => {
+  if (!serviceAccountId) {
+    return { line: '', block: '' };
+  }
+  const line = `  run_as: ${JSON.stringify(serviceAccountId)}\n`;
+  return { line, block: `settings:\n${line}` };
+};
 
 export const renderCommonWorkerYaml = (
   yaml: string,
-  { settingsVersion, autonomyLevel }: CommonWorkerTemplateValues
-): string =>
-  yaml
+  { settingsVersion, autonomyLevel, serviceAccountId }: CommonWorkerTemplateValues
+): string => {
+  const runAs = renderRunAs(serviceAccountId);
+  return yaml
     .replaceAll('__WORKER_SETTINGS_VERSION__', String(settingsVersion))
-    .replaceAll('__WORKER_AUTONOMY_LEVEL__', autonomyLevel);
+    .replaceAll('__WORKER_AUTONOMY_LEVEL__', autonomyLevel)
+    .replaceAll(RUN_AS_LINE_PLACEHOLDER, runAs.line)
+    .replaceAll(RUN_AS_BLOCK_PLACEHOLDER, runAs.block);
+};
 
 /**
  * Values for the subset of Workers that own a scheduled trigger. Kept out of

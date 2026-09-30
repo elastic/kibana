@@ -12,6 +12,7 @@ tags:
   - watch-forensics
 
 settings:
+  __WORKER_RUN_AS_LINE__
   # Concurrency is keyed per (key, spaceId), so a constant key means one
   # sweep per space, not one across the whole deployment. Capped at 1 so
   # overlapping ticks can't dispatch the same pending indicators twice.

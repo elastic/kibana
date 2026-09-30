@@ -55,6 +55,9 @@ const toTemplateValues = (
     ? {}
     : { scheduleInterval: settings.scheduleInterval }),
   ...(settings.extras === undefined ? {} : { extras: settings.extras }),
+  ...(settings.serviceAccountId === undefined
+    ? {}
+    : { serviceAccountId: settings.serviceAccountId }),
 });
 
 /**
@@ -69,7 +72,14 @@ const parseWorkerValues = (
 ): WorkerSettings => {
   const raw = applyMissingWorkerSettingDefaults(getWorkerSettingsDeclaration(workerId), stored);
   const currentVersion = WORKER_SETTINGS_VERSIONS[workerId];
-  const { settingsVersion, autonomyLevel, scheduleInterval, extras, ...unsupported } = raw;
+  const {
+    settingsVersion,
+    autonomyLevel,
+    scheduleInterval,
+    extras,
+    serviceAccountId,
+    ...unsupported
+  } = raw;
   if (settingsVersion !== undefined && settingsVersion !== currentVersion) {
     throw new Error(
       `Unsupported settings version for AlertZero worker "${workerId}": ${String(settingsVersion)}`
@@ -89,6 +99,8 @@ const parseWorkerValues = (
     autonomy: projectStoredAutonomyLevel(getWorkerSettingsDeclaration(workerId), autonomyLevel),
     ...(scheduleInterval === undefined ? {} : { scheduleInterval }),
     ...(extras === undefined ? {} : { extras }),
+    // Null is the cleared write value, not a stored identity. Anything else is validated below.
+    ...(serviceAccountId === undefined || serviceAccountId === null ? {} : { serviceAccountId }),
   };
   const parsed = getCompleteWorkerSettingsSchema(workerId).safeParse(candidate);
   if (!parsed.success) {

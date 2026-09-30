@@ -61,6 +61,12 @@ components:
         extras:
           $ref: '#/components/schemas/WorkerSettingsExtras'
           description: Omitted for Workers that declare no Worker-specific settings.
+        serviceAccountId:
+          type: string
+          minLength: 1
+          maxLength: 1024
+          description: >-
+            Service account this Worker runs as. Omitted to run as the current user.
 
     WorkerSettingsWrite:
       type: object
@@ -69,8 +75,8 @@ components:
         Settings patch; the editable subset of WorkerSettings with the same names and nesting.
         Shared fields are per-field: omitted keeps the stored value, supplied replaces it. `extras`
         is whole-object: omitted keeps the stored extras, supplied must be the complete valid object
-        for this Worker and replaces the stored one. There is no deep merge and `null` has no
-        special meaning.
+        for this Worker and replaces the stored one. There is no deep merge. `serviceAccountId` is
+        the one field where null is meaningful: null clears the stored account.
       properties:
         autonomy:
           $ref: '#/components/schemas/WatchAutonomyLevel'
@@ -78,6 +84,14 @@ components:
           $ref: '#/components/schemas/WorkerScheduleInterval'
         extras:
           $ref: '#/components/schemas/WorkerSettingsExtras'
+        serviceAccountId:
+          type: string
+          minLength: 1
+          maxLength: 1024
+          nullable: true
+          description: >-
+            Omitted keeps the stored account. A string replaces it. Null clears it so the Worker
+            runs as the current user.
 
     Worker:
       type: object

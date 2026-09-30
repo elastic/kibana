@@ -161,6 +161,30 @@ describe('createWorkerSettingsRegistration', () => {
       ).toThrow(/unsupported fields: candidateLimit/);
     });
 
+    it('stores a service account and drops it when cleared', () => {
+      const applied = registration.applyPatch(registration.createDefaultValues(), {
+        serviceAccountId: 'account-a',
+      });
+      expect(applied).toEqual({
+        values: {
+          settingsVersion: 1,
+          autonomyLevel: 'manual',
+          scheduleInterval: '24h',
+          serviceAccountId: 'account-a',
+        },
+      });
+      if (!('values' in applied)) throw new Error('Expected the account to be stored');
+      expect(registration.toSettings(applied.values)).toEqual({
+        workerId: AD_WORKER_ID,
+        autonomy: 'manual',
+        scheduleInterval: '24h',
+        serviceAccountId: 'account-a',
+      });
+      expect(registration.applyPatch(applied.values, { serviceAccountId: null })).toEqual({
+        values: { settingsVersion: 1, autonomyLevel: 'manual', scheduleInterval: '24h' },
+      });
+    });
+
     it.each(['1m', '2h', '7d'])('applies a %s interval patch', (scheduleInterval) => {
       const applied = registration.applyPatch(registration.createDefaultValues(), {
         scheduleInterval,
