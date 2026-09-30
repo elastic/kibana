@@ -21,6 +21,7 @@ dependsOn:
   - '@kbn/config-schema'
   - '@kbn/core'
   - '@kbn/esql'
+  - '@kbn/deeplinks-analytics'
   - '@kbn/esql-language'
   - '@kbn/esql-types'
   - '@kbn/esql-utils'
@@ -28,6 +29,8 @@ dependsOn:
   - '@kbn/i18n'
   - '@kbn/management-plugin'
   - '@kbn/esql-editor'
+  - '@kbn/share-plugin'
+  - '@kbn/utility-types'
 tags:
   - plugin
   - prod

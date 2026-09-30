@@ -30,6 +30,7 @@ const coordinatorResult: HuntCoordinatorResult = {
   report_id: 'report-1',
   run_id: 'run-1',
   technologies: ['aws_iam'],
+  index_patterns: ['logs-aws.cloudtrail-*'],
   tier1: {
     tier: 1,
     ...emptyHuntForThreatResult('no_environment_hits', [], [], { from: 'now-7d', to: 'now' }, ''),
@@ -141,7 +142,7 @@ describe('registerHuntCoordinatorRoute', () => {
     });
   });
 
-  it('skips model resolution entirely when Tier 2 is never going to run', async () => {
+  it('still resolves the model when Tier 2 is never going to run, so scope resolution can use it', async () => {
     const { handler, context } = makeDeps();
 
     await handler(
@@ -150,8 +151,39 @@ describe('registerHuntCoordinatorRoute', () => {
       httpServerMock.createResponseFactory()
     );
 
-    expect(resolveScopedModelMock).not.toHaveBeenCalled();
+    expect(resolveScopedModelMock).toHaveBeenCalledTimes(1);
+    expect(huntCoordinatorMock.mock.calls[0][1]).toBe(model);
+    expect(paramsOf().tier2_when).toBe('never');
+  });
+
+  it('passes no model on a never run without a connector, and the request still succeeds', async () => {
+    resolveScopedModelMock.mockResolvedValue({
+      ok: false,
+      reason: 'no_connector',
+      message: 'no connector configured',
+    });
+    const { handler, context } = makeDeps();
+    const response = httpServerMock.createResponseFactory();
+
+    await handler(context, requestFor({ tier2_when: 'never' }), response);
+
     expect(huntCoordinatorMock.mock.calls[0][1]).toBeUndefined();
+    expect(response.ok).toHaveBeenCalled();
+  });
+
+  it('passes no model when resolution throws, logging at debug rather than failing the request', async () => {
+    resolveScopedModelMock.mockRejectedValue(new Error('connector store unavailable'));
+    const { handler, context, logger } = makeDeps();
+    const response = httpServerMock.createResponseFactory();
+
+    await handler(context, requestFor(), response);
+
+    expect(huntCoordinatorMock.mock.calls[0][1]).toBeUndefined();
+    expect(logger.debug).toHaveBeenCalledWith(
+      expect.stringContaining('connector store unavailable')
+    );
+    expect(logger.error).not.toHaveBeenCalled();
+    expect(response.ok).toHaveBeenCalled();
   });
 
   it('passes no model when resolution fails, leaving the coordinator to degrade', async () => {

@@ -42,6 +42,8 @@ export {
   listProposalsQuerySchema,
   MAX_PROPOSALS_PAGE_OFFSET,
   MAX_PROPOSALS_PAGE_SIZE,
+  DEFAULT_PROPOSAL_TITLE,
+  MAX_TITLE_LENGTH,
   proposalFiltersSchema,
   proposalCategorySchema,
   proposalConfidenceSchema,
