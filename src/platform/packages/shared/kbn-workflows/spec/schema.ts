@@ -27,8 +27,12 @@ import {
   MAX_HITL_MESSAGE_LENGTH,
   MAX_HITL_SLACK_CHANNEL_LENGTH,
 } from '../common/hitl';
+import { DURATION_REGEX, MAX_DURATION_LENGTH } from '../common/utils/duration/duration';
 
-export const DurationSchema = z.string().regex(/^\d+(ms|[smhdw])$/, 'Invalid duration format');
+export const DurationSchema = z
+  .string()
+  .max(MAX_DURATION_LENGTH)
+  .regex(DURATION_REGEX, 'Invalid duration format');
 
 export const ByteSizeSchema = z
   .string()
@@ -46,10 +50,7 @@ export type RetryDelayStrategy = z.infer<typeof RetryDelayStrategySchema>;
 export const WorkflowRetrySchema = z.object({
   'max-attempts': z.number().min(1),
   condition: z.string().optional(), // e.g., "${{error.type == 'NetworkError'}}" (default: always retry)
-  delay: z
-    .string()
-    .regex(/^\d+(ms|[smhdw])$/, 'Invalid duration format')
-    .optional(), // e.g., '5s', '1m', '2h' (default: no delay)
+  delay: DurationSchema.optional(), // e.g., '5s', '1h30m' (default: no delay)
   /** Delay strategy: fixed (same delay each retry) or exponential backoff. Default: fixed. */
   strategy: RetryDelayStrategySchema.optional(),
   /** Multiplier for exponential backoff (e.g. 2 => 1s, 2s, 4s). Default: 2. Ignored when strategy is fixed. */
@@ -169,6 +170,7 @@ export const LiquidSettingsSchema = z.object({
 export type LiquidSettings = z.infer<typeof LiquidSettingsSchema>;
 
 export const WorkflowSettingsSchema = z.object({
+  run_as: z.string().min(1).max(1024).optional(),
   'on-failure': WorkflowOnFailureSchema.optional(),
   timezone: z.string().optional(), // Should follow IANA TZ format
   timeout: DurationSchema.optional(), // e.g., '5s', '1m', '2h'
@@ -196,6 +198,43 @@ export const TimeoutPropSchema = z.object({
   timeout: DurationSchema.optional(),
 });
 export type TimeoutProp = z.infer<typeof TimeoutPropSchema>;
+
+/** Upper bound on a Liquid duration template. Matches other dynamic expressions in this schema. */
+export const DYNAMIC_TIMEOUT_TEMPLATE_MAX_LENGTH = 2000;
+
+const liquidDurationTemplateSchema = (message: string) =>
+  z
+    .string()
+    .max(DYNAMIC_TIMEOUT_TEMPLATE_MAX_LENGTH)
+    .regex(/\{\{[\s\S]*\}\}/, message);
+
+/** A duration, or Liquid that renders to one at step entry. */
+export const DynamicTimeoutSchema = z
+  .union([
+    DurationSchema,
+    liquidDurationTemplateSchema(
+      'Invalid timeout. Use a duration (e.g. "72h") or a template that renders to one.'
+    ),
+  ])
+  .describe(
+    "Duration (`72h`) or Liquid that renders to one (`{{ inputs.expiresIn | default: '72h' }}`)."
+  );
+
+/** A wait duration, or Liquid that renders to one at step entry. */
+export const DynamicDurationSchema = z
+  .union([
+    DurationSchema,
+    liquidDurationTemplateSchema(
+      'Invalid duration. Use a duration (e.g. "5s") or a template that renders to one.'
+    ),
+  ])
+  .describe(
+    "Duration (`5s`) or Liquid that renders to one (`{{ inputs.waitFor | default: '5s' }}`)."
+  );
+
+export const DynamicTimeoutPropSchema = z.object({
+  timeout: DynamicTimeoutSchema.optional(),
+});
 
 export const MaxStepSizePropSchema = z.object({
   'max-step-size': ByteSizeSchema.optional(),
@@ -243,7 +282,7 @@ export const BaseConnectorStepSchema = BaseStepSchema.extend({
   with: z.record(z.string(), z.any()).optional(),
 })
   .merge(StepWithForEachSchema)
-  .merge(TimeoutPropSchema)
+  .merge(DynamicTimeoutPropSchema)
   .merge(StepWithOnFailureSchema);
 export type ConnectorStep = z.infer<typeof BaseConnectorStepSchema>;
 
@@ -263,8 +302,9 @@ export const BuiltInStepProperties = [
 export type BuiltInStepProperty = (typeof BuiltInStepProperties)[number];
 
 export const WaitStepInputSchema = z.object({
-  duration: DurationSchema.describe(
-    'Duration to wait, e.g. "5s", "1m", "2h". Format: number + unit (ms/s/m/h/d/w)'
+  duration: DynamicDurationSchema.describe(
+    'Duration to wait, e.g. "5s", "1h30m". Units in descending order (w/d/h/m/s/ms). ' +
+      "Accepts Liquid that renders to one (`{{ inputs.waitFor | default: '5s' }}`)."
   ),
 });
 export const WaitStepSchema = BaseStepSchema.extend({
@@ -345,7 +385,9 @@ export const WaitForInputStepInputSchema = z
 export const WaitForInputStepSchema = BaseStepSchema.extend({
   type: z.literal('waitForInput').describe('Pause execution until external input is provided'),
   with: WaitForInputStepInputSchema,
-}).merge(TimeoutPropSchema);
+})
+  .merge(DynamicTimeoutPropSchema)
+  .merge(StepWithOnFailureSchema);
 export type WaitForInputStep = z.infer<typeof WaitForInputStepSchema>;
 
 export const WaitForApprovalStepInputSchema = z
@@ -374,7 +416,9 @@ export const WaitForApprovalStepSchema = BaseStepSchema.extend({
     .literal('waitForApproval')
     .describe('Pause execution until approval or rejection is received'),
   with: WaitForApprovalStepInputSchema,
-}).merge(TimeoutPropSchema);
+})
+  .merge(DynamicTimeoutPropSchema)
+  .merge(StepWithOnFailureSchema);
 export type WaitForApprovalStep = z.infer<typeof WaitForApprovalStepSchema>;
 
 export const DataSetStepInputSchema = z
@@ -389,7 +433,14 @@ export const DataSetStepSchema = BaseStepSchema.extend({
 export type DataSetStep = z.infer<typeof DataSetStepSchema>;
 
 // Fetcher configuration for HTTP request customization (shared across formats)
-export const FetcherConfigSchema = z
+export const IGNORED_KIBANA_FETCHER_SETTING_MESSAGE =
+  'The "fetcher" setting is deprecated and some options are already ignored. Please remove this setting. Configure self HTTP routing, TLS, and redirects with `server.selfHttp`. Use `max-step-size` for response limits.';
+
+/** Editor schema copy. Unlike the warning above, this is shown while the self client is still off. */
+const KIBANA_FETCHER_SCHEMA_DESCRIPTION =
+  'Deprecated. Still applied unless Kibana steps use the Core self HTTP client. When that client is in use, these options are ignored: configure routing, TLS, and redirects with `server.selfHttp`, and use `max-step-size` for response limits.';
+
+const FetcherConfigObjectSchema = z
   .object({
     skip_ssl_verification: z
       .boolean()
@@ -408,8 +459,15 @@ export const FetcherConfigSchema = z
       .optional()
       .describe('Maximum response body size in bytes. Aborts the request mid-stream if exceeded.'),
   })
-  .meta({ $id: 'fetcher', description: 'Fetcher configuration for HTTP request customization' })
-  .optional();
+  .meta({ $id: 'fetcher', description: 'Fetcher configuration for HTTP request customization' });
+
+export const FetcherConfigSchema = FetcherConfigObjectSchema.optional();
+
+export const KibanaFetcherConfigSchema = FetcherConfigObjectSchema.meta({
+  $id: 'kibanaFetcher',
+  deprecated: true,
+  description: KIBANA_FETCHER_SCHEMA_DESCRIPTION,
+}).optional();
 
 // Single source of truth for the kibana.request HTTP method enum (mirrors the `http` step's
 // valid values). Reused by the connector schema (editor + validation) and the runtime guard so
@@ -477,7 +535,7 @@ export const KibanaStepInputSchema = z.union([
       body: z.any().optional(),
       headers: z.record(z.string(), z.string()).optional(),
     }),
-    fetcher: FetcherConfigSchema,
+    fetcher: KibanaFetcherConfigSchema,
     ...KibanaStepMetaSchema,
   }),
   // Sugar syntax for common Kibana operations
@@ -499,7 +557,7 @@ export const KibanaStepInputSchema = z.union([
       page: z.number().optional(),
       perPage: z.number().optional(),
       status: z.string().optional(),
-      fetcher: FetcherConfigSchema,
+      fetcher: KibanaFetcherConfigSchema,
       ...KibanaStepMetaSchema,
     })
     .and(z.record(z.string(), z.any())), // Allow additional properties for flexibility
@@ -921,7 +979,7 @@ export const WorkflowExecuteStepInputSchema = z.object({
 
 const WorkflowExecuteBaseSchema = BaseStepSchema.extend({
   with: WorkflowExecuteStepInputSchema,
-});
+}).merge(StepWithOnFailureSchema);
 
 export const WorkflowExecuteStepSchema = WorkflowExecuteBaseSchema.extend({
   type: z.literal('workflow.execute'),
@@ -1168,6 +1226,9 @@ export const WorkflowExecutionContextSchema = z.object({
   startedAt: z.date(),
   url: z.string(),
   executedBy: z.string().optional(),
+  effectiveIdentity: z
+    .object({ type: z.literal('service_account'), id: z.string().max(1024) })
+    .optional(),
   triggeredBy: z.string().optional(),
   usage: WorkflowTokenUsageSchema.optional(),
 });

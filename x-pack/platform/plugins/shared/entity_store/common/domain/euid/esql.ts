@@ -414,8 +414,16 @@ export function getFieldEvaluationsEsqlFromDefinition(
  * @returns An ESQL filter string that checks if the document contains an entity id.
  */
 export function getEuidEsqlDocumentsContainsIdFilter(entityType: EntityType) {
-  const entityDefinition = getEntityDefinitionWithoutId(entityType);
-  const { identityField } = entityDefinition;
+  return getEuidEsqlDocumentsContainsIdFilterFromDefinition(
+    getEntityDefinitionWithoutId(entityType)
+  );
+}
+
+/** Same filter for callers that already resolved a definition. */
+export function getEuidEsqlDocumentsContainsIdFilterFromDefinition(
+  definition: EntityDefinitionWithoutId
+) {
+  const { identityField } = definition;
 
   if (isSingleFieldIdentity(identityField)) {
     return `(${esqlIsNotNullOrEmpty(identityField.singleField)})`;

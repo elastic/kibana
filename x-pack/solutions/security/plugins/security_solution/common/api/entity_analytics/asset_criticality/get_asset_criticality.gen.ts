@@ -23,11 +23,11 @@ export const GetAssetCriticalityRecordRequestQuery = lazySchema(() =>
     /**
      * The ID value of the asset.
      */
-    id_value: z.string(),
+    id_value: z.string().describe('The ID value of the asset.'),
     /**
      * The field representing the ID.
      */
-    id_field: IdField,
+    id_field: IdField.describe('The field representing the ID.'),
   })
 );
 export type GetAssetCriticalityRecordRequestQuery = z.infer<

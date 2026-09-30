@@ -99,6 +99,7 @@ function mapResponseToDatatable(
   const hasEmptyColumns = body.all_columns && body.all_columns?.length > body.columns.length;
   const lookup = new Set(hasEmptyColumns ? body.columns?.map(({ name }) => name) || [] : []);
   const indexPattern = getIndexPatternFromESQLQuery(query);
+  const approximationApplied = body.approximation_applied;
 
   const appliedTimeRange = input?.timeRange
     ? {
@@ -184,6 +185,7 @@ function mapResponseToDatatable(
       statistics: {
         totalCount: normalizedValues.length,
       },
+      ...(approximationApplied !== undefined && { approximationApplied }),
     },
     columns: updatedWithVariablesColumns,
     rows,

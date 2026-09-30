@@ -5,8 +5,9 @@
  * 2.0.
  */
 
-import { schema } from '@kbn/config-schema';
+import { z } from '@kbn/zod';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
+import { routeId } from '../../zod_query';
 import { getPrivateLocationsAndAgentPolicies } from './get_private_locations';
 import { getEnrolledAgents } from './get_agent_stats';
 import type { SyntheticsRestApiRouteFactory } from '../../types';
@@ -14,10 +15,8 @@ import { SYNTHETICS_API_URLS } from '../../../../common/constants';
 import { ConfigKey } from '../../../../common/runtime_types';
 import type { MonitorAssignedAgent, MonitorLocationAssignment } from '../../../../common/types';
 import { getMonitorNotFoundResponse } from '../../synthetics_service/service_errors';
-import {
-  assignedAgentIdForMonitorLocation,
-  isConditionShardedLocation,
-} from '../../../synthetics_service/private_location/assign_by_condition';
+import { assignedAgentIdForMonitorLocation } from '../../../synthetics_service/private_location/assign_by_condition';
+import { isAgentShardingActive } from '../../../synthetics_service/private_location/agent_sharding_license';
 import { PackagePolicyService } from '../../../synthetics_service/private_location/package_policy_service';
 
 const toAssignedAgent = (meta: {
@@ -48,8 +47,8 @@ export const getMonitorAgentAssignment: SyntheticsRestApiRouteFactory<
   method: 'GET',
   path: SYNTHETICS_API_URLS.MONITOR_AGENT_ASSIGNMENT,
   validate: {
-    params: schema.object({
-      monitorId: schema.string({ minLength: 1, maxLength: 1024 }),
+    params: z.strictObject({
+      monitorId: routeId,
     }),
   },
   handler: async ({
@@ -83,10 +82,10 @@ export const getMonitorAgentAssignment: SyntheticsRestApiRouteFactory<
       const locationById = new Map(locations.map((location) => [location.id, location]));
       const policyNameById = new Map(agentPolicies.map((policy) => [policy.id, policy.name]));
 
-      const shardedMonitorLocations = privateMonitorLocations.filter((location) => {
-        const privateLocation = locationById.get(location.id);
-        return privateLocation != null && isConditionShardedLocation(privateLocation);
-      });
+      const isAgentSharding = await isAgentShardingActive(server);
+      const shardedMonitorLocations = isAgentSharding
+        ? privateMonitorLocations.filter((location) => locationById.has(location.id))
+        : [];
 
       const packagePolicies =
         shardedMonitorLocations.length > 0
@@ -116,7 +115,6 @@ export const getMonitorAgentAssignment: SyntheticsRestApiRouteFactory<
           );
           enrolledByPolicyId.set(privateLocation.agentPolicyId, enrolled);
         }
-        const isAgentSharding = isConditionShardedLocation(privateLocation);
 
         let agents: MonitorAssignedAgent[];
         if (isAgentSharding) {

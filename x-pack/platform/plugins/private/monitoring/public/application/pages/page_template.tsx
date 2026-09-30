@@ -5,13 +5,17 @@
  * 2.0.
  */
 
-import { EuiPage, EuiPageBody, EuiPageTemplate, EuiTab, EuiTabs, EuiSpacer } from '@elastic/eui';
+import { EuiPage, EuiPageBody, EuiPageTemplate, EuiSpacer } from '@elastic/eui';
+import { AppHeader } from '@kbn/app-header';
+import type { AppHeaderTab, AppHeaderMenu } from '@kbn/app-header';
 import type { FC, PropsWithChildren } from 'react';
-import React, { useContext, useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { useHistory } from 'react-router-dom';
 import type { IHttpFetchError, ResponseErrorBody } from '@kbn/core-http-browser';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { AutoOpsPromotionCallout, AutoOpsEnabledCallout } from '@kbn/autoops-promotion-callout';
+import { i18n } from '@kbn/i18n';
+import { METRIC_TYPE } from '@kbn/analytics';
 import { useTitle } from '../hooks/use_title';
 import { MonitoringToolbar } from '../../components/shared/toolbar';
 import { useMonitoringTimeContainerContext } from '../hooks/use_monitoring_time';
@@ -19,17 +23,20 @@ import { PageLoading } from '../../components';
 import {
   getSetupModeState,
   isSetupModeFeatureEnabled,
+  subscribeSetupModeState,
   toggleSetupMode,
   updateSetupModeData,
 } from '../../lib/setup_mode';
 import { SetupModeFeature } from '../../../common/enums';
-import { AlertsDropdown } from '../../alerts/alerts_dropdown';
+import { TELEMETRY_METRIC_BUTTON_CLICK } from '../../../common/constants';
+import { useAlertsModal } from '../hooks/use_alerts_modal';
+import { WatcherMigrationStep } from '../../alerts/enable_alerts_modal';
 import { useRequestErrorHandler } from '../hooks/use_request_error_handler';
-import { SetupModeToggleButton } from '../../components/setup_mode/toggle_button';
-import { HeaderActionMenuContext } from '../contexts/header_action_menu_context';
-import { HeaderMenuPortal } from '../../components/header_menu';
+import { useUiTracker } from '../hooks/use_track_metric';
 import { Legacy } from '../../legacy_shims';
 import type { MonitoringStartServices } from '../../types';
+import { useClusterListingAvailability } from '../contexts/cluster_listing_availability_context';
+import { getMonitoringBack } from './get_monitoring_back';
 
 export interface TabMenuItem {
   id: string;
@@ -37,7 +44,7 @@ export interface TabMenuItem {
   testSubj?: string;
   route?: string;
   onClick?: () => void;
-  prepend?: React.ReactNode;
+  betaTooltip?: string;
 }
 export interface PageTemplateProps {
   title: string;
@@ -62,12 +69,12 @@ export const PageTemplate: FC<PropsWithChildren<PageTemplateProps>> = ({
   useTitle('', title);
 
   const { currentTimerange } = useMonitoringTimeContainerContext();
+  const { hasClusterListing } = useClusterListingAvailability();
   const [loaded, setLoaded] = useState(false);
   const [isRequestPending, setIsRequestPending] = useState(false);
   const history = useHistory();
   const [hasError, setHasError] = useState(false);
   const handleRequestError = useRequestErrorHandler();
-  const { setHeaderActionMenu, theme$ } = useContext(HeaderActionMenuContext);
   const { services } = useKibana<MonitoringStartServices>();
   const cloudConnectUrl = services.application.getUrlForApp('cloud_connect');
   const handleConnectClick = (e: React.MouseEvent) => {
@@ -77,6 +84,22 @@ export const PageTemplate: FC<PropsWithChildren<PageTemplateProps>> = ({
   const hasCloudConnectPermission = Boolean(
     services.application.capabilities.cloudConnect?.show ||
       services.application.capabilities.cloudConnect?.configure
+  );
+  const trackStat = useUiTracker();
+  const alertsEnableModalProvider = useAlertsModal();
+  const [shouldShowAlertsModal, setShouldShowAlertsModal] = useState(false);
+  const [setupMode, setSetupMode] = useState(() => {
+    const state = getSetupModeState();
+    return { supported: state.supported, enabled: state.enabled };
+  });
+
+  useEffect(
+    () =>
+      subscribeSetupModeState(() => {
+        const state = getSetupModeState();
+        setSetupMode({ supported: state.supported, enabled: state.enabled });
+      }),
+    []
   );
 
   const getPageDataResponseHandler = useCallback(
@@ -117,9 +140,11 @@ export const PageTemplate: FC<PropsWithChildren<PageTemplateProps>> = ({
     }
   };
 
-  const createHref = (route: string) => history.createHref({ pathname: route });
-
-  const isTabSelected = (route: string) => history.location.pathname === route;
+  const { pathname, search } = history.location;
+  const createHref = useCallback(
+    (route: string) => history.createHref({ pathname: route, search }),
+    [history, search]
+  );
 
   const renderContent = () => {
     if (hasError) return null;
@@ -127,7 +152,7 @@ export const PageTemplate: FC<PropsWithChildren<PageTemplateProps>> = ({
     return children;
   };
 
-  const { supported, enabled } = getSetupModeState();
+  const { supported, enabled } = setupMode;
 
   const hideAnnouncements = !services.notifications.tours.isEnabled();
   const cloudConnectStatus = Legacy.shims.useCloudConnectStatus();
@@ -146,6 +171,105 @@ export const PageTemplate: FC<PropsWithChildren<PageTemplateProps>> = ({
     cloudConnectStatus.isCloudConnectAutoopsEnabled &&
     !hideAnnouncements;
 
+  const tabsDisabled = isDisabledTab(product);
+
+  const headerTabs = useMemo<AppHeaderTab[] | undefined>(() => {
+    if (!tabs?.length) {
+      return undefined;
+    }
+
+    return tabs.map((item) => {
+      const tab: AppHeaderTab = {
+        id: item.id,
+        label: item.label,
+        disabled: tabsDisabled,
+        'data-test-subj': item.testSubj,
+        isSelected: item.route ? pathname === item.route : false,
+        href: item.route ? createHref(item.route) : undefined,
+        onClick: item.onClick,
+      };
+
+      if (item.betaTooltip) {
+        tab.badge = { iconType: 'flask', tooltip: item.betaTooltip };
+      }
+
+      return tab;
+    });
+  }, [tabs, tabsDisabled, createHref, pathname]);
+
+  const back = useMemo(
+    () =>
+      getMonitoringBack(pathname, createHref, {
+        hasClusterListing,
+      }),
+    [pathname, createHref, hasClusterListing]
+  );
+
+  const menu = useMemo<AppHeaderMenu>(() => {
+    const items: NonNullable<AppHeaderMenu['items']> = [];
+
+    if (supported) {
+      items.push({
+        id: 'setupMode',
+        label: enabled
+          ? i18n.translate('xpack.monitoring.setupMode.exit', {
+              defaultMessage: 'Exit setup mode',
+            })
+          : i18n.translate('xpack.monitoring.setupMode.enter', {
+              defaultMessage: 'Enter setup mode',
+            }),
+        iconType: enabled ? 'logOut' : 'pencil',
+        testId: enabled ? 'exitSetupModeBtn' : 'monitoringSetupModeBtn',
+        isSelected: enabled,
+        run: () => {
+          const nextEnabled = !enabled;
+          toggleSetupMode(nextEnabled);
+          trackStat({
+            metric: `${TELEMETRY_METRIC_BUTTON_CLICK}setupmode_${nextEnabled ? 'enter' : 'exit'}`,
+            metricType: METRIC_TYPE.CLICK,
+          });
+        },
+      });
+    }
+
+    return {
+      items,
+      primaryActionItem: {
+        id: 'alertsAndRules',
+        label: i18n.translate('xpack.monitoring.alerts.dropdown.button', {
+          defaultMessage: 'Alerts and rules',
+        }),
+        iconType: 'bell',
+        items: [
+          {
+            id: 'createDefaultRules',
+            label: i18n.translate('xpack.monitoring.alerts.dropdown.createAlerts', {
+              defaultMessage: 'Create default rules',
+            }),
+            iconType: 'bell',
+            run: () => {
+              setShouldShowAlertsModal(true);
+            },
+          },
+          {
+            id: 'manageRules',
+            label: i18n.translate('xpack.monitoring.alerts.dropdown.manageRules', {
+              defaultMessage: 'Manage rules',
+            }),
+            iconType: 'tableOfContents',
+            run: () => {
+              services.application.navigateToApp('rules');
+            },
+          },
+        ],
+      },
+    };
+  }, [supported, enabled, services.application, trackStat]);
+
+  const closeAlertsModal = () => {
+    setShouldShowAlertsModal(false);
+  };
+
   return (
     <EuiPageTemplate
       offset={0}
@@ -154,57 +278,51 @@ export const PageTemplate: FC<PropsWithChildren<PageTemplateProps>> = ({
       data-test-subj="monitoringAppContainer"
     >
       <EuiPageTemplate.Section>
-        {setHeaderActionMenu && theme$ && (
-          <HeaderMenuPortal setHeaderActionMenu={setHeaderActionMenu} theme$={theme$}>
-            {supported && (
-              <SetupModeToggleButton enabled={enabled} toggleSetupMode={toggleSetupMode} />
-            )}
-            <AlertsDropdown />
-          </HeaderMenuPortal>
-        )}
-        <MonitoringToolbar pageTitle={pageTitle} onRefresh={onRefresh} />
+        <AppHeader
+          title={pageTitle || title}
+          tabs={headerTabs}
+          back={back}
+          menu={menu}
+          spacing="bleed"
+        />
         <EuiSpacer size="m" />
+        <MonitoringToolbar onRefresh={onRefresh} />
         {shouldShowAutoOpsPromotion && (
-          <AutoOpsPromotionCallout
-            cloudConnectUrl={cloudConnectUrl}
-            onConnectClick={handleConnectClick}
-            hasCloudConnectPermission={hasCloudConnectPermission}
-            compressed={false}
-          />
+          <>
+            <EuiSpacer size="m" />
+            <AutoOpsPromotionCallout
+              cloudConnectUrl={cloudConnectUrl}
+              onConnectClick={handleConnectClick}
+              hasCloudConnectPermission={hasCloudConnectPermission}
+              compressed={false}
+            />
+          </>
         )}
         {shouldShowAutoOpsEnabledBanner && (
-          <AutoOpsEnabledCallout
-            autoOpsUrl={cloudConnectStatus.autoOpsServiceUrl}
-            docsUrl={cloudConnectStatus.autoOpsDocsUrl}
-            compressed={false}
-          />
+          <>
+            <EuiSpacer size="m" />
+            <AutoOpsEnabledCallout
+              autoOpsUrl={cloudConnectStatus.autoOpsServiceUrl}
+              docsUrl={cloudConnectStatus.autoOpsDocsUrl}
+              compressed={false}
+            />
+          </>
         )}
         <EuiSpacer size="m" />
-        {tabs && (
-          <EuiTabs size="l">
-            {tabs.map((item, idx) => {
-              return (
-                <EuiTab
-                  key={idx}
-                  disabled={isDisabledTab(product)}
-                  title={item.label}
-                  data-test-subj={item.testSubj}
-                  href={item.route ? createHref(item.route) : undefined}
-                  isSelected={item.route ? isTabSelected(item.route) : undefined}
-                  onClick={item.onClick}
-                  prepend={item.prepend}
-                >
-                  {item.label}
-                </EuiTab>
-              );
-            })}
-          </EuiTabs>
-        )}
 
         <EuiPage paddingSize="m">
           <EuiPageBody>{renderContent()}</EuiPageBody>
         </EuiPage>
       </EuiPageTemplate.Section>
+      {shouldShowAlertsModal ? (
+        <WatcherMigrationStep
+          closeModal={closeAlertsModal}
+          createButtonClick={() => {
+            alertsEnableModalProvider.enableAlerts();
+            closeAlertsModal();
+          }}
+        />
+      ) : null}
     </EuiPageTemplate>
   );
 };

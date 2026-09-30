@@ -118,6 +118,28 @@ describe('DataView component', () => {
     jest.clearAllMocks();
   });
 
+  it('uses the full data view label as the accessible name without a browser tooltip', () => {
+    render(wrapDataViewComponentInContext());
+
+    const trigger = screen.getByTestId('dataview-trigger');
+    expect(trigger).toHaveAccessibleName('Dataview 1');
+    expect(trigger).not.toHaveAttribute('title');
+  });
+
+  it('resets the inherited text fill color so the truncated label stays readable when disabled', () => {
+    render(wrapDataViewComponentInContext({ isDisabled: true }));
+
+    const trigger = screen.getByTestId('dataview-trigger');
+    expect(trigger).toBeDisabled();
+    expect(trigger).toHaveAccessibleName('Dataview 1');
+
+    const ghostLabel = screen.getByText('Dataview 1', { selector: '[aria-hidden="true"]' });
+    expect(ghostLabel.nextElementSibling).toHaveStyleRule(
+      '-webkit-text-fill-color',
+      'currentColor'
+    );
+  });
+
   it('can hide the prepended data view label', async () => {
     render(wrapDataViewComponentInContext({ showDataViewLabel: false }));
 

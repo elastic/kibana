@@ -6,7 +6,6 @@
  */
 
 import { EuiFlexGroup, EuiFlexItem, EuiSuperDatePicker } from '@elastic/eui';
-import { getEbtProps } from '@kbn/ebt-click';
 import type { Query } from '@kbn/es-query';
 import moment from 'moment';
 import { stringify } from 'query-string';
@@ -16,6 +15,7 @@ import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { MLJobsAwaitingNodeWarning } from '@kbn/ml-plugin/public';
 import { useTrackPageview } from '@kbn/observability-shared-plugin/public';
 import { useLogViewContext, LogEntryFlyout } from '@kbn/logs-shared-plugin/public';
+import { useShouldRenderInfraMlCpsUi } from '../../../hooks/use_infra_ml_cps';
 import type { IdFormatByJobType } from '../../../../common/http_api/latest';
 import {
   isJobStatusWithResults,
@@ -23,7 +23,6 @@ import {
   logEntryRateJobType,
 } from '../../../../common/log_analysis';
 import type { TimeKey } from '../../../../common/time';
-import { INFRA_EBT_ACTIONS, INFRA_EBT_ELEMENTS } from '../../../common/ebt_constants';
 import {
   CategoryJobNoticesSection,
   JobStoppedCallout,
@@ -31,8 +30,8 @@ import {
 } from '../../../components/logging/log_analysis_job_status';
 import { JobProjectScopes } from '../../../components/logging/log_analysis_project_scope';
 import { DatasetsSelector } from '../../../components/logging/log_analysis_results/datasets_selector';
-import { ManageJobsButton } from '../../../components/logging/log_analysis_setup/manage_jobs_button';
 import { useLogAnalysisSetupFlyoutStateContext } from '../../../components/logging/log_analysis_setup/setup_flyout';
+import { getManageMlJobsPrimaryAction, LogsAppHeader } from '../header';
 import { useLogAnalysisCapabilitiesContext } from '../../../containers/logs/log_analysis/log_analysis_capabilities';
 import { useLogEntryCategoriesModuleContext } from '../../../containers/logs/log_analysis/modules/log_entry_categories';
 import { useLogEntryRateModuleContext } from '../../../containers/logs/log_analysis/modules/log_entry_rate';
@@ -241,42 +240,38 @@ export const LogEntryRateResultsContent: React.FunctionComponent<{
     [setSelectedTimeRange]
   );
 
+  const shouldRenderCpsUi = useShouldRenderInfraMlCpsUi();
+  const manageMlJobsPrimaryAction = useMemo(
+    () => getManageMlJobsPrimaryAction(showModuleList),
+    [showModuleList]
+  );
+
   return (
     <LogsPageTemplate
       data-test-subj="logEntryRateResultsPage"
       hasData={logViewStatus?.index !== 'missing'}
-      pageHeader={{
-        pageTitle,
-        rightSideItems: [
-          <ManageJobsButton
-            onClick={showModuleList}
-            size="s"
-            {...getEbtProps({
-              action: INFRA_EBT_ACTIONS.MANAGE_ML_JOBS,
-              element: INFRA_EBT_ELEMENTS.LOG_ANALYSIS_PAGE_HEADER,
-            })}
-          />,
-        ],
-      }}
+      header={<LogsAppHeader title={pageTitle} primaryActionItem={manageMlJobsPrimaryAction} />}
     >
       <EuiFlexGroup direction="column">
         <EuiFlexItem grow={false}>
           <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
             <EuiFlexGroup justifyContent="flexStart" alignItems="center">
-              <EuiFlexItem grow={false}>
-                <JobProjectScopes
-                  jobs={[
-                    {
-                      name: logEntryCategoriesModuleDescriptor.moduleName,
-                      projectRouting: logEntryCategoriesProjectRouting,
-                    },
-                    {
-                      name: logEntryRateModuleDescriptor.moduleName,
-                      projectRouting: logEntryRateProjectRouting,
-                    },
-                  ]}
-                />
-              </EuiFlexItem>
+              {shouldRenderCpsUi !== false && (
+                <EuiFlexItem grow={false}>
+                  <JobProjectScopes
+                    jobs={[
+                      {
+                        name: logEntryCategoriesModuleDescriptor.moduleName,
+                        projectRouting: logEntryCategoriesProjectRouting,
+                      },
+                      {
+                        name: logEntryRateModuleDescriptor.moduleName,
+                        projectRouting: logEntryRateProjectRouting,
+                      },
+                    ]}
+                  />
+                </EuiFlexItem>
+              )}
               <EuiFlexItem>
                 <DatasetsSelector
                   availableDatasets={datasets}

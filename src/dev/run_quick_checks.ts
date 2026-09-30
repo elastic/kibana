@@ -27,6 +27,7 @@ const MAX_ANNOTATION_OUTPUT_LINES = 50;
 interface QuickCheck {
   script: string;
   mayChangeFiles?: boolean;
+  requiresStableWorkspace?: boolean;
   // Additional properties can be added here in the future
 }
 
@@ -74,20 +75,19 @@ void run(async ({ log, flagsReader }) => {
     checks: flagsReader.string('checks'),
   });
 
-  // Partition checks based on mayChangeFiles flag
-  const fileChangingChecks = checksToRun
-    .filter((check) => check.mayChangeFiles)
+  const workspaceExclusiveChecks = checksToRun
+    .filter((check) => check.mayChangeFiles || check.requiresStableWorkspace)
     .map((check) => (isAbsolute(check.script) ? check.script : join(REPO_ROOT, check.script)));
 
   const regularChecks = checksToRun
-    .filter((check) => !check.mayChangeFiles)
+    .filter((check) => !check.mayChangeFiles && !check.requiresStableWorkspace)
     .map((check) => (isAbsolute(check.script) ? check.script : join(REPO_ROOT, check.script)));
 
   logger.write(
-    `--- Running ${checksToRun.length} checks (${fileChangingChecks.length} file-changing with parallelism=1, ${regularChecks.length} regular with parallelism=${MAX_PARALLELISM})...`
+    `--- Running ${checksToRun.length} checks (${workspaceExclusiveChecks.length} workspace-exclusive with parallelism=1, ${regularChecks.length} regular with parallelism=${MAX_PARALLELISM})...`
   );
   const startTime = Date.now();
-  const results = await runPartitionedChecks(fileChangingChecks, regularChecks);
+  const results = await runPartitionedChecks(workspaceExclusiveChecks, regularChecks);
 
   logger.write('--- All checks finished.');
   printResults(startTime, results);

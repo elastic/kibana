@@ -46,6 +46,7 @@ export const RoutedConversationsProvider: React.FC<RoutedConversationsProviderPr
 
   const location = useLocation<LocationState>();
   const initialMessage = location.state?.initialMessage;
+  const locationAttachments = location.state?.attachments;
   // Defaults to true so existing deep-link auto-send keeps working; the abort bounce-back
   // passes false to prefill the input without sending.
   const autoSendInitialMessage = location.state?.autoSendInitialMessage ?? true;
@@ -76,10 +77,10 @@ export const RoutedConversationsProvider: React.FC<RoutedConversationsProviderPr
   );
 
   const [attachments, setAttachments] = useState<ConversationAttachment[] | undefined>(
-    location.state?.attachments
+    locationAttachments
   );
 
-  // Clear attachments when navigating to a different conversation, but not on initial mount.
+  // Reset attachments when navigating to a different conversation, but not on initial mount.
   // Skipping initial mount prevents the parent effect from racing with child effects (e.g.
   // stale-attachments checks in conversation.tsx) that set attachments during the same render.
   const hasMountedRef = useRef(false);
@@ -88,8 +89,8 @@ export const RoutedConversationsProvider: React.FC<RoutedConversationsProviderPr
       hasMountedRef.current = true;
       return;
     }
-    setAttachments(undefined);
-  }, [conversationId]);
+    setAttachments(locationAttachments);
+  }, [conversationId, locationAttachments]);
 
   const conversationActions = useConversationActions({
     conversationId,

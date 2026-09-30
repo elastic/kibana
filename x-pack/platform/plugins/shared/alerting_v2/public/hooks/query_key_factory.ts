@@ -62,13 +62,10 @@ export const actionPolicyKeys = {
     page: number;
     perPage: number;
     search?: string;
-    tags?: string[];
     enabled?: boolean;
     sortField?: string;
     sortOrder?: 'asc' | 'desc';
   }) => [...actionPolicyKeys.lists(), filters] as const,
-  allTags: () => [...actionPolicyKeys.all, 'tags'] as const,
-  tags: (search?: string) => [...actionPolicyKeys.allTags(), { search }] as const,
   linkedForRule: (ruleId: string) =>
     [...actionPolicyKeys.lists(), 'linkedForRule', ruleId] as const,
 };
@@ -80,16 +77,19 @@ export const executionHistoryKeys = {
     perPage: number;
     search?: string;
     ruleIds?: string[];
-    outcome?: PolicyExecutionOutcomeFilter;
+    outcomes?: PolicyExecutionOutcomeFilter;
     episodeIds?: string[];
-    startDate?: string;
+    from?: string;
+    to?: string;
+    sortField?: 'dispatchedAt';
+    sortOrder?: 'asc' | 'desc';
   }) => [...executionHistoryKeys.all, 'list', filters] as const,
   newEventsSince: (
     since: string,
     filters: {
       search?: string;
       ruleIds?: string[];
-      outcome?: PolicyExecutionOutcomeFilter;
+      outcomes?: PolicyExecutionOutcomeFilter;
     } = {}
   ) => [...executionHistoryKeys.all, 'newEventsSince', since, filters] as const,
 };

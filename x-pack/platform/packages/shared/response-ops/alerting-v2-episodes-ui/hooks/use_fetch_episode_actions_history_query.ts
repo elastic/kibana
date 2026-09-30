@@ -9,6 +9,7 @@ import { useMemo } from 'react';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { useInfiniteQuery } from '@kbn/react-query';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
+import { normalizeTags } from '@kbn/alerting-v2-utils';
 import { rowsFromEsql, type EpisodeActionHistoryEntry } from '@kbn/alerting-v2-common-queries';
 import {
   buildEpisodeActionsHistoryQuery,
@@ -57,7 +58,7 @@ export const useFetchEpisodeActionsHistoryQuery = ({
       });
       return rowsFromEsql(esqlQuery, raw);
     },
-    getNextPageParam: (lastPage: EpisodeActionHistoryEntry[]) =>
+    getNextPageParam: (lastPage) =>
       lastPage.length === pageSize ? lastPage[lastPage.length - 1]['@timestamp'] : undefined,
     enabled: Boolean(episodeId) && Boolean(groupHash),
   });
@@ -68,7 +69,7 @@ export const useFetchEpisodeActionsHistoryQuery = ({
     for (const entry of query.data?.pages.flat() ?? []) {
       if (seen.has(entry._id)) continue;
       seen.add(entry._id);
-      deduped.push(entry);
+      deduped.push({ ...entry, tags: normalizeTags(entry.tags) });
     }
     return deduped;
   }, [query.data]);

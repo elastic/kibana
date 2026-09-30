@@ -10,6 +10,16 @@
 import expect from '@kbn/expect';
 import type { FtrProviderContext } from '../ftr_provider_context';
 
+/**
+ * Migration recommendation: MIXED. See individual tests. Timeout copy is covered in
+ * src/platform/plugins/shared/inspector/public/views/requests/components/details/clusters_view/clusters_table/cluster_view.test.tsx
+ * ("Request timed out before completion"). The toast is covered in
+ * src/platform/packages/shared/kbn-search-response-warnings/src/handle_warnings.test.ts.
+ * The unique value is a live remote-cluster timeout that still returns local hits.
+ * Scout's default servers have no CCS — keep one smoke on a CCS stack
+ * (config.ccs.ts or a custom Scout config set). CCS-only file (see ./index.ts).
+ */
+
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const filterBar = getService('filterBar');
   const kibanaServer = getService('kibanaServer');
@@ -56,6 +66,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     describe('bfetch enabled', () => {
+      /**
+       * Migration recommendation: MIXED. Keep one CCS smoke that Discover shows the callout,
+       * inspector "timed out" details, and still returns the full local 14,004 hits. Drop the
+       * toast title (handle_warnings.test.ts).
+       */
       it('timeout on single shard shows warning and results with bfetch enabled', async () => {
         await common.navigateToApp('discover');
         await dataViews.createFromSearchBar({
@@ -126,6 +141,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await kibanaServer.uiSettings.unset('bfetch:disabled');
       });
 
+      /**
+       * Migration recommendation: DELETE. Duplicate of the bfetch-enabled test. bfetch is a
+       * transport, not Discover CCS behavior.
+       */
       it('timeout on single shard shows warning and results', async () => {
         await common.navigateToApp('discover');
         await dataViews.createFromSearchBar({
@@ -188,6 +207,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     describe('with esql', () => {
+      /**
+       * Migration recommendation: MIXED. Same warning pipeline as classic. Keep as a `test.step`
+       * of the CCS timeout smoke if ES|QL CCS timeout is still a real risk. Keep the 746 hit
+       * count — it is the proof the local aggregation still completed.
+       */
       it('should show warning and results', async () => {
         await common.navigateToApp('discover');
         await discover.selectTextBaseLang();

@@ -37,6 +37,7 @@ export const createHandlerTestMocks = (initialPersistedState?: Record<string, un
   const stepExecutionRuntime = {
     contextManager: {
       renderValueAccordingToContext: jest.fn((v: unknown) => v),
+      renderValueWithContext: jest.fn((v: unknown) => v),
       getContext: jest.fn(() => ({})),
       getEsClientAsUser: jest.fn(() => ({})),
       getFakeRequest: jest.fn(() => null),

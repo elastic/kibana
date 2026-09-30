@@ -8,6 +8,14 @@
 /** How often (ms) the abort monitor polls the execution status to detect abort requests. */
 export const ABORT_POLL_INTERVAL_MS = 2000;
 
+/**
+ * After an abort is observed, how long (ms) the agent stream may keep emitting — so the handler
+ * can wind down and emit `round_interrupted` with the partial run summary — before it is cut and a
+ * `RequestAbortedError` is raised anyway. LangGraph aborts promptly on the signal, so this is a
+ * fallback for tools that ignore it.
+ */
+export const CANCELLATION_DEADLINE_MS = 5_000;
+
 /** How often (ms) followExecution polls for new events. */
 export const FOLLOW_POLL_INTERVAL_MS = 500;
 
@@ -38,3 +46,24 @@ export const FOLLOW_EXECUTION_HEARTBEAT_TIMEOUT_MS = 60 * 1000; // 60 seconds
  * Grace period (ms) for followExecution polling while the execution is still `scheduled`.
  */
 export const FOLLOW_EXECUTION_SCHEDULED_TIMEOUT_MS = 5 * 60 * 1000; // 5 minutes
+
+/**
+ * How long (ms) followExecution keeps draining events after observing `aborted`, so the
+ * `execution_aborted` terminal written by the executing node is forwarded before the follower
+ * throws. The bound covers the whole worker-side chain: abort detection by the AbortMonitor,
+ * the graceful cancellation deadline, event batching, the interruption persist and event flush,
+ * one follower poll, plus a read-retry margin.
+ */
+/**
+ * How long (ms) `abortExecution` waits for the executing node to record the interruption before
+ * resolving. Same chain as the follower's abort drain: abort detection + graceful cancellation +
+ * batching + one poll + margin.
+ */
+export const ABORT_WAIT_FOR_TERMINAL_TIMEOUT_MS = 15_000;
+
+export const FOLLOW_ABORT_DRAIN_TIMEOUT_MS =
+  ABORT_POLL_INTERVAL_MS +
+  CANCELLATION_DEADLINE_MS +
+  EVENT_BATCH_INTERVAL_MS +
+  FOLLOW_POLL_INTERVAL_MS +
+  7_300; // ≈ 15 s

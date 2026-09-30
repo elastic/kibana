@@ -300,7 +300,7 @@ export const ManageDashboardsPopover = ({
       return {
         id: resolveArtifactId(DASHBOARD_ARTIFACT_TYPE, existingArtifact?.id),
         type: DASHBOARD_ARTIFACT_TYPE,
-        data: { dashboardId },
+        data: { dashboard_id: dashboardId },
       };
     });
     onSave(mapArtifacts([...otherArtifacts, ...draftDashboardArtifacts]) ?? []);

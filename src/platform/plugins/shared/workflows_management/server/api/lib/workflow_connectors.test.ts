@@ -151,6 +151,43 @@ describe('getAvailableConnectors', () => {
     });
   });
 
+  it('includes inbound webhook types omitted from the workflows feature list', async () => {
+    const inboundType = mockActionType({
+      id: '.inboundWebhook',
+      name: 'Inbound Webhook',
+      minimumLicenseRequired: 'gold',
+    });
+    const actionsClient = {
+      getAll: jest.fn().mockResolvedValue([
+        mockConnector({
+          id: 'testyng',
+          name: 'testyng',
+          actionTypeId: '.inboundWebhook',
+        }),
+      ]),
+    };
+    const actionsClientWithRequest = {
+      listTypes: jest
+        .fn()
+        .mockResolvedValueOnce([mockActionType()])
+        .mockResolvedValueOnce([mockActionType(), inboundType]),
+    };
+
+    const result = await getAvailableConnectors({
+      getActionsClient: jest.fn().mockResolvedValue(actionsClient),
+      getActionsClientWithRequest: jest.fn().mockResolvedValue(actionsClientWithRequest),
+      spaceId: 'default',
+      request,
+    });
+
+    expect(actionsClientWithRequest.listTypes).toHaveBeenCalledTimes(2);
+    expect(result.connectorTypes['.inboundWebhook']).toMatchObject({
+      actionTypeId: '.inboundWebhook',
+      displayName: 'Inbound Webhook',
+      instances: [{ id: 'testyng', name: 'testyng', isPreconfigured: false }],
+    });
+  });
+
   it('returns an empty payload when there are neither connectors nor action types', async () => {
     const actionsClient = { getAll: jest.fn().mockResolvedValue([]) };
     const actionsClientWithRequest = { listTypes: jest.fn().mockResolvedValue([]) };

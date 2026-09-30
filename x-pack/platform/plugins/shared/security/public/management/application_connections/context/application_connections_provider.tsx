@@ -8,6 +8,8 @@
 import React, { createContext, useCallback, useContext, useMemo, useRef, useState } from 'react';
 
 import { McpClientDetails } from '@kbn/agent-builder-browser';
+import type { CoreStart } from '@kbn/core/public';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
 
 import { ApplicationConnectionsActionModal } from '../application_connections_action_modal';
 import type {
@@ -47,6 +49,9 @@ interface ClientDetailsState {
 }
 
 export const ApplicationConnectionsProvider = ({ children }: { children: React.ReactNode }) => {
+  const {
+    services: { http },
+  } = useKibana<CoreStart>();
   const [actionState, setActionState] = useState<ActionState | null>(null);
   const [clientDetailsState, setClientDetailsState] = useState<ClientDetailsState | null>(null);
   const onSettledRef = useRef<ApplicationConnectionsActionOptions['onSettled'] | undefined>(
@@ -117,6 +122,7 @@ export const ApplicationConnectionsProvider = ({ children }: { children: React.R
       {clientDetailsState && (
         <McpClientDetails
           clientDetails={clientDetailsState.client}
+          spaceId={http.spaceId}
           presentation="flyout"
           onClose={closeClientDetails}
         />

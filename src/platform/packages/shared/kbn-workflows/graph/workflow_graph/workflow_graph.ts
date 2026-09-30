@@ -85,14 +85,17 @@ export class WorkflowGraph {
     return undefined;
   }
 
-  public getNodeStack(nodeId: string): string[] {
+  public getNodeStack(
+    nodeId: string,
+    precomputedPredecessors?: readonly GraphNodeUnion[]
+  ): string[] {
     const currentNode = this.getNode(nodeId);
 
     if (!currentNode) {
       throw new Error(`Node not found for node id: ${nodeId}`);
     }
 
-    const predecessors = this.getAllPredecessors(nodeId).toReversed();
+    const predecessors = (precomputedPredecessors ?? this.getAllPredecessors(nodeId)).toReversed();
 
     const stack: string[] = [];
 

@@ -18,6 +18,7 @@ project:
   sourceRoot: x-pack/platform/plugins/private/upgrade_assistant
 dependsOn:
   - '@kbn/core'
+  - '@kbn/app-header'
   - '@kbn/management-plugin'
   - '@kbn/usage-collection-plugin'
   - '@kbn/features-plugin'

@@ -17,7 +17,7 @@
   "https://docs.elastic.dev/kibana-dev-docs/key-concepts/anatomy-of-a-plugin": "https://www.elastic.co/docs/extend/kibana/key-concepts/platform-architecture/anatomy-of-a-plugin",
   "https://docs.elastic.dev/kibana-dev-docs/key-concepts/security-api-authorization": "https://www.elastic.co/docs/extend/kibana/key-concepts/security/api-authorization",
   "https://docs.elastic.dev/kibana-dev-docs/key-concepts/audit-logging": "https://www.elastic.co/docs/extend/kibana/key-concepts/security/audit-logging",
-  "https://docs.elastic.dev/kibana-dev-docs/key-concepts/building-blocks": "https://www.elastic.co/docs/extend/kibana/key-concepts/ui/building-blocks",
+  "https://docs.elastic.dev/kibana-dev-docs/key-concepts/building-blocks": "https://www.elastic.co/docs/extend/kibana/key-concepts",
   "https://docs.elastic.dev/kibana-dev-docs/key-concepts/data-view-intro": "https://www.elastic.co/docs/extend/kibana/key-concepts/data/data-views",
   "https://docs.elastic.dev/kibana-dev-docs/key-concepts/embeddables": "https://www.elastic.co/docs/extend/kibana/key-concepts/ui/embeddables",
   "https://docs.elastic.dev/kibana-dev-docs/key-concepts/encrypted-saved-objects-intro": "https://www.elastic.co/docs/extend/kibana/key-concepts/security/encrypted-saved-objects",

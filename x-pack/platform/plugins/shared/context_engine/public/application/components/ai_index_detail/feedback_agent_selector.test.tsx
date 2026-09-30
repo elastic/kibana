@@ -10,6 +10,7 @@ import { I18nProvider } from '@kbn/i18n-react';
 import { fireEvent, render, screen } from '@testing-library/react';
 import React from 'react';
 import type { GetAiIndexResponse } from '../../../../common/http_api/ai_indices';
+import { CONTEXT_ENGINE_UI_EBT } from '../../../../common/telemetry';
 import { useAgentBuilderAgents } from '../../hooks/use_agent_builder_agents';
 import { useUpdateFeedbackAgent } from '../../hooks/use_update_feedback_agent';
 import { FeedbackAgentSelector } from './feedback_agent_selector';
@@ -26,6 +27,7 @@ const aiIndex: GetAiIndexResponse = {
   dest: { type: 'data_stream', value: 'ds' },
   automations: [],
   sources: [],
+  traces: [],
   date_created: '2026-01-01T00:00:00.000Z',
   date_modified: '2026-01-01T00:00:00.000Z',
 };
@@ -56,6 +58,20 @@ describe('FeedbackAgentSelector', () => {
   });
 
   afterEach(() => jest.clearAllMocks());
+
+  it('annotates the select with EBT props for interaction tracking', () => {
+    renderSelector();
+
+    const select = screen.getByTestId('contextSignalsFeedbackAgentSelect');
+    expect(select).toHaveAttribute(
+      'data-ebt-element',
+      CONTEXT_ENGINE_UI_EBT.element.aiIndexDetailPageSignalsPanel
+    );
+    expect(select).toHaveAttribute(
+      'data-ebt-action',
+      CONTEXT_ENGINE_UI_EBT.action.signals.INTERACT_FEEDBACK_AGENT
+    );
+  });
 
   it('renders an option per agent plus an unset placeholder, reflecting the current selection', () => {
     renderSelector({ ...aiIndex, feedback_analysis: { enabled: false, agent_id: 'agent-b' } });

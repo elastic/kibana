@@ -159,4 +159,45 @@ describe('CertMonitors', () => {
       expect(href).not.toContain('remoteName=');
     });
   });
+
+  describe('cross-space monitors', () => {
+    const localMonitor: CertMonitor = {
+      name: 'Local Monitor',
+      id: 'local-id',
+      configId: 'local-cfg',
+      url: 'https://local.example.com',
+    };
+
+    it('threads ?spaceId= when the monitor lives in another space', () => {
+      jest.spyOn(useKibanaSpaceModule, 'useKibanaSpace').mockReturnValue({
+        space: { id: asSpaceId('default'), name: 'Default', disabledFeatures: [] },
+        loading: false,
+        error: undefined,
+      });
+      const { getByTestId } = render(
+        <CertMonitors monitors={[{ ...localMonitor, spaces: ['team-a'] }]} />
+      );
+      const href = (getByTestId('syntheticsMonitorPageLinkLink') as HTMLAnchorElement).getAttribute(
+        'href'
+      );
+      expect(href).toContain('/app/synthetics/monitor/local-cfg');
+      expect(href).toContain('spaceId=team-a');
+    });
+
+    it('omits ?spaceId= when the monitor is in the active space', () => {
+      jest.spyOn(useKibanaSpaceModule, 'useKibanaSpace').mockReturnValue({
+        space: { id: asSpaceId('default'), name: 'Default', disabledFeatures: [] },
+        loading: false,
+        error: undefined,
+      });
+      const { getByTestId } = render(
+        <CertMonitors monitors={[{ ...localMonitor, spaces: ['default'] }]} />
+      );
+      const href = (getByTestId('syntheticsMonitorPageLinkLink') as HTMLAnchorElement).getAttribute(
+        'href'
+      );
+      expect(href).toContain('/app/synthetics/monitor/local-cfg');
+      expect(href).not.toContain('spaceId=');
+    });
+  });
 });

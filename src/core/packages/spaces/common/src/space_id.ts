@@ -59,6 +59,24 @@ export const brandSpaceId = (value: string): SpaceId => value as SpaceId;
 export const DEFAULT_SPACE_ID: SpaceId = 'default' as SpaceId;
 
 /**
+ * The identifier in a saved object's `namespaces` array when it is shared globally to all spaces.
+ *
+ * Deliberately not a {@link SpaceId}. This and {@link UNKNOWN_SPACE} are sentinels
+ * that stand in place of a space id inside a `namespaces` array; neither names a
+ * space that exists, and neither matches `SPACE_ID_REGEX`, so {@link asSpaceId}
+ * rejects both. Leaving them as plain string literals is what keeps a sentinel
+ * from being passed where a real space is expected.
+ */
+export const ALL_SPACES_ID = '*';
+
+/**
+ * The identifier in a saved object's `namespaces` array when it is shared to an unknown space (e.g., one that the end user is not authorized to see).
+ *
+ * See {@link ALL_SPACES_ID} for why this is not a {@link SpaceId}.
+ */
+export const UNKNOWN_SPACE = '?';
+
+/**
  * Returns the URL path prefix for the given space (`/s/<spaceId>`),
  * or an empty string for the default space.
  */

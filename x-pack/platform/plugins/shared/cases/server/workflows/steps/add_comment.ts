@@ -12,6 +12,7 @@ import {
   type AddCommentStepInput,
 } from '../../../common/workflows/steps/add_comment';
 import { COMMENT_ATTACHMENT_TYPE } from '../../../common/constants/attachments';
+import { toLegacyCaseResponse } from '../../common/attachments';
 import type { CasesClient } from '../../client';
 import { createCasesStepHandler, safeParseCaseForWorkflowOutput, withCaseOwner } from './utils';
 
@@ -31,9 +32,11 @@ export const addCommentStepDefinition = (
           },
         });
 
+        // The client returns unified comments; the output schema mirrors the
+        // public (legacy) wire shape, so convert back before validating.
         return safeParseCaseForWorkflowOutput(
           addCommentStepCommonDefinition.outputSchema.shape.case,
-          updatedCase
+          toLegacyCaseResponse(updatedCase)
         );
       });
     }),

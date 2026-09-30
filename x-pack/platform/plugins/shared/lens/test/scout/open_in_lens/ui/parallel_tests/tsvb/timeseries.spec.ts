@@ -190,7 +190,7 @@ spaceTest.describe('TSVB Timeseries - Open in Lens', { tag: tags.deploymentAgnos
       // Stateful only — editPanel on by-reference panels requires visualize_v2.save,
       // which is not available in serverless roles. Original FTR test was stateful-only too.
       spaceTest.skip(!!config.serverless, 'editPanel not available on serverless');
-      const { dashboard, lens } = pageObjects;
+      const { dashboard, lens, visualize } = pageObjects;
 
       await spaceTest.step('open TSVB panel in Visualize editor', async () => {
         await dashboard.clickPanelAction('embeddablePanelAction-editPanel', 'Timeseries -  Basic');
@@ -198,7 +198,7 @@ spaceTest.describe('TSVB Timeseries - Open in Lens', { tag: tags.deploymentAgnos
       });
 
       await spaceTest.step('convert to Lens from Visualize editor', async () => {
-        await page.testSubj.locator('visualizeEditInLensButton').click();
+        await visualize.clickEditInLensButton();
         await lens.waitForVisualization('xyVisChart');
       });
 

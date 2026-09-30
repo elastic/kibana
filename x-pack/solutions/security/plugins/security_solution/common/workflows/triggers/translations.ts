@@ -14,23 +14,23 @@ export const TRIGGER_SCHEMA_STATUS_DESCRIPTION = i18n.translate(
   { defaultMessage: 'The new workflow status.' }
 );
 
-export const TRIGGER_SCHEMA_TAGS_TO_ADD_DESCRIPTION = i18n.translate(
-  'xpack.securitySolution.workflows.triggers.schema.tagsToAdd',
-  { defaultMessage: 'Tags requested to be added.' }
+export const TRIGGER_SCHEMA_TAGS_ADDED_DESCRIPTION = i18n.translate(
+  'xpack.securitySolution.workflows.triggers.schema.tagsAdded',
+  { defaultMessage: 'Tags added.' }
 );
 
-export const TRIGGER_SCHEMA_TAGS_TO_REMOVE_DESCRIPTION = i18n.translate(
-  'xpack.securitySolution.workflows.triggers.schema.tagsToRemove',
-  { defaultMessage: 'Tags requested to be removed.' }
+export const TRIGGER_SCHEMA_TAGS_REMOVED_DESCRIPTION = i18n.translate(
+  'xpack.securitySolution.workflows.triggers.schema.tagsRemoved',
+  { defaultMessage: 'Tags removed.' }
 );
 
-export const TRIGGER_SCHEMA_ASSIGNEES_TO_ADD_DESCRIPTION = i18n.translate(
-  'xpack.securitySolution.workflows.triggers.schema.assigneesToAdd',
+export const TRIGGER_SCHEMA_ASSIGNEES_ADDED_DESCRIPTION = i18n.translate(
+  'xpack.securitySolution.workflows.triggers.schema.assigneesAdded',
   { defaultMessage: 'Profile UIDs of assignees added.' }
 );
 
-export const TRIGGER_SCHEMA_ASSIGNEES_TO_REMOVE_DESCRIPTION = i18n.translate(
-  'xpack.securitySolution.workflows.triggers.schema.assigneesToRemove',
+export const TRIGGER_SCHEMA_ASSIGNEES_REMOVED_DESCRIPTION = i18n.translate(
+  'xpack.securitySolution.workflows.triggers.schema.assigneesRemoved',
   { defaultMessage: 'Profile UIDs of assignees removed.' }
 );
 
@@ -67,7 +67,7 @@ export const ALERT_TAGS_CHANGED_SCHEMA_TRUNCATED_DESCRIPTION = i18n.translate(
   'xpack.securitySolution.workflows.triggers.alertTagsChanged.schema.truncated',
   {
     defaultMessage:
-      'True if any payload field was capped: either the number of affected alerts exceeded the capture limit, or the number of tags in the request exceeded the per-operation limit.',
+      'True if any payload field was capped: the number of affected alerts exceeded the capture limit, the number of tags in the request exceeded the per-operation limit, or a tag value exceeded the maximum allowed length.',
   }
 );
 
@@ -82,7 +82,7 @@ export const ALERT_ASSIGNEES_CHANGED_SCHEMA_TRUNCATED_DESCRIPTION = i18n.transla
   'xpack.securitySolution.workflows.triggers.alertAssigneesChanged.schema.truncated',
   {
     defaultMessage:
-      'True if any payload field was capped: either the number of affected alerts exceeded the capture limit, or the number of assignees in the request exceeded the per-operation limit.',
+      'True if any payload field was capped: the number of affected alerts exceeded the capture limit, the number of assignees in the request exceeded the per-operation limit, or an assignee UID exceeded the maximum allowed length.',
   }
 );
 
@@ -114,7 +114,7 @@ export const ATTACK_TAGS_CHANGED_SCHEMA_TRUNCATED_DESCRIPTION = i18n.translate(
   'xpack.securitySolution.workflows.triggers.attackTagsChanged.schema.truncated',
   {
     defaultMessage:
-      'True if any payload field was capped: either the number of affected attacks exceeded the capture limit, or the number of tags in the request exceeded the per-operation limit.',
+      'True if any payload field was capped: the number of affected attacks exceeded the capture limit, the number of tags in the request exceeded the per-operation limit, or a tag value exceeded the maximum allowed length.',
   }
 );
 
@@ -129,7 +129,7 @@ export const ATTACK_ASSIGNEES_CHANGED_SCHEMA_TRUNCATED_DESCRIPTION = i18n.transl
   'xpack.securitySolution.workflows.triggers.attackAssigneesChanged.schema.truncated',
   {
     defaultMessage:
-      'True if any payload field was capped: either the number of affected attacks exceeded the capture limit, or the number of assignees in the request exceeded the per-operation limit.',
+      'True if any payload field was capped: the number of affected attacks exceeded the capture limit, the number of assignees in the request exceeded the per-operation limit, or an assignee UID exceeded the maximum allowed length.',
   }
 );
 
@@ -211,7 +211,7 @@ export const ALERT_TAGS_CHANGED_TRIGGER_DOCUMENTATION_DETAILS = i18n.translate(
   'xpack.securitySolution.workflows.triggers.alertTagsChanged.documentation.details',
   {
     defaultMessage:
-      'Emitted after tags are added or removed from a batch of detection alerts. The payload includes event.alertIds, event.tagsToAdd, event.tagsToRemove, and event.truncated (true when more than 10,000 alerts were affected).',
+      'Emitted after tags are added or removed from a batch of detection alerts. The payload includes event.alertIds, event.tagsAdded, event.tagsRemoved, and event.truncated (true when the payload was capped: more than 10,000 alerts were affected, more than the per-operation tag limit was supplied, or a tag value exceeded the maximum allowed length).',
   }
 );
 
@@ -231,7 +231,7 @@ export const ALERT_ASSIGNEES_CHANGED_TRIGGER_DOCUMENTATION_DETAILS = i18n.transl
   'xpack.securitySolution.workflows.triggers.alertAssigneesChanged.documentation.details',
   {
     defaultMessage:
-      'Emitted after assignees are added or removed from a batch of detection alerts. The payload includes event.alertIds, event.assigneesToAdd, event.assigneesToRemove, and event.truncated (true when more than 10,000 alerts were affected).',
+      'Emitted after assignees are added or removed from a batch of detection alerts. The payload includes event.alertIds, event.assigneesAdded, event.assigneesRemoved, and event.truncated (true when the payload was capped: more than 10,000 alerts were affected, more than the per-operation assignee limit was supplied, or an assignee UID exceeded the maximum allowed length).',
   }
 );
 
@@ -273,7 +273,7 @@ export const ATTACK_TAGS_CHANGED_TRIGGER_DOCUMENTATION_DETAILS = i18n.translate(
   'xpack.securitySolution.workflows.triggers.attackTagsChanged.documentation.details',
   {
     defaultMessage:
-      'Emitted after tags are added or removed from a batch of attack discoveries. The payload includes event.attackIds, event.tagsToAdd, event.tagsToRemove, and event.truncated (true when more than 10,000 attack discoveries were affected).',
+      'Emitted after tags are added or removed from a batch of attack discoveries. The payload includes event.attackIds, event.tagsAdded, event.tagsRemoved, and event.truncated (true when the payload was capped: more than 10,000 attack discoveries were affected, more than the per-operation tag limit was supplied, or a tag value exceeded the maximum allowed length).',
   }
 );
 
@@ -293,7 +293,7 @@ export const ATTACK_ASSIGNEES_CHANGED_TRIGGER_DOCUMENTATION_DETAILS = i18n.trans
   'xpack.securitySolution.workflows.triggers.attackAssigneesChanged.documentation.details',
   {
     defaultMessage:
-      'Emitted after assignees are added or removed from a batch of attack discoveries. The payload includes event.attackIds, event.assigneesToAdd, event.assigneesToRemove, and event.truncated (true when more than 10,000 attack discoveries were affected).',
+      'Emitted after assignees are added or removed from a batch of attack discoveries. The payload includes event.attackIds, event.assigneesAdded, event.assigneesRemoved, and event.truncated (true when the payload was capped: more than 10,000 attack discoveries were affected, more than the per-operation assignee limit was supplied, or an assignee UID exceeded the maximum allowed length).',
   }
 );
 

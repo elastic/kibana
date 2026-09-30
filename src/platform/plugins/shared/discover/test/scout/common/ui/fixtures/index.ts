@@ -24,11 +24,15 @@ import {
 import { Inspector } from '@kbn/inspector-plugin/test/scout/ui/fixtures/page_objects';
 import { UnifiedFieldList } from '@kbn/unified-field-list/test/scout/ui/fixtures/page_objects';
 import { DocViewer } from '@kbn/unified-doc-viewer/test/scout/ui/fixtures/page_objects';
-import { LookupIndexEditor } from './page_objects';
+import { SavedQueryManagementMenu } from '@kbn/unified-search-plugin/test/scout/ui/fixtures/page_objects';
+import { InsightsAndAlerting, LookupIndexEditor } from './page_objects';
 import * as testData from './constants';
 
 export interface DiscoverScoutSpace extends ScoutSpaceParallelFixture {
-  setupDiscoverDefaults: (options?: { loadFlightsDataView?: boolean }) => Promise<void>;
+  setupDiscoverDefaults: (options?: {
+    loadFlightsDataView?: boolean;
+    loadLongWindowDataView?: boolean;
+  }) => Promise<void>;
   teardownDiscoverDefaults: () => Promise<void>;
   getDataViewId: (title: string) => string;
 }
@@ -42,6 +46,8 @@ export type DiscoverPageObjects = PageObjects & {
   unifiedFieldList: UnifiedFieldList;
   lookupIndexEditor: LookupIndexEditor;
   docViewer: DocViewer;
+  savedQueryManagementMenu: SavedQueryManagementMenu;
+  insightsAndAlerting: InsightsAndAlerting;
 };
 
 export interface DiscoverTestFixtures extends ScoutParallelTestFixtures {
@@ -57,6 +63,8 @@ const extendWithDiscoverPageObjects = (
   unifiedFieldList: createLazyPageObject(UnifiedFieldList, page),
   lookupIndexEditor: createLazyPageObject(LookupIndexEditor, page, pageObjects.dataGrid),
   docViewer: createLazyPageObject(DocViewer, page),
+  savedQueryManagementMenu: createLazyPageObject(SavedQueryManagementMenu, page),
+  insightsAndAlerting: createLazyPageObject(InsightsAndAlerting, page),
 });
 
 export const spaceTest = spaceBaseTest.extend<DiscoverTestFixtures, DiscoverWorkerFixtures>({
@@ -75,10 +83,16 @@ export const spaceTest = spaceBaseTest.extend<DiscoverTestFixtures, DiscoverWork
 
       const discoverScoutSpace: DiscoverScoutSpace = {
         ...scoutSpace,
-        setupDiscoverDefaults: async ({ loadFlightsDataView = false } = {}) => {
+        setupDiscoverDefaults: async ({
+          loadFlightsDataView = false,
+          loadLongWindowDataView = false,
+        } = {}) => {
           await loadSavedObjects(testData.DISCOVER_KBN_ARCHIVE);
           if (loadFlightsDataView) {
             await loadSavedObjects(testData.FLIGHTS_KBN_ARCHIVE);
+          }
+          if (loadLongWindowDataView) {
+            await loadSavedObjects(testData.LONG_WINDOW_LOGSTASH_KBN_ARCHIVE);
           }
           await scoutSpace.uiSettings.setDefaultIndex(testData.DEFAULT_DATA_VIEW);
           await scoutSpace.uiSettings.setDefaultTime(testData.DEFAULT_TIME_RANGE);

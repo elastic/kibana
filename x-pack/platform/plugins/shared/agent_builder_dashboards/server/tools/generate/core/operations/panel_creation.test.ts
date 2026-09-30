@@ -19,7 +19,9 @@ const makeLensPanel = (): MaterializedPanelInput => ({
 
 describe('applyCustomContentTemplates', () => {
   it('calls resolveTemplate for panels that have a prompt but no template', async () => {
-    const resolveTemplate = jest.fn().mockResolvedValue('<div>generated</div>');
+    const resolveTemplate = jest
+      .fn()
+      .mockResolvedValue({ template: '<div>generated</div>', height: 320 });
     const panel = makeCustomContentPanel({ prompt: 'Show KPI' });
     const materialized = [{ panel }];
 
@@ -33,7 +35,9 @@ describe('applyCustomContentTemplates', () => {
   });
 
   it('passes esqlQuery through to resolveTemplate when present', async () => {
-    const resolveTemplate = jest.fn().mockResolvedValue('<div>chart</div>');
+    const resolveTemplate = jest
+      .fn()
+      .mockResolvedValue({ template: '<div>chart</div>', height: 320 });
     const panel = makeCustomContentPanel({
       prompt: 'Bar chart',
       esqlQuery: 'FROM logs-* | STATS count = COUNT(*)',
@@ -76,8 +80,8 @@ describe('applyCustomContentTemplates', () => {
   it('resolves multiple panels in parallel and writes each template back', async () => {
     const resolveTemplate = jest
       .fn()
-      .mockResolvedValueOnce('<div>first</div>')
-      .mockResolvedValueOnce('<div>second</div>');
+      .mockResolvedValueOnce({ template: '<div>first</div>', height: 320 })
+      .mockResolvedValueOnce({ template: '<div>second</div>', height: 320 });
 
     const panel1 = makeCustomContentPanel({ prompt: 'First' });
     const panel2 = makeCustomContentPanel({ prompt: 'Second' });
@@ -97,7 +101,7 @@ describe('applyCustomContentTemplates', () => {
     const resolveTemplate = jest
       .fn()
       .mockRejectedValueOnce(new Error('Generated template was rejected: contains a <script> tag.'))
-      .mockResolvedValueOnce('<div>second</div>');
+      .mockResolvedValueOnce({ template: '<div>second</div>', height: 320 });
 
     const entry1 = { panel: makeCustomContentPanel({ prompt: 'First' }) };
     const entry2 = { panel: makeCustomContentPanel({ prompt: 'Second' }) };
@@ -116,7 +120,9 @@ describe('applyCustomContentTemplates', () => {
 });
 
 describe('mergeAndResolveCustomContentEdit', () => {
-  const resolveTemplate = jest.fn().mockResolvedValue('<div>resolved</div>');
+  const resolveTemplate = jest
+    .fn()
+    .mockResolvedValue({ template: '<div>resolved</div>', height: 320 });
 
   beforeEach(() => {
     resolveTemplate.mockClear();

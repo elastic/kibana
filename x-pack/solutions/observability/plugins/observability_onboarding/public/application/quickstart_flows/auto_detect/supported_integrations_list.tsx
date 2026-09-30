@@ -7,15 +7,7 @@
 
 import React from 'react';
 import type { IconType } from '@elastic/eui';
-import {
-  EuiBadge,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiText,
-  EuiTextColor,
-  EuiToolTip,
-  useEuiTheme,
-} from '@elastic/eui';
+import { EuiBadge, EuiFlexGroup, EuiFlexItem, EuiText, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import dockerIconSrc from '../../../assets/docker.svg';
 
@@ -51,9 +43,6 @@ const FEATURED_INTEGRATIONS_LIST: SupportedIntegrationItem[] = [
 ];
 
 export function SupportedIntegrationsList() {
-  const {
-    euiTheme: { colors },
-  } = useEuiTheme();
   const customLogFilesTitle = i18n.translate(
     'xpack.observability_onboarding.autoDetectPanel.supportedIntegrationsList.customIntegrationTitle',
     { defaultMessage: 'Custom .log files' }
@@ -85,9 +74,7 @@ export function SupportedIntegrationsList() {
         }
       >
         <EuiBadge color="hollow" tabIndex={0}>
-          <EuiTextColor color={colors.link}>
-            {`+${SUPPORTED_INTEGRATIONS_LIST.length - FEATURED_INTEGRATIONS_LIST.length}`}
-          </EuiTextColor>
+          {`+${SUPPORTED_INTEGRATIONS_LIST.length - FEATURED_INTEGRATIONS_LIST.length}`}
         </EuiBadge>
       </EuiToolTip>
     </EuiFlexGroup>

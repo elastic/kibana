@@ -315,16 +315,21 @@ export class Plugin implements InfraClientPluginClass {
   }
 
   start(core: InfraClientCoreStart, plugins: InfraClientStartDeps) {
-    if (
-      core.featureFlags.getBooleanValue(
+    let infraCpsEnabled = OBSERVABILITY_INFRA_CPS_ENABLED_DEFAULT;
+    core.featureFlags
+      .getBooleanValue$(
         OBSERVABILITY_INFRA_CPS_ENABLED_FEATURE_FLAG,
         OBSERVABILITY_INFRA_CPS_ENABLED_DEFAULT
       )
-    ) {
-      // The logs app only contains the ML anomaly detection results pages, where project
-      // routing is a per-job property derived from each job's stored configuration rather
-      // than from the global project picker, so the picker is explicitly disabled there.
-      plugins.cps?.cpsManager?.registerAppAccess('logs', () => ProjectRoutingAccess.READONLY);
+      .subscribe((enabled) => {
+        infraCpsEnabled = enabled;
+      })
+      .unsubscribe();
+
+    if (infraCpsEnabled) {
+      // The logs app starts disabled and will later register its own picker access from within its page providers
+      // (useInfraMlCpsPickerAccess), where the ML CPS capability of Elasticsearch is known after resolving asynchronously;
+      plugins.cps?.cpsManager?.registerAppAccess('logs', () => ProjectRoutingAccess.DISABLED);
       plugins.cps?.cpsManager?.registerAppAccess('metrics', () => ProjectRoutingAccess.EDITABLE);
     }
 

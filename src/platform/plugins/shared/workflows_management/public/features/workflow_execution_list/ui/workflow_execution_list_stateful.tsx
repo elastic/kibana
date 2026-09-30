@@ -57,6 +57,7 @@ export function WorkflowExecutionList({ workflowId }: WorkflowExecutionListProps
     error,
     setPaginationObserver,
     refetch,
+    hasNextPage,
   } = useWorkflowExecutions({
     workflowId,
     statuses: filters.statuses,
@@ -86,10 +87,15 @@ export function WorkflowExecutionList({ workflowId }: WorkflowExecutionListProps
   });
 
   const { selectedExecutionId, setSelectedExecution } = useWorkflowUrlState();
+  const [lastViewedExecutionId, setLastViewedExecutionId] = useState<string | null>(null);
 
-  const handleViewWorkflowExecution = (executionId: string) => {
-    setSelectedExecution(executionId);
-  };
+  const handleViewWorkflowExecution = useCallback(
+    (executionId: string) => {
+      setLastViewedExecutionId(executionId);
+      setSelectedExecution(executionId);
+    },
+    [setSelectedExecution]
+  );
 
   const onConfirmCancel = useCallback(async () => {
     if (!workflowId) {
@@ -138,6 +144,7 @@ export function WorkflowExecutionList({ workflowId }: WorkflowExecutionListProps
       executions={workflowExecutions ?? null}
       onExecutionClick={handleViewWorkflowExecution}
       selectedId={selectedExecutionId ?? null}
+      lastViewedId={lastViewedExecutionId}
       isInitialLoading={isLoadingWorkflowExecutions}
       isLoadingMore={isLoadingMoreWorkflowExecutions}
       error={error as Error | null}
@@ -145,6 +152,7 @@ export function WorkflowExecutionList({ workflowId }: WorkflowExecutionListProps
       onFiltersChange={setFilters}
       setPaginationObserver={setPaginationObserver}
       showExecutor={showExecutor}
+      hasNextPage={Boolean(hasNextPage)}
       canCancel={canCancelWorkflowExecution}
       isCancelInProgress={isCancelInProgress}
       onConfirmCancel={onConfirmCancel}

@@ -331,6 +331,16 @@ describe('runNode', () => {
 
       expect(mockNodeImplementation.run).not.toHaveBeenCalled();
     });
+
+    it('should stop the cursor when workflow status is WAITING so the loop cannot spin', async () => {
+      workflowExecution.status = ExecutionStatus.WAITING;
+
+      await runNode(mockParams);
+
+      expect(mockNodeImplementation.run).not.toHaveBeenCalled();
+      expect(mockParams.workflowExecutionCursor.stop).toHaveBeenCalled();
+      expect(mockParams.workflowExecutionCursor.isExecuting).toBe(false);
+    });
   });
 
   describe('when there is no current node', () => {

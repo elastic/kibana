@@ -13,6 +13,10 @@
 
 import { restoreSelfClientTestEnvironment } from './self_client_test_environment';
 import { readFileSync } from 'node:fs';
+import {
+  ReadableStream as NodeReadableStream,
+  TransformStream as NodeTransformStream,
+} from 'node:stream/web';
 import http from 'node:http';
 import https from 'node:https';
 import Supertest from 'supertest';
@@ -21,6 +25,7 @@ import {
   Headers as UndiciHeaders,
   Request as UndiciRequest,
   Response as UndiciResponse,
+  FormData as UndiciFormData,
 } from 'undici';
 import { schema } from '@kbn/config-schema';
 import { CA_CERT_PATH, KBN_CERT_PATH, KBN_KEY_PATH } from '@kbn/dev-utils';
@@ -48,6 +53,9 @@ const originalFetch = global.fetch;
 const originalHeaders = global.Headers;
 const originalRequest = global.Request;
 const originalResponse = global.Response;
+const originalFormData = global.FormData;
+const originalReadableStream = global.ReadableStream;
+const originalTransformStream = global.TransformStream;
 const routeSecurity = {
   authz: {
     enabled: false,
@@ -60,7 +68,7 @@ const setupDeps = {
   userActivity: userActivityServiceMock.createInternalSetupContract(),
 };
 type TestHttpConfig = Omit<Partial<HttpConfigType>, 'selfHttp' | 'ssl' | 'versioned'> & {
-  selfHttp?: Partial<HttpConfigType['selfHttp']> & {
+  selfHttp?: Omit<Partial<HttpConfigType['selfHttp']>, 'ssl'> & {
     ssl?: Partial<HttpConfigType['selfHttp']['ssl']>;
   };
   ssl?: Partial<HttpConfigType['ssl']>;
@@ -155,6 +163,41 @@ const startServer = async (serverConfig: TestHttpConfig = { port: TEST_PORT }) =
 
   router.get(
     {
+      path: '/self/call_form_data',
+      security: routeSecurity,
+      validate: false,
+    },
+    async (_context, req, res) => {
+      const form = new FormData();
+      form.append('message', 'hello');
+      try {
+        const response = await started
+          .httpStart!.selfClient.asScoped(req)
+          .fetch<{ body: string; contentType: string }>('/self/form_target', {
+            method: 'POST',
+            rawBody: form,
+          });
+        return res.ok({ body: response });
+      } catch (error) {
+        const cause = (error as Error & { cause?: Error }).cause;
+        return res.ok({ body: { error: (error as Error).message, cause: cause?.message } });
+      }
+    }
+  );
+
+  router.post(
+    {
+      path: '/self/form_target',
+      options: { body: { accepts: 'multipart/form-data', output: 'stream' } },
+      security: routeSecurity,
+      validate: { body: schema.any() },
+    },
+    (_context, req, res) =>
+      res.ok({ body: { received: req.body, contentType: req.headers['content-type'] } })
+  );
+
+  router.get(
+    {
       path: '/self/authz_denied',
       security: routeSecurity,
       validate: false,
@@ -198,6 +241,31 @@ const startServer = async (serverConfig: TestHttpConfig = { port: TEST_PORT }) =
     async (_context, req, res) => {
       try {
         await started.httpStart!.selfClient.asScoped(req).fetch('/self/redirect');
+        return res.ok({ body: { error: null } });
+      } catch (error) {
+        return res.ok({ body: { error: (error as Error).message } });
+      }
+    }
+  );
+
+  router.get(
+    {
+      path: '/self/redirect_cross',
+      security: routeSecurity,
+      validate: false,
+    },
+    (_context, _req, res) => res.redirected({ headers: { location: 'https://evil.example/steal' } })
+  );
+
+  router.get(
+    {
+      path: '/self/call_redirect_cross',
+      security: routeSecurity,
+      validate: false,
+    },
+    async (_context, req, res) => {
+      try {
+        await started.httpStart!.selfClient.asScoped(req).fetch('/self/redirect_cross');
         return res.ok({ body: { error: null } });
       } catch (error) {
         return res.ok({ body: { error: (error as Error).message } });
@@ -351,6 +419,9 @@ describe('Http self client', () => {
     global.Headers = UndiciHeaders as typeof global.Headers;
     global.Request = UndiciRequest as unknown as typeof global.Request;
     global.Response = UndiciResponse as unknown as typeof global.Response;
+    global.FormData = UndiciFormData as unknown as typeof global.FormData;
+    global.ReadableStream = NodeReadableStream as typeof global.ReadableStream;
+    global.TransformStream = NodeTransformStream as typeof global.TransformStream;
   });
 
   afterAll(() => {
@@ -358,6 +429,9 @@ describe('Http self client', () => {
     global.Headers = originalHeaders;
     global.Request = originalRequest;
     global.Response = originalResponse;
+    global.FormData = originalFormData;
+    global.ReadableStream = originalReadableStream;
+    global.TransformStream = originalTransformStream;
     restoreSelfClientTestEnvironment();
   });
 
@@ -393,6 +467,12 @@ describe('Http self client', () => {
       expect(response.body.error).toContain('a self call cannot issue another self call');
     });
 
+    it('sends a buffered FormData self-call with its multipart boundary', async () => {
+      const response = await supertest.get('/self/call_form_data').expect(200);
+      expect(response.body.received).toEqual({ message: 'hello' });
+      expect(response.body.contentType).toMatch(/^multipart\/form-data; boundary=/);
+    });
+
     it('does not follow redirects', async () => {
       const response = await supertest.get('/self/call_redirect').expect(200);
 
@@ -409,6 +489,36 @@ describe('Http self client', () => {
     });
   });
 
+  describe('same-origin redirects', () => {
+    let server: HttpService;
+    let supertest: Supertest.Agent;
+
+    beforeEach(async () => {
+      ({ server, supertest } = await startServer({
+        port: TEST_PORT,
+        selfHttp: { maxRedirects: 1 },
+      }));
+    });
+
+    afterEach(async () => {
+      await server.stop();
+      http.globalAgent.destroy();
+      https.globalAgent.destroy();
+    });
+
+    it('follows a same-origin redirect', async () => {
+      const response = await supertest.get('/self/call_redirect').expect(200);
+
+      expect(response.body.error).toBeNull();
+    });
+
+    it('refuses a cross-origin redirect', async () => {
+      const response = await supertest.get('/self/call_redirect_cross').expect(200);
+
+      expect(response.body.error).toMatch(/cross-origin redirect/i);
+    });
+  });
+
   describe('receiving self-call observation', () => {
     let server: HttpService;
 
@@ -421,6 +531,7 @@ describe('Http self client', () => {
     it('allows and safely logs self calls after authorization', async () => {
       const started = await startServer({ port: TEST_PORT });
       server = started.server;
+      (started.logger.get().debug as jest.Mock).mockClear();
       (started.logger.get().info as jest.Mock).mockClear();
 
       await started.supertest
@@ -428,27 +539,35 @@ describe('Http self client', () => {
         .set('x-kbn-self-call', 'true')
         .expect(200, { ok: true });
 
-      expect(started.logger.get().info).toHaveBeenCalledWith(
-        'Kibana self HTTP call completed',
-        expect.objectContaining({
-          event: { action: 'kibana_self_http_request' },
-          http: {
-            request: { method: 'GET' },
-            response: { status_code: 200 },
-          },
-          labels: expect.objectContaining({
-            self_http_route_template: '/self/observed_target',
-            self_http_status_class: '2xx',
+      const completedCalls = (started.logger.get().debug as jest.Mock).mock.calls.filter(
+        ([message]) => message === 'Kibana self HTTP call completed'
+      );
+      expect(completedCalls).toEqual([
+        [
+          'Kibana self HTTP call completed',
+          expect.objectContaining({
+            event: { action: 'kibana_self_http_request' },
+            http: {
+              request: { method: 'GET' },
+              response: { status_code: 200 },
+            },
+            labels: expect.objectContaining({
+              self_http_route_template: '/self/observed_target',
+              self_http_status_class: '2xx',
+            }),
           }),
-        })
-      );
-      expect(started.logger.get().info).toHaveBeenCalledTimes(1);
-      expect(JSON.stringify((started.logger.get().info as jest.Mock).mock.calls)).not.toContain(
-        'filter=raw-value'
-      );
+        ],
+      ]);
+      expect(started.logger.get().info).not.toHaveBeenCalled();
+      expect(JSON.stringify(completedCalls)).not.toContain('filter=raw-value');
 
-      (started.logger.get().info as jest.Mock).mockClear();
+      (started.logger.get().debug as jest.Mock).mockClear();
       await started.supertest.get('/self/authz_denied').set('x-kbn-self-call', 'true').expect(403);
+      expect(
+        (started.logger.get().debug as jest.Mock).mock.calls.some(
+          ([message]) => message === 'Kibana self HTTP call completed'
+        )
+      ).toBe(false);
       expect(started.logger.get().info).not.toHaveBeenCalled();
     });
 
@@ -555,6 +674,75 @@ describe('Http self client', () => {
         .expect(200);
 
       expect(response.body.url).toBe(`https://localhost:${TEST_PORT}/self/target_url`);
+    });
+  });
+
+  describe('selfHttp SSL verification mode', () => {
+    let server: HttpService;
+
+    afterEach(async () => {
+      await server?.stop();
+      http.globalAgent.destroy();
+      https.globalAgent.destroy();
+    });
+
+    const resolveTarget = async (
+      selfHttpSsl: NonNullable<TestHttpConfig['selfHttp']>['ssl'],
+      publicBaseUrlHost: string
+    ) => {
+      ({ server } = await startServer({
+        port: TEST_PORT,
+        publicBaseUrl: `https://${publicBaseUrlHost}:${TEST_PORT}`,
+        ssl: {
+          enabled: true,
+          certificate: KBN_CERT_PATH,
+          key: KBN_KEY_PATH,
+        },
+        selfHttp: { target: 'auto', ssl: selfHttpSsl },
+      }));
+
+      const response = await Supertest(`https://localhost:${TEST_PORT}`)
+        .get('/self/resolve_target')
+        .ca(readFileSync(CA_CERT_PATH))
+        .expect(200);
+
+      return response.body as { url?: string; error?: string };
+    };
+
+    it('rejects an untrusted certificate in full mode when no authorities are configured', async () => {
+      const body = await resolveTarget({ verificationMode: 'full' }, 'localhost');
+
+      expect(body.url).toBeUndefined();
+      expect(body.error).toBeDefined();
+    });
+
+    it('accepts an untrusted certificate in none mode when no authorities are configured', async () => {
+      const body = await resolveTarget({ verificationMode: 'none' }, 'localhost');
+
+      expect(body.error).toBeUndefined();
+      expect(body.url).toBe(`https://localhost:${TEST_PORT}/self/target_url`);
+    });
+
+    // KBN_CERT_PATH is issued for `localhost` with no `127.0.0.1` SAN, so addressing the
+    // self call by IP is what makes the hostname check the only thing that can fail.
+    it('rejects a hostname mismatch in full mode', async () => {
+      const body = await resolveTarget(
+        { verificationMode: 'full', certificateAuthorities: CA_CERT_PATH },
+        '127.0.0.1'
+      );
+
+      expect(body.url).toBeUndefined();
+      expect(body.error).toBeDefined();
+    });
+
+    it('accepts a hostname mismatch in certificate mode', async () => {
+      const body = await resolveTarget(
+        { verificationMode: 'certificate', certificateAuthorities: CA_CERT_PATH },
+        '127.0.0.1'
+      );
+
+      expect(body.error).toBeUndefined();
+      expect(body.url).toBe(`https://127.0.0.1:${TEST_PORT}/self/target_url`);
     });
   });
 });

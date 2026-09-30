@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { firstValueFrom } from 'rxjs';
 import type { PluginInitializerContext, CoreSetup, Logger, Plugin } from '@kbn/core/server';
 import type { UsageCounter } from '@kbn/usage-collection-plugin/server';
 import type {
@@ -36,8 +37,8 @@ export class VisTypeVegaPlugin implements Plugin<VisTypeVegaPluginSetup, VisType
     // Startup-only: public API/OpenAPI contract should not hot-swap mid-process.
     void core
       .getStartServices()
-      .then(([coreStart]) =>
-        coreStart.featureFlags.getBooleanValue(VEGA_STANDALONE_EMBEDDABLE_FLAG, false)
+      .then(([{ featureFlags }]) =>
+        firstValueFrom(featureFlags.getBooleanValue$(VEGA_STANDALONE_EMBEDDABLE_FLAG, false))
       )
       .then((enabled) => {
         this.standaloneEmbeddableEnabled = enabled;

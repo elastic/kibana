@@ -24,7 +24,7 @@ import { httpServiceMock } from '@kbn/core-http-server-mocks';
 
 const getConfigService = (
   defaultLocale = 'en',
-  locales: string[] = ['en', 'fr-FR', 'ja-JP', 'zh-CN', 'de-DE']
+  locales: string[] = ['en', 'fr-FR', 'ja-JP', 'zh-CN', 'de-DE', 'pt-BR']
 ) => {
   const configService = configServiceMock.create();
   configService.atPath.mockImplementation((path) => {
@@ -76,6 +76,7 @@ describe('I18nService', () => {
         'ja-JP',
         'zh-CN',
         'de-DE',
+        'pt-BR',
       ]);
     });
 
@@ -126,6 +127,7 @@ describe('I18nService', () => {
         'ja-JP',
         'zh-CN',
         'de-DE',
+        'pt-BR',
       ]);
     });
 
@@ -163,7 +165,7 @@ describe('I18nService', () => {
         });
 
       expect(getLocale()).toEqual('en');
-      expect(getLocales()).toEqual(['en', 'fr-FR', 'ja-JP', 'zh-CN', 'de-DE']);
+      expect(getLocales()).toEqual(['en', 'fr-FR', 'ja-JP', 'zh-CN', 'de-DE', 'pt-BR']);
       // Labels come from Intl.DisplayNames in the endonym pattern. Each
       // language's own orthographic convention applies — French does not
       // capitalise language names, hence "français" (lowercase).
@@ -173,6 +175,7 @@ describe('I18nService', () => {
         { id: 'ja-JP', label: '日本語' },
         { id: 'zh-CN', label: '中文' },
         { id: 'de-DE', label: 'Deutsch' },
+        { id: 'pt-BR', label: 'português' },
       ]);
       expect(getTranslationFiles()).toEqual(translationFiles);
     });
