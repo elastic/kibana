@@ -1559,33 +1559,47 @@ describe('NightshiftInvestigationsClient.ensureOrCreate() continuing an investig
     context: { inputs: { investigation_id: INVESTIGATION_ID, ...inputs } },
   });
 
-  it.each<InvestigationStatus>(['pending', 'completed', 'failed'])(
-    'moves a %s investigation to running for the run that names it',
-    async (status) => {
-      repository.get.mockResolvedValue(
-        makeRecord(
-          { status, conversation_id: 'conv-slack' },
-          { id: INVESTIGATION_ID, version: 'v2' }
-        )
-      );
-      mockManagement.getWorkflowExecution.mockResolvedValue(makeFollowUpExecution());
+  it.each<[InvestigationStatus, Record<string, unknown>]>([
+    ['pending', {}],
+    ['completed', { completed_at: null, error: null }],
+    ['failed', { completed_at: null, error: null }],
+  ])('moves a %s investigation to running for the run that names it', async (status, cleared) => {
+    repository.get.mockResolvedValue(
+      makeRecord({ status, conversation_id: 'conv-slack' }, { id: INVESTIGATION_ID, version: 'v2' })
+    );
+    mockManagement.getWorkflowExecution.mockResolvedValue(makeFollowUpExecution());
 
-      await expect(makeClient().ensureOrCreate(INVESTIGATION_ID, EXECUTION_ID)).resolves.toBe(
-        'conv-slack'
-      );
+    await expect(makeClient().ensureOrCreate(INVESTIGATION_ID, EXECUTION_ID)).resolves.toBe(
+      'conv-slack'
+    );
 
-      expect(mockManagement.getWorkflowExecution).toHaveBeenCalledWith(
-        EXECUTION_ID,
-        SPACE_ID,
-        expect.anything()
-      );
-      expect(repository.update).toHaveBeenCalledWith({
-        id: INVESTIGATION_ID,
-        patch: { status: 'running', started_at: '2024-01-02T00:00:00Z', executed_by: 'slack-app' },
-        version: 'v2',
-      });
-    }
-  );
+    expect(mockManagement.getWorkflowExecution).toHaveBeenCalledWith(
+      EXECUTION_ID,
+      SPACE_ID,
+      expect.anything()
+    );
+    expect(repository.update).toHaveBeenCalledWith({
+      id: INVESTIGATION_ID,
+      patch: {
+        status: 'running',
+        started_at: '2024-01-02T00:00:00Z',
+        executed_by: 'slack-app',
+        ...cleared,
+      },
+      version: 'v2',
+    });
+  });
+
+  it('reports a reopened investigation without its previous completion or error', async () => {
+    repository.get.mockResolvedValue(
+      makeRecord({ status: 'running', completed_at: null, error: null }, { id: INVESTIGATION_ID })
+    );
+
+    const investigation = await makeClient().get(INVESTIGATION_ID);
+
+    expect(investigation.completed_at).toBeUndefined();
+    expect(investigation.error).toBeUndefined();
+  });
 
   it('rejects a run that names a different investigation', async () => {
     repository.get.mockResolvedValue(makeRecord({}, { id: INVESTIGATION_ID }));

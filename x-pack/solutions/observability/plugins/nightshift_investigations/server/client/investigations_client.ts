@@ -181,7 +181,7 @@ const toListInvestigationItem = (record: ListInvestigationRecord): ListInvestiga
   status: record.status,
   created_at: record.created_at,
   started_at: record.started_at,
-  completed_at: record.completed_at,
+  completed_at: record.completed_at ?? undefined,
   severity: record.severity,
   concurrency_key: record.concurrency_key,
   executed_by: record.executed_by,
@@ -203,7 +203,7 @@ const toInvestigationResponse = (record: InvestigationRecord): GetInvestigationR
   return {
     ...toListInvestigationItem(record),
     trigger_type: record.trigger_type,
-    error: record.error,
+    error: record.error ?? undefined,
     summary: record.summary,
     conclusion: record.conclusion,
     hypotheses: record.hypotheses,
@@ -627,25 +627,37 @@ export class NightshiftInvestigationsClient {
       version: existing.version,
       startedAt: execution.startedAt ?? new Date().toISOString(),
       executedBy: execution.executedBy,
+      reopen: isTerminalStatus(existing.status),
     });
     return existing.conversation_id;
   }
 
+  /**
+   * `reopen` clears the previous run's `completed_at` and `error`, so a reopened record does not
+   * report an old completion while running or an old failure after it succeeds.
+   */
   private async transitionToRunning({
     investigationId,
     version,
     startedAt,
     executedBy,
+    reopen = false,
   }: {
     investigationId: string;
     version?: string;
     startedAt: string;
     executedBy?: string;
+    reopen?: boolean;
   }): Promise<void> {
     try {
       await this.investigationRepository.update({
         id: investigationId,
-        patch: { status: 'running', started_at: startedAt, executed_by: executedBy },
+        patch: {
+          status: 'running',
+          started_at: startedAt,
+          executed_by: executedBy,
+          ...(reopen && { completed_at: null, error: null }),
+        },
         version,
       });
     } catch (error) {

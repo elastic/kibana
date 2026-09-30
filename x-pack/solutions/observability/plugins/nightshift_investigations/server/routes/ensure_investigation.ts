@@ -35,7 +35,7 @@ export const ensureInvestigationRoute = createNightshiftInvestigationsServerRout
         /** The run's own execution, when it continues an investigation it did not create. */
         execution_id: z.string().min(1).max(MAX_KEYWORD_LENGTH).optional(),
       })
-      .optional(),
+      .nullish(),
   }),
   handler: async ({ request, params, getInvestigationsClient }) => {
     const client = getInvestigationsClient(request);
