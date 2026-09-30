@@ -17,6 +17,7 @@ import {
   isRepositoryIdentity,
   isSafeRevision,
   validateRepositorySettings,
+  type RepositorySettings,
 } from '../common/repository_settings';
 import {
   START_EXTRACTION_ERROR_CODES,
@@ -44,9 +45,17 @@ const revision = schema.string({ minLength: 1, maxLength: MAX_REVISION_LENGTH })
 const identitySegment = schema.string({ minLength: 1, maxLength: MAX_REPOSITORY_IDENTITY_LENGTH });
 const repositoryParams = schema.object({ owner: identitySegment, name: identitySegment });
 
+/** A repository that an extraction batch may select. */
+export type ExtractableRepository = Pick<
+  RepositorySettings,
+  'repository' | 'remoteUrl' | 'defaultRef' | 'enabled' | 'githubConnectorId'
+>;
+
 /** Services available once the plugin has started; extraction is absent when its source is unavailable. */
 export interface RouteServices {
   readonly extractionService?: ExtractionService;
+  /** Replaces the settings index as the extraction selection source, for the `local_git` source. */
+  readonly configuredRepositories?: readonly ExtractableRepository[];
   /** Explains why extraction is unavailable, for example a missing `xpack.sandbox` configuration. */
   readonly extractionUnavailableReason?: string;
   readonly getSpaceId: (request: KibanaRequest) => string;
@@ -175,7 +184,8 @@ export const registerRoutes = ({
       },
     },
     async (context, request, response) => {
-      const { extractionService, extractionUnavailableReason, getSpaceId } = getServices();
+      const { configuredRepositories, extractionService, extractionUnavailableReason, getSpaceId } =
+        getServices();
       const sourceUnavailable = (message: string) =>
         response.customError({
           statusCode: 503,
@@ -192,10 +202,12 @@ export const registerRoutes = ({
         return response.badRequest({ body: { message: 'Each repository may appear only once.' } });
       }
       const { elasticsearch } = await context.core;
-      const settings = await new ElasticsearchRepositorySettingsStore(
-        elasticsearch.client.asCurrentUser,
-        settingsIndex
-      ).list();
+      const settings: readonly ExtractableRepository[] =
+        configuredRepositories ??
+        (await new ElasticsearchRepositorySettingsStore(
+          elasticsearch.client.asCurrentUser,
+          settingsIndex
+        ).list());
       const byIdentity = new Map(settings.map((entry) => [entry.repository, entry]));
       const selected: BatchRepository[] = [];
       for (const entry of requested.length === 0

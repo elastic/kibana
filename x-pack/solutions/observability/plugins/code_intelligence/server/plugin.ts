@@ -150,6 +150,18 @@ export class CodeIntelligencePlugin
         createSourceSession,
         validator: new SkippedQueryValidator(),
       }),
+      ...(this.config.source === 'local_git'
+        ? {
+            configuredRepositories: this.config.repositories.map(
+              ({ repository, expectedRemoteUrl }) => ({
+                repository,
+                remoteUrl: expectedRemoteUrl,
+                defaultRef: 'HEAD',
+                enabled: true,
+              })
+            ),
+          }
+        : {}),
       getSpaceId,
     };
   }
