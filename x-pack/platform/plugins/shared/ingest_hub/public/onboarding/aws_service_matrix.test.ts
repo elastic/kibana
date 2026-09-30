@@ -295,10 +295,24 @@ describe('AWS service matrix', () => {
       ],
     };
 
-    const FIREWALL_OTEL_STATIC = AWS_SERVICES_STATIC.filter((e) => e.id === 'firewall_otel');
+    const FIREWALL_OTEL_STATIC = [
+      {
+        id: 'firewall_otel',
+        name: 'AWS Network Firewall',
+        category: 'security_identity_compliance' as const,
+        dataFormat: 'otel' as const,
+        policyTemplate: 'firewall',
+        ecfDataStream: 'firewall_logs',
+        excludedDataStreams: ['firewall_metrics'],
+        deploymentMethods: [{ method: 'ecf' as const, preferred: true }],
+        ecfOnly: true,
+        packageName: 'aws',
+        ecfLogType: 'networkfirewall' as const,
+      },
+    ];
     const FIREWALL_OTEL_MATRIX = buildAwsServiceMatrix(
       { aws: FIREWALL_PKG as any },
-      FIREWALL_OTEL_STATIC
+      FIREWALL_OTEL_STATIC as any
     );
     const firewallOtel = FIREWALL_OTEL_MATRIX[0];
 
