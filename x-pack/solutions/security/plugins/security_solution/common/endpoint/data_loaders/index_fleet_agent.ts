@@ -201,9 +201,15 @@ export const deleteIndexedFleetAgents = async (
   };
 
   if (indexedData.agents.length) {
+    // Fleet refuses to delete an agent policy while any active agent still references it.
+    // Agents are indexed into `.fleet-agents`; a `.fleet-agents-*` pattern does not match that
+    // index, so the policy delete then races whatever side effect removed the agents.
     response.agents = await esClient
       .deleteByQuery({
-        index: `${indexedData.fleetAgentsIndex}-*`,
+        index: [indexedData.fleetAgentsIndex, `${indexedData.fleetAgentsIndex}-*`],
+        allow_no_indices: true,
+        ignore_unavailable: true,
+        refresh: true,
         wait_for_completion: true,
         conflicts: 'proceed',
         query: {
