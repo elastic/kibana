@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import { render, screen, fireEvent, waitFor, act } from '@testing-library/react';
 import { EuiProvider } from '@elastic/eui';
 import { I18nProvider } from '@kbn/i18n-react';
 import { Router } from '@kbn/shared-ux-router';
@@ -338,6 +338,67 @@ describe('OnboardingPage', () => {
       // Only 3 toggles should exist and the first (last enabled) should be disabled.
       expect(toggles).toHaveLength(3);
       expect(toggles[0]).toBeDisabled();
+    });
+
+    it('disables the Enable button when the sole checked worker disappears from a workers refetch', async () => {
+      // Start with two workers: user unchecks the second, leaving only the first (last-enabled guard
+      // keeps its toggle disabled). Then a background refetch removes the first worker entirely —
+      // enabledCount should drop to 0 and the Enable button must be disabled.
+      const twoWorkers = {
+        workers: [
+          { id: ALL_ONBOARDING_WORKER_IDS[0], enabled: false },
+          { id: ALL_ONBOARDING_WORKER_IDS[1], enabled: false },
+        ],
+      };
+      const coreStart = coreMock.createStart();
+      (coreStart.application.capabilities as Record<string, unknown>).alertzero = { write: true };
+      const queryClient = new QueryClient({
+        defaultOptions: { queries: { retry: false }, mutations: { retry: false } },
+      });
+      queryClient.setQueryData(queryKeys.workers.list(), twoWorkers);
+      const httpGet = jest.fn().mockResolvedValue(twoWorkers);
+      const core = { ...coreStart, http: { ...coreStart.http, get: httpGet } };
+
+      const history = createMemoryHistory();
+      const makeUI = () => (
+        <I18nProvider>
+          <EuiProvider>
+            <QueryClientProvider client={queryClient}>
+              <KibanaContextProvider services={core}>
+                <Router history={history}>
+                  <OnboardingPage />
+                </Router>
+              </KibanaContextProvider>
+            </QueryClientProvider>
+          </EuiProvider>
+        </I18nProvider>
+      );
+
+      const { rerender } = render(makeUI());
+
+      // Catalog order: Alert Triage (B=ALL_ONBOARDING_WORKER_IDS[1]) is toggles[0],
+      // Attack Discovery (A=ALL_ONBOARDING_WORKER_IDS[0]) is toggles[1].
+      // Toggle Alert Triage (B) off — Attack Discovery (A) becomes the sole enabled worker.
+      const toggles = screen.getAllByRole('switch');
+      fireEvent.click(toggles[0]);
+      expect(screen.getByRole('button', { name: 'Enable and continue' })).not.toBeDisabled();
+
+      // Simulate a background workers refetch that removes the sole checked worker (Attack Discovery).
+      // Update the http mock so the next fetch returns only Alert Triage (B), then force a refetch.
+      const oneWorker = {
+        workers: [{ id: ALL_ONBOARDING_WORKER_IDS[1], enabled: false }], // only B = Alert Triage
+      };
+      httpGet.mockResolvedValue(oneWorker);
+      await act(async () => {
+        await queryClient.refetchQueries({ queryKey: queryKeys.workers.list() });
+      });
+      rerender(makeUI());
+
+      // enabledCount is now 0: only Alert Triage (B) remains and the user had checked it off.
+      // The Enable button must be disabled so no empty PATCH fan-out can be submitted.
+      await waitFor(() =>
+        expect(screen.getByRole('button', { name: 'Enable and continue' })).toBeDisabled()
+      );
     });
   });
 

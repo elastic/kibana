@@ -10,6 +10,7 @@ import {
   SYSTEM_SECURITY_WORKER_FLOOR_ATTACK_DISCOVERY_ID,
   SYSTEM_SECURITY_WORKER_FLOOR_ALERT_TRIAGE_ID,
   SYSTEM_SECURITY_WORKER_DETECTION_RULE_TUNING_ID,
+  SYSTEM_SECURITY_WORKER_DETECTION_RULE_CREATION_ID,
   SYSTEM_SECURITY_WORKER_FORENSICS_ENDPOINT_ANALYSIS_ID,
   SYSTEM_SECURITY_WORKER_HUNT_CONTINUOUS_THREAT_HUNT_ID,
 } from '@kbn/alertzero-common';
@@ -110,6 +111,10 @@ const ONBOARDING_WORKER_DESCRIPTIONS: Record<string, string> = {
   [SYSTEM_SECURITY_WORKER_HUNT_CONTINUOUS_THREAT_HUNT_ID]: i18n.translate(
     'xpack.alertzero.onboarding.workerDescription.continuousThreatHunt',
     { defaultMessage: 'Scheduled hunts against your data; surfaces leads' }
+  ),
+  [SYSTEM_SECURITY_WORKER_DETECTION_RULE_CREATION_ID]: i18n.translate(
+    'xpack.alertzero.onboarding.workerDescription.ruleCreation',
+    { defaultMessage: 'Drafts detection rules for coverage gaps; creates them on approval' }
   ),
 };
 
