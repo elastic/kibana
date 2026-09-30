@@ -5,21 +5,36 @@
  * 2.0.
  */
 import React from 'react';
-import { EuiTitle } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n-react';
-import { TechnicalPreviewBadge } from './technical_preview_badge';
-import { TEST_SUBJ_PAGE_TITLE } from '../constants';
+import { i18n } from '@kbn/i18n';
+import type { AppHeaderBadge } from '@kbn/app-header';
+import { SecurityAppHeader } from '../../common/components/app_header';
+import { DOCS_URL } from '../constants';
 
-export const AssetInventoryTitle = () => {
-  return (
-    <EuiTitle size="l" data-test-subj={TEST_SUBJ_PAGE_TITLE}>
-      <h1>
-        <FormattedMessage
-          id="xpack.securitySolution.assetInventory.title"
-          defaultMessage="Inventory"
-        />
-        <TechnicalPreviewBadge />
-      </h1>
-    </EuiTitle>
-  );
-};
+const PAGE_TITLE = i18n.translate('xpack.securitySolution.assetInventory.title', {
+  defaultMessage: 'Inventory',
+});
+
+const TECHNICAL_PREVIEW_LABEL = i18n.translate(
+  'xpack.securitySolution.assetInventory.technicalPreviewLabel',
+  { defaultMessage: 'Technical Preview' }
+);
+
+const TECHNICAL_PREVIEW_TOOLTIP = i18n.translate(
+  'xpack.securitySolution.assetInventory.technicalPreviewTooltip',
+  {
+    defaultMessage:
+      'This functionality is experimental and not supported. It may change or be removed at any time.',
+  }
+);
+
+const BADGES: AppHeaderBadge[] = [
+  {
+    label: TECHNICAL_PREVIEW_LABEL.toUpperCase(),
+    tooltip: TECHNICAL_PREVIEW_TOOLTIP,
+    color: 'hollow',
+  },
+];
+
+export const AssetInventoryTitle = () => (
+  <SecurityAppHeader title={PAGE_TITLE} badges={BADGES} spacing="largeBleed" docLink={DOCS_URL} />
+);
