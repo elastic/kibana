@@ -17,6 +17,9 @@
     ],
     "optionalPlugins": [
       "agentBuilder"
+    ],
+    "requiredBundles": [
+      "dashboard"
     ]
   }
 }
