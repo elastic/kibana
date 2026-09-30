@@ -10,9 +10,10 @@
 import React, { useCallback, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux-v7';
 import { i18n } from '@kbn/i18n';
-import { useRunWorkflow, useWorkflowsCapabilities } from '@kbn/workflows-ui';
+import { useRunWorkflow, useTestWorkflow, useWorkflowsCapabilities } from '@kbn/workflows-ui';
 import {
   selectEditorYaml,
+  selectExecution,
   selectIsTestModalOpen,
   selectReplayExecutionId,
   selectWorkflow,
@@ -41,17 +42,23 @@ export const WorkflowDetailTestModal = () => {
 
   const isTestModalOpen = useSelector(selectIsTestModalOpen);
   const replayExecutionId = useSelector(selectReplayExecutionId);
+  const execution = useSelector(selectExecution);
   const definition = useSelector(selectWorkflowDefinition);
   const workflowId = useSelector(selectWorkflowId);
   const yamlString = useSelector(selectEditorYaml);
 
   const testWorkflow = useAsyncThunk(testWorkflowThunk);
   const { mutateAsync: runWorkflow } = useRunWorkflow();
-  const isProductionReplay = Boolean(replayExecutionId);
+  const { mutateAsync: testSavedWorkflow } = useTestWorkflow();
+  const isReplay = Boolean(replayExecutionId);
+  // The flyout keeps this execution loaded. Match its run mode, same as bulk re-run.
+  const replayIsTestRun =
+    isReplay && execution?.id === replayExecutionId && execution.isTestRun === true;
+  const isProductionReplay = isReplay && !replayIsTestRun;
 
   const handleRunWorkflow = useCallback(
     async (inputs: Record<string, unknown>, triggerTab?: WorkflowTriggerTab) => {
-      if (isProductionReplay) {
+      if (isReplay) {
         if (!workflowId) {
           const missingIdError = new Error(
             i18n.translate('workflows.detail.testModal.reRunMissingWorkflowId', {
@@ -68,7 +75,9 @@ export const WorkflowDetailTestModal = () => {
         }
 
         try {
-          const result = await runWorkflow({ id: workflowId, inputs });
+          const result = replayIsTestRun
+            ? await testSavedWorkflow({ workflowId, inputs })
+            : await runWorkflow({ id: workflowId, inputs });
           if (result?.workflowExecutionId) {
             setSelectedExecution(result.workflowExecutionId);
           }
@@ -91,10 +100,12 @@ export const WorkflowDetailTestModal = () => {
       }
     },
     [
-      isProductionReplay,
+      isReplay,
       notifications.toasts,
+      replayIsTestRun,
       runWorkflow,
       setSelectedExecution,
+      testSavedWorkflow,
       testWorkflow,
       workflowId,
     ]
