@@ -9,6 +9,8 @@ import { expect } from 'expect';
 import type { FtrProviderContext } from '../../ftr_provider_context';
 import type { RoleCredentials } from '../../services';
 
+const ALERTS_PATH = '/app/observability/alerts';
+
 export default ({ getPageObject, getService }: FtrProviderContext) => {
   const svlCommonPage = getPageObject('svlCommonPage');
   const svlCommonNavigation = getPageObject('svlCommonNavigation');
@@ -123,7 +125,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
       const uuid = ` ${uuidv4()}`;
       const ruleName = `Custom threshold rule${uuid}`;
       it('logs in with privileged role', async () => {
-        await svlCommonPage.loginWithPrivilegedRole();
+        await svlCommonPage.loginWithPrivilegedRole({ initialPath: ALERTS_PATH });
       });
 
       createCustomThresholdRule({
@@ -148,7 +150,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
       it('logs in with logs only role', async () => {
         await samlAuth.setCustomRole(ROLES.logs_only);
 
-        await svlCommonPage.loginWithCustomRole();
+        await svlCommonPage.loginWithCustomRole({ initialPath: ALERTS_PATH });
       });
 
       createCustomThresholdRule({ ruleName, consumersToVerify: new Set(['All', 'Logs']) });
@@ -171,7 +173,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
       it('logs in with infra only role', async () => {
         await samlAuth.setCustomRole(ROLES.infra_only);
 
-        await svlCommonPage.loginWithCustomRole();
+        await svlCommonPage.loginWithCustomRole({ initialPath: ALERTS_PATH });
       });
 
       createCustomThresholdRule({ ruleName, consumersToVerify: new Set(['All', 'Metrics']) });
