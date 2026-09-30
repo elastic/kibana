@@ -94,7 +94,6 @@ import {
   canEnableSyncIntegrations,
   createOrUpdateFleetSyncedIntegrationsIndex,
 } from './setup/fleet_synced_integrations';
-import { applyManagedOtlpDefaults } from './utils/managed_otlp';
 import { assertPrivilegesInSpaces } from './security/assert_privileges_in_spaces';
 
 type Nullable<T> = { [P in keyof T]: T[P] | null };
