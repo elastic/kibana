@@ -5,24 +5,13 @@
  * 2.0.
  */
 
-import * as t from 'io-ts';
+import type { SchemaOutput } from '../schema_output';
+import { AlertConfigCodec, AlertConfigsCodec } from '../zod/alert_config';
 
-export const AlertConfigCodec = t.intersection([
-  t.interface({
-    enabled: t.boolean,
-  }),
-  t.partial({
-    groupBy: t.string,
-  }),
-]);
+export { AlertConfigCodec, AlertConfigsCodec };
 
-export const AlertConfigsCodec = t.partial({
-  tls: AlertConfigCodec,
-  status: AlertConfigCodec,
-});
-
-export type AlertConfig = t.TypeOf<typeof AlertConfigCodec>;
-export type AlertConfigs = t.TypeOf<typeof AlertConfigsCodec>;
+export type AlertConfig = SchemaOutput<typeof AlertConfigCodec>;
+export type AlertConfigs = SchemaOutput<typeof AlertConfigsCodec>;
 
 export const toggleStatusAlert = (configs: AlertConfigs = {}): AlertConfigs => {
   if (configs.status?.enabled) {

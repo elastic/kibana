@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { queryKeys as platformQueryKeys } from '@kbn/agentic-investigations-plugin/public';
+import { queryKeys as platformQueryKeys } from '@kbn/proposals-plugin/public';
 
 export const queryKeys = {
   /**

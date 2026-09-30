@@ -27,6 +27,9 @@ const tileIcon = (logo: LogoIconProps['logo'], color: LogoIconProps['color']) =>
   <LogoIcon logo={logo} isAvatar size="l" avatarType="space" hasBorder color={color} />
 );
 
+const opensInNewTab = (event: React.MouseEvent) =>
+  event.button !== 0 || event.metaKey || event.altKey || event.ctrlKey || event.shiftKey;
+
 /**
  * The o11y flavor of the Add Data grid: plugin tile content plus everything
  * plugin-specific (navigation, icons, test subjects) mapped into view-models.
@@ -73,8 +76,21 @@ export const useObservabilityCuratedCategories = ({
       {
         // ingest_hub's guided AWS flow wins over the CloudWatch quickstart
         // while it rolls out behind its own flag.
+        // An href cannot carry router state, so the click handler passes `newSession`.
         aws: isIngestHubOnboardingEnabled
-          ? { href: getUrlForApp?.('onboarding', { path: '/aws' }) }
+          ? {
+              href: getUrlForApp?.('onboarding', { path: '/aws' }),
+              onClick: (event: React.MouseEvent) => {
+                if (opensInNewTab(event)) {
+                  return;
+                }
+                event.preventDefault();
+                application?.navigateToApp('onboarding', {
+                  path: '/aws',
+                  state: { newSession: true },
+                });
+              },
+            }
           : reactRouterNavigate(history, '/aws'),
         opentelemetry: isManagedOtlpServiceAvailable
           ? reactRouterNavigate(history, '/otel-apm')

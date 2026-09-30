@@ -9,7 +9,8 @@ import React from 'react';
 import { act, render, screen } from '@testing-library/react';
 import { Subject } from 'rxjs';
 import type { Observable } from 'rxjs';
-import type { ChatEvent, Conversation, TimelineEvent } from '@kbn/agent-builder-common';
+import type { ChatEvent, Conversation, ConversationEvent } from '@kbn/agent-builder-common';
+import type { VersionedAttachment } from '@kbn/agent-builder-common/attachments';
 import type { BrowserChatEvent } from '@kbn/agent-builder-browser/events';
 import { ConversationStreamService } from '../../../../services/events/conversation_stream_service';
 import { useConversation } from '../../../hooks/use_conversation';
@@ -18,6 +19,9 @@ import { useStreamRecord } from '../../../context/streaming/streaming_context';
 import { createUserMessageEvent } from './items/user_message_event.factory';
 import { createExecutionStartedEvent } from './items/execution_started.factory';
 import { createExecutionTerminatedEvent } from './items/execution_terminated_event.factory';
+import { createAttachmentAddedEvent } from './items/attachment_added_event.factory';
+import { createVersionedAttachment } from './items/versioned_attachment.factory';
+import { CUSTOM_EVENT_TYPE, createCustomEvent } from './items/custom_event.factory';
 import type { TimelineItem } from './types';
 import { TimelineConnector } from './timeline_connector';
 
@@ -35,12 +39,28 @@ jest.mock('../../../context/streaming/streaming_context', () => ({
   useStreamRecord: jest.fn(),
   useConversationStreamService: () => mockStreamService,
 }));
-jest.mock('../conversation_rounds/rounds_screen_reader_status', () => ({
-  RoundsScreenReaderStatus: () => null,
+jest.mock('./screen_reader_status', () => ({
+  TimelineScreenReaderStatus: () => null,
 }));
 jest.mock('../../../hooks/use_conversation_stream', () => ({
   useConversationStream: () => ({ isResuming: false }),
 }));
+jest.mock('../../../hooks/use_agent_builder_service', () => ({
+  useAgentBuilderServices: () => ({
+    attachmentsService: {
+      hasAttachmentType: (type: string) => registeredAttachmentTypes.has(type),
+    },
+    conversationEventsService: {
+      getUiDefinition: (type: string) =>
+        registeredEventTypes.has(type) ? { type, render: () => null } : undefined,
+    },
+  }),
+}));
+
+/** Attachment types with a UI in this test's Kibana; empty unless a test registers one. */
+const registeredAttachmentTypes = new Set<string>();
+/** Custom event types with a UI in this test's Kibana; empty unless a test registers one. */
+const registeredEventTypes = new Set<string>();
 jest.mock('./timeline', () => ({
   Timeline: ({ items }: { items: TimelineItem[] }) => (
     <ul>
@@ -90,8 +110,8 @@ const setState = ({
   });
 };
 
-const conversationWith = (events: TimelineEvent[]) =>
-  ({ id: conversationId, events, rounds: [] } as unknown as Conversation);
+const conversationWith = (events: ConversationEvent[], attachments?: VersionedAttachment[]) =>
+  ({ id: conversationId, events, attachments, rounds: [] } as unknown as Conversation);
 
 const renderedItems = () => screen.getAllByTestId('item').map((el) => el.textContent);
 
@@ -110,6 +130,8 @@ const savedUserMessage = createUserMessageEvent({ id: 'round-1::user_message' })
 describe('TimelineConnector', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    registeredAttachmentTypes.clear();
+    registeredEventTypes.clear();
     mockStreamService.clearPersistedExecution(conversationId, 'round-1::execution');
   });
 
@@ -231,6 +253,87 @@ describe('TimelineConnector', () => {
     });
     rerender(<TimelineConnector />);
     expect(renderedItems()[0]).toBe('userMessage:round-1::user_message:saved-1');
+  });
+
+  describe('inline attachments', () => {
+    const inlineAdded = createAttachmentAddedEvent({ id: 'round-1::attachment_added' });
+    const record = createVersionedAttachment({ id: inlineAdded.data.attachment_id });
+
+    it('shows the card once a refetch brings the event and its record', () => {
+      registeredAttachmentTypes.add(record.type);
+      setState({ conversation: conversationWith([savedUserMessage, started, terminated]) });
+      const { rerender } = render(<TimelineConnector />);
+      expect(renderedItems()).toHaveLength(2);
+
+      setState({
+        conversation: conversationWith(
+          [savedUserMessage, started, terminated, inlineAdded],
+          [record]
+        ),
+      });
+      rerender(<TimelineConnector />);
+
+      expect(renderedItems()).toEqual([
+        'userMessage:round-1::user_message:',
+        'agentTurn:round-1::execution:completed',
+        'attachment:round-1::attachment_added:',
+      ]);
+    });
+
+    it('shows nothing for the event when its type has no UI here', () => {
+      setState({
+        conversation: conversationWith(
+          [savedUserMessage, started, terminated, inlineAdded],
+          [record]
+        ),
+      });
+      render(<TimelineConnector />);
+
+      expect(renderedItems()).toEqual([
+        'userMessage:round-1::user_message:',
+        'agentTurn:round-1::execution:completed',
+      ]);
+    });
+
+    it('shows nothing for the event when the record is gone', () => {
+      registeredAttachmentTypes.add(record.type);
+      setState({
+        conversation: conversationWith([savedUserMessage, started, terminated, inlineAdded], []),
+      });
+      render(<TimelineConnector />);
+
+      expect(renderedItems()).toHaveLength(2);
+    });
+  });
+
+  describe('custom events', () => {
+    const note = createCustomEvent({ id: 'note-1' });
+
+    it('shows the event once a refetch brings it and its type has a UI here', () => {
+      registeredEventTypes.add(CUSTOM_EVENT_TYPE);
+      setState({ conversation: conversationWith([savedUserMessage, started, terminated]) });
+      const { rerender } = render(<TimelineConnector />);
+      expect(renderedItems()).toHaveLength(2);
+
+      setState({ conversation: conversationWith([savedUserMessage, started, terminated, note]) });
+      rerender(<TimelineConnector />);
+
+      expect(renderedItems()).toEqual([
+        'userMessage:round-1::user_message:',
+        'agentTurn:round-1::execution:completed',
+        'customEvent:note-1:',
+      ]);
+    });
+
+    it('shows nothing for the event when its type has no UI here', () => {
+      setState({ conversation: conversationWith([savedUserMessage, started, terminated, note]) });
+      render(<TimelineConnector />);
+
+      expect(renderedItems()).toEqual([
+        'userMessage:round-1::user_message:',
+        'agentTurn:round-1::execution:completed',
+      ]);
+    });
   });
 
   it('observes the live events of a conversation that has not been fetched yet', () => {

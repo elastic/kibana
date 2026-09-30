@@ -10,6 +10,7 @@
 import { ExecutionStatus } from '@kbn/workflows';
 import type { WorkflowStepExecutionDto } from '@kbn/workflows';
 import { isNotRunStatus } from './get_failed_step_position';
+import { parseIterationIndex } from './parse_iteration_index';
 
 /** Minimal tree shape needed to derive iteration status from descendants. */
 export interface IterationStatusTreeItem {
@@ -118,7 +119,7 @@ export const buildIterationStatusOverrides = (
   const derivedByIndex = new Map<number, ExecutionStatus>();
   for (const child of children) {
     if (isIterationStepType(child.stepType)) {
-      const index = parseInt(child.stepId, 10);
+      const index = parseIterationIndex(child.stepId);
       if (!Number.isNaN(index)) {
         derivedByIndex.set(index, deriveIterationStatus(child, stepExecutionMap));
       }

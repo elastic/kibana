@@ -10,8 +10,8 @@ import { EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { ExecutionFailedEvent as ExecutionFailedEventData } from '@kbn/agent-builder-common';
 import { AGENT_BUILDER_UI_EBT, deserializeExecutionError } from '@kbn/agent-builder-common';
-import { StepLayout } from '../../conversation_rounds/round_events/step_layout';
-import { RoundError } from '../../conversation_rounds/round_error/round_error';
+import { StepLayout } from '../event_steps/step_layout';
+import { ExecutionError } from '../errors/execution_error';
 
 interface ExecutionFailedEventProps {
   event: ExecutionFailedEventData;
@@ -35,7 +35,7 @@ export const ExecutionFailedEvent: React.FC<ExecutionFailedEventProps> = ({ even
         }
         onClick={() => setIsExpanded((expanded) => !expanded)}
         isExpanded={isExpanded}
-        expansion={<RoundError error={error} />}
+        expansion={<ExecutionError error={error} />}
         ebtAction={AGENT_BUILDER_UI_EBT.action.conversation.EXPAND_EXECUTION_ERROR}
       />
     </div>

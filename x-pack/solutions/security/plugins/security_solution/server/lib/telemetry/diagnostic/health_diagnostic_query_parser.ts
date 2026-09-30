@@ -7,6 +7,7 @@
 
 import { z } from '@kbn/zod/v4';
 import * as YAML from 'yaml';
+import semver from 'semver';
 import {
   Action,
   QueryType,
@@ -31,6 +32,13 @@ const expiresAtSchema = z
     z.union([z.iso.date(), z.iso.datetime({ offset: true })])
   )
   .transform((val) => new Date(val).toISOString())
+  .optional();
+
+const stackVersionsSchema = z
+  .string()
+  .refine((val) => semver.validRange(val) !== null, {
+    message: 'stackVersions must be a valid node-semver range',
+  })
   .optional();
 
 // ---------------------------------------------------------------------------
@@ -277,7 +285,7 @@ const v3ApiSchema = z
     return q;
   });
 
-// V4 index: same as v3 but filterlist is optional (defaults to {}) and adds encryptDocument/expiresAt.
+// V4 index: same as v3 but filterlist is optional (defaults to {}) and adds encryptDocument/expiresAt/stackVersions.
 const v4IndexSchema = z
   .object({
     version: z.literal(4),
@@ -285,6 +293,7 @@ const v4IndexSchema = z
     filterlist: filterlistSchema.optional(),
     encryptDocument: z.boolean().optional(),
     expiresAt: expiresAtSchema,
+    stackVersions: stackVersionsSchema,
   })
   .strict()
   .superRefine(validateIndexQuery)
@@ -292,10 +301,11 @@ const v4IndexSchema = z
   .transform((data): IndexQuery => {
     const q = transformIndexQuery(data);
     if (data.expiresAt !== undefined) q.expiresAt = data.expiresAt;
+    if (data.stackVersions !== undefined) q.stackVersions = data.stackVersions;
     return q;
   });
 
-// V4 API: same as v3 but filterlist is optional (defaults to {}) and adds encryptDocument.
+// V4 API: same as v3 but filterlist is optional (defaults to {}) and adds encryptDocument/expiresAt/stackVersions.
 const v4ApiSchema = z
   .object({
     id: z.string().min(1),
@@ -314,6 +324,7 @@ const v4ApiSchema = z
     encryptionKeyId: z.string().min(1).optional(),
     encryptDocument: z.boolean().optional(),
     expiresAt: expiresAtSchema,
+    stackVersions: stackVersionsSchema,
   })
   .strict()
   .superRefine((data, ctx) => {
@@ -346,6 +357,7 @@ const v4ApiSchema = z
     if (data.encryptionKeyId !== undefined) q.encryptionKeyId = data.encryptionKeyId;
     if (data.encryptDocument === true) q.encryptDocument = true;
     if (data.expiresAt !== undefined) q.expiresAt = data.expiresAt;
+    if (data.stackVersions !== undefined) q.stackVersions = data.stackVersions;
     return q;
   });
 

@@ -21,8 +21,14 @@ type RegisteredWorkerId = (typeof SYSTEM_SECURITY_WORKER_IDS)[number];
 
 interface ExpectedWorkerSettings {
   settingsVersion: number;
-  /** Present only for schedule-driven Workers. */
+  /** Present only for Workers that expose their interval as a Watch setting. */
   scheduleInterval?: string;
+  /**
+   * The interval on the Worker's scheduled trigger. Defaults to `scheduleInterval`;
+   * spell it out only for a Worker whose cadence is fixed in the definition and
+   * deliberately not offered as a setting.
+   */
+  every?: string;
   /** Present only for Workers with Watch-owned settings. */
   extras?: Record<string, unknown>;
   triggerTypes: string[];
@@ -40,12 +46,19 @@ const EXPECTED_WORKER_SETTINGS: Record<RegisteredWorkerId, ExpectedWorkerSetting
     scheduleInterval: '24h',
     triggerTypes: ['scheduled'],
   },
+  // Sweeps on a fixed 1m cadence that is not a setting, so it has `every` without
+  // `scheduleInterval`. Manual stays alongside it so a sweep can be kicked on demand.
+  'system-security-forensics-endpoint-analysis': {
+    settingsVersion: 1,
+    every: '1m',
+    triggerTypes: ['scheduled', 'manual'],
+  },
   'system-security-hunt-continuous-threat-hunt': { settingsVersion: 1, triggerTypes: ['manual'] },
   // Keeps manual alongside the schedule so a sweep can be kicked on demand.
   'system-security-detection-rule-tuning': {
     settingsVersion: 1,
     scheduleInterval: '2h',
-    extras: { analysisWindowDays: 14 },
+    extras: { analysisWindowDays: 7, fpCountThreshold: 10, fpRateThresholdPct: 50 },
     triggerTypes: ['scheduled', 'manual'],
   },
   'system-security-detection-rule-creation': { settingsVersion: 1, triggerTypes: ['manual'] },
@@ -96,7 +109,9 @@ describe('workerRegistry', () => {
 
       // A Worker with no schedule must not gain one by accident, and vice versa.
       expect(parsed.triggers?.map(({ type }) => type)).toEqual(expected.triggerTypes);
-      expect(parsed.triggers?.[0]?.with?.every).toBe(expected.scheduleInterval);
+      expect(parsed.triggers?.[0]?.with?.every).toBe(expected.every ?? expected.scheduleInterval);
+      // A fixed cadence must stay out of the settings contract, or the shared Watch
+      // page would render an interval control the Worker does not accept writes for.
       if (expected.scheduleInterval === undefined) {
         expect(yaml).not.toContain('scheduleInterval');
       }

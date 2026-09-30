@@ -11,6 +11,8 @@ import {
   MAX_SUMMARY_LENGTH,
   MAX_SYMPTOM_HYPOTHESIS_LENGTH,
 } from '@kbn/significant-events-schema';
+import type { AlertEventsClientApi } from '@kbn/alerting-v2-plugin/server';
+import type { Logger } from '@kbn/core/server';
 import { updateSignificantEventStatus } from './update_event_status';
 import { EventClient } from './event_client';
 import type { SignificantEvent } from './data_stream';
@@ -28,27 +30,31 @@ const createSignificantEvent = (overrides: Partial<SignificantEvent> = {}): Sign
   ...overrides,
 });
 
-/**
- * @param hits - results returned for the first esql query (findByEventUuid)
- * @param lineageHits - when provided, returned for the second query (findByEventId);
- *   when omitted both queries return the same `hits` (backward-compat behaviour).
- */
-const createEventClient = (hits: SignificantEvent[], lineageHits?: SignificantEvent[]) => {
+const makeAlertEventsClient = (
+  overrides: Partial<jest.Mocked<AlertEventsClientApi>> = {}
+): jest.Mocked<AlertEventsClientApi> =>
+  ({
+    createAlertEvent: jest.fn().mockResolvedValue(undefined),
+    ...overrides,
+  } as jest.Mocked<AlertEventsClientApi>);
+
+const makeLogger = (): jest.Mocked<Logger> =>
+  ({
+    error: jest.fn(),
+    warn: jest.fn(),
+    info: jest.fn(),
+    debug: jest.fn(),
+  } as unknown as jest.Mocked<Logger>);
+
+/** @param hits - results returned for the single findByEventId esql query. */
+const createEventClient = (hits: SignificantEvent[]) => {
   const okResponse = { errors: false, items: [] } as unknown as BulkResponse;
   const dataStreamClient = { create: jest.fn().mockResolvedValue(okResponse) };
 
-  const makeResult = (h: SignificantEvent[]) => ({
+  const queryMock = jest.fn().mockResolvedValue({
     columns: [{ name: '_source' }],
-    values: h.map((event) => [{ ...event }]),
+    values: hits.map((event) => [{ ...event }]),
   });
-
-  const queryMock = jest.fn().mockResolvedValue(makeResult(hits));
-  if (lineageHits !== undefined) {
-    // Sequence the two internal esql calls: findByEventUuid first, findByEventId second.
-    queryMock
-      .mockResolvedValueOnce(makeResult(hits))
-      .mockResolvedValueOnce(makeResult(lineageHits));
-  }
 
   const esClient = { esql: { query: queryMock } };
   const client = new EventClient({
@@ -66,8 +72,10 @@ describe('updateSignificantEventStatus', () => {
 
     const result = await updateSignificantEventStatus({
       eventClient: client,
-      eventUuid: 'event-1',
+      eventId: existing.event_id,
       status: 'closed',
+      alertEventsClient: makeAlertEventsClient(),
+      logger: makeLogger(),
     });
 
     expect(result).toEqual({
@@ -102,8 +110,10 @@ describe('updateSignificantEventStatus', () => {
     await expect(
       updateSignificantEventStatus({
         eventClient: client,
-        eventUuid: 'event-1',
+        eventId: existing.event_id,
         status: 'closed',
+        alertEventsClient: makeAlertEventsClient(),
+        logger: makeLogger(),
       })
     ).resolves.toMatchObject({ updated: 1, status: 'closed' });
 
@@ -116,9 +126,11 @@ describe('updateSignificantEventStatus', () => {
 
     await updateSignificantEventStatus({
       eventClient: client,
-      eventUuid: 'event-1',
+      eventId: existing.event_id,
       status: 'closed',
       assessmentNote: 'Automatically closed by cleanup.',
+      alertEventsClient: makeAlertEventsClient(),
+      logger: makeLogger(),
     });
 
     const [[callArg]] = dataStreamClient.create.mock.calls;
@@ -135,8 +147,10 @@ describe('updateSignificantEventStatus', () => {
 
     await updateSignificantEventStatus({
       eventClient: client,
-      eventUuid: 'event-1',
+      eventId: existing.event_id,
       status: 'closed',
+      alertEventsClient: makeAlertEventsClient(),
+      logger: makeLogger(),
     });
 
     const [[callArg]] = dataStreamClient.create.mock.calls;
@@ -148,12 +162,13 @@ describe('updateSignificantEventStatus', () => {
 
     const result = await updateSignificantEventStatus({
       eventClient: client,
-      eventUuid: 'missing-event',
+      eventId: 'missing-event',
       status: 'closed',
+      alertEventsClient: makeAlertEventsClient(),
+      logger: makeLogger(),
     });
 
     expect(result).toEqual({
-      event_uuid: 'missing-event',
       updated: 0,
       ignored: 1,
       status: 'closed',
@@ -167,15 +182,17 @@ describe('updateSignificantEventStatus', () => {
 
     const result = await updateSignificantEventStatus({
       eventClient: client,
-      eventUuid: 'event-1',
+      eventId: existing.event_id,
       status: 'closed',
+      alertEventsClient: makeAlertEventsClient(),
+      logger: makeLogger(),
     });
 
     expect(result).toEqual({ event_uuid: 'event-1', updated: 0, ignored: 1, status: 'closed' });
     expect(dataStreamClient.create).not.toHaveBeenCalled();
   });
 
-  it('resolves lineage: update targets the latest event_id version, not a stale caller reference', async () => {
+  it('targets the latest version in the lineage when multiple versions exist, not the first', async () => {
     const e0 = createSignificantEvent({
       event_uuid: 'event-0',
       event_id: 'event-id-1',
@@ -188,13 +205,15 @@ describe('updateSignificantEventStatus', () => {
       '@timestamp': '2026-01-01T00:01:00.000Z',
       status: 'dismissed',
     });
-    // findByEventUuid returns only E0 (the stale ref); findByEventId returns the full lineage
-    const { client, dataStreamClient } = createEventClient([e0], [e0, e1]);
+    // findByEventId returns the full lineage, ordered ascending by @timestamp.
+    const { client, dataStreamClient } = createEventClient([e0, e1]);
 
     const result = await updateSignificantEventStatus({
       eventClient: client,
-      eventUuid: 'event-0',
+      eventId: 'event-id-1',
       status: 'closed',
+      alertEventsClient: makeAlertEventsClient(),
+      logger: makeLogger(),
     });
 
     expect(result.updated).toBe(1);
@@ -202,8 +221,87 @@ describe('updateSignificantEventStatus', () => {
     const [[callArg]] = dataStreamClient.create.mock.calls;
     const written: SignificantEvent = callArg.documents[0];
 
-    // Must chain off E1 (the true latest), not E0 (the stale caller reference)
+    // Must chain off E1 (the latest lineage entry), not E0 (the first)
     expect(written.previous_event_uuid).toBe('event-1');
     expect(written.status).toBe('closed');
+  });
+
+  describe('dual-write to .rule-events (Writer 2)', () => {
+    it('calls createAlertEvent once with the toRuleEvent output of the updated event', async () => {
+      const existing = createSignificantEvent({ event_uuid: 'event-1', status: 'open' });
+      const { client } = createEventClient([existing]);
+      const alertEventsClient = makeAlertEventsClient();
+      const logger = makeLogger();
+
+      await updateSignificantEventStatus({
+        eventClient: client,
+        eventId: existing.event_id,
+        status: 'closed',
+        alertEventsClient,
+        logger,
+      });
+
+      expect(alertEventsClient.createAlertEvent).toHaveBeenCalledTimes(1);
+      const [calledWith] = alertEventsClient.createAlertEvent.mock.calls[0];
+      // Verify the argument is the toRuleEvent output: must have fingerprint and alert_status
+      expect(calledWith).toMatchObject({
+        fingerprint: existing.event_id,
+        alert_status: 'inactive', // 'closed' maps to inactive
+      });
+    });
+
+    it('does not call createAlertEvent when no write occurs (status unchanged)', async () => {
+      const existing = createSignificantEvent({ event_uuid: 'event-1', status: 'closed' });
+      const { client } = createEventClient([existing]);
+      const alertEventsClient = makeAlertEventsClient();
+
+      await updateSignificantEventStatus({
+        eventClient: client,
+        eventId: existing.event_id,
+        status: 'closed',
+        alertEventsClient,
+        logger: makeLogger(),
+      });
+
+      expect(alertEventsClient.createAlertEvent).not.toHaveBeenCalled();
+    });
+
+    it('does not call createAlertEvent when the event is not found', async () => {
+      const { client } = createEventClient([]);
+      const alertEventsClient = makeAlertEventsClient();
+
+      await updateSignificantEventStatus({
+        eventClient: client,
+        eventId: 'missing-event',
+        status: 'closed',
+        alertEventsClient,
+        logger: makeLogger(),
+      });
+
+      expect(alertEventsClient.createAlertEvent).not.toHaveBeenCalled();
+    });
+
+    it('returns success and logs error when createAlertEvent rejects (error suppression)', async () => {
+      const existing = createSignificantEvent({ event_uuid: 'event-1', status: 'open' });
+      const { client } = createEventClient([existing]);
+      const alertEventsClient = makeAlertEventsClient({
+        createAlertEvent: jest.fn().mockRejectedValue(new Error('index unavailable')),
+      });
+      const logger = makeLogger();
+
+      // Writer still returns success despite .rule-events failure
+      const result = await updateSignificantEventStatus({
+        eventClient: client,
+        eventId: existing.event_id,
+        status: 'closed',
+        alertEventsClient,
+        logger,
+      });
+
+      expect(result).toMatchObject({ updated: 1, status: 'closed' });
+      // Give the fire-and-forget promise a chance to settle (flush full microtask queue)
+      await new Promise(setImmediate);
+      expect(logger.error).toHaveBeenCalledWith(expect.stringContaining('index unavailable'));
+    });
   });
 });

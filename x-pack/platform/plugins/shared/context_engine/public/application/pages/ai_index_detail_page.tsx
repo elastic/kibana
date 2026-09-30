@@ -15,11 +15,13 @@ import {
   EuiTab,
   EuiTabs,
 } from '@elastic/eui';
+import { getEbtProps } from '@kbn/ebt-click';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React, { useEffect, useMemo, useState } from 'react';
 import { useHistory, useLocation, useParams } from 'react-router-dom';
 import type { AiIndexCreatedLocationState } from '../ai_index_created_location_state';
+import { CONTEXT_ENGINE_UI_EBT } from '../../../common/telemetry';
 import { KI_SUMMARY_PAGE_SIZE } from '../../../common/constants';
 import {
   AiIndexCreatedCallout,
@@ -31,7 +33,6 @@ import {
   SourcesPanel,
 } from '../components/ai_index_detail';
 import { KiListPanel } from '../components/ki';
-import { EditSourcesFlyout } from '../components/edit_sources_flyout';
 import { useAiIndex } from '../hooks/use_ai_index';
 import { useAiIndexOverviewSections } from '../hooks/use_ai_index_overview_sections';
 import { useKiList } from '../hooks/use_ki_list';
@@ -73,11 +74,17 @@ export const AiIndexDetailPage = () => {
   const history = useHistory<AiIndexCreatedLocationState | undefined>();
   const { aiIndex, isLoading, error, refetch } = useAiIndex(id);
   const { createContextEngineUrl, navigateToContextEngine } = useNavigation();
-  const [isEditingSources, setIsEditingSources] = useState(false);
   const [selectedTab, setSelectedTab] = useState<DetailTabId>('overview');
   const [showCreatedCallout, setShowCreatedCallout] = useState(
     () => location.state?.aiIndexCreated === true
   );
+
+  // Hide the callout as soon as the user adds a source.
+  useEffect(() => {
+    if (showCreatedCallout && aiIndex && aiIndex.sources.length > 0) {
+      setShowCreatedCallout(false);
+    }
+  }, [aiIndex, showCreatedCallout]);
 
   // Remove aiIndexCreated from location state after it has been shown
   useEffect(() => {
@@ -88,11 +95,15 @@ export const AiIndexDetailPage = () => {
     history.replace({ ...location, state: undefined });
   }, [location, history]);
 
-  const { summary } = useKiList({
+  const { summary, isLoading: isKiSummaryLoading } = useKiList({
     aiIndexId: aiIndex?.id,
     size: KI_SUMMARY_PAGE_SIZE,
     enabled: aiIndex !== undefined,
+    notifyOnError: true,
   });
+
+  const showKnowledgeIndicatorsTab =
+    aiIndex !== undefined && !isKiSummaryLoading && summary.total > 0;
 
   const { hideEditControls, showAutomationsPanel, showSignalsSection, showSignalsPanel } =
     useAiIndexOverviewSections({
@@ -137,37 +148,45 @@ export const AiIndexDetailPage = () => {
     />
   ) : (
     <>
-      <EuiTabs data-test-subj="contextAiIndexDetailTabs">
-        <EuiTab
-          isSelected={selectedTab === 'overview'}
-          onClick={() => setSelectedTab('overview')}
-          data-test-subj="contextAiIndexDetailTab-overview"
-        >
-          <FormattedMessage
-            id="xpack.contextEngine.aiIndexDetail.tabs.overview"
-            defaultMessage="Overview"
-          />
-        </EuiTab>
-        <EuiTab
-          isSelected={selectedTab === 'knowledge_indicators'}
-          onClick={() => setSelectedTab('knowledge_indicators')}
-          append={
-            summary.total > 0 ? (
-              <EuiNotificationBadge>{summary.total}</EuiNotificationBadge>
-            ) : undefined
-          }
-          data-test-subj="contextAiIndexDetailTab-knowledge_indicators"
-        >
-          <FormattedMessage
-            id="xpack.contextEngine.aiIndexDetail.tabs.knowledgeIndicators"
-            defaultMessage="Knowledge Indicators"
-          />
-        </EuiTab>
-      </EuiTabs>
+      {showKnowledgeIndicatorsTab && (
+        <>
+          <EuiTabs data-test-subj="contextAiIndexDetailTabs">
+            <EuiTab
+              isSelected={selectedTab === 'overview'}
+              onClick={() => setSelectedTab('overview')}
+              data-test-subj="contextAiIndexDetailTab-overview"
+              {...getEbtProps({
+                element: CONTEXT_ENGINE_UI_EBT.element.aiIndexDetailPage,
+                action: CONTEXT_ENGINE_UI_EBT.action.aiIndexDetail.TAB_OVERVIEW,
+              })}
+            >
+              <FormattedMessage
+                id="xpack.contextEngine.aiIndexDetail.tabs.overview"
+                defaultMessage="Overview"
+              />
+            </EuiTab>
+            <EuiTab
+              isSelected={selectedTab === 'knowledge_indicators'}
+              onClick={() => setSelectedTab('knowledge_indicators')}
+              append={<EuiNotificationBadge>{summary.total}</EuiNotificationBadge>}
+              data-test-subj="contextAiIndexDetailTab-knowledge_indicators"
+              {...getEbtProps({
+                element: CONTEXT_ENGINE_UI_EBT.element.aiIndexDetailPage,
+                action: CONTEXT_ENGINE_UI_EBT.action.aiIndexDetail.TAB_KNOWLEDGE_INDICATORS,
+              })}
+            >
+              <FormattedMessage
+                id="xpack.contextEngine.aiIndexDetail.tabs.knowledgeIndicators"
+                defaultMessage="Knowledge Indicators"
+              />
+            </EuiTab>
+          </EuiTabs>
 
-      <EuiSpacer size="m" />
+          <EuiSpacer size="m" />
+        </>
+      )}
 
-      {selectedTab === 'overview' && (
+      {(selectedTab === 'overview' || !showKnowledgeIndicatorsTab) && (
         <>
           {showCreatedCallout && (
             <AiIndexCreatedCallout onDismiss={() => setShowCreatedCallout(false)} />
@@ -188,9 +207,8 @@ export const AiIndexDetailPage = () => {
           <EuiSpacer size="m" />
           <SourcesPanel
             isLoading={isLoading}
-            sources={aiIndex?.sources ?? []}
-            canEdit={aiIndex !== undefined}
-            onEditSources={() => setIsEditingSources(true)}
+            aiIndex={aiIndex}
+            onSaved={refetch}
             isManaged={hideEditControls}
           />
           <EuiSpacer size="m" />
@@ -245,17 +263,6 @@ export const AiIndexDetailPage = () => {
       )}
 
       {selectedTab === 'knowledge_indicators' && aiIndex && <KiListPanel aiIndex={aiIndex} />}
-
-      {isEditingSources && aiIndex && (
-        <EditSourcesFlyout
-          aiIndex={aiIndex}
-          onClose={() => setIsEditingSources(false)}
-          onSaved={() => {
-            setIsEditingSources(false);
-            refetch();
-          }}
-        />
-      )}
     </>
   );
 
