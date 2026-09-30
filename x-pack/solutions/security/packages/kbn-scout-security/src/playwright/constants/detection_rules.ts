@@ -34,6 +34,11 @@ export interface CustomQueryRule {
   response_actions?: CustomQueryRuleResponseAction[];
 }
 
+export interface EqlRule extends Omit<CustomQueryRule, 'type' | 'response_actions'> {
+  type: 'eql';
+  language: 'eql';
+}
+
 export const DEFAULT_SECURITY_SOLUTION_INDEXES = [
   'apm-*-transaction*',
   'auditbeat-*',
@@ -56,5 +61,19 @@ export const CUSTOM_QUERY_RULE: CustomQueryRule = {
   severity: 'high',
   type: 'query',
   query: '*:*',
+  from: '2019-01-01T00:00:00.000Z',
+};
+
+export const EQL_RULE: EqlRule = {
+  index: DEFAULT_SECURITY_SOLUTION_INDEXES,
+  enabled: true,
+  name: 'EQL Alert Testing Query',
+  description: 'Tests a simple EQL query',
+  risk_score: 1,
+  rule_id: 'eql-rule-1',
+  severity: 'high',
+  type: 'eql',
+  language: 'eql',
+  query: 'any where process.name == "zsh"',
   from: '2019-01-01T00:00:00.000Z',
 };
