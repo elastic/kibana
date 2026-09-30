@@ -10,7 +10,10 @@ import type { SpaceId } from '@kbn/core-spaces-common';
 import { WorkflowNotFoundError } from '@kbn/workflows/common/errors';
 import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
 import type { SignificantEventsMaintenanceFailure } from '../../../common/maintenance/types';
-import { shouldRestoreSettingsBackedWorkflow } from './feature_settings';
+import {
+  shouldRestoreSettingsBackedWorkflow,
+  type PausedFeatureSettings,
+} from './feature_settings';
 import {
   buildCancelTargets,
   buildDisableTargets,
@@ -154,22 +157,26 @@ export const reEnableWorkflow = async (
 
 /**
  * Reset step: re-enable the workflows reset (or an earlier pause) disabled,
- * except settings-backed ones, which stay off alongside their toggles. Returns
- * the workflows that failed to re-enable so a later Resume can retry them.
+ * except settings-backed ones, which stay off alongside their toggles. A
+ * settings-backed workflow whose toggle could not be turned off (`settingsStillOn`)
+ * is restored too, so a toggle never reads "on" with its workflow disabled.
+ * Returns the workflows that failed to re-enable so a later Resume can retry them.
  */
 export const restoreWorkflowsAfterReset = async ({
   mgmt,
   workflows,
+  settingsStillOn,
   request,
   failures,
 }: {
   mgmt: ManagementApi | undefined;
   workflows: MaintenanceWorkflowTarget[];
+  settingsStillOn: PausedFeatureSettings;
   request: KibanaRequest;
   failures: SignificantEventsMaintenanceFailure[];
 }): Promise<MaintenanceWorkflowTarget[]> => {
   const eligible = workflows.filter((workflow) =>
-    shouldRestoreSettingsBackedWorkflow(workflow, undefined)
+    shouldRestoreSettingsBackedWorkflow(workflow, settingsStillOn)
   );
   if (!mgmt) {
     return eligible;

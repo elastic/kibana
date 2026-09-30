@@ -697,13 +697,17 @@ export const createSignificantEventsMaintenanceService = ({
         for (const target of await sweepWorkflows({ mgmt, spaceIds, request, failures })) {
           recoveryByKey.set(workflowKey(target), target);
         }
-        await featureSettings.reassertFeatureSettingsOff({ request, spaceIds, failures });
+        const settingsStillOn = await featureSettings.reassertFeatureSettingsOff({
+          request,
+          spaceIds,
+          failures,
+        });
 
         // The snapshot below searches the knowledge-indicator stream; refresh it first so
         // unrefreshed revisions are counted (and their rules found) before the wipe.
-        const esClient = server.core.elasticsearch.client.asScoped(request).asCurrentUser;
+        const internalEsClient = server.core.elasticsearch.client.asInternalUser;
         try {
-          await esClient.indices.refresh({
+          await internalEsClient.indices.refresh({
             index: KNOWLEDGE_INDICATORS_DATA_STREAM,
             ignore_unavailable: true,
           });
@@ -719,8 +723,8 @@ export const createSignificantEventsMaintenanceService = ({
           });
         const investigations = await deleteInvestigations(failures);
         const wipedDataStreams = await resetDataStreams({
-          esClient,
-          internalEsClient: server.core.elasticsearch.client.asInternalUser,
+          esClient: server.core.elasticsearch.client.asScoped(request).asCurrentUser,
+          internalEsClient,
           dataStreams: server.core.dataStreams,
           failures,
         });
@@ -731,6 +735,7 @@ export const createSignificantEventsMaintenanceService = ({
         const remainingWorkflows = await restoreWorkflowsAfterReset({
           mgmt,
           workflows: [...recoveryByKey.values()],
+          settingsStillOn,
           request,
           failures,
         });

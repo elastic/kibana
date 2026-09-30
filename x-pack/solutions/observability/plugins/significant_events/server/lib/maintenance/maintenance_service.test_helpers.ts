@@ -244,32 +244,32 @@ export function makeService(params?: {
       }
     )
   );
-  const indices = {
-    exists: jest.fn(async ({ index }: { index: string }) => streamDocuments.has(index)),
-    deleteDataStream: jest.fn(async ({ name }: { name: string }) => {
-      streamDocuments.delete(name);
-      return { acknowledged: true };
-    }),
-    createDataStream: jest.fn(async ({ name }: { name: string }) => {
-      streamDocuments.set(name, 0);
-      return { acknowledged: true };
-    }),
-    refresh: jest.fn(async () => ({})),
-  };
+  // The caller's client only deletes; `createDataStream` is a sentinel that must stay uncalled.
   const esClient = {
-    indices,
-    count: jest.fn(async ({ index }: { index: string }) => ({
-      count: streamDocuments.get(index) ?? 0,
-    })),
-  };
-  // Streams are recreated as `kibana_system`, so the internal client gets its own mock.
-  const internalEsClient = {
     indices: {
+      deleteDataStream: jest.fn(async ({ name }: { name: string }) => {
+        streamDocuments.delete(name);
+        return { acknowledged: true };
+      }),
       createDataStream: jest.fn(async ({ name }: { name: string }) => {
         streamDocuments.set(name, 0);
         return { acknowledged: true };
       }),
     },
+  };
+  // Everything else runs as `kibana_system`.
+  const internalEsClient = {
+    indices: {
+      exists: jest.fn(async ({ index }: { index: string }) => streamDocuments.has(index)),
+      createDataStream: jest.fn(async ({ name }: { name: string }) => {
+        streamDocuments.set(name, 0);
+        return { acknowledged: true };
+      }),
+      refresh: jest.fn(async () => ({})),
+    },
+    count: jest.fn(async ({ index }: { index: string }) => ({
+      count: streamDocuments.get(index) ?? 0,
+    })),
   };
   const initializeClient = jest.fn(async (_name: string) => ({}));
   const asScoped = jest.fn(() => ({ asCurrentUser: esClient }));

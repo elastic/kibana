@@ -22,9 +22,12 @@ export const RESET_REGISTERED_DATA_STREAMS = [
 ] as const;
 
 interface ResetDataStreamsParams {
-  /** Current-user client: `kibana_system` can initialize these streams but cannot delete them. */
+  /** Current-user client, used only to delete: `kibana_system` cannot delete these streams. */
   esClient: ElasticsearchClient;
-  /** `kibana_system` client: recreates streams so a delete-capable caller cannot strand one. */
+  /**
+   * `kibana_system` client for everything else (exists, refresh, count, create), so the
+   * caller needs nothing beyond delete privileges on the streams.
+   */
   internalEsClient: ElasticsearchClient;
   dataStreams: DataStreamsStart;
   failures: SignificantEventsMaintenanceFailure[];
@@ -36,7 +39,7 @@ interface ResetDataStreamsParams {
  */
 const ensureStreamHealthy = async (
   name: string,
-  { esClient, internalEsClient, dataStreams, failures }: ResetDataStreamsParams
+  { internalEsClient, dataStreams, failures }: ResetDataStreamsParams
 ): Promise<boolean> => {
   try {
     await dataStreams.initializeClient(name);
@@ -47,7 +50,7 @@ const ensureStreamHealthy = async (
 
   let exists = false;
   try {
-    exists = await esClient.indices.exists({ index: name });
+    exists = await internalEsClient.indices.exists({ index: name });
   } catch (error) {
     failures.push({ target: `data-stream:${name}`, error: toMessage(error) });
     return false;
@@ -68,13 +71,13 @@ const ensureStreamHealthy = async (
 /** Delete a healthy stream when it holds documents. Returns true when it was deleted. */
 const wipeIfPopulated = async (
   name: string,
-  { esClient, failures }: ResetDataStreamsParams
+  { esClient, internalEsClient, failures }: ResetDataStreamsParams
 ): Promise<boolean> => {
   let documentCount: number | undefined;
   try {
     // `_count` is search-based; refresh first so unrefreshed writes cannot masquerade as empty.
-    await esClient.indices.refresh({ index: name });
-    documentCount = (await esClient.count({ index: name })).count;
+    await internalEsClient.indices.refresh({ index: name });
+    documentCount = (await internalEsClient.count({ index: name })).count;
   } catch (error) {
     failures.push({ target: `data-stream:${name}:count`, error: toMessage(error) });
   }
@@ -114,10 +117,11 @@ const resetRegisteredDataStream = async (
 /** Delete the discoveries stream outright; its owning workflow recreates it. Returns true when deleted. */
 const deleteDiscoveriesDataStream = async ({
   esClient,
+  internalEsClient,
   failures,
 }: ResetDataStreamsParams): Promise<boolean> => {
   try {
-    if (!(await esClient.indices.exists({ index: DISCOVERIES_DATA_STREAM }))) {
+    if (!(await internalEsClient.indices.exists({ index: DISCOVERIES_DATA_STREAM }))) {
       return false;
     }
     await esClient.indices.deleteDataStream({ name: DISCOVERIES_DATA_STREAM }, { ignore: [404] });

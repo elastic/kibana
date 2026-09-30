@@ -114,11 +114,11 @@ describe('SignificantEventsMaintenanceService', () => {
       expect(streamDocuments.get(KNOWLEDGE_INDICATORS_DATA_STREAM)).toBe(0);
       expect(streamDocuments.has(DISCOVERIES_DATA_STREAM)).toBe(false);
       expect(esClient.indices.createDataStream).not.toHaveBeenCalled();
-      expect(esClient.indices.refresh).toHaveBeenCalledWith({
+      expect(internalEsClient.indices.refresh).toHaveBeenCalledWith({
         index: KNOWLEDGE_INDICATORS_DATA_STREAM,
         ignore_unavailable: true,
       });
-      expect(esClient.indices.refresh.mock.invocationCallOrder[0]).toBeLessThan(
+      expect(internalEsClient.indices.refresh.mock.invocationCallOrder[0]).toBeLessThan(
         countKnowledgeIndicators.mock.invocationCallOrder[0]
       );
       expect(asScoped).toHaveBeenCalledWith(REQUEST);
@@ -171,11 +171,11 @@ describe('SignificantEventsMaintenanceService', () => {
 
     it('skips a registered stream after its existence check fails and continues cleanup', async () => {
       const { api } = makeManagementApi();
-      const { service, esClient, internalEsClient } = makeService({
+      const { service, internalEsClient } = makeService({
         management: api,
         dataStreams: {},
       });
-      esClient.indices.exists.mockRejectedValueOnce(new Error('existence check failed'));
+      internalEsClient.indices.exists.mockRejectedValueOnce(new Error('existence check failed'));
 
       const summary = await service.reset({ request: REQUEST });
 
@@ -221,15 +221,15 @@ describe('SignificantEventsMaintenanceService', () => {
 
     it('refreshes a registered stream before counting so unrefreshed writes are wiped', async () => {
       const { api } = makeManagementApi();
-      const { service, esClient } = makeService({
+      const { service, internalEsClient } = makeService({
         management: api,
         dataStreams: { [DETECTIONS_DATA_STREAM]: 1 },
       });
 
       await service.reset({ request: REQUEST });
 
-      expect(esClient.indices.refresh.mock.invocationCallOrder[0]).toBeLessThan(
-        esClient.count.mock.invocationCallOrder[0]
+      expect(internalEsClient.indices.refresh.mock.invocationCallOrder[0]).toBeLessThan(
+        internalEsClient.count.mock.invocationCallOrder[0]
       );
     });
 
@@ -311,6 +311,35 @@ describe('SignificantEventsMaintenanceService', () => {
       ).toBe(false);
       const lastWrite = soClient.create.mock.calls.at(-1)?.[1] as Record<string, unknown>;
       expect(lastWrite.pausedSettings).toBeUndefined();
+    });
+
+    it('keeps a settings-backed workflow running when its toggle could not be turned off', async () => {
+      const { api, updateWorkflow } = makeManagementApi();
+      const { service } = makeService({
+        management: api,
+        continuousOnboardingEnabled: true,
+        failContinuousSet: true,
+      });
+
+      const summary = await service.reset({ request: REQUEST });
+
+      expect(summary.partialFailures).toContainEqual(
+        expect.objectContaining({ target: 'settings:continuous-onboarding' })
+      );
+      expect(updateWorkflow).toHaveBeenCalledWith(
+        SIGNIFICANT_EVENTS_KI_CONTINUOUS_ONBOARDING_WORKFLOW_ID,
+        { enabled: true },
+        expect.any(String),
+        REQUEST
+      );
+      expect(
+        updateWorkflow.mock.calls.some(
+          ([id, patch]) =>
+            id.startsWith(SIGNIFICANT_EVENTS_SCHEDULED_DETECTION_WORKFLOW_ID) &&
+            patch.enabled === true
+        )
+      ).toBe(false);
+      expect(summary.workflowsDisabled).toBe(0);
     });
 
     it('keeps failed workflow re-enables as retry inventory for Resume', async () => {
