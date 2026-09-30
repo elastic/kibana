@@ -61,6 +61,7 @@ const createWorkspaceMock = () =>
     runLayout: jest.fn(),
     stopLayout: jest.fn(),
     nodes: [],
+    nodesMap: {},
     edges: [],
     selectedNodes: [],
     clearEdgeSelection: jest.fn(),
@@ -503,18 +504,46 @@ describe('workspace listeners', () => {
   });
 
   describe('workspace requests', () => {
-    it('expands selected nodes and fills existing connections', () => {
+    it('expands selected nodes through the listener transport', async () => {
       const environment = createWorkspaceListenerEnvironment();
       const fields = [{ name: 'field' }] as WorkspaceField[];
 
       environment.store.dispatch(toggleNodeSelection({ nodeId: 'selected', replace: false }));
       environment.store.dispatch(expandSelectedNodes(fields));
+      await flushPromises();
+
+      expect(environment.mockedDeps.exploreGraph).toHaveBeenCalledWith(
+        'data-view-title',
+        expect.objectContaining({ connections: { vertices: expect.any(Array) } })
+      );
+      expect(environment.workspace.mergeGraph).toHaveBeenCalledWith({ nodes: [], edges: [] });
+    });
+
+    it('fills existing connections using the selected Redux node IDs', () => {
+      const environment = createWorkspaceListenerEnvironment();
+      environment.store.dispatch(toggleNodeSelection({ nodeId: 'selected', replace: false }));
+
       environment.store.dispatch(fillWorkspaceConnections(20));
 
-      expect(environment.workspace.expandNodes).toHaveBeenCalledWith(['selected'], {
-        toFields: fields,
-      });
       expect(environment.workspace.fillConnections).toHaveBeenCalledWith(['selected'], 20);
+    });
+
+    it('ignores stale expand responses', async () => {
+      const environment = createWorkspaceListenerEnvironment();
+      const fields = [{ name: 'field' }] as WorkspaceField[];
+      const resolvers: Array<(response: { vertices: []; connections: [] }) => void> = [];
+      environment.mockedDeps.exploreGraph.mockImplementation(
+        () => new Promise((resolve) => resolvers.push(resolve))
+      );
+
+      environment.store.dispatch(expandSelectedNodes(fields));
+      environment.store.dispatch(expandSelectedNodes(fields));
+      resolvers[1]({ vertices: [], connections: [] });
+      await flushPromises();
+      resolvers[0]({ vertices: [], connections: [] });
+      await flushPromises();
+
+      expect(environment.workspace.mergeGraph).toHaveBeenCalledTimes(1);
     });
   });
 

@@ -16,8 +16,14 @@ import { datasourceSelector } from './datasource';
 import { liveResponseFieldsSelector, selectedFieldsSelector } from './fields';
 import { fetchTopNodes } from '../services/fetch_top_nodes';
 import { makeEdgeId, makeNodeId } from '../services/workspace/graph_merge_planner';
-import { buildSearchExploreRequest } from '../services/workspace/graph_request_builders';
-import { transformSearchResponse } from '../services/workspace/graph_response_transformers';
+import {
+  buildExpandExploreRequest,
+  buildSearchExploreRequest,
+} from '../services/workspace/graph_request_builders';
+import {
+  transformExpandResponse,
+  transformSearchResponse,
+} from '../services/workspace/graph_response_transformers';
 import type { GraphData, Workspace, WorkspaceField, WorkspaceNode } from '../types';
 import type { ServerResultNode } from '../types';
 import type { MatchedAction } from './helpers';
@@ -495,16 +501,43 @@ export const registerWorkspaceListeners = (
 ) => {
   startListening({
     predicate: (action) => requestActionTypes.has(action.type),
-    effect: (action, listenerApi) => {
+    effect: async (action, listenerApi) => {
       const workspace = getWorkspace();
       if (!workspace) {
         return;
       }
 
       if (expandSelectedNodes.match(action)) {
-        workspace.expandNodes(listenerApi.getState().workspace.selectedNodeIds, {
-          toFields: action.payload,
+        listenerApi.cancelActiveListeners();
+        const { exploreControls, indexName, vertex_fields: vertexFields } = workspace.options;
+        if (!exploreControls || !indexName || !vertexFields) return;
+        const selectedNodes = listenerApi
+          .getState()
+          .workspace.selectedNodeIds.map((id) => workspace.nodesMap[id])
+          .filter((node) => node !== undefined);
+        const startNodes =
+          selectedNodes.length > 0
+            ? workspace.returnUnpackedGroupeds(selectedNodes)
+            : workspace.nodes;
+        const request = buildExpandExploreRequest({
+          startNodes,
+          existingNodes: workspace.nodes,
+          blocklistedNodes: workspace.blocklistedNodes,
+          fields: vertexFields,
+          targetFields: action.payload,
+          settings: exploreControls,
         });
+        try {
+          const response = await exploreGraph(indexName, request);
+          listenerApi.throwIfCancelled();
+          const graph = transformExpandResponse(response, action.payload);
+          listenerApi.dispatch(workspaceGraphMerged(graph));
+          workspace.mergeGraph(graph);
+        } catch (error) {
+          if (!listenerApi.signal.aborted) {
+            handleSearchQueryError(error as Error);
+          }
+        }
       } else if (fillWorkspaceConnections.match(action)) {
         workspace.fillConnections(listenerApi.getState().workspace.selectedNodeIds, action.payload);
       }
