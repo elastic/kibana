@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { PUBLIC_API_HEADERS } from '@kbn/scout-security';
+import { getEndpointArtifactsApiService, PUBLIC_API_HEADERS } from '@kbn/scout-security';
 import { expect } from '@kbn/scout-security/api';
 import { ExceptionListTypeEnum } from '@kbn/securitysolution-io-ts-list-types';
 import { ENDPOINT_ARTIFACT_LISTS } from '@kbn/securitysolution-list-constants';
@@ -68,8 +68,10 @@ apiTest.describe(
   'Endpoint artifact changes on a live host',
   { tag: ['@local-stateful-classic'] },
   () => {
-    apiTest.afterEach(async ({ apiServices }) => {
-      await apiServices.endpointArtifacts.deleteList(TRUSTED_APPS_LIST_ID);
+    apiTest.afterEach(async ({ kbnClient, esClient, log }) => {
+      await getEndpointArtifactsApiService({ kbnClient, esClient, log }).deleteList(
+        TRUSTED_APPS_LIST_ID
+      );
     });
 
     apiTest(

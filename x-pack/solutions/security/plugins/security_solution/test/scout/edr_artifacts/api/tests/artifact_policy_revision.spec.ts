@@ -7,8 +7,7 @@
 
 import type { GetOnePackagePolicyResponse } from '@kbn/fleet-plugin/common';
 import { API_VERSIONS, packagePolicyRouteService } from '@kbn/fleet-plugin/common';
-import type { KbnClient } from '@kbn/scout-security';
-import { tags } from '@kbn/scout-security';
+import { getEndpointArtifactsApiService, tags, type KbnClient } from '@kbn/scout-security';
 import { expect } from '@kbn/scout-security/api';
 import { ExceptionListTypeEnum } from '@kbn/securitysolution-io-ts-list-types';
 import { ENDPOINT_ARTIFACT_LISTS } from '@kbn/securitysolution-list-constants';
@@ -106,8 +105,9 @@ apiTest.describe(
     let packagePolicyId = '';
     let headers: Record<string, string>;
 
-    apiTest.beforeAll(async ({ kbnClient, log, apiServices, requestAuth }) => {
+    apiTest.beforeAll(async ({ kbnClient, esClient, log, requestAuth }) => {
       apiTest.setTimeout(SUITE_TIMEOUT_MS);
+      const endpointArtifacts = getEndpointArtifactsApiService({ kbnClient, esClient, log });
       const adminApiCredentials = await requestAuth.getApiKey('admin');
       headers = {
         ...adminApiCredentials.apiKeyHeader,
@@ -116,7 +116,7 @@ apiTest.describe(
         'x-elastic-internal-origin': 'kibana',
       };
       await setupFleetForEndpoint(kbnClient, log);
-      await apiServices.endpointArtifacts.deleteList(TRUSTED_APPS_LIST_ID);
+      await endpointArtifacts.deleteList(TRUSTED_APPS_LIST_ID);
       indexedPolicy = await createScoutEndpointPolicy(
         kbnClient,
         log,
@@ -125,15 +125,17 @@ apiTest.describe(
       packagePolicyId = getCreatedPackagePolicy(indexedPolicy).id;
       // Create the empty list before the baseline read. A later item write is
       // what should dispatch a new artifact manifest.
-      await apiServices.endpointArtifacts.createList({
+      await endpointArtifacts.createList({
         listId: TRUSTED_APPS_LIST_ID,
         type: ExceptionListTypeEnum.ENDPOINT,
       });
       await waitForStableRevision(() => readPackagePolicyRevision(kbnClient, packagePolicyId));
     });
 
-    apiTest.afterAll(async ({ kbnClient, log, apiServices }) => {
-      await apiServices.endpointArtifacts.deleteList(TRUSTED_APPS_LIST_ID);
+    apiTest.afterAll(async ({ kbnClient, esClient, log }) => {
+      await getEndpointArtifactsApiService({ kbnClient, esClient, log }).deleteList(
+        TRUSTED_APPS_LIST_ID
+      );
       if (indexedPolicy) {
         await deleteScoutEndpointPolicy(kbnClient, log, indexedPolicy);
       }
