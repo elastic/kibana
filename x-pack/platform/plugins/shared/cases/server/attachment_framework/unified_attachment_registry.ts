@@ -19,6 +19,7 @@ export class UnifiedAttachmentTypeRegistry extends AttachmentTypeRegistry<Unifie
       schema: attachmentType.schema,
       workflowSchema: attachmentType.workflowSchema,
       workflow: attachmentType.workflow,
+      resolve: attachmentType.resolve,
       telemetry: attachmentType.telemetry || ((state, stats) => stats),
     };
 

@@ -19,7 +19,7 @@ import type { CasesClientArgs } from '..';
 import type { OwnerEntity } from '../../authorization';
 import { Operations } from '../../authorization';
 import type { BulkCreateArgs } from './types';
-import { validateUnifiedAttachments } from './validators';
+import { resolveUnifiedAttachment, validateUnifiedAttachments } from './validators';
 import { validateMaxUserActions } from '../../common/validators';
 import { emitAttachmentsAddedEvent } from './trigger_utils';
 import { extractAndAddObservables } from './extract_observables';
@@ -34,26 +34,32 @@ export const bulkCreate = async (
     logger,
     authorization,
     unifiedAttachmentTypeRegistry,
+    request,
     services: { userActionService },
   } = clientArgs;
 
   try {
-    const decodedAttachments = decodeWithExcessOrThrow(BulkCreateUnifiedAttachmentsRequestRt)(
+    const rawAttachments = decodeWithExcessOrThrow(BulkCreateUnifiedAttachmentsRequestRt)(
       attachments
     );
 
     await validateMaxUserActions({
       caseId,
       userActionService,
-      userActionsToAdd: decodedAttachments.length,
+      userActionsToAdd: rawAttachments.length,
     });
 
-    decodedAttachments.forEach((attachment) => {
+    rawAttachments.forEach((attachment) => {
       validateUnifiedAttachments({
         query: attachment,
         unifiedAttachmentTypeRegistry,
       });
     });
+    const decodedAttachments = await Promise.all(
+      rawAttachments.map((query) =>
+        resolveUnifiedAttachment({ query, unifiedAttachmentTypeRegistry, request })
+      )
+    );
 
     const [attachmentsWithIds, entities]: [
       Array<{ id: string } & UnifiedAttachmentPayload>,

@@ -21,7 +21,7 @@ import { isAlertAttachmentType, isEventAttachmentType } from '../../../common/ut
 import type { CasesClientArgs } from '..';
 import { Operations } from '../../authorization';
 import type { AddArgs } from './types';
-import { validateUnifiedAttachments } from './validators';
+import { resolveUnifiedAttachment, validateUnifiedAttachments } from './validators';
 import { validateMaxUserActions } from '../../common/validators';
 import { extractAndAddObservables } from './extract_observables';
 import { emitAttachmentsAddedEvent } from './trigger_utils';
@@ -80,11 +80,12 @@ export const addComment = async (addArgs: AddArgs, clientArgs: CasesClientArgs):
     logger,
     authorization,
     unifiedAttachmentTypeRegistry,
+    request,
     services: { userActionService },
   } = clientArgs;
 
   try {
-    const query = decodeWithExcessOrThrow(UnifiedAttachmentPayloadRt)(comment);
+    const decoded = decodeWithExcessOrThrow(UnifiedAttachmentPayloadRt)(comment);
 
     await validateMaxUserActions({ caseId, userActionService, userActionsToAdd: 1 });
 
@@ -94,14 +95,19 @@ export const addComment = async (addArgs: AddArgs, clientArgs: CasesClientArgs):
       entities: [
         {
           id: savedObjectID,
-          owner: query.owner,
+          owner: decoded.owner,
         },
       ],
     });
 
     validateUnifiedAttachments({
-      query,
+      query: decoded,
       unifiedAttachmentTypeRegistry,
+    });
+    const query = await resolveUnifiedAttachment({
+      query: decoded,
+      unifiedAttachmentTypeRegistry,
+      request,
     });
 
     const createdDate = new Date().toISOString();

@@ -49,7 +49,10 @@ import type {
   AlertingServerSetup,
 } from '@kbn/alerting-plugin/server';
 import type { CloudSetup } from '@kbn/cloud-plugin/server';
-import type { AgentBuilderPluginSetup } from '@kbn/agent-builder-plugin/server';
+import type {
+  AgentBuilderPluginSetup,
+  AgentBuilderPluginStart,
+} from '@kbn/agent-builder-plugin/server';
 import type { DataViewsServerPluginStart } from '@kbn/data-views-plugin/server';
 import type {
   WorkflowsExtensionsServerPluginSetup,
@@ -91,6 +94,7 @@ export interface CasesServerStartDependencies {
   notifications: NotificationsPluginStart;
   ruleRegistry: RuleRegistryPluginStartContract;
   workflowsExtensions?: WorkflowsExtensionsServerPluginStart;
+  agentBuilder?: AgentBuilderPluginStart;
   /**
    * Data views server plugin — needed by cases-analytics v2 to create
    * per-space managed `Cases` data views. Optional because v2 is the only
