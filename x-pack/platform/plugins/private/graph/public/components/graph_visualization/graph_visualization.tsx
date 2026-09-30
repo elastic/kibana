@@ -33,10 +33,10 @@ export interface GraphVisualizationProps {
   onSetControl: (control: ControlType) => void;
   selectSelected: (node: WorkspaceNode) => void;
   onSetMergeCandidates: (terms: TermIntersect[]) => void;
-  onToggleNodeSelection?: (node: WorkspaceNode, replace: boolean) => boolean;
-  onToggleEdgeSelection?: (edge: WorkspaceEdge) => boolean;
-  selectedNodeIds?: readonly string[];
-  selectedEdgeIds?: readonly string[];
+  onToggleNodeSelection: (node: WorkspaceNode, replace: boolean) => boolean;
+  onToggleEdgeSelection: (edge: WorkspaceEdge) => boolean;
+  selectedNodeIds: readonly string[];
+  selectedEdgeIds: readonly string[];
 }
 
 function registerZooming(element: SVGSVGElement) {
@@ -82,26 +82,11 @@ export function GraphVisualization({
     // Selection logic - shift key+click helps selects multiple nodes
     // Without the shift key we deselect all prior selections (perhaps not
     // a great idea for touch devices with no concept of shift key)
-    if (onToggleNodeSelection) {
-      if (onToggleNodeSelection(n, !event.shiftKey)) {
-        selectSelected(n);
-      } else {
-        onSetControl('none');
-      }
-      return;
-    }
-
-    if (!event.shiftKey) {
-      const prevSelection = n.isSelected;
-      workspace.selectNone();
-      n.isSelected = prevSelection;
-    }
-    if (workspace.toggleNodeSelection(n)) {
+    if (onToggleNodeSelection(n, !event.shiftKey)) {
       selectSelected(n);
     } else {
       onSetControl('none');
     }
-    workspace.changeHandler();
   };
 
   const handleMergeCandidatesCallback = (termIntersects: TermIntersect[]) => {
@@ -111,22 +96,7 @@ export function GraphVisualization({
   };
 
   const edgeClick = (edge: WorkspaceEdge) => {
-    let isSelected: boolean;
-    if (onToggleEdgeSelection) {
-      isSelected = onToggleEdgeSelection(edge);
-    } else {
-      // no multiple selection for now
-      const currentSelection = workspace.getEdgeSelection();
-      if (currentSelection.length && currentSelection[0] !== edge) {
-        workspace.clearEdgeSelection();
-      }
-      if (!edge.isSelected) {
-        workspace.addEdgeToSelection(edge);
-      } else {
-        workspace.removeEdgeFromSelection(edge);
-      }
-      isSelected = Boolean(edge.isSelected);
-    }
+    const isSelected = onToggleEdgeSelection(edge);
     onSetControl('edgeSelection');
 
     if (isSelected) {
@@ -167,9 +137,7 @@ export function GraphVisualization({
                   css={[
                     styles.edge(euiThemeContext),
                     // the stroke and stroke-opacity are overridden
-                    (selectedEdgeIds
-                      ? selectedEdgeIds.includes(edge.id ?? makeEdgeId(edge))
-                      : edge.isSelected) &&
+                    selectedEdgeIds.includes(edge.id ?? makeEdgeId(edge)) &&
                       css`
                         stroke: ${euiThemeContext.euiTheme.colors.darkShade};
                         stroke-opacity: 0.95;
@@ -229,7 +197,7 @@ export function GraphVisualization({
                       css`
                         fill: ${node.color};
                       `,
-                      (selectedNodeIds ? selectedNodeIds.includes(node.id) : node.isSelected) &&
+                      selectedNodeIds.includes(node.id) &&
                         css`
                           stroke-width: ${euiThemeContext.euiTheme.size.xs};
                           stroke: ${euiThemeContext.euiTheme.colors.borderBasePrimary};
@@ -329,7 +297,12 @@ const svgTextStyles = ({ euiTheme }: UseEuiTheme) =>
     color: euiTheme.colors.darkShade,
   });
 
-export const ReduxGraphVisualization = (props: GraphVisualizationProps) => {
+type ReduxGraphVisualizationProps = Omit<
+  GraphVisualizationProps,
+  'onToggleNodeSelection' | 'onToggleEdgeSelection' | 'selectedNodeIds' | 'selectedEdgeIds'
+>;
+
+export const ReduxGraphVisualization = (props: ReduxGraphVisualizationProps) => {
   const dispatch = useDispatch<GraphDispatch>();
   const { selectedEdgeIds, selectedNodeIds } = useSelector(workspaceSelector);
 
