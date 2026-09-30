@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { createHash } from 'crypto';
 import { errors } from '@elastic/elasticsearch';
 import type { ElasticsearchClient, IClusterClient, KibanaRequest } from '@kbn/core/server';
 import {
@@ -13,6 +14,8 @@ import {
   isUiamCredential,
 } from '@kbn/core-security-server';
 import type { ReportingUser } from '../types';
+
+const MAX_REALM_ID_LENGTH = 1024;
 
 /** A stable, realm-aware identity for authorization checks on scheduled reports. */
 export interface ReportingUserIdentity {
@@ -28,7 +31,7 @@ export interface ReportingUserIdentity {
   username?: string;
 }
 
-interface StableUserIdAuthUser {
+interface StableUserIdAuthUser extends ApiKeyAuthUser {
   username?: string;
   profile_uid?: string;
   authentication_type?: string;
@@ -51,6 +54,14 @@ interface ApiKeyContext {
   /** UIAM keys have no Elasticsearch counterpart, so their creator cannot be looked up. */
   isUiam: boolean;
 }
+
+// Derived bearer tokens retain the key descriptor and synthetic lookup realm. Run-as requests
+// instead have the effective human's lookup realm and no key descriptor, even with API-key auth.
+const isApiKeyPrincipal = ({
+  api_key: apiKey,
+  lookup_realm: realm,
+}: StableUserIdAuthUser): boolean =>
+  apiKey !== undefined || realm?.type === '_es_api_key' || realm?.type === '_cloud_api_key';
 
 /**
  * Elasticsearch reports the key id on the authenticated user for both Elasticsearch- and
@@ -118,10 +129,19 @@ const toRealmId = (
   realmType: string | undefined,
   realmName: string | undefined,
   username: string | undefined
-): string | undefined =>
-  realmType && realmName && username
-    ? `realm:${JSON.stringify([realmType, realmName, username])}`
-    : undefined;
+): string | undefined => {
+  if (!realmType || !realmName || !username) {
+    return undefined;
+  }
+
+  const realmId = `realm:${JSON.stringify([realmType, realmName, username])}`;
+  if (realmId.length <= MAX_REALM_ID_LENGTH) {
+    return realmId;
+  }
+
+  // An ID exceeding the mapping's ignore_above would look absent to the legacy ownership filter.
+  return `realm:sha256:${createHash('sha256').update(realmId).digest('hex')}`;
+};
 
 /**
  * Builds every stable id the acting human may own documents under, preferred first.
@@ -138,7 +158,7 @@ export const toStableUserIds = async ({
 }): Promise<string[]> => {
   const ids: Array<string | undefined> = [authUser.profile_uid];
 
-  if (authUser.authentication_type === 'api_key') {
+  if (isApiKeyPrincipal(authUser)) {
     // The realm reported for API-key auth is shared by every key, so the creator's real realm can
     // only come from the key itself.
     const apiKeyOwner = await resolveOwner?.();
@@ -176,8 +196,7 @@ export const getReportingUserIdentity = async ({
     return { ids: [] };
   }
 
-  const apiKey =
-    user.authentication_type === 'api_key' ? getApiKeyContext({ user, request }) : undefined;
+  const apiKey = isApiKeyPrincipal(user) ? getApiKeyContext({ user, request }) : undefined;
 
   let resolveOwner: (() => Promise<ApiKeyOwner | undefined>) | undefined;
   if (apiKey && !apiKey.isUiam) {

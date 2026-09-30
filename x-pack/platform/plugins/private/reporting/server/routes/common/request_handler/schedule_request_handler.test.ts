@@ -284,6 +284,7 @@ describe('Handle request to schedule', () => {
           username: 'testymcgee',
           authentication_type: 'api_key',
           authentication_realm: { type: '_es_api_key', name: '_es_api_key' },
+          lookup_realm: { type: '_es_api_key', name: '_es_api_key' },
         } as ReportingUser,
         context: mockContext,
         path: '/api/reporting/test/generate/pdf',

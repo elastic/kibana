@@ -18,9 +18,8 @@ export const scheduledReportMappings: SavedObjectsTypeMappingDefinition = {
     },
     createdById: {
       type: 'keyword',
-      // Required on new keyword fields. Well above any realm-qualified username (e.g. a SAML
-      // NameID or LDAP DN); a longer id would be left out of the index, and the `list` filter
-      // reads an absent id as a legacy, username-owned report.
+      // Oversized realm-qualified IDs are hashed before storage so they remain indexed and cannot
+      // be mistaken for legacy documents by the ownership filter.
       ignore_above: 1024,
     },
     createdByApiKeyId: {

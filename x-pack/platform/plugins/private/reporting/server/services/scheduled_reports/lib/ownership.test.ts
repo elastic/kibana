@@ -6,7 +6,10 @@
  */
 
 import { toElasticsearchQuery } from '@kbn/es-query';
+import { elasticsearchServiceMock, httpServerMock } from '@kbn/core/server/mocks';
+import { mockAuthenticatedUser } from '@kbn/core-security-common/mocks';
 import type { ReportingUserIdentity } from '../../../lib';
+import { getReportingUserIdentity } from '../../../lib';
 import { buildOwnedByFilter, isScheduledReportOwner } from './ownership';
 
 const NATIVE_ID = 'realm:["native","default_native","rshared"]';
@@ -28,6 +31,33 @@ const asApiKey = (overrides: Partial<ReportingUserIdentity> = {}): ReportingUser
 
 describe('isScheduledReportOwner', () => {
   describe('acting through a session', () => {
+    it('preserves ownership of a hashed realm identity while denying a same-username user in another realm', async () => {
+      const username = '"'.repeat(500);
+      const esClient = elasticsearchServiceMock.createClusterClient();
+      const request = httpServerMock.createKibanaRequest();
+      const owner = mockAuthenticatedUser({
+        username,
+        profile_uid: undefined,
+        lookup_realm: { type: 'native', name: 'default_native' },
+      });
+      const creator = await getReportingUserIdentity({ user: owner, request, esClient });
+      const returningOwner = await getReportingUserIdentity({
+        user: { ...owner, profile_uid: 'new-profile' },
+        request,
+        esClient,
+      });
+      const otherUser = await getReportingUserIdentity({
+        user: { ...owner, lookup_realm: { type: 'file', name: 'default_file' } },
+        request,
+        esClient,
+      });
+      const report = { createdBy: username, createdById: creator.ids };
+
+      expect(creator.ids[0]).toHaveLength(77);
+      expect(isScheduledReportOwner({ report, currentUser: returningOwner })).toBe(true);
+      expect(isScheduledReportOwner({ report, currentUser: otherUser })).toBe(false);
+    });
+
     it('matches when the stored id equals the current user id', () => {
       expect(
         isScheduledReportOwner({
@@ -97,14 +127,17 @@ describe('isScheduledReportOwner', () => {
       ).toBe(true);
     });
 
-    it('reaches a key-created document whose owner could not be resolved, via the username', () => {
-      expect(
-        isScheduledReportOwner({
-          report: { createdBy: 'rshared', createdByApiKeyId: 'api-key-1' },
-          currentUser: asUser(),
-        })
-      ).toBe(true);
-    });
+    it.each([asUser(), asUser({ ids: [FILE_ID] }), asUser({ ids: [] })])(
+      'denies a key-only document to a same-username human with identity %j',
+      (currentUser) => {
+        expect(
+          isScheduledReportOwner({
+            report: { createdBy: 'rshared', createdByApiKeyId: 'api-key-1' },
+            currentUser,
+          })
+        ).toBe(false);
+      }
+    );
 
     it('falls back to username matching for legacy documents with no stored id', () => {
       expect(
@@ -135,6 +168,63 @@ describe('isScheduledReportOwner', () => {
   });
 
   describe('acting through an api key', () => {
+    it('restricts a key-derived bearer token to its own key even when human ownership ids match', async () => {
+      const esClient = elasticsearchServiceMock.createClusterClient();
+      esClient.asScoped().asCurrentUser.security.getApiKey.mockResponse({
+        api_keys: [
+          {
+            id: 'api-key-2',
+            name: 'second key',
+            type: 'rest',
+            metadata: {},
+            creation: 0,
+            invalidated: false,
+            username: 'rshared',
+            realm: 'default_native',
+            realm_type: 'native',
+            profile_uid: 'profile-123',
+          },
+        ],
+      });
+      const currentUser = await getReportingUserIdentity({
+        user: mockAuthenticatedUser({
+          username: 'rshared',
+          profile_uid: undefined,
+          authentication_type: 'token',
+          lookup_realm: { type: '_es_api_key', name: '_es_api_key' },
+          api_key: { id: 'api-key-2', name: 'second key', managed_by: 'elasticsearch' },
+        }),
+        request: httpServerMock.createKibanaRequest({
+          headers: { authorization: 'Bearer access-token' },
+        }),
+        esClient,
+      });
+      const report = { createdBy: 'rshared', createdById: ['profile-123', NATIVE_ID] };
+
+      expect(
+        isScheduledReportOwner({
+          report: { ...report, createdByApiKeyId: 'api-key-2' },
+          currentUser,
+        })
+      ).toBe(true);
+      expect(
+        isScheduledReportOwner({
+          report: { ...report, createdByApiKeyId: 'api-key-1' },
+          currentUser,
+        })
+      ).toBe(false);
+      expect(isScheduledReportOwner({ report, currentUser })).toBe(false);
+    });
+
+    it('matches a document the key created even when its human owner could not be resolved', () => {
+      expect(
+        isScheduledReportOwner({
+          report: { createdBy: 'rshared', createdByApiKeyId: 'api-key-1' },
+          currentUser: asApiKey({ ids: [] }),
+        })
+      ).toBe(true);
+    });
+
     it('matches a document the key created', () => {
       expect(
         isScheduledReportOwner({
@@ -209,7 +299,7 @@ describe('isScheduledReportOwner', () => {
       expect(
         isScheduledReportOwner({
           report: { createdBy: 'uiam-key-id', createdByApiKeyId: 'uiam-key-id' },
-          currentUser: asUser(),
+          currentUser: asUser({ username: 'uiam-key-id' }),
         })
       ).toBe(false);
     });
@@ -259,6 +349,39 @@ describe('buildOwnedByFilter', () => {
     expect(legacyClause).toHaveLength(3);
     expect(legacyClause[2]).toMatchObject({ type: 'function', function: 'not' });
   });
+
+  it.each([asUser(), asUser({ ids: [] })])(
+    'excludes key-only documents from the username fallback for a human with identity %j',
+    (currentUser) => {
+      const node = buildOwnedByFilter(currentUser);
+      if (!node) {
+        throw new Error('Expected an ownership filter for a user with a username');
+      }
+      const legacyClause =
+        currentUser.ids.length > 0 ? node.arguments[node.arguments.length - 1] : node;
+
+      expect(toElasticsearchQuery(legacyClause)).toMatchObject({
+        bool: {
+          filter: expect.arrayContaining([
+            {
+              bool: {
+                must_not: {
+                  bool: {
+                    should: [
+                      {
+                        exists: { field: 'scheduled_report.attributes.createdByApiKeyId' },
+                      },
+                    ],
+                    minimum_should_match: 1,
+                  },
+                },
+              },
+            },
+          ]),
+        },
+      });
+    }
+  );
 
   it('excludes documents with a stored createdById via a wildcard-`is`-under-`not`, not a bare exists node', () => {
     const node = buildOwnedByFilter({ ids: [], username: 'somebody' });

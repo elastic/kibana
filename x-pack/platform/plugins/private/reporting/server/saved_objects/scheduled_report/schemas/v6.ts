@@ -10,7 +10,7 @@ import { rawScheduledReportSchema as rawScheduledReportSchemaV5 } from './v5';
 export * from './v5';
 
 export const rawScheduledReportSchema = rawScheduledReportSchemaV5.extends({
-  // Every stable id of the creator: a profile uid, and/or `realm:[type,name,username]`. Both are
+  // Every stable id of the creator: a profile uid and/or a realm-qualified id (hashed if oversized). Both are
   // recorded when both are derivable, so the creator is recognised from a later request whichever
   // one it can derive. Absent on documents predating this version, and when an API key's creator
   // could not be resolved.

@@ -58,7 +58,7 @@ export const isScheduledReportOwner = ({
     return report.createdById.some((id) => currentUser.ids.includes(id));
   }
 
-  return matchesUsername(report, currentUser);
+  return isLegacyDocument(report) && matchesUsername(report, currentUser);
 };
 
 /**
@@ -102,7 +102,11 @@ export const buildOwnedByFilter = (currentUser: ReportingUserIdentity): KueryNod
 
   if (username !== undefined) {
     clauses.push(
-      nodeBuilder.and([nodeBuilder.is(CREATED_BY_FIELD, username), isAbsent(CREATED_BY_ID_FIELD)])
+      nodeBuilder.and([
+        nodeBuilder.is(CREATED_BY_FIELD, username),
+        isAbsent(CREATED_BY_ID_FIELD),
+        isAbsent(CREATED_BY_API_KEY_ID_FIELD),
+      ])
     );
   }
 
