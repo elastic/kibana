@@ -25,6 +25,8 @@ import {
   selectAllNodes,
   selectNeighborNodes,
   setNodeLabel,
+  startWorkspaceLayout,
+  stopWorkspaceLayout,
   submitSearch,
   toggleEdgeSelection,
   toggleNodeSelection,
@@ -50,6 +52,8 @@ const createWorkspaceMock = () =>
     simpleSearch: jest.fn(),
     search: jest.fn(),
     callElasticsearch: jest.fn(),
+    runLayout: jest.fn(),
+    stopLayout: jest.fn(),
     options: {},
     blocklistedNodes: [],
   } as unknown as jest.Mocked<Workspace>);
@@ -120,6 +124,7 @@ describe('workspace state', () => {
     const snapshot = createWorkspaceState(workspace);
 
     expect(snapshot).toEqual({
+      isLayoutRunning: false,
       nodesById: {
         parent: {
           id: 'parent',
@@ -408,6 +413,7 @@ describe('workspace state', () => {
 
     expect(undoHistory).toHaveLength(1);
     expect(undoHistory[0]).not.toHaveProperty('isInitialized');
+    expect(undoHistory[0]).not.toHaveProperty('isLayoutRunning');
     expect(undoHistory[0]).not.toHaveProperty('undoHistory');
     expect(undoHistory[0]).not.toHaveProperty('redoHistory');
 
@@ -416,7 +422,9 @@ describe('workspace state', () => {
     expect(environment.store.getState().workspace.undoHistory).toEqual(undoHistory);
     expect(workspaceInitializedSelector(environment.store.getState())).toBe(true);
 
+    environment.store.dispatch(workspaceLayoutChanged(true));
     environment.store.dispatch(undoWorkspace());
+    expect(environment.store.getState().workspace.isLayoutRunning).toBe(true);
     expect(workspaceInitializedSelector(environment.store.getState())).toBe(true);
     const { redoHistory } = environment.store.getState().workspace;
     expect(redoHistory).toHaveLength(1);
@@ -424,7 +432,9 @@ describe('workspace state', () => {
     environment.store.dispatch(workspaceChanged(initialState));
     expect(environment.store.getState().workspace.redoHistory).toEqual(redoHistory);
 
+    environment.store.dispatch(workspaceLayoutChanged(true));
     environment.store.dispatch(redoWorkspace());
+    expect(environment.store.getState().workspace.isLayoutRunning).toBe(true);
     expect(workspaceInitializedSelector(environment.store.getState())).toBe(true);
     expect(environment.store.getState().workspace.undoHistory).toHaveLength(1);
   });
@@ -457,11 +467,11 @@ describe('workspace state', () => {
     environment.store.dispatch(initializeWorkspace());
     const previousState = environment.store.getState().workspace;
 
-    environment.store.dispatch(workspaceLayoutChanged());
+    environment.store.dispatch(workspaceLayoutChanged(true));
 
     const nextState = environment.store.getState().workspace;
     expect(nextState).not.toBe(previousState);
-    expect(nextState).toEqual(previousState);
+    expect(nextState).toEqual({ ...previousState, isLayoutRunning: true });
     expect(nextState.nodesById).toBe(previousState.nodesById);
     expect(nextState.nodeIds).toBe(previousState.nodeIds);
     expect(nextState.edgesById).toBe(previousState.edgesById);
@@ -471,6 +481,19 @@ describe('workspace state', () => {
     expect(nextState.undoHistory).toBe(previousState.undoHistory);
     expect(nextState.redoHistory).toBe(previousState.redoHistory);
     expect(nextState.isInitialized).toBe(true);
+
+    environment.store.dispatch(workspaceLayoutChanged(false));
+    expect(environment.store.getState().workspace.isLayoutRunning).toBe(false);
+  });
+
+  it('tracks layout lifecycle state', () => {
+    const environment = createMockGraphStore({});
+
+    environment.store.dispatch(startWorkspaceLayout());
+    expect(environment.store.getState().workspace.isLayoutRunning).toBe(true);
+
+    environment.store.dispatch(stopWorkspaceLayout());
+    expect(environment.store.getState().workspace.isLayoutRunning).toBe(false);
   });
 
   it('keeps edge selection single-valued', () => {
@@ -548,6 +571,19 @@ describe('workspace listeners', () => {
       expect(environment.mockedDeps.notifications.toasts.addDanger).toHaveBeenCalledWith({
         title: 'Fetching top terms failed: server failure',
       });
+    });
+  });
+
+  describe('layout lifecycle', () => {
+    it('starts and stops the legacy layout runtime', () => {
+      const environment = createWorkspaceListenerEnvironment();
+
+      environment.store.dispatch(startWorkspaceLayout());
+      environment.store.dispatch(stopWorkspaceLayout());
+
+      expect(environment.workspace.runLayout).toHaveBeenCalled();
+      expect(environment.workspace.stopLayout).toHaveBeenCalled();
+      expect(environment.mockedDeps.notifyReact).toHaveBeenCalled();
     });
   });
 

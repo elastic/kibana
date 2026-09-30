@@ -100,7 +100,8 @@ export const WorkspaceRoute = ({
           nodeLabeller() {
             // console.log(newNodes);
           },
-          changeHandler: () => storeRef.current?.dispatch(workspaceLayoutChanged()),
+          changeHandler: () =>
+            storeRef.current?.dispatch(workspaceLayoutChanged(Boolean(workspaceRef.current?.force))),
           topologyChangeHandler: notifyWorkspaceChanged,
           graphExploreProxy: callNodeProxy,
           searchProxy: callSearchNodeProxy,

@@ -45,6 +45,7 @@ export interface WorkspaceEdgeState {
 }
 
 export interface WorkspaceSnapshot {
+  isLayoutRunning: boolean;
   nodesById: Record<string, WorkspaceNodeState>;
   nodeIds: string[];
   edgesById: Record<string, WorkspaceEdgeState>;
@@ -55,14 +56,17 @@ export interface WorkspaceSnapshot {
   selectedEdgeIds: string[];
 }
 
+type WorkspaceHistorySnapshot = Omit<WorkspaceSnapshot, 'isLayoutRunning'>;
+
 export interface WorkspaceState extends WorkspaceSnapshot {
   isInitialized: boolean;
-  undoHistory: WorkspaceSnapshot[];
-  redoHistory: WorkspaceSnapshot[];
+  undoHistory: WorkspaceHistorySnapshot[];
+  redoHistory: WorkspaceHistorySnapshot[];
 }
 
 const initialWorkspaceState: WorkspaceState = {
   isInitialized: false,
+  isLayoutRunning: false,
   nodesById: {},
   nodeIds: [],
   edgesById: {},
@@ -77,7 +81,7 @@ const initialWorkspaceState: WorkspaceState = {
 
 export const initializeWorkspace = actionCreator('INITIALIZE_WORKSPACE');
 export const workspaceChanged = actionCreator<WorkspaceSnapshot>('WORKSPACE_CHANGED');
-export const workspaceLayoutChanged = actionCreator('WORKSPACE_LAYOUT_CHANGED');
+export const workspaceLayoutChanged = actionCreator<boolean>('WORKSPACE_LAYOUT_CHANGED');
 export const selectAllNodes = actionCreator('SELECT_ALL_NODES');
 export const clearNodeSelection = actionCreator('CLEAR_NODE_SELECTION');
 export const invertNodeSelection = actionCreator('INVERT_NODE_SELECTION');
@@ -97,11 +101,13 @@ export const undoWorkspace = actionCreator('UNDO_WORKSPACE');
 export const redoWorkspace = actionCreator('REDO_WORKSPACE');
 export const setNodeLabel = actionCreator<{ nodeId: string; label: string }>('SET_NODE_LABEL');
 export const colorSelectedNodes = actionCreator<string>('COLOR_SELECTED_NODES');
+export const startWorkspaceLayout = actionCreator('START_WORKSPACE_LAYOUT');
+export const stopWorkspaceLayout = actionCreator('STOP_WORKSPACE_LAYOUT');
 export const submitSearch = actionCreator<string>('SUBMIT_SEARCH');
 
 export const workspaceReducer = reducerWithInitialState(initialWorkspaceState)
   .case(reset, () => initialWorkspaceState)
-  .case(workspaceLayoutChanged, (state) => ({ ...state }))
+  .case(workspaceLayoutChanged, (state, isLayoutRunning) => ({ ...state, isLayoutRunning }))
   .case(initializeWorkspace, (state) => ({ ...state, isInitialized: true }))
   .case(workspaceChanged, (state, workspace) => ({
     ...workspace,
@@ -222,6 +228,8 @@ export const workspaceReducer = reducerWithInitialState(initialWorkspaceState)
       ])
     ),
   }))
+  .case(startWorkspaceLayout, (state) => ({ ...state, isLayoutRunning: true }))
+  .case(stopWorkspaceLayout, (state) => ({ ...state, isLayoutRunning: false }))
   .build();
 
 export const workspaceSelector = (state: GraphState) => state.workspace;
@@ -237,10 +245,11 @@ export const selectedNodeIdsSelector = createSelector(
 
 const toSnapshot = ({
   isInitialized,
+  isLayoutRunning,
   undoHistory,
   redoHistory,
   ...snapshot
-}: WorkspaceState): WorkspaceSnapshot => snapshot;
+}: WorkspaceState): WorkspaceHistorySnapshot => snapshot;
 
 const recordUndo = (state: WorkspaceState, nextState: WorkspaceState): WorkspaceState => ({
   ...nextState,
@@ -256,6 +265,7 @@ const applyUndo = (state: WorkspaceState): WorkspaceState => {
   return {
     ...previous,
     isInitialized: state.isInitialized,
+    isLayoutRunning: state.isLayoutRunning,
     undoHistory: state.undoHistory.slice(0, -1),
     redoHistory: [...state.redoHistory, toSnapshot(state)].slice(-50),
   };
@@ -269,6 +279,7 @@ const applyRedo = (state: WorkspaceState): WorkspaceState => {
   return {
     ...next,
     isInitialized: state.isInitialized,
+    isLayoutRunning: state.isLayoutRunning,
     undoHistory: [...state.undoHistory, toSnapshot(state)].slice(-50),
     redoHistory: state.redoHistory.slice(0, -1),
   };
@@ -364,6 +375,7 @@ export const createWorkspaceState = (workspace: Workspace): WorkspaceSnapshot =>
   );
 
   return {
+    isLayoutRunning: Boolean(workspace.force),
     nodesById,
     // IDs use field + '..' + term; repeated nodes or delimiter collisions can produce the same ID.
     // Derive IDs from the map so duplicates cannot make the normalized collections inconsistent.
@@ -393,6 +405,8 @@ const toNodeState = (node: WorkspaceNode): WorkspaceNodeState => ({
 
 const getEdgeId = ({ id, source, target }: Workspace['edges'][number]): string =>
   id ?? `${source.id}-${target.id}`;
+
+const layoutActionTypes = new Set([startWorkspaceLayout.type, stopWorkspaceLayout.type]);
 
 const presentationActionTypes = new Set([setNodeLabel.type, colorSelectedNodes.type]);
 
@@ -452,6 +466,23 @@ export const registerWorkspaceListeners = (
 
       synchronizeWorkspaceSelection(workspace, listenerApi.getState().workspace);
       notifyReact();
+    },
+  });
+
+  startListening({
+    predicate: (action) => layoutActionTypes.has(action.type),
+    effect: (action) => {
+      const workspace = getWorkspace();
+      if (!workspace) {
+        return;
+      }
+
+      if (startWorkspaceLayout.match(action)) {
+        workspace.runLayout();
+      } else {
+        workspace.stopLayout();
+        notifyReact();
+      }
     },
   });
 
