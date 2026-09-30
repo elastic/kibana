@@ -44,7 +44,7 @@ Each pack has `events.ndjson`, matching `hunts.ts`, and `provenance.json`.
 
 **Not included in this MVP:** FortiGate and Exchange (no scenarios in that app to port yet). Revisit when they exist.
 
-Packs land in **concrete indices** (`logs-<dataset>.<YYYY.MM.DD>`, e.g. `logs-okta.system.2026.07.13`), not Fleet data streams. Names use dots (not a second hyphen) so creates do not match the `logs-*-*` data-stream-only template.
+Packs land in **`logs-<dataset>-default` data streams** (e.g. `logs-okta.system-default`), the shape a Fleet integration produces, so `_resolve/index` and Hunt Watch discovery see them as integration data. Each pack gets a composable template (`data-generator-pack-<dataset>`, priority 250, `data_stream: {}`, composed of `logs@mappings`, `logs@settings`, `ecs@mappings`) and bulk writes use `create`. `--clean` deletes the data stream, then the template, then any dotted `logs-<dataset>.<YYYY.MM.DD>` or `logs-generator.*` indices left by older runs.
 
 Light fidelity check: docs index cleanly, pack hunts fire in preview (logged; noisy on unexpected 0), provenance says `authored` + pinned integration/version.
 
@@ -156,7 +156,7 @@ This is independent of the episode entity catalog (`lib/entities.ts`). Packs are
 
 Fixture ids/names stay eval-neutral (`ti-rss-<pack>`). They do **not** use `data-generator` branding in document fields.
 
-Environment telemetry is the Technology Watch packs (`logs-okta.system.*`, `logs-aws.cloudtrail.*`, `logs-kubernetes.audit.*`, `logs-github.audit.*`). This path does **not** write `logs-aws.local` or merge with the mustard branch. Generate here, then run mustard Kibana against the same Elasticsearch.
+Environment telemetry is the Technology Watch packs (`logs-okta.system-default`, `logs-aws.cloudtrail-default`, `logs-kubernetes.audit-default`, `logs-github.audit-default`). This path does **not** write `logs-aws.local` or merge with the mustard branch. Generate here, then run mustard Kibana against the same Elasticsearch.
 
 `--threat-intel` / `--threat-intel-reports` with no `--packs` selects all four packs. Use `--alert-mode preview` so pack hunts mint Detection Engine alerts (needed for non-zero Env. hits via `hit_provenance_backfill` on workflow-ingested reports).
 

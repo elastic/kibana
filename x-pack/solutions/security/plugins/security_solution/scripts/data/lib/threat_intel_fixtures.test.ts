@@ -434,8 +434,11 @@ describe('pack TI join contract', () => {
   it('places every env-bound join IOC on mustard hunt ECS fields after pack enrich', async () => {
     const missing: string[] = [];
 
-    for (const scenario of Object.values(PACK_TI_SCENARIOS).flat()) {
-      if (scenario.joinIocsArticleOnly) continue;
+    const envBoundScenarios = Object.values(PACK_TI_SCENARIOS)
+      .flat()
+      .filter((scenario) => !scenario.joinIocsArticleOnly);
+
+    for (const scenario of envBoundScenarios) {
       const eventsPath = path.join(scriptsDataDir('packs', scenario.packId), 'events.ndjson');
       const raw = await readNdjson(eventsPath);
       const docs = raw.map((doc) => {
@@ -478,6 +481,51 @@ describe('pack TI join contract', () => {
         expect(fieldValues.has(ioc.value)).toBe(false);
       }
     }
+  });
+});
+
+describe('okta process chain narrative', () => {
+  const scenario = PACK_TI_SCENARIOS.okta[0];
+  const slots = [
+    { label: 'scenario.body', body: scenario.body },
+    ...scenario.historicArticles.map((article, n) => ({
+      label: `historicArticles[${n}].body`,
+      body: article.body,
+    })),
+  ];
+
+  it('names ADMIN-WS02 and the powershell.exe to curl.exe chain in every body slot', () => {
+    const missing: string[] = [];
+    for (const { label, body } of slots) {
+      for (const token of ['ADMIN-WS02', 'powershell.exe', 'curl.exe', 'T1059.001']) {
+        if (!body.includes(token)) missing.push(`${label} missing "${token}"`);
+      }
+    }
+    expect(missing).toEqual([]);
+  });
+
+  it('declares the chain in the narrative anchors and adds T1059.001 to the techniques', () => {
+    expect(scenario.narrative).toEqual(expect.arrayContaining(['powershell.exe', 'curl.exe']));
+    expect(scenario.mitre).toEqual(
+      expect.arrayContaining(['T1078.004', 'T1556', 'T1098', 'T1136.003', 'T1059.001'])
+    );
+  });
+
+  it('renders the chain into every seeded historic report body', () => {
+    scenario.historicArticles.forEach((article, itemIndex) => {
+      const doc = buildHistoricThreatReportDoc({
+        scenario,
+        item: { itemKey: `historic-${itemIndex}`, reportTimestamp: '2026-07-01T00:00:00.000Z' },
+        itemIndex,
+        reportsPerPack: 12,
+        spaceId: 'default',
+        feedUrl: 'data:application/rss+xml;charset=utf-8,',
+        kind: 'historic',
+      });
+      expect(doc.content.body_text).toContain('powershell.exe');
+      expect(doc.content.body_text).toContain('curl.exe');
+      expect(doc.content.body_text).toContain('ADMIN-WS02');
+    });
   });
 });
 

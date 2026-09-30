@@ -42,6 +42,7 @@ import {
   huntRuleId,
   indexAndInstallPack,
   legacyHuntRuleId,
+  legacyDottedPackIndexName,
   legacyPackIndexName,
   packIndexName,
   packTag,
@@ -589,14 +590,13 @@ const cleanGeneratedData = async ({
             packHuntRuleIds.push(legacyHuntRuleId(packId, hunt.name));
           }
           const dataStream = pack.eventSources[0]?.dataStream ?? 'unknown';
+          // Alerts over a data stream record the backing index (`.ds-<stream>-<date>-<gen>`) as
+          // their ancestor; pack alerts are matched by rule id and tags above, so the stream
+          // name here only covers the stream itself.
+          ancestorIndices.push(packIndexName({ dataStream }));
           for (const suffix of suffixes) {
             ancestorIndices.push(
-              packIndexName({
-                packId,
-                dataStream,
-                endMs,
-                dateSuffixOverride: suffix,
-              })
+              legacyDottedPackIndexName({ dataStream, endMs, dateSuffixOverride: suffix })
             );
             ancestorIndices.push(
               legacyPackIndexName({

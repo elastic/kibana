@@ -42,6 +42,62 @@ describe('aws-iam host correlation config', () => {
   });
 });
 
+describe('okta host correlation config', () => {
+  const config = PACK_HOST_CORRELATION_CONFIGS.okta;
+
+  it('pins ADMIN-WS02 to the okta Fleet agent id', () => {
+    expect(config.hostName).toBe('ADMIN-WS02');
+    expect(config.agentId).toBe('d4e5f6a7-8b9c-4d1e-af3a-5b6c7d8e9f0a');
+    expect(config.episodeId).toBe('okta-admin-ws02');
+  });
+
+  it('pins the explorer.exe -> powershell.exe -> curl.exe process chain with plain commands', () => {
+    expect(config.processTree?.map((node) => node.name)).toEqual([
+      'explorer.exe',
+      'powershell.exe',
+      'curl.exe',
+    ]);
+    expect(
+      config.processTree?.every(
+        (node) => !/-enc|FromBase64|IEX|DownloadString/i.test(node.commandLine)
+      )
+    ).toBe(true);
+  });
+
+  it('chains process parent/child pids, entity ids, and names', () => {
+    const [explorer, powershell, curl] = config.processTree ?? [];
+    expect(explorer.parent).toBeUndefined();
+    expect(powershell.parent).toEqual({
+      pid: explorer.pid,
+      entityId: explorer.entityId,
+      name: explorer.name,
+    });
+    expect(curl.parent).toEqual({
+      pid: powershell.pid,
+      entityId: powershell.entityId,
+      name: powershell.name,
+    });
+  });
+
+  it('gives every node a distinct entity id and pid', () => {
+    const nodes = config.processTree ?? [];
+    expect(new Set(nodes.map((node) => node.entityId)).size).toBe(nodes.length);
+    expect(new Set(nodes.map((node) => node.pid)).size).toBe(nodes.length);
+  });
+
+  it('shapes child process docs with process.parent.name and the okta agent id', () => {
+    const [, powershell, curl] = config.processTree ?? [];
+    const anchorMs = 1_700_000_000_000;
+    for (const node of [powershell, curl]) {
+      expect(buildProcessDoc(config, node, anchorMs)).toMatchObject({
+        agent: { id: config.agentId, type: 'endpoint' },
+        host: { name: 'ADMIN-WS02' },
+        process: { entity_id: node.entityId, parent: { name: node.parent?.name } },
+      });
+    }
+  });
+});
+
 describe('buildFleetAgentDoc', () => {
   const config = PACK_HOST_CORRELATION_CONFIGS['aws-iam'];
 
