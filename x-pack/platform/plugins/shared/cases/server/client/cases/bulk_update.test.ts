@@ -846,7 +846,7 @@ describe('update', () => {
 
     it('resolves the applied template name and passes it to buildUserActions', async () => {
       clientArgs.services.templatesService.getTemplate.mockResolvedValue({
-        attributes: { name: 'My Template' },
+        attributes: { name: 'My Template', owner: SECURITY_SOLUTION_OWNER, templateId: 'tmpl-1' },
       } as Awaited<ReturnType<typeof clientArgs.services.templatesService.getTemplate>>);
 
       await bulkUpdate(
@@ -871,8 +871,81 @@ describe('update', () => {
       );
     });
 
-    it('omits the applied template from templateNamesByKey when it cannot be resolved', async () => {
+    it('rejects when the applied template cannot be found', async () => {
       clientArgs.services.templatesService.getTemplate.mockResolvedValue(undefined);
+
+      await expect(
+        bulkUpdate(
+          {
+            cases: [
+              {
+                id: mockCases[0].id,
+                version: mockCases[0].version ?? '',
+                template: { id: 'tmpl-missing', version: 1 },
+              },
+            ],
+          },
+          clientArgs,
+          casesClientMock
+        )
+      ).rejects.toThrow('Template tmpl-missing version 1 not found');
+    });
+
+    it('rejects when the applied template belongs to a different owner', async () => {
+      clientArgs.services.templatesService.getTemplate.mockResolvedValue({
+        attributes: {
+          name: 'Other Template',
+          owner: OBSERVABILITY_OWNER,
+          templateId: 'tmpl-other-owner',
+        },
+      } as Awaited<ReturnType<typeof clientArgs.services.templatesService.getTemplate>>);
+
+      await expect(
+        bulkUpdate(
+          {
+            cases: [
+              {
+                id: mockCases[0].id,
+                version: mockCases[0].version ?? '',
+                template: { id: 'tmpl-other-owner', version: 1 },
+              },
+            ],
+          },
+          clientArgs,
+          casesClientMock
+        )
+      ).rejects.toThrow('Template tmpl-other-owner version 1 not found');
+    });
+
+    it('rejects when the template id is empty', async () => {
+      await expect(
+        bulkUpdate(
+          {
+            cases: [
+              {
+                id: mockCases[0].id,
+                version: mockCases[0].version ?? '',
+                template: { id: '', version: 1 },
+              },
+            ],
+          },
+          clientArgs,
+          casesClientMock
+        )
+      ).rejects.toThrow('Template id must not be empty');
+    });
+
+    it('issues one getTemplate search when multiple cases switch to the same template version', async () => {
+      const secondCase = { ...mockCases[0], id: 'mock-id-2' };
+      clientArgs.services.caseService.getCases.mockResolvedValue({
+        saved_objects: [mockCases[0], secondCase],
+      });
+      clientArgs.services.caseService.patchCases.mockResolvedValue({
+        saved_objects: [mockCases[0], secondCase],
+      });
+      clientArgs.services.templatesService.getTemplate.mockResolvedValue({
+        attributes: { name: 'My Template', owner: SECURITY_SOLUTION_OWNER, templateId: 'tmpl-1' },
+      } as Awaited<ReturnType<typeof clientArgs.services.templatesService.getTemplate>>);
 
       await bulkUpdate(
         {
@@ -880,7 +953,12 @@ describe('update', () => {
             {
               id: mockCases[0].id,
               version: mockCases[0].version ?? '',
-              template: { id: 'tmpl-missing', version: 1 },
+              template: { id: 'tmpl-1', version: 3 },
+            },
+            {
+              id: secondCase.id,
+              version: secondCase.version ?? '',
+              template: { id: 'tmpl-1', version: 3 },
             },
           ],
         },
@@ -888,11 +966,69 @@ describe('update', () => {
         casesClientMock
       );
 
-      expect(clientArgs.services.userActionService.creator.buildUserActions).toHaveBeenCalledWith(
-        expect.objectContaining({
-          templateNamesByKey: new Map(),
-        })
-      );
+      // Both cases share the same template id+version — validation issues one search (not one
+      // per case), and the name-lookup for buildUserActions issues one more = 2 total, not 4.
+      expect(clientArgs.services.templatesService.getTemplate).toHaveBeenCalledTimes(2);
+      expect(clientArgs.services.templatesService.getTemplate).toHaveBeenCalledWith('tmpl-1', '3');
+    });
+
+    it('issues one getTemplate search when multiple cases request the same nonexistent template', async () => {
+      const secondCase = { ...mockCases[0], id: 'mock-id-2' };
+      clientArgs.services.caseService.getCases.mockResolvedValue({
+        saved_objects: [mockCases[0], secondCase],
+      });
+      clientArgs.services.templatesService.getTemplate.mockResolvedValue(undefined);
+
+      await expect(
+        bulkUpdate(
+          {
+            cases: [
+              {
+                id: mockCases[0].id,
+                version: mockCases[0].version ?? '',
+                template: { id: 'tmpl-missing', version: 1 },
+              },
+              {
+                id: secondCase.id,
+                version: secondCase.version ?? '',
+                template: { id: 'tmpl-missing', version: 1 },
+              },
+            ],
+          },
+          clientArgs,
+          casesClientMock
+        )
+      ).rejects.toThrow('Template tmpl-missing version 1 not found');
+
+      // Both cases share the same nonexistent template — the cached undefined result
+      // is preserved as a null sentinel, so getTemplate is called exactly once.
+      expect(clientArgs.services.templatesService.getTemplate).toHaveBeenCalledTimes(1);
+    });
+
+    it('rejects when the fetched template id does not match the requested id', async () => {
+      clientArgs.services.templatesService.getTemplate.mockResolvedValue({
+        attributes: {
+          name: 'Unrelated Template',
+          owner: SECURITY_SOLUTION_OWNER,
+          templateId: 'tmpl-different',
+        },
+      } as Awaited<ReturnType<typeof clientArgs.services.templatesService.getTemplate>>);
+
+      await expect(
+        bulkUpdate(
+          {
+            cases: [
+              {
+                id: mockCases[0].id,
+                version: mockCases[0].version ?? '',
+                template: { id: 'tmpl-requested', version: 1 },
+              },
+            ],
+          },
+          clientArgs,
+          casesClientMock
+        )
+      ).rejects.toThrow('Template tmpl-requested version 1 not found');
     });
   });
 
@@ -933,9 +1069,15 @@ describe('update', () => {
       args.services.caseService.patchCases.mockResolvedValue({
         saved_objects: patchedCases ?? originalCases,
       });
-      args.services.templatesService.getTemplate.mockResolvedValue({
-        attributes: { name: 'My Template' },
-      } as Awaited<ReturnType<typeof args.services.templatesService.getTemplate>>);
+      args.services.templatesService.getTemplate.mockImplementation((templateId: string) =>
+        Promise.resolve({
+          attributes: {
+            name: 'My Template',
+            owner: SECURITY_SOLUTION_OWNER,
+            templateId,
+          },
+        } as Awaited<ReturnType<typeof args.services.templatesService.getTemplate>>)
+      );
 
       return args;
     };

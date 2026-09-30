@@ -75,6 +75,7 @@ import {
   validateCustomFields,
   validateCaseExtendedFields,
   validateExtendedFieldsInRequest,
+  validateTemplateInRequest,
   validateExtendedFieldsOnClose,
   resolveTemplateFieldsForClose,
   resolveGlobalFields,
@@ -695,6 +696,41 @@ export const bulkUpdate = async (
       )
     );
 
+    // Pre-fetch unique templates (deduplicate by id@version so N cases switching to the
+    // same template version issue exactly one SO search, not one per case).
+    const prefetchedTemplates = new Map<
+      string,
+      Promise<Awaited<ReturnType<typeof templatesService.getTemplate>>>
+    >();
+    for (const { updateReq } of casesToUpdate) {
+      if (updateReq.template != null && updateReq.template.id) {
+        const { id, version } = updateReq.template;
+        const key = `${id}@${version}`;
+        if (!prefetchedTemplates.has(key)) {
+          prefetchedTemplates.set(key, templatesService.getTemplate(id, String(version)));
+        }
+      }
+    }
+
+    // Owner/existence check must complete before field validation: a foreign or deleted
+    // template can leak schema details through the field-validation error path.
+    await Promise.all(
+      casesToUpdate.map(async ({ updateReq, originalCase }) => {
+        const { template } = updateReq;
+        // Coerce undefined (template not found) to null so validators.ts can distinguish
+        // a cached miss from an absent prefetch and avoids a redundant getTemplate call.
+        const prefetchedTemplate =
+          template != null && template.id
+            ? (await prefetchedTemplates.get(`${template.id}@${template.version}`)) ?? null
+            : undefined;
+        return validateTemplateInRequest({
+          updateReq,
+          originalCase,
+          templatesService,
+          prefetchedTemplate,
+        });
+      })
+    );
     await Promise.all(
       casesToUpdate.map(({ updateReq, originalCase }) =>
         validateExtendedFieldsInRequest({
@@ -1209,10 +1245,17 @@ const createPatchCasesPayload = async ({
             updateReq.template === null
               ? null
               : updateReq.template?.id ?? originalCase.attributes.template?.id;
+          // Pin to the explicitly requested (or stored) version so post-pairing validation
+          // uses the same template definition that was validated pre-pairing.
+          const templateVersion =
+            updateReq.template === null
+              ? undefined
+              : updateReq.template?.version ?? originalCase.attributes.template?.version;
           const globalFields = await resolveCachedGlobalFields(originalCase.attributes.owner);
           await validateCaseExtendedFields({
             extendedFields: finalExtendedFields,
             templateId,
+            templateVersion,
             globalFields,
             templatesService,
             fieldDefinitionsService,
