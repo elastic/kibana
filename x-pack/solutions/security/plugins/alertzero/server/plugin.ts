@@ -163,13 +163,17 @@ export class AlertZeroPlugin
 
     registerAlertZeroInferenceFeatures(searchInferenceEndpoints, this.logger.get('inference'));
     // Steps register during setup but only run after start; deps resolve lazily.
+    const stepsLogger = this.logger.get('steps');
     registerStepDefinitions({
       workflowsExtensions,
       getActionsService: () => this.requireActionsService(),
       getConversations: () => this.requireAgentBuilderConversations(),
-      getResolveHostEnrollment: makeScopedResolveHostEnrollment(() => this.fleetAgentService),
+      getResolveHostEnrollment: makeScopedResolveHostEnrollment(
+        () => this.fleetAgentService,
+        stepsLogger
+      ),
       isContextEngineEnabled: makeIsContextEngineEnabled(() => this.requireCoreStart()),
-      logger: this.logger.get('steps'),
+      logger: stepsLogger,
     });
 
     features.registerKibanaFeature({

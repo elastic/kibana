@@ -25,8 +25,20 @@ const buildClient = (
 ): FindOrCreateConversationClient => ({
   create: jest.fn().mockResolvedValue(undefined),
   get: jest.fn().mockResolvedValue({ id: conversationId }),
+  patchMetadata: jest.fn().mockResolvedValue(undefined),
   ...overrides,
 });
+
+/** A 409 from `create` plus whatever metadata the existing conversation carries. */
+const buildRerunClient = (
+  metadata: Record<string, string> | undefined,
+  overrides: Partial<FindOrCreateConversationClient> = {}
+): FindOrCreateConversationClient =>
+  buildClient({
+    create: jest.fn().mockRejectedValue(createConversationAlreadyExistsError({ conversationId })),
+    get: jest.fn().mockResolvedValue({ id: conversationId, metadata }),
+    ...overrides,
+  });
 
 const reportContext = {
   iocs: [
@@ -117,6 +129,64 @@ describe('runFindOrCreateInvestigation', () => {
       runFindOrCreateInvestigation({ spaceId, reportId }, { conversationClient })
     ).rejects.toThrow('boom');
     expect(conversationClient.get).not.toHaveBeenCalled();
+  });
+
+  // A rerun resolves to the same derived id, so it can land on an Investigation a clean hunt
+  // closed as `benign` or the proposal gate closed as `resolved`. Nothing else reopens it.
+  describe('reopening a closed Investigation on a rerun', () => {
+    it('reopens one a previous run had closed', async () => {
+      const conversationClient = buildRerunClient({ status: 'closed', close_reason: 'benign' });
+
+      const output = await runFindOrCreateInvestigation(
+        { spaceId, reportId },
+        { conversationClient }
+      );
+
+      expect(conversationClient.patchMetadata).toHaveBeenCalledWith(
+        conversationId,
+        { status: 'open' },
+        { access: 'converse' }
+      );
+      expect(output.created).toBe(false);
+    });
+
+    it('leaves an already-open Investigation untouched', async () => {
+      const conversationClient = buildRerunClient({ status: 'open' });
+
+      await runFindOrCreateInvestigation({ spaceId, reportId }, { conversationClient });
+
+      expect(conversationClient.patchMetadata).not.toHaveBeenCalled();
+    });
+
+    // Absent metadata reads as open in the investigation template, so there is nothing to reopen.
+    it('leaves an Investigation with no status metadata untouched', async () => {
+      const conversationClient = buildRerunClient(undefined);
+
+      await runFindOrCreateInvestigation({ spaceId, reportId }, { conversationClient });
+
+      expect(conversationClient.patchMetadata).not.toHaveBeenCalled();
+    });
+
+    // Failing beats hunting into a conversation nobody is looking at: with no Investigation id
+    // the Worker skips the coordinator, so the report stays eligible for the next sweep.
+    it('fails the call when a closed Investigation cannot be reopened', async () => {
+      const conversationClient = buildRerunClient(
+        { status: 'closed' },
+        { patchMetadata: jest.fn().mockRejectedValue(new Error('conflict')) }
+      );
+
+      await expect(
+        runFindOrCreateInvestigation({ spaceId, reportId }, { conversationClient })
+      ).rejects.toThrow('conflict');
+    });
+
+    it('does not reopen anything on the create path', async () => {
+      const conversationClient = buildClient();
+
+      await runFindOrCreateInvestigation({ spaceId, reportId }, { conversationClient });
+
+      expect(conversationClient.patchMetadata).not.toHaveBeenCalled();
+    });
   });
 
   it('rethrows when the verify-read fails after a verified 409', async () => {

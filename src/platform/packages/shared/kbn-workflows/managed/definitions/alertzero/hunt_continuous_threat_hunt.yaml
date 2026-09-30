@@ -216,7 +216,7 @@ steps:
               - **Report:** `{{ foreach.item }}`
               - **Hunt:** {{ steps.hunt.output.headline }}. {{ steps.hunt.output.reason }}
               - **Packaging:** {% if steps.package_report.output.status == 'run_incomplete' %}did not complete. {{ steps.package_report.output.reason }}.{% else %}{{ steps.package_report.output.summary | strip }}{% endif %}
-              - **What this means:** the findings above are real, but part of the search did not run, so the report stays eligible for the next scheduled sweep or a manual rerun; the Investigation stays open.
+              - **What this means:** the findings above are real, but part of the search did not run. Whether this report gets hunted again is stated in the hunt reason above: a gap that may clear keeps it eligible for a later sweep, while a gap that reproduces retires it having never been fully searched. The Investigation closes once every proposal from this run has been decided; a later sweep reopens it if it finds more.
               {% elsif steps.resolve_run_outcome.output.outcome == 'partial' -%}
               ### Hunt Watch run partial: packaging did not complete
               - **Report:** `{{ foreach.item }}`
