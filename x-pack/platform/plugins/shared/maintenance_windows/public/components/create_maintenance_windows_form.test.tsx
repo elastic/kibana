@@ -54,7 +54,6 @@ vi.mock('./episode_matcher_input', () => {
   return { ...mocked, default: mocked };
 });
 
-
 const formProps: CreateMaintenanceWindowFormProps = {
   onCancel: vi.fn(),
   onSuccess: vi.fn(),
@@ -94,8 +93,14 @@ describe('CreateMaintenanceWindowForm', () => {
       { category: 'securitySolution' },
     ]);
 
-    vi.mocked(useCreateMaintenanceWindow).mockReturnValue({ mutate: createMutate, isLoading: false });
-    vi.mocked(useUpdateMaintenanceWindow).mockReturnValue({ mutate: updateMutate, isLoading: false });
+    vi.mocked(useCreateMaintenanceWindow).mockReturnValue({
+      mutate: createMutate,
+      isLoading: false,
+    });
+    vi.mocked(useUpdateMaintenanceWindow).mockReturnValue({
+      mutate: updateMutate,
+      isLoading: false,
+    });
 
     vi.mocked(useKibana).mockReturnValue({
       services: {

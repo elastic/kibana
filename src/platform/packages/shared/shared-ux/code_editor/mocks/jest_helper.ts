@@ -8,13 +8,12 @@
  */
 
 import { vi } from 'vitest';
-import type * as CodeEditorModule from '@kbn/code-editor';
 import { MockedCodeEditor } from './code_editor_mock';
 
 // Only imported by Vitest unit tests; vi.mock is hoisted within this module, so importing the
 // helper first in a test file mocks @kbn/code-editor for everything imported after it.
 vi.mock('@kbn/code-editor', async (importOriginal) => ({
-  ...(await importOriginal<typeof CodeEditorModule>()),
+  ...(await importOriginal<Record<string, unknown>>()),
   CodeEditorField: MockedCodeEditor,
   CodeEditor: MockedCodeEditor,
 }));

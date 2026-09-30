@@ -18,7 +18,6 @@ project:
   sourceRoot: src/platform/packages/shared/shared-ux/code_editor/mocks
 dependsOn:
   - '@kbn/monaco'
-  - '@kbn/code-editor'
 tags:
   - shared-common
   - package

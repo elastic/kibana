@@ -251,12 +251,12 @@ describe('#solution', () => {
   it('should throw error if solution is invalid in classic offering', () => {
     expect(() => spaceBaseSchema.validate({ ...defaultProperties, solution: 'some_value' }, {}))
       .toThrowErrorMatchingInlineSnapshot(`
-      "[solution]: types that failed validation:
-      - [solution.0]: expected value to equal [security]
-      - [solution.1]: expected value to equal [oblt]
-      - [solution.2]: expected value to equal [es]
-      - [solution.3]: expected value to equal [classic]"
-    `);
+        [Error: [solution]: types that failed validation:
+        - [solution.0]: expected value to equal [security]
+        - [solution.1]: expected value to equal [oblt]
+        - [solution.2]: expected value to equal [es]
+        - [solution.3]: expected value to equal [classic]]
+      `);
 
     expect(() =>
       spaceBaseSchema.validate({ ...defaultProperties, solution: ' es ' }, {})

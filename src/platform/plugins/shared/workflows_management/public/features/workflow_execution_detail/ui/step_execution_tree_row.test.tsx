@@ -14,13 +14,13 @@ import type { Mock } from 'vitest';
 
 import { I18nProvider } from '@kbn/i18n-react';
 import { ExecutionStatus } from '@kbn/workflows';
+import * as workflowsUiModule from '@kbn/workflows-ui';
 import {
   getTreeIndentGuideOffset,
   StepExecutionTreeRow,
   type StepExecutionTreeRowProps,
   TREE_ROW_CHEVRON_SLOT_PX,
 } from './step_execution_tree_row';
-import * as workflowsUiModule from '@kbn/workflows-ui';
 
 vi.mock('../../../shared/ui/step_icons/step_icon', () => {
   const mocked = {
@@ -361,7 +361,7 @@ describe('StepExecutionTreeRow', () => {
   });
 
   it('omits the trailing hourglass when the waitForInput type icon is already hourglass-shaped', async () => {
-    const { getStepIconType } = (workflowsUiModule as unknown) as {
+    const { getStepIconType } = workflowsUiModule as unknown as {
       getStepIconType: Mock;
     };
     getStepIconType.mockReturnValueOnce('hourglass');

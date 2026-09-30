@@ -50,9 +50,7 @@ vi.mock('./report_exports_table', () => ({
 }));
 
 vi.mock('./report_schedules_table', () => ({
-  default: () => (
-    <div data-test-subj="reportSchedulesTable">{'Render Report Schedules Table'}</div>
-  ),
+  default: () => <div data-test-subj="reportSchedulesTable">{'Render Report Schedules Table'}</div>,
 }));
 
 const queryClient = new QueryClient();

@@ -127,10 +127,10 @@ describe('GET /internal/spaces/{spaceId}/content_summary', () => {
       `[Error: [spaceId]: expected value of type [string] but got [undefined]]`
     );
     expect(() => paramsSchema.validate({ spaceId: '' })).toThrowErrorMatchingInlineSnapshot(
-      `"[spaceId]: value has length [0] but it must have a minimum length of [1]."`
+      `[Error: [spaceId]: value has length [0] but it must have a minimum length of [1].]`
     );
     expect(() => paramsSchema.validate({ spaceId: '*' })).toThrowErrorMatchingInlineSnapshot(
-      `"[spaceId]: lower case, a-z, 0-9, \\"_\\", and \\"-\\" are allowed."`
+      `[Error: [spaceId]: lower case, a-z, 0-9, "_", and "-" are allowed.]`
     );
   });
 

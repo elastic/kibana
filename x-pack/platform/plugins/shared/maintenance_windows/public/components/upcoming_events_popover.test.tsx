@@ -16,7 +16,6 @@ import { useUiSetting } from '../utils/kibana_react';
 
 vi.mock('../utils/kibana_react');
 
-
 vi.mocked(useUiSetting).mockReturnValue('YYYY.MM.DD, h:mm:ss');
 
 describe('rule_actions_popover', () => {

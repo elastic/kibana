@@ -25,7 +25,6 @@ import { getSelectedForDatePicker } from '../../helpers/get_selected_for_date_pi
 vi.mock('../../utils/kibana_react');
 vi.mock('../../helpers/get_selected_for_date_picker');
 
-
 describe('DatePickerRangeField', () => {
   let appMockRenderer: AppMockRenderer;
 

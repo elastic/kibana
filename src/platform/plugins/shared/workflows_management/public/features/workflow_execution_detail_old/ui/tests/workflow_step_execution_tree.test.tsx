@@ -12,12 +12,12 @@ import userEvent from '@testing-library/user-event';
 import React from 'react';
 import type { Mock } from 'vitest';
 import { vi } from 'vitest';
-import { ExecutionStatus } from '@kbn/workflows';
 import type { WorkflowExecutionDto, WorkflowStepExecutionDto, WorkflowYaml } from '@kbn/workflows';
-import { TestWrapper } from '../../../../shared/test_utils/test_wrapper';
-import { WorkflowStepExecutionTree } from '../workflow_step_execution_tree';
+import { ExecutionStatus } from '@kbn/workflows';
 import * as workflowsModule from '@kbn/workflows';
+import { TestWrapper } from '../../../../shared/test_utils/test_wrapper';
 import * as buildStepExecutionsTreeModule from '../../../workflow_execution_detail/ui/build_step_executions_tree';
+import { WorkflowStepExecutionTree } from '../workflow_step_execution_tree';
 
 // Mock the workflows module functions
 vi.mock('@kbn/workflows', async () => {
@@ -116,13 +116,14 @@ vi.mock('../shared/step_icon', () => {
 
 describe('WorkflowStepExecutionTree', () => {
   // Import the mocked functions
-  const { isTerminalStatus, isInProgressStatus, isDangerousStatus } = (workflowsModule as unknown) as {
-    isTerminalStatus: Mock;
-    isInProgressStatus: Mock;
-    isDangerousStatus: Mock;
-  };
+  const { isTerminalStatus, isInProgressStatus, isDangerousStatus } =
+    workflowsModule as unknown as {
+      isTerminalStatus: Mock;
+      isInProgressStatus: Mock;
+      isDangerousStatus: Mock;
+    };
 
-  const { buildStepExecutionsTree } = (buildStepExecutionsTreeModule as unknown) as {
+  const { buildStepExecutionsTree } = buildStepExecutionsTreeModule as unknown as {
     buildStepExecutionsTree: Mock;
   };
 

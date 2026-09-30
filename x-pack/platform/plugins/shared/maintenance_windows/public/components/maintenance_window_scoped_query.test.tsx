@@ -22,7 +22,6 @@ vi.mock('@kbn/alerts-ui-shared', () => {
   return { ...mocked, default: mocked };
 });
 
-
 describe('MaintenanceWindowScopedQuery', () => {
   let appMockRenderer: AppMockRenderer;
 

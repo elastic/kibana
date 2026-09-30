@@ -54,7 +54,6 @@ test('creates a maintenance window client with proper constructor arguments when
     includedHiddenTypes: [MAINTENANCE_WINDOW_SAVED_OBJECT_TYPE],
   });
 
-
   expect(MaintenanceWindowClient).toHaveBeenCalledWith({
     logger: maintenanceWindowClientFactoryParams.logger,
     savedObjectsClient,
@@ -76,7 +75,6 @@ test('creates a maintenance window client with proper constructor arguments', as
   expect(savedObjectsService.getScopedClient).toHaveBeenCalledWith(request, {
     includedHiddenTypes: [MAINTENANCE_WINDOW_SAVED_OBJECT_TYPE],
   });
-
 
   expect(MaintenanceWindowClient).toHaveBeenCalledWith({
     logger: maintenanceWindowClientFactoryParams.logger,
@@ -101,7 +99,6 @@ test('creates an unauthorized maintenance window client', async () => {
     includedHiddenTypes: [MAINTENANCE_WINDOW_SAVED_OBJECT_TYPE],
   });
 
-
   expect(MaintenanceWindowClient).toHaveBeenCalledWith({
     logger: maintenanceWindowClientFactoryParams.logger,
     savedObjectsClient,
@@ -123,7 +120,6 @@ test('creates an internal maintenance window client', async () => {
   expect(savedObjectsService.createInternalRepository).toHaveBeenCalledWith([
     MAINTENANCE_WINDOW_SAVED_OBJECT_TYPE,
   ]);
-
 
   expect(MaintenanceWindowClient).toHaveBeenCalledWith({
     logger: maintenanceWindowClientFactoryParams.logger,
@@ -152,8 +148,7 @@ test('getUserName() returns null when security is disabled', async () => {
   const request = mockRouter.createKibanaRequest();
 
   factory.createWithAuthorization(request);
-  const constructorCall = vi.mocked(MaintenanceWindowClient).mock
-    .calls[0][0];
+  const constructorCall = vi.mocked(MaintenanceWindowClient).mock.calls[0][0];
 
   const userNameResult = await constructorCall.getUserName();
   expect(userNameResult).toEqual(null);
@@ -166,8 +161,7 @@ test('getUserName() returns a name when security is enabled', async () => {
 
   factory.createWithAuthorization(request);
 
-  const constructorCall = vi.mocked(MaintenanceWindowClient).mock
-    .calls[0][0];
+  const constructorCall = vi.mocked(MaintenanceWindowClient).mock.calls[0][0];
 
   securityService.authc.getCurrentUser.mockReturnValueOnce({
     username: 'testname',

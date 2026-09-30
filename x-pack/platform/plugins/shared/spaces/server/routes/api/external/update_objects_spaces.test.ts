@@ -122,7 +122,7 @@ describe('update_objects_spaces', () => {
       expect(() =>
         (updateObjectsSpaces.routeValidation.body as ObjectType).validate(payload2)
       ).toThrowErrorMatchingInlineSnapshot(
-        `"[spacesToRemove]: duplicate space ids are not allowed"`
+        `[Error: [spacesToRemove]: duplicate space ids are not allowed]`
       );
     });
 
@@ -140,7 +140,7 @@ describe('update_objects_spaces', () => {
       expect(() =>
         (updateObjectsSpaces.routeValidation.body as ObjectType).validate(payload2)
       ).toThrowErrorMatchingInlineSnapshot(
-        `"[spacesToRemove.1]: lower case, a-z, 0-9, \\"_\\", and \\"-\\" are allowed, OR \\"*\\""`
+        `[Error: [spacesToRemove.1]: lower case, a-z, 0-9, "_", and "-" are allowed, OR "*"]`
       );
     });
 

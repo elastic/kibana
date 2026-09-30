@@ -17,7 +17,6 @@ import { parseTemplateAtPosition } from '../template_expression/parse_template_a
 
 vi.mock('../template_expression/parse_template_at_position');
 
-
 const WORKFLOW_YAML = `name: test-workflow
 enabled: false
 triggers:
