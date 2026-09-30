@@ -25,7 +25,12 @@ import {
   createMarkedResultTransformer,
   substituteToolCallResults,
 } from './filestore_substitution';
-import { formatUserInput, prepareMessages, roundOutcomeMessage } from './to_langchain_messages';
+import {
+  customEventToLangchain,
+  formatUserInput,
+  prepareMessages,
+  roundOutcomeMessage,
+} from './to_langchain_messages';
 import {
   renderCurrentRun,
   renderHistorySteps,
@@ -138,6 +143,9 @@ export const renderUnit = async (
         attachmentTypes: conversation.attachmentTypes,
       }),
     ];
+  }
+  if (unit.kind === 'custom_event') {
+    return [customEventToLangchain(unit.entry.event)];
   }
   if (unit.kind === 'current_cycle') {
     return renderCurrentRun({

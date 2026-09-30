@@ -8,6 +8,7 @@
 import type { Logger } from '@kbn/core/server';
 import type {
   ConversationRoundStep,
+  ExecutionStepEvent,
   ToolCallRef,
   ToolCallWithResult,
   ToolResult,
@@ -50,9 +51,9 @@ export const collectSubstitutionMarks = ({
   timeline: ProcessedTimelineEvent[];
   steps: ConversationRoundStep[];
 }): Set<string> => {
-  const timelineSteps = timeline.flatMap((event) =>
-    event.type === TimelineEventType.executionStep ? [event.data.step] : []
-  );
+  const timelineSteps = timeline
+    .filter((event): event is ExecutionStepEvent => event.type === TimelineEventType.executionStep)
+    .map((event) => event.data.step);
   return new Set(
     [...timelineSteps, ...steps]
       .filter(isSubstitutionStep)

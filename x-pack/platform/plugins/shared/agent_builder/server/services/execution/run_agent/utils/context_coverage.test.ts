@@ -20,6 +20,7 @@ import {
 import {
   eventsNativeConversation,
   pausedRoundTimeline,
+  processedCustomEventFixture,
   timelineFromRounds,
 } from '../../../../test_utils/timeline';
 import type { ProcessedConversation } from './prepare_conversation';
@@ -91,6 +92,16 @@ const fixture = () => {
   const rounds = entries.filter(isTimelineRound) as Array<TimelineRound<ProcessedTimelineEvent>>;
   return { entries, rounds };
 };
+
+/** Round `a`, a custom event `note`, then round `b`. */
+const withNote = () =>
+  historyView(
+    conversationOf([
+      ...timelineFromRounds([{ id: 'a', input: input('first'), steps: [call('a1')] }]),
+      processedCustomEventFixture({ id: 'note', created_at: new Date(0).toISOString() }),
+      ...timelineFromRounds([{ id: 'b', input: input('second'), steps: [call('b1')] }]),
+    ])
+  ).entries;
 
 describe('groupStepCycles', () => {
   it('returns no cycle for no steps and a single cycle without tool calls', () => {
@@ -191,6 +202,14 @@ describe('resolveVisibility', () => {
     });
   });
 
+  it('hides up to a custom event anchor', () => {
+    expect(resolve(withNote(), { event_id: 'note' })).toEqual({
+      hiddenEntryCount: 2,
+      entryFromStep: 0,
+      currentFromStep: 0,
+    });
+  });
+
   it('hides the history and the current cycles up to a current-run anchor', () => {
     const { entries } = fixture();
     const steps = [call('x1'), call('x2')];
@@ -221,6 +240,8 @@ describe('listVisibleUnits', () => {
   const describeUnit = (unit: ContextUnit) =>
     unit.kind === 'message'
       ? 'message'
+      : unit.kind === 'custom_event'
+      ? `event:${unit.entry.event.id}`
       : unit.kind === 'round_cycle'
       ? `${unit.round.id}:${unit.range?.start ?? '-'}:${unit.first ? 'first' : ''}${
           unit.last ? 'last' : ''
@@ -260,6 +281,11 @@ describe('listVisibleUnits', () => {
       'current:1',
     ]);
   });
+
+  it('lists a custom event as its own unit, in timeline order', () => {
+    const units = listVisibleUnits({ entries: withNote(), steps: [], visibility: FULLY_VISIBLE });
+    expect(units.map(describeUnit)).toEqual(['a:0:firstlast', 'event:note', 'b:0:firstlast']);
+  });
 });
 
 describe('unitAnchor', () => {
@@ -276,6 +302,17 @@ describe('unitAnchor', () => {
       { event_id: 'sm' },
       { event_id: rounds[2].terminal.id },
     ]);
+  });
+
+  it('anchors a custom event on its id', () => {
+    const [, note] = listVisibleUnits({
+      entries: withNote(),
+      steps: [],
+      visibility: FULLY_VISIBLE,
+    });
+    expect(unitAnchor(note, { roundId: 'current', steps: [], renderState: {} })).toEqual({
+      event_id: 'note',
+    });
   });
 
   it('anchors current cycles on their last persisted call only', () => {
@@ -362,6 +399,18 @@ describe('translateLegacySummary', () => {
         legacyEligibleIds: new Set(),
       }).summarized_up_to
     ).toEqual({ event_id: entries[0].terminal.id });
+  });
+
+  it('covers the custom events between covered rounds', () => {
+    const entries = withNote();
+    const [, , roundB] = entries as Array<TimelineRound<ProcessedTimelineEvent>>;
+    expect(
+      translateLegacySummary({
+        summary: summary({ covered_round_ids: ['a', 'b'], summarized_round_count: 2 }),
+        entries,
+        legacyEligibleIds: new Set(),
+      }).summarized_up_to
+    ).toEqual({ event_id: roundB.terminal.id });
   });
 
   it('reads a count-only summary over the legacy eligible rounds', () => {

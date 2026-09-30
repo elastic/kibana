@@ -14,7 +14,7 @@ import type {
   CompactionSummary,
   ToolCallStep,
 } from '@kbn/agent-builder-common';
-import { timelineFromRounds } from '../../../../test_utils/timeline';
+import { processedCustomEventFixture, timelineFromRounds } from '../../../../test_utils/timeline';
 import { createToolResultStoreMock } from '../../../../test_utils/runner';
 import type { CurrentRun, ToolRenderStateMap } from '../transient_state';
 import type { ProcessedConversation } from './prepare_conversation';
@@ -256,6 +256,39 @@ describe('compactContext', () => {
     expect(request).toContain('hello B');
     expect(request).not.toContain('hello C');
     expect(request).toContain('CURRENT_REQUEST');
+  });
+
+  it('summarizes a covered custom event and can anchor the cursor on it', async () => {
+    const { invoke, deps } = setup();
+    const [a, b, c] = ['A', 'B', 'C'].map((id) =>
+      timelineFromRounds([
+        {
+          id,
+          input: { message: `hello ${id}`, attachments: [] },
+          steps: [call(id.toLowerCase(), BIG)],
+          response: { message: `answer ${id}` },
+        },
+      ])
+    );
+    const note = processedCustomEventFixture({
+      id: 'note',
+      created_at: new Date(0).toISOString(),
+      representation: `NOTE_TEXT ${'n'.repeat(BIG)}`,
+    });
+    const result = await compact(
+      {
+        conversation: conversationOf([...a, ...b, note, ...c]),
+        run: run([call('x1')]),
+        tailCapTokens: 20_000,
+      },
+      deps
+    );
+
+    expect(result?.summary.summarized_up_to).toEqual({ event_id: 'note' });
+    expect(result?.summary.covered_round_ids).toEqual(['A', 'B']);
+    const request = requestText(invoke, 0);
+    expect(request).toContain('NOTE_TEXT');
+    expect(request).not.toContain('hello C');
   });
 
   it('covers cycles of the current run, anchored on their last call', async () => {

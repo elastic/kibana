@@ -18,8 +18,10 @@ import {
   groupTimelineEntries,
   groupTimelineRounds,
   isAwaitingPrompt,
+  isTimelineCustomEvent,
   isTimelineRound,
   type ProcessedTimelineEvent,
+  type TimelineCustomEvent,
   type TimelineEntry,
   type TimelineRound,
   type TimelineStandaloneUserMessage,
@@ -140,6 +142,12 @@ export const resolveVisibility = ({
   }
   if ('event_id' in cursor) {
     for (const [index, entry] of entries.entries()) {
+      if (isTimelineCustomEvent(entry)) {
+        if (entry.event.id === cursor.event_id) {
+          return { hiddenEntryCount: index + 1, entryFromStep: 0, currentFromStep: 0 };
+        }
+        continue;
+      }
       if (entry.userMessage.id === cursor.event_id) {
         return isTimelineRound(entry)
           ? coveredThroughRoundStep(entry, index, 0)
@@ -175,6 +183,10 @@ export type ContextUnit =
       entry: TimelineStandaloneUserMessage<ProcessedTimelineEvent>;
     }
   | {
+      kind: 'custom_event';
+      entry: TimelineCustomEvent<ProcessedTimelineEvent>;
+    }
+  | {
       kind: 'round_cycle';
       round: TimelineRound<ProcessedTimelineEvent>;
       /** Absent for a round without steps. */
@@ -196,6 +208,10 @@ export const listVisibleUnits = ({
 }): ContextUnit[] => {
   const units: ContextUnit[] = [];
   entries.slice(visibility.hiddenEntryCount).forEach((entry, offset) => {
+    if (isTimelineCustomEvent(entry)) {
+      units.push({ kind: 'custom_event', entry });
+      return;
+    }
     if (!isTimelineRound(entry)) {
       units.push({ kind: 'message', entry });
       return;
@@ -231,7 +247,7 @@ export const unitSteps = (
   unit: ContextUnit,
   steps: ConversationRoundStep[]
 ): ConversationRoundStep[] => {
-  if (unit.kind === 'message' || !unit.range) {
+  if (unit.kind === 'message' || unit.kind === 'custom_event' || !unit.range) {
     return [];
   }
   const source = unit.kind === 'round_cycle' ? unit.round.steps : steps;
@@ -253,6 +269,9 @@ export const unitAnchor = (
 ): CompactionCursor | undefined => {
   if (unit.kind === 'message') {
     return { event_id: unit.entry.userMessage.id };
+  }
+  if (unit.kind === 'custom_event') {
+    return { event_id: unit.entry.event.id };
   }
   const calls = unitSteps(unit, steps).filter(isToolCallStep);
   if (unit.kind === 'current_cycle') {
@@ -285,7 +304,8 @@ export const fullyCoveredRoundIds = (
 /**
  * Gives a summary written before cycle-based compaction a cursor: the end of the longest prefix of
  * the history made of rounds it covers (main's `covered_round_ids`, or the legacy count). Covered
- * rounds after a gap stay visible — duplicated with the summary rather than lost.
+ * rounds after a gap stay visible — duplicated with the summary rather than lost. Custom events
+ * between covered rounds are covered too: the legacy compaction dropped them from the context.
  */
 export const translateLegacySummary = ({
   summary,
@@ -303,6 +323,9 @@ export const translateLegacySummary = ({
   const covered = coveredRoundIds({ summary, rounds, legacyEligibleIds });
   let lastCovered: TimelineRound<ProcessedTimelineEvent> | undefined;
   for (const entry of entries) {
+    if (isTimelineCustomEvent(entry)) {
+      continue;
+    }
     if (!isTimelineRound(entry) || !covered.has(entry.id)) {
       break;
     }

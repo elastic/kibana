@@ -20,7 +20,7 @@ import {
   createSubstitutionStep,
 } from '@kbn/agent-builder-common';
 import type { ToolResultStore } from '@kbn/agent-builder-server/runner';
-import { timelineFromRounds } from '../../../../test_utils/timeline';
+import { processedCustomEventFixture, timelineFromRounds } from '../../../../test_utils/timeline';
 import type { ProcessedTimelineEvent } from './context_timeline';
 import type { ProcessedConversation } from './prepare_conversation';
 import type { CurrentRun, ToolRenderStateMap } from '../transient_state';
@@ -216,6 +216,32 @@ describe('renderVisibleContext', () => {
     expect(rendered).toContain('RAW_x2');
     // the current input is never covered
     expect(rendered).toContain('NEXT_INPUT');
+  });
+
+  it('renders the custom events after the cursor, and hides the ones it covers', async () => {
+    const [roundA, roundB] = [
+      { id: 'a', input: { message: 'FIRST_INPUT', attachments: [] }, steps: [call('a1')] },
+      { id: 'b', input: { message: 'SECOND_INPUT', attachments: [] }, steps: [call('b1')] },
+    ].map((round) => timelineFromRounds([round]));
+    const note = (id: string) =>
+      processedCustomEventFixture({
+        id,
+        created_at: new Date(0).toISOString(),
+        representation: `${id.toUpperCase()}_TEXT`,
+      });
+    const messages = await renderVisibleContext(
+      {
+        conversation: conversation([...roundA, note('covered'), note('visible'), ...roundB]),
+        run: run([], { cursor: { event_id: 'covered' } }),
+        phase: 'research',
+      },
+      deps()
+    );
+    const rendered = text(messages);
+
+    expect(rendered).not.toContain('FIRST_INPUT');
+    expect(rendered).not.toContain('COVERED_TEXT');
+    expect(rendered.indexOf('VISIBLE_TEXT')).toBeLessThan(rendered.indexOf('SECOND_INPUT'));
   });
 });
 
