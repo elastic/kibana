@@ -119,17 +119,14 @@ export const investigationImpactEntitySchema = z.object({
   /** KI feature_id when this entity is backed by a Knowledge Indicator. */
   feature_id: z.string().max(MAX_ID_LENGTH).optional(),
   stream_name: z.string().max(MAX_ID_LENGTH).optional(),
-  /**
-   * One evidence artifact linking this entity to the investigation — ideally a chart of the
-   * failure signal for this entity.
-   */
+  /** Evidence of this entity's impact — ideally a chart of its failure signal. */
   evidence: investigationEvidenceSchema.optional(),
 });
 export type InvestigationImpactEntity = z.infer<typeof investigationImpactEntitySchema>;
 
 /**
- * Impact of the investigated issue. The top-level `summary` and `evidence` are the primary account;
- * `entities` only lists affected services or components when the data clearly points at them.
+ * Impact of the investigated issue: a `summary`, backed by evidence either per entity (when the
+ * impact maps onto specific services or components) or at the top level — never both.
  */
 export const investigationImpactSchema = z.object({
   /**
@@ -137,9 +134,12 @@ export const investigationImpactSchema = z.object({
    * broadly (users, requests, regions). Lets a reader prioritise and explain the incident.
    */
   summary: z.string().max(MAX_TEXT_LENGTH).optional(),
-  /** One evidence artifact backing the summary — ideally a chart of the user-facing failure signal. */
+  /**
+   * Evidence backing the summary when there are no `entities` — ideally a chart of the
+   * user-facing failure signal.
+   */
   evidence: investigationEvidenceSchema.optional(),
-  /** Affected services or components, listed only when strongly indicated by the data. */
+  /** Affected services or components, each with its own evidence. */
   entities: z.array(investigationImpactEntitySchema).max(MAX_IMPACT_ENTITIES).optional(),
 });
 export type InvestigationImpact = z.infer<typeof investigationImpactSchema>;
@@ -247,8 +247,8 @@ export const investigationStateSchema = z.object({
     .overwrite(sortByConfidence)
     .optional(),
   /**
-   * Structured account of the impact: a summary and evidence, plus the affected entities when
-   * strongly indicated. Optional so existing persisted investigations remain valid.
+   * Structured account of the impact: a summary, backed by per-entity or top-level evidence.
+   * Optional so existing persisted investigations remain valid.
    */
   impact: investigationImpactSchema.optional(),
 });

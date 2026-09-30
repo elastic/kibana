@@ -315,20 +315,20 @@ steps:
           impact:
             type: object
             description: >
-              Structured account of the impact. Lead with summary and evidence; list entities only
-              when the data clearly points at specific services or components. Omit only when no
-              signals establish impact.
+              The impact: a summary, backed by evidence either per entity (when the impact maps
+              naturally onto specific services or components) or at the top level, never both.
+              Omit only when no signals establish impact.
             properties:
               summary:
                 type: string
                 maxLength: 10000
                 description: >
                   Business-facing account of the impact in plain prose: what was affected, how badly,
-                  for how long, and how broadly (users, requests, regions), backed by the evidence.
+                  for how long, and how broadly (users, requests, regions).
               evidence:
                 description: >
-                  One artifact backing the impact summary. Prefer a chart of the user-facing failure
-                  signal (error rate, failed requests, latency), with a short Markdown description.
+                  Evidence backing the summary when the impact does not map onto specific entities.
+                  Prefer a chart of the user-facing failure signal. Omit when entities are listed.
                 type: object
                 properties:
                   description:
@@ -435,8 +435,9 @@ steps:
               entities:
                 type: array
                 description: >
-                  Affected services or components, only when strongly indicated by the data. Prefer
-                  service-level entries. Leave it out rather than guessing.
+                  Affected services or components, when the impact maps naturally onto them, each
+                  with its own evidence. Prefer service-level entries. Omit when using top-level
+                  evidence.
                 maxItems: 10
                 items:
                   type: object
@@ -459,8 +460,7 @@ steps:
                       maxLength: 255
                     evidence:
                       description: >
-                        Optional artifact linking this entity to the impact. Prefer a chart of the
-                        failure signal for this entity, with a short Markdown description as its label.
+                        Evidence of this entity's impact. Prefer a chart of its failure signal.
                       type: object
                       properties:
                         description:

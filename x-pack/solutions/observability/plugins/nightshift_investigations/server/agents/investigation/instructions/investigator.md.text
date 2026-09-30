@@ -38,26 +38,20 @@ moving to the next — see <reporting_progress> for exactly what to send and wor
    Report progress: `summary` describing the timeline and signals you gathered (what deviated, when,
    and which signals were and weren't available). Still no hypotheses.
 
-2.5. **Seed impact.** Before forming hypotheses, write an initial `impact` block. The impact is
-   primarily told through `impact.summary` and `impact.evidence` — what is affected and how badly,
-   backed by one artifact. `impact.entities` is secondary: list an entity only when the data or the
-   trigger clearly names it as affected. Never invent entities to fill the list.
+2.5. **Seed impact.** Before forming hypotheses, write an initial `impact` block:
 
-   - Write `impact.summary` from the symptom as you know it so far (for example "Checkout requests
-     are failing since about 14:02"). You refine it in step 5.5.
-   - If the prompt contains an `<alert_data>` block (alert-triggered investigation): its
-     `Affected entity` fields are established scope. Add service-level entities from them:
-     `service.name` → entity type "service"; `host.name` → type "host". Skip granular fields
-     (pod names, IPs) unless no service-level entity is available. Do not re-examine whether they
-     are impacted; they are.
-   - If `inputs.context.causal_features` or `inputs.context.blast_radius` are present
-     (sig-event-triggered investigation): add the entity-type entries with a name as impact
-     entities. Set `feature_id` from the KI's `feature_id`. Set `type` to "service" for entity KIs,
-     or from the KI's subtype if available.
-   - Otherwise leave `entities` out; add one later only if the investigation clearly establishes
-     it.
+   - `impact.summary`: the symptom as you know it so far (for example "Checkout requests are
+     failing since about 14:02"). You refine it in step 5.5.
+   - `impact.entities`: seed it only when the trigger names affected entities, otherwise leave it
+     out:
+     - An `<alert_data>` block (alert-triggered investigation): its `Affected entity` fields are
+       established scope. `service.name` → type "service"; `host.name` → type "host". Skip
+       granular fields (pod names, IPs) unless no service-level entity is available.
+     - `inputs.context.causal_features` or `inputs.context.blast_radius` (sig-event-triggered
+       investigation): add the entries that name an entity. Set `feature_id` from the KI's
+       `feature_id`, and `type` to "service" for entity KIs or from the KI's subtype.
 
-   `evidence` may be omitted at this stage — it is added in step 5.5.
+   Evidence is added in step 5.5.
 
    Report progress: include the seeded `impact` in the snapshot.
 
@@ -98,25 +92,25 @@ moving to the next — see <reporting_progress> for exactly what to send and wor
    Report progress: the final hypotheses list (none left `investigating` unless the telemetry
    needed to check it was unavailable).
 
-5.5. **Finalize impact.** Settle the `impact` block on what the investigation confirmed:
+5.5. **Finalize impact.** Settle `impact` on what the investigation confirmed:
 
-   - Write `impact.summary`: the business-facing account of the impact in two or three plain
-     sentences — what was affected, how badly, for how long, and how broadly (share of requests
-     or users, regions, customers), using the numbers you measured. A reader should be able to
-     prioritise the incident and explain it to the business from this paragraph alone.
-   - Attach `impact.evidence`: a short Markdown `description` and, whenever you have the data, a
-     `chart` of the signal that most directly shows the user-facing impact (for example failed
-     requests or error rate over the incident window) — see <citing_evidence>. This is the
-     primary impact evidence; prefer it over per-entity evidence.
-   - `impact.entities` is optional. Keep seeded entities the evidence supports, remove ones the
-     investigation ruled out, and add an entity only when the data clearly shows it was affected
-     (for example a downstream service whose own error rate you measured). When the affected
-     scope is not clearly a specific service or component, leave `entities` out rather than
-     guessing — the summary and evidence carry the impact.
-   - When you list entities, prefer service-level grouping: if three hosts show errors because a
-     shared service is failing, list the service once, not the three hosts. Keep it to 1–5. An
-     entity may carry its own `evidence` only when it adds something the top-level evidence does
-     not already show.
+   - `impact.summary`: the business-facing account in two or three plain sentences — what was
+     affected, how badly, for how long, and how broadly (share of requests or users, regions,
+     customers), using the numbers you measured. A reader should be able to prioritise the
+     incident and explain it to the business from this paragraph alone.
+   - Back the summary with evidence in exactly one of two ways — never both (see
+     <citing_evidence>):
+     - **Per entity**, when the impact maps naturally onto specific services or components: list
+       them in `entities`, each with its own `evidence` showing that entity's impact (ideally a
+       chart of its failure signal), and omit the top-level `evidence`. Group at service level (a
+       shared failing service once, not its three hosts) and list at most 5.
+     - **Top level**, when it does not (for example one user-facing symptom that no single
+       component owns): set `impact.evidence` to the signal that most directly shows the
+       user-facing impact, such as failed requests or error rate over the incident window, and
+       omit `entities`.
+
+     Alert entities are a natural mapping, so keep them. Drop other seeded entities the
+     investigation ruled out; if none remain, use the top-level form.
 
    Report progress: include the refined `impact`.
 
@@ -584,33 +578,33 @@ not end the investigation. Keep working after calling it.
   ],
   "impact": {
     "summary": "Order placement failed for about 35% of requests for 38 minutes (14:02–14:40), affecting all regions; order reads were unaffected.",
-    "evidence": {
-      "description": "Failed order placement requests per 5 minutes across the incident window.",
-      "chart": {
-        "type": "bar",
-        "title": "Failed order placement requests",
-        "x_axis": { "type": "time" },
-        "y_axis": { "label": "Failed requests" },
-        "series": [
-          {
-            "name": "failures",
-            "points": [
-              { "x": "2026-07-28T13:55:00Z", "y": 3 },
-              { "x": "2026-07-28T14:00:00Z", "y": 412 },
-              { "x": "2026-07-28T14:05:00Z", "y": 1290 },
-              { "x": "2026-07-28T14:40:00Z", "y": 8 }
-            ]
-          }
-        ],
-        "annotations": [{ "x": "2026-07-28T14:02:00Z", "label": "Deploy v2.3.1" }]
-      }
-    },
     "entities": [
       {
         "name": "orders-api",
         "type": "service",
         "feature_id": "orders-api-service",
-        "stream_name": "logs-generic.acme-prod"
+        "stream_name": "logs-generic.acme-prod",
+        "evidence": {
+          "description": "Failed order placement requests per 5 minutes across the incident window.",
+          "chart": {
+            "type": "bar",
+            "title": "Failed order placement requests",
+            "x_axis": { "type": "time" },
+            "y_axis": { "label": "Failed requests" },
+            "series": [
+              {
+                "name": "failures",
+                "points": [
+                  { "x": "2026-07-28T13:55:00Z", "y": 3 },
+                  { "x": "2026-07-28T14:00:00Z", "y": 412 },
+                  { "x": "2026-07-28T14:05:00Z", "y": 1290 },
+                  { "x": "2026-07-28T14:40:00Z", "y": 8 }
+                ]
+              }
+            ],
+            "annotations": [{ "x": "2026-07-28T14:02:00Z", "label": "Deploy v2.3.1" }]
+          }
+        }
       }
     ]
   }
@@ -691,14 +685,9 @@ been reporting via `investigation_progress_report`:
 - **recommendations**: Concrete, actionable steps to resolve or mitigate the issue, each with a
   relevance `confidence`; sort descending and return only the 3 strongest — see <results_format>
   for the field shapes and examples.
-- **impact**: Optional. `{ summary, evidence, entities[] }` — see steps 2.5 and 5.5. `summary`
-  is the business-facing account of the impact (what was affected, how badly, for how long, how
-  broadly) and `evidence` is the one artifact backing it (a short Markdown description plus a
-  chart of the user-facing failure signal whenever you have the data — see <citing_evidence>).
-  These two are the main way to report impact. `entities` is optional: at most 10 services or
-  components, listed only when the trigger or the data clearly identifies them as affected — never
-  invented to fill the list. Each entity has `name` (required), optional `type` (default
-  "service"), optional `feature_id` (KI reference), and optional `evidence`. Prefer services over
-  granular infrastructure. Omit `impact` entirely only when no signals establish impact.
+- **impact**: `summary`, backed by evidence either per entity (`entities[]`, each with `name`,
+  optional `type` (default "service"), `feature_id`, `stream_name`, and `evidence`) or at the top
+  level (`evidence`) — never both. See steps 2.5 and 5.5. Omit `impact` entirely only when no
+  signals establish impact.
 
 </output_format>

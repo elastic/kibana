@@ -339,10 +339,6 @@ const INVESTIGATIONS: InvestigationAttributes[] = [
           annotations: [annotation(70, 'api-gateway v2.8.1 rollout')],
         })
       ),
-      entities: [
-        entity('web-frontend', 'service', 'logs.web-frontend', 'web-frontend'),
-        entity('api-gateway', 'service', 'logs.api-gateway', 'api-gateway'),
-      ],
     },
   }),
   completed({
@@ -410,16 +406,6 @@ const INVESTIGATIONS: InvestigationAttributes[] = [
     impact: {
       summary:
         'Each OOM restart drops the payments in flight on that pod. Over the last three hours about 1.2% of payment attempts failed, in short bursts roughly every 45 minutes.',
-      evidence: evidence(
-        'Failed payments spike at each restart and are near zero in between.',
-        timeChart({
-          title: 'Failed payment attempts',
-          type: 'bar',
-          yLabel: 'Failures per 15 minutes',
-          unit: 'number',
-          series: [timeSeries('Failed payments', 95, [3, 4, 2, 5, 6, 212, 3, 4, 5, 6, 198, 4], 15)],
-        })
-      ),
       entities: [
         entity(
           'payment-service',
@@ -427,13 +413,15 @@ const INVESTIGATIONS: InvestigationAttributes[] = [
           'logs.payment-service',
           'payment-service',
           evidence(
-            'Pods restart after `OOMKilled` about every 45 minutes.',
+            'Failed payments spike at each restart and are near zero in between.',
             timeChart({
-              title: 'payment-service pod restarts',
+              title: 'Failed payment attempts',
               type: 'bar',
-              yLabel: 'Restarts per 15 minutes',
+              yLabel: 'Failures per 15 minutes',
               unit: 'number',
-              series: [timeSeries('Restarts', 95, [0, 0, 0, 0, 0, 3, 0, 0, 0, 0, 3, 0], 15)],
+              series: [
+                timeSeries('Failed payments', 95, [3, 4, 2, 5, 6, 212, 3, 4, 5, 6, 198, 4], 15),
+              ],
             })
           )
         ),
@@ -580,10 +568,6 @@ const INVESTIGATIONS: InvestigationAttributes[] = [
           annotations: [annotation(95, 'IdP key rotation')],
         })
       ),
-      entities: [
-        entity('api-gateway', 'service', 'logs.api-gateway', 'api-gateway'),
-        entity('web-frontend', 'service', 'logs.web-frontend', 'web-frontend'),
-      ],
     },
   }),
   completed({
@@ -646,25 +630,29 @@ const INVESTIGATIONS: InvestigationAttributes[] = [
     impact: {
       summary:
         'Orders are confirmed about 25 minutes late and the delay is still growing. No orders have been lost: they are all waiting in Kafka.',
-      evidence: evidence(
-        'Processing throughput dropped to a fifth of normal after the outage.',
-        timeChart({
-          title: 'Orders processed per second',
-          yLabel: 'Orders per second',
-          unit: 'number',
-          series: [
-            timeSeries(
-              'Throughput',
-              30,
-              [15100, 14900, 15200, 3100, 2900, 3000, 3200, 2950, 3050, 3000]
-            ),
-          ],
-          annotations: [annotation(62, 'Schema registry outage', 60)],
-        })
-      ),
       entities: [
-        entity('order-processors', 'consumer_group', 'logs.kafka-cluster', 'order-processors'),
-        entity('order-processing', 'service', 'logs.order-processing'),
+        entity(
+          'order-processing',
+          'service',
+          'logs.order-processing',
+          undefined,
+          evidence(
+            'Processing throughput dropped to a fifth of normal after the outage.',
+            timeChart({
+              title: 'Orders processed per second',
+              yLabel: 'Orders per second',
+              unit: 'number',
+              series: [
+                timeSeries(
+                  'Throughput',
+                  30,
+                  [15100, 14900, 15200, 3100, 2900, 3000, 3200, 2950, 3050, 3000]
+                ),
+              ],
+              annotations: [annotation(62, 'Schema registry outage', 60)],
+            })
+          )
+        ),
       ],
     },
   }),
@@ -710,25 +698,38 @@ const INVESTIGATIONS: InvestigationAttributes[] = [
     impact: {
       summary:
         'Checkout fails for about 8% of shoppers for roughly ten minutes after each payment-service restart, three times in the last two hours. Checkout is healthy in between.',
-      evidence: evidence(
-        'Checkout error rate crosses the 5% alert threshold after each restart.',
-        timeChart({
-          title: 'Checkout error rate',
-          yLabel: 'Error rate',
-          unit: 'percent',
-          series: [
-            timeSeries(
-              'Error rate',
-              100,
-              [0.4, 8.1, 3.2, 0.5, 0.4, 7.9, 2.9, 0.4, 8.3, 3.0, 0.5, 0.4],
-              10
-            ),
-          ],
-        })
-      ),
       entities: [
-        entity('payment-service', 'service', 'logs.payment-service', 'payment-service'),
-        entity('web-frontend', 'service', 'logs.web-frontend', 'web-frontend'),
+        entity(
+          'web-frontend',
+          'service',
+          'logs.web-frontend',
+          'web-frontend',
+          evidence(
+            'Checkout error rate crosses the 5% alert threshold after each restart.',
+            timeChart({
+              title: 'Checkout error rate',
+              yLabel: 'Error rate',
+              unit: 'percent',
+              series: [
+                timeSeries(
+                  'Error rate',
+                  100,
+                  [0.4, 8.1, 3.2, 0.5, 0.4, 7.9, 2.9, 0.4, 8.3, 3.0, 0.5, 0.4],
+                  10
+                ),
+              ],
+            })
+          )
+        ),
+        entity(
+          'payment-service',
+          'service',
+          'logs.payment-service',
+          'payment-service',
+          evidence(
+            'Payment calls from checkout fail while each pod restarts:\n\n| Restart | Failed calls | Duration |\n| --- | --- | --- |\n| 1 | 212 | 9 min |\n| 2 | 198 | 11 min |\n| 3 | 205 | 10 min |'
+          )
+        ),
       ],
     },
   }),
@@ -831,10 +832,17 @@ const INVESTIGATIONS: InvestigationAttributes[] = [
     impact: {
       summary:
         'For about 20 minutes each night, cart and pricing reads slow from 2ms to 40ms P99. It is a low-traffic hour, so few shoppers notice, and there are no errors.',
-      evidence: evidence(
-        'P99 latency on cache-service during the batch window:\n\n| Window | P99 latency |\n| --- | --- |\n| 01:40–02:00 | 2ms |\n| 02:00–02:20 | 40ms |\n| 02:20–02:40 | 3ms |'
-      ),
-      entities: [entity('cache-service', 'service', 'logs.cache-service', 'cache-service')],
+      entities: [
+        entity(
+          'cache-service',
+          'service',
+          'logs.cache-service',
+          'cache-service',
+          evidence(
+            'P99 latency on cache-service during the batch window:\n\n| Window | P99 latency |\n| --- | --- |\n| 01:40–02:00 | 2ms |\n| 02:00–02:20 | 40ms |\n| 02:20–02:40 | 3ms |'
+          )
+        ),
+      ],
     },
   }),
   completed({
@@ -901,7 +909,15 @@ const INVESTIGATIONS: InvestigationAttributes[] = [
       summary:
         'No user-facing impact yet. Without the manual renewal, every internal HTTPS endpoint would have failed TLS in 48 hours.',
       entities: [
-        entity('Ingress controller', 'service', 'logs.ingress-controller', 'ingress-controller'),
+        entity(
+          'Ingress controller',
+          'service',
+          'logs.ingress-controller',
+          'ingress-controller',
+          evidence(
+            'The `*.internal` wildcard certificate served by the ingress was 48 hours from expiry before the manual renewal. The last automated renewal succeeded 58 days ago.'
+          )
+        ),
       ],
     },
   }),
