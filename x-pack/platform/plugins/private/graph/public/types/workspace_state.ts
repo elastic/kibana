@@ -94,9 +94,6 @@ export interface Workspace {
   blocklistedNodes: BlockListedNode[];
   undoLog: string;
   redoLog: string;
-  lastRequest: string;
-  lastResponse: string;
-
   undo: () => void;
   redo: () => void;
   deleteNodes: (nodeIds: string[]) => void;
