@@ -55,6 +55,7 @@ import {
 } from '../validators';
 import {
   validateCustomFieldTypesInRequest,
+  validateStatusesConfiguration,
   validateTemplatesCustomFieldsInRequest,
 } from './validators';
 import { LICENSING_CASE_ASSIGNMENT_FEATURE } from '../../common/constants';
@@ -331,6 +332,12 @@ export async function update(
       originalCustomFields: configuration.attributes.customFields,
     });
 
+    validateStatusesConfiguration({
+      requestStatuses: request.statuses,
+      originalStatuses: configuration.attributes.statuses,
+      customStatusesEnabled: clientArgs.config.customStatuses.enabled,
+    });
+
     const updatedTemplates = transformTemplateCustomFields({
       templates,
       customFields: request.customFields,
@@ -478,6 +485,11 @@ export async function create(
 
     validateDuplicatedObservableTypesInRequest({
       requestFields: validatedConfigurationRequest.observableTypes,
+    });
+
+    validateStatusesConfiguration({
+      requestStatuses: validatedConfigurationRequest.statuses,
+      customStatusesEnabled: clientArgs.config.customStatuses.enabled,
     });
 
     let error = null;

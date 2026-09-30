@@ -27,6 +27,7 @@ import {
   createMockConnectorFindResult,
 } from '@kbn/actions-plugin/server/application/connector/mocks';
 import { ConfigSchema } from '../../config';
+import { getBuiltInStatuses } from '../../../common/utils/statuses';
 
 describe('client', () => {
   const clientArgs = createCasesClientMockArgs();
@@ -332,6 +333,56 @@ describe('client', () => {
       ).rejects.toThrow(
         'Failed to get patch configure in route: Error: Invalid custom field types in request for the following labels: "text label"'
       );
+    });
+
+    describe('statuses', () => {
+      const onHold = {
+        key: 'on_hold',
+        label: 'On hold',
+        category: 'in-progress' as const,
+        order: 3,
+        isDefault: false,
+        disabled: false,
+      };
+
+      beforeEach(() => {
+        clientArgs.services.caseConfigureService.get.mockResolvedValue({
+          // @ts-ignore: these are all the attributes needed for the test
+          attributes: { customFields: [], statuses: [...getBuiltInStatuses(), onHold] },
+        });
+      });
+
+      afterEach(() => {
+        clientArgs.config = ConfigSchema.validate({});
+      });
+
+      it('throws when custom statuses are not enabled', async () => {
+        await expect(
+          update(
+            'test-id',
+            { version: 'test-version', statuses: getBuiltInStatuses() },
+            clientArgs,
+            casesClientInternal
+          )
+        ).rejects.toThrow(
+          'Failed to get patch configure in route: Error: Custom statuses are not enabled'
+        );
+      });
+
+      it('validates the request against the stored statuses', async () => {
+        clientArgs.config = { ...ConfigSchema.validate({}), customStatuses: { enabled: true } };
+
+        await expect(
+          update(
+            'test-id',
+            { version: 'test-version', statuses: getBuiltInStatuses() },
+            clientArgs,
+            casesClientInternal
+          )
+        ).rejects.toThrow(
+          'Failed to get patch configure in route: Error: The status "on_hold" cannot be removed, disable it instead'
+        );
+      });
     });
 
     describe('templates', () => {
@@ -1500,6 +1551,14 @@ describe('client', () => {
         )
       ).rejects.toThrow(
         `Failed to create case configuration: Error: The length of the field customFields is too long. Array must be of length <= ${MAX_CUSTOM_FIELDS_PER_CASE}.`
+      );
+    });
+
+    it('throws when statuses are set while custom statuses are not enabled', async () => {
+      await expect(
+        create({ ...baseRequest, statuses: getBuiltInStatuses() }, clientArgs, casesClientInternal)
+      ).rejects.toThrow(
+        'Failed to create case configuration: Error: Custom statuses are not enabled'
       );
     });
 
