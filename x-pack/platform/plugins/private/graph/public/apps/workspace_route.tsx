@@ -118,7 +118,6 @@ export const WorkspaceRoute = ({
             // console.log(newNodes);
           },
           changeHandler: notifyWorkspaceChanged,
-          graphExploreProxy: callNodeProxy,
           searchProxy: callSearchNodeProxy,
           exploreControls,
           layoutController,

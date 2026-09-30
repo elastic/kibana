@@ -6,7 +6,6 @@
  */
 
 import type { JsonObject } from '@kbn/utility-types';
-import type { TargetOptions } from '../components/control_panel';
 import type { GenericIcon } from '../helpers/style_choices';
 import type { WorkspaceField, AdvancedSettings } from './app_state';
 
@@ -100,18 +99,10 @@ export interface Workspace {
 
   undo: () => void;
   redo: () => void;
-  expandNodes: (nodeIds: string[], targetOptions: TargetOptions) => void;
   deleteNodes: (nodeIds: string[]) => void;
   blocklistNodes: (nodeIds: string[]) => void;
   groupNodes: (parentId: string, nodeIds: string[]) => void;
   ungroup: (node: WorkspaceNode | undefined) => void;
-  callElasticsearch: (request: any) => void;
-  search: (qeury: any, fieldsChoice: WorkspaceField[] | undefined, numHops: number) => void;
-  simpleSearch: (
-    searchTerm: string,
-    fieldsChoice: WorkspaceField[] | undefined,
-    numHops: number
-  ) => void;
   getAllIntersections: (
     callback: (termIntersects: TermIntersect[]) => void,
     nodes: WorkspaceNode[]
@@ -168,11 +159,6 @@ export type WorkspaceOptions = {
   vertex_fields: WorkspaceField[];
   nodeLabeller: (newNodes: WorkspaceNode[]) => void;
   changeHandler: () => void;
-  graphExploreProxy: (
-    indexPattern: string,
-    request: ExploreRequest,
-    callback: GraphExploreCallback
-  ) => void;
   searchProxy: (
     indexPattern: string,
     request: SearchRequest,

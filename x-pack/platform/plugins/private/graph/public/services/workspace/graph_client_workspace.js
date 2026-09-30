@@ -13,28 +13,8 @@ import {
   planIncomingEdges,
   prepareIncomingNodes,
 } from './graph_merge_planner';
-import {
-  buildExpandExploreRequest,
-  buildExploreControls,
-  buildFillConnectionsRequest,
-  buildNodeQuery,
-  buildSearchExploreRequest,
-} from './graph_request_builders';
-import { transformExpandResponse, transformSearchResponse } from './graph_response_transformers';
+import { buildFillConnectionsRequest, buildNodeQuery } from './graph_request_builders';
 
-// Pluggable function to handle the comms with a server. Default impl here is
-// for use outside of Kibana server with direct access to elasticsearch
-let graphExplorer = function (indexName, typeName, request, responseHandler) {
-  const dataForServer = JSON.stringify(request);
-  fetch(`http://localhost:9200/${indexName}/_graph/explore`, {
-    method: 'POST',
-    dataType: 'json',
-    contentType: 'application/json;charset=utf-8',
-    data: dataForServer,
-  })
-    .then((response) => response.json())
-    .then(responseHandler);
-};
 let searcher = function (indexName, request, responseHandler) {
   const dataForServer = JSON.stringify(request);
   fetch(`http://localhost:9200/${indexName}/_search?rest_total_hits_as_int=true`, {
@@ -132,9 +112,6 @@ function GraphWorkspace(options) {
   this.lastResponse = null;
   this.changeHandler = options.changeHandler;
   const layoutController = options.layoutController;
-  if (options.graphExploreProxy) {
-    graphExplorer = options.graphExploreProxy;
-  }
   if (options.searchProxy) {
     searcher = options.searchProxy;
   }
@@ -383,36 +360,6 @@ function GraphWorkspace(options) {
     self.runLayout();
   };
 
-  // A "simple search" operation that requires no parameters from the client.
-  // Performs numHops hops pulling in field-specific number of terms each time
-  this.simpleSearch = function (searchTerm, fieldsChoice, numHops) {
-    const qs = {
-      query_string: {
-        query: searchTerm,
-      },
-    };
-    return this.search(qs, fieldsChoice, numHops);
-  };
-
-  this.search = function (query, fieldsChoice, numHops) {
-    if (!fieldsChoice) {
-      fieldsChoice = self.options.vertex_fields;
-    }
-    self.callElasticsearch(
-      buildSearchExploreRequest({
-        query,
-        fields: fieldsChoice,
-        numHops,
-        blocklistedNodes: self.blocklistedNodes,
-        settings: self.options.exploreControls,
-      })
-    );
-  };
-
-  this.buildControls = function () {
-    return buildExploreControls(self.options.exploreControls);
-  };
-
   this.makeNodeId = makeNodeId;
 
   this.makeEdgeId = makeEdgeId;
@@ -522,44 +469,6 @@ function GraphWorkspace(options) {
   };
   this.getEdge = function (edgeId) {
     return this.edgesMap[edgeId];
-  };
-
-  //======= Expand functions to request new additions to the graph
-
-  this.expandNodes = function (nodeIds, targetOptions = {}) {
-    const selectedNodes = nodeIds
-      .map((nodeId) => self.nodesMap[nodeId])
-      .filter((node) => node !== undefined);
-    const startNodes =
-      selectedNodes.length > 0 ? self.returnUnpackedGroupeds(selectedNodes) : self.nodes;
-    self.expand(startNodes.slice(), targetOptions);
-  };
-
-  //Find new nodes to link to existing selected nodes
-  this.expandNode = function (node) {
-    self.expand(self.returnUnpackedGroupeds([node]), {});
-  };
-
-  // A manual expand function where the client provides the list
-  // of existing nodes that are the start points and some options
-  // about what targets are of interest.
-  this.expand = function (startNodes, targetOptions) {
-    const targetFields = targetOptions.toFields ?? this.options.vertex_fields;
-    const request = buildExpandExploreRequest({
-      startNodes,
-      existingNodes: this.nodes,
-      blocklistedNodes: this.blocklistedNodes,
-      fields: this.options.vertex_fields,
-      targetFields,
-      settings: this.options.exploreControls,
-    });
-    self.lastRequest = JSON.stringify(request, null, '\t');
-    graphExplorer(self.options.indexName, request, function (data) {
-      self.lastResponse = JSON.stringify(data, null, '\t');
-      // Add the new nodes and edges into the existing workspace's graph
-      self.mergeGraph(transformExpandResponse(data, targetFields));
-    });
-    //===== End expand graph ========================
   };
 
   this.trimExcessNewEdges = function (newNodes, newEdges) {
@@ -987,18 +896,6 @@ function GraphWorkspace(options) {
       if (callback) {
         callback(termIntersects);
       }
-    });
-  };
-
-  // Internal utility function for calling the Graph API and handling the response
-  // by merging results into existing nodes in this workspace.
-  this.callElasticsearch = function (request) {
-    self.lastRequest = JSON.stringify(request, null, '\t');
-    graphExplorer(self.options.indexName, request, function (data) {
-      self.lastResponse = JSON.stringify(data, null, '\t');
-      self.mergeGraph(transformSearchResponse(data, self.options.vertex_fields), {
-        labeller: self.options.labeller,
-      });
     });
   };
 }
