@@ -91,7 +91,12 @@ export const useGraphLoader = ({ toastNotifications, coreStart }: UseGraphLoader
   // Replacement function for graphClientWorkspace's comms so
   // that it works with Kibana.
   const callNodeProxy = useCallback(
-    (indexName: string, query: ExploreRequest, responseHandler: GraphExploreCallback) => {
+    (
+      indexName: string,
+      query: ExploreRequest,
+      responseHandler: GraphExploreCallback,
+      errorHandler?: (error: Error) => void
+    ) => {
       const dsl = { index: indexName, query };
       const request = { body: JSON.stringify(dsl) };
       setLoading(true);
@@ -118,6 +123,7 @@ export const useGraphLoader = ({ toastNotifications, coreStart }: UseGraphLoader
         .catch((e) => {
           inspectRequest.error({ json: e });
           handleHttpError(e);
+          errorHandler?.(e);
         })
         .finally(() => setLoading(false));
     },
