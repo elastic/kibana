@@ -107,6 +107,14 @@ rather than an ad-hoc index. Deleting a seed and immediately reseeding the same
 ids can fail with 409 version conflicts because serverless ignores the delete
 refresh; wait a moment and rerun.
 
+Classic-stack caveats: the seeder writes the Attack Discovery document to the
+`-default` namespace data stream, so on classic it only pairs with workflows
+running in the default space. The AD data stream must already exist on the
+target stack (it is created when the first Attack Discovery alert runs); if it
+does not, the seed write would auto-create a plain index of the same name and
+conflict with the product data stream later — seed after AD has produced at
+least one alert.
+
 ## Reproducibility
 
 Run with `--repetitions 5` or more. Each repetition is a separate run in the report, so per-example agreement is the share of an example's repetitions that land on the same outcome; `OutcomeAccuracy`'s label distribution per example shows it directly.
