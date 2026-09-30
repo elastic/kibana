@@ -20,8 +20,8 @@ import type {
 } from '../../types';
 import type { OverlayStart, Capabilities } from '@kbn/core/public';
 import type { SharingSavedObjectProps } from '../../helpers/use_workspace_loader';
-import { GraphVisualization } from '../graph_visualization';
 import { ControlPanel } from '../control_panel';
+import { ReduxGraphVisualization as GraphVisualization } from '../graph_visualization';
 
 jest.mock('react-router-dom', () => {
   const useLocation = () => ({
