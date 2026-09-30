@@ -14,6 +14,7 @@ import {
   KI_SHAPES_REFERENCE_NAME,
   STRATEGY_CATALOG_REFERENCE_NAME,
   kiShapesReference,
+  strategyCatalogReference,
 } from '../context_engine_shared';
 import { contextEngineSkillAvailability } from '../context_engine_skill_availability';
 import {
@@ -39,6 +40,7 @@ const templates = () =>
 interface WorkflowStep {
   name?: string;
   type?: string;
+  condition?: string;
   with?: Record<string, unknown>;
   steps?: WorkflowStep[];
   else?: WorkflowStep[];
@@ -159,16 +161,41 @@ describe('aiIndexAutomationsSkill', () => {
     }
   });
 
-  it('pins every ai.prompt to the default connector, which the user can change after the save', () => {
+  it('verifies inside create_ki and reports a rejected KI from its verification output', () => {
+    for (const name of TEMPLATE_NAMES) {
+      const template = parsedTemplate(name);
+      const createKi = stepNamed(template, 'create_ki');
+      const gate = stepNamed(template, 'check_verification');
+      const failureLog = stepNamed(template, 'log_verification_failure');
+
+      expect(allSteps(template.steps).map(({ type }) => type)).not.toContain(
+        'context-engine.verifyKi'
+      );
+      expect(createKi.type).toBe('context-engine.createKi');
+      expect(createKi.with?.verifiers).toEqual(['esql-valid-syntax', 'esql-valid-runtime']);
+      expect(createKi.with?.ki).toBeDefined();
+      expect(gate.type).toBe('if');
+      expect(gate.condition).toBe('steps.create_ki.output.verification.passed : false');
+      expect(gate.else).toBeUndefined();
+      expect(gate.steps).toContain(failureLog);
+      expect(failureLog.type).toBe('console');
+      expect(failureLog.with?.message).toContain(
+        '{{ steps.create_ki.output.verification.results | json }}'
+      );
+    }
+  });
+
+  it('routes ai.prompt via the context-engine-prompt feature rather than a literal connector', () => {
     const blocks = templates().flatMap(({ content: yaml }) => aiPromptBlocks(yaml));
 
     expect(blocks.length).toBeGreaterThan(0);
     for (const block of blocks) {
-      expect(block).toMatch(/^\s*connector-id: \.google-gemini-3\.5-flash-chat_completion\s*$/m);
+      expect(block).toContain('connector-id-by-feature: context_engine_prompt');
+      expect(block).not.toMatch(/connector-id: /);
     }
-    // The connector belongs on the prompt steps only; nothing else in a template names one.
+    // The feature ref belongs on the prompt steps only; nothing else in a template names one.
     for (const reference of templates()) {
-      const pinned = reference.content.match(/connector-id:/g) ?? [];
+      const pinned = reference.content.match(/connector-id-by-feature:/g) ?? [];
       expect(pinned).toHaveLength(aiPromptBlocks(reference.content).length);
     }
   });
@@ -215,23 +242,40 @@ describe('aiIndexAutomationsSkill', () => {
     );
   });
 
-  it('pages the unit template on a cursor', () => {
+  it("finds the unit template's units in one query, with no paging", () => {
     const unitTemplate = templates().find(({ name }) => name === UNIT_PROFILE_TEMPLATE_NAME);
 
-    expect(unitTemplate?.content).toContain('type: while');
-    expect(unitTemplate?.content).toMatch(/variables\.cursor/);
-    expect(unitTemplate?.content).toMatch(/\| last \| first/);
-    // The three strategy answers as consts.
-    for (const constName of [
-      'unit_index:',
-      'unit_key:',
-      'activity_field:',
-      'catalog_index:',
-      'discovery_filter:',
-      'batch_size:',
-    ]) {
-      expect(unitTemplate?.content).toContain(constName);
-    }
+    expect(unitTemplate?.content).not.toContain('type: while');
+    expect(unitTemplate?.content).not.toMatch(/variables\.|advance_cursor|batch_count/);
+    // The three strategy answers as consts, and nothing for the removed catalog and paging.
+    const consts = parsedTemplate(UNIT_PROFILE_TEMPLATE_NAME).consts ?? {};
+    expect(Object.keys(consts).sort()).toEqual(
+      [
+        'activity_field',
+        'ai_index_id',
+        'breakdown_field',
+        'corpus_filter',
+        'max_units',
+        'unit_index',
+        'unit_key',
+      ].sort()
+    );
+  });
+
+  it('caps every generated template at the onboarding KI budget', () => {
+    const unitConsts = parsedTemplate(UNIT_PROFILE_TEMPLATE_NAME).consts ?? {};
+    const documentConsts = parsedTemplate(DOCUMENT_TEMPLATE_NAME).consts ?? {};
+
+    expect(unitConsts.max_units).toBeLessThanOrEqual(100);
+    expect(documentConsts.max_documents).toBeLessThanOrEqual(100);
+  });
+
+  it('asks for a document-retrieving pattern only when the document template returns patterns', () => {
+    const prompt = stepNamed(parsedTemplate(DOCUMENT_TEMPLATE_NAME), 'summarize_document').with
+      ?.prompt as string;
+
+    expect(prompt).toMatch(/When you return patterns, at least one retrieves this exact document/);
+    expect(prompt).not.toMatch(/^\s*At least one pattern retrieves/m);
   });
 
   it('writes targeted KIs without a model call, from consts', () => {
@@ -280,8 +324,8 @@ describe('aiIndexAutomationsSkill', () => {
       expect(unitContext).not.toHaveProperty('unit_last_seen');
       // Discovery only lists units; the range comes from `unit_totals`.
       expect(discovery).not.toContain('activity_field');
-      expect(unitTemplateYaml()).toMatch(
-        /Active from \{\{ steps\.unit_metrics\.output\.first_seen \}\} to \{\{ steps\.unit_metrics\.output\.last_seen \}\}/
+      expect(stepNamed(template(), 'unit_totals').with?.query).toMatch(
+        /`first \{\{ consts\.activity_field \| remove: '`' \}\}` = MIN\(\{\{ consts\.activity_field \}\}\)/
       );
     });
 
@@ -301,19 +345,113 @@ describe('aiIndexAutomationsSkill', () => {
       expect(unitTemplateYaml()).toMatch(/`ki_id` is derived from the unit/);
     });
 
-    it('reads the catalog record with the other grounding queries, right before the prompt', () => {
+    it('grounds the profile in the unit index alone, with no catalog lookup', () => {
       const order = stepNames();
 
-      expect(order.indexOf('unit_breakdown')).toBeLessThan(order.indexOf('catalog_record'));
-      expect(order.indexOf('catalog_record')).toBe(order.indexOf('profile_unit') - 1);
-      expect(unitTemplateYaml()).toMatch(/# Grounding 3: the unit's own record/);
+      expect(order.indexOf('unit_totals')).toBeLessThan(order.indexOf('unit_breakdown'));
+      expect(order.indexOf('unit_breakdown')).toBe(order.indexOf('profile_unit') - 1);
+      expect(order).not.toContain('catalog_record');
+      expect(order).not.toContain('unit_metrics');
+      expect(unitTemplateYaml()).not.toMatch(/catalog_index|catalog_key|json_parse/);
     });
 
-    it('lists units in discovery and leaves the counting to unit_totals', () => {
+    it('spends the budget on the most active units, keeping only the key', () => {
       const discovery = stepNamed(template(), 'discover_units').with?.query as string;
 
-      expect(discovery).toMatch(/\| STATS BY \{\{ consts\.unit_key \}\}/);
+      expect(discovery).toMatch(/\| STATS docs = COUNT\(\*\) BY \{\{ consts\.unit_key \}\}/);
+      expect(discovery).toMatch(/\| SORT docs DESC/);
+      expect(discovery).toMatch(/\| LIMIT \{\{ consts\.max_units \}\}/);
       expect(discovery).toMatch(/\| KEEP \{\{ consts\.unit_key \}\}\s*$/);
+    });
+
+    it('applies the corpus filter to discovery and to every per-unit query', () => {
+      for (const name of ['discover_units', 'unit_totals', 'unit_breakdown']) {
+        const query = stepNamed(template(), name).with?.query as string;
+        expect({ name, filtered: query.includes('{{ consts.corpus_filter }}') }).toEqual({
+          name,
+          filtered: true,
+        });
+      }
+    });
+
+    it('does not tag a KI with its unit key, which can exceed the tag length cap', () => {
+      const [ki] = assembledKis(UNIT_PROFILE_TEMPLATE_NAME);
+      const { tags } = ki as { tags?: string[] };
+
+      expect(tags).toEqual(['entity']);
+    });
+
+    it('prints every unit_totals column by name, so a new metric is one STATS edit', async () => {
+      const [ki] = assembledKis(UNIT_PROFILE_TEMPLATE_NAME);
+      const { description, content } = ki as { description: string; content: string };
+      const context = {
+        consts: { unit_key: 'ProductKey', corpus_filter: '' },
+        steps: {
+          unit_context: { output: { unit: 'P-1' } },
+          unit_totals: {
+            output: {
+              columns: [{ name: 'records' }, { name: 'total_revenue' }],
+              values: [[42, 1234.5]],
+            },
+          },
+          profile_unit: {
+            output: {
+              content: { summary: 'S', notable_values: [], when_to_use: 'W', access_patterns: [] },
+            },
+          },
+        },
+      };
+      const liquid = new Liquid();
+
+      expect(await liquid.parseAndRender(description, context)).toBe(
+        'P-1: records 42, total_revenue 1234.5. S'
+      );
+      const rendered = await liquid.parseAndRender(content, context);
+      expect(rendered).toContain('- records: 42\n- total_revenue: 1234.5\n');
+      expect(ki.attributes?.doc_count).toBe('${{ steps.unit_totals.output.values[0][0] }}');
+      expect(stepNamed(template(), 'unit_totals').with?.query).toMatch(
+        /\| STATS records = COUNT\(\*\),/
+      );
+    });
+
+    it('names the default metrics after the fields they count, even when the const is backquoted', async () => {
+      const query = stepNamed(template(), 'unit_totals').with?.query as string;
+      const rendered = await new Liquid().parseAndRender(query, {
+        consts: {
+          unit_index: 'sales',
+          unit_key: 'ProductKey',
+          breakdown_field: '`Sales Region`',
+          activity_field: 'order_date',
+          corpus_filter: '',
+        },
+        steps: { unit_context: { output: { unit_escaped: 'P-1' } } },
+      });
+
+      expect(rendered).toContain('`distinct Sales Region values` = COUNT_DISTINCT(`Sales Region`)');
+      expect(rendered).toContain('`first order_date` = MIN(order_date)');
+      expect(rendered).toContain('`last order_date` = MAX(order_date)');
+    });
+
+    it('hands every profile the unit index mapping, fetched once outside the loop', () => {
+      const [first] = template().steps ?? [];
+      const prompt = stepNamed(template(), 'profile_unit').with?.prompt as string;
+
+      expect(first).toMatchObject({
+        name: 'fetch_mapping',
+        type: 'elasticsearch.request',
+        with: { method: 'GET', path: '/{{ consts.unit_index }}/_mapping' },
+      });
+      expect(prompt).toContain('{{ steps.fetch_mapping.output | json }}');
+      expect(prompt).toMatch(/Every field you\s+name must appear in the mapping above/);
+    });
+
+    it('says the verifier runs only esql_example, with a bare ?unit parameter in the template', () => {
+      const prompt = stepNamed(template(), 'profile_unit').with?.prompt as string;
+
+      expect(prompt).not.toMatch(/both executed by the verifier/);
+      expect(prompt).toMatch(/esql_example is executed by the verifier/);
+      expect(prompt).toContain('`{{ consts.unit_key }} == ?unit`');
+      expect(prompt).not.toContain('"?unit"');
     });
   });
 
@@ -399,9 +537,10 @@ describe('aiIndexAutomationsSkill', () => {
     });
   });
 
-  it('escapes a unit key for ES|QL in the per-unit queries and in the pagination cursor', async () => {
+  it('escapes a unit key for ES|QL in the per-unit queries and in the example the model writes', async () => {
     const template = parsedTemplate(UNIT_PROFILE_TEMPLATE_NAME);
-    const discovery = stepNamed(template, 'discover_units').with?.query as string;
+    const totals = stepNamed(template, 'unit_totals').with?.query as string;
+    const prompt = stepNamed(template, 'profile_unit').with?.prompt as string;
     const unitEscaped = stepNamed(template, 'unit_context').with?.unit_escaped as string;
     // LiquidJS reads backslash escapes inside string literals, so a filter argument written as
     // '\"' is a bare quote and the replace does nothing. Render for real to catch that.
@@ -410,14 +549,42 @@ describe('aiIndexAutomationsSkill', () => {
     const esqlLiteral = 'Contoso \\"Pro\\" 15\\\\in';
 
     const escapedUnit = await liquid.parseAndRender(unitEscaped, { foreach: { item: [key] } });
-    const rendered = await liquid.parseAndRender(discovery, {
-      consts: { unit_index: 'sales', unit_key: 'ProductKey' },
-      variables: { cursor: key },
+    const unitContext = { output: { unit: key, unit_escaped: escapedUnit } };
+    const consts = { unit_index: 'sales', unit_key: 'ProductKey', corpus_filter: '' };
+    const renderedTotals = await liquid.parseAndRender(totals, {
+      consts,
+      steps: { unit_context: unitContext },
+    });
+    const renderedPrompt = await liquid.parseAndRender(prompt, {
+      consts,
+      steps: { unit_context: unitContext },
     });
 
     expect(escapedUnit).toBe(esqlLiteral);
-    // A raw quote in the cursor would end the string literal and break every page after it.
-    expect(rendered).toContain(`ProductKey > "${esqlLiteral}"`);
+    expect(renderedTotals).toContain(`ProductKey == "${esqlLiteral}"`);
+    // A raw quote in the example would end the string literal and fail verification.
+    expect(renderedPrompt).toMatch(
+      new RegExp(
+        `\\?unit replaced by the string literal\\s+"${esqlLiteral.replace(/\\/g, '\\\\')}"`
+      )
+    );
+    expect(renderedPrompt).toMatch(/copy it exactly as written,\s+every backslash included/);
+  });
+
+  it('tells the model the figures cover only the corpus filter, when one is set', async () => {
+    const template = parsedTemplate(UNIT_PROFILE_TEMPLATE_NAME);
+    const prompt = stepNamed(template, 'profile_unit').with?.prompt as string;
+    const liquid = new Liquid();
+    const render = (corpusFilter: string) =>
+      liquid.parseAndRender(prompt, {
+        consts: { unit_key: 'k', corpus_filter: corpusFilter },
+        steps: { unit_context: { output: { unit: 'u', unit_escaped: 'u' } } },
+      });
+
+    expect(await render('| WHERE status == "resolved"')).toContain(
+      'Every figure below covers only the rows matching `| WHERE status == "resolved"`'
+    );
+    expect(await render('')).not.toContain('Every figure below covers only');
   });
 
   it('documents the escape as LiquidJS reads it, with backslashes escaped first', () => {
@@ -454,11 +621,7 @@ describe('aiIndexAutomationsSkill', () => {
     });
 
     it('writes each literal reference as a derived_from URI in one of the four schemes', () => {
-      for (const name of [
-        INDEX_METADATA_TEMPLATE_NAME,
-        DOCUMENT_TEMPLATE_NAME,
-        TARGETED_KI_WRITER_TEMPLATE_NAME,
-      ]) {
+      for (const name of TEMPLATE_NAMES) {
         for (const ki of assembledKis(name)) {
           expect(Array.isArray(ki.references)).toBe(true);
           for (const reference of ki.references as KiReference[]) {
@@ -484,24 +647,10 @@ describe('aiIndexAutomationsSkill', () => {
       ]);
     });
 
-    it('references the unit index, and the catalog index only when it is a separate index', async () => {
-      const template = parsedTemplate(UNIT_PROFILE_TEMPLATE_NAME);
+    it('references the profiled unit index from the unit profile template', () => {
       const [ki] = assembledKis(UNIT_PROFILE_TEMPLATE_NAME);
-      const source = stepNamed(template, 'unit_context').with?.references;
 
-      expect(ki.references).toBe('${{ steps.unit_context.output.references | json_parse }}');
-      expect(typeof source).toBe('string');
-
-      const render = async (consts: Record<string, string>): Promise<KiReference[]> =>
-        JSON.parse(await new Liquid().parseAndRender(source as string, { consts }));
-
-      expect(await render({ unit_index: 'sales', catalog_index: 'products' })).toEqual([
-        { uri: 'index://sales', relation: 'derived_from' },
-        { uri: 'index://products', relation: 'derived_from' },
-      ]);
-      expect(await render({ unit_index: 'sales', catalog_index: 'sales' })).toEqual([
-        { uri: 'index://sales', relation: 'derived_from' },
-      ]);
+      expect(referenceUris(ki)).toEqual(['index://{{ consts.unit_index }}']);
     });
 
     it('references the traces, conversation and index behind a targeted KI', () => {
@@ -545,6 +694,8 @@ describe('aiIndexAutomationsSkill', () => {
       `${internalNamespaces.workflows}.get_examples`,
       `${internalNamespaces.workflows}.get_connectors`,
       `${internalNamespaces.workflows}.workflow_execute_step`,
+      'platform.context_engine.save_automation',
+      'platform.context_engine.run_automation',
     ]);
   });
 
@@ -606,7 +757,7 @@ describe('aiIndexAutomationsSkill', () => {
     });
 
     it('states the sink contract every automation has to satisfy', () => {
-      expect(content).toContain('context-engine.verifyKi');
+      expect(content).toMatch(/pass\s+`verifiers` to every `context-engine\.createKi`/);
       expect(content).toContain('ki_id');
       expect(content).toContain('attributes.esql');
     });
@@ -646,9 +797,13 @@ describe('aiIndexAutomationsSkill', () => {
       expect(content).toMatch(/`unit_index` and `unit_key` are the unit/);
       expect(content).toMatch(/how units are found and refreshed/);
       expect(content).toMatch(
-        /the metrics, the `activity_field` range\s+and `catalog_index` are what one KI carries/
+        /the metrics,\s+the `activity_field` range and the `breakdown_field` distribution are what one KI carries/
       );
-      expect(content).toMatch(/`discovery_filter` and `batch_size` are how units are\s+found/);
+      expect(content).toMatch(/`corpus_filter` and `max_units` are how units are found/);
+      expect(content).toMatch(
+        /To refresh only some units, add a `WHERE` to `discover_units` alone/
+      );
+      expect(content).not.toMatch(/discovery_filter|batch_size|catalog_index/);
       expect(content).toMatch(/A re-run\s+regenerates every unit/);
       expect(content).not.toMatch(/fingerprint|profile_version|freshness_field/);
     });
@@ -670,9 +825,9 @@ describe('aiIndexAutomationsSkill', () => {
       expect(content).not.toMatch(/\| `title` \| text \+ semantic \|/);
     });
 
-    it('documents while and variables, which the unit template depends on', () => {
-      expect(content).toMatch(/\*\*A `while` pages through a corpus/);
-      expect(content).toMatch(/readable as `variables\.<key>`/);
+    it('does not teach while or variables, which no template uses', () => {
+      expect(content).not.toContain('`while`');
+      expect(content).not.toMatch(/variables\.<(key|name)>/);
       // No template skips an iteration any more, so the skill no longer teaches it.
       expect(content).not.toContain('loop.continue');
     });
@@ -737,7 +892,9 @@ describe('aiIndexAutomationsSkill', () => {
       expect(content).toMatch(
         /\*\*State the time estimate from the pilot in the same message\.\*\*/
       );
-      expect(content).toMatch(/divide to get a per-unit time, and multiply by the\s+unit count/);
+      expect(content).toMatch(
+        /divide to get a per-unit time, and multiply by the\s+number of units the saved run will write/
+      );
       expect(content).toMatch(/units, not rows/);
       expect(content).toMatch(/Say \*at least\*/);
       expect(content).toMatch(/Show the three numbers, not only the result/);
@@ -748,7 +905,7 @@ describe('aiIndexAutomationsSkill', () => {
         /\*\*When the projection exceeds one hour, put the estimate in bold between 🚨 markers\*\*/
       );
       expect(content).toMatch(
-        /"🚨 \*\*The full run over 2,517 units will take at least 11 hours\*\* 🚨"/
+        /"🚨 \*\*The full run over 300 units will take at least 80 minutes\*\* 🚨"/
       );
       expect(content).toMatch(/Under an hour, write it in plain text/);
     });
@@ -806,7 +963,6 @@ describe('aiIndexAutomationsSkill', () => {
         '`elasticsearch.request`',
         '`ai.prompt`',
         '`foreach`',
-        '`while`',
         '`if`',
         '`data.set`',
         '`console`',
@@ -822,12 +978,10 @@ describe('aiIndexAutomationsSkill', () => {
         'elasticsearch.request',
         'ai.prompt',
         'foreach',
-        'while',
         'if',
         'data.set',
         'console',
         'context-engine.createKi',
-        'context-engine.verifyKi',
       ];
 
       for (const reference of templates()) {
@@ -846,25 +1000,17 @@ describe('aiIndexAutomationsSkill', () => {
       expect(content).toMatch(/one call for the example library rather than one per step/);
     });
 
-    it('names the default connector for every prompt step, inside and outside the templates', () => {
-      expect(content).toMatch(
-        /set its\s+`connector-id` to `\.google-gemini-3\.5-flash-chat_completion`/
-      );
-      expect(content).toMatch(/default model for\s+every prompt step in every automation/);
-      expect(content).toMatch(
-        /a\s+workflow you assemble outside the templates carries it too, on each `ai\.prompt` and `ai\.agent`\s+step/
-      );
-      expect(content).toMatch(/Use a different connector only when the user names one/);
+    it('routes ai.prompt through a named feature rather than a literal connector-id', () => {
+      expect(content).toMatch(/`connector-id-by-feature`/);
+      expect(content).toContain('context_engine_prompt');
+      expect(content).toMatch(/Leave `connector-id`\s+off/);
     });
 
-    it('says the templates carry the default connector and it is not a placeholder', () => {
+    it('says the templates use connector-id-by-feature deliberately, so no literal connector is added', () => {
       expect(content).toMatch(
-        /Every `ai\.prompt` step in the templates carries `connector-id: \.google-gemini-3\.5-flash-chat_completion`/
+        /connector-id-by-feature: context_engine_prompt.*on their `ai\.prompt` steps/s
       );
-      expect(content).toMatch(/That is the default, not a placeholder/);
-      expect(content).toMatch(
-        /put the same id on any prompt step you add or write outside the templates/
-      );
+      expect(content).toMatch(/do not add a `connector-id`/);
     });
 
     it('requires ${{ }} for non-strings, since {{ }} stringifies objects and booleans', () => {
@@ -942,9 +1088,7 @@ describe('aiIndexAutomationsSkill', () => {
     });
 
     it('points the pilot bound at the consts the templates already expose', () => {
-      expect(content).toMatch(
-        /`max_documents`, `corpus_filter`, `discovery_filter`, and `batch_size`/
-      );
+      expect(content).toMatch(/`max_documents`, `max_units` and `corpus_filter`/);
     });
 
     it('saves the piloted definition rather than a regenerated one', () => {
@@ -1036,18 +1180,20 @@ describe('aiIndexAutomationsSkill', () => {
     it('does not let piloting a workflow be read as licence to run the saved one', () => {
       expect(content).toContain('Running one is a separate decision');
       expect(content).toMatch(
-        /do not\s+execute a saved\s+workflow unless the run you are in has told you/
+        /do not\s+execute a saved\s+workflow unless the context in this conversation calls for it/
       );
     });
 
-    it('has the save tool perform the run, so a failure is reported rather than retried', () => {
-      expect(content).toMatch(/starts that run itself, in its own code/);
+    it('has run_automation report a failed start as the final answer, not a retryable task', () => {
+      expect(content).toMatch(
+        /run_automation` reports that the run did not start, that is the answer/
+      );
       expect(content).toMatch(/that is the answer, not a task/);
       expect(content).toMatch(/a second attempt doubles it/);
     });
 
-    it('does not treat the save tool run flag as an unauthorized run', () => {
-      expect(content).toMatch(/approving the save approves the run/);
+    it('gives save and run each their own confirmation dialog', () => {
+      expect(content).toMatch(/two separate operations, each with its own confirmation\s+dialog/);
     });
 
     it('carries the workflow syntax itself, rather than depending on another skill for it', () => {
@@ -1085,8 +1231,16 @@ describe('aiIndexAutomationsSkill', () => {
       ).toEqual([]);
     });
 
-    it('notes the ES|QL row cap, which otherwise truncates a large corpus silently', () => {
-      expect(content).toContain('10,000');
+    it('has the brief carry the KI budget, as guidance rather than a user-facing figure', () => {
+      expect(content).toMatch(/the KI budget: at most 100 KIs per run during onboarding/);
+      expect(content).toMatch(/not a figure to put to the user/);
+      expect(strategyCatalogReference.content).toMatch(/## The KI budget/);
+      expect(content).not.toContain('## Corpora larger than 10,000 documents');
+    });
+
+    it("tells the second-index recipe to filter on that index's own key", () => {
+      expect(content).toMatch(/Filter that query on the second index's own key field/);
+      expect(content).toMatch(/Run the join probe/);
     });
 
     it('points at the skills on either side of it', () => {

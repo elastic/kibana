@@ -29,12 +29,15 @@ import {
   parseElasticCloudHost,
   getElasticCloudEnvironmentFromHost,
   getCloudHostFromCloudId,
-  getIacLaunchUrl,
+  getArtifactLaunchUrl,
+  getStaticLaunchUrl,
+  getStaticTemplate,
   getAwsStackConsoleUrl,
-  hasTemplateUrlParam,
   isStackArnInvalid,
   getUnresolvedTemplateUrlTokens,
+  getWorkloadIdentityFederationStackParams,
 } from './utils';
+import type { GetStaticTemplateParams } from './utils';
 import { SINGLE_ACCOUNT, ORGANIZATION_ACCOUNT, TEMPLATE_URL_TOKENS } from './constants';
 import type { CloudConnectorCredentials } from './types';
 import { AWS_PROVIDER, AZURE_PROVIDER, GCP_PROVIDER } from './constants';
@@ -652,11 +655,11 @@ describe('getCloudConnectorRemoteRoleTemplate', () => {
       expect(result).not.toContain('RESOURCE_ID');
     });
 
-    it('should use ESS deployment ID when both serverless and cloud are enabled', () => {
+    it('should use the serverless project ID when both serverless and cloud are enabled', () => {
       const hybridCloudSetup = {
         ...mockCloudSetup,
         isServerlessEnabled: true,
-        serverless: { projectId: 'serverless-should-not-use' },
+        serverless: { projectId: 'serverless-project-id' },
       } as CloudSetup;
 
       const result = getCloudConnectorRemoteRoleTemplate({
@@ -665,8 +668,9 @@ describe('getCloudConnectorRemoteRoleTemplate', () => {
         iacTemplateUrl: mockIacTemplateUrl,
       });
 
-      expect(result).toContain('kibana-component-id');
-      expect(result).not.toContain('serverless-should-not-use');
+      expect(result).toBe(
+        'https://example.com/templates/single-account/serverless-project-id/cloudformation.yaml'
+      );
     });
 
     it('should handle complex cloud ID with base64 encoding', () => {
@@ -1085,8 +1089,9 @@ describe('Workload Identity template URLs', () => {
   const serverlessProductionCloud = {
     isCloudEnabled: true,
     isServerlessEnabled: true,
-    cloudId: encodeCloudId('us-east-1.aws.elastic.cloud', 'kibana'),
+    cloudId: encodeCloudId('us-east-1.aws.elastic.cloud', `${PROJECT_ID}.kb`),
     deploymentUrl: `https://cloud.elastic.co/projects/security/${PROJECT_ID}`,
+    deploymentId: PROJECT_ID,
     organizationId: '10',
     csp: 'aws',
     baseUrl: 'https://cloud.elastic.co',
@@ -1268,6 +1273,54 @@ describe('Workload Identity template URLs', () => {
     });
   });
 
+  describe('getWorkloadIdentityFederationStackParams', () => {
+    it('fills every stack parameter for an Elastic Cloud Hosted deployment', () => {
+      expect(getWorkloadIdentityFederationStackParams(echQaCloud)).toEqual({
+        ElasticOrganizationId: '2070044029',
+        ElasticCloudProvider: 'aws',
+        ElasticCloudRegion: 'eu-west-1',
+        ElasticCloudEnvironment: 'qa',
+        ElasticResourceType: 'deployment',
+        ElasticResourceId: KIBANA_COMPONENT_ID,
+      });
+    });
+
+    it('fills every stack parameter for a Serverless project', () => {
+      expect(getWorkloadIdentityFederationStackParams(serverlessProductionCloud)).toEqual({
+        ElasticOrganizationId: '10',
+        ElasticCloudProvider: 'aws',
+        ElasticCloudRegion: 'us-east-1',
+        ElasticCloudEnvironment: 'production',
+        ElasticResourceType: 'project',
+        ElasticResourceId: PROJECT_ID,
+      });
+    });
+
+    it('omits parameters this Kibana cannot resolve', () => {
+      const params = getWorkloadIdentityFederationStackParams({
+        ...echQaCloud,
+        organizationId: undefined,
+      } as CloudSetup);
+
+      expect(params).not.toHaveProperty('ElasticOrganizationId');
+      expect(params.ElasticResourceId).toBe(KIBANA_COMPONENT_ID);
+    });
+
+    it('returns no parameters without a cloud context', () => {
+      expect(getWorkloadIdentityFederationStackParams(undefined)).toEqual({});
+    });
+
+    it('returns no parameters outside Elastic Cloud', () => {
+      expect(
+        getWorkloadIdentityFederationStackParams({
+          ...echQaCloud,
+          isCloudEnabled: false,
+          isServerlessEnabled: false,
+        } as CloudSetup)
+      ).toEqual({});
+    });
+  });
+
   describe('getElasticCloudTemplateContext', () => {
     it('describes an Elastic Cloud Hosted deployment', () => {
       expect(getElasticCloudTemplateContext(echQaCloud)).toEqual({
@@ -1335,14 +1388,14 @@ describe('Workload Identity template URLs', () => {
       });
     });
 
-    it('keeps Elastic Cloud Hosted precedence when both deployment and project data are present', () => {
+    it('uses the project ID on Serverless even when a deployment ID and Kibana component are present', () => {
       expect(
         getElasticResource({
           ...echQaCloud,
           isServerlessEnabled: true,
-          serverless: { projectId: 'should-not-be-used' },
+          serverless: { projectId: PROJECT_ID },
         } as CloudSetup)
-      ).toEqual({ type: 'deployment', id: KIBANA_COMPONENT_ID });
+      ).toEqual({ type: 'project', id: PROJECT_ID });
     });
 
     it('returns the resource type without an ID when nothing can be derived', () => {
@@ -1427,19 +1480,150 @@ describe('IaC launch URL helpers', () => {
   const ARTIFACT = 'https://s3.example/rendered?X-Amz-Signature=abc';
   const STACK_ARN = 'arn:aws:cloudformation:us-east-1:123456789012:stack/my-stack/uuid';
 
-  it('getIacLaunchUrl swaps templateURL on the quick-create scaffold when no deployment id', () => {
-    expect(getIacLaunchUrl({ provider: 'aws', staticUrl: STATIC_URL, artifactUrl: ARTIFACT })).toBe(
+  it('getArtifactLaunchUrl builds the quick-create link from the artifact', () => {
+    expect(getArtifactLaunchUrl({ provider: 'aws', artifactUrl: ARTIFACT })).toBe(
       `https://console.aws.amazon.com/cloudformation/home#/stacks/quickcreate?templateURL=${encodeURIComponent(
         ARTIFACT
-      )}&param_X=1`
+      )}`
     );
   });
 
-  it('getIacLaunchUrl builds the stack-update deep link when a deployment id is known', () => {
+  it('getArtifactLaunchUrl adds encoded stack params to the quick-create link', () => {
+    const url = getArtifactLaunchUrl({
+      provider: 'aws',
+      artifactUrl: ARTIFACT,
+      stackParams: { ElasticOrganizationId: 'org id&x', ElasticResourceType: 'project' },
+    });
+
+    expect(url).toBe(
+      `https://console.aws.amazon.com/cloudformation/home#/stacks/quickcreate?templateURL=${encodeURIComponent(
+        ARTIFACT
+      )}&param_ElasticOrganizationId=org%20id%26x&param_ElasticResourceType=project`
+    );
+  });
+
+  it('getArtifactLaunchUrl swaps the artifact into the static URL, keeping its host and params', () => {
+    const staticUrl =
+      'https://console.amazonaws-us-gov.com/cloudformation/home#/stacks/quickcreate?templateURL=https%3A%2F%2Fstatic.example%2Ft.yml&stackName=Elastic-Cloud-Connector&param_X=1';
+
+    expect(getArtifactLaunchUrl({ provider: 'aws', artifactUrl: ARTIFACT, staticUrl })).toBe(
+      `https://console.amazonaws-us-gov.com/cloudformation/home#/stacks/quickcreate?templateURL=${encodeURIComponent(
+        ARTIFACT
+      )}&stackName=Elastic-Cloud-Connector&param_X=1`
+    );
+  });
+
+  it('getArtifactLaunchUrl sets stack params on the static URL, replacing any it already carries', () => {
+    const url = getArtifactLaunchUrl({
+      provider: 'aws',
+      artifactUrl: ARTIFACT,
+      staticUrl: `${STATIC_URL}&stackName=Elastic-Cloud-Connector`,
+      stackParams: { X: 'replaced', ElasticOrganizationId: '2070044029' },
+    });
+
+    expect(url).toBe(
+      `https://console.aws.amazon.com/cloudformation/home#/stacks/quickcreate?templateURL=${encodeURIComponent(
+        ARTIFACT
+      )}&param_X=replaced&stackName=Elastic-Cloud-Connector&param_ElasticOrganizationId=2070044029`
+    );
+  });
+
+  it('getArtifactLaunchUrl builds the quick-create link when the static URL has no templateURL param', () => {
     expect(
-      getIacLaunchUrl({
+      getArtifactLaunchUrl({
+        provider: 'aws',
+        artifactUrl: ARTIFACT,
+        staticUrl: 'https://static.example/t.yml',
+      })
+    ).toBe(
+      `https://console.aws.amazon.com/cloudformation/home#/stacks/quickcreate?templateURL=${encodeURIComponent(
+        ARTIFACT
+      )}`
+    );
+  });
+
+  it('getArtifactLaunchUrl ignores the static URL for the stack-update deep link', () => {
+    expect(
+      getArtifactLaunchUrl({
+        provider: 'aws',
+        artifactUrl: ARTIFACT,
+        deploymentId: STACK_ARN,
+        staticUrl: STATIC_URL,
+      })
+    ).toBe(
+      `https://console.aws.amazon.com/cloudformation/home?region=us-east-1#/stacks/update/template?stackId=${encodeURIComponent(
+        STACK_ARN
+      )}&templateURL=${encodeURIComponent(ARTIFACT)}`
+    );
+  });
+
+  it('getStaticLaunchUrl adds stack params to the static URL', () => {
+    expect(
+      getStaticLaunchUrl({
         provider: 'aws',
         staticUrl: STATIC_URL,
+        stackParams: { ElasticOrganizationId: '2070044029' },
+      })
+    ).toBe(`${STATIC_URL}&param_ElasticOrganizationId=2070044029`);
+  });
+
+  it('getStaticLaunchUrl replaces stack params the static URL already carries', () => {
+    expect(
+      getStaticLaunchUrl({
+        provider: 'aws',
+        staticUrl: STATIC_URL,
+        stackParams: { X: 'replaced' },
+      })
+    ).toBe(STATIC_URL.replace('param_X=1', 'param_X=replaced'));
+  });
+
+  it('getStaticLaunchUrl keeps replacement patterns in stack params literal', () => {
+    const url = getStaticLaunchUrl({
+      provider: 'aws',
+      staticUrl: STATIC_URL,
+      stackParams: { X: '$&$1' },
+    });
+
+    expect(new URLSearchParams(url?.split('?')[1]).get('param_X')).toBe('$&$1');
+  });
+
+  it('getStaticLaunchUrl leaves a URL that is not a quick-create link unchanged', () => {
+    const rawTemplateUrl = 'https://static.example/t.yml?X-Amz-Signature=abc';
+
+    expect(
+      getStaticLaunchUrl({
+        provider: 'aws',
+        staticUrl: rawTemplateUrl,
+        stackParams: { ElasticOrganizationId: '2070044029' },
+      })
+    ).toBe(rawTemplateUrl);
+  });
+
+  it('getStaticLaunchUrl returns undefined when there is no static URL', () => {
+    expect(
+      getStaticLaunchUrl({
+        provider: 'aws',
+        staticUrl: undefined,
+        stackParams: { ElasticOrganizationId: '2070044029' },
+      })
+    ).toBeUndefined();
+  });
+
+  it('getArtifactLaunchUrl does not add stack params to the stack-update deep link', () => {
+    const url = getArtifactLaunchUrl({
+      provider: 'aws',
+      artifactUrl: ARTIFACT,
+      deploymentId: STACK_ARN,
+      stackParams: { ElasticOrganizationId: '2070044029' },
+    });
+
+    expect(url).not.toContain('param_');
+  });
+
+  it('getArtifactLaunchUrl builds the stack-update deep link when a deployment id is known', () => {
+    expect(
+      getArtifactLaunchUrl({
+        provider: 'aws',
         artifactUrl: ARTIFACT,
         deploymentId: STACK_ARN,
       })
@@ -1450,28 +1634,19 @@ describe('IaC launch URL helpers', () => {
     );
   });
 
-  it('getIacLaunchUrl returns undefined for non-AWS providers and scaffolds without templateURL', () => {
-    expect(
-      getIacLaunchUrl({ provider: 'azure', staticUrl: STATIC_URL, artifactUrl: ARTIFACT })
-    ).toBeUndefined();
-    expect(
-      getIacLaunchUrl({
-        provider: 'aws',
-        staticUrl: 'https://x.example/no-param',
-        artifactUrl: ARTIFACT,
-      })
-    ).toBeUndefined();
+  it('getStaticLaunchUrl and getArtifactLaunchUrl return undefined for non-AWS providers', () => {
+    expect(getStaticLaunchUrl({ provider: 'azure', staticUrl: STATIC_URL })).toBeUndefined();
+    expect(getArtifactLaunchUrl({ provider: 'azure', artifactUrl: ARTIFACT })).toBeUndefined();
   });
 
-  it('getIacLaunchUrl and getAwsStackConsoleUrl link to the console of the ARN partition', () => {
+  it('getArtifactLaunchUrl and getAwsStackConsoleUrl link to the console of the ARN partition', () => {
     // The ARN validator accepts GovCloud and China stacks; their consoles live on other hosts.
     const GOV_ARN = 'arn:aws-us-gov:cloudformation:us-gov-west-1:123456789012:stack/s/u';
     const CN_ARN = 'arn:aws-cn:cloudformation:cn-north-1:123456789012:stack/s/u';
 
     expect(
-      getIacLaunchUrl({
+      getArtifactLaunchUrl({
         provider: 'aws',
-        staticUrl: STATIC_URL,
         artifactUrl: ARTIFACT,
         deploymentId: GOV_ARN,
       })
@@ -1491,9 +1666,8 @@ describe('IaC launch URL helpers', () => {
     const ISO_ARN = 'arn:aws-iso:cloudformation:us-iso-east-1:123456789012:stack/s/u';
 
     expect(
-      getIacLaunchUrl({
+      getArtifactLaunchUrl({
         provider: 'aws',
-        staticUrl: STATIC_URL,
         artifactUrl: ARTIFACT,
         deploymentId: ISO_ARN,
       })
@@ -1507,9 +1681,8 @@ describe('IaC launch URL helpers', () => {
     const LOGS_ARN = 'arn:aws:logs:us-east-1:123456789012:log-group:/aws/lambda/fn:*';
 
     expect(
-      getIacLaunchUrl({
+      getArtifactLaunchUrl({
         provider: 'aws',
-        staticUrl: STATIC_URL,
         artifactUrl: ARTIFACT,
         deploymentId: LOGS_ARN,
       })
@@ -1517,11 +1690,10 @@ describe('IaC launch URL helpers', () => {
     expect(getAwsStackConsoleUrl(LOGS_ARN)).toBeUndefined();
   });
 
-  it('getIacLaunchUrl returns undefined for a malformed deploymentId that has no parseable region', () => {
+  it('getArtifactLaunchUrl returns undefined for a malformed deploymentId that has no parseable region', () => {
     expect(
-      getIacLaunchUrl({
+      getArtifactLaunchUrl({
         provider: 'aws',
-        staticUrl: STATIC_URL,
         artifactUrl: ARTIFACT,
         deploymentId: 'not-an-arn',
       })
@@ -1539,10 +1711,6 @@ describe('IaC launch URL helpers', () => {
 
   it('getAwsStackConsoleUrl returns undefined for a malformed ARN', () => {
     expect(getAwsStackConsoleUrl('not-an-arn')).toBeUndefined();
-  });
-
-  it('hasTemplateUrlParam returns false for undefined', () => {
-    expect(hasTemplateUrlParam(undefined)).toBe(false);
   });
 });
 
@@ -1641,5 +1809,66 @@ describe('getUnresolvedTemplateUrlTokens', () => {
         iacTemplateUrl: undefined,
       })
     ).toEqual([]);
+  });
+});
+
+describe('getStaticTemplate', () => {
+  const wiiUrl =
+    'https://console.aws.amazon.com/cloudformation/home#/stacks/quickcreate?templateURL=https://example.com/wii.yml&param_ElasticOrganizationId=ORGANIZATION_ID&param_ElasticResourceId=RESOURCE_ID';
+  const echCloud = {
+    isCloudEnabled: true,
+    isServerlessEnabled: false,
+    cloudId: `qa:${btoa('eu-west-1.aws.qa.cld.elstc.co:9243$es-id$kibana-id')}`,
+    deploymentId: 'deployment-id',
+    organizationId: '2070044029',
+    serverless: {},
+  } as CloudSetup;
+  const BASE: GetStaticTemplateParams = {
+    provider: 'aws',
+    cloud: echCloud,
+    accountType: SINGLE_ACCOUNT,
+    iacTemplateUrl: wiiUrl,
+  };
+
+  it('returns the token-substituted URL with the stack params set', () => {
+    const { url, unresolvedTokensError } = getStaticTemplate({
+      ...BASE,
+      stackParams: { ElasticCloudProvider: 'aws' },
+    });
+
+    expect(unresolvedTokensError).toBeUndefined();
+    expect(url).toContain('param_ElasticOrganizationId=2070044029');
+    expect(url).toContain('param_ElasticResourceId=kibana-id');
+    expect(url).toContain('param_ElasticCloudProvider=aws');
+  });
+
+  it('names the unresolved tokens instead of returning a URL', () => {
+    expect(
+      getStaticTemplate({
+        ...BASE,
+        cloud: { ...echCloud, organizationId: undefined } as CloudSetup,
+      })
+    ).toEqual({
+      url: undefined,
+      unresolvedTokensError: expect.stringContaining('ORGANIZATION_ID'),
+    });
+  });
+
+  it('returns neither a URL nor an error when there is no cloud context or template', () => {
+    expect(getStaticTemplate({ ...BASE, cloud: undefined })).toEqual({
+      url: undefined,
+      unresolvedTokensError: undefined,
+    });
+    expect(getStaticTemplate({ ...BASE, iacTemplateUrl: undefined })).toEqual({
+      url: undefined,
+      unresolvedTokensError: undefined,
+    });
+  });
+
+  it('returns neither a URL nor an error for non-AWS providers', () => {
+    expect(getStaticTemplate({ ...BASE, provider: 'azure' })).toEqual({
+      url: undefined,
+      unresolvedTokensError: undefined,
+    });
   });
 });

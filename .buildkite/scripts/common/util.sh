@@ -321,10 +321,7 @@ download_tmp_artifact() {
 
     if [[ -z "$expected_sha256" ]]; then
       echo "No recorded checksum for ${artifact_name} (build ${build_id}), skipping GCS download."
-    elif "${SCRIPTS_COMMON_DIR}/activate_service_account.sh" "kibana-ci-artifacts-${BUILDKITE_AGENT_GCP_REGION}" \
-      && gcloud storage cp \
-        "gs://kibana-ci-artifacts-${BUILDKITE_AGENT_GCP_REGION}/tmp/builds/${build_id}/${artifact_name}" \
-        "${dest_dir}/${artifact_name}"; then
+    elif download_tmp_artifact_from_gcs "$artifact_name" "$dest_dir" "$build_id"; then
       if [[ "$(sha256_of "${dest_dir}/${artifact_name}")" == "$expected_sha256" ]]; then
         return 0
       fi
@@ -353,7 +350,7 @@ upload_tmp_artifact() {
     return 0
   fi
 
-  if ! "${SCRIPTS_COMMON_DIR}/activate_service_account.sh" "kibana-ci-artifacts-${GCS_CI_ARTIFACT_REGIONS[0]}"; then
+  if ! "${SCRIPTS_COMMON_DIR}/activate_service_account.sh" "kibana-ci-artifacts-${GCS_CI_ARTIFACT_REGIONS[0]}" >&2; then
     echo "Service account activation failed; skipping GCS upload of ${artifact_name}. Same-region downloads will fall back to the buildkite artifact." >&2
     return 0
   fi
@@ -384,10 +381,21 @@ upload_tmp_artifact_to_region() (
   trap 'rm -rf "$config_dir"' EXIT
   cp -a "${CLOUDSDK_CONFIG:-$HOME/.config/gcloud}/." "$config_dir/"
 
-  retry 3 5 env "CLOUDSDK_CONFIG=$config_dir" gcloud storage cp \
-    "$local_path" \
-    "gs://kibana-ci-artifacts-${region}/tmp/builds/${build_id}/${artifact_name}"
+  CLOUDSDK_CONFIG="$config_dir" CLOUDSDK_STORAGE_PARALLEL_COMPOSITE_UPLOAD_ENABLED=True \
+    retry 3 5 gcloud storage cp \
+      "$local_path" \
+      "gs://kibana-ci-artifacts-${region}/tmp/builds/${build_id}/${artifact_name}"
 )
+
+download_tmp_artifact_from_gcs() {
+  local artifact_name="$1" dest_dir="$2" build_id="$3"
+  local bucket="kibana-ci-artifacts-${BUILDKITE_AGENT_GCP_REGION}"
+
+  "${SCRIPTS_COMMON_DIR}/activate_service_account.sh" "$bucket" >&2 || return 1
+  gcloud storage cp \
+    "gs://${bucket}/tmp/builds/${build_id}/${artifact_name}" \
+    "${dest_dir}/${artifact_name}"
+}
 
 # Artifacts of other builds are checked against the checksum Buildkite recorded for their buildkite artifact
 tmp_artifact_expected_sha256() {

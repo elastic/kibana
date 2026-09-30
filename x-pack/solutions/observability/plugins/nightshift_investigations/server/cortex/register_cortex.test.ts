@@ -7,7 +7,14 @@
 
 import { loggerMock } from '@kbn/logging-mocks';
 import { coreMock } from '@kbn/core/server/mocks';
+import {
+  SIGNIFICANT_EVENTS_INFERENCE_PARENT_FEATURE_ID,
+  SIGNIFICANT_EVENTS_INFERENCE_PRODUCT_FEATURE,
+  SIGNIFICANT_EVENTS_INFERENCE_PRODUCT_SOLUTION,
+  SIGNIFICANT_EVENTS_INVESTIGATION_INFERENCE_FEATURE_ID,
+} from '@kbn/significant-events-schema';
 import { NIGHTSHIFT_INVESTIGATION_AGENT_ID } from '../agents/investigation';
+import type { InvestigationToolCall } from '../decision_trees/accessed_trees';
 import { hydrateCortexWorkspace, runCortexOptimize } from './register_cortex';
 import { optimizeCortex } from './optimize';
 import { materializeCortex } from './materialize';
@@ -93,9 +100,8 @@ describe('hydrateCortexWorkspace', () => {
 describe('runCortexOptimize', () => {
   const esClient = { search: jest.fn() } as never;
   const request = { headers: {} } as never;
-  const getInference = jest.fn().mockReturnValue({
-    getClient: jest.fn().mockReturnValue({}),
-  });
+  const getClient = jest.fn().mockReturnValue({});
+  const getInference = jest.fn().mockReturnValue({ getClient });
   const getSearchInferenceEndpoints = jest.fn().mockReturnValue({
     endpoints: {
       getForFeature: jest.fn().mockResolvedValue({
@@ -104,14 +110,26 @@ describe('runCortexOptimize', () => {
     },
   });
 
-  const run = (agentId?: string) =>
+  const toolCalls: InvestigationToolCall[] = [
+    { tool_id: 'nightshift_sandbox_bash', params: { command: 'cat /workspace/cortex/README.md' } },
+    { tool_id: 'nightshift_sandbox_bash', params: { command: 'esql "FROM logs-* | LIMIT 5"' } },
+    { tool_id: 'nightshift_sandbox_view_file', params: { file_path: '/workspace/elastic.md' } },
+  ];
+  const progressReport: InvestigationToolCall = {
+    tool_id: 'platform.streams.investigation_progress_report',
+    params: { step: 'triage' },
+  };
+
+  const run = (agentId?: string, calls = toolCalls) =>
     runCortexOptimize({
       request,
       agentId,
       userMessage: 'why?',
       assistantMessage: 'redis',
+      toolCalls: calls,
       esClient,
       spaceId: 'default',
+      interactionId: 'execution-1',
       analytics: coreMock.createSetup().analytics,
       getInference,
       getSearchInferenceEndpoints,
@@ -124,7 +142,48 @@ describe('runCortexOptimize', () => {
 
   it('runs for the Nightshift investigation agent', async () => {
     await run(NIGHTSHIFT_INVESTIGATION_AGENT_ID);
-    expect(optimizeCortex).toHaveBeenCalled();
+    expect(optimizeCortex).toHaveBeenCalledWith(expect.objectContaining({ toolCalls }));
+  });
+
+  // A reply that made almost no tool calls answered from what the wiki already said, or was a
+  // smoke test. Neither should mint pages.
+  it('skips a round with fewer than three tool calls', async () => {
+    await run(NIGHTSHIFT_INVESTIGATION_AGENT_ID, toolCalls.slice(0, 2));
+    expect(optimizeCortex).not.toHaveBeenCalled();
+    expect(getInference).not.toHaveBeenCalled();
+  });
+
+  it('attributes the optimize LLM call to significant events investigation spend', async () => {
+    await run(NIGHTSHIFT_INVESTIGATION_AGENT_ID);
+    expect(getClient).toHaveBeenCalledWith({
+      request,
+      bindTo: {
+        connectorId: 'connector-1',
+        metadata: {
+          connectorTelemetry: {
+            pluginId: SIGNIFICANT_EVENTS_INVESTIGATION_INFERENCE_FEATURE_ID,
+            aggregateBy: SIGNIFICANT_EVENTS_INFERENCE_PARENT_FEATURE_ID,
+            productSolution: SIGNIFICANT_EVENTS_INFERENCE_PRODUCT_SOLUTION,
+            productFeature: SIGNIFICANT_EVENTS_INFERENCE_PRODUCT_FEATURE,
+            interactionId: 'execution-1',
+          },
+        },
+      },
+    });
+  });
+
+  it('passes only sandbox tool calls to the optimizer', async () => {
+    await run(NIGHTSHIFT_INVESTIGATION_AGENT_ID, [progressReport, ...toolCalls, progressReport]);
+    expect(optimizeCortex).toHaveBeenCalledWith(expect.objectContaining({ toolCalls }));
+  });
+
+  it('does not count non-sandbox tool calls towards the minimum', async () => {
+    await run(NIGHTSHIFT_INVESTIGATION_AGENT_ID, [
+      ...toolCalls.slice(0, 2),
+      progressReport,
+      progressReport,
+    ]);
+    expect(optimizeCortex).not.toHaveBeenCalled();
   });
 
   it('skips another agent', async () => {

@@ -167,3 +167,6 @@ export const DEFAULT_TIME_RANGE_DISPLAY = {
 export const DEFAULT_ROWS_PER_PAGE = 100;
 
 export const DEFAULT_SAMPLE_SIZE = 500;
+
+export const SEARCH_SOURCE_ALERT_INDEX_PREFIX = 'search-source-alert';
+export const SEARCH_SOURCE_ALERT_OUTPUT_INDEX_PREFIX = 'search-source-alert-output';

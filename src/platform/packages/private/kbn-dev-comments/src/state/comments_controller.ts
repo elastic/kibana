@@ -10,6 +10,7 @@
 import { i18n } from '@kbn/i18n';
 import { DISPLAY_NAME_STORAGE_KEY, GUIDE_HANDOFF_STORAGE_KEY } from '../constants';
 import { buildAnchor } from '../lib/anchor';
+import { isPassingThrough } from '../lib/pass_through';
 import { createSnapshot } from '../lib/snapshot';
 import { createTrailRecorder } from '../lib/trail';
 import type {
@@ -67,6 +68,8 @@ export interface CommentsState {
   /** Comment mode: the page is not interactable and a click on it starts a comment. */
   active: boolean;
   panelMinimized: boolean;
+  /** The thread the panel shows in place of the list: the fallback for a comment whose element cannot be shown. */
+  panelThreadId: string | null;
   activeThreadId: string | null;
   /** Pin that should take focus once it is rendered: its thread was opened without a pointer. */
   focusPinId: string | null;
@@ -118,6 +121,8 @@ export interface CommentsController {
   guideTo(comment: Comment): Promise<void>;
   /** Ends the guide; with `found`, opens the comment it led to. */
   stopGuide(found?: boolean): void;
+  /** Shows the thread in the panel, in place of the list, ending any guide; `null` goes back to the list. */
+  showInPanel(id: string | null): void;
   setOverlayOpen(open: boolean): void;
   dismissNotice(): void;
 }
@@ -189,6 +194,13 @@ const takeGuideHandoff = (): GuideHandoff | null => {
 const droppingDraft = (state: CommentsState): Partial<CommentsState> =>
   state.pending?.saving ? {} : { pending: null };
 
+/** Opens the thread at its pin; one shown in the panel gives way: one thread at a time. */
+const openingPin = (id: string, focusPin: boolean): Partial<CommentsState> => ({
+  activeThreadId: id,
+  focusPinId: focusPin ? id : null,
+  panelThreadId: null,
+});
+
 /** A screenshot that was asked for could not be taken; the comment is not saved without it. */
 class ScreenshotError extends Error {}
 
@@ -234,6 +246,7 @@ export const createCommentsController = (services: CommentsHostServices): Commen
     loadError: null,
     active: false,
     panelMinimized: false,
+    panelThreadId: null,
     activeThreadId: null,
     focusPinId: null,
     pending: null,
@@ -248,10 +261,11 @@ export const createCommentsController = (services: CommentsHostServices): Commen
   const trail = createTrailRecorder({
     location,
     ignoreSelectors,
-    // Page clicks in comment mode place pins instead of acting, except while a guide runs.
+    // Page clicks in comment mode place pins instead of acting, except while a
+    // guide runs, and except those made with Alt held.
     isRecording: () => {
       const { active, guide } = store.getState();
-      return !active || guide !== null;
+      return !active || guide !== null || isPassingThrough();
     },
   });
 
@@ -370,13 +384,14 @@ export const createCommentsController = (services: CommentsHostServices): Commen
       return;
     }
     // A guide survives the navigation it asked for (to the comment's page), nothing
-    // else; a draft being saved is kept until the save settles, so that a failure
-    // can hand it back with its text instead of losing it.
+    // else, threads included; a draft being saved is kept until the save settles, so
+    // that a failure can hand it back with its text instead of losing it.
     const guided = guide && comments.find(({ id }) => id === guide.id);
     store.setState((state) => ({
       pageKey,
       activeThreadId: null,
       focusPinId: null,
+      panelThreadId: null,
       guide: guided?.route.pageKey === pageKey ? guide : null,
       ...droppingDraft(state),
     }));
@@ -418,6 +433,7 @@ export const createCommentsController = (services: CommentsHostServices): Commen
       activeThreadId: null,
       focusPinId: null,
       guide: null,
+      panelThreadId: null,
       ...(active ? {} : { panelMinimized: false }),
     });
   };
@@ -522,7 +538,7 @@ export const createCommentsController = (services: CommentsHostServices): Commen
           comments: [...state.comments, created],
           ...(state.pending?.id === draft.id ? { pending: null } : {}),
           ...(state.pending?.id === draft.id && state.pageKey === draft.route.pageKey
-            ? { activeThreadId: created.id, focusPinId: created.id }
+            ? openingPin(created.id, true)
             : {}),
         }));
       } catch (error) {
@@ -575,11 +591,11 @@ export const createCommentsController = (services: CommentsHostServices): Commen
     },
 
     openThread(id, { focusPin = false } = {}) {
-      store.setState((state) => ({
-        activeThreadId: id,
-        focusPinId: focusPin ? id : null,
-        ...(id ? droppingDraft(state) : {}),
-      }));
+      store.setState((state) =>
+        id
+          ? { ...openingPin(id, focusPin), ...droppingDraft(state) }
+          : { activeThreadId: null, focusPinId: null }
+      );
     },
 
     pinFocused(id) {
@@ -632,8 +648,23 @@ export const createCommentsController = (services: CommentsHostServices): Commen
       }
       store.setState({
         guide: null,
-        ...(found ? { activeThreadId: guide.id, focusPinId: guide.id } : {}),
+        ...(found ? openingPin(guide.id, true) : {}),
       });
+    },
+
+    showInPanel(id) {
+      store.setState((state) => ({
+        panelThreadId: id,
+        guide: null,
+        ...(id
+          ? {
+              activeThreadId: null,
+              focusPinId: null,
+              panelMinimized: false,
+              ...droppingDraft(state),
+            }
+          : {}),
+      }));
     },
 
     setOverlayOpen(open) {
