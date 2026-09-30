@@ -36,6 +36,7 @@ import {
   roundUserMessage,
   type VisibleContextDeps,
 } from './visible_context';
+import { isPreExecutionWorkflowContextMessage } from './render_steps_to_messages';
 import { serializeCompactionSummary } from './compaction_serialize';
 import { llmCompactionSchema, COMPACTION_SYSTEM_PROMPT } from './compaction_schema';
 import type { LlmCompactionOutput } from './compaction_schema';
@@ -119,9 +120,27 @@ export const extractProgrammaticSummary = (
 
 interface RenderedUnit {
   unit: ContextUnit;
-  messages: BaseMessage[];
+  /** Size in the agent's context; pinned messages stay whatever is covered, like the request. */
   tokens: number;
+  /** What the summarizer is sent: workflow model context is kept out of summaries. */
+  messages: BaseMessage[];
+  messageTokens: number;
 }
+
+const renderForCompaction = async (
+  unit: ContextUnit,
+  context: Parameters<typeof renderUnit>[1]
+): Promise<RenderedUnit> => {
+  const rendered = await renderUnit(unit, context);
+  const messages = rendered.filter((message) => !isPreExecutionWorkflowContextMessage(message));
+  const messageTokens = estimateMessagesTokens(messages);
+  return {
+    unit,
+    tokens: unit.kind === 'current_cycle' ? messageTokens : estimateMessagesTokens(rendered),
+    messages,
+    messageTokens,
+  };
+};
 
 /**
  * Summarizes everything but a token-banded tail of the visible context.
@@ -151,8 +170,7 @@ export const compactContext = async (
     steps: run.steps,
     visibility: view.visibility,
   })) {
-    const messages = await renderUnit(unit, { view, run, conversation });
-    rendered.push({ unit, messages, tokens: estimateMessagesTokens(messages) });
+    rendered.push(await renderForCompaction(unit, { view, run, conversation }));
   }
 
   // At round start with no current step, the last unit is history and can be covered too.
@@ -307,11 +325,11 @@ const takeWithinBudget = (units: RenderedUnit[], budget: number): RenderedUnit[]
   const taken: RenderedUnit[] = [];
   let total = 0;
   for (const unit of units) {
-    if (taken.length > 0 && total + unit.tokens > budget) {
+    if (taken.length > 0 && total + unit.messageTokens > budget) {
       break;
     }
     taken.push(unit);
-    total += unit.tokens;
+    total += unit.messageTokens;
   }
   return taken;
 };

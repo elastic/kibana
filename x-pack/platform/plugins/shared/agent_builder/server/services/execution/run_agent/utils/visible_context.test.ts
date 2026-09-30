@@ -17,6 +17,7 @@ import type {
 import {
   ConversationRoundStepType,
   ToolResultType,
+  createPreExecutionWorkflowStep,
   createSubstitutionStep,
 } from '@kbn/agent-builder-common';
 import type { ToolResultStore } from '@kbn/agent-builder-server/runner';
@@ -216,6 +217,33 @@ describe('renderVisibleContext', () => {
     expect(rendered).toContain('RAW_x2');
     // the current input is never covered
     expect(rendered).toContain('NEXT_INPUT');
+  });
+
+  it('keeps the workflow model context of the current run after the request once covered', async () => {
+    const render = (cursor?: CompactionCursor) =>
+      renderVisibleContext(
+        {
+          conversation: conversation(twoRoundTimeline()),
+          run: run(
+            [
+              createPreExecutionWorkflowStep({ model_context: 'WF_CONTEXT' }),
+              call('x1'),
+              call('x2'),
+            ],
+            { cursor, renderState: renderStateOf(['x1', 'x2']) }
+          ),
+          phase: 'research',
+        },
+        deps()
+      );
+
+    for (const cursor of [undefined, { round_id: 'current', tool_call_id: 'x1' }]) {
+      const rendered = text(await render(cursor));
+      expect(rendered.split('WF_CONTEXT')).toHaveLength(2);
+      expect(rendered.indexOf('WF_CONTEXT')).toBeGreaterThan(rendered.indexOf('NEXT_INPUT'));
+      expect(rendered.indexOf('WF_CONTEXT')).toBeLessThan(rendered.indexOf('RAW_x2'));
+      expect(rendered.includes('RAW_x1')).toBe(cursor === undefined);
+    }
   });
 
   it('renders the custom events after the cursor, and hides the ones it covers', async () => {

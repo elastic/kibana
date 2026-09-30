@@ -83,11 +83,16 @@ interface CurrentRenderContext extends Omit<CurrentRunRenderOptions, 'range'> {
 
 type RenderContext = HistoryRenderContext | CurrentRenderContext;
 
+const PRE_EXECUTION_WORKFLOW_CONTEXT_NAME = 'pre_execution_workflow_context';
+
 export const createPreExecutionWorkflowContextMessage = (modelContext: string): HumanMessage =>
   new HumanMessage({
     content: modelContext,
-    name: 'pre_execution_workflow_context',
+    name: PRE_EXECUTION_WORKFLOW_CONTEXT_NAME,
   });
+
+export const isPreExecutionWorkflowContextMessage = (message: BaseMessage): boolean =>
+  message.name === PRE_EXECUTION_WORKFLOW_CONTEXT_NAME;
 
 /**
  * Groups consecutive tool call steps by `tool_call_group_id`.

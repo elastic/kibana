@@ -8,10 +8,16 @@
 import { loggerMock } from '@kbn/logging-mocks';
 import type { BaseMessage } from '@langchain/core/messages';
 import type { InferenceChatModel } from '@kbn/inference-langchain';
-import { ConversationRoundStepType, ToolResultType } from '@kbn/agent-builder-common';
+import {
+  ConversationRoundStepType,
+  ToolResultType,
+  createPreExecutionWorkflowStep,
+  isToolCallStep,
+} from '@kbn/agent-builder-common';
 import type {
   CompactionStructuredData,
   CompactionSummary,
+  ConversationRoundStep,
   ToolCallStep,
 } from '@kbn/agent-builder-common';
 import { processedCustomEventFixture, timelineFromRounds } from '../../../../test_utils/timeline';
@@ -87,7 +93,7 @@ const renderStateOf = (
   );
 
 const run = (
-  steps: ToolCallStep[],
+  steps: ConversationRoundStep[],
   {
     compactionSummary,
     kinds,
@@ -96,7 +102,7 @@ const run = (
   roundId: 'current',
   steps,
   cycleLimit: 30,
-  renderState: renderStateOf(steps, kinds),
+  renderState: renderStateOf(steps.filter(isToolCallStep), kinds),
   pendingToolCallIds: [],
   retryNotices: [],
   compactionSummary,
@@ -289,6 +295,50 @@ describe('compactContext', () => {
     const request = requestText(invoke, 0);
     expect(request).toContain('NOTE_TEXT');
     expect(request).not.toContain('hello C');
+  });
+
+  it('keeps workflow model context out of summaries, and pinned context out of the tail', async () => {
+    const { invoke, deps } = setup();
+    const conversation = conversationOf(
+      timelineFromRounds([
+        {
+          id: 'A',
+          input: { message: 'hello A', attachments: [] },
+          steps: [createPreExecutionWorkflowStep({ model_context: 'OLD_WF' }), call('a', BIG)],
+          response: { message: 'answer A' },
+        },
+      ])
+    );
+    const steps = [
+      createPreExecutionWorkflowStep({ model_context: `CURRENT_WF ${'w'.repeat(BIG)}` }),
+      call('x1'),
+      call('x2', BIG),
+      call('x3'),
+    ];
+    const result = await compact({ conversation, run: run(steps), tailCapTokens: 20_000 }, deps);
+
+    // the first current cycle only weighs its tool call: its workflow context is pinned
+    expect(result?.summary.summarized_up_to).toEqual({ round_id: 'A', tool_call_id: 'a' });
+    const request = requestText(invoke, 0);
+    expect(request).toContain('hello A');
+    expect(request).not.toContain('OLD_WF');
+  });
+
+  it('keeps the current workflow model context out of summaries once its cycle is covered', async () => {
+    const { invoke, deps } = setup();
+    const steps = [
+      createPreExecutionWorkflowStep({ model_context: 'CURRENT_WF' }),
+      ...['x1', 'x2', 'x3'].map((id) => call(id, BIG)),
+    ];
+    const result = await compact(
+      { conversation: conversationOf([]), run: run(steps), tailCapTokens: 20_000 },
+      deps
+    );
+
+    expect(result?.summary.summarized_up_to).toEqual({ round_id: 'current', tool_call_id: 'x1' });
+    const request = requestText(invoke, 0);
+    expect(request).toContain('r-x1');
+    expect(request).not.toContain('CURRENT_WF');
   });
 
   it('covers cycles of the current run, anchored on their last call', async () => {

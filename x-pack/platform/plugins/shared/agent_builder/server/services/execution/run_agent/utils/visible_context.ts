@@ -7,6 +7,7 @@
 
 import type { Logger } from '@kbn/core/server';
 import type { BaseMessage } from '@langchain/core/messages';
+import { isPreExecutionWorkflowStep } from '@kbn/agent-builder-common';
 import type { ToolResultStore } from '@kbn/agent-builder-server/runner';
 import type { HandoverParams, PromptImageResolver } from '../prompts/types';
 import type { CurrentRun } from '../transient_state';
@@ -32,6 +33,7 @@ import {
   roundOutcomeMessage,
 } from './to_langchain_messages';
 import {
+  createPreExecutionWorkflowContextMessage,
   renderCurrentRun,
   renderHistorySteps,
   type CurrentRunPhase,
@@ -123,8 +125,24 @@ export const renderVisibleContext = async (
     range: { start: view.visibility.currentFromStep },
     substitution: view.substitution,
   });
-  return [...history, ...current];
+  return [...history, ...pinnedCurrentRunMessages(run, view.visibility), ...current];
 };
+
+/**
+ * The current run's workflow model context stays with the current request when the summary covers
+ * its cycle.
+ */
+const pinnedCurrentRunMessages = (
+  { steps }: CurrentRun,
+  { currentFromStep }: ContextVisibility
+): BaseMessage[] =>
+  steps
+    .slice(0, currentFromStep)
+    .flatMap((step) =>
+      isPreExecutionWorkflowStep(step) && step.model_context
+        ? [createPreExecutionWorkflowContextMessage(step.model_context)]
+        : []
+    );
 
 /** One unit of the visible context, rendered as it is sent (images aside). */
 export const renderUnit = async (
