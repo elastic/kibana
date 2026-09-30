@@ -24,8 +24,10 @@ import type { LensPublicStart } from '@kbn/lens-plugin/public';
 import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import React, { useCallback, useMemo, useState } from 'react';
 import type { RuleApiResponse } from '../services/rules_api';
+import { CreateActionPolicyFormFlyout } from '../components/action_policy/form_flyout/create_action_policy_form_flyout';
 import { useBuilderToEsqlTransition } from './use_builder_to_esql_transition';
 import { useCreateRule } from './use_create_rule';
+import { useIsActionPoliciesLicenseValid } from './use_is_action_policies_license_valid';
 import { useUpdateRule } from './use_update_rule';
 
 const templateToSyntheticRule = (template: RuleTemplateResponse): RuleApiResponse => ({
@@ -66,6 +68,7 @@ export const useComposeDiscoverFlyout = ({
     | DashboardStart
     | undefined;
   const cps = useService(PluginStart('cps'), { optional: true }) as CPSPluginStart | undefined;
+  const canCreateActionPolicy = useIsActionPoliciesLicenseValid();
 
   const [flyoutOpen, setFlyoutOpen] = useState(false);
   const [flyoutMode, setFlyoutMode] = useState<ComposeDiscoverMode>('create');
@@ -111,6 +114,8 @@ export const useComposeDiscoverFlyout = ({
       esqlMenu: ESQLMenu,
       esqlEditorActionsProvider: EsqlEditorActionsProvider,
       esqlEditorActionsRegister: EsqlEditorActionsRegister,
+      createActionPolicyFormFlyout: CreateActionPolicyFormFlyout,
+      canCreateActionPolicy,
     }),
     [
       http,
@@ -124,6 +129,7 @@ export const useComposeDiscoverFlyout = ({
       uiActions,
       dashboard,
       cps,
+      canCreateActionPolicy,
     ]
   );
 
