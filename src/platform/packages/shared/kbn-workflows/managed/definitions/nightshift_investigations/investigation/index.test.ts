@@ -59,6 +59,8 @@ describe('Nightshift investigation workflow', () => {
       'investigate',
       'persist_investigation_completed',
       'render_investigation_canvas',
+      'list_conversation_attachments',
+      'find_investigation_canvas',
       'update_investigation_canvas',
       'add_investigation_canvas',
       'persist_investigation_failed',
@@ -127,13 +129,21 @@ describe('Nightshift investigation workflow', () => {
     expect(NIGHTSHIFT_INVESTIGATION_WORKFLOW.yaml).not.toMatch(/slack/i);
   });
 
-  it('updates the canvas only on a continued run and adds it when none exists yet', () => {
-    expect(requireStep('update_investigation_canvas').if).toBe(
-      '${{ steps.investigate.error == null and inputs.investigation_id != null }}'
-    );
+  it('looks the canvas up, updates it when it is active and adds it when it does not exist', () => {
+    expect(requireStep('render_investigation_canvas').with).toMatchObject({
+      investigation_canvas_id: '{{ inputs.investigation_id | default: execution.id }}',
+    });
+    expect(requireStep('list_conversation_attachments')).toMatchObject({
+      type: 'ai.attachment.list',
+      with: { include_deleted: true },
+    });
+    expect(requireStep('update_investigation_canvas')).toMatchObject({
+      if: '${{ variables.investigation_canvas_matches.first.active == true }}',
+      with: { attachment_id: '{{ variables.investigation_canvas_id }}' },
+    });
     expect(requireStep('add_investigation_canvas')).toMatchObject({
-      if: '${{ steps.investigate.error == null and inputs.investigation_id == null or steps.update_investigation_canvas.error != null }}',
-      with: { id: '{{ inputs.investigation_id | default: execution.id }}', type: 'text' },
+      if: '${{ variables.investigation_canvas_matches.size == 0 }}',
+      with: { id: '{{ variables.investigation_canvas_id }}', type: 'text' },
     });
   });
 });

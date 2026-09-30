@@ -426,12 +426,12 @@ steps:
         strategy: exponential
 
   # The canvas: one attachment per investigation, keyed by its ID, that each successful run
-  # replaces. A new investigation adds it. A continued one updates it, and adds it when no earlier
-  # run created it. A failed run leaves the previous canvas as it was.
+  # replaces. A failed run leaves the previous canvas as it was.
   - name: render_investigation_canvas
     type: data.set
     if: '${{ steps.investigate.error == null }}'
     with:
+      investigation_canvas_id: '{{ inputs.investigation_id | default: execution.id }}'
       investigation_canvas: |
         ## {{ steps.investigate.output.structured_output.title }}
 
@@ -448,25 +448,41 @@ steps:
         {% endfor %}
         {% endif %}
 
-  - name: update_investigation_canvas
-    type: ai.attachment.update
-    if: '${{ steps.investigate.error == null and inputs.investigation_id != null }}'
+  # Looked up rather than attempted, so a run with no canvas yet does not log a failed update.
+  # Deleted attachments are included because their IDs cannot be reused.
+  - name: list_conversation_attachments
+    type: ai.attachment.list
+    if: '${{ steps.investigate.error == null }}'
     with:
       conversation_id: '${{ steps.investigate.output.conversation_id }}'
-      attachment_id: '{{ inputs.investigation_id | default: execution.id }}'
+      include_deleted: true
+    on-failure:
+      continue: true
+
+  - name: find_investigation_canvas
+    type: data.set
+    if: '${{ steps.investigate.error == null and steps.list_conversation_attachments.error == null }}'
+    with:
+      investigation_canvas_matches: "${{ steps.list_conversation_attachments.output.attachments | where: 'id', variables.investigation_canvas_id }}"
+
+  # A canvas the user deleted stays deleted.
+  - name: update_investigation_canvas
+    type: ai.attachment.update
+    if: '${{ variables.investigation_canvas_matches.first.active == true }}'
+    with:
+      conversation_id: '${{ steps.investigate.output.conversation_id }}'
+      attachment_id: '{{ variables.investigation_canvas_id }}'
       data:
         content: '{{ variables.investigation_canvas }}'
     on-failure:
       continue: true
 
-  # Liquid has no parentheses. The update only runs after a successful investigation, so this
-  # holds whichever way `and` and `or` group.
   - name: add_investigation_canvas
     type: ai.attachment.add
-    if: '${{ steps.investigate.error == null and inputs.investigation_id == null or steps.update_investigation_canvas.error != null }}'
+    if: '${{ variables.investigation_canvas_matches.size == 0 }}'
     with:
       conversation_id: '${{ steps.investigate.output.conversation_id }}'
-      id: '{{ inputs.investigation_id | default: execution.id }}'
+      id: '{{ variables.investigation_canvas_id }}'
       type: text
       description: 'Investigation findings'
       render_inline: true
