@@ -9,8 +9,17 @@ import React, { useCallback, useEffect, useMemo, useState } from 'react';
 
 import type { ActionConnectorTableItem } from '@kbn/triggers-actions-ui-plugin/public/types';
 import { CasesConnectorFeatureId } from '@kbn/actions-plugin/common';
-import type { ActionConnector, ObservableTypeConfiguration } from '../../../common/types/domain';
+import type {
+  ActionConnector,
+  CaseStatusConfiguration,
+  CaseStatusesConfiguration,
+  CaseStatuses,
+  ObservableTypeConfiguration,
+} from '../../../common/types/domain';
 import { getNoneConnector } from '../../../common/utils/connectors';
+import { getBuiltInStatuses, getEffectiveStatuses } from '../../../common/utils/statuses';
+import { useStatusConfigurationEditedEBT } from '../../analytics/statuses';
+import type { StatusConfigurationAction } from '../../analytics/statuses';
 import { useKibana } from '../../common/lib/kibana';
 import { useGetActionTypes } from '../../containers/configure/use_action_types';
 import { useGetCaseConfiguration } from '../../containers/configure/use_get_case_configuration';
@@ -24,11 +33,27 @@ import { useLicense } from '../../common/use_license';
 import { useCasesFeatures } from '../../common/use_cases_features';
 import { CommonFlyout } from './flyout';
 import { ObservableTypesForm } from '../observable_types/form';
+import { StatusForm } from './statuses/status_form';
+import type { StatusFormData } from './statuses/status_form';
+import {
+  generateStatusKey,
+  moveStatus,
+  setDefaultStatus,
+  toggleStatusDisabled,
+  upsertStatus,
+} from './statuses/utils';
+import * as statusesI18n from './statuses/translations';
 import * as i18n from './translations';
 
 export interface ConfigureCasesFlyout<ExtraFlyoutType extends string = never> {
-  type: 'addConnector' | 'editConnector' | 'observableTypes' | ExtraFlyoutType;
+  type: 'addConnector' | 'editConnector' | 'observableTypes' | 'statuses' | ExtraFlyoutType;
   visible: boolean;
+}
+
+interface StatusFlyoutState {
+  category: CaseStatuses;
+  /** The status being renamed; null when adding one to `category` */
+  status: CaseStatusConfiguration | null;
 }
 
 /**
@@ -54,6 +79,8 @@ export const useConfigureCasesController = <ExtraFlyoutType extends string = nev
   );
   const [observableTypeToEdit, setObservableTypeToEdit] =
     useState<ObservableTypeConfiguration | null>(null);
+  const [statusFlyout, setStatusFlyout] = useState<StatusFlyoutState | null>(null);
+  const reportStatusConfigurationEdited = useStatusConfigurationEditedEBT();
 
   const {
     data: currentConfiguration,
@@ -73,7 +100,9 @@ export const useConfigureCasesController = <ExtraFlyoutType extends string = nev
     templates,
     observableTypes,
     extractObservables,
+    statuses: configuredStatuses,
   } = currentConfiguration;
+  const statuses = useMemo(() => getEffectiveStatuses(configuredStatuses), [configuredStatuses]);
 
   const {
     mutate: persistCaseConfigure,
@@ -359,6 +388,166 @@ export const useConfigureCasesController = <ExtraFlyoutType extends string = nev
     ]
   );
 
+  const persistStatuses = useCallback(
+    (
+      updatedStatuses: CaseStatusesConfiguration,
+      category: CaseStatuses,
+      action: StatusConfigurationAction
+    ) => {
+      persistCaseConfigure(
+        {
+          connector,
+          id: configurationId,
+          version: configurationVersion,
+          closureType,
+          customFields,
+          templates,
+          observableTypes,
+          statuses: updatedStatuses,
+        },
+        { onSuccess: () => reportStatusConfigurationEdited({ category, action }) }
+      );
+    },
+    [
+      closureType,
+      configurationId,
+      configurationVersion,
+      connector,
+      customFields,
+      observableTypes,
+      persistCaseConfigure,
+      reportStatusConfigurationEdited,
+      templates,
+    ]
+  );
+
+  const onAddStatus = useCallback((category: CaseStatuses) => {
+    setStatusFlyout({ category, status: null });
+    setFlyOutVisibility({ type: 'statuses', visible: true });
+  }, []);
+
+  const onEditStatus = useCallback(
+    (key: string) => {
+      const status = statuses.find((item) => item.key === key);
+
+      if (status) {
+        setStatusFlyout({ category: status.category, status });
+        setFlyOutVisibility({ type: 'statuses', visible: true });
+      }
+    },
+    [statuses]
+  );
+
+  const onMoveStatus = useCallback(
+    (key: string, direction: 'up' | 'down') => {
+      const status = statuses.find((item) => item.key === key);
+
+      if (status) {
+        persistStatuses(moveStatus(statuses, key, direction), status.category, 'reordered');
+      }
+    },
+    [persistStatuses, statuses]
+  );
+
+  const onSetDefaultStatus = useCallback(
+    (key: string) => {
+      const status = statuses.find((item) => item.key === key);
+
+      if (status) {
+        persistStatuses(setDefaultStatus(statuses, key), status.category, 'default_changed');
+      }
+    },
+    [persistStatuses, statuses]
+  );
+
+  const onToggleStatusDisabled = useCallback(
+    (key: string) => {
+      const status = statuses.find((item) => item.key === key);
+
+      if (status) {
+        persistStatuses(
+          toggleStatusDisabled(statuses, key),
+          status.category,
+          status.disabled ? 'enabled' : 'disabled'
+        );
+      }
+    },
+    [persistStatuses, statuses]
+  );
+
+  const onCloseStatusFlyout = useCallback(() => {
+    setFlyOutVisibility({ type: 'statuses', visible: false });
+    setStatusFlyout(null);
+  }, []);
+
+  const onStatusSave = useCallback(
+    ({ label }: StatusFormData) => {
+      if (!statusFlyout) {
+        return;
+      }
+
+      const trimmedLabel = label.trim();
+      const status: CaseStatusConfiguration = statusFlyout.status
+        ? { ...statusFlyout.status, label: trimmedLabel }
+        : {
+            key: generateStatusKey(
+              trimmedLabel,
+              statuses.map((item) => item.key)
+            ),
+            label: trimmedLabel,
+            category: statusFlyout.category,
+            order: statuses.length,
+            isDefault: false,
+            disabled: false,
+          };
+
+      persistStatuses(
+        upsertStatus(statuses, status),
+        statusFlyout.category,
+        statusFlyout.status ? 'renamed' : 'added'
+      );
+      onCloseStatusFlyout();
+    },
+    [onCloseStatusFlyout, persistStatuses, statusFlyout, statuses]
+  );
+
+  const AddOrEditStatusFlyout =
+    statusFlyout && flyOutVisibility?.type === 'statuses' && flyOutVisibility?.visible ? (
+      <CommonFlyout<StatusFormData>
+        isLoading={isLoadingCaseConfiguration}
+        disabled={!permissions.settings || isLoadingCaseConfiguration}
+        onCloseFlyout={onCloseStatusFlyout}
+        onSaveField={onStatusSave}
+        renderHeader={() => (
+          <span>
+            {statusFlyout.status
+              ? statusesI18n.EDIT_STATUS
+              : statusesI18n.ADD_STATUS_UNDER(
+                  getBuiltInStatuses().find((item) => item.category === statusFlyout.category)
+                    ?.label ?? statusFlyout.category
+                )}
+          </span>
+        )}
+      >
+        {({ onChange }) => (
+          <StatusForm
+            onChange={onChange}
+            status={statusFlyout.status}
+            categoryLabel={
+              getBuiltInStatuses().find((item) => item.category === statusFlyout.category)?.label ??
+              statusFlyout.category
+            }
+            takenLabels={statuses
+              .filter(
+                (item) =>
+                  item.category === statusFlyout.category && item.key !== statusFlyout.status?.key
+              )
+              .map((item) => item.label)}
+          />
+        )}
+      </CommonFlyout>
+    ) : null;
+
   const AddOrEditObservableTypeFlyout =
     flyOutVisibility?.type === 'observableTypes' && flyOutVisibility?.visible ? (
       <CommonFlyout<ObservableTypeConfiguration>
@@ -413,6 +602,13 @@ export const useConfigureCasesController = <ExtraFlyoutType extends string = nev
     onEditObservableType,
     onDeleteObservableType,
     AddOrEditObservableTypeFlyout,
+    statuses,
+    onAddStatus,
+    onEditStatus,
+    onMoveStatus,
+    onSetDefaultStatus,
+    onToggleStatusDisabled,
+    AddOrEditStatusFlyout,
   };
 };
 
