@@ -483,7 +483,7 @@ export const registerWorkspaceListeners = (
           toFields: action.payload,
         });
       } else if (fillWorkspaceConnections.match(action)) {
-        workspace.fillInGraph(action.payload);
+        workspace.fillConnections(listenerApi.getState().workspace.selectedNodeIds, action.payload);
       }
     },
   });

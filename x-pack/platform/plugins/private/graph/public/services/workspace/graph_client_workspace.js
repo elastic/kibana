@@ -1080,8 +1080,13 @@ function GraphWorkspace(options) {
    * @param maxNewEdges Max number of new edges added. Avoid adding too many new edges
    * at once into the graph otherwise disorientating
    */
-  this.fillInGraph = function (maxNewEdges = 10) {
-    let nodesForLinking = self.getSelectedOrAllTopNodes();
+  this.fillConnections = function (nodeIds, maxNewEdges = 10) {
+    const selectedNodes = nodeIds
+      .map((nodeId) => self.nodesMap[nodeId])
+      .filter((node) => node !== undefined);
+    let nodesForLinking = (
+      selectedNodes.length > 0 ? self.returnUnpackedGroupeds(selectedNodes) : self.nodes
+    ).filter((node) => node.parent === undefined);
 
     const maxNumVerticesSearchable = 100;
 
@@ -1225,6 +1230,13 @@ function GraphWorkspace(options) {
         edges: connections,
       });
     });
+  };
+
+  this.fillInGraph = function (maxNewEdges = 10) {
+    self.fillConnections(
+      self.selectedNodes.map(({ id }) => id),
+      maxNewEdges
+    );
   };
 
   // Provide a "fuzzy find similar" query that can find similar docs but preferably
