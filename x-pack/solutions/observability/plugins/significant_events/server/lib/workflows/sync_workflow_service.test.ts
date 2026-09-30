@@ -35,6 +35,7 @@ const createManagementApi = () => {
 
 const createManagedWorkflowsClient = () => ({
   install: jest.fn().mockResolvedValue(undefined),
+  uninstall: jest.fn().mockResolvedValue(undefined),
 });
 
 const request = {} as KibanaRequest;
@@ -107,6 +108,35 @@ describe('SyncWorkflowService', () => {
 
     expect(managedWorkflowsClient.install).toHaveBeenCalledTimes(1);
     expect(managementApi.updateWorkflow).not.toHaveBeenCalled();
+    expect(logger.warn).toHaveBeenCalled();
+  });
+
+  it('uninstalls the legacy default-space sync document after enabling its replacement', async () => {
+    (managementApi.getWorkflow as jest.Mock).mockResolvedValue({ enabled: false });
+
+    await createService().ensureEnabled({ request, spaceId: 'default' });
+
+    expect(managedWorkflowsClient.uninstall).toHaveBeenCalledWith(
+      SIGNIFICANT_EVENTS_KI_SYNC_WORKFLOW_ID,
+      { spaceId: 'default' }
+    );
+  });
+
+  it('does not uninstall the legacy document when enabling in a non-default space', async () => {
+    (managementApi.getWorkflow as jest.Mock).mockResolvedValue({ enabled: false });
+
+    await createService().ensureEnabled({ request, spaceId });
+
+    expect(managedWorkflowsClient.uninstall).not.toHaveBeenCalled();
+  });
+
+  it('logs a warning but does not throw when legacy uninstall fails', async () => {
+    (managementApi.getWorkflow as jest.Mock).mockResolvedValue({ enabled: false });
+    managedWorkflowsClient.uninstall.mockRejectedValue(new Error('uninstall failed'));
+
+    await expect(
+      createService().ensureEnabled({ request, spaceId: 'default' })
+    ).resolves.not.toThrow();
     expect(logger.warn).toHaveBeenCalled();
   });
 });
