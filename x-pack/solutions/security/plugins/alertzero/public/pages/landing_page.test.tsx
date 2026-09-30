@@ -338,6 +338,80 @@ describe('LandingPage', () => {
     expect(screen.queryByTestId('conversations-page')).not.toBeInTheDocument();
   });
 
+  it('releases the save lock on total failure so a subsequent worker enable can transition normally', async () => {
+    mockUseWorkers.mockReturnValue({
+      data: { workers: ALL_ONBOARDING_WORKER_IDS.map((id) => ({ id, enabled: false })) },
+      isLoading: false,
+      isFetching: false,
+      error: undefined,
+    });
+    mockUseInvestigationsCount.mockReturnValue(investigationsResult(0));
+
+    const settlers: Array<{ reject: (err: Error) => void }> = [];
+    const httpPatch = jest.fn().mockImplementation(
+      () =>
+        new Promise<void>((_, reject) => {
+          settlers.push({ reject: (err) => reject(err) });
+        })
+    );
+    const coreStart = coreMock.createStart();
+    (coreStart.application.capabilities as Record<string, unknown>).alertzero = { write: true };
+    const core = { ...coreStart, http: { ...coreStart.http, patch: httpPatch } };
+    const history = createMemoryHistory();
+    const queryClient = new QueryClient({
+      defaultOptions: { queries: { retry: false }, mutations: { retry: false } },
+    });
+    queryClient.setQueryData(queryKeys.workers.list(), {
+      workers: ALL_ONBOARDING_WORKER_IDS.map((id) => ({ id, enabled: false })),
+    });
+
+    const makeUI = () => (
+      <I18nProvider>
+        <EuiProvider>
+          <QueryClientProvider client={queryClient}>
+            <KibanaContextProvider services={core}>
+              <Router history={history}>
+                <LandingPage />
+              </Router>
+            </KibanaContextProvider>
+          </QueryClientProvider>
+        </EuiProvider>
+      </I18nProvider>
+    );
+
+    const { rerender } = render(makeUI());
+    expect(screen.getByText('Enable your workers')).toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole('button', { name: 'Enable and continue' }));
+
+    // Wait for all PATCHes to be in-flight.
+    await waitFor(() => expect(httpPatch).toHaveBeenCalledTimes(5));
+
+    // All PATCHes fail — total failure, nothing committed server-side.
+    settlers.forEach(({ reject }) => reject(new Error('network error')));
+
+    // Wait for the save to settle (button re-enables).
+    await waitFor(() =>
+      expect(screen.getByRole('button', { name: 'Enable and continue' })).not.toHaveAttribute(
+        'disabled'
+      )
+    );
+
+    // On total failure, onSavingChange(false) must be called, releasing the lock.
+    // Simulate a background refetch returning an enabled worker: the queue should
+    // now be reachable (savingInProgress is false).
+    mockUseWorkers.mockReturnValue({
+      data: { workers: [{ id: ALL_ONBOARDING_WORKER_IDS[0], enabled: true }] },
+      isLoading: false,
+      isFetching: false,
+      error: undefined,
+    });
+    rerender(makeUI());
+
+    expect(screen.getByTestId('conversations-page')).toBeInTheDocument();
+    expect(screen.queryByText('Enable your workers')).not.toBeInTheDocument();
+  });
+
   it('transitions from queue to onboarding when stale positive cache is corrected by a fresh empty response', () => {
     // Phase 1: stale cache shows an enabled worker while refetching — queue shown optimistically.
     mockUseWorkers.mockReturnValue(workersResult([{ enabled: true }], { isFetching: true }));

@@ -74,11 +74,15 @@ export const useEnableWorkers = (
     });
 
     if (hadFailure) {
-      // On partial or full failure, keep savingInProgress=true in LandingPage so a
-      // background workers refetch with partially-committed state cannot transition
-      // to ConversationsPage before the user has had a chance to retry or leave.
       if (hadSuccess) {
+        // Partial success: keep savingInProgress=true in LandingPage so a background
+        // workers refetch with partially-committed state cannot transition to
+        // ConversationsPage before the user has had a chance to retry or leave.
         services.notifications!.toasts.addWarning(PARTIAL_SUCCESS_WARNING);
+      } else {
+        // Total failure: nothing was committed server-side, so it is safe to release
+        // the save lock and let a subsequent worker enable transition normally.
+        onSavingChange?.(false);
       }
       return;
     }
