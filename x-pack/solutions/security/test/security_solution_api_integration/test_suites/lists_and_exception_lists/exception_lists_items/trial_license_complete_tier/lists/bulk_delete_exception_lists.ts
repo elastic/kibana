@@ -15,7 +15,7 @@ import {
 import { getCreateExceptionListItemMinimalSchemaMock } from '@kbn/lists-plugin/common/schemas/request/create_exception_list_item_schema.mock';
 import { ExceptionListTypeEnum } from '@kbn/securitysolution-io-ts-list-types';
 import { ROLES } from '@kbn/security-solution-plugin/common/test';
-import { deleteAllRules } from '@kbn/detections-response-ftr-services';
+import { deleteAllRules, withSpaceUrl } from '@kbn/detections-response-ftr-services';
 import { deleteAndReCreateUserRole } from '../../../../../config/services/common';
 
 import { deleteAllExceptions } from '../../../utils';
@@ -26,6 +26,7 @@ export default ({ getService }: FtrProviderContext) => {
   const supertest = getService('supertest');
   const exceptionsApi = getService('exceptionsApi');
   const detectionsApi = getService('detectionsApi');
+  const spacesService = getService('spaces');
   const log = getService('log');
 
   const createList = (overrides: Record<string, unknown> = {}) =>
@@ -328,6 +329,54 @@ export default ({ getService }: FtrProviderContext) => {
 
         // the single-namespace list must still exist
         await getList('list-1').expect(200);
+      });
+
+      // Single-namespace lists are space-scoped. A request issued in one space must not
+      // be able to reach a list that lives in another space.
+      describe('@skipInServerlessMKI cross-space isolation', () => {
+        const otherSpaceId = 'bulk-delete-other-space';
+
+        before(async () => {
+          await spacesService.create({ id: otherSpaceId, name: otherSpaceId });
+        });
+
+        after(async () => {
+          await spacesService.delete(otherSpaceId);
+        });
+
+        afterEach(async () => {
+          await deleteAllExceptions(supertest, log, otherSpaceId);
+        });
+
+        it('should not delete a single-namespace list that belongs to another space', async () => {
+          const { body: defaultSpaceList } = await createList({ list_id: 'list-1' });
+          const { body: otherSpaceList } = await supertest
+            .post(withSpaceUrl(EXCEPTION_LIST_URL, otherSpaceId))
+            .set('kbn-xsrf', 'true')
+            .send({ ...getCreateExceptionListMinimalSchemaMock(), list_id: 'list-2' })
+            .expect(200);
+
+          const { body } = await exceptionsApi
+            .bulkDeleteExceptionLists(
+              { body: { action: 'delete', ids: [defaultSpaceList.id, otherSpaceList.id] } },
+              otherSpaceId
+            )
+            .expect(200);
+
+          expect(body.success).to.eql(false);
+          expect(body.results.map((list: { list_id: string }) => list.list_id)).to.eql(['list-2']);
+          expect(body.errors).to.eql([
+            {
+              lists: [{ id: defaultSpaceList.id }],
+              message: `exception list id: "${defaultSpaceList.id}" does not exist`,
+              status_code: 404,
+            },
+          ]);
+          expect(body.summary).to.eql({ total: 2, succeeded: 1, failed: 1, skipped: 0 });
+
+          // the list in the default space must still exist
+          await getList('list-1').expect(200);
+        });
       });
 
       // These cover the rule-reference safety gate: a list that one or more detection

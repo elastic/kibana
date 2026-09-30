@@ -43,7 +43,7 @@ The existing single-delete endpoint (`DELETE /api/exception_lists`) is **not** c
 
 - **Exception list**: a saved object container (`list_type: 'list'`) that groups exception list items. Identified by a saved object `id` (UUID) and a human-readable `list_id` (string).
 - **Exception list item**: a saved object (`list_type: 'item'`) that belongs to exactly one exception list, identified by `list_id`.
-- **Item cascade**: when a list is deleted, all its items are deleted first, then the list container itself. This prevents orphaned items.
+- **Item cascade**: when a list is deleted, the list container is deleted first, then all its items. This prevents a half-emptied list that rules still execute against.
 - **Rule reference**: a detection rule's `params.exceptionsList` entry and corresponding `SavedObjectReference` pointing to an exception list. The bulk action endpoint checks for these references before deletion.
 - **Namespace type**: `single` (space-scoped) or `agnostic` (global across all spaces).
 - **Partial failure**: the endpoint always returns HTTP 200 with `{ success, results, errors, summary }` for per-list outcomes. HTTP 4xx/5xx is reserved for validation or system-level failures.
@@ -473,7 +473,7 @@ And the list is deleted from the current space
 
 #### **Scenario: Lists in a different namespace are not affected**
 
-**Automation**: not yet automated.
+**Automation**: 2 integration tests (one per direction).
 
 ```Gherkin
 Given an exception list "so-1" exists in the agnostic namespace
@@ -486,6 +486,24 @@ And the agnostic list still exists
 ```
 
 **Notes**: `namespace_type` applies uniformly to the entire request. Callers cannot mix `single` and `agnostic` deletions in one call.
+
+#### **Scenario: Single-namespace lists in another space are not affected**
+
+**Automation**: 1 integration test (`@skipInServerlessMKI`).
+
+```Gherkin
+Given an exception list "list-1" exists in the default space
+And an exception list "list-2" exists in space "other"
+When the user calls POST /s/other/api/exception_lists/_bulk_action with body:
+  { "action": "delete", "ids": ["list-1-so-id", "list-2-so-id"] }
+Then the response status is 200
+And "success" is false
+And the "results" array contains only "list-2"
+And the "errors" array contains 1 entry for "list-1-so-id" with status_code 404
+And "list-1" still exists in the default space
+```
+
+**Notes**: Space scoping is enforced by the saved objects layer; a list from another space is reported as not found, never deleted.
 
 ### Authorization / RBAC
 
