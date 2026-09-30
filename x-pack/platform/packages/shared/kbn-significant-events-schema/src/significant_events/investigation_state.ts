@@ -125,8 +125,8 @@ export const investigationImpactEntitySchema = z.object({
 export type InvestigationImpactEntity = z.infer<typeof investigationImpactEntitySchema>;
 
 /**
- * Impact of the investigated issue: a `summary`, backed by evidence either per entity (when the
- * impact maps onto specific services or components) or at the top level — never both.
+ * Impact of the investigated issue: a `summary`, backed either by one top-level `evidence` or, when
+ * two or more entities were affected in different ways, by per-entity evidence — never both.
  */
 export const investigationImpactSchema = z.object({
   /**
@@ -139,7 +139,7 @@ export const investigationImpactSchema = z.object({
    * user-facing failure signal.
    */
   evidence: investigationEvidenceSchema.optional(),
-  /** Affected services or components, each with its own evidence. */
+  /** Affected services or components when there are several, each with its own evidence. */
   entities: z.array(investigationImpactEntitySchema).max(MAX_IMPACT_ENTITIES).optional(),
 });
 export type InvestigationImpact = z.infer<typeof investigationImpactSchema>;

@@ -42,8 +42,8 @@ moving to the next — see <reporting_progress> for exactly what to send and wor
 
    - `impact.summary`: the symptom as you know it so far (for example "Checkout requests are
      failing since about 14:02"). You refine it in step 5.5.
-   - `impact.entities`: seed it only when the trigger names affected entities, otherwise leave it
-     out:
+   - `impact.entities`: seed candidates only when the trigger names affected entities, otherwise
+     leave it out. Step 5.5 decides whether the list stays:
      - An `<alert_data>` block (alert-triggered investigation): its `Affected entity` fields are
        established scope. `service.name` → type "service"; `host.name` → type "host". Skip
        granular fields (pod names, IPs) unless no service-level entity is available.
@@ -101,18 +101,19 @@ moving to the next — see <reporting_progress> for exactly what to send and wor
      incident and explain it to the business from this paragraph alone. Add a short code block
      only when an excerpt matters.
    - Then back it in one of two ways, never both:
-     - **Generic impact** — no specific service or component owns it: set `impact.evidence` to a
-       chart of the user-facing failure signal (for example failed requests or error rate over the
-       incident window) and omit `entities`. The summary already explains it, so a `description`
-       is rarely needed.
-     - **Specific entities** — the impact maps onto services or components: list them in
-       `entities` and omit the top-level `evidence`. Give each entity `evidence` of how it was
-       affected: a short `description` (with a code block if useful) and, when you have the data,
-       a chart of its failure signal. Group at service level (a shared failing service once, not
-       its three hosts) and list at most 5.
+     - **One chart** — the usual case, when the impact sits in a single service or in no specific
+       component: name the affected service in the summary, set `impact.evidence` to a chart of
+       the user-facing failure signal (for example failed requests or error rate over the incident
+       window), and omit `entities`. The summary already explains the chart, so a `description` is
+       rarely needed.
+     - **Entities** — only when two or more services or components were affected in ways worth
+       telling apart: list them in `entities` (at most 5, grouped at service level: a shared
+       failing service once, not its three hosts) and omit the top-level `evidence`. Give each
+       entity `evidence` of how it was affected: a short `description` (with a code block if
+       useful) and, when you have the data, a chart of its failure signal.
 
-     Alert entities are a natural mapping, so keep them. Drop other seeded entities the
-     investigation ruled out; if none remain, use the generic form.
+     Seeded entities are candidates, not a commitment: keep only the ones the investigation
+     confirmed as affected, and use the entity form only if two or more remain.
 
    Report progress: include the refined `impact`.
 
@@ -577,37 +578,41 @@ not end the investigation. Keep working after calling it.
     }
   ],
   "impact": {
-    "summary": "Order placement failed for about 35% of requests for 38 minutes (14:02–14:40), affecting all regions; order reads were unaffected.",
-    "entities": [
-      {
-        "name": "orders-api",
-        "type": "service",
-        "feature_id": "orders-api-service",
-        "stream_name": "logs-generic.acme-prod",
-        "evidence": {
-          "description": "Placement calls failed with `PoolTimeoutError`; order reads kept succeeding.",
-          "chart": {
-            "type": "bar",
-            "title": "Failed order placement requests",
-            "x_axis": { "type": "time" },
-            "y_axis": { "label": "Failed requests" },
-            "series": [
-              {
-                "name": "failures",
-                "points": [
-                  { "x": "2026-07-28T13:55:00Z", "y": 3 },
-                  { "x": "2026-07-28T14:00:00Z", "y": 412 },
-                  { "x": "2026-07-28T14:05:00Z", "y": 1290 },
-                  { "x": "2026-07-28T14:40:00Z", "y": 8 }
-                ]
-              }
-            ],
-            "annotations": [{ "x": "2026-07-28T14:02:00Z", "label": "Deploy v2.3.1" }]
+    "summary": "Order placement on orders-api failed for about 35% of requests for 38 minutes (14:02–14:40), affecting all regions; order reads were unaffected.",
+    "evidence": {
+      "chart": {
+        "type": "bar",
+        "title": "Failed order placement requests",
+        "x_axis": { "type": "time" },
+        "y_axis": { "label": "Failed requests" },
+        "series": [
+          {
+            "name": "failures",
+            "points": [
+              { "x": "2026-07-28T13:55:00Z", "y": 3 },
+              { "x": "2026-07-28T14:00:00Z", "y": 412 },
+              { "x": "2026-07-28T14:05:00Z", "y": 1290 },
+              { "x": "2026-07-28T14:40:00Z", "y": 8 }
+            ]
           }
-        }
+        ],
+        "annotations": [{ "x": "2026-07-28T14:02:00Z", "label": "Deploy v2.3.1" }]
       }
-    ]
+    }
   }
+}
+```
+
+If several services had been affected in different ways, `impact` would take the entity form
+instead (charts elided):
+
+```json
+"impact": {
+  "summary": "Checkout failed for about 8% of shoppers for 40 minutes; payment confirmations were delayed by up to 6 minutes.",
+  "entities": [
+    { "name": "checkout", "type": "service", "evidence": { "description": "Failed with `503` from payments during each pool stall.", "chart": { ... } } },
+    { "name": "payments", "type": "service", "evidence": { "description": "Confirmations queued behind the stalled pool; none were lost.", "chart": { ... } } }
+  ]
 }
 ```
 
@@ -685,9 +690,9 @@ been reporting via `investigation_progress_report`:
 - **recommendations**: Concrete, actionable steps to resolve or mitigate the issue, each with a
   relevance `confidence`; sort descending and return only the 3 strongest — see <results_format>
   for the field shapes and examples.
-- **impact**: `summary`, backed by evidence either per entity (`entities[]`, each with `name`,
-  optional `type` (default "service"), `feature_id`, `stream_name`, and `evidence`) or at the top
-  level (`evidence`) — never both. See steps 2.5 and 5.5. Omit `impact` entirely only when no
-  signals establish impact.
+- **impact**: `summary`, backed either by one top-level `evidence` (usually) or, when two or more
+  entities were affected in different ways, by `entities[]` (each with `name`, optional `type`
+  (default "service"), `feature_id`, `stream_name`, and `evidence`) — never both. See steps 2.5
+  and 5.5. Omit `impact` entirely only when no signals establish impact.
 
 </output_format>

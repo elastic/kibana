@@ -313,9 +313,9 @@ steps:
           impact:
             type: object
             description: >
-              The impact: a summary, backed by evidence either per entity (when the impact maps
-              naturally onto specific services or components) or at the top level, never both.
-              Omit only when no signals establish impact.
+              The impact: a summary, backed either by one top-level evidence (usually) or, when two
+              or more entities were affected in different ways, by entities. Never both. Omit only
+              when no signals establish impact.
             properties:
               summary:
                 type: string
@@ -326,9 +326,9 @@ steps:
                   when an excerpt matters.
               evidence:
                 description: >
-                  Used when the impact does not map onto specific entities: a chart of the user-facing
-                  failure signal, usually without a description since the summary explains it. Omit
-                  when entities are listed.
+                  The usual backing, when the impact sits in one service or no specific component: a
+                  chart of the user-facing failure signal, usually without a description since the
+                  summary explains it. Omit when entities are listed.
                 type: object
                 properties:
                   description:
@@ -433,9 +433,9 @@ steps:
               entities:
                 type: array
                 description: >
-                  Affected services or components, when the impact maps naturally onto them, each
-                  with its own evidence. Prefer service-level entries. Omit when using top-level
-                  evidence.
+                  Only when two or more services or components were affected in ways worth telling
+                  apart, each with its own evidence. Prefer service-level entries. Omit when using
+                  top-level evidence.
                 maxItems: 10
                 items:
                   type: object
