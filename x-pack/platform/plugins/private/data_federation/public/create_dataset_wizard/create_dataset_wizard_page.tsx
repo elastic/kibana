@@ -10,7 +10,6 @@ import { EuiPageSection, EuiSpacer } from '@elastic/eui';
 import { AppHeader } from '@kbn/app-header';
 import { KbnDangerCallout } from '@kbn/ui-callout';
 import { Forms } from '@kbn/es-ui-shared-plugin/public';
-import { i18n } from '@kbn/i18n';
 import { useHistory } from 'react-router-dom';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { FormProvider, useForm } from 'react-hook-form';
@@ -95,11 +94,7 @@ export function CreateDatasetWizardPage({
       (f) => f.id === TIMESTAMP_FIELD_ID || f.name.trim() === TIMESTAMP_LOGICAL_FIELD_NAME
     );
     if (timestampField && timestampField.path.trim() === '') {
-      setSaveError(
-        i18n.translate('xpack.dataFederation.createDatasetWizard.timestampFieldPathRequiredSave', {
-          defaultMessage: 'When timeseries data is enabled, Field name is required.',
-        })
-      );
+      setSaveError(createDatasetWizardStrings.timestampFieldPathRequiredSave);
       return;
     }
 

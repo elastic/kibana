@@ -262,6 +262,12 @@ export const createDatasetWizardStrings = {
       defaultMessage: 'Format is required.',
     }
   ),
+  timestampFieldPathRequiredSave: i18n.translate(
+    'xpack.dataFederation.createDatasetWizard.timestampFieldPathRequiredSave',
+    {
+      defaultMessage: 'When timeseries data is enabled, Field name is required.',
+    }
+  ),
 
   settingsFormatLabel: i18n.translate(
     'xpack.dataFederation.createDatasetForm.settingsFormatLabel',
