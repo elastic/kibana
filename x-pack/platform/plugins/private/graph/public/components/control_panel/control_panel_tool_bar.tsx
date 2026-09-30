@@ -13,7 +13,9 @@ import type { ControlType, Workspace, WorkspaceField } from '../../types';
 import {
   blocklistSelectedNodes,
   deleteSelectedNodes,
+  redoWorkspace,
   type GraphDispatch,
+  undoWorkspace,
 } from '../../state_management';
 
 interface ControlPanelToolBarProps {
@@ -73,8 +75,8 @@ export const ControlPanelToolBar = ({
     }
   );
 
-  const onUndoClick = () => workspace.undo();
-  const onRedoClick = () => workspace.redo();
+  const onUndoClick = () => dispatch(undoWorkspace());
+  const onRedoClick = () => dispatch(redoWorkspace());
   const onExpandButtonClick = () => {
     onSetControl('none');
     workspace.expandSelecteds({ toFields: liveResponseFields });
