@@ -15,7 +15,7 @@ import { reset } from './global';
 import { datasourceSelector } from './datasource';
 import { liveResponseFieldsSelector, selectedFieldsSelector } from './fields';
 import { fetchTopNodes } from '../services/fetch_top_nodes';
-import type { Workspace, WorkspaceNode } from '../types';
+import type { Workspace, WorkspaceField, WorkspaceNode } from '../types';
 import type { ServerResultNode } from '../types';
 import type { MatchedAction } from './helpers';
 import { matchesAction } from './helpers';
@@ -101,6 +101,10 @@ export const setNodeLabel = actionCreator<{ nodeId: string; label: string }>('SE
 export const colorSelectedNodes = actionCreator<string>('COLOR_SELECTED_NODES');
 export const startWorkspaceLayout = actionCreator('START_WORKSPACE_LAYOUT');
 export const stopWorkspaceLayout = actionCreator('STOP_WORKSPACE_LAYOUT');
+export const expandSelectedNodes = actionCreator<WorkspaceField[]>('EXPAND_SELECTED_NODES');
+export const fillWorkspaceConnections = actionCreator<number | undefined>(
+  'FILL_WORKSPACE_CONNECTIONS'
+);
 export const submitSearch = actionCreator<string>('SUBMIT_SEARCH');
 
 export const workspaceReducer = reducerWithInitialState(initialWorkspaceState)
@@ -400,6 +404,8 @@ const toNodeState = (node: WorkspaceNode): WorkspaceNodeState => ({
 const getEdgeId = ({ id, source, target }: Workspace['edges'][number]): string =>
   id ?? `${source.id}-${target.id}`;
 
+const requestActionTypes = new Set([expandSelectedNodes.type, fillWorkspaceConnections.type]);
+
 const layoutActionTypes = new Set([startWorkspaceLayout.type, stopWorkspaceLayout.type]);
 
 const presentationActionTypes = new Set([setNodeLabel.type, colorSelectedNodes.type]);
@@ -461,6 +467,22 @@ export const registerWorkspaceListeners = (
 
       synchronizeWorkspaceSelection(workspace, listenerApi.getState().workspace);
       notifyReact();
+    },
+  });
+
+  startListening({
+    predicate: (action) => requestActionTypes.has(action.type),
+    effect: (action) => {
+      const workspace = getWorkspace();
+      if (!workspace) {
+        return;
+      }
+
+      if (expandSelectedNodes.match(action)) {
+        workspace.expandSelecteds({ toFields: action.payload });
+      } else if (fillWorkspaceConnections.match(action)) {
+        workspace.fillInGraph(action.payload);
+      }
     },
   });
 
@@ -568,7 +590,7 @@ export const registerWorkspaceListeners = (
         workspace.mergeGraph({ nodes: topTermNodes, edges: [] });
         listenerApi.dispatch(initializeWorkspace());
         notifyReact();
-        workspace.fillInGraph(fields.length * 10);
+        listenerApi.dispatch(fillWorkspaceConnections(fields.length * 10));
       } catch (error) {
         if (listenerApi.signal.aborted) {
           return;

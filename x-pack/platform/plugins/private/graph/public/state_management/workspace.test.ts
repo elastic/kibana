@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { Workspace } from '../types';
+import type { Workspace, WorkspaceField } from '../types';
 import { fetchTopNodes } from '../services/fetch_top_nodes';
 import { setDatasource } from './datasource';
 import { loadFields } from './fields';
@@ -17,6 +17,8 @@ import {
   colorSelectedNodes,
   createWorkspaceState,
   deleteSelectedNodes,
+  expandSelectedNodes,
+  fillWorkspaceConnections,
   groupSelectedNodes,
   invertNodeSelection,
   mergeNodes,
@@ -51,6 +53,7 @@ const createWorkspaceMock = () =>
     simpleSearch: jest.fn(),
     search: jest.fn(),
     callElasticsearch: jest.fn(),
+    expandSelecteds: jest.fn(),
     runLayout: jest.fn(),
     stopLayout: jest.fn(),
     options: {},
@@ -452,6 +455,19 @@ describe('workspace listeners', () => {
       expect(environment.mockedDeps.notifications.toasts.addDanger).toHaveBeenCalledWith({
         title: 'Fetching top terms failed: server failure',
       });
+    });
+  });
+
+  describe('workspace requests', () => {
+    it('expands selected nodes and fills existing connections', () => {
+      const environment = createWorkspaceListenerEnvironment();
+      const fields = [{ name: 'field' }] as WorkspaceField[];
+
+      environment.store.dispatch(expandSelectedNodes(fields));
+      environment.store.dispatch(fillWorkspaceConnections(20));
+
+      expect(environment.workspace.expandSelecteds).toHaveBeenCalledWith({ toFields: fields });
+      expect(environment.workspace.fillInGraph).toHaveBeenCalledWith(20);
     });
   });
 

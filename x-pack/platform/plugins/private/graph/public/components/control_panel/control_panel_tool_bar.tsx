@@ -13,6 +13,8 @@ import type { ControlType, Workspace, WorkspaceField } from '../../types';
 import {
   blocklistSelectedNodes,
   deleteSelectedNodes,
+  expandSelectedNodes,
+  fillWorkspaceConnections,
   redoWorkspace,
   startWorkspaceLayout,
   stopWorkspaceLayout,
@@ -83,9 +85,9 @@ export const ControlPanelToolBar = ({
   const onRedoClick = () => dispatch(redoWorkspace());
   const onExpandButtonClick = () => {
     onSetControl('none');
-    workspace.expandSelecteds({ toFields: liveResponseFields });
+    dispatch(expandSelectedNodes(liveResponseFields));
   };
-  const onAddLinksClick = () => workspace.fillInGraph();
+  const onAddLinksClick = () => dispatch(fillWorkspaceConnections(undefined));
   const onRemoveVerticesClick = () => {
     onSetControl('none');
     dispatch(deleteSelectedNodes());
