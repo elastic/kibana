@@ -197,10 +197,16 @@ export class WorkflowExecuteStepImpl implements NodeImplementation, CancellableN
   }
 
   private async getWorkflow(workflowId: string): Promise<EsWorkflow | null> {
+    const isManagedParentRun = this.isManagedParentExecution();
     return this.init.workflowRepository.getWorkflow(workflowId, this.init.spaceId, {
-      includeGlobal: true,
-      managedFilter: 'all',
+      includeGlobal: isManagedParentRun,
+      managedFilter: isManagedParentRun ? 'all' : 'unmanaged',
     });
+  }
+
+  private isManagedParentExecution(): boolean {
+    const { workflowExecution } = this.init.stepExecutionRuntime;
+    return workflowExecution.managed === true;
   }
 
   private async ensureWorkflowIsExecutable(workflow: EsWorkflow): Promise<void> {
@@ -213,6 +219,7 @@ export class WorkflowExecuteStepImpl implements NodeImplementation, CancellableN
       );
     }
     // Note: workflow visibility is validated by the repository fetch.
+    // Global definitions are included only for managed parent workflow runs.
     if (!workflow.enabled) {
       throw new Error(
         `Workflow "${workflow.id}" is disabled (referenced by step "${node.stepId}" in workflow "${currentWorkflowId}")`
