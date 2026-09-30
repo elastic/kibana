@@ -7,9 +7,24 @@
 
 import type { VersionedAttachment } from '@kbn/agent-builder-common';
 import { significantSecurityEventAttachmentDataSchema } from '../../../common/significant_security_event_schema';
+import { DEFAULT_BASELINE_TELEMETRY } from '../../services/watches/hunt/common/resolve_index_scope';
+import { buildMatchesRequired } from '../../services/watches/hunt/common/matches_required';
 import type { CurrentRunHost, CurrentRunState, ProcessSelector } from './types';
 
 const SSE_ATTACHMENT_TYPE = 'security.significant_security_event';
+
+/** Baseline patterns whose telemetry carries `process.entity_id`/`pid`, so a hit there is a
+ *  process-shaped finding a process selector could in principle be rehydrated from. */
+const PROCESS_BEARING_BASELINE_PATTERNS = [
+  'logs-endpoint.events.*',
+  'logs-endpoint.alerts.*',
+  'logs-crowdstrike.fdr*',
+  'logs-sentinel_one_cloud_funnel.*',
+  'logs-m365_defender.event-*',
+];
+
+const matchesBaseline = buildMatchesRequired([...DEFAULT_BASELINE_TELEMETRY]);
+const matchesProcessBearing = buildMatchesRequired(PROCESS_BEARING_BASELINE_PATTERNS);
 
 const currentVersionData = (attachment: VersionedAttachment): unknown => {
   const version = attachment.versions.find((v) => v.version === attachment.current_version);
@@ -115,6 +130,18 @@ export const readCurrentRunState = async ({
     })),
   });
 
+  const hasNonHostEntity = currentRun.some((sse) =>
+    sse.entities.some((e) => e.field !== 'host.name' && e.field !== 'host.hostname')
+  );
+  const hasIocIndicator = currentRun.some((sse) =>
+    sse.security_knowledge_indicators.some((ski) => ski.type === 'ioc')
+  );
+  const allEventsWithinBaseline = eventRefs.every((e) => matchesBaseline(e.source_index));
+  const hasProcessBearingEvent = eventRefs.some((e) => matchesProcessBearing(e.source_index));
+  const manualRemediation = [
+    ...new Set(currentRun.flatMap((sse) => sse.maps_to_proposal?.manual_remediation ?? [])),
+  ];
+
   return {
     runId,
     reportId,
@@ -122,6 +149,11 @@ export const readCurrentRunState = async ({
     titles,
     evidenceLines,
     techniques,
+    hasNonHostEntity,
+    hasIocIndicator,
+    allEventsWithinBaseline,
+    hasProcessBearingEvent,
+    manualRemediation,
     hosts,
     processSelectors,
   };

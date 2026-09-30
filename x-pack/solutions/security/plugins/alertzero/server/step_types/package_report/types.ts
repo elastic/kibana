@@ -54,6 +54,16 @@ export interface CurrentRunState {
    * Empty means kill/suspend cannot be filled.
    */
   processSelectors: ProcessSelector[];
+  /** True when any current-run SSE entity is `user.name` or `service.name`, not a host. */
+  hasNonHostEntity: boolean;
+  /** True when any current-run SSE security knowledge indicator is IOC-typed. */
+  hasIocIndicator: boolean;
+  /** False when a current-run SSE event ref's `source_index` falls outside the baseline patterns. */
+  allEventsWithinBaseline: boolean;
+  /** True when a current-run SSE event ref's `source_index` is a process-bearing baseline pattern. */
+  hasProcessBearingEvent: boolean;
+  /** Analyst recommendation lines the hunt child wrote onto the current-run SSEs, deduped. */
+  manualRemediation: string[];
 }
 
 export type CatalogListResult =

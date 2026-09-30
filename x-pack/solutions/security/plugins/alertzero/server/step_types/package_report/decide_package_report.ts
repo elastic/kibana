@@ -39,14 +39,9 @@ export const buildProposalSubjectKey = ({
   return uuidv5(material, HUNT_PROPOSAL_SUBJECT_UUID_NAMESPACE);
 };
 
-const buildActionlessSubjectKey = ({
-  conversationId,
-  reason,
-}: {
-  conversationId: string;
-  reason: string;
-}): string =>
-  uuidv5(`${conversationId}|actionless|${reason}`, HUNT_PROPOSAL_SUBJECT_UUID_NAMESPACE);
+/** One per run: a rerun of the same report must settle onto the same recommendation, not mint a second one. */
+const buildRecommendationSubjectKey = (conversationId: string): string =>
+  uuidv5(`${conversationId}|recommendation`, HUNT_PROPOSAL_SUBJECT_UUID_NAMESPACE);
 
 const schemaRequires = (schema: JsonSchema | undefined, key: string): boolean => {
   if (!schema || typeof schema !== 'object') {
@@ -155,9 +150,8 @@ const buildClosureSummary = (state: CurrentRunState): string => {
 };
 
 /** Every fillable respond action today is an Elastic Defend action; naming that plainly in the
- *  title is what tells an executable proposal apart from the "Recommend" companion below. */
+ *  title is what tells an executable proposal apart from the recommendation below. */
 const DEFEND_TITLE_PREFIX = 'Defend';
-const RECOMMEND_TITLE_PREFIX = 'Recommend';
 
 const titleCase = (value: string): string => value.replace(/\b\w/g, (c) => c.toUpperCase());
 
@@ -175,54 +169,64 @@ const buildHostClosureSummary = (state: CurrentRunState, host: CurrentRunHost): 
 const buildHostActionTitle = (host: CurrentRunHost, actionName: string): string =>
   `${DEFEND_TITLE_PREFIX} ${titleCase(actionName)}: ${host.name}`;
 
-const actionlessTitle = ({
-  reason,
+/** Why the recommendation fired, one line per reason that actually held. */
+const buildRecommendationReasonLines = ({
+  hasExecutable,
   unenrolledHosts,
+  notHostScoped,
+  processUncovered,
 }: {
-  reason: NonNullable<PackageReportMintPayload['actionlessReason']>;
+  hasExecutable: boolean;
   unenrolledHosts: CurrentRunHost[];
-}): string => {
-  switch (reason) {
-    case 'unenrolled':
-      return unenrolledHosts.length > 0
-        ? `${RECOMMEND_TITLE_PREFIX}: Unenrolled host${
-            unenrolledHosts.length === 1 ? '' : 's'
-          } need${unenrolledHosts.length === 1 ? 's' : ''} isolation: ${unenrolledHosts
-            .map((h) => h.name)
-            .join(', ')}`
-        : `${RECOMMEND_TITLE_PREFIX}: Unenrolled host needs isolation`;
-    case 'hostless':
-      return `${RECOMMEND_TITLE_PREFIX}: No host entity to act on`;
-    case 'catalog_error':
-      return `${RECOMMEND_TITLE_PREFIX}: Response action catalog unavailable`;
-    case 'catalog_empty':
-      return `${RECOMMEND_TITLE_PREFIX}: No response actions installed`;
-    case 'no_fillable_action':
-      return `${RECOMMEND_TITLE_PREFIX}: No fillable response action`;
+  notHostScoped: boolean;
+  processUncovered: boolean;
+}): string[] => {
+  const lines: string[] = [];
+  if (!hasExecutable) {
+    lines.push('No respond action could be filled for this finding.');
+  } else if (unenrolledHosts.length > 0) {
+    lines.push(
+      `${unenrolledHosts.length === 1 ? 'Host' : 'Hosts'} ${unenrolledHosts
+        .map((h) => h.name)
+        .join(', ')} ${
+        unenrolledHosts.length === 1 ? 'is' : 'are'
+      } not enrolled, so no Defend action reaches ${unenrolledHosts.length === 1 ? 'it' : 'them'}.`
+    );
   }
+  if (notHostScoped) {
+    lines.push(
+      'Part of the evidence for this finding is not host-scoped, so a host action would not close it.'
+    );
+  }
+  if (processUncovered) {
+    lines.push('A process was implicated but could not be resolved to a live process to act on.');
+  }
+  return lines;
 };
 
-const actionlessProposal = ({
+const buildRecommendationProposal = ({
   conversationId,
   state,
-  reason,
-  unenrolledHosts,
+  reasonLines,
 }: {
   conversationId: string;
   state: CurrentRunState;
-  reason: NonNullable<PackageReportMintPayload['actionlessReason']>;
-  unenrolledHosts: CurrentRunHost[];
+  reasonLines: string[];
 }): PackageReportMintPayload => ({
-  subjectKey: buildActionlessSubjectKey({ conversationId, reason }),
+  subjectKey: buildRecommendationSubjectKey(conversationId),
   conversationId,
-  title: actionlessTitle({ reason, unenrolledHosts }),
-  comment: buildClosureSummary(state),
+  // Fixed, not per-host/per-action like buildHostActionTitle above: this Proposal isn't scoped
+  // to one host or action, so there's no single subject to name in a dynamic title.
+  title: 'Analyst recommendation',
+  comment: [...reasonLines, ...state.manualRemediation, buildClosureSummary(state)].join('\n\n'),
+  // TODO: give this its own queue category once the UI has a place to show it separately
+  // from executable proposals; a stored keyword move, not a schema change.
   category: 'respond',
-  actionlessReason: reason,
+  confidence: 'medium',
 });
 
 /**
- * Section D decision table + respond-action fan-out. Pure: no I/O.
+ * Respond-action fan-out plus the analyst-recommendation mint rule. Pure: no I/O.
  */
 export const decidePackageReport = ({
   conversationId,
@@ -241,155 +245,108 @@ export const decidePackageReport = ({
 
   const eligible = state.hosts.filter((h) => h.enrolled && h.agentId);
   const unenrolled = state.hosts.filter((h) => !h.enrolled || !h.agentId);
-
-  if (!catalog.ok) {
-    return {
-      dismiss: false,
-      closureSummary,
-      proposals: [
-        actionlessProposal({
-          conversationId,
-          state,
-          reason: 'catalog_error',
-          unenrolledHosts: unenrolled,
-        }),
-      ],
-    };
-  }
-
-  const respondActions = catalog.actions.filter((a) => a.category === 'respond');
-
-  if (respondActions.length === 0) {
-    return {
-      dismiss: false,
-      closureSummary,
-      proposals: [
-        actionlessProposal({
-          conversationId,
-          state,
-          reason: 'catalog_empty',
-          unenrolledHosts: unenrolled,
-        }),
-      ],
-    };
-  }
-
-  if (eligible.length === 0) {
-    const reason = state.hosts.length === 0 ? 'hostless' : 'unenrolled';
-    return {
-      dismiss: false,
-      closureSummary,
-      proposals: [
-        actionlessProposal({ conversationId, state, reason, unenrolledHosts: unenrolled }),
-      ],
-    };
-  }
+  const respondActions = catalog.ok ? catalog.actions.filter((a) => a.category === 'respond') : [];
 
   const proposals: PackageReportMintPayload[] = [];
   const seenSubjectKeys = new Set<string>();
 
-  for (const host of eligible) {
-    const agentId = host.agentId!;
-    // A selector's `hostName` names the host it was actually observed on; applying it to
-    // every enrolled host would mint a kill-process proposal against the wrong agent.
-    const hostProcessSelectors = state.processSelectors.filter(
-      (selector) => selector.hostName === host.name
-    );
-    const hostClosureSummary = buildHostClosureSummary(state, host);
-    for (const entry of respondActions) {
-      const title = buildHostActionTitle(host, entry.name);
-      const schema = actionInputSchema(entry);
-      const processScoped = needsProcessParameters(schema);
+  if (catalog.ok && respondActions.length > 0 && eligible.length > 0) {
+    for (const host of eligible) {
+      const agentId = host.agentId!;
+      // A selector's `hostName` names the host it was actually observed on; applying it to
+      // every enrolled host would mint a kill-process proposal against the wrong agent.
+      const hostProcessSelectors = state.processSelectors.filter(
+        (selector) => selector.hostName === host.name
+      );
+      const hostClosureSummary = buildHostClosureSummary(state, host);
+      for (const entry of respondActions) {
+        const title = buildHostActionTitle(host, entry.name);
+        const schema = actionInputSchema(entry);
+        const processScoped = needsProcessParameters(schema);
 
-      if (processScoped) {
-        for (const processSelector of hostProcessSelectors) {
-          const actionInput = buildActionInput({ entry, agentId, processSelector });
-          if (!actionInput) {
-            continue;
+        if (processScoped) {
+          for (const processSelector of hostProcessSelectors) {
+            const actionInput = buildActionInput({ entry, agentId, processSelector });
+            if (!actionInput) {
+              continue;
+            }
+            const subjectKey = buildProposalSubjectKey({
+              conversationId,
+              endpointId: agentId,
+              actionWorkflowId: entry.workflowId,
+              processKey: processSelector.processKey,
+            });
+            if (seenSubjectKeys.has(subjectKey)) {
+              continue;
+            }
+            seenSubjectKeys.add(subjectKey);
+            proposals.push({
+              subjectKey,
+              conversationId,
+              title,
+              // The selector's own summary distinguishes two process-scoped proposals on the
+              // same host (e.g. kill-process for two different pids) that would otherwise share
+              // an identical comment.
+              comment: `${hostClosureSummary}\n\n${processSelector.summary}`,
+              category: entry.category ?? 'respond',
+              impact: entry.impact,
+              actionWorkflowId: entry.workflowId,
+              actionInput,
+              hostName: host.name,
+            });
           }
-          const subjectKey = buildProposalSubjectKey({
-            conversationId,
-            endpointId: agentId,
-            actionWorkflowId: entry.workflowId,
-            processKey: processSelector.processKey,
-          });
-          if (seenSubjectKeys.has(subjectKey)) {
-            continue;
-          }
-          seenSubjectKeys.add(subjectKey);
-          proposals.push({
-            subjectKey,
-            conversationId,
-            title,
-            // The selector's own summary distinguishes two process-scoped proposals on the
-            // same host (e.g. kill-process for two different pids) that would otherwise share
-            // an identical comment.
-            comment: `${hostClosureSummary}\n\n${processSelector.summary}`,
-            category: entry.category ?? 'respond',
-            impact: entry.impact,
-            actionWorkflowId: entry.workflowId,
-            actionInput,
-            hostName: host.name,
-          });
+          continue;
         }
-        continue;
-      }
 
-      const actionInput = buildActionInput({ entry, agentId });
-      if (!actionInput) {
-        continue;
-      }
-      const subjectKey = buildProposalSubjectKey({
-        conversationId,
-        endpointId: agentId,
-        actionWorkflowId: entry.workflowId,
-      });
-      if (seenSubjectKeys.has(subjectKey)) {
-        continue;
-      }
-      seenSubjectKeys.add(subjectKey);
-      proposals.push({
-        subjectKey,
-        conversationId,
-        title,
-        comment: hostClosureSummary,
-        category: entry.category ?? 'respond',
-        impact: entry.impact,
-        actionWorkflowId: entry.workflowId,
-        actionInput,
-        hostName: host.name,
-      });
-    }
-  }
-
-  const executable = proposals.filter((p) => p.actionWorkflowId);
-
-  if (executable.length === 0) {
-    return {
-      dismiss: false,
-      closureSummary,
-      proposals: [
-        actionlessProposal({
+        const actionInput = buildActionInput({ entry, agentId });
+        if (!actionInput) {
+          continue;
+        }
+        const subjectKey = buildProposalSubjectKey({
           conversationId,
-          state,
-          reason: 'no_fillable_action',
-          unenrolledHosts: unenrolled,
-        }),
-      ],
-    };
+          endpointId: agentId,
+          actionWorkflowId: entry.workflowId,
+        });
+        if (seenSubjectKeys.has(subjectKey)) {
+          continue;
+        }
+        seenSubjectKeys.add(subjectKey);
+        proposals.push({
+          subjectKey,
+          conversationId,
+          title,
+          comment: hostClosureSummary,
+          category: entry.category ?? 'respond',
+          impact: entry.impact,
+          actionWorkflowId: entry.workflowId,
+          actionInput,
+          hostName: host.name,
+        });
+      }
+    }
   }
 
-  // Unenrolled hosts are named on a companion actionless recommendation.
-  if (unenrolled.length > 0) {
-    const companion = actionlessProposal({
-      conversationId,
-      state,
-      reason: 'unenrolled',
+  const hasExecutable = proposals.length > 0;
+  const notHostScoped =
+    state.hasNonHostEntity || state.hasIocIndicator || !state.allEventsWithinBaseline;
+  // Only worth flagging once something else did mint for a host with process evidence;
+  // "nothing minted at all" is already covered by `!hasExecutable` above.
+  const processUncovered =
+    hasExecutable &&
+    state.hasProcessBearingEvent &&
+    state.processSelectors.length === 0 &&
+    !proposals.some((p) => p.actionInput?.parameters !== undefined);
+  const needsRecommendation =
+    !hasExecutable || unenrolled.length > 0 || notHostScoped || processUncovered;
+
+  if (needsRecommendation) {
+    const reasonLines = buildRecommendationReasonLines({
+      hasExecutable,
       unenrolledHosts: unenrolled,
+      notHostScoped,
+      processUncovered,
     });
-    if (!seenSubjectKeys.has(companion.subjectKey)) {
-      proposals.push(companion);
-    }
+    proposals.push(buildRecommendationProposal({ conversationId, state, reasonLines }));
   }
 
   return { dismiss: false, proposals, closureSummary };

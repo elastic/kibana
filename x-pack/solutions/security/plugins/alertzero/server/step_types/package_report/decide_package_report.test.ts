@@ -75,6 +75,12 @@ const baseHitState = (overrides: Partial<CurrentRunState> = {}): CurrentRunState
   techniques: ['T1078.004'],
   hosts: [{ name: 'host-a', enrolled: true, agentId: 'agent-a' }],
   processSelectors: [],
+  // Fully-covered defaults: no recommendation trigger fires unless a test overrides one.
+  hasNonHostEntity: false,
+  hasIocIndicator: false,
+  allEventsWithinBaseline: true,
+  hasProcessBearingEvent: false,
+  manualRemediation: [],
   ...overrides,
 });
 
@@ -139,7 +145,7 @@ describe('decidePackageReport', () => {
     expect(new Set(a.proposals.map((p) => p.subjectKey)).size).toBe(a.proposals.length);
   });
 
-  it('mints an actionless recommendation when the hit is hostless', () => {
+  it('mints a recommendation instead of an executable proposal when the hit is hostless', () => {
     const result = decidePackageReport({
       conversationId,
       state: baseHitState({ hosts: [] }),
@@ -148,11 +154,12 @@ describe('decidePackageReport', () => {
     expect(result.dismiss).toBe(false);
     expect(result.proposals).toHaveLength(1);
     expect(result.proposals[0].actionWorkflowId).toBeUndefined();
-    expect(result.proposals[0].actionlessReason).toBe('hostless');
-    expect(result.proposals[0].title).toBe('Recommend: No host entity to act on');
+    expect(result.proposals[0].title).toBe('Analyst recommendation');
+    expect(result.proposals[0].confidence).toBe('medium');
+    expect(result.proposals[0].comment).toContain('No respond action could be filled');
   });
 
-  it('mints an actionless recommendation naming unenrolled hosts', () => {
+  it('mints a recommendation naming unenrolled hosts', () => {
     const result = decidePackageReport({
       conversationId,
       state: baseHitState({
@@ -161,12 +168,11 @@ describe('decidePackageReport', () => {
       catalog: { ok: true, actions: [isolateHost] },
     });
     expect(result.proposals).toHaveLength(1);
-    expect(result.proposals[0].actionlessReason).toBe('unenrolled');
+    expect(result.proposals[0].title).toBe('Analyst recommendation');
     expect(result.proposals[0].comment).toContain('ghost');
-    expect(result.proposals[0].title).toBe('Recommend: Unenrolled host needs isolation: ghost');
   });
 
-  it('mints executable plus companion actionless when some hosts are unenrolled', () => {
+  it('mints executable plus a recommendation when some hosts are unenrolled (trigger: partial enrollment)', () => {
     const result = decidePackageReport({
       conversationId,
       state: baseHitState({
@@ -179,41 +185,98 @@ describe('decidePackageReport', () => {
     });
     expect(result.proposals).toHaveLength(2);
     expect(result.proposals.some((p) => p.actionWorkflowId === isolateHost.workflowId)).toBe(true);
-    expect(result.proposals.some((p) => p.actionlessReason === 'unenrolled')).toBe(true);
     expect(result.proposals.some((p) => p.title === 'Defend Isolate Host: host-a')).toBe(true);
-    expect(
-      result.proposals.some((p) => p.title === 'Recommend: Unenrolled host needs isolation: ghost')
-    ).toBe(true);
+    const recommendation = result.proposals.find((p) => p.title === 'Analyst recommendation');
+    expect(recommendation).toBeDefined();
+    expect(recommendation?.comment).toContain('ghost');
+    expect(recommendation?.comment).toContain('not enrolled');
   });
 
-  it('returns actionless when the catalog errors', () => {
+  it('mints a recommendation when the catalog errors (trigger: no executable proposal at all)', () => {
     const result = decidePackageReport({
       conversationId,
       state: baseHitState(),
       catalog: { ok: false, reason: 'catalog_error' },
     });
     expect(result.proposals).toHaveLength(1);
-    expect(result.proposals[0].actionlessReason).toBe('catalog_error');
+    expect(result.proposals[0].title).toBe('Analyst recommendation');
   });
 
-  it('returns actionless when zero respond actions are installed', () => {
+  it('mints a recommendation when zero respond actions are installed (trigger: no executable proposal at all)', () => {
     const result = decidePackageReport({
       conversationId,
       state: baseHitState(),
       catalog: { ok: true, actions: [configureAction] },
     });
     expect(result.proposals).toHaveLength(1);
-    expect(result.proposals[0].actionlessReason).toBe('catalog_empty');
+    expect(result.proposals[0].title).toBe('Analyst recommendation');
   });
 
-  it('skips kill/suspend when process fields are absent', () => {
+  it('mints a recommendation when process fields are absent for the only fillable actions (trigger: no executable proposal at all)', () => {
     const result = decidePackageReport({
       conversationId,
       state: baseHitState({ processSelectors: [] }),
       catalog: { ok: true, actions: [killProcess, suspendProcess] },
     });
     expect(result.proposals).toHaveLength(1);
-    expect(result.proposals[0].actionlessReason).toBe('no_fillable_action');
+    expect(result.proposals[0].title).toBe('Analyst recommendation');
+  });
+
+  it('mints executable isolate-host plus a recommendation when a process-bearing finding has no selector (trigger: process uncovered)', () => {
+    const result = decidePackageReport({
+      conversationId,
+      state: baseHitState({ hasProcessBearingEvent: true, processSelectors: [] }),
+      catalog: { ok: true, actions: [isolateHost] },
+    });
+    expect(result.proposals).toHaveLength(2);
+    expect(result.proposals.some((p) => p.actionWorkflowId === isolateHost.workflowId)).toBe(true);
+    const recommendation = result.proposals.find((p) => p.title === 'Analyst recommendation');
+    expect(recommendation?.comment).toContain('could not be resolved to a live process');
+  });
+
+  it('mints executable plus a recommendation when evidence is not host-scoped (trigger: not host-scoped)', () => {
+    const result = decidePackageReport({
+      conversationId,
+      state: baseHitState({ allEventsWithinBaseline: false }),
+      catalog: { ok: true, actions: [isolateHost] },
+    });
+    expect(result.proposals).toHaveLength(2);
+    const recommendation = result.proposals.find((p) => p.title === 'Analyst recommendation');
+    expect(recommendation?.comment).toContain('not host-scoped');
+  });
+
+  it('mints no recommendation when every host is enrolled, covered, and host-scoped', () => {
+    const result = decidePackageReport({
+      conversationId,
+      state: baseHitState(),
+      catalog: { ok: true, actions: [isolateHost] },
+    });
+    expect(result.proposals).toHaveLength(1);
+    expect(result.proposals[0].actionWorkflowId).toBe(isolateHost.workflowId);
+    expect(result.proposals.some((p) => p.title === 'Analyst recommendation')).toBe(false);
+  });
+
+  it('lifts manual_remediation lines into the recommendation comment', () => {
+    const result = decidePackageReport({
+      conversationId,
+      state: baseHitState({ hosts: [], manualRemediation: ['Rotate credentials for role X.'] }),
+      catalog: { ok: true, actions: [isolateHost] },
+    });
+    expect(result.proposals[0].comment).toContain('Rotate credentials for role X.');
+  });
+
+  it('mints the same recommendation subject key on a rerun of the same conversation', () => {
+    const a = decidePackageReport({
+      conversationId,
+      state: baseHitState({ hosts: [] }),
+      catalog: { ok: true, actions: [isolateHost] },
+    });
+    const b = decidePackageReport({
+      conversationId,
+      state: baseHitState({ hosts: [] }),
+      catalog: { ok: true, actions: [isolateHost] },
+    });
+    expect(a.proposals[0].subjectKey).toBe(b.proposals[0].subjectKey);
   });
 
   it('mints kill/suspend per process selector when process fields are present', () => {

@@ -96,6 +96,7 @@ steps:
             comment: "{{ foreach.item.comment }}"
             category: "{{ foreach.item.category }}"
             impact: "{{ foreach.item.impact }}"
+            confidence: "{{ foreach.item.confidence }}"
             actionWorkflowId: "{{ foreach.item.actionWorkflowId }}"
             actionInput: "${{ foreach.item.actionInput }}"
             investigationConversationId: "{{ inputs.investigationConversationId }}"
@@ -160,7 +161,7 @@ steps:
         {% else -%}
         Packaging minted {{ packaged.proposals | size }} proposal{% if packaged.proposals.size != 1 %}s{% endif %} for analyst review.{% if variables.dispatch_failed_count > 0 %} {{ variables.dispatch_failed_count }} of the approval gates failed to launch.{% else %} Each proposal waits on its own approval gate; the Investigation stays open until every gate is decided.{% endif %}
         {% for p in packaged.proposals -%}
-          - **{{ p.category }}**{% if p.hostName != nil and p.hostName != empty %} on `{{ p.hostName }}`{% endif %}{% if p.actionWorkflowId != nil and p.actionWorkflowId != empty %}: runs `{{ p.actionWorkflowId }}` on approval{% else %}: recommendation only{% if p.actionlessReason != nil and p.actionlessReason != empty %} ({{ p.actionlessReason | replace: "_", " " }}){% endif %}{% endif %}
+          - **{{ p.title | default: p.category }}**{% if p.hostName != nil and p.hostName != empty %} on `{{ p.hostName }}`{% endif %}{% if p.actionWorkflowId != nil and p.actionWorkflowId != empty %}: runs `{{ p.actionWorkflowId }}` on approval{% else %}: recommendation only{% endif %}
         {% endfor -%}
         {% if packaged.coverage.written != nil and packaged.coverage.written != empty -%}
           - Recorded {{ packaged.coverage.written | size }} coverage knowledge item{% if packaged.coverage.written.size != 1 %}s{% endif %} for Detection Watch.

@@ -50,12 +50,9 @@ export const packageReportMintPayloadSchema = z.object({
   impact: z.string().optional(),
   actionWorkflowId: z.string().optional(),
   actionInput: z.record(z.string(), z.unknown()).optional(),
-  /** Host name when the mint is host-scoped; absent on hostless actionless recommendations. */
+  /** Host name when the mint is host-scoped; absent on a hostless analyst recommendation. */
   hostName: z.string().optional(),
-  /** Reason an otherwise-needed mint omitted actionWorkflowId. */
-  actionlessReason: z
-    .enum(['catalog_error', 'catalog_empty', 'no_fillable_action', 'hostless', 'unenrolled'])
-    .optional(),
+  confidence: z.enum(['low', 'medium', 'high']).optional(),
 });
 
 export const packageReportOutputSchema = z.discriminatedUnion('status', [

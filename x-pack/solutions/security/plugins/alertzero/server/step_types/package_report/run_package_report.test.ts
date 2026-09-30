@@ -226,6 +226,26 @@ describe('runPackageReport', () => {
     expect(result.expectedProposalCount).toBe(1);
   });
 
+  it('mints only a recommendation when Fleet is unavailable (no host resolves as enrolled)', async () => {
+    const result = await runPackageReport({
+      spaceId: 'default',
+      reportId,
+      investigationConversationId: conversationId,
+      runId,
+      attachments: [sseAttachment({ hit: true, hostName: 'host-a' })],
+      deps: deps({ resolveHostEnrollment: async () => ({ enrolled: false }) }),
+    });
+    expect(result.status).toBe('packaged');
+    if (result.status !== 'packaged') {
+      return;
+    }
+    expect(result.dismiss).toBe(false);
+    expect(result.proposals).toHaveLength(1);
+    expect(result.proposals[0].actionWorkflowId).toBeUndefined();
+    expect(result.proposals[0].title).toBe('Analyst recommendation');
+    expect(result.proposals[0].comment).toContain('host-a');
+  });
+
   it('mints kill-process and suspend-process from a rehydrated, host-scoped process selector', async () => {
     const result = await runPackageReport({
       spaceId: 'default',

@@ -33,7 +33,7 @@ triggers:
           description: Explains what is being proposed, rendered as markdown.
         actionWorkflowId:
           type: string
-          description: Managed action workflow to execute once approved. Absent for an actionless recommendation.
+          description: Managed action workflow to execute once approved. Absent for a proposal the analyst carries out themselves.
         actionInput:
           type: object
           additionalProperties: true
@@ -41,6 +41,9 @@ triggers:
         impact:
           type: string
           description: Impact snapshotted at creation.
+        confidence:
+          type: string
+          description: Confidence in the recommendation, snapshotted at creation.
         category:
           type: string
           description: Grouping axis for the decision queue; always set by the packaging child's mint payload.
@@ -95,6 +98,7 @@ steps:
         actionWorkflowId: "${{ inputs.actionWorkflowId }}"
         actionInput: "${{ inputs.actionInput }}"
         impact: "${{ inputs.impact }}"
+        confidence: "${{ inputs.confidence }}"
         category: "${{ inputs.category }}"
     on-failure:
       continue: true
