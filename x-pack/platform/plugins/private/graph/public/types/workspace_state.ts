@@ -128,7 +128,7 @@ export type WorkspaceOptions = {
 } & Partial<{
   indexName: string;
   vertex_fields: WorkspaceField[];
-  nodeLabeller: (newNodes: WorkspaceNode[]) => void;
+  nodeLabeller: (newNodes: IncomingGraphNode[]) => void;
   exploreControls: AdvancedSettings;
 }>;
 

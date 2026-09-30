@@ -6,30 +6,28 @@
  */
 
 import { getIcon } from '../../helpers/style_choices';
+import type { IncomingGraphNode, WorkspaceEdge, WorkspaceNode } from '../../types/workspace_state';
 
-interface IncomingNode {
-  field: string;
-  term: string;
-  id?: string;
-  label?: string;
-  icon?: Parameters<typeof getIcon>[0];
-  color?: string;
-  [key: string]: unknown;
-}
+type IncomingNode = IncomingGraphNode;
 
 export interface NormalizedIncomingNode extends IncomingNode {
   id: string;
   label: string;
 }
 
-export const materializeRuntimeNode = (node: NormalizedIncomingNode, sequence: number) => ({
+export const materializeRuntimeNode = (
+  node: NormalizedIncomingNode,
+  sequence: number
+): WorkspaceNode & { seqNumber: number } => ({
   x: 1,
   y: 1,
+  kx: 1,
+  ky: 1,
   numChildren: 0,
-  parent: undefined,
+  parent: null,
   id: node.id,
   label: node.label,
-  color: node.color,
+  color: node.color ?? '#000000',
   icon: getIcon(node.icon ?? ''),
   data: node,
   scaledSize: 15,
@@ -38,15 +36,17 @@ export const materializeRuntimeNode = (node: NormalizedIncomingNode, sequence: n
 
 export const materializeRuntimeEdge = (
   operation: Extract<EdgeMergeOperation, { type: 'add' }>,
-  nodesById: Record<string, ReturnType<typeof materializeRuntimeNode>>
-) => ({
+  nodesById: Record<string, WorkspaceNode>
+): WorkspaceEdge & { id: string } => ({
   source: nodesById[operation.sourceId],
   target: nodesById[operation.targetId],
+  topSrc: nodesById[operation.sourceId],
+  topTarget: nodesById[operation.targetId],
   weight: operation.edge.weight,
   width: operation.edge.width,
   id: operation.id,
   doc_count: operation.edge.doc_count,
-  ...(operation.edge.label ? { label: operation.edge.label } : {}),
+  label: operation.edge.label ?? '',
 });
 
 export const makeNodeId = (field: string, term: string): string => `${field}..${term}`;
@@ -59,13 +59,13 @@ interface IncomingEdge {
   target: number;
   weight: number;
   width: number;
-  doc_count: number;
+  doc_count?: number;
   label?: string;
 }
 
 interface ExistingEdge {
   weight: number;
-  doc_count: number;
+  doc_count?: number;
 }
 
 export type EdgeMergeOperation =
@@ -102,7 +102,7 @@ export const planIncomingEdges = ({
     if (existingEdge) {
       const updatedEdge = {
         weight: Math.max(existingEdge.weight, edge.weight),
-        doc_count: Math.max(existingEdge.doc_count, edge.doc_count),
+        doc_count: Math.max(existingEdge.doc_count ?? 0, edge.doc_count ?? 0),
       };
       currentEdges.set(id, updatedEdge);
       return {
