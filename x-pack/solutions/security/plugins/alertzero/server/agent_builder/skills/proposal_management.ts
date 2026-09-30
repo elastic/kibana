@@ -46,17 +46,21 @@ does not increment revision; never initiate a retry through this skill.
 
 ## Read before editing
 
-1. Read the proposal attachment using attachments.read. If needed, locate it with
-   attachments.list. The attachment ID is for reading/rendering; the proposal data's
-   id is the proposalId supplied to the revision tool.
+1. If needed, locate the card with attachments.list, then pass its attachment_id
+   to attachments.read. In the read result, find \`Proposal ID: <id>\` (the same value as
+   \`Proposal data.id\`). This is the proposal's own ID; attachment_id identifies the
+   conversation card and is only for attachment tools.
 2. Inspect status, decision, expired, rootProposalId, revision, supersedes, and
    supersededBy. Missing optional history fields on older records are not values
    to invent. If supersededBy is present, locate and read that proposal's attachment
    and repeat until you reach the current revision. Do not base edits on an older
    revision merely because the tool can resolve its ID to the latest one.
 3. Revise only a pending, undecided, unexpired proposal at the analyst's request.
-   If the current attachment is unavailable, stop and explain the missing context.
-   Never guess its contents or recover it by querying internal storage.
+   Before calling the revision tool, obtain the \`Proposal ID: <id>\` from the current
+   revision's read result into its \`proposalId\` argument and check the values match
+   exactly. If that line or the current attachment is unavailable, stop and
+   explain the missing context. Never guess its contents or recover it by
+   querying internal storage.
 
 ## Build a complete successor
 
@@ -80,7 +84,7 @@ does not increment revision; never initiate a retry through this skill.
 - Update any matching prose and table entries so comment and actionInput agree.
 - Keep actionWorkflowId unchanged: a different action is not a revision.
 - Use security.alertzero.actions.list only when action discovery is needed.
-- Call security.alertzero.proposals.revise with the current proposal id and edits.
+- Call security.alertzero.proposals.revise with the verified proposalId and edits.
   On a conflict or stale context, reread the current revision before proposing edits
   again; do not blindly repeat a write whose outcome is uncertain.
 
