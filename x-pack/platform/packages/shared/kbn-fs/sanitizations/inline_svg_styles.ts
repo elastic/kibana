@@ -13,6 +13,7 @@ const MAX_STYLE_RULES = 256;
 const MAX_VALUE_LENGTH = 64;
 const MAX_DASH_ARRAY_ENTRIES = 16;
 const MAX_RESOLUTION_STEPS = 20_000;
+const MAX_REFERENCED_IDS = 1_024;
 const MAX_ADDED_ATTRIBUTE_BYTES = 65_536;
 const MAX_COPIED_MARKUP_BYTES = 65_536;
 const MAX_REFERENCE_DEPTH = 8;
@@ -24,7 +25,6 @@ const LENGTH = new RegExp(`^${NUMERIC}(?:px|%)?$`, 'i');
 const HEX_COLOR = /^#(?:[\da-f]{3,4}|[\da-f]{6}|[\da-f]{8})$/i;
 // Same-document references only, e.g. url(#GreenGradient); anything else could load a remote resource.
 const LOCAL_REFERENCE = /^url\(\s*#([\w-]+)\s*\)$/;
-const LOCAL_HREF = /^#([\w-]+)$/;
 const LOCAL_URL = /url\(\s*['"]?#([^\s'")]+)/gi;
 const CLASS_SELECTOR = /^\.(-?[_a-zA-Z][\w-]*)$/;
 const SVG_TYPE_SELECTOR = 'svg';
@@ -459,13 +459,15 @@ const indexById = (
   return elementsById;
 };
 
+const hasHref = (element: Element): boolean =>
+  Array.from(element.attributes).some(({ localName }) => toAsciiLowerCase(localName) === 'href');
+
 const getHrefTarget = (
   element: Element,
   elementsById: ReadonlyMap<string, Element>
 ): Element | undefined => {
   const href = element.getAttribute('href') ?? element.getAttribute('xlink:href') ?? '';
-  const id = LOCAL_HREF.exec(href)?.[1];
-  return id === undefined ? undefined : elementsById.get(id);
+  return href.startsWith('#') ? elementsById.get(href.slice(1)) : undefined;
 };
 
 interface Copy {
@@ -536,6 +538,7 @@ const planReferences = (
     const kind = kindOf(element);
     if (GRADIENT_ELEMENTS.has(kind)) {
       const chain: Element[] = [];
+      let last = element;
       let next = getHrefTarget(element, elementsById);
       while (
         next &&
@@ -545,10 +548,12 @@ const planReferences = (
         chain.length < MAX_REFERENCE_DEPTH
       ) {
         chain.push(next);
+        last = next;
         next = getHrefTarget(next, elementsById);
       }
-      // A cycle or a chain past the depth limit ends on another gradient and stays unresolved.
-      let isResolved = !next || !GRADIENT_ELEMENTS.has(kindOf(next));
+      // A cycle or a chain past the depth limit ends on another gradient, and an href that finds no element
+      // here (percent-encoded, for example) may still name one the browser finds, so both stay unresolved.
+      let isResolved = next ? !GRADIENT_ELEMENTS.has(kindOf(next)) : !hasHref(last);
 
       const stopSource = hasStops(element) ? undefined : chain.find(hasStops);
       if (stopSource) {
@@ -652,9 +657,6 @@ interface InlinedSvg {
   readonly dependencies: ReadonlyMap<string, number>;
 }
 
-const hasHref = (element: Element): boolean =>
-  Array.from(element.attributes).some(({ localName }) => toAsciiLowerCase(localName) === 'href');
-
 // Undefined when anything reachable still needs an href that sanitization strips.
 const collectDependencies = (
   ids: readonly string[],
@@ -698,6 +700,10 @@ const collectDependencies = (
         }
         for (const [, referencedId] of value.matchAll(LOCAL_URL)) {
           pending.add(referencedId);
+          // Ids that match nothing cost no element visits, so they need their own bound.
+          if (pending.size > MAX_REFERENCED_IDS) {
+            return undefined;
+          }
         }
       }
     }
@@ -777,6 +783,13 @@ interface SanitizedTree {
   readonly subtree: (element: Element) => readonly Element[];
 }
 
+// A pattern tile defaults to zero width and height, and a zero-sized tile paints nothing.
+const hasPatternTile = (pattern: Element): boolean =>
+  ['width', 'height'].every((name) => {
+    const value = pattern.getAttribute(name) ?? '';
+    return LENGTH.test(value) && Number.parseFloat(value) > 0;
+  });
+
 // Descriptive children such as <title> leave a clip path, mask, pattern or filter hiding whatever uses it.
 const isRenderableTarget = (
   target: Element,
@@ -797,8 +810,9 @@ const isRenderableTarget = (
     case 'filter':
       return children.some((child) => kindOf(child).startsWith('fe'));
     case 'mask':
-    case 'pattern':
       return subtree(target).some(draws);
+    case 'pattern':
+      return hasPatternTile(target) && subtree(target).some(draws);
     default:
       return true;
   }
