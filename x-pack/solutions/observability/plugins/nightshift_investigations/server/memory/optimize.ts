@@ -15,7 +15,7 @@ import { isElasticsearchWriteConflict } from '@kbn/occ';
 import { formatPageRefs, previewText } from './log_format';
 import type { InvestigationToolCall } from '../decision_trees/accessed_trees';
 import { renderMemoryTranscript, type TranscriptStep } from './transcript';
-import type { MemoryPageStore, VersionedMemoryPage } from './page_store';
+import type { MemoryPageStore, MemoryPageWrite, VersionedMemoryPage } from './page_store';
 import {
   canonicalizeSlug,
   epochSecondsToIso,
@@ -74,6 +74,7 @@ Extract a fact only if a tool result in the investigation shows it. The final an
 **TIME OF OBSERVATION** — the environment changes, so a memory must say when each changeable claim was true:
 - Any claim that can change over time (counts, rates, latencies, percentiles, error levels, versions, config values, which component is slowest) states when it was observed: the absolute UTC time or window of the data, with dates (e.g. "observed 2026-09-29T18:46–2026-09-30T18:46 UTC"). Take it from the tool calls and results; if they do not show it, use the run time given below.
 - Never write relative times such as "current window", "prior 21 hours", "now", or "recently".
+- A problem that has stopped is written in the past tense, with when it was observed and when it stopped.
 - Lead with the lasting pattern the measurements show, then the dated measurements that support it. Keep only the numbers that support the pattern; a table of every measurement is not a memory.
 - Structural facts that do not change from run to run (ownership, dependencies, naming, topology) need no time.
 
@@ -444,6 +445,7 @@ The transcript is the evidence. It has the user task; the investigation, in orde
 - Every claim that can change over time (counts, rates, latencies, percentiles, error levels, versions, config values, which component is slowest) states when it was observed, as an absolute UTC time or window with dates. Keep the times given in the inputs. A replaced memory's claim with no time was observed by that memory's updated date: say "as of <date>".
 - Never write relative times such as "current", "prior window", "now", or "recently".
 - Earlier observations may stay when they are still useful, labeled with their times. When a newer observation conflicts with an older one, the newer one is the current state; keep the older one only as a dated earlier observation.
+- A problem the evidence shows has stopped is written in the past tense, with when it was observed and when it stopped, including its cause (e.g. "From 2026-09-30T06:57Z to 07:30Z the host clock was 1 s behind the CA"). Keep its signature and cause so a recurrence is recognized; never describe it as ongoing.
 - Compare observations from different times only when they measure the same thing the same way; otherwise state each on its own.
 - Lead with the lasting conclusion, then the dated observations that support it.
 - These rules apply to the new information as well as to the replaced memories. The note explains what changed; the rules still apply where it suggests otherwise.
@@ -685,6 +687,32 @@ const unionStrings = (...groups: Array<readonly string[] | undefined>): string[]
   return out;
 };
 
+/**
+ * Writes a fresh memory over an archived one that holds the same id. The archived version's
+ * counters are not inherited; its merge history is.
+ */
+const writeOverArchived = async (
+  store: MemoryPageStore,
+  archived: VersionedMemoryPage,
+  write: MemoryPageWrite,
+  nowSec: number
+): Promise<void> => {
+  const mergedFrom = unionStrings(write.merged_from, archived.page.merged_from);
+  await store.update(
+    archived.page.id,
+    {
+      ...write,
+      ...(mergedFrom.length > 0 ? { merged_from: mergedFrom } : {}),
+      telemetry: write.telemetry ?? {
+        impressions: 0,
+        conversions: 0,
+        last_impression_time: epochSecondsToIso(nowSec),
+      },
+    },
+    archived
+  );
+};
+
 export const applyMemoryEdits = async ({
   store,
   recalledIds,
@@ -768,6 +796,7 @@ export const applyMemoryEdits = async ({
   const consumedExtracts = new Set<number>();
   // Pages an entry was written to or archived into an entry this round.
   const replacedDoneIds = new Set<string>();
+  const archivedExactIds = new Set<string>();
 
   interface MergeGroup {
     sourceIds: string[];
@@ -793,11 +822,11 @@ export const applyMemoryEdits = async ({
     }
 
     const exactId = toMemoryKiId(extra.slug);
-    const exactPage = await store.get(exactId);
-    if (exactPage?.status === 'archived') {
-      logger.debug(`Skipped extraction "${extra.slug}" — exact slug is archived`);
-      consumedExtracts.add(index);
-      continue;
+    const exactStored = await store.get(exactId);
+    const exactPage = exactStored?.status === 'archived' ? undefined : exactStored;
+    if (exactStored && !exactPage) {
+      archivedExactIds.add(exactId);
+      logger.debug(`Extraction "${extra.slug}" reuses the id of an archived memory`);
     }
     const catalogHits =
       (await store.retrieve({ query: extra.title, size: 5, match: 'content' })) ?? [];
@@ -902,18 +931,25 @@ export const applyMemoryEdits = async ({
       continue;
     }
     const extra = extractions[index];
+    const write: MemoryPageWrite = {
+      slug: extra.slug,
+      title: extra.title,
+      content: extra.content,
+      context: task,
+      tags: extra.tags,
+      categories: extra.categories,
+      references: [],
+      status: 'tentative',
+      user: 'nightshift-optimizer',
+    };
     try {
-      await store.create({
-        slug: extra.slug,
-        title: extra.title,
-        content: extra.content,
-        context: task,
-        tags: extra.tags,
-        categories: extra.categories,
-        references: [],
-        status: 'tentative',
-        user: 'nightshift-optimizer',
-      });
+      const id = toMemoryKiId(extra.slug);
+      const existing = archivedExactIds.has(id) ? await store.getVersioned(id) : undefined;
+      if (existing?.page.status === 'archived') {
+        await writeOverArchived(store, existing, write, now());
+      } else {
+        await store.create(write);
+      }
       summary.standaloneUpsertCount += 1;
       logger.debug(
         `Memory extract upserted ${toMemoryKiId(extra.slug)} contextChars=${task.length}`
@@ -922,7 +958,7 @@ export const applyMemoryEdits = async ({
       if (isElasticsearchWriteConflict(err)) {
         const winner = await store.get(toMemoryKiId(extra.slug));
         if (winner?.status === 'archived') {
-          logger.debug(`Skipped extraction "${extra.slug}" — race winner is archived`);
+          logger.debug(`Skipped extraction "${extra.slug}" — its archived id changed during write`);
           continue;
         }
         if (winner && synthesizeMemoryGroup) {
@@ -1066,6 +1102,7 @@ const mergeMemoryGroup = async ({
     }
 
     let slug = versionedCanonical?.page.slug;
+    let archivedTarget: VersionedMemoryPage | undefined;
     if (!slug) {
       const avoid = new Set(currentSources.map((page) => page.id));
       const base = canonicalizeSlug(title) || 'merged';
@@ -1074,7 +1111,15 @@ const mergeMemoryGroup = async ({
           slugAttempt === 0 ? '' : slugAttempt === 1 ? '-merged' : `-merged-${slugAttempt}`;
         const candidate = `${base.slice(0, 80 - suffix.length)}${suffix}`;
         const candidateId = toMemoryKiId(candidate);
-        if (avoid.has(candidateId) || (await store.get(candidateId))) {
+        if (avoid.has(candidateId)) {
+          continue;
+        }
+        const occupant = await store.get(candidateId);
+        if (occupant && occupant.status !== 'archived') {
+          continue;
+        }
+        archivedTarget = occupant ? await store.getVersioned(candidateId) : undefined;
+        if (occupant && archivedTarget?.page.status !== 'archived') {
           continue;
         }
         slug = candidate;
@@ -1157,6 +1202,8 @@ const mergeMemoryGroup = async ({
     try {
       if (versionedCanonical) {
         await store.update(targetCanonicalId, write, versionedCanonical);
+      } else if (archivedTarget) {
+        await writeOverArchived(store, archivedTarget, write, nowSec);
       } else {
         await store.create(write);
       }

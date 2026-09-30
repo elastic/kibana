@@ -1186,12 +1186,15 @@ describe('applyMemoryEdits', () => {
     );
   });
 
-  it('does not resurrect an archived exact slug', async () => {
-    const archived = page('memory_checkout-redis', 'Checkout Redis');
-    archived.status = 'archived';
+  it('writes a new memory over an archived one with the same id, resetting its counters', async () => {
+    const archived = {
+      ...page('memory_checkout-redis', 'Checkout Redis', 'Old wrong fact.'),
+      status: 'archived' as const,
+      merged_from: ['memory_older-redis'],
+    };
     const store = createStore({ get: jest.fn().mockResolvedValue(archived) });
 
-    await applyMemoryEdits({
+    const summary = await applyMemoryEdits({
       store,
       recalledIds: [],
       labels: { useful: [], harmful: [] },
@@ -1210,9 +1213,64 @@ describe('applyMemoryEdits', () => {
       logger: loggerMock.create(),
     });
 
-    expect(store.retrieve).not.toHaveBeenCalled();
     expect(store.create).not.toHaveBeenCalled();
-    expect(store.update).not.toHaveBeenCalled();
+    expect(store.update).toHaveBeenCalledWith(
+      archived.id,
+      expect.objectContaining({
+        content: 'New fact.',
+        status: 'tentative',
+        merged_from: ['memory_older-redis'],
+        telemetry: expect.objectContaining({ impressions: 0, conversions: 0 }),
+      }),
+      expect.objectContaining({ page: archived })
+    );
+    expect(summary).toEqual(expect.objectContaining({ standaloneUpsertCount: 1 }));
+  });
+
+  it('merges into an archived id instead of adding a -merged suffix', async () => {
+    const source = page('memory_redis-evictions', 'Redis evictions', 'Evicts under load.');
+    const archived = {
+      ...page('memory_checkout-redis', 'Checkout Redis', 'Old fact.'),
+      status: 'archived' as const,
+    };
+    const pages = [source, archived];
+    const store = createStore({
+      get: jest.fn(async (id: string) => pages.find((candidate) => candidate.id === id)),
+    });
+
+    await applyMemoryEdits({
+      store,
+      recalledIds: [source.id],
+      recalledMemories: [source],
+      labels: { useful: [], harmful: [] },
+      extractions: [
+        {
+          slug: 'checkout-redis',
+          title: 'Checkout Redis',
+          content: 'Evictions start above 90% memory.',
+          tags: [],
+          categories: [],
+          replaces: [source.id],
+          note: '',
+        },
+      ],
+      synthesizeMemoryGroup: jest.fn().mockResolvedValue({
+        content: 'Checkout Redis evicts keys above 90% memory.',
+        context: 'checkout redis evictions',
+      }),
+      logger: loggerMock.create(),
+    });
+
+    expect(store.create).not.toHaveBeenCalled();
+    expect(store.update).toHaveBeenCalledWith(
+      archived.id,
+      expect.objectContaining({ slug: 'checkout-redis', status: 'established' }),
+      expect.objectContaining({ page: archived })
+    );
+    expect(store.archiveVersioned).toHaveBeenCalledWith(
+      expect.objectContaining({ page: source }),
+      'merged'
+    );
   });
 
   it('skips extractions that look like secrets', async () => {
