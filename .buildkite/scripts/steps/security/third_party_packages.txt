@@ -22,7 +22,6 @@ xml-formatter
 dompurify
 magic-bytes.js
 @opentelemetry/exporter-trace-otlp-grpc
-@ai-sdk/langchain
 ink
 @hey-api/openapi-ts
 vscode-languageserver-textdocument
@@ -72,3 +71,4 @@ graphql
 @cfworker/json-schema
 oxlint-tsgolint
 bump-cli
+@oxlint/plugins

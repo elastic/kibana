@@ -1,5 +1,5 @@
 {
-  "sha1": "efdb894a56cd6d66e504c141c57da70a952a538d",
+  "sha1": "450bbc15d106a0a53afbd54930e033152e479d01",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -145,6 +145,20 @@
       }
     },
     {
+      "id": "4a2b3d75494c20d-5875365e562f516",
+      "title": "[NON-MKI] Workflow service accounts: parent/child execution permissions a read-only child cannot inherit its parent write permissions",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-search",
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/workflows_management/test/scout_service_accounts/api/tests/service_account_nested_permissions.spec.ts",
+        "line": 29,
+        "column": 7
+      }
+    },
+    {
       "id": "956a46181e9404d-e383abb79f31e60",
       "title": "[NON-MKI] Workflow service accounts: nested SA continuation audit: unbound child approval does not change parent identity",
       "expectedStatus": "passed",
@@ -184,6 +198,20 @@
         "file": "src/platform/plugins/shared/workflows_management/test/scout_service_accounts/api/tests/service_account_nested.spec.ts",
         "line": 77,
         "column": 17
+      }
+    },
+    {
+      "id": "b95c7f214593057-7077e78e01d0ae9",
+      "title": "[NON-MKI] Workflow service accounts: approval/resume permissions retains read-only permissions after approval by an administrator",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-search",
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/workflows_management/test/scout_service_accounts/api/tests/service_account_resume_permissions.spec.ts",
+        "line": 29,
+        "column": 7
       }
     },
     {
@@ -254,6 +282,20 @@
         "file": "src/platform/plugins/shared/workflows_management/test/scout_service_accounts/api/tests/service_account_resume.spec.ts",
         "line": 85,
         "column": 55
+      }
+    },
+    {
+      "id": "de0cd5101678d6f-a9727b01da67762",
+      "title": "[NON-MKI] Workflow service accounts: scheduled execution permissions scheduled execution cannot use the scheduler privileges to write",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-search",
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/workflows_management/test/scout_service_accounts/api/tests/service_account_scheduling_permissions.spec.ts",
+        "line": 29,
+        "column": 7
       }
     },
     {
