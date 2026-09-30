@@ -22,12 +22,13 @@ export interface UserMessageTextStyles {
 }
 
 export const useUserMessageTextStyles = (): UserMessageTextStyles => {
-  const { euiTheme } = useEuiTheme();
+  const euiThemeContext = useEuiTheme();
+  const { euiTheme } = euiThemeContext;
 
   return useMemo(
     () => ({
       container: css`
-        ${markdownContainerStyles(euiTheme)}
+        ${markdownContainerStyles(euiThemeContext)}
 
         /* Avoids extra blank lines: remark's leftover "\\n" text nodes would otherwise render under the inherited white-space: pre-wrap (user_message.tsx). */
         .euiMarkdownFormat {
@@ -88,6 +89,6 @@ export const useUserMessageTextStyles = (): UserMessageTextStyles => {
         ${euiTextTruncate('100%')}
       `,
     }),
-    [euiTheme]
+    [euiThemeContext, euiTheme]
   );
 };

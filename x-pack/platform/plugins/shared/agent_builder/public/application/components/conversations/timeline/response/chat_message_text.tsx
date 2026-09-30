@@ -64,7 +64,7 @@ export function ChatMessageText({
   conversationId,
   isStreaming = false,
 }: Props) {
-  const { euiTheme } = useEuiTheme();
+  const euiThemeContext = useEuiTheme();
 
   const { attachmentsService, renderersService, conversationsService, startDependencies } =
     useAgentBuilderServices();
@@ -156,7 +156,7 @@ export function ChatMessageText({
 
   return (
     <>
-      <EuiText size="s" css={markdownContainerStyles(euiTheme)}>
+      <EuiText size="s" css={markdownContainerStyles(euiThemeContext)}>
         <EuiMarkdownFormat
           textSize="s"
           parsingPluginList={parsingPluginList}

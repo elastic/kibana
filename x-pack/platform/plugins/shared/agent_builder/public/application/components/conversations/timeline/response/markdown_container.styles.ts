@@ -6,23 +6,49 @@
  */
 
 import { css } from '@emotion/react';
-import type { EuiThemeComputed } from '@elastic/eui';
+import { euiFontSize, type UseEuiTheme } from '@elastic/eui';
+
+// EUI's default markdown heading scale is sized for documents, far too large inside a chat message.
+const HEADING_FONT_SCALES = [
+  ['h1', 'l'],
+  ['h2', 'm'],
+  ['h3', 's'],
+  ['h4', 's'],
+  ['h5', 's'],
+  ['h6', 's'],
+] as const;
 
 /** Container styles shared by agent responses and user messages rendered as markdown. */
-export const markdownContainerStyles = (euiTheme: EuiThemeComputed) => css`
-  overflow-wrap: anywhere;
+export const markdownContainerStyles = (euiThemeContext: UseEuiTheme) => {
+  const { euiTheme } = euiThemeContext;
 
-  /* Standardize spacing between numbered list items */
-  ol > li:not(:first-child) {
-    margin-top: ${euiTheme.size.s};
-  }
+  const headingStyles = HEADING_FONT_SCALES.map(([heading, scale]) => {
+    const { fontSize, lineHeight } = euiFontSize(euiThemeContext, scale);
+    return `
+      .euiMarkdownFormat ${heading} {
+        font-size: ${fontSize};
+        line-height: ${lineHeight};
+      }
+    `;
+  }).join('');
 
-  ol > li > p {
-    margin-bottom: ${euiTheme.size.s};
-  }
+  return css`
+    overflow-wrap: anywhere;
 
-  .euiMarkdownFormat > ul > li,
-  .euiMarkdownFormat > ol > li {
-    line-height: ${euiTheme.size.l};
-  }
-`;
+    /* Standardize spacing between numbered list items */
+    ol > li:not(:first-child) {
+      margin-top: ${euiTheme.size.s};
+    }
+
+    ol > li > p {
+      margin-bottom: ${euiTheme.size.s};
+    }
+
+    .euiMarkdownFormat > ul > li,
+    .euiMarkdownFormat > ol > li {
+      line-height: ${euiTheme.size.l};
+    }
+
+    ${headingStyles}
+  `;
+};
