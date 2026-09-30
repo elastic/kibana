@@ -23,4 +23,10 @@ const dashboardTool = (toolName: string) => {
  */
 export const dashboardTools = {
   generateDashboard: dashboardTool('generate_dashboard'),
+  panelToVisualization: dashboardTool('panel_to_visualization'),
 } as const;
+
+/**
+ * Id of the built-in dashboard management skill registered by the agent_builder_dashboards plugin.
+ */
+export const DASHBOARD_MANAGEMENT_SKILL_ID = 'dashboard-management';

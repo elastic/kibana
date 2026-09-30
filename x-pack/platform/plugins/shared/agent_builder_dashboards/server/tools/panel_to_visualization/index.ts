@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export { dashboardTools, DASHBOARD_MANAGEMENT_SKILL_ID } from './constants';
+export { createPanelToVisualizationTool } from './panel_to_visualization_tool';
