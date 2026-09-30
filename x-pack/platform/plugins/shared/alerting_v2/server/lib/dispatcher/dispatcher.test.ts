@@ -9,6 +9,7 @@ import type { BulkResponse } from '@elastic/elasticsearch/lib/api/types';
 import { ALERT_ACTIONS_DATA_STREAM } from '@kbn/alerting-v2-constants';
 import type { DeeplyMockedApi } from '@kbn/core-elasticsearch-client-server-mocks';
 import type { ElasticsearchClient } from '@kbn/core/server';
+import { coreMock } from '@kbn/core/server/mocks';
 import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
 import moment from 'moment';
 import type { AlertAction } from '../../resources/datastreams/alert_actions';
@@ -132,21 +133,24 @@ function buildDispatcherService(deps: {
   maintenanceWindowService: MaintenanceWindowServiceContract;
   eventLogService: EventLogServiceContract;
 }): DispatcherService {
-  const pipeline = new DispatcherPipeline([
-    new FetchEpisodesStep(deps.queryService),
-    new FetchSuppressionsStep(deps.queryService),
-    new ApplySuppressionStep(),
-    new HydrateEpisodeDataStep(deps.queryService),
-    new FetchRulesStep(deps.rulesSoService),
-    new ApplyMaintenanceWindowStep(deps.maintenanceWindowService),
-    new FetchPoliciesStep(deps.npSoService),
-    new EvaluateMatchersStep(),
-    new BuildGroupsStep(),
-    new ApplyThrottlingStep(deps.queryService),
-    new DispatchStep(deps.workflowsManagement),
-    new StoreActionsStep(deps.storageService),
-    new StoreExecutionHistoryStep(deps.eventLogService),
-  ]);
+  const pipeline = new DispatcherPipeline(
+    [
+      new FetchEpisodesStep(deps.queryService),
+      new FetchSuppressionsStep(deps.queryService),
+      new ApplySuppressionStep(),
+      new HydrateEpisodeDataStep(deps.queryService),
+      new FetchRulesStep(deps.rulesSoService),
+      new ApplyMaintenanceWindowStep(deps.maintenanceWindowService),
+      new FetchPoliciesStep(deps.npSoService),
+      new EvaluateMatchersStep(),
+      new BuildGroupsStep(),
+      new ApplyThrottlingStep(deps.queryService),
+      new DispatchStep(deps.workflowsManagement),
+      new StoreActionsStep(deps.storageService),
+      new StoreExecutionHistoryStep(deps.eventLogService),
+    ],
+    coreMock.createStart().executionContext
+  );
   return new DispatcherService(pipeline, deps.storageService, createLoggerService().loggerService);
 }
 

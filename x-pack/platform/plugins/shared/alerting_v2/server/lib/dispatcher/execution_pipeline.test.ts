@@ -6,6 +6,7 @@
  */
 
 import { createLoggerService } from '../services/logger_service/logger_service.mock';
+import { coreMock } from '@kbn/core/server/mocks';
 import { DispatcherPipeline } from './execution_pipeline';
 import { createDispatcherPipelineInput, createMockDispatcherStep } from './fixtures/test_utils';
 import { EpisodeScan, EpisodeTriage } from './state';
@@ -14,6 +15,8 @@ import type { DispatcherPipelineState } from './types';
 jest.mock('./with_dispatcher_span', () => ({
   withDispatcherSpan: (_name: string, cb: () => Promise<unknown>) => cb(),
 }));
+
+const executionContext = coreMock.createStart().executionContext;
 
 describe('DispatcherPipeline', () => {
   describe('execute', () => {
@@ -35,7 +38,7 @@ describe('DispatcherPipeline', () => {
         return { type: 'continue' };
       });
 
-      const pipeline = new DispatcherPipeline([step1, step2, step3]);
+      const pipeline = new DispatcherPipeline([step1, step2, step3], executionContext);
       const input = createDispatcherPipelineInput();
 
       const result = await pipeline.execute(input, createLoggerService().loggerService);
@@ -43,6 +46,20 @@ describe('DispatcherPipeline', () => {
       expect(result.completed).toBe(true);
       expect(result.haltReason).toBeUndefined();
       expect(executionOrder).toEqual(['step1', 'step2', 'step3']);
+    });
+
+    it('runs each step within an execution context naming the step', async () => {
+      const step1 = createMockDispatcherStep('step1', async () => ({ type: 'continue' }));
+      const step2 = createMockDispatcherStep('step2', async () => ({ type: 'continue' }));
+      const ownExecutionContext = coreMock.createStart().executionContext;
+
+      const pipeline = new DispatcherPipeline([step1, step2], ownExecutionContext);
+      await pipeline.execute(createDispatcherPipelineInput(), createLoggerService().loggerService);
+
+      expect(jest.mocked(ownExecutionContext.withContext).mock.calls.map(([ctx]) => ctx)).toEqual([
+        { type: 'alerting_v2', name: 'dispatcher step', id: 'step1' },
+        { type: 'alerting_v2', name: 'dispatcher step', id: 'step2' },
+      ]);
     });
 
     it('stops execution when a step returns halt', async () => {
@@ -63,7 +80,7 @@ describe('DispatcherPipeline', () => {
         return { type: 'continue' };
       });
 
-      const pipeline = new DispatcherPipeline([step1, step2, step3]);
+      const pipeline = new DispatcherPipeline([step1, step2, step3], executionContext);
       const input = createDispatcherPipelineInput();
 
       const result = await pipeline.execute(input, createLoggerService().loggerService);
@@ -92,7 +109,7 @@ describe('DispatcherPipeline', () => {
         return { type: 'continue' };
       });
 
-      const pipeline = new DispatcherPipeline([step1, step2, step3]);
+      const pipeline = new DispatcherPipeline([step1, step2, step3], executionContext);
       const input = createDispatcherPipelineInput();
 
       const result = await pipeline.execute(input, createLoggerService().loggerService);
@@ -121,7 +138,7 @@ describe('DispatcherPipeline', () => {
         return { type: 'continue' };
       });
 
-      const pipeline = new DispatcherPipeline([step1, step2]);
+      const pipeline = new DispatcherPipeline([step1, step2], executionContext);
       const input = createDispatcherPipelineInput();
 
       await expect(pipeline.execute(input, createLoggerService().loggerService)).rejects.toThrow(
@@ -131,7 +148,7 @@ describe('DispatcherPipeline', () => {
     });
 
     it('returns completed result when no steps', async () => {
-      const pipeline = new DispatcherPipeline([]);
+      const pipeline = new DispatcherPipeline([], executionContext);
       const input = createDispatcherPipelineInput();
 
       const result = await pipeline.execute(input, createLoggerService().loggerService);
@@ -146,7 +163,7 @@ describe('DispatcherPipeline', () => {
 
       const step1 = createMockDispatcherStep('step1', async () => ({ type: 'continue' }));
 
-      const pipeline = new DispatcherPipeline([step1]);
+      const pipeline = new DispatcherPipeline([step1], executionContext);
       const input = createDispatcherPipelineInput({ signal: controller.signal });
 
       const result = await pipeline.execute(input, createLoggerService().loggerService);
@@ -166,7 +183,7 @@ describe('DispatcherPipeline', () => {
 
       const step2 = createMockDispatcherStep('step2', async () => ({ type: 'continue' }));
 
-      const pipeline = new DispatcherPipeline([step1, step2]);
+      const pipeline = new DispatcherPipeline([step1, step2], executionContext);
       const input = createDispatcherPipelineInput({ signal: controller.signal });
 
       const result = await pipeline.execute(input, createLoggerService().loggerService);

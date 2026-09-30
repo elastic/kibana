@@ -5,7 +5,9 @@
  * 2.0.
  */
 
-import { injectable, multiInject } from 'inversify';
+import { inject, injectable, multiInject } from 'inversify';
+import type { ExecutionContextStart } from '@kbn/core/server';
+import { CoreStart } from '@kbn/core-di-server';
 import { ALERTING_LOG_CODES } from '../errors/error_codes';
 import { type LoggerServiceContract } from '../services/logger_service/logger_service';
 import { DispatcherExecutionStepsToken } from './steps/tokens';
@@ -29,7 +31,9 @@ export interface DispatcherPipelineContract {
 @injectable()
 export class DispatcherPipeline implements DispatcherPipelineContract {
   constructor(
-    @multiInject(DispatcherExecutionStepsToken) private readonly steps: DispatcherStep[]
+    @multiInject(DispatcherExecutionStepsToken) private readonly steps: DispatcherStep[],
+    @inject(CoreStart('executionContext'))
+    private readonly executionContext: ExecutionContextStart
   ) {}
 
   public async execute(
@@ -50,7 +54,12 @@ export class DispatcherPipeline implements DispatcherPipelineContract {
 
       let output: Awaited<ReturnType<DispatcherStep['execute']>>;
       try {
-        output = await withDispatcherSpan(step.name, () => step.execute(pipelineState, logger));
+        // Labels in-flight work (e.g. for Core's event loop watchdog), so the step is identifiable
+        // when the dispatcher task blocks the event loop.
+        output = await this.executionContext.withContext(
+          { type: 'alerting_v2', name: 'dispatcher step', id: step.name },
+          () => withDispatcherSpan(step.name, () => step.execute(pipelineState, logger))
+        );
       } catch (error) {
         // If the tick signal fired while the step had an in-flight request (e.g.
         // RequestAbortedError from ES|QL), convert to a clean aborted halt so
