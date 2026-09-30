@@ -66,15 +66,15 @@ describe('validateParams()', () => {
     expect(() => {
       validateParams(connectorType, {}, { configurationUtilities });
     }).toThrowErrorMatchingInlineSnapshot(`
-      "error validating action params: ✖ Invalid input: expected string, received undefined
-        → at message"
+      [Error: error validating action params: ✖ Invalid input: expected string, received undefined
+        → at message]
     `);
 
     expect(() => {
       validateParams(connectorType, { message: 1 }, { configurationUtilities });
     }).toThrowErrorMatchingInlineSnapshot(`
-      "error validating action params: ✖ Invalid input: expected string, received number
-        → at message"
+      [Error: error validating action params: ✖ Invalid input: expected string, received number
+        → at message]
     `);
   });
 });
@@ -94,21 +94,21 @@ describe('validateConnectorTypeSecrets()', () => {
     expect(() => {
       validateSecrets(connectorType, {}, { configurationUtilities });
     }).toThrowErrorMatchingInlineSnapshot(`
-      "error validating connector type secrets: ✖ Invalid input: expected string, received undefined
-        → at webhookUrl"
+      [Error: error validating connector type secrets: ✖ Invalid input: expected string, received undefined
+        → at webhookUrl]
     `);
 
     expect(() => {
       validateSecrets(connectorType, { webhookUrl: 1 }, { configurationUtilities });
     }).toThrowErrorMatchingInlineSnapshot(`
-      "error validating connector type secrets: ✖ Invalid input: expected string, received number
-        → at webhookUrl"
+      [Error: error validating connector type secrets: ✖ Invalid input: expected string, received number
+        → at webhookUrl]
     `);
 
     expect(() => {
       validateSecrets(connectorType, { webhookUrl: 'fee-fi-fo-fum' }, { configurationUtilities });
     }).toThrowErrorMatchingInlineSnapshot(
-      `"error validating connector type secrets: error configuring slack action: unable to parse host name from webhookUrl"`
+      `[Error: error validating connector type secrets: error configuring slack action: unable to parse host name from webhookUrl]`
     );
   });
 
@@ -146,7 +146,7 @@ describe('validateConnectorTypeSecrets()', () => {
         { configurationUtilities: configUtils }
       );
     }).toThrowErrorMatchingInlineSnapshot(
-      `"error validating connector type secrets: error configuring slack action: target hostname is not added to allowedHosts"`
+      `[Error: error validating connector type secrets: error configuring slack action: target hostname is not added to allowedHosts]`
     );
   });
 });
@@ -210,7 +210,7 @@ describe('execute()', () => {
         connectorUsageCollector,
       })
     ).rejects.toThrowErrorMatchingInlineSnapshot(
-      `"slack mockExecutor failure: this invocation should fail"`
+      `[Error: slack mockExecutor failure: this invocation should fail]`
     );
   });
 

@@ -14,8 +14,10 @@ import { vi } from 'vitest';
 import type { Mock } from 'vitest';
 import { ChangeHistoryTelemetryEventTypes } from '@kbn/change-history-ui';
 import type { WorkflowDetailDto } from '@kbn/workflows';
+import * as workflowsUi from '@kbn/workflows-ui';
 import { WORKFLOW_UNSAVED_CHANGE_ID } from './constants';
 import { UNSAVED_CHANGES_ACTION } from './translations';
+import * as useWorkflowChangeHistoryModule from './use_workflow_change_history';
 import {
   WorkflowChangeHistoryListItem,
   WorkflowChangeHistoryProvider,
@@ -36,6 +38,7 @@ import {
   createUseKibanaMockValue,
   type StartServicesMock,
 } from '../../mocks';
+import * as useKibanaModule from '../../hooks/use_kibana';
 import { TestWrapper } from '../../shared/test_utils';
 
 const restorableWorkflow: WorkflowDetailDto = {
@@ -205,9 +208,13 @@ vi.mock('../../entities/workflows/store/workflow_detail/thunks/load_workflow_thu
   };
 });
 
-const { useWorkflowChangeHistoryEnabled } = await vi.importMock('./use_workflow_change_history');
-const { useKibana } = await vi.importMock('../../hooks/use_kibana');
-const { useWorkflowsCapabilities } = await vi.importMock('@kbn/workflows-ui');
+const { useWorkflowChangeHistoryEnabled } = useWorkflowChangeHistoryModule as unknown as {
+  useWorkflowChangeHistoryEnabled: Mock;
+};
+const { useKibana } = useKibanaModule as unknown as { useKibana: Mock };
+const { useWorkflowsCapabilities } = workflowsUi as unknown as {
+  useWorkflowsCapabilities: Mock;
+};
 
 const mockWorkflowChangeHistoryKibanaServices = ({
   configureHttp,

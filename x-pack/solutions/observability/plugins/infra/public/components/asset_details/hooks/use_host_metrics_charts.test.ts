@@ -50,7 +50,7 @@ describe('useHostCharts', () => {
             const expectedOrder = getHostChartsExpectedOrder(metric, false);
 
             const { result } = renderHook(() => useHostCharts({ indexPattern, metric, schema }));
-            await waitFor(() => new Promise((resolve) => resolve(null)));
+            await waitFor(() => expect(result.current.charts).not.toHaveLength(0));
 
             const { charts } = result.current;
 
@@ -70,7 +70,7 @@ describe('useHostCharts', () => {
             const { result } = renderHook(() =>
               useHostCharts({ indexPattern, metric, overview: true, schema })
             );
-            await waitFor(() => new Promise((resolve) => resolve(null)));
+            await waitFor(() => expect(result.current.charts).not.toHaveLength(0));
 
             const { charts } = result.current;
 
@@ -89,7 +89,7 @@ describe('useHostCharts', () => {
 describe('useKubernetesCharts', () => {
   it('should return an array of charts with correct order - overview', async () => {
     const { result } = renderHook(() => useKubernetesCharts({ indexPattern, overview: true }));
-    await waitFor(() => new Promise((resolve) => resolve(null)));
+    await waitFor(() => expect(result.current.charts).not.toHaveLength(0));
 
     const expectedOrder = ['nodeCpuCapacity', 'nodeMemoryCapacity'];
 
@@ -104,7 +104,7 @@ describe('useKubernetesCharts', () => {
 
   it('should return an array of charts with correct order', async () => {
     const { result } = renderHook(() => useKubernetesCharts({ indexPattern }));
-    await waitFor(() => new Promise((resolve) => resolve(null)));
+    await waitFor(() => expect(result.current.charts).not.toHaveLength(0));
 
     const expectedOrder = [
       'nodeCpuCapacity',
@@ -146,7 +146,7 @@ describe('useHostKpiCharts', () => {
   describe.each<DataSchemaFormat>(SCHEMAS)('schema=%s', (schema) => {
     it('should return an array of charts with correct order and schema-resolved subtitles', async () => {
       const { result } = renderHook(() => useHostKpiCharts({ indexPattern, schema }));
-      await waitFor(() => new Promise((resolve) => resolve(null)));
+      await waitFor(() => expect(result.current).not.toHaveLength(0));
 
       const expected = expectedKpiBySchema[schema];
 
@@ -169,7 +169,7 @@ describe('useHostKpiCharts', () => {
     const { result } = renderHook(() =>
       useHostKpiCharts({ indexPattern, schema: 'ecs', ...options })
     );
-    await waitFor(() => new Promise((resolve) => resolve(null)));
+    await waitFor(() => expect(result.current).not.toHaveLength(0));
 
     expect(result.current).toHaveLength(4);
 

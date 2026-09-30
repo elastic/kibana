@@ -15,6 +15,7 @@ import type { Mock } from 'vitest';
 import { Route } from '@kbn/shared-ux-router';
 import type { WorkflowDetailDto, WorkflowExecutionDto } from '@kbn/workflows';
 import { ExecutionStatus } from '@kbn/workflows';
+import * as workflowsUi from '@kbn/workflows-ui';
 
 import { useWorkflowEditorReadOnly } from './use_workflow_editor_read_only';
 import { createMockStore } from '../entities/workflows/store/__mocks__/store.mock';
@@ -33,7 +34,7 @@ vi.mock('@kbn/workflows-ui', async () => {
   return { ...mocked, default: mocked };
 });
 
-const { useWorkflowsCapabilities } = (await vi.importMock('@kbn/workflows-ui')) as {
+const { useWorkflowsCapabilities } = workflowsUi as unknown as {
   useWorkflowsCapabilities: Mock;
 };
 

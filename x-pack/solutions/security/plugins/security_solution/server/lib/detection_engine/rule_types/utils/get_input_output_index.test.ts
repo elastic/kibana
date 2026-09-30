@@ -196,7 +196,7 @@ describe('get_input_output_index', () => {
           logger,
         })
       ).rejects.toThrowErrorMatchingInlineSnapshot(
-        `"Saved object [index-pattern/12345] not found"`
+        `[Error: Saved object [index-pattern/12345] not found]`
       );
     });
 

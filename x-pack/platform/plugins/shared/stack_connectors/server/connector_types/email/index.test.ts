@@ -199,7 +199,7 @@ describe('config validation', () => {
     expect(() => {
       validateConfig(connectorType, config, { configurationUtilities });
     }).toThrowErrorMatchingInlineSnapshot(
-      `"error validating connector type config: [allowHtml]: cannot be true when [service] is \\"elastic_cloud\\""`
+      `[Error: error validating connector type config: [allowHtml]: cannot be true when [service] is "elastic_cloud"]`
     );
   });
 
@@ -212,15 +212,15 @@ describe('config validation', () => {
     expect(() => {
       validateConfig(connectorType, {}, { configurationUtilities });
     }).toThrowErrorMatchingInlineSnapshot(`
-      "error validating connector type config: ✖ Invalid input: expected string, received undefined
-        → at from"
+      [Error: error validating connector type config: ✖ Invalid input: expected string, received undefined
+        → at from]
     `);
 
     // no service or host/port
     expect(() => {
       validateConfig(connectorType, baseConfig, { configurationUtilities });
     }).toThrowErrorMatchingInlineSnapshot(
-      `"error validating connector type config: [host]/[port] is required"`
+      `[Error: error validating connector type config: [host]/[port] is required]`
     );
 
     // host but no port
@@ -231,14 +231,14 @@ describe('config validation', () => {
         { configurationUtilities }
       );
     }).toThrowErrorMatchingInlineSnapshot(
-      `"error validating connector type config: [port] is required"`
+      `[Error: error validating connector type config: [port] is required]`
     );
 
     // port but no host
     expect(() => {
       validateConfig(connectorType, { ...baseConfig, port: 8080 }, { configurationUtilities });
     }).toThrowErrorMatchingInlineSnapshot(
-      `"error validating connector type config: [host] is required"`
+      `[Error: error validating connector type config: [host] is required]`
     );
 
     // invalid service
@@ -252,7 +252,7 @@ describe('config validation', () => {
         { configurationUtilities }
       );
     }).toThrowErrorMatchingInlineSnapshot(
-      `"error validating connector type config: [service] value 'bad-nodemailer-service' is not valid"`
+      `[Error: error validating connector type config: [service] value 'bad-nodemailer-service' is not valid]`
     );
 
     // invalid exchange_server no clientId and no tenantId
@@ -266,7 +266,7 @@ describe('config validation', () => {
         { configurationUtilities }
       );
     }).toThrowErrorMatchingInlineSnapshot(
-      `"error validating connector type config: [clientId]/[tenantId] is required"`
+      `[Error: error validating connector type config: [clientId]/[tenantId] is required]`
     );
 
     // invalid exchange_server no clientId
@@ -281,7 +281,7 @@ describe('config validation', () => {
         { configurationUtilities }
       );
     }).toThrowErrorMatchingInlineSnapshot(
-      `"error validating connector type config: [clientId] is required"`
+      `[Error: error validating connector type config: [clientId] is required]`
     );
 
     // invalid exchange_server no tenantId
@@ -296,7 +296,7 @@ describe('config validation', () => {
         { configurationUtilities }
       );
     }).toThrowErrorMatchingInlineSnapshot(
-      `"error validating connector type config: [tenantId] is required"`
+      `[Error: error validating connector type config: [tenantId] is required]`
     );
   });
 
@@ -350,13 +350,13 @@ describe('config validation', () => {
         configurationUtilities: configUtils,
       });
     }).toThrowErrorMatchingInlineSnapshot(
-      `"error validating connector type config: [service] value 'gmail' resolves to host 'smtp.gmail.com' which is not in the allowedHosts configuration"`
+      `[Error: error validating connector type config: [service] value 'gmail' resolves to host 'smtp.gmail.com' which is not in the allowedHosts configuration]`
     );
 
     expect(() => {
       validateConfig(connectorType, notAllowedHosts2, { configurationUtilities: configUtils });
     }).toThrowErrorMatchingInlineSnapshot(
-      `"error validating connector type config: [host] value 'smtp.gmail.com' is not in the allowedHosts configuration"`
+      `[Error: error validating connector type config: [host] value 'smtp.gmail.com' is not in the allowedHosts configuration]`
     );
   });
 
@@ -387,7 +387,7 @@ describe('config validation', () => {
     expect(() => {
       validateConfig(connectorType, config, { configurationUtilities: configUtilsSmtp });
     }).toThrowErrorMatchingInlineSnapshot(
-      `"error validating connector type config: [oauthTokenUrl]: host name value for 'http://auth.example.com' is not in the allowedHosts configuration"`
+      `[Error: error validating connector type config: [oauthTokenUrl]: host name value for 'http://auth.example.com' is not in the allowedHosts configuration]`
     );
   });
 
@@ -405,7 +405,7 @@ describe('config validation', () => {
         { configurationUtilities: configUtils }
       );
     }).toThrowErrorMatchingInlineSnapshot(
-      `"error validating connector type config: [from]: stub for actual message"`
+      `[Error: error validating connector type config: [from]: stub for actual message]`
     );
     expect(configUtils.validateEmailAddresses).toHaveBeenNthCalledWith(1, ['badmail'], {
       isSender: true,
@@ -491,7 +491,7 @@ describe('connector validation: secrets with config', () => {
     expect(() => {
       validateConnector(connectorType, { config, secrets });
     }).toThrowErrorMatchingInlineSnapshot(
-      `"error validating action type connector: [user] is required"`
+      `[Error: error validating action type connector: [user] is required]`
     );
   });
 
@@ -516,7 +516,7 @@ describe('connector validation: secrets with config', () => {
     expect(() => {
       validateConnector(connectorType, { config, secrets });
     }).toThrowErrorMatchingInlineSnapshot(
-      `"error validating action type connector: [clientSecret] is required"`
+      `[Error: error validating action type connector: [clientSecret] is required]`
     );
   });
 });
@@ -552,10 +552,10 @@ describe('params validation', () => {
     expect(() => {
       validateParams(connectorType, {}, { configurationUtilities });
     }).toThrowErrorMatchingInlineSnapshot(`
-      "error validating action params: ✖ Invalid input: expected string, received undefined
+      [Error: error validating action params: ✖ Invalid input: expected string, received undefined
         → at subject
       ✖ Invalid input: expected string, received undefined
-        → at message"
+        → at message]
     `);
   });
 
@@ -573,7 +573,7 @@ describe('params validation', () => {
         { configurationUtilities }
       );
     }).toThrowErrorMatchingInlineSnapshot(
-      `"error validating action params: At least one entry in [to], [cc], or [bcc] is required"`
+      `[Error: error validating action params: At least one entry in [to], [cc], or [bcc] is required]`
     );
   });
 
@@ -591,7 +591,7 @@ describe('params validation', () => {
         { configurationUtilities }
       );
     }).toThrowErrorMatchingInlineSnapshot(
-      `"error validating action params: At least one entry in [to], [cc], or [bcc] is required"`
+      `[Error: error validating action params: At least one entry in [to], [cc], or [bcc] is required]`
     );
   });
 
@@ -799,7 +799,7 @@ describe('params validation', () => {
         { configurationUtilities: configUtils }
       );
     }).toThrowErrorMatchingInlineSnapshot(
-      `"error validating action params: [to/cc/bcc]: stub for actual message"`
+      `[Error: error validating action params: [to/cc/bcc]: stub for actual message]`
     );
 
     const allEmails = ['to@example.com', 'cc@example.com', 'bcc@example.com'];
@@ -844,7 +844,7 @@ describe('params validation', () => {
         { configurationUtilities: configUtils }
       )
     ).toThrowErrorMatchingInlineSnapshot(
-      `"error validating connector type config: [service]: \\"other\\" is not in the list of enabled email services: google-mail,elastic-cloud"`
+      `[Error: error validating connector type config: [service]: "other" is not in the list of enabled email services: google-mail,elastic-cloud]`
     );
   });
 
@@ -905,8 +905,8 @@ describe('params validation', () => {
         { configurationUtilities: configUtils }
       );
     }).toThrowErrorMatchingInlineSnapshot(`
-      "error validating action params: ✖ Too big: expected string to have <=512 characters
-        → at to[0]"
+      [Error: error validating action params: ✖ Too big: expected string to have <=512 characters
+        → at to[0]]
     `);
   });
   test('throws for too long "cc" address ', async () => {
@@ -928,8 +928,8 @@ describe('params validation', () => {
         { configurationUtilities: configUtils }
       );
     }).toThrowErrorMatchingInlineSnapshot(`
-      "error validating action params: ✖ Too big: expected string to have <=512 characters
-        → at cc[0]"
+      [Error: error validating action params: ✖ Too big: expected string to have <=512 characters
+        → at cc[0]]
     `);
   });
   test('throws for too long "bcc" address ', async () => {
@@ -951,8 +951,8 @@ describe('params validation', () => {
         { configurationUtilities: configUtils }
       );
     }).toThrowErrorMatchingInlineSnapshot(`
-      "error validating action params: ✖ Too big: expected string to have <=512 characters
-        → at bcc[0]"
+      [Error: error validating action params: ✖ Too big: expected string to have <=512 characters
+        → at bcc[0]]
     `);
   });
 
@@ -1002,7 +1002,7 @@ describe('params validation', () => {
         { configurationUtilities: configUtils }
       );
     }).toThrowErrorMatchingInlineSnapshot(
-      `"error validating action params: [to/cc/bcc/replyTo]: stub for actual message"`
+      `[Error: error validating action params: [to/cc/bcc/replyTo]: stub for actual message]`
     );
     const allEmails = ['to@example.com', 'cc@example.com', 'bcc@example.com', 'badmail'];
     expect(configUtils.validateEmailAddresses).toHaveBeenCalledWith(allEmails, {
@@ -1027,8 +1027,8 @@ describe('params validation', () => {
         { configurationUtilities: configUtils }
       );
     }).toThrowErrorMatchingInlineSnapshot(`
-      "error validating action params: ✖ Too big: expected string to have <=512 characters
-        → at replyTo[0]"
+      [Error: error validating action params: ✖ Too big: expected string to have <=512 characters
+        → at replyTo[0]]
     `);
   });
 
@@ -1049,8 +1049,8 @@ describe('params validation', () => {
         { configurationUtilities: configUtils }
       );
     }).toThrowErrorMatchingInlineSnapshot(`
-      "error validating action params: ✖ Too big: expected array to have <=10 items
-        → at replyTo"
+      [Error: error validating action params: ✖ Too big: expected array to have <=10 items
+        → at replyTo]
     `);
   });
 });
@@ -2513,7 +2513,7 @@ describe('validateConfig AWS SES specific checks', () => {
     expect(() => {
       validateConfig(connectorType, config, { configurationUtilities: configUtilsWithSes });
     }).toThrowErrorMatchingInlineSnapshot(
-      `"error validating connector type config: [ses.host]/[ses.port] does not match with the configured AWS SES host/port combination"`
+      `[Error: error validating connector type config: [ses.host]/[ses.port] does not match with the configured AWS SES host/port combination]`
     );
   });
 
@@ -2522,7 +2522,7 @@ describe('validateConfig AWS SES specific checks', () => {
     expect(() => {
       validateConfig(connectorType, config, { configurationUtilities: configUtilsWithSes });
     }).toThrowErrorMatchingInlineSnapshot(
-      `"error validating connector type config: [ses.host] does not match with the configured AWS SES host"`
+      `[Error: error validating connector type config: [ses.host] does not match with the configured AWS SES host]`
     );
   });
 
@@ -2531,7 +2531,7 @@ describe('validateConfig AWS SES specific checks', () => {
     expect(() => {
       validateConfig(connectorType, config, { configurationUtilities: configUtilsWithSes });
     }).toThrowErrorMatchingInlineSnapshot(
-      `"error validating connector type config: [ses.port] does not match with the configured AWS SES port"`
+      `[Error: error validating connector type config: [ses.port] does not match with the configured AWS SES port]`
     );
   });
 
@@ -2540,7 +2540,7 @@ describe('validateConfig AWS SES specific checks', () => {
     expect(() => {
       validateConfig(connectorType, config, { configurationUtilities: configUtilsWithSes });
     }).toThrowErrorMatchingInlineSnapshot(
-      `"error validating connector type config: [ses.secure] must be true for AWS SES"`
+      `[Error: error validating connector type config: [ses.secure] must be true for AWS SES]`
     );
   });
 });

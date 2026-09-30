@@ -12,6 +12,7 @@ import { fireEvent, waitFor } from '@testing-library/react';
 
 import { useAgentPoliciesSpaces } from '../../../../../../hooks/use_request/spaces';
 import { useStartServices } from '../../../../../../hooks/use_core';
+import type * as UseCoreModule from '../../../../../../hooks/use_core';
 
 import { createFleetTestRendererMock } from '../../../../../../mock';
 
@@ -26,12 +27,16 @@ vi.mock('../../../../../../hooks/use_core', async () => {
   return { ...mocked, default: mocked };
 });
 
+const actualUseCore = await vi.importActual<typeof UseCoreModule>(
+  '../../../../../../hooks/use_core'
+);
+
 describe('Space Selector', () => {
   beforeEach(() => {
     vi.mocked(useStartServices).mockImplementation(
-      async () =>
+      () =>
         ({
-          ...(await vi.importActual('../../../../../../hooks/use_core')).useStartServices(),
+          ...actualUseCore.useStartServices(),
           spaces: {
             getActiveSpace: () => ({
               id: 'default',

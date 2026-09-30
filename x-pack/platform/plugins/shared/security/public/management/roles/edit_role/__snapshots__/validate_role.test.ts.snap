@@ -1,5 +1,5 @@
 // Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`validateIndexPrivileges > it throws when indices is not an array 1`] = `[Error: Expected "role.elasticsearch.indices" to be an array]`;
+exports[`validateIndexPrivileges > it throws when indices is not an array 1`] = `[TypeError: Expected "role.elasticsearch.indices" to be an array]`;
 
-exports[`validateRemoteIndexPrivileges > it throws when indices is not an array 1`] = `[Error: Expected "role.elasticsearch.remote_indices" to be an array]`;
+exports[`validateRemoteIndexPrivileges > it throws when indices is not an array 1`] = `[TypeError: Expected "role.elasticsearch.remote_indices" to be an array]`;

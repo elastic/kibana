@@ -65,29 +65,29 @@ describe('validateParams()', () => {
     expect(() => {
       validateParams(connectorType, {}, { configurationUtilities });
     }).toThrowErrorMatchingInlineSnapshot(`
-      "error validating action params: ✖ Invalid input: expected string, received undefined
-        → at message"
+      [Error: error validating action params: ✖ Invalid input: expected string, received undefined
+        → at message]
     `);
 
     expect(() => {
       validateParams(connectorType, { message: 1 }, { configurationUtilities });
     }).toThrowErrorMatchingInlineSnapshot(`
-      "error validating action params: ✖ Invalid input: expected string, received number
-        → at message"
+      [Error: error validating action params: ✖ Invalid input: expected string, received number
+        → at message]
     `);
 
     expect(() => {
       validateParams(connectorType, { message: 'x', level: 2 }, { configurationUtilities });
     }).toThrowErrorMatchingInlineSnapshot(`
-      "error validating action params: ✖ Invalid option: expected one of \\"trace\\"|\\"debug\\"|\\"info\\"|\\"warn\\"|\\"error\\"|\\"fatal\\"
-        → at level"
+      [Error: error validating action params: ✖ Invalid option: expected one of "trace"|"debug"|"info"|"warn"|"error"|"fatal"
+        → at level]
     `);
 
     expect(() => {
       validateParams(connectorType, { message: 'x', level: 'foo' }, { configurationUtilities });
     }).toThrowErrorMatchingInlineSnapshot(`
-      "error validating action params: ✖ Invalid option: expected one of \\"trace\\"|\\"debug\\"|\\"info\\"|\\"warn\\"|\\"error\\"|\\"fatal\\"
-        → at level"
+      [Error: error validating action params: ✖ Invalid option: expected one of "trace"|"debug"|"info"|"warn"|"error"|"fatal"
+        → at level]
     `);
   });
 });

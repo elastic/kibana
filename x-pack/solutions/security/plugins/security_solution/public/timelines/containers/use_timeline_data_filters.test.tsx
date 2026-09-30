@@ -12,12 +12,13 @@ import { createMockStore, mockGlobalState, TestProviders } from '../../common/mo
 import { useTimelineDataFilters } from './use_timeline_data_filters';
 import React from 'react';
 
+const pathname = vi.hoisted(() => '/alerts');
+
 vi.mock('react-router-dom', () => {
   const actual = require('react-router-dom');
   return { ...actual, useLocation: vi.fn().mockReturnValue({ pathname }) };
 });
 
-const pathname = '/alerts';
 const store = createMockStore({
   ...mockGlobalState,
   inputs: {

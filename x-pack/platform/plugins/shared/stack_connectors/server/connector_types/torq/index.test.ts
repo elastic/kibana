@@ -73,8 +73,8 @@ describe('secrets validation', () => {
     expect(() => {
       validateSecrets(actionType, {}, { configurationUtilities });
     }).toThrowErrorMatchingInlineSnapshot(`
-      "error validating connector type secrets: ✖ Invalid input: expected string, received undefined
-        → at token"
+      [Error: error validating connector type secrets: ✖ Invalid input: expected string, received undefined
+        → at token]
     `);
   });
 });
@@ -105,22 +105,22 @@ describe('config validation', () => {
     {
       name: 'invalid URL leads to error',
       url: 'iamnotavalidurl',
-      errorMsg: `"error validating connector type config: error configuring send to Torq action: unable to parse url: TypeError: Invalid URL: iamnotavalidurl"`,
+      errorMsg: `error validating connector type config: error configuring send to Torq action: unable to parse url: TypeError: Invalid URL: iamnotavalidurl`,
     },
     {
       name: 'incomplete URL leads to error',
       url: 'example.com/do-something',
-      errorMsg: `"error validating connector type config: error configuring send to Torq action: unable to parse url: TypeError: Invalid URL: example.com/do-something"`,
+      errorMsg: `error validating connector type config: error configuring send to Torq action: unable to parse url: TypeError: Invalid URL: example.com/do-something`,
     },
     {
       name: 'fails when URL is not a Torq webhook endpoint',
       url: 'http://mylisteningserver:9200/endpoint',
-      errorMsg: `"error validating connector type config: error configuring send to Torq action: url must begin with https://hooks.torq.io or https://hooks.eu.torq.io"`,
+      errorMsg: `error validating connector type config: error configuring send to Torq action: url must begin with https://hooks.torq.io or https://hooks.eu.torq.io`,
     },
     {
       name: 'fails when URL is an unsupported Torq webhook subdomain',
       url: 'https://hooks.anothersubdomain.torq.io/v1/test',
-      errorMsg: `"error validating connector type config: error configuring send to Torq action: url must begin with https://hooks.torq.io or https://hooks.eu.torq.io"`,
+      errorMsg: `error validating connector type config: error configuring send to Torq action: url must begin with https://hooks.torq.io or https://hooks.eu.torq.io`,
     },
   ];
   errorCases.forEach(({ name, url, errorMsg }) => {
@@ -128,9 +128,10 @@ describe('config validation', () => {
       const config: Record<string, string> = {
         webhookIntegrationUrl: url,
       };
+      // Vitest rejects inline snapshots with different values at one location, so compare the exact message
       expect(() => {
         validateConfig(actionType, config, { configurationUtilities });
-      }).toThrowErrorMatchingInlineSnapshot(errorMsg);
+      }).toThrow(expect.objectContaining({ message: errorMsg }));
     });
   });
 
@@ -152,7 +153,7 @@ describe('config validation', () => {
     expect(() => {
       validateConfig(actionType, config, { configurationUtilities: configUtils });
     }).toThrowErrorMatchingInlineSnapshot(
-      `"error validating connector type config: error configuring send to Torq action: target url is not present in allowedHosts"`
+      `[Error: error validating connector type config: error configuring send to Torq action: target url is not present in allowedHosts]`
     );
   });
 });

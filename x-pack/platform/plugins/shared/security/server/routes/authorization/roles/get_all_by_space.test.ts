@@ -153,10 +153,10 @@ describe('GET all roles by space id', () => {
 
     expect(config.security?.authz).toEqual({ requiredPrivileges: ['manage_spaces'] });
     expect(() => paramsSchema.validate({})).toThrowErrorMatchingInlineSnapshot(
-      `"[spaceId]: expected value of type [string] but got [undefined]"`
+      `[Error: [spaceId]: expected value of type [string] but got [undefined]]`
     );
     expect(() => paramsSchema.validate({ spaceId: '' })).toThrowErrorMatchingInlineSnapshot(
-      `"[spaceId]: value has length [0] but it must have a minimum length of [1]."`
+      `[Error: [spaceId]: value has length [0] but it must have a minimum length of [1].]`
     );
   });
 
@@ -254,7 +254,9 @@ describe('GET all roles by space id', () => {
       }),
       asserts: {
         statusCode: 500,
-        result: new Error("ES returned an application entry without resources, can't process this"),
+        result: Boom.boomify(
+          new Error("ES returned an application entry without resources, can't process this")
+        ),
       },
     });
   });

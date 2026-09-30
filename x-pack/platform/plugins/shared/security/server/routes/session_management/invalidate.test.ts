@@ -57,23 +57,23 @@ describe('Invalidate sessions routes', () => {
 
       const bodySchema = (routeConfig.validate as any).body as ObjectType;
       expect(() => bodySchema.validate({})).toThrowErrorMatchingInlineSnapshot(
-        `"[match]: expected at least one defined value but got [undefined]"`
+        `[Error: [match]: expected at least one defined value but got [undefined]]`
       );
       expect(() => bodySchema.validate({ match: 'current' })).toThrowErrorMatchingInlineSnapshot(`
-        "[match]: types that failed validation:
+        [Error: [match]: types that failed validation:
         - [match.0]: expected value to equal [all]
-        - [match.1]: expected value to equal [query]"
+        - [match.1]: expected value to equal [query]]
       `);
       expect(() =>
         bodySchema.validate({ match: 'all', query: { provider: { type: 'basic' } } })
-      ).toThrowErrorMatchingInlineSnapshot(`"[query]: a value wasn't expected to be present"`);
+      ).toThrowErrorMatchingInlineSnapshot(`[Error: [query]: a value wasn't expected to be present]`);
       expect(() => bodySchema.validate({ match: 'query' })).toThrowErrorMatchingInlineSnapshot(
-        `"[query.provider.type]: expected value of type [string] but got [undefined]"`
+        `[Error: [query.provider.type]: expected value of type [string] but got [undefined]]`
       );
       expect(() =>
         bodySchema.validate({ match: 'query', query: { username: 'user' } })
       ).toThrowErrorMatchingInlineSnapshot(
-        `"[query.provider.type]: expected value of type [string] but got [undefined]"`
+        `[Error: [query.provider.type]: expected value of type [string] but got [undefined]]`
       );
       expect(() =>
         bodySchema.validate({
@@ -81,7 +81,7 @@ describe('Invalidate sessions routes', () => {
           query: { provider: { name: 'basic1' }, username: 'user' },
         })
       ).toThrowErrorMatchingInlineSnapshot(
-        `"[query.provider.type]: expected value of type [string] but got [undefined]"`
+        `[Error: [query.provider.type]: expected value of type [string] but got [undefined]]`
       );
 
       expect(bodySchema.validate({ match: 'all' })).toEqual({ match: 'all' });

@@ -22,7 +22,7 @@ import { useFetchAgentsData } from './use_fetch_agents_data';
 vi.mock('../../../../../../services/experimental_features');
 const mockedExperimentalFeaturesService = vi.mocked(ExperimentalFeaturesService);
 
-const defaultState = {
+const defaultState = vi.hoisted(() => ({
   search: '',
   selectedAgentPolicies: [],
   selectedStatus: ['healthy', 'unhealthy', 'orphaned', 'updating', 'offline'],
@@ -30,7 +30,7 @@ const defaultState = {
   showUpgradeable: false,
   sort: { field: 'enrolled_at', direction: 'desc' },
   page: { index: 0, size: 20 },
-};
+}));
 
 vi.mock('./use_session_agent_list_state', () => {
   let currentMockState = { ...defaultState };

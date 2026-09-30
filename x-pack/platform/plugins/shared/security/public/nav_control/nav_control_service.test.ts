@@ -325,7 +325,7 @@ describe('SecurityNavControlService', () => {
           },
         ]);
       }).toThrowErrorMatchingInlineSnapshot(
-        `"Only one custom profile link can be passed at a time (found 2)"`
+        `[Error: Only one custom profile link can be passed at a time (found 2)]`
       );
 
       // Adding a single custom profile link.
@@ -344,7 +344,7 @@ describe('SecurityNavControlService', () => {
           },
         ]);
       }).toThrowErrorMatchingInlineSnapshot(
-        `"Only one custom profile link can be set. A custom profile link named link3 (path-to-link3) already exists"`
+        `[Error: Only one custom profile link can be set. A custom profile link named link3 (path-to-link3) already exists]`
       );
 
       const onUserMenuLinksHandler = vi.fn();

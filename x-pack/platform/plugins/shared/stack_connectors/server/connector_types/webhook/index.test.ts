@@ -110,7 +110,7 @@ describe('secrets validation', () => {
     expect(() => {
       validateSecrets(connectorType, { user: 'bob' }, { configurationUtilities });
     }).toThrowErrorMatchingInlineSnapshot(
-      `"error validating connector type secrets: ✖ must specify one of the following schemas: user and password; crt and key (with optional password); pfx (with optional password); or clientSecret (for OAuth2)"`
+      `[Error: error validating connector type secrets: ✖ must specify one of the following schemas: user and password; crt and key (with optional password); pfx (with optional password); or clientSecret (for OAuth2)]`
     );
   });
 
@@ -184,12 +184,12 @@ describe('secrets validation', () => {
     expect(() => {
       validateSecrets(connectorType, { crt: CRT_FILE }, { configurationUtilities });
     }).toThrowErrorMatchingInlineSnapshot(
-      `"error validating connector type secrets: ✖ must specify one of the following schemas: user and password; crt and key (with optional password); pfx (with optional password); or clientSecret (for OAuth2)"`
+      `[Error: error validating connector type secrets: ✖ must specify one of the following schemas: user and password; crt and key (with optional password); pfx (with optional password); or clientSecret (for OAuth2)]`
     );
     expect(() => {
       validateSecrets(connectorType, { key: KEY_FILE }, { configurationUtilities });
     }).toThrowErrorMatchingInlineSnapshot(
-      `"error validating connector type secrets: ✖ must specify one of the following schemas: user and password; crt and key (with optional password); pfx (with optional password); or clientSecret (for OAuth2)"`
+      `[Error: error validating connector type secrets: ✖ must specify one of the following schemas: user and password; crt and key (with optional password); pfx (with optional password); or clientSecret (for OAuth2)]`
     );
   });
 });
@@ -235,8 +235,8 @@ describe('config validation', () => {
     expect(() => {
       validateConfig(connectorType, config, { configurationUtilities });
     }).toThrowErrorMatchingInlineSnapshot(`
-      "error validating connector type config: ✖ Invalid option: expected one of \\"post\\"|\\"put\\"|\\"patch\\"|\\"get\\"|\\"delete\\"
-        → at method"
+      [Error: error validating connector type config: ✖ Invalid option: expected one of "post"|"put"|"patch"|"get"|"delete"
+        → at method]
     `);
   });
 
@@ -259,7 +259,7 @@ describe('config validation', () => {
     expect(() => {
       validateConfig(connectorType, config, { configurationUtilities });
     }).toThrowErrorMatchingInlineSnapshot(
-      `"error validating connector type config: error validation webhook action config: unable to parse url: TypeError: Invalid URL: example.com/do-something"`
+      `[Error: error validating connector type config: error validation webhook action config: unable to parse url: TypeError: Invalid URL: example.com/do-something]`
     );
   });
 
@@ -288,8 +288,8 @@ describe('config validation', () => {
     expect(() => {
       validateConfig(connectorType, config, { configurationUtilities });
     }).toThrowErrorMatchingInlineSnapshot(`
-      "error validating connector type config: ✖ Invalid input: expected record, received string
-        → at headers"
+      [Error: error validating connector type config: ✖ Invalid input: expected record, received string
+        → at headers]
     `);
   });
 
@@ -331,7 +331,7 @@ describe('config validation', () => {
     expect(() => {
       validateConfig(connectorType, config, { configurationUtilities: configUtils });
     }).toThrowErrorMatchingInlineSnapshot(
-      `"error validating connector type config: error validation webhook action config: target url is not present in allowedHosts"`
+      `[Error: error validating connector type config: error validation webhook action config: target url is not present in allowedHosts]`
     );
   });
 
@@ -349,7 +349,7 @@ describe('config validation', () => {
     expect(() => {
       validateConfig(connectorType, config, { configurationUtilities });
     }).toThrowErrorMatchingInlineSnapshot(
-      `"error validating connector type config: error validation webhook action config: certType \\"ssl-pfx\\" is disabled"`
+      `[Error: error validating connector type config: error validation webhook action config: certType "ssl-pfx" is disabled]`
     );
   });
 
@@ -366,7 +366,7 @@ describe('config validation', () => {
       expect(() => {
         validateConfig(connectorType, config, { configurationUtilities });
       }).toThrowErrorMatchingInlineSnapshot(
-        `"error validating connector type config: error validation webhook action config: OAuth2 password grant authentication is not supported"`
+        `[Error: error validating connector type config: error validation webhook action config: OAuth2 password grant authentication is not supported]`
       );
     });
   });
@@ -384,7 +384,7 @@ describe('config validation', () => {
       expect(() => {
         validateConfig(connectorType, config, { configurationUtilities });
       }).toThrowErrorMatchingInlineSnapshot(
-        `"error validating connector type config: error validation webhook action config: missing Access Token URL (accessTokenUrl), Client ID (clientId) fields"`
+        `[Error: error validating connector type config: error validation webhook action config: missing Access Token URL (accessTokenUrl), Client ID (clientId) fields]`
       );
     });
 
@@ -413,7 +413,7 @@ describe('config validation', () => {
       expect(() => {
         validateConfig(connectorType, config, { configurationUtilities: configUtils });
       }).toThrowErrorMatchingInlineSnapshot(
-        `"error validating connector type config: error validation webhook action config: target url \\"http://token.not.in.allowlist/oauth\\" is not added to the Kibana config xpack.actions.allowedHosts"`
+        `[Error: error validating connector type config: error validation webhook action config: target url "http://token.not.in.allowlist/oauth" is not added to the Kibana config xpack.actions.allowedHosts]`
       );
     });
 
@@ -454,7 +454,7 @@ describe('config validation', () => {
       expect(() => {
         validateConfig(connectorType, config, { configurationUtilities });
       }).toThrowErrorMatchingInlineSnapshot(
-        `"error validating connector type config: error validation webhook action config: additionalFields must be a non-empty JSON object."`
+        `[Error: error validating connector type config: error validation webhook action config: additionalFields must be a non-empty JSON object.]`
       );
     });
 
@@ -472,7 +472,7 @@ describe('config validation', () => {
       expect(() => {
         validateConfig(connectorType, config, { configurationUtilities });
       }).toThrowErrorMatchingInlineSnapshot(
-        `"error validating connector type config: error validation webhook action config: additionalFields must be a non-empty JSON object."`
+        `[Error: error validating connector type config: error validation webhook action config: additionalFields must be a non-empty JSON object.]`
       );
     });
 
@@ -490,7 +490,7 @@ describe('config validation', () => {
       expect(() => {
         validateConfig(connectorType, config, { configurationUtilities });
       }).toThrowErrorMatchingInlineSnapshot(
-        `"error validating connector type config: error validation webhook action config: additionalFields must be a non-empty JSON object."`
+        `[Error: error validating connector type config: error validation webhook action config: additionalFields must be a non-empty JSON object.]`
       );
     });
 
@@ -508,7 +508,7 @@ describe('config validation', () => {
       expect(() => {
         validateConfig(connectorType, config, { configurationUtilities });
       }).toThrowErrorMatchingInlineSnapshot(
-        `"error validating connector type config: error validation webhook action config: additionalFields must be a non-empty JSON object."`
+        `[Error: error validating connector type config: error validation webhook action config: additionalFields must be a non-empty JSON object.]`
       );
     });
   });

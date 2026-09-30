@@ -788,22 +788,28 @@ describe('SAMLAuthenticationProvider', () => {
         });
       });
 
-      for (const [description, response] of [
+      // Build the responses lazily: a rejected promise created during collection is reported by
+      // Vitest as an unhandled rejection before a test awaits it.
+      for (const [description, getResponse] of [
         [
           'current session is valid',
-          Promise.resolve(
-            securityMock.createApiResponse({
-              body: mockAuthenticatedUser({
-                authentication_provider: { type: 'saml', name: 'saml' },
-              }),
-            })
-          ),
+          () =>
+            Promise.resolve(
+              securityMock.createApiResponse({
+                body: mockAuthenticatedUser({
+                  authentication_provider: { type: 'saml', name: 'saml' },
+                }),
+              })
+            ),
         ],
         [
           'current session is expired',
-          Promise.reject(
-            new errors.ResponseError(securityMock.createApiResponse({ statusCode: 401, body: {} }))
-          ),
+          () =>
+            Promise.reject(
+              new errors.ResponseError(
+                securityMock.createApiResponse({ statusCode: 401, body: {} })
+              )
+            ),
         ],
       ] as Array<[string, any]>) {
         it(`redirects to the home page if ${description}.`, async () => {
@@ -819,7 +825,7 @@ describe('SAMLAuthenticationProvider', () => {
 
           // The first call is made using tokens from existing session.
           mockScopedClusterClient.asCurrentUser.security.authenticate.mockImplementationOnce(
-            () => response
+            getResponse
           );
           mockOptions.client.asInternalUser.transport.request.mockResolvedValue({
             username: 'user',
@@ -878,7 +884,7 @@ describe('SAMLAuthenticationProvider', () => {
 
           // The first call is made using tokens from existing session.
           mockScopedClusterClient.asCurrentUser.security.authenticate.mockImplementationOnce(
-            () => response
+            getResponse
           );
           mockOptions.client.asInternalUser.transport.request.mockResolvedValue({
             username: 'user',

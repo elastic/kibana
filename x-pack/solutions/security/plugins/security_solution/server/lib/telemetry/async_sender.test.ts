@@ -58,7 +58,7 @@ describe('AsyncTelemetryEventsSender', () => {
 
   beforeEach(() => {
     service = new AsyncTelemetryEventsSender(loggingSystemMock.createLogger());
-    vi.useFakeTimers({ advanceTimers: true });
+    vi.useFakeTimers({ shouldAdvanceTime: true });
     mockedAxiosPost.mockClear();
     telemetryUsageCounter.incrementCounter.mockClear();
     mockedAxiosPost.mockResolvedValue({ status: 201 });

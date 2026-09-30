@@ -13,6 +13,7 @@ import { loggerMock } from '@kbn/logging-mocks';
 
 import type { AIAssistantKnowledgeBaseDataClient } from '../../../ai_assistant_data_clients/knowledge_base';
 import { appContextService } from '../../../services/app_context';
+import type * as AppContextModule from '../../../services/app_context';
 import { getDefendInsightsDocsCount, loadDefendInsights } from './defend_insights_loader';
 
 vi.mock('../../../services/app_context');
@@ -21,14 +22,14 @@ const mockKbDataClient = {
   addKnowledgeBaseDocuments: vi.fn().mockResolvedValue([{ foo: 'bar' }]),
 } as unknown as AIAssistantKnowledgeBaseDataClient;
 
+const originalAppContext = await vi.importActual<typeof AppContextModule>(
+  '../../../services/app_context'
+);
 const mockedAppContextService = appContextService as Mocked<typeof appContextService>;
-mockedAppContextService.getRegisteredFeatures.mockImplementation(async () => {
-  const original = await vi.importActual('../../../services/app_context');
-  return {
-    ...original.appContextService.getRegisteredFeatures(),
-    defendInsightsPolicyResponseFailure: true,
-  };
-});
+mockedAppContextService.getRegisteredFeatures.mockImplementation(() => ({
+  ...originalAppContext.appContextService.getRegisteredFeatures(),
+  defendInsightsPolicyResponseFailure: true,
+}));
 
 describe('defend_insights_loader', () => {
   beforeEach(() => {

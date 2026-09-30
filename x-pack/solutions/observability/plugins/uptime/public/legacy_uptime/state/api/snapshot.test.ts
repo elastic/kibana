@@ -70,6 +70,9 @@ describe('snapshot API', () => {
       dateRangeEnd: 'now',
     });
 
-    expect(result).toEqual(new Error('There was an error fetching your data.'));
+    expect(result).toBeInstanceOf(Error);
+    expect(result).toEqual(
+      expect.objectContaining({ message: 'There was an error fetching your data.' })
+    );
   });
 });

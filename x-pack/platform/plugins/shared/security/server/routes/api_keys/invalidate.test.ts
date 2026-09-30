@@ -85,19 +85,19 @@ describe('Invalidate API keys', () => {
       expect(() =>
         requestBodySchema.validate({}, {}, 'request body')
       ).toThrowErrorMatchingInlineSnapshot(
-        `"[request body.apiKeys]: expected value of type [array] but got [undefined]"`
+        `[Error: [request body.apiKeys]: expected value of type [array] but got [undefined]]`
       );
 
       expect(() =>
         requestBodySchema.validate({ apiKeys: [] }, {}, 'request body')
       ).toThrowErrorMatchingInlineSnapshot(
-        `"[request body.isAdmin]: expected value of type [boolean] but got [undefined]"`
+        `[Error: [request body.isAdmin]: expected value of type [boolean] but got [undefined]]`
       );
 
       expect(() =>
         requestBodySchema.validate({ apiKeys: {}, isAdmin: true }, {}, 'request body')
       ).toThrowErrorMatchingInlineSnapshot(
-        `"[request body.apiKeys]: expected value of type [array] but got [Object]"`
+        `[Error: [request body.apiKeys]: expected value of type [array] but got [Object]]`
       );
 
       expect(() =>
@@ -110,7 +110,7 @@ describe('Invalidate API keys', () => {
           'request body'
         )
       ).toThrowErrorMatchingInlineSnapshot(
-        `"[request body.apiKeys.0.unknown]: Additional properties are not allowed ('unknown' was unexpected)"`
+        `[Error: [request body.apiKeys.0.unknown]: Additional properties are not allowed ('unknown' was unexpected)]`
       );
     });
   });

@@ -361,7 +361,7 @@ describe('sendEmailGraphApi', () => {
         connectorUsageCollector
       )
     ).rejects.toThrowErrorMatchingInlineSnapshot(
-      '"{\\"error\\":{\\"code\\":\\"ErrorMimeContentInvalidBase64String\\",\\"message\\":\\"Invalid base64 string for MIME content.\\"}}"'
+      `[Error: {"error":{"code":"ErrorMimeContentInvalidBase64String","message":"Invalid base64 string for MIME content."}}]`
     );
 
     expect(logger.warn.mock.calls[0]).toMatchInlineSnapshot(`

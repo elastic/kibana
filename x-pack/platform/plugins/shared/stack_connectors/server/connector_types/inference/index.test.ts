@@ -65,7 +65,7 @@ describe('AI Connector', () => {
       expect(() => {
         configValidator(config, { configurationUtilities });
       }).toThrowErrorMatchingInlineSnapshot(
-        `"Error configuring Inference API action: Error: Task type is not supported by Inference Endpoint."`
+        `[Error: Error configuring Inference API action: Error: Task type is not supported by Inference Endpoint.]`
       );
     });
 
@@ -80,7 +80,7 @@ describe('AI Connector', () => {
       expect(() => {
         configValidator(config, { configurationUtilities });
       }).toThrowErrorMatchingInlineSnapshot(
-        `"Error configuring Inference API action: Error: API Provider is not supported by Inference Endpoint."`
+        `[Error: Error configuring Inference API action: Error: API Provider is not supported by Inference Endpoint.]`
       );
     });
   });

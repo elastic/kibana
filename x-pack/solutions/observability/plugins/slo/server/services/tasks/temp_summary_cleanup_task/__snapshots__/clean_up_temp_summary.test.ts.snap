@@ -39,15 +39,7 @@ exports[`CleanUpTempSummary > deletes the duplicated temp documents 1`] = `
         "wait_for_completion": false,
       },
       Object {
-        "signal": AbortSignal {
-          Symbol(kEvents): undefined,
-          Symbol(events.maxEventTargetListeners): 0,
-          Symbol(events.maxEventTargetListenersWarned): false,
-          Symbol(kHandlers): undefined,
-          Symbol(kAborted): false,
-          Symbol(kReason): undefined,
-          Symbol(kComposite): false,
-        },
+        "signal": AbortSignal {},
       },
     ],
     Array [
@@ -86,15 +78,7 @@ exports[`CleanUpTempSummary > deletes the duplicated temp documents 1`] = `
         "wait_for_completion": false,
       },
       Object {
-        "signal": AbortSignal {
-          Symbol(kEvents): undefined,
-          Symbol(events.maxEventTargetListeners): 0,
-          Symbol(events.maxEventTargetListenersWarned): false,
-          Symbol(kHandlers): undefined,
-          Symbol(kAborted): false,
-          Symbol(kReason): undefined,
-          Symbol(kComposite): false,
-        },
+        "signal": AbortSignal {},
       },
     ],
   ],

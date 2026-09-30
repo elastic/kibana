@@ -44,7 +44,7 @@ const paramsWithResponseActions = (responseActions?: RuleResponseAction[]): Rule
 describe('createSecurityRuleParamsAuthorizer', () => {
   let endpointAppContextService: ReturnType<typeof createMockEndpointAppContextService>;
   const request = httpServerMock.createKibanaRequest();
-  const getRulesAuthz = vi.fn<Promise<DetectionRulesAuthz>, [unknown]>();
+  const getRulesAuthz = vi.fn<(arg: unknown) => Promise<DetectionRulesAuthz>>();
 
   const buildAuthorizer = (
     overrides: Partial<Parameters<typeof createSecurityRuleParamsAuthorizer>[0]> = {}

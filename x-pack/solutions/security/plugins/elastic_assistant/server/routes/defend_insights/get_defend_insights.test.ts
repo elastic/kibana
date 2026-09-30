@@ -20,11 +20,13 @@ import { getDefendInsightsRequest } from '../../__mocks__/request';
 import type { ElasticAssistantRequestHandlerContextMock } from '../../__mocks__/request_context';
 import { requestContextMock } from '../../__mocks__/request_context';
 import { serverMock } from '../../__mocks__/server';
-import { updateDefendInsightsLastViewedAt } from './helpers';
+import { runExternalCallbacks, updateDefendInsightsLastViewedAt } from './helpers';
 import { getDefendInsightsRoute } from './get_defend_insights';
 import { licensingMock } from '@kbn/licensing-plugin/public/mocks';
 
 vi.mock('./helpers');
+
+const runExternalCallbacksMock = vi.mocked(runExternalCallbacks);
 
 describe('getDefendInsightsRoute', () => {
   let server: ReturnType<typeof serverMock.create>;
@@ -181,8 +183,7 @@ describe('getDefendInsightsRoute', () => {
   });
   describe('runExternalCallbacks', () => {
     it('should call runExternalCallbacks if defendInsights are returned', async () => {
-      const runExternalCallbacks = (await vi.importMock('./helpers')).runExternalCallbacks as Mock;
-      runExternalCallbacks.mockResolvedValue(undefined);
+      runExternalCallbacksMock.mockResolvedValue(undefined);
 
       const response = await server.inject(
         getDefendInsightsRequest({ connector_id: 'connector-id1' }),
@@ -195,7 +196,7 @@ describe('getDefendInsightsRoute', () => {
         new Set(mockCurrentInsights.flatMap((insight: any) => insight.endpointIds))
       );
 
-      expect(runExternalCallbacks).toHaveBeenCalledWith(
+      expect(runExternalCallbacksMock).toHaveBeenCalledWith(
         expect.any(String), // CallbackIds.DefendInsightsPostFetch
         expect.anything(), // request
         expectedAgentIds
@@ -203,8 +204,7 @@ describe('getDefendInsightsRoute', () => {
     });
 
     it('should handle error thrown by runExternalCallbacks', async () => {
-      const runExternalCallbacks = (await vi.importMock('./helpers')).runExternalCallbacks as Mock;
-      runExternalCallbacks.mockRejectedValueOnce(new Error('External callback failed'));
+      runExternalCallbacksMock.mockRejectedValueOnce(new Error('External callback failed'));
 
       const response = await server.inject(
         getDefendInsightsRequest({ connector_id: 'connector-id1' }),
@@ -222,8 +222,6 @@ describe('getDefendInsightsRoute', () => {
     });
 
     it('should not call runExternalCallbacks if no defendInsights are returned', async () => {
-      const runExternalCallbacks = (await vi.importMock('./helpers')).runExternalCallbacks as Mock;
-
       mockDataClient.findDefendInsightsByParams = vi.fn().mockResolvedValueOnce([]);
       (updateDefendInsightsLastViewedAt as Mock).mockResolvedValueOnce([]);
 
@@ -233,7 +231,7 @@ describe('getDefendInsightsRoute', () => {
       );
 
       expect(response.status).toEqual(200);
-      expect(runExternalCallbacks).not.toHaveBeenCalled();
+      expect(runExternalCallbacksMock).not.toHaveBeenCalled();
     });
   });
 });

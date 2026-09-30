@@ -43,7 +43,7 @@ describe('getBulkCreateOrUpdatePayloadSchema', () => {
     expect(() =>
       bulkCreateOrUpdatePayloadSchema.validate(payload)
     ).toThrowErrorMatchingInlineSnapshot(
-      `"[roles]: expected value of type [object] but got [undefined]"`
+      `[Error: [roles]: expected value of type [object] but got [undefined]]`
     );
   });
 
@@ -57,7 +57,7 @@ describe('getBulkCreateOrUpdatePayloadSchema', () => {
     expect(() =>
       bulkCreateOrUpdatePayloadSchema.validate(payload)
     ).toThrowErrorMatchingInlineSnapshot(
-      `"[roles.role1]: could not parse object value from json input"`
+      `[Error: [roles.role1]: could not parse object value from json input]`
     );
   });
 });

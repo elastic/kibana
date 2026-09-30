@@ -13,7 +13,7 @@ import { useMetricsCharts } from './use_metrics_charts';
 describe('useMetricsCharts', () => {
   it('should return an array of charts with breakdown config', async () => {
     const { result } = renderHook(() => useMetricsCharts({ indexPattern: 'metrics-*' }));
-    await waitFor(() => new Promise((resolve) => resolve(null)));
+    await waitFor(() => expect(result.current).not.toHaveLength(0));
 
     expect(result.current).toHaveLength(11);
 
@@ -28,7 +28,7 @@ describe('useMetricsCharts', () => {
 
   it('should return an array of charts with correct order', async () => {
     const { result } = renderHook(() => useMetricsCharts({ indexPattern: 'metrics-*' }));
-    await waitFor(() => new Promise((resolve) => resolve(null)));
+    await waitFor(() => expect(result.current).not.toHaveLength(0));
 
     const expectedOrder = [
       'cpuUsage',

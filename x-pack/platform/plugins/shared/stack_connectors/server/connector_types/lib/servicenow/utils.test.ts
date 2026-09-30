@@ -524,7 +524,7 @@ describe('utils', () => {
       await expect(() =>
         mockRequestCallback({ headers: {} })
       ).rejects.toThrowErrorMatchingInlineSnapshot(
-        `"Unable to retrieve access token for connectorId: 123"`
+        `[Error: Unable to retrieve access token for connectorId: 123]`
       );
 
       expect(getOAuthJwtAccessToken as Mock).toHaveBeenCalledWith({

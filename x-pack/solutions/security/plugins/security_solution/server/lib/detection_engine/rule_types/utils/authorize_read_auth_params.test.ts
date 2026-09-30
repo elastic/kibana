@@ -94,7 +94,7 @@ const FIELDS: FieldFixture[] = [
 describe('createSecurityRuleParamsAuthorizer read-auth editable params', () => {
   let endpointAppContextService: ReturnType<typeof createMockEndpointAppContextService>;
   const request = httpServerMock.createKibanaRequest();
-  const getRulesAuthz = vi.fn<Promise<DetectionRulesAuthz>, [unknown]>();
+  const getRulesAuthz = vi.fn<(arg: unknown) => Promise<DetectionRulesAuthz>>();
 
   const buildAuthorizer = () =>
     createSecurityRuleParamsAuthorizer({ endpointAppContextService, getRulesAuthz });

@@ -210,13 +210,13 @@ describe('PUT role', () => {
       expect(() =>
         requestParamsSchema.validate({}, {}, 'request params')
       ).toThrowErrorMatchingInlineSnapshot(
-        `"[request params.name]: expected value of type [string] but got [undefined]"`
+        `[Error: [request params.name]: expected value of type [string] but got [undefined]]`
       );
 
       expect(() =>
         requestParamsSchema.validate({ name: '' }, {}, 'request params')
       ).toThrowErrorMatchingInlineSnapshot(
-        `"[request params.name]: value has length [0] but it must have a minimum length of [1]."`
+        `[Error: [request params.name]: value has length [0] but it must have a minimum length of [1].]`
       );
     });
 
@@ -224,7 +224,7 @@ describe('PUT role', () => {
       expect(() =>
         requestParamsSchema.validate({ name: 'a'.repeat(1025) }, {}, 'request params')
       ).toThrowErrorMatchingInlineSnapshot(
-        `"[request params.name]: value has length [1025] but it must have a maximum length of [1024]."`
+        `[Error: [request params.name]: value has length [1025] but it must have a maximum length of [1024].]`
       );
     });
   });

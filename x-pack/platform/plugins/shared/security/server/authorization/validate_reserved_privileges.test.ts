@@ -133,7 +133,7 @@ it('prevents a feature from specifying the same reserved privilege id', () => {
   });
 
   expect(() => validateReservedPrivileges([feature1])).toThrowErrorMatchingInlineSnapshot(
-    `"Duplicate reserved privilege id detected: reserved. This is not allowed."`
+    `[Error: Duplicate reserved privilege id detected: reserved. This is not allowed.]`
   );
 });
 
@@ -185,6 +185,6 @@ it('prevents features from sharing a reserved privilege id', () => {
   });
 
   expect(() => validateReservedPrivileges([feature1, feature2])).toThrowErrorMatchingInlineSnapshot(
-    `"Duplicate reserved privilege id detected: reserved. This is not allowed."`
+    `[Error: Duplicate reserved privilege id detected: reserved. This is not allowed.]`
   );
 });

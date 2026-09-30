@@ -319,17 +319,17 @@ describe('config schema', () => {
 
       expect(() => ConfigSchema.validate({ public: { protocol: 'ftp' } }))
         .toThrowErrorMatchingInlineSnapshot(`
-        "[public.protocol]: types that failed validation:
-        - [public.protocol.0]: expected value to equal [http]
-        - [public.protocol.1]: expected value to equal [https]"
-      `);
+          [Error: [public.protocol]: types that failed validation:
+          - [public.protocol.0]: expected value to equal [http]
+          - [public.protocol.1]: expected value to equal [https]]
+        `);
 
       expect(() => ConfigSchema.validate({ public: { protocol: 'some-protocol' } }))
         .toThrowErrorMatchingInlineSnapshot(`
-        "[public.protocol]: types that failed validation:
-        - [public.protocol.0]: expected value to equal [http]
-        - [public.protocol.1]: expected value to equal [https]"
-      `);
+          [Error: [public.protocol]: types that failed validation:
+          - [public.protocol.0]: expected value to equal [http]
+          - [public.protocol.1]: expected value to equal [https]]
+        `);
     });
 
     it('properly validates `hostname`', async () => {
@@ -356,13 +356,13 @@ describe('config schema', () => {
       expect(() =>
         ConfigSchema.validate({ public: { hostname: 'http://elastic.co' } })
       ).toThrowErrorMatchingInlineSnapshot(
-        `"[public.hostname]: value must be a valid hostname (see RFC 1123)."`
+        `[Error: [public.hostname]: value must be a valid hostname (see RFC 1123).]`
       );
 
       expect(() =>
         ConfigSchema.validate({ public: { hostname: 'localhost:5601' } })
       ).toThrowErrorMatchingInlineSnapshot(
-        `"[public.hostname]: value must be a valid hostname (see RFC 1123)."`
+        `[Error: [public.hostname]: value must be a valid hostname (see RFC 1123).]`
       );
     });
 
@@ -388,19 +388,19 @@ describe('config schema', () => {
       expect(() =>
         ConfigSchema.validate({ public: { port: -1 } })
       ).toThrowErrorMatchingInlineSnapshot(
-        `"[public.port]: Value must be equal to or greater than [0]."`
+        `[Error: [public.port]: Value must be equal to or greater than [0].]`
       );
 
       expect(() =>
         ConfigSchema.validate({ public: { port: 65536 } })
       ).toThrowErrorMatchingInlineSnapshot(
-        `"[public.port]: Value must be equal to or lower than [65535]."`
+        `[Error: [public.port]: Value must be equal to or lower than [65535].]`
       );
 
       expect(() =>
         ConfigSchema.validate({ public: { port: '56x1' } })
       ).toThrowErrorMatchingInlineSnapshot(
-        `"[public.port]: expected value of type [number] but got [string]"`
+        `[Error: [public.port]: expected value of type [number] but got [string]]`
       );
     });
   });
@@ -1178,9 +1178,9 @@ describe('config schema', () => {
             authc: { providers: { anonymous: { anonymous1: { order: 0 } } } },
           })
         ).toThrowErrorMatchingInlineSnapshot(`
-          "[authc.providers]: types that failed validation:
+          [Error: [authc.providers]: types that failed validation:
           - [authc.providers.0]: expected value of type [array] but got [Object]
-          - [authc.providers.1.anonymous.anonymous1.credentials]: expected at least one defined value but got [undefined]"
+          - [authc.providers.1.anonymous.anonymous1.credentials]: expected at least one defined value but got [undefined]]
         `);
       });
 
@@ -1194,12 +1194,12 @@ describe('config schema', () => {
             },
           })
         ).toThrowErrorMatchingInlineSnapshot(`
-          "[authc.providers]: types that failed validation:
+          [Error: [authc.providers]: types that failed validation:
           - [authc.providers.0]: expected value of type [array] but got [Object]
           - [authc.providers.1.anonymous.anonymous1.credentials]: types that failed validation:
            - [credentials.0]: expected value to equal [elasticsearch_anonymous_user]
            - [credentials.1.password]: expected value of type [string] but got [undefined]
-           - [credentials.2.apiKey]: expected at least one defined value but got [undefined]"
+           - [credentials.2.apiKey]: expected at least one defined value but got [undefined]]
         `);
 
         expect(() =>
@@ -1211,12 +1211,12 @@ describe('config schema', () => {
             },
           })
         ).toThrowErrorMatchingInlineSnapshot(`
-          "[authc.providers]: types that failed validation:
+          [Error: [authc.providers]: types that failed validation:
           - [authc.providers.0]: expected value of type [array] but got [Object]
           - [authc.providers.1.anonymous.anonymous1.credentials]: types that failed validation:
            - [credentials.0]: expected value to equal [elasticsearch_anonymous_user]
            - [credentials.1.username]: expected value of type [string] but got [undefined]
-           - [credentials.2.apiKey]: expected at least one defined value but got [undefined]"
+           - [credentials.2.apiKey]: expected at least one defined value but got [undefined]]
         `);
       });
 
@@ -1267,14 +1267,14 @@ describe('config schema', () => {
             },
           })
         ).toThrowErrorMatchingInlineSnapshot(`
-          "[authc.providers]: types that failed validation:
+          [Error: [authc.providers]: types that failed validation:
           - [authc.providers.0]: expected value of type [array] but got [Object]
           - [authc.providers.1.anonymous.anonymous1.credentials]: types that failed validation:
            - [credentials.0]: expected value to equal [elasticsearch_anonymous_user]
            - [credentials.1.username]: expected value of type [string] but got [undefined]
            - [credentials.2.apiKey]: types that failed validation:
             - [credentials.apiKey.0.key]: expected value of type [string] but got [undefined]
-            - [credentials.apiKey.1]: expected value of type [string] but got [Object]"
+            - [credentials.apiKey.1]: expected value of type [string] but got [Object]]
         `);
 
         expect(() =>
@@ -1288,14 +1288,14 @@ describe('config schema', () => {
             },
           })
         ).toThrowErrorMatchingInlineSnapshot(`
-          "[authc.providers]: types that failed validation:
+          [Error: [authc.providers]: types that failed validation:
           - [authc.providers.0]: expected value of type [array] but got [Object]
           - [authc.providers.1.anonymous.anonymous1.credentials]: types that failed validation:
            - [credentials.0]: expected value to equal [elasticsearch_anonymous_user]
            - [credentials.1.username]: expected value of type [string] but got [undefined]
            - [credentials.2.apiKey]: types that failed validation:
             - [credentials.apiKey.0.id]: expected value of type [string] but got [undefined]
-            - [credentials.apiKey.1]: expected value of type [string] but got [Object]"
+            - [credentials.apiKey.1]: expected value of type [string] but got [Object]]
         `);
       });
 
@@ -1670,7 +1670,7 @@ describe('config schema', () => {
           { serverless: false }
         )
       ).toThrowErrorMatchingInlineSnapshot(
-        `"[authc.http.jwt]: a value wasn't expected to be present"`
+        `[Error: [authc.http.jwt]: a value wasn't expected to be present]`
       );
     });
 
@@ -1696,7 +1696,7 @@ describe('config schema', () => {
           },
           { serverless: false }
         )
-      ).toThrowErrorMatchingInlineSnapshot(`"[ui]: a value wasn't expected to be present"`);
+      ).toThrowErrorMatchingInlineSnapshot(`[Error: [ui]: a value wasn't expected to be present]`);
     });
 
     it('should allow xpack.security.ui.* to be configured inside of the serverless context', () => {
@@ -1729,7 +1729,7 @@ describe('config schema', () => {
           { serverless: false }
         )
       ).toThrowErrorMatchingInlineSnapshot(
-        `"[roleManagementEnabled]: a value wasn't expected to be present"`
+        `[Error: [roleManagementEnabled]: a value wasn't expected to be present]`
       );
     });
 

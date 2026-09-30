@@ -157,7 +157,7 @@ describe('Slack API service', () => {
           configurationUtilities,
           connectorUsageCollector
         )
-      ).toThrowErrorMatchingInlineSnapshot(`"[Action][Slack API]: Wrong configuration."`);
+      ).toThrowErrorMatchingInlineSnapshot(`[Error: [Action][Slack API]: Wrong configuration.]`);
     });
   });
 

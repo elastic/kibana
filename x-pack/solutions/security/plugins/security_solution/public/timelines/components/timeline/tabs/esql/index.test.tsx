@@ -54,7 +54,7 @@ const renderEsqlTab = async ({
   setCurrentTabAppState(discoverState.stateContainer, currentTabAppState);
 
   const startServices = createStartServicesMock();
-  const DiscoverContainer = vi.fn<React.ReactElement, [DiscoverContainerProps]>(() => (
+  const DiscoverContainer = vi.fn<(props: DiscoverContainerProps) => React.ReactElement>(() => (
     <div data-test-subj="discover-container" />
   ));
   startServices.discover = { ...startServices.discover, DiscoverContainer };

@@ -23,7 +23,7 @@ describe(`#useRbacForRequest`, () => {
   test(`throws an Error if request isn't specified`, async () => {
     const mode = authorizationModeFactory(mockLicense);
     expect(() => mode.useRbacForRequest(undefined as any)).toThrowErrorMatchingInlineSnapshot(
-      `"Invalid value used as weak map key"`
+      `[TypeError: Invalid value used as weak map key]`
     );
   });
 
@@ -31,7 +31,7 @@ describe(`#useRbacForRequest`, () => {
     const mode = authorizationModeFactory(mockLicense);
 
     expect(() => mode.useRbacForRequest(null as any)).toThrowErrorMatchingInlineSnapshot(
-      `"Invalid value used as weak map key"`
+      `[TypeError: Invalid value used as weak map key]`
     );
   });
 

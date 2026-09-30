@@ -17,13 +17,14 @@ import { CreateUserPage } from './create_user_page';
 import { securityMock } from '../../../mocks';
 import { Providers } from '../users_management_app';
 
-vi.mock('@elastic/eui/lib/services/accessibility/html_id_generator', () => {
-  const mocked = {
-    htmlIdGenerator: () => () => `id-${Math.random()}`,
-    useGeneratedHtmlId: () => `id-${Math.random()}`,
-  };
-  return { ...mocked, default: mocked };
-});
+// EUI loads natively (not through Vite), so `vi.mock` can't replace the id generator its form rows
+// use and every field would share the static test-env id. Patch the CommonJS module EUI requires
+// instead, so labels stay associated with their own inputs.
+const euiHtmlIdGenerator = require('@elastic/eui/test-env/services/accessibility/html_id_generator');
+vi.spyOn(euiHtmlIdGenerator, 'htmlIdGenerator').mockImplementation(
+  () => () => `id-${Math.random()}`
+);
+vi.spyOn(euiHtmlIdGenerator, 'useGeneratedHtmlId').mockImplementation(() => `id-${Math.random()}`);
 
 describe('CreateUserPage', () => {
   vi.setConfig({ testTimeout: 15_000 });

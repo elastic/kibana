@@ -34,14 +34,14 @@ const mockOriginRouteState: RouteState = {
   originSearch: '?kuery=host.name:%20foo',
 };
 
-const mockUseHistory = vi.fn<MockHistory, []>(() => ({
+const mockUseHistory = vi.fn<() => MockHistory>(() => ({
   goBack: vi.fn(),
   length: 0,
 }));
-const mockUseLocation = vi.fn<MockLocation, []>(() => ({
+const mockUseLocation = vi.fn<() => MockLocation>(() => ({
   state: null,
 }));
-const mockChromeStyle = vi.fn<'classic' | 'project', []>(() => 'classic');
+const mockChromeStyle = vi.fn<() => 'classic' | 'project'>(() => 'classic');
 
 vi.mock('react-router-dom', () => {
   const mocked = {

@@ -60,10 +60,8 @@ describe('Internal Routes', () => {
   };
   let mockTriggerEventsIsEnabled: boolean;
   let mockSearch: Mock;
-  const mockSearchTriggerEventLog = vi.fn<
-    Promise<SearchTriggerEventLogResult>,
-    [TriggerEventLogSearchCall]
-  >();
+  const mockSearchTriggerEventLog =
+    vi.fn<(call: TriggerEventLogSearchCall) => Promise<SearchTriggerEventLogResult>>();
 
   const mockContext = {
     workflows: Promise.resolve({

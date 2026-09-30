@@ -48,6 +48,12 @@ vi.mock('../../../components/side_bar_column', () => {
   return { ...mocked, default: mocked };
 });
 
+// The real hook imports this page's index, so loading it from the hooks mock factory below would
+// evaluate the page before that mock exists (Jest re-entered the factory instead).
+vi.mock('../../../../../hooks/use_alerting_assets', () => ({
+  useAlertingAssets: (...args: unknown[]) => mockUseAlertingAssets(...args),
+}));
+
 vi.mock('../../../../../hooks', async () => {
   const mocked = {
     ...(await vi.importActual('../../../../../hooks')),
@@ -179,9 +185,6 @@ describe('AlertingPage', () => {
   });
 
   const renderComponent = (packageInfo: PackageInfo = basePackageInfo) => {
-    // eslint-disable-next-line
-    const h = { useAuthz: 'x' };
-    console.log('DBG', String(h.useAuthz).slice(0, 80), JSON.stringify(mockUseAuthz()), mockUseAuthz.getMockImplementation?.());
     return render(
       <I18nProvider>
         <MemoryRouter>

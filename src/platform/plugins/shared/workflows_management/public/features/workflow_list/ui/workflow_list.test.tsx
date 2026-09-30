@@ -14,6 +14,7 @@ import { useLocation } from 'react-router-dom';
 import type { Mock } from 'vitest';
 import { vi } from 'vitest';
 import type { WorkflowListDto, WorkflowListItemDto, WorkflowsSearchParams } from '@kbn/workflows';
+import * as workflowsUi from '@kbn/workflows-ui';
 import { createMockWorkflowsCapabilities as mockCreateMockWorkflowsCapabilities } from '@kbn/workflows-ui/mocks';
 import { WorkflowList } from './workflow_list';
 import { PLUGIN_ID } from '../../../../common';
@@ -293,7 +294,7 @@ describe('WorkflowList', () => {
     });
 
     it('shows the read-only empty state when there are no workflows and the user cannot create', async () => {
-      const { useWorkflowsCapabilities } = (await vi.importMock('@kbn/workflows-ui')) as {
+      const { useWorkflowsCapabilities } = workflowsUi as unknown as {
         useWorkflowsCapabilities: Mock;
       };
       useWorkflowsCapabilities.mockReturnValue({

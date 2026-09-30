@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
 import {
   changeHistoryTelemetryEvents,
   ChangeHistoryTelemetryEventTypes,
@@ -22,12 +23,13 @@ describe('TelemetryService', () => {
 
     service.setup({ analytics });
 
-    await new Promise((resolve) => setImmediate(resolve));
-
     const expectedEventCount =
       workflowsTelemetryEvents.length + changeHistoryTelemetryEvents.length;
 
-    expect(analytics.registerEventType).toHaveBeenCalledTimes(expectedEventCount);
+    // Change history events are registered after a dynamic import, which resolves asynchronously.
+    await vi.waitFor(() => {
+      expect(analytics.registerEventType).toHaveBeenCalledTimes(expectedEventCount);
+    });
     expect(analytics.registerEventType).toHaveBeenCalledWith(
       expect.objectContaining({
         eventType: ChangeHistoryTelemetryEventTypes.Opened,

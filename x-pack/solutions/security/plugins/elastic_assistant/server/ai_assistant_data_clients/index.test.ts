@@ -104,7 +104,7 @@ describe('AIAssistantDataClient', () => {
       const query = { query: { bool: { filter: { range: { '@timestamp': { gte: 0 } } } } } };
 
       await expect(reader.search(query)).rejects.toThrowErrorMatchingInlineSnapshot(
-        `"something went wrong!"`
+        `[Error: something went wrong!]`
       );
 
       expect(logger.error).toHaveBeenCalledWith(

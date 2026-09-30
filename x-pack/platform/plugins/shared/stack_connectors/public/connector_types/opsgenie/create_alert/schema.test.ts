@@ -15,26 +15,26 @@ describe('schema', () => {
   describe('decodeCreateAlert', () => {
     it('throws an error when the message field is not present', () => {
       expect(() => decodeCreateAlert({ alias: '123' })).toThrowErrorMatchingInlineSnapshot(
-        `"[message]: expected value of type [string] but got [undefined]"`
+        `[DecodeError: [message]: expected value of type [string] but got [undefined]]`
       );
     });
 
     it('throws an error when the message field is only spaces', () => {
       expect(() => decodeCreateAlert({ message: '  ' })).toThrowErrorMatchingInlineSnapshot(
-        `"[message]: must be populated with a value other than just whitespace"`
+        `[DecodeError: [message]: must be populated with a value other than just whitespace]`
       );
     });
 
     it('throws an error when the message field is an empty string', () => {
       expect(() => decodeCreateAlert({ message: '' })).toThrowErrorMatchingInlineSnapshot(
-        `"[message]: must be populated with a value other than just whitespace"`
+        `[DecodeError: [message]: must be populated with a value other than just whitespace]`
       );
     });
 
     it('throws an error when additional fields are present in the data that are not defined in the schema', () => {
       expect(() =>
         decodeCreateAlert({ invalidField: 'hi', message: 'hi' })
-      ).toThrowErrorMatchingInlineSnapshot(`"invalid keys \\"invalidField\\""`);
+      ).toThrowErrorMatchingInlineSnapshot(`[DecodeError: invalid keys "invalidField"]`);
     });
 
     it('throws an error when additional fields are present in responders with name field than in the schema', () => {
@@ -43,7 +43,7 @@ describe('schema', () => {
           message: 'hi',
           responders: [{ name: 'sam', type: 'team', invalidField: 'scott' }],
         })
-      ).toThrowErrorMatchingInlineSnapshot(`"invalid keys \\"invalidField\\""`);
+      ).toThrowErrorMatchingInlineSnapshot(`[DecodeError: invalid keys "invalidField"]`);
     });
 
     it('throws an error when additional fields are present in responders with id field than in the schema', () => {
@@ -52,7 +52,7 @@ describe('schema', () => {
           message: 'hi',
           responders: [{ id: 'id', type: 'team', invalidField: 'scott' }],
         })
-      ).toThrowErrorMatchingInlineSnapshot(`"invalid keys \\"invalidField\\""`);
+      ).toThrowErrorMatchingInlineSnapshot(`[DecodeError: invalid keys "invalidField"]`);
     });
 
     it('throws an error when additional fields are present in visibleTo with name and type=team', () => {
@@ -61,7 +61,7 @@ describe('schema', () => {
           message: 'hi',
           visibleTo: [{ name: 'sam', type: 'team', invalidField: 'scott' }],
         })
-      ).toThrowErrorMatchingInlineSnapshot(`"invalid keys \\"invalidField\\""`);
+      ).toThrowErrorMatchingInlineSnapshot(`[DecodeError: invalid keys "invalidField"]`);
     });
 
     it('throws an error when additional fields are present in visibleTo with id and type=team', () => {
@@ -70,7 +70,7 @@ describe('schema', () => {
           message: 'hi',
           visibleTo: [{ id: 'id', type: 'team', invalidField: 'scott' }],
         })
-      ).toThrowErrorMatchingInlineSnapshot(`"invalid keys \\"invalidField\\""`);
+      ).toThrowErrorMatchingInlineSnapshot(`[DecodeError: invalid keys "invalidField"]`);
     });
 
     it('throws an error when additional fields are present in visibleTo with id and type=user', () => {
@@ -79,7 +79,7 @@ describe('schema', () => {
           message: 'hi',
           visibleTo: [{ id: 'id', type: 'user', invalidField: 'scott' }],
         })
-      ).toThrowErrorMatchingInlineSnapshot(`"invalid keys \\"invalidField\\""`);
+      ).toThrowErrorMatchingInlineSnapshot(`[DecodeError: invalid keys "invalidField"]`);
     });
 
     it('throws an error when additional fields are present in visibleTo with username and type=user', () => {
@@ -88,7 +88,7 @@ describe('schema', () => {
           message: 'hi',
           visibleTo: [{ username: 'sam', type: 'user', invalidField: 'scott' }],
         })
-      ).toThrowErrorMatchingInlineSnapshot(`"invalid keys \\"invalidField\\""`);
+      ).toThrowErrorMatchingInlineSnapshot(`[DecodeError: invalid keys "invalidField"]`);
     });
 
     it('throws an error when details is a record of string to number', () => {
@@ -97,7 +97,7 @@ describe('schema', () => {
           message: 'hi',
           details: { id: 1 },
         })
-      ).toThrowErrorMatchingInlineSnapshot(`"Invalid value \\"1\\" supplied to \\"details.id\\""`);
+      ).toThrowErrorMatchingInlineSnapshot(`[DecodeError: Invalid value "1" supplied to "details.id"]`);
     });
 
     it.each([

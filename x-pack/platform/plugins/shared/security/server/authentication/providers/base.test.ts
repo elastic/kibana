@@ -112,7 +112,7 @@ describe('BaseAuthenticationProvider', () => {
         expect(() => {
           (user as any).username = 'changed';
         }).toThrowErrorMatchingInlineSnapshot(
-          `"Cannot assign to read only property 'username' of object '#<Object>'"`
+          `[TypeError: Cannot assign to read only property 'username' of object '#<Object>']`
         );
       });
 

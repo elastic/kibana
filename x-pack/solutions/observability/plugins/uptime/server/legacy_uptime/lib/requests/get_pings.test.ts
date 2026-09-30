@@ -413,7 +413,7 @@ describe('getAll', () => {
         dateRange: { from: 'now-1h', to: 'now' },
         excludedLocations: `["fairbanks", 2345]`,
       })
-    ).rejects.toThrowErrorMatchingInlineSnapshot(`"Excluded locations can only be strings"`);
+    ).rejects.toThrowErrorMatchingInlineSnapshot(`[Error: Excluded locations can only be strings]`);
   });
 
   it('adds a filter for monitor status', async () => {

@@ -101,7 +101,9 @@ describe('ruleType Params validate()', () => {
     );
 
     params.esQuery = '{\n  "query":{\n    "match_all" : {}\n  }\n';
-    expect(onValidate()).toThrowErrorMatchingInlineSnapshot(`[Error: [esQuery]: must be valid JSON]`);
+    expect(onValidate()).toThrowErrorMatchingInlineSnapshot(
+      `[Error: [esQuery]: must be valid JSON]`
+    );
 
     params.esQuery = '{\n  "aggs":{\n    "match_all" : {}\n  }\n}';
     expect(onValidate()).toThrowErrorMatchingInlineSnapshot(
@@ -394,7 +396,9 @@ describe('ruleType Params validate()', () => {
 
     it('fails for invalid threshold', async () => {
       params.threshold = [7];
-      expect(onValidate()).toThrowErrorMatchingInlineSnapshot(`[Error: [threshold]: is required to be 0]`);
+      expect(onValidate()).toThrowErrorMatchingInlineSnapshot(
+        `[Error: [threshold]: is required to be 0]`
+      );
     });
 
     it('fails for undefined timeField', async () => {

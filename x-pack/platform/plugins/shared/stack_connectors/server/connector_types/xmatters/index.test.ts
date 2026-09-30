@@ -98,7 +98,7 @@ describe('secrets validation', () => {
     expect(() => {
       validateSecrets(connectorType, secrets, { configurationUtilities });
     }).toThrowErrorMatchingInlineSnapshot(
-      `"error validating connector type secrets: Cannot use user/password for URL authentication. Provide valid secretsUrl or use Basic Authentication."`
+      `[Error: error validating connector type secrets: Cannot use user/password for URL authentication. Provide valid secretsUrl or use Basic Authentication.]`
     );
   });
 
@@ -110,7 +110,7 @@ describe('secrets validation', () => {
     expect(() => {
       validateSecrets(connectorType, secrets, { configurationUtilities });
     }).toThrowErrorMatchingInlineSnapshot(
-      `"error validating connector type secrets: Cannot use user/password for URL authentication. Provide valid secretsUrl or use Basic Authentication."`
+      `[Error: error validating connector type secrets: Cannot use user/password for URL authentication. Provide valid secretsUrl or use Basic Authentication.]`
     );
   });
 
@@ -123,7 +123,7 @@ describe('secrets validation', () => {
     expect(() => {
       validateSecrets(connectorType, secrets, { configurationUtilities });
     }).toThrowErrorMatchingInlineSnapshot(
-      `"error validating connector type secrets: Cannot use user/password for URL authentication. Provide valid secretsUrl or use Basic Authentication."`
+      `[Error: error validating connector type secrets: Cannot use user/password for URL authentication. Provide valid secretsUrl or use Basic Authentication.]`
     );
   });
 
@@ -131,7 +131,7 @@ describe('secrets validation', () => {
     expect(() => {
       validateSecrets(connectorType, { user: 'bob' }, { configurationUtilities });
     }).toThrowErrorMatchingInlineSnapshot(
-      `"error validating connector type secrets: Both user and password must be specified."`
+      `[Error: error validating connector type secrets: Both user and password must be specified.]`
     );
   });
 
@@ -139,7 +139,7 @@ describe('secrets validation', () => {
     expect(() => {
       validateSecrets(connectorType, { password: 'supersecret' }, { configurationUtilities });
     }).toThrowErrorMatchingInlineSnapshot(
-      `"error validating connector type secrets: Both user and password must be specified."`
+      `[Error: error validating connector type secrets: Both user and password must be specified.]`
     );
   });
 
@@ -147,7 +147,7 @@ describe('secrets validation', () => {
     expect(() => {
       validateSecrets(connectorType, {}, { configurationUtilities });
     }).toThrowErrorMatchingInlineSnapshot(
-      `"error validating connector type secrets: Provide either secretsUrl link or user/password to authenticate"`
+      `[Error: error validating connector type secrets: Provide either secretsUrl link or user/password to authenticate]`
     );
   });
 
@@ -158,7 +158,7 @@ describe('secrets validation', () => {
     expect(() => {
       validateSecrets(connectorType, secrets, { configurationUtilities });
     }).toThrowErrorMatchingInlineSnapshot(
-      '"error validating connector type secrets: Invalid secretsUrl: TypeError: Invalid URL: example.com/do-something?apiKey=someKey"'
+      `[Error: error validating connector type secrets: Invalid secretsUrl: TypeError: Invalid URL: example.com/do-something?apiKey=someKey]`
     );
   });
 
@@ -176,7 +176,7 @@ describe('secrets validation', () => {
     expect(() => {
       validateSecrets(connectorType, secrets, { configurationUtilities: configUtils });
     }).toThrowErrorMatchingInlineSnapshot(
-      '"error validating connector type secrets: target url is not present in allowedHosts"'
+      `[Error: error validating connector type secrets: target url is not present in allowedHosts]`
     );
   });
 });
@@ -198,7 +198,7 @@ describe('config validation', () => {
     expect(() => {
       validateConfig(connectorType, config, { configurationUtilities });
     }).toThrowErrorMatchingInlineSnapshot(
-      `"error validating connector type config: Error configuring xMatters action: unable to parse url: Invalid URL: example.com/do-something"`
+      `[Error: error validating connector type config: Error configuring xMatters action: unable to parse url: Invalid URL: example.com/do-something]`
     );
   });
 
@@ -217,7 +217,7 @@ describe('config validation', () => {
     expect(() => {
       validateConfig(connectorType, config, { configurationUtilities: configUtils });
     }).toThrowErrorMatchingInlineSnapshot(
-      `"error validating connector type config: Error configuring xMatters action: target url is not present in allowedHosts"`
+      `[Error: error validating connector type config: Error configuring xMatters action: target url is not present in allowedHosts]`
     );
   });
 
@@ -267,7 +267,7 @@ describe('connector validation', () => {
     expect(() => {
       validateConnector(connectorType, { config, secrets });
     }).toThrowErrorMatchingInlineSnapshot(
-      `"error validating action type connector: Provide valid Username"`
+      `[Error: error validating action type connector: Provide valid Username]`
     );
   });
 
@@ -282,7 +282,7 @@ describe('connector validation', () => {
     expect(() => {
       validateConnector(connectorType, { config, secrets });
     }).toThrowErrorMatchingInlineSnapshot(
-      `"error validating action type connector: Provide valid Password"`
+      `[Error: error validating action type connector: Provide valid Password]`
     );
   });
 
@@ -297,7 +297,7 @@ describe('connector validation', () => {
     expect(() => {
       validateConnector(connectorType, { config, secrets });
     }).toThrowErrorMatchingInlineSnapshot(
-      `"error validating action type connector: Provide valid configUrl"`
+      `[Error: error validating action type connector: Provide valid configUrl]`
     );
   });
 
@@ -313,7 +313,7 @@ describe('connector validation', () => {
     expect(() => {
       validateConnector(connectorType, { config, secrets });
     }).toThrowErrorMatchingInlineSnapshot(
-      `"error validating action type connector: Username and password should not be provided when usesBasic is false"`
+      `[Error: error validating action type connector: Username and password should not be provided when usesBasic is false]`
     );
   });
 
@@ -330,7 +330,7 @@ describe('connector validation', () => {
     expect(() => {
       validateConnector(connectorType, { config, secrets });
     }).toThrowErrorMatchingInlineSnapshot(
-      `"error validating action type connector: secretsUrl should not be provided when usesBasic is true"`
+      `[Error: error validating action type connector: secretsUrl should not be provided when usesBasic is true]`
     );
   });
 
@@ -344,7 +344,7 @@ describe('connector validation', () => {
     expect(() => {
       validateConnector(connectorType, { config, secrets });
     }).toThrowErrorMatchingInlineSnapshot(
-      `"error validating action type connector: secretsUrl should not be provided when usesBasic is true"`
+      `[Error: error validating action type connector: secretsUrl should not be provided when usesBasic is true]`
     );
   });
 
@@ -360,7 +360,7 @@ describe('connector validation', () => {
     expect(() => {
       validateConnector(connectorType, { config, secrets });
     }).toThrowErrorMatchingInlineSnapshot(
-      `"error validating action type connector: Username and password should not be provided when usesBasic is false"`
+      `[Error: error validating action type connector: Username and password should not be provided when usesBasic is false]`
     );
   });
 
@@ -373,7 +373,7 @@ describe('connector validation', () => {
     expect(() => {
       validateConnector(connectorType, { config, secrets });
     }).toThrowErrorMatchingInlineSnapshot(
-      `"error validating action type connector: configUrl should not be provided when usesBasic is false"`
+      `[Error: error validating action type connector: configUrl should not be provided when usesBasic is false]`
     );
   });
 

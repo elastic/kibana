@@ -72,7 +72,7 @@ describe('validateConfig()', () => {
     expect(() => {
       validateConfig(connectorType, { shouldNotBeHere: true }, { configurationUtilities });
     }).toThrowErrorMatchingInlineSnapshot(
-      `"error validating connector type config: ✖ Unrecognized key: \\"shouldNotBeHere\\""`
+      `[Error: error validating connector type config: ✖ Unrecognized key: "shouldNotBeHere"]`
     );
   });
 
@@ -110,7 +110,7 @@ describe('validateConfig()', () => {
         { configurationUtilities: configUtils }
       );
     }).toThrowErrorMatchingInlineSnapshot(
-      `"error validating connector type config: error configuring pagerduty action: target url is not added to allowedHosts"`
+      `[Error: error validating connector type config: error configuring pagerduty action: target url is not added to allowedHosts]`
     );
   });
 });
@@ -127,15 +127,15 @@ describe('validateSecrets()', () => {
     expect(() => {
       validateSecrets(connectorType, { routingKey: false }, { configurationUtilities });
     }).toThrowErrorMatchingInlineSnapshot(`
-      "error validating connector type secrets: ✖ Invalid input: expected string, received boolean
-        → at routingKey"
+      [Error: error validating connector type secrets: ✖ Invalid input: expected string, received boolean
+        → at routingKey]
     `);
 
     expect(() => {
       validateSecrets(connectorType, {}, { configurationUtilities });
     }).toThrowErrorMatchingInlineSnapshot(`
-      "error validating connector type secrets: ✖ Invalid input: expected string, received undefined
-        → at routingKey"
+      [Error: error validating connector type secrets: ✖ Invalid input: expected string, received undefined
+        → at routingKey]
     `);
   });
 });
@@ -162,8 +162,8 @@ describe('validateParams()', () => {
     expect(() => {
       validateParams(connectorType, { eventAction: 'ackynollage' }, { configurationUtilities });
     }).toThrowErrorMatchingInlineSnapshot(`
-      "error validating action params: ✖ Invalid option: expected one of \\"trigger\\"|\\"resolve\\"|\\"acknowledge\\"
-        → at eventAction"
+      [Error: error validating action params: ✖ Invalid option: expected one of "trigger"|"resolve"|"acknowledge"
+        → at eventAction]
     `);
   });
 
@@ -239,7 +239,7 @@ describe('validateParams()', () => {
         { configurationUtilities }
       );
     }).toThrowErrorMatchingInlineSnapshot(
-      `"error validating action params: ✖ error parsing timestamp \\"1963-09-55 90:23:45\\""`
+      `[Error: error validating action params: ✖ error parsing timestamp "1963-09-55 90:23:45"]`
     );
   });
 
@@ -253,7 +253,7 @@ describe('validateParams()', () => {
         { configurationUtilities }
       );
     }).toThrowErrorMatchingInlineSnapshot(
-      `"error validating action params: ✖ DedupKey is required when eventAction is \\"resolve\\""`
+      `[Error: error validating action params: ✖ DedupKey is required when eventAction is "resolve"]`
     );
   });
 });

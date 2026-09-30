@@ -24,7 +24,7 @@ vi.mock('./use_hosts_view');
 vi.mock('../../../../containers/metrics_source');
 vi.mock('../../../../hooks/use_kibana');
 vi.mock('./use_hosts_table_url_state');
-vi.mock('react-use/lib/useAsync', () => vi.fn(() => ({ value: undefined })));
+vi.mock('react-use/lib/useAsync', () => ({ default: vi.fn(() => ({ value: undefined })) }));
 
 const mockUseUnifiedSearchContext = useUnifiedSearchHooks.useUnifiedSearchContext as MockedFunction<
   typeof useUnifiedSearchHooks.useUnifiedSearchContext

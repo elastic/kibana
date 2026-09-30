@@ -32,7 +32,7 @@ describe('validateCommonConfig', () => {
         }
       )
     ).toThrowErrorMatchingInlineSnapshot(
-      `"error configuring connector action: target url is not present in allowedHosts"`
+      `[Error: error configuring connector action: target url is not present in allowedHosts]`
     );
   });
   describe('when isOAuth = true', () => {
@@ -50,7 +50,7 @@ describe('validateCommonConfig', () => {
           { configurationUtilities }
         )
       ).toThrowErrorMatchingInlineSnapshot(
-        `"userIdentifierValue must be provided when isOAuth = true"`
+        `[Error: userIdentifierValue must be provided when isOAuth = true]`
       );
     });
     test('config validation fails when clientId is null', () => {
@@ -66,7 +66,7 @@ describe('validateCommonConfig', () => {
           },
           { configurationUtilities }
         )
-      ).toThrowErrorMatchingInlineSnapshot(`"clientId must be provided when isOAuth = true"`);
+      ).toThrowErrorMatchingInlineSnapshot(`[Error: clientId must be provided when isOAuth = true]`);
     });
     test('config validation fails when jwtKeyId is null', () => {
       expect(() =>
@@ -81,7 +81,7 @@ describe('validateCommonConfig', () => {
           },
           { configurationUtilities }
         )
-      ).toThrowErrorMatchingInlineSnapshot(`"jwtKeyId must be provided when isOAuth = true"`);
+      ).toThrowErrorMatchingInlineSnapshot(`[Error: jwtKeyId must be provided when isOAuth = true]`);
     });
   });
 
@@ -168,7 +168,7 @@ describe('validateCommonSecrets', () => {
         { configurationUtilities }
       )
     ).toThrowErrorMatchingInlineSnapshot(
-      `"Either basic auth or OAuth credentials must be specified"`
+      `[Error: Either basic auth or OAuth credentials must be specified]`
     );
   });
 
@@ -184,7 +184,7 @@ describe('validateCommonSecrets', () => {
         },
         { configurationUtilities }
       )
-    ).toThrowErrorMatchingInlineSnapshot(`"username and password must both be specified"`);
+    ).toThrowErrorMatchingInlineSnapshot(`[Error: username and password must both be specified]`);
   });
 
   test('secrets validation fails when password is defined and username is not', () => {
@@ -199,7 +199,7 @@ describe('validateCommonSecrets', () => {
         },
         { configurationUtilities }
       )
-    ).toThrowErrorMatchingInlineSnapshot(`"username and password must both be specified"`);
+    ).toThrowErrorMatchingInlineSnapshot(`[Error: username and password must both be specified]`);
   });
 
   test('secrets validation fails when clientSecret is defined and privateKey is not', () => {
@@ -214,7 +214,7 @@ describe('validateCommonSecrets', () => {
         },
         { configurationUtilities }
       )
-    ).toThrowErrorMatchingInlineSnapshot(`"clientSecret and privateKey must both be specified"`);
+    ).toThrowErrorMatchingInlineSnapshot(`[Error: clientSecret and privateKey must both be specified]`);
   });
 
   test('secrets validation fails when privateKey is defined and clientSecret is not', () => {
@@ -229,7 +229,7 @@ describe('validateCommonSecrets', () => {
         },
         { configurationUtilities }
       )
-    ).toThrowErrorMatchingInlineSnapshot(`"clientSecret and privateKey must both be specified"`);
+    ).toThrowErrorMatchingInlineSnapshot(`[Error: clientSecret and privateKey must both be specified]`);
   });
 });
 

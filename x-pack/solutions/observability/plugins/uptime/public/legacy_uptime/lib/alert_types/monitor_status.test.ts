@@ -187,34 +187,36 @@ describe('monitor status alert type', () => {
   });
 
   describe('initMonitorStatusAlertType', () => {
-    expect(
-      initMonitorStatusAlertType({
-        store: {
-          dispatch: vi.fn(),
-          getState: vi.fn(),
-          replaceReducer: vi.fn(),
-          subscribe: vi.fn(),
-          [Symbol.observable]: vi.fn(),
-        },
-        // @ts-ignore we don't need to test this functionality here because
-        // it's not used by the code this file tests
-        core: {},
-        // @ts-ignore
-        plugins: {},
-      })
-    ).toMatchInlineSnapshot(`
-      Object {
-        "defaultActionMessage": "Monitor {{context.monitorName}} with url {{{context.monitorUrl}}} from {{context.observerLocation}} {{{context.statusMessage}}} The latest error message is {{{context.latestErrorMessage}}}, checked at {{context.checkedAt}}",
-        "defaultRecoveryMessage": "Alert for monitor {{context.monitorName}} with url {{{context.monitorUrl}}} from {{context.observerLocation}} has recovered",
-        "description": "Alert when a monitor is down or an availability threshold is breached.",
-        "documentationUrl": [Function],
-        "format": [Function],
-        "iconClass": "uptimeApp",
-        "id": "xpack.uptime.alerts.monitorStatus",
-        "requiresAppContext": undefined,
-        "ruleParamsExpression": [Function],
-        "validate": [Function],
-      }
-    `);
+    it('creates the monitor status rule type model', () => {
+      expect(
+        initMonitorStatusAlertType({
+          store: {
+            dispatch: vi.fn(),
+            getState: vi.fn(),
+            replaceReducer: vi.fn(),
+            subscribe: vi.fn(),
+            [Symbol.observable]: vi.fn(),
+          },
+          // @ts-ignore we don't need to test this functionality here because
+          // it's not used by the code this file tests
+          core: {},
+          // @ts-ignore
+          plugins: {},
+        })
+      ).toMatchInlineSnapshot(`
+        Object {
+          "defaultActionMessage": "Monitor {{context.monitorName}} with url {{{context.monitorUrl}}} from {{context.observerLocation}} {{{context.statusMessage}}} The latest error message is {{{context.latestErrorMessage}}}, checked at {{context.checkedAt}}",
+          "defaultRecoveryMessage": "Alert for monitor {{context.monitorName}} with url {{{context.monitorUrl}}} from {{context.observerLocation}} has recovered",
+          "description": "Alert when a monitor is down or an availability threshold is breached.",
+          "documentationUrl": [Function],
+          "format": [Function],
+          "iconClass": "uptimeApp",
+          "id": "xpack.uptime.alerts.monitorStatus",
+          "requiresAppContext": undefined,
+          "ruleParamsExpression": [Function],
+          "validate": [Function],
+        }
+      `);
+    });
   });
 });

@@ -81,8 +81,8 @@ describe('config validation', () => {
     expect(() => {
       validateConfig(connectorType, { index: 666 }, { configurationUtilities });
     }).toThrowErrorMatchingInlineSnapshot(`
-      "error validating connector type config: ✖ Invalid input: expected string, received number
-        → at index"
+      [Error: error validating connector type config: ✖ Invalid input: expected string, received number
+        → at index]
     `);
     delete config.executionTimeField;
 
@@ -93,8 +93,8 @@ describe('config validation', () => {
         { configurationUtilities }
       );
     }).toThrowErrorMatchingInlineSnapshot(`
-      "error validating connector type config: ✖ Invalid input: expected string, received boolean
-        → at executionTimeField"
+      [Error: error validating connector type config: ✖ Invalid input: expected string, received boolean
+        → at executionTimeField]
     `);
 
     delete config.refresh;
@@ -105,8 +105,8 @@ describe('config validation', () => {
         { configurationUtilities }
       );
     }).toThrowErrorMatchingInlineSnapshot(`
-      "error validating connector type config: ✖ Invalid input: expected boolean, received string
-        → at refresh"
+      [Error: error validating connector type config: ✖ Invalid input: expected boolean, received string
+        → at refresh]
     `);
   });
 
@@ -118,9 +118,9 @@ describe('config validation', () => {
     expect(() => {
       validateConfig(connectorType, baseConfig, { configurationUtilities });
     }).toThrowErrorMatchingInlineSnapshot(`
-      "error validating connector type config: ✖ Unrecognized key: \\"indeX\\"
+      [Error: error validating connector type config: ✖ Unrecognized key: "indeX"
       ✖ Invalid input: expected string, received undefined
-        → at index"
+        → at index]
     `);
   });
 
@@ -128,14 +128,14 @@ describe('config validation', () => {
     expect(() => {
       validateParams(connectorType, { documents: [{}], jim: 'bob' }, { configurationUtilities });
     }).toThrowErrorMatchingInlineSnapshot(
-      `"error validating action params: ✖ Unrecognized key: \\"jim\\""`
+      `[Error: error validating action params: ✖ Unrecognized key: "jim"]`
     );
 
     expect(() => {
       validateParams(connectorType, {}, { configurationUtilities });
     }).toThrowErrorMatchingInlineSnapshot(`
-      "error validating action params: ✖ Invalid input: expected array, received undefined
-        → at documents"
+      [Error: error validating action params: ✖ Invalid input: expected array, received undefined
+        → at documents]
     `);
 
     expect(() => {
@@ -586,7 +586,7 @@ describe('execute()', () => {
         AlertHistoryEsIndexConnectorId
       )
     ).toThrowErrorMatchingInlineSnapshot(
-      `"error creating alert history document for preconfigured-alert-history-es-index connector"`
+      `[Error: error creating alert history document for preconfigured-alert-history-es-index connector]`
     );
   });
 

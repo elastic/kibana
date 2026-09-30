@@ -80,11 +80,11 @@ describe('Login view routes', () => {
       });
 
       expect(() => queryValidator.validate({ next: 1 })).toThrowErrorMatchingInlineSnapshot(
-        `"[next]: expected value of type [string] but got [number]"`
+        `[Error: [next]: expected value of type [string] but got [number]]`
       );
 
       expect(() => queryValidator.validate({ msg: 1 })).toThrowErrorMatchingInlineSnapshot(
-        `"[msg]: expected value of type [string] but got [number]"`
+        `[Error: [msg]: expected value of type [string] but got [number]]`
       );
     });
 

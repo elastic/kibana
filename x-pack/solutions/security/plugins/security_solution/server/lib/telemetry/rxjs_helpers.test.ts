@@ -15,7 +15,7 @@ describe('telemetry.helpers.rxjs.retryOnError$', () => {
   const delay = 100;
 
   beforeEach(() => {
-    vi.useFakeTimers({ advanceTimers: true });
+    vi.useFakeTimers({ shouldAdvanceTime: true });
   });
 
   afterEach(() => {

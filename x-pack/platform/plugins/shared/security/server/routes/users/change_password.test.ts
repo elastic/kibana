@@ -77,28 +77,28 @@ describe('Change password', () => {
 
     const paramsSchema = (routeConfig.validate as any).params as ObjectType;
     expect(() => paramsSchema.validate({})).toThrowErrorMatchingInlineSnapshot(
-      `"[username]: expected value of type [string] but got [undefined]"`
+      `[Error: [username]: expected value of type [string] but got [undefined]]`
     );
     expect(() => paramsSchema.validate({ username: '' })).toThrowErrorMatchingInlineSnapshot(
-      `"[username]: value has length [0] but it must have a minimum length of [1]."`
+      `[Error: [username]: value has length [0] but it must have a minimum length of [1].]`
     );
     expect(() =>
       paramsSchema.validate({ username: 'a'.repeat(1025) })
     ).toThrowErrorMatchingInlineSnapshot(
-      `"[username]: value has length [1025] but it must have a maximum length of [1024]."`
+      `[Error: [username]: value has length [1025] but it must have a maximum length of [1024].]`
     );
 
     const bodySchema = (routeConfig.validate as any).body as ObjectType;
     expect(() => bodySchema.validate({})).toThrowErrorMatchingInlineSnapshot(
-      `"[newPassword]: expected value of type [string] but got [undefined]"`
+      `[Error: [newPassword]: expected value of type [string] but got [undefined]]`
     );
     expect(() => bodySchema.validate({ newPassword: '' })).toThrowErrorMatchingInlineSnapshot(
-      `"[newPassword]: value has length [0] but it must have a minimum length of [1]."`
+      `[Error: [newPassword]: value has length [0] but it must have a minimum length of [1].]`
     );
     expect(() =>
       bodySchema.validate({ newPassword: '123456', password: '' })
     ).toThrowErrorMatchingInlineSnapshot(
-      `"[password]: value has length [0] but it must have a minimum length of [1]."`
+      `[Error: [password]: value has length [0] but it must have a minimum length of [1].]`
     );
   });
 

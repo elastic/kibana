@@ -417,7 +417,7 @@ describe('send_email module', () => {
     await expect(() =>
       sendEmail(mockLogger, sendEmailOptions, connectorTokenClient, connectorUsageCollector)
     ).rejects.toThrowErrorMatchingInlineSnapshot(
-      `"Unable to retrieve access token for connectorId: 1"`
+      `[Error: Unable to retrieve access token for connectorId: 1]`
     );
 
     expect(getOAuthClientCredentialsAccessTokenMock).toHaveBeenCalledWith({

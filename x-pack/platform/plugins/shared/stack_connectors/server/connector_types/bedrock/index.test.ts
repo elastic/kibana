@@ -58,7 +58,7 @@ describe('Bedrock Connector', () => {
       expect(() => {
         configValidator(config, { configurationUtilities });
       }).toThrowErrorMatchingInlineSnapshot(
-        `"Error configuring Amazon Bedrock action: Error: URL Error: Invalid URL: example.com/do-something"`
+        `[Error: Error configuring Amazon Bedrock action: Error: URL Error: Invalid URL: example.com/do-something]`
       );
     });
 
@@ -78,7 +78,7 @@ describe('Bedrock Connector', () => {
       expect(() => {
         configValidator(config, { configurationUtilities: configUtils });
       }).toThrowErrorMatchingInlineSnapshot(
-        `"Error configuring Amazon Bedrock action: Error: error validating url: target url is not present in allowedHosts"`
+        `[Error: Error configuring Amazon Bedrock action: Error: error validating url: target url is not present in allowedHosts]`
       );
     });
   });

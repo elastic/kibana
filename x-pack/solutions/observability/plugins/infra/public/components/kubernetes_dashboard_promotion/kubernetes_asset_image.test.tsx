@@ -21,18 +21,18 @@ vi.mock('@elastic/eui', async () => {
   };
 });
 
-vi.mock('../../images/kubernetes_dashboards/ecs_light.svg', () => 'ecs-light-mock.svg', {
-  virtual: true,
-});
-vi.mock('../../images/kubernetes_dashboards/ecs_dark.svg', () => 'ecs-dark-mock.svg', {
-  virtual: true,
-});
-vi.mock('../../images/kubernetes_dashboards/semconv_light.svg', () => 'semconv-light-mock.svg', {
-  virtual: true,
-});
-vi.mock('../../images/kubernetes_dashboards/semconv_dark.svg', () => 'semconv-dark-mock.svg', {
-  virtual: true,
-});
+vi.mock('../../images/kubernetes_dashboards/ecs_light.svg', () => ({
+  default: 'ecs-light-mock.svg',
+}));
+vi.mock('../../images/kubernetes_dashboards/ecs_dark.svg', () => ({
+  default: 'ecs-dark-mock.svg',
+}));
+vi.mock('../../images/kubernetes_dashboards/semconv_light.svg', () => ({
+  default: 'semconv-light-mock.svg',
+}));
+vi.mock('../../images/kubernetes_dashboards/semconv_dark.svg', () => ({
+  default: 'semconv-dark-mock.svg',
+}));
 
 const useEuiThemeMock = useEuiTheme as MockedFunction<typeof useEuiTheme>;
 

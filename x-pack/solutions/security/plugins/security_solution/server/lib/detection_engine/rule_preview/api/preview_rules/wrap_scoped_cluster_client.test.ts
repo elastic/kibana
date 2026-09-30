@@ -108,7 +108,7 @@ describe('wrapScopedClusterClient', () => {
 
     await expect(
       wrappedSearchClient.asInternalUser.search
-    ).rejects.toThrowErrorMatchingInlineSnapshot(`"something went wrong!"`);
+    ).rejects.toThrowErrorMatchingInlineSnapshot(`[Error: something went wrong!]`);
   });
 
   test('handles empty search result object', async () => {
@@ -150,7 +150,7 @@ describe('wrapScopedClusterClient', () => {
     await expect(
       abortableSearchClient.asInternalUser.search
     ).rejects.toThrowErrorMatchingInlineSnapshot(
-      `"Search has been aborted due to cancelled execution"`
+      `[Error: Search has been aborted due to cancelled execution]`
     );
   });
 });

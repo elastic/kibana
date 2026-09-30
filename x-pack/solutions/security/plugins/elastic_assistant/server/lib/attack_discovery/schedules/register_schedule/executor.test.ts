@@ -253,7 +253,7 @@ describe('attackDiscoveryScheduleExecutor', () => {
       telemetry: mockTelemetry,
     });
     await expect(attackDiscoveryScheduleExecutorPromise).rejects.toThrowErrorMatchingInlineSnapshot(
-      '"Expected actionsClient not to be null!"'
+      `[Error: Expected actionsClient not to be null!]`
     );
   });
 
@@ -534,7 +534,7 @@ describe('attackDiscoveryScheduleExecutor', () => {
       telemetry: mockTelemetry,
     });
     await expect(attackDiscoveryScheduleExecutorPromise).rejects.toThrowErrorMatchingInlineSnapshot(
-      '"Rule execution cancelled due to timeout"'
+      `[Error: Rule execution cancelled due to timeout]`
     );
   });
 

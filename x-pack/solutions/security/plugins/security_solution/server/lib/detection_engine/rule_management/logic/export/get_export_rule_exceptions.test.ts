@@ -96,7 +96,7 @@ describe('get_export_rule_exceptions', () => {
       // This rule has 2 exception lists tied to it
       await expect(async () => {
         await getExportableExceptions([getListMock()], exceptionsClient);
-      }).rejects.toThrowErrorMatchingInlineSnapshot(`"oops"`);
+      }).rejects.toThrowErrorMatchingInlineSnapshot(`[Error: oops]`);
     });
   });
 });

@@ -63,7 +63,7 @@ describe('Gemini Connector', () => {
       expect(() => {
         configValidator(config, { configurationUtilities });
       }).toThrowErrorMatchingInlineSnapshot(
-        `"Error configuring Google Gemini action: Error: URL Error: Invalid URL: example.com/do-something"`
+        `[Error: Error configuring Google Gemini action: Error: URL Error: Invalid URL: example.com/do-something]`
       );
     });
 
@@ -85,7 +85,7 @@ describe('Gemini Connector', () => {
       expect(() => {
         configValidator(config, { configurationUtilities: configUtils });
       }).toThrowErrorMatchingInlineSnapshot(
-        `"Error configuring Google Gemini action: Error: error validating url: target url is not present in allowedHosts"`
+        `[Error: Error configuring Google Gemini action: Error: error validating url: target url is not present in allowedHosts]`
       );
     });
   });
@@ -115,7 +115,7 @@ describe('Gemini Connector', () => {
       expect(() => {
         secretsValidator(secrets, { configurationUtilities });
       }).toThrowErrorMatchingInlineSnapshot(
-        `"Error configuring Google Gemini secrets: Error: Invalid credential type. Only \\"service_account\\" credentials are supported. Type was \\"external_account\\"."`
+        `[Error: Error configuring Google Gemini secrets: Error: Invalid credential type. Only "service_account" credentials are supported. Type was "external_account".]`
       );
     });
 
@@ -127,7 +127,7 @@ describe('Gemini Connector', () => {
       expect(() => {
         secretsValidator(secrets, { configurationUtilities });
       }).toThrowErrorMatchingInlineSnapshot(
-        `"Error configuring Google Gemini secrets: Error: Invalid JSON format for credentials."`
+        `[Error: Error configuring Google Gemini secrets: Error: Invalid JSON format for credentials.]`
       );
     });
 
@@ -139,7 +139,7 @@ describe('Gemini Connector', () => {
       expect(() => {
         secretsValidator(secrets, { configurationUtilities });
       }).toThrowErrorMatchingInlineSnapshot(
-        `"Error configuring Google Gemini secrets: Error: Google Service Account credentials JSON is required."`
+        `[Error: Error configuring Google Gemini secrets: Error: Google Service Account credentials JSON is required.]`
       );
     });
   });

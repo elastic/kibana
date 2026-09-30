@@ -29,11 +29,14 @@ import {
   createDefendInsight,
   invokeDefendInsightsGraph,
   isDefendInsightsPolicyResponseFailureEnabled,
+  runExternalCallbacks,
 } from './helpers';
 import { postDefendInsightsRoute } from './post_defend_insights';
 
 vi.mock('@kbn/security-ai-prompts');
 vi.mock('./helpers');
+
+const runExternalCallbacksMock = vi.mocked(runExternalCallbacks);
 
 describe('postDefendInsightsRoute', () => {
   let server: ReturnType<typeof serverMock.create>;
@@ -193,8 +196,7 @@ describe('postDefendInsightsRoute', () => {
 
   describe('runExternalCallbacks', () => {
     it('should handle error thrown by runExternalCallbacks', async () => {
-      const runExternalCallbacks = (await vi.importMock('./helpers')).runExternalCallbacks as Mock;
-      runExternalCallbacks.mockRejectedValueOnce(new Error('External callback failed'));
+      runExternalCallbacksMock.mockRejectedValueOnce(new Error('External callback failed'));
 
       const response = await server.inject(
         postDefendInsightsRequest(mockRequestBody),

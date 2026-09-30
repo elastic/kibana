@@ -163,8 +163,7 @@ describe('CrowdstrikeSessionManager', () => {
       mockApiRequest.mockResolvedValue(refreshResponse);
 
       // Advance time to trigger first refresh (5 minutes)
-      vi.advanceTimersByTime(5 * 60 * 1000);
-      await vi.runOnlyPendingTimers();
+      await vi.advanceTimersByTimeAsync(5 * 60 * 1000);
 
       expect(mockApiRequest).toHaveBeenCalledWith(
         {
@@ -175,10 +174,14 @@ describe('CrowdstrikeSessionManager', () => {
         },
         mockConnectorUsageCollector
       );
+      expect(mockApiRequest).toHaveBeenCalledTimes(1);
+
+      // Keep the session active (reuses the batch id without an API call), so the 10 minute
+      // inactivity timeout doesn't coincide with the second refresh
+      await sessionManager.initializeSession(payload, mockConnectorUsageCollector);
 
       // Advance time for second refresh
-      vi.advanceTimersByTime(5 * 60 * 1000);
-      await vi.runOnlyPendingTimers();
+      await vi.advanceTimersByTimeAsync(5 * 60 * 1000);
 
       expect(mockApiRequest).toHaveBeenCalledTimes(2);
     });

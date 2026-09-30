@@ -42,7 +42,7 @@ describe('BasicHTTPAuthorizationHeaderCredentials.parseFromRequest()', () => {
     expect(() => {
       BasicHTTPAuthorizationHeaderCredentials.parseFromCredentials(encodeToBase64('fOobArbAz'));
     }).toThrowErrorMatchingInlineSnapshot(
-      `"Unable to parse basic authentication credentials without a colon"`
+      `[Error: Unable to parse basic authentication credentials without a colon]`
     );
   });
 });

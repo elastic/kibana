@@ -62,7 +62,7 @@ describe('OpenAI Connector', () => {
       expect(() => {
         configValidator(config, { configurationUtilities });
       }).toThrowErrorMatchingInlineSnapshot(
-        '"Error configuring OpenAI action: Error: URL Error: Invalid URL: example.com/do-something"'
+        `[Error: Error configuring OpenAI action: Error: URL Error: Invalid URL: example.com/do-something]`
       );
     });
 
@@ -75,7 +75,7 @@ describe('OpenAI Connector', () => {
       expect(() => {
         configValidator(config, { configurationUtilities });
       }).toThrowErrorMatchingInlineSnapshot(
-        '"Error configuring OpenAI action: Error: API Provider is not supported"'
+        `[Error: Error configuring OpenAI action: Error: API Provider is not supported]`
       );
     });
 
@@ -88,7 +88,7 @@ describe('OpenAI Connector', () => {
       expect(() => {
         configValidator(config, { configurationUtilities });
       }).toThrowErrorMatchingInlineSnapshot(
-        '"Error configuring OpenAI action: Error: API Provider is not supported: bad-one"'
+        `[Error: Error configuring OpenAI action: Error: API Provider is not supported: bad-one]`
       );
     });
 
@@ -109,7 +109,7 @@ describe('OpenAI Connector', () => {
       expect(() => {
         configValidator(config, { configurationUtilities: configUtils });
       }).toThrowErrorMatchingInlineSnapshot(
-        `"Error configuring OpenAI action: Error: error validating url: target url is not present in allowedHosts"`
+        `[Error: Error configuring OpenAI action: Error: error validating url: target url is not present in allowedHosts]`
       );
     });
   });

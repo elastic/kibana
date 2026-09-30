@@ -18,6 +18,7 @@ import type { LogMeta, Logger } from '@kbn/logging';
 import { DEFAULT_FLAPPING_SETTINGS } from '@kbn/alerting-plugin/common';
 import { createInventoryMetricThresholdExecutor } from './inventory_metric_threshold_executor';
 import type { ConditionResult } from './evaluate_condition';
+import { evaluateCondition } from './evaluate_condition';
 import type { InfraBackendLibs, InfraLocators } from '../../infra_types';
 import { infraPluginMock } from '../../../mocks';
 import { logsSharedPluginMock } from '@kbn/logs-shared-plugin/server/mocks';
@@ -102,10 +103,10 @@ const mockOptions = {
   },
 };
 
-const setEvaluationResults = async (response: Record<string, ConditionResult>) => {
-  return (await vi.importMock('./evaluate_condition')).evaluateCondition.mockImplementation(
-    () => response
-  );
+const evaluateConditionMock = vi.mocked(evaluateCondition);
+
+const setEvaluationResults = (response: Record<string, ConditionResult>) => {
+  return evaluateConditionMock.mockImplementation(async () => response);
 };
 const createMockStaticConfiguration = (sources: any) => ({
   alerting: {

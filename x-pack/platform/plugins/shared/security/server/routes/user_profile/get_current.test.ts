@@ -65,10 +65,10 @@ describe('Get current user profile routes', () => {
     it('correctly defines route.', () => {
       const querySchema = (routeConfig.validate as any).query as ObjectType;
       expect(() => querySchema.validate(0)).toThrowErrorMatchingInlineSnapshot(
-        `"expected a plain object value, but found [number] instead."`
+        `[Error: expected a plain object value, but found [number] instead.]`
       );
       expect(() => querySchema.validate(null)).toThrowErrorMatchingInlineSnapshot(
-        `"expected a plain object value, but found [null] instead."`
+        `[Error: expected a plain object value, but found [null] instead.]`
       );
 
       expect(querySchema.validate(undefined)).toEqual({});

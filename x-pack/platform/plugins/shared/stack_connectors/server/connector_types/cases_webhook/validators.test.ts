@@ -24,7 +24,7 @@ describe('validateCasesWebhookConfig', () => {
     expect(() =>
       validateCasesWebhookConfig(configObject, {} as ValidatorServices)
     ).toThrowErrorMatchingInlineSnapshot(
-      `"OAuth2 authentication is not supported for cases webhook connector"`
+      `[Error: OAuth2 authentication is not supported for cases webhook connector]`
     );
   });
 
@@ -41,7 +41,7 @@ describe('validateCasesWebhookConfig', () => {
     expect(() =>
       validateCasesWebhookConfig(configObject, {} as ValidatorServices)
     ).toThrowErrorMatchingInlineSnapshot(
-      `"OAuth2 authentication is not supported for cases webhook connector"`
+      `[Error: OAuth2 authentication is not supported for cases webhook connector]`
     );
   });
 });

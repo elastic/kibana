@@ -13,8 +13,6 @@ import {
   getBroadcastChannelInstances,
   stubBroadcastChannel,
 } from '@kbn/test-jest-helpers';
-// Vitest's jsdom environment exposes Node's BroadcastChannel, which would make the stub a no-op.
-vi.stubGlobal('BroadcastChannel', undefined);
 stubBroadcastChannel();
 
 import { createSessionExpiredMock } from './session_expired.mock';

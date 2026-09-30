@@ -37,7 +37,6 @@ import { AlertingAssetsAccordion } from './alerting_assets_accordion';
 
 import { ALERTING_ASSET_TYPES } from '.';
 
-console.log('DBGSTACK', new Error().stack);
 const getInactivityMonitoringTemplatePrefix = (pkgName: string): string =>
   `fleet-${pkgName}-inactivity-monitoring`;
 

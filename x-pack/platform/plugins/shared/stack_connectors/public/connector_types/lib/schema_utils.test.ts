@@ -14,14 +14,14 @@ describe('schema_utils', () => {
 
     it('throws an error when stringField is not present', () => {
       expect(() => decodeSchema(testSchema, { a: 1 })).toThrowErrorMatchingInlineSnapshot(
-        `"Invalid value \\"undefined\\" supplied to \\"stringField\\""`
+        `[DecodeError: Invalid value "undefined" supplied to "stringField"]`
       );
     });
 
     it('throws an error when stringField is present but excess properties are also present', () => {
       expect(() =>
         decodeSchema(testSchema, { stringField: 'abc', a: 1 })
-      ).toThrowErrorMatchingInlineSnapshot(`"invalid keys \\"a\\""`);
+      ).toThrowErrorMatchingInlineSnapshot(`[DecodeError: invalid keys "a"]`);
     });
 
     it('does not throw an error when the data matches the schema', () => {

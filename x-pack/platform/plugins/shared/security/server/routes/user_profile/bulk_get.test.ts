@@ -58,20 +58,20 @@ describe('Bulk get profile routes', () => {
 
       const bodySchema = (routeConfig.validate as any).body as ObjectType;
       expect(() => bodySchema.validate(0)).toThrowErrorMatchingInlineSnapshot(
-        `"expected a plain object value, but found [number] instead."`
+        `[Error: expected a plain object value, but found [number] instead.]`
       );
       expect(() => bodySchema.validate(null)).toThrowErrorMatchingInlineSnapshot(
-        `"expected a plain object value, but found [null] instead."`
+        `[Error: expected a plain object value, but found [null] instead.]`
       );
       expect(() => bodySchema.validate(undefined)).toThrowErrorMatchingInlineSnapshot(
-        `"[uids]: expected value of type [array] but got [undefined]"`
+        `[Error: [uids]: expected value of type [array] but got [undefined]]`
       );
 
       expect(() => bodySchema.validate({})).toThrowErrorMatchingInlineSnapshot(
-        `"[uids]: expected value of type [array] but got [undefined]"`
+        `[Error: [uids]: expected value of type [array] but got [undefined]]`
       );
       expect(() => bodySchema.validate({ uids: [] })).toThrowErrorMatchingInlineSnapshot(
-        `"[uids]: array size is [0], but cannot be smaller than [1]"`
+        `[Error: [uids]: array size is [0], but cannot be smaller than [1]]`
       );
       expect(bodySchema.validate({ uids: ['uid-1', 'uid-2'] })).toEqual({
         uids: ['uid-1', 'uid-2'],

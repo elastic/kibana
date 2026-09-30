@@ -8,7 +8,6 @@
 import { vi } from 'vitest';
 
 import React from 'react';
-import { act } from '@testing-library/react';
 
 import type { FieldSpec } from '@kbn/data-plugin/common';
 
@@ -26,7 +25,7 @@ import {
 
 import { SearchBar, getFieldSpecs } from './search_bar';
 
-const fields = [
+const fields = vi.hoisted(() => [
   {
     name: '_id',
     type: 'string',
@@ -47,7 +46,7 @@ const fields = [
     type: 'string',
     esTypes: ['keyword'],
   },
-] as FieldSpec[];
+]) as FieldSpec[];
 
 vi.mock('../hooks', async () => {
   return {
@@ -163,13 +162,9 @@ describe('SearchBar', () => {
   );
 
   it('renders the search box', async () => {
-    await act(async () => {
-      result.queryByTestId('queryInput');
-    });
-    const textArea = result.queryByTestId('queryInput');
-    expect(textArea).not.toBeNull();
-    expect(textArea?.getAttribute('placeholder')).toEqual('Filter your data using KQL syntax');
-    expect(textArea?.getAttribute('aria-label')).toEqual(
+    const textArea = await result.findByTestId('queryInput');
+    expect(textArea.getAttribute('placeholder')).toEqual('Filter your data using KQL syntax');
+    expect(textArea.getAttribute('aria-label')).toEqual(
       'Start typing to search and filter the Fleet page'
     );
     expect(result?.getByText('test-index.name: test')).toBeInTheDocument();

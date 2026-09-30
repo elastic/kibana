@@ -168,7 +168,7 @@ describe('secrets validation', () => {
     expect(() => {
       validateSecrets(connectorType, { ...emptySecrets, user: 'bob' }, { configurationUtilities });
     }).toThrowErrorMatchingInlineSnapshot(
-      `"error validating connector type secrets: ✖ must specify one of the following schemas: user and password; crt and key (with optional password); pfx (with optional password); or clientSecret (for OAuth2)"`
+      `[Error: error validating connector type secrets: ✖ must specify one of the following schemas: user and password; crt and key (with optional password); pfx (with optional password); or clientSecret (for OAuth2)]`
     );
   });
 
@@ -224,7 +224,7 @@ describe('secrets validation', () => {
         { configurationUtilities }
       );
     }).toThrowErrorMatchingInlineSnapshot(
-      `"error validating connector type secrets: ✖ must specify one of the following schemas: user and password; crt and key (with optional password); pfx (with optional password); or clientSecret (for OAuth2)"`
+      `[Error: error validating connector type secrets: ✖ must specify one of the following schemas: user and password; crt and key (with optional password); pfx (with optional password); or clientSecret (for OAuth2)]`
     );
     expect(() => {
       validateSecrets(
@@ -233,7 +233,7 @@ describe('secrets validation', () => {
         { configurationUtilities }
       );
     }).toThrowErrorMatchingInlineSnapshot(
-      `"error validating connector type secrets: ✖ must specify one of the following schemas: user and password; crt and key (with optional password); pfx (with optional password); or clientSecret (for OAuth2)"`
+      `[Error: error validating connector type secrets: ✖ must specify one of the following schemas: user and password; crt and key (with optional password); pfx (with optional password); or clientSecret (for OAuth2)]`
     );
   });
 
@@ -250,7 +250,7 @@ describe('secrets validation', () => {
         { configurationUtilities }
       );
     }).toThrowErrorMatchingInlineSnapshot(
-      `"error validating connector type secrets: proxyUsername and proxyPassword must both be provided, or neither"`
+      `[Error: error validating connector type secrets: proxyUsername and proxyPassword must both be provided, or neither]`
     );
   });
 
@@ -268,7 +268,7 @@ describe('secrets validation', () => {
         { configurationUtilities }
       );
     }).toThrowErrorMatchingInlineSnapshot(
-      `"error validating connector type secrets: proxyUsername and proxyPassword must both be provided, or neither"`
+      `[Error: error validating connector type secrets: proxyUsername and proxyPassword must both be provided, or neither]`
     );
   });
 
@@ -308,8 +308,8 @@ describe('config validation', () => {
     expect(() => {
       validateConfig(connectorType, config, { configurationUtilities });
     }).toThrowErrorMatchingInlineSnapshot(`
-      "error validating connector type config: ✖ Invalid URL
-        → at url"
+      [Error: error validating connector type config: ✖ Invalid URL
+        → at url]
     `);
   });
 
@@ -332,8 +332,8 @@ describe('config validation', () => {
     expect(() => {
       validateConfig(connectorType, config, { configurationUtilities });
     }).toThrowErrorMatchingInlineSnapshot(`
-      "error validating connector type config: ✖ Invalid input: expected record, received string
-        → at headers"
+      [Error: error validating connector type config: ✖ Invalid input: expected record, received string
+        → at headers]
     `);
   });
 
@@ -368,7 +368,7 @@ describe('config validation', () => {
     expect(() => {
       validateConfig(connectorType, config, { configurationUtilities: configUtils });
     }).toThrowErrorMatchingInlineSnapshot(
-      `"error validating connector type config: error validation http action config: target url is not present in allowedHosts"`
+      `[Error: error validating connector type config: error validation http action config: target url is not present in allowedHosts]`
     );
   });
 
@@ -391,7 +391,7 @@ describe('config validation', () => {
     expect(() => {
       validateConfig(connectorType, config, { configurationUtilities: configUtils });
     }).toThrowErrorMatchingInlineSnapshot(
-      `"error validating connector type config: error validation http action config: proxy url is not present in allowedHosts"`
+      `[Error: error validating connector type config: error validation http action config: proxy url is not present in allowedHosts]`
     );
   });
 
@@ -407,7 +407,7 @@ describe('config validation', () => {
       expect(() => {
         validateConnector(connectorType, { config, secrets: emptySecrets });
       }).toThrowErrorMatchingInlineSnapshot(
-        `"error validating action type connector: Username and password are required when OAuth2 password grant authentication is enabled"`
+        `[Error: error validating action type connector: Username and password are required when OAuth2 password grant authentication is enabled]`
       );
     });
 
@@ -422,7 +422,7 @@ describe('config validation', () => {
       expect(() => {
         validateConnector(connectorType, { config, secrets: { ...emptySecrets, user: 'bob' } });
       }).toThrowErrorMatchingInlineSnapshot(
-        `"error validating action type connector: Username and password are required when OAuth2 password grant authentication is enabled"`
+        `[Error: error validating action type connector: Username and password are required when OAuth2 password grant authentication is enabled]`
       );
     });
 
@@ -440,7 +440,7 @@ describe('config validation', () => {
           secrets: { ...emptySecrets, password: 'supersecret' },
         });
       }).toThrowErrorMatchingInlineSnapshot(
-        `"error validating action type connector: Username and password are required when OAuth2 password grant authentication is enabled"`
+        `[Error: error validating action type connector: Username and password are required when OAuth2 password grant authentication is enabled]`
       );
     });
 
@@ -478,7 +478,7 @@ describe('config validation', () => {
       expect(() => {
         validateConnector(connectorType, { config, secrets });
       }).toThrowErrorMatchingInlineSnapshot(
-        `"error validating action type connector: proxyUrl is required when proxy authentication is enabled"`
+        `[Error: error validating action type connector: proxyUrl is required when proxy authentication is enabled]`
       );
     });
 
@@ -497,7 +497,7 @@ describe('config validation', () => {
       expect(() => {
         validateConnector(connectorType, { config, secrets });
       }).toThrowErrorMatchingInlineSnapshot(
-        `"error validating action type connector: proxyUsername and proxyPassword are required when proxy authentication is enabled"`
+        `[Error: error validating action type connector: proxyUsername and proxyPassword are required when proxy authentication is enabled]`
       );
     });
 
@@ -550,7 +550,7 @@ describe('config validation', () => {
     expect(() => {
       validateConfig(connectorType, config, { configurationUtilities });
     }).toThrowErrorMatchingInlineSnapshot(
-      `"error validating connector type config: error validation http action config: certType \\"ssl-pfx\\" is disabled"`
+      `[Error: error validating connector type config: error validation http action config: certType "ssl-pfx" is disabled]`
     );
   });
 
@@ -565,7 +565,7 @@ describe('config validation', () => {
       expect(() => {
         validateConfig(connectorType, config, { configurationUtilities });
       }).toThrowErrorMatchingInlineSnapshot(
-        `"error validating connector type config: error validation http action config: missing Access Token URL (accessTokenUrl), Client ID (clientId) fields"`
+        `[Error: error validating connector type config: error validation http action config: missing Access Token URL (accessTokenUrl), Client ID (clientId) fields]`
       );
     });
 
@@ -582,7 +582,7 @@ describe('config validation', () => {
       expect(() => {
         validateConfig(connectorType, config, { configurationUtilities });
       }).toThrowErrorMatchingInlineSnapshot(
-        `"error validating connector type config: error validation http action config: additionalFields must be a valid JSON object"`
+        `[Error: error validating connector type config: error validation http action config: additionalFields must be a valid JSON object]`
       );
     });
 
@@ -599,7 +599,7 @@ describe('config validation', () => {
       expect(() => {
         validateConfig(connectorType, config, { configurationUtilities });
       }).toThrowErrorMatchingInlineSnapshot(
-        `"error validating connector type config: error validation http action config: additionalFields must be a valid JSON object"`
+        `[Error: error validating connector type config: error validation http action config: additionalFields must be a valid JSON object]`
       );
     });
 
@@ -616,7 +616,7 @@ describe('config validation', () => {
       expect(() => {
         validateConfig(connectorType, config, { configurationUtilities });
       }).toThrowErrorMatchingInlineSnapshot(
-        `"error validating connector type config: error validation http action config: additionalFields must be a valid JSON object"`
+        `[Error: error validating connector type config: error validation http action config: additionalFields must be a valid JSON object]`
       );
     });
 
@@ -633,7 +633,7 @@ describe('config validation', () => {
       expect(() => {
         validateConfig(connectorType, config, { configurationUtilities });
       }).toThrowErrorMatchingInlineSnapshot(
-        `"error validating connector type config: error validation http action config: additionalFields must be a valid JSON object"`
+        `[Error: error validating connector type config: error validation http action config: additionalFields must be a valid JSON object]`
       );
     });
   });
@@ -649,7 +649,7 @@ describe('config validation', () => {
       expect(() => {
         validateConfig(connectorType, config, { configurationUtilities });
       }).toThrowErrorMatchingInlineSnapshot(
-        `"error validating connector type config: error validation http action config: missing Access Token URL (accessTokenUrl) field"`
+        `[Error: error validating connector type config: error validation http action config: missing Access Token URL (accessTokenUrl) field]`
       );
     });
 

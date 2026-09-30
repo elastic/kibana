@@ -159,7 +159,7 @@ it('does not allow features with sub-features which have id conflicts with the m
   });
 
   expect(() => validateFeaturePrivileges([feature])).toThrowErrorMatchingInlineSnapshot(
-    `"KibanaFeature 'foo' already has a privilege with ID 'minimal_all'. Sub feature 'sub-feature-1' cannot also specify this."`
+    `[Error: KibanaFeature 'foo' already has a privilege with ID 'minimal_all'. Sub feature 'sub-feature-1' cannot also specify this.]`
   );
 });
 
@@ -210,7 +210,7 @@ it('does not allow features with sub-features which have id conflicts with the p
   });
 
   expect(() => validateFeaturePrivileges([feature])).toThrowErrorMatchingInlineSnapshot(
-    `"KibanaFeature 'foo' already has a privilege with ID 'read'. Sub feature 'sub-feature-1' cannot also specify this."`
+    `[Error: KibanaFeature 'foo' already has a privilege with ID 'read'. Sub feature 'sub-feature-1' cannot also specify this.]`
   );
 });
 
@@ -281,6 +281,6 @@ it('does not allow features with sub-features which have id conflicts each other
   });
 
   expect(() => validateFeaturePrivileges([feature])).toThrowErrorMatchingInlineSnapshot(
-    `"KibanaFeature 'foo' already has a privilege with ID 'some-sub-feature'. Sub feature 'sub-feature-2' cannot also specify this."`
+    `[Error: KibanaFeature 'foo' already has a privilege with ID 'some-sub-feature'. Sub feature 'sub-feature-2' cannot also specify this.]`
   );
 });

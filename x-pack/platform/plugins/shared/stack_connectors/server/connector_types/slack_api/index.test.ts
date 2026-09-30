@@ -66,7 +66,7 @@ describe('validate config', () => {
     expect(() => {
       validateConfig(connectorType, { message: 1 }, { configurationUtilities });
     }).toThrowErrorMatchingInlineSnapshot(
-      `"error validating connector type config: ✖ Unrecognized key: \\"message\\""`
+      `[Error: error validating connector type config: ✖ Unrecognized key: "message"]`
     );
   });
 
@@ -81,11 +81,11 @@ describe('validate params', () => {
   test('should validate and throw error when params are invalid', () => {
     expect(() => {
       validateParams(connectorType, {}, { configurationUtilities });
-    }).toThrowErrorMatchingInlineSnapshot(`"error validating action params: ✖ Invalid input"`);
+    }).toThrowErrorMatchingInlineSnapshot(`[Error: error validating action params: ✖ Invalid input]`);
 
     expect(() => {
       validateParams(connectorType, { message: 1 }, { configurationUtilities });
-    }).toThrowErrorMatchingInlineSnapshot(`"error validating action params: ✖ Invalid input"`);
+    }).toThrowErrorMatchingInlineSnapshot(`[Error: error validating action params: ✖ Invalid input]`);
   });
 
   test('should validate and pass when channels is used as a valid params for post message', () => {
@@ -136,8 +136,8 @@ describe('validate secrets', () => {
     expect(() => {
       validateSecrets(connectorType, {}, { configurationUtilities });
     }).toThrowErrorMatchingInlineSnapshot(`
-      "error validating connector type secrets: ✖ Invalid input: expected string, received undefined
-        → at token"
+      [Error: error validating connector type secrets: ✖ Invalid input: expected string, received undefined
+        → at token]
     `);
   });
 
@@ -155,8 +155,8 @@ describe('validate secrets', () => {
     expect(() => {
       validateSecrets(connectorType, { token: 1 }, { configurationUtilities });
     }).toThrowErrorMatchingInlineSnapshot(`
-      "error validating connector type secrets: ✖ Invalid input: expected string, received number
-        → at token"
+      [Error: error validating connector type secrets: ✖ Invalid input: expected string, received number
+        → at token]
     `);
   });
 
@@ -175,7 +175,7 @@ describe('validate secrets', () => {
         { configurationUtilities: configUtils }
       );
     }).toThrowErrorMatchingInlineSnapshot(
-      `"error validating connector type secrets: error configuring slack action: target hostname is not added to allowedHosts"`
+      `[Error: error validating connector type secrets: error configuring slack action: target hostname is not added to allowedHosts]`
     );
   });
 });
@@ -208,7 +208,7 @@ describe('execute', () => {
         connectorUsageCollector,
       })
     ).rejects.toThrowErrorMatchingInlineSnapshot(
-      `"[Action][ExternalService] -> [Slack API] Unsupported subAction type undefined."`
+      `[Error: [Action][ExternalService] -> [Slack API] Unsupported subAction type undefined.]`
     );
   });
 
@@ -236,7 +236,7 @@ describe('execute', () => {
         logger: mockedLogger,
       })
     ).rejects.toThrowErrorMatchingInlineSnapshot(
-      `"[Action][ExternalService] -> [Slack API] Unsupported subAction type getMessage."`
+      `[Error: [Action][ExternalService] -> [Slack API] Unsupported subAction type getMessage.]`
     );
   });
 

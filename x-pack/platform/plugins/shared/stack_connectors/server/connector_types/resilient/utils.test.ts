@@ -77,10 +77,10 @@ describe('utils', () => {
       };
       expect(() => prepareAdditionalFieldsForCreation(resilientFields, additionalFields))
         .toThrowErrorMatchingInlineSnapshot(`
-        "Invalid values provided to test_select: [
-          1337
-        ]. Accepted values: 100 (for \\"Option 1\\"),110 (for \\"Option 2\\"),120 (for \\"Option 3\\"),130 (for \\"Option 4\\")"
-      `);
+          [Error: Invalid values provided to test_select: [
+            1337
+          ]. Accepted values: 100 (for "Option 1"),110 (for "Option 2"),120 (for "Option 3"),130 (for "Option 4")]
+        `);
     });
 
     it('should not throw for unknown fields', () => {
@@ -98,11 +98,11 @@ describe('utils', () => {
       };
       expect(() => prepareAdditionalFieldsForCreation(resilientFields, additionalFields))
         .toThrowErrorMatchingInlineSnapshot(`
-        "Invalid values provided to test_multi_select: [
-          100,
-          1337
-        ]. Accepted values: 100 (for \\"Option 1\\"),110 (for \\"Option 2\\"),120 (for \\"Option 3\\"),130 (for \\"Option 4\\")"
-      `);
+          [Error: Invalid values provided to test_multi_select: [
+            100,
+            1337
+          ]. Accepted values: 100 (for "Option 1"),110 (for "Option 2"),120 (for "Option 3"),130 (for "Option 4")]
+        `);
     });
   });
 
@@ -490,9 +490,9 @@ describe('utils', () => {
           fields: resilientFields,
         })
       ).toThrowErrorMatchingInlineSnapshot(`
-        "Invalid values provided to severity_code: [
+        [Error: Invalid values provided to severity_code: [
           1337
-        ]. Accepted values: 5 (for \\"Low\\"),6 (for \\"Medium\\")"
+        ]. Accepted values: 5 (for "Low"),6 (for "Medium")]
       `);
     });
 
@@ -510,11 +510,11 @@ describe('utils', () => {
           fields: resilientFields,
         })
       ).toThrowErrorMatchingInlineSnapshot(`
-        "Invalid values provided to incident_type_ids: [
+        [Error: Invalid values provided to incident_type_ids: [
           12,
           16,
           1337
-        ]. Accepted values: 12 (for \\"Communication error (fax; email)\\"),16 (for \\"Custom type\\"),1001 (for \\"Custom type 2\\")"
+        ]. Accepted values: 12 (for "Communication error (fax; email)"),16 (for "Custom type"),1001 (for "Custom type 2")]
       `);
     });
   });

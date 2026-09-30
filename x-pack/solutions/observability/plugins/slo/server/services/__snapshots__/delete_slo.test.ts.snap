@@ -59,15 +59,7 @@ exports[`DeleteSLO > happy path > removes all resources associated to the slo 4`
         "ignore": Array [
           404,
         ],
-        "signal": AbortSignal {
-          Symbol(kEvents): undefined,
-          Symbol(events.maxEventTargetListeners): 0,
-          Symbol(events.maxEventTargetListenersWarned): false,
-          Symbol(kHandlers): undefined,
-          Symbol(kAborted): false,
-          Symbol(kReason): undefined,
-          Symbol(kComposite): false,
-        },
+        "signal": AbortSignal {},
       },
     ],
     Array [
@@ -78,15 +70,7 @@ exports[`DeleteSLO > happy path > removes all resources associated to the slo 4`
         "ignore": Array [
           404,
         ],
-        "signal": AbortSignal {
-          Symbol(kEvents): undefined,
-          Symbol(events.maxEventTargetListeners): 0,
-          Symbol(events.maxEventTargetListenersWarned): false,
-          Symbol(kHandlers): undefined,
-          Symbol(kAborted): false,
-          Symbol(kReason): undefined,
-          Symbol(kComposite): false,
-        },
+        "signal": AbortSignal {},
       },
     ],
   ],
@@ -123,15 +107,7 @@ exports[`DeleteSLO > happy path > removes all resources associated to the slo 5`
         "wait_for_completion": false,
       },
       Object {
-        "signal": AbortSignal {
-          Symbol(kEvents): undefined,
-          Symbol(events.maxEventTargetListeners): 0,
-          Symbol(events.maxEventTargetListenersWarned): false,
-          Symbol(kHandlers): undefined,
-          Symbol(kAborted): false,
-          Symbol(kReason): undefined,
-          Symbol(kComposite): false,
-        },
+        "signal": AbortSignal {},
       },
     ],
     Array [
@@ -152,15 +128,7 @@ exports[`DeleteSLO > happy path > removes all resources associated to the slo 5`
         "wait_for_completion": false,
       },
       Object {
-        "signal": AbortSignal {
-          Symbol(kEvents): undefined,
-          Symbol(events.maxEventTargetListeners): 0,
-          Symbol(events.maxEventTargetListenersWarned): false,
-          Symbol(kHandlers): undefined,
-          Symbol(kAborted): false,
-          Symbol(kReason): undefined,
-          Symbol(kComposite): false,
-        },
+        "signal": AbortSignal {},
       },
     ],
   ],

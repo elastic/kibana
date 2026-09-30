@@ -12,7 +12,7 @@ import { dataViewMock } from '@kbn/discover-utils/src/__mocks__';
 import type { SavedSearch } from '@kbn/saved-search-plugin/common';
 import { waitFor, act, renderHook } from '@testing-library/react';
 import { createMockStore, mockGlobalState, TestProviders } from '../../mock';
-import { useDiscoverInTimelineActions } from './use_discover_in_timeline_actions';
+import type { useDiscoverInTimelineActions as UseDiscoverInTimelineActions } from './use_discover_in_timeline_actions';
 import type { Filter } from '@kbn/es-query';
 import { createStartServicesMock } from '../../lib/kibana/kibana_react.mock';
 import { useKibana } from '../../lib/kibana';
@@ -59,10 +59,11 @@ const mockState: State = {
   },
 };
 
-vi.mock('./use_discover_in_timeline_actions', async () => {
-  const actual = await vi.importActual('./use_discover_in_timeline_actions');
-  return actual;
-});
+// TestProviders loads mocks/discover_in_timeline_provider, whose vi.mock replaces this module
+// with its __mocks__ version for every importer, so load the real hook under test explicitly.
+const { useDiscoverInTimelineActions } = await vi.importActual<{
+  useDiscoverInTimelineActions: typeof UseDiscoverInTimelineActions;
+}>('./use_discover_in_timeline_actions');
 
 const getTestProviderWithCustomState = (state: State = mockState) => {
   const store = createMockStore(state);

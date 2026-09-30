@@ -24,7 +24,8 @@ import { isString } from 'lodash';
 
 // Mock dependencies
 vi.mock('@elastic/elasticsearch');
-vi.mock('lodash');
+// lodash is CJS, so an automock has no named exports; only `isString` is used by the module under test.
+vi.mock('lodash', () => ({ ...require('lodash'), isString: vi.fn() }));
 
 describe('isModelAlreadyExistsError', () => {
   beforeEach(() => {
@@ -47,12 +48,14 @@ describe('isModelAlreadyExistsError', () => {
       warnings: null,
       body: { error: { type: 'resource_not_found_exception' } },
     });
-    // @ts-ignore
-    error.body = {
-      error: {
-        type: 'resource_not_found_exception',
+    // The automocked ResponseError keeps the prototype's getter-only `body`.
+    Object.defineProperty(error, 'body', {
+      value: {
+        error: {
+          type: 'resource_not_found_exception',
+        },
       },
-    };
+    });
     expect(isModelAlreadyExistsError(error)).toBe(true);
   });
 
@@ -73,12 +76,13 @@ describe('isModelAlreadyExistsError', () => {
       warnings: null,
       body: { error: { type: 'status_exception' } },
     });
-    // @ts-ignore
-    error.body = {
-      error: {
-        type: 'status_exception',
+    Object.defineProperty(error, 'body', {
+      value: {
+        error: {
+          type: 'status_exception',
+        },
       },
-    };
+    });
     expect(isModelAlreadyExistsError(error)).toBe(true);
   });
 

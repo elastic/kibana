@@ -126,10 +126,10 @@ const mockOptions = {
   isServerless: false,
 };
 
-const mockedEvaluateRule = vi.mocked(evaluateRule);
+const evaluateRuleMock = vi.mocked(evaluateRule);
 
 const setEvaluationResults = (response: Array<Record<string, Evaluation>>) => {
-  return mockedEvaluateRule.mockImplementation(async () => response);
+  return evaluateRuleMock.mockImplementation(async () => response);
 };
 
 describe('The metric threshold rule type', () => {
@@ -432,9 +432,7 @@ describe('The metric threshold rule type', () => {
       });
 
       expect(services.getDataViews).not.toHaveBeenCalled();
-      expect(
-        mockedEvaluateRule.mock.calls[0][6]
-      ).toBeUndefined();
+      expect(evaluateRuleMock.mock.calls[0][6]).toBeUndefined();
     });
 
     test('fetches a data view when the rule uses a filtered custom count metric', async () => {
@@ -453,9 +451,7 @@ describe('The metric threshold rule type', () => {
         pattern: 'metrics-*,metricbeat-*',
         allowNoIndex: true,
       });
-      expect(mockedEvaluateRule.mock.calls[0][6]).toEqual(
-        mockDataView
-      );
+      expect(evaluateRuleMock.mock.calls[0][6]).toEqual(mockDataView);
     });
   });
 
@@ -2913,7 +2909,7 @@ describe('The metric threshold rule type', () => {
         });
       };
 
-      const trackedMissingGroups = () => mockedEvaluateRule.mock.calls[0][4];
+      const trackedMissingGroups = () => evaluateRuleMock.mock.calls[0][4];
 
       test('remainActive still tracks missing groups', async () => {
         await runWith({

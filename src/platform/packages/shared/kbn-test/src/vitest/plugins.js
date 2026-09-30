@@ -240,6 +240,40 @@ const kbnConditionsPlugin = () => {
   };
 };
 
-const kbnVitestPlugins = () => [kbnResolvePlugin(), kbnSwcPlugin(), kbnConditionsPlugin()];
+const matchAlias = (find, source) => {
+  if (typeof find !== 'string') {
+    return find.test(source);
+  }
+  return source === find || source.startsWith(`${find}/`);
+};
+
+/**
+ * Config `aliases` (Jest's moduleNameMapper / root `__mocks__` for packages). The replacement
+ * module itself resolves the aliased specifier to the real module, which is how such mocks
+ * re-export the original (Jest: `jest.requireActual`) with a lint-stable import.
+ */
+const kbnAliasPlugin = (aliases) => ({
+  name: 'kbn-vitest-aliases',
+  enforce: 'pre',
+  async resolveId(source, importer, options) {
+    const alias = aliases.find(({ find }) => matchAlias(find, source));
+    if (!alias || (importer && importer.split('?')[0] === alias.replacement)) {
+      return null;
+    }
+    const { find, replacement } = alias;
+    const target =
+      typeof find === 'string'
+        ? replacement + source.slice(find.length)
+        : source.replace(find, replacement);
+    return (await this.resolve(target, importer, { ...options, skipSelf: true })) ?? target;
+  },
+});
+
+const kbnVitestPlugins = (aliases = []) => [
+  kbnAliasPlugin(aliases),
+  kbnResolvePlugin(),
+  kbnSwcPlugin(),
+  kbnConditionsPlugin(),
+];
 
 module.exports = { kbnVitestPlugins };

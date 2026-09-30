@@ -52,7 +52,7 @@ describe('useDockerContainerCharts', () => {
         const { result } = renderHook(() =>
           useDockerContainerPageViewMetricsCharts({ metricsDataViewId, metric })
         );
-        await waitFor(() => new Promise((resolve) => resolve(null)));
+        await waitFor(() => expect(result.current.charts).not.toHaveLength(0));
 
         const { charts } = result.current;
 
@@ -91,7 +91,7 @@ describe('useK8sContainerCharts', () => {
         const { result } = renderHook(() =>
           useK8sContainerPageViewMetricsCharts({ metricsDataViewId, metric })
         );
-        await waitFor(() => new Promise((resolve) => resolve(null)));
+        await waitFor(() => expect(result.current.charts).not.toHaveLength(0));
 
         const { charts } = result.current;
 

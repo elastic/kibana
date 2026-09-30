@@ -42,11 +42,11 @@ vi.mock('@kbn/triggers-actions-ui-plugin/public/application/lib/action_connector
 });
 
 vi.mock('lodash', () => {
-  const module = require('lodash');
-  return {
-    ...module,
+  const mocked = {
+    ...require('lodash'),
     debounce: (fn: () => unknown) => fn,
   };
+  return { ...mocked, default: mocked };
 });
 
 vi.mock('@kbn/triggers-actions-ui-plugin/public/common/index_controls', () => {

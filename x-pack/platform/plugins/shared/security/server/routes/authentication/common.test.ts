@@ -325,19 +325,19 @@ describe('Common authentication routes', () => {
       }
 
       expect(() => bodyValidator.validate({})).toThrowErrorMatchingInlineSnapshot(
-        `"[providerType]: expected value of type [string] but got [undefined]"`
+        `[Error: [providerType]: expected value of type [string] but got [undefined]]`
       );
 
       expect(() =>
         bodyValidator.validate({ providerType: 'saml' })
       ).toThrowErrorMatchingInlineSnapshot(
-        `"[providerName]: expected value of type [string] but got [undefined]"`
+        `[Error: [providerName]: expected value of type [string] but got [undefined]]`
       );
 
       expect(() =>
         bodyValidator.validate({ providerType: 'saml', providerName: 'saml1' })
       ).toThrowErrorMatchingInlineSnapshot(
-        `"[currentURL]: expected value of type [string] but got [undefined]"`
+        `[Error: [currentURL]: expected value of type [string] but got [undefined]]`
       );
 
       expect(() =>
@@ -348,7 +348,7 @@ describe('Common authentication routes', () => {
           UnknownArg: 'arg',
         })
       ).toThrowErrorMatchingInlineSnapshot(
-        `"[UnknownArg]: Additional properties are not allowed ('UnknownArg' was unexpected)"`
+        `[Error: [UnknownArg]: Additional properties are not allowed ('UnknownArg' was unexpected)]`
       );
 
       expect(() =>
@@ -358,7 +358,7 @@ describe('Common authentication routes', () => {
           currentURL: '/some-url',
           params: { username: 'some-user', password: 'some-password' },
         })
-      ).toThrowErrorMatchingInlineSnapshot(`"[params]: a value wasn't expected to be present"`);
+      ).toThrowErrorMatchingInlineSnapshot(`[Error: [params]: a value wasn't expected to be present]`);
 
       expect(() =>
         bodyValidator.validate({
@@ -367,7 +367,7 @@ describe('Common authentication routes', () => {
           currentURL: '/some-url',
         })
       ).toThrowErrorMatchingInlineSnapshot(
-        `"[params.username]: expected value of type [string] but got [undefined]"`
+        `[Error: [params.username]: expected value of type [string] but got [undefined]]`
       );
 
       expect(() =>
@@ -378,7 +378,7 @@ describe('Common authentication routes', () => {
           params: { username: 'some-user' },
         })
       ).toThrowErrorMatchingInlineSnapshot(
-        `"[params.password]: expected value of type [string] but got [undefined]"`
+        `[Error: [params.password]: expected value of type [string] but got [undefined]]`
       );
 
       expect(() =>
@@ -389,7 +389,7 @@ describe('Common authentication routes', () => {
           params: { password: 'some-password' },
         })
       ).toThrowErrorMatchingInlineSnapshot(
-        `"[params.username]: expected value of type [string] but got [undefined]"`
+        `[Error: [params.username]: expected value of type [string] but got [undefined]]`
       );
 
       expect(() =>
@@ -400,7 +400,7 @@ describe('Common authentication routes', () => {
           params: { username: '', password: 'some-password' },
         })
       ).toThrowErrorMatchingInlineSnapshot(
-        `"[params.username]: value has length [0] but it must have a minimum length of [1]."`
+        `[Error: [params.username]: value has length [0] but it must have a minimum length of [1].]`
       );
 
       expect(() =>
@@ -411,7 +411,7 @@ describe('Common authentication routes', () => {
           params: { username: 'some-user', password: '' },
         })
       ).toThrowErrorMatchingInlineSnapshot(
-        `"[params.password]: value has length [0] but it must have a minimum length of [1]."`
+        `[Error: [params.password]: value has length [0] but it must have a minimum length of [1].]`
       );
 
       expect(() =>
@@ -421,7 +421,7 @@ describe('Common authentication routes', () => {
           currentURL: '/some-url',
         })
       ).toThrowErrorMatchingInlineSnapshot(
-        `"[params.username]: expected value of type [string] but got [undefined]"`
+        `[Error: [params.username]: expected value of type [string] but got [undefined]]`
       );
 
       expect(() =>
@@ -432,7 +432,7 @@ describe('Common authentication routes', () => {
           params: { username: 'some-user' },
         })
       ).toThrowErrorMatchingInlineSnapshot(
-        `"[params.password]: expected value of type [string] but got [undefined]"`
+        `[Error: [params.password]: expected value of type [string] but got [undefined]]`
       );
 
       expect(() =>
@@ -443,7 +443,7 @@ describe('Common authentication routes', () => {
           params: { password: 'some-password' },
         })
       ).toThrowErrorMatchingInlineSnapshot(
-        `"[params.username]: expected value of type [string] but got [undefined]"`
+        `[Error: [params.username]: expected value of type [string] but got [undefined]]`
       );
 
       expect(() =>
@@ -454,7 +454,7 @@ describe('Common authentication routes', () => {
           params: { username: '', password: 'some-password' },
         })
       ).toThrowErrorMatchingInlineSnapshot(
-        `"[params.username]: value has length [0] but it must have a minimum length of [1]."`
+        `[Error: [params.username]: value has length [0] but it must have a minimum length of [1].]`
       );
 
       expect(() =>
@@ -465,7 +465,7 @@ describe('Common authentication routes', () => {
           params: { username: 'some-user', password: '' },
         })
       ).toThrowErrorMatchingInlineSnapshot(
-        `"[params.password]: value has length [0] but it must have a minimum length of [1]."`
+        `[Error: [params.password]: value has length [0] but it must have a minimum length of [1].]`
       );
 
       expect(() =>
@@ -475,7 +475,7 @@ describe('Common authentication routes', () => {
           currentURL: '/some-url',
         })
       ).toThrowErrorMatchingInlineSnapshot(
-        `"[providerType]: value has length [1025] but it must have a maximum length of [1024]."`
+        `[Error: [providerType]: value has length [1025] but it must have a maximum length of [1024].]`
       );
 
       expect(() =>
@@ -485,7 +485,7 @@ describe('Common authentication routes', () => {
           currentURL: '/some-url',
         })
       ).toThrowErrorMatchingInlineSnapshot(
-        `"[providerName]: value has length [1025] but it must have a maximum length of [1024]."`
+        `[Error: [providerName]: value has length [1025] but it must have a maximum length of [1024].]`
       );
 
       expect(() =>
@@ -495,7 +495,7 @@ describe('Common authentication routes', () => {
           currentURL: 'a'.repeat(8193),
         })
       ).toThrowErrorMatchingInlineSnapshot(
-        `"[currentURL]: value has length [8193] but it must have a maximum length of [8192]."`
+        `[Error: [currentURL]: value has length [8193] but it must have a maximum length of [8192].]`
       );
 
       expect(() =>
@@ -506,7 +506,7 @@ describe('Common authentication routes', () => {
           params: { username: 'a'.repeat(1025), password: 'some-password' },
         })
       ).toThrowErrorMatchingInlineSnapshot(
-        `"[params.username]: value has length [1025] but it must have a maximum length of [1024]."`
+        `[Error: [params.username]: value has length [1025] but it must have a maximum length of [1024].]`
       );
 
       expect(() =>
@@ -517,7 +517,7 @@ describe('Common authentication routes', () => {
           params: { username: 'some-user', password: 'a'.repeat(1025) },
         })
       ).toThrowErrorMatchingInlineSnapshot(
-        `"[params.password]: value has length [1025] but it must have a maximum length of [1024]."`
+        `[Error: [params.password]: value has length [1025] but it must have a maximum length of [1024].]`
       );
     });
 
