@@ -51,7 +51,7 @@ export const EsqlPickFieldsStep = () => {
     setQueryState({ delayedDataCheckEnabled: nextEnabled });
 
   return (
-    <EuiForm component="form">
+    <EuiForm>
       <EuiFormRow
         label={i18n.translate('xpack.ml.esqlJob.query.sourceTimeFieldLabel', {
           defaultMessage: 'Source time field',

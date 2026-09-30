@@ -109,4 +109,12 @@ describe('EsqlJobDetailsStep', () => {
     ).toBeInTheDocument();
     expect(screen.queryByText(/Invalid group name/)).not.toBeInTheDocument();
   });
+
+  // A native <form> turns any submit-typed button rendered by EUI (e.g. the
+  // date picker's calendar toggle) into a full-page reload.
+  it('does not render a native <form> element', () => {
+    const { container } = renderStep();
+
+    expect(container.querySelector('form')).toBeNull();
+  });
 });

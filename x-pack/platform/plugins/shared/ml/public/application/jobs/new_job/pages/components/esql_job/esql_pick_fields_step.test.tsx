@@ -292,4 +292,12 @@ describe('EsqlPickFieldsStep', () => {
       expect(screen.getByTestId('mlEsqlSourceTimeField')).toHaveValue('my_custom_time');
     });
   });
+
+  // A native <form> turns any submit-typed button rendered by EUI (e.g. the
+  // date picker's calendar toggle) into a full-page reload.
+  it('does not render a native <form> element', () => {
+    const { container } = renderStep();
+
+    expect(container.querySelector('form')).toBeNull();
+  });
 });

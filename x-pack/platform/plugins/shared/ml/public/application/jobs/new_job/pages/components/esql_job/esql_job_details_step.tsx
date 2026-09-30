@@ -83,7 +83,7 @@ export const EsqlJobDetailsStep = () => {
   };
 
   return (
-    <EuiForm component="form">
+    <EuiForm>
       <EuiFormRow
         label={i18n.translate('xpack.ml.esqlJob.jobDetails.jobIdLabel', {
           defaultMessage: 'Job ID',

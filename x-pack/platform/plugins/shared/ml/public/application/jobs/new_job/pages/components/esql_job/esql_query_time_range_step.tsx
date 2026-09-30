@@ -9,6 +9,8 @@ import React, { useMemo } from 'react';
 import {
   EuiCallOut,
   EuiComboBox,
+  EuiFlexGroup,
+  EuiFlexItem,
   EuiForm,
   EuiFormRow,
   EuiSpacer,
@@ -21,6 +23,7 @@ import { i18n } from '@kbn/i18n';
 import { useEsqlWizardContext } from './esql_wizard_context';
 import { getEsqlQueryWarnings, type EsqlQueryWarningClause } from './esql_query_warnings';
 import { EsqlHistogramChart } from './esql_histogram_chart';
+import { EsqlStartFromBeginningButton } from './esql_start_from_beginning_button';
 
 const DATE_ESQL_TYPES = new Set(['date', 'date_nanos']);
 
@@ -75,7 +78,7 @@ export const EsqlQueryTimeRangeStep = () => {
   );
 
   return (
-    <EuiForm component="form">
+    <EuiForm>
       <EuiFormRow
         label={i18n.translate('xpack.ml.esqlJob.query.queryLabel', {
           defaultMessage: 'ES|QL query',
@@ -119,17 +122,24 @@ export const EsqlQueryTimeRangeStep = () => {
         })}
         fullWidth
       >
-        <EuiSuperDatePicker
-          start={state.wizardStart}
-          end={state.wizardEnd}
-          onTimeChange={({ start, end, isInvalid }) => {
-            if (isInvalid) return;
+        <EuiFlexGroup gutterSize="s" alignItems="center" wrap responsive={false}>
+          <EuiFlexItem grow={false}>
+            <EuiSuperDatePicker
+              start={state.wizardStart}
+              end={state.wizardEnd}
+              onTimeChange={({ start, end, isInvalid }) => {
+                if (isInvalid) return;
 
-            setTimeRange({ start, end });
-          }}
-          showUpdateButton={false}
-          data-test-subj="mlEsqlTimeRange"
-        />
+                setTimeRange({ start, end });
+              }}
+              showUpdateButton={false}
+              data-test-subj="mlEsqlTimeRange"
+            />
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EsqlStartFromBeginningButton />
+          </EuiFlexItem>
+        </EuiFlexGroup>
       </EuiFormRow>
 
       <EuiFormRow

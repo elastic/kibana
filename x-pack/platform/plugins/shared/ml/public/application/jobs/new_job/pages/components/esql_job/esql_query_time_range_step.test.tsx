@@ -18,6 +18,10 @@ jest.mock('../../../../../contexts/kibana/use_ml_api_context', () => ({
   useMlApi: jest.fn(),
 }));
 
+jest.mock('../../../../../contexts/kibana', () => ({
+  useMlKibana: () => ({ services: { data: { search: { search: jest.fn() } } } }),
+}));
+
 jest.mock('./esql_histogram_executor', () => ({
   useEsqlHistogramExecutor: jest.fn(),
 }));
@@ -218,5 +222,12 @@ describe('EsqlQueryTimeRangeStep', () => {
     fireEvent.click(screen.getByTestId('mlEsqlInvalidTimeRange'));
 
     expect(screen.getByTestId('mlEsqlWizardRange')).toHaveTextContent('now-15m|now');
+  });
+
+  it('renders the start-from-beginning action next to the time range, outside any <form>', () => {
+    const { container } = renderStep();
+
+    expect(screen.getByTestId('mlEsqlStartFromBeginningButton')).toBeInTheDocument();
+    expect(container.querySelector('form')).toBeNull();
   });
 });
