@@ -188,16 +188,11 @@ test.describe(
       // Open rule edit form
       await pageObjects.ruleDetailsPage.openRuleEditForm();
 
-      const { dashboardsSelector } = pageObjects.ruleDetailsPage;
-
       // Verify dashboard selector is visible
-      await expect(dashboardsSelector.locator).toBeVisible();
+      await expect(pageObjects.ruleDetailsPage.dashboardsSelector.locator).toBeVisible();
 
-      // Options are fetched from the dashboards API when the dropdown opens, so give them
-      // more than the helper's default budget to arrive.
-      await dashboardsSelector.setSelectedOptions([testDashboardTitle], { timeout: 20000 });
-
-      expect(await dashboardsSelector.getSelectedOptions()).toContain(testDashboardTitle);
+      // Verify the dashboard the test created is offered and selectable
+      await pageObjects.ruleDetailsPage.selectRelatedDashboard(testDashboardTitle);
     });
   }
 );

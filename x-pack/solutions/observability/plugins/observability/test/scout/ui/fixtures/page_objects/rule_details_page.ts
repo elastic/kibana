@@ -168,6 +168,20 @@ export class RuleDetailsPage {
   }
 
   /**
+   * Selects a dashboard in the related dashboards combobox (on edit form)
+   */
+  async selectRelatedDashboard(dashboardTitle: string) {
+    // EUI closes the combobox popover on any ancestor scroll and only reopens it when the search
+    // value changes, so re-drive the whole open-and-pick attempt until the selection sticks.
+    await expect(async () => {
+      await this.dashboardsSelector.setSelectedOptions([dashboardTitle], {
+        timeout: SHORTER_TIMEOUT,
+      });
+      expect(await this.dashboardsSelector.getSelectedOptions()).toContain(dashboardTitle);
+    }).toPass({ timeout: BIGGER_TIMEOUT, intervals: [1000] });
+  }
+
+  /**
    * Opens the rule edit form
    */
   async openRuleEditForm() {
