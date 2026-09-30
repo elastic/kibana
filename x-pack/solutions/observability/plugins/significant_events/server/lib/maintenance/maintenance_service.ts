@@ -5,12 +5,8 @@
  * 2.0.
  */
 
-import type { KibanaRequest, Logger, SavedObjectsClientContract } from '@kbn/core/server';
-import { SavedObjectsErrorHelpers } from '@kbn/core/server';
-import { brandSpaceId, DEFAULT_SPACE_ID, type SpaceId } from '@kbn/core-spaces-common';
-import { WorkflowNotFoundError } from '@kbn/workflows/common/errors';
-import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
-import { ALERTING_ERROR_CODES, type RulesClientApi } from '@kbn/alerting-v2-plugin/server';
+import type { KibanaRequest, Logger } from '@kbn/core/server';
+import type { SpaceId } from '@kbn/core-spaces-common';
 import type {
   SignificantEventsMaintenanceFailure,
   SignificantEventsMaintenanceStatus,
@@ -18,36 +14,40 @@ import type {
 } from '../../../common/maintenance/types';
 import {
   DEFAULT_MAINTENANCE_STATE,
-  isMaintenanceState,
   type SignificantEventsMaintenanceState,
 } from '../../../common/maintenance/state_machine';
 import { MAINTENANCE_FEATURE_FLAG_ACTOR } from '../../../common/maintenance/actors';
 import type { GetScopedClients } from '../../routes/types';
 import type { SignificantEventsServer } from '../../types';
 import { KNOWLEDGE_INDICATORS_DATA_STREAM } from '../knowledge_indicators/data_stream';
-import {
-  SIGNIFICANT_EVENTS_MAINTENANCE_STATE_SO_ID,
-  SIGNIFICANT_EVENTS_MAINTENANCE_STATE_SO_TYPE,
-  type SignificantEventsMaintenanceStateAttributes,
-} from './saved_object';
+import type { SignificantEventsMaintenanceStateAttributes } from './saved_object';
 import {
   createFeatureSettingsController,
   hasPausedSettings,
   shouldRestoreSettingsBackedWorkflow,
-  type PausedFeatureSettings,
 } from './feature_settings';
-import {
-  buildCancelTargets,
-  buildDisableTargets,
-  type MaintenanceWorkflowTarget,
-} from './managed_workflow_targets';
+import type { MaintenanceWorkflowTarget } from './managed_workflow_targets';
 import { collectResetSnapshot } from './reset_snapshot';
 import { resetDataStreams } from './reset_data_streams';
 import type { MaintenanceAccess } from './maintenance_access';
 import { createMaintenanceSystemRequest } from './system_request';
 import { toMessage } from './to_message';
-
-type ManagementApi = WorkflowsServerPluginSetup['management'];
+import { logFailures } from './log_failures';
+import { deleteV2Rules, setV2RulesEnabled } from './rules';
+import { getAllSpaceIds } from './spaces';
+import {
+  createMaintenanceStateStore,
+  emptySummary,
+  normalizeState,
+  normalizeSummary,
+  type LoadedMaintenanceState,
+} from './state_store';
+import {
+  reEnableWorkflow,
+  restoreWorkflowsAfterReset,
+  sweepWorkflows,
+  workflowKey,
+} from './workflows';
 
 /**
  * `pause` records a fresh restore snapshot, as the caller or as the system;
@@ -55,28 +55,6 @@ type ManagementApi = WorkflowsServerPluginSetup['management'];
  * touching the snapshot, and always runs as the system.
  */
 type PauseRun = { mode: 'pause'; access: MaintenanceAccess } | { mode: 'reassert' };
-
-const SPACE_SO_TYPE = 'space';
-/** Matches the default `xpack.spaces.maxSpaces`, so a typical deployment is one page. */
-const SPACES_PAGE_SIZE = 1000;
-
-/**
- * Maintenance SO attributes after branding spaceId fields at the SO → domain
- * boundary. Wire schemas remain `schema.string()`.
- */
-type LoadedMaintenanceState = Omit<
-  SignificantEventsMaintenanceStateAttributes,
-  'disabledWorkflows' | 'pausedSettings'
-> & {
-  disabledWorkflows: MaintenanceWorkflowTarget[];
-  pausedSettings?: PausedFeatureSettings;
-};
-
-/** Loaded state plus the SO version used for optimistic-concurrency writes. */
-interface VersionedMaintenanceState {
-  attributes: LoadedMaintenanceState;
-  version?: string;
-}
 
 /**
  * Pauses and resumes all Significant Events background activity from a single
@@ -141,114 +119,6 @@ export interface SignificantEventsMaintenanceService {
   reassertPause(): Promise<void>;
 }
 
-const workflowKey = ({ id, spaceId }: MaintenanceWorkflowTarget): string => `${id}@${spaceId}`;
-
-/** Normalise a persisted (possibly newer/unknown) state string to a known state. */
-const normalizeState = (raw: string | undefined): SignificantEventsMaintenanceState =>
-  // Fail-open: unknown values from a newer node are treated as enabled so
-  // activity is not permanently blocked.
-  raw && isMaintenanceState(raw) ? raw : DEFAULT_MAINTENANCE_STATE;
-
-/**
- * The persisted summary stores `state` as a free-form string (see the saved
- * object); narrow it back to a known state when reading.
- */
-const normalizeSummary = (
-  raw: SignificantEventsMaintenanceStateAttributes['lastSummary']
-): SignificantEventsMaintenanceSummary | undefined =>
-  raw ? { ...raw, state: normalizeState(raw.state) } : undefined;
-
-const emptySummary = (
-  state: SignificantEventsMaintenanceSummary['state']
-): SignificantEventsMaintenanceSummary => ({
-  state,
-  executionsCancelled: 0,
-  workflowsDisabled: 0,
-  rulesDisabled: 0,
-  partialFailures: [],
-});
-
-const logFailures = (
-  log: Logger,
-  message: string,
-  failures: SignificantEventsMaintenanceFailure[]
-): void => {
-  if (failures.length > 0) {
-    log.warn(message);
-    for (const failure of failures) {
-      log.warn(`Significant Events maintenance failure [${failure.target}]: ${failure.error}`);
-    }
-  } else {
-    log.info(message);
-  }
-};
-
-/**
- * Toggle `enabled` on a set of alerting v2 signal rules. Rule pause/resume
- * targets the v2 engine only (v1 is being removed in a follow-up). Returns the
- * ids that were actually toggled (no error), the ids that failed for a non-not-found
- * reason, and one failure entry per fatal id. A missing rule is treated as
- * "already gone" and reported as neither toggled nor failed.
- */
-const setV2RulesEnabled = async (
-  rulesClient: RulesClientApi,
-  ids: string[],
-  enabled: boolean
-): Promise<{
-  toggledIds: string[];
-  failedIds: string[];
-  failures: SignificantEventsMaintenanceFailure[];
-}> => {
-  const { errors } = enabled
-    ? await rulesClient.bulkEnableRules({ ids })
-    : await rulesClient.bulkDisableRules({ ids });
-  const fatalErrors = errors.filter(
-    (error) => error.error.code !== ALERTING_ERROR_CODES.RULE_NOT_FOUND
-  );
-  const erroredIds = new Set(errors.map((error) => error.id));
-  return {
-    toggledIds: ids.filter((id) => !erroredIds.has(id)),
-    failedIds: fatalErrors.map((error) => error.id),
-    failures: fatalErrors.map((error) => ({
-      target: `rule:${error.id}`,
-      error: error.error.message,
-    })),
-  };
-};
-
-const RULE_BULK_SIZE = 100;
-
-const deleteV2Rules = async (
-  rulesClient: RulesClientApi,
-  ids: string[]
-): Promise<{
-  deleted: number;
-  failedIds: string[];
-  failures: SignificantEventsMaintenanceFailure[];
-}> => {
-  let deleted = 0;
-  const failedIds: string[] = [];
-  const failures: SignificantEventsMaintenanceFailure[] = [];
-  for (let offset = 0; offset < ids.length; offset += RULE_BULK_SIZE) {
-    const chunk = ids.slice(offset, offset + RULE_BULK_SIZE);
-    try {
-      const result = await rulesClient.bulkDeleteRules({ ids: chunk });
-      deleted += result.affected_count;
-      for (const error of result.errors) {
-        if (error.error.code !== ALERTING_ERROR_CODES.RULE_NOT_FOUND) {
-          failedIds.push(error.id);
-          failures.push({ target: `rule:${error.id}`, error: error.error.message });
-        }
-      }
-    } catch (error) {
-      const message = toMessage(error);
-      failedIds.push(...chunk);
-      failures.push(...chunk.map((id) => ({ target: `rule:${id}`, error: message })));
-    }
-  }
-  return { deleted, failedIds, failures };
-};
-
 export const createSignificantEventsMaintenanceService = ({
   logger,
   server,
@@ -260,6 +130,8 @@ export const createSignificantEventsMaintenanceService = ({
 }): SignificantEventsMaintenanceService => {
   const log = logger.get('significant-events-maintenance');
   const featureSettings = createFeatureSettingsController({ server, getScopedClients });
+  const { readVersionedState, readState, claimPausedIntent, writeState } =
+    createMaintenanceStateStore(server);
 
   // Serialize pause/resume/reassert on this Kibana node so concurrent callers
   // cannot interleave sweeps and overwrites. Cross-node races still rely on
@@ -272,274 +144,6 @@ export const createSignificantEventsMaintenanceService = ({
       () => undefined
     );
     return next;
-  };
-
-  // Lazy: this factory runs in plugin setup, before `server.core` is assigned
-  // in start(). Route authz is the user gate (Nightshift read for status,
-  // Nightshift manage for pause/resume, Streams manage for reset). This SO is hidden,
-  // agnostic, and not listed on
-  // any Nightshift privilege `savedObject` array. A scoped client then checks
-  // `saved_object:significant-events-maintenance-state/get` and 403s every
-  // Nightshift-only user once the document exists. Same pattern as run quotas.
-  let soClient: SavedObjectsClientContract | undefined;
-  const getSoClient = (): SavedObjectsClientContract => {
-    soClient ??= server.core.savedObjects.createInternalRepository([
-      SIGNIFICANT_EVENTS_MAINTENANCE_STATE_SO_TYPE,
-    ]);
-    return soClient;
-  };
-
-  const normalizePausedSettings = (
-    raw: SignificantEventsMaintenanceStateAttributes['pausedSettings']
-  ): PausedFeatureSettings | undefined =>
-    raw
-      ? {
-          continuousOnboardingWasEnabled: raw.continuousOnboardingWasEnabled,
-          scheduledDiscoveryEnabledSpaceIds:
-            raw.scheduledDiscoveryEnabledSpaceIds.map(brandSpaceId),
-        }
-      : undefined;
-
-  /** Brand SO-loaded workflow targets once at the SO → domain boundary. */
-  const brandDisabledWorkflows = (
-    workflows: SignificantEventsMaintenanceStateAttributes['disabledWorkflows'] | undefined
-  ): MaintenanceWorkflowTarget[] =>
-    (workflows ?? []).map(({ id, spaceId }) => ({ id, spaceId: brandSpaceId(spaceId) }));
-
-  const readVersionedState = async (): Promise<VersionedMaintenanceState | undefined> => {
-    try {
-      const so = await getSoClient().get<SignificantEventsMaintenanceStateAttributes>(
-        SIGNIFICANT_EVENTS_MAINTENANCE_STATE_SO_TYPE,
-        SIGNIFICANT_EVENTS_MAINTENANCE_STATE_SO_ID
-      );
-      // Brand spaceId fields once on SO load (wire schema stays schema.string()).
-      return {
-        attributes: {
-          ...so.attributes,
-          disabledWorkflows: brandDisabledWorkflows(so.attributes.disabledWorkflows),
-          pausedSettings: normalizePausedSettings(so.attributes.pausedSettings),
-        },
-        version: so.version,
-      };
-    } catch (error) {
-      if (SavedObjectsErrorHelpers.isNotFoundError(error as Error)) {
-        return undefined;
-      }
-      throw error;
-    }
-  };
-
-  const readState = async (): Promise<LoadedMaintenanceState | undefined> =>
-    (await readVersionedState())?.attributes;
-
-  /**
-   * Writes the paused intent only if the document is unchanged since `current`
-   * was read, so when every Kibana node reacts to the same flag flip exactly one
-   * of them sweeps. Returns the claimed state, or `undefined` if another node won.
-   */
-  const claimPausedIntent = async ({
-    current,
-    updatedBy,
-  }: {
-    current: VersionedMaintenanceState | undefined;
-    updatedBy: string;
-  }): Promise<LoadedMaintenanceState | undefined> => {
-    const claimed: LoadedMaintenanceState = {
-      disabledWorkflows: [],
-      disabledRuleIds: [],
-      ...current?.attributes,
-      state: 'paused',
-      updatedAt: new Date().toISOString(),
-      updatedBy,
-    };
-    try {
-      if (current) {
-        await getSoClient().update<SignificantEventsMaintenanceStateAttributes>(
-          SIGNIFICANT_EVENTS_MAINTENANCE_STATE_SO_TYPE,
-          SIGNIFICANT_EVENTS_MAINTENANCE_STATE_SO_ID,
-          claimed,
-          { version: current.version }
-        );
-      } else {
-        await getSoClient().create<SignificantEventsMaintenanceStateAttributes>(
-          SIGNIFICANT_EVENTS_MAINTENANCE_STATE_SO_TYPE,
-          claimed,
-          { id: SIGNIFICANT_EVENTS_MAINTENANCE_STATE_SO_ID, overwrite: false }
-        );
-      }
-      return claimed;
-    } catch (error) {
-      if (error instanceof Error && SavedObjectsErrorHelpers.isConflictError(error)) {
-        return undefined;
-      }
-      throw error;
-    }
-  };
-
-  const writeState = async (
-    attributes: SignificantEventsMaintenanceStateAttributes
-  ): Promise<void> => {
-    await getSoClient().create<SignificantEventsMaintenanceStateAttributes>(
-      SIGNIFICANT_EVENTS_MAINTENANCE_STATE_SO_TYPE,
-      attributes,
-      { id: SIGNIFICANT_EVENTS_MAINTENANCE_STATE_SO_ID, overwrite: true }
-    );
-  };
-
-  /** Every space id via the internal client, for sweeps without a user request. */
-  const findAllSpaceIdsInternally = async (): Promise<SpaceId[]> => {
-    const finder = server.core.savedObjects
-      .createInternalRepository([SPACE_SO_TYPE])
-      .createPointInTimeFinder({ type: SPACE_SO_TYPE, perPage: SPACES_PAGE_SIZE, fields: [] });
-    try {
-      const ids: SpaceId[] = [];
-      for await (const { saved_objects: spaces } of finder.find()) {
-        ids.push(...spaces.map((space) => brandSpaceId(space.id)));
-      }
-      return ids;
-    } finally {
-      await finder.close();
-    }
-  };
-
-  const listSpaceIds = async ({
-    spaces,
-    request,
-    access,
-  }: {
-    spaces: NonNullable<SignificantEventsServer['spaces']>;
-    request: KibanaRequest;
-    access: MaintenanceAccess;
-  }): Promise<SpaceId[]> => {
-    switch (access) {
-      case 'user': {
-        // SpacesClient.getAll already loads every space SO (up to xpack.spaces.maxSpaces).
-        // Space.id is already branded as SpaceId.
-        const userSpaces = await spaces.spacesService.createSpacesClient(request).getAll();
-        return userSpaces.map((space) => space.id);
-      }
-      case 'system':
-        return findAllSpaceIdsInternally();
-      default: {
-        const unhandledAccess: never = access;
-        throw new Error(`Unhandled maintenance access: ${unhandledAccess}`);
-      }
-    }
-  };
-
-  const getAllSpaceIds = async ({
-    request,
-    access,
-    failures,
-  }: {
-    request: KibanaRequest;
-    access: MaintenanceAccess;
-    failures: SignificantEventsMaintenanceFailure[];
-  }): Promise<SpaceId[]> => {
-    if (!server.spaces) {
-      failures.push({
-        target: 'spaces',
-        error:
-          'Spaces client is not available; only the default space was processed for per-space workflows',
-      });
-      return [DEFAULT_SPACE_ID];
-    }
-    try {
-      const ids = await listSpaceIds({ spaces: server.spaces, request, access });
-      return [...new Set([DEFAULT_SPACE_ID, ...ids])];
-    } catch (error) {
-      // Surface (not just log) the under-scoping so pause doesn't silently skip
-      // per-space workflows in every space but the default.
-      failures.push({
-        target: 'spaces',
-        error: `Failed to enumerate spaces; only the default space was processed: ${toMessage(
-          error
-        )}`,
-      });
-      return [DEFAULT_SPACE_ID];
-    }
-  };
-
-  const disableWorkflow = async (
-    mgmt: ManagementApi,
-    { id, spaceId }: MaintenanceWorkflowTarget,
-    request: KibanaRequest,
-    failures: SignificantEventsMaintenanceFailure[]
-  ): Promise<boolean> => {
-    const target = `workflow:${id}@${spaceId}`;
-    try {
-      const workflow = await mgmt.getClient(request).getWorkflow(id, spaceId);
-      if (!workflow || !workflow.enabled) {
-        return false;
-      }
-      const result = await mgmt.updateWorkflow(id, { enabled: false }, spaceId, request);
-      if (result.enabled !== false) {
-        failures.push({
-          target,
-          error: result.validationErrors.join('; ') || 'workflow was not disabled',
-        });
-        return false;
-      }
-      return true;
-    } catch (error) {
-      failures.push({ target, error: toMessage(error) });
-      return false;
-    }
-  };
-
-  /**
-   * Best-effort cancel of every non-terminal execution for a workflow target.
-   * Delegates paging/cancel to workflows management; missing workflows are a no-op.
-   */
-  const cancelTargetExecutions = async (
-    mgmt: ManagementApi,
-    { id, spaceId }: MaintenanceWorkflowTarget,
-    request: KibanaRequest,
-    failures: SignificantEventsMaintenanceFailure[]
-  ): Promise<void> => {
-    try {
-      await mgmt.cancelAllActiveWorkflowExecutions(id, spaceId, request);
-    } catch (error) {
-      if (error instanceof WorkflowNotFoundError) {
-        return;
-      }
-      failures.push({ target: `execution:${id}@${spaceId}`, error: toMessage(error) });
-    }
-  };
-
-  /**
-   * Disable every managed workflow target and cancel its executions. Returns
-   * the targets this call actually disabled; records a single `workflows`
-   * failure when workflows management is unavailable.
-   */
-  const sweepWorkflows = async ({
-    mgmt,
-    spaceIds,
-    request,
-    failures,
-  }: {
-    mgmt: ManagementApi | undefined;
-    spaceIds: SpaceId[];
-    request: KibanaRequest;
-    failures: SignificantEventsMaintenanceFailure[];
-  }): Promise<MaintenanceWorkflowTarget[]> => {
-    if (!mgmt) {
-      failures.push({
-        target: 'workflows',
-        error: 'Workflows management plugin is not available',
-      });
-      return [];
-    }
-    const newlyDisabled: MaintenanceWorkflowTarget[] = [];
-    for (const target of buildDisableTargets(spaceIds)) {
-      if (await disableWorkflow(mgmt, target, request, failures)) {
-        newlyDisabled.push(target);
-      }
-    }
-    for (const target of buildCancelTargets(spaceIds)) {
-      await cancelTargetExecutions(mgmt, target, request, failures);
-    }
-    return newlyDisabled;
   };
 
   /**
@@ -647,53 +251,6 @@ export const createSignificantEventsMaintenanceService = ({
   };
 
   /**
-   * Re-enable a single workflow.
-   * - `toggled`: disable→enable update succeeded
-   * - `already` / `gone`: no longer needs resume (already on, or deleted)
-   * - `failed`: keep in the disabled snapshot for retry
-   */
-  const reEnableWorkflow = async (
-    mgmt: ManagementApi,
-    { id, spaceId }: MaintenanceWorkflowTarget,
-    request: KibanaRequest,
-    failures: SignificantEventsMaintenanceFailure[],
-    reportMissing = true
-  ): Promise<'toggled' | 'already' | 'gone' | 'failed'> => {
-    const target = `workflow:${id}@${spaceId}`;
-    try {
-      const workflow = await mgmt.getClient(request).getWorkflow(id, spaceId);
-      if (!workflow) {
-        if (reportMissing) {
-          // Gone — surface it, but don't keep the deployment paused on a workflow
-          // that no longer exists.
-          failures.push({ target, error: 'workflow not found' });
-        }
-        return 'gone';
-      }
-      if (workflow.enabled) {
-        return 'already';
-      }
-      if (!workflow.definition) {
-        // Transient (installer hasn't finished); keep recorded so resume retries.
-        failures.push({ target, error: 'workflow is not fully installed yet' });
-        return 'failed';
-      }
-      const result = await mgmt.updateWorkflow(id, { enabled: true }, spaceId, request);
-      if (result.enabled !== true) {
-        failures.push({
-          target,
-          error: result.validationErrors.join('; ') || 'workflow was not enabled',
-        });
-        return 'failed';
-      }
-      return 'toggled';
-    } catch (error) {
-      failures.push({ target, error: toMessage(error) });
-      return 'failed';
-    }
-  };
-
-  /**
    * Disable + cancel every managed target, disable backed rules, and merge the
    * result with the previous snapshot (so re-pause keeps earlier successes and
    * adds anything newly disabled). Enumerates spaces once and returns them so
@@ -721,7 +278,7 @@ export const createSignificantEventsMaintenanceService = ({
     const mgmt = server.workflowsManagement?.management;
     // Enumerate spaces regardless of workflow availability: settings still need
     // to be turned off per space even when workflows management is down.
-    const spaceIds = await getAllSpaceIds({ request, access, failures });
+    const spaceIds = await getAllSpaceIds({ server, request, access, failures });
     const newlyDisabled = await sweepWorkflows({ mgmt, spaceIds, request, failures });
 
     // Alerting v2 only offers request-scoped rules clients, so a system sweep
@@ -957,37 +514,6 @@ export const createSignificantEventsMaintenanceService = ({
     }
   };
 
-  /**
-   * Reset step: re-enable the workflows reset (or an earlier pause) disabled,
-   * except settings-backed ones, which stay off alongside their toggles. Returns
-   * the workflows that failed to re-enable so a later Resume can retry them.
-   */
-  const restoreWorkflowsAfterReset = async ({
-    mgmt,
-    workflows,
-    request,
-    failures,
-  }: {
-    mgmt: ManagementApi | undefined;
-    workflows: MaintenanceWorkflowTarget[];
-    request: KibanaRequest;
-    failures: SignificantEventsMaintenanceFailure[];
-  }): Promise<MaintenanceWorkflowTarget[]> => {
-    const eligible = workflows.filter((workflow) =>
-      shouldRestoreSettingsBackedWorkflow(workflow, undefined)
-    );
-    if (!mgmt) {
-      return eligible;
-    }
-    const remaining: MaintenanceWorkflowTarget[] = [];
-    for (const workflow of eligible) {
-      if ((await reEnableWorkflow(mgmt, workflow, request, failures, false)) === 'failed') {
-        remaining.push(workflow);
-      }
-    }
-    return remaining;
-  };
-
   return {
     async getState({ request }) {
       return normalizeState((await readState())?.state);
@@ -1162,7 +688,7 @@ export const createSignificantEventsMaintenanceService = ({
         await persistPausedIntent({ existing, actor: updatedBy, target: 'reset' });
 
         // Stop activity first, as pause does, then destroy data, then restore.
-        const spaceIds = await getAllSpaceIds({ request, access: 'user', failures });
+        const spaceIds = await getAllSpaceIds({ server, request, access: 'user', failures });
         const mgmt = server.workflowsManagement?.management;
         const recoveryByKey = new Map<string, MaintenanceWorkflowTarget>();
         for (const workflow of existing?.disabledWorkflows ?? []) {

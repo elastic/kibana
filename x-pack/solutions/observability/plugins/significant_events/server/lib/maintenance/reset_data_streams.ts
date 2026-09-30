@@ -31,11 +31,10 @@ interface ResetDataStreamsParams {
 }
 
 /**
- * Wipe a registered stream by deleting and recreating it, leaving an empty
- * stream untouched so a repeated reset is a no-op. Returns true when the
- * stream was deleted.
+ * Make a registered stream usable: initialise it through Core and create it
+ * when missing. Returns false when it could not be made healthy.
  */
-const resetRegisteredDataStream = async (
+const ensureStreamHealthy = async (
   name: string,
   { esClient, internalEsClient, dataStreams, failures }: ResetDataStreamsParams
 ): Promise<boolean> => {
@@ -53,20 +52,24 @@ const resetRegisteredDataStream = async (
     failures.push({ target: `data-stream:${name}`, error: toMessage(error) });
     return false;
   }
-
-  const createDataStream = async (): Promise<void> => {
-    try {
-      await internalEsClient.indices.createDataStream({ name });
-    } catch (error) {
-      failures.push({ target: `data-stream:${name}:create`, error: toMessage(error) });
-    }
-  };
-
-  if (!exists) {
-    await createDataStream();
-    return false;
+  if (exists) {
+    return true;
   }
 
+  try {
+    await internalEsClient.indices.createDataStream({ name });
+    return true;
+  } catch (error) {
+    failures.push({ target: `data-stream:${name}:create`, error: toMessage(error) });
+    return false;
+  }
+};
+
+/** Delete a healthy stream when it holds documents. Returns true when it was deleted. */
+const wipeIfPopulated = async (
+  name: string,
+  { esClient, failures }: ResetDataStreamsParams
+): Promise<boolean> => {
   let documentCount: number | undefined;
   try {
     // `_count` is search-based; refresh first so unrefreshed writes cannot masquerade as empty.
@@ -81,11 +84,30 @@ const resetRegisteredDataStream = async (
 
   try {
     await esClient.indices.deleteDataStream({ name }, { ignore: [404] });
+    return true;
   } catch (error) {
     failures.push({ target: `data-stream:${name}:delete`, error: toMessage(error) });
     return false;
   }
-  await createDataStream();
+};
+
+/**
+ * Reset a registered stream: make it healthy, wipe it when populated, then
+ * make it healthy again so cached clients stay readable. An empty stream is
+ * left untouched so a repeated reset is a no-op. Returns true when the stream
+ * was deleted.
+ */
+const resetRegisteredDataStream = async (
+  name: string,
+  params: ResetDataStreamsParams
+): Promise<boolean> => {
+  if (!(await ensureStreamHealthy(name, params))) {
+    return false;
+  }
+  if (!(await wipeIfPopulated(name, params))) {
+    return false;
+  }
+  await ensureStreamHealthy(name, params);
   return true;
 };
 
