@@ -7,6 +7,7 @@
 
 import type {
   Conversation,
+  PreExecutionWorkflowStep,
   CurrentUser,
   ExecutionFailedEvent,
   TimelineEvent,
@@ -364,6 +365,28 @@ describe('conversation model converters', () => {
           reasoning: 'reasoning',
         },
       ]);
+    });
+
+    it('round-trips a pre-execution workflow step through Elasticsearch conversion', () => {
+      const conversation = fromEs(documentBase(), requestingUser);
+      const workflowStep: PreExecutionWorkflowStep = {
+        type: ConversationRoundStepType.preExecutionWorkflow,
+        model_context: '<system_update>workflow context</system_update>',
+        workflow_context: {
+          'nightshift.semantic_memory.recall': { version: 1, data: { recalled_ids: ['memory-1'] } },
+        },
+      };
+      conversation.rounds[0].steps = [workflowStep];
+
+      const roundTripped = fromEs(
+        {
+          ...documentBase(),
+          _source: toEs(conversation, 'space'),
+        },
+        requestingUser
+      );
+
+      expect(roundTripped.rounds[0].steps).toEqual([workflowStep]);
     });
 
     it('adds tool_call_id for results without it', () => {

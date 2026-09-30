@@ -50056,7 +50056,6 @@
     "xpack.serverlessVectordb.nav.mngt.access": "Acesso",
     "xpack.serverlessVectordb.nav.mngt.alertsAndInsights": "Alertas e insights",
     "xpack.serverlessVectordb.nav.mngt.content": "Conteúdo",
-    "xpack.serverlessVectordb.nav.performance": "Desempenho",
     "xpack.sessionView.alert": "Alerta",
     "xpack.sessionView.alertDetailsAllFilterItem": "Ver todos os alertas",
     "xpack.sessionView.alertDetailsAllSelectedCategory": "Ver: todos os alertas",
