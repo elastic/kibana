@@ -8,7 +8,7 @@
 import type { MockedGraphEnvironment } from './mocks';
 import { createMockGraphStore } from './mocks';
 import type { LoadSavedWorkspacePayload } from './persistence';
-import { loadSavedWorkspace, loadingSaga, saveWorkspace, savingSaga } from './persistence';
+import { loadSavedWorkspace, registerPersistenceListeners, saveWorkspace } from './persistence';
 import type {
   UrlTemplate,
   AdvancedSettings,
@@ -70,12 +70,12 @@ jest.mock('../helpers/saved_workspace_utils', () => ({
   saveSavedWorkspace: jest.fn().mockResolvedValueOnce('123'),
 }));
 
-describe('persistence sagas', () => {
+describe('persistence listeners', () => {
   let env: MockedGraphEnvironment;
 
-  describe('loading saga', () => {
+  describe('loading listener', () => {
     beforeEach(() => {
-      env = createMockGraphStore({ sagas: [loadingSaga] });
+      env = createMockGraphStore({ listeners: [registerPersistenceListeners] });
     });
     it('should deserialize saved object and populate state', async () => {
       env.store.dispatch(
@@ -119,10 +119,10 @@ describe('persistence sagas', () => {
     });
   });
 
-  describe('saving saga', () => {
+  describe('saving listener', () => {
     beforeEach(() => {
       env = createMockGraphStore({
-        sagas: [savingSaga],
+        listeners: [registerPersistenceListeners],
         initialStateOverwrites: {
           datasource: {
             current: {
