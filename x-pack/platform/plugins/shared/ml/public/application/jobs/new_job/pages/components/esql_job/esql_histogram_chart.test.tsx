@@ -63,15 +63,18 @@ describe('EsqlHistogramChart', () => {
     expect(screen.queryByTestId('mlEsqlHistogramChart')).not.toBeInTheDocument();
   });
 
-  it('shows an empty-state callout when the histogram succeeded with zero rows', () => {
-    renderWithI18n(
+  it('renders nothing when the histogram succeeded with zero rows (the output preview owns the empty state)', () => {
+    const { container } = renderWithI18n(
       <EsqlWizardProvider>
         <SeedHistogramState histogramStatus="success" histogramTotalRows={0} />
         <EsqlHistogramChart />
       </EsqlWizardProvider>
     );
 
-    expect(screen.getByTestId('mlEsqlHistogramEmpty')).toBeInTheDocument();
+    expect(screen.queryByTestId('mlEsqlHistogramEmpty')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('mlEsqlHistogramChart')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('mlEsqlHistogramError')).not.toBeInTheDocument();
+    expect(container).toBeEmptyDOMElement();
   });
 
   it('renders the chart and total row count once the histogram has rows', () => {

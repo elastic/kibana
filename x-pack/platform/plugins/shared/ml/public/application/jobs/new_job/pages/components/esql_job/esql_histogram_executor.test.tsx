@@ -6,7 +6,7 @@
  */
 
 import React, { useEffect } from 'react';
-import { act, render, screen } from '@testing-library/react';
+import { act, fireEvent, render, screen } from '@testing-library/react';
 import { getESQLResults } from '@kbn/esql-utils';
 import { useMlKibana } from '../../../../../contexts/kibana';
 import { useEsqlHistogramExecutor } from './esql_histogram_executor';
@@ -50,6 +50,12 @@ const SeedState = () => {
   return null;
 };
 
+const RefreshButton = () => {
+  const { refreshTimeRange } = useEsqlWizardContext();
+
+  return <button type="button" data-test-subj="refresh" onClick={refreshTimeRange} />;
+};
+
 const Harness = () => {
   useEsqlHistogramExecutor();
 
@@ -57,6 +63,7 @@ const Harness = () => {
     <>
       <SeedState />
       <HistogramState />
+      <RefreshButton />
     </>
   );
 };
@@ -146,5 +153,71 @@ describe('useEsqlHistogramExecutor', () => {
 
     expect(screen.getByTestId('mlEsqlHistogramState')).toHaveTextContent('idle|0|');
     expect(mockedGetESQLResults).not.toHaveBeenCalled();
+  });
+
+  it('restricts rows to the selected range with the same source-time-field filter as the output preview', async () => {
+    jest.setSystemTime(new Date('2026-09-30T12:00:00.000Z'));
+    mockedGetESQLResults.mockResolvedValue({
+      response: { columns: [], values: [] },
+    } as unknown as ReturnType<typeof getESQLResults>);
+
+    render(
+      <EsqlWizardProvider>
+        <Harness />
+      </EsqlWizardProvider>
+    );
+
+    await act(async () => {
+      jest.advanceTimersByTime(300);
+      await Promise.resolve();
+    });
+
+    expect(mockedGetESQLResults).toHaveBeenCalledTimes(1);
+    expect(mockedGetESQLResults.mock.calls[0][0].filter).toEqual({
+      bool: {
+        filter: [
+          {
+            range: {
+              '@timestamp': {
+                gte: '2026-09-30T11:45:00.000Z',
+                lte: '2026-09-30T12:00:00.000Z',
+                format: 'strict_date_optional_time',
+              },
+            },
+          },
+        ],
+      },
+    });
+  });
+
+  it('re-resolves relative times when the time range is refreshed', async () => {
+    jest.setSystemTime(new Date('2026-09-30T12:00:00.000Z'));
+    mockedGetESQLResults.mockResolvedValue({
+      response: { columns: [], values: [] },
+    } as unknown as ReturnType<typeof getESQLResults>);
+
+    render(
+      <EsqlWizardProvider>
+        <Harness />
+      </EsqlWizardProvider>
+    );
+
+    await act(async () => {
+      jest.advanceTimersByTime(300);
+      await Promise.resolve();
+    });
+    expect(mockedGetESQLResults).toHaveBeenCalledTimes(1);
+
+    jest.setSystemTime(new Date('2026-09-30T12:30:00.000Z'));
+    fireEvent.click(screen.getByTestId('refresh'));
+    await act(async () => {
+      jest.advanceTimersByTime(300);
+      await Promise.resolve();
+    });
+
+    expect(mockedGetESQLResults).toHaveBeenCalledTimes(2);
+    const refreshed = mockedGetESQLResults.mock.calls[1][0];
+    expect(refreshed.esqlQuery).toContain('"2026-09-30T12:30:00.000Z"');
+    expect(JSON.stringify(refreshed.filter)).toContain('2026-09-30T12:15:00.000Z');
   });
 });

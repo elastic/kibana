@@ -8,6 +8,7 @@
 import React, { useMemo } from 'react';
 import {
   EuiCallOut,
+  EuiButtonIcon,
   EuiComboBox,
   EuiFlexGroup,
   EuiFlexItem,
@@ -15,6 +16,7 @@ import {
   EuiFormRow,
   EuiSpacer,
   EuiSuperDatePicker,
+  EuiToolTip,
   EuiTextArea,
   type EuiComboBoxOptionOption,
 } from '@elastic/eui';
@@ -46,6 +48,10 @@ const warningClauseLabels: Record<EsqlQueryWarningClause, string> = {
   }),
 };
 
+const refreshLabel = i18n.translate('xpack.ml.esqlJob.timeRange.refreshAriaLabel', {
+  defaultMessage: 'Refresh time range and preview',
+});
+
 const formatWarningClauses = (clauses: EsqlQueryWarningClause[]) =>
   i18n.formatList(
     'conjunction',
@@ -60,7 +66,7 @@ const formatWarningClauses = (clauses: EsqlQueryWarningClause[]) =>
  * itself is owned by `useEsqlColumnsResolver`, run once at the wizard root.
  */
 export const EsqlQueryTimeRangeStep = () => {
-  const { state, setQueryState, setTimeRange } = useEsqlWizardContext();
+  const { state, setQueryState, setTimeRange, refreshTimeRange } = useEsqlWizardContext();
   const isLoading = state.queryProbeState === 'loading';
 
   const allOptions = useMemo(() => toOptions(state.columns), [state.columns]);
@@ -137,6 +143,18 @@ export const EsqlQueryTimeRangeStep = () => {
               showUpdateButton={false}
               data-test-subj="mlEsqlTimeRange"
             />
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiToolTip content={refreshLabel} disableScreenReaderOutput>
+              <EuiButtonIcon
+                iconType="refresh"
+                display="base"
+                size="m"
+                onClick={refreshTimeRange}
+                aria-label={refreshLabel}
+                data-test-subj="mlEsqlRefreshTimeRange"
+              />
+            </EuiToolTip>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <EsqlStartFromBeginningButton />

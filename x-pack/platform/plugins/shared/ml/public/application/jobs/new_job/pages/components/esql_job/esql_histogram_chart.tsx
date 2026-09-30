@@ -39,25 +39,10 @@ export const EsqlHistogramChart = () => {
     );
   }
 
+  // An empty result is explained once, by the output preview's empty state
+  // right below; render nothing here so it is not announced twice (g2sz.28).
   if (histogramStatus === 'success' && histogramTotalRows === 0) {
-    return (
-      <EuiCallOut
-        title={i18n.translate('xpack.ml.esqlJob.histogram.emptyTitle', {
-          defaultMessage: 'The query returned no rows for the selected time range',
-        })}
-        color="warning"
-        iconType="warning"
-        announceOnMount
-        data-test-subj="mlEsqlHistogramEmpty"
-      >
-        <p>
-          {i18n.translate('xpack.ml.esqlJob.histogram.emptyDescription', {
-            defaultMessage:
-              'Widen the time range or adjust the query so it produces output before continuing.',
-          })}
-        </p>
-      </EuiCallOut>
-    );
+    return null;
   }
 
   return (

@@ -41,10 +41,17 @@ const Seed = ({ probe = 'success' }: { probe?: 'success' | 'idle' | 'error' }) =
   return null;
 };
 
+const RefreshButton = () => {
+  const { refreshTimeRange } = useEsqlWizardContext();
+
+  return <button type="button" data-test-subj="refresh" onClick={refreshTimeRange} />;
+};
+
 const renderPreview = (probe?: 'success' | 'idle' | 'error') =>
   renderWithI18n(
     <EsqlWizardProvider>
       <Seed probe={probe} />
+      <RefreshButton />
       <EsqlQueryOutputPreview />
     </EsqlWizardProvider>
   );
@@ -110,6 +117,26 @@ describe('EsqlQueryOutputPreview', () => {
     expect(table).toHaveTextContent('20');
   });
 
+  it('re-resolves relative times when the time range is refreshed', async () => {
+    jest.setSystemTime(new Date('2026-09-30T12:00:00.000Z'));
+    mockedGetESQLResults.mockResolvedValue(response([{ name: 'host', type: 'keyword' }], []));
+    renderPreview();
+    await flushDebounce();
+    expect(mockedGetESQLResults).toHaveBeenCalledTimes(1);
+    expect(JSON.stringify(mockedGetESQLResults.mock.calls[0][0].filter)).toContain(
+      '2026-09-30T11:45:00.000Z'
+    );
+
+    jest.setSystemTime(new Date('2026-09-30T12:30:00.000Z'));
+    fireEvent.click(screen.getByTestId('refresh'));
+    await flushDebounce();
+
+    expect(mockedGetESQLResults).toHaveBeenCalledTimes(2);
+    expect(JSON.stringify(mockedGetESQLResults.mock.calls[1][0].filter)).toContain(
+      '2026-09-30T12:15:00.000Z'
+    );
+  });
+
   it('does not query until the query resolved output columns', async () => {
     renderPreview('idle');
     await flushDebounce();
@@ -123,7 +150,9 @@ describe('EsqlQueryOutputPreview', () => {
     renderPreview();
     await flushDebounce();
 
-    expect(await screen.findByTestId('mlEsqlQueryOutputPreviewEmpty')).toBeInTheDocument();
+    expect(await screen.findByTestId('mlEsqlQueryOutputPreviewEmpty')).toHaveTextContent(
+      'The query returned no rows for the selected time range.'
+    );
     expect(screen.queryByTestId('mlEsqlQueryOutputPreviewTable')).not.toBeInTheDocument();
   });
 

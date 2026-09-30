@@ -36,7 +36,7 @@ const stepComponents: Record<ESQL_WIZARD_STEPS, FC> = {
  * `WIZARD_STEPS` used by the classic DataView-backed wizards.
  */
 export const EsqlWizard = () => {
-  const { state } = useEsqlWizardContext();
+  const { state, refreshTimeRange } = useEsqlWizardContext();
   useEsqlColumnsResolver();
   useEsqlHistogramExecutor();
 
@@ -48,6 +48,9 @@ export const EsqlWizard = () => {
   const nextActive = !isLastStep && gating[currentStep];
 
   const goToStep = (step: ESQL_WIZARD_STEPS) => {
+    // Relative times ('now-15m') are resolved when the range is used; returning
+    // to step 1 re-resolves them against the current clock (g2sz.28).
+    if (step === ESQL_WIZARD_STEPS.QUERY_TIME_RANGE && currentStep !== step) refreshTimeRange();
     setCurrentStep(step);
     setHighestStep((current) => Math.max(current, step) as ESQL_WIZARD_STEPS);
   };
@@ -61,7 +64,10 @@ export const EsqlWizard = () => {
   const previous = () => {
     if (currentStep === ESQL_WIZARD_STEPS.QUERY_TIME_RANGE) return;
 
-    setCurrentStep((currentStep - 1) as ESQL_WIZARD_STEPS);
+    const previousStep = (currentStep - 1) as ESQL_WIZARD_STEPS;
+
+    if (previousStep === ESQL_WIZARD_STEPS.QUERY_TIME_RANGE) refreshTimeRange();
+    setCurrentStep(previousStep);
   };
 
   const StepComponent = stepComponents[currentStep];

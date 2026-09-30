@@ -8,7 +8,6 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { EuiCallOut, EuiInMemoryTable, EuiSpacer, EuiText, EuiTitle } from '@elastic/eui';
 import type { EuiBasicTableColumn } from '@elastic/eui';
-import { calculateBounds } from '@kbn/data-plugin/common';
 import { getESQLResults } from '@kbn/esql-utils';
 import { i18n } from '@kbn/i18n';
 import { useMlKibana } from '../../../../../contexts/kibana';
@@ -17,6 +16,7 @@ import {
   buildEsqlOutputPreviewQuery,
   ESQL_OUTPUT_PREVIEW_ROW_LIMIT,
 } from './esql_output_preview_query';
+import { buildEsqlSourceTimeRangeFilter } from './esql_source_time_range_filter';
 import { useEsqlWizardContext } from './esql_wizard_context';
 
 type PreviewRow = Record<string, unknown>;
@@ -55,7 +55,8 @@ export const EsqlQueryOutputPreview = () => {
     services: { data },
   } = useMlKibana();
   const { state } = useEsqlWizardContext();
-  const { query, sourceTimeField, wizardStart, wizardEnd, queryProbeState } = state;
+  const { query, sourceTimeField, wizardStart, wizardEnd, queryProbeState, rangeRefreshToken } =
+    state;
   const [result, setResult] = useState<PreviewResult>();
   const [error, setError] = useState<string>();
   const [isLoading, setIsLoading] = useState(false);
@@ -70,25 +71,11 @@ export const EsqlQueryOutputPreview = () => {
       return;
     }
 
-    const bounds = calculateBounds({ from: wizardStart, to: wizardEnd });
-    const filter =
-      sourceTimeField.trim() !== '' && bounds.min && bounds.max
-        ? {
-            bool: {
-              filter: [
-                {
-                  range: {
-                    [sourceTimeField]: {
-                      gte: bounds.min.toISOString(),
-                      lte: bounds.max.toISOString(),
-                      format: 'strict_date_optional_time',
-                    },
-                  },
-                },
-              ],
-            },
-          }
-        : undefined;
+    const filter = buildEsqlSourceTimeRangeFilter({
+      sourceTimeField,
+      from: wizardStart,
+      to: wizardEnd,
+    });
 
     const controller = new AbortController();
     let cancelled = false;
@@ -138,7 +125,15 @@ export const EsqlQueryOutputPreview = () => {
       window.clearTimeout(timeout);
       controller.abort();
     };
-  }, [canRun, data.search.search, query, sourceTimeField, wizardEnd, wizardStart]);
+  }, [
+    canRun,
+    data.search.search,
+    query,
+    rangeRefreshToken,
+    sourceTimeField,
+    wizardEnd,
+    wizardStart,
+  ]);
 
   const columns = useMemo<Array<EuiBasicTableColumn<PreviewRow>>>(
     () =>
@@ -186,7 +181,8 @@ export const EsqlQueryOutputPreview = () => {
         <EuiText size="s" color="subdued" data-test-subj="mlEsqlQueryOutputPreviewEmpty">
           <p>
             {i18n.translate('xpack.ml.esqlJob.queryOutput.emptyDescription', {
-              defaultMessage: 'The query returned no rows for the selected time range.',
+              defaultMessage:
+                'The query returned no rows for the selected time range. Widen the time range or adjust the query so it produces output before continuing.',
             })}
           </p>
         </EuiText>

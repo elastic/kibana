@@ -41,6 +41,7 @@ const baseState: EsqlWizardState = {
   histogramTotalRows: 42,
   histogramErrorMessage: undefined,
   histogramSeries: [{ time: 0, value: 42 }],
+  rangeRefreshToken: 0,
 };
 
 describe('isQueryTimeRangeStepValid', () => {

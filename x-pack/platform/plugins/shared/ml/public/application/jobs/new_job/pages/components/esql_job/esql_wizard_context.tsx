@@ -43,6 +43,12 @@ export interface EsqlWizardState extends EsqlQueryStepState {
   histogramTotalRows: number;
   histogramErrorMessage?: string;
   histogramSeries: EsqlHistogramPoint[];
+  /**
+   * Bumped to re-resolve relative times (`now-15m`) against the current clock:
+   * on an explicit refresh and when the user returns to the Query & time range
+   * step. The histogram and output preview re-run when it changes (g2sz.28).
+   */
+  rangeRefreshToken: number;
 }
 
 export interface EsqlWizardContextValue {
@@ -55,6 +61,7 @@ export interface EsqlWizardContextValue {
   setColumnsErrorMessage: (columnsErrorMessage: string | undefined) => void;
   setTimeRange: (range: { start: string; end: string }) => void;
   setContinueInRealTime: (continueInRealTime: boolean) => void;
+  refreshTimeRange: () => void;
   setHistogramState: (
     next: Partial<
       Pick<
@@ -88,6 +95,7 @@ const initialState: EsqlWizardState = {
   histogramTotalRows: 0,
   histogramErrorMessage: undefined,
   histogramSeries: [],
+  rangeRefreshToken: 0,
 };
 
 const EsqlWizardContext = createContext<EsqlWizardContextValue | undefined>(undefined);
@@ -120,6 +128,9 @@ export const EsqlWizardProvider = ({ children }: PropsWithChildren) => {
   const setContinueInRealTime = useCallback((continueInRealTime: boolean) => {
     setState((current) => ({ ...current, continueInRealTime }));
   }, []);
+  const refreshTimeRange = useCallback(() => {
+    setState((current) => ({ ...current, rangeRefreshToken: current.rangeRefreshToken + 1 }));
+  }, []);
   const setHistogramState = useCallback(
     (
       next: Partial<
@@ -144,9 +155,11 @@ export const EsqlWizardProvider = ({ children }: PropsWithChildren) => {
       setColumnsErrorMessage,
       setTimeRange,
       setContinueInRealTime,
+      refreshTimeRange,
       setHistogramState,
     }),
     [
+      refreshTimeRange,
       setColumnsErrorMessage,
       setContinueInRealTime,
       setHistogramState,

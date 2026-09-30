@@ -124,6 +124,35 @@ describe('EsqlWizard step navigation', () => {
     expect(screen.getByTestId('mlEsqlPickFieldsStepStub')).toBeInTheDocument();
   });
 
+  it('re-resolves relative times when returning to step 1 (g2sz.28)', () => {
+    const RefreshToken = () => {
+      const { state } = useEsqlWizardContext();
+
+      return <output data-test-subj="mlEsqlRefreshToken">{state.rangeRefreshToken}</output>;
+    };
+
+    renderWithI18n(
+      <EsqlWizardProvider>
+        <SeedQueryTimeRangeStep />
+        <RefreshToken />
+        <EsqlWizard />
+      </EsqlWizardProvider>
+    );
+
+    expect(screen.getByTestId('mlEsqlRefreshToken')).toHaveTextContent('0');
+
+    fireEvent.click(screen.getByTestId('mlJobWizardNavButtonNext'));
+    expect(screen.getByTestId('mlEsqlRefreshToken')).toHaveTextContent('0');
+
+    fireEvent.click(screen.getByTestId('mlJobWizardNavButtonPrevious'));
+    expect(screen.getByTestId('mlEsqlQueryTimeRangeStepStub')).toBeInTheDocument();
+    expect(screen.getByTestId('mlEsqlRefreshToken')).toHaveTextContent('1');
+
+    fireEvent.click(screen.getByTestId('mlJobWizardNavButtonNext'));
+    fireEvent.click(screen.getByTestId('mlEsqlWizardQueryTimeRangeStep'));
+    expect(screen.getByTestId('mlEsqlRefreshToken')).toHaveTextContent('2');
+  });
+
   it('hides the Previous button on step 1 and the Next button on the summary step', () => {
     renderWizard();
 

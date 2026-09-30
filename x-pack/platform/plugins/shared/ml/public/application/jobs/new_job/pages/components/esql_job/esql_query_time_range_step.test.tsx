@@ -182,6 +182,25 @@ describe('EsqlQueryTimeRangeStep', () => {
     expect(screen.getByTestId('mlEsqlQuery')).not.toBeDisabled();
   });
 
+  it('bumps the range refresh token when the refresh button is clicked', () => {
+    const RefreshToken = () => {
+      const { state } = useEsqlWizardContext();
+
+      return <output data-test-subj="mlEsqlRefreshToken">{state.rangeRefreshToken}</output>;
+    };
+
+    renderWithI18n(
+      <EsqlWizardProvider>
+        <Harness />
+        <RefreshToken />
+      </EsqlWizardProvider>
+    );
+
+    expect(screen.getByTestId('mlEsqlRefreshToken')).toHaveTextContent('0');
+    fireEvent.click(screen.getByTestId('mlEsqlRefreshTimeRange'));
+    expect(screen.getByTestId('mlEsqlRefreshToken')).toHaveTextContent('1');
+  });
+
   it('persists a valid time range picker change in wizard state', () => {
     const WizardState = () => {
       const { state } = useEsqlWizardContext();

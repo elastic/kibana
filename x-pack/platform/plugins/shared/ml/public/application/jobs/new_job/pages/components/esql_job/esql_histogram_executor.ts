@@ -15,6 +15,7 @@ import {
   ESQL_HISTOGRAM_COUNT_COLUMN,
   ESQL_HISTOGRAM_TIME_COLUMN,
 } from './esql_histogram_query';
+import { buildEsqlSourceTimeRangeFilter } from './esql_source_time_range_filter';
 
 const DEBOUNCE_MS = 300;
 
@@ -36,7 +37,16 @@ export const useEsqlHistogramExecutor = (): void => {
   const requestGeneration = useRef(0);
   const abortController = useRef<AbortController>();
 
-  const { query, emittedTimeField, wizardStart, wizardEnd, columns, queryProbeState } = state;
+  const {
+    query,
+    emittedTimeField,
+    sourceTimeField,
+    wizardStart,
+    wizardEnd,
+    columns,
+    queryProbeState,
+    rangeRefreshToken,
+  } = state;
 
   useEffect(() => {
     const generation = ++requestGeneration.current;
@@ -72,6 +82,14 @@ export const useEsqlHistogramExecutor = (): void => {
 
     setHistogramState({ histogramStatus: 'loading' });
 
+    // Same raw source-time-field range filter as the step-1 output preview, so
+    // rows outside the selected range cannot produce buckets (g2sz.28).
+    const filter = buildEsqlSourceTimeRangeFilter({
+      sourceTimeField,
+      from: wizardStart,
+      to: wizardEnd,
+    });
+
     const histogramQuery = buildEsqlHistogramQuery({
       query,
       timeField: emittedTimeField,
@@ -87,6 +105,7 @@ export const useEsqlHistogramExecutor = (): void => {
         esqlQuery: histogramQuery,
         search: data.search.search,
         signal: controller.signal,
+        filter,
       })
         .then(({ response }) => {
           if (generation !== requestGeneration.current) return;
@@ -139,6 +158,8 @@ export const useEsqlHistogramExecutor = (): void => {
     emittedTimeField,
     query,
     queryProbeState,
+    rangeRefreshToken,
+    sourceTimeField,
     wizardEnd,
     wizardStart,
   ]);
