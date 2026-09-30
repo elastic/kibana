@@ -22,6 +22,8 @@ export type {
   FlyoutHeaderMetaBlockProps,
   FlyoutTabProps,
   FlyoutBodyProps,
+  FlyoutBodyCalloutLevel,
+  FlyoutBodyCalloutProps,
   FlyoutBodyTabPanelProps,
   FlyoutBodySectionProps,
   FlyoutBodySectionAction,
@@ -30,4 +32,7 @@ export type {
   FlyoutFooterProps,
   FlyoutFooterPrimaryActionProps,
   FlyoutFooterSecondaryActionProps,
+  FlyoutFooterPrimaryActionMenuProps,
+  FlyoutFooterMenuPanel,
+  FlyoutFooterMenuItem,
 } from './src/types';

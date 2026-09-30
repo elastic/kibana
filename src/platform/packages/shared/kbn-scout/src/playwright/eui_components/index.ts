@@ -19,3 +19,48 @@ export {
   EuiBasicTableObject,
   EuiDraggableObject,
 } from '@elastic/eui-test-helpers';
+
+import {
+  EuiAccordionSelectors,
+  EuiBasicTableSelectors,
+  EuiColorPickerSelectors,
+  EuiComboBoxSelectors,
+  EuiContextMenuSelectors,
+  EuiDataGridSelectors,
+  EuiDraggableSelectors,
+  EuiFilterButtonSelectors,
+  EuiFlyoutSelectors,
+  EuiModalSelectors,
+  EuiPopoverSelectors,
+  EuiRangeSelectors,
+  EuiSelectableSelectors,
+  EuiSuperSelectSelectors,
+  EuiGlobalToastListSelectors,
+  EuiToolTipSelectors,
+  EuiTreeViewSelectors,
+} from '@elastic/eui-test-helpers';
+
+/**
+ * Stable EUI selectors, keyed like `page.components`, for when no Component Object method fits.
+ *
+ * @example page.locator(euiSelectors.basicTable.ROW_SELECTOR)
+ */
+export const euiSelectors = {
+  accordion: EuiAccordionSelectors,
+  basicTable: EuiBasicTableSelectors,
+  colorPicker: EuiColorPickerSelectors,
+  comboBox: EuiComboBoxSelectors,
+  contextMenu: EuiContextMenuSelectors,
+  dataGrid: EuiDataGridSelectors,
+  draggable: EuiDraggableSelectors,
+  filterButton: EuiFilterButtonSelectors,
+  flyout: EuiFlyoutSelectors,
+  modal: EuiModalSelectors,
+  popover: EuiPopoverSelectors,
+  range: EuiRangeSelectors,
+  selectable: EuiSelectableSelectors,
+  superSelect: EuiSuperSelectSelectors,
+  toast: EuiGlobalToastListSelectors,
+  toolTip: EuiToolTipSelectors,
+  treeView: EuiTreeViewSelectors,
+} as const;

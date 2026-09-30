@@ -324,7 +324,7 @@ export const createInlineRegistryWebpackConfig = ({
                 loader: 'postcss-loader',
                 options: {
                   postcssOptions: {
-                    config: require.resolve('@kbn/optimizer/postcss.config'),
+                    config: require.resolve('@kbn/optimizer-webpack-helpers/postcss.config'),
                   },
                 },
               },

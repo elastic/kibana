@@ -254,7 +254,7 @@ export function MachineLearningStackManagementJobsProvider(
 
     async openAppMenuItem(testSubj: string) {
       // Import/export (and other) actions may live in the app menu overflow ("More") popover.
-      if (!(await testSubjects.exists(testSubj, { timeout: 1000 }))) {
+      if (!(await testSubjects.exists(testSubj))) {
         await testSubjects.click('app-menu-overflow-button', 1000);
         await testSubjects.existOrFail(testSubj, { timeout: 5000 });
       }

@@ -7,6 +7,7 @@
 
 import './helpers/mocks';
 
+import { APP_HEADER_TEST_SUBJECTS } from '@kbn/app-header';
 import { fireEvent, screen, waitFor } from '@testing-library/react';
 
 import { setupEnvironment } from './helpers/setup_environment';
@@ -108,7 +109,7 @@ describe('<PolicyEdit />', () => {
     test('should set the correct page title', async () => {
       await setupPage();
 
-      const pageTitle = await screen.findByTestId('pageTitle');
+      const pageTitle = await screen.findByTestId(APP_HEADER_TEST_SUBJECTS.title);
       expect(pageTitle).toHaveTextContent('Edit policy');
     });
 

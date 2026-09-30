@@ -10,7 +10,11 @@ import type { ToolingLog } from '@kbn/tooling-log';
 import type { ReplayConfig, LoadResult } from '../types';
 import { extractDataStreamName, getMissingDataStreams, getErrorMessage } from '../utils';
 import { getSnapshotMetadata, deleteRepository, generateRepoName } from '../repository';
-import { filterIndicesToRestore, restoreIndices } from '../restore/restore';
+import {
+  filterIndicesToRestore,
+  restoreIndices,
+  waitForRestoredIndicesToBeActive,
+} from '../restore/restore';
 import { createTimestampPipeline, deletePipeline } from './pipeline';
 import { getDestinationInfo, reindexAllIndices } from './reindex';
 
@@ -61,6 +65,7 @@ export async function replaySnapshot(config: ReplayConfig): Promise<LoadResult> 
     concurrency,
     shouldUseInlineScript,
     beforeReindex,
+    indexSettings,
   } = config;
 
   const result: LoadResult = {
@@ -111,8 +116,13 @@ export async function replaySnapshot(config: ReplayConfig): Promise<LoadResult> 
       indices: indicesToRestore,
       renamePattern: '(.+)',
       renameReplacement: `${TEMP_INDEX_PREFIX}$1`,
+      indexSettings,
     });
     result.restoredIndices = restoredIndices;
+
+    if (indexSettings !== undefined) {
+      await waitForRestoredIndicesToBeActive({ esClient, restoredIndices });
+    }
 
     const destinationIndices = [
       ...new Set(indicesToRestore.map((idx) => getDestinationInfo(idx).destIndex)),

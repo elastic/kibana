@@ -188,11 +188,7 @@ export function createNavigationTree({
             }),
           },
           {
-            children: [
-              { link: 'searchSynonyms:synonyms' },
-              { link: 'searchQueryRules' },
-              { link: 'searchPlayground' },
-            ],
+            children: [{ link: 'searchSynonyms:synonyms' }, { link: 'searchQueryRules' }],
             id: 'search_relevance',
             title: i18n.translate('xpack.serverlessSearch.nav.ingest.relevance.title', {
               defaultMessage: 'Relevance',
@@ -239,6 +235,7 @@ export function createNavigationTree({
             children: [
               { link: 'management:api_keys', breadcrumbStatus: 'hidden' },
               { link: 'management:application_connections', breadcrumbStatus: 'hidden' },
+              { link: 'management:service_accounts', breadcrumbStatus: 'hidden' },
               { link: 'management:roles', breadcrumbStatus: 'hidden' },
             ],
           },
