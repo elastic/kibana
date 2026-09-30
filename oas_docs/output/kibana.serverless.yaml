@@ -125493,7 +125493,7 @@ paths:
                   maxLength: 1000
                   type: string
                 include:
-                  $ref: '#/components/schemas/Kibana_HTTP_APIs__zod_v4_55___schema0'
+                  $ref: '#/components/schemas/Kibana_HTTP_APIs__zod_v4_53___schema0'
                 name:
                   maxLength: 256
                   type: string
@@ -139453,7 +139453,7 @@ components:
           type: boolean
       required:
         - data_view
-    Kibana_HTTP_APIs__zod_v4_55___schema0:
+    Kibana_HTTP_APIs__zod_v4_53___schema0:
       anyOf:
         - additionalProperties: false
           type: object
@@ -139482,7 +139482,7 @@ components:
                 routing:
                   items:
                     allOf:
-                      - $ref: '#/components/schemas/Kibana_HTTP_APIs__zod_v4_55___schema0'
+                      - $ref: '#/components/schemas/Kibana_HTTP_APIs__zod_v4_53___schema0'
                       - type: object
                         properties:
                           destination:
