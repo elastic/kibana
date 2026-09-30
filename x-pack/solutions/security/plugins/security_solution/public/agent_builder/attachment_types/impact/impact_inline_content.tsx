@@ -19,7 +19,10 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { KbnWarningCallout } from '@kbn/ui-callout';
 import type { AttachmentRenderProps } from '@kbn/agent-builder-browser/attachments';
 import type { Attachment } from '@kbn/agent-builder-common/attachments';
-import { impactedEntitySchema } from '../../../../common/agent_builder/impact_attachment';
+import {
+  MISSING_ENTITY_NAME,
+  impactedEntitySchema,
+} from '../../../../common/agent_builder/impact_attachment';
 
 export const IMPACT_ATTACHMENT_TEST_ID = 'securitySolutionAgentBuilderImpactAttachment';
 export const IMPACT_ATTACHMENT_TRUNCATED_TEST_ID =
@@ -28,7 +31,7 @@ export const IMPACT_ATTACHMENT_TRUNCATED_TEST_ID =
 /** Flat table row — avoids nested field access in EuiBasicTable columns. */
 interface EntityRow {
   id: string;
-  entity_type: string;
+  entity_type: 'host' | 'user';
   name: string;
   alert_count: number;
   true_positive: number;
@@ -49,6 +52,19 @@ const formatEntityType = (entityType: string): string => {
     default:
       return entityType;
   }
+};
+
+const formatEntityName = (entityType: 'host' | 'user', name: string): string => {
+  if (name !== MISSING_ENTITY_NAME) {
+    return name;
+  }
+  return entityType === 'host'
+    ? i18n.translate('xpack.securitySolution.agentBuilder.impact.missingHostName', {
+        defaultMessage: 'No host name',
+      })
+    : i18n.translate('xpack.securitySolution.agentBuilder.impact.missingUserName', {
+        defaultMessage: 'No user name',
+      });
 };
 
 const parseTotalAlertCount = (value: unknown): number | undefined => {
@@ -108,6 +124,7 @@ const COLUMNS: Array<EuiBasicTableColumn<EntityRow>> = [
     name: i18n.translate('xpack.securitySolution.agentBuilder.impact.nameColumn', {
       defaultMessage: 'Entity',
     }),
+    render: (name: string, row: EntityRow) => formatEntityName(row.entity_type, name),
   },
   {
     field: 'alert_count',

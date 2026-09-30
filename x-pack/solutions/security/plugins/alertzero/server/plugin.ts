@@ -16,6 +16,7 @@ import {
 } from '@kbn/core/server';
 import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
+import { SECURITY_SOLUTION_ALERT_ANALYSIS_WORKFLOW_ENABLED } from '@kbn/management-settings-ids';
 import { getSubscriptionAvailability } from '../common/availability';
 import {
   ALERTZERO_API_PRIVILEGE_READ,
@@ -26,6 +27,7 @@ import {
 import type { AlertZeroConfig } from './config';
 import type {
   AlertZeroRequestHandlerContext,
+  AlertTriageAttachmentServiceProvider,
   AlertZeroPluginSetup,
   AlertZeroPluginStart,
   AlertZeroSetupDependencies,
@@ -81,11 +83,24 @@ export class AlertZeroPlugin
   private huntServices?: HuntServices;
   private scanFailuresService?: ScanFailuresService;
 
+  /**
+   * Set by whichever optional consumer's `start()` calls `registerAlertTriageAttachmentServiceProvider`
+   * (see `AlertZeroPluginStart`). May still be unset when `WorkersService` is constructed below,
+   * since that consumer starts after this plugin; `WorkersService` reads it lazily per call.
+   */
+  private alertTriageAttachmentServiceProvider?: AlertTriageAttachmentServiceProvider;
+
   constructor(context: PluginInitializerContext<AlertZeroConfig>) {
     this.logger = context.logger.get();
     this.config = context.config.get();
     this.isServerless = context.env.packageInfo.buildFlavor === 'serverless';
   }
+
+  private readonly registerAlertTriageAttachmentServiceProvider = (
+    provider: AlertTriageAttachmentServiceProvider
+  ): void => {
+    this.alertTriageAttachmentServiceProvider = provider;
+  };
 
   setup(
     coreSetup: CoreSetup<AlertZeroStartDependencies, AlertZeroPluginStart>,
@@ -186,19 +201,25 @@ export class AlertZeroPlugin
     return { isEnabled: true, setServerlessTierAvailable: this.setServerlessTierAvailable };
   }
 
-  start(_core: CoreStart, plugins: AlertZeroStartDependencies): AlertZeroPluginStart {
+  start(core: CoreStart, plugins: AlertZeroStartDependencies): AlertZeroPluginStart {
     this.spaces = plugins.spaces;
     this.proposals = plugins.proposals;
     this.agentBuilderConversations = plugins.agentBuilder?.conversations;
 
     if (!this.config.enabled) {
-      return {};
+      return {
+        registerAlertTriageAttachmentServiceProvider:
+          this.registerAlertTriageAttachmentServiceProvider,
+      };
     }
 
     const { agentBuilder, agenticInvestigations, proposals } = plugins;
     // Optional dependencies allow the upgrade shell to load without starting feature work.
     if (!agentBuilder || !proposals || !agenticInvestigations) {
-      return {};
+      return {
+        registerAlertTriageAttachmentServiceProvider:
+          this.registerAlertTriageAttachmentServiceProvider,
+      };
     }
     void ensureAgentSafe({ agentBuilder, spaceId: DEFAULT_SPACE_ID, logger: this.logger });
 
@@ -233,12 +254,33 @@ export class AlertZeroPlugin
           : undefined,
       this.logger
     );
-    this.workersService = new WorkersService(management, managedWorkflows, this.logger, {
-      ensureAgentForSpace: (spaceId) =>
-        ensureAgentSafe({ agentBuilder, spaceId, logger: this.logger }),
-      agentBuilder,
-      agentTypes: [agentType],
-    });
+    this.workersService = new WorkersService(
+      management,
+      managedWorkflows,
+      this.logger,
+      {
+        ensureAgentForSpace: (spaceId) =>
+          ensureAgentSafe({ agentBuilder, spaceId, logger: this.logger }),
+        agentBuilder,
+        agentTypes: [agentType],
+      },
+      {
+        // Reads whatever was registered via `registerAlertTriageAttachmentServiceProvider` at
+        // call time, not at construction time — a consumer may register after this plugin has
+        // started, since this plugin's optional consumers necessarily start after it does.
+        getAttachmentService: (request, workflowId) =>
+          this.alertTriageAttachmentServiceProvider
+            ? this.alertTriageAttachmentServiceProvider(request, workflowId)
+            : Promise.resolve(undefined),
+        // Read per request: the setting is space-scoped, so a Worker enabled in one space
+        // says nothing about another. Resolved here rather than in WorkersService because
+        // the setting belongs to security_solution.
+        isAlertAnalysisRuntimeEnabled: async (request) =>
+          core.uiSettings
+            .asScopedToClient(core.savedObjects.getScopedClient(request))
+            .get<boolean>(SECURITY_SOLUTION_ALERT_ANALYSIS_WORKFLOW_ENABLED),
+      }
+    );
 
     this.scanFailuresService = new ScanFailuresService(management, this.logger);
 
@@ -248,7 +290,10 @@ export class AlertZeroPlugin
       getSearchInferenceEndpoints: () => plugins.searchInferenceEndpoints,
     };
 
-    return {};
+    return {
+      registerAlertTriageAttachmentServiceProvider:
+        this.registerAlertTriageAttachmentServiceProvider,
+    };
   }
 
   private requireStarted<T>(value: T | undefined, name: string): T {
