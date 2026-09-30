@@ -145,15 +145,12 @@ describe('cluster_settings validators', () => {
       });
     });
 
-    it('returns profiling enabled false when profilingStatus throws', async () => {
+    it('rethrows when profilingStatus throws', async () => {
       const { setupOptions, profilingStatus } = createSetupOptions();
-      profilingStatus.mockRejectedValue(new Error('profilingStatus failed'));
+      const error = new Error('profilingStatus failed');
+      profilingStatus.mockRejectedValue(error);
 
-      await expect(validateProfilingStatus(setupOptions)).resolves.toEqual({
-        profiling: {
-          enabled: false,
-        },
-      });
+      await expect(validateProfilingStatus(setupOptions)).rejects.toBe(error);
     });
   });
 });
