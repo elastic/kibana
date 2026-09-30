@@ -211,16 +211,23 @@ export const UpdatePullRequestInputSchema = lazySchema(() =>
         .describe(
           'Replace the full reviewer list with these user UUIDs (max 50). Pass an empty array to remove all reviewers. Omit to leave reviewers unchanged.'
         ),
+      draft: z
+        .boolean()
+        .optional()
+        .describe(
+          'Set to false to mark a draft pull request ready for review and merging, or true to mark a ready pull request as draft again. Omit to leave draft status unchanged. createPullRequest cannot be merged while draft is true.'
+        ),
     })
     .refine(
       (value) =>
         value.title !== undefined ||
         value.description !== undefined ||
         value.destinationBranch !== undefined ||
-        value.reviewers !== undefined,
+        value.reviewers !== undefined ||
+        value.draft !== undefined,
       {
         message:
-          'At least one of title, description, destinationBranch, or reviewers must be provided.',
+          'At least one of title, description, destinationBranch, reviewers, or draft must be provided.',
       }
     )
 );

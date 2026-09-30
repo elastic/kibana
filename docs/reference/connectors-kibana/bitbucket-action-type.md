@@ -46,7 +46,7 @@ Authentication
 | `createPullRequest` | Open a pull request from a source branch to a destination branch. Parameters: `repoSlug` (required), `title` (required), `sourceBranch` (required), `destinationBranch`, `description`, `reviewers`, `closeSourceBranch`, `draft`. |
 | `getPullRequest` | Get a pull request with its state, branches, reviewers, participants, approval count, and merge commit. Parameters: `repoSlug` (required), `pullRequestId` (required). |
 | `listPullRequests` | List pull requests filtered by state and query. Parameters: `repoSlug` (required), `state`, `query`, `sort`, `page`, `pageSize`. |
-| `updatePullRequest` | Edit a pull request's title, description, destination branch, or reviewers. Parameters: `repoSlug` (required), `pullRequestId` (required), and at least one of `title`, `description`, `destinationBranch`, `reviewers`. |
+| `updatePullRequest` | Edit a pull request's title, description, destination branch, reviewers, or draft status. Parameters: `repoSlug` (required), `pullRequestId` (required), and at least one of `title`, `description`, `destinationBranch`, `reviewers`, `draft`. |
 | `mergePullRequest` | Merge an open pull request. Parameters: `repoSlug` (required), `pullRequestId` (required), `mergeStrategy`, `message`, `closeSourceBranch`. |
 | `approvePullRequest` | Approve a pull request as the authenticated user. Parameters: `repoSlug` (required), `pullRequestId` (required). |
 | `declinePullRequest` | Decline an open pull request. Parameters: `repoSlug` (required), `pullRequestId` (required). |

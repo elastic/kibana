@@ -419,6 +419,7 @@ describe('Bitbucket', () => {
         description: 'Automated remediation',
         reviewers: [{ uuid: '{rev-uuid}' }],
         destination: undefined,
+        draft: false,
       });
       expect(result.title).toBe('New title');
     });
@@ -442,7 +443,41 @@ describe('Bitbucket', () => {
         description: 'Automated remediation',
         reviewers: [],
         destination: { branch: { name: 'release/1.0' } },
+        draft: false,
       });
+    });
+
+    it('marks a draft pull request ready with draft: false', async () => {
+      const draftPullRequest = { ...samplePullRequest, draft: true };
+      mockClient.get.mockResolvedValue({ data: draftPullRequest });
+      mockClient.put.mockResolvedValue({ data: { ...draftPullRequest, draft: false } });
+
+      const result = await Bitbucket.actions.updatePullRequest.handler(
+        mockContext,
+        parse('updatePullRequest', { repoSlug: 'my-repo', pullRequestId: 7, draft: false })
+      );
+
+      expect(mockClient.put).toHaveBeenCalledWith(
+        `${REPO_URL}/pullrequests/7`,
+        expect.objectContaining({ draft: false })
+      );
+      expect(result.draft).toBe(false);
+    });
+
+    it('preserves the current draft status when draft is omitted', async () => {
+      const draftPullRequest = { ...samplePullRequest, draft: true };
+      mockClient.get.mockResolvedValue({ data: draftPullRequest });
+      mockClient.put.mockResolvedValue({ data: draftPullRequest });
+
+      await Bitbucket.actions.updatePullRequest.handler(
+        mockContext,
+        parse('updatePullRequest', { repoSlug: 'my-repo', pullRequestId: 7, title: 'New title' })
+      );
+
+      expect(mockClient.put).toHaveBeenCalledWith(
+        `${REPO_URL}/pullrequests/7`,
+        expect.objectContaining({ draft: true })
+      );
     });
   });
 
@@ -1040,6 +1075,21 @@ describe('Bitbucket', () => {
       } as unknown as ActionContext;
       await expect(Bitbucket.test.handler(ctx)).rejects.toThrow(
         'Bitbucket test failed (status 403)'
+      );
+    });
+
+    it('does not reinterpret an invalid bearer credential (401) as a repository-scoped token', async () => {
+      // 401 means the credential itself was rejected (invalid, expired, revoked) -
+      // unlike 403, it is not evidence the token merely lacks workspace-wide scope,
+      // and must not be reported as usable for every other action.
+      mockClient.get.mockRejectedValue({ response: { status: 401 } });
+      const ctx = {
+        ...mockContext,
+        config: { workspace: 'my-workspace' },
+        secrets: { authType: 'bearer' },
+      } as unknown as ActionContext;
+      await expect(Bitbucket.test.handler(ctx)).rejects.toThrow(
+        'Bitbucket test failed (status 401)'
       );
     });
   });

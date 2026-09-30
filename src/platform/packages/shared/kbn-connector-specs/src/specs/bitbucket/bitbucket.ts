@@ -502,7 +502,7 @@ export const Bitbucket: ConnectorSpec = {
       isTool: true,
       scope: 'destroy',
       description:
-        "Edit an open pull request's title, description, destination branch, or reviewer list. Only the fields you provide change; the current values are preserved for the rest. Returns the updated pull request. Use this to refine a proposal after opening it, for example to add reviewers once a check has passed.",
+        "Edit an open pull request's title, description, destination branch, reviewer list, or draft status. Only the fields you provide change; the current values are preserved for the rest. Returns the updated pull request. Use this to refine a proposal after opening it (for example to add reviewers once a check has passed), or to set draft: false to make a pull request created with createPullRequest's draft: true mergeable.",
       input: UpdatePullRequestInputSchema,
       handler: async (ctx, input: UpdatePullRequestInput) =>
         runAction('updatePullRequest', async () => {
@@ -521,6 +521,7 @@ export const Bitbucket: ConnectorSpec = {
             destination: input.destinationBranch
               ? { branch: { name: input.destinationBranch } }
               : undefined,
+            draft: input.draft ?? current.data.draft,
           });
           return toPullRequestSummary(response.data);
         }),
@@ -855,7 +856,7 @@ export const Bitbucket: ConnectorSpec = {
     'Typical patterns:',
     '  - Propose a change: `getBranch` (main) to get the tip hash, `createBranch` from it, push commits through git/CI tooling, then `createPullRequest` from the new branch. Add reviewers by UUID at creation or later with `updatePullRequest`.',
     '  - Gate a pull request: `getPullRequest` to read `sourceCommit` and `sourceBranch`, run your check, then `createCommitBuildStatus` with `refname` set to the source branch (INPROGRESS first, then SUCCESSFUL/FAILED with the same `key`). Approve with `approvePullRequest` or reject with `addPullRequestComment` + `declinePullRequest`.',
-    '  - Land a change: confirm `state` is OPEN and `approvalCount` satisfies your policy via `getPullRequest`, and check required build statuses with `listCommitBuildStatuses` on `sourceCommit` (its output has no status fields), then `mergePullRequest` (optionally `closeSourceBranch: true`); otherwise clean up later with `deleteBranch`.',
+    '  - Land a change: if the pull request was opened with `draft: true`, first call `updatePullRequest` with `draft: false` - mergePullRequest rejects a draft pull request. Confirm `state` is OPEN and `approvalCount` satisfies your policy via `getPullRequest`, and check required build statuses with `listCommitBuildStatuses` on `sourceCommit` (its output has no status fields), then `mergePullRequest` (optionally `closeSourceBranch: true`); otherwise clean up later with `deleteBranch`.',
     '  - Run CI on demand: `triggerPipeline` for a branch or commit (add `customPipeline` and `variables` for custom pipelines), then poll `getPipeline` until `state` is COMPLETED and branch on `result` (SUCCESSFUL, FAILED, STOPPED, ERROR, EXPIRED). Use `stopPipeline` to abort a run that is no longer needed.',
     '  - Review or cleanup pass: `listPullRequests` with `state: ["OPEN"]` (default) or `["MERGED", "DECLINED"]` and a `query` such as `source.branch.name ~ "remediation/"`, then act on each `id`. List results omit reviewers, participants, and `approvalCount`; call `getPullRequest` for those.',
     '',
@@ -887,14 +888,16 @@ export const Bitbucket: ConnectorSpec = {
         } catch (error) {
           // A Bitbucket repository, project, or workspace access token (the bearer
           // auth option) can be scoped to a single repository and is then denied
-          // by this workspace-wide listing call even though the same token works
-          // for every repository-scoped action (pull requests, branches,
-          // pipelines). Recognize that case for bearer auth specifically, rather
-          // than reporting valid repository-scoped credentials as broken.
+          // (403) by this workspace-wide listing call even though the same token
+          // works for every repository-scoped action (pull requests, branches,
+          // pipelines). Only 403 (authenticated, insufficient scope) means that -
+          // a 401 means the credential itself was rejected (invalid, expired, or
+          // revoked), which is a real failure and must not be reported as a
+          // scope limitation the token can otherwise be used with.
           const status = (error as { response?: { status?: number } }).response?.status;
-          if (ctx.secrets?.authType === 'bearer' && (status === 401 || status === 403)) {
+          if (ctx.secrets?.authType === 'bearer' && status === 403) {
             throw new Error(
-              `Could not list repositories in workspace "${workspace}" with this access token (status ${status}). This is expected for a token scoped to a single repository - it cannot list the whole workspace, but can still be used with repoSlug in every other action. If you expect broader access, verify the token has the repository:write scope.`
+              `Could not list repositories in workspace "${workspace}" with this access token (status 403). This is expected for a token scoped to a single repository - it cannot list the whole workspace, but can still be used with repoSlug in every other action. If you expect broader access, verify the token has the repository:write scope.`
             );
           }
           throw error;
