@@ -174,47 +174,6 @@ function GraphWorkspace(options) {
 
   //======== Selection functions ========
 
-  this.selectAll = function () {
-    self.selectedNodes = [];
-    self.nodes.forEach((node) => {
-      if (node.parent === undefined) {
-        node.isSelected = true;
-        self.selectedNodes.push(node);
-      } else {
-        node.isSelected = false;
-      }
-    });
-  };
-
-  this.selectNone = function () {
-    self.selectedNodes = [];
-    self.nodes.forEach((node) => {
-      node.isSelected = false;
-    });
-  };
-
-  this.selectInvert = function () {
-    self.selectedNodes = [];
-    self.nodes.forEach((node) => {
-      if (node.parent !== undefined) {
-        return;
-      }
-      node.isSelected = !node.isSelected;
-      if (node.isSelected) {
-        self.selectedNodes.push(node);
-      }
-    });
-  };
-
-  this.selectNodes = function (nodes) {
-    nodes.forEach((node) => {
-      node.isSelected = true;
-      if (self.selectedNodes.indexOf(node) < 0) {
-        self.selectedNodes.push(node);
-      }
-    });
-  };
-
   this.selectNode = function (node) {
     node.isSelected = true;
     if (self.selectedNodes.indexOf(node) < 0) {
@@ -227,19 +186,12 @@ function GraphWorkspace(options) {
     self.selectedEdges.push(edge);
   };
 
-  this.removeEdgeFromSelection = function (edge) {
-    edge.isSelected = false;
-    self.selectedEdges = self.selectedEdges.filter((e) => e !== edge);
-  };
-
   this.clearEdgeSelection = function () {
     for (const edge of self.selectedEdges) {
       edge.isSelected = false;
     }
     self.selectedEdges = [];
   };
-
-  this.getEdgeSelection = () => [...self.selectedEdges];
 
   this.deleteNodes = function (nodeIds) {
     const selectedNodes = nodeIds
@@ -274,76 +226,11 @@ function GraphWorkspace(options) {
     self.runLayout();
   };
 
-  this.selectNeighbours = function () {
-    const newSelections = [];
-    self.edges.forEach((edge) => {
-      if (!edge.topSrc.isSelected) {
-        if (self.selectedNodes.indexOf(edge.topTarget) >= 0) {
-          if (newSelections.indexOf(edge.topSrc) < 0) {
-            newSelections.push(edge.topSrc);
-          }
-        }
-      }
-      if (!edge.topTarget.isSelected) {
-        if (self.selectedNodes.indexOf(edge.topSrc) >= 0) {
-          if (newSelections.indexOf(edge.topTarget) < 0) {
-            newSelections.push(edge.topTarget);
-          }
-        }
-      }
-    });
-    newSelections.forEach((newlySelectedNode) => {
-      self.selectedNodes.push(newlySelectedNode);
-      newlySelectedNode.isSelected = true;
-    });
-  };
-
   this.selectNone = function () {
     self.selectedNodes.forEach((node) => {
       node.isSelected = false;
     });
     self.selectedNodes = [];
-  };
-
-  this.deselectNode = function (node) {
-    node.isSelected = false;
-    self.arrRemove(self.selectedNodes, node);
-  };
-
-  this.getAllSelectedNodes = function () {
-    return this.returnUnpackedGroupeds(self.selectedNodes);
-  };
-
-  this.colorSelected = function (colorNum) {
-    self.getAllSelectedNodes().forEach((node) => {
-      node.color = colorNum;
-    });
-  };
-
-  this.getSelectionsThatAreGrouped = function () {
-    const result = [];
-    self.selectedNodes.forEach((node) => {
-      if (node.numChildren > 0) {
-        result.push(node);
-      }
-    });
-    return result;
-  };
-
-  this.ungroupSelection = function () {
-    self.getSelectionsThatAreGrouped().forEach((node) => {
-      self.ungroup(node);
-    });
-  };
-
-  this.toggleNodeSelection = function (node) {
-    if (node.isSelected) {
-      self.deselectNode(node);
-    } else {
-      node.isSelected = true;
-      self.selectedNodes.push(node);
-    }
-    return node.isSelected;
   };
 
   this.returnUnpackedGroupeds = function (topLevelNodeArray) {
@@ -1053,20 +940,6 @@ function GraphWorkspace(options) {
     };
   };
 
-  this.getSelectedOrAllNodes = function () {
-    let startNodes = self.getAllSelectedNodes();
-    if (startNodes.length === 0) {
-      startNodes = self.nodes;
-    }
-    return startNodes;
-  };
-
-  this.getSelectedOrAllTopNodes = function () {
-    return self.getSelectedOrAllNodes().filter(function (node) {
-      return node.parent === undefined;
-    });
-  };
-
   function addTermToFieldList(map, field, term) {
     let arr = map[field];
     if (!arr) {
@@ -1308,19 +1181,6 @@ function GraphWorkspace(options) {
       },
     };
     return result;
-  };
-
-  this.getSelectedIntersections = function (callback) {
-    if (self.selectedNodes.length === 0) {
-      return self.getAllIntersections(callback, self.nodes);
-    }
-    if (self.selectedNodes.length === 1) {
-      const selectedNode = self.selectedNodes[0];
-      const neighbourNodes = self.getNeighbours(selectedNode);
-      neighbourNodes.push(selectedNode);
-      return self.getAllIntersections(callback, neighbourNodes);
-    }
-    return self.getAllIntersections(callback, self.getAllSelectedNodes());
   };
 
   this.jLHScore = function (subsetFreq, subsetSize, supersetFreq, supersetSize) {
