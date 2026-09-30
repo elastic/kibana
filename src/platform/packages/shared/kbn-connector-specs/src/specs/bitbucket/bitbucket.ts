@@ -76,6 +76,7 @@ import {
 } from './types';
 
 const BITBUCKET_API_BASE_URL = 'https://api.bitbucket.org/2.0';
+const BITBUCKET_API_BASE_URL_ORIGIN = new URL(BITBUCKET_API_BASE_URL).origin;
 const BITBUCKET_WEB_BASE_URL = 'https://bitbucket.org';
 
 const getWorkspace = (ctx: ActionContext): string => {
@@ -679,11 +680,36 @@ export const Bitbucket: ConnectorSpec = {
           // is itself the full next-page URL, already scoped to this workspace
           // and repository, so request it directly instead of rebuilding it.
           // The cursor is caller-supplied text, though, and ctx.client carries
-          // this connector's credentials, so reject anything that is not
-          // actually a Bitbucket API URL before sending it.
-          if (input.cursor && !input.cursor.startsWith(`${BITBUCKET_API_BASE_URL}/`)) {
+          // this connector's credentials, so it must be pinned to this exact
+          // workspace and repository's commits endpoint - not just any
+          // api.bitbucket.org URL, which would let a cursor naming a different
+          // workspace/repository read through this connector's credentials
+          // regardless of the repoSlug the caller passed.
+          // A string prefix check here is bypassable: a cursor whose path
+          // contains a `../` segment can start with this exact prefix while
+          // resolving, once parsed as a URL, to a different repository or
+          // workspace entirely - the credentials would then read through to
+          // wherever it actually resolves. Parse the cursor and compare its
+          // normalized origin + pathname against this repository's commits
+          // endpoint (either the bare form or a revision-scoped subpath),
+          // rejecting anything - including an unparseable string - that
+          // does not match exactly.
+          const commitsUrl = `${buildRepoUrl(ctx, input.repoSlug)}/commits`;
+          const commitsPath = new URL(commitsUrl).pathname;
+          const isValidCursor = (cursor: string): boolean => {
+            try {
+              const parsed = new URL(cursor);
+              return (
+                parsed.origin === BITBUCKET_API_BASE_URL_ORIGIN &&
+                (parsed.pathname === commitsPath || parsed.pathname.startsWith(`${commitsPath}/`))
+              );
+            } catch {
+              return false;
+            }
+          };
+          if (input.cursor && !isValidCursor(input.cursor)) {
             throw new Error(
-              `cursor must be a nextCursor value returned by a previous listCommits call, starting with ${BITBUCKET_API_BASE_URL}/.`
+              `cursor must be a nextCursor value returned by a previous listCommits call for this repoSlug, matching ${commitsUrl}.`
             );
           }
           const response = input.cursor
@@ -729,7 +755,7 @@ export const Bitbucket: ConnectorSpec = {
       isTool: true,
       scope: 'read',
       description:
-        "List the build statuses reported on a commit, optionally filtered to a refname. Returns each status's key, state (INPROGRESS, SUCCESSFUL, FAILED, or STOPPED), name, and URL. Use this before mergePullRequest to check that required checks reported by createCommitBuildStatus have passed, since getPullRequest does not include statuses.",
+        "List the build statuses reported on a commit, optionally filtered to a refname. Returns each status's key, state (INPROGRESS, SUCCESSFUL, FAILED, or STOPPED), name, and URL, plus page/pageSize/hasMore for a commit with more than one page of statuses. Use this before mergePullRequest to check that required checks reported by createCommitBuildStatus have passed, since getPullRequest does not include statuses.",
       input: ListCommitBuildStatusesInputSchema,
       handler: async (ctx, input: ListCommitBuildStatusesInput) =>
         runAction('listCommitBuildStatuses', async () => {
@@ -737,7 +763,7 @@ export const Bitbucket: ConnectorSpec = {
             `${buildRepoUrl(ctx, input.repoSlug)}/commit/${encodeURIComponent(
               input.commit
             )}/statuses`,
-            { params: { refname: input.refname } }
+            { params: { refname: input.refname, page: input.page, pagelen: input.pageSize } }
           );
           return toPage(response.data, toCommitStatusSummary);
         }),

@@ -727,6 +727,47 @@ describe('Bitbucket', () => {
       expect(mockClient.get).not.toHaveBeenCalled();
     });
 
+    it('rejects a cursor naming a different workspace or repository behind the same hostname', async () => {
+      await expect(
+        Bitbucket.actions.listCommits.handler(
+          mockContext,
+          parse('listCommits', {
+            repoSlug: 'my-repo',
+            cursor:
+              'https://api.bitbucket.org/2.0/repositories/other-workspace/other-repo/commits?page=2',
+          })
+        )
+      ).rejects.toThrow(
+        'cursor must be a nextCursor value returned by a previous listCommits call'
+      );
+      expect(mockClient.get).not.toHaveBeenCalled();
+    });
+
+    it('rejects a same-prefix cursor that resolves elsewhere via a path-traversal segment', async () => {
+      await expect(
+        Bitbucket.actions.listCommits.handler(
+          mockContext,
+          parse('listCommits', {
+            repoSlug: 'my-repo',
+            cursor: `${REPO_URL}/commits/../../other-workspace/other-repo/commits?page=2`,
+          })
+        )
+      ).rejects.toThrow(
+        'cursor must be a nextCursor value returned by a previous listCommits call'
+      );
+      expect(mockClient.get).not.toHaveBeenCalled();
+    });
+
+    it('accepts a cursor for a revision-scoped call on this repository', async () => {
+      const nextUrl = `${REPO_URL}/commits/main?pagelen=1&ctx=abc&page=2`;
+      mockClient.get.mockResolvedValue({ data: { values: [commit] } });
+      await Bitbucket.actions.listCommits.handler(
+        mockContext,
+        parse('listCommits', { repoSlug: 'my-repo', cursor: nextUrl })
+      );
+      expect(mockClient.get).toHaveBeenCalledWith(nextUrl);
+    });
+
     it('creates a build status on a commit', async () => {
       mockClient.post.mockResolvedValue({
         data: {
@@ -796,11 +837,30 @@ describe('Bitbucket', () => {
         })
       );
       expect(mockClient.get).toHaveBeenCalledWith(`${REPO_URL}/commit/abc1234/statuses`, {
-        params: { refname: 'fix/config-drift' },
+        params: { refname: 'fix/config-drift', page: undefined, pagelen: undefined },
       });
       expect(result.values).toEqual([
         expect.objectContaining({ key: 'KIBANA-CHECK', state: 'SUCCESSFUL' }),
       ]);
+    });
+
+    it('requests a subsequent page of build statuses', async () => {
+      mockClient.get.mockResolvedValue({
+        data: { values: [], page: 2, pagelen: 5, next: undefined },
+      });
+      const result = await Bitbucket.actions.listCommitBuildStatuses.handler(
+        mockContext,
+        parse('listCommitBuildStatuses', {
+          repoSlug: 'my-repo',
+          commit: 'abc1234',
+          page: 2,
+          pageSize: 5,
+        })
+      );
+      expect(mockClient.get).toHaveBeenCalledWith(`${REPO_URL}/commit/abc1234/statuses`, {
+        params: { refname: undefined, page: 2, pagelen: 5 },
+      });
+      expect(result).toEqual(expect.objectContaining({ page: 2, pageSize: 5, hasMore: false }));
     });
   });
 

@@ -441,6 +441,8 @@ export const ListCommitBuildStatusesInputSchema = lazySchema(() =>
       .describe(
         "Only return statuses created with this refname, or without one. Set it to a pull request's source branch to see only the statuses relevant to that pull request."
       ),
+    page: page(),
+    pageSize: pageSize(),
   })
 );
 export type ListCommitBuildStatusesInput = z.infer<typeof ListCommitBuildStatusesInputSchema>;
