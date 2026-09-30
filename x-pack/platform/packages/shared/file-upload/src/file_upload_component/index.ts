@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export { ResultsLinks } from './results_links';
+export { FileUploadLiteLookUpView } from './components/file_upload_lite_lookup_view';

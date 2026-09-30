@@ -18,10 +18,9 @@ import {
   EuiPanel,
   EuiLink,
 } from '@elastic/eui';
-import type { EuiIconType } from '@elastic/eui/src/components/icon/icon';
 
 export interface LinkCardProps {
-  icon: EuiIconType | string;
+  icon: any | string;
   iconAreaLabel?: string;
   title: any;
   description: any;
