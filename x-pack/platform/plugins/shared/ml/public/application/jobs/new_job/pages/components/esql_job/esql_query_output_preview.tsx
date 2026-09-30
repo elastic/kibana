@@ -6,13 +6,17 @@
  */
 
 import React, { useEffect, useMemo, useState } from 'react';
-import { EuiBasicTable, EuiCallOut, EuiSpacer, EuiText, EuiTitle } from '@elastic/eui';
+import { EuiCallOut, EuiInMemoryTable, EuiSpacer, EuiText, EuiTitle } from '@elastic/eui';
 import type { EuiBasicTableColumn } from '@elastic/eui';
 import { calculateBounds } from '@kbn/data-plugin/common';
 import { getESQLResults } from '@kbn/esql-utils';
 import { i18n } from '@kbn/i18n';
 import { useMlKibana } from '../../../../../contexts/kibana';
 import { extractEsqlErrorReason } from './esql_error_reason';
+import {
+  buildEsqlOutputPreviewQuery,
+  ESQL_OUTPUT_PREVIEW_ROW_LIMIT,
+} from './esql_output_preview_query';
 import { useEsqlWizardContext } from './esql_wizard_context';
 
 type PreviewRow = Record<string, unknown>;
@@ -23,6 +27,7 @@ interface PreviewResult {
 }
 
 const DEBOUNCE_MS = 300;
+const PAGE_SIZE_OPTIONS = [10, 25, 50];
 
 const tableValue = (value: unknown): string => {
   if (value === null || value === undefined) return '';
@@ -91,7 +96,7 @@ export const EsqlQueryOutputPreview = () => {
 
     const timeout = window.setTimeout(() => {
       getESQLResults({
-        esqlQuery: query,
+        esqlQuery: buildEsqlOutputPreviewQuery(query),
         search: data.search.search,
         signal: controller.signal,
         filter,
@@ -100,9 +105,12 @@ export const EsqlQueryOutputPreview = () => {
           if (cancelled) return;
 
           const columnNames = (response.columns ?? []).map(({ name }) => name);
-          const rows = ((response.values ?? []) as unknown[][]).map((values) =>
-            Object.fromEntries(columnNames.map((name, index) => [name, values[index]]))
-          );
+          const rows = ((response.values ?? []) as unknown[][])
+            // The query already carries LIMIT 100; slice again as a safety net.
+            .slice(0, ESQL_OUTPUT_PREVIEW_ROW_LIMIT)
+            .map((values) =>
+              Object.fromEntries(columnNames.map((name, index) => [name, values[index]]))
+            );
 
           setResult({ columnNames, rows });
           setError(undefined);
@@ -184,15 +192,31 @@ export const EsqlQueryOutputPreview = () => {
         </EuiText>
       ) : null}
       {canRun && result !== undefined && result.rows.length > 0 ? (
-        <EuiBasicTable
-          items={result.rows}
-          columns={columns}
-          loading={isLoading}
-          tableCaption={i18n.translate('xpack.ml.esqlJob.queryOutput.tableCaption', {
-            defaultMessage: 'ES|QL query output',
-          })}
-          data-test-subj="mlEsqlQueryOutputPreviewTable"
-        />
+        <>
+          {result.rows.length >= ESQL_OUTPUT_PREVIEW_ROW_LIMIT ? (
+            <>
+              <EuiText size="s" color="subdued" data-test-subj="mlEsqlQueryOutputPreviewLimitNote">
+                <p>
+                  {i18n.translate('xpack.ml.esqlJob.queryOutput.limitNote', {
+                    defaultMessage: 'Showing the first {limit} rows.',
+                    values: { limit: ESQL_OUTPUT_PREVIEW_ROW_LIMIT },
+                  })}
+                </p>
+              </EuiText>
+              <EuiSpacer size="s" />
+            </>
+          ) : null}
+          <EuiInMemoryTable
+            items={result.rows}
+            columns={columns}
+            loading={isLoading}
+            pagination={{ initialPageSize: 10, pageSizeOptions: PAGE_SIZE_OPTIONS }}
+            tableCaption={i18n.translate('xpack.ml.esqlJob.queryOutput.tableCaption', {
+              defaultMessage: 'ES|QL query output',
+            })}
+            data-test-subj="mlEsqlQueryOutputPreviewTable"
+          />
+        </>
       ) : null}
     </section>
   );

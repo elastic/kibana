@@ -6,7 +6,7 @@
  */
 
 import React, { useEffect } from 'react';
-import { act, screen } from '@testing-library/react';
+import { act, fireEvent, screen, within } from '@testing-library/react';
 import { getESQLResults } from '@kbn/esql-utils';
 import { renderWithI18n } from '../../../../../test_utils/render_with_ml_context';
 import { useMlKibana } from '../../../../../contexts/kibana';
@@ -137,5 +137,84 @@ describe('EsqlQueryOutputPreview', () => {
     expect(await screen.findByTestId('mlEsqlQueryOutputPreviewError')).toHaveTextContent(
       'Unknown column [bytes]'
     );
+  });
+
+  it('caps the query at 100 rows', async () => {
+    mockedGetESQLResults.mockResolvedValue(response([{ name: 'host', type: 'keyword' }], []));
+    renderPreview();
+    await flushDebounce();
+
+    expect(mockedGetESQLResults.mock.calls[0][0].esqlQuery).toBe(
+      'FROM logs-* | KEEP host, bytes\n| LIMIT 100'
+    );
+  });
+
+  it('paginates with 10 rows per page by default and offers 10/25/50 page sizes', async () => {
+    mockedGetESQLResults.mockResolvedValue(
+      response(
+        [{ name: 'n', type: 'long' }],
+        Array.from({ length: 100 }, (_, index) => [index])
+      )
+    );
+    renderPreview();
+    await flushDebounce();
+
+    const table = await screen.findByTestId('mlEsqlQueryOutputPreviewTable');
+    expect(table.querySelectorAll('tbody tr')).toHaveLength(10);
+    expect(table).toHaveTextContent('Rows per page: 10');
+
+    await act(async () => {
+      fireEvent.click(within(table).getByTestId('tablePaginationPopoverButton'));
+    });
+    expect(
+      ['tablePagination-10-rows', 'tablePagination-25-rows', 'tablePagination-50-rows'].map(
+        (testId) => screen.getByTestId(testId)
+      )
+    ).toHaveLength(3);
+    expect(screen.queryByTestId('tablePagination-100-rows')).not.toBeInTheDocument();
+
+    fireEvent.click(screen.getByTestId('tablePagination-25-rows'));
+    expect(
+      screen.getByTestId('mlEsqlQueryOutputPreviewTable').querySelectorAll('tbody tr')
+    ).toHaveLength(25);
+  });
+
+  it('notes that only the first 100 rows are shown when the limit is reached', async () => {
+    mockedGetESQLResults.mockResolvedValue(
+      response(
+        [{ name: 'n', type: 'long' }],
+        Array.from({ length: 100 }, (_, index) => [index])
+      )
+    );
+    renderPreview();
+    await flushDebounce();
+
+    expect(await screen.findByTestId('mlEsqlQueryOutputPreviewLimitNote')).toHaveTextContent(
+      'Showing the first 100 rows'
+    );
+  });
+
+  it('slices client-side to 100 rows even if more come back, and omits the note below the limit', async () => {
+    mockedGetESQLResults.mockResolvedValue(
+      response(
+        [{ name: 'n', type: 'long' }],
+        Array.from({ length: 250 }, (_, index) => [index])
+      )
+    );
+    const { unmount } = renderPreview();
+    await flushDebounce();
+
+    const table = await screen.findByTestId('mlEsqlQueryOutputPreviewTable');
+    expect(table).toHaveTextContent('Page 1 of 10');
+    unmount();
+
+    mockedGetESQLResults.mockResolvedValue(
+      response([{ name: 'n', type: 'long' }], [[1], [2], [3]])
+    );
+    renderPreview();
+    await flushDebounce();
+
+    await screen.findByTestId('mlEsqlQueryOutputPreviewTable');
+    expect(screen.queryByTestId('mlEsqlQueryOutputPreviewLimitNote')).not.toBeInTheDocument();
   });
 });
