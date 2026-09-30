@@ -28,6 +28,8 @@ import type {
   ExploreRequest,
   ExploreResults,
   GraphSavePolicy,
+  SearchRequest,
+  SearchResults,
   IndexPatternProvider,
   Workspace,
 } from '../types';
@@ -62,6 +64,7 @@ export interface GraphStoreDependencies
   basePath: string;
   handleSearchQueryError: (err: Error | string) => void;
   exploreGraph: (index: string, request: ExploreRequest) => Promise<ExploreResults>;
+  searchGraph: (index: string, request: SearchRequest) => Promise<SearchResults>;
 }
 
 export type StartGraphListening = TypedStartListening<GraphState, GraphDispatch>;
