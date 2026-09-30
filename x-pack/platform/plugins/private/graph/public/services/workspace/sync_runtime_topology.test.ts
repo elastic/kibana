@@ -13,7 +13,15 @@ it('rebuilds mutable runtime references from normalized Redux topology', () => {
   const workspace = {
     runLayout: jest.fn(),
   } as unknown as Workspace;
-  const state = {
+  const state: WorkspaceState = {
+    isInitialized: true,
+    isLayoutRunning: false,
+    selectedNodeIds: [],
+    selectedEdgeIds: [],
+    blocklistedNodesById: {},
+    blocklistedNodeIds: [],
+    undoHistory: [],
+    redoHistory: [],
     nodeIds: ['parent', 'child'],
     nodesById: {
       parent: {
@@ -49,7 +57,7 @@ it('rebuilds mutable runtime references from normalized Redux topology', () => {
         width: 2,
       },
     },
-  } as WorkspaceState;
+  };
 
   syncRuntimeTopology(workspace, state);
 
