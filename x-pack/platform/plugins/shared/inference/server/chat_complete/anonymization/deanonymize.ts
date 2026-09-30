@@ -75,27 +75,35 @@ function restoreToolCallFields<TMessage extends Message>(
 }
 
 /**
- * Scans `content` for every known mask (from `anonymizations`) and replaces each
- * occurrence with its original value, returning the rebuilt string plus the
- * final-string offset ranges of every replacement made.
- *
- * Shared by `deanonymize()` (full-message deanonymization) and the streaming
- * hold-buffer (`deanonymize_stream_buffer.ts`), which deanonymizes safe prefixes
- * of a streamed response incrementally using the same mask-matching logic.
+ * Multiple anonymization entries can point at the same mask; index them by mask so each
+ * unique mask is scanned once (no duplicated matches/ranges). Build this once per
+ * call and reuse it across `replaceMasks` invocations.
  */
-export function replaceAnonymizedText(
-  content: string,
+export function indexEntitiesByMask(
   anonymizations: Anonymization[]
-): { output: string; deanonymizations: Deanonymization[] } {
-  // Multiple anonymization entries can point at the same mask.
-  // Scan each unique mask once so we don't duplicate matches/ranges.
+): ReadonlyMap<string, Anonymization['entity']> {
   const entitiesByMask = new Map<string, Anonymization['entity']>();
   for (const { entity } of anonymizations) {
     if (!entitiesByMask.has(entity.mask)) {
       entitiesByMask.set(entity.mask, entity);
     }
   }
+  return entitiesByMask;
+}
 
+/**
+ * Scans `content` for every mask in `entitiesByMask` and replaces each occurrence with
+ * its original value, returning the rebuilt string plus the final-string offset ranges
+ * of every replacement made.
+ *
+ * Shared by `deanonymize()` (full-message deanonymization) and the streaming
+ * hold-buffer (`deanonymize_stream_buffer.ts`), which deanonymizes safe prefixes
+ * of a streamed response incrementally using the same mask-matching logic.
+ */
+export function replaceMasks(
+  content: string,
+  entitiesByMask: ReadonlyMap<string, Anonymization['entity']>
+): { output: string; deanonymizations: Deanonymization[] } {
   const matches: DeanonymizeMaskMatch[] = [];
   // Collect mask occurrences from the original (immutable) content.
   // We compute ranges from rebuilt output later, so they are final-string offsets.
@@ -149,7 +157,8 @@ export function deanonymize<TMessage extends Message>(
   message: TMessage,
   anonymizations: Anonymization[]
 ): { message: TMessage; deanonymizations: Deanonymization[] } {
-  const replace = (content: string) => replaceAnonymizedText(content, anonymizations);
+  const entitiesByMask = indexEntitiesByMask(anonymizations);
+  const replace = (content: string) => replaceMasks(content, entitiesByMask);
 
   const anonymized = getAnonymizableMessageParts(message);
   const allDeanonymizations: Deanonymization[] = [];

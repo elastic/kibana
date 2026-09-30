@@ -157,6 +157,54 @@ describe('DeanonymizeStreamBuffer', () => {
     expect(buffer.emittedLength).toBe(0);
   });
 
+  it('holds only the longest tail that is a real mask prefix when an earlier character also matches a mask start', () => {
+    const value = 'jorge@gmail.com';
+    const mask = createMask('EMAIL', value);
+    const anonymizations: Anonymization[] = [
+      { entity: { class_name: 'EMAIL', value, mask }, rule: { type: 'RegExp' } },
+    ];
+    const buffer = new DeanonymizeStreamBuffer(anonymizations);
+
+    // The first "E" is not the start of a mask (it is followed by another "E"), so only
+    // the trailing "EMAI" may be held back; the leading "E" must be emitted.
+    const partialMask = mask.slice(0, 4);
+    const firstDelta = buffer.push(`E${partialMask}`);
+    expect(firstDelta).toBe('E');
+
+    const secondDelta = buffer.push(mask.slice(4));
+    expect(firstDelta + secondDelta).toBe(`E${value}`);
+  });
+
+  it('emits text without any mask-start character untouched, keeps emittedLength accurate, and still restores masks in later chunks', () => {
+    const value = 'jorge@gmail.com';
+    const mask = createMask('EMAIL', value);
+    const anonymizations: Anonymization[] = [
+      { entity: { class_name: 'EMAIL', value, mask }, rule: { type: 'RegExp' } },
+    ];
+    const buffer = new DeanonymizeStreamBuffer(anonymizations);
+
+    const plain = '123 - ok, done. ';
+    expect(buffer.push(plain)).toBe(plain);
+    expect(buffer.emittedLength).toBe(plain.length);
+
+    const restored = buffer.push(`${mask}!`);
+    expect(restored).toBe(`${value}!`);
+    expect(buffer.emittedLength).toBe(plain.length + restored.length);
+  });
+
+  it('does not duplicate a replacement when several anonymization entries share the same mask', () => {
+    const value = 'jorge@gmail.com';
+    const mask = createMask('EMAIL', value);
+    const entity = { class_name: 'EMAIL', value, mask };
+    const anonymizations: Anonymization[] = [
+      { entity, rule: { type: 'RegExp' } },
+      { entity, rule: { type: 'NER' } },
+    ];
+    const buffer = new DeanonymizeStreamBuffer(anonymizations);
+
+    expect(buffer.push(`Contact ${mask} today.`)).toBe(`Contact ${value} today.`);
+  });
+
   it('returns an empty delta and does not advance emittedLength for empty input', () => {
     const buffer = new DeanonymizeStreamBuffer([]);
     expect(buffer.push('')).toBe('');

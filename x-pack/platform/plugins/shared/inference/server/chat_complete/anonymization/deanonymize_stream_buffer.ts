@@ -6,7 +6,7 @@
  */
 
 import type { Anonymization } from '@kbn/inference-common';
-import { replaceAnonymizedText } from './deanonymize';
+import { indexEntitiesByMask, replaceMasks } from './deanonymize';
 
 // Minimum tail length before we consider it a potential split mask. This must be 1, not
 // higher: if a mask's very first character (e.g. 'E' for an EMAIL_... mask) is ever
@@ -22,6 +22,8 @@ const MIN_HOLDBACK_LENGTH = 1;
 interface MaskPrefixIndex {
   /** Every proper prefix (length >= MIN_HOLDBACK_LENGTH, strictly shorter than the mask itself) of every known mask for this call. */
   prefixes: ReadonlySet<string>;
+  /** First character of every known mask; a held suffix or a mask occurrence can only begin at one of these. */
+  firstChars: ReadonlySet<string>;
   /** Longest prefix in `prefixes`, i.e. the most this buffer could ever hold at once. */
   maxLength: number;
 }
@@ -32,29 +34,51 @@ interface MaskPrefixIndex {
  * response — rather than a generic "looks token-shaped" heuristic, which would also
  * match ordinary capitalized words/acronyms and cause needless streaming gaps.
  */
-function buildMaskPrefixIndex(anonymizations: Anonymization[]): MaskPrefixIndex {
+function buildMaskPrefixIndex(masks: Iterable<string>): MaskPrefixIndex {
   const prefixes = new Set<string>();
+  const firstChars = new Set<string>();
   let maxLength = 0;
 
-  for (const { entity } of anonymizations) {
-    const { mask } = entity;
+  for (const mask of masks) {
+    if (mask.length === 0) {
+      continue;
+    }
+    firstChars.add(mask[0]);
     for (let length = MIN_HOLDBACK_LENGTH; length < mask.length; length += 1) {
       prefixes.add(mask.slice(0, length));
       maxLength = Math.max(maxLength, length);
     }
   }
 
-  return { prefixes, maxLength };
+  return { prefixes, firstChars, maxLength };
 }
 
-/** Longest suffix of `value` that is a known proper mask prefix, or 0 if none matches. */
-function longestHeldSuffixLength(value: string, { prefixes, maxLength }: MaskPrefixIndex): number {
-  for (let length = Math.min(value.length, maxLength); length >= MIN_HOLDBACK_LENGTH; length -= 1) {
-    if (prefixes.has(value.slice(-length))) {
-      return length;
+/**
+ * Length of the longest suffix of `value` that is a known proper mask prefix, or 0 if
+ * none matches. Only positions holding a mask's first character are sliced/looked up,
+ * so the common case (no candidate start in the tail) allocates nothing.
+ */
+function longestHeldSuffixLength(
+  value: string,
+  { prefixes, firstChars, maxLength }: MaskPrefixIndex
+): number {
+  const earliestStart = Math.max(0, value.length - maxLength);
+  for (let start = earliestStart; start <= value.length - MIN_HOLDBACK_LENGTH; start += 1) {
+    if (firstChars.has(value[start]) && prefixes.has(value.slice(start))) {
+      return value.length - start;
     }
   }
   return 0;
+}
+
+/** Whether `value` contains any character a mask could start with. */
+function mayContainMask(value: string, firstChars: ReadonlySet<string>): boolean {
+  for (let i = 0; i < value.length; i += 1) {
+    if (firstChars.has(value[i])) {
+      return true;
+    }
+  }
+  return false;
 }
 
 /**
@@ -77,10 +101,12 @@ function longestHeldSuffixLength(value: string, { prefixes, maxLength }: MaskPre
 export class DeanonymizeStreamBuffer {
   private held = '';
   private _emittedLength = 0;
+  private readonly entitiesByMask: ReadonlyMap<string, Anonymization['entity']>;
   private readonly prefixIndex: MaskPrefixIndex;
 
-  constructor(private readonly anonymizations: Anonymization[]) {
-    this.prefixIndex = buildMaskPrefixIndex(anonymizations);
+  constructor(anonymizations: Anonymization[]) {
+    this.entitiesByMask = indexEntitiesByMask(anonymizations);
+    this.prefixIndex = buildMaskPrefixIndex(this.entitiesByMask.keys());
   }
 
   /** Total number of deanonymized characters emitted via `push` so far. */
@@ -106,7 +132,13 @@ export class DeanonymizeStreamBuffer {
       return '';
     }
 
-    const { output } = replaceAnonymizedText(safePrefix, this.anonymizations);
+    // No character that could start a mask: nothing to replace, skip the per-mask scan.
+    if (!mayContainMask(safePrefix, this.prefixIndex.firstChars)) {
+      this._emittedLength += safePrefix.length;
+      return safePrefix;
+    }
+
+    const { output } = replaceMasks(safePrefix, this.entitiesByMask);
     this._emittedLength += output.length;
     return output;
   }
