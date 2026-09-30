@@ -65,6 +65,18 @@ describe('runFindOrCreateInvestigation', () => {
     expect(conversationClient.get).not.toHaveBeenCalled();
   });
 
+  it('creates the Investigation public, not private to whichever identity ran the Worker', async () => {
+    const conversationClient = buildClient();
+
+    await runFindOrCreateInvestigation({ spaceId, reportId }, { conversationClient });
+
+    expect(conversationClient.create).toHaveBeenCalledWith(
+      expect.objectContaining({
+        accessControl: { access_mode: 'public', entries: [] },
+      })
+    );
+  });
+
   it('titles the Investigation with the report title when available', async () => {
     const conversationClient = buildClient();
 

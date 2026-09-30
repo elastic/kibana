@@ -8,6 +8,7 @@
 import type { Logger } from '@kbn/core/server';
 import {
   agentBuilderDefaultAgentId,
+  ConversationAccessControlMode,
   isConversationAlreadyExistsError,
 } from '@kbn/agent-builder-common';
 import { TEMPLATE_ID_INVESTIGATION } from '@kbn/alertzero-common';
@@ -33,6 +34,7 @@ export interface FindOrCreateConversationClient {
     agentId: string;
     title: string;
     templateId: string;
+    accessControl: { access_mode: ConversationAccessControlMode; entries: never[] };
   }) => Promise<unknown>;
   get: (conversationId: string) => Promise<unknown>;
 }
@@ -98,6 +100,9 @@ export const runFindOrCreateInvestigation = async (
       agentId: agentBuilderDefaultAgentId,
       title: report?.title ?? reportId,
       templateId: TEMPLATE_ID_INVESTIGATION,
+      // A Worker-minted Investigation belongs to whichever analyst is on duty, not to the
+      // identity the workflow happened to execute as; the client default is private.
+      accessControl: { access_mode: ConversationAccessControlMode.Public, entries: [] },
     });
   } catch (error) {
     if (!isConversationAlreadyExistsError(error)) {
