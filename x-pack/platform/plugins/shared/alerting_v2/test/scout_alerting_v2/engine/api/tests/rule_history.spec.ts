@@ -61,6 +61,10 @@ const expectSequences = (entries: ChangeHistoryDocument[], expected: number[]): 
   expect(entries.map((entry) => entry.object.sequence)).toStrictEqual(expected);
 };
 
+const expectSequenceMatchesRuleVersion = (doc: ChangeHistoryDocument, rule: RuleResponse): void => {
+  expect(doc.object.sequence).toBe(rule.version);
+};
+
 apiTest.describe('Rule change history', { tag: tags.stateful.classic }, () => {
   apiTest.beforeAll(async ({ apiServices }) => {
     await apiServices.alertingV2.rules.cleanUp();
@@ -111,6 +115,7 @@ apiTest.describe('Rule change history', { tag: tags.stateful.classic }, () => {
         },
       });
       expectSnapshotShape(entries[0], created);
+      expectSequenceMatchesRuleVersion(entries[0], created);
       expectSequences(entries, [1]);
     }
   );
@@ -163,6 +168,7 @@ apiTest.describe('Rule change history', { tag: tags.stateful.classic }, () => {
         },
       });
       expectSnapshotShape(updateEntries[0], updated);
+      expectSequenceMatchesRuleVersion(updateEntries[0], updated);
 
       // Snapshot must reflect the post-change state, not the pre-change one.
       expect(updateEntries[0].object.snapshot).toMatchObject({
@@ -213,6 +219,7 @@ apiTest.describe('Rule change history', { tag: tags.stateful.classic }, () => {
         },
       });
       expectSnapshotShape(entries[0], created);
+      expectSequenceMatchesRuleVersion(entries[0], created);
       expectSequences(entries, [1]);
     }
   );
@@ -264,6 +271,7 @@ apiTest.describe('Rule change history', { tag: tags.stateful.classic }, () => {
         },
       });
       expectSnapshotShape(updateEntries[0], updated);
+      expectSequenceMatchesRuleVersion(updateEntries[0], updated);
       expect(updateEntries[0].object.snapshot).toMatchObject({
         metadata: { name: 'change-history-upsert-changed' },
         schedule: { every: '6h' },
@@ -323,6 +331,7 @@ apiTest.describe('Rule change history', { tag: tags.stateful.classic }, () => {
         },
       });
       expectSnapshotShape(disableEntries[0], disabled);
+      expectSequenceMatchesRuleVersion(disableEntries[0], disabled);
       expect(disableEntries[0].object.snapshot).toMatchObject({ enabled: false });
 
       const allEntries = await apiServices.alertingV2.ruleChangesHistory.find({
@@ -390,6 +399,7 @@ apiTest.describe('Rule change history', { tag: tags.stateful.classic }, () => {
         },
       });
       expectSnapshotShape(enableEntries[0], enabled);
+      expectSequenceMatchesRuleVersion(enableEntries[0], enabled);
       expect(enableEntries[0].object.snapshot).toMatchObject({ enabled: true });
 
       const allEntries = await apiServices.alertingV2.ruleChangesHistory.find({
@@ -416,9 +426,10 @@ apiTest.describe('Rule change history', { tag: tags.stateful.classic }, () => {
 
       // Capture state before delete: RulesClient stamps getNextVersion onto the
       // emitted snapshot (nothing is persisted on delete), so the deletion
-      // orders after the create at sequence 1.
+      // orders after the create at sequence 1. Derived from the rule's own
+      // counter rather than hard-coded, so the two cannot drift apart.
       const beforeDelete = await apiServices.alertingV2.rules.get(created.id);
-      const expectedDeleteSequence = 2;
+      const expectedDeleteSequence = beforeDelete.version + 1;
 
       await apiServices.alertingV2.rules.delete(created.id);
 
@@ -469,7 +480,7 @@ apiTest.describe('Rule change history', { tag: tags.stateful.classic }, () => {
         action: RuleChangesHistoryAction.ruleCreate,
       });
 
-      await apiServices.alertingV2.rules.upsert(
+      const updated = await apiServices.alertingV2.rules.upsert(
         created.id,
         buildCreateRuleData({
           metadata: { name: 'change-history-http-updated' },
@@ -494,6 +505,7 @@ apiTest.describe('Rule change history', { tag: tags.stateful.classic }, () => {
         is_current: true,
         version: 2,
       });
+      expect(list.items[0].version).toBe(updated.version);
       expect('snapshot' in list.items[0]).toBe(false);
       expect(list.items[0].changes?.count).toBeGreaterThan(0);
       expect(list.items[0].changes?.summary).toStrictEqual(
@@ -512,6 +524,7 @@ apiTest.describe('Rule change history', { tag: tags.stateful.classic }, () => {
         id: created.id,
         metadata: expect.objectContaining({ name: 'change-history-http-updated' }),
       });
+      expect(detail.version).toBe(updated.version);
       expect(detail.is_current).toBe(true);
     }
   );
