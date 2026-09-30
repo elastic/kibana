@@ -16,11 +16,14 @@ const mockGetUrlForApp = jest.fn(
   (appId: string, opts: { path: string }) => `/app/${appId}${opts.path}`
 );
 
+let mockCapabilities: Record<string, Record<string, boolean>> = {};
+
 jest.mock('../../common/lib/kibana', () => ({
   useKibana: () => ({
     services: {
       application: {
         getUrlForApp: mockGetUrlForApp,
+        capabilities: mockCapabilities,
       },
     },
   }),
@@ -92,6 +95,7 @@ const FormWrapper: React.FC<WrapperProps> = ({
 describe('PolicyAssignmentList', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    mockCapabilities = { fleetv2: { agent_policies_read: true } };
     mockUseAgentPolicies.mockReturnValue({
       data: { agentPoliciesById: mockAgentPoliciesById },
       isFetching: false,
@@ -252,6 +256,29 @@ describe('PolicyAssignmentList', () => {
       const links = screen.getAllByText('View policy');
       // 3 rows, all have links regardless of selection
       expect(links).toHaveLength(3);
+    });
+
+    it('hides View policy links when the user cannot read Fleet agent policies', () => {
+      mockCapabilities = { fleetv2: { agent_policies_read: false } };
+      render(<FormWrapper />);
+
+      expect(screen.queryByText('View policy')).not.toBeInTheDocument();
+      expect(screen.getByText('Alpha Policy')).toBeInTheDocument();
+    });
+
+    it('hides View policy links when Fleet capabilities are missing', () => {
+      mockCapabilities = {};
+      render(<FormWrapper />);
+
+      expect(screen.queryByText('View policy')).not.toBeInTheDocument();
+    });
+
+    it('still marks orphan rows as unavailable without Fleet access', () => {
+      mockCapabilities = {};
+      render(<FormWrapper defaultValues={{ policy_ids: ['orphan-policy'] }} />);
+
+      expect(screen.getByText('Unavailable')).toBeInTheDocument();
+      expect(screen.queryByText('View policy')).not.toBeInTheDocument();
     });
   });
 

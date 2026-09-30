@@ -49,6 +49,7 @@ jest.mock('../../common/lib/kibana', () => ({
         getUrlForApp: jest.fn(
           (appId: string, opts: { path: string }) => `/app/${appId}${opts.path}`
         ),
+        capabilities: { fleetv2: { agent_policies_read: true } },
       },
     },
   }),

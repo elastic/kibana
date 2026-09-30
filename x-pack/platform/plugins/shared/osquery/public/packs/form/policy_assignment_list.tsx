@@ -28,7 +28,7 @@ import {
   EuiSearchBar,
 } from '@elastic/eui';
 import type { EuiSearchBarOnChangeArgs, Query } from '@elastic/eui';
-import { PLUGIN_ID } from '@kbn/fleet-plugin/common';
+import { PLUGIN_ID as FLEET_PLUGIN_ID } from '@kbn/fleet-plugin/common';
 import { pagePathGetters } from '@kbn/fleet-plugin/public';
 import { useAgentPolicies } from '../../agent_policies';
 import { useKibana } from '../../common/lib/kibana';
@@ -118,7 +118,7 @@ const unavailablePolicyTooltip = i18n.translate(
   'xpack.osquery.pack.policyList.unavailablePolicyTooltip',
   {
     defaultMessage:
-      'This policy no longer exists in Fleet, or you do not have access to it. Un-check it to remove it from this pack.',
+      'This policy is no longer available in Fleet. Un-check it to remove it from this pack.',
   }
 );
 
@@ -211,7 +211,10 @@ const tableCaption = i18n.translate('xpack.osquery.pack.policyList.tableCaption'
 const PolicyAssignmentListComponent: React.FC<PolicyAssignmentListProps> = ({
   isReadOnly = false,
 }) => {
-  const getUrlForApp = useKibana().services.application.getUrlForApp;
+  const { getUrlForApp, capabilities } = useKibana().services.application;
+  // The policy list is fetched with Osquery privileges only, so a user can see
+  // rows here without being allowed to open the Fleet policy details page.
+  const canReadFleetPolicies = !!capabilities.fleetv2?.agent_policies_read;
   const { data: { agentPoliciesById } = {}, isFetching, isError } = useAgentPolicies();
 
   const {
@@ -415,9 +418,9 @@ const PolicyAssignmentListComponent: React.FC<PolicyAssignmentListProps> = ({
         render: (item: PolicyRow) =>
           item.isOrphan ? (
             <UnavailablePolicyCell policyId={item.id} policyName={item.name} />
-          ) : (
+          ) : canReadFleetPolicies ? (
             <EuiLink
-              href={getUrlForApp(PLUGIN_ID, {
+              href={getUrlForApp(FLEET_PLUGIN_ID, {
                 path: pagePathGetters.policy_details({ policyId: item.id })[1],
               })}
               target="_blank"
@@ -428,10 +431,17 @@ const PolicyAssignmentListComponent: React.FC<PolicyAssignmentListProps> = ({
                 defaultMessage="View policy"
               />
             </EuiLink>
-          ),
+          ) : null,
       },
     ],
-    [selectedSet, togglePolicy, isAssignmentDisabled, getUrlForApp, shardKeySet]
+    [
+      selectedSet,
+      togglePolicy,
+      isAssignmentDisabled,
+      getUrlForApp,
+      shardKeySet,
+      canReadFleetPolicies,
+    ]
   );
 
   // Must return true: `EuiInMemoryTable` skips its own in-memory filtering for
