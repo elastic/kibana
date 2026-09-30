@@ -9,6 +9,9 @@
 
 import { parse } from 'yaml';
 import { NIGHTSHIFT_INVESTIGATION_WORKFLOW } from '.';
+import { buildFieldsZodValidator } from '../../../../spec/lib/build_fields_zod_validator';
+import { getInputsFromDefinition } from '../../../../spec/lib/field_conversion';
+import { WorkflowSchema } from '../../../../spec/schema';
 
 interface WorkflowStep {
   name: string;
@@ -99,6 +102,39 @@ describe('Nightshift investigation workflow', () => {
       'product-solution': 'observability',
       'product-feature': 'nightshift',
     });
+  });
+
+  it('passes WorkflowSchema normalization', () => {
+    const result = WorkflowSchema.safeParse(parse(NIGHTSHIFT_INVESTIGATION_WORKFLOW.yaml));
+    expect(result.success ? null : result.error.issues).toBeNull();
+  });
+
+  it('accepts Slack destinations as a run input and rejects malformed ones', () => {
+    // Same path as the execution engine's validateWorkflowInputs.
+    const validator = buildFieldsZodValidator(
+      getInputsFromDefinition(parse(NIGHTSHIFT_INVESTIGATION_WORKFLOW.yaml))
+    );
+    const base = { message: 'Investigate checkout latency', title: 'Checkout latency' };
+    const destination = {
+      type: 'slack',
+      connector_id: 'elastic-apps-slack',
+      channel: '#alerts',
+      automation_id: 'auto-1',
+      automation_name: 'Prod alerts',
+    };
+
+    expect(validator.safeParse({ ...base, notifications: [destination] }).success).toBe(true);
+    expect(validator.safeParse({ ...base }).success).toBe(true);
+    expect(
+      validator.safeParse({ ...base, notifications: [{ type: 'slack', channel: '#alerts' }] })
+        .success
+    ).toBe(false);
+    expect(
+      validator.safeParse({ ...base, notifications: [{ ...destination, type: 'email' }] }).success
+    ).toBe(false);
+    expect(
+      validator.safeParse({ ...base, notifications: [{ ...destination, status: 'sent' }] }).success
+    ).toBe(false);
   });
 
   it('space-scopes the path of every kibana.request step', () => {
