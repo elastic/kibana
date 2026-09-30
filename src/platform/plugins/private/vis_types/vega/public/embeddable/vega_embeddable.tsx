@@ -32,7 +32,13 @@ import {
   switchMap,
   tap,
 } from 'rxjs';
-import { isOfQueryType, type AggregateQuery, type Filter, type Query } from '@kbn/es-query';
+import {
+  FilterStateStore,
+  isOfQueryType,
+  type AggregateQuery,
+  type Filter,
+  type Query,
+} from '@kbn/es-query';
 import { parse } from 'hjson';
 import { ON_APPLY_FILTER } from '@kbn/ui-actions-plugin/common/trigger_ids';
 import {
@@ -128,6 +134,12 @@ export type VegaEmbeddableApi = DefaultEmbeddableApi<VegaByValueState> &
     }) => Promise<JSX.Element | undefined>;
   };
 
+// `toStoredFilters` drops `$state`, and the filter editor ignores edits to filters without one.
+const toPanelFilters = (filters: VegaByValueState['filters']): Filter[] | undefined =>
+  (toStoredFilters(filters) as Filter[] | undefined)?.map((filter) =>
+    filter.$state?.store ? filter : { ...filter, $state: { store: FilterStateStore.APP_STATE } }
+  );
+
 interface VegaEmbeddableDependencies {
   uiActions: Pick<VegaPluginStartDependencies['uiActions'], 'executeTriggerActions'>;
   SearchBar: VegaPluginStartDependencies['unifiedSearch']['ui']['SearchBar'];
@@ -156,7 +168,7 @@ export const vegaEmbeddableFactory = (
     }>(
       {
         query: toStoredQuery(initialState.query),
-        filters: toStoredFilters(initialState.filters) as Filter[] | undefined,
+        filters: toPanelFilters(initialState.filters),
       },
       {
         query: undefined,
@@ -238,7 +250,7 @@ export const vegaEmbeddableFactory = (
         drilldownsManager.reinitializeState(nextState);
         panelSearchStateManager.reinitializeState({
           query: toStoredQuery(nextState.query),
-          filters: toStoredFilters(nextState.filters) as Filter[] | undefined,
+          filters: toPanelFilters(nextState.filters),
         });
         spec$.next(nextState.spec);
       },

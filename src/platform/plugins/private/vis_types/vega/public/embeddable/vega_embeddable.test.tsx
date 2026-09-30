@@ -15,6 +15,7 @@ import type { DataView } from '@kbn/data-views-plugin/public';
 import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
 import { initializeDrilldownsManager } from '@kbn/embeddable-plugin/public/drilldowns/drilldowns_manager';
 import { AbortReason } from '@kbn/kibana-utils-plugin/common';
+import { FilterStateStore } from '@kbn/es-query';
 import { BehaviorSubject, of } from 'rxjs';
 import { ESQLVariableType } from '@kbn/esql-types';
 import { getESQLQueryVariables } from '@kbn/esql-utils';
@@ -138,9 +139,11 @@ describe('vegaEmbeddableFactory', () => {
   const buildEmbeddable = async ({
     standaloneEmbeddableEnabled = false,
     spec = { format: 'hjson' as const, value: '{ mark: point }' },
+    filters,
   }: {
     standaloneEmbeddableEnabled?: boolean;
     spec?: VegaByValueState['spec'];
+    filters?: VegaByValueState['filters'];
   } = {}) => {
     const coreStart = coreMock.createStart();
     coreStart.featureFlags.getBooleanValue$.mockImplementation((key, fallback) =>
@@ -155,7 +158,7 @@ describe('vegaEmbeddableFactory', () => {
 
     return factory.buildEmbeddable({
       initializeDrilldownsManager,
-      initialState: { spec, title: 'Initial title' },
+      initialState: { spec, filters, title: 'Initial title' },
       finalizeApi: (api) => ({
         ...api,
         uuid,
@@ -241,6 +244,28 @@ describe('vegaEmbeddableFactory', () => {
         },
       })
     );
+  });
+
+  it('gives stored panel filters an app state store so the filter editor can update them', async () => {
+    const panelFilter: NonNullable<VegaByValueState['filters']>[number] = {
+      type: 'condition',
+      condition: { field: 'status', operator: 'is', value: 'active' },
+    };
+    const { api } = await buildEmbeddable({ filters: [panelFilter] });
+
+    expect(api.filters$.getValue()).toEqual([
+      expect.objectContaining({ $state: { store: FilterStateStore.APP_STATE } }),
+    ]);
+
+    api.applySerializedState({
+      spec: { format: 'hjson', value: '{ mark: point }' },
+      filters: [panelFilter],
+    });
+
+    expect(api.filters$.getValue()).toEqual([
+      expect.objectContaining({ $state: { store: FilterStateStore.APP_STATE } }),
+    ]);
+    expect(api.serializeState().filters).toEqual([panelFilter]);
   });
 
   it.each([
