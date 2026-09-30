@@ -8,6 +8,7 @@
 import React, { memo, useCallback, useMemo, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux-v7';
 import type { DataTableRecord } from '@kbn/discover-utils/types';
+import type { RowControlColumn } from '@kbn/discover-utils';
 import type {
   UnifiedDataTableProps,
   UnifiedDataTableSettingsColumn,
@@ -80,7 +81,7 @@ type CommonDataTableProps = {
   dataLoadingState: DataLoadingState;
   updatedAt: number;
   isTextBasedQuery?: boolean;
-  leadingControlColumns: EuiDataGridProps['leadingControlColumns'];
+  rowAdditionalLeadingControls?: RowControlColumn[];
 } & Pick<
   UnifiedDataTableProps,
   | 'onSort'
@@ -120,7 +121,7 @@ export const TimelineDataTableComponent: React.FC<DataTableProps> = memo(
     onSetColumns,
     onSort,
     onFilter,
-    leadingControlColumns,
+    rowAdditionalLeadingControls,
     onUpdatePageIndex,
   }) {
     const dispatch = useDispatch();
@@ -502,7 +503,7 @@ export const TimelineDataTableComponent: React.FC<DataTableProps> = memo(
             externalAdditionalControls={additionalControls}
             renderCustomGridBody={finalRenderCustomBodyCallback}
             trailingControlColumns={finalTrailControlColumns}
-            externalControlColumns={leadingControlColumns}
+            rowAdditionalLeadingControls={rowAdditionalLeadingControls}
             onUpdatePageIndex={onUpdatePageIndex}
             getRowIndicator={getTimelineRowTypeIndicator}
             settings={settings}
