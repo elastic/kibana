@@ -23,8 +23,7 @@
       "cloud"
     ],
     "requiredBundles": [
-      "kibanaReact",
-      "esUiShared"
+      "kibanaReact"
     ]
   }
 }

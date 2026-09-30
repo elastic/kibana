@@ -5,39 +5,53 @@
  * 2.0.
  */
 
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { EuiSpacer, EuiText, EuiTitle } from '@elastic/eui';
-import { useFormContext } from 'react-hook-form';
-import { Forms } from '@kbn/es-ui-shared-plugin/public';
+import { useFormContext, useFormState, useWatch, type FieldPath } from 'react-hook-form';
 
 import type { CreateDatasetFormValues } from '../create_dataset_form_state';
 import { CreateDatasetAdditionalSettings } from './create_dataset_settings';
 import { createDatasetWizardStrings } from '../create_dataset_wizard_i18n';
-import type { DatasetWizardContent } from '../types';
+import { useWizardStep } from '../wizard_step_context';
+
+const ADDITIONAL_STEP_FIELDS: Array<FieldPath<CreateDatasetFormValues>> = [
+  'settings.partition_path',
+  'settings.max_errors',
+  'settings.max_error_ratio',
+  'settings.skip_rows',
+  'settings.delimiter',
+  'settings.quote',
+  'settings.escape',
+];
 
 export function StepAdditional() {
-  const { control, getValues, trigger } = useFormContext<CreateDatasetFormValues>();
-  const { updateContent } = Forms.useContent<DatasetWizardContent, 'settings'>('settings');
+  const { control, getFieldState, trigger } = useFormContext<CreateDatasetFormValues>();
+  const formState = useFormState({ control, name: ADDITIONAL_STEP_FIELDS });
+  const hasFieldErrors = ADDITIONAL_STEP_FIELDS.some(
+    (field) => getFieldState(field, formState).invalid
+  );
+  const settings = useWatch({ control, name: 'settings' });
+  const updateContent = useWizardStep();
+  const [hasAttemptedValidation, setHasAttemptedValidation] = useState(false);
 
   useEffect(() => {
+    // Don't mark the step invalid (disabling Next) until the user tries to proceed.
     updateContent({
-      // isValid stays true so unset optional fields do not block the step.
-      // validate enforces fields that are required only in some conditions.
-      isValid: true,
+      isValid: !hasAttemptedValidation || !hasFieldErrors,
       validate: async () => {
-        return await trigger([
-          'settings.partition_path',
-          'settings.max_errors',
-          'settings.max_error_ratio',
-          'settings.skip_rows',
-          'settings.delimiter',
-          'settings.quote',
-          'settings.escape',
-        ]);
+        setHasAttemptedValidation(true);
+        return trigger(ADDITIONAL_STEP_FIELDS);
       },
-      getData: () => getValues().settings,
     });
-  }, [getValues, trigger, updateContent]);
+  }, [hasAttemptedValidation, hasFieldErrors, trigger, updateContent]);
+
+  useEffect(() => {
+    // The form uses react-hook-form's default `onSubmit` mode, and the wizard never submits it,
+    // so errors shown after a Next attempt would otherwise not clear until Next is clicked again.
+    // Any settings change is watched because some rules depend on other settings (e.g. CSV mode).
+    if (!hasAttemptedValidation) return;
+    trigger(ADDITIONAL_STEP_FIELDS);
+  }, [settings, hasAttemptedValidation, trigger]);
 
   return (
     <div data-test-subj="createDatasetWizardAdditionalStep">

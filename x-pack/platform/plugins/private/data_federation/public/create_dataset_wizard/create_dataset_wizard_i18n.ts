@@ -191,6 +191,15 @@ export const createDatasetWizardStrings = {
   saveErrorTitle: i18n.translate('xpack.dataFederation.createDatasetWizard.saveErrorTitle', {
     defaultMessage: 'Could not save the dataset',
   }),
+  backButton: i18n.translate('xpack.dataFederation.createDatasetWizard.backButtonLabel', {
+    defaultMessage: 'Back',
+  }),
+  nextButton: i18n.translate('xpack.dataFederation.createDatasetWizard.nextButtonLabel', {
+    defaultMessage: 'Next',
+  }),
+  savingButton: i18n.translate('xpack.dataFederation.createDatasetWizard.savingButtonLabel', {
+    defaultMessage: 'Saving...',
+  }),
 
   // Form strings
   nameRequired: i18n.translate('xpack.dataFederation.createDatasetForm.nameRequired', {

@@ -275,6 +275,47 @@ describe('CreateDatasetWizardPage', () => {
     ).toBeInTheDocument();
   });
 
+  it('clears the name error as soon as the name becomes valid without clicking Next', async () => {
+    const { getByTestId, queryByText, findByText } = renderWizard();
+
+    await clickNext(getByTestId);
+    expect(await findByText(createDatasetWizardStrings.nameRequired)).toBeInTheDocument();
+    expect(getByTestId('createDatasetName')).toHaveAttribute('aria-invalid', 'true');
+
+    fireEvent.change(getByTestId('createDatasetName'), {
+      target: { value: 'logs-dataset' },
+    });
+
+    await waitFor(() => {
+      expect(queryByText(createDatasetWizardStrings.nameRequired)).toBeNull();
+    });
+    expect(getByTestId('createDatasetName')).not.toHaveAttribute('aria-invalid', 'true');
+    expect(getByTestId('createDatasetWizardDatasetStep')).toBeInTheDocument();
+  });
+
+  it('disables Next after a failed attempt while a non-empty field is still invalid', async () => {
+    const { getByTestId, findByTestId, findByText } = renderWizard();
+
+    fireEvent.click(getByTestId('createDatasetDataSource'));
+    fireEvent.click(await findByTestId('createDatasetDataSource-source-1'));
+    fireEvent.change(getByTestId('createDatasetName'), {
+      target: { value: 'logs-dataset' },
+    });
+    fireEvent.change(getByTestId('createDatasetResource'), { target: { value: 'x' } });
+    selectFormat(getByTestId, 'csv');
+
+    expect(getByTestId('nextButton')).toBeEnabled();
+    await clickNext(getByTestId);
+    expect(await findByText(createDatasetWizardStrings.resourceInvalid)).toBeInTheDocument();
+    expect(getByTestId('createDatasetWizardDatasetStep')).toBeInTheDocument();
+    await waitFor(() => expect(getByTestId('nextButton')).toBeDisabled());
+
+    fireEvent.change(getByTestId('createDatasetResource'), {
+      target: { value: 's3://bucket/*' },
+    });
+    await waitFor(() => expect(getByTestId('nextButton')).toBeEnabled());
+  });
+
   it('requires format before leaving the dataset step', async () => {
     const { getByTestId, queryByTestId, findByTestId } = renderWizard();
 
@@ -294,7 +335,9 @@ describe('CreateDatasetWizardPage', () => {
     expect(queryByTestId('createDatasetWizardAdditionalStep')).toBeNull();
     expect(getByTestId('createDatasetWizardDatasetStep')).toBeInTheDocument();
 
+    await waitFor(() => expect(getByTestId('nextButton')).toBeDisabled());
     selectFormat(getByTestId, 'parquet');
+    await waitFor(() => expect(getByTestId('nextButton')).toBeEnabled());
     await clickNext(getByTestId);
     expect(
       await waitFor(() => getByTestId('createDatasetWizardAdditionalStep'))
@@ -934,8 +977,12 @@ describe('CreateDatasetWizardPage', () => {
     fireEvent.change(getByTestId('createDatasetSettingsEscape'), { target: { value: '\\a' } });
     await clickNext(getByTestId);
     expect(queryByTestId('createDatasetWizardMappingStep')).toBeNull();
+    expect(getByTestId('createDatasetSettingsEscape')).toHaveAttribute('aria-invalid', 'true');
+    await waitFor(() => expect(getByTestId('nextButton')).toBeDisabled());
 
     fireEvent.change(getByTestId('createDatasetSettingsEscape'), { target: { value: '/' } });
+    await waitFor(() => expect(getByTestId('nextButton')).toBeEnabled());
+    expect(getByTestId('createDatasetSettingsEscape')).not.toHaveAttribute('aria-invalid', 'true');
     await clickNext(getByTestId);
 
     expect(await waitFor(() => getByTestId('createDatasetWizardMappingStep'))).toBeInTheDocument();
