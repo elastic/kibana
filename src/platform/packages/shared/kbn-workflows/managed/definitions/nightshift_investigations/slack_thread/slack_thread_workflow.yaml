@@ -2,8 +2,9 @@ version: '1'
 name: Nightshift Slack Thread Investigation
 description: >
   Keeps one Nightshift investigation per Slack thread. Mentioning the app starts it; every later
-  human reply in the thread re-runs it in the same conversation. Each run posts or edits one
-  status message in the thread: started, then the findings or the failure.
+  human reply in the thread re-runs it in the same conversation. The thread has one status
+  message: the first run posts it, and every run edits it with the findings or the failure. A
+  later run leaves it showing the previous findings until its own are ready.
 enabled: true
 settings:
   # Longer than the investigation's own timeout, since this run waits for it.
@@ -53,21 +54,21 @@ steps:
         with:
           investigation_url: "{{ kibanaUrl }}{% if workflow.spaceId != 'default' %}/s/{{ workflow.spaceId }}{% endif %}/app/nightshift?investigationId={{ steps.find_investigation.output.investigation_id }}"
 
-      # One status message per thread: a run announces itself as soon as it starts, or re-announces
-      # itself on the message an earlier run posted, and then edits it with the result.
+      # Only the first run announces itself, so a later run leaves the thread's status message
+      # showing the previous findings rather than blanking it for as long as the run takes.
       - name: post_started
         type: slack2.sendMessage
+        if: '${{ steps.find_investigation.output.slack_message_ts == null }}'
         connector-id: '{{ event.connectorId }}'
         with:
           channel: '{{ event.channel }}'
           threadTs: '{{ event.threadId | default: event.messageId }}'
-          messageTs: '${{ steps.find_investigation.output.slack_message_ts }}'
-          text: "{% if steps.find_investigation.output.slack_message_ts %}Investigating the follow-up.{% else %}Investigation started.{% endif %} <{{ variables.investigation_url }}|View the investigation>"
+          text: 'Investigation started. <{{ variables.investigation_url }}|View the investigation>'
         on-failure:
           continue: true
 
-      # Recorded before the investigation runs so a failed run still leaves later runs a message
-      # to edit.
+      # Recorded before the investigation runs so a failed first run still leaves later runs a
+      # message to edit.
       - name: record_status_message
         type: kibana.request
         if: '${{ steps.post_started.output.ts != null }}'
@@ -109,6 +110,8 @@ steps:
           headers:
             x-elastic-internal-origin: 'kibana'
 
+      # Edits this run's own message on the first run and the recorded one on every later run.
+      # Without either, the thread has no status message yet and this posts one.
       - name: post_result
         type: slack2.sendMessage
         connector-id: '{{ event.connectorId }}'

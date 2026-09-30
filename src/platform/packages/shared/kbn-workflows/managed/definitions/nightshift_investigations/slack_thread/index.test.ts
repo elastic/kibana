@@ -72,11 +72,14 @@ describe('Nightshift Slack thread workflow', () => {
     ]);
   });
 
-  it('posts the status message, or re-announces on the one an earlier run posted, and records it', () => {
-    expect(requireStep('post_started')).toMatchObject({
+  it('announces itself and records the message only when the thread has none yet', () => {
+    const postStarted = requireStep('post_started');
+    expect(postStarted).toMatchObject({
       type: 'slack2.sendMessage',
-      with: { messageTs: '${{ steps.find_investigation.output.slack_message_ts }}' },
+      if: '${{ steps.find_investigation.output.slack_message_ts == null }}',
     });
+    // A later run must not blank the previous findings for as long as its own run takes.
+    expect(postStarted.with).not.toHaveProperty('messageTs');
     expect(requireStep('record_status_message').with?.body).toMatchObject({
       create: false,
       slack_message_ts: '{{ steps.post_started.output.ts }}',
