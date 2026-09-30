@@ -39,7 +39,7 @@ describe('ReduxLayoutTopology', () => {
     expect(topology.getEdges()).toEqual([secondEdge, firstEdge]);
   });
 
-  it('uses runtime topology while Redux synchronization is pending', () => {
+  it('does not expose runtime topology while Redux synchronization is pending', () => {
     const node = createNode('new-node');
     const edge = createEdge('new-edge');
     const workspace = {
@@ -56,7 +56,7 @@ describe('ReduxLayoutTopology', () => {
       getWorkspace: () => workspace,
     });
 
-    expect(topology.getNodes()).toBe(workspace.nodes);
-    expect(topology.getEdges()).toBe(workspace.edges);
+    expect(topology.getNodes()).toEqual([]);
+    expect(topology.getEdges()).toEqual([]);
   });
 });

@@ -21,7 +21,7 @@ export class ReduxLayoutTopology {
     const workspace = this.options.getWorkspace();
     const state = this.options.getState();
     if (!workspace || !state || !this.hasSynchronizedNodes(workspace, state)) {
-      return workspace?.nodes ?? [];
+      return [];
     }
     return state.workspace.nodeIds.map((nodeId) => workspace.nodesMap[nodeId]);
   }
@@ -30,7 +30,7 @@ export class ReduxLayoutTopology {
     const workspace = this.options.getWorkspace();
     const state = this.options.getState();
     if (!workspace || !state || !this.hasSynchronizedEdges(workspace, state)) {
-      return workspace?.edges ?? [];
+      return [];
     }
     return state.workspace.edgeIds.map((edgeId) => workspace.edgesMap[edgeId]);
   }

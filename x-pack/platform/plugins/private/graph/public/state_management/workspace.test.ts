@@ -19,6 +19,7 @@ import {
   deleteSelectedNodes,
   groupSelectedNodes,
   invertNodeSelection,
+  mergeNodes,
   redoWorkspace,
   registerWorkspaceListeners,
   selectAllNodes,
@@ -282,6 +283,23 @@ describe('workspace state', () => {
 
     environment.store.dispatch(ungroupNode('parent'));
     expect(environment.store.getState().workspace.nodesById.child.parentId).toBeUndefined();
+  });
+
+  it('merges one node into another', () => {
+    const environment = createMockGraphStore({});
+    const state = {
+      ...environment.store.getState().workspace,
+      nodesById: { parent: { id: 'parent' }, child: { id: 'child' } },
+      nodeIds: ['parent', 'child'],
+      selectedNodeIds: ['parent', 'child'],
+    } as unknown as ReturnType<typeof environment.store.getState>['workspace'];
+    environment.store.dispatch(workspaceChanged(state));
+
+    environment.store.dispatch(mergeNodes({ parentId: 'parent', childId: 'child' }));
+
+    expect(environment.store.getState().workspace.nodesById.child.parentId).toBe('parent');
+    expect(environment.store.getState().workspace.selectedNodeIds).toEqual(['parent']);
+    expect(environment.store.getState().workspace.undoHistory).toHaveLength(1);
   });
 
   it('removes individual and all blocklisted nodes', () => {
