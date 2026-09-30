@@ -6,7 +6,6 @@
  */
 
 import type { Client } from '@elastic/elasticsearch';
-import type { FleetServerAgent } from '@kbn/fleet-plugin/common';
 import { deleteIndexedFleetAgents, type IndexedFleetAgentResponse } from './index_fleet_agent';
 import { EndpointDataLoadingError } from './utils';
 
@@ -14,8 +13,11 @@ const indexedData: IndexedFleetAgentResponse = {
   fleetAgentsIndex: '.fleet-agents',
   agents: [
     {
+      type: 'PERMANENT',
+      active: true,
+      enrolled_at: '2020-01-01T00:00:00.000Z',
       local_metadata: { elastic: { agent: { id: 'agent-1' } } },
-    } as FleetServerAgent,
+    },
   ],
 };
 
