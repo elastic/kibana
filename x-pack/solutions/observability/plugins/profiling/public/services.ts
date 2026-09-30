@@ -7,7 +7,7 @@
 
 import type { HttpFetchQuery } from '@kbn/core/public';
 import { buildPath } from '@kbn/core-http-browser';
-import type { TopNFunctions } from '@kbn/profiling-utils';
+import type { ProfilingStatus, TopNFunctions } from '@kbn/profiling-utils';
 import {
   createFlameGraph,
   type BaseFlameGraph,
@@ -31,14 +31,8 @@ export interface APMTransactionsPerService {
   };
 }
 
-export interface ProfilingSetupStatus {
-  type: 'cloud' | 'self-managed' | 'serverless';
-  profiling_enabled?: boolean;
-  has_setup: boolean;
-  has_data: boolean;
-  pre_8_9_1_data: boolean;
+export interface ProfilingSetupStatus extends ProfilingStatus {
   has_required_role: boolean;
-  unauthorized?: boolean;
 }
 
 export interface Services {
