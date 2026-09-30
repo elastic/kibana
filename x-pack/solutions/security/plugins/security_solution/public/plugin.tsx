@@ -460,7 +460,42 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
         : ProjectRoutingAccess.READONLY
     );
 
+    this.registerImpactEntityOpener(plugins);
+
     return this.contract.getStartContract(core);
+  }
+
+  /**
+   * AlertZero owns the investigation flyout and cannot import this plugin. It calls the opener
+   * registered here when an entity-store Impact row is clicked.
+   */
+  private registerImpactEntityOpener(plugins: StartPlugins): void {
+    const register = plugins.alertzero?.registerImpactEntityOpener;
+    const coreSetup = this._coreSetup;
+    if (!register || !coreSetup) {
+      return;
+    }
+
+    register((entity, historyKey) => {
+      void this.openImpactEntityChild(coreSetup, entity, historyKey);
+    });
+  }
+
+  private async openImpactEntityChild(
+    coreSetup: CoreSetup<StartPluginsDependencies, PluginStart>,
+    entity: { id: string; name?: string; type?: string },
+    historyKey: symbol
+  ): Promise<void> {
+    try {
+      const [store, services, { openImpactEntityChildFlyout }] = await Promise.all([
+        this.getDiscoverFlyoutStore(coreSetup),
+        this.getDiscoverFlyoutServices(coreSetup),
+        import('./flyout_v2/entity/open_impact_entity_child_flyout'),
+      ]);
+      openImpactEntityChildFlyout({ services, store, entity, historyKey });
+    } catch (error) {
+      this.logger.error('Failed to open the impact entity flyout', error);
+    }
   }
 
   public stop() {

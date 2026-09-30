@@ -185,6 +185,18 @@ export interface StartPlugins {
   inference: InferencePublicStart;
   share?: SharePluginStart;
   agentBuilder?: AgentBuilderPluginStart;
+  /**
+   * Optional. Registers the Impact entity child flyout on the investigation session.
+   * Present when the AlertZero plugin is installed.
+   *
+   * Declared structurally so this plugin does not take a TypeScript project dependency
+   * on AlertZero. Keep it assignable to `AlertZeroPublicStart.registerImpactEntityOpener`.
+   */
+  alertzero?: {
+    registerImpactEntityOpener: (
+      opener: (entity: { id: string; name?: string; type?: string }, historyKey: symbol) => void
+    ) => void;
+  };
   mitreAttack?: MitreAttackPublicStart;
   cps?: CPSPluginStart;
   evals?: EvalsPublicStart;

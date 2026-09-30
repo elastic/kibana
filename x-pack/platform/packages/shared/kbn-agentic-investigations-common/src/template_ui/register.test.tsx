@@ -113,8 +113,10 @@ describe('registerAgenticInvestigationTemplateUI', () => {
     register(contract);
 
     expect(contract.getTab('investigation.overview')?.label).toBe('Overview');
+    expect(contract.getTab('investigation.attachments')?.label).toBe('Attachments');
     expect(contract.getTemplateUIDefinition('investigation')?.tabs).toEqual([
       'investigation.overview',
+      'investigation.attachments',
     ]);
   });
 

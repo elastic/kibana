@@ -10,6 +10,7 @@ import type { IconType } from '@elastic/eui';
 import { EuiSkeletonText } from '@elastic/eui';
 import type { ConversationTemplateServiceStartContract } from '@kbn/agent-builder-browser';
 import { DETAILS_FLYOUT_LABELS } from '../components/details/translations';
+import type { OpenImpactEntity } from '../components/impact/impact_entities';
 import { ConversationTitle } from './conversation_title';
 import type { RenderAssignees, RenderStatus, RenderLinkedInvestigations } from './types';
 
@@ -20,6 +21,9 @@ import type { RenderAssignees, RenderStatus, RenderLinkedInvestigations } from '
  */
 const LazyOverviewSlot = lazy(() =>
   import('./slots').then(({ OverviewSlot }) => ({ default: OverviewSlot }))
+);
+const LazyAttachmentsSlot = lazy(() =>
+  import('./slots').then(({ AttachmentsSlot }) => ({ default: AttachmentsSlot }))
 );
 const LazyHeaderSlot = lazy(() =>
   import('./slots').then(({ HeaderSlot }) => ({ default: HeaderSlot }))
@@ -40,6 +44,7 @@ const LazyEscalationOverviewSlot = lazy(() =>
  */
 export const getInvestigationTabIds = (templateId: string): readonly string[] => [
   `${templateId}.overview`,
+  `${templateId}.attachments`,
 ];
 
 export interface RegisterAgenticInvestigationTemplateUIOptions {
@@ -77,11 +82,16 @@ export interface RegisterAgenticInvestigationTemplateUIOptions {
    * Supplied by the caller so the modal can use HTTP hooks unavailable in this package.
    */
   renderCloseInvestigationModal?: import('./slots').FooterSlotProps['onCloseInvestigation'];
+  /**
+   * Opens an entity-store Impact row. Supplied by the caller: this package cannot open a
+   * Security entity flyout. Knowledge-indicator rows are not passed through.
+   */
+  onOpenImpactEntity?: OpenImpactEntity;
 }
 
 /**
- * Registers one solution's agentic investigation flyout UI: the overview tab Agent Builder
- * renders, plus the header and footer of its conversation details flyout.
+ * Registers one solution's agentic investigation flyout UI: the overview and attachments tabs
+ * Agent Builder renders, plus the header and footer of its conversation details flyout.
  *
  * Call once per solution from the plugin's `start`. Tabs are registered per template rather than
  * shared, so each solution's tab components stay independent.
@@ -96,8 +106,9 @@ export const registerAgenticInvestigationTemplateUI = ({
   renderAssignees,
   renderStatus,
   renderCloseInvestigationModal,
+  onOpenImpactEntity,
 }: RegisterAgenticInvestigationTemplateUIOptions): void => {
-  const [overviewTabId] = getInvestigationTabIds(templateId);
+  const [overviewTabId, attachmentsTabId] = getInvestigationTabIds(templateId);
 
   conversationTemplates.registerTab(overviewTabId, ({ attachmentsService }) => ({
     label: DETAILS_FLYOUT_LABELS.tabs.overview,
@@ -108,6 +119,21 @@ export const registerAgenticInvestigationTemplateUI = ({
             conversation={conversation}
             attachmentsService={attachmentsService}
             renderProposedActions={renderProposedActions}
+            onOpenImpactEntity={onOpenImpactEntity}
+          />
+        </Suspense>
+      );
+    },
+  }));
+
+  conversationTemplates.registerTab(attachmentsTabId, () => ({
+    label: DETAILS_FLYOUT_LABELS.tabs.attachments,
+    content: function AttachmentsTabContent({ conversation }) {
+      return (
+        <Suspense fallback={<EuiSkeletonText lines={3} />}>
+          <LazyAttachmentsSlot
+            conversation={conversation}
+            onOpenImpactEntity={onOpenImpactEntity}
           />
         </Suspense>
       );
@@ -119,7 +145,7 @@ export const registerAgenticInvestigationTemplateUI = ({
     ({ openFullscreenConversation }) => ({
       name,
       icon,
-      tabs: [overviewTabId],
+      tabs: [overviewTabId, attachmentsTabId],
       detailsFlyout: {
         header: function InvestigationFlyoutHeader({ conversation, refetchConversation }) {
           return (

@@ -6,7 +6,8 @@
  */
 
 import React from 'react';
-import { render, screen } from '@testing-library/react';
+import { fireEvent, render, screen } from '@testing-library/react';
+import { renderWithKibanaRenderContext } from '@kbn/test-jest-helpers';
 import type { AttachmentServiceStartContract } from '@kbn/agent-builder-browser';
 import type { VersionedAttachment } from '@kbn/agent-builder-common/attachments';
 import type { Investigation } from '../../types';
@@ -60,7 +61,7 @@ const renderTab = ({
   );
 
 describe('OverviewTab', () => {
-  it('no longer renders the Impact table', () => {
+  it('does not render the removed Impact table from investigation fields', () => {
     renderTab({ attachments: [attachment] });
 
     expect(screen.queryByText('Impact')).not.toBeInTheDocument();
@@ -90,5 +91,54 @@ describe('OverviewTab', () => {
 
     expect(screen.queryByText("What's happened")).not.toBeInTheDocument();
     expect(screen.getByText('Attachment summary')).toBeInTheDocument();
+  });
+
+  it('shows Impact chips between the narrative and the attachment summary', () => {
+    const onOpenImpactEntity = jest.fn();
+    const impact: VersionedAttachment = {
+      id: 'impact-1',
+      type: 'investigation_impact',
+      current_version: 1,
+      versions: [
+        {
+          version: 1,
+          data: {
+            entities: [
+              { id: 'host-1', name: 'web-01', type: 'host' },
+              {
+                id: 'payments',
+                name: 'payments',
+                type: 'service',
+                featureId: 'feat-1',
+                streamName: 'logs',
+              },
+            ],
+          },
+          created_at: '2026-09-01T10:00:00.000Z',
+          content_hash: 'impact',
+        },
+      ],
+    };
+
+    renderWithKibanaRenderContext(
+      <OverviewTab
+        investigation={investigation}
+        attachments={[impact, attachment]}
+        attachmentsService={attachmentsService}
+        onOpenImpactEntity={onOpenImpactEntity}
+      />
+    );
+
+    const headings = screen.getAllByRole('heading').map(({ textContent }) => textContent);
+    expect(headings).toEqual(["What's happened", 'Impact', 'Attachment summary']);
+
+    fireEvent.click(screen.getByRole('button', { name: 'Open host web-01' }));
+    expect(onOpenImpactEntity).toHaveBeenCalledWith({
+      id: 'host-1',
+      name: 'web-01',
+      type: 'host',
+    });
+    expect(screen.getByText('payments')).toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: /payments/ })).not.toBeInTheDocument();
   });
 });

@@ -158,11 +158,27 @@ export interface OpenConversationSidebarOptions extends EmbeddableConversationPr
 }
 
 /**
+ * Overrides the conversation details flyout's history session.
+ * Omit it to use `CONVERSATION_DETAILS_FLYOUT_HISTORY_KEY` and the default chat-info title.
+ */
+export interface OpenConversationDetailsSystemFlyout {
+  /** Shared with child flyouts so Back returns to this conversation. */
+  historyKey: symbol;
+  /** History label the child flyout's Back button returns to. */
+  title?: string;
+}
+
+/**
  * Options passed when opening conversation details.
  */
 export interface OpenConversationDetailsOptions {
   conversationId: string;
   onClose?: () => void;
+  /**
+   * Overrides the flyout history key and title. Omit to use
+   * `CONVERSATION_DETAILS_FLYOUT_HISTORY_KEY` and the default chat-info title.
+   */
+  systemFlyout?: OpenConversationDetailsSystemFlyout;
   /** Icon buttons rendered in the flyout menu bar, before the close button (e.g. copy link). */
   trailingActions?: EuiFlyoutMenuAction[];
 }

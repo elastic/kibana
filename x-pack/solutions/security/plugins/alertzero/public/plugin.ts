@@ -37,6 +37,7 @@ import {
 import { getAgenticInvestigationsCapabilities } from './hooks/use_agentic_investigations_capabilities';
 import { getAlertZeroDeepLinks } from './deep_links';
 import { registerAlertZeroAttachmentTypesUI } from './agent_builder/attachment_types';
+import { openImpactEntity, registerImpactEntityOpener } from './impact_entity_opener';
 import { EscalationModalBoundary } from './pages/conversations/escalation_modal_boundary';
 import { ProposedActionsBoundary } from './pages/conversations/proposed_actions_boundary';
 import { getSharedAppQueryClient } from './shared_app_query_client';
@@ -132,7 +133,7 @@ export class AlertZeroPublicPlugin
 
   public start(core: CoreStart, startDeps: AlertZeroStartDependencies): AlertZeroPublicStart {
     if (!this.config.enabled) {
-      return {};
+      return { registerImpactEntityOpener };
     }
 
     // Push capability-resolved deep links now that `core.application.capabilities` is available.
@@ -373,6 +374,7 @@ export class AlertZeroPublicPlugin
                   null,
                   React.createElement(LazyProposedActionsSlot, props)
                 ),
+              onOpenImpactEntity: openImpactEntity,
             });
 
             registerEscalationTemplateUI({
@@ -411,7 +413,7 @@ export class AlertZeroPublicPlugin
       this.logger.error('Failed to register AlertZero attachment UI definitions', error);
     });
 
-    return {};
+    return { registerImpactEntityOpener };
   }
 
   public stop() {

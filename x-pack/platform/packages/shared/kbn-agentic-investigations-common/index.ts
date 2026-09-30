@@ -82,6 +82,11 @@ export {
   getInvestigationTabIds,
   getEscalationTabIds,
 } from './src/template_ui/register';
+export { investigationFlyoutHistoryKey } from './src/investigation_flyout_history';
+export {
+  type ImpactEntityView,
+  type OpenImpactEntity,
+} from './src/components/impact/impact_entities';
 export {
   type RenderAssignees,
   type AssigneesSlotRenderProps,

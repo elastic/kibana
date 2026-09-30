@@ -14,7 +14,12 @@ export interface SummaryAttachmentType {
   types: readonly string[];
 }
 
-// Spelled out (not imported) — this package cannot depend on a solution plugin.
+/**
+ * Spelled out (not imported) — this package cannot depend on a solution plugin.
+ *
+ * `investigation_impact` is intentionally absent. Overview shows those entities as chips, and the
+ * Attachments tab keeps the full list. It is not another row in this overview inventory.
+ */
 export const SUMMARY_ATTACHMENT_TYPES: readonly SummaryAttachmentType[] = [
   { types: ['security.alert', 'security.alerts'] },
   { types: ['security.attack_discovery'] },

@@ -15,6 +15,8 @@ import {
   type ConversationDetailsFlyoutFooterProps,
   OverviewTab,
 } from '../components/details';
+import { AttachmentsTab } from '../components/impact/attachments_tab';
+import type { OpenImpactEntity } from '../components/impact/impact_entities';
 import {
   conversationToInvestigation,
   conversationToEscalationHeader,
@@ -44,19 +46,30 @@ export interface OverviewSlotProps extends InvestigationSlotProps {
    * host can fetch its proposals; omitted entirely (see `OverviewTab`) when the caller has none.
    */
   renderProposedActions?: (props: { conversationId: string }) => React.ReactNode;
+  onOpenImpactEntity?: OpenImpactEntity;
 }
 
 export const OverviewSlot = ({
   conversation,
   attachmentsService,
   renderProposedActions,
+  onOpenImpactEntity,
 }: OverviewSlotProps) => (
   <OverviewTab
     investigation={conversationToInvestigation(conversation)}
     attachments={conversation.attachments}
     attachmentsService={attachmentsService}
     proposedActionsContent={renderProposedActions?.({ conversationId: conversation.id })}
+    onOpenImpactEntity={onOpenImpactEntity}
   />
+);
+
+export interface AttachmentsSlotProps extends InvestigationSlotProps {
+  onOpenImpactEntity?: OpenImpactEntity;
+}
+
+export const AttachmentsSlot = ({ conversation, onOpenImpactEntity }: AttachmentsSlotProps) => (
+  <AttachmentsTab attachments={conversation.attachments} onOpenImpactEntity={onOpenImpactEntity} />
 );
 
 export interface HeaderSlotProps extends InvestigationSlotProps {

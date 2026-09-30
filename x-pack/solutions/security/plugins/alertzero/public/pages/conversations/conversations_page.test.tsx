@@ -15,6 +15,7 @@ import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { coreMock } from '@kbn/core/public/mocks';
 import { agentBuilderMocks } from '@kbn/agent-builder-plugin/public/mocks';
+import { investigationFlyoutHistoryKey } from '@kbn/agentic-investigations-common';
 import {
   useApproveProposal,
   useDismissProposal,
@@ -323,7 +324,13 @@ describe('ConversationsPage details flyout', () => {
     // conversation and renders the slots this solution registered. Nothing here fetches it.
     await waitFor(() => {
       expect(agentBuilder.openConversationDetails).toHaveBeenCalledWith(
-        expect.objectContaining({ conversationId: 'inv-1' })
+        expect.objectContaining({
+          conversationId: 'inv-1',
+          systemFlyout: {
+            historyKey: investigationFlyoutHistoryKey,
+            title: 'Investigation',
+          },
+        })
       );
     });
   });
@@ -344,7 +351,13 @@ describe('ConversationsPage details flyout', () => {
     expect(history.location.search).toBe('?selectedConversationId=inv-1');
     await waitFor(() => {
       expect(agentBuilder.openConversationDetails).toHaveBeenCalledWith(
-        expect.objectContaining({ conversationId: 'inv-1' })
+        expect.objectContaining({
+          conversationId: 'inv-1',
+          systemFlyout: {
+            historyKey: investigationFlyoutHistoryKey,
+            title: 'Investigation',
+          },
+        })
       );
     });
   });

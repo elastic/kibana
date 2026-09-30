@@ -10,6 +10,7 @@ import type { SecurityPluginStart } from '@kbn/security-plugin/public';
 import type { SharePluginStart } from '@kbn/share-plugin/public';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
 import type { WorkflowsPublicPluginStart } from '@kbn/workflows-management-plugin/public';
+import type { ImpactEntityOpener } from './impact_entity_opener';
 
 export interface AlertZeroClientConfig {
   enabled: boolean;
@@ -34,4 +35,10 @@ export interface AlertZeroStartDependencies {
 export interface AlertZeroPublicSetup {
   enabled: boolean;
 }
-export type AlertZeroPublicStart = Record<string, never>;
+export interface AlertZeroPublicStart {
+  /**
+   * Registers the handler that opens an Impact entity as a Flyout V2 child of the investigation.
+   * Invoked at click time, so Security Solution can register after this plugin's start returns.
+   */
+  registerImpactEntityOpener: (opener: ImpactEntityOpener) => void;
+}

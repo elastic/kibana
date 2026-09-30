@@ -10,7 +10,10 @@ import type { CoreStart } from '@kbn/core/public';
 import { htmlIdGenerator } from '@elastic/eui';
 import type { EuiFlyoutMenuAction } from '@elastic/eui';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
-import { CONVERSATION_DETAILS_FLYOUT_HISTORY_KEY } from '@kbn/agent-builder-browser';
+import {
+  CONVERSATION_DETAILS_FLYOUT_HISTORY_KEY,
+  type OpenConversationDetailsSystemFlyout,
+} from '@kbn/agent-builder-browser';
 import type { ConversationsService } from '../services/conversations/conversations_service';
 import type { ConversationTemplatesService } from '../services/conversation_templates';
 import { ConversationDetailsFlyoutSnapshot, FLYOUT_TITLE } from './conversation_details_flyout';
@@ -24,6 +27,11 @@ export interface OpenConversationDetailsFlyoutOptions {
   conversationTemplatesService: ConversationTemplatesService;
   conversationId: string;
   onClose?: () => void;
+  /**
+   * Overrides the flyout history key and title. Omit to use
+   * `CONVERSATION_DETAILS_FLYOUT_HISTORY_KEY` and the default chat-info title.
+   */
+  systemFlyout?: OpenConversationDetailsSystemFlyout;
   trailingActions?: EuiFlyoutMenuAction[];
 }
 
@@ -33,6 +41,7 @@ export const openConversationDetailsFlyout = async ({
   conversationTemplatesService,
   conversationId,
   onClose,
+  systemFlyout,
   trailingActions,
 }: OpenConversationDetailsFlyoutOptions): Promise<() => void> => {
   const titleId = generateTitleId();
@@ -49,8 +58,8 @@ export const openConversationDetailsFlyout = async ({
     </QueryClientProvider>,
     {
       session: 'start',
-      historyKey: CONVERSATION_DETAILS_FLYOUT_HISTORY_KEY,
-      title: FLYOUT_TITLE,
+      historyKey: systemFlyout?.historyKey ?? CONVERSATION_DETAILS_FLYOUT_HISTORY_KEY,
+      title: systemFlyout?.title ?? FLYOUT_TITLE,
       size: 's',
       flyoutMenuDisplayMode: 'always',
       flyoutMenuProps: { trailingActions },

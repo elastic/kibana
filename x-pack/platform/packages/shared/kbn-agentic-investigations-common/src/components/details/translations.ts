@@ -36,6 +36,9 @@ export const DETAILS_FLYOUT_LABELS = Object.freeze({
     overview: i18n.translate('xpack.alertzero.detailsFlyout.tabs.overview', {
       defaultMessage: 'Overview',
     }),
+    attachments: i18n.translate('xpack.alertzero.detailsFlyout.tabs.attachments', {
+      defaultMessage: 'Attachments',
+    }),
   },
   sections: {
     overview: i18n.translate('xpack.alertzero.detailsFlyout.sections.situation', {

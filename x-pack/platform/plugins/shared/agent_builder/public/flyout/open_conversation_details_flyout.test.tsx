@@ -7,7 +7,10 @@
 
 import type { EuiFlyoutMenuAction } from '@elastic/eui';
 import { coreMock } from '@kbn/core/public/mocks';
-import { CONVERSATION_DETAILS_FLYOUT_HISTORY_KEY } from '@kbn/agent-builder-browser';
+import {
+  CONVERSATION_DETAILS_FLYOUT_HISTORY_KEY,
+  type OpenConversationDetailsSystemFlyout,
+} from '@kbn/agent-builder-browser';
 import type { ConversationsService } from '../services/conversations/conversations_service';
 import { ConversationTemplatesService } from '../services/conversation_templates';
 import { openConversationDetailsFlyout } from './open_conversation_details_flyout';
@@ -25,7 +28,12 @@ describe('openConversationDetailsFlyout', () => {
     const open = ({
       onClose,
       trailingActions,
-    }: { onClose?: () => void; trailingActions?: EuiFlyoutMenuAction[] } = {}) =>
+      systemFlyout,
+    }: {
+      onClose?: () => void;
+      trailingActions?: EuiFlyoutMenuAction[];
+      systemFlyout?: OpenConversationDetailsSystemFlyout;
+    } = {}) =>
       openConversationDetailsFlyout({
         core,
         conversationsService: { get: jest.fn() } as unknown as ConversationsService,
@@ -33,6 +41,7 @@ describe('openConversationDetailsFlyout', () => {
         conversationId: 'conversation',
         onClose,
         trailingActions,
+        systemFlyout,
       });
 
     return { core, close, open, closeFlyout: () => resolveClosed() };
@@ -50,6 +59,22 @@ describe('openConversationDetailsFlyout', () => {
         historyKey: CONVERSATION_DETAILS_FLYOUT_HISTORY_KEY,
         title: 'Chat info',
         type: 'push',
+      })
+    );
+  });
+
+  it('uses the caller history key and title when a system flyout override is set', async () => {
+    const { core, open } = setup();
+    const historyKey = Symbol('investigation');
+
+    await open({ systemFlyout: { historyKey, title: 'Investigation' } });
+
+    expect(core.overlays.openSystemFlyout).toHaveBeenCalledWith(
+      expect.anything(),
+      expect.objectContaining({
+        session: 'start',
+        historyKey,
+        title: 'Investigation',
       })
     );
   });
