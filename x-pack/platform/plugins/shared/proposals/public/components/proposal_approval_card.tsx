@@ -21,7 +21,6 @@ import type { ApprovalAction } from '@kbn/proposals-ui';
 import { getUserDisplayName } from '@kbn/user-profile-components';
 import { isAwaitingDecision } from '@kbn/proposals-common';
 import type { DismissReason } from '@kbn/proposals-common';
-import { PROPOSAL_WITHOUT_ACTION_LABEL } from '../translations';
 import {
   useApproveProposal,
   useDismissProposal,
@@ -152,9 +151,6 @@ export const ProposalApprovalCard = memo<ProposalApprovalCardProps>(({ proposalI
     );
   }
 
-  const actionName =
-    liveProposal.action?.name ?? liveProposal.actionWorkflowId ?? PROPOSAL_WITHOUT_ACTION_LABEL;
-
   const isReplaced =
     liveProposal.supersededBy !== undefined || liveProposal.status === 'superseded';
   const isPending = isAwaitingDecision(liveProposal);
@@ -214,9 +210,8 @@ export const ProposalApprovalCard = memo<ProposalApprovalCardProps>(({ proposalI
     <div css={css({ padding: `${euiTheme.size.m}` })} data-test-subj={`proposalCard-${proposalId}`}>
       <ApprovalContent
         showHeader={false}
-        title={actionName}
+        title={liveProposal.title}
         tone={getProposalTone(liveProposal)}
-        iconType="lock"
         comment={liveProposal.comment}
         decision={isReplaced ? undefined : decision}
         isSubmitting={isReplaced ? undefined : isSubmitting}
@@ -224,6 +219,23 @@ export const ProposalApprovalCard = memo<ProposalApprovalCardProps>(({ proposalI
         primaryAction={primaryAction}
         secondaryActions={secondaryActions}
       >
+        {/* A retry keeps the prior failure visible while this revision awaits a decision. */}
+        {!isReplaced && isPending && liveProposal.previousExecutionError && (
+          <>
+            <EuiSpacer size="m" />
+            <div css={css({ padding: `0 ${euiTheme.size.m}` })}>
+              <KbnWarningCallout
+                announceOnMount
+                size="s"
+                title={i18n.translate('xpack.proposals.proposalCard.previousFailureCallout', {
+                  defaultMessage: 'A previous attempt at this action failed',
+                })}
+              >
+                {liveProposal.previousExecutionError}
+              </KbnWarningCallout>
+            </div>
+          </>
+        )}
         {isReplaced && (
           <>
             <EuiSpacer size="m" />
@@ -238,9 +250,9 @@ export const ProposalApprovalCard = memo<ProposalApprovalCardProps>(({ proposalI
             </div>
           </>
         )}
-        {/* An expired proposal nobody decided is not itself an outcome `ApprovalContent`
-              models — `decision` covers only a human's actual approve/dismiss. */}
-        {!isReplaced && isExpired && !decision && (
+        {/* The badge identifies expiry; this callout explains why no decision is possible.
+            The replacement notice takes precedence for historical cards. */}
+        {!isReplaced && isExpired && (
           <>
             <EuiSpacer size="m" />
             <div css={css({ padding: `0 ${euiTheme.size.m}` })}>

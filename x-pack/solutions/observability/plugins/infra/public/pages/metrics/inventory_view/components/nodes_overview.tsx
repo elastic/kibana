@@ -8,7 +8,7 @@
 import { i18n } from '@kbn/i18n';
 import { usePerformanceContext } from '@kbn/ebt-tools';
 import React, { useCallback, useMemo } from 'react';
-import { EuiLink, useCurrentEuiBreakpoint } from '@elastic/eui';
+import { EuiLink, EuiPanel, useCurrentEuiBreakpoint } from '@elastic/eui';
 import styled from '@emotion/styled';
 import {
   type DataSchemaFormat,
@@ -188,14 +188,21 @@ export const NodesOverview = ({
   if (view === 'table') {
     return (
       <TableContainer data-test-subj="infraNodesOverviewTable">
-        <TableView
-          nodeType={nodeType}
-          nodes={nodes}
-          options={options}
-          formatter={formatter}
-          currentTime={currentTime}
-          onFilter={handleDrilldown}
-        />
+        <EuiPanel
+          hasShadow={false}
+          borderRadius="m"
+          paddingSize="none"
+          css={{ overflow: 'hidden' }}
+        >
+          <TableView
+            nodeType={nodeType}
+            nodes={nodes}
+            options={options}
+            formatter={formatter}
+            currentTime={currentTime}
+            onFilter={handleDrilldown}
+          />
+        </EuiPanel>
         {nodeType === entityType && detailsItemId && (
           <AssetDetailsFlyout
             entityId={detailsItemId}
