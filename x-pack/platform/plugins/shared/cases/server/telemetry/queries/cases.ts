@@ -95,7 +95,15 @@ export const getCasesTelemetryData = async ({
 
     const aggregationsBuckets = getAggregationsBuckets({
       aggs: casesRes.aggregations,
-      keys: ['counts', 'syncAlerts', 'extractObservables', 'status', 'users', 'totalAssignees'],
+      keys: [
+        'counts',
+        'syncAlerts',
+        'extractObservables',
+        'extractObservablesSource',
+        'status',
+        'users',
+        'totalAssignees',
+      ],
     });
 
     const allAttachmentFrameworkStats = buildAttachmentFramework({
@@ -122,6 +130,18 @@ export const getCasesTelemetryData = async ({
         syncAlertsOff: findValueInBuckets(aggregationsBuckets.syncAlerts, 0),
         extractObservablesOn: findValueInBuckets(aggregationsBuckets.extractObservables, 1),
         extractObservablesOff: findValueInBuckets(aggregationsBuckets.extractObservables, 0),
+        extractObservablesSourceExplicit: findValueInBuckets(
+          aggregationsBuckets.extractObservablesSource,
+          'explicit'
+        ),
+        extractObservablesSourceSpaceDefault: findValueInBuckets(
+          aggregationsBuckets.extractObservablesSource,
+          'space_default'
+        ),
+        extractObservablesSourceRule: findValueInBuckets(
+          aggregationsBuckets.extractObservablesSource,
+          'rule'
+        ),
         observables: getObservablesTotalsByType(casesRes.aggregations?.observables),
         totalWithMaxObservables: getTotalWithMaxObservables(
           casesRes.aggregations?.totalWithMaxObservables?.buckets ?? []
@@ -211,6 +231,9 @@ const getCasesSavedObjectTelemetry = async (
       },
       extractObservables: {
         terms: { field: `${CASE_SAVED_OBJECT}.attributes.settings.extractObservables` },
+      },
+      extractObservablesSource: {
+        terms: { field: `${CASE_SAVED_OBJECT}.attributes.settings.extractObservablesSource` },
       },
       users: {
         cardinality: {

@@ -332,6 +332,27 @@ export const casesSchema: CasesTelemetrySchema = {
         type: 'long',
         _meta: { description: 'Automatically extract observables setting disabled' },
       },
+      extractObservablesSourceExplicit: {
+        type: 'long',
+        _meta: {
+          description:
+            'Cases where extractObservables was explicitly set by the API caller or UI toggle',
+        },
+      },
+      extractObservablesSourceSpaceDefault: {
+        type: 'long',
+        _meta: {
+          description:
+            'Cases where extractObservables was inherited from the space or owner default',
+        },
+      },
+      extractObservablesSourceRule: {
+        type: 'long',
+        _meta: {
+          description:
+            'Cases where extractObservables was set by a per-rule detection rule override',
+        },
+      },
       observables: observablesSchema,
       totalWithMaxObservables: {
         type: 'long',

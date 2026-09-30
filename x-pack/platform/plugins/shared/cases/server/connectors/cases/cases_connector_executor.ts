@@ -917,8 +917,8 @@ export class CasesConnectorExecutor {
         extractObservables,
         ...v2Template.settings,
         ...(extractObservablesOverride != null
-          ? { extractObservables: extractObservablesOverride }
-          : {}),
+          ? { extractObservables: extractObservablesOverride, extractObservablesSource: 'rule' }
+          : { extractObservablesSource: 'space_default' }),
       },
       ...getAssigneesFromTemplate(v2Template.assignees, hasPlatinumLicenseOrGreater),
       owner: params.owner,
@@ -1008,8 +1008,12 @@ export class CasesConnectorExecutor {
     const baseSettings = caseFieldsFromTemplate?.settings ?? { syncAlerts, extractObservables };
     const resolvedSettings =
       extractObservablesOverride != null
-        ? { ...baseSettings, extractObservables: extractObservablesOverride }
-        : baseSettings;
+        ? {
+            ...baseSettings,
+            extractObservables: extractObservablesOverride,
+            extractObservablesSource: 'rule' as const,
+          }
+        : { ...baseSettings, extractObservablesSource: 'space_default' as const };
 
     return {
       id: caseId,
