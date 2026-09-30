@@ -16,8 +16,6 @@ import {
   MAX_CANDIDATES,
   NON_TERMINAL_INVESTIGATION_STATUSES,
   PAGE_SIZE,
-  UNTRACKED_RUN_TIMEOUT_ERROR,
-  UNTRACKED_RUN_TIMEOUT_MS,
 } from './investigation_reconciliation_types';
 import type {
   ExecutionSummary,
@@ -52,7 +50,7 @@ const getCandidatesBySpace = async ({
 
     const { results } = await investigationSweepRepository.findAcrossSpaces({
       statuses: [...NON_TERMINAL_INVESTIGATION_STATUSES],
-      fields: ['created_at', 'started_at'],
+      fields: ['created_at', 'execution_id'],
       sortField: 'created_at',
       sortOrder: 'asc',
       page,
@@ -77,6 +75,11 @@ const getCandidatesBySpace = async ({
   }
   return { bySpace, scanned: candidates.length };
 };
+
+const getLatestExecutionId = ({
+  id,
+  execution_id: executionId,
+}: ReconciliationCandidate['investigation']): string => executionId ?? id;
 
 const toInvestigationStatus = (
   executionStatus: ExecutionStatus
@@ -104,52 +107,13 @@ const toInvestigationStatus = (
   }
 };
 
-/**
- * When the record was reopened, if it was. A continued investigation keeps its first execution's
- * id, so an execution that finished before the record last started running settled an earlier
- * run, not the current one.
- */
-const getReopenedAt = (
-  execution: ExecutionSummary,
-  startedAt: string | undefined
-): number | undefined => {
-  if (execution.finishedAt === undefined || startedAt === undefined) {
-    return undefined;
-  }
-  const startedAtMs = Date.parse(startedAt);
-  return Date.parse(execution.finishedAt) < startedAtMs ? startedAtMs : undefined;
-};
-
-/** Fails a run no execution can settle once it outlives the workflow timeout. */
-const failUntrackedRun = (runStartedAt: number, now: number): ReconciliationOutcome | undefined =>
-  now - runStartedAt > UNTRACKED_RUN_TIMEOUT_MS
-    ? {
-        reconciledStatus: 'failed',
-        completedAt: new Date(now).toISOString(),
-        errorMessage: UNTRACKED_RUN_TIMEOUT_ERROR,
-      }
-    : undefined;
-
 const toReconciliationOutcome = ({
   execution,
-  startedAt,
-  now,
 }: {
   execution: ExecutionSummary | undefined;
-  startedAt: string | undefined;
-  now: number;
 }): ReconciliationOutcome | undefined => {
-  if (!execution) {
-    // Only a record that has started running; a pending one may still be waiting for its run.
-    return startedAt === undefined ? undefined : failUntrackedRun(Date.parse(startedAt), now);
-  }
-  if (!isInvestigationWorkflowExecution(execution)) {
+  if (!execution || !isInvestigationWorkflowExecution(execution)) {
     return undefined;
-  }
-
-  const reopenedAt = getReopenedAt(execution, startedAt);
-  if (reopenedAt !== undefined) {
-    return failUntrackedRun(reopenedAt, now);
   }
 
   const reconciledStatus = toInvestigationStatus(execution.status);
@@ -168,10 +132,9 @@ const toReconciliationOutcome = ({
 /**
  * Corrects investigations left in a non-terminal status by a workflow execution that has already
  * settled — the engine cancels or times out a run before its `persist_investigation_*` step can
- * write the outcome. Executions from removed workflows are left untouched. A running investigation
- * with no execution to settle it, because it was reopened or its execution is missing, is failed
- * only once it outlives the workflow timeout. Only the status is corrected; no lifecycle trigger
- * is emitted.
+ * write the outcome. An investigation is settled from its latest run's execution, which is its own
+ * ID unless a later run continued it. Executions from removed workflows and missing execution
+ * documents are left untouched. Only the status is corrected; no lifecycle trigger is emitted.
  */
 export const reconcileInvestigationStatuses = async ({
   investigationSweepRepository,
@@ -197,7 +160,7 @@ export const reconcileInvestigationStatuses = async ({
       let executions: ReadonlyMap<string, ExecutionSummary>;
       try {
         executions = await getExecutionSummaries(
-          batch.map(({ investigation }) => investigation.id),
+          batch.map(({ investigation }) => getLatestExecutionId(investigation)),
           spaceId
         );
       } catch (error) {
@@ -211,9 +174,9 @@ export const reconcileInvestigationStatuses = async ({
           return { scanned, reconciled };
         }
 
-        const { id, version, started_at: startedAt } = candidate.investigation;
-        const execution = executions.get(id);
-        const outcome = toReconciliationOutcome({ execution, startedAt, now: Date.now() });
+        const { id, version } = candidate.investigation;
+        const execution = executions.get(getLatestExecutionId(candidate.investigation));
+        const outcome = toReconciliationOutcome({ execution });
 
         if (!outcome) {
           continue;

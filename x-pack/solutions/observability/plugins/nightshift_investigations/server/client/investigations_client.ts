@@ -7,6 +7,7 @@
 
 import type { KibanaRequest, Logger } from '@kbn/core/server';
 import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
+import { TerminalExecutionStatuses } from '@kbn/workflows';
 import { NIGHTSHIFT_INVESTIGATION_WORKFLOW_ID } from '@kbn/workflows/managed';
 import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
@@ -514,15 +515,15 @@ export class NightshiftInvestigationsClient {
    * run's executor, and stamping the transition with the wall clock would date the record to when
    * the persist step happened to run rather than to when the run began.
    *
-   * A run that `continues` an existing investigation reopens it instead, and resolves to the
-   * conversation it resumes, so callers name only the investigation.
+   * A run whose execution is not the one the investigation is named after continues it instead,
+   * and resolves to the conversation it resumes, so callers name only the investigation.
    */
   async ensureOrCreate(
     investigationId: string,
-    { continues = false }: { continues?: boolean } = {}
+    executionId = investigationId
   ): Promise<string | undefined> {
-    if (continues) {
-      return this.continueInvestigation(investigationId);
+    if (executionId !== investigationId) {
+      return this.continueInvestigation(investigationId, executionId);
     }
 
     const existing = await this.investigationRepository.get(investigationId);
@@ -589,20 +590,49 @@ export class NightshiftInvestigationsClient {
 
   /**
    * Marks an existing investigation running for a run that continues it, such as a reply in its
-   * Slack thread. Unlike a first run, a settled record is reopened. `started_at` is when the
-   * reopen happened, which is what the reconciliation task compares against the investigation's
-   * first execution. Resolves to the investigation's conversation.
+   * Slack thread. Unlike a first run, a settled record is reopened. The run must be a live run of
+   * the investigation workflow that names this investigation in its inputs, so a caller cannot
+   * reopen an investigation without a run to settle it. The record then points at the run's
+   * execution, which is what the reconciliation task settles it from. Resolves to the
+   * investigation's conversation.
    */
-  private async continueInvestigation(investigationId: string): Promise<string | undefined> {
+  private async continueInvestigation(
+    investigationId: string,
+    executionId: string
+  ): Promise<string | undefined> {
     const existing = await this.investigationRepository.get(investigationId);
     if (!existing) {
+      throw new InvestigationNotFoundError(investigationId);
+    }
+
+    if (!this.workflowsManagement) {
+      throw new InvestigationUnavailableError('workflowsManagement is not available');
+    }
+
+    const execution = await this.workflowsManagement.management.getWorkflowExecution(
+      executionId,
+      this.getSpaceId(),
+      { includeOutput: false, request: this.request }
+    );
+    const context = execution?.context;
+    const inputs =
+      isPlainObject(context) && isPlainObject(context.inputs) ? context.inputs : undefined;
+
+    if (
+      !execution ||
+      !isInvestigationWorkflowExecution(execution) ||
+      TerminalExecutionStatuses.includes(execution.status) ||
+      inputs?.investigation_id !== investigationId
+    ) {
       throw new InvestigationNotFoundError(investigationId);
     }
 
     await this.transitionToRunning({
       investigationId,
       version: existing.version,
-      startedAt: new Date().toISOString(),
+      startedAt: execution.startedAt ?? new Date().toISOString(),
+      executedBy: execution.executedBy,
+      executionId,
       reopen: isTerminalStatus(existing.status),
     });
     return existing.conversation_id;
@@ -617,12 +647,14 @@ export class NightshiftInvestigationsClient {
     version,
     startedAt,
     executedBy,
+    executionId,
     reopen = false,
   }: {
     investigationId: string;
     version?: string;
     startedAt: string;
     executedBy?: string;
+    executionId?: string;
     reopen?: boolean;
   }): Promise<void> {
     try {
@@ -632,6 +664,7 @@ export class NightshiftInvestigationsClient {
           status: 'running',
           started_at: startedAt,
           ...(executedBy && { executed_by: executedBy }),
+          ...(executionId && { execution_id: executionId }),
           ...(reopen && { completed_at: null, error: null }),
         },
         version,
