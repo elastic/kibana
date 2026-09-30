@@ -86,4 +86,5 @@ export const casesConfigurationsMock: CasesConfigurationUI = {
   owner: 'securitySolution',
   observableTypes: observableTypesMock,
   extractObservables: true,
+  statuses: [],
 };

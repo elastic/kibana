@@ -26,4 +26,11 @@ describe('Stats', () => {
       expect(res.getByText(label)).toBeInTheDocument();
     }
   );
+
+  it('renders a custom label with the color of its category', () => {
+    const res = render(<Status status={CaseStatuses['in-progress']} label="Awaiting customer" />);
+
+    expect(res.getByText('Awaiting customer')).toBeInTheDocument();
+    expect(res.getByTestId('case-status-badge-in-progress')).toBeInTheDocument();
+  });
 });
