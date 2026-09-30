@@ -49,7 +49,7 @@ const flushPromises = () => new Promise((resolve) => setTimeout(resolve));
 const createWorkspaceMock = () =>
   ({
     mergeGraph: jest.fn(),
-    fillInGraph: jest.fn(),
+    fillConnections: jest.fn(),
     simpleSearch: jest.fn(),
     search: jest.fn(),
     callElasticsearch: jest.fn(),
@@ -421,7 +421,7 @@ describe('workspace listeners', () => {
       expect(environment.workspace.mergeGraph).toHaveBeenCalledWith({ nodes, edges: [] });
       expect(workspaceInitializedSelector(environment.store.getState())).toBe(true);
       expect(environment.mockedDeps.notifyReact).toHaveBeenCalled();
-      expect(environment.workspace.fillInGraph).toHaveBeenCalledWith(10);
+      expect(environment.workspace.fillConnections).toHaveBeenCalledWith([], 10);
     });
 
     it('does not apply a stale response after a newer request', async () => {
@@ -475,7 +475,7 @@ describe('workspace listeners', () => {
       expect(environment.workspace.expandNodes).toHaveBeenCalledWith(['selected'], {
         toFields: fields,
       });
-      expect(environment.workspace.fillInGraph).toHaveBeenCalledWith(20);
+      expect(environment.workspace.fillConnections).toHaveBeenCalledWith(['selected'], 20);
     });
   });
 
