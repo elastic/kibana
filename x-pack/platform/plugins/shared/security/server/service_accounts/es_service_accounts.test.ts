@@ -733,7 +733,7 @@ describe('EsServiceAccounts', () => {
         count: 2,
         service_accounts: [
           queried('acme/billing', { enabled: false, roles: ['billing_read'] }),
-          queried('kibana/nightshift-relay'),
+          queried('kibana/nightshift-relay', { description: 'Runs investigation workflows.' }),
         ],
       });
       credentialStore.findExisting.mockResolvedValue(new Set(['kibana/nightshift-relay']));
@@ -765,6 +765,7 @@ describe('EsServiceAccounts', () => {
           {
             id: 'kibana/nightshift-relay',
             name: 'nightshift-relay',
+            description: 'Runs investigation workflows.',
             roles: ['viewer'],
             enabled: true,
             assumable: true,
@@ -899,7 +900,9 @@ describe('EsServiceAccounts', () => {
 
     it('reads the user-managed account and confirms it is assumable', async () => {
       esClient.asCurrentUser.transport.request
-        .mockResolvedValueOnce(accountEntry({ roles: ['viewer'] }))
+        .mockResolvedValueOnce(
+          accountEntry({ roles: ['viewer'], description: 'Runs investigation workflows.' })
+        )
         // The account still holds Kibana's token, so the stored credential describes it.
         .mockResolvedValueOnce(accountCredentials(['kibana-managed']));
       credentialStore.findExisting.mockResolvedValue(new Set([ACCOUNT_ID]));
@@ -909,6 +912,7 @@ describe('EsServiceAccounts', () => {
       await expect(serviceAccounts.get(request, ACCOUNT_ID)).resolves.toEqual({
         id: ACCOUNT_ID,
         name: 'nightshift-relay',
+        description: 'Runs investigation workflows.',
         roles: ['viewer'],
         enabled: true,
         assumable: true,

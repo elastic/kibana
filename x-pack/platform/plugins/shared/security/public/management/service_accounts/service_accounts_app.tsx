@@ -5,8 +5,9 @@
  * 2.0.
  */
 
-import React, { useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import { useHistory, useLocation } from 'react-router-dom';
+import useMountedState from 'react-use/lib/useMountedState';
 
 import type { ServiceAccount } from '@kbn/core-security-browser';
 import type { PublicMethodsOf } from '@kbn/utility-types';
@@ -36,6 +37,20 @@ export const ServiceAccountsApp = ({
   const history = useHistory();
   const location = useLocation();
   const [refreshKey, setRefreshKey] = useState(0);
+  const isMounted = useMountedState();
+  const creationClient = useMemo(
+    () => ({
+      create: async (params: Parameters<ServiceAccountsAPIClient['create']>[0]) => {
+        const account = await serviceAccountsAPIClient.create(params);
+        if (isMounted()) {
+          setRefreshKey((value) => value + 1);
+          onCreated(account);
+        }
+        return account;
+      },
+    }),
+    [serviceAccountsAPIClient, isMounted, onCreated]
+  );
 
   return (
     <>
@@ -48,15 +63,11 @@ export const ServiceAccountsApp = ({
       {canCreate && location.pathname === '/create' && (
         <CreateServiceAccountFlyout
           isServerless={isServerless}
-          serviceAccountsAPIClient={serviceAccountsAPIClient}
+          serviceAccountsAPIClient={creationClient}
           rolesAPIClient={rolesAPIClient}
           createRoleUrl={createRoleUrl}
           onClose={() => history.replace('/')}
-          onCreated={(account) => {
-            history.replace('/');
-            setRefreshKey((value) => value + 1);
-            onCreated(account);
-          }}
+          onCreated={() => history.replace('/')}
         />
       )}
     </>

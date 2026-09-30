@@ -99,6 +99,7 @@ export class ManagementService {
       this.securitySection.registerApp(
         serviceAccountsManagementApp.create({
           buildFlavor,
+          roleManagementEnabled: this.roleManagementEnabled,
           getStartServices,
           serviceAccountsAPIClient,
         })
