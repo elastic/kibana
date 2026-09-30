@@ -31,6 +31,7 @@ import { PrevalenceTool } from './flyout_v2/document/tools/prevalence_tool';
 import { AnalyzerTool } from './flyout_v2/document/tools/analyzer_tool';
 import { EntityFlyoutAnomaliesPage } from './entity_flyout_anomalies_page';
 import { CoverageOverviewPage } from './coverage_overview';
+import { RuleEditPage } from './rule_edit_page';
 
 export type { RuleCreateWizardPage } from './rule_create_wizard';
 export type { ThreatMatchRuleCreatePage } from './threat_match_rule_create_page';
@@ -74,6 +75,8 @@ export interface SecurityPageObjects extends PageObjects {
   entityFlyoutAnomaliesPage: EntityFlyoutAnomaliesPage;
   /** MITRE ATT&CK coverage overview dashboard — rule coverage matrix. */
   coverageOverviewPage: CoverageOverviewPage;
+  /** Detection rule edit page — save flow and the save-with-warnings confirmation modal. */
+  ruleEditPage: RuleEditPage;
 }
 
 export function extendPageObjects(
@@ -111,5 +114,6 @@ export function extendPageObjects(
     analyzerTool: createLazyPageObject(AnalyzerTool, page),
     entityFlyoutAnomaliesPage: createLazyPageObject(EntityFlyoutAnomaliesPage, page),
     coverageOverviewPage: createLazyPageObject(CoverageOverviewPage, page),
+    ruleEditPage: createLazyPageObject(RuleEditPage, page),
   };
 }
