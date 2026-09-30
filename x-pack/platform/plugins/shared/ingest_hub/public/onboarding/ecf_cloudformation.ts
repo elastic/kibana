@@ -161,8 +161,7 @@ export const ensureOtlpPort = (endpoint: string): string => {
     const parsed = new URL(endpoint);
     // URL.port is '' for scheme-default ports, so check the raw string for an explicit port.
     if (/^https?:\/\/[^/:]+:\d+/.test(endpoint)) return endpoint;
-    const port =
-      parsed.protocol === 'https:' ? '443' : parsed.protocol === 'http:' ? '80' : null;
+    const port = parsed.protocol === 'https:' ? '443' : parsed.protocol === 'http:' ? '80' : null;
     if (!port) return endpoint;
     // URL.hostname is lowercased; use the original authority string to preserve casing.
     const schemeEnd = endpoint.indexOf('://') + 3;

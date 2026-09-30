@@ -466,9 +466,7 @@ describe('ensureOtlpPort()', () => {
   });
 
   it('does not double-append when the explicit port equals the scheme default', () => {
-    expect(ensureOtlpPort('https://ingest.example.com:443')).toBe(
-      'https://ingest.example.com:443'
-    );
+    expect(ensureOtlpPort('https://ingest.example.com:443')).toBe('https://ingest.example.com:443');
     expect(ensureOtlpPort('http://ingest.example.com:80')).toBe('http://ingest.example.com:80');
   });
 
