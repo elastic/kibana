@@ -51,7 +51,7 @@ export const alertEpisodeToEpisodeAttachment = (
     last_ack_action: episode.last_ack_action,
     last_assignee_uid: episode.last_assignee_uid,
     last_snooze_action: episode.last_snooze_action,
-    snooze_expiry: episode.snooze_expiry,
+    snoozed_until: episode.snoozed_until,
     last_tags: episode.last_tags,
     episode_data: episode.episode_data,
     severity: episode.severity,

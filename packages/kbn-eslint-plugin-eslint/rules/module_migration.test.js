@@ -8,7 +8,7 @@
  */
 
 const { RuleTester } = require('eslint');
-const rule = require('./module_migration');
+const rule = require('..').rules.module_migration;
 const dedent = require('dedent');
 
 const ruleTester = new RuleTester({

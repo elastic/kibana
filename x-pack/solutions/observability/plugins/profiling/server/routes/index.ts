@@ -10,6 +10,7 @@ import type {
   ElasticsearchClient,
 } from '@kbn/core-elasticsearch-server';
 import type { KibanaRequest } from '@kbn/core-http-server';
+import type { BuildFlavor } from '@kbn/config';
 import type { IRouter, Logger } from '@kbn/core/server';
 import type { ProfilingConfig } from '..';
 import type {
@@ -41,6 +42,7 @@ export interface RouteRegisterParameters {
     setup: ProfilingPluginSetupDeps;
     config: ProfilingConfig;
     stackVersion: string;
+    buildFlavor: BuildFlavor;
     telemetryUsageCounter?: TelemetryUsageCounter;
     esCapabilities: ElasticsearchCapabilities;
   };

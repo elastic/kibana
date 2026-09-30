@@ -14,7 +14,7 @@ export const LIST_ACTION_POLICY_EXECUTIONS_RESPONSE: ListPolicyExecutionHistoryR
     {
       dispatched_at: '2026-01-15T12:05:00.000Z',
       policy: { id: 'action-policy-1', name: 'Notify on production alerts' },
-      outcome: 'dispatched',
+      outcome: 'success',
       episode_count: 1,
       episodes: [{ id: 'episode-1' }],
       action_group_count: 1,

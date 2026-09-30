@@ -10,6 +10,13 @@
 import { parse } from 'yaml';
 import { SECURITY_ALERT_ANALYSIS_WORKFLOW } from '.';
 import { createWorkflowLiquidEngine } from '../../../common/utils';
+import {
+  builtinWorkflowInputDefinitions,
+  SECURITY_ALERT_ANALYSIS_CALLER_ALERTS_INPUT_DEFINITION_ID,
+} from '../../../spec/builtin_workflow_input_definitions';
+import { buildFieldsZodValidator } from '../../../spec/lib/build_fields_zod_validator';
+import { getInputsFromDefinition } from '../../../spec/lib/field_conversion';
+import { WorkflowSchema } from '../../../spec/schema';
 
 type Step = Record<string, unknown>;
 
@@ -94,7 +101,75 @@ describe('SECURITY_ALERT_ANALYSIS_WORKFLOW yaml', () => {
     consts: Record<string, unknown>;
     settings: Record<string, unknown>;
     steps: unknown[];
+    triggers: unknown[];
   };
+
+  it('passes WorkflowSchema normalization and keeps manual-trigger Worker inputs', () => {
+    // Raw yaml.parse alone can miss schema transforms that strip trigger fields (the class of
+    // bug that previously left inputs on an alert trigger). Parse through WorkflowSchema so
+    // manual-trigger inputs and structured outputs survive the same normalization the runtime
+    // uses. Full connector runtime is not exercised here.
+    const result = WorkflowSchema.safeParse(parse(SECURITY_ALERT_ANALYSIS_WORKFLOW.yaml));
+    expect(result.success ? null : result.error.issues).toBeNull();
+    if (!result.success) {
+      return;
+    }
+
+    const manualTrigger = result.data.triggers.find(
+      (trigger): trigger is Extract<(typeof result.data.triggers)[number], { type: 'manual' }> =>
+        trigger.type === 'manual'
+    );
+    expect(manualTrigger).toBeDefined();
+    const manualInputs = manualTrigger?.inputs;
+    // WorkflowSchema accepts legacy array or JSON Schema object; after normalizeFieldsToJsonSchema
+    // manual inputs are object-shaped. Narrow before reading `.properties` for tsc.
+    expect(manualInputs && typeof manualInputs === 'object' && !Array.isArray(manualInputs)).toBe(
+      true
+    );
+    if (!manualInputs || typeof manualInputs !== 'object' || Array.isArray(manualInputs)) {
+      return;
+    }
+    expect(manualInputs.properties).toHaveProperty('alerts');
+    expect(manualInputs.properties).toHaveProperty('calledByWorker');
+    expect(manualInputs.properties).toHaveProperty('connectorIdByFeature');
+
+    expect(result.data.outputs).toBeDefined();
+    if (
+      result.data.outputs &&
+      typeof result.data.outputs === 'object' &&
+      'properties' in result.data.outputs
+    ) {
+      expect(result.data.outputs.properties).toHaveProperty('verdicts');
+      expect(result.data.outputs.properties).toHaveProperty('missing_alert_ids');
+    }
+  });
+
+  it.each([
+    ['the raw yaml', () => parse(SECURITY_ALERT_ANALYSIS_WORKFLOW.yaml)],
+    ['the WorkflowSchema-parsed definition', () => WorkflowSchema.parse(workflow)],
+  ])('enforces the caller alerts contract at execution-time input validation for %s', (_, load) => {
+    // Same path as the execution engine's validateWorkflowInputs.
+    const validator = buildFieldsZodValidator(getInputsFromDefinition(load()));
+    const alert = {
+      _id: 'alert-1',
+      _index: '.internal.alerts-security.alerts-default-000001',
+      '@timestamp': '2026-09-23T10:00:00.000Z',
+      kibana: { alert: { rule: { uuid: 'rule-1' } } },
+    };
+
+    expect(validator.safeParse({ alerts: [alert] }).success).toBe(true);
+    expect(validator.safeParse({ alerts: Array.from({ length: 1001 }, () => alert) }).success).toBe(
+      false
+    );
+    expect(validator.safeParse({ alerts: [{ _id: 'alert-1' }] }).success).toBe(false);
+    expect(validator.safeParse({ alerts: [{ ...alert, _index: 'logs-endpoint' }] }).success).toBe(
+      false
+    );
+    expect(
+      validator.safeParse({ alerts: [{ ...alert, '@timestamp': '2026-09-23T12:00:00.000+02:00' }] })
+        .success
+    ).toBe(false);
+  });
 
   it('reads per-space config at run time from the space-scoped runtime_config route', () => {
     const fetchStep = findStepByName(workflow.steps, 'fetch_runtime_config') as {
@@ -182,10 +257,10 @@ describe('SECURITY_ALERT_ANALYSIS_WORKFLOW yaml', () => {
     expect(guard.type).toBe('if');
     // A disabled space or a space with no connector must skip enrichment, the AI agent calls, and
     // auto-close (fixes enabled-with-no-connector and moves the on/off decision to run time), and
-    // an execution whose alerts were all analyzed already must not call the model at all. The
-    // guard is a parens-free `and` because the workflow template parser reads `(` as range syntax.
+    // an execution whose alerts were all analyzed already must not call the model at all.
+    // Parentheses group the two-connector OR (groupedExpressions is enabled on the engine).
     expect(guard.condition).toBe(
-      "${{ variables.workflow_enabled and variables.connector_id != '' and variables.pending_alert_count > 0 }}"
+      "${{ variables.workflow_enabled and (variables.connector_id != '' or variables.connector_id_by_feature != '') and variables.pending_alert_count > 0 }}"
     );
 
     // Everything expensive lives under the guard — including the "about to analyze N alerts" log,
@@ -225,7 +300,7 @@ describe('SECURITY_ALERT_ANALYSIS_WORKFLOW yaml', () => {
     // what amortises the ~28k-token agent framework prompt across the whole batch.
     expect(loops).toHaveLength(1);
     expect(loops[0].foreach).toBe(
-      "{{ event.alerts | reject_exp: 'a', variables.pending_filter_expr | chunk: consts.batch_size | json }}"
+      "{% if inputs.calledByWorker == true %}{{ inputs.alerts | reject_exp: 'a', variables.pending_filter_expr | chunk: consts.batch_size | json }}{% else %}{{ event.alerts | reject_exp: 'a', variables.pending_filter_expr | chunk: consts.batch_size | json }}{% endif %}"
     );
     expect(workflow.consts.batch_size).toEqual(expect.any(Number));
     expect(workflow.consts.batch_size).toBeGreaterThan(1);
@@ -240,15 +315,22 @@ describe('SECURITY_ALERT_ANALYSIS_WORKFLOW yaml', () => {
           properties: {
             verdicts: {
               type: string;
+              maxItems: number;
               items: {
                 required: string[];
                 properties: {
-                  id: { type: string };
+                  id: { type: string; maxLength: number };
                   classification: { enum: string[] };
                   confidence_score: { minimum: number; maximum: number };
+                  rationale: { type: string; maxLength: number };
+                  contributing_factors: {
+                    maxItems: number;
+                    items: { type: string; maxLength: number };
+                  };
                 };
               };
             };
+            batch_summary?: { type: string; maxLength: number };
           };
         };
       };
@@ -261,11 +343,15 @@ describe('SECURITY_ALERT_ANALYSIS_WORKFLOW yaml', () => {
 
     const verdicts = agentStep.with.schema.properties.verdicts;
     expect(verdicts.type).toBe('array');
+    // Cap at consts.batch_size — more than 50 verdicts cannot pair to real alerts in a batch.
+    expect(verdicts.maxItems).toBe(50);
     // The echoed id is what pairs a verdict with its alert, so it is required.
     expect(verdicts.items.required).toEqual(
       expect.arrayContaining(['id', 'classification', 'confidence_score', 'rationale'])
     );
     expect(verdicts.items.properties.id.type).toBe('string');
+    // Matches alerts items._id maxLength so a hallucinated long id fails at the producer.
+    expect(verdicts.items.properties.id.maxLength).toBe(512);
     expect(verdicts.items.properties.classification.enum).toEqual([
       'false_positive',
       'true_positive',
@@ -275,6 +361,13 @@ describe('SECURITY_ALERT_ANALYSIS_WORKFLOW yaml', () => {
     // `score <= 1.0` would never hold for a meaningful score.
     expect(verdicts.items.properties.confidence_score.minimum).toBe(0);
     expect(verdicts.items.properties.confidence_score.maximum).toBe(1);
+    // Must match workflow.output / Zod — otherwise a long rationale/factor passes the agent
+    // schema and fails final output validation after tags/notes are already written.
+    expect(verdicts.items.properties.rationale.maxLength).toBe(500);
+    expect(verdicts.items.properties.contributing_factors.maxItems).toBe(3);
+    expect(verdicts.items.properties.contributing_factors.items.maxLength).toBe(100);
+    // Bound at the producer so accumulated batch_summaries cannot inflate execution state.
+    expect(agentStep.with.schema.properties.batch_summary?.maxLength).toBe(500);
   });
 
   it('tells the model how to behave in a batch: one verdict per id, judged independently', () => {
@@ -294,11 +387,15 @@ describe('SECURITY_ALERT_ANALYSIS_WORKFLOW yaml', () => {
   it('passes the runtime connector id and create-conversation flag to the AI agent step', () => {
     const agentStep = findStepByName(workflow.steps, 'runAgent_step') as {
       'connector-id': string;
+      'connector-id-by-feature': string;
       'create-conversation': string;
     };
 
     expect(agentStep).toBeDefined();
     expect(agentStep['connector-id']).toBe('{{ variables.connector_id }}');
+    // Dual connector params coexist: superRefine only fires when BOTH are non-empty; Liquid renders
+    // "" for the unused variable so exactly one is non-empty at execution time.
+    expect(agentStep['connector-id-by-feature']).toBe('{{ variables.connector_id_by_feature }}');
     // `${{ }}` preserves the boolean; a plain `{{ }}` would render the string "false" (truthy).
     expect(agentStep['create-conversation']).toBe('${{ variables.create_conversation }}');
   });
@@ -318,6 +415,26 @@ describe('SECURITY_ALERT_ANALYSIS_WORKFLOW yaml', () => {
     };
     expect(batchCheck.condition).toBe(
       'not steps.runAgent_step.output.structured_output.verdicts:*'
+    );
+  });
+
+  it('posts batch progress counts reconciled to this batch alert ids, not raw agent verdicts', () => {
+    const progress = findStepByName(workflow.steps, 'post_batch_progress_comment') as {
+      with: { body: { input: string } };
+    };
+    // Fabricated agent ids must not inflate the Investigation summary.
+    expect(progress.with.body.input).toContain('variables.batch_tp_count');
+    expect(progress.with.body.input).toContain('variables.batch_fp_count');
+    expect(progress.with.body.input).toContain('variables.batch_inc_count');
+    expect(progress.with.body.input).not.toContain(
+      "structured_output.verdicts | where: 'classification'"
+    );
+
+    const counts = findStepByName(workflow.steps, 'set_batch_progress_counts') as {
+      with: { batch_tp_count: string };
+    };
+    expect(counts.with.batch_tp_count).toBe(
+      "${{ variables.batch_verdicts | where: 'classification', 'true_positive' | size }}"
     );
   });
 
@@ -342,14 +459,52 @@ describe('SECURITY_ALERT_ANALYSIS_WORKFLOW yaml', () => {
     expect(anchorStep.with.anchor_timestamp).toBe('{{ event.alerts[0]["@timestamp"] }}');
   });
 
+  it('scopes enrichment alert-index queries to the executing Kibana space', () => {
+    // Worker-path rule UUID is caller-supplied; without space isolation a forged UUID could
+    // read another space's close-history / prevalence / rule-metadata into the model prompt.
+    const initStep = findStepByName(workflow.steps, 'set_workflow_variables') as {
+      with: { spaceId: string };
+    };
+    expect(initStep.with.spaceId).toBe('{{ workflow.spaceId }}');
+
+    for (const stepName of [
+      'get_close_history_search',
+      'get_close_history_false_positive_count',
+      'get_global_prevalence_stats',
+      'get_noise_signal_stats',
+      'get_rule_metadata_source',
+    ]) {
+      const step = findStepByName(workflow.steps, stepName) as {
+        with: { index: string; query: { bool: { filter: Array<Record<string, unknown>> } } };
+      };
+      expect(step.with.index).toBe('.alerts-security.alerts-{{ variables.spaceId }}');
+      expect(step.with.query.bool.filter).toEqual(
+        expect.arrayContaining([{ term: { 'kibana.space_ids': '{{ variables.spaceId }}' } }])
+      );
+    }
+
+    const esqlStep = findStepByName(workflow.steps, 'get_close_history_reasons_summary') as {
+      with: {
+        query: string;
+        filter: { bool: { filter: Array<Record<string, unknown>> } };
+      };
+    };
+    expect(esqlStep.with.query).toContain('FROM .alerts-security.alerts-{{ variables.spaceId }}');
+    expect(esqlStep.with.filter.bool.filter).toEqual(
+      expect.arrayContaining([{ term: { 'kibana.space_ids': '{{ variables.spaceId }}' } }])
+    );
+  });
+
   it('keeps the related-alert graph per alert and summarises it into the batch prompt', () => {
     const graphStep = findStepByName(workflow.steps, 'get_related_alerts') as {
       type: string;
-      with: { alertId: string; max_alerts: string };
+      with: { alertId: string; alertIndex: string; max_alerts: string };
     };
 
     expect(graphStep.type).toBe('security.buildAlertEntityGraph');
     expect(graphStep.with.alertId).toBe('{{foreach.item._id}}');
+    // Space-scoped alias — never foreach.item._index (caller could point at another space).
+    expect(graphStep.with.alertIndex).toBe('.alerts-security.alerts-{{ variables.spaceId }}');
     // Per alert, inside the batch loop: the outer foreach is classify_alert_batches (over
     // batches) and the inner foreach is collect_related_alerts (over the batch's alerts).
     // Two enclosing loops keep the related_summaries accumulator bounded to batch_size entries.
@@ -419,12 +574,15 @@ describe('SECURITY_ALERT_ANALYSIS_WORKFLOW yaml', () => {
     expect(note).toContain('variables.batch_output_tokens');
     expect(note).toContain('variables.batch_llm_calls');
     expect(note).toContain('variables.pending_alert_count');
+    // Worker path clears connector_id for the feature-registry swap; the note must attribute
+    // the resolved ID captured after the agent call (standalone falls back to connector_id).
+    expect(note).toContain('variables.resolved_connector_id | default: variables.connector_id');
 
     const collectStep = findStepByName(workflow.steps, 'collect_batch_verdicts') as {
       with: Record<string, string>;
     };
     expect(collectStep.with.all_verdicts).toBe(
-      '${{ variables.all_verdicts | concat: steps.runAgent_step.output.structured_output.verdicts }}'
+      '${{ variables.all_verdicts | concat: variables.batch_verdicts }}'
     );
     expect(collectStep.with.batch_input_tokens).toContain(
       'steps.runAgent_step.output.metadata.usage.inputTokens'
@@ -432,6 +590,39 @@ describe('SECURITY_ALERT_ANALYSIS_WORKFLOW yaml', () => {
     expect(collectStep.with.batch_output_tokens).toContain(
       'steps.runAgent_step.output.metadata.usage.outputTokens'
     );
+  });
+
+  it('filters batch verdicts to the batch alert ids before collecting them', () => {
+    const batchSteps = findStepByName(workflow.steps, 'check_batch_output_exists') as {
+      else: Array<{ name: string }>;
+    };
+    const orderedSteps = [
+      'set_batch_alert_ids',
+      'filter_verdicts_to_batch',
+      'collect_batch_verdicts',
+    ];
+
+    expect(
+      batchSteps.else.map(({ name }) => name).filter((name) => orderedSteps.includes(name))
+    ).toEqual(orderedSteps);
+  });
+
+  it('populates missing_alert_ids from the pending alerts when analysis_enabled skips', () => {
+    const analysisEnabled = findStepByName(workflow.steps, 'analysis_enabled') as {
+      else: Array<{ name: string; if: string }>;
+    };
+    const [skipFallback] = analysisEnabled.else;
+
+    expect(skipFallback.name).toBe('set_missing_alert_ids_on_skip');
+    expect(skipFallback.if).toBe('${{ inputs.calledByWorker == true }}');
+  });
+
+  // Derived once after the loops, not pushed per alert: every data.set persists its full value,
+  // so a per-alert push would store the cumulative list once for each alert analysed.
+  it('derives missing_alert_ids outside the per-alert loops', () => {
+    expect(enclosingLoops(workflow.steps, 'collect_verdict_ids')).toHaveLength(0);
+    expect(enclosingLoops(workflow.steps, 'set_missing_alert_ids')).toHaveLength(0);
+    expect(findStepByName(workflow.steps, 'accumulate_missing_alert_id')).toBeUndefined();
   });
 
   it('formats the verdict note timestamp with a human-readable date filter', () => {
@@ -614,9 +805,352 @@ describe('SECURITY_ALERT_ANALYSIS_WORKFLOW yaml', () => {
 
   it('auto_close_ids is initialised to empty in set_workflow_variables', () => {
     const initStep = findStepByName(workflow.steps, 'set_workflow_variables') as {
-      with: { auto_close_ids: unknown };
+      with: { auto_close_ids: unknown; missing_alert_ids: unknown };
     };
     expect(initStep.with.auto_close_ids).toEqual([]);
+    expect(initStep.with.missing_alert_ids).toEqual([]);
+  });
+
+  it('initialises connector_id_by_feature to empty string so the standalone path is unchanged', () => {
+    // Both paths invoke the same underlying workflow. The empty initialiser means that when no
+    // caller supplies connectorIdByFeature, the variable exists but is "" — the analysis_enabled
+    // guard's OR collapses to (connector_id != ''), matching pre-Worker guard behaviour.
+    const initStep = findStepByName(workflow.steps, 'set_workflow_variables') as {
+      with: { connector_id_by_feature: string; investigation_conversation_id: string };
+    };
+    expect(initStep.with.connector_id_by_feature).toBe('');
+    // Standalone path: empty string keeps conversation creation under uiSettings control.
+    // Worker path: set_caller_overrides overwrites this with the Investigation conversation id.
+    expect(initStep.with.investigation_conversation_id).toBe('');
+  });
+
+  it('applies caller-supplied inputs only when calledByWorker is true', () => {
+    const overrideStep = findStepByName(workflow.steps, 'apply_caller_input_overrides') as {
+      type: string;
+      condition: string;
+      steps: Step[];
+    };
+    expect(overrideStep).toBeDefined();
+    expect(overrideStep.type).toBe('if');
+    // Gate on the explicit calledByWorker flag — absent (or false) on the standalone path.
+    // NOTE: workflow_enabled is intentionally not overridden here — a space admin's decision
+    // to disable the workflow is respected on both standalone and Worker paths.
+    expect(overrideStep.condition).toBe('${{ inputs.calledByWorker == true }}');
+
+    const setStep = findStepByName(overrideStep.steps, 'set_caller_overrides') as {
+      with: Record<string, string | number>;
+    };
+    expect(setStep.with).not.toHaveProperty('connector_id');
+    expect(setStep.with).not.toHaveProperty('connector_id_by_feature');
+
+    // An omitted connectorIdByFeature keeps the space's uiSettings connector.
+    const connectorGate = findStepByName(
+      overrideStep.steps,
+      'use_connector_by_feature_if_provided'
+    ) as { condition: string; steps: Array<{ with: Record<string, string> }> };
+    expect(connectorGate.condition).toBe('${{ inputs.connectorIdByFeature != null }}');
+    expect(connectorGate.steps[0].with).toEqual({
+      connector_id: '',
+      connector_id_by_feature: '{{ inputs.connectorIdByFeature }}',
+    });
+    // Absent threshold preserves the fetched runtime-config value. A filter, not a ternary:
+    // the engine's Liquid has no ternary operator and fails at execution time on one.
+    expect(setStep.with.auto_close_confidence_score_min_threshold).toBe(
+      '${{ inputs.autoCloseConfidenceScoreMinThreshold | default: variables.auto_close_confidence_score_min_threshold }}'
+    );
+    // Worker mode defaults auto-close off so omitting autoCloseEnabled cannot inherit a
+    // space-level true and close FPs inside the sub-workflow. An explicit input still wins
+    // via the presence gate below (`| default:` would swallow false).
+    expect(setStep.with.auto_close_enabled).toBe(false);
+    expect(setStep.with.auto_close_confidence_score_max_threshold).toBeUndefined();
+    const collapseMaxGate = findStepByName(
+      overrideStep.steps,
+      'collapse_max_threshold_if_min_provided'
+    ) as {
+      type: string;
+      condition: string;
+      steps: Array<{ with: Record<string, number> }>;
+    };
+    expect(collapseMaxGate.type).toBe('if');
+    expect(collapseMaxGate.condition).toBe(
+      '${{ inputs.autoCloseConfidenceScoreMinThreshold != null }}'
+    );
+    expect(collapseMaxGate.steps[0].with.auto_close_confidence_score_max_threshold).toBe(1);
+    const autoCloseGate = findStepByName(
+      overrideStep.steps,
+      'set_auto_close_enabled_if_provided'
+    ) as { type: string; condition: string; steps: Array<{ with: Record<string, string> }> };
+    expect(autoCloseGate.type).toBe('if');
+    expect(autoCloseGate.condition).toBe('${{ inputs.autoCloseEnabled != null }}');
+    expect(autoCloseGate.steps[0].with.auto_close_enabled).toBe('${{ inputs.autoCloseEnabled }}');
+    // String fields use Liquid | default: (safe because empty string is the only falsy edge case
+    // and neither field would be intentionally set to "")
+    expect(setStep.with.agent_id).toBe('{{ inputs.agentId | default: variables.agent_id }}');
+    expect(setStep.with.tag_prefix).toBe('{{ inputs.tagPrefix | default: variables.tag_prefix }}');
+    // Worker path: suppress Agent Builder chats (output goes to the Investigation via comments)
+    // and stash investigationConversationId for the gated kibana.request comment steps.
+    expect(setStep.with.create_conversation).toBe(false);
+    expect(setStep.with.investigation_conversation_id).toBe(
+      '{{ inputs.investigationConversationId }}'
+    );
+  });
+
+  // `workflow.execute` hands the child only `inputs` — a child run has no trigger event —
+  // so without a caller-supplied alert set the Worker path would read zero alerts. That
+  // used to complete with empty output; it now fails via workflow.fail (asserted below).
+  it('analyses a caller-supplied alert set, falling back to the trigger event', () => {
+    // Caller inputs are declared on the manual trigger (AlertRuleTriggerSchema strips inputs).
+    const manualTrigger = (
+      workflow.triggers as Array<{ type: string; inputs?: { properties?: object } }>
+    ).find(({ type }) => type === 'manual');
+    expect(manualTrigger?.inputs?.properties).toHaveProperty('alerts');
+    expect(manualTrigger?.inputs?.properties).toHaveProperty('calledByWorker');
+
+    const alertsRef = (
+      manualTrigger?.inputs?.properties as {
+        alerts?: { $ref?: string };
+      }
+    )?.alerts;
+    expect(alertsRef?.$ref).toBe(
+      `#/kibana/definitions/${SECURITY_ALERT_ANALYSIS_CALLER_ALERTS_INPUT_DEFINITION_ID}`
+    );
+
+    // Shape lives in the builtin registry (alerting-v2 style), not inline in the YAML.
+    const alertsInput = builtinWorkflowInputDefinitions[
+      SECURITY_ALERT_ANALYSIS_CALLER_ALERTS_INPUT_DEFINITION_ID
+    ] as {
+      items?: {
+        required?: string[];
+        properties?: {
+          '@timestamp'?: { format?: string; maxLength?: number };
+          _index?: { maxLength?: number; pattern?: string };
+        };
+      };
+      maxItems?: number;
+    };
+    expect(alertsInput?.maxItems).toBe(1000);
+    expect(alertsInput?.items?.required).toEqual(
+      expect.arrayContaining(['_id', '_index', '@timestamp', 'kibana'])
+    );
+    // Caller _index must still be a Security alerts alias/backing index (schema boundary);
+    // related-alert graph search uses the executing-space alias, not this field.
+    expect(alertsInput?.items?.properties?._index?.maxLength).toBe(512);
+    expect(alertsInput?.items?.properties?._index?.pattern).toBe(
+      '^\\.(internal\\.)?(preview\\.)?alerts-security\\.alerts-[a-zA-Z0-9._-]+$'
+    );
+    // Used as an ES date-math enrichment anchor — reject non-dates at the input boundary.
+    expect(alertsInput?.items?.properties?.['@timestamp']?.format).toBe('date-time');
+    expect(alertsInput?.items?.properties?.['@timestamp']?.maxLength).toBe(64);
+
+    const alertTrigger = (workflow.triggers as Array<{ type: string; inputs?: unknown }>).find(
+      ({ type }) => type === 'alert'
+    );
+    expect(alertTrigger).toBeDefined();
+    expect(alertTrigger?.inputs).toBeUndefined();
+
+    // Worker child runs have no event.rule — derive from the supplied alert set.
+    const ruleContext = findStepByName(workflow.steps, 'set_rule_context') as {
+      with: { rule_id: string; rule_name: string };
+    };
+    expect(ruleContext.with.rule_id).toBe('{{ event.rule.id }}');
+    expect(ruleContext.with.rule_name).toBe('{{ event.rule.name }}');
+
+    const deriveRule = findStepByName(workflow.steps, 'derive_rule_context_from_alerts') as {
+      condition: string;
+      steps: Array<{ with: { rule_id: string; rule_name: string } }>;
+    };
+    expect(deriveRule.condition).toBe('${{ inputs.calledByWorker == true }}');
+    expect(deriveRule.steps[0].with.rule_id).toBe('{{ inputs.alerts[0].kibana.alert.rule.uuid }}');
+    expect(deriveRule.steps[0].with.rule_name).toBe(
+      '{{ inputs.alerts[0].kibana.alert.rule.name }}'
+    );
+
+    // Enrichment / logs must use the resolved variables, not the (missing) child event.rule.
+    const stepsWithoutRuleSource = (workflow.steps as Array<{ name: string }>).filter(
+      ({ name }) => name !== 'set_rule_context'
+    );
+    expect(JSON.stringify(stepsWithoutRuleSource)).not.toContain('event.rule.id');
+    expect(JSON.stringify(stepsWithoutRuleSource)).not.toContain('event.rule.name');
+    expect(JSON.stringify(workflow.steps)).toContain('variables.rule_id');
+
+    // Alerts are never stored in a step output (max-step-size, duplicated state).
+    expect(JSON.stringify(workflow.steps)).not.toContain('alert_set');
+  });
+
+  it('fails the Worker path when alerts is missing or empty instead of completing empty', () => {
+    const emptyGate = findStepByName(workflow.steps, 'require_caller_alerts_nonempty') as {
+      type: string;
+      condition: string;
+      steps: Array<{ name: string; type: string; with: { message: string } }>;
+    };
+    expect(emptyGate.type).toBe('if');
+    expect(emptyGate.condition).toBe(
+      '${{ inputs.calledByWorker == true and inputs.alerts.size == 0 }}'
+    );
+    expect(emptyGate.steps[0].type).toBe('workflow.fail');
+    expect(emptyGate.steps[0].with.message).toContain('missing or empty');
+  });
+
+  // The mirror of the gate above. Which input holds the alerts is decided by calledByWorker,
+  // not by which one has data, so alerts passed without the flag are read from nowhere and the
+  // run would otherwise complete empty and look healthy.
+  it('fails when alerts are supplied without calledByWorker rather than completing empty', () => {
+    const flagGate = findStepByName(workflow.steps, 'require_worker_flag_for_caller_alerts') as {
+      type: string;
+      condition: string;
+      steps: Array<{ name: string; type: string; with: { message: string } }>;
+    };
+    expect(flagGate.type).toBe('if');
+    expect(flagGate.condition).toBe(
+      '${{ inputs.alerts.size > 0 and inputs.calledByWorker != true }}'
+    );
+    expect(flagGate.steps[0].type).toBe('workflow.fail');
+    expect(flagGate.steps[0].with.message).toContain('calledByWorker');
+  });
+
+  it('fails the Worker path when alerts contain duplicate _id values', () => {
+    const rejectGate = findStepByName(workflow.steps, 'reject_duplicate_caller_alert_ids') as {
+      type: string;
+      condition: string;
+      steps: Array<{
+        name: string;
+        type: string;
+        condition?: string;
+        with?: { caller_alert_count?: string; caller_unique_alert_id_count?: string };
+        steps?: Array<{ type: string; with: { message: string } }>;
+      }>;
+    };
+    expect(rejectGate.type).toBe('if');
+    expect(rejectGate.condition).toBe('${{ inputs.calledByWorker == true }}');
+    expect(rejectGate.steps[0].name).toBe('compute_caller_alert_id_counts');
+    expect(rejectGate.steps[0].with?.caller_alert_count).toBe('${{ inputs.alerts.size }}');
+    expect(rejectGate.steps[0].with?.caller_unique_alert_id_count).toBe(
+      "${{ inputs.alerts | map: '_id' | uniq | size }}"
+    );
+    expect(rejectGate.steps[1].condition).toBe(
+      '${{ variables.caller_alert_count != variables.caller_unique_alert_id_count }}'
+    );
+    expect(rejectGate.steps[1].steps?.[0].type).toBe('workflow.fail');
+    expect(rejectGate.steps[1].steps?.[0].with.message).toContain('unique alert _id');
+  });
+
+  it('fails the Worker path when alerts span multiple rule UUIDs', () => {
+    const rejectGate = findStepByName(workflow.steps, 'reject_multi_rule_caller_alerts') as {
+      type: string;
+      condition: string;
+      steps: Array<{
+        name: string;
+        type: string;
+        condition?: string;
+        with?: { caller_unique_rule_uuid_count?: string };
+        steps?: Array<{ type: string; with: { message: string } }>;
+      }>;
+    };
+    expect(rejectGate.type).toBe('if');
+    expect(rejectGate.condition).toBe('${{ inputs.calledByWorker == true }}');
+    expect(rejectGate.steps[0].name).toBe('compute_caller_unique_rule_count');
+    expect(rejectGate.steps[0].with?.caller_unique_rule_uuid_count).toBe(
+      "${{ inputs.alerts | map: 'kibana.alert.rule.uuid' | uniq | size }}"
+    );
+    expect(rejectGate.steps[1].condition).toBe(
+      '${{ variables.caller_unique_rule_uuid_count > 1 }}'
+    );
+    expect(rejectGate.steps[1].steps?.[0].type).toBe('workflow.fail');
+    expect(rejectGate.steps[1].steps?.[0].with.message).toContain('single rule');
+  });
+
+  it('bypasses already-analyzed dedup on the Worker path so retries return full output', () => {
+    const bypassGate = findStepByName(workflow.steps, 'bypass_dedup_for_worker') as {
+      type: string;
+      condition: string;
+      steps: Array<{ with: { pending_filter_expr: string } }>;
+    };
+    expect(bypassGate.type).toBe('if');
+    expect(bypassGate.condition).toBe('${{ inputs.calledByWorker == true }}');
+    expect(bypassGate.steps[0].with.pending_filter_expr).toBe('false');
+  });
+
+  // The model echoes the alert id back with each verdict, and that echo is only safe as a
+  // pairing key. A caller acts on what workflow.output emits — the Alert Triage Worker tags,
+  // notes and closes by it — so exporting the raw model output would let a fabricated id close
+  // an unrelated alert. The workflow already refuses to trust the echo internally; this pins
+  // the same guarantee at the boundary, where it is easy to undo by "simplifying" one variable.
+  it('emits verdicts keyed on the real alert id, never the model-supplied one', () => {
+    const outputStep = findStepByName(workflow.steps, 'emit_workflow_output') as {
+      with: Record<string, string>;
+    };
+    expect(outputStep.with.verdicts).toBe('${{ variables.output_verdicts }}');
+    expect(outputStep.with.verdicts).not.toContain('all_verdicts');
+
+    // The exported list is built from the alert being iterated, not from the model's echo.
+    const buildStep = findStepByName(workflow.steps, 'build_output_verdict') as {
+      with: { output_verdict: Record<string, string> };
+    };
+    expect(buildStep.with.output_verdict.alert_id).toBe('{{ foreach.item._id }}');
+
+    // Counts must agree with the exported list, or a caller sees a total it cannot reconcile
+    // against the verdicts it was given.
+    for (const field of [
+      'false_positive_count',
+      'true_positive_count',
+      'inconclusive_count',
+    ] as const) {
+      expect(outputStep.with[field]).toContain('variables.output_verdicts');
+    }
+  });
+
+  // Every data.set persists its full value, so pushing each verdict onto the run-wide
+  // output_verdicts would store the list once per alert — O(n²) entries across a run. The push
+  // belongs to a per-batch list that is reset each iteration and merged onto output_verdicts once.
+  it('accumulates output verdicts per batch rather than per alert', () => {
+    const resetStep = findStepByName(workflow.steps, 'reset_batch_output_verdicts') as {
+      with: { batch_output_verdicts: unknown[] };
+    };
+    expect(resetStep.with.batch_output_verdicts).toEqual([]);
+    expect(
+      enclosingLoops(workflow.steps, 'reset_batch_output_verdicts').map((l) => l.name)
+    ).toEqual(['classify_alert_batches']);
+
+    // Inside the batch loop and its own per-alert loop, never inside apply_verdicts (which
+    // iterates the whole alert set).
+    expect(enclosingLoops(workflow.steps, 'accumulate_output_verdict').map((l) => l.name)).toEqual([
+      'classify_alert_batches',
+      'build_batch_output_verdicts',
+    ]);
+
+    // The merge runs once per batch, outside the per-alert loop.
+    expect(
+      enclosingLoops(workflow.steps, 'merge_batch_output_verdicts').map((l) => l.name)
+    ).toEqual(['classify_alert_batches']);
+  });
+
+  // The engine's Liquid dialect has no ternary operator. A `cond ? a : b` parses as valid YAML
+  // and installs cleanly, then fails mid-run with "The provided expression is invalid" — so it
+  // survives review and schema validation and only shows up as a failed execution.
+  it('uses no ternary expressions, which the engine rejects at execution time', () => {
+    const ternaryInExpression = /\{\{[^}]*\?[^}]*:[^}]*\}\}/;
+    expect(JSON.stringify(workflow.steps)).not.toMatch(ternaryInExpression);
+  });
+
+  it('emits workflow.output at the top level so callers always receive a structured result', () => {
+    const outputStep = findStepByName(workflow.steps, 'emit_workflow_output') as {
+      type: string;
+      status: string;
+      with: Record<string, string>;
+    };
+    expect(outputStep).toBeDefined();
+    expect(outputStep.type).toBe('workflow.output');
+    expect(outputStep.status).toBe('completed');
+    expect(outputStep.with.verdicts).toBe('${{ variables.output_verdicts }}');
+    expect(outputStep.with.false_positive_count).toContain("'classification', 'false_positive'");
+    expect(outputStep.with.true_positive_count).toContain("'classification', 'true_positive'");
+    expect(outputStep.with.inconclusive_count).toContain("'classification', 'inconclusive'");
+    expect(outputStep.with.auto_closed_ids).toBe('${{ variables.auto_close_ids }}');
+    // Must be OUTSIDE analysis_enabled so it fires even when the guard short-circuits.
+    // The accumulators are initialised to [] / 0 in set_workflow_variables, so the output
+    // is always well-formed (callers receive an empty verdict list when analysis is skipped).
+    const ancestors = findStepAncestors(workflow.steps, 'emit_workflow_output') ?? [];
+    expect(ancestors.map((a) => a.name)).not.toContain('analysis_enabled');
   });
 });
 
@@ -639,7 +1173,7 @@ const makeRenderContext = (batchAlerts: unknown[], relatedSummaries: unknown[] =
     batch_llm_calls: 1,
     batch_input_tokens: 0,
     batch_output_tokens: 0,
-    normalized_version: 'v0_0_3',
+    normalized_version: 'v0_0_4',
     connector_id: 'test-connector',
   },
   steps: {
@@ -855,5 +1389,970 @@ describe('SECURITY_ALERT_ANALYSIS_WORKFLOW render-level tests', () => {
     expect(output).toContain('process.code_signature.exists: false');
     expect(output).toContain('process.code_signature.trusted: false');
     expect(output).toContain('process.parent.code_signature.trusted: false');
+  });
+
+  it('includes batch_summary instructions only when calledByWorker is true', () => {
+    const template = getMessageTemplate();
+    const batchAlerts = [
+      {
+        _id: 'alert-1',
+        event: {},
+        user: {},
+        host: {},
+        process: {},
+        file: {},
+        source: {},
+        destination: {},
+        network: {},
+        url: {},
+        dns: {},
+        cloud: {},
+        kibana: { alert: {} },
+        aws: {},
+        azure: {},
+        gcp: {},
+      },
+    ];
+
+    const standalone = engine.parseAndRenderSync(template, {
+      ...makeRenderContext(batchAlerts),
+      inputs: { calledByWorker: false },
+    });
+    expect(standalone).not.toContain('batch_summary');
+
+    const worker = engine.parseAndRenderSync(template, {
+      ...makeRenderContext(batchAlerts),
+      inputs: { calledByWorker: true },
+    });
+    expect(worker).toContain('batch_summary');
+  });
+});
+
+// ──────────────────────────────────────────────────────────────────────────────
+// Liquid execution: evaluate Worker-path expressions the way the engine does
+// (evalValueSync / recursive render). Full workflow runtime needs Kibana
+// connectors; these pin the Liquid contracts that decide what a Worker receives.
+// ──────────────────────────────────────────────────────────────────────────────
+
+/**
+ * Mirrors WorkflowTemplatingEngine.evaluateExpression: drop the leading `$`,
+ * then take everything between the first `{{` and the last `}}`.
+ */
+const evaluateExpression = (
+  engine: ReturnType<typeof createWorkflowLiquidEngine>,
+  template: string,
+  context: Record<string, unknown>
+): unknown => {
+  const open = template.indexOf('{{');
+  const close = template.lastIndexOf('}}');
+  return engine.evalValueSync(template.substring(open + 2, close).trim(), context);
+};
+
+/**
+ * Mirrors WorkflowTemplatingEngine.renderValueRecursively for step `with` payloads.
+ */
+const renderValueRecursively = (
+  engine: ReturnType<typeof createWorkflowLiquidEngine>,
+  value: unknown,
+  context: Record<string, unknown>
+): unknown => {
+  if (value === null || value === undefined) {
+    return value;
+  }
+
+  if (typeof value === 'string') {
+    return value.startsWith('${{') && value.endsWith('}}')
+      ? evaluateExpression(engine, value.substring(1), context)
+      : engine.parseAndRenderSync(value, context);
+  }
+
+  if (Array.isArray(value)) {
+    return value.map((item) => renderValueRecursively(engine, item, context));
+  }
+
+  if (typeof value === 'object') {
+    return Object.fromEntries(
+      Object.entries(value as Record<string, unknown>).map(([key, item]) => [
+        key,
+        renderValueRecursively(engine, item, context),
+      ])
+    );
+  }
+
+  return value;
+};
+
+const createMockOutputVerdict = (
+  overrides: Partial<{
+    alert_id: string;
+    classification: string;
+    confidence_score: number;
+    rationale: string;
+    contributing_factors: string[];
+    host_name: string;
+    user_name: string;
+  }> = {}
+) => ({
+  alert_id: 'alert-1',
+  classification: 'true_positive',
+  confidence_score: 0.9,
+  rationale: 'suspicious',
+  contributing_factors: ['c2 url'],
+  host_name: 'host-a',
+  user_name: 'user-a',
+  ...overrides,
+});
+
+describe('SECURITY_ALERT_ANALYSIS_WORKFLOW liquid execution (Worker path)', () => {
+  const workflow = parse(SECURITY_ALERT_ANALYSIS_WORKFLOW.yaml) as {
+    consts: Record<string, unknown>;
+    steps: unknown[];
+  };
+  const engine = createWorkflowLiquidEngine();
+
+  it('evaluates calledByWorker gates as booleans for Worker vs standalone', () => {
+    const accumulateGate = findStepByName(
+      workflow.steps,
+      'accumulate_batch_output_verdicts_gate'
+    ) as {
+      condition: string;
+    };
+    const summaryGate = findStepByName(workflow.steps, 'build_grouped_counts_summary_gate') as {
+      condition: string;
+    };
+    const overrideGate = findStepByName(workflow.steps, 'apply_caller_input_overrides') as {
+      condition: string;
+    };
+
+    expect(
+      evaluateExpression(engine, accumulateGate.condition, { inputs: { calledByWorker: true } })
+    ).toBe(true);
+    expect(
+      evaluateExpression(engine, accumulateGate.condition, { inputs: { calledByWorker: false } })
+    ).toBe(false);
+    expect(evaluateExpression(engine, accumulateGate.condition, { inputs: {} })).toBe(false);
+
+    expect(
+      evaluateExpression(engine, summaryGate.condition, { inputs: { calledByWorker: true } })
+    ).toBe(true);
+    expect(
+      evaluateExpression(engine, overrideGate.condition, { inputs: { calledByWorker: true } })
+    ).toBe(true);
+  });
+
+  it('evaluates the Worker alerts emptiness gate for the fail-loud path', () => {
+    const emptyGate = findStepByName(workflow.steps, 'require_caller_alerts_nonempty') as {
+      condition: string;
+    };
+
+    expect(
+      evaluateExpression(engine, emptyGate.condition, {
+        inputs: { calledByWorker: true, alerts: [] },
+      })
+    ).toBe(true);
+    expect(
+      evaluateExpression(engine, emptyGate.condition, {
+        inputs: { calledByWorker: true, alerts: [{ _id: 'a1' }] },
+      })
+    ).toBe(false);
+  });
+
+  it('detects duplicate caller alert _ids via uniq count before failing', () => {
+    const computeStep = findStepByName(workflow.steps, 'compute_caller_alert_id_counts') as {
+      with: { caller_alert_count: string; caller_unique_alert_id_count: string };
+    };
+    const failGate = findStepByName(workflow.steps, 'fail_if_duplicate_caller_alert_ids') as {
+      condition: string;
+    };
+    const alerts = [
+      { _id: 'a1', _index: '.alerts-security.alerts-default' },
+      { _id: 'a1', _index: '.alerts-security.alerts-default' },
+      { _id: 'a2', _index: '.alerts-security.alerts-default' },
+    ];
+
+    const total = evaluateExpression(engine, computeStep.with.caller_alert_count, {
+      inputs: { alerts },
+    });
+    const unique = evaluateExpression(engine, computeStep.with.caller_unique_alert_id_count, {
+      inputs: { alerts },
+    });
+    expect(total).toBe(3);
+    expect(unique).toBe(2);
+    expect(
+      evaluateExpression(engine, failGate.condition, {
+        variables: { caller_alert_count: total, caller_unique_alert_id_count: unique },
+      })
+    ).toBe(true);
+    expect(
+      evaluateExpression(engine, failGate.condition, {
+        variables: { caller_alert_count: 2, caller_unique_alert_id_count: 2 },
+      })
+    ).toBe(false);
+  });
+
+  it('detects multi-rule caller alerts via unique rule uuid count before failing', () => {
+    const computeStep = findStepByName(workflow.steps, 'compute_caller_unique_rule_count') as {
+      with: { caller_unique_rule_uuid_count: string };
+    };
+    const failGate = findStepByName(workflow.steps, 'fail_if_multi_rule_caller_alerts') as {
+      condition: string;
+    };
+
+    const makeAlert = (ruleUuid: string) => ({
+      _id: `alert-${ruleUuid}`,
+      kibana: { alert: { rule: { uuid: ruleUuid } } },
+    });
+
+    const multiRuleAlerts = [makeAlert('rule-1'), makeAlert('rule-2'), makeAlert('rule-1')];
+    const singleRuleAlerts = [makeAlert('rule-1'), makeAlert('rule-1')];
+
+    const multiCount = evaluateExpression(engine, computeStep.with.caller_unique_rule_uuid_count, {
+      inputs: { alerts: multiRuleAlerts },
+    });
+    const singleCount = evaluateExpression(engine, computeStep.with.caller_unique_rule_uuid_count, {
+      inputs: { alerts: singleRuleAlerts },
+    });
+    expect(multiCount).toBe(2);
+    expect(singleCount).toBe(1);
+
+    expect(
+      evaluateExpression(engine, failGate.condition, {
+        variables: { caller_unique_rule_uuid_count: multiCount },
+      })
+    ).toBe(true);
+    expect(
+      evaluateExpression(engine, failGate.condition, {
+        variables: { caller_unique_rule_uuid_count: singleCount },
+      })
+    ).toBe(false);
+  });
+
+  it('builds an output verdict keyed on the real alert id, with __missing__ entity defaults', () => {
+    const buildStep = findStepByName(workflow.steps, 'build_output_verdict') as {
+      with: { output_verdict: Record<string, unknown> };
+    };
+
+    const rendered = renderValueRecursively(engine, buildStep.with.output_verdict, {
+      foreach: { item: { _id: 'real-alert-id', host: {}, user: {} } },
+      variables: {
+        batch_alert_verdict: {
+          classification: 'false_positive',
+          confidence_score: 0.82,
+          rationale: 'signed installer',
+          contributing_factors: ['vendor signature'],
+        },
+      },
+    }) as Record<string, unknown>;
+
+    expect(rendered).toEqual({
+      alert_id: 'real-alert-id',
+      classification: 'false_positive',
+      confidence_score: 0.82,
+      rationale: 'signed installer',
+      contributing_factors: ['vendor signature'],
+      host_name: '__missing__',
+      user_name: '__missing__',
+    });
+  });
+
+  it('truncates host_name and user_name to the workflow.output 512-char limit', () => {
+    const buildStep = findStepByName(workflow.steps, 'build_output_verdict') as {
+      with: { output_verdict: Record<string, unknown> };
+    };
+    expect(String(buildStep.with.output_verdict.host_name)).toContain("truncate: 512, ''");
+    expect(String(buildStep.with.output_verdict.user_name)).toContain("truncate: 512, ''");
+
+    const longName = 'n'.repeat(600);
+    const rendered = renderValueRecursively(engine, buildStep.with.output_verdict, {
+      foreach: {
+        item: {
+          _id: 'real-alert-id',
+          host: { name: longName },
+          user: { name: longName },
+        },
+      },
+      variables: {
+        batch_alert_verdict: {
+          classification: 'true_positive',
+          confidence_score: 0.9,
+          rationale: 'c2',
+          contributing_factors: ['url'],
+        },
+      },
+    }) as Record<string, unknown>;
+
+    expect(rendered.host_name).toBe('n'.repeat(512));
+    expect(rendered.user_name).toBe('n'.repeat(512));
+  });
+
+  it('pushes the built verdict onto the batch list and merges it once per batch', () => {
+    const accumulateStep = findStepByName(workflow.steps, 'accumulate_output_verdict') as {
+      with: { batch_output_verdicts: string };
+    };
+    const mergeStep = findStepByName(workflow.steps, 'merge_batch_output_verdicts') as {
+      with: { output_verdicts: string };
+    };
+    const alreadyBatched = [createMockOutputVerdict({ alert_id: 'alert-0' })];
+    const next = createMockOutputVerdict({
+      alert_id: 'alert-1',
+      classification: 'false_positive',
+      host_name: 'host-b',
+    });
+
+    const batchList = evaluateExpression(engine, accumulateStep.with.batch_output_verdicts, {
+      variables: { batch_output_verdicts: alreadyBatched, output_verdict: next },
+    });
+    expect(batchList).toEqual([...alreadyBatched, next]);
+
+    // The run-wide list grows once per batch, not once per alert.
+    const previousBatch = [createMockOutputVerdict({ alert_id: 'alert-from-earlier-batch' })];
+    expect(
+      evaluateExpression(engine, mergeStep.with.output_verdicts, {
+        variables: { output_verdicts: previousBatch, batch_output_verdicts: batchList },
+      })
+    ).toEqual([...previousBatch, ...alreadyBatched, next]);
+  });
+
+  it('skips an alert the batch returned no verdict for', () => {
+    const selectStep = findStepByName(workflow.steps, 'select_batch_alert_verdict') as {
+      with: { batch_alert_verdict_count: string };
+    };
+    const accumulateGate = findStepByName(workflow.steps, 'accumulate_worker_output_verdict') as {
+      condition: string;
+    };
+    const batchVerdicts = [{ id: 'alert-1', classification: 'true_positive' }];
+
+    const missingCount = evaluateExpression(engine, selectStep.with.batch_alert_verdict_count, {
+      variables: { batch_verdicts: batchVerdicts },
+      foreach: { item: { _id: 'alert-2' } },
+    });
+    expect(missingCount).toBe(0);
+    expect(
+      evaluateExpression(engine, accumulateGate.condition, {
+        variables: { batch_alert_verdict_count: missingCount },
+      })
+    ).toBe(false);
+
+    const matchedCount = evaluateExpression(engine, selectStep.with.batch_alert_verdict_count, {
+      variables: { batch_verdicts: batchVerdicts },
+      foreach: { item: { _id: 'alert-1' } },
+    });
+    expect(matchedCount).toBe(1);
+    expect(
+      evaluateExpression(engine, accumulateGate.condition, {
+        variables: { batch_alert_verdict_count: matchedCount },
+      })
+    ).toBe(true);
+  });
+
+  it('derives missing_alert_ids from the alerts that never matched a verdict', () => {
+    const collectStep = findStepByName(workflow.steps, 'collect_verdict_ids') as {
+      if: string;
+      with: { all_verdict_ids: string };
+    };
+    const missingStep = findStepByName(workflow.steps, 'set_missing_alert_ids') as {
+      if: string;
+      with: { missing_alert_ids: string };
+    };
+    expect(collectStep.if).toBe('${{ inputs.calledByWorker == true }}');
+    expect(missingStep.if).toBe('${{ inputs.calledByWorker == true }}');
+
+    const alerts = [{ _id: 'a1' }, { _id: 'a2' }, { _id: 'a3' }];
+    // a1 got a verdict. a2 was skipped by the agent and a3's whole batch returned nothing —
+    // neither reaches all_verdicts, so one derivation covers both failure modes.
+    const allVerdictIds = evaluateExpression(engine, collectStep.with.all_verdict_ids, {
+      variables: { all_verdicts: [{ id: 'a1' }] },
+    });
+    expect(allVerdictIds).toEqual(['a1']);
+
+    expect(
+      evaluateExpression(engine, missingStep.with.missing_alert_ids, {
+        inputs: { alerts },
+        variables: { pending_filter_expr: 'false', all_verdict_ids: allVerdictIds },
+      })
+    ).toEqual(['a2', 'a3']);
+
+    // Every alert reconciled: an empty list is the caller's signal that nothing is outstanding.
+    expect(
+      evaluateExpression(engine, missingStep.with.missing_alert_ids, {
+        inputs: { alerts },
+        variables: { pending_filter_expr: 'false', all_verdict_ids: ['a1', 'a2', 'a3'] },
+      })
+    ).toEqual([]);
+  });
+
+  it('fails a caller that supplies alerts without the Worker flag instead of analysing nothing', () => {
+    const gate = findStepByName(workflow.steps, 'require_worker_flag_for_caller_alerts') as {
+      condition: string;
+    };
+
+    expect(
+      evaluateExpression(engine, gate.condition, { inputs: { alerts: [{ _id: 'a1' }] } })
+    ).toBe(true);
+    expect(
+      evaluateExpression(engine, gate.condition, {
+        inputs: { alerts: [{ _id: 'a1' }], calledByWorker: false },
+      })
+    ).toBe(true);
+    expect(
+      evaluateExpression(engine, gate.condition, {
+        inputs: { alerts: [{ _id: 'a1' }], calledByWorker: true },
+      })
+    ).toBe(false);
+    // Standalone alert-trigger run: no caller alerts, so the gate never fires.
+    expect(evaluateExpression(engine, gate.condition, { inputs: { alerts: [] } })).toBe(false);
+    expect(evaluateExpression(engine, gate.condition, { inputs: {} })).toBe(false);
+  });
+
+  it('links the Investigation from both alert notes, and omits it on the standalone path', () => {
+    const verdictNote = findStepByName(workflow.steps, 'add_verdict_note_to_alert') as {
+      with: { body: { note: { note: string } } };
+    };
+    const errorNote = findStepByName(workflow.steps, 'add_no_data_note_to_alert') as {
+      with: { body: { note: { note: string } } };
+    };
+
+    for (const note of [verdictNote.with.body.note.note, errorNote.with.body.note.note]) {
+      const withInvestigation = engine.parseAndRenderSync(note, {
+        workflow: { spaceId: 'default' },
+        variables: { investigation_conversation_id: 'conv-1' },
+      });
+      expect(withInvestigation).toContain(
+        '- Investigation: [conv-1](/s/default/app/agent_builder/conversations/conv-1)'
+      );
+
+      // Standalone runs have no Investigation, so the line must not render as a dead link.
+      const standalone = engine.parseAndRenderSync(note, {
+        workflow: { spaceId: 'default' },
+        variables: { investigation_conversation_id: '' },
+      });
+      expect(standalone).not.toContain('Investigation:');
+      expect(standalone).not.toContain('agent_builder/conversations');
+    }
+  });
+
+  it('drops verdicts whose id belongs to another batch', () => {
+    const idsStep = findStepByName(workflow.steps, 'set_batch_alert_ids') as {
+      with: { batch_alert_ids: string };
+    };
+    const filterStep = findStepByName(workflow.steps, 'filter_verdicts_to_batch') as {
+      with: { batch_verdicts: string };
+    };
+    const { name: agentStepName } = findStepByType(workflow.steps, 'ai.agent') as { name: string };
+
+    const batchAlertIds = evaluateExpression(engine, idsStep.with.batch_alert_ids, {
+      foreach: { item: [{ _id: 'a1' }, { _id: 'a2' }] },
+    });
+    const batchVerdicts = evaluateExpression(engine, filterStep.with.batch_verdicts, {
+      variables: { batch_alert_ids: batchAlertIds },
+      steps: {
+        [agentStepName]: {
+          output: {
+            structured_output: {
+              verdicts: [{ id: 'a1' }, { id: 'other-batch-alert' }, { id: 'a2' }],
+            },
+          },
+        },
+      },
+    });
+
+    expect(batchVerdicts).toEqual([{ id: 'a1' }, { id: 'a2' }]);
+  });
+
+  it('reports every pending alert as missing when analysis is skipped', () => {
+    const skipFallback = findStepByName(workflow.steps, 'set_missing_alert_ids_on_skip') as {
+      with: { missing_alert_ids: string };
+    };
+
+    const result = evaluateExpression(engine, skipFallback.with.missing_alert_ids, {
+      inputs: { alerts: [{ _id: 'a1' }, { _id: 'a2' }] },
+      variables: { pending_filter_expr: 'false' },
+    });
+
+    expect(result).toEqual(['a1', 'a2']);
+  });
+
+  it('reads event.alerts on the standalone path and inputs.alerts on the Worker path', () => {
+    // Extend Step so the cast from its index signature stays comparable to tsc.
+    interface DataSetStep extends Step {
+      with: Record<string, string>;
+    }
+    interface GateStep extends Step {
+      condition: string;
+    }
+    const countsStep = findStepByName(workflow.steps, 'set_alert_counts') as DataSetStep;
+    const callerCountsGate = findStepByName(workflow.steps, 'count_caller_alerts') as GateStep;
+    const callerCountsStep = findStepByName(
+      workflow.steps,
+      'apply_caller_alert_counts'
+    ) as DataSetStep;
+    const anchorStep = findStepByName(workflow.steps, 'set_enrichment_anchor') as DataSetStep;
+    const callerAnchorGate = findStepByName(workflow.steps, 'anchor_on_caller_alerts') as GateStep;
+    const callerAnchorStep = findStepByName(
+      workflow.steps,
+      'apply_caller_enrichment_anchor'
+    ) as DataSetStep;
+    const classifyLoop = findStepByName(workflow.steps, 'classify_alert_batches') as {
+      foreach: string;
+    };
+    const verdictsLoop = findStepByName(workflow.steps, 'apply_verdicts') as { foreach: string };
+
+    const triggerAlerts = [
+      { _id: 't1', '@timestamp': '2026-01-01T00:00:00.000Z' },
+      { _id: 't2', '@timestamp': '2026-01-01T00:01:00.000Z' },
+    ];
+    const callerAlerts = [{ _id: 'c1', '@timestamp': '2026-02-01T00:00:00.000Z' }];
+    const shared = { variables: { pending_filter_expr: 'false' }, consts: workflow.consts };
+    const standalone = {
+      ...shared,
+      event: { alerts: triggerAlerts },
+      inputs: { alerts: callerAlerts },
+    };
+    const worker = { ...shared, inputs: { calledByWorker: true, alerts: callerAlerts } };
+    interface LoopAlert {
+      _id: string;
+    }
+    const renderLoopIds = (foreach: string, context: object): string[] =>
+      (JSON.parse(engine.parseAndRenderSync(foreach, context)) as Array<LoopAlert | LoopAlert[]>)
+        .flat()
+        .map(({ _id }) => _id);
+
+    // Standalone ignores caller alerts even when present: the flag, not the data, picks the source.
+    expect(evaluateExpression(engine, countsStep.with.total_alert_count, standalone)).toBe(2);
+    expect(evaluateExpression(engine, callerCountsGate.condition, standalone)).toBe(false);
+    expect(engine.parseAndRenderSync(anchorStep.with.anchor_timestamp, standalone)).toBe(
+      '2026-01-01T00:00:00.000Z'
+    );
+    expect(evaluateExpression(engine, callerAnchorGate.condition, standalone)).toBe(false);
+    expect(renderLoopIds(classifyLoop.foreach, standalone)).toEqual(['t1', 't2']);
+    expect(renderLoopIds(verdictsLoop.foreach, standalone)).toEqual(['t1', 't2']);
+
+    expect(evaluateExpression(engine, callerCountsGate.condition, worker)).toBe(true);
+    expect(evaluateExpression(engine, callerCountsStep.with.total_alert_count, worker)).toBe(1);
+    expect(evaluateExpression(engine, callerAnchorGate.condition, worker)).toBe(true);
+    expect(engine.parseAndRenderSync(callerAnchorStep.with.anchor_timestamp, worker)).toBe(
+      '2026-02-01T00:00:00.000Z'
+    );
+    expect(renderLoopIds(classifyLoop.foreach, worker)).toEqual(['c1']);
+    expect(renderLoopIds(verdictsLoop.foreach, worker)).toEqual(['c1']);
+  });
+
+  it('emits workflow.output counts and fields from accumulated Worker verdicts', () => {
+    const outputStep = findStepByName(workflow.steps, 'emit_workflow_output') as {
+      with: Record<string, unknown>;
+    };
+    const verdicts = [
+      createMockOutputVerdict({
+        alert_id: 'a1',
+        classification: 'true_positive',
+        host_name: 'host-a',
+        user_name: 'user-a',
+      }),
+      createMockOutputVerdict({
+        alert_id: 'a2',
+        classification: 'false_positive',
+        host_name: 'host-a',
+        user_name: 'user-b',
+      }),
+      createMockOutputVerdict({
+        alert_id: 'a3',
+        classification: 'inconclusive',
+        host_name: 'host-b',
+        user_name: 'user-a',
+      }),
+    ];
+
+    const rendered = renderValueRecursively(engine, outputStep.with, {
+      variables: {
+        output_verdicts: verdicts,
+        auto_close_ids: ['a2'],
+        grouped_counts_summary: ' 2 alert(s) for host host-a classified as true positive.',
+        generated_summary: 'Hosts look compromised.',
+        resolved_connector_id: 'connector-1',
+        agent_id: 'elastic-ai-agent',
+        impacted_entities: [{ entity_type: 'host', name: 'host-a' }],
+        impacted_entities_truncated: 'false',
+        missing_alert_ids: ['a-missing'],
+      },
+    }) as Record<string, unknown>;
+
+    expect(rendered.verdicts).toEqual(verdicts);
+    expect(rendered.true_positive_count).toBe(1);
+    expect(rendered.false_positive_count).toBe(1);
+    expect(rendered.inconclusive_count).toBe(1);
+    expect(rendered.auto_closed_ids).toEqual(['a2']);
+    expect(rendered.grouped_counts_summary).toContain('host-a');
+    expect(rendered.generated_summary).toBe('Hosts look compromised.');
+    expect(rendered.connector_id).toBe('connector-1');
+    expect(rendered.agent_id).toBe('elastic-ai-agent');
+    expect(rendered.impacted_entities).toEqual([{ entity_type: 'host', name: 'host-a' }]);
+    expect(rendered.impacted_entities_truncated).toBe('false');
+    expect(rendered.missing_alert_ids).toEqual(['a-missing']);
+  });
+
+  it('renders a deterministic grouped_counts_summary from output_verdicts', () => {
+    const summaryStep = findStepByName(workflow.steps, 'build_grouped_counts_summary') as {
+      with: { grouped_counts_summary: string };
+    };
+    const verdicts = [
+      createMockOutputVerdict({
+        alert_id: 'a1',
+        classification: 'true_positive',
+        host_name: 'ws-1',
+      }),
+      createMockOutputVerdict({
+        alert_id: 'a2',
+        classification: 'true_positive',
+        host_name: 'ws-1',
+      }),
+      createMockOutputVerdict({
+        alert_id: 'a3',
+        classification: 'false_positive',
+        host_name: 'dc-1',
+      }),
+    ];
+
+    const summary = engine.parseAndRenderSync(summaryStep.with.grouped_counts_summary, {
+      variables: { output_verdicts: verdicts },
+    });
+
+    expect(summary).toContain('2 alert(s) with host ws-1 classified as true positive.');
+    expect(summary).toContain('1 alert(s) with host dc-1 classified as false positive.');
+  });
+
+  it('describes alerts with no host field in plain language instead of the __missing__ sentinel', () => {
+    const summaryStep = findStepByName(workflow.steps, 'build_grouped_counts_summary') as {
+      with: { grouped_counts_summary: string };
+    };
+    const verdicts = [
+      createMockOutputVerdict({
+        alert_id: 'a1',
+        classification: 'false_positive',
+        host_name: '__missing__',
+      }),
+    ];
+
+    const summary = engine.parseAndRenderSync(summaryStep.with.grouped_counts_summary, {
+      variables: { output_verdicts: verdicts },
+    });
+
+    expect(summary).toContain('1 alert(s) with no host field classified as false positive.');
+    expect(summary).not.toContain('__missing__');
+  });
+
+  it('strips the leading space so grouped_counts_summary joins cleanly after other sentences', () => {
+    const summaryStep = findStepByName(workflow.steps, 'build_grouped_counts_summary') as {
+      with: { grouped_counts_summary: string };
+    };
+    const verdicts = [
+      createMockOutputVerdict({
+        alert_id: 'a1',
+        classification: 'true_positive',
+        host_name: 'host-a',
+      }),
+    ];
+
+    const summary = engine.parseAndRenderSync(summaryStep.with.grouped_counts_summary, {
+      variables: { output_verdicts: verdicts },
+    });
+
+    expect(summary.startsWith(' ')).toBe(false);
+    expect(summary.endsWith(' ')).toBe(false);
+  });
+
+  it('builds host and user impact entity rows with per-verdict counts', () => {
+    const hostStep = findStepByName(workflow.steps, 'build_host_entity') as {
+      with: { current_entity: Record<string, unknown> };
+    };
+    const userStep = findStepByName(workflow.steps, 'build_user_entity') as {
+      with: { current_entity: Record<string, unknown> };
+    };
+    const verdicts = [
+      createMockOutputVerdict({
+        alert_id: 'a1',
+        classification: 'true_positive',
+        host_name: 'ws-1',
+        user_name: 'alice',
+      }),
+      createMockOutputVerdict({
+        alert_id: 'a2',
+        classification: 'false_positive',
+        host_name: 'ws-1',
+        user_name: 'alice',
+      }),
+    ];
+
+    const hostEntity = renderValueRecursively(engine, hostStep.with.current_entity, {
+      foreach: { item: 'ws-1' },
+      variables: { output_verdicts: verdicts },
+    });
+    const userEntity = renderValueRecursively(engine, userStep.with.current_entity, {
+      foreach: { item: 'alice' },
+      variables: { output_verdicts: verdicts },
+    });
+
+    expect(hostEntity).toEqual({
+      entity_type: 'host',
+      name: 'ws-1',
+      alert_count: 2,
+      verdicts: { true_positive: 1, false_positive: 1, inconclusive: 0 },
+    });
+    expect(userEntity).toEqual({
+      entity_type: 'user',
+      name: 'alice',
+      alert_count: 2,
+      verdicts: { true_positive: 1, false_positive: 1, inconclusive: 0 },
+    });
+  });
+
+  it('pre-caps unique host/user lists before entity loops and flags truncation from uncapped counts', () => {
+    const hostPlan = findStepByName(workflow.steps, 'plan_host_entity_iteration') as {
+      with: { host_names_for_entities: string; entity_name_count: string };
+    };
+    const userPlan = findStepByName(workflow.steps, 'plan_user_entity_iteration') as {
+      with: {
+        impacted_entities_truncated: string;
+        user_entity_budget: string;
+      };
+    };
+    const userSlice = findStepByName(workflow.steps, 'slice_user_names_for_entities') as {
+      with: { user_names_for_entities: string };
+    };
+    const hostLoop = findStepByName(workflow.steps, 'build_host_entities') as {
+      foreach: string;
+    };
+    const userLoop = findStepByName(workflow.steps, 'build_user_entities') as {
+      foreach: string;
+    };
+    const capStep = findStepByName(workflow.steps, 'cap_impacted_entities') as {
+      with: { impacted_entities: string };
+    };
+
+    expect(hostLoop.foreach).toContain('host_names_for_entities');
+    expect(userLoop.foreach).toContain('user_names_for_entities');
+
+    const hostNamesAll = Array.from({ length: 40 }, (_, i) => `host-${i}`);
+    const userNamesAll = Array.from({ length: 30 }, (_, i) => `user-${i}`);
+
+    const entityNameCount = evaluateExpression(engine, hostPlan.with.entity_name_count, {
+      variables: { host_names_all: hostNamesAll, user_names_all: userNamesAll },
+    });
+    expect(entityNameCount).toBe(70);
+
+    const hostNamesForEntities = evaluateExpression(engine, hostPlan.with.host_names_for_entities, {
+      variables: { host_names_all: hostNamesAll },
+    }) as string[];
+    expect(hostNamesForEntities).toHaveLength(40);
+
+    const truncatedFlag = engine.parseAndRenderSync(userPlan.with.impacted_entities_truncated, {
+      variables: { entity_name_count: 70 },
+    });
+    expect(truncatedFlag.trim()).toBe('true');
+
+    const userBudget = evaluateExpression(engine, userPlan.with.user_entity_budget, {
+      variables: { host_names_for_entities: hostNamesForEntities },
+    });
+    expect(userBudget).toBe(10);
+
+    const userNamesForEntities = evaluateExpression(
+      engine,
+      userSlice.with.user_names_for_entities,
+      {
+        variables: {
+          user_names_all: userNamesAll,
+          user_entity_budget: userBudget,
+        },
+      }
+    ) as string[];
+    expect(userNamesForEntities).toHaveLength(10);
+    expect(userNamesForEntities[0]).toBe('user-0');
+    expect(userNamesForEntities[9]).toBe('user-9');
+
+    // Safety net still slices any materialized list to 50.
+    const entities = Array.from({ length: 55 }, (_, i) => ({
+      entity_type: 'host',
+      name: `host-${i}`,
+    }));
+    const capped = evaluateExpression(engine, capStep.with.impacted_entities, {
+      variables: { impacted_entities: entities },
+    }) as unknown[];
+    expect(capped).toHaveLength(50);
+  });
+
+  it('applies autoCloseEnabled only when the caller explicitly provides it', () => {
+    const presenceGate = findStepByName(workflow.steps, 'set_auto_close_enabled_if_provided') as {
+      condition: string;
+      steps: Array<{ with: { auto_close_enabled: string } }>;
+    };
+
+    expect(
+      evaluateExpression(engine, presenceGate.condition, {
+        inputs: { autoCloseEnabled: false },
+      })
+    ).toBe(true);
+    expect(
+      evaluateExpression(engine, presenceGate.condition, {
+        inputs: {},
+      })
+    ).toBe(false);
+
+    const appliedFalse = evaluateExpression(engine, presenceGate.steps[0].with.auto_close_enabled, {
+      inputs: { autoCloseEnabled: false },
+    });
+    expect(appliedFalse).toBe(false);
+
+    // Caller can also override the Worker-mode default (false) back to true.
+    const appliedTrue = evaluateExpression(engine, presenceGate.steps[0].with.auto_close_enabled, {
+      inputs: { autoCloseEnabled: true },
+    });
+    expect(appliedTrue).toBe(true);
+  });
+
+  it('collapses max auto-close threshold to 1 only when min threshold input is provided', () => {
+    const collapseGate = findStepByName(
+      workflow.steps,
+      'collapse_max_threshold_if_min_provided'
+    ) as {
+      condition: string;
+      steps: Array<{ with: { auto_close_confidence_score_max_threshold: number } }>;
+    };
+
+    expect(
+      evaluateExpression(engine, collapseGate.condition, {
+        inputs: { autoCloseConfidenceScoreMinThreshold: 0.7 },
+      })
+    ).toBe(true);
+    expect(
+      evaluateExpression(engine, collapseGate.condition, {
+        inputs: {},
+      })
+    ).toBe(false);
+    expect(collapseGate.steps[0].with.auto_close_confidence_score_max_threshold).toBe(1);
+  });
+
+  it('joins compact batch_summaries into generated_summary', () => {
+    const summaryStep = findStepByName(workflow.steps, 'build_generated_summary') as {
+      with: { generated_summary: string };
+    };
+
+    const rendered = engine.parseAndRenderSync(summaryStep.with.generated_summary, {
+      variables: {
+        batch_summaries: ['Hosts look like malware.', null, 'Users look like admins.'],
+      },
+    });
+
+    expect(rendered).toBe('Hosts look like malware. Users look like admins.');
+  });
+
+  describe('batch_summary reconciliation', () => {
+    const { name: agentStepName } = findStepByType(workflow.steps, 'ai.agent') as { name: string };
+    const agentOutput = (batchSummary: string | null) => ({
+      [agentStepName]: { output: { structured_output: { batch_summary: batchSummary } } },
+    });
+
+    it('counts distinct matched verdict ids so a repeated id cannot hide a dropped alert', () => {
+      const collectStep = findStepByName(workflow.steps, 'collect_batch_verdicts') as {
+        with: { batch_matched_id_count: string };
+      };
+
+      const count = evaluateExpression(engine, collectStep.with.batch_matched_id_count, {
+        variables: { batch_verdicts: [{ id: 'a1' }, { id: 'a1' }, { id: 'a2' }] },
+      });
+
+      expect(count).toBe(2);
+    });
+
+    it('keeps a batch summary only when at least one verdict matched and the model returned one', () => {
+      const gate = findStepByName(workflow.steps, 'accumulate_batch_summary_gate') as {
+        condition: string;
+      };
+      const evaluate = (matched: number, batchSummary: string | null, calledByWorker = true) =>
+        evaluateExpression(engine, gate.condition, {
+          inputs: { calledByWorker },
+          variables: { batch_matched_id_count: matched },
+          steps: agentOutput(batchSummary),
+        });
+
+      expect(evaluate(2, 'Hosts look benign.')).toBe(true);
+      expect(evaluate(0, 'Describes another batch.')).toBe(false);
+      expect(evaluate(2, null)).toBe(false);
+      expect(evaluate(2, '')).toBe(false);
+      expect(evaluate(2, 'Hosts look benign.', false)).toBe(false);
+    });
+
+    it('marks a summary that covers only part of the batch', () => {
+      const entryStep = findStepByName(workflow.steps, 'build_batch_summary_entry') as {
+        with: { batch_summary_entry: string };
+      };
+      const render = (matched: number) =>
+        engine.parseAndRenderSync(entryStep.with.batch_summary_entry, {
+          variables: { batch_matched_id_count: matched, batch_alert_ids: ['a1', 'a2', 'a3'] },
+          steps: agentOutput('Hosts look benign.'),
+        });
+
+      expect(render(3)).toBe('Hosts look benign.');
+      expect(render(2)).toBe(
+        'Hosts look benign. (Covers 2 of 3 alerts in this batch; the rest returned no verdict.)'
+      );
+    });
+  });
+
+  it('truncates generated_summary to the workflow.output 2000-char limit', () => {
+    const summaryStep = findStepByName(workflow.steps, 'build_generated_summary') as {
+      with: { generated_summary: string };
+    };
+    // 20 × 101 chars (+ spaces) exceeds 2000; truncate must keep emit valid and signal truncation.
+    const batchSummaries = Array.from({ length: 20 }, () => 'x'.repeat(101));
+    const rendered = engine.parseAndRenderSync(summaryStep.with.generated_summary, {
+      variables: { batch_summaries: batchSummaries },
+    });
+
+    expect(rendered.length).toBeLessThanOrEqual(2000);
+    expect(rendered).toContain('[truncated]');
+    expect(summaryStep.with.generated_summary).toContain("truncate: 2000, ' [truncated]'");
+  });
+
+  it('caps unique hosts at 50 before building grouped_counts_summary, then truncates to 10000 chars', () => {
+    const summaryStep = findStepByName(workflow.steps, 'build_grouped_counts_summary') as {
+      with: { grouped_counts_summary: string };
+    };
+    expect(summaryStep.with.grouped_counts_summary).toContain('all_host_names | slice: 0, 50');
+    expect(summaryStep.with.grouped_counts_summary).toContain("truncate: 10000, ' [truncated]'");
+
+    // Short names so all 50 capped hosts fit under the 10000-char truncate; otherwise the
+    // char cap alone would hide whether the host slice ran.
+    const verdicts = Array.from({ length: 80 }, (_, i) =>
+      createMockOutputVerdict({
+        alert_id: `a${i}`,
+        classification: 'true_positive',
+        host_name: `host-${i}`,
+      })
+    );
+    const summary = engine.parseAndRenderSync(summaryStep.with.grouped_counts_summary, {
+      variables: { output_verdicts: verdicts },
+    });
+
+    expect(summary).toContain('host-0');
+    expect(summary).toContain('host-49');
+    expect(summary).not.toContain('host-50');
+    // 80 verdicts, 80 unique hosts → 30 omitted; overflow note must appear
+    expect(summary).toContain('30 additional host(s) omitted from summary');
+    expect(summary.length).toBeLessThanOrEqual(10000);
+
+    const longHost = 'h'.repeat(200);
+    const longVerdicts = Array.from({ length: 50 }, (_, i) =>
+      createMockOutputVerdict({
+        alert_id: `b${i}`,
+        classification: 'true_positive',
+        host_name: `${longHost}-${i}`,
+      })
+    );
+    const longSummary = engine.parseAndRenderSync(summaryStep.with.grouped_counts_summary, {
+      variables: { output_verdicts: longVerdicts },
+    });
+    // 50 hosts × ~210 chars each exceeds 10000 — truncation suffix must appear so the
+    // caller knows the summary is partial (not silently cut mid-sentence).
+    expect(longSummary.length).toBeLessThanOrEqual(10000);
+    expect(longSummary).toContain('[truncated]');
   });
 });

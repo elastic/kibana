@@ -122,14 +122,14 @@ describe('AgenticInvestigationsPlugin', () => {
       expect(privileges.read.ui).toEqual([]);
     });
 
-    it('keeps escalations in a sub-feature, joined to the base levels by includeIn', () => {
+    it('keeps escalation manage off the base privileges and joins view to Read', () => {
       const { features } = setupPlugin();
       const { subFeatures } = registeredFeature(features);
       const [escalationsAll, escalationsRead] = subFeatures[0].privilegeGroups[0].privileges;
 
       expect(escalationsAll).toEqual(
         expect.objectContaining({
-          includeIn: 'all',
+          includeIn: 'none',
           api: [ESCALATIONS_API_PRIVILEGE_READ, ESCALATIONS_API_PRIVILEGE_MANAGE],
           ui: [ESCALATIONS_UI_CAPABILITY_SHOW, ESCALATIONS_UI_CAPABILITY_MANAGE],
         })

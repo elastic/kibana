@@ -47,7 +47,7 @@ One Kibana feature, `agenticInvestigations`.
 
 The feature carries `minimumLicense: 'enterprise'`.
 
-Impact has no privilege of its own yet. Reads and writes require the investigations sub-feature privilege, `manage_investigations`, which `includeIn: 'all'` joins to the base All level. A dedicated impact privilege can be split out later if read and write need to diverge. Escalations sit in their own sub-feature, joined to the base levels through `includeIn: 'all'` / `includeIn: 'read'`. Follow that sub-feature pattern for any new entity that is not intrinsic to an investigation.
+Impact has no privilege of its own yet. Reads and writes require the investigations sub-feature privilege, `manage_investigations`, which `includeIn: 'all'` joins to the base All level. A dedicated impact privilege can be split out later if read and write need to diverge. Escalation create and update stay `includeIn: 'none'`, so All does not grant them. Escalation view is `includeIn: 'read'`, so base Read and All can list. Follow the sub-feature pattern for any new entity that is not intrinsic to an investigation.
 
 **Note:** `minimal_all` and `minimal_read` are **not** equivalent to `all` and `read`. They only grant sub-features marked `groupType: 'independent'`, and only when the user holds them explicitly.
 
@@ -62,7 +62,8 @@ An **Impact** record is the set of entities (users, hosts, services) an investig
 - Evidence is not on this document. Nightshift's current evidence shape cannot represent non-local data, and that format is still open.
 - HTTP: `POST /internal/investigations/impact` and `GET ...?conversationId=` both require `manage_investigations`. Bulk hydrate is in-process via `getImpactClient(request).listByConversationIds()`, which checks that same privilege and uses the request's space. The raw service stays internal to the routes.
 - Workflow steps: `investigations.attachImpact` and `investigations.getImpact` both require `manage_investigations` and fail the step when it is missing. `getImpact` also fails if none is attached. Same fail-closed privilege check as proposal steps.
-- Agent Builder attachment type `investigation_impact` (`isReadonly: true`) is registered for the investigation flyout (and allow-listed in `@kbn/agent-builder-server`). Nothing in this plugin writes the attachment onto a conversation yet — producers persist the Impact document; stamping it onto chat is a follow-up.
+- Agent Builder attachment type `investigation_impact` (`isReadonly: true`) is registered for the investigation flyout (and allow-listed in `@kbn/agent-builder-server`). Attach HTTP and `investigations.attachImpact` call `attachImpactToInvestigation`, which checks conversation owner access, writes the impact document, then puts a by-reference attachment (`origin` = Impact document id). A failed attachment write reverts that index write. `resolve()` loads the current document through `ImpactService`, so a later merge does not leave the flyout on a stale snapshot.
+- `scripts/seed_impact_attachment.sh` creates an investigation conversation, attaches entities through the internal API, and checks that the conversation has one `investigation_impact` attachment.
 
 ## Index naming
 
@@ -86,8 +87,8 @@ The `escalations` sub-feature uses a `mutually_exclusive` privilege group, so a 
 
 | Sub-feature privilege | API | UI |
 | --- | --- | --- |
-| `escalations_all` (included in `all`) | `read_escalations`, `manage_escalations` | `showEscalations`, `manageEscalations` |
-| `escalations_read` (included in `read`) | `read_escalations` | `showEscalations` |
+| `escalations_all` (`includeIn: 'none'`) | `read_escalations`, `manage_escalations` | `showEscalations`, `manageEscalations` |
+| `escalations_read` (`includeIn: 'read'`) | `read_escalations` | `showEscalations` |
 
 ### API
 

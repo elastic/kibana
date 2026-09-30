@@ -17,7 +17,8 @@ import {
   DiscoverTabType,
   UnifiedHistogramSuggestionType,
 } from '@kbn/discover-session-constants';
-import { FILTERS, FilterStateStore } from '@kbn/es-query';
+import { BooleanRelation, FILTERS, FilterStateStore } from '@kbn/es-query';
+import type { CombinedFilter, Filter } from '@kbn/es-query';
 import { VIEW_MODE } from '@kbn/saved-search-plugin/common';
 import { cloneDeep } from 'lodash';
 import { v4 as uuidv4 } from 'uuid';
@@ -35,6 +36,7 @@ import {
   getDiscoverSessionReferences,
   toDiscoverSessionApiData,
 } from './session_conversions';
+import { toStoredSearchAndTable } from '../../common/session/search_and_table_mapping';
 
 type ApiInlineDataView = Extract<
   DiscoverSessionApiClassicTab['data_source'],
@@ -86,7 +88,7 @@ const esqlApiTab: Required<DiscoverSessionApiEsqlTab> = {
   column_settings: { message: { width: 320 } },
   data_source: { type: 'esql', query: 'FROM logs-* | WHERE status == 500' },
   hide_chart: false,
-  hide_table: false,
+  hide_table: true,
   hide_aggregated_preview: true,
   row_height: 2,
   header_row_height: 'auto',
@@ -178,10 +180,20 @@ describe('Discover session conversion and UI preparation', () => {
 
   it('converts API fields without assigning inline IDs or binding filters', () => {
     const originalResponse = cloneDeep(response);
+    const { serializedSearchSource, ...tabFields } = toStoredSearchAndTable(response.data.tabs[0]);
+    expect(tabFields).not.toHaveProperty('kibanaSavedObjectMeta');
+    expect(tabFields).not.toHaveProperty('hideChart');
+    expect(tabFields).not.toHaveProperty('hideTable');
+    expect(serializedSearchSource.index).toBe('logs-data-view');
+    expect(serializedSearchSource).not.toHaveProperty('indexRefName');
 
     const session = fromDiscoverSessionApiResponse(response);
 
     expect(session.tabs[0].visContext).toBeUndefined();
+    expect(session.tabs[1].hideChart).toBe(true);
+    expect(session.tabs[2].hideTable).toBe(true);
+    expect(session.tabs[0]).not.toHaveProperty('kibanaSavedObjectMeta');
+    expect(session.references).toStrictEqual(getDiscoverSessionReferences(response.data));
     expect(session.tabs[0]).not.toHaveProperty('tabTypeState');
     expect(session.tabs[2].visContext).toStrictEqual({
       suggestionType: UnifiedHistogramSuggestionType.histogramForESQL,
@@ -406,9 +418,51 @@ describe('Discover session conversion and UI preparation', () => {
     expect(toDiscoverSessionApiData(session)).toStrictEqual(metricsResponse.data);
   });
 
+  it('rejects Metrics settings on a classic tab when building a save request', () => {
+    const session = fromDiscoverSessionApiResponse(response);
+    const [classicTab] = session.tabs;
+    classicTab.tabTypeState = {
+      type: DiscoverTabType.Metrics,
+      dimensions: ['host.name'],
+      searchTerm: 'cpu',
+      counterAggregation: 'max',
+      gaugeAggregation: 'min',
+      histogramPercentile: 'p99',
+    };
+
+    expect(() => toDiscoverSessionApiData(session)).toThrow(
+      `Metrics tab "${classicTab.label}" with ID "${classicTab.id}" requires an ES|QL data source.`
+    );
+  });
+
   it('keeps inline IDs runtime-only and preserves filters for other data views', () => {
     const session = assignSessionDataViewIds(fromDiscoverSessionApiResponse(response), []);
     const inlineTab = session.tabs[1];
+    const pinnedFilter: Filter = {
+      meta: { index: 'runtime-inline-id', type: FILTERS.PHRASE, key: 'service.name' },
+      query: { match_phrase: { 'service.name': 'checkout' } },
+      $state: { store: FilterStateStore.GLOBAL_STATE },
+    };
+    const combinedFilter: CombinedFilter = {
+      meta: {
+        index: 'runtime-inline-id',
+        type: FILTERS.COMBINED,
+        relation: BooleanRelation.OR,
+        params: [
+          {
+            meta: { index: 'runtime-inline-id', type: FILTERS.PHRASE, key: 'service.name' },
+            query: { match_phrase: { 'service.name': 'api' } },
+          },
+          {
+            meta: { index: 'runtime-inline-id', type: FILTERS.PHRASE, key: 'host.name' },
+            query: { match_phrase: { 'host.name': 'web-1' } },
+          },
+        ],
+      },
+      query: {},
+    };
+    const { filter: loadedFilters = [] } = inlineTab.serializedSearchSource;
+    inlineTab.serializedSearchSource.filter = [...loadedFilters, pinnedFilter, combinedFilter];
 
     expect(inlineTab.serializedSearchSource.index).toEqual(
       expect.objectContaining({
@@ -420,11 +474,86 @@ describe('Discover session conversion and UI preparation', () => {
     expect(inlineTab.serializedSearchSource.filter?.[0].meta.index).toBe('runtime-inline-id');
     expect(inlineTab.serializedSearchSource.filter?.[1].meta.index).toBe('foreign-data-view-id');
 
+    const beforeSave = cloneDeep(session);
     const apiTab = toDiscoverSessionApiData(session).tabs[1];
     const filters = 'filters' in apiTab ? apiTab.filters ?? [] : [];
     expect(apiTab.data_source).not.toHaveProperty('id');
     expect(filters[0].data_view_id).toBeUndefined();
     expect(filters[1].data_view_id).toBe('foreign-data-view-id');
+    // The pinned condition is kept as an app filter; neither filter keeps the inline ID.
+    expect(filters.slice(2)).toStrictEqual([
+      {
+        type: 'condition',
+        condition: { field: 'service.name', operator: 'is', value: 'checkout' },
+      },
+      {
+        type: 'group',
+        group: {
+          operator: 'or',
+          conditions: [
+            { field: 'service.name', operator: 'is', value: 'api' },
+            { field: 'host.name', operator: 'is', value: 'web-1' },
+          ],
+        },
+      },
+    ]);
+
+    // Saving must not unpin filters or drop the runtime IDs from the tab.
+    expect(session).toStrictEqual(beforeSave);
+    expect(pinnedFilter.$state).toStrictEqual({ store: FilterStateStore.GLOBAL_STATE });
+    expect(pinnedFilter.meta.index).toBe('runtime-inline-id');
+    expect(combinedFilter.meta.index).toBe('runtime-inline-id');
+    expect(combinedFilter.meta.params.map(({ meta }) => meta.index)).toStrictEqual([
+      'runtime-inline-id',
+      'runtime-inline-id',
+    ]);
+  });
+
+  it('skips session filter policies when the text-based flag is true despite a classic query', () => {
+    const session = assignSessionDataViewIds(fromDiscoverSessionApiResponse(response), []);
+    const inlineTab = session.tabs[1];
+    inlineTab.isTextBasedQuery = true;
+    inlineTab.serializedSearchSource.filter = [
+      {
+        meta: { index: 'runtime-inline-id', type: FILTERS.PHRASE, key: 'service.name' },
+        query: { match_phrase: { 'service.name': 'checkout' } },
+        $state: { store: FilterStateStore.GLOBAL_STATE },
+      },
+      {
+        meta: { index: 'runtime-inline-id', type: FILTERS.PHRASE, key: 'host.name' },
+        query: { match_phrase: { 'host.name': 'web-1' } },
+      },
+    ];
+    const beforeSave = cloneDeep(session);
+
+    const apiTab = toDiscoverSessionApiData(session).tabs[1];
+
+    expect(apiTab.data_source).toStrictEqual(inlineApiDataView);
+    expect(apiTab).toHaveProperty('filters', [
+      {
+        type: 'condition',
+        condition: { field: 'host.name', operator: 'is', value: 'web-1' },
+        data_view_id: 'runtime-inline-id',
+      },
+    ]);
+    expect(session).toStrictEqual(beforeSave);
+  });
+
+  it('converts ES|QL without approximation when the text-based flag is incorrectly false', () => {
+    const session = fromDiscoverSessionApiResponse(response);
+    const esqlTab = session.tabs[2];
+    esqlTab.isTextBasedQuery = false;
+    const beforeSave = cloneDeep(session);
+
+    const apiTab = toDiscoverSessionApiData(session).tabs[2];
+
+    expect(apiTab.data_source).toStrictEqual({
+      type: 'esql',
+      query: 'FROM logs-* | WHERE status == 500',
+    });
+    expect(apiTab).not.toHaveProperty('filters');
+    expect(apiTab).not.toHaveProperty('esql_approximation');
+    expect(session).toStrictEqual(beforeSave);
   });
 
   it('round-trips pinned conditions as app filters without changing the local pin', () => {

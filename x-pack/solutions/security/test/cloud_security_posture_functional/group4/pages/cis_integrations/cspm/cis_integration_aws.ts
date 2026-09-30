@@ -88,7 +88,7 @@ export default function (providerContext: FtrProviderContext) {
         await pageObjects.header.waitUntilLoadingHasFinished();
         await cisIntegration.inputUniqueIntegrationName();
         await cisIntegration.clickSaveButton();
-        await cisIntegration.waitUntilLaunchCloudFormationButtonAppears();
+        await cisIntegration.waitForPostInstallModal();
         expect(
           (await cisIntegration.getUrlOnPostInstallModal()) ===
             'https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/cfn-whatis-howdoesitwork.html'
@@ -104,7 +104,7 @@ export default function (providerContext: FtrProviderContext) {
         await pageObjects.header.waitUntilLoadingHasFinished();
         await cisIntegration.clickSaveButton();
         await pageObjects.header.waitUntilLoadingHasFinished();
-        await cisIntegration.waitUntilLaunchCloudFormationButtonAppears();
+        await cisIntegration.waitForPostInstallModal();
         expect(
           (await cisIntegration.getUrlOnPostInstallModal()) ===
             'https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/cfn-whatis-howdoesitwork.html'
@@ -137,7 +137,7 @@ export default function (providerContext: FtrProviderContext) {
          * sometimes it takes a while to save the integration so added timeout to wait for post install modal
          */
         await retry.tryForTime(saveIntegrationPolicyTimeout, async () => {
-          await cisIntegration.waitUntilLaunchCloudFormationButtonAppears();
+          await cisIntegration.waitForPostInstallModal();
           const modal = await cisIntegration.getPostInstallModal();
           if (!modal) {
             logger.debug('Post install modal not found');
@@ -177,7 +177,7 @@ export default function (providerContext: FtrProviderContext) {
         await cisIntegration.inputUniqueIntegrationName();
         await cisIntegration.clickSaveButton();
         await retry.tryForTime(saveIntegrationPolicyTimeout, async () => {
-          await cisIntegration.waitUntilLaunchCloudFormationButtonAppears();
+          await cisIntegration.waitForPostInstallModal();
           expect((await cisIntegration.getPostInstallModal()) !== undefined).to.be(true);
           await cisIntegration.navigateToIntegrationCspList();
           expect(
@@ -216,7 +216,7 @@ export default function (providerContext: FtrProviderContext) {
         await cisIntegration.inputUniqueIntegrationName();
         await cisIntegration.clickSaveButton();
         await retry.tryForTime(saveIntegrationPolicyTimeout, async () => {
-          await cisIntegration.waitUntilLaunchCloudFormationButtonAppears();
+          await cisIntegration.waitForPostInstallModal();
           expect((await cisIntegration.getPostInstallModal()) !== undefined).to.be(true);
           await cisIntegration.navigateToIntegrationCspList();
           await cisIntegration.clickFirstElementOnIntegrationTable();
@@ -259,7 +259,7 @@ export default function (providerContext: FtrProviderContext) {
         await cisIntegration.inputUniqueIntegrationName();
         await cisIntegration.clickSaveButton();
         await retry.tryForTime(saveIntegrationPolicyTimeout, async () => {
-          await cisIntegration.waitUntilLaunchCloudFormationButtonAppears();
+          await cisIntegration.waitForPostInstallModal();
           expect((await cisIntegration.getPostInstallModal()) !== undefined).to.be(true);
           await cisIntegration.navigateToIntegrationCspList();
           await cisIntegration.clickFirstElementOnIntegrationTable();
@@ -287,7 +287,7 @@ export default function (providerContext: FtrProviderContext) {
         await cisIntegration.inputUniqueIntegrationName();
         await cisIntegration.clickSaveButton();
         await retry.tryForTime(saveIntegrationPolicyTimeout, async () => {
-          await cisIntegration.waitUntilLaunchCloudFormationButtonAppears();
+          await cisIntegration.waitForPostInstallModal();
           expect((await cisIntegration.getPostInstallModal()) !== undefined).to.be(true);
           await cisIntegration.navigateToIntegrationCspList();
           expect(
@@ -323,7 +323,7 @@ export default function (providerContext: FtrProviderContext) {
         await cisIntegration.inputUniqueIntegrationName();
         await cisIntegration.clickSaveButton();
         await retry.tryForTime(saveIntegrationPolicyTimeout, async () => {
-          await cisIntegration.waitUntilLaunchCloudFormationButtonAppears();
+          await cisIntegration.waitForPostInstallModal();
           expect((await cisIntegration.getPostInstallModal()) !== undefined).to.be(true);
           await cisIntegration.navigateToIntegrationCspList();
           expect(
@@ -363,7 +363,7 @@ export default function (providerContext: FtrProviderContext) {
         const integrationName = await cisIntegration.inputUniqueIntegrationName();
         await cisIntegration.clickSaveButton();
         await retry.tryForTime(saveIntegrationPolicyTimeout, async () => {
-          await cisIntegration.waitUntilLaunchCloudFormationButtonAppears();
+          await cisIntegration.waitForPostInstallModal();
           expect((await cisIntegration.getPostInstallModal()) !== undefined).to.be(true);
           await cisIntegration.navigateToIntegrationCspList();
           await cisIntegration.clickPolicyToBeEdited(integrationName);
@@ -407,7 +407,7 @@ export default function (providerContext: FtrProviderContext) {
         await cisIntegration.inputUniqueIntegrationName();
         await cisIntegration.clickSaveButton();
         await retry.tryForTime(saveIntegrationPolicyTimeout, async () => {
-          await cisIntegration.waitUntilLaunchCloudFormationButtonAppears();
+          await cisIntegration.waitForPostInstallModal();
           expect((await cisIntegration.getPostInstallModal()) !== undefined).to.be(true);
           await cisIntegration.navigateToIntegrationCspList();
           await cisIntegration.clickFirstElementOnIntegrationTable();
@@ -433,7 +433,7 @@ export default function (providerContext: FtrProviderContext) {
         await cisIntegration.fillInComboBox(NAMESPACE_INPUT_TEST_SUBJ, namespace);
         await cisIntegration.clickSaveButton();
         await pageObjects.header.waitUntilLoadingHasFinished();
-        await cisIntegration.waitUntilLaunchCloudFormationButtonAppears();
+        await cisIntegration.waitForPostInstallModal();
 
         await cisIntegration.navigateToIntegrationCspList();
         await pageObjects.header.waitUntilLoadingHasFinished();

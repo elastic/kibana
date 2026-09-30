@@ -19,6 +19,7 @@ project:
 dependsOn:
   - '@kbn/i18n'
   - '@kbn/proposals-common'
+  - '@kbn/i18n-react'
 tags:
   - shared-browser
   - package

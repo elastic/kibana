@@ -137,7 +137,7 @@ export const AddToExistingEscalationForm = memo<AddToExistingEscalationFormProps
                   onClick={() => !isRowDisabled(incident) && setSelectedId(incident.id)}
                   data-test-subj={`escalationModalIncident-${incident.id}`}
                 >
-                  <EuiFlexGroup alignItems="center" gutterSize="s">
+                  <EuiFlexGroup alignItems="center" gutterSize="xs">
                     <EuiFlexItem grow={false}>
                       <EuiRadio
                         id={`incident-${incident.id}`}
@@ -157,7 +157,7 @@ export const AddToExistingEscalationForm = memo<AddToExistingEscalationFormProps
                       </EuiText>
                     </EuiFlexItem>
                     <EuiFlexItem grow={false}>
-                      <EuiBadge color="hollow">{T.openBadge}</EuiBadge>
+                      <EuiBadge color="primary">{T.openBadge}</EuiBadge>
                     </EuiFlexItem>
                   </EuiFlexGroup>
                 </EuiPanel>
@@ -182,7 +182,7 @@ export const AddToExistingEscalationForm = memo<AddToExistingEscalationFormProps
             onClick={() => selectedId && onSubmit(selectedId)}
             isLoading={isSubmitting}
             isDisabled={!selectedId || isSubmitting}
-            data-test-subj="escalationModalAddToEscalation"
+            data-test-subj="escalationModalattachToEscalation"
           >
             {T.submitButton}
           </EuiButton>
