@@ -214,7 +214,7 @@ describe('readCurrentRunState', () => {
     expect(state?.hasProcessBearingEvent).toBe(false);
   });
 
-  it('returns undefined when no current-run SSE exists', async () => {
+  it('returns undefined when no current-run SSE exists and the hunt outcome is unknown', async () => {
     const state = await readCurrentRunState({
       attachments: [],
       reportId,
@@ -224,6 +224,63 @@ describe('readCurrentRunState', () => {
     });
 
     expect(state).toBeUndefined();
+  });
+
+  it('returns undefined when no current-run SSE exists and the hunt did not complete successfully', async () => {
+    const state = await readCurrentRunState({
+      attachments: [],
+      reportId,
+      runId,
+      huntStatus: 'partial',
+      huntConfirmedHit: false,
+      resolveHostEnrollment,
+      rehydrateProcessSelectors,
+    });
+
+    expect(state).toBeUndefined();
+  });
+
+  it('synthesizes a hitless state when the hunt child reports a clean, successful run with no SSE', async () => {
+    const state = await readCurrentRunState({
+      attachments: [],
+      reportId,
+      runId,
+      huntStatus: 'success',
+      huntConfirmedHit: false,
+      resolveHostEnrollment,
+      rehydrateProcessSelectors,
+    });
+
+    expect(state).toEqual({
+      runId,
+      reportId,
+      hasConfirmedHit: false,
+      titles: [],
+      evidenceLines: [],
+      techniques: [],
+      hosts: [],
+      processSelectors: [],
+      hasNonHostEntity: false,
+      hasIocIndicator: false,
+      allEventsActionable: true,
+      hasProcessBearingEvent: false,
+      manualRemediation: [],
+      evidence: { tier2Confirmed: [] },
+    });
+  });
+
+  it('prefers a real current-run SSE over the clean-run synthesis when both are present', async () => {
+    const state = await readCurrentRunState({
+      attachments: [sseAttachment({})],
+      reportId,
+      runId,
+      huntStatus: 'success',
+      huntConfirmedHit: false,
+      resolveHostEnrollment,
+      rehydrateProcessSelectors,
+    });
+
+    expect(state?.hasConfirmedHit).toBe(true);
   });
 
   it('dedupes identical titles and evidence lines across current-run SSEs', async () => {

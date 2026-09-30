@@ -26,6 +26,19 @@ export const packageReportInputSchema = z.object({
     'Investigation conversation id; must equal uuidv5(hunt:report:{reportId}).'
   ),
   runId: boundedId.describe('Current-run id; packaging reads only attachments scoped to this run.'),
+  huntStatus: z
+    .string()
+    .max(64)
+    .optional()
+    .describe(
+      'Status the hunt child reported for this run (success/partial/failed). Combined with ' +
+        'huntConfirmedHit to tell a genuinely clean run (no confirmed hit, so no SSE attachment ' +
+        'was written) from a run packaging cannot evaluate at all.'
+    ),
+  huntConfirmedHit: z
+    .boolean()
+    .optional()
+    .describe('Whether the hunt child confirmed a hit for this run.'),
 });
 
 const coverageWrittenSchema = z.object({
@@ -112,6 +125,8 @@ export const packageReportStepCommonDefinition: CommonStepDefinition<
     reportId: "{{ inputs.reportId }}"
     investigationConversationId: "{{ inputs.investigationConversationId }}"
     runId: "{{ inputs.runId }}"
+    huntStatus: "{{ inputs.huntStatus }}"
+    huntConfirmedHit: "\${{ inputs.huntConfirmedHit }}"
 \`\`\``,
     ],
   },

@@ -171,7 +171,7 @@ describe('runPackageReport', () => {
     ).rejects.toBeInstanceOf(PackageReportIdentityError);
   });
 
-  it('returns run_incomplete when no current-run SSE exists', async () => {
+  it('returns run_incomplete when no current-run SSE exists and the hunt outcome is unknown', async () => {
     const result = await runPackageReport({
       spaceId: 'default',
       reportId,
@@ -184,6 +184,43 @@ describe('runPackageReport', () => {
       status: 'run_incomplete',
       reason: expect.stringContaining(runId),
     });
+  });
+
+  it('returns run_incomplete when no current-run SSE exists and the hunt itself did not complete', async () => {
+    const result = await runPackageReport({
+      spaceId: 'default',
+      reportId,
+      investigationConversationId: conversationId,
+      runId,
+      huntStatus: 'partial',
+      huntConfirmedHit: false,
+      attachments: [],
+      deps: deps(),
+    });
+    expect(result).toEqual({
+      status: 'run_incomplete',
+      reason: expect.stringContaining(runId),
+    });
+  });
+
+  it('dismisses a clean run even with no SSE attachment, when the hunt child reports success with no hit', async () => {
+    const result = await runPackageReport({
+      spaceId: 'default',
+      reportId,
+      investigationConversationId: conversationId,
+      runId,
+      huntStatus: 'success',
+      huntConfirmedHit: false,
+      attachments: [],
+      deps: deps(),
+    });
+    expect(result.status).toBe('packaged');
+    if (result.status !== 'packaged') {
+      return;
+    }
+    expect(result.dismiss).toBe(true);
+    expect(result.proposals).toEqual([]);
+    expect(result.expectedProposalCount).toBe(0);
   });
 
   it('packages a clean run: dismiss, coverage written, no proposals', async () => {

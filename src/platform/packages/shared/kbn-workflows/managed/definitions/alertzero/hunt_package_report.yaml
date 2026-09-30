@@ -28,6 +28,16 @@ triggers:
         runId:
           type: string
           description: Run id the Worker's fan-out minted for this sweep; packaging reads only attachments scoped to this run.
+        huntStatus:
+          type: string
+          description: >-
+            Status the hunt child reported for this run (success/partial/failed).
+            Combined with huntConfirmedHit to tell a genuinely clean run (no
+            attachments because nothing was confirmed) from one packaging
+            cannot evaluate (no attachments because the hunt did not finish).
+        huntConfirmedHit:
+          type: boolean
+          description: Whether the hunt child confirmed a hit for this run.
       required:
         - reportId
         - investigationConversationId
@@ -58,6 +68,8 @@ steps:
       reportId: "{{ inputs.reportId }}"
       investigationConversationId: "{{ inputs.investigationConversationId }}"
       runId: "{{ inputs.runId }}"
+      huntStatus: "{{ inputs.huntStatus }}"
+      huntConfirmedHit: "${{ inputs.huntConfirmedHit }}"
     on-failure:
       fallback:
         - name: emit_package_failed

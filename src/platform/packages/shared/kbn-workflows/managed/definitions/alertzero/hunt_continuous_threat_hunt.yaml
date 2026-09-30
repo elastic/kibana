@@ -153,6 +153,16 @@ steps:
             reportId: "{{ foreach.item }}"
             investigationConversationId: "{{ steps.find_or_create_investigation.output.investigationConversationId }}"
             runId: "{{ execution.id }}"
+            # Packaging can't tell "hunt ran clean" from "packaging can't see
+            # any run data" by reading conversation attachments alone: the
+            # hunt child only writes an SSE attachment on a confirmed hit
+            # (hunt.yaml's attach_sse), so a genuinely clean run leaves zero
+            # attachments for this runId, same as a run packaging never got
+            # to evaluate. These two pass the hunt child's own verdict
+            # through so packaging can dismiss a clean run instead of
+            # reporting it `run_incomplete`.
+            huntStatus: "{{ steps.hunt.output.status }}"
+            huntConfirmedHit: "${{ steps.hunt.output.hit }}"
 
       # Outcome derivation (section A): find_or_create failing means no
       # Investigation ever existed, so no conclusion is possible (handled by

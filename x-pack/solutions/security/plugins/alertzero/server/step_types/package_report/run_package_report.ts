@@ -48,6 +48,8 @@ export const runPackageReport = async ({
   reportId,
   investigationConversationId,
   runId,
+  huntStatus,
+  huntConfirmedHit,
   attachments,
   deps,
 }: {
@@ -55,6 +57,10 @@ export const runPackageReport = async ({
   reportId: string;
   investigationConversationId: string;
   runId: string;
+  /** The hunt child's own `status` output for this run; disambiguates a clean run from an incomplete one. */
+  huntStatus?: string;
+  /** The hunt child's own `hit` output for this run. */
+  huntConfirmedHit?: boolean;
   attachments: VersionedAttachment[] | undefined;
   deps: RunPackageReportDeps;
 }): Promise<PackageReportOutput> => {
@@ -69,6 +75,8 @@ export const runPackageReport = async ({
     attachments,
     reportId,
     runId,
+    huntStatus,
+    huntConfirmedHit,
     resolveHostEnrollment: deps.resolveHostEnrollment,
     rehydrateProcessSelectors: deps.rehydrateProcessSelectors,
   });

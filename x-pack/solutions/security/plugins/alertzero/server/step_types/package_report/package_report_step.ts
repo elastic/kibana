@@ -231,6 +231,8 @@ export const getPackageReportStepDefinition = ({
           reportId: input.reportId,
           investigationConversationId: input.investigationConversationId,
           runId: input.runId,
+          huntStatus: input.huntStatus,
+          huntConfirmedHit: input.huntConfirmedHit,
           attachments: conversation.attachments,
           deps: {
             listRespondActions,
