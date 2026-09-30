@@ -96,6 +96,6 @@ export interface ChatMessageResponse {
   conversation_id: string;
   /** The agent's final text answer. Empty when the agent finished without a message. */
   answer: string;
-  /** HITL prompts auto-declined during the run; empty when the agent did not ask for any. */
-  declined_prompts: ChatMessageDeclinedPrompt[];
+  /** HITL prompts auto-declined during the run; omitted when the agent did not ask for any. */
+  declined_prompts?: ChatMessageDeclinedPrompt[];
 }

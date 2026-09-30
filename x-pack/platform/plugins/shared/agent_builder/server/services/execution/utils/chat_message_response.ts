@@ -32,10 +32,13 @@ export const buildChatMessageResponseFromEvents = (events: ChatEvent[]): ChatMes
     throw createInternalError('No execution_terminated event was emitted by the agent run');
   }
 
+  // `declined_prompts` only appears when there is something to report, so the common case stays
+  // a two-field body.
+  const declinedPrompts = declinedPromptsOf(events);
   return {
     conversation_id: conversationEvent.data.conversation_id,
     answer: answerOf(terminatedEvent),
-    declined_prompts: declinedPromptsOf(events),
+    ...(declinedPrompts.length > 0 ? { declined_prompts: declinedPrompts } : {}),
   };
 };
 

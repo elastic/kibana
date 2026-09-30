@@ -541,9 +541,10 @@ describe('POST /api/chat/message', () => {
     expect(executeParams.params.nextInput.attachments).toBeUndefined();
     expect(executeParams.params.nextInput.prompts).toBeUndefined();
 
-    expect(result).toEqual({
+    // No prompt was declined, so `declined_prompts` is left out rather than sent empty.
+    expect(result).toStrictEqual({
       status: 200,
-      payload: { conversation_id: 'conv-1', answer: 'Hi!', declined_prompts: [] },
+      payload: { conversation_id: 'conv-1', answer: 'Hi!' },
     });
   });
 
@@ -553,7 +554,7 @@ describe('POST /api/chat/message', () => {
       events: [declinedToolResultEvent, conversationCreatedEvent, respondedEvent('I could not.')],
     });
 
-    expect(result).toEqual({
+    expect(result).toStrictEqual({
       status: 200,
       payload: {
         conversation_id: 'conv-1',
@@ -687,12 +688,10 @@ describe('chatMessagePayloadSchema', () => {
 });
 
 describe('chatMessageResponseSchema', () => {
-  it('requires the conversation id, the answer and the declined prompts', () => {
+  it('requires the conversation id and the answer, and only accepts a non-empty declined prompts list', () => {
     const responseSchema = chatMessageResponseSchema();
 
-    expect(() =>
-      responseSchema.validate({ conversation_id: 'conv-1', answer: '', declined_prompts: [] })
-    ).not.toThrow();
+    expect(() => responseSchema.validate({ conversation_id: 'conv-1', answer: '' })).not.toThrow();
     expect(() =>
       responseSchema.validate({
         conversation_id: 'conv-1',
@@ -700,12 +699,11 @@ describe('chatMessageResponseSchema', () => {
         declined_prompts: [{ tool_id: 'tool', message: 'declined' }],
       })
     ).not.toThrow();
-    expect(() => responseSchema.validate({ conversation_id: 'conv-1', answer: 'x' })).toThrow(
-      /declined_prompts/
-    );
+    // An empty list is never sent: the field is omitted instead.
     expect(() =>
-      responseSchema.validate({ conversation_id: 'conv-1', declined_prompts: [] })
-    ).toThrow(/answer/);
+      responseSchema.validate({ conversation_id: 'conv-1', answer: 'x', declined_prompts: [] })
+    ).toThrow(/declined_prompts/);
+    expect(() => responseSchema.validate({ conversation_id: 'conv-1' })).toThrow(/answer/);
   });
 });
 

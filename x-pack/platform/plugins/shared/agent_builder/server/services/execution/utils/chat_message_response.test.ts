@@ -72,11 +72,20 @@ describe('buildChatMessageResponseFromEvents', () => {
       executionTerminated({ type: 'responded', response: { message: 'Hello there' } }),
     ]);
 
-    expect(response).toEqual({
+    expect(response).toStrictEqual({
       conversation_id: 'conv-1',
       answer: 'Hello there',
-      declined_prompts: [],
     });
+  });
+
+  it('omits declined_prompts when only non-declined tool results were emitted', () => {
+    const response = buildChatMessageResponseFromEvents([
+      toolResult('search', [plainError, otherResult]),
+      conversationCreated,
+      executionTerminated({ type: 'responded', response: { message: 'Found it' } }),
+    ]);
+
+    expect(response).not.toHaveProperty('declined_prompts');
   });
 
   it('keeps an empty answer when the agent finished without a message', () => {

@@ -99,19 +99,24 @@ export const chatMessageResponseSchema = () =>
           "The agent's final text answer. Empty when the agent finished without a message.",
       },
     }),
-    declined_prompts: schema.arrayOf(
-      schema.object({
-        tool_id: schema.string({ meta: { description: 'The tool whose call was declined.' } }),
-        message: schema.string({
-          meta: { description: 'The explanation the agent received in place of the prompt.' },
+    // Optional so the common case is a two-field body; present only when at least one prompt
+    // was declined.
+    declined_prompts: schema.maybe(
+      schema.arrayOf(
+        schema.object({
+          tool_id: schema.string({ meta: { description: 'The tool whose call was declined.' } }),
+          message: schema.string({
+            meta: { description: 'The explanation the agent received in place of the prompt.' },
+          }),
         }),
-      }),
-      {
-        meta: {
-          description:
-            'Prompts the agent raised that would have paused an interactive conversation (tool confirmations, questions to the user, destructive API approvals). This endpoint has no user to answer them, so each was declined and the agent told why; the list is empty when the agent asked for none.',
-        },
-      }
+        {
+          minSize: 1,
+          meta: {
+            description:
+              'Prompts the agent raised that would have paused an interactive conversation (tool confirmations, questions to the user, destructive API approvals). This endpoint has no user to answer them, so each was declined and the agent told why. Omitted when the agent asked for none.',
+          },
+        }
+      )
     ),
   });
 

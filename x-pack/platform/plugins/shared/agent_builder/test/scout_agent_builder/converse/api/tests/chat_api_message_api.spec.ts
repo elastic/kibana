@@ -146,11 +146,11 @@ apiTest.describe(
             const body = res.body as ChatMessageResponse;
             expect(typeof body.conversation_id).toBe('string');
             conversationIds.add(body.conversation_id);
-            // Nothing but the three documented fields: no timeline, no rounds, no events.
+            // Nothing but the two always-present fields: no timeline, no rounds, no events, and no
+            // `declined_prompts` since nothing was declined.
             expect(body).toStrictEqual({
               conversation_id: body.conversation_id,
               answer: 'Elasticsearch is a search engine.',
-              declined_prompts: [],
             });
 
             return body.conversation_id;
@@ -188,7 +188,6 @@ apiTest.describe(
           expect(res.body).toStrictEqual({
             conversation_id: conversationId,
             answer: 'Kibana is its UI.',
-            declined_prompts: [],
           });
 
           const stored = await getConversation(

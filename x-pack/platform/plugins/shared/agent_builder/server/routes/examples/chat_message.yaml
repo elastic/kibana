@@ -24,11 +24,10 @@ responses:
       application/json:
         examples:
           messageResponseExample:
-            description: "The agent's answer and the ID of the conversation it was stored in"
+            description: "The agent's answer and the ID of the conversation it was stored in. `declined_prompts` is absent because the agent asked for nothing."
             value:
               conversation_id: "696ccd6d-4bff-4b26-a62e-522ccf2dcd16"
               answer: "Elasticsearch is a distributed, RESTful search and analytics engine capable of addressing a growing number of use cases. As the heart of the Elastic Stack, it centrally stores your data for lightning fast search, fine‑tuned relevancy, and powerful analytics that scale with ease."
-              declined_prompts: []
           messageDeclinedPromptResponseExample:
             description: "The agent tried to call a tool that requires user confirmation. There is no user to ask on this endpoint, so the call was declined and the agent answered with what it could"
             value:
