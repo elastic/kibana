@@ -27,7 +27,15 @@ import {
   getAlertSeriesNotFoundMessage,
   getEpisodeNotLatestMessage,
 } from '../errors/alert_error_messages';
-import type { AlertAction } from '../../resources/datastreams/alert_actions';
+import {
+  ALERT_ACTIONS_RESOURCE_KEY,
+  type AlertActionDocument,
+} from '../../resources/datastreams/alert_actions';
+import { ALERT_EVENTS_RESOURCE_KEY } from '../../resources/datastreams/alert_events';
+import {
+  ResourceManager,
+  type ResourceManagerContract,
+} from '../services/resource_service/resource_manager';
 import { AlertActionEventPublisher } from '../events/alert_action_event_publisher/alert_action_event_publisher';
 import { type QueryServiceContract } from '../services/query_service/query_service';
 import { QueryServiceInternalToken } from '../services/query_service/tokens';
@@ -94,7 +102,7 @@ const boomToBulkActionError = (id: string, error: Boom.Boom): BulkAlertActionErr
 
 /**
  * Lifecycle actions (`activate` / `deactivate`) write a synthetic
- * `.rule-events` doc with `@timestamp: now`; applied to a superseded episode
+ * `.rule-events` doc with `@timestamp set at ingest time; applied to a superseded episode
  * that doc would make the old episode the group's latest and hijack the
  * director's group-level state machine, so they are guarded to the latest
  * episode of the series. The other episode actions are pure audit records
@@ -119,7 +127,8 @@ export class AlertActionsClient {
     @inject(Request) private readonly request: KibanaRequest,
     @inject(RequestSpaceIdToken) private readonly spaceId: string,
     @inject(AlertActionEventPublisher)
-    private readonly eventPublisher: AlertActionEventPublisher
+    private readonly eventPublisher: AlertActionEventPublisher,
+    @inject(ResourceManager) private readonly resourceManager: ResourceManagerContract
   ) {}
 
   /**
@@ -256,6 +265,12 @@ export class AlertActionsClient {
           ]
         : [{ index: ALERT_ACTIONS_DATA_STREAM, doc: alertActionDoc }]
     );
+
+    // Docs omit `@timestamp`, so the ingest pipelines must be in place before writing.
+    await Promise.all([
+      this.resourceManager.ensureResourceReady(ALERT_ACTIONS_RESOURCE_KEY),
+      this.resourceManager.ensureResourceReady(ALERT_EVENTS_RESOURCE_KEY),
+    ]);
 
     await this.storageService.bulkIndexDocsAcrossIndices({
       docs,
@@ -428,7 +443,7 @@ export class AlertActionsClient {
     alertEvent: AlertEventRecord;
     userProfileUid: string | null;
     docEpisodeId: string | null;
-  }): AlertAction {
+  }): AlertActionDocument {
     const { action, alertEvent, userProfileUid, docEpisodeId } = params;
     const actionData = omit(action, ['group_hash', 'episode_id', 'action_type']);
     const storageActionData =
@@ -437,7 +452,6 @@ export class AlertActionsClient {
         : actionData;
 
     return {
-      '@timestamp': new Date().toISOString(),
       actor: userProfileUid,
       action_type: action.action_type,
       last_series_event_timestamp: alertEvent['@timestamp'],

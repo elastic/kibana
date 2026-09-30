@@ -37,6 +37,9 @@ const toolDescription = dedent`
   )}
 `;
 
+const MULTIPLE_CONFIRMED_WARNING =
+  'More than one hypothesis is "confirmed". Report a single root cause for the triggering symptom: merge candidates that jointly produce it, or that are downstream effects of it, into one "confirmed" hypothesis, and mark candidates that do not produce it "dismissed" with a reason saying why. Send a corrected report before your final output.';
+
 export const createInvestigationProgressReportTool = ({
   logger,
   availability,
@@ -62,11 +65,16 @@ export const createInvestigationProgressReportTool = ({
     context.events.sendUiEvent(INVESTIGATION_PROGRESS_UI_EVENT, state);
     logger.debug('Reported investigation progress');
 
+    const confirmedCount = state.hypotheses.filter(({ status }) => status === 'confirmed').length;
+
     return {
       results: [
         {
           type: ToolResultType.other,
-          data: { acknowledged: true },
+          data:
+            confirmedCount > 1
+              ? { acknowledged: true, warning: MULTIPLE_CONFIRMED_WARNING }
+              : { acknowledged: true },
         },
       ],
     };

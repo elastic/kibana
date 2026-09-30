@@ -80,6 +80,15 @@ describe('AssistantBody', () => {
     expect(screen.getByTestId('comments')).toBeInTheDocument();
   });
 
+  it('allows the comments container to shrink below the width of wide comment content', () => {
+    render(
+      <TestProviders>
+        <AssistantBody {...baseProps} />
+      </TestProviders>
+    );
+    expect(screen.getByTestId('comments').closest('.euiFlexGroup')).toHaveStyle({ minWidth: '0' });
+  });
+
   it('shows owner callout when conversation is shared and user is owner', () => {
     render(
       <TestProviders>

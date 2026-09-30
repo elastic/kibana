@@ -12,6 +12,7 @@ import {
   ChatEventType,
   ConversationRoundStatus,
   ConversationRoundStepType,
+  EventActorType,
   TimelineEventType,
   ToolResultType,
 } from '@kbn/agent-builder-common';
@@ -28,6 +29,7 @@ import type { ProcessedConversation } from './prepare_conversation';
 import {
   abortedExec0Timeline,
   failedExec0Timeline,
+  processedCustomEventFixture,
   roundsOfTimeline,
   timelineFromRounds,
   type ProcessedConversationRound,
@@ -328,6 +330,11 @@ describe('compactConversation', () => {
       createMockRound('r5', 200),
     ];
     const conversation = createMockConversation(rounds);
+    rounds[0].steps.push({
+      type: ConversationRoundStepType.preExecutionWorkflow,
+      model_context: '<system_update>historical workflow context</system_update>',
+    });
+    conversation.timeline = timelineFromRounds(rounds);
 
     const budget: ContextBudget = {
       totalBudget: 500,
@@ -336,6 +343,9 @@ describe('compactConversation', () => {
     };
 
     const chatModel = createMockChatModel();
+    const preCompactionMessages = await prepareMessages({ conversation });
+    expect(JSON.stringify(preCompactionMessages)).toContain('historical workflow context');
+
     const result = await compact({
       processedConversation: conversation,
       perRoundTokenCounts: countsFor(conversation),
@@ -346,6 +356,13 @@ describe('compactConversation', () => {
 
     expect(result.compactionTriggered).toBe(true);
     expect(chatModel.withStructuredOutput).toHaveBeenCalled();
+    const structuredModel = chatModel.withStructuredOutput.mock.results[0].value;
+    expect(JSON.stringify(structuredModel.invoke.mock.calls[0][0])).not.toContain(
+      'historical workflow context'
+    );
+    expect(JSON.stringify(result.processedConversation.timeline)).not.toContain(
+      'historical workflow context'
+    );
   });
 
   it('should merge programmatic and LLM fields in the summary', async () => {
@@ -776,6 +793,107 @@ describe('compactConversation', () => {
     });
   });
 
+  describe('custom events', () => {
+    const note = (id: string, minute: number) =>
+      processedCustomEventFixture({ id, created_at: at(minute), representation: `note ${id}` });
+    const entryIds = (timeline: ProcessedTimelineEvent[]) =>
+      Array.from(new Set(timeline.map((event) => event.id.split('::')[0])));
+
+    it('drops a custom event older than the cut and keeps the newer one when summarizing', async () => {
+      // n1 sits between r1 and r2 (older than r3, the first kept round); n2 sits between r3 and r4
+      const timeline = [
+        ...timelineFromRounds([roundAt('r1', 0, 2000, 3)]),
+        note('n1', 1),
+        ...timelineFromRounds([roundAt('r2', 2, 2000, 3), roundAt('r3', 3, 200)]),
+        note('n2', 4),
+        ...timelineFromRounds([roundAt('r4', 5, 200)]),
+      ];
+      const conversation = conversationOf(timeline);
+
+      const result = await compact({
+        processedConversation: conversation,
+        perRoundTokenCounts: countsFor(conversation),
+        chatModel: createMockChatModel(),
+        contextBudget: { totalBudget: 500_000, historyBudget: 400_000, triggerThreshold: 100 },
+        logger: mockLogger,
+      });
+
+      expect(entryIds(result.processedConversation.timeline)).toEqual(['r3', 'n2', 'r4']);
+    });
+  });
+
+  describe('hard truncation', () => {
+    /** A user message that triggered no execution, sent between rounds. */
+    const standaloneMessage = (id: string, createdAt: string): ProcessedTimelineEvent =>
+      ({
+        id,
+        type: TimelineEventType.userMessage,
+        created_at: createdAt,
+        actor: { type: EventActorType.user, id: 'u1', username: 'user1' },
+        data: { message: `standalone ${id}`, attachments: [] },
+      } as unknown as ProcessedTimelineEvent);
+    const entryIds = (timeline: ProcessedTimelineEvent[]) =>
+      Array.from(new Set(timeline.map((event) => event.id.split('::')[0])));
+    const failingChatModel = () =>
+      ({
+        withStructuredOutput: jest.fn().mockReturnValue({
+          invoke: jest.fn().mockRejectedValue(new Error('llm down')),
+        }),
+      } as unknown as InferenceChatModel);
+    // Over budget even at the floor, so truncation drops every round it is allowed to.
+    const tightBudget: ContextBudget = {
+      totalBudget: 200,
+      historyBudget: 100,
+      triggerThreshold: 50,
+    };
+
+    it('keeps a standalone user message on the retained side of the cut', async () => {
+      const timeline = [
+        ...timelineFromRounds([
+          roundAt('r1', 0, 2000),
+          roundAt('r2', 1, 2000),
+          roundAt('r3', 2, 2000),
+        ]),
+        standaloneMessage('m', '2026-01-01T00:02:30.000Z'),
+        ...timelineFromRounds([roundAt('r4', 3, 2000)]),
+      ];
+      const conversation = conversationOf(timeline);
+
+      const result = await compact({
+        processedConversation: conversation,
+        perRoundTokenCounts: countsFor(conversation),
+        chatModel: failingChatModel(),
+        contextBudget: tightBudget,
+        logger: mockLogger,
+      });
+
+      expect(result.compactionTriggered).toBe(false);
+      expect(entryIds(result.processedConversation.timeline)).toEqual(['r3', 'm', 'r4']);
+    });
+
+    it('leaves the timeline untouched when no round can be dropped', async () => {
+      // Two rounds: PRESERVED_RECENT_ROUNDS keeps both, so there is nothing to truncate.
+      const timeline = [
+        ...timelineFromRounds([roundAt('r1', 0, 2000)]),
+        standaloneMessage('m', '2026-01-01T00:00:30.000Z'),
+        ...timelineFromRounds([roundAt('r2', 1, 2000)]),
+      ];
+      const conversation = conversationOf(timeline);
+
+      const result = await compact({
+        processedConversation: conversation,
+        perRoundTokenCounts: countsFor(conversation),
+        chatModel: failingChatModel(),
+        contextBudget: tightBudget,
+        logger: mockLogger,
+      });
+
+      expect(result.compactionTriggered).toBe(false);
+      expect(result.processedConversation.timeline).toBe(timeline);
+      expect(entryIds(result.processedConversation.timeline)).toEqual(['r1', 'm', 'r2']);
+    });
+  });
+
   describe('coverage', () => {
     const budget: ContextBudget = {
       totalBudget: 100_000,
@@ -988,22 +1106,19 @@ describe('compactConversation', () => {
       expect(roundIds(result.processedConversation.timeline)).toEqual(['D', 'E']);
     });
 
-    it('chunks the raw history on the estimate, each chunk building on the previous output', async () => {
-      // rounds [A, B, C, D, E] all uncovered and tiny to render; perRoundTokenCounts [3000, 3000, 3000, 1, 1],
-      // historyBudget 5000 → [A, B, C] summarised one per request (A+B = 6000 > 5000 − fixed)
+    it('chunks the rendered raw history, each chunk building on the previous output', async () => {
+      const rounds = ['A', 'B', 'C', 'D', 'E'].map((id, index) => {
+        const round = completed(id, index);
+        if (index < 3) {
+          round.input.message = `hello ${id} ${'x'.repeat(8000)}`;
+        }
+        return round;
+      });
       invoke.mockResolvedValueOnce(firstOutput);
       const result = await compactConversation({
         ...options,
-        processedConversation: conversationOf(
-          timelineFromRounds([
-            completed('A', 0),
-            completed('B', 1),
-            completed('C', 2),
-            completed('D', 3),
-            completed('E', 4),
-          ])
-        ),
-        contextBudget: { totalBudget: 6000, historyBudget: 5000, triggerThreshold: 100 },
+        processedConversation: conversationOf(timelineFromRounds(rounds)),
+        contextBudget: { totalBudget: 5000, historyBudget: 4000, triggerThreshold: 100 },
         perRoundTokenCounts: [3000, 3000, 3000, 1, 1],
       });
 
@@ -1026,6 +1141,34 @@ describe('compactConversation', () => {
         defaultLlmOutput.discussion_summary
       );
       expect(roundIds(result.processedConversation.timeline)).toEqual(['D', 'E']);
+    });
+
+    it('uses context-stripped counts to group summarizer chunks while full counts trigger compaction', async () => {
+      const rounds = ['A', 'B', 'C', 'D', 'E'].map((id, index) => {
+        const round = completed(id, index);
+        round.steps.push({
+          type: ConversationRoundStepType.preExecutionWorkflow,
+          model_context: `MODEL-CONTEXT-${id}-${'z'.repeat(40_000)}`,
+        });
+        return round;
+      });
+
+      const result = await compactConversation({
+        ...options,
+        processedConversation: conversationOf(timelineFromRounds(rounds)),
+        contextBudget: { totalBudget: 6000, historyBudget: 5000, triggerThreshold: 50_000 },
+        perRoundTokenCounts: [20_000, 20_000, 20_000, 1, 1],
+      });
+
+      expect(result.compactionTriggered).toBe(true);
+      expect(result.tokensBefore).toBe(60_002);
+      expect(invoke).toHaveBeenCalledTimes(1);
+      const text = requestText(invoke.mock.calls[0]);
+      expect(text).toContain('hello A');
+      expect(text).toContain('hello B');
+      expect(text).toContain('hello C');
+      expect(text).not.toContain('MODEL-CONTEXT-');
+      expect(requestTokens(invoke.mock.calls[0])).toBeLessThanOrEqual(5000);
     });
 
     describe('rendered-size budgeting', () => {
