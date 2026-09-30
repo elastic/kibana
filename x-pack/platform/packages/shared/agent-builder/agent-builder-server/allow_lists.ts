@@ -115,8 +115,6 @@ export const AGENT_BUILDER_BUILTIN_TOOLS = [
   // Platform – Dashboards
   'platform.dashboard.panel_to_visualization',
 
-  // Custom content panels
-
   // Platform – Context Engine
   `${internalNamespaces.platformContextEngine}.save_automation`,
   `${internalNamespaces.platformContextEngine}.run_automation`,
