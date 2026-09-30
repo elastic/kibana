@@ -60,7 +60,7 @@ export class DatastreamInitializer implements IResourceInitializer {
       },
     };
 
-    await this.resetOutdatedDataStream();
+    await this.resetOutdatedDataStream(dataStreamDefinition);
 
     try {
       await DataStreamClient.initialize({
@@ -83,10 +83,12 @@ export class DatastreamInitializer implements IResourceInitializer {
   /**
    * Deletes the data stream when it was created from an index template at or below
    * `forceReset.version`, so `DataStreamClient.initialize` recreates it from the current one.
-   * Elasticsearch copies the template `_meta` into the data stream only at creation, so a data
-   * stream recreated from an outdated template by a concurrent write is reset on the next run.
+   * Elasticsearch copies the template `_meta` into the data stream only at creation, so
+   * installing the current template does not change the outcome of this check.
    */
-  private async resetOutdatedDataStream(): Promise<void> {
+  private async resetOutdatedDataStream(
+    dataStreamDefinition: DataStreamDefinition<ResourceDefinition['mappings']>
+  ): Promise<void> {
     const { dataStreamName, forceReset, version } = this.resourceDefinition;
     if (!forceReset) {
       return;
@@ -102,6 +104,10 @@ export class DatastreamInitializer implements IResourceInitializer {
       return;
     }
 
+    // Nodes still running an outdated version keep writing, and a write after the delete
+    // recreates the data stream from whichever template is installed at that moment.
+    await this.installCurrentIndexTemplate(dataStreamDefinition);
+
     const createdFrom = createdFromVersion ?? '(unknown)';
     this.logger.warn(
       `Deleting data stream ${dataStreamName} created from index template v${createdFrom}: data streams created from v${forceReset.version} or below are recreated from v${version}. Their documents are lost.`
@@ -113,6 +119,62 @@ export class DatastreamInitializer implements IResourceInitializer {
       if (!isResponseError(error) || error.statusCode !== 404) {
         throw error;
       }
+    }
+  }
+
+  /**
+   * Installs the current index template while the outdated data stream still exists.
+   * `DataStreamClient.initializeTemplate` then applies the template mappings to the existing
+   * write index, which fails for the changes that require a reset, so the installed template
+   * version decides whether the reset can proceed.
+   */
+  private async installCurrentIndexTemplate(
+    dataStreamDefinition: DataStreamDefinition<ResourceDefinition['mappings']>
+  ): Promise<void> {
+    const { dataStreamName, version } = this.resourceDefinition;
+
+    let installError: Error | undefined;
+    try {
+      await DataStreamClient.initializeTemplate({
+        logger: this.logger,
+        dataStream: dataStreamDefinition,
+        elasticsearchClient: this.esClient,
+      });
+    } catch (error) {
+      installError = error;
+    }
+
+    const installedVersion = await this.getIndexTemplateVersion();
+    if (installedVersion === undefined || installedVersion < version) {
+      throw (
+        installError ??
+        new Error(
+          `Index template ${dataStreamName} is at v${
+            installedVersion ?? '(none)'
+          } instead of v${version}, so its data stream is not reset.`
+        )
+      );
+    }
+
+    if (installError) {
+      this.logger.debug(
+        `Index template ${dataStreamName} v${installedVersion} is installed; ignoring the failure to update the existing data stream: ${installError.message}`
+      );
+    }
+  }
+
+  private async getIndexTemplateVersion(): Promise<number | undefined> {
+    try {
+      const { index_templates: indexTemplates } = await this.esClient.indices.getIndexTemplate({
+        name: this.resourceDefinition.dataStreamName,
+      });
+      const deployedVersion = indexTemplates[0]?.index_template._meta?.version;
+      return typeof deployedVersion === 'number' ? deployedVersion : undefined;
+    } catch (error) {
+      if (isResponseError(error) && error.statusCode === 404) {
+        return undefined;
+      }
+      throw error;
     }
   }
 

@@ -182,7 +182,7 @@ Disallowed changes:
 
 ### Mapping changes that cannot be applied in place
 
-Elasticsearch cannot apply some mapping changes to existing backing indices, for example turning a concrete field into an `alias`. For those, set `forceReset: { version }` on the resource definition, where `version` is the last datastream version with the old mapping. On startup, `DatastreamInitializer` deletes a data stream created from that version or below and recreates it from the current template. All of its documents are lost.
+Elasticsearch cannot apply some mapping changes to existing backing indices, for example turning a concrete field into an `alias`. For those, set `forceReset: { version }` on the resource definition, where `version` is the last datastream version with the old mapping. On startup, `DatastreamInitializer` installs the current template, then deletes a data stream created from that version or below and recreates it. Installing the template first means that a write from a node still running the previous version recreates the data stream with the current mapping. All of its documents are lost.
 
 `.rule-events` uses `forceReset: { version: 7 }` for the `episode.*` to `alert.*` rename in v8. Keep `forceReset.version` unchanged when bumping the datastream version later.
 

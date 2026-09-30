@@ -307,8 +307,7 @@ describe('DatastreamInitializer', () => {
     const notFound = () =>
       new errors.ResponseError({ statusCode: 404, body: {} } as DiagnosticResult);
 
-    // Only the first read is mocked: it is the one done before `DataStreamClient.initialize`,
-    // which then finds no data stream and recreates it.
+    // Mocks the next data stream read only: later reads find no data stream, as after the delete.
     const mockExistingDataStream = (meta: IndicesDataStream['_meta']) => {
       esClient.indices.getDataStream.mockResolvedValueOnce({
         data_streams: [
@@ -323,6 +322,18 @@ describe('DatastreamInitializer', () => {
 
     beforeEach(() => {
       esClient.indices.deleteDataStream.mockResolvedValue({ acknowledged: true });
+      // Template reads return the last installed template, as Elasticsearch does.
+      esClient.indices.putIndexTemplate.mockImplementation(async ({ _meta }) => {
+        esClient.indices.getIndexTemplate.mockResolvedValue({
+          index_templates: [
+            {
+              name: forceResetDefinition.dataStreamName,
+              index_template: { index_patterns: [], composed_of: [], _meta },
+            },
+          ],
+        });
+        return { acknowledged: true };
+      });
     });
 
     it('does not read the data stream ahead of DataStreamClient when forceReset is not set', async () => {
@@ -356,7 +367,7 @@ describe('DatastreamInitializer', () => {
     });
 
     it.each([6, 7])(
-      'deletes a data stream created from v%i before installing the template and recreating it',
+      'installs the current template, then deletes a data stream created from v%i and recreates it',
       async (createdFromVersion) => {
         mockExistingDataStream({ version: createdFromVersion, managed: true });
 
@@ -364,16 +375,20 @@ describe('DatastreamInitializer', () => {
 
         await initializer.initialize();
 
+        expect(esClient.indices.putIndexTemplate).toHaveBeenCalledTimes(1);
+        expect(esClient.indices.putIndexTemplate).toHaveBeenCalledWith(
+          expect.objectContaining({
+            _meta: expect.objectContaining({ version: forceResetDefinition.version }),
+          })
+        );
         expect(esClient.indices.deleteDataStream).toHaveBeenCalledWith({
           name: forceResetDefinition.dataStreamName,
         });
+        const [installOrder] = esClient.indices.putIndexTemplate.mock.invocationCallOrder;
         const [deleteOrder] = esClient.indices.deleteDataStream.mock.invocationCallOrder;
-        expect(deleteOrder).toBeLessThan(
-          esClient.indices.putIndexTemplate.mock.invocationCallOrder[0]
-        );
-        expect(deleteOrder).toBeLessThan(
-          esClient.indices.createDataStream.mock.invocationCallOrder[0]
-        );
+        const [createOrder] = esClient.indices.createDataStream.mock.invocationCallOrder;
+        expect(installOrder).toBeLessThan(deleteOrder);
+        expect(deleteOrder).toBeLessThan(createOrder);
         expect(mockLogger.warn).toHaveBeenCalledWith(
           expect.stringContaining(
             `Deleting data stream ${forceResetDefinition.dataStreamName} created from index template v${createdFromVersion}`
@@ -420,7 +435,44 @@ describe('DatastreamInitializer', () => {
       });
     });
 
-    it('fails initialization without installing the template when the delete fails', async () => {
+    it('deletes the data stream when the current template mappings cannot be applied to its write index', async () => {
+      // Read by the reset check, then by DataStreamClient.initializeTemplate.
+      mockExistingDataStream({ version: 7, managed: true });
+      mockExistingDataStream({ version: 7, managed: true });
+      esClient.indices.simulateIndexTemplate.mockResolvedValue({
+        template: { aliases: {}, mappings: {}, settings: {} },
+      });
+      esClient.indices.putMapping.mockRejectedValueOnce(
+        new errors.ResponseError({ statusCode: 400, body: {} } as DiagnosticResult)
+      );
+
+      const initializer = new DatastreamInitializer(mockLogger, esClient, forceResetDefinition);
+
+      await expect(initializer.initialize()).resolves.toBeUndefined();
+      expect(esClient.indices.putMapping).toHaveBeenCalledTimes(1);
+      expect(esClient.indices.deleteDataStream).toHaveBeenCalledWith({
+        name: forceResetDefinition.dataStreamName,
+      });
+      expect(esClient.indices.createDataStream).toHaveBeenCalledWith({
+        name: forceResetDefinition.dataStreamName,
+      });
+    });
+
+    it('fails initialization without deleting the data stream when the current template is not installed', async () => {
+      mockExistingDataStream({ version: 7, managed: true });
+      esClient.indices.putIndexTemplate.mockRejectedValueOnce(
+        new errors.ResponseError({ statusCode: 500, body: {} } as DiagnosticResult)
+      );
+
+      const initializer = new DatastreamInitializer(mockLogger, esClient, forceResetDefinition);
+
+      await expect(initializer.initialize()).rejects.toMatchObject({ statusCode: 500 });
+      expect(esClient.indices.deleteDataStream).not.toHaveBeenCalled();
+      expect(esClient.indices.createDataStream).not.toHaveBeenCalled();
+      expect(mockLogger.warn).not.toHaveBeenCalled();
+    });
+
+    it('fails initialization without recreating the data stream when the delete fails', async () => {
       mockExistingDataStream({ version: 7, managed: true });
       esClient.indices.deleteDataStream.mockRejectedValueOnce(
         new errors.ResponseError({ statusCode: 500 } as DiagnosticResult)
@@ -429,7 +481,7 @@ describe('DatastreamInitializer', () => {
       const initializer = new DatastreamInitializer(mockLogger, esClient, forceResetDefinition);
 
       await expect(initializer.initialize()).rejects.toThrow();
-      expect(esClient.indices.putIndexTemplate).not.toHaveBeenCalled();
+      expect(esClient.indices.createDataStream).not.toHaveBeenCalled();
     });
 
     it('fails initialization without deleting anything when reading the data stream fails', async () => {

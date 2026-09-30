@@ -206,6 +206,35 @@ describe('DatastreamInitializer forceReset (integration)', () => {
     expect(logger.warn).not.toHaveBeenCalled();
   });
 
+  it('recreates the data stream from the current template when a v7 node writes right after the delete', async () => {
+    await seedV7DataStream();
+
+    const esClient = esServer.getClient();
+    const { indices } = esClient;
+    const deleteDataStream = indices.deleteDataStream.bind(indices);
+    let gapWriteError: unknown;
+    jest.spyOn(indices, 'deleteDataStream').mockImplementationOnce(async (params) => {
+      const response = await deleteDataStream(params);
+      // A node still on v7 writes before this node recreates the data stream, so
+      // Elasticsearch recreates it from the index template installed at that moment.
+      gapWriteError = await writeDocument('v7-gap-doc', {
+        episode: { id: 'episode-2', status: 'active' },
+        space_id: 'default',
+      }).then(
+        () => undefined,
+        (error: unknown) => error
+      );
+      return response;
+    });
+
+    await new DatastreamInitializer(logger, esClient, currentDefinition).initialize();
+
+    expect(gapWriteError).toMatchObject({ message: expect.stringMatching(/field alias/) });
+    expect(await countDocuments()).toBe(0);
+    expect(await getDataStreamVersion()).toBe(currentDefinition.version);
+    await expectCurrentMapping();
+  });
+
   it('resets a data stream created from v7 after the current index template was installed', async () => {
     await seedV7DataStream();
 
