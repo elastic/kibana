@@ -111,6 +111,7 @@ export const connectorAttachmentDataSchema = z.object({
   connector_id: z.string(),
   connector_name: z.string(),
   connector_type: z.string(),
+  connector_description: z.string().optional(),
 });
 
 /**
@@ -123,6 +124,8 @@ export interface ConnectorAttachmentData {
   connector_name: string;
   /** Action type ID (e.g., ".slack2", ".mcp") */
   connector_type: string;
+  /** User-provided description of what this connector is for and when to use it */
+  connector_description?: string;
 }
 
 export type AttachmentDataOf<Type extends AttachmentType> = AttachmentDataMap[Type];

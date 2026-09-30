@@ -485,6 +485,66 @@ describe('create()', () => {
       );
     });
 
+    test('stores and returns the description when provided', async () => {
+      unsecuredSavedObjectsClient.create.mockResolvedValueOnce({
+        id: '1',
+        type: 'action',
+        attributes: {
+          name: 'my name',
+          description: 'Use for production alerts.',
+          actionTypeId: 'my-connector-type',
+          isMissingSecrets: false,
+          config: {},
+        },
+        references: [],
+      });
+
+      const result = await create({
+        context: mockContext,
+        action: {
+          name: 'my name',
+          description: 'Use for production alerts.',
+          actionTypeId: 'my-connector-type',
+          config: {},
+          secrets: {},
+        },
+      });
+
+      expect(result.description).toBe('Use for production alerts.');
+      expect(unsecuredSavedObjectsClient.create).toHaveBeenCalledWith(
+        'action',
+        expect.objectContaining({ description: 'Use for production alerts.' }),
+        { id: 'mock-saved-object-id' }
+      );
+    });
+
+    test('does not store an empty description', async () => {
+      unsecuredSavedObjectsClient.create.mockResolvedValueOnce({
+        id: '1',
+        type: 'action',
+        attributes: {
+          name: 'my name',
+          actionTypeId: 'my-connector-type',
+          isMissingSecrets: false,
+          config: {},
+        },
+        references: [],
+      });
+
+      await create({
+        context: mockContext,
+        action: {
+          name: 'my name',
+          description: '',
+          actionTypeId: 'my-connector-type',
+          config: {},
+          secrets: {},
+        },
+      });
+
+      expect(unsecuredSavedObjectsClient.create.mock.calls[0][1]).not.toHaveProperty('description');
+    });
+
     test('creates an action with a custom ID when provided', async () => {
       const savedObjectCreateResult = {
         id: 'custom-id',

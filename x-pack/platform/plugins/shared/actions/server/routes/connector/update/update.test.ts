@@ -306,6 +306,53 @@ describe('updateConnectorRoute', () => {
     );
   });
 
+  it('forwards the description and returns it in the response', async () => {
+    const licenseState = licenseStateMock.create();
+    const router = httpServiceMock.createRouter();
+    updateConnectorRoute(router, licenseState, actionsConfigUtils());
+    const [, handler] = router.put.mock.calls[0];
+
+    const actionsClient = actionsClientMock.create();
+    actionsClient.update.mockResolvedValueOnce(
+      createMockConnector({
+        id: '1',
+        actionTypeId: 'my-action-type-id',
+        name: 'My name',
+        description: 'Use for prod alerts.',
+      })
+    );
+
+    const [context, req, res] = mockHandlerArguments(
+      { actionsClient },
+      {
+        params: { id: '1' },
+        body: { name: 'My name', description: 'Use for prod alerts.', config: {}, secrets: {} },
+      },
+      ['ok']
+    );
+
+    await handler(context, req, res);
+
+    expect(actionsClient.update).toHaveBeenCalledWith({
+      id: '1',
+      action: { name: 'My name', description: 'Use for prod alerts.', config: {}, secrets: {} },
+    });
+    expect(res.ok).toHaveBeenCalledWith({
+      body: expect.objectContaining({ description: 'Use for prod alerts.' }),
+    });
+  });
+
+  test('rejects a description past the max length', () => {
+    expect(() =>
+      updateConnectorBodySchema.validate({
+        name: 'ok',
+        description: 'a'.repeat(4097),
+        config: {},
+        secrets: {},
+      })
+    ).toThrow(/maximum length/);
+  });
+
   it('rejects update when OAuth URLs fail allowedHosts validation (validation error)', async () => {
     const licenseState = licenseStateMock.create();
     const router = httpServiceMock.createRouter();

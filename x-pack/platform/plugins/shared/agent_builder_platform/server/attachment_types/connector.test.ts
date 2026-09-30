@@ -142,6 +142,24 @@ describe('connector attachment type', () => {
         expect(representation.value).toContain('"connectorId":"connector-123"');
       });
 
+      it('includes the user-provided connector description when present', () => {
+        getConnectorSpecMock.mockReturnValue(undefined);
+
+        const attachment = createAttachment({
+          ...validData,
+          connector_description: 'Use for the elastic/kibana repository.',
+        });
+        const formatted = connectorType.format(
+          attachment,
+          formatContext
+        ) as AgentFormattedAttachment;
+        const representation = formatted.getRepresentation!() as { value: string };
+
+        expect(representation.value).toContain(
+          'When to use this connector: Use for the elastic/kibana repository.'
+        );
+      });
+
       it('lists sub-actions from ConnectorSpec when available', () => {
         const inputSchema = z.object({
           query: z.string().describe('Search query'),

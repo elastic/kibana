@@ -58,6 +58,7 @@ export const prefetchConnectors = async ({
       summaries.push({
         id: instance.id,
         name: instance.name,
+        ...(instance.description ? { description: instance.description } : {}),
         actionTypeId,
         stepTypes,
       });

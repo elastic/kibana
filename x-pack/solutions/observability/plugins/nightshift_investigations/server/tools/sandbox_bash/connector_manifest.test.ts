@@ -131,6 +131,18 @@ describe('writeConnectorManifest', () => {
       expect(content).toContain('## My GitHub (connector-id: connector-1, type: .github)');
     });
 
+    it('renders the connector description below the heading', async () => {
+      const { content } = await renderManifest({
+        connectors: [
+          createRawConnector({ description: 'Use this for the elastic/kibana repository.' }),
+        ],
+      });
+
+      expect(content).toContain(
+        '## My GitHub (connector-id: connector-1, type: .github)\n\nUse this for the elastic/kibana repository.'
+      );
+    });
+
     it('renders every allow-listed connector', async () => {
       const { content } = await renderManifest({
         allowedConnectorIds: ['connector-1', 'connector-2'],

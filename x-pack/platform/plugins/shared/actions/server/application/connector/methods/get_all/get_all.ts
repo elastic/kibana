@@ -138,6 +138,7 @@ async function getAllHelper({
         id: connector.id,
         actionTypeId: connector.actionTypeId,
         name: connector.name,
+        ...(connector.description ? { description: connector.description } : {}),
         isPreconfigured: connector.isPreconfigured,
         isDeprecated: isConnectorDeprecated(connector),
         isSystemAction: connector.isSystemAction,

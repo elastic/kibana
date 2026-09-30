@@ -17,6 +17,7 @@ export const transformGetAllConnectorsResponse = (
     ({
       id,
       name,
+      description,
       config,
       actionTypeId,
       isPreconfigured,
@@ -30,6 +31,7 @@ export const transformGetAllConnectorsResponse = (
     }) => ({
       id,
       name,
+      ...(description !== undefined ? { description } : {}),
       config: omitIngestTokenHashFromConfig(config),
       connector_type_id: actionTypeId,
       is_preconfigured: isPreconfigured,

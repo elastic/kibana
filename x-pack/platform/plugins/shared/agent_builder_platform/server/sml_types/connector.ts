@@ -65,7 +65,11 @@ export const createConnectorSmlType = (deps: ConnectorSmlTypeDeps): SmlTypeDefin
     getSmlEntry: async (originId, context) => {
       try {
         const so = await context.savedObjectsClient.get('action', originId);
-        const attrs = so.attributes as { name?: string; actionTypeId?: string };
+        const attrs = so.attributes as {
+          name?: string;
+          actionTypeId?: string;
+          description?: string;
+        };
         const name = attrs.name ?? originId;
         const actionTypeId = attrs.actionTypeId ?? '';
 
@@ -81,7 +85,11 @@ export const createConnectorSmlType = (deps: ConnectorSmlTypeDeps): SmlTypeDefin
           : [];
 
         const contentParts = [
-          ...new Set([name, displayName, description, ...subActionDescriptions].filter(Boolean)),
+          ...new Set(
+            [name, attrs.description, displayName, description, ...subActionDescriptions].filter(
+              Boolean
+            )
+          ),
         ];
 
         return {
@@ -106,7 +114,11 @@ export const createConnectorSmlType = (deps: ConnectorSmlTypeDeps): SmlTypeDefin
       try {
         const soClient = await getActionSavedObjectsClient(context.request);
         const so = await soClient.get('action', originId);
-        const attrs = so.attributes as { name?: string; actionTypeId?: string };
+        const attrs = so.attributes as {
+          name?: string;
+          actionTypeId?: string;
+          description?: string;
+        };
         const connectorName = attrs.name ?? originId;
         const connectorType = attrs.actionTypeId ?? '';
 
@@ -114,6 +126,7 @@ export const createConnectorSmlType = (deps: ConnectorSmlTypeDeps): SmlTypeDefin
           connector_id: originId,
           connector_name: connectorName,
           connector_type: connectorType,
+          ...(attrs.description ? { connector_description: attrs.description } : {}),
         };
 
         return {

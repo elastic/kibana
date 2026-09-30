@@ -278,6 +278,34 @@ describe('connectorSmlType', () => {
       expect(result).not.toHaveProperty('permissions');
     });
 
+    it('includes the user-provided connector description in content', async () => {
+      mockSavedObjectsClient.get.mockResolvedValue({
+        id: 'conn-1',
+        type: 'action',
+        attributes: {
+          name: 'My MCP Connector',
+          actionTypeId: '.mcp',
+          description: 'Use for the production observability cluster.',
+        },
+        references: [],
+      });
+
+      getConnectorSpec.mockReturnValue({
+        metadata: {
+          id: '.mcp',
+          displayName: 'MCP',
+          description: 'Model Context Protocol connector',
+        },
+        actions: {},
+      });
+
+      const result = await connectorSmlType.getSmlEntry!('conn-1', createContext() as never);
+
+      expect(result?.content).toBe(
+        'My MCP Connector\nUse for the production observability cluster.\nMCP\nModel Context Protocol connector'
+      );
+    });
+
     it('returns undefined on error and logs warning', async () => {
       mockSavedObjectsClient.get.mockRejectedValue(new Error('Not found'));
       const context = createContext();
@@ -403,6 +431,31 @@ describe('connectorSmlType', () => {
           connector_name: 'My MCP Connector',
           connector_type: '.mcp',
         },
+      });
+    });
+
+    it('includes the user-provided connector description in the attachment data', async () => {
+      mockSavedObjectsClient.get.mockResolvedValue({
+        id: 'conn-1',
+        type: 'action',
+        attributes: {
+          name: 'My MCP Connector',
+          actionTypeId: '.mcp',
+          description: 'Use for the production observability cluster.',
+        },
+        references: [],
+      });
+
+      const result = await connectorSmlType.toAttachment!(
+        { references: [{ uri: 'connector://conn-1', relation: 'derived_from' }] } as never,
+        createAttachmentContext() as never
+      );
+
+      expect(result?.data).toEqual({
+        connector_id: 'conn-1',
+        connector_name: 'My MCP Connector',
+        connector_type: '.mcp',
+        connector_description: 'Use for the production observability cluster.',
       });
     });
 

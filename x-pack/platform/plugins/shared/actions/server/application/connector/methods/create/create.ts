@@ -37,6 +37,7 @@ export async function create({
   action: {
     actionTypeId,
     name,
+    description,
     config,
     secrets,
     isInboundEventsEnabled: requestedInboundEventsEnabled,
@@ -179,6 +180,7 @@ export async function create({
         {
           actionTypeId,
           name,
+          ...(description ? { description } : {}),
           isMissingSecrets: false,
           config: configForSave,
           secrets: validatedActionTypeSecrets,
@@ -250,6 +252,7 @@ export async function create({
     actionTypeId: result.attributes.actionTypeId,
     isMissingSecrets: result.attributes.isMissingSecrets,
     name: result.attributes.name,
+    ...(result.attributes.description ? { description: result.attributes.description } : {}),
     config: result.attributes.config,
     isPreconfigured: false,
     isSystemAction: false,

@@ -204,6 +204,68 @@ describe('update()', () => {
     });
   });
 
+  describe('description', () => {
+    const getSavedAttributes = () =>
+      unsecuredSavedObjectsClient.create.mock.calls[0][1] as Record<string, unknown>;
+
+    test('keeps the stored description when it is omitted', async () => {
+      unsecuredSavedObjectsClient.get.mockResolvedValueOnce(
+        makeSavedObjectResult({ description: 'stored description' })
+      );
+      unsecuredSavedObjectsClient.create.mockResolvedValueOnce(
+        makeSavedObjectResult({ description: 'stored description' })
+      );
+
+      const result = await update({
+        context: mockContext,
+        id: '1',
+        action: { name: 'Test Connector', config: {}, secrets: {} },
+      });
+
+      expect(getSavedAttributes().description).toBe('stored description');
+      expect(result.description).toBe('stored description');
+    });
+
+    test('replaces the stored description when a new one is provided', async () => {
+      unsecuredSavedObjectsClient.get.mockResolvedValueOnce(
+        makeSavedObjectResult({ description: 'stored description' })
+      );
+      unsecuredSavedObjectsClient.create.mockResolvedValueOnce(
+        makeSavedObjectResult({ description: 'new description' })
+      );
+
+      const result = await update({
+        context: mockContext,
+        id: '1',
+        action: {
+          name: 'Test Connector',
+          description: 'new description',
+          config: {},
+          secrets: {},
+        },
+      });
+
+      expect(getSavedAttributes().description).toBe('new description');
+      expect(result.description).toBe('new description');
+    });
+
+    test('clears the stored description when an empty string is provided', async () => {
+      unsecuredSavedObjectsClient.get.mockResolvedValueOnce(
+        makeSavedObjectResult({ description: 'stored description' })
+      );
+      unsecuredSavedObjectsClient.create.mockResolvedValueOnce(makeSavedObjectResult({}));
+
+      const result = await update({
+        context: mockContext,
+        id: '1',
+        action: { name: 'Test Connector', description: '', config: {}, secrets: {} },
+      });
+
+      expect(getSavedAttributes()).not.toHaveProperty('description');
+      expect(result).not.toHaveProperty('description');
+    });
+  });
+
   describe('authType change restrictions', () => {
     test('rejects changing a per-user connector authType', async () => {
       const soResult = makeSavedObjectResult({

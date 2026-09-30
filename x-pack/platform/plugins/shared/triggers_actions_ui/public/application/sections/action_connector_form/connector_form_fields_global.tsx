@@ -17,7 +17,13 @@ import {
   useFormData,
 } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import { fieldValidators } from '@kbn/es-ui-shared-plugin/static/forms/helpers';
-import { Field, HiddenField } from '@kbn/es-ui-shared-plugin/static/forms/components';
+import {
+  Field,
+  HiddenField,
+  TextAreaField,
+} from '@kbn/es-ui-shared-plugin/static/forms/components';
+import { EuiText } from '@elastic/eui';
+import { CONNECTOR_DESCRIPTION_MAX_LENGTH } from '@kbn/actions-plugin/common';
 import { i18n } from '@kbn/i18n';
 import { isHttpFetchError } from '@kbn/core-http-browser';
 import { toSlugIdentifier } from '@kbn/std';
@@ -28,6 +34,7 @@ import { checkConnectorIdAvailability } from '../../lib/action_connector_api';
 interface ConnectorFormData {
   name: string;
   id: string;
+  description?: string;
 }
 
 interface ConnectorFormFieldsProps {
@@ -110,6 +117,44 @@ const nameConfig: FieldConfig<{ name: string }, ConnectorFormData> = {
     },
   ],
 };
+
+const descriptionConfig: FieldConfig<string, ConnectorFormData> = {
+  label: i18n.translate(
+    'xpack.triggersActionsUI.sections.actionConnectorForm.descriptionFieldLabel',
+    {
+      defaultMessage: 'Description',
+    }
+  ),
+  helpText: i18n.translate(
+    'xpack.triggersActionsUI.sections.actionConnectorForm.descriptionFieldHelpText',
+    {
+      defaultMessage:
+        'Describe what this connector is for and when to use it. AI agents also read this description to decide which connector to use.',
+    }
+  ),
+  defaultValue: '',
+  validations: [
+    {
+      validator: maxLengthField({
+        length: CONNECTOR_DESCRIPTION_MAX_LENGTH,
+        message: i18n.translate(
+          'xpack.triggersActionsUI.sections.actionConnectorForm.error.descriptionTooLong',
+          {
+            defaultMessage: 'Description must be {maxLength} characters or less.',
+            values: { maxLength: CONNECTOR_DESCRIPTION_MAX_LENGTH },
+          }
+        ),
+      }),
+    },
+  ],
+};
+
+const DESCRIPTION_OPTIONAL_LABEL = i18n.translate(
+  'xpack.triggersActionsUI.sections.actionConnectorForm.descriptionFieldOptionalLabel',
+  {
+    defaultMessage: 'Optional',
+  }
+);
 
 const createIdConfig = (
   isEdit: boolean,
@@ -242,6 +287,24 @@ const ConnectorFormFieldsGlobalComponent: React.FC<ConnectorFormFieldsProps> = (
             'data-test-subj': 'connectorIdInput',
             fullWidth: true,
             onChange: handleIdChange,
+          },
+        }}
+      />
+      <UseField
+        path="description"
+        config={descriptionConfig}
+        component={TextAreaField}
+        componentProps={{
+          labelAppend: (
+            <EuiText size="xs" color="subdued">
+              {DESCRIPTION_OPTIONAL_LABEL}
+            </EuiText>
+          ),
+          euiFieldProps: {
+            readOnly: !canSave,
+            'data-test-subj': 'connectorDescriptionInput',
+            fullWidth: true,
+            rows: 3,
           },
         }}
       />

@@ -64,6 +64,7 @@ export const updateConnectorRoute = (
           const { id }: UpdateConnectorParamsV1 = req.params;
           const {
             name,
+            description,
             config,
             secrets,
             is_inbound_events_enabled: isInboundEventsEnabled,
@@ -75,6 +76,7 @@ export const updateConnectorRoute = (
                 id,
                 action: {
                   name,
+                  ...(description !== undefined ? { description } : {}),
                   config,
                   secrets,
                   ...(isInboundEventsEnabled !== undefined ? { isInboundEventsEnabled } : {}),

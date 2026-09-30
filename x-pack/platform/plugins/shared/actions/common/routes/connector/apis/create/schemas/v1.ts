@@ -11,6 +11,7 @@ import { validateEmptyStrings } from '../../../../../validate_empty_strings';
 import { validateConnectorId } from '../../../../../validate_connector_id';
 import {
   CONNECTOR_CONFIG_KEY_MAX_LENGTH,
+  CONNECTOR_DESCRIPTION_MAX_LENGTH,
   CONNECTOR_ID_MAX_LENGTH,
   CONNECTOR_NAME_MAX_LENGTH,
 } from '../../../../..';
@@ -34,6 +35,15 @@ const createConnectorRequestBodyFields = {
     validate: validateEmptyStrings,
     meta: { description: 'The display name for the connector.' },
   }),
+  description: schema.maybe(
+    schema.string({
+      maxLength: CONNECTOR_DESCRIPTION_MAX_LENGTH,
+      meta: {
+        description:
+          'A description of the connector, such as what it is used for and when to use it. It is shown to users and to AI agents.',
+      },
+    })
+  ),
   connector_type_id: schema.string({
     maxLength: MAX_CONNECTOR_TYPE_ID_LENGTH,
     validate: validateEmptyStrings,

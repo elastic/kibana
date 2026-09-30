@@ -414,10 +414,11 @@ export const EditConnectorFlyoutContent: React.FC<EditConnectorFlyoutContentProp
        * At this point the form is valid
        * and there are no pre submit error messages.
        */
-      const { name, config, secrets, isInboundEventsEnabled } = data;
+      const { name, description, config, secrets, isInboundEventsEnabled } = data;
       const validConnector = {
         id: connector.id,
         name: name ?? '',
+        description: description ?? '',
         config: config ?? {},
         secrets: secrets ?? {},
         ...isInboundEventsEnabledPayload(

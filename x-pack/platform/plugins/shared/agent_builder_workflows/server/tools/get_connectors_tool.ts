@@ -33,7 +33,7 @@ export function registerGetConnectorsTool(
 **When NOT to use:** To discover step types and their schemas (use get_step_definitions instead).
 
 Returns:
-- \`connectors\`: instances with their ID, name, and \`actionTypeId\` (Kibana action type ID, e.g. ".slack")
+- \`connectors\`: instances with their ID, name, \`actionTypeId\` (Kibana action type ID, e.g. ".slack"), and an optional user-provided \`description\` explaining what the connector is for and when to use it
 - \`stepTypesByActionType\`: a map from \`actionTypeId\` to the workflow step types it supports (e.g. \`{".inference": ["inference.completion", "inference.rerank"]}\`). Look up a connector's supported step types via its \`actionTypeId\`.
 
 The connector \`id\` is what you put in the \`connector-id\` field of a workflow step.`,
@@ -46,7 +46,10 @@ The connector \`id\` is what you put in the \`connector-id\` field of a workflow
         .string()
         .optional()
         .describe('Filter by workflow step type (e.g., "slack", "jira", "inference.completion")'),
-      search: z.string().optional().describe('Search term to match against connector names'),
+      search: z
+        .string()
+        .optional()
+        .describe('Search term to match against connector names and descriptions'),
     }),
     tags: ['workflows', 'connectors'],
     handler: async ({ actionTypeId, stepType, search }, { spaceId, request }) => {
@@ -72,10 +75,11 @@ The connector \`id\` is what you put in the \`connector-id\` field of a workflow
 
         stepTypesByActionType[type] = stepTypesForType;
 
-        return (typeInfo.instances ?? []).map((instance) => ({
-          id: instance.id,
-          name: instance.name,
+        return (typeInfo.instances ?? []).map(({ id, name, description }) => ({
+          id,
+          name,
           actionTypeId: type,
+          ...(description ? { description } : {}),
         }));
       });
 
@@ -90,6 +94,7 @@ The connector \`id\` is what you put in the \`connector-id\` field of a workflow
         connectors = connectors.filter(
           (c) =>
             c.name.toLowerCase().includes(term) ||
+            c.description?.toLowerCase().includes(term) ||
             c.actionTypeId.toLowerCase().includes(term) ||
             stepTypesByActionType[c.actionTypeId]?.some((st) => st.toLowerCase().includes(term))
         );

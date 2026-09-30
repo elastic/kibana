@@ -11,12 +11,14 @@ import type { CreateConnectorRequestBodyV1 } from '../../../../../../common/rout
 export const transformCreateConnectorBody = ({
   connector_type_id: actionTypeId,
   name,
+  description,
   config,
   secrets,
   is_inbound_events_enabled: isInboundEventsEnabled,
 }: CreateConnectorRequestBodyV1): ConnectorCreateParams['action'] => ({
   actionTypeId,
   name,
+  ...(description ? { description } : {}),
   config,
   secrets,
   ...(isInboundEventsEnabled !== undefined ? { isInboundEventsEnabled } : {}),

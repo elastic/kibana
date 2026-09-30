@@ -11,8 +11,15 @@ import type { AgentConnector, ActionsClient } from './agent_connectors';
 import { listAgentConnectors } from './agent_connectors';
 import type { SandboxCallContext } from './tool_utils';
 
-const renderConnectorSection = (connector: AgentConnector): string =>
-  `## ${connector.name} (connector-id: ${connector.id}, type: ${connector.actionTypeId})`;
+const renderConnectorSection = ({
+  id,
+  name,
+  actionTypeId,
+  description,
+}: AgentConnector): string => {
+  const heading = `## ${name} (connector-id: ${id}, type: ${actionTypeId})`;
+  return description ? `${heading}\n\n${description.trim()}` : heading;
+};
 
 const renderSecretsSections = (secretKeys: readonly string[]): string[] => {
   const sections = [
