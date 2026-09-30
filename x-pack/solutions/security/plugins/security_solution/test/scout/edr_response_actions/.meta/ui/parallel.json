@@ -60,6 +60,22 @@
         "line": 47,
         "column": 7
       }
+    },
+    {
+      "id": "2b4b7976e269899-f99c42e68a5845b",
+      "title": "SentinelOne isolate/release from alert flyout isolates and releases a SentinelOne host from the alert flyout",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout/edr_response_actions/ui/parallel_tests/sentinelone_isolate.spec.ts",
+        "line": 97,
+        "column": 47
+      }
     }
   ]
 }
