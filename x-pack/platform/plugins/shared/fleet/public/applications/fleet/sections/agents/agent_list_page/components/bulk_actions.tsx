@@ -437,6 +437,7 @@ export const AgentBulkActions: React.FunctionComponent<Props> = ({
     isTagAddVisible,
     agents,
     exportMenuItem,
+    isRestartAgentActionEnabled,
   ]);
 
   const getSelectedTagsFromAgents = useMemo(

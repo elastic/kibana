@@ -86,6 +86,9 @@ describe('AgentBulkActions', () => {
         isServerlessEnabled,
       },
       reporting: {},
+      featureFlags: {
+        useBooleanValue: jest.fn().mockReturnValue(true),
+      },
     });
   };
 
