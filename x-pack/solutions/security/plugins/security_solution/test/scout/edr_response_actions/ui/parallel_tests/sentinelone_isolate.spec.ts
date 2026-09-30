@@ -33,11 +33,14 @@ spaceTest.describe(
     // The detection engine runs on a schedule; give the alert time to fire before we assert on it.
     spaceTest.setTimeout(5 * 60_000);
 
-    spaceTest.beforeEach(async ({ apiServices, esClient, scoutSpace }) => {
-      // The alert flyout + take-action menu are Security-solution surfaces; a freshly-provisioned
-      // space defaults to the "classic" view. Deployment tags do not configure the solution view,
-      // so we set it explicitly here (per the security-scout-best-practices skill).
-      await scoutSpace.setSolutionView('security');
+    spaceTest.beforeEach(async ({ apiServices, config, esClient, scoutSpace }) => {
+      // The alert flyout + take-action menu are Security-solution surfaces. In ESS the space
+      // defaults to the "classic" view, so we set it explicitly; in Serverless the view is fixed
+      // by the project type and the endpoint returns 400 when `xpack.spaces.allowSolutionVisibility`
+      // is disabled, so we skip the call there.
+      if (!config.serverless) {
+        await scoutSpace.setSolutionView('security');
+      }
 
       const idSegment = scoutSpace.id.replace(/[^a-z0-9]/gi, '_').toLowerCase();
       sourceIndex = `${SOURCE_INDEX_PREFIX}-${idSegment}`;
