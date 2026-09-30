@@ -7,7 +7,6 @@
 
 import { EuiProvider } from '@elastic/eui';
 import { MockAppHeaderProvider } from '@kbn/app-header/mocks';
-import type { CoreStart } from '@kbn/core/public';
 import { coreMock, scopedHistoryMock } from '@kbn/core/public/mocks';
 import { contentListQueryClient } from '@kbn/content-list-provider';
 import { createAppChromeMock } from './test_utils/app_chrome_mock';
@@ -72,9 +71,9 @@ const mockContextEngineHttpGet = (
   });
 };
 
-const renderWithProviders = (core: CoreStart) =>
+const renderWithProviders = (core: ReturnType<typeof createCore>) =>
   render(
-    <MockAppHeaderProvider chrome={core.chrome}>
+    <MockAppHeaderProvider>
       <I18nProvider>
         <EuiProvider>
           <KibanaContextProvider

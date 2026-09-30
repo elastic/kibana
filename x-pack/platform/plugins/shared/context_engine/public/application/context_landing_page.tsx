@@ -78,6 +78,7 @@ const ContextLandingPageContent = ({
         testId: 'contextCreateAiIndexButton',
         ebt: {
           action: CONTEXT_ENGINE_UI_EBT.action.aiIndexList.CREATE,
+          detail: CONTEXT_ENGINE_UI_EBT.element.aiIndexListPage,
         },
       },
     };
