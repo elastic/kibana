@@ -112,7 +112,9 @@ describe('createFormulaColumn', () => {
     if (expected === null) {
       expect(createFormulaColumn(...input)).toBeNull();
     } else if (Array.isArray(expected)) {
-      expect(createFormulaColumn(...input)).toEqual(expected.map((item) => expect.objectContaining(item)));
+      expect(createFormulaColumn(...input)).toEqual(
+        expected.map((item) => expect.objectContaining(item))
+      );
     } else {
       expect(createFormulaColumn(...input)).toEqual(expect.objectContaining(expected));
     }
@@ -295,7 +297,9 @@ describe('convertMathToFormulaColumn', () => {
     if (expected === null) {
       expect(convertMathToFormulaColumn(...input)).toBeNull();
     } else if (Array.isArray(expected)) {
-      expect(convertMathToFormulaColumn(...input)).toEqual(expected.map((item) => expect.objectContaining(item)));
+      expect(convertMathToFormulaColumn(...input)).toEqual(
+        expected.map((item) => expect.objectContaining(item))
+      );
     } else {
       expect(convertMathToFormulaColumn(...input)).toEqual(expect.objectContaining(expected));
     }
