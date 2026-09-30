@@ -23,7 +23,7 @@ const aiIndex: AiIndexHttpItem = {
   description: 'Support KIs',
   dest: { type: 'index', value: 'ai-index-idx-support*' },
   managed: false,
-  memory_enabled: true,
+  memory_enabled: false,
   automations: [],
   sources: [],
   traces: [],
@@ -40,7 +40,11 @@ const fields = [
 
 const exampleQueriesBlock = [
   'Example queries (adapt field names for non-canonical indices)',
-  ...buildExampleQueries(aiIndex.dest).flatMap(({ title, esql }) => ['', title, esql]),
+  ...buildExampleQueries(aiIndex.dest, { excludeMemory: true }).flatMap(({ title, esql }) => [
+    '',
+    title,
+    esql,
+  ]),
 ].join('\n');
 
 describe('describeAiIndex', () => {
@@ -80,9 +84,9 @@ describe('describeAiIndex', () => {
     });
     expect(response).toBe(
       [
-        'AI index: support',
+        'AI-index registry ID: support',
         'Support KIs',
-        'Query with ES|QL against: ai-index-idx-support*',
+        'Backing Elasticsearch target (use only in ES|QL queries): ai-index-idx-support*',
         '',
         'Fields',
         'content.semantic: semantic_text, searchable',
@@ -111,8 +115,8 @@ describe('describeAiIndex', () => {
     const response = await describeAiIndex({ ...params, aiIndex: withoutDescription });
 
     expect(response.split('\n').slice(0, 2)).toEqual([
-      'AI index: support',
-      'Query with ES|QL against: ai-index-idx-support*',
+      'AI-index registry ID: support',
+      'Backing Elasticsearch target (use only in ES|QL queries): ai-index-idx-support*',
     ]);
   });
 
@@ -163,5 +167,54 @@ describe('describeAiIndex', () => {
     expect(response).not.toContain('Knowledge item types');
     expect(response).not.toContain('\nTags\n');
     expect(response.endsWith(exampleQueriesBlock)).toBe(true);
+  });
+
+  it('renders memory capability without treating document counts as logical memory counts', async () => {
+    describeAiIndexAggregationsMock.mockResolvedValue({
+      kiTypeCounts: [
+        { type: 'memory.session', count: 2 },
+        { type: 'memory.session_fact', count: 7 },
+        { type: 'document', count: 3 },
+      ],
+      tagCounts: [],
+    });
+
+    const response = await describeAiIndex({
+      ...params,
+      aiIndex: { ...aiIndex, memory_enabled: true },
+    });
+
+    expect(response).toContain('\nMemory\nMemory writes are enabled');
+    expect(response).toContain('\nKnowledge item types\n"document": 3\n');
+    expect(response).not.toContain('"memory.session": 2');
+    expect(response).not.toContain('"memory.session_fact": 7');
+    expect(response).toContain(
+      '| WHERE type IS NULL OR (type != "memory.session" AND type != "memory.session_fact")'
+    );
+    expect(response).toContain(
+      [
+        'For cross-session recall, search granular facts with hybrid retrieval:',
+        'FROM ai-index-idx-support* METADATA _id, _index, _score',
+        '| WHERE type == "memory.session_fact"',
+        '| INLINE STATS latest_at = MAX(@timestamp) BY id',
+        '| WHERE @timestamp == latest_at',
+        '  AND (governance.lifecycle.status IS NULL OR governance.lifecycle.status != "deleted")',
+        '  AND (expires_at IS NULL OR expires_at > NOW())',
+        '| FORK',
+      ].join('\n')
+    );
+    expect(response).toContain('| FUSE\n| SORT _score DESC, _id ASC');
+    expect(response).not.toContain('For recall from the current Agent Builder conversation:');
+    expect(response).toContain('references.uri, references.relation, references.description');
+    expect(response).toContain(
+      'Select the latest revision before filtering deleted or expired memories'
+    );
+  });
+
+  it('omits memory capability when memory writes are disabled', async () => {
+    const response = await describeAiIndex(params);
+
+    expect(response).not.toContain('\nMemory\n');
+    expect(response).not.toContain('platform.context_engine.remember');
   });
 });

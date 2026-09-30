@@ -62,6 +62,13 @@ const KI_DOCS = {
     tags: ['errors'],
     expires_at: '2000-01-01T00:00:00Z',
   },
+  memory: {
+    type: 'memory.session_fact',
+    title: 'Remembered billing detail',
+    description: 'A memory that ordinary KI counts and queries must exclude',
+    content: 'Billing retries use exponential backoff.',
+    tags: ['billing', 'memory-only'],
+  },
   other: {
     type: 'hidden',
     title: 'Billing secret',
@@ -241,9 +248,9 @@ apiTest.describe('context engine AI index describe API', { tag: tags.stateful.cl
     expect(response).toHaveStatusCode(200);
     const block = blockOf(response.body);
     expect(block.split('\n').slice(0, 3)).toStrictEqual([
-      `AI index: ${SINGLE_AI_INDEX_ID}`,
+      `AI-index registry ID: ${SINGLE_AI_INDEX_ID}`,
       `Scout describe fixture ${SINGLE_AI_INDEX_ID}`,
-      `Query with ES|QL against: ${INDEX_A}`,
+      `Backing Elasticsearch target (use only in ES|QL queries): ${INDEX_A}`,
     ]);
     // Fields not truncated: plain heading, no `(showing …)`.
     expect(block).toContain('\n\nFields\n');
@@ -282,27 +289,26 @@ apiTest.describe('context engine AI index describe API', { tag: tags.stateful.cl
 
     expect(response).toHaveStatusCode(200);
     const block = blockOf(response.body);
-    expect(block).toContain(`\nQuery with ES|QL against: ${DATA_STREAM}\n`);
+    expect(block).toContain(
+      `\nBacking Elasticsearch target (use only in ES|QL queries): ${DATA_STREAM}\n`
+    );
     expect(fieldLine(block, '@timestamp')).toMatch(/^@timestamp: date/);
   });
 
-  apiTest(
-    'counts types and tags for active KIs visible in the current space',
-    async ({ apiClient }) => {
-      const response = await apiClient.get(describePath(SINGLE_AI_INDEX_ID), {
-        headers: { ...describeCredentials.apiKeyHeader, ...API_HEADERS },
-        responseType: 'json',
-      });
+  apiTest('counts active non-memory KIs visible in the current space', async ({ apiClient }) => {
+    const response = await apiClient.get(describePath(SINGLE_AI_INDEX_ID), {
+      headers: { ...describeCredentials.apiKeyHeader, ...API_HEADERS },
+      responseType: 'json',
+    });
 
-      expect(response).toHaveStatusCode(200);
-      const block = blockOf(response.body);
-      expect(sectionLines(block, 'Knowledge item types')).toStrictEqual([
-        '"document": 2',
-        '"detection": 1',
-      ]);
-      expect(sectionLines(block, 'Tags')).toStrictEqual(['"billing": 2', '"errors": 1']);
-    }
-  );
+    expect(response).toHaveStatusCode(200);
+    const block = blockOf(response.body);
+    expect(sectionLines(block, 'Knowledge item types')).toStrictEqual([
+      '"document": 2',
+      '"detection": 1',
+    ]);
+    expect(sectionLines(block, 'Tags')).toStrictEqual(['"billing": 2', '"errors": 1']);
+  });
 
   apiTest('lists example queries that run as-is through _query', async ({ apiClient }) => {
     const described = await apiClient.get(describePath(SINGLE_AI_INDEX_ID), {
@@ -318,7 +324,11 @@ apiTest.describe('context engine AI index describe API', { tag: tags.stateful.cl
     const hybrid = exampleQuery('Full text search, lexical and semantic fused together');
     expect(
       hybrid.startsWith(
-        `FROM ${INDEX_A} METADATA _id, _index, _score\n| WHERE governance.lifecycle.status IS NULL OR governance.lifecycle.status == "active"\n| WHERE expires_at IS NULL OR expires_at > NOW()\n| FORK\n`
+        `FROM ${INDEX_A} METADATA _id, _index, _score\n` +
+          '| WHERE governance.lifecycle.status IS NULL OR governance.lifecycle.status == "active"\n' +
+          '| WHERE expires_at IS NULL OR expires_at > NOW()\n' +
+          '| WHERE type IS NULL OR (type != "memory.session" AND type != "memory.session_fact")\n' +
+          '| FORK\n'
       )
     ).toBe(true);
     expect(hybrid).toContain('\n| FUSE\n');
@@ -404,7 +414,9 @@ apiTest.describe('context engine AI index describe API', { tag: tags.stateful.cl
 
     expect(response).toHaveStatusCode(200);
     const block = blockOf(response.body);
-    expect(block).toContain(`\nQuery with ES|QL against: ${MISSING_INDEX}\n`);
+    expect(block).toContain(
+      `\nBacking Elasticsearch target (use only in ES|QL queries): ${MISSING_INDEX}\n`
+    );
     expect(sectionLines(block, 'Fields')).toStrictEqual(['(none)']);
   });
 });
