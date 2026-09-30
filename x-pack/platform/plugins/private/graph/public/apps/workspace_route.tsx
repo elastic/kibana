@@ -18,6 +18,7 @@ import {
 } from '../state_management';
 import { createWorkspace } from '../services/workspace/graph_client_workspace';
 import { GraphLayoutController } from '../services/workspace/graph_layout_controller';
+import { ReduxLayoutTopology } from '../services/workspace/redux_layout_topology';
 import { WorkspaceLayout } from '../components/workspace_layout';
 import type { GraphServices } from '../application';
 import { useWorkspaceLoader } from '../helpers/use_workspace_loader';
@@ -92,9 +93,13 @@ export const WorkspaceRoute = ({
       indexPatternProvider,
       createWorkspace: (indexPattern, exploreControls) => {
         workspaceRef.current?.stopLayout();
+        const layoutTopology = new ReduxLayoutTopology({
+          getState: () => storeRef.current?.getState(),
+          getWorkspace: () => workspaceRef.current,
+        });
         const layoutController = new GraphLayoutController({
-          getNodes: () => workspaceRef.current?.nodes ?? [],
-          getEdges: () => workspaceRef.current?.edges ?? [],
+          getNodes: () => layoutTopology.getNodes(),
+          getEdges: () => layoutTopology.getEdges(),
           onTick: notifyWorkspaceChanged,
         });
         const options = {
