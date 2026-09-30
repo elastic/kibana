@@ -17,7 +17,7 @@ import {
 } from '@kbn/core/server';
 import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
-import type { AgentClient } from '@kbn/fleet-plugin/server';
+import type { AgentService } from '@kbn/fleet-plugin/server';
 import { SECURITY_SOLUTION_ALERT_ANALYSIS_WORKFLOW_ENABLED } from '@kbn/management-settings-ids';
 import {
   ALERTZERO_API_PRIVILEGE_READ,
@@ -50,7 +50,7 @@ import { reviseProposalTool } from './agent_builder_tools/revise_proposal_tool';
 import { agentType, ensureAgent, ensureAgentSafe, registerAgentType } from './agent';
 import { registerAttachments } from './agent_builder/attachments/register_attachments';
 import { registerStepDefinitions } from './step_types';
-import { makeResolveHostEnrollment } from './services/fleet/resolve_host_enrollment';
+import { makeScopedResolveHostEnrollment } from './services/fleet/resolve_host_enrollment';
 
 export class AlertZeroPlugin
   implements
@@ -75,7 +75,7 @@ export class AlertZeroPlugin
   private agentBuilderConversations?: AlertZeroStartDependencies['agentBuilder']['conversations'];
   private huntServices?: HuntServices;
   private reportsEsClient?: ElasticsearchClient;
-  private fleetAgentClient?: AgentClient;
+  private fleetAgentService?: AgentService;
   private scanFailuresService?: ScanFailuresService;
 
   /**
@@ -130,7 +130,7 @@ export class AlertZeroPlugin
       getActionsService: () => this.requireActionsService(),
       getConversations: () => this.requireAgentBuilderConversations(),
       getReportsEsClient: () => this.requireReportsEsClient(),
-      getResolveHostEnrollment: () => makeResolveHostEnrollment(this.fleetAgentClient),
+      getResolveHostEnrollment: makeScopedResolveHostEnrollment(() => this.fleetAgentService),
       logger: this.logger.get('steps'),
     });
     // Registered in setup so the builtin tool is available to Agent Builder before
@@ -185,7 +185,7 @@ export class AlertZeroPlugin
   start(core: CoreStart, plugins: AlertZeroStartDependencies): AlertZeroPluginStart {
     this.spaces = plugins.spaces;
     this.reportsEsClient = core.elasticsearch.client.asInternalUser;
-    this.fleetAgentClient = plugins.fleet?.agentService.asInternalUser;
+    this.fleetAgentService = plugins.fleet?.agentService;
     this.proposals = plugins.proposals;
     this.agentBuilderConversations = plugins.agentBuilder?.conversations;
 

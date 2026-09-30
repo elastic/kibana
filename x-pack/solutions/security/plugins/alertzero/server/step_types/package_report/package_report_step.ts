@@ -31,8 +31,12 @@ export interface PackageReportStepDependencies {
    * with reason `disabled` and proposals still mint.
    */
   isContextEngineEnabled?: (spaceId: string) => Promise<boolean>;
-  /** Defaults to treating every host as unenrolled when not provided (e.g. no Fleet plugin). */
-  getResolveHostEnrollment?: () => RunPackageReportDeps['resolveHostEnrollment'];
+  /**
+   * Space-scoped per call: hostnames are not unique across spaces, so the Fleet lookup has to be
+   * bound to the space the step runs in. Defaults to treating every host as unenrolled when not
+   * provided (e.g. no Fleet plugin).
+   */
+  getResolveHostEnrollment?: (spaceId: string) => RunPackageReportDeps['resolveHostEnrollment'];
   /**
    * Defaults to the real `mget`-backed rehydrator built from the step's own scoped client, so
    * the calling user's privileges apply. Overridable for tests and Fleet-less deployments.
@@ -235,7 +239,7 @@ export const getPackageReportStepDefinition = ({
           deps: {
             listRespondActions,
             writeCoverageKis,
-            resolveHostEnrollment: getResolveHostEnrollment(),
+            resolveHostEnrollment: getResolveHostEnrollment(spaceId),
             rehydrateProcessSelectors,
           },
         });

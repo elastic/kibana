@@ -5,8 +5,11 @@
  * 2.0.
  */
 
-import type { AgentClient } from '@kbn/fleet-plugin/server';
-import { makeResolveHostEnrollment } from './resolve_host_enrollment';
+import type { AgentClient, AgentService } from '@kbn/fleet-plugin/server';
+import {
+  makeResolveHostEnrollment,
+  makeScopedResolveHostEnrollment,
+} from './resolve_host_enrollment';
 
 describe('makeResolveHostEnrollment', () => {
   it('returns enrolled: false for every host when no agent client is available', async () => {
@@ -41,5 +44,61 @@ describe('makeResolveHostEnrollment', () => {
     expect(listAgents).toHaveBeenCalledWith(
       expect.objectContaining({ kuery: 'local_metadata.host.hostname:"weird\\"host\\\\name"' })
     );
+  });
+});
+
+describe('makeScopedResolveHostEnrollment', () => {
+  const agentService = (listAgents = jest.fn()) => {
+    const asInternalScopedUser = jest.fn(() => ({ listAgents } as unknown as AgentClient));
+    return { service: { asInternalScopedUser } as unknown as AgentService, asInternalScopedUser };
+  };
+
+  it('scopes the agent lookup to the space it is called with', async () => {
+    const listAgents = jest.fn().mockResolvedValue({ agents: [{ id: 'agent-1' }], total: 1 });
+    const { service, asInternalScopedUser } = agentService(listAgents);
+
+    const resolve = makeScopedResolveHostEnrollment(() => service)('space-a');
+    await expect(resolve('host-a')).resolves.toEqual({ enrolled: true, agentId: 'agent-1' });
+
+    expect(asInternalScopedUser).toHaveBeenCalledWith('space-a');
+  });
+
+  it('resolves a client per space rather than reusing one across spaces', () => {
+    const { service, asInternalScopedUser } = agentService();
+    const scoped = makeScopedResolveHostEnrollment(() => service);
+
+    scoped('space-a');
+    scoped('space-b');
+
+    expect(asInternalScopedUser.mock.calls).toEqual([['space-a'], ['space-b']]);
+  });
+
+  it('reads the service lazily, so steps registered before start still get it', async () => {
+    const listAgents = jest.fn().mockResolvedValue({ agents: [{ id: 'agent-1' }], total: 1 });
+    const { service } = agentService(listAgents);
+    const getAgentService = jest.fn<AgentService | undefined, []>().mockReturnValue(undefined);
+
+    const scoped = makeScopedResolveHostEnrollment(getAgentService);
+    await expect(scoped('space-a')('host-a')).resolves.toEqual({ enrolled: false });
+
+    getAgentService.mockReturnValue(service);
+    await expect(scoped('space-a')('host-a')).resolves.toEqual({
+      enrolled: true,
+      agentId: 'agent-1',
+    });
+  });
+
+  it('treats every host as unenrolled when Fleet is absent', async () => {
+    const resolve = makeScopedResolveHostEnrollment(() => undefined)('space-a');
+    await expect(resolve('host-a')).resolves.toEqual({ enrolled: false });
+  });
+
+  it('never falls back to an unscoped client when the space is empty', async () => {
+    const { service, asInternalScopedUser } = agentService();
+
+    const resolve = makeScopedResolveHostEnrollment(() => service)('');
+    await expect(resolve('host-a')).resolves.toEqual({ enrolled: false });
+
+    expect(asInternalScopedUser).not.toHaveBeenCalled();
   });
 });

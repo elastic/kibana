@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { AgentClient } from '@kbn/fleet-plugin/server';
+import type { AgentClient, AgentService } from '@kbn/fleet-plugin/server';
 import type { ResolveHostEnrollment } from '../../step_types/package_report/read_current_run_state';
 
 const escapeKuery = (value: string): string => value.replace(/(["\\])/g, '\\$1');
@@ -14,6 +14,10 @@ const escapeKuery = (value: string): string => value.replace(/(["\\])/g, '\\$1')
  * Resolves a host name to its enrolled Elastic Defend agent id via Fleet.
  * `showInactive: false` excludes unenrolled/inactive agents, matching
  * Fleet's own definition of an active agent.
+ *
+ * The client must be space-scoped: hostnames are not unique across spaces, and an
+ * unscoped search returns the first global match, which can enroll — and later act
+ * on — an agent belonging to a different space.
  */
 export const makeResolveHostEnrollment = (
   agentClient: AgentClient | undefined
@@ -31,3 +35,15 @@ export const makeResolveHostEnrollment = (
     return agent ? { enrolled: true, agentId: agent.id } : { enrolled: false };
   };
 };
+
+/**
+ * Binds host enrollment lookups to the space the caller is running in. The service is read
+ * through a getter because step definitions register during `setup` but only run after
+ * `start`, which is when Fleet's service becomes available.
+ */
+export const makeScopedResolveHostEnrollment =
+  (getAgentService: () => AgentService | undefined) =>
+  (spaceId: string): ResolveHostEnrollment =>
+    makeResolveHostEnrollment(
+      spaceId ? getAgentService()?.asInternalScopedUser(spaceId) : undefined
+    );
