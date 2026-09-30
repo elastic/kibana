@@ -252,34 +252,6 @@ export const CasesParamsFieldsComponent: React.FunctionComponent<
     currentConfiguration.templates,
   ]);
 
-  /**
-   * When a v2 template is selected its settings.extractObservables overrides the space default
-   * (executor merges v2Template.settings over the space value). Reflect that in the "inherit" label
-   * so it shows the value the rule will actually use, not just the space default.
-   */
-  const effectiveInheritedExtractObservables = useMemo(() => {
-    if (isTemplatesV2Enabled && templateId) {
-      const v2Template = findV2Template(
-        templateId,
-        v2TemplatesData?.templates ?? [],
-        currentConfiguration.templates
-      );
-      if (v2Template?.definitionString) {
-        const { settings } = getTemplateSettingsAndConnectorFromYaml(v2Template.definitionString);
-        if (settings?.extractObservables != null) {
-          return settings.extractObservables;
-        }
-      }
-    }
-    return currentConfiguration.extractObservables;
-  }, [
-    isTemplatesV2Enabled,
-    templateId,
-    v2TemplatesData?.templates,
-    currentConfiguration.templates,
-    currentConfiguration.extractObservables,
-  ]);
-
   const showAutoPushCheckbox =
     (!isTemplatesV2Enabled && selectedTemplateHasConnector) ||
     (!isLoadingV2Templates && selectedV2TemplateHasConnector);
@@ -331,12 +303,18 @@ export const CasesParamsFieldsComponent: React.FunctionComponent<
     () => [
       {
         value: 'inherit',
-        text: i18n.EXTRACT_OBSERVABLES_INHERIT(effectiveInheritedExtractObservables),
+        // When a v2 template is selected the executor resolves its pinned version server-side
+        // (params.templateVersion), so the client-side latest copy may differ. Avoid showing a
+        // potentially wrong Yes/No; fall back to the unambiguous space-only label instead.
+        text:
+          isTemplatesV2Enabled && templateId
+            ? i18n.EXTRACT_OBSERVABLES_INHERIT_TEMPLATE
+            : i18n.EXTRACT_OBSERVABLES_INHERIT(currentConfiguration.extractObservables),
       },
       { value: 'on', text: i18n.EXTRACT_OBSERVABLES_ON },
       { value: 'off', text: i18n.EXTRACT_OBSERVABLES_OFF },
     ],
-    [effectiveInheritedExtractObservables]
+    [isTemplatesV2Enabled, templateId, currentConfiguration.extractObservables]
   );
 
   const extractObservablesValue = useMemo(() => {

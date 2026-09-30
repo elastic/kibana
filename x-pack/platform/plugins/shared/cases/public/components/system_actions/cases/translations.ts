@@ -177,6 +177,13 @@ export const EXTRACT_OBSERVABLES_INHERIT = (spaceDefault: boolean) =>
     },
   });
 
+export const EXTRACT_OBSERVABLES_INHERIT_TEMPLATE = i18n.translate(
+  'xpack.cases.systemActions.casesConnector.extractObservablesInheritTemplate',
+  {
+    defaultMessage: 'Use template/space default',
+  }
+);
+
 export const EXTRACT_OBSERVABLES_ON = i18n.translate(
   'xpack.cases.systemActions.casesConnector.extractObservablesOn',
   {
