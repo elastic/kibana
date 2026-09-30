@@ -12,18 +12,9 @@ import { expect } from '../..';
 import { DEFAULT_SAVE_MODAL_TIMEOUT, type TimeoutOptions } from './base';
 import { NavigationMixin } from './navigation';
 
-interface JobStatusResult {
-  source: 'api';
-  terminal: true;
-  status: 'completed' | 'failed';
-  errorText?: string;
-}
-
-interface UiStatusResult {
-  source: 'ui';
-  terminal: true;
+interface JobPollResult {
   failed: boolean;
-  errorText?: string | null;
+  errorText?: string;
 }
 
 /**
@@ -248,28 +239,11 @@ export abstract class SaveMixin extends NavigationMixin {
     }
     const { job } = (await generateResponse.json()) as { job: { id: string } };
 
-    const downloadBtn = this.page.testSubj.locator('downloadCompletedReportButton');
-    const reportFailure = this.page.locator('[data-test-errorText]');
-
-    // Race the UI notification (fast when no load) against a direct API poll on the specific job
-    // (immune to stale toast notifications from previous runs and browser tab state).
-    const uiResult: Promise<UiStatusResult> = downloadBtn
-      .or(reportFailure)
-      .waitFor({ state: 'visible', timeout })
-      .then(async () => ({
-        source: 'ui' as const,
-        terminal: true as const,
-        failed: await reportFailure.isVisible(),
-        errorText: (await reportFailure.isVisible())
-          ? await reportFailure.getAttribute('data-test-errorText')
-          : undefined,
-      }));
-
-    const apiResult: Promise<JobStatusResult> = this.pollJobStatus(job.id, timeout);
-    const result = await Promise.race([uiResult, apiResult]);
-
-    const failed = result.source === 'api' ? result.status === 'failed' : result.failed;
-    const errorText = result.source === 'api' ? result.errorText : result.errorText ?? undefined;
+    // Poll the reporting API by job ID. UI locators are page-global — a stale download button
+    // or error toast from a previous test can settle a UI-race before the new job finishes.
+    // Using the API avoids that, and Scout sets no Playwright baseURL so we derive the origin
+    // from the current page URL.
+    const { failed, errorText } = await this.pollJobStatus(job.id, timeout);
 
     if (failed) {
       // version_conflict_engine_exception is a transient error in the reporting/ES write path
@@ -281,21 +255,24 @@ export abstract class SaveMixin extends NavigationMixin {
       throw new Error(`CSV report generation failed: ${errorText ?? 'Unknown error'}`);
     }
 
-    // If the API resolved first, the UI download button may not be visible yet.
-    await downloadBtn.waitFor({ state: 'visible', timeout: 10_000 });
+    const downloadBtn = this.page.testSubj.locator('downloadCompletedReportButton');
+    await downloadBtn.waitFor({ state: 'visible', timeout });
 
     const [download] = await Promise.all([this.page.waitForEvent('download'), downloadBtn.click()]);
     return download;
   }
 
-  private async pollJobStatus(jobId: string, timeout: number): Promise<JobStatusResult> {
+  private async pollJobStatus(jobId: string, timeout: number): Promise<JobPollResult> {
+    const baseUrl = new URL(this.page.url()).origin;
     let job: { status: string; error?: unknown } | undefined;
 
     await expect
       .poll(
         async () => {
           try {
-            const response = await this.page.request.get(`/internal/reporting/jobs/info/${jobId}`);
+            const response = await this.page.request.get(
+              `${baseUrl}/internal/reporting/jobs/info/${jobId}`
+            );
             if (!response.ok()) return 'pending';
             job = (await response.json()) as { status: string; error?: unknown };
             return job.status;
@@ -307,12 +284,10 @@ export abstract class SaveMixin extends NavigationMixin {
       )
       .toMatch(/completed|warnings|failed/);
 
-    const status = job?.status === 'failed' ? 'failed' : 'completed';
+    const failed = job?.status === 'failed';
     return {
-      source: 'api',
-      terminal: true,
-      status,
-      errorText: status === 'failed' && job?.error ? JSON.stringify(job.error) : undefined,
+      failed,
+      errorText: failed && job?.error ? JSON.stringify(job.error) : undefined,
     };
   }
 }
