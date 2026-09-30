@@ -119,6 +119,32 @@ describe('getEntityFilterESQL', () => {
       dataSources: ['a" OR true OR "', 'x\\y'],
     });
     expect(clauses).toHaveLength(1);
-    expect(clauses[0]).toBe('| WHERE entity.source IN ("a\\" OR true OR \\"", "x\\\\y")');
+    expect(clauses[0]).toBe(
+      '| WHERE MV_CONTAINS(entity.source, "a\\" OR true OR \\"") OR MV_CONTAINS(entity.source, "x\\\\y")'
+    );
+  });
+
+  it('uses MV_CONTAINS for watchlists and dataSources (multi-value fields)', () => {
+    const clauses = getEntityFilterESQL({
+      entityTypes: [],
+      riskLevels: [],
+      assetCriticality: [],
+      watchlists: ['my-watchlist'],
+      dataSources: [],
+    });
+    expect(clauses).toHaveLength(1);
+    expect(clauses[0]).toBe('| WHERE MV_CONTAINS(entity.attributes.watchlists, "my-watchlist")');
+  });
+
+  it('uses IN for scalar fields like entityTypes', () => {
+    const clauses = getEntityFilterESQL({
+      entityTypes: ['host', 'user'],
+      riskLevels: [],
+      assetCriticality: [],
+      watchlists: [],
+      dataSources: [],
+    });
+    expect(clauses).toHaveLength(1);
+    expect(clauses[0]).toBe('| WHERE entity.EngineMetadata.Type IN ("host", "user")');
   });
 });
