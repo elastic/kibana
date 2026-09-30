@@ -1545,3 +1545,137 @@ describe('NightshiftInvestigationsClient.ensureOrCreate()', () => {
     });
   });
 });
+
+describe('NightshiftInvestigationsClient notifications', () => {
+  const notifications = [
+    {
+      type: 'slack' as const,
+      connector_id: 'elastic-apps-slack',
+      channel: '#alerts',
+      automation_id: 'auto-1',
+      automation_name: 'Prod alerts',
+    },
+  ];
+  const mockWorkflow = {
+    id: NIGHTSHIFT_INVESTIGATION_WORKFLOW_ID,
+    enabled: true,
+    valid: true,
+    definition: { steps: [] },
+  };
+
+  beforeEach(() => {
+    repository.get.mockResolvedValue(undefined);
+    mockManagement.getWorkflow.mockResolvedValue(mockWorkflow);
+    mockManagement.runWorkflow.mockResolvedValue('exec-notify');
+  });
+
+  it('start() passes destinations to the workflow and onto the pending record', async () => {
+    await makeClient().start({
+      title: 'Latency is too high',
+      subject: { type: 'manual', id: 'manual' },
+      trigger_type: 'automatic',
+      message: 'Investigate checkout latency',
+      notifications,
+    });
+
+    const [, , inputs] = mockManagement.runWorkflow.mock.calls[0];
+    expect(inputs).toEqual(expect.objectContaining({ notifications }));
+    expect(repository.create).toHaveBeenCalledWith(
+      expect.objectContaining({
+        id: 'exec-notify',
+        attributes: expect.objectContaining({ notifications }),
+      })
+    );
+  });
+
+  it('start() omits notifications from the inputs and record when none are given', async () => {
+    await makeClient().start({
+      title: 'Latency is too high',
+      subject: { type: 'manual', id: 'manual' },
+      trigger_type: 'manual',
+      message: 'Investigate checkout latency',
+      notifications: [],
+    });
+
+    const [, , inputs] = mockManagement.runWorkflow.mock.calls[0];
+    expect(inputs).not.toHaveProperty('notifications');
+    const [{ attributes }] = repository.create.mock.calls[0];
+    expect(attributes).not.toHaveProperty('notifications');
+  });
+
+  it('ensureOrCreate() recovers destinations from the execution inputs', async () => {
+    mockManagement.getWorkflowExecution.mockResolvedValue({
+      id: 'exec-notify',
+      workflowId: NIGHTSHIFT_INVESTIGATION_WORKFLOW_ID,
+      status: ExecutionStatus.RUNNING,
+      startedAt: '2024-01-01T00:00:00Z',
+      executedBy: 'workflow-user',
+      context: {
+        inputs: {
+          message: 'Investigate this',
+          title: 'Investigate this',
+          notifications,
+          context: { source: 'manual', manual_id: 'manual', trigger_type: 'automatic' },
+        },
+      },
+    });
+
+    await makeClient().ensureOrCreate('exec-notify');
+
+    expect(repository.create).toHaveBeenCalledWith(
+      expect.objectContaining({ attributes: expect.objectContaining({ notifications }) })
+    );
+  });
+
+  it('ensureOrCreate() ignores malformed destinations rather than failing the run', async () => {
+    mockManagement.getWorkflowExecution.mockResolvedValue({
+      id: 'exec-notify',
+      workflowId: NIGHTSHIFT_INVESTIGATION_WORKFLOW_ID,
+      status: ExecutionStatus.RUNNING,
+      startedAt: '2024-01-01T00:00:00Z',
+      executedBy: 'workflow-user',
+      context: {
+        inputs: {
+          message: 'Investigate this',
+          title: 'Investigate this',
+          notifications: [{ type: 'pager', channel: '#alerts' }],
+          context: { source: 'manual', manual_id: 'manual', trigger_type: 'automatic' },
+        },
+      },
+    });
+
+    await makeClient().ensureOrCreate('exec-notify');
+
+    const [{ attributes }] = repository.create.mock.calls[0];
+    expect(attributes).not.toHaveProperty('notifications');
+  });
+
+  it('get() returns the stored destinations and delivery results', async () => {
+    const delivered = [{ ...notifications[0], status: 'sent' as const, message_ts: '1.2' }];
+    repository.get.mockResolvedValue(makeRecord({ notifications: delivered }));
+
+    await expect(makeClient().get('inv-1')).resolves.toEqual(
+      expect.objectContaining({ notifications: delivered })
+    );
+  });
+
+  it('setNotifications() writes delivery results onto a settled record', async () => {
+    const delivered = [{ ...notifications[0], status: 'failed' as const, error: 'not connected' }];
+    repository.get.mockResolvedValue(makeRecord({ status: 'completed' }, { version: 'v7' }));
+
+    await makeClient().setNotifications('inv-1', delivered);
+
+    expect(repository.update).toHaveBeenCalledWith({
+      id: 'inv-1',
+      patch: { notifications: delivered },
+      version: 'v7',
+    });
+  });
+
+  it('setNotifications() throws InvestigationNotFoundError for an unknown record', async () => {
+    await expect(makeClient().setNotifications('inv-missing', notifications)).rejects.toThrow(
+      InvestigationNotFoundError
+    );
+    expect(repository.update).not.toHaveBeenCalled();
+  });
+});

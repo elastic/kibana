@@ -40,6 +40,34 @@ triggers:
         concurrency_key:
           type: string
           description: Optional key for concurrency deduplication. Defaults to the workflow execution ID.
+        notifications:
+          type: array
+          maxItems: 20
+          description: >
+            Slack destinations the concluded investigation is posted to, one per automation.
+            Delivery results are recorded on the investigation.
+          items:
+            type: object
+            additionalProperties: false
+            required:
+              - type
+              - connector_id
+              - channel
+            properties:
+              type:
+                type: string
+                enum:
+                  - slack
+              connector_id:
+                type: string
+              channel:
+                type: string
+              thread_ts:
+                type: string
+              automation_id:
+                type: string
+              automation_name:
+                type: string
       required:
         - message
         - title

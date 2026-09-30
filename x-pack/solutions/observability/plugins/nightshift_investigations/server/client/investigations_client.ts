@@ -15,6 +15,8 @@ import type { AgentAvailabilityConfig } from '@kbn/agent-builder-server/agents';
 import { investigationStateSchema } from '@kbn/significant-events-schema';
 import { assertNever } from '@kbn/std';
 import { installInvestigationAgent } from '../lib/install_investigation_agent';
+import { investigationNotificationSchema } from '../../common/schemas';
+import type { InvestigationNotification } from '../../common/schemas';
 import { isInvestigationWorkflowExecution } from '../lib/managed_workflows/is_investigation_workflow_execution';
 import type { InvestigationQuotaCallback } from '../types';
 import type {
@@ -119,6 +121,7 @@ interface ExecutionInvestigationMetadata {
   title?: string;
   triggerType: InvestigationTriggerType;
   concurrencyKey?: string;
+  notifications?: InvestigationNotification[];
 }
 /**
  * Context fields each subject type's id arrives under. The `satisfies` clause is what makes a
@@ -211,6 +214,7 @@ const toInvestigationResponse = (record: InvestigationRecord): GetInvestigationR
     blind_spots: blindSpots.success ? blindSpots.data : undefined,
     conversation_id: record.conversation_id,
     impact: record.impact,
+    notifications: record.notifications,
   };
 };
 
@@ -223,6 +227,8 @@ const parseExecutionInvestigationMetadata = (
       : undefined;
   const rawConcurrencyKey = inputs?.concurrency_key;
   const concurrencyKey = typeof rawConcurrencyKey === 'string' ? rawConcurrencyKey : undefined;
+  // The engine validated the input against the workflow schema; this only guards a hand-run.
+  const notifications = investigationNotificationSchema.array().safeParse(inputs?.notifications);
 
   return {
     subject: recoverSubjectFromInput(inputs),
@@ -230,6 +236,9 @@ const parseExecutionInvestigationMetadata = (
     title: asString(inputs?.title),
     triggerType: recoverTriggerTypeFromInput(inputs) ?? DEFAULT_INVESTIGATION_TRIGGER_TYPE,
     concurrencyKey,
+    ...(notifications.success && notifications.data.length > 0
+      ? { notifications: notifications.data }
+      : {}),
   };
 };
 
@@ -366,6 +375,7 @@ export class NightshiftInvestigationsClient {
     stream_names,
     concurrency_key,
     context = {},
+    notifications,
   }: StartInvestigationRequest): Promise<StartInvestigationResponse> {
     if (!this.workflowsManagement) {
       throw new InvestigationUnavailableError('workflowsManagement is not available');
@@ -430,6 +440,7 @@ export class NightshiftInvestigationsClient {
       title,
       stream_names: stream_names ?? [],
       ...(concurrency_key ? { concurrency_key } : {}),
+      ...(notifications?.length ? { notifications } : {}),
       context: {
         ...prepared.context,
         source: resolvedSubject.type,
@@ -457,6 +468,7 @@ export class NightshiftInvestigationsClient {
       title,
       triggerType: trigger_type,
       concurrencyKey: concurrency_key,
+      notifications,
     }).catch((error) => {
       this.logger.warn(
         `Failed to eagerly persist investigation "${executionId}", deferring to the workflow's ensure step: ${error.message}`
@@ -477,12 +489,14 @@ export class NightshiftInvestigationsClient {
     title,
     triggerType,
     concurrencyKey,
+    notifications,
   }: {
     investigationId: string;
     subject: InvestigationSubject;
     title: string;
     triggerType: InvestigationTriggerType;
     concurrencyKey?: string;
+    notifications?: InvestigationNotification[];
   }): Promise<void> {
     if (concurrencyKey) {
       await this.cancelSupersededInvestigation({ concurrencyKey, investigationId });
@@ -496,6 +510,7 @@ export class NightshiftInvestigationsClient {
         ...toSubjectFields(subject),
         trigger_type: triggerType,
         concurrency_key: concurrencyKey,
+        ...(notifications?.length ? { notifications } : {}),
         created_at: new Date().toISOString(),
       },
     });
@@ -550,9 +565,8 @@ export class NightshiftInvestigationsClient {
       return;
     }
 
-    const { subject, title, triggerType, concurrencyKey } = parseExecutionInvestigationMetadata(
-      execution.context
-    );
+    const { subject, title, triggerType, concurrencyKey, notifications } =
+      parseExecutionInvestigationMetadata(execution.context);
 
     if (!subject || !title) {
       throw new InvestigationMetadataMissingError(investigationId);
@@ -570,6 +584,7 @@ export class NightshiftInvestigationsClient {
         ...toSubjectFields(subject),
         trigger_type: triggerType,
         concurrency_key: concurrencyKey,
+        ...(notifications ? { notifications } : {}),
         executed_by: execution.executedBy,
         created_at: startedAt,
         started_at: startedAt,
@@ -697,6 +712,32 @@ export class NightshiftInvestigationsClient {
       await this.investigationRepository.update({
         id: investigationId,
         patch,
+        version: existing.version,
+      });
+    } catch (err) {
+      if (err instanceof InvestigationStaleWriteError) {
+        throw InvestigationConflictError.concurrentlyModified(investigationId);
+      }
+      throw err;
+    }
+  }
+
+  /**
+   * Records Slack delivery results. Separate from `update()` because that method refuses to touch
+   * a settled record, and delivery happens precisely after the record has settled.
+   */
+  async setNotifications(
+    investigationId: string,
+    notifications: InvestigationNotification[]
+  ): Promise<void> {
+    const existing = await this.investigationRepository.get(investigationId);
+    if (!existing) {
+      throw new InvestigationNotFoundError(investigationId);
+    }
+    try {
+      await this.investigationRepository.update({
+        id: investigationId,
+        patch: { notifications },
         version: existing.version,
       });
     } catch (err) {

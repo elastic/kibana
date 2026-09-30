@@ -97,6 +97,42 @@ describe('triggerInvestigationStepDefinition', () => {
     );
   });
 
+  it('forwards Slack destinations to the client', async () => {
+    const start = jest.fn().mockResolvedValue({ investigation_id: 'investigation-1' });
+    const { definition } = createDefinition(start);
+    const notifications = [
+      { type: 'slack', connector_id: 'elastic-apps-slack', channel: '#alerts', automation_id: 'a1' },
+    ];
+
+    await definition.handler(
+      createContext({
+        subject_type: 'significant_event',
+        subject_id: 'event-1',
+        title: 'Checkout latency breach',
+        notifications,
+      })
+    );
+
+    expect(start).toHaveBeenCalledWith(expect.objectContaining({ notifications }));
+  });
+
+  it('rejects a destination without a connector or channel', async () => {
+    const start = jest.fn();
+    const { definition } = createDefinition(start);
+
+    await expect(
+      definition.handler(
+        createContext({
+          subject_type: 'significant_event',
+          subject_id: 'event-1',
+          title: 'Checkout latency breach',
+          notifications: [{ type: 'slack', channel: '#alerts' }],
+        })
+      )
+    ).rejects.toThrow();
+    expect(start).not.toHaveBeenCalled();
+  });
+
   it('rejects invalid prompt and stream inputs before starting', async () => {
     const start = jest.fn();
     const { definition } = createDefinition(start);

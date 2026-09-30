@@ -14,7 +14,11 @@ import {
 } from '@kbn/significant-events-schema';
 import { StepCategory } from '@kbn/workflows';
 import { createServerStepDefinition } from '@kbn/workflows-extensions/server';
-import { INVESTIGATION_TRIGGER_TYPES } from '../../common';
+import {
+  INVESTIGATION_TRIGGER_TYPES,
+  MAX_INVESTIGATION_NOTIFICATIONS,
+  investigationNotificationSchema,
+} from '../../common';
 import type { GetInvestigationsClient } from '../routes/types';
 
 const inputSchema = z.object({
@@ -59,6 +63,13 @@ const inputSchema = z.object({
     .describe(
       'Additional context to pass to the investigation workflow. When subject_type is "alert" this must carry an "alerts" array of alert snapshots, or the investigation is rejected.'
     ),
+  notifications: z
+    .array(investigationNotificationSchema)
+    .max(MAX_INVESTIGATION_NOTIFICATIONS)
+    .optional()
+    .describe(
+      'Slack destinations the concluded investigation is posted to. Delivery results are recorded on the investigation.'
+    ),
 });
 
 export const triggerInvestigationStepDefinition = (
@@ -95,6 +106,7 @@ export const triggerInvestigationStepDefinition = (
         stream_names: input.stream_names,
         concurrency_key: input.concurrency_key,
         context: input.context,
+        notifications: input.notifications,
       });
       return { output: result };
     },
