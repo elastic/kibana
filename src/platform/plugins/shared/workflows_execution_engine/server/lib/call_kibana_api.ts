@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { ALERTING_CLONE_API_KEY_HEADER } from '@kbn/alerting-plugin/common';
 import type { CloudSetup } from '@kbn/cloud-plugin/server';
 import type { CoreStart, KibanaRequest } from '@kbn/core/server';
 import { applySpacePrefix } from '@kbn/workflows';
@@ -110,6 +111,7 @@ export interface CallKibanaApiDeps {
  * under the engine's control.
  */
 const RESERVED_HEADER_NAMES = new Set([
+  ALERTING_CLONE_API_KEY_HEADER,
   'authorization',
   'content-type',
   'kbn-xsrf',
@@ -253,6 +255,11 @@ export async function callKibanaApi<T = unknown>(
     'kbn-xsrf': 'true',
     [X_ELASTIC_INTERNAL_ORIGIN_REQUEST]: 'Kibana',
     ...getOutboundEventChainHeaders(fakeRequest, workflowRunId),
+    // Our API key dies after the workflow run (Task Manager revokes it). This header tells alerting
+    // to give any rule it creates or enables its own key instead of keeping ours.
+    // Only alerting reads this header. Other routes ignore it, so it is safe to send on every call.
+    // See: https://github.com/elastic/kibana/pull/291318
+    [ALERTING_CLONE_API_KEY_HEADER]: 'true',
   };
 
   const requestInit: RequestInit = {
