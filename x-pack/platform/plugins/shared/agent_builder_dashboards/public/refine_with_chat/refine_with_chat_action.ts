@@ -9,6 +9,7 @@ import type { Observable } from 'rxjs';
 import { firstValueFrom, map, skip } from 'rxjs';
 import { i18n } from '@kbn/i18n';
 import type { AgentBuilderPluginStart } from '@kbn/agent-builder-browser';
+import type { AnalyticsServiceStart } from '@kbn/core/public';
 import type { Conversation } from '@kbn/agent-builder-common';
 import {
   DASHBOARD_ATTACHMENT_TYPE,
@@ -40,6 +41,7 @@ import {
 } from '@kbn/presentation-publishing';
 import type { UiActionsActionDefinition as ActionDefinition } from '@kbn/ui-actions-plugin/public';
 import type { IdGenerator } from '../attachment_types';
+import { reportRefineWithChatClicked, type RefineWithChatChatState } from '../telemetry';
 
 export interface RefineWithChatActionDeps {
   agentBuilder: Pick<
@@ -47,6 +49,7 @@ export interface RefineWithChatActionDeps {
     'openChat' | 'addAttachment' | 'getAgentBuilderAccess' | 'events'
   >;
   dashboardAppApi$: DashboardStart['dashboardAppClientApi$'];
+  analytics: AnalyticsServiceStart;
   canWriteDashboards: boolean;
   draftAttachmentId: IdGenerator;
 }
@@ -99,6 +102,7 @@ const findLinkedDashboardAttachmentId = (
 export const createRefineWithChatAction = ({
   agentBuilder,
   dashboardAppApi$,
+  analytics,
   canWriteDashboards,
   draftAttachmentId,
 }: RefineWithChatActionDeps): ActionDefinition<RefineWithChatActionContext> => {
@@ -140,6 +144,15 @@ export const createRefineWithChatAction = ({
       }
 
       const dashboardId = dashboardApi.savedObjectId$.getValue();
+      const panelType = apiIsOfType(embeddable, CUSTOM_CONTENT_EMBEDDABLE_TYPE)
+        ? CUSTOM_CONTENT_EMBEDDABLE_TYPE
+        : LENS_EMBEDDABLE_TYPE;
+      const reportClicked = (chatState: RefineWithChatChatState) =>
+        reportRefineWithChatClicked(analytics, {
+          panel_type: panelType,
+          chat_state: chatState,
+          is_saved_dashboard: Boolean(dashboardId),
+        });
       const buildDashboardAttachment = (id: string): PendingDashboardAttachment => ({
         id,
         origin: dashboardId,
@@ -155,9 +168,7 @@ export const createRefineWithChatAction = ({
           dashboard_attachment_id: dashboardAttachmentId,
           panel_id: embeddable.uuid,
           label: getPanelLabel(embeddable),
-          panel_type: apiIsOfType(embeddable, CUSTOM_CONTENT_EMBEDDABLE_TYPE)
-            ? CUSTOM_CONTENT_EMBEDDABLE_TYPE
-            : LENS_EMBEDDABLE_TYPE,
+          panel_type: panelType,
         },
       });
 
@@ -165,6 +176,7 @@ export const createRefineWithChatAction = ({
 
       // No chat surface is bound: open a new conversation with the dashboard and the pointer.
       if (!activeConversation) {
+        reportClicked('new_conversation');
         agentBuilder.openChat({
           newConversation: true,
           sessionTag: 'dashboard',
@@ -184,12 +196,14 @@ export const createRefineWithChatAction = ({
         dashboardId
       );
       if (linkedDashboardAttachmentId) {
+        reportClicked('linked_attachment');
         agentBuilder.addAttachment(buildPanelPointer(linkedDashboardAttachmentId));
         return;
       }
 
       // New conversation, or an unsaved dashboard that the sidebar integration did not attach:
       // stage the dashboard under the draft id (merging with any staged copy) and point at it.
+      reportClicked('staged_attachment');
       agentBuilder.addAttachment(buildDashboardAttachment(draftAttachmentId.current));
       agentBuilder.addAttachment(buildPanelPointer(draftAttachmentId.current));
     },

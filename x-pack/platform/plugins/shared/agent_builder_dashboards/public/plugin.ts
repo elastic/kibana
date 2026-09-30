@@ -24,6 +24,7 @@ import {
   registerDashboardAttachmentUiDefinition,
   registerDashboardPanelAttachmentUiDefinition,
 } from './attachment_types';
+import { registerAgentBuilderDashboardsAnalyticsEvents } from './telemetry';
 
 export class AgentBuilderDashboardsPlugin
   implements
@@ -39,12 +40,13 @@ export class AgentBuilderDashboardsPlugin
   constructor(_initContext: PluginInitializerContext) {}
 
   public setup(
-    _core: CoreSetup<
+    core: CoreSetup<
       AgentBuilderDashboardsPluginPublicStartDependencies,
       AgentBuilderDashboardsPluginPublicStart
     >,
     _plugins: AgentBuilderDashboardsPluginPublicSetupDependencies
   ): AgentBuilderDashboardsPluginPublicSetup {
+    registerAgentBuilderDashboardsAnalyticsEvents(core.analytics);
     return {};
   }
 
@@ -82,6 +84,7 @@ export class AgentBuilderDashboardsPlugin
         );
         return createRefineWithChatAction({
           agentBuilder: plugins.agentBuilder,
+          analytics: core.analytics,
           dashboardAppApi$: plugins.dashboard.dashboardAppClientApi$,
           canWriteDashboards,
           draftAttachmentId,
