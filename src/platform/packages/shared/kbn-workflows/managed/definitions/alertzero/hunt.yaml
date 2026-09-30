@@ -108,7 +108,7 @@ steps:
   # Populated only when Tier 1 confirmed a hit: one entry per confirmed
   # technique (a single report-scoped entry when Tier 2 produced none). No
   # templated fields — `sse_mapper.ts` already built the full attachment_id
-  # and data payload server-side, this just fans out ai.attachment.add over
+  # and data payload server-side, this just fans out the upsert below over
   # what the coordinator returned.
   - name: attach_sse
     type: foreach
@@ -124,8 +124,32 @@ steps:
           data: "${{ foreach.item.data }}"
           description: Hunt Watch significant security event
           render_inline: true
+        # Add-then-update, because `buildSseAttachmentId` is subject-stable by
+        # design: the id hashes (space, report, technique) with no run component so
+        # that re-hunting the same subject lands on the same card instead of adding
+        # one per sweep. `ai.attachment.add` is a create, so that rerun throws
+        # `AttachmentConflictError`. Swallowing it is what makes the rerun
+        # unpackageable: the surviving attachment still carries the first run's
+        # `run_id`, and `readCurrentRunState` matches on the current one, so the
+        # rerun reads as a run whose state is missing. Updating writes a new version
+        # carrying this run's payload, which is what makes the stable id work as the
+        # idempotency key it is documented to be. Folding `run_id` into the id would
+        # also stop the conflict, but by abandoning that idempotency.
+        #
+        # A failure for any other reason (validation, a conversation that vanished)
+        # also lands here, and the update fails in turn, which `continue` then
+        # swallows exactly as before.
         on-failure:
-          continue: true
+          fallback:
+            - name: update_sse_attachment
+              type: ai.attachment.update
+              with:
+                conversation_id: "{{ inputs.investigationConversationId }}"
+                attachment_id: "{{ foreach.item.attachment_id }}"
+                data: "${{ foreach.item.data }}"
+                render_inline: true
+              on-failure:
+                continue: true
 
   # Hunt results write-back: every completed hunt (hit or clean) gets exactly
   # one message here. The narrative

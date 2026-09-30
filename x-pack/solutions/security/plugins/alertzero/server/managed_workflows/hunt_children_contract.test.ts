@@ -29,6 +29,7 @@ interface NestedStep {
   if?: string;
   with?: Record<string, unknown>;
   steps?: NestedStep[];
+  'on-failure'?: { continue?: boolean; fallback?: NestedStep[] };
 }
 
 interface ParsedWorkflow {
@@ -37,8 +38,13 @@ interface ParsedWorkflow {
   steps: NestedStep[];
 }
 
+/** Includes `on-failure` fallbacks: a step that only runs on the sad path still calls routes. */
 const flattenSteps = (steps: NestedStep[]): NestedStep[] =>
-  steps.flatMap((step) => [step, ...(step.steps ? flattenSteps(step.steps) : [])]);
+  steps.flatMap((step) => [
+    step,
+    ...flattenSteps(step.steps ?? []),
+    ...flattenSteps(step['on-failure']?.fallback ?? []),
+  ]);
 
 const parseChild = (workflowId: string): ParsedWorkflow => {
   const definition = getManagedWorkflowDefinition(workflowId);
@@ -98,6 +104,27 @@ describe('system-security-hunt-execute', () => {
   it('never sends the camelCase runId the coordinator no longer accepts', () => {
     const body = stepNamed(workflow, 'run_hunt_coordinator').with?.body as Record<string, unknown>;
     expect(body).not.toHaveProperty('runId');
+  });
+
+  // `buildSseAttachmentId` hashes (space, report, technique) with no run component, so a rerun
+  // of the same subject collides. Without the update the surviving card keeps the first run's
+  // payload, and packaging -- which matches on the current `run_id` -- cannot see the rerun at all.
+  it('upserts the SSE attachment so a rerun refreshes the card instead of conflicting', () => {
+    const add = stepNamed(workflow, 'add_sse_attachment');
+    const fallback = add['on-failure']?.fallback ?? [];
+
+    expect(fallback.map((step) => step.type)).toEqual(['ai.attachment.update']);
+    expect(fallback[0].with?.data).toBe(add.with?.data);
+  });
+
+  it('points the SSE update at exactly the id the add used', () => {
+    const add = stepNamed(workflow, 'add_sse_attachment');
+    const update = stepNamed(workflow, 'update_sse_attachment');
+
+    // Diverging here would make the update create-or-miss a different attachment, which is the
+    // same stranded-rerun bug wearing a second id.
+    expect(update.with?.attachment_id).toBe(add.with?.id);
+    expect(update.with?.conversation_id).toBe(add.with?.conversation_id);
   });
 
   it('writes the evidence fields the candidate selection gate filters on', () => {
