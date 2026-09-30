@@ -6,11 +6,14 @@
  */
 
 import { z } from '@kbn/zod/v4';
+import { MAX_TAG_LENGTH, TAGS_RESPONSE_LIMIT } from '@kbn/alerting-v2-constants';
 import { createRuleDataSchema } from './rule_data_schema';
 import {
   findRuleTemplatesRequestSchema,
   ruleTemplateDataSchema,
   ruleTemplateIdParamsSchema,
+  ruleTemplateTagsParamsSchema,
+  ruleTemplateTagsResponseSchema,
 } from './rule_template_schema';
 import { FIND_MAX_RESULT_WINDOW, RULE_TEMPLATE_MAX_PER_PAGE } from './constants';
 
@@ -135,6 +138,7 @@ describe('findRuleTemplatesRequestSchema', () => {
         sort_field: 'name',
         sort_order: 'asc',
         tags: ['Kubernetes'],
+        excluded_tags: ['development'],
       })
     ).toEqual({
       page: 2,
@@ -143,6 +147,7 @@ describe('findRuleTemplatesRequestSchema', () => {
       sort_field: 'name',
       sort_order: 'asc',
       tags: ['Kubernetes'],
+      excluded_tags: ['development'],
     });
   });
 
@@ -771,5 +776,38 @@ describe('ruleTemplateIdParamsSchema', () => {
 
   it('rejects unknown keys', () => {
     expect(() => ruleTemplateIdParamsSchema.parse({ id: 'template-1', foo: 'bar' })).toThrow();
+  });
+});
+
+describe('ruleTemplateTagsParamsSchema', () => {
+  it.each([{}, { search: '' }, { search: 'nginx' }, { search: 'a'.repeat(MAX_TAG_LENGTH) }])(
+    'accepts a bounded optional prefix: %j',
+    (params) => {
+      expect(ruleTemplateTagsParamsSchema.parse(params)).toEqual(params);
+    }
+  );
+
+  it.each([
+    { search: 'a'.repeat(MAX_TAG_LENGTH + 1) },
+    { kind: 'alert' },
+    { size: 100 },
+    { search: 1 },
+  ])('rejects invalid query parameters: %j', (params) => {
+    expect(ruleTemplateTagsParamsSchema.safeParse(params).success).toBe(false);
+  });
+});
+
+describe('ruleTemplateTagsResponseSchema', () => {
+  it.each([{ tags: [] }, { tags: ['nginx', 'infra'] }])('accepts tags %j', ({ tags }) => {
+    expect(ruleTemplateTagsResponseSchema.parse({ tags })).toEqual({ tags });
+  });
+
+  it.each([
+    {},
+    { tags: [''] },
+    { tags: ['a'.repeat(MAX_TAG_LENGTH + 1)] },
+    { tags: Array.from({ length: TAGS_RESPONSE_LIMIT + 1 }, (_, index) => `tag-${index}`) },
+  ])('rejects invalid or oversized responses', (response) => {
+    expect(ruleTemplateTagsResponseSchema.safeParse(response).success).toBe(false);
   });
 });
