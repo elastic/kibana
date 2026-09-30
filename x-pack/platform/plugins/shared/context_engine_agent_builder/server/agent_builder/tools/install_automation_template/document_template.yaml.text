@@ -90,12 +90,6 @@ steps:
       - name: summarize_document
         type: ai.prompt
         connector-id-by-feature: context_engine_prompt
-        on-failure:
-          retry:
-            max-attempts: 3
-            delay: "5s"
-            strategy: exponential
-            jitter: true
         with:
           systemPrompt: |
             You summarise source documents for a retrieval index. Ground every statement in the
@@ -254,14 +248,3 @@ steps:
             - esql-valid-syntax
             - esql-valid-runtime
 
-      - name: check_verification
-        type: if
-        condition: "steps.create_ki.output.verification.passed : false"
-        steps:
-          - name: log_verification_failure
-            type: console
-            with:
-              message: |
-                KI verification failed for document
-                {{ steps.document_context.output.doc_id }}.
-                Results: {{ steps.create_ki.output.verification.results | json }}
