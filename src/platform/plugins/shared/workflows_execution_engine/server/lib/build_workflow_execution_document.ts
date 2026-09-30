@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import omit from 'lodash/omit';
 import { v4 as generateUuid } from 'uuid';
 import type { WorkflowExecutionEngineModel } from '@kbn/workflows';
 import {
@@ -24,6 +25,7 @@ import type { WorkflowExecutionForInputRendering } from '../workflow_context_man
 
 export interface BuildWorkflowExecutionDocumentParams {
   workflow: WorkflowExecutionEngineModel;
+  spaceId: string;
   context: Record<string, unknown>;
   defaultTriggeredBy: string;
   authenticatedUser: string | undefined;
@@ -47,6 +49,7 @@ export const buildWorkflowExecutionDocument = (
 ): WorkflowExecutionForInputRendering => {
   const {
     workflow,
+    spaceId,
     context,
     defaultTriggeredBy,
     authenticatedUser,
@@ -55,7 +58,8 @@ export const buildWorkflowExecutionDocument = (
     getConcurrencyGroupKey,
   } = params;
   const triggeredBy = (context.triggeredBy as string | undefined) || defaultTriggeredBy;
-  const spaceId = (context.spaceId as string | undefined) || 'default';
+  // Strip the context's space so property order cannot override the trusted execution space.
+  const executionContext = { spaceId, ...omit(context, 'spaceId') };
   const metadata = context.metadata as Record<string, unknown> | undefined;
   const eventPayload = context.event as Record<string, unknown> | undefined;
   let rootEventChainDepth: number | undefined;
@@ -86,7 +90,7 @@ export const buildWorkflowExecutionDocument = (
     isEphemeral: workflow.isEphemeral,
     workflowDefinition: workflow.definition,
     yaml: workflow.yaml,
-    context,
+    context: executionContext,
     status: missingIdentity ? ExecutionStatus.FAILED : ExecutionStatus.PENDING,
     createdAt: now.toISOString(),
     executedBy: authenticatedUser ?? UNKNOWN_EXECUTION_IDENTITY,

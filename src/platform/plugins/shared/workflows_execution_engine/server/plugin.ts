@@ -956,6 +956,7 @@ export class WorkflowsExecutionEnginePlugin
 
                 const workflowExecution = buildWorkflowExecutionDocument({
                   workflow: toWorkflowExecutionEngineModel(workflow),
+                  spaceId,
                   context: executionContext,
                   defaultTriggeredBy: 'scheduled',
                   authenticatedUser: executedBy,
@@ -1242,15 +1243,13 @@ export class WorkflowsExecutionEnginePlugin
 
     const buildExecutionDocument = async (args: {
       workflow: WorkflowExecutionEngineModel;
+      spaceId: string;
       context: Record<string, unknown>;
       defaultTriggeredBy: string;
       authenticatedUser: string | undefined;
       now: Date;
     }): Promise<WorkflowExecutionForInputRendering> => {
-      await ensureServiceAccountBinding(
-        args.workflow,
-        (args.context.spaceId as string | undefined) || 'default'
-      );
+      await ensureServiceAccountBinding(args.workflow, args.spaceId);
       return buildWorkflowExecutionDocument({
         ...args,
         maxEventChainDepth: this.config.eventDriven.maxChainDepth,
@@ -1289,12 +1288,9 @@ export class WorkflowsExecutionEnginePlugin
       workflowExecution: WorkflowExecutionForInputRendering;
       repository: WorkflowExecutionRepository;
     }> => {
-      await ensureExecutionAccess(
-        workflow,
-        (context.spaceId as string | undefined) || 'default',
-        request
-      );
-      await ensureWorkflowEnabled(workflow, (context.spaceId as string | undefined) || 'default');
+      const spaceId = (context.spaceId as string | undefined) || 'default';
+      await ensureExecutionAccess(workflow, spaceId, request);
+      await ensureWorkflowEnabled(workflow, spaceId);
 
       const authenticatedUser = await getAuthenticatedUser(
         request,
@@ -1304,6 +1300,7 @@ export class WorkflowsExecutionEnginePlugin
 
       const workflowExecution = await buildExecutionDocument({
         workflow,
+        spaceId,
         context,
         defaultTriggeredBy,
         authenticatedUser,
@@ -1578,8 +1575,8 @@ export class WorkflowsExecutionEnginePlugin
       for (let idx = 0; idx < items.length; idx++) {
         const item = items[idx];
         try {
+          const spaceId = spaceIdFor(item);
           if (!item.workflow.isEphemeral) {
-            const spaceId = spaceIdFor(item);
             const state = executionStates.get(`${spaceId}:${item.workflow.id}`);
             if (state && !getWorkflowPermissions(state, profileId).execute) {
               throw new Error('You do not have permission to execute this workflow.');
@@ -1592,6 +1589,7 @@ export class WorkflowsExecutionEnginePlugin
           }
           const workflowExecution = await buildExecutionDocument({
             workflow: item.workflow,
+            spaceId,
             context: item.context,
             defaultTriggeredBy: 'alert',
             authenticatedUser,
@@ -1750,11 +1748,9 @@ export class WorkflowsExecutionEnginePlugin
         );
       }
 
-      await ensureWorkflowEnabled(workflow, workflow.spaceId || 'default');
-
       const spaceId = workflow.spaceId || 'default';
+      await ensureWorkflowEnabled(workflow, spaceId);
       const context: Record<string, unknown> = {
-        spaceId,
         ...(executionContext ?? {}),
         contextOverride,
       };
@@ -1766,6 +1762,7 @@ export class WorkflowsExecutionEnginePlugin
       );
       const workflowExecution = await buildExecutionDocument({
         workflow,
+        spaceId,
         context,
         defaultTriggeredBy: 'manual',
         authenticatedUser: executedBy,

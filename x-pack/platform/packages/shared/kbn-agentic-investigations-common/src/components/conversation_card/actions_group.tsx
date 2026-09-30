@@ -55,6 +55,19 @@ export const ConversationsActionsGroup = memo<ConversationsActionsGroupProps>(
 
     return (
       <EuiFlexGroup alignItems="center" gutterSize="xs" responsive direction="row">
+        <span
+          aria-hidden="true"
+          css={css({
+            width: '1px',
+            height: euiTheme.size.base,
+            background: euiTheme.colors.backgroundLightText,
+            marginLeft: euiTheme.size.s,
+            marginRight: euiTheme.size.xs,
+            [`@media (max-width: ${euiTheme.breakpoint.m}px)`]: {
+              display: 'none',
+            },
+          })}
+        />
         <EuiFlexItem grow={false}>
           <AiButtonIcon
             variant="empty"
@@ -68,30 +81,15 @@ export const ConversationsActionsGroup = memo<ConversationsActionsGroupProps>(
           />
         </EuiFlexItem>
         {hasAvailableActions(investigation, canManageEscalations) && (
-          <>
-            <span
-              aria-hidden="true"
-              css={css({
-                width: '1px',
-                height: euiTheme.size.base,
-                background: euiTheme.colors.backgroundLightText,
-                marginLeft: euiTheme.size.s,
-                marginRight: euiTheme.size.xs,
-                [`@media (max-width: ${euiTheme.breakpoint.m}px)`]: {
-                  display: 'none',
-                },
-              })}
+          <EuiFlexItem grow={false}>
+            <BaseActions
+              investigation={investigation}
+              onClickAction={onClickAction}
+              onClickRecommendedAction={onClickRecommendedAction}
+              canManageEscalations={canManageEscalations}
+              canCloseInvestigation={canCloseInvestigation}
             />
-            <EuiFlexItem grow={false}>
-              <BaseActions
-                investigation={investigation}
-                onClickAction={onClickAction}
-                onClickRecommendedAction={onClickRecommendedAction}
-                canManageEscalations={canManageEscalations}
-                canCloseInvestigation={canCloseInvestigation}
-              />
-            </EuiFlexItem>
-          </>
+          </EuiFlexItem>
         )}
       </EuiFlexGroup>
     );
