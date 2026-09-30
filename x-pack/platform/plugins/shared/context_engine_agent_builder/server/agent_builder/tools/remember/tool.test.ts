@@ -400,7 +400,7 @@ describe('remember tool', () => {
     });
   });
 
-  it('appends a data stream revision and resets omitted expiration to the default', async () => {
+  it('appends a data stream revision with only the current conversation reference', async () => {
     search.mockResolvedValue({
       hits: {
         hits: [
@@ -474,11 +474,6 @@ describe('remember tool', () => {
           tags: ['existing'],
           expires_at: '2026-12-23T12:00:00.000Z',
           references: [
-            {
-              uri: 'conversation://conversation-0',
-              relation: 'derived_from',
-              description: 'An earlier conversation.',
-            },
             {
               uri: 'conversation://conversation-1',
               relation: 'derived_from',

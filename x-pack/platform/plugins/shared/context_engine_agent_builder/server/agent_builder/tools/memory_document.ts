@@ -59,25 +59,16 @@ export const createMemoryWriter = ({
   },
 });
 
-export const addConversationReference = (
-  references: MemoryReference[] | undefined,
+export const createConversationReferences = (
   conversationId: string | undefined
 ): MemoryReference[] | undefined => {
   if (conversationId === undefined) {
-    return references;
-  }
-
-  const existingReferences = references ?? [];
-  const uri = `conversation://${conversationId}`;
-
-  if (existingReferences.some((reference) => reference.uri === uri)) {
-    return existingReferences;
+    return undefined;
   }
 
   return [
-    ...existingReferences,
     {
-      uri,
+      uri: `conversation://${conversationId}`,
       relation: 'derived_from',
       description: 'The Agent Builder conversation where this memory was recorded.',
     },

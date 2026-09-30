@@ -29,7 +29,7 @@ import { CONTEXT_ENGINE_REMEMBER_TOOL_ID } from '../../../../common/agent_builde
 import { assertContextEngineWriteAccess } from '../../assert_context_engine_write_access';
 import { aiIndexToolsAvailability } from '../ai_index_tools_availability';
 import {
-  addConversationReference,
+  createConversationReferences,
   createMemoryWriter,
   type StoredMemoryDocument,
   updateMemoryProvenance,
@@ -246,7 +246,7 @@ export const createRememberTool = ({
           ? {}
           : { expires_at: params.expires_at ?? defaultExpiresAt }),
         updated_at: now,
-        references: addConversationReference(existingDocument?.references, conversationId),
+        references: createConversationReferences(conversationId),
         attributes: {
           ...existingDocument?.attributes,
           'memory.session_id': sessionId,
