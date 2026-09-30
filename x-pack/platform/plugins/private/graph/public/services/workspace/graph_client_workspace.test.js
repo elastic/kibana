@@ -107,7 +107,6 @@ describe('graphui-workspace', function () {
 
       expect(workspace.nodes.length).toEqual(2);
       expect(workspace.edges.length).toEqual(1);
-      expect(workspace.selectedNodes.length).toEqual(0);
       expect(workspace.blocklistedNodes.length).toEqual(0);
 
       const nodeA = workspace.getNode(workspace.makeNodeId('field1', 'a'));
@@ -149,7 +148,6 @@ describe('graphui-workspace', function () {
 
       expect(workspace.nodes.length).toEqual(2);
       expect(workspace.edges.length).toEqual(1);
-      expect(workspace.selectedNodes.length).toEqual(0);
       expect(workspace.blocklistedNodes.length).toEqual(0);
 
       mockedResult = {
@@ -217,7 +215,6 @@ describe('graphui-workspace', function () {
       const nodeA2 = workspace.getNode(workspace.makeNodeId('field1', 'a2'));
       expect(typeof nodeA2).toEqual('object');
 
-      workspace.selectNode(nodeA1);
       workspace.deleteNodes([nodeA1.id]);
       expect(workspace.nodes.length).toEqual(1);
       nodeA1 = workspace.getNode(workspace.makeNodeId('field1', 'a1'));
@@ -273,8 +270,7 @@ describe('graphui-workspace', function () {
       const nodeA2 = workspace.getNode(workspace.makeNodeId('field1', 'a2'));
       expect(typeof nodeA2).toEqual('object');
 
-      workspace.selectNode(nodeA2);
-      workspace.mergeSelections(nodeA1);
+      workspace.groupNodes(nodeA1.id, [nodeA2.id]);
 
       let groupedItems = workspace.returnUnpackedGroupeds([nodeA1]);
       expect(groupedItems.length).toEqual(2);
@@ -286,11 +282,8 @@ describe('graphui-workspace', function () {
       expect(groupedItems.length).toEqual(2);
 
       //Grouped deletes delete all grouped items
-      workspace.selectNone();
-      workspace.selectNode(nodeA1);
       workspace.deleteNodes([nodeA1.id]);
       expect(workspace.nodes.length).toEqual(0);
-      expect(workspace.selectedNodes.length).toEqual(0);
 
       workspace.undo();
       expect(workspace.nodes.length).toEqual(2);

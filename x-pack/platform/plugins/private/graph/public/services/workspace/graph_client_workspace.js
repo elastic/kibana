@@ -41,9 +41,6 @@ function AddNodeOperation(node, owner) {
   self.node = node;
   self.undo = function () {
     vm.arrRemove(vm.nodes, self.node);
-    vm.arrRemove(vm.selectedNodes, self.node);
-    self.node.isSelected = false;
-
     delete vm.nodesMap[self.node.id];
   };
   self.redo = function () {
@@ -104,8 +101,6 @@ function GraphWorkspace(options) {
   this.options = options;
   this.undoLog = [];
   this.redoLog = [];
-  this.selectedNodes = [];
-  this.selectedEdges = [];
 
   if (!options) {
     this.options = {};
@@ -174,25 +169,6 @@ function GraphWorkspace(options) {
 
   //======== Selection functions ========
 
-  this.selectNode = function (node) {
-    node.isSelected = true;
-    if (self.selectedNodes.indexOf(node) < 0) {
-      self.selectedNodes.push(node);
-    }
-  };
-
-  this.addEdgeToSelection = function (edge) {
-    edge.isSelected = true;
-    self.selectedEdges.push(edge);
-  };
-
-  this.clearEdgeSelection = function () {
-    for (const edge of self.selectedEdges) {
-      edge.isSelected = false;
-    }
-    self.selectedEdges = [];
-  };
-
   this.deleteNodes = function (nodeIds) {
     const selectedNodes = nodeIds
       .map((nodeId) => self.nodesMap[nodeId])
@@ -206,13 +182,10 @@ function GraphWorkspace(options) {
 
     const undoOperations = [];
     allAndGrouped.forEach((node) => {
-      //We set selected to false because despite being deleted, node objects sit in an undo log
-      node.isSelected = false;
       delete self.nodesMap[node.id];
       undoOperations.push(new ReverseOperation(new AddNodeOperation(node, self)));
     });
     self.arrRemoveAll(self.nodes, allAndGrouped);
-    self.arrRemoveAll(self.selectedNodes, allAndGrouped);
 
     const danglingEdges = self.edges.filter(function (edge) {
       return self.nodes.indexOf(edge.source) < 0 || self.nodes.indexOf(edge.target) < 0;
@@ -224,13 +197,6 @@ function GraphWorkspace(options) {
     self.addUndoLogEntry(undoOperations);
     self.arrRemoveAll(self.edges, danglingEdges);
     self.runLayout();
-  };
-
-  this.selectNone = function () {
-    self.selectedNodes.forEach((node) => {
-      node.isSelected = false;
-    });
-    self.selectedNodes = [];
   };
 
   this.returnUnpackedGroupeds = function (topLevelNodeArray) {
@@ -286,8 +252,6 @@ function GraphWorkspace(options) {
     this.nodesMap = {};
     this.edgesMap = {};
     this.blocklistedNodes = [];
-    this.selectedNodes = [];
-    this.selectedEdges = [];
     this.lastResponse = null;
   };
 
@@ -402,45 +366,7 @@ function GraphWorkspace(options) {
         otherNode.parent === undefined
       ) {
         otherNode.parent = node;
-        otherNode.isSelected = false;
-        self.arrRemove(self.selectedNodes, otherNode);
         ops.push(new GroupOperation(node, otherNode));
-      }
-    });
-    self.selectNone();
-    self.selectNode(node);
-    self.addUndoLogEntry(ops);
-    self.runLayout();
-  };
-
-  this.mergeNeighbours = function (node) {
-    const neighbours = self.getNeighbours(node);
-    const ops = [];
-    neighbours.forEach(function (otherNode) {
-      if (otherNode !== node && otherNode.parent === undefined) {
-        otherNode.parent = node;
-        otherNode.isSelected = false;
-        self.arrRemove(self.selectedNodes, otherNode);
-        ops.push(new GroupOperation(node, otherNode));
-      }
-    });
-    self.addUndoLogEntry(ops);
-    self.runLayout();
-  };
-
-  this.mergeSelections = function (targetNode) {
-    if (!targetNode) {
-      console.log('Error - merge called on undefined target');
-      return;
-    }
-    const selClone = self.selectedNodes.slice();
-    const ops = [];
-    selClone.forEach(function (otherNode) {
-      if (otherNode !== targetNode && otherNode.parent === undefined) {
-        otherNode.parent = targetNode;
-        otherNode.isSelected = false;
-        self.arrRemove(self.selectedNodes, otherNode);
-        ops.push(new GroupOperation(targetNode, otherNode));
       }
     });
     self.addUndoLogEntry(ops);
@@ -482,11 +408,9 @@ function GraphWorkspace(options) {
     selection.forEach((node) => {
       delete self.nodesMap[node.id];
       self.blocklistedNodes.push(node);
-      node.isSelected = false;
     });
     self.arrRemoveAll(self.nodes, selection);
     self.arrRemoveAll(self.edges, danglingEdges);
-    self.selectedNodes = [];
     self.runLayout();
   };
 
@@ -648,7 +572,6 @@ function GraphWorkspace(options) {
         y: 1,
         numChildren: 0,
         parent: undefined,
-        isSelected: false,
         id: dedupedNode.id,
         label: label,
         color: dedupedNode.color,
@@ -707,10 +630,6 @@ function GraphWorkspace(options) {
   this.mergeIds = function (parentId, childId) {
     const parent = self.getNode(parentId);
     const child = self.getNode(childId);
-    if (child.isSelected) {
-      child.isSelected = false;
-      self.arrRemove(self.selectedNodes, child);
-    }
     child.parent = parent;
     self.addUndoLogEntry([new GroupOperation(parent, child)]);
     self.runLayout();
