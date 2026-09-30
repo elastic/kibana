@@ -40,7 +40,10 @@ const mockCreateServerStepDefinition = createServerStepDefinition as jest.Mocked
 describe('aiPromptStepDefinition', () => {
   let mockCoreSetup: jest.Mocked<CoreSetup<InferenceWorkflowsStartDeps>>;
   let mockInference: jest.Mocked<InferenceServerStart>;
-  let mockSearchInferenceEndpoints: { features: { get: jest.Mock }; endpoints: { getForFeature: jest.Mock } };
+  let mockSearchInferenceEndpoints: {
+    features: { get: jest.Mock };
+    endpoints: { getForFeature: jest.Mock };
+  };
   let mockContextManager: jest.Mocked<ContextManager>;
   let mockContext: StepHandlerContext<any>;
   let mockChatModel: any;
@@ -103,10 +106,12 @@ describe('aiPromptStepDefinition', () => {
     };
 
     mockCoreSetup = {
-      getStartServices: jest.fn().mockResolvedValue([
-        {},
-        { inference: mockInference, searchInferenceEndpoints: mockSearchInferenceEndpoints },
-      ]),
+      getStartServices: jest
+        .fn()
+        .mockResolvedValue([
+          {},
+          { inference: mockInference, searchInferenceEndpoints: mockSearchInferenceEndpoints },
+        ]),
     } as any;
 
     mockResolveConnectorId.mockResolvedValue('resolved-connector-id');
@@ -538,9 +543,7 @@ describe('aiPromptStepDefinition', () => {
 
         mockSearchInferenceEndpoints.features.get.mockReturnValue({ taskType: 'text_embedding' });
 
-        await expect(handler(contextWithFeature)).rejects.toThrow(
-          'not a chat completion feature'
-        );
+        await expect(handler(contextWithFeature)).rejects.toThrow('not a chat completion feature');
         expect(mockSearchInferenceEndpoints.endpoints.getForFeature).not.toHaveBeenCalled();
       });
 
