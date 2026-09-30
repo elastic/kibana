@@ -74,9 +74,7 @@ describe('processDocuments', () => {
 
     it('preserves all documents when none are duplicates or sparse', async () => {
       const count = 50;
-      const docs = Array.from({ length: count }, (_, i) =>
-        createDoc({ slug: `doc-${i}` })
-      );
+      const docs = Array.from({ length: count }, (_, i) => createDoc({ slug: `doc-${i}` }));
 
       const result = await processDocuments({ documents: docs, log: createLog() });
 
@@ -94,9 +92,7 @@ describe('processDocuments', () => {
     });
 
     it('preserves a pipe that is part of a product name, e.g. ES|QL', async () => {
-      const docs = [
-        createDoc({ slug: 'esql', content_title: 'ES|QL for security use cases' }),
-      ];
+      const docs = [createDoc({ slug: 'esql', content_title: 'ES|QL for security use cases' })];
 
       const result = await processDocuments({ documents: docs, log: createLog() });
 

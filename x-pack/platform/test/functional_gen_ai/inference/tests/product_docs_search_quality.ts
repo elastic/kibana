@@ -76,15 +76,6 @@ export const productDocsSearchQualitySuite = (_: {}, { getService }: FtrProvider
       .send({ inferenceId })
       .expect(200);
 
-  const callUninstall = (inferenceId: string) =>
-    supertest
-      .post('/internal/product_doc_base/uninstall')
-      .set(ELASTIC_HTTP_VERSION_HEADER, '1')
-      .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
-      .set('kbn-xsrf', 'foo')
-      .send({ inferenceId })
-      .expect(200);
-
   const searchDocs = async (query: string, products: ProductName[], topN: number) => {
     const resp = await es.search<SearchHit>({
       index: products.map(indexFor),
@@ -96,13 +87,54 @@ export const productDocsSearchQualitySuite = (_: {}, { getService }: FtrProvider
   };
 
   describe('product docs search quality', () => {
+    const productIndicesMissing = async () => {
+      const exists = await Promise.all(
+        PRODUCTS.map((product) => es.indices.exists({ index: indexFor(product) }))
+      );
+      return exists.some((present) => !present);
+    };
+
     before(async () => {
+      // Install is skipped when saved-object status is already "installed", even if the indices
+      // were deleted. Clear that status so this install recreates them.
+      if (await productIndicesMissing()) {
+        await es.deleteByQuery(
+          {
+            index: '.kibana',
+            refresh: true,
+            conflicts: 'proceed',
+            query: {
+              term: { type: 'product-doc-install-status' },
+            },
+          },
+          { ignore: [404] }
+        );
+      }
       const resp = await callInstall(defaultInferenceEndpoints.ELSER);
-      expect(resp.body.installed).to.be(true);
+      expect(resp.body.installed).to.be(
+        true,
+        `Product docs install failed: ${JSON.stringify(resp.body)}`
+      );
+      expect(await productIndicesMissing()).to.be(false);
     });
 
     after(async () => {
-      await callUninstall(defaultInferenceEndpoints.ELSER);
+      await Promise.all(
+        PRODUCTS.map((product) =>
+          es.indices.delete({ index: indexFor(product) }, { ignore: [404] })
+        )
+      );
+      await es.deleteByQuery(
+        {
+          index: '.kibana',
+          refresh: true,
+          conflicts: 'proceed',
+          query: {
+            term: { type: 'product-doc-install-status' },
+          },
+        },
+        { ignore: [404] }
+      );
     });
 
     // ── 1. Document count ─────────────────────────────────────────────────
@@ -150,6 +182,17 @@ export const productDocsSearchQualitySuite = (_: {}, { getService }: FtrProvider
         );
       });
 
+      it('ES|QL IP_LOCATION query surfaces the IP_LOCATION command docs', async () => {
+        const hits = await searchDocs('ES|QL IP_LOCATION command', ['elasticsearch'], TOP_N);
+        const found = hits.some((h) => /query-languages\/esql\/commands\/ip-location/i.test(h.url));
+        expect(found).to.be(
+          true,
+          `Expected https://www.elastic.co/docs/reference/query-languages/esql/commands/ip-location in top ${TOP_N}, got: ${JSON.stringify(
+            hits.map((h) => ({ title: h.content_title, url: h.url }))
+          )}`
+        );
+      });
+
       it('anomaly detection query surfaces machine-learning content', async () => {
         const hits = await searchDocs(
           'machine learning anomaly detection job',
@@ -171,7 +214,7 @@ export const productDocsSearchQualitySuite = (_: {}, { getService }: FtrProvider
       });
 
       it('dashboard creation query surfaces Kibana dashboard content', async () => {
-        const hits = await searchDocs('create a dashboard in Kibana', ['kibana'], TOP_N);
+        const hits = await searchDocs('load kibana dashboards', ['kibana'], TOP_N);
         const found = hits.some(
           (h) => /dashboard/i.test(h.url) || /dashboard/i.test(h.content_title)
         );

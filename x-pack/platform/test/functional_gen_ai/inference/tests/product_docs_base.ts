@@ -108,24 +108,42 @@ export const productDocsBaseInstallationSuite = ({}: {}, { getService }: FtrProv
     );
   };
 
+  const resetProductDocInstallStatus = async () => {
+    // Drop install-status docs directly. The uninstall API waits on a task that can hold the
+    // install lock for minutes, which blows the suite hook timeout before any test runs.
+    await es.deleteByQuery(
+      {
+        index: '.kibana',
+        refresh: true,
+        conflicts: 'proceed',
+        query: {
+          term: { type: 'product-doc-install-status' },
+        },
+      },
+      { ignore: [404] }
+    );
+  };
+
+  const deleteAllProductDocIndices = async () => {
+    await Promise.all(products.map((product) => deleteProductDocIndex({ productName: product })));
+    await Promise.all(
+      products.map((product) =>
+        deleteProductDocIndex({
+          productName: product,
+          optionalInferenceId: defaultInferenceEndpoints.JINAv5,
+        })
+      )
+    );
+  };
+
   describe('product docs base', () => {
-    const cleanUp = async () => {
-      await kibanaServer.savedObjects.cleanStandardList();
-      await Promise.all(products.map((product) => deleteProductDocIndex({ productName: product })));
-      await Promise.all(
-        products.map((product) =>
-          deleteProductDocIndex({
-            productName: product,
-            optionalInferenceId: defaultInferenceEndpoints.JINAv5,
-          })
-        )
-      );
-    };
     before(async () => {
-      await cleanUp();
+      await kibanaServer.savedObjects.cleanStandardList();
+      await deleteAllProductDocIndices();
+      await resetProductDocInstallStatus();
     });
     after(async () => {
-      await cleanUp();
+      await kibanaServer.savedObjects.cleanStandardList();
     });
 
     it('installs the ELSER product docs', async () => {
@@ -144,7 +162,8 @@ export const productDocsBaseInstallationSuite = ({}: {}, { getService }: FtrProv
         )}`
       );
     });
-    describe('Jina (via EIS)', () => {
+    // Jina is hosted on EIS and needs KIBANA_EIS_CCM_API_KEY (set in CI). Skip locally when it is absent.
+    (process.env.KIBANA_EIS_CCM_API_KEY ? describe : describe.skip)('Jina (via EIS)', () => {
       before(async () => {
         await ensureEisEndpoints({
           es,
