@@ -21,7 +21,7 @@ The template is the source of truth for what renders. It is either generated ser
 
 | Package | Contents |
 |---------|----------|
-| `@kbn/custom-content-common` | Constants (embeddable type, size limits, CSP meta), the zod state schema, the two update schemas (`customContentUpdateSchema` for the dashboard tool, `customContentPanelUpdateSchema` for the chat tool), `stripMarkdownFences` |
+| `@kbn/custom-content-common` | Constants (embeddable type, size limits, CSP meta), the zod state schema, the update schema (`customContentUpdateSchema`, used by the dashboard generation tool), `stripMarkdownFences` |
 | `@kbn/custom-content-server` | `createCustomContentTemplateResolver` (the LLM template generator) and `sanitizeCellValue` |
 
 Both packages are separate from `agent_builder_dashboards` because this plugin and the dashboard generation tool consume the same code.
@@ -96,57 +96,33 @@ Opening the panel context menu → Edit renders `EditCustomContentFlyout`, which
 
 - Edit the LiquidJS template directly in a Monaco editor (`liquid` language mode), with a copy-to-clipboard button and a vertically resizable editor pane
 - Add or change the ES|QL query, with a live data preview (`EsqlPreviewSection`)
-- Hand off to the AI chat sidebar with the current draft attached — labelled "Refine with chat" when a template already exists and "Generate with chat" when the editor is empty, and shown only when `agentBuilder` is available
+- Hand off to the AI chat sidebar — labelled "Refine with chat" when a template already exists and "Generate with chat" when the editor is empty, and shown only when `agentBuilder` is available. The draft is applied to the panel first, then the shared "Refine with chat" action attaches the dashboard and a pointer to this panel
 
 "Run Preview" renders the current draft into the panel without saving, and is enabled only while there are unpreviewed changes. "Apply and close" is enabled only when the template or the query has changed from the saved state.
 
 ## Agent builder integration
 
-When `agentBuilder` is available (optional plugin dependency), the panel participates in two ways.
+When `agentBuilder` is available (optional plugin dependency), the panel participates in two ways. Both go through the dashboard attachment: the panel never has an attachment of its own.
 
 ### 1. Refine an existing panel via chat
 
-"Refine with chat" attaches the current template, query, panel title, and panel id as a `platform.custom_content.panel_context` attachment and opens the chat sidebar. The `embeddable_id` field identifies which panel on the dashboard owns the attachment.
+"Refine with chat" (flyout) and "Generate with chat" (empty panel) run the shared `refinePanelWithChat` UI action. The action id lives in `@kbn/dashboard-plugin/public` as `REFINE_WITH_CHAT_ACTION_ID` and the action itself is registered by `agent_builder_dashboards`, so this plugin only needs `uiActions`. The same action appears in every ES|QL Lens and custom panel's context menu and hover bar in the dashboard app.
 
-The conversation is the ordinary dashboard chat — panels are not given their own chat session. Isolation comes from the attachment rather than the conversation: each panel gets a stable attachment id (`platform.custom_content.panel_context-<embeddableId>`, see `utils/chat_integration.ts`) so re-pushing a panel's context replaces its previous snapshot instead of accumulating duplicates, and every consumer keys off `embeddable_id`. A single round can therefore carry the dashboard attachment plus one attachment per custom content panel, and each panel picks out its own.
+The action attaches two things to the chat: the dashboard attachment (`platform.dashboard.dashboard_state`, the editable working copy the dashboard app keeps in sync) and a thin pointer (`platform.dashboard.panel`) naming this panel on it. The pointer carries only `dashboard_attachment_id`, `panel_id`, `label` and `panel_type`; the panel config lives in the dashboard attachment. The agent edits the panel with `platform.dashboard.generate_dashboard` → `edit_panels` (`source: "config"`, `type: "custom_content"`, the pointer's `panel_id` as `panelId`), and the dashboard live update applies the result to the panel through `applySerializedState`. Chat renders only the dashboard card.
 
-The attachment type is registered server-side in `server/attachment_types/custom_content_context.ts` and client-side in `public/attachment_types/custom_content_context.ts`.
+From the flyout, the current draft (template and query) is applied to the panel before the action runs, so the attached dashboard already carries what the user was looking at. The action is deferred by the dashboard's unsaved-changes debounces so the serialized dashboard state has picked the draft up.
 
-A server-side builtin tool, `custom_content_update_panel` (`server/tools/update_custom_content_tool.ts`), accepts `embeddable_id` plus `prompt` and/or `esqlQuery` — never a `template`. It resolves a new template via the shared resolver, merges the result into that panel's attachment, and updates it with `actor: agent`. The embeddable subscribes to `RoundCompleteEvent` and scans every agent-authored create/update ref in the round for a `platform.custom_content.panel_context` attachment whose `embeddable_id` matches its own uuid, then applies that template and query. It scans all refs rather than only the first, because a round routinely touches the dashboard attachment and other panels' attachments too.
-
-Passing `esqlQuery: null` removes the query entirely.
-
-#### Targeting the right panel
-
-`embeddable_id` is **required**. One conversation can hold a context attachment per panel, so without an explicit target the tool would act on whichever panel was attached first — refining a second panel would silently edit the first. The id is surfaced to the agent in each attachment's text representation (`Custom content panel (embeddable_id: …)`, see `formatPanelContext`) and echoed in `getAgentDescription()`.
-
-This is why the tool takes `customContentPanelUpdateSchema` rather than `customContentUpdateSchema` (`@kbn/custom-content-common`). The two share their field definitions and their "at least one of prompt or esqlQuery" rule, but only the chat variant carries an identifier — the dashboard generation tool already targets by `panelId`, and a second identifier in its config would be redundant and unfillable.
-
-#### Panels that are not attached
-
-Only panels the user explicitly sent to chat via "Refine with chat" have a context attachment. Asking a fresh conversation to update some other custom content panel therefore misses, even though the panel is visible on the dashboard.
-
-That is recoverable rather than fatal: the dashboard attachment is added automatically for a new conversation (`dashboard_app_integration.ts`), and `edit_panels` accepts `type: "custom_content"` targeting by `panelId`, needing no context attachment at all. Both the tool description and the not-found error therefore name `platform.dashboard.generate_dashboard` as the route to take, alongside the ids that *are* attached. Without that the agent dead-ends and invents its own remediation — in practice, asking the user to click the panel, which attaches nothing.
-
-Two consequences worth knowing. The fallback applies the change through `api.setState(...)`, a whole-dashboard state replace, rather than the targeted `template$`/`esqlQuery$` update the attachment route uses. And the tool id is inlined as a string constant rather than imported from `@kbn/agent-builder-dashboards-common`, to avoid a plugin dependency for prompt copy — it needs keeping in sync with `dashboardTools.generateDashboard`.
-
-#### Preview and version history
-
-The tool returns `attachment_id` and `version`, and both the tool description and the attachment's `getAgentDescription()` instruct the agent to emit `<render_attachment id="…" version="…" />` in its answer. That tag is what renders the attachment card for the round; the panel update itself is applied independently via `RoundCompleteEvent`, so a round without the tag still updates the panel, it just doesn't offer a card to preview from.
-
-The card carries a single **Preview** action (`public/attachment_types/custom_content_context.ts`), which applies that card's version to the live panel — the same in-place state swap the dashboard attachment performs, not a separate preview container. The definition deliberately provides neither `renderInlineContent` nor `renderCanvasContent`, since either would make agent builder open its canvas flyout instead.
-
-Because each round's card is pinned to the version that round produced, clicking Preview on an earlier round steps the panel back to that template, and clicking a later one steps it forward. The button reaches the panel through a small `embeddableId → handler` registry (`utils/panel_preview_registry.ts`) that mounted panels register into; when the panel is not mounted the action warns instead of failing silently. The handler is lazy-loaded so the registry and its copy stay out of the plugin's page-load bundle.
+The "generating" state (`CustomContentGeneratingPrompt`) is derived from chat events: a `round_started` whose `input.attachment_refs` contains this panel's pointer id (`platform.dashboard.panel-<embeddableId>`) turns it on, and any terminal execution event turns it off. It only shows for rounds that carry the pointer; follow-up prompts that edit the panel without re-attaching it still update the panel, just without the interstitial.
 
 ### 2. Agent-driven dashboard creation and editing
 
 `agent_builder_dashboards` registers a `custom_content` panel type for its dashboard generation tool (`.../operations/panels/custom_content/index.ts`). Both the create and edit schemas omit `template` — the agent supplies only `prompt` and optionally `esqlQuery`, and the server generates the template.
 
-The edit variant reuses `customContentUpdateSchema` and adds its own `panelId`, so this path can reach any custom content panel on the dashboard whether or not it has a chat attachment. That makes it the fallback described above.
+The edit variant reuses `customContentUpdateSchema` and adds its own `panelId`, so this path can reach any custom content panel on the dashboard. It is also the path "Refine with chat" leads to, through the panel pointer described above.
 
 ### The shared template resolver
 
-`createCustomContentTemplateResolver` (`@kbn/custom-content-server`) backs both the panel update tool and the dashboard generation tool. It picks one of two system prompts:
+`createCustomContentTemplateResolver` (`@kbn/custom-content-server`) backs the dashboard generation tool for both new and edited custom content panels. It picks one of two system prompts:
 
 - **Static HTML** — no query involved; produces a self-contained HTML document.
 - **Liquid template** — a query is present or changing; produces a reusable template with no literal data baked in.
@@ -163,7 +139,7 @@ When a query is changing it samples 3 rows (`appendLimitToQuery`) to give the LL
 
 A valid query that matches no rows is **not** a failure — Elasticsearch returns the real columns with empty values, and the template is generated with a "no rows available for the current time range" note.
 
-Callers already surface this: `applyCustomContentTemplates` drops the panel and records a failure, `edit_panels` records a failure and leaves the existing panel untouched, and `custom_content_update_panel` returns an error result. The dashboard skill instructs the agent to explain each `data.failures` entry to the user.
+Callers already surface this: `applyCustomContentTemplates` drops the panel and records a failure, `edit_panels` records a failure and leaves the existing panel untouched. The dashboard skill instructs the agent to explain each `data.failures` entry to the user.
 
 ## Security
 
