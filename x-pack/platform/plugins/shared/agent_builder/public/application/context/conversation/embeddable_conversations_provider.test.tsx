@@ -7,12 +7,13 @@
 
 import '@testing-library/jest-dom';
 import { coreMock } from '@kbn/core/public/mocks';
-import React, { useContext } from 'react';
+import React from 'react';
 import { act, fireEvent, render, screen } from '@testing-library/react';
 import type { EmbeddableConversationCallbacks } from '../../../embeddable/types';
 import type { AgentBuilderInternalService } from '../../../services/types';
 import { storageKeys } from '../../storage_keys';
-import { ConversationContext } from './conversation_context';
+import type { ConversationContext } from './conversation_context';
+import { useConversationContext } from './conversation_context';
 import {
   EmbeddableConversationsProvider,
   PinnedConversationProvider,
@@ -51,13 +52,13 @@ const TAG_A = 'context-engine-ai-index:default:index-a';
 const TAG_B = 'context-engine-ai-index:default:index-b';
 
 const AgentIdConsumer = () => {
-  const ctx = useContext(ConversationContext);
-  return <div>{`agent:${ctx?.agentId}`}</div>;
+  const { agentId } = useConversationContext();
+  return <div>{`agent:${agentId}`}</div>;
 };
 
 const ContextSpy = () => {
   const { conversationId, initialMessage, autoSendInitialMessage, setConversationId } =
-    useContext(ConversationContext);
+    useConversationContext();
   return (
     <>
       <div>{`conversationId:${conversationId ?? 'none'}`}</div>
