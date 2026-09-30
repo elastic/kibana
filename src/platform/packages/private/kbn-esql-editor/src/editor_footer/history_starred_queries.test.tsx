@@ -309,6 +309,30 @@ describe('Starred and History queries components', () => {
       });
     });
 
+    it('opens save as view for the selected history query', () => {
+      render(
+        <KibanaContextProvider services={services}>
+          <HistoryAndStarredQueriesTabs
+            containerCSS={{}}
+            containerWidth={1024}
+            onUpdateAndSubmit={jest.fn()}
+            onClose={jest.fn()}
+            height={200}
+            starredQueriesService={createMockStarredQueriesService()}
+          />
+        </KibanaContextProvider>
+      );
+
+      const historyTable = within(screen.getByTestId('ESQLEditor-queryHistory'));
+      const query = 'FROM logs | WHERE status = "error"';
+      const row = historyTable.getByText(query).closest('tr');
+      expect(row).not.toBeNull();
+      fireEvent.click(within(row as HTMLElement).getByRole('button', { name: 'Save as view' }));
+
+      const dialog = screen.getByRole('dialog', { name: 'Save as view' });
+      expect(within(dialog).getByTestId('saveAsViewQueryPreview')).toHaveTextContent(query);
+    });
+
     it('should render two tabs', () => {
       render(
         <KibanaContextProvider services={services}>

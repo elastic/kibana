@@ -43,6 +43,8 @@ import { getReducedSpaceStyling, swapArrayElements } from './history_starred_que
 import type { EsqlStarredQueriesService, StarredQueryItem } from './esql_starred_queries_service';
 import { DiscardStarredQueryModal } from './discard_starred_query';
 import { useRestorableState } from '../restorable_state';
+import { SaveAsViewModal, saveAsViewLabel } from '../save_as_view/save_as_view_modal';
+import { useApplySavedView } from '../save_as_view/use_apply_saved_view';
 
 export function QueryHistoryAction({
   toggleHistory,
@@ -234,6 +236,8 @@ export function QueryList({
   const theme = useEuiTheme();
   const scrollBarStyles = euiScrollBarStyles(theme);
   const [isDiscardQueryModalVisible, setIsDiscardQueryModalVisible] = useState(false);
+  const [queryToSave, setQueryToSave] = useState<string>();
+  const applySavedView = useApplySavedView();
   const [starredQueries, setStarredQueries] = useState<StarredQueryItem[]>([]);
   const starredQueriesCount = starredQueries.length;
 
@@ -314,6 +318,21 @@ export function QueryList({
                 </EuiToolTip>
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
+                <EuiToolTip position="top" content={saveAsViewLabel} disableScreenReaderOutput>
+                  <EuiButtonIcon
+                    iconType="save"
+                    aria-label={saveAsViewLabel}
+                    data-test-subj="ESQLEditor-history-save-as-view-button"
+                    role="button"
+                    iconSize="m"
+                    onClick={() => setQueryToSave(item.queryString)}
+                    css={css`
+                      cursor: pointer;
+                    `}
+                  />
+                </EuiToolTip>
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
                 <EuiCopy
                   textToCopy={item.queryString}
                   beforeMessage={i18n.translate('esqlEditor.query.esqlQueriesCopy', {
@@ -341,7 +360,7 @@ export function QueryList({
         },
       },
     ];
-  }, [onUpdateAndSubmit, starredQueriesCount, starredQueriesService]);
+  }, [onUpdateAndSubmit, setQueryToSave, starredQueriesCount, starredQueriesService]);
 
   const isOnReducedSpaceLayout = containerWidth < 560;
   const columns = useMemo(() => {
@@ -393,6 +412,13 @@ export function QueryList({
             (await starredQueriesService?.onDiscardModalClose(dismissFlag, removeQuery)) ??
             Promise.resolve()
           }
+        />
+      )}
+      {queryToSave !== undefined && (
+        <SaveAsViewModal
+          query={queryToSave}
+          onClose={() => setQueryToSave(undefined)}
+          onSaved={applySavedView}
         />
       )}
     </div>

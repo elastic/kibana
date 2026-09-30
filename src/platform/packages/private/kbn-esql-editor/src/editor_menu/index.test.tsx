@@ -9,7 +9,7 @@
 import React from 'react';
 import '@testing-library/jest-dom';
 import { BehaviorSubject } from 'rxjs';
-import { act, render, screen } from '@testing-library/react';
+import { act, fireEvent, render, screen } from '@testing-library/react';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { coreMock, notificationServiceMock } from '@kbn/core/public/mocks';
 import { ESQLMenu } from '.';
@@ -37,13 +37,16 @@ const services = { core: startMock, data: { dataViews: {} } };
 
 const renderMenu = async (
   props: React.ComponentProps<typeof ESQLMenu> = {},
-  { editorIsInline = false }: { editorIsInline?: boolean } = {}
+  {
+    editorIsInline = false,
+    currentQuery = '',
+  }: { editorIsInline?: boolean; currentQuery?: string } = {}
 ) =>
   act(async () => {
     render(
       <KibanaContextProvider services={services as any}>
         <EsqlEditorActionsProvider>
-          <EsqlEditorActionsRegister editorIsInline={editorIsInline} />
+          <EsqlEditorActionsRegister editorIsInline={editorIsInline} currentQuery={currentQuery} />
           <ESQLMenu {...props} />
         </EsqlEditorActionsProvider>
       </KibanaContextProvider>
@@ -81,5 +84,28 @@ describe('ESQLMenu', () => {
       'data-hide-recommended',
       'false'
     );
+  });
+
+  it('disables save as view when the query is empty', async () => {
+    await renderMenu();
+    expect(screen.getByRole('button', { name: 'Save as view' })).toBeDisabled();
+    expect(screen.getByTestId('ESQLEditor-save-as-view-new-dot')).toBeInTheDocument();
+  });
+
+  it('opens the save as view modal for the current query', async () => {
+    await renderMenu({}, { currentQuery: 'FROM logs-*' });
+    const saveButton = screen.getByRole('button', { name: 'Save as view' });
+    expect(saveButton).toBeEnabled();
+
+    fireEvent.click(saveButton);
+
+    const dialog = await screen.findByRole('dialog', { name: 'Save as view' });
+    expect(dialog).toHaveTextContent('FROM logs-*');
+  });
+
+  it('keeps save as view available when history is hidden', async () => {
+    await renderMenu({ hideHistory: true }, { currentQuery: 'FROM logs-*' });
+    expect(screen.getByRole('button', { name: 'Save as view' })).toBeEnabled();
+    expect(screen.queryByTestId('ESQLEditor-toggle-query-history-icon')).not.toBeInTheDocument();
   });
 });

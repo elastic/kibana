@@ -107,6 +107,13 @@ export {
   EsqlViewsClientError,
   type EsqlViewsClient,
 } from './utils/esql_views_client';
+export {
+  MAX_ESQL_VIEW_DESCRIPTION_LENGTH,
+  MAX_ESQL_VIEW_NAME_LENGTH,
+  validateEsqlViewName,
+  type EsqlViewNameValidationError,
+} from './utils/esql_view_validation';
+export { getViewEsqlQuery } from './utils/get_view_esql_query';
 export { getEsqlControls, getAllEsqlControls, getVariableNamePrefix } from './utils/controls';
 export {
   getColumnsWithHighlights,
