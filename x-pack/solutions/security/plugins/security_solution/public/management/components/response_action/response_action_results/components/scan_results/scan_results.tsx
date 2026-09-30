@@ -25,17 +25,17 @@ export const ScanResults = memo<ScanResultsProps>(
       return <></>;
     }
 
-    if (!agentActionState.wasSuccessful) {
-      return (
-        <EndpointActionFailureMessage
-          action={action}
-          agentId={agentId}
-          data-test-subj={getTestId('failure')}
-        />
-      );
-    }
-
-    return <></>;
+    return (
+      <div data-test-subj={getTestId()}>
+        {!agentActionState.wasSuccessful && (
+          <EndpointActionFailureMessage
+            action={action}
+            agentId={agentId}
+            data-test-subj={getTestId('failure')}
+          />
+        )}
+      </div>
+    );
   }
 );
 ScanResults.displayName = 'ScanResults';

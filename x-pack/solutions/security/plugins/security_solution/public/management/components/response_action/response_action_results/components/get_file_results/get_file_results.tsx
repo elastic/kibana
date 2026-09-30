@@ -31,24 +31,24 @@ export const GetFileResults = memo<GetFileResultsProps>(
       return <></>;
     }
 
-    if (!agentActionState.wasSuccessful) {
-      return (
-        <EndpointActionFailureMessage
-          action={action}
-          agentId={agentId}
-          data-test-subj={getTestId('failure')}
-        />
-      );
-    }
-
     return (
-      <ResponseActionFileDownloadLink
-        action={action}
-        agentId={agentId}
-        canAccessFileDownloadLink={canWriteFileOperations}
-        textSize="xs"
-        data-test-subj={getTestId('getFileDownloadLink')}
-      />
+      <div data-test-subj={getTestId()}>
+        {!agentActionState.wasSuccessful ? (
+          <EndpointActionFailureMessage
+            action={action}
+            agentId={agentId}
+            data-test-subj={getTestId('failure')}
+          />
+        ) : (
+          <ResponseActionFileDownloadLink
+            action={action}
+            agentId={agentId}
+            canAccessFileDownloadLink={canWriteFileOperations}
+            textSize="xs"
+            data-test-subj={getTestId('getFileDownloadLink')}
+          />
+        )}
+      </div>
     );
   }
 );

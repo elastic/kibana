@@ -83,7 +83,9 @@ export const ResponseActionResults = memo<ResponseActionResultsProps>(
             ? 'success'
             : 'danger';
           const hostStatusDisplay = (
-            <EuiTextColor color={hostStatusMessageColor}>{hostStatusMessage}</EuiTextColor>
+            <EuiTextColor data-test-subj={getTestId('hostStatus')} color={hostStatusMessageColor}>
+              {hostStatusMessage}
+            </EuiTextColor>
           );
 
           return (
