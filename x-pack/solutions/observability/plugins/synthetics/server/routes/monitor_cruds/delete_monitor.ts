@@ -5,7 +5,8 @@
  * 2.0.
  */
 import { i18n } from '@kbn/i18n';
-import { schema } from '@kbn/config-schema';
+import { z } from '@kbn/zod';
+import { MAX_MONITOR_BULK_SIZE, optionalRouteId, routeId } from '../zod_query';
 import { DeleteMonitorAPI } from './services/delete_monitor_api';
 import type { SyntheticsRestApiRouteFactory } from '../types';
 import type { DeleteParamsResponse } from '../../../common/runtime_types';
@@ -22,16 +23,13 @@ export const deleteSyntheticsMonitorRoute: SyntheticsRestApiRouteFactory<
   validate: {},
   validation: {
     request: {
-      body: schema.nullable(
-        schema.object({
-          ids: schema.arrayOf(schema.string({ maxLength: 1024 }), {
-            minSize: 1,
-            maxSize: 1000,
-          }),
+      body: z
+        .strictObject({
+          ids: z.array(routeId).min(1).max(MAX_MONITOR_BULK_SIZE),
         })
-      ),
-      params: schema.object({
-        id: schema.maybe(schema.string({ maxLength: 1024 })),
+        .nullable(),
+      params: z.strictObject({
+        id: optionalRouteId,
       }),
     },
   },

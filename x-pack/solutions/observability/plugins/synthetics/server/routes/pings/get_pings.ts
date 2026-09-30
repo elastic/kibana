@@ -5,33 +5,27 @@
  * 2.0.
  */
 
-import type { TypeOf } from '@kbn/config-schema';
-import { schema } from '@kbn/config-schema';
+import { z } from '@kbn/zod';
+import { queryNumber, optionalQueryString, MAX_DATE_RANGE_LENGTH } from '../zod_query';
 import { queryPings } from '../../queries/query_pings';
 import type { SyntheticsRestApiRouteFactory } from '../types';
 import { SYNTHETICS_API_URLS } from '../../../common/constants';
-import {
-  MAX_DATE_LENGTH,
-  MAX_ENUM_LENGTH,
-  MAX_ID_LENGTH,
-  MAX_LABEL_LENGTH,
-} from '../../constants/schema_validation';
 
-export const getPingsRouteQuerySchema = schema.object({
-  from: schema.string({ maxLength: MAX_DATE_LENGTH }),
-  to: schema.string({ maxLength: MAX_DATE_LENGTH }),
-  locations: schema.maybe(schema.string({ maxLength: MAX_ID_LENGTH })),
-  excludedLocations: schema.maybe(schema.string({ maxLength: MAX_ID_LENGTH })),
-  monitorId: schema.maybe(schema.string({ maxLength: MAX_ID_LENGTH })),
-  index: schema.maybe(schema.number()),
-  size: schema.maybe(schema.number()),
-  pageIndex: schema.maybe(schema.number()),
-  sort: schema.maybe(schema.string({ maxLength: MAX_ENUM_LENGTH })),
-  status: schema.maybe(schema.string({ maxLength: MAX_ENUM_LENGTH })),
-  remoteName: schema.maybe(schema.string({ maxLength: MAX_LABEL_LENGTH })),
+export const getPingsRouteQuerySchema = z.strictObject({
+  from: z.string().max(MAX_DATE_RANGE_LENGTH),
+  to: z.string().max(MAX_DATE_RANGE_LENGTH),
+  locations: optionalQueryString,
+  excludedLocations: optionalQueryString,
+  monitorId: optionalQueryString,
+  index: queryNumber.optional(),
+  size: queryNumber.optional(),
+  pageIndex: queryNumber.optional(),
+  sort: optionalQueryString,
+  status: optionalQueryString,
+  remoteName: z.string().max(256).optional(),
 });
 
-type GetPingsRouteRequest = TypeOf<typeof getPingsRouteQuerySchema>;
+type GetPingsRouteRequest = z.infer<typeof getPingsRouteQuerySchema>;
 
 export const syntheticsGetPingsRoute: SyntheticsRestApiRouteFactory = () => ({
   method: 'GET',

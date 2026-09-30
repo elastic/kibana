@@ -144,6 +144,7 @@ export const manageCasesTool = (
     },
     schema: manageCasesSchema,
     tags: ['cases'],
+    excludeFromMcp: true,
     handler: async (args, toolContext) => {
       const { mode, connector_id, tags_to_add, case_id, assignees, ...rest } = args;
 

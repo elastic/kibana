@@ -156,7 +156,7 @@ const TAB_PAGES: Record<StreamFlyoutTabId, (props: StreamFlyoutPageProps) => Rea
   ),
 };
 
-function StreamFlyoutContent({ name, onClose }: StreamFlyoutProps) {
+function StreamFlyoutContent({ name, onClose, refreshStreams }: StreamFlyoutProps) {
   const { loading, definition } = useStreamFlyoutDetail();
   const { push } = useStreamsAppRouter();
   const { rangeFrom, rangeTo } = useTimeRange();
@@ -211,8 +211,8 @@ function StreamFlyoutContent({ name, onClose }: StreamFlyoutProps) {
   );
 
   const page = useMemo(
-    () => TAB_PAGES[selectedTab]({ name, onClose, loading }),
-    [loading, name, selectedTab, onClose]
+    () => TAB_PAGES[selectedTab]({ name, onClose, loading, refreshStreams }),
+    [loading, name, onClose, refreshStreams, selectedTab]
   );
   const badges = [];
 
@@ -367,9 +367,10 @@ function StreamFlyoutContent({ name, onClose }: StreamFlyoutProps) {
 export interface StreamFlyoutProps {
   name: string;
   onClose: () => void;
+  refreshStreams?: () => void;
 }
 
-export function StreamFlyout({ name, onClose }: StreamFlyoutProps) {
+export function StreamFlyout({ name, onClose, refreshStreams }: StreamFlyoutProps) {
   const { streamsRepositoryClient } = useKibana().dependencies.start.streams;
 
   return (
@@ -377,7 +378,7 @@ export function StreamFlyout({ name, onClose }: StreamFlyoutProps) {
       name={name}
       streamsRepositoryClient={streamsRepositoryClient}
     >
-      <StreamFlyoutContent name={name} onClose={onClose} />
+      <StreamFlyoutContent name={name} onClose={onClose} refreshStreams={refreshStreams} />
     </StreamFlyoutDetailContextProvider>
   );
 }

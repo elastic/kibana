@@ -18,6 +18,7 @@ project:
   sourceRoot: x-pack/solutions/security/packages/security-mitre-attack-common
 dependsOn:
   - '@kbn/zod'
+  - '@kbn/zod-helpers'
 tags:
   - shared-common
   - package

@@ -8,9 +8,10 @@
  */
 
 import { ESQL_CONTROL } from '@kbn/controls-constants';
-import type { DiscoverSessionControlPanels } from '../schema';
-import { MAX_DISCOVER_SESSION_CONTROL_PANELS } from '../schema';
-import { transformControlPanelsIn, transformControlPanelsOut } from './transform_control_panels';
+import { MAX_DISCOVER_SESSION_CONTROL_PANELS } from '@kbn/discover-session-constants';
+import type { DiscoverSessionApiControlPanels } from '../schema';
+import { serializeEsqlControls } from '../../../common/session/control_panels';
+import { transformControlPanelsOut } from './transform_control_panels';
 
 describe('control panel transforms', () => {
   describe('transformControlPanelsOut', () => {
@@ -247,7 +248,7 @@ describe('control panel transforms', () => {
   });
 
   describe('round-trip', () => {
-    const controlPanels: DiscoverSessionControlPanels = [
+    const controlPanels: DiscoverSessionApiControlPanels = [
       {
         id: 'control-1',
         type: ESQL_CONTROL,
@@ -279,7 +280,7 @@ describe('control panel transforms', () => {
     ];
 
     it('round-trips API control_panels through stored controlGroupJson', () => {
-      const stored = transformControlPanelsIn(controlPanels);
+      const stored = serializeEsqlControls(controlPanels);
       const { panels } = transformControlPanelsOut(stored, 'tab-1');
 
       expect(panels).toEqual(controlPanels);
@@ -314,53 +315,10 @@ describe('control panel transforms', () => {
       });
 
       const { panels: apiPanels } = transformControlPanelsOut(legacyStored, 'tab-1');
-      const storedAgain = transformControlPanelsIn(apiPanels);
+      const storedAgain = serializeEsqlControls(apiPanels);
       const { panels } = transformControlPanelsOut(storedAgain, 'tab-1');
 
       expect(panels).toEqual(apiPanels);
-    });
-  });
-
-  describe('transformControlPanelsIn', () => {
-    it('maps API control_panels to stored flattened controlGroupJson', () => {
-      const result = transformControlPanelsIn([
-        {
-          id: 'control-1',
-          type: ESQL_CONTROL,
-          width: 'small',
-          grow: true,
-          config: {
-            control_type: 'STATIC_VALUES',
-            variable_name: 'foo',
-            variable_type: 'values',
-            available_options: ['x', 'y'],
-            selected_options: ['y'],
-            single_select: true,
-          },
-        },
-      ]);
-
-      expect(result).toBe(
-        JSON.stringify({
-          'control-1': {
-            order: 0,
-            type: ESQL_CONTROL,
-            width: 'small',
-            grow: true,
-            control_type: 'STATIC_VALUES',
-            variable_name: 'foo',
-            variable_type: 'values',
-            available_options: ['x', 'y'],
-            selected_options: ['y'],
-            single_select: true,
-          },
-        })
-      );
-    });
-
-    it('returns undefined for empty control arrays', () => {
-      expect(transformControlPanelsIn(undefined)).toBeUndefined();
-      expect(transformControlPanelsIn([])).toBeUndefined();
     });
   });
 });

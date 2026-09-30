@@ -10,7 +10,7 @@ import type {
   IndicesUpdateAliasesAction,
 } from '@elastic/elasticsearch/lib/api/types';
 import type { Logger, ElasticsearchClient } from '@kbn/core/server';
-import { sortBy } from 'lodash';
+import { omit, sortBy } from 'lodash';
 import type { IIndexPatternString } from '../resource_installer_utils';
 import { retryTransientEsErrors } from '../../lib/retry_transient_es_errors';
 import type { DataStreamAdapter } from './data_stream_adapter';
@@ -19,6 +19,7 @@ import {
   evaluateTotalFieldsLimit,
   getTotalFieldsLimitSettings,
 } from './total_fields_limit_settings';
+import { computeResourceHash, RESOURCE_CONTENT_HASH_META_FIELD } from './resource_hash';
 
 export interface ConcreteIndexInfo {
   index: string;
@@ -95,6 +96,52 @@ const updateTotalFieldLimitSetting = async ({
   }
 };
 
+const readContentHash = (mappings: MappingTypeMapping | undefined): string | undefined => {
+  const contentHash = mappings?._meta?.[RESOURCE_CONTENT_HASH_META_FIELD];
+  return typeof contentHash === 'string' ? contentHash : undefined;
+};
+
+/**
+ * Reads the content hash stamped in `_meta` on the mapping of every index the given
+ * name resolves to, or `undefined` when the mappings cannot be read.
+ */
+const getInstalledMappingHashes = async (
+  esClient: ElasticsearchClient,
+  index: string,
+  logger: Logger
+): Promise<Array<string | undefined> | undefined> => {
+  try {
+    // `index` may be a data stream name, which resolves to its backing indices.
+    const response = await retryTransientEsErrors(
+      () =>
+        esClient.indices.get({
+          index,
+          features: ['mappings', 'settings'],
+          // Only the `_meta` stamp is read, and the field definitions it sits next to run
+          // to several MB per index. `index.uuid` is pulled alongside it purely as an
+          // anchor: Elasticsearch omits an index entirely when the filter leaves nothing
+          // of it, and an index carrying no `_meta` has to read as unstamped rather than
+          // disappear, or its missing stamp would go unnoticed.
+          filter_path: ['*.settings.index.uuid', '*.mappings._meta'],
+        }),
+      { logger }
+    );
+    const installed = Object.values(response ?? {});
+    if (installed.length === 0) {
+      return undefined;
+    }
+    return installed.map(({ mappings }) => readContentHash(mappings));
+  } catch (err) {
+    // Any failure reading the installed hash (404, permissions, exhausted retries)
+    // leaves the installed mapping unknown, which falls through to the PUT. The
+    // check must never block an update that would otherwise have succeeded.
+    logger.debug(
+      `Could not read installed mapping hash for ${index}; will install (${err.message})`
+    );
+    return undefined;
+  }
+};
+
 // This will update the mappings of backing indices but *not* the settings. This
 // is due to the fact settings can be classed as dynamic and static, and static
 // updates will fail on an index that isn't closed. New settings *will* be applied as part
@@ -107,9 +154,32 @@ const updateUnderlyingMapping = async ({
   attempt = 1,
 }: UpdateIndexOpts) => {
   const { index, alias } = concreteIndexInfo;
+
+  // Stamp the content hash (over the mapping body, excluding the `_meta` that carries
+  // it) so a later install can detect an unchanged mapping and skip the write.
+  const contentHash = computeResourceHash(omit(simulatedMapping, '_meta'));
+  const mappingToInstall: MappingTypeMapping = {
+    ...simulatedMapping,
+    _meta: {
+      ...simulatedMapping._meta,
+      [RESOURCE_CONTENT_HASH_META_FIELD]: contentHash,
+    },
+  };
+
+  // Skip only when every index the name resolves to carries a matching stamp, and only
+  // on the first attempt: after a total_fields.limit increase we must PUT so the
+  // previously rejected fields can apply.
+  if (attempt === 1) {
+    const installedHashes = await getInstalledMappingHashes(esClient, index, logger);
+    if (installedHashes !== undefined && installedHashes.every((hash) => hash === contentHash)) {
+      logger.debug(`Skipping PUT mapping for ${alias}; content unchanged (${contentHash})`);
+      return;
+    }
+  }
+
   try {
     await retryTransientEsErrors(
-      () => esClient.indices.putMapping({ index, ...simulatedMapping }),
+      () => esClient.indices.putMapping({ index, ...mappingToInstall }),
       { logger }
     );
 

@@ -15,7 +15,7 @@ import { useRefreshedRangeFromUrl } from '../../../hooks';
 import { SyntheticsDatePicker } from '../../common/date_picker/synthetics_date_picker';
 import { useSelectedLocation } from '../hooks/use_selected_location';
 import { useMonitorAttachmentConfig } from '../hooks/use_monitor_attachment_config';
-import { useMonitorDetailsPage } from '../use_monitor_details_page';
+import { MonitorDetailsPage } from '../../common/app_header';
 
 export const MONITOR_ALERTS_TABLE_ID = 'xpack.synthetics.monitor.alertTable';
 
@@ -31,53 +31,54 @@ export function MonitorDetailsAlerts() {
   // Configure the agent builder flyout with the monitor details
   useMonitorAttachmentConfig();
 
-  const redirect = useMonitorDetailsPage();
-  if (redirect) {
-    return redirect;
-  }
-
-  if (!selectedLocation) {
-    return <EuiLoadingSpinner size="xl" />;
-  }
-
   return (
-    <>
-      <EuiSpacer size="m" />
-      <EuiFlexGroup direction="column" gutterSize="xl">
-        <EuiFlexItem>
-          <SyntheticsDatePicker fullWidth={true} />
-        </EuiFlexItem>
-        <EuiFlexItem>
-          <ObservabilityAlertsTable
-            services={{
-              data,
-              http,
-              notifications,
-              fieldFormats,
-              application,
-              licensing,
-              cases,
-              settings,
-            }}
-            id={MONITOR_ALERTS_TABLE_ID}
-            ruleTypeIds={SYNTHETICS_RULE_TYPE_IDS}
-            consumers={[AlertConsumers.UPTIME, AlertConsumers.ALERTS, AlertConsumers.OBSERVABILITY]}
-            query={{
-              bool: {
-                filter: [
-                  { term: { configId } },
-                  { term: { 'location.id': selectedLocation?.id } },
-                  { range: { '@timestamp': { gte: from, lte: to } } },
-                ],
-              },
-            }}
-            pageSize={100}
-            data-test-subj="monitorAlertsTable"
-            renderActionsCell={AlertActions}
-            showInspectButton
-          />
-        </EuiFlexItem>
-      </EuiFlexGroup>
-    </>
+    <MonitorDetailsPage selectedTab="alerts">
+      {!selectedLocation ? (
+        <EuiLoadingSpinner size="xl" />
+      ) : (
+        <>
+          <EuiSpacer size="m" />
+          <EuiFlexGroup direction="column" gutterSize="xl">
+            <EuiFlexItem>
+              <SyntheticsDatePicker fullWidth={true} />
+            </EuiFlexItem>
+            <EuiFlexItem>
+              <ObservabilityAlertsTable
+                services={{
+                  data,
+                  http,
+                  notifications,
+                  fieldFormats,
+                  application,
+                  licensing,
+                  cases,
+                  settings,
+                }}
+                id={MONITOR_ALERTS_TABLE_ID}
+                ruleTypeIds={SYNTHETICS_RULE_TYPE_IDS}
+                consumers={[
+                  AlertConsumers.UPTIME,
+                  AlertConsumers.ALERTS,
+                  AlertConsumers.OBSERVABILITY,
+                ]}
+                query={{
+                  bool: {
+                    filter: [
+                      { term: { configId } },
+                      { term: { 'location.id': selectedLocation?.id } },
+                      { range: { '@timestamp': { gte: from, lte: to } } },
+                    ],
+                  },
+                }}
+                pageSize={100}
+                data-test-subj="monitorAlertsTable"
+                renderActionsCell={AlertActions}
+                showInspectButton
+              />
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </>
+      )}
+    </MonitorDetailsPage>
   );
 }

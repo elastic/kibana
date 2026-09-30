@@ -43,7 +43,7 @@ import type { EcfServiceConfig } from '../ecf_cloudformation';
 import { getOnboardingSessionKey } from '../onboarding_session_storage';
 import type { ServiceInstance, ServiceVars } from './service_settings_step/use_service_settings';
 import { useEcfTemplateVersion } from '../use_ecf_template_version';
-import { ECF_STACK_NAME_MAX_LENGTH } from '../../../common/ecf_template_version';
+import { ECF_STACK_NAME_MAX_LENGTH } from '../../../common/providers/aws/ecf_template_version';
 
 // ── Constants ─────────────────────────────────────────────────────────────────
 
@@ -89,7 +89,7 @@ interface UseEcfDeploymentOpts {
 interface UseEcfDeploymentResult {
   /** True when at least one ECF template family is relevant to the selected services. */
   hasAnyEcf: boolean;
-  /** Service IDs handled by ECF — used by the parent to exclude them from agentless chips. */
+  /** Service IDs handled by ECF — used by the parent to exclude them from managed-integration chips. */
   ecfServiceIds: Set<string>;
   /** True when all relevant ECF template families have had their Launch button clicked. */
   isDone: boolean;

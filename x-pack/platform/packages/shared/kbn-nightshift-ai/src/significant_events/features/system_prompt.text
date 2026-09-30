@@ -296,4 +296,4 @@ One example per type family, plus an indirectly-inferred case. Rules above win w
 - Entities: one feature per distinct named component; include a valid `filter` when the entity's own field=value is observed, omit it otherwise
 - Schema: one feature per evident family; short `properties` only
 
-Build one deduplicated list of features to emit for the current sample documents, then call **finalize_features** exactly once. Previously identified features are context, not a historical inventory to return.
+Build one deduplicated result for the current sample documents, then return it exactly once through the configured structured-output mechanism. Previously identified features are context, not a historical inventory to return.

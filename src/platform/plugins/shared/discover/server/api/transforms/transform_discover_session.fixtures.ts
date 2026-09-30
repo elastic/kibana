@@ -7,10 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { DataGridDensity, UnifiedHistogramSuggestionType } from '@kbn/discover-utils';
+import type { DiscoverSessionApiData } from '@kbn/as-code-discover-schema';
+import {
+  DataGridDensity,
+  DiscoverTabType,
+  UnifiedHistogramSuggestionType,
+} from '@kbn/discover-session-constants';
 import { VIEW_MODE } from '@kbn/saved-search-plugin/common';
 import type { DiscoverSessionAttributes } from '@kbn/saved-search-plugin/server';
-import type { DiscoverSessionApiData } from '../schema';
 
 export const discoverSessionAttributes: DiscoverSessionAttributes = {
   title: 'all_props',
@@ -257,6 +261,14 @@ export const discoverSessionAttributes: DiscoverSessionAttributes = {
         },
         controlGroupJson:
           '{"e2be5bb5-87d2-4226-8950-2614f0522209":{"selected_options":["event.dataset"],"variable_name":"field_name","single_select":true,"variable_type":"fields","control_type":"STATIC_VALUES","available_options":["event.dataset","event.module","event.type"],"title":"field_name","order":1,"width":"medium","grow":false,"type":"esql_control"},"c8106b8e-e13a-4dc4-9fc6-1a8c48e70464":{"selected_options":["kibana.log"],"variable_name":"field_value","single_select":true,"variable_type":"values","control_type":"VALUES_FROM_QUERY","esql_query":"FROM logs*,-logstash*,filebeat-* | WHERE @timestamp <= ?_tend and @timestamp > ?_tstart | STATS BY ??field_name","title":"field_value","order":1,"width":"medium","grow":false,"type":"esql_control"}}',
+        tabTypeState: {
+          type: DiscoverTabType.Metrics,
+          dimensions: ['host.name'],
+          searchTerm: 'cpu',
+          counterAggregation: 'max',
+          gaugeAggregation: 'min',
+          histogramPercentile: 'p99',
+        },
       },
     },
   ],
@@ -270,6 +282,7 @@ export const discoverSessionApiData: DiscoverSessionApiData = {
     {
       id: 'fe157f5f-1ad8-47c9-9cb0-f9fff059aa48',
       label: 'Classic',
+      type: DiscoverTabType.Default,
       sort: [
         {
           name: 'transaction.id',
@@ -292,11 +305,9 @@ export const discoverSessionApiData: DiscoverSessionApiData = {
       header_row_height: 1,
       density: DataGridDensity.COMPACT,
       documents_display_mode: 'json',
-      json_mode_settings: {
-        hide_nulls: true,
-        wrap_lines: false,
-        default_rendered_nodes: 10,
-      },
+      hide_nulls: true,
+      wrap_lines: false,
+      default_rendered_nodes: 10,
       query: {
         expression: '',
         language: 'kql',
@@ -327,6 +338,12 @@ export const discoverSessionApiData: DiscoverSessionApiData = {
     {
       id: 'de687fc2-0719-456e-b9c3-adccc8426746',
       label: 'ES|QL',
+      type: DiscoverTabType.Metrics,
+      dimensions: ['host.name'],
+      search_term: 'cpu',
+      counter_aggregation: 'max',
+      gauge_aggregation: 'min',
+      histogram_percentile: 'p99',
       sort: [
         {
           name: 'transaction.id',
@@ -340,11 +357,9 @@ export const discoverSessionApiData: DiscoverSessionApiData = {
       header_row_height: 1,
       density: DataGridDensity.COMPACT,
       documents_display_mode: 'json',
-      json_mode_settings: {
-        hide_nulls: true,
-        wrap_lines: false,
-        default_rendered_nodes: 10,
-      },
+      hide_nulls: true,
+      wrap_lines: false,
+      default_rendered_nodes: 10,
       data_source: {
         type: 'esql',
         query: 'FROM logs*,-logstash*,filebeat-* | WHERE ??field_name == ?field_value',

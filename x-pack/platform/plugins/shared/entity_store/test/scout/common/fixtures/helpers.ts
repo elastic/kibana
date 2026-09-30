@@ -5,12 +5,16 @@
  * 2.0.
  */
 
-import type { EsClient } from '@kbn/scout';
+import type { EsClient, KbnClient } from '@kbn/scout';
 import type { apiTest } from '@kbn/scout';
 import { expect } from '@kbn/scout/api';
 import type { EntityStoreStatusResponseBody } from '../../../../server/routes/apis/status';
 import { hashEuid } from '../../../../common/domain/euid';
-import type { EntityType } from '../../../../common';
+import {
+  RESOLUTION_RULE_IDS,
+  type EntityType,
+  type GetEntityMaintainersResponse,
+} from '../../../../common';
 
 import {
   ENTITY_STORE_ROUTES,
@@ -20,6 +24,7 @@ import {
   UPDATES_INDEX,
   ENTRA_SOURCE_INDEX,
 } from './constants';
+import { EntityResolutionRuleTypeName } from '../../../../server/domain/resolution/rules/saved_object/constants';
 
 type ApiWorkerFixtures = Parameters<Parameters<typeof apiTest>[2]>[0];
 export type ApiClientFixture = ApiWorkerFixtures['apiClient'];
@@ -37,6 +42,24 @@ export const normalizeKeywordList = (value: unknown): string[] => {
 
 /** Logs-compatible data stream used by extraction tests to seed source log events. */
 export const LOGS_TEST_INDEX = 'logs-entity-store-tests-default';
+const LOGS_TEST_TEMPLATE = 'entity-store-test-logs-override';
+
+export interface LogsTestDataStreamOptions {
+  index?: string;
+  template?: string;
+  /** Defaults to the exact stream name. Overlapping same-priority templates are rejected. */
+  indexPattern?: string;
+}
+
+const resolveLogsTestDataStream = ({
+  index = LOGS_TEST_INDEX,
+  template = LOGS_TEST_TEMPLATE,
+  indexPattern,
+}: LogsTestDataStreamOptions = {}) => ({
+  index,
+  template,
+  indexPattern: indexPattern ?? index,
+});
 
 /** Non-logs data stream used by query translation tests. Avoids logs-* template quirks (null stripping, constant_keyword). */
 export const QUERY_TRANSLATION_TEST_INDEX = 'entity-store-tests-default';
@@ -60,10 +83,26 @@ export const clearEntityStoreIndices = async (esClient: EsClient) => {
 };
 
 /**
+ * Removes rule enablement overrides so `defaultEnabled` is what the matcher sees.
+ * Disable/enable routes write a saved object rather than deleting one, and
+ * uninstall does not clean these up.
+ */
+export const clearResolutionRuleOverrides = async (kbnClient: KbnClient): Promise<void> => {
+  await kbnClient.savedObjects.clean({ types: [EntityResolutionRuleTypeName] });
+};
+
+/**
  * API client shape required by forceUserExtraction.
  * Use this instead of importing Scout's ApiClient type.
  */
 export interface ForceLogExtractionApiClient {
+  get(
+    url: string,
+    options: {
+      headers: Record<string, string>;
+      responseType: 'json';
+    }
+  ): Promise<{ statusCode: number; body: unknown }>;
   post(
     url: string,
     options: {
@@ -93,11 +132,18 @@ export const ingestDoc = async (
  * The standard `logs` component template locks data_stream.dataset as constant_keyword
  * (one value per backing index). Our test archive has multiple dataset values, so we
  * override the mapping before the data stream is created.
+ *
+ * Each template matches only its stream name. Overlapping patterns at this
+ * priority are rejected by Elasticsearch.
  */
-export const setupLogsTestDataStream = async (esClient: EsClient) => {
+export const setupLogsTestDataStream = async (
+  esClient: EsClient,
+  options?: LogsTestDataStreamOptions
+) => {
+  const { index, template, indexPattern } = resolveLogsTestDataStream(options);
   await esClient.indices.putIndexTemplate({
-    name: 'entity-store-test-logs-override',
-    index_patterns: ['logs-entity-store-tests-*'],
+    name: template,
+    index_patterns: [indexPattern],
     data_stream: {},
     // Compose the same component templates as the built-in `logs` template so ECS field
     // mappings (e.g. entity.id as keyword) are preserved. Our own template.mappings entry
@@ -113,13 +159,16 @@ export const setupLogsTestDataStream = async (esClient: EsClient) => {
     },
     priority: 500,
   });
-  await esClient.indices.deleteDataStream({ name: LOGS_TEST_INDEX }).catch(() => {});
+  await esClient.indices.deleteDataStream({ name: index }).catch(() => {});
 };
 
-export const teardownLogsTestDataStream = async (esClient: EsClient) => {
-  await esClient.indices
-    .deleteIndexTemplate({ name: 'entity-store-test-logs-override' })
-    .catch(() => {});
+export const teardownLogsTestDataStream = async (
+  esClient: EsClient,
+  options?: LogsTestDataStreamOptions
+) => {
+  const { index, template } = resolveLogsTestDataStream(options);
+  await esClient.indices.deleteDataStream({ name: index }).catch(() => {});
+  await esClient.indices.deleteIndexTemplate({ name: template }).catch(() => {});
 };
 
 /** Sets up a plain (non-logs-*) data stream for query translation tests with ECS field mappings. */
@@ -161,6 +210,7 @@ interface SeedUserEntityOptions {
   namespace: string;
   email: string | string[];
   userName?: string;
+  userId?: string | string[];
   timestamp?: string;
 }
 
@@ -175,7 +225,7 @@ interface SeedUserEntityOptions {
  */
 export const seedUserEntity = async (
   esClient: EsClient,
-  { entityId, namespace, email, userName, timestamp }: SeedUserEntityOptions
+  { entityId, namespace, email, userName, userId, timestamp }: SeedUserEntityOptions
 ) => {
   const ts = timestamp ?? new Date().toISOString();
   await esClient.index({
@@ -197,6 +247,7 @@ export const seedUserEntity = async (
       user: {
         email,
         name: userName ?? entityId,
+        ...(userId !== undefined ? { id: userId } : {}),
       },
       '@timestamp': ts,
     },
@@ -307,17 +358,23 @@ export const assertNotResolved = async (
   entityId: string,
   timeoutMs = 10_000
 ): Promise<void> => {
+  const existing = await fetchEntitySource(esClient, entityId);
+  if (!existing) {
+    throw new Error(`Entity '${entityId}' was not found — cannot assert it stayed unresolved`);
+  }
+
   const start = Date.now();
 
   while (Date.now() - start < timeoutMs) {
     const source = await fetchEntitySource(esClient, entityId);
-    if (source) {
-      const resolvedTo = readResolvedTo(source);
-      if (resolvedTo != null) {
-        throw new Error(
-          `Entity '${entityId}' unexpectedly resolved to '${resolvedTo}' — expected it to stay unresolved`
-        );
-      }
+    if (!source) {
+      throw new Error(`Entity '${entityId}' disappeared while asserting it stayed unresolved`);
+    }
+    const resolvedTo = readResolvedTo(source);
+    if (resolvedTo != null) {
+      throw new Error(
+        `Entity '${entityId}' unexpectedly resolved to '${resolvedTo}' — expected it to stay unresolved`
+      );
     }
 
     await new Promise((resolve) => setTimeout(resolve, 200));
@@ -362,6 +419,63 @@ export const triggerMaintainerRun = async (
     }
 
     throw new Error(`Failed to trigger maintainer run '${maintainerId}': ${body}`);
+  }
+};
+
+const readSidRuleWatermark = async (
+  apiClient: ForceLogExtractionApiClient,
+  headers: Record<string, string>
+): Promise<string | null | undefined> => {
+  const response = await apiClient.get(
+    `${ENTITY_STORE_ROUTES.internal.ENTITY_MAINTAINERS_GET}?ids=automated-resolution`,
+    { headers, responseType: 'json' }
+  );
+  expect(response.statusCode).toBe(200);
+  const maintainer = (response.body as GetEntityMaintainersResponse).maintainers.find(
+    (item) => item.id === 'automated-resolution'
+  );
+  const rules = (
+    maintainer?.customState as {
+      rules?: Record<string, { lastProcessedTimestamp?: string | null }>;
+    } | null
+  )?.rules;
+  return rules?.[RESOLUTION_RULE_IDS.WINDOWS_SID_BRIDGE]?.lastProcessedTimestamp;
+};
+
+const watermarkCovers = (watermark: string | null | undefined, firstSeen: string): boolean =>
+  typeof watermark === 'string' && Date.parse(watermark) >= Date.parse(firstSeen);
+
+/**
+ * Fails unless this call's SID matcher run advanced the watermark to the
+ * control entity's first_seen, so negative asserts are not vacuous.
+ */
+export const assertSidRuleWatermarked = async (
+  apiClient: ForceLogExtractionApiClient,
+  headers: Record<string, string>,
+  esClient: EsClient
+): Promise<void> => {
+  const firstSeen = new Date().toISOString();
+  await seedUserEntity(esClient, {
+    entityId: 'sid-rule-watermark-control',
+    namespace: 'active_directory',
+    email: 'sid-rule-watermark-control@sid.example',
+    userId: 'S-1-5-21-9-8-7-6501',
+    timestamp: firstSeen,
+  });
+
+  await triggerMaintainerRun(apiClient, headers, 'automated-resolution', { sync: true });
+  let watermark = await readSidRuleWatermark(apiClient, headers);
+  if (!watermarkCovers(watermark, firstSeen)) {
+    await triggerMaintainerRun(apiClient, headers, 'automated-resolution', { sync: true });
+    watermark = await readSidRuleWatermark(apiClient, headers);
+  }
+
+  if (!watermarkCovers(watermark, firstSeen)) {
+    throw new Error(
+      `windows_sid_bridge lastProcessedTimestamp is ${JSON.stringify(
+        watermark
+      )} — expected it at or after the control first_seen ${firstSeen}. Negative asserts would be vacuous.`
+    );
   }
 };
 

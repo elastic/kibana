@@ -43,6 +43,18 @@ export abstract class NavigationMixin extends DiscoverAppBase {
     });
   }
 
+  getRefreshDataButton(): Locator {
+    return this.page.testSubj.locator('refreshDataButton');
+  }
+
+  getUninitializedPrompt(): Locator {
+    return this.page.testSubj.locator('discoverUninitialized');
+  }
+
+  getUninitializedKeyboardShortcuts(): Locator {
+    return this.page.testSubj.locator('discoverUninitializedKeyboardShortcuts');
+  }
+
   // Waits for a Discover tab to finish loading.
   async waitUntilTabIsLoaded() {
     await this.waitForDiscoverPage();
@@ -108,7 +120,6 @@ export abstract class NavigationMixin extends DiscoverAppBase {
       await this.page.testSubj.click('select-text-based-language-btn');
     }
 
-    await this.waitUntilSearchingHasFinished();
     await this.codeEditor.waitCodeEditorReady('ESQLEditor');
   }
 
@@ -127,8 +138,7 @@ export abstract class NavigationMixin extends DiscoverAppBase {
   async writeAndSubmitEsqlQuery(query: string) {
     await this.selectTextBaseLang();
     await this.codeEditor.setCodeEditorValue(query);
-    await this.submitQuery();
-    await this.waitUntilSearchingHasFinished();
+    await this.submitQueryAndWait();
   }
 
   async writeAndSubmitKqlQuery(query: string) {
@@ -141,18 +151,45 @@ export abstract class NavigationMixin extends DiscoverAppBase {
     }
 
     await this.queryBar.setQuery(query);
-    await this.submitQuery();
-    await this.waitUntilSearchingHasFinished();
+    await this.submitQueryAndWait();
   }
 
   /**
    * Submits the current query (classic search bar or ES|QL editor) by clicking
    * the query submit button. Does not wait for results — pair with
-   * `waitUntilSearchingHasFinished()` or `waitUntilTabIsLoaded()` as appropriate.
+   * `submitQueryAndWait()` or `waitUntilTabIsLoaded()` as appropriate.
    */
   async submitQuery() {
     await this.hideTabPreview();
     await this.page.testSubj.click('querySubmitButton');
+  }
+
+  /**
+   * Submits the current query and waits until the tab has finished loading.
+   */
+  async submitQueryAndWait() {
+    await this.submitQuery();
+    await this.waitUntilTabIsLoaded();
+  }
+
+  /**
+   * Opens a new Discover tab and runs the current query so the tab is initialized.
+   * New tabs skip the initial fetch and ES|QL tabs start with an empty query, so
+   * this recopies the previous ES|QL query before submit. Use
+   * `unifiedTabs.createNewTab()` when the test needs the uninitialized empty state.
+   */
+  async createNewTabAndSearch() {
+    const previousMode = await this.getCurrentQueryMode();
+    const previousEsqlQuery =
+      previousMode === 'esql' ? (await this.getEsqlQueryValue()).trim() : '';
+
+    await this.unifiedTabs.createNewTab();
+
+    if (previousEsqlQuery) {
+      await this.codeEditor.setCodeEditorValue(previousEsqlQuery);
+    }
+
+    await this.submitQueryAndWait();
   }
 
   async getQuerySubmitButtonLabel(): Promise<string | null> {
@@ -160,8 +197,7 @@ export abstract class NavigationMixin extends DiscoverAppBase {
   }
 
   async waitForDataGridRowWithRefresh(rowLocator: Locator, timeout = 30_000) {
-    await this.submitQuery();
-    await this.waitUntilSearchingHasFinished();
+    await this.submitQueryAndWait();
     await rowLocator.waitFor({ state: 'visible', timeout });
   }
 
@@ -211,9 +247,12 @@ export abstract class NavigationMixin extends DiscoverAppBase {
     return this.page.testSubj.locator('esqlInlineDocumentationFlyout');
   }
 
+  getEsqlHistoryPanel(): Locator {
+    return this.page.testSubj.locator('ESQLEditor-history-container');
+  }
+
   async isEsqlHistoryPanelOpen(): Promise<boolean> {
-    return this.page.testSubj
-      .locator('ESQLEditor-history-container')
+    return this.getEsqlHistoryPanel()
       .waitFor({ state: 'visible', timeout: 1_000 })
       .then(() => true)
       .catch(() => false);
@@ -222,9 +261,27 @@ export abstract class NavigationMixin extends DiscoverAppBase {
   async toggleEsqlHistoryPanel() {
     const wasOpen = await this.isEsqlHistoryPanelOpen();
     await this.page.testSubj.locator('ESQLEditor-toggle-query-history-icon').click();
-    await this.page.testSubj
-      .locator('ESQLEditor-history-container')
-      .waitFor({ state: wasOpen ? 'hidden' : 'visible' });
+    await this.getEsqlHistoryPanel().waitFor({ state: wasOpen ? 'hidden' : 'visible' });
+  }
+
+  /**
+   * Runs the given query from the open ES|QL history panel. The row's run button
+   * both loads the query into the editor and submits it. Matches the row by query
+   * text rather than index, so callers don't depend on history ordering.
+   */
+  async runEsqlHistoryQuery(query: string) {
+    const row = this.page.testSubj
+      .locator('ESQLEditor-queryHistory')
+      .locator('tr')
+      .filter({
+        // Match the whole text of the query cell rather than `hasText` on the
+        // row: that is a case-insensitive substring match over the timestamp and
+        // action buttons too, so one query would also match a row whose query
+        // merely contains it.
+        has: this.page.testSubj.locator('queryString').getByText(query, { exact: true }),
+      });
+    await row.locator('[data-test-subj="ESQLEditor-history-starred-queries-run-button"]').click();
+    await this.waitUntilSearchingHasFinished();
   }
 
   async getEsqlEditorHeight(): Promise<number> {
@@ -252,41 +309,8 @@ export abstract class NavigationMixin extends DiscoverAppBase {
     await this.page.mouse.up();
   }
 
-  async clickAppMenuItem(
-    testId: string,
-    { isInOverflowMenu }: { isInOverflowMenu?: boolean } = {}
-  ) {
-    const item = this.page.testSubj.locator(testId);
-    if (!isInOverflowMenu && (await item.isVisible())) {
-      await item.click();
-      return;
-    }
-    const overflowButton = this.page.testSubj.locator('app-menu-overflow-button');
-    const popover = this.page.testSubj.locator('app-menu-popover');
-
-    // Dismiss any stale popovers
-    if (await popover.isVisible()) {
-      await overflowButton.click();
-      await expect(popover).toBeHidden();
-    }
-
-    await expect(overflowButton).toBeVisible();
-    await overflowButton.click();
-
-    // If the click was consumed by closing a stale overlay, the popover won't be open.
-    // Click the overflow button again if needed.
-    const popoverOpened = await popover
-      .waitFor({ state: 'visible', timeout: 2000 })
-      .then(() => true)
-      .catch(() => false);
-    if (!popoverOpened) {
-      await overflowButton.click();
-    }
-
-    await expect(popover).toBeVisible();
-    const menuItem = this.page.testSubj.locator(testId);
-    await expect(menuItem).toBeVisible();
-    await menuItem.click();
+  async clickAppMenuItem(testId: string) {
+    await this.appMenu.clickItem(testId);
   }
 
   private async dismissHoverOverlays() {
@@ -304,9 +328,15 @@ export abstract class NavigationMixin extends DiscoverAppBase {
     await expect(this.page.testSubj.locator('addRuleFlyoutTitle')).toBeVisible();
   }
 
-  async clickNewSearch({ isInOverflowMenu }: { isInOverflowMenu?: boolean } = {}) {
-    await this.clickAppMenuItem('discoverNewButton', { isInOverflowMenu });
+  async clickNewSearch() {
+    await this.clickAppMenuItem('discoverNewButton');
     await this.dismissHoverOverlays();
+    await this.waitUntilTabIsLoaded();
+  }
+
+  /** Opens a linked panel's inline Dashboard edit session in the full Discover editor. */
+  async openInlineEditorInDiscover() {
+    await this.page.testSubj.click('discoverEmbeddableInlineEditEditInDiscoverLink');
     await this.waitUntilTabIsLoaded();
   }
 

@@ -274,14 +274,15 @@ var ENV_DOCS = [
     example: 'SELECTED_EVALUATORS="Factuality,Relevance"',
   },
   {
-    name: 'RAG_EVAL_K',
-    description: 'Overrides default k used by RAG evaluators.',
-    example: 'RAG_EVAL_K=5',
+    name: 'IR_EVAL_K',
+    description: 'Overrides default k used by IR evaluators (deprecated RAG_EVAL_K still read).',
+    example: 'IR_EVAL_K=5',
   },
   {
-    name: 'INDEX_FOCUSED_RAG_EVAL',
-    description: 'Restrict RAG evaluators to ground-truth indices.',
-    example: 'INDEX_FOCUSED_RAG_EVAL=true',
+    name: 'INDEX_FOCUSED_IR_EVAL',
+    description:
+      'Restrict IR evaluators to ground-truth indices (deprecated INDEX_FOCUSED_RAG_EVAL still read).',
+    example: 'INDEX_FOCUSED_IR_EVAL=true',
   },
 ];
 

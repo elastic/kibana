@@ -1,5 +1,5 @@
 {
-  "sha1": "f38230c7a17fee668a3250e466a9e15a0ca0fc4c",
+  "sha1": "9b7eb8f88f6b4d136108ba3ee1c24935fbe4a787",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -398,6 +398,22 @@
         "file": "x-pack/solutions/observability/plugins/observability/test/scout/ui/parallel_tests/navigation/navigation_sidebar.spec.ts",
         "line": 192,
         "column": 32
+      }
+    },
+    {
+      "id": "a2f8223a9b58a7e-f8468b3fbfaa3c1",
+      "title": "Stack Alerts visibility in Observability project nav hides Stack Alerts under Alerts and Insights",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/observability/test/scout/ui/parallel_tests/navigation/stack_alerts_nav_visibility.spec.ts",
+        "line": 21,
+        "column": 43
       }
     },
     {

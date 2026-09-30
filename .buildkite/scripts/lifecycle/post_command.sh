@@ -80,7 +80,7 @@ if [[ "$IS_TEST_EXECUTION_STEP" == "true" ]]; then
 
   if [[ -d 'target/test_failures' ]]; then
     buildkite-agent artifact upload 'target/test_failures/**/*'
-    ts-node .buildkite/scripts/lifecycle/annotate_test_failures.ts
+    node .buildkite/scripts/lifecycle/annotate_test_failures.ts
   fi
 
   if [[ -d 'target/agent_diagnostics' ]]; then

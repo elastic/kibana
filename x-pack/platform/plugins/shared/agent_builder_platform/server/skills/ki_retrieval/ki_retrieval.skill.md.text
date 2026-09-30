@@ -3,7 +3,8 @@
 Load this skill when the user wants to **query a Context Engine AI Index** — i.e. to
 retrieve Knowledge Indicators (KIs) that have already been generated.
 
-This is the query-time complement to `ki-automation-generation`, which populates the index.
+This is the query-time complement to `analyze-and-improve`, which decides what the index should
+contain and produces the automations that populate it.
 This skill is not about generating these KIs, that is a separate skill.
 
 ## What a KI index looks like

@@ -314,22 +314,32 @@ export class DatasetClient {
 
     const datasetId = await this.indexNewDataset({ name, targetSpaceIds, document });
 
-    // A dataset is deleted document-first, so one whose delete died in between
-    // could have left examples behind under an id this name derives again.
-    await this.deleteExamplesByDatasetId(datasetId);
+    try {
+      // A dataset is deleted document-first, so one whose delete died in between
+      // could have left examples behind under an id this name derives again.
+      await this.deleteExamplesByDatasetId(datasetId);
 
-    if (examples.length > 0) {
-      await this.addExamples(datasetId, examples, { touchDataset: false });
-      // Persist the count without advancing updated_at past the creation timestamp.
-      await this.touchDataset(datasetId, { bumpUpdatedAt: false });
+      if (examples.length > 0) {
+        await this.addExamples(datasetId, examples, { touchDataset: false });
+        // Persist the count without advancing updated_at past the creation timestamp.
+        await this.touchDataset(datasetId, { bumpUpdatedAt: false });
+      }
+
+      const created = await this.get(datasetId);
+      if (!created) {
+        throw new Error(`Failed to create dataset "${datasetId}"`);
+      }
+
+      return created;
+    } catch (error) {
+      try {
+        await this.datasetsStorage.delete({ id: datasetId });
+        await this.deleteExamplesByDatasetId(datasetId);
+      } catch {
+        // Best-effort; the caller must see the original create failure.
+      }
+      throw error;
     }
-
-    const created = await this.get(datasetId);
-    if (!created) {
-      throw new Error(`Failed to create dataset "${datasetId}"`);
-    }
-
-    return created;
   }
 
   /**
@@ -394,6 +404,30 @@ export class DatasetClient {
       ...dataset,
       examples,
     };
+  }
+
+  async copy(
+    sourceDatasetId: string,
+    { name, description }: { name: string; description?: string }
+  ): Promise<DatasetWithExamples | undefined> {
+    const sourceDataset = await this.get(sourceDatasetId);
+    if (!sourceDataset) {
+      return undefined;
+    }
+
+    const examples = sourceDataset.examples.map(({ input, output, metadata }) => ({
+      input,
+      output,
+      metadata,
+    }));
+
+    return this.create({
+      name,
+      description: description ?? sourceDataset.description,
+      tags: sourceDataset.tags,
+      maturity: sourceDataset.maturity,
+      examples,
+    });
   }
 
   /**
@@ -907,6 +941,71 @@ export class DatasetClient {
     }
   }
 
+  /**
+   * Deletes the given examples from a dataset in one bulk request, reporting ids
+   * that aren't in it as not found. Undefined when the dataset isn't in this space.
+   */
+  async deleteExamples(
+    datasetId: string,
+    exampleIds: string[]
+  ): Promise<{ deleted: string[]; notFound: string[] } | undefined> {
+    if (!(await this.datasetExists(datasetId))) {
+      return undefined;
+    }
+
+    const requestedIds = dedupe(exampleIds);
+    if (requestedIds.length === 0) {
+      return { deleted: [], notFound: [] };
+    }
+
+    const searchResponse = await this.examplesStorage.search({
+      track_total_hits: false,
+      size: requestedIds.length,
+      _source: ['dataset_id'],
+      query: {
+        bool: {
+          filter: [{ term: { dataset_id: datasetId } }, { terms: { _id: requestedIds } }],
+        },
+      },
+    });
+
+    const ownedIds = searchResponse.hits.hits
+      .filter((hit): hit is typeof hit & { _id: string } => typeof hit._id === 'string')
+      .map((hit) => hit._id);
+
+    const deleted: string[] = [];
+    const notFound = requestedIds.filter((id) => !ownedIds.includes(id));
+
+    if (ownedIds.length > 0) {
+      const bulkResponse = await this.examplesStorage.bulk({
+        operations: ownedIds.map((id) => ({ delete: { _id: id } })),
+        throwOnFail: false,
+      });
+
+      let failed = 0;
+      bulkResponse.items.forEach((item, index) => {
+        const status = item.delete?.status ?? 200;
+        if (status === 404) {
+          notFound.push(ownedIds[index]);
+        } else if (status >= 400) {
+          failed += 1;
+        } else {
+          deleted.push(ownedIds[index]);
+        }
+      });
+
+      if (deleted.length > 0) {
+        await this.touchDataset(datasetId);
+      }
+
+      if (failed > 0) {
+        throw new Error(`Failed to delete ${failed} examples from dataset "${datasetId}"`);
+      }
+    }
+
+    return { deleted, notFound };
+  }
+
   async deleteExamplesByDatasetId(datasetId: string): Promise<{ deleted: number }> {
     const searchResponse = await this.examplesStorage.search({
       track_total_hits: true,
@@ -1131,10 +1230,49 @@ export class DatasetClient {
     };
   }
 
+  /**
+   * One page of a dataset's examples, in the order `get` returns them, with the
+   * dataset's total example count. Undefined when the dataset isn't in this space.
+   */
+  async getExamplesPage(
+    datasetId: string,
+    { from, size }: { from: number; size: number }
+  ): Promise<{ examples: ExampleDocument[]; total: number } | undefined> {
+    if (!(await this.datasetExists(datasetId))) {
+      return undefined;
+    }
+
+    // A dataset never holds more than the search window, so a page past it is empty.
+    const start = Math.min(Math.max(0, from), MAX_EXAMPLES_PER_DATASET);
+    return this.searchExamples(datasetId, {
+      from: start,
+      size: Math.min(Math.max(0, size), MAX_EXAMPLES_PER_DATASET - start),
+    });
+  }
+
   private async getExamplesByDatasetId(datasetId: string): Promise<ExampleDocument[]> {
+    const { examples, total } = await this.searchExamples(datasetId, {
+      from: 0,
+      size: MAX_EXAMPLES_PER_DATASET,
+    });
+
+    if (total > MAX_EXAMPLES_PER_DATASET) {
+      throw new Error(
+        `Dataset "${datasetId}" has ${total} examples, exceeding the maximum of ${MAX_EXAMPLES_PER_DATASET}`
+      );
+    }
+
+    return examples;
+  }
+
+  private async searchExamples(
+    datasetId: string,
+    { from, size }: { from: number; size: number }
+  ): Promise<{ examples: ExampleDocument[]; total: number }> {
     const response = await this.examplesStorage.search({
       track_total_hits: true,
-      size: MAX_EXAMPLES_PER_DATASET,
+      from,
+      size,
       sort: [
         {
           created_at: {
@@ -1153,13 +1291,8 @@ export class DatasetClient {
       typeof response.hits.total === 'number'
         ? response.hits.total
         : response.hits.total?.value ?? 0;
-    if (total > MAX_EXAMPLES_PER_DATASET) {
-      throw new Error(
-        `Dataset "${datasetId}" has ${total} examples, exceeding the maximum of ${MAX_EXAMPLES_PER_DATASET}`
-      );
-    }
 
-    return response.hits.hits
+    const examples = response.hits.hits
       .filter(
         (hit): hit is typeof hit & { _source: DatasetExampleStorageDocument; _id: string } =>
           Boolean(hit._source) && typeof hit._id === 'string'
@@ -1168,6 +1301,8 @@ export class DatasetClient {
         id: hit._id,
         ...hit._source,
       }));
+
+    return { examples, total };
   }
 
   private async getExampleById(exampleId: string): Promise<ExampleDocument | undefined> {

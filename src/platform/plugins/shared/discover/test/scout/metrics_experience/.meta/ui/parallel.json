@@ -1,5 +1,5 @@
 {
-  "sha1": "1388d4181e509e894a7836aaaa163ca4f632c94b",
+  "sha1": "cd5f2180ce7827abc52918b1f4b5a24934ba52f9",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -299,8 +299,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/metrics_experience/ui/parallel_tests/grid_settings.spec.ts",
-        "line": 25,
-        "column": 61
+        "line": 28,
+        "column": 52
       }
     },
     {
@@ -317,8 +317,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/metrics_experience/ui/parallel_tests/grid_settings.spec.ts",
-        "line": 46,
-        "column": 30
+        "line": 48,
+        "column": 15
       }
     },
     {
@@ -335,8 +335,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/metrics_experience/ui/parallel_tests/grid_settings.spec.ts",
-        "line": 67,
-        "column": 46
+        "line": 70,
+        "column": 17
       }
     },
     {
@@ -353,8 +353,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/metrics_experience/ui/parallel_tests/grid_settings.spec.ts",
-        "line": 99,
-        "column": 30
+        "line": 101,
+        "column": 24
       }
     },
     {
@@ -371,7 +371,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/metrics_experience/ui/parallel_tests/grid_settings.spec.ts",
-        "line": 157,
+        "line": 159,
         "column": 17
       }
     },
@@ -389,8 +389,44 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/metrics_experience/ui/parallel_tests/grid_settings.spec.ts",
-        "line": 183,
+        "line": 185,
         "column": 11
+      }
+    },
+    {
+      "id": "8556b3250071fcb-53fabb119f6524c",
+      "title": "Metrics in Discover - Grid Settings never shows the configuration and insights flyouts at the same time",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/metrics_experience/ui/parallel_tests/grid_settings.spec.ts",
+        "line": 213,
+        "column": 17
+      }
+    },
+    {
+      "id": "8556b3250071fcb-da9fbb7ce26fe76",
+      "title": "Metrics in Discover - Grid Settings leaves no gap after closing the configuration opened from the inspector",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/metrics_experience/ui/parallel_tests/grid_settings.spec.ts",
+        "line": 244,
+        "column": 9
       }
     },
     {

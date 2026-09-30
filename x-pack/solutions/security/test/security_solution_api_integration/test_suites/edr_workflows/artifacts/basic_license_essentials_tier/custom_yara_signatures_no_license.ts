@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import expect from '@kbn/expect';
 import type { ENDPOINT_ARTIFACT_LIST_IDS } from '@kbn/securitysolution-list-constants';
 import {
   ENDPOINT_ARTIFACT_LISTS,
@@ -14,6 +15,7 @@ import {
 import { GLOBAL_ARTIFACT_TAG } from '@kbn/security-solution-plugin/common/endpoint/service/artifacts';
 import { ExceptionsListItemGenerator } from '@kbn/security-solution-plugin/common/endpoint/data_generators/exceptions_list_item_generator';
 import { CUSTOM_YARA_SIGNATURES_LIST_DEFINITION } from '@kbn/security-solution-plugin/public/management/pages/custom_yara_signatures/constants';
+import { CUSTOM_YARA_SIGNATURES_VALIDATE_ROUTE } from '@kbn/security-solution-plugin/common/endpoint/constants';
 import type TestAgent from 'supertest/lib/agent';
 import type { FtrProviderContext } from '../../../../ftr_provider_context_edr_workflows';
 
@@ -42,6 +44,7 @@ export default function ({ getService }: FtrProviderContext) {
       path: string;
       getBody?: () => BodyReturnType;
       getFile?: () => [string, Buffer, string];
+      getHeader?: () => Record<string, string>;
     }
 
     before(async () => {
@@ -172,11 +175,28 @@ export default function ({ getService }: FtrProviderContext) {
           'import_data.ndjson',
         ],
       },
+      {
+        method: 'post',
+        info: 'validate YARA rules',
+        path: CUSTOM_YARA_SIGNATURES_VALIDATE_ROUTE,
+        getHeader: () => ({
+          'Elastic-Api-Version': '1',
+          'x-elastic-internal-origin': 'kibana',
+        }),
+        getBody: () => ({
+          yara_rule: 'rule rule1 { condition: true }',
+          os_types: ['windows'],
+        }),
+      },
     ];
 
     for (const apiCall of apiCalls) {
       it(`should return 403 on [${apiCall.method}] - [${apiCall.info}]`, async () => {
         const request = adminSupertest[apiCall.method](apiCall.path).set('kbn-xsrf', 'true');
+
+        if (apiCall.getHeader) {
+          request.set(apiCall.getHeader());
+        }
 
         if (apiCall.getFile) {
           request.attach(...apiCall.getFile());
@@ -186,9 +206,9 @@ export default function ({ getService }: FtrProviderContext) {
           request.send(apiCall.getBody());
         }
 
-        await request.expect(403, {
-          status_code: 403,
-          message: 'EndpointArtifactError: Endpoint authorization failure',
+        await request.expect((res) => {
+          expect(res.status).to.eql(403);
+          expect(res.body.message).to.match(/Endpoint authorization failure/);
         });
       });
     }

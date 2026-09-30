@@ -6,7 +6,10 @@
  */
 
 import type { Logger } from '@kbn/core/server';
-import type { NormalizedReport } from '../../../common/threat_intel/workflows/step_types/fetch_source/fetch_source_common';
+import type {
+  IocEntry,
+  NormalizedReport,
+} from '../../../common/threat_intel/workflows/step_types/fetch_source/fetch_source_common';
 import type { FetchAdapterType } from '../../../common/threat_intel';
 import type { DnsLookupFn } from './http_client';
 
@@ -70,4 +73,4 @@ export interface FetchAdapter {
   run(source: SourceHit, context: AdapterRunContext): Promise<NormalizedReport[]>;
 }
 
-export type { NormalizedReport };
+export type { IocEntry, NormalizedReport };

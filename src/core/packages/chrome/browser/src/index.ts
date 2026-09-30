@@ -23,6 +23,11 @@ export type {
   AppHeaderFavoriteAction,
   AppHeaderFavoriteStatus,
   AppHeaderShareAction,
+  /**
+   * @internal Experimental. Dashboard edit Enhance only. Do not use from other apps.
+   * Not a stable App Header contract.
+   */
+  AppHeaderExperimentalDashboardAiAction,
   AppHeaderMetadataButtonItem,
   AppHeaderMetadataHealthItem,
   AppHeaderMetadataItem,
@@ -37,7 +42,6 @@ export type {
   AppHeaderTitle,
   AppHeaderTitleSaveResult,
 } from './app_header';
-export type { ChromeNext } from './chrome_next';
 export type { ChromeAiButton, ChromeControls, GlobalSearchConfig } from './controls';
 export type { ChromeHelp, ChromeNewsfeedHandler } from './help';
 export type { ChromeSetup, ChromeStart } from './contracts';
@@ -83,6 +87,9 @@ export type {
   NavigationCustomizationMove,
   EuiSideNavItemTypeEnhanced,
   RenderAs,
+  ProjectNavigationLinkItem,
+  ProjectNavigationLinkList,
+  ProjectNavigationLinks,
 } from './project_navigation';
 
 export type {

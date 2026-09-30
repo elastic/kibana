@@ -59,12 +59,15 @@ const services = {
 };
 
 describe('HelpPopover', () => {
-  const renderHelpPopover = async (adHocDataView?: DataView | null) => {
+  const renderHelpPopover = async (
+    adHocDataView?: DataView | null,
+    props: React.ComponentProps<typeof HelpPopover> = {}
+  ) => {
     (getESQLAdHocDataview as jest.Mock).mockResolvedValue(adHocDataView ?? null);
     return await act(async () => {
       render(
         <KibanaContextProvider services={services as any}>
-          <HelpPopover />
+          <HelpPopover {...props} />
         </KibanaContextProvider>
       );
     });
@@ -97,6 +100,16 @@ describe('HelpPopover', () => {
     await waitFor(() => {
       expect(screen.queryByTestId('esql-recommended-queries')).toBeInTheDocument();
     });
+  });
+
+  it('hides recommended queries when hideRecommendedQueries is set, even with a dataview', async () => {
+    await renderHelpPopover(stubIndexPattern, { hideRecommendedQueries: true });
+    await userEvent.click(screen.getByTestId('esql-help-popover-button'));
+    // The derivation is skipped, so the section never appears.
+    expect(getESQLAdHocDataview).not.toHaveBeenCalled();
+    expect(screen.queryByTestId('esql-recommended-queries')).not.toBeInTheDocument();
+    // The rest of the menu still renders.
+    expect(screen.getByTestId('esql-quick-reference')).toBeInTheDocument();
   });
 
   it('should not have feedback if feedback is not enabled', async () => {

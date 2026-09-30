@@ -9,6 +9,8 @@ import type {
   BulkByIdsParams,
   BulkByQueryParams,
   BulkByQueryResult,
+  BulkCreateRulesParams,
+  BulkCreateRulesResponse,
   BulkResponse,
   CreateRuleData,
   DryRunResponse,
@@ -25,6 +27,8 @@ export type {
   BulkByIdsParams,
   BulkByQueryParams,
   BulkByQueryResult,
+  BulkCreateRulesParams,
+  BulkCreateRulesResponse,
   BulkResponse,
   CreateRuleData,
   DryRunResponse,
@@ -62,5 +66,4 @@ export interface FindRulesArgs {
 export interface UpdateRuleParams {
   id: string;
   data: UpdateRuleData;
-  options?: { version?: string };
 }

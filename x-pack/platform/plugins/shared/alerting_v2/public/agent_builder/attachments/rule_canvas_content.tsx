@@ -102,6 +102,7 @@ export const RuleCanvasContent = ({
         }),
         icon: 'external',
         type: ActionButtonType.OVERFLOW,
+        // TODO: Migrate to rules locator once agent builder attachments render inside the LocatorProvider tree
         handler: () => {
           application.navigateToUrl(basePath.prepend(paths.ruleDetails(ruleId)));
         },

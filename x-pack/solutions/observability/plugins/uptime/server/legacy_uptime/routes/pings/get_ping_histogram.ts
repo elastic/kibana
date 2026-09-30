@@ -9,19 +9,28 @@ import { schema } from '@kbn/config-schema';
 import type { UMServerLibs } from '../../lib/lib';
 import type { UMRestApiRouteFactory } from '../types';
 import { API_URLS } from '../../../../common/constants';
+import {
+  MAX_BUCKET_SIZE_LENGTH,
+  MAX_DATE_RANGE_LENGTH,
+  MAX_FILTER_LENGTH,
+  MAX_ID_LENGTH,
+  MAX_TIME_ZONE_LENGTH,
+  boundedString,
+  optionalBoundedString,
+} from '../schema_limits';
 
 export const createGetPingHistogramRoute: UMRestApiRouteFactory = (libs: UMServerLibs) => ({
   method: 'GET',
   path: API_URLS.PING_HISTOGRAM,
   validate: {
     query: schema.object({
-      dateStart: schema.string({ maxLength: 256 }),
-      dateEnd: schema.string({ maxLength: 256 }),
-      monitorId: schema.maybe(schema.string({ maxLength: 1024 })),
-      filters: schema.maybe(schema.string({ maxLength: 1024 })),
-      bucketSize: schema.maybe(schema.string({ maxLength: 50 })),
-      query: schema.maybe(schema.string({ maxLength: 1024 })),
-      timeZone: schema.string({ maxLength: 256 }),
+      dateStart: boundedString(MAX_DATE_RANGE_LENGTH),
+      dateEnd: boundedString(MAX_DATE_RANGE_LENGTH),
+      monitorId: optionalBoundedString(MAX_ID_LENGTH),
+      filters: optionalBoundedString(MAX_FILTER_LENGTH),
+      bucketSize: optionalBoundedString(MAX_BUCKET_SIZE_LENGTH),
+      query: optionalBoundedString(MAX_FILTER_LENGTH),
+      timeZone: boundedString(MAX_TIME_ZONE_LENGTH),
     }),
   },
   handler: async ({ uptimeEsClient, request }): Promise<any> => {

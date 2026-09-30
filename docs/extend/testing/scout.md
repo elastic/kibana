@@ -61,6 +61,8 @@ We welcome contributions to one of the Scout packages.
 | Is reusable but scoped to a solution  | In the solution Scout package (for example `@kbn/scout-security`, `@kbn/scout-oblt`, `@kbn/scout-search`) | Solution workflows and domain-specific helpers     |
 | Is specific to one plugin or package  | In your plugin or package's `test/scout` directory                                                        | Components specific to your plugin or package only |
 
+For page objects, "reusable" depends on what renders the UI rather than on how many tests use the helper today. See the [page object placement policy](./page-objects.md#scout-page-objects-placement).
+
 ## Need help? [need-help]
 
 - **Internal (Elasticians)**: reach out to the AppEx QA team for guidance.

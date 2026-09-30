@@ -5,7 +5,21 @@
  * 2.0.
  */
 
-import { getConversationRoundAuthorDisplayName } from './conversation';
+import {
+  ZERO_MODEL_USAGE,
+  getConversationRoundAuthorDisplayName,
+  isZeroModelUsage,
+} from './conversation';
+
+describe('isZeroModelUsage', () => {
+  it('is true for the sentinel and false for any real usage', () => {
+    expect(isZeroModelUsage(ZERO_MODEL_USAGE)).toBe(true);
+    expect(isZeroModelUsage({ ...ZERO_MODEL_USAGE })).toBe(true);
+    expect(isZeroModelUsage({ ...ZERO_MODEL_USAGE, llm_calls: 1 })).toBe(false);
+    expect(isZeroModelUsage({ ...ZERO_MODEL_USAGE, connector_id: 'c' })).toBe(false);
+    expect(isZeroModelUsage({ ...ZERO_MODEL_USAGE, model: 'm' })).toBe(false);
+  });
+});
 
 describe('getConversationRoundAuthorDisplayName', () => {
   it('returns undefined when author is missing', () => {

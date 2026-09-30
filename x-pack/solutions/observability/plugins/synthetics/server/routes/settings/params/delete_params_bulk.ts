@@ -5,17 +5,14 @@
  * 2.0.
  */
 
-import { schema } from '@kbn/config-schema';
+import { z } from '@kbn/zod';
+import { MAX_PARAM_BULK_SIZE, routeId } from '../../zod_query';
 import { getExistingParamsInfo } from './delete_param';
 import type { SyntheticsRestApiRouteFactory } from '../../types';
 import { syntheticsParamType } from '../../../../common/types/saved_objects';
 import { SYNTHETICS_API_URLS } from '../../../../common/constants';
 import type { DeleteParamsResponse } from '../../../../common/runtime_types';
 import { asyncGlobalParamsPropagation } from '../../../tasks/sync_global_params_task';
-
-export const deleteParamsBulkBodySchema = schema.object({
-  ids: schema.arrayOf(schema.string({ maxLength: 1024 }), { maxSize: 1000 }),
-});
 
 export const deleteSyntheticsParamsBulkRoute: SyntheticsRestApiRouteFactory<
   DeleteParamsResponse[],
@@ -28,7 +25,9 @@ export const deleteSyntheticsParamsBulkRoute: SyntheticsRestApiRouteFactory<
   validate: {},
   validation: {
     request: {
-      body: deleteParamsBulkBodySchema,
+      body: z.strictObject({
+        ids: z.array(routeId).max(MAX_PARAM_BULK_SIZE),
+      }),
     },
   },
   handler: async ({ savedObjectsClient, request, server, spaceId }) => {

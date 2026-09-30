@@ -10,6 +10,7 @@
 import type { Locator } from '../../..';
 import type { ScoutPage } from '..';
 import { expect } from '..';
+import { euiSelectors } from '../eui_components';
 
 const IN_TABLE_SEARCH_BUTTON_TEST_SUBJ = 'startInTableSearchButton';
 const IN_TABLE_SEARCH_INPUT_TEST_SUBJ = 'inTableSearchInput';
@@ -31,8 +32,9 @@ export class DataGrid {
   }
 
   private async readHeaderLabels(scope: Locator, limit: number): Promise<string[]> {
+    const headerCell = euiSelectors.dataGrid.HEADER_CELL_SELECTOR;
     const headerCellContent = scope.locator(
-      '.euiDataGridHeaderCell:not(.euiDataGridHeaderCell--controlColumn) .euiDataGridHeaderCell__content'
+      `${headerCell}:not(${headerCell}--controlColumn) ${headerCell}__content`
     );
 
     const labels = await headerCellContent.allInnerTexts();
@@ -76,6 +78,18 @@ export class DataGrid {
     return this.page.testSubj.locator('docTable');
   }
 
+  private getDisplaySelectorButton(): Locator {
+    return this.page.testSubj.locator('dataGridDisplaySelectorButton');
+  }
+
+  private getExpandedDisplaySelectorButton(): Locator {
+    return this.getDisplaySelectorButton().and(this.page.locator('[aria-expanded="true"]'));
+  }
+
+  private getSampleSizeInput(): Locator {
+    return this.page.locator('[data-test-subj="unifiedDataTableSampleSizeInput"][type="number"]');
+  }
+
   async addFieldFromSidebar(field: string) {
     await this.waitUntilFieldListHasCountOfFields();
     await this.page.testSubj.fill('fieldListFiltersFieldSearch', field);
@@ -109,6 +123,24 @@ export class DataGrid {
     await cell.hover();
     await cell.locator('[data-test-subj="euiDataGridCellExpandButton"]').click();
     await this.page.testSubj.waitForSelector('euiDataGridExpansionPopover', { state: 'visible' });
+  }
+
+  async filterCell({
+    rowIndex,
+    columnId,
+    mode,
+  }: {
+    rowIndex: number;
+    columnId: string;
+    mode: 'for' | 'out';
+  }): Promise<void> {
+    const actionTestSubj = mode === 'for' ? 'filterForButton' : 'filterOutButton';
+    const expansionPopover = this.page.testSubj.locator('euiDataGridExpansionPopover');
+
+    await this.expandCell({ rowIndex, columnId });
+    await expansionPopover.locator(`[data-test-subj="${actionTestSubj}"]`).click();
+    await expansionPopover.waitFor({ state: 'hidden' });
+    await this.waitForLoad();
   }
 
   async expandMetaFieldsSection() {
@@ -251,9 +283,8 @@ export class DataGrid {
   }
 
   async getCurrentSampleSize(): Promise<number> {
-    const input = this.page.locator(
-      '[data-test-subj="unifiedDataTableSampleSizeInput"][type="number"]'
-    );
+    await this.openGridDisplaySettings();
+    const input = this.getSampleSizeInput();
     await input.waitFor({ state: 'visible' });
 
     return Number(await input.inputValue());
@@ -316,7 +347,9 @@ export class DataGrid {
 
   async getNumberOfSelectedRowsOnCurrentPage(): Promise<number> {
     return this.page
-      .locator('.euiDataGridRow [data-gridcell-column-id="select"] input[type="checkbox"]:checked')
+      .locator(
+        `${euiSelectors.dataGrid.ROW_SELECTOR} [data-gridcell-column-id="select"] input[type="checkbox"]:checked`
+      )
       .count();
   }
 
@@ -514,13 +547,14 @@ export class DataGrid {
   }
 
   async openColumnMenuByField(field: string) {
-    await expect(async () => {
-      await this.page.testSubj.hover(`dataGridHeaderCell-${field}`);
-      await this.page.testSubj.click(`dataGridHeaderCellActionButton-${field}`);
-      await this.page.testSubj.locator(`dataGridHeaderCellActionGroup-${field}`).waitFor({
-        state: 'visible',
-      });
-    }).toPass();
+    const actionButton = this.page.testSubj.locator(`dataGridHeaderCellActionButton-${field}`);
+
+    await this.page.testSubj.hover(`dataGridHeaderCell-${field}`);
+    await actionButton.click();
+
+    await this.page.testSubj.locator(`dataGridHeaderCellActionGroup-${field}`).waitFor({
+      state: 'visible',
+    });
   }
 
   async openDocumentDetails({ rowIndex }: { rowIndex: number }) {
@@ -535,14 +569,25 @@ export class DataGrid {
   }
 
   async openGridDisplaySettings() {
-    // The toolbar button toggles the display-options popover, so clicking it while
-    // the popover is already open would close it; confirm it ends up open instead.
-    const densityButtonGroup = this.page.testSubj.locator('densityButtonGroup');
-    if (await densityButtonGroup.isVisible()) {
+    // The toolbar button toggles the popover. Gate on the button's aria-expanded
+    // (survives a session remount) instead of popover contents, which can be a
+    // stale portal after New Search / reload.
+    const displayButton = this.getDisplaySelectorButton();
+    await displayButton.waitFor({ state: 'visible' });
+
+    const expandedButton = this.getExpandedDisplaySelectorButton();
+    if (await expandedButton.isVisible()) {
       return;
     }
-    await this.page.testSubj.click('dataGridDisplaySelectorButton');
-    await densityButtonGroup.waitFor({ state: 'visible' });
+
+    await displayButton.click();
+    await expandedButton.waitFor({ state: 'visible' });
+  }
+
+  /** Opens the grid toolbar's column-sorting popover. */
+  async openSortPopover() {
+    await this.page.testSubj.click('dataGridColumnSortingButton');
+    await this.page.testSubj.locator('dataGridColumnSortingPopover').waitFor({ state: 'visible' });
   }
 
   async openInTableSearch() {
@@ -612,9 +657,8 @@ export class DataGrid {
   }
 
   async setSampleSize(newValue: number) {
-    const input = this.page.locator(
-      '[data-test-subj="unifiedDataTableSampleSizeInput"][type="number"]'
-    );
+    await this.openGridDisplaySettings();
+    const input = this.getSampleSizeInput();
     await input.waitFor({ state: 'visible' });
     await input.fill(newValue.toString());
     await input.press('Enter');

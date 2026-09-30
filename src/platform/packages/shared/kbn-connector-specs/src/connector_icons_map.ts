@@ -132,6 +132,8 @@ export const ConnectorIconsMap: Map<
     '.slack2',
     lazy(() => import(/* webpackChunkName: "connectorIconSlack2" */ './specs/slack/icon')),
   ],
+
+  ['.mysql', lazy(() => import(/* webpackChunkName: "connectorIconMysql" */ './specs/mysql/icon'))],
   ['.gmail', lazy(() => import(/* webpackChunkName: "connectorIconGmail" */ './specs/gmail/icon'))],
   [
     '.azure-blob',
@@ -236,6 +238,10 @@ export const ConnectorIconsMap: Map<
   [
     '.one_drive',
     lazy(() => import(/* webpackChunkName: "connectorIconOneDrive" */ './specs/one_drive/icon')),
+  ],
+  [
+    '.mongodb',
+    lazy(() => import(/* webpackChunkName: "connectorIconMongodb" */ './specs/mongodb/icon')),
   ],
   [
     '.ansible_controller',
@@ -377,8 +383,15 @@ export const ConnectorIconsMap: Map<
     '.urlscan_io',
     lazy(() => import(/* webpackChunkName: "connectorIconUrlscanIo" */ './specs/urlscan_io/icon')),
   ],
+  [
+    '.bitbucket',
+    lazy(() => import(/* webpackChunkName: "connectorIconBitbucket" */ './specs/bitbucket/icon')),
+  ],
+  [
+    '.azure_aks',
+    lazy(() => import(/* webpackChunkName: "connectorIconAzureAks" */ './specs/azure_aks/icon')),
+  ],
   ['.misp', lazy(() => import(/* webpackChunkName: "connectorIconMisp" */ './specs/misp/icon'))],
-
   [
     '.google_threat_intelligence',
     lazy(
@@ -386,6 +399,29 @@ export const ConnectorIconsMap: Map<
         import(
           /* webpackChunkName: "connectorIconGoogleThreatIntelligence" */ './specs/google_threat_intelligence/icon'
         )
+    ),
+  ],
+  [
+    '.gitlab',
+    lazy(() => import(/* webpackChunkName: "connectorIconGitlab" */ './specs/gitlab/icon')),
+  ],
+  [
+    '.threatq',
+    lazy(() => import(/* webpackChunkName: "connectorIconThreatQ" */ './specs/threatq/icon')),
+  ],
+
+  [
+    '.elasticsearch',
+    lazy(
+      () =>
+        import(/* webpackChunkName: "connectorIconelasticsearch" */ './specs/elasticsearch/icon')
+    ),
+  ],
+  [
+    '.azure_functions',
+    lazy(
+      () =>
+        import(/* webpackChunkName: "connectorIconazurefunctions" */ './specs/azure_functions/icon')
     ),
   ],
 ]);

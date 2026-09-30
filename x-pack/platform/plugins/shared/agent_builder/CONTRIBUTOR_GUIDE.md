@@ -380,6 +380,12 @@ const myAttachmentType: AttachmentTypeDefinition = {
 Do **not** include guidance on *when* to render inline — that is the responsibility of the
 skill that owns the relevant task. See [Inline rendering guidance in skills](#inline-rendering-guidance-in-skills).
 
+#### Real example: the built-in image attachment
+
+Agent Builder already ships a built-in `image` attachment type, so agents can see images pasted into the chat input. It's a real, file-backed attachment type and a good reference to copy from — the placeholder above just reuses the same `id` to illustrate `getAgentDescription`. See `x-pack/platform/plugins/shared/agent_builder_platform/server/attachment_types/image.ts`.
+
+It validates by looking up the file through a request-scoped Files client, so a user can never read another user's file. `format` downloads and base64-encodes the file lazily, only when the agent actually reads the attachment, so the bytes never end up in a tool result. The binary itself lives in the Files plugin under the `chat-attachment-images` file kind (registered in `agent_builder/server/plugin.ts`); the attachment only carries a `file_id` pointer. Limits — PNG/JPEG only, 3.5 MB max, 10 images per message — are defined in `agent-builder-common/attachments/attachment_types.ts`; the count limit is enforced client-side only.
+
 ### Browser-side registration
 
 Register a UI definition for your attachment type using the `attachments.addAttachmentType` API from the `agentBuilder` plugin's start contract:
@@ -1064,6 +1070,95 @@ return BriefCard ? (
 
 The registry does not fetch card data or provide a default card when none is registered.
 
+### Conversation details header and footer
+
+Tabs, headers, and footers share `ConversationTemplateDetailsFlyoutRenderProps`.
+`isOpenedFromChat` is `true` in the live chat details flyout and `false` when opened through
+`openConversationDetails`. It is supplied at render time, not through registration context.
+
+Template UI definitions can provide optional `detailsFlyout.header` and
+`detailsFlyout.footer` React components. Both receive `{ conversation, isOpenedFromChat }` and can use
+hooks. Agent Builder owns the EUI header/footer wrappers and tab navigation; return
+only the content for each slot. Without a custom header, the default title remains.
+Without a custom footer, no footer is rendered.
+
+Capture Agent Builder capabilities from the existing registration context, and
+provide any solution-specific React providers inside your components:
+
+```tsx
+agentBuilder.conversationTemplates.registerTemplateUIDefinition('investigation', (context) => ({
+  name: investigationTemplateName,
+  tabs: ['investigation.details'],
+  detailsFlyout: {
+    header: InvestigationHeader,
+    footer: ({ conversation }) => (
+      <InvestigationFooter
+        conversation={conversation}
+        onOpenChat={() => context.openSidebarConversation(conversation.id)}
+      />
+    ),
+  },
+}));
+```
+
+### Conversation details menu actions
+
+Menu actions are icon buttons rendered in the flyout menu bar before the close button. Each entry
+is an `EuiFlyoutMenuAction` (`iconType`, `aria-label`, and `onClick` or `href`, plus optional
+`toolTipContent`, `isDisabled` and `isLoading`). Each flyout takes them from a different place:
+
+- The in-chat flyout (opened from the chat's "Chat info" button) uses the template's
+  `detailsFlyout.trailingActions`, re-evaluated when the conversation updates.
+- Flyouts opened with `openConversationDetails` use only its `trailingActions` option, fixed when
+  the flyout opens. They don't read the template's `trailingActions`, because the template isn't
+  known until the conversation has loaded.
+
+Define the actions once and pass the same function to both:
+
+```tsx
+const getTrailingActions = (conversationId: string): EuiFlyoutMenuAction[] => [
+  {
+    iconType: 'link',
+    'aria-label': copyLinkLabel,
+    toolTipContent: copyLinkLabel,
+    onClick: () => copyToClipboard(getShareUrl(conversationId)),
+  },
+];
+
+agentBuilder.conversationTemplates.registerTemplateUIDefinition('investigation', () => ({
+  name: investigationTemplateName,
+  tabs: ['investigation.details'],
+  detailsFlyout: {
+    trailingActions: ({ conversation }) => getTrailingActions(conversation.id),
+  },
+}));
+
+agentBuilder.openConversationDetails({
+  conversationId,
+  trailingActions: getTrailingActions(conversationId),
+});
+```
+
+### Opening flyouts from conversation details content
+
+Both conversation details flyouts are managed EUI flyouts in the
+`CONVERSATION_DETAILS_FLYOUT_HISTORY_KEY` history group. To open your own flyout from a tab, header,
+footer, or attachment renderer and have it stack on top with a Back button, open it as a main flyout
+in the same group by passing these options when you open it:
+
+```tsx
+import { CONVERSATION_DETAILS_FLYOUT_HISTORY_KEY } from '@kbn/agent-builder-browser';
+
+const options = {
+  session: 'start',
+  historyKey: CONVERSATION_DETAILS_FLYOUT_HISTORY_KEY,
+};
+```
+
+Back returns to the conversation details flyout. Closing any flyout in the group closes all of them.
+A flyout opened with a different `historyKey` hides the conversation details flyout until it closes,
+with no Back button.
+
 ### Rules
 
 - **Display name and icon**: `name` is the template's localized display name, shown in the conversation UI (title badge, conversation lists). `icon` is optional; the UI falls back to a default icon without it, and to the raw template id when no UI definition is registered at all.
@@ -1399,7 +1494,7 @@ attach them to a conversation.
 |---|---|
 | **SML Type** | A category of content you expose (e.g. `visualization`, `dashboard`). You implement `SmlTypeDefinition`. |
 | **Crawler** | A Task Manager background task that periodically calls your `list()` and `getSmlEntry()` hooks, indexing content into system indices. Uses mark-and-sweep with `last_crawled_at` timestamps for efficient change detection. |
-| **SML Document** | A single indexed entry stored in the `.chat-sml-data` system index, containing title, content, permissions, and space information. |
+| **SML Document** | A single indexed entry stored in the `.ai-index-idx-elastic-index` system index (the Elastic AI index), containing title, content, permissions, and space information. |
 | **`sml_search` tool** | A built-in Agent Builder tool the AI uses to keyword-search SML documents. Results are filtered by the requesting user's space and permissions. |
 | **`sml_attach` tool** | A built-in Agent Builder tool the AI uses to convert SML search hits into conversation attachments. It accepts `entry_ids` from `sml_search`;  `entry_id` format is `attachment_type:origin_id:uuid`. |
 | **Origin ID** | The unique identifier for the source asset (typically a saved object ID). Used to link SML documents back to their source. |
@@ -1409,7 +1504,7 @@ attach them to a conversation.
 1. **Crawl**: The crawler runs on a configurable interval (default 10 min).
    For each registered SML type it calls `list()` to enumerate items, detects
    changes via timestamps, and calls `getSmlEntry()` for new/updated items.
-2. **Index**: Results are written to the `.chat-sml-data` system index.
+2. **Index**: Results are written to the `.ai-index-idx-elastic-index` system index.
    Crawler state (which items have been seen) is stored in a separate
    `.chat-sml-crawler-state` index.
 3. **Search**: When the AI agent calls `sml_search`, the SML service queries
@@ -1621,7 +1716,7 @@ The full implementation is ~130 lines and serves as the reference for new types.
 The chat streaming layer lives across two folders:
 
 - `public/application/context/streaming/` — the lifted provider, its context hook, the
-  send/regenerate and resume mutation hooks, the chat-events subscriber, and shared types.
+  send and resume mutation hooks, the chat-events subscriber, and shared types.
 - `public/application/hooks/` — the per-conversation convenience hook
   (`use_conversation_stream.ts`) and the "any stream active?" derived hook
   (`use_is_any_conversation_streaming.ts`). They live here because they compose
@@ -1745,4 +1840,3 @@ What this means in practice:
   flight when the user navigates away, a confirm dialog appears; on confirm,
   `cancelAllStreams()` aborts every controller in the map before the platform
   proceeds.
-

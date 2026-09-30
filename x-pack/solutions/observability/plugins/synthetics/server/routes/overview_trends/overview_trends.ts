@@ -5,8 +5,13 @@
  * 2.0.
  */
 
-import type { ObjectType } from '@kbn/config-schema';
-import { schema } from '@kbn/config-schema';
+import { z } from '@kbn/zod';
+import {
+  MAX_MONITOR_BATCH_SIZE,
+  MAX_ROUTE_ID_LENGTH,
+  MAX_ROUTE_STRING_LENGTH,
+  routeId,
+} from '../zod_query';
 import { SYNTHETICS_API_URLS } from '../../../common/constants';
 import type { TrendRequest, TrendTable } from '../../../common/types';
 import type { TrendsQuery } from './fetch_trends';
@@ -53,18 +58,20 @@ export async function fetchTrends(
   }, {});
 }
 
-export const overviewTrendsItemSchema = schema.object({
-  configId: schema.string({ maxLength: 1024 }),
-  locationIds: schema.arrayOf(schema.string({ maxLength: 256 }), { maxSize: 100 }),
-  schedule: schema.string({ maxLength: 256 }),
-});
-
 export const createOverviewTrendsRoute: SyntheticsRestApiRouteFactory = () => ({
   method: 'POST',
   writeAccess: false,
   path: SYNTHETICS_API_URLS.OVERVIEW_TRENDS,
   validate: {
-    body: schema.arrayOf(overviewTrendsItemSchema, { maxSize: 500 }) as unknown as ObjectType,
+    body: z
+      .array(
+        z.strictObject({
+          configId: routeId,
+          locationIds: z.array(z.string().max(MAX_ROUTE_ID_LENGTH)).max(100),
+          schedule: z.string().max(MAX_ROUTE_STRING_LENGTH),
+        })
+      )
+      .max(MAX_MONITOR_BATCH_SIZE),
   },
   handler: async (routeContext): Promise<TrendTable> => {
     const esClient = routeContext.syntheticsEsClient;
