@@ -146,17 +146,6 @@ describe('buildIntegrationRuntimeEvals — integration actor and target fields',
       ],
     },
     {
-      integration: 'azure_openai',
-      column: 'entity.target.id',
-      branches: [
-        {
-          condition:
-            'data_stream.dataset == "azure_openai.logs" AND azure.open_ai.category IN ("Audit", "RequestResponse") AND azure.resource.id IS NOT NULL',
-          value: 'azure.resource.id',
-        },
-      ],
-    },
-    {
       integration: 'azure_ai_foundry',
       column: 'entity.target.id',
       branches: [
@@ -164,11 +153,6 @@ describe('buildIntegrationRuntimeEvals — integration actor and target fields',
           condition:
             'data_stream.dataset == "azure_ai_foundry.logs" AND data_stream.type == "logs" AND azure.ai_foundry.category == "GatewayLogs"',
           value: 'azure.ai_foundry.properties.backend_response_body.id',
-        },
-        {
-          condition:
-            'data_stream.dataset == "azure_ai_foundry.logs" AND data_stream.type == "logs" AND azure.ai_foundry.category IN ("Audit", "RequestResponse") AND azure.resource.id IS NOT NULL',
-          value: 'azure.resource.id',
         },
       ],
     },
