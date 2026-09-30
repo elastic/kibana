@@ -105,6 +105,7 @@ import {
   type ValueToStringConverter,
   type DocMap,
   type DataGridPaginationMode,
+  TanStackCellActionsBubble,
 } from '@kbn/unified-data-table';
 import { uniq } from 'lodash';
 import type { AggregateQuery } from '@kbn/es-query';
@@ -615,23 +616,6 @@ const parseStatsByColumns = (
   return { byFields, orderedColumns };
 };
 
-const CELL_ACTIONS_HOVER_OPEN_DELAY_MS = 350;
-const CELL_ACTION_ICON_WIDTH = 28;
-
-const estimateCellActionsOpenWidth = (actionCount: number, insetPx: number) =>
-  actionCount * CELL_ACTION_ICON_WIDTH + Math.max(0, actionCount - 1) * insetPx + insetPx * 2;
-
-const cellActionsNeedFixedLayer = (
-  cellElement: HTMLElement | null,
-  actionCount: number,
-  insetPx: number
-) => {
-  if (!cellElement) return false;
-  const cellWidth = cellElement.getBoundingClientRect().width;
-  const openWidth = estimateCellActionsOpenWidth(actionCount, insetPx);
-  return openWidth > cellWidth - insetPx;
-};
-
 // ── Cell Actions: filter in/out, copy (clippable), expand (always visible) ──
 const CellActions = React.memo(
   ({
@@ -653,217 +637,6 @@ const CellActions = React.memo(
     anchorCellRef: React.RefObject<HTMLDivElement | null>;
     styles: ReturnType<typeof getTanStackDataGridStyles>;
   }) => {
-    const { euiTheme } = useEuiTheme();
-    const bubbleRef = useRef<HTMLDivElement>(null);
-    const triggerRef = useRef<HTMLButtonElement>(null);
-    const openTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-    const [isOpen, setIsOpen] = useState(false);
-    const [useFixedLayer, setUseFixedLayer] = useState(false);
-    const [fixedLayerStyle, setFixedLayerStyle] = useState<React.CSSProperties>();
-    const collapsedRadius = euiTheme.border.radius.small;
-    const openRadius = euiTheme.size.m;
-    const actionInsetPx = parseInt(euiTheme.size.xxs, 10) || 4;
-
-    const clearOpenTimer = useCallback(() => {
-      if (openTimerRef.current !== null) {
-        clearTimeout(openTimerRef.current);
-        openTimerRef.current = null;
-      }
-    }, []);
-
-    const playMorph = useCallback(
-      (nextOpen: boolean) => {
-        const el = bubbleRef.current;
-        const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-        if (!el || reduceMotion) {
-          setIsOpen(nextOpen);
-          return;
-        }
-
-        const firstWidth = el.getBoundingClientRect().width;
-        setIsOpen(nextOpen);
-        requestAnimationFrame(() => {
-          const node = bubbleRef.current;
-          if (!node) return;
-          const lastWidth = node.getBoundingClientRect().width;
-          const scaleX = firstWidth / Math.max(lastWidth, 1);
-          node.getAnimations().forEach((animation) => animation.cancel());
-          node.animate(
-            nextOpen
-              ? [
-                  { transform: `scaleX(${scaleX})`, borderRadius: collapsedRadius },
-                  { transform: 'scaleX(1.06)', borderRadius: '14px', offset: 0.58 },
-                  { transform: 'scaleX(1)', borderRadius: openRadius },
-                ]
-              : [
-                  { transform: `scaleX(${scaleX})`, borderRadius: openRadius },
-                  { transform: 'scaleX(1)', borderRadius: collapsedRadius },
-                ],
-            {
-              duration: nextOpen ? 420 : 240,
-              easing: nextOpen
-                ? 'cubic-bezier(0.22, 0.8, 0.28, 1)'
-                : 'cubic-bezier(0.4, 0, 0.2, 1)',
-            }
-          );
-        });
-      },
-      [collapsedRadius, openRadius]
-    );
-
-    const actionCount = onFilter ? 4 : 2;
-
-    const refreshFixedLayer = useCallback(() => {
-      const needsFixedLayer = cellActionsNeedFixedLayer(
-        anchorCellRef.current,
-        actionCount,
-        actionInsetPx
-      );
-      setUseFixedLayer(needsFixedLayer);
-      if (needsFixedLayer && anchorCellRef.current) {
-        const rect = anchorCellRef.current.getBoundingClientRect();
-        setFixedLayerStyle({
-          top: rect.top + actionInsetPx,
-          right: window.innerWidth - rect.right + actionInsetPx,
-        });
-      }
-      return needsFixedLayer;
-    }, [actionCount, actionInsetPx, anchorCellRef]);
-
-    const openBubble = useCallback(() => {
-      if (isOpen) return;
-      clearOpenTimer();
-      refreshFixedLayer();
-      playMorph(true);
-    }, [clearOpenTimer, isOpen, playMorph, refreshFixedLayer]);
-
-    const closeBubble = useCallback(
-      (returnFocusToTrigger = false) => {
-        clearOpenTimer();
-        if (!isOpen) return;
-        setUseFixedLayer(false);
-        playMorph(false);
-        if (returnFocusToTrigger) {
-          requestAnimationFrame(() => triggerRef.current?.focus());
-        }
-      },
-      [clearOpenTimer, isOpen, playMorph]
-    );
-
-    const scheduleOpen = useCallback(() => {
-      if (isOpen) return;
-      clearOpenTimer();
-      openTimerRef.current = setTimeout(() => {
-        openTimerRef.current = null;
-        openBubble();
-      }, CELL_ACTIONS_HOVER_OPEN_DELAY_MS);
-    }, [clearOpenTimer, isOpen, openBubble]);
-
-    useEffect(() => {
-      if (!isOpen || !useFixedLayer) return;
-      const updateFixedLayer = () => refreshFixedLayer();
-      window.addEventListener('scroll', updateFixedLayer, true);
-      window.addEventListener('resize', updateFixedLayer);
-      return () => {
-        window.removeEventListener('scroll', updateFixedLayer, true);
-        window.removeEventListener('resize', updateFixedLayer);
-      };
-    }, [isOpen, refreshFixedLayer, useFixedLayer]);
-
-    useEffect(() => () => clearOpenTimer(), [clearOpenTimer]);
-
-    const handleBubbleMouseEnter = useCallback(() => {
-      if (!isOpen) {
-        scheduleOpen();
-      }
-    }, [isOpen, scheduleOpen]);
-
-    const handleBubbleMouseLeave = useCallback(() => {
-      clearOpenTimer();
-      if (isOpen) {
-        closeBubble(false);
-      }
-    }, [clearOpenTimer, closeBubble, isOpen]);
-
-    useEffect(() => {
-      if (!isOpen) return;
-
-      const focusFirstAction = () => {
-        bubbleRef.current?.querySelector<HTMLElement>('button')?.focus();
-      };
-      const focusFrame = requestAnimationFrame(focusFirstAction);
-
-      const onPointerDown = (event: PointerEvent) => {
-        if (!bubbleRef.current?.contains(event.target as Node)) {
-          closeBubble(true);
-        }
-      };
-      const onKeyDown = (event: KeyboardEvent) => {
-        if (event.key === keys.ESCAPE) {
-          event.stopPropagation();
-          closeBubble(true);
-        }
-      };
-
-      document.addEventListener('pointerdown', onPointerDown);
-      document.addEventListener('keydown', onKeyDown, true);
-      return () => {
-        cancelAnimationFrame(focusFrame);
-        document.removeEventListener('pointerdown', onPointerDown);
-        document.removeEventListener('keydown', onKeyDown, true);
-      };
-    }, [closeBubble, isOpen]);
-
-    const handleTriggerClick = useCallback(
-      (event: React.MouseEvent) => {
-        event.stopPropagation();
-        if (isOpen) {
-          closeBubble(true);
-        } else {
-          openBubble();
-        }
-      },
-      [closeBubble, isOpen, openBubble]
-    );
-
-    const handleTriggerKeyDown = useCallback(
-      (event: React.KeyboardEvent) => {
-        event.stopPropagation();
-        if (event.key === keys.ENTER || event.key === keys.SPACE) {
-          event.preventDefault();
-          if (isOpen) {
-            closeBubble(true);
-          } else {
-            openBubble();
-          }
-        }
-      },
-      [closeBubble, isOpen, openBubble]
-    );
-
-    const handleToolbarKeyDown = useCallback((event: React.KeyboardEvent<HTMLDivElement>) => {
-      if (event.key !== keys.ARROW_LEFT && event.key !== keys.ARROW_RIGHT) {
-        return;
-      }
-      const toolbar = bubbleRef.current?.querySelector<HTMLElement>('[role="toolbar"]');
-      const actionButtons = toolbar
-        ? Array.from(toolbar.querySelectorAll<HTMLButtonElement>('button'))
-        : [];
-      if (actionButtons.length === 0) return;
-
-      event.preventDefault();
-      event.stopPropagation();
-      const currentIndex = actionButtons.indexOf(document.activeElement as HTMLButtonElement);
-      const delta = event.key === keys.ARROW_RIGHT ? 1 : -1;
-      const nextIndex =
-        currentIndex >= 0
-          ? (currentIndex + delta + actionButtons.length) % actionButtons.length
-          : delta > 0
-          ? 0
-          : actionButtons.length - 1;
-      actionButtons[nextIndex]?.focus();
-    }, []);
-
     const handleFilterIn = useCallback(
       (e: React.MouseEvent) => {
         e.stopPropagation();
@@ -972,66 +745,13 @@ const CellActions = React.memo(
       </EuiToolTip>,
     ].filter((button): button is React.ReactElement => button != null);
 
-    const bubble = (
-      <div
-        ref={bubbleRef}
-        className="tsg-cellActions"
-        css={[
-          styles.cellActions,
-          isOpen && useFixedLayer && styles.cellActionsFixed,
-          isOpen && styles.cellActionsOpen,
-        ]}
-        style={isOpen && useFixedLayer ? fixedLayerStyle : undefined}
-        onMouseEnter={handleBubbleMouseEnter}
-        onMouseLeave={handleBubbleMouseLeave}
-      >
-        {isOpen ? (
-          <div
-            role="toolbar"
-            aria-label={cellActionsLabel}
-            css={styles.cellActionsToolbar}
-            onKeyDown={handleToolbarKeyDown}
-          >
-            {actionButtons.map((button, index) => (
-              <span
-                key={button.key}
-                css={styles.cellActionPop}
-                style={{ animationDelay: `${index * 45}ms` }}
-              >
-                {button}
-              </span>
-            ))}
-          </div>
-        ) : (
-          <EuiToolTip
-            content={cellActionsLabel}
-            disableScreenReaderOutput
-            anchorProps={{ css: { display: 'inline-flex' } }}
-          >
-            <EuiButtonIcon
-              buttonRef={triggerRef}
-              color="text"
-              display="base"
-              iconType="ellipsis"
-              size="xs"
-              iconSize="s"
-              aria-label={cellActionsLabel}
-              aria-haspopup="toolbar"
-              aria-expanded={isOpen}
-              data-test-subj="tanStackCellActionsButton"
-              onClick={handleTriggerClick}
-              onKeyDown={handleTriggerKeyDown}
-            />
-          </EuiToolTip>
-        )}
-      </div>
+    return (
+      <TanStackCellActionsBubble
+        anchorCellRef={anchorCellRef}
+        actionButtons={actionButtons}
+        toolbarAriaLabel={cellActionsLabel}
+      />
     );
-
-    if (isOpen && useFixedLayer) {
-      return <EuiPortal>{bubble}</EuiPortal>;
-    }
-
-    return bubble;
   }
 );
 

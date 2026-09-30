@@ -49,6 +49,11 @@ import { css } from '@emotion/react';
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 import { i18n } from '@kbn/i18n';
 import { KbnWarningCallout } from '@kbn/ui-callout';
+import {
+  TANSTACK_CELL_ACTIONS_CLASS,
+  TanStackCellActionsBubble,
+  tanStackCellActionsStyles,
+} from '@kbn/unified-data-table';
 import { getUnifiedDocViewerServices } from '../../plugin';
 import type { FieldRow } from './field_row';
 import { PinControlCell } from './get_pin_control';
@@ -93,6 +98,10 @@ const getInitialNameColumnWidth = (containerWidth: number) =>
 // comparatively heavy cell actions only mount for that one cell.
 const GridCellActiveContext = createContext(false);
 
+const GridCellAnchorContext = createContext<React.RefObject<HTMLDivElement | null>>({
+  current: null,
+});
+
 // Mirrors the EuiDataGrid hover action button: icon only, label exposed via tooltip and aria-label.
 const CellActionIconButton: typeof EuiButtonIcon = ({ children, title, ...rest }) => (
   <EuiToolTip content={title} disableScreenReaderOutput>
@@ -131,8 +140,9 @@ const FieldTableCell = memo(
     hideFilteringOnComputedColumns,
   }: FieldTableCellProps) => {
     const isActive = useContext(GridCellActiveContext);
+    const anchorCellRef = useContext(GridCellAnchorContext);
     const [isPopoverOpen, setIsPopoverOpen] = useState(false);
-    const togglePopover = useCallback(() => setIsPopoverOpen((isOpen) => !isOpen), []);
+    const openPopover = useCallback(() => setIsPopoverOpen(true), []);
     const closePopover = useCallback(() => setIsPopoverOpen(false), []);
 
     const row = rows[rowIndex];
@@ -150,6 +160,37 @@ const FieldTableCell = memo(
       defaultMessage: 'Expand cell',
     });
 
+    const actionButtons = useMemo(() => {
+      const sharedActionProps = {
+        rowIndex,
+        colIndex,
+        columnId,
+        isExpanded: false as const,
+      };
+      const actions = cellActions
+        .map((Action, idx) => (
+          <Action key={idx} {...sharedActionProps} Component={CellActionIconButton} />
+        ))
+        .filter((action) => action != null);
+
+      actions.push(
+        <EuiToolTip key="expand" content={expandLabel} disableScreenReaderOutput>
+          <EuiButtonIcon
+            data-test-subj="euiDataGridCellExpandButton"
+            iconType="maximize"
+            aria-label={expandLabel}
+            size="xs"
+            iconSize="s"
+            color="text"
+            display="empty"
+            onClick={openPopover}
+          />
+        </EuiToolTip>
+      );
+
+      return actions;
+    }, [cellActions, colIndex, columnId, expandLabel, openPopover, rowIndex]);
+
     return (
       <>
         <TableCell
@@ -162,75 +203,60 @@ const FieldTableCell = memo(
           onFindSearchTermMatch={onFindSearchTermMatch}
         />
         {(isActive || isPopoverOpen) && (
-          <div className="kbnDocViewer__tanStackCellActions">
-            {cellActions.map((Action, idx) => (
-              <Action
-                key={idx}
-                rowIndex={rowIndex}
-                colIndex={colIndex}
-                columnId={columnId}
-                Component={CellActionIconButton}
-                isExpanded={false}
-              />
-            ))}
-            <EuiPopover
-              isOpen={isPopoverOpen}
-              closePopover={closePopover}
-              anchorPosition="downRight"
-              aria-label={i18n.translate('unifiedDocViewer.fieldsTable.cellPopoverAriaLabel', {
-                defaultMessage: 'Cell details',
-              })}
-              panelPaddingSize="s"
-              panelProps={{ 'data-test-subj': 'euiDataGridExpansionPopover' }}
-              button={
-                <EuiToolTip content={expandLabel} disableScreenReaderOutput>
-                  <EuiButtonIcon
-                    data-test-subj="euiDataGridCellExpandButton"
-                    iconType="maximize"
-                    aria-label={expandLabel}
-                    size="xs"
-                    iconSize="s"
-                    color="text"
-                    onClick={togglePopover}
+          <div css={cellActionsHostStyles}>
+            <TanStackCellActionsBubble
+              anchorCellRef={anchorCellRef}
+              actionButtons={actionButtons}
+              stayVisible={isPopoverOpen}
+            />
+            {isPopoverOpen && (
+              <EuiPopover
+                isOpen
+                closePopover={closePopover}
+                anchorPosition="downRight"
+                aria-label={i18n.translate('unifiedDocViewer.fieldsTable.cellPopoverAriaLabel', {
+                  defaultMessage: 'Cell details',
+                })}
+                panelPaddingSize="s"
+                panelProps={{ 'data-test-subj': 'euiDataGridExpansionPopover' }}
+                button={<span aria-hidden="true" css={hiddenPopoverAnchorStyles} />}
+              >
+                <EuiText size="s" css={popoverContentStyles}>
+                  <TableCell
+                    searchTerm={searchTerm || ''}
+                    rows={rows}
+                    rowIndex={rowIndex}
+                    columnId={columnId}
+                    isDetails
+                    isESQLMode={isEsqlMode}
+                    onFindSearchTermMatch={onFindSearchTermMatch}
                   />
-                </EuiToolTip>
-              }
-            >
-              <EuiText size="s" css={popoverContentStyles}>
-                <TableCell
-                  searchTerm={searchTerm || ''}
-                  rows={rows}
-                  rowIndex={rowIndex}
-                  columnId={columnId}
-                  isDetails
-                  isESQLMode={isEsqlMode}
-                  onFindSearchTermMatch={onFindSearchTermMatch}
-                />
-              </EuiText>
-              {cellActions.length > 0 && (
-                <EuiPopoverFooter>
-                  <EuiFlexGroup gutterSize="s" responsive={false} wrap>
-                    {cellActions.map((Action, idx) => (
-                      <EuiFlexItem key={idx} grow={false}>
-                        <Action
-                          rowIndex={rowIndex}
-                          colIndex={colIndex}
-                          columnId={columnId}
-                          Component={CellActionPopoverButton}
-                          isExpanded
-                        />
-                      </EuiFlexItem>
-                    ))}
-                  </EuiFlexGroup>
-                </EuiPopoverFooter>
-              )}
-              {Boolean(warningMessage) && (
-                <div>
-                  <EuiSpacer size="xs" />
-                  <KbnWarningCallout announceOnMount={false} title={warningMessage} size="s" />
-                </div>
-              )}
-            </EuiPopover>
+                </EuiText>
+                {cellActions.length > 0 && (
+                  <EuiPopoverFooter>
+                    <EuiFlexGroup gutterSize="s" responsive={false} wrap>
+                      {cellActions.map((Action, idx) => (
+                        <EuiFlexItem key={idx} grow={false}>
+                          <Action
+                            rowIndex={rowIndex}
+                            colIndex={colIndex}
+                            columnId={columnId}
+                            Component={CellActionPopoverButton}
+                            isExpanded
+                          />
+                        </EuiFlexItem>
+                      ))}
+                    </EuiFlexGroup>
+                  </EuiPopoverFooter>
+                )}
+                {Boolean(warningMessage) && (
+                  <div>
+                    <EuiSpacer size="xs" />
+                    <KbnWarningCallout announceOnMount={false} title={warningMessage} size="s" />
+                  </div>
+                )}
+              </EuiPopover>
+            )}
           </div>
         )}
       </>
@@ -241,6 +267,7 @@ const FieldTableCell = memo(
 const GridCell = memo(
   ({ cell, styles }: { cell: Cell<FieldRow, unknown>; styles: TableStyles }) => {
     const [isActive, setIsActive] = useState(false);
+    const cellRef = useRef<HTMLDivElement>(null);
     const { id: columnId } = cell.column;
     const hasActions = columnId !== PIN_COLUMN_ID;
 
@@ -254,6 +281,7 @@ const GridCell = memo(
 
     return (
       <div
+        ref={cellRef}
         role="gridcell"
         data-gridcell-column-id={columnId}
         tabIndex={hasActions ? 0 : undefined}
@@ -261,11 +289,13 @@ const GridCell = memo(
         onMouseLeave={hasActions ? onDeactivate : undefined}
         onFocus={hasActions ? onActivate : undefined}
         onBlur={hasActions ? onBlur : undefined}
-        css={[styles.cell, getColumnCss(styles, columnId)]}
+        css={[styles.cell, hasActions && styles.cellWithActions, getColumnCss(styles, columnId)]}
       >
-        <GridCellActiveContext.Provider value={isActive}>
-          {flexRender(cell.column.columnDef.cell, cell.getContext())}
-        </GridCellActiveContext.Provider>
+        <GridCellAnchorContext.Provider value={cellRef}>
+          <GridCellActiveContext.Provider value={isActive}>
+            {flexRender(cell.column.columnDef.cell, cell.getContext())}
+          </GridCellActiveContext.Provider>
+        </GridCellAnchorContext.Provider>
       </div>
     );
   }
@@ -659,6 +689,24 @@ const popoverContentStyles = css({
   wordBreak: 'break-word',
 });
 
+const hiddenPopoverAnchorStyles = css({
+  display: 'none',
+});
+
+// Keeps the bubble and expansion popover anchor out of the row layout (matches legacy actions bar).
+const cellActionsHostStyles = css({
+  position: 'absolute',
+  top: 0,
+  right: 0,
+  bottom: 0,
+  left: 0,
+  zIndex: 1,
+  pointerEvents: 'none',
+  [`& .${TANSTACK_CELL_ACTIONS_CLASS}`]: {
+    pointerEvents: 'auto',
+  },
+});
+
 const componentStyles = {
   scrollContainer: (themeContext: UseEuiTheme) => {
     const { euiTheme } = themeContext;
@@ -699,22 +747,9 @@ const componentStyles = {
         {
           opacity: 1,
         },
-
-      '.kbnDocViewer__tanStackCellActions': {
-        position: 'absolute',
-        top: euiTheme.size.xs,
-        right: euiTheme.size.xs,
-        display: 'flex',
-        alignItems: 'center',
-        gap: euiTheme.size.xxs,
-        paddingInline: euiTheme.size.xxs,
-        borderRadius: euiTheme.border.radius.small,
-        backgroundColor: euiTheme.colors.backgroundBasePlain,
-        boxShadow: `0 0 0 ${euiTheme.border.width.thin} ${euiTheme.colors.borderBasePlain}`,
-        zIndex: 1,
-      },
     });
   },
+  cellWithActions: tanStackCellActionsStyles.cellWithActions,
   stickyTop: css({
     position: 'sticky',
     top: 0,

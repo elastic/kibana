@@ -83,3 +83,12 @@ export {
 } from './src/utils/copy_value_to_clipboard';
 
 export { type EuiDataGridRefProps } from '@elastic/eui';
+
+export {
+  TanStackCellActionsBubble,
+  type TanStackCellActionsBubbleProps,
+} from './src/components/tanstack_cell_actions/tanstack_cell_actions_bubble';
+export {
+  TANSTACK_CELL_ACTIONS_CLASS,
+  tanStackCellActionsStyles,
+} from './src/components/tanstack_cell_actions/tanstack_cell_actions_styles';

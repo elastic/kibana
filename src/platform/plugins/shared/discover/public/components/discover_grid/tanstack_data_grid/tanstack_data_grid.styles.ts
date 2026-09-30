@@ -352,10 +352,10 @@ export const getTanStackDataGridStyles = (euiTheme: UseEuiTheme['euiTheme']) => 
   cellWithActions: css({
     position: 'relative',
     overflow: 'hidden',
-    '&:hover > .tsg-cellActions, &:focus-within > .tsg-cellActions': {
+    '&:hover .tsg-cellActions, &:focus-within .tsg-cellActions': {
       display: 'flex',
     },
-    '&.tsg-actionsDismissed > .tsg-cellActions, &.tsg-actionsDismissed:hover > .tsg-cellActions, &.tsg-actionsDismissed:focus-within > .tsg-cellActions':
+    '&.tsg-actionsDismissed .tsg-cellActions, &.tsg-actionsDismissed:hover .tsg-cellActions, &.tsg-actionsDismissed:focus-within .tsg-cellActions':
       {
         display: 'none',
         pointerEvents: 'none',

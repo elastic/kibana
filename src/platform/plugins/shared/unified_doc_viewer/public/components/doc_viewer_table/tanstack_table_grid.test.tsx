@@ -48,6 +48,10 @@ const buildFieldRow = (name: string, value: string, isPinned = false) =>
 
 const mockRows: FieldRow[] = [buildFieldRow('fieldA', 'valueA'), buildFieldRow('fieldB', 'valueB')];
 
+const openCellActionsBubble = async () => {
+  await userEvent.click(await screen.findByTestId('tanStackCellActionsButton'));
+};
+
 describe('TanStackTableGrid', () => {
   // jsdom has no layout, give the scroll container a size so the virtualizer renders rows.
   beforeAll(() => {
@@ -135,19 +139,19 @@ describe('TanStackTableGrid', () => {
 
   it('only mounts cell actions for the hovered or focused cell', async () => {
     render(<TanStackTableGrid {...defaultProps} />);
-    expect(screen.queryByTestId('copyValueButton-fieldA')).not.toBeInTheDocument();
-    expect(screen.queryByTestId('euiDataGridCellExpandButton')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('tanStackCellActionsButton')).not.toBeInTheDocument();
 
     await userEvent.hover(screen.getByText('fieldA'));
+    await openCellActionsBubble();
     await userEvent.click(screen.getByTestId('toggleColumnButton-fieldA'));
     expect(defaultProps.onAddColumn).toHaveBeenCalledWith('fieldA');
-    expect(screen.getAllByTestId('euiDataGridCellExpandButton')).toHaveLength(1);
 
     await userEvent.unhover(screen.getByText('fieldA'));
-    expect(screen.queryByTestId('toggleColumnButton-fieldA')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('tanStackCellActionsButton')).not.toBeInTheDocument();
 
     screen.getByText('valueB').closest<HTMLElement>('[role="gridcell"]')?.focus();
-    expect(await screen.findByTestId('copyValueButton-fieldB')).toBeInTheDocument();
+    await openCellActionsBubble();
+    expect(screen.getByTestId('copyValueButton-fieldB')).toBeInTheDocument();
     // Unmapped fields cannot be filtered.
     expect(screen.queryByTestId('addFilterForValueButton-fieldB')).not.toBeInTheDocument();
   });
@@ -155,6 +159,7 @@ describe('TanStackTableGrid', () => {
   it('opens the cell popover with actions and warnings', async () => {
     render(<TanStackTableGrid {...defaultProps} rows={[mockRows[0]]} />);
     await userEvent.hover(screen.getByText('valueA'));
+    await openCellActionsBubble();
     await userEvent.click(screen.getByTestId('euiDataGridCellExpandButton'));
 
     const popover = await screen.findByTestId('euiDataGridExpansionPopover');
