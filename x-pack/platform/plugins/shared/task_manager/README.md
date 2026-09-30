@@ -320,6 +320,7 @@ taskManager.registerTaskDefinitions({
 ```
 
 The task id, stored API key, and user scope are unchanged across yields, and `attempts` resets to 0 because a yield is a successful run.
+Params handed off by a yield go through the `beforeSave` middleware, exactly like params passed to `schedule`, so a middleware that wraps params on save and unwraps them in `beforeRun` keeps working across a resume.
 
 A yield is recorded in the event log (provider `taskManager`): the yielding run writes its normal `task-run` event plus a `task-yield` event carrying `kibana.task.yield.deadline`. The task's next `task-run-start` event is the resume; if it starts before the deadline, the task was resumed by `runSoon`.
 

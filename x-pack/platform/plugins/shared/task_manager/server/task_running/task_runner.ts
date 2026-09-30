@@ -127,7 +127,7 @@ type Opts = {
   apiKeyStrategy: ApiKeyStrategy;
   eventLogger: TaskEventLogger;
   enrichFakeRequest?: FakeRequestEnricher;
-} & Pick<Middleware, 'beforeRun'>;
+} & Pick<Middleware, 'beforeRun' | 'beforeSave'>;
 
 export enum TaskRunResult {
   // Task completed successfully
@@ -170,6 +170,7 @@ export class TaskManagerRunner implements TaskRunner {
   private logger: Logger;
   private bufferedTaskStore: Updatable;
   private beforeRun: Middleware['beforeRun'];
+  private beforeSave: Middleware['beforeSave'];
   private onTaskEvent: (event: TaskRun | TaskMarkRunning | TaskManagerStat) => void;
   private defaultMaxAttempts: number;
   private uuid: string;
@@ -201,6 +202,7 @@ export class TaskManagerRunner implements TaskRunner {
     logger,
     store,
     beforeRun,
+    beforeSave,
     defaultMaxAttempts,
     onTaskEvent = identity,
     executionContext,
@@ -217,6 +219,7 @@ export class TaskManagerRunner implements TaskRunner {
     this.logger = logger;
     this.bufferedTaskStore = store;
     this.beforeRun = beforeRun;
+    this.beforeSave = beforeSave;
     this.onTaskEvent = onTaskEvent;
     this.defaultMaxAttempts = defaultMaxAttempts;
     this.executionContext = executionContext;
@@ -620,6 +623,22 @@ export class TaskManagerRunner implements TaskRunner {
     return asOk(successful);
   }
 
+  private async applyBeforeSaveToYieldedParams(
+    result: Result<SuccessfulRunResult, FailedRunResult>
+  ): Promise<Result<SuccessfulRunResult, FailedRunResult>> {
+    if (!isOk(result)) {
+      return result;
+    }
+    const { value } = result;
+    if (!value.shouldYieldTask || value.params === undefined) {
+      return result;
+    }
+    const { taskInstance } = await this.beforeSave({
+      taskInstance: { ...this.instance.task, params: value.params },
+    });
+    return asOk({ ...value, params: taskInstance.params });
+  }
+
   private shouldTryToScheduleRetry(): boolean {
     if (this.instance.task.schedule) {
       return true;
@@ -687,6 +706,9 @@ export class TaskManagerRunner implements TaskRunner {
   ): Promise<TaskRunResult> {
     const hasTaskRunFailed = isOk(result);
     let shouldTaskBeDisabled = false;
+    // Params handed off by a yield are persisted by the framework, so run them through
+    // the same `beforeSave` middleware that `schedule` applies to params.
+    const resultToPersist = await this.applyBeforeSaveToYieldedParams(result);
     const fieldUpdates: Partial<ConcreteTaskInstance> & Pick<ConcreteTaskInstance, 'status'> = flow(
       // if running the task has failed ,try to correct by scheduling a retry in the near future
       mapErr(this.rescheduleFailedRun),
@@ -736,7 +758,7 @@ export class TaskManagerRunner implements TaskRunner {
         }
       ),
       unwrap
-    )(result);
+    )(resultToPersist);
 
     if (
       fieldUpdates.status === TaskStatus.Failed ||

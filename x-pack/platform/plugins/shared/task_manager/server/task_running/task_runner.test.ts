@@ -6,6 +6,7 @@
  */
 
 import _ from 'lodash';
+import type { Middleware } from '../lib/middleware';
 import { errors } from '@elastic/elasticsearch';
 import { secondsFromNow, secondsFromDate } from '../lib/intervals';
 import { asOk, asErr } from '../lib/result_type';
@@ -947,6 +948,49 @@ describe('TaskManagerRunner', () => {
             })
           )
         )
+      );
+    });
+
+    test('runs the handed-off params through the beforeSave middleware when an ad-hoc task yields', async () => {
+      const yielded = getYieldTaskRunResult({ state: {}, params: { step: 2 }, delay: '5m' });
+      const beforeSave = jest.fn(
+        async ({ taskInstance, ...opts }: Parameters<Middleware['beforeSave']>[0]) => ({
+          ...opts,
+          taskInstance: { ...taskInstance, params: { wrapped: taskInstance.params } },
+        })
+      );
+      const { instance, runner, store } = await readyToRunStageSetup({
+        beforeSave,
+        instance: {
+          status: TaskStatus.Running,
+          startedAt: new Date(),
+        },
+        definitions: {
+          bar: {
+            title: 'Bar!',
+            createTaskRunner: () => ({
+              async run() {
+                return yielded;
+              },
+            }),
+          },
+        },
+      });
+
+      await runner.run();
+
+      expect(beforeSave).toHaveBeenCalledWith({
+        taskInstance: expect.objectContaining({ id: instance.id, params: { step: 2 } }),
+      });
+      expect(store.partialUpdate).toHaveBeenCalledWith(
+        expect.objectContaining({
+          params: { wrapped: { step: 2 } },
+          status: TaskStatus.Waiting,
+        }),
+        {
+          validate: true,
+          doc: instance,
+        }
       );
     });
 
@@ -3887,6 +3931,7 @@ describe('TaskManagerRunner', () => {
     onTaskEvent?: jest.Mock<(event: TaskEvent<unknown, unknown>) => void>;
     allowReadingInvalidState?: boolean;
     enrichFakeRequest?: jest.Mock;
+    beforeSave?: Middleware['beforeSave'];
   }
 
   function withAnyTiming(taskRun: TaskRun) {
@@ -3949,6 +3994,7 @@ describe('TaskManagerRunner', () => {
     const runner = new TaskManagerRunner({
       defaultMaxAttempts: 5,
       beforeRun: (context) => Promise.resolve(context),
+      beforeSave: opts.beforeSave ?? ((context) => Promise.resolve(context)),
       logger,
       store,
       instance,

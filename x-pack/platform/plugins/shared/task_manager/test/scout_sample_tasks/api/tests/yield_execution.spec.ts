@@ -19,7 +19,8 @@ interface TaskBody {
   attempts?: number;
   status?: string;
   state?: { count?: number };
-  params?: { phase?: string };
+  // The sample task plugin's middleware wraps params in `originalParams` on save
+  params?: { originalParams?: { phase?: string } };
   statusCode?: number;
 }
 
@@ -67,7 +68,7 @@ apiTest.describe('Task Manager yield execution', { tag: ['@local-stateful-classi
           attempts: 0,
           status: 'waiting',
           state: { count: 1 },
-          params: { phase: 'resumed' },
+          params: { originalParams: { phase: 'resumed' } },
         });
 
       const runSoon = await apiClient.post('api/sample_tasks/run_soon', {
