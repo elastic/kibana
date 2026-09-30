@@ -178,3 +178,5 @@ export const registerDashboardAttachmentUiDefinition = ({
     updateOriginByAttachmentId.clear();
   };
 };
+
+export { registerDashboardPanelAttachmentUiDefinition } from './dashboard_panel_ui_definition';
