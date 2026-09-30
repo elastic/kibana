@@ -10,7 +10,13 @@ import { i18n } from '@kbn/i18n';
 import type { DataView, DataViewListItem } from '@kbn/data-views-plugin/public';
 import type { GraphWorkspaceSavedObject, Workspace } from '../types';
 import type { GraphStoreDependencies, GraphState, StartGraphListening } from '.';
-import { createWorkspaceState, initializeWorkspace, submitSearch, workspaceChanged } from '.';
+import {
+  createWorkspaceState,
+  initializeWorkspace,
+  submitSearch,
+  workspaceChanged,
+  workspaceRuntimeChanged,
+} from '.';
 import { datasourceSelector } from './datasource';
 import type { IndexpatternDatasource } from './datasource';
 import { setDatasource } from './datasource';
@@ -144,7 +150,7 @@ export const registerPersistenceListeners = (
           getState: () => {
             const currentWorkspace = deps.getWorkspace();
             if (currentWorkspace) {
-              listenerApi.dispatch(workspaceChanged(createWorkspaceState(currentWorkspace)));
+              listenerApi.dispatch(workspaceRuntimeChanged(createWorkspaceState(currentWorkspace)));
             }
             return listenerApi.getState();
           },

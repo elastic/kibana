@@ -13,7 +13,7 @@ import type { Workspace } from '../types';
 import {
   createGraphStore,
   createWorkspaceState,
-  workspaceChanged,
+  workspaceRuntimeChanged,
   workspaceLayoutChanged,
   type GraphStore,
 } from '../state_management';
@@ -85,7 +85,7 @@ export const WorkspaceRoute = ({
   const notifyWorkspaceChanged = () => {
     const workspace = workspaceRef.current;
     if (workspace) {
-      storeRef.current?.dispatch(workspaceChanged(createWorkspaceState(workspace)));
+      storeRef.current?.dispatch(workspaceRuntimeChanged(createWorkspaceState(workspace)));
     }
   };
 

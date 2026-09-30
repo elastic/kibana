@@ -83,7 +83,6 @@ export interface Workspace {
   nodesMap: Record<string, WorkspaceNode>;
   edgesMap: Record<string, WorkspaceEdge>;
   nodes: WorkspaceNode[];
-  selectedNodes: WorkspaceNode[];
   edges: WorkspaceEdge[];
   blocklistedNodes: BlockListedNode[];
   undoLog: string;
@@ -139,9 +138,6 @@ export interface Workspace {
   runLayout(): void;
   stopLayout(): void;
   isLayoutRunning(): boolean;
-
-  addEdgeToSelection(edge: WorkspaceEdge): void;
-  clearEdgeSelection(): void;
 }
 
 export type ExploreRequest = any;
