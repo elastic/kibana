@@ -1,4 +1,5 @@
 # ----- Copy from internal roles config in elasticsearch-controller
+# Read-tier Dashboard/Discover grants: elastic/elasticsearch-controller#2058
 # modeled after the t1_analyst minus osquery run saved queries privilege, plus endpoint exceptions read
 viewer:
   metadata:
@@ -7,6 +8,19 @@ viewer:
   cluster:
     - 'read_project_routing'
   indices:
+    - names:
+        - .metrics-endpoint.metadata_united_default*
+        - metrics-endpoint.policy-*
+      privileges:
+        - read
+      allow_restricted_indices: false
+    - names:
+        - .logs-osquery_manager.actions-*
+        - .logs-osquery_manager.action.responses-*
+      privileges:
+        - 'read'
+        - 'view_index_metadata'
+      allow_restricted_indices: false
     - names:
         - '.siem-signals*'
         - '.lists-*'
@@ -76,13 +90,20 @@ viewer:
         - feature_actions.read
         - feature_builtInAlerts.read
         - feature_osquery.read
-        - feature_discover_v2.all
-        - feature_dashboard_v2.all
+        # Dashboard/Discover `.all` was inert while those Kibana features were hidden.
+        # Keep `.read` so unhiding them does not grant write; SIEM `read` already
+        # composes the same read privileges. maps_v2/visualize_v2 stay `.all` because
+        # they remain hidden and Dashboard `read` already composes them.
+        - feature_discover_v2.read
+        - feature_dashboard_v2.read
         - feature_maps_v2.all
         - feature_visualize_v2.all
         - feature_savedQueryManagement.all
         - feature_agentBuilder.read
         - feature_workflowsManagement.read
+        - feature_alertzero.read
+        - feature_agenticInvestigations.read
+        - feature_proposals.read
       resources: '*'
   run_as: []
 
@@ -94,6 +115,29 @@ editor:
   cluster:
     - 'read_project_routing'
   indices:
+    - names:
+        - metrics-endpoint.metadata_current_*
+      privileges:
+        - read
+    - names:
+        - .logs-endpoint.actions-*
+        - .logs-endpoint.action.responses-*
+      privileges:
+        - read
+      allow_restricted_indices: false
+    - names:
+        - .metrics-endpoint.metadata_united_default*
+        - metrics-endpoint.policy-*
+      privileges:
+        - read
+      allow_restricted_indices: false
+    - names:
+        - .logs-osquery_manager.actions-*
+        - .logs-osquery_manager.action.responses-*
+      privileges:
+        - 'read'
+        - 'view_index_metadata'
+      allow_restricted_indices: false
     - names:
         - '.siem-signals*'
         - '.lists-*'
@@ -190,6 +234,7 @@ editor:
         - feature_securitySolutionTimeline.all
         - feature_securitySolutionNotes.all
         - feature_securitySolutionCases.all
+        - feature_securitySolutionCasesV3.cases_manage_templates
         - feature_securitySolutionAssistant.all
         - feature_securitySolutionAttackDiscovery.all
         - feature_actions.read
@@ -203,6 +248,11 @@ editor:
         - feature_savedQueryManagement.all
         - feature_agentBuilder.all
         - feature_workflowsManagement.all
+        - feature_alertzero.all
+        - feature_agenticInvestigations.all
+        - feature_agenticInvestigations.escalations_all
+        - feature_proposals.all
+        - feature_workflowsManagement.workflow_update_managed
       resources: '*'
   run_as: []
 
@@ -213,6 +263,19 @@ t1_analyst:
   cluster:
     - 'read_project_routing'
   indices:
+    - names:
+        - .metrics-endpoint.metadata_united_default*
+        - metrics-endpoint.policy-*
+      privileges:
+        - read
+      allow_restricted_indices: false
+    - names:
+        - .logs-osquery_manager.actions-*
+        - .logs-osquery_manager.action.responses-*
+      privileges:
+        - 'read'
+        - 'view_index_metadata'
+      allow_restricted_indices: false
     - names:
         - '.alerts-security*'
         - '.siem-signals-*'
@@ -288,13 +351,19 @@ t1_analyst:
         - feature_builtInAlerts.read
         - feature_osquery.read
         - feature_osquery.run_saved_queries
-        - feature_discover_v2.all
-        - feature_dashboard_v2.all
+        # Same as viewer: Dashboard/Discover stay `.read`; maps_v2/visualize_v2 stay
+        # `.all` because those features remain hidden.
+        - feature_discover_v2.read
+        - feature_dashboard_v2.read
         - feature_maps_v2.all
         - feature_visualize_v2.all
         - feature_savedQueryManagement.all
         - feature_agentBuilder.all
         - feature_workflowsManagement.all
+        - feature_alertzero.read
+        - feature_agenticInvestigations.all
+        - feature_agenticInvestigations.escalations_all
+        - feature_proposals.all
       resources: '*'
 
 t2_analyst:
@@ -304,6 +373,19 @@ t2_analyst:
   cluster:
     - 'read_project_routing'
   indices:
+    - names:
+        - .metrics-endpoint.metadata_united_default*
+        - metrics-endpoint.policy-*
+      privileges:
+        - read
+      allow_restricted_indices: false
+    - names:
+        - .logs-osquery_manager.actions-*
+        - .logs-osquery_manager.action.responses-*
+      privileges:
+        - 'read'
+        - 'view_index_metadata'
+      allow_restricted_indices: false
     - names:
         - .alerts-security*
         - .siem-signals-*
@@ -374,19 +456,26 @@ t2_analyst:
         - feature_securitySolutionTimeline.read
         - feature_securitySolutionNotes.read
         - feature_securitySolutionCases.all
+        - feature_securitySolutionCasesV3.cases_manage_templates
         - feature_securitySolutionAssistant.all
         - feature_securitySolutionAttackDiscovery.minimal_all
         - feature_actions.read
         - feature_builtInAlerts.read
         - feature_osquery.read
         - feature_osquery.run_saved_queries
-        - feature_discover_v2.all
-        - feature_dashboard_v2.all
+        # Same as viewer: Dashboard/Discover stay `.read`; maps_v2/visualize_v2 stay
+        # `.all` because those features remain hidden.
+        - feature_discover_v2.read
+        - feature_dashboard_v2.read
         - feature_maps_v2.all
         - feature_visualize_v2.all
         - feature_savedQueryManagement.all
         - feature_agentBuilder.all
         - feature_workflowsManagement.all
+        - feature_alertzero.read
+        - feature_agenticInvestigations.all
+        - feature_agenticInvestigations.escalations_all
+        - feature_proposals.all
       resources: '*'
 
 t3_analyst:
@@ -396,6 +485,25 @@ t3_analyst:
   cluster:
     - 'read_project_routing'
   indices:
+    - names:
+        - .logs-endpoint.actions-*
+        - .logs-endpoint.action.responses-*
+      privileges:
+        - read
+      allow_restricted_indices: false
+    - names:
+        - .metrics-endpoint.metadata_united_default*
+        - metrics-endpoint.policy-*
+      privileges:
+        - read
+      allow_restricted_indices: false
+    - names:
+        - .logs-osquery_manager.actions-*
+        - .logs-osquery_manager.action.responses-*
+      privileges:
+        - 'read'
+        - 'view_index_metadata'
+      allow_restricted_indices: false
     - names:
         - apm-*-transaction*
         - traces-apm*
@@ -485,6 +593,7 @@ t3_analyst:
         - feature_securitySolutionTimeline.all
         - feature_securitySolutionNotes.all
         - feature_securitySolutionCases.all
+        - feature_securitySolutionCasesV3.cases_manage_templates
         - feature_securitySolutionAssistant.all
         - feature_securitySolutionAttackDiscovery.all
         - feature_actions.read
@@ -498,6 +607,10 @@ t3_analyst:
         - feature_savedQueryManagement.all
         - feature_agentBuilder.all
         - feature_workflowsManagement.all
+        - feature_alertzero.all
+        - feature_agenticInvestigations.all
+        - feature_proposals.all
+        - feature_workflowsManagement.workflow_update_managed
       resources: '*'
 
 threat_intelligence_analyst:
@@ -507,6 +620,19 @@ threat_intelligence_analyst:
   cluster:
     - 'read_project_routing'
   indices:
+    - names:
+        - .metrics-endpoint.metadata_united_default*
+        - metrics-endpoint.policy-*
+      privileges:
+        - read
+      allow_restricted_indices: false
+    - names:
+        - .logs-osquery_manager.actions-*
+        - .logs-osquery_manager.action.responses-*
+      privileges:
+        - 'read'
+        - 'view_index_metadata'
+      allow_restricted_indices: false
     - names:
         - apm-*-transaction*
         - traces-apm*
@@ -582,6 +708,7 @@ threat_intelligence_analyst:
         - feature_securitySolutionTimeline.all
         - feature_securitySolutionNotes.all
         - feature_securitySolutionCases.all
+        - feature_securitySolutionCasesV3.cases_manage_templates
         - feature_securitySolutionAssistant.all
         - feature_securitySolutionAttackDiscovery.all
         - feature_actions.read
@@ -594,6 +721,10 @@ threat_intelligence_analyst:
         - feature_savedQueryManagement.all
         - feature_agentBuilder.all
         - feature_workflowsManagement.all
+        - feature_alertzero.read
+        - feature_agenticInvestigations.all
+        - feature_agenticInvestigations.escalations_all
+        - feature_proposals.all
       resources: '*'
 
 rule_author:
@@ -603,6 +734,25 @@ rule_author:
   cluster:
     - 'read_project_routing'
   indices:
+    - names:
+        - .logs-endpoint.actions-*
+        - .logs-endpoint.action.responses-*
+      privileges:
+        - read
+      allow_restricted_indices: false
+    - names:
+        - .metrics-endpoint.metadata_united_default*
+        - metrics-endpoint.policy-*
+      privileges:
+        - read
+      allow_restricted_indices: false
+    - names:
+        - .logs-osquery_manager.actions-*
+        - .logs-osquery_manager.action.responses-*
+      privileges:
+        - 'read'
+        - 'view_index_metadata'
+      allow_restricted_indices: false
     - names:
         - apm-*-transaction*
         - traces-apm*
@@ -681,6 +831,7 @@ rule_author:
         - feature_securitySolutionTimeline.all
         - feature_securitySolutionNotes.all
         - feature_securitySolutionCases.all
+        - feature_securitySolutionCasesV3.cases_manage_templates
         - feature_securitySolutionAssistant.all
         - feature_securitySolutionAttackDiscovery.all
         - feature_actions.read
@@ -693,6 +844,10 @@ rule_author:
         - feature_savedQueryManagement.all
         - feature_agentBuilder.all
         - feature_workflowsManagement.all
+        - feature_alertzero.all
+        - feature_agenticInvestigations.all
+        - feature_proposals.all
+        - feature_workflowsManagement.workflow_update_managed
       resources: '*'
 
 soc_manager:
@@ -702,6 +857,25 @@ soc_manager:
   cluster:
     - 'read_project_routing'
   indices:
+    - names:
+        - .logs-endpoint.actions-*
+        - .logs-endpoint.action.responses-*
+      privileges:
+        - read
+      allow_restricted_indices: false
+    - names:
+        - .metrics-endpoint.metadata_united_default*
+        - metrics-endpoint.policy-*
+      privileges:
+        - read
+      allow_restricted_indices: false
+    - names:
+        - .logs-osquery_manager.actions-*
+        - .logs-osquery_manager.action.responses-*
+      privileges:
+        - 'read'
+        - 'view_index_metadata'
+      allow_restricted_indices: false
     - names:
         - apm-*-transaction*
         - traces-apm*
@@ -790,6 +964,7 @@ soc_manager:
         - feature_siemV5.soc_management_all
         - feature_securitySolutionRulesV2.all
         - feature_securitySolutionCases.all
+        - feature_securitySolutionCasesV3.cases_manage_templates
         - feature_securitySolutionAssistant.all
         - feature_securitySolutionAttackDiscovery.all
         - feature_securitySolutionTimeline.all
@@ -806,6 +981,10 @@ soc_manager:
         - feature_savedQueryManagement.all
         - feature_agentBuilder.all
         - feature_workflowsManagement.all
+        - feature_alertzero.all
+        - feature_agenticInvestigations.all
+        - feature_proposals.all
+        - feature_workflowsManagement.workflow_update_managed
       resources: '*'
 
 detections_admin:
@@ -814,6 +993,13 @@ detections_admin:
     reserved: true
   cluster: ['manage_index_templates', 'manage_transform', 'read_project_routing']
   indices:
+    - names:
+        - .logs-osquery_manager.actions-*
+        - .logs-osquery_manager.action.responses-*
+      privileges:
+        - 'read'
+        - 'view_index_metadata'
+      allow_restricted_indices: false
     - names:
         - apm-*-transaction*
         - traces-apm*
@@ -879,6 +1065,7 @@ detections_admin:
         - feature_securitySolutionTimeline.all
         - feature_securitySolutionNotes.all
         - feature_securitySolutionCases.all
+        - feature_securitySolutionCasesV3.cases_manage_templates
         - feature_securitySolutionAssistant.all
         - feature_securitySolutionAttackDiscovery.all
         - feature_actions.all
@@ -891,6 +1078,10 @@ detections_admin:
         - feature_savedQueryManagement.all
         - feature_agentBuilder.all
         - feature_workflowsManagement.all
+        - feature_alertzero.all
+        - feature_agenticInvestigations.all
+        - feature_proposals.all
+        - feature_workflowsManagement.workflow_update_managed
       resources: '*'
 
 platform_engineer:
@@ -899,7 +1090,31 @@ platform_engineer:
     reserved: true
   cluster:
     - manage
+    - 'read_project_routing'
   indices:
+    - names:
+        - metrics-endpoint.metadata_current_*
+      privileges:
+        - read
+    - names:
+        - .logs-endpoint.actions-*
+        - .logs-endpoint.action.responses-*
+      privileges:
+        - read
+      allow_restricted_indices: false
+    - names:
+        - .metrics-endpoint.metadata_united_default*
+        - metrics-endpoint.policy-*
+      privileges:
+        - read
+      allow_restricted_indices: false
+    - names:
+        - .logs-osquery_manager.actions-*
+        - .logs-osquery_manager.action.responses-*
+      privileges:
+        - 'read'
+        - 'view_index_metadata'
+      allow_restricted_indices: false
     - names:
         - apm-*-transaction*
         - traces-apm*
@@ -973,6 +1188,7 @@ platform_engineer:
         - feature_securitySolutionTimeline.all
         - feature_securitySolutionNotes.all
         - feature_securitySolutionCases.all
+        - feature_securitySolutionCasesV3.cases_manage_templates
         - feature_securitySolutionAssistant.all
         - feature_securitySolutionAttackDiscovery.all
         - feature_actions.all
@@ -988,6 +1204,10 @@ platform_engineer:
         - feature_savedQueryManagement.all
         - feature_agentBuilder.all
         - feature_workflowsManagement.all
+        - feature_alertzero.all
+        - feature_agenticInvestigations.all
+        - feature_proposals.all
+        - feature_workflowsManagement.workflow_update_managed
       resources: '*'
 
 endpoint_operations_analyst:
@@ -997,6 +1217,25 @@ endpoint_operations_analyst:
   cluster:
     - 'read_project_routing'
   indices:
+    - names:
+        - .logs-endpoint.actions-*
+        - .logs-endpoint.action.responses-*
+      privileges:
+        - read
+      allow_restricted_indices: false
+    - names:
+        - .metrics-endpoint.metadata_united_default*
+        - metrics-endpoint.policy-*
+      privileges:
+        - read
+      allow_restricted_indices: false
+    - names:
+        - .logs-osquery_manager.actions-*
+        - .logs-osquery_manager.action.responses-*
+      privileges:
+        - 'read'
+        - 'view_index_metadata'
+      allow_restricted_indices: false
     - names:
         - metrics-endpoint.metadata_current_*
         - .fleet-agents*
@@ -1084,6 +1323,7 @@ endpoint_operations_analyst:
         - feature_securitySolutionTimeline.all
         - feature_securitySolutionNotes.all
         - feature_securitySolutionCases.all
+        - feature_securitySolutionCasesV3.cases_manage_templates
         - feature_securitySolutionAssistant.all
         - feature_securitySolutionAttackDiscovery.all
         - feature_actions.all
@@ -1099,6 +1339,10 @@ endpoint_operations_analyst:
         - feature_savedQueryManagement.all
         - feature_agentBuilder.all
         - feature_workflowsManagement.all
+        - feature_alertzero.read
+        - feature_agenticInvestigations.all
+        - feature_agenticInvestigations.escalations_all
+        - feature_proposals.all
       resources: '*'
 
 endpoint_policy_manager:
@@ -1108,6 +1352,19 @@ endpoint_policy_manager:
   cluster:
     - 'read_project_routing'
   indices:
+    - names:
+        - .metrics-endpoint.metadata_united_default*
+        - metrics-endpoint.policy-*
+      privileges:
+        - read
+      allow_restricted_indices: false
+    - names:
+        - .logs-osquery_manager.actions-*
+        - .logs-osquery_manager.action.responses-*
+      privileges:
+        - 'read'
+        - 'view_index_metadata'
+      allow_restricted_indices: false
     - names:
         - metrics-endpoint.metadata_current_*
         - .fleet-agents*
@@ -1184,6 +1441,7 @@ endpoint_policy_manager:
         - feature_siemV5.workflow_insights_all
         - feature_securitySolutionRulesV2.all
         - feature_securitySolutionCases.all
+        - feature_securitySolutionCasesV3.cases_manage_templates
         - feature_securitySolutionAssistant.all
         - feature_securitySolutionAttackDiscovery.all
         - feature_securitySolutionTimeline.all
@@ -1200,6 +1458,10 @@ endpoint_policy_manager:
         - feature_savedQueryManagement.all
         - feature_agentBuilder.all
         - feature_workflowsManagement.all
+        - feature_alertzero.read
+        - feature_agenticInvestigations.all
+        - feature_agenticInvestigations.escalations_all
+        - feature_proposals.all
       resources: '*'
 
 # admin role defined in elasticsearch controller

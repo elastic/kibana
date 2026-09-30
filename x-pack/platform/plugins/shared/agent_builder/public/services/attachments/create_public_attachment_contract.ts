@@ -14,11 +14,16 @@ export const createPublicAttachmentContract = ({
   attachmentsService: AttachmentsService;
 }): AttachmentServiceStartContract => {
   return {
-    addAttachmentType: (attachmentType, definition) => {
-      return attachmentsService.addAttachmentType(attachmentType, definition);
-    },
-    getAttachmentUiDefinition: (attachmentType) => {
-      return attachmentsService.getAttachmentUiDefinition(attachmentType);
-    },
+    addAttachmentType: (attachmentType, definition) =>
+      attachmentsService.addAttachmentType(attachmentType, definition),
+    getAttachmentUiDefinition: (attachmentType) =>
+      attachmentsService.getAttachmentUiDefinition(attachmentType),
+    getClient: () => ({
+      create: attachmentsService.create.bind(attachmentsService),
+      get: attachmentsService.get.bind(attachmentsService),
+      update: attachmentsService.update.bind(attachmentsService),
+      delete: attachmentsService.delete.bind(attachmentsService),
+      list: attachmentsService.list.bind(attachmentsService),
+    }),
   };
 };

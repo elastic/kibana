@@ -90,7 +90,8 @@ export type CloudLinkId =
   | 'billingAndSub'
   | 'deployment'
   | 'deployments'
-  | 'projects';
+  | 'projects'
+  | 'searchPower';
 
 export interface CloudURLs {
   baseUrl?: string;
@@ -100,6 +101,7 @@ export interface CloudURLs {
   projectsUrl?: string;
   performanceUrl?: string;
   usersAndRolesUrl?: string;
+  searchPowerUrl?: string;
 }
 
 export interface CloudLink {
@@ -294,6 +296,33 @@ export interface NavigationTreeDefinitionUI {
   id: SolutionId;
   body: Array<ChromeProjectNavigationNode>;
   footer?: Array<ChromeProjectNavigationNode>;
+}
+
+/** Chrome-owned popover row. Not a re-export of SecondaryMenuItem. */
+export interface ProjectNavigationLinkItem {
+  id: string;
+  href: string;
+  label: string;
+  badgeType?: BadgeType;
+  isExternal?: boolean;
+}
+
+/** One titled list inside a hover registration. */
+export interface ProjectNavigationLinkList {
+  /** Unique within the registration. Rendered ids are `${id}:${item.id}`. */
+  id: string;
+  title: string;
+  items$: Observable<readonly ProjectNavigationLinkItem[]>;
+}
+
+/**
+ * Everything one feature contributes to an existing deep link's hover popover. One per target.
+ * Chrome attaches this to primary and footer hover only, not More.
+ */
+export interface ProjectNavigationLinks {
+  id: string;
+  target: AppDeepLinkId;
+  lists: readonly ProjectNavigationLinkList[];
 }
 
 /**

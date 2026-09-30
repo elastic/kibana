@@ -17,6 +17,10 @@ import {
   type CustomContentContextAttachmentData,
 } from '../../common/panel_context_attachment';
 import { readPanelContextData } from '../../common/read_panel_context_data';
+import {
+  CUSTOM_CONTENT_UPDATED_UI_EVENT,
+  type CustomContentUpdatedUiEventData,
+} from '../../common/ui_events';
 
 const updateCustomContentSchema = customContentPanelUpdateSchema;
 
@@ -65,7 +69,7 @@ On success this returns \`attachment_id\` and \`version\`. You MUST render the u
   schema: updateCustomContentSchema,
   handler: async (
     { embeddable_id, prompt, esqlQuery },
-    { attachments, logger, esClient, modelProvider }
+    { attachments, events, logger, esClient, modelProvider }
   ) => {
     const panelAttachments = attachments
       .getAll()
@@ -109,12 +113,12 @@ On success this returns \`attachment_id\` and \`version\`. You MUST render the u
     if (prompt !== undefined) {
       try {
         const resolver = createCustomContentTemplateResolver({ modelProvider, esClient, logger });
-        resolvedTemplate = await resolver({
+        ({ template: resolvedTemplate } = await resolver({
           prompt,
           esqlQuery: isQueryChanging ? resolvedQuery : undefined,
           existingTemplate: currentData?.panel_template || undefined,
           hasExistingQuery: !isQueryChanging && !!resolvedQuery,
-        });
+        }));
       } catch (err) {
         logger.error(`custom_content_update_panel: template resolver failed — ${err}`);
         return {
@@ -138,6 +142,17 @@ On success this returns \`attachment_id\` and \`version\`. You MUST render the u
       esql_query: resolvedQuery,
       panel_title: currentData?.panel_title,
       embeddable_id: currentData?.embeddable_id ?? '',
+      // Carried over so a refined version still previews against the range the panel was
+      // sent with, rather than silently reverting to the default.
+      ...(currentData?.time_range ? { time_range: currentData.time_range } : {}),
+      ...(currentData?.panel_height ? { panel_height: currentData.panel_height } : {}),
+      ...(currentData?.esql_variables?.length
+        ? { esql_variables: currentData.esql_variables }
+        : {}),
+      ...(currentData?.filters?.length ? { filters: currentData.filters } : {}),
+      ...(currentData?.query ? { query: currentData.query } : {}),
+      ...(currentData?.is_approximate ? { is_approximate: true } : {}),
+      ...(currentData?.project_routing ? { project_routing: currentData.project_routing } : {}),
     };
 
     const updated = await attachments.update(
@@ -145,6 +160,13 @@ On success this returns \`attachment_id\` and \`version\`. You MUST render the u
       { data: newData },
       ATTACHMENT_REF_ACTOR.agent
     );
+
+    if (updated) {
+      events.sendUiEvent<typeof CUSTOM_CONTENT_UPDATED_UI_EVENT, CustomContentUpdatedUiEventData>(
+        CUSTOM_CONTENT_UPDATED_UI_EVENT,
+        { attachmentId: contextAttachment.id, data: newData }
+      );
+    }
 
     return {
       results: [

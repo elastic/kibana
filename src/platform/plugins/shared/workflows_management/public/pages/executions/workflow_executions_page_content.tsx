@@ -34,6 +34,11 @@ const DEFAULT_QUERY: Query = {
 
 const DEFAULT_REFRESH_INTERVAL_MS = 5_000;
 
+/**
+ * Deselecting is a consequence of the filter change, not a navigation the user asked for, and the
+ * filters themselves are not in the URL — so it must replace, or Back restores the execution
+ * against filters that no longer match it.
+ */
 const clearSelectedExecutionIfChanged = (
   previousKeyRef: React.MutableRefObject<string | null>,
   nextKey: string,
@@ -118,7 +123,7 @@ export const WorkflowExecutionsPageContent = React.memo(() => {
       }
 
       clearSelectedExecutionIfChanged(previousSubmittedSearchKey, nextKey, () =>
-        setSelectedExecution(null)
+        setSelectedExecution(null, { replace: true })
       );
     },
     [query, setSelectedExecution, telemetry]
@@ -135,7 +140,7 @@ export const WorkflowExecutionsPageContent = React.memo(() => {
         telemetry.reportWorkflowExecutionsFilterApplied({ filterTypes });
       }
       clearSelectedExecutionIfChanged(previousControlFiltersKey, nextKey, () =>
-        setSelectedExecution(null)
+        setSelectedExecution(null, { replace: true })
       );
     },
     [setSelectedExecution, telemetry]
@@ -152,7 +157,7 @@ export const WorkflowExecutionsPageContent = React.memo(() => {
         telemetry.reportWorkflowExecutionsFilterApplied({ filterTypes });
       }
       clearSelectedExecutionIfChanged(previousSearchBarFiltersKey, nextKey, () =>
-        setSelectedExecution(null)
+        setSelectedExecution(null, { replace: true })
       );
     },
     [setSelectedExecution, telemetry]
@@ -165,10 +170,32 @@ export const WorkflowExecutionsPageContent = React.memo(() => {
   const handleViewAllExecutionsForWorkflow = useCallback(
     (workflowId: string) => {
       applyWorkflowIdFilter(workflowId);
-      setSelectedExecution(null);
+      setSelectedExecution(null, { replace: true });
     },
     [applyWorkflowIdFilter, setSelectedExecution]
   );
+
+  const handleTimeRangeLinkClick = useCallback(() => {
+    // Prefer focusing the date-range toggle so the user can narrow the window.
+    // Fallbacks cover unified-search markup differences across versions.
+    const datePickerTrigger =
+      document.querySelector<HTMLElement>(
+        '[data-test-subj="workflowExecutionsSearchBar"] [data-test-subj="superDatePickerToggleQuickMenuButton"]'
+      ) ??
+      document.querySelector<HTMLElement>(
+        '[data-test-subj="workflowExecutionsSearchBar"] [data-test-subj="superDatePickerShowDatesButton"]'
+      ) ??
+      document.querySelector<HTMLElement>(
+        '[data-test-subj="workflowExecutionsSearchBar"] [data-test-subj="superDatePickerstartDatePopoverButton"]'
+      );
+
+    if (datePickerTrigger) {
+      datePickerTrigger.focus();
+      datePickerTrigger.click();
+    }
+
+    // TODO: Wire a SearchBar/date-picker ref API when available instead of DOM query.
+  }, []);
 
   return (
     <div data-test-subj="workflowExecutionsPageContent">
@@ -203,6 +230,7 @@ export const WorkflowExecutionsPageContent = React.memo(() => {
           }
           onReRunExecution={rerunExecution}
           onViewAllExecutionsForWorkflow={handleViewAllExecutionsForWorkflow}
+          onTimeRangeLinkClick={handleTimeRangeLinkClick}
           query={submittedQuery}
           spaceId={spaceId}
           timeRange={timeRange}

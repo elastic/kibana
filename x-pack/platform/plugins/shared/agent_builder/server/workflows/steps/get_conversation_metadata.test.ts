@@ -13,14 +13,18 @@ import {
 
 const experimentalEnabled = jest.fn().mockResolvedValue(true);
 const experimentalDisabled = jest.fn().mockResolvedValue(false);
+const getAgentRegistry = jest.fn().mockResolvedValue({ get: jest.fn() });
+const getExecutionService = jest.fn();
 
 describe('getConversationMetadataStepDefinition', () => {
   it('creates expected step definition structure', () => {
     const { getConversationClient } = createWorkflowStepConversationClientMock();
-    const definition = getConversationMetadataStepDefinition(
+    const definition = getConversationMetadataStepDefinition({
       getConversationClient,
-      experimentalEnabled
-    );
+      getAgentRegistry,
+      getExecutionService,
+      isExperimentalEnabled: experimentalEnabled,
+    });
 
     expect(definition.id).toBe('ai.conversation.metadata.read');
     expect(typeof definition.handler).toBe('function');
@@ -36,10 +40,12 @@ describe('getConversationMetadataStepDefinition', () => {
       }),
     });
 
-    const definition = getConversationMetadataStepDefinition(
+    const definition = getConversationMetadataStepDefinition({
       getConversationClient,
-      experimentalEnabled
-    );
+      getAgentRegistry,
+      getExecutionService,
+      isExperimentalEnabled: experimentalEnabled,
+    });
     const context = createStepHandlerContext({
       input: { conversation_id: 'conv-1' },
       stepType: 'agentBuilder.conversation.metadata.read',
@@ -64,10 +70,12 @@ describe('getConversationMetadataStepDefinition', () => {
       }),
     });
 
-    const definition = getConversationMetadataStepDefinition(
+    const definition = getConversationMetadataStepDefinition({
       getConversationClient,
-      experimentalEnabled
-    );
+      getAgentRegistry,
+      getExecutionService,
+      isExperimentalEnabled: experimentalEnabled,
+    });
     const result = await definition.handler(
       createStepHandlerContext({ input: { conversation_id: 'conv-1' } })
     );
@@ -84,10 +92,12 @@ describe('getConversationMetadataStepDefinition', () => {
       get: jest.fn().mockRejectedValue(new Error('not found')),
     });
 
-    const definition = getConversationMetadataStepDefinition(
+    const definition = getConversationMetadataStepDefinition({
       getConversationClient,
-      experimentalEnabled
-    );
+      getAgentRegistry,
+      getExecutionService,
+      isExperimentalEnabled: experimentalEnabled,
+    });
     const result = await definition.handler(
       createStepHandlerContext({ input: { conversation_id: 'missing' } })
     );
@@ -99,20 +109,24 @@ describe('getConversationMetadataStepDefinition', () => {
 
   it('rejects input without conversation_id', () => {
     const { getConversationClient } = createWorkflowStepConversationClientMock();
-    const definition = getConversationMetadataStepDefinition(
+    const definition = getConversationMetadataStepDefinition({
       getConversationClient,
-      experimentalEnabled
-    );
+      getAgentRegistry,
+      getExecutionService,
+      isExperimentalEnabled: experimentalEnabled,
+    });
 
     expect(definition.inputSchema.safeParse({}).success).toBe(false);
   });
 
   it('returns an error when experimental features are disabled', async () => {
     const { getConversationClient } = createWorkflowStepConversationClientMock();
-    const definition = getConversationMetadataStepDefinition(
+    const definition = getConversationMetadataStepDefinition({
       getConversationClient,
-      experimentalDisabled
-    );
+      getAgentRegistry,
+      getExecutionService,
+      isExperimentalEnabled: experimentalDisabled,
+    });
 
     const result = await definition.handler(
       createStepHandlerContext({ input: { conversation_id: 'conv-1' } })

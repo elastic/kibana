@@ -5,30 +5,26 @@
  * 2.0.
  */
 
-import type { CoreSetup, Logger } from '@kbn/core/server';
+import type { CoreSetup } from '@kbn/core/server';
 import { ExecutionError } from '@kbn/workflows/server';
 import { createServerStepDefinition } from '@kbn/workflows-extensions/server';
 import { CONTEXT_ENGINE_ENABLED_SETTING_ID } from '@kbn/management-settings-ids';
 import { VerifyKiStepCommonDefinition } from '../../common/step_types/verify_ki_step';
-import { createKiVerifierRegistry, KiVerificationService } from '../ki_verification';
-import type { ContextEngineAnalyticsService } from '../telemetry';
-import { withKiVerificationTelemetry } from './helpers';
+import { omitNullKiAttributes } from '../../common/step_types/ki';
+import { isContextEngineEnabledInSpace } from '../utils/is_context_engine_enabled_in_space';
+import type { VerifyKi } from './verify_ki';
 
-export const createVerifyKiStepDefinition = (
-  coreSetup: CoreSetup,
-  logger: Logger,
-  analyticsService: ContextEngineAnalyticsService
-) => {
-  const service = new KiVerificationService(createKiVerifierRegistry());
-
-  return createServerStepDefinition({
+export const createVerifyKiStepDefinition = (coreSetup: CoreSetup, verifyKi: VerifyKi) =>
+  createServerStepDefinition({
     ...VerifyKiStepCommonDefinition,
     handler: async (context) => {
       const [coreStart] = await coreSetup.getStartServices();
-      const fakeRequest = context.contextManager.getFakeRequest();
-      const soClient = coreStart.savedObjects.getScopedClient(fakeRequest);
-      const uiSettings = coreStart.uiSettings.asScopedToClient(soClient);
-      const isEnabled = (await uiSettings.get<boolean>(CONTEXT_ENGINE_ENABLED_SETTING_ID)) ?? false;
+      const { spaceId } = context.contextManager.getContext().workflow;
+      const isEnabled = await isContextEngineEnabledInSpace({
+        savedObjects: coreStart.savedObjects,
+        uiSettings: coreStart.uiSettings,
+        spaceId,
+      });
       if (!isEnabled) {
         throw new ExecutionError({
           type: 'FeatureDisabledError',
@@ -36,19 +32,19 @@ export const createVerifyKiStepDefinition = (
         });
       }
 
-      const summary = await withKiVerificationTelemetry({
-        analyticsService,
-        logger,
-        run: () =>
-          service.verifyKi(context.input.ki, {
-            isEnabled,
-            esClient: context.contextManager.getScopedEsClient(),
-            logger,
-            abortSignal: context.abortSignal,
-          }),
+      const {
+        ki,
+        verifiers,
+        ai_index_id: aiIndexId,
+        total_timeout_sec: totalTimeoutSec,
+      } = context.input;
+      const summary = await verifyKi({
+        context,
+        ki: omitNullKiAttributes(ki),
+        verifiers,
+        aiIndexId,
+        totalTimeoutSec,
       });
-
       return { output: summary };
     },
   });
-};

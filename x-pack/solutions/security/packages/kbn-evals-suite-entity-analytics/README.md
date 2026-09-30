@@ -22,34 +22,19 @@ telemetry.tracing.enabled: true
 telemetry.tracing.sample_rate: 1
 telemetry.tracing.exporters:
   - phoenix:
-      base_url: "http://0.0.0.0:6006"
-      public_url: "http://0.0.0.0:6006"
+      base_url: 'http://0.0.0.0:6006'
+      public_url: 'http://0.0.0.0:6006'
 ```
 
 > **Note:** `elastic.apm.active: false` and `elastic.apm.contextPropagationOnly: false` are required — Elastic APM and OpenTelemetry tracing cannot run simultaneously.
 
 ### Configure AI Connectors
 
-Configure your AI connectors in `kibana.dev.yml` or via the `KIBANA_TESTING_AI_CONNECTORS` environment variable:
+Define the models to evaluate as inference endpoint definitions in the `KIBANA_TESTING_INFERENCE_ENDPOINTS` environment variable (raw or base64-encoded JSON; `node scripts/evals init` can generate it for EIS and OpenRouter)
 
-```yaml
-# In kibana.dev.yml
-xpack.actions.preconfigured:
-  my-connector:
-    name: My Test Connector
-    actionTypeId: .inference
-    config:
-      provider: openai
-      taskType: completion
-    secrets:
-      apiKey: <your-api-key>
-```
+Alternatively, declare a preconfigured `.inference` connector in `kibana.dev.yml`.
 
-Or via environment variable:
-
-```bash
-export KIBANA_TESTING_AI_CONNECTORS='{"my-connector":{"name":"My Test Connector","actionTypeId":".inference","config":{"provider":"openai","taskType":"completion"},"secrets":{"apiKey":"your-api-key"}}}'
-```
+See [Connector definitions and inference endpoints](../../../../platform/packages/shared/kbn-evals/README.md#connector-definitions-and-inference-endpoints) for the full shape.
 
 ### Enable Agent Builder
 
@@ -106,50 +91,50 @@ node scripts/playwright test --config x-pack/solutions/security/packages/kbn-eva
 
 Prompt-to-spec mapping showing which strategy doc prompts are covered by which spec files.
 
-| Prompt | Description | Spec File |
-|--------|-------------|-----------|
-| P001 | Risk score queries (engine on) | `risk_score_engine_on.spec.ts` |
-| P001 | Risk score queries (engine off) | `risk_score_engine_off.spec.ts` |
-| P002 | Users logged in from multiple locations | `anomalous_behavior_active_jobs.spec.ts` |
-| P003 | Service accounts with unusual access | `anomalous_behavior_active_jobs.spec.ts`, `anomalous_behavior_no_jobs.spec.ts` |
-| P004 | Risk score queries (engine on/off) | `risk_score_engine_on.spec.ts`, `risk_score_engine_off.spec.ts` |
-| P005 | Risk score jump over time | `partial_feasibility.spec.ts` |
-| P006 | Riskiest hosts with high impact | `partial_feasibility.spec.ts` |
-| P007 | Risk score queries (engine on/off) | `risk_score_engine_on.spec.ts`, `risk_score_engine_off.spec.ts` |
-| P008 | Risk score change for named user | `partial_feasibility.spec.ts` |
-| P011 | Privileged accounts with unusual commands | `anomalous_behavior_active_jobs.spec.ts` |
-| P012 | Lateral movement connections | `anomalous_behavior_active_jobs.spec.ts` |
-| P013 | User activity queries | `partial_feasibility.spec.ts` |
-| P015 | Compromised account interactions | `partial_feasibility.spec.ts` |
-| P017 | Unusual administrative actions | `anomalous_behavior_active_jobs.spec.ts` |
-| P021 | Data uploads to external domains | `anomalous_behavior_active_jobs.spec.ts` |
-| P023 | Unusual access to privileged accounts | `anomalous_behavior_active_jobs.spec.ts` |
-| P024 | Large email attachments | `partial_feasibility.spec.ts` |
-| P026 | Suspicious login patterns | `anomalous_behavior_active_jobs.spec.ts` |
-| P028 | Entities with anomalous behavior | `anomalous_behavior_active_jobs.spec.ts` |
-| P032 | Unusually large data downloads | `anomalous_behavior_active_jobs.spec.ts` |
-| P035 | Downloads exceeding threshold | `anomalous_behavior_active_jobs.spec.ts` |
-| P037 | Accounts with increasing risk trends | `partial_feasibility.spec.ts` |
-| P039 | Accessing sensitive data from new locations | `anomalous_behavior_active_jobs.spec.ts` |
-| P040 | Failed logins followed by successful (EQL) | `boundary_cases.spec.ts` |
-| P043 | Unusual after-hours access patterns | `anomalous_behavior_active_jobs.spec.ts` |
-| P-AC1 | Asset criticality for host | `asset_criticality.spec.ts` |
-| P-AC2 | Business-critical assets with elevated risk | `asset_criticality.spec.ts` |
-| P-MS1 | Privileged users with anomalous activity | `multi_skill_routing.spec.ts`, `partial_feasibility.spec.ts` |
-| P-MS2 | Privileged accounts outside normal scope | `multi_skill_routing.spec.ts`, `partial_feasibility.spec.ts` |
-| P-DR1/2/3 | Detection rules boundary cases | `boundary_cases.spec.ts` |
-| Tier 3 | 18 negative/boundary prompts | `boundary_cases.spec.ts` |
-| Grounding | Risk score grounding with seeded data | `risk_score_grounding.spec.ts` |
-| V2 | Entity Store V2 get_entity routing | `v2/entity_store_v2_get_entity.spec.ts` |
-| V2 | Entity Store V2 search_entities routing | `v2/entity_store_v2_search_entities.spec.ts` |
-| V2 | Entity Store V2 multi-skill routing | `v2/entity_store_v2_multi_skill.spec.ts` |
-| V2 | `security.entity` attachment side-effects (single card, table, not-found) | `v2/entity_attachment_side_effect.spec.ts` |
-| V2 | `security.get_entity_graph` routing + `security.entity_graph` attachment (host, user, not-found) | `v2/entity_store_v2_get_entity_graph.spec.ts` |
-| V2 | `security.get_entity_risk_score_history` routing + `security.entity_risk_score_history` attachment (host, user, resolution, not-found) | `v2/entity_store_v2_get_entity_risk_score_history.spec.ts` |
-| V2 | Leads skill routing (`list_leads`, `generate_leads`, `dismiss_lead`) | `v2/entity_analytics_leads.spec.ts` |
-| V2 | `set_asset_criticality` tool selection, argument extraction, confirmation gating, unassign path | `v2/set_asset_criticality.spec.ts` |
-| V2 | `list_watchlists` routing (discovery, membership, and `get_entity` cross-checks) | `v2/list_watchlists.spec.ts` |
-| V2 | `manage-watchlists` skill routing (create/update/delete, add/remove entities, query-then-add flows) | `v2/manage_watchlists.spec.ts` |
+| Prompt    | Description                                                                                                                            | Spec File                                                                      |
+| --------- | -------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------ |
+| P001      | Risk score queries (engine on)                                                                                                         | `risk_score_engine_on.spec.ts`                                                 |
+| P001      | Risk score queries (engine off)                                                                                                        | `risk_score_engine_off.spec.ts`                                                |
+| P002      | Users logged in from multiple locations                                                                                                | `anomalous_behavior_active_jobs.spec.ts`                                       |
+| P003      | Service accounts with unusual access                                                                                                   | `anomalous_behavior_active_jobs.spec.ts`, `anomalous_behavior_no_jobs.spec.ts` |
+| P004      | Risk score queries (engine on/off)                                                                                                     | `risk_score_engine_on.spec.ts`, `risk_score_engine_off.spec.ts`                |
+| P005      | Risk score jump over time                                                                                                              | `partial_feasibility.spec.ts`                                                  |
+| P006      | Riskiest hosts with high impact                                                                                                        | `partial_feasibility.spec.ts`                                                  |
+| P007      | Risk score queries (engine on/off)                                                                                                     | `risk_score_engine_on.spec.ts`, `risk_score_engine_off.spec.ts`                |
+| P008      | Risk score change for named user                                                                                                       | `partial_feasibility.spec.ts`                                                  |
+| P011      | Privileged accounts with unusual commands                                                                                              | `anomalous_behavior_active_jobs.spec.ts`                                       |
+| P012      | Lateral movement connections                                                                                                           | `anomalous_behavior_active_jobs.spec.ts`                                       |
+| P013      | User activity queries                                                                                                                  | `partial_feasibility.spec.ts`                                                  |
+| P015      | Compromised account interactions                                                                                                       | `partial_feasibility.spec.ts`                                                  |
+| P017      | Unusual administrative actions                                                                                                         | `anomalous_behavior_active_jobs.spec.ts`                                       |
+| P021      | Data uploads to external domains                                                                                                       | `anomalous_behavior_active_jobs.spec.ts`                                       |
+| P023      | Unusual access to privileged accounts                                                                                                  | `anomalous_behavior_active_jobs.spec.ts`                                       |
+| P024      | Large email attachments                                                                                                                | `partial_feasibility.spec.ts`                                                  |
+| P026      | Suspicious login patterns                                                                                                              | `anomalous_behavior_active_jobs.spec.ts`                                       |
+| P028      | Entities with anomalous behavior                                                                                                       | `anomalous_behavior_active_jobs.spec.ts`                                       |
+| P032      | Unusually large data downloads                                                                                                         | `anomalous_behavior_active_jobs.spec.ts`                                       |
+| P035      | Downloads exceeding threshold                                                                                                          | `anomalous_behavior_active_jobs.spec.ts`                                       |
+| P037      | Accounts with increasing risk trends                                                                                                   | `partial_feasibility.spec.ts`                                                  |
+| P039      | Accessing sensitive data from new locations                                                                                            | `anomalous_behavior_active_jobs.spec.ts`                                       |
+| P040      | Failed logins followed by successful (EQL)                                                                                             | `boundary_cases.spec.ts`                                                       |
+| P043      | Unusual after-hours access patterns                                                                                                    | `anomalous_behavior_active_jobs.spec.ts`                                       |
+| P-AC1     | Asset criticality for host                                                                                                             | `asset_criticality.spec.ts`                                                    |
+| P-AC2     | Business-critical assets with elevated risk                                                                                            | `asset_criticality.spec.ts`                                                    |
+| P-MS1     | Privileged users with anomalous activity                                                                                               | `multi_skill_routing.spec.ts`, `partial_feasibility.spec.ts`                   |
+| P-MS2     | Privileged accounts outside normal scope                                                                                               | `multi_skill_routing.spec.ts`, `partial_feasibility.spec.ts`                   |
+| P-DR1/2/3 | Detection rules boundary cases                                                                                                         | `boundary_cases.spec.ts`                                                       |
+| Tier 3    | 18 negative/boundary prompts                                                                                                           | `boundary_cases.spec.ts`                                                       |
+| Grounding | Risk score grounding with seeded data                                                                                                  | `risk_score_grounding.spec.ts`                                                 |
+| V2        | Entity Store V2 get_entity routing                                                                                                     | `v2/entity_store_v2_get_entity.spec.ts`                                        |
+| V2        | Entity Store V2 search_entities routing                                                                                                | `v2/entity_store_v2_search_entities.spec.ts`                                   |
+| V2        | Entity Store V2 multi-skill routing                                                                                                    | `v2/entity_store_v2_multi_skill.spec.ts`                                       |
+| V2        | `security.entity` attachment side-effects (single card, table, not-found)                                                              | `v2/entity_attachment_side_effect.spec.ts`                                     |
+| V2        | `security.get_entity_graph` routing + `security.entity_graph` attachment (host, user, not-found)                                       | `v2/entity_store_v2_get_entity_graph.spec.ts`                                  |
+| V2        | `security.get_entity_risk_score_history` routing + `security.entity_risk_score_history` attachment (host, user, resolution, not-found) | `v2/entity_store_v2_get_entity_risk_score_history.spec.ts`                     |
+| V2        | Leads skill routing (`list_leads`, `generate_leads`, `dismiss_lead`)                                                                   | `v2/entity_analytics_leads.spec.ts`                                            |
+| V2        | `set_asset_criticality` tool selection, argument extraction, confirmation gating, unassign path                                        | `v2/set_asset_criticality.spec.ts`                                             |
+| V2        | `list_watchlists` routing (discovery, membership, and `get_entity` cross-checks)                                                       | `v2/list_watchlists.spec.ts`                                                   |
+| V2        | `manage-watchlists` skill routing (create/update/delete, add/remove entities, query-then-add flows)                                    | `v2/manage_watchlists.spec.ts`                                                 |
 
 ## Adding New Tests
 
@@ -162,7 +147,7 @@ To add new evaluation tests:
 5. Use `attachments` in the output to assert conversation-level attachments
    (e.g. `security.entity` side-effects) persisted during the run. Each entry
    supports `{ type, shape?: 'single' | 'table', entityId?, entityType?,
-   minEntities?, count?: { exact?|min?|max? }, criteria? }`. Count-based
+minEntities?, count?: { exact?|min?|max? }, criteria? }`. Count-based
    assertions (including `count.exact: 0` for negative checks) are evaluated
    deterministically; `criteria` delegates to the LLM judge over the matched
    payload.
@@ -201,10 +186,7 @@ evaluate.describe('My Test Suite', { tag: '@svlSecurity' }, () => {
               question: 'My question?',
             },
             output: {
-              criteria: [
-                'Criteria 1',
-                'Criteria 2',
-              ],
+              criteria: ['Criteria 1', 'Criteria 2'],
             },
             metadata: { query_intent: 'Factual' },
           },
@@ -214,4 +196,3 @@ evaluate.describe('My Test Suite', { tag: '@svlSecurity' }, () => {
   });
 });
 ```
-

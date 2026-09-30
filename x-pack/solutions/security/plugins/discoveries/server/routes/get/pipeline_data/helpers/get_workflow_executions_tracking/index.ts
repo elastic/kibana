@@ -71,7 +71,12 @@ export const getWorkflowExecutionsTracking = async ({
           // matching the event author's `user.name` enforces object-level
           // ownership so a cross-user id lookup finds no events (safe 404).
           { term: { 'user.name': username } },
-          { exists: { field: 'event.reference' } },
+          // NOTE: do not filter on `exists: event.reference`. That field is a
+          // `keyword` with `ignore_above`, so a reference larger than the limit is
+          // kept in `_source` but never indexed, and `exists` silently drops the
+          // event. The generate-step-started event embeds the provided alerts and
+          // may exceed it. It is the only event carrying the generation
+          // run id. Events without a usable reference are skipped while reducing.
         ],
       },
     },

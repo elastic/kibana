@@ -6,7 +6,7 @@
  */
 
 import { ReplaySubject } from 'rxjs';
-import { ChatEventType } from '@kbn/agent-builder-common';
+import { ChatEventType, SELF_AGENT_ID } from '@kbn/agent-builder-common';
 import type { ChatEvent, ConversationRound } from '@kbn/agent-builder-common';
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 import { agentBuilderMocks } from '../../../../mocks';
@@ -75,6 +75,7 @@ describe('createSendMessageTool', () => {
         sendToSubAgent: jest.fn(),
         getExecution: jest.fn(),
       },
+      allowedIds: new Set(['test-agent']),
     });
 
     const { context } = createMockContext();
@@ -89,7 +90,10 @@ describe('createSendMessageTool', () => {
   });
 
   it('errors with the available roster when the recipient name is unknown', async () => {
-    const subagentTracker = new SubagentTracker({ researcher: 'child-1', writer: 'child-2' });
+    const subagentTracker = new SubagentTracker({
+      researcher: { conversation_id: 'child-1', agent_id: 'test-agent' },
+      writer: { conversation_id: 'child-2', agent_id: 'test-agent' },
+    });
 
     const tool = createSendMessageTool({
       agentId: 'test-agent',
@@ -101,6 +105,7 @@ describe('createSendMessageTool', () => {
         getExecution: jest.fn(),
       },
       subagentTracker,
+      allowedIds: new Set(['test-agent']),
     });
 
     const { context } = createMockContext();
@@ -126,6 +131,7 @@ describe('createSendMessageTool', () => {
         getExecution: jest.fn(),
       },
       subagentTracker,
+      allowedIds: new Set(['test-agent']),
     });
 
     const { context } = createMockContext();
@@ -143,7 +149,9 @@ describe('createSendMessageTool', () => {
       executionId: 'sub-exec',
       events$: events$.asObservable(),
     });
-    const subagentTracker = new SubagentTracker({ researcher: 'child-convo' });
+    const subagentTracker = new SubagentTracker({
+      researcher: { conversation_id: 'child-convo', agent_id: 'test-agent' },
+    });
 
     const tool = createSendMessageTool({
       agentId: 'test-agent',
@@ -155,6 +163,7 @@ describe('createSendMessageTool', () => {
         getExecution: jest.fn(),
       },
       subagentTracker,
+      allowedIds: new Set(['test-agent']),
     });
 
     const { context } = createMockContext('conn-x');
@@ -183,7 +192,9 @@ describe('createSendMessageTool', () => {
       executionId: 'bg-sub-exec',
       events$: events$.asObservable(),
     });
-    const subagentTracker = new SubagentTracker({ researcher: 'child-convo' });
+    const subagentTracker = new SubagentTracker({
+      researcher: { conversation_id: 'child-convo', agent_id: 'test-agent' },
+    });
 
     const tool = createSendMessageTool({
       agentId: 'test-agent',
@@ -201,6 +212,7 @@ describe('createSendMessageTool', () => {
         hasPending: jest.fn(),
         checkForCompletions: jest.fn(),
       } as any,
+      allowedIds: new Set(['test-agent']),
     });
 
     const { context } = createMockContext();
@@ -221,9 +233,101 @@ describe('createSendMessageTool', () => {
     events$.complete();
   });
 
+  describe('allowlist gating', () => {
+    it('rejects with a specific error when the backing agent_id is no longer allowed', async () => {
+      const sendToSubAgent = jest.fn();
+      const subagentTracker = new SubagentTracker({
+        researcher: { conversation_id: 'child-convo', agent_id: 'agent-b' },
+      });
+      const tool = createSendMessageTool({
+        agentId: 'test-agent',
+        executionId: 'parent-exec',
+        subAgentExecutor: {
+          executeSubAgent: jest.fn(),
+          createSubAgent: jest.fn(),
+          sendToSubAgent,
+          getExecution: jest.fn(),
+        },
+        subagentTracker,
+        allowedIds: new Set(['agent-a']), // 'agent-b' is no longer in the allowlist
+      });
+
+      const { context } = createMockContext();
+      const result = await callHandler(tool, { to: 'researcher', prompt: 'hi' }, context);
+
+      expect(sendToSubAgent).not.toHaveBeenCalled();
+      expect(result.results[0].type).toBe(ToolResultType.error);
+      expect(result.results[0].data.message).toMatch(
+        /Sub-agent "researcher" is backed by agent "agent-b".*allowlist/i
+      );
+    });
+
+    it('allows a message when the backing agent_id is in the allowlist', async () => {
+      const events$ = roundCompleteEvents({ response: { message: 'ok' } });
+      const sendToSubAgent = jest.fn().mockResolvedValue({
+        executionId: 'sub-exec',
+        events$: events$.asObservable(),
+      });
+      const subagentTracker = new SubagentTracker({
+        researcher: { conversation_id: 'child-convo', agent_id: 'agent-b' },
+      });
+      const tool = createSendMessageTool({
+        agentId: 'test-agent',
+        executionId: 'parent-exec',
+        subAgentExecutor: {
+          executeSubAgent: jest.fn(),
+          createSubAgent: jest.fn(),
+          sendToSubAgent,
+          getExecution: jest.fn(),
+        },
+        subagentTracker,
+        allowedIds: new Set(['agent-b']),
+      });
+
+      const { context } = createMockContext();
+      await callHandler(tool, { to: 'researcher', prompt: 'hi' }, context);
+
+      expect(sendToSubAgent).toHaveBeenCalledWith(
+        expect.objectContaining({ conversationId: 'child-convo' })
+      );
+    });
+
+    it('matches _self exactly (sentinel-to-sentinel)', async () => {
+      const events$ = roundCompleteEvents({ response: { message: 'ok' } });
+      const sendToSubAgent = jest.fn().mockResolvedValue({
+        executionId: 'sub-exec',
+        events$: events$.asObservable(),
+      });
+      const subagentTracker = new SubagentTracker({
+        me: { conversation_id: 'child-self', agent_id: SELF_AGENT_ID },
+      });
+      const tool = createSendMessageTool({
+        agentId: 'test-agent',
+        executionId: 'parent-exec',
+        subAgentExecutor: {
+          executeSubAgent: jest.fn(),
+          createSubAgent: jest.fn(),
+          sendToSubAgent,
+          getExecution: jest.fn(),
+        },
+        subagentTracker,
+        allowedIds: new Set([SELF_AGENT_ID]),
+      });
+
+      const { context } = createMockContext();
+      await callHandler(tool, { to: 'me', prompt: 'hi' }, context);
+
+      expect(sendToSubAgent).toHaveBeenCalledWith(
+        expect.objectContaining({ conversationId: 'child-self' })
+      );
+    });
+  });
+
   it('returns an error result when sendToSubAgent throws', async () => {
     const sendToSubAgent = jest.fn().mockRejectedValue(new Error('inference offline'));
-    const subagentTracker = new SubagentTracker({ researcher: 'child-convo' });
+    const subagentTracker = new SubagentTracker({
+      researcher: { conversation_id: 'child-convo', agent_id: 'test-agent' },
+    });
 
     const tool = createSendMessageTool({
       agentId: 'test-agent',
@@ -235,6 +339,7 @@ describe('createSendMessageTool', () => {
         getExecution: jest.fn(),
       },
       subagentTracker,
+      allowedIds: new Set(['test-agent']),
     });
 
     const { context } = createMockContext();

@@ -10,9 +10,9 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import os from 'node:os';
-import { scoutTestTrack } from './test_tracks';
+import { scoutTestTrack } from './test_tracks.ts';
 
-jest.mock('./paths', () => ({
+jest.mock('./paths.ts', () => ({
   SCOUT_TEST_TRACKS_ROOT: '',
 }));
 
@@ -22,7 +22,7 @@ describe('scoutTestTrack.definitions', () => {
 
   beforeEach(() => {
     tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), 'scout-tracks-test-'));
-    pathsMock = require('./paths');
+    pathsMock = require('./paths.ts');
     pathsMock.SCOUT_TEST_TRACKS_ROOT = tmpDir;
   });
 

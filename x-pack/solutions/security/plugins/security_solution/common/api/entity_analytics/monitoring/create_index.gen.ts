@@ -21,11 +21,13 @@ export const CreatePrivilegesImportIndexRequestBody = lazySchema(() =>
     /**
      * The index name to create
      */
-    name: z.string(),
+    name: z.string().describe('The index name to create'),
     /**
      * The mode of index creation, either 'standard' or 'lookup'
      */
-    mode: z.enum(['standard', 'lookup']),
+    mode: z
+      .enum(['standard', 'lookup'])
+      .describe("The mode of index creation, either 'standard' or 'lookup'"),
   })
 );
 export type CreatePrivilegesImportIndexRequestBody = z.infer<

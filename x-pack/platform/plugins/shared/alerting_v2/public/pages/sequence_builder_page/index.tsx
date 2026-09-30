@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useMemo } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import { FormProvider } from 'react-hook-form';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { PluginStart } from '@kbn/core-di';
@@ -18,10 +18,16 @@ import type { DashboardStart } from '@kbn/dashboard-plugin/public';
 import type { CPSPluginStart } from '@kbn/cps/public';
 import { RuleFormProvider } from '@kbn/alerting-v2-rule-form';
 import type { RuleFormServices } from '@kbn/alerting-v2-rule-form';
-import { paths } from '../../constants';
+import { useAlertingLocators } from '../../application/locator_context';
 import { useSequenceBuilderForm, useSequenceBuilderState } from './use_sequence_builder_form';
 import { SequenceBuilderHeader } from './sequence_builder_header';
 import { AlertConditionCanvas } from './alert_condition_canvas';
+import {
+  RecoveryConditionCanvas,
+  DEFAULT_RECOVERY_CONFIG,
+  resolveRecoveryIndices,
+} from './recovery_condition_canvas';
+import type { RecoveryConfig } from './recovery_condition_canvas';
 
 const useRuleFormServicesBag = (): RuleFormServices => {
   const http = useService(CoreStart('http'));
@@ -69,20 +75,58 @@ const useRuleFormServicesBag = (): RuleFormServices => {
 };
 
 export const SequenceBuilderPage: React.FC = () => {
-  const application = useService(CoreStart('application'));
   const ruleFormServices = useRuleFormServicesBag();
+  const { rulesLocators } = useAlertingLocators();
 
   const { methods } = useSequenceBuilderForm();
   const uiState = useSequenceBuilderState();
+  const [isRuleListOpen, setIsRuleListOpen] = useState(true);
+  const handleToggleRuleList = useCallback(() => setIsRuleListOpen((prev) => !prev), []);
+  const [recoveryConfig, setRecoveryConfig] = useState<RecoveryConfig>(DEFAULT_RECOVERY_CONFIG);
 
-  const basePath = useService(CoreStart('http')).basePath;
+  const handleStepChange = useCallback(
+    (nextStep: 'alert' | 'recovery') => {
+      if (nextStep === 'recovery') {
+        uiState.setSeqValues((prev) => ({
+          ...prev,
+          ...resolveRecoveryIndices(
+            recoveryConfig.mode,
+            prev.steps.length,
+            prev.recoveryStepIndices
+          ),
+        }));
+      }
+      uiState.setStep(nextStep);
+    },
+    [uiState, recoveryConfig.mode]
+  );
+
   const handleCancel = useCallback(() => {
-    application.navigateToUrl(basePath.prepend(paths.ruleList));
-  }, [application, basePath]);
+    rulesLocators.navigateSync({});
+  }, [rulesLocators]);
 
-  const rulesListHref = useMemo(() => basePath.prepend(paths.ruleList), [basePath]);
+  const rulesListHref = rulesLocators.useUrl({});
 
   const handleSave = methods.handleSubmit((formValues) => uiState.save(formValues));
+
+  const canvasContent =
+    uiState.step === 'alert' ? (
+      <AlertConditionCanvas
+        seqValues={uiState.seqValues}
+        setSeqValues={uiState.setSeqValues}
+        isRuleListOpen={isRuleListOpen}
+        onToggleRuleList={handleToggleRuleList}
+      />
+    ) : (
+      <RecoveryConditionCanvas
+        seqValues={uiState.seqValues}
+        setSeqValues={uiState.setSeqValues}
+        recoveryConfig={recoveryConfig}
+        setRecoveryConfig={setRecoveryConfig}
+        isRuleListOpen={isRuleListOpen}
+        onToggleRuleList={handleToggleRuleList}
+      />
+    );
 
   return (
     <RuleFormProvider services={ruleFormServices} meta={{ layout: 'flyout' }}>
@@ -94,20 +138,17 @@ export const SequenceBuilderPage: React.FC = () => {
         >
           <EuiFlexItem grow={false}>
             <SequenceBuilderHeader
+              step={uiState.step}
               seqValues={uiState.seqValues}
               isSaving={uiState.isSaving}
               rulesListHref={rulesListHref}
+              onStepChange={handleStepChange}
               onSave={handleSave}
               onCancel={handleCancel}
             />
           </EuiFlexItem>
 
-          <EuiFlexItem style={{ minHeight: 0 }}>
-            <AlertConditionCanvas
-              seqValues={uiState.seqValues}
-              setSeqValues={uiState.setSeqValues}
-            />
-          </EuiFlexItem>
+          <EuiFlexItem style={{ minHeight: 0 }}>{canvasContent}</EuiFlexItem>
         </EuiFlexGroup>
       </FormProvider>
     </RuleFormProvider>

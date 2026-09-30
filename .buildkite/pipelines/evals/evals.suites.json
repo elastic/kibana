@@ -89,9 +89,9 @@
       "id": "significant-events",
       "name": "Significant Events",
       "slackChannel": "#significant-events-alerts",
-      "configPath": "x-pack/platform/packages/shared/kbn-evals-suite-significant-events/playwright.config.ts",
+      "configPath": "x-pack/solutions/observability/packages/kbn-evals-suite-significant-events/playwright.config.ts",
       "tags": [
-        "platform",
+        "observability",
         "significant-events"
       ],
       "ciLabels": [
@@ -138,6 +138,22 @@
       ]
     },
     {
+      "id": "nightshift-investigations",
+      "name": "Nightshift Investigations",
+      "slackChannel": "#nightshift-alerts",
+      "configPath": "x-pack/solutions/observability/packages/kbn-evals-suite-nightshift-investigations/playwright.config.ts",
+      "serverConfigSet": "evals_nightshift_investigations",
+      "scoutHook": "x-pack/solutions/observability/packages/kbn-evals-suite-nightshift-investigations/scout/scout_hook.sh",
+      "tags": [
+        "observability",
+        "nightshift-investigations"
+      ],
+      "ciLabels": [
+        "evals:nightshift-investigations"
+      ],
+      "stepTimeoutInMinutes": 60
+    },
+    {
       "id": "llm-tasks",
       "name": "LLM Tasks",
       "slackChannel": "#search-ml-ux-team",
@@ -147,19 +163,6 @@
       ],
       "ciLabels": [
         "evals:llm-tasks"
-      ]
-    },
-    {
-      "id": "obs-ai-assistant",
-      "name": "Observability AI Assistant",
-      "slackChannel": "#obs-ai-assistant-alerts",
-      "configPath": "x-pack/solutions/observability/packages/kbn-evals-suite-obs-ai-assistant/playwright.config.ts",
-      "tags": [
-        "observability",
-        "ai-assistant"
-      ],
-      "ciLabels": [
-        "evals:obs-ai-assistant"
       ]
     },
     {
@@ -299,6 +302,19 @@
         "evals:lead-generation"
       ],
       "serverConfigSet": "evals_lead_generation"
+    },
+    {
+      "id": "threat-intel-enrichment",
+      "name": "Threat Intel Enrichment",
+      "configPath": "x-pack/solutions/security/packages/kbn-evals-suite-threat-intel-enrichment/playwright.config.ts",
+      "tags": [
+        "security",
+        "threat-intel-enrichment"
+      ],
+      "ciLabels": [
+        "evals:threat-intel-enrichment"
+      ],
+      "serverConfigSet": "evals_threat_intel"
     },
     {
       "id": "workflows",
@@ -443,6 +459,20 @@
         "evals:detection-watch-rule-creation"
       ],
       "serverConfigSet": "evals_detection_watch_rule_creation"
+    },
+    {
+      "id": "security-attack-discovery-fp-tp",
+      "name": "Attack Discovery FP/TP Analysis",
+      "slackChannel": "#security-generative-ai-evals",
+      "configPath": "x-pack/solutions/security/packages/kbn-evals-suite-attack-discovery-fp-tp/playwright.config.ts",
+      "tags": [
+        "security",
+        "attack-discovery"
+      ],
+      "ciLabels": [
+        "evals:security-attack-discovery-fp-tp"
+      ],
+      "serverConfigSet": "evals_attack_discovery_fp_tp"
     },
     {
       "id": "skill-selection-benchmark",

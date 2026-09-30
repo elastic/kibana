@@ -5,10 +5,8 @@
  * 2.0.
  */
 
-import type {
-  AlertEpisodeStatus,
-  AlertEventSeverity,
-} from '../../resources/datastreams/alert_events';
+import type { AlertEventSeverity } from '@kbn/alerting-v2-schemas';
+import type { AlertEpisodeStatus } from '../../resources/datastreams/alert_events';
 import type { LoggerServiceContract } from '../services/logger_service/logger_service';
 import type {
   DispatchOutcome,
@@ -89,18 +87,21 @@ export interface Rule {
   tags: string[];
 }
 
+export interface PolicyMatcherAttributes {
+  tags?: string[] | null;
+  expression?: string | null;
+}
+
 export interface ActionPolicy {
   id: ActionPolicyId;
   spaceId: string;
   name: string;
   enabled: boolean;
-  /** KQL expression evaluated against the alert episode context.
-   *  An empty matcher matches all episodes (catch-all). */
-  matcher?: string; // e.g. 'data.severity == "critical" AND data.env != "dev"'
+  /** Structured matcher evaluated against the alert episode context.
+   *  Null or absent means catch-all (matches every episode). */
+  matcher?: PolicyMatcherAttributes | null;
   /** data.* fields used to group episodes into a single action group */
   groupBy: string[];
-  /** User-defined tags for organizing and filtering policies */
-  tags: string[];
   /** How episodes are grouped into action group payloads. Defaulted at hydration (DEFAULT_GROUPING_MODE). */
   groupingMode: 'per_episode' | 'all' | 'per_field';
   /** Throttle configuration controlling action frequency */
@@ -198,7 +199,11 @@ export interface DispatcherPipelineState {
   readonly outcome?: DispatchOutcome;
 }
 
-export type DispatcherHaltReason = 'no_episodes' | 'no_actions' | 'aborted';
+export type DispatcherHaltReason =
+  | 'no_episodes'
+  | 'no_actions'
+  | 'aborted'
+  | 'inline_stats_too_large';
 
 export type DispatcherStepOutput =
   | { type: 'continue'; data?: Partial<Omit<DispatcherPipelineState, 'input'>> }

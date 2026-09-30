@@ -22,8 +22,8 @@ describe('alertTagsChanged trigger', () => {
     expect(() =>
       schema.parse({
         alertIds: ['a'],
-        tagsToAdd: ['t1'],
-        tagsToRemove: [],
+        tagsAdded: ['t1'],
+        tagsRemoved: [],
         truncated: false,
       })
     ).not.toThrow();

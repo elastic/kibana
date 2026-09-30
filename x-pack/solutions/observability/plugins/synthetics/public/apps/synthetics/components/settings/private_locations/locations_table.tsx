@@ -15,13 +15,11 @@ import {
   EuiFlexItem,
   EuiInMemoryTable,
   EuiScreenReaderOnly,
-  EuiSpacer,
   EuiText,
   EuiToolTip,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { useDispatch } from 'react-redux-v7';
 import type { Criteria } from '@elastic/eui/src/components/basic_table/basic_table';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { useSyntheticsRefreshContext } from '../../../contexts';
@@ -30,9 +28,7 @@ import { ViewLocationMonitors } from './view_location_monitors';
 import { TableTitle } from '../../common/components/table_title';
 import { TAGS_LABEL } from '../components/tags_field';
 import { useSyntheticsSettingsContext } from '../../../contexts';
-import { PrivateLocationDocsLink, START_ADDING_LOCATIONS_DESCRIPTION } from './empty_locations';
 import type { PrivateLocation } from '../../../../../../common/runtime_types';
-import { NoPermissionsTooltip } from '../../common/components/permissions';
 import { useLocationMonitors } from './hooks/use_location_monitors';
 import { useAgentStats } from './hooks/use_agent_stats';
 import { LocationAgentDetails } from './location_agent_details';
@@ -40,8 +36,9 @@ import { RelativeTimestamp } from './relative_timestamp';
 import { PolicyName } from './policy_name';
 import { LocationHealth } from './location_health';
 import { LOCATION_NAME_LABEL } from './location_form';
-import { setIsPrivateLocationFlyoutVisible } from '../../../state/private_locations/actions';
 import type { ClientPluginsStart } from '../../../../../plugin';
+import { useLicense } from '../../../hooks/use_license';
+import { AGENT_SHARDING_MIN_LICENSE } from '../../../../../../common/constants/license';
 import { UnhealthyCountBadge } from './unhealthy_count_badge';
 import { ResetMonitorModal } from '../../monitors_page/management/monitor_list_table/reset_monitor_modal';
 import { useMonitorIntegrationHealth } from '../../common/hooks/use_monitor_integration_health';
@@ -63,8 +60,6 @@ export const PrivateLocationsTable = ({
   onEdit: (privateLocation: PrivateLocation) => void;
   privateLocations: PrivateLocation[];
 }) => {
-  const dispatch = useDispatch();
-
   const [pageIndex, setPageIndex] = useState(0);
   const [pageSize, setPageSize] = useState(10);
   const [monitorPendingReset, setMonitorPendingReset] = useState<{
@@ -97,7 +92,10 @@ export const PrivateLocationsTable = ({
       return next;
     });
 
-  const { canSave, canManagePrivateLocations } = useSyntheticsSettingsContext();
+  const { canSave } = useSyntheticsSettingsContext();
+  const { hasAtLeast } = useLicense();
+  // Stats carry the server's answer (license + rebalance switch); license is the pre-load fallback.
+  const isAgentSharding = hasAtLeast(AGENT_SHARDING_MIN_LICENSE) === true;
 
   const { services } = useKibana<ClientPluginsStart>();
 
@@ -163,7 +161,7 @@ export const PrivateLocationsTable = ({
           locationStats={agentStatsByLocation.get(item.id)}
           // The expanded panel already shows the agent count, so drop the badge there.
           hideAgentCount={expandedIds.has(item.id)}
-          isAgentSharding={item.isAgentSharding}
+          isAgentSharding={agentStatsByLocation.get(item.id)?.isAgentSharding ?? isAgentSharding}
         />
       ),
     },
@@ -297,45 +295,25 @@ export const PrivateLocationsTable = ({
     return acc;
   }, {});
 
-  const openFlyout = () => dispatch(setIsPrivateLocationFlyoutVisible(true));
-
   const renderToolRight = () => {
     return [
-      <EuiButton
-        data-test-subj="syntheticsRefreshPrivateLocationsButton"
-        iconType="refresh"
-        onClick={refreshApp}
-        isLoading={loading || agentStatsLoading}
+      <EuiFlexGroup
         key="refreshPrivateLocations"
+        direction="column"
+        gutterSize="xs"
+        alignItems="center"
+        responsive={false}
       >
-        {REFRESH_LABEL}
-      </EuiButton>,
-      <NoPermissionsTooltip
-        canEditSynthetics={canSave}
-        canManagePrivateLocations={canManagePrivateLocations}
-        key="addPrivateLocationButton"
-      >
-        <EuiButton
-          fill
-          data-test-subj={'addPrivateLocationButton'}
-          isLoading={loading}
-          disabled={!canSave || !canManagePrivateLocations}
-          onClick={openFlyout}
-          iconType="plusCircle"
-        >
-          {ADD_LABEL}
-        </EuiButton>
-      </NoPermissionsTooltip>,
-    ];
-  };
-
-  return (
-    <div>
-      <EuiText>
-        {START_ADDING_LOCATIONS_DESCRIPTION} <PrivateLocationDocsLink label={LEARN_MORE} />
-      </EuiText>
-      <EuiSpacer size="m" />
-      <EuiFlexGroup justifyContent="flexEnd" responsive={false}>
+        <EuiFlexItem grow={false}>
+          <EuiButton
+            data-test-subj="syntheticsRefreshPrivateLocationsButton"
+            iconType="refresh"
+            onClick={refreshApp}
+            isLoading={loading || agentStatsLoading}
+          >
+            {REFRESH_LABEL}
+          </EuiButton>
+        </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EuiText size="xs" color="subdued" className="eui-textNoWrap">
             <FormattedMessage
@@ -345,8 +323,12 @@ export const PrivateLocationsTable = ({
             />
           </EuiText>
         </EuiFlexItem>
-      </EuiFlexGroup>
-      <EuiSpacer size="xs" />
+      </EuiFlexGroup>,
+    ];
+  };
+
+  return (
+    <div>
       <EuiInMemoryTable<ListItem>
         itemId={'id'}
         tableLayout="auto"
@@ -462,14 +444,6 @@ const getDeleteDescription = (canDelete: boolean, monCount: number) =>
 
 const EDIT_LOCATION = i18n.translate('xpack.synthetics.settingsRoute.privateLocations.editLabel', {
   defaultMessage: 'Edit private location',
-});
-
-const ADD_LABEL = i18n.translate('xpack.synthetics.monitorManagement.createLocation', {
-  defaultMessage: 'Create location',
-});
-
-export const LEARN_MORE = i18n.translate('xpack.synthetics.privateLocations.learnMore.label', {
-  defaultMessage: 'Learn more.',
 });
 
 const RESET_MONITORS_LABEL = i18n.translate(

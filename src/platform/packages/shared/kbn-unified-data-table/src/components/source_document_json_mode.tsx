@@ -19,7 +19,7 @@ import type {
   EsHitRecord,
   ShouldShowFieldInTableHandler,
 } from '@kbn/discover-utils/types';
-import { formatFieldStringValueWithHighlights } from '@kbn/discover-utils';
+import { formatFieldStringValueWithHighlights, getIgnoredReason } from '@kbn/discover-utils';
 import { shouldShowFieldFilterInOutActions } from '@kbn/unified-doc-viewer/utils/should_show_field_filter_actions';
 import { getDataViewFieldOrCreateFromColumnMeta } from '@kbn/data-view-utils';
 import { CELL_CLASS } from '../utils/get_render_cell_value';
@@ -27,6 +27,7 @@ import { flattenedToNestedDocument, MAX_TREE_VALUES } from '../utils/build_docum
 import type { JsonModeSettings } from '../types';
 import type { FormatValue, GetLeafActions } from './json_tree_viewer/json_tree_viewer';
 import { JsonTreeViewer, type TreeExpansionState } from './json_tree_viewer/json_tree_viewer';
+import { DEFAULT_RENDERED_NODES } from './data_table_additional_display_settings';
 import { getDocumentText } from './json_tree_viewer/doc_scan';
 import { UnifiedDataTableContext } from '../table_context';
 
@@ -62,6 +63,7 @@ export const SourceDocumentJsonMode = ({
 
   const hideNulls = jsonModeSettings?.hideNulls ?? false;
   const wrapLines = jsonModeSettings?.wrapLines ?? true;
+  const defaultRenderedNodes = jsonModeSettings?.defaultRenderedNodes ?? DEFAULT_RENDERED_NODES;
 
   // Filter for / filter out actions per leaf.
   const getLeafActions = useCallback<GetLeafActions>(
@@ -78,7 +80,9 @@ export const SourceDocumentJsonMode = ({
           dataViewField: field,
           hideFilteringOnComputedColumns,
           onFilter,
-        })
+        }) ||
+        // Elasticsearch did not index this value, so a filter built from it would never match.
+        (field && getIgnoredReason(field, row.raw._ignored))
       ) {
         return [];
       }
@@ -107,7 +111,7 @@ export const SourceDocumentJsonMode = ({
         },
       ];
     },
-    [dataView, columnsMeta, onFilter, hideFilteringOnComputedColumns, isPlainRecord]
+    [dataView, columnsMeta, onFilter, hideFilteringOnComputedColumns, isPlainRecord, row]
   );
 
   const initialTreeState = useMemo(() => treeExpansionStore.get(row.raw), [row]);
@@ -193,6 +197,7 @@ export const SourceDocumentJsonMode = ({
         formatValue={formatTreeValue}
         getLeafActions={getLeafActions}
         wrapLines={wrapLines}
+        defaultRenderedNodes={defaultRenderedNodes}
       />
     </span>
   );

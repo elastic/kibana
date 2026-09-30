@@ -8,6 +8,7 @@
 import {
   RuleExecutionCancellationError,
   isRuleExecutionCancellationError,
+  toRuleExecutionCancellationError,
 } from './cancellation_error';
 
 describe('RuleExecutionCancellationError', () => {
@@ -75,5 +76,36 @@ describe('isRuleExecutionCancellationError', () => {
   it('returns false for primitive values', () => {
     expect(isRuleExecutionCancellationError('error')).toBe(false);
     expect(isRuleExecutionCancellationError(42)).toBe(false);
+  });
+});
+
+describe('toRuleExecutionCancellationError', () => {
+  it('returns an already-recognized cancellation unchanged', () => {
+    const reason = new RuleExecutionCancellationError('already a cancellation');
+
+    expect(toRuleExecutionCancellationError(reason)).toBe(reason);
+  });
+
+  it('returns a duck-typed cancellation unchanged', () => {
+    const reason = { code: 'rule_execution_aborted', message: 'aborted' };
+
+    expect(toRuleExecutionCancellationError(reason)).toBe(reason);
+  });
+
+  it('wraps any other reason, preserving it as cause', () => {
+    const reason = new Error('underlying error');
+
+    const normalized = toRuleExecutionCancellationError(reason);
+
+    expect(normalized).toBeInstanceOf(RuleExecutionCancellationError);
+    expect(normalized.message).toBe('Rule execution aborted');
+    expect(normalized.cause).toBe(reason);
+  });
+
+  it('wraps a non-Error reason', () => {
+    const normalized = toRuleExecutionCancellationError('string reason');
+
+    expect(normalized).toBeInstanceOf(RuleExecutionCancellationError);
+    expect(normalized.cause).toBe('string reason');
   });
 });

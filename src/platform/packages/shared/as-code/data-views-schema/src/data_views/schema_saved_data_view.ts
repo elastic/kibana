@@ -20,7 +20,7 @@ import {
   savedCompositeRuntimeFieldSchema,
   savedPrimitiveRuntimeFieldSchema,
 } from '../runtime_fields/schema_saved_runtime_fields';
-import { fieldSettingsWithPopularitySchema } from '../schema_field_settings';
+import { fieldSettingsWithPopularitySchema } from '../field_settings/schema_field_settings';
 
 export const savedFieldSettingsSchema = z
   .union([

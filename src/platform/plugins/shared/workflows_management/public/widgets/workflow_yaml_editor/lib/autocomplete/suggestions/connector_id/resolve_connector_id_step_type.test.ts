@@ -7,7 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { resolveConnectorIdStepType } from './resolve_connector_id_step_type';
+import { parseDocument } from 'yaml';
+import {
+  resolveConnectorIdStepType,
+  resolveConnectorIdTriggerType,
+} from './resolve_connector_id_step_type';
 import type { StepInfo, StepPropInfo } from '../../../../../../entities/workflows/store';
 
 describe('resolveConnectorIdStepType', () => {
@@ -18,6 +22,12 @@ describe('resolveConnectorIdStepType', () => {
     stepYamlNode: {} as StepInfo['stepYamlNode'],
     lineStart: 1,
     lineEnd: 5,
+  };
+
+  const waitForInputStep: StepInfo = {
+    ...waitForApprovalStep,
+    stepType: 'waitForInput',
+    stepId: 'ask-in-slack',
   };
 
   it('returns null when focused step info is missing', () => {
@@ -60,5 +70,69 @@ describe('resolveConnectorIdStepType', () => {
         focusedYamlPair
       )
     ).toBe('slack_api');
+  });
+
+  it('maps waitForInput slack channel connector-id to slack connector type', () => {
+    const focusedYamlPair = {
+      path: ['with', 'channels', 'slack', 'connector-id'],
+    } as StepPropInfo;
+
+    expect(
+      resolveConnectorIdStepType(
+        waitForInputStep,
+        ['steps', 0, ...focusedYamlPair.path],
+        focusedYamlPair
+      )
+    ).toBe('slack');
+  });
+
+  it('maps waitForInput slack_api channel connector-id from path when focusedYamlPair is missing', () => {
+    expect(
+      resolveConnectorIdStepType(
+        waitForInputStep,
+        ['steps', 0, 'with', 'channels', 'slack_api', 'connector-id'],
+        null
+      )
+    ).toBe('slack_api');
+  });
+
+  it('does not treat waitForInput or waitForApproval as action types', () => {
+    expect(
+      resolveConnectorIdStepType(waitForInputStep, ['steps', 0, 'with', 'message'], null)
+    ).toBeNull();
+    expect(
+      resolveConnectorIdStepType(waitForApprovalStep, ['steps', 0, 'with', 'message'], null)
+    ).toBeNull();
+  });
+
+  it('does not apply HITL channel mapping to non-HITL step types', () => {
+    const focusedYamlPair = {
+      path: ['with', 'channels', 'slack_api', 'connector-id'],
+    } as StepPropInfo;
+
+    expect(
+      resolveConnectorIdStepType(
+        { ...waitForApprovalStep, stepType: 'http' },
+        ['steps', 0, ...focusedYamlPair.path],
+        focusedYamlPair
+      )
+    ).toBe('http');
+  });
+});
+
+describe('resolveConnectorIdTriggerType', () => {
+  const yamlDocument = parseDocument(`triggers:
+  - type: inboundWebhook.received
+    connector-id: testyng
+`);
+
+  it('maps a connector-event trigger connector-id to the spec type id', () => {
+    expect(resolveConnectorIdTriggerType(['triggers', 0, 'connector-id'], yamlDocument)).toBe(
+      '.inboundWebhook'
+    );
+  });
+
+  it('returns null outside a trigger connector-id path', () => {
+    expect(resolveConnectorIdTriggerType(['steps', 0, 'connector-id'], yamlDocument)).toBeNull();
   });
 });

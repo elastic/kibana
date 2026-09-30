@@ -17,6 +17,7 @@ export interface ApiFailureContext {
   target: ApiTarget;
   api: string;
   logger: Logger;
+  discoveryEnabled: boolean;
 }
 
 const toMessage = (error: unknown): string =>
@@ -48,7 +49,7 @@ export const registryUnavailableErrorResult = (
  */
 export const apiFailureToErrorResult = (
   failure: PrepareApiRequestFailure,
-  { toolId, target, api, logger }: ApiFailureContext
+  { toolId, target, api, logger, discoveryEnabled }: ApiFailureContext
 ): ErrorResult => {
   const metadata = { target, api };
 
@@ -58,21 +59,19 @@ export const apiFailureToErrorResult = (
 
     case 'unknown_api':
       return createErrorResult({
-        message:
-          `Unknown API identifier: "${api}". Use the ${internalTools.discoverApis} tool to ` +
-          `find valid identifiers.`,
+        message: discoveryEnabled
+          ? `Unknown API identifier: "${api}". Use the ${internalTools.discoverApis} tool to ` +
+            `find valid identifiers.`
+          : `The ${target} target exposes no API named "${api}". Identifiers are spelled ` +
+            `"namespace.name" (e.g. "indices.create", "cluster.health") or just "name" for root ` +
+            `operations (e.g. "bulk"). Retry with the identifier of an operation you know ` +
+            `${target} ships, or tell the user the operation is not available.`,
       });
 
     case 'load_failed':
       logger.error(`${toolId}: failed to load API "${api}" (target=${target}): ${failure.error}`);
       return createErrorResult({
         message: `Failed to load API definition for "${api}": ${toMessage(failure.error)}`,
-      });
-
-    case 'unsupported_api':
-      return createErrorResult({
-        message: `Cannot execute "${api}": ${failure.reason} Do not retry it.`,
-        metadata,
       });
 
     case 'schema_unavailable':

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useMemo, useState } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import {
   EuiButton,
   EuiButtonGroup,
@@ -19,18 +19,22 @@ import {
   EuiTitle,
   logicalCSS,
   useEuiMinBreakpoint,
-  useEuiMaxBreakpoint,
   useEuiTheme,
 } from '@elastic/eui';
 import { AppHeader } from '@kbn/app-header';
 import { useQueryClient } from '@kbn/react-query';
-import { useService } from '@kbn/core-di-browser';
+import { PluginStart } from '@kbn/core-di';
+import { CoreStart, useService } from '@kbn/core-di-browser';
+import type { AgentBuilderPluginStart } from '@kbn/agent-builder-plugin/public';
 import { getBreachEsqlQuery } from '@kbn/alerting-v2-schemas';
 import { parseEpisodeDataJson } from '@kbn/alerting-v2-utils';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { useFetchEpisodeQuery } from '@kbn/alerting-v2-episodes-ui/hooks/use_fetch_episode_query';
 import { useFetchEpisodeActions } from '@kbn/alerting-v2-episodes-ui/hooks/use_fetch_episode_actions';
-import { useFetchGroupActions } from '@kbn/alerting-v2-episodes-ui/hooks/use_fetch_group_actions';
+import {
+  getGroupAction,
+  useFetchGroupActions,
+} from '@kbn/alerting-v2-episodes-ui/hooks/use_fetch_group_actions';
 import { useFetchRule } from '@kbn/alerting-v2-episodes-ui/hooks/use_fetch_rule';
 import { useEpisodeFlapping } from '@kbn/alerting-v2-episodes-ui/hooks/use_episode_flapping';
 import { isRuleLoaded } from '@kbn/alerting-v2-episodes-ui/types/rule_state';
@@ -42,17 +46,18 @@ import { AlertEpisodeTrendChartSection } from '@kbn/alerting-v2-episodes-ui/comp
 import { AlertEpisodeTimelineHeatmapsSection } from '@kbn/alerting-v2-episodes-ui/components/details/timeline_heatmaps_section';
 import { AlertEpisodesRelatedSection } from '@kbn/alerting-v2-episodes-ui/components/details/related_section';
 import { AlertEpisodeMetadataSection } from '@kbn/alerting-v2-episodes-ui/components/details/metadata_section';
+import { DOC_VIEWER_FLEX_HEIGHT_SENTINEL } from '@kbn/alerting-v2-episodes-ui/components/details/metadata_layout';
 import { AlertEpisodeRunbookSection } from '@kbn/alerting-v2-episodes-ui/components/details/runbook_section';
 import { css } from '@emotion/react';
-import { useHistory, useParams } from 'react-router-dom';
+import { useParams } from 'react-router-dom';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 import { AlertEpisodeTimelineSection } from '@kbn/alerting-v2-episodes-ui/components/details/timeline_section';
+import { useEpisodeAutoAttach } from '@kbn/alerting-v2-browser-shared';
 import { CenterJustifiedSpinner } from '../../components/center_justified_spinner';
-import { paths } from '../../constants';
+import { useAlertingLocators } from '../../application/locator_context';
 import type { AlertEpisodesKibanaServices } from '../../episodes_kibana_services';
 import { useBreadcrumbs } from '../../hooks/use_breadcrumbs';
 import { UserCapabilities } from '../../services/user_capabilities';
-import { useEpisodeAutoAttach } from '../../agent_builder/use_episode_auto_attach';
 import { getDiscoverHrefForRuleAndEpisodeTimestamp } from '../../utils/discover_href_for_episode';
 import {
   filterEpisodeActionsByPrivilege,
@@ -80,14 +85,13 @@ export function EpisodeDetailsPage() {
   const [mainPanel, setMainPanel] = useState<EpisodeDetailsMainPanel>('overview');
 
   const { services } = useKibana<AlertEpisodesKibanaServices>();
+  const { episodesLocators, rulesLocators } = useAlertingLocators();
   const queryClient = useQueryClient();
   const alertsCapability = useService(UserCapabilities).canWrite('alerts')
     ? EPISODE_ACTIONS_PRIVILEGE.all
     : EPISODE_ACTIONS_PRIVILEGE.read;
   const { data, http, spaces } = services;
-  const history = useHistory();
 
-  const smallMediaQuery = useEuiMaxBreakpoint('s');
   const largeMediaQuery = useEuiMinBreakpoint('m');
 
   const invalidateEpisodeQueries = useInvalidateEpisodeQueries();
@@ -124,7 +128,7 @@ export function EpisodeDetailsPage() {
   });
 
   const episodeAction = episodeId ? episodeActionsMap?.get(episodeId) : undefined;
-  const groupAction = groupHash ? groupActionsMap?.get(groupHash) : undefined;
+  const groupAction = groupHash ? getGroupAction(groupActionsMap, ruleId, groupHash) : undefined;
 
   const showRuleDependentUi = isRuleLoaded(ruleState);
 
@@ -136,10 +140,19 @@ export function EpisodeDetailsPage() {
   const episodeBreadcrumbTitle = episodeRuleName ?? i18n.EPISODE_DETAILS_BREADCRUMB_FALLBACK;
   const groupingFields = showRuleDependentUi ? ruleState.rule.grouping?.fields : undefined;
 
-  useEpisodeAutoAttach(episode, {
-    ruleName: episodeRuleName,
-    groupingFields,
-  });
+  useEpisodeAutoAttach(
+    episode,
+    {
+      ruleName: episodeRuleName,
+      groupingFields,
+    },
+    {
+      chrome: useService(CoreStart('chrome')),
+      agentBuilder: useService(PluginStart('agentBuilder'), { optional: true }) as
+        | AgentBuilderPluginStart
+        | undefined,
+    }
+  );
 
   useBreadcrumbs('episode_details', { ruleName: episodeBreadcrumbTitle });
 
@@ -255,7 +268,15 @@ export function EpisodeDetailsPage() {
     [applicableActions, episode, invalidateEpisodeQueries]
   );
 
-  const episodesListHref = services.http.basePath.prepend(paths.alertEpisodesList);
+  const episodesListHref = episodesLocators.useUrl({});
+  const getRuleDetailsHref = useCallback(
+    (id: string) => rulesLocators.getRedirectUrl({ ruleId: id }),
+    [rulesLocators]
+  );
+  const getEpisodeDetailsHref = useCallback(
+    (id: string) => episodesLocators.getRedirectUrl({ episodeId: id }),
+    [episodesLocators]
+  );
 
   const isLoading = isLoadingEpisode;
   const episodeNotFound = !isLoading && episode == null;
@@ -271,7 +292,7 @@ export function EpisodeDetailsPage() {
           <EuiButton
             color="primary"
             fill
-            onClick={() => history.push('/')}
+            href={episodesListHref}
             data-test-subj="episodeDetailsErrorBackButton"
           >
             {i18n.BACK_TO_ALERT_EPISODES}
@@ -342,6 +363,7 @@ export function EpisodeDetailsPage() {
             <AlertEpisodeRuleOverviewPanelSection
               episodeId={episodeId}
               services={detailsServices}
+              getRuleDetailsHref={getRuleDetailsHref}
             />
           </>
         )}
@@ -436,27 +458,7 @@ export function EpisodeDetailsPage() {
               paddingSize="none"
               css={css`
                 min-width: 0;
-
-                ${smallMediaQuery} {
-                  [class*='InternalDocViewerTable'] {
-                    display: block;
-                    height: unset;
-                  }
-                }
-
-                ${largeMediaQuery} {
-                  // The doc-viewer table uses a fixed height by default; set
-                  // it to 100% so it fills the available flex height instead
-                  // of measuring against \`window.innerHeight\`.
-                  [class*='InternalDocViewerTable'] {
-                    height: 100%;
-
-                    & > :nth-child(2),
-                    & > :nth-child(4) {
-                      padding-right: ${euiTheme.size.s};
-                    }
-                  }
-                }
+                min-block-size: 0;
               `}
             >
               {actualMainPanel === 'timeline' ? (
@@ -473,8 +475,20 @@ export function EpisodeDetailsPage() {
                   episodeStart={episode?.first_timestamp}
                 />
               ) : actualMainPanel === 'metadata' ? (
-                <EuiPanel hasBorder={false} hasShadow={false} paddingSize="l">
-                  <AlertEpisodeMetadataSection episodeId={episodeId} services={metadataServices} />
+                <EuiPanel
+                  hasBorder={false}
+                  hasShadow={false}
+                  paddingSize="l"
+                  css={css`
+                    block-size: 100%;
+                    min-block-size: 0;
+                  `}
+                >
+                  <AlertEpisodeMetadataSection
+                    episodeId={episodeId}
+                    services={metadataServices}
+                    decreaseAvailableHeightBy={DOC_VIEWER_FLEX_HEIGHT_SENTINEL}
+                  />
                 </EuiPanel>
               ) : (
                 <EuiPanel hasBorder={false} hasShadow={false} paddingSize="l">
@@ -487,7 +501,11 @@ export function EpisodeDetailsPage() {
                       episodeId={episodeId}
                       services={detailsServices}
                     />
-                    <AlertEpisodesRelatedSection episodeId={episodeId} services={detailsServices} />
+                    <AlertEpisodesRelatedSection
+                      episodeId={episodeId}
+                      services={detailsServices}
+                      getEpisodeDetailsHref={getEpisodeDetailsHref}
+                    />
                   </EuiFlexGroup>
                 </EuiPanel>
               )}

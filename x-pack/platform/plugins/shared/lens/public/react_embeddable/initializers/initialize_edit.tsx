@@ -330,7 +330,7 @@ export function initializeEditApi(
           core: startDependencies.coreStart,
           api: parentApi,
           loadContent: getEditPanel,
-          options: { uuid },
+          options: { uuid, isEsql: isTextBasedLanguage(getState()) },
         });
       },
       getEditPanel,
@@ -372,7 +372,7 @@ export function initializeEditApi(
               closeFlyout,
             });
           },
-          options: { uuid },
+          options: { uuid, isEsql: isTextBasedLanguage(getState()) },
         });
       },
       getEditHref: async () => {

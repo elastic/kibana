@@ -11,6 +11,7 @@ import type {
   Logger,
   SavedObjectsClientContract,
 } from '@kbn/core/server';
+import type { MitreAttackDataClient } from '@kbn/mitre-attack-plugin/server';
 import type { Entity, EntityType } from '@kbn/entity-store/common';
 import type { MlPluginSetup } from '@kbn/ml-plugin/server';
 import type {
@@ -74,6 +75,7 @@ interface GetEntityAnomaliesParams {
   request: KibanaRequest;
   sort?: Array<{ field: AnomalySortField; order: AnomalySortOrder }>;
   soClient: SavedObjectsClientContract;
+  mitreDataClient?: MitreAttackDataClient;
 }
 
 export interface GetEntityAnomaliesResult {
@@ -98,6 +100,7 @@ export const getEntityAnomalies = async ({
   request,
   sort,
   soClient,
+  mitreDataClient,
 }: GetEntityAnomaliesParams): Promise<GetEntityAnomaliesResult> => {
   const allSecurityJobIds = await getSecurityMlJobIds({ ml, request, soClient });
   const allConfigs = await getJobConfig({
@@ -106,11 +109,17 @@ export const getEntityAnomalies = async ({
     ml,
     request,
     soClient,
+    mitreDataClient,
   });
+
+  // getJobConfig uses the space-aware anomalyDetectorsProvider and silently drops any job
+  // not installed in the current space, so its keys are the installed security job IDs.
+  const installedSecurityJobIds = [...allConfigs.keys()];
+  if (installedSecurityJobIds.length === 0) return { anomalies: [], total: 0 };
 
   let resolvedJobIds = jobIds;
   if (threatTactics && threatTactics.length > 0) {
-    const tacticMatchedIds = allSecurityJobIds.filter((id) =>
+    const tacticMatchedIds = installedSecurityJobIds.filter((id) =>
       allConfigs.get(id)?.threatTactics.some((t) => threatTactics.includes(t))
     );
 
@@ -130,6 +139,7 @@ export const getEntityAnomalies = async ({
     toMs,
     scoreRanges,
     jobIds: resolvedJobIds,
+    securityJobIds: installedSecurityJobIds,
     sort,
     from: offset,
     size: pageSize,
