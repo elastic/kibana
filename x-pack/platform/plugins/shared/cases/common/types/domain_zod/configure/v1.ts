@@ -13,7 +13,7 @@ import {
   CustomFieldToggleTypeSchema,
   CustomFieldNumberTypeSchema,
 } from '../custom_field/v1';
-import { CaseBaseOptionalFieldsSchema } from '../case/v1';
+import { CaseBaseOptionalFieldsSchema, CaseStatusSchema } from '../case/v1';
 import { CaseObservableTypeSchema } from '../observable/v1';
 
 export const ClosureTypeSchema = z.union([
@@ -54,6 +54,17 @@ export const CustomFieldsConfigurationSchema = z.array(CustomFieldConfigurationS
 
 export const ObservableTypesConfigurationSchema = z.array(CaseObservableTypeSchema);
 
+export const CaseStatusConfigurationSchema = z.object({
+  key: z.string(),
+  label: z.string(),
+  category: CaseStatusSchema,
+  order: z.number(),
+  isDefault: z.boolean(),
+  disabled: z.boolean(),
+});
+
+export const CaseStatusesConfigurationSchema = z.array(CaseStatusConfigurationSchema);
+
 export const TemplateConfigurationSchema = z.object({
   key: z.string(),
   name: z.string(),
@@ -71,6 +82,7 @@ export const ConfigurationBasicWithoutOwnerSchema = z.object({
   templates: TemplatesConfigurationSchema,
   observableTypes: ObservableTypesConfigurationSchema,
   extractObservables: z.boolean(),
+  statuses: CaseStatusesConfigurationSchema,
 });
 
 export const CasesConfigureBasicSchema = ConfigurationBasicWithoutOwnerSchema.extend({
@@ -108,3 +120,5 @@ export type Configuration = z.infer<typeof ConfigurationSchema>;
 export type Configurations = z.infer<typeof ConfigurationsSchema>;
 export type ObservableTypesConfiguration = z.infer<typeof ObservableTypesConfigurationSchema>;
 export type ObservableTypeConfiguration = z.infer<typeof CaseObservableTypeSchema>;
+export type CaseStatusConfiguration = z.infer<typeof CaseStatusConfigurationSchema>;
+export type CaseStatusesConfiguration = z.infer<typeof CaseStatusesConfigurationSchema>;

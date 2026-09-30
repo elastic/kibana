@@ -575,6 +575,7 @@ export async function create(
         updated_at: null,
         updated_by: null,
         observableTypes: validatedConfigurationRequest.observableTypes ?? [],
+        statuses: validatedConfigurationRequest.statuses ?? [],
         extractObservables:
           validatedConfigurationRequest.extractObservables ??
           OWNER_INFO[validatedConfigurationRequest.owner as Owner]?.features.observables

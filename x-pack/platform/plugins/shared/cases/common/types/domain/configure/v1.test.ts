@@ -138,6 +138,7 @@ describe('configure', () => {
         },
       ],
       extractObservables: true,
+      statuses: [],
     };
 
     it('has expected attributes in request', () => {
@@ -224,6 +225,7 @@ describe('configure', () => {
         },
       ],
       extractObservables: true,
+      statuses: [],
     };
 
     it('has expected attributes in request', () => {

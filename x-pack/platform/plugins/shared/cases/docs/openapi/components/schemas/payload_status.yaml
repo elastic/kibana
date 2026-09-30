@@ -2,3 +2,7 @@ type: object
 properties:
   status:
     $ref: 'case_status.yaml'
+  status_key:
+    type: string
+    description: The key of the configured status the case was moved to.
+    example: awaiting_customer

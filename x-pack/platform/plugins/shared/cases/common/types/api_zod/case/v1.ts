@@ -26,12 +26,15 @@ import {
   MAX_TAGS_PER_CASE,
   MAX_TEMPLATE_DEFINITION_LENGTH,
   MAX_TITLE_LENGTH,
+  MAX_CASE_STATUSES,
+  MAX_CASE_STATUS_KEY_LENGTH,
 } from '../../../constants';
 import {
   limitedArraySchema,
   limitedStringSchema,
   NonEmptyString,
   paginationSchema,
+  regexStringSchema,
 } from '../../../schema_zod';
 import {
   CaseCustomFieldToggleSchema,
@@ -117,8 +120,15 @@ export const CaseBaseOptionalFieldsRequestSchema = z.object({
   [CASE_EXTENDED_FIELDS]: z.record(z.string(), z.string()).optional(),
 });
 
+export const CaseStatusKeySchema = regexStringSchema({
+  codec: limitedStringSchema({ fieldName: 'status_key', min: 1, max: MAX_CASE_STATUS_KEY_LENGTH }),
+  pattern: '^[a-z0-9_-]+$',
+  message: `Key must be lower case, a-z, 0-9, '_', and '-' are allowed`,
+});
+
 export const CaseRequestFieldsSchema = CaseBaseOptionalFieldsRequestSchema.extend({
   status: CaseStatusSchema.optional(),
+  status_key: CaseStatusKeySchema.optional(),
   owner: z.string().optional(),
 });
 
@@ -217,6 +227,17 @@ const CasesFindRequestBaseFieldsSchema = paginationSchema({
     ])
     .optional(),
   status: z.union([CaseStatusSchema, z.array(CaseStatusSchema)]).optional(),
+  status_key: z
+    .union([
+      limitedArraySchema({
+        codec: z.string(),
+        fieldName: 'status_key',
+        min: 0,
+        max: MAX_CASE_STATUSES,
+      }),
+      z.string(),
+    ])
+    .optional(),
   severity: z.union([CaseSeveritySchema, z.array(CaseSeveritySchema)]).optional(),
   assignees: z
     .union([

@@ -731,6 +731,13 @@ export type CaseStatus = z.infer<typeof CaseStatus>;
 export type CaseStatusEnum = typeof CaseStatus.enum;
 export const CaseStatusEnum = CaseStatus.enum;
 
+/**
+  * The key of the configured status the case is in. Configured statuses are grouped under the built-in statuses, which `status` continues to report. Null for cases last updated before statuses were configured. Technical preview.
+
+  */
+export const CaseStatusKey = lazySchema(() => z.string().nullable());
+export type CaseStatusKey = z.infer<typeof CaseStatusKey>;
+
 export const CaseResponseProperties = lazySchema(() =>
   z.object({
     assignees: Assignees.optional(),
@@ -849,6 +856,7 @@ export const CaseResponseProperties = lazySchema(() =>
     settings: Settings,
     severity: CaseSeverity,
     status: CaseStatus,
+    status_key: CaseStatusKey.optional(),
     tags: z.array(z.string()),
     title: z.string(),
     totalAlerts: z.number().int(),
@@ -974,6 +982,17 @@ export const UpdateCaseRequest = lazySchema(() =>
           settings: Settings.optional(),
           severity: CaseSeverity.optional(),
           status: CaseStatus.optional(),
+          /**
+      * The key of a configured status to move the case to. The `status` field is derived from the configured status's category and must match it when both are provided. Requires `xpack.cases.customStatuses.enabled`. Technical preview.
+
+      */
+          status_key: z
+            .string()
+            .max(50)
+            .optional()
+            .describe(
+              "The key of a configured status to move the case to. The `status` field is derived from the configured status's category and must match it when both are provided. Requires `xpack.cases.customStatuses.enabled`. Technical preview.\n"
+            ),
           tags: CaseTags.optional(),
           title: CaseTitle.optional(),
           closeReason: CaseCloseSyncReason.optional(),
@@ -1058,6 +1077,7 @@ export const RelatedCase = lazySchema(() =>
      */
     description: z.string().describe('The case description.'),
     status: CaseStatus,
+    status_key: CaseStatusKey.optional(),
     /**
      * When the case was created.
      */
@@ -1092,6 +1112,54 @@ export const ConnectorTypes = lazySchema(() =>
 export type ConnectorTypes = z.infer<typeof ConnectorTypes>;
 export type ConnectorTypesEnum = typeof ConnectorTypes.enum;
 export const ConnectorTypesEnum = ConnectorTypes.enum;
+
+/**
+  * The statuses available for cases. Each entry belongs to one of the built-in statuses, its category, which drives every status-dependent behavior such as alert synchronization and closure. An empty array means only the built-in statuses are available. Requires `xpack.cases.customStatuses.enabled`. Technical preview.
+
+  */
+export const CaseStatusesConfiguration = lazySchema(() =>
+  z
+    .array(
+      z.object({
+        /**
+         * The identifier used as `status_key` on cases. It cannot be changed after creation. The built-in statuses use `open`, `in-progress`, and `closed`.
+         */
+        key: z
+          .string()
+          .max(50)
+          .describe(
+            'The identifier used as `status_key` on cases. It cannot be changed after creation. The built-in statuses use `open`, `in-progress`, and `closed`.'
+          ),
+        /**
+         * The label shown on cases.
+         */
+        label: z.string().max(50).describe('The label shown on cases.'),
+        category: CaseStatus,
+        /**
+         * The display position of the status.
+         */
+        order: z.number().int().describe('The display position of the status.'),
+        /**
+         * Whether updates that only specify `status` move cases in this category to this status. Exactly one status per category must be the default.
+         */
+        isDefault: z
+          .boolean()
+          .describe(
+            'Whether updates that only specify `status` move cases in this category to this status. Exactly one status per category must be the default.'
+          ),
+        /**
+         * Disabled statuses cannot be applied but keep their label on cases that already use them.
+         */
+        disabled: z
+          .boolean()
+          .describe(
+            'Disabled statuses cannot be applied but keep their label on cases that already use them.'
+          ),
+      })
+    )
+    .max(30)
+);
+export type CaseStatusesConfiguration = z.infer<typeof CaseStatusesConfiguration>;
 
 /**
   * The words and phrases that help categorize templates. It can be an empty array.
@@ -1305,6 +1373,7 @@ export const SetCaseConfigurationRequest = lazySchema(() =>
         "Indicates whether observables (for example, IPs, hashes, and URLs) are automatically extracted from case comments and events. When omitted, defaults to the owner's default: `true` for Security, `false` for Stack and Observability. For owners that do not support observable extraction (currently Observability), setting this to `true` has no effect on case creation; new cases for those owners always use `false`.\n"
       ),
     owner: Owner,
+    statuses: CaseStatusesConfiguration.optional(),
     templates: Templates.optional(),
   })
 );
@@ -1413,6 +1482,7 @@ export const UpdateCaseConfigurationRequest = lazySchema(() =>
       .describe(
         'Indicates whether observables (for example, IPs, hashes, and URLs) are automatically extracted from case comments and events.\n'
       ),
+    statuses: CaseStatusesConfiguration.optional(),
     templates: Templates.optional(),
     /**
       * The version of the connector. To retrieve the version value, use the get configuration API.
@@ -2047,6 +2117,7 @@ export const CaseResponseGetCase = lazySchema(() =>
     settings: Settings,
     severity: CaseSeverity,
     status: CaseStatus,
+    status_key: CaseStatusKey.optional(),
     tags: z.array(z.string()),
     title: z.string(),
     totalAlerts: z.number().int(),
@@ -2679,6 +2750,13 @@ export type PayloadSeverity = z.infer<typeof PayloadSeverity>;
 export const PayloadStatus = lazySchema(() =>
   z.object({
     status: CaseStatus.optional(),
+    /**
+     * The key of the configured status the case was moved to.
+     */
+    status_key: z
+      .string()
+      .optional()
+      .describe('The key of the configured status the case was moved to.'),
   })
 );
 export type PayloadStatus = z.infer<typeof PayloadStatus>;

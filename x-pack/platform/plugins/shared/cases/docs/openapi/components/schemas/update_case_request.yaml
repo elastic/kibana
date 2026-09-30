@@ -58,6 +58,14 @@ properties:
           $ref: 'case_severity.yaml'
         status:
           $ref: 'case_status.yaml'
+        status_key:
+          type: string
+          description: >
+            The key of a configured status to move the case to. The `status` field is derived from
+            the configured status's category and must match it when both are provided.
+            Requires `xpack.cases.customStatuses.enabled`. Technical preview.
+          maxLength: 50
+          example: awaiting_customer
         tags:
           $ref: 'case_tags.yaml'
         title:

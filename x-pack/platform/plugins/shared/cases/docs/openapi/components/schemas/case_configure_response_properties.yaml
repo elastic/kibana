@@ -66,6 +66,8 @@ extractObservables:
   example: true
 owner:
   $ref: 'owner.yaml'
+statuses:
+  $ref: 'case_statuses_configuration.yaml'
 templates:
   $ref: 'templates.yaml'
 updated_at:

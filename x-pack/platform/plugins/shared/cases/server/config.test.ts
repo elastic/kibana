@@ -33,6 +33,9 @@ describe('config validation', () => {
           "chat": Object {
             "enabled": true,
           },
+          "customStatuses": Object {
+            "enabled": false,
+          },
           "enabled": true,
           "files": Object {
             "allowedMimeTypes": Array [

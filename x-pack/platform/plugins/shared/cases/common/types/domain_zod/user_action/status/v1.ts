@@ -9,7 +9,10 @@ import { z } from '@kbn/zod/v4';
 import { CaseStatusSchema } from '../../case/v1';
 import { UserActionTypes } from '../action/v1';
 
-export const StatusUserActionPayloadSchema = z.object({ status: CaseStatusSchema });
+export const StatusUserActionPayloadSchema = z.object({
+  status: CaseStatusSchema,
+  status_key: z.string().optional(),
+});
 
 export const StatusUserActionSchema = z.object({
   type: z.literal(UserActionTypes.status),

@@ -390,6 +390,7 @@ describe('client', () => {
               username: 'elastic',
             },
             observableTypes: [],
+            statuses: [],
           },
         });
 
@@ -451,6 +452,7 @@ describe('client', () => {
               },
             ],
             observableTypes: [],
+            statuses: [],
             extractObservables: true,
           },
           version: 'test-version',
@@ -464,6 +466,7 @@ describe('client', () => {
           references: [],
           attributes: {
             observableTypes: [],
+            statuses: [],
             templates: [],
             created_at: '2019-11-25T21:54:48.952Z',
             created_by: {
@@ -1060,6 +1063,7 @@ describe('client', () => {
               closure_type: 'close-by-user',
               owner: 'cases',
               observableTypes: [],
+              statuses: [],
               extractObservables: true,
             },
             id: 'test-id',
@@ -1130,6 +1134,7 @@ describe('client', () => {
                   },
                 ],
                 observableTypes: [],
+                statuses: [],
               },
               id: 'test-id',
               version: 'test-version',
@@ -1282,6 +1287,7 @@ describe('client', () => {
               username: 'elastic',
             },
             observableTypes: [],
+            statuses: [],
           },
         };
 
@@ -1629,6 +1635,7 @@ describe('client', () => {
                   updated_at: null,
                   updated_by: null,
                   observableTypes: [],
+                  statuses: [],
                   extractObservables: true,
                 },
                 score: 0,
@@ -1656,6 +1663,7 @@ describe('client', () => {
               updated_at: null,
               updated_by: null,
               observableTypes: [],
+              statuses: [],
               extractObservables: true,
             },
           });
@@ -1896,6 +1904,7 @@ describe('client', () => {
           ],
           templates: [],
           observableTypes: [],
+          statuses: [],
           extractObservables: true,
           created_at: '2019-11-25T21:54:48.952Z',
           created_by: { full_name: 'elastic', email: 'test@test.com', username: 'elastic' },

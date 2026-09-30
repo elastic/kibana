@@ -249,6 +249,9 @@ function transformToExternalModel(
     false;
   const extractObservables = configuration.attributes.extractObservables ?? ownerAutoExtractDefault;
 
+  const statuses = (configuration.attributes.statuses ??
+    []) as ConfigurationTransformedAttributes['statuses'];
+
   return {
     ...configuration,
     attributes: {
@@ -258,6 +261,7 @@ function transformToExternalModel(
       templates,
       observableTypes,
       extractObservables,
+      statuses,
     },
   };
 }
