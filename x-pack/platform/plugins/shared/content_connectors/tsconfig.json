@@ -61,6 +61,7 @@
     "@kbn/logging",
     "@kbn/shared-ux-ai-components",
     "@kbn/deeplinks-management",
+    "@kbn/app-header",
     "@kbn/ui-callout",
     "@kbn/usage-collection-plugin",
     "@kbn/core-logging-server-mocks"

@@ -11,6 +11,12 @@ import { parse, stringify } from 'query-string';
 import { useCallback, useMemo } from 'react';
 import { useHistory, useLocation } from 'react-router-dom';
 import type { LayoutDirection } from '@kbn/workflows';
+import {
+  getStoredEditorView,
+  getStoredGraphDirection,
+  setStoredEditorView,
+  setStoredGraphDirection,
+} from '../lib/workflow_editor_preferences';
 
 export type WorkflowUrlStateTabType = 'workflow' | 'executions';
 export type WorkflowEditorView = 'yaml' | 'graph';
@@ -25,6 +31,55 @@ export interface WorkflowUrlState {
   resume?: boolean;
   replayExecutionId?: string;
 }
+
+export interface WorkflowUrlUpdateOptions {
+  /**
+   * Replace the current history entry instead of pushing a new one. Use it for normalisation and
+   * cleanup (consuming a one-shot param, defaulting a selection), so Back skips the intermediate URL.
+   */
+  replace?: boolean;
+}
+
+export type WorkflowUrlSelectionSetter = (
+  value: string | null,
+  options?: WorkflowUrlUpdateOptions
+) => void;
+
+/**
+ * History-entry state for the run flyout: how many entries were pushed since the last entry with
+ * no `executionId` (1 on the entry that opened the run), and whether that earlier entry exists in
+ * this history. It does not for a deep link that opened the page with a run already selected.
+ */
+interface RunEntryState {
+  depth: number;
+  openedInApp: boolean;
+}
+
+const RUN_ENTRY_STATE_KEY = 'workflowsRunEntry';
+
+const getRunEntryState = (state: unknown): RunEntryState | undefined => {
+  const value = (state as Record<string, unknown> | null | undefined)?.[RUN_ENTRY_STATE_KEY] as
+    | Partial<RunEntryState>
+    | undefined;
+  return typeof value?.depth === 'number' && value.depth > 0
+    ? { depth: value.depth, openedInApp: value.openedInApp === true }
+    : undefined;
+};
+
+/** Returns the entry state with the run entry set; the same object when the run entry is unchanged. */
+const withRunEntryState = (state: unknown, runEntry: RunEntryState | undefined): unknown => {
+  const current = getRunEntryState(state);
+  if (current?.depth === runEntry?.depth && current?.openedInApp === runEntry?.openedInApp) {
+    return state;
+  }
+  const rest =
+    state != null && typeof state === 'object' ? { ...(state as Record<string, unknown>) } : {};
+  delete rest[RUN_ENTRY_STATE_KEY];
+  if (runEntry) {
+    return { ...rest, [RUN_ENTRY_STATE_KEY]: runEntry };
+  }
+  return Object.keys(rest).length > 0 ? rest : undefined;
+};
 
 /**
  * Normalise a `query-string` value (which may be `string | string[] | null`)
@@ -52,8 +107,16 @@ export function useWorkflowUrlState() {
     const params = parse(location.search);
     return {
       tab: (firstString(params.tab) as WorkflowUrlStateTabType) || 'workflow',
-      view: params.view === 'graph' ? 'graph' : 'yaml',
-      direction: params.direction === 'LR' ? 'LR' : 'TB',
+      view:
+        getStoredEditorView() ??
+        (params.view === 'graph' || params.view === 'yaml'
+          ? (params.view as WorkflowEditorView)
+          : 'yaml'),
+      direction:
+        getStoredGraphDirection() ??
+        (params.direction === 'LR' || params.direction === 'TB'
+          ? (params.direction as LayoutDirection)
+          : 'TB'),
       executionId: firstString(params.executionId),
       stepExecutionId: firstString(params.stepExecutionId),
       stepId: firstString(params.stepId),
@@ -63,7 +126,7 @@ export function useWorkflowUrlState() {
   }, [location.search]);
 
   const updateUrlState = useCallback(
-    (updates: Partial<WorkflowUrlState>) => {
+    (updates: Partial<WorkflowUrlState>, { replace = true }: WorkflowUrlUpdateOptions = {}) => {
       const currentParams = parse(history.location.search);
 
       // Update the params with new values
@@ -80,60 +143,133 @@ export function useWorkflowUrlState() {
         }
       });
 
-      // Update the URL without causing a full page reload
-      const newSearch = stringify(cleanParams, { encode: false });
+      // Update the URL without causing a full page reload. Values must be encoded: iteration and
+      // case-branch ids embed author-controlled step names and case matches, and a raw `&`, `#`
+      // or `+` would split or truncate the param when the URL is parsed back.
+      const newSearch = stringify(cleanParams);
       const nextSearch = newSearch ? `?${newSearch}` : '';
       if (nextSearch === history.location.search) {
         return;
       }
 
-      history.replace({
+      const currentExecutionId = firstString(currentParams.executionId);
+      const nextExecutionId = firstString(cleanParams.executionId as string | undefined);
+      // A deep-linked run has no state yet: its entry counts as depth 1 with nothing before it.
+      const currentRunEntry =
+        getRunEntryState(history.location.state) ??
+        (currentExecutionId ? { depth: 1, openedInApp: false } : undefined);
+
+      if (!replace) {
+        let nextRunEntry: RunEntryState | undefined;
+        if (nextExecutionId) {
+          nextRunEntry = currentRunEntry
+            ? { depth: currentRunEntry.depth + 1, openedInApp: currentRunEntry.openedInApp }
+            : { depth: 1, openedInApp: true };
+        }
+        history.push({
+          ...history.location,
+          search: nextSearch,
+          state: withRunEntryState(history.location.state, nextRunEntry),
+        });
+        return;
+      }
+
+      let replacedRunEntry: RunEntryState | undefined;
+      if (nextExecutionId) {
+        replacedRunEntry = currentRunEntry ?? { depth: 1, openedInApp: false };
+      }
+      const nextLocation = {
         ...history.location,
         search: nextSearch,
-      });
+        state: withRunEntryState(history.location.state, replacedRunEntry),
+      };
+
+      // Closing a run without a navigation (a filter change, a cleanup) must leave none of its
+      // entries reachable, or Back or Forward reopens the run against state that no longer
+      // matches it. Replacing only the current entry is not enough once steps inside the run
+      // pushed more.
+      if (currentExecutionId && !nextExecutionId && currentRunEntry) {
+        const { depth, openedInApp } = currentRunEntry;
+        if (openedInApp) {
+          // Go to the entry before the run and push from it: the push discards every run entry.
+          const unlisten = history.listen(() => {
+            unlisten();
+            history.push(nextLocation);
+          });
+          history.go(-depth);
+          return;
+        }
+        if (depth > 1) {
+          // Nothing before a deep-linked run: replace its first entry instead.
+          const unlisten = history.listen(() => {
+            unlisten();
+            history.replace(nextLocation);
+          });
+          history.go(-(depth - 1));
+          return;
+        }
+      }
+
+      history.replace(nextLocation);
     },
     [history]
   );
 
   const setActiveTab = useCallback(
-    (tab: 'workflow' | 'executions') => {
+    (tab: 'workflow' | 'executions', options: WorkflowUrlUpdateOptions = {}) => {
       // When switching to other tab, clear execution selection
-      updateUrlState({
-        executionId: undefined,
-        stepExecutionId: undefined,
-        stepId: undefined,
-        tab,
-      });
+      updateUrlState(
+        {
+          executionId: undefined,
+          stepExecutionId: undefined,
+          stepId: undefined,
+          tab,
+        },
+        { replace: false, ...options }
+      );
     },
     [updateUrlState]
   );
 
-  const setSelectedExecution = useCallback(
-    (executionId: string | null) => {
-      updateUrlState({
-        executionId: executionId || undefined,
-        stepExecutionId: undefined,
-        stepId: undefined,
-      });
+  const setSelectedExecution = useCallback<WorkflowUrlSelectionSetter>(
+    (executionId, options = {}) => {
+      updateUrlState(
+        {
+          executionId: executionId || undefined,
+          stepExecutionId: undefined,
+          stepId: undefined,
+        },
+        { replace: false, ...options }
+      );
     },
     [updateUrlState]
   );
 
-  const setSelectedStepExecution = useCallback(
-    (stepExecutionId: string | null) => {
-      updateUrlState({
-        stepExecutionId: stepExecutionId || undefined,
-        stepId: undefined,
-      });
+  const setSelectedStepExecution = useCallback<WorkflowUrlSelectionSetter>(
+    (stepExecutionId, options = {}) => {
+      updateUrlState(
+        {
+          stepExecutionId: stepExecutionId || undefined,
+          stepId: undefined,
+        },
+        { replace: false, ...options }
+      );
     },
     [updateUrlState]
   );
 
-  const setSelectedStep = useCallback(
-    (stepId: string | null) => {
-      updateUrlState({
-        stepId: stepId || undefined,
-      });
+  /**
+   * Authoring-time selection in the editor, not navigation: the step panel is part of the editing
+   * surface, so Back should leave the workflow page rather than walk back through step clicks.
+   */
+  const setSelectedStep = useCallback<WorkflowUrlSelectionSetter>(
+    (stepId, options = {}) => {
+      updateUrlState(
+        {
+          stepId: stepId || undefined,
+        },
+        options
+      );
     },
     [updateUrlState]
   );
@@ -148,9 +284,9 @@ export function useWorkflowUrlState() {
 
   const setEditorView = useCallback(
     (view: WorkflowEditorView) => {
+      setStoredEditorView(view);
       updateUrlState({
-        // Omit default to keep the URL clean
-        view: view === 'yaml' ? undefined : view,
+        view,
         // Clear the flyout selection when switching views
         stepId: undefined,
       });
@@ -160,8 +296,8 @@ export function useWorkflowUrlState() {
 
   const setGraphDirection = useCallback(
     (direction: LayoutDirection) => {
-      // Omit default 'TB' to keep the URL clean
-      updateUrlState({ direction: direction === 'TB' ? undefined : direction });
+      setStoredGraphDirection(direction);
+      updateUrlState({ direction });
     },
     [updateUrlState]
   );

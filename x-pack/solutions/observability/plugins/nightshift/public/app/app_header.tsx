@@ -20,47 +20,78 @@ const settingsLabel = i18n.translate('xpack.nightshift.settingsLinkLabel', {
   defaultMessage: 'Settings',
 });
 
+const managementLabel = i18n.translate('xpack.nightshift.managementLinkLabel', {
+  defaultMessage: 'Management',
+});
+
 const settingsEbtProps = getEbtProps({
   action: NIGHTSHIFT_EBT_ACTIONS.VIEW_SETTINGS,
   element: NIGHTSHIFT_EBT_ELEMENTS.PAGE_HEADER,
 });
 
+const managementEbtProps = getEbtProps({
+  action: NIGHTSHIFT_EBT_ACTIONS.VIEW_MANAGEMENT,
+  element: NIGHTSHIFT_EBT_ELEMENTS.PAGE_HEADER,
+});
+
 // App menu items do not expose arbitrary data attributes. Their run callback fires before the
 // delegated document click handler, so the EBT attributes are present when that handler inspects it.
-const applySettingsEbtProps = (params?: AppMenuRunActionParams): void => {
+const applyEbtProps = (
+  ebtProps: typeof settingsEbtProps,
+  params?: AppMenuRunActionParams
+): void => {
   if (!params) {
     return;
   }
 
-  Object.entries(settingsEbtProps).forEach(([attribute, value]) => {
+  Object.entries(ebtProps).forEach(([attribute, value]) => {
     params.triggerElement.setAttribute(attribute, value);
   });
 };
 
 export function NightshiftAppHeader({
+  onManagementClick,
+  managementHref,
   onSettingsClick,
   settingsHref,
 }: {
-  onSettingsClick: () => void | Promise<void>;
-  settingsHref: string;
+  onManagementClick: () => void | Promise<void>;
+  managementHref: string;
+  onSettingsClick?: () => void | Promise<void>;
+  settingsHref?: string;
 }): React.ReactElement {
   const menu = useMemo<AppMenuConfig>(
     () => ({
       items: [
         {
-          id: 'nightshiftSettings',
-          label: settingsLabel,
-          iconType: 'gear',
-          href: settingsHref,
+          id: 'nightshiftManagement',
+          label: managementLabel,
+          iconType: 'managementApp',
+          href: managementHref,
           run: (params) => {
-            applySettingsEbtProps(params);
-            void onSettingsClick();
+            applyEbtProps(managementEbtProps, params);
+            void onManagementClick();
           },
-          testId: 'nightshiftSettingsLink',
+          testId: 'nightshiftManagementLink',
         },
+        ...(onSettingsClick && settingsHref
+          ? [
+              {
+                id: 'nightshiftSettings',
+                label: settingsLabel,
+                iconType: 'gear' as const,
+                href: settingsHref,
+                run: (params?: AppMenuRunActionParams) => {
+                  applyEbtProps(settingsEbtProps, params);
+                  void onSettingsClick();
+                },
+                testId: 'nightshiftSettingsLink',
+              },
+            ]
+          : []),
       ],
     }),
-    [onSettingsClick, settingsHref]
+    [managementHref, onManagementClick, onSettingsClick, settingsHref]
   );
 
   return <AppHeader title={nightshiftPageTitle} menu={menu} spacing="compact" />;

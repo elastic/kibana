@@ -7,31 +7,41 @@
 
 import React from 'react';
 import { EuiPageSection, EuiSpacer } from '@elastic/eui';
+import { AppHeader } from '@kbn/app-header';
 
 import { MAINTENANCE_WINDOW_DEEP_LINK_IDS } from '../../common';
 import { useBreadcrumbs } from '../hooks/use_breadcrumbs';
 import { useMaintenanceWindowsNavigation } from '../hooks/use_navigation';
+import { useKibana } from '../utils/kibana_react';
 import * as i18n from '../translations';
-import { PageHeader } from './page_header';
 import { CreateMaintenanceWindowForm } from './create_maintenance_windows_form';
 
 export const MaintenanceWindowsCreate = React.memo(() => {
   useBreadcrumbs(MAINTENANCE_WINDOW_DEEP_LINK_IDS.maintenanceWindowsCreate);
-  const { navigateToMaintenanceWindows } = useMaintenanceWindowsNavigation();
+  const { docLinks } = useKibana().services;
+  const { navigateToMaintenanceWindows, getMaintenanceWindowsUrl } =
+    useMaintenanceWindowsNavigation();
 
   return (
-    <EuiPageSection restrictWidth={true}>
-      <PageHeader
-        showBackButton={true}
+    <>
+      <AppHeader
         title={i18n.CREATE_MAINTENANCE_WINDOW}
         description={i18n.CREATE_MAINTENANCE_WINDOW_DESCRIPTION}
+        back={{
+          href: getMaintenanceWindowsUrl(),
+          label: i18n.MAINTENANCE_WINDOWS,
+        }}
+        docLink={docLinks.links.alerting.maintenanceWindows}
+        spacing="bleed"
       />
-      <EuiSpacer size="xl" />
-      <CreateMaintenanceWindowForm
-        onCancel={navigateToMaintenanceWindows}
-        onSuccess={navigateToMaintenanceWindows}
-      />
-    </EuiPageSection>
+      <EuiSpacer size="l" />
+      <EuiPageSection restrictWidth>
+        <CreateMaintenanceWindowForm
+          onCancel={navigateToMaintenanceWindows}
+          onSuccess={navigateToMaintenanceWindows}
+        />
+      </EuiPageSection>
+    </>
   );
 });
 MaintenanceWindowsCreate.displayName = 'MaintenanceWindowsCreate';

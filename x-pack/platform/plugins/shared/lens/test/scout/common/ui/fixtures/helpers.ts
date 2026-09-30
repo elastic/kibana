@@ -7,6 +7,7 @@
 
 import { LENS_EMBEDDABLE_TYPE } from '@kbn/lens-common';
 import {
+  AppMenu,
   extendPlaywrightPage,
   KibanaCodeEditorWrapper,
   QueryBar,
@@ -45,7 +46,9 @@ export async function createAdHocDataViewFromLens(page: ScoutPage, name: string)
   await page.testSubj.click('exploreIndexPatternButton');
   await flyout.waitFor({ state: 'hidden' });
   // Wait until the switcher reflects the new DV name
-  await expect(page.testSubj.locator('lns-dataView-switch-link')).toContainText(name);
+  await expect(
+    page.testSubj.locator('lns-dataView-switch-link').getByTestId('fullText')
+  ).toHaveText(name);
 }
 
 /**
@@ -54,12 +57,13 @@ export async function createAdHocDataViewFromLens(page: ScoutPage, name: string)
  */
 export async function addDataLayer(
   page: ScoutPage,
-  seriesType: 'bar' | 'line' = 'line'
+  seriesType: 'bar' | 'line' = 'line',
+  layerIndex = 1
 ): Promise<void> {
   await page.testSubj.click('lnsLayerAddButton');
   await page.testSubj.click('lnsLayerAddButton-data');
   await page.testSubj.click(`lnsXY_seriesType-${seriesType}`);
-  await page.testSubj.locator('lns-layerPanel-1').waitFor({ state: 'visible' });
+  await page.testSubj.locator(`lns-layerPanel-${layerIndex}`).waitFor({ state: 'visible' });
 }
 
 /**
@@ -101,10 +105,13 @@ export async function createRuntimeFieldFromEditor(
  * Dual-path handling lives here (not in the spec) for `playwright/no-conditional-in-test`.
  */
 export async function completeLensCsvExport(page: ScoutPage): Promise<void> {
-  const exportButton = page.testSubj.locator('lnsApp_exportButton');
   const csvMenuItem = page.testSubj.locator('exportMenuItem-CSV');
+  const exportButton = page.testSubj.locator('lnsApp_exportButton');
 
+  // Toasts sit over the AppMenu; closing them after overflow is open dismisses the menu.
+  await page.components.toast().closeAll();
   // Readiness before click: csvEnabled / shareUrlEnabled both require hasData.
+  await new AppMenu(page).openOverflow();
   await expect(exportButton).toBeEnabled();
   await exportButton.click();
 
@@ -527,8 +534,9 @@ export async function convertToEsqlViaModal({
   // Click on the "Conver to ES|QL" button in the in-line editor
   await lens.workspace.convertToEsqlButton.click();
 
-  // Click on the confirmation button in the modal
+  // Conversion is chart-level, so the modal summarizes the result without layer selection.
   const modal = lens.workspace.convertToEsqlModal;
+  await expect(modal.getByRole('checkbox')).toHaveCount(0);
   await lens.workspace.convertToEsqlModalConfirmButton.click();
   await expect(modal).toBeHidden();
 

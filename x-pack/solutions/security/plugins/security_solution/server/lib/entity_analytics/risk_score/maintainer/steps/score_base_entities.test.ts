@@ -9,7 +9,11 @@ import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
 import type { ElasticsearchClient } from '@kbn/core/server';
 import type { EntityUpdateClient } from '@kbn/entity-store/server';
 import { EntityType } from '../../../../../../common/entity_analytics/types';
-import { calculateBaseEntityScores, scoreBaseEntities } from './score_base_entities';
+import {
+  calculateBaseEntityScores,
+  persistZeroBaseScore,
+  scoreBaseEntities,
+} from './score_base_entities';
 import type { ScopedLogger } from '../utils/with_log_context';
 import type { RiskEngineDataWriter } from '../../risk_engine_data_writer';
 
@@ -73,7 +77,10 @@ describe('score_base_entities', () => {
 
   beforeEach(() => {
     esClient = elasticsearchServiceMock.createScopedClusterClient().asCurrentUser;
-    crudClient = { listEntities: jest.fn() } as unknown as EntityUpdateClient;
+    crudClient = {
+      listEntities: jest.fn(),
+      bulkUpdateEntity: jest.fn().mockResolvedValue([]),
+    } as unknown as EntityUpdateClient;
     logger = buildLogger();
     (crudClient.listEntities as jest.Mock).mockResolvedValue({
       entities: [],
@@ -267,6 +274,42 @@ describe('score_base_entities', () => {
       expect(summary.entitiesCreated).toBe(0);
       expect(summary.entityCreationsSkipped).toBe(0);
       expect(summary.entityCreationsFailed).toBe(0);
+    });
+
+    // Root cause of https://github.com/elastic/kibana/issues/280414.
+    //
+    // After an asset criticality change the flyout asks the risk engine to score
+    // that one entity, which comes through here. If the entity has no alert in
+    // the engine's lookback, the composite agg finds nothing, so no score is
+    // written and the old one stays in place with the old criticality on it.
+    // `scoresWrittenRiskIndex: 0` is what `recalculateEntityRiskScore` reads to
+    // decide it needs `persistZeroBaseScore` instead.
+    it('reports a successful run with nothing written when the entity has no alerts in range', async () => {
+      mockCompositeAggPage(esClient, []);
+
+      const writer = buildWriter();
+
+      const summary = await scoreBaseEntities({
+        esClient,
+        crudClient,
+        logger,
+        writer,
+        idBasedRiskScoringEnabled: true,
+        createMissingEntities: false,
+        ...baseParams,
+      });
+
+      expect(esClient.esql.query as jest.Mock).not.toHaveBeenCalled();
+      expect(writer.bulk).not.toHaveBeenCalled();
+      expect(summary).toEqual(
+        expect.objectContaining({
+          pagesProcessed: 0,
+          scoresCalculated: 0,
+          scoresWrittenRiskIndex: 0,
+          scoresWrittenEntityStore: 0,
+          scoresFailed: 0,
+        })
+      );
     });
 
     it('writes no scores when no entity on the page is in the entity store', async () => {
@@ -551,6 +594,84 @@ describe('score_base_entities', () => {
       expect(summary.entitiesCreated).toBe(0);
       expect(summary.entityCreationsSkipped).toBe(0);
       expect(summary.entityCreationsFailed).toBe(0);
+    });
+  });
+
+  // Second half of the fix for https://github.com/elastic/kibana/issues/280414. When the
+  // alert-driven pass writes nothing, this puts a fresh score in place so the entity's current
+  // criticality lands on it instead of the row keeping the old level.
+  describe('persistZeroBaseScore', () => {
+    const buildWriter = (): RiskEngineDataWriter =>
+      ({
+        bulk: jest.fn().mockImplementation(async (params) => {
+          const [scoresArr] = Object.values(params as Record<string, unknown[]>);
+          return { errors: [], docs_written: scoresArr.length, took: 1 };
+        }),
+      } as unknown as RiskEngineDataWriter);
+
+    const zeroScoreParams = {
+      entityType: EntityType.user,
+      entityId: 'user:a@okta',
+      now: baseParams.now,
+      watchlistConfigs: baseParams.watchlistConfigs,
+      calculationRunId: baseParams.calculationRunId,
+      idBasedRiskScoringEnabled: true,
+    };
+
+    it('writes a zero score carrying the criticality on the entity record', async () => {
+      (crudClient.listEntities as jest.Mock).mockResolvedValue({
+        entities: [
+          {
+            entity: { id: 'user:a@okta', attributes: { watchlists: [] } },
+            asset: { criticality: 'extreme_impact' },
+          },
+        ],
+        nextSearchAfter: undefined,
+      });
+
+      const writer = buildWriter();
+
+      const written = await persistZeroBaseScore({
+        crudClient,
+        logger,
+        writer,
+        ...zeroScoreParams,
+      });
+
+      expect(written).toBe(1);
+      const [score] = (writer.bulk as jest.Mock).mock.calls[0][0][EntityType.user];
+      expect(score.id_field).toBe('entity.id');
+      expect(score.id_value).toBe('user:a@okta');
+      expect(score.calculated_score_norm).toBe(0);
+      expect(score.category_1_count).toBe(0);
+      // The current level, with a contribution of 0 because there are no alerts for it to lift.
+      expect(score.modifiers).toEqual([
+        expect.objectContaining({
+          type: 'asset_criticality',
+          contribution: 0,
+          metadata: expect.objectContaining({ criticality_level: 'extreme_impact' }),
+        }),
+      ]);
+    });
+
+    it('writes nothing when the entity is missing from the store', async () => {
+      // Writing here would replace a score that has modifiers with one that has none.
+      (crudClient.listEntities as jest.Mock).mockResolvedValue({
+        entities: [],
+        nextSearchAfter: undefined,
+      });
+
+      const writer = buildWriter();
+
+      const written = await persistZeroBaseScore({
+        crudClient,
+        logger,
+        writer,
+        ...zeroScoreParams,
+      });
+
+      expect(written).toBe(0);
+      expect(writer.bulk).not.toHaveBeenCalled();
     });
   });
 });

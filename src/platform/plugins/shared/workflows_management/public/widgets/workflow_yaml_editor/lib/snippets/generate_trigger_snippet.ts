@@ -15,7 +15,8 @@ import { isTriggerType } from '@kbn/workflows';
 const CUSTOM_TRIGGER_CONDITION_COMMENT =
   'Filter the subscription by using KQL, use event.* to target event properties';
 
-const CONNECTOR_ID_COMMENT = 'Id of the connector instance this trigger is bound to';
+const CONNECTOR_ID_COMMENT =
+  'Id of the connector instance this trigger is bound to, or "*" for every instance of this type';
 
 interface GenerateTriggerSnippetOptions {
   full?: boolean;

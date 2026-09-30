@@ -1,5 +1,5 @@
 {
-  "sha1": "1daeef4ecbb0a7f4baaa0b099f37dfe6087aebc7",
+  "sha1": "e8afb2f505b681fcc25286f9672173e86216af90",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -196,7 +196,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/triggers_actions_ui/test/scout/rules/ui/tests/rules_create_flow.spec.ts",
-        "line": 52,
+        "line": 55,
         "column": 26
       }
     },
@@ -210,8 +210,24 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/triggers_actions_ui/test/scout/rules/ui/tests/rules_create_flow.spec.ts",
-        "line": 66,
+        "line": 69,
         "column": 11
+      }
+    },
+    {
+      "id": "10bb73fb1cffef4-a4356c0feb0367d",
+      "title": "Create rule from template stays on the host mount when selecting a template",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/triggers_actions_ui/test/scout/rules/ui/tests/rules_create_from_template.spec.ts",
+        "line": 50,
+        "column": 15
       }
     },
     {
@@ -224,8 +240,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/triggers_actions_ui/test/scout/rules/ui/tests/rules_home_page.spec.ts",
-        "line": 65,
-        "column": 5
+        "line": 70,
+        "column": 11
       }
     },
     {
@@ -238,7 +254,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/triggers_actions_ui/test/scout/rules/ui/tests/rules_home_page.spec.ts",
-        "line": 68,
+        "line": 74,
         "column": 23
       }
     },
@@ -252,8 +268,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/triggers_actions_ui/test/scout/rules/ui/tests/rules_home_page.spec.ts",
-        "line": 75,
-        "column": 16
+        "line": 81,
+        "column": 8
       }
     },
     {
@@ -266,8 +282,117 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/triggers_actions_ui/test/scout/rules/ui/tests/rules_home_page.spec.ts",
-        "line": 82,
-        "column": 20
+        "line": 87,
+        "column": 19
+      }
+    },
+    {
+      "id": "60c5cd570357893-1802deeeed466e0",
+      "title": "Classic (v1) Rules host-aware URLs clicking a rule name stays on Stack Management",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/triggers_actions_ui/test/scout/rules/ui/tests/rules_host_aware_urls.spec.ts",
+        "line": 54,
+        "column": 28
+      }
+    },
+    {
+      "id": "60c5cd570357893-ed848633cf1bf58",
+      "title": "Classic (v1) Rules host-aware URLs back button from details returns to the management rules list",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/triggers_actions_ui/test/scout/rules/ui/tests/rules_host_aware_urls.spec.ts",
+        "line": 69,
+        "column": 13
+      }
+    },
+    {
+      "id": "60c5cd570357893-c9285d8d0dd98aa",
+      "title": "Classic (v1) Rules host-aware URLs create rule type selection stays on Stack Management",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/triggers_actions_ui/test/scout/rules/ui/tests/rules_host_aware_urls.spec.ts",
+        "line": 88,
+        "column": 9
+      }
+    },
+    {
+      "id": "60c5cd570357893-a0f16b174eff37a",
+      "title": "Classic (v1) Rules host-aware URLs edit from the list stays on Stack Management and cancel returns to the list",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/triggers_actions_ui/test/scout/rules/ui/tests/rules_host_aware_urls.spec.ts",
+        "line": 110,
+        "column": 9
+      }
+    },
+    {
+      "id": "60c5cd570357893-f6ffecc69894448",
+      "title": "Classic (v1) Rules host-aware URLs rules and logs tab switches stay on Stack Management",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/triggers_actions_ui/test/scout/rules/ui/tests/rules_host_aware_urls.spec.ts",
+        "line": 128,
+        "column": 72
+      }
+    },
+    {
+      "id": "bd9490acf6f74e1-9d28720e02e6524",
+      "title": "Rules page Logs visibility hides the classic Logs tab when the user lacks rule-type read access",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/triggers_actions_ui/test/scout/rules/ui/tests/rules_page_logs_visibility.spec.ts",
+        "line": 41,
+        "column": 14
+      }
+    },
+    {
+      "id": "bd9490acf6f74e1-cb3905a385c6076",
+      "title": "Rules page Logs visibility omits the Logs menu item when the user lacks rule-type read access",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/triggers_actions_ui/test/scout/rules/ui/tests/rules_page_logs_visibility.spec.ts",
+        "line": 46,
+        "column": 23
+      }
+    },
+    {
+      "id": "bd9490acf6f74e1-eec97efa4a5cc65",
+      "title": "Rules page Logs visibility shows the Logs child page with its own heading, back button, no tabs, and no create button",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/triggers_actions_ui/test/scout/rules/ui/tests/rules_page_logs_visibility.spec.ts",
+        "line": 60,
+        "column": 11
       }
     },
     {
@@ -282,6 +407,32 @@
         "file": "x-pack/platform/plugins/shared/triggers_actions_ui/test/scout/rules/ui/tests/rules_page_navigation.spec.ts",
         "line": 24,
         "column": 8
+      }
+    },
+    {
+      "id": "2aeef73611b17a7-1c516239081bd78",
+      "title": "Rules page heading tabs - alerting v2 privileges shows the V1 and V2 rules tabs when the user can read both surfaces",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/triggers_actions_ui/test/scout/rules/ui/tests/rules_page_tabs_privileges.spec.ts",
+        "line": 46,
+        "column": 15
+      }
+    },
+    {
+      "id": "2aeef73611b17a7-f2b6d3aaeeac5bf",
+      "title": "Rules page heading tabs - alerting v2 privileges hides all heading tabs when the user cannot read Alerting v2 rules",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/triggers_actions_ui/test/scout/rules/ui/tests/rules_page_tabs_privileges.spec.ts",
+        "line": 54,
+        "column": 7
       }
     },
     {

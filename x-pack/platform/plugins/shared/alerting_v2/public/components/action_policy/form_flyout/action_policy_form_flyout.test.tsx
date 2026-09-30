@@ -6,17 +6,27 @@
  */
 
 import React from 'react';
-import { render, screen, waitFor, within } from '@testing-library/react';
+import { fireEvent, render, screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import type { ActionPolicyResponse } from '@kbn/alerting-v2-schemas';
 import { I18nProvider } from '@kbn/i18n-react';
 import { ActionPolicyFormFlyout } from './action_policy_form_flyout';
 
+const mockGetUrlForApp = jest.fn(
+  (appId: string, { path }: { path: string }) => `/app/${appId}${path}`
+);
+let mockIsLicenseValid = true;
+
+jest.mock('../../../hooks/use_is_action_policies_license_valid', () => ({
+  useIsActionPoliciesLicenseValid: () => mockIsLicenseValid,
+}));
+
 jest.mock('@kbn/core-di-browser', () => ({
   useService: (token: unknown) => {
     if (token === 'application') {
       return {
-        getUrlForApp: (appId: string, { path }: { path: string }) => `/app/${appId}${path}`,
+        capabilities: {},
+        getUrlForApp: mockGetUrlForApp,
       };
     }
     if (token === 'uiSettings') {
@@ -48,8 +58,18 @@ jest.mock('@kbn/alerting-v2-rule-form', () => ({
   INLINE_ACTION_STEP_DEFINITIONS: INLINE_DEFS,
   getInlineActionStepDefinition: (id: string) => INLINE_DEFS.find((d) => d.id === id),
   isActionValid: () => true,
-  InlineWorkflowEditor: ({ value }: { value: { id: string } }) => (
-    <div data-test-subj={`inlineWorkflowEditor-${value.id}`} />
+  InlineWorkflowEditor: ({
+    value,
+    connectorCreationConfig,
+  }: {
+    value: { id: string };
+    connectorCreationConfig?: { mode: string; href?: string };
+  }) => (
+    <div
+      data-test-subj={`inlineWorkflowEditor-${value.id}`}
+      data-connector-creation-mode={connectorCreationConfig?.mode}
+      data-connector-creation-href={connectorCreationConfig?.href}
+    />
   ),
 }));
 
@@ -79,10 +99,6 @@ jest.mock('../../../hooks/use_fetch_rule_tags', () => ({
   useFetchRuleTags: () => ({ data: [], isLoading: false }),
 }));
 
-jest.mock('../../../hooks/use_fetch_tags', () => ({
-  useFetchTags: () => ({ data: [], isLoading: false }),
-}));
-
 jest.mock('../../../hooks/use_fetch_workflows', () => ({
   useFetchWorkflows: () => ({
     data: {
@@ -103,6 +119,7 @@ jest.mock('../../../hooks/use_fetch_workflows', () => ({
       size: 100,
     },
     isLoading: false,
+    refetch: jest.fn(),
   }),
 }));
 
@@ -119,11 +136,13 @@ const renderFlyout = ({
   onSave,
   onUpdate,
   initialValues,
+  isLoading = false,
 }: {
   onClose?: jest.Mock;
   onSave?: jest.Mock;
   onUpdate?: jest.Mock;
   initialValues?: ActionPolicyResponse;
+  isLoading?: boolean;
 }) => {
   return render(
     <I18nProvider>
@@ -132,12 +151,17 @@ const renderFlyout = ({
         onSave={onSave}
         onUpdate={onUpdate}
         initialValues={initialValues}
+        isLoading={isLoading}
       />
     </I18nProvider>
   );
 };
 
 describe('ActionPolicyFormFlyout', () => {
+  beforeEach(() => {
+    mockIsLicenseValid = true;
+  });
+
   it('renders create mode and closes on cancel', async () => {
     const user = userEvent.setup({ delay: null });
     const onClose = jest.fn();
@@ -151,11 +175,58 @@ describe('ActionPolicyFormFlyout', () => {
     expect(onClose).toHaveBeenCalledTimes(1);
   });
 
+  it('blocks closing while saving', () => {
+    const onClose = jest.fn();
+
+    renderFlyout({ onClose, onSave: jest.fn(), isLoading: true });
+
+    expect(screen.queryByTestId('euiFlyoutCloseButton')).not.toBeInTheDocument();
+    expect(screen.getByTestId(TEST_SUBJ.cancelButton)).toBeDisabled();
+
+    fireEvent.keyDown(screen.getByRole('dialog'), { key: 'Escape' });
+
+    expect(onClose).not.toHaveBeenCalled();
+  });
+
+  it('shows the license warning and disables submission when the license is invalid', () => {
+    mockIsLicenseValid = false;
+
+    renderFlyout({ onClose: jest.fn(), onSave: jest.fn() });
+
+    expect(screen.getByTestId('actionPoliciesLicenseCallout')).toBeInTheDocument();
+    expect(screen.getByTestId(TEST_SUBJ.submitButton)).toBeDisabled();
+  });
+
   it('renders the inline simple workflow builder alongside the existing-workflow selector', () => {
     renderFlyout({ onClose: jest.fn(), onSave: jest.fn() });
 
     expect(screen.getByTestId('simpleWorkflowBuilder')).toBeInTheDocument();
     expect(screen.getByTestId('destinationsInput')).toBeInTheDocument();
+    expect(
+      within(screen.getByTestId('actionPolicyFormSection-notificationControls'))
+        .getByText('Notification controls')
+        .closest('button')
+    ).toHaveAttribute('aria-expanded', 'false');
+  });
+
+  it('opens connector creation in a new tab for inline workflows', async () => {
+    const user = userEvent.setup();
+    renderFlyout({ onClose: jest.fn(), onSave: jest.fn() });
+
+    await user.click(screen.getByTestId('simpleWorkflowAdd-slack'));
+
+    expect(await screen.findByTestId(/inlineWorkflowEditor-/)).toHaveAttribute(
+      'data-connector-creation-mode',
+      'new-tab'
+    );
+    expect(screen.getByTestId(/inlineWorkflowEditor-/)).toHaveAttribute(
+      'data-connector-creation-href',
+      '/app/management/connectors'
+    );
+    expect(mockGetUrlForApp).toHaveBeenCalledWith('management', {
+      deepLinkId: 'triggersActionsConnectors',
+      path: '/connectors',
+    });
   });
 
   it('forwards the raw form state (not a payload) to onSave so the host can build it', async () => {
@@ -182,8 +253,7 @@ describe('ActionPolicyFormFlyout', () => {
     expect(onSave).toHaveBeenCalledWith({
       name: 'Policy from test',
       description: 'Description from test',
-      tags: [],
-      matcher: '',
+      matcher: null,
       groupingMode: 'per_episode',
       groupBy: [],
       throttleStrategy: 'on_status_change',
@@ -227,21 +297,16 @@ describe('ActionPolicyFormFlyout', () => {
       name: 'Critical production alerts',
       description: 'Routes critical alerts',
       enabled: true,
-      matcher: 'data.severity : "critical"',
+      matcher: { expression: 'data.severity : "critical"' },
       group_by: ['host.name', 'service.name'],
-      tags: ['production'],
       grouping_mode: 'per_field',
       throttle: { strategy: 'time_interval', interval: '5m' },
       snoozed_until: null,
       destinations: [{ type: 'workflow', id: 'workflow-2' }],
-      created_by: 'elastic',
+      created_by: { profile_uid: 'elastic' },
       created_at: '2026-03-01T10:00:00.000Z',
-      updated_by: 'elastic',
+      updated_by: { profile_uid: 'elastic' },
       updated_at: '2026-03-01T10:00:00.000Z',
-      auth: {
-        owner: 'elastic',
-        created_by_user: true,
-      },
     };
 
     renderFlyout({ onClose: jest.fn(), onUpdate, initialValues });
@@ -264,8 +329,7 @@ describe('ActionPolicyFormFlyout', () => {
       {
         name: 'Critical production alerts',
         description: 'Routes critical alerts',
-        tags: ['production'],
-        matcher: 'data.severity : "critical"',
+        matcher: { expression: 'data.severity : "critical"' },
         groupingMode: 'per_field',
         groupBy: ['host.name', 'service.name'],
         throttleStrategy: 'time_interval',

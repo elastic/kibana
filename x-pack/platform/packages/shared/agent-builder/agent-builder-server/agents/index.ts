@@ -13,6 +13,7 @@ export type {
   AgentEventEmitter,
   AgentEventEmitterFn,
   ExperimentalFeatures,
+  DeductiveRuntimeConfig,
   SubAgentExecutor,
   SubAgentExecution,
   ConversationClient,

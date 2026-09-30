@@ -22,31 +22,55 @@ export const ReadPrebuiltRulesAndTimelinesStatusResponse = lazySchema(() =>
       /**
        * The total number of custom rules
        */
-      rules_custom_installed: z.number().int().min(0),
+      rules_custom_installed: z.number().int().min(0).describe('The total number of custom rules'),
       /**
        * The total number of installed prebuilt rules
        */
-      rules_installed: z.number().int().min(0),
+      rules_installed: z
+        .number()
+        .int()
+        .min(0)
+        .describe('The total number of installed prebuilt rules'),
       /**
        * The total number of available prebuilt rules that are not installed
        */
-      rules_not_installed: z.number().int().min(0),
+      rules_not_installed: z
+        .number()
+        .int()
+        .min(0)
+        .describe('The total number of available prebuilt rules that are not installed'),
       /**
        * The total number of outdated prebuilt rules
        */
-      rules_not_updated: z.number().int().min(0),
+      rules_not_updated: z
+        .number()
+        .int()
+        .min(0)
+        .describe('The total number of outdated prebuilt rules'),
       /**
        * The total number of installed prebuilt timelines
        */
-      timelines_installed: z.number().int().min(0),
+      timelines_installed: z
+        .number()
+        .int()
+        .min(0)
+        .describe('The total number of installed prebuilt timelines'),
       /**
        * The total number of available prebuilt timelines that are not installed
        */
-      timelines_not_installed: z.number().int().min(0),
+      timelines_not_installed: z
+        .number()
+        .int()
+        .min(0)
+        .describe('The total number of available prebuilt timelines that are not installed'),
       /**
        * The total number of outdated prebuilt timelines
        */
-      timelines_not_updated: z.number().int().min(0),
+      timelines_not_updated: z
+        .number()
+        .int()
+        .min(0)
+        .describe('The total number of outdated prebuilt timelines'),
     })
     .strict()
 );

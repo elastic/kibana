@@ -57,25 +57,25 @@ describe('connector attachment type', () => {
 
   describe('validate', () => {
     it('accepts valid connector data', () => {
-      const result = connectorType.validate(validData);
+      const result = connectorType.validate(validData, formatContext);
       expect(result).toEqual({ valid: true, data: validData });
     });
 
     it('rejects data missing connector_id', () => {
       const { connector_id: _, ...data } = validData;
-      const result = connectorType.validate(data);
+      const result = connectorType.validate(data, formatContext);
       expect(result).toEqual({ valid: false, error: expect.any(String) });
     });
 
     it('rejects data missing connector_name', () => {
       const { connector_name: _, ...data } = validData;
-      const result = connectorType.validate(data);
+      const result = connectorType.validate(data, formatContext);
       expect(result).toEqual({ valid: false, error: expect.any(String) });
     });
 
     it('rejects data missing connector_type', () => {
       const { connector_type: _, ...data } = validData;
-      const result = connectorType.validate(data);
+      const result = connectorType.validate(data, formatContext);
       expect(result).toEqual({ valid: false, error: expect.any(String) });
     });
   });

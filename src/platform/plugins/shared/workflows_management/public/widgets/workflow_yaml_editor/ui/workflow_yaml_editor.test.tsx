@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { fireEvent, render, waitFor } from '@testing-library/react';
+import { act, fireEvent, render, waitFor } from '@testing-library/react';
 import React from 'react';
 import { fieldFormatsServiceMock } from '@kbn/field-formats-plugin/public/mocks';
 import { kqlPluginMock } from '@kbn/kql/public/mocks';
@@ -27,35 +27,43 @@ import { saveYamlThunk } from '../../../entities/workflows/store/workflow_detail
 import { mockWorkflowsManagementCapabilities } from '../../../hooks/__mocks__/use_workflows_capabilities';
 import { getTestProvider } from '../../../shared/mocks/test_providers';
 import { createMockWorkflowExecutionDto } from '../../../shared/test_utils/mock_workflow_factories';
-import type { YamlEditorProps } from '../../../shared/ui';
 import { getCompletionItemProvider } from '../lib/autocomplete/get_completion_item_provider';
 
-// Mock the YamlEditor component to avoid Monaco complexity in tests
-jest.mock('../../../shared/ui/yaml_editor', () => ({
-  YamlEditor: ({ value, onChange, editorDidMount, options }: YamlEditorProps) => (
-    <div data-testid="yaml-editor">
-      <textarea
-        ref={(el) => {
-          const editorMock = {
-            getModel: jest.fn(),
-            dispose: jest.fn(),
-            onDidScrollChange: jest.fn(() => ({ dispose: jest.fn() })),
-            onDidChangeCursorPosition: jest.fn(() => ({ dispose: jest.fn() })),
-            getPosition: jest.fn(),
-            revealLineInCenter: jest.fn(),
-          } as unknown as monaco.editor.IStandaloneCodeEditor;
-          if (el) {
-            editorDidMount?.(editorMock);
-          }
-        }}
-        value={value || ''}
-        onChange={(e: any) => onChange?.(e.target.value)}
-        readOnly={Boolean(options?.readOnly)}
-        data-testid="yaml-textarea"
-      />
-    </div>
-  ),
-}));
+// Mock the YamlEditor component to avoid Monaco complexity in tests.
+// Uses createMockMonacoEditor (which includes getVisibleRanges, onDid* listeners,
+// revealLineInCenter, etc.) instead of a hand-rolled inline mock, so the minimap's
+// viewport-tracking code path is exercised without needing the real Monaco environment.
+jest.mock('../../../shared/ui/yaml_editor', () => {
+  // require() is mandatory here: jest.mock factories run before ES-import transforms.
+  // eslint-disable-next-line @typescript-eslint/no-var-requires
+  const { createMockMonacoEditor } = require('../../../shared/test_utils/mock_monaco');
+  // eslint-disable-next-line @typescript-eslint/no-var-requires
+  const { createElement } = require('react');
+  return {
+    YamlEditor: ({ value, onChange, editorDidMount, options }: any) => {
+      return createElement(
+        'div',
+        { 'data-testid': 'yaml-editor' },
+        createElement('textarea', {
+          ref: (el: HTMLTextAreaElement | null): void => {
+            if (el) {
+              // getModel returns undefined so handleEditorDidMount skips provider
+              // registration (the `if (!model) return` guard). This keeps the
+              // YamlEditor mock minimal — provider registration is separately mocked.
+              editorDidMount?.(
+                createMockMonacoEditor(value ?? '', { getModel: jest.fn() } as any).editor
+              );
+            }
+          },
+          value: value || '',
+          onChange: (e: any) => onChange?.(e.target.value),
+          readOnly: Boolean(options?.readOnly),
+          'data-testid': 'yaml-textarea',
+        })
+      );
+    },
+  };
+});
 
 // Mock the validation hook
 jest.mock('../../../features/validate_workflow_yaml/lib/use_yaml_validation', () => ({
@@ -191,8 +199,12 @@ jest.mock('../styles/global_workflow_editor_styles', () => ({
   GlobalWorkflowEditorStyles: () => null,
 }));
 
+let mockCloseActionsPopover: (() => void) | undefined;
 jest.mock('../../../features/actions_menu_popover', () => ({
-  ActionsMenuPopover: () => null,
+  ActionsMenuPopover: ({ closePopover }: { closePopover: () => void }) => {
+    mockCloseActionsPopover = closePopover;
+    return null;
+  },
 }));
 
 jest.mock('../lib/utils', () => ({
@@ -292,6 +304,8 @@ describe('WorkflowYAMLEditor', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     capturedKeyboardHandlers = {};
+    mockCloseActionsPopover = undefined;
+    defaultProps.editorRef.current = null;
     mockSaveYaml.mockResolvedValue(undefined);
     // useSaveYaml now returns just the function, not an array
     mockUseSaveYaml.mockReturnValue(mockSaveYaml);
@@ -305,6 +319,33 @@ describe('WorkflowYAMLEditor', () => {
     await waitFor(() => {
       expect(document.querySelector('[data-testid="yaml-editor"]')).toBeInTheDocument();
     });
+  });
+
+  it('restores editor focus when the actions menu closes', async () => {
+    renderWithProviders(<WorkflowYAMLEditor {...defaultProps} />);
+
+    await waitFor(() => {
+      expect(mockCloseActionsPopover).toBeDefined();
+      expect(defaultProps.editorRef.current).not.toBeNull();
+    });
+
+    const requestAnimationFrame = jest
+      .spyOn(window, 'requestAnimationFrame')
+      .mockImplementation((callback) => {
+        callback(0);
+        return 0;
+      });
+
+    try {
+      const focus = defaultProps.editorRef.current?.focus as jest.Mock;
+      focus.mockClear();
+
+      act(() => mockCloseActionsPopover?.());
+
+      expect(focus).toHaveBeenCalledTimes(1);
+    } finally {
+      requestAnimationFrame.mockRestore();
+    }
   });
 
   it('updates store when editor content changes', async () => {

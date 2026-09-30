@@ -8,6 +8,7 @@
 import { EuiProvider } from '@elastic/eui';
 import { ChromeServiceProvider } from '@kbn/core-chrome-browser-context';
 import { coreMock, scopedHistoryMock } from '@kbn/core/public/mocks';
+import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { createAppChromeMock } from '../test_utils/app_chrome_mock';
 import { DISCOVER_APP_LOCATOR } from '@kbn/deeplinks-analytics';
 import { INDEX_MANAGEMENT_LOCATOR_ID } from '@kbn/index-management-shared-types';
@@ -16,14 +17,17 @@ import { sharePluginMock } from '@kbn/share-plugin/public/mocks';
 import { I18nProvider } from '@kbn/i18n-react';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
-import { MemoryRouter, Route } from '@kbn/shared-ux-router';
+import { MemoryRouter, Route, Router } from '@kbn/shared-ux-router';
 import { createEvent, fireEvent, render, screen, waitFor } from '@testing-library/react';
+import { createMemoryHistory } from 'history';
 import React from 'react';
 import type { GetAiIndexResponse } from '../../../common/http_api/ai_indices';
 import { CONTEXT_ENGINE_APP_ID } from '../../../common/features';
+import { AI_INDEX_CREATED_LOCATION_STATE } from '../ai_index_created_location_state';
 import { CONTEXT_ENGINE_PATHS, getAiIndexDetailPath } from '../paths';
 import { CONTEXT_ENGINE_BACK_BUTTON_TEST_SUBJ } from '../layout/context_engine_page_header';
 import { AiIndexDetailPage } from './ai_index_detail_page';
+import { useFeedbackLoopEnabled } from '../hooks/use_feedback_loop_enabled';
 
 jest.mock('@kbn/esql/public', () => ({
   ESQLLangEditor: ({
@@ -60,27 +64,46 @@ jest.mock('@kbn/workflows-ui', () => ({
   }),
 }));
 
+const mockUseKiList = jest.fn();
+
 jest.mock('../hooks/use_ki_list', () => ({
-  useKiList: () => ({
-    kis: [],
-    total: 25,
-    summary: {
-      total: 25,
-      countsByType: [
-        { type: 'index_metadata', count: 10 },
-        { type: 'document', count: 8 },
-        { type: 'detection', count: 7 },
-      ],
-    },
-    isLoading: false,
-    error: undefined,
-    refetch: jest.fn(),
-  }),
+  useKiList: (...args: unknown[]) => mockUseKiList(...args),
 }));
+
+const defaultKiListMock = {
+  kis: [],
+  total: 25,
+  summary: {
+    total: 25,
+    countsByType: [
+      { type: 'index_metadata', count: 10 },
+      { type: 'document', count: 8 },
+      { type: 'detection', count: 7 },
+    ],
+  },
+  isLoading: false,
+  isFetching: false,
+  error: undefined,
+  refetch: jest.fn(),
+};
 
 jest.mock('../hooks/use_signal_groups', () => ({
   useSignalGroups: () => ({ groups: [], isLoading: false, error: undefined, refetch: jest.fn() }),
 }));
+
+jest.mock('../hooks/use_feedback_loop_enabled', () => ({
+  useFeedbackLoopEnabled: jest.fn(() => true),
+}));
+
+jest.mock('../hooks/use_agent_builder_agents', () => ({
+  useAgentBuilderAgents: () => ({
+    agents: [{ id: 'agent-1', name: 'Loyalty Support Agent' }],
+    isLoading: false,
+    error: undefined,
+  }),
+}));
+
+const mockUseFeedbackLoopEnabled = jest.mocked(useFeedbackLoopEnabled);
 
 jest.mock('../hooks/use_signals', () => ({
   useSignals: () => ({
@@ -98,6 +121,7 @@ const aiIndex: GetAiIndexResponse = {
   dest: { type: 'data_stream', value: 'ai-index-ds-my-ai-index' },
   automations: [],
   sources: [{ type: 'esql', value: 'FROM My view' }],
+  traces: [],
   date_created: '2026-01-01T00:00:00.000Z',
   date_modified: '2026-01-01T00:00:00.000Z',
 };
@@ -105,6 +129,7 @@ const aiIndex: GetAiIndexResponse = {
 const createServices = () => {
   const services = {
     ...coreMock.createStart(),
+    data: dataPluginMock.createStartContract(),
     share: sharePluginMock.createStartContract(),
     history: scopedHistoryMock.create(),
     appChrome: createAppChromeMock(),
@@ -115,7 +140,10 @@ const createServices = () => {
   return services;
 };
 
-const renderWithProviders = (services: ReturnType<typeof createServices>) => {
+const renderWithProviders = (
+  services: ReturnType<typeof createServices>,
+  locationState?: typeof AI_INDEX_CREATED_LOCATION_STATE
+) => {
   const discoverLocator = sharePluginMock.createLocator();
   discoverLocator.getRedirectUrl.mockReturnValue('/app/discover');
 
@@ -142,7 +170,14 @@ const renderWithProviders = (services: ReturnType<typeof createServices>) => {
             services={{ ...services, triggersActionsUi: triggersActionsUiMock.createStart() }}
           >
             <QueryClientProvider client={queryClient}>
-              <MemoryRouter initialEntries={[getAiIndexDetailPath(aiIndex.id)]}>
+              <MemoryRouter
+                initialEntries={[
+                  {
+                    pathname: getAiIndexDetailPath(aiIndex.id),
+                    ...(locationState ? { state: locationState } : {}),
+                  },
+                ]}
+              >
                 <Route path={CONTEXT_ENGINE_PATHS.detail} component={AiIndexDetailPage} />
               </MemoryRouter>
             </QueryClientProvider>
@@ -159,10 +194,133 @@ describe('AiIndexDetailPage', () => {
   beforeEach(() => {
     mockMgetWorkflows.mockResolvedValue([]);
     mockCreateWorkflow.mockResolvedValue({ id: 'wf-created' });
+    mockUseFeedbackLoopEnabled.mockReturnValue(true);
+    mockUseKiList.mockImplementation(() => defaultKiListMock);
   });
 
   afterEach(() => {
     jest.clearAllMocks();
+    mockUseKiList.mockImplementation(() => defaultKiListMock);
+  });
+
+  it('shows a dismissible success callout when navigated from AI index creation', async () => {
+    const services = createServices();
+    services.http.get.mockResolvedValue({ ...aiIndex, sources: [] });
+
+    renderWithProviders(services, AI_INDEX_CREATED_LOCATION_STATE);
+
+    await screen.findByTestId('contextAiIndexSourcesEmpty');
+
+    expect(screen.getByTestId('contextAiIndexCreatedCallout')).toBeInTheDocument();
+    expect(screen.getByText('Your AI index is ready')).toBeInTheDocument();
+    expect(
+      screen.getByText(
+        /Add sources to build agent context from your data, or use it to store agent memory/i
+      )
+    ).toBeInTheDocument();
+    expect(screen.getByTestId('contextAiIndexCreatedCalloutDocumentationLink')).toHaveAttribute(
+      'href',
+      services.docLinks.links.contextEngine.overview
+    );
+
+    fireEvent.click(screen.getByRole('button', { name: 'Dismiss AI index created message' }));
+
+    expect(screen.queryByTestId('contextAiIndexCreatedCallout')).not.toBeInTheDocument();
+  });
+
+  it('does not show the success callout without creation navigation state', async () => {
+    const services = createServices();
+    services.http.get.mockResolvedValue(aiIndex);
+
+    renderWithProviders(services);
+
+    await waitForAiIndexDetailLoaded();
+
+    expect(screen.queryByTestId('contextAiIndexCreatedCallout')).not.toBeInTheDocument();
+  });
+
+  it('dismisses the success callout when a source is added after creation', async () => {
+    const services = createServices();
+    const indexWithoutSources = { ...aiIndex, sources: [] };
+    const indexWithSources = {
+      ...aiIndex,
+      sources: [{ type: 'esql', value: 'FROM My view' }],
+    };
+    services.http.get
+      .mockResolvedValueOnce(indexWithoutSources)
+      .mockResolvedValueOnce(indexWithSources);
+    services.http.put.mockResolvedValue({ status: 'updated' });
+
+    renderWithProviders(services, AI_INDEX_CREATED_LOCATION_STATE);
+
+    await screen.findByTestId('contextAddSourcesButton');
+    expect(screen.getByTestId('contextAiIndexCreatedCallout')).toBeInTheDocument();
+
+    fireEvent.click(screen.getByTestId('contextAddSourcesButton'));
+
+    const editor = await screen.findByTestId('mockEsqlEditor');
+    fireEvent.change(editor, { target: { value: 'FROM My view' } });
+    fireEvent.click(screen.getByTestId('contextAddEsqlSourceButton'));
+    fireEvent.click(screen.getByTestId('contextEditSourcesDoneButton'));
+
+    await waitFor(() => {
+      expect(screen.queryByTestId('contextAiIndexCreatedCallout')).not.toBeInTheDocument();
+    });
+  });
+
+  it('strips creation navigation state from history after showing the callout', async () => {
+    const services = createServices();
+    services.http.get.mockResolvedValue({ ...aiIndex, sources: [] });
+    const history = createMemoryHistory({
+      initialEntries: [
+        {
+          pathname: getAiIndexDetailPath(aiIndex.id),
+          state: AI_INDEX_CREATED_LOCATION_STATE,
+        },
+      ],
+    });
+
+    const discoverLocator = sharePluginMock.createLocator();
+    discoverLocator.getRedirectUrl.mockReturnValue('/app/discover');
+
+    const indexManagementLocator = sharePluginMock.createLocator();
+    indexManagementLocator.getUrl.mockResolvedValue(
+      '/app/management/data/index_management/indices/index_details?indexName=ai-index-ds-my-ai-index'
+    );
+
+    jest.spyOn(services.share.url.locators, 'get').mockImplementation((locatorId: string) => {
+      if (locatorId === DISCOVER_APP_LOCATOR) {
+        return discoverLocator;
+      }
+      if (locatorId === INDEX_MANAGEMENT_LOCATOR_ID) {
+        return indexManagementLocator;
+      }
+      return undefined;
+    });
+
+    const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } });
+    render(
+      <ChromeServiceProvider value={{ chrome: services.chrome }}>
+        <I18nProvider>
+          <EuiProvider>
+            <KibanaContextProvider
+              services={{ ...services, triggersActionsUi: triggersActionsUiMock.createStart() }}
+            >
+              <QueryClientProvider client={queryClient}>
+                <Router history={history}>
+                  <Route path={CONTEXT_ENGINE_PATHS.detail} component={AiIndexDetailPage} />
+                </Router>
+              </QueryClientProvider>
+            </KibanaContextProvider>
+          </EuiProvider>
+        </I18nProvider>
+      </ChromeServiceProvider>
+    );
+
+    await screen.findByTestId('contextAiIndexSourcesEmpty');
+
+    expect(screen.getByTestId('contextAiIndexCreatedCallout')).toBeInTheDocument();
+    expect(history.location.state).toBeUndefined();
   });
 
   it('fetches the AI index and renders its id and sources', async () => {
@@ -184,7 +342,7 @@ describe('AiIndexDetailPage', () => {
     expect(screen.getByTestId('contextAiIndexDetailPageTitle')).toHaveTextContent('my-ai-index');
     expect(screen.getByTestId('contextAiIndexSourceRow')).toHaveTextContent('FROM My view');
     expect(screen.getByTestId('contextSourceTypeBadge')).toHaveTextContent('ES|QL');
-    expect(screen.getByTestId('contextAiIndexDetailTabs')).toBeInTheDocument();
+    expect(await screen.findByTestId('contextAiIndexDetailTabs')).toBeInTheDocument();
   });
 
   it('renders a back button linking to the AI indexes landing page', async () => {
@@ -234,6 +392,75 @@ describe('AiIndexDetailPage', () => {
     renderWithProviders(services);
 
     expect(await screen.findByTestId('contextAiIndexSourcesEmpty')).toBeInTheDocument();
+    expect(screen.getByTestId('contextAutomationsLocked')).toHaveAttribute(
+      'aria-label',
+      'Automations locked. Add a source above to unlock automations.'
+    );
+    expect(screen.queryByTestId('contextAiIndexAutomationsEmpty')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('contextSignalsLocked')).not.toBeInTheDocument();
+  });
+
+  it('hides the signals section when the feedback loop is disabled', async () => {
+    mockUseFeedbackLoopEnabled.mockReturnValue(false);
+
+    const services = createServices();
+    services.http.get.mockResolvedValue({ ...aiIndex, sources: [] });
+
+    renderWithProviders(services);
+
+    expect(await screen.findByTestId('contextAiIndexSourcesEmpty')).toBeInTheDocument();
+    expect(screen.getByTestId('contextAutomationsLocked')).toBeInTheDocument();
+    expect(screen.queryByTestId('contextSignalsLocked')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('contextSignalsPanel')).not.toBeInTheDocument();
+  });
+
+  it('shows automations once sources are configured', async () => {
+    const services = createServices();
+    services.http.get.mockResolvedValue(aiIndex);
+
+    renderWithProviders(services);
+
+    await waitForAiIndexDetailLoaded();
+
+    expect(screen.queryByTestId('contextAutomationsLocked')).not.toBeInTheDocument();
+    expect(screen.getByTestId('contextAiIndexAutomationsEmpty')).toBeInTheDocument();
+    expect(screen.queryByTestId('contextSignalsLocked')).not.toBeInTheDocument();
+  });
+
+  it('keeps automations visible when sources are removed but automations remain', async () => {
+    const services = createServices();
+    services.http.get.mockResolvedValue({
+      ...aiIndex,
+      sources: [],
+      automations: [{ type: 'workflow', value: 'wf-1' }],
+    });
+    mockMgetWorkflows.mockResolvedValue([{ id: 'wf-1', name: 'My workflow', enabled: true }]);
+
+    renderWithProviders(services);
+
+    await screen.findByTestId('contextAiIndexDetailPageTitle');
+
+    expect(screen.queryByTestId('contextAutomationsLocked')).not.toBeInTheDocument();
+    expect(await screen.findByTestId('contextAiIndexAutomationRow')).toHaveTextContent(
+      'My workflow'
+    );
+  });
+
+  it('shows automations list once automations are configured', async () => {
+    const services = createServices();
+    services.http.get.mockResolvedValue({
+      ...aiIndex,
+      automations: [{ type: 'workflow', value: 'wf-1' }],
+    });
+    mockMgetWorkflows.mockResolvedValue([{ id: 'wf-1', name: 'My workflow', enabled: true }]);
+
+    renderWithProviders(services);
+
+    await waitForAiIndexDetailLoaded();
+
+    expect(screen.queryByTestId('contextSignalsLocked')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('contextSignalsPanel')).not.toBeInTheDocument();
+    expect(await screen.findByTestId('contextAiIndexAutomationRow')).toBeInTheDocument();
   });
 
   it('renders an error state when the fetch fails', async () => {
@@ -246,6 +473,49 @@ describe('AiIndexDetailPage', () => {
     expect(screen.getByTestId(CONTEXT_ENGINE_BACK_BUTTON_TEST_SUBJ)).toBeInTheDocument();
   });
 
+  it('saves edited traces and refetches the AI index', async () => {
+    const services = createServices();
+    services.http.get.mockResolvedValue(aiIndex);
+    services.http.put.mockResolvedValue({ status: 'updated' });
+
+    renderWithProviders(services);
+
+    await waitForAiIndexDetailLoaded();
+    expect(services.http.get).toHaveBeenCalledTimes(1);
+
+    fireEvent.click(screen.getByTestId('contextAddTracesButton'));
+
+    fireEvent.change(screen.getByTestId('contextTraceAgentComboBox').querySelector('input')!, {
+      target: { value: 'Loyalty' },
+    });
+
+    await waitFor(() => {
+      expect(screen.getByText('Loyalty Support Agent')).toBeInTheDocument();
+    });
+
+    fireEvent.click(screen.getByText('Loyalty Support Agent'));
+    fireEvent.click(screen.getByTestId('contextTracesSaveButton'));
+
+    await waitFor(() => {
+      expect(services.http.put).toHaveBeenCalledWith(
+        '/api/context_engine/ai_index/my-ai-index',
+        expect.objectContaining({
+          body: JSON.stringify({
+            dest: { type: 'data_stream', value: 'ai-index-ds-my-ai-index' },
+            automations: [],
+            sources: [{ type: 'esql', value: 'FROM My view' }],
+            traces: [{ type: 'elastic_agent', value: 'agent-1' }],
+          }),
+        })
+      );
+    });
+
+    await waitFor(() => {
+      expect(screen.queryByTestId('contextTraceAgentComboBox')).not.toBeInTheDocument();
+    });
+    expect(services.http.get).toHaveBeenCalledTimes(2);
+  });
+
   it('edits the description and refetches the AI index', async () => {
     const services = createServices();
     services.http.get.mockResolvedValue(aiIndex);
@@ -256,7 +526,7 @@ describe('AiIndexDetailPage', () => {
     await waitForAiIndexDetailLoaded();
     expect(services.http.get).toHaveBeenCalledTimes(1);
 
-    fireEvent.click(screen.getByTestId('contextEditDescriptionButton'));
+    fireEvent.click(screen.getByTestId('contextAddDescriptionButton'));
 
     const textArea = await screen.findByTestId('contextDescriptionTextArea');
     fireEvent.change(textArea, { target: { value: 'A brand new description' } });
@@ -270,6 +540,7 @@ describe('AiIndexDetailPage', () => {
             dest: { type: 'data_stream', value: 'ai-index-ds-my-ai-index' },
             automations: [],
             sources: [{ type: 'esql', value: 'FROM My view' }],
+            traces: [],
             description: 'A brand new description',
           }),
         })
@@ -283,7 +554,7 @@ describe('AiIndexDetailPage', () => {
     expect(services.http.get).toHaveBeenCalledTimes(2);
   });
 
-  it('opens the edit sources flyout with the current sources selected', async () => {
+  it('opens the inline sources editor with the current sources selected', async () => {
     const services = createServices();
     services.http.get.mockResolvedValue(aiIndex);
 
@@ -293,7 +564,7 @@ describe('AiIndexDetailPage', () => {
 
     fireEvent.click(screen.getByTestId('contextEditSourcesButton'));
 
-    expect(await screen.findByTestId('contextEditSourcesFlyout')).toBeInTheDocument();
+    expect(await screen.findByTestId('contextEditSourcesInlineEditor')).toBeInTheDocument();
     expect(await screen.findByTestId('contextSelectedSource-esql-0')).toBeInTheDocument();
   });
 
@@ -304,10 +575,10 @@ describe('AiIndexDetailPage', () => {
 
     renderWithProviders(services);
 
-    await screen.findByTestId('contextEditSourcesButton');
+    await screen.findByTestId('contextAddSourcesButton');
     expect(services.http.get).toHaveBeenCalledTimes(1);
 
-    fireEvent.click(screen.getByTestId('contextEditSourcesButton'));
+    fireEvent.click(screen.getByTestId('contextAddSourcesButton'));
 
     // The ES|QL tab is selected by default; author a raw query and add it.
     const editor = await screen.findByTestId('mockEsqlEditor');
@@ -323,14 +594,14 @@ describe('AiIndexDetailPage', () => {
             dest: { type: 'data_stream', value: 'ai-index-ds-my-ai-index' },
             automations: [],
             sources: [{ type: 'esql', value: 'FROM My view' }],
+            traces: [],
           }),
         })
       );
     });
 
-    // Flyout closes and the detail data is refetched after a successful save.
     await waitFor(() => {
-      expect(screen.queryByTestId('contextEditSourcesFlyout')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('contextEditSourcesInlineEditor')).not.toBeInTheDocument();
     });
     expect(services.http.get).toHaveBeenCalledTimes(2);
   });
@@ -354,11 +625,11 @@ describe('AiIndexDetailPage', () => {
     renderWithProviders(services);
 
     expect(screen.queryByTestId('contextEditAutomationsButton')).not.toBeInTheDocument();
-    expect(screen.queryByTestId('contextEditDescriptionButton')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('contextAddDescriptionButton')).not.toBeInTheDocument();
 
     await waitForAiIndexDetailLoaded();
 
-    expect(screen.getByTestId('contextEditDescriptionButton')).toBeEnabled();
+    expect(screen.getByTestId('contextAddDescriptionButton')).toBeEnabled();
 
     expect(screen.getByTestId('contextEditAutomationsButton')).toBeEnabled();
   });
@@ -456,6 +727,7 @@ describe('AiIndexDetailPage', () => {
             dest: { type: 'data_stream', value: 'ai-index-ds-my-ai-index' },
             automations: [{ type: 'workflow', value: 'wf-created' }],
             sources: [{ type: 'esql', value: 'FROM My view' }],
+            traces: [],
           }),
         })
       );
@@ -477,7 +749,27 @@ describe('AiIndexDetailPage', () => {
     expect(screen.getByTestId('contextAiIndexDetailManagedBadge')).toHaveTextContent('Managed');
     expect(screen.queryByTestId('contextEditDescriptionButton')).not.toBeInTheDocument();
     expect(screen.queryByTestId('contextEditSourcesButton')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('contextAddSourcesButton')).not.toBeInTheDocument();
     expect(screen.queryByTestId('contextEditAutomationsButton')).not.toBeInTheDocument();
+  });
+
+  it('shows all overview sections for managed AI indexes without setup locks', async () => {
+    const services = createServices();
+    services.http.get.mockResolvedValue({
+      ...aiIndex,
+      managed: true,
+      sources: [],
+      automations: [],
+    });
+
+    renderWithProviders(services);
+
+    await screen.findByTestId('contextAiIndexDetailManagedBadge');
+
+    expect(screen.queryByTestId('contextAutomationsLocked')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('contextSignalsLocked')).not.toBeInTheDocument();
+    expect(screen.getByTestId('contextAiIndexAutomationsEmpty')).toBeInTheDocument();
+    expect(screen.queryByTestId('contextSignalsPanel')).not.toBeInTheDocument();
   });
 
   it('shows edit controls and no managed badge for non-managed AI indexes', async () => {
@@ -489,7 +781,7 @@ describe('AiIndexDetailPage', () => {
     await waitForAiIndexDetailLoaded();
 
     expect(screen.queryByTestId('contextAiIndexDetailManagedBadge')).not.toBeInTheDocument();
-    expect(screen.getByTestId('contextEditDescriptionButton')).toBeInTheDocument();
+    expect(screen.getByTestId('contextAddDescriptionButton')).toBeInTheDocument();
     expect(screen.getByTestId('contextEditSourcesButton')).toBeInTheDocument();
 
     expect(screen.getByTestId('contextEditAutomationsButton')).toBeInTheDocument();
@@ -536,6 +828,7 @@ describe('AiIndexDetailPage', () => {
             dest: { type: 'data_stream', value: 'ai-index-ds-my-ai-index' },
             automations: [],
             sources: [{ type: 'esql', value: 'FROM My view' }],
+            traces: [],
           }),
         })
       );
@@ -558,8 +851,62 @@ describe('AiIndexDetailPage', () => {
 
     expect(screen.queryByTestId('contextKiListPanel')).not.toBeInTheDocument();
 
-    fireEvent.click(screen.getByTestId('contextAiIndexDetailTab-knowledge_indicators'));
+    fireEvent.click(await screen.findByTestId('contextAiIndexDetailTab-knowledge_indicators'));
 
     expect(screen.getByTestId('contextKiListPanel')).toBeInTheDocument();
+  });
+
+  it('hides the Knowledge Indicators tab when there are no KIs', async () => {
+    mockUseKiList.mockImplementation(() => ({
+      ...defaultKiListMock,
+      total: 0,
+      summary: { total: 0, countsByType: [] },
+    }));
+    const services = createServices();
+    services.http.get.mockResolvedValue(aiIndex);
+
+    renderWithProviders(services);
+
+    await waitForAiIndexDetailLoaded();
+
+    expect(screen.queryByTestId('contextAiIndexDetailTabs')).not.toBeInTheDocument();
+    expect(
+      screen.queryByTestId('contextAiIndexDetailTab-knowledge_indicators')
+    ).not.toBeInTheDocument();
+    expect(screen.getByTestId('contextAiIndexSourceRow')).toBeInTheDocument();
+  });
+
+  it('hides the Knowledge Indicators tab while the KI summary is loading', async () => {
+    mockUseKiList.mockImplementation(() => ({
+      ...defaultKiListMock,
+      isLoading: true,
+    }));
+    const services = createServices();
+    services.http.get.mockResolvedValue(aiIndex);
+
+    renderWithProviders(services);
+
+    await waitForAiIndexDetailLoaded();
+
+    expect(screen.queryByTestId('contextAiIndexDetailTabs')).not.toBeInTheDocument();
+    expect(screen.getByTestId('contextAiIndexSourceRow')).toBeInTheDocument();
+  });
+
+  it('hides the Knowledge Indicators tab when the KI summary request fails', async () => {
+    mockUseKiList.mockImplementation(() => ({
+      ...defaultKiListMock,
+      total: 0,
+      summary: { total: 0, countsByType: [] },
+      error: new Error('Request timed out'),
+    }));
+    const services = createServices();
+    services.http.get.mockResolvedValue(aiIndex);
+
+    renderWithProviders(services);
+
+    await waitForAiIndexDetailLoaded();
+
+    expect(screen.queryByTestId('contextAiIndexDetailTabs')).not.toBeInTheDocument();
+    expect(screen.getByTestId('contextAiIndexSourceRow')).toBeInTheDocument();
   });
 });

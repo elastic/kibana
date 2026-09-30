@@ -87,10 +87,12 @@ export function usePreferredTransactionDataSource({
   http,
   start,
   end,
+  projectRouting,
 }: {
   http: HttpStart;
   start: string;
   end: string;
+  projectRouting?: string;
 }): { dataSource: PreferredTransactionDataSource | undefined; isLoading: boolean; error: unknown } {
   const {
     value,
@@ -103,10 +105,11 @@ export function usePreferredTransactionDataSource({
       const meta = await http.get<TimeRangeMetadataResponse>('/internal/apm/time_range_metadata', {
         signal,
         query: { start, end, kuery: '', useSpanName: false },
+        ...(projectRouting ? { headers: { 'x-project-routing': projectRouting } } : {}),
       });
       return pickPreferredTransactionSource(meta.sources, bucketSizeInSeconds);
     },
-    [http, start, end]
+    [http, start, end, projectRouting]
   );
 
   return { dataSource: value, isLoading, error };

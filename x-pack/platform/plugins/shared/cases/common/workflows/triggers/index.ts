@@ -10,6 +10,13 @@ import { z } from '@kbn/zod/v4';
 import type { CommonTriggerDefinition } from '@kbn/workflows-extensions/common';
 import { Owner as OwnerSchema } from '../../bundled-types.gen';
 import {
+  MAX_OBSERVABLE_TYPE_KEY_LENGTH,
+  MAX_OBSERVABLES_PER_CASE,
+  OBSERVABLE_ID_MAX_LENGTH,
+  OBSERVABLE_TYPE_FILE_HASH,
+  OBSERVABLE_TYPE_IPV4,
+} from '../../constants';
+import {
   CASE_TRIGGER_EVENT_SCHEMA_CASE_ID_DESCRIPTION,
   CASE_TRIGGER_EVENT_SCHEMA_OWNER_DESCRIPTION,
   CASE_UPDATED_TRIGGER_EVENT_SCHEMA_UPDATED_FIELDS_DESCRIPTION,
@@ -19,6 +26,8 @@ import {
   CASE_STATUS_UPDATED_TRIGGER_EVENT_SCHEMA_STATUS_DESCRIPTION,
   CASE_STATUS_UPDATED_TRIGGER_EVENT_SCHEMA_PREVIOUS_STATUS_DESCRIPTION,
   EXTENDED_FIELDS_UPDATED_TRIGGER_EVENT_SCHEMA_CHANGED_FIELDS_DESCRIPTION,
+  OBSERVABLES_ADDED_TRIGGER_EVENT_SCHEMA_OBSERVABLE_IDS_DESCRIPTION,
+  OBSERVABLES_ADDED_TRIGGER_EVENT_SCHEMA_OBSERVABLE_TYPE_KEYS_DESCRIPTION,
 } from '../translations';
 
 export const CaseCreatedTriggerId = 'cases.caseCreated' as const;
@@ -330,4 +339,114 @@ triggers:
     ],
   },
   snippets: { condition: 'event.changedFields: "priority_as_keyword"' },
+};
+
+export const ObservablesAddedTriggerId = 'cases.observablesAdded' as const;
+
+// Observable values are deliberately omitted from this schema so that users without
+// Cases read access cannot observe case data through workflow triggers or through the
+// trigger-events data stream. Use a cases.getCase step to read the current observables
+// (including values) after the trigger fires.
+// .strict() makes the redaction guarantee fail-closed: an accidental extra key
+// (e.g. spreading the full Observable object) causes safeParse to fail loudly
+// rather than silently forwarding case data into the trigger-events data stream.
+// Safe because trigger_event_handler validates the raw payload, not the augmented
+// eventContextForResolution (which adds timestamp/spaceId/eventChainDepth).
+const observablesAddedEventSchema = baseCaseEventSchema
+  .extend({
+    observableIds: z
+      .array(z.string().max(OBSERVABLE_ID_MAX_LENGTH))
+      .max(MAX_OBSERVABLES_PER_CASE)
+      .meta({ description: OBSERVABLES_ADDED_TRIGGER_EVENT_SCHEMA_OBSERVABLE_IDS_DESCRIPTION }),
+    observableTypeKeys: z
+      .array(z.string().max(MAX_OBSERVABLE_TYPE_KEY_LENGTH))
+      .max(MAX_OBSERVABLES_PER_CASE)
+      .meta({
+        description: OBSERVABLES_ADDED_TRIGGER_EVENT_SCHEMA_OBSERVABLE_TYPE_KEYS_DESCRIPTION,
+      }),
+  })
+  .strict();
+
+export type ObservablesAddedPayload = z.infer<typeof observablesAddedEventSchema>;
+
+export const observablesAddedTriggerCommonDefinition: CommonTriggerDefinition = {
+  id: ObservablesAddedTriggerId,
+  stability: 'tech_preview',
+  eventSchema: observablesAddedEventSchema,
+  title: i18n.translate('xpack.cases.workflowTriggers.observablesAdded.title', {
+    defaultMessage: 'Cases - Observables added',
+  }),
+  description: i18n.translate('xpack.cases.workflowTriggers.observablesAdded.description', {
+    defaultMessage: 'Emitted when one or more observables are added to a case.',
+  }),
+  documentation: {
+    details: i18n.translate('xpack.cases.workflowTriggers.observablesAdded.documentation.details', {
+      defaultMessage: `Emitted after observables are added to a case from every path that persists an observable: manual add (UI or API), auto-extraction from alert/event attachments (when the case setting extractObservables is enabled), and the cases.addObservables workflow step.
+
+**Payload fields**
+- event.observableIds — IDs of the newly-persisted observables, in insertion order.
+- event.observableTypeKeys — type keys for the newly-persisted observables, one entry per observable, index-aligned with event.observableIds (e.g. "{ipv4Key}", "{fileHashKey}"). A type key repeats when several observables of the same type are added in one request. Custom observable types use a UUID key. Use this field in trigger conditions — KQL matches on any element.
+
+**Observable values are not included in the payload.** Use a cases.getCase step to read the current observable values after the trigger fires. This preserves the invariant that users without Cases read access cannot observe case data through workflow triggers.
+
+**Filtering**
+Use event.observableTypeKeys for type-scoped conditions: event.observableTypeKeys: "{ipv4Key}"
+
+**Dual emission**
+When an alert or event attachment is added to a case with extractObservables enabled, both cases.attachmentsAdded and cases.observablesAdded are emitted for the same request.
+
+**Loop prevention**
+A workflow that uses the cases.addObservables step will re-emit this trigger. Omitting on.workflowEvents defaults to avoid-loop (cycle guard). To skip workflow-attributed emits entirely, set on.workflowEvents: ignore. The chain depth is bounded by workflowsExecutionEngine.eventDriven.maxChainDepth.
+
+**Duplicate observables**
+The cases.addObservables step errors when every submitted observable is already on the case. Guard enrichment workflows with a condition (e.g. filter by owner) rather than relying on a silent no-op.`,
+      values: {
+        ipv4Key: OBSERVABLE_TYPE_IPV4.key,
+        fileHashKey: OBSERVABLE_TYPE_FILE_HASH.key,
+      },
+    }),
+    examples: [
+      i18n.translate(
+        'xpack.cases.workflowTriggers.observablesAdded.documentation.exampleOwnerFilter',
+        {
+          defaultMessage: `## Run only for Security cases
+\`\`\`yaml
+triggers:
+  - type: {triggerId}
+    on:
+      condition: 'event.owner: "securitySolution"'
+\`\`\``,
+          values: {
+            triggerId: ObservablesAddedTriggerId,
+          },
+        }
+      ),
+      i18n.translate(
+        'xpack.cases.workflowTriggers.observablesAdded.documentation.exampleTypeFilter',
+        {
+          defaultMessage: `## Run only when an IPv4 observable is added (with loop guard)
+\`\`\`yaml
+triggers:
+  - type: {triggerId}
+    on:
+      condition: 'event.owner: "securitySolution" and event.observableTypeKeys: "{ipv4Key}"'
+      # Prevent re-triggering if this workflow later calls cases.addObservables.
+      workflowEvents: ignore
+steps:
+  - name: get-case
+    type: cases.getCase
+    with:
+      case_id: {liqCaseId}
+  # Use steps.get-case.output.case.observables to read values.
+\`\`\``,
+          values: {
+            triggerId: ObservablesAddedTriggerId,
+            ipv4Key: OBSERVABLE_TYPE_IPV4.key,
+            liqCaseId: '{{ event.caseId }}',
+          },
+        }
+      ),
+    ],
+  },
+  snippets: { condition: `event.observableTypeKeys: "${OBSERVABLE_TYPE_IPV4.key}"` },
 };

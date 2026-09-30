@@ -30,10 +30,10 @@ const mockIsIndexExist = isIndexExist as jest.Mock;
 
 jest.mock('@kbn/entity-store/common/euid_helpers', () => ({
   euid: {
-    getEuidFromObject: jest.fn(),
+    getEuidFromObjectForSearch: jest.fn(),
   },
 }));
-const mockGetEuidFromObject = euid.getEuidFromObject as jest.Mock;
+const mockGetEuidForSearch = euid.getEuidFromObjectForSearch as jest.Mock;
 
 const hostEnrichmentResponse = [
   {
@@ -131,7 +131,7 @@ describe('enrichEvents', () => {
   });
   afterEach(() => {
     mockIsIndexExist.mockClear();
-    mockGetEuidFromObject.mockReset();
+    mockGetEuidForSearch.mockReset();
   });
 
   describe(`with entityAnalyticsEntityStoreV2 = false`, () => {
@@ -334,7 +334,7 @@ describe('enrichEvents', () => {
       entityStoreCrudClient = {
         listEntities: mockListEntities,
       } as unknown as EntityStoreCRUDClient;
-      mockGetEuidFromObject.mockImplementation(
+      mockGetEuidForSearch.mockImplementation(
         (entityType: string, source: Record<string, { name?: string } | undefined>) => {
           const name = source?.[entityType]?.name;
           return name ? `${entityType}:${name}` : undefined;

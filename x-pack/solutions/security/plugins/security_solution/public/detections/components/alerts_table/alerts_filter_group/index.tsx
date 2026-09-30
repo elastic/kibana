@@ -49,7 +49,6 @@ const AlertsTableFilterGroupComponent: React.FC<Props> = ({
   return (
     <EuiButtonGroup
       legend="filter status"
-      color="primary"
       options={options}
       idSelected={status}
       data-test-subj="alerts-table-filter-group"

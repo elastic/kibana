@@ -14,7 +14,7 @@
  *   version: 2023-10-31
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 
 import { ApiConfig, Replacements } from '../common_attributes.gen';
 import { AttackDiscovery } from '../attack_discovery/attack_discovery.gen';
@@ -23,63 +23,94 @@ import { AttackDiscoveryApiAlert } from '../attack_discovery/attack_discovery_ap
 /**
  * Input for the default validation workflow step
  */
+export const DefaultValidationInput = lazySchema(() =>
+  z.object({
+    /**
+     * The number of alerts provided as context to the LLM
+     */
+    alerts_context_count: z
+      .number()
+      .int()
+      .describe('The number of alerts provided as context to the LLM'),
+    /**
+     * The Elasticsearch index pattern for alerts (used for hallucination detection)
+     */
+    alerts_index_pattern: z
+      .string()
+      .optional()
+      .default('.alerts-security.alerts-*')
+      .describe('The Elasticsearch index pattern for alerts (used for hallucination detection)'),
+    /**
+     * The anonymized alerts that were used to generate the attack discovery
+     */
+    anonymized_alerts: z
+      .array(
+        z.object({
+          id: z.string().optional(),
+          metadata: z.object({}),
+          page_content: z.string(),
+        })
+      )
+      .describe('The anonymized alerts that were used to generate the attack discovery'),
+    /**
+     * LLM API configuration
+     */
+    api_config: ApiConfig.describe('LLM API configuration'),
+    /**
+     * The generated Attack discoveries to validate
+     */
+    attack_discoveries: z
+      .array(AttackDiscovery)
+      .describe('The generated Attack discoveries to validate'),
+    /**
+     * The name of the connector that generated the attack discovery
+     */
+    connector_name: z
+      .string()
+      .describe('The name of the connector that generated the attack discovery'),
+    /**
+     * The generation ID of the run that created the attack discovery
+     */
+    generation_uuid: z
+      .string()
+      .describe('The generation ID of the run that created the attack discovery'),
+    /**
+     * Replacements enable anonymization of data sent to the LLM
+     */
+    replacements: Replacements.optional().describe(
+      'Replacements enable anonymization of data sent to the LLM'
+    ),
+    /**
+     * Enables markdown syntax for pivot fields
+     */
+    enable_field_rendering: z
+      .boolean()
+      .optional()
+      .default(true)
+      .describe('Enables markdown syntax for pivot fields'),
+    /**
+     * Return discoveries with text replacements applied
+     */
+    with_replacements: z
+      .boolean()
+      .optional()
+      .default(false)
+      .describe('Return discoveries with text replacements applied'),
+  })
+);
 export type DefaultValidationInput = z.infer<typeof DefaultValidationInput>;
-export const DefaultValidationInput = z.object({
-  /**
-   * The number of alerts provided as context to the LLM
-   */
-  alerts_context_count: z.number().int(),
-  /**
-   * The Elasticsearch index pattern for alerts (used for hallucination detection)
-   */
-  alerts_index_pattern: z.string().optional().default('.alerts-security.alerts-*'),
-  /**
-   * The anonymized alerts that were used to generate the attack discovery
-   */
-  anonymized_alerts: z.array(
-    z.object({
-      id: z.string().optional(),
-      metadata: z.object({}),
-      page_content: z.string(),
-    })
-  ),
-  /**
-   * LLM API configuration
-   */
-  api_config: ApiConfig,
-  /**
-   * The generated Attack discoveries to validate
-   */
-  attack_discoveries: z.array(AttackDiscovery),
-  /**
-   * The name of the connector that generated the attack discovery
-   */
-  connector_name: z.string(),
-  /**
-   * The generation ID of the run that created the attack discovery
-   */
-  generation_uuid: z.string(),
-  /**
-   * Replacements enable anonymization of data sent to the LLM
-   */
-  replacements: Replacements.optional(),
-  /**
-   * Enables markdown syntax for pivot fields
-   */
-  enable_field_rendering: z.boolean().optional().default(true),
-  /**
-   * Return discoveries with text replacements applied
-   */
-  with_replacements: z.boolean().optional().default(false),
-});
 
 /**
  * Output from the default validation workflow step
  */
+export const DefaultValidationOutput = lazySchema(() =>
+  z.object({
+    /**
+     * Successfully validated attack discovery alerts
+     */
+    validated_discoveries: z
+      .array(AttackDiscoveryApiAlert)
+      .describe('Successfully validated attack discovery alerts'),
+  })
+);
 export type DefaultValidationOutput = z.infer<typeof DefaultValidationOutput>;
-export const DefaultValidationOutput = z.object({
-  /**
-   * Successfully validated attack discovery alerts
-   */
-  validated_discoveries: z.array(AttackDiscoveryApiAlert),
-});

@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { groups } from './groups.json';
-import { TestSuiteType } from './constants';
+import { TestSuiteType } from './constants.ts';
+import { loadBuildkiteJson } from '../../pipeline-utils/load_buildkite_json.ts';
 import type { BuildkiteStep } from '#pipeline-utils';
 import {
   expandAgentQueue,
@@ -16,6 +16,10 @@ import {
   getTrackedBranch,
   retryOnPreemption,
 } from '#pipeline-utils';
+
+const { groups } = loadBuildkiteJson<typeof import('./groups.json')>(
+  'pipelines/flaky_tests/groups.json'
+);
 
 const TEST_STEP_TIMEOUT_MINUTES = 80;
 
@@ -102,7 +106,7 @@ interface CommandTestSuite {
   scoutLabel?: string;
   agentQueue?: string;
   diskSizeGb?: number;
-  /** Package path (repo-relative) where `yarn junit:merge` should run when it differs from `workingDirectory`. */
+  /** Package path (repo-relative) where `pnpm junit:merge` should run when it differs from `workingDirectory`. */
   junitMergeWorkingDirectory?: string;
 }
 
@@ -280,13 +284,15 @@ steps.push({
   label: 'Build Kibana Distribution',
   agents: expandAgentQueue('c2-8'),
   key: 'build',
-  if: "build.env('KIBANA_BUILD_ID') == null || build.env('KIBANA_BUILD_ID') == ''",
+  // Keep this step when KIBANA_BUILD_ID is set: FTR/Scout/Cypress jobs
+  // depends_on: build, so skipping it skips those jobs. build_kibana.sh
+  // no-ops when the cached dist type matches.
 });
 
 if (hasScoutSuites) {
   // Single step that bootstraps Kibana, resolves ONLY the requested Scout configs, and
   // dynamically uploads one BK step per (scoutConfig x arch x domain) mode (parallelism: count).
-  // Resolving requested configs requires a full `yarn kbn bootstrap`, which is too heavy to
+  // Resolving requested configs requires a full `pnpm kbn bootstrap`, which is too heavy to
   // run inside pipeline.ts itself; combining resolution + planning here avoids paying for an
   // extra agent boot and an artifact round-trip just to hand the manifest between
   // two otherwise-coupled steps.
@@ -435,7 +441,7 @@ pipeline.steps.push({
 });
 
 pipeline.steps.push({
-  command: 'ts-node .buildkite/pipelines/flaky_tests/post_stats_on_pr.ts',
+  command: 'node .buildkite/pipelines/flaky_tests/post_stats_on_pr.ts',
   label: 'Post results on Github pull request',
   agents: expandAgentQueue('n2-4-spot'),
   timeout_in_minutes: 15,

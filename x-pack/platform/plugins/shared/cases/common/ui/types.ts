@@ -94,11 +94,6 @@ export interface CasesUiConfigType {
   runWorkflows: {
     enabled: boolean;
   };
-  casesRedesign: {
-    list: boolean;
-    details: boolean;
-    settings: boolean;
-  };
 }
 
 export const UserActionTypeAll = 'all' as const;
@@ -175,6 +170,7 @@ export type CasesConfigurationUI = Pick<
   | 'version'
   | 'owner'
   | 'observableTypes'
+  | 'extractObservables'
 >;
 
 export type CasesConfigurationUICustomField = CasesConfigurationUI['customFields'][number];

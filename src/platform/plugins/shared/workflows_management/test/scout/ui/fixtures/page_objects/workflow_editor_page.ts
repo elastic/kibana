@@ -22,6 +22,12 @@ export class WorkflowEditorPage {
   public bulkBar: Locator;
   public graphCanvas: Locator;
   public graphYamlErrorCallout: Locator;
+  public actionsMenuButton: Locator;
+  public actionsMenuSearch: Locator;
+  public readOnlyBadge: Locator;
+  public readonly accessMode: Locator;
+  public readonly serviceAccountBadges: Locator;
+  public readonly serviceAccountPopup: Locator;
 
   constructor(private readonly page: ScoutPage) {
     this.yamlEditor = this.page.testSubj.locator('workflowYamlEditor');
@@ -39,6 +45,52 @@ export class WorkflowEditorPage {
     this.bulkBar = this.page.testSubj.locator('wfDiffBulkBar');
     this.graphCanvas = this.page.testSubj.locator('workflowGraphCanvas');
     this.graphYamlErrorCallout = this.page.testSubj.locator('workflowGraphYamlErrorCallout');
+    this.actionsMenuButton = this.page.testSubj.locator('workflowBottomBarActionsMenu');
+    this.actionsMenuSearch = this.page.locator('#actions-menu-search');
+    this.readOnlyBadge = this.page.testSubj.locator('workflowEditorReadOnlyBadge');
+    this.serviceAccountBadges = this.yamlEditor.locator(
+      '.service-account-name-badge, .service-account-name-badge-unavailable'
+    );
+    this.serviceAccountPopup = this.page.testSubj.locator('serviceAccountEditorPopup');
+    this.accessMode = this.page.testSubj.locator('entityAccessControlMode');
+  }
+
+  async openAccessDialog(): Promise<void> {
+    await this.page.testSubj.click('app-menu-overflow-button');
+    await this.page.testSubj.click('workflowAccessButton');
+    await this.accessMode.waitFor({ state: 'visible' });
+  }
+
+  async hoverDisabledAccessButton(): Promise<void> {
+    await this.page.testSubj.click('app-menu-overflow-button');
+    await this.page.testSubj.locator('workflowAccessButton').hover({ force: true });
+  }
+
+  async setAccessMode(mode: 'private' | 'public'): Promise<void> {
+    await this.page.components.superSelect('entityAccessControlMode').selectOptionByValue(mode);
+  }
+
+  async addAccessUser(name: string): Promise<void> {
+    await this.page.testSubj
+      .locator('entityAccessControlUserSearch')
+      .getByRole('combobox')
+      .fill(name);
+    await this.page.getByRole('option', { name }).click();
+  }
+
+  accessRole(username: string): Locator {
+    return this.page.getByLabel(`Role for ${username}`, { exact: true });
+  }
+
+  async setAccessRole(username: string, role: 'viewer' | 'executor' | 'editor'): Promise<void> {
+    await this.page.components
+      .superSelect(`entityAccessControlRole-${username}`)
+      .selectOptionByValue(role);
+  }
+
+  async saveAccess(): Promise<void> {
+    await this.page.testSubj.click('workflowAccessSave');
+    await this.accessMode.waitFor({ state: 'hidden' });
   }
 
   /**
@@ -99,6 +151,25 @@ export class WorkflowEditorPage {
    */
   async switchToYamlView(): Promise<void> {
     await this.page.testSubj.click('workflowEditorViewToggle-yaml');
+  }
+
+  /**
+   * Expand the floating bottom toolbar if it has auto-collapsed to the pill.
+   */
+  async expandBottomBar(): Promise<void> {
+    const yamlViewToggle = this.page.testSubj.locator('workflowEditorViewToggle-yaml');
+    if (!(await yamlViewToggle.isVisible())) {
+      await this.page.getByRole('button', { name: 'Show toolbar' }).hover();
+    }
+    await yamlViewToggle.waitFor({ state: 'visible' });
+  }
+
+  /**
+   * Open the actions menu from the bottom bar.
+   */
+  async openActionsMenu(): Promise<void> {
+    await this.expandBottomBar();
+    await this.actionsMenuButton.click();
   }
 
   /**
@@ -279,6 +350,75 @@ export class WorkflowEditorPage {
     );
   }
 
+  async acceptYamlSuggestion(name: string): Promise<void> {
+    await this.getYamlEditorSuggestWidget().getByRole('option', { name, exact: true }).dblclick();
+  }
+
+  async dismissYamlSuggestions(): Promise<void> {
+    await this.page.keyboard.press('Escape');
+  }
+
+  serviceAccountOption(name: string): Locator {
+    return this.serviceAccountPopup.getByRole('option', { name, exact: true });
+  }
+
+  async openServiceAccountPicker(
+    yaml: string,
+    format: 'block' | 'inline' = 'block'
+  ): Promise<void> {
+    if (format === 'inline') {
+      await this.setYamlEditorValue(`${yaml}\nsettings: { run_as: , timezone: UTC }`);
+      await this.setCursorToText(', timezone:');
+    } else {
+      await this.setYamlEditorValue(`${yaml}\nsettings:\n  run_as: `);
+      await this.setCursorToText('run_as: ');
+      await this.page.keyboard.press('End');
+    }
+    await this.page.keyboard.press('Control+Space');
+    await this.serviceAccountPopup.getByRole('listbox', { name: 'Service accounts' }).waitFor();
+  }
+
+  async openExistingServiceAccountPicker(id: string): Promise<void> {
+    await this.setCursorToText(id);
+    await this.page.keyboard.press('Control+Space');
+    await this.serviceAccountPopup.getByRole('listbox', { name: 'Service accounts' }).waitFor();
+  }
+
+  async typeServiceAccountSearch(query: string): Promise<void> {
+    await this.page.keyboard.type(query);
+  }
+
+  async selectServiceAccount(name: string): Promise<void> {
+    await this.serviceAccountOption(name).click();
+  }
+
+  async highlightNextServiceAccount(): Promise<void> {
+    await this.page.keyboard.press('ArrowDown');
+  }
+
+  async acceptSelectedServiceAccount(): Promise<void> {
+    await this.page.keyboard.press('Enter');
+  }
+
+  async getServiceAccountBadgeText(): Promise<string> {
+    return (await this.serviceAccountBadges.allTextContents()).join('').replaceAll('\u00a0', ' ');
+  }
+
+  async hoverServiceAccountBadge(): Promise<void> {
+    await this.serviceAccountBadges.filter({ hasText: /^[✓○]/ }).hover();
+  }
+
+  async hoverServiceAccountId(id: string): Promise<void> {
+    const activateEditor = this.yamlEditor.getByRole('button', {
+      name: 'Code Editor, activate edit mode',
+    });
+    if (await activateEditor.isVisible()) {
+      await activateEditor.focus();
+      await this.page.keyboard.press('Enter');
+    }
+    await this.yamlEditor.getByText(id, { exact: true }).hover();
+  }
+
   public getYamlEditorSuggestWidget() {
     return this.page.locator(
       '[data-test-subj="kbnCodeEditorEditorOverflowWidgetsContainer"] .suggest-widget'
@@ -354,6 +494,12 @@ export class WorkflowEditorPage {
     await this.page.testSubj.click('confirmModalConfirmButton');
   }
 
+  async executeWorkflowFromBottomBar(inputs: Record<string, unknown>): Promise<void> {
+    await this.page.testSubj.click('workflowBottomBarRunButton');
+    await this.setExecuteModalInputs(inputs);
+    await this.page.testSubj.click('executeWorkflowButton');
+  }
+
   /**
    * Execute the workflow from the execute modal with the given inputs.
    * Assumes the run button has already been clicked or the execute modal is about to appear.
@@ -397,7 +543,11 @@ export class WorkflowEditorPage {
    * Finds the first occurrence of `searchText` in the editor and places the cursor
    * at the end of it, then triggers autocomplete via Ctrl+Space.
    */
-  async triggerAutocompleteAfter(yamlContent: string, searchText: string) {
+  async triggerAutocompleteAfter(
+    yamlContent: string,
+    searchText: string,
+    textToInsert: string = ''
+  ): Promise<void> {
     await this.setYamlEditorValue(yamlContent);
 
     // Wait for the workflow definition to be parsed after setting the YAML.
@@ -407,7 +557,7 @@ export class WorkflowEditorPage {
     // Use Monaco API to find the text and position cursor right after it
     const uri = await this.getEditorUri(this.yamlEditor);
     await this.page.evaluate(
-      ({ modelUri, text }) => {
+      ({ modelUri, text, insertion }) => {
         // eslint-disable-next-line @typescript-eslint/no-explicit-any -- monaco environment is global, but we don't have a type for it
         const monacoEnv = (window as any).MonacoEnvironment;
         if (!monacoEnv?.monaco?.editor) {
@@ -431,15 +581,22 @@ export class WorkflowEditorPage {
 
         // Get the editor instance and set cursor position + focus
         const editors = monacoEnv.monaco.editor.getEditors();
-        if (editors.length > 0) {
-          const editor = editors[0];
-          editor.setPosition(position);
-          editor.focus();
-          // Trigger suggest directly via the editor command
-          editor.trigger('autocomplete-test', 'editor.action.triggerSuggest', {});
+        const editor = editors.find(
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any -- Monaco editor instances are untyped in the browser context
+          (candidate: any) => candidate.getModel()?.uri?.toString() === model.uri.toString()
+        );
+        if (!editor) {
+          throw new Error('No editor instance found for the YAML model');
         }
+
+        editor.setPosition(position);
+        editor.focus();
+        if (insertion) {
+          editor.trigger('autocomplete-test', 'type', { text: insertion });
+        }
+        editor.trigger('autocomplete-test', 'editor.action.triggerSuggest', {});
       },
-      { modelUri: uri, text: searchText }
+      { modelUri: uri, text: searchText, insertion: textToInsert }
     );
   }
 

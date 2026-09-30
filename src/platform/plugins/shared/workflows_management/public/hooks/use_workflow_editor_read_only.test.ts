@@ -8,6 +8,8 @@
  */
 
 import { renderHook } from '@testing-library/react';
+import React from 'react';
+import { Route } from '@kbn/shared-ux-router';
 import type { WorkflowDetailDto, WorkflowExecutionDto } from '@kbn/workflows';
 import { ExecutionStatus } from '@kbn/workflows';
 
@@ -80,8 +82,17 @@ const renderReadOnlyHook = ({
     store.dispatch(setExecution(execution));
   }
 
+  const Provider = getTestProvider({
+    store,
+    initialEntries: [`/workflows/${workflow.id}${search}`],
+  });
   return renderHook(() => useWorkflowEditorReadOnly(), {
-    wrapper: getTestProvider({ store, initialEntries: [`/workflows/${workflow.id}${search}`] }),
+    wrapper: ({ children }: { children: React.ReactNode }) =>
+      React.createElement(
+        Provider,
+        null,
+        React.createElement(Route, { path: '/workflows/:id' }, children)
+      ),
   });
 };
 
@@ -95,6 +106,16 @@ describe('useWorkflowEditorReadOnly', () => {
 
   afterEach(() => {
     jest.clearAllMocks();
+  });
+
+  it('keeps an executor read-only despite the feature edit privilege', () => {
+    const { result } = renderReadOnlyHook({
+      workflow: {
+        ...baseWorkflow,
+        permissions: { read: true, execute: true, edit: false, manage: false },
+      },
+    });
+    expect(result.current).toBe(true);
   });
 
   it('is editable on the workflow tab with no execution selected', () => {

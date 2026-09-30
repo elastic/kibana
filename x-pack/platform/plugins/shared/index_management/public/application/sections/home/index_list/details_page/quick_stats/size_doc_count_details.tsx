@@ -105,6 +105,10 @@ export const SizeDocCountDetails: FunctionComponent<{
   };
 
   const renderVectorCountFooter = () => {
+    if (!config.enableVectorCount) {
+      return null;
+    }
+
     if (vectorCount.isError) {
       return (
         <EuiToolTip content={vectorCountErrorTooltip}>

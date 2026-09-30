@@ -9,6 +9,7 @@
 
 export { getSavedSearchFullPathUrl } from './saved_searches_url';
 export { extractTabs } from './service/extract_tabs';
+export type { StoredDiscoverSession } from './service/discover_session_serialization';
 
 export type {
   DiscoverGridSettings,
@@ -18,9 +19,10 @@ export type {
   SavedSearchByValueAttributes,
   DiscoverSession,
   DiscoverSessionTab,
+  DiscoverSessionTabTypeState,
 } from './types';
 
-export { VIEW_MODE } from '@kbn/discover-utils';
+export { VIEW_MODE } from '@kbn/discover-session-constants';
 
 export {
   SavedSearchType,
@@ -31,7 +33,9 @@ export {
   MAX_DISCOVER_SESSION_COLUMNS,
   MAX_DISCOVER_SESSION_COLUMNS_SERVERLESS,
   MAX_DISCOVER_SESSION_TABS,
-} from './constants';
+  MAX_METRICS_TAB_DIMENSIONS,
+  MAX_METRICS_TAB_STATE_STRING_LENGTH,
+} from '@kbn/discover-session-constants';
 
 export {
   fromDiscoverSessionAttributesToSavedSearch,

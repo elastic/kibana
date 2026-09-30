@@ -7,8 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+/*
+ * Test-only metric (`lnsMetric`) attribute normalizer for strict SO ↔ API round-trip checks.
+ */
+
 import {
   LENS_METRIC_BREAKDOWN_DEFAULT_MAX_COLUMNS,
+  type DataType,
   type MetricVisualizationState,
 } from '@kbn/lens-common';
 
@@ -247,14 +252,6 @@ const alignMetricColumns: NormalizerConfig<MetricAttributes> = {
     }
     return attributes;
   },
-  ignore: [
-    // ES|QL column display format (`params`) is not preserved through the API round-trip,
-    // consistent with the already-ignored `meta` / `inMetricDimension` text-based fields.
-    'state.datasourceStates.textBased.layers.*.columns.*.params',
-    // Runtime-only ES|QL fields not produced by the transform.
-    'state.datasourceStates.textBased.initialContext',
-    'state.datasourceStates.textBased.layers.*.columns.*.variable',
-  ],
 };
 
 /**
@@ -472,6 +469,27 @@ const alignIds: NormalizerConfig<MetricAttributes> = {
   },
 };
 
+function inferColumnDataType(
+  newColumnId: string,
+  { isTextBased }: { isTextBased: boolean }
+): DataType | undefined {
+  if (!isTextBased) {
+    return;
+  }
+  if (
+    newColumnId === 'metric_accessor_breakdown' ||
+    newColumnId === `${ACCESSOR}_breakdown_trendline`
+  ) {
+    return 'string';
+  }
+  if (newColumnId === 'x_date_histogram') {
+    return 'date';
+  }
+  if (canonicalMetricColumns.has(newColumnId)) {
+    return 'number';
+  }
+}
+
 export const normalizeMetric = mergeNormalizers([
   getCommonNormalizer<MetricAttributes>(({ state: { visualization } }) => ({
     layerRemapping: [
@@ -479,6 +497,7 @@ export const normalizeMetric = mergeNormalizers([
       [visualization.trendlineLayerId, TRENDLINE_LAYER_ID],
     ],
     columnRemapping: getColumnRemapping(visualization),
+    inferColumnDataType,
   })),
   getPaletteNormalizer<MetricAttributes>('state.visualization.palette', isSingleValueMetric),
   alignIds,

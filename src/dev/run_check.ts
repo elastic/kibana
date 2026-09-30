@@ -39,6 +39,7 @@ import {
 import { executeTypeCheckValidation } from './type_check_validation_loader';
 
 import { executeEslintValidation } from './eslint/run_eslint_contract';
+import { executeOxlintValidation } from './oxlint/run_oxlint_contract';
 
 // ── Output helpers ──────────────────────────────────────────────────────────
 
@@ -377,6 +378,46 @@ run(
       } catch (error) {
         moonProgress.writeResult(line('moon', '✗', 'failed', moonProgress.elapsed()));
         errors.push(error instanceof Error ? error : new Error(String(error)));
+      }
+    }
+
+    // ── oxlint ─────────────────────────────────────────────────────────
+
+    {
+      const { log, captured } = createSilentLog();
+      const progress = startProgress('oxlint');
+      try {
+        const result = await executeOxlintValidation({ baseContext, log, fix });
+        if (!result) {
+          progress.writeResult(line('oxlint', '—', 'no files changed'));
+        } else if (result.failedFiles.length > 0) {
+          progress.writeResult(line('oxlint', '✗', 'failed', progress.elapsed()));
+          if (captured.length > 0) {
+            writeln('');
+            for (const msg of captured) writeln(`    ${msg}`);
+          }
+          writeln(`    $ node scripts/lint ${result.failedFiles.join(' ')}`);
+          writeln('');
+          errors.push(new Error('oxlint failed'));
+        } else {
+          const suffix =
+            result.warningCount > 0 ? ` (${pluralize(result.warningCount, 'warning')})` : '';
+          progress.writeResult(
+            line(
+              'oxlint',
+              result.warningCount > 0 ? '⚠' : '✓',
+              `${pluralize(result.fileCount, 'file')}${suffix}`,
+              progress.elapsed()
+            )
+          );
+        }
+      } catch (error) {
+        progress.writeResult(line('oxlint', '✗', 'failed', progress.elapsed()));
+        const failure = error instanceof Error ? error : new Error(String(error));
+        writeln('');
+        for (const l of failure.message.split('\n')) writeln(`    ${l}`);
+        writeln('');
+        errors.push(failure);
       }
     }
 

@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-import { isRight } from 'fp-ts/Either';
-import { formatErrors } from '@kbn/securitysolution-io-ts-utils';
 import type { HttpFetchOptions, HttpFetchQuery, HttpSetup } from '@kbn/core/public';
 import type { AddInspectorRequest } from '@kbn/observability-shared-plugin/public';
 import { FETCH_STATUS } from '@kbn/observability-shared-plugin/public';
@@ -47,29 +45,6 @@ class ApiService {
     }
 
     return ApiService.instance;
-  }
-
-  private parseResponse<T>(response: Awaited<T>, apiUrl: string, decodeType?: any): T {
-    if (decodeType) {
-      const decoded = decodeType.decode(response);
-      if (isRight(decoded)) {
-        return decoded.right as T;
-      } else {
-        // This was changed from using template literals to using %s string
-        // interpolation, but the previous version included the apiUrl value
-        // twice. To ensure the log output doesn't change, this continues.
-        //
-        // eslint-disable-next-line no-console
-        console.error(
-          'API %s is not returning expected response, %s for response',
-          apiUrl,
-          formatErrors(decoded.left).toString(),
-          apiUrl,
-          response
-        );
-      }
-    }
-    return response;
   }
 
   private getCpsHeaders(): Record<string, string> | undefined {
@@ -114,12 +89,7 @@ class ApiService {
     return Boolean(spaceId && spaceId !== '*');
   }
 
-  public async get<T>(
-    apiUrl: string,
-    params: Params = {},
-    decodeType?: any,
-    options?: FetchOptions
-  ) {
+  public async get<T>(apiUrl: string, params: Params = {}, options?: FetchOptions) {
     const { version, spaceId, ...queryParams } = params;
     const response = await this._http!.fetch<T>({
       path: this.parseApiUrl(apiUrl, spaceId),
@@ -135,10 +105,10 @@ class ApiService {
       loading: false,
     });
 
-    return this.parseResponse(response, apiUrl, decodeType);
+    return response;
   }
 
-  public async post<T>(apiUrl: string, data?: any, decodeType?: any, params: Params = {}) {
+  public async post<T>(apiUrl: string, data?: any, params: Params = {}) {
     const { version, spaceId, ...queryParams } = params;
 
     const response = await this._http!.post<T>(this.parseApiUrl(apiUrl, spaceId), {
@@ -156,16 +126,10 @@ class ApiService {
       loading: false,
     });
 
-    return this.parseResponse(response, apiUrl, decodeType);
+    return response;
   }
 
-  public async put<T>(
-    apiUrl: string,
-    data?: any,
-    decodeType?: any,
-    params: Params = {},
-    options?: FetchOptions
-  ) {
+  public async put<T>(apiUrl: string, data?: any, params: Params = {}, options?: FetchOptions) {
     const { version, spaceId, ...queryParams } = params;
 
     const response = await this._http!.put<T>(this.parseApiUrl(apiUrl, spaceId), {
@@ -177,7 +141,7 @@ class ApiService {
       ...(this.shouldSkipBasePath(spaceId) ? { prependBasePath: false } : {}),
     });
 
-    return this.parseResponse(response, apiUrl, decodeType);
+    return response;
   }
 
   public async delete<T>(apiUrl: string, params: Params = {}, data?: any, options?: FetchOptions) {

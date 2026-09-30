@@ -35,6 +35,7 @@ const aiIndex: GetAiIndexResponse = {
   dest: { type: 'data_stream', value: 'ai-index-ds-my-ai-index' },
   automations: [{ type: 'workflow', value: 'wf-saved' }],
   sources: [{ type: 'esql', value: 'FROM logs-*' }],
+  traces: [],
   date_created: '2026-01-01T00:00:00.000Z',
   date_modified: '2026-01-01T00:00:00.000Z',
 };
@@ -174,6 +175,40 @@ describe('useAutomationsEditor', () => {
     });
 
     expect(mockSaveAutomations).not.toHaveBeenCalled();
+  });
+
+  it('awaits onSaved before createAndAttach resolves', async () => {
+    let resolveOnSaved!: () => void;
+    const onSaved = jest.fn(
+      () =>
+        new Promise<void>((resolve) => {
+          resolveOnSaved = resolve;
+        })
+    );
+    const { result } = renderHook(() => useAutomationsEditor({ aiIndex, onSaved }));
+
+    let created: string | undefined;
+    let createSettled = false;
+    const pending = result.current.createAndAttach().then((id) => {
+      created = id;
+      createSettled = true;
+    });
+
+    await act(async () => {
+      await Promise.resolve();
+    });
+
+    expect(onSaved).toHaveBeenCalledTimes(1);
+    expect(createSettled).toBe(false);
+    expect(result.current.isBusy).toBe(true);
+
+    await act(async () => {
+      resolveOnSaved();
+      await pending;
+    });
+
+    expect(created).toBe('wf-created');
+    expect(createSettled).toBe(true);
   });
 
   it('creates a workflow while idle, attaches it, and resolves with its id', async () => {

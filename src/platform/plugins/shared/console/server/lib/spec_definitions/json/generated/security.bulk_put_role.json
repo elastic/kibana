@@ -18,6 +18,7 @@
             "__any_of": [
               "all",
               "cancel_task",
+              "clone_api_key",
               "create_snapshot",
               "cross_cluster_replication",
               "cross_cluster_search",
@@ -186,51 +187,24 @@
             }
           ],
           "global": {
-            "__one_of": [
+            "application": {
+              "manage": {
+                "applications": []
+              }
+            },
+            "data_source": [
               {
-                "application": {
-                  "manage": {
-                    "applications": []
-                  }
-                },
-                "data_source": [
-                  {
-                    "names": [],
-                    "privileges": {
-                      "__any_of": [
-                        "create",
-                        "delete",
-                        "read_metadata",
-                        "read",
-                        "manage"
-                      ]
-                    }
-                  }
-                ]
-              },
-              [
-                {
-                  "application": {
-                    "manage": {
-                      "applications": []
-                    }
-                  },
-                  "data_source": [
-                    {
-                      "names": [],
-                      "privileges": {
-                        "__any_of": [
-                          "create",
-                          "delete",
-                          "read_metadata",
-                          "read",
-                          "manage"
-                        ]
-                      }
-                    }
+                "names": [],
+                "privileges": {
+                  "__any_of": [
+                    "create",
+                    "delete",
+                    "read_metadata",
+                    "read",
+                    "manage"
                   ]
                 }
-              ]
+              }
             ]
           },
           "applications": [

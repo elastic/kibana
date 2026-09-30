@@ -12,6 +12,7 @@ import { loggerMock } from '@kbn/logging-mocks';
 import type { DeeplyMockedApi } from '@kbn/core-elasticsearch-client-server-mocks';
 import type { EsqlQueryResponse } from '@elastic/elasticsearch/lib/api/types';
 import { Type } from 'apache-arrow/Arrow.node';
+import { asSpaceId } from '@kbn/core-spaces-common';
 import type {
   PipelineStateStream,
   RuleExecutionInput,
@@ -62,13 +63,14 @@ export function createRuleResponse(
     kind: 'alert',
     time_field: '@timestamp',
     schedule: { every: '1m', lookback: '5m' },
-    recovery_strategy: 'no_breach',
-    query: { format: 'standalone', breach: { query: 'FROM logs-* | LIMIT 10' } },
+    query: { base: 'FROM logs-* | LIMIT 10' },
+    recovery: { strategy: 'no_breach' },
+    no_data: { strategy: 'ignore' },
     grouping: { fields: [] },
     enabled: true,
-    created_by: 'elastic_profile_uid',
+    created_by: { profile_uid: 'elastic_profile_uid' },
     created_at: '2025-01-01T00:00:00.000Z',
-    updated_by: 'elastic_profile_uid',
+    updated_by: { profile_uid: 'elastic_profile_uid' },
     updated_at: '2025-01-01T00:00:00.000Z',
     ...rest,
     metadata: { name: 'test-rule', ...metadata, version: metadata?.version ?? 1 },
@@ -86,13 +88,14 @@ export function createRuleSoAttributes(
     metadata: { name: 'test-rule' },
     time_field: '@timestamp',
     schedule: { every: '1m', lookback: '5m' },
-    recovery_strategy: 'no_breach',
-    query: { format: 'standalone', breach: { query: 'FROM logs-* | LIMIT 10' } },
+    query: { base: 'FROM logs-* | LIMIT 10' },
+    recovery: { strategy: 'no_breach' },
+    no_data: { strategy: 'ignore' },
     grouping: { fields: [] },
     enabled: true,
-    createdBy: 'elastic_profile_uid',
+    createdBy: { profile_uid: 'elastic_profile_uid' },
     createdAt: '2025-01-01T00:00:00.000Z',
-    updatedBy: 'elastic_profile_uid',
+    updatedBy: { profile_uid: 'elastic_profile_uid' },
     updatedAt: '2025-01-01T00:00:00.000Z',
     ...overrides,
   };
@@ -111,7 +114,7 @@ export function createRuleExecutionInput(
 
   return {
     ruleId: 'rule-1',
-    spaceId: 'default',
+    spaceId: asSpaceId('default'),
     scheduledAt: '2025-01-01T00:00:00.000Z',
     executionContext: createExecutionContext(abortSignal),
     ...overrides,
@@ -123,7 +126,7 @@ export function createRuleExecutionPipelineInput(
 ): RuleExecutionPipelineInput {
   return {
     ruleId: 'rule-1',
-    spaceId: 'default',
+    spaceId: asSpaceId('default'),
     scheduledAt: '2025-01-01T00:00:00.000Z',
     executionUuid: 'execution-uuid',
     abortSignal: new AbortController().signal,

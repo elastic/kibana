@@ -264,6 +264,31 @@ describe('processConverseResponse', () => {
     ]);
   });
 
+  it('counts cache read and write tokens in the prompt total and exposes cache reads as cached', async () => {
+    const response = createResponse({
+      output: {
+        message: {
+          role: 'assistant',
+          content: [{ text: 'Hello!' }],
+        },
+      },
+      usage: {
+        inputTokens: 10,
+        outputTokens: 5,
+        totalTokens: 15,
+        cacheReadInputTokens: 100,
+        cacheWriteInputTokens: 20,
+      },
+    });
+
+    const result = await lastValueFrom(of(response).pipe(processConverseResponse(), toArray()));
+
+    expect(result[1]).toEqual({
+      type: 'chatCompletionTokenCount',
+      tokens: { prompt: 130, completion: 5, total: 135, cached: 100 },
+    });
+  });
+
   it('includes model in token count event when provided', async () => {
     const response = createResponse({
       output: {

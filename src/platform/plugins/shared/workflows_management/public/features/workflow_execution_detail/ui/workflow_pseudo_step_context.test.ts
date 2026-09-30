@@ -13,6 +13,7 @@ import {
   buildOverviewStepExecutionFromContext,
   buildTriggerContextFromExecution,
   buildTriggerStepExecutionFromContext,
+  isOverviewContextField,
 } from './workflow_pseudo_step_context';
 
 describe('buildTriggerContextFromExecution', () => {
@@ -56,6 +57,18 @@ describe('buildTriggerContextFromExecution', () => {
     expect(result).toEqual({
       triggerType: 'document',
       input: event,
+    });
+  });
+
+  it('should detect manual trigger when a legacy row has event.type === manual', () => {
+    const inputs = { severity: 'high', hostId: 'host-1' };
+    const result = buildTriggerContextFromExecution({
+      event: { type: 'manual', inputs, spaceId: 'default' },
+      inputs,
+    });
+    expect(result).toEqual({
+      triggerType: 'manual',
+      input: inputs,
     });
   });
 
@@ -222,6 +235,32 @@ describe('buildTriggerStepExecutionFromContext', () => {
     expect(result?.stepType).toBe('trigger_event');
   });
 
+  it('uses context.inputs as trigger input when a legacy row has event.type === manual', () => {
+    const inputs = { severity: 'high' };
+    const result = buildTriggerStepExecutionFromContext({
+      ...baseExecution,
+      stepExecutions: [completedActionStep],
+      context: {
+        event: { type: 'manual', inputs, spaceId: 'default' },
+        inputs,
+      },
+    });
+    expect(result).not.toBeNull();
+    expect(result?.stepId).toBe('manual');
+    expect(result?.stepType).toBe('trigger_manual');
+    expect(result?.input).toEqual(inputs);
+  });
+
+  it('labels the trigger manual when stored context has inputs and no event', () => {
+    const result = buildTriggerStepExecutionFromContext({
+      ...baseExecution,
+      context: { inputs: { message: 'test message' } },
+    });
+    expect(result?.stepId).toBe('manual');
+    expect(result?.stepType).toBe('trigger_manual');
+    expect(result?.input).toEqual({ message: 'test message' });
+  });
+
   it('exposes manual inputs as output when both event and inputs are present', () => {
     const result = buildTriggerStepExecutionFromContext({
       ...baseExecution,
@@ -267,6 +306,11 @@ describe('buildOverviewStepExecutionFromContext', () => {
     yaml: '',
     context: { inputs: {}, workflowRunId: 'run-1' },
   };
+
+  it('preserves the finish time without a context timestamp', () => {
+    const overview = buildOverviewStepExecutionFromContext(baseOverviewExecution);
+    expect(overview.finishedAt).toBe(baseOverviewExecution.finishedAt);
+  });
 
   it('adds executionError when execution.error is set and steps ran (no duplicate of trigger-only path)', () => {
     const overview = buildOverviewStepExecutionFromContext(baseOverviewExecution);
@@ -396,5 +440,25 @@ describe('buildOverviewStepExecutionFromContext', () => {
     });
     const input = overview.input as Record<string, unknown>;
     expect((input.workflow as Record<string, unknown>).version).toBe(2);
+  });
+});
+
+describe('isOverviewContextField', () => {
+  it.each(['workflow.name', 'execution.id', 'consts.target_index', 'kibanaUrl', 'now'])(
+    'treats %s as a workflow context path',
+    (field) => {
+      expect(isOverviewContextField(field)).toBe(true);
+    }
+  );
+
+  it.each(['trace.traceId', 'trace.entryTransactionId', 'executionError.message', 'skipReason'])(
+    'treats display-only %s as not a context path',
+    (field) => {
+      expect(isOverviewContextField(field)).toBe(false);
+    }
+  );
+
+  it('matches the top-level key only, not a prefix of it', () => {
+    expect(isOverviewContextField('traceSettings.enabled')).toBe(true);
   });
 });

@@ -13,7 +13,6 @@ import {
   ALERTING_V2_ACTION_POLICIES_READ_ROLE,
   apiTest,
   buildCreateActionPolicyData,
-  buildCreateRuleData,
   getActionPolicyUrl,
   NO_ACCESS_ROLE,
   testData,
@@ -61,30 +60,24 @@ apiTest.describe('Upsert action policy API', { tag: '@local-stateful-classic' },
       expect(response.body.snoozed_until).toBeNull();
       // On create, updatedAt equals createdAt — there has been no replace yet.
       expect(response.body.updated_at).toBe(response.body.created_at);
-      expect(response.body.auth.apiKey).toBeUndefined();
+      // API key ownership is server-side only and must never be exposed over the wire.
+      expect(response.body.auth).toBeUndefined();
     }
   );
 
-  apiTest(
-    'matcher: scopes a policy to a single rule via a rule.id matcher on create-via-PUT',
-    async ({ apiClient, apiServices }) => {
-      const rule = await apiServices.alertingV2.rules.create(
-        buildCreateRuleData({ metadata: { name: 'rule-for-upsert-scoped' } })
-      );
+  apiTest('matcher: scopes a policy to rules via tags on create-via-PUT', async ({ apiClient }) => {
+    const matcher = { tags: ['notify-upsert-scoped'] };
+    const response = await apiClient.put(getActionPolicyUrl('upsert-tag-scoped-policy'), {
+      headers: { ...testData.COMMON_HEADERS, ...writerHeaders },
+      body: buildCreateActionPolicyData({
+        name: 'tag-scoped-via-put',
+        matcher,
+      }),
+    });
 
-      const matcher = `rule.id: "${rule.id}"`;
-      const response = await apiClient.put(getActionPolicyUrl('upsert-rule-scoped-policy'), {
-        headers: { ...testData.COMMON_HEADERS, ...writerHeaders },
-        body: buildCreateActionPolicyData({
-          name: 'rule-scoped-via-put',
-          matcher,
-        }),
-      });
-
-      expect(response).toHaveStatusCode(201);
-      expect(response.body.matcher).toBe(matcher);
-    }
-  );
+    expect(response).toHaveStatusCode(201);
+    expect(response.body.matcher).toMatchObject(matcher);
+  });
 
   apiTest(
     'upsert: 200 replaces and rotates version+updated_at, preserves created_at/created_by',
@@ -95,7 +88,7 @@ apiTest.describe('Upsert action policy API', { tag: '@local-stateful-classic' },
         buildCreateActionPolicyData({
           name: 'first-version',
           description: 'before replace',
-          matcher: 'env == "production"',
+          matcher: { expression: 'env == "production"' },
           group_by: ['service.name'],
           throttle: { interval: '5m' },
         })
@@ -117,7 +110,7 @@ apiTest.describe('Upsert action policy API', { tag: '@local-stateful-classic' },
       expect(replaced.body.description).toBe('after replace');
       expect(replaced.body.destinations).toStrictEqual([{ type: 'workflow', id: 'wf-2' }]);
 
-      expect(replaced.body.created_by).toBe(created.created_by);
+      expect(replaced.body.created_by).toStrictEqual(created.created_by);
       expect(replaced.body.created_at).toBe(created.created_at);
 
       expect(replaced.body.updated_at).not.toBe(created.created_at);
@@ -133,7 +126,7 @@ apiTest.describe('Upsert action policy API', { tag: '@local-stateful-classic' },
         id,
         buildCreateActionPolicyData({
           name: 'with-optional-fields',
-          matcher: 'env == "production"',
+          matcher: { expression: 'env == "production"' },
           group_by: ['service.name'],
           throttle: { interval: '5m' },
         })

@@ -8,7 +8,8 @@
 import {
   bulkByIdsSchema,
   bulkByQuerySchema,
-  bulkGetRulesParamsSchema,
+  bulkCreateRulesRequestSchema,
+  bulkCreateRulesResponseSchema,
   bulkGetRulesResponseSchema,
   bulkResponseSchema,
   createRuleDataSchema,
@@ -18,11 +19,13 @@ import {
   ruleTagsResponseSchema,
   updateRuleBodySchema,
 } from '@kbn/alerting-v2-schemas';
-import { BULK_GET_RULES_REQUEST, BULK_GET_RULES_RESPONSE } from './bulk_get_rules_oas_example';
+import { BULK_GET_RULES_RESPONSE } from './bulk_get_rules_oas_example';
 import { RULE_TAGS_RESPONSE } from './get_rule_tags_oas_example';
 import { LIST_RULES_RESPONSE } from './list_rules_oas_example';
 import {
   BULK_BY_QUERY_REQUEST,
+  BULK_CREATE_RULES_REQUEST,
+  BULK_CREATE_RULES_RESPONSE,
   BULK_OPERATION_REQUEST,
   BULK_OPERATION_RESPONSE,
   CREATE_RULE_REQUEST,
@@ -38,10 +41,6 @@ describe('rule OAS example payloads', () => {
 
   it('keeps update request example valid against updateRuleBodySchema', () => {
     expect(updateRuleBodySchema.safeParse(UPDATE_RULE_REQUEST).success).toBe(true);
-  });
-
-  it('keeps bulk-get request example valid against bulkGetRulesParamsSchema', () => {
-    expect(bulkGetRulesParamsSchema.safeParse(BULK_GET_RULES_REQUEST).success).toBe(true);
   });
 
   it('keeps bulk-operation request examples valid against bulkByIdsSchema', () => {
@@ -66,6 +65,14 @@ describe('rule OAS example payloads', () => {
 
   it('keeps bulk-operation response example valid against bulkResponseSchema', () => {
     expect(bulkResponseSchema.safeParse(BULK_OPERATION_RESPONSE).success).toBe(true);
+  });
+
+  it('keeps bulk-create request example valid against bulkCreateRulesRequestSchema', () => {
+    expect(bulkCreateRulesRequestSchema.safeParse(BULK_CREATE_RULES_REQUEST).success).toBe(true);
+  });
+
+  it('keeps bulk-create response example valid against bulkCreateRulesResponseSchema', () => {
+    expect(bulkCreateRulesResponseSchema.safeParse(BULK_CREATE_RULES_RESPONSE).success).toBe(true);
   });
 
   it('keeps dry-run response example valid against dryRunResponseSchema', () => {

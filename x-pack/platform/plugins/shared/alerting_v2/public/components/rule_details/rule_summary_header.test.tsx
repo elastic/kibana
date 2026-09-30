@@ -6,10 +6,9 @@
  */
 
 import React from 'react';
-import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import { render, screen } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
-import { RULE_KIND_TOOLTIPS } from '@kbn/alerting-v2-constants';
-import { RuleHeaderDescription, RuleTagsList, RuleTitleWithBadges } from './rule_summary_header';
+import { RuleHeaderDescription, RuleTagsList } from './rule_summary_header';
 import { RuleProvider } from './rule_context';
 import type { RuleApiResponse } from '../../services/rules_api';
 
@@ -66,54 +65,5 @@ describe('RuleTagsList', () => {
     const rule = { ...baseRule, metadata: { name: 'No Tags' } } as RuleApiResponse;
     const { container } = wrap(<RuleTagsList />, rule);
     expect(container.innerHTML).toBe('');
-  });
-});
-
-describe('RuleTitleWithBadges', () => {
-  it('renders the rule name', () => {
-    wrap(<RuleTitleWithBadges />);
-    expect(screen.getByTestId('ruleName')).toHaveTextContent('My Rule');
-  });
-
-  it('renders kind badge as Events for signal rules', () => {
-    wrap(<RuleTitleWithBadges />);
-    expect(screen.getByTestId('kindBadge')).toHaveTextContent('Events');
-  });
-
-  it('renders kind badge as Alerts for alert rules', () => {
-    wrap(<RuleTitleWithBadges />, { ...baseRule, kind: 'alert' } as RuleApiResponse);
-    expect(screen.getByTestId('kindBadge')).toHaveTextContent('Alerts');
-  });
-
-  it('renders kind-specific tooltip for Events rules', async () => {
-    wrap(<RuleTitleWithBadges />);
-
-    fireEvent.mouseOver(screen.getByTestId('kindBadge'));
-
-    await waitFor(() => {
-      expect(screen.getByText(RULE_KIND_TOOLTIPS.signal)).toBeInTheDocument();
-    });
-  });
-
-  it('renders kind-specific tooltip for Alerts rules', async () => {
-    wrap(<RuleTitleWithBadges />, { ...baseRule, kind: 'alert' } as RuleApiResponse);
-
-    fireEvent.mouseOver(screen.getByTestId('kindBadge'));
-
-    await waitFor(() => {
-      expect(screen.getByText(RULE_KIND_TOOLTIPS.alert)).toBeInTheDocument();
-    });
-  });
-
-  it('renders enabled badge when rule is enabled', () => {
-    wrap(<RuleTitleWithBadges />);
-    expect(screen.getByTestId('enabledBadge')).toBeInTheDocument();
-    expect(screen.queryByTestId('disabledBadge')).not.toBeInTheDocument();
-  });
-
-  it('renders disabled badge when rule is disabled', () => {
-    wrap(<RuleTitleWithBadges />, { ...baseRule, enabled: false } as RuleApiResponse);
-    expect(screen.getByTestId('disabledBadge')).toBeInTheDocument();
-    expect(screen.queryByTestId('enabledBadge')).not.toBeInTheDocument();
   });
 });

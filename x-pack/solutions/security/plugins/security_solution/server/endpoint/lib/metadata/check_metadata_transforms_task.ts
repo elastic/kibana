@@ -33,6 +33,10 @@ export const VERSION = '0.0.1';
 const MAX_ATTEMPTS = 5;
 export const BASE_NEXT_ATTEMPT_DELAY = 5; // minutes
 
+// transform stats are only requested for METADATA_TRANSFORMS_PATTERN, so the expected transforms
+// have to be narrowed to the same pattern to stay comparable with the stats response
+const METADATA_TRANSFORM_ID_PREFIX = METADATA_TRANSFORMS_PATTERN.replace(/\*$/, '');
+
 export interface CheckMetadataTransformsTaskSetupContract {
   endpointAppContext: EndpointAppContext;
   core: CoreSetup;
@@ -145,27 +149,55 @@ export class CheckMetadataTransformsTask {
       return { state: taskInstance.state };
     }
 
-    const expectedTransforms = installation.installed_es.filter(
-      (asset) => asset.type === ElasticsearchAssetType.transform
+    const expectedTransformIds = new Set(
+      installation.installed_es
+        .filter(
+          (asset) =>
+            asset.type === ElasticsearchAssetType.transform &&
+            asset.id.startsWith(METADATA_TRANSFORM_ID_PREFIX)
+        )
+        .map(({ id }) => id)
     );
 
     const { transforms } = transformStatsResponse.body;
     let { reinstallAttempts } = taskInstance.state as LatestTaskStateSchema;
     let runAt: Date | undefined;
-    if (transforms.length !== expectedTransforms.length) {
-      const { attempts, didAttemptReinstall } = await this.reinstallTransformsIfNeeded(
+
+    if (!expectedTransformIds.size) {
+      // a same version package reinstall can strip the transform references from the installation,
+      // see https://github.com/elastic/kibana/issues/217503. Without them there is no expected set
+      // to compare against, and acting on transforms of unknown provenance is what turns this task
+      // destructive: reinstalling deletes and recreates the transform destination indices.
+      this.logger.warn(
+        `no metadata transforms are registered on the [${FLEET_ENDPOINT_PACKAGE}] package installation [${installation.version}], skipping transform health checks`
+      );
+      return this.buildNextTask({ reinstallAttempts });
+    }
+
+    const installedTransformIds = new Set(transforms.map(({ id }) => id));
+    const missingTransformIds = [...expectedTransformIds].filter(
+      (id) => !installedTransformIds.has(id)
+    );
+
+    if (missingTransformIds.length) {
+      const { attempts, didReinstallFail } = await this.reinstallTransformsIfNeeded(
         installation.version,
+        missingTransformIds,
         reinstallAttempts
       );
       reinstallAttempts = attempts;
 
-      // after a reinstall attempt next check sooner with exponential backoff
-      if (didAttemptReinstall) {
+      // only a failed reinstall backs off, a successful one returns to the regular interval
+      if (didReinstallFail) {
         runAt = this.getNextRunAt(reinstallAttempts);
       }
 
       return this.buildNextTask({ reinstallAttempts, runAt });
     }
+
+    // transforms of other package versions can linger in Elasticsearch, only the ones this
+    // installation owns should be restarted
+    const monitoredTransforms = transforms.filter(({ id }) => expectedTransformIds.has(id));
 
     let didAttemptRestart: boolean = false;
     let highestAttempt: number = 0;
@@ -173,7 +205,7 @@ export class CheckMetadataTransformsTask {
       ...taskInstance.state.restartAttempts,
     };
 
-    for (const transform of transforms) {
+    for (const transform of monitoredTransforms) {
       const restartedTransform = await this.restartTransformIfNeeded(
         esClient,
         transform,
@@ -250,26 +282,38 @@ export class CheckMetadataTransformsTask {
     };
   };
 
-  private reinstallTransformsIfNeeded = async (pkgVersion: string, currentAttempts = 0) => {
+  private reinstallTransformsIfNeeded = async (
+    pkgVersion: string,
+    missingTransformIds: string[],
+    currentAttempts = 0
+  ) => {
     let attempts = currentAttempts;
-    let didAttemptReinstall = false;
+    let didReinstallFail = false;
     const endpointPolicies = await this.endpointAppContext.service
       .getEndpointMetadataService()
       .getAllEndpointPackagePolicies();
 
     // endpoint not being used, no need to reinstall transforms
     if (!endpointPolicies.length) {
-      return { attempts, didAttemptReinstall };
+      return { attempts, didReinstallFail };
     }
 
     if (attempts > MAX_ATTEMPTS) {
-      this.logger.info('missing endpoint metadata transforms found, attempting reinstall');
-      return { attempts, didAttemptReinstall };
+      this.logger.warn(
+        `missing endpoint metadata transforms [${missingTransformIds.join(
+          ', '
+        )}] have failed to reinstall ${attempts} times, stopping auto reinstall attempts`
+      );
+      return { attempts, didReinstallFail };
     }
 
     try {
       // endpoint policy exists but transforms don't exist, attempt to reinstall
-      this.logger.info('missing endpoint transforms found, attempting reinstall');
+      this.logger.info(
+        `missing endpoint transforms [${missingTransformIds.join(
+          ', '
+        )}] found, attempting reinstall`
+      );
 
       const packageClient = this.endpointAppContext.service.getInternalFleetServices().packages;
 
@@ -295,13 +339,12 @@ export class CheckMetadataTransformsTask {
       const errMessage = `failed to reinstall endpoint transforms with error: ${err}`;
       this.logger.error(errMessage);
 
-      // restart failed, increment attempt count
+      // reinstall failed, increment attempt count
       attempts = attempts + 1;
-    } finally {
-      didAttemptReinstall = true;
+      didReinstallFail = true;
     }
 
-    return { attempts, didAttemptReinstall };
+    return { attempts, didReinstallFail };
   };
 
   private getTaskId = (): string => {
