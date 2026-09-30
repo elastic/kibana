@@ -182,7 +182,9 @@ describe('layer_actions', () => {
     let originalSyncDataForLayerId: unknown;
 
     beforeEach(() => {
+      // eslint-disable-next-line @typescript-eslint/no-var-requires
       originalGetLayerById = require('../selectors/map_selectors').getLayerById;
+      // eslint-disable-next-line @typescript-eslint/no-var-requires
       originalSyncDataForLayerId = require('./data_request_actions').syncDataForLayerId;
       // eslint-disable-next-line @typescript-eslint/no-var-requires
       require('./data_request_actions').syncDataForLayerId = syncDataForLayerIdMock;

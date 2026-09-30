@@ -43,77 +43,78 @@ test.describe(
       }
     });
 
-    test.describe('initial location', () => {
-      test.beforeEach(async ({ browserAuth, pageObjects }) => {
-        await browserAuth.loginAsPrivilegedUser();
-        await pageObjects.maps.openMapWithId(AUTO_FIT_INITIAL_LOCATION_MAP_ID);
-      });
+    test('initial location - should automatically fit to bounds on initial map load', async ({
+      browserAuth,
+      pageObjects,
+    }) => {
+      await browserAuth.loginAsPrivilegedUser();
+      await pageObjects.maps.openMapWithId(AUTO_FIT_INITIAL_LOCATION_MAP_ID);
 
-      test('should automatically fit to bounds on initial map load', async ({ pageObjects }) => {
-        await expect.poll(() => pageObjects.maps.getHits(), { timeout: 20_000 }).toBe('6');
+      await expect.poll(() => pageObjects.maps.getHits(), { timeout: 20_000 }).toBe('6');
 
-        const { lat, lon } = await pageObjects.maps.getView();
-        expect(Math.round(lat)).toBeGreaterThanOrEqual(41);
-        expect(Math.round(lat)).toBeLessThanOrEqual(43);
-        expect(Math.round(lon)).toBe(-99);
-      });
+      const { lat, lon } = await pageObjects.maps.getView();
+      expect(Math.round(lat)).toBeGreaterThanOrEqual(41);
+      expect(Math.round(lat)).toBeLessThanOrEqual(43);
+      expect(Math.round(lon)).toBe(-99);
     });
 
-    test.describe('with joins', () => {
-      test.beforeEach(async ({ browserAuth, pageObjects }) => {
-        await browserAuth.loginAsPrivilegedUser();
-        await pageObjects.maps.openMapWithId(JOIN_EXAMPLE_MAP_ID);
-        await pageObjects.maps.enableAutoFitToBounds();
-      });
+    test('with joins - should automatically fit to bounds when query is applied', async ({
+      browserAuth,
+      pageObjects,
+    }) => {
+      await browserAuth.loginAsPrivilegedUser();
+      await pageObjects.maps.openMapWithId(JOIN_EXAMPLE_MAP_ID);
+      await pageObjects.maps.enableAutoFitToBounds();
 
-      test('should automatically fit to bounds when query is applied', async ({
-        page,
-        pageObjects,
-      }) => {
-        // Set view to other side of world so no matching results
-        await pageObjects.maps.setView(0, 0, 6);
+      // Set view to other side of world so no matching results
+      await pageObjects.maps.setView(0, 0, 6);
 
-        // Setting query should trigger fit to bounds and move map
-        const origView = await pageObjects.maps.getView();
-        await pageObjects.maps.setAndSubmitQuery('prop1 >= 11');
-        await pageObjects.maps.waitForMapPanAndZoom(origView);
+      // Setting query should trigger fit to bounds and move map
+      const origView = await pageObjects.maps.getView();
+      await pageObjects.maps.setAndSubmitQuery('prop1 >= 11');
+      await pageObjects.maps.waitForMapPanAndZoom(origView);
 
-        const { lat, lon } = await pageObjects.maps.getView();
-        expect(Math.round(lat)).toBe(0);
-        expect(Math.round(lon)).toBe(60);
-      });
+      const { lat, lon } = await pageObjects.maps.getView();
+      expect(Math.round(lat)).toBe(0);
+      expect(Math.round(lon)).toBe(60);
     });
 
-    test.describe('without joins', () => {
-      test.beforeEach(async ({ browserAuth, pageObjects }) => {
-        await browserAuth.loginAsPrivilegedUser();
-        await pageObjects.maps.openMapWithId(DOCUMENT_EXAMPLE_MAP_ID);
-        await pageObjects.maps.enableAutoFitToBounds();
-      });
+    test('without joins - should automatically fit to bounds when query is applied', async ({
+      browserAuth,
+      pageObjects,
+    }) => {
+      await browserAuth.loginAsPrivilegedUser();
+      await pageObjects.maps.openMapWithId(DOCUMENT_EXAMPLE_MAP_ID);
+      await pageObjects.maps.enableAutoFitToBounds();
 
-      test('should automatically fit to bounds when query is applied', async ({ pageObjects }) => {
-        // Set view to other side of world so no matching results
-        await pageObjects.maps.setView(-15, -100, 6);
+      // Set view to other side of world so no matching results
+      await pageObjects.maps.setView(-15, -100, 6);
 
-        // Setting query should trigger fit to bounds and move map
-        const origView = await pageObjects.maps.getView();
-        await pageObjects.maps.setAndSubmitQuery('machine.os.raw : "ios"');
-        await pageObjects.maps.waitForMapPanAndZoom(origView);
+      // Setting query should trigger fit to bounds and move map
+      const origView = await pageObjects.maps.getView();
+      await pageObjects.maps.setAndSubmitQuery('machine.os.raw : "ios"');
+      await pageObjects.maps.waitForMapPanAndZoom(origView);
 
-        const hits = await pageObjects.maps.getHits();
-        expect(hits).toBe('2');
+      const hits = await pageObjects.maps.getHits();
+      expect(hits).toBe('2');
 
-        const { lat, lon } = await pageObjects.maps.getView();
-        expect(Math.round(lat)).toBe(43);
-        expect(Math.round(lon)).toBe(-102);
-      });
+      const { lat, lon } = await pageObjects.maps.getView();
+      expect(Math.round(lat)).toBe(43);
+      expect(Math.round(lon)).toBe(-102);
+    });
 
-      test('should sync layers even when there is no data', async ({ pageObjects }) => {
-        await pageObjects.maps.setAndSubmitQuery('machine.os.raw : "fake_os_with_no_matches"');
+    test('without joins - should sync layers even when there is no data', async ({
+      browserAuth,
+      pageObjects,
+    }) => {
+      await browserAuth.loginAsPrivilegedUser();
+      await pageObjects.maps.openMapWithId(DOCUMENT_EXAMPLE_MAP_ID);
+      await pageObjects.maps.enableAutoFitToBounds();
 
-        const hits = await pageObjects.maps.getHits();
-        expect(hits).toBe('0');
-      });
+      await pageObjects.maps.setAndSubmitQuery('machine.os.raw : "fake_os_with_no_matches"');
+
+      const hits = await pageObjects.maps.getHits();
+      expect(hits).toBe('0');
     });
   }
 );
