@@ -111,7 +111,9 @@ export const resolveUpdateInboundEventsEnabled = ({
   return requestedEnabled === undefined ? previouslyEnabled : requestedEnabled;
 };
 
-export const attachInboundEventsEnabled = <T extends { id: string; actionTypeId: string }>({
+export const attachInboundEventsEnabled = <
+  T extends { id: string; actionTypeId: string; isPreconfigured?: boolean }
+>({
   connectors,
   connectorIdsWithIdentity,
   connectorIdsWithEventsEnabled = new Set<string>(),
@@ -124,12 +126,14 @@ export const attachInboundEventsEnabled = <T extends { id: string; actionTypeId:
     if (!connectorTypeHasInboundEvents(connector.actionTypeId)) {
       return connector;
     }
+    // A shared id must not copy a preconfigured registration onto a saved row, or a saved identity onto a preconfigured row.
+    const isPreconfigured = connector.isPreconfigured === true;
     return {
       ...connector,
       isInboundEventsEnabled: resolveInboundEventsEnabled({
         actionTypeId: connector.actionTypeId,
-        hasIdentity: connectorIdsWithIdentity.has(connector.id),
-        eventsEnabled: connectorIdsWithEventsEnabled.has(connector.id),
+        hasIdentity: !isPreconfigured && connectorIdsWithIdentity.has(connector.id),
+        eventsEnabled: isPreconfigured && connectorIdsWithEventsEnabled.has(connector.id),
       }),
     };
   });
