@@ -89,6 +89,7 @@ const normalize = ({
   sessionTabs = [],
   openTabs = [],
   closedTabs = [],
+  defaultTabState,
   openTabsFromSession = true,
   navigationDataViewSpec,
 }: Partial<Parameters<typeof normalizeInlineDataViewIds>[0]>) =>
@@ -96,11 +97,37 @@ const normalize = ({
     sessionTabs,
     openTabs,
     closedTabs,
+    defaultTabState,
     openTabsFromSession,
     navigationDataViewSpec,
   });
 
 describe('normalizeInlineDataViewIds', () => {
+  it('includes the default tab in the shared map without resolving ambiguous pinned references', () => {
+    const defaultTabState = createLocalTab('default', { ...inlineDataView, id: 'legacy-id' });
+    const pinnedFilter: Filter = {
+      ...createFilter('legacy-id'),
+      $state: { store: FilterStateStore.GLOBAL_STATE },
+    };
+    defaultTabState.globalState = { filters: [pinnedFilter] };
+    const closedTab = {
+      ...createLocalTab('closed', { ...editedDataView, id: 'legacy-id' }),
+      closedAt: 1,
+    };
+
+    const normalized = normalize({ defaultTabState, closedTabs: [closedTab] });
+
+    expect(normalized.defaultTabState).toMatchObject({
+      initialInternalState: { serializedSearchSource: { index: { id: inlineDataViewId } } },
+      appState: { dataSource: createDataViewDataSource({ dataViewId: inlineDataViewId }) },
+      globalState: { filters: [pinnedFilter] },
+    });
+    expect(normalized.closedTabs[0].appState.dataSource).toEqual(
+      createDataViewDataSource({ dataViewId: editedDataViewId })
+    );
+    expect(normalized.dataViewIdMap.has('legacy-id')).toBe(false);
+  });
+
   it('assigns the spec ID to API tabs and binds their unreferenced filters', () => {
     const sessionTabs = [createSessionTab('api-a'), createSessionTab('api-b')];
     const originalSessionTabs = cloneDeep(sessionTabs);

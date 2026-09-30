@@ -8,23 +8,20 @@
  */
 
 import type { DataViewSpec } from '@kbn/data-views-plugin/common';
+import { toStoredFilters } from '@kbn/as-code-filters-transforms';
 import type { Filter } from '@kbn/es-query';
 import { BooleanRelation, buildCombinedFilter, FilterStateStore } from '@kbn/es-query';
 import { cloneDeep } from 'lodash';
 import { generateInlineDataViewId } from './inline_data_view';
 import {
   bindUnreferencedAppFilters,
-  createInlineDataViewIdMap,
   getInlineDataViewIdentity,
   normalizeInlineSearchSource,
   translateFilterDataViewIds,
-  withOwnInlineDataViewId,
 } from './inline_data_view_references';
 
 const inlineDataView: DataViewSpec = { title: 'logs-*', timeFieldName: '@timestamp' };
-const otherDataView: DataViewSpec = { title: 'metrics-*' };
 const inlineDataViewId = generateInlineDataViewId(inlineDataView);
-const otherDataViewId = generateInlineDataViewId(otherDataView);
 
 const unreferencedFilter: Filter = { meta: {}, query: { match_all: {} } };
 const foreignFilter: Filter = {
@@ -58,55 +55,6 @@ describe('getInlineDataViewIdentity', () => {
 
   it('ignores referenced Data Views', () => {
     expect(getInlineDataViewIdentity({ index: 'saved-data-view' })).toBeUndefined();
-  });
-});
-
-describe('createInlineDataViewIdMap', () => {
-  it('maps each previous ID that refers to a single spec', () => {
-    const idMap = createInlineDataViewIdMap([
-      getInlineDataViewIdentity({ index: { ...inlineDataView, id: 'first-id' } }),
-      getInlineDataViewIdentity({ index: { ...inlineDataView, id: 'second-id' } }),
-      getInlineDataViewIdentity({ index: inlineDataView }),
-      undefined,
-    ]);
-
-    expect(Object.fromEntries(idMap)).toEqual({
-      'first-id': inlineDataViewId,
-      'second-id': inlineDataViewId,
-    });
-  });
-
-  it('leaves out previous IDs that refer to different specs', () => {
-    const idMap = createInlineDataViewIdMap([
-      getInlineDataViewIdentity({ index: { ...inlineDataView, id: 'shared-id' } }),
-      getInlineDataViewIdentity({ index: { ...otherDataView, id: 'shared-id' } }),
-    ]);
-
-    expect(idMap.size).toBe(0);
-  });
-
-  it('treats a derived ID used by another spec as ambiguous', () => {
-    const idMap = createInlineDataViewIdMap([
-      getInlineDataViewIdentity({ index: { ...inlineDataView, id: inlineDataViewId } }),
-      getInlineDataViewIdentity({ index: { ...otherDataView, id: inlineDataViewId } }),
-    ]);
-
-    expect(idMap.has(inlineDataViewId)).toBe(false);
-  });
-});
-
-describe('withOwnInlineDataViewId', () => {
-  it('adds the own previous ID even when it is ambiguous elsewhere', () => {
-    const identity = getInlineDataViewIdentity({ index: { ...otherDataView, id: 'shared-id' } });
-
-    expect(withOwnInlineDataViewId(identity, new Map()).get('shared-id')).toBe(otherDataViewId);
-  });
-
-  it('returns the same map when the representation has no previous ID', () => {
-    const idMap = new Map([['legacy-id', inlineDataViewId]]);
-    const identity = getInlineDataViewIdentity({ index: inlineDataView });
-
-    expect(withOwnInlineDataViewId(identity, idMap)).toBe(idMap);
   });
 });
 
@@ -160,8 +108,42 @@ describe('bindUnreferencedAppFilters', () => {
     ).toEqual([createFilterWithIndex(unreferencedFilter, 'view-id'), pinnedFilter, foreignFilter]);
   });
 
+  it.each([undefined, 'view-id'])('binds nested filters when the group ID is %s', (id) => {
+    const foreignGroup = buildCombinedFilter(
+      BooleanRelation.OR,
+      [unreferencedFilter, foreignFilter],
+      { id: 'foreign-data-view-id' }
+    );
+    const filters = [
+      buildCombinedFilter(BooleanRelation.AND, [unreferencedFilter, foreignGroup], { id }),
+    ];
+    const original = cloneDeep(filters);
+    const boundFilters = bindUnreferencedAppFilters(filters, 'view-id');
+
+    expect(boundFilters).toEqual([
+      buildCombinedFilter(
+        BooleanRelation.AND,
+        [
+          createFilterWithIndex(unreferencedFilter, 'view-id'),
+          buildCombinedFilter(
+            BooleanRelation.OR,
+            [createFilterWithIndex(unreferencedFilter, 'foreign-data-view-id'), foreignFilter],
+            { id: 'foreign-data-view-id' }
+          ),
+        ],
+        { id: 'view-id' }
+      ),
+    ]);
+    expect(filters).toEqual(original);
+    expect(bindUnreferencedAppFilters(boundFilters, 'view-id')).toBe(boundFilters);
+  });
+
   it('returns the same filters when there is nothing to bind', () => {
-    const filters = [pinnedFilter, foreignFilter];
+    const pinnedGroup = {
+      ...buildCombinedFilter(BooleanRelation.OR, [unreferencedFilter], { id: undefined }),
+      $state: { store: FilterStateStore.GLOBAL_STATE },
+    };
+    const filters = [pinnedFilter, foreignFilter, pinnedGroup];
 
     expect(bindUnreferencedAppFilters(filters, 'view-id')).toBe(filters);
   });
@@ -173,6 +155,45 @@ describe('normalizeInlineSearchSource', () => {
     filter: [createFilter('legacy-id'), unreferencedFilter],
   };
   const identity = getInlineDataViewIdentity(searchSource);
+  const ownDataViewIdMap = new Map([['legacy-id', inlineDataViewId]]);
+
+  it('normalizes an API group like the same group with explicit legacy references', () => {
+    const filters: Parameters<typeof toStoredFilters>[0] = [
+      {
+        type: 'group',
+        group: {
+          operator: 'or',
+          conditions: [
+            { field: 'status', operator: 'is', value: '500' },
+            { field: 'status', operator: 'is', value: '503' },
+          ],
+        },
+      },
+    ];
+    const apiSource = { index: inlineDataView, filter: toStoredFilters(filters) };
+    const legacySource = {
+      index: { ...inlineDataView, id: 'legacy-id' },
+      filter: toStoredFilters(filters.map((filter) => ({ ...filter, data_view_id: 'legacy-id' }))),
+    };
+
+    expect(
+      normalizeInlineSearchSource({
+        searchSource: apiSource,
+        identity: getInlineDataViewIdentity(apiSource),
+        ownDataViewIdMap: new Map(),
+        dataViewIdMap: new Map(),
+        bindUnreferencedFilters: true,
+      })
+    ).toEqual(
+      normalizeInlineSearchSource({
+        searchSource: legacySource,
+        identity: getInlineDataViewIdentity(legacySource),
+        ownDataViewIdMap,
+        dataViewIdMap: new Map(),
+        bindUnreferencedFilters: false,
+      })
+    );
+  });
 
   it('assigns the derived ID and translates its own references', () => {
     const input = cloneDeep(searchSource);
@@ -180,6 +201,7 @@ describe('normalizeInlineSearchSource', () => {
     const normalized = normalizeInlineSearchSource({
       searchSource: input,
       identity,
+      ownDataViewIdMap,
       dataViewIdMap: new Map(),
       bindUnreferencedFilters: false,
     });
@@ -195,6 +217,7 @@ describe('normalizeInlineSearchSource', () => {
     const normalized = normalizeInlineSearchSource({
       searchSource,
       identity,
+      ownDataViewIdMap,
       dataViewIdMap: new Map(),
       bindUnreferencedFilters: true,
     });
@@ -205,7 +228,7 @@ describe('normalizeInlineSearchSource', () => {
     ]);
   });
 
-  it('translates pinned filters only with previous IDs that refer to a single spec', () => {
+  it('uses the supplied shared map for pinned references', () => {
     const pinnedLegacyFilter: Filter = {
       ...createFilter('legacy-id'),
       $state: { store: FilterStateStore.GLOBAL_STATE },
@@ -215,6 +238,7 @@ describe('normalizeInlineSearchSource', () => {
       normalizeInlineSearchSource({
         searchSource: input,
         identity,
+        ownDataViewIdMap,
         dataViewIdMap,
         bindUnreferencedFilters: false,
       });
@@ -240,6 +264,7 @@ describe('normalizeInlineSearchSource', () => {
       normalizeInlineSearchSource({
         searchSource: normalizedSearchSource,
         identity: normalizedIdentity,
+        ownDataViewIdMap: new Map(),
         dataViewIdMap: new Map(),
         bindUnreferencedFilters: true,
       })

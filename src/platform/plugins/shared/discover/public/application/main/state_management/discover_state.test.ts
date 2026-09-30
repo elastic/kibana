@@ -509,6 +509,40 @@ describe('Discover state', () => {
       localStorage.removeItem(TABS_LOCAL_STORAGE_KEY);
     });
 
+    it('normalizes a legacy by-value panel and its URL and filter references together', async () => {
+      const services = createDiscoverServicesMock();
+      services.storage = new Storage(localStorage);
+      services.history = createMemoryHistory({
+        initialEntries: ['/#?_a=(index:stored-inline-id)'],
+      });
+      jest.spyOn(services.embeddableEditor, 'isByValueEditor').mockReturnValue(true);
+      jest.spyOn(services.embeddableEditor, 'isEmbeddedEditor').mockReturnValue(true);
+      jest
+        .spyOn(services.embeddableEditor, 'getByValueTab')
+        .mockReturnValue(cloneDeep(legacySession.tabs[0]));
+      const state = createState(services);
+
+      await state.initializeTabs();
+      const tabId = state.getCurrentTab().id;
+      expect(state.getCurrentTab().initialInternalState?.serializedSearchSource?.index).toEqual({
+        id: apiDataViewId,
+        title: 'logs-*',
+      });
+      expect(state.stateStorageContainer.get(APP_STATE_URL_KEY)).toEqual({
+        dataSource: createDataViewDataSource({ dataViewId: apiDataViewId }),
+      });
+
+      await state.initializeSingleTab({ tabId });
+
+      expect(
+        selectTabRuntimeState(state.runtimeStateManager, tabId).currentDataView$.getValue()?.id
+      ).toBe(apiDataViewId);
+      expect(state.getCurrentTab().appState.dataSource).toEqual(
+        createDataViewDataSource({ dataViewId: apiDataViewId })
+      );
+      expectLoadedFilters(services, apiDataViewId);
+    });
+
     it.each([
       { source: 'legacy', loadSession: () => cloneDeep(legacySession) },
       { source: 'HTTP', loadSession: () => fromDiscoverSessionApiResponse(cloneDeep(response)) },

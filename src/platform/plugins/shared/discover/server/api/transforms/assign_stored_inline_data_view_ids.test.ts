@@ -189,7 +189,7 @@ describe('assignStoredInlineDataViewIds', () => {
     expect(readInlineId(result)).not.toBe('legacy-id');
   });
 
-  it('keeps the ID and submitted order when field exclusions are reordered', () => {
+  it('assigns a new ID and preserves submitted order when field exclusions are reordered', () => {
     const previousSpec = {
       ...inlineSpec,
       id: 'legacy-id',
@@ -204,7 +204,12 @@ describe('assignStoredInlineDataViewIds', () => {
 
     const result = assignStoredInlineDataViewIds(input, existing);
 
-    expect(readSearchSource(result).index).toEqual({ ...previousSpec, sourceFilters });
+    expect(readSearchSource(result).index).toEqual({
+      ...previousSpec,
+      id: expect.any(String),
+      sourceFilters,
+    });
+    expect(readInlineId(result)).not.toBe('legacy-id');
     expect(JSON.stringify({ input, existing })).toBe(before);
   });
 

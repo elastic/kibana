@@ -68,11 +68,12 @@ export interface TabsInternalStatePayload {
   recentlyClosedTabs: RecentlyClosedTabState[];
 }
 
-/** The session and the tabs a load restores, before any of them is consumed. */
+/** The session, restored tabs and fallback tab before a load consumes them. */
 export interface TabsToPrepare {
   session: DiscoverSession | undefined;
   openTabs: TabState[];
   closedTabs: RecentlyClosedTabState[];
+  defaultTabState: Omit<TabState, keyof TabItem>;
 }
 
 export interface TabsStorageManager {
@@ -100,7 +101,7 @@ export interface TabsStorageManager {
     shouldClearAllTabs?: boolean;
     defaultTabState: Omit<TabState, keyof TabItem>;
     /**
-     * Prepares the session and every restored tab. Only open tabs stored for the same session
+     * Prepares the session, restored tabs and fallback. Only open tabs stored for the same session
      * belong to it; recently closed tabs keep no session.
      */
     prepareTabs?: (tabs: TabsToPrepare & { openTabsFromSession: boolean }) => TabsToPrepare;
@@ -465,6 +466,7 @@ export const createTabsStorageManager = ({
       session: persistedDiscoverSession,
       openTabs: storedOpenTabs,
       closedTabs: storedClosedTabs,
+      defaultTabState,
       openTabsFromSession:
         persistedDiscoverSession !== undefined &&
         persistedDiscoverSession.id === storedTabsState.discoverSessionId,
@@ -472,6 +474,7 @@ export const createTabsStorageManager = ({
     const updatedDiscoverSession = prepared ? prepared.session : persistedDiscoverSession;
     const previousOpenTabs = prepared?.openTabs ?? storedOpenTabs;
     const closedTabs = prepared?.closedTabs ?? storedClosedTabs;
+    const preparedDefaultTabState = prepared?.defaultTabState ?? defaultTabState;
     let openTabs = shouldClearAllTabs ? [] : previousOpenTabs;
 
     const persistedTabs = updatedDiscoverSession?.tabs.map((tab) =>
@@ -510,7 +513,7 @@ export const createTabsStorageManager = ({
         (selectedTabId && tabsStateFromURL?.tabLabel && updatedDiscoverSession)
       ) {
         const newTab = {
-          ...defaultTabState,
+          ...preparedDefaultTabState,
           ...createTabItem(openTabs),
         };
 
@@ -556,7 +559,7 @@ export const createTabsStorageManager = ({
 
     // otherwise open the first tab from the Discover Session SO or a new default tab as a fallback
     const newDefaultTab = {
-      ...defaultTabState,
+      ...preparedDefaultTabState,
       ...createTabItem([]),
     };
 

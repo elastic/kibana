@@ -137,10 +137,11 @@ describe('TabsStorageManager', () => {
   });
 
   const createPrepareTabs = () =>
-    jest.fn(({ session, openTabs, closedTabs }: TabsToPrepare) => ({
+    jest.fn(({ session, openTabs, closedTabs, defaultTabState }: TabsToPrepare) => ({
       session: session && { ...session, title: 'Prepared session' },
       openTabs: openTabs.map((tab) => ({ ...tab, label: `Prepared ${tab.label}` })),
       closedTabs: closedTabs.map((tab) => ({ ...tab, label: `Prepared ${tab.label}` })),
+      defaultTabState,
     }));
 
   it('should push tab state to URL', async () => {
@@ -390,6 +391,7 @@ describe('TabsStorageManager', () => {
       session: persistedDiscoverSession,
       openTabs: [toRestoredTab(mockTab1), toRestoredTab(mockTab2)],
       closedTabs: [toRestoredTab(mockRecentlyClosedTab)],
+      defaultTabState: DEFAULT_TAB_STATE,
       openTabsFromSession: true,
     });
     expect(loadedProps.updatedDiscoverSession).toEqual(preparedDiscoverSession);

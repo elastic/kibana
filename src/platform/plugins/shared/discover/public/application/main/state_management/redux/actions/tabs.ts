@@ -472,11 +472,12 @@ export const initializeTabs = createInternalStateAsyncThunk(
       shouldClearAllTabs,
       defaultTabState: byValueEmbeddableTabState ?? DEFAULT_TAB_STATE,
       // Give each inline view the ID of its own spec before the document or local tabs are used.
-      prepareTabs: ({ session, openTabs, closedTabs, openTabsFromSession }) => {
+      prepareTabs: ({ session, openTabs, closedTabs, defaultTabState, openTabsFromSession }) => {
         normalized = normalizeInlineDataViewIds({
           sessionTabs: session?.tabs ?? [],
           openTabs,
           closedTabs,
+          defaultTabState,
           openTabsFromSession,
           navigationDataViewSpec: initialTabState?.dataViewSpec,
         });
@@ -488,6 +489,7 @@ export const initializeTabs = createInternalStateAsyncThunk(
               : session,
           openTabs: normalized.openTabs,
           closedTabs: normalized.closedTabs,
+          defaultTabState: normalized.defaultTabState,
         };
       },
     });
