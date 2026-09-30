@@ -472,10 +472,6 @@ describe('createFiltersFromClickEvent', () => {
           fieldsAdd.mockClear();
         });
 
-        afterEach(() => {
-          clearKnownEsqlViewSources();
-        });
-
         test('creates a phrase filter for a STATS grouping field on a view', async () => {
           useViewColumn('meow', 'geo.dest', 'US');
 

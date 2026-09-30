@@ -132,7 +132,7 @@ function mapResponseToDatatable(
       const { isSourceFieldFilterable, sourceField } = resolveSourceField(
         name,
         querySummary,
-        renameSourceFieldMap
+        renameSourceFieldMap ?? new Map()
       );
 
       return {

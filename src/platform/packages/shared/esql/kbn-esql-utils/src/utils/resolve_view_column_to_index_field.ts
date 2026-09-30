@@ -9,7 +9,7 @@
 
 import { isSubQuery, Parser } from '@elastic/esql';
 import type { EsqlView } from '@kbn/esql-types';
-import { buildRenameSourceFieldMap } from './build_rename_source_field_map';
+import { buildRenameSourceFieldMapFromCommands } from './build_rename_source_field_map';
 import {
   getIndexPatternFromESQLQuery,
   splitIndexPatternSources,
@@ -36,7 +36,9 @@ const filterableSourceField = (query: string, fieldName: string): string | undef
     }
 
     const summary = getQuerySummaryFromCommands(root.commands, query);
-    const renameMap = summary.renamedColumnsPairs?.size ? buildRenameSourceFieldMap(query) : null;
+    const renameMap = summary.renamedColumnsPairs?.size
+      ? buildRenameSourceFieldMapFromCommands(root.commands, query)
+      : new Map<string, string>();
     const { isSourceFieldFilterable, sourceField } = resolveSourceField(
       fieldName,
       summary,

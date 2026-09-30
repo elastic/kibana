@@ -103,13 +103,12 @@ export function getQuerySummary(query: string): ESQLCommandSummary {
 export function resolveSourceField(
   fieldName: string,
   summary: ESQLCommandSummary,
-  renameMap: ReadonlyMap<string, string> | null
+  renameMap: ReadonlyMap<string, string>
 ): { isSourceFieldFilterable: boolean; sourceField: string } {
-  const isSourceFieldFilterable =
-    !summary.newColumns.has(fieldName) || (renameMap?.has(fieldName) ?? false);
+  const isSourceFieldFilterable = !summary.newColumns.has(fieldName) || renameMap.has(fieldName);
   return {
     isSourceFieldFilterable,
-    sourceField: renameMap?.get(fieldName) ?? fieldName,
+    sourceField: renameMap.get(fieldName) ?? fieldName,
   };
 }
 
