@@ -33,11 +33,12 @@ const createContext = (input: Record<string, unknown>): StepHandlerContext<never
     stepType: 'investigations.reopen',
   } as unknown as StepHandlerContext<never, never>);
 
-const makeConversation = (status: string, title: string) => ({
+const makeConversation = (status: string, title: string, rename = true) => ({
   id: 'conv-1',
   title,
   template_id: 'investigation',
   metadata: { status },
+  permissions: { rename, delete: rename, update_access_control: rename },
 });
 
 describe('investigations.reopen step', () => {
@@ -46,11 +47,15 @@ describe('investigations.reopen step', () => {
   });
 
   const makeDefinition = (
-    conversationData: { status: string; title: string },
+    conversationData: { status: string; title: string; rename?: boolean },
     setStatusMock = jest.fn().mockResolvedValue({ status: 'open' }),
     updateMock = jest.fn().mockResolvedValue({})
   ) => {
-    const conv = makeConversation(conversationData.status, conversationData.title);
+    const conv = makeConversation(
+      conversationData.status,
+      conversationData.title,
+      conversationData.rename
+    );
     const getConversationClient = jest.fn().mockResolvedValue({
       get: jest.fn().mockResolvedValue(conv),
       update: updateMock,
@@ -95,30 +100,78 @@ describe('investigations.reopen step', () => {
     expect(result.output).toEqual({ reopened: true, title: '[Reopen] My Investigation' });
   });
 
-  it('should not double-prefix the title when [Reopen] is already present', async () => {
-    const { definition, updateMock } = makeDefinition({
+  it('should rename before reopening so the investigation stays closed until the last write', async () => {
+    const { definition, setStatusMock, updateMock } = makeDefinition({
+      status: 'closed',
+      title: 'My Investigation',
+    });
+
+    await definition.handler(createContext({ conversationId: 'conv-1' }));
+
+    expect(updateMock.mock.invocationCallOrder[0]).toBeLessThan(
+      setStatusMock.mock.invocationCallOrder[0]
+    );
+  });
+
+  it('should skip the rename when [Reopen] is already present', async () => {
+    const { definition, setStatusMock, updateMock } = makeDefinition({
       status: 'closed',
       title: '[Reopen] My Investigation',
     });
 
     const result = await definition.handler(createContext({ conversationId: 'conv-1' }));
 
-    expect(updateMock).toHaveBeenCalledWith({
-      id: 'conv-1',
-      title: '[Reopen] My Investigation',
-    });
+    expect(updateMock).not.toHaveBeenCalled();
+    expect(setStatusMock).toHaveBeenCalledWith(FAKE_REQUEST, 'conv-1', { status: 'open' });
     expect(result.output).toEqual({ reopened: true, title: '[Reopen] My Investigation' });
   });
 
-  it('should propagate a status service failure as an ApiError', async () => {
-    const { definition } = makeDefinition(
+  it('should fail with PermissionError without writing anything when the caller cannot rename', async () => {
+    const { definition, setStatusMock, updateMock } = makeDefinition({
+      status: 'closed',
+      title: 'My Investigation',
+      rename: false,
+    });
+
+    await expect(
+      definition.handler(createContext({ conversationId: 'conv-1' }))
+    ).rejects.toMatchObject({ type: 'PermissionError' });
+    expect(updateMock).not.toHaveBeenCalled();
+    expect(setStatusMock).not.toHaveBeenCalled();
+  });
+
+  it('should leave the investigation closed when the rename fails', async () => {
+    const { definition, setStatusMock } = makeDefinition(
       { status: 'closed', title: 'My Investigation' },
+      undefined,
       jest.fn().mockRejectedValue(new Error('ES unavailable'))
     );
 
     await expect(
       definition.handler(createContext({ conversationId: 'conv-1' }))
     ).rejects.toMatchObject({ type: 'ApiError', message: 'ES unavailable' });
+    expect(setStatusMock).not.toHaveBeenCalled();
+  });
+
+  // The retry after a rename that landed and a status write that did not: the
+  // investigation is still closed, so it must still report `reopened: true`.
+  it('should still report reopened on a retry after the status write failed', async () => {
+    const setStatusMock = jest
+      .fn()
+      .mockRejectedValueOnce(new Error('ES unavailable'))
+      .mockResolvedValueOnce({ status: 'open' });
+    const first = makeDefinition({ status: 'closed', title: 'My Investigation' }, setStatusMock);
+    await expect(
+      first.definition.handler(createContext({ conversationId: 'conv-1' }))
+    ).rejects.toMatchObject({ type: 'ApiError' });
+
+    const retry = makeDefinition(
+      { status: 'closed', title: '[Reopen] My Investigation' },
+      setStatusMock
+    );
+    const result = await retry.definition.handler(createContext({ conversationId: 'conv-1' }));
+
+    expect(result.output).toEqual({ reopened: true, title: '[Reopen] My Investigation' });
   });
 
   it('should fail the step with ValidationError when the conversation is not an investigation', async () => {

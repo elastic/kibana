@@ -8,6 +8,7 @@
 import type { KibanaRequest } from '@kbn/core/server';
 import type { ConversationPublicClient } from '@kbn/agent-builder-server';
 import { createServerStepDefinition } from '@kbn/workflows-extensions/server';
+import { ExecutionError } from '@kbn/workflows/server';
 import { reopenInvestigationStepCommonDefinition } from '../../../common/investigations/step_types/reopen_investigation_step';
 import { parseStepInput } from '../../impact/step_types/parse_step_input';
 import { toStepError } from './to_step_error';
@@ -39,15 +40,28 @@ export const getReopenInvestigationStepDefinition = ({
           return { output: { reopened: false, title: conv.title } };
         }
 
-        await getInvestigationStatusService().setStatus(request, input.conversationId, {
-          status: 'open',
-        });
+        // Status writes need converse access but renames need ownership, so check
+        // up front rather than reopen and then fail on the title.
+        if (!conv.permissions.rename) {
+          throw new ExecutionError({
+            type: 'PermissionError',
+            message: `Not allowed to rename investigation ${input.conversationId}, so it cannot be reopened`,
+          });
+        }
 
+        // Title before status: the investigation stays closed until the last write,
+        // so a retry after any partial failure still takes this branch and reports
+        // `reopened: true`, which is what keeps the caller from auto-approving.
         const newTitle = conv.title.startsWith(REOPEN_PREFIX)
           ? conv.title
           : `${REOPEN_PREFIX}${conv.title}`;
+        if (newTitle !== conv.title) {
+          await client.update({ id: input.conversationId, title: newTitle });
+        }
 
-        await client.update({ id: input.conversationId, title: newTitle });
+        await getInvestigationStatusService().setStatus(request, input.conversationId, {
+          status: 'open',
+        });
 
         return { output: { reopened: true, title: newTitle } };
       } catch (error) {

@@ -9,7 +9,7 @@
 
 import { parse } from 'yaml';
 import ALERTZERO_CREATE_PROPOSAL_YAML from './create_proposal.yaml';
-import { parseDuration } from '../../../common/utils';
+import { createWorkflowLiquidEngine, parseDuration } from '../../../common/utils';
 import { CREATE_PROPOSAL_WORKFLOW_ID } from '../proposals';
 import CREATE_PROPOSAL_YAML from '../proposals/create_proposal.yaml';
 
@@ -62,13 +62,32 @@ describe('AlertZero create proposal bridge', () => {
       expect(resolveAutoApproveStep().type).toBe('data.set');
     });
 
-    it('forces autoApprove false when the investigation was reopened', () => {
-      // Expression must short-circuit when reopened is true:
-      // `inputs.autoApprove == true and steps.reopen_investigation.output.reopened != true`
-      const value = resolveAutoApproveStep().with?.value as string;
-      expect(value).toContain('steps.reopen_investigation.output.reopened != true');
-      expect(value).toContain('inputs.autoApprove == true');
-    });
+    const evaluateAutoApprove = (autoApprove: boolean | undefined, reopened: boolean): unknown =>
+      createWorkflowLiquidEngine().evalValueSync(
+        String(resolveAutoApproveStep().with?.value)
+          .replace(/^\$\{\{/, '')
+          .replace(/\}\}$/, '')
+          .trim(),
+        { inputs: { autoApprove }, steps: { reopen_investigation: { output: { reopened } } } }
+      );
+
+    it.each([true, false, undefined])(
+      'never auto-approves on a reopened investigation (caller autoApprove: %s)',
+      (autoApprove) => {
+        expect(evaluateAutoApprove(autoApprove, true)).toBe(false);
+      }
+    );
+
+    it.each([
+      [true, true],
+      [false, false],
+      [undefined, false],
+    ])(
+      'follows the caller on an investigation that was already open (autoApprove: %s)',
+      (autoApprove, expected) => {
+        expect(evaluateAutoApprove(autoApprove, false)).toBe(expected);
+      }
+    );
   });
 
   describe('the forward', () => {
