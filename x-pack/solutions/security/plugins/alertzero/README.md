@@ -209,7 +209,7 @@ The Workers service owns per-space installation, reading persisted values, enabl
 
 Not every Worker is schedule-driven — the rest are alert- or event-triggered — so a schedule is a per-Worker opt-in rather than part of `CommonWorkerTemplateValues`. A Worker without one carries no interval in its template values and none in its projected settings.
 
-Scheduled Workers today: `system-security-floor-attack-discovery` (default `24h`) and `system-security-detection-rule-tuning` (default `2h`, also keeps a `manual` trigger for on-demand sweeps).
+Scheduled Workers today: `system-security-floor-attack-discovery` (default `24h`), `system-security-detection-rule-tuning` (default `2h`) and `system-security-detection-rule-coverage` (default `1h`). The two Detection Workers also keep a `manual` trigger for on-demand sweeps.
 
 The interval is a positive count with a unit of minutes, hours or days (`'30m'`, `'24h'`, `'7d'`). It is validated by the `WorkerScheduleInterval` OpenAPI schema at the route boundary and rendered verbatim into the trigger's `every`. Seconds are not offered: the workflow engine only accepts `s` at 60 or above. Changing an interval rewrites the workflow YAML, and the post-install `updateWorkflow` call is what re-registers the Task Manager task.
 
