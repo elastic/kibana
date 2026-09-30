@@ -46,7 +46,7 @@ const getUneditablePanelError = ({ id, type }: AttachmentPanel): string => {
  * fails instead of being rewritten. This is the only place an edit's renderer is
  * decided; the resolvers trust the one on the request.
  */
-const toPanelResolutionRequest = (
+const toEditResolutionRequest = (
   panelInput: EditPanelRequestInput,
   existingPanel: AttachmentPanel
 ): { request: PanelResolutionRequest } | { error: string } => {
@@ -144,7 +144,7 @@ export const editPanelsOperation = defineOperation({
         continue;
       }
 
-      const result = toPanelResolutionRequest(panelInput, existingPanel);
+      const result = toEditResolutionRequest(panelInput, existingPanel);
       if ('error' in result) {
         recordFailure(panelInput.panelId, result.error);
         continue;

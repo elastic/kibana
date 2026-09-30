@@ -67,7 +67,7 @@ const collectPanelCreationRequests = (
 };
 
 /** Maps a new-panel request input onto the resolution request for its renderer. */
-const toPanelResolutionRequest = ({
+const toCreationResolutionRequest = ({
   operationType,
   panelInput,
 }: PanelCreationRequest): PanelResolutionRequest => {
@@ -113,7 +113,7 @@ export const resolvePanelCreationRequests = async ({
           await Promise.all(
             requests.map(async (request) => ({
               request,
-              resolvedPanel: await resolvePanelContent(toPanelResolutionRequest(request)),
+              resolvedPanel: await resolvePanelContent(toCreationResolutionRequest(request)),
             }))
           ),
         ] as const
