@@ -9,10 +9,11 @@
 
 import React from 'react';
 import { BehaviorSubject } from 'rxjs';
-import { fireEvent, render, screen, waitFor } from '@testing-library/react';
+import { act, fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import type { Filter, Query } from '@kbn/es-query';
+import type { StatefulSearchBarProps } from '@kbn/unified-search-plugin/public';
 import type { VegaPluginStartDependencies } from '../plugin';
 import { setData } from '../services';
 import type { VegaEmbeddableApi } from './vega_embeddable';
@@ -63,42 +64,12 @@ const renderFlyout = ({
     setFilters: jest.fn((filters?: Filter[]) => filters$.next(filters)),
   } as unknown as VegaEmbeddableApi;
 
-  const SearchBar = ((props: unknown) => {
-    const { query, filters, indexPatterns, onQuerySubmit, onFiltersUpdated } = props as {
-      query?: Query;
-      filters: Filter[];
-      indexPatterns: DataView[];
-      onQuerySubmit: (payload: { dateRange: unknown; query?: Query }) => void;
-      onFiltersUpdated: (filters: Filter[]) => void;
-    };
-
-    return (
-      <div>
-        <div>{`query:${query ? `${query.language}:${query.query}` : 'none'}`}</div>
-        <div>{`filtersLength:${filters.length}`}</div>
-        <div>{`dataViews:${indexPatterns.map(({ id }) => id).join(',')}`}</div>
-        <button
-          onClick={() =>
-            onQuerySubmit({
-              dateRange: undefined,
-              query: { language: 'kuery', query: 'bytes > 1000' },
-            })
-          }
-        >
-          updateQuery
-        </button>
-        <button
-          onClick={() =>
-            onFiltersUpdated([
-              { meta: { alias: 'panel filter' }, query: { match: { status: 200 } } },
-            ])
-          }
-        >
-          updateFilters
-        </button>
-      </div>
-    );
-  }) as VegaPluginStartDependencies['unifiedSearch']['ui']['SearchBar'];
+  const SearchBar = jest.fn((_props: StatefulSearchBarProps): null => null);
+  const getSearchBarProps = (): StatefulSearchBarProps => {
+    const props = SearchBar.mock.lastCall?.[0];
+    if (!props) throw new Error('SearchBar has not rendered');
+    return props;
+  };
 
   const closeFlyout = jest.fn();
   const onPreview = jest.fn();
@@ -112,7 +83,7 @@ const renderFlyout = ({
       closeFlyout={closeFlyout}
       defaultDataView={defaultDataView}
       initialSpec={{ format: 'hjson', value: '{ mark: point }' }}
-      SearchBar={SearchBar}
+      SearchBar={SearchBar as VegaPluginStartDependencies['unifiedSearch']['ui']['SearchBar']}
       isNewPanel={isNewPanel}
       onPreview={onPreview}
       onRevert={onRevert}
@@ -120,7 +91,7 @@ const renderFlyout = ({
     />
   );
 
-  return { api, closeFlyout, onPreview, onRevert, onSave, view };
+  return { api, closeFlyout, getSearchBarProps, onPreview, onRevert, onSave, view };
 };
 
 describe('VegaEditorFlyout', () => {
@@ -190,66 +161,84 @@ describe('VegaEditorFlyout', () => {
   });
 
   it('applies search changes live and enables saving for them', async () => {
-    const { api } = renderFlyout();
+    const { api, getSearchBarProps } = renderFlyout();
+    const panelFilter = { meta: { alias: 'panel filter' }, query: { match: { status: 200 } } };
 
-    fireEvent.click(await screen.findByText('updateQuery'));
-    fireEvent.click(screen.getByText('updateFilters'));
-
-    await waitFor(() => {
-      expect(api.setQuery).toHaveBeenCalledWith({ language: 'kuery', query: 'bytes > 1000' });
-      expect(api.setFilters).toHaveBeenCalledWith([
-        { meta: { alias: 'panel filter' }, query: { match: { status: 200 } } },
-      ]);
+    act(() => {
+      getSearchBarProps().onQuerySubmit?.({
+        dateRange: { from: 'now-15m', to: 'now' },
+        query: { language: 'kuery', query: 'bytes > 1000' },
+      });
+      getSearchBarProps().onFiltersUpdated?.([panelFilter]);
     });
 
-    expect(screen.getByRole('button', { name: 'Apply and close' })).toBeEnabled();
+    expect(api.setQuery).toHaveBeenCalledWith({ language: 'kuery', query: 'bytes > 1000' });
+    expect(api.setFilters).toHaveBeenCalledWith([panelFilter]);
+    await waitFor(() =>
+      expect(screen.getByRole('button', { name: 'Apply and close' })).toBeEnabled()
+    );
   });
 
   it('does not enable saving when filters only differ in display metadata', async () => {
-    const { api } = renderFlyout({
+    const { api, getSearchBarProps } = renderFlyout({
       initialFilters: [
         { meta: { alias: 'panel filter', key: 'status' }, query: { match: { status: 200 } } },
       ],
     });
 
-    fireEvent.click(await screen.findByText('updateFilters'));
+    act(() => {
+      getSearchBarProps().onFiltersUpdated?.([
+        { meta: { alias: 'panel filter' }, query: { match: { status: 200 } } },
+      ]);
+    });
 
-    await waitFor(() => expect(api.setFilters).toHaveBeenCalled());
+    expect(api.setFilters).toHaveBeenCalled();
+    await waitFor(() => expect(getSearchBarProps().filters?.[0].meta).not.toHaveProperty('key'));
     expect(screen.getByRole('button', { name: 'Apply and close' })).toBeDisabled();
   });
 
   // SearchBar hides the query input when it gets no query, and with useDefaultBehaviors={false}
   // it doesn't substitute a default.
-  it('passes the default query to the search bar when the panel has no query', async () => {
-    renderFlyout();
+  it('passes the default query to the search bar when the panel has no query', () => {
+    const { getSearchBarProps } = renderFlyout();
 
-    expect(await screen.findByText('query:lucene:')).toBeInTheDocument();
+    expect(getSearchBarProps().query).toEqual({ language: 'lucene', query: '' });
   });
 
-  it('passes the panel query to the search bar', async () => {
-    renderFlyout({ initialQuery: { language: 'kuery', query: 'bytes > 1000' } });
+  it('passes the panel query to the search bar', () => {
+    const { getSearchBarProps } = renderFlyout({
+      initialQuery: { language: 'kuery', query: 'bytes > 1000' },
+    });
 
-    expect(await screen.findByText('query:kuery:bytes > 1000')).toBeInTheDocument();
+    expect(getSearchBarProps().query).toEqual({ language: 'kuery', query: 'bytes > 1000' });
   });
 
-  it('passes an empty filters array to the search bar when the panel has no filters', async () => {
-    renderFlyout();
+  it('passes an empty filters array to the search bar when the panel has no filters', () => {
+    const { getSearchBarProps } = renderFlyout();
 
-    expect(await screen.findByText('filtersLength:0')).toBeInTheDocument();
+    expect(getSearchBarProps().filters).toEqual([]);
   });
 
-  it('gives the search bar the default data view when the spec names none', async () => {
-    renderFlyout({ defaultDataView: { id: 'default-view' } as DataView });
+  it('hides the pin filter options because panel filters cannot be pinned', () => {
+    const { getSearchBarProps } = renderFlyout();
 
-    expect(await screen.findByText('dataViews:default-view')).toBeInTheDocument();
+    expect(getSearchBarProps().hiddenFilterPanelOptions).toEqual(['pinFilter']);
   });
 
-  it('gives the search bar the data views named by the spec', async () => {
-    renderFlyout({
+  it('gives the search bar the default data view when the spec names none', () => {
+    const { getSearchBarProps } = renderFlyout({
+      defaultDataView: { id: 'default-view' } as DataView,
+    });
+
+    expect(getSearchBarProps().indexPatterns).toEqual([{ id: 'default-view' }]);
+  });
+
+  it('gives the search bar the data views named by the spec', () => {
+    const { getSearchBarProps } = renderFlyout({
       initialDataViews: [{ id: 'spec-view' } as DataView],
       defaultDataView: { id: 'default-view' } as DataView,
     });
 
-    expect(await screen.findByText('dataViews:spec-view')).toBeInTheDocument();
+    expect(getSearchBarProps().indexPatterns).toEqual([{ id: 'spec-view' }]);
   });
 });

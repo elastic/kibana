@@ -178,6 +178,8 @@ export const VegaEditorFlyout = ({
               indexPatterns={dataViews}
               showQueryInput
               showFilterBar
+              // Pinned filters live in global state, which panel filters are not persisted to.
+              hiddenFilterPanelOptions={['pinFilter']}
               showDatePicker={false}
               showSubmitButton
               showSavedQueryControls={false}
