@@ -17,6 +17,7 @@ import {
 import {
   API_VERSIONS,
   CANDIDATES_URL,
+  FIND_OR_CREATE_INVESTIGATION_URL,
   HUNT_COORDINATOR_URL,
   HUNT_INDEX_SCOPE_URL,
   SYSTEM_SECURITY_HUNT_PACKAGE_REPORT_ID,
@@ -293,6 +294,7 @@ describe('Hunt Watch public exports (kbn-alertzero-common)', () => {
       HUNT_INDEX_SCOPE_URL,
       CANDIDATES_URL,
       HUNT_COORDINATOR_URL,
+      FIND_OR_CREATE_INVESTIGATION_URL,
       // main's own public package, not alertzero's -- Hunt Watch calls it but does not
       // own it, so it is not one of this package's exports.
       '/internal/proposals',

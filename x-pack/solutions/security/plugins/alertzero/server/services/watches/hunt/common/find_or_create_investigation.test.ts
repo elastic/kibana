@@ -8,12 +8,9 @@
 import { createConversationAlreadyExistsError } from '@kbn/agent-builder-common';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { TEMPLATE_ID_INVESTIGATION } from '@kbn/alertzero-common';
-import {
-  buildHuntInvestigationConversationId,
-  buildHuntTriggerAttachmentId,
-} from '../../services/watches/hunt/common/hunt_investigation_id';
-import { runFindOrCreateInvestigation } from './run_find_or_create_investigation';
-import type { FindOrCreateConversationClient } from './run_find_or_create_investigation';
+import { buildHuntInvestigationConversationId, buildHuntTriggerAttachmentId } from './hunt_investigation_id';
+import { runFindOrCreateInvestigation } from './find_or_create_investigation';
+import type { FindOrCreateConversationClient } from './find_or_create_investigation';
 
 const spaceId = 'default';
 const reportId = 'rpt-find-or-create-1';

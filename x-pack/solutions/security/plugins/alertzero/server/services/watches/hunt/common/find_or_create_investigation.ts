@@ -12,18 +12,20 @@ import {
   isConversationAlreadyExistsError,
 } from '@kbn/agent-builder-common';
 import { TEMPLATE_ID_INVESTIGATION } from '@kbn/alertzero-common';
+import type { FindOrCreateInvestigationResponse } from '@kbn/alertzero-common';
 import {
   buildHuntInvestigationConversationId,
   buildHuntTriggerAttachmentId,
-} from '../../services/watches/hunt/common/hunt_investigation_id';
-import type { ReportHuntContext } from '../../services/watches/hunt/common/load_report_context';
-import type {
-  FindOrCreateInvestigationOutput,
-  FindOrCreateInvestigationReportSummary,
-} from '../../../common/step_types/find_or_create_investigation';
+} from './hunt_investigation_id';
+import type { ReportHuntContext } from './load_report_context';
+
+export type FindOrCreateInvestigationOutput = FindOrCreateInvestigationResponse;
+export type FindOrCreateInvestigationReportSummary = NonNullable<
+  FindOrCreateInvestigationResponse['report']
+>;
 
 /**
- * Narrow slice of `ConversationPublicClient` this step needs (the client actually
+ * Narrow slice of `ConversationPublicClient` this needs (the client actually
  * injected at the call site is the public, camelCase wrapper, not the internal
  * snake_case `ConversationClient`), kept separate from the real type so the
  * business logic below is testable without mocking the full client.
@@ -86,7 +88,7 @@ export const runFindOrCreateInvestigation = async (
       if (context) report = summarizeReportForTrigger(context);
     } catch (error) {
       logger?.warn(
-        `hunt.findOrCreateInvestigation: could not read report ${reportId} for the trigger message: ${
+        `findOrCreateInvestigation: could not read report ${reportId} for the trigger message: ${
           error instanceof Error ? error.message : String(error)
         }`
       );

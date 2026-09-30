@@ -93,3 +93,7 @@ export {
   HuntCoordinatorResponse,
   HuntCoordinatorStatus,
 } from './hunt/hunt_coordinator_route.gen';
+export {
+  FindOrCreateInvestigationRequestBody,
+  FindOrCreateInvestigationResponse,
+} from './hunt/find_or_create_investigation_route.gen';
