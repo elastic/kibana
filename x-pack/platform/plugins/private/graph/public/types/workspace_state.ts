@@ -6,7 +6,6 @@
  */
 
 import type { JsonObject } from '@kbn/utility-types';
-import type d3 from 'd3';
 import type { TargetOptions } from '../components/control_panel';
 import type { GenericIcon } from '../helpers/style_choices';
 import type { WorkspaceField, AdvancedSettings } from './app_state';
@@ -88,7 +87,6 @@ export interface Workspace {
   blocklistedNodes: BlockListedNode[];
   undoLog: string;
   redoLog: string;
-  force: ReturnType<typeof d3.layout.force>;
   lastRequest: string;
   lastResponse: string;
 
@@ -147,6 +145,7 @@ export interface Workspace {
 
   runLayout(): void;
   stopLayout(): void;
+  isLayoutRunning(): boolean;
 
   addEdgeToSelection(edge: WorkspaceEdge): void;
   removeEdgeFromSelection(edge: WorkspaceEdge): void;

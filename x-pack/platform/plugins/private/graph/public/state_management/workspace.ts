@@ -375,7 +375,7 @@ export const createWorkspaceState = (workspace: Workspace): WorkspaceSnapshot =>
   );
 
   return {
-    isLayoutRunning: Boolean(workspace.force),
+    isLayoutRunning: Boolean(workspace.isLayoutRunning?.()),
     nodesById,
     // IDs use field + '..' + term; repeated nodes or delimiter collisions can produce the same ID.
     // Derive IDs from the map so duplicates cannot make the normalized collections inconsistent.
