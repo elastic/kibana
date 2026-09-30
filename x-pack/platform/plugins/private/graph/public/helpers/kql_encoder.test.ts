@@ -8,74 +8,58 @@
 import { asKQL } from './kql_encoder';
 import type { Workspace, WorkspaceNode } from '../types';
 
+const createNode = (id: string, field: string, term: string) =>
+  ({ id, data: { field, term } } as WorkspaceNode);
+
 describe('kql_encoder', () => {
-  let workspaceMock: jest.Mocked<Workspace>;
+  let workspaceMock: Workspace;
 
   beforeEach(() => {
+    const nodes = [
+      createNode('1', 'fieldA', 'term1'),
+      createNode('2', 'fieldA', 'term2'),
+      createNode('3', 'fieldB', 'term1'),
+    ];
     workspaceMock = {
-      returnUnpackedGroupeds: (nodes: []) => nodes,
-      getSelectedOrAllNodes: jest.fn(() => [
-        {
-          data: {
-            field: 'fieldA',
-            term: 'term1',
-          },
-        },
-        {
-          data: {
-            field: 'fieldA',
-            term: 'term2',
-          },
-        },
-        {
-          data: {
-            field: 'fieldB',
-            term: 'term1',
-          },
-        },
-      ]),
-    } as unknown as jest.Mocked<Workspace>;
+      nodes,
+      nodesMap: Object.fromEntries(nodes.map((node) => [node.id, node])),
+      returnUnpackedGroupeds: (selectedNodes: WorkspaceNode[]) => selectedNodes,
+    } as unknown as Workspace;
   });
 
   it('should encode query as URI component', () => {
-    expect(asKQL(workspaceMock, 'and')).toEqual(
+    expect(asKQL(workspaceMock, [], 'and')).toEqual(
       "'%22fieldA%22%20%3A%20%22term1%22%20and%20%22fieldA%22%20%3A%20%22term2%22%20and%20%22fieldB%22%20%3A%20%22term1%22'"
     );
   });
 
   it('should encode nodes as or query', () => {
-    expect(decodeURIComponent(asKQL(workspaceMock, 'or'))).toEqual(
+    expect(decodeURIComponent(asKQL(workspaceMock, [], 'or'))).toEqual(
       `'"fieldA" : "term1" or "fieldA" : "term2" or "fieldB" : "term1"'`
     );
   });
 
   it('should encode nodes as and query', () => {
-    expect(decodeURIComponent(asKQL(workspaceMock, 'and'))).toEqual(
+    expect(decodeURIComponent(asKQL(workspaceMock, [], 'and'))).toEqual(
       `'"fieldA" : "term1" and "fieldA" : "term2" and "fieldB" : "term1"'`
     );
   });
 
+  it('uses explicit selected node IDs', () => {
+    expect(decodeURIComponent(asKQL(workspaceMock, ['2'], 'and'))).toEqual(`'"fieldA" : "term2"'`);
+  });
+
   it('should escape quotes in field names', () => {
-    workspaceMock.getSelectedOrAllNodes.mockReturnValue([
-      {
-        data: {
-          field: 'a"b',
-          term: 'term1',
-        },
-      } as WorkspaceNode,
-    ]);
-    expect(decodeURIComponent(asKQL(workspaceMock, 'and'))).toEqual(`'"a\\"b" : "term1"'`);
+    const node = createNode('quote', 'a"b', 'term1');
+    workspaceMock.nodes = [node];
+    workspaceMock.nodesMap = { quote: node };
+    expect(decodeURIComponent(asKQL(workspaceMock, [], 'and'))).toEqual(`'"a\\"b" : "term1"'`);
   });
 
   it('should escape quotes in terms', () => {
-    workspaceMock.getSelectedOrAllNodes.mockReturnValue([
-      {
-        data: {
-          field: 'fieldA',
-          term: 'term"1',
-        },
-      } as WorkspaceNode,
-    ]);
-    expect(decodeURIComponent(asKQL(workspaceMock, 'and'))).toEqual(`'"fieldA" : "term\\"1"'`);
+    const node = createNode('quote', 'fieldA', 'term"1');
+    workspaceMock.nodes = [node];
+    workspaceMock.nodesMap = { quote: node };
+    expect(decodeURIComponent(asKQL(workspaceMock, [], 'and'))).toEqual(`'"fieldA" : "term\\"1"'`);
   });
 });

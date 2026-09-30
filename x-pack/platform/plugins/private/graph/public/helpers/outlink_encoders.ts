@@ -9,13 +9,13 @@ import rison from '@kbn/rison';
 
 import { i18n } from '@kbn/i18n';
 import type { Workspace } from '../types';
-import { asKQL } from './kql_encoder';
+import { asKQL, getSelectedOrAllNodes } from './kql_encoder';
 
 export interface OutlinkEncoder {
   id: string;
   title: string;
   description: string;
-  encode: (workspace: Workspace) => string;
+  encode: (workspace: Workspace, selectedNodeIds: readonly string[]) => string;
   type: 'kql' | 'lucene' | 'plain' | 'esq';
 }
 
@@ -28,8 +28,8 @@ export const outlinkEncoders: OutlinkEncoder[] = [
     description: i18n.translate('xpack.graph.outlinkEncoders.kqlLooseDescription', {
       defaultMessage: 'KQL query, compatible with Discover, Visualize, and Dashboards',
     }),
-    encode(workspace) {
-      return asKQL(workspace, 'or');
+    encode(workspace, selectedNodeIds) {
+      return asKQL(workspace, selectedNodeIds, 'or');
     },
     type: 'kql',
   },
@@ -41,8 +41,8 @@ export const outlinkEncoders: OutlinkEncoder[] = [
     description: i18n.translate('xpack.graph.outlinkEncoders.kqlLooseDescription', {
       defaultMessage: 'KQL query, compatible with Discover, Visualize, and Dashboards',
     }),
-    encode(workspace) {
-      return asKQL(workspace, 'and');
+    encode(workspace, selectedNodeIds) {
+      return asKQL(workspace, selectedNodeIds, 'and');
     },
     type: 'kql',
   },
@@ -55,9 +55,9 @@ export const outlinkEncoders: OutlinkEncoder[] = [
       defaultMessage:
         'rison-encoded JSON, minimum_should_match=1, compatible with most Kibana URLs',
     }),
-    encode(workspace) {
+    encode(workspace, selectedNodeIds) {
       return encodeURIComponent(
-        rison.encode(workspace.getQuery(workspace.getSelectedOrAllNodes(), true))
+        rison.encode(workspace.getQuery(getSelectedOrAllNodes(workspace, selectedNodeIds), true))
       );
     },
     type: 'esq',
@@ -71,9 +71,9 @@ export const outlinkEncoders: OutlinkEncoder[] = [
       defaultMessage:
         'rison-encoded JSON, minimum_should_match=2, compatible with most Kibana URLs',
     }),
-    encode(workspace) {
+    encode(workspace, selectedNodeIds) {
       return encodeURIComponent(
-        rison.encode(workspace.getQuery(workspace.getSelectedOrAllNodes()))
+        rison.encode(workspace.getQuery(getSelectedOrAllNodes(workspace, selectedNodeIds)))
       );
     },
     type: 'esq',
@@ -87,9 +87,11 @@ export const outlinkEncoders: OutlinkEncoder[] = [
       defaultMessage:
         'rison-encoded JSON, "like this but not this" type query to find missing docs',
     }),
-    encode(workspace) {
+    encode(workspace, selectedNodeIds) {
       return encodeURIComponent(
-        rison.encode(workspace.getLikeThisButNotThisQuery(workspace.getSelectedOrAllNodes()))
+        rison.encode(
+          workspace.getLikeThisButNotThisQuery(getSelectedOrAllNodes(workspace, selectedNodeIds))
+        )
       );
     },
     type: 'esq',
@@ -102,9 +104,9 @@ export const outlinkEncoders: OutlinkEncoder[] = [
     description: i18n.translate('xpack.graph.outlinkEncoders.esqPlainDescription', {
       defaultMessage: 'JSON encoded using standard url encoding',
     }),
-    encode(workspace) {
+    encode(workspace, selectedNodeIds) {
       return encodeURIComponent(
-        JSON.stringify(workspace.getQuery(workspace.getSelectedOrAllNodes()))
+        JSON.stringify(workspace.getQuery(getSelectedOrAllNodes(workspace, selectedNodeIds)))
       );
     },
     type: 'esq',
@@ -117,9 +119,9 @@ export const outlinkEncoders: OutlinkEncoder[] = [
     description: i18n.translate('xpack.graph.outlinkEncoders.textPlainDescription', {
       defaultMessage: 'Text of selected vertex labels as a plain url-encoded string',
     }),
-    encode(workspace) {
+    encode(workspace, selectedNodeIds) {
       let q = '';
-      const nodes = workspace.getSelectedOrAllNodes();
+      const nodes = getSelectedOrAllNodes(workspace, selectedNodeIds);
       for (let i = 0; i < nodes.length; i++) {
         const node = nodes[i];
         if (i > 0) {
@@ -139,9 +141,9 @@ export const outlinkEncoders: OutlinkEncoder[] = [
     description: i18n.translate('xpack.graph.outlinkEncoders.textLuceneDescription', {
       defaultMessage: 'Text of selected vertex labels with any Lucene special characters encoded',
     }),
-    encode(workspace) {
+    encode(workspace, selectedNodeIds) {
       let q = '';
-      const nodes = workspace.getSelectedOrAllNodes();
+      const nodes = getSelectedOrAllNodes(workspace, selectedNodeIds);
       for (let i = 0; i < nodes.length; i++) {
         const node = nodes[i];
         if (i > 0) {
