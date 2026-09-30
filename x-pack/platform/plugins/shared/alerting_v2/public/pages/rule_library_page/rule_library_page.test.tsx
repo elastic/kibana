@@ -209,6 +209,39 @@ describe('RuleLibraryPage', () => {
     expect(screen.getByTestId('mockedV1RuleLibraryList')).toHaveAttribute('data-url-sync', 'false');
   });
 
+  it('opens the v2 flyout from templateId after the user returns from the v1 tab', async () => {
+    mockCanAccessV1 = true;
+    let resolveTemplate: (template: RuleTemplateResponse) => void = () => {};
+    mockGetRuleTemplate.mockReturnValue(
+      new Promise((resolve) => {
+        resolveTemplate = resolve;
+      })
+    );
+    const user = userEvent.setup();
+    renderPage(['/?q=cpu&templateId=template-1']);
+
+    await waitFor(() => {
+      expect(mockGetRuleTemplate).toHaveBeenCalledWith('template-1');
+    });
+
+    await user.click(await screen.findByTestId('ruleLibraryV1Tab'));
+    resolveTemplate(mockTemplate);
+
+    await waitFor(() => {
+      expect(screen.getByTestId('mockedV1RuleLibraryList')).toBeInTheDocument();
+    });
+    expect(mockOpenCreateFromTemplateFlyout).not.toHaveBeenCalled();
+    expect(screen.queryByTestId('composeDiscoverFlyout')).not.toBeInTheDocument();
+
+    await user.click(screen.getByTestId('ruleLibraryV2Tab'));
+
+    await waitFor(() => {
+      expect(mockOpenCreateFromTemplateFlyout).toHaveBeenCalledWith(mockTemplate);
+    });
+    expect(screen.getByTestId('composeDiscoverFlyout')).toBeInTheDocument();
+    expect(screen.getByTestId('mockedRuleLibraryList')).toBeInTheDocument();
+  });
+
   it('does not open the v2 flyout from templateId while the v1 library is showing', async () => {
     mockCanAccessV2 = false;
     mockCanAccessV1 = true;

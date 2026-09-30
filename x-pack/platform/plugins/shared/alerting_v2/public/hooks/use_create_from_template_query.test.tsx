@@ -102,6 +102,42 @@ describe('useCreateFromTemplateQuery', () => {
     expect(mockOpenCreateFromTemplateFlyout).not.toHaveBeenCalled();
   });
 
+  it('waits to open the flyout until the query is enabled again', async () => {
+    let resolveTemplate: (template: RuleTemplateResponse) => void = () => {};
+    mockGetRuleTemplate.mockReturnValue(
+      new Promise((resolve) => {
+        resolveTemplate = resolve;
+      })
+    );
+    const history = createMemoryHistory({
+      initialEntries: ['/?templateId=template-1'],
+    });
+
+    const { rerender } = renderHook(
+      ({ enabled }) => useCreateFromTemplateQuery(mockOpenCreateFromTemplateFlyout, { enabled }),
+      { initialProps: { enabled: true }, wrapper: createWrapper(history) }
+    );
+
+    await waitFor(() => {
+      expect(mockGetRuleTemplate).toHaveBeenCalledWith('template-1');
+    });
+
+    rerender({ enabled: false });
+    resolveTemplate(mockTemplate);
+
+    await waitFor(() => {
+      expect(history.location.search).toBe('?templateId=template-1');
+    });
+    expect(mockOpenCreateFromTemplateFlyout).not.toHaveBeenCalled();
+
+    rerender({ enabled: true });
+
+    await waitFor(() => {
+      expect(mockOpenCreateFromTemplateFlyout).toHaveBeenCalledWith(mockTemplate);
+    });
+    expect(history.location.search).toBe('');
+  });
+
   it('does not fetch a template when templateId is absent', async () => {
     const history = createMemoryHistory({ initialEntries: ['/'] });
 
