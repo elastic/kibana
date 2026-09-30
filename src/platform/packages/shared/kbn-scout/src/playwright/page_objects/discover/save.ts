@@ -276,16 +276,19 @@ export abstract class SaveMixin extends NavigationMixin {
   ): Promise<JobPollResult> {
     let job: { status: string; output?: { warnings?: string[] } } | undefined;
 
+    // Use page.evaluate so the fetch runs inside the browser context, which carries the full
+    // session (cookies, auth tokens). page.request.get() uses a separate Playwright API context
+    // that can miss session state and receive 403 on Kibana internal endpoints.
     await expect
       .poll(
         async () => {
           try {
-            const response = await this.page.request.get(
-              `${reportingBase}/internal/reporting/jobs/info/${jobId}`
-            );
-            if (!response.ok()) return 'pending';
-            job = (await response.json()) as { status: string; output?: { warnings?: string[] } };
-            return job.status;
+            job = await this.page.evaluate(async (url) => {
+              const res = await fetch(url, { credentials: 'same-origin' });
+              if (!res.ok) return undefined;
+              return res.json() as Promise<{ status: string; output?: { warnings?: string[] } }>;
+            }, `${reportingBase}/internal/reporting/jobs/info/${jobId}`);
+            return job?.status ?? 'pending';
           } catch {
             return 'pending';
           }
