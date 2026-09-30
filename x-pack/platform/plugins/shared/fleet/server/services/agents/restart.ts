@@ -68,7 +68,8 @@ export async function bulkRestartAgents(
   const currentSpaceId = getCurrentNamespace(soClient);
 
   if ('agentIds' in options) {
-    const maybeAgents = await getAgentsById(esClient, soClient, options.agentIds);
+    const uniqueAgentIds = [...new Set(options.agentIds)];
+    const maybeAgents = await getAgentsById(esClient, soClient, uniqueAgentIds);
     const missingErrors: Record<Agent['id'], Error> = {};
     const givenAgents: Agent[] = [];
     for (const maybeAgent of maybeAgents) {
@@ -80,7 +81,7 @@ export async function bulkRestartAgents(
     }
     const result = await restartBatch(esClient, soClient, givenAgents, {
       spaceId: currentSpaceId,
-      total: options.agentIds.length,
+      total: uniqueAgentIds.length,
     });
     await createErrorActionResults(esClient, result.actionId, missingErrors, 'agent not found');
     return result;
