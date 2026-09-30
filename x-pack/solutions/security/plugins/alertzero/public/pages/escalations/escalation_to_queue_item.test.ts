@@ -16,6 +16,7 @@ import {
 /** Minimal fixture — only fields the adapter reads. */
 const base = {
   id: 'esc-1',
+  agent_id: 'agent-1',
   title: 'Login anomaly detected',
   created_at: '2024-01-01T00:00:00Z',
   updated_at: '2024-01-02T00:00:00Z',
@@ -24,9 +25,10 @@ const base = {
 
 describe('escalationToQueueItem', () => {
   describe('passthrough fields', () => {
-    it('copies id, title, createdAt, updatedAt verbatim', () => {
+    it('copies id, agentId, title, createdAt, updatedAt verbatim', () => {
       const item = escalationToQueueItem(base);
       expect(item.id).toBe('esc-1');
+      expect(item.agentId).toBe('agent-1');
       expect(item.title).toBe('Login anomaly detected');
       expect(item.createdAt).toBe('2024-01-01T00:00:00Z');
       expect(item.updatedAt).toBe('2024-01-02T00:00:00Z');

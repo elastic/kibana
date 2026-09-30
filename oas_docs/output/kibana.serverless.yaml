@@ -8446,7 +8446,6 @@ paths:
                         updated_at: '2026-01-15T12:00:00.000Z'
                         updated_by:
                           profile_uid: u_elastic_0
-                        version: WzAsMV0=
                     page: 1
                     per_page: 20
                     total: 1
@@ -8600,7 +8599,6 @@ paths:
                     updated_at: '2026-01-15T12:00:00.000Z'
                     updated_by:
                       profile_uid: u_elastic_0
-                    version: WzAsMV0=
               schema:
                 $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_action_policy_response'
           description: Returns the newly created action policy.
@@ -9618,7 +9616,6 @@ paths:
                     updated_at: '2026-01-15T12:00:00.000Z'
                     updated_by:
                       profile_uid: u_elastic_0
-                    version: WzAsMV0=
               schema:
                 $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_action_policy_response'
           description: Returns the requested action policy.
@@ -9752,7 +9749,6 @@ paths:
                 value:
                   description: Updated description.
                   name: Notify on production alerts (updated)
-                  version: WzAsMV0=
             schema:
               $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_update_action_policy'
       responses:
@@ -9785,7 +9781,6 @@ paths:
                     updated_at: '2026-01-15T12:00:00.000Z'
                     updated_by:
                       profile_uid: u_elastic_0
-                    version: WzAsMV0=
               schema:
                 $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_action_policy_response'
           description: Returns the updated action policy.
@@ -9986,7 +9981,6 @@ paths:
                     updated_at: '2026-01-15T12:00:00.000Z'
                     updated_by:
                       profile_uid: u_elastic_0
-                    version: WzAsMV0=
               schema:
                 $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_action_policy_response'
           description: Returns the replaced action policy.
@@ -10019,7 +10013,6 @@ paths:
                     updated_at: '2026-01-15T12:00:00.000Z'
                     updated_by:
                       profile_uid: u_elastic_0
-                    version: WzAsMV0=
               schema:
                 $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_action_policy_response'
           description: Returns the newly created action policy.
@@ -10186,7 +10179,6 @@ paths:
                     updated_at: '2026-01-15T12:00:00.000Z'
                     updated_by:
                       profile_uid: u_elastic_0
-                    version: WzAsMV0=
               schema:
                 $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_action_policy_response'
           description: Returns the disabled action policy.
@@ -10357,7 +10349,6 @@ paths:
                     updated_at: '2026-01-15T12:00:00.000Z'
                     updated_by:
                       profile_uid: u_elastic_0
-                    version: WzAsMV0=
               schema:
                 $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_action_policy_response'
           description: Returns the enabled action policy.
@@ -10548,7 +10539,6 @@ paths:
                     updated_at: '2026-01-15T12:00:00.000Z'
                     updated_by:
                       profile_uid: u_elastic_0
-                    version: WzAsMV0=
               schema:
                 $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_action_policy_response'
           description: Returns the snoozed action policy.
@@ -10719,7 +10709,6 @@ paths:
                     updated_at: '2026-01-15T12:00:00.000Z'
                     updated_by:
                       profile_uid: u_elastic_0
-                    version: WzAsMV0=
               schema:
                 $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_action_policy_response'
           description: Returns the unsnoozed action policy.
@@ -10890,7 +10879,6 @@ paths:
                     updated_at: '2026-01-15T12:00:00.000Z'
                     updated_by:
                       profile_uid: u_elastic_0
-                    version: WzAsMV0=
               schema:
                 $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_action_policy_response'
           description: Returns the action policy whose API key was rotated.
@@ -13052,7 +13040,6 @@ paths:
                           tags:
                             - production
                             - infra
-                          version: 1
                         no_data:
                           strategy: keep_last
                         query:
@@ -13073,7 +13060,7 @@ paths:
                         updated_at: '2026-01-15T12:00:00.000Z'
                         updated_by:
                           profile_uid: u_elastic_0
-                        version: WzAsMV0=
+                        version: 1
                     page: 1
                     per_page: 20
                     total: 1
@@ -13236,7 +13223,6 @@ paths:
                       tags:
                         - production
                         - infra
-                      version: 1
                     no_data:
                       strategy: keep_last
                     query:
@@ -13257,7 +13243,7 @@ paths:
                     updated_at: '2026-01-15T12:00:00.000Z'
                     updated_by:
                       profile_uid: u_elastic_0
-                    version: WzAsMV0=
+                    version: 1
               schema:
                 $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_rule_response'
           description: Returns the newly created rule.
@@ -13447,7 +13433,6 @@ paths:
                           tags:
                             - production
                             - infra
-                          version: 1
                         no_data:
                           strategy: keep_last
                         query:
@@ -13468,7 +13453,7 @@ paths:
                         updated_at: '2026-01-15T12:00:00.000Z'
                         updated_by:
                           profile_uid: u_elastic_0
-                        version: WzAsMV0=
+                        version: 1
                       - created_at: '2026-01-15T12:00:00.000Z'
                         created_by:
                           profile_uid: u_elastic_0
@@ -13484,7 +13469,6 @@ paths:
                           tags:
                             - production
                             - infra
-                          version: 1
                         no_data:
                           strategy: keep_last
                         query:
@@ -13505,7 +13489,7 @@ paths:
                         updated_at: '2026-01-15T12:00:00.000Z'
                         updated_by:
                           profile_uid: u_elastic_0
-                        version: WzAsMV0=
+                        version: 1
               schema:
                 $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_bulk_create_rules_response'
           description: Created rules are returned in `items`. Failures are returned in `errors`.
@@ -14000,7 +13984,6 @@ paths:
                           tags:
                             - production
                             - infra
-                          version: 1
                         no_data:
                           strategy: keep_last
                         query:
@@ -14021,7 +14004,7 @@ paths:
                         updated_at: '2026-01-15T12:00:00.000Z'
                         updated_by:
                           profile_uid: u_elastic_0
-                        version: WzAsMV0=
+                        version: 1
               schema:
                 $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_bulk_get_rules_response'
           description: Returns the requested rules.
@@ -14890,7 +14873,6 @@ paths:
                       tags:
                         - production
                         - infra
-                      version: 1
                     no_data:
                       strategy: keep_last
                     query:
@@ -14911,7 +14893,7 @@ paths:
                     updated_at: '2026-01-15T12:00:00.000Z'
                     updated_by:
                       profile_uid: u_elastic_0
-                    version: WzAsMV0=
+                    version: 1
               schema:
                 $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_rule_response'
           description: Returns the requested rule.
@@ -15046,7 +15028,6 @@ paths:
                   metadata:
                     description: Updated description.
                     name: Host CPU high (updated)
-                  version: WzAsMV0=
             schema:
               $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_update_rule'
       responses:
@@ -15072,7 +15053,6 @@ paths:
                       tags:
                         - production
                         - infra
-                      version: 1
                     no_data:
                       strategy: keep_last
                     query:
@@ -15093,7 +15073,7 @@ paths:
                     updated_at: '2026-01-15T12:00:00.000Z'
                     updated_by:
                       profile_uid: u_elastic_0
-                    version: WzAsMV0=
+                    version: 1
               schema:
                 $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_rule_response'
           description: Returns the updated rule.
@@ -15289,7 +15269,6 @@ paths:
                       tags:
                         - production
                         - infra
-                      version: 1
                     no_data:
                       strategy: keep_last
                     query:
@@ -15310,7 +15289,7 @@ paths:
                     updated_at: '2026-01-15T12:00:00.000Z'
                     updated_by:
                       profile_uid: u_elastic_0
-                    version: WzAsMV0=
+                    version: 1
               schema:
                 $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_rule_response'
           description: Returns the replaced rule.
@@ -15336,7 +15315,6 @@ paths:
                       tags:
                         - production
                         - infra
-                      version: 1
                     no_data:
                       strategy: keep_last
                     query:
@@ -15357,7 +15335,7 @@ paths:
                     updated_at: '2026-01-15T12:00:00.000Z'
                     updated_by:
                       profile_uid: u_elastic_0
-                    version: WzAsMV0=
+                    version: 1
               schema:
                 $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_rule_response'
           description: Returns the newly created rule.
@@ -15503,7 +15481,6 @@ paths:
                       tags:
                         - production
                         - infra
-                      version: 1
                     no_data:
                       strategy: keep_last
                     query:
@@ -15524,7 +15501,7 @@ paths:
                     updated_at: '2026-01-15T12:00:00.000Z'
                     updated_by:
                       profile_uid: u_elastic_0
-                    version: WzAsMV0=
+                    version: 1
               schema:
                 $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_rule_response'
           description: Returns the disabled rule.
@@ -15688,7 +15665,6 @@ paths:
                       tags:
                         - production
                         - infra
-                      version: 1
                     no_data:
                       strategy: keep_last
                     query:
@@ -15709,7 +15685,7 @@ paths:
                     updated_at: '2026-01-15T12:00:00.000Z'
                     updated_by:
                       profile_uid: u_elastic_0
-                    version: WzAsMV0=
+                    version: 1
               schema:
                 $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_rule_response'
           description: Returns the enabled rule.
@@ -143484,9 +143460,6 @@ components:
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_actor'
           description: The actor who last updated the action policy.
           nullable: true
-        version:
-          description: The version, used for optimistic concurrency control.
-          type: string
       required:
         - id
         - name
@@ -144178,6 +144151,7 @@ components:
             - workflow_not_found
             - workflow_disabled
             - schedule_error
+            - license_not_supported
           type: string
         outcome:
           enum:
@@ -144685,7 +144659,7 @@ components:
               type: string
           description: Whether the rule creates alerts (`alert`) or only stores matching events (`signal`).
         metadata:
-          $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_rule_response_metadata'
+          $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_rule_metadata'
         no_data:
           $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_rule_no_data'
         query:
@@ -144713,53 +144687,22 @@ components:
           description: Actor who last updated the rule.
           nullable: true
         version:
-          description: The saved object version token of the rule, used for optimistic concurrency control.
-          type: string
+          description: Monotonically increasing integer number representing a rule configuration version, incremented on every change. Used on generated rule events as `rule.version`.
+          maximum: 9007199254740991
+          minimum: 1
+          type: integer
       required:
         - kind
         - metadata
         - schedule
         - query
         - id
+        - version
         - enabled
         - created_by
         - created_at
         - updated_by
         - updated_at
-    Kibana_HTTP_APIs_alerting_rule_response_metadata:
-      additionalProperties: false
-      type: object
-      properties:
-        builder_type:
-          description: Identifies the rule builder that authored this rule (e.g. "threshold"). Absent for rules authored directly in ES|QL.
-          maxLength: 64
-          type: string
-        description:
-          description: Human-readable description of the rule.
-          maxLength: 1024
-          type: string
-        name:
-          description: Rule name (must be unique within the space).
-          maxLength: 256
-          minLength: 1
-          type: string
-        tags:
-          description: Tags for categorization, e.g. ["production", "infra"].
-          items:
-            maxLength: 128
-            minLength: 1
-            type: string
-          maxItems: 20
-          minItems: 1
-          type: array
-        version:
-          description: Monotonically increasing integer number representing a rule configuration version, incremented on every change. Used on generated rule events as `rule.version`.
-          maximum: 9007199254740991
-          minimum: 1
-          type: integer
-      required:
-        - name
-        - version
     Kibana_HTTP_APIs_alerting_rule_schedule:
       additionalProperties: false
       description: Execution schedule configuration.
@@ -144791,7 +144734,7 @@ components:
       type: object
       properties:
         count:
-          description: Consecutive matches required before the alert episode becomes `active`. Set to `0` to open it on the first match.
+          description: Consecutive matches the alert episode spends in `pending` before it becomes `active` on the next match. For example, `2` opens it on the third consecutive match. Set to `0` to open it on the first match.
           maximum: 1000
           minimum: 0
           type: integer
@@ -144810,7 +144753,7 @@ components:
       type: object
       properties:
         count:
-          description: Consecutive recoveries required before the alert episode becomes `inactive`. Set to `0` to close it on the first recovery.
+          description: Consecutive recoveries the alert episode spends in `recovering` before it becomes `inactive` on the next recovery. For example, `2` closes it on the third consecutive recovery. Set to `0` to close it on the first recovery.
           maximum: 1000
           minimum: 0
           type: integer
@@ -144894,13 +144837,6 @@ components:
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_action_policy_throttle'
           description: The throttle configuration for notifications.
           nullable: true
-        version:
-          description: The current version of the action policy, used for optimistic concurrency control.
-          maxLength: 256
-          minLength: 1
-          type: string
-      required:
-        - version
     Kibana_HTTP_APIs_alerting_update_rule:
       additionalProperties: false
       type: object
@@ -144967,11 +144903,6 @@ components:
           nullable: true
         time_field:
           description: Document field Kibana uses with `schedule.lookback` to time-filter `query.base`. If omitted, the existing value is kept.
-          maxLength: 256
-          minLength: 1
-          type: string
-        version:
-          description: The current version of the rule, used for optimistic concurrency control.
           maxLength: 256
           minLength: 1
           type: string
@@ -174789,6 +174720,32 @@ components:
         - group_id
       title: Annotation Layer (By Reference)
       type: object
+    Kibana_HTTP_APIs_visXyAnnotationLayerESQL:
+      additionalProperties: false
+      description: Layer containing annotations (points and ranges)
+      properties:
+        events:
+          description: Array of static annotation configurations
+          items:
+            anyOf:
+              - $ref: '#/components/schemas/Kibana_HTTP_APIs_visXyAnnotationManualEvent'
+              - $ref: '#/components/schemas/Kibana_HTTP_APIs_visXyAnnotationManualRange'
+          maxItems: 100
+          minItems: 1
+          type: array
+        ignore_global_filters:
+          default: false
+          description: When `true`, ignores global filters when fetching data for this layer. Defaults to `false`.
+          type: boolean
+        type:
+          enum:
+            - annotations
+          type: string
+      required:
+        - type
+        - events
+      title: Annotation Layer (ES|QL)
+      type: object
     Kibana_HTTP_APIs_visXyAnnotationLayerNoESQL:
       additionalProperties: false
       description: Layer containing annotations (query-based, points, and ranges)
@@ -175145,7 +175102,7 @@ components:
         layers:
           description: ES|QL chart layers
           items:
-            $ref: '#/components/schemas/Kibana_HTTP_APIs_visXyLayerESQL'
+            $ref: '#/components/schemas/Kibana_HTTP_APIs_visXyLayersESQL'
           maxItems: 100
           minItems: 1
           type: array
@@ -175497,8 +175454,11 @@ components:
       title: Layer (DSL)
       type: object
     Kibana_HTTP_APIs_visXyLayersESQL:
-      $ref: '#/components/schemas/Kibana_HTTP_APIs_visXyLayerESQL'
-      description: XY chart layer types for ES|QL queries
+      anyOf:
+        - $ref: '#/components/schemas/Kibana_HTTP_APIs_visXyLayerESQL'
+        - $ref: '#/components/schemas/Kibana_HTTP_APIs_visXyReferenceLineLayerESQLStatic'
+        - $ref: '#/components/schemas/Kibana_HTTP_APIs_visXyAnnotationLayerESQL'
+      description: XY chart layer types for ES|QL queries.
     Kibana_HTTP_APIs_visXyLayersNoESQL:
       anyOf:
         - $ref: '#/components/schemas/Kibana_HTTP_APIs_visXyLayerNoESQL'
@@ -175864,6 +175824,177 @@ components:
         visible:
           description: When true, shows the legend table series header.
           type: boolean
+    Kibana_HTTP_APIs_visXyReferenceLineLayerESQLStatic:
+      additionalProperties: false
+      description: Reference line layer with static value thresholds. Field-based threshold operations are not supported on ES|QL charts yet.
+      properties:
+        data_source:
+          discriminator:
+            mapping:
+              data_view_reference: '#/components/schemas/Kibana_HTTP_APIs_kbn-data-view-reference-schema'
+              data_view_spec: '#/components/schemas/Kibana_HTTP_APIs_kbn-data-view-spec-schema'
+            propertyName: type
+          oneOf:
+            - $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-data-view-reference-schema'
+            - $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-data-view-spec-schema'
+        ignore_global_filters:
+          default: false
+          description: When `true`, ignores global filters when fetching data for this layer. Defaults to `false`.
+          type: boolean
+        sampling:
+          default: 1
+          description: Sampling factor between 0 (no sampling) and 1 (full sampling).
+          maximum: 1
+          minimum: 0
+          type: number
+        thresholds:
+          description: Array of static value reference line thresholds
+          items:
+            type: object
+            properties:
+              axis:
+                anyOf:
+                  - enum:
+                      - x
+                    type: string
+                  - enum:
+                      - 'y'
+                    type: string
+                  - enum:
+                      - y2
+                    type: string
+                default: 'y'
+                description: The axis this reference line is drawn on. Values match the root axis configuration keys. If omitted, defaults to the primary Y axis.
+              color:
+                anyOf:
+                  - $ref: '#/components/schemas/Kibana_HTTP_APIs_visStaticColor'
+                  - $ref: '#/components/schemas/Kibana_HTTP_APIs_visAutoColor'
+                default:
+                  type: auto
+              fill:
+                anyOf:
+                  - enum:
+                      - above
+                    type: string
+                  - enum:
+                      - below
+                    type: string
+                description: Fill direction for reference line
+              format:
+                $ref: '#/components/schemas/Kibana_HTTP_APIs_visFormatType'
+              icon:
+                anyOf:
+                  - enum:
+                      - asterisk
+                    type: string
+                  - enum:
+                      - alert
+                    type: string
+                  - enum:
+                      - bell
+                    type: string
+                  - enum:
+                      - bolt
+                    type: string
+                  - enum:
+                      - bug
+                    type: string
+                  - enum:
+                      - circle
+                    type: string
+                  - enum:
+                      - editor_comment
+                    type: string
+                  - enum:
+                      - flag
+                    type: string
+                  - enum:
+                      - heart
+                    type: string
+                  - enum:
+                      - map_marker
+                    type: string
+                  - enum:
+                      - pin_filled
+                    type: string
+                  - enum:
+                      - star_empty
+                    type: string
+                  - enum:
+                      - star_filled
+                    type: string
+                  - enum:
+                      - tag
+                    type: string
+                  - enum:
+                      - triangle
+                    type: string
+                description: Icon to display on the reference line
+              label:
+                description: Label for the operation
+                type: string
+              operation:
+                enum:
+                  - static_value
+                type: string
+              position:
+                anyOf:
+                  - enum:
+                      - auto
+                    type: string
+                  - enum:
+                      - left
+                    type: string
+                  - enum:
+                      - right
+                    type: string
+                description: Position of the icon and label relative to the reference line
+              stroke_dash:
+                anyOf:
+                  - enum:
+                      - solid
+                    type: string
+                  - enum:
+                      - dashed
+                    type: string
+                  - enum:
+                      - dotted
+                    type: string
+                description: Line style
+              stroke_width:
+                description: Line width in pixels
+                maximum: 10
+                minimum: 1
+                type: number
+              text:
+                additionalProperties: false
+                description: Reference line text label configuration
+                type: object
+                properties:
+                  visible:
+                    description: Show text label on the reference line
+                    type: boolean
+                required:
+                  - visible
+              value:
+                default: 100
+                description: Static value
+                type: number
+            required:
+              - operation
+          maxItems: 100
+          minItems: 1
+          type: array
+        type:
+          enum:
+            - reference_lines
+          type: string
+      required:
+        - data_source
+        - type
+        - thresholds
+      title: Reference Line Layer (ES|QL, static values)
+      type: object
     Kibana_HTTP_APIs_visXyReferenceLineLayerNoESQL:
       additionalProperties: false
       description: Reference line layer for standard queries

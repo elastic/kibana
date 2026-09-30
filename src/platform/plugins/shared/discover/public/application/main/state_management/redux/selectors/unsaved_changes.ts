@@ -8,7 +8,9 @@
  */
 
 import { VIEW_MODE } from '@kbn/saved-search-plugin/public';
-import { isEqual, isObject, omit } from 'lodash';
+import { isEqual, isObject, omit, sortBy } from 'lodash';
+import type { ControlPanelsState } from '@kbn/control-group-renderer';
+import type { OptionsListESQLControlState } from '@kbn/controls-schemas';
 import type { SerializedSearchSourceFields } from '@kbn/data-plugin/public';
 import type { FilterCompareOptions } from '@kbn/es-query';
 import { COMPARE_ALL_OPTIONS, isOfAggregateQueryType } from '@kbn/es-query';
@@ -228,6 +230,25 @@ const visContextComparator: TabComparators['visContext'] = (visContextA, visCont
   return isEqual(getAdjustedVisContext(visContextA), getAdjustedVisContext(visContextB));
 };
 
+// API conversions renumber positions, so compare the visual order rather than the numbers.
+const getComparableControls = (controls: ControlPanelsState<OptionsListESQLControlState>) =>
+  sortBy(Object.entries(controls), ([, control]) => control.order).map(([id, control]) => [
+    id,
+    omit(control, 'order'),
+  ]);
+
+const controlGroupComparator: TabComparators['controlGroupJson'] = (a, b) => {
+  const controlsA: ControlPanelsState<OptionsListESQLControlState> = JSON.parse(a ?? '{}');
+  const controlsB: ControlPanelsState<OptionsListESQLControlState> = JSON.parse(b ?? '{}');
+
+  // Equal positions must not make JSON key order count as an edit.
+  if (isEqual(controlsA, controlsB)) {
+    return true;
+  }
+
+  return isEqual(getComparableControls(controlsA), getComparableControls(controlsB));
+};
+
 const TAB_COMPARATORS: TabComparators = {
   id: fieldComparator('id', ''),
   label: fieldComparator('label', ''),
@@ -259,11 +280,6 @@ const TAB_COMPARATORS: TabComparators = {
   jsonModeSettings: fieldComparator('jsonModeSettings', {}),
   esqlApproximation: fieldComparator('esqlApproximation', false),
   visContext: visContextComparator,
-  controlGroupJson: (a, b) => {
-    // ignore the order of keys when comparing JSON strings
-    const testA = JSON.parse(a ?? '{}');
-    const testB = JSON.parse(b ?? '{}');
-    return isEqual(testA, testB);
-  },
+  controlGroupJson: controlGroupComparator,
   tabTypeState: fieldComparator('tabTypeState', undefined),
 };

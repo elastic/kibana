@@ -7,8 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { ALERTING_CLONE_API_KEY_HEADER } from '@kbn/alerting-plugin/common';
 import type { CoreStart, KibanaRequest } from '@kbn/core/server';
 import {
+  ES_CLIENT_AUTHENTICATION_HEADER,
   HTTPAuthorizationHeader,
   UIAM_INTERNAL_CALLER_ATTESTATION_HEADER,
 } from '@kbn/core-security-server';
@@ -134,6 +136,7 @@ export interface CallKibanaApiDeps {
  * propagation, and content negotiation stay under the engine's control.
  */
 const RESERVED_HEADER_NAMES = new Set([
+  ALERTING_CLONE_API_KEY_HEADER,
   'authorization',
   'kbn-xsrf',
   UIAM_INTERNAL_CALLER_ATTESTATION_HEADER,
@@ -157,7 +160,9 @@ const isCoreProtectedSelfCallHeader = (name: string): boolean => {
     lowerName.startsWith('kbn-') ||
     lowerName === 'x-kbn-self-call' ||
     lowerName.startsWith('x-elastic-internal-') ||
-    lowerName === UIAM_INTERNAL_CALLER_ATTESTATION_HEADER.toLowerCase()
+    lowerName === UIAM_INTERNAL_CALLER_ATTESTATION_HEADER.toLowerCase() ||
+    lowerName === ES_CLIENT_AUTHENTICATION_HEADER ||
+    lowerName === 'es-secondary-x-client-authentication'
   );
 };
 
@@ -313,8 +318,10 @@ export async function callKibanaApi<T = unknown>(
 
   // Only the headers Core's self client does not manage for us: caller-supplied custom headers
   // (reserved ones stripped) plus the engine's event-chain propagation. Authorization,
-  // x-elastic-internal-origin, and kbn-version/xsrf are set by the self client itself; JSON
-  // requests receive a default content type unless the caller supplied one.
+  // x-elastic-internal-origin, kbn-version/xsrf, and the UIAM internal-caller attestation are set
+  // by the self client itself — the attestation is bound to the credential, so it has to be
+  // derived per attempt by whoever chooses that credential. JSON requests receive a default
+  // content type unless the caller supplied one.
   const callerHeaders = stripReservedHeaders(params.headers, params.rawBody instanceof FormData);
   const hasContentType = Object.keys(callerHeaders).some(
     (name) => name.toLowerCase() === 'content-type'
@@ -325,6 +332,11 @@ export async function callKibanaApi<T = unknown>(
       : {}),
     ...callerHeaders,
     ...getOutboundEventChainHeaders(fakeRequest, workflowRunId),
+    // Our API key dies after the workflow run (Task Manager revokes it). This header tells alerting
+    // to give any rule it creates or enables its own key instead of keeping ours.
+    // Only alerting reads this header. Other routes ignore it, so it is safe to send on every call.
+    // See: https://github.com/elastic/kibana/pull/291318
+    [ALERTING_CLONE_API_KEY_HEADER]: 'true',
   };
 
   // Space-relative paths get the workflow space prefix exactly once. The server base path stays
