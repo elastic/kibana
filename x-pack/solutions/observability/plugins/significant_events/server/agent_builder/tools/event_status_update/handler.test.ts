@@ -34,6 +34,7 @@ describe('updateEventStatusToolHandler', () => {
     );
     expect(result).toEqual({
       event_id: 'event-id-1',
+      found: true,
       updated: 1,
       ignored: 0,
       status: 'inactive',
@@ -53,6 +54,7 @@ describe('updateEventStatusToolHandler', () => {
     });
     expect(missing).toEqual({
       event_id: 'event-id-1',
+      found: false,
       updated: 0,
       ignored: 1,
       status: 'inactive',
@@ -73,6 +75,7 @@ describe('updateEventStatusToolHandler', () => {
     });
     expect(same).toEqual({
       event_id: 'event-id-1',
+      found: true,
       updated: 0,
       ignored: 1,
       status: 'inactive',

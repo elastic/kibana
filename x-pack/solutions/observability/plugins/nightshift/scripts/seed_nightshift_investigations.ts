@@ -166,7 +166,7 @@ const unfinished = ({
 
 const INVESTIGATIONS: InvestigationAttributes[] = [
   completed({
-    severity: '80-critical',
+    severity: 'critical',
     title: 'api-gateway v2.8.1 auth middleware blocks the event loop',
     subject: {
       type: 'significant_event',
@@ -235,7 +235,7 @@ const INVESTIGATIONS: InvestigationAttributes[] = [
     ],
   }),
   completed({
-    severity: '80-critical',
+    severity: 'critical',
     title: 'Transaction batching leaks references and OOM-kills payment-service',
     subject: {
       type: 'significant_event',
@@ -283,7 +283,7 @@ const INVESTIGATIONS: InvestigationAttributes[] = [
     entities: [entity('payment-service', 'service', 'logs.payment-service', 'payment-service')],
   }),
   completed({
-    severity: '80-critical',
+    severity: 'critical',
     title: 'ILM policy gap fills Elasticsearch data nodes past the high watermark',
     subject: {
       type: 'significant_event',
@@ -340,7 +340,7 @@ const INVESTIGATIONS: InvestigationAttributes[] = [
     ],
   }),
   completed({
-    severity: '60-high',
+    severity: 'high',
     title: 'Stale JWKS cache rejects valid tokens after IdP key rotation',
     subject: { type: 'significant_event', id: 'evt-009', summary: 'Auth API — elevated 401 rate' },
     minutesAgo: 70,
@@ -387,7 +387,7 @@ const INVESTIGATIONS: InvestigationAttributes[] = [
     ],
   }),
   completed({
-    severity: '60-high',
+    severity: 'high',
     title: 'order-processors stuck in deserialisation retries after schema registry blip',
     subject: {
       type: 'significant_event',
@@ -445,7 +445,7 @@ const INVESTIGATIONS: InvestigationAttributes[] = [
     ],
   }),
   completed({
-    severity: '60-high',
+    severity: 'high',
     title: 'Checkout error rate alert traced to payment-service restarts',
     subject: {
       type: 'alert',
@@ -485,7 +485,7 @@ const INVESTIGATIONS: InvestigationAttributes[] = [
     ],
   }),
   completed({
-    severity: '40-medium',
+    severity: 'medium',
     title: 'Catalog index lag returns empty search facets for new SKUs',
     subject: {
       type: 'significant_event',
@@ -528,7 +528,7 @@ const INVESTIGATIONS: InvestigationAttributes[] = [
     entities: [entity('web-frontend', 'service', 'logs.web-frontend', 'web-frontend')],
   }),
   completed({
-    severity: '40-medium',
+    severity: 'medium',
     title: 'Nightly batch saturates the cache-service connection pool',
     subject: {
       type: 'manual',
@@ -567,7 +567,7 @@ const INVESTIGATIONS: InvestigationAttributes[] = [
     entities: [entity('cache-service', 'service', 'logs.cache-service', 'cache-service')],
   }),
   completed({
-    severity: '20-low',
+    severity: 'low',
     title: 'Cache hit-rate dip was a planned node replacement',
     subject: {
       type: 'significant_event',
@@ -593,7 +593,7 @@ const INVESTIGATIONS: InvestigationAttributes[] = [
     entities: [entity('cache-service', 'service', 'logs.cache-service', 'cache-service')],
   }),
   completed({
-    severity: '20-low',
+    severity: 'low',
     title: 'cert-manager lost DNS01 permissions after RBAC tightening',
     subject: {
       type: 'significant_event',
