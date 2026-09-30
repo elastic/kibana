@@ -6,18 +6,20 @@
  */
 
 import React from 'react';
-import { render, screen, fireEvent } from '@testing-library/react';
+import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { EuiProvider } from '@elastic/eui';
+import { I18nProvider } from '@kbn/i18n-react';
 import { ApprovalContent, type ApprovalContentProps } from './approval_content';
 
 const wrapper: React.FC<{ children: React.ReactNode }> = ({ children }) => (
-  <EuiProvider>{children}</EuiProvider>
+  <I18nProvider>
+    <EuiProvider>{children}</EuiProvider>
+  </I18nProvider>
 );
 
 const baseProps: ApprovalContentProps = {
   title: 'Block IP 10.0.0.4',
   tone: 'danger',
-  iconType: 'lock',
   comment: 'Isolate the compromised host.',
   primaryAction: {
     label: 'Approve',
@@ -47,14 +49,9 @@ describe('ApprovalContent', () => {
     jest.clearAllMocks();
   });
 
-  it('renders the header when showHeader is true (default)', () => {
+  it('renders the header', () => {
     renderContent();
     expect(screen.getByText('Needs review')).toBeInTheDocument();
-  });
-
-  it('hides the header when showHeader is false', () => {
-    renderContent({ showHeader: false });
-    expect(screen.queryByText('Needs review')).not.toBeInTheDocument();
   });
 
   it('renders a caption under the badge when supplied', () => {
@@ -177,5 +174,85 @@ describe('ApprovalContent', () => {
     });
     fireEvent.click(screen.getByRole('checkbox'));
     expect(onChange).toHaveBeenCalledWith(true);
+  });
+
+  describe('built-in decline flow (onDismiss)', () => {
+    it('renders a Decline trigger next to the primary action when onDismiss is supplied', () => {
+      renderContent({ onDismiss: jest.fn(), 'data-test-subj': 'card' });
+      expect(screen.getByTestId('card-dismiss')).toBeInTheDocument();
+    });
+
+    it('omits the Decline trigger when onDismiss is not supplied', () => {
+      renderContent({ onDismiss: undefined, 'data-test-subj': 'card' });
+      expect(screen.queryByTestId('card-dismiss')).not.toBeInTheDocument();
+    });
+
+    it('disables the Decline trigger whenever the primary action is disabled', () => {
+      renderContent({
+        onDismiss: jest.fn(),
+        primaryAction: { label: 'Approve', onClick: jest.fn(), isDisabled: true },
+        'data-test-subj': 'card',
+      });
+      expect(screen.getByTestId('card-dismiss')).toBeDisabled();
+    });
+
+    it('swaps the comment for the reason form, and the footer for Cancel/Decline, once the trigger is clicked', () => {
+      renderContent({ onDismiss: jest.fn(), 'data-test-subj': 'card' });
+      fireEvent.click(screen.getByTestId('card-dismiss'));
+
+      expect(screen.queryByText('Isolate the compromised host.')).not.toBeInTheDocument();
+      expect(screen.getByTestId('card-decline-form')).toBeInTheDocument();
+      expect(screen.getByTestId('card-cancel-decline')).toBeInTheDocument();
+      expect(screen.getByTestId('card-confirm-decline')).toBeInTheDocument();
+      expect(screen.queryByTestId('content-confirm')).not.toBeInTheDocument();
+    });
+
+    it('returns to view without declining when Cancel is clicked', () => {
+      const onDismiss = jest.fn();
+      renderContent({ onDismiss, 'data-test-subj': 'card' });
+      fireEvent.click(screen.getByTestId('card-dismiss'));
+      fireEvent.click(screen.getByTestId('card-cancel-decline'));
+
+      expect(screen.getByText('Isolate the compromised host.')).toBeInTheDocument();
+      expect(onDismiss).not.toHaveBeenCalled();
+    });
+
+    it('calls onDismiss with the selected reason and rationale on confirm', async () => {
+      const onDismiss = jest.fn().mockResolvedValue(undefined);
+      renderContent({ onDismiss, 'data-test-subj': 'card' });
+      fireEvent.click(screen.getByTestId('card-dismiss'));
+      fireEvent.click(screen.getByTestId('card-confirm-decline'));
+
+      await waitFor(() =>
+        expect(onDismiss).toHaveBeenCalledWith({ dismissReason: 'no_reason', rationale: undefined })
+      );
+    });
+
+    it('shows an error and keeps the form open when onDismiss rejects', async () => {
+      const onDismiss = jest.fn().mockRejectedValue(new Error('Could not decline.'));
+      renderContent({ onDismiss, 'data-test-subj': 'card' });
+      fireEvent.click(screen.getByTestId('card-dismiss'));
+      fireEvent.click(screen.getByTestId('card-confirm-decline'));
+
+      await waitFor(() => expect(screen.getByText('Could not decline.')).toBeInTheDocument());
+      expect(screen.getByTestId('card-decline-form')).toBeInTheDocument();
+    });
+
+    it('hides the reason form once isSubmitting is "declining", since the banner already says so', () => {
+      const onDismiss = jest.fn();
+      const { rerender } = renderContent({ onDismiss, 'data-test-subj': 'card' });
+      fireEvent.click(screen.getByTestId('card-dismiss'));
+      expect(screen.getByTestId('card-decline-form')).toBeInTheDocument();
+
+      rerender(
+        <ApprovalContent
+          {...baseProps}
+          onDismiss={onDismiss}
+          isSubmitting="declining"
+          data-test-subj="card"
+        />
+      );
+      expect(screen.queryByTestId('card-decline-form')).not.toBeInTheDocument();
+    });
   });
 });

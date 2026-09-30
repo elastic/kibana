@@ -19,7 +19,7 @@ import {
 } from '@elastic/eui';
 import { KbnInfoCallout } from '@kbn/ui-callout';
 import type { DismissReason } from '@kbn/proposals-common';
-import { DISMISS_REASON_OPTIONS } from '@kbn/proposals-plugin/public';
+import { DISMISS_REASON_OPTIONS } from '@kbn/proposals-ui';
 import type { EscalationClosePreviewResponse } from '@kbn/agentic-investigations-plugin/common';
 import { PendingProposalsList } from './pending_proposals_list';
 import * as i18n from './translations';
@@ -81,7 +81,7 @@ export const CloseEscalationModal: React.FC<CloseEscalationModalProps> = ({
   onConfirm,
   isLoading = false,
 }) => {
-  const [dismissReason, setDismissReason] = useState<DismissReason>('wrong');
+  const [dismissReason, setDismissReason] = useState<DismissReason>('no_reason');
   const [rationale, setRationale] = useState('');
 
   const totalPendingProposals = useMemo(

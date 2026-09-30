@@ -120,6 +120,9 @@ const mockUpdateRuleMutate = jest.fn();
 jest.mock('../../hooks/use_update_rule', () => ({
   useUpdateRule: () => ({ mutate: mockUpdateRuleMutate, isLoading: false }),
 }));
+jest.mock('../../hooks/use_is_action_policies_license_valid', () => ({
+  useIsActionPoliciesLicenseValid: () => true,
+}));
 
 const mockDeleteMutate = jest.fn();
 const mockUseDeleteRule = jest.fn();

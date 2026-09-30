@@ -28,7 +28,7 @@ import {
 import type { QueryServiceContract } from '../../services/query_service/query_service';
 import type { ActiveAlertGroupHash } from '../queries';
 import type { RuleResponse } from '../../rules_client';
-import type { AlertEvent } from '../../../resources/datastreams/alert_events';
+import type { AlertEventDocument } from '../../../resources/datastreams/alert_events';
 
 /**
  * End-of-stream classifier for active groups that are **absent from the
@@ -112,7 +112,7 @@ export class ClassifyAbsentGroupsStep implements RuleExecutionStep {
   private async classify(
     state: RulePipelineState,
     breachedGroupHashes: ReadonlySet<string>
-  ): Promise<AlertEvent[]> {
+  ): Promise<AlertEventDocument[]> {
     const { rule, input } = state;
 
     if (rule?.kind !== 'alert') {
@@ -201,7 +201,7 @@ export class ClassifyAbsentGroupsStep implements RuleExecutionStep {
     dataPresentGroupHashes?: ReadonlySet<string>;
     recoveryQuery?: string;
     logger: RulePipelineState['logger'];
-  }): Promise<AlertEvent[]> {
+  }): Promise<AlertEventDocument[]> {
     if (recoveryQuery) {
       return executeRecoveryQuery({
         queryService: this.scopedQueryService,
@@ -248,7 +248,7 @@ export class ClassifyAbsentGroupsStep implements RuleExecutionStep {
     recoveredGroupHashes: ReadonlySet<string>;
     dataPresentGroupHashes: ReadonlySet<string>;
     recoveryQuery?: string;
-  }): AlertEvent[] {
+  }): AlertEventDocument[] {
     const unresolvedAbsentGroups = activeGroups
       .map(({ group_hash: groupHash }) => groupHash)
       .filter(
@@ -272,7 +272,7 @@ export class ClassifyAbsentGroupsStep implements RuleExecutionStep {
       }
     }
 
-    const events: AlertEvent[] = [];
+    const events: AlertEventDocument[] = [];
     const eventType = resolveAlertEventType(rule);
 
     if (noDataGroupHashes.length > 0) {

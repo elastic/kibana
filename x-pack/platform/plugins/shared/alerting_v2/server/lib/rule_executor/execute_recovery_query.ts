@@ -17,7 +17,7 @@ import type { LoggerServiceContract } from '../services/logger_service/logger_se
 import type { QueryServiceContract } from '../services/query_service/query_service';
 import type { ActiveAlertGroupHash } from './queries';
 import type { RuleResponse } from '../rules_client';
-import type { AlertEvent } from '../../resources/datastreams/alert_events';
+import type { AlertEventDocument } from '../../resources/datastreams/alert_events';
 
 /**
  * Runs the rule's recovery ES|QL query and builds `recovered` events for the
@@ -45,7 +45,7 @@ export const executeRecoveryQuery = async ({
   activeGroupHashes: ActiveAlertGroupHash[];
   breachedGroupHashes: ReadonlySet<string>;
   maxResponseSize?: number;
-}): Promise<AlertEvent[]> => {
+}): Promise<AlertEventDocument[]> => {
   const lookbackWindow = rule.schedule.lookback ?? rule.schedule.every;
 
   const queryPayload = getQueryPayload({
