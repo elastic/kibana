@@ -7,7 +7,11 @@
 
 // Kibana wrapper
 import { getIcon } from '../../helpers/style_choices';
-import { buildExploreControls, buildSearchExploreRequest } from './graph_request_builders';
+import {
+  buildExpandExploreRequest,
+  buildExploreControls,
+  buildSearchExploreRequest,
+} from './graph_request_builders';
 
 // Pluggable function to handle the comms with a server. Default impl here is
 // for use outside of Kibana server with direct access to elasticsearch
@@ -594,100 +598,15 @@ function GraphWorkspace(options) {
   // of existing nodes that are the start points and some options
   // about what targets are of interest.
   this.expand = function (startNodes, targetOptions) {
-    //=============================
-    const nodesByField = {};
-    const excludeNodesByField = {};
-
-    //Add any blocklisted nodes to exclusion list
-    const avoidNodes = this.blocklistedNodes;
-    for (let i = 0; i < avoidNodes.length; i++) {
-      const n = avoidNodes[i];
-      let arr = excludeNodesByField[n.data.field];
-      if (!arr) {
-        arr = [];
-        excludeNodesByField[n.data.field] = arr;
-      }
-      if (arr.indexOf(n.data.term) < 0) {
-        arr.push(n.data.term);
-      }
-    }
-
-    const allExistingNodes = this.nodes;
-    for (let i = 0; i < allExistingNodes.length; i++) {
-      const n = allExistingNodes[i];
-      let arr = excludeNodesByField[n.data.field];
-      if (!arr) {
-        arr = [];
-        excludeNodesByField[n.data.field] = arr;
-      }
-      arr.push(n.data.term);
-    }
-
-    //Organize nodes by field
-    for (let i = 0; i < startNodes.length; i++) {
-      const n = startNodes[i];
-      let arr = nodesByField[n.data.field];
-      if (!arr) {
-        arr = [];
-        nodesByField[n.data.field] = arr;
-      }
-      // pushing boosts server-side to influence sampling/direction
-      arr.push({
-        term: n.data.term,
-        boost: n.data.weight,
-      });
-
-      arr = excludeNodesByField[n.data.field];
-      if (!arr) {
-        arr = [];
-        excludeNodesByField[n.data.field] = arr;
-      }
-      //NOTE for the entity-building use case need to remove excludes that otherwise
-      // prevent bridge-building.
-      if (arr.indexOf(n.data.term) < 0) {
-        arr.push(n.data.term);
-      }
-    }
-
-    const primaryVertices = [];
-    const secondaryVertices = [];
-    for (const fieldName in nodesByField) {
-      if (Object.hasOwn(nodesByField, fieldName)) {
-        primaryVertices.push({
-          field: fieldName,
-          include: nodesByField[fieldName],
-          min_doc_count: parseInt(self.options.exploreControls.minDocCount),
-        });
-      }
-    }
-
-    let targetFields = this.options.vertex_fields;
-    if (targetOptions.toFields) {
-      targetFields = targetOptions.toFields;
-    }
-
-    //Identify target fields
-    targetFields.forEach((targetField) => {
-      const fieldName = targetField.name;
-      // Sometimes the target field is disabled from loading new hops so we need to use the last valid figure
-      const hopSize = targetField.hopSize > 0 ? targetField.hopSize : targetField.lastValidHopSize;
-
-      const fieldHop = {
-        field: fieldName,
-        size: hopSize,
-        min_doc_count: parseInt(self.options.exploreControls.minDocCount),
-      };
-      fieldHop.exclude = excludeNodesByField[fieldName];
-      secondaryVertices.push(fieldHop);
+    const targetFields = targetOptions.toFields ?? this.options.vertex_fields;
+    const request = buildExpandExploreRequest({
+      startNodes,
+      existingNodes: this.nodes,
+      blocklistedNodes: this.blocklistedNodes,
+      fields: this.options.vertex_fields,
+      targetFields,
+      settings: this.options.exploreControls,
     });
-
-    const request = {
-      controls: self.buildControls(),
-      vertices: primaryVertices,
-      connections: {
-        vertices: secondaryVertices,
-      },
-    };
     self.lastRequest = JSON.stringify(request, null, '\t');
     graphExplorer(self.options.indexName, request, function (data) {
       self.lastResponse = JSON.stringify(data, null, '\t');

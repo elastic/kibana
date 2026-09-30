@@ -6,9 +6,16 @@
  */
 
 import type { AdvancedSettings, WorkspaceField } from '../../types/app_state';
-import type { WorkspaceNode } from '../../types/workspace_state';
 
 type Query = Record<string, object>;
+
+interface RequestNode {
+  data: {
+    field: string;
+    term: string;
+    weight?: number;
+  };
+}
 
 interface VertexRequest {
   field: string;
@@ -44,6 +51,63 @@ export const buildExploreControls = (settings: AdvancedSettings) => {
   return controls;
 };
 
+export const buildExpandExploreRequest = ({
+  startNodes,
+  existingNodes,
+  blocklistedNodes,
+  fields,
+  targetFields = fields,
+  settings,
+}: {
+  startNodes: RequestNode[];
+  existingNodes: RequestNode[];
+  blocklistedNodes: RequestNode[];
+  fields: WorkspaceField[];
+  targetFields?: WorkspaceField[];
+  settings: AdvancedSettings;
+}) => {
+  const nodesByField: Record<string, Array<{ term: string; boost: number | undefined }>> = {};
+  const excludesByField: Record<string, string[]> = {};
+
+  blocklistedNodes.forEach((node) => {
+    const excludes = (excludesByField[node.data.field] ??= []);
+    if (!excludes.includes(node.data.term)) {
+      excludes.push(node.data.term);
+    }
+  });
+  existingNodes.forEach((node) => {
+    (excludesByField[node.data.field] ??= []).push(node.data.term);
+  });
+  startNodes.forEach((node) => {
+    (nodesByField[node.data.field] ??= []).push({
+      term: node.data.term,
+      boost: node.data.weight,
+    });
+    const excludes = (excludesByField[node.data.field] ??= []);
+    if (!excludes.includes(node.data.term)) {
+      excludes.push(node.data.term);
+    }
+  });
+
+  const vertices = Object.entries(nodesByField).map(([field, include]) => ({
+    field,
+    include,
+    min_doc_count: Number.parseInt(String(settings.minDocCount), 10),
+  }));
+  const connectionVertices = targetFields.map((targetField) => ({
+    field: targetField.name,
+    size: (targetField.hopSize ?? 0) > 0 ? targetField.hopSize : targetField.lastValidHopSize,
+    min_doc_count: Number.parseInt(String(settings.minDocCount), 10),
+    exclude: excludesByField[targetField.name],
+  }));
+
+  return {
+    controls: buildExploreControls(settings),
+    vertices,
+    connections: { vertices: connectionVertices },
+  };
+};
+
 export const buildSearchExploreRequest = ({
   query,
   fields,
@@ -54,7 +118,7 @@ export const buildSearchExploreRequest = ({
   query: Query;
   fields: WorkspaceField[];
   numHops: number;
-  blocklistedNodes: WorkspaceNode[];
+  blocklistedNodes: RequestNode[];
   settings: AdvancedSettings;
 }) => {
   const excludesByField: Record<string, string[]> = {};
