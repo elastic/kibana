@@ -68,6 +68,7 @@ import {
   getCaseTasksUrl,
   getCaseTaskDetailsUrl,
   getCaseTasksApplyTemplateUrl,
+  getTaskTemplateDetailsUrl,
 } from '../../common/api';
 import {
   CASE_REPORTERS_URL,
@@ -80,6 +81,7 @@ import {
   CASES_TASK_TEMPLATES_URL,
 } from '../../common/constants';
 import type { CaseTask } from '../../common/types/domain/task/v1';
+import type { CaseTaskTemplate } from '../../common/types/domain/task_template/v1';
 import { getAllConnectorTypesUrl } from '../../common/utils/connectors_api';
 
 import { KibanaServices } from '../common/lib/kibana';
@@ -783,3 +785,23 @@ export const getTaskTemplates = async (
     query: { owner: owners },
     signal,
   });
+
+export const createTaskTemplate = async (
+  request: taskApiV1.TaskTemplateCreateRequest
+): Promise<CaseTaskTemplate> =>
+  KibanaServices.get().http.fetch<CaseTaskTemplate>(CASES_TASK_TEMPLATES_URL, {
+    method: 'POST',
+    body: JSON.stringify(request),
+  });
+
+export const updateTaskTemplate = async (
+  templateId: string,
+  request: taskApiV1.TaskTemplatePatchRequest
+): Promise<CaseTaskTemplate> =>
+  KibanaServices.get().http.fetch<CaseTaskTemplate>(getTaskTemplateDetailsUrl(templateId), {
+    method: 'PATCH',
+    body: JSON.stringify(request),
+  });
+
+export const deleteTaskTemplate = async (templateId: string): Promise<void> =>
+  KibanaServices.get().http.fetch(getTaskTemplateDetailsUrl(templateId), { method: 'DELETE' });

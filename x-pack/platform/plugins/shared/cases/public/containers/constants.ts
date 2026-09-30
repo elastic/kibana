@@ -105,6 +105,9 @@ export const casesMutationsKeys = {
   updateTask: ['update-task'] as const,
   deleteTask: ['delete-task'] as const,
   applyTaskTemplate: ['apply-task-template'] as const,
+  createTaskTemplate: ['create-task-template'] as const,
+  updateTaskTemplate: ['update-task-template'] as const,
+  deleteTaskTemplate: ['delete-task-template'] as const,
 };
 
 export const inferenceKeys = {

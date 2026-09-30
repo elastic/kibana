@@ -13,10 +13,13 @@ import type { ServerError } from '../types';
 import {
   applyTaskTemplate,
   createTask,
+  createTaskTemplate,
   deleteTask,
+  deleteTaskTemplate,
   getCaseTasks,
   getTaskTemplates,
   updateTask,
+  updateTaskTemplate,
 } from './api';
 import { casesMutationsKeys, casesQueriesKeys } from './constants';
 import * as i18n from './translations';
@@ -97,4 +100,50 @@ export const useApplyTaskTemplate = (caseId: string) =>
     casesMutationsKeys.applyTaskTemplate,
     (templateId: string) => applyTaskTemplate(caseId, templateId),
     i18n.TASK_LIST_APPLIED
+  );
+
+const useTaskTemplateMutation = <TVariables>(
+  mutationKey: readonly string[],
+  mutationFn: (variables: TVariables) => Promise<unknown>,
+  successTitle: string
+) => {
+  const { owner } = useCasesContext();
+  const { showErrorToast, showSuccessToast } = useCasesToast();
+  const queryClient = useQueryClient();
+
+  return useMutation(mutationFn, {
+    mutationKey,
+    onSuccess: () => {
+      showSuccessToast(successTitle);
+      queryClient.invalidateQueries(casesQueriesKeys.taskTemplates(owner));
+    },
+    onError: (error: ServerError) => showErrorToast(error, { title: i18n.ERROR_TITLE }),
+  });
+};
+
+export const useCreateTaskTemplate = () =>
+  useTaskTemplateMutation(
+    casesMutationsKeys.createTaskTemplate,
+    createTaskTemplate,
+    i18n.TASK_LIST_SAVED
+  );
+
+export const useUpdateTaskTemplate = () =>
+  useTaskTemplateMutation(
+    casesMutationsKeys.updateTaskTemplate,
+    ({
+      templateId,
+      request,
+    }: {
+      templateId: string;
+      request: taskApiV1.TaskTemplatePatchRequest;
+    }) => updateTaskTemplate(templateId, request),
+    i18n.TASK_LIST_SAVED
+  );
+
+export const useDeleteTaskTemplate = () =>
+  useTaskTemplateMutation(
+    casesMutationsKeys.deleteTaskTemplate,
+    deleteTaskTemplate,
+    i18n.TASK_LIST_DELETED
   );

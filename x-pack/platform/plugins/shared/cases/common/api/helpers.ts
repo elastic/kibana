@@ -29,6 +29,7 @@ import {
   CASE_TASKS_URL,
   CASE_TASK_DETAILS_URL,
   CASE_TASKS_APPLY_TEMPLATE_URL,
+  CASE_TASK_TEMPLATE_DETAILS_URL,
 } from '../constants';
 
 export const getCaseDetailsUrl = (id: string): string => {
@@ -130,4 +131,8 @@ export const getCaseTaskDetailsUrl = (caseId: string, taskId: string): string =>
 
 export const getCaseTasksApplyTemplateUrl = (caseId: string): string => {
   return CASE_TASKS_APPLY_TEMPLATE_URL.replace('{case_id}', caseId);
+};
+
+export const getTaskTemplateDetailsUrl = (templateId: string): string => {
+  return CASE_TASK_TEMPLATE_DETAILS_URL.replace('{template_id}', templateId);
 };

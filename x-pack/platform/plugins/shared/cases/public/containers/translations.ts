@@ -116,3 +116,11 @@ export const TASK_DELETED = i18n.translate('xpack.cases.containers.tasks.deleted
 export const TASK_LIST_APPLIED = i18n.translate('xpack.cases.containers.tasks.listApplied', {
   defaultMessage: 'Task list applied',
 });
+
+export const TASK_LIST_SAVED = i18n.translate('xpack.cases.containers.tasks.listSaved', {
+  defaultMessage: 'Task list saved',
+});
+
+export const TASK_LIST_DELETED = i18n.translate('xpack.cases.containers.tasks.listDeleted', {
+  defaultMessage: 'Task list deleted',
+});
