@@ -8,7 +8,10 @@
 import { createConversationAlreadyExistsError } from '@kbn/agent-builder-common';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { TEMPLATE_ID_INVESTIGATION } from '@kbn/alertzero-common';
-import { buildHuntInvestigationConversationId, buildHuntTriggerAttachmentId } from './hunt_investigation_id';
+import {
+  buildHuntInvestigationConversationId,
+  buildHuntTriggerAttachmentId,
+} from './hunt_investigation_id';
 import { runFindOrCreateInvestigation } from './find_or_create_investigation';
 import type { FindOrCreateConversationClient } from './find_or_create_investigation';
 

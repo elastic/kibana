@@ -124,7 +124,11 @@ describe('registerFindOrCreateInvestigationRoute', () => {
   it('loads the report as the internal user, not the enabling user, since the reports index is hidden', async () => {
     const { handler, context, asInternalUser } = makeDeps();
 
-    await handler(context, requestFor({ reportId: 'report-9' }), httpServerMock.createResponseFactory());
+    await handler(
+      context,
+      requestFor({ reportId: 'report-9' }),
+      httpServerMock.createResponseFactory()
+    );
 
     const { loadReport } = runFindOrCreateInvestigationMock.mock.calls[0][1];
     await loadReport?.();
