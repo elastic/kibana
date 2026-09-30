@@ -51,6 +51,7 @@ spaceTest.describe(
       'data view with exclusion pattern shows only included index fields',
       async ({ pageObjects, scoutSpace }) => {
         const prefix = indexPrefix(scoutSpace.id);
+
         await spaceTest.step('navigate to data views management', async () => {
           await pageObjects.dataViewsManagement.goto();
         });
