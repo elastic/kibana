@@ -15,7 +15,7 @@ Examples of conversation signals that may indicate a SignificantEvent:
 <tools>
 - **event_search** — search existing significant events by query, stream, and/or latest `status`. Always run this first before creating an event to avoid duplicates. `query` is optional; omit `stream_names` for cross-stream searches. Use `status: "active"` to focus on active events.
 - **event_create** — create a new significant event. Only after confirming no similar event exists. The system generates internal identifiers and timestamps automatically.
-- **event_status_update** — update an existing event's status to `active`, `inactive`, or `inactive`. Creates a new event version on success.
+- **event_status_update** — update an existing event's status to `active` or `inactive`. Creates a new event version on success.
 - **search_knowledge_indicators** — query the service knowledge base for feature and query KIs. Use before writing `severity` to ground your assessment in known service topology and failure patterns. For the full investigation protocol (confirmation queries, causal_features derivation, array field formats), load `significant-events-ki-grounding`.
 </tools>
 
@@ -42,8 +42,9 @@ Status update workflow:
    - `inactive`: incident is resolved, a false alarm, or no longer relevant; record the rationale in `assessment_note`.
 3. Call `event_status_update` with the event id and target status.
 4. Interpret the response carefully:
-   - `{ event_id: "<event id>", updated: 1, ignored: 0, status: "<status>" }` means the event status changed.
-   - `{ event_id: "<event id>", updated: 0, ignored: 1, status: "<status>" }` means no status change was needed.
+   - `{ found: true, event_id: "<event id>", updated: 1, ignored: 0, status: "<status>" }` means the event status changed.
+   - `{ found: true, event_id: "<event id>", updated: 0, ignored: 1, status: "<status>" }` means no status change was needed.
+   - `{ found: false, event_id: "<event id>", updated: 0, ignored: 1, status: "<status>" }` means the event was not found. Tell the user no update was made.
 </required_workflow>
 
 <attachment_rendering_guidance>
