@@ -102,6 +102,7 @@ export function createMockGraphStore({
     reducer: initializedRootReducer,
     middleware: (getDefaultMiddleware) =>
       getDefaultMiddleware({
+        thunk: false,
         serializableCheck: false,
         immutableCheck: false,
       }).prepend(listenerMiddleware.middleware),
