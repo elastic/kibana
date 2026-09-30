@@ -691,15 +691,12 @@ test.describe(
       await expect(page.testSubj.locator('authenticateAndDeployStep-nextButton')).toBeEnabled();
     });
 
-    test('auth drift: connector change detected and callout shown', async ({
+    test('auth method radio is locked in identity-federation edit mode', async ({
       browserAuth,
       page,
     }) => {
-      // SO has identity_federation auth. Clicking "Access Keys" changes authMethod in React state,
-      // re-triggering the drift effect which compares the new session value ('static_keys') against
-      // the SO's stored value ('identity_federation') and sets isDirty=true.
-      // An ELB instance is seeded after hydration so deployGroups is non-empty and the callout
-      // (gated on deployGroups.length > 0 || agentTargets.length > 0) can render.
+      // Auth method is locked in MI edit mode: a deployment that used identity federation cannot
+      // switch to Access Keys via the radio. The Access Keys option must be disabled.
       const DEP_ID = 'dep-auth-drift-001';
       await page.route(
         (url) =>
@@ -724,54 +721,19 @@ test.describe(
       });
       await expect(page.testSubj.locator('onboardingStep-authenticate-and-deploy')).toBeVisible();
 
-      // Seed instances after hydration so deployGroups is non-empty on the subsequent reload.
-      // hydrateOnboardingSession does not write instances, so they survive the reload
-      // (hydration is skipped because hydratedDeploymentId is already set).
-      await page.evaluate(
-        ({ key }) => {
-          sessionStorage.setItem(
-            key,
-            JSON.stringify({
-              globalRegion: 'us-east-1',
-              instances: [
-                { instanceId: 'elb', serviceId: 'elb', name: 'AWS ELB', isDuplicate: false },
-              ],
-              serviceVars: {},
-            })
-          );
-        },
-        { key: SERVICE_SETTINGS_SESSION_KEY }
-      );
+      // The Access Keys radio must be disabled — auth method is locked once a deployment exists.
+      await expect(
+        page.testSubj
+          .locator('managedIntegrationsSection-preferredMethodRadio')
+          .locator('[id="access_keys"]')
+      ).toBeDisabled();
 
-      // Reload so the component reads the seeded instances. Wait for the drift effect's SO fetch
-      // to settle (no drift yet — session auth matches SO after hydration).
-      const postReloadSoGetPromise = page.waitForResponse(
-        (resp) =>
-          new RegExp(`/api/fleet/cloud_onboarding_deployments/${DEP_ID}$`).test(
-            new URL(resp.url()).pathname
-          ) && resp.status() === 200
-      );
-      await page.reload();
-      await expect(page.testSubj.locator('onboardingStep-authenticate-and-deploy')).toBeVisible();
-      await postReloadSoGetPromise;
-
-      // Click "Access Keys" radio via the live UI. This changes authMethod in React state, which
-      // is a drift-effect dep, causing the effect to re-run and compare the new session value
-      // ('static_keys') against the SO's stored value ('identity_federation').
-      const postClickSoGetPromise = page.waitForResponse(
-        (resp) =>
-          new RegExp(`/api/fleet/cloud_onboarding_deployments/${DEP_ID}$`).test(
-            new URL(resp.url()).pathname
-          ) && resp.status() === 200
-      );
-      await page.testSubj
-        .locator('managedIntegrationsSection-preferredMethodRadio')
-        .locator('[id="access_keys"]')
-        .click();
-      await postClickSoGetPromise;
-
-      // Auth drift detected: session authMethod 'static_keys' differs from SO 'identity_federation'.
-      await expect(page.testSubj.locator('authenticateAndDeployStep-driftCallout')).toBeVisible();
+      // The Identity Federation radio remains enabled (already selected, not switching).
+      await expect(
+        page.testSubj
+          .locator('managedIntegrationsSection-preferredMethodRadio')
+          .locator('[id="identity_federation"]')
+      ).toBeEnabled();
     });
   }
 );

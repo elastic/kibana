@@ -195,9 +195,6 @@ export function AgentBasedSection({
 
   const handleCredentialMethodChange = (method: AgentCredentialMethod) => {
     setAgentBasedDeployment({ agentCredentialMethod: method });
-    // Keep authenticateAndDeployStep.authMethod in sync so the drift effect detects credential
-    // method changes and marks isDirty when editing an existing deployment.
-    if (isEditMode) setAuthMethod(toSOAuthMethod(method));
     // For text-field methods, recompute readiness from retained persisted values so switching
     // back to a previously populated assume_role/shared_credentials method doesn't leave Next
     // permanently disabled until the user manually edits an already-valid field.
