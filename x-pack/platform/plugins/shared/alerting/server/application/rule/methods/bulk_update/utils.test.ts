@@ -7,9 +7,8 @@
 
 import type { SavedObject } from '@kbn/core/server';
 import { RULE_SAVED_OBJECT_TYPE } from '../../../../saved_objects';
-import type { RulesClientContext } from '../../../../rules_client/types';
+import type { BulkOperationError, RulesClientContext } from '../../../../rules_client/types';
 import type { RawRule } from '../../../../types';
-import type { BulkOperationError } from '../../../../rules_client/types';
 import { loadPending, loadRulesByIds, prepareUpdate, updateTaskSchedules } from './utils';
 import type { PreparedUpdate } from './types';
 
@@ -190,6 +189,7 @@ describe('bulkUpdate utils', () => {
         context,
         actionsClient: {} as never,
         username: 'elastic',
+        profileUid: null,
         item: { id: 'id-1', data: { name: 'broken' } as never },
         original: so('id-1'),
         apiKeys: new Map(),

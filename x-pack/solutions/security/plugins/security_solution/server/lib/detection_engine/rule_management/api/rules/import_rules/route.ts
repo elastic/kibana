@@ -81,6 +81,23 @@ export const importRulesRoute = (
         const siemResponse = buildSiemResponse(response);
 
         try {
+          const file = request.body?.file as HapiReadableStream | undefined;
+          if (!file) {
+            return siemResponse.error({
+              statusCode: 400,
+              body: 'file is required',
+            });
+          }
+
+          const { filename } = file.hapi;
+          const fileExtension = extname(filename).toLowerCase();
+          if (fileExtension !== '.ndjson') {
+            return siemResponse.error({
+              statusCode: 400,
+              body: `Invalid file extension ${fileExtension}`,
+            });
+          }
+
           const ctx = await context.resolve([
             'core',
             'securitySolution',
@@ -101,23 +118,6 @@ export const importRulesRoute = (
           const endpointAuthz = await ctx.securitySolution.getEndpointAuthz();
           const endpointService = ctx.securitySolution.getEndpointService();
           const spaceId = ctx.securitySolution.getSpaceId();
-
-          const file = request.body?.file as HapiReadableStream | undefined;
-          if (!file) {
-            return siemResponse.error({
-              statusCode: 400,
-              body: 'file is required',
-            });
-          }
-
-          const { filename } = file.hapi;
-          const fileExtension = extname(filename).toLowerCase();
-          if (fileExtension !== '.ndjson') {
-            return siemResponse.error({
-              statusCode: 400,
-              body: `Invalid file extension ${fileExtension}`,
-            });
-          }
 
           const objectLimit = config.maxRuleImportExportSize;
 
