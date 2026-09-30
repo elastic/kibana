@@ -50,8 +50,11 @@ The connector can start a workflow from a Slack Events API `event_callback`. A s
 | `slack2.channel_created` | `channel_created` | `channelId`, `name`, `creator` |
 | `slack2.team_join` | `team_join` | `userId`, `name`, `realName`, `displayName`, `email` |
 | `slack2.member_joined_channel` | `member_joined_channel` | `userId`, `channelId`, `inviter` |
+| `slack2.slash_command` | slash command | `workspace`, `channel`, `channelName`, `user`, `userName`, `command`, `text`, `responseUrl`, `apiAppId` |
 
-`threadId`, `sender`, `text`, `subtype`, and `botId` are present only when Slack sends them. The same applies to `channel` on a shared file, `userId` on a file made public, and `inviter` on a channel join. A reaction includes `channel` and `messageId` when it is on a message, and `fileId` or `fileCommentId` when it is on a file or file comment. An event type that is not in this table does not start a workflow.
+`threadId`, `sender`, `text`, `subtype`, and `botId` are present only when Slack sends them. The same applies to `channel` on a shared file, `userId` on a file made public, and `inviter` on a channel join. A reaction includes `channel` and `messageId` when it is on a message, and `fileId` or `fileCommentId` when it is on a file or file comment. On a slash command, `channelName`, `userName`, `text`, `responseUrl`, and `apiAppId` are present only when Slack sends them. An event type that is not in this table does not start a workflow.
+
+Slack slash commands POST `application/x-www-form-urlencoded` to the same ingest URL. The connector emits `slack2.slash_command` and responds with HTTP 200 and an empty body. Post a message to `event.responseUrl` to reply in Slack. That URL is temporary. `command` includes the leading slash, so a workflow can filter with `event.command: "/investigate"`.
 
 Slack's Request URL check sends `url_verification`. The connector responds with HTTP 200 and `{ "challenge": "<value>" }` and does not start a workflow.
 

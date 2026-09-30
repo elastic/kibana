@@ -9,6 +9,7 @@ import type { Logger, SavedObjectsClientContract } from '@kbn/core/server';
 import {
   connectorTypeIsDual,
   getConnectorSpec,
+  type HandleEventsHttpResponse,
   MAX_CONNECTOR_TYPE_ID_LENGTH,
   normalizeConnectorTypeId,
   parseHandleEventsResult,
@@ -62,6 +63,19 @@ export interface IngestInboundEventParams extends IngestInboundEventInput {
   getDecryptedConnectorAttributes: (connectorId: string, spaceId: string) => Promise<RawAction>;
   inMemoryConnectors: InMemoryConnector[];
 }
+
+const toEmittedHttpResult = (
+  httpResponse: HandleEventsHttpResponse,
+  headers: Record<string, string> | undefined
+): IngestInboundEventResult => {
+  const { status, body: spokeBody } = httpResponse;
+  return {
+    status: 'spoke_http',
+    statusCode: status,
+    ...(spokeBody !== undefined ? { body: spokeBody } : {}),
+    ...(headers !== undefined ? { headers } : {}),
+  };
+};
 
 const stripIngestTokenHash = (config: Record<string, unknown>): Record<string, unknown> => {
   const { ingestTokenHash: _omit, ...spokeConfig } = config;
@@ -232,6 +246,30 @@ export async function ingestInboundEvent({
       };
     }
 
+    const emitHttpResponse = result.httpResponse;
+    let emitHttpHeaders: Record<string, string> | undefined;
+    if (emitHttpResponse !== undefined) {
+      const spokeHeaders = validateSpokeHttpHeaders(emitHttpResponse.headers);
+      if (spokeHeaders === 'invalid') {
+        logInboundIngressOutcome(logger, {
+          ...baseLog,
+          outcome: 'handle_fail',
+          detail: 'invalid_http_ack',
+        });
+        return {
+          status: 'error',
+          statusCode: 500,
+          body: INBOUND_EVENTS_UNEXPECTED_ERROR_MESSAGE,
+        };
+      }
+      emitHttpHeaders = spokeHeaders;
+    }
+
+    const finishEmit = (): IngestInboundEventResult =>
+      emitHttpResponse !== undefined
+        ? toEmittedHttpResult(emitHttpResponse, emitHttpHeaders)
+        : { status: 'accepted', body: { ok: true } };
+
     if (result.events.length > maxEmitted) {
       logInboundIngressOutcome(logger, {
         ...baseLog,
@@ -264,7 +302,7 @@ export async function ingestInboundEvent({
         ...baseLog,
         outcome: 'accepted',
       });
-      return { status: 'accepted', body: { ok: true } };
+      return finishEmit();
     }
 
     let scheduleRequest;
@@ -277,7 +315,7 @@ export async function ingestInboundEvent({
         outcome: 'identity_missing',
         detail: `decrypt_failed ${error instanceof Error ? error.message : String(error)}`,
       });
-      return { status: 'accepted', body: { ok: true } };
+      return finishEmit();
     }
 
     if (!scheduleRequest) {
@@ -286,7 +324,7 @@ export async function ingestInboundEvent({
         outcome: 'identity_missing',
         detail: 'missing_api_key',
       });
-      return { status: 'accepted', body: { ok: true } };
+      return finishEmit();
     }
 
     let emitFailures = 0;
@@ -331,7 +369,7 @@ export async function ingestInboundEvent({
       });
     }
 
-    return { status: 'accepted', body: { ok: true } };
+    return finishEmit();
   } catch (error) {
     logInboundIngressOutcome(logger, {
       ...baseLog,

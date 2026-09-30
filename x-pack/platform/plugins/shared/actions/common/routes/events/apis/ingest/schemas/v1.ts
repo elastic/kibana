@@ -48,14 +48,14 @@ export const ingestEventsRequestQuerySchema = schema.object(
 );
 
 /**
- * Opaque JSON body for the connector `handleEvents` implementation.
+ * Opaque body for the connector `handleEvents` implementation.
  * Shape is connector-type specific; not validated by the hub.
  */
 export const ingestEventsRequestBodySchema = schema.maybe(
   schema.any({
     meta: {
       description:
-        'Connector-specific event payload (JSON). Validated and interpreted by the connector type’s `events.handleEvents` handler.',
+        'Connector-specific event payload (JSON or application/x-www-form-urlencoded). Validated and interpreted by the connector type’s `events.handleEvents` handler.',
     },
   })
 );

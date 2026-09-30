@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { schema } from '@kbn/config-schema';
 import type { IRouter, KibanaRequest } from '@kbn/core/server';
 
 import type {
@@ -56,7 +57,7 @@ export function inboundEventsRoute({
       security: INBOUND_EVENTS_SECURITY,
       summary: 'Ingest an external event for a Kibana connector',
       description:
-        'Public ingress for Kibana connector-scoped inbound events. Authenticate with an ingest token (`Authorization: Bearer`, or `token` query parameter as fallback). A successful emit returns 202. A connector HTTP ack returns 200 (`.inboundWebhook` handshake is `{ challenge }`) and does not emit.',
+        'Public ingress for Kibana connector-scoped inbound events. Authenticate with an ingest token (`Authorization: Bearer`, or `token` query parameter as fallback). A successful emit returns 202. An emit that includes an HTTP ack returns that status, usually 200 with an empty body, and still emits. A connector HTTP-only ack returns 200 (`.inboundWebhook` handshake is `{ challenge }`) and does not emit.',
       options: {
         // External vendors cannot send Kibana session XSRF headers (`kbn-xsrf`).
         // Auth is the ingest token (Bearer, or `token` query if Authorization is
@@ -68,7 +69,12 @@ export function inboundEventsRoute({
           stability: 'experimental',
         },
         body: {
-          accepts: ['application/json', 'application/*+json', '*/*'],
+          accepts: [
+            'application/json',
+            'application/*+json',
+            'application/x-www-form-urlencoded',
+            '*/*',
+          ],
           maxBytes: maxBodyBytes,
         },
       },
@@ -85,8 +91,8 @@ export function inboundEventsRoute({
           response: {
             200: {
               description:
-                'Connector HTTP 200 ack. No event is emitted. `.inboundWebhook` handshake is `{ challenge }`.',
-              body: () => ingestEventsAckResponseSchemaV1,
+                'Connector HTTP 200. A handshake such as `.inboundWebhook` `{ challenge }` does not emit. An ack included with an emit may have an empty body, and the events are still emitted.',
+              body: () => schema.maybe(ingestEventsAckResponseSchemaV1),
             },
             202: {
               description:

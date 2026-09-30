@@ -27,6 +27,8 @@ import {
   SLACK_MESSAGE_EVENT_KEY,
   SLACK_REACTION_ADDED_EVENT_ID,
   SLACK_REACTION_ADDED_EVENT_KEY,
+  SLACK_SLASH_COMMAND_EVENT_ID,
+  SLACK_SLASH_COMMAND_EVENT_KEY,
   SLACK_TEAM_JOIN_EVENT_ID,
   SLACK_TEAM_JOIN_EVENT_KEY,
 } from './constants';
@@ -41,6 +43,7 @@ const NAMED_SLACK_EVENTS = [
   [SLACK_CHANNEL_CREATED_EVENT_KEY, SLACK_CHANNEL_CREATED_EVENT_ID],
   [SLACK_TEAM_JOIN_EVENT_KEY, SLACK_TEAM_JOIN_EVENT_ID],
   [SLACK_MEMBER_JOINED_CHANNEL_EVENT_KEY, SLACK_MEMBER_JOINED_CHANNEL_EVENT_ID],
+  [SLACK_SLASH_COMMAND_EVENT_KEY, SLACK_SLASH_COMMAND_EVENT_ID],
 ] as const;
 
 describe('Slack inbound events', () => {
@@ -85,6 +88,7 @@ describe('Slack inbound events', () => {
       expect(eventId).toBe(buildEventId(SLACK_CONNECTOR_TYPE_ID, eventKey));
     }
     expect(SLACK_APP_MENTION_EVENT_ID).toBe('slack2.app_mention');
+    expect(SLACK_SLASH_COMMAND_EVENT_ID).toBe('slack2.slash_command');
   });
 
   it('emits a posted message with subtype and bot identity when present', async () => {
@@ -395,6 +399,85 @@ describe('Slack inbound events', () => {
     expect(result.events[0]?.payload).not.toHaveProperty('inviter');
   });
 
+  it('emits a slash command and acks with HTTP 200', async () => {
+    const result = expectEmit(
+      await events.handleEvents(
+        createContext({
+          token: 'deprecated-verification-token',
+          team_id: 'T123',
+          channel_id: 'C123',
+          channel_name: 'general',
+          user_id: 'U123',
+          user_name: 'ada',
+          command: '/investigate',
+          text: 'host-1',
+          api_app_id: 'A123',
+          response_url: 'https://hooks.slack.com/commands/T123/1/secret',
+          trigger_id: '13345224609.738474920.8088930838d88f008e0',
+        })
+      )
+    );
+
+    expect(result.httpResponse).toEqual({ status: 200 });
+    expect(result.events).toEqual([
+      {
+        eventId: SLACK_SLASH_COMMAND_EVENT_ID,
+        correlationKey: '13345224609.738474920.8088930838d88f008e0',
+        payload: {
+          workspace: 'T123',
+          channel: 'C123',
+          channelName: 'general',
+          user: 'U123',
+          userName: 'ada',
+          command: '/investigate',
+          text: 'host-1',
+          responseUrl: 'https://hooks.slack.com/commands/T123/1/secret',
+          apiAppId: 'A123',
+        },
+      },
+    ]);
+    expect(result.events[0]?.payload).not.toHaveProperty('token');
+    expect(validateEmittedEvents(events.definitions, result.events)).toEqual({ ok: true });
+  });
+
+  it('omits an empty slash command text and a non-https response url', async () => {
+    const result = expectEmit(
+      await events.handleEvents(
+        createContext({
+          team_id: 'T123',
+          channel_id: 'C123',
+          user_id: 'U123',
+          command: '/investigate',
+          text: '',
+          response_url: 'http://hooks.slack.com/commands/T123/1/secret',
+          trigger_id: 'trig-1',
+        })
+      )
+    );
+
+    expect(result.events[0]?.payload).toEqual({
+      workspace: 'T123',
+      channel: 'C123',
+      user: 'U123',
+      command: '/investigate',
+    });
+  });
+
+  it('assigns a distinct correlation key when a slash command omits trigger_id', async () => {
+    const rawBody = {
+      team_id: 'T123',
+      channel_id: 'C123',
+      user_id: 'U123',
+      command: '/investigate',
+    };
+    const first = expectEmit(await events.handleEvents(createContext(rawBody)));
+    const second = expectEmit(await events.handleEvents(createContext(rawBody)));
+
+    expect(first.httpResponse).toEqual({ status: 200 });
+    expect(first.events[0]?.correlationKey).toEqual(expect.any(String));
+    expect(first.events[0]?.correlationKey).not.toBe(second.events[0]?.correlationKey);
+  });
+
   it('acks Slack url_verification without emitting', async () => {
     await expect(
       events.handleEvents(
@@ -419,6 +502,15 @@ describe('Slack inbound events', () => {
     ['uncatalogued event', callback({ type: 'app_home_opened', user: 'U123' })],
     ['message without a channel', callback({ type: 'message', ts: '1.0', user: 'U123' })],
     ['non-object body', null],
+    [
+      'slash command without a workspace',
+      { command: '/investigate', channel_id: 'C123', user_id: 'U123' },
+    ],
+    [
+      'slash command without a leading slash',
+      { command: 'investigate', team_id: 'T123', channel_id: 'C123', user_id: 'U123' },
+    ],
+    ['interactivity payload', { payload: '{"type":"block_actions"}' }],
   ])('does not emit for %s', async (_label, rawBody) => {
     await expect(events.handleEvents(createContext(rawBody))).resolves.toEqual({
       type: 'emit',

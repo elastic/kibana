@@ -84,6 +84,41 @@ describe('parseHandleEventsResult', () => {
     });
   });
 
+  it('accepts an emit that also acks over HTTP', () => {
+    expect(
+      parseHandleEventsResult({
+        type: 'emit',
+        events: [
+          {
+            eventId: 'slack2.slash_command',
+            correlationKey: 'trig-1',
+            payload: { command: '/investigate' },
+          },
+        ],
+        httpResponse: { status: 200 },
+      })
+    ).toMatchObject({
+      ok: true,
+      data: { type: 'emit', httpResponse: { status: 200 } },
+    });
+  });
+
+  it('rejects an emit ack whose status is out of range', () => {
+    expect(
+      parseHandleEventsResult({
+        type: 'emit',
+        events: [
+          {
+            eventId: 'slack2.slash_command',
+            correlationKey: 'trig-1',
+            payload: { command: '/investigate' },
+          },
+        ],
+        httpResponse: { status: 99 },
+      }).ok
+    ).toBe(false);
+  });
+
   it('accepts an http handshake ack', () => {
     expect(
       parseHandleEventsResult({

@@ -31,6 +31,8 @@ import {
   SLACK_MESSAGE_EVENT_KEY,
   SLACK_REACTION_ADDED_EVENT_ID,
   SLACK_REACTION_ADDED_EVENT_KEY,
+  SLACK_SLASH_COMMAND_EVENT_ID,
+  SLACK_SLASH_COMMAND_EVENT_KEY,
   SLACK_TEAM_JOIN_EVENT_ID,
   SLACK_TEAM_JOIN_EVENT_KEY,
 } from './constants';
@@ -40,6 +42,7 @@ const SLACK_EVENT_NAME_MAX = 256;
 const SLACK_EVENT_TEXT_MAX = 40_000;
 const SLACK_EVENT_EMAIL_MAX = 320;
 const SLACK_URL_VERIFICATION_CHALLENGE_MAX = 1024;
+const SLACK_RESPONSE_URL_MAX = 2048;
 
 const slackId = (description: string) =>
   z.string().min(1).max(SLACK_EVENT_ID_MAX).describe(description);
@@ -130,6 +133,38 @@ const SlackTeamJoinEventSchema = z.object({
     .max(SLACK_EVENT_EMAIL_MAX)
     .optional()
     .describe('Profile email, when Slack includes it.'),
+});
+
+const SlackSlashCommandEventSchema = z.object({
+  workspace: slackId('Slack workspace (team) id.'),
+  channel: slackId('Channel where the slash command was run.'),
+  channelName: z
+    .string()
+    .min(1)
+    .max(SLACK_EVENT_NAME_MAX)
+    .optional()
+    .describe('Channel name, when Slack includes it.'),
+  user: slackId('User id of the person who ran the command.'),
+  userName: z
+    .string()
+    .min(1)
+    .max(SLACK_EVENT_NAME_MAX)
+    .optional()
+    .describe('Username of the person who ran the command, when Slack includes it.'),
+  command: z
+    .string()
+    .min(2)
+    .max(SLACK_EVENT_NAME_MAX)
+    .startsWith('/')
+    .describe('Slash command, including the leading slash.'),
+  text: z.string().max(SLACK_EVENT_TEXT_MAX).optional().describe('Text after the command.'),
+  responseUrl: z
+    .string()
+    .max(SLACK_RESPONSE_URL_MAX)
+    .startsWith('https://')
+    .optional()
+    .describe('Temporary Slack URL for a delayed reply to this command.'),
+  apiAppId: optionalSlackId('Slack app id, when Slack includes it.'),
 });
 
 const SlackMemberJoinedChannelEventSchema = z.object({
@@ -423,6 +458,49 @@ const parseSlackCallback = (
   };
 };
 
+const readResponseUrl = (value: unknown): string | undefined => {
+  const url = readBoundedString(value, SLACK_RESPONSE_URL_MAX);
+  if (url === undefined || !url.startsWith('https://')) {
+    return undefined;
+  }
+  return url;
+};
+
+/**
+ * Slack slash commands arrive as flat form fields (`command`, `team_id`, …),
+ * not as an Events API `event_callback`.
+ */
+const parseSlashCommand = (
+  rawBody: Record<string, unknown>
+): (ParsedSlackEvent & { correlationKey: string }) | undefined => {
+  const command = readName(rawBody.command);
+  if (command === undefined || !command.startsWith('/') || command.length < 2) {
+    return undefined;
+  }
+  const workspace = readId(rawBody.team_id);
+  const channel = readId(rawBody.channel_id);
+  const user = readId(rawBody.user_id);
+  if (workspace === undefined || channel === undefined || user === undefined) {
+    return undefined;
+  }
+  const triggerId = readBoundedString(rawBody.trigger_id, MAX_HANDLE_EVENTS_CORRELATION_KEY_LENGTH);
+  return {
+    eventId: SLACK_SLASH_COMMAND_EVENT_ID,
+    correlationKey: triggerId ?? uuidv4(),
+    payload: omitUndefined({
+      workspace,
+      channel,
+      channelName: readName(rawBody.channel_name),
+      user,
+      userName: readName(rawBody.user_name),
+      command,
+      text: readText(rawBody.text),
+      responseUrl: readResponseUrl(rawBody.response_url),
+      apiAppId: readId(rawBody.api_app_id),
+    }),
+  };
+};
+
 /**
  * Slack Request URL check: `{ type: "url_verification", challenge }`.
  */
@@ -457,7 +535,21 @@ const handleSlackEvents = async (ctx: ConnectorIngressContext): Promise<HandleEv
   }
 
   const parsed = parseSlackCallback(ctx.rawBody);
-  if (parsed === undefined) {
+  if (parsed !== undefined) {
+    return {
+      type: 'emit',
+      events: [
+        {
+          eventId: parsed.eventId,
+          correlationKey: parsed.correlationKey,
+          payload: parsed.payload,
+        },
+      ],
+    };
+  }
+
+  const slashCommand = parseSlashCommand(ctx.rawBody);
+  if (slashCommand === undefined) {
     return { type: 'emit', events: [] };
   }
 
@@ -465,11 +557,12 @@ const handleSlackEvents = async (ctx: ConnectorIngressContext): Promise<HandleEv
     type: 'emit',
     events: [
       {
-        eventId: parsed.eventId,
-        correlationKey: parsed.correlationKey,
-        payload: parsed.payload,
+        eventId: slashCommand.eventId,
+        correlationKey: slashCommand.correlationKey,
+        payload: slashCommand.payload,
       },
     ],
+    httpResponse: { status: 200 },
   };
 };
 
@@ -564,6 +657,20 @@ export const slackEvents: ConnectorSpecEvents = {
         }
       ),
       eventSchema: SlackMemberJoinedChannelEventSchema,
+    },
+    [SLACK_SLASH_COMMAND_EVENT_KEY]: {
+      eventId: SLACK_SLASH_COMMAND_EVENT_ID,
+      title: i18n.translate('core.kibanaConnectorSpecs.slack.events.slashCommand.title', {
+        defaultMessage: 'Slash command',
+      }),
+      description: i18n.translate(
+        'core.kibanaConnectorSpecs.slack.events.slashCommand.description',
+        {
+          defaultMessage:
+            'A Slack slash command was invoked. Reply by posting a message to the response URL.',
+        }
+      ),
+      eventSchema: SlackSlashCommandEventSchema,
     },
   },
   handleEvents: handleSlackEvents,
