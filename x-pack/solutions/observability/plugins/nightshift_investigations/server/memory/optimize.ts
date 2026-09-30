@@ -83,7 +83,7 @@ Extract a fact only if a tool result in the investigation shows it. The final an
 - This run corrects or extends a recalled memory: replaces lists its id. content holds only what this run adds or corrects; the writer keeps what is still right in the replaced memory. note says what this run showed and what in the replaced memory is wrong or outdated. Read the replaced memory sentence by sentence: a claim written as ongoing ("the clock runs 1 s behind", "errors occur") is outdated when this run shows the problem has stopped, even if it was true when written, and note must say so.
 - Several recalled memories cover the same topic: replaces lists all of them. content holds anything this run adds, or is empty. note says what they share and anything that conflicts.
 - Replace a memory only when this run's evidence justifies it. A recalled memory that is still right and complete needs no entry. A memory is not still right if it states as ongoing a problem this run shows has stopped, or states as current a value this run measured differently: replace it. If note would say the memory needs no change, propose no entry for it.
-- The time-of-observation rules apply to replacing entries too: content dates this run's observations, and note says which replaced claims they supersede. Compare observations from different windows only if they measure the same thing the same way.
+- The time-of-observation rules apply to replacing entries too: content dates this run's observations, and note says which replaced claims they supersede. The writer keeps earlier observations only as one-line summaries; note never asks to keep them in full. Compare observations from different windows only if they measure the same thing the same way.
 - When two recalled memories cover the same topic or the same data, replace both with one entry instead of leaving them side by side.
 - The title names the topic. When the entry replaces one memory and the topic is unchanged, copy that memory's title exactly, word for word; change it only when this run shows the topic itself was named wrongly.
 
@@ -450,6 +450,7 @@ The transcript is the evidence. It has the user task; the investigation, in orde
 - Never write relative times such as "current", "prior window", "now", or "recently".
 - Structural facts that do not change from run to run (names, fields, index or data stream names, ownership, dependencies, topology) get no time, even when the transcript shows when they were seen: no "observed" or "as of" on them.
 - Earlier observations may stay when they are still useful, labeled with their times. When a newer observation conflicts with an older one, the newer one is the current state; keep the older one only as a dated earlier observation.
+- History stays short: give the newest observation in full, and each earlier one as a single dated line with only the numbers that show the change (e.g. "2026-09-29T19:06Z–2026-09-30T19:06Z: reinforce avg 78.6 s, p95 332.5 s"). Delete the tables of earlier observations; the content has at most one table.
 - A problem the evidence shows has stopped is written in the past tense throughout, cause included, with when it was observed and when it stopped. Write "From 2026-09-30T06:57Z to 07:30Z the host clock was 1 s behind the CA", not "The host clock runs 1 s behind the CA". Keep its signature (error text, affected component) so a recurrence is recognized, but never describe the problem or its cause as ongoing.
 - State facts only; never address the reader or give instructions (no "should be used to", "watch for").
 - Before returning, reread the content: rewrite any present-tense sentence about a problem that has stopped.
@@ -457,7 +458,7 @@ The transcript is the evidence. It has the user task; the investigation, in orde
 - Lead with the lasting conclusion, then the dated observations that support it.
 - These rules apply to the new information as well as to the replaced memories. The note explains what changed; the rules still apply where it suggests otherwise.
 - State each fact once. Add nothing that is not in the new information, the replaced memories, or this run's tool results: no fixes or recommendations.
-- Be concise: no longer than the longest input unless the facts need it.
+- Be concise: at most 2,000 characters. Cut earlier observations and detail before cutting the conclusion or the newest observation.
 
 Return markdown content and context.
 context is the recall key: compact, semantically rich phrases covering the union of the replaced memories' contexts and this round's task goal. Not verbatim sentences. Not a concatenation of full prompts. Not one task copied when the others differ.
