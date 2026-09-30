@@ -118,6 +118,34 @@ describe('resolveConnectorIdStepType', () => {
       )
     ).toBe('http');
   });
+
+  it('maps waitForApproval email channel connector-id to email connector type', () => {
+    const focusedYamlPair = {
+      path: ['with', 'channels', 'email', 'connector-id'],
+    } as StepPropInfo;
+
+    expect(
+      resolveConnectorIdStepType(
+        waitForApprovalStep,
+        ['steps', 0, ...focusedYamlPair.path],
+        focusedYamlPair
+      )
+    ).toBe('email');
+  });
+
+  it('maps waitForInput email channel connector-id to email connector type', () => {
+    const focusedYamlPair = {
+      path: ['with', 'channels', 'email', 'connector-id'],
+    } as StepPropInfo;
+
+    expect(
+      resolveConnectorIdStepType(
+        { ...waitForApprovalStep, stepType: 'waitForInput', stepId: 'ask-input' },
+        ['steps', 0, ...focusedYamlPair.path],
+        focusedYamlPair
+      )
+    ).toBe('email');
+  });
 });
 
 describe('resolveConnectorIdTriggerType', () => {
