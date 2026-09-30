@@ -1,5 +1,5 @@
 {
-  "sha1": "68b28429a321d9de96949c63f0ea558fc33e58f7",
+  "sha1": "f8dc0988732dca32c49cc841993445705dd2ef57",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -13,8 +13,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability/test/scout_discover_telemetry/ui/tests/context.spec.ts",
-        "line": 26,
-        "column": 26
+        "line": 23,
+        "column": 7
       }
     },
     {
@@ -26,8 +26,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability/test/scout_discover_telemetry/ui/tests/context.spec.ts",
-        "line": 38,
-        "column": 8
+        "line": 36,
+        "column": 22
       }
     },
     {
@@ -39,8 +39,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability/test/scout_discover_telemetry/ui/tests/context.spec.ts",
-        "line": 67,
-        "column": 24
+        "line": 66,
+        "column": 34
       }
     },
     {
@@ -52,8 +52,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability/test/scout_discover_telemetry/ui/tests/field_usage.spec.ts",
-        "line": 34,
-        "column": 8
+        "line": 24,
+        "column": 34
       }
     },
     {
@@ -65,8 +65,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability/test/scout_discover_telemetry/ui/tests/field_usage.spec.ts",
-        "line": 52,
-        "column": 11
+        "line": 41,
+        "column": 20
       }
     },
     {
@@ -78,8 +78,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability/test/scout_discover_telemetry/ui/tests/field_usage.spec.ts",
-        "line": 66,
-        "column": 24
+        "line": 55,
+        "column": 39
       }
     },
     {
@@ -91,8 +91,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability/test/scout_discover_telemetry/ui/tests/field_usage.spec.ts",
-        "line": 88,
-        "column": 12
+        "line": 81,
+        "column": 70
       }
     },
     {
@@ -104,8 +104,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability/test/scout_discover_telemetry/ui/tests/field_usage.spec.ts",
-        "line": 117,
-        "column": 11
+        "line": 112,
+        "column": 54
       }
     },
     {
@@ -117,8 +117,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability/test/scout_discover_telemetry/ui/tests/profiles.spec.ts",
-        "line": 25,
-        "column": 26
+        "line": 23,
+        "column": 7
       }
     },
     {
@@ -130,8 +130,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability/test/scout_discover_telemetry/ui/tests/profiles.spec.ts",
-        "line": 60,
-        "column": 21
+        "line": 58,
+        "column": 22
       }
     }
   ]
