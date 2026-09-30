@@ -241,8 +241,11 @@ function GraphWorkspace(options) {
 
   this.getEdgeSelection = () => [...self.selectedEdges];
 
-  this.deleteSelection = function () {
-    let allAndGrouped = self.returnUnpackedGroupeds(self.selectedNodes);
+  this.deleteNodes = function (nodeIds) {
+    const selectedNodes = nodeIds
+      .map((nodeId) => self.nodesMap[nodeId])
+      .filter((node) => node !== undefined);
+    let allAndGrouped = self.returnUnpackedGroupeds(selectedNodes);
 
     // Nothing selected so process all nodes
     if (allAndGrouped.length === 0) {
@@ -269,6 +272,10 @@ function GraphWorkspace(options) {
     self.addUndoLogEntry(undoOperations);
     self.arrRemoveAll(self.edges, danglingEdges);
     self.runLayout();
+  };
+
+  this.deleteSelection = function () {
+    self.deleteNodes(self.selectedNodes.map(({ id }) => id));
   };
 
   this.selectNeighbours = function () {
@@ -501,10 +508,16 @@ function GraphWorkspace(options) {
   //========Grouping functions==========
 
   //Merges all selected nodes into node
-  this.groupSelections = function (node) {
+  this.groupNodes = function (parentId, nodeIds) {
+    const node = self.nodesMap[parentId];
+    const selectedNodeIds = new Set(nodeIds);
     const ops = [];
     self.nodes.forEach(function (otherNode) {
-      if (otherNode !== node && otherNode.isSelected && otherNode.parent === undefined) {
+      if (
+        otherNode !== node &&
+        selectedNodeIds.has(otherNode.id) &&
+        otherNode.parent === undefined
+      ) {
         otherNode.parent = node;
         otherNode.isSelected = false;
         self.arrRemove(self.selectedNodes, otherNode);
@@ -515,6 +528,13 @@ function GraphWorkspace(options) {
     self.selectNode(node);
     self.addUndoLogEntry(ops);
     self.runLayout();
+  };
+
+  this.groupSelections = function (node) {
+    self.groupNodes(
+      node.id,
+      self.selectedNodes.map(({ id }) => id)
+    );
   };
 
   this.mergeNeighbours = function (node) {
@@ -571,8 +591,11 @@ function GraphWorkspace(options) {
     self.arrRemoveAll(self.blocklistedNodes, self.blocklistedNodes);
   };
 
-  this.blocklistSelection = function () {
-    const selection = self.getAllSelectedNodes();
+  this.blocklistNodes = function (nodeIds) {
+    const selectedNodes = nodeIds
+      .map((nodeId) => self.nodesMap[nodeId])
+      .filter((node) => node !== undefined);
+    const selection = self.returnUnpackedGroupeds(selectedNodes);
     const danglingEdges = [];
     self.edges.forEach(function (edge) {
       if (selection.indexOf(edge.source) >= 0 || selection.indexOf(edge.target) >= 0) {
@@ -589,6 +612,10 @@ function GraphWorkspace(options) {
     self.arrRemoveAll(self.edges, danglingEdges);
     self.selectedNodes = [];
     self.runLayout();
+  };
+
+  this.blocklistSelection = function () {
+    self.blocklistNodes(self.selectedNodes.map(({ id }) => id));
   };
 
   // A "simple search" operation that requires no parameters from the client.

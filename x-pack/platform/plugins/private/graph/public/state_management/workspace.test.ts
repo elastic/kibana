@@ -54,6 +54,9 @@ const createWorkspaceMock = () =>
     search: jest.fn(),
     callElasticsearch: jest.fn(),
     expandNodes: jest.fn(),
+    deleteNodes: jest.fn(),
+    blocklistNodes: jest.fn(),
+    groupNodes: jest.fn(),
     runLayout: jest.fn(),
     stopLayout: jest.fn(),
     nodes: [],
@@ -460,6 +463,17 @@ describe('workspace listeners', () => {
       expect(environment.mockedDeps.notifications.toasts.addDanger).toHaveBeenCalledWith({
         title: 'Fetching top terms failed: server failure',
       });
+    });
+  });
+
+  describe('topology commands', () => {
+    it('passes the original Redux selection into the runtime adapter', () => {
+      const environment = createWorkspaceListenerEnvironment();
+      environment.store.dispatch(toggleNodeSelection({ nodeId: 'selected', replace: false }));
+
+      environment.store.dispatch(deleteSelectedNodes());
+
+      expect(environment.workspace.deleteNodes).toHaveBeenCalledWith(['selected']);
     });
   });
 
