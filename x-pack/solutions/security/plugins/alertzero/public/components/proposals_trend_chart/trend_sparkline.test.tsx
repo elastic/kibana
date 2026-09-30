@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { render, screen } from '@testing-library/react';
-import { EuiProvider } from '@elastic/eui';
+import { EuiProvider, useResizeObserver } from '@elastic/eui';
 import { AreaSeries, Axis, Settings } from '@elastic/charts';
 import type { PointStyleAccessor } from '@elastic/charts';
 import { TrendSparkline } from './trend_sparkline';
@@ -38,6 +38,7 @@ jest.mock('@elastic/eui', () => {
 jest.mock('@kbn/charts-theme', () => ({ useElasticChartsTheme: () => ({}) }));
 jest.mock('../../hooks/use_kibana_time_zone', () => ({ useKibanaTimeZone: () => 'UTC' }));
 
+const mockedUseResizeObserver = useResizeObserver as jest.MockedFunction<typeof useResizeObserver>;
 const MockedSettings = Settings as jest.MockedFunction<typeof Settings>;
 const MockedAxis = Axis as jest.MockedFunction<typeof Axis>;
 const MockedAreaSeries = AreaSeries as jest.MockedFunction<typeof AreaSeries>;
@@ -80,6 +81,32 @@ describe('TrendSparkline', () => {
 
   it('should mount the chart once a width is observed', () => {
     renderSparkline();
+    expect(screen.getByTestId('chart-mock')).toBeInTheDocument();
+  });
+
+  it('should observe the wrapper element and reveal the chart when its width arrives', () => {
+    // First paint: nothing measured yet. The observer must already be attached to the
+    // rendered wrapper (not to a null ref) so the first measurement can reveal the chart.
+    mockObservedWidth.width = 0;
+    const { rerender } = renderSparkline();
+    expect(screen.queryByTestId('chart-mock')).not.toBeInTheDocument();
+    expect(mockedUseResizeObserver).toHaveBeenLastCalledWith(expect.any(HTMLDivElement), 'width');
+
+    // The observer reports a size for the same mounted sparkline; no remount.
+    mockObservedWidth.width = 300;
+    rerender(
+      <EuiProvider>
+        <TrendSparkline
+          series={series}
+          color="#61A2FF"
+          ariaLabel="Configure: 2 open proposals over the last 24 hours"
+          panelId="configure"
+          seriesName="Configure actions"
+          bucketMinutes={30}
+          yMax={5}
+        />
+      </EuiProvider>
+    );
     expect(screen.getByTestId('chart-mock')).toBeInTheDocument();
   });
 
