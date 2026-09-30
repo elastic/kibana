@@ -8,7 +8,7 @@
 import React, { useMemo } from 'react';
 import { EuiMarkdownFormat } from '@elastic/eui';
 import { createUserMessageMarkdownPlugins } from './user_message_markdown_plugins';
-import { useUserMessageTextStyles } from './user_message_text.hooks';
+import { useUserMessageTextStyles } from './user_message_text.styles';
 
 interface UserMessageTextProps {
   text: string;
