@@ -9,8 +9,8 @@ KIBANA_GITHUB_URL="https://github.com/elastic/kibana"
 if [[ -z "${UIAM_COSMOSDB_IMAGE:-}" ]]; then
   echo "UIAM_COSMOSDB_IMAGE is not set"
   exit 1
-elif [[ "$UIAM_COSMOSDB_IMAGE" != *"mcr.microsoft.com"* ]]; then
-  echo "UIAM_COSMOSDB_IMAGE should be a mcr.microsoft.com image"
+elif [[ ! "$UIAM_COSMOSDB_IMAGE" =~ ^mcr\.microsoft\.com/cosmosdb/linux/azure-cosmos-emulator:[A-Za-z0-9_.-]+$ ]]; then
+  echo "UIAM_COSMOSDB_IMAGE should be a tagged mcr.microsoft.com/cosmosdb/linux/azure-cosmos-emulator image"
   exit 1
 fi
 

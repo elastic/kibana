@@ -9,8 +9,8 @@ KIBANA_GITHUB_URL="https://github.com/elastic/kibana"
 if [[ -z "${UIAM_IMAGE:-}" ]]; then
   echo "UIAM_IMAGE is not set"
   exit 1
-elif [[ "$UIAM_IMAGE" != *"docker.elastic.co"* ]]; then
-  echo "UIAM_IMAGE should be a docker.elastic.co image"
+elif [[ ! "$UIAM_IMAGE" =~ ^docker\.elastic\.co/cloud-ci/uiam:[A-Za-z0-9_.-]+$ ]]; then
+  echo "UIAM_IMAGE should be a tagged docker.elastic.co/cloud-ci/uiam image"
   exit 1
 fi
 

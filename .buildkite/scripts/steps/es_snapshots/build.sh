@@ -17,6 +17,10 @@ mkdir -p "$destination"
 mkdir -p elasticsearch && cd elasticsearch
 
 export ELASTICSEARCH_BRANCH="${ELASTICSEARCH_BRANCH:-$BUILDKITE_BRANCH}"
+if [[ ! "$ELASTICSEARCH_BRANCH" =~ ^(main|[0-9]+\.[0-9]+)$ ]]; then
+  echo "ELASTICSEARCH_BRANCH must be main or a release branch (X.Y), got: $ELASTICSEARCH_BRANCH"
+  exit 1
+fi
 
 if [[ ! -d .git ]]; then
   git init

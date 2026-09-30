@@ -35,18 +35,29 @@ import { BASE_BUCKET_DAILY, BASE_BUCKET_PERMANENT } from './bucket_config.ts';
     const manifestJson = await manifestResponse.text();
     fs.writeFileSync('manifest.json', manifestJson);
     const manifest = JSON.parse(manifestJson);
-    const { id, bucket, version, sha } = manifest;
+    const { id, bucket, branch, version, sha, archives } = manifest;
     if (!/^\d+\.\d+\.\d+(-SNAPSHOT)?$/.test(version)) {
       throw Error(`Invalid version format: ${version}`);
     }
     if (!/^[0-9a-f]{40}$/.test(sha)) {
       throw Error(`Invalid sha format: ${sha}`);
     }
-    if (!/^[\w./-]+$/.test(id)) {
+    if (!/^[\w-]+$/.test(id)) {
       throw Error(`Invalid id format: ${id}`);
     }
-    if (!/^[\w./-]+$/.test(bucket)) {
-      throw Error(`Invalid bucket format: ${bucket}`);
+    if (bucket !== `${BASE_BUCKET_DAILY}/${version}/archives/${id}`) {
+      throw Error(`Unexpected bucket: ${bucket}`);
+    }
+    if (!/^(main|\d+\.\d+)$/.test(branch)) {
+      throw Error(`Invalid branch: ${branch}`);
+    }
+    for (const { url } of archives) {
+      if (
+        !url.startsWith(`https://storage.googleapis.com/${bucket}/`) &&
+        !url.startsWith('docker.elastic.co/kibana-ci/elasticsearch-cloud-ess:')
+      ) {
+        throw Error(`Unexpected archive url: ${url}`);
+      }
     }
 
     const manifestPermanentJson = manifestJson
