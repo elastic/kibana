@@ -23,7 +23,6 @@ import type {
   InvestigationImpact,
   InvestigationImpactEntity,
 } from '@kbn/significant-events-schema';
-import { EvidenceChart } from './evidence_chart';
 import { EvidenceItem } from './evidence_list';
 
 /** Impact summaries longer than this are cut short behind "Show more". */
@@ -110,7 +109,6 @@ export const ImpactSection: React.FC<ImpactSectionProps> = ({ impact }) => {
     isSummaryLong && !isSummaryExpanded
       ? truncateAtWord(trimmedSummary, IMPACT_SUMMARY_MAX_LENGTH)
       : trimmedSummary;
-  const hasEvidenceDescription = Boolean(evidence?.description.trim());
 
   return (
     <div data-test-subj="investigationOutputImpact">
@@ -142,13 +140,7 @@ export const ImpactSection: React.FC<ImpactSectionProps> = ({ impact }) => {
         <>
           {trimmedSummary && <EuiSpacer size="s" />}
           <div data-test-subj="investigationOutputImpactEvidence">
-            {evidence.chart && <EvidenceChart chart={evidence.chart} />}
-            {evidence.chart && hasEvidenceDescription && <EuiSpacer size="s" />}
-            {hasEvidenceDescription && (
-              <EuiMarkdownFormat textSize="xs" color="subdued">
-                {evidence.description}
-              </EuiMarkdownFormat>
-            )}
+            <EvidenceItem evidence={evidence} />
           </div>
         </>
       )}

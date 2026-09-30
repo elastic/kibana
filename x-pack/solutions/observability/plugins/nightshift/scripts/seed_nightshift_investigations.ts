@@ -143,6 +143,9 @@ const evidence = (description: string, chart?: EvidenceChart): InvestigationEvid
   ...(chart && { chart }),
 });
 
+/** Chart-only evidence, for when the surrounding text already says what the chart shows. */
+const chartEvidence = (chart: EvidenceChart): InvestigationEvidence => ({ chart });
+
 const hypothesis = (
   candidate: string,
   confidence: number,
@@ -320,8 +323,7 @@ const INVESTIGATIONS: InvestigationAttributes[] = [
     impact: {
       summary:
         'Signed-in users saw login and page loads slow from about 0.1s to 0.9s for the 35 minutes since the rollout. About 18% of login attempts timed out, across all regions.',
-      evidence: evidence(
-        'Login timeouts start with the rollout and stay at about 18% of attempts.',
+      evidence: chartEvidence(
         timeChart({
           title: 'Login attempts by outcome',
           type: 'bar',
@@ -487,8 +489,7 @@ const INVESTIGATIONS: InvestigationAttributes[] = [
     impact: {
       summary:
         'About 7% of log ingest has been rejected for the last 40 minutes, so logs from all 12 services writing to this cluster are incomplete. Search on existing data is unaffected.',
-      evidence: evidence(
-        'Rejected bulk requests start when the third node crosses the high watermark.',
+      evidence: chartEvidence(
         timeChart({
           title: 'Rejected bulk requests',
           yLabel: 'Rejected share',
@@ -552,8 +553,7 @@ const INVESTIGATIONS: InvestigationAttributes[] = [
     impact: {
       summary:
         'About one in five logins has failed since the key rotation 30 minutes ago. Users who were already signed in are unaffected until their token is refreshed.',
-      evidence: evidence(
-        'Failed logins rise with the rotation and have not recovered.',
+      evidence: chartEvidence(
         timeChart({
           title: 'Failed logins on web-frontend',
           yLabel: 'Failed share',
@@ -637,7 +637,7 @@ const INVESTIGATIONS: InvestigationAttributes[] = [
           'logs.order-processing',
           undefined,
           evidence(
-            'Processing throughput dropped to a fifth of normal after the outage.',
+            'Consumers retry every message with exponential backoff; none were dropped, so the backlog drains once they are restarted.',
             timeChart({
               title: 'Orders processed per second',
               yLabel: 'Orders per second',
@@ -768,8 +768,7 @@ const INVESTIGATIONS: InvestigationAttributes[] = [
     impact: {
       summary:
         'About 340 products published since the deploy do not show up in search for up to 15 minutes. Roughly 4% of searches return no results, up from 1%.',
-      evidence: evidence(
-        'The empty-result share rises at the deploy and saws with the 15-minute refresh.',
+      evidence: chartEvidence(
         timeChart({
           title: 'Searches with no results',
           yLabel: 'Empty-result share',

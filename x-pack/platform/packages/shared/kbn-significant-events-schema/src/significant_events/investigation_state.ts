@@ -97,13 +97,13 @@ export type EvidenceChartAnnotation = z.infer<typeof evidenceChartAnnotationSche
 
 /**
  * One observation supporting a claim the investigation makes. Evidence is self-contained: a
- * Markdown description (text, tables, links) and an optional static chart, so it works for every
- * data source, including data that is not available in the local cluster.
+ * Markdown description (text, tables, links), a static chart, or both, so it works for every data
+ * source, including data that is not available in the local cluster.
  */
 export const investigationEvidenceSchema = z.object({
-  /** Markdown: what was observed and why it bears on the claim. Tables and links are allowed. */
-  description: z.string().max(MAX_TEXT_LENGTH),
-  /** Optional static chart visualizing the observation. */
+  /** Markdown: what was observed and why it matters. With a chart, only what the chart doesn't show. */
+  description: z.string().max(MAX_TEXT_LENGTH).optional(),
+  /** Static chart visualizing the observation. */
   chart: evidenceChartSchema.optional(),
 });
 export type InvestigationEvidence = z.infer<typeof investigationEvidenceSchema>;

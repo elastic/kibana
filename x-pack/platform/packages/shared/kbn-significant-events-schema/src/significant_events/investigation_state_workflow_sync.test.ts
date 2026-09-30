@@ -523,13 +523,13 @@ describe('investigation_workflow.yaml structured-output schema stays in sync wit
     expect(investigationStateSchema.safeParse(emptyImpact).success).toBe(true);
   });
 
-  it('rejects top-level impact evidence without a description under both schemas', () => {
-    const invalidEvidence = {
+  it('accepts chart-only evidence without a description under both schemas', () => {
+    const chartOnlyEvidence = {
       ...validPayload,
       impact: { summary: 'Checkout failed.', evidence: { chart: sampleChart } },
     };
 
-    expect(validate(invalidEvidence)).toBe(false);
-    expect(investigationStateSchema.safeParse(invalidEvidence).success).toBe(false);
+    expect(validate(chartOnlyEvidence)).toBe(true);
+    expect(investigationStateSchema.safeParse(chartOnlyEvidence).success).toBe(true);
   });
 });

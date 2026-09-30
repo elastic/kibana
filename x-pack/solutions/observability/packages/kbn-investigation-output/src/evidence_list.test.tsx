@@ -108,6 +108,13 @@ describe('EvidenceList', () => {
     expect(screen.queryByTestId('investigationEvidenceChart')).not.toBeInTheDocument();
   });
 
+  it('renders chart-only evidence without a description', () => {
+    renderEvidence([{ chart: sampleChart }]);
+
+    expect(screen.getByTestId('investigationEvidenceChart')).toBeInTheDocument();
+    expect(screen.getByTestId('investigationEvidenceItem')).not.toHaveTextContent('saturates');
+  });
+
   it('renders one row per observation', () => {
     renderEvidence([chartEvidence, { description: 'Pods restarted.' }]);
 

@@ -16,27 +16,28 @@ export interface EvidenceItemProps {
 }
 
 /** One observation: its chart, when it has one, followed by its Markdown description. */
-export const EvidenceItem: React.FC<EvidenceItemProps> = ({ evidence: { description, chart } }) => (
-  <>
-    {chart && (
-      <>
-        <EvidenceChart chart={chart} />
-        <EuiSpacer size="s" />
-      </>
-    )}
-    <EuiMarkdownFormat textSize="xs" color="subdued">
-      {description}
-    </EuiMarkdownFormat>
-  </>
-);
+export const EvidenceItem: React.FC<EvidenceItemProps> = ({ evidence: { description, chart } }) => {
+  const hasDescription = Boolean(description?.trim());
+  return (
+    <>
+      {chart && <EvidenceChart chart={chart} />}
+      {chart && hasDescription && <EuiSpacer size="s" />}
+      {hasDescription && (
+        <EuiMarkdownFormat textSize="xs" color="subdued">
+          {description ?? ''}
+        </EuiMarkdownFormat>
+      )}
+    </>
+  );
+};
 
 export interface EvidenceListProps {
   evidence: InvestigationEvidence[];
 }
 
 /**
- * The observations an investigation's claim rests on. Each is self-contained Markdown plus an
- * optional static chart, so it renders the same whether the data was local or fetched remotely.
+ * The observations an investigation's claim rests on. Each is a self-contained static chart,
+ * Markdown, or both, so it renders the same whether the data was local or fetched remotely.
  */
 export const EvidenceList: React.FC<EvidenceListProps> = ({ evidence }) => {
   const { euiTheme } = useEuiTheme();

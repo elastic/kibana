@@ -161,8 +161,8 @@ steps:
                         type: string
                         maxLength: 10000
                         description: >
-                          Markdown explaining what was observed and why it bears on the claim. Use tables for small
-                          result sets and links only to URLs a tool actually returned. No images, headings, or HTML.
+                          Markdown: what was observed and why it matters. With a chart, only what the chart does not
+                          show; leave it out rather than restate the chart. No images, headings, or HTML.
                       chart:
                         type: object
                         description: >
@@ -256,8 +256,6 @@ steps:
                           - x_axis
                           - y_axis
                           - series
-                    required:
-                      - description
               required:
                 - candidate
                 - confidence
@@ -323,20 +321,22 @@ steps:
                 type: string
                 maxLength: 10000
                 description: >
-                  Business-facing account of the impact in plain prose: what was affected, how badly,
-                  for how long, and how broadly (users, requests, regions).
+                  Business-facing account of the impact: what was affected, how badly, for how long,
+                  and how broadly (users, requests, regions). Markdown; a short code block is fine
+                  when an excerpt matters.
               evidence:
                 description: >
-                  Evidence backing the summary when the impact does not map onto specific entities.
-                  Prefer a chart of the user-facing failure signal. Omit when entities are listed.
+                  Used when the impact does not map onto specific entities: a chart of the user-facing
+                  failure signal, usually without a description since the summary explains it. Omit
+                  when entities are listed.
                 type: object
                 properties:
                   description:
                     type: string
                     maxLength: 10000
                     description: >
-                      Markdown explaining what was observed and why it bears on the claim. Use tables for small
-                      result sets and links only to URLs a tool actually returned. No images, headings, or HTML.
+                      Markdown: what was observed and why it matters. With a chart, only what the chart does not
+                      show; leave it out rather than restate the chart. No images, headings, or HTML.
                   chart:
                     type: object
                     description: >
@@ -430,8 +430,6 @@ steps:
                       - x_axis
                       - y_axis
                       - series
-                required:
-                  - description
               entities:
                 type: array
                 description: >
@@ -460,15 +458,16 @@ steps:
                       maxLength: 255
                     evidence:
                       description: >
-                        Evidence of this entity's impact. Prefer a chart of its failure signal.
+                        How this entity was affected: a short description and, when you have the
+                        data, a chart of its failure signal.
                       type: object
                       properties:
                         description:
                           type: string
                           maxLength: 10000
                           description: >
-                            Markdown explaining what was observed and why it bears on the claim. Use tables for small
-                            result sets and links only to URLs a tool actually returned. No images, headings, or HTML.
+                            Markdown: what was observed and why it matters. With a chart, only what the chart does not
+                            show; leave it out rather than restate the chart. No images, headings, or HTML.
                         chart:
                           type: object
                           description: >
@@ -562,8 +561,6 @@ steps:
                             - x_axis
                             - y_axis
                             - series
-                      required:
-                        - description
                   required:
                     - name
         required:

@@ -92,25 +92,27 @@ moving to the next — see <reporting_progress> for exactly what to send and wor
    Report progress: the final hypotheses list (none left `investigating` unless the telemetry
    needed to check it was unavailable).
 
-5.5. **Finalize impact.** Settle `impact` on what the investigation confirmed:
+5.5. **Finalize impact.** Settle `impact` on what the investigation confirmed. Fill in what helps
+   a reader judge the impact, not every field — each part should add something the others don't.
 
    - `impact.summary`: the business-facing account in two or three plain sentences — what was
      affected, how badly, for how long, and how broadly (share of requests or users, regions,
      customers), using the numbers you measured. A reader should be able to prioritise the
-     incident and explain it to the business from this paragraph alone.
-   - Back the summary with evidence in exactly one of two ways — never both (see
-     <citing_evidence>):
-     - **Per entity**, when the impact maps naturally onto specific services or components: list
-       them in `entities`, each with its own `evidence` showing that entity's impact (ideally a
-       chart of its failure signal), and omit the top-level `evidence`. Group at service level (a
-       shared failing service once, not its three hosts) and list at most 5.
-     - **Top level**, when it does not (for example one user-facing symptom that no single
-       component owns): set `impact.evidence` to the signal that most directly shows the
-       user-facing impact, such as failed requests or error rate over the incident window, and
-       omit `entities`.
+     incident and explain it to the business from this paragraph alone. Add a short code block
+     only when an excerpt matters.
+   - Then back it in one of two ways, never both:
+     - **Generic impact** — no specific service or component owns it: set `impact.evidence` to a
+       chart of the user-facing failure signal (for example failed requests or error rate over the
+       incident window) and omit `entities`. The summary already explains it, so a `description`
+       is rarely needed.
+     - **Specific entities** — the impact maps onto services or components: list them in
+       `entities` and omit the top-level `evidence`. Give each entity `evidence` of how it was
+       affected: a short `description` (with a code block if useful) and, when you have the data,
+       a chart of its failure signal. Group at service level (a shared failing service once, not
+       its three hosts) and list at most 5.
 
      Alert entities are a natural mapping, so keep them. Drop other seeded entities the
-     investigation ruled out; if none remain, use the top-level form.
+     investigation ruled out; if none remain, use the generic form.
 
    Report progress: include the refined `impact`.
 
@@ -234,7 +236,7 @@ every evidence entry must be **self-contained**: it shows what you observed, not
 dismissal needs one as much as a confirmation — "why did you rule that out?" is exactly the
 question evidence answers.
 
-Each entry has:
+Each entry has a `chart`, a `description`, or both:
 
 - `description` — Markdown. What was observed and why it decided the claim. Start with one plain
   sentence; add a small Markdown table when a handful of concrete values makes the point (at most
@@ -265,8 +267,9 @@ Rules:
 - **Downsample, don't truncate.** If a series has more than 100 points, re-run the query with a
   larger bucket rather than cutting off part of the window.
 - **Tables and numbers in `description` follow the same rule** — only values you observed.
-- **Don't show the same data twice.** When an entry has a chart, the `description` says what the
-  chart shows and why it matters; it does not repeat the chart's values as a table.
+- **Don't show the same data twice.** With a chart, the `description` only adds what the chart
+  doesn't show — a detail, an excerpt, why it matters. Leave it out rather than restate the chart,
+  and never repeat the chart's values as a table.
 - **At most 3 entries per hypothesis.** Pick the ones that decided it, not everything you looked
   at — the full state is resent on every progress report.
 
@@ -280,7 +283,6 @@ Rules:
   "reason": "Pool utilization jumped from 40% to 100% at 14:02, matching the deploy timestamp.",
   "evidence": [
     {
-      "description": "Pool utilization jumps from 40% to 100% within a minute of the 14:02 deploy.",
       "chart": {
         "type": "line",
         "title": "orders-api connection pool utilization",
@@ -464,7 +466,6 @@ not end the investigation. Keep working after calling it.
       "reason": "Pool utilization metrics jumped from 40% to 100% at 14:02, matching the deploy timestamp exactly.",
       "evidence": [
         {
-          "description": "Pool utilization jumps from 40% to 100% within a minute of the deploy.",
           "chart": {
             "type": "line",
             "title": "orders-api connection pool utilization",
@@ -518,7 +519,6 @@ not end the investigation. Keep working after calling it.
       "reason": "Pool utilization metrics jumped from 40% to 100% at 14:02, matching the deploy timestamp exactly.",
       "evidence": [
         {
-          "description": "Pool utilization jumps from 40% to 100% within a minute of the deploy.",
           "chart": {
             "type": "line",
             "title": "orders-api connection pool utilization",
@@ -585,7 +585,7 @@ not end the investigation. Keep working after calling it.
         "feature_id": "orders-api-service",
         "stream_name": "logs-generic.acme-prod",
         "evidence": {
-          "description": "Failed order placement requests per 5 minutes across the incident window.",
+          "description": "Placement calls failed with `PoolTimeoutError`; order reads kept succeeding.",
           "chart": {
             "type": "bar",
             "title": "Failed order placement requests",
