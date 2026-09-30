@@ -320,6 +320,12 @@ enum AlertTypes {
   BEHAVIOR = 'BEHAVIOR',
 }
 
+export interface CustomYaraSignatureAlertFields {
+  entry_name: string;
+  rule_identifier: string;
+  entry_id: string;
+}
+
 const alertsDefaultDataStream = {
   type: 'logs',
   dataset: 'endpoint.alerts',
@@ -626,6 +632,7 @@ export class EndpointDocGenerator extends BaseDataGenerator {
     ancestry = [],
     alertsDataStream = alertsDefaultDataStream,
     alertType,
+    customYaraSignature,
   }: {
     ts?: number;
     sessionEntryLeader?: string;
@@ -634,9 +641,11 @@ export class EndpointDocGenerator extends BaseDataGenerator {
     ancestry?: string[];
     alertsDataStream?: DataStream;
     alertType?: AlertTypes;
+    customYaraSignature?: CustomYaraSignatureAlertFields;
   } = {}): AlertEvent {
     const processName = this.randomProcessName();
     const isShellcode = alertType === AlertTypes.MEMORY_SHELLCODE;
+    const resolvedCustomYaraSignature = isShellcode ? undefined : customYaraSignature;
     const newAlert: AlertEvent = {
       ...this.commonInfo,
       data_stream: alertsDataStream,
@@ -644,6 +653,18 @@ export class EndpointDocGenerator extends BaseDataGenerator {
       ecs: {
         version: '1.6.0',
       },
+      ...(resolvedCustomYaraSignature
+        ? {
+            rule: {
+              name: resolvedCustomYaraSignature.rule_identifier,
+              custom_yara_signature: {
+                entry_name: resolvedCustomYaraSignature.entry_name,
+                rule_identifier: resolvedCustomYaraSignature.rule_identifier,
+                entry_id: resolvedCustomYaraSignature.entry_id,
+              },
+            },
+          }
+        : {}),
       // disabling naming-convention to accommodate external field
       // eslint-disable-next-line @typescript-eslint/naming-convention
       Memory_protection: {

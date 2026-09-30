@@ -54,6 +54,7 @@ const renderPanel = (workflowId: string | null, isAccordion: boolean) => {
         settings={createWorker(workflowId).settings}
         settingsLocked={false}
         isSaving={false}
+        canWrite
         onEnabledChange={jest.fn()}
         onSettingsChange={jest.fn()}
       />

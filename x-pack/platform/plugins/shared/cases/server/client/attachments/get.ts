@@ -5,45 +5,46 @@
  * 2.0.
  */
 
+import Boom from '@hapi/boom';
 import type { SavedObject } from '@kbn/core/server';
 
 import type {
   AttachmentsV2,
-  AttachmentV2,
+  UnifiedAttachment,
   DocumentAttachmentAttributesV2,
 } from '../../../common/types/domain';
-import { AttachmentType } from '../../../common';
-import type { DocumentResponse, AttachmentsFindResponseV2 } from '../../../common/types/api';
+import type { DocumentResponse, UnifiedAttachmentsFindResponse } from '../../../common/types/api';
 import {
   DocumentResponseRt,
-  FindAttachmentsQueryParamsRt,
-  AttachmentsFindResponseRtV2,
+  UnifiedAttachmentsFindQueryParamsRt,
+  UnifiedAttachmentsFindResponseRt,
 } from '../../../common/types/api';
 import type { CasesClient } from '../client';
 import type { CasesClientArgs } from '../types';
 
-import type { FindCommentsArgs, GetAllDocumentsAttachedToCase, GetAllArgs, GetArgs } from './types';
+import type {
+  FindAttachmentsArgs,
+  GetAllDocumentsAttachedToCase,
+  GetAllArgs,
+  GetArgs,
+} from './types';
 
-import {
-  CASE_ATTACHMENT_SAVED_OBJECT,
-  CASE_COMMENT_SAVED_OBJECT,
-  CASE_SAVED_OBJECT,
-} from '../../../common/constants';
-import { COMMENT_ATTACHMENT_TYPE } from '../../../common/constants/attachments';
+import { CASE_SAVED_OBJECT } from '../../../common/constants';
 import { getAttachmentAuthorizationFilter } from '../../authorization/utils';
 import { decodeOrThrow, decodeWithExcessOrThrow } from '../../common/runtime_types';
 import {
   defaultSortField,
-  transformComments,
   flattenAttachmentSavedObject,
   flattenAttachmentSavedObjects,
   getIDsAndIndicesAsArrays,
 } from '../../common/utils';
 import { createCaseError } from '../../common/error';
+import { getCaseReferenceId } from '../../common/references';
 import { DEFAULT_PAGE, DEFAULT_PER_PAGE } from '../../routes/api';
-import { buildFilter, combineFilters, NodeBuilderOperators } from '../utils';
+import { combineFilters } from '../utils';
 import { Operations } from '../../authorization';
-import { AttachmentRtV2, AttachmentsRtV2 } from '../../../common/types/domain';
+import { UnifiedAttachmentRt, AttachmentsRtV2 } from '../../../common/types/domain';
+import { buildAttachmentTypeFilter } from './type_filter';
 
 const normalizeDocumentResponse = (
   documents: Array<SavedObject<DocumentAttachmentAttributesV2>>
@@ -120,12 +121,13 @@ export const getAllDocumentsAttachedToCase = async (
 };
 
 /**
- * Retrieves the attachments for a case entity. This support pagination.
+ * Retrieves the attachments for a case entity, optionally filtered by `type`.
+ * Omitting `type` returns every attachment type across both storage models.
  */
 export async function find(
-  { caseID, findQueryParams }: FindCommentsArgs,
+  { caseID, findQueryParams }: FindAttachmentsArgs,
   clientArgs: CasesClientArgs
-): Promise<AttachmentsFindResponseV2> {
+): Promise<UnifiedAttachmentsFindResponse> {
   const {
     services: { attachmentService },
     logger,
@@ -133,33 +135,23 @@ export async function find(
   } = clientArgs;
 
   try {
-    const queryParams = decodeWithExcessOrThrow(FindAttachmentsQueryParamsRt)(findQueryParams);
+    const queryParams = decodeWithExcessOrThrow(UnifiedAttachmentsFindQueryParamsRt)(
+      findQueryParams
+    );
 
     const { filter: authorizationFilter, ensureSavedObjectsAreAuthorized } =
       await getAttachmentAuthorizationFilter(authorization, Operations.findComments);
 
-    const filter = combineFilters([
-      combineFilters(
-        [
-          buildFilter({
-            filters: [AttachmentType.user],
-            field: 'type',
-            operator: 'or',
-            type: CASE_COMMENT_SAVED_OBJECT,
-          }),
-          buildFilter({
-            filters: [COMMENT_ATTACHMENT_TYPE],
-            field: 'type',
-            operator: 'or',
-            type: CASE_ATTACHMENT_SAVED_OBJECT,
-          }),
-        ],
-        NodeBuilderOperators.or
-      ),
-      authorizationFilter,
-    ]);
+    const requestedTypes =
+      queryParams?.type == null
+        ? undefined
+        : Array.isArray(queryParams.type)
+        ? queryParams.type
+        : [queryParams.type];
 
-    const theComments = await attachmentService.find({
+    const filter = combineFilters([buildAttachmentTypeFilter(requestedTypes), authorizationFilter]);
+
+    const theAttachments = await attachmentService.find({
       options: {
         page: queryParams?.page ?? DEFAULT_PAGE,
         perPage: queryParams?.perPage ?? DEFAULT_PER_PAGE,
@@ -171,18 +163,23 @@ export async function find(
     });
 
     ensureSavedObjectsAreAuthorized(
-      theComments.saved_objects.map((comment) => ({
-        owner: comment.attributes.owner,
-        id: comment.id,
+      theAttachments.saved_objects.map((attachment) => ({
+        owner: attachment.attributes.owner,
+        id: attachment.id,
       }))
     );
 
-    const res = transformComments(theComments);
+    const res = {
+      data: flattenAttachmentSavedObjects(theAttachments.saved_objects),
+      page: theAttachments.page,
+      per_page: theAttachments.per_page,
+      total: theAttachments.total,
+    };
 
-    return decodeOrThrow(AttachmentsFindResponseRtV2)(res);
+    return decodeOrThrow(UnifiedAttachmentsFindResponseRt)(res);
   } catch (error) {
     throw createCaseError({
-      message: `Failed to find comments case id: ${caseID}: ${error}`,
+      message: `Failed to find attachments case id: ${caseID}: ${error}`,
       error,
       logger,
     });
@@ -190,12 +187,14 @@ export async function find(
 }
 
 /**
- * Retrieves a single attachment by its saved object id.
+ * Retrieves a single attachment by its saved object id. `AttachmentGetter.get`
+ * already normalizes legacy-stored rows via `toUnifiedAttributes`, so this decodes
+ * against the unified-only shape rather than the legacy-tolerant union.
  */
 export async function get(
   { savedObjectId, caseID }: GetArgs,
   clientArgs: CasesClientArgs
-): Promise<AttachmentV2> {
+): Promise<UnifiedAttachment> {
   const {
     services: { attachmentService },
     logger,
@@ -203,21 +202,25 @@ export async function get(
   } = clientArgs;
 
   try {
-    const comment = await attachmentService.getter.get({
+    const attachment = await attachmentService.getter.get({
       savedObjectId,
     });
 
     await authorization.ensureAuthorized({
-      entities: [{ owner: comment.attributes.owner, id: comment.id }],
+      entities: [{ owner: attachment.attributes.owner, id: attachment.id }],
       operation: Operations.getComment,
     });
 
-    const res = flattenAttachmentSavedObject(comment);
+    if (getCaseReferenceId(attachment.references) !== caseID) {
+      throw Boom.notFound(`This attachment ${savedObjectId} does not exist in case ${caseID}.`);
+    }
 
-    return decodeOrThrow(AttachmentRtV2)(res);
+    const res = flattenAttachmentSavedObject(attachment);
+
+    return decodeOrThrow(UnifiedAttachmentRt)(res);
   } catch (error) {
     throw createCaseError({
-      message: `Failed to get comment case id: ${caseID} attachment id: ${savedObjectId}: ${error}`,
+      message: `Failed to get attachment case id: ${caseID} attachment id: ${savedObjectId}: ${error}`,
       error,
       logger,
     });

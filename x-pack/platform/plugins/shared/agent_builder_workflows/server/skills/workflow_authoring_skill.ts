@@ -153,35 +153,34 @@ narrowest \`ai.*\` step for the task: \`ai.summarize\` for summarization,
 
 These steps manage knowledge indicators (KIs) in Context Engine AI indices. All of them require the \`contextEngine:enabled\` advanced setting (fails with \`FeatureDisabledError\` when off) and the Context Engine write privilege (fails with \`PermissionError\` when the workflow user lacks it).
 
-- **context-engine.createKi**: Index a KI document into an AI index. Inputs: \`ai_index_id\`, \`ki\`. When the AI index does not exist yet, it is created automatically. Output: the document \`id\` of the created KI.
+- **context-engine.createKi**: Index a KI document into an AI index. Inputs: \`ai_index_id\`, \`ki\`, optional \`verifiers\`. When the AI index does not exist yet, it is created automatically. Output: the document \`id\` of the created KI, plus \`verification\` (\`passed\` and per-verifier \`results\`) when \`verifiers\` was given. When any verifier fails, the KI is not written and \`id\` is absent.
 - **context-engine.updateKi**: Partially update an existing KI. Inputs: \`ai_index_id\`, \`ki_id\`, \`ki\` (only the provided fields change). Output: \`id\` and \`result\` (\`updated\` or \`noop\`). Fails when the KI or AI index does not exist (unlike \`createKi\`, the index is not auto-created).
 - **context-engine.deleteKi**: Delete a KI. Inputs: \`ai_index_id\`, \`ki_id\`. Fails when the KI or AI index does not exist.
 - **context-engine.verifyKi**: Run all applicable Context Engine KI verifiers against a KI without writing anything — use it for report-only checks or before a write. Input: \`ki\`. Output: \`passed\` (true only when every applicable verifier passed) and \`results\`, one entry per verifier that ran, each with \`verifier\` (its id), \`passed\`, and a \`reason\` on failure. A verifier only applies when the KI carries the field it checks — for example, ES|QL verifiers read \`attributes.esql\` (a query string or an array of query strings). When no verifier applies, the step passes with empty \`results\`.
 
-The write steps do NOT run verifiers themselves. To avoid persisting a KI that fails verification, verify first and gate the write on the result:
+To avoid persisting a KI that fails verification, pass \`verifiers\` to \`createKi\`; the step runs them before writing and skips the write when any fails:
 
 \`\`\`yaml
-- name: verify_ki
-  type: context-engine.verifyKi
-  with:
-    ki:
-      type: detection
-      title: Failed login burst
-      attributes:
-        esql: 'FROM logs-* | WHERE event.outcome == "failure" | STATS c = COUNT(*) BY user.name'
 - name: create_ki
   type: context-engine.createKi
-  if: "steps.verify_ki.output.passed : true"
   with:
     ai_index_id: "my-ai-index"
+    verifiers:
+      - esql-valid-syntax
+      - esql-valid-runtime
     ki:
       type: detection
       title: Failed login burst
       attributes:
         esql: 'FROM logs-* | WHERE event.outcome == "failure" | STATS c = COUNT(*) BY user.name'
+- name: report_verification_failure
+  type: console
+  if: "steps.create_ki.output.verification.passed : false"
+  with:
+    message: "KI not written: {{ steps.create_ki.output.verification.results | json }}"
 \`\`\`
 
-When verification fails, report \`steps.verify_ki.output.results\` — each failing entry names the verifier and the reason it failed.
+When verification fails, report \`steps.create_ki.output.verification.results\` — each failing entry names the verifier and the reason it failed.
 
 #### Connector-Based Step Types (PREFERRED for integrations!)
 

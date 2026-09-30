@@ -14,12 +14,12 @@ import type { RuleSummarySectionProps } from '../types';
 export const RuleSummaryActionPoliciesSection: React.FC<RuleSummarySectionProps> = ({ rule }) => (
   <FlyoutAccordion
     title={i18n.translate('xpack.alertingV2.ruleSummary.actionPolicies', {
-      defaultMessage: 'Action Policies',
+      defaultMessage: 'Action policies',
     })}
     hasBorder={false}
     initialIsOpen
     data-test-subj="ruleSummaryActionPolicies"
   >
-    <ActionPoliciesArtifactsSubsection rule={rule} />
+    <ActionPoliciesArtifactsSubsection rule={rule} flyoutSession="inherit" showTitle={false} />
   </FlyoutAccordion>
 );

@@ -1,5 +1,5 @@
 {
-  "sha1": "54859cf45dc9134656d0faa3506ce759f083b762",
+  "sha1": "ebfae51fa2d81e9e6427beef3394b9e3ff9685a1",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -382,7 +382,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/dashboard/test/scout/ui/parallel_tests/migration_smoke_tests/controls_migration_smoke.spec.ts",
-        "line": 65,
+        "line": 32,
         "column": 51
       }
     },

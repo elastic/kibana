@@ -13,10 +13,11 @@ import { ToolType } from '@kbn/agent-builder-common';
 import { ALERTZERO_PROPOSALS_REVISE_TOOL_ID } from '@kbn/alertzero-common';
 import {
   boundedActionInput,
+  MAX_TITLE_LENGTH,
   proposalConfidenceSchema,
   proposalImpactSchema,
-} from '@kbn/agentic-investigations-plugin/common';
-import type { AgenticInvestigationsPluginStart } from '@kbn/agentic-investigations-plugin/server';
+} from '@kbn/proposals-common';
+import type { ProposalsPluginStart } from '@kbn/proposals-plugin/server';
 
 const reviseProposalSchema = z.object({
   proposalId: z
@@ -26,6 +27,11 @@ const reviseProposalSchema = z.object({
     .describe(
       'The id of the proposal being replaced. Any id in a revision chain works, not only the root — the live head is resolved before the revision is appended.'
     ),
+  title: z
+    .string()
+    .max(MAX_TITLE_LENGTH)
+    .optional()
+    .describe("Override for the proposal's short plain-text title. Omit to keep the original."),
   comment: z
     .string()
     .max(8192)
@@ -51,7 +57,7 @@ const reviseProposalSchema = z.object({
  * direct in-process call bypasses both the route and the step wrapper.
  */
 export const reviseProposalTool = (
-  getAgenticInvestigations: () => AgenticInvestigationsPluginStart
+  getProposals: () => ProposalsPluginStart
 ): BuiltinToolDefinition<typeof reviseProposalSchema> => ({
   id: ALERTZERO_PROPOSALS_REVISE_TOOL_ID,
   type: ToolType.builtin,
@@ -68,10 +74,10 @@ export const reviseProposalTool = (
   tags: ['alertzero'],
   handler: async ({ proposalId, ...overrides }, { logger, request, spaceId }) => {
     try {
-      const agenticInvestigations = getAgenticInvestigations();
-      await agenticInvestigations.getProposalPrivileges().assertCanManage(request);
+      const proposals = getProposals();
+      await proposals.getProposalPrivileges().assertCanManage(request);
 
-      const service = agenticInvestigations.getProposalsService();
+      const service = proposals.getProposalsService();
 
       // The schema accepts any id in the chain, but `revise()` refuses a
       // superseded one, so a model holding the original id needs the head.
@@ -79,7 +85,8 @@ export const reviseProposalTool = (
 
       const { proposalId: newProposalId, revision } = await service.revise(
         { id: liveProposalId, ...overrides },
-        spaceId
+        spaceId,
+        request
       );
 
       return {

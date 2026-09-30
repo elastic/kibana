@@ -26,6 +26,8 @@ dependsOn:
   - '@kbn/server-http-tools'
   - '@kbn/serverless'
   - '@kbn/security-solution-navigation'
+  - '@kbn/alertzero-common'
+  - '@kbn/alertzero-plugin'
   - '@kbn/security-solution-upselling'
   - '@kbn/kibana-react-plugin'
   - '@kbn/core-chrome-browser'
