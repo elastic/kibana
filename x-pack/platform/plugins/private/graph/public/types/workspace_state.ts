@@ -33,6 +33,7 @@ export interface WorkspaceNode {
 export type BlockListedNode = Omit<WorkspaceNode, 'numChildren' | 'kx' | 'ky' | 'id'>;
 
 export interface WorkspaceEdge {
+  id?: string;
   weight: number;
   width: number;
   label: string;

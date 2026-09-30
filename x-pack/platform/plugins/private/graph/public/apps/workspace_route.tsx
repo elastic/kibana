@@ -10,7 +10,12 @@ import { Provider } from 'react-redux';
 import { useHistory } from 'react-router-dom';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import type { Workspace } from '../types';
-import { createGraphStore } from '../state_management';
+import {
+  createGraphStore,
+  createWorkspaceState,
+  workspaceChanged,
+  type GraphStore,
+} from '../state_management';
 import { createWorkspace } from '../services/workspace/graph_client_workspace';
 import { WorkspaceLayout } from '../components/workspace_layout';
 import type { GraphServices } from '../application';
@@ -50,6 +55,7 @@ export const WorkspaceRoute = ({
    * `workspace.changeHandler()`.
    */
   const workspaceRef = useRef<Workspace>();
+  const storeRef = useRef<GraphStore>();
   /**
    * Providing `workspaceRef.current` to the hook dependencies or components itself
    * will not leads to updates, therefore `renderCounter` is used to update react state.
@@ -81,6 +87,14 @@ export const WorkspaceRoute = ({
       coreStart,
     });
 
+  const notifyWorkspaceChanged = () => {
+    const workspace = workspaceRef.current;
+    if (workspace) {
+      storeRef.current?.dispatch(workspaceChanged(createWorkspaceState(workspace)));
+    }
+    setRenderCounter((cur) => cur + 1);
+  };
+
   const [store] = useState(() =>
     createGraphStore({
       basePath: getBasePath(),
@@ -94,7 +108,7 @@ export const WorkspaceRoute = ({
           nodeLabeller() {
             // console.log(newNodes);
           },
-          changeHandler: () => setRenderCounter((cur) => cur + 1),
+          changeHandler: notifyWorkspaceChanged,
           graphExploreProxy: callNodeProxy,
           searchProxy: callSearchNodeProxy,
           exploreControls,
@@ -106,11 +120,12 @@ export const WorkspaceRoute = ({
       savePolicy: graphSavePolicy,
       contentClient,
       changeUrl: (newUrl) => history.push(newUrl),
-      notifyReact: () => setRenderCounter((cur) => cur + 1),
+      notifyReact: notifyWorkspaceChanged,
       handleSearchQueryError,
       ...coreStart,
     })
   );
+  storeRef.current = store;
 
   const loaded = useWorkspaceLoader({
     workspaceRef,
