@@ -29,7 +29,13 @@ describe('AgentBuilderDashboardsPlugin', () => {
       } as never
     );
 
-    expect(registerAttachmentType).toHaveBeenCalledTimes(1);
+    expect(registerAttachmentType).toHaveBeenCalledTimes(2);
+    expect(registerAttachmentType).toHaveBeenCalledWith(
+      expect.objectContaining({ id: 'platform.dashboard.dashboard_state' })
+    );
+    expect(registerAttachmentType).toHaveBeenCalledWith(
+      expect.objectContaining({ id: 'platform.dashboard.panel', isReadonly: true })
+    );
     expect(registerSkill).toHaveBeenCalledTimes(1);
     expect(registerSkill).toHaveBeenCalledWith(
       expect.objectContaining({ id: 'dashboard-management' })

@@ -11,12 +11,11 @@ import {
   DASHBOARD_PANEL_ATTACHMENT_TYPE,
   type DashboardPanelAttachment,
 } from '@kbn/agent-builder-dashboards-common';
-
-const CUSTOM_CONTENT_PANEL_TYPE = 'custom_content';
-const LENS_PANEL_TYPE = 'lens';
+import { CUSTOM_CONTENT_EMBEDDABLE_TYPE } from '@kbn/custom-content-common';
+import { LENS_EMBEDDABLE_TYPE } from '@kbn/lens-common';
 
 const getFallbackLabel = (panelType: string | undefined): string => {
-  if (panelType === CUSTOM_CONTENT_PANEL_TYPE) {
+  if (panelType === CUSTOM_CONTENT_EMBEDDABLE_TYPE) {
     return i18n.translate(
       'xpack.agentBuilderDashboards.attachments.dashboardPanel.customPanelLabel',
       {
@@ -24,7 +23,7 @@ const getFallbackLabel = (panelType: string | undefined): string => {
       }
     );
   }
-  if (panelType === LENS_PANEL_TYPE) {
+  if (panelType === LENS_EMBEDDABLE_TYPE) {
     return i18n.translate(
       'xpack.agentBuilderDashboards.attachments.dashboardPanel.visualizationLabel',
       { defaultMessage: 'Visualization' }
