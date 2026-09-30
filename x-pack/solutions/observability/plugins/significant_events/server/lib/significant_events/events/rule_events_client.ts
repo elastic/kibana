@@ -33,7 +33,6 @@ import {
   applyTimeRange,
   executeCountQuery,
   executeEsqlQuery,
-  flagLineageMatch,
   pickLatestPerGroup,
 } from '../latest_source_query';
 import { RULE_EVENTS_INDEX } from '../alerting/rule_events_metric_series';
@@ -269,17 +268,13 @@ export class RuleEventsClient implements SignificantEventsReadClient {
     let query = buildBaseQuery(this.clients.space)
       .pipe`INLINE STATS created_at = MIN(@timestamp) BY ${esql.col(GROUP_HASH_FIELD)}`;
 
-    // Free-text search matches any revision in the lineage but, like status/severity, is filtered
-    // post-latest so a stale revision cannot make a closed series look open.
-    const searchWhere = buildFreeTextWhere(options.search);
-    if (searchWhere) {
-      query = flagLineageMatch(query, searchWhere, GROUP_HASH_FIELD);
-    }
-
     query = pickLatestPerGroup(query, GROUP_HASH_FIELD);
 
+    // Free-text search and status/severity run post-latest (against only the current state) so a
+    // stale revision cannot make a closed series look open.
+    const searchWhere = buildFreeTextWhere(options.search);
     if (searchWhere) {
-      query = query.where`lineage_matches == 1`;
+      query = query.where`${searchWhere}`;
     }
 
     // The time range selects series active during it, always shown in their current state.

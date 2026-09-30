@@ -378,7 +378,7 @@ describe('EventClient', () => {
       expect(dataQuery).toContain('TO_LOWER(event_id) == TO_LOWER("checkout-failure")');
     });
 
-    it('matches search against the lineage but filters it after latest-state reduction', async () => {
+    it('matches search against the current version after latest-state reduction', async () => {
       const { client, query } = createSearchClient({ hits: [], total: 0 });
 
       await client.findLatestByCurrentStatePaginated({ search: 'checkout' });
@@ -386,18 +386,9 @@ describe('EventClient', () => {
       const dataQuery = query.mock.calls
         .map((call) => (call[0] as { query: string }).query)
         .find((q) => !q.includes('STATS total'));
-      const lineageMatchIdx = dataQuery!.indexOf(
-        'INLINE STATS lineage_matches = MAX(lineage_match) BY event_id'
+      expect(dataQuery!.indexOf('LIKE')).toBeGreaterThan(
+        dataQuery!.indexOf('WHERE _id == tiebreaker_id')
       );
-      const latestPerGroupIdx = dataQuery!.indexOf('INLINE STATS latest_ts');
-      const searchFilterIdx = dataQuery!.indexOf('WHERE lineage_matches == 1');
-
-      expect(lineageMatchIdx).toBeGreaterThanOrEqual(0);
-      expect(latestPerGroupIdx).toBeGreaterThan(lineageMatchIdx);
-      expect(searchFilterIdx).toBeGreaterThan(latestPerGroupIdx);
-      // The search predicate must not drop versions before the latest one is picked.
-      expect(dataQuery!.indexOf('LIKE')).toBeGreaterThan(dataQuery!.indexOf('EVAL lineage_match'));
-      expect(dataQuery!.lastIndexOf('LIKE')).toBeLessThan(lineageMatchIdx);
     });
   });
 

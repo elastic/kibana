@@ -31,7 +31,6 @@ import {
   applyLifetimeOverlap,
   applyTimeRange,
   executeCountQuery,
-  flagLineageMatch,
   fromIndexForSpace,
   inFilter,
   executeEsqlQuery,
@@ -243,18 +242,13 @@ export class EventClient implements SignificantEventsReadClient {
       columns: ['_id', '_source'],
     }).pipe`INLINE STATS created_at = MIN(@timestamp) BY ${esql.col(FIELD_EVENT_ID)}`;
 
-    // Free-text search matches any version in the lineage but is filtered post-latest, like the
-    // current state and continuation-candidate filters, so stale versions cannot make a closed
-    // episode appear open.
-    const searchWhere = this.buildWhere({ search: options.search });
-    if (searchWhere) {
-      query = flagLineageMatch(query, searchWhere, FIELD_EVENT_ID);
-    }
-
     query = pickLatestPerGroup(query, FIELD_EVENT_ID);
 
+    // Free-text search, current state and continuation-candidate filters all run post-latest, so
+    // they match the current version and stale versions cannot make a closed episode appear open.
+    const searchWhere = this.buildWhere({ search: options.search });
     if (searchWhere) {
-      query = query.where`lineage_matches == 1`;
+      query = query.where`${searchWhere}`;
     }
 
     // The time range selects events active during it, always shown in their current state.
