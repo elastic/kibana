@@ -553,7 +553,7 @@ export function InternalDashboardTopNav({
           esqlApproximation={{
             isApproximate: esqlApproximation ?? false,
             onChange: dashboardApi.setEsqlApproximation,
-            disabled: !hasEsqlPanel,
+            disabled: viewMode === 'preview' || !hasEsqlPanel,
             additionalText: i18n.translate('dashboard.esqlApproximationToggle.additionalText', {
               defaultMessage:
                 'Fast mode requires at least one ES|QL visualization that uses STATS in the dashboard.',

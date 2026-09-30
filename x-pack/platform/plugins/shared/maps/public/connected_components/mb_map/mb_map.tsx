@@ -444,7 +444,7 @@ export class MbMap extends Component<Props> {
     let scaleControl;
     let keydownScrollZoomControl;
     let tileStatusTrackerControl;
-    if (!this.props.previewMode && this.props.mapApi) {
+    if (this.props.mapApi) {
       drawFilterControl =
         this.props.addFilters && this.props.filterModeActive ? (
           <DrawFilterControl mbMap={this.props.mapApi} addFilters={this.props.addFilters} />
