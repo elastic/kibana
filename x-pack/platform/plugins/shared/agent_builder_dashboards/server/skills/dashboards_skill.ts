@@ -10,9 +10,9 @@ import { generateDashboardTool } from '../tools';
 import { dashboardGeneration } from './generation_guidance';
 import { kibanaRendering } from './rendering_guidance';
 
-export const dashboardManagementSkill = defineSkillType({
-  id: 'dashboard-management',
-  name: 'dashboard-management',
+export const dashboardsSkill = defineSkillType({
+  id: 'dashboards',
+  name: 'dashboards',
   basePath: 'skills/platform/dashboard',
   description:
     'Compose and update Kibana dashboards, involving panel creation, layout, and inline visualization editing.',
