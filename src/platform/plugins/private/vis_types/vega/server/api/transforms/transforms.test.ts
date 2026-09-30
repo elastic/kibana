@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { ZodError } from '@kbn/zod';
 import type { VegaLibraryItemState } from '../schema';
 import { transformVegaIn } from './transform_vega_in';
 import { transformVegaOut } from './transform_vega_out';
@@ -73,6 +74,21 @@ describe('Vega library item transforms', () => {
     test('returns attributes without filters unchanged', () => {
       const { filters, ...stateWithoutFilters } = state;
       expect(transformVegaOut(stateWithoutFilters, [])).toEqual(stateWithoutFilters);
+    });
+
+    test('throws when the stored spec does not satisfy the API schema', () => {
+      const attributes = { title: 'Vega chart', spec: { format: 'hjson' as const, value: '' } };
+      expect(() => transformVegaOut(attributes, [])).toThrow(ZodError);
+    });
+
+    test('throws when a stored filter does not satisfy the API schema', () => {
+      const filterWithUnknownKey = {
+        type: 'condition' as const,
+        condition: { field: 'host', operator: 'exists' as const },
+        unexpected: true,
+      };
+      const attributes = { title: 'Vega chart', spec: state.spec, filters: [filterWithUnknownKey] };
+      expect(() => transformVegaOut(attributes, [])).toThrow(ZodError);
     });
   });
 });
