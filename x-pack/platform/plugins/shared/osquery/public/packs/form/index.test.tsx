@@ -19,8 +19,8 @@ import { ExperimentalFeaturesService } from '../../common/experimental_features_
 import { ExperimentalFeaturesProvider } from '../../common/experimental_features_context';
 import { allowedExperimentalValues } from '../../../common/experimental_features';
 import {
-  PACK_QUERY_STALE_INTERVAL_ERROR,
-  PACK_QUERY_STALE_RRULE_ERROR,
+  getPackQueryStaleIntervalError,
+  getPackQueryStaleRruleError,
 } from '../../components/schedule_section/translations';
 
 const mockUseRouterNavigate = jest.fn();
@@ -748,7 +748,9 @@ describe('PackForm', () => {
       expect(getByTestId('update-pack-button')).not.toBeDisabled();
       fireEvent.click(getByTestId('update-pack-button'));
       await waitFor(() => expect(mockAddDanger).toHaveBeenCalled());
-      expect(mockAddDanger.mock.calls[0][0].text).toContain(PACK_QUERY_STALE_INTERVAL_ERROR);
+      expect(mockAddDanger.mock.calls[0][0].text).toContain(
+        getPackQueryStaleIntervalError('q-stale')
+      );
       expect(mockUpdateAsync).not.toHaveBeenCalled();
     });
 
@@ -790,7 +792,9 @@ describe('PackForm', () => {
       expect(getByTestId('update-pack-button')).not.toBeDisabled();
       fireEvent.click(getByTestId('update-pack-button'));
       await waitFor(() => expect(mockAddDanger).toHaveBeenCalled());
-      expect(mockAddDanger.mock.calls[0][0].text).toContain(PACK_QUERY_STALE_RRULE_ERROR);
+      expect(mockAddDanger.mock.calls[0][0].text).toContain(
+        getPackQueryStaleRruleError('q-stale-rrule')
+      );
       expect(mockUpdateAsync).not.toHaveBeenCalled();
     });
 

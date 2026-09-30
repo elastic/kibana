@@ -36,7 +36,6 @@ import { ScheduleSection } from '../../components/schedule_section';
 import { ToggleableRow } from '../../components/schedule_section/toggleable_row';
 import { validateScheduleFormData } from '../../components/schedule_section/validation';
 import {
-  OVERRIDE_MODE_MISMATCH_ERROR,
   QUERY_OVERRIDE_SCHEDULE_TOGGLE_DESCRIPTION,
   QUERY_OVERRIDE_SCHEDULE_TOGGLE_LABEL,
   QUERY_USING_PACK_SCHEDULE_LABEL,
@@ -53,7 +52,6 @@ import type {
 } from './use_pack_query_form';
 import {
   usePackQueryForm,
-  hasStaleOverrideMode,
   resolveInheritedScheduleInput,
   resolveExecutionDefaultFormValues,
 } from './use_pack_query_form';
@@ -131,6 +129,23 @@ const QueryFlyoutComponent: React.FC<QueryFlyoutProps> = ({
 
   const queryOwnInterval = defaultValue?.interval ? parseInt(defaultValue.interval, 10) : undefined;
 
+  // Reuse the schedule that seeded the form's defaultValue so the "unchanged
+  // start" check compares against the same timestamp, not a fresh one. The
+  // seeded schedule already resolves inherited-vs-override (and the legacy-pack
+  // interval-authority case) via `deserializeQuerySchedule`.
+  const originalStartDate = isRruleSchedulingEnabled ? deserializedSchedule.startDate : undefined;
+
+  // Single source of truth for the override schedule. Only an
+  // active override has a schedule to validate — an inherited query defers to
+  // the pack. Empty when the flag is off (schedule is undefined).
+  const scheduleErrors = useMemo(
+    () =>
+      isRruleSchedulingEnabled && overridePackSchedule && schedule
+        ? validateScheduleFormData(schedule, { originalStartDate })
+        : [],
+    [isRruleSchedulingEnabled, overridePackSchedule, schedule, originalStartDate]
+  );
+
   const inheritedScheduleInput = useMemo(
     () => resolveInheritedScheduleInput(packSchedule, queryOwnInterval),
     [packSchedule, queryOwnInterval]
@@ -139,86 +154,27 @@ const QueryFlyoutComponent: React.FC<QueryFlyoutProps> = ({
     () => JSON.stringify(inheritedScheduleInput),
     [inheritedScheduleInput]
   );
-  const packScheduleType = packSchedule?.schedule_type;
-
-  // Seeded from the schedule that produced the form's defaultValue so the
-  // "unchanged start" check compares against the same timestamp, not a fresh
-  // one. Re-seeding moves it (see below) — leaving it pinned to the mount-time
-  // value let a pack whose start date is in the past trip a false
-  // START_DATE_IN_PAST_ERROR, the failure mode of #276903.
-  const [baselineStartDate, setBaselineStartDate] = useState(deserializedSchedule.startDate);
-
-  // Two independent baselines, because the two paths follow different things:
-  // an inheriting query displays the pack's schedule and tracks every pack
-  // edit, while an active override owns its details and follows only the
-  // pack's *mode* (D11). Both refs are refreshed on every run so toggling the
-  // override on and off is not itself mistaken for a change worth re-seeding.
-  const seededInheritKeyRef = useRef(inheritedScheduleKey);
-  const seededOverrideModeRef = useRef(packScheduleType);
+  const seededScheduleKeyRef = useRef(inheritedScheduleKey);
   useEffect(() => {
-    const reseed = () => {
-      const reseeded = deserializeSchedule(inheritedScheduleInput);
-      setValue('schedule', reseeded, { shouldDirty: false });
-      setBaselineStartDate(reseeded.startDate);
-    };
-
-    if (!isRruleSchedulingEnabled) {
-      seededInheritKeyRef.current = inheritedScheduleKey;
-      seededOverrideModeRef.current = packScheduleType;
+    if (!isRruleSchedulingEnabled || overridePackSchedule) {
+      seededScheduleKeyRef.current = inheritedScheduleKey;
 
       return;
     }
 
-    if (overridePackSchedule) {
-      seededInheritKeyRef.current = inheritedScheduleKey;
-      if (seededOverrideModeRef.current === packScheduleType) {
-        return;
-      }
-
-      seededOverrideModeRef.current = packScheduleType;
-      reseed();
-
+    if (seededScheduleKeyRef.current === inheritedScheduleKey) {
       return;
     }
 
-    seededOverrideModeRef.current = packScheduleType;
-    if (seededInheritKeyRef.current === inheritedScheduleKey) {
-      return;
-    }
-
-    seededInheritKeyRef.current = inheritedScheduleKey;
-    reseed();
+    seededScheduleKeyRef.current = inheritedScheduleKey;
+    setValue('schedule', deserializeSchedule(inheritedScheduleInput), { shouldDirty: false });
   }, [
     isRruleSchedulingEnabled,
     overridePackSchedule,
     inheritedScheduleKey,
     inheritedScheduleInput,
-    packScheduleType,
     setValue,
   ]);
-
-  const originalStartDate = isRruleSchedulingEnabled ? baselineStartDate : undefined;
-
-  // Single source of truth for the override schedule. Only an
-  // active override has a schedule to validate — an inherited query defers to
-  // the pack. Empty when the flag is off (schedule is undefined).
-  const scheduleErrors = useMemo(() => {
-    if (!isRruleSchedulingEnabled || !overridePackSchedule || !schedule) {
-      return [];
-    }
-
-    const errors = validateScheduleFormData(schedule, { originalStartDate });
-
-    // The form normalizes an override to the pack's mode, so a disagreement
-    // here means form state was mutated outside the UI. Report it rather than
-    // let the serializer silently fall through to the inherit branch and drop
-    // the override without telling anyone.
-    if (hasStaleOverrideMode(packSchedule, schedule.scheduleType)) {
-      errors.push(OVERRIDE_MODE_MISMATCH_ERROR);
-    }
-
-    return errors;
-  }, [isRruleSchedulingEnabled, overridePackSchedule, schedule, originalStartDate, packSchedule]);
 
   // The one mode this flyout is in, resolved the same way `ScheduleSection`
   // resolves it (`lockedScheduleType ?? value.scheduleType`, where the locked
@@ -278,15 +234,10 @@ const QueryFlyoutComponent: React.FC<QueryFlyoutProps> = ({
   const onSubmit = useCallback(
     async (payload: PackQueryFormData) => {
       // Final guard: the controlled schedule object doesn't register
-      // with RHF, so re-validate here and abort on error. Checks the same
-      // conditions as `scheduleErrors` — a mode the pack does not use has to
-      // abort here too, or the serializer drops the override without a word.
+      // with RHF, so re-validate here and abort on error.
       if (payload.override_pack_schedule && payload.schedule) {
         const errors = validateScheduleFormData(payload.schedule, { originalStartDate });
-        if (
-          errors.length > 0 ||
-          hasStaleOverrideMode(packSchedule, payload.schedule.scheduleType)
-        ) {
+        if (errors.length > 0) {
           return;
         }
       }
@@ -295,7 +246,7 @@ const QueryFlyoutComponent: React.FC<QueryFlyoutProps> = ({
       await onSave(serializedData);
       onClose();
     },
-    [serializer, onSave, onClose, originalStartDate, packSchedule]
+    [serializer, onSave, onClose, originalStartDate]
   );
 
   const handleSaveClick = useCallback(() => {

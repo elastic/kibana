@@ -55,34 +55,13 @@ jest.mock('../../saved_queries/saved_queries_dropdown', () => ({
 jest.mock('../../components/schedule_section', () => ({
   ScheduleSection: ({
     value,
-    onChange,
     disabled,
   }: {
     value: Record<string, unknown>;
-    onChange: (next: Record<string, unknown>) => void;
     disabled?: boolean;
   }) => (
-    <div
-      data-test-subj="mocked-schedule-section"
-      data-disabled={String(!!disabled)}
-      data-interval={String(value?.interval)}
-    >
+    <div data-test-subj="mocked-schedule-section" data-disabled={String(!!disabled)}>
       {JSON.stringify(value?.scheduleType ?? 'unknown')}
-      {/* Stands in for the user editing a schedule detail, so tests can prove
-          an in-progress override edit survives an unrelated pack change. */}
-      <button
-        type="button"
-        data-test-subj="mocked-schedule-section-edit"
-        onClick={() => onChange({ ...value, interval: 777 })}
-      />
-      {/* The real selector is locked and cannot change the mode. This stands in
-          for a caller mutating form state directly, which is the only way the
-          mode can drift from the pack's. */}
-      <button
-        type="button"
-        data-test-subj="mocked-schedule-section-force-rrule"
-        onClick={() => onChange({ ...value, scheduleType: 'rrule' })}
-      />
     </div>
   ),
 }));
@@ -90,7 +69,6 @@ jest.mock('../../components/schedule_section', () => ({
 import { QueryFlyout } from './query_flyout';
 import { ExperimentalFeaturesService } from '../../common/experimental_features_service';
 import { allowedExperimentalValues } from '../../../common/experimental_features';
-import { OVERRIDE_MODE_MISMATCH_ERROR } from '../../components/schedule_section/translations';
 
 beforeAll(() => {
   ExperimentalFeaturesService.init({
@@ -457,11 +435,7 @@ describe('QueryFlyout', () => {
       });
     });
 
-    // D11: a pack and its queries share one schedule mode — a mixed-mode pack
-    // makes osquerybeat return ErrPackMixedScheduleModes and halt its osquery
-    // runner. An active override follows the pack's mode (elastic/kibana#272441)
-    // while keeping the details the user has chosen (asserted below).
-    it('adopts the new pack mode on an active override when the pack mode flips', async () => {
+    it('preserves an active override edit when the pack mode flips', async () => {
       const { rerender } = renderFlyout({
         packSchedule: {
           schedule_type: 'rrule',
@@ -477,9 +451,10 @@ describe('QueryFlyout', () => {
         fireEvent.click(screen.getByTestId('osquery-query-override-pack-schedule'));
       });
       await waitFor(() =>
-        expect(screen.getByTestId('mocked-schedule-section')).toHaveTextContent('rrule')
+        expect(screen.getByTestId('mocked-schedule-section')).toBeInTheDocument()
       );
 
+      // Flip the pack mode. The active override must NOT be re-seeded.
       rerender(
         <EuiProvider>
           <IntlProvider locale="en">
@@ -493,143 +468,10 @@ describe('QueryFlyout', () => {
         </EuiProvider>
       );
 
-      await waitFor(() =>
-        expect(screen.getByTestId('mocked-schedule-section')).toHaveTextContent('interval')
-      );
-      // Still an override — the mode is re-seeded, the user's decision to
-      // override is not revoked.
-      expect(screen.queryByTestId('osquery-using-pack-schedule')).not.toBeInTheDocument();
-    });
-
-    // The mode is the pack's (above); the details are the user's. Keying the
-    // override re-seed on the pack's whole schedule rather than just its mode
-    // would wipe an in-progress edit on any unrelated pack change.
-    it('preserves an active override edit when a pack schedule detail changes', async () => {
-      const packSchedule = {
-        schedule_type: 'interval' as const,
-        interval: 3600,
-        hasExplicitSchedule: true,
-      };
-      const { rerender } = renderFlyout({ packSchedule });
-
-      act(() => {
-        fireEvent.click(screen.getByTestId('osquery-query-override-pack-schedule'));
-      });
-      await waitFor(() =>
-        expect(screen.getByTestId('mocked-schedule-section')).toHaveAttribute(
-          'data-disabled',
-          'false'
-        )
-      );
-
-      // The user edits the override's interval.
-      act(() => {
-        fireEvent.click(screen.getByTestId('mocked-schedule-section-edit'));
-      });
-      await waitFor(() =>
-        expect(screen.getByTestId('mocked-schedule-section')).toHaveAttribute(
-          'data-interval',
-          '777'
-        )
-      );
-
-      // The pack changes a detail, staying in the same mode.
-      rerender(
-        <EuiProvider>
-          <IntlProvider locale="en">
-            <QueryFlyout
-              uniqueQueryIds={[]}
-              onSave={jest.fn()}
-              onClose={jest.fn()}
-              packSchedule={{ ...packSchedule, interval: 120 }}
-            />
-          </IntlProvider>
-        </EuiProvider>
-      );
-
+      // The override schedule stays in its edited (rrule) mode — not reset to
+      // the new pack mode.
       await new Promise((resolve) => setTimeout(resolve, 0));
-      expect(screen.getByTestId('mocked-schedule-section')).toHaveAttribute('data-interval', '777');
-    });
-
-    // Regression guard for the failure mode of #276903: a re-seed installs the
-    // pack's start date, so the "start unchanged" baseline has to move with it.
-    // Left pinned to the mount-time value, a pack whose start date is in the
-    // past would trip a false START_DATE_IN_PAST_ERROR and block the save.
-    it('does not block the save when a re-seed installs a pack start date in the past', async () => {
-      const onSave = jest.fn().mockResolvedValue(undefined);
-      const { rerender } = renderFlyout({
-        onSave,
-        packSchedule: { schedule_type: 'interval', interval: 3600, hasExplicitSchedule: true },
-      });
-
-      act(() => {
-        fireEvent.click(screen.getByTestId('osquery-query-override-pack-schedule'));
-      });
-      await waitFor(() =>
-        expect(screen.getByTestId('mocked-schedule-section')).toHaveTextContent('interval')
-      );
-
-      rerender(
-        <EuiProvider>
-          <IntlProvider locale="en">
-            <QueryFlyout
-              uniqueQueryIds={[]}
-              onSave={onSave}
-              onClose={jest.fn()}
-              packSchedule={{
-                schedule_type: 'rrule',
-                rrule_schedule: {
-                  rrule: 'FREQ=DAILY',
-                  start_date: '2020-01-01T00:00:00.000Z',
-                },
-              }}
-            />
-          </IntlProvider>
-        </EuiProvider>
-      );
-
-      await waitFor(() =>
-        expect(screen.getByTestId('mocked-schedule-section')).toHaveTextContent('rrule')
-      );
-
-      const idInput = screen.getByRole('textbox', { name: /ID/i });
-      fireEvent.change(idInput, { target: { value: 'past-start-reseed-query' } });
-
-      fireEvent.click(screen.getByTestId('query-flyout-save-button'));
-
-      await waitFor(() => expect(onSave).toHaveBeenCalled());
-      expect(mockAddDanger).not.toHaveBeenCalled();
-    });
-
-    // The serializer drops a mode-mismatched override on the floor. That is the
-    // right wire-shape outcome (a mixed-mode pack halts osquerybeat) but it used
-    // to happen without a word, so the user's override vanished on save.
-    it('blocks the save and reports it when an override mode is mutated away from the pack', async () => {
-      const onSave = jest.fn().mockResolvedValue(undefined);
-      renderFlyout({
-        onSave,
-        packSchedule: { schedule_type: 'interval', interval: 3600, hasExplicitSchedule: true },
-      });
-
-      act(() => {
-        fireEvent.click(screen.getByTestId('osquery-query-override-pack-schedule'));
-      });
-      await waitFor(() =>
-        expect(screen.getByTestId('mocked-schedule-section')).toHaveTextContent('interval')
-      );
-
-      act(() => {
-        fireEvent.click(screen.getByTestId('mocked-schedule-section-force-rrule'));
-      });
-
-      const idInput = screen.getByRole('textbox', { name: /ID/i });
-      fireEvent.change(idInput, { target: { value: 'mode-mismatch-query' } });
-
-      fireEvent.click(screen.getByTestId('query-flyout-save-button'));
-
-      await waitFor(() => expect(mockAddDanger).toHaveBeenCalled());
-      expect(mockAddDanger.mock.calls[0][0].text).toContain(OVERRIDE_MODE_MISMATCH_ERROR);
-      expect(onSave).not.toHaveBeenCalled();
+      expect(screen.getByTestId('mocked-schedule-section')).toHaveTextContent('rrule');
     });
 
     // Timeout is stripped from the wire for any rrule-mode query, so the control
@@ -755,6 +597,99 @@ describe('QueryFlyout', () => {
         const saved = onSave.mock.calls[0][0];
         expect(saved).not.toHaveProperty('interval');
         expect(saved).not.toHaveProperty('schedule_type');
+      });
+    });
+
+    // A per-query override changes schedule details, never the mode (D11). An
+    // override stored in a mode the pack no longer uses is stale: the server
+    // drops it on a pack mode change, so the flyout opens it as inheriting.
+    describe('stale override mode (elastic/kibana#272441)', () => {
+      const RRULE_OVERRIDE_QUERY = {
+        id: 'stale-query',
+        query: 'select * from uptime;',
+        interval: '80',
+        shards: {},
+        schedule_type: 'rrule' as const,
+        rrule_schedule: { rrule: 'FREQ=DAILY', start_date: '2026-01-01T00:00:00.000Z' },
+      };
+
+      it('opens a recurrence override in an interval pack as inheriting and saves no override', async () => {
+        const onSave = jest.fn().mockResolvedValue(undefined);
+
+        renderFlyout({
+          onSave,
+          uniqueQueryIds: ['stale-query'],
+          defaultValue: RRULE_OVERRIDE_QUERY,
+          packSchedule: { schedule_type: 'interval', interval: 900, hasExplicitSchedule: true },
+        });
+
+        expect(screen.getByTestId('osquery-using-pack-schedule')).toBeInTheDocument();
+        expect(screen.getByTestId('mocked-schedule-section')).toHaveTextContent('interval');
+
+        fireEvent.click(screen.getByTestId('query-flyout-save-button'));
+
+        await waitFor(() => expect(onSave).toHaveBeenCalled());
+        const saved = onSave.mock.calls[0][0];
+        expect(saved).not.toHaveProperty('schedule_type');
+        expect(saved).not.toHaveProperty('rrule_schedule');
+        expect(saved).not.toHaveProperty('interval');
+      });
+
+      // Legacy pack (no persisted pack schedule): the client synthesizes an
+      // interval default, and the server rejects any per-query schedule_type on
+      // such a pack. The query must come back as its own bare interval.
+      it('opens a recurrence override in a legacy pack as inheriting and saves a bare interval', async () => {
+        const onSave = jest.fn().mockResolvedValue(undefined);
+
+        renderFlyout({
+          onSave,
+          uniqueQueryIds: ['stale-query'],
+          defaultValue: RRULE_OVERRIDE_QUERY,
+          packSchedule: { schedule_type: 'interval', interval: 3600 },
+        });
+
+        expect(screen.getByTestId('osquery-using-pack-schedule')).toBeInTheDocument();
+        expect(screen.getByTestId('mocked-schedule-section')).toHaveTextContent('interval');
+        expect(screen.getByTestId('timeout-input')).not.toBeDisabled();
+
+        fireEvent.click(screen.getByTestId('query-flyout-save-button'));
+
+        await waitFor(() => expect(onSave).toHaveBeenCalled());
+        const saved = onSave.mock.calls[0][0];
+        expect(saved).not.toHaveProperty('schedule_type');
+        expect(saved).not.toHaveProperty('rrule_schedule');
+        expect(saved.interval).toBe('80');
+      });
+
+      it('opens an interval override in a recurrence pack as inheriting and saves no override', async () => {
+        const onSave = jest.fn().mockResolvedValue(undefined);
+
+        renderFlyout({
+          onSave,
+          uniqueQueryIds: ['stale-query'],
+          defaultValue: {
+            id: 'stale-query',
+            query: 'select * from uptime;',
+            shards: {},
+            schedule_type: 'interval',
+            interval: '670',
+          },
+          packSchedule: {
+            schedule_type: 'rrule',
+            rrule_schedule: { rrule: 'FREQ=DAILY', start_date: '2026-01-01T00:00:00.000Z' },
+          },
+        });
+
+        expect(screen.getByTestId('osquery-using-pack-schedule')).toBeInTheDocument();
+        expect(screen.getByTestId('mocked-schedule-section')).toHaveTextContent('rrule');
+
+        fireEvent.click(screen.getByTestId('query-flyout-save-button'));
+
+        await waitFor(() => expect(onSave).toHaveBeenCalled());
+        const saved = onSave.mock.calls[0][0];
+        expect(saved).not.toHaveProperty('schedule_type');
+        expect(saved).not.toHaveProperty('interval');
+        expect(saved).not.toHaveProperty('timeout');
       });
     });
   });

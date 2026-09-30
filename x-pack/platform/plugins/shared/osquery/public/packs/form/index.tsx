@@ -37,8 +37,8 @@ import { deserializeSchedule, serializeSchedule } from './schedule_serializer';
 import { ScheduleSection } from '../../components/schedule_section';
 import { validateScheduleFormData } from '../../components/schedule_section/validation';
 import {
-  PACK_QUERY_STALE_INTERVAL_ERROR,
-  PACK_QUERY_STALE_RRULE_ERROR,
+  getPackQueryStaleIntervalError,
+  getPackQueryStaleRruleError,
   SCHEDULE_ERRORS_TOAST_TITLE,
 } from '../../components/schedule_section/translations';
 import type { ScheduleFormData } from '../../components/schedule_section/types';
@@ -243,18 +243,23 @@ const PackFormComponent: React.FC<PackFormProps> = ({
     // a mixed-mode write, and an agent that received one would halt its osquery
     // runner. Both directions are checked so the user is told here rather than
     // by a 400 from the route.
-    if (
-      schedule.scheduleType === 'rrule' &&
-      queries?.some((query) => query.schedule_type === 'interval')
-    ) {
-      errors.push(PACK_QUERY_STALE_INTERVAL_ERROR);
+    const staleQueryIds = (isStale: (query: PackQueryFormData) => boolean) =>
+      (queries ?? []).filter(isStale).map(({ id }) => id);
+
+    if (schedule.scheduleType === 'rrule') {
+      const staleIds = staleQueryIds((query) => query.schedule_type === 'interval');
+      if (staleIds.length > 0) {
+        errors.push(getPackQueryStaleIntervalError(staleIds.join(', ')));
+      }
     }
 
-    if (
-      schedule.scheduleType === 'interval' &&
-      queries?.some((query) => query.schedule_type === 'rrule' || query.rrule_schedule)
-    ) {
-      errors.push(PACK_QUERY_STALE_RRULE_ERROR);
+    if (schedule.scheduleType === 'interval') {
+      const staleIds = staleQueryIds(
+        (query) => query.schedule_type === 'rrule' || !!query.rrule_schedule
+      );
+      if (staleIds.length > 0) {
+        errors.push(getPackQueryStaleRruleError(staleIds.join(', ')));
+      }
     }
 
     return errors;

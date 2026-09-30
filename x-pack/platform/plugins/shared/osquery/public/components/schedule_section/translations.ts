@@ -199,29 +199,19 @@ export const SPLAY_MAX_ERROR = i18n.translate('xpack.osquery.scheduleSection.spl
   defaultMessage: 'Splay must be a positive integer no greater than 12 hours.',
 });
 
-export const PACK_QUERY_STALE_INTERVAL_ERROR = i18n.translate(
-  'xpack.osquery.scheduleSection.packQueryStaleIntervalError',
-  {
+export const getPackQueryStaleIntervalError = (queryIds: string) =>
+  i18n.translate('xpack.osquery.scheduleSection.packQueryStaleIntervalQueriesError', {
     defaultMessage:
-      'One or more queries still use an interval schedule. Per-query intervals do not apply while the pack uses a date & time schedule and will not be saved.',
-  }
-);
+      'These queries still use an interval schedule: {queryIds}. Per-query intervals do not apply while the pack uses a date & time schedule and will not be saved.',
+    values: { queryIds },
+  });
 
-export const PACK_QUERY_STALE_RRULE_ERROR = i18n.translate(
-  'xpack.osquery.scheduleSection.packQueryStaleRruleError',
-  {
+export const getPackQueryStaleRruleError = (queryIds: string) =>
+  i18n.translate('xpack.osquery.scheduleSection.packQueryStaleRruleQueriesError', {
     defaultMessage:
-      'One or more queries still use a date & time schedule. Per-query recurrences do not apply while the pack uses an interval schedule and will not be saved.',
-  }
-);
-
-export const OVERRIDE_MODE_MISMATCH_ERROR = i18n.translate(
-  'xpack.osquery.scheduleSection.overrideModeMismatchError',
-  {
-    defaultMessage:
-      'This override uses a different schedule mode than the pack. Overrides change the schedule details; the mode is set at the pack level.',
-  }
-);
+      'These queries still use a date & time schedule: {queryIds}. Per-query recurrences do not apply while the pack uses an interval schedule and will not be saved.',
+    values: { queryIds },
+  });
 
 export const SCHEDULE_ERRORS_TOAST_TITLE = i18n.translate(
   'xpack.osquery.scheduleSection.scheduleErrorsToastTitle',
