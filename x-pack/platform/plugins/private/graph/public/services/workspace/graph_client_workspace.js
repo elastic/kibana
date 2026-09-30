@@ -129,20 +129,6 @@ function GraphWorkspace(options) {
     }
   };
 
-  //Determines if 2 nodes are connected via an edge
-  this.areLinked = function (a, b) {
-    if (a === b) return true;
-    this.edges.forEach((e) => {
-      if (e.source === a && e.target === b) {
-        return true;
-      }
-      if (e.source === b && e.target === a) {
-        return true;
-      }
-    });
-    return false;
-  };
-
   //======== Selection functions ========
 
   this.deleteNodes = function (nodeIds) {
@@ -243,26 +229,6 @@ function GraphWorkspace(options) {
         arr.splice(i, 1);
       }
     }
-  };
-
-  this.getNeighbours = function (node) {
-    const neighbourNodes = [];
-    self.edges.forEach((edge) => {
-      if (edge.topSrc === edge.topTarget) {
-        return;
-      }
-      if (edge.topSrc === node) {
-        if (neighbourNodes.indexOf(edge.topTarget) < 0) {
-          neighbourNodes.push(edge.topTarget);
-        }
-      }
-      if (edge.topTarget === node) {
-        if (neighbourNodes.indexOf(edge.topSrc) < 0) {
-          neighbourNodes.push(edge.topSrc);
-        }
-      }
-    });
-    return neighbourNodes;
   };
 
   //====== Layout functions ========
@@ -452,52 +418,6 @@ function GraphWorkspace(options) {
   this.getNode = function (nodeId) {
     return this.nodesMap[nodeId];
   };
-  this.getEdge = function (edgeId) {
-    return this.edgesMap[edgeId];
-  };
-
-  this.trimExcessNewEdges = function (newNodes, newEdges) {
-    let trimmedEdges = [];
-    const maxNumEdgesToReturn = 5;
-    //Trim here to just the new edges that are most interesting.
-    newEdges.forEach((edge) => {
-      const src = newNodes[edge.source];
-      const target = newNodes[edge.target];
-      const srcId = src.field + '..' + src.term;
-      const targetId = target.field + '..' + target.term;
-      const id = this.makeEdgeId(srcId, targetId);
-      const existingSrcNode = self.nodesMap[srcId];
-      const existingTargetNode = self.nodesMap[targetId];
-      if (existingSrcNode != null && existingTargetNode != null) {
-        if (existingSrcNode.parent !== undefined && existingTargetNode.parent !== undefined) {
-          // both nodes are rolled-up and grouped so this edge would not be a visible
-          // change to the graph - lose it in favour of any other visible ones.
-          return;
-        }
-      } else {
-        console.log('Error? Missing nodes ' + srcId + ' or ' + targetId, self.nodesMap);
-        return;
-      }
-
-      const existingEdge = self.edgesMap[id];
-      if (existingEdge) {
-        existingEdge.weight = Math.max(existingEdge.weight, edge.weight);
-        existingEdge.doc_count = Math.max(existingEdge.doc_count, edge.doc_count);
-        return;
-      } else {
-        trimmedEdges.push(edge);
-      }
-    });
-    if (trimmedEdges.length > maxNumEdgesToReturn) {
-      //trim to only the most interesting ones
-      trimmedEdges.sort(function (a, b) {
-        return b.weight - a.weight;
-      });
-      trimmedEdges = trimmedEdges.splice(0, maxNumEdgesToReturn);
-    }
-    return trimmedEdges;
-  };
-
   this.getQuery = function (startNodes, loose) {
     const shoulds = [];
     let nodes = startNodes;
@@ -526,11 +446,6 @@ function GraphWorkspace(options) {
     arr.push(term);
   }
 
-  /**
-   * Add missing links between existing nodes
-   * @param maxNewEdges Max number of new edges added. Avoid adding too many new edges
-   * at once into the graph otherwise disorientating
-   */
   // Provide a "fuzzy find similar" query that can find similar docs but preferably
   // not re-iterating the exact terms we already have in the workspace.
   // We use a free-text search on the index's configured default field (typically '_all')
