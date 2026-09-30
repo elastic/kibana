@@ -523,6 +523,19 @@ export const pickLatestPerGroup = (
     .where`_id == tiebreaker_id`;
 };
 
+/**
+ * Adds a `lineage_matches` column that is 1 on every version of a group when any of its versions
+ * matches `where`, so a lineage-wide match can be filtered after `pickLatestPerGroup` without
+ * dropping versions that would otherwise be the latest.
+ */
+export const flagLineageMatch = (
+  query: ComposerQuery,
+  where: ESQLAstExpression,
+  groupBy: LatestSourceGroupBy
+): ComposerQuery =>
+  query.pipe`EVAL lineage_match = CASE(${where}, 1, 0)`
+    .pipe`INLINE STATS lineage_matches = MAX(lineage_match) BY ${buildGroupByCols(groupBy)}`;
+
 export const withSort = (query: ComposerQuery, sort?: ComposerSortShorthand[]): ComposerQuery => {
   if (!sort?.length) {
     return query;

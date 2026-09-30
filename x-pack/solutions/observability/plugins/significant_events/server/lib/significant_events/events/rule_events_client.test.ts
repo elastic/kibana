@@ -222,7 +222,7 @@ describe('RuleEventsClient', () => {
       );
     });
 
-    it('orders stages: created_at -> free-text -> latest-per-group -> time range -> status', async () => {
+    it('orders stages: created_at -> lineage free-text flag -> latest-per-group -> free-text filter -> time range -> status', async () => {
       const { client, query } = createClient(async (request) =>
         request.query.includes('STATS total') ? countResponse(0) : sourceResponse([])
       );
@@ -238,6 +238,7 @@ describe('RuleEventsClient', () => {
       const createdAtIdx = q.indexOf('INLINE STATS created_at');
       const freeTextIdx = q.indexOf('FIELD_EXTRACT');
       const latestPerGroupIdx = q.indexOf('INLINE STATS latest_ts');
+      const searchFilterIdx = q.indexOf('WHERE lineage_matches == 1');
       const createdBeforeToIdx = q.indexOf('created_at <= TO_DATETIME');
       const activeOrUpdatedIdx = q.indexOf(
         '(`episode.status` IN ("active")) OR @timestamp >= TO_DATETIME'
@@ -246,8 +247,10 @@ describe('RuleEventsClient', () => {
 
       expect(createdAtIdx).toBeGreaterThanOrEqual(0);
       expect(freeTextIdx).toBeGreaterThan(createdAtIdx);
+      expect(freeTextIdx).toBeGreaterThan(q.indexOf('EVAL lineage_match'));
       expect(latestPerGroupIdx).toBeGreaterThan(freeTextIdx);
-      expect(createdBeforeToIdx).toBeGreaterThan(latestPerGroupIdx);
+      expect(searchFilterIdx).toBeGreaterThan(latestPerGroupIdx);
+      expect(createdBeforeToIdx).toBeGreaterThan(searchFilterIdx);
       expect(activeOrUpdatedIdx).toBeGreaterThan(createdBeforeToIdx);
       expect(statusIdx).toBeGreaterThan(activeOrUpdatedIdx);
     });
