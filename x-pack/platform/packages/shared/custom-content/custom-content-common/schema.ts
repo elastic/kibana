@@ -101,22 +101,3 @@ export const customContentUpdateSchema = z
   .refine(hasSomethingToChange, atLeastOneChange);
 
 export type CustomContentUpdate = z.output<typeof customContentUpdateSchema>;
-
-/**
- * Edit input for the chat tool. A conversation can hold one context attachment per panel, so the
- * target has to be explicit — without it the tool would act on whichever panel was attached first.
- */
-export const customContentPanelUpdateSchema = z
-  .object({
-    embeddable_id: z
-      .string()
-      .min(1)
-      .max(100)
-      .describe(
-        'The embeddable_id of the custom content panel to update, as shown in that panel\'s context header (e.g. "Custom content panel (embeddable_id: …)"). Always required — several panels can be attached to one conversation.'
-      ),
-    ...customContentUpdateFields,
-  })
-  .refine(hasSomethingToChange, atLeastOneChange);
-
-export type CustomContentPanelUpdate = z.output<typeof customContentPanelUpdateSchema>;

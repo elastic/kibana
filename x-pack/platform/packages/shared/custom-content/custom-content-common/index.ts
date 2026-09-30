@@ -20,7 +20,6 @@ export {
 export {
   customContentStateSchema,
   customContentUpdateSchema,
-  customContentPanelUpdateSchema,
   readEsqlQuery,
   toEsqlQueryState,
   resolveEsqlQueryEdit,
