@@ -6,6 +6,7 @@
  */
 
 import type {
+  InvestigationNotification,
   InvestigationStatus,
   InvestigationStructuredOutput,
   InvestigationSubjectType,
@@ -28,6 +29,7 @@ export interface InvestigationAttributes extends InvestigationStructuredOutput {
   executed_by?: string;
   error?: string;
   conversation_id?: string;
+  notifications?: InvestigationNotification[];
 }
 
 export interface InvestigationRecord extends InvestigationAttributes {
@@ -52,6 +54,7 @@ export interface InvestigationPatch extends InvestigationStructuredOutput {
   executed_by?: string;
   error?: string;
   conversation_id?: string;
+  notifications?: InvestigationNotification[];
 }
 
 export interface FindInvestigationsQuery<

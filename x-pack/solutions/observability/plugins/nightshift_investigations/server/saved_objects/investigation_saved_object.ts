@@ -20,6 +20,7 @@ import {
   INVESTIGATION_STATUSES,
   INVESTIGATION_SUBJECT_TYPES,
   INVESTIGATION_TRIGGER_TYPES,
+  MAX_INVESTIGATION_NOTIFICATIONS,
   MAX_KEYWORD_LENGTH,
 } from '../../common';
 import type { InvestigationAttributes } from '../storage/types';
@@ -95,6 +96,10 @@ const investigationAttributesSchemaV3 = investigationAttributesSchemaBase.extend
   title: schema.string({ maxLength: MAX_TITLE_LENGTH }),
 });
 
+const investigationAttributesSchemaV4 = investigationAttributesSchemaV3.extends({
+  notifications: opaqueArray(MAX_INVESTIGATION_NOTIFICATIONS),
+});
+
 export const nightshiftInvestigationSavedObjectType: SavedObjectsType<InvestigationAttributes> = {
   name: NIGHTSHIFT_INVESTIGATION_SO_TYPE,
   hidden: true,
@@ -140,6 +145,13 @@ export const nightshiftInvestigationSavedObjectType: SavedObjectsType<Investigat
       schemas: {
         create: investigationAttributesSchemaV3,
         forwardCompatibility: investigationAttributesSchemaV3.extends({}, { unknowns: 'ignore' }),
+      },
+    },
+    4: {
+      changes: [],
+      schemas: {
+        create: investigationAttributesSchemaV4,
+        forwardCompatibility: investigationAttributesSchemaV4.extends({}, { unknowns: 'ignore' }),
       },
     },
   },

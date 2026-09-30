@@ -34,6 +34,29 @@ export const investigationSubjectSchema = z.object({
   summary: z.string().max(MAX_TEXT_LENGTH).optional(),
 });
 
+/** Bound on Slack destinations one investigation fans out to; one per automation is the norm. */
+export const MAX_INVESTIGATION_NOTIFICATIONS = 20;
+
+/**
+ * One Slack destination an investigation posts its outcome to, plus the delivery result the notify
+ * step writes back. Destinations are copied onto the investigation at start so delivery needs no
+ * automation lookup, thread replies can carry a per-event `thread_ts`, and several automations can
+ * later fan out to one investigation.
+ */
+export const investigationNotificationSchema = z.object({
+  type: z.literal('slack'),
+  connector_id: z.string().min(1).max(500),
+  /** Slack channel id, or a `#name` when the connector resolves names (the Elastic Slack app does). */
+  channel: z.string().min(1).max(500),
+  thread_ts: z.string().max(100).optional(),
+  automation_id: z.string().max(500).optional(),
+  automation_name: z.string().max(500).optional(),
+  status: z.enum(['sent', 'failed']).optional(),
+  message_ts: z.string().max(100).optional(),
+  error: z.string().max(MAX_TEXT_LENGTH).optional(),
+  sent_at: z.string().max(64).optional(),
+});
+
 export const alertSnapshotGroupSchema = z.object({
   field: z.string().max(500),
   value: z.string().max(1000),
@@ -159,6 +182,7 @@ export const freeFormContextSchema = z
   });
 
 export type InvestigationSubject = z.infer<typeof investigationSubjectSchema>;
+export type InvestigationNotification = z.infer<typeof investigationNotificationSchema>;
 export type AlertSnapshotGroup = z.infer<typeof alertSnapshotGroupSchema>;
 export type AlertSnapshotEvaluation = z.infer<typeof alertSnapshotEvaluationSchema>;
 export type AlertSnapshot = z.infer<typeof alertSnapshotSchema>;
