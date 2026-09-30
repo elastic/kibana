@@ -380,6 +380,10 @@ export type ListUpdatesInput = z.infer<typeof ListUpdatesInputSchema>;
 
 const LOG_TYPES = ['api', 'audit', 'authenticator', 'controllerManager', 'scheduler'] as const;
 
+// EKS answers "Only one type of update can be allowed." when one call mixes categories.
+const oneCategory = (categories: Record<string, boolean>): boolean =>
+  Object.values(categories).filter(Boolean).length === 1;
+
 export const UpdateClusterConfigInputSchema = lazySchema(() =>
   z
     .object({
@@ -397,6 +401,44 @@ export const UpdateClusterConfigInputSchema = lazySchema(() =>
         .max(5)
         .optional()
         .describe('Control-plane log types to stop shipping.'),
+      supportType: z
+        .enum(['STANDARD', 'EXTENDED'])
+        .optional()
+        .describe(
+          'Upgrade policy: "EXTENDED" keeps the cluster on a Kubernetes version past standard support (at extra cost), "STANDARD" auto-upgrades when support ends.'
+        ),
+      deletionProtection: z
+        .boolean()
+        .optional()
+        .describe('Whether the cluster is protected from deletion.'),
+    })
+    .refine(
+      (v) =>
+        oneCategory({
+          logging: v.enableLogTypes !== undefined || v.disableLogTypes !== undefined,
+          upgradePolicy: v.supportType !== undefined,
+          deletionProtection: v.deletionProtection !== undefined,
+        }),
+      {
+        message:
+          'Change exactly one of: log types, supportType, or deletionProtection. EKS rejects updates that mix them; make separate calls.',
+      }
+    )
+    .refine(
+      (v) =>
+        !v.enableLogTypes ||
+        !v.disableLogTypes ||
+        !v.enableLogTypes.some((type) => v.disableLogTypes?.includes(type)),
+      { message: 'A log type cannot be both enabled and disabled' }
+    )
+);
+export type UpdateClusterConfigInput = z.infer<typeof UpdateClusterConfigInputSchema>;
+
+export const UpdateClusterAccessConfigInputSchema = lazySchema(() =>
+  z
+    .object({
+      region: region(),
+      clusterName: clusterName(),
       authenticationMode: z
         .enum(['API', 'API_AND_CONFIG_MAP', 'CONFIG_MAP'])
         .optional()
@@ -428,40 +470,23 @@ export const UpdateClusterConfigInputSchema = lazySchema(() =>
         .describe(
           'IPv4 CIDRs allowed to reach the public API server endpoint. REPLACES the current list when given; read it from getCluster first and include every range to keep. Omit to keep the current list. Requires public endpoint access.'
         ),
-      supportType: z
-        .enum(['STANDARD', 'EXTENDED'])
-        .optional()
-        .describe(
-          'Upgrade policy: "EXTENDED" keeps the cluster on a Kubernetes version past standard support (at extra cost), "STANDARD" auto-upgrades when support ends.'
-        ),
-      deletionProtection: z
-        .boolean()
-        .optional()
-        .describe('Whether the cluster is protected from deletion.'),
     })
     .refine(
       (v) =>
-        [
-          v.enableLogTypes,
-          v.disableLogTypes,
-          v.authenticationMode,
-          v.endpointPublicAccess,
-          v.endpointPrivateAccess,
-          v.publicAccessCidrs,
-          v.supportType,
-          v.deletionProtection,
-        ].some((field) => field !== undefined),
-      { message: 'Provide at least one field to change' }
-    )
-    .refine(
-      (v) =>
-        !v.enableLogTypes ||
-        !v.disableLogTypes ||
-        !v.enableLogTypes.some((type) => v.disableLogTypes?.includes(type)),
-      { message: 'A log type cannot be both enabled and disabled' }
+        oneCategory({
+          authenticationMode: v.authenticationMode !== undefined,
+          endpoint:
+            v.endpointPublicAccess !== undefined ||
+            v.endpointPrivateAccess !== undefined ||
+            v.publicAccessCidrs !== undefined,
+        }),
+      {
+        message:
+          'Change either authenticationMode or the endpoint settings (endpointPublicAccess, endpointPrivateAccess, publicAccessCidrs). EKS rejects updates that mix them; make separate calls.',
+      }
     )
 );
-export type UpdateClusterConfigInput = z.infer<typeof UpdateClusterConfigInputSchema>;
+export type UpdateClusterAccessConfigInput = z.infer<typeof UpdateClusterAccessConfigInputSchema>;
 
 export const ListTagsForResourceInputSchema = lazySchema(() =>
   z.object({

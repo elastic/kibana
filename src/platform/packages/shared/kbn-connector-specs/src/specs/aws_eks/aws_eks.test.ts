@@ -157,7 +157,7 @@ describe('AwsEks', () => {
       }
     });
 
-    it('keeps access grants and the token mint out of the agent tool set', () => {
+    it('keeps access grants, cluster access changes, and the token mint out of the agent tool set', () => {
       const workflowOnly = Object.entries(AwsEks.actions)
         .filter(([, action]) => action.isTool === false)
         .map(([name]) => name)
@@ -169,6 +169,7 @@ describe('AwsEks', () => {
         'disassociateAccessPolicy',
         'getToken',
         'updateAccessEntry',
+        'updateClusterAccessConfig',
       ]);
     });
 
@@ -541,7 +542,7 @@ describe('AwsEks', () => {
   });
 
   describe('cluster configuration and tags', () => {
-    it('updateClusterConfig builds logging and access config payloads', async () => {
+    it('updateClusterConfig builds a logging payload without reading the cluster', async () => {
       mockClient.post.mockResolvedValue({
         data: { update: { ...sampleUpdate, type: 'LoggingUpdate' } },
       });
@@ -559,34 +560,47 @@ describe('AwsEks', () => {
             { types: ['scheduler'], enabled: false },
           ],
         },
-        accessConfig: undefined,
-        resourcesVpcConfig: undefined,
-        upgradePolicy: undefined,
-        deletionProtection: undefined,
-      });
-
-      mockClient.get.mockResolvedValue({ data: { cluster: sampleCluster } });
-      await run('updateClusterConfig', {
-        clusterName: 'prod-eu',
-        authenticationMode: 'API',
-        endpointPublicAccess: true,
-        publicAccessCidrs: ['203.0.113.0/24'],
-      });
-      expect(mockClient.get).toHaveBeenCalledWith(CLUSTER);
-      expect(mockClient.post).toHaveBeenLastCalledWith(`${CLUSTER}/update-config`, {
-        logging: undefined,
-        accessConfig: { authenticationMode: 'API' },
-        resourcesVpcConfig: {
-          endpointPublicAccess: true,
-          endpointPrivateAccess: false,
-          publicAccessCidrs: ['203.0.113.0/24'],
-        },
         upgradePolicy: undefined,
         deletionProtection: undefined,
       });
     });
 
-    it('updateClusterConfig keeps the public endpoint and its allowlist when only private access changes', async () => {
+    it('updateClusterAccessConfig sends the authentication mode without reading the cluster', async () => {
+      mockClient.post.mockResolvedValue({
+        data: { update: { ...sampleUpdate, type: 'AccessConfigUpdate' } },
+      });
+      const result = await run('updateClusterAccessConfig', {
+        clusterName: 'prod-eu',
+        authenticationMode: 'API',
+      });
+      expect(mockClient.get).not.toHaveBeenCalled();
+      expect(result).toMatchObject({ clusterName: 'prod-eu', region: REGION, id: UPDATE_ID });
+      expect(mockClient.post).toHaveBeenCalledWith(`${CLUSTER}/update-config`, {
+        accessConfig: { authenticationMode: 'API' },
+        resourcesVpcConfig: undefined,
+      });
+    });
+
+    it('updateClusterAccessConfig replaces the allowlist and keeps the private endpoint setting', async () => {
+      mockClient.get.mockResolvedValue({ data: { cluster: sampleCluster } });
+      mockClient.post.mockResolvedValue({ data: { update: sampleUpdate } });
+      await run('updateClusterAccessConfig', {
+        clusterName: 'prod-eu',
+        endpointPublicAccess: true,
+        publicAccessCidrs: ['203.0.113.0/24'],
+      });
+      expect(mockClient.get).toHaveBeenCalledWith(CLUSTER);
+      expect(mockClient.post).toHaveBeenCalledWith(`${CLUSTER}/update-config`, {
+        accessConfig: undefined,
+        resourcesVpcConfig: {
+          endpointPublicAccess: true,
+          endpointPrivateAccess: false,
+          publicAccessCidrs: ['203.0.113.0/24'],
+        },
+      });
+    });
+
+    it('updateClusterAccessConfig keeps the public endpoint and its allowlist when only private access changes', async () => {
       mockClient.get.mockResolvedValue({
         data: {
           cluster: {
@@ -599,7 +613,10 @@ describe('AwsEks', () => {
         },
       });
       mockClient.post.mockResolvedValue({ data: { update: sampleUpdate } });
-      await run('updateClusterConfig', { clusterName: 'prod-eu', endpointPrivateAccess: true });
+      await run('updateClusterAccessConfig', {
+        clusterName: 'prod-eu',
+        endpointPrivateAccess: true,
+      });
       expect(mockClient.post).toHaveBeenCalledWith(
         `${CLUSTER}/update-config`,
         expect.objectContaining({
@@ -612,10 +629,17 @@ describe('AwsEks', () => {
       );
     });
 
-    it('updateClusterConfig requires a change and rejects contradictory log types', () => {
+    it('updateClusterConfig requires exactly one category and rejects contradictory log types', () => {
       expect(() => parse('updateClusterConfig', { clusterName: 'prod-eu' })).toThrow(
-        'at least one field'
+        'Change exactly one of'
       );
+      expect(() =>
+        parse('updateClusterConfig', {
+          clusterName: 'prod-eu',
+          enableLogTypes: ['api'],
+          supportType: 'EXTENDED',
+        })
+      ).toThrow('EKS rejects updates that mix them');
       expect(() =>
         parse('updateClusterConfig', {
           clusterName: 'prod-eu',
@@ -623,6 +647,26 @@ describe('AwsEks', () => {
           disableLogTypes: ['api'],
         })
       ).toThrow('both enabled and disabled');
+    });
+
+    it('updateClusterAccessConfig requires exactly one of the authentication mode or endpoint settings', () => {
+      expect(() => parse('updateClusterAccessConfig', { clusterName: 'prod-eu' })).toThrow(
+        'Change either authenticationMode or the endpoint settings'
+      );
+      expect(() =>
+        parse('updateClusterAccessConfig', {
+          clusterName: 'prod-eu',
+          authenticationMode: 'API',
+          endpointPrivateAccess: true,
+        })
+      ).toThrow('EKS rejects updates that mix them');
+      expect(
+        parse('updateClusterAccessConfig', {
+          clusterName: 'prod-eu',
+          endpointPublicAccess: true,
+          publicAccessCidrs: ['203.0.113.0/24'],
+        })
+      ).toMatchObject({ endpointPublicAccess: true });
     });
 
     it('listTagsForResource encodes the ARN into the path', async () => {

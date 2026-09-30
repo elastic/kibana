@@ -10,6 +10,7 @@
 import type {
   EksCluster,
   EksNodegroup,
+  UpdateClusterAccessConfigInput,
   UpdateClusterConfigInput,
   UpdateNodegroupConfigInput,
 } from './types';
@@ -112,14 +113,14 @@ export const buildNodegroupUpdateBody = (
       : undefined,
 });
 
-/** True when the cluster update touches the VPC endpoint settings, which EKS takes whole. */
-export const clusterUpdateNeedsCurrent = (input: UpdateClusterConfigInput): boolean =>
+/** True when the cluster access update touches the VPC endpoint settings, which EKS takes whole. */
+export const clusterAccessUpdateNeedsCurrent = (input: UpdateClusterAccessConfigInput): boolean =>
   input.endpointPublicAccess !== undefined ||
   input.endpointPrivateAccess !== undefined ||
   input.publicAccessCidrs !== undefined;
 
-const mergeVpcConfig = (input: UpdateClusterConfigInput, current: EksCluster) => {
-  if (!clusterUpdateNeedsCurrent(input)) {
+const mergeVpcConfig = (input: UpdateClusterAccessConfigInput, current: EksCluster) => {
+  if (!clusterAccessUpdateNeedsCurrent(input)) {
     return undefined;
   }
   const existing = current.resourcesVpcConfig ?? {};
@@ -134,22 +135,29 @@ const mergeVpcConfig = (input: UpdateClusterConfigInput, current: EksCluster) =>
   });
 };
 
-/** Builds the `UpdateClusterConfig` body, merged with the cluster's current endpoint settings. */
-export const buildClusterUpdateBody = (
-  input: UpdateClusterConfigInput,
-  current: EksCluster = {}
-) => {
+/** Builds the `UpdateClusterConfig` body for logging, upgrade policy, or deletion protection. */
+export const buildClusterUpdateBody = (input: UpdateClusterConfigInput) => {
   const clusterLogging = [
     ...(input.enableLogTypes?.length ? [{ types: input.enableLogTypes, enabled: true }] : []),
     ...(input.disableLogTypes?.length ? [{ types: input.disableLogTypes, enabled: false }] : []),
   ];
   return {
     logging: clusterLogging.length ? { clusterLogging } : undefined,
-    accessConfig: input.authenticationMode
-      ? { authenticationMode: input.authenticationMode }
-      : undefined,
-    resourcesVpcConfig: mergeVpcConfig(input, current),
     upgradePolicy: input.supportType ? { supportType: input.supportType } : undefined,
     deletionProtection: input.deletionProtection,
   };
 };
+
+/**
+ * Builds the `UpdateClusterConfig` body for the authentication mode or endpoint access, merged
+ * with the cluster's current endpoint settings.
+ */
+export const buildClusterAccessUpdateBody = (
+  input: UpdateClusterAccessConfigInput,
+  current: EksCluster = {}
+) => ({
+  accessConfig: input.authenticationMode
+    ? { authenticationMode: input.authenticationMode }
+    : undefined,
+  resourcesVpcConfig: mergeVpcConfig(input, current),
+});

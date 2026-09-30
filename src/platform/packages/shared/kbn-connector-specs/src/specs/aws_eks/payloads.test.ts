@@ -8,12 +8,18 @@
  */
 
 import {
+  buildClusterAccessUpdateBody,
   buildClusterUpdateBody,
   buildNodegroupUpdateBody,
-  clusterUpdateNeedsCurrent,
+  clusterAccessUpdateNeedsCurrent,
   nodegroupUpdateNeedsCurrent,
 } from './payloads';
-import type { EksCluster, EksNodegroup, UpdateClusterConfigInput } from './types';
+import type {
+  EksCluster,
+  EksNodegroup,
+  UpdateClusterAccessConfigInput,
+  UpdateClusterConfigInput,
+} from './types';
 import { UpdateNodegroupConfigInputSchema } from './types';
 
 const ref = { clusterName: 'prod-eu', nodegroupName: 'workers' };
@@ -84,19 +90,20 @@ describe('cluster update body', () => {
       publicAccessCidrs: ['198.51.100.0/24'],
     },
   };
-  const clusterInput = (raw: Partial<UpdateClusterConfigInput>): UpdateClusterConfigInput => ({
-    clusterName: 'prod-eu',
-    ...raw,
-  });
+  const accessInput = (
+    raw: Partial<UpdateClusterAccessConfigInput>
+  ): UpdateClusterAccessConfigInput => ({ clusterName: 'prod-eu', ...raw });
 
   it('reads the current cluster only for endpoint changes', () => {
-    expect(clusterUpdateNeedsCurrent(clusterInput({ enableLogTypes: ['api'] }))).toBe(false);
-    expect(clusterUpdateNeedsCurrent(clusterInput({ endpointPrivateAccess: true }))).toBe(true);
+    expect(clusterAccessUpdateNeedsCurrent(accessInput({ authenticationMode: 'API' }))).toBe(false);
+    expect(clusterAccessUpdateNeedsCurrent(accessInput({ endpointPrivateAccess: true }))).toBe(
+      true
+    );
   });
 
   it('keeps the endpoint flags and allowlist it was not asked to change', () => {
     expect(
-      buildClusterUpdateBody(clusterInput({ endpointPrivateAccess: true }), cluster)
+      buildClusterAccessUpdateBody(accessInput({ endpointPrivateAccess: true }), cluster)
         .resourcesVpcConfig
     ).toEqual({
       endpointPublicAccess: true,
@@ -107,29 +114,34 @@ describe('cluster update body', () => {
 
   it('drops the allowlist when the public endpoint is turned off', () => {
     expect(
-      buildClusterUpdateBody(
-        clusterInput({ endpointPublicAccess: false, endpointPrivateAccess: true }),
+      buildClusterAccessUpdateBody(
+        accessInput({ endpointPublicAccess: false, endpointPrivateAccess: true }),
         cluster
       ).resourcesVpcConfig
     ).toEqual({ endpointPublicAccess: false, endpointPrivateAccess: true });
   });
 
-  it('builds logging, access, upgrade and deletion settings without the VPC block', () => {
-    expect(
-      buildClusterUpdateBody(
-        clusterInput({
-          enableLogTypes: ['audit'],
-          authenticationMode: 'API',
-          supportType: 'STANDARD',
-          deletionProtection: true,
-        })
-      )
-    ).toEqual({
-      logging: { clusterLogging: [{ types: ['audit'], enabled: true }] },
+  it('sends the authentication mode on its own', () => {
+    expect(buildClusterAccessUpdateBody(accessInput({ authenticationMode: 'API' }))).toEqual({
       accessConfig: { authenticationMode: 'API' },
       resourcesVpcConfig: undefined,
-      upgradePolicy: { supportType: 'STANDARD' },
-      deletionProtection: true,
+    });
+  });
+
+  it.each<[string, Partial<UpdateClusterConfigInput>, Record<string, unknown>]>([
+    [
+      'logging',
+      { enableLogTypes: ['audit'] },
+      { logging: { clusterLogging: [{ types: ['audit'], enabled: true }] } },
+    ],
+    ['upgrade policy', { supportType: 'STANDARD' }, { upgradePolicy: { supportType: 'STANDARD' } }],
+    ['deletion protection', { deletionProtection: true }, { deletionProtection: true }],
+  ])('builds a %s-only config body', (_, raw, expected) => {
+    expect(buildClusterUpdateBody({ clusterName: 'prod-eu', ...raw })).toEqual({
+      logging: undefined,
+      upgradePolicy: undefined,
+      deletionProtection: undefined,
+      ...expected,
     });
   });
 });

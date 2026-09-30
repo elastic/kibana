@@ -40,9 +40,10 @@ import {
 } from './client';
 import { decodeCaCertificate, trimCluster, trimNodegroup, trimUpdate } from './format';
 import {
+  buildClusterAccessUpdateBody,
   buildClusterUpdateBody,
   buildNodegroupUpdateBody,
-  clusterUpdateNeedsCurrent,
+  clusterAccessUpdateNeedsCurrent,
   nodegroupUpdateNeedsCurrent,
 } from './payloads';
 import type {
@@ -57,6 +58,7 @@ import type {
   ListNodegroupsInput,
   ListTagsForResourceInput,
   ListUpdatesInput,
+  UpdateClusterAccessConfigInput,
   UpdateClusterConfigInput,
   UpdateNodegroupConfigInput,
 } from './types';
@@ -71,6 +73,7 @@ import {
   ListUpdatesInputSchema,
   REGION_PATTERN,
   REGION_PATTERN_MESSAGE,
+  UpdateClusterAccessConfigInputSchema,
   UpdateClusterConfigInputSchema,
   UpdateNodegroupConfigInputSchema,
 } from './types';
@@ -128,8 +131,9 @@ export const AwsEks: ConnectorSpec = {
     '- Every cluster action takes `clusterName` and an optional `region` (defaults to the connector region). Start with `listClusters`, then `getCluster`. Node group actions add `nodegroupName` from `listNodegroups`.',
     '',
     '### Mutations are asynchronous updates',
-    '- `updateNodegroupConfig` and `updateClusterConfig` return an Update with `id`, `status` (InProgress, Successful, Failed, Cancelled), `done`, and `succeeded`, plus the `clusterName`, `region` (and `nodegroupName`) to poll it with. Pass those unchanged to `describeUpdate` until `done`. Scaling a node group takes 1-5 minutes; cluster config changes such as logging or endpoint access take 5-25 minutes. Do not wait inside one turn: report the update id and check it again later.',
+    '- `updateNodegroupConfig` and `updateClusterConfig` return an Update with `id`, `status` (InProgress, Successful, Failed, Cancelled), `done`, and `succeeded`, plus the `clusterName`, `region` (and `nodegroupName`) to poll it with. Pass those unchanged to `describeUpdate` until `done`. Scaling a node group takes 1-5 minutes; cluster config changes such as logging take 5-25 minutes. Do not wait inside one turn: report the update id and check it again later.',
     '- EKS allows one update per node group at a time, and one cluster-level update at a time; a second one fails with ResourceInUseException until the first completes. Check `listUpdates` first.',
+    '- `updateClusterConfig` changes one category per call: log types, supportType, or deletionProtection. Make separate calls, each after the previous update is done.',
     '- Settings you omit keep their current values: the connector reads the node group or cluster first and re-sends them.',
     '',
     '### Scaling semantics',
@@ -137,12 +141,11 @@ export const AwsEks: ConnectorSpec = {
     '- If the Cluster Autoscaler or Karpenter manages the group, a manual `desiredSize` change is temporary; adjust `minSize`/`maxSize` instead. EKS Auto Mode clusters (`autoMode: true` in getCluster) have no managed node groups.',
     '',
     '### Cluster access',
-    "- Granting cluster access and minting Kubernetes tokens are not available to agents. To check who can reach a cluster's Kubernetes API, use `listAccessEntries` and `listAssociatedAccessPolicies`; if a principal is missing, tell the user an administrator has to grant it an access entry and an access policy.",
-    '- Access entries require the cluster `authenticationMode` to be API or API_AND_CONFIG_MAP (`updateClusterConfig` can move it forward, never back).',
+    "- Granting cluster access, changing the authentication mode or API endpoint access, and minting Kubernetes tokens are not available to agents. To check who can reach a cluster's Kubernetes API, use `listAccessEntries` and `listAssociatedAccessPolicies`; if a principal is missing, tell the user an administrator has to grant it an access entry and an access policy.",
+    '- Access entries require the cluster `authenticationMode` (from getCluster) to be API or API_AND_CONFIG_MAP. If it is CONFIG_MAP, tell the user an administrator has to move it forward.',
     '- A cluster registered through the EKS Connector has no `endpoint` and no `kubernetesConnector` block. A cluster with `vpc.endpointPublicAccess: false` is reachable only from inside its VPC.',
     '',
     '### Gotchas',
-    '- `updateClusterConfig.publicAccessCidrs` REPLACES the public CIDR allowlist when given. Read the current list from getCluster first and re-send what you keep.',
     '- Node group version upgrades are not covered here; only scaling, labels, taints, update strategy, and node repair.',
   ].join('\n'),
 
@@ -324,15 +327,32 @@ export const AwsEks: ConnectorSpec = {
       isTool: true,
       scope: 'destroy',
       description:
-        'Change cluster control-plane settings: enable or disable control-plane log types, move the authentication mode forward (CONFIG_MAP -> API_AND_CONFIG_MAP -> API), toggle public/private API endpoint access and its public CIDR allowlist, set the upgrade support type, or deletion protection. One category per call (EKS rejects mixed logging + access + VPC changes). Endpoint settings you omit keep their current values. Returns an Update with the clusterName and region to poll describeUpdate with until done (5-25 minutes).',
+        'Change one category of cluster control-plane settings per call: enable or disable control-plane log types, set the upgrade support type, or toggle deletion protection (EKS rejects updates that mix them). Returns an Update with the clusterName and region to poll describeUpdate with until done (5-25 minutes).',
       input: UpdateClusterConfigInputSchema,
       handler: async (ctx, input: UpdateClusterConfigInput) => {
         const { region, url } = resolveCluster(ctx, input);
-        const current = clusterUpdateNeedsCurrent(input)
+        const data = await request<{ update?: EksUpdate }>(() =>
+          ctx.client.post(`${url}/update-config`, buildClusterUpdateBody(input))
+        );
+        return { clusterName: input.clusterName, region, ...trimUpdate(data.update ?? {}) };
+      },
+    },
+
+    // Kept out of the agent tool set: switching to API disables the aws-auth ConfigMap for good,
+    // and endpoint or CIDR changes can cut every client off from the Kubernetes API.
+    updateClusterAccessConfig: {
+      isTool: false,
+      scope: 'destroy',
+      description:
+        'Change how clients reach the cluster, one category per call: move the authentication mode forward (CONFIG_MAP -> API_AND_CONFIG_MAP -> API; irreversible), or toggle public/private API endpoint access and replace the public CIDR allowlist. Endpoint settings you omit keep their current values. Returns an Update with the clusterName and region to poll describeUpdate with until done (5-25 minutes).',
+      input: UpdateClusterAccessConfigInputSchema,
+      handler: async (ctx, input: UpdateClusterAccessConfigInput) => {
+        const { region, url } = resolveCluster(ctx, input);
+        const current = clusterAccessUpdateNeedsCurrent(input)
           ? (await request<{ cluster?: EksCluster }>(() => ctx.client.get(url))).cluster
           : undefined;
         const data = await request<{ update?: EksUpdate }>(() =>
-          ctx.client.post(`${url}/update-config`, buildClusterUpdateBody(input, current))
+          ctx.client.post(`${url}/update-config`, buildClusterAccessUpdateBody(input, current))
         );
         return { clusterName: input.clusterName, region, ...trimUpdate(data.update ?? {}) };
       },
