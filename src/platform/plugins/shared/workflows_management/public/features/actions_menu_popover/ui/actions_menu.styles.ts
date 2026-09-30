@@ -8,6 +8,7 @@
  */
 
 import type { UseEuiTheme } from '@elastic/eui';
+import { euiFontSize } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { actionIconTileStyles } from './action_icon_tile.styles';
 import { kbdStyles } from '../../../widgets/workflow_yaml_editor/ui/kbd_styles';
@@ -29,6 +30,12 @@ export const componentStyles = {
       padding: `${euiTheme.size.base} ${euiTheme.size.base} ${euiTheme.size.m}`,
       borderBottom: `${euiTheme.border.width.thin} solid ${euiTheme.colors.borderBaseSubdued}`,
     }),
+  // Clears the absolute modal close button so the title doesn't sit under it;
+  // search below stays full-width to the menu edge padding.
+  headerTitle: ({ euiTheme }: UseEuiTheme) =>
+    css({
+      paddingInlineEnd: euiTheme.size.xl,
+    }),
   body: css({
     height: 'min(520px, calc(100vh - 160px))',
     overflow: 'hidden',
@@ -41,25 +48,46 @@ export const componentStyles = {
       overflow: 'hidden',
       borderRight: `${euiTheme.border.width.thin} solid ${euiTheme.colors.borderBaseSubdued}`,
     }),
-  listFill: css({
-    flex: 1,
-    minHeight: 0,
-    overflow: 'hidden',
-    display: 'flex',
-    flexDirection: 'column',
-    '& > *': {
+  listFill: ({ euiTheme }: UseEuiTheme) =>
+    css({
       flex: 1,
       minHeight: 0,
-    },
-    // Square rows; own padding lives on optionPad (EUI list items add their own).
-    '.euiSelectableListItem': {
-      borderRadius: 0,
-      padding: 0,
-    },
-    '.euiSelectableListItem__text': {
-      padding: 0,
-    },
-  }),
+      overflow: 'hidden',
+      display: 'flex',
+      flexDirection: 'column',
+      '& > *': {
+        flex: 1,
+        minHeight: 0,
+      },
+      // Align group labels with optionPad / icon tiles (size.base).
+      // Keep bottom divider; drop EUI's ::before top rule and the 3× top padding
+      // that existed to clear that rule above "Commands" / other section labels.
+      '.euiSelectableList__groupLabel': {
+        paddingInline: euiTheme.size.base,
+        borderBottom: `${euiTheme.border.width.thin} solid ${euiTheme.colors.borderBaseSubdued}`,
+        '&::before': {
+          content: 'none',
+        },
+        '&:not(:first-child)': {
+          paddingBlockStart: euiTheme.size.s,
+        },
+      },
+      // Square rows; own padding lives on optionPad (EUI list items add their own).
+      '.euiSelectableListItem': {
+        borderRadius: 0,
+        padding: 0,
+        borderBottom: `${euiTheme.border.width.thin} solid ${euiTheme.colors.borderBaseSubdued}`,
+      },
+      // Override EUI list-item interactive hover (backgroundBaseInteractiveHover),
+      // which reads as a semi-white wash on dark theme. Match preview-panel subdued fill.
+      '.euiSelectableListItem:hover, .euiSelectableListItem:has(.actionsMenu-keyboardActive), .euiSelectableListItem-isFocused, .euiSelectableListItem:hover .euiListItemLayout, .euiSelectableListItem:has(.actionsMenu-keyboardActive) .euiListItemLayout, .euiSelectableListItem-isFocused .euiListItemLayout':
+        {
+          backgroundColor: euiTheme.colors.backgroundBaseSubdued,
+        },
+      '.euiSelectableListItem__text': {
+        padding: 0,
+      },
+    }),
   optionInfo: css({
     flex: 1,
     minWidth: 0,
@@ -72,13 +100,19 @@ export const componentStyles = {
     textOverflow: 'ellipsis',
     whiteSpace: 'nowrap',
   }),
-  breadcrumbRow: ({ euiTheme }: UseEuiTheme) =>
-    css({
+  breadcrumbRow: (euiThemeContext: UseEuiTheme) => {
+    const { euiTheme } = euiThemeContext;
+    return css({
       flexShrink: 0,
       marginTop: -1,
       padding: `${euiTheme.size.s} ${euiTheme.size.base}`,
       borderBottom: `${euiTheme.border.width.thin} solid ${euiTheme.colors.borderBaseSubdued}`,
-    }),
+      // EuiBreadcrumbs has no size prop; shrink to xs for denser menu chrome.
+      '.euiBreadcrumbs__list, .euiBreadcrumb, .euiBreadcrumb__content': {
+        ...euiFontSize(euiThemeContext, 'xs'),
+      },
+    });
+  },
   rightColumn: ({ euiTheme }: UseEuiTheme) =>
     css({
       flex: 1,

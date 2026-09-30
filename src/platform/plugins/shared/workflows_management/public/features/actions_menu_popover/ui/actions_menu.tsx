@@ -653,7 +653,7 @@ export function ActionsMenu({
       {(list, search) => (
         <div ref={menuContainerRef} css={styles.fill}>
           <EuiFlexGroup direction="column" gutterSize="s" responsive={false} css={styles.header}>
-            <EuiFlexItem grow={false}>
+            <EuiFlexItem grow={false} css={styles.headerTitle}>
               <EuiTitle size="xxs">
                 <h3>
                   <FormattedMessage

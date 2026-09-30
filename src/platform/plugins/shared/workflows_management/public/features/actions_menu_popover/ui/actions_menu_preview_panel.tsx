@@ -340,14 +340,16 @@ function SectionPreviewPanel({
           borderRadius="m"
           css={styles.stepListPanel}
         >
-          {steps.map((step) => (
-            <PreviewStepRow
-              key={step.id}
-              step={step}
-              onClick={() => onStepSelected(step)}
-              onAdd={onAddStep ? () => onAddStep(step) : undefined}
-              onPinPreview={onPinPreview ? () => onPinPreview(step, section) : undefined}
-            />
+          {steps.map((step, idx) => (
+            <React.Fragment key={step.id}>
+              {idx > 0 && <EuiHorizontalRule margin="none" />}
+              <PreviewStepRow
+                step={step}
+                onClick={() => onStepSelected(step)}
+                onAdd={onAddStep ? () => onAddStep(step) : undefined}
+                onPinPreview={onPinPreview ? () => onPinPreview(step, section) : undefined}
+              />
+            </React.Fragment>
           ))}
         </EuiPanel>
       </div>
@@ -393,7 +395,7 @@ function StepDetailPanel({
       color="transparent"
       css={styles.scroll}
     >
-      <EuiTitle size="xxs">
+      <EuiTitle size="xs">
         <h3>{displayTitle}</h3>
       </EuiTitle>
       {displayDescription && (
@@ -479,7 +481,7 @@ function StepDetailPanel({
       <EuiPanel hasBorder hasShadow={false} paddingSize="none" borderRadius="m">
         {activeTab === 'examples' ? (
           examples.length === 0 ? (
-            <EuiPanel hasShadow={false} paddingSize="m" color="transparent">
+            <EuiPanel hasShadow={false} paddingSize="m" color="transparent" borderRadius="none">
               <EuiText size="xs" color="subdued">
                 <FormattedMessage
                   id="workflows.actionsMenu.preview.noExamples"
@@ -491,14 +493,14 @@ function StepDetailPanel({
             examples.map((example, idx) => (
               <React.Fragment key={idx}>
                 {idx > 0 && <EuiHorizontalRule margin="none" />}
-                <EuiPanel hasShadow={false} paddingSize="m" color="transparent">
+                <EuiPanel hasShadow={false} paddingSize="m" color="transparent" borderRadius="none">
                   <EuiMarkdownFormat textSize="xs">{example}</EuiMarkdownFormat>
                 </EuiPanel>
               </React.Fragment>
             ))
           )
         ) : fields.length === 0 ? (
-          <EuiPanel hasShadow={false} paddingSize="m" color="transparent">
+          <EuiPanel hasShadow={false} paddingSize="m" color="transparent" borderRadius="none">
             <EuiText size="xs" color="subdued">
               <FormattedMessage
                 id="workflows.actionsMenu.preview.noFields"
@@ -510,7 +512,7 @@ function StepDetailPanel({
           fields.map((field, idx) => (
             <React.Fragment key={field.name}>
               {idx > 0 && <EuiHorizontalRule margin="none" />}
-              <EuiPanel hasShadow={false} paddingSize="m" color="transparent">
+              <EuiPanel hasShadow={false} paddingSize="m" color="transparent" borderRadius="none">
                 <EuiFlexGroup
                   alignItems="center"
                   justifyContent="spaceBetween"
