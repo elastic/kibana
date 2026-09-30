@@ -16,6 +16,7 @@ import {
 } from '@kbn/significant-events-schema';
 
 import { NIGHTSHIFT_API_PRIVILEGES } from '@kbn/nightshift-shared';
+import { resolveNightshiftModelForRequest } from '@kbn/nightshift-ai';
 import { createServerRoute } from '../../../create_server_route';
 import { assertSignificantEventsAccess } from '../../../utils/assert_significant_events_access';
 import { assertNotPaused } from '../../../utils/assert_not_paused';
@@ -24,7 +25,6 @@ import {
   MAX_STREAMS_PER_QUERY,
   type SignificantEventsKIsOnboardingInputs,
 } from '../../../../lib/workflows/onboarding_workflow_client';
-import { resolveSignificantEventsModelForRequest } from '../../../../model_resolution';
 
 const timestampFromString = z
   .string()
@@ -119,7 +119,7 @@ const onboardingExecuteRoute = createServerRoute({
       const [featuresConnectorId, queriesConnectorId] = await Promise.all([
         skipFeatures
           ? undefined
-          : resolveSignificantEventsModelForRequest({
+          : resolveNightshiftModelForRequest({
               request,
               inference: server.inference,
               savedObjects: server.core.savedObjects,
@@ -129,7 +129,7 @@ const onboardingExecuteRoute = createServerRoute({
             }),
         skipQueries
           ? undefined
-          : resolveSignificantEventsModelForRequest({
+          : resolveNightshiftModelForRequest({
               request,
               inference: server.inference,
               savedObjects: server.core.savedObjects,

@@ -18,13 +18,14 @@ jest.mock('../../../utils/assert_significant_events_access', () => ({
   assertSignificantEventsAccess: jest.fn().mockResolvedValue(undefined),
 }));
 
-const mockResolveSignificantEventsModelForRequest = jest.fn(async ({ step }: { step: string }) =>
+const mockResolveNightshiftModelForRequest = jest.fn(async ({ step }: { step: string }) =>
   step === 'kiExtraction' ? 'canonical-features-model' : 'canonical-queries-model'
 );
 
-jest.mock('../../../../model_resolution', () => ({
-  resolveSignificantEventsModelForRequest: (options: { step: string }) =>
-    mockResolveSignificantEventsModelForRequest(options),
+jest.mock('@kbn/nightshift-ai', () => ({
+  ...jest.requireActual('@kbn/nightshift-ai'),
+  resolveNightshiftModelForRequest: (options: { step: string }) =>
+    mockResolveNightshiftModelForRequest(options),
 }));
 
 const route = internalKIOnboardingRoutes['POST /internal/streams/{streamName}/onboarding/_execute'];
@@ -102,10 +103,10 @@ it('resolves strict overrides and forwards canonical connector IDs', async () =>
   });
 
   expect(assertSignificantEventsAccess).toHaveBeenCalledWith({ server, licensing });
-  expect(mockResolveSignificantEventsModelForRequest).toHaveBeenCalledWith(
+  expect(mockResolveNightshiftModelForRequest).toHaveBeenCalledWith(
     expect.objectContaining({ step: 'kiExtraction', requestedId: 'features-alias' })
   );
-  expect(mockResolveSignificantEventsModelForRequest).toHaveBeenCalledWith(
+  expect(mockResolveNightshiftModelForRequest).toHaveBeenCalledWith(
     expect.objectContaining({ step: 'kiQueryGeneration', requestedId: 'queries-alias' })
   );
   expect(run).toHaveBeenCalledWith({
@@ -133,8 +134,8 @@ it('does not resolve or forward a model for a skipped step', async () => {
 
   await route.handler(handlerParams);
 
-  expect(mockResolveSignificantEventsModelForRequest).toHaveBeenCalledTimes(1);
-  expect(mockResolveSignificantEventsModelForRequest).toHaveBeenCalledWith(
+  expect(mockResolveNightshiftModelForRequest).toHaveBeenCalledTimes(1);
+  expect(mockResolveNightshiftModelForRequest).toHaveBeenCalledWith(
     expect.objectContaining({ step: 'kiQueryGeneration' })
   );
   expect(run).toHaveBeenCalledWith(
@@ -148,7 +149,7 @@ it('does not resolve or forward a model for a skipped step', async () => {
 
 it('maps an unknown strict override to a 400 response', async () => {
   const { handlerParams, run } = makeHandlerParams();
-  mockResolveSignificantEventsModelForRequest.mockRejectedValueOnce(
+  mockResolveNightshiftModelForRequest.mockRejectedValueOnce(
     new NightshiftModelNotFoundError('missing-model')
   );
 

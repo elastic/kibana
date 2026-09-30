@@ -23,6 +23,7 @@ import {
 } from '@kbn/significant-events-schema';
 import { i18n } from '@kbn/i18n';
 import type { SandboxSession } from '@kbn/sandbox-plugin/server';
+import { resolveNightshiftModelForRequest } from '@kbn/nightshift-ai';
 import { CORTEX_AI_INDEX_DEST, CORTEX_AI_INDEX_ID } from '../../common/cortex';
 import { NIGHTSHIFT_INVESTIGATION_AGENT_ID, SANDBOX_TOOL_IDS } from '../agents/investigation';
 import type { InvestigationToolCall } from '../decision_trees/accessed_trees';
@@ -30,7 +31,6 @@ import { createCortexTelemetry } from '../telemetry';
 import { materializeCortex } from './materialize';
 import { createLlmProposeCortexEdits, optimizeCortex } from './optimize';
 import { createCortexPageStore, type CortexPageStore } from './page_store';
-import { resolveNightshiftModelForRequest } from '../model_resolution';
 
 export const createCortexStore = ({
   esClient,

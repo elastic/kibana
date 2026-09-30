@@ -15,7 +15,7 @@ import {
 import { StepCategory } from '@kbn/workflows';
 import { createServerStepDefinition } from '@kbn/workflows-extensions/server';
 import { z } from '@kbn/zod/v4';
-import { resolveSignificantEventsModelForRequest } from '../model_resolution';
+import { resolveNightshiftModelForRequest } from '@kbn/nightshift-ai';
 
 const significantEventsModelSteps = [
   'discovery',
@@ -55,7 +55,7 @@ export const resolveModelStepDefinition = ({
       }
 
       try {
-        const connectorId = await resolveSignificantEventsModelForRequest({
+        const connectorId = await resolveNightshiftModelForRequest({
           request: context.contextManager.getFakeRequest(),
           inference,
           savedObjects,

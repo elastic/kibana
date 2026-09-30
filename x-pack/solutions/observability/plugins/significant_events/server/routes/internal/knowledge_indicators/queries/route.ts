@@ -22,6 +22,7 @@ import {
 } from '@kbn/significant-events-schema';
 import { NIGHTSHIFT_API_PRIVILEGES } from '@kbn/nightshift-shared';
 import { deriveQueryType, MAX_STREAM_NAME_LENGTH } from '@kbn/streams-schema';
+import { resolveNightshiftModelForRequest } from '@kbn/nightshift-ai';
 import { sortQueryLinksForTable } from '../../../../lib/significant_events/utils';
 import { generateKIQueries } from '../../../../lib/significant_events/ki_queries_generation_service';
 import { createServerRoute } from '../../../create_server_route';
@@ -51,7 +52,6 @@ import type {
 import { cleanupStaleEvents } from '../../../../lib/significant_events/events/cleanup_stale_events';
 import { QueryNotFoundError } from '../../../../lib/errors/query_not_found_error';
 import { validateEsqlQueryForStreamOrThrow } from '../../../../lib/significant_events/validate_esql_query';
-import { resolveSignificantEventsModelForRequest } from '../../../../model_resolution';
 
 const RECONCILE_STREAM_CONCURRENCY = 3;
 // Manual repair endpoint: keep each request small so operators batch large migrations explicitly.
@@ -674,7 +674,7 @@ const generateQueriesRoute = createServerRoute({
         kiClient,
         agentBuilder: server.agentBuilder,
         resolveModel: (requestedId) =>
-          resolveSignificantEventsModelForRequest({
+          resolveNightshiftModelForRequest({
             request,
             inference: server.inference,
             savedObjects: server.core.savedObjects,

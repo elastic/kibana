@@ -11,8 +11,8 @@ import { NightshiftModelBlockedError } from '@kbn/significant-events-schema';
 import { StepCategory } from '@kbn/workflows';
 import { createServerStepDefinition } from '@kbn/workflows-extensions/server';
 import { z } from '@kbn/zod/v4';
+import { resolveNightshiftModelForRequest } from '@kbn/nightshift-ai';
 import { MAX_KEYWORD_LENGTH } from '../../common';
-import { resolveNightshiftModelForRequest } from '../model_resolution';
 
 export const resolveModelStepDefinition = ({
   getInference,

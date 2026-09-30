@@ -12,11 +12,12 @@ jest.mock('../../utils/assert_significant_events_access', () => ({
   assertSignificantEventsAccess: jest.fn().mockResolvedValue(undefined),
 }));
 
-const mockResolveSignificantEventsModelForRequest = jest.fn().mockResolvedValue('canonical-model');
+const mockResolveNightshiftModelForRequest = jest.fn().mockResolvedValue('canonical-model');
 
-jest.mock('../../../model_resolution', () => ({
-  resolveSignificantEventsModelForRequest: (...args: unknown[]) =>
-    mockResolveSignificantEventsModelForRequest(...args),
+jest.mock('@kbn/nightshift-ai', () => ({
+  ...jest.requireActual('@kbn/nightshift-ai'),
+  resolveNightshiftModelForRequest: (...args: unknown[]) =>
+    mockResolveNightshiftModelForRequest(...args),
 }));
 
 const route =
@@ -88,7 +89,7 @@ it('passes a strict connector override and request-scoped resolver to the discov
       resolveModel: expect.any(Function),
     })
   );
-  expect(mockResolveSignificantEventsModelForRequest).toHaveBeenCalledWith({
+  expect(mockResolveNightshiftModelForRequest).toHaveBeenCalledWith({
     request,
     inference: server.inference,
     savedObjects: server.core.savedObjects,
@@ -100,7 +101,7 @@ it('passes a strict connector override and request-scoped resolver to the discov
 
 it('maps an unknown connector to a 400 response', async () => {
   const { handlerParams } = makeHandlerParams();
-  mockResolveSignificantEventsModelForRequest.mockRejectedValueOnce(
+  mockResolveNightshiftModelForRequest.mockRejectedValueOnce(
     new NightshiftModelNotFoundError('missing-model')
   );
 
