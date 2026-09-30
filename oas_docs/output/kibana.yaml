@@ -44081,7 +44081,7 @@ paths:
       summary: Restart an agent
       tags:
         - Elastic Agent actions
-      x-state: Generally available; added in 9.6.0
+      x-state: Experimental; added in 9.6.0
       x-metaTags:
         - content: Kibana
           name: product_name
@@ -45550,7 +45550,7 @@ paths:
       summary: Bulk restart agents
       tags:
         - Elastic Agent actions
-      x-state: Generally available; added in 9.6.0
+      x-state: Experimental; added in 9.6.0
       x-metaTags:
         - content: Kibana
           name: product_name

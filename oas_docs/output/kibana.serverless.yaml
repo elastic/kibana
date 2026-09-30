@@ -42402,7 +42402,7 @@ paths:
       summary: Restart an agent
       tags:
         - Elastic Agent actions
-      x-state: Generally available
+      x-state: Experimental
       x-metaTags:
         - content: Kibana, Elastic Cloud Serverless
           name: product_name
@@ -43871,7 +43871,7 @@ paths:
       summary: Bulk restart agents
       tags:
         - Elastic Agent actions
-      x-state: Generally available
+      x-state: Experimental
       x-metaTags:
         - content: Kibana, Elastic Cloud Serverless
           name: product_name
