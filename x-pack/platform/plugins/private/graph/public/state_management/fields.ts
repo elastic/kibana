@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { Action } from 'typescript-fsa';
 import actionCreatorFactory from 'typescript-fsa';
 import { reducerWithInitialState } from 'typescript-fsa-reducers/dist';
 import { createSelector } from './create_selector';
@@ -13,8 +12,8 @@ import type { WorkspaceField } from '../types';
 import type { GraphState, GraphStoreDependencies, StartGraphListening } from './store';
 import { reset } from './global';
 import { setDatasource } from './datasource';
-import type { InferActionType } from './helpers';
-import { matchesOne } from './helpers';
+import type { InferActionType, MatchedAction } from './helpers';
+import { matchesAction, matchesOne } from './helpers';
 
 const actionCreator = actionCreatorFactory('x-pack/graph/fields');
 
@@ -102,12 +101,9 @@ export const registerFieldsListeners = (
    * Won't be necessary once the workspace is moved to redux
    */
   startListening({
-    predicate: updateFieldProperties.match,
-    effect: (unknownAction, listenerApi) => {
+    matcher: matchesAction(updateFieldProperties),
+    effect: (action: MatchedAction<InferActionType<typeof updateFieldProperties>>, listenerApi) => {
       listenerApi.cancelActiveListeners();
-      const action = unknownAction as unknown as Action<
-        InferActionType<typeof updateFieldProperties>
-      >;
       const workspace = getWorkspace();
       if (!workspace) {
         return;

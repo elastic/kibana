@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import type { ActionCreator, AnyAction } from 'typescript-fsa';
+import type { UnknownAction } from 'redux';
+import type { Action, ActionCreator, AnyAction } from 'typescript-fsa';
 
 /**
  * Infers the type of an action out of a given action type.
@@ -29,3 +30,11 @@ export const matchesOne =
   (...actionCreators: Array<ActionCreator<any>>) =>
   (action: AnyAction) =>
     actionCreators.some((actionCreator) => actionCreator.match(action));
+
+export type MatchedAction<Payload> = Action<Payload> & UnknownAction;
+
+/** Adapts a TypeScript-FSA action creator to an RTK listener type predicate. */
+export const matchesAction =
+  <Payload>(actionCreator: ActionCreator<Payload>) =>
+  (action: UnknownAction): action is MatchedAction<Payload> =>
+    actionCreator.match(action);

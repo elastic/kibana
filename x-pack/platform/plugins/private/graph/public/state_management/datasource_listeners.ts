@@ -6,7 +6,6 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import type { Action } from 'typescript-fsa';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import type { GraphStoreDependencies, StartGraphListening } from './store';
 import { loadFields } from './fields';
@@ -14,6 +13,8 @@ import { mapFields } from '../services/persistence';
 import { settingsSelector } from './advanced_settings';
 import type { IndexpatternDatasource } from './datasource';
 import { datasourceLoaded, setDatasource, requestDatasource } from './datasource';
+import type { MatchedAction } from './helpers';
+import { matchesAction } from './helpers';
 
 /**
  * Listener loading field information when the datasource is switched. This will overwrite current settings
@@ -26,10 +27,9 @@ export const registerDatasourceListeners = (
   { indexPatternProvider, notifications, createWorkspace, notifyReact }: GraphStoreDependencies
 ) => {
   startListening({
-    predicate: requestDatasource.match,
-    effect: async (unknownAction, listenerApi) => {
+    matcher: matchesAction(requestDatasource),
+    effect: async (action: MatchedAction<IndexpatternDatasource>, listenerApi) => {
       listenerApi.cancelActiveListeners();
-      const action = unknownAction as unknown as Action<IndexpatternDatasource>;
 
       let indexPattern: DataView;
       try {

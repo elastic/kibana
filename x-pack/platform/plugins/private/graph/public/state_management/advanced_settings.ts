@@ -5,13 +5,14 @@
  * 2.0.
  */
 
-import type { Action } from 'typescript-fsa';
 import actionCreatorFactory from 'typescript-fsa';
 import { reducerWithInitialState } from 'typescript-fsa-reducers/dist';
 import type { GraphState, GraphStoreDependencies, StartGraphListening } from './store';
 import type { AdvancedSettings } from '../types';
 import { reset } from './global';
 import { setDatasource, requestDatasource } from './datasource';
+import type { MatchedAction } from './helpers';
+import { matchesAction } from './helpers';
 
 const actionCreator = actionCreatorFactory('x-pack/graph/advancedSettings');
 
@@ -48,10 +49,9 @@ export const registerAdvancedSettingsListeners = (
   { getWorkspace, notifyReact }: GraphStoreDependencies
 ) => {
   startListening({
-    predicate: updateSettings.match,
-    effect: (unknownAction, listenerApi) => {
+    matcher: matchesAction(updateSettings),
+    effect: (action: MatchedAction<AdvancedSettingsState>, listenerApi) => {
       listenerApi.cancelActiveListeners();
-      const action = unknownAction as unknown as Action<AdvancedSettingsState>;
       const workspace = getWorkspace();
       if (!workspace) {
         return;
