@@ -77,6 +77,7 @@ import type { DiscoverEBTManager } from './ebt_manager';
 import {
   CASCADE_LAYOUT_ENABLED_FEATURE_FLAG_KEY,
   IS_ESQL_DEFAULT_FEATURE_FLAG_KEY,
+  SESSION_HTTP_API_ENABLED_FEATURE_FLAG_KEY,
 } from './constants';
 import { EmbeddableEditorService } from './plugin_imports/embeddable_editor_service';
 import { InitialTabStateService } from './plugin_imports/initial_tab_state_service';
@@ -85,8 +86,6 @@ import {
   createDiscoverSessionService,
   type DiscoverSessionService,
 } from './session';
-
-const USE_DISCOVER_SESSION_HTTP_API = true;
 
 /**
  * Location state of internal Discover history instance
@@ -225,7 +224,7 @@ export const buildServices = ({
   const discoverSessionService = createDiscoverSessionService({
     apiClient: createDiscoverSessionClient(core.http),
     legacyClient: plugins.savedSearch,
-    useHttpApi: USE_DISCOVER_SESSION_HTTP_API,
+    useHttpApi: readBooleanFlag(core, SESSION_HTTP_API_ENABLED_FEATURE_FLAG_KEY, false),
   });
 
   return {
