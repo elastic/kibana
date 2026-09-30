@@ -71,14 +71,15 @@ spaceTest.describe(
             .locator('alerts-charts-panel')
             .getByTestId('query-toggle-header')
             .and(page.locator('[aria-label="Charts"]'));
-          await chartsToggle.waitFor({ state: 'visible' });
+          // The alerts view can still be on its loading spinner well after navigation.
+          await chartsToggle.waitFor({ state: 'visible', timeout: 60_000 });
           const expandedChartsToggle = chartsToggle.and(page.locator('[aria-expanded="true"]'));
           if (await expandedChartsToggle.isVisible()) {
             await expandedChartsToggle.click();
           }
           await chartsToggle
             .and(page.locator('[aria-expanded="false"]'))
-            .waitFor({ state: 'visible' });
+            .waitFor({ state: 'visible', timeout: 60_000 });
           await alertsTablePage.waitForRuleAlert(host.ruleName);
           await alertsTablePage.expandAlertDetailsFlyout(host.ruleName);
           await documentFlyout.waitForAlertFlyout();
