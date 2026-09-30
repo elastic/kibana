@@ -571,42 +571,42 @@ export class ExceptionListClient {
   }: BulkDeleteExceptionListOptions): Promise<BulkDeleteExceptionListResult> => {
     const { savedObjectsClient } = this;
 
-    const preDeleteListHook: PreDeleteListHook | undefined = this.enableServerExtensionPoints
-      ? async (list): Promise<ExceptionListPreDeleteListBlocker[]> => {
-          const { blockedBy } = await this.serverExtensionsClient.pipeRun(
-            'exceptionsListPreDeleteList',
-            { blockedBy: [], list, namespaceType },
-            this.getServerExtensionCallbackContext(),
-            (returnedData) => {
-              if (returnedData.list.id !== list.id) {
-                return new Error(
-                  `exceptionsListPreDeleteList extension changed the list being processed from [${list.id}] to [${returnedData.list.id}]`
-                );
-              }
-              if (
-                !Array.isArray(returnedData.blockedBy) ||
-                returnedData.blockedBy.some(
-                  (blocker) =>
-                    typeof blocker.id !== 'string' ||
-                    typeof blocker.rule_id !== 'string' ||
-                    typeof blocker.name !== 'string'
-                )
-              ) {
-                return new Error(
-                  'exceptionsListPreDeleteList extension returned a malformed [blockedBy] value'
-                );
-              }
-              return undefined;
-            }
-          );
-          return blockedBy;
+    const preDeleteListHook: PreDeleteListHook = async (
+      list
+    ): Promise<ExceptionListPreDeleteListBlocker[]> => {
+      const { blockedBy } = await this.serverExtensionsClient.pipeRun(
+        'exceptionsListPreDeleteList',
+        { blockedBy: [], list, namespaceType },
+        this.getServerExtensionCallbackContext(),
+        (returnedData) => {
+          if (returnedData.list.id !== list.id) {
+            return new Error(
+              `exceptionsListPreDeleteList extension changed the list being processed from [${list.id}] to [${returnedData.list.id}]`
+            );
+          }
+          if (
+            !Array.isArray(returnedData.blockedBy) ||
+            returnedData.blockedBy.some(
+              (blocker) =>
+                typeof blocker.id !== 'string' ||
+                typeof blocker.rule_id !== 'string' ||
+                typeof blocker.name !== 'string'
+            )
+          ) {
+            return new Error(
+              'exceptionsListPreDeleteList extension returned a malformed [blockedBy] value'
+            );
+          }
+          return undefined;
         }
-      : undefined;
+      );
+      return blockedBy;
+    };
 
     return bulkDeleteExceptionList({
       ids,
       namespaceType,
-      preDeleteListHook,
+      preDeleteListHook: this.enableServerExtensionPoints ? preDeleteListHook : undefined,
       savedObjectsClient,
     });
   };
