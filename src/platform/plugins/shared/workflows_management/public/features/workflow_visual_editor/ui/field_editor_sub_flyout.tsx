@@ -43,6 +43,18 @@ const VALUE_LABEL = i18n.translate('workflows.fieldEditorSubFlyout.valueLabel', 
   defaultMessage: 'Value',
 });
 
+const MAX_DRAFT_HISTORY = 200;
+
+type DraftHistory = {
+  stack: string[];
+  index: number;
+};
+
+const createDraftHistory = (initial: string): DraftHistory => ({
+  stack: [initial],
+  index: 0,
+});
+
 /**
  * Expanded field editor stacked inside the canvas-bounded step panel.
  * Live write-through to the step working state — no save/cancel of its own.
@@ -67,6 +79,8 @@ export function FieldEditorSubFlyout({
   const dragOverCaretRafRef = useRef<number | null>(null);
   const dragOverPointerRef = useRef({ x: 0, y: 0 });
   const editorFocusedForDragRef = useRef(false);
+  /** Scoped undo/redo — controlled React value resets the browser textarea stack. */
+  const draftHistoryRef = useRef<DraftHistory>(createDraftHistory(value));
 
   // Same kbd chip style as the inline data-reference picker footer.
   const keyChipCss = {
@@ -86,8 +100,12 @@ export function FieldEditorSubFlyout({
   // Sync when the parent field value changes from outside (not every keystroke
   // source — parent should push the same string we already wrote).
   useEffect(() => {
-    setDraft(value);
-    caretRef.current = value.length;
+    setDraft((prev) => {
+      if (prev === value) return prev;
+      draftHistoryRef.current = createDraftHistory(value);
+      caretRef.current = value.length;
+      return value;
+    });
   }, [value]);
 
   // Focus the editor on open with the caret at the end.
@@ -104,14 +122,56 @@ export function FieldEditorSubFlyout({
     });
   }, []);
 
+  const recordDraftHistory = useCallback((next: string) => {
+    const history = draftHistoryRef.current;
+    if (history.stack[history.index] === next) return;
+    const stack = history.stack.slice(0, history.index + 1);
+    stack.push(next);
+    while (stack.length > MAX_DRAFT_HISTORY) {
+      stack.shift();
+    }
+    draftHistoryRef.current = { stack, index: stack.length - 1 };
+  }, []);
+
   const applyDraft = useCallback(
-    (next: string, caret?: number) => {
+    (next: string, caret?: number, options?: { readonly recordHistory?: boolean }) => {
+      if (options?.recordHistory !== false) {
+        recordDraftHistory(next);
+      }
       setDraft(next);
       if (caret !== undefined) caretRef.current = caret;
       onChange(next);
     },
-    [onChange]
+    [onChange, recordDraftHistory]
   );
+
+  const restoreDraftFromHistory = useCallback(
+    (next: string) => {
+      const caret = next.length;
+      applyDraft(next, caret, { recordHistory: false });
+      window.requestAnimationFrame(() => {
+        const el = textareaRef.current;
+        if (!el) return;
+        el.focus();
+        el.setSelectionRange(caret, caret);
+      });
+    },
+    [applyDraft]
+  );
+
+  const undoDraft = useCallback(() => {
+    const history = draftHistoryRef.current;
+    if (history.index <= 0) return;
+    history.index -= 1;
+    restoreDraftFromHistory(history.stack[history.index]);
+  }, [restoreDraftFromHistory]);
+
+  const redoDraft = useCallback(() => {
+    const history = draftHistoryRef.current;
+    if (history.index >= history.stack.length - 1) return;
+    history.index += 1;
+    restoreDraftFromHistory(history.stack[history.index]);
+  }, [restoreDraftFromHistory]);
 
   const insertAtOffset = useCallback(
     (token: string, offset: number) => {
@@ -172,9 +232,27 @@ export function FieldEditorSubFlyout({
       if (e.key === 'Escape') {
         e.stopPropagation();
         onBack();
+        return;
+      }
+
+      // Keep Cmd/Ctrl+Z (and redo) inside this editor — never the canvas / YAML.
+      const mod = e.metaKey || e.ctrlKey;
+      if (!mod) return;
+      const key = e.key.toLowerCase();
+      if (key === 'z') {
+        e.preventDefault();
+        e.stopPropagation();
+        if (e.shiftKey) redoDraft();
+        else undoDraft();
+        return;
+      }
+      if (key === 'y') {
+        e.preventDefault();
+        e.stopPropagation();
+        redoDraft();
       }
     },
-    [onBack]
+    [onBack, redoDraft, undoDraft]
   );
 
   return (
