@@ -22,12 +22,6 @@ export const TAKE_ACTION_BUTTON = i18n.translate(
     defaultMessage: 'Take action',
   }
 );
-export const ADD_TO_CASE_ARIA_LABEL = i18n.translate(
-  'xpack.securitySolution.alertSummary.flyout.attachToCaseAriaLabel',
-  {
-    defaultMessage: 'Attach alert to case',
-  }
-);
 
 /**
  * Take action button in the panel footer.
@@ -73,7 +67,6 @@ export const TakeActionButton = memo(() => {
     ecsData: dataAsNestedObject,
     nonEcsData,
     onMenuItemClick: closePopover,
-    ariaLabel: ADD_TO_CASE_ARIA_LABEL,
   });
 
   const { alertTagsItems, alertTagsPanels } = useAlertTagsActions({

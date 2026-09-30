@@ -7,3 +7,4 @@
 
 export { Impact } from './impact';
 export { investigationEntityIds } from './entity_ids';
+export { impactPills, matchesEntityFilter, type ImpactPill } from './impact_pills';

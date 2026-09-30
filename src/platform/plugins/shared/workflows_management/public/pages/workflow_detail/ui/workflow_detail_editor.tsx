@@ -46,6 +46,7 @@ import {
   selectIsExecutionsTab,
   selectIsSavingYaml,
   selectIsYamlSyntaxValid,
+  selectWorkflow,
   selectWorkflowId,
   selectYamlString,
 } from '../../../entities/workflows/store/workflow_detail/selectors';
@@ -116,6 +117,7 @@ export const WorkflowDetailEditor = React.memo<WorkflowDetailEditorProps>(({ hig
 
   const workflowYaml = useSelector(selectYamlString) ?? '';
   const workflowId = useSelector(selectWorkflowId);
+  const workflow = useSelector(selectWorkflow);
   const isExecutionsTab = useSelector(selectIsExecutionsTab);
   const isReadOnly = useWorkflowEditorReadOnly();
   const isSyntaxValid = useSelector(selectIsYamlSyntaxValid);
@@ -124,7 +126,9 @@ export const WorkflowDetailEditor = React.memo<WorkflowDetailEditorProps>(({ hig
   const { runIndividualStep } = useWorkflowActions();
   const { notifications } = useKibana().services;
   const { setSelectedExecution } = useWorkflowUrlState();
-  const { canExecuteWorkflow } = useWorkflowsCapabilities();
+  const { canExecuteWorkflow: hasExecutePrivilege } = useWorkflowsCapabilities();
+  const canExecuteWorkflow = hasExecutePrivilege && workflow?.permissions?.execute !== false;
+  const canTestStep = canExecuteWorkflow && workflow?.permissions?.edit !== false;
 
   const handleStepRun = useCallback(
     async (params: { stepId: string; actionType: string }) => {
@@ -139,7 +143,7 @@ export const WorkflowDetailEditor = React.memo<WorkflowDetailEditorProps>(({ hig
         return;
       }
 
-      if (!canExecuteWorkflow) {
+      if (!canTestStep) {
         return;
       }
 
@@ -182,7 +186,7 @@ export const WorkflowDetailEditor = React.memo<WorkflowDetailEditorProps>(({ hig
       setSelectedExecution,
       dispatch,
       notifications.toasts,
-      canExecuteWorkflow,
+      canTestStep,
     ]
   );
 
@@ -229,10 +233,11 @@ export const WorkflowDetailEditor = React.memo<WorkflowDetailEditorProps>(({ hig
       getTestRunTooltipContent({
         isExecutionsTab,
         isValid: Boolean(isSyntaxValid),
-        canRunWorkflow: canExecuteWorkflow,
+        canRunWorkflow: hasExecutePrivilege,
+        hasWorkflowAccess: workflow?.permissions?.execute !== false,
         isSaving: Boolean(isSaving),
       }),
-    [isExecutionsTab, isSyntaxValid, canExecuteWorkflow, isSaving]
+    [isExecutionsTab, isSyntaxValid, hasExecutePrivilege, workflow, isSaving]
   );
 
   const runDisabled = isExecutionsTab || !canExecuteWorkflow || !isSyntaxValid || isSaving;
