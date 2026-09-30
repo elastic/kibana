@@ -120,10 +120,14 @@ function resolveServiceVars(
   const rawVars = storedServiceVars[instanceId] ?? storedServiceVars[service.id];
   if (!rawVars) return { enabledDataStreams: service.dataStreams, varsByDataStream: {} };
   // Guard against stale session state: filter out dsIds the current service no longer has.
-  const enabledDataStreams = rawVars.enabledDataStreams.filter((dsId) =>
-    service.dataStreams.includes(dsId)
-  );
-  return enabledDataStreams.length === rawVars.enabledDataStreams.length
+  // If filtering removes every ID from a non-empty original the user hadn't explicitly cleared,
+  // fall back to service defaults — an empty list is the "intentional opt-out" sentinel.
+  const filtered = rawVars.enabledDataStreams.filter((dsId) => service.dataStreams.includes(dsId));
+  const enabledDataStreams =
+    filtered.length === 0 && rawVars.enabledDataStreams.length > 0
+      ? service.dataStreams
+      : filtered;
+  return enabledDataStreams === rawVars.enabledDataStreams
     ? rawVars
     : { ...rawVars, enabledDataStreams };
 }

@@ -207,14 +207,22 @@ export async function buildGroupPackagePolicy(
   for (const { instance, service } of members) {
     const rawVars =
       storedServiceVars[instance.instanceId] ?? storedServiceVars[instance.serviceId];
-    serviceVarsMap[service.id] = rawVars
-      ? {
-          ...rawVars,
-          enabledDataStreams: rawVars.enabledDataStreams.filter((dsId) =>
-            service.dataStreams.includes(dsId)
-          ),
-        }
-      : { enabledDataStreams: service.dataStreams, varsByDataStream: {} };
+    if (!rawVars) {
+      serviceVarsMap[service.id] = { enabledDataStreams: service.dataStreams, varsByDataStream: {} };
+    } else {
+      const filtered = rawVars.enabledDataStreams.filter((dsId) =>
+        service.dataStreams.includes(dsId)
+      );
+      // If stale-ID filtering removed every previously-stored dsId (but the user hadn't
+      // explicitly emptied the selection), fall back to the current service defaults rather
+      // than forwarding an empty list — an empty list is the "intentional opt-out" sentinel
+      // used by buildGroupPackagePolicy and would silently disable all inputs.
+      const enabledDataStreams =
+        filtered.length === 0 && rawVars.enabledDataStreams.length > 0
+          ? service.dataStreams
+          : filtered;
+      serviceVarsMap[service.id] = { ...rawVars, enabledDataStreams };
+    }
   }
 
   const services = members.map(({ service }) => service);
