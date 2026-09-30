@@ -84,7 +84,7 @@ export function RequestFlyoutTransactions({
             },
           }}
           title={i18n.translate('xpack.apm.requestFlyout.transactions.title', {
-            defaultMessage: 'Upstream transactions',
+            defaultMessage: 'Transactions',
           })}
           data-test-subj="requestFlyoutTransactionsTable"
         />

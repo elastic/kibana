@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { EuiFlyoutBody, EuiSpacer, useGeneratedHtmlId } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiFlyoutBody, EuiSpacer, EuiTitle, useGeneratedHtmlId } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import React, { useCallback, useMemo, useState } from 'react';
 import type { CoreStart } from '@kbn/core/public';
 import type { LensPublicStart } from '@kbn/lens-plugin/public';
@@ -115,6 +116,18 @@ export function RequestFlyout({
               <EuiFlyoutBody>
                 <RequestFlyoutQueryControls />
                 <EuiSpacer size="m" />
+                <EuiFlexGroup alignItems="center" gutterSize="xs" responsive={false}>
+                  <EuiFlexItem grow={false}>
+                    <EuiTitle size="xs">
+                      <h3>
+                        {i18n.translate('xpack.apm.requestFlyout.keyMetricsSectionTitle', {
+                          defaultMessage: 'Key metrics',
+                        })}
+                      </h3>
+                    </EuiTitle>
+                  </EuiFlexItem>
+                </EuiFlexGroup>
+                <EuiSpacer size="s" />
                 <RequestFlyoutRedMetrics
                   latencyAggregationType={latencyAggregationType}
                   setLatencyAggregationType={setLatencyAggregationType}

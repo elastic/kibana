@@ -97,8 +97,8 @@ describe('getConnectionTransactions', () => {
     it('returns transaction groups when exit spans match the resource', async () => {
       const search: SearchMock = jest
         .fn()
-        // Phase 1: exit span / transaction doc IDs
-        .mockResolvedValueOnce(idsAggResponse(['tx-1', 'tx-2'], 'transaction_ids'))
+        // Phase 1: trace IDs from exit spans / transaction docs
+        .mockResolvedValueOnce(idsAggResponse(['trace-1', 'trace-2'], 'trace_ids'))
         // Phase 2: transaction groups
         .mockResolvedValueOnce(txGroupsAggResponse(['GET /foo', 'POST /bar']));
 
@@ -114,8 +114,8 @@ describe('getConnectionTransactions', () => {
     it('returns empty groups and skips Phase 2 when no exit spans match the resource', async () => {
       const search: SearchMock = jest
         .fn()
-        // Phase 1: no IDs found
-        .mockResolvedValueOnce(idsAggResponse([], 'transaction_ids'));
+        // Phase 1: no trace IDs found
+        .mockResolvedValueOnce(idsAggResponse([], 'trace_ids'));
 
       const apmEventClient = { search } as unknown as APMEventClient;
       const result = await getConnectionTransactions(makeOptions({ apmEventClient }));
@@ -129,7 +129,7 @@ describe('getConnectionTransactions', () => {
     it('sets the correct operation name for Phase 1', async () => {
       const search: SearchMock = jest
         .fn()
-        .mockResolvedValueOnce(idsAggResponse([], 'transaction_ids'));
+        .mockResolvedValueOnce(idsAggResponse([], 'trace_ids'));
 
       const apmEventClient = { search } as unknown as APMEventClient;
       await getConnectionTransactions(makeOptions({ apmEventClient }));
@@ -147,8 +147,8 @@ describe('getConnectionTransactions', () => {
         .fn()
         // Phase 1a: parent.id values of targetService entry transactions
         .mockResolvedValueOnce(idsAggResponse(['span-abc'], 'parent_ids'))
-        // Phase 1b: source transaction IDs containing those spans
-        .mockResolvedValueOnce(idsAggResponse(['tx-42'], 'transaction_ids'))
+        // Phase 1b: trace IDs from spans in sourceService matching those span IDs
+        .mockResolvedValueOnce(idsAggResponse(['trace-42'], 'trace_ids'))
         // Phase 2: transaction groups
         .mockResolvedValueOnce(txGroupsAggResponse(['GET /checkout']));
 
@@ -185,8 +185,8 @@ describe('getConnectionTransactions', () => {
         .fn()
         // Phase 1a: found parent IDs
         .mockResolvedValueOnce(idsAggResponse(['span-abc'], 'parent_ids'))
-        // Phase 1b: no source transactions match
-        .mockResolvedValueOnce(idsAggResponse([], 'transaction_ids'));
+        // Phase 1b: no source trace IDs match
+        .mockResolvedValueOnce(idsAggResponse([], 'trace_ids'));
 
       const apmEventClient = { search } as unknown as APMEventClient;
       const result = await getConnectionTransactions(
@@ -215,12 +215,12 @@ describe('getConnectionTransactions', () => {
   // isMaxTransactionsReached
   // -------------------------------------------------------------------------
   describe('isMaxTransactionsReached', () => {
-    it('is true when Phase 1 (resource-based) returns exactly MAX_IDS transaction IDs', async () => {
-      const maxIds = Array.from({ length: MAX_IDS }, (_, i) => `tx-${i}`);
+    it('is true when Phase 1 (resource-based) returns exactly MAX_IDS trace IDs', async () => {
+      const maxIds = Array.from({ length: MAX_IDS }, (_, i) => `trace-${i}`);
 
       const search: SearchMock = jest
         .fn()
-        .mockResolvedValueOnce(idsAggResponse(maxIds, 'transaction_ids'))
+        .mockResolvedValueOnce(idsAggResponse(maxIds, 'trace_ids'))
         .mockResolvedValueOnce(txGroupsAggResponse(['GET /']));
 
       const apmEventClient = { search } as unknown as APMEventClient;
@@ -235,7 +235,7 @@ describe('getConnectionTransactions', () => {
       const search: SearchMock = jest
         .fn()
         .mockResolvedValueOnce(idsAggResponse(maxParentIds, 'parent_ids'))
-        .mockResolvedValueOnce(idsAggResponse(['tx-1'], 'transaction_ids'))
+        .mockResolvedValueOnce(idsAggResponse(['trace-1'], 'trace_ids'))
         .mockResolvedValueOnce(txGroupsAggResponse(['GET /']));
 
       const apmEventClient = { search } as unknown as APMEventClient;
@@ -246,13 +246,13 @@ describe('getConnectionTransactions', () => {
       expect(result.isMaxTransactionsReached).toBe(true);
     });
 
-    it('is true when Phase 1b (source tx) returns exactly MAX_IDS transaction IDs', async () => {
-      const maxTxIds = Array.from({ length: MAX_IDS }, (_, i) => `tx-${i}`);
+    it('is true when Phase 1b (source span) returns exactly MAX_IDS trace IDs', async () => {
+      const maxTraceIds = Array.from({ length: MAX_IDS }, (_, i) => `trace-${i}`);
 
       const search: SearchMock = jest
         .fn()
         .mockResolvedValueOnce(idsAggResponse(['span-1'], 'parent_ids'))
-        .mockResolvedValueOnce(idsAggResponse(maxTxIds, 'transaction_ids'))
+        .mockResolvedValueOnce(idsAggResponse(maxTraceIds, 'trace_ids'))
         .mockResolvedValueOnce(txGroupsAggResponse(['GET /']));
 
       const apmEventClient = { search } as unknown as APMEventClient;
@@ -263,10 +263,10 @@ describe('getConnectionTransactions', () => {
       expect(result.isMaxTransactionsReached).toBe(true);
     });
 
-    it('is false when Phase 1 returns fewer than MAX_IDS transaction IDs', async () => {
+    it('is false when Phase 1 returns fewer than MAX_IDS trace IDs', async () => {
       const search: SearchMock = jest
         .fn()
-        .mockResolvedValueOnce(idsAggResponse(['tx-1', 'tx-2'], 'transaction_ids'))
+        .mockResolvedValueOnce(idsAggResponse(['trace-1', 'trace-2'], 'trace_ids'))
         .mockResolvedValueOnce(txGroupsAggResponse(['GET /']));
 
       const apmEventClient = { search } as unknown as APMEventClient;
@@ -276,11 +276,11 @@ describe('getConnectionTransactions', () => {
     });
 
     it('propagates isSampled=true to every transaction group when the cap is reached', async () => {
-      const maxIds = Array.from({ length: MAX_IDS }, (_, i) => `tx-${i}`);
+      const maxIds = Array.from({ length: MAX_IDS }, (_, i) => `trace-${i}`);
 
       const search: SearchMock = jest
         .fn()
-        .mockResolvedValueOnce(idsAggResponse(maxIds, 'transaction_ids'))
+        .mockResolvedValueOnce(idsAggResponse(maxIds, 'trace_ids'))
         .mockResolvedValueOnce(txGroupsAggResponse(['GET /a', 'POST /b']));
 
       const apmEventClient = { search } as unknown as APMEventClient;
@@ -296,7 +296,7 @@ describe('getConnectionTransactions', () => {
     it('propagates isSampled=false to every transaction group when below the cap', async () => {
       const search: SearchMock = jest
         .fn()
-        .mockResolvedValueOnce(idsAggResponse(['tx-1'], 'transaction_ids'))
+        .mockResolvedValueOnce(idsAggResponse(['trace-1'], 'trace_ids'))
         .mockResolvedValueOnce(txGroupsAggResponse(['GET /a']));
 
       const apmEventClient = { search } as unknown as APMEventClient;

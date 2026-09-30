@@ -207,7 +207,8 @@ const serviceMapConnectionTransactionsRoute = createApmServerRoute({
       apmEventClient,
       sourceServiceName,
       targetServiceName,
-      dependencies: Array.isArray(dependencies) ? dependencies : [dependencies],
+      dependencies:
+        dependencies === undefined ? [] : Array.isArray(dependencies) ? dependencies : [dependencies],
       environment,
       start,
       end,

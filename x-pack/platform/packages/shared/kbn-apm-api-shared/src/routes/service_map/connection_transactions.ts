@@ -37,8 +37,12 @@ export const serviceMapConnectionTransactionsRoute = defineRoute<ConnectionTrans
       query: z
         .object({
           sourceServiceName: z.string(),
-          dependencies: z.union([z.string(), z.array(z.string())]),
-          /** Set for service→service edges — triggers a trace-level join instead of resource-based. */
+          /**
+           * span.destination.service.resource values for the connection.
+           * Optional — absent for service→service edges where only targetServiceName is used.
+           */
+          dependencies: z.union([z.string(), z.array(z.string())]).optional(),
+          /** Set for service→service edges — triggers a parent-span join instead of resource-based. */
           targetServiceName: z.string().optional(),
         })
         .merge(z.object({ latencyAggregationType: latencyAggregationTypeSchema }).partial())

@@ -20,8 +20,8 @@ import {
   SERVICE_NAME,
   SPAN_DESTINATION_SERVICE_RESOURCE,
   SPAN_ID,
+  TRACE_ID,
   TRANSACTION_DURATION,
-  TRANSACTION_ID,
   TRANSACTION_NAME,
   TRANSACTION_TYPE,
 } from '../../../common/es_fields/apm';
@@ -62,7 +62,10 @@ export function getConnectionTransactions({
   latencyAggregationType?: LatencyAggregationType;
 }): Promise<ConnectionTransactionsResponse> {
   return withApmSpan('get_connection_transactions', async () => {
-    let transactionIds: string[];
+    // trace.id is present on both APM-native and OTel-native spans/transactions,
+    // while transaction.id is absent on OTel exit spans. Using trace.id for the join
+    // means Phase 2 may include extra transactions in multi-tx traces (PoC trade-off).
+    let traceIds: string[];
     let isMaxTransactionsReached: boolean;
 
     if (targetServiceName) {
@@ -114,7 +117,8 @@ export function getConnectionTransactions({
       }
 
       // Phase 1b: find sourceService spans whose span.id is in parentIds, then collect
-      // the transaction.id of each containing transaction.
+      // the trace.id. Using trace.id (not transaction.id) so OTel exit spans — which lack
+      // transaction.id — are handled correctly. Phase 2 filters by trace.id + service.name.
       const sourceTxResponse = await apmEventClient.search(
         'get_connection_transactions_source_tx_ids',
         {
@@ -132,34 +136,29 @@ export function getConnectionTransactions({
             },
           },
           aggs: {
-            transaction_ids: {
-              terms: { field: TRANSACTION_ID, size: MAX_IDS },
+            trace_ids: {
+              terms: { field: TRACE_ID, size: MAX_IDS },
             },
           },
         }
       );
 
-      const sourceBuckets = sourceTxResponse.aggregations?.transaction_ids.buckets ?? [];
-      transactionIds = sourceBuckets.map((b) => String(b.key));
-      isMaxTransactionsReached = parentIds.length >= MAX_IDS || transactionIds.length >= MAX_IDS;
+      const sourceBuckets = sourceTxResponse.aggregations?.trace_ids.buckets ?? [];
+      traceIds = sourceBuckets.map((b) => String(b.key));
+      isMaxTransactionsReached = parentIds.length >= MAX_IDS || traceIds.length >= MAX_IDS;
     } else {
       //
       // Service→dependency Phase 1: resource-based join.
       //
-      // Spans have `transaction.id` (the containing transaction) but NOT `transaction.name`.
+      // Spans have `trace.id` but NOT `transaction.name`.
       // Transaction docs have `transaction.name` but NOT `span.destination.service.resource`.
-      // So we must do a two-phase join. We join on transaction.id — not trace.id — to avoid
-      // the attribution bug in get_top_dependency_spans.ts:126 (trace-id keying attributes
-      // the wrong transaction in multi-service traces).
+      // So we do a two-phase join on trace.id — present on both APM-native and OTel-native
+      // spans — then filter in Phase 2 by service.name + trace.id to find the right transactions.
       //
       // We query BOTH span and transaction documents. The service map's own exit span query
       // (fetch_exit_span_samples.ts) does the same — in some cases (single-span transactions,
       // certain agent types) `span.destination.service.resource` appears on a transaction
       // document rather than a span document.
-      //
-      // When the doc is a span: `transaction.id` = the containing transaction's ID.
-      // When the doc is a transaction: `transaction.id` = the doc's own ID (self-referential).
-      // Either way Phase 2 correctly resolves to a transaction document.
       //
       const spanAggResponse = await apmEventClient.search(
         'get_connection_transactions_exit_span_ids',
@@ -180,9 +179,9 @@ export function getConnectionTransactions({
             },
           },
           aggs: {
-            transaction_ids: {
+            trace_ids: {
               terms: {
-                field: TRANSACTION_ID,
+                field: TRACE_ID,
                 size: MAX_IDS,
               },
             },
@@ -190,12 +189,12 @@ export function getConnectionTransactions({
         }
       );
 
-      const buckets = spanAggResponse.aggregations?.transaction_ids.buckets ?? [];
-      transactionIds = buckets.map((b) => String(b.key));
-      isMaxTransactionsReached = transactionIds.length >= MAX_IDS;
+      const buckets = spanAggResponse.aggregations?.trace_ids.buckets ?? [];
+      traceIds = buckets.map((b) => String(b.key));
+      isMaxTransactionsReached = traceIds.length >= MAX_IDS;
     }
 
-    if (transactionIds.length === 0) {
+    if (traceIds.length === 0) {
       return { transactionGroups: [], isMaxTransactionsReached: false };
     }
 
@@ -214,7 +213,7 @@ export function getConnectionTransactions({
         bool: {
           filter: [
             { term: { [SERVICE_NAME]: sourceServiceName } },
-            { terms: { [TRANSACTION_ID]: transactionIds } },
+            { terms: { [TRACE_ID]: traceIds } },
             ...rangeQuery(start, end),
             ...environmentQuery(environment),
           ],
