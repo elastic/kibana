@@ -6,3 +6,6 @@
  */
 
 export { SIGNIFICANT_EVENTS_APP_ROUTE } from '@kbn/significant-events-plugin/common';
+
+/** Id of the Significant Events list tab on the `/{tab}` route. */
+export const SIGNIFICANT_EVENTS_TAB = 'significant_events' as const;

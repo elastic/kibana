@@ -10,6 +10,7 @@ import type { ProposalsPublicPluginStart } from '@kbn/proposals-plugin/public';
 import type { LicensingPluginStart } from '@kbn/licensing-plugin/public';
 import type { CloudStart } from '@kbn/cloud-plugin/public';
 import type { AgentBuilderPluginStart } from '@kbn/agent-builder-browser';
+import type { SecurityPluginStart } from '@kbn/security-plugin/public';
 import type { SharePluginStart } from '@kbn/share-plugin/public';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
 import type { WorkflowsPublicPluginStart } from '@kbn/workflows-management-plugin/public';
@@ -26,6 +27,8 @@ export interface AlertZeroStartDependencies {
   agentBuilder?: AgentBuilderPluginStart;
   agenticInvestigations?: AgenticInvestigationsPublicPluginStart;
   proposals?: ProposalsPublicPluginStart;
+  /** Optional; absent in minimal Kibana deployments without X-Pack security. */
+  security?: SecurityPluginStart;
   spaces?: SpacesPluginStart;
   share?: SharePluginStart;
   workflowsManagement?: WorkflowsPublicPluginStart;

@@ -7,7 +7,6 @@
 
 import React, { memo, useCallback, useState } from 'react';
 import {
-  EuiCallOut,
   EuiCheckableCard,
   EuiFlexGroup,
   EuiFlexItem,
@@ -20,6 +19,7 @@ import {
   EuiTitle,
   useEuiTheme,
 } from '@elastic/eui';
+import { KbnWarningCallout } from '@kbn/ui-callout';
 import { css } from '@emotion/react';
 import { type EscalationModalRenderProps } from '@kbn/agentic-investigations-common';
 import {
@@ -34,14 +34,13 @@ import { getUserDisplayName } from '@kbn/user-profile-components';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { CoreStart } from '@kbn/core/public';
 import { isHttpFetchError } from '@kbn/core-http-browser';
-import { ALERTZERO_APP_ID } from '@kbn/alertzero-common';
 import {
   ESCALATION_MODAL_TRANSLATIONS,
   ESCALATION_ERRORS,
   ESCALATION_SUCCESS,
 } from './escalation_modal_translations';
-import { SELECTED_CONVERSATION_ID_PARAM } from './conversations_url_params';
 import { AddToExistingEscalationForm } from './add_to_existing_escalation_form';
+import { useOpenInChat } from '../../hooks/use_open_in_chat';
 import { CreateEscalationForm } from './create_escalation_form';
 import { useAgenticInvestigationsCapabilities } from '../../hooks/use_agentic_investigations_capabilities';
 
@@ -62,29 +61,25 @@ export const ConnectedEscalationModal = memo<EscalationModalRenderProps>(
     const [incidentSearch, setIncidentSearch] = useState('');
     const [collaboratorSearch, setCollaboratorSearch] = useState('');
     const {
-      services: { notifications, application },
+      services: { notifications },
     } = useKibana<CoreStart>();
 
     const { showEscalations } = useAgenticInvestigationsCapabilities();
 
-    const escalationPath = useCallback(
-      (escalationId: string) => `/escalations?${SELECTED_CONVERSATION_ID_PARAM}=${escalationId}`,
-      []
-    );
+    const { getChatHref, openChat } = useOpenInChat();
 
     const makeViewEscalationPrimary = useCallback(
-      (escalationId: string) => {
-        const path = escalationPath(escalationId);
+      (escalationId: string, agentId: string) => {
         return {
           children: ESCALATION_SUCCESS.linkText,
-          href: application.getUrlForApp(ALERTZERO_APP_ID, { path }),
+          href: getChatHref(escalationId, agentId),
           onClick: (e: React.MouseEvent) => {
             e.preventDefault();
-            void application.navigateToApp(ALERTZERO_APP_ID, { path });
+            openChat(escalationId, agentId);
           },
         };
       },
-      [application, escalationPath]
+      [getChatHref, openChat]
     );
 
     const { data: currentUserProfile } = useCurrentUserProfile();
@@ -146,24 +141,22 @@ export const ConnectedEscalationModal = memo<EscalationModalRenderProps>(
           {existingEscalations.length > 0 && (
             <>
               <EuiSpacer size="m" />
-              <EuiCallOut
+              <KbnWarningCallout
                 announceOnMount
                 size="s"
-                color="warning"
-                iconType="warning"
                 title={T.alreadyEscalatedCallout.title(existingEscalations.length)}
                 data-test-subj="escalationModalAlreadyEscalatedCallout"
               >
                 <ul style={{ marginBottom: 0 }}>
                   {existingEscalations.map((e) => {
-                    const path = escalationPath(e.id);
+                    const href = getChatHref(e.id, e.agent_id);
                     return (
                       <li key={e.id}>
                         <EuiLink
-                          href={application.getUrlForApp(ALERTZERO_APP_ID, { path })}
+                          href={href}
                           onClick={(ev: React.MouseEvent) => {
                             ev.preventDefault();
-                            void application.navigateToApp(ALERTZERO_APP_ID, { path });
+                            openChat(e.id, e.agent_id);
                             onClose();
                           }}
                           data-test-subj={`escalationModalExistingEscalationLink-${e.id}`}
@@ -174,7 +167,7 @@ export const ConnectedEscalationModal = memo<EscalationModalRenderProps>(
                     );
                   })}
                 </ul>
-              </EuiCallOut>
+              </KbnWarningCallout>
             </>
           )}
 
@@ -248,7 +241,9 @@ export const ConnectedEscalationModal = memo<EscalationModalRenderProps>(
                   onSuccess: (escalation) => {
                     notifications?.toasts.addSuccess({
                       title: ESCALATION_SUCCESS.createTitle,
-                      actionProps: { primary: makeViewEscalationPrimary(escalation.id) },
+                      actionProps: {
+                        primary: makeViewEscalationPrimary(escalation.id, escalation.agent_id),
+                      },
                     });
                     onClose();
                   },
@@ -275,10 +270,12 @@ export const ConnectedEscalationModal = memo<EscalationModalRenderProps>(
               attachToEscalation.mutate(
                 { escalationId, linkedInvestigationId: conversationId },
                 {
-                  onSuccess: () => {
+                  onSuccess: (escalation) => {
                     notifications?.toasts.addSuccess({
                       title: ESCALATION_SUCCESS.addToTitle,
-                      actionProps: { primary: makeViewEscalationPrimary(escalationId) },
+                      actionProps: {
+                        primary: makeViewEscalationPrimary(escalation.id, escalation.agent_id),
+                      },
                     });
                     onClose();
                   },
