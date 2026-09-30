@@ -119,11 +119,10 @@ export const registerRoutes = ({
         });
       }
       const { elasticsearch } = await context.core;
-      await ensureSettingsIndex(elasticsearch.client.asInternalUser, settingsIndex);
-      const store = new ElasticsearchRepositorySettingsStore(
-        elasticsearch.client.asCurrentUser,
-        settingsIndex
-      );
+      const client = elasticsearch.client.asCurrentUser;
+      // Like the catalog, the settings index is created by the user who first writes to it.
+      await ensureSettingsIndex(client, settingsIndex);
+      const store = new ElasticsearchRepositorySettingsStore(client, settingsIndex);
       return response.ok({ body: { repository: await store.upsert(request.body) } });
     }
   );

@@ -94,7 +94,7 @@ const setup = ({
     };
     const context = {
       core: Promise.resolve({
-        elasticsearch: { client: { asCurrentUser: es.client, asInternalUser: es.client } },
+        elasticsearch: { client: { asCurrentUser: es.client } },
       }),
     };
     await handler(context, request, response);
