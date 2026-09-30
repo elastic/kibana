@@ -15,6 +15,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
   const kibanaServer = getService('kibanaServer');
   const toasts = getService('toasts');
+  const retry = getService('retry');
 
   describe('Kibana Alerts - rules tab accessibility tests', () => {
     before(async () => {
@@ -83,7 +84,13 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     // Adding a11y test for one connector
     it('a11y test on email connectors', async () => {
-      await testSubjects.click('.email-card');
+      // A card click can be dropped while the grid settles, and the card is gone once the form is up.
+      await retry.try(async () => {
+        if (await testSubjects.exists('.email-card')) {
+          await testSubjects.click('.email-card');
+        }
+        await testSubjects.existOrFail('nameInput', { timeout: 10_000 });
+      });
       await a11y.testAppSnapshot();
       await testSubjects.click('create-connector-flyout-back-btn');
     });

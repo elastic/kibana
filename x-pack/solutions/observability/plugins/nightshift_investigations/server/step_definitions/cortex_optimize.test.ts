@@ -29,12 +29,16 @@ describe('cortexOptimizeStepDefinition', () => {
     agent_id?: string;
     conversation_id?: string;
     round_id?: string;
+    tool_calls?: unknown;
   }) =>
     ({
       input,
       rawInput: input,
       contextManager: {
-        getContext: jest.fn().mockReturnValue({ workflow: { spaceId: 'default' } }),
+        getContext: jest.fn().mockReturnValue({
+          workflow: { spaceId: 'default' },
+          execution: { id: 'execution-1' },
+        }),
         getFakeRequest,
         getScopedEsClient,
         renderInputTemplate: jest.fn((val) => val),
@@ -61,6 +65,7 @@ describe('cortexOptimizeStepDefinition', () => {
         agent_id: 'nightshift.investigation',
         conversation_id: 'conv-1',
         round_id: 'round-1',
+        tool_calls: [{ tool_id: 'nightshift.sandbox_bash', params: { command: 'ls' } }],
       })
     );
 
@@ -69,8 +74,10 @@ describe('cortexOptimizeStepDefinition', () => {
       agentId: 'nightshift.investigation',
       userMessage: 'why is checkout slow?',
       assistantMessage: 'Redis evictions.',
+      toolCalls: [{ tool_id: 'nightshift.sandbox_bash', params: { command: 'ls' } }],
       esClient,
       spaceId: 'default',
+      interactionId: 'execution-1',
       signal: expect.any(AbortSignal),
       analytics,
       conversationId: 'conv-1',
@@ -80,5 +87,20 @@ describe('cortexOptimizeStepDefinition', () => {
       getSearchInferenceEndpoints,
     });
     expect(result).toEqual({ output: { status: 'ok' } });
+  });
+
+  it('passes no tool calls when the round did not report any', async () => {
+    const definition = cortexOptimizeStepDefinition({
+      getInference,
+      getSearchInferenceEndpoints,
+      analytics,
+      logger: loggerMock.create(),
+    });
+
+    await definition.handler(
+      createContext({ prompt: 'hi', response: 'hello', agent_id: 'nightshift.investigation' })
+    );
+
+    expect(runCortexOptimize).toHaveBeenLastCalledWith(expect.objectContaining({ toolCalls: [] }));
   });
 });

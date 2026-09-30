@@ -17,6 +17,7 @@ import {
   getWorkflowIdleTimeoutResumeAtAfterLoop,
   handleExecutionDelay,
 } from './handle_execution_delay';
+import { ResumeTaskSchedulingError } from './resume_task_scheduling_error';
 import type { WorkflowExecutionLoopParams } from './types';
 import { DEFAULT_WORKFLOW_TIMEOUT } from '../default_workflow_settings';
 import {
@@ -776,10 +777,11 @@ describe('handleExecutionDelay', () => {
   });
 
   describe('TM scheduling errors', () => {
-    it('propagates scheduleResumeTask failure', async () => {
+    it('propagates scheduleResumeTask failure as a ResumeTaskSchedulingError', async () => {
       const params = makeParams();
+      const schedulingError = new Error('task manager unavailable');
       (params.workflowTaskManager.scheduleResumeTask as jest.Mock).mockRejectedValue(
-        new Error('task manager unavailable')
+        schedulingError
       );
       const resumeAt = new Date(Date.now() + 8000).toISOString();
       const stepRuntime = makeStepRuntime({
@@ -790,9 +792,13 @@ describe('handleExecutionDelay', () => {
         } as any,
       });
 
-      await expect(handleExecutionDelay(params, stepRuntime)).rejects.toThrow(
-        'task manager unavailable'
+      const error = await handleExecutionDelay(params, stepRuntime).catch((e) => e);
+
+      expect(error).toBeInstanceOf(ResumeTaskSchedulingError);
+      expect(error.message).toBe(
+        'Failed to schedule workflow resume task: task manager unavailable'
       );
+      expect(error.cause).toBe(schedulingError);
     });
   });
 });

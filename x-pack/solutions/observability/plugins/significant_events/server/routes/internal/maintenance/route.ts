@@ -58,7 +58,8 @@ const pauseRoute = createServerRoute({
     summary: 'Pause Significant Events activity',
     description:
       'Disables all Significant Events managed workflows across every Kibana space, cancels their in-flight executions, and disables the alerting rules backing knowledge indicator queries. Existing data is kept. Idempotent while paused. ' +
-      'This is a deployment-wide control (agnostic saved object), not per-space. Authorization uses the caller’s space-scoped Nightshift manage privilege; there is no separate cluster-level privilege today — treat manage as sufficient to pause the whole deployment.',
+      'This is a deployment-wide control (agnostic saved object), not per-space. Authorization uses the caller’s space-scoped Nightshift manage privilege; there is no separate cluster-level privilege today — treat manage as sufficient to pause the whole deployment. ' +
+      'Stays available while the Nightshift feature flag is off, so background activity can be stopped without turning Nightshift back on.',
   },
   security: {
     authz: {
@@ -73,7 +74,7 @@ const pauseRoute = createServerRoute({
     maintenanceService,
   }): Promise<SignificantEventsMaintenanceSummary> => {
     const { licensing } = await getScopedClients({ request });
-    await assertSignificantEventsAccess({ server, licensing });
+    await assertSignificantEventsAccess({ server, licensing, ignore: ['feature_flag'] });
 
     const updatedBy = server.core.security.authc.getCurrentUser(request)?.username;
     return maintenanceService.pause({ request, updatedBy });
@@ -114,7 +115,7 @@ const statusRoute = createServerRoute({
     access: 'internal',
     summary: 'Get Significant Events maintenance status',
     description:
-      'Returns the current maintenance state of Significant Events activity (e.g. enabled or paused).',
+      'Returns the current maintenance state of Significant Events activity (e.g. enabled or paused). Stays available while the Nightshift feature flag is off.',
   },
   security: {
     authz: {
@@ -129,7 +130,7 @@ const statusRoute = createServerRoute({
     maintenanceService,
   }): Promise<SignificantEventsMaintenanceStatus> => {
     const { licensing } = await getScopedClients({ request });
-    await assertSignificantEventsAccess({ server, licensing });
+    await assertSignificantEventsAccess({ server, licensing, ignore: ['feature_flag'] });
 
     return maintenanceService.getStatus({ request });
   },

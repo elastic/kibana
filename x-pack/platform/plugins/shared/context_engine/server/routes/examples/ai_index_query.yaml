@@ -1,0 +1,85 @@
+requestBody:
+  content:
+    application/json:
+      examples:
+        queryAiIndicesRequestExample:
+          summary: "Query with a parameter and a limit"
+          description: "Example ES|QL query with a named parameter and a row limit"
+          value:
+            query: FROM ai-index-* | WHERE type == ?type | KEEP title, type, attributes | LIMIT 10
+            params:
+              type: faq
+            limit: 10
+responses:
+  200:
+    content:
+      application/json:
+        examples:
+          queryAiIndicesResponseExample:
+            summary: "Columns and rows"
+            description: "Example response with column metadata and matching rows. `flattened` columns such as `attributes` are returned as objects."
+            value:
+              columns:
+                - name: title
+                  type: text
+                - name: type
+                  type: keyword
+                - name: attributes
+                  type: flattened
+              values:
+                - ["How to reset a password", "faq", { source: zendesk }]
+                - ["Billing cycle explained", "faq", { source: zendesk }]
+  400:
+    content:
+      application/json:
+        examples:
+          invalidQueryExample:
+            summary: "Unknown column"
+            description: "The ES|QL query references a column that does not exist"
+            value:
+              statusCode: 400
+              error: Bad Request
+              message: "verification_exception\n\tRoot causes:\n\t\tverification_exception: Found 1 problem\nline 1:46: Unknown column [titel], did you mean [title]?"
+  403:
+    content:
+      application/json:
+        examples:
+          forbiddenExample:
+            summary: "Missing index privileges"
+            description: "The caller lacks Elasticsearch index privileges"
+            value:
+              statusCode: 403
+              error: Forbidden
+              message: "security_exception\n\tRoot causes:\n\t\tsecurity_exception: action [indices:data/read/esql] is unauthorized for user [jdoe] with effective roles [support_reader], this action is granted by the index privileges [read_cross_cluster,read,all]"
+  404:
+    content:
+      application/json:
+        examples:
+          contextEngineDisabledExample:
+            summary: "Context Engine turned off"
+            description: "Context Engine is turned off in this space"
+            value:
+              statusCode: 404
+              error: Not Found
+              message: Not Found
+x-codeSamples:
+  - lang: curl
+    source: |
+      curl \
+        -X POST "https://${KIBANA_URL}/api/context_engine/ai_index/_query" \
+        -H "Authorization: ApiKey ${API_KEY}" \
+        -H "kbn-xsrf: true" \
+        -H "Content-Type: application/json" \
+        -d '{
+          "query": "FROM ai-index-* | WHERE type == ?type | KEEP title, type, attributes | LIMIT 10",
+          "params": { "type": "faq" },
+          "limit": 10
+        }'
+  - lang: Console
+    source: |
+      POST kbn:/api/context_engine/ai_index/_query
+      {
+        "query": "FROM ai-index-* | WHERE type == ?type | KEEP title, type, attributes | LIMIT 10",
+        "params": { "type": "faq" },
+        "limit": 10
+      }

@@ -13,7 +13,8 @@ import type {
   SaveDiscoverSessionParams,
   SavedSearchPublicPluginStart,
 } from '@kbn/saved-search-plugin/public';
-import type { DiscoverSessionApiResponse, DiscoverSessionWarning } from '../../server';
+import type { DiscoverSessionWarning } from '../../server';
+import type { DiscoverSessionInternalResponse } from '../../server/api/internal_schema';
 import type { DiscoverSessionClient } from './api_client';
 import {
   fromDiscoverSessionApiResponse,
@@ -23,7 +24,7 @@ import {
 
 // Coordinates session loading and saving through HTTP or the legacy client, selected by the flag.
 // HTTP loads convert the API response and return its warnings without showing UI.
-// Local Data View IDs are assigned when the UI restores its tabs, not by this service.
+// Internal routes preserve inline Data View IDs; tab restoration fills any missing IDs.
 // HTTP saves convert the session into a create or upsert request, then keep the submitted tabs
 // and update only the session ID, metadata, and references from the response.
 
@@ -71,7 +72,7 @@ export const createSessionService = ({
     },
     save: async (session, options) => {
       const data = toDiscoverSessionApiData(session);
-      let response: DiscoverSessionApiResponse;
+      let response: DiscoverSessionInternalResponse;
 
       if (options.copyOnSave || session.id === undefined) {
         response = await apiClient.create(data);
@@ -80,7 +81,7 @@ export const createSessionService = ({
       }
 
       // Saving confirms the submitted tabs; it does not reload them. The API document omits
-      // local values such as pin markers, inline IDs, and the live chart fingerprint.
+      // local values such as pin markers, control order numbers, and the live chart fingerprint.
       return {
         ...session,
         id: response.id,

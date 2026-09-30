@@ -27,7 +27,7 @@ type Rule = FindRulesResponse['items'][number];
 const makeRule = (name: string, grouping?: { fields: string[] }): Rule =>
   ({
     metadata: { name },
-    query: { format: 'standalone', breach: { query: `FROM ${name}` } },
+    query: { base: `FROM ${name}` },
     ...(grouping ? { grouping } : {}),
   } as unknown as Rule);
 
@@ -81,6 +81,32 @@ describe('EpisodeStatusCell', () => {
     expect(screen.getByText('Active')).toBeInTheDocument();
     expect(screen.queryByTestId('alertEpisodeStatusCellSnoozeIndicator')).not.toBeInTheDocument();
     expect(screen.queryByTestId('alertEpisodeStatusCellAckIndicator')).not.toBeInTheDocument();
+  });
+
+  it('renders the flapping indicator for an active flapping alert', () => {
+    const row = makeRow({
+      'episode.status': 'active',
+      'episode.id': 'ep1',
+      'rule.id': 'r1',
+      group_hash: 'gh1',
+      is_flapping: true,
+    });
+    renderWithI18n(<EpisodeStatusCell {...baseCellProps} columnId="episode.status" row={row} />);
+
+    expect(screen.getByTestId('alertEpisodeFlappingBadge')).toBeInTheDocument();
+  });
+
+  it('does not render the flapping indicator for a recovered flapping alert', () => {
+    const row = makeRow({
+      'episode.status': 'inactive',
+      'episode.id': 'ep1',
+      'rule.id': 'r1',
+      group_hash: 'gh1',
+      is_flapping: true,
+    });
+    renderWithI18n(<EpisodeStatusCell {...baseCellProps} columnId="episode.status" row={row} />);
+
+    expect(screen.queryByTestId('alertEpisodeFlappingBadge')).not.toBeInTheDocument();
   });
 });
 

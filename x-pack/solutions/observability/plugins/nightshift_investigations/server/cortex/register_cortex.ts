@@ -14,11 +14,17 @@ import type {
 import type { InferenceServerStart } from '@kbn/inference-plugin/server';
 import type { SearchInferenceEndpointsPluginStart } from '@kbn/search-inference-endpoints/server';
 import type { ContextEnginePluginSetup } from '@kbn/context-engine-plugin/server';
-import { SIGNIFICANT_EVENTS_INVESTIGATION_INFERENCE_FEATURE_ID } from '@kbn/significant-events-schema';
+import {
+  SIGNIFICANT_EVENTS_INFERENCE_PARENT_FEATURE_ID,
+  SIGNIFICANT_EVENTS_INFERENCE_PRODUCT_FEATURE,
+  SIGNIFICANT_EVENTS_INFERENCE_PRODUCT_SOLUTION,
+  SIGNIFICANT_EVENTS_INVESTIGATION_INFERENCE_FEATURE_ID,
+} from '@kbn/significant-events-schema';
 import { i18n } from '@kbn/i18n';
 import type { SandboxSession } from '@kbn/sandbox-plugin/server';
 import { CORTEX_AI_INDEX_DEST, CORTEX_AI_INDEX_ID } from '../../common/cortex';
-import { NIGHTSHIFT_INVESTIGATION_AGENT_ID } from '../agents/investigation';
+import { NIGHTSHIFT_INVESTIGATION_AGENT_ID, SANDBOX_TOOL_IDS } from '../agents/investigation';
+import type { InvestigationToolCall } from '../decision_trees/accessed_trees';
 import { createCortexTelemetry } from '../telemetry';
 import { materializeCortex } from './materialize';
 import { createLlmProposeCortexEdits, optimizeCortex } from './optimize';
@@ -56,6 +62,13 @@ export const registerCortexAiIndex = (
     traces: [],
   });
 };
+
+/** Rounds with fewer tool calls rarely establish anything durable, e.g. chat replies or smoke tests. */
+const MIN_OPTIMIZE_TOOL_CALLS = 3;
+
+// Only sandbox calls carry the queries and files the optimizer learns from; the rest (e.g.
+// progress reports) would spend its transcript budget and count towards the minimum.
+const OPTIMIZER_TOOL_IDS: ReadonlySet<string> = new Set(SANDBOX_TOOL_IDS);
 
 /** gRPC status the sandbox session rethrows when its pod refuses or drops the connection. */
 const GRPC_UNAVAILABLE = 14;
@@ -103,8 +116,10 @@ export const runCortexOptimize = async ({
   agentId,
   userMessage,
   assistantMessage,
+  toolCalls,
   esClient,
   spaceId,
+  interactionId,
   signal,
   analytics,
   conversationId,
@@ -117,8 +132,10 @@ export const runCortexOptimize = async ({
   agentId?: string;
   userMessage: string;
   assistantMessage: string;
+  toolCalls: InvestigationToolCall[];
   esClient: ElasticsearchClient;
   spaceId: string;
+  interactionId: string;
   signal?: AbortSignal;
   analytics: AnalyticsServiceSetup;
   conversationId?: string;
@@ -135,6 +152,16 @@ export const runCortexOptimize = async ({
   if (agentId !== NIGHTSHIFT_INVESTIGATION_AGENT_ID) {
     logger.debug(
       'Cortex optimizer skipped — round was not produced by the Nightshift investigator'
+    );
+    return;
+  }
+
+  const sandboxToolCalls = toolCalls.filter(
+    ({ tool_id: toolId }) => toolId !== undefined && OPTIMIZER_TOOL_IDS.has(toolId)
+  );
+  if (sandboxToolCalls.length < MIN_OPTIMIZE_TOOL_CALLS) {
+    logger.debug(
+      `Cortex optimizer skipped — round made ${sandboxToolCalls.length} sandbox tool calls, below ${MIN_OPTIMIZE_TOOL_CALLS}`
     );
     return;
   }
@@ -157,12 +184,27 @@ export const runCortexOptimize = async ({
   }
 
   const store = createCortexStore({ esClient, logger, spaceId, signal });
-  const inferenceClient = inference.getClient({ request });
+  const inferenceClient = inference.getClient({
+    request,
+    bindTo: {
+      connectorId,
+      metadata: {
+        connectorTelemetry: {
+          pluginId: SIGNIFICANT_EVENTS_INVESTIGATION_INFERENCE_FEATURE_ID,
+          aggregateBy: SIGNIFICANT_EVENTS_INFERENCE_PARENT_FEATURE_ID,
+          productSolution: SIGNIFICANT_EVENTS_INFERENCE_PRODUCT_SOLUTION,
+          productFeature: SIGNIFICANT_EVENTS_INFERENCE_PRODUCT_FEATURE,
+          interactionId,
+        },
+      },
+    },
+  });
   await optimizeCortex({
     store,
-    proposeEdits: createLlmProposeCortexEdits({ inferenceClient, connectorId }),
+    proposeEdits: createLlmProposeCortexEdits({ inferenceClient }),
     userMessage,
     assistantMessage,
+    toolCalls: sandboxToolCalls,
     telemetry: createCortexTelemetry({
       analytics,
       conversationId,
