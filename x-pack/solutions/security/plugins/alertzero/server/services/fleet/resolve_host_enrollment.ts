@@ -40,6 +40,11 @@ export const makeResolveHostEnrollment = (
  * Binds host enrollment lookups to the space the caller is running in. The service is read
  * through a getter because step definitions register during `setup` but only run after
  * `start`, which is when Fleet's service becomes available.
+ *
+ * Without a space to scope to there is no correct lookup to make, so the resolver reports
+ * every host unenrolled -- the same answer as a Fleet-less deployment. That mints a
+ * recommendation instead of an executable action, which is the safe direction to fail: the
+ * alternative is acting on whichever space's host happened to match first.
  */
 export const makeScopedResolveHostEnrollment =
   (getAgentService: () => AgentService | undefined) =>
