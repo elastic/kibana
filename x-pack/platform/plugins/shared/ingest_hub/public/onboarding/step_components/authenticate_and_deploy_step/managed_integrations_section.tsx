@@ -117,8 +117,7 @@ export function ManagedIntegrationsSection({
   const location = useLocation();
   const isEditMode = new URLSearchParams(location.search).has('deploymentId');
   const isStaticKeysEditMode = isEditMode && authenticateAndDeployStep.authMethod === 'static_keys';
-  const isIfEditMode =
-    isEditMode && authenticateAndDeployStep.authMethod === 'identity_federation';
+  const isIfEditMode = isEditMode && authenticateAndDeployStep.authMethod === 'identity_federation';
   const { euiTheme } = useEuiTheme();
   const contentId = useGeneratedHtmlId({ prefix: 'managedIntegrationsContent' });
   const [isOpen, setIsOpen] = useState(!isDone);
