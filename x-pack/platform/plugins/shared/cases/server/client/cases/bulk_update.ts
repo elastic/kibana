@@ -54,10 +54,12 @@ import {
   fillMissingCustomFields,
   getCloseReasonIfValid,
   getClosedInfoForUpdate,
+  getConfiguredStatuses,
   getDurationForUpdate,
   getInProgressInfoForUpdate,
   getTimingMetricsForUpdate,
   getUserProfilesSafe,
+  resolveStatusForUpdate,
 } from './utils';
 import { LICENSING_CASE_ASSIGNMENT_FEATURE } from '../../common/constants';
 import type { LicensingService } from '../../services/licensing';
@@ -416,7 +418,7 @@ function partitionPatchRequest(
 /**
  * Fields that are allowed to be present when users reopen cases
  */
-const REOPEN_ONLY_CASE_FIELDS = new Set(['id', 'version', 'status']);
+const REOPEN_ONLY_CASE_FIELDS = new Set(['id', 'version', 'status', 'status_key']);
 
 /**
  * Fields that are allowed to be present when case is reassigned
@@ -558,8 +560,8 @@ export const bulkUpdate = async (
 
   try {
     const rawQuery = decodeWithExcessOrThrow(CasesPatchRequestRt)(cases);
-    const query = emptyCasesAssigneesSanitizer(rawQuery);
-    const caseIds = query.cases.map((q) => q.id);
+    const sanitizedQuery = emptyCasesAssigneesSanitizer(rawQuery);
+    const caseIds = sanitizedQuery.cases.map((q) => q.id);
     const myCases = await caseService.getCases({
       caseIds,
     });
@@ -573,6 +575,47 @@ export const bulkUpdate = async (
       acc.set(so.id, so as CaseSavedObjectTransformed);
       return acc;
     }, new Map<string, CaseSavedObjectTransformed>());
+
+    const configurations = await casesClient.configure.get();
+    const customStatusesEnabled = clientArgs.config.customStatuses.enabled;
+    const statusesByOwner = new Map(
+      configurations.map((conf) => [
+        conf.owner,
+        getConfiguredStatuses({ configuration: conf, customStatusesEnabled }),
+      ])
+    );
+
+    // Resolve the requested status before partitioning so reopen detection and every
+    // status-dependent step below see the category. A `status` equal to the case's current
+    // category is left alone so legacy clients don't move cases off a custom status.
+    const query = {
+      ...sanitizedQuery,
+      cases: sanitizedQuery.cases.map((reqCase) => {
+        const foundCase = casesMap.get(reqCase.id);
+        const { status_key: statusKey, ...reqCaseWithoutStatusKey } = reqCase;
+
+        if (
+          !foundCase ||
+          isSOError(foundCase) ||
+          (statusKey == null &&
+            (reqCase.status == null || reqCase.status === foundCase.attributes.status))
+        ) {
+          return reqCase;
+        }
+
+        return {
+          ...reqCaseWithoutStatusKey,
+          ...resolveStatusForUpdate({
+            status: reqCase.status,
+            statusKey,
+            statuses:
+              statusesByOwner.get(foundCase.attributes.owner) ??
+              getConfiguredStatuses({ customStatusesEnabled }),
+            customStatusesEnabled,
+          }),
+        };
+      }),
+    };
 
     const { nonExistingCases, conflictedCases, casesToAuthorize, reopenedCases, changedAssignees } =
       partitionPatchRequest(casesMap, query.cases);
@@ -604,7 +647,6 @@ export const bulkUpdate = async (
       );
     }
 
-    const configurations = await casesClient.configure.get();
     const customFieldsConfigurationMap: Map<string, CustomFieldsConfiguration> = new Map(
       configurations.map((conf) => [conf.owner, conf.customFields])
     );

@@ -62,6 +62,7 @@ export interface BuilderParameters {
     parameters: {
       payload: {
         status: CaseStatuses;
+        status_key?: string;
         closeReason?: string;
         syncAlerts?: boolean;
         syncedAlertCount?: number;

@@ -221,6 +221,7 @@ describe('bulkCreate', () => {
               },
               "severity": "low",
               "status": "open",
+              "status_key": null,
               "tags": Array [
                 "defacement",
               ],
@@ -269,6 +270,7 @@ describe('bulkCreate', () => {
               },
               "severity": "critical",
               "status": "open",
+              "status_key": null,
               "tags": Array [
                 "defacement",
               ],

@@ -36,9 +36,11 @@ import { UNIFIED_ALERT_TYPES_ARRAY } from '../../../common/utils/attachments';
 
 import {
   createIncident,
+  getConfiguredStatuses,
   getDurationInSeconds,
   getTimingMetricsForUpdate,
   getUserProfiles,
+  resolveStatusForUpdate,
 } from './utils';
 import { createCaseError } from '../../common/error';
 import {
@@ -247,15 +249,25 @@ export const push = async (
     };
 
     const shouldMarkAsClosed = shouldCloseByPush(myCaseConfigure);
+    const closedStatus = shouldMarkAsClosed
+      ? resolveStatusForUpdate({
+          status: CaseStatuses.closed,
+          statuses: getConfiguredStatuses({
+            configuration: myCaseConfigure.saved_objects[0]?.attributes,
+            customStatusesEnabled: clientArgs.config.customStatuses.enabled,
+          }),
+          customStatusesEnabled: clientArgs.config.customStatuses.enabled,
+        })
+      : undefined;
 
     const [updatedCase, updatedComments] = await Promise.all([
       caseService.patchCase({
         originalCase: myCase,
         caseId,
         updatedAttributes: {
-          ...(shouldMarkAsClosed
+          ...(closedStatus
             ? {
-                status: CaseStatuses.closed,
+                ...closedStatus,
                 closed_at: pushedDate,
                 closed_by: { email, full_name, username, profile_uid },
               }
@@ -298,11 +310,11 @@ export const push = async (
       }),
     ]);
 
-    if (shouldMarkAsClosed) {
+    if (closedStatus) {
       await userActionService.creator.createUserAction({
         userAction: {
           type: UserActionTypes.status,
-          payload: { status: CaseStatuses.closed },
+          payload: closedStatus,
           user,
           caseId,
           owner: myCase.attributes.owner,

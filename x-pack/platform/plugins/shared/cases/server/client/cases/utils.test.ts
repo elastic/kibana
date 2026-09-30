@@ -6,6 +6,7 @@
  */
 
 import { omit } from 'lodash';
+import { getBuiltInStatuses } from '../../../common/utils/statuses';
 
 import {
   comment as commentObj,
@@ -32,6 +33,8 @@ import {
   addKibanaInformationToDescription,
   fillMissingCustomFields,
   normalizeCreateCaseRequest,
+  getConfiguredStatuses,
+  resolveStatusForUpdate,
   getInProgressInfoForUpdate,
   getTimingMetricsForUpdate,
   isObservable,
@@ -1192,6 +1195,116 @@ describe('utils', () => {
           },
         },
       });
+    });
+  });
+
+  describe('getConfiguredStatuses', () => {
+    const configured = [
+      ...getBuiltInStatuses(),
+      {
+        key: 'on_hold',
+        label: 'On hold',
+        category: CaseStatuses['in-progress'],
+        order: 3,
+        isDefault: false,
+        disabled: false,
+      },
+    ];
+
+    it('returns the configured statuses when custom statuses are enabled', () => {
+      expect(
+        getConfiguredStatuses({
+          configuration: { statuses: configured },
+          customStatusesEnabled: true,
+        })
+      ).toEqual(configured);
+    });
+
+    it('ignores the configured statuses when custom statuses are disabled', () => {
+      expect(
+        getConfiguredStatuses({
+          configuration: { statuses: configured },
+          customStatusesEnabled: false,
+        })
+      ).toEqual(getBuiltInStatuses());
+    });
+
+    it('falls back to the built-in statuses without a configuration', () => {
+      expect(getConfiguredStatuses({ customStatusesEnabled: true })).toEqual(getBuiltInStatuses());
+    });
+  });
+
+  describe('resolveStatusForUpdate', () => {
+    const onHold = {
+      key: 'on_hold',
+      label: 'On hold',
+      category: CaseStatuses['in-progress'],
+      order: 3,
+      isDefault: false,
+      disabled: false,
+    };
+    const statuses = [
+      ...getBuiltInStatuses(),
+      onHold,
+      { ...onHold, key: 'retired', disabled: true },
+    ];
+    const resolve = (args: { status?: CaseStatuses; statusKey?: string; enabled?: boolean }) =>
+      resolveStatusForUpdate({
+        status: args.status,
+        statusKey: args.statusKey,
+        statuses,
+        customStatusesEnabled: args.enabled ?? true,
+      });
+
+    it('returns undefined when neither status nor status key is given', () => {
+      expect(resolve({})).toBeUndefined();
+    });
+
+    it('derives the category from the status key', () => {
+      expect(resolve({ statusKey: 'on_hold' })).toEqual({
+        status: CaseStatuses['in-progress'],
+        status_key: 'on_hold',
+      });
+    });
+
+    it('accepts a status that matches the category of the status key', () => {
+      expect(resolve({ status: CaseStatuses['in-progress'], statusKey: 'on_hold' })).toEqual({
+        status: CaseStatuses['in-progress'],
+        status_key: 'on_hold',
+      });
+    });
+
+    it('fills the default status key when only the status is given', () => {
+      expect(resolve({ status: CaseStatuses.closed })).toEqual({
+        status: CaseStatuses.closed,
+        status_key: 'closed',
+      });
+    });
+
+    it('only returns the status when custom statuses are disabled', () => {
+      expect(resolve({ status: CaseStatuses.closed, enabled: false })).toEqual({
+        status: CaseStatuses.closed,
+      });
+    });
+
+    it('rejects a status key when custom statuses are disabled', () => {
+      expect(() => resolve({ statusKey: 'on_hold', enabled: false })).toThrow(
+        'Custom statuses are not enabled'
+      );
+    });
+
+    it('rejects an unknown status key', () => {
+      expect(() => resolve({ statusKey: 'nope' })).toThrow('Unknown status key: nope');
+    });
+
+    it('rejects a disabled status key', () => {
+      expect(() => resolve({ statusKey: 'retired' })).toThrow('Unknown status key: retired');
+    });
+
+    it('rejects a status that does not match the category of the status key', () => {
+      expect(() => resolve({ status: CaseStatuses.closed, statusKey: 'on_hold' })).toThrow(
+        'The status "closed" does not match the category of the status key "on_hold"'
+      );
     });
   });
 

@@ -152,6 +152,7 @@ export const mockCases: CaseSavedObjectTransformed[] = [
       incremental_id: undefined,
       title: 'Super Bad Security Issue',
       status: CaseStatuses.open,
+      status_key: null,
       tags: ['defacement'],
       observables: [],
       total_observables: 0,
@@ -199,6 +200,7 @@ export const mockCases: CaseSavedObjectTransformed[] = [
       incremental_id: undefined,
       title: 'Damaging Data Destruction Detected',
       status: CaseStatuses.open,
+      status_key: null,
       tags: ['Data Destruction'],
       updated_at: '2019-11-25T22:32:00.900Z',
       updated_by: {
@@ -246,6 +248,7 @@ export const mockCases: CaseSavedObjectTransformed[] = [
       incremental_id: undefined,
       title: 'Another bad one',
       status: CaseStatuses.open,
+      status_key: null,
       tags: ['LOLBins'],
       updated_at: '2019-11-25T22:32:17.947Z',
       updated_by: {
@@ -296,6 +299,7 @@ export const mockCases: CaseSavedObjectTransformed[] = [
       external_service: null,
       incremental_id: undefined,
       status: CaseStatuses.closed,
+      status_key: null,
       title: 'Another bad one',
       tags: ['LOLBins'],
       updated_at: '2019-11-25T22:32:17.947Z',

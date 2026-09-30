@@ -10,7 +10,7 @@ import type { SavedObject } from '@kbn/core/server';
 import { SavedObjectsUtils } from '@kbn/core/server';
 
 import type { Case, CustomFieldsConfiguration, User } from '../../../common/types/domain';
-import { CaseSeverity, UserActionTypes } from '../../../common/types/domain';
+import { CaseSeverity, CaseStatuses, UserActionTypes } from '../../../common/types/domain';
 import { decodeWithExcessOrThrow, decodeOrThrow } from '../../common/runtime_types';
 
 import { Operations } from '../../authorization';
@@ -37,7 +37,13 @@ import {
   buildExtendedFieldsDefaults,
   pickExtendedFieldsDifferingFromDefaults,
 } from '../../../common/utils/template_fields';
-import { applyProfilesToAssignees, getUserProfilesSafe, normalizeCreateCaseRequest } from './utils';
+import {
+  applyProfilesToAssignees,
+  getConfiguredStatuses,
+  getUserProfilesSafe,
+  normalizeCreateCaseRequest,
+  resolveStatusForUpdate,
+} from './utils';
 import { ensureTemplateVersionIsPinned } from './expand_template_defaults';
 import type { BulkCreateCasesArgs } from '../../services/cases/types';
 import type { NotifyAssigneesArgs } from '../../services/notifications/types';
@@ -132,6 +138,18 @@ export const bulkCreate = async (
       configurations.map((conf) => [conf.owner, conf.extractObservables])
     );
 
+    const customStatusesEnabled = clientArgs.config.customStatuses.enabled;
+    const configurationsByOwner = new Map(configurations.map((conf) => [conf.owner, conf]));
+    const getOpenStatusKey = (owner: string) =>
+      resolveStatusForUpdate({
+        status: CaseStatuses.open,
+        statuses: getConfiguredStatuses({
+          configuration: configurationsByOwner.get(owner),
+          customStatusesEnabled,
+        }),
+        customStatusesEnabled,
+      })?.status_key;
+
     const casesWithIds = getCaseWithIds(decodedData);
 
     if (
@@ -189,6 +207,7 @@ export const bulkCreate = async (
         templatesEnabled: clientArgs.config.templates.enabled,
         relaxRequiredFields: options.relaxRequiredFields === true,
         spaceExtractObservables: extractObservablesMap.get(theCase.owner),
+        statusKey: getOpenStatusKey(theCase.owner),
       });
       bulkCreateRequest.push(request);
     }
@@ -496,6 +515,7 @@ const createBulkCreateCaseRequest = async ({
   templatesEnabled,
   relaxRequiredFields,
   spaceExtractObservables,
+  statusKey,
 }: {
   theCase: { id: string } & BulkCreateCasesRequest['cases'][number];
   customFieldsConfiguration?: CustomFieldsConfiguration;
@@ -513,6 +533,8 @@ const createBulkCreateCaseRequest = async ({
   relaxRequiredFields: boolean;
   /** Space-level extractObservables default from the configuration saved object. */
   spaceExtractObservables?: boolean;
+  /** Key of the owner's default open status; undefined while custom statuses are disabled. */
+  statusKey?: string;
 }): Promise<{
   request: BulkCreateCasesArgs['cases'][number];
 }> => {
@@ -654,6 +676,7 @@ const createBulkCreateCaseRequest = async ({
       ...transformNewCase({
         user,
         newCase: normalizedCase,
+        statusKey,
       }),
     },
   };

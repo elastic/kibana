@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import Boom from '@hapi/boom';
 import { isEmpty, uniqBy } from 'lodash';
 import type { UserProfile } from '@kbn/security-plugin/common';
 import type { IBasePath } from '@kbn/core-http-browser';
@@ -20,6 +21,7 @@ import type {
   CaseAssignees,
   CaseAttributes,
   CaseCustomField,
+  CaseStatusesConfiguration,
   ConnectorMappings,
   ConnectorMappingSource,
   ConnectorMappingTarget,
@@ -30,6 +32,12 @@ import type {
 } from '../../../common/types/domain';
 import type { Template } from '../../../common/types/domain/template/latest';
 import { AttachmentType, CaseStatuses, UserActionTypes } from '../../../common/types/domain';
+import {
+  findStatusByKey,
+  getBuiltInStatuses,
+  getDefaultStatus,
+  getEffectiveStatuses,
+} from '../../../common/utils/statuses';
 import type {
   AttachmentRequestV2,
   CasePostRequest,
@@ -398,6 +406,65 @@ const validOrUndefined = (value: string | undefined | null): string | undefined 
   }
 
   return value;
+};
+
+/**
+ * The statuses a case of this owner can be in. With the flag off the stored list is ignored so
+ * cases keep landing on the built-in statuses.
+ */
+export const getConfiguredStatuses = ({
+  configuration,
+  customStatusesEnabled,
+}: {
+  configuration?: { statuses?: CaseStatusesConfiguration };
+  customStatusesEnabled: boolean;
+}): CaseStatusesConfiguration =>
+  customStatusesEnabled ? getEffectiveStatuses(configuration?.statuses) : getBuiltInStatuses();
+
+/**
+ * Turns the `status` and `status_key` of a request into what gets persisted: `status` always
+ * holds the category; `status_key` is only written while custom statuses are enabled.
+ */
+export const resolveStatusForUpdate = ({
+  status,
+  statusKey,
+  statuses,
+  customStatusesEnabled,
+}: {
+  status?: CaseStatuses;
+  statusKey?: string;
+  statuses: CaseStatusesConfiguration;
+  customStatusesEnabled: boolean;
+}): { status: CaseStatuses; status_key?: string } | undefined => {
+  if (statusKey != null) {
+    if (!customStatusesEnabled) {
+      throw Boom.badRequest('Custom statuses are not enabled');
+    }
+
+    const configured = findStatusByKey(statuses, statusKey);
+
+    if (configured == null || configured.disabled) {
+      throw Boom.badRequest(`Unknown status key: ${statusKey}`);
+    }
+
+    if (status != null && status !== configured.category) {
+      throw Boom.badRequest(
+        `The status "${status}" does not match the category of the status key "${statusKey}"`
+      );
+    }
+
+    return { status: configured.category, status_key: statusKey };
+  }
+
+  if (status == null) {
+    return;
+  }
+
+  if (!customStatusesEnabled) {
+    return { status };
+  }
+
+  return { status, status_key: getDefaultStatus(statuses, status)?.key ?? status };
 };
 
 export const getClosedInfoForUpdate = ({
