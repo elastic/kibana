@@ -49,7 +49,7 @@ apiTest.describe('Task Manager yield execution', { tag: ['@local-stateful-classi
 
       expect(scheduled).toHaveStatusCode(200);
       const taskId = (scheduled.body as TaskBody).id;
-      expect(taskId).toStrictEqual(expect.any(String));
+      expect(typeof taskId).toBe('string');
 
       await expect
         .poll(
