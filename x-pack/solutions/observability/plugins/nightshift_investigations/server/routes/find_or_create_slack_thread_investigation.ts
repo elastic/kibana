@@ -18,7 +18,7 @@ export const findOrCreateSlackThreadInvestigationRoute = createNightshiftInvesti
     access: 'internal',
     summary: "Find or create a Slack thread's investigation",
     description:
-      'Returns the investigation, conversation, and status message for a Slack thread. With ' +
+      'Returns the investigation and status message for a Slack thread. With ' +
       '`create`, a thread without one gets a pending investigation; otherwise the response is ' +
       'empty. With `slack_message_ts`, records that message as the thread status message. ' +
       'Called by the Slack thread workflow.',

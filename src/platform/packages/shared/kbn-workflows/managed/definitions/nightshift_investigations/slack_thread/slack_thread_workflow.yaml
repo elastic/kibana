@@ -98,7 +98,6 @@ steps:
 
               {{ event.text }}
             investigation_id: '{{ steps.find_investigation.output.investigation_id }}'
-            conversation_id: '{{ steps.find_investigation.output.conversation_id }}'
         on-failure:
           continue: true
 

@@ -83,7 +83,7 @@ describe('Nightshift Slack thread workflow', () => {
     });
   });
 
-  it('runs the Slack-agnostic investigation on the found investigation and conversation', () => {
+  it('runs the Slack-agnostic investigation on the found investigation', () => {
     const investigate = requireStep('investigate');
     expect(investigate).toMatchObject({
       type: 'workflow.execute',
@@ -91,11 +91,11 @@ describe('Nightshift Slack thread workflow', () => {
         'workflow-id': NIGHTSHIFT_INVESTIGATION_WORKFLOW_ID,
         inputs: {
           investigation_id: '{{ steps.find_investigation.output.investigation_id }}',
-          conversation_id: '{{ steps.find_investigation.output.conversation_id }}',
         },
       },
     });
     expect(investigate.with?.inputs).not.toHaveProperty('slack');
+    expect(investigate.with?.inputs).not.toHaveProperty('conversation_id');
   });
 
   it('edits the status message with the result read back from the investigation', () => {

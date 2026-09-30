@@ -126,14 +126,12 @@ const DEFAULT_SLACK_THREAD_TITLE = 'Slack investigation';
 /** Response of POST /internal/nightshift/investigations/_slack_thread. */
 export interface SlackThreadInvestigation {
   investigation_id: string;
-  conversation_id?: string;
   title: string;
   slack_message_ts?: string;
 }
 
 const toSlackThreadInvestigation = (record: InvestigationRecord): SlackThreadInvestigation => ({
   investigation_id: record.id,
-  conversation_id: record.conversation_id,
   title: record.title,
   slack_message_ts: record.slack_message_ts,
 });
