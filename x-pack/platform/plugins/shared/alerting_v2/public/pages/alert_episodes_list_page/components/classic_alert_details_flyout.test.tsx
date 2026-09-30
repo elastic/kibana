@@ -14,6 +14,33 @@ import { ClassicAlertDetailsFlyout } from './classic_alert_details_flyout';
 
 jest.mock('@kbn/alerting-v2-episodes-ui/classic_alerts/apis/fetch_classic_alert_by_id');
 
+// Surface flyout chrome props that EUI does not expose as queryable DOM attributes.
+jest.mock('@elastic/eui', () => {
+  const actual = jest.requireActual('@elastic/eui');
+  const MockEuiFlyout = ({
+    children,
+    type,
+    ownFocus,
+    resizable,
+    'data-test-subj': testSubj,
+    'aria-labelledby': ariaLabelledBy,
+  }: React.ComponentProps<typeof actual.EuiFlyout> & {
+    'data-test-subj'?: string;
+    'aria-labelledby'?: string;
+  }) => (
+    <div
+      data-test-subj={testSubj}
+      data-type={type}
+      data-own-focus={String(ownFocus)}
+      data-resizable={String(Boolean(resizable))}
+      aria-labelledby={ariaLabelledBy}
+    >
+      {children}
+    </div>
+  );
+  return { ...actual, EuiFlyout: MockEuiFlyout };
+});
+
 const mockFetchClassicAlertById = jest.mocked(fetchClassicAlertById);
 
 const services = {
@@ -42,9 +69,29 @@ const renderFlyout = (props?: Partial<React.ComponentProps<typeof ClassicAlertDe
     { wrapper: createWrapper() }
   );
 
+const observabilityAlert = {
+  _index: '.internal.alerts-observability.apm.alerts-default-000001',
+  _id: 'alert-1',
+  'kibana.alert.uuid': 'alert-1',
+  'kibana.alert.status': 'active',
+  'kibana.alert.rule.name': 'CPU usage',
+  'kibana.alert.rule.rule_type_id': 'apm.error_rate',
+};
+
 describe('ClassicAlertDetailsFlyout', () => {
   afterEach(() => {
     jest.clearAllMocks();
+  });
+
+  it('opens as a resizable overlay without stealing page focus', () => {
+    mockFetchClassicAlertById.mockReturnValue(new Promise(() => {}));
+
+    renderFlyout();
+
+    const flyout = screen.getByTestId('classicAlertEpisodeDetailsFlyout');
+    expect(flyout).toHaveAttribute('data-type', 'overlay');
+    expect(flyout).toHaveAttribute('data-own-focus', 'false');
+    expect(flyout).toHaveAttribute('data-resizable', 'true');
   });
 
   it('shows a loading spinner while the classic alert is being fetched', () => {
@@ -57,11 +104,7 @@ describe('ClassicAlertDetailsFlyout', () => {
 
   it('renders the overview and fields tabs when the alert loads', async () => {
     mockFetchClassicAlertById.mockResolvedValue({
-      _index: '.internal.alerts-observability.apm.alerts-default-000001',
-      _id: 'alert-1',
-      'kibana.alert.status': 'active',
-      'kibana.alert.rule.name': 'CPU usage',
-      'kibana.alert.rule.rule_type_id': 'apm.error_rate',
+      ...observabilityAlert,
       'kibana.alert.severity': 'critical',
       'kibana.alert.reason': 'CPU is high',
       'kibana.alert.duration.us': 120_000_000,
@@ -123,19 +166,12 @@ describe('ClassicAlertDetailsFlyout', () => {
       id: 'test-action',
       order: 1,
       displayName: 'Test Action',
-      iconType: 'star',
+      iconType: 'starEmpty' as const,
       isCompatible: jest.fn(() => true),
       execute: jest.fn(async () => {}),
     };
 
-    mockFetchClassicAlertById.mockResolvedValue({
-      _index: '.internal.alerts-observability.apm.alerts-default-000001',
-      _id: 'alert-1',
-      'kibana.alert.uuid': 'alert-1',
-      'kibana.alert.status': 'active',
-      'kibana.alert.rule.name': 'CPU usage',
-      'kibana.alert.rule.rule_type_id': 'apm.error_rate',
-    });
+    mockFetchClassicAlertById.mockResolvedValue(observabilityAlert);
 
     renderFlyout({ actions: [mockAction] });
 
@@ -143,8 +179,12 @@ describe('ClassicAlertDetailsFlyout', () => {
       expect(screen.getByTestId('classicAlertEpisodeDetailsTabs')).toBeInTheDocument();
     });
 
-    fireEvent.click(screen.getByTestId('alertingV2EpisodeFlyoutTakeActionButton'));
+    const takeActionButton = screen.getByTestId('alertingV2EpisodeFlyoutTakeActionButton');
+    expect(takeActionButton.querySelector('[data-euiicon-type="chevronSingleDown"]')).toBeTruthy();
+
+    fireEvent.click(takeActionButton);
     expect(await screen.findByTestId('alertingV2EpisodeFlyoutTakeAction')).toBeInTheDocument();
+    expect(takeActionButton.querySelector('[data-euiicon-type="chevronSingleUp"]')).toBeTruthy();
     expect(mockAction.isCompatible).toHaveBeenCalledWith({
       episodes: [expect.objectContaining({ source_id: 'v1' })],
     });
