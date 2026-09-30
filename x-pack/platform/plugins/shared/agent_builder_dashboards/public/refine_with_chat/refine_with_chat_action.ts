@@ -48,8 +48,12 @@ import { reportRefineWithChatClicked, type RefineWithChatChatState } from '../te
  * Prefilled as a skill badge in the chat input so the user's first message loads the dashboard
  * management skill. Skills are loaded by the model on request; without this the agent tends to
  * answer a panel request in chat instead of editing the panel.
+ *
+ * The separator is a non-breaking space: the editor is a contentEditable, where a trailing plain
+ * space collapses and the caret lands against the badge. This is the same character the editor
+ * inserts after a badge picked from the command menu.
  */
-export const REFINE_WITH_CHAT_INITIAL_MESSAGE = `[/${DASHBOARD_MANAGEMENT_SKILL_ID}](skill://${DASHBOARD_MANAGEMENT_SKILL_ID}) `;
+export const REFINE_WITH_CHAT_INITIAL_MESSAGE = `[/${DASHBOARD_MANAGEMENT_SKILL_ID}](skill://${DASHBOARD_MANAGEMENT_SKILL_ID})\u00A0`;
 
 export interface RefineWithChatActionDeps {
   agentBuilder: Pick<

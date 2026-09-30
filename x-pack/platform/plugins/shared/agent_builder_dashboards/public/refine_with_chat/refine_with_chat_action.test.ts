@@ -130,9 +130,9 @@ describe('createRefineWithChatAction', () => {
     expect(createAction().action.id).toBe(REFINE_WITH_CHAT_ACTION_ID);
   });
 
-  it('prefills the input with the dashboard management skill badge', () => {
+  it('prefills the input with the dashboard management skill badge and a caret-able separator', () => {
     expect(REFINE_WITH_CHAT_INITIAL_MESSAGE).toBe(
-      '[/dashboard-management](skill://dashboard-management) '
+      '[/dashboard-management](skill://dashboard-management)\u00A0'
     );
   });
 
