@@ -17,6 +17,7 @@
     ".datadog",
     ".dropbox",
     ".dynatrace",
+    ".elasticsearch",
     ".email",
     ".figma",
     ".firecrawl",
@@ -281,11 +282,15 @@
     "dynatrace.listProblems",
     "dynatrace.queryMetrics",
     "elasticsearch.bulk",
+    "elasticsearch.esql",
     "elasticsearch.esql.query",
+    "elasticsearch.getClusterInfo",
+    "elasticsearch.getMapping",
     "elasticsearch.index",
     "elasticsearch.indices.create",
     "elasticsearch.indices.delete",
     "elasticsearch.indices.exists",
+    "elasticsearch.listIndices",
     "elasticsearch.request",
     "elasticsearch.search",
     "elasticsearch.update",
@@ -983,11 +988,11 @@
   "variants": {
     "strict": {
       "path": "strict/schema.json",
-      "sha256": "e4c508a1993a897a41b61e78e2a8a0007987036e3ca2a85b81e304129d5fd558"
+      "sha256": "e55e9012a67eb78db3305bc8f8b46856f23e5beecff3fba71c38d01c6f60aec2"
     },
     "template": {
       "path": "template/schema.json",
-      "sha256": "eb660a18ce2f5e8c126f0a614d22a8c53bb36aec0a00e442f95a1183c1d79208"
+      "sha256": "e611e1da694247cd48eb43b72c9f43eb4c3bc700435f457cebfcf6e0df2cf5f2"
     }
   }
 }
