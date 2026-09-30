@@ -10,6 +10,7 @@ import {
   INTERNAL_CASE_METRICS_DETAILS_URL,
   CASE_COMMENTS_URL,
   CASE_PUSH_URL,
+  CASE_SYNC_URL,
   CASE_CONFIGURE_DETAILS_URL,
   CASE_ALERTS_URL,
   CASE_COMMENT_DELETE_URL,
@@ -58,6 +59,10 @@ export const getCaseFindUserActionsUrl = (id: string): string => {
 
 export const getCasePushUrl = (caseId: string, connectorId: string): string => {
   return CASE_PUSH_URL.replace('{case_id}', caseId).replace('{connector_id}', connectorId);
+};
+
+export const getCaseSyncUrl = (caseId: string): string => {
+  return CASE_SYNC_URL.replace('{case_id}', caseId);
 };
 
 export const getCaseConfigurationDetailsUrl = (configureID: string): string => {

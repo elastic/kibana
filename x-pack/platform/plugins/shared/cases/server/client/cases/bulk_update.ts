@@ -62,6 +62,7 @@ import {
 import { LICENSING_CASE_ASSIGNMENT_FEATURE } from '../../common/constants';
 import type { LicensingService } from '../../services/licensing';
 import type { CaseSavedObjectTransformed } from '../../common/types/case';
+import type { CaseUpdateOrigin } from '../../events/types';
 import { decodeWithExcessOrThrow, decodeOrThrow } from '../../common/runtime_types';
 import type {
   CaseAttributes,
@@ -534,10 +535,16 @@ const incrementTemplateUsageStats = async (
  *
  * @ignore
  */
+export interface BulkUpdateCasesClientOptions {
+  /** Marks the emitted `caseUpdated` events so listeners can tell an update applied from the external incident apart from a user edit. */
+  origin?: CaseUpdateOrigin;
+}
+
 export const bulkUpdate = async (
   cases: CasesPatchRequest,
   clientArgs: CasesClientArgs,
-  casesClient: CasesClient
+  casesClient: CasesClient,
+  options: BulkUpdateCasesClientOptions = {}
 ): Promise<CasesPatchResponse> => {
   const {
     services: {
@@ -1003,6 +1010,7 @@ export const bulkUpdate = async (
           owner: updatedCase.owner as Owner,
 
           ...(updatedFields != null ? { updatedFields } : {}),
+          ...(options.origin != null ? { origin: options.origin } : {}),
         },
         { previousCase: casesMap.get(updatedCase.id), updatedCase }
       );

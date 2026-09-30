@@ -23,9 +23,13 @@ export interface CaseCreatedEventPayload extends BaseCaseEventPayload {
 /**
  * Event: case updated
  */
+/** Set when the update was applied from an external incident rather than by a user. */
+export type CaseUpdateOrigin = 'external_sync';
+
 export interface CaseUpdatedEventPayload extends BaseCaseEventPayload {
   readonly caseId: string;
   readonly updatedFields?: string[];
+  readonly origin?: CaseUpdateOrigin;
 }
 
 /**
