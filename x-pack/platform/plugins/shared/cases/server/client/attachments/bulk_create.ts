@@ -55,18 +55,11 @@ export const bulkCreate = async (
         unifiedAttachmentTypeRegistry,
       });
     });
-    const decodedAttachments = await Promise.all(
-      rawAttachments.map((query) =>
-        resolveUnifiedAttachment({ query, unifiedAttachmentTypeRegistry, request })
-      )
-    );
 
-    const [attachmentsWithIds, entities]: [
+    const [rawAttachmentsWithIds, entities]: [
       Array<{ id: string } & UnifiedAttachmentPayload>,
       OwnerEntity[]
-    ] = decodedAttachments.reduce<
-      [Array<{ id: string } & UnifiedAttachmentPayload>, OwnerEntity[]]
-    >(
+    ] = rawAttachments.reduce<[Array<{ id: string } & UnifiedAttachmentPayload>, OwnerEntity[]]>(
       ([a, e], attachment) => {
         const savedObjectID = SavedObjectsUtils.generateId();
         return [
@@ -81,6 +74,14 @@ export const bulkCreate = async (
       operation: Operations.bulkCreateAttachments,
       entities,
     });
+
+    const attachmentsWithIds = await Promise.all(
+      rawAttachmentsWithIds.map(async ({ id, ...query }) => ({
+        id,
+        ...(await resolveUnifiedAttachment({ query, unifiedAttachmentTypeRegistry, request })),
+      }))
+    );
+    const decodedAttachments = attachmentsWithIds.map(({ id, ...attachment }) => attachment);
 
     const model = await CaseCommentModel.create(caseId, clientArgs);
     const updatedModel = await model.bulkCreate({
