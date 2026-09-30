@@ -6,10 +6,11 @@
  */
 
 // Kibana wrapper
-import { getIcon } from '../../helpers/style_choices';
 import {
   makeEdgeId,
   makeNodeId,
+  materializeRuntimeEdge,
+  materializeRuntimeNode,
   planIncomingEdges,
   prepareIncomingNodes,
 } from './graph_merge_planner';
@@ -344,25 +345,7 @@ function GraphWorkspace(options) {
     }
 
     newNodes.forEach((dedupedNode) => {
-      let label = dedupedNode.term;
-      if (dedupedNode.label) {
-        label = dedupedNode.label;
-      }
-
-      const node = {
-        x: 1,
-        y: 1,
-        numChildren: 0,
-        parent: undefined,
-        id: dedupedNode.id,
-        label: label,
-        color: dedupedNode.color,
-        icon: getIcon(dedupedNode.icon),
-        data: dedupedNode,
-      };
-      //        node.scaledSize = sizeScale(node.data.weight);
-      node.scaledSize = 15;
-      node.seqNumber = this.seqNumber++;
+      const node = materializeRuntimeNode(dedupedNode, this.seqNumber++);
       this.nodes.push(node);
       lastOps.push(new AddNodeOperation(node, self));
       this.nodesMap[node.id] = node;
@@ -381,18 +364,7 @@ function GraphWorkspace(options) {
         return;
       }
 
-      const newEdge = {
-        source: this.nodesMap[operation.sourceId],
-        target: this.nodesMap[operation.targetId],
-        weight: operation.edge.weight,
-        width: operation.edge.width,
-        id: operation.id,
-        doc_count: operation.edge.doc_count,
-      };
-      if (operation.edge.label) {
-        newEdge.label = operation.edge.label;
-      }
-
+      const newEdge = materializeRuntimeEdge(operation, this.nodesMap);
       this.edgesMap[newEdge.id] = newEdge;
       this.edges.push(newEdge);
       lastOps.push(new AddEdgeOperation(newEdge, self));
