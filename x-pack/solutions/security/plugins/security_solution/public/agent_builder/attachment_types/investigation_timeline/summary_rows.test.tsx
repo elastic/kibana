@@ -47,7 +47,7 @@ describe('renderInvestigationTimelineSummary', () => {
       ],
     });
 
-    expect(screen.getByText('Attack timeline')).toBeInTheDocument();
+    expect(screen.getByText('Timeline')).toBeInTheDocument();
     expect(screen.getByText('1')).toBeInTheDocument();
     expect(screen.getByTestId('attachmentSummaryRowButton')).toHaveAccessibleName(
       'Timeline: WKSTN-RECV01'
@@ -60,7 +60,6 @@ describe('renderInvestigationTimelineSummary', () => {
     await waitFor(() => expect(mockOpener).toHaveBeenCalled());
     expect(mockOpener).toHaveBeenCalledWith(
       expect.objectContaining({
-        title: 'WKSTN-RECV01',
         events: [
           expect.objectContaining({ host: 'WKSTN-RECV01' }),
           expect.objectContaining({ host: 'SRV-DC01' }),

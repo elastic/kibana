@@ -22,6 +22,7 @@ import type { IconType } from '@elastic/eui';
 import { attachmentSummaryRowAriaLabel } from './translations';
 
 const FALLBACK_ICON = 'document';
+const ROW_FONT_SIZE = '14px';
 
 export interface AttachmentSummaryRowProps {
   /** Human-readable label for this row, e.g. the alert name or entity id. */
@@ -61,7 +62,7 @@ export const AttachmentSummaryRow = memo<AttachmentSummaryRowProps>(
 
     const labelStyles = css`
       ${euiTextTruncate()}
-      font-size: 14px;
+      font-size: ${ROW_FONT_SIZE};
       line-height: 20px;
       font-weight: ${euiTheme.font.weight.medium};
       color: ${euiTheme.colors.textParagraph};
@@ -96,7 +97,20 @@ export const AttachmentSummaryRow = memo<AttachmentSummaryRowProps>(
 
     const content = (
       <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
-        <EuiFlexItem grow={false}>{iconElement}</EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <span
+            css={css({
+              display: 'inline-flex',
+              // Named icon sizes skip 14px, which is the label's font size.
+              '& .euiIcon, & [data-euiicon-type]': {
+                inlineSize: ROW_FONT_SIZE,
+                blockSize: ROW_FONT_SIZE,
+              },
+            })}
+          >
+            {iconElement}
+          </span>
+        </EuiFlexItem>
 
         <EuiFlexItem css={css({ minInlineSize: 0 })}>
           {isLabelTruncated ? (

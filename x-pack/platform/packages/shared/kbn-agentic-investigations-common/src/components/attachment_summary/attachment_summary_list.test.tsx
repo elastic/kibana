@@ -40,6 +40,21 @@ describe('AttachmentSummaryList', () => {
     expect(container).toBeEmptyDOMElement();
   });
 
+  it('renders each group in its own panel with space between them', () => {
+    render(
+      <AttachmentSummaryList
+        attachments={[makeAttachment('a1'), makeAttachment('a2', 'security.investigation.timeline')]}
+        attachmentsService={makeService(makeSectionRenderer('section'))}
+      />
+    );
+
+    expect(screen.getAllByTestId('attachmentSummaryGroupPanel')).toHaveLength(2);
+    expect(screen.getByTestId('attachmentSummaryPanel')).toHaveStyle({
+      display: 'flex',
+      gap: '12px',
+    });
+  });
+
   it('renders one section per attachment', () => {
     render(
       <AttachmentSummaryList

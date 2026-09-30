@@ -18,7 +18,7 @@ export interface AttachmentSummaryListProps {
   attachmentsService: AttachmentServiceStartContract;
 }
 
-/** Stacks each attachment's section inside a bordered panel. */
+/** Stacks each attachment's section as its own bordered panel, with space between groups. */
 export const AttachmentSummaryList = memo<AttachmentSummaryListProps>(
   ({ attachments, attachmentsService }) => {
     const { euiTheme } = useEuiTheme();
@@ -36,9 +36,21 @@ export const AttachmentSummaryList = memo<AttachmentSummaryListProps>(
         if (!renderContent) return null;
 
         return (
-          <DrilldownErrorBoundary key={attachment.id}>
-            {renderContent({ attachment: toRenderAttachment(attachment) })}
-          </DrilldownErrorBoundary>
+          <EuiPanel
+            key={attachment.id}
+            hasBorder
+            hasShadow={false}
+            paddingSize="none"
+            css={css({
+              borderRadius: euiTheme.size.s,
+              overflow: 'hidden',
+            })}
+            data-test-subj="attachmentSummaryGroupPanel"
+          >
+            <DrilldownErrorBoundary>
+              {renderContent({ attachment: toRenderAttachment(attachment) })}
+            </DrilldownErrorBoundary>
+          </EuiPanel>
         );
       })
       .filter(Boolean);
@@ -48,19 +60,16 @@ export const AttachmentSummaryList = memo<AttachmentSummaryListProps>(
     }
 
     return (
-      <EuiPanel
-        hasBorder
-        hasShadow={false}
-        paddingSize="none"
+      <div
         css={css({
-          borderRadius: euiTheme.size.s,
-          overflow: 'hidden',
-          '& > *:not(:first-child)': { borderTop: euiTheme.border.thin },
+          display: 'flex',
+          flexDirection: 'column',
+          gap: euiTheme.size.m,
         })}
         data-test-subj="attachmentSummaryPanel"
       >
         {sections}
-      </EuiPanel>
+      </div>
     );
   }
 );

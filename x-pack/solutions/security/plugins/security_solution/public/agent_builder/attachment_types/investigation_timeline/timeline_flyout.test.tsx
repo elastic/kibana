@@ -10,19 +10,16 @@ import { render, screen } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
 import { InvestigationTimelineFlyout } from './timeline_flyout';
 
-const renderFlyout = (
-  title: string,
-  events: Array<{ timestamp: string; host: string; description: string }>
-) =>
+const renderFlyout = (events: Array<{ timestamp: string; host: string; description: string }>) =>
   render(
     <I18nProvider>
-      <InvestigationTimelineFlyout title={title} events={events} />
+      <InvestigationTimelineFlyout events={events} />
     </I18nProvider>
   );
 
 describe('InvestigationTimelineFlyout', () => {
-  it('renders the host as the title, and one vertical event per timeline entry', () => {
-    renderFlyout('WKSTN-RECV01', [
+  it('titles the flyout Investigation timeline, and renders one vertical event per entry', () => {
+    renderFlyout([
       {
         timestamp: '2026-09-11T14:23:32.488Z',
         host: 'WKSTN-RECV01',
@@ -35,7 +32,8 @@ describe('InvestigationTimelineFlyout', () => {
       },
     ]);
 
-    expect(screen.getByRole('heading', { name: 'WKSTN-RECV01' })).toBeInTheDocument();
+    expect(screen.getByRole('heading', { name: 'Investigation timeline' })).toBeInTheDocument();
+    expect(screen.getByTestId('investigationTimelineFlyout')).toHaveClass('euiFlyoutBody');
     expect(
       screen.getAllByTestId('investigationTimelineEventTimestamp').map((el) => el.textContent)
     ).toEqual(['2026-09-11 14:23:32.488Z', '2026-09-11 15:05:32.488Z']);
@@ -47,7 +45,7 @@ describe('InvestigationTimelineFlyout', () => {
   });
 
   it('renders an empty state when there are no events', () => {
-    renderFlyout('Investigation timeline', []);
+    renderFlyout([]);
     expect(
       screen.getByText('No events were reconstructed from the available telemetry.')
     ).toBeInTheDocument();

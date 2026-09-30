@@ -44,6 +44,23 @@ describe('AttachmentSummaryRow', () => {
       expect(screen.getByRole('button', { name: 'Alert: 3 alerts' })).toBeInTheDocument();
     });
 
+    it('sizes the icon to the label font size', () => {
+      render(
+        <AttachmentSummaryRow
+          label="WKSTN-RECV01"
+          typeName="Timeline"
+          iconType="clock"
+          onClick={onClick}
+        />
+      );
+
+      expect(screen.getByTestId('attachmentSummaryRowIcon')).toHaveStyle({
+        inlineSize: '14px',
+        blockSize: '14px',
+      });
+      expect(screen.getByTestId('attachmentSummaryRowLabel')).toHaveStyle({ fontSize: '14px' });
+    });
+
     it('shows the chevron, which marks the row as leading somewhere', () => {
       const { container } = render(
         <AttachmentSummaryRow label="3 alerts" typeName="Alert" onClick={onClick} />

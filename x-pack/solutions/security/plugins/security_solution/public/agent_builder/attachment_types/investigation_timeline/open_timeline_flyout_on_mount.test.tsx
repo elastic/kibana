@@ -48,7 +48,6 @@ describe('InvestigationTimelineFlyoutOpener', () => {
   it('opens a system flyout for the timeline, attributed to the summary', async () => {
     render(
       <InvestigationTimelineFlyoutOpener
-        title="Investigation timeline"
         events={events}
         resolveSecurityCanvasContext={resolveSecurityCanvasContext}
       />
@@ -59,6 +58,7 @@ describe('InvestigationTimelineFlyoutOpener', () => {
       expect.anything(),
       expect.objectContaining({
         size: 's',
+        paddingSize: 'l',
         title: 'Investigation timeline',
         session: 'start',
       }),

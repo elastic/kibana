@@ -12,16 +12,13 @@ import { useDefaultDocumentFlyoutProperties } from '../../../flyout_v2/shared/ho
 import { useOpenFlyout } from '../../../flyout_v2/shared/hooks/use_open_flyout';
 import { useFlyoutSessionContext } from '../../../flyout_v2/session_context';
 import type { SecurityCanvasEmbeddedBundle } from '../../components/security_redux_embedded_provider';
-import { InvestigationTimelineFlyout } from './timeline_flyout';
+import {
+  INVESTIGATION_TIMELINE_FLYOUT_TITLE,
+  InvestigationTimelineFlyout,
+} from './timeline_flyout';
 import type { InvestigationTimelineEvent } from './types';
 
-const OpenTimelineOnMount = ({
-  title,
-  events,
-}: {
-  title: string;
-  events: InvestigationTimelineEvent[];
-}) => {
+const OpenTimelineOnMount = ({ events }: { events: InvestigationTimelineEvent[] }) => {
   const openFlyout = useOpenFlyout();
   const { session, historyKey } = useFlyoutSessionContext();
   const defaultProperties = useDefaultDocumentFlyoutProperties();
@@ -35,12 +32,13 @@ const OpenTimelineOnMount = ({
     // The timeline is carried by value, so it is not written into the flyout URL the way an
     // alert document id is. It still opens through the same system flyout as an alert row.
     openFlyout(
-      <InvestigationTimelineFlyout title={title} events={events} />,
+      <InvestigationTimelineFlyout events={events} />,
       {
         ...defaultProperties,
         historyKey,
         session,
-        title,
+        paddingSize: 'l',
+        title: INVESTIGATION_TIMELINE_FLYOUT_TITLE,
       },
       {
         surface: FLYOUT_SURFACE.FLYOUT,
@@ -49,13 +47,12 @@ const OpenTimelineOnMount = ({
         origin: FLYOUT_ORIGIN.ATTACHMENT_SUMMARY,
       }
     );
-  }, [defaultProperties, events, historyKey, openFlyout, session, title]);
+  }, [defaultProperties, events, historyKey, openFlyout, session]);
 
   return null;
 };
 
 export interface InvestigationTimelineFlyoutOpenerProps {
-  title: string;
   events: InvestigationTimelineEvent[];
   resolveSecurityCanvasContext: () => Promise<SecurityCanvasEmbeddedBundle>;
 }
@@ -65,7 +62,6 @@ export interface InvestigationTimelineFlyoutOpenerProps {
  * re-established with `flyoutProviders`, the same way an alert summary row opens its flyout.
  */
 export const InvestigationTimelineFlyoutOpener = ({
-  title,
   events,
   resolveSecurityCanvasContext,
 }: InvestigationTimelineFlyoutOpenerProps) => {
@@ -94,6 +90,6 @@ export const InvestigationTimelineFlyoutOpener = ({
   return flyoutProviders({
     services: bundle.kibanaServices,
     store: bundle.store,
-    children: <OpenTimelineOnMount title={title} events={events} />,
+    children: <OpenTimelineOnMount events={events} />,
   });
 };

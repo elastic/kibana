@@ -16,7 +16,7 @@ import type { InvestigationTimelineEvent } from './types';
 
 const TIMELINE_TITLE = i18n.translate(
   'xpack.securitySolution.agentBuilder.investigationTimeline.summaryTitle',
-  { defaultMessage: 'Attack timeline' }
+  { defaultMessage: 'Timeline' }
 );
 
 const TIMELINE_TYPE_NAME = i18n.translate(
@@ -28,7 +28,7 @@ const LazyTimelineFlyoutOpener = React.lazy(() =>
   import(
     /* webpackChunkName: "security_investigation_timeline_flyout" */
     './open_timeline_flyout_on_mount'
-  ).then((module) => ({ default: module.InvestigationTimelineFlyoutOpener }))
+  ).then((m) => ({ default: m.InvestigationTimelineFlyoutOpener }))
 );
 
 interface TimelineSummaryRowProps {
@@ -48,14 +48,13 @@ const TimelineSummaryRow = ({
     <AttachmentSummaryRow
       label={label}
       typeName={TIMELINE_TYPE_NAME}
-      iconType="timeline"
+      iconType="clock"
       onClick={() => setOpenCount((count) => count + 1)}
     >
       {openCount > 0 ? (
         <div css={css({ display: 'none' })} key={openCount}>
           <Suspense fallback={null}>
             <LazyTimelineFlyoutOpener
-              title={label}
               events={events}
               resolveSecurityCanvasContext={resolveSecurityCanvasContext}
             />
@@ -66,7 +65,7 @@ const TimelineSummaryRow = ({
   );
 };
 
-/** One clickable row for an attack-timeline attachment. The full timeline opens in a flyout. */
+/** One clickable row for an investigation timeline attachment. The full timeline opens in a flyout. */
 export const renderInvestigationTimelineSummary = (
   attachment: { data?: unknown },
   resolveSecurityCanvasContext: () => Promise<SecurityCanvasEmbeddedBundle>
