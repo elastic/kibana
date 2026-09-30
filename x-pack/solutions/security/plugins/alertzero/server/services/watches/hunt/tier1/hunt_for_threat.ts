@@ -398,7 +398,7 @@ export const huntForThreat = async (
       users.push(asset);
     }
   }
-  const perIndex = (aggs?.per_index?.buckets ?? []).map((b) => ({
+  let perIndex = (aggs?.per_index?.buckets ?? []).map((b) => ({
     index: b.key,
     hit_count: b.doc_count,
     required: matchesRequired(b.key),
@@ -410,9 +410,11 @@ export const huntForThreat = async (
   // would call that clean. Count the required patterns on their own instead, and
   // let Elasticsearch resolve them exactly as the main search does rather than
   // re-implementing pattern matching over `_index` here. `per_index` stays as
-  // display context.
-  // An empty `required` would count across every index rather than none, so the
-  // bar is unreachable by definition instead.
+  // display context, except when the count confirms a hit and the capped buckets
+  // show none required: Tier 2 needs those concrete required indices, so recover
+  // them with a terms agg scoped to required patterns alone (optional indices
+  // cannot crowd the cap). An empty `required` would count across every index
+  // rather than none, so the bar is unreachable by definition instead.
   const requiredMatches =
     scope.required.length === 0
       ? undefined
@@ -439,6 +441,48 @@ export const huntForThreat = async (
         `No index backed the required patterns (${scope.required.join(', ')}) when the hit bar ` +
         `was counted, so the hunt never searched the indices that can confirm a hit.`,
     });
+  }
+
+  if (hasConfirmedHit && !perIndex.some((entry) => entry.required) && scope.required.length > 0) {
+    try {
+      const requiredOnly = await esClient.search({
+        index: scope.required,
+        ignore_unavailable: true,
+        allow_no_indices: true,
+        size: 0,
+        track_total_hits: false,
+        query: huntQuery,
+        aggs: {
+          per_index: {
+            terms: { field: '_index', size: PER_INDEX_MAX_BUCKETS },
+          },
+        },
+      });
+      incomplete.push(...shardCoverageGaps('required-index per_index recovery', requiredOnly));
+      const recovered = (
+        (requiredOnly.aggregations as HuntAggregations | undefined)?.per_index?.buckets ?? []
+      )
+        .map((b) => ({
+          index: b.key,
+          hit_count: b.doc_count,
+          required: matchesRequired(b.key),
+        }))
+        .filter((entry) => entry.required);
+      if (recovered.length > 0) {
+        // Required buckets first so Tier 2's matched_indices slice prefers them;
+        // keep the original optional/alias buckets for display.
+        const recoveredKeys = new Set(recovered.map((entry) => entry.index));
+        perIndex = [...recovered, ...perIndex.filter((entry) => !recoveredKeys.has(entry.index))];
+      }
+    } catch (err) {
+      incomplete.push({
+        reason: 'search_partial',
+        detail:
+          `Confirmed a required-index hit but could not recover which required indices matched ` +
+          `(${((err as Error).message ?? 'unknown error').slice(0, 200)}), so Tier 2 has no ` +
+          `safe target from this run.`,
+      });
+    }
   }
 
   return {
