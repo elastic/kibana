@@ -81,6 +81,8 @@ export const deleteSelectedNodes = actionCreator('DELETE_SELECTED_NODES');
 export const blocklistSelectedNodes = actionCreator('BLOCKLIST_SELECTED_NODES');
 export const groupSelectedNodes = actionCreator<string>('GROUP_SELECTED_NODES');
 export const ungroupNode = actionCreator<string>('UNGROUP_NODE');
+export const unblockNode = actionCreator<string>('UNBLOCK_NODE');
+export const unblockAllNodes = actionCreator('UNBLOCK_ALL_NODES');
 export const submitSearch = actionCreator<string>('SUBMIT_SEARCH');
 
 export const workspaceReducer = reducerWithInitialState(initialWorkspaceState)
@@ -157,6 +159,20 @@ export const workspaceReducer = reducerWithInitialState(initialWorkspaceState)
         node.parentId === parentId ? { ...node, parentId: undefined } : node,
       ])
     ),
+  }))
+  .case(unblockNode, (state, nodeId) => {
+    const blocklistedNodesById = { ...state.blocklistedNodesById };
+    delete blocklistedNodesById[nodeId];
+    return {
+      ...state,
+      blocklistedNodesById,
+      blocklistedNodeIds: state.blocklistedNodeIds.filter((id) => id !== nodeId),
+    };
+  })
+  .case(unblockAllNodes, (state) => ({
+    ...state,
+    blocklistedNodesById: {},
+    blocklistedNodeIds: [],
   }))
   .build();
 
@@ -288,6 +304,8 @@ const topologyActionTypes = new Set([
   blocklistSelectedNodes.type,
   groupSelectedNodes.type,
   ungroupNode.type,
+  unblockNode.type,
+  unblockAllNodes.type,
 ]);
 
 const selectionActionTypes = new Set([
@@ -354,6 +372,15 @@ export const registerWorkspaceListeners = (
         workspace.groupSelections(workspace.nodesMap[action.payload]);
       } else if (ungroupNode.match(action)) {
         workspace.ungroup(workspace.nodesMap[action.payload]);
+      } else if (unblockNode.match(action)) {
+        const blockedNode = (workspace.blocklistedNodes as WorkspaceNode[]).find(
+          ({ id }) => id === action.payload
+        );
+        if (blockedNode) {
+          workspace.unblockNode(blockedNode);
+        }
+      } else if (unblockAllNodes.match(action)) {
+        workspace.unblockAll();
       }
       notifyReact();
     },
