@@ -11,6 +11,7 @@ import {
   buildExpandExploreRequest,
   buildExploreControls,
   buildFillConnectionsRequest,
+  buildNodeQuery,
   buildSearchExploreRequest,
 } from './graph_request_builders';
 
@@ -297,47 +298,7 @@ function GraphWorkspace(options) {
 
   //Creates a query that represents a node - either simple term query or boolean if grouped
   this.buildNodeQuery = function (topLevelNode) {
-    let containedNodes = [topLevelNode];
-    containedNodes = self.returnUnpackedGroupeds(containedNodes);
-    if (containedNodes.length === 1) {
-      //Simple case - return a single-term query
-      const tq = {};
-      tq[topLevelNode.data.field] = topLevelNode.data.term;
-      return {
-        term: tq,
-      };
-    }
-    const termsByField = {};
-    containedNodes.forEach((node) => {
-      let termsList = termsByField[node.data.field];
-      if (!termsList) {
-        termsList = [];
-        termsByField[node.data.field] = termsList;
-      }
-      termsList.push(node.data.term);
-    });
-    //Single field case
-    if (Object.keys(termsByField).length === 1) {
-      return {
-        terms: termsByField,
-      };
-    }
-    //Multi-field case - build a bool query with per-field terms clauses.
-    const q = {
-      bool: {
-        should: [],
-      },
-    };
-    for (const field in termsByField) {
-      if (Object.hasOwn(termsByField, field)) {
-        const tq = {};
-        tq[field] = termsByField[field];
-        q.bool.should.push({
-          terms: tq,
-        });
-      }
-    }
-    return q;
+    return buildNodeQuery(self.returnUnpackedGroupeds([topLevelNode]));
   };
 
   //====== Layout functions ========
