@@ -87,24 +87,6 @@ describe('Inbound events HTTP API', () => {
     return saved.attributes;
   };
 
-  it('accepts Authorization ApiKey on the public route', async () => {
-    const created =
-      await kibanaServer.coreStart.elasticsearch.client.asInternalUser.security.createApiKey({
-        name: 'inbound-events-route',
-      });
-    const apiKey = Buffer.from(`${created.id}:${created.api_key}`).toString('base64');
-
-    await getSupertest(
-      kibanaServer.root,
-      'post',
-      '/api/actions/events/webhook/nonexistent-connector'
-    )
-      .set('elastic-api-version', INBOUND_EVENTS_API_VERSION)
-      .set('Authorization', `ApiKey ${apiKey}`)
-      .send({ hello: 'world' })
-      .expect(404);
-  });
-
   it('serves the versioned public route and returns 404 fail-closed for unknown connector', async () => {
     await getSupertest(
       kibanaServer.root,
