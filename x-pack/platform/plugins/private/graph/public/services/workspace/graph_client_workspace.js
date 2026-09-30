@@ -801,6 +801,7 @@ function GraphWorkspace(options) {
       self.addUndoLogEntry(lastOps);
     }
 
+    self.changeHandler?.();
     this.runLayout();
   };
 

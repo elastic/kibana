@@ -54,6 +54,23 @@ describe('graphui-workspace', function () {
         };
       };
     });
+    it('synchronizes merged topology before starting layout', function () {
+      const calls = [];
+      const layoutController = {
+        stop: jest.fn(),
+        start: jest.fn(() => calls.push('layout')),
+        isRunning: jest.fn(() => false),
+      };
+      const workspace = createWorkspace({
+        layoutController,
+        changeHandler: () => calls.push('change'),
+      });
+
+      workspace.mergeGraph({ nodes: [], edges: [] });
+
+      expect(calls).toEqual(['change', 'layout']);
+    });
+
     it('initializeWorkspace', function () {
       const { workspace } = init();
       expect(workspace.nodes.length).toEqual(0);
