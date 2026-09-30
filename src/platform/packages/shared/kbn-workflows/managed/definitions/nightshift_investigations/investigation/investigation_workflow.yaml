@@ -70,7 +70,7 @@ steps:
       headers:
         x-elastic-internal-origin: 'kibana'
       body:
-        execution_id: '{{ execution.id }}'
+        continue: '${{ inputs.investigation_id != null }}'
     on-failure:
       retry:
         max-attempts: 3

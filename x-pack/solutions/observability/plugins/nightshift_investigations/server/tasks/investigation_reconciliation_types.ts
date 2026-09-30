@@ -30,6 +30,16 @@ export const EXECUTION_LOOKUP_BATCH_SIZE = 100;
  */
 export const MAX_CANDIDATES = 1_000;
 
+/**
+ * How long a reopened investigation may stay running before it is failed. Its record still points
+ * at its first execution, so no execution reports the continuing run settling. The investigation
+ * workflow times out after 60 minutes; the margin covers the reconciliation interval.
+ */
+export const CONTINUED_INVESTIGATION_TIMEOUT_MS = 70 * 60 * 1000;
+
+export const CONTINUED_INVESTIGATION_TIMEOUT_ERROR =
+  'Continued investigation did not finish within the workflow timeout';
+
 /** Used when the execution recorded no error of its own. */
 export const FALLBACK_ERRORS: Partial<Record<ExecutionStatus, string>> = {
   [ExecutionStatus.FAILED]: 'Workflow execution failed',
@@ -59,8 +69,9 @@ export interface ReconciliationResult {
   reconciled: number;
 }
 
-export type ReconciliationCandidate =
-  FindInvestigationsAcrossSpacesResult<'created_at'>['results'][number];
+export type ReconciliationCandidate = FindInvestigationsAcrossSpacesResult<
+  'created_at' | 'started_at'
+>['results'][number];
 
 export interface ReconciliationOutcome {
   reconciledStatus: InvestigationStatus;
