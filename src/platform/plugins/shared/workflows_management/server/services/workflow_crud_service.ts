@@ -11,6 +11,7 @@ import type { estypes } from '@elastic/elasticsearch';
 import { randomBytes } from 'node:crypto';
 
 import pMap from 'p-map';
+import { firstValueFrom } from 'rxjs';
 import type { KibanaRequest } from '@kbn/core/server';
 import { buildEntityReadAccessQuery } from '@kbn/entity-access-control';
 import { isNotFoundError } from '@kbn/es-errors';
@@ -29,6 +30,7 @@ import {
   toCustomTriggerSchemaConfigs,
   type UpdatedWorkflowResponseDto,
   type WorkflowDetailDto,
+  WORKFLOWS_CORE_SELF_CLIENT_ENABLED_FLAG,
   type WorkflowYaml,
 } from '@kbn/workflows';
 import { buildWorkflowFilters, GLOBAL_WORKFLOW_SPACE_ID } from '@kbn/workflows/server';
@@ -133,6 +135,14 @@ type SuccessfullyWrittenBulkEntry = BulkWorkflowEntry & {
 
 export class WorkflowCrudService {
   constructor(private readonly deps: WorkflowCrudDeps) {}
+
+  private async shouldWarnIgnoredKibanaFetcher(): Promise<boolean> {
+    return firstValueFrom(
+      this.deps
+        .getCoreStart()
+        .featureFlags.getBooleanValue$(WORKFLOWS_CORE_SELF_CLIENT_ENABLED_FLAG, false)
+    );
+  }
 
   async logWorkflowChangesAfterWrite(params: {
     workflows: Array<{ id: string; document: WorkflowProperties }>;
@@ -459,6 +469,8 @@ export class WorkflowCrudService {
       now: params.now,
       spaceId: params.spaceId,
       triggerDefinitions,
+      logger: this.deps.logger,
+      warnIgnoredKibanaFetcher: await this.shouldWarnIgnoredKibanaFetcher(),
     });
     const profileId = params.request
       ? (await this.deps
@@ -643,6 +655,8 @@ export class WorkflowCrudService {
       spaceId,
       triggerDefinitions,
       nameFallback: options?.nameFallback,
+      logger: this.deps.logger,
+      warnIgnoredKibanaFetcher: await this.shouldWarnIgnoredKibanaFetcher(),
     });
 
     const profileId =
@@ -718,6 +732,7 @@ export class WorkflowCrudService {
     const profileId = await this.deps.getCoreStart().userProfile.getCurrentProfileId({ request });
     const now = new Date();
     const triggerDefinitions = this.deps.workflowsExtensions?.getAllTriggerDefinitions() ?? [];
+    const warnIgnoredKibanaFetcher = await this.shouldWarnIgnoredKibanaFetcher();
 
     const created: WorkflowDetailDto[] = [];
     const failed: BulkFailureEntry[] = [];
@@ -738,6 +753,8 @@ export class WorkflowCrudService {
           now,
           spaceId,
           triggerDefinitions,
+          logger: this.deps.logger,
+          warnIgnoredKibanaFetcher,
         });
 
         if (profileId) {
@@ -932,6 +949,9 @@ export class WorkflowCrudService {
               workflowYaml,
               zodSchema,
               triggerDefinitions,
+              logger: this.deps.logger,
+              warnIgnoredKibanaFetcher: await this.shouldWarnIgnoredKibanaFetcher(),
+              workflowId: id,
             }),
           }
         : undefined;

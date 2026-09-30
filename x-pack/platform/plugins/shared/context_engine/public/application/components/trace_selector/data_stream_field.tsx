@@ -62,12 +62,8 @@ export const DataStreamField = ({ value, onChange }: DataStreamFieldProps) => {
         data-test-subj="contextTraceDataStreamComboBoxLoadingBar"
       />
       <EuiFormRow
-        label={i18n.translate('xpack.contextEngine.traceSelector.dataStreamField.label', {
-          defaultMessage: 'Data stream',
-        })}
         helpText={i18n.translate('xpack.contextEngine.traceSelector.dataStreamField.helpText', {
-          defaultMessage:
-            'Data streams carrying OTel GenAI spans from external harnesses such as LangChain, LlamaIndex, or the OpenAI SDK.',
+          defaultMessage: 'Data stream carrying OTel traces from external harnesses.',
         })}
         fullWidth
       >

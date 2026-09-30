@@ -114,4 +114,27 @@ describe('createSignificantEventsClients', () => {
 
     await expect(clients.getEventSearchClient()).resolves.toBe(ruleEventsClient);
   });
+
+  it('returns the same EventClient from getEventClient() and getEventSearchClient() when the flag is off', async () => {
+    const eventClient = {};
+    const services: SignificantEventsServices = {
+      detection: { getClient: jest.fn() } as never,
+      event: { getClient: jest.fn().mockReturnValue(eventClient) } as never,
+    };
+    const clients = createSignificantEventsClients({
+      services,
+      dataStreams: { initializeClient: jest.fn().mockResolvedValue({}) } as never,
+      esClient: {} as never,
+      space: 'default',
+      useRuleEventsRead$: of(false),
+    });
+
+    const [fromEventClient, fromSearchClient] = await Promise.all([
+      clients.getEventClient(),
+      clients.getEventSearchClient(),
+    ]);
+
+    expect(fromSearchClient).toBe(fromEventClient);
+    expect(services.event.getClient).toHaveBeenCalledTimes(1);
+  });
 });

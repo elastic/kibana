@@ -24,6 +24,7 @@ import {
   distinctUntilChanged,
   exhaustMap,
   filter,
+  firstValueFrom,
   from,
   of,
   skip,
@@ -352,6 +353,12 @@ export class SignificantEventsPlugin
               })
             : false;
         },
+        getUseRuleEventsRead: async () => {
+          const [coreStart] = await core.getStartServices();
+          return firstValueFrom(
+            coreStart.featureFlags.getBooleanValue$(SIGNIFICANT_EVENTS_USE_RULE_EVENTS_READ, false)
+          );
+        },
       });
     }
 
@@ -565,6 +572,7 @@ export class SignificantEventsPlugin
       this.managedWorkflowsInstaller = createManagedWorkflowsInstaller({
         getClient: () =>
           workflowsExtensions.initManagedWorkflowsClient(SIGNIFICANT_EVENTS_MANAGED_WORKFLOW_OWNER),
+        dataStreams: core.dataStreams,
         isAvailable,
         logger: this.logger,
       });
