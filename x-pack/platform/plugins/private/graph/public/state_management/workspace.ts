@@ -472,14 +472,16 @@ export const registerWorkspaceListeners = (
 
   startListening({
     predicate: (action) => requestActionTypes.has(action.type),
-    effect: (action) => {
+    effect: (action, listenerApi) => {
       const workspace = getWorkspace();
       if (!workspace) {
         return;
       }
 
       if (expandSelectedNodes.match(action)) {
-        workspace.expandSelecteds({ toFields: action.payload });
+        workspace.expandNodes(listenerApi.getState().workspace.selectedNodeIds, {
+          toFields: action.payload,
+        });
       } else if (fillWorkspaceConnections.match(action)) {
         workspace.fillInGraph(action.payload);
       }

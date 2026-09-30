@@ -53,9 +53,14 @@ const createWorkspaceMock = () =>
     simpleSearch: jest.fn(),
     search: jest.fn(),
     callElasticsearch: jest.fn(),
-    expandSelecteds: jest.fn(),
+    expandNodes: jest.fn(),
     runLayout: jest.fn(),
     stopLayout: jest.fn(),
+    nodes: [],
+    edges: [],
+    selectedNodes: [],
+    clearEdgeSelection: jest.fn(),
+    addEdgeToSelection: jest.fn(),
     options: {},
     blocklistedNodes: [],
   } as unknown as jest.Mocked<Workspace>);
@@ -463,10 +468,13 @@ describe('workspace listeners', () => {
       const environment = createWorkspaceListenerEnvironment();
       const fields = [{ name: 'field' }] as WorkspaceField[];
 
+      environment.store.dispatch(toggleNodeSelection({ nodeId: 'selected', replace: false }));
       environment.store.dispatch(expandSelectedNodes(fields));
       environment.store.dispatch(fillWorkspaceConnections(20));
 
-      expect(environment.workspace.expandSelecteds).toHaveBeenCalledWith({ toFields: fields });
+      expect(environment.workspace.expandNodes).toHaveBeenCalledWith(['selected'], {
+        toFields: fields,
+      });
       expect(environment.workspace.fillInGraph).toHaveBeenCalledWith(20);
     });
   });
