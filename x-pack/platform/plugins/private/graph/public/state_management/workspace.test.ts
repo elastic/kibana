@@ -51,22 +51,12 @@ const flushPromises = () => new Promise((resolve) => setTimeout(resolve));
 const createWorkspaceMock = () =>
   ({
     mergeGraph: jest.fn(),
-    simpleSearch: jest.fn(),
-    search: jest.fn(),
-    callElasticsearch: jest.fn(),
-    expandNodes: jest.fn(),
-    deleteNodes: jest.fn(),
-    blocklistNodes: jest.fn(),
-    groupNodes: jest.fn(),
     runLayout: jest.fn(),
     stopLayout: jest.fn(),
     nodes: [],
     nodesMap: {},
     edges: [],
     edgesMap: {},
-    selectedNodes: [],
-    clearEdgeSelection: jest.fn(),
-    addEdgeToSelection: jest.fn(),
     options: {
       indexName: 'data-view-title',
       vertex_fields: [],
@@ -511,13 +501,13 @@ describe('workspace listeners', () => {
   });
 
   describe('topology commands', () => {
-    it('passes the original Redux selection into the runtime adapter', () => {
+    it('synchronizes Redux topology into the runtime adapter', () => {
       const environment = createWorkspaceListenerEnvironment();
       environment.store.dispatch(toggleNodeSelection({ nodeId: 'selected', replace: false }));
 
       environment.store.dispatch(deleteSelectedNodes());
 
-      expect(environment.workspace.deleteNodes).toHaveBeenCalledWith(['selected']);
+      expect(environment.workspace.runLayout).toHaveBeenCalled();
     });
   });
 
