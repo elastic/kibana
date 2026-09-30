@@ -34,7 +34,7 @@ const MANAGEMENT = {
 export const CODE_INTELLIGENCE_LOGGING_CLASSIFICATION_WORKFLOW = {
   id: CODE_INTELLIGENCE_LOGGING_CLASSIFICATION_WORKFLOW_ID,
   pluginId: 'codeIntelligence',
-  version: 2,
+  version: 3,
   billable: true,
   yamlTemplate: ({ connectorId }) =>
     renderTemplate(CLASSIFY_LOGGING_CANDIDATES_YAML, { connectorId }),
@@ -44,7 +44,7 @@ export const CODE_INTELLIGENCE_LOGGING_CLASSIFICATION_WORKFLOW = {
 export const CODE_INTELLIGENCE_OTEL_CLASSIFICATION_WORKFLOW = {
   id: CODE_INTELLIGENCE_OTEL_CLASSIFICATION_WORKFLOW_ID,
   pluginId: 'codeIntelligence',
-  version: 2,
+  version: 3,
   billable: true,
   yamlTemplate: ({ connectorId }) => renderTemplate(CLASSIFY_OTEL_CANDIDATES_YAML, { connectorId }),
   management: MANAGEMENT,
