@@ -283,8 +283,9 @@ export const createInstallAutomationTemplateTool = ({
     targeted_ki_writer has triggers: manual and takes no dynamic parameters beyond the AI index id.
     It writes KIs verbatim from a kis array you edit in the installed workflow's consts block, then
     run with platform.core.execute_workflow. Do not pass sourceIndex.
-    If this template is already an automation on the AI index, the call replaces that workflow's
-    definition and keeps the same workflow id. It does not add a second automation.
+    If this template is already installed on the AI index, calling this tool again reinstalls it:
+    the workflow definition is replaced in-place and the same workflow id is kept. At most one
+    automation of each template type exists per AI index — reinstalling never adds a second copy.
   `,
   schema: installAutomationTemplateSchema,
   handler: async (params, { request, spaceId, attachments, logger }) => {

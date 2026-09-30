@@ -90,6 +90,7 @@ const renderTemplate = (params: InstallAutomationTemplateParams, aiIndexId: stri
 export const findInstalledTemplateWorkflowId = async ({
   aiIndexId,
   spaceId,
+  request,
   template,
   workflowYaml,
   logger,
@@ -98,6 +99,7 @@ export const findInstalledTemplateWorkflowId = async ({
 }: {
   aiIndexId: string;
   spaceId: string;
+  request: KibanaRequest;
   template: AutomationTemplateId;
   workflowYaml: string;
   logger: Logger;
@@ -117,7 +119,7 @@ export const findInstalledTemplateWorkflowId = async ({
 
     let workflow: { id?: string; name?: string; tags?: string[] } | null | undefined;
     try {
-      workflow = await workflowsManagement.getWorkflow(automation.value, spaceId);
+      workflow = await workflowsManagement.getWorkflow(automation.value, spaceId, request);
     } catch (error) {
       // A failed read is not "not installed". Creating here would attach a second copy.
       logger.error(
@@ -172,6 +174,7 @@ export const installAutomationTemplateHandler = async ({
   const existingWorkflowId = await findInstalledTemplateWorkflowId({
     aiIndexId,
     spaceId,
+    request,
     template: params.template,
     workflowYaml,
     logger,
