@@ -147,7 +147,6 @@ export function SloCardItem({
             />
           </div>
         )}
-        .
       </EuiPanel>
 
       <BurnRateRuleFlyout
