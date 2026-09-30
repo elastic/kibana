@@ -27,7 +27,7 @@ import { useKibana } from '../hooks/use_kibana';
 
 /** Public agent_builder route that returns a conversation, including each round's `trace_id`. */
 const buildConversationApiPath = (conversationId: string): string =>
-  `/api/agent_builder/conversations/${conversationId}`;
+  `/api/agent_builder/conversations/${encodeURIComponent(conversationId)}`;
 
 /**
  * agent_builder OTel traces land in a space-scoped index. Mirrors
@@ -114,12 +114,10 @@ export function InvestigationTraceFlyout({
 
   const traceId = useMemo(() => resolveTraceId(conversation?.rounds), [conversation]);
 
+  const tracesIndex = spaceId ? buildTracesIndexPattern(spaceId) : undefined;
   const fetchTrace = useMemo(
-    () =>
-      createEsTraceFetcher(data.search.search, {
-        index: spaceId ? buildTracesIndexPattern(spaceId) : '',
-      }),
-    [data.search.search, spaceId]
+    () => createEsTraceFetcher(data.search.search, { index: tracesIndex ?? '' }),
+    [data.search.search, tracesIndex]
   );
   const {
     spans,
@@ -128,6 +126,9 @@ export function InvestigationTraceFlyout({
     error: spansError,
   } = useTraceSpans(traceId, {
     fetchTrace,
+    // Key the cache by the resolved (space-scoped) index too, so spans from one space's
+    // index are never served for another space's request.
+    index: tracesIndex,
     // Only query once we know which space's traces index to hit.
     enabled: Boolean(traceId) && spaceId !== undefined && !hasSpaceError,
   });
@@ -221,7 +222,9 @@ export function InvestigationTraceFlyout({
       size={620}
       minWidth={400}
       maxWidth={1200}
-      ownFocus={false}
+      // Own the focus trap while open (over the push investigation flyout) so keyboard users can
+      // reach the waterfall and close control; EUI returns focus to the trigger on close.
+      ownFocus={true}
     >
       <EuiFlyoutHeader hasBorder>
         <EuiTitle size="s">
