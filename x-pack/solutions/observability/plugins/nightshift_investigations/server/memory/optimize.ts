@@ -160,6 +160,7 @@ export type SynthesizeMemoryGroup = (input: {
   sources: MemoryPage[];
   extract: MemoryExtractProposal;
   task?: string;
+  transcript?: string;
 }) => Promise<MemoryMergeSynthesis>;
 
 /** Normalize the user-authored task without interpreting literal prompt content. */
@@ -433,9 +434,12 @@ Investigation transcript:\n${transcript}`,
 
 export const MEMORY_WRITER_SYSTEM_PROMPT = `You write one semantic memory for an AI SRE assistant: durable facts about one topic in the customer's environment.
 
-You get the run time, the topic, a note on why the entry is being written, the new information from this run, and the stored memories it replaces. The replaced memories are archived once your entry is written, so anything worth keeping from them must be in your content.
+You get the run time, the topic, a note on why the entry is being written, the new information from this run, the stored memories it replaces, and this round's investigation transcript. The replaced memories are archived once your entry is written, so anything worth keeping from them must be in your content.
+
+The transcript is the evidence. It has the user task; the investigation, in order (the agent's notes and every tool call with an excerpt of its result, where "ERROR" marks a failed call); and the final answer. Use it to check the new information and the replaced memories, and to recover a detail the entry needs. A claim is observed only if a tool result shows it. The final answer can include the agent's inferences, so it is not evidence by itself. Calls that read memories (/workspace/memories/), Cortex pages (/workspace/cortex/), or decision trees (/workspace/decision-trees/) return stored knowledge, not new evidence. If results are unavailable (the transcript says so), the final answer is the only source for what this run observed.
 - Keep the facts from the replaced memories that are still correct and useful.
-- Where the new information or the note contradicts a replaced memory, keep the new information and drop the contradicted claim.
+- Where this run's evidence, the new information, or the note contradicts a replaced memory, drop the contradicted claim. Keep a replaced memory's inference or explanation only if the evidence supports it.
+- Stay on the entry's topic: the transcript can cover other topics, which belong to other entries.
 - Drop what is not useful and ids from one run (trace, span, request, alert, or document ids).
 - Every claim that can change over time (counts, rates, latencies, percentiles, error levels, versions, config values, which component is slowest) states when it was observed, as an absolute UTC time or window with dates. Keep the times given in the inputs. A replaced memory's claim with no time was observed by that memory's updated date: say "as of <date>".
 - Never write relative times such as "current", "prior window", "now", or "recently".
@@ -443,7 +447,7 @@ You get the run time, the topic, a note on why the entry is being written, the n
 - Compare observations from different times only when they measure the same thing the same way; otherwise state each on its own.
 - Lead with the lasting conclusion, then the dated observations that support it.
 - These rules apply to the new information as well as to the replaced memories. The note explains what changed; the rules still apply where it suggests otherwise.
-- State each fact once. Add nothing that is in neither the new information nor the replaced memories: no new sections, fixes, or recommendations.
+- State each fact once. Add nothing that is not in the new information, the replaced memories, or this run's tool results: no fixes or recommendations.
 - Be concise: no longer than the longest input unless the facts need it.
 
 Return markdown content and context.
@@ -494,12 +498,15 @@ export const createLlmSynthesizeMemoryGroup = ({
   inferenceClient: BoundInferenceClient;
   signal?: AbortSignal;
 }): SynthesizeMemoryGroup => {
-  return async ({ sources, extract, task }) => {
+  return async ({ sources, extract, task, transcript }) => {
     const taskText = task ? truncateTokens(task, MAX_MERGE_TASK_TOKENS) : '';
     const taskBlock = taskText
       ? `\n\nThis round's original task (cover its goal in context; do not copy it verbatim): ${taskText}`
       : '';
-    const framingTokens = estimateTokens(taskBlock);
+    const transcriptBlock = transcript
+      ? `\n\nInvestigation transcript:\n${transcript}`
+      : '\n\nInvestigation transcript: (unavailable)';
+    const framingTokens = estimateTokens(taskBlock) + estimateTokens(transcriptBlock);
     const entryBlock = formatMemoryMergeSources({
       sources,
       extract,
@@ -509,7 +516,7 @@ export const createLlmSynthesizeMemoryGroup = ({
       id: 'nightshift_memory_write',
       abortSignal: signal,
       system: MEMORY_WRITER_SYSTEM_PROMPT,
-      input: `Run time: ${new Date().toISOString()}\n\n${entryBlock}${taskBlock}`,
+      input: `Run time: ${new Date().toISOString()}\n\n${entryBlock}${transcriptBlock}${taskBlock}`,
       schema: {
         type: 'object',
         properties: {
@@ -685,6 +692,7 @@ export const applyMemoryEdits = async ({
   labels,
   extractions,
   context,
+  transcript,
   synthesizeMemoryGroup,
   now = () => Date.now() / 1000,
   logger,
@@ -696,6 +704,7 @@ export const applyMemoryEdits = async ({
   extractions: MemoryExtractProposal[];
   /** Current user task — stored on new pages as the recall key. */
   context?: string;
+  transcript?: string;
   synthesizeMemoryGroup?: SynthesizeMemoryGroup;
   now?: () => number;
   logger: Logger;
@@ -859,6 +868,7 @@ export const applyMemoryEdits = async ({
       extract: group.extract,
       canonicalId: group.canonicalId,
       task,
+      transcript,
       synthesizeMemoryGroup,
       now,
       logger,
@@ -923,6 +933,7 @@ export const applyMemoryEdits = async ({
             extract: extra,
             canonicalId: winner.id,
             task,
+            transcript,
             synthesizeMemoryGroup,
             now,
             logger,
@@ -964,6 +975,7 @@ const mergeMemoryGroup = async ({
   extract,
   canonicalId: initialCanonicalId,
   task,
+  transcript,
   synthesizeMemoryGroup,
   now,
   logger,
@@ -973,6 +985,7 @@ const mergeMemoryGroup = async ({
   extract: MemoryExtractProposal;
   canonicalId?: string;
   task: string;
+  transcript?: string;
   synthesizeMemoryGroup: SynthesizeMemoryGroup;
   now: () => number;
   logger: Logger;
@@ -1015,6 +1028,7 @@ const mergeMemoryGroup = async ({
         sources: currentSources,
         extract,
         task,
+        transcript,
       });
     } catch (err) {
       logger.warn('Memory merge synthesis failed');
@@ -1326,6 +1340,7 @@ export const optimizeMemory = async ({
     labels,
     extractions,
     context: task,
+    transcript,
     synthesizeMemoryGroup,
     logger,
   });

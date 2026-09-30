@@ -1699,6 +1699,58 @@ describe('optimizeMemory', () => {
     }
   });
 
+  it('gives the writer the same transcript as extraction', async () => {
+    const recalled = page('memory_redis', 'Redis', 'Checkout Redis evicts keys under load.');
+    const store = createStore({
+      get: jest
+        .fn()
+        .mockImplementation(async (id: string) => (id === recalled.id ? recalled : null)),
+    });
+    const proposeExtractions = jest.fn().mockResolvedValue({
+      extractions: [
+        {
+          slug: 'redis',
+          title: 'Redis',
+          content: 'Evictions start above 90% memory.',
+          tags: [],
+          categories: [],
+          replaces: [recalled.id],
+          note: '',
+        },
+      ],
+    });
+    const synthesizeMemoryGroup = jest.fn().mockResolvedValue({
+      content: 'Checkout Redis evicts keys above 90% memory.',
+      context: 'checkout redis evictions',
+    });
+
+    await optimizeMemory({
+      store,
+      recalledIds: [recalled.id],
+      proposeLabels: jest.fn().mockResolvedValue({ useful: [], harmful: [] }),
+      proposeExtractions,
+      synthesizeMemoryGroup,
+      userMessage: 'why is checkout slow?',
+      assistantMessage: 'Redis evictions on checkout.',
+      toolCalls: [],
+      investigation: [
+        {
+          kind: 'tool',
+          toolId: 'nightshift_sandbox_bash',
+          params: { command: 'esql "FROM metrics-redis*"' },
+          resultText: 'evicted_keys=4210',
+          isError: false,
+        },
+      ],
+      logger: loggerMock.create(),
+    });
+
+    expect(synthesizeMemoryGroup).toHaveBeenCalledTimes(1);
+    const { transcript } = synthesizeMemoryGroup.mock.calls[0][0];
+    expect(transcript).toBe(proposeExtractions.mock.calls[0][0].transcript);
+    expect(transcript).toContain('Result: evicted_keys=4210');
+  });
+
   it('marks an empty tool-call list explicitly', async () => {
     const store = createStore();
     const proposeExtractions = jest.fn().mockResolvedValue({ extractions: [] });
