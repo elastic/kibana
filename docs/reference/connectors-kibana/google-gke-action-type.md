@@ -55,7 +55,7 @@ Every cluster action accepts an optional `projectId` and a `location` (the zone 
 :   Gets one cluster in full: status and conditions, control-plane and node versions, node pools with sizes and autoscaling, network policy, authorized networks, Binary Authorization, release channel, endpoints, and the `etag`. Also returns `kubernetesConnector` with the API server URL and PEM CA certificate for wiring the Kubernetes connector to the cluster.
 
 `listNodePools`
-:   Lists the node pools of a cluster with status, version, per-zone and total node count, machine type, autoscaling bounds, and management settings.
+:   Lists the node pools of a cluster with status, version, per-zone node count and an estimated total, machine type, autoscaling bounds, and management settings.
 
 `getNodePool`
 :   Gets one node pool: status, version, node count and zones, machine and disk configuration, labels and taints, autoscaling, auto-repair and auto-upgrade, upgrade settings, and `etag`.
@@ -66,7 +66,7 @@ Every cluster action accepts an optional `projectId` and a `location` (the zone 
 ### Operations
 
 `getOperation`
-:   Gets the status of an operation returned by any mutating action: status, a `done` flag, the error if it failed, progress metrics, and cluster and node pool conditions. Parameters: `location`, `operationId`.
+:   Gets the status of an operation returned by any mutating action: status, a `done` flag, the error if it failed, progress metrics, and cluster and node pool conditions. Parameters: `location`, `operationId`, `projectId`. Pass the `projectId` the mutation's response carries, not just the connector default, so a mutation against a non-default project is polled there rather than on the connector default project.
 
 `listOperations`
 :   Lists recent and in-flight operations in a project, across every location by default.
@@ -120,7 +120,7 @@ Every cluster action accepts an optional `projectId` and a `location` (the zone 
 
 * Node counts (`nodeCount`, `initialNodeCount`, `minNodeCount`, `maxNodeCount`) are per zone. A regional node pool spanning three zones with `nodeCount` 2 runs six nodes. Use `totalMinNodeCount` and `totalMaxNodeCount` for cluster-wide autoscaler bounds.
 * Autopilot clusters have GKE-managed node pools. Node pool actions do not apply to them.
-* Operations are slow. Node pool resizes take a few minutes; upgrades, rollbacks, logging or monitoring changes, Binary Authorization changes, and network policy steps re-create nodes and take 5 to 15 minutes; cluster creation takes 5 to 15 minutes. Do not wait for an operation inside a single step: keep the returned operation ID and poll `getOperation` from later steps, with a wait between polls, so the calling agent turn or workflow step does not time out.
+* Operations are slow. Node pool resizes take a few minutes; upgrades, rollbacks, logging or monitoring changes, Binary Authorization changes, and network policy steps re-create nodes and take 5 to 15 minutes; cluster creation takes 5 to 15 minutes. Do not wait for an operation inside a single step: keep the returned `operationId`, `location`, and `projectId` and poll `getOperation` from later steps, with a wait between polls, so the calling agent turn or workflow step does not time out.
 * `updateCluster` changes the logging and monitoring services together, as GKE requires. When you pass only one, the connector reads the other from the cluster and sends it back unchanged.
 * A safe upgrade reads `getServerConfig`, upgrades the control plane with `updateCluster` and `desiredMasterVersion`, polls the operation, then upgrades each node pool with `desiredNodeVersion` and `desiredNodePoolId`. If a node upgrade fails, `rollbackNodePoolUpgrade` reverts the nodes that already moved.
 * `autoUpgrade` cannot be turned off on clusters enrolled in a release channel. Leave the channel first with `updateCluster` and `desiredReleaseChannel: "UNSPECIFIED"`.

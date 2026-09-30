@@ -307,7 +307,7 @@ describe('GoogleGke', () => {
         },
         binaryAuthorization: { evaluationMode: 'DISABLED' },
         workloadIdentityPool: 'my-project-123.svc.id.goog',
-        nodePools: [{ name: 'default-pool', nodeCountPerZone: 2, totalNodeCount: 6 }],
+        nodePools: [{ name: 'default-pool', nodeCountPerZone: 2, totalNodeCountEstimate: 6 }],
       });
     });
 
@@ -371,7 +371,7 @@ describe('GoogleGke', () => {
           expect.objectContaining({
             name: 'default-pool',
             nodeCountPerZone: 2,
-            totalNodeCount: 6,
+            totalNodeCountEstimate: 6,
             machineType: 'e2-standard-4',
             spot: false,
             preemptible: false,
@@ -453,6 +453,7 @@ describe('GoogleGke', () => {
       expect(mockClient.get).toHaveBeenCalledWith(OPERATION);
       expect(result).toMatchObject({
         operationId: OPERATION_ID,
+        projectId: PROJECT,
         operationType: 'SET_NODE_POOL_SIZE',
         status: 'DONE',
         done: true,
@@ -461,6 +462,22 @@ describe('GoogleGke', () => {
         error: undefined,
         progress: { status: 'RUNNING', metrics: [{ name: 'NODES_DONE', value: '1' }] },
       });
+    });
+
+    it('getOperation polls the explicit projectId a mutation targeted rather than the connector default', async () => {
+      // A mutation against a non-default project returns that project on the trimmed Operation.
+      // Following the documented pattern (operationId + location + projectId) must poll that
+      // same project, not fall back to the service-account/connector-default project.
+      mockClient.get.mockResolvedValue({ data: sampleOperation });
+      const OTHER_PROJECT = 'other-project-9';
+      await run('getOperation', {
+        projectId: OTHER_PROJECT,
+        location: ZONE,
+        operationId: OPERATION_ID,
+      });
+      expect(mockClient.get).toHaveBeenCalledWith(
+        `${API}/projects/${OTHER_PROJECT}/locations/${ZONE}/operations/${OPERATION_ID}`
+      );
     });
 
     it('getOperation surfaces a failed operation error', async () => {
@@ -485,7 +502,9 @@ describe('GoogleGke', () => {
         `${API}/projects/${PROJECT}/locations/-/operations`
       );
       expect(result).toEqual({
-        operations: [expect.objectContaining({ operationId: OPERATION_ID, done: false })],
+        operations: [
+          expect.objectContaining({ operationId: OPERATION_ID, projectId: PROJECT, done: false }),
+        ],
         missingZones: [],
       });
     });
@@ -498,7 +517,12 @@ describe('GoogleGke', () => {
         operationId: OPERATION_ID,
       });
       expect(mockClient.post).toHaveBeenCalledWith(`${OPERATION}:cancel`, {});
-      expect(result).toEqual({ cancelRequested: true, operationId: OPERATION_ID, location: ZONE });
+      expect(result).toEqual({
+        cancelRequested: true,
+        operationId: OPERATION_ID,
+        location: ZONE,
+        projectId: PROJECT,
+      });
     });
   });
 
@@ -514,7 +538,23 @@ describe('GoogleGke', () => {
       mockClient.post.mockResolvedValue({ data: sampleOperation });
       const result = await run('setNodePoolSize', { ...poolRef, nodeCount: 4 });
       expect(mockClient.post).toHaveBeenCalledWith(`${POOL}:setSize`, { nodeCount: 4 });
-      expect(result).toMatchObject({ operationId: OPERATION_ID, status: 'RUNNING', done: false });
+      expect(result).toMatchObject({
+        operationId: OPERATION_ID,
+        projectId: PROJECT,
+        status: 'RUNNING',
+        done: false,
+      });
+    });
+
+    it('setNodePoolSize stamps the explicit projectId onto the returned operation, not the connector default', async () => {
+      mockClient.post.mockResolvedValue({ data: sampleOperation });
+      const OTHER_PROJECT = 'other-project-9';
+      const result = await run('setNodePoolSize', {
+        ...poolRef,
+        projectId: OTHER_PROJECT,
+        nodeCount: 4,
+      });
+      expect(result).toMatchObject({ projectId: OTHER_PROJECT });
     });
 
     it('setNodePoolSize rejects a negative or fractional count', () => {
@@ -653,6 +693,44 @@ describe('GoogleGke', () => {
           management: { autoRepair: true, autoUpgrade: true },
           upgradeSettings: { maxSurge: 2, maxUnavailable: undefined },
         },
+      });
+    });
+
+    it('createNodePool accepts a qualified Kubernetes label key but rejects a Google-Cloud-only key', () => {
+      const base = {
+        location: ZONE,
+        clusterId: 'prod-web',
+        nodePoolId: 'batch-pool',
+        initialNodeCount: 1,
+      };
+      expect(() =>
+        parse('createNodePool', { ...base, labels: { 'example.com/workload': 'batch' } })
+      ).not.toThrow();
+      expect(() =>
+        parse('createNodePool', { ...base, labels: { 'kubernetes.io/hostname': 'node-1' } })
+      ).not.toThrow();
+      expect(() =>
+        parse('createNodePool', { ...base, labels: { 'Not Valid!!': 'batch' } })
+      ).toThrow();
+    });
+
+    it('labels totalNodeCountEstimate as an estimate that will not track an autoscaler with uneven zonal distribution', async () => {
+      // initialNodeCount is the configured per-zone starting point GKE was asked for. An
+      // autoscaled pool with locationPolicy ANY can since have resized unevenly across zones, so
+      // the estimate (initialNodeCount * zoneCount) no longer matches the real running total.
+      mockClient.get.mockResolvedValue({
+        data: {
+          ...samplePool,
+          initialNodeCount: 2,
+          locations: ['us-central1-a', 'us-central1-b', 'us-central1-c'],
+          autoscaling: { enabled: true, locationPolicy: 'ANY', minNodeCount: 0, maxNodeCount: 10 },
+        },
+      });
+      const result = await run('getNodePool', poolRef);
+      expect(result).toMatchObject({
+        nodeCountPerZone: 2,
+        totalNodeCountEstimate: 6,
+        autoscaling: expect.objectContaining({ enabled: true, locationPolicy: 'ANY' }),
       });
     });
 
@@ -993,6 +1071,24 @@ describe('GoogleGke', () => {
           machineType: 'e2-standard-4',
         })
       ).toThrow('do not apply to Autopilot');
+    });
+
+    it('createCluster accepts a fully qualified Shared VPC network and subnetwork reference', async () => {
+      mockClient.post.mockResolvedValue({ data: sampleOperation });
+      await run('createCluster', {
+        location: 'us-central1',
+        clusterId: 'shared-vpc',
+        network: 'projects/host-project/global/networks/shared',
+        subnetwork: 'projects/host-project/regions/us-central1/subnetworks/nodes',
+      });
+      const [, body] = mockClient.post.mock.calls[0];
+      expect(body.cluster.network).toBe('projects/host-project/global/networks/shared');
+      expect(body.cluster.subnetwork).toBe(
+        'projects/host-project/regions/us-central1/subnetworks/nodes'
+      );
+      expect(() =>
+        parse('createCluster', { location: 'us-central1', clusterId: 'bad', network: 'not valid' })
+      ).toThrow();
     });
 
     it('deleteCluster refuses to run without a matching confirmation', async () => {

@@ -235,10 +235,15 @@ const trimNodePool = (pool: GkeNodePool) => ({
   statusMessage: pool.statusMessage,
   version: pool.version,
   // GKE reports the per-zone node count it was told to run, not a live count. It is updated by
-  // setNodePoolSize, so it does reflect the last requested size.
+  // setNodePoolSize, so it does reflect the last requested size on a non-autoscaled pool. On an
+  // autoscaled pool (especially with locationPolicy "ANY") the autoscaler can since have resized
+  // and redistributed nodes unevenly across zones, so this is only the configured starting point.
   nodeCountPerZone: pool.initialNodeCount,
   locations: pool.locations ?? [],
-  totalNodeCount:
+  // An estimate derived from the configured per-zone count times the zone count, not a live
+  // reading: it does not reflect autoscaler activity or uneven zonal distribution. Do not use it
+  // to make capacity decisions on an autoscaled pool; call the Kubernetes connector for live counts.
+  totalNodeCountEstimate:
     pool.initialNodeCount !== undefined
       ? pool.initialNodeCount * Math.max(pool.locations?.length ?? 1, 1)
       : undefined,
@@ -359,12 +364,14 @@ const trimClusterDetail = (cluster: GkeCluster) => {
 };
 
 /**
- * Every mutation returns an Operation. The trimmed shape carries `operationId` and `location`
- * exactly as getOperation and cancelOperation expect them, so a workflow can poll without
- * parsing resource names.
+ * Every mutation returns an Operation. The trimmed shape carries `operationId`, `location`, and
+ * `projectId` exactly as getOperation and cancelOperation expect them, so a workflow can poll
+ * without parsing resource names or falling back to the connector's default project, which can
+ * differ from the project an explicit `projectId` on the mutation actually targeted.
  */
-const trimOperation = (operation: GkeOperation) => ({
+const trimOperation = (operation: GkeOperation, projectId: string) => ({
   operationId: operation.name,
+  projectId,
   operationType: operation.operationType,
   status: operation.status,
   done: operation.status === 'DONE',
@@ -408,11 +415,12 @@ const trimServerConfig = (config: GkeServerConfig) => ({
 
 const startOperation = async (
   ctx: ActionContext,
+  projectId: string,
   request: () => Promise<{ data: unknown }>
 ): Promise<ReturnType<typeof trimOperation>> => {
   try {
     const response = await request();
-    return trimOperation(response.data as GkeOperation);
+    return trimOperation(response.data as GkeOperation, projectId);
   } catch (error) {
     return throwWithApiError(error);
   }
@@ -513,7 +521,7 @@ export const GoogleGke: ConnectorSpec = {
     '',
     '### Everything mutating is asynchronous',
     '- `setNodePoolSize`, `setNodePoolAutoscaling`, `updateCluster`, `createNodePool`, `deleteNodePool`, `setNetworkPolicy`, `setNodePoolManagement`, `rollbackNodePoolUpgrade`, `setBinaryAuthorization`, `setMasterAuthorizedNetworks`, `createCluster`, and `deleteCluster` return an Operation, not the finished resource.',
-    '- Poll `getOperation` with the returned `operationId` and `location` until `done` is true, then check `error`. Node pool resizes take a few minutes; upgrades and cluster creation can take 10-30 minutes.',
+    '- Poll `getOperation` with the returned `operationId`, `location`, and `projectId` until `done` is true, then check `error`. Pass `projectId` even when it equals the connector default: a mutation that targeted an explicit `projectId` different from the default needs it to poll the right project. Node pool resizes take a few minutes; upgrades and cluster creation can take 10-30 minutes.',
     '- GKE allows one operation per cluster at a time. A second mutation fails with FAILED_PRECONDITION "cluster is currently being operated on" or similar: call `listOperations` (or `getOperation`) and wait, do not retry blindly.',
     '',
     '### Sizing semantics',
@@ -587,7 +595,7 @@ export const GoogleGke: ConnectorSpec = {
       isTool: true,
       scope: 'read',
       description:
-        'List the node pools of a cluster with status, version, per-zone and total node count, machine type, autoscaling bounds, and management settings. The prerequisite for any node pool remediation: use the returned name as nodePoolId.',
+        'List the node pools of a cluster with status, version, per-zone node count and an estimated total, machine type, autoscaling bounds, and management settings. The prerequisite for any node pool remediation: use the returned name as nodePoolId.',
       input: ListNodePoolsInputSchema,
       handler: async (ctx, input: ListNodePoolsInput) => {
         const { url } = resolveCluster(ctx, input);
@@ -644,7 +652,7 @@ export const GoogleGke: ConnectorSpec = {
       isTool: true,
       scope: 'read',
       description:
-        'Get the status of a long-running Operation returned by any mutating action: status (PENDING, RUNNING, DONE, ABORTING), a `done` flag, the error if it failed, progress metrics, and cluster/node pool conditions. Poll it until done is true before treating a scale, upgrade, create, or delete as finished.',
+        'Get the status of a long-running Operation returned by any mutating action: status (PENDING, RUNNING, DONE, ABORTING), a `done` flag, the error if it failed, progress metrics, and cluster/node pool conditions. Poll it until done is true before treating a scale, upgrade, create, or delete as finished. Pass the `projectId` the returned Operation carries, not just `operationId` and `location`, so a mutation that targeted a non-default project is polled there rather than the connector default.',
       input: GetOperationInputSchema,
       handler: async (ctx, input: GetOperationInput) => {
         const projectId = resolveProjectId(ctx, input.projectId);
@@ -653,7 +661,7 @@ export const GoogleGke: ConnectorSpec = {
           const response = await ctx.client.get(
             operationPath(projectId, location, input.operationId)
           );
-          return trimOperation(response.data as GkeOperation);
+          return trimOperation(response.data as GkeOperation, projectId);
         } catch (error) {
           return throwWithApiError(error);
         }
@@ -673,7 +681,9 @@ export const GoogleGke: ConnectorSpec = {
           const response = await ctx.client.get(`${parentPath(projectId, location)}/operations`);
           const data = response.data as { operations?: GkeOperation[]; missingZones?: string[] };
           return {
-            operations: (data.operations ?? []).map(trimOperation),
+            operations: (data.operations ?? []).map((operation) =>
+              trimOperation(operation, projectId)
+            ),
             missingZones: data.missingZones ?? [],
           };
         } catch (error) {
@@ -696,7 +706,7 @@ export const GoogleGke: ConnectorSpec = {
             `${operationPath(projectId, location, input.operationId)}:cancel`,
             {}
           );
-          return { cancelRequested: true, operationId: input.operationId, location };
+          return { cancelRequested: true, operationId: input.operationId, location, projectId };
         } catch (error) {
           return throwWithApiError(error);
         }
@@ -714,8 +724,8 @@ export const GoogleGke: ConnectorSpec = {
         'Scale a node pool to an exact per-zone node count. The primary capacity remediation: scale up to absorb load, or down (even to 0) to shed cost or drain a pool. Returns an Operation to poll with getOperation. On an autoscaled pool the autoscaler may resize again; adjust bounds with setNodePoolAutoscaling for a lasting change.',
       input: SetNodePoolSizeInputSchema,
       handler: async (ctx, input: SetNodePoolSizeInput) => {
-        const { url } = resolveNodePool(ctx, input);
-        return startOperation(ctx, () =>
+        const { url, projectId } = resolveNodePool(ctx, input);
+        return startOperation(ctx, projectId, () =>
           ctx.client.post(`${url}:setSize`, { nodeCount: input.nodeCount })
         );
       },
@@ -728,8 +738,8 @@ export const GoogleGke: ConnectorSpec = {
         'Enable, adjust, or disable cluster-autoscaler management of a node pool. Provide per-zone bounds (minNodeCount/maxNodeCount) or cluster-wide bounds (totalMinNodeCount/totalMaxNodeCount). The standing fix for recurring capacity pressure. Returns an Operation to poll with getOperation.',
       input: SetNodePoolAutoscalingInputSchema,
       handler: async (ctx, input: SetNodePoolAutoscalingInput) => {
-        const { url } = resolveNodePool(ctx, input);
-        return startOperation(ctx, () =>
+        const { url, projectId } = resolveNodePool(ctx, input);
+        return startOperation(ctx, projectId, () =>
           ctx.client.post(`${url}:setAutoscaling`, { autoscaling: buildAutoscaling(input) })
         );
       },
@@ -742,7 +752,7 @@ export const GoogleGke: ConnectorSpec = {
         'Turn node auto-repair and/or auto-upgrade on or off for a node pool. Fields you omit keep their current value (the connector reads the pool first, because the API replaces both flags at once). Returns an Operation to poll with getOperation.',
       input: SetNodePoolManagementInputSchema,
       handler: async (ctx, input: SetNodePoolManagementInput) => {
-        const { url } = resolveNodePool(ctx, input);
+        const { url, projectId } = resolveNodePool(ctx, input);
         let current: GkeNodePool;
         try {
           current = (await ctx.client.get(url)).data as GkeNodePool;
@@ -753,7 +763,9 @@ export const GoogleGke: ConnectorSpec = {
           autoRepair: input.autoRepair ?? current.management?.autoRepair === true,
           autoUpgrade: input.autoUpgrade ?? current.management?.autoUpgrade === true,
         };
-        return startOperation(ctx, () => ctx.client.post(`${url}:setManagement`, { management }));
+        return startOperation(ctx, projectId, () =>
+          ctx.client.post(`${url}:setManagement`, { management })
+        );
       },
     },
 
@@ -764,8 +776,8 @@ export const GoogleGke: ConnectorSpec = {
         'Roll back a node pool whose upgrade was aborted or failed, returning already-upgraded nodes to the previous version. A no-op if the last upgrade completed successfully. The error-handling step for upgrade automations. Returns an Operation to poll with getOperation.',
       input: RollbackNodePoolUpgradeInputSchema,
       handler: async (ctx, input: RollbackNodePoolUpgradeInput) => {
-        const { url } = resolveNodePool(ctx, input);
-        return startOperation(ctx, () =>
+        const { url, projectId } = resolveNodePool(ctx, input);
+        return startOperation(ctx, projectId, () =>
           ctx.client.post(`${url}:rollback`, {
             ...(input.respectPdb !== undefined ? { respectPdb: input.respectPdb } : {}),
           })
@@ -780,7 +792,7 @@ export const GoogleGke: ConnectorSpec = {
         'Add a node pool to a Standard cluster with its own machine type, disk, image, Spot setting, labels, taints, zones, autoscaling, and management options. Use it to rotate to a differently shaped pool (create, move workloads, then deleteNodePool the old one) or to add dedicated capacity. Returns an Operation to poll with getOperation.',
       input: CreateNodePoolInputSchema,
       handler: async (ctx, input: CreateNodePoolInput) => {
-        const { url } = resolveCluster(ctx, input);
+        const { url, projectId } = resolveCluster(ctx, input);
         const config = {
           machineType: input.machineType,
           diskSizeGb: input.diskSizeGb,
@@ -805,7 +817,7 @@ export const GoogleGke: ConnectorSpec = {
           input.autoRepair !== undefined || input.autoUpgrade !== undefined
             ? { autoRepair: input.autoRepair ?? true, autoUpgrade: input.autoUpgrade ?? true }
             : undefined;
-        return startOperation(ctx, () =>
+        return startOperation(ctx, projectId, () =>
           ctx.client.post(`${url}/nodePools`, {
             nodePool: {
               name: input.nodePoolId,
@@ -829,8 +841,8 @@ export const GoogleGke: ConnectorSpec = {
         'Delete a node pool. GKE cordons and drains its nodes first, so pods are rescheduled onto other pools if capacity exists; pods that fit nowhere else stay Pending. The remove half of a pool rotation. Returns an Operation to poll with getOperation.',
       input: DeleteNodePoolInputSchema,
       handler: async (ctx, input: DeleteNodePoolInput) => {
-        const { url } = resolveNodePool(ctx, input);
-        return startOperation(ctx, () => ctx.client.delete(url));
+        const { url, projectId } = resolveNodePool(ctx, input);
+        return startOperation(ctx, projectId, () => ctx.client.delete(url));
       },
     },
 
@@ -845,7 +857,7 @@ export const GoogleGke: ConnectorSpec = {
         'Update cluster configuration or version: upgrade the control plane (desiredMasterVersion), upgrade a node pool (desiredNodeVersion + desiredNodePoolId), change node image type or node zones, switch release channel, or toggle Cloud Logging/Monitoring. Pick versions from getServerConfig. Upgrades move one minor version at a time and nodes cannot run a newer version than the control plane. Returns an Operation to poll with getOperation.',
       input: UpdateClusterInputSchema,
       handler: async (ctx, input: UpdateClusterInput) => {
-        const { url } = resolveCluster(ctx, input);
+        const { url, projectId } = resolveCluster(ctx, input);
         let desiredLoggingService: string | undefined = input.desiredLoggingService;
         let desiredMonitoringService: string | undefined = input.desiredMonitoringService;
         // GKE rejects a change to one of the two services without the other ("Request would
@@ -860,7 +872,7 @@ export const GoogleGke: ConnectorSpec = {
             return throwWithApiError(error);
           }
         }
-        return startOperation(ctx, () =>
+        return startOperation(ctx, projectId, () =>
           ctx.client.put(url, {
             update: {
               desiredMasterVersion: input.desiredMasterVersion,
@@ -887,7 +899,7 @@ export const GoogleGke: ConnectorSpec = {
         'Enable or disable Kubernetes NetworkPolicy enforcement (Calico) on a Standard cluster, so that NetworkPolicy objects actually restrict pod traffic. GKE does this in two steps, each a long Operation that re-creates nodes: first the network policy addon on the cluster, then enforcement on the nodes. Each call performs the next outstanding step and returns its Operation with a `phase` of "addon" or "nodes" plus `nextStep`; poll getOperation until done, then call setNetworkPolicy again with the same input until it reports `phase: "done"`.',
       input: SetNetworkPolicyInputSchema,
       handler: async (ctx, input: SetNetworkPolicyInput) => {
-        const { url } = resolveCluster(ctx, input);
+        const { url, projectId } = resolveCluster(ctx, input);
         let cluster: GkeCluster;
         try {
           cluster = (await ctx.client.get(url)).data as GkeCluster;
@@ -912,26 +924,26 @@ export const GoogleGke: ConnectorSpec = {
         if (input.enabled) {
           if (!addonEnabled) {
             return {
-              ...(await startOperation(ctx, enableAddon)),
+              ...(await startOperation(ctx, projectId, enableAddon)),
               phase: 'addon',
               nextStep:
                 'Poll getOperation until done, then call setNetworkPolicy again to enforce the policy on the nodes.',
             };
           }
           if (!enforced) {
-            return { ...(await startOperation(ctx, enforceOnNodes)), phase: 'nodes' };
+            return { ...(await startOperation(ctx, projectId, enforceOnNodes)), phase: 'nodes' };
           }
         } else {
           if (enforced) {
             return {
-              ...(await startOperation(ctx, enforceOnNodes)),
+              ...(await startOperation(ctx, projectId, enforceOnNodes)),
               phase: 'nodes',
               nextStep:
                 'Poll getOperation until done, then call setNetworkPolicy again to disable the addon.',
             };
           }
           if (addonEnabled) {
-            return { ...(await startOperation(ctx, enableAddon)), phase: 'addon' };
+            return { ...(await startOperation(ctx, projectId, enableAddon)), phase: 'addon' };
           }
         }
         return { phase: 'done', enabled: input.enabled, done: true };
@@ -945,8 +957,8 @@ export const GoogleGke: ConnectorSpec = {
         "Enable or disable Binary Authorization on a cluster. PROJECT_SINGLETON_POLICY_ENFORCE makes the cluster admit only container images that satisfy the project's Binary Authorization policy; DISABLED turns enforcement off. Returns an Operation to poll with getOperation.",
       input: SetBinaryAuthorizationInputSchema,
       handler: async (ctx, input: SetBinaryAuthorizationInput) => {
-        const { url } = resolveCluster(ctx, input);
-        return startOperation(ctx, () =>
+        const { url, projectId } = resolveCluster(ctx, input);
+        return startOperation(ctx, projectId, () =>
           ctx.client.put(url, {
             update: { desiredBinaryAuthorization: { evaluationMode: input.evaluationMode } },
           })
@@ -961,7 +973,7 @@ export const GoogleGke: ConnectorSpec = {
         'Restrict which IPv4 CIDR ranges may reach the cluster API server (control plane authorized networks), or lift the restriction. The cidrBlocks list REPLACES the current allowlist: read it from getCluster first and include every range you want to keep, or operators lose access. Returns an Operation to poll with getOperation.',
       input: SetMasterAuthorizedNetworksInputSchema,
       handler: async (ctx, input: SetMasterAuthorizedNetworksInput) => {
-        const { url } = resolveCluster(ctx, input);
+        const { url, projectId } = resolveCluster(ctx, input);
         let gcpPublicCidrsAccessEnabled = input.gcpPublicCidrsAccessEnabled;
         if (gcpPublicCidrsAccessEnabled === undefined) {
           // The API replaces the whole config, so an omitted flag would silently flip to false.
@@ -973,7 +985,7 @@ export const GoogleGke: ConnectorSpec = {
             return throwWithApiError(error);
           }
         }
-        return startOperation(ctx, () =>
+        return startOperation(ctx, projectId, () =>
           ctx.client.put(url, {
             update: {
               desiredMasterAuthorizedNetworksConfig: {
@@ -1038,7 +1050,7 @@ export const GoogleGke: ConnectorSpec = {
             cluster.addonsConfig = { networkPolicyConfig: { disabled: false } };
           }
         }
-        return startOperation(ctx, () =>
+        return startOperation(ctx, projectId, () =>
           ctx.client.post(`${parentPath(projectId, location)}/clusters`, { cluster })
         );
       },
@@ -1053,8 +1065,8 @@ export const GoogleGke: ConnectorSpec = {
         'Delete a cluster and everything running in it. Irreversible. Fails unless confirmClusterId repeats the cluster name exactly, and fails on clusters with deletion protection or an in-flight operation. Returns an Operation to poll with getOperation.',
       input: DeleteClusterInputSchema,
       handler: async (ctx, input: DeleteClusterInput) => {
-        const { url } = resolveCluster(ctx, input);
-        return startOperation(ctx, () => ctx.client.delete(url));
+        const { url, projectId } = resolveCluster(ctx, input);
+        return startOperation(ctx, projectId, () => ctx.client.delete(url));
       },
     },
   },

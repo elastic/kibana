@@ -25,6 +25,30 @@ const OPERATION_ID_PATTERN = /^[a-zA-Z0-9][a-zA-Z0-9-]{0,127}$/;
 const VERSION_PATTERN = /^(-|latest|[0-9]+(\.[0-9]+){0,2}(-gke\.[0-9]+)?)$/;
 const CIDR_PATTERN = /^(\d{1,3}\.){3}\d{1,3}\/\d{1,2}$/;
 const LABEL_KEY_PATTERN = /^[a-z][a-z0-9_-]{0,62}$/;
+/**
+ * A VPC network name, or the fully-qualified Shared VPC reference GKE also accepts, e.g.
+ * "projects/host-project/global/networks/shared", needed to provision into another project's
+ * (the Shared VPC host project's) network.
+ */
+const NETWORK_PATTERN =
+  /^([a-z][a-z0-9-]{0,62}|projects\/[a-z][a-z0-9-]{4,28}[a-z0-9]\/global\/networks\/[a-z][a-z0-9-]{0,62})$/;
+/**
+ * A subnetwork name, or the fully-qualified Shared VPC reference GKE also accepts, e.g.
+ * "projects/host-project/regions/us-central1/subnetworks/nodes".
+ */
+const SUBNETWORK_PATTERN =
+  /^([a-z][a-z0-9-]{0,62}|projects\/[a-z][a-z0-9-]{4,28}[a-z0-9]\/regions\/[a-z]+-[a-z]+[0-9]+\/subnetworks\/[a-z][a-z0-9-]{0,62})$/;
+/**
+ * Kubernetes label key: an optional DNS-subdomain prefix (e.g. "example.com/") followed by a
+ * name segment of up to 63 characters, alphanumeric plus '-', '_', '.', starting and ending with
+ * an alphanumeric. Distinct from LABEL_KEY_PATTERN, which is Google Cloud's resource-label key
+ * syntax and disallows the '.' and '/' a qualified Kubernetes label key routinely uses (e.g.
+ * node-selector keys like "example.com/workload").
+ */
+const K8S_LABEL_KEY_PATTERN =
+  /^([a-z0-9]([a-z0-9-]{0,251}[a-z0-9])?(\.[a-z0-9]([a-z0-9-]{0,251}[a-z0-9])?)*\/)?[a-zA-Z0-9]([a-zA-Z0-9._-]{0,61}[a-zA-Z0-9])?$/;
+/** Kubernetes label value: up to 63 characters, alphanumeric plus '-', '_', '.', or empty. */
+const K8S_LABEL_VALUE_PATTERN = /^([a-zA-Z0-9]([a-zA-Z0-9._-]{0,61}[a-zA-Z0-9])?)?$/;
 
 const projectId = () =>
   z
@@ -112,6 +136,27 @@ const resourceLabels = () =>
           'Label keys are lowercase letters, digits, underscores and hyphens, starting with a letter',
       }),
       z.string().max(63)
+    )
+    .refine((value) => Object.keys(value).length <= 64, {
+      message: 'At most 64 labels are allowed',
+    });
+
+/**
+ * Kubernetes node labels, as opposed to Google Cloud resource labels (see resourceLabels above):
+ * these allow a qualified key with a DNS-subdomain prefix and '.', which GCP resource-label keys
+ * do not.
+ */
+const k8sNodeLabels = () =>
+  z
+    .record(
+      z.string().max(253).regex(K8S_LABEL_KEY_PATTERN, {
+        message:
+          'Must be a valid Kubernetes label key: an optional DNS-subdomain prefix followed by "/", then up to 63 alphanumeric characters, "-", "_", or ".", starting and ending alphanumeric',
+      }),
+      z.string().max(63).regex(K8S_LABEL_VALUE_PATTERN, {
+        message:
+          'Must be a valid Kubernetes label value: up to 63 alphanumeric characters, "-", "_", or ".", starting and ending alphanumeric',
+      })
     )
     .refine((value) => Object.keys(value).length <= 64, {
       message: 'At most 64 labels are allowed',
@@ -385,10 +430,10 @@ export const CreateNodePoolInputSchema = lazySchema(() =>
       .describe(
         'Zones the pool runs in, for example ["us-central1-a","us-central1-b"]. Must be zones within the cluster\'s region. Defaults to the cluster\'s zones.'
       ),
-    labels: resourceLabels()
+    labels: k8sNodeLabels()
       .optional()
       .describe(
-        'Kubernetes node labels applied to every node in the pool, for example {"workload":"batch"}.'
+        'Kubernetes node labels applied to every node in the pool, for example {"workload":"batch"} or {"example.com/workload":"batch"} for a qualified key.'
       ),
     taints: z
       .array(
@@ -670,15 +715,25 @@ export const CreateClusterInputSchema = lazySchema(() =>
       network: z
         .string()
         .max(128)
-        .regex(/^[a-z0-9-]+$/, { message: 'Must be a VPC network name' })
+        .regex(NETWORK_PATTERN, {
+          message:
+            'Must be a VPC network name, or a fully qualified Shared VPC reference such as projects/host-project/global/networks/shared',
+        })
         .optional()
-        .describe('VPC network name, for example "default".'),
+        .describe(
+          'VPC network name, for example "default", or a fully qualified Shared VPC reference such as "projects/host-project/global/networks/shared" to provision into another project\'s network.'
+        ),
       subnetwork: z
         .string()
         .max(128)
-        .regex(/^[a-z0-9-]+$/, { message: 'Must be a subnetwork name' })
+        .regex(SUBNETWORK_PATTERN, {
+          message:
+            'Must be a subnetwork name, or a fully qualified Shared VPC reference such as projects/host-project/regions/us-central1/subnetworks/nodes',
+        })
         .optional()
-        .describe('Subnetwork name in the cluster region.'),
+        .describe(
+          'Subnetwork name in the cluster region, or a fully qualified Shared VPC reference such as "projects/host-project/regions/us-central1/subnetworks/nodes".'
+        ),
       enableWorkloadIdentity: z
         .boolean()
         .optional()
