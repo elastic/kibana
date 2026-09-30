@@ -35,6 +35,8 @@ import { ScheduleIntervalField } from './schedule_interval_field';
 import { SettingRow } from './setting_row';
 import { getWorkerCustomSettingsComponent } from '../custom_settings/registry';
 import * as settingsI18n from '../settings_translations';
+import type { WorkerWarningReason } from '../worker_dependencies/worker_dependencies';
+import { WorkerWarningIcon } from '../worker_dependencies/worker_warning_icon';
 import { workerDescription, workerName } from '../workers/translations';
 import { workerScheduleCadenceLabel } from './worker_trigger_cadence';
 
@@ -47,6 +49,8 @@ interface WorkerSettingsPanelProps {
   enabled: boolean;
   settings: WorkerSettings;
   error?: string;
+  /** Why this Worker has nothing to do, or what its being off costs others; one header icon. */
+  warningReasons?: WorkerWarningReason[];
   /** Settings could not be read for this Worker; controls are locked and the subtitle says why. */
   settingsLocked: boolean;
   /** A Watch save is in flight; controls are locked so edits cannot slip into a draft about to be cleared. */
@@ -61,6 +65,8 @@ interface WorkerSettingsPanelProps {
   draftResetKey?: number;
 }
 
+const NO_WARNING_REASONS: WorkerWarningReason[] = [];
+
 /**
  * A single Worker's settings. The header doubles as the accordion button when a Watch has several
  * Workers, so collapsed panels still summarise their state. Every control writes into the page
@@ -74,6 +80,7 @@ export const WorkerSettingsPanel = React.memo(function WorkerSettingsPanel({
   enabled,
   settings,
   error,
+  warningReasons = NO_WARNING_REASONS,
   settingsLocked,
   isSaving,
   canWrite,
@@ -164,6 +171,10 @@ export const WorkerSettingsPanel = React.memo(function WorkerSettingsPanel({
     [euiTheme]
   );
 
+  const stopAccordionToggle = (event: React.MouseEvent | React.KeyboardEvent) => {
+    event.stopPropagation();
+  };
+
   const headerBandContent = (titleId: string, titleAs: 'span' | 'h2') => {
     const TitleTag = titleAs;
     return (
@@ -198,6 +209,12 @@ export const WorkerSettingsPanel = React.memo(function WorkerSettingsPanel({
               <EuiBadge color="hollow" data-test-subj={`alertZeroWorkerScheduleBadge-${worker.id}`}>
                 {scheduleLabel}
               </EuiBadge>
+            </EuiFlexItem>
+          ) : null}
+          {warningReasons.length > 0 ? (
+            // The band is the accordion's click target; opening the tooltip must not collapse it.
+            <EuiFlexItem grow={false} onClick={stopAccordionToggle} onKeyDown={stopAccordionToggle}>
+              <WorkerWarningIcon workerId={worker.id} workerName={name} reasons={warningReasons} />
             </EuiFlexItem>
           ) : null}
           {/* Carried on the band itself so a collapsed Worker still reports a failed save. */}
@@ -311,10 +328,6 @@ export const WorkerSettingsPanel = React.memo(function WorkerSettingsPanel({
       ) : null}
     </>
   );
-
-  const stopAccordionToggle = (event: React.MouseEvent | React.KeyboardEvent) => {
-    event.stopPropagation();
-  };
 
   if (isAccordion) {
     return (

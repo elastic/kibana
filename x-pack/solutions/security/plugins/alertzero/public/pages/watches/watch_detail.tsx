@@ -19,6 +19,7 @@ import {
   useEuiTheme,
 } from '@elastic/eui';
 import { useHistory, useParams } from 'react-router-dom';
+import type { Worker } from '@kbn/alertzero-common';
 import { isHttpFetchError } from '@kbn/core-http-browser';
 import { useAlertZeroDocTitle } from '../../hooks/use_alertzero_doc_title';
 import { useCanWriteAlertZero } from '../../hooks/use_can_write_alertzero';
@@ -27,6 +28,17 @@ import { useWatch } from '../../hooks/use_watches_api';
 import { useWorkers } from '../../hooks/use_workers_api';
 import { WatchesSectionLayout } from './components/watches_section_layout';
 import { WorkerSettingsPanel } from './components/worker_settings_panel';
+import {
+  getBlockedAfterSaveNotices,
+  getDisableConfirmation,
+  getWorkerWarningReasons,
+  type WorkerBlockedNotice,
+  type WorkerDisableConfirmation,
+  type WorkerEnabledById,
+} from './worker_dependencies/worker_dependencies';
+import { WorkerBlockedAfterSaveModal } from './worker_dependencies/worker_blocked_after_save_modal';
+import { WorkerDisableConfirmModal } from './worker_dependencies/worker_disable_confirm_modal';
+import { workerName } from './workers/translations';
 import * as i18n from './translations';
 import * as settingsI18n from './settings_translations';
 
@@ -52,6 +64,18 @@ export const WatchDetailPage: React.FC = () => {
   );
   const { discard, isDirty, isSaving, resolve, save, updateEnabled, updateSettings } =
     useWatchSettingsDraft(members);
+  // Dependencies cross Watches, so this spans every Worker: saved state, with this page's draft
+  // on top for the Workers it holds.
+  const enabledById: WorkerEnabledById = useMemo(
+    () =>
+      new Map((workersData?.workers ?? []).map((worker) => [worker.id, resolve(worker).enabled])),
+    [workersData?.workers, resolve]
+  );
+  const [pendingDisable, setPendingDisable] = useState<{
+    worker: Worker;
+    confirmation: WorkerDisableConfirmation;
+  } | null>(null);
+  const [blockedNotices, setBlockedNotices] = useState<WorkerBlockedNotice[]>([]);
   const [saveBlockedByInvalidDraft, setSaveBlockedByInvalidDraft] = useState(false);
   // Workers whose trigger control holds an uncommittable amount. That draft never reaches settings
   // state, so the page must hear about it directly or Save would persist the last valid cadence.
@@ -83,8 +107,10 @@ export const WatchDetailPage: React.FC = () => {
       setSaveBlockedByInvalidDraft(true);
       return;
     }
+    const workersBeforeSave = workersData?.workers ?? [];
+    let savedWorkerIds: string[];
     try {
-      await save();
+      savedWorkerIds = await save();
       setSaveBlockedByInvalidDraft(false);
     } catch (saveError) {
       if (saveError instanceof Error && saveError.message === 'invalid') {
@@ -93,7 +119,35 @@ export const WatchDetailPage: React.FC = () => {
       }
       throw saveError;
     }
-  }, [save, hasInvalidDraft]);
+    // A Worker whose write failed is still at its stored value.
+    const saved = new Set(savedWorkerIds);
+    const enabledAfterSave: WorkerEnabledById = new Map(
+      workersBeforeSave.map((worker) => [
+        worker.id,
+        saved.has(worker.id) ? resolve(worker).enabled : worker.enabled,
+      ])
+    );
+    setBlockedNotices(getBlockedAfterSaveNotices(savedWorkerIds, enabledAfterSave));
+  }, [save, hasInvalidDraft, resolve, workersData?.workers]);
+
+  const handleEnabledChange = useCallback(
+    (worker: Worker, enabled: boolean) => {
+      const confirmation = enabled ? undefined : getDisableConfirmation(worker.id, enabledById);
+      if (confirmation) {
+        setPendingDisable({ worker, confirmation });
+        return;
+      }
+      updateEnabled(worker, enabled);
+    },
+    [enabledById, updateEnabled]
+  );
+
+  const confirmPendingDisable = useCallback(() => {
+    if (pendingDisable) {
+      updateEnabled(pendingDisable.worker, false);
+    }
+    setPendingDisable(null);
+  }, [pendingDisable, updateEnabled]);
 
   const onDiscard = useCallback(() => {
     discard();
@@ -103,6 +157,7 @@ export const WatchDetailPage: React.FC = () => {
   }, [discard]);
 
   const isMultiWorker = members.length > 1;
+  const blockedNotice = blockedNotices[0];
 
   const headerPrimaryActionItem = useMemo(
     () => ({
@@ -146,6 +201,8 @@ export const WatchDetailPage: React.FC = () => {
     setInvalidTriggerWorkerIds(new Set());
     setSaveBlockedByInvalidDraft(false);
     setDraftResetKey((key) => key + 1);
+    setPendingDisable(null);
+    setBlockedNotices([]);
   }, [watchId, discard]);
 
   const handleToggleWorker = useCallback((workerId: string, isOpen: boolean) => {
@@ -262,10 +319,11 @@ export const WatchDetailPage: React.FC = () => {
                 enabled={draft.enabled}
                 settings={draft.settings}
                 error={draft.error}
+                warningReasons={getWorkerWarningReasons(worker.id, enabledById)}
                 settingsLocked={worker.state === 'unavailable'}
                 isSaving={isSaving}
                 canWrite={canWrite}
-                onEnabledChange={(enabled) => updateEnabled(worker, enabled)}
+                onEnabledChange={(enabled) => handleEnabledChange(worker, enabled)}
                 onSettingsChange={(patch) => updateSettings(worker, patch)}
                 onTriggerValidityChange={(isValid) =>
                   handleTriggerValidityChange(worker.id, isValid)
@@ -313,6 +371,23 @@ export const WatchDetailPage: React.FC = () => {
           <div data-test-subj="alertZeroWatchWorkersSection">{renderWorkers()}</div>
         </EuiFlexItem>
       </EuiFlexGroup>
+      {pendingDisable ? (
+        <WorkerDisableConfirmModal
+          confirmation={pendingDisable.confirmation}
+          onConfirm={confirmPendingDisable}
+          onCancel={() => setPendingDisable(null)}
+        />
+      ) : null}
+      {blockedNotice ? (
+        <WorkerBlockedAfterSaveModal
+          workerName={workerName(
+            blockedNotice.workerId,
+            workersData?.workers.find((worker) => worker.id === blockedNotice.workerId)?.name
+          )}
+          reasons={blockedNotice.reasons}
+          onAcknowledge={() => setBlockedNotices((current) => current.slice(1))}
+        />
+      ) : null}
     </WatchesSectionLayout>
   );
 };

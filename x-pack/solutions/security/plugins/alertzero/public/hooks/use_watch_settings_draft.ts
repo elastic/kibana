@@ -108,10 +108,11 @@ export const useWatchSettingsDraft = (workers: Worker[]) => {
     setOverlays({});
   }, []);
 
-  const save = useCallback(async (): Promise<void> => {
+  /** Resolves with the ids of the Workers that were written; a failed Worker keeps its draft. */
+  const save = useCallback(async (): Promise<string[]> => {
     const outstanding = workers.filter((worker) => isWorkerDirty(worker, overlays[worker.id]));
     if (outstanding.length === 0) {
-      return;
+      return [];
     }
 
     const invalid = outstanding.some(
@@ -122,6 +123,7 @@ export const useWatchSettingsDraft = (workers: Worker[]) => {
       throw new Error('invalid');
     }
 
+    const savedWorkerIds: string[] = [];
     setIsSaving(true);
     try {
       for (const worker of outstanding) {
@@ -139,6 +141,7 @@ export const useWatchSettingsDraft = (workers: Worker[]) => {
 
         try {
           await mutateAsync({ workerId: worker.id, patch });
+          savedWorkerIds.push(worker.id);
           setOverlays((current) => {
             const { [worker.id]: _removed, ...rest } = current;
             return rest;
@@ -156,6 +159,7 @@ export const useWatchSettingsDraft = (workers: Worker[]) => {
     } finally {
       setIsSaving(false);
     }
+    return savedWorkerIds;
   }, [mutateAsync, overlays, resolve, workers]);
 
   return {
