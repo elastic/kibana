@@ -24,15 +24,18 @@ export async function updateEventStatusToolHandler({
   alertEventsClient?: AlertEventsClientApi;
   logger: Logger;
 }): Promise<{
+  event_id: string;
   updated: number;
   ignored: number;
   status: SignificantEventStatus;
 }> {
-  return updateSignificantEventStatus({
+  const result = await updateSignificantEventStatus({
     eventClient,
     eventId,
     status,
     alertEventsClient,
     logger,
   });
+
+  return { event_id: eventId, ...result };
 }

@@ -33,6 +33,7 @@ describe('updateEventStatusToolHandler', () => {
       { throwOnFail: true, refresh: 'wait_for' }
     );
     expect(result).toEqual({
+      event_id: 'event-id-1',
       updated: 1,
       ignored: 0,
       status: 'inactive',
@@ -50,7 +51,12 @@ describe('updateEventStatusToolHandler', () => {
       status: 'inactive',
       logger: makeLogger(),
     });
-    expect(missing).toEqual({ updated: 0, ignored: 1, status: 'inactive' });
+    expect(missing).toEqual({
+      event_id: 'event-id-1',
+      updated: 0,
+      ignored: 1,
+      status: 'inactive',
+    });
 
     const eventClientSame = {
       findLatestByEventId: jest.fn().mockResolvedValue({
@@ -65,6 +71,11 @@ describe('updateEventStatusToolHandler', () => {
       status: 'inactive',
       logger: makeLogger(),
     });
-    expect(same).toEqual({ updated: 0, ignored: 1, status: 'inactive' });
+    expect(same).toEqual({
+      event_id: 'event-id-1',
+      updated: 0,
+      ignored: 1,
+      status: 'inactive',
+    });
   });
 });

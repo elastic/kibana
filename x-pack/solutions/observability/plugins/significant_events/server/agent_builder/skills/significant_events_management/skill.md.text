@@ -42,8 +42,8 @@ Status update workflow:
    - `inactive`: incident is resolved, a false alarm, or no longer relevant; record the rationale in `assessment_note`.
 3. Call `event_status_update` with the event id and target status.
 4. Interpret the response carefully:
-   - `{ event_id: "<event id>", updated: 1, ignored: 0 }` means the event status changed.
-   - `{ event_id: "<event id>", updated: 0, ignored: 1 }` means no status change was needed.
+   - `{ event_id: "<event id>", updated: 1, ignored: 0, status: "<status>" }` means the event status changed.
+   - `{ event_id: "<event id>", updated: 0, ignored: 1, status: "<status>" }` means no status change was needed.
 </required_workflow>
 
 <attachment_rendering_guidance>

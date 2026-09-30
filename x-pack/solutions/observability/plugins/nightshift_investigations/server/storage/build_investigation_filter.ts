@@ -6,10 +6,18 @@
  */
 
 import { escapeQuotes } from '@kbn/es-query';
+import type { Severity } from '../../common';
 import { NIGHTSHIFT_INVESTIGATION_SO_TYPE } from '../saved_objects';
 import type { FindInvestigationsQuery, InvestigationAttributes } from './types';
 
 const attr = (field: string) => `${NIGHTSHIFT_INVESTIGATION_SO_TYPE}.attributes.${field}`;
+
+const legacySeverityByCanonical: Record<Severity, string> = {
+  critical: '80-critical',
+  high: '60-high',
+  medium: '40-medium',
+  low: '20-low',
+};
 
 const orClause = (field: string, values: readonly string[]): string =>
   `(${values.map((value) => `${attr(field)}: "${escapeQuotes(value)}"`).join(' OR ')})`;
@@ -48,7 +56,12 @@ export const buildInvestigationFilter = <Fields extends keyof InvestigationAttri
   }
 
   if (query.severities?.length) {
-    filters.push(orClause('severity', query.severities));
+    filters.push(
+      orClause(
+        'severity',
+        query.severities.flatMap((severity) => [severity, legacySeverityByCanonical[severity]])
+      )
+    );
   }
 
   return filters.length > 0 ? filters.join(' AND ') : undefined;

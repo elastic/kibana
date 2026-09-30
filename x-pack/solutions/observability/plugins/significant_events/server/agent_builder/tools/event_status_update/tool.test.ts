@@ -47,10 +47,10 @@ describe('event_status_update tool', () => {
     (assertSignificantEventsAccess as jest.Mock).mockResolvedValue(undefined);
     (assertCanManageSignificantEvents as jest.Mock).mockResolvedValue(undefined);
     (updateEventStatusToolHandler as jest.Mock).mockResolvedValue({
-      event_uuid: 'e1',
+      event_id: 'e1',
       updated: 1,
       ignored: 0,
-      status: 'closed',
+      status: 'inactive',
     });
 
     const getScopedClients = jest.fn().mockResolvedValue({
@@ -69,7 +69,7 @@ describe('event_status_update tool', () => {
 
     const result = await invokeHandler(
       tool as never,
-      { event_uuid: 'e1', status: 'closed' },
+      { event_id: 'e1', status: 'inactive' },
       createMockToolContext()
     );
 

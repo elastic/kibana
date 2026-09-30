@@ -259,7 +259,10 @@ describe('SavedObjectInvestigationRepository', () => {
       expect(savedObjectsClient.find).toHaveBeenCalledWith(
         expect.objectContaining({
           filter:
-            `(${TYPE}.attributes.severity: "critical"` + ` OR ${TYPE}.attributes.severity: "high")`,
+            `(${TYPE}.attributes.severity: "critical"` +
+            ` OR ${TYPE}.attributes.severity: "80-critical"` +
+            ` OR ${TYPE}.attributes.severity: "high"` +
+            ` OR ${TYPE}.attributes.severity: "60-high")`,
         })
       );
     });
