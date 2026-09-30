@@ -87,6 +87,7 @@ test.describe(
       pageObjects: { inventoryPage },
     }) => {
       await inventoryPage.selectSchema('Elastic System Integration');
+      await inventoryPage.goToTime(DATE_WITH_MIXED_POD_DATA);
 
       await inventoryPage.openInventoryRuleFlyout();
       await expect(inventoryPage.ruleFlyoutForExpressionButton).toContainText('Kubernetes Pods');
@@ -138,6 +139,7 @@ test.describe(
       pageObjects: { inventoryPage },
     }) => {
       await inventoryPage.selectSchema('Elastic System Integration');
+      await inventoryPage.goToTime(DATE_WITH_MIXED_POD_DATA);
 
       await inventoryPage.openInventoryRuleFlyoutFromPodWaffleNode(POD_NAMES[0]);
 
