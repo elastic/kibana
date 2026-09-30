@@ -13,13 +13,13 @@ import {
   type ToolCallStep,
 } from '@kbn/agent-builder-common';
 import { WORKFLOWS_UI_SETTING_ID, ExecutionStatus } from '@kbn/workflows';
-import { getInputsFromDefinition } from '@kbn/workflows/spec/lib/field_conversion';
 import type { Logger } from '@kbn/logging';
 import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
 import { executeWorkflow } from '@kbn/agent-builder-tools-base/workflows';
 import type { InternalStartServices } from '../../services/types';
 import { getCurrentSpaceId } from '../../utils/spaces';
 import type { AfterExecutionWorkflowParams } from './types';
+import { withDeclaredInputs } from './with_declared_inputs';
 
 type WorkflowApi = WorkflowsServerPluginSetup['management'];
 
@@ -82,47 +82,19 @@ export const runAfterExecutionWorkflows = async ({
       roundConnectorId && roundConnectorId !== 'unknown' ? roundConnectorId : undefined,
     workflow_context: workflowContext,
   };
-  const optionalInputs = Object.entries(optionalWorkflowParams).filter(
-    ([, value]) => value !== undefined
-  );
 
   for (const workflowId of workflowIds) {
-    let currentWorkflowParams: Record<string, unknown> = workflowParams as unknown as Record<
-      string,
-      unknown
-    >;
-
-    if (optionalInputs.length) {
-      try {
-        const workflow = await workflowApi.getWorkflow(workflowId, spaceId, context.request);
-        if (!workflow?.definition) {
-          logger.error(
-            `Post-execution workflow "${workflowId}" could not be read; skipping execution`
-          );
-          continue;
-        }
-
-        const declaredInputs = getInputsFromDefinition(workflow.definition)?.properties;
-        if (declaredInputs) {
-          currentWorkflowParams = {
-            ...workflowParams,
-            ...Object.fromEntries(
-              optionalInputs.filter(([name]) =>
-                Object.prototype.hasOwnProperty.call(declaredInputs, name)
-              )
-            ),
-          };
-        }
-      } catch (error) {
-        logger.error(
-          `Post-execution workflow "${workflowId}" could not be inspected; running with original inputs: ${error}`
-        );
-      }
-    }
-
     const result = await executeWorkflow({
       workflowId,
-      workflowParams: currentWorkflowParams,
+      workflowParams: await withDeclaredInputs({
+        workflowId,
+        inputs: workflowParams as unknown as Record<string, unknown>,
+        optionalInputs: optionalWorkflowParams,
+        workflowApi,
+        spaceId,
+        request: context.request,
+        logger,
+      }),
       request: context.request,
       spaceId,
       workflowApi,

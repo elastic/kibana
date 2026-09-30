@@ -427,8 +427,8 @@ describe('runAfterExecutionWorkflows', () => {
 
         const params = executeWorkflowMock.mock.calls[0][0].workflowParams;
         expect(Object.keys(params).sort()).toEqual([...legacyInputNames].sort());
-        expect(logger.error).toHaveBeenCalledWith(
-          expect.stringContaining('Post-execution workflow "wf-1" could not be inspected')
+        expect(logger.warn).toHaveBeenCalledWith(
+          expect.stringContaining('Could not read the inputs of workflow "wf-1"')
         );
       });
 
@@ -452,45 +452,28 @@ describe('runAfterExecutionWorkflows', () => {
   });
 
   describe('error handling (non-throwing — fire-and-forget)', () => {
-    it('runs with original inputs when the workflow lookup throws', async () => {
-      const { workflowApi, getWorkflow, getInternalServices } = createDeps();
-      getWorkflow.mockRejectedValue(new Error('lookup failed'));
+    it.each([null, { definition: undefined }])(
+      'runs with original inputs when the lookup returns %p',
+      async (workflow) => {
+        const { workflowApi, getWorkflow, getInternalServices } = createDeps();
+        getWorkflow.mockResolvedValue(workflow);
 
-      await expect(
-        runAfterExecutionWorkflows({
-          context: createContext(),
-          workflowApi,
-          getInternalServices,
-          logger,
-        })
-      ).resolves.toBeUndefined();
+        await expect(
+          runAfterExecutionWorkflows({
+            context: createContext(),
+            workflowApi,
+            getInternalServices,
+            logger,
+          })
+        ).resolves.toBeUndefined();
 
-      expect(logger.error).toHaveBeenCalledWith(expect.stringContaining('wf-1'));
-      expect(logger.error).toHaveBeenCalledWith(expect.stringContaining('lookup failed'));
-      expect(executeWorkflowMock).toHaveBeenCalledWith(
-        expect.objectContaining({ workflowId: 'wf-1' })
-      );
-      expect(executeWorkflowMock.mock.calls[0][0].workflowParams).not.toHaveProperty(
-        'round_connector_id'
-      );
-    });
-
-    it('logs and skips the workflow when the lookup returns no workflow', async () => {
-      const { workflowApi, getWorkflow, getInternalServices } = createDeps();
-      getWorkflow.mockResolvedValue(null);
-
-      await expect(
-        runAfterExecutionWorkflows({
-          context: createContext(),
-          workflowApi,
-          getInternalServices,
-          logger,
-        })
-      ).resolves.toBeUndefined();
-
-      expect(logger.error).toHaveBeenCalledWith(expect.stringContaining('wf-1'));
-      expect(executeWorkflowMock).not.toHaveBeenCalled();
-    });
+        expect(executeWorkflowMock).toHaveBeenCalledWith(
+          expect.objectContaining({ workflowId: 'wf-1' })
+        );
+        const params = executeWorkflowMock.mock.calls[0][0].workflowParams;
+        expect(Object.keys(params).sort()).toEqual([...legacyInputNames].sort());
+      }
+    );
 
     it('still passes the round model to a later workflow after a lookup fails', async () => {
       const { workflowApi, getWorkflow, getInternalServices } = createDeps();
