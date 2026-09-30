@@ -113,6 +113,14 @@ export const ESCALATION_MODAL_TRANSLATIONS = Object.freeze({
   cancelButton: i18n.translate('xpack.alertzero.escalationModal.cancelButton', {
     defaultMessage: 'Cancel',
   }),
+  alreadyEscalatedCallout: {
+    title: (count: number) =>
+      i18n.translate('xpack.alertzero.escalationModal.alreadyEscalatedCallout.title', {
+        defaultMessage:
+          '{count, plural, one {This investigation is already part of an open escalation} other {This investigation is already part of # open escalations}}',
+        values: { count },
+      }),
+  },
 });
 
 export const ESCALATION_SUCCESS = Object.freeze({
