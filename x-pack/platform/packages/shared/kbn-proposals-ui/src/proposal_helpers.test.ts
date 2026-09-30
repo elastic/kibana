@@ -14,6 +14,7 @@ import {
 import type { ApprovalProposal } from './types';
 
 const proposal = (overrides: Partial<ApprovalProposal> = {}): ApprovalProposal => ({
+  title: 'Tune the Okta rule',
   comment: 'Tune the noisy rule',
   impact: 'low',
   status: 'pending',

@@ -39,6 +39,9 @@ jest.mock('./use_create_rule', () => ({
 jest.mock('./use_update_rule', () => ({
   useUpdateRule: () => ({ mutate: mockUpdateMutate, isLoading: false }),
 }));
+jest.mock('./use_is_action_policies_license_valid', () => ({
+  useIsActionPoliciesLicenseValid: () => true,
+}));
 
 const mockNavigateToUrl = jest.fn();
 const mockAddWarning = jest.fn();
