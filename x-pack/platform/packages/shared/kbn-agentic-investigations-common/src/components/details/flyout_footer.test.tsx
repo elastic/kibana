@@ -9,6 +9,7 @@ import React from 'react';
 import { fireEvent, screen } from '@testing-library/react';
 import { renderWithKibanaRenderContext } from '@kbn/test-jest-helpers';
 import type { Investigation } from '../../types';
+import { ACTIONS_TRANSLATIONS } from '../actions/translations';
 import { ConversationDetailsFlyoutFooter } from './flyout_footer';
 
 const investigation: Investigation = {
@@ -26,16 +27,18 @@ const investigation: Investigation = {
   events: [],
 };
 
-const openActionsMenu = () => {
-  fireEvent.click(screen.getByTestId('investigationFlyoutActions-button'));
-};
+const openEscalationButtonName = ACTIONS_TRANSLATIONS.buttons.openEscalation;
 
 describe('ConversationDetailsFlyoutFooter', () => {
   it('calls the supplied onOpenChat rather than reaching for Kibana services', () => {
     const onOpenChat = jest.fn();
 
     renderWithKibanaRenderContext(
-      <ConversationDetailsFlyoutFooter investigation={investigation} onOpenChat={onOpenChat} />
+      <ConversationDetailsFlyoutFooter
+        investigation={investigation}
+        isOpenedFromChat={false}
+        onOpenChat={onOpenChat}
+      />
     );
 
     fireEvent.click(screen.getByTestId('investigationFlyoutOpenChat'));
@@ -43,57 +46,51 @@ describe('ConversationDetailsFlyoutFooter', () => {
     expect(onOpenChat).toHaveBeenCalledTimes(1);
   });
 
-  it('owns the assign modal, so it opens without a page-level host', () => {
-    renderWithKibanaRenderContext(
-      <ConversationDetailsFlyoutFooter investigation={investigation} onOpenChat={jest.fn()} />
-    );
-
-    openActionsMenu();
-    fireEvent.click(screen.getByText('Assign'));
-
-    expect(screen.getByText('Assign proposal')).toBeInTheDocument();
-  });
-
-  it('owns the close investigation modal', () => {
+  it('hides Open in chat when the flyout was opened from within chat, which is already there', () => {
     renderWithKibanaRenderContext(
       <ConversationDetailsFlyoutFooter
         investigation={investigation}
+        isOpenedFromChat
         onOpenChat={jest.fn()}
-        onCloseInvestigation={() => <div>Dismiss proposal</div>}
       />
     );
 
-    openActionsMenu();
-    fireEvent.click(screen.getByText('Close investigation'));
-
-    expect(screen.getByText('Dismiss proposal')).toBeInTheDocument();
+    expect(screen.queryByTestId('investigationFlyoutOpenChat')).not.toBeInTheDocument();
   });
 
-  it('hides the close action when onCloseInvestigation is not provided', () => {
-    renderWithKibanaRenderContext(
-      <ConversationDetailsFlyoutFooter investigation={investigation} onOpenChat={jest.fn()} />
-    );
-
-    openActionsMenu();
-
-    expect(screen.queryByText('Close investigation')).not.toBeInTheDocument();
-  });
-
-  it('hides the close action when the investigation is already closed', () => {
-    const closedInvestigation: Investigation = { ...investigation, status: 'closed' };
+  it('opens the escalation modal via onOpenEscalation when the button is clicked', () => {
+    const onOpenEscalation = jest.fn(() => <div>Escalation modal</div>);
 
     renderWithKibanaRenderContext(
       <ConversationDetailsFlyoutFooter
-        investigation={closedInvestigation}
+        investigation={investigation}
+        isOpenedFromChat={false}
+        onOpenChat={jest.fn()}
+        onOpenEscalation={onOpenEscalation}
+      />
+    );
+
+    fireEvent.click(screen.getByRole('button', { name: openEscalationButtonName }));
+
+    expect(onOpenEscalation).toHaveBeenCalledTimes(1);
+    expect(onOpenEscalation).toHaveBeenCalledWith(
+      expect.objectContaining({ mode: 'create', investigation, onClose: expect.any(Function) })
+    );
+    expect(screen.getByText('Escalation modal')).toBeInTheDocument();
+  });
+
+  it('omits the escalation button when onOpenEscalation is not supplied', () => {
+    renderWithKibanaRenderContext(
+      <ConversationDetailsFlyoutFooter
+        investigation={investigation}
+        isOpenedFromChat={false}
         onOpenChat={jest.fn()}
         onCloseInvestigation={() => <div>Dismiss proposal</div>}
       />
     );
 
-    openActionsMenu();
-
-    // Even though onCloseInvestigation is provided, the menu item should not appear
-    // because the investigation is already closed.
-    expect(screen.queryByText('Close investigation')).not.toBeInTheDocument();
+    expect(
+      screen.queryByRole('button', { name: openEscalationButtonName })
+    ).not.toBeInTheDocument();
   });
 });

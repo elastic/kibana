@@ -17,12 +17,10 @@ Two layers of flags exist. **Kibana config** (`kibana.dev.yml`) is evaluated at 
 # Restart Kibana after changing it.
 xpack.streams.canvas.enabled: true
 
-# Optional. When unset, unit PUT still writes saved objects but skips
-# streams-config-distributor validate and publish (local canvas saves still work).
-# xpack.streams.distributor.url: "https://localhost:18443"
-# xpack.streams.distributor.ssl.certificate: /tmp/certs/kibana.crt
-# xpack.streams.distributor.ssl.key: /tmp/certs/kibana.key
-# xpack.streams.distributor.ssl.certificateAuthorities: /tmp/certs/server-ca.crt
+xpack.streams.distributor.url: "https://localhost:18443"
+xpack.streams.distributor.ssl.certificate: /tmp/certs/kibana.crt
+xpack.streams.distributor.ssl.key: /tmp/certs/kibana.key
+xpack.streams.distributor.ssl.certificateAuthorities: /tmp/certs/server-ca.crt
 
 uiSettings.overrides:
   observability:streamsEnableCanvas: true
@@ -78,7 +76,7 @@ Plaintext secrets live in the configuration SO `secrets` map (`{ "<name>": "<val
 
 `GET /internal/streams/unit/{id}` omits `secrets`. Canvas saves that omit `secrets` keep the stored bag. A PUT that includes `secrets` **merges** those keys onto what is stored — it does not replace the secrets — because the UI only sends newly entered values. A later runtime fetch can reveal values when an editor actually needs them.
 
-Project-key encryption (`encryptCredentials`) is not wired yet. Publishing a **non-empty** secrets bag without it fails closed (503) rather than sending plaintext. Empty secrets still publish `unit_yaml` + `config_hash` only.
+Project-key encryption (`encryptCredentials`) is not wired yet. Publishing a **non-empty** secrets bag without it logs a warning and omits the `credentials` sidecar rather than sending plaintext or failing the unit write. Secrets stay in the configuration saved object. Empty secrets still publish `unit_yaml` + `config_hash` only.
 
 `config_hash` is SHA-256 of the authored YAML bytes, plus a credential ciphertext fingerprint when `credentials[]` is present. The distributor stores that hash without recomputing it; including ciphertext means a secret-only change still rolls out instead of matching the previous YAML-only hash and no-op'ing. Validate (`POST /v1/validate`) does not send credentials.
 
@@ -170,7 +168,7 @@ POST kbn:/internal/streams/unit/default/_reset
 
 Internal routes need `kbn-xsrf` and `x-elastic-internal-origin`. Set `Content-Type: application/yaml` and send the file with `--data-binary` (not `-d`, which urlencodes).
 
-`good-unit.yaml`:
+Kibana does not insert a default unit yet. Seed a local environment with a source, destination, and pipeline by putting `good-unit.yaml`. Otherwise you'll get an error about the unit not containing the three of these things:
 
 ```yaml
 sources:
@@ -213,7 +211,7 @@ pipelines:
 ```
 
 ```bash
-# Expect 400 + distributor diagnostics (or Kibana structural errors)
+# Expect 400 + distributor diagnostics
 curl -sS -X PUT "$KIBANA_URL/internal/streams/unit/default" \
   -u elastic_serverless:changeme \
   -H 'kbn-xsrf: true' \
@@ -230,17 +228,16 @@ curl -sS -X PUT "$KIBANA_URL/internal/streams/unit/default" \
   --data-binary @good-unit.yaml
 ```
 
-Component `id`s must be unique across sources, processors, destinations, and pipelines. Semantic / compile validation calls config-distributor `POST /v1/validate` ([ingest-dev#9430](https://github.com/elastic/ingest-dev/issues/9430)) when `xpack.streams.distributor.url` is set. Invalid units return 400 with `{ valid: false, diagnostics }` and are not written. Without a distributor URL, only Kibana structural checks run.
+Unit writes require a running config-distributor. Validation calls `POST /v1/validate` ([ingest-dev#9430](https://github.com/elastic/ingest-dev/issues/9430)). Invalid units return 400 with `{ valid: false, diagnostics }` and are not written. When `xpack.streams.distributor.url` is unset, Kibana logs an error, does not call the distributor, and does not store the unit (HTTP 503).
 
-The distributor (via `transpiler.Compile()`) is the authority on whether a unit is valid. Kibana schema and Zod types are structural DX only. 
+The distributor (via `transpiler.Compile()`) is the authority on whether a unit is valid. The unit HTTP routes do not schema-check the document. 
 
 ## End-to-end testing
 
-There isn't an easy way to truly test all of this end to end yet, with a working backend.
 
 [These instructions](https://github.com/elastic/ingest-dev/issues/9168#issuecomment-5427844503) can be used for testing source ingestion by running the `hosted-otel-collector` locally.
 
-[These instructions](https://github.com/elastic/ingest-dev/issues/9443) can be used for running the `streams-config-distributor` locally. You can then place the following in your `kibana.dev.yml` using the values you get from the instructions:
+[These instructions](https://github.com/elastic/streams-config-distributor/tree/main/testing/kibana) can be used for running the `streams-config-distributor` locally. You can then place the following in your `kibana.dev.yml` using the values you get from the instructions:
 
 
 ```

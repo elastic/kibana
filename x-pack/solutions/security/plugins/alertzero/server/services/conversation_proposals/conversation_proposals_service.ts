@@ -12,6 +12,7 @@ import type { MetadataFieldValue } from '@kbn/agent-builder-common';
 import type { AgenticInvestigationsPluginStart } from '@kbn/agentic-investigations-plugin/server';
 import type { ProposalsPluginStart } from '@kbn/proposals-plugin/server';
 import type { ProposalWithMetadata } from '@kbn/proposals-common';
+import { ALERTZERO_PROPOSAL_ORIGIN } from '../../../common/proposals/origin';
 import type { ProposalItem, ProposalsPageResponse } from '../../../common/proposals/list';
 
 type ProposalsService = ReturnType<ProposalsPluginStart['getProposalsService']>;
@@ -64,8 +65,17 @@ export class ConversationProposalsService {
     { size, from }: { size: number; from: number }
   ): Promise<ProposalsPageResponse> {
     const { proposals, total } = await this.proposalsService.list(
-      { category, status: 'pending', excludeSuperseded: true, excludeExpired: false, size, from },
+      {
+        category,
+        origin: ALERTZERO_PROPOSAL_ORIGIN,
+        status: 'pending',
+        excludeSuperseded: true,
+        excludeExpired: false,
+        size,
+        from,
+      },
       spaceId,
+      request,
       [{ createdAt: { order: 'desc' as const } }, ...TIEBREAKER]
     );
 
@@ -81,12 +91,16 @@ export class ConversationProposalsService {
     const { proposals, total } = await this.proposalsService.list(
       {
         decidedWithinHours: CLOSED_DECIDED_WITHIN_HOURS,
+        // The index is shared with every other solution's proposals, and only
+        // this filter keeps theirs out of an AlertZero queue.
+        origin: ALERTZERO_PROPOSAL_ORIGIN,
         excludeSuperseded: true,
         excludeExpired: false,
         size,
         from,
       },
       spaceId,
+      request,
       [
         { decidedAt: { order: 'desc' as const } },
         { createdAt: { order: 'desc' as const } },
