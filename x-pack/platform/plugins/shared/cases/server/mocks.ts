@@ -784,6 +784,7 @@ export const mockCasesContract = (): CasesServerStart => ({
   config: {
     enabled: true,
     assigneeIdentity: { enabled: true },
+    bidirectionalSync: { enabled: false },
     stack: {
       enabled: true,
     },

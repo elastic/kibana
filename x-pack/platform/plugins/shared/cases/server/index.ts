@@ -25,6 +25,9 @@ export const config: PluginConfigDescriptor<ConfigType> = {
     runWorkflows: {
       enabled: true,
     },
+    bidirectionalSync: {
+      enabled: true,
+    },
     attachments: {
       enabled: true,
     },

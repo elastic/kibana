@@ -94,6 +94,9 @@ export interface CasesUiConfigType {
   runWorkflows: {
     enabled: boolean;
   };
+  bidirectionalSync: {
+    enabled: boolean;
+  };
 }
 
 export const UserActionTypeAll = 'all' as const;
