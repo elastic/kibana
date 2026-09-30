@@ -14,7 +14,9 @@ import {
   createRuleDataSchema,
   FIND_DEFAULT_PER_PAGE,
   isStateTransitionAllowed,
+  putRuleDataSchema,
   updateRuleDataSchema,
+  type PutRuleData,
   type RuleKind,
 } from '@kbn/alerting-v2-schemas';
 import { PluginStart } from '@kbn/core-di';
@@ -1781,15 +1783,16 @@ export class RulesClient {
     data,
   }: {
     id: string;
-    data: CreateRuleData;
+    data: PutRuleData;
   }): Promise<{ rule: RuleResponse; created: boolean }> {
-    const parsed = this.parseRuleData(createRuleDataSchema, data, 'upsert');
+    const parsed = this.parseRuleData(putRuleDataSchema, data, 'upsert');
     this.artifactTypeRegistry.validate(parsed.artifacts);
 
     const exists = await this.ruleExists({ id });
 
     if (!exists) {
-      const rule = await this.createRule({ data, options: { id } });
+      const { enabled, ...createData } = parsed;
+      const rule = await this.createRule({ data: createData, options: { id, enabled } });
       return { rule, created: true };
     }
 
@@ -1805,9 +1808,12 @@ export class RulesClient {
 
     assertImmutableUnchanged(parsed, existingAttrs);
 
+    const wasEnabled = existingAttrs.enabled;
+    const nextEnabled = parsed.enabled ?? wasEnabled;
+
     const ruleVersion = this.getNextVersion(existingAttrs.metadata.version);
     const nextAttrs = transformCreateRuleBodyToRuleSoAttributes(parsed, {
-      enabled: existingAttrs.enabled,
+      enabled: nextEnabled,
       createdBy: existingAttrs.createdBy,
       createdAt: existingAttrs.createdAt,
       updatedBy: actor,
@@ -1819,15 +1825,23 @@ export class RulesClient {
       {
         updatedEvery: nextAttrs.schedule.every,
         prevEvery: existingAttrs.schedule.every,
-        checkLimit: existingAttrs.enabled,
+        checkLimit: nextEnabled,
       },
     ]);
 
-    await this.scheduleRuleExecutorTask({
-      ruleId: id,
-      spaceId,
-      scheduleEvery: nextAttrs.schedule.every,
-    });
+    // Mirrors `enableRule`/`disableRule`: an enabled rule always (re)schedules
+    // its executor task (self-heal), while a rule that stays disabled must not
+    // get a task scheduled for it.
+    if (nextEnabled) {
+      await this.scheduleRuleExecutorTask({
+        ruleId: id,
+        spaceId,
+        scheduleEvery: nextAttrs.schedule.every,
+      });
+    } else if (wasEnabled) {
+      const taskId = getRuleExecutorTaskId({ ruleId: id, spaceId });
+      await this.taskManager.removeIfExists(taskId);
+    }
 
     const references = rebuildArtifactReferences({
       artifacts: nextAttrs.artifacts,
@@ -1851,6 +1865,14 @@ export class RulesClient {
     this.ruleEventPublisher.emitRuleUpdated(this.request, [
       { ruleId: rule.id, spaceId: this.spaceId, rule },
     ]);
+    if (nextEnabled !== wasEnabled) {
+      const eventRule = { ruleId: rule.id, spaceId: this.spaceId, rule };
+      if (nextEnabled) {
+        this.ruleEventPublisher.emitRuleEnabled(this.request, [eventRule]);
+      } else {
+        this.ruleEventPublisher.emitRuleDisabled(this.request, [eventRule]);
+      }
+    }
     return { rule, created: false };
   }
 }
