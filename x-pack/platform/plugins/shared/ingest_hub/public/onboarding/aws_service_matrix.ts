@@ -580,8 +580,6 @@ const AWS_SERVICES_MATRIX_RAW: AwsServiceStaticEntry[] = [
     name: 'AWS Cost and Usage Report (CUR 2.0)',
     category: 'cloud_financial_management',
     packageName: 'aws_billing',
-    deploymentMethods: [{ method: 'agent_based', preferred: true }],
-    signalTypes: ['metrics'],
   },
 
   // ── amazon_security_lake package — Security, Identity & Compliance ────────
@@ -590,8 +588,6 @@ const AWS_SERVICES_MATRIX_RAW: AwsServiceStaticEntry[] = [
     name: 'Amazon Security Lake',
     category: 'security_identity_compliance',
     packageName: 'amazon_security_lake',
-    deploymentMethods: [{ method: 'agent_based', preferred: true }],
-    signalTypes: ['logs'],
   },
 ];
 
