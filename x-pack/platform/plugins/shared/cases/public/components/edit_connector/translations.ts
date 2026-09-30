@@ -21,3 +21,37 @@ export const EDIT_CONNECTOR_ARIA = i18n.translate(
     defaultMessage: 'click to edit connector',
   }
 );
+
+export const AUTO_PUSH_LABEL = i18n.translate('xpack.cases.editConnector.autoPushLabel', {
+  defaultMessage: 'Push changes automatically',
+});
+
+export const CONFLICT_STRATEGY_LABEL = i18n.translate(
+  'xpack.cases.editConnector.conflictStrategyLabel',
+  {
+    defaultMessage: 'If a field changed in both places',
+  }
+);
+
+export const CONFLICT_KEEP_EXTERNAL = i18n.translate(
+  'xpack.cases.editConnector.conflictKeepExternal',
+  {
+    defaultMessage: 'Keep the external value',
+  }
+);
+
+export const CONFLICT_KEEP_KIBANA = i18n.translate('xpack.cases.editConnector.conflictKeepKibana', {
+  defaultMessage: 'Keep the Kibana value',
+});
+
+export const SYNC_FROM = (connectorName: string) =>
+  i18n.translate('xpack.cases.editConnector.syncFrom', {
+    values: { connectorName },
+    defaultMessage: 'Sync from {connectorName}',
+  });
+
+export const SYNC_REQUIRES_PUSH = (connectorName: string) =>
+  i18n.translate('xpack.cases.editConnector.syncRequiresPush', {
+    values: { connectorName },
+    defaultMessage: 'Push the case to {connectorName} before syncing from it',
+  });
