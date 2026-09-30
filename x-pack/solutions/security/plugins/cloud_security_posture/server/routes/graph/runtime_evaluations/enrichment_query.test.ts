@@ -85,11 +85,6 @@ describe('buildIntegrationRuntimeEvals — integration actor and target fields',
             'data_stream.dataset == "aws.cloudtrail.otel" AND rpc.method == "AttachUserPolicy" AND aws.request.parameters.userName IS NOT NULL',
           value: 'aws.request.parameters.userName',
         },
-        {
-          condition:
-            'data_stream.dataset == "aws.cloudtrail.otel" AND rpc.service == "iam.amazonaws.com" AND rpc.method IN ("DetachUserPolicy", "CreateUser", "DeleteUser", "UpdateUser", "PutUserPolicy", "DeleteUserPolicy", "CreateAccessKey", "DeleteAccessKey", "UpdateAccessKey") AND aws.request.parameters.userName IS NOT NULL',
-          value: 'aws.request.parameters.userName',
-        },
       ],
     },
     {
@@ -103,9 +98,15 @@ describe('buildIntegrationRuntimeEvals — integration actor and target fields',
         },
         {
           condition:
-            'data_stream.dataset == "aws.cloudtrail.otel" AND rpc.method IN ("PutObject", "GetObject") AND rpc.service IS NOT NULL',
+            'data_stream.dataset == "aws.cloudtrail.otel" AND rpc.method IN ("PutObject", "GetObject", "DeleteObject") AND rpc.service IS NOT NULL',
           value: 'rpc.service',
         },
+      ],
+    },
+    {
+      integration: 'aws_cloudtrail_otel',
+      column: 'entity.target.id',
+      branches: [
         {
           condition:
             'data_stream.dataset == "aws.cloudtrail.otel" AND rpc.service == "s3.amazonaws.com" AND rpc.method == "DeleteObject" AND aws.request.parameters.bucketName IS NOT NULL',
@@ -223,11 +224,6 @@ describe('buildIntegrationRuntimeEvals — integration actor and target fields',
           condition:
             'data_stream.dataset IN ("m365_defender.event", "m365_defender.alert") AND file.hash.sha256 IS NOT NULL',
           value: 'file.hash.sha256',
-        },
-        {
-          condition:
-            'data_stream.dataset == "m365_defender.event" AND m365_defender.event.category == "AdvancedHunting-DeviceFileEvents" AND file.hash.sha1 IS NOT NULL',
-          value: 'file.hash.sha1',
         },
       ],
     },

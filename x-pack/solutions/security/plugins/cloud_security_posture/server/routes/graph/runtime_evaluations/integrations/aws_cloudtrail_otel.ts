@@ -55,7 +55,11 @@ export const aws_cloudtrail_otelEvaluations = {
   service.target.name = CASE(
     service.target.name IS NOT NULL, service.target.name,
     data_stream.dataset == "aws.cloudtrail.otel" AND rpc.method == "GetCallerIdentity" AND rpc.service IS NOT NULL, rpc.service,
-    data_stream.dataset == "aws.cloudtrail.otel" AND rpc.method IN ("PutObject", "GetObject") AND rpc.service IS NOT NULL, rpc.service,
+    data_stream.dataset == "aws.cloudtrail.otel" AND rpc.method IN ("PutObject", "GetObject", "DeleteObject") AND rpc.service IS NOT NULL, rpc.service,
+    null
+  ),
+  entity.target.id = CASE(
+    entity.target.id IS NOT NULL, entity.target.id,
     data_stream.dataset == "aws.cloudtrail.otel" AND rpc.service == "s3.amazonaws.com" AND rpc.method == "DeleteObject" AND aws.request.parameters.bucketName IS NOT NULL, aws.request.parameters.bucketName,
     null
   ),
@@ -67,7 +71,6 @@ export const aws_cloudtrail_otelEvaluations = {
   user.target.name = CASE(
     user.target.name IS NOT NULL, user.target.name,
     data_stream.dataset == "aws.cloudtrail.otel" AND rpc.method == "AttachUserPolicy" AND aws.request.parameters.userName IS NOT NULL, aws.request.parameters.userName,
-    data_stream.dataset == "aws.cloudtrail.otel" AND rpc.service == "iam.amazonaws.com" AND rpc.method IN ("DetachUserPolicy", "CreateUser", "DeleteUser", "UpdateUser", "PutUserPolicy", "DeleteUserPolicy", "CreateAccessKey", "DeleteAccessKey", "UpdateAccessKey") AND aws.request.parameters.userName IS NOT NULL, aws.request.parameters.userName,
     null
   )`,
     },
