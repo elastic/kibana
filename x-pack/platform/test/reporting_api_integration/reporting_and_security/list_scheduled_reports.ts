@@ -185,7 +185,9 @@ export default function ({ getService }: FtrProviderContext) {
         id: `scheduled_report:${foreignRealmReportId}`,
         doc: {
           scheduled_report: {
-            createdById: `realm:["file","default_file","${reportingAPI.REPORTING_USER_USERNAME}"]`,
+            createdById: [
+              `realm:["file","default_file","${reportingAPI.REPORTING_USER_USERNAME}"]`,
+            ],
           },
         },
         refresh: true,

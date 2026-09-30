@@ -264,7 +264,7 @@ describe('Handle request to schedule', () => {
         'scheduled_report',
         expect.objectContaining({
           createdBy: 'testymcgee',
-          createdById: 'realm:["native","default_native","testymcgee"]',
+          createdById: ['realm:["native","default_native","testymcgee"]'],
         }),
         { id: 'mock-report-id' }
       );
@@ -308,7 +308,7 @@ describe('Handle request to schedule', () => {
         'scheduled_report',
         expect.objectContaining({
           createdBy: 'testymcgee',
-          createdById: 'profile-from-api-key',
+          createdById: ['profile-from-api-key'],
           createdByApiKeyId: apiKeyId,
         }),
         { id: 'mock-report-id' }

@@ -14,7 +14,6 @@ const FILE_ID = 'realm:["file","default_file","rshared"]';
 
 /** A human acting through a session, holding both representations of the same principal. */
 const asUser = (overrides: Partial<ReportingUserIdentity> = {}): ReportingUserIdentity => ({
-  id: 'profile-123',
   ids: ['profile-123', NATIVE_ID],
   username: 'rshared',
   ...overrides,
@@ -32,7 +31,7 @@ describe('isScheduledReportOwner', () => {
     it('matches when the stored id equals the current user id', () => {
       expect(
         isScheduledReportOwner({
-          report: { createdBy: 'rshared', createdById: 'profile-123' },
+          report: { createdBy: 'rshared', createdById: ['profile-123'] },
           currentUser: asUser(),
         })
       ).toBe(true);
@@ -41,26 +40,37 @@ describe('isScheduledReportOwner', () => {
     it('matches a document stored under the realm-qualified id when the profile uid is now preferred', () => {
       expect(
         isScheduledReportOwner({
-          report: { createdBy: 'rshared', createdById: NATIVE_ID },
+          report: { createdBy: 'rshared', createdById: [NATIVE_ID] },
           currentUser: asUser(),
         })
       ).toBe(true);
     });
 
-    it('matches a document stored under the profile uid when only the realm-qualified id resolves', () => {
+    it('matches a document recording both representations when only the realm-qualified id resolves', () => {
+      // A run-as request carries no profile uid, so it can derive nothing but the realm id. The
+      // document is reachable because creation recorded every id, not because the check is lenient.
       expect(
         isScheduledReportOwner({
-          report: { createdBy: 'rshared', createdById: 'profile-123' },
-          currentUser: asUser({ id: NATIVE_ID, ids: [NATIVE_ID, 'profile-123'] }),
+          report: { createdBy: 'rshared', createdById: ['profile-123', NATIVE_ID] },
+          currentUser: asUser({ ids: [NATIVE_ID] }),
         })
       ).toBe(true);
+    });
+
+    it('cannot match a document that recorded only a profile uid from a request without one', () => {
+      expect(
+        isScheduledReportOwner({
+          report: { createdBy: 'rshared', createdById: ['profile-123'] },
+          currentUser: asUser({ ids: [NATIVE_ID] }),
+        })
+      ).toBe(false);
     });
 
     it('does not match when the stored id differs, even for the same username (cross-realm collision)', () => {
       expect(
         isScheduledReportOwner({
-          report: { createdBy: 'rshared', createdById: FILE_ID },
-          currentUser: asUser({ id: NATIVE_ID, ids: [NATIVE_ID] }),
+          report: { createdBy: 'rshared', createdById: [FILE_ID] },
+          currentUser: asUser({ ids: [NATIVE_ID] }),
         })
       ).toBe(false);
     });
@@ -68,8 +78,8 @@ describe('isScheduledReportOwner', () => {
     it('does not fall back to username matching once a document has a stored id', () => {
       expect(
         isScheduledReportOwner({
-          report: { createdBy: 'rshared', createdById: FILE_ID },
-          currentUser: asUser({ id: undefined, ids: [] }),
+          report: { createdBy: 'rshared', createdById: [FILE_ID] },
+          currentUser: asUser({ ids: [] }),
         })
       ).toBe(false);
     });
@@ -79,7 +89,7 @@ describe('isScheduledReportOwner', () => {
         isScheduledReportOwner({
           report: {
             createdBy: 'rshared',
-            createdById: 'profile-123',
+            createdById: ['profile-123'],
             createdByApiKeyId: 'api-key-1',
           },
           currentUser: asUser(),
@@ -130,7 +140,7 @@ describe('isScheduledReportOwner', () => {
         isScheduledReportOwner({
           report: {
             createdBy: 'rshared',
-            createdById: 'profile-123',
+            createdById: ['profile-123'],
             createdByApiKeyId: 'api-key-1',
           },
           currentUser: asApiKey(),
@@ -143,7 +153,7 @@ describe('isScheduledReportOwner', () => {
         isScheduledReportOwner({
           report: {
             createdBy: 'rshared',
-            createdById: 'profile-123',
+            createdById: ['profile-123'],
             createdByApiKeyId: 'api-key-2',
           },
           currentUser: asApiKey(),
@@ -154,7 +164,7 @@ describe('isScheduledReportOwner', () => {
     it('does not reach a document its owner created through a session', () => {
       expect(
         isScheduledReportOwner({
-          report: { createdBy: 'rshared', createdById: 'profile-123' },
+          report: { createdBy: 'rshared', createdById: ['profile-123'] },
           currentUser: asApiKey(),
         })
       ).toBe(false);
@@ -181,7 +191,6 @@ describe('isScheduledReportOwner', () => {
 
   describe('UIAM api keys, whose creator cannot be resolved', () => {
     const uiamKey: ReportingUserIdentity = {
-      id: undefined,
       ids: [],
       apiKeyId: 'uiam-key-id',
       username: 'uiam-key-id',
@@ -225,7 +234,7 @@ describe('buildOwnedByFilter', () => {
   });
 
   it('builds only id clauses when the current user has no username', () => {
-    const node = buildOwnedByFilter({ id: 'profile-123', ids: ['profile-123'] });
+    const node = buildOwnedByFilter({ ids: ['profile-123'] });
     expect(node).toMatchObject({ type: 'function', function: 'is' });
   });
 
@@ -278,7 +287,7 @@ describe('buildOwnedByFilter', () => {
   });
 
   it('matches a realm-qualified id containing quotes and brackets exactly', () => {
-    const node = buildOwnedByFilter({ id: FILE_ID, ids: [FILE_ID], username: 'rshared' });
+    const node = buildOwnedByFilter({ ids: [FILE_ID], username: 'rshared' });
     const idClause = clausesOf(node)[0];
 
     expect(toElasticsearchQuery(idClause as never)).toEqual({

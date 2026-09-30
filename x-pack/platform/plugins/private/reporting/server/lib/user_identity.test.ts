@@ -236,7 +236,6 @@ describe('getReportingUserIdentity', () => {
         esClient,
       })
     ).resolves.toEqual({
-      id: 'profile-123',
       ids: ['profile-123', 'realm:["native","default_native","rshared"]'],
       apiKeyId: undefined,
       username: 'rshared',
@@ -261,7 +260,6 @@ describe('getReportingUserIdentity', () => {
         esClient,
       })
     ).resolves.toEqual({
-      id: 'realm:["native","default_native","rshared"]',
       ids: ['realm:["native","default_native","rshared"]'],
       apiKeyId: undefined,
       username: 'rshared',
@@ -285,7 +283,7 @@ describe('getReportingUserIdentity', () => {
     const nativeIdentity = await getReportingUserIdentity({ user: nativeUser, request, esClient });
 
     expect(fileIdentity.username).toBe(nativeIdentity.username);
-    expect(fileIdentity.id).not.toBe(nativeIdentity.id);
+    expect(fileIdentity.ids).not.toEqual(nativeIdentity.ids);
   });
 
   it('reports the api key id and resolves the owner for an elasticsearch api key', async () => {
@@ -315,7 +313,6 @@ describe('getReportingUserIdentity', () => {
         esClient,
       })
     ).resolves.toEqual({
-      id: 'profile-from-key',
       ids: ['profile-from-key', 'realm:["native","default_native","rshared"]'],
       apiKeyId: 'api-key-id',
       username: 'rshared',
@@ -366,7 +363,6 @@ describe('getReportingUserIdentity', () => {
         esClient,
       })
     ).resolves.toEqual({
-      id: undefined,
       ids: [],
       apiKeyId: 'api-key-id',
       username: 'rshared',
@@ -390,7 +386,6 @@ describe('getReportingUserIdentity', () => {
         esClient,
       })
     ).resolves.toEqual({
-      id: undefined,
       ids: [],
       apiKeyId: 'uiam-key-id',
       username: 'uiam-key-id',
@@ -428,7 +423,6 @@ describe('getReportingUserIdentity', () => {
         esClient,
       })
     ).resolves.toEqual({
-      id: 'profile-uiam',
       ids: ['profile-uiam', 'realm:["saml","cloud-saml-kibana","1806480617"]'],
       apiKeyId: undefined,
       username: '1806480617',

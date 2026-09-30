@@ -491,7 +491,6 @@ describe('ScheduledReportsService', () => {
       expect(soClient.find).toHaveBeenCalledWith(
         expect.objectContaining({
           filter: buildOwnedByFilter({
-            id: 'realm:["native","default_native","rshared"]',
             ids: ['realm:["native","default_native","rshared"]'],
             username: 'rshared',
           }),
@@ -972,7 +971,7 @@ describe('ScheduledReportsService', () => {
         attributes: {
           ...savedObjects[0].attributes,
           createdBy: 'rshared',
-          createdById: 'realm:["file","default_file","rshared"]',
+          createdById: ['realm:["file","default_file","rshared"]'],
         },
       };
       soClient.bulkGet = jest
@@ -2181,7 +2180,7 @@ describe('ScheduledReportsService', () => {
         attributes: {
           ...savedObjects[0].attributes,
           createdBy: 'rshared',
-          createdById: 'realm:["file","default_file","rshared"]',
+          createdById: ['realm:["file","default_file","rshared"]'],
         },
       };
       soClient.bulkGet = jest
@@ -2741,7 +2740,7 @@ describe('ScheduledReportsService', () => {
         attributes: {
           ...savedObjects[0].attributes,
           createdBy: 'rshared',
-          createdById: 'realm:["file","default_file","rshared"]',
+          createdById: ['realm:["file","default_file","rshared"]'],
         },
       };
       soClient.get = jest.fn().mockResolvedValue(crossRealmReport);

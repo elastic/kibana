@@ -16,9 +16,11 @@ import type { ReportingUser } from '../types';
 
 /** A stable, realm-aware identity for authorization checks on scheduled reports. */
 export interface ReportingUserIdentity {
-  /** Preferred id, written when creating a document. */
-  id?: string;
-  /** Every id this human may own documents under: a profile uid and a realm id are the same principal. */
+  /**
+   * Every id this human may own documents under: a profile uid and a realm id are the same
+   * principal. All of them are recorded when creating a document, because which ones a later
+   * request can derive varies -- a run-as request, for instance, never carries a profile uid.
+   */
   ids: string[];
   /** Set for API-key auth. A key owns only what it created, so it is matched separately from `ids`. */
   apiKeyId?: string;
@@ -188,5 +190,5 @@ export const getReportingUserIdentity = async ({
 
   const ids = await toStableUserIds({ authUser: user, resolveApiKeyOwner: resolveOwner });
 
-  return { id: ids[0], ids, apiKeyId: apiKey?.id, username: user.username };
+  return { ids, apiKeyId: apiKey?.id, username: user.username };
 };

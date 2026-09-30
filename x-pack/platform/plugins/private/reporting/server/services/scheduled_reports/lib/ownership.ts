@@ -55,7 +55,7 @@ export const isScheduledReportOwner = ({
   }
 
   if (report.createdById !== undefined) {
-    return currentUser.ids.includes(report.createdById);
+    return report.createdById.some((id) => currentUser.ids.includes(id));
   }
 
   return matchesUsername(report, currentUser);

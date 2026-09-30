@@ -41,7 +41,7 @@ describe('scheduledReportModelVersions v6', () => {
     expect(() =>
       asObjectSchema(v6Schemas.create).validate({
         ...baseAttributes,
-        createdById: 'realm:["file","default_file","rshared"]',
+        createdById: ['realm:["file","default_file","rshared"]'],
       })
     ).not.toThrow();
   });
@@ -59,10 +59,10 @@ describe('scheduledReportModelVersions v6', () => {
   it('round-trips createdById through forwardCompatibility', () => {
     const result = asObjectSchema(v6Schemas.forwardCompatibility).validate({
       ...baseAttributes,
-      createdById: 'realm:["file","default_file","rshared"]',
+      createdById: ['realm:["file","default_file","rshared"]'],
       someFutureField: 'ignored',
     });
-    expect(result.createdById).toBe('realm:["file","default_file","rshared"]');
+    expect(result.createdById).toEqual(['realm:["file","default_file","rshared"]']);
   });
 });
 
@@ -71,7 +71,7 @@ describe('scheduledReportModelVersions v5 forwardCompatibility (ZDT rollback)', 
     const v5Schemas = scheduledReportModelVersions['5']!.schemas!;
     const result = asObjectSchema(v5Schemas.forwardCompatibility).validate({
       ...baseAttributes,
-      createdById: 'realm:["file","default_file","rshared"]',
+      createdById: ['realm:["file","default_file","rshared"]'],
     });
     // A node running the older (v5) model version ignores `createdById` on read; it never
     // writes back a full-attribute overwrite, so the field survives a rolling downgrade.
