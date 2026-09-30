@@ -705,6 +705,55 @@ describe('CreateDatasetWizardPage', () => {
     expect(timestampFormatInput as HTMLInputElement).toHaveValue('yyyy-MM-dd');
   });
 
+  it('keeps unsaved edits to a mapped field when the timestamp field name changes', async () => {
+    const { getByTestId, getAllByTestId, findByTestId } = renderWizard();
+
+    fireEvent.click(getByTestId('createDatasetDataSource'));
+    fireEvent.click(await findByTestId('createDatasetDataSource-source-1'));
+    fireEvent.change(getByTestId('createDatasetName'), { target: { value: 'logs-dataset' } });
+    fireEvent.change(getByTestId('createDatasetResource'), { target: { value: 's3://bucket/*' } });
+    selectFormat(getByTestId, 'csv');
+
+    await clickNext(getByTestId);
+    expect(
+      await waitFor(() => getByTestId('createDatasetWizardAdditionalStep'))
+    ).toBeInTheDocument();
+    await clickNext(getByTestId);
+    expect(await waitFor(() => getByTestId('createDatasetWizardMappingStep'))).toBeInTheDocument();
+
+    await act(async () => {
+      fireEvent.click(getByTestId('dataFederationMappingEditorAddField'));
+    });
+    fireEvent.change(getByTestId('dataFederationMappingEditorFieldName'), {
+      target: { value: 'oldname' },
+    });
+    await act(async () => {
+      fireEvent.click(getByTestId('dataFederationMappingEditorDraftAddField'));
+    });
+    expect(getAllByTestId('dataFederationMappingEditorField')).toHaveLength(1);
+
+    await act(async () => {
+      fireEvent.click(getByTestId('dataFederationMappingEditorEditField'));
+    });
+    const mappedField = getByTestId('dataFederationMappingEditorField');
+    fireEvent.change(within(mappedField).getByTestId('dataFederationMappingEditorFieldName'), {
+      target: { value: 'newname' },
+    });
+
+    await act(async () => {
+      fireEvent.change(getByTestId('createDatasetWizardTimestampPath'), {
+        target: { value: 'timestamp' },
+      });
+    });
+    expect(getByTestId('createDatasetWizardTimestampPath')).toHaveValue('timestamp');
+
+    const editedField = getByTestId('dataFederationMappingEditorField');
+    expect(within(editedField).getByTestId('dataFederationMappingEditorUpdateField')).toBeVisible();
+    expect(within(editedField).getByTestId('dataFederationMappingEditorFieldName')).toHaveValue(
+      'newname'
+    );
+  });
+
   it('still allows Next after navigating back multiple steps', async () => {
     const { getByTestId, findByTestId } = renderWizard();
 

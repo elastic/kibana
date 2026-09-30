@@ -101,11 +101,6 @@ export function FieldMappingForm({
   onDraftChange,
 }: FieldMappingFormProps) {
   const [draft, setDraft] = useState<FieldMappingFormValue>(value);
-
-  useEffect(() => {
-    setDraft(value);
-  }, [value]);
-
   const isDateType = Boolean(draft.type) && isDateLikeType(draft.type as DatasetMappingFieldType);
 
   const updateDraft = (patch: Partial<FieldMappingFormValue>) => {
