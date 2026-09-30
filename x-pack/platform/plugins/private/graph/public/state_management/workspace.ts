@@ -30,6 +30,7 @@ import {
   transformExpandResponse,
   transformSearchResponse,
 } from '../services/workspace/graph_response_transformers';
+import { syncRuntimeTopology } from '../services/workspace/sync_runtime_topology';
 import type { GraphData, Workspace, WorkspaceField, WorkspaceNode } from '../types';
 import type { ServerResultNode } from '../types';
 import type { MatchedAction } from './helpers';
@@ -46,6 +47,7 @@ export interface WorkspaceNodeState {
   color: string;
   scaledSize: number;
   data: WorkspaceNode['data'];
+  icon?: WorkspaceNode['icon'];
 }
 
 export interface WorkspaceEdgeState {
@@ -57,6 +59,7 @@ export interface WorkspaceEdgeState {
   label: string;
   weight: number;
   width: number;
+  docCount?: number;
 }
 
 export interface WorkspaceSnapshot {
@@ -162,6 +165,7 @@ export const workspaceReducer = reducerWithInitialState(initialWorkspaceState)
         color: node.color ?? '#000000',
         scaledSize: 15,
         data: { field: node.field, term: node.term },
+        icon: node.icon,
       };
       nodeIds.push(id);
     });
@@ -186,6 +190,7 @@ export const workspaceReducer = reducerWithInitialState(initialWorkspaceState)
         label: '',
         weight: edge.weight,
         width: edge.width,
+        docCount: edge.doc_count,
       };
       edgeIds.push(id);
     });
@@ -453,6 +458,7 @@ export const createWorkspaceState = (workspace: Workspace): WorkspaceSnapshot =>
           label: edge.label,
           weight: edge.weight,
           width: edge.width,
+          docCount: edge.doc_count,
         },
       ];
     })
@@ -489,6 +495,7 @@ const toNodeState = (node: WorkspaceNode): WorkspaceNodeState => ({
     field: node.data.field,
     term: node.data.term,
   },
+  icon: node.icon,
 });
 
 const getEdgeId = ({ id, source, target }: Workspace['edges'][number]): string =>
@@ -683,10 +690,9 @@ export const registerWorkspaceListeners = (
         }
       } else if (unblockAllNodes.match(action)) {
         workspace.unblockAll();
-      } else if (undoWorkspace.match(action)) {
-        workspace.undo();
-      } else if (redoWorkspace.match(action)) {
-        workspace.redo();
+      } else if (undoWorkspace.match(action) || redoWorkspace.match(action)) {
+        syncRuntimeTopology(workspace, listenerApi.getState().workspace);
+        return;
       }
       notifyReact();
     },
