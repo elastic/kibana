@@ -20,9 +20,7 @@ export const buildCoverageKiId = ({
   reportId: string;
   techniqueId?: string;
 }): string => {
-  const subject = techniqueId
-    ? `${spaceId}|${reportId}|${techniqueId}`
-    : `${spaceId}|${reportId}`;
+  const subject = techniqueId ? `${spaceId}|${reportId}|${techniqueId}` : `${spaceId}|${reportId}`;
   const hash = createHash('sha256').update(subject).digest('hex');
   return `ki-cov-${hash}`;
 };

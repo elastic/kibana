@@ -1680,9 +1680,7 @@ describe('Attack Discovery worker chain', () => {
 
   describe('the Investigation journal helper', () => {
     const append = stepIn(journalNoteSteps, 'append_note');
-    const request = append?.with as
-      | { body?: { trigger_mode?: string }; path?: string }
-      | undefined;
+    const request = append?.with as { body?: { trigger_mode?: string }; path?: string } | undefined;
 
     it('POSTs the chat converse route, not the agent_builder converse route', () => {
       expect(request?.path).toContain('/api/chat/converse');
