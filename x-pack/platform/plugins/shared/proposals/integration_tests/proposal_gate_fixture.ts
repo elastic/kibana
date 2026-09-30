@@ -7,7 +7,6 @@
 
 import { httpServerMock } from '@kbn/core-http-server-mocks';
 import { loggerMock } from '@kbn/logging-mocks';
-import { httpServerMock } from '@kbn/core-http-server-mocks';
 import type { ExecutionStatus } from '@kbn/workflows';
 import { CREATE_PROPOSAL_WORKFLOW_ID, getManagedWorkflowDefinition } from '@kbn/workflows/managed';
 import { WorkflowRunFixture } from '@kbn/workflows-execution-engine/test_helpers';

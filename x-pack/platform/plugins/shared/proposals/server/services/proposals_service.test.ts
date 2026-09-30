@@ -896,7 +896,7 @@ describe('ProposalsService', () => {
         'proposal-1',
         releaseParams({
           approved: false,
-          dismissReason: 'low_value',
+          dismissReason: 'risk_accepted',
           rationale: 'Noise, not worth a rule',
         })
       );
@@ -904,7 +904,7 @@ describe('ProposalsService', () => {
       const [[indexArgs]] = storage.index.mock.calls;
       expect(indexArgs.document).toEqual(
         expect.objectContaining({
-          dismissReason: 'low_value',
+          dismissReason: 'risk_accepted',
           rationale: 'Noise, not worth a rule',
           // The decision is the workflow's to write, not the route's.
           status: 'pending',
@@ -961,7 +961,7 @@ describe('ProposalsService', () => {
       await expect(
         service.releaseGate(
           'proposal-1',
-          releaseParams({ approved: false, dismissReason: 'low_value' })
+          releaseParams({ approved: false, dismissReason: 'risk_accepted' })
         )
       ).rejects.toBeInstanceOf(ProposalConflictError);
       expect(storage.index).not.toHaveBeenCalled();
@@ -977,7 +977,7 @@ describe('ProposalsService', () => {
       await expect(
         service.releaseGate(
           'proposal-1',
-          releaseParams({ approved: false, dismissReason: 'low_value' })
+          releaseParams({ approved: false, dismissReason: 'risk_accepted' })
         )
       ).rejects.toBeInstanceOf(ProposalConflictError);
     });
@@ -1243,19 +1243,9 @@ describe('ProposalsService', () => {
     const original = () =>
       baseDocument(operation === 'clone' ? { decision: 'approved', status: 'failed' } : {});
 
-    it.each([
-      ['display name', 'Create detection rule', false],
-      ['workflow ID', 'system-alertzero-action-create-rule', true],
-    ])('attaches the successor with its %s after linking it', async (_, title, missingMetadata) => {
+    it('attaches the successor with its proposal title after linking it', async () => {
       const storage = createStorage(original());
-      const workflowsApi = createWorkflowsApi();
-      if (missingMetadata) {
-        workflowsApi.getWorkflow.mockResolvedValue(undefined);
-      }
-      const { service, attachmentsClient, getAttachmentsClient } = createService(
-        storage,
-        workflowsApi
-      );
+      const { service, attachmentsClient, getAttachmentsClient } = createService(storage);
       attachmentsClient.create.mockImplementation(async () => {
         expect(storage.index).toHaveBeenCalledTimes(2);
         return { id: 'attachment-2' };
@@ -1269,7 +1259,7 @@ describe('ProposalsService', () => {
         conversationId: 'conv-1',
         type: PROPOSAL_ATTACHMENT_TYPE,
         origin: proposalId,
-        data: { proposalId, title },
+        data: { proposalId, title: 'Tune the noisy rule' },
         render_inline: true,
       });
     });
@@ -1313,7 +1303,7 @@ describe('ProposalsService', () => {
       );
       const { service } = createService(storage);
 
-      await service.clone({ id: 'proposal-1' }, SPACE_ID);
+      await service.clone({ id: 'proposal-1' }, SPACE_ID, request);
 
       const [[cloneArgs]] = storage.index.mock.calls;
       expect(cloneArgs.document.origin).toBe('nightshift');
@@ -1323,7 +1313,11 @@ describe('ProposalsService', () => {
       const storage = createStorage(baseDocument({ decision: 'approved', status: 'failed' }));
       const { service } = createService(storage);
 
-      await service.clone({ id: 'proposal-1', executionError: 'rule API rejected it' }, SPACE_ID);
+      await service.clone(
+        { id: 'proposal-1', executionError: 'rule API rejected it' },
+        SPACE_ID,
+        request
+      );
 
       const [[cloneArgs]] = storage.index.mock.calls;
       expect(cloneArgs.document).toMatchObject({

@@ -10,6 +10,7 @@
 import { i18n } from '@kbn/i18n';
 import { DISPLAY_NAME_STORAGE_KEY, GUIDE_HANDOFF_STORAGE_KEY } from '../constants';
 import { buildAnchor } from '../lib/anchor';
+import { isPassingThrough } from '../lib/pass_through';
 import { createSnapshot } from '../lib/snapshot';
 import { createTrailRecorder } from '../lib/trail';
 import type {
@@ -260,10 +261,11 @@ export const createCommentsController = (services: CommentsHostServices): Commen
   const trail = createTrailRecorder({
     location,
     ignoreSelectors,
-    // Page clicks in comment mode place pins instead of acting, except while a guide runs.
+    // Page clicks in comment mode place pins instead of acting, except while a
+    // guide runs, and except those made with Alt held.
     isRecording: () => {
       const { active, guide } = store.getState();
-      return !active || guide !== null;
+      return !active || guide !== null || isPassingThrough();
     },
   });
 

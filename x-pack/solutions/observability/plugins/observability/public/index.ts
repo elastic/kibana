@@ -38,6 +38,7 @@ export {
   enableInspectEsQueries,
   enableComparisonByDefault,
   apmServiceGroupMaxNumberOfServices,
+  apmMaxNumberOfServices,
   apmEnableTableSearchBar,
 } from '../common/ui_settings_keys';
 export { alertsLocatorID, uptimeOverviewLocatorID } from '../common';

@@ -5,22 +5,22 @@
  * 2.0.
  */
 
-import React, { memo, useCallback, useState } from 'react';
+import React, { memo, useCallback } from 'react';
 import { css } from '@emotion/react';
-import { EuiLoadingSpinner, EuiSpacer, useEuiTheme } from '@elastic/eui';
+import { EuiLoadingSpinner, EuiSpacer, useEuiTheme, useGeneratedHtmlId } from '@elastic/eui';
 import { KbnDangerCallout, KbnInfoCallout, KbnWarningCallout } from '@kbn/ui-callout';
 import { i18n } from '@kbn/i18n';
 import { isHttpFetchError } from '@kbn/core-http-browser';
 import {
   ApprovalContent,
+  getProposalCaption,
   getProposalDecision,
   getProposalTone,
   isProposalExpired,
 } from '@kbn/proposals-ui';
-import type { ApprovalAction } from '@kbn/proposals-ui';
+import type { ApprovalAction, DeclineParams } from '@kbn/proposals-ui';
 import { getUserDisplayName } from '@kbn/user-profile-components';
 import { isAwaitingDecision } from '@kbn/proposals-common';
-import type { DismissReason } from '@kbn/proposals-common';
 import {
   useApproveProposal,
   useDismissProposal,
@@ -29,9 +29,6 @@ import {
   useProposal,
 } from '../hooks/use_proposals_api';
 import { useCurrentUserProfile } from '../hooks/use_current_user_profile';
-import { ProposalDismissForm } from './proposal_dismiss_form';
-
-type CardMode = 'view' | 'dismissing';
 
 /**
  * Turns a decision mutation's rejection into the friendly text `ApprovalContent` shows in its own
@@ -67,7 +64,7 @@ const toFriendlyError = (error: unknown): Error => {
 };
 
 export interface ProposalApprovalCardProps {
-  /** Proposal id from `attachment.origin ?? attachment.id`. */
+  /** Proposal id from `attachment.origin ?? attachment.data.proposalId`. */
   proposalId: string;
 }
 
@@ -78,15 +75,14 @@ export interface ProposalApprovalCardProps {
  * Renders inside the framework's `EuiSplitPanel.Inner paddingSize="none"`, so
  * the card adds its own horizontal padding.
  *
- * Shares `ApprovalContent`'s own decision engine with the AlertZero flyout's approval modal — the
- * "Applying"/"Applied"/"Declined" states, the badge, and the outcome banner are the same UI
- * whether the proposal is reached from the queue or from the chat page a worker posted it to.
+ * Shares `ApprovalContent`'s own decision engine — including its built-in decline flow — with the
+ * AlertZero flyout's approval modal, so the "Applying"/"Applied"/"Declined" states, the badge, the
+ * outcome banner, and the inline decline form are the same UI whether the proposal is reached
+ * from the queue or from the chat page a worker posted it to.
  */
 export const ProposalApprovalCard = memo<ProposalApprovalCardProps>(({ proposalId }) => {
   const { euiTheme } = useEuiTheme();
-  const [mode, setMode] = useState<CardMode>('view');
-  const [dismissReason, setDismissReason] = useState<DismissReason>('wrong');
-  const [rationale, setRationale] = useState('');
+  const titleId = useGeneratedHtmlId({ prefix: 'approvalChatHeader' });
 
   const proposalQuery = useProposal(proposalId);
   const approveMutation = useApproveProposal();
@@ -111,28 +107,19 @@ export const ProposalApprovalCard = memo<ProposalApprovalCardProps>(({ proposalI
     }
   }, [approveMutation, proposalQuery.data?.actionInput, proposalId]);
 
-  const handleDismissClick = useCallback(() => {
-    setMode('dismissing');
-  }, []);
-
-  const handleDismissConfirm = useCallback(async () => {
-    try {
-      await dismissMutation.mutateAsync({
-        id: proposalId,
-        body: { dismissReason, rationale: rationale.trim() || undefined },
-      });
-      // Otherwise the inline form stays rendered (still gated on `mode`, not `isPending`)
-      // beside the outcome banner `ApprovalContent` now shows for the decision that just landed.
-      setMode('view');
-    } catch (err) {
-      throw toFriendlyError(err);
-    }
-  }, [dismissMutation, dismissReason, proposalId, rationale]);
-
-  const handleDismissCancel = useCallback(() => {
-    setMode('view');
-    setRationale('');
-  }, []);
+  const handleDismiss = useCallback(
+    async ({ dismissReason, rationale }: DeclineParams) => {
+      try {
+        await dismissMutation.mutateAsync({
+          id: proposalId,
+          body: { dismissReason, rationale },
+        });
+      } catch (err) {
+        throw toFriendlyError(err);
+      }
+    },
+    [dismissMutation, proposalId]
+  );
 
   const liveProposal = proposalQuery.data;
 
@@ -157,69 +144,52 @@ export const ProposalApprovalCard = memo<ProposalApprovalCardProps>(({ proposalI
   const isExpired = isProposalExpired(liveProposal);
   const decision = getProposalDecision(liveProposal);
 
-  let primaryAction: ApprovalAction | undefined;
-  let secondaryActions: ApprovalAction[] | undefined;
+  const primaryAction: ApprovalAction | undefined =
+    isPending || isReplaced
+      ? {
+          label: i18n.translate('xpack.proposals.proposalCard.approve', {
+            defaultMessage: 'Approve',
+          }),
+          color: 'primary',
+          onClick: handleApprove,
+          isDisabled: isReplaced || isExpired,
+          'data-test-subj': `proposalApprove-${proposalId}`,
+        }
+      : undefined;
 
-  if (isPending || isReplaced) {
-    if (mode === 'view' || isReplaced) {
-      primaryAction = {
-        label: i18n.translate('xpack.proposals.proposalCard.approve', {
-          defaultMessage: 'Approve',
-        }),
-        color: 'success',
-        onClick: handleApprove,
-        isDisabled: isReplaced || isExpired,
-        'data-test-subj': `proposalApprove-${proposalId}`,
-      };
-      secondaryActions = [
+  const secondaryActions: ApprovalAction[] | undefined = isReplaced
+    ? [
         {
           label: i18n.translate('xpack.proposals.proposalCard.dismiss', {
             defaultMessage: 'Dismiss',
           }),
           color: 'danger',
-          onClick: handleDismissClick,
-          isDisabled: isReplaced || isExpired,
+          onClick: () => undefined,
+          isDisabled: true,
           'data-test-subj': `proposalDismiss-${proposalId}`,
         },
-      ];
-    } else {
-      // mode === 'dismissing'
-      primaryAction = {
-        label: i18n.translate('xpack.proposals.proposalCard.confirmDismiss', {
-          defaultMessage: 'Confirm dismiss',
-        }),
-        color: 'danger',
-        onClick: handleDismissConfirm,
-        isDisabled: !rationale.trim(),
-        'data-test-subj': `proposalDismissConfirm-${proposalId}`,
-      };
-      secondaryActions = [
-        {
-          label: i18n.translate('xpack.proposals.proposalCard.cancel', {
-            defaultMessage: 'Cancel',
-          }),
-          color: 'text',
-          onClick: handleDismissCancel,
-          'data-test-subj': `proposalDismissCancel-${proposalId}`,
-        },
-      ];
-    }
-  }
+      ]
+    : undefined;
 
   return (
     <div css={css({ padding: `${euiTheme.size.m}` })} data-test-subj={`proposalCard-${proposalId}`}>
       <ApprovalContent
-        showHeader={false}
+        key={isReplaced ? 'replaced' : 'current'}
         title={liveProposal.title}
+        titleId={titleId}
+        showStatusBadge={!isReplaced}
         tone={getProposalTone(liveProposal)}
         comment={liveProposal.comment}
+        caption={getProposalCaption(liveProposal, { includeRiskDetails: !isReplaced })}
         decision={isReplaced ? undefined : decision}
         isSubmitting={isReplaced ? undefined : isSubmitting}
         currentActorName={currentActorName}
         primaryAction={primaryAction}
         secondaryActions={secondaryActions}
+        onDismiss={isPending && !isReplaced ? handleDismiss : undefined}
+        data-test-subj={`proposalCard-${proposalId}`}
       >
-        {/* A retry keeps the prior failure visible while this revision awaits a decision. */}
+        {/* Why this proposal is being offered again, when it is a retry. */}
         {!isReplaced && isPending && liveProposal.previousExecutionError && (
           <>
             <EuiSpacer size="m" />
@@ -234,8 +204,10 @@ export const ProposalApprovalCard = memo<ProposalApprovalCardProps>(({ proposalI
                 {liveProposal.previousExecutionError}
               </KbnWarningCallout>
             </div>
+            <EuiSpacer size="m" />
           </>
         )}
+
         {isReplaced && (
           <>
             <EuiSpacer size="m" />
@@ -250,9 +222,12 @@ export const ProposalApprovalCard = memo<ProposalApprovalCardProps>(({ proposalI
             </div>
           </>
         )}
-        {/* The badge identifies expiry; this callout explains why no decision is possible.
-            The replacement notice takes precedence for historical cards. */}
-        {!isReplaced && isExpired && (
+
+        {/* `ApprovalContent`'s own badge already says "Expired"; this callout adds the
+              explanation the badge alone has no room for. `getProposalDecision` reports a
+              gate timeout as a real (actor-less) decision, so `decision` is set here too —
+              gating on `isExpired` alone, not on `decision`'s absence. */}
+        {isExpired && !isReplaced && (
           <>
             <EuiSpacer size="m" />
             <div css={css({ padding: `0 ${euiTheme.size.m}` })}>
@@ -265,20 +240,6 @@ export const ProposalApprovalCard = memo<ProposalApprovalCardProps>(({ proposalI
                 })}
               />
             </div>
-          </>
-        )}
-
-        {/* Inline dismiss form */}
-        {!isReplaced && mode === 'dismissing' && (
-          <>
-            <EuiSpacer size="m" />
-            <ProposalDismissForm
-              dismissReason={dismissReason}
-              rationale={rationale}
-              onDismissReasonChange={setDismissReason}
-              onRationaleChange={setRationale}
-              data-test-subj={`proposalDismissForm-${proposalId}`}
-            />
           </>
         )}
       </ApprovalContent>

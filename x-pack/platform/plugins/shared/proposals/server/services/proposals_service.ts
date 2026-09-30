@@ -622,15 +622,7 @@ export class ProposalsService {
 
     await this.writeDocument(id, superseded, { seqNo, primaryTerm });
 
-    const metadata = document.actionWorkflowId
-      ? await this.resolveActionMetadata(document.actionWorkflowId, spaceId)
-      : undefined;
-    await this.attachToConversation(
-      cloneId,
-      document.conversationId,
-      metadata?.name ?? document.actionWorkflowId,
-      request
-    );
+    await this.attachToConversation(cloneId, document.conversationId, document.title, request);
 
     return cloneId;
   }
@@ -764,15 +756,7 @@ export class ProposalsService {
       throw error;
     }
 
-    const metadata = document.actionWorkflowId
-      ? await this.resolveActionMetadata(document.actionWorkflowId, spaceId)
-      : undefined;
-    await this.attachToConversation(
-      revisionId,
-      document.conversationId,
-      metadata?.name ?? document.actionWorkflowId,
-      request
-    );
+    await this.attachToConversation(revisionId, document.conversationId, document.title, request);
 
     return { proposalId: revisionId, revision };
   }
