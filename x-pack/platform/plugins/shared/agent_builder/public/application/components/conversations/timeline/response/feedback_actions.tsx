@@ -42,6 +42,22 @@ export const FeedbackActions: React.FC<FeedbackActionsProps> = ({ roundId }) => 
     [conversation?.feedback, roundId]
   );
 
+  const round = useMemo(
+    () => conversation?.rounds.find((r) => r.id === roundId),
+    [conversation?.rounds, roundId]
+  );
+
+  const ebtContext = useMemo(
+    () => ({
+      connectorId: round?.model_usage?.connector_id,
+      model: round?.model_usage?.model,
+      inputTokens: round?.model_usage?.input_tokens,
+      outputTokens: round?.model_usage?.output_tokens,
+      llmCalls: round?.model_usage?.llm_calls,
+    }),
+    [round]
+  );
+
   const {
     vote,
     chips,
@@ -58,7 +74,7 @@ export const FeedbackActions: React.FC<FeedbackActionsProps> = ({ roundId }) => 
     closeModal,
     dismissInvite,
     submit,
-  } = useFeedback(conversationId ?? '', roundId, serverVote);
+  } = useFeedback(conversationId ?? '', roundId, serverVote, ebtContext);
 
   useEffect(() => {
     if (inviteVisible) inviteRef.current?.focus();

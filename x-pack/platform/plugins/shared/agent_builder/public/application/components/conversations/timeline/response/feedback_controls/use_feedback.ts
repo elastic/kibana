@@ -65,6 +65,17 @@ interface FeedbackEbtContext {
 const SUBMITTED_VISIBLE_MS = 2500;
 const SUBMITTED_FADE_MS = 500;
 
+const makeEbtPayload = (ctx: FeedbackEbtContext | undefined) => ({
+  trace_id: ctx?.traceId,
+  connector_id: ctx?.connectorId,
+  model: ctx?.model,
+  agent_id: ctx?.agentId,
+  tool_names: ctx?.toolNames,
+  input_tokens: ctx?.inputTokens,
+  output_tokens: ctx?.outputTokens,
+  llm_calls: ctx?.llmCalls,
+});
+
 export const useFeedback = (
   conversationId: string,
   roundId: string,
@@ -141,14 +152,7 @@ export const useFeedback = (
             services.analytics?.reportEvent(AGENT_BUILDER_EVENT_TYPES.FeedbackRetracted, {
               round_id: roundId,
               conversation_id: conversationId,
-              trace_id: ebtContext?.traceId,
-              connector_id: ebtContext?.connectorId,
-              model: ebtContext?.model,
-              agent_id: ebtContext?.agentId,
-              tool_names: ebtContext?.toolNames,
-              input_tokens: ebtContext?.inputTokens,
-              output_tokens: ebtContext?.outputTokens,
-              llm_calls: ebtContext?.llmCalls,
+              ...makeEbtPayload(ebtContext),
             });
           })
           .catch(() => {
@@ -182,14 +186,7 @@ export const useFeedback = (
               conversation_id: conversationId,
               vote: 'down',
               chips: [],
-              trace_id: ebtContext?.traceId,
-              connector_id: ebtContext?.connectorId,
-              model: ebtContext?.model,
-              agent_id: ebtContext?.agentId,
-              tool_names: ebtContext?.toolNames,
-              input_tokens: ebtContext?.inputTokens,
-              output_tokens: ebtContext?.outputTokens,
-              llm_calls: ebtContext?.llmCalls,
+              ...makeEbtPayload(ebtContext),
             });
           })
           .catch(() => {
@@ -215,14 +212,7 @@ export const useFeedback = (
               conversation_id: conversationId,
               vote: 'up',
               chips: [],
-              trace_id: ebtContext?.traceId,
-              connector_id: ebtContext?.connectorId,
-              model: ebtContext?.model,
-              agent_id: ebtContext?.agentId,
-              tool_names: ebtContext?.toolNames,
-              input_tokens: ebtContext?.inputTokens,
-              output_tokens: ebtContext?.outputTokens,
-              llm_calls: ebtContext?.llmCalls,
+              ...makeEbtPayload(ebtContext),
             });
           })
           .catch(() => {
@@ -282,14 +272,7 @@ export const useFeedback = (
           vote: currentVote,
           chips: chips as string[],
           ...(comment.trim().length > 0 ? { comment: comment.trim() } : {}),
-          trace_id: ebtContext?.traceId,
-          connector_id: ebtContext?.connectorId,
-          model: ebtContext?.model,
-          agent_id: ebtContext?.agentId,
-          tool_names: ebtContext?.toolNames,
-          input_tokens: ebtContext?.inputTokens,
-          output_tokens: ebtContext?.outputTokens,
-          llm_calls: ebtContext?.llmCalls,
+          ...makeEbtPayload(ebtContext),
         });
 
         setSubmittedPhase('visible');
