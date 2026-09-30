@@ -81,7 +81,8 @@ export const deliverInvestigationNotifications = async ({
   kibanaUrl: string;
   spaceId: string;
   execute: ExecuteConnector;
-  logger: Logger;
+  /** Only `warn` is used, so the narrower workflow step logger fits too. */
+  logger: Pick<Logger, 'warn'>;
 }): Promise<DeliverInvestigationNotificationsResult> => {
   const notifications = investigation.notifications ?? [];
   if (!TERMINAL_STATUSES.includes(investigation.status)) {
