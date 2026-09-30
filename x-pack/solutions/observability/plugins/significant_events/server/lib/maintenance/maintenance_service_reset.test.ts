@@ -342,6 +342,27 @@ describe('SignificantEventsMaintenanceService', () => {
       expect(summary.workflowsDisabled).toBe(0);
     });
 
+    it('leaves a settings-backed workflow off when its toggle write fails but the toggle is already off', async () => {
+      const { api, updateWorkflow } = makeManagementApi();
+      const { service } = makeService({
+        management: api,
+        continuousOnboardingEnabled: false,
+        failContinuousSet: true,
+      });
+
+      const summary = await service.reset({ request: REQUEST });
+
+      expect(summary.partialFailures).toContainEqual(
+        expect.objectContaining({ target: 'settings:continuous-onboarding' })
+      );
+      expect(
+        updateWorkflow.mock.calls.some(
+          ([id, patch]) =>
+            id === SIGNIFICANT_EVENTS_KI_CONTINUOUS_ONBOARDING_WORKFLOW_ID && patch.enabled === true
+        )
+      ).toBe(false);
+    });
+
     it('keeps failed workflow re-enables as retry inventory for Resume', async () => {
       const failEnableFor: { id?: string } = { id: SIGNIFICANT_EVENTS_DETECTION_WORKFLOW_ID };
       const { api, updateWorkflow } = makeManagementApi({ failEnableFor });

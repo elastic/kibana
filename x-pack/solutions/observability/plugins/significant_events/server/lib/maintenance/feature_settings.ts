@@ -309,11 +309,21 @@ export const createFeatureSettingsController = ({
    * While paused, keep feature settings off if something turned them back on
    * (e.g. a stale client). Does not change the restore snapshot.
    */
+  /** Whether a toggle currently reads on; an unreadable toggle counts as off. */
+  const readsOn = async (client: Pick<IUiSettingsClient, 'get'>, key: string): Promise<boolean> => {
+    try {
+      return Boolean(await client.get<boolean>(key));
+    } catch {
+      return false;
+    }
+  };
+
   /**
-   * Turn every feature toggle off. Returns the toggles that could not be turned
-   * off, in `PausedFeatureSettings` shape, so callers can keep the matching
-   * settings-backed workflows running instead of leaving a toggle on with its
-   * workflow disabled.
+   * Turn every feature toggle off. Returns the toggles that still read on after
+   * a failed write, in `PausedFeatureSettings` shape, so callers can keep the
+   * matching settings-backed workflows running instead of leaving a toggle on
+   * with its workflow disabled. A failed write on a toggle that was already off
+   * (or cannot be read) is only recorded; keeping activity off wins.
    */
   const reassertFeatureSettingsOff = async ({
     request,
@@ -330,11 +340,14 @@ export const createFeatureSettingsController = ({
     };
     // Re-assert runs without a user request (e.g. after a feature-flag flip).
     const uiSettingsClients = getUiSettingsClients({ request, access: 'system' });
+    let globalClient: IUiSettingsClient | undefined;
     try {
-      const globalClient = await uiSettingsClients.global();
+      globalClient = await uiSettingsClients.global();
       await globalClient.set(OBSERVABILITY_STREAMS_CONTINUOUS_KI_EXTRACTION_ENABLED, false);
     } catch (error) {
-      stillOn.continuousOnboardingWasEnabled = true;
+      stillOn.continuousOnboardingWasEnabled =
+        globalClient !== undefined &&
+        (await readsOn(globalClient, OBSERVABILITY_STREAMS_CONTINUOUS_KI_EXTRACTION_ENABLED));
       failures.push({
         target: CONTINUOUS_SETTING_TARGET,
         error: `Failed to keep continuous onboarding off while paused: ${toMessage(error)}`,
@@ -342,14 +355,23 @@ export const createFeatureSettingsController = ({
     }
 
     for (const spaceId of spaceIds) {
+      let spaceClient: IUiSettingsClient | undefined;
       try {
-        const spaceClient = await uiSettingsClients.space(spaceId);
+        spaceClient = await uiSettingsClients.space(spaceId);
         await spaceClient.set(
           OBSERVABILITY_STREAMS_SIGNIFICANT_EVENTS_SCHEDULED_DISCOVERY_ENABLED,
           false
         );
       } catch (error) {
-        stillOn.scheduledDiscoveryEnabledSpaceIds.push(spaceId);
+        if (
+          spaceClient !== undefined &&
+          (await readsOn(
+            spaceClient,
+            OBSERVABILITY_STREAMS_SIGNIFICANT_EVENTS_SCHEDULED_DISCOVERY_ENABLED
+          ))
+        ) {
+          stillOn.scheduledDiscoveryEnabledSpaceIds.push(spaceId);
+        }
         failures.push({
           target: scheduledSettingTarget(spaceId),
           error: `Failed to keep scheduled discovery off while paused: ${toMessage(error)}`,
