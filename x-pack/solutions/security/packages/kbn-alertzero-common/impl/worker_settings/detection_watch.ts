@@ -48,7 +48,7 @@ export const RULE_TUNING_SETTINGS: WorkerSettingsDeclaration<RuleTuningWorkerExt
   extras: { schema: RuleTuningWorkerExtras, defaultValue: RULE_TUNING_DEFAULT_EXTRAS },
 };
 
-export const LOOKBACK_DAYS_DEFAULT = 7;
+export const LOOKBACK_DAYS_DEFAULT = 14;
 export const LOOKBACK_DAYS_MIN = 1;
 export const LOOKBACK_DAYS_MAX = 90;
 

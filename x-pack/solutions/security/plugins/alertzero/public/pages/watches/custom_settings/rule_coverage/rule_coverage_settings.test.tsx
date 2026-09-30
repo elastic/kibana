@@ -15,7 +15,7 @@ import {
 } from '@kbn/alertzero-common';
 import { RuleCoverageSettings } from './rule_coverage_settings';
 
-const SAVED_EXTRAS = { lookbackDays: 14, maxGapsPerRun: 10 };
+const SAVED_EXTRAS = { lookbackDays: 21, maxGapsPerRun: 10 };
 
 const ruleCoverage: Worker = {
   id: SYSTEM_SECURITY_WORKER_DETECTION_RULE_COVERAGE_ID,
@@ -46,7 +46,7 @@ const renderSettings = (onExtrasChange = jest.fn()) => {
 };
 
 const expectDefaultsShown = () => {
-  expect(screen.getByTestId('alertZeroLookbackDays')).toHaveValue(7);
+  expect(screen.getByTestId('alertZeroLookbackDays')).toHaveValue(14);
   expect(screen.getByTestId('alertZeroMaxGapsPerRun')).toHaveValue(5);
 };
 

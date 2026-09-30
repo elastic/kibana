@@ -217,6 +217,7 @@ describe('detection rule workflows', () => {
       ]);
       expect(calls[0].with?.['workflow-id']).toBe(ALERTZERO_COVERAGE_WORKER_WORKFLOW_ID);
       expect(calls[0].with?.inputs).toEqual({
+        autonomy_level: '{{ consts.worker_settings.autonomy }}',
         lookback_days: '${{ consts.worker_settings.extras.lookbackDays }}',
         batch_size: '${{ consts.worker_settings.extras.maxGapsPerRun }}',
       });
@@ -235,6 +236,9 @@ describe('detection rule workflows', () => {
       });
 
       const inputs = dispatch.with?.inputs as Record<string, unknown>;
+      expect(resolveExpression(inputs.autonomy_level, { consts: rendered.consts })).toBe(
+        'assisted'
+      );
       expect(resolveExpression(inputs.lookback_days, { consts: rendered.consts })).toBe(30);
       expect(resolveExpression(inputs.batch_size, { consts: rendered.consts })).toBe(20);
       for (const key of ['lookback_days', 'batch_size']) {
@@ -1423,6 +1427,9 @@ describe('detection rule workflows', () => {
         expect(launches[0].with?.['workflow-id']).toBe(ALERTZERO_COVERAGE_REVIEW_WORKFLOW_ID);
         expect((launches[0].with?.inputs as Record<string, string>).ki_id).toBe(
           '{{ foreach.item._id }}'
+        );
+        expect((launches[0].with?.inputs as Record<string, string>).autonomy_level).toBe(
+          "{{ inputs.autonomy_level | default: 'manual' }}"
         );
         expect(sweepTypes).not.toContain('workflow.execute');
         expect(sweepTypes).not.toContain('waitForApproval');

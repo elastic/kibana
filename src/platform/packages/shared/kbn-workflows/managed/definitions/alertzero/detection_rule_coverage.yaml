@@ -35,6 +35,7 @@ steps:
     with:
       workflow-id: system-security-coverage-worker
       inputs:
+        autonomy_level: "{{ consts.worker_settings.autonomy }}"
         lookback_days: "${{ consts.worker_settings.extras.lookbackDays }}"
         batch_size: "${{ consts.worker_settings.extras.maxGapsPerRun }}"
 

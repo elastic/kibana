@@ -74,7 +74,7 @@ const EXPECTED_WORKER_SETTINGS: Record<RegisteredWorkerId, ExpectedWorkerSetting
   'system-security-detection-rule-coverage': {
     settingsVersion: 1,
     scheduleInterval: '1h',
-    extras: { lookbackDays: 7, maxGapsPerRun: 5 },
+    extras: { lookbackDays: 14, maxGapsPerRun: 5 },
     triggerTypes: ['scheduled', 'manual'],
   },
 };

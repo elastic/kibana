@@ -602,13 +602,13 @@ describe('WatchDetailPage', () => {
     const ruleTuning = screen.getByTestId(
       `alertZeroWatchWorkerSection-${SYSTEM_SECURITY_WORKER_DETECTION_RULE_TUNING_ID}`
     );
-    const ruleCreation = screen.getByTestId(
+    const ruleCoverage = screen.getByTestId(
       `alertZeroWatchWorkerSection-${SYSTEM_SECURITY_WORKER_DETECTION_RULE_COVERAGE_ID}`
     );
 
     expect(within(ruleTuning).getByTestId('alertZeroAnalysisWindowDays')).toHaveValue(14);
     expect(
-      within(ruleCreation).queryByTestId('alertZeroAnalysisWindowDays')
+      within(ruleCoverage).queryByTestId('alertZeroAnalysisWindowDays')
     ).not.toBeInTheDocument();
     expect(screen.getByTestId('alertZeroWatchSettingsSave')).toBeDisabled();
     expect(screen.getByTestId('alertZeroWatchSettingsDiscard')).toBeDisabled();
