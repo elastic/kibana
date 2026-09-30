@@ -31,7 +31,7 @@ import {
   type PrecedingStepRef,
 } from './get_document_order_predecessors';
 
-export type DataReferenceGroupId = 'triggers' | 'steps' | 'consts' | 'context';
+export type DataReferenceGroupId = 'triggers' | 'steps' | 'context';
 
 export interface DataReferenceItem {
   /** Liquid path without braces, e.g. `steps.a.output.status`. */
@@ -69,7 +69,7 @@ export interface DataReferenceGroup {
   readonly title: string;
   /** Keyboard-accessible info-icon tooltip on the group header. */
   readonly description: string;
-  /** Optional leading icon on the group header (e.g. gear for Constants). */
+  /** Optional leading icon on the group header. */
   readonly iconType?: string;
   readonly items: readonly DataReferenceItem[];
   /** Shown when `items` is empty (Steps on the first step). */
@@ -424,33 +424,22 @@ const buildStepEntities = (
   });
 };
 
-const buildConstsGroup = (definition: WorkflowYaml | undefined): DataReferenceGroup => {
-  const originConsts = i18n.translate('workflows.dataReferencePicker.originConsts', {
-    defaultMessage: 'Constants',
-  });
+const buildConstItems = (
+  definition: WorkflowYaml | undefined,
+  originLabel: string
+): DataReferenceItem[] => {
   const items: DataReferenceItem[] = [];
-
   for (const [key, value] of Object.entries(definition?.consts ?? {})) {
     items.push(
       pathLeafItem({
         path: `consts.${key}`,
         typeLabel: typeof value,
-        originLabel: originConsts,
+        originLabel,
         subtitle: formatConstValue(value),
       })
     );
   }
-
-  return {
-    id: 'consts',
-    title: i18n.translate('workflows.dataReferencePicker.constants', {
-      defaultMessage: 'Constants',
-    }),
-    description: i18n.translate('workflows.dataReferencePicker.constantsDescription', {
-      defaultMessage: "Named values defined on this workflow — shared across every step.",
-    }),
-    items,
-  };
+  return items;
 };
 
 const buildContextGroup = (definition: WorkflowYaml | undefined): DataReferenceGroup => {
@@ -458,6 +447,19 @@ const buildContextGroup = (definition: WorkflowYaml | undefined): DataReferenceG
     defaultMessage: 'Workflow context',
   });
   const items: DataReferenceItem[] = [];
+
+  const constChildren = buildConstItems(definition, originContext);
+  if (constChildren.length > 0) {
+    items.push(
+      pathLeafItem({
+        path: 'consts',
+        typeLabel: 'object',
+        originLabel: originContext,
+        drillable: true,
+        children: constChildren,
+      })
+    );
+  }
 
   const workflowChildren = schemaToItems(WorkflowDataContextSchema, 'workflow', originContext);
   items.push(
@@ -504,7 +506,8 @@ const buildContextGroup = (definition: WorkflowYaml | undefined): DataReferenceG
       defaultMessage: 'Workflow context',
     }),
     description: i18n.translate('workflows.dataReferencePicker.workflowContextDescription', {
-      defaultMessage: 'Execution metadata and Kibana URLs available at run time.',
+      defaultMessage:
+        'Constants, execution metadata, and Kibana URLs available across this workflow.',
     }),
     items,
   };
@@ -579,7 +582,6 @@ export const buildDataReferenceCatalog = ({
           }),
   });
 
-  groups.push(buildConstsGroup(definition));
   groups.push(buildContextGroup(definition));
 
   return { groups };
