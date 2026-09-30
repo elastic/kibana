@@ -18,6 +18,7 @@ import {
   deleteSelectedNodes,
   groupSelectedNodes,
   invertNodeSelection,
+  redoWorkspace,
   registerWorkspaceListeners,
   selectAllNodes,
   selectNeighborNodes,
@@ -26,6 +27,7 @@ import {
   toggleNodeSelection,
   unblockAllNodes,
   unblockNode,
+  undoWorkspace,
   ungroupNode,
   workspaceChanged,
   workspaceInitializedSelector,
@@ -150,6 +152,8 @@ describe('workspace state', () => {
       selectedEdgeIds: ['edge'],
       blocklistedNodesById: {},
       blocklistedNodeIds: [],
+      undoHistory: [],
+      redoHistory: [],
     });
   });
 
@@ -286,6 +290,29 @@ describe('workspace state', () => {
     environment.store.dispatch(unblockAllNodes());
     expect(environment.store.getState().workspace.blocklistedNodeIds).toEqual([]);
     expect(environment.store.getState().workspace.blocklistedNodesById).toEqual({});
+  });
+
+  it('undoes and redoes topology changes using serializable snapshots', () => {
+    const environment = createMockGraphStore({});
+    const state = {
+      ...environment.store.getState().workspace,
+      nodesById: { selected: { id: 'selected' }, remaining: { id: 'remaining' } },
+      nodeIds: ['selected', 'remaining'],
+      selectedNodeIds: ['selected'],
+    } as unknown as ReturnType<typeof environment.store.getState>['workspace'];
+    environment.store.dispatch(workspaceChanged(state));
+    environment.store.dispatch(deleteSelectedNodes());
+
+    expect(environment.store.getState().workspace.nodeIds).toEqual(['remaining']);
+    expect(environment.store.getState().workspace.undoHistory).toHaveLength(1);
+
+    environment.store.dispatch(undoWorkspace());
+    expect(environment.store.getState().workspace.nodeIds).toEqual(['selected', 'remaining']);
+    expect(environment.store.getState().workspace.redoHistory).toHaveLength(1);
+
+    environment.store.dispatch(redoWorkspace());
+    expect(environment.store.getState().workspace.nodeIds).toEqual(['remaining']);
+    expect(environment.store.getState().workspace.undoHistory).toHaveLength(1);
   });
 
   it('keeps edge selection single-valued', () => {

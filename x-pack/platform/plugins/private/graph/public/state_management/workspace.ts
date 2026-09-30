@@ -42,7 +42,7 @@ export interface WorkspaceEdgeState {
   weight: number;
 }
 
-export interface WorkspaceState {
+export interface WorkspaceSnapshot {
   isInitialized: boolean;
   nodesById: Record<string, WorkspaceNodeState>;
   nodeIds: string[];
@@ -52,6 +52,11 @@ export interface WorkspaceState {
   selectedEdgeIds: string[];
   blocklistedNodesById: Record<string, WorkspaceNodeState>;
   blocklistedNodeIds: string[];
+}
+
+export interface WorkspaceState extends WorkspaceSnapshot {
+  undoHistory: WorkspaceSnapshot[];
+  redoHistory: WorkspaceSnapshot[];
 }
 
 const initialWorkspaceState: WorkspaceState = {
@@ -64,6 +69,8 @@ const initialWorkspaceState: WorkspaceState = {
   selectedEdgeIds: [],
   blocklistedNodesById: {},
   blocklistedNodeIds: [],
+  undoHistory: [],
+  redoHistory: [],
 };
 
 export const initializeWorkspace = actionCreator('INITIALIZE_WORKSPACE');
@@ -83,12 +90,18 @@ export const groupSelectedNodes = actionCreator<string>('GROUP_SELECTED_NODES');
 export const ungroupNode = actionCreator<string>('UNGROUP_NODE');
 export const unblockNode = actionCreator<string>('UNBLOCK_NODE');
 export const unblockAllNodes = actionCreator('UNBLOCK_ALL_NODES');
+export const undoWorkspace = actionCreator('UNDO_WORKSPACE');
+export const redoWorkspace = actionCreator('REDO_WORKSPACE');
 export const submitSearch = actionCreator<string>('SUBMIT_SEARCH');
 
 export const workspaceReducer = reducerWithInitialState(initialWorkspaceState)
   .case(reset, () => initialWorkspaceState)
   .case(initializeWorkspace, (state) => ({ ...state, isInitialized: true }))
-  .case(workspaceChanged, (_state, workspace) => workspace)
+  .case(workspaceChanged, (state, workspace) => ({
+    ...workspace,
+    undoHistory: state.undoHistory,
+    redoHistory: state.redoHistory,
+  }))
   .case(selectAllNodes, (state) => ({
     ...state,
     selectedNodeIds: state.nodeIds.filter((id) => state.nodesById[id].parentId === undefined),
@@ -119,7 +132,9 @@ export const workspaceReducer = reducerWithInitialState(initialWorkspaceState)
     ...state,
     selectedEdgeIds: state.selectedEdgeIds.includes(edgeId) ? [] : [edgeId],
   }))
-  .case(deleteSelectedNodes, (state) => removeNodes(state, getSelectedNodeIds(state)))
+  .case(deleteSelectedNodes, (state) =>
+    recordUndo(state, removeNodes(state, getSelectedNodeIds(state)))
+  )
   .case(blocklistSelectedNodes, (state) => {
     const nodeIds = getSelectedNodeIds(state, false);
     const blocklistedNodesById = { ...state.blocklistedNodesById };
@@ -136,7 +151,7 @@ export const workspaceReducer = reducerWithInitialState(initialWorkspaceState)
     if (!state.nodesById[parentId]) {
       return state;
     }
-    return {
+    return recordUndo(state, {
       ...state,
       nodesById: Object.fromEntries(
         Object.entries(state.nodesById).map(([nodeId, node]) => [
@@ -149,17 +164,19 @@ export const workspaceReducer = reducerWithInitialState(initialWorkspaceState)
         ])
       ),
       selectedNodeIds: [parentId],
-    };
+    });
   })
-  .case(ungroupNode, (state, parentId) => ({
-    ...state,
-    nodesById: Object.fromEntries(
-      Object.entries(state.nodesById).map(([nodeId, node]) => [
-        nodeId,
-        node.parentId === parentId ? { ...node, parentId: undefined } : node,
-      ])
-    ),
-  }))
+  .case(ungroupNode, (state, parentId) =>
+    recordUndo(state, {
+      ...state,
+      nodesById: Object.fromEntries(
+        Object.entries(state.nodesById).map(([nodeId, node]) => [
+          nodeId,
+          node.parentId === parentId ? { ...node, parentId: undefined } : node,
+        ])
+      ),
+    })
+  )
   .case(unblockNode, (state, nodeId) => {
     const blocklistedNodesById = { ...state.blocklistedNodesById };
     delete blocklistedNodesById[nodeId];
@@ -174,6 +191,8 @@ export const workspaceReducer = reducerWithInitialState(initialWorkspaceState)
     blocklistedNodesById: {},
     blocklistedNodeIds: [],
   }))
+  .case(undoWorkspace, (state) => applyUndo(state))
+  .case(redoWorkspace, (state) => applyRedo(state))
   .build();
 
 export const workspaceSelector = (state: GraphState) => state.workspace;
@@ -186,6 +205,39 @@ export const selectedNodeIdsSelector = createSelector(
   workspaceSelector,
   (workspace: WorkspaceState) => workspace.selectedNodeIds
 );
+
+const toSnapshot = ({ undoHistory, redoHistory, ...snapshot }: WorkspaceState): WorkspaceSnapshot =>
+  snapshot;
+
+const recordUndo = (state: WorkspaceState, nextState: WorkspaceState): WorkspaceState => ({
+  ...nextState,
+  undoHistory: [...state.undoHistory, toSnapshot(state)].slice(-50),
+  redoHistory: [],
+});
+
+const applyUndo = (state: WorkspaceState): WorkspaceState => {
+  const previous = state.undoHistory[state.undoHistory.length - 1];
+  if (!previous) {
+    return state;
+  }
+  return {
+    ...previous,
+    undoHistory: state.undoHistory.slice(0, -1),
+    redoHistory: [...state.redoHistory, toSnapshot(state)].slice(-50),
+  };
+};
+
+const applyRedo = (state: WorkspaceState): WorkspaceState => {
+  const next = state.redoHistory[state.redoHistory.length - 1];
+  if (!next) {
+    return state;
+  }
+  return {
+    ...next,
+    undoHistory: [...state.undoHistory, toSnapshot(state)].slice(-50),
+    redoHistory: state.redoHistory.slice(0, -1),
+  };
+};
 
 const getSelectedNodeIds = (state: WorkspaceState, defaultToAll = true): string[] => {
   const selectedNodeIds = state.selectedNodeIds.length
@@ -283,6 +335,8 @@ export const createWorkspaceState = (workspace: Workspace): WorkspaceState => {
       blocklistedNodes.map((node) => [node.id, toNodeState(node)])
     ),
     blocklistedNodeIds: blocklistedNodes.map(({ id }) => id),
+    undoHistory: [],
+    redoHistory: [],
   };
 };
 
@@ -306,6 +360,8 @@ const topologyActionTypes = new Set([
   ungroupNode.type,
   unblockNode.type,
   unblockAllNodes.type,
+  undoWorkspace.type,
+  redoWorkspace.type,
 ]);
 
 const selectionActionTypes = new Set([
@@ -381,6 +437,10 @@ export const registerWorkspaceListeners = (
         }
       } else if (unblockAllNodes.match(action)) {
         workspace.unblockAll();
+      } else if (undoWorkspace.match(action)) {
+        workspace.undo();
+      } else if (redoWorkspace.match(action)) {
+        workspace.redo();
       }
       notifyReact();
     },
