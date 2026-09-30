@@ -23,10 +23,24 @@ describe('makeResolveHostEnrollment', () => {
 
     await expect(resolve('host-a')).resolves.toEqual({ enrolled: true, agentId: 'agent-1' });
     expect(listAgents).toHaveBeenCalledWith({
-      kuery: 'local_metadata.host.hostname:"host-a"',
+      kuery: 'local_metadata.host.hostname:"host-a" or local_metadata.host.name:"host-a"',
       showInactive: false,
       perPage: 1,
     });
+  });
+
+  // The caller collects entities from either `host.name` or `host.hostname`, and the two
+  // routinely differ on one machine. Matching a single field reports an enrolled host as
+  // unenrolled, which quietly turns an executable action into a recommendation.
+  it('matches a host recorded under either Fleet name field', async () => {
+    const listAgents = jest.fn().mockResolvedValue({ agents: [], total: 0 });
+    const resolve = makeResolveHostEnrollment({ listAgents } as unknown as AgentClient);
+
+    await resolve('web-01.corp.example.com');
+
+    const { kuery } = listAgents.mock.calls[0][0];
+    expect(kuery).toContain('local_metadata.host.hostname:"web-01.corp.example.com"');
+    expect(kuery).toContain('local_metadata.host.name:"web-01.corp.example.com"');
   });
 
   it('returns enrolled: false when Fleet finds no agent for the host', async () => {
@@ -42,7 +56,10 @@ describe('makeResolveHostEnrollment', () => {
 
     await resolve('weird"host\\name');
     expect(listAgents).toHaveBeenCalledWith(
-      expect.objectContaining({ kuery: 'local_metadata.host.hostname:"weird\\"host\\\\name"' })
+      expect.objectContaining({
+        kuery:
+          'local_metadata.host.hostname:"weird\\"host\\\\name" or local_metadata.host.name:"weird\\"host\\\\name"',
+      })
     );
   });
 });

@@ -15,6 +15,12 @@ const escapeKuery = (value: string): string => value.replace(/(["\\])/g, '\\$1')
  * `showInactive: false` excludes unenrolled/inactive agents, matching
  * Fleet's own definition of an active agent.
  *
+ * Both `local_metadata.host.hostname` and `local_metadata.host.name` are matched, because
+ * the caller feeds this entities collected from either `host.name` or `host.hostname` and
+ * the two routinely differ on the same machine (a configured or fully-qualified name
+ * against a short one). Matching only one field silently reports an enrolled host as
+ * unenrolled, which downgrades an executable response action to a recommendation.
+ *
  * The client must be space-scoped: hostnames are not unique across spaces, and an
  * unscoped search returns the first global match, which can enroll — and later act
  * on — an agent belonging to a different space.
@@ -26,8 +32,9 @@ export const makeResolveHostEnrollment = (
     return async () => ({ enrolled: false });
   }
   return async (hostName) => {
+    const escaped = escapeKuery(hostName);
     const { agents } = await agentClient.listAgents({
-      kuery: `local_metadata.host.hostname:"${escapeKuery(hostName)}"`,
+      kuery: `local_metadata.host.hostname:"${escaped}" or local_metadata.host.name:"${escaped}"`,
       showInactive: false,
       perPage: 1,
     });
