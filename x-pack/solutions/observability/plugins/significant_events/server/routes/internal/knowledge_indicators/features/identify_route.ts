@@ -38,6 +38,7 @@ import type { SignificantEventsMaintenanceService } from '../../../../lib/mainte
 import { stateBlocksNewActivity } from '../../../../../common/maintenance/state_machine';
 import { sourceToAnalysisTarget } from '../../../../lib/significant_events/stream_to_analysis_target';
 import { installFeatureIdentificationAgent } from '../../../../agent_builder/agents/feature_identification';
+import { createSignificantEventsAvailability } from '../../../../agent_builder/tools/significant_events_availability';
 
 const getSerializedByteLength = (value: unknown) =>
   Buffer.byteLength(JSON.stringify(value), 'utf8');
@@ -252,6 +253,7 @@ const identifyInferredFeaturesRoute = createServerRoute({
       await installFeatureIdentificationAgent({
         agentBuilder: server.agentBuilder,
         spaceId: request.spaceId,
+        availability: createSignificantEventsAvailability({ server, logger: routeLogger }),
       });
     }
 
