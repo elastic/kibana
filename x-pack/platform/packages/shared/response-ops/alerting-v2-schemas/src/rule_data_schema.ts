@@ -37,7 +37,6 @@ import {
   MAX_SEARCH_LENGTH,
   MIN_SCHEDULE_INTERVAL,
   MAX_BULK_ITEMS,
-  VERSION_MAX_LENGTH,
   MAX_ARTIFACT_DATA_FIELDS,
   MAX_ARTIFACT_DATA_LENGTH,
   FIND_DEFAULT_PER_PAGE,
@@ -791,36 +790,10 @@ export const updateRuleDataSchema = z
     artifacts: artifactsSchema.optional().nullable(),
   })
   .strict()
-  .refine(isNoDataStrategyWritable, rejectAlertNoDataStrategy);
-
-export type UpdateRuleData = z.infer<typeof updateRuleDataSchema>;
-
-/** Update rule API body schema — adds OCC version on top of update data. */
-export const updateRuleBodySchema = updateRuleDataSchema
-  .extend({
-    version: z
-      .string()
-      .min(1)
-      .max(VERSION_MAX_LENGTH)
-      .optional()
-      .describe('The current version of the rule, used for optimistic concurrency control.'),
-  })
+  .refine(isNoDataStrategyWritable, rejectAlertNoDataStrategy)
   .meta({ id: 'alerting_update_rule' });
 
-export type UpdateRuleBody = z.infer<typeof updateRuleBodySchema>;
-
-/** Rule response metadata — write-path fields plus server-managed `version`. */
-export const ruleResponseMetadataSchema = metadataSchema
-  .extend({
-    version: z
-      .number()
-      .int()
-      .min(1)
-      .describe(
-        'Monotonically increasing integer number representing a rule configuration version, incremented on every change. Used on generated rule events as `rule.version`.'
-      ),
-  })
-  .meta({ id: 'alerting_rule_response_metadata' });
+export type UpdateRuleData = z.infer<typeof updateRuleDataSchema>;
 
 /**
  * Schema for rule response data returned from the API.
@@ -832,18 +805,18 @@ export const ruleResponseSchema = createRuleDataBaseSchema
     // response never carries it.
     state_transition: stateTransitionSchema.optional(),
     id: z.string().describe('Unique rule identifier.'),
-    metadata: ruleResponseMetadataSchema,
+    version: z
+      .number()
+      .int()
+      .min(1)
+      .describe(
+        'Monotonically increasing integer number representing a rule configuration version, incremented on every change. Used on generated rule events as `rule.version`.'
+      ),
     enabled: z.boolean().describe('Whether the rule is enabled.'),
     created_by: actorSchema.nullable().describe('Actor who created the rule.'),
     created_at: z.iso.datetime().describe('ISO timestamp when the rule was created.'),
     updated_by: actorSchema.nullable().describe('Actor who last updated the rule.'),
     updated_at: z.iso.datetime().describe('ISO timestamp when the rule was last updated.'),
-    version: z
-      .string()
-      .optional()
-      .describe(
-        'The saved object version token of the rule, used for optimistic concurrency control.'
-      ),
   })
   .meta({ id: 'alerting_rule_response' });
 

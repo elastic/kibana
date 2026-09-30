@@ -24043,7 +24043,6 @@
     "xpack.globalSearchBar.searchBar.helpText.helpTextPrefix": "Filtrar por",
     "xpack.globalSearchBar.searchBar.noResults": "Tente buscar aplicativos, dashboards, visualizações e muito mais.",
     "xpack.globalSearchBar.searchBar.noResultsHeading": "Nenhum resultado encontrado",
-    "xpack.globalSearchBar.searchBar.noResultsImageAlt": "Ilustração do buraco negro",
     "xpack.globalSearchBar.searchBar.optionTagListAriaLabel": "Tags",
     "xpack.globalSearchBar.searchbar.overflowTagsAriaLabel": "Mais {n} {n, plural, one {tag} other {tags}}: {tags}",
     "xpack.globalSearchBar.searchBar.placeholder": "Encontre apps, conteúdo e muito mais.",

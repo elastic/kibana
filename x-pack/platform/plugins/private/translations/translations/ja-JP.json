@@ -24053,7 +24053,6 @@
     "xpack.globalSearchBar.searchBar.helpText.helpTextPrefix": "フィルタリング条件",
     "xpack.globalSearchBar.searchBar.noResults": "アプリケーション、ダッシュボード、ビジュアライゼーションなどを検索してみてください。",
     "xpack.globalSearchBar.searchBar.noResultsHeading": "結果が見つかりませんでした",
-    "xpack.globalSearchBar.searchBar.noResultsImageAlt": "ブラックホールの図",
     "xpack.globalSearchBar.searchBar.optionTagListAriaLabel": "タグ",
     "xpack.globalSearchBar.searchbar.overflowTagsAriaLabel": "{n}件のその他の{n, plural, one {tag} other {タグ}}: {tags}",
     "xpack.globalSearchBar.searchBar.placeholder": "アプリ、コンテンツなどを検索します。",

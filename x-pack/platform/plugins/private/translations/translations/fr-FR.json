@@ -23911,7 +23911,6 @@
     "xpack.globalSearchBar.searchBar.helpText.helpTextPrefix": "Filtrer par",
     "xpack.globalSearchBar.searchBar.noResults": "Essayez de rechercher des applications, des tableaux de bord, des visualisations, etc.",
     "xpack.globalSearchBar.searchBar.noResultsHeading": "Résultat introuvable",
-    "xpack.globalSearchBar.searchBar.noResultsImageAlt": "Illustration d'un trou noir",
     "xpack.globalSearchBar.searchBar.optionTagListAriaLabel": "Balises",
     "xpack.globalSearchBar.searchbar.overflowTagsAriaLabel": "{n} {n, plural, one {tag} other {balises}} de plus : {tags}",
     "xpack.globalSearchBar.searchBar.placeholder": "Cherchez des applications, du contenu, et plus encore.",
