@@ -63,12 +63,19 @@ export const getEntityFilterTerms = (filters: EntityFilters): EntityFilterTerm[]
     terms: { [FILTER_ES_FIELDS[key]]: filters[key] as string[] },
   }));
 
+const MV_CONTAINS_FIELDS = new Set<keyof EntityFilters>(['watchlists', 'dataSources']);
+
 export const getEntityFilterESQL = (filters: EntityFilters): string[] =>
   FILTER_FIELDS.filter((key) => filters[key].length).map((key) => {
-    const quoted = (filters[key] as string[])
-      .map((v) => `"${v.replace(/["\\]/g, '\\$&')}"`)
-      .join(', ');
-    return `| WHERE ${FILTER_ES_FIELDS[key]} IN (${quoted})`;
+    const field = FILTER_ES_FIELDS[key];
+    const values = filters[key] as string[];
+    const quoted = values.map((v) => `"${v.replace(/["\\]/g, '\\$&')}"`).join(', ');
+    if (MV_CONTAINS_FIELDS.has(key)) {
+      return values.length === 1
+        ? `| WHERE MV_CONTAINS(${field}, ${quoted})`
+        : `| WHERE ${values.map((v) => `MV_CONTAINS(${field}, "${v.replace(/["\\]/g, '\\$&')}")`).join(' OR ')}`;
+    }
+    return `| WHERE ${field} IN (${quoted})`;
   });
 
 interface EntityFiltersResult {

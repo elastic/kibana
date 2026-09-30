@@ -80,39 +80,6 @@ const layoutCappedGridCss = ({
   `;
 };
 
-/** v.5 title overrides (tooltip uses the same string). */
-const V3_CARD_TITLES: Partial<Record<SignalCardId, string>> = {
-  entitiesWithAlerts: i18n.translate(
-    'xpack.securitySolution.entityAnalytics.facelift.signalCards.entitiesWithAlerts',
-    { defaultMessage: 'Entities with alerts' }
-  ),
-  entitiesWithAnomalies: i18n.translate(
-    'xpack.securitySolution.entityAnalytics.facelift.signalCards.entitiesWithAnomalies',
-    { defaultMessage: 'Entities with anomalies' }
-  ),
-  riskMovers: i18n.translate(
-    'xpack.securitySolution.entityAnalytics.facelift.signalCards.riskMovers',
-    { defaultMessage: 'Risk movers' }
-  ),
-  newlyHighCritical: i18n.translate(
-    'xpack.securitySolution.entityAnalytics.facelift.signalCards.newlyHighCritical',
-    { defaultMessage: 'Newly high/critical' }
-  ),
-  watchlisted: i18n.translate(
-    'xpack.securitySolution.entityAnalytics.facelift.signalCards.watchlisted',
-    { defaultMessage: 'Watchlisted' }
-  ),
-  newEntity: i18n.translate(
-    'xpack.securitySolution.entityAnalytics.facelift.signalCards.newEntity',
-    { defaultMessage: 'New entity' }
-  ),
-};
-
-// All descriptions are dynamic — driven by the selected time range from the page.
-// Do not add static overrides here; use i18n.translate in the page's signalCards config instead.
-
-const displayTitleFor = (card: SignalCardData): string => V3_CARD_TITLES[card.id] ?? card.title;
-
 const displayDescriptionFor = (card: SignalCardData): string => card.description;
 
 const filterTableTooltip = (title: string) =>
@@ -275,7 +242,7 @@ const SignalMetricCard: React.FC<SignalMetricCardProps> = ({
   // Active keeps a white tile; only the border (and sparkline tint) mark selection.
   const tileBackground = selected ? defaultBg : emphasized ? hoverBg : defaultBg;
   const borderColor = selected ? activeBorder : emphasized ? hoverBorder : defaultBorder;
-  const displayTitle = displayTitleFor(card);
+  const displayTitle = card.title;
   const displayDescription = displayDescriptionFor(card);
 
   const onKeyDown = useCallback(
