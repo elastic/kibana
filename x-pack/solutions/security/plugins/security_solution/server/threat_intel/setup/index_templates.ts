@@ -945,7 +945,6 @@ const migrateExistingContentScrubbedMapping = async (
  * `*` searches. Settings updates are cheap and idempotent.
  */
 
-
 /** RSS article materialization fields for reports indices created before Jina support. */
 const migrateExistingMaterializationMappings = async (
   esClient: ElasticsearchClient,
