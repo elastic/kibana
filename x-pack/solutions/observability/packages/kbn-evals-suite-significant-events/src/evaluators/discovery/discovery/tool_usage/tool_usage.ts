@@ -101,12 +101,32 @@ const findDuplicateEventWriteRule = (
   }
 };
 
-/** Require events_write and reject workflow-owned discovery stamping. */
+const hasGroundedNoEventDecision = (steps: ConverseStep[]): boolean => {
+  const calledTools = new Set(extractToolCallIds(steps));
+  const hasQueryKiSearch = extractOrderedToolCalls(steps).some(
+    ({ toolId, params }) =>
+      isTool(toolId, TOOL_ID_KI_SEARCH) &&
+      Array.isArray(params.kind) &&
+      params.kind.includes('query')
+  );
+
+  return (
+    hasQueryKiSearch &&
+    calledCanonical(calledTools, TOOL_ID_EXECUTE_ESQL) &&
+    calledCanonical(calledTools, TOOL_ID_EVENT_SEARCH)
+  );
+};
+
+/** Require a completed event write or a grounded no-event decision. */
 const scoreOutputTool = (
   calledTools: Set<string>,
   steps: ConverseStep[]
 ): ToolUsageScore | null => {
   if (!calledCanonical(calledTools, TOOL_ID_EVENTS_WRITE)) {
+    if (hasGroundedNoEventDecision(steps)) {
+      return null;
+    }
+
     return {
       score: 0,
       label: `missing-${TOOL_ID_EVENTS_WRITE}`,
