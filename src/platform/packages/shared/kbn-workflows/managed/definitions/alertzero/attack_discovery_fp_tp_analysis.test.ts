@@ -376,7 +376,9 @@ describe('Attack Discovery FP/TP analysis workflow', () => {
     });
 
     it('reads it from the product-managed Attack Discovery alerts data stream', () => {
-      expect(loadAttack?.with?.index).toBe('.alerts-security.attack.discovery.alerts-default');
+      expect(loadAttack?.with?.index).toBe(
+        '.alerts-security.attack.discovery.alerts-{{ workflow.spaceId }}'
+      );
     });
 
     // The persisted document is indexed UNDER `kibana.alert.uuid`, so `_id` is the
