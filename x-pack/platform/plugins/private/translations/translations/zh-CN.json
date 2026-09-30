@@ -50083,7 +50083,6 @@
     "xpack.serverlessVectordb.nav.mngt.access": "访问",
     "xpack.serverlessVectordb.nav.mngt.alertsAndInsights": "告警和洞见",
     "xpack.serverlessVectordb.nav.mngt.content": "内容",
-    "xpack.serverlessVectordb.nav.performance": "性能",
     "xpack.sessionView.alert": "告警",
     "xpack.sessionView.alertDetailsAllFilterItem": "查看所有告警",
     "xpack.sessionView.alertDetailsAllSelectedCategory": "查看：所有告警",

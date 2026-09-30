@@ -57,6 +57,7 @@ export {
   type ChatCompletionToolNotFoundError,
   type ChatCompletionToolValidationError,
   type ChatCompletionTokenLimitReachedError,
+  isContextLengthExceededError,
   isToolValidationError,
   isOutputTokenLimitReachedError,
   isToolNotFoundError,
