@@ -1,6 +1,6 @@
 // Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`metrics queries with a service node name fetches cpu chart data 1`] = `
+exports[`metrics queries > with a service node name > fetches cpu chart data 1`] = `
 Object {
   "aggs": Object {
     "processCPUAverage": Object {
@@ -92,7 +92,7 @@ Object {
 }
 `;
 
-exports[`metrics queries with a service node name fetches heap memory chart data 1`] = `
+exports[`metrics queries > with a service node name > fetches heap memory chart data 1`] = `
 Object {
   "aggs": Object {
     "heapMemoryCommitted": Object {
@@ -183,7 +183,7 @@ Object {
 }
 `;
 
-exports[`metrics queries with a service node name fetches memory chart data 1`] = `
+exports[`metrics queries > with a service node name > fetches memory chart data 1`] = `
 Object {
   "aggs": Object {
     "memoryUsedAvg": Object {
@@ -355,7 +355,7 @@ Object {
 }
 `;
 
-exports[`metrics queries with a service node name fetches non heap memory chart data 1`] = `
+exports[`metrics queries > with a service node name > fetches non heap memory chart data 1`] = `
 Object {
   "aggs": Object {
     "nonHeapMemoryCommitted": Object {
@@ -446,7 +446,7 @@ Object {
 }
 `;
 
-exports[`metrics queries with a service node name fetches thread count chart data 1`] = `
+exports[`metrics queries > with a service node name > fetches thread count chart data 1`] = `
 Object {
   "aggs": Object {
     "threadCount": Object {
@@ -527,7 +527,7 @@ Object {
 }
 `;
 
-exports[`metrics queries with service_node_name_missing fetches cpu chart data 1`] = `
+exports[`metrics queries > with service_node_name_missing > fetches cpu chart data 1`] = `
 Object {
   "aggs": Object {
     "processCPUAverage": Object {
@@ -625,7 +625,7 @@ Object {
 }
 `;
 
-exports[`metrics queries with service_node_name_missing fetches heap memory chart data 1`] = `
+exports[`metrics queries > with service_node_name_missing > fetches heap memory chart data 1`] = `
 Object {
   "aggs": Object {
     "heapMemoryCommitted": Object {
@@ -722,7 +722,7 @@ Object {
 }
 `;
 
-exports[`metrics queries with service_node_name_missing fetches memory chart data 1`] = `
+exports[`metrics queries > with service_node_name_missing > fetches memory chart data 1`] = `
 Object {
   "aggs": Object {
     "memoryUsedAvg": Object {
@@ -900,7 +900,7 @@ Object {
 }
 `;
 
-exports[`metrics queries with service_node_name_missing fetches non heap memory chart data 1`] = `
+exports[`metrics queries > with service_node_name_missing > fetches non heap memory chart data 1`] = `
 Object {
   "aggs": Object {
     "nonHeapMemoryCommitted": Object {
@@ -997,7 +997,7 @@ Object {
 }
 `;
 
-exports[`metrics queries with service_node_name_missing fetches thread count chart data 1`] = `
+exports[`metrics queries > with service_node_name_missing > fetches thread count chart data 1`] = `
 Object {
   "aggs": Object {
     "threadCount": Object {
@@ -1084,7 +1084,7 @@ Object {
 }
 `;
 
-exports[`metrics queries without a service node name fetches cpu chart data 1`] = `
+exports[`metrics queries > without a service node name > fetches cpu chart data 1`] = `
 Object {
   "aggs": Object {
     "processCPUAverage": Object {
@@ -1171,7 +1171,7 @@ Object {
 }
 `;
 
-exports[`metrics queries without a service node name fetches heap memory chart data 1`] = `
+exports[`metrics queries > without a service node name > fetches heap memory chart data 1`] = `
 Object {
   "aggs": Object {
     "heapMemoryCommitted": Object {
@@ -1257,7 +1257,7 @@ Object {
 }
 `;
 
-exports[`metrics queries without a service node name fetches memory chart data 1`] = `
+exports[`metrics queries > without a service node name > fetches memory chart data 1`] = `
 Object {
   "aggs": Object {
     "memoryUsedAvg": Object {
@@ -1424,7 +1424,7 @@ Object {
 }
 `;
 
-exports[`metrics queries without a service node name fetches non heap memory chart data 1`] = `
+exports[`metrics queries > without a service node name > fetches non heap memory chart data 1`] = `
 Object {
   "aggs": Object {
     "nonHeapMemoryCommitted": Object {
@@ -1510,7 +1510,7 @@ Object {
 }
 `;
 
-exports[`metrics queries without a service node name fetches thread count chart data 1`] = `
+exports[`metrics queries > without a service node name > fetches thread count chart data 1`] = `
 Object {
   "aggs": Object {
     "threadCount": Object {

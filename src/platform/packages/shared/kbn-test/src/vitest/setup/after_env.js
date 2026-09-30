@@ -49,11 +49,30 @@ try {
 }
 Error.prepareStackTrace = vitestPrepareStackTrace;
 
-// Jest's resolver stubbed style imports for every module. Natively loaded code (node_modules and
-// `jest.requireActual`, e.g. monaco-editor's ESM) would otherwise fail on `import './x.css'`.
-const STYLE_HOOKS = Symbol.for('kbn.vitest.styleHooks');
-if (!global[STYLE_HOOKS]) {
-  global[STYLE_HOOKS] = registerHooks({
+// Natively loaded code (node_modules and `jest.requireActual`) goes through Node's loader, which
+// Jest bypassed with its own resolver and transforms:
+// - Jest's resolver stubbed style imports for every module (e.g. monaco-editor's `import './x.css'`);
+// - Jest transformed ESM packages whose relative imports omit the extension (e.g. monaco-promql,
+//   in transformIgnorePatterns), which Node's ESM resolution rejects.
+const NATIVE_HOOKS = Symbol.for('kbn.vitest.nativeHooks');
+const isNotFound = (error) => error?.code === 'ERR_MODULE_NOT_FOUND';
+if (!global[NATIVE_HOOKS]) {
+  global[NATIVE_HOOKS] = registerHooks({
+    resolve: (specifier, context, nextResolve) => {
+      try {
+        return nextResolve(specifier, context);
+      } catch (error) {
+        const retry =
+          isNotFound(error) &&
+          /^\.\.?\//.test(specifier) &&
+          !/\.[cm]?js$/.test(specifier) &&
+          context.parentURL?.includes('/node_modules/');
+        if (!retry) {
+          throw error;
+        }
+        return nextResolve(`${specifier}.js`, context);
+      }
+    },
     load: (url, context, nextLoad) =>
       /\.(css|less|scss)$/.test(url)
         ? { format: 'module', source: 'export default {};', shortCircuit: true }
