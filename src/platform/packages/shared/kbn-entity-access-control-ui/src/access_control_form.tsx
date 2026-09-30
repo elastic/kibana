@@ -14,12 +14,15 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiFormRow,
+  EuiPanel,
   EuiSuperSelect,
   EuiIcon,
   EuiSpacer,
   EuiText,
   EuiToolTip,
+  useEuiTheme,
 } from '@elastic/eui';
+import { css } from '@emotion/react';
 import { ACCESS_CONTROL_MAX_ENTRIES } from '@kbn/entity-access-control';
 import type { AccessControlInput, AccessControlMode } from '@kbn/entity-access-control';
 import { i18n } from '@kbn/i18n';
@@ -88,6 +91,13 @@ export const AccessControlForm = <Role extends string>({
   isDisabled = false,
   isSearching = false,
 }: AccessControlFormProps<Role>): React.ReactElement => {
+  const { euiTheme } = useEuiTheme();
+  const userRowCss = css({
+    paddingBlock: euiTheme.size.s,
+    paddingInline: euiTheme.size.m,
+    minBlockSize: `calc(${euiTheme.size.xxl} + ${euiTheme.size.s} * 2)`,
+    '&:not(:last-child)': { borderBlockEnd: euiTheme.border.thin },
+  });
   const entries = value.entries ?? [];
   const showEntries = value.access_mode === 'private' || allowPublicEntries;
   const profileById = new Map(
@@ -161,7 +171,7 @@ export const AccessControlForm = <Role extends string>({
     ),
     dropdownDisplay: (
       <>
-        <EuiText size="s">
+        <EuiText size="s" color="default">
           <strong>{label}</strong>
         </EuiText>
         <EuiText size="xs" color="subdued">
@@ -234,76 +244,96 @@ export const AccessControlForm = <Role extends string>({
           />
         </EuiFormRow>
       )}
-      <EuiSpacer size="m" />
-      {ownerId && (
+      {(ownerId || (showEntries && entries.length > 0)) && (
         <>
-          <EuiFlexGroup alignItems="center" responsive={false}>
-            <EuiFlexItem>{renderUser(owner?.uid ?? ownerId)}</EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <EuiText size="s">
-                {ownerId === currentUserId
-                  ? i18n.translate('entityAccessControl.currentOwnerLabel', {
-                      defaultMessage: 'Owner (you)',
-                    })
-                  : i18n.translate('entityAccessControl.ownerLabel', { defaultMessage: 'Owner' })}
-              </EuiText>
-            </EuiFlexItem>
-          </EuiFlexGroup>
-          <EuiSpacer size="s" />
+          <EuiSpacer size="m" />
+          <EuiPanel
+            hasBorder
+            hasShadow={false}
+            paddingSize="none"
+            color="transparent"
+            borderRadius="m"
+            css={css({ display: 'grid', gridAutoRows: '1fr' })}
+            data-test-subj="entityAccessControlUserList"
+          >
+            {ownerId && (
+              <EuiFlexGroup alignItems="center" responsive={false} css={userRowCss}>
+                <EuiFlexItem>{renderUser(owner?.uid ?? ownerId)}</EuiFlexItem>
+                <EuiFlexItem grow={false}>
+                  <EuiText size="s">
+                    {ownerId === currentUserId
+                      ? i18n.translate('entityAccessControl.currentOwnerLabel', {
+                          defaultMessage: 'Owner (you)',
+                        })
+                      : i18n.translate('entityAccessControl.ownerLabel', {
+                          defaultMessage: 'Owner',
+                        })}
+                  </EuiText>
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            )}
+            {showEntries &&
+              entries.map((entry) => (
+                <EuiFlexGroup
+                  key={entry.id}
+                  alignItems="center"
+                  gutterSize="s"
+                  responsive={false}
+                  css={userRowCss}
+                >
+                  <EuiFlexItem>{renderUser(entry.id)}</EuiFlexItem>
+                  <EuiFlexItem grow={false}>
+                    <EuiSuperSelect<Role>
+                      aria-label={i18n.translate('entityAccessControl.roleAriaLabel', {
+                        defaultMessage: 'Role for {name}',
+                        values: { name: profileById.get(entry.id)?.user.username ?? entry.id },
+                      })}
+                      options={roles.map(({ value: role, text }) => ({
+                        value: role,
+                        inputDisplay: text,
+                      }))}
+                      valueOfSelected={entry.role}
+                      data-test-subj={`entityAccessControlRole-${
+                        profileById.get(entry.id)?.user.username ?? entry.id
+                      }`}
+                      disabled={isDisabled}
+                      onChange={(role) =>
+                        onChange({
+                          ...value,
+                          entries: entries.map((current) =>
+                            current.id === entry.id ? { ...current, role } : current
+                          ),
+                        })
+                      }
+                      compressed
+                    />
+                  </EuiFlexItem>
+                  <EuiFlexItem grow={false}>
+                    <EuiToolTip
+                      content={getRemoveLabel(profileById.get(entry.id)?.user.username ?? entry.id)}
+                      disableScreenReaderOutput
+                    >
+                      <EuiButtonIcon
+                        iconType="cross"
+                        color="danger"
+                        aria-label={getRemoveLabel(
+                          profileById.get(entry.id)?.user.username ?? entry.id
+                        )}
+                        isDisabled={isDisabled}
+                        onClick={() =>
+                          onChange({
+                            ...value,
+                            entries: entries.filter(({ id }) => id !== entry.id),
+                          })
+                        }
+                      />
+                    </EuiToolTip>
+                  </EuiFlexItem>
+                </EuiFlexGroup>
+              ))}
+          </EuiPanel>
         </>
       )}
-      {showEntries &&
-        entries.map((entry) => (
-          <React.Fragment key={entry.id}>
-            <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
-              <EuiFlexItem>{renderUser(entry.id)}</EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                <EuiSuperSelect<Role>
-                  aria-label={i18n.translate('entityAccessControl.roleAriaLabel', {
-                    defaultMessage: 'Role for {name}',
-                    values: { name: profileById.get(entry.id)?.user.username ?? entry.id },
-                  })}
-                  options={roles.map(({ value: role, text }) => ({
-                    value: role,
-                    inputDisplay: text,
-                  }))}
-                  valueOfSelected={entry.role}
-                  data-test-subj={`entityAccessControlRole-${
-                    profileById.get(entry.id)?.user.username ?? entry.id
-                  }`}
-                  disabled={isDisabled}
-                  onChange={(role) =>
-                    onChange({
-                      ...value,
-                      entries: entries.map((current) =>
-                        current.id === entry.id ? { ...current, role } : current
-                      ),
-                    })
-                  }
-                  compressed
-                />
-              </EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                <EuiToolTip
-                  content={getRemoveLabel(profileById.get(entry.id)?.user.username ?? entry.id)}
-                  disableScreenReaderOutput
-                >
-                  <EuiButtonIcon
-                    iconType="cross"
-                    aria-label={getRemoveLabel(
-                      profileById.get(entry.id)?.user.username ?? entry.id
-                    )}
-                    isDisabled={isDisabled}
-                    onClick={() =>
-                      onChange({ ...value, entries: entries.filter(({ id }) => id !== entry.id) })
-                    }
-                  />
-                </EuiToolTip>
-              </EuiFlexItem>
-            </EuiFlexGroup>
-            <EuiSpacer size="s" />
-          </React.Fragment>
-        ))}
     </>
   );
 };

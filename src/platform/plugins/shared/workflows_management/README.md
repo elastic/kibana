@@ -420,10 +420,12 @@ See the queryable execution data changes in
 
 ### Access model
 
-The workflow Access dialog uses `@kbn/entity-access-control` and
+The workflow Sharing dialog uses `@kbn/entity-access-control` and
 `@kbn/entity-access-control-ui`. Its ACL has the same field structure as Agent
 Builder conversations: `access_mode` and `entries` with `type`, profile `id`,
 `role`, and server-assigned `added_at`. The workflow stores the owner in `owner_id`.
+Save a new workflow before sharing it. Access controls are stored on the workflow document.
+Open Sharing from the Share button in the workflow header.
 
 | Role | View | Run | Edit and delete | Change access |
 | --- | --- | --- | --- | --- |
