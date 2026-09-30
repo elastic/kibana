@@ -37,6 +37,7 @@ import * as i18nSeverity from '../severity_mapping/translations';
 import * as i18nRiskScore from '../risk_score_mapping/translations';
 
 import * as i18n from './translations';
+import { MITRE_ATLAS_FRAMEWORK } from '../../../../../common/detection_engine/mitre/iterate_mitre_threat_entities';
 import type { BuildQueryBarDescription, ListItems } from './types';
 import { SeverityBadge } from '../../../../common/components/severity_badge';
 import type { AboutStepRiskScore, AboutStepSeverity, Duration } from '../../../common/types';
@@ -182,19 +183,37 @@ interface BuildThreatDescriptionProps {
   threat: Threats;
 }
 
+/**
+ * Renders one entry per MITRE framework present on the rule, so a rule mapped to both
+ * ATT&CK and ATLAS gets a labeled section for each. Entries with an unrecognized
+ * framework fall into the ATT&CK section rather than being dropped.
+ */
 export const buildThreatDescription = ({
   threat,
   label,
 }: BuildThreatDescriptionProps): ListItems[] => {
-  if (threat.length > 0) {
-    return [
-      {
-        title: label,
-        description: <ThreatEuiFlexGroup threat={threat} />,
-      },
-    ];
+  const atlasThreat = threat.filter((item) => item.framework === MITRE_ATLAS_FRAMEWORK);
+  const attackThreat = threat.filter((item) => item.framework !== MITRE_ATLAS_FRAMEWORK);
+
+  const items: ListItems[] = [];
+
+  if (attackThreat.length > 0) {
+    items.push({
+      title: label,
+      description: <ThreatEuiFlexGroup threat={attackThreat} framework="enterprise" />,
+    });
   }
-  return [];
+
+  if (atlasThreat.length > 0) {
+    items.push({
+      title: i18n.MITRE_ATLAS_THREAT_LABEL,
+      description: (
+        <ThreatEuiFlexGroup threat={atlasThreat} framework="atlas" data-test-subj="atlasThreat" />
+      ),
+    });
+  }
+
+  return items;
 };
 
 export const buildUnorderedListArrayDescription = (

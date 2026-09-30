@@ -9,7 +9,7 @@ import React from 'react';
 import { EuiDescriptionList } from '@elastic/eui';
 import type { Threats } from '@kbn/securitysolution-io-ts-alerting-types';
 import * as ruleDetailsI18n from '../../../../translations';
-import { Threat } from '../../../../rule_about_section';
+import { Threat, splitThreatsByFramework } from '../../../../rule_about_section';
 import { EmptyFieldValuePlaceholder } from '../../empty_field_value_placeholder';
 
 export interface ThreatReadOnlyProps {
@@ -17,14 +17,27 @@ export interface ThreatReadOnlyProps {
 }
 
 export const ThreatReadOnly = ({ threat }: ThreatReadOnlyProps) => {
-  return (
-    <EuiDescriptionList
-      listItems={[
-        {
-          title: ruleDetailsI18n.THREAT_FIELD_LABEL,
-          description: threat.length ? <Threat threat={threat} /> : <EmptyFieldValuePlaceholder />,
-        },
-      ]}
-    />
-  );
+  const { attackThreat, atlasThreat } = splitThreatsByFramework(threat);
+
+  // Always render the ATT&CK row so an empty threat field still shows the placeholder;
+  // the ATLAS row only appears when the rule actually has ATLAS mappings.
+  const listItems = [
+    {
+      title: ruleDetailsI18n.THREAT_FIELD_LABEL,
+      description: attackThreat.length ? (
+        <Threat threat={attackThreat} framework="enterprise" />
+      ) : (
+        <EmptyFieldValuePlaceholder />
+      ),
+    },
+  ];
+
+  if (atlasThreat.length > 0) {
+    listItems.push({
+      title: ruleDetailsI18n.ATLAS_THREAT_FIELD_LABEL,
+      description: <Threat threat={atlasThreat} framework="atlas" />,
+    });
+  }
+
+  return <EuiDescriptionList listItems={listItems} />;
 };

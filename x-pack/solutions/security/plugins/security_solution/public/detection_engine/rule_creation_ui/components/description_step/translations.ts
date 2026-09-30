@@ -207,12 +207,19 @@ export const ALERT_SUPPRESSION_LABEL = i18n.translate(
   }
 );
 
+export const MITRE_ATLAS_THREAT_LABEL = i18n.translate(
+  'xpack.securitySolution.detectionEngine.ruleDescription.mitreAtlasThreatLabel',
+  {
+    defaultMessage: 'MITRE ATLAS\u2122',
+  }
+);
+
 export const UNSUPPORTED_MITRE_ID_WARNING = (id: string) =>
   i18n.translate(
     'xpack.securitySolution.detectionEngine.ruleDescription.unsupportedMitreIdWarning',
     {
       values: { id },
       defaultMessage:
-        '"{id}" is not in the currently supported MITRE ATT&CK\u00AE version. Edit the rule to update its mappings.',
+        '"{id}" is not in the currently supported MITRE version. Edit the rule to update its mappings.',
     }
   );

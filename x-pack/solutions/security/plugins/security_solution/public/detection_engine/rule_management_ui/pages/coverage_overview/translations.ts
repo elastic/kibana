@@ -10,7 +10,7 @@ import { i18n } from '@kbn/i18n';
 export const COVERAGE_OVERVIEW_DASHBOARD_TITLE = i18n.translate(
   'xpack.securitySolution.coverageOverviewDashboard.pageTitle',
   {
-    defaultMessage: 'MITRE ATT&CK\u00AE coverage',
+    defaultMessage: 'MITRE coverage',
   }
 );
 
@@ -156,6 +156,14 @@ export const CoverageOverviewSearchBarPlaceholder = i18n.translate(
   }
 );
 
+export const CoverageOverviewAtlasSearchBarPlaceholder = i18n.translate(
+  'xpack.securitySolution.coverageOverviewDashboard.atlasSearchBarPlaceholder',
+  {
+    defaultMessage:
+      'Search for the tactic, technique (e.g.,"AI Model Access" or "AML.TA0000") or rule name',
+  }
+);
+
 export const CoverageOverviewFilterPopoverTitle = i18n.translate(
   'xpack.securitySolution.coverageOverviewDashboard.filterPopoverTitle',
   {
@@ -174,7 +182,7 @@ export const CoverageOverviewDashboardInformation = i18n.translate(
   'xpack.securitySolution.coverageOverviewDashboard.dashboardInformation',
   {
     defaultMessage:
-      "Your current coverage of MITRE ATT&CK\u00AE tactics and techniques, based on installed rules. Click a cell to view and enable a technique's rules. Rules must be mapped to the MITRE ATT&CK\u00AE framework to be displayed.",
+      "Your current coverage of MITRE tactics and techniques, based on installed rules. Select a framework tab to view its matrix, then click a cell to view and enable a technique's rules. Rules must be mapped to that framework to be displayed.",
   }
 );
 

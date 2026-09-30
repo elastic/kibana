@@ -35,7 +35,7 @@ const TITLE_CASE_GLOSSARY = [
   'Saved Objects',
   'Advanced Settings',
   'Data Views',
-  'MITRE ATT&CK® Coverage',
+  'MITRE Coverage',
   'License Management',
   'Developer Tools',
   'Stack Management',

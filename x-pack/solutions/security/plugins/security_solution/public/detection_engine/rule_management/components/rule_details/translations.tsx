@@ -205,6 +205,13 @@ export const THREAT_FIELD_LABEL = i18n.translate(
   }
 );
 
+export const ATLAS_THREAT_FIELD_LABEL = i18n.translate(
+  'xpack.securitySolution.detectionEngine.ruleDetails.atlasThreatFieldLabel',
+  {
+    defaultMessage: 'MITRE ATLAS\u2122',
+  }
+);
+
 export const THREAT_INDICATOR_PATH_LABEL = i18n.translate(
   'xpack.securitySolution.detectionEngine.ruleDetails.threatIndicatorPathFieldLabel',
   {

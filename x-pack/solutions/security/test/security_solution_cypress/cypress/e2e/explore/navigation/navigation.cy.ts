@@ -221,7 +221,7 @@ describe(
       cy.get(SOLUTION_SIDE_NAV_PANEL).should('contain.text', 'Detection rules (SIEM)');
       cy.get(SOLUTION_SIDE_NAV_PANEL).should('contain.text', 'Benchmarks');
       cy.get(SOLUTION_SIDE_NAV_PANEL).should('contain.text', 'Shared exception lists');
-      cy.get(SOLUTION_SIDE_NAV_PANEL).should('contain.text', 'MITRE ATT&CK® Coverage');
+      cy.get(SOLUTION_SIDE_NAV_PANEL).should('contain.text', 'MITRE Coverage');
     });
 
     it('navigates to the Exceptions page', () => {

@@ -26,6 +26,7 @@ import type {
 } from '@kbn/securitysolution-io-ts-alerting-types';
 import { ALERT_RISK_SCORE } from '@kbn/rule-data-utils';
 import { requiredOptional } from '@kbn/zod-helpers/v4';
+import type { MitreFramework } from '@kbn/security-mitre-attack-common';
 import type {
   BuildingBlockType,
   RuleResponse,
@@ -33,6 +34,7 @@ import type {
 import { SeverityBadge } from '../../../../common/components/severity_badge';
 import { defaultToEmptyTag } from '../../../../common/components/empty_value';
 import { filterEmptyThreats } from '../../../rule_creation_ui/pages/rule_creation/helpers';
+import { MITRE_ATLAS_FRAMEWORK } from '../../../../../common/detection_engine/mitre/iterate_mitre_threat_entities';
 import { ThreatEuiFlexGroup } from '../../../rule_creation_ui/components/description_step/threat_description';
 
 import { BadgeList } from './badge_list';
@@ -231,11 +233,28 @@ export const RuleNameOverride = ({ ruleNameOverride }: RuleNameOverrideProps) =>
 
 interface ThreatProps {
   threat: Threats;
+  /** Resolves entry names against this framework's dataset. Defaults to ATT&CK. */
+  framework?: MitreFramework;
+  'data-test-subj'?: string;
 }
 
-export const Threat = ({ threat }: ThreatProps) => (
-  <ThreatEuiFlexGroup threat={filterEmptyThreats(threat)} data-test-subj="threatPropertyValue" />
+export const Threat = ({
+  threat,
+  framework = 'enterprise',
+  'data-test-subj': dataTestSubj = 'threatPropertyValue',
+}: ThreatProps) => (
+  <ThreatEuiFlexGroup
+    threat={filterEmptyThreats(threat)}
+    framework={framework}
+    data-test-subj={dataTestSubj}
+  />
 );
+
+/** Splits a rule's threat entries by framework; unrecognized frameworks fall under ATT&CK. */
+export const splitThreatsByFramework = (threat: Threats) => ({
+  attackThreat: threat.filter((item) => item.framework !== MITRE_ATLAS_FRAMEWORK),
+  atlasThreat: threat.filter((item) => item.framework === MITRE_ATLAS_FRAMEWORK),
+});
 
 interface ThreatIndicatorPathProps {
   threatIndicatorPath: string;
@@ -437,14 +456,35 @@ const prepareAboutSectionListItems = ({
   }
 
   if (rule.threat && rule.threat.length > 0) {
-    aboutSectionListItems.push({
-      title: (
-        <span data-test-subj="threatPropertyTitle">
-          <RuleFieldName fieldName="threat" />
-        </span>
-      ),
-      description: <Threat threat={rule.threat} />,
-    });
+    // One row per framework so ATLAS mappings aren't labeled as ATT&CK and aren't
+    // validated against the ATT&CK dataset.
+    const { attackThreat, atlasThreat } = splitThreatsByFramework(rule.threat);
+
+    if (attackThreat.length > 0) {
+      aboutSectionListItems.push({
+        title: (
+          <span data-test-subj="threatPropertyTitle">
+            <RuleFieldName fieldName="threat" />
+          </span>
+        ),
+        description: <Threat threat={attackThreat} framework="enterprise" />,
+      });
+    }
+
+    if (atlasThreat.length > 0) {
+      aboutSectionListItems.push({
+        title: (
+          <span data-test-subj="atlasThreatPropertyTitle">{i18n.ATLAS_THREAT_FIELD_LABEL}</span>
+        ),
+        description: (
+          <Threat
+            threat={atlasThreat}
+            framework="atlas"
+            data-test-subj="atlasThreatPropertyValue"
+          />
+        ),
+      });
+    }
   }
 
   if ('threat_indicator_path' in rule && rule.threat_indicator_path) {

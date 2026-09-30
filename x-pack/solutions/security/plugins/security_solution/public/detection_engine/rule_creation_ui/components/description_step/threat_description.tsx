@@ -58,10 +58,15 @@ const UnsupportedMitreIdWarning = ({ id }: { id: string }) => (
  */
 export const ThreatEuiFlexGroup = ({
   threat,
+  framework = 'enterprise',
   'data-test-subj': dataTestSubj = 'threat',
 }: BuildThreatDescription) => {
   const { euiTheme } = useEuiTheme();
-  const { tactics, techniques, subtechniques, isLoading, isError } = useMitreConfiguration();
+  // Scoped to the entries' own framework so ATLAS IDs resolve against ATLAS data
+  // instead of being reported as unsupported ATT&CK IDs.
+  const { tactics, techniques, subtechniques, isLoading, isError } = useMitreConfiguration({
+    framework,
+  });
 
   const isMitreAttackUpdatesUIEnabled = useIsExperimentalFeatureEnabled(
     'mitreAttackUpdatesUIEnabled'

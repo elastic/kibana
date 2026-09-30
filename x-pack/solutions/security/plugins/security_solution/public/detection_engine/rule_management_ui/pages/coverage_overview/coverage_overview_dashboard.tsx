@@ -66,7 +66,7 @@ const CoverageOverviewDashboardComponent = () => {
       {isMitreAttackUpdatesUIEnabled && activeTab === 'attack' && (
         <CoverageOverviewInvalidMitreRulesCallout />
       )}
-      <CoverageOverviewFiltersPanel />
+      <CoverageOverviewFiltersPanel framework={activeTab === 'atlas' ? 'atlas' : 'enterprise'} />
       <EuiSpacer />
       {activeTab === 'atlas' ? (
         <AtlasCoverageGrid />

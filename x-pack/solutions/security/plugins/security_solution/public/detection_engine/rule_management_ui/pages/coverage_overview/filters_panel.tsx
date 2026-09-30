@@ -14,13 +14,21 @@ import {
   EuiFieldSearch,
 } from '@elastic/eui';
 import React, { memo, useCallback } from 'react';
+import type { MitreFramework } from '@kbn/security-mitre-attack-common';
 import { CoverageOverviewLegend } from './shared_components/dashboard_legend';
 import * as i18n from './translations';
 import { useCoverageOverviewDashboardContext } from './coverage_overview_dashboard_context';
 import { RuleActivityFilter } from './rule_activity_filter';
 import { RuleSourceFilter } from './rule_source_filter';
 
-const CoverageOverviewFiltersPanelComponent = () => {
+interface CoverageOverviewFiltersPanelProps {
+  /** Framework of the active matrix tab; selects matching search examples. */
+  framework?: MitreFramework;
+}
+
+const CoverageOverviewFiltersPanelComponent = ({
+  framework = 'enterprise',
+}: CoverageOverviewFiltersPanelProps) => {
   const {
     state: { filter, isLoading, showExpandedCells },
     actions: {
@@ -67,7 +75,11 @@ const CoverageOverviewFiltersPanelComponent = () => {
                 fullWidth
                 incremental={false}
                 data-test-subj="coverageOverviewFilterSearchBar"
-                placeholder={i18n.CoverageOverviewSearchBarPlaceholder}
+                placeholder={
+                  framework === 'atlas'
+                    ? i18n.CoverageOverviewAtlasSearchBarPlaceholder
+                    : i18n.CoverageOverviewSearchBarPlaceholder
+                }
                 onSearch={handleRuleSearchOnChange}
               />
             </EuiFlexItem>
