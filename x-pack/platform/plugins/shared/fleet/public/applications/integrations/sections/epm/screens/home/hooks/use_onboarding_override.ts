@@ -13,7 +13,7 @@ import { useStartServices } from '../../../../../hooks';
 
 import type { IntegrationCardItem } from '..';
 
-// Keep in sync with @kbn/ingest-hub-plugin/common/constants
+// Keep in sync with @kbn/ingest-hub-plugin/common/core/constants
 const ONBOARDING_ENABLED_FLAG = 'ingestHub.onboardingEnabled';
 const ONBOARDING_APP_ID = 'onboarding';
 const ONBOARDING_AWS_PATH = '/aws';
@@ -31,12 +31,13 @@ const HIDDEN_TILE_NAMES = new Set([
   'aws',
   'aws_bedrock',
   'aws_bedrock_agentcore',
+  'aws_billing',
   'aws_cloudwatch_input_otel',
   'aws_logs',
   'aws_mq',
-  'awsfargate',
-  'awsfirehose',
   'aws_securityhub',
+  'amazon_security_lake',
+  'awsfargate',
   'aws_cloudtrail_otel',
   'aws_ec2_otel',
   'aws_ecs_otel',

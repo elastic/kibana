@@ -34,7 +34,11 @@ export const WorkflowSelector = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const debouncedQuery = useDebouncedValue(searchQuery, 300);
 
-  const { data: workflowsData, isLoading } = useFetchWorkflows({
+  const {
+    data: workflowsData,
+    isLoading,
+    refetch,
+  } = useFetchWorkflows({
     query: debouncedQuery,
     isEnabled: isWorkflowsEnabled,
   });
@@ -136,6 +140,7 @@ export const WorkflowSelector = () => {
               { defaultMessage: 'Search and select workflows' }
             )}
             selectedOptions={selectedWorkflows.map((w) => ({ label: w.name, value: w.id }))}
+            onFocus={() => refetch()}
             onSearchChange={setSearchQuery}
             onChange={(options) => {
               setSelectedWorkflows(options.map((o) => ({ id: o.value as string, name: o.label })));

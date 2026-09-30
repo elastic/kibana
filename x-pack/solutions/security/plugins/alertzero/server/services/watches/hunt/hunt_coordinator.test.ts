@@ -13,6 +13,7 @@ import { SUMMARIZE_HIT_SOURCE_FIELDS } from './common/summarize_hit';
 jest.mock('./common/resolve_index_scope', () => ({
   resolveHuntScope: jest.fn().mockResolvedValue({
     technologies: ['aws_iam'],
+    index_patterns: ['logs-aws.cloudtrail-*'],
     status: 'ok',
     required: ['logs-aws.cloudtrail-*'],
     optional: [],
@@ -191,6 +192,151 @@ describe('huntCoordinator', () => {
     expect(result.technologies).toEqual(['aws_iam']);
   });
 
+  it('reports the index patterns the scope resolved to', async () => {
+    const result = await huntCoordinator(
+      { esClient, reportsEsClient: esClient },
+      undefined,
+      logger,
+      {
+        spaceId: 'default',
+        trigger: 'scheduled',
+        run_id: 'run-6-patterns',
+      }
+    );
+    expect(result.index_patterns).toEqual(['logs-aws.cloudtrail-*']);
+  });
+
+  describe('what scope resolution is handed', () => {
+    const { resolveHuntScope: mockScope } = jest.requireMock('./common/resolve_index_scope');
+    const { loadReportHuntContext: mockLoad } = jest.requireMock('./common/load_report_context');
+
+    beforeEach(() => {
+      mockScope.mockClear();
+    });
+
+    it('passes the report context and the model so datasets can be discovered for the report', async () => {
+      mockLoad.mockResolvedValueOnce({
+        iocs: [{ type: 'ip', value: '192.0.2.30' }],
+        techniques: ['T1078.004'],
+        text: 'report body text',
+        vendor: 'Fortinet',
+        product: 'FortiOS',
+      });
+      const mockModel = {} as import('@kbn/agent-builder-server').ScopedModel;
+
+      await huntCoordinator({ esClient, reportsEsClient: esClient }, mockModel, logger, {
+        report_id: 'rpt-1',
+        spaceId: 'hunt-a',
+        trigger: 'scheduled',
+        run_id: 'run-scope-report',
+      });
+
+      expect(mockScope).toHaveBeenCalledWith({
+        esClient,
+        spaceId: 'hunt-a',
+        technology: undefined,
+        report: {
+          vendor: 'Fortinet',
+          product: 'FortiOS',
+          text: 'report body text',
+          iocs: [{ type: 'ip', value: '192.0.2.30' }],
+          techniques: ['T1078.004'],
+        },
+        model: mockModel,
+        logger,
+      });
+    });
+
+    it('hands scope resolution only the IOCs Tier 1 can query, so an unsearchable-only list cannot earn a broad scope', async () => {
+      mockLoad.mockResolvedValueOnce({
+        // Six hex characters is no md5, sha1, or sha256; Tier 1 builds no clause for it.
+        iocs: [
+          { type: 'hash', value: 'abcdef' },
+          { type: 'ip', value: '192.0.2.30' },
+        ],
+        techniques: [],
+        text: 'report body text',
+      });
+
+      await huntCoordinator({ esClient, reportsEsClient: esClient }, undefined, logger, {
+        report_id: 'rpt-hash',
+        spaceId: 'hunt-a',
+        trigger: 'scheduled',
+        run_id: 'run-scope-hash',
+      });
+
+      expect(mockScope).toHaveBeenCalledWith(
+        expect.objectContaining({
+          report: expect.objectContaining({ iocs: [{ type: 'ip', value: '192.0.2.30' }] }),
+        })
+      );
+    });
+
+    it('hands over what the caller supplied when the caller overrode the report', async () => {
+      mockLoad.mockResolvedValueOnce({
+        iocs: [{ type: 'ip', value: '192.0.2.30' }],
+        techniques: ['T1078.004'],
+        text: 'report body text',
+        vendor: 'Fortinet',
+      });
+
+      await huntCoordinator({ esClient, reportsEsClient: esClient }, undefined, logger, {
+        report_id: 'rpt-1',
+        spaceId: 'hunt-a',
+        trigger: 'manual',
+        run_id: 'run-scope-caller-wins',
+        iocs: [{ type: 'domain', value: 'evil.example' }],
+        text: 'caller text',
+      });
+
+      expect(mockScope).toHaveBeenCalledWith(
+        expect.objectContaining({
+          report: {
+            vendor: 'Fortinet',
+            product: undefined,
+            text: 'caller text',
+            iocs: [{ type: 'domain', value: 'evil.example' }],
+            techniques: ['T1078.004'],
+          },
+          model: undefined,
+        })
+      );
+    });
+
+    it('passes no report on a bare call with neither a report id nor caller inputs', async () => {
+      await huntCoordinator({ esClient, reportsEsClient: esClient }, undefined, logger, {
+        spaceId: 'default',
+        trigger: 'scheduled',
+        run_id: 'run-scope-bare',
+      });
+
+      expect(mockScope).toHaveBeenCalledWith(
+        expect.objectContaining({ spaceId: 'default', report: undefined })
+      );
+    });
+
+    it('still passes the caller inputs as the report context without a report id', async () => {
+      await huntCoordinator({ esClient, reportsEsClient: esClient }, undefined, logger, {
+        spaceId: 'default',
+        trigger: 'manual',
+        run_id: 'run-scope-adhoc',
+        techniques: ['T1566'],
+      });
+
+      expect(mockScope).toHaveBeenCalledWith(
+        expect.objectContaining({
+          report: {
+            vendor: undefined,
+            product: undefined,
+            text: undefined,
+            iocs: [],
+            techniques: ['T1566'],
+          },
+        })
+      );
+    });
+  });
+
   it('echoes the caller-supplied run_id', async () => {
     const result = await huntCoordinator(
       { esClient, reportsEsClient: esClient },
@@ -214,7 +360,9 @@ describe('huntCoordinator', () => {
       mockT1.mockClear();
       mockScope.mockResolvedValueOnce({
         technologies: [],
+        index_patterns: [],
         status: 'blocked',
+        resolution: 'blocked:no_report',
         required: ['logs-aws.*', 'logs-fortinet.*'],
         optional: [],
         missing: ['logs-aws.*', 'logs-fortinet.*'],
@@ -232,6 +380,17 @@ describe('huntCoordinator', () => {
       expect(result.status).toBe('blocked');
     });
 
+    it('reports no index patterns, since nothing was hunted', () => {
+      expect(result.index_patterns).toEqual([]);
+    });
+
+    it('keeps the static wording for a bare call, since nothing was matched against a report', () => {
+      expect(result.message).toContain(
+        'No required index resolved for any configured technology in space default'
+      );
+      expect(result.next_step).toContain('Install the integration whose indices this hunt needs');
+    });
+
     it('does not report the run as completed, so no hunt evidence is written', () => {
       expect(result.completed_successfully).toBe(false);
     });
@@ -247,6 +406,219 @@ describe('huntCoordinator', () => {
     it('never runs Tier 1', () => {
       const { huntForThreat: mockT1 } = jest.requireMock('./tier1/hunt_for_threat');
       expect(mockT1).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('what a blocked scope tells the caller', () => {
+    const { resolveHuntScope: mockScope } = jest.requireMock('./common/resolve_index_scope');
+
+    const blockedScope = (
+      resolution: string,
+      overrides: Record<string, unknown> = {}
+    ): Record<string, unknown> => ({
+      technologies: [],
+      index_patterns: [],
+      status: 'blocked',
+      resolution,
+      required: ['logs-aws.*', 'logs-fortinet.*'],
+      optional: [],
+      missing: ['logs-aws.*', 'logs-fortinet.*'],
+      window: { from: 'now-24h', to: 'now' },
+      row_limit: 100,
+      ...overrides,
+    });
+
+    const runBlocked = async (
+      resolution: string,
+      params: Record<string, unknown> = {},
+      overrides: Record<string, unknown> = {}
+    ) => {
+      mockScope.mockResolvedValueOnce(blockedScope(resolution, overrides));
+      return huntCoordinator({ esClient, reportsEsClient: esClient }, undefined, logger, {
+        spaceId: 'default',
+        trigger: 'scheduled',
+        run_id: `run-${resolution}`,
+        iocs: [{ type: 'ip', value: '203.0.113.10' }],
+        ...params,
+      });
+    };
+
+    it('reports no index patterns on the wire even when the blocked scope carried some', async () => {
+      const result = await runBlocked(
+        'blocked:model_declined',
+        {},
+        { index_patterns: ['logs-aws.*', 'logs-fortinet.*'] }
+      );
+
+      expect(result.status).toBe('blocked');
+      expect(result.index_patterns).toEqual([]);
+    });
+
+    it('skips Tier 2 as no_matched_scope when a broad hit arrived only through an alias', async () => {
+      const { resolveHuntScope: mockScopeAlias } = jest.requireMock('./common/resolve_index_scope');
+      const { huntForThreat: mockT1Alias } = jest.requireMock('./tier1/hunt_for_threat');
+      const { huntBehavior: mockT2Alias } = jest.requireMock('./tier2/hunt_behavior');
+      mockT2Alias.mockClear();
+      mockScopeAlias.mockResolvedValueOnce({
+        technologies: [],
+        index_patterns: ['logs-*', '-logs-elastic_agent*', '-logs-fleet_server*'],
+        status: 'degraded',
+        required: ['logs-*', '-logs-elastic_agent*', '-logs-fleet_server*'],
+        optional: [],
+        missing: [],
+        resolution: 'discovered:broad',
+        window: { from: 'now-24h', to: 'now' },
+        row_limit: 100,
+      });
+      // `logs-archive` aliases `archive-v1`: the required count is positive, but the only
+      // bucket Tier 1 saw is the backing index, which no required pattern names.
+      mockT1Alias.mockResolvedValueOnce({
+        status: 'environment_hits_found',
+        has_confirmed_hit: true,
+        searched_iocs: 1,
+        searched_techniques: 0,
+        resolved_iocs: [{ type: 'ip', value: '203.0.113.10' }],
+        resolved_techniques: [],
+        time_range: { from: 'now-24h', to: 'now' },
+        counts: { total_hits: 1, returned_hits: 1, affected_hosts: 0, affected_users: 0 },
+        hits: [],
+        affected_assets: { hosts: [], users: [], services: [] },
+        per_index: [{ index: 'archive-v1', hit_count: 1, required: false }],
+      });
+
+      const result = await huntCoordinator(
+        { esClient, reportsEsClient: esClient },
+        {} as import('@kbn/agent-builder-server').ScopedModel,
+        logger,
+        {
+          spaceId: 'default',
+          trigger: 'scheduled',
+          run_id: 'run-alias',
+          tier2_when: 'always',
+          iocs: [{ type: 'ip', value: '203.0.113.10' }],
+          text: 'report text',
+        }
+      );
+
+      expect(result.tier2_skipped_reason).toBe('no_matched_scope');
+      expect(result.has_confirmed_hit).toBe(true);
+      expect(mockT2Alias).not.toHaveBeenCalled();
+    });
+
+    it('names the pinned technology when a pinned scope is blocked', async () => {
+      const result = await runBlocked(
+        'blocked:pinned',
+        { technology: 'fortigate', iocs: undefined },
+        { technologies: ['fortigate'], required: ['logs-fortinet.*'], missing: ['logs-fortinet.*'] }
+      );
+
+      expect(result.status).toBe('blocked');
+      expect(result.message).toBe(
+        'No required index resolved for fortigate in space default (missing: logs-fortinet.*).'
+      );
+      expect(result.next_step).toBe(
+        'Install the integration whose indices this hunt needs, or pass a technology whose indices exist in this space.'
+      );
+    });
+
+    it('keeps the pinned wording for any blocked result while a technology is pinned', async () => {
+      const result = await runBlocked(
+        'blocked:model_declined',
+        { technology: 'fortigate' },
+        { required: ['logs-fortinet.*'], missing: ['logs-fortinet.*'] }
+      );
+
+      expect(result.message).toBe(
+        'No required index resolved for fortigate in space default (missing: logs-fortinet.*).'
+      );
+      expect(result.next_step).toContain('pass a technology whose indices exist in this space');
+    });
+
+    it('keeps the static wording for a bare call that had no report to match against', async () => {
+      const result = await runBlocked('blocked:no_report', { iocs: undefined });
+
+      expect(result.message).toBe(
+        'No required index resolved for any configured technology in space default (missing: logs-aws.*, logs-fortinet.*).'
+      );
+      expect(result.next_step).toBe(
+        'Install the integration whose indices this hunt needs, or pass a technology whose indices exist in this space.'
+      );
+    });
+
+    it('says the model declined every discovered dataset', async () => {
+      const result = await runBlocked('blocked:model_declined');
+
+      expect(result.message).toBe(
+        "No known technology's indices are visible to this hunt and no discovered dataset matched the report (checked: logs-aws.*, logs-fortinet.*)."
+      );
+      expect(result.next_step).toBe(
+        "Install an integration for the report's vendor so its data is ingested, or pin a technology whose indices exist."
+      );
+    });
+
+    it('says no model was there to widen a missed deterministic match', async () => {
+      const result = await runBlocked('blocked:model_unavailable');
+
+      expect(result.message).toBe(
+        "No known technology's indices are visible to this hunt and the report's vendor matched no discovered dataset; no model was available to widen the match (checked: logs-aws.*, logs-fortinet.*)."
+      );
+      expect(result.next_step).toBe(
+        "Configure a connector on the reasoning tier so scope resolution can use the model, install an integration for the report's vendor, or pin a technology."
+      );
+    });
+
+    it('says no log datasets were discovered at all', async () => {
+      const result = await runBlocked('blocked:no_datasets');
+
+      expect(result.message).toBe(
+        "No known technology's indices are visible to this hunt and no log datasets were discovered (checked: logs-aws.*, logs-fortinet.*)."
+      );
+      expect(result.next_step).toBe(
+        'Install an integration whose data this hunt can search, or pin a technology.'
+      );
+    });
+
+    it('says discovery itself failed', async () => {
+      const result = await runBlocked('blocked:discovery_failed');
+
+      expect(result.message).toBe(
+        "No known technology's indices are visible to this hunt and dataset discovery failed (checked: logs-aws.*, logs-fortinet.*)."
+      );
+      expect(result.next_step).toBe(
+        "Check Elasticsearch connectivity and the calling user's index privileges, then retry."
+      );
+    });
+
+    it('never says "in space" on a dynamic path, since index resolution is cluster-wide', async () => {
+      for (const resolution of [
+        'blocked:model_declined',
+        'blocked:model_unavailable',
+        'blocked:no_datasets',
+        'blocked:discovery_failed',
+      ]) {
+        const result = await runBlocked(resolution);
+        expect(result.message).not.toContain('in space');
+      }
+    });
+
+    it('returns a blocked dynamic scope with no index patterns when discovery found nothing for the report', async () => {
+      const result = await runBlocked(
+        'blocked:model_declined',
+        { spaceId: 'hunt-a', report_id: 'rpt-1', iocs: undefined },
+        { required: [], missing: [] }
+      );
+
+      expect(result).toEqual(
+        expect.objectContaining({
+          status: 'blocked',
+          technologies: [],
+          index_patterns: [],
+          tier2_skipped_reason: 'scope_blocked',
+          message: expect.stringContaining('no discovered dataset matched the report'),
+          next_step: expect.stringContaining("Install an integration for the report's vendor"),
+          completed_successfully: false,
+        })
+      );
     });
   });
 
@@ -460,6 +832,8 @@ describe('huntCoordinator', () => {
       expect(mockT1).not.toHaveBeenCalled();
       expect(result).toEqual(
         expect.objectContaining({
+          technologies: [],
+          index_patterns: [],
           tier2_skipped_reason: 'report_not_found',
           has_confirmed_hit: false,
           completed_successfully: false,
@@ -819,6 +1193,31 @@ describe('huntCoordinator', () => {
     });
   });
 
+  it('returns no index patterns when scope resolution throws', async () => {
+    const { resolveHuntScope: mockScope } = jest.requireMock('./common/resolve_index_scope');
+    mockScope.mockRejectedValueOnce(new Error('resolve failed'));
+
+    const result = await huntCoordinator(
+      { esClient, reportsEsClient: esClient },
+      undefined,
+      logger,
+      {
+        spaceId: 'default',
+        trigger: 'scheduled',
+        run_id: 'run-scope-threw',
+      }
+    );
+
+    expect(result).toEqual(
+      expect.objectContaining({
+        status: 'tier1_only',
+        technologies: [],
+        index_patterns: [],
+        completed_successfully: false,
+      })
+    );
+  });
+
   it('never writes feedback — completed_successfully is the caller signal', async () => {
     const result = await huntCoordinator(
       { esClient, reportsEsClient: esClient },
@@ -912,6 +1311,88 @@ describe('huntCoordinator', () => {
       expect(result.completeness).toBe('incomplete_final');
       // Retrying reproduces the same gap, so the run counts as done — but not as clean.
       expect(result.completed_successfully).toBe(true);
+    });
+
+    it('retires a report whose Tier 2 queries were ungrounded when Tier 1 had nothing to search', async () => {
+      // A KEV-shaped report: no IOCs or techniques for Tier 1, prose with no literal values
+      // for Tier 2 to ground a query in. The same text fails grounding identically every
+      // sweep, so leaving it retryable re-spends a Tier 2 call per sweep and never retires.
+      mockT1.mockResolvedValueOnce(
+        tier1Result({
+          status: 'no_searchable_terms',
+          searched_iocs: 0,
+          searched_techniques: 0,
+          resolved_iocs: [],
+          resolved_techniques: [],
+        })
+      );
+      mockT2.mockResolvedValueOnce(
+        tier2Result({
+          incomplete: [
+            { reason: 'query_ungrounded', technique_id: 'T1190', detail: 'no literal matched' },
+          ],
+        })
+      );
+
+      const result = await run('run-kev-ungrounded');
+
+      expect(result.tier2_skipped_reason).toBeUndefined();
+      expect(result.completeness).toBe('incomplete_final');
+      expect(result.completed_successfully).toBe(true);
+    });
+
+    it('keeps an ungrounded query retryable when another behavior on the same text did ground and run', async () => {
+      // One executed behavior proves the text holds literals a query can anchor to, so the
+      // model may well ground the failed one next time.
+      mockT1.mockResolvedValueOnce(
+        tier1Result({
+          status: 'no_searchable_terms',
+          searched_iocs: 0,
+          searched_techniques: 0,
+          resolved_iocs: [],
+          resolved_techniques: [],
+        })
+      );
+      mockT2.mockResolvedValueOnce(
+        tier2Result({
+          behaviors: [
+            {
+              technique_id: 'T1078',
+              technique_name: 'Valid Accounts',
+              rule_name: 'grounded',
+              esql: 'FROM logs-* | LIMIT 1',
+              evidence_quote: 'q',
+              confidence: 0.6,
+              severity: 'medium',
+              execution: { executed: true, row_count: 0, hit: false },
+            },
+          ],
+          incomplete: [
+            { reason: 'query_ungrounded', technique_id: 'T1190', detail: 'no literal matched' },
+          ],
+        })
+      );
+
+      const result = await run('run-partially-grounded');
+
+      expect(result.completeness).toBe('incomplete_retryable');
+      expect(result.completed_successfully).toBe(false);
+    });
+
+    it('keeps an ungrounded Tier 2 query retryable when Tier 1 did have terms to search', async () => {
+      mockT1.mockResolvedValueOnce(tier1Result());
+      mockT2.mockResolvedValueOnce(
+        tier2Result({
+          incomplete: [
+            { reason: 'query_ungrounded', technique_id: 'T1190', detail: 'no literal matched' },
+          ],
+        })
+      );
+
+      const result = await run('run-ungrounded-with-terms');
+
+      expect(result.completeness).toBe('incomplete_retryable');
+      expect(result.completed_successfully).toBe(false);
     });
 
     it('lets one transient gap keep the report eligible even alongside a deterministic one', async () => {
@@ -1231,6 +1712,244 @@ describe('huntCoordinator', () => {
       expect(result.tier2_skipped_reason).toBe('tier2_failed');
       expect(result.completeness).toBe('incomplete_retryable');
       expect(result.completed_successfully).toBe(false);
+    });
+  });
+
+  describe('when Tier 1 had nothing to search (decision 9)', () => {
+    const { huntForThreat: mockT1 } = jest.requireMock('./tier1/hunt_for_threat');
+    const { huntBehavior: mockT2 } = jest.requireMock('./tier2/hunt_behavior');
+    const { loadReportHuntContext: mockLoad } = jest.requireMock('./common/load_report_context');
+    const mockModel = {} as import('@kbn/agent-builder-server').ScopedModel;
+
+    // A real KEV report: no IOCs, no techniques, so Tier 1 maps nothing.
+    const nothingSearchable = () => ({
+      status: 'no_searchable_terms',
+      has_confirmed_hit: false,
+      searched_iocs: 0,
+      searched_techniques: 0,
+      resolved_iocs: [],
+      resolved_techniques: [],
+      time_range: { from: 'now-24h', to: 'now' },
+      counts: { total_hits: 0, returned_hits: 0, affected_hosts: 0, affected_users: 0 },
+      hits: [],
+      affected_assets: { hosts: [], users: [], services: [] },
+      per_index: [],
+    });
+
+    beforeEach(() => {
+      mockT2.mockClear();
+      mockT1.mockResolvedValueOnce(nothingSearchable());
+    });
+
+    it('runs Tier 2 under on_hits when the run has report text, since Tier 1 never ran', async () => {
+      const result = await huntCoordinator(
+        { esClient, reportsEsClient: esClient },
+        mockModel,
+        logger,
+        {
+          spaceId: 'default',
+          trigger: 'scheduled',
+          run_id: 'run-d9-text',
+          text: 'CVE-2026-0001 in FortiOS SSL-VPN is exploited in the wild.',
+          tier2_when: 'on_hits',
+        }
+      );
+
+      expect(mockT2).toHaveBeenCalledTimes(1);
+      expect(result.status).toBe('tier1_and_tier2');
+      expect(result.tier2).toBeDefined();
+      expect(result.tier2_skipped_reason).toBeUndefined();
+    });
+
+    it('does not gate on_hits on Tier 1 when the report names a vendor but carries no text yet', async () => {
+      mockLoad.mockResolvedValueOnce({ iocs: [], techniques: [], vendor: 'Fortinet' });
+
+      const result = await huntCoordinator(
+        { esClient, reportsEsClient: esClient },
+        mockModel,
+        logger,
+        {
+          spaceId: 'default',
+          trigger: 'scheduled',
+          run_id: 'run-d9-vendor',
+          report_id: 'rpt-kev',
+          tier2_when: 'on_hits',
+        }
+      );
+
+      // Tier 2 was asked for and reached; it is the text it lacks, which a later ingest
+      // can supply, so the report stays eligible rather than retiring without a query.
+      expect(result.tier2_skipped_reason).not.toBe('no_searchable_input');
+      expect(result.tier2_skipped_reason).toBe('no_report_text');
+      expect(result.completeness).toBe('incomplete_retryable');
+      expect(result.completed_successfully).toBe(false);
+    });
+
+    it('still skips with no_searchable_input under on_hits when there is nothing for Tier 2 either', async () => {
+      const result = await huntCoordinator(
+        { esClient, reportsEsClient: esClient },
+        mockModel,
+        logger,
+        {
+          spaceId: 'default',
+          trigger: 'scheduled',
+          run_id: 'run-d9-nothing',
+          tier2_when: 'on_hits',
+        }
+      );
+
+      expect(mockT2).not.toHaveBeenCalled();
+      expect(result.status).toBe('tier1_only');
+      expect(result.tier2_skipped_reason).toBe('no_searchable_input');
+      // Zero queries is not a clean environment, but it is deterministic.
+      expect(result.completeness).toBe('incomplete_final');
+      expect(result.completed_successfully).toBe(true);
+    });
+
+    it('lets never win even when the run has text', async () => {
+      const result = await huntCoordinator(
+        { esClient, reportsEsClient: esClient },
+        mockModel,
+        logger,
+        {
+          spaceId: 'default',
+          trigger: 'scheduled',
+          run_id: 'run-d9-never',
+          text: 'report text',
+          tier2_when: 'never',
+        }
+      );
+
+      expect(mockT2).not.toHaveBeenCalled();
+      expect(result.tier2_skipped_reason).toBe('configured_never');
+    });
+
+    it('keeps running Tier 2 under always', async () => {
+      const result = await huntCoordinator(
+        { esClient, reportsEsClient: esClient },
+        mockModel,
+        logger,
+        {
+          spaceId: 'default',
+          trigger: 'scheduled',
+          run_id: 'run-d9-always',
+          text: 'report text',
+          tier2_when: 'always',
+        }
+      );
+
+      expect(mockT2).toHaveBeenCalledTimes(1);
+      expect(result.status).toBe('tier1_and_tier2');
+    });
+  });
+
+  describe('on a broad discovered scope (decision 11)', () => {
+    const { resolveHuntScope: mockScope } = jest.requireMock('./common/resolve_index_scope');
+    const { huntForThreat: mockT1 } = jest.requireMock('./tier1/hunt_for_threat');
+    const { huntBehavior: mockT2 } = jest.requireMock('./tier2/hunt_behavior');
+    const mockModel = {} as import('@kbn/agent-builder-server').ScopedModel;
+
+    const broadPatterns = [
+      'logs-fortinet.fortigate-*',
+      'logs-okta.system-*',
+      'logs-aws.cloudtrail-*',
+    ];
+
+    const tier1Clean = () => ({
+      status: 'no_environment_hits',
+      has_confirmed_hit: false,
+      searched_iocs: 1,
+      searched_techniques: 0,
+      resolved_iocs: [{ type: 'ip', value: '192.0.2.30' }],
+      resolved_techniques: [],
+      time_range: { from: 'now-24h', to: 'now' },
+      counts: { total_hits: 0, returned_hits: 0, affected_hosts: 0, affected_users: 0 },
+      hits: [],
+      affected_assets: { hosts: [], users: [], services: [] },
+      per_index: [],
+    });
+
+    const tier1HitOkta = () => ({
+      ...tier1Clean(),
+      status: 'environment_hits_found',
+      has_confirmed_hit: true,
+      counts: { total_hits: 2, returned_hits: 2, affected_hosts: 0, affected_users: 0 },
+      per_index: [
+        { index: '.ds-logs-okta.system-default-2026.09.01-000001', hit_count: 2, required: true },
+      ],
+    });
+
+    beforeEach(() => {
+      mockT2.mockClear();
+      mockScope.mockResolvedValueOnce({
+        technologies: [],
+        index_patterns: broadPatterns,
+        status: 'degraded',
+        resolution: 'discovered:broad',
+        required: broadPatterns,
+        optional: [],
+        missing: [],
+        window: { from: 'now-24h', to: 'now' },
+        row_limit: 100,
+      });
+    });
+
+    const run = (runId: string, tier2When: 'on_hits' | 'always' | 'never') =>
+      huntCoordinator({ esClient, reportsEsClient: esClient }, mockModel, logger, {
+        spaceId: 'default',
+        trigger: 'scheduled',
+        run_id: runId,
+        iocs: [{ type: 'ip', value: '192.0.2.30' }],
+        text: 'report text',
+        tier2_when: tier2When,
+      });
+
+    it.each(['always', 'on_hits'] as const)(
+      'skips Tier 2 with no_matched_scope under %s when Tier 1 confirmed no hit, and reports the run off Tier 1 alone',
+      async (tier2When) => {
+        mockT1.mockResolvedValueOnce(tier1Clean());
+
+        const result = await run(`run-d11-clean-${tier2When}`, tier2When);
+
+        expect(mockT2).not.toHaveBeenCalled();
+        expect(result.status).toBe('tier1_only');
+        expect(result.tier2_skipped_reason).toBe('no_matched_scope');
+        expect(result.index_patterns).toEqual(broadPatterns);
+        expect(result.next_step).toContain('Tier 2 had no safe target');
+        // Tier 1 searched every discovered dataset and found nothing, with no gaps of its
+        // own; the skip is deterministic and the caller's, so it is not lost coverage.
+        expect(result.completeness).toBe('complete');
+        expect(result.completed_successfully).toBe(true);
+      }
+    );
+
+    it('runs Tier 2 under on_hits when Tier 1 confirmed a hit, generating only against the indices it hit', async () => {
+      mockT1.mockResolvedValueOnce(tier1HitOkta());
+
+      const result = await run('run-d11-hit', 'on_hits');
+
+      expect(result.status).toBe('tier1_and_tier2');
+      expect(result.tier2_skipped_reason).toBeUndefined();
+      expect(mockT2).toHaveBeenCalledWith(
+        mockModel,
+        logger,
+        expect.objectContaining({
+          required_indices: broadPatterns,
+          article_context: expect.objectContaining({
+            matched_indices: ['.ds-logs-okta.system-default-2026.09.01-000001'],
+          }),
+        }),
+        esClient
+      );
+    });
+
+    it('lets never win over the broad-scope rule', async () => {
+      mockT1.mockResolvedValueOnce(tier1Clean());
+
+      const result = await run('run-d11-never', 'never');
+
+      expect(mockT2).not.toHaveBeenCalled();
+      expect(result.tier2_skipped_reason).toBe('configured_never');
     });
   });
 });
