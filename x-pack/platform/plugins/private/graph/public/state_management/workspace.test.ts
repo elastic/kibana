@@ -38,6 +38,7 @@ import {
   ungroupNode,
   workspaceChanged,
   workspaceInitializedSelector,
+  workspaceRuntimeChanged,
 } from './workspace';
 
 jest.mock('../services/fetch_top_nodes', () => ({
@@ -171,8 +172,8 @@ describe('workspace state', () => {
         },
       },
       edgeIds: ['edge'],
-      selectedNodeIds: ['parent'],
-      selectedEdgeIds: ['edge'],
+      selectedNodeIds: [],
+      selectedEdgeIds: [],
       blocklistedNodesById: {},
       blocklistedNodeIds: [],
       undoHistory: [],
@@ -194,6 +195,20 @@ describe('workspace state', () => {
     environment.store.dispatch(workspaceChanged(snapshot));
 
     expect(environment.store.getState().workspace).toEqual(snapshot);
+  });
+
+  it('preserves Redux selection across runtime snapshots', () => {
+    const environment = createMockGraphStore({});
+    environment.store.dispatch(toggleNodeSelection({ nodeId: 'selected', replace: false }));
+    const runtimeSnapshot = {
+      ...environment.store.getState().workspace,
+      selectedNodeIds: [],
+      selectedEdgeIds: [],
+    };
+
+    environment.store.dispatch(workspaceRuntimeChanged(runtimeSnapshot));
+
+    expect(environment.store.getState().workspace.selectedNodeIds).toEqual(['selected']);
   });
 
   it('handles node selection operations using normalized IDs', () => {

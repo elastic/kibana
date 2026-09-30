@@ -171,7 +171,6 @@ describe('serialize', () => {
       edge.topSrc = edge.source;
       edge.topTarget = edge.target;
     });
-    appState.workspace.selectedNodes = [];
 
     const legacySavedWorkspace = {} as GraphWorkspaceSavedObject;
     const reduxSavedWorkspace = {} as GraphWorkspaceSavedObject;

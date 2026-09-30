@@ -79,6 +79,7 @@ const initialWorkspaceState: WorkspaceState = {
 
 export const initializeWorkspace = actionCreator('INITIALIZE_WORKSPACE');
 export const workspaceChanged = actionCreator<WorkspaceState>('WORKSPACE_CHANGED');
+export const workspaceRuntimeChanged = actionCreator<WorkspaceState>('WORKSPACE_RUNTIME_CHANGED');
 export const selectAllNodes = actionCreator('SELECT_ALL_NODES');
 export const clearNodeSelection = actionCreator('CLEAR_NODE_SELECTION');
 export const invertNodeSelection = actionCreator('INVERT_NODE_SELECTION');
@@ -110,8 +111,11 @@ export const submitSearch = actionCreator<string>('SUBMIT_SEARCH');
 export const workspaceReducer = reducerWithInitialState(initialWorkspaceState)
   .case(reset, () => initialWorkspaceState)
   .case(initializeWorkspace, (state) => ({ ...state, isInitialized: true }))
-  .case(workspaceChanged, (state, workspace) => ({
+  .case(workspaceChanged, (_state, workspace) => workspace)
+  .case(workspaceRuntimeChanged, (state, workspace) => ({
     ...workspace,
+    selectedNodeIds: state.selectedNodeIds,
+    selectedEdgeIds: state.selectedEdgeIds,
     undoHistory: state.undoHistory,
     redoHistory: state.redoHistory,
   }))
@@ -379,8 +383,8 @@ export const createWorkspaceState = (workspace: Workspace): WorkspaceState => {
     nodeIds: workspace.nodes.map(({ id }) => id),
     edgesById,
     edgeIds: Object.keys(edgesById),
-    selectedNodeIds: workspace.selectedNodes.map(({ id }) => id),
-    selectedEdgeIds: workspace.edges.filter(({ isSelected }) => isSelected).map(getEdgeId),
+    selectedNodeIds: [],
+    selectedEdgeIds: [],
     blocklistedNodesById: Object.fromEntries(
       blocklistedNodes.map((node) => [node.id, toNodeState(node)])
     ),
@@ -422,32 +426,6 @@ const topologyActionTypes = new Set([
   redoWorkspace.type,
 ]);
 
-const selectionActionTypes = new Set([
-  selectAllNodes.type,
-  clearNodeSelection.type,
-  invertNodeSelection.type,
-  selectNeighborNodes.type,
-  toggleNodeSelection.type,
-  deselectNode.type,
-  toggleEdgeSelection.type,
-]);
-
-const synchronizeWorkspaceSelection = (workspace: Workspace, state: WorkspaceState): void => {
-  const selectedNodeIds = new Set(state.selectedNodeIds);
-  workspace.selectedNodes = workspace.nodes.filter((node) => {
-    node.isSelected = selectedNodeIds.has(node.id);
-    return node.isSelected;
-  });
-
-  const selectedEdgeIds = new Set(state.selectedEdgeIds);
-  workspace.clearEdgeSelection();
-  workspace.edges.forEach((edge) => {
-    if (selectedEdgeIds.has(getEdgeId(edge))) {
-      workspace.addEdgeToSelection(edge);
-    }
-  });
-};
-
 /**
  * Listener handling filling in top terms into workspace.
  *
@@ -457,19 +435,6 @@ export const registerWorkspaceListeners = (
   startListening: StartGraphListening,
   { getWorkspace, notifyReact, http, notifications, handleSearchQueryError }: GraphStoreDependencies
 ) => {
-  startListening({
-    predicate: (action) => selectionActionTypes.has(action.type),
-    effect: (_action, listenerApi) => {
-      const workspace = getWorkspace();
-      if (!workspace) {
-        return;
-      }
-
-      synchronizeWorkspaceSelection(workspace, listenerApi.getState().workspace);
-      notifyReact();
-    },
-  });
-
   startListening({
     predicate: (action) => requestActionTypes.has(action.type),
     effect: (action, listenerApi) => {
