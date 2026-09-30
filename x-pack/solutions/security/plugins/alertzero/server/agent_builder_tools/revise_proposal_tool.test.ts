@@ -36,10 +36,10 @@ const agenticWith = (opts: {
     } as unknown as ProposalsPluginStart);
 };
 
-const assertAlertZeroAccess = jest.fn().mockResolvedValue(undefined);
+const assertEnabled = jest.fn().mockResolvedValue(undefined);
 
 beforeEach(() => {
-  assertAlertZeroAccess.mockReset().mockResolvedValue(undefined);
+  assertEnabled.mockReset().mockResolvedValue(undefined);
 });
 
 const run = async (
@@ -48,7 +48,7 @@ const run = async (
   // from the schema the moment the schema gains a field.
   input: Parameters<ReturnType<typeof reviseProposalTool>['handler']>[0]
 ) => {
-  const tool = reviseProposalTool(getProposals, assertAlertZeroAccess);
+  const tool = reviseProposalTool(getProposals, assertEnabled);
   const result = await tool.handler(input, {
     logger: logger(),
     request: requestMock,
@@ -61,7 +61,7 @@ const run = async (
 };
 
 describe('reviseProposalTool', () => {
-  it('checks the manage privilege before revising', async () => {
+  it('requires Proposals Manage without an AlertZero privilege check', async () => {
     const assertCanManage = jest.fn().mockResolvedValue(undefined);
     const getLatestRevision = jest.fn().mockResolvedValue({
       proposalId: 'proposal-1',
@@ -75,7 +75,7 @@ describe('reviseProposalTool', () => {
       comment: 'Tightened the match',
     });
 
-    expect(assertAlertZeroAccess).toHaveBeenCalledWith(requestMock, 'write');
+    expect(assertEnabled).toHaveBeenCalledWith(requestMock);
     expect(assertCanManage).toHaveBeenCalledWith(requestMock);
     expect(getLatestRevision).toHaveBeenCalledWith('proposal-1', 'default');
     expect(revise).toHaveBeenCalledWith(
@@ -125,7 +125,7 @@ describe('reviseProposalTool', () => {
    * bypass the route closes.
    */
   it('caps actionInput the same way the HTTP route does', () => {
-    const schema = reviseProposalTool(agenticWith({}), assertAlertZeroAccess).schema;
+    const schema = reviseProposalTool(agenticWith({}), assertEnabled).schema;
 
     expect(
       schema.safeParse({ proposalId: 'proposal-1', actionInput: { ['k'.repeat(257)]: true } })
@@ -144,18 +144,16 @@ describe('reviseProposalTool', () => {
     );
   });
 
-  it.each(['Missing AlertZero All (write) privilege.', 'AlertZero is disabled in this space.'])(
-    'does not access proposals when denied: %s',
-    async (errorMessage) => {
-      assertAlertZeroAccess.mockRejectedValue(new Error(errorMessage));
-      const getProposals = jest.fn();
-      const result = await run(getProposals, { proposalId: 'proposal-1' });
+  it('does not access proposals when AlertZero is disabled', async () => {
+    const errorMessage = 'AlertZero is disabled in this space.';
+    assertEnabled.mockRejectedValue(new Error(errorMessage));
+    const getProposals = jest.fn();
+    const result = await run(getProposals, { proposalId: 'proposal-1' });
 
-      expect(assertAlertZeroAccess).toHaveBeenCalledWith(requestMock, 'write');
-      expect(getProposals).not.toHaveBeenCalled();
-      expect(JSON.stringify(result)).toContain(errorMessage);
-    }
-  );
+    expect(assertEnabled).toHaveBeenCalledWith(requestMock);
+    expect(getProposals).not.toHaveBeenCalled();
+    expect(JSON.stringify(result)).toContain(errorMessage);
+  });
 
   it('never calls revise() when the privilege check rejects', async () => {
     const assertCanManage = jest.fn().mockRejectedValue(new Error('missing manage_proposals'));
@@ -178,7 +176,7 @@ describe('reviseProposalTool', () => {
   });
 
   it('declares the documented tool id and write annotations', () => {
-    const tool = reviseProposalTool(agenticWith({}), assertAlertZeroAccess);
+    const tool = reviseProposalTool(agenticWith({}), assertEnabled);
     expect(tool.id).toBe('security.alertzero.proposals.revise');
     expect(tool.annotations).toMatchObject({
       readOnlyHint: false,

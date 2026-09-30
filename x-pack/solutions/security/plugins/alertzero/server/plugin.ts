@@ -46,7 +46,10 @@ import { ScanFailuresService } from './services/scan_failures/scan_failures_serv
 import { ActionsService } from './services/actions/actions_service';
 import type { HuntServices } from './services/watches/hunt';
 import { listActionsTool } from './agent_builder_tools/list_actions_tool';
-import { createAssertAlertZeroAccess } from './agent_builder_tools/assert_alertzero_access';
+import {
+  createAssertAlertZeroAccess,
+  assertAlertZeroEnabled,
+} from './agent_builder_tools/assert_alertzero_access';
 import { reviseProposalTool } from './agent_builder_tools/revise_proposal_tool';
 import { agentType, ensureAgent, ensureAgentSafe, registerAgentType } from './agent';
 import { registerAttachments } from './agent_builder/attachments/register_attachments';
@@ -142,7 +145,13 @@ export class AlertZeroPlugin
         ...listActionsTool(() => this.requireActionsService(), assertAlertZeroAccess),
       });
       agentBuilder.tools.register({
-        ...reviseProposalTool(() => this.requireProposals(), assertAlertZeroAccess),
+        ...reviseProposalTool(
+          () => this.requireProposals(),
+          async (request) => {
+            const [core] = await coreSetup.getStartServices();
+            await assertAlertZeroEnabled(core, request);
+          }
+        ),
       });
     }
 

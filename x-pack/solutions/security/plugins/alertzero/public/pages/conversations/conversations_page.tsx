@@ -10,7 +10,10 @@ import { useQueryClient } from '@kbn/react-query';
 import { css } from '@emotion/react';
 import { EuiEmptyPrompt, EuiFlexGroup, EuiFlexItem, useEuiTheme } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { PROPOSALS_UI_CAPABILITY_SHOW } from '@kbn/proposals-common';
+import {
+  PROPOSALS_UI_CAPABILITY_SHOW,
+  PROPOSALS_UI_CAPABILITY_DECIDE,
+} from '@kbn/proposals-common';
 import {
   type ConversationsActionsGroupProps,
   type BaseActionsProps,
@@ -35,7 +38,6 @@ import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { CoreStart } from '@kbn/core/public';
 import { useAssignInvestigation } from '@kbn/agentic-investigations-plugin/public';
 import type { DeclineParams } from '@kbn/proposals-ui';
-import { useCanWriteAlertZero } from '../../hooks/use_can_write_alertzero';
 import { useQueueAssignees } from '../../components/connected_assignees/use_queue_assignees';
 import { useStatusSignal } from '../../components/connected_status/use_status_signal';
 import { useAgenticInvestigationsCapabilities } from '../../hooks/use_agentic_investigations_capabilities';
@@ -196,10 +198,10 @@ const ConversationsPageContent: React.FC = () => {
   );
 
   const {
-    services: { notifications },
+    services: { application, notifications },
   } = useKibana<CoreStart>();
 
-  const canWrite = useCanWriteAlertZero();
+  const canDecide = application.capabilities.proposals?.[PROPOSALS_UI_CAPABILITY_DECIDE] === true;
   const { manageEscalations: canManageEscalations, manageInvestigations: canManageInvestigations } =
     useAgenticInvestigationsCapabilities();
 
@@ -375,7 +377,7 @@ const ConversationsPageContent: React.FC = () => {
         initialAssignee={actionInvestigation?.assignee}
         investigation={actionInvestigation}
         approvalProposal={selectedProposal}
-        readOnly={!canWrite}
+        readOnly={!canDecide}
         onCloseAction={closeModal}
         onCloseApproval={closeApproval}
         onConfirmApproval={confirmApproval}
@@ -421,7 +423,7 @@ const ConversationsPageContent: React.FC = () => {
               section={section}
               entityFilter={effectiveEntityFilter}
               selectedConversationId={selectedConversationId}
-              onClickRecommendedAction={canWrite ? onClickRecommendedAction : undefined}
+              onClickRecommendedAction={canDecide ? onClickRecommendedAction : undefined}
               onClickAction={onClickAction}
               onClickCard={onClickCard}
               onOpenChat={openChatForProposal}

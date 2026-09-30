@@ -19,7 +19,7 @@ import {
 } from '@kbn/proposals-common';
 import type { ProposalsPluginStart } from '@kbn/proposals-plugin/server';
 
-import type { AssertAlertZeroAccess } from './assert_alertzero_access';
+import type { KibanaRequest } from '@kbn/core/server';
 
 const reviseProposalSchema = z.object({
   proposalId: z
@@ -60,7 +60,7 @@ const reviseProposalSchema = z.object({
  */
 export const reviseProposalTool = (
   getProposals: () => ProposalsPluginStart,
-  assertAlertZeroAccess: AssertAlertZeroAccess
+  assertEnabled: (request: KibanaRequest) => Promise<void>
 ): BuiltinToolDefinition<typeof reviseProposalSchema> => ({
   id: ALERTZERO_PROPOSALS_REVISE_TOOL_ID,
   type: ToolType.builtin,
@@ -77,7 +77,7 @@ export const reviseProposalTool = (
   tags: ['alertzero'],
   handler: async ({ proposalId, ...overrides }, { logger, request, spaceId }) => {
     try {
-      await assertAlertZeroAccess(request, 'write');
+      await assertEnabled(request);
       const proposals = getProposals();
       await proposals.getProposalPrivileges().assertCanManage(request);
 

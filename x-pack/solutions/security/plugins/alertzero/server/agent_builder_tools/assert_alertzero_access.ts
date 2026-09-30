@@ -42,11 +42,19 @@ export const createAssertAlertZeroAccess =
       throw new Error(`Missing AlertZero ${access === 'read' ? 'Read' : 'All (write)'} privilege.`);
     }
 
-    const savedObjectsClient = core.savedObjects.getScopedClient(request);
-    const uiSettingsClient = core.uiSettings.asScopedToClient(savedObjectsClient);
-    if (!(await uiSettingsClient.get<boolean>(ALERTZERO_ENABLED_SETTING_ID))) {
-      throw new Error(
-        'AlertZero is disabled in this space. Enable the securitySolution:enableAlertZero advanced setting.'
-      );
-    }
+    await assertAlertZeroEnabled(core, request);
   };
+
+/** Checks the caller's space setting without imposing feature privileges on shared operations. */
+export const assertAlertZeroEnabled = async (
+  core: Pick<CoreStart, 'savedObjects' | 'uiSettings'>,
+  request: KibanaRequest
+): Promise<void> => {
+  const savedObjectsClient = core.savedObjects.getScopedClient(request);
+  const uiSettingsClient = core.uiSettings.asScopedToClient(savedObjectsClient);
+  if (!(await uiSettingsClient.get<boolean>(ALERTZERO_ENABLED_SETTING_ID))) {
+    throw new Error(
+      'AlertZero is disabled in this space. Enable the securitySolution:enableAlertZero advanced setting.'
+    );
+  }
+};

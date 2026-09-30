@@ -240,16 +240,18 @@ const renderPage = (
   initialEntry: string,
   {
     capabilities = {},
-    proposalsCapabilities = { showProposals: true },
+    proposalsCapabilities = { showProposals: true, decideProposals: true },
+    alertZeroWrite = true,
   }: {
     capabilities?: Record<string, unknown>;
     proposalsCapabilities?: Record<string, boolean>;
+    alertZeroWrite?: boolean;
   } = {}
 ) => {
   const core = coreMock.createStart();
   core.application.capabilities = {
     ...core.application.capabilities,
-    alertzero: { show: true, write: true },
+    alertzero: { show: true, write: alertZeroWrite },
     proposals: proposalsCapabilities,
   };
   // The real service returns a URL; the mock returns undefined, which would silently drop the
@@ -525,8 +527,8 @@ describe('ConversationsPage decisions', () => {
     fireEvent.click(screen.getByRole('menuitem', { name: 'Revoke sessions' }));
   };
 
-  it('submits the action input the analyst was shown, so the API can refuse a stale approval', () => {
-    renderPage('/');
+  it('allows Proposals Manage to approve without AlertZero Write and submits the displayed input', () => {
+    renderPage('/', { alertZeroWrite: false });
     openApproval();
 
     fireEvent.click(approvalDialog().getByRole('button', { name: 'Approve' }));
@@ -535,6 +537,14 @@ describe('ConversationsPage decisions', () => {
       id: 'prop-1',
       body: { actionInput: { user: 'cfo@corp' } },
     });
+  });
+
+  it('does not offer proposal decisions without Proposals Manage even with AlertZero All', () => {
+    renderPage('/', { proposalsCapabilities: { showProposals: true, decideProposals: false } });
+    expect(screen.queryByRole('button', { name: 'Open actions menu' })).not.toBeInTheDocument();
+    expect(screen.queryByRole('menuitem', { name: 'Revoke sessions' })).not.toBeInTheDocument();
+    expect(approveMutateAsync).not.toHaveBeenCalled();
+    expect(dismissMutateAsync).not.toHaveBeenCalled();
   });
 
   it('stays open and shows Applying while useIsApprovingProposal reports this proposal in flight', () => {

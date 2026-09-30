@@ -21,13 +21,13 @@ import {
   useIsApprovingProposal,
   useIsDecliningProposal,
 } from '@kbn/proposals-plugin/public';
+import { PROPOSALS_UI_CAPABILITY_DECIDE } from '@kbn/proposals-common';
 import type { ProposalWithMetadata } from '@kbn/proposals-common';
 import { useCurrentUserProfile } from '@kbn/agentic-investigations-plugin/public';
 import { getUserDisplayName } from '@kbn/user-profile-components';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { CoreStart } from '@kbn/core/public';
 import { ProposedActionButton } from '@kbn/agentic-investigations-common';
-import { useCanWriteAlertZero } from '../../hooks/use_can_write_alertzero';
 import { decisionErrorMessage } from './decision_errors';
 import {
   PROPOSED_ACTIONS_EMPTY_LABEL,
@@ -59,7 +59,10 @@ const ProposedActionRow = ({
   approve,
   dismiss,
 }: ProposedActionRowProps) => {
-  const canWrite = useCanWriteAlertZero();
+  const {
+    services: { application },
+  } = useKibana<CoreStart>();
+  const canDecide = application.capabilities.proposals?.[PROPOSALS_UI_CAPABILITY_DECIDE] === true;
   const isApproving = useIsApprovingProposal(proposal.id);
   const isDeclining = useIsDecliningProposal(proposal.id);
 
@@ -67,7 +70,7 @@ const ProposedActionRow = ({
     <EuiFlexItem>
       <ProposedActionButton
         proposal={proposal}
-        readOnly={!canWrite}
+        readOnly={!canDecide}
         isSubmitting={isApproving ? 'applying' : isDeclining ? 'declining' : undefined}
         onConfirm={async () => {
           try {

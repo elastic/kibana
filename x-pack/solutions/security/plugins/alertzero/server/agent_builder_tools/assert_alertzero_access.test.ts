@@ -12,7 +12,7 @@ import {
   ALERTZERO_API_PRIVILEGE_READ,
   ALERTZERO_API_PRIVILEGE_WRITE,
 } from '../../common/constants';
-import { createAssertAlertZeroAccess } from './assert_alertzero_access';
+import { createAssertAlertZeroAccess, assertAlertZeroEnabled } from './assert_alertzero_access';
 
 const setup = () => {
   const core = coreMock.createStart();
@@ -86,5 +86,17 @@ describe('createAssertAlertZeroAccess', () => {
     await expect(assertAccess(request, 'read')).rejects.toThrow('Authorization unavailable');
     uiSettingsClient.get.mockRejectedValueOnce(new Error('Settings unavailable'));
     await expect(assertAccess(request, 'read')).rejects.toThrow('Settings unavailable');
+  });
+});
+
+describe('assertAlertZeroEnabled', () => {
+  it('checks the space setting without requiring AlertZero privileges', async () => {
+    const { core, request, checkPrivileges, uiSettingsClient } = setup();
+    checkPrivileges.mockResolvedValue({ hasAllRequested: false });
+    await expect(assertAlertZeroEnabled(core, request)).resolves.toBeUndefined();
+    expect(checkPrivileges).not.toHaveBeenCalled();
+    expect(uiSettingsClient.get).toHaveBeenCalledWith(ALERTZERO_ENABLED_SETTING_ID);
+    uiSettingsClient.get.mockResolvedValue(false);
+    await expect(assertAlertZeroEnabled(core, request)).rejects.toThrow('AlertZero is disabled');
   });
 });

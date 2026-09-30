@@ -129,16 +129,26 @@ describe('ProposedActionsSlot', () => {
     } as unknown as ReturnType<typeof useCurrentUserProfile>);
     mockUseKibana.mockReturnValue({
       services: {
-        application: { capabilities: { alertzero: { show: true, write: true } } },
+        application: {
+          capabilities: {
+            alertzero: { show: true, write: false },
+            proposals: { decideProposals: true },
+          },
+        },
         notifications: { toasts: { addDanger } },
       },
     } as unknown as ReturnType<typeof useKibana>);
   });
 
-  it('allows reading proposal details without granting decision access', () => {
+  it('keeps decisions read-only without Proposals Manage even with AlertZero All', () => {
     mockUseKibana.mockReturnValue({
       services: {
-        application: { capabilities: { alertzero: { show: true, write: false } } },
+        application: {
+          capabilities: {
+            alertzero: { show: true, write: true },
+            proposals: { decideProposals: false },
+          },
+        },
         notifications: { toasts: { addDanger } },
       },
     } as ReturnType<typeof useKibana>);
@@ -202,7 +212,7 @@ describe('ProposedActionsSlot', () => {
     ).not.toBeInTheDocument();
   });
 
-  it('approves with the proposal id and its own action input', () => {
+  it('approves with Proposals Manage and no AlertZero Write using the displayed input', () => {
     mockConversationProposalsPage([mockProposal]);
 
     renderSlot();
