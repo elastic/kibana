@@ -221,8 +221,6 @@ describe('send_wait_for_approval_notifications', () => {
           email: {
             'connector-id': 'email-1',
             to: ['oncall@example.com'],
-            // channel message is ignored for waitForApproval (built-in body only)
-            message: 'should be ignored',
           },
         },
         connectorExecutor: { execute } as never,
