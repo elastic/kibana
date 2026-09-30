@@ -8,6 +8,7 @@
  */
 
 import type { estypes } from '@elastic/elasticsearch';
+import isEqual from 'lodash/isEqual';
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import type { EsWorkflow, WorkflowDetailDto } from '../..';
 import { storedWorkflowAccessControlSchema } from '../../common/access_control';
@@ -136,6 +137,41 @@ export class WorkflowRepository {
   ): Promise<boolean> {
     const map = await this.areWorkflowsEnabled([{ workflowId, spaceId }], options);
     return map.get(`${spaceId}:${workflowId}`) ?? false;
+  }
+
+  /** Confirms that the exact approved child snapshot is still current using a real-time read. */
+  async isWorkflowRevisionCurrent(
+    workflow: Pick<EsWorkflow, 'id' | 'yaml' | 'definition'>,
+    spaceId: string
+  ): Promise<boolean> {
+    try {
+      const response = await this.options.esClient.get<{
+        spaceId: string;
+        yaml: string;
+        definition: EsWorkflow['definition'];
+        enabled: boolean;
+        valid: boolean;
+        deleted_at?: string | null;
+      }>({
+        index: this.options.indexName,
+        id: workflow.id,
+        _source_includes: ['spaceId', 'yaml', 'definition', 'enabled', 'valid', 'deleted_at'],
+        realtime: true,
+      });
+      const source = response._source;
+      return Boolean(
+        source &&
+          source.spaceId === spaceId &&
+          source.enabled &&
+          source.valid &&
+          !source.deleted_at &&
+          source.yaml === workflow.yaml &&
+          isEqual(source.definition, workflow.definition)
+      );
+    } catch (error) {
+      if (error.statusCode === 404) return false;
+      throw error;
+    }
   }
 
   /** Reads the enabled state from the translog after an execution becomes searchable. */

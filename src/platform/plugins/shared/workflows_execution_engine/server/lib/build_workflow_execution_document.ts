@@ -9,7 +9,7 @@
 
 import omit from 'lodash/omit';
 import { v4 as generateUuid } from 'uuid';
-import type { WorkflowExecutionEngineModel } from '@kbn/workflows';
+import type { EsWorkflowExecution, WorkflowExecutionEngineModel } from '@kbn/workflows';
 import {
   ExecutionStatus,
   pickManagedWorkflowFields,
@@ -25,6 +25,7 @@ import type { WorkflowExecutionForInputRendering } from '../workflow_context_man
 
 export interface BuildWorkflowExecutionDocumentParams {
   workflow: WorkflowExecutionEngineModel;
+  inheritedIdentity?: EsWorkflowExecution['effectiveIdentity'];
   spaceId: string;
   context: Record<string, unknown>;
   defaultTriggeredBy: string;
@@ -49,6 +50,7 @@ export const buildWorkflowExecutionDocument = (
 ): WorkflowExecutionForInputRendering => {
   const {
     workflow,
+    inheritedIdentity,
     spaceId,
     context,
     defaultTriggeredBy,
@@ -94,6 +96,7 @@ export const buildWorkflowExecutionDocument = (
     status: missingIdentity ? ExecutionStatus.FAILED : ExecutionStatus.PENDING,
     createdAt: now.toISOString(),
     executedBy: authenticatedUser ?? UNKNOWN_EXECUTION_IDENTITY,
+    ...(inheritedIdentity ? { effectiveIdentity: inheritedIdentity } : {}),
     ...(workflow.definition?.settings?.run_as
       ? {
           effectiveIdentity: {

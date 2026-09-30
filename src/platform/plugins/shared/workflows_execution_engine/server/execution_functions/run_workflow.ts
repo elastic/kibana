@@ -28,7 +28,10 @@ import { hasWorkflowAccess } from '../lib/has_workflow_access';
 import type { WorkflowsMeteringService } from '../metering';
 import type { StepExecutionRepository } from '../repositories/step_execution_repository';
 import type { WorkflowExecutionRepository } from '../repositories/workflow_execution_repository';
-import { withWorkflowExecutionIdentity } from '../service_account_execution';
+import {
+  getExecutionServiceAccountId,
+  withWorkflowExecutionIdentity,
+} from '../service_account_execution';
 import type {
   InternalResumeWorkflowExecution,
   WorkflowsExecutionEnginePluginStart,
@@ -309,7 +312,7 @@ export const runWorkflow = async (
       }
     );
   } catch (error) {
-    if (!enteredExecution && execution.workflowDefinition?.settings?.run_as) {
+    if (!enteredExecution && getExecutionServiceAccountId(execution)) {
       const executionError = {
         type: 'ServiceAccountExecutionError',
         message: error instanceof Error ? error.message : String(error),

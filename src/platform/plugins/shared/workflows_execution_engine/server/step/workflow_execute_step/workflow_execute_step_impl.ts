@@ -69,7 +69,12 @@ export class WorkflowExecuteStepImpl implements NodeImplementation, CancellableN
     );
   }
 
-  private getInput(): { workflowId: string; inputs: Record<string, unknown> } {
+  private getInput(): {
+    workflowId: string;
+    inputs: Record<string, unknown>;
+    inheritRunAs: boolean;
+    expectedRevision?: string;
+  } {
     const step = this.init.node.configuration as WorkflowExecuteStep | WorkflowExecuteAsyncStep;
     const renderedWith =
       this.init.stepExecutionRuntime.contextManager.renderValueAccordingToContext(
@@ -78,7 +83,12 @@ export class WorkflowExecuteStepImpl implements NodeImplementation, CancellableN
     const { 'workflow-id': workflowId, inputs = {} } = renderedWith;
     const mappedInputs =
       typeof inputs === 'object' && inputs !== null ? (inputs as Record<string, unknown>) : {};
-    return { workflowId: String(workflowId ?? ''), inputs: mappedInputs };
+    return {
+      workflowId: String(workflowId ?? ''),
+      inputs: mappedInputs,
+      inheritRunAs: step.with.inheritRunAs === true,
+      expectedRevision: step.with.expectedRevision,
+    };
   }
 
   private assertValidWorkflowId(workflowId: string): void {
@@ -127,10 +137,14 @@ export class WorkflowExecuteStepImpl implements NodeImplementation, CancellableN
     // First iteration only: start step and run validation
     stepExecutionRuntime.startStep();
 
-    const { workflowId, inputs } = this.getInput();
+    const { workflowId, inputs, inheritRunAs, expectedRevision } = this.getInput();
 
     // Persist resolved inputs for observability in the execution UI
-    stepExecutionRuntime.setInput({ 'workflow-id': workflowId, inputs });
+    stepExecutionRuntime.setInput({
+      'workflow-id': workflowId,
+      inputs,
+      ...(inheritRunAs ? { inheritRunAs: true, expectedRevision } : {}),
+    });
 
     // Select executor based on step type
     const executor = node.type === 'workflow.execute' ? this.syncExecutor : this.asyncExecutor;
@@ -173,7 +187,8 @@ export class WorkflowExecuteStepImpl implements NodeImplementation, CancellableN
         inputs,
         this.init.spaceId,
         this.init.request,
-        currentDepth
+        currentDepth,
+        inheritRunAs
       );
 
       this.handleResult(result);

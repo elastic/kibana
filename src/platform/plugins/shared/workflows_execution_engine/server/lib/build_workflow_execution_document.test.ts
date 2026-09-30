@@ -43,6 +43,24 @@ const baseParams = {
 };
 
 describe('buildWorkflowExecutionDocument', () => {
+  it('persists inherited identity independently of the unbound child snapshot and original caller', () => {
+    const inheritedIdentity = {
+      type: 'service_account' as const,
+      id: 'parent-account',
+      inheritedFrom: {
+        workloadId: 'parent',
+        workflowId: 'parent',
+        executionId: 'parent-execution',
+        revision: 'a'.repeat(64),
+      },
+    };
+    const execution = buildWorkflowExecutionDocument({ ...baseParams, inheritedIdentity });
+    expect(execution.effectiveIdentity).toEqual(inheritedIdentity);
+    expect(execution.executedBy).toBe('user-1');
+    expect(execution.workflowDefinition?.settings?.run_as).toBeUndefined();
+    expect(execution.yaml).toBe(baseWorkflow.yaml);
+  });
+
   it('uses the explicit execution space instead of the context or global workflow storage space', () => {
     const context = { spaceId: 'foreign-space', inputs: { message: 'test input' } };
     const getConcurrencyGroupKey = jest.fn(() => null);
