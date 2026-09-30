@@ -6,14 +6,35 @@
  */
 
 import React from 'react';
-import { render, waitFor } from '@testing-library/react';
+import { render, screen, waitFor } from '@testing-library/react';
 import { NIGHTSHIFT_APP_ID } from '@kbn/deeplinks-observability';
 import { useKibana } from '../../hooks/use_kibana';
+import { useSignificantEventsAppParams } from '../../hooks/use_significant_events_app_params';
 import { useSignificantEventsAvailability } from '../../hooks/use_significant_events_availability';
 import { SettingsPage } from './page';
 
 jest.mock('../../hooks/use_kibana');
 jest.mock('../../hooks/use_significant_events_availability');
+jest.mock('../../hooks/use_significant_events_app_params', () => ({
+  useSignificantEventsAppParams: jest.fn(),
+}));
+jest.mock('../../hooks/use_significant_events_app_router', () => ({
+  useSignificantEventsAppRouter: () => ({
+    link: (_path: string, params: { path: { tab: string } }) =>
+      `/app/significant_events/${params.path.tab}`,
+  }),
+}));
+jest.mock('../../components/page_template', () => ({
+  SignificantEventsAppHeader: ({ back }: { back: { href: string; label: string } }) => (
+    <a data-test-subj="settingsPageBackLink" href={back.href}>
+      {back.label}
+    </a>
+  ),
+  SignificantEventsAppLoading: () => null,
+  SignificantEventsAppPageTemplate: {
+    Body: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
+  },
+}));
 jest.mock('../significant_events/components/settings/tab', () => ({
   SettingsTab: () => null,
 }));
@@ -21,6 +42,9 @@ jest.mock('../significant_events/components/settings/tab', () => ({
 const mockUseKibana = useKibana as jest.MockedFunction<typeof useKibana>;
 const mockUseSignificantEventsAvailability =
   useSignificantEventsAvailability as jest.MockedFunction<typeof useSignificantEventsAvailability>;
+const mockUseSignificantEventsAppParams = useSignificantEventsAppParams as jest.MockedFunction<
+  typeof useSignificantEventsAppParams
+>;
 
 const getUrlForApp = jest.fn().mockReturnValue('/app/nightshift');
 const navigateToApp = jest.fn();
@@ -43,6 +67,7 @@ describe('SettingsPage', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     setCapabilities(true);
+    mockUseSignificantEventsAppParams.mockReturnValue({ query: {} } as never);
     mockUseSignificantEventsAvailability.mockReturnValue({
       availability: { available: true },
       isLoading: false,
@@ -58,5 +83,33 @@ describe('SettingsPage', () => {
     await waitFor(() => {
       expect(navigateToApp).toHaveBeenCalledWith(NIGHTSHIFT_APP_ID);
     });
+  });
+
+  it('links Back to Nightshift when opened from outside the Management page', () => {
+    render(<SettingsPage />);
+
+    const back = screen.getByTestId('settingsPageBackLink');
+    expect(back).toHaveAttribute('href', '/app/nightshift');
+    expect(back).toHaveTextContent(/^Nightshift$/);
+    expect(setBreadcrumbs).toHaveBeenCalledWith([
+      { text: 'Nightshift', href: '/app/nightshift' },
+      { text: 'Settings' },
+    ]);
+  });
+
+  it('links Back to the Management tab Settings was opened from', () => {
+    mockUseSignificantEventsAppParams.mockReturnValue({
+      query: { fromTab: 'knowledge_indicators' },
+    } as never);
+
+    render(<SettingsPage />);
+
+    const back = screen.getByTestId('settingsPageBackLink');
+    expect(back).toHaveAttribute('href', '/app/significant_events/knowledge_indicators');
+    expect(back).toHaveTextContent('Nightshift Management');
+    expect(setBreadcrumbs).toHaveBeenCalledWith([
+      { text: 'Nightshift Management', href: '/app/significant_events/knowledge_indicators' },
+      { text: 'Settings' },
+    ]);
   });
 });

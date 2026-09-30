@@ -106,6 +106,8 @@ export function SignificantEventsPage() {
     defaultMessage: 'Settings',
   });
   const nightshiftHref = getUrlForApp(NIGHTSHIFT_APP_ID);
+  // Settings also opens from Nightshift; `fromTab` makes its Back link return to this tab.
+  const settingsHref = router.link('/settings', { query: { fromTab: tab } });
 
   const menu = useMemo<AppHeaderMenu | undefined>(
     () =>
@@ -117,13 +119,13 @@ export function SignificantEventsPage() {
                 order: 1,
                 label: settingsLabel,
                 iconType: 'gear',
-                href: router.link('/settings'),
+                href: settingsHref,
                 testId: 'significantEventsSettingsLink',
               },
             ],
           }
         : undefined,
-    [canConfigure, router, settingsLabel]
+    [canConfigure, settingsHref, settingsLabel]
   );
 
   useEffect(() => {
@@ -288,7 +290,7 @@ export function SignificantEventsPage() {
                 </p>
                 {canManage && canConfigure && (
                   <EuiButton
-                    href={router.link('/settings')}
+                    href={settingsHref}
                     color="danger"
                     size="s"
                     data-test-subj="significantEventsStatusErrorBannerSettingsLink"
@@ -334,7 +336,7 @@ export function SignificantEventsPage() {
                 )}
                 {canManage && canConfigure && (
                   <EuiButton
-                    href={router.link('/settings')}
+                    href={settingsHref}
                     color="warning"
                     size="s"
                     data-test-subj="significantEventsPausedBannerSettingsLink"
@@ -348,7 +350,7 @@ export function SignificantEventsPage() {
               <EuiSpacer />
             </>
           )}
-          <RunLimitsBanner />
+          <RunLimitsBanner manageHref={settingsHref} />
           {canShow && (
             <KiGenerationProvider onFailed={onOnboardingFailed}>
               {tab === 'sources' && <SourcesView />}

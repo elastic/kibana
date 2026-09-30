@@ -16,6 +16,8 @@ import {
 } from '../../components/page_template';
 import { SignificantEventsNotEnabledPrompt } from '../../components/not_enabled_prompt';
 import { useKibana } from '../../hooks/use_kibana';
+import { useSignificantEventsAppParams } from '../../hooks/use_significant_events_app_params';
+import { useSignificantEventsAppRouter } from '../../hooks/use_significant_events_app_router';
 import { useSignificantEventsAvailability } from '../../hooks/use_significant_events_availability';
 import { SettingsTab } from '../significant_events/components/settings/tab';
 
@@ -30,6 +32,13 @@ const nightshiftLabel = i18n.translate(
   }
 );
 
+const managementLabel = i18n.translate(
+  'xpack.significantEventsApp.settingsPage.backToManagementLabel',
+  {
+    defaultMessage: 'Nightshift Management',
+  }
+);
+
 export function SettingsPage() {
   const {
     core: {
@@ -41,9 +50,17 @@ export function SettingsPage() {
       chrome,
     },
   } = useKibana();
+  const { query } = useSignificantEventsAppParams('/settings');
+  const router = useSignificantEventsAppRouter();
   const { canConfigure } = getNightshiftCapabilities(nightshift);
   const { availability, isLoading: isAvailabilityLoading } = useSignificantEventsAvailability();
-  const nightshiftHref = getUrlForApp(NIGHTSHIFT_APP_ID);
+  // Settings opens from both Nightshift and the Management page; Back returns to the one it
+  // came from.
+  const fromTab = query?.fromTab;
+  const backHref = fromTab
+    ? router.link('/{tab}', { path: { tab: fromTab } })
+    : getUrlForApp(NIGHTSHIFT_APP_ID);
+  const backLabel = fromTab ? managementLabel : nightshiftLabel;
 
   useEffect(() => {
     if (!canConfigure) {
@@ -53,12 +70,9 @@ export function SettingsPage() {
 
   useEffect(() => {
     if (canConfigure) {
-      chrome.setBreadcrumbs([
-        { text: nightshiftLabel, href: nightshiftHref },
-        { text: settingsTitle },
-      ]);
+      chrome.setBreadcrumbs([{ text: backLabel, href: backHref }, { text: settingsTitle }]);
     }
-  }, [canConfigure, chrome, nightshiftHref]);
+  }, [canConfigure, chrome, backHref, backLabel]);
 
   if (!canConfigure) {
     return null;
@@ -81,7 +95,7 @@ export function SettingsPage() {
     <>
       <SignificantEventsAppHeader
         title={settingsTitle}
-        back={{ href: nightshiftHref, label: nightshiftLabel }}
+        back={{ href: backHref, label: backLabel }}
       />
       <SignificantEventsAppPageTemplate.Body grow>
         <SettingsTab />

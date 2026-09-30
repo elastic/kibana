@@ -166,7 +166,7 @@ export function SourcesView() {
                 <EuiButton
                   data-test-subj="significantEventsAppCreateSourceButton"
                   size="s"
-                  iconType="plusInCircle"
+                  iconType="plus"
                   onClick={openCreateFlyout}
                 >
                   {CREATE_SOURCE_BUTTON_LABEL}
@@ -228,7 +228,7 @@ export function SourcesView() {
                   <EuiButton
                     data-test-subj="significantEventsAppSourcesEmptyPromptCreateButton"
                     fill
-                    iconType="plusInCircle"
+                    iconType="plus"
                     onClick={openCreateFlyout}
                   >
                     {CREATE_SOURCE_BUTTON_LABEL}

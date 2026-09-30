@@ -8,7 +8,7 @@
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
-import type { AppHeaderTab } from '@kbn/app-header';
+import type { AppHeaderMenu, AppHeaderTab } from '@kbn/app-header';
 import { useDeveloperMode } from '../../hooks/use_developer_mode';
 import { useSignificantEventsAppParams } from '../../hooks/use_significant_events_app_params';
 import { SignificantEventsPage } from './page';
@@ -46,8 +46,10 @@ jest.mock('../../hooks/use_significant_events_app_params', () => ({
 }));
 jest.mock('../../hooks/use_significant_events_app_router', () => ({
   useSignificantEventsAppRouter: () => ({
-    link: (path: string, params?: { path: { tab: string } }) =>
-      params ? `/${params.path.tab}` : path,
+    link: (path: string, params?: { path?: { tab: string }; query?: Record<string, string> }) =>
+      params?.path
+        ? `/${params.path.tab}`
+        : `${path}${params?.query ? `?${new URLSearchParams(params.query)}` : ''}`,
   }),
 }));
 jest.mock('../../hooks/use_significant_events_availability', () => ({
@@ -65,8 +67,13 @@ jest.mock('../../hooks/use_significant_events_maintenance', () => ({
   }),
 }));
 jest.mock('../../components/page_template', () => ({
-  SignificantEventsAppHeader: ({ tabs }: { tabs: AppHeaderTab[] }) => (
+  SignificantEventsAppHeader: ({ tabs, menu }: { tabs: AppHeaderTab[]; menu?: AppHeaderMenu }) => (
     <div data-test-subj="app-header-tabs">
+      {menu?.items?.map((item) => (
+        <a key={item.id} data-test-subj={item.testId} href={item.href}>
+          {item.label}
+        </a>
+      ))}
       {tabs.map((tab) => (
         <div key={tab.id} data-test-subj={`app-header-tab-${tab.id}`}>
           {tab.label}
@@ -169,5 +176,20 @@ describe('SignificantEventsPage developer mode', () => {
 
     expect(screen.getByTestId('redirect-to')).toHaveTextContent('sources');
     expect(screen.queryByTestId('sources-tab-content')).not.toBeInTheDocument();
+  });
+});
+
+describe('SignificantEventsPage settings link', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
+  it('links Settings with the current tab so its Back link returns there', () => {
+    setup({ tab: 'knowledge_indicators', isDeveloperMode: false });
+
+    expect(screen.getByTestId('significantEventsSettingsLink')).toHaveAttribute(
+      'href',
+      '/settings?fromTab=knowledge_indicators'
+    );
   });
 });

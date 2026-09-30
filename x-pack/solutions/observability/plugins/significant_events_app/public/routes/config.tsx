@@ -33,6 +33,12 @@ const significantEventsAppRoutes = {
       },
       '/settings': {
         element: <SettingsPage />,
+        params: t.partial({
+          query: t.partial({
+            // The Management tab Settings was opened from; without it, Back goes to Nightshift.
+            fromTab: t.string,
+          }),
+        }),
       },
       '/{tab}': {
         element: (
