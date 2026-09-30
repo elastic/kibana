@@ -8,6 +8,7 @@
 import type { AfterExecutionHookContext } from '@kbn/agent-builder-server';
 import {
   ConversationRoundStatus,
+  isPreExecutionWorkflowStep,
   isToolCallStep,
   type ToolCallStep,
 } from '@kbn/agent-builder-common';
@@ -55,15 +56,15 @@ export const runAfterExecutionWorkflows = async ({
 
   const spaceId = getCurrentSpaceId({ request: context.request, spaces });
   const { round } = context;
-  const roundConnectorId = round.model_usage?.connector_id?.trim();
-  const usableRoundConnectorId =
-    roundConnectorId && roundConnectorId !== 'unknown' ? roundConnectorId : undefined;
 
   const toolCalls = round.steps.filter(isToolCallStep).map((step: ToolCallStep) => ({
     tool_id: step.tool_id,
     tool_call_id: step.tool_call_id,
     params: step.params as Record<string, unknown>,
   }));
+
+  const roundConnectorId = context.connectorId?.trim() || round.model_usage?.connector_id?.trim();
+  const workflowContext = round.steps.find(isPreExecutionWorkflowStep)?.workflow_context;
 
   const workflowParams: AfterExecutionWorkflowParams = {
     prompt: round.input.message ?? '',
@@ -73,11 +74,25 @@ export const runAfterExecutionWorkflows = async ({
     ...(context.agentId ? { agent_id: context.agentId } : {}),
     tool_calls: toolCalls,
   };
+  const optionalWorkflowParams: Pick<
+    AfterExecutionWorkflowParams,
+    'round_connector_id' | 'workflow_context'
+  > = {
+    round_connector_id:
+      roundConnectorId && roundConnectorId !== 'unknown' ? roundConnectorId : undefined,
+    workflow_context: workflowContext,
+  };
+  const optionalInputs = Object.entries(optionalWorkflowParams).filter(
+    ([, value]) => value !== undefined
+  );
 
   for (const workflowId of workflowIds) {
-    let currentWorkflowParams = workflowParams;
+    let currentWorkflowParams: Record<string, unknown> = workflowParams as unknown as Record<
+      string,
+      unknown
+    >;
 
-    if (usableRoundConnectorId) {
+    if (optionalInputs.length) {
       try {
         const workflow = await workflowApi.getWorkflow(workflowId, spaceId, context.request);
         if (!workflow?.definition) {
@@ -87,14 +102,15 @@ export const runAfterExecutionWorkflows = async ({
           continue;
         }
 
-        const workflowInputs = getInputsFromDefinition(workflow.definition);
-        if (
-          workflowInputs?.properties &&
-          Object.prototype.hasOwnProperty.call(workflowInputs.properties, 'round_connector_id')
-        ) {
+        const declaredInputs = getInputsFromDefinition(workflow.definition)?.properties;
+        if (declaredInputs) {
           currentWorkflowParams = {
             ...workflowParams,
-            round_connector_id: usableRoundConnectorId,
+            ...Object.fromEntries(
+              optionalInputs.filter(([name]) =>
+                Object.prototype.hasOwnProperty.call(declaredInputs, name)
+              )
+            ),
           };
         }
       } catch (error) {
@@ -106,7 +122,7 @@ export const runAfterExecutionWorkflows = async ({
 
     const result = await executeWorkflow({
       workflowId,
-      workflowParams: currentWorkflowParams as unknown as Record<string, unknown>,
+      workflowParams: currentWorkflowParams,
       request: context.request,
       spaceId,
       workflowApi,

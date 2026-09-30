@@ -15,7 +15,7 @@ const workflow = parse(NIGHTSHIFT_CORTEX_OPTIMIZE_WORKFLOW.yaml) as {
   triggers: Array<{
     inputs: { properties: Record<string, { type: string; maxLength?: number }> };
   }>;
-  steps: Array<{ name: string; type?: string; with?: Record<string, string> }>;
+  steps: Array<{ name: string; type?: string; with?: Record<string, unknown> }>;
 };
 
 describe('cortex optimize workflow', () => {
@@ -43,5 +43,10 @@ describe('cortex optimize workflow', () => {
         round_connector_id: '{{ inputs.round_connector_id }}',
       })
     );
+  });
+
+  // Liquid `{{ }}` would stringify the array, leaving the optimizer with no tool calls to read.
+  it('hands the round tool calls to the optimizer as an array', () => {
+    expect(workflow.steps[0].with?.tool_calls).toBe('${{ inputs.tool_calls }}');
   });
 });

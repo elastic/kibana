@@ -32,6 +32,7 @@ describe('cortexOptimizeStepDefinition', () => {
     round_id?: string;
     connector_id?: string;
     round_connector_id?: string;
+    tool_calls?: unknown;
   }) =>
     ({
       input,
@@ -70,6 +71,7 @@ describe('cortexOptimizeStepDefinition', () => {
         round_id: 'round-1',
         connector_id: 'manual-model',
         round_connector_id: 'round-model',
+        tool_calls: [{ tool_id: 'nightshift.sandbox_bash', params: { command: 'ls' } }],
       })
     );
 
@@ -78,6 +80,7 @@ describe('cortexOptimizeStepDefinition', () => {
       agentId: 'nightshift.investigation',
       userMessage: 'why is checkout slow?',
       assistantMessage: 'Redis evictions.',
+      toolCalls: [{ tool_id: 'nightshift.sandbox_bash', params: { command: 'ls' } }],
       esClient,
       spaceId: 'default',
       interactionId: 'execution-1',
@@ -93,5 +96,21 @@ describe('cortexOptimizeStepDefinition', () => {
       getUiSettings,
     });
     expect(result).toEqual({ output: { status: 'ok' } });
+  });
+
+  it('passes no tool calls when the round did not report any', async () => {
+    const definition = cortexOptimizeStepDefinition({
+      getInference,
+      getSavedObjects,
+      getUiSettings,
+      analytics,
+      logger: loggerMock.create(),
+    });
+
+    await definition.handler(
+      createContext({ prompt: 'hi', response: 'hello', agent_id: 'nightshift.investigation' })
+    );
+
+    expect(runCortexOptimize).toHaveBeenLastCalledWith(expect.objectContaining({ toolCalls: [] }));
   });
 });
