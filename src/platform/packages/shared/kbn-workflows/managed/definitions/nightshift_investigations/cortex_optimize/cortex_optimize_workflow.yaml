@@ -38,6 +38,14 @@ triggers:
           items:
             type: object
             additionalProperties: true
+        tool_results:
+          type: array
+          description: >
+            Results of the completed round's tool calls, keyed by tool_call_id.
+            Shows the optimizer what each query returned.
+          items:
+            type: object
+            additionalProperties: true
       additionalProperties: false
 
 steps:
@@ -51,5 +59,6 @@ steps:
       round_id: '{{ inputs.round_id }}'
       # ${{ }} keeps the array. Liquid `{{ }}` stringifies it as "[object Object]…".
       tool_calls: '${{ inputs.tool_calls }}'
+      tool_results: '${{ inputs.tool_results }}'
     on-failure:
       continue: true
