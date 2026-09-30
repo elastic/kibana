@@ -12,7 +12,7 @@ import {
   ENCODED_POWERSHELL_ATTACK_ID,
   getEncodedPowershellIds,
 } from '../scenarios/encoded_powershell';
-import { FP_TP_ATTACK_ADHOC_INDEX } from './constants';
+import { FP_TP_ATTACK_INDEX } from './constants';
 import {
   buildLiveSeedPlan,
   cleanupManualSeedLive,
@@ -32,8 +32,8 @@ describe('buildLiveSeedPlan', () => {
     expect(plan.attackId).toBe(ENCODED_POWERSHELL_ATTACK_ID);
   });
 
-  it('returns the adhoc Attack Discovery index', () => {
-    expect(plan.attackIndex).toBe(FP_TP_ATTACK_ADHOC_INDEX);
+  it('returns the product Attack Discovery index', () => {
+    expect(plan.attackIndex).toBe(FP_TP_ATTACK_INDEX);
   });
 
   it('returns alert bulk operations targeting the detection alerts index', () => {
@@ -180,7 +180,7 @@ describe('seedFixture', () => {
 
     expect(esClient.deleteByQuery).toHaveBeenCalledWith(
       expect.objectContaining({
-        index: FP_TP_ATTACK_ADHOC_INDEX,
+        index: FP_TP_ATTACK_INDEX,
         query: { ids: { values: [ENCODED_POWERSHELL_ATTACK_ID] } },
       })
     );

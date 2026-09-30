@@ -22,7 +22,7 @@ export const FP_TP_ENTITY_INDEX = '.entities.v2.latest.default';
 /** Alias the workflow reads entities through. */
 export const FP_TP_ENTITY_READ_ALIAS = 'entities-latest-default';
 
-export const FP_TP_ATTACK_ADHOC_INDEX = '.alerts-security.attack.discovery.alerts-default';
+export const FP_TP_ATTACK_INDEX = '.alerts-security.attack.discovery.alerts-default';
 
 /** Half-width of the raw-event window the analysis reads around the attack timestamp. */
 export const FP_TP_RAW_EVENT_WINDOW_MS = 2 * 60 * 60 * 1000;

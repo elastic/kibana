@@ -109,7 +109,7 @@ steps:
   - name: load_attack_discovery
     type: elasticsearch.search
     with:
-      index: '.adhoc.alerts-security.attack.discovery.alerts-{{ workflow.spaceId }}'
+      index: '.alerts-security.attack.discovery.alerts-{{ workflow.spaceId }}'
       size: 1
       query:
         ids:

@@ -93,7 +93,8 @@ has no basic-auth users, so pass an API key (`--apiKey`, base64 form from
 Kibana's API keys UI) and the ES endpoint in addition to the Kibana URL:
 
 ```bash
-node scripts/evals tsx scripts/seed_fp_tp_twin.ts \
+node x-pack/solutions/security/packages/kbn-evals-suite-attack-discovery-fp-tp/scripts/load_fp_tp_twin.js \
+  --scenario encoded-powershell --variant fp \
   --kibanaUrl https://<project>.kb.<region>.qa.elastic.cloud \
   --elasticsearchUrl https://<project>.es.<region>.qa.elastic.cloud \
   --apiKey <base64-api-key>

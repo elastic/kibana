@@ -11,7 +11,7 @@ import {
   createWorkflowLiquidEngine,
   WorkflowSchema,
 } from '@kbn/workflows';
-import { FP_TP_VERDICT_RULES } from '../world';
+import { FP_TP_ATTACK_INDEX, FP_TP_VERDICT_RULES } from '../world';
 import { readSampleWorkflowYaml } from './sample_workflow_yaml';
 
 interface YamlStep {
@@ -115,6 +115,15 @@ describe('sample FP/TP analysis workflow', () => {
     const [, rules = ''] =
       /Choose the verdict by the first rule that matches:\n([\s\S]*?)\n\s*\n/.exec(yaml) ?? [];
     expect(collapseWhitespace(rules)).toBe(collapseWhitespace(FP_TP_VERDICT_RULES));
+  });
+
+  it('reads the persisted Attack Discovery from the product-managed alerts index', () => {
+    // FP_TP_ATTACK_INDEX is the per-space-default form (`...alerts-default`); the
+    // workflow step templates the space suffix instead of hardcoding `default`.
+    const indexPrefix = FP_TP_ATTACK_INDEX.replace(/-default$/, '');
+    expect(stepIn('load_attack_discovery')?.with?.index).toBe(
+      `${indexPrefix}-{{ workflow.spaceId }}`
+    );
   });
 
   it('routes the agent through the AlertZero reasoning feature', () => {

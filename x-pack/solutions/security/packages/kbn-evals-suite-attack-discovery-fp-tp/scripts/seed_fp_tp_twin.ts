@@ -8,50 +8,7 @@
 import { Client } from '@elastic/elasticsearch';
 import { run } from '@kbn/dev-cli-runner';
 import { getFpTpScenario } from '../src/scenarios';
-import { FP_TP_TWIN_SEED_LABEL, joinKibanaUrl, seedTwinLive } from '../src/world';
-import type { FpTpLiveKbnRequest } from '../src/world';
-
-const createKbnRequest = ({
-  kibanaUrl,
-  apiKey,
-  username,
-  password,
-}: {
-  kibanaUrl: string;
-  apiKey?: string;
-  username: string;
-  password: string;
-}): FpTpLiveKbnRequest => {
-  const authorization = apiKey
-    ? `ApiKey ${apiKey}`
-    : `Basic ${Buffer.from(`${username}:${password}`).toString('base64')}`;
-
-  return async ({ method, path, body, version }) => {
-    const headers: Record<string, string> = {
-      Authorization: authorization,
-      'kbn-xsrf': 'true',
-      'x-elastic-internal-origin': 'kibana',
-      'Content-Type': 'application/json',
-    };
-    if (version !== undefined) {
-      headers['elastic-api-version'] = version;
-    }
-
-    const response = await fetch(joinKibanaUrl(kibanaUrl, path), {
-      method,
-      headers,
-      body: body === undefined ? undefined : JSON.stringify(body),
-    });
-    const text = await response.text();
-    let parsed: unknown = text;
-    try {
-      parsed = text.length > 0 ? JSON.parse(text) : undefined;
-    } catch {
-      parsed = text;
-    }
-    return { statusCode: response.status, body: parsed };
-  };
-};
+import { createLiveKbnRequest, FP_TP_TWIN_SEED_LABEL, seedTwinLive } from '../src/world';
 
 run(
   async ({ flags, log }) => {
@@ -76,7 +33,7 @@ run(
     });
 
     try {
-      const kbnRequest = createKbnRequest({ kibanaUrl, apiKey, username, password });
+      const kbnRequest = createLiveKbnRequest({ kibanaUrl, apiKey, username, password });
       const summary = await seedTwinLive({
         esClient,
         kbnRequest,
