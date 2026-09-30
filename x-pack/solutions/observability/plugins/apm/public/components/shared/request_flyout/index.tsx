@@ -150,7 +150,10 @@ export function RequestFlyout({
 
                 <EuiSpacer size="m" />
 
-                {/* Breakdown tabs */}
+                {/* Breakdown tabs
+                    service→dependency: Operations only (which d1 methods does s1 call?)
+                    service→service:    Operations + s1 transactions (what does s1 call on
+                                        s2, and which s1 transactions trigger it?) */}
                 <EuiTabs size="s">
                   <EuiTab
                     isSelected={activeTab === 'operations'}
@@ -162,21 +165,25 @@ export function RequestFlyout({
                       values: { target: connection.targetLabel },
                     })}
                   </EuiTab>
-                  <EuiTab
-                    isSelected={activeTab === 'affectedEndpoints'}
-                    onClick={() => setActiveTab('affectedEndpoints')}
-                    data-test-subj="requestFlyoutTabAffectedEndpoints"
-                  >
-                    {i18n.translate('xpack.apm.requestFlyout.tabs.affectedEndpoints', {
-                      defaultMessage: '{source} transactions',
-                      values: { source: connection.sourceLabel },
-                    })}
-                  </EuiTab>
+                  {connection.targetServiceName && (
+                    <EuiTab
+                      isSelected={activeTab === 'affectedEndpoints'}
+                      onClick={() => setActiveTab('affectedEndpoints')}
+                      data-test-subj="requestFlyoutTabAffectedEndpoints"
+                    >
+                      {i18n.translate('xpack.apm.requestFlyout.tabs.affectedEndpoints', {
+                        defaultMessage: '{source} transactions',
+                        values: { source: connection.sourceLabel },
+                      })}
+                    </EuiTab>
+                  )}
                 </EuiTabs>
                 <EuiSpacer size="s" />
 
                 {activeTab === 'operations' && <RequestFlyoutOperations />}
-                {activeTab === 'affectedEndpoints' && <RequestFlyoutAffectedEndpoints />}
+                {activeTab === 'affectedEndpoints' && connection.targetServiceName && (
+                  <RequestFlyoutAffectedEndpoints />
+                )}
               </EuiFlyoutBody>
               <RequestFlyoutFooter />
             </>
