@@ -33,6 +33,7 @@ export interface GraphVisualizationProps {
   onSetControl: (control: ControlType) => void;
   selectSelected: (node: WorkspaceNode) => void;
   onSetMergeCandidates: (terms: TermIntersect[]) => void;
+  getMergeCandidates?: (nodes: WorkspaceNode[]) => Promise<TermIntersect[]>;
   onToggleNodeSelection: (node: WorkspaceNode, replace: boolean) => boolean;
   onToggleEdgeSelection: (edge: WorkspaceEdge) => boolean;
   selectedNodeIds: readonly string[];
@@ -69,6 +70,7 @@ export function GraphVisualization({
   selectSelected,
   onSetControl,
   onSetMergeCandidates,
+  getMergeCandidates,
   onToggleNodeSelection,
   onToggleEdgeSelection,
   selectedNodeIds,
@@ -95,12 +97,12 @@ export function GraphVisualization({
     onSetControl('mergeTerms');
   };
 
-  const edgeClick = (edge: WorkspaceEdge) => {
+  const edgeClick = async (edge: WorkspaceEdge) => {
     const isSelected = onToggleEdgeSelection(edge);
     onSetControl('edgeSelection');
 
-    if (isSelected) {
-      workspace.getAllIntersections(handleMergeCandidatesCallback, [edge.topSrc, edge.topTarget]);
+    if (isSelected && getMergeCandidates) {
+      handleMergeCandidatesCallback(await getMergeCandidates([edge.topSrc, edge.topTarget]));
     }
   };
 

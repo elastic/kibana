@@ -104,10 +104,6 @@ export interface Workspace {
   blocklistNodes: (nodeIds: string[]) => void;
   groupNodes: (parentId: string, nodeIds: string[]) => void;
   ungroup: (node: WorkspaceNode | undefined) => void;
-  getAllIntersections: (
-    callback: (termIntersects: TermIntersect[]) => void,
-    nodes: WorkspaceNode[]
-  ) => void;
   mergeIds: (term1: string, term2: string) => void;
   changeHandler: () => void;
   unblockNode: (node: BlockListedNode) => void;
@@ -154,11 +150,6 @@ export type WorkspaceOptions = {
   vertex_fields: WorkspaceField[];
   nodeLabeller: (newNodes: WorkspaceNode[]) => void;
   changeHandler: () => void;
-  searchProxy: (
-    indexPattern: string,
-    request: SearchRequest,
-    callback: GraphSearchCallback
-  ) => void;
   exploreControls: AdvancedSettings;
 }>;
 

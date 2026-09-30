@@ -14,7 +14,9 @@ import type {
   ExploreResults,
   SearchRequest,
   SearchResults,
+  TermIntersect,
   Workspace,
+  WorkspaceNode,
 } from '../types';
 import {
   createGraphStore,
@@ -25,6 +27,11 @@ import {
 import { createWorkspace } from '../services/workspace/graph_client_workspace';
 import { GraphLayoutController } from '../services/workspace/graph_layout_controller';
 import { ReduxLayoutTopology } from '../services/workspace/redux_layout_topology';
+import {
+  buildIntersectionRequest,
+  buildNodeQuery,
+} from '../services/workspace/graph_request_builders';
+import { transformIntersectionResponse } from '../services/workspace/intersections';
 import { WorkspaceLayout } from '../components/workspace_layout';
 import type { GraphServices } from '../application';
 import { useWorkspaceLoader } from '../helpers/use_workspace_loader';
@@ -101,6 +108,18 @@ export const WorkspaceRoute = ({
     [callSearchNodeProxy]
   );
 
+  const getMergeCandidates = async (nodes: WorkspaceNode[]): Promise<TermIntersect[]> => {
+    const workspace = workspaceRef.current;
+    const indexName = workspace?.options.indexName;
+    if (!workspace || !indexName) return [];
+    const topLevelNodes = nodes.filter((node) => node.parent === undefined);
+    const request = buildIntersectionRequest(
+      topLevelNodes.map((node) => buildNodeQuery(workspace.returnUnpackedGroupeds([node])))
+    );
+    const response = await searchGraph(indexName, request);
+    return transformIntersectionResponse(response, topLevelNodes);
+  };
+
   const notifyWorkspaceChanged = () => {
     const workspace = workspaceRef.current;
     if (workspace) {
@@ -132,7 +151,6 @@ export const WorkspaceRoute = ({
             // console.log(newNodes);
           },
           changeHandler: notifyWorkspaceChanged,
-          searchProxy: callSearchNodeProxy,
           exploreControls,
           layoutController,
         };
@@ -182,6 +200,7 @@ export const WorkspaceRoute = ({
           overlays={overlays}
           savedWorkspace={savedWorkspace}
           indexPatternProvider={indexPatternProvider}
+          getMergeCandidates={getMergeCandidates}
           inspect={inspect}
           requestAdapter={requestAdapter}
         />
