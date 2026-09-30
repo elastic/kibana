@@ -22,7 +22,7 @@ describe('createConnectorTypeFromSpec', () => {
   const mockActionsPlugin: ActionsPluginSetupContract = {
     getActionsConfigurationUtilities: () => mockActionsConfigUtils,
     getAxiosInstanceWithAuth: mockGetAxiosInstanceWithAuth,
-    getCredential: jest.fn().mockReturnValue({ getAuthHeaders: jest.fn() }),
+    getCredential: jest.fn().mockReturnValue({ getAuthHeaders: jest.fn().mockResolvedValue({}) }),
     getClientLeasePool: jest.fn().mockReturnValue({ lease: jest.fn() }),
   } as unknown as ActionsPluginSetupContract;
 
@@ -641,58 +641,6 @@ describe('createConnectorTypeFromSpec', () => {
       expect(connectorType.validate.config.schema.parse(configWithAuthType)).toEqual(
         configWithAuthType
       );
-    });
-
-    it('injects ingestTokenHash when the spoke schema is empty', () => {
-      const spec = createMockSpec({
-        schema: z4.object({}),
-        actions: {},
-        events: {
-          definitions: {
-            received: {
-              eventId: 'test.received',
-              title: 'Received',
-              description: 'Inbound event',
-              eventSchema: z4.object({ body: z4.unknown() }),
-            },
-          },
-          handleEvents: async () => ({ type: 'emit' as const, events: [] }),
-        },
-      });
-
-      const connectorType = createConnectorTypeFromSpec(spec, mockActionsPlugin);
-      const hash = 'a'.repeat(64);
-
-      expect(connectorType.validate.config.schema.parse({ ingestTokenHash: hash })).toEqual({
-        ingestTokenHash: hash,
-      });
-    });
-
-    it('accepts ingestTokenHash on dual specs that declare events', () => {
-      const spec = createMockSpec({
-        schema: z4.object({ url: z4.string() }),
-        events: {
-          definitions: {
-            received: {
-              eventId: 'test.received',
-              title: 'Received',
-              description: 'Inbound event',
-              eventSchema: z4.object({ body: z4.unknown() }),
-            },
-          },
-          handleEvents: async () => ({ type: 'emit' as const, events: [] }),
-        },
-      });
-
-      const connectorType = createConnectorTypeFromSpec(spec, mockActionsPlugin);
-      const hash = 'a'.repeat(64);
-
-      expect(() =>
-        connectorType.validate.config.schema.parse({
-          url: 'https://example.com',
-          ingestTokenHash: hash,
-        })
-      ).not.toThrow();
     });
   });
 });

@@ -13,6 +13,8 @@ import type {
   BulkByIdsParams,
   BulkByQueryParams,
   BulkByQueryResult,
+  BulkCreateRulesParams,
+  BulkCreateRulesResponse,
   BulkResponse,
   CreateRuleData,
   DryRunResponse,
@@ -35,7 +37,15 @@ const buildRulePath = (id: string): string =>
 /** Re-exported from the shared schemas package. */
 export type { RuleResponse as RuleApiResponse, FindRulesResponse };
 
-export type { BulkByIdsParams, BulkByQueryParams, BulkByQueryResult, BulkResponse, DryRunResponse };
+export type {
+  BulkByIdsParams,
+  BulkByQueryParams,
+  BulkByQueryResult,
+  BulkCreateRulesParams,
+  BulkCreateRulesResponse,
+  BulkResponse,
+  DryRunResponse,
+};
 
 @injectable()
 export class RulesApi {
@@ -62,6 +72,12 @@ export class RulesApi {
     });
   }
 
+  public async bulkCreateRules(params: BulkCreateRulesParams) {
+    return this.http.post<BulkCreateRulesResponse>(`${ALERTING_V2_RULE_API_PATH}/_bulk_create`, {
+      body: JSON.stringify(params),
+    });
+  }
+
   public async upsertRule(id: string, payload: CreateRuleData) {
     return this.http.put<RuleResponse>(buildRulePath(id), {
       body: JSON.stringify(payload),
@@ -83,15 +99,19 @@ export class RulesApi {
   }
 
   public async enableRule(id: string) {
-    return this.http.post<RuleResponse>(`${buildRulePath(id)}/_enable`);
+    return this.http.post<RuleResponse>(
+      buildPath(`${ALERTING_V2_RULE_API_PATH}/{id}/_enable`, { id })
+    );
   }
 
   public async disableRule(id: string) {
-    return this.http.post<RuleResponse>(`${buildRulePath(id)}/_disable`);
+    return this.http.post<RuleResponse>(
+      buildPath(`${ALERTING_V2_RULE_API_PATH}/{id}/_disable`, { id })
+    );
   }
 
   public async runRule(id: string) {
-    return this.http.post<void>(`${buildRulePath(id)}/_run`);
+    return this.http.post<void>(buildPath(`${ALERTING_V2_RULE_API_PATH}/{id}/_run`, { id }));
   }
 
   public async bulkDeleteRules(params: BulkByIdsParams) {

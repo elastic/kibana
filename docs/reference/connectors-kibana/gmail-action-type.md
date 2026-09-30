@@ -19,8 +19,8 @@ You can create a Gmail connector in **{{stack-manage-app}} > {{connectors-ui}}**
 
 Gmail connectors support the following authentication types:
 
-Elastic-managed authentication (recommended, read-only)
-:   Uses Elastic's managed Google OAuth integration. Grants `gmail.readonly` access only. **Write actions are not available** with this authentication type.
+Quick Connect OAuth 2.0 (recommended, read-only) {applies_to}`serverless: preview` {applies_to}`stack: preview 9.6`
+:   Elastic's managed OAuth flow for Gmail. Grants `gmail.readonly` access only. **Write actions are not available** with this authentication type. No app setup is required — select this option and authorize access through Elastic.
 
 OAuth 2.0 authorization code (required for write actions)
 :   Uses your own Google OAuth 2.0 app. Grants `gmail.modify` access, which covers reads, label changes, trash, and send. Required for `modifyLabels`, `trashMessage`, `untrashMessage`, `sendMessage`, `replyMessage`, `markAsRead`, and `markAsUnread`. See [Get API credentials](#gmail-api-credentials) for setup instructions.
@@ -173,7 +173,7 @@ Send a reply to an existing message, preserving the thread. The connector fetche
 
 ## Limitations [gmail-limitations]
 
-- **Write actions require OAuth 2.0 authorization code auth.** Elastic-managed authentication is limited to `gmail.readonly`. The `modifyLabels`, `trashMessage`, `untrashMessage`, `sendMessage`, `replyMessage`, `markAsRead`, and `markAsUnread` actions are not available with Elastic-managed authentication.
+- **Write actions require OAuth 2.0 authorization code auth.** Quick Connect OAuth 2.0 is limited to `gmail.readonly`. The `modifyLabels`, `trashMessage`, `untrashMessage`, `sendMessage`, `replyMessage`, `markAsRead`, and `markAsUnread` actions are not available with Quick Connect OAuth 2.0.
 - **Existing connectors must be re-authorized.** Google does not re-prompt for consent when the requested scope changes. If you created a Gmail connector before write action support was added, edit the connector and re-authorize it so Google issues a token that includes `gmail.modify`.
 - **Permanent deletion is not supported.** Use `trashMessage` (reversible with `untrashMessage`). Gmail permanently removes trashed mail after 30 days.
 - **No attachments in `sendMessage` v1.** Attachment support is planned for a future release.

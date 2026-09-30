@@ -19,6 +19,8 @@ responses:
                     - 'cloudwatch_metrics'
                   status: 'succeeded'
                   attemptCount: 1
+                  agentPolicyIds:
+                    - 'agent-policy-id-1'
                   packagePolicyIds:
                     - 'package-policy-id-1'
                 - id: 'onboarding-deployment-id-2'

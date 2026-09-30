@@ -33,7 +33,6 @@ export const useFetchMaintenanceWindows = () => {
       apiService.get<SyntheticsMaintenanceWindowsResult>(
         SYNTHETICS_API_URLS.MAINTENANCE_WINDOWS,
         undefined,
-        undefined,
         { signal }
       ),
     {

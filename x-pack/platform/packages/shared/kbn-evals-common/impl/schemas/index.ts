@@ -9,8 +9,11 @@ export * from './common_attributes.gen';
 
 export * from './experiments/get_experiments_route.gen';
 export * from './experiments/get_experiment_route.gen';
+export * from './experiments/get_experiment_runs_route.gen';
+export * from './experiments/get_experiment_traces_route.gen';
 export * from './experiments/get_experiment_scores_route.gen';
 export * from './experiments/get_experiment_dataset_examples_route.gen';
+export * from './experiments/get_experiment_example_details_route.gen';
 export * from './experiments/compare_experiments_route.gen';
 
 export * from './datasets/get_datasets_route.gen';
@@ -26,6 +29,7 @@ export * from './datasets/upsert_dataset_route.gen';
 export * from './datasets/resolve_dataset_route.gen';
 
 export * from './traces/get_trace_route.gen';
+export * from './traces/get_trace_evidence_route.gen';
 export * from './tracing/get_tracing_projects_route.gen';
 export * from './tracing/get_project_traces_route.gen';
 export * from './examples/get_example_scores_route.gen';

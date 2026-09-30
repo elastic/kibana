@@ -1,0 +1,11 @@
+prs:
+- https://github.com/elastic/kibana/pull/290761
+issues:
+- https://github.com/elastic/kibana/issues/284426
+type: feature
+products:
+- product: cloud-serverless
+- product: kibana
+areas:
+- AI and machine Learning
+title: Improve conversation streaming reliability using the events data source

@@ -15,7 +15,6 @@ import type {
   UiSettingsServiceStart,
   AnalyticsServiceStart,
 } from '@kbn/core/server';
-import type { FeatureFlagsStart } from '@kbn/core-feature-flags-server';
 import type { ActionsClient, ActionsAuthorization } from '@kbn/actions-plugin/server';
 import type {
   GrantAPIKeyResult as SecurityPluginGrantAPIKeyResult,
@@ -77,6 +76,7 @@ export interface RulesClientContext {
    */
   readonly request: KibanaRequest;
   readonly getUserName: () => Promise<string | null>;
+  readonly getProfileUid: () => Promise<string | null>;
   readonly spaceId: string;
   readonly namespace?: string;
   readonly taskManager: TaskManagerStartContract;
@@ -130,7 +130,6 @@ export interface RulesClientContext {
   readonly shouldGrantUiam?: boolean;
   readonly apiKeyType?: ApiKeyType;
   readonly isServerless: boolean;
-  readonly featureFlags: FeatureFlagsStart;
   /**
    * Used to report EBT events (e.g. rule create telemetry). Optional on the context so the
    * many hand-constructed test contexts across the codebase aren't forced to wire it. In

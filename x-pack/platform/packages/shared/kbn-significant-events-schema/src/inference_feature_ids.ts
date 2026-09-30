@@ -8,6 +8,12 @@
 /** Parent feature for Streams Significant Events (Inference Feature Registry). */
 export const SIGNIFICANT_EVENTS_INFERENCE_PARENT_FEATURE_ID = 'significant_events' as const;
 
+/** Product solution for Significant Events EIS attribution. */
+export const SIGNIFICANT_EVENTS_INFERENCE_PRODUCT_SOLUTION = 'observability' as const;
+
+/** Product feature for Significant Events EIS attribution. */
+export const SIGNIFICANT_EVENTS_INFERENCE_PRODUCT_FEATURE = 'nightshift' as const;
+
 /** Knowledge Indicator feature extraction (KI extraction). */
 export const SIGNIFICANT_EVENTS_KI_EXTRACTION_INFERENCE_FEATURE_ID =
   'significant_events_ki_extraction' as const;
@@ -24,31 +30,6 @@ export const SIGNIFICANT_EVENTS_DISCOVERY_INFERENCE_FEATURE_ID =
 export const SIGNIFICANT_EVENTS_INVESTIGATION_INFERENCE_FEATURE_ID =
   'significant_events_investigation' as const;
 
-/**
- * Background memory upkeep for Streams Significant Events: scraping durable knowledge out of
- * chat conversations, synthesizing knowledge indicators into wiki pages, consolidating the wiki
- * (merging duplicates, removing stale entries), and reconciling knowledge gaps (from
- * investigations and the periodic memory audit). All one feature since these are all low-stakes,
- * background curation tasks over the same memory wiki.
- */
-export const SIGNIFICANT_EVENTS_MEMORY_INFERENCE_FEATURE_ID = 'significant_events_memory' as const;
-
-/** Memory wiki synthesis (telemetry and cost bucketing). */
-export const SIGNIFICANT_EVENTS_MEMORY_SYNTHESIS_INFERENCE_FEATURE_ID =
-  'significant_events_memory_synthesis' as const;
-
-/** Memory conversation scraper (telemetry and cost bucketing). */
-export const SIGNIFICANT_EVENTS_MEMORY_CONVERSATION_SCRAPER_INFERENCE_FEATURE_ID =
-  'significant_events_memory_conversation_scraper' as const;
-
-/** Memory gap detection (telemetry and cost bucketing). */
-export const SIGNIFICANT_EVENTS_MEMORY_GAP_DETECTION_INFERENCE_FEATURE_ID =
-  'significant_events_memory_gap_detection' as const;
-
-/** Memory wiki consolidation (telemetry and cost bucketing). */
-export const SIGNIFICANT_EVENTS_MEMORY_CONSOLIDATION_INFERENCE_FEATURE_ID =
-  'significant_events_memory_consolidation' as const;
-
-/** Memory investigation-gap reconciliation (telemetry and cost bucketing). */
-export const SIGNIFICANT_EVENTS_MEMORY_INVESTIGATION_GAPS_INFERENCE_FEATURE_ID =
-  'significant_events_memory_investigation_gaps' as const;
+/** Decision tree reinforcement. */
+export const SIGNIFICANT_EVENTS_DECISION_TREE_REINFORCE_INFERENCE_FEATURE_ID =
+  'significant_events_decision_tree_reinforce' as const;

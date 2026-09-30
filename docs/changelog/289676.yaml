@@ -1,0 +1,9 @@
+prs:
+- https://github.com/elastic/kibana/pull/289676
+issues:
+- https://github.com/elastic/kibana/issues/288404
+type: bug-fix
+products:
+- product: cloud-serverless
+- product: kibana
+title: Fix multiple EQL alerts missing when investigating in Timeline

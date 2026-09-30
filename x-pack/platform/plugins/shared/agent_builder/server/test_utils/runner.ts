@@ -27,6 +27,7 @@ import type {
   WritableToolResultStore,
 } from '@kbn/agent-builder-server';
 import type {
+  ConversationEventTypesService,
   ConversationStateManager,
   PluginsService,
   PromptManager,
@@ -148,9 +149,11 @@ export const createSkillsStoreMock = (): SkillsStoreMock => {
 
 export const createAttachmentsServiceStartMock = (): AttachmentsServiceStartMock => {
   return {
-    validate: jest.fn(),
+    validateAttachmentInputs: jest.fn(),
     getTypeDefinition: jest.fn(),
     getRegisteredTypeIds: jest.fn(),
+    createStateManager: jest.fn(),
+    mergeAttachmentInputs: jest.fn(),
   };
 };
 
@@ -254,6 +257,8 @@ export const createAttachmentStateManagerMock = (): AttachmentStateManagerMock =
     rename: jest.fn(),
     getAccessedRefs: jest.fn(),
     clearAccessTracking: jest.fn(),
+    drainChanges: jest.fn().mockReturnValue([]),
+    clearChanges: jest.fn(),
     resolveRefs: jest.fn(),
     evaluateStalenessForActiveAttachments: jest.fn(),
     getTotalTokenEstimate: jest.fn(),
@@ -313,7 +318,14 @@ export interface AgentHandlerContextMock extends AgentHandlerContext {
   skills: SkillsServiceMock;
   plugins: PluginsServiceMock;
   toolManager: ToolManagerMock;
+  conversationEvents: jest.Mocked<ConversationEventTypesService>;
 }
+
+export const createConversationEventTypesServiceMock =
+  (): jest.Mocked<ConversationEventTypesService> => ({
+    getDefinition: jest.fn(),
+    list: jest.fn(() => []),
+  });
 
 export const createAgentHandlerContextMock = (): AgentHandlerContextMock => {
   return {
@@ -328,6 +340,7 @@ export const createAgentHandlerContextMock = (): AgentHandlerContextMock => {
     runner: createScopedRunnerMock(),
     attachments: createAttachmentsService(),
     renderers: { getRegisteredRenderers: () => [], getRenderer: () => undefined },
+    conversationEvents: createConversationEventTypesServiceMock(),
     resultStore: createToolResultStoreMock(),
     skillsStore: createSkillsStoreMock(),
     attachmentStateManager: createAttachmentStateManagerMock(),
@@ -357,7 +370,7 @@ export const createAgentHandlerContextMock = (): AgentHandlerContextMock => {
       datasets: false,
       askUserQuestion: false,
       bash: false,
-      apiTools: false,
+      apiDiscovery: false,
     },
     subAgentExecutor: {
       executeSubAgent: jest.fn(),
@@ -433,7 +446,7 @@ export const createToolHandlerContextMock = (): ToolHandlerContextMock => {
       datasets: false,
       askUserQuestion: false,
       bash: false,
-      apiTools: false,
+      apiDiscovery: false,
     },
     executionMode: AgentExecutionMode.conversation,
     interactivity: { enabled: true },
@@ -477,6 +490,7 @@ export const createScopedRunnerDepsMock = (): CreateScopedRunnerDepsMock => {
     todoStateManager: createTodoStateManager(),
     attachmentsService: createAttachmentsServiceStartMock(),
     renderersService: { getRegisteredRenderers: () => [], getRenderer: () => undefined },
+    conversationEventsService: createConversationEventTypesServiceMock(),
     conversationTemplates: createInMemoryConversationTemplates(),
     promptManager: createPromptManagerMock(),
     stateManager: createStateManagerMock(),
@@ -493,7 +507,7 @@ export const createScopedRunnerDepsMock = (): CreateScopedRunnerDepsMock => {
       datasets: false,
       askUserQuestion: false,
       bash: false,
-      apiTools: false,
+      apiDiscovery: false,
     },
     subAgentExecutor: {
       executeSubAgent: jest.fn(),
@@ -524,6 +538,7 @@ export const createRunnerDepsMock = (): CreateRunnerDepsMock => {
     logger: loggerMock.create(),
     attachmentsService: createAttachmentsServiceStartMock(),
     renderersService: { getRegisteredRenderers: () => [], getRenderer: () => undefined },
+    conversationEventsService: createConversationEventTypesServiceMock(),
     conversationTemplates: createInMemoryConversationTemplates(),
     hooks: createHooksServiceStartMock(),
     skillServiceStart: createSkillServiceStartMock(),

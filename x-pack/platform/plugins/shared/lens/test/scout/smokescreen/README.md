@@ -36,11 +36,12 @@ project first, since the seeded archives, default data views and available UI di
 | `chart_switching_from_scratch.spec.ts` | building a pie chart then switching to a datatable, and building a heatmap then switching to a bar chart | `apps/lens/group1/chart_switching.ts` |
 | `layers.spec.ts` | creating, duplicating, switching, and removing Lens layers; applying a treemap suggestion; keeping suggestions in sync with stacking subtype | `apps/lens/group1/layers.ts` |
 | `dimension_editor.spec.ts` | dimension label / format / color, style flyout curve and missing values, reference-based operations, incomplete columns, percentile metrics | `apps/lens/group1/dimension_editor.ts` |
+| `chart_style_settings.spec.ts` | multi-axis side switching, bar value labels, axis title and gridlines, legend filtering on XY and pie, line point visibility | `apps/lens/group1/chart_style_settings.ts` |
 
-`apps/lens/group1/chart_switching.ts`, `apps/lens/group1/layers.ts` and
-`apps/lens/group1/dimension_editor.ts` are still loaded by the FTR cross-cluster-search config
-(`x-pack/platform/test/functional/config.ccs.ts`), which Scout cannot reproduce yet; they no longer
-run in the plain stateful FTR config.
+`apps/lens/group1/chart_switching.ts`, `apps/lens/group1/layers.ts`,
+`apps/lens/group1/dimension_editor.ts` and `apps/lens/group1/chart_style_settings.ts` are still loaded
+by the FTR cross-cluster-search config (`x-pack/platform/test/functional/config.ccs.ts`), which Scout
+cannot reproduce yet; they no longer run in the plain stateful FTR config.
 
 ## Running
 

@@ -165,7 +165,10 @@ const fetchNextEntityStorePage = async ({
   searchAfter: Array<string | number> | undefined;
 }) =>
   crudClient.listEntities({
-    filter: { terms: { 'entity.EngineMetadata.Type': entityTypes } },
+    filter: [
+      { terms: { 'entity.EngineMetadata.Type': entityTypes } },
+      { exists: { field: 'entity.relationships.resolution.resolved_to' } },
+    ],
     size: LOOKUP_BUILD_PAGE_SIZE,
     searchAfter,
     source: ['entity.id', 'entity.relationships.resolution.resolved_to'],
@@ -200,6 +203,7 @@ export const buildLookupIndex = async ({
   let searchAfter: Array<string | number> | undefined;
   let previousSearchAfter: Array<string | number> | undefined;
   const failureReasons = new Map<string, number>();
+  const startedAtMs = Date.now();
 
   do {
     if (abortSignal?.aborted) {
@@ -257,6 +261,12 @@ export const buildLookupIndex = async ({
   }
 
   await esClient.indices.refresh({ index: lookupIndex });
+
+  logger.info(
+    `Phase 0 lookup build complete: durationMs=${
+      Date.now() - startedAtMs
+    }, pagesProcessed=${pagesProcessed}, entitiesIterated=${entitiesIterated}, lookupRowsWritten=${lookupRowsWritten}`
+  );
 
   return {
     lookupRowsWritten,

@@ -4,28 +4,16 @@ version: "1"
 # LLM steps sequentially; partial drain per pass is intentional.
 # Installed once globally: enrichment is content-only and space-blind, so it
 # selects all pending reports regardless of `space_id` (analyst-paste and
-# future custom-source reports included). HTTP calls to the enrich routes are
-# routed through a fixed real space (`routeSpaceId`, currently `default`)
-# rather than the install-time `workflow.spaceId` (`*`, which is not a real
-# space and produces an invalid `/s/*/...` route).
-#
-# MVP tradeoff, not just a routing detail: the enrich routes resolve their LLM
-# connector via the inference feature registry (`resolveScopedModel`), which
-# reads a per-space saved object (Stack Management > Model Settings,
-# `namespaceType: 'single'') scoped to whatever space the request is routed
-# through. Pinning `routeSpaceId` to `default` means every report in the
-# deployment is enriched using only the `default` space's Model Settings,
-# regardless of which space the report is tagged to. That's an accepted MVP
-# simplification (sources are global-only for now too), not an oversight.
-#
-# Future per-space model settings: once reports need distinct model config per
-# owning space, `routeSpaceId` has to stop being a single top-level constant
-# and instead resolve per-report inside `extract_each_report`, from that
-# report's own `space_id` field (already stamped by the ingest adapters), not
-# from `workflow.spaceId`.
-# The LLM steps do not name an inference endpoint. Each route resolves its own
-# model through the inference feature registry, so operators pick the models in
-# Stack Management > Model Settings rather than by editing this workflow.
+# future custom-source reports included). The `kibana.request` steps below
+# call the enrich routes with no `/s/{id}/` prefix, so every request resolves
+# to the `default` space, including the per-space LLM connector each route
+# reads via Stack Management > Model Settings. That means every report in the
+# deployment is enriched using only the `default` space's Model Settings
+# regardless of which space it's tagged to. Accepted MVP simplification
+# (sources are global-only for now too), not an oversight: once reports need
+# distinct model config per owning space, these calls have to resolve a space
+# per report inside `extract_each_report`, from that report's own `space_id`
+# (already stamped by the ingest adapters).
 name: Enrich threat report
 description: Extract IOCs, taxonomy, severity, and Diamond from pending reports
 tags:
@@ -33,7 +21,7 @@ tags:
 enabled: false
 settings:
   concurrency:
-    key: "threat-intel-enrich-global"
+    key: "threat-intel-enrich"
     strategy: drop
     max: 1
 triggers:
@@ -41,15 +29,6 @@ triggers:
     with:
       every: "4h"
 steps:
-  - name: set_route_space
-    type: data.set
-    with:
-      # MVP: hardcoded to a fixed real space, not resolved per report. See the
-      # file header for why (`workflow.spaceId` is `*` here, and the model
-      # resolved via this route's space is a deployment-wide choice for now,
-      # not a per-report one).
-      routeSpaceId: "default"
-
   - name: load_pending_reports
     type: elasticsearch.search
     with:
@@ -89,8 +68,14 @@ steps:
                     content_fingerprint: "{{ foreach.item._source.content_fingerprint }}"
               must_not:
                 # A different non-pending doc with this fingerprint means already extracted.
+                # Hard-rejected siblings must not count: they never completed extraction and
+                # would strand other Spaces' pending duplicates on skip_already_extracted.
                 - term:
                     lineage.extraction_method: pending
+                - term:
+                    lineage.extraction_method: workflow_v4_rejected
+                - term:
+                    extracted.gate.is_intelligence: false
                 - ids:
                     values:
                       - "{{ foreach.item._id }}"
@@ -108,37 +93,75 @@ steps:
               values:
                 - "{{ foreach.item._id }}"
 
-      # Observe-first gate: persist the verdict, do not skip later stages.
+      # Cheap hard gate: a negative Fast-tier verdict stops this report before
+      # deterministic extraction, Reasoning-tier core extraction, or Diamond.
       - name: assess_relevance
         type: kibana.request
         with:
           method: POST
-          path: "/s/{{ variables.routeSpaceId }}/internal/threat_intel/assess_relevance"
+          path: "/internal/threat_intel/assess_relevance"
           headers:
             elastic-api-version: "1"
             x-elastic-internal-origin: "kibana"
           body:
-            text: "{{ steps.load_full_doc.output.hits.hits[0]._source.content.body_text | slice: 0, 30000 }}"
+            text: "{{ steps.load_full_doc.output.hits.hits[0]._source.content.body_text }}"
             title: "{{ steps.load_full_doc.output.hits.hits[0]._source.content.title }}"
+            url: "{{ steps.load_full_doc.output.hits.hits[0]._source.content.article_url }}"
         on-failure:
           continue: true
 
-      # Fail-open: missing gate output defaults to intelligence=true.
+      # A gate outage is retryable, never a reason to spend through to Sonnet.
+      - name: retry_gate_failure
+        type: loop.continue
+        if: "${{ steps.assess_relevance.error != null }}"
+
       - name: capture_gate_signals
         type: data.set
         with:
-          gate_is_intelligence: "${{ steps.assess_relevance.output.is_intelligence | default: true }}"
-          gate_quality_class: "{{ steps.assess_relevance.output.quality_class | default: 'intel' }}"
-          gate_evidence_tier: "{{ steps.assess_relevance.output.evidence_tier | default: 'primary' }}"
-          gate_needs_render: "${{ steps.assess_relevance.output.needs_render | default: false }}"
-          gate_has_original_commentary: "${{ steps.assess_relevance.output.has_original_commentary | default: true }}"
-          gate_reason: "{{ steps.assess_relevance.output.reason | default: '' }}"
+          gate_is_intelligence: "${{ steps.assess_relevance.output.is_intelligence }}"
+          gate_quality_class: "{{ steps.assess_relevance.output.quality_class }}"
+          gate_evidence_tier: "{{ steps.assess_relevance.output.evidence_tier }}"
+          gate_needs_render: "${{ steps.assess_relevance.output.needs_render }}"
+          gate_has_original_commentary: "${{ steps.assess_relevance.output.has_original_commentary }}"
+          gate_reason: "{{ steps.assess_relevance.output.reason }}"
+
+      - name: persist_gate_rejection
+        type: elasticsearch.update
+        if: "variables.gate_is_intelligence: false"
+        with:
+          index: "{{ foreach.item._index }}"
+          id: "{{ foreach.item._id }}"
+          doc:
+            extracted:
+              gate:
+                is_intelligence: false
+                quality_class: "{{ variables.gate_quality_class }}"
+                evidence_tier: "{{ variables.gate_evidence_tier }}"
+                needs_render: "${{ variables.gate_needs_render }}"
+                has_original_commentary: "${{ variables.gate_has_original_commentary }}"
+                reason: "{{ variables.gate_reason }}"
+                assessed_at: "${{ now }}"
+                context_mode: "{{ steps.assess_relevance.output.context.mode }}"
+                context_coverage: "${{ steps.assess_relevance.output.context.coverage }}"
+            lineage:
+              extracted_at: "${{ now }}"
+              extraction_method: workflow_v4_rejected
+        on-failure:
+          continue: true
+
+      - name: retry_gate_rejection_persist_failure
+        type: loop.continue
+        if: "${{ steps.persist_gate_rejection.error != null }}"
+
+      - name: stop_rejected_report
+        type: loop.continue
+        if: "variables.gate_is_intelligence: false"
 
       - name: extract_iocs
         type: kibana.request
         with:
           method: POST
-          path: "/s/{{ variables.routeSpaceId }}/internal/threat_intel/extract_iocs"
+          path: "/internal/threat_intel/extract_iocs"
           headers:
             elastic-api-version: "1"
             x-elastic-internal-origin: "kibana"
@@ -148,71 +171,44 @@ steps:
         on-failure:
           continue: true
 
-      # Taxonomy + actionability. Do not set use_server_info: true (breaks on Cloud).
-      - name: enrich_taxonomy
+      # One Sonnet read consolidates taxonomy, severity, behaviors, artifacts,
+      # and semantic verdicts over byte-exact deterministic IOC candidate IDs.
+      - name: enrich_report_core
         type: kibana.request
         with:
           method: POST
-          path: "/s/{{ variables.routeSpaceId }}/internal/threat_intel/enrich_taxonomy"
+          path: "/internal/threat_intel/enrich_report_core"
           headers:
             elastic-api-version: "1"
             x-elastic-internal-origin: "kibana"
           body:
-            text: "{{ steps.load_full_doc.output.hits.hits[0]._source.content.body_text | slice: 0, 30000 }}"
-            report_id: "{{ foreach.item._id }}"
+            text: "{{ steps.load_full_doc.output.hits.hits[0]._source.content.body_text }}"
             title: "{{ steps.load_full_doc.output.hits.hits[0]._source.content.title }}"
+            article_url: "{{ steps.load_full_doc.output.hits.hits[0]._source.content.article_url }}"
+            report_id: "{{ foreach.item._id }}"
+            iocs: "${{ steps.extract_iocs.output.iocs }}"
+            ioc_set_hash: "{{ steps.extract_iocs.output.ioc_set_hash }}"
+            truncated: "${{ steps.extract_iocs.output.truncated | default: false }}"
         on-failure:
           continue: true
 
-      - name: classify_severity
-        type: kibana.request
-        with:
-          method: POST
-          path: "/s/{{ variables.routeSpaceId }}/internal/threat_intel/classify_severity"
-          headers:
-            elastic-api-version: "1"
-            x-elastic-internal-origin: "kibana"
-          body:
-            text: "{{ steps.load_full_doc.output.hits.hits[0]._source.content.body_text | slice: 0, 30000 }}"
-            report_id: "{{ foreach.item._id }}"
-            title: "{{ steps.load_full_doc.output.hits.hits[0]._source.content.title }}"
-            categories: "${{ steps.enrich_taxonomy.output.categories }}"
-            ioc_count: "${{ steps.extract_iocs.output.count | default: 0 }}"
-        on-failure:
-          continue: true
-
-      # `${{ }}` keeps numbers typed. Neutral defaults when taxonomy failed.
+      # `${{ }}` keeps numbers typed.
       - name: capture_ranking_signals
         type: data.set
         with:
-          relevance: "${{ steps.enrich_taxonomy.output.relevance | default: 0.5 }}"
-          # False is Liquid-falsy, so `default:` covers both missing and explicit false.
-          diamond_suitable: "${{ steps.enrich_taxonomy.output.diamond_suitable | default: false }}"
-          # Sentinel so related-report `terms` never receives an empty array.
-          technique_ids: "${{ '__no_techniques__' | split: ',' }}"
+          relevance: "${{ steps.enrich_report_core.output.relevance | default: 0.5 }}"
+          diamond_suitable: "${{ steps.enrich_report_core.output.diamond_suitable | default: false }}"
 
-      # Keep `pending` unless extraction, taxonomy, and severity all succeeded.
-      # Probe step health via `.error`, not payload fields: every taxonomy
-      # field has a legitimate falsy value (relevance 0.0, diamond_suitable
-      # false, empty categories/regions). All three steps use on-failure
-      # continue, so a failure still reaches this gate with `.error` set. The
-      # enrich taxonomy route returns non-2xx when Zod validation fails.
-      #
-      # extract_iocs has to be in this set. It is the step whose output the rest
-      # of the pipeline actually consumes: promote_threat_indicators only reads
-      # reports that have extracted.iocs, and load_pending_reports only re-reads
-      # reports still marked pending. Leaving it out meant one transient IOC-route
-      # failure marked the report complete with no IOCs, and nothing ever looked
-      # at it again.
+      # Core persistence is retryable independently of optional Diamond.
       - name: mark_llm_enrich_complete
         type: data.set
-        if: "${{ steps.extract_iocs.error == null and steps.classify_severity.error == null and steps.enrich_taxonomy.error == null }}"
+        if: "${{ steps.extract_iocs.error == null and steps.enrich_report_core.error == null }}"
         with:
-          extraction_method: workflow_v2
+          extraction_method: workflow_v4
 
       - name: mark_llm_enrich_incomplete
         type: data.set
-        if: "${{ steps.extract_iocs.error != null or steps.classify_severity.error != null or steps.enrich_taxonomy.error != null }}"
+        if: "${{ steps.extract_iocs.error != null or steps.enrich_report_core.error != null }}"
         with:
           extraction_method: pending
 
@@ -222,12 +218,12 @@ steps:
         if: "variables.diamond_suitable: true"
         with:
           method: POST
-          path: "/s/{{ variables.routeSpaceId }}/internal/threat_intel/extract_diamond"
+          path: "/internal/threat_intel/extract_diamond"
           headers:
             elastic-api-version: "1"
             x-elastic-internal-origin: "kibana"
           body:
-            text: "{{ steps.load_full_doc.output.hits.hits[0]._source.content.body_text | slice: 0, 30000 }}"
+            text: "{{ steps.load_full_doc.output.hits.hits[0]._source.content.body_text }}"
             report_id: "{{ foreach.item._id }}"
         on-failure:
           continue: true
@@ -250,6 +246,10 @@ steps:
                 model_id: "{{ steps.extract_diamond.output.model_id }}"
                 extracted_at: "{{ steps.extract_diamond.output.extracted_at }}"
                 extraction_mode: "{{ steps.extract_diamond.output.extraction_mode }}"
+                context_mode: "{{ steps.extract_diamond.output.context_mode }}"
+                context_coverage: "${{ steps.extract_diamond.output.context_coverage }}"
+                context_chars: "${{ steps.extract_diamond.output.context_chars }}"
+                source_chars: "${{ steps.extract_diamond.output.source_chars }}"
         on-failure:
           continue: true
 
@@ -259,9 +259,14 @@ steps:
       # boost 5 (exact ioc_set_hash) or boost 2 + score_mode sum (IOC overlap)
       # is what clears it. Technique overlap is omitted on purpose: common
       # ATT&CK IDs have low IDF and never cleared min_score 4 alone.
+      # ioc_set_hash stays the extract_iocs fingerprint (deterministic). Do not
+      # substitute enrich_report_core's adjudicated anchors here: the boost: 5
+      # term was calibrated against a hash that cannot move with model verdicts.
       - name: find_related_reports
         type: elasticsearch.search
-        if: "steps.extract_iocs.output.ioc_set_hash : *"
+        # Must also gate on enrich_report_core succeeding: anchor_iocs below
+        # comes from its output, and an error leaves that undefined.
+        if: "${{ steps.extract_iocs.output.ioc_set_hash != null and steps.enrich_report_core.error == null }}"
         with:
           index: .kibana-threat-reports
           size: 15
@@ -275,6 +280,12 @@ steps:
                 - ids:
                     values:
                       - "{{ foreach.item._id }}"
+                # Hard-rejected reports keep stale ioc_set_hash / iocs for forensics;
+                # they must not surface as related intelligence.
+                - term:
+                    lineage.extraction_method: workflow_v4_rejected
+                - term:
+                    extracted.gate.is_intelligence: false
               should:
                 - term:
                     extracted.ioc_set_hash:
@@ -287,12 +298,13 @@ steps:
                     boost: 2
                     query:
                       terms:
-                        extracted.iocs.value: "${{ steps.extract_iocs.output.iocs | map: 'value' }}"
+                        extracted.iocs.value: "${{ steps.enrich_report_core.output.anchor_iocs | map: 'value' }}"
         on-failure:
           continue: true
 
       - name: persist_extractions
         type: elasticsearch.update
+        if: "${{ steps.enrich_report_core.error == null }}"
         with:
           # Concrete `_index`; wildcards are rejected on update.
           index: "{{ foreach.item._index }}"
@@ -301,10 +313,25 @@ steps:
           # Omit `default: []`; Liquid has no array literal and would drop the field.
           doc:
             extracted:
-              iocs: "${{ steps.extract_iocs.output.iocs }}"
+              iocs: "${{ steps.enrich_report_core.output.iocs }}"
               ioc_set_hash: "{{ steps.extract_iocs.output.ioc_set_hash }}"
-              categories: "${{ steps.enrich_taxonomy.output.categories }}"
+              categories: "${{ steps.enrich_report_core.output.categories }}"
+              behaviors: "${{ steps.enrich_report_core.output.behaviors }}"
+              artifacts: "${{ steps.enrich_report_core.output.artifacts }}"
               relevance: "${{ variables.relevance }}"
+              core:
+                model_id: "{{ steps.enrich_report_core.output.model_id }}"
+                context_mode: "{{ steps.enrich_report_core.output.context.mode }}"
+                context_coverage: "${{ steps.enrich_report_core.output.context.coverage }}"
+                context_chars: "${{ steps.enrich_report_core.output.context.selected_chars }}"
+                source_chars: "${{ steps.enrich_report_core.output.context.original_chars }}"
+                adjudication:
+                  provider: "{{ steps.enrich_report_core.output.adjudication.provider }}"
+                  reviewed: "${{ steps.enrich_report_core.output.adjudication.reviewed }}"
+                  approved: "${{ steps.enrich_report_core.output.adjudication.approved }}"
+                  downgraded: "${{ steps.enrich_report_core.output.adjudication.downgraded }}"
+                  deterministic_references: "${{ steps.enrich_report_core.output.adjudication.deterministic_references }}"
+                  deferred_unreviewed: "${{ steps.enrich_report_core.output.adjudication.deferred_unreviewed }}"
               diamond:
                 suitable: "${{ variables.diamond_suitable }}"
               gate:
@@ -315,8 +342,10 @@ steps:
                 has_original_commentary: "${{ variables.gate_has_original_commentary }}"
                 reason: "{{ variables.gate_reason }}"
                 assessed_at: "${{ now }}"
+                context_mode: "{{ steps.assess_relevance.output.context.mode }}"
+                context_coverage: "${{ steps.assess_relevance.output.context.coverage }}"
             geography:
-              regions: "${{ steps.enrich_taxonomy.output.regions }}"
+              regions: "${{ steps.enrich_report_core.output.regions }}"
             lineage:
               extracted_at: "${{ now }}"
               extraction_method: "{{ variables.extraction_method | default: 'pending' }}"
@@ -325,17 +354,17 @@ steps:
         on-failure:
           continue: true
 
-      # Severity only after a successful classify. Incomplete LLM runs keep ingest severity.
+      # Severity is part of the same Sonnet core result.
       - name: persist_classified_severity
         type: elasticsearch.update
-        if: "steps.classify_severity.output.level : *"
+        if: "steps.enrich_report_core.output.severity.level : *"
         with:
           index: "{{ foreach.item._index }}"
           id: "{{ foreach.item._id }}"
           doc:
             severity:
-              level: "{{ steps.classify_severity.output.level }}"
-              score: "${{ steps.classify_severity.output.score }}"
-            rank_score: "${{ steps.classify_severity.output.score | times: variables.relevance }}"
+              level: "{{ steps.enrich_report_core.output.severity.level }}"
+              score: "${{ steps.enrich_report_core.output.severity.score }}"
+            rank_score: "${{ steps.enrich_report_core.output.severity.score | times: variables.relevance }}"
         on-failure:
           continue: true

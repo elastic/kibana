@@ -16,15 +16,30 @@ import type { ToolManager } from '@kbn/agent-builder-server/runner';
 import type { ToolRegistry } from '@kbn/agent-builder-server';
 import type { ProcessedConversationRound } from '../../../../test_utils/timeline';
 import {
+  estimateFailedEntryTokens,
   estimateMessagesTokens,
   estimatePerRoundTokens as estimateTimelineTokens,
+  survivingFailedEntryTokens,
 } from './estimate_conversation_tokens';
-import { timelineFromRounds } from '../../../../test_utils/timeline';
+import {
+  eventsNativeConversation,
+  failedExec0Timeline,
+  processedCustomEventFixture,
+  timelineFromRounds,
+} from '../../../../test_utils/timeline';
+import type { ProcessedTimelineEvent } from './context_timeline';
+import { eventsForContext, groupTimelineRounds } from './context_timeline';
+import { roundToLangchain } from './to_langchain_messages';
+import { createSummarizationTransformer, type ToolSummarizationDeps } from './tool_summarization';
 
 const estimatePerRoundTokens = (
   rounds: ProcessedConversationRound[],
-  deps: Parameters<typeof estimateTimelineTokens>[1]
-) => estimateTimelineTokens(timelineFromRounds(rounds), deps);
+  deps: ToolSummarizationDeps
+) => estimateTimelineTokens(timelineFromRounds(rounds), createSummarizationTransformer(deps));
+
+/** A processed round fixture with a distinct id and a fixed started_at for timeline ordering tests. */
+const roundAt = (id: string, started_at: string): ProcessedConversationRound =>
+  ({ ...createMockRound(id), id, started_at } as unknown as ProcessedConversationRound);
 
 const createMockToolManager = (
   summarizers: Map<
@@ -132,5 +147,59 @@ describe('estimatePerRoundTokens', () => {
     });
 
     expect(summarizedCounts[0]).toBeLessThan(rawCounts[0]);
+  });
+});
+
+describe('interrupted rounds', () => {
+  it('estimates an interrupted round including its steps and the notice', async () => {
+    const toolStep = createMockRound('r'.repeat(200)).steps[0];
+    const timeline = eventsForContext(
+      eventsNativeConversation(failedExec0Timeline('r1', [toolStep]))
+    ).map((event) =>
+      event.type === 'user_message' ? { ...event, data: { ...event.data, attachments: [] } } : event
+    ) as ProcessedTimelineEvent[];
+    const transformer = createSummarizationTransformer({
+      toolManager: createMockToolManager(),
+      toolRegistry: createMockToolRegistry(),
+    });
+
+    const [tokens] = await estimateTimelineTokens(timeline, transformer);
+    const [round] = groupTimelineRounds(timeline);
+    const messages = await roundToLangchain(round);
+
+    expect(tokens).toBe(estimateMessagesTokens(messages));
+    expect(messages.some((message) => String(message.content).includes('<system_notice>'))).toBe(
+      true
+    );
+    expect(messages.some((message) => message.getType() === 'tool')).toBe(true);
+  });
+
+  describe('custom events', () => {
+    // r1 → N (between r1 and r2) → r2
+    const withNote: ProcessedTimelineEvent[] = [
+      ...timelineFromRounds([roundAt('r1', '2026-01-01T00:00:00.000Z')]),
+      processedCustomEventFixture({
+        id: 'note',
+        created_at: '2026-01-01T00:01:00.000Z',
+        representation: 'n'.repeat(4000),
+      }),
+      ...timelineFromRounds([roundAt('r2', '2026-01-01T00:02:00.000Z')]),
+    ];
+
+    it('estimates each custom event as its rendered notice, keyed by event id', () => {
+      const counts = estimateFailedEntryTokens(withNote);
+
+      expect(Array.from(counts.keys())).toEqual(['note']);
+      // ~4000 chars of representation (~1000 tokens) + the wrapper
+      expect(counts.get('note')!).toBeGreaterThan(1000);
+    });
+
+    it('sums only the custom events that survive the cut', () => {
+      const counts = estimateFailedEntryTokens(withNote);
+
+      expect(survivingFailedEntryTokens(withNote, 0, counts)).toBe(counts.get('note'));
+      // cutting at r2 drops N, which is older than r2
+      expect(survivingFailedEntryTokens(withNote, 1, counts)).toBe(0);
+    });
   });
 });

@@ -107,8 +107,13 @@ describe('wrapManagementApiForScheduledExecution', () => {
   it('delegates non-runWorkflow methods to the wrapped api unchanged', async () => {
     const management = buildManagementApi();
 
-    await wrapManagementApiForScheduledExecution(management).getWorkflow('workflow-1', 'default');
+    const request = {} as Parameters<ManagementApi['getWorkflow']>[2];
+    await wrapManagementApiForScheduledExecution(management).getWorkflow(
+      'workflow-1',
+      'default',
+      request
+    );
 
-    expect(management.getWorkflow).toHaveBeenCalledWith('workflow-1', 'default');
+    expect(management.getWorkflow).toHaveBeenCalledWith('workflow-1', 'default', request);
   });
 });

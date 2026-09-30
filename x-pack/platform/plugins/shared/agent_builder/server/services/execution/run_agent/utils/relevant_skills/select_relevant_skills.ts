@@ -77,7 +77,8 @@ const toRelevantSkill = (
 
 /**
  * Builds a bounded, plain-text slice of recent conversation history to give the selector context
- * beyond the current message. Structurally typed so it accepts both raw and processed rounds.
+ * beyond the current message. Structurally typed so it accepts both raw and processed rounds, and
+ * entries with no response at all: a user message posted without triggering the agent.
  *
  * Applies a per-message char cap before joining rather than a single tail slice on the whole
  * blob: with a tail slice, an older user question (which is what the selector most needs to see)
@@ -93,13 +94,19 @@ export const buildRecentContext = (
     return '';
   }
 
-  // Framing overhead per round: "User: " (6) + "\n" (1) + "Assistant: " (11) = 18 chars.
-  // Separator "\n\n" (2 chars) between rounds — (recent.length - 1) of those.
-  const framingChars = 18 * recent.length + 2 * (recent.length - 1);
+  // A user message posted without triggering the agent has no response to show.
+  const answered = recent.filter((round) => round.response !== undefined).length;
 
-  // Each round contributes a user message + an assistant response. Divide the remaining
-  // (post-framing) budget across 2 * recent.length message slots.
-  const perMessageBudget = Math.max(1, Math.floor((maxChars - framingChars) / (recent.length * 2)));
+  // Framing overhead: "User: " (6) per entry, plus "\n" (1) + "Assistant: " (11) for the answered
+  // ones. Separator "\n\n" (2 chars) between entries — (recent.length - 1) of those.
+  const framingChars = 6 * recent.length + 12 * answered + 2 * (recent.length - 1);
+
+  // Every entry contributes a user message, answered ones also a response. Divide the remaining
+  // (post-framing) budget across those message slots.
+  const perMessageBudget = Math.max(
+    1,
+    Math.floor((maxChars - framingChars) / (recent.length + answered))
+  );
 
   const truncateMessage = (message: string): string => {
     if (message.length <= perMessageBudget) {
@@ -111,12 +118,13 @@ export const buildRecentContext = (
   };
 
   const text = recent
-    .map(
-      (round) =>
-        `User: ${truncateMessage(round.input?.message ?? '')}\nAssistant: ${truncateMessage(
-          round.response?.message ?? ''
-        )}`
-    )
+    .map((round) => {
+      const user = `User: ${truncateMessage(round.input?.message ?? '')}`;
+
+      return round.response === undefined
+        ? user
+        : `${user}\nAssistant: ${truncateMessage(round.response.message ?? '')}`;
+    })
     .join('\n\n');
 
   // Final backstop: per-message truncation accounts for framing so the total should be under

@@ -12,11 +12,15 @@ import type { SpacesServiceStart } from '@kbn/spaces-plugin/server';
 import type { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
 import { registerCreateThreatReportRoute } from './create_threat_report';
 import { registerExtractIocsRoute } from './extract_iocs';
+import { registerEnrichReportCoreRoute } from './enrich_report_core';
 import { registerExtractDiamondRoute } from './extract_diamond';
 import { registerEnrichTaxonomyRoute } from './enrich_taxonomy';
 import { registerClassifySeverityRoute } from './classify_severity';
 import { registerAssessRelevanceRoute } from './assess_relevance';
 import { registerListSourcesRoute, registerUpdateSourceRoute } from './list_sources';
+import { registerFindThreatReportsRoute } from './find_threat_reports';
+import { registerGetThreatReportRoute } from './get_threat_report';
+import { registerReadinessRoute } from './readiness';
 
 export interface RouteRegistrationDeps {
   router: IRouter;
@@ -57,10 +61,14 @@ export interface RouteRegistrationDeps {
 export const registerRoutes = (deps: RouteRegistrationDeps): void => {
   registerCreateThreatReportRoute(deps);
   registerExtractIocsRoute(deps);
+  registerEnrichReportCoreRoute(deps);
   registerExtractDiamondRoute(deps);
   registerEnrichTaxonomyRoute(deps);
   registerClassifySeverityRoute(deps);
   registerAssessRelevanceRoute(deps);
   registerListSourcesRoute(deps);
   registerUpdateSourceRoute(deps);
+  registerFindThreatReportsRoute(deps);
+  registerGetThreatReportRoute(deps);
+  registerReadinessRoute(deps);
 };

@@ -14,6 +14,7 @@ import { getConnectorProvider } from '@kbn/inference-common';
 import { getCurrentSpaceId } from '../../../utils/spaces';
 import { withAgentSpan } from '../../../tracing';
 import { createAgentHandler } from '../run_agent/create_handler';
+import { resolveTelemetryOrigin } from '../utils/pending_round';
 import {
   createAgentEventEmitter,
   forkContextForAgentRun,
@@ -43,6 +44,7 @@ export const createAgentHandlerContext = async <TParams = Record<string, unknown
     toolsService,
     attachmentsService,
     renderersService,
+    conversationEventsService,
     resultStore,
     skillsStore,
     attachmentStateManager,
@@ -117,6 +119,7 @@ export const createAgentHandlerContext = async <TParams = Record<string, unknown
       runner: manager.getRunner(),
     }),
     renderers: renderersService,
+    conversationEvents: conversationEventsService,
     conversationTemplates,
     plugins: createPluginsService({ pluginsServiceStart, request }),
     toolManager,
@@ -156,6 +159,10 @@ export const runAgent = async ({
     agentName: agent.name,
     executionId,
     conversationId: agentParams.conversation?.id,
+    origin: resolveTelemetryOrigin({
+      conversation: agentParams.conversation,
+      requestOrigin: agentParams.origin?.type,
+    }),
   });
   const manager = parentManager.createChild(forkedContext);
 
