@@ -11,7 +11,12 @@ import {
   AD2_SCENARIO_ALL_INDICES,
 } from '@kbn/evals-suite-attack-discovery-agent-builder';
 import { toAttackAlertDocument } from './attack_alert';
-import { FP_TP_ATTACK_INDEX, FP_TP_ENTITY_READ_ALIAS, FP_TP_TWIN_SEED_LABEL } from './constants';
+import {
+  FP_TP_ATTACK_ADHOC_INDEX,
+  FP_TP_ATTACK_INDEX,
+  FP_TP_ENTITY_READ_ALIAS,
+  FP_TP_TWIN_SEED_LABEL,
+} from './constants';
 import { toEntityCrudRequest } from './entity_crud';
 import type { FpTpEntityCrudRequest } from './entity_crud';
 import { shiftTwinToNow } from './shift_timestamps';
@@ -364,7 +369,7 @@ export const cleanupManualSeedLive = async (
   esClient: EsClient,
   events: ReadonlyArray<{ index: string; id: string }> = []
 ): Promise<void> => {
-  for (const index of [...AD2_SCENARIO_ALL_INDICES, FP_TP_ATTACK_INDEX]) {
+  for (const index of [...AD2_SCENARIO_ALL_INDICES, FP_TP_ATTACK_INDEX, FP_TP_ATTACK_ADHOC_INDEX]) {
     await deleteBySeedLabel(esClient, index);
   }
   await deleteDocumentsById(esClient, events);

@@ -17,6 +17,7 @@ export type {
 } from './chain';
 export type { FpTpEntityRoleKey } from './chain_entities';
 export {
+  FP_TP_ATTACK_ADHOC_INDEX,
   FP_TP_ATTACK_INDEX,
   FP_TP_BASE_TIME,
   FP_TP_ENTITY_INDEX,

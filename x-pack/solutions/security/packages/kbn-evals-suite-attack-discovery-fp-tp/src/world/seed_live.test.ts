@@ -12,7 +12,7 @@ import {
   ENCODED_POWERSHELL_ATTACK_ID,
   getEncodedPowershellIds,
 } from '../scenarios/encoded_powershell';
-import { FP_TP_ATTACK_INDEX } from './constants';
+import { FP_TP_ATTACK_ADHOC_INDEX, FP_TP_ATTACK_INDEX } from './constants';
 import {
   buildLiveSeedPlan,
   cleanupManualSeedLive,
@@ -85,6 +85,17 @@ describe('cleanupManualSeedLive', () => {
         index: 'logs-endpoint.events.process-default',
         query: { ids: { values: [ids.process1Id] } },
       })
+    );
+  });
+
+  it('also deletes the former ad-hoc Attack Discovery index during the transition', async () => {
+    const deleteByQuery = jest.fn().mockResolvedValue({});
+
+    await cleanupManualSeedLive({ deleteByQuery } as unknown as EsClient);
+
+    const calledIndices = deleteByQuery.mock.calls.map(([params]) => params.index);
+    expect(calledIndices).toEqual(
+      expect.arrayContaining([FP_TP_ATTACK_INDEX, FP_TP_ATTACK_ADHOC_INDEX])
     );
   });
 });

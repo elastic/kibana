@@ -24,5 +24,14 @@ export const FP_TP_ENTITY_READ_ALIAS = 'entities-latest-default';
 
 export const FP_TP_ATTACK_INDEX = '.alerts-security.attack.discovery.alerts-default';
 
+/**
+ * Former ad-hoc index the seeder wrote Attack Discovery documents to before
+ * this package switched to the product-managed `FP_TP_ATTACK_INDEX` data
+ * stream. Not written to anymore, but a classic-stack world seeded before the
+ * switch still has its document here, so cleanup must keep deleting from it
+ * during this transition.
+ */
+export const FP_TP_ATTACK_ADHOC_INDEX = '.adhoc.alerts-security.attack.discovery.alerts-default';
+
 /** Half-width of the raw-event window the analysis reads around the attack timestamp. */
 export const FP_TP_RAW_EVENT_WINDOW_MS = 2 * 60 * 60 * 1000;
