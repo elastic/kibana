@@ -11,8 +11,8 @@ import type { InferenceServerStart } from '@kbn/inference-plugin/server';
 import type { SearchInferenceEndpointsPluginStart } from '@kbn/search-inference-endpoints/server';
 import type { ConnectorTelemetryMetadata } from '@kbn/inference-common';
 import { createAgentNotFoundError } from '@kbn/agent-builder-common';
-import type { ConversationService } from '../../conversation';
 import { AGENT_BUILDER_INFERENCE_FEATURE_ID } from '@kbn/agent-builder-common/constants';
+import type { ConversationService } from '../../conversation';
 import type { AgentsServiceStart } from '../../agents';
 import { createModelProvider } from '../runner/model_provider';
 
