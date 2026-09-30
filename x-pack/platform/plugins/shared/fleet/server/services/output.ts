@@ -13,6 +13,7 @@ import { indexBy } from 'lodash/fp';
 
 import type {
   ElasticsearchClient,
+  KibanaRequest,
   SavedObject,
   SavedObjectsClientContract,
 } from '@kbn/core/server';
@@ -93,6 +94,7 @@ import {
   canEnableSyncIntegrations,
   createOrUpdateFleetSyncedIntegrationsIndex,
 } from './setup/fleet_synced_integrations';
+import { assertPrivilegesInSpaces } from './security/assert_privileges_in_spaces';
 
 type Nullable<T> = { [P in keyof T]: T[P] | null };
 
@@ -926,9 +928,10 @@ class OutputService {
 
   public async delete(
     id: string,
-    { fromPreconfiguration = false }: { fromPreconfiguration?: boolean } = {
-      fromPreconfiguration: false,
-    }
+    {
+      fromPreconfiguration = false,
+      request,
+    }: { fromPreconfiguration?: boolean; request?: KibanaRequest } = {}
   ) {
     const logger = appContextService.getLogger();
     logger.debug(`Deleting output ${id}`);
@@ -947,6 +950,41 @@ class OutputService {
 
     if (originalOutput.is_default_monitoring && !fromPreconfiguration) {
       throw new OutputUnauthorizedError(`Default monitoring output ${id} cannot be deleted.`);
+    }
+
+    if (request) {
+      const security = appContextService.getSecurity();
+      if (security && security.authz.mode.useRbacForRequest(request)) {
+        // Collect agent-policy and package-policy spaces before any mutation.
+        // Fail closed if SO_SEARCH_LIMIT is hit.
+        const [agentPolicySpaces, packagePolicySpaces] = await Promise.all([
+          agentPolicyService.getSpacesForPoliciesUsingOutput(id),
+          packagePolicyService.getSpacesForPoliciesUsingOutput(id),
+        ]);
+        if (agentPolicySpaces.truncated || packagePolicySpaces.truncated) {
+          throw new OutputUnauthorizedError(
+            `Unable to verify delete authorization for output ${id}: too many agent policies to enumerate`
+          );
+        }
+        const errorMessage = `Insufficient privileges to delete output ${id}: it is used by agent policies in spaces you are not authorized to access`;
+        // Agent-policy spaces only need fleet-agent-policies-all.
+        // Package-policy spaces also need integrations-all because removeOutputFromAll
+        // rewrites package policies too. Check them separately so a user with
+        // integrations-all only in the spaces that actually have package policies
+        // is not incorrectly blocked in agent-only spaces.
+        await assertPrivilegesInSpaces({
+          request,
+          spaceIds: agentPolicySpaces.spaceIds,
+          apiPrivileges: ['fleet-agent-policies-all'],
+          errorMessage,
+        });
+        await assertPrivilegesInSpaces({
+          request,
+          spaceIds: packagePolicySpaces.spaceIds,
+          apiPrivileges: ['integrations-all', 'fleet-agent-policies-all'],
+          errorMessage,
+        });
+      }
     }
 
     await packagePolicyService.removeOutputFromAll(

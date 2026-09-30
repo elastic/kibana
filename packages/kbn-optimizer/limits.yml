@@ -1,8 +1,8 @@
 pageLoadAssetSize:
   actions: 20500
   advancedSettings: 6196
-  agentBuilder: 48000
-  agentBuilderPlatform: 8886
+  agentBuilder: 51600
+  agentBuilderPlatform: 11500
   aiAssistantManagementSelection: 11569
   aiops: 15227
   alerting: 22371
@@ -54,7 +54,7 @@ pageLoadAssetSize:
   embeddable: 16634
   embeddableAlertsTable: 6524
   enterpriseSearch: 37565
-  entityStore: 9718
+  entityStore: 12700
   esql: 21193
   esqlDataGrid: 10209
   esUiShared: 101220
