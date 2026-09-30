@@ -11,8 +11,10 @@ import { createServerStepDefinition } from '@kbn/workflows-extensions/server';
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import type { AgentBuilderPluginStart } from '@kbn/agent-builder-server';
 import { NIGHTSHIFT_INVESTIGATION_AGENT_ID } from '../agents/investigation';
+import type { InvestigationToolCall } from '../decision_trees/accessed_trees';
 import { runMemoryOptimize } from '../memory/register_memory';
 import type { NightshiftTelemetryClient } from '../telemetry';
+import { toolCallsSchema } from './tool_calls_schema';
 import { withTimeout } from './with_timeout';
 
 const MAX_ROUND_TEXT_LENGTH = 65_536;
@@ -57,6 +59,9 @@ export const memoryOptimizeStepDefinition = ({
         .max(1024)
         .optional()
         .describe('Supported agent policy selector; never used as a storage boundary.'),
+      tool_calls: toolCallsSchema.describe(
+        'Investigator tool calls from this round (parameters only). Lets the optimizer see what the investigator queried.'
+      ),
       recalled_ids: z
         .array(z.string().max(2_000))
         .max(100)
@@ -121,6 +126,7 @@ export const memoryOptimizeStepDefinition = ({
               agentId: context.input.agent_id,
               userMessage: context.input.prompt,
               assistantMessage: context.input.response,
+              toolCalls: (context.input.tool_calls ?? []) as InvestigationToolCall[],
               recalledIds: context.input.recalled_ids ?? [],
               esClient: await getMemoryEsClient(),
               spaceId,

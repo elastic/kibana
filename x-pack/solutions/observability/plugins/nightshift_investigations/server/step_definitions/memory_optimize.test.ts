@@ -57,6 +57,7 @@ describe('memoryOptimizeStepDefinition', () => {
       round_connector_id?: string;
       conversation_id?: string;
       round_id?: string;
+      tool_calls?: unknown;
     },
     spaceId = 'default'
   ) =>
@@ -95,6 +96,7 @@ describe('memoryOptimizeStepDefinition', () => {
         sandbox_id: 'default__conv-1',
         conversation_id: 'conv-1',
         round_id: 'round-1',
+        tool_calls: [{ tool_id: 'nightshift_sandbox_bash', params: { command: 'ls' } }],
       })
     );
 
@@ -103,6 +105,7 @@ describe('memoryOptimizeStepDefinition', () => {
       agentId: 'nightshift.investigation',
       userMessage: 'why is checkout slow?',
       assistantMessage: 'Redis evictions.',
+      toolCalls: [{ tool_id: 'nightshift_sandbox_bash', params: { command: 'ls' } }],
       recalledIds: ['memory_a'],
       esClient,
       spaceId: 'default',

@@ -12,6 +12,8 @@ import {
   createInvestigationOptimizeTelemetry,
   createOptimizeModel,
 } from '../lib/create_optimize_model';
+import { SANDBOX_TOOL_IDS } from '../agents/investigation';
+import type { InvestigationToolCall } from '../decision_trees/accessed_trees';
 import { previewText } from './log_format';
 import { materializeMemory, type MaterializeMemoryResult } from './materialize';
 import {
@@ -61,11 +63,14 @@ export const hydrateMemoryWorkspace = async ({
   return materializeMemory({ session, store, logger, query });
 };
 
+const OPTIMIZER_TOOL_IDS: ReadonlySet<string> = new Set(SANDBOX_TOOL_IDS);
+
 export const runMemoryOptimize = async ({
   request,
   agentId,
   userMessage,
   assistantMessage,
+  toolCalls,
   recalledIds,
   esClient,
   spaceId,
@@ -79,6 +84,7 @@ export const runMemoryOptimize = async ({
   agentId?: string;
   userMessage: string;
   assistantMessage: string;
+  toolCalls: InvestigationToolCall[];
   recalledIds: string[];
   esClient: ElasticsearchClient;
   spaceId: string;
@@ -91,7 +97,7 @@ export const runMemoryOptimize = async ({
   logger.debug(
     `Memory optimize wiring space=${spaceId} agent=${agentId} ` +
       `connector=${requestedConnectorId ?? '(agent default)'} ` +
-      `recalledIds=${recalledIds.length} userChars=${userMessage.length} ` +
+      `recalledIds=${recalledIds.length} toolCalls=${toolCalls.length} userChars=${userMessage.length} ` +
       `assistantChars=${assistantMessage.length} user=${JSON.stringify(previewText(userMessage))}`
   );
 
@@ -119,6 +125,10 @@ export const runMemoryOptimize = async ({
     }),
     userMessage,
     assistantMessage,
+    // Same filter as Cortex: progress reports and other non-sandbox calls carry no environment facts.
+    toolCalls: toolCalls.filter(
+      ({ tool_id: toolId }) => toolId !== undefined && OPTIMIZER_TOOL_IDS.has(toolId)
+    ),
     logger,
   });
 };

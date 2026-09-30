@@ -55,8 +55,9 @@ triggers:
         tool_calls:
           type: array
           description: >
-            Tool calls from the completed round. Shows the Cortex optimizer which services,
-            indices, and integrations the investigator queried.
+            Tool calls from the completed round (parameters only). Shows the Cortex and
+            Semantic Memory optimizers which services, indices, and integrations the
+            investigator queried.
           items:
             type: object
             additionalProperties: true
@@ -105,3 +106,5 @@ steps:
               sandbox_id: '{{ steps.obtain_sandbox.output.sandbox_id }}'
               # Preserve the array for the step's bounded Zod schema.
               recalled_ids: '${{ inputs.workflow_context["nightshift.semantic_memory.recall"].data.recalled_ids }}'
+              # ${{ }} keeps the array. Liquid `{{ }}` stringifies it as "[object Object]…".
+              tool_calls: '${{ inputs.tool_calls }}'

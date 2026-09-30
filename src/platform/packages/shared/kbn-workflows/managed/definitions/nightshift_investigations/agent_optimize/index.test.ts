@@ -100,6 +100,7 @@ describe('nightshift agent optimize workflow', () => {
                   round_id: '{{ inputs.round_id }}',
                   recalled_ids:
                     '${{ inputs.workflow_context["nightshift.semantic_memory.recall"].data.recalled_ids }}',
+                  tool_calls: '${{ inputs.tool_calls }}',
                 }),
               }),
             ],

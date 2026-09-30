@@ -1311,6 +1311,55 @@ describe('isDuplicateExtraction / contentOverlap', () => {
 });
 
 describe('optimizeMemory', () => {
+  it('gives both LLM calls the round tool calls, not just the user and assistant text', async () => {
+    const store = createStore({
+      get: jest.fn().mockImplementation(async (id: string) => page(id)),
+    });
+    const proposeLabels = jest.fn().mockResolvedValue({ useful: [], harmful: [] });
+    const proposeExtractions = jest.fn().mockResolvedValue({ extractions: [], mergeTargets: [] });
+
+    await optimizeMemory({
+      store,
+      recalledIds: ['memory_a'],
+      proposeLabels,
+      proposeExtractions,
+      userMessage: 'why is checkout slow?',
+      assistantMessage: 'Redis evictions on checkout.',
+      toolCalls: [
+        { tool_id: 'nightshift_sandbox_bash', params: { command: 'esql "FROM metrics-redis*"' } },
+      ],
+      logger: loggerMock.create(),
+    });
+
+    for (const propose of [proposeLabels, proposeExtractions]) {
+      const { transcript } = propose.mock.calls[0][0];
+      expect(transcript).toContain('## Tool calls (parameters only)');
+      expect(transcript).toContain('nightshift_sandbox_bash');
+      expect(transcript).toContain('FROM metrics-redis*');
+      expect(transcript.indexOf('## User')).toBeLessThan(transcript.indexOf('## Tool calls'));
+      expect(transcript.indexOf('## Tool calls')).toBeLessThan(transcript.indexOf('## Assistant'));
+    }
+  });
+
+  it('marks an empty tool-call list explicitly', async () => {
+    const store = createStore();
+    const proposeExtractions = jest.fn().mockResolvedValue({ extractions: [], mergeTargets: [] });
+
+    await optimizeMemory({
+      store,
+      recalledIds: [],
+      proposeLabels: jest.fn(),
+      proposeExtractions,
+      userMessage: 'hi',
+      assistantMessage: 'hello',
+      toolCalls: [],
+      logger: loggerMock.create(),
+    });
+
+    expect(proposeExtractions.mock.calls[0][0].transcript).toContain(
+      '## Tool calls (parameters only)\n(none)'
+    );
+  });
   it('labels only recalled pages fetched by id, not store.list()', async () => {
     const store = createStore({
       get: jest.fn().mockImplementation(async (id: string) => page(id)),
@@ -1325,6 +1374,7 @@ describe('optimizeMemory', () => {
       proposeExtractions,
       userMessage: 'why is checkout slow?',
       assistantMessage: 'Redis evictions on checkout.',
+      toolCalls: [],
       logger: loggerMock.create(),
     });
 
@@ -1362,6 +1412,7 @@ describe('optimizeMemory', () => {
       proposeExtractions,
       userMessage: 'why is checkout slow?',
       assistantMessage: 'Redis evictions on checkout.',
+      toolCalls: [],
       logger: loggerMock.create(),
     });
 
@@ -1400,6 +1451,7 @@ describe('optimizeMemory', () => {
       userMessage:
         'why is checkout slow?\n\n<system_update>\nSemantic memories materialized this turn:\n- `/workspace/memories/memory_a.md` — Alpha\n</system_update>',
       assistantMessage: 'Redis evictions on checkout.',
+      toolCalls: [],
       logger: loggerMock.create(),
     });
 
@@ -1426,6 +1478,7 @@ describe('optimizeMemory', () => {
       proposeExtractions,
       userMessage: 'why is checkout slow?',
       assistantMessage: '   ',
+      toolCalls: [],
       logger: loggerMock.create(),
     });
 

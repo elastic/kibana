@@ -13,6 +13,8 @@ import type { Logger } from '@kbn/core/server';
 import type { BoundInferenceClient } from '@kbn/inference-common';
 import { isElasticsearchWriteConflict } from '@kbn/occ';
 import { formatPageRefs, previewText } from './log_format';
+import type { InvestigationToolCall } from '../decision_trees/accessed_trees';
+import { renderToolCalls } from '../cortex/optimize';
 import type { MemoryPageStore, VersionedMemoryPage } from './page_store';
 import {
   canonicalizeSlug,
@@ -31,6 +33,8 @@ export const MEMORY_CRITIQUE_SYSTEM_PROMPT = `You are an impartial analyst-LLM.
 **Objective**
 Evaluate how retrieved *memory* affected an agent's work.
 
+The transcript has the user task, the investigator's tool calls (parameters only: the commands and queries it ran, not their output), and its final answer. Use the tool calls to see whether the agent opened, followed, or contradicted a recalled memory.
+
 **Definitions**
 - *Positive signal* ("helpful"): memory was quoted, aligned with, or enabled correct decisions.
 - *Negative signal* ("harmful"): memory caused contradiction, wasted steps, or misinformation.
@@ -45,6 +49,8 @@ export const MEMORY_EXTRACT_SYSTEM_PROMPT = `You are a knowledge distillation en
 Focus strictly on durable, tool-output-verifiable knowledge about the customer's environment — how this organization's systems are structured and how its components behave. Do **not** extract generic tool, connector, or API usage — that belongs to the tool/connector's own documentation, not to per-customer memory.`;
 
 export const MEMORY_EXTRACT_GUIDELINES = `Review the conversation. Extract only facts that are directly substantiated by the transcript.
+
+The transcript has the user task, the investigator's tool calls (parameters only: the commands and queries it ran, not their output), and its final answer. The answer is the record of what the tools returned. Use the tool calls to confirm the names and structure the answer relies on (indices, services, fields, hosts); never extract a fact from a tool call alone.
 
 **EXTRACT** — durable customer-environment knowledge:
 - Organizational context: team ownership, on-call structure, service → team mapping, escalation paths, naming conventions.
@@ -1146,6 +1152,7 @@ export const optimizeMemory = async ({
   synthesizeMemoryGroup,
   userMessage,
   assistantMessage,
+  toolCalls,
   logger,
 }: {
   store: MemoryPageStore;
@@ -1155,12 +1162,15 @@ export const optimizeMemory = async ({
   synthesizeMemoryGroup?: SynthesizeMemoryGroup;
   userMessage: string;
   assistantMessage: string;
+  /** Investigator tool calls for the round; only their parameters are available. */
+  toolCalls: InvestigationToolCall[];
   logger: Logger;
 }): Promise<MemoryOptimizeSummary> => {
   logger.debug(
     `Memory optimize start recalledIds=${recalledIds.length} ` +
       `[${recalledIds.join(', ') || '(none)'}] userChars=${userMessage.length} ` +
-      `assistantChars=${assistantMessage.length} user=${JSON.stringify(previewText(userMessage))}`
+      `assistantChars=${assistantMessage.length} toolCalls=${toolCalls.length} ` +
+      `user=${JSON.stringify(previewText(userMessage))}`
   );
   if (recalledIds.length === 0 && assistantMessage.trim().length === 0) {
     logger.info('Memory optimizer skipped — no recalled memories and empty assistant message');
@@ -1181,6 +1191,9 @@ export const optimizeMemory = async ({
   const transcript = [
     '## User',
     task.slice(0, MAX_TRANSCRIPT_CHARS),
+    '',
+    '## Tool calls (parameters only)',
+    renderToolCalls(toolCalls),
     '',
     '## Assistant',
     assistantMessage.slice(0, MAX_TRANSCRIPT_CHARS),
