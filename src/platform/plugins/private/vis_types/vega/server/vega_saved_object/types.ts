@@ -8,6 +8,12 @@
  */
 
 import type { TypeOf } from '@kbn/config-schema';
+import type { StoredAsCodeFilter } from '@kbn/as-code-filters-transforms';
 import type { vegaLibraryItemSavedObjectSchema } from './vega_saved_object';
 
-export type StoredVegaLibraryItemState = TypeOf<typeof vegaLibraryItemSavedObjectSchema>;
+export type StoredVegaLibraryItemState = Omit<
+  TypeOf<typeof vegaLibraryItemSavedObjectSchema>,
+  'filters'
+> & {
+  filters?: StoredAsCodeFilter[];
+};

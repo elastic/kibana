@@ -11,6 +11,8 @@ import { z } from '@kbn/zod';
 import {
   asCodeMetaSchema,
   asCodePaginationResponseMetaSchema,
+  MAX_DESCRIPTION_LENGTH,
+  MAX_TITLE_LENGTH,
   PAGINATION_MAX_SIZE,
 } from '@kbn/as-code-shared-schemas';
 
@@ -25,9 +27,13 @@ export const searchResponseBodySchema = z
               .object({
                 description: z
                   .string()
+                  .max(MAX_DESCRIPTION_LENGTH)
                   .optional()
                   .meta({ description: 'A short description of the Vega library item.' }),
-                title: z.string().meta({ description: 'The Vega library item title.' }),
+                title: z
+                  .string()
+                  .max(MAX_TITLE_LENGTH)
+                  .meta({ description: 'The Vega library item title.' }),
               })
               .strict(),
             meta: asCodeMetaSchema,

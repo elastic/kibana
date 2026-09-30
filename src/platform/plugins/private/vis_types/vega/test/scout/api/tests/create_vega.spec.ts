@@ -14,6 +14,9 @@ import {
   apiTest,
   COMMON_HEADERS,
   VEGA_API_PATH,
+  VEGA_FILTER_DATA_VIEW_ID,
+  VEGA_FILTERS,
+  VEGA_QUERY,
   VEGA_SPEC_HJSON,
   VEGA_SPEC_JSON,
 } from '../fixtures';
@@ -70,6 +73,68 @@ apiTest.describe('vega - create', { tag: tags.deploymentAgnostic }, () => {
       expect(response.body.data.spec).toStrictEqual({ format: 'json', value: {} });
     }
   );
+
+  apiTest(
+    'should create a vega library item with filters and query',
+    async ({ apiClient, kbnClient }) => {
+      const response = await apiClient.post(VEGA_API_PATH, {
+        headers: { ...COMMON_HEADERS, ...editorCredentials.apiKeyHeader },
+        body: {
+          title: 'My Filtered Chart',
+          spec: VEGA_SPEC_HJSON,
+          query: VEGA_QUERY,
+          filters: VEGA_FILTERS,
+        },
+        responseType: 'json',
+      });
+
+      expect(response).toHaveStatusCode(201);
+      expect(response.body.data.query).toStrictEqual(VEGA_QUERY);
+      expect(response.body.data.filters).toStrictEqual(VEGA_FILTERS);
+
+      const savedObject = await kbnClient.savedObjects.get({
+        type: 'vega',
+        id: response.body.id,
+      });
+      expect(savedObject.attributes.filters[0].data_view_id).toBeUndefined();
+      expect(savedObject.attributes.filters[0].data_view_ref_name).toBe('filters[0].data_view_id');
+      expect(savedObject.references).toStrictEqual([
+        {
+          name: 'filters[0].data_view_id',
+          type: 'index-pattern',
+          id: VEGA_FILTER_DATA_VIEW_ID,
+        },
+      ]);
+    }
+  );
+
+  apiTest('validation - returns 400 for an invalid filter', async ({ apiClient }) => {
+    const response = await apiClient.post(VEGA_API_PATH, {
+      headers: { ...COMMON_HEADERS, ...editorCredentials.apiKeyHeader },
+      body: {
+        title: 'My Vega Chart',
+        spec: VEGA_SPEC_HJSON,
+        filters: [{ type: 'condition', condition: { field: 'a', operator: 'unknown' } }],
+      },
+      responseType: 'json',
+    });
+
+    expect(response).toHaveStatusCode(400);
+  });
+
+  apiTest('validation - returns 400 for an invalid query language', async ({ apiClient }) => {
+    const response = await apiClient.post(VEGA_API_PATH, {
+      headers: { ...COMMON_HEADERS, ...editorCredentials.apiKeyHeader },
+      body: {
+        title: 'My Vega Chart',
+        spec: VEGA_SPEC_HJSON,
+        query: { expression: 'a', language: 'sql' },
+      },
+      responseType: 'json',
+    });
+
+    expect(response).toHaveStatusCode(400);
+  });
 
   apiTest('validation - returns 400 when title is missing', async ({ apiClient }) => {
     const response = await apiClient.post(VEGA_API_PATH, {

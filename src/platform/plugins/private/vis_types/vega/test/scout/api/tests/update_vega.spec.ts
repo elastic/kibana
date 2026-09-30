@@ -10,7 +10,15 @@
 import type { RoleApiCredentials } from '@kbn/scout';
 import { expect } from '@kbn/scout/api';
 import { tags } from '@kbn/scout';
-import { apiTest, COMMON_HEADERS, VEGA_API_PATH, VEGA_SPEC_HJSON } from '../fixtures';
+import {
+  apiTest,
+  COMMON_HEADERS,
+  VEGA_API_PATH,
+  VEGA_FILTER_DATA_VIEW_ID,
+  VEGA_FILTERS,
+  VEGA_QUERY,
+  VEGA_SPEC_HJSON,
+} from '../fixtures';
 
 apiTest.describe('vega - update', { tag: tags.deploymentAgnostic }, () => {
   let editorCredentials: RoleApiCredentials;
@@ -46,6 +54,52 @@ apiTest.describe('vega - update', { tag: tags.deploymentAgnostic }, () => {
     expect(response.body.id).toBe(createdId);
     expect(response.body.data.title).toBe('Updated Title');
   });
+
+  apiTest(
+    'should add, then clear filters, query, and references',
+    async ({ apiClient, kbnClient }) => {
+      const withFilters = await apiClient.put(`${VEGA_API_PATH}/${createdId}`, {
+        headers: { ...COMMON_HEADERS, ...editorCredentials.apiKeyHeader },
+        body: {
+          title: 'Filtered Title',
+          spec: VEGA_SPEC_HJSON,
+          query: VEGA_QUERY,
+          filters: VEGA_FILTERS,
+        },
+        responseType: 'json',
+      });
+
+      expect(withFilters).toHaveStatusCode(200);
+      expect(withFilters.body.data.query).toStrictEqual(VEGA_QUERY);
+      expect(withFilters.body.data.filters).toStrictEqual(VEGA_FILTERS);
+      const filteredSavedObject = await kbnClient.savedObjects.get({
+        type: 'vega',
+        id: createdId,
+      });
+      expect(filteredSavedObject.references).toStrictEqual([
+        {
+          name: 'filters[0].data_view_id',
+          type: 'index-pattern',
+          id: VEGA_FILTER_DATA_VIEW_ID,
+        },
+      ]);
+
+      const cleared = await apiClient.put(`${VEGA_API_PATH}/${createdId}`, {
+        headers: { ...COMMON_HEADERS, ...editorCredentials.apiKeyHeader },
+        body: { title: 'Cleared Title', spec: VEGA_SPEC_HJSON },
+        responseType: 'json',
+      });
+
+      expect(cleared).toHaveStatusCode(200);
+      expect(cleared.body.data.query).toBeUndefined();
+      expect(cleared.body.data.filters).toBeUndefined();
+      const clearedSavedObject = await kbnClient.savedObjects.get({
+        type: 'vega',
+        id: createdId,
+      });
+      expect(clearedSavedObject.references).toStrictEqual([]);
+    }
+  );
 
   apiTest('should create when id does not exist (upsert)', async ({ apiClient }) => {
     const response = await apiClient.put(`${VEGA_API_PATH}/new-id-for-upsert`, {

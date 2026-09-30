@@ -10,12 +10,20 @@
 import type { RoleApiCredentials } from '@kbn/scout';
 import { expect } from '@kbn/scout/api';
 import { tags } from '@kbn/scout';
-import { apiTest, COMMON_HEADERS, VEGA_API_PATH, VEGA_SPEC_HJSON } from '../fixtures';
+import {
+  apiTest,
+  COMMON_HEADERS,
+  VEGA_API_PATH,
+  VEGA_FILTERS,
+  VEGA_QUERY,
+  VEGA_SPEC_HJSON,
+} from '../fixtures';
 
 apiTest.describe('vega - get', { tag: tags.deploymentAgnostic }, () => {
   let viewerCredentials: RoleApiCredentials;
   let editorCredentials: RoleApiCredentials;
   let createdId: string;
+  let filteredId: string;
 
   apiTest.beforeAll(async ({ requestAuth, apiClient }) => {
     viewerCredentials = await requestAuth.getApiKeyForViewer();
@@ -27,10 +35,33 @@ apiTest.describe('vega - get', { tag: tags.deploymentAgnostic }, () => {
       responseType: 'json',
     });
     createdId = response.body.id;
+
+    const filteredResponse = await apiClient.post(VEGA_API_PATH, {
+      headers: { ...COMMON_HEADERS, ...editorCredentials.apiKeyHeader },
+      body: {
+        title: 'Get Filtered Chart',
+        spec: VEGA_SPEC_HJSON,
+        query: VEGA_QUERY,
+        filters: VEGA_FILTERS,
+      },
+      responseType: 'json',
+    });
+    filteredId = filteredResponse.body.id;
   });
 
   apiTest.afterAll(async ({ kbnClient }) => {
     await kbnClient.savedObjects.clean({ types: ['vega'] });
+  });
+
+  apiTest('should return filters and query', async ({ apiClient }) => {
+    const response = await apiClient.get(`${VEGA_API_PATH}/${filteredId}`, {
+      headers: { ...COMMON_HEADERS, ...viewerCredentials.apiKeyHeader },
+      responseType: 'json',
+    });
+
+    expect(response).toHaveStatusCode(200);
+    expect(response.body.data.query).toStrictEqual(VEGA_QUERY);
+    expect(response.body.data.filters).toStrictEqual(VEGA_FILTERS);
   });
 
   apiTest('should return a vega library item by id', async ({ apiClient }) => {

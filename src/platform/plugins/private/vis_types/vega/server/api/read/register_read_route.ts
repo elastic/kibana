@@ -62,7 +62,7 @@ export const registerReadRoute = (
           return res.notFound();
         }
         try {
-          const result = await read(ctx, req.params.id);
+          const result = await read(ctx, req.params.id, logger);
           return res.ok({ body: result });
         } catch (e) {
           if (e.isBoom && e.output.statusCode === 404) {

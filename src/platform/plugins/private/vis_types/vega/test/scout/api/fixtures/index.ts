@@ -12,4 +12,12 @@ import { apiTest as baseApiTest } from '@kbn/scout';
 
 export const apiTest = baseApiTest.extend<ScoutTestFixtures, ScoutWorkerFixtures>({});
 
-export { VEGA_API_PATH, COMMON_HEADERS, VEGA_SPEC_HJSON, VEGA_SPEC_JSON } from './constants';
+export {
+  VEGA_API_PATH,
+  COMMON_HEADERS,
+  VEGA_SPEC_HJSON,
+  VEGA_SPEC_JSON,
+  VEGA_QUERY,
+  VEGA_FILTERS,
+  VEGA_FILTER_DATA_VIEW_ID,
+} from './constants';

@@ -8,14 +8,17 @@
  */
 
 import { schema } from '@kbn/config-schema';
+import { ASCODE_FILTER_TYPE } from '@kbn/as-code-filters-constants';
 import type { SavedObjectsType } from '@kbn/core/server';
 import type { SavedObjectsFullModelVersion } from '@kbn/core-saved-objects-server';
 import { ANALYTICS_SAVED_OBJECT_INDEX } from '@kbn/core-saved-objects-server';
 import { VEGA_SAVED_OBJECT_TYPE } from '../../common/constants';
+import { MAX_VEGA_FILTERS } from '../api/constants';
 
 /**
  * Temporary duplicate `@kbn/config-schema` needed for `SavedObjectsType` compatibility.
  * Use zod schema once https://github.com/elastic/kibana/pull/262683 is merged.
+ * Attributes are stored in the API shape; filters replace `data_view_id` with `data_view_ref_name`.
  */
 export const vegaLibraryItemSavedObjectSchema = schema.object({
   title: schema.string({ minLength: 1 }),
@@ -30,6 +33,29 @@ export const vegaLibraryItemSavedObjectSchema = schema.object({
       value: schema.object({}, { unknowns: 'allow' }),
     }),
   ]),
+  query: schema.maybe(
+    schema.object({
+      expression: schema.string(),
+      language: schema.oneOf([schema.literal('kql'), schema.literal('lucene')]),
+    })
+  ),
+  filters: schema.maybe(
+    schema.arrayOf(
+      schema.object(
+        {
+          type: schema.oneOf([
+            schema.literal(ASCODE_FILTER_TYPE.CONDITION),
+            schema.literal(ASCODE_FILTER_TYPE.GROUP),
+            schema.literal(ASCODE_FILTER_TYPE.DSL),
+            schema.literal(ASCODE_FILTER_TYPE.SPATIAL),
+          ]),
+          data_view_ref_name: schema.maybe(schema.string()),
+        },
+        { unknowns: 'allow' }
+      ),
+      { maxSize: MAX_VEGA_FILTERS }
+    )
+  ),
 });
 
 const modelVersion1: SavedObjectsFullModelVersion = {

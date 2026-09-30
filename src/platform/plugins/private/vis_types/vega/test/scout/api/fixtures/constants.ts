@@ -21,3 +21,16 @@ export const VEGA_SPEC_JSON = {
   format: 'json',
   value: { $schema: 'https://vega.github.io/schema/vega/v5.json' },
 } as const;
+
+export const VEGA_QUERY = { expression: 'status:active', language: 'kql' } as const;
+
+export const VEGA_FILTER_DATA_VIEW_ID = 'vega-filter-data-view';
+
+export const VEGA_FILTERS = [
+  {
+    type: 'condition',
+    data_view_id: VEGA_FILTER_DATA_VIEW_ID,
+    condition: { field: 'host.name', operator: 'is', value: 'web-01' },
+  },
+  { type: 'dsl', dsl: { match_all: {} } },
+] as const;

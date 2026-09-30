@@ -8,6 +8,13 @@
  */
 
 import { z } from '@kbn/zod';
+import { asCodeFilterSchema } from '@kbn/as-code-filters-schema';
+import {
+  asCodeQuerySchema,
+  MAX_DESCRIPTION_LENGTH,
+  MAX_TITLE_LENGTH,
+} from '@kbn/as-code-shared-schemas';
+import { MAX_VEGA_FILTERS } from './constants';
 
 export const vegaSpecSchema = z
   .discriminatedUnion('format', [
@@ -32,11 +39,26 @@ export const vegaSpecSchema = z
 
 export const vegaLibraryItemSchema = z
   .object({
-    title: z.string().min(1).meta({ description: 'The Vega library item title.' }),
+    title: z
+      .string()
+      .min(1)
+      .max(MAX_TITLE_LENGTH)
+      .meta({ description: 'The Vega library item title.' }),
     description: z
       .string()
+      .max(MAX_DESCRIPTION_LENGTH)
       .optional()
       .meta({ description: 'A short description of the Vega library item.' }),
     spec: vegaSpecSchema,
+    query: asCodeQuerySchema.optional().meta({
+      description:
+        'KQL or Lucene query. Applied together with the dashboard query to Elasticsearch and ES|QL data sources that use `%context%: true`, and to Elasticsearch data sources that use `%dashboard_context-*%` placeholders.',
+    }),
+    filters: z.array(asCodeFilterSchema).max(MAX_VEGA_FILTERS).optional().meta({
+      description:
+        'Filters. Applied together with the dashboard filters to Elasticsearch and ES|QL data sources that use `%context%: true`, and to Elasticsearch data sources that use `%dashboard_context-*%` placeholders.',
+    }),
   })
   .strict();
+
+export type VegaLibraryItemState = z.output<typeof vegaLibraryItemSchema>;
