@@ -7,11 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import {
-  SavedObjectsErrorHelpers,
-  type Logger,
-  type RequestHandlerContext,
-} from '@kbn/core/server';
+import { SavedObjectsErrorHelpers, type RequestHandlerContext } from '@kbn/core/server';
 import { VEGA_SAVED_OBJECT_TYPE } from '../../../common/constants';
 import { getVegaCRUResponseBody } from '../get_cru_response_body';
 import type { StoredVegaLibraryItemState } from '../../vega_saved_object';
@@ -22,8 +18,7 @@ import type { VegaUpdateRequestBody, VegaUpdateResponseBody } from './types';
 export const update = async (
   requestCtx: RequestHandlerContext,
   id: string,
-  body: VegaUpdateRequestBody,
-  logger: Logger
+  body: VegaUpdateRequestBody
 ): Promise<{ body: VegaUpdateResponseBody; operation: 'create' | 'update' }> => {
   const { core } = await requestCtx.resolve(['core']);
 
@@ -38,7 +33,7 @@ export const update = async (
   }
 
   if (isNew) {
-    return { body: await create(requestCtx, body, logger, id), operation: 'create' };
+    return { body: await create(requestCtx, body, id), operation: 'create' };
   }
 
   const { attributes, references } = transformVegaIn(body);
@@ -48,5 +43,5 @@ export const update = async (
     attributes,
     { upsert: attributes, mergeAttributes: false, references }
   );
-  return { body: getVegaCRUResponseBody(savedObject, logger), operation: 'update' };
+  return { body: getVegaCRUResponseBody(savedObject), operation: 'update' };
 };

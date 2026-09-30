@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { Logger, RequestHandlerContext } from '@kbn/core/server';
+import type { RequestHandlerContext } from '@kbn/core/server';
 import { VEGA_SAVED_OBJECT_TYPE } from '../../../common/constants';
 import { getVegaCRUResponseBody } from '../get_cru_response_body';
 import type { StoredVegaLibraryItemState } from '../../vega_saved_object';
@@ -15,8 +15,7 @@ import type { VegaReadResponseBody } from './types';
 
 export const read = async (
   requestCtx: RequestHandlerContext,
-  id: string,
-  logger: Logger
+  id: string
 ): Promise<VegaReadResponseBody> => {
   const { core } = await requestCtx.resolve(['core']);
 
@@ -25,5 +24,5 @@ export const read = async (
     id
   );
 
-  return getVegaCRUResponseBody(savedObject, logger);
+  return getVegaCRUResponseBody(savedObject);
 };

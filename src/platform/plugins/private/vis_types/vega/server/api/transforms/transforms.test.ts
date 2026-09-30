@@ -7,8 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { loggingSystemMock } from '@kbn/core/server/mocks';
-import type { StoredVegaLibraryItemState } from '../../vega_saved_object';
 import type { VegaLibraryItemState } from '../schema';
 import { transformVegaIn } from './transform_vega_in';
 import { transformVegaOut } from './transform_vega_out';
@@ -28,12 +26,6 @@ const state: VegaLibraryItemState = {
 };
 
 describe('Vega library item transforms', () => {
-  const logger = loggingSystemMock.createLogger();
-
-  beforeEach(() => {
-    jest.clearAllMocks();
-  });
-
   describe('transformVegaIn', () => {
     test('stores the API shape and extracts filter data view references', () => {
       expect(transformVegaIn(state)).toEqual({
@@ -68,40 +60,19 @@ describe('Vega library item transforms', () => {
   describe('transformVegaOut', () => {
     test('round-trips API state', () => {
       const { attributes, references } = transformVegaIn(state);
-      expect(transformVegaOut(attributes, references, logger)).toEqual(state);
-      expect(logger.warn).not.toHaveBeenCalled();
+      expect(transformVegaOut(attributes, references)).toEqual(state);
     });
 
-    test('drops filters with missing references and keeps the others', () => {
+    test('throws when a filter data view reference is missing', () => {
       const { attributes } = transformVegaIn(state);
-      expect(transformVegaOut(attributes, [], logger).filters).toEqual([
-        { type: 'dsl', dsl: { match_all: {} } },
-      ]);
-      expect(logger.warn).toHaveBeenCalledWith(
-        expect.stringContaining('Could not find reference for filters[0].data_view_id')
-      );
-    });
-
-    test('drops filters that do not satisfy the API schema', () => {
-      const attributes = {
-        ...transformVegaIn(state).attributes,
-        filters: [
-          { type: 'condition', condition: { field: 'status', operator: 'unknown' } },
-          { type: 'dsl', dsl: { match_all: {} } },
-        ],
-      } as StoredVegaLibraryItemState;
-
-      expect(transformVegaOut(attributes, [], logger).filters).toEqual([
-        { type: 'dsl', dsl: { match_all: {} } },
-      ]);
-      expect(logger.warn).toHaveBeenCalledWith(
-        expect.stringContaining('Dropped Vega library item filter [filters.0]')
+      expect(() => transformVegaOut(attributes, [])).toThrow(
+        'Could not find reference for filters[0].data_view_id'
       );
     });
 
     test('returns attributes without filters unchanged', () => {
       const { filters, ...stateWithoutFilters } = state;
-      expect(transformVegaOut(stateWithoutFilters, [], logger)).toEqual(stateWithoutFilters);
+      expect(transformVegaOut(stateWithoutFilters, [])).toEqual(stateWithoutFilters);
     });
   });
 });

@@ -72,7 +72,7 @@ export const registerUpdateRoute = (
           return res.notFound();
         }
         try {
-          const { body, operation } = await update(ctx, req.params.id, req.body, logger);
+          const { body, operation } = await update(ctx, req.params.id, req.body);
           if (operation === 'create') {
             return res.created({ body });
           }

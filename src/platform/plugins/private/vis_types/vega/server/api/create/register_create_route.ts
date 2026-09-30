@@ -65,7 +65,7 @@ export const registerCreateRoute = (
           return res.notFound();
         }
         try {
-          const result = await create(ctx, req.body, logger);
+          const result = await create(ctx, req.body);
           return res.created({ body: result });
         } catch (e) {
           if (e.isBoom && e.output.statusCode === 403) {

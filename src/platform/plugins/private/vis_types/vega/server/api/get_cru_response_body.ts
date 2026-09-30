@@ -8,25 +8,19 @@
  */
 
 import { getMeta } from '@kbn/as-code-shared-schemas';
-import type { Logger, SavedObject, SavedObjectsUpdateResponse } from '@kbn/core/server';
+import type { SavedObject, SavedObjectsUpdateResponse } from '@kbn/core/server';
 import type { StoredVegaLibraryItemState } from '../vega_saved_object';
-import { vegaLibraryItemSchema } from './schema';
 import { transformVegaOut } from './transforms/transform_vega_out';
 
 // CRU is Create, Read, Update
 export const getVegaCRUResponseBody = (
   savedObject:
     | SavedObject<StoredVegaLibraryItemState>
-    | SavedObjectsUpdateResponse<StoredVegaLibraryItemState>,
-  logger: Logger
+    | SavedObjectsUpdateResponse<StoredVegaLibraryItemState>
 ) => {
   return {
     id: savedObject.id,
-    // Route does not apply defaults to response
-    // Instead, call validate to ensure defaults are applied to response
-    data: vegaLibraryItemSchema.parse(
-      transformVegaOut(savedObject.attributes, savedObject.references, logger)
-    ),
+    data: transformVegaOut(savedObject.attributes, savedObject.references),
     meta: getMeta(savedObject),
   };
 };

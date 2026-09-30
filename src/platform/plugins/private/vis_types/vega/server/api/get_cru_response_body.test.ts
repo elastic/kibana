@@ -8,7 +8,6 @@
  */
 
 import type { SavedObject, SavedObjectReference } from '@kbn/core/server';
-import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { ZodError } from '@kbn/zod';
 import type { StoredVegaLibraryItemState } from '../vega_saved_object';
 import { getVegaCRUResponseBody } from './get_cru_response_body';
@@ -24,15 +23,13 @@ const getSavedObject = (
 });
 
 describe('getVegaCRUResponseBody', () => {
-  const logger = loggingSystemMock.createLogger();
-
   test('parses stored attributes into the API response', () => {
     const attributes = {
       title: 'Vega chart',
       spec: { format: 'json' as const, value: { mark: 'point' } },
     };
 
-    expect(getVegaCRUResponseBody(getSavedObject(attributes), logger)).toEqual({
+    expect(getVegaCRUResponseBody(getSavedObject(attributes))).toEqual({
       id: 'vega-library-item-id',
       data: attributes,
       meta: { managed: false },
@@ -56,7 +53,7 @@ describe('getVegaCRUResponseBody', () => {
       [{ name: 'filters[0].data_view_id', type: 'index-pattern', id: 'logs-data-view' }]
     );
 
-    expect(getVegaCRUResponseBody(savedObject, logger).data).toEqual({
+    expect(getVegaCRUResponseBody(savedObject).data).toEqual({
       title: 'Vega chart',
       spec: { format: 'hjson', value: '{ mark: point }' },
       query: { expression: 'status:active', language: 'kql' },
@@ -76,6 +73,21 @@ describe('getVegaCRUResponseBody', () => {
       spec: { format: 'hjson', value: '' },
     });
 
-    expect(() => getVegaCRUResponseBody(savedObject, logger)).toThrow(ZodError);
+    expect(() => getVegaCRUResponseBody(savedObject)).toThrow(ZodError);
+  });
+
+  test('rejects stored filters that do not satisfy the API response schema', () => {
+    const filterWithUnknownKey = {
+      type: 'condition' as const,
+      condition: { field: 'host', operator: 'exists' as const },
+      unexpected: true,
+    };
+    const savedObject = getSavedObject({
+      title: 'Vega chart',
+      spec: { format: 'hjson', value: '{ mark: point }' },
+      filters: [filterWithUnknownKey],
+    });
+
+    expect(() => getVegaCRUResponseBody(savedObject)).toThrow(ZodError);
   });
 });

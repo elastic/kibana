@@ -7,45 +7,22 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { prettifyError } from '@kbn/zod';
-import { asCodeFilterSchema, type AsCodeFilter } from '@kbn/as-code-filters-schema';
-import { injectFilterReference } from '@kbn/as-code-filters-transforms';
-import type { Logger, SavedObjectReference } from '@kbn/core/server';
+import { injectFilterReferences } from '@kbn/as-code-filters-transforms';
+import type { SavedObjectReference } from '@kbn/core/server';
 import type { StoredVegaLibraryItemState } from '../../vega_saved_object';
+import { vegaLibraryItemSchema, type VegaLibraryItemState } from '../schema';
 
 /**
- * Converts Vega library item saved object attributes and references to API state.
- * Filters that can not be restored are dropped and logged.
+ * Converts Vega library item saved object attributes and references to validated API state.
+ * Throws when a filter data view reference is missing or the state does not satisfy the API schema.
  */
 export const transformVegaOut = (
   attributes: Partial<StoredVegaLibraryItemState>,
-  references: SavedObjectReference[] = [],
-  logger: Logger
-): Omit<Partial<StoredVegaLibraryItemState>, 'filters'> & { filters?: AsCodeFilter[] } => {
-  const { filters: storedFilters, ...rest } = attributes;
-  if (!storedFilters) {
-    return rest;
-  }
-
-  const filters: AsCodeFilter[] = [];
-  storedFilters.forEach((storedFilter, index) => {
-    let filter: AsCodeFilter;
-    try {
-      filter = injectFilterReference(storedFilter, references);
-    } catch (error) {
-      logger.warn(`Dropped Vega library item filter [filters.${index}]: ${error.message}`);
-      return;
-    }
-
-    const result = asCodeFilterSchema.safeParse(filter);
-    if (!result.success) {
-      logger.warn(
-        `Dropped Vega library item filter [filters.${index}]: ${prettifyError(result.error)}`
-      );
-      return;
-    }
-    filters.push(result.data);
+  references: SavedObjectReference[] = []
+): VegaLibraryItemState => {
+  const { filters, ...rest } = attributes;
+  return vegaLibraryItemSchema.parse({
+    ...rest,
+    ...(filters && { filters: injectFilterReferences(filters, references) }),
   });
-
-  return { ...rest, filters };
 };
