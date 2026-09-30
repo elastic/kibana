@@ -27,10 +27,11 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
   const browser = getService('browser');
 
   const waitForConfigurationSaved = async () => {
-    const toast = await toasts.getElementByIndex(1);
-    expect(await toast.getVisibleText()).to.be('Settings successfully updated');
-    await header.waitUntilLoadingHasFinished();
+    await retry.try(async () => {
+      expect(await toasts.getTitleByIndex(1)).to.be('Settings successfully updated');
+    });
     await toasts.dismissAll();
+    await header.waitUntilLoadingHasFinished();
   };
 
   describe('Configure Case', function () {
@@ -95,7 +96,8 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
 
         await testSubjects.setValue('custom-field-label-input', 'Summary');
 
-        await testSubjects.setCheckbox('text-custom-field-required-wrapper', 'check');
+        await testSubjects.setCheckbox('text-custom-field-required', 'check');
+        expect(await testSubjects.isChecked('text-custom-field-required')).to.be(true);
 
         await testSubjects.click('common-flyout-save');
         await testSubjects.missingOrFail('common-flyout');
