@@ -12,6 +12,7 @@
     "@kbn/i18n",
     "@kbn/lock-manager",
     "@kbn/react-kibana-context-render",
+    "@kbn/sandbox-plugin",
     "@kbn/spaces-plugin",
     "@kbn/workflows",
     "@kbn/workflows-extensions",
