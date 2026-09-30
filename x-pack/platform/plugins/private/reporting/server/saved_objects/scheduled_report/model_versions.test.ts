@@ -30,8 +30,8 @@ describe('scheduledReportModelVersions v6', () => {
       {
         type: 'mappings_addition',
         addedMappings: {
-          createdById: { type: 'keyword' },
-          createdByApiKeyId: { type: 'keyword' },
+          createdById: { type: 'keyword', ignore_above: 1024 },
+          createdByApiKeyId: { type: 'keyword', ignore_above: 1024 },
         },
       },
     ]);
