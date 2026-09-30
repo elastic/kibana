@@ -244,6 +244,12 @@ describe('RuleLibraryList', () => {
       fireEvent.click(within(options).getByText(tag));
     }
 
+    const tagToExclude = within(options).getByText(selectedTags[11]);
+    fireEvent.mouseDown(tagToExclude, { ctrlKey: true });
+    fireEvent.click(tagToExclude, { ctrlKey: true });
+
+    expect(tagToExclude.closest('[role="option"]')).toHaveAttribute('aria-posinset', '12');
+
     fireEvent.change(screen.getByTestId('ruleLibraryTagsFilterSearch'), {
       target: { value: additionalTag },
     });
@@ -256,7 +262,9 @@ describe('RuleLibraryList', () => {
       screen.getByText(`Maximum of ${MAX_TAGS} tags selected. Remove one to select another.`)
     ).toBeInTheDocument();
 
-    fireEvent.click(within(options).getByText(selectedTags[MAX_TAGS - 1]));
+    const tagToRemove = within(options).getByText(selectedTags[MAX_TAGS - 1]);
+    fireEvent.mouseDown(tagToRemove);
+    fireEvent.click(tagToRemove);
 
     expect(await within(options).findByText(additionalTag)).toBeInTheDocument();
   });

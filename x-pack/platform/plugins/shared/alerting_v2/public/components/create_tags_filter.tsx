@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useMemo, useState } from 'react';
+import React, { useMemo, useRef, useState } from 'react';
 import { EuiFieldSearch, EuiText, type Query } from '@elastic/eui';
 import { MAX_TAG_LENGTH, MAX_TAGS, TAGS_RESPONSE_LIMIT } from '@kbn/alerting-v2-constants';
 import { SelectableFilterPopover, StandardFilterOption } from '@kbn/content-list';
@@ -53,6 +53,7 @@ export const createTagsFilter = ({
     onChange?: (query: Query) => void;
   }) => {
     const [tagSearch, setTagSearch] = useState('');
+    const optionOrderRef = useRef<string[]>([]);
     const debouncedTagSearch = useDebouncedValue(tagSearch, TAG_SEARCH_DEBOUNCE_MS);
     const { selection } = useFieldQueryFilter({
       fieldName: TAG_FILTER_ID,
@@ -70,16 +71,22 @@ export const createTagsFilter = ({
     const selectedTags = useMemo(() => Object.keys(selection), [selection]);
     const selectionLimitReached = selectedTags.length >= MAX_TAGS;
     const options = useMemo(() => {
-      if (selectionLimitReached) {
-        return selectedTags.map((tag) => ({ key: tag, label: tag }));
-      }
-
       const apiTagSet = new Set(tagNames);
-      const orphans = selectedTags
-        .filter((tag) => !apiTagSet.has(tag))
-        .map((tag) => ({ key: tag, label: tag }));
-      return [...orphans, ...tagNames.map((tag) => ({ key: tag, label: tag }))];
-    }, [tagNames, selectedTags, selectionLimitReached]);
+      const candidateTags = [...selectedTags.filter((tag) => !apiTagSet.has(tag)), ...tagNames];
+      const candidateTagSet = new Set(candidateTags);
+      const previousOrder = optionOrderRef.current.filter((tag) => candidateTagSet.has(tag));
+      const previousOrderSet = new Set(previousOrder);
+      const orderedTags = [
+        ...previousOrder,
+        ...candidateTags.filter((tag) => !previousOrderSet.has(tag)),
+      ];
+      optionOrderRef.current = orderedTags;
+
+      const visibleTags = selectionLimitReached
+        ? orderedTags.filter((tag) => selection[tag] !== undefined)
+        : orderedTags;
+      return visibleTags.map((tag) => ({ key: tag, label: tag }));
+    }, [tagNames, selectedTags, selection, selectionLimitReached]);
 
     const showCapGuidance = tagNames.length >= TAGS_RESPONSE_LIMIT;
 
