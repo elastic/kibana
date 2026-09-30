@@ -11,7 +11,10 @@ import { i18n } from '@kbn/i18n';
 import type { DeviceControlAccessLevel } from '../../../../../../../common/endpoint/types';
 import { DeviceControlAccessLevel as DeviceControlAccessLevelEnum } from '../../../../../../../common/endpoint/types';
 import { OS_CONTROL_WIDTH } from './os_control_layout';
-import { buildOsControlSelectOptions } from './os_control_select_options';
+import {
+  buildOsControlSelectOptions,
+  OS_CONTROL_SELECT_POPOVER_PROPS,
+} from './os_control_select_options';
 
 const ALLOW_ALL_LABEL = i18n.translate(
   'xpack.securitySolution.endpoint.policy.details.deviceControl.allowReadWrite',
@@ -98,6 +101,7 @@ export const PerOsDeviceControlAccessLevelSelect = memo<PerOsDeviceControlAccess
           onChange={handleChange}
           disabled={disabled}
           fullWidth={true}
+          popoverProps={OS_CONTROL_SELECT_POPOVER_PROPS}
           data-test-subj={dataTestSubj}
           aria-label={ACCESS_LEVEL_SELECT_ARIA_LABEL}
         />

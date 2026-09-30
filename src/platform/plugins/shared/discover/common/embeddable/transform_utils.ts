@@ -9,31 +9,16 @@
 
 import type { DiscoverSessionTabAttributes } from '@kbn/saved-search-plugin/server';
 import type { SavedSearchAttributes } from '@kbn/saved-search-plugin/common';
-import { extractTabs, SavedSearchType, VIEW_MODE } from '@kbn/saved-search-plugin/common';
-import type { SerializedSearchSourceFields } from '@kbn/data-plugin/common';
-import {
-  extractReferences,
-  injectReferences,
-  parseSearchSourceJSON,
-} from '@kbn/data-plugin/common';
-import { fromStoredFilters, toStoredFilters } from '@kbn/as-code-filters-transforms';
-import { AS_CODE_ESQL_DATA_SOURCE_TYPE } from '@kbn/as-code-data-views-schema';
-import { fromStoredDataView, toStoredDataView } from '@kbn/as-code-data-views-transforms';
-import { toAsCodeQuery, toStoredQuery } from '@kbn/as-code-shared-transforms';
+import { extractTabs, SavedSearchType } from '@kbn/saved-search-plugin/common';
+import { injectReferences, parseSearchSourceJSON } from '@kbn/data-plugin/common';
 import type { SavedObjectReference } from '@kbn/core/server';
-import { isLegacySort, type SortOrder } from '@kbn/discover-utils';
 import { DiscoverTabType } from '@kbn/discover-session-constants';
 import type {
-  DiscoverSessionApiMetricsTabTypeState,
-  DiscoverSessionApiEmbeddableOverrides,
   DiscoverSessionApiEmbeddableTab,
   DiscoverSessionApiTabBase,
 } from '@kbn/as-code-discover-schema';
-import { isOfAggregateQueryType } from '@kbn/es-query';
-import type { JsonModeSettings } from '@kbn/unified-data-table';
 import {
   isDiscoverSessionEmbeddableByReferenceState,
-  isDiscoverSessionEsqlTab,
   isSearchEmbeddableByValueState,
 } from './type_guards';
 import type {
@@ -51,6 +36,14 @@ import {
   DISCOVER_SESSION_EMBEDDABLE_SYNTHETIC_TAB_LABEL,
   SAVED_SEARCH_SAVED_OBJECT_REF_NAME,
 } from './constants';
+import {
+  toStoredSearchAndTableAttributes,
+  toStoredTableSettings,
+  fromStoredSearchAndTable,
+  fromStoredTableSettings,
+} from '../session/search_and_table_mapping';
+import { toStoredTabTypeState, fromStoredTabTypeState } from '../session/tab_type_state';
+import { isDiscoverSessionEsqlTab } from '../session/type_guards';
 
 export function fromStoredSearchEmbeddable(
   storedState: SearchEmbeddableState | StoredSearchEmbeddableState,
@@ -104,7 +97,7 @@ export function fromStoredSearchEmbeddableByRef(
     ...otherAttrs,
     ref_id: savedObjectId,
     selected_tab_id: selectedTabId,
-    overrides: toDiscoverSessionEmbeddableOverrides(storedState),
+    overrides: fromStoredTableSettings(storedState),
   };
 }
 
@@ -120,7 +113,7 @@ export function toStoredSearchEmbeddableByRef(
   const { ref_id, selected_tab_id, overrides, ...otherAttrs } = apiState;
   const state: StoredSearchEmbeddableByReferenceState = {
     ...otherAttrs,
-    ...fromDiscoverSessionEmbeddableOverrides(overrides ?? {}),
+    ...toStoredTableSettings(overrides ?? {}),
     ...(selected_tab_id != null && { selectedTabId: selected_tab_id }),
   };
   return {
@@ -155,9 +148,9 @@ export function fromStoredSearchEmbeddableByValue(
   // the panel, unlike the session API which rejects the session outright.
   const typedTab: DiscoverSessionApiEmbeddableTab =
     tab.attributes.tabTypeState && isDiscoverSessionEsqlTab(apiTab)
-      ? { ...apiTab, ...fromStoredMetricsTabTypeState(tab.attributes.tabTypeState) }
+      ? { ...apiTab, ...fromStoredTabTypeState(tab.attributes.tabTypeState) }
       : { ...apiTab, type: DiscoverTabType.Default };
-  const embeddableOverrides = toDiscoverSessionEmbeddableOverrides(storedState);
+  const embeddableOverrides = fromStoredTableSettings(storedState);
   const { hide_title, hide_border } = storedState;
 
   return {
@@ -179,9 +172,10 @@ export function toStoredSearchEmbeddableByValue(
     ...otherAttrs
   } = apiState;
   const { state: tabAttributes, references: tabReferences } = toStoredTab(apiTab);
+  const tabTypeState = toStoredTabTypeState(apiTab);
   const state: StoredSearchEmbeddableByValueState = {
     ...otherAttrs,
-    ...fromDiscoverSessionEmbeddableOverrides(apiTab),
+    ...toStoredTableSettings(apiTab),
     attributes: {
       ...tabAttributes,
       sort: tabAttributes.sort as SavedSearchAttributes['sort'],
@@ -193,11 +187,7 @@ export function toStoredSearchEmbeddableByValue(
           label: DISCOVER_SESSION_EMBEDDABLE_SYNTHETIC_TAB_LABEL,
           attributes: {
             ...tabAttributes,
-            ...(apiTab.type === DiscoverTabType.Metrics && {
-              tabTypeState: toStoredMetricsTabTypeState(
-                apiTab as DiscoverSessionApiMetricsTabTypeState
-              ),
-            }),
+            ...(tabTypeState !== undefined && { tabTypeState }),
           },
         },
       ],
@@ -209,228 +199,21 @@ export function toStoredSearchEmbeddableByValue(
   };
 }
 
-export const fromStoredMetricsTabTypeState = (
-  tabTypeState: NonNullable<DiscoverSessionTabAttributes['tabTypeState']>
-): DiscoverSessionApiMetricsTabTypeState => ({
-  type: DiscoverTabType.Metrics,
-  dimensions: tabTypeState.dimensions,
-  search_term: tabTypeState.searchTerm,
-  counter_aggregation: tabTypeState.counterAggregation,
-  gauge_aggregation: tabTypeState.gaugeAggregation,
-  histogram_percentile: tabTypeState.histogramPercentile,
-});
-
-export const toStoredMetricsTabTypeState = (
-  tabTypeState: DiscoverSessionApiMetricsTabTypeState
-): NonNullable<DiscoverSessionTabAttributes['tabTypeState']> => ({
-  type: DiscoverTabType.Metrics,
-  dimensions: tabTypeState.dimensions,
-  searchTerm: tabTypeState.search_term,
-  counterAggregation: tabTypeState.counter_aggregation,
-  gaugeAggregation: tabTypeState.gauge_aggregation,
-  histogramPercentile: tabTypeState.histogram_percentile,
-});
-
-export function fromStoredTab(
+function fromStoredTab(
   tab: DiscoverSessionTabAttributes,
   references: SavedObjectReference[] = []
 ): DiscoverSessionApiTabBase {
-  const {
-    kibanaSavedObjectMeta: { searchSourceJSON },
-  } = tab;
-  const searchSource = injectReferences(parseSearchSourceJSON(searchSourceJSON), references);
-
-  return fromStoredTabWithSearchSource(tab, searchSource);
+  const { searchSourceJSON } = tab.kibanaSavedObjectMeta;
+  const searchSourceValues = parseSearchSourceJSON(searchSourceJSON);
+  const searchSource = injectReferences(searchSourceValues, references);
+  return fromStoredSearchAndTable(tab, searchSource);
 }
 
-/** Maps a stored tab using the SearchSource prepared by the caller. */
-export function fromStoredTabWithSearchSource(
-  tab: DiscoverSessionTabAttributes,
-  { index, query, filter }: SerializedSearchSourceFields
-): DiscoverSessionApiTabBase {
-  const { sort, sampleSize, rowsPerPage, viewMode } = tab;
-  const apiTab = {
-    ...toDiscoverSessionEmbeddableOverrides(tab),
-    sort: fromStoredSort(sort),
-  };
-
-  return isOfAggregateQueryType(query)
-    ? {
-        ...apiTab,
-        data_source: {
-          type: AS_CODE_ESQL_DATA_SOURCE_TYPE,
-          query: query.esql,
-        },
-      }
-    : {
-        ...apiTab,
-        ...(sampleSize && { sample_size: sampleSize }),
-        ...(rowsPerPage && { rows_per_page: rowsPerPage }),
-        ...(query && { query: toAsCodeQuery(query) }),
-        filters: fromStoredFilters(filter) ?? [],
-        data_source: fromStoredDataView(index),
-        view_mode: viewMode ?? VIEW_MODE.DOCUMENT_LEVEL,
-      };
-}
-
-export function toStoredTab(
-  apiTab: DiscoverSessionApiTabBase,
-  options?: { refNamePrefix?: string }
-): {
+export function toStoredTab(apiTab: DiscoverSessionApiTabBase): {
   state: DiscoverSessionTabAttributes;
   references: SavedObjectReference[];
 } {
-  const { sort, column_order: columnOrder, column_settings: columnSettings } = apiTab;
-  const storedQuery = isDiscoverSessionEsqlTab(apiTab)
-    ? { esql: apiTab.data_source.query }
-    : toStoredQuery(apiTab.query);
-  const searchSourceValues: SerializedSearchSourceFields = {
-    ...(storedQuery && { query: storedQuery }),
-    ...('filters' in apiTab && { filter: toStoredFilters(apiTab.filters) }),
-    ...(!isDiscoverSessionEsqlTab(apiTab) && { index: toStoredDataView(apiTab.data_source) }),
-  };
-  const [searchSourceFields, references] = extractReferences(searchSourceValues, options);
-  const state: DiscoverSessionTabAttributes = {
-    ...fromDiscoverSessionEmbeddableOverrides(apiTab),
-    sort: toStoredSort(sort),
-    columns: columnOrder ?? [],
-    grid: toStoredGrid(columnSettings),
-    hideChart: false,
-    hideTable: false,
-    isTextBasedQuery: isDiscoverSessionEsqlTab(apiTab),
-    kibanaSavedObjectMeta: { searchSourceJSON: JSON.stringify(searchSourceFields) },
-    ...('view_mode' in apiTab && { viewMode: apiTab.view_mode }),
-  };
+  const { attributes, references } = toStoredSearchAndTableAttributes(apiTab);
+  const state: DiscoverSessionTabAttributes = { ...attributes, hideChart: false, hideTable: false };
   return { state, references };
-}
-
-export function toDiscoverSessionEmbeddableOverrides(
-  storedState: StoredSearchEmbeddableState | DiscoverSessionTabAttributes
-): DiscoverSessionApiEmbeddableOverrides {
-  const {
-    sort,
-    columns,
-    rowHeight,
-    sampleSize,
-    rowsPerPage,
-    headerRowHeight,
-    density,
-    documentsDisplayMode,
-    jsonModeSettings,
-    grid,
-  } = storedState;
-  return {
-    ...(sort && { sort: fromStoredSort(sort) }),
-    ...(columns && { column_order: columns }),
-    ...(grid &&
-      Object.keys(grid?.columns ?? {}).length && { column_settings: fromStoredGrid(grid) }),
-    ...(rowHeight && { row_height: fromStoredRowHeight(rowHeight) }),
-    ...(sampleSize && { sample_size: sampleSize }),
-    ...(rowsPerPage && { rows_per_page: rowsPerPage }),
-    ...(headerRowHeight && { header_row_height: fromStoredRowHeight(headerRowHeight) }),
-    ...(density && { density }),
-    ...(documentsDisplayMode && { documents_display_mode: documentsDisplayMode }),
-    ...fromStoredJsonModeSettings(jsonModeSettings),
-  };
-}
-
-export function fromDiscoverSessionEmbeddableOverrides(
-  apiState: DiscoverSessionApiEmbeddableOverrides
-): StoredSearchEmbeddableState {
-  const {
-    sort,
-    column_order: columnOrder,
-    column_settings: columnSettings,
-    row_height: rowHeight,
-    sample_size: sampleSize,
-    rows_per_page: rowsPerPage,
-    header_row_height: headerRowHeight,
-    density,
-    documents_display_mode: documentsDisplayMode,
-  } = apiState;
-  const jsonModeSettings = toStoredJsonModeSettings(apiState);
-  return {
-    ...(sort && { sort: toStoredSort(sort) }),
-    ...(columnOrder && { columns: columnOrder }),
-    ...(rowHeight && { rowHeight: toStoredHeight(rowHeight) }),
-    ...(sampleSize && { sampleSize }),
-    ...(rowsPerPage && { rowsPerPage }),
-    ...(headerRowHeight && { headerRowHeight: toStoredHeight(headerRowHeight) }),
-    ...(density && { density }),
-    ...(documentsDisplayMode && { documentsDisplayMode }),
-    ...(jsonModeSettings && { jsonModeSettings }),
-    ...(Object.keys(columnSettings ?? {}).length && { grid: toStoredGrid(columnSettings) }),
-  };
-}
-
-const fromStoredJsonModeSettings = (
-  jsonModeSettings?: JsonModeSettings
-): Pick<
-  DiscoverSessionApiEmbeddableOverrides,
-  'hide_nulls' | 'wrap_lines' | 'default_rendered_nodes'
-> => {
-  if (!jsonModeSettings) {
-    return {};
-  }
-  return {
-    ...(jsonModeSettings.hideNulls !== undefined && { hide_nulls: jsonModeSettings.hideNulls }),
-    ...(jsonModeSettings.wrapLines !== undefined && { wrap_lines: jsonModeSettings.wrapLines }),
-    ...(jsonModeSettings.defaultRenderedNodes !== undefined && {
-      default_rendered_nodes: jsonModeSettings.defaultRenderedNodes,
-    }),
-  };
-};
-
-const toStoredJsonModeSettings = (
-  apiState: DiscoverSessionApiEmbeddableOverrides
-): JsonModeSettings | undefined => {
-  const jsonModeSettings: JsonModeSettings = {
-    ...(apiState.hide_nulls !== undefined && { hideNulls: apiState.hide_nulls }),
-    ...(apiState.wrap_lines !== undefined && { wrapLines: apiState.wrap_lines }),
-    ...(apiState.default_rendered_nodes !== undefined && {
-      defaultRenderedNodes: apiState.default_rendered_nodes,
-    }),
-  };
-  return Object.keys(jsonModeSettings).length > 0 ? jsonModeSettings : undefined;
-};
-
-export function fromStoredGrid(
-  grid: DiscoverSessionTabAttributes['grid']
-): DiscoverSessionApiTabBase['column_settings'] {
-  return grid.columns ?? {};
-}
-
-export function toStoredGrid(
-  columnSettings: DiscoverSessionApiTabBase['column_settings'] = {}
-): DiscoverSessionTabAttributes['grid'] {
-  return Object.keys(columnSettings).length > 0 ? { columns: columnSettings } : {};
-}
-
-export function fromStoredSort(
-  sort: DiscoverSessionTabAttributes['sort']
-): DiscoverSessionApiTabBase['sort'] {
-  const sortInput = sort as SortOrder | SortOrder[];
-  const normalizedSort: SortOrder[] = isLegacySort(sortInput) ? [sortInput] : sortInput;
-
-  return normalizedSort.map((s) => {
-    const [name, dir] = Array.isArray(s) ? s : [s, 'desc'];
-    const direction = dir === 'asc' || dir === 'desc' ? dir : 'desc';
-    return { name, direction };
-  });
-}
-
-export function toStoredSort(
-  sort: DiscoverSessionApiTabBase['sort'] = []
-): DiscoverSessionTabAttributes['sort'] & SavedSearchAttributes['sort'] {
-  return sort.map((s) => [s.name, s.direction]);
-}
-
-export function fromStoredRowHeight(height: number) {
-  return height === -1 ? 'auto' : height;
-}
-
-export function toStoredHeight(
-  height: DiscoverSessionApiTabBase['row_height'] | DiscoverSessionApiTabBase['header_row_height']
-): number {
-  return typeof height === 'number' ? height : -1; // -1 === 'auto'
 }
