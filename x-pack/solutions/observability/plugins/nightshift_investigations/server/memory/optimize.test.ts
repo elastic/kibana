@@ -71,13 +71,14 @@ const createStore = (overrides: Partial<MemoryPageStore> = {}): MemoryPageStore 
 };
 
 describe('formatRecalled', () => {
-  it('shows id and facts beyond character 150, and hides the recall key', () => {
-    const memory = page('memory_long');
+  it('shows id, title, and facts beyond character 150, and hides the recall key', () => {
+    const memory = page('memory_long', 'Checkout Redis evictions');
     memory.context = 'checkout latency';
     memory.content = `${'x'.repeat(150)}FACT_AFTER_150`;
 
     const formatted = formatRecalled([memory]);
 
+    expect(formatted).toContain('title: Checkout Redis evictions');
     expect(formatted).not.toContain('checkout latency');
     expect(formatted).not.toContain('context:');
     expect(formatted).toContain('FACT_AFTER_150');
@@ -1446,6 +1447,7 @@ describe('applyMemoryEdits entries: new, update, merge', () => {
         note: 'The -07:00 offset is the time zone, not the gap.',
       }),
       task: 'how large is the clock difference?',
+      otherTopics: [],
     });
     expect(store.create).toHaveBeenCalledTimes(1);
     expect(store.create).toHaveBeenCalledWith(
@@ -1757,7 +1759,7 @@ describe('optimizeMemory', () => {
     }
   });
 
-  it('gives the writer the same transcript as extraction', async () => {
+  it('gives the writer the same transcript as extraction and the other entries topics', async () => {
     const recalled = page('memory_redis', 'Redis', 'Checkout Redis evicts keys under load.');
     const store = createStore({
       get: jest
@@ -1773,6 +1775,15 @@ describe('optimizeMemory', () => {
           tags: [],
           categories: [],
           replaces: [recalled.id],
+          note: '',
+        },
+        {
+          slug: 'kafka-consumer-lag',
+          title: 'Kafka consumer lag',
+          content: 'Lag spikes during rebalances.',
+          tags: [],
+          categories: [],
+          replaces: [],
           note: '',
         },
       ],
@@ -1804,9 +1815,10 @@ describe('optimizeMemory', () => {
     });
 
     expect(synthesizeMemoryGroup).toHaveBeenCalledTimes(1);
-    const { transcript } = synthesizeMemoryGroup.mock.calls[0][0];
+    const { transcript, otherTopics } = synthesizeMemoryGroup.mock.calls[0][0];
     expect(transcript).toBe(proposeExtractions.mock.calls[0][0].transcript);
     expect(transcript).toContain('Result: evicted_keys=4210');
+    expect(otherTopics).toEqual(['Kafka consumer lag']);
   });
 
   it('marks an empty tool-call list explicitly', async () => {

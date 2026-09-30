@@ -80,12 +80,12 @@ Extract a fact only if a tool result in the investigation shows it. The final an
 
 **NEW OR REPLACE** — every entry has a title (its topic), content, replaces, and note. A writer turns each entry into the stored memory, and every memory in replaces is archived once it is written.
 - New topic: replaces is empty, content holds the facts, note is empty.
-- This run corrects or extends a recalled memory: replaces lists its id. content holds only what this run adds or corrects; the writer keeps what is still right in the replaced memory. note says what this run showed and what in the replaced memory is wrong or outdated.
+- This run corrects or extends a recalled memory: replaces lists its id. content holds only what this run adds or corrects; the writer keeps what is still right in the replaced memory. note says what this run showed and what in the replaced memory is wrong or outdated. Read the replaced memory sentence by sentence: a claim written as ongoing ("the clock runs 1 s behind", "errors occur") is outdated when this run shows the problem has stopped, even if it was true when written, and note must say so.
 - Several recalled memories cover the same topic: replaces lists all of them. content holds anything this run adds, or is empty. note says what they share and anything that conflicts.
-- Replace a memory only when this run's evidence justifies it. A recalled memory that is still right and complete needs no entry.
+- Replace a memory only when this run's evidence justifies it. A recalled memory that is still right and complete needs no entry. A memory is not still right if it states as ongoing a problem this run shows has stopped, or states as current a value this run measured differently: replace it. If note would say the memory needs no change, propose no entry for it.
 - The time-of-observation rules apply to replacing entries too: content dates this run's observations, and note says which replaced claims they supersede. Compare observations from different windows only if they measure the same thing the same way.
 - When two recalled memories cover the same topic or the same data, replace both with one entry instead of leaving them side by side.
-- The title names the topic as it should read now; for an unchanged topic, reuse the replaced memory's wording.
+- The title names the topic. When the entry replaces one memory and the topic is unchanged, copy that memory's title exactly, word for word; change it only when this run shows the topic itself was named wrongly.
 
 Keep entries concise. Return an empty list if the conversation produced no reusable environment knowledge.`;
 
@@ -162,6 +162,8 @@ export type SynthesizeMemoryGroup = (input: {
   extract: MemoryExtractProposal;
   task?: string;
   transcript?: string;
+  /** Titles of the other entries proposed this round. */
+  otherTopics?: string[];
 }) => Promise<MemoryMergeSynthesis>;
 
 /** Normalize the user-authored task without interpreting literal prompt content. */
@@ -241,6 +243,7 @@ export const formatRecalled = (
     recalledMemories.map((memory, index) => ({
       prefix:
         `${index === 0 ? '' : '\n'}- id=${memory.id}\n` +
+        `  title: ${memory.title.slice(0, MAX_RECALLED_TITLE_CHARS)}\n` +
         `  updated: ${memory.updated_at}\n` +
         `  content: `,
       content: memory.content,
@@ -438,14 +441,18 @@ export const MEMORY_WRITER_SYSTEM_PROMPT = `You write one semantic memory for an
 You get the run time, the topic, a note on why the entry is being written, the new information from this run, the stored memories it replaces, and this round's investigation transcript. The replaced memories are archived once your entry is written, so anything worth keeping from them must be in your content.
 
 The transcript is the evidence. It has the user task; the investigation, in order (the agent's notes and every tool call with an excerpt of its result, where "ERROR" marks a failed call); and the final answer. Use it to check the new information and the replaced memories, and to recover a detail the entry needs. A claim is observed only if a tool result shows it. The final answer can include the agent's inferences, so it is not evidence by itself. Calls that read memories (/workspace/memories/), Cortex pages (/workspace/cortex/), or decision trees (/workspace/decision-trees/) return stored knowledge, not new evidence. If results are unavailable (the transcript says so), the final answer is the only source for what this run observed.
+- Rewrite, do not patch. Check every sentence you keep from a replaced memory against the rules below, even when the note calls the memory correct: a fact can be right and still need a date, or the past tense because the problem has stopped.
 - Keep the facts from the replaced memories that are still correct and useful.
 - Where this run's evidence, the new information, or the note contradicts a replaced memory, drop the contradicted claim. Keep a replaced memory's inference or explanation only if the evidence supports it.
-- Stay on the entry's topic: the transcript can cover other topics, which belong to other entries.
+- Stay on the entry's topic as its title names it. The transcript covers other topics too; add a fact from it only if it is about this topic. Facts about the other entries written this round (listed in the input) belong to those entries, never to this one.
 - Drop what is not useful and ids from one run (trace, span, request, alert, or document ids).
 - Every claim that can change over time (counts, rates, latencies, percentiles, error levels, versions, config values, which component is slowest) states when it was observed, as an absolute UTC time or window with dates. Keep the times given in the inputs. A replaced memory's claim with no time was observed by that memory's updated date: say "as of <date>".
 - Never write relative times such as "current", "prior window", "now", or "recently".
+- Structural facts that do not change from run to run (names, fields, index or data stream names, ownership, dependencies, topology) get no time, even when the transcript shows when they were seen: no "observed" or "as of" on them.
 - Earlier observations may stay when they are still useful, labeled with their times. When a newer observation conflicts with an older one, the newer one is the current state; keep the older one only as a dated earlier observation.
-- A problem the evidence shows has stopped is written in the past tense, with when it was observed and when it stopped, including its cause (e.g. "From 2026-09-30T06:57Z to 07:30Z the host clock was 1 s behind the CA"). Keep its signature and cause so a recurrence is recognized; never describe it as ongoing.
+- A problem the evidence shows has stopped is written in the past tense throughout, cause included, with when it was observed and when it stopped. Write "From 2026-09-30T06:57Z to 07:30Z the host clock was 1 s behind the CA", not "The host clock runs 1 s behind the CA". Keep its signature (error text, affected component) so a recurrence is recognized, but never describe the problem or its cause as ongoing.
+- State facts only; never address the reader or give instructions (no "should be used to", "watch for").
+- Before returning, reread the content: rewrite any present-tense sentence about a problem that has stopped.
 - Compare observations from different times only when they measure the same thing the same way; otherwise state each on its own.
 - Lead with the lasting conclusion, then the dated observations that support it.
 - These rules apply to the new information as well as to the replaced memories. The note explains what changed; the rules still apply where it suggests otherwise.
@@ -500,7 +507,7 @@ export const createLlmSynthesizeMemoryGroup = ({
   inferenceClient: BoundInferenceClient;
   signal?: AbortSignal;
 }): SynthesizeMemoryGroup => {
-  return async ({ sources, extract, task, transcript }) => {
+  return async ({ sources, extract, task, transcript, otherTopics = [] }) => {
     const taskText = task ? truncateTokens(task, MAX_MERGE_TASK_TOKENS) : '';
     const taskBlock = taskText
       ? `\n\nThis round's original task (cover its goal in context; do not copy it verbatim): ${taskText}`
@@ -508,7 +515,13 @@ export const createLlmSynthesizeMemoryGroup = ({
     const transcriptBlock = transcript
       ? `\n\nInvestigation transcript:\n${transcript}`
       : '\n\nInvestigation transcript: (unavailable)';
-    const framingTokens = estimateTokens(taskBlock) + estimateTokens(transcriptBlock);
+    const othersBlock = `\n\nOther entries written this round: ${
+      otherTopics.length > 0
+        ? otherTopics.map((topic) => `\n- ${topic.slice(0, MAX_RECALLED_TITLE_CHARS)}`).join('')
+        : '(none)'
+    }`;
+    const framingTokens =
+      estimateTokens(taskBlock) + estimateTokens(transcriptBlock) + estimateTokens(othersBlock);
     const entryBlock = formatMemoryMergeSources({
       sources,
       extract,
@@ -518,7 +531,7 @@ export const createLlmSynthesizeMemoryGroup = ({
       id: 'nightshift_memory_write',
       abortSignal: signal,
       system: MEMORY_WRITER_SYSTEM_PROMPT,
-      input: `Run time: ${new Date().toISOString()}\n\n${entryBlock}${transcriptBlock}${taskBlock}`,
+      input: `Run time: ${new Date().toISOString()}\n\n${entryBlock}${othersBlock}${transcriptBlock}${taskBlock}`,
       schema: {
         type: 'object',
         properties: {
@@ -797,6 +810,8 @@ export const applyMemoryEdits = async ({
   // Pages an entry was written to or archived into an entry this round.
   const replacedDoneIds = new Set<string>();
   const archivedExactIds = new Set<string>();
+  const otherTopicsOf = (extract: MemoryExtractProposal): string[] =>
+    extractions.filter((other) => other !== extract).map((other) => other.title);
 
   interface MergeGroup {
     sourceIds: string[];
@@ -898,6 +913,7 @@ export const applyMemoryEdits = async ({
       canonicalId: group.canonicalId,
       task,
       transcript,
+      otherTopics: otherTopicsOf(group.extract),
       synthesizeMemoryGroup,
       now,
       logger,
@@ -970,6 +986,7 @@ export const applyMemoryEdits = async ({
             canonicalId: winner.id,
             task,
             transcript,
+            otherTopics: otherTopicsOf(extra),
             synthesizeMemoryGroup,
             now,
             logger,
@@ -1012,6 +1029,7 @@ const mergeMemoryGroup = async ({
   canonicalId: initialCanonicalId,
   task,
   transcript,
+  otherTopics,
   synthesizeMemoryGroup,
   now,
   logger,
@@ -1022,6 +1040,7 @@ const mergeMemoryGroup = async ({
   canonicalId?: string;
   task: string;
   transcript?: string;
+  otherTopics: string[];
   synthesizeMemoryGroup: SynthesizeMemoryGroup;
   now: () => number;
   logger: Logger;
@@ -1065,6 +1084,7 @@ const mergeMemoryGroup = async ({
         extract,
         task,
         transcript,
+        otherTopics,
       });
     } catch (err) {
       logger.warn('Memory merge synthesis failed');
