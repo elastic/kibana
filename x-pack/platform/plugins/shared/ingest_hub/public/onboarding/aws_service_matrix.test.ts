@@ -660,6 +660,35 @@ describe('AWS service matrix', () => {
       expect(result.dataStreams).not.toContain('application_activity');
     });
 
+    it('excludes data streams with no stream definitions (routing-rule-only streams)', () => {
+      // Regression: amazon_security_lake has 7 data streams but only `event` has an explicit
+      // `streams:` section. The rest use routing rules and have `streams: null`. Fleet's
+      // getStreamsForInputType skips them, so they are never in Fleet's streamsMap. Sending
+      // stream keys for them always produces "stream not found".
+      const pkg = {
+        policy_templates: [
+          { name: 'amazon_security_lake', inputs: [{ type: 'aws-s3', title: 'S3' }] },
+        ],
+        data_streams: [
+          // Only `event` has a stream definition; the rest use routing rules (streams: null).
+          { path: 'event', type: 'logs', streams: [{ input: 'aws-s3', vars: [] }] },
+          { path: 'application_activity', type: 'logs', streams: null },
+          { path: 'network_activity', type: 'logs', streams: null },
+        ],
+      };
+      const [result] = buildAwsServiceMatrix({ amazon_security_lake: pkg as any }, [
+        {
+          id: 'amazon_security_lake',
+          category: 'security_identity_compliance',
+          packageName: 'amazon_security_lake',
+        },
+      ]);
+      // Only `event` has a stream definition — routing-rule streams must be excluded.
+      expect(result.dataStreams).toEqual(['event']);
+      expect(result.dataStreams).not.toContain('application_activity');
+      expect(result.dataStreams).not.toContain('network_activity');
+    });
+
     it('does not consume aws-package data streams when the entry has a policyTemplate set', () => {
       // An `aws` entry whose PT is temporarily missing must not fall through to the no-PT
       // fallback and pick up ALL package data streams (regression guard for Libra 4125759535).

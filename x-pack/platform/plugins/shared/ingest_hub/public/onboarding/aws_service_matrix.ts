@@ -908,6 +908,11 @@ export function buildAwsServiceMatrix(
         for (const dsId of includedDsIds) {
           const ds = (packageInfo.data_streams ?? []).find((d: any) => d.path === dsId);
           if (!ds) continue;
+          // Skip data streams with no stream definitions. Fleet's getStreamsForInputType also
+          // skips them, so they are never present in its streamsMap. Sending a stream key for
+          // such a data stream always produces "stream not found" (e.g. amazon_security_lake
+          // uses routing rules for most of its data streams — only `event` has a stream def).
+          if (!(ds as any).streams?.length) continue;
 
           dataStreams.push(dsId);
           if ((ds as any)?.type === 'logs' || (ds as any)?.type === 'metrics') {
