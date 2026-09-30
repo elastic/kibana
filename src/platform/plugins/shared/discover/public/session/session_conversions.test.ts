@@ -299,10 +299,14 @@ describe('Discover session conversion and UI preparation', () => {
       { meta: { index: 'stored-inline-id' } },
       { meta: { index: 'foreign-data-view-id' } },
     ]);
-    expect(tab.visContext?.requestData).toStrictEqual({
-      dataViewId: 'stored-inline-id',
-      timeField: '@timestamp',
-      timeInterval: 'h',
+    expect(tab.visContext).toStrictEqual({
+      suggestionType: UnifiedHistogramSuggestionType.histogramForDataView,
+      attributes: { visualizationType: 'lnsXY' },
+      requestData: {
+        dataViewId: 'stored-inline-id',
+        timeField: '@timestamp',
+        timeInterval: 'h',
+      },
     });
     expect(assignSessionDataViewIds(session, [])).toBe(session);
     expect(mockedUuidv4).not.toHaveBeenCalled();
