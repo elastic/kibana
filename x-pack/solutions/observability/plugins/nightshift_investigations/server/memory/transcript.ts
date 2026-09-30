@@ -6,7 +6,6 @@
  */
 
 import type { InvestigationToolCall } from '../decision_trees/accessed_trees';
-import { renderToolCalls } from '../cortex/optimize';
 
 /**
  * The text the Semantic Memory critique and extraction calls read.
@@ -91,7 +90,11 @@ interface Rendered {
   omitted: number;
 }
 
-const renderInvestigation = (steps: TranscriptStep[], excerptChars: number): Rendered => {
+const renderInvestigation = (
+  steps: TranscriptStep[],
+  excerptChars: number,
+  noteMissingResults = true
+): Rendered => {
   const contextPaths: string[] = [];
   const entries: string[] = [];
   let n = 0;
@@ -120,18 +123,25 @@ const renderInvestigation = (steps: TranscriptStep[], excerptChars: number): Ren
       lines.push(
         `   ${step.isError ? 'ERROR' : 'Result'}: ${(excerpt || '(empty)').replace(/\n/g, '\n   ')}`
       );
-    } else if (step.resultText === undefined) {
+    } else if (step.resultText === undefined && noteMissingResults) {
       lines.push('   Result: (not available)');
     }
     entries.push(lines.join('\n'));
   }
 
+  // Memory files are named (the critique needs to know which recalled memories were opened); the
+  // rest of the prior context is only counted: it is already known and irrelevant to memory.
+  const memoryPaths = contextPaths.filter((path) => path.startsWith('/workspace/memories/'));
+  const otherCount = contextPaths.length - memoryPaths.length;
+  const loaded = [
+    ...(memoryPaths.length > 0 ? [`memories: ${memoryPaths.join(', ')}`] : []),
+    ...(otherCount > 0
+      ? [`${otherCount} other file(s) (Cortex pages, decision trees, environment docs)`]
+      : []),
+  ];
   const header =
-    contextPaths.length > 0
-      ? [
-          `Loaded from prior context (already known, not new evidence): ${contextPaths.join(', ')}`,
-          '',
-        ]
+    loaded.length > 0
+      ? [`Loaded from prior context (already known, not new evidence): ${loaded.join('; ')}`, '']
       : [];
   let kept = entries.length;
   let text = [...header, ...entries].join('\n');
@@ -166,10 +176,24 @@ export const renderMemoryTranscript = ({
   /** Parameters-only fallback, used when `investigation` is unavailable. */
   toolCalls: InvestigationToolCall[];
 }): string => {
+  // The parameters-only fallback is rendered the same way, so prior-context loads still collapse
+  // to one line and only the calls that touched the environment stay in the list.
   const middle =
     investigation !== undefined
       ? ['## Investigation', fitInvestigation(investigation)]
-      : ['## Tool calls (parameters only; results unavailable)', renderToolCalls(toolCalls)];
+      : [
+          '## Tool calls (parameters only; results unavailable)',
+          renderInvestigation(
+            toolCalls.map((call) => ({
+              kind: 'tool' as const,
+              toolId: call.tool_id ?? 'unknown_tool',
+              params: call.params ?? {},
+              isError: false,
+            })),
+            0,
+            false
+          ).text,
+        ];
   return [
     '## User task',
     task.slice(0, MAX_TASK_CHARS),

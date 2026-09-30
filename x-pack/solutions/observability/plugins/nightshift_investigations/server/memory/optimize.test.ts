@@ -1395,7 +1395,7 @@ describe('optimizeMemory', () => {
     });
 
     expect(proposeExtractions.mock.calls[0][0].transcript).toContain(
-      '## Tool calls (parameters only; results unavailable)\n(none)'
+      '## Tool calls (parameters only; results unavailable)\n(no tool calls)'
     );
   });
   it('labels only recalled pages fetched by id, not store.list()', async () => {

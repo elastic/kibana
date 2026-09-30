@@ -89,7 +89,7 @@ describe('renderMemoryTranscript', () => {
       tool('nightshift_sandbox_bash', { command: 'curl $URL/_cluster/health' }, 'status: green'),
     ]);
     expect(text).toContain(
-      'Loaded from prior context (already known, not new evidence): /workspace/elastic.md, /workspace/memories/checkout-redis-evictions.md, /workspace/cortex/README.md'
+      'Loaded from prior context (already known, not new evidence): memories: /workspace/memories/checkout-redis-evictions.md; 2 other file(s) (Cortex pages, decision trees, environment docs)'
     );
     expect(text).not.toMatch(/ELASTIC-DOC-BODY|MEMORY-BODY|CORTEX-BODY/);
     expect(text).toContain('1. nightshift_sandbox_bash: curl $URL/_cluster/health');
@@ -142,6 +142,29 @@ describe('renderMemoryTranscript', () => {
     expect(text).toContain('## Tool calls (parameters only; results unavailable)');
     expect(text).toContain('nightshift_sandbox_bash');
     expect(text).not.toContain('## Investigation');
+  });
+
+  it('collapses prior-context loads in the fallback too, and does not repeat "not available"', () => {
+    const text = render(undefined, [
+      {
+        tool_id: 'nightshift_sandbox_view_file',
+        params: { file_path: '/workspace/cortex/INDEX.md' },
+      },
+      {
+        tool_id: 'nightshift_sandbox_view_file',
+        params: { file_path: '/workspace/memories/a.md' },
+      },
+      {
+        tool_id: 'nightshift_sandbox_bash',
+        params: { command: 'curl -sS http://x/_cluster/health' },
+      },
+    ] as never);
+    expect(text).toContain(
+      'Loaded from prior context (already known, not new evidence): memories: /workspace/memories/a.md; 1 other file(s) (Cortex pages, decision trees, environment docs)'
+    );
+    expect(text).toContain('1. nightshift_sandbox_bash: curl -sS http://x/_cluster/health');
+    expect(text).not.toContain('view_file');
+    expect(text).not.toContain('not available');
   });
 });
 
