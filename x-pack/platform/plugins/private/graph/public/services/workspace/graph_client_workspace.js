@@ -13,7 +13,6 @@ import {
   planIncomingEdges,
   prepareIncomingNodes,
 } from './graph_merge_planner';
-import { buildNodeQuery } from './graph_request_builders';
 
 // ====== Undo operations =============
 
@@ -417,110 +416,6 @@ function GraphWorkspace(options) {
 
   this.getNode = function (nodeId) {
     return this.nodesMap[nodeId];
-  };
-  this.getQuery = function (startNodes, loose) {
-    const shoulds = [];
-    let nodes = startNodes;
-    if (!startNodes) {
-      nodes = self.nodes;
-    }
-    nodes.forEach((node) => {
-      if (node.parent === undefined) {
-        shoulds.push(buildNodeQuery(self.returnUnpackedGroupeds([node])));
-      }
-    });
-    return {
-      bool: {
-        should: shoulds,
-        minimum_should_match: Math.min(shoulds.length, loose ? 1 : 2),
-      },
-    };
-  };
-
-  function addTermToFieldList(map, field, term) {
-    let arr = map[field];
-    if (!arr) {
-      arr = [];
-      map[field] = arr;
-    }
-    arr.push(term);
-  }
-
-  // Provide a "fuzzy find similar" query that can find similar docs but preferably
-  // not re-iterating the exact terms we already have in the workspace.
-  // We use a free-text search on the index's configured default field (typically '_all')
-  // to drill-down into docs that should be linked but aren't via the exact terms
-  // we have in the workspace
-  this.getLikeThisButNotThisQuery = function (startNodes) {
-    const likeQueries = [];
-
-    const txtsByFieldType = {};
-    startNodes.forEach((node) => {
-      let txt = txtsByFieldType[node.data.field];
-      if (txt) {
-        txt = txt + ' ' + node.label;
-      } else {
-        txt = node.label;
-      }
-      txtsByFieldType[node.data.field] = txt;
-    });
-    for (const field in txtsByFieldType) {
-      if (Object.hasOwn(txtsByFieldType, field)) {
-        likeQueries.push({
-          more_like_this: {
-            like: txtsByFieldType[field],
-            min_term_freq: 1,
-            minimum_should_match: '20%',
-            min_doc_freq: 1,
-            boost_terms: 2,
-            max_query_terms: 25,
-          },
-        });
-      }
-    }
-
-    const excludeNodesByField = {};
-    const allExistingNodes = self.nodes;
-    allExistingNodes.forEach((existingNode) => {
-      addTermToFieldList(excludeNodesByField, existingNode.data.field, existingNode.data.term);
-    });
-    const blocklistedNodes = self.blocklistedNodes;
-    blocklistedNodes.forEach((blocklistedNode) => {
-      addTermToFieldList(
-        excludeNodesByField,
-        blocklistedNode.data.field,
-        blocklistedNode.data.term
-      );
-    });
-
-    //Create negative boosting queries to avoid matching what you already have in the workspace.
-    const notExistingNodes = [];
-    Object.keys(excludeNodesByField).forEach((fieldName) => {
-      const termsQuery = {};
-      termsQuery[fieldName] = excludeNodesByField[fieldName];
-      notExistingNodes.push({
-        terms: termsQuery,
-      });
-    });
-
-    const result = {
-      // Use a boosting query to effectively to request "similar to these IDS/labels but
-      // preferably not containing these exact IDs".
-      boosting: {
-        negative_boost: 0.0001,
-        negative: {
-          bool: {
-            should: notExistingNodes,
-          },
-        },
-        positive: {
-          bool: {
-            should: likeQueries,
-          },
-        },
-      },
-    };
-    return result;
   };
 }
 //=====================

@@ -10,6 +10,7 @@ import rison from '@kbn/rison';
 import { i18n } from '@kbn/i18n';
 import type { Workspace } from '../types';
 import { asKQL, getSelectedOrAllNodes } from './kql_encoder';
+import { buildLikeThisButNotThisQuery, buildWorkspaceQuery } from './outlink_queries';
 
 export interface OutlinkEncoder {
   id: string;
@@ -57,7 +58,9 @@ export const outlinkEncoders: OutlinkEncoder[] = [
     }),
     encode(workspace, selectedNodeIds) {
       return encodeURIComponent(
-        rison.encode(workspace.getQuery(getSelectedOrAllNodes(workspace, selectedNodeIds), true))
+        rison.encode(
+          buildWorkspaceQuery(workspace, getSelectedOrAllNodes(workspace, selectedNodeIds), true)
+        )
       );
     },
     type: 'esq',
@@ -73,7 +76,9 @@ export const outlinkEncoders: OutlinkEncoder[] = [
     }),
     encode(workspace, selectedNodeIds) {
       return encodeURIComponent(
-        rison.encode(workspace.getQuery(getSelectedOrAllNodes(workspace, selectedNodeIds)))
+        rison.encode(
+          buildWorkspaceQuery(workspace, getSelectedOrAllNodes(workspace, selectedNodeIds))
+        )
       );
     },
     type: 'esq',
@@ -90,7 +95,7 @@ export const outlinkEncoders: OutlinkEncoder[] = [
     encode(workspace, selectedNodeIds) {
       return encodeURIComponent(
         rison.encode(
-          workspace.getLikeThisButNotThisQuery(getSelectedOrAllNodes(workspace, selectedNodeIds))
+          buildLikeThisButNotThisQuery(workspace, getSelectedOrAllNodes(workspace, selectedNodeIds))
         )
       );
     },
@@ -106,7 +111,9 @@ export const outlinkEncoders: OutlinkEncoder[] = [
     }),
     encode(workspace, selectedNodeIds) {
       return encodeURIComponent(
-        JSON.stringify(workspace.getQuery(getSelectedOrAllNodes(workspace, selectedNodeIds)))
+        JSON.stringify(
+          buildWorkspaceQuery(workspace, getSelectedOrAllNodes(workspace, selectedNodeIds))
+        )
       );
     },
     type: 'esq',
