@@ -18,7 +18,7 @@
          -XGET "http://localhost:5601/internal/profiling/setup/has_data"
 
 Applying the setup is rejected while `xpack.profiling.elasticsearch` is set — see
-[Reading profiling data from a remote cluster](../../../../README.md#reading-profiling-data-from-a-remote-cluster).
+[Reading profiling data from a remote cluster](../../../../../README.md#reading-profiling-data-from-a-remote-cluster).
 
 
 ### Testing in Cloud
