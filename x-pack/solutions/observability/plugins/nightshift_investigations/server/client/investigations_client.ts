@@ -513,8 +513,13 @@ export class NightshiftInvestigationsClient {
    * thing however the record came to exist: `start()` cannot know the id the engine assigns to the
    * run's executor, and stamping the transition with the wall clock would date the record to when
    * the persist step happened to run rather than to when the run began.
+   *
+   * Resolves to the conversation a continuing run resumes, so callers name only the investigation.
    */
-  async ensureOrCreate(investigationId: string, executionId = investigationId): Promise<void> {
+  async ensureOrCreate(
+    investigationId: string,
+    executionId = investigationId
+  ): Promise<string | undefined> {
     if (executionId !== investigationId) {
       return this.continueInvestigation(investigationId, executionId);
     }
@@ -584,9 +589,13 @@ export class NightshiftInvestigationsClient {
   /**
    * Marks an existing investigation running for a run that continues it, such as a reply in its
    * Slack thread. Unlike a first run, a settled record is reopened. The run must name this
-   * investigation in its own inputs, so a caller cannot reopen one it did not start.
+   * investigation in its own inputs, so a caller cannot reopen one it did not start. Resolves to
+   * the investigation's conversation.
    */
-  private async continueInvestigation(investigationId: string, executionId: string) {
+  private async continueInvestigation(
+    investigationId: string,
+    executionId: string
+  ): Promise<string | undefined> {
     const existing = await this.investigationRepository.get(investigationId);
     if (!existing) {
       throw new InvestigationNotFoundError(investigationId);
@@ -619,6 +628,7 @@ export class NightshiftInvestigationsClient {
       startedAt: execution.startedAt ?? new Date().toISOString(),
       executedBy: execution.executedBy,
     });
+    return existing.conversation_id;
   }
 
   private async transitionToRunning({

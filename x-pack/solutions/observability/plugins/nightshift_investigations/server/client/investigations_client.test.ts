@@ -1563,11 +1563,16 @@ describe('NightshiftInvestigationsClient.ensureOrCreate() continuing an investig
     'moves a %s investigation to running for the run that names it',
     async (status) => {
       repository.get.mockResolvedValue(
-        makeRecord({ status }, { id: INVESTIGATION_ID, version: 'v2' })
+        makeRecord(
+          { status, conversation_id: 'conv-slack' },
+          { id: INVESTIGATION_ID, version: 'v2' }
+        )
       );
       mockManagement.getWorkflowExecution.mockResolvedValue(makeFollowUpExecution());
 
-      await makeClient().ensureOrCreate(INVESTIGATION_ID, EXECUTION_ID);
+      await expect(makeClient().ensureOrCreate(INVESTIGATION_ID, EXECUTION_ID)).resolves.toBe(
+        'conv-slack'
+      );
 
       expect(mockManagement.getWorkflowExecution).toHaveBeenCalledWith(
         EXECUTION_ID,

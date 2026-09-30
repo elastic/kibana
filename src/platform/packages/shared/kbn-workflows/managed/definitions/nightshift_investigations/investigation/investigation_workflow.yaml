@@ -43,13 +43,8 @@ triggers:
         investigation_id:
           type: string
           description: >
-            Existing investigation to continue. Defaults to a new investigation keyed by the
-            workflow execution ID.
-        conversation_id:
-          type: string
-          description: >
-            Conversation to continue. It is created under this ID if it does not exist yet.
-            Defaults to a new conversation.
+            Existing investigation to continue, in its own conversation. Defaults to a new
+            investigation keyed by the workflow execution ID.
       required:
         - message
         - title
@@ -66,7 +61,7 @@ steps:
 
   # Creates the record if needed before lifecycle emission, so a running investigation is always
   # visible. The server derives attributes from the execution document; retries cover startup races.
-  # A run continuing an existing investigation reopens it instead.
+  # A run continuing an existing investigation reopens it instead and gets back its conversation.
   - name: persist_investigation_started
     type: kibana.request
     with:
@@ -112,7 +107,7 @@ steps:
       # Correlates the workflow and generated agent executions for live progress lookup.
       metadata:
         workflow_execution_id: '{{ execution.id }}'
-      conversation_id: '${{ inputs.conversation_id }}'
+      conversation_id: '${{ steps.persist_investigation_started.output.conversation_id }}'
       message: |
         {{ inputs.message }}
 

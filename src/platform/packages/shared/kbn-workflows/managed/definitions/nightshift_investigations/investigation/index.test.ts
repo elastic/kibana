@@ -114,9 +114,13 @@ describe('Nightshift investigation workflow', () => {
     expect(requireStep('persist_investigation_started').with?.body).toEqual({
       execution_id: '{{ execution.id }}',
     });
+  });
+
+  it('continues the conversation the investigation record names', () => {
     expect(requireStep('investigate').with).toMatchObject({
-      conversation_id: '${{ inputs.conversation_id }}',
+      conversation_id: '${{ steps.persist_investigation_started.output.conversation_id }}',
     });
+    expect(NIGHTSHIFT_INVESTIGATION_WORKFLOW.yaml).not.toContain('inputs.conversation_id');
   });
 
   it('knows nothing about Slack', () => {
