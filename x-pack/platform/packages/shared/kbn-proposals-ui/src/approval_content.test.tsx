@@ -147,6 +147,23 @@ describe('ApprovalContent', () => {
     expect(screen.getByTestId('approvalContent-confirm')).toHaveTextContent('Approve');
   });
 
+  it('colors the Approve button by the proposal tone: danger for high/critical impact', () => {
+    // `baseProposal` is `critical` impact, so the default render already covers this.
+    renderContent();
+    expect(screen.getByTestId('approvalContent-confirm').className).toContain('danger');
+  });
+
+  it('colors the Approve button primary for low/medium impact, not success', () => {
+    // Regression check: the chat card's Approve button was once styled `success` here,
+    // independent of — and inconsistent with — the flyout modal's tone-derived `primary`. Both
+    // hosts now share this one derivation, so this covers both.
+    renderContent({ proposal: { ...baseProposal, impact: 'low' } });
+    const className = screen.getByTestId('approvalContent-confirm').className;
+    expect(className).toContain('primary');
+    expect(className).not.toContain('success');
+    expect(className).not.toContain('danger');
+  });
+
   it('renders secondary action buttons as empty buttons', () => {
     renderContent();
     expect(screen.getByTestId('content-cancel')).toHaveTextContent('Cancel');
@@ -201,10 +218,12 @@ describe('ApprovalContent', () => {
     expect(screen.queryByText('A previous attempt at this action failed')).not.toBeInTheDocument();
   });
 
-  it('renders an expiry explanation when the proposal has expired', () => {
+  it('renders an expiry explanation when the deadline has passed', () => {
     renderContent({ proposal: { ...baseProposal, expired: true } });
     expect(
-      screen.getByText('The decision deadline has passed. This proposal can no longer be actioned.')
+      screen.getByText(
+        'This proposal expired before a decision was made and can no longer be actioned.'
+      )
     ).toBeInTheDocument();
   });
 
@@ -389,6 +408,13 @@ describe('ApprovalContent', () => {
       renderContent({ proposal: { ...baseProposal, expired: false, status: 'expired' } });
       expect(screen.getByText('Expired')).toBeInTheDocument();
       expect(screen.queryByTestId('approvalContent-confirm')).not.toBeInTheDocument();
+      // The callout's wording must hold for this cause too, not just a deadline that passed —
+      // `isProposalExpired` reports both the same way, so the explanation cannot claim one.
+      expect(
+        screen.getByText(
+          'This proposal expired before a decision was made and can no longer be actioned.'
+        )
+      ).toBeInTheDocument();
     });
   });
 

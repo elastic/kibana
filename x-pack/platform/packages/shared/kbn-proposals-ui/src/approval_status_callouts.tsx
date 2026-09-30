@@ -17,8 +17,10 @@ interface ApprovalStatusCalloutsProps {
   /** Error from a prior run of this proposal's action, explaining why it is offered again. */
   previousExecutionError?: string;
   /**
-   * Whether the decision deadline has passed. The header badge already says "Expired"; this adds
-   * the explanation the badge alone has no room for.
+   * Whether the proposal is expired — its deadline passed, or the workflow settled it as
+   * `status: 'expired'` beforehand (e.g. after exhausting its retry attempts). The header badge
+   * already says "Expired"; this adds the explanation the badge alone has no room for, worded to
+   * hold for either cause since this flag does not distinguish them.
    */
   isExpired?: boolean;
   'data-test-subj'?: string;
