@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { EuiSpacer, EuiText, EuiTitle } from '@elastic/eui';
 import { Forms } from '@kbn/es-ui-shared-plugin/public';
 import { useFormContext, useWatch } from 'react-hook-form';
@@ -59,34 +59,21 @@ export function StepDataset({
   const dataSource = useWatch({ control, name: 'data_source' });
   const resource = useWatch({ control, name: 'resource' });
   const format = useWatch({ control, name: 'settings.format' });
+  const formatWasAutoDetected = useWatch({ control, name: 'ui.formatWasAutoDetected' });
   const [hasAttemptedValidation, setHasAttemptedValidation] = useState(false);
-  const lastAutoSelectedFormatRef = useRef<DatasetFormatFormValue | null>(null);
-
-  useEffect(() => {
-    // If the user changes format away from what we last auto-selected, stop auto-updating.
-    if (
-      format &&
-      lastAutoSelectedFormatRef.current &&
-      format !== lastAutoSelectedFormatRef.current
-    ) {
-      lastAutoSelectedFormatRef.current = null;
-      setValue('ui.formatWasAutoDetected', false);
-    }
-  }, [format, setValue]);
 
   useEffect(() => {
     const inferredFormat = inferFormatFromResource(resource);
-    if (!inferredFormat) return;
+    if (!inferredFormat || inferredFormat === format) return;
 
-    // Only auto-select when:
-    // - the format is not set yet, OR
-    // - the current format was previously auto-selected (so we can keep it in sync with path changes)
-    if (!format || format === lastAutoSelectedFormatRef.current) {
-      lastAutoSelectedFormatRef.current = inferredFormat;
+    // Only auto-select when the format is unset or was itself auto-selected, so a manual choice
+    // (which clears `ui.formatWasAutoDetected`) is never overridden. The flag lives in form state
+    // so it survives this step unmounting when the user moves to another step and back.
+    if (!format || formatWasAutoDetected) {
       setValue('settings.format', inferredFormat, { shouldValidate: true });
       setValue('ui.formatWasAutoDetected', true);
     }
-  }, [format, resource, setValue]);
+  }, [format, formatWasAutoDetected, resource, setValue]);
 
   useEffect(() => {
     // Don't mark the step invalid (disabling Next) until the user tries to proceed.

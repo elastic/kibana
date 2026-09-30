@@ -790,6 +790,64 @@ describe('CreateDatasetWizardPage', () => {
     expect(await waitFor(() => getByTestId('createDatasetWizardMappingStep'))).toBeInTheDocument();
   });
 
+  it('keeps inferring the format from the resource after navigating back', async () => {
+    const { getByTestId, findByTestId, queryByTestId } = renderWizard();
+
+    fireEvent.click(getByTestId('createDatasetDataSource'));
+    fireEvent.click(await findByTestId('createDatasetDataSource-source-1'));
+    fireEvent.change(getByTestId('createDatasetName'), { target: { value: 'logs-dataset' } });
+    fireEvent.change(getByTestId('createDatasetResource'), {
+      target: { value: 's3://bucket/*.csv' },
+    });
+    expect(await findByTestId('createDatasetSettingsFormatInput-csv')).toHaveTextContent(
+      createDatasetWizardStrings.autoDetectedSuffix
+    );
+
+    await clickNext(getByTestId);
+    expect(
+      await waitFor(() => getByTestId('createDatasetWizardAdditionalStep'))
+    ).toBeInTheDocument();
+    await clickBack(getByTestId);
+    expect(await waitFor(() => getByTestId('createDatasetWizardDatasetStep'))).toBeInTheDocument();
+
+    fireEvent.change(getByTestId('createDatasetResource'), {
+      target: { value: 's3://bucket/*.parquet' },
+    });
+
+    expect(await findByTestId('createDatasetSettingsFormatInput-parquet')).toHaveTextContent(
+      createDatasetWizardStrings.autoDetectedSuffix
+    );
+    expect(queryByTestId('createDatasetSettingsFormatInput-csv')).toBeNull();
+  });
+
+  it('keeps a manually selected format when the resource changes after navigating back', async () => {
+    const { getByTestId, findByTestId, queryByTestId } = renderWizard();
+
+    fireEvent.click(getByTestId('createDatasetDataSource'));
+    fireEvent.click(await findByTestId('createDatasetDataSource-source-1'));
+    fireEvent.change(getByTestId('createDatasetName'), { target: { value: 'logs-dataset' } });
+    fireEvent.change(getByTestId('createDatasetResource'), {
+      target: { value: 's3://bucket/*.csv' },
+    });
+    await findByTestId('createDatasetSettingsFormatInput-csv');
+    selectFormat(getByTestId, 'tsv');
+
+    await clickNext(getByTestId);
+    expect(
+      await waitFor(() => getByTestId('createDatasetWizardAdditionalStep'))
+    ).toBeInTheDocument();
+    await clickBack(getByTestId);
+    expect(await waitFor(() => getByTestId('createDatasetWizardDatasetStep'))).toBeInTheDocument();
+
+    fireEvent.change(getByTestId('createDatasetResource'), {
+      target: { value: 's3://bucket/*.parquet' },
+    });
+
+    const formatInput = await findByTestId('createDatasetSettingsFormatInput-tsv');
+    expect(formatInput).not.toHaveTextContent(createDatasetWizardStrings.autoDetectedSuffix);
+    expect(queryByTestId('createDatasetSettingsFormatInput-parquet')).toBeNull();
+  });
+
   it('blocks navigation when max error ratio is out of range', async () => {
     const { getByTestId, findByTestId, queryByTestId } = renderWizard();
 

@@ -7,7 +7,7 @@
 
 import React, { useEffect, useState } from 'react';
 import { EuiProvider } from '@elastic/eui';
-import { act, render, waitFor } from '@testing-library/react';
+import { act, fireEvent, render, waitFor } from '@testing-library/react';
 import type { UseFormReturn } from 'react-hook-form';
 import { FormProvider, useForm, useWatch } from 'react-hook-form';
 
@@ -109,17 +109,15 @@ describe('StepDataset', () => {
   });
 
   it('does not override a user-selected format after manual change', async () => {
-    const { getMethods, getFormat } = renderStep();
+    const { getMethods, getFormat, getByTestId } = renderStep();
 
     act(() => {
       getMethods().setValue('resource', 's3://bucket/logs/*.csv');
     });
     await waitFor(() => expect(getFormat()).toBe('csv'));
 
-    act(() => {
-      // Simulate user picking a different format manually.
-      getMethods().setValue('settings.format', 'parquet');
-    });
+    fireEvent.click(getByTestId('createDatasetSettingsFormat'));
+    fireEvent.click(getByTestId('createDatasetSettingsFormatOption-parquet'));
     await waitFor(() => expect(getFormat()).toBe('parquet'));
 
     act(() => {
