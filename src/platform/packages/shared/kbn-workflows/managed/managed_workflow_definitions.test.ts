@@ -90,7 +90,7 @@ const templateRepresentativeValuesById: ManagedWorkflowTemplateValuesById = {
     settingsVersion: 1,
     autonomyLevel: 'manual',
     scheduleInterval: '4h',
-    extras: { tier2When: 'on_hits', candidateLimit: 10, fanOutMax: 10 },
+    extras: { tier2When: 'always', candidateLimit: 10, fanOutMax: 10 },
   },
   [ALERTZERO_WORKER_DETECTION_RULE_TUNING_WORKFLOW_ID]: {
     settingsVersion: 1,
@@ -203,7 +203,7 @@ it.each([
   [
     ALERTZERO_WORKER_HUNT_CONTINUOUS_THREAT_HUNT_WORKFLOW_ID,
     HUNT_CONTINUOUS_THREAT_HUNT_YAML,
-    '3:8ca87c89',
+    '4:b13dded3',
   ],
   [ALERTZERO_WORKER_DETECTION_RULE_TUNING_WORKFLOW_ID, DETECTION_RULE_TUNING_YAML, '7:f3649616'],
   [

@@ -56,7 +56,7 @@ const EXPECTED_WORKER_SETTINGS: Record<RegisteredWorkerId, ExpectedWorkerSetting
   'system-security-hunt-continuous-threat-hunt': {
     settingsVersion: 1,
     scheduleInterval: '4h',
-    extras: { tier2When: 'on_hits', candidateLimit: 10, fanOutMax: 10 },
+    extras: { tier2When: 'always', candidateLimit: 10, fanOutMax: 10 },
     // Default autonomy is manual, so the scheduled trigger is omitted even though
     // scheduleInterval is a setting (assisted/supervised re-render it in).
     triggerTypes: ['manual'],
