@@ -54,16 +54,6 @@ interface Candidate {
 const asTypeList = (value: string | string[] | undefined): string[] =>
   value === undefined ? [] : Array.isArray(value) ? value : [value];
 
-const buildSummary = (candidate: Candidate): string => {
-  const idPart =
-    candidate.entityId !== undefined && candidate.pid !== undefined
-      ? `pid ${candidate.pid}, entity_id ${candidate.entityId}`
-      : candidate.entityId !== undefined
-      ? `entity_id ${candidate.entityId}`
-      : `pid ${candidate.pid}`;
-  return `${candidate.processName} (${idPart}) observed ${candidate.timestamp}; the process may have exited`;
-};
-
 const extractCandidate = (source: RehydrateSource, ref: RehydrateRef): Candidate | undefined => {
   const hostName = source.host?.name ?? source.host?.hostname;
   if (!hostName) {
@@ -187,7 +177,7 @@ export const makeRehydrateProcessSelectors = (
           processKey: candidate.processKey,
           hostName: candidate.hostName,
           observedAt: candidate.timestamp,
-          summary: buildSummary(candidate),
+          processName: candidate.processName,
         });
       }
     }

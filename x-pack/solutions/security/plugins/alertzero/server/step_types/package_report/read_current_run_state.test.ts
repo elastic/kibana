@@ -15,10 +15,23 @@ const sseAttachment = ({
   actionableIndices,
   events,
   attachmentId = 'sse-1',
+  title = 'Test SSE',
+  evidenceFor = ['Tier 1 hit'],
+  tier1TotalHits = 1,
+  tier2Behaviors = [],
 }: {
   actionableIndices?: string[];
   events?: Array<{ event_id: string; source_index: string }>;
   attachmentId?: string;
+  title?: string;
+  evidenceFor?: string[];
+  tier1TotalHits?: number;
+  tier2Behaviors?: Array<{
+    technique_id: string;
+    technique_name?: string;
+    row_count: number;
+    hit?: boolean;
+  }>;
 }): VersionedAttachment => ({
   id: attachmentId,
   type: 'security.significant_security_event',
@@ -29,7 +42,7 @@ const sseAttachment = ({
       created_at: '2026-09-25T00:00:00.000Z',
       content_hash: 'abc',
       data: {
-        title: 'Test SSE',
+        title,
         severity: 'high',
         confidence: 0.9,
         status: 'open',
@@ -49,7 +62,7 @@ const sseAttachment = ({
         ],
         timeline: [],
         hypothesis_tested: 'test',
-        evidence_for: ['Tier 1 hit'],
+        evidence_for: evidenceFor,
         evidence_against: [],
         evaluation_record_ref: 'eval-1',
         hunt_result: {
@@ -62,20 +75,39 @@ const sseAttachment = ({
           tier1: {
             status: 'environment_hits_found',
             counts: {
-              total_hits: 1,
-              returned_hits: 1,
+              total_hits: tier1TotalHits,
+              returned_hits: tier1TotalHits,
               affected_hosts: 1,
               affected_users: 0,
             },
             per_index: [
               {
                 index: '.ds-logs-endpoint.events.process-default-2026.09.25-000001',
-                hit_count: 1,
+                hit_count: tier1TotalHits,
                 required: true,
               },
             ],
             resolved_iocs: [],
           },
+          ...(tier2Behaviors.length > 0
+            ? {
+                tier2: {
+                  status: 'behaviors_proposed',
+                  behaviors: tier2Behaviors.map((behavior) => ({
+                    technique_id: behavior.technique_id,
+                    technique_name: behavior.technique_name,
+                    tactic_ids: [],
+                    confidence: 0.8,
+                    title: `Hunted ${behavior.technique_id}`,
+                    execution: {
+                      executed: true,
+                      row_count: behavior.row_count,
+                      hit: behavior.hit ?? true,
+                    },
+                  })),
+                },
+              }
+            : {}),
           ...(actionableIndices !== undefined
             ? { actionable_indices: actionableIndices }
             : { actionable_indices: ['logs-endpoint.events.process-*'] }),
@@ -192,5 +224,64 @@ describe('readCurrentRunState', () => {
     });
 
     expect(state).toBeUndefined();
+  });
+
+  it('dedupes identical titles and evidence lines across current-run SSEs', async () => {
+    const state = await readCurrentRunState({
+      attachments: [
+        sseAttachment({ attachmentId: 'sse-1', title: 'Same finding', evidenceFor: ['Same line'] }),
+        sseAttachment({ attachmentId: 'sse-2', title: 'Same finding', evidenceFor: ['Same line'] }),
+        sseAttachment({ attachmentId: 'sse-3', title: 'Same finding', evidenceFor: ['Same line'] }),
+      ],
+      reportId,
+      runId,
+      resolveHostEnrollment,
+      rehydrateProcessSelectors,
+    });
+
+    expect(state?.titles).toEqual(['Same finding']);
+    expect(state?.evidenceLines).toEqual(['Same line']);
+  });
+
+  it('takes the max Tier 1 total hits across current-run SSEs', async () => {
+    const state = await readCurrentRunState({
+      attachments: [
+        sseAttachment({ attachmentId: 'sse-1', tier1TotalHits: 2 }),
+        sseAttachment({ attachmentId: 'sse-2', tier1TotalHits: 4 }),
+      ],
+      reportId,
+      runId,
+      resolveHostEnrollment,
+      rehydrateProcessSelectors,
+    });
+
+    expect(state?.evidence.tier1HitCount).toBe(4);
+  });
+
+  it('unions confirmed Tier 2 behaviors by technique_id, ignoring non-hit behaviors', async () => {
+    const state = await readCurrentRunState({
+      attachments: [
+        sseAttachment({
+          attachmentId: 'sse-1',
+          tier2Behaviors: [
+            { technique_id: 'T1059.001', row_count: 3, hit: true },
+            { technique_id: 'T1078.004', row_count: 1, hit: false },
+          ],
+        }),
+        sseAttachment({
+          attachmentId: 'sse-2',
+          tier2Behaviors: [{ technique_id: 'T1078.004', row_count: 4, hit: true }],
+        }),
+      ],
+      reportId,
+      runId,
+      resolveHostEnrollment,
+      rehydrateProcessSelectors,
+    });
+
+    expect(state?.evidence.tier2Confirmed).toEqual([
+      { techniqueId: 'T1059.001', techniqueName: undefined, rowCount: 3 },
+      { techniqueId: 'T1078.004', techniqueName: undefined, rowCount: 4 },
+    ]);
   });
 });

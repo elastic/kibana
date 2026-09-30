@@ -50,11 +50,8 @@ describe('makeRehydrateProcessSelectors', () => {
       pid: 4312,
       processKey: 'entity_id:ent-1',
       observedAt: '2026-09-26T10:00:00.000Z',
+      processName: 'powershell.exe',
     });
-    expect(selectors[0].summary).toContain('powershell.exe');
-    expect(selectors[0].summary).toContain('pid 4312');
-    expect(selectors[0].summary).toContain('entity_id ent-1');
-    expect(selectors[0].summary).toContain('may have exited');
   });
 
   it('prefers entity_id over pid when both are present, and derives processKey from it', async () => {
@@ -160,7 +157,7 @@ describe('makeRehydrateProcessSelectors', () => {
       ],
     });
     expect(selectors).toHaveLength(1);
-    expect(selectors[0].summary).toContain('new.exe');
+    expect(selectors[0].processName).toBe('new.exe');
   });
 
   it('prefers a technique-attributed ref over a plain sample ref regardless of recency', async () => {
@@ -186,7 +183,7 @@ describe('makeRehydrateProcessSelectors', () => {
       ],
     });
     expect(selectors).toHaveLength(1);
-    expect(selectors[0].summary).toContain('confirmed.exe');
+    expect(selectors[0].processName).toBe('confirmed.exe');
   });
 
   it('caps at 5 selectors per host, keeping the newest', async () => {

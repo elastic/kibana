@@ -8,7 +8,13 @@
 import type { VersionedAttachment } from '@kbn/agent-builder-common';
 import { significantSecurityEventAttachmentDataSchema } from '../../../common/significant_security_event_schema';
 import { buildMatchesRequired } from '../../services/watches/hunt/common/matches_required';
-import type { CurrentRunHost, CurrentRunState, ProcessSelector } from './types';
+import type {
+  CurrentRunHost,
+  CurrentRunState,
+  HuntEvidenceSummary,
+  HuntEvidenceTechnique,
+  ProcessSelector,
+} from './types';
 
 const SSE_ATTACHMENT_TYPE = 'security.significant_security_event';
 
@@ -20,6 +26,44 @@ const currentVersionData = (attachment: VersionedAttachment): unknown => {
 export type HostEnrollment = { enrolled: true; agentId: string } | { enrolled: false };
 
 export type ResolveHostEnrollment = (hostName: string) => Promise<HostEnrollment>;
+
+/**
+ * Structured Tier 1 / Tier 2 evidence for the current run, extracted once from
+ * `hunt_result` rather than quoting each SSE's `evidence_for`/`evidence_against` verbatim
+ * (which repeats the same sentence once per SSE).
+ */
+const extractEvidenceSummary = (
+  currentRun: Array<ReturnType<typeof significantSecurityEventAttachmentDataSchema.parse>>
+): HuntEvidenceSummary => {
+  let tier1HitCount: number | undefined;
+  const tier2ByTechnique = new Map<string, HuntEvidenceTechnique>();
+
+  for (const sse of currentRun) {
+    const totalHits = sse.hunt_result?.tier1.counts.total_hits;
+    if (totalHits !== undefined) {
+      tier1HitCount = tier1HitCount === undefined ? totalHits : Math.max(tier1HitCount, totalHits);
+    }
+    for (const behavior of sse.hunt_result?.tier2?.behaviors ?? []) {
+      if (behavior.execution?.hit !== true) {
+        continue;
+      }
+      const existing = tier2ByTechnique.get(behavior.technique_id);
+      const rowCount = behavior.execution.row_count;
+      if (!existing || rowCount > existing.rowCount) {
+        tier2ByTechnique.set(behavior.technique_id, {
+          techniqueId: behavior.technique_id,
+          techniqueName: behavior.technique_name,
+          rowCount,
+        });
+      }
+    }
+  }
+
+  return {
+    tier1HitCount,
+    tier2Confirmed: [...tier2ByTechnique.values()],
+  };
+};
 
 export type RehydrateProcessSelectors = (args: {
   alerts: Array<{ alert_id: string; index: string }>;
@@ -72,8 +116,11 @@ export const readCurrentRunState = async ({
   }
 
   const hasConfirmedHit = currentRun.some((sse) => sse.hunt_result?.has_confirmed_hit === true);
-  const titles = currentRun.map((sse) => sse.title);
-  const evidenceLines = currentRun.flatMap((sse) => [...sse.evidence_for, ...sse.evidence_against]);
+  const titles = [...new Set(currentRun.map((sse) => sse.title))];
+  const evidenceLines = [
+    ...new Set(currentRun.flatMap((sse) => [...sse.evidence_for, ...sse.evidence_against])),
+  ];
+  const evidence = extractEvidenceSummary(currentRun);
 
   const techniques = [
     ...new Set(
@@ -150,5 +197,6 @@ export const readCurrentRunState = async ({
     manualRemediation,
     hosts,
     processSelectors,
+    evidence,
   };
 };
