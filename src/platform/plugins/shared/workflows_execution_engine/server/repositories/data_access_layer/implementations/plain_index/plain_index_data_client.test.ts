@@ -103,7 +103,13 @@ describe('PlainIndexDataClient', () => {
     });
 
     expect(esClient.mget).toHaveBeenCalledWith({
-      docs: [expect.objectContaining({ _id: 'a', _index: '.workflows-executions' })],
+      docs: [
+        {
+          _id: 'a',
+          _index: '.workflows-executions',
+          _source: { includes: ['status'] },
+        },
+      ],
     });
   });
 });

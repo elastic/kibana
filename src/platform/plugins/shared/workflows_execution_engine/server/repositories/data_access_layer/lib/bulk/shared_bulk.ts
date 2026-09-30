@@ -176,7 +176,7 @@ const mgetUpdaterSources = async <TExecution extends { id: string }>(
     fallbackIndexes.map((index) => ({
       _id: item.documentId,
       _index: index,
-      ...(item.sourceFields.length > 0 ? { _source_includes: [...item.sourceFields] } : {}),
+      ...(item.sourceFields.length > 0 ? { _source: { includes: [...item.sourceFields] } } : {}),
     }))
   );
 
