@@ -12,7 +12,7 @@ tags:
   - watch-hunt
 settings:
   # Per-space: prevents a second sweep from starting while the first is still
-  # running. Not an ordering, atomicity, or gate-wait bound (section F);
+  # running. It is not an ordering, atomicity, or gate-wait bound, and it is
   # distinct from report_fan_out's own concurrency.max below, which throttles
   # branches within one sweep, not sweeps against each other.
   concurrency:
@@ -20,7 +20,7 @@ settings:
     strategy: drop
     max: 1
 # Triggers are rendered from autonomy: manual = manual only; assisted/supervised
-# add the schedule. Dial placeholders land in consts so Phase 3 can wire them.
+# add the schedule.
 triggers:
 __WORKER_TRIGGERS__
 consts:
@@ -75,8 +75,8 @@ steps:
         scheduled
         {%- endif -%}
 
-  # Empty selection (`ids: []`) is a successful sweep: no error, no writes; the
-  # empty-array fan-out no-op is proven by the Phase 0 engine test (case 02).
+  # Empty selection (`ids: []`) is a successful sweep: no error, no writes,
+  # because a fan-out over an empty array is a no-op in this engine.
   # Reports the route returns under `skipped` are logged in sweep diagnostics
   # and never enter the fan-out (not surfaced here; see the route's own response).
   - name: select_candidate_reports
@@ -118,11 +118,11 @@ steps:
     concurrency:
       max: __WORKER_FAN_OUT_MAX__
     # Straight-line branch body, atomic steps only: no on-failure/if/foreach on
-    # any step here (Phase 0 task 7 — the engine rejects nested flow-control in
-    # a parallel branch body). Each risky stage is its own child workflow,
-    # invoked via a single unconditional workflow.execute; the child owns its
-    # own on-failure and always resolves to `completed` (section A item 2), so
-    # these calls never abort the branch.
+    # any step here, because the engine rejects nested flow-control in a
+    # parallel branch body. Each risky stage is its own child workflow, invoked
+    # via a single unconditional workflow.execute; every child owns its own
+    # on-failure and always resolves to `completed`, so these calls never abort
+    # the branch.
     steps:
       - name: find_or_create_investigation
         type: workflow.execute
@@ -143,8 +143,8 @@ steps:
             trigger: "{{ steps.resolve_trigger_mode.output.trigger_mode }}"
             tier2_when: "{{ consts.worker_settings.tier2When }}"
 
-      # R.7: no correlation step here. 3B re-inserts workflow.execute
-      # system-security-hunt-correlation between hunt and packaging.
+      # Packaging follows the hunt directly: there is deliberately no
+      # cross-report correlation stage between them yet.
       - name: package_report
         type: workflow.execute
         with:
@@ -153,19 +153,16 @@ steps:
             reportId: "{{ foreach.item }}"
             investigationConversationId: "{{ steps.find_or_create_investigation.output.investigationConversationId }}"
             runId: "{{ execution.id }}"
-            # Packaging can't tell "hunt ran clean" from "packaging can't see
-            # any run data" by reading conversation attachments alone: the
-            # hunt child only writes an SSE attachment on a confirmed hit
-            # (hunt.yaml's attach_sse), so a genuinely clean run leaves zero
-            # attachments for this runId, same as a run packaging never got
-            # to evaluate. These two pass the hunt child's own verdict
-            # through so packaging can dismiss a clean run instead of
-            # reporting it `run_incomplete`.
-            huntStatus: "{{ steps.hunt.output.status }}"
-            huntConfirmedHit: "${{ steps.hunt.output.hit }}"
+            # The hunt's verdict travels with the packaging call: a run that confirmed no
+            # hit writes no SSE attachment, so packaging needs to be told that outcome
+            # rather than inferring it from missing state (which is also what a rerun
+            # collision or a failed attach looks like). `failed` covers the hunt step
+            # having no output at all.
+            huntStatus: "{{ steps.hunt.output.status | default: 'failed' }}"
+            hasConfirmedHit: "${{ steps.hunt.output.hit == true }}"
 
-      # Outcome derivation (section A): find_or_create failing means no
-      # Investigation ever existed, so no conclusion is possible (handled by
+      # Outcome derivation: find_or_create failing means no Investigation ever
+      # existed, so no conclusion is possible (handled by
       # write_run_conclusion below no-op'ing on an empty conversation id).
       # Otherwise: hunt not succeeding is `failed`; packaging returning
       # `run_incomplete` is `partial`; anything else is `completed`.
@@ -187,14 +184,14 @@ steps:
             packaging
             {%- endif -%}
 
-      # Always-runs terminal step (D41), unconditional (no `if`: a nested
-      # flow-control key on a branch-body step is rejected — Phase 0 task 7).
+      # Always-runs terminal step, unconditional: an `if` is impossible here
+      # because the engine rejects a flow-control key on a branch-body step.
       # journal_note.yaml's own `on-failure: continue: true` makes an empty
-      # conversation_id (find_or_create never minted one) a silent no-op,
-      # which is exactly "a run that never obtained an Investigation writes no
-      # conclusion" (section A) without a branch-level conditional.
+      # conversation_id (find_or_create never minted one) a silent no-op, which
+      # gives "a run that never obtained an Investigation writes no conclusion"
+      # without a branch-level conditional.
       #
-      # The single closing message (mvp-slice.md's message contract): the run
+      # The single closing message: the run
       # outcome, what the hunt found (the hunt child's `headline`), what
       # packaging did (the packaging child's `summary`), the failing or
       # incomplete stage and its reason when the run did not complete cleanly,

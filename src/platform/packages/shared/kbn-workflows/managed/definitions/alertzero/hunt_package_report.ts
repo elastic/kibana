@@ -17,7 +17,7 @@ import type { ManagedWorkflowDefinition } from '../../types';
 export const ALERTZERO_HUNT_PACKAGE_REPORT_WORKFLOW_ID = 'system-security-hunt-package-report';
 
 /**
- * Child invoked by PR 4's tagged Worker (`hunt_continuous_threat_hunt.yaml`)
+ * Child invoked by Hunt Watch's tagged Worker (`hunt_continuous_threat_hunt.yaml`)
  * via `workflow.execute`. Wraps the native `hunt.packageReport` step type,
  * fans mint payloads out to per-Proposal gate children, and closes the
  * Investigation benignly on a clean run. Tagged `security` +

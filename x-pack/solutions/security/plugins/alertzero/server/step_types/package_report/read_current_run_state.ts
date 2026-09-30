@@ -6,7 +6,8 @@
  */
 
 import type { VersionedAttachment } from '@kbn/agent-builder-common';
-import { significantSecurityEventAttachmentDataSchema } from '../../../common/significant_security_event_schema';
+import type { significantSecurityEventAttachmentDataSchema } from '../../../common/significant_security_event_schema';
+import { significantSecurityEventAttachmentReadSchema } from '../../../common/significant_security_event_schema';
 import { buildMatchesRequired } from '../../services/watches/hunt/common/matches_required';
 import type {
   CurrentRunHost,
@@ -75,62 +76,30 @@ export type RehydrateProcessSelectors = (args: {
   }>;
 }) => Promise<ProcessSelector[]>;
 
-/** A minimal, hitless state for a run the hunt child itself reported as clean. */
-const buildCleanState = (runId: string, reportId: string): CurrentRunState => ({
-  runId,
-  reportId,
-  hasConfirmedHit: false,
-  titles: [],
-  evidenceLines: [],
-  techniques: [],
-  hosts: [],
-  processSelectors: [],
-  hasNonHostEntity: false,
-  hasIocIndicator: false,
-  allEventsActionable: true,
-  hasProcessBearingEvent: false,
-  manualRemediation: [],
-  evidence: { tier2Confirmed: [] },
-});
-
 /**
  * Reads current-run SSE attachments from a conversation and builds packaging state.
- *
- * The hunt child only writes an SSE attachment on a confirmed hit (hunt_coordinator
- * only returns `sse` when `has_confirmed_hit`), so a genuinely clean run leaves zero
- * current-run attachments — identical, from attachments alone, to a run packaging
- * never got to evaluate. `huntStatus`/`huntConfirmedHit` (the hunt child's own
- * verdict, threaded through as workflow inputs) disambiguate the two: a clean run
- * synthesizes a minimal hitless state (so `decidePackageReport` dismisses it and
- * `deriveCoverageSubjects` still records the sweep); anything else returns
- * undefined (run_incomplete).
+ * Returns undefined when no current-run SSE is present (run_incomplete).
  */
 export const readCurrentRunState = async ({
   attachments,
   reportId,
   runId,
-  huntStatus,
-  huntConfirmedHit,
   resolveHostEnrollment,
   rehydrateProcessSelectors,
 }: {
   attachments: VersionedAttachment[] | undefined;
   reportId: string;
   runId: string;
-  /** The hunt child's own `status` output for this run (success/partial/failed). */
-  huntStatus?: string;
-  /** The hunt child's own `hit` output for this run. */
-  huntConfirmedHit?: boolean;
   resolveHostEnrollment: ResolveHostEnrollment;
   rehydrateProcessSelectors: RehydrateProcessSelectors;
 }): Promise<CurrentRunState | undefined> => {
   const sseAttachments = (attachments ?? []).filter((a) => a.type === SSE_ATTACHMENT_TYPE);
-  const currentRun: Array<ReturnType<typeof significantSecurityEventAttachmentDataSchema.parse>> =
+  const currentRun: Array<ReturnType<typeof significantSecurityEventAttachmentReadSchema.parse>> =
     [];
 
   for (const attachment of sseAttachments) {
     const raw = currentVersionData(attachment);
-    const parsed = significantSecurityEventAttachmentDataSchema.safeParse(raw);
+    const parsed = significantSecurityEventAttachmentReadSchema.safeParse(raw);
     if (!parsed.success) {
       continue;
     }
@@ -144,9 +113,6 @@ export const readCurrentRunState = async ({
   }
 
   if (currentRun.length === 0) {
-    if (huntStatus === 'success' && huntConfirmedHit === false) {
-      return buildCleanState(runId, reportId);
-    }
     return undefined;
   }
 

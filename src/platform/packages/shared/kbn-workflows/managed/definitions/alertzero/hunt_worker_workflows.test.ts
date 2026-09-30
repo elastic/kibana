@@ -16,7 +16,7 @@ import {
   ALERTZERO_WORKER_HUNT_CONTINUOUS_THREAT_HUNT_WORKFLOW,
 } from '.';
 
-// Route-path and cross-package id checks (Phase 7 tasks 1f and the SYSTEM_SECURITY_HUNT_*
+// Route-path and cross-package id checks (including the SYSTEM_SECURITY_HUNT_*
 // cross-check) live in the alertzero PLUGIN's own hunt_children_contract.test.ts, not
 // here: this package (kbn-workflows) is a generic platform package with no dependency on
 // @kbn/alertzero-common (a security-solution-specific package; no other file in

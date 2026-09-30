@@ -17,6 +17,7 @@ import { ALERTZERO_API_PRIVILEGE_WRITE, HUNT_INTERNAL_ROUTE_BASE } from '../../.
 import { huntBehavior } from '../../services/watches/hunt/tier2/hunt_behavior';
 import { resolveScopedModel } from './lib/scoped_model';
 import { resolveHuntUniverse } from './resolve_hunt_universe';
+import { withAlertZeroEnabled } from '../with_alertzero_enabled';
 import type { RouteDependencies } from '../register_routes';
 
 export const HUNT_BEHAVIOR_URL = `${HUNT_INTERNAL_ROUTE_BASE}/hunt_behavior` as const;
@@ -52,7 +53,7 @@ export const registerHuntBehaviorRoute = ({
           },
         },
       },
-      async (context, request, response) => {
+      withAlertZeroEnabled(async (context, request, response) => {
         try {
           const core = await context.core;
           const { getInference, getSearchInferenceEndpoints } = getHuntServices();
@@ -113,6 +114,6 @@ export const registerHuntBehaviorRoute = ({
             },
           });
         }
-      }
+      })
     );
 };

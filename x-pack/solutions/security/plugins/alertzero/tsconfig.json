@@ -6,12 +6,17 @@
   "include": ["common/**/*", "public/**/*", "server/**/*"],
   "exclude": ["target/**/*"],
   "kbn_references": [
+    "@kbn/security-plugin-types-server",
+    "@kbn/security-plugin",
     "@kbn/agentic-investigations-common",
     "@kbn/core",
     "@kbn/config-schema",
     "@kbn/datemath",
     "@kbn/logging",
     "@kbn/features-plugin",
+    "@kbn/licensing-plugin",
+    "@kbn/licensing-types",
+    "@kbn/cloud-plugin",
     "@kbn/kibana-react-plugin",
     "@kbn/alertzero-common",
     "@kbn/agentic-investigations-plugin",
@@ -61,8 +66,8 @@
     "@kbn/inference-plugin",
     "@kbn/fleet-plugin",
     "@kbn/management-settings-ids",
-    "@kbn/ui-callout",
+    "@kbn/proposals-ui",
     "@kbn/core-chrome-browser-context-mocks",
-    "@kbn/core-chrome-browser-mocks",
+    "@kbn/core-chrome-browser-mocks"
   ]
 }

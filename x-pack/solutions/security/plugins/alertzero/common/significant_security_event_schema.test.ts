@@ -5,7 +5,10 @@
  * 2.0.
  */
 
-import { significantSecurityEventAttachmentDataSchema } from './significant_security_event_schema';
+import {
+  significantSecurityEventAttachmentDataSchema,
+  significantSecurityEventAttachmentReadSchema,
+} from './significant_security_event_schema';
 
 const validPayload = {
   attachmentLabel: 'Significant Security Event',
@@ -276,6 +279,94 @@ describe('significantSecurityEventAttachmentDataSchema', () => {
     });
 
     expect(result.success).toBe(true);
+  });
+
+  // The strict schema's parse failure mode is to skip the attachment, so a persisted payload
+  // that predates a rename would silently vanish from packaging and render as an empty card.
+  describe('significantSecurityEventAttachmentReadSchema', () => {
+    const preRenamePayload = {
+      ...validPayload,
+      hunt_result: {
+        has_confirmed_hit: true,
+        hit_sources: ['tier1'],
+        time_range: { from: '2026-01-01T00:00:00.000Z', to: '2026-01-01T02:00:00.000Z' },
+        tier1: {
+          status: 'environment_hits_found',
+          counts: { total_hits: 4, returned_hits: 4, affected_hosts: 1, affected_users: 1 },
+          per_index: [
+            { index: 'logs-aws.cloudtrail-default', hit_count: 3, required: true },
+            { index: '.alerts-security.alerts-default', hit_count: 1, required: false },
+          ],
+          resolved_iocs: [{ type: 'hash', value: 'abc123' }],
+        },
+        tier2: {
+          status: 'behaviors_proposed',
+          behaviors: [
+            {
+              technique_id: 'T1021',
+              tactic_ids: ['TA0008'],
+              confidence: 0.8,
+              rule_name: 'Lateral movement via RDP',
+              proposed_esql_rule: 'FROM logs-* | WHERE true',
+              execution: { executed: true, row_count: 0, hit: false },
+            },
+          ],
+        },
+      },
+    };
+
+    it('reads a payload written before the renames', () => {
+      const result = significantSecurityEventAttachmentReadSchema.safeParse(preRenamePayload);
+      expect(result.success).toBe(true);
+    });
+
+    it('maps the retired behavior keys onto their current names', () => {
+      const result = significantSecurityEventAttachmentReadSchema.parse(preRenamePayload);
+
+      expect(result.hunt_result?.tier2?.behaviors[0]).toEqual(
+        expect.objectContaining({
+          title: 'Lateral movement via RDP',
+          validated_esql: 'FROM logs-* | WHERE true',
+        })
+      );
+    });
+
+    it('prefers the current key when a payload carries both', () => {
+      const result = significantSecurityEventAttachmentReadSchema.parse({
+        ...preRenamePayload,
+        hunt_result: {
+          ...preRenamePayload.hunt_result,
+          tier2: {
+            ...preRenamePayload.hunt_result.tier2,
+            behaviors: [
+              {
+                ...preRenamePayload.hunt_result.tier2.behaviors[0],
+                title: 'Current title',
+              },
+            ],
+          },
+        },
+      });
+
+      expect(result.hunt_result?.tier2?.behaviors[0].title).toBe('Current title');
+    });
+
+    it('still rejects a payload that is genuinely unreadable', () => {
+      const result = significantSecurityEventAttachmentReadSchema.safeParse({
+        ...preRenamePayload,
+        hunt_result: {
+          ...preRenamePayload.hunt_result,
+          tier1: { ...preRenamePayload.hunt_result.tier1, status: 'no_environment_hits' },
+        },
+      });
+
+      expect(result.success).toBe(false);
+    });
+
+    it('keeps writes strict: the retired keys alone do not satisfy the write schema', () => {
+      const result = significantSecurityEventAttachmentDataSchema.safeParse(preRenamePayload);
+      expect(result.success).toBe(false);
+    });
   });
 
   it('rejects has_confirmed_hit with clean Tier 1 and no Tier 2 execution hit', () => {

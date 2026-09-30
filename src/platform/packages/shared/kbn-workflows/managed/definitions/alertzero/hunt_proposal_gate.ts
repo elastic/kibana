@@ -17,7 +17,7 @@ import type { ManagedWorkflowDefinition } from '../../types';
 export const ALERTZERO_HUNT_PROPOSAL_GATE_WORKFLOW_ID = 'system-security-hunt-proposal-gate';
 
 /**
- * Child dispatched by PR 4's packaging child (`hunt_package_report.yaml`) via
+ * Child dispatched by Hunt Watch's packaging child (`hunt_package_report.yaml`) via
  * `workflow.executeAsync`, one per minted Proposal. Wraps
  * `system-create-alertzero-proposal`'s single `waitForApproval`, then closes
  * the Investigation on settlement. Tagged `security` + `continuous-threat-hunt`

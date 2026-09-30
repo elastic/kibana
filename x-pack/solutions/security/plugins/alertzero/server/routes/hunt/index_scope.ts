@@ -9,6 +9,7 @@ import type { HuntIndexScopeResponse } from '@kbn/alertzero-common';
 import { API_VERSIONS, INTERNAL_API_ACCESS } from '@kbn/alertzero-common';
 import { ALERTZERO_API_PRIVILEGE_READ, HUNT_INDEX_SCOPE_URL } from '../../../common/constants';
 import { resolveHuntScope } from '../../services/watches/hunt/common/resolve_index_scope';
+import { withAlertZeroEnabled } from '../with_alertzero_enabled';
 import type { RouteDependencies } from '../register_routes';
 import { resolveHuntUniverse } from './resolve_hunt_universe';
 
@@ -39,7 +40,7 @@ export const registerHuntIndexScopeRoute = ({ router, logger, getSpaceId }: Rout
           request: {},
         },
       },
-      async (context, request, response) => {
+      withAlertZeroEnabled(async (context, request, response) => {
         try {
           const spaceId = getSpaceId(request);
           const esClient = (await context.core).elasticsearch.client.asCurrentUser;
@@ -63,6 +64,6 @@ export const registerHuntIndexScopeRoute = ({ router, logger, getSpaceId }: Rout
             body: { message: 'Failed to resolve hunt index scope' },
           });
         }
-      }
+      })
     );
 };

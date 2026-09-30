@@ -7,6 +7,7 @@
 
 import { useCallback, useMemo, useState } from 'react';
 import { isEqual } from 'lodash';
+import { isHttpFetchError } from '@kbn/core-http-browser';
 import type {
   UpdateWorkerRequestBody,
   Worker,
@@ -144,12 +145,18 @@ export const useWatchSettingsDraft = (workers: Worker[]) => {
             return rest;
           });
         } catch (error) {
+          const body = isHttpFetchError(error)
+            ? (error.body as { message?: unknown } | undefined)
+            : undefined;
+          const message =
+            typeof body?.message === 'string'
+              ? body.message
+              : error instanceof Error
+              ? error.message
+              : String(error);
           setOverlays((current) => ({
             ...current,
-            [worker.id]: {
-              ...current[worker.id],
-              error: error instanceof Error ? error.message : String(error),
-            },
+            [worker.id]: { ...current[worker.id], error: message },
           }));
         }
       }

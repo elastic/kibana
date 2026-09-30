@@ -22,7 +22,7 @@ import {
   ALERTZERO_HUNT_CHILD_WORKFLOW_IDS,
   ALERTZERO_MANAGED_WORKER_WORKFLOW_IDS,
   ALERTZERO_RULE_WORKFLOW_IDS,
-  ALERTZERO_WORKER_DETECTION_RULE_CREATION_WORKFLOW_ID,
+  ALERTZERO_WORKER_DETECTION_RULE_COVERAGE_WORKFLOW_ID,
   ALERTZERO_WORKER_DETECTION_RULE_TUNING_WORKFLOW_ID,
   ALERTZERO_WORKER_FLOOR_ALERT_TRIAGE_WORKFLOW_ID,
   ALERTZERO_WORKER_FLOOR_ATTACK_DISCOVERY_WORKFLOW_ID,
@@ -38,7 +38,7 @@ import {
 import ACTION_ISOLATE_HOST_YAML from './definitions/alertzero/actions/defend/action_isolate_host.yaml';
 import ACTION_KILL_PROCESS_YAML from './definitions/alertzero/actions/defend/action_kill_process.yaml';
 import ACTION_SUSPEND_PROCESS_YAML from './definitions/alertzero/actions/defend/action_suspend_process.yaml';
-import DETECTION_RULE_CREATION_YAML from './definitions/alertzero/detection_rule_creation.yaml';
+import DETECTION_RULE_COVERAGE_YAML from './definitions/alertzero/detection_rule_coverage.yaml';
 import DETECTION_RULE_TUNING_YAML from './definitions/alertzero/detection_rule_tuning.yaml';
 import FLOOR_ALERT_TRIAGE_YAML from './definitions/alertzero/floor_alert_triage.yaml';
 import FLOOR_ATTACK_DISCOVERY_YAML from './definitions/alertzero/floor_attack_discovery.yaml';
@@ -74,8 +74,9 @@ const templateRepresentativeValuesById: ManagedWorkflowTemplateValuesById = {
     intervalMinutes: 1440,
   },
   [ALERTZERO_WORKER_FLOOR_ALERT_TRIAGE_WORKFLOW_ID]: {
-    settingsVersion: 1,
+    settingsVersion: 2,
     autonomyLevel: 'manual',
+    extras: { autoCloseConfidenceScoreMinThreshold: 0.85 },
   },
   [ALERTZERO_WORKER_FLOOR_ATTACK_DISCOVERY_WORKFLOW_ID]: {
     settingsVersion: 1,
@@ -97,9 +98,11 @@ const templateRepresentativeValuesById: ManagedWorkflowTemplateValuesById = {
     scheduleInterval: '2h',
     extras: { analysisWindowDays: 7, fpCountThreshold: 10, fpRateThresholdPct: 50 },
   },
-  [ALERTZERO_WORKER_DETECTION_RULE_CREATION_WORKFLOW_ID]: {
+  [ALERTZERO_WORKER_DETECTION_RULE_COVERAGE_WORKFLOW_ID]: {
     settingsVersion: 1,
     autonomyLevel: 'manual',
+    scheduleInterval: '1h',
+    extras: { lookbackDays: 14, maxGapsPerRun: 5 },
   },
   [SIGNIFICANT_EVENTS_SCHEDULED_DETECTION_WORKFLOW_ID]: {
     detectionIntervalMinutes: 30,
@@ -187,7 +190,7 @@ function createContentFingerprint(content: string): string {
 }
 
 it.each([
-  [ALERTZERO_WORKER_FLOOR_ALERT_TRIAGE_WORKFLOW_ID, FLOOR_ALERT_TRIAGE_YAML, '5:74170b32'],
+  [ALERTZERO_WORKER_FLOOR_ALERT_TRIAGE_WORKFLOW_ID, FLOOR_ALERT_TRIAGE_YAML, '6:97d61fe0'],
   [ALERTZERO_WORKER_FLOOR_ATTACK_DISCOVERY_WORKFLOW_ID, FLOOR_ATTACK_DISCOVERY_YAML, '4:ceae137f'],
   [
     ALERTZERO_WORKER_FORENSICS_ENDPOINT_ANALYSIS_WORKFLOW_ID,
@@ -202,13 +205,13 @@ it.each([
   [
     ALERTZERO_WORKER_HUNT_CONTINUOUS_THREAT_HUNT_WORKFLOW_ID,
     HUNT_CONTINUOUS_THREAT_HUNT_YAML,
-    '1:bcc20aea',
+    '1:40ed5cd2',
   ],
   [ALERTZERO_WORKER_DETECTION_RULE_TUNING_WORKFLOW_ID, DETECTION_RULE_TUNING_YAML, '7:f3649616'],
   [
-    ALERTZERO_WORKER_DETECTION_RULE_CREATION_WORKFLOW_ID,
-    DETECTION_RULE_CREATION_YAML,
-    '1:a6804a44',
+    ALERTZERO_WORKER_DETECTION_RULE_COVERAGE_WORKFLOW_ID,
+    DETECTION_RULE_COVERAGE_YAML,
+    '1:7b889e7a',
   ],
   [ALERTZERO_ACTION_ISOLATE_HOST_WORKFLOW_ID, ACTION_ISOLATE_HOST_YAML, '3:20440aaf'],
   [ALERTZERO_ACTION_KILL_PROCESS_WORKFLOW_ID, ACTION_KILL_PROCESS_YAML, '3:39ab48da'],
@@ -390,8 +393,8 @@ describe('managedWorkflowDefinitions', () => {
       }
     });
 
-    // Section A / the plan's tag convention: the tagged Worker is the only `watch-hunt`
-    // definition in the whole registry, not just among the four hunt children -- a second
+    // The tagged Worker is the only `watch-hunt` definition in the whole
+    // registry, not just among the four hunt children -- a second
     // definition carrying it would make the Watch UI list two Workers for one feature.
     it('tags only the tagged Worker as watch-hunt', () => {
       const taggedWatchHunt = parsedDefinitions.filter((definition) =>

@@ -5,19 +5,17 @@
  * 2.0.
  */
 
-import type { ElasticsearchClient, Logger } from '@kbn/core/server';
+import type { Logger } from '@kbn/core/server';
 import type { WorkflowsExtensionsServerPluginSetup } from '@kbn/workflows-extensions/server';
 import type { AgentBuilderPluginStart } from '@kbn/agent-builder-server';
 import type { ActionsService } from '../services/actions/actions_service';
 import { getPackageReportStepDefinition } from './package_report';
 import type { PackageReportStepDependencies } from './package_report/package_report_step';
-import { getFindOrCreateInvestigationStepDefinition } from './find_or_create_investigation';
 
 export const registerStepDefinitions = ({
   workflowsExtensions,
   getActionsService,
   getConversations,
-  getReportsEsClient,
   getResolveHostEnrollment,
   isContextEngineEnabled,
   logger,
@@ -25,10 +23,8 @@ export const registerStepDefinitions = ({
   workflowsExtensions: WorkflowsExtensionsServerPluginSetup;
   getActionsService: () => ActionsService;
   getConversations: () => AgentBuilderPluginStart['conversations'];
-  /** Internal-user client for the hidden `.kibana-threat-reports` index (trigger message report facts). */
-  getReportsEsClient?: () => ElasticsearchClient;
   getResolveHostEnrollment?: PackageReportStepDependencies['getResolveHostEnrollment'];
-  isContextEngineEnabled?: (spaceId: string) => Promise<boolean>;
+  isContextEngineEnabled: PackageReportStepDependencies['isContextEngineEnabled'];
   logger?: Logger;
 }) => {
   workflowsExtensions.registerStepDefinition(
@@ -40,10 +36,6 @@ export const registerStepDefinitions = ({
       logger,
     })
   );
-  workflowsExtensions.registerStepDefinition(
-    getFindOrCreateInvestigationStepDefinition({ getConversations, getReportsEsClient, logger })
-  );
 };
 
 export { getPackageReportStepDefinition } from './package_report';
-export { getFindOrCreateInvestigationStepDefinition } from './find_or_create_investigation';

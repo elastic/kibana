@@ -343,6 +343,11 @@ const mapsToProposalSchema = z
 /**
  * Hunt-owned Significant Security Event payload: the finding a watch surfaces when its
  * hunt confirms a hit, plus the context needed to render and act on it without a live fetch.
+ *
+ * Writes only. Read an already-persisted attachment through
+ * {@link significantSecurityEventAttachmentReadSchema} instead: the two have the same
+ * inferred type, so nothing here will stop this one parsing a stored payload, it will just
+ * silently drop anything written before a field was renamed.
  */
 export const significantSecurityEventAttachmentDataSchema = alertZeroAttachmentDataSchema.extend({
   title: z.string().trim().min(1).max(512),
@@ -377,3 +382,58 @@ export const significantSecurityEventAttachmentDataSchema = alertZeroAttachmentD
 export type SignificantSecurityEventAttachmentData = z.infer<
   typeof significantSecurityEventAttachmentDataSchema
 >;
+
+const isRecord = (value: unknown): value is Record<string, unknown> =>
+  typeof value === 'object' && value !== null && !Array.isArray(value);
+
+/** Pre-rename keys for the same two values; see the behavior schema for the current names. */
+const migrateBehavior = (value: unknown): unknown => {
+  if (!isRecord(value)) {
+    return value;
+  }
+  const { rule_name: ruleName, proposed_esql_rule: proposedEsqlRule, ...rest } = value;
+  return {
+    ...rest,
+    ...(rest.title === undefined && ruleName !== undefined ? { title: ruleName } : {}),
+    ...(rest.validated_esql === undefined && proposedEsqlRule !== undefined
+      ? { validated_esql: proposedEsqlRule }
+      : {}),
+  };
+};
+
+const migrateArray = (value: unknown, migrate: (entry: unknown) => unknown): unknown =>
+  Array.isArray(value) ? value.map(migrate) : value;
+
+/**
+ * Brings a persisted payload onto the current key names before validation. Only the shapes
+ * that were renamed or gained a required field are touched; everything else passes through, so
+ * an attachment this build genuinely cannot read still fails rather than being quietly patched.
+ */
+const migratePersistedAttachment = (value: unknown): unknown => {
+  if (!isRecord(value) || !isRecord(value.hunt_result)) {
+    return value;
+  }
+  const huntResult = value.hunt_result;
+  const { tier2 } = huntResult;
+  return {
+    ...value,
+    hunt_result: {
+      ...huntResult,
+      ...(isRecord(tier2)
+        ? { tier2: { ...tier2, behaviors: migrateArray(tier2.behaviors, migrateBehavior) } }
+        : {}),
+    },
+  };
+};
+
+/**
+ * Read path only: writes stay strict on {@link significantSecurityEventAttachmentDataSchema},
+ * because the mapper has no reason to emit a retired key. Every reader of a *persisted*
+ * attachment uses this instead, since the schema's own parse failure mode is to skip the
+ * attachment -- so a payload written before a rename would drop out of packaging's current-run
+ * state and render as an empty card, rather than surfacing as an error anyone could act on.
+ */
+export const significantSecurityEventAttachmentReadSchema = z.preprocess(
+  migratePersistedAttachment,
+  significantSecurityEventAttachmentDataSchema
+);

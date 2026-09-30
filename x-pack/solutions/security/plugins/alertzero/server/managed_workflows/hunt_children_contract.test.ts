@@ -17,6 +17,7 @@ import {
 import {
   API_VERSIONS,
   CANDIDATES_URL,
+  FIND_OR_CREATE_INVESTIGATION_URL,
   HUNT_COORDINATOR_URL,
   HUNT_INDEX_SCOPE_URL,
   SYSTEM_SECURITY_HUNT_PACKAGE_REPORT_ID,
@@ -29,16 +30,23 @@ interface NestedStep {
   if?: string;
   with?: Record<string, unknown>;
   steps?: NestedStep[];
+  'on-failure'?: { continue?: boolean; fallback?: NestedStep[] };
 }
 
 interface ParsedWorkflow {
   tags?: string[];
+  settings?: { timeout?: string };
   outputs?: Array<{ name: string; type: string }>;
   steps: NestedStep[];
 }
 
+/** Includes `on-failure` fallbacks: a step that only runs on the sad path still calls routes. */
 const flattenSteps = (steps: NestedStep[]): NestedStep[] =>
-  steps.flatMap((step) => [step, ...(step.steps ? flattenSteps(step.steps) : [])]);
+  steps.flatMap((step) => [
+    step,
+    ...flattenSteps(step.steps ?? []),
+    ...flattenSteps(step['on-failure']?.fallback ?? []),
+  ]);
 
 const parseChild = (workflowId: string): ParsedWorkflow => {
   const definition = getManagedWorkflowDefinition(workflowId);
@@ -96,6 +104,44 @@ describe('system-security-hunt-execute', () => {
   it('never sends the camelCase runId the coordinator no longer accepts', () => {
     const body = stepNamed(workflow, 'run_hunt_coordinator').with?.body as Record<string, unknown>;
     expect(body).not.toHaveProperty('runId');
+  });
+
+  // `buildSseAttachmentId` hashes (space, report, technique) with no run component, so a rerun
+  // of the same subject collides. Without the update the surviving card keeps the first run's
+  // payload, and packaging -- which matches on the current `run_id` -- cannot see the rerun at all.
+  it('upserts the SSE attachment so a rerun refreshes the card instead of conflicting', () => {
+    const add = stepNamed(workflow, 'add_sse_attachment');
+    const fallback = add['on-failure']?.fallback ?? [];
+
+    expect(fallback.map((step) => step.type)).toEqual(['ai.attachment.update']);
+    expect(fallback[0].with?.data).toBe(add.with?.data);
+  });
+
+  it('points the SSE update at exactly the id the add used', () => {
+    const add = stepNamed(workflow, 'add_sse_attachment');
+    const update = stepNamed(workflow, 'update_sse_attachment');
+
+    // Diverging here would make the update create-or-miss a different attachment, which is the
+    // same stranded-rerun bug wearing a second id.
+    expect(update.with?.attachment_id).toBe(add.with?.id);
+    expect(update.with?.conversation_id).toBe(add.with?.conversation_id);
+  });
+
+  // The sole consumer of this field, `HUNT_STATUS_LABELS` in the threat attachment, is keyed on
+  // these three literals, and it was previously keyed on raw Tier 1 statuses this step never
+  // emits -- so every value production wrote rendered as an unlabelled string. Nothing
+  // type-checks a Liquid template against a React constant, so pin the producer's vocabulary
+  // here and let the attachment's own test cover the labels.
+  it('collapses the hunt outcome to exactly the three statuses the UI labels', () => {
+    const collapse = stepNamed(workflow, 'resolve_evidence_values').with
+      ?.last_hunt_status as string;
+
+    const emitted = collapse
+      .split('\n')
+      .map((line) => line.trim())
+      .filter((line) => line.length > 0 && !line.startsWith('{%'));
+
+    expect(emitted).toEqual(['hit', 'clean', 'incomplete']);
   });
 
   it('writes the evidence fields the candidate selection gate filters on', () => {
@@ -156,6 +202,18 @@ describe(ALERTZERO_HUNT_PACKAGE_REPORT_WORKFLOW_ID, () => {
 });
 
 describe(ALERTZERO_HUNT_PROPOSAL_GATE_WORKFLOW_ID, () => {
+  // The timeout is wall-clock from `startedAt`, so the time this run parks waiting on the
+  // escalation gate counts against it. It has to clear the gate's own 168h ceiling (a 72h
+  // decision window plus a second 72h for a proposal re-parked on a denial or a failed
+  // action) and clear it strictly: this clock starts before the gate is launched, so equal
+  // ceilings expire the parent first and lose a decision the analyst already made. 176h is
+  // what every other human-gated AlertZero parent uses.
+  it('outlives the analyst decision window the escalation gate parks for', () => {
+    const workflow = parseChild(ALERTZERO_HUNT_PROPOSAL_GATE_WORKFLOW_ID);
+
+    expect(workflow.settings?.timeout).toBe('176h');
+  });
+
   // Both requeries swallow their own failure, so every settlement count has to fall
   // back to the earlier read. Reading the retry alone means a transient failure on
   // the second call discards a first call that succeeded, collapses created_count to
@@ -234,6 +292,7 @@ describe('Hunt Watch public exports (kbn-alertzero-common)', () => {
       HUNT_INDEX_SCOPE_URL,
       CANDIDATES_URL,
       HUNT_COORDINATOR_URL,
+      FIND_OR_CREATE_INVESTIGATION_URL,
       // main's own public package, not alertzero's -- Hunt Watch calls it but does not
       // own it, so it is not one of this package's exports.
       '/internal/proposals',

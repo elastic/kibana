@@ -18,13 +18,15 @@ export const ALERTZERO_HUNT_FIND_OR_CREATE_INVESTIGATION_WORKFLOW_ID =
   'system-security-hunt-find-or-create-investigation';
 
 /**
- * Untagged child invoked by PR 4's tagged Worker
- * (`hunt_continuous_threat_hunt.yaml`) via `workflow.execute`. Wraps the native
- * `hunt.findOrCreateInvestigation` step type (the deterministic id it mints
- * requires a uuidv5 hash Liquid cannot compute, so this cannot be a pure-YAML
- * composition of generic `ai.conversation.*` steps). Owns no trigger of its
- * own, so enablement is `enforced` (a disabled child would silently break its
- * parent), matching `hunt.yaml`.
+ * Untagged child invoked by Hunt Watch's tagged Worker
+ * (`hunt_continuous_threat_hunt.yaml`) via `workflow.execute`. Calls the
+ * `find_or_create_investigation` internal route via `kibana.request` (the
+ * deterministic id it mints requires a uuidv5 hash Liquid cannot compute, and
+ * the route reads the hidden `.kibana-threat-reports` index as the internal
+ * user, so this cannot be a pure-YAML composition of generic
+ * `ai.conversation.*` steps). Owns no trigger of its own, so enablement is
+ * `enforced` (a disabled child would silently break its parent), matching
+ * `hunt.yaml`.
  */
 export const ALERTZERO_HUNT_FIND_OR_CREATE_INVESTIGATION_WORKFLOW = {
   billable: false,

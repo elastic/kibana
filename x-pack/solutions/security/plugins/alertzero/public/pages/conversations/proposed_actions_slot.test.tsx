@@ -128,8 +128,36 @@ describe('ProposedActionsSlot', () => {
       data: null,
     } as unknown as ReturnType<typeof useCurrentUserProfile>);
     mockUseKibana.mockReturnValue({
-      services: { notifications: { toasts: { addDanger } } },
+      services: {
+        application: {
+          capabilities: {
+            alertzero: { show: true, write: false },
+            proposals: { decideProposals: true },
+          },
+        },
+        notifications: { toasts: { addDanger } },
+      },
     } as unknown as ReturnType<typeof useKibana>);
+  });
+
+  it('keeps decisions read-only without Proposals Manage even with AlertZero All', () => {
+    mockUseKibana.mockReturnValue({
+      services: {
+        application: {
+          capabilities: {
+            alertzero: { show: true, write: true },
+            proposals: { decideProposals: false },
+          },
+        },
+        notifications: { toasts: { addDanger } },
+      },
+    } as ReturnType<typeof useKibana>);
+    mockConversationProposalsPage([mockProposal]);
+    renderSlot();
+    fireEvent.click(screen.getByText('Isolate cfo-mbp-14 — host isolation'));
+    expect(screen.getByRole('button', { name: 'Approve' })).toBeDisabled();
+    expect(approveMutateAsync).not.toHaveBeenCalled();
+    expect(dismissMutateAsync).not.toHaveBeenCalled();
   });
 
   it('renders a proposed-action button for each proposal, decided or not', () => {
@@ -184,7 +212,7 @@ describe('ProposedActionsSlot', () => {
     ).not.toBeInTheDocument();
   });
 
-  it('approves with the proposal id and its own action input', () => {
+  it('approves with Proposals Manage and no AlertZero Write using the displayed input', () => {
     mockConversationProposalsPage([mockProposal]);
 
     renderSlot();
@@ -231,7 +259,7 @@ describe('ProposedActionsSlot', () => {
     ).toBeInTheDocument();
   });
 
-  it('opens the dismiss modal instead of dismissing directly', () => {
+  it('shows the reason form in the same modal instead of dismissing directly', () => {
     mockConversationProposalsPage([mockProposal]);
 
     renderSlot();
@@ -240,8 +268,30 @@ describe('ProposedActionsSlot', () => {
       screen.getByTestId('investigationFlyoutProposedAction-proposal-1-modal-dismiss')
     );
 
-    expect(screen.getByText('Close the investigation?')).toBeInTheDocument();
+    expect(
+      screen.getByTestId('investigationFlyoutProposedAction-proposal-1-modal-decline-form-reason')
+    ).toBeInTheDocument();
     expect(dismissMutateAsync).not.toHaveBeenCalled();
+  });
+
+  it('submits the selected reason once Decline is confirmed', async () => {
+    mockConversationProposalsPage([mockProposal]);
+
+    renderSlot();
+    fireEvent.click(screen.getByTestId('investigationFlyoutProposedAction-proposal-1'));
+    fireEvent.click(
+      screen.getByTestId('investigationFlyoutProposedAction-proposal-1-modal-dismiss')
+    );
+    fireEvent.click(
+      screen.getByTestId('investigationFlyoutProposedAction-proposal-1-modal-confirm-decline')
+    );
+
+    await waitFor(() =>
+      expect(dismissMutateAsync).toHaveBeenCalledWith({
+        id: 'proposal-1',
+        body: { dismissReason: 'no_reason', rationale: undefined },
+      })
+    );
   });
 
   it('offers Show more when the conversation has more proposals than the loaded page, and fetches the next one', () => {

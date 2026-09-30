@@ -11,13 +11,25 @@ tags:
   - security
   - continuous-threat-hunt
 settings:
-  # Must cover system-create-proposal's own settings.timeout (168h): this
-  # child waits on it synchronously via workflow.execute, so its own ceiling
-  # has to be at least as long or the wait gets cut short first (same reasoning
-  # as attack_discovery_review.yaml's settings.timeout against its own
-  # escalation_gate). Pinned to exactly 168h, not padded, since the two
-  # requery/close steps after the wrap are near-instant.
-  timeout: '168h'
+  # This run parks in WAITING_FOR_CHILD for as long as the escalation gate holds the
+  # analyst's decision, and the workflow timeout is wall-clock from `startedAt` rather
+  # than active time, so that park counts against it. At the engine's 6h default the
+  # gate would be cancelled under the analyst, leaving the Investigation open and the
+  # proposal dangling.
+  #
+  # So this has to stay *above* the gate's own ceiling of `168h` — a 72h decision
+  # window plus a second full 72h for a proposal re-parked just before its deadline by
+  # a privilege denial or a failed action, plus margin. Equal is not enough: this
+  # clock starts before the gate is launched, so matching ceilings have the parent
+  # expire first and lose a decision the child had already reached (the same reasoning
+  # create_proposal.yaml gives for being strictly longer than `52w`). Hence the same
+  # 176h as every other human-gated AlertZero parent — attack_discovery_review,
+  # coverage_review, rule_creation, rule_tuning_review. The two requery/close steps
+  # after the wrap are near-instant, so the margin is all decision time.
+  #
+  # Not to be confused with the `53w` on system-create-alertzero-proposal, the bridge
+  # this child actually executes: that is a deliberate sentinel, not a decision window.
+  timeout: '176h'
 triggers:
   - type: manual
     inputs:
@@ -76,14 +88,14 @@ outputs:
   - name: expired
     type: boolean
 steps:
-  # The gate child adds no second gate (mvp-slice.md:934): this is the settled
-  # single sync wrap of system-create-alertzero-proposal's own waitForApproval.
+  # The gate child adds no second gate: this is a single sync wrap of
+  # system-create-alertzero-proposal's own waitForApproval.
   # Goes through the bridge, not straight to system-create-proposal, so this
   # child's Proposals are stamped origin: alertzero like every other AlertZero
   # caller's. on-failure: continue rather than a fallback ending in
   # workflow.output, since this is this workflow's own terminal concern, not a
-  # stage a Worker branch depends on continuing past (section A's rule is for
-  # the Worker's parallel branch specifically) -- but continuing here still
+  # stage a Worker branch depends on continuing past (that rule applies to the
+  # Worker's parallel branch specifically) -- but continuing here still
   # lets the requery/close steps below run their own best-effort cleanup
   # rather than aborting the whole execution if the wrap itself never resolves
   # normally.
@@ -111,10 +123,10 @@ steps:
       proposal_expired: "${{ steps.create_and_gate_proposal.output.status == 'expired' }}"
 
   # Two calls, not a conditional retry: `!= filter chain -> comparison` in one
-  # expression is illegal in this engine (Phase 0 task 7), so an "only requery
-  # again if the first read looks stale" branch would need the same split this
-  # avoids entirely. Bounded (exactly one retry, always run) rather than
-  # unbounded: a just-created Proposal must be visible (section C item 4), and
+  # expression is illegal in this engine, so an "only requery again if the first
+  # read looks stale" branch would need the same split this avoids entirely.
+  # Bounded (exactly one retry, always run) rather than unbounded: a
+  # just-created Proposal has to become visible, and
   # a second immediate read after the wrap has already returned is enough
   # margin for the common case. The later read is preferred and the first is its
   # fallback (see resolve_settlement_counts), so the pair can only ever see more
@@ -156,10 +168,10 @@ steps:
   # chains two step outputs and a literal the same way).
   #
   # `where`/`size` on a nil `.proposals` (both requeries failed) resolve to 0,
-  # not a hard-fail -- verified live, unlike `foreach` on a nil source (Phase 0
-  # task 7 finding), so the trailing literal guard is only needed on the scalar.
-  # `total` (not the array length) is the created count per section C item 4:
-  # never assume one page is complete.
+  # not a hard-fail -- verified live, unlike `foreach` on a nil source, so the
+  # trailing literal guard is only needed on the scalar. `total` rather than the
+  # array length is the created count, so this never assumes one page is
+  # complete.
   - name: resolve_settlement_counts
     type: data.set
     with:
@@ -170,7 +182,8 @@ steps:
   # Three-term `and` chain, no `or` mixed in -- verified live this associates
   # left-to-right without the mixed and/or precedence hazard create_proposal.yaml
   # warns about (that warning is specifically about mixing and/or, not chaining
-  # multiple ands). Section C item 3's full settlement predicate.
+  # multiple ands). This is the full settlement predicate: enough Proposals
+  # created, none still pending, none still executing.
   - name: resolve_settled
     type: data.set
     with:
@@ -179,7 +192,7 @@ steps:
   # Idempotent close (a second close on an already-closed Investigation is a
   # no-op returning closed: true, per the client's own patchMetadata contract);
   # accepted unrecoverable case on failure: the Investigation stays open with
-  # its pending state visible, recovery is manual (section H).
+  # its pending state visible, and recovery is manual.
   - name: close_if_settled
     type: ai.conversation.metadata.patch
     if: "${{ variables.settled == true }}"

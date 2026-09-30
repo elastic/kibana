@@ -64,6 +64,7 @@ const getEpisodeGroupingFromRow = (
 
 export const EpisodeStatusCell = ({ row, columnId }: CellRendererProps) => {
   const status = row.flattened[columnId] as AlertEpisodeStatus;
+  const isFlapping = row.flattened.is_flapping === true;
 
   const episodeAction: EpisodeActionState = {
     episodeId: row.flattened['episode.id'] as string,
@@ -86,6 +87,7 @@ export const EpisodeStatusCell = ({ row, columnId }: CellRendererProps) => {
       status={status}
       episodeAction={episodeAction}
       groupAction={groupAction}
+      isFlapping={isFlapping}
     />
   );
 };

@@ -26,19 +26,22 @@ export const packageReportInputSchema = z.object({
     'Investigation conversation id; must equal uuidv5(hunt:report:{reportId}).'
   ),
   runId: boundedId.describe('Current-run id; packaging reads only attachments scoped to this run.'),
+  /**
+   * The hunt child's own verdict, threaded through so packaging can tell a run that found
+   * nothing from one that could not finish. Without it, both look identical here: neither
+   * leaves a current-run SSE attachment behind, because the coordinator only emits one for a
+   * confirmed hit.
+   */
   huntStatus: z
-    .string()
-    .max(64)
-    .optional()
+    .enum(['success', 'partial', 'failed'])
     .describe(
-      'Status the hunt child reported for this run (success/partial/failed). Combined with ' +
-        'huntConfirmedHit to tell a genuinely clean run (no confirmed hit, so no SSE attachment ' +
-        'was written) from a run packaging cannot evaluate at all.'
+      "Hunt child's result status: `success` when the run covered what it was asked to, `partial` when a tier could not finish, `failed` when the coordinator call failed or was skipped."
     ),
-  huntConfirmedHit: z
+  hasConfirmedHit: z
     .boolean()
-    .optional()
-    .describe('Whether the hunt child confirmed a hit for this run.'),
+    .describe(
+      "Whether the hunt cleared the confirmed-hit bar (the coordinator's top-level `has_confirmed_hit`: a required-or-baseline index hit from Tier 1, or a Tier 2 behavior that executed and hit). False covers both an environment that is clean and one where nothing was searchable."
+    ),
 });
 
 const coverageWrittenSchema = z.object({
@@ -113,6 +116,9 @@ export const packageReportStepCommonDefinition: CommonStepDefinition<
         'writes pending security.coverage KIs (no-reset), resolves every fillable category:respond catalog ' +
         'action, and returns mint payloads (including expectedProposalCount, the settlement barrier the ' +
         'packaging child threads into each gate) for the packaging child to dispatch as gate executions. ' +
+        'A completed hunt that confirmed no hit leaves no current-run SSE attachment, so it packages as a ' +
+        'dismissal off huntStatus and hasConfirmedHit. A hunt that did not complete returns run_incomplete ' +
+        'instead, because its report may still be hunted again into this same Investigation. ' +
         'Does not close the Investigation; dismiss is a boolean the child applies.',
     }),
     examples: [
@@ -126,7 +132,7 @@ export const packageReportStepCommonDefinition: CommonStepDefinition<
     investigationConversationId: "{{ inputs.investigationConversationId }}"
     runId: "{{ inputs.runId }}"
     huntStatus: "{{ inputs.huntStatus }}"
-    huntConfirmedHit: "\${{ inputs.huntConfirmedHit }}"
+    hasConfirmedHit: "\${{ inputs.hasConfirmedHit }}"
 \`\`\``,
     ],
   },

@@ -37,8 +37,16 @@ export {
   AnalysisWindowDays,
   FpCountThreshold,
   FpRateThresholdPct,
+  LookbackDays,
+  MaxGapsPerRun,
+  RuleCoverageWorkerExtras,
   RuleTuningWorkerExtras,
 } from './components/detection_watch_settings.gen';
+
+export {
+  AutoCloseConfidenceScoreMinThreshold,
+  AlertTriageWorkerExtras,
+} from './components/floor_watch_settings.gen';
 
 export { ListWatchesResponse } from './watches/list_watches_route.gen';
 export { GetWatchResponse } from './watches/get_watch_route.gen';
@@ -82,3 +90,7 @@ export {
   HuntCoordinatorResponse,
   HuntCoordinatorStatus,
 } from './hunt/hunt_coordinator_route.gen';
+export {
+  FindOrCreateInvestigationRequestBody,
+  FindOrCreateInvestigationResponse,
+} from './hunt/find_or_create_investigation_route.gen';

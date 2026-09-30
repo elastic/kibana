@@ -5,8 +5,11 @@
  * 2.0.
  */
 
-import type { AgentClient } from '@kbn/fleet-plugin/server';
-import { makeResolveHostEnrollment } from './resolve_host_enrollment';
+import type { AgentClient, AgentService } from '@kbn/fleet-plugin/server';
+import {
+  makeResolveHostEnrollment,
+  makeScopedResolveHostEnrollment,
+} from './resolve_host_enrollment';
 
 describe('makeResolveHostEnrollment', () => {
   it('returns enrolled: false for every host when no agent client is available', async () => {
@@ -20,10 +23,24 @@ describe('makeResolveHostEnrollment', () => {
 
     await expect(resolve('host-a')).resolves.toEqual({ enrolled: true, agentId: 'agent-1' });
     expect(listAgents).toHaveBeenCalledWith({
-      kuery: 'local_metadata.host.hostname:"host-a"',
+      kuery: 'local_metadata.host.hostname:"host-a" or local_metadata.host.name:"host-a"',
       showInactive: false,
       perPage: 1,
     });
+  });
+
+  // The caller collects entities from either `host.name` or `host.hostname`, and the two
+  // routinely differ on one machine. Matching a single field reports an enrolled host as
+  // unenrolled, which quietly turns an executable action into a recommendation.
+  it('matches a host recorded under either Fleet name field', async () => {
+    const listAgents = jest.fn().mockResolvedValue({ agents: [], total: 0 });
+    const resolve = makeResolveHostEnrollment({ listAgents } as unknown as AgentClient);
+
+    await resolve('web-01.corp.example.com');
+
+    const { kuery } = listAgents.mock.calls[0][0];
+    expect(kuery).toContain('local_metadata.host.hostname:"web-01.corp.example.com"');
+    expect(kuery).toContain('local_metadata.host.name:"web-01.corp.example.com"');
   });
 
   it('returns enrolled: false when Fleet finds no agent for the host', async () => {
@@ -39,7 +56,66 @@ describe('makeResolveHostEnrollment', () => {
 
     await resolve('weird"host\\name');
     expect(listAgents).toHaveBeenCalledWith(
-      expect.objectContaining({ kuery: 'local_metadata.host.hostname:"weird\\"host\\\\name"' })
+      expect.objectContaining({
+        kuery:
+          'local_metadata.host.hostname:"weird\\"host\\\\name" or local_metadata.host.name:"weird\\"host\\\\name"',
+      })
     );
+  });
+});
+
+describe('makeScopedResolveHostEnrollment', () => {
+  const agentService = (listAgents = jest.fn()) => {
+    const asInternalScopedUser = jest.fn(() => ({ listAgents } as unknown as AgentClient));
+    return { service: { asInternalScopedUser } as unknown as AgentService, asInternalScopedUser };
+  };
+
+  it('scopes the agent lookup to the space it is called with', async () => {
+    const listAgents = jest.fn().mockResolvedValue({ agents: [{ id: 'agent-1' }], total: 1 });
+    const { service, asInternalScopedUser } = agentService(listAgents);
+
+    const resolve = makeScopedResolveHostEnrollment(() => service)('space-a');
+    await expect(resolve('host-a')).resolves.toEqual({ enrolled: true, agentId: 'agent-1' });
+
+    expect(asInternalScopedUser).toHaveBeenCalledWith('space-a');
+  });
+
+  it('resolves a client per space rather than reusing one across spaces', () => {
+    const { service, asInternalScopedUser } = agentService();
+    const scoped = makeScopedResolveHostEnrollment(() => service);
+
+    scoped('space-a');
+    scoped('space-b');
+
+    expect(asInternalScopedUser.mock.calls).toEqual([['space-a'], ['space-b']]);
+  });
+
+  it('reads the service lazily, so steps registered before start still get it', async () => {
+    const listAgents = jest.fn().mockResolvedValue({ agents: [{ id: 'agent-1' }], total: 1 });
+    const { service } = agentService(listAgents);
+    const getAgentService = jest.fn<AgentService | undefined, []>().mockReturnValue(undefined);
+
+    const scoped = makeScopedResolveHostEnrollment(getAgentService);
+    await expect(scoped('space-a')('host-a')).resolves.toEqual({ enrolled: false });
+
+    getAgentService.mockReturnValue(service);
+    await expect(scoped('space-a')('host-a')).resolves.toEqual({
+      enrolled: true,
+      agentId: 'agent-1',
+    });
+  });
+
+  it('treats every host as unenrolled when Fleet is absent', async () => {
+    const resolve = makeScopedResolveHostEnrollment(() => undefined)('space-a');
+    await expect(resolve('host-a')).resolves.toEqual({ enrolled: false });
+  });
+
+  it('never falls back to an unscoped client when the space is empty', async () => {
+    const { service, asInternalScopedUser } = agentService();
+
+    const resolve = makeScopedResolveHostEnrollment(() => service)('');
+    await expect(resolve('host-a')).resolves.toEqual({ enrolled: false });
+
+    expect(asInternalScopedUser).not.toHaveBeenCalled();
   });
 });

@@ -163,7 +163,7 @@ export const HuntIoc = lazySchema(() =>
 export type HuntIoc = z.infer<typeof HuntIoc>;
 
 /**
- * Tier 1 raw hunt statuses. The hit/clean collapse for evidence[].last_hunt_status happens in the managed-workflow evidence step. `scope_blocked` means no required index existed, so the hunt never ran; it is a failed run, never clean.
+ * Tier 1 raw hunt statuses. The collapse to hit/clean/incomplete for evidence[].last_hunt_status happens in the managed-workflow evidence step. `scope_blocked` means no required index existed, so the hunt never ran; it is a failed run, never clean.
  */
 export const HuntForThreatStatus = lazySchema(() =>
   z.enum(['scope_blocked', 'no_searchable_terms', 'no_environment_hits', 'environment_hits_found'])

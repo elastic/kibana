@@ -14,6 +14,7 @@ import { buildRouteValidationWithZod } from '@kbn/zod-helpers/v4';
 import { ALERTZERO_API_PRIVILEGE_READ, CANDIDATES_URL } from '../../../common/constants';
 import { buildCandidateQuery } from '../../services/watches/hunt/common/build_candidate_query';
 import type { OpenProposalConversationIdsReader } from '../../services/watches/hunt/common/build_candidate_query';
+import { withAlertZeroEnabled } from '../with_alertzero_enabled';
 import type { RouteDependencies } from '../register_routes';
 
 export { CANDIDATES_URL };
@@ -113,7 +114,7 @@ export const registerCandidatesRoute = ({
           },
         },
       },
-      async (context, request, response) => {
+      withAlertZeroEnabled(async (context, request, response) => {
         try {
           const spaceId = getSpaceId(request);
           // Internal user: `.kibana-threat-reports` is a plugin-owned hidden index and
@@ -150,6 +151,6 @@ export const registerCandidatesRoute = ({
             body: { message: 'Failed to build candidate query' },
           });
         }
-      }
+      })
     );
 };

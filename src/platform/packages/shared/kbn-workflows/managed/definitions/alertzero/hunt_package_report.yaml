@@ -28,20 +28,28 @@ triggers:
         runId:
           type: string
           description: Run id the Worker's fan-out minted for this sweep; packaging reads only attachments scoped to this run.
+        # The hunt's own verdict, passed down because a run that confirmed no hit leaves no
+        # SSE attachment behind: without these, packaging cannot tell that from a run whose
+        # state is genuinely missing, and reports every no-hit run as incomplete.
+        #
+        # Deliberately a plain string rather than an enum of the three values the step
+        # accepts. A trigger input is validated before any step runs, so an unexpected value
+        # here would abort the child ahead of its own on-failure handling and leave the
+        # sweep with no conclusion at all -- the same failure the `technology` enum caused on
+        # `hunt.yaml`. The step's own schema rejects a bad value inside that envelope, where
+        # `emit_package_failed` can still report it.
         huntStatus:
           type: string
-          description: >-
-            Status the hunt child reported for this run (success/partial/failed).
-            Combined with huntConfirmedHit to tell a genuinely clean run (no
-            attachments because nothing was confirmed) from one packaging
-            cannot evaluate (no attachments because the hunt did not finish).
-        huntConfirmedHit:
+          description: Hunt child's result status, one of `success`, `partial` or `failed`; the latter two mean absence of a hit is not a clean verdict.
+        hasConfirmedHit:
           type: boolean
-          description: Whether the hunt child confirmed a hit for this run.
+          description: Whether the hunt cleared the confirmed-hit bar.
       required:
         - reportId
         - investigationConversationId
         - runId
+        - huntStatus
+        - hasConfirmedHit
       additionalProperties: false
 outputs:
   - name: status
@@ -58,8 +66,8 @@ outputs:
 steps:
   # No Investigation to package against (the Worker's find_or_create failed)
   # means there is nothing to decide: skip the real packaging call rather than
-  # run it against a nonexistent Investigation (Phase 5 task 2; same guard as
-  # hunt.yaml's run_hunt_coordinator).
+  # run it against a nonexistent Investigation. Same guard as hunt.yaml's
+  # run_hunt_coordinator.
   - name: decide_and_package
     type: hunt.packageReport
     if: "${{ inputs.investigationConversationId != nil and inputs.investigationConversationId != empty }}"
@@ -69,7 +77,9 @@ steps:
       investigationConversationId: "{{ inputs.investigationConversationId }}"
       runId: "{{ inputs.runId }}"
       huntStatus: "{{ inputs.huntStatus }}"
-      huntConfirmedHit: "${{ inputs.huntConfirmedHit }}"
+      # `${{ }}`, not `{{ }}`: the step schema types this as a boolean, and the text form
+      # renders it as the string "false", which fails input validation.
+      hasConfirmedHit: "${{ inputs.hasConfirmedHit }}"
     on-failure:
       fallback:
         - name: emit_package_failed
@@ -84,12 +94,11 @@ steps:
   # checks `!= nil`/`!= empty` rather than a `| default: []` filter chain: a
   # bracket array literal is not a valid filter argument in this engine (it
   # silently drops the field) and `foreach` itself hard-fails on a nil
-  # predecessor rather than treating it as empty (Phase 0 task 7 finding,
-  # section A item 8 — same reasoning as the Worker's own report_fan_out).
-  # Fire-and-forget: this child does not join the gates (Phase 5 task 4), so
-  # `mode: settled` plus the failed count read below is how a launch failure
-  # is observed without an on-failure inside the branch body (illegal there
-  # per Phase 0 task 7 finding 1).
+  # predecessor rather than treating it as empty. Same reasoning as the Worker's
+  # own report_fan_out.
+  # Fire-and-forget: this child does not join the gates, so `mode: settled` plus
+  # the failed count read below is how a launch failure is observed without an
+  # on-failure inside the branch body, which the engine rejects there.
   - name: start_proposal_gates
     type: parallel
     if: "${{ steps.decide_and_package.output.status == 'packaged' and steps.decide_and_package.output.proposals != nil and steps.decide_and_package.output.proposals != empty }}"
@@ -116,16 +125,16 @@ steps:
             closureSummary: "{{ steps.decide_and_package.output.closureSummary }}"
             expectedProposalCount: "${{ steps.decide_and_package.output.expectedProposalCount }}"
 
-  # A scalar `default: 0` (not a bracket array literal) is fine in this engine
-  # (Phase 0 task 7 only flagged `default: []`); safe when start_proposal_gates
-  # was itself skipped (no proposals) or never ran.
+  # A scalar `default: 0` is fine in this engine; it is only a bracket array
+  # literal that gets silently dropped. Safe when start_proposal_gates was
+  # itself skipped (no proposals) or never ran.
   - name: resolve_dispatch_status
     type: data.set
     with:
       dispatch_failed_count: "${{ steps.start_proposal_gates.output.failed | default: 0 }}"
 
-  # Section C item 5: a partial gate launch (k of N dispatched) marks the
-  # packaging stage `partial`, same as a `run_incomplete` native result — the
+  # A partial gate launch (k of N dispatched) marks the packaging stage
+  # `partial`, same as a `run_incomplete` native result — the
   # Worker's own outcome derivation only checks this child's status for
   # equality to `run_incomplete`, so both collapse to the one literal it reads.
   - name: resolve_package_status

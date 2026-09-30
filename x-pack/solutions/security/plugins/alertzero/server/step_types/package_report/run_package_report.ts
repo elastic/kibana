@@ -7,7 +7,10 @@
 
 import type { ActionCatalogEntry } from '@kbn/alertzero-common';
 import type { VersionedAttachment } from '@kbn/agent-builder-common';
-import type { PackageReportOutput } from '../../../common/step_types/package_report';
+import type {
+  PackageReportInput,
+  PackageReportOutput,
+} from '../../../common/step_types/package_report';
 import { buildHuntInvestigationConversationId } from '../../services/watches/hunt/common/hunt_investigation_id';
 import { decidePackageReport } from './decide_package_report';
 import { deriveCoverageSubjects } from './derive_coverage_subjects';
@@ -40,8 +43,9 @@ export interface RunPackageReportDeps {
 
 /**
  * Orchestrates packaging for one Investigation run. Throws
- * {@link PackageReportIdentityError} when the conversation id does not match
- * the report binding; returns typed `run_incomplete` when current-run SSE is missing.
+ * {@link PackageReportIdentityError} when the conversation id does not match the report
+ * binding; returns typed `run_incomplete` when the run claimed a hit whose current-run SSE
+ * state cannot be read, and when a hunt that did not complete left nothing to package.
  */
 export const runPackageReport = async ({
   spaceId,
@@ -49,7 +53,7 @@ export const runPackageReport = async ({
   investigationConversationId,
   runId,
   huntStatus,
-  huntConfirmedHit,
+  hasConfirmedHit,
   attachments,
   deps,
 }: {
@@ -57,10 +61,8 @@ export const runPackageReport = async ({
   reportId: string;
   investigationConversationId: string;
   runId: string;
-  /** The hunt child's own `status` output for this run; disambiguates a clean run from an incomplete one. */
-  huntStatus?: string;
-  /** The hunt child's own `hit` output for this run. */
-  huntConfirmedHit?: boolean;
+  huntStatus: PackageReportInput['huntStatus'];
+  hasConfirmedHit: boolean;
   attachments: VersionedAttachment[] | undefined;
   deps: RunPackageReportDeps;
 }): Promise<PackageReportOutput> => {
@@ -75,16 +77,38 @@ export const runPackageReport = async ({
     attachments,
     reportId,
     runId,
-    huntStatus,
-    huntConfirmedHit,
     resolveHostEnrollment: deps.resolveHostEnrollment,
     rehydrateProcessSelectors: deps.rehydrateProcessSelectors,
   });
 
   if (!state) {
+    // The coordinator emits an SSE attachment only for a confirmed hit, so a run that
+    // cleared no hit legitimately has no current-run state to read. That is the normal
+    // outcome of a hunt and has to close the Investigation, not strand it: treat it as a
+    // dismissal. Reaching here with a confirmed hit means the state really is missing
+    // (a rerun colliding on the attachment id, or a failed attach), which stays
+    // `run_incomplete` so the Worker reports the sweep as partial.
+    //
+    // Only a hunt that completed may close, though. The hunt-once gate keys on
+    // `evidence.last_hunted_at`, which the hunt writes only for a run it considers
+    // recorded, so a retryable-incomplete or failed run leaves its report eligible and a
+    // later sweep hunts it again. Closing here would have that sweep write its findings --
+    // a real hit included -- into an Investigation this run had already closed.
+    if (!hasConfirmedHit && huntStatus === 'success') {
+      return {
+        status: 'packaged',
+        coverage: { written: [], skipped: [] },
+        proposals: [],
+        dismiss: true,
+        closureSummary: `Hunt for report ${reportId} found no confirmed hits. Closing: nothing in this environment matched the report at the confirming-index bar.`,
+        expectedProposalCount: 0,
+      };
+    }
     return {
       status: 'run_incomplete',
-      reason: `No current-run SSE attachment for runId=${runId}`,
+      reason: hasConfirmedHit
+        ? `No current-run SSE attachment for runId=${runId}`
+        : `Hunt did not complete (status=${huntStatus}), so there is no verdict to record for runId=${runId}`,
     };
   }
 

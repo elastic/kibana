@@ -76,7 +76,7 @@ const HUNT_WORKER_DEFAULTS = {
 };
 
 /**
- * The manual trigger's optional `reportIds` input (Phase 3 task 2): a manual-bypass
+ * The manual trigger's optional `reportIds` input: a manual-bypass
  * fan-out over named reports, capped at 10 to match `create_proposal.yaml`'s
  * trigger-input shape and the candidates route's own `report_ids` bound. Present on
  * every autonomy level's manual trigger, scheduled or not.
@@ -113,3 +113,34 @@ export const renderHuntWorkerYaml = (yaml: string, values: HuntWorkerTemplateVal
     .replaceAll('__WORKER_CANDIDATE_LIMIT__', String(HUNT_WORKER_DEFAULTS.candidateLimit))
     .replaceAll('__WORKER_FAN_OUT_MAX__', String(HUNT_WORKER_DEFAULTS.fanOutMax));
 };
+
+export interface AlertTriageWorkerTemplateValues extends CommonWorkerTemplateValues {
+  extras: {
+    autoCloseConfidenceScoreMinThreshold: number;
+  };
+}
+
+export const renderAlertTriageWorkerYaml = (
+  yaml: string,
+  values: AlertTriageWorkerTemplateValues
+): string =>
+  renderCommonWorkerYaml(yaml, values).replaceAll(
+    '__WORKER_AUTO_CLOSE_CONFIDENCE_MIN_THRESHOLD__',
+    String(values.extras.autoCloseConfidenceScoreMinThreshold)
+  );
+
+export interface RuleCoverageWorkerTemplateValues extends ScheduledWorkerTemplateValues {
+  extras: {
+    lookbackDays: number;
+    maxGapsPerRun: number;
+  };
+}
+
+export const renderRuleCoverageWorkerYaml = (
+  yaml: string,
+  values: RuleCoverageWorkerTemplateValues
+): string =>
+  renderScheduledWorkerYaml(yaml, values).replaceAll(
+    '__WORKER_EXTRAS__',
+    JSON.stringify(values.extras)
+  );

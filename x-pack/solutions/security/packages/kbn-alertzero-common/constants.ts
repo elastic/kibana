@@ -66,6 +66,10 @@ export const CANDIDATES_URL = `${HUNT_INTERNAL_ROUTE_BASE}/candidates` as const;
 /** Two-tier hunt pipeline for a single report, called by the hunt child (`hunt.yaml`). */
 export const HUNT_COORDINATOR_URL = `${HUNT_INTERNAL_ROUTE_BASE}/hunt_coordinator` as const;
 
+/** Mints or verifies the Hunt Watch Investigation for a report, called by its own child workflow. */
+export const FIND_OR_CREATE_INVESTIGATION_URL =
+  `${HUNT_INTERNAL_ROUTE_BASE}/find_or_create_investigation` as const;
+
 /** Failed managed scans in the trailing 24 hours, folded onto Workers. */
 export const ALERTZERO_SCAN_FAILURES_URL = `${ALERTZERO_INTERNAL_URL}/scan-failures` as const;
 
@@ -197,15 +201,15 @@ export const SYSTEM_SECURITY_WORKER_HUNT_CONTINUOUS_THREAT_HUNT_ID =
   'system-security-hunt-continuous-threat-hunt' as const;
 export const SYSTEM_SECURITY_WORKER_DETECTION_RULE_TUNING_ID =
   'system-security-detection-rule-tuning' as const;
-export const SYSTEM_SECURITY_WORKER_DETECTION_RULE_CREATION_ID =
-  'system-security-detection-rule-creation' as const;
+export const SYSTEM_SECURITY_WORKER_DETECTION_RULE_COVERAGE_ID =
+  'system-security-detection-rule-coverage' as const;
 
 export const SYSTEM_SECURITY_WORKER_IDS = [
   SYSTEM_SECURITY_WORKER_FLOOR_ALERT_TRIAGE_ID,
   SYSTEM_SECURITY_WORKER_FLOOR_ATTACK_DISCOVERY_ID,
   SYSTEM_SECURITY_WORKER_HUNT_CONTINUOUS_THREAT_HUNT_ID,
   SYSTEM_SECURITY_WORKER_DETECTION_RULE_TUNING_ID,
-  SYSTEM_SECURITY_WORKER_DETECTION_RULE_CREATION_ID,
+  SYSTEM_SECURITY_WORKER_DETECTION_RULE_COVERAGE_ID,
   SYSTEM_SECURITY_WORKER_FORENSICS_ENDPOINT_ANALYSIS_ID,
 ] as const;
 
@@ -248,8 +252,8 @@ export const SYSTEM_SECURITY_WORKER_CATALOG = [
     watchTag: WATCH_DETECTION_TAG,
   },
   {
-    id: SYSTEM_SECURITY_WORKER_DETECTION_RULE_CREATION_ID,
-    name: 'Rule Creation',
+    id: SYSTEM_SECURITY_WORKER_DETECTION_RULE_COVERAGE_ID,
+    name: 'Rule Coverage',
     watchId: SYSTEM_SECURITY_WATCH_DETECTION_ID,
     watchTag: WATCH_DETECTION_TAG,
   },
