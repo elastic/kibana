@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { Logger } from '@kbn/logging';
 import type { AgentClient, AgentService } from '@kbn/fleet-plugin/server';
 import type { ResolveHostEnrollment } from '../../step_types/package_report/read_current_run_state';
 
@@ -19,20 +20,35 @@ const escapeKuery = (value: string): string => value.replace(/(["\\])/g, '\\$1')
  * cosmetic -- it downgrades an executable response action to a recommendation.
  */
 export const makeResolveHostEnrollment = (
-  agentClient: AgentClient | undefined
+  agentClient: AgentClient | undefined,
+  logger?: Logger
 ): ResolveHostEnrollment => {
   if (!agentClient) {
     return async () => ({ enrolled: false });
   }
   return async (hostName) => {
     const escaped = escapeKuery(hostName);
-    const { agents } = await agentClient.listAgents({
-      kuery: `local_metadata.host.hostname:"${escaped}" or local_metadata.host.name:"${escaped}"`,
-      showInactive: false,
-      perPage: 1,
-    });
-    const agent = agents[0];
-    return agent ? { enrolled: true, agentId: agent.id } : { enrolled: false };
+    try {
+      const { agents } = await agentClient.listAgents({
+        kuery: `local_metadata.host.hostname:"${escaped}" or local_metadata.host.name:"${escaped}"`,
+        showInactive: false,
+        perPage: 1,
+      });
+      const agent = agents[0];
+      return agent ? { enrolled: true, agentId: agent.id } : { enrolled: false };
+    } catch (err) {
+      // A Fleet outage must not sink packaging. The hunt writes its evidence before packaging
+      // runs, so the report is no longer swept automatically, and failing here would strand a
+      // confirmed hit outside the Proposal queue until someone reran it by hand. An unknown host
+      // takes the same downgrade a Fleet-less deployment gets: the finding is still packaged, as
+      // a recommendation rather than an executable action.
+      logger?.warn(
+        `resolveHostEnrollment: Fleet agent lookup failed for "${hostName}", treating it as unenrolled — ${
+          err instanceof Error ? err.message : String(err)
+        }`
+      );
+      return { enrolled: false };
+    }
   };
 };
 
@@ -46,8 +62,9 @@ export const makeResolveHostEnrollment = (
  * host matched first.
  */
 export const makeScopedResolveHostEnrollment =
-  (getAgentService: () => AgentService | undefined) =>
+  (getAgentService: () => AgentService | undefined, logger?: Logger) =>
   (spaceId: string): ResolveHostEnrollment =>
     makeResolveHostEnrollment(
-      spaceId ? getAgentService()?.asInternalScopedUser(spaceId) : undefined
+      spaceId ? getAgentService()?.asInternalScopedUser(spaceId) : undefined,
+      logger
     );

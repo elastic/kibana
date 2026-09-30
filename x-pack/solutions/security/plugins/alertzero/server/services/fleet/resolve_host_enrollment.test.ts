@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { loggingSystemMock } from '@kbn/core/server/mocks';
 import type { AgentClient, AgentService } from '@kbn/fleet-plugin/server';
 import {
   makeResolveHostEnrollment,
@@ -45,6 +46,24 @@ describe('makeResolveHostEnrollment', () => {
 
   it('returns enrolled: false when Fleet finds no agent for the host', async () => {
     const listAgents = jest.fn().mockResolvedValue({ agents: [], total: 0 });
+    const resolve = makeResolveHostEnrollment({ listAgents } as unknown as AgentClient);
+
+    await expect(resolve('host-a')).resolves.toEqual({ enrolled: false });
+  });
+
+  // Packaging runs after the hunt has written its evidence, so the report is no longer swept
+  // automatically: a throw here would strand a confirmed hit outside the Proposal queue.
+  it('treats the host as unenrolled when the Fleet lookup fails, rather than failing packaging', async () => {
+    const logger = loggingSystemMock.createLogger();
+    const listAgents = jest.fn().mockRejectedValue(new Error('Fleet unavailable'));
+    const resolve = makeResolveHostEnrollment({ listAgents } as unknown as AgentClient, logger);
+
+    await expect(resolve('host-a')).resolves.toEqual({ enrolled: false });
+    expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('Fleet unavailable'));
+  });
+
+  it('reports a failed lookup even without a logger', async () => {
+    const listAgents = jest.fn().mockRejectedValue(new Error('Fleet unavailable'));
     const resolve = makeResolveHostEnrollment({ listAgents } as unknown as AgentClient);
 
     await expect(resolve('host-a')).resolves.toEqual({ enrolled: false });

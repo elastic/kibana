@@ -11,6 +11,7 @@ import {
   ConversationAccessControlMode,
   isConversationAlreadyExistsError,
 } from '@kbn/agent-builder-common';
+import type { MetadataFieldValue } from '@kbn/agent-builder-common';
 import { TEMPLATE_ID_INVESTIGATION } from '@kbn/alertzero-common';
 import type { FindOrCreateInvestigationResponse } from '@kbn/alertzero-common';
 import {
@@ -38,7 +39,12 @@ export interface FindOrCreateConversationClient {
     templateId: string;
     accessControl: { access_mode: ConversationAccessControlMode; entries: never[] };
   }) => Promise<unknown>;
-  get: (conversationId: string) => Promise<unknown>;
+  get: (conversationId: string) => Promise<{ metadata?: Record<string, MetadataFieldValue> }>;
+  patchMetadata: (
+    conversationId: string,
+    updates: Record<string, MetadataFieldValue>,
+    options?: { access?: 'owner' | 'converse' }
+  ) => Promise<unknown>;
 }
 
 export interface RunFindOrCreateInvestigationDeps {
@@ -53,6 +59,43 @@ export interface RunFindOrCreateInvestigationDeps {
 }
 
 const MAX_SUMMARY_TECHNIQUES = 100;
+
+/**
+ * Reopens an Investigation a previous run closed, so a new run records into active work.
+ *
+ * The Investigation id is derived from the report, so every run on the same report resolves
+ * to the same conversation -- including one that packaging closed as `benign` after a clean
+ * hunt, or that the proposal gate closed as `resolved` once every proposal settled. Nothing
+ * else reopens it, so without this a later confirmed hit and its proposals would attach to a
+ * conversation an analyst sees as finished.
+ *
+ * Only `status` is reset. `close_reason` is a SELECT over
+ * `false_positive | benign | resolved | duplicate | other`, so there is no value meaning "not
+ * closed" to write back, and an empty string fails template validation -- a reopened
+ * Investigation therefore keeps the reason the last run closed it. The platform treats that
+ * pairing as wrong (`escalations_service` deliberately excludes `close_reason` when seeding an
+ * open escalation) but only has the option of omitting the field, which a merge-patch cannot do.
+ *
+ * `converse` access rather than the default `owner`: the Investigation is created public
+ * precisely so it belongs to whoever is on duty rather than to the identity that minted it, and
+ * a manual rerun is run by an analyst who typically does not own it.
+ */
+const reopenIfClosed = async (
+  conversationClient: FindOrCreateConversationClient,
+  investigationConversationId: string,
+  metadata: Record<string, MetadataFieldValue> | undefined
+): Promise<boolean> => {
+  // Absent or empty reads as open in the investigation template, so there is nothing to reopen.
+  if (metadata?.status !== 'closed') {
+    return false;
+  }
+  await conversationClient.patchMetadata(
+    investigationConversationId,
+    { status: 'open' },
+    { access: 'converse' }
+  );
+  return true;
+};
 
 export const summarizeReportForTrigger = (
   context: ReportHuntContext
@@ -110,8 +153,17 @@ export const runFindOrCreateInvestigation = async (
     if (!isConversationAlreadyExistsError(error)) {
       throw error;
     }
-    await conversationClient.get(investigationConversationId);
+    const existing = await conversationClient.get(investigationConversationId);
     created = false;
+    // Deliberately not swallowed. Without an Investigation id the Worker skips the coordinator
+    // entirely, so a failure here writes no evidence and leaves the report eligible for the next
+    // sweep -- a retry. Continuing instead would hunt into a conversation this run knows is
+    // closed and file its findings where nobody is looking, which is the worse of the two.
+    if (await reopenIfClosed(conversationClient, investigationConversationId, existing.metadata)) {
+      logger?.debug(
+        `findOrCreateInvestigation: reopened Investigation ${investigationConversationId} for report ${reportId}, which a previous run had closed.`
+      );
+    }
   }
 
   return {
