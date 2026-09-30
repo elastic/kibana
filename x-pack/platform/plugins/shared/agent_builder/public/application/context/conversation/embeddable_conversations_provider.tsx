@@ -172,13 +172,11 @@ export const EmbeddableConversationsProvider: React.FC<EmbeddableConversationsPr
       try {
         const conversation = await services.conversationsService.get({ conversationId: id });
         setConversationId(conversation.id ?? undefined);
-        // Host may pass initialMessage for a new chat; skip auto-send when restoring a thread.
-        resetInitialMessage();
       } catch {
         setConversationId(undefined);
       }
     },
-    [services.conversationsService, setConversationId, resetInitialMessage]
+    [services.conversationsService, setConversationId]
   );
 
   // One-time initialization per provider instance:
@@ -216,6 +214,12 @@ export const EmbeddableConversationsProvider: React.FC<EmbeddableConversationsPr
     // After initialization, always use persisted ID
     return persistedConversationId;
   }, [currentProps, persistedConversationId]);
+
+  useEffect(() => {
+    if (conversationId && currentProps.initialMessage) {
+      resetInitialMessage();
+    }
+  }, [conversationId, currentProps.initialMessage, resetInitialMessage]);
 
   const conversationActions = useConversationActions({
     conversationId,
