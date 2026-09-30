@@ -21,38 +21,23 @@ import {
   type ApprovalPhase,
 } from './approval_outcome';
 import { APPROVAL_MODAL_TRANSLATIONS } from './translations';
-import type { ApprovalAction, AlwaysAllowOption, DeclineParams } from './types';
-
-/**
- * A proposal already decided, read from the real record rather than assumed from a click.
- * `status` admits `'applying'`/`'failed'` alongside `'applied'`/`'declined'`: approving only
- * resumes the gate workflow, whose post-gate steps run the action, so a decided proposal can
- * still read `executing` or `failed` once that real record is what supplies this.
- */
-export interface ApprovalDecision {
-  status: Exclude<ApprovalPhase, 'pending'>;
-  /**
-   * Omitted when nobody actually decided — an expired gate timed out rather than being approved or
-   * declined by anyone. Callers fall back to their own plain caption rather than rendering a
-   * fabricated "by Unknown" for an outcome no one chose.
-   */
-  actorName?: string;
-  /** ISO 8601 timestamp. Optional: the record itself may carry none — see `ApprovalActorTime`. */
-  decidedAt?: string;
-  /** Shown in the outcome banner, e.g. why a decline was made. */
-  reason?: React.ReactNode;
-}
+import {
+  getProposalCaption,
+  getProposalDecision,
+  getProposalTone,
+  isProposalExpired,
+} from './proposal_helpers';
+import type { ApprovalAction, AlwaysAllowOption, DeclineParams, ApprovalProposal } from './types';
 
 export interface ApprovalContentProps {
-  title: string;
-  tone: 'primary' | 'danger';
-  /** The proposal's own markdown, rendered as the body. */
-  comment?: string;
+  /**
+   * The proposal this asks for a decision on. Title, tone, comment, header caption, decision and
+   * expiry are all derived from it internally, the same way for every host, rather than each host
+   * computing them itself and risking a subtle divergence (as the chat card's Approve button once
+   * did, styled `success` where the flyout modal's read `primary`).
+   */
+  proposal: ApprovalProposal;
   titleId?: string;
-  /** Header caption below the badge, e.g. a category/reversibility line. Omitted when there is none. */
-  caption?: React.ReactNode;
-  /** Already decided — read-only history. Omit while a proposal is still awaiting one. */
-  decision?: ApprovalDecision;
   /**
    * Whether this proposal's approve/decline is currently in flight. Sourced from the host's own
    * mutation cache (e.g. `useIsMutating`) rather than tracked here — a local `useState` would not
@@ -68,36 +53,29 @@ export interface ApprovalContentProps {
    */
   currentActorName?: string;
   alwaysAllow?: AlwaysAllowOption;
-  /** Rendered as a filled `EuiButton`. Footer is omitted entirely when both this and `secondaryActions` are absent. */
-  primaryAction?: ApprovalAction;
-  /** Each entry rendered as an `EuiButtonEmpty`. */
+  /**
+   * Approves the proposal. Rendered as a filled `EuiButton` labeled "Approve", disabled once the
+   * proposal has expired — both derived here rather than supplied by the caller, so every host's
+   * Approve button behaves and reads identically. Omit for a host that cannot record an approval,
+   * which hides the button entirely rather than leaving it inert.
+   */
+  onApprove?: () => void | Promise<void>;
+  /** Each entry rendered as an `EuiButtonEmpty`, alongside Approve/Decline. */
   secondaryActions?: ApprovalAction[];
   /**
-   * Enables the built-in decline flow. When set, a "Decline" trigger appears next to
-   * `primaryAction`; clicking it swaps the body for `DeclineReasonForm` and the footer for
-   * Cancel/Decline, entirely within this component — so a host never renders `DeclineReasonForm`
-   * itself or tracks its own declining mode. The same flow renders identically whether this is
-   * placed inside a modal or an Agent Builder chat card. Disabled whenever `primaryAction` is.
+   * Enables the built-in decline flow. When set, a "Decline" trigger appears next to the Approve
+   * button; clicking it swaps the body for `DeclineReasonForm` and the footer for Cancel/Decline,
+   * entirely within this component — so a host never renders `DeclineReasonForm` itself or tracks
+   * its own declining mode. The same flow renders identically whether this is placed inside a
+   * modal or an Agent Builder chat card. Disabled whenever the Approve button is.
    */
   onDismiss?: (params: DeclineParams) => Promise<void>;
-  /**
-   * Error from a prior run of this proposal's action, shown as a warning explaining why the
-   * proposal is being offered again. Only rendered while still pending — a decided proposal's
-   * outcome banner already covers it.
-   */
-  previousExecutionError?: string;
-  /**
-   * Whether the decision deadline has passed. `ApprovalContent`'s own badge already says
-   * "Expired"; this adds the explanation the badge alone has no room for. Passed explicitly
-   * rather than derived from `decision` here, since a caller may compute it against a proposal
-   * shape this component never sees.
-   */
-  isExpired?: boolean;
   'data-test-subj'?: string;
 }
 
 /**
- * Layout-agnostic approval UI.
+ * The proposal-specific approval UI, shared by the AlertZero flyout's modal and the Agent Builder
+ * chat card.
  *
  * Renders as a React Fragment so it can be placed inside an `EuiModal` (by
  * {@link ApprovalModal}) or directly into a div/card (by the Agent Builder
@@ -108,30 +86,25 @@ export interface ApprovalContentProps {
  * hosts get the identical inline decline UX rather than each tracking its own mode and rendering
  * the form itself.
  *
- * The decision's async lifecycle is the host's, not this component's: `isSubmitting` and
- * `decision` together are the whole phase this renders — the badge, the header's actor/time
- * caption, and the outcome banner. This only wraps `primaryAction.onClick` to surface a
- * rejection as its own banner; it holds no phase of its own, so it renders identically whether
- * it just mounted or has been open the whole time.
+ * The decision's async lifecycle is the host's, not this component's: `isSubmitting` and the
+ * proposal's own decision together are the whole phase this renders — the badge, the header's
+ * actor/time caption, and the outcome banner. This only wraps `onApprove` to surface a rejection
+ * as its own banner; it holds no phase of its own, so it renders identically whether it just
+ * mounted or has been open the whole time.
  *
- * Footer is omitted entirely when neither `primaryAction` nor `secondaryActions` are provided.
+ * Footer is omitted entirely once the proposal is decided or in a transient state — see
+ * `isSettledOrTransient` below.
  */
 export const ApprovalContent = memo<ApprovalContentProps>(
   ({
-    title,
-    tone,
-    comment,
+    proposal,
     titleId,
-    caption,
-    decision,
     isSubmitting,
     currentActorName,
     alwaysAllow,
-    primaryAction,
+    onApprove,
     secondaryActions,
     onDismiss,
-    previousExecutionError,
-    isExpired,
     'data-test-subj': dataTestSubj,
   }) => {
     const generatedTitleId = useGeneratedHtmlId({ prefix: 'ApprovalContent' });
@@ -150,6 +123,18 @@ export const ApprovalContent = memo<ApprovalContentProps>(
     }, [isSubmitting]);
 
     const actorName = currentActorName ?? APPROVAL_MODAL_TRANSLATIONS.currentActorFallback;
+    const isExpired = isProposalExpired(proposal);
+    const decision = getProposalDecision(proposal);
+    const tone = getProposalTone(proposal);
+
+    const primaryAction: ApprovalAction | undefined = onApprove
+      ? {
+          label: APPROVAL_MODAL_TRANSLATIONS.approve,
+          onClick: onApprove,
+          isDisabled: isExpired,
+          'data-test-subj': dataTestSubj ? `${dataTestSubj}-confirm` : undefined,
+        }
+      : undefined;
 
     const startDeclining = useCallback(() => {
       setActionError(undefined);
@@ -238,7 +223,7 @@ export const ApprovalContent = memo<ApprovalContentProps>(
     ) : isSubmitting && since ? (
       <ApprovalActorTime actorName={actorName} at={since} live />
     ) : (
-      caption
+      getProposalCaption(proposal, { includeRiskDetails: true })
     );
 
     const defaultButtonColor: EuiButtonColor = tone === 'danger' ? 'danger' : 'primary';
@@ -258,13 +243,13 @@ export const ApprovalContent = memo<ApprovalContentProps>(
         <ApprovalContentHeader
           badge={badge}
           caption={headerCaption}
-          title={title}
+          title={proposal.title}
           titleId={titleId ?? generatedTitleId}
         />
 
         <ApprovalContentBody
           mode={mode}
-          comment={comment}
+          comment={proposal.comment}
           banner={banner}
           bannerSuffix={bannerSuffix}
           actionError={actionError}
@@ -280,7 +265,7 @@ export const ApprovalContent = memo<ApprovalContentProps>(
 
         <ApprovalStatusCallouts
           isPending={approvalPhase === 'pending'}
-          previousExecutionError={previousExecutionError}
+          previousExecutionError={proposal.previousExecutionError}
           isExpired={isExpired}
           data-test-subj={dataTestSubj}
         />

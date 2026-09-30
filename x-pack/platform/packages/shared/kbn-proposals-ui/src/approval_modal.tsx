@@ -8,16 +8,8 @@
 import React, { memo } from 'react';
 import { css } from '@emotion/react';
 import { EuiModal, useEuiTheme, useGeneratedHtmlId } from '@elastic/eui';
-import type { ApprovalAction, DeclineParams, AlwaysAllowOption } from './types';
 import { ApprovalContent } from './approval_content';
-import {
-  getProposalCaption,
-  getProposalDecision,
-  getProposalTone,
-  isProposalExpired,
-} from './proposal_helpers';
-import { APPROVAL_MODAL_TRANSLATIONS } from './translations';
-import type { ApprovalProposal } from './types';
+import type { DeclineParams, AlwaysAllowOption, ApprovalProposal } from './types';
 
 export interface ApprovalModalProps {
   alwaysAllow?: AlwaysAllowOption;
@@ -47,9 +39,10 @@ export interface ApprovalModalProps {
 /**
  * Asks for a decision on one proposal.
  *
- * Takes the proposal rather than something adapted from it: the title, tone and expiry all come
- * off the proposal, so this modal and the Agent Builder card derive them the same way instead of
- * from whatever each host happened to keep.
+ * Takes the proposal rather than something adapted from it, and forwards it straight to
+ * `ApprovalContent`: title, tone, caption, decision and expiry are all derived there, the same
+ * way for this modal and for the Agent Builder chat card, instead of each host deriving them
+ * itself.
  *
  * Declining is `ApprovalContent`'s own built-in flow — this modal just forwards `onDismiss` and
  * lets it swap its body and footer in place, rather than closing this modal and opening a second
@@ -70,16 +63,6 @@ export const ApprovalModal = memo<ApprovalModalProps>(
     const { euiTheme } = useEuiTheme();
     const titleId = useGeneratedHtmlId({ prefix: 'ApprovalModal' });
 
-    const { title } = proposal;
-    const isExpired = isProposalExpired(proposal);
-
-    const primaryAction: ApprovalAction = {
-      label: APPROVAL_MODAL_TRANSLATIONS.approve,
-      onClick: onConfirm,
-      isDisabled: isExpired,
-      'data-test-subj': dataTestSubj ? `${dataTestSubj}-confirm` : undefined,
-    };
-
     return (
       <EuiModal
         aria-labelledby={titleId}
@@ -88,19 +71,14 @@ export const ApprovalModal = memo<ApprovalModalProps>(
         data-test-subj={dataTestSubj}
       >
         <ApprovalContent
-          title={title}
-          tone={getProposalTone(proposal)}
-          comment={proposal.comment}
-          caption={getProposalCaption(proposal, { includeRiskDetails: true })}
-          decision={getProposalDecision(proposal)}
+          proposal={proposal}
+          titleId={titleId}
           isSubmitting={isSubmitting}
           currentActorName={currentActorName}
           alwaysAllow={alwaysAllow}
           data-test-subj={dataTestSubj}
-          primaryAction={primaryAction}
+          onApprove={onConfirm}
           onDismiss={onDismiss}
-          previousExecutionError={proposal.previousExecutionError}
-          isExpired={isExpired}
         />
       </EuiModal>
     );

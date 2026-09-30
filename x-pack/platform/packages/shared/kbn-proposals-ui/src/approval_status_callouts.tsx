@@ -49,8 +49,8 @@ export const ApprovalStatusCallouts = memo<ApprovalStatusCalloutsProps>(
               >
                 {previousExecutionError}
               </KbnWarningCallout>
+              <EuiSpacer size="m" />
             </div>
-            <EuiSpacer size="m" />
           </>
         )}
 
@@ -64,6 +64,7 @@ export const ApprovalStatusCallouts = memo<ApprovalStatusCalloutsProps>(
                 title={APPROVAL_MODAL_TRANSLATIONS.expiredCalloutTitle}
                 data-test-subj={dataTestSubj ? `${dataTestSubj}-expired` : undefined}
               />
+              <EuiSpacer size="m" />
             </div>
           </>
         )}

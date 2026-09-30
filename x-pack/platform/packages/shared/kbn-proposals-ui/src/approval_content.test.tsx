@@ -10,6 +10,7 @@ import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { EuiProvider } from '@elastic/eui';
 import { I18nProvider } from '@kbn/i18n-react';
 import { ApprovalContent, type ApprovalContentProps } from './approval_content';
+import type { ApprovalProposal } from './types';
 
 const wrapper: React.FC<{ children: React.ReactNode }> = ({ children }) => (
   <I18nProvider>
@@ -17,15 +18,17 @@ const wrapper: React.FC<{ children: React.ReactNode }> = ({ children }) => (
   </I18nProvider>
 );
 
-const baseProps: ApprovalContentProps = {
+const baseProposal: ApprovalProposal = {
   title: 'Block IP 10.0.0.4',
-  tone: 'danger',
+  impact: 'critical',
   comment: 'Isolate the compromised host.',
-  primaryAction: {
-    label: 'Approve',
-    onClick: jest.fn(),
-    'data-test-subj': 'content-confirm',
-  },
+  status: 'pending',
+  expired: false,
+};
+
+const baseProps: ApprovalContentProps = {
+  proposal: baseProposal,
+  onApprove: jest.fn(),
   secondaryActions: [
     {
       label: 'Cancel',
@@ -54,14 +57,24 @@ describe('ApprovalContent', () => {
     expect(screen.getByText('Needs review')).toBeInTheDocument();
   });
 
-  it('renders a caption under the badge when supplied', () => {
-    renderContent({ caption: 'Rule tuning · Reversible' });
-    expect(screen.getByText('Rule tuning · Reversible')).toBeInTheDocument();
+  it('renders a caption derived from the proposal, e.g. category, reversibility and impact', () => {
+    renderContent({
+      proposal: {
+        ...baseProposal,
+        category: 'configure',
+        action: { name: 'Block IP', reversible: true },
+      },
+    });
+    expect(screen.getByText('Configure • Reversible • Critical impact')).toBeInTheDocument();
   });
 
-  it('omits the caption line when none is supplied', () => {
-    renderContent({ caption: undefined });
-    expect(screen.queryByText('Rule tuning · Reversible')).not.toBeInTheDocument();
+  it('drops category and reversibility from the caption when the proposal has neither, keeping impact', () => {
+    // Every proposal carries an impact, so the caption itself is never fully empty — only its
+    // category/reversibility parts are conditional. Full coverage of this lives in
+    // `approval_modal.test.tsx`; this just confirms `ApprovalContent` derives it the same way.
+    renderContent({ proposal: { ...baseProposal, category: undefined, action: undefined } });
+    expect(screen.queryByText(/reversible/i)).not.toBeInTheDocument();
+    expect(screen.getByText('Critical impact')).toBeInTheDocument();
   });
 
   it('renders the comment', () => {
@@ -70,28 +83,26 @@ describe('ApprovalContent', () => {
   });
 
   it('renders emphasis in the comment as markdown rather than literal asterisks', () => {
-    renderContent({ comment: 'Revoking **all** sessions.' });
+    renderContent({ proposal: { ...baseProposal, comment: 'Revoking **all** sessions.' } });
     expect(screen.getByText('all').tagName).toBe('STRONG');
   });
 
   it('renders a GFM table in the comment, which is how a proposal lists what it touches', () => {
     const { container } = renderContent({
-      comment: ['| Field | Value |', '| --- | --- |', '| host | fin-dc-01 |'].join('\n'),
+      proposal: {
+        ...baseProposal,
+        comment: ['| Field | Value |', '| --- | --- |', '| host | fin-dc-01 |'].join('\n'),
+      },
     });
 
     expect(container.querySelector('table')).toBeInTheDocument();
     expect(screen.getByText('fin-dc-01')).toBeInTheDocument();
   });
 
-  it('omits the comment block entirely when no comment is supplied', () => {
-    renderContent({ comment: undefined });
-    expect(screen.queryByTestId('approvalContent-comment')).not.toBeInTheDocument();
-  });
-
   it('renders the secondary action before the primary, so the committing decision sits last', () => {
     renderContent();
     expect(
-      isBefore(screen.getByTestId('content-cancel'), screen.getByTestId('content-confirm'))
+      isBefore(screen.getByTestId('content-cancel'), screen.getByTestId('approvalContent-confirm'))
     ).toBe(true);
   });
 
@@ -104,9 +115,9 @@ describe('ApprovalContent', () => {
     expect(screen.getByTestId('content-x').querySelector('[data-euiicon-type]')).toBeTruthy();
   });
 
-  it('renders the primary action button', () => {
+  it('renders the Approve button, labeled the same way regardless of host', () => {
     renderContent();
-    expect(screen.getByTestId('content-confirm')).toHaveTextContent('Approve');
+    expect(screen.getByTestId('approvalContent-confirm')).toHaveTextContent('Approve');
   });
 
   it('renders secondary action buttons as empty buttons', () => {
@@ -114,13 +125,11 @@ describe('ApprovalContent', () => {
     expect(screen.getByTestId('content-cancel')).toHaveTextContent('Cancel');
   });
 
-  it('calls primaryAction.onClick when primary button is clicked', () => {
-    const onClick = jest.fn();
-    renderContent({
-      primaryAction: { label: 'Approve', onClick, 'data-test-subj': 'content-confirm' },
-    });
-    fireEvent.click(screen.getByTestId('content-confirm'));
-    expect(onClick).toHaveBeenCalledTimes(1);
+  it('calls onApprove when the Approve button is clicked', () => {
+    const onApprove = jest.fn();
+    renderContent({ onApprove });
+    fireEvent.click(screen.getByTestId('approvalContent-confirm'));
+    expect(onApprove).toHaveBeenCalledTimes(1);
   });
 
   it('calls secondaryAction.onClick when secondary button is clicked', () => {
@@ -132,34 +141,48 @@ describe('ApprovalContent', () => {
     expect(onClick).toHaveBeenCalledTimes(1);
   });
 
-  it('omits the footer when neither primaryAction nor secondaryActions are supplied', () => {
-    renderContent({ primaryAction: undefined, secondaryActions: undefined });
-    expect(screen.queryByTestId('content-confirm')).not.toBeInTheDocument();
+  it('omits the footer when neither onApprove nor secondaryActions are supplied', () => {
+    renderContent({ onApprove: undefined, secondaryActions: undefined });
+    expect(screen.queryByTestId('approvalContent-confirm')).not.toBeInTheDocument();
     expect(screen.queryByTestId('content-cancel')).not.toBeInTheDocument();
   });
 
+  it('hides the Approve button once the proposal has expired, since expiry is itself a decision', () => {
+    // Expiry resolves to a real (actor-less) decision via `getProposalDecision`, so the footer
+    // — Approve alongside it — is gone the same way it is for any other decided proposal.
+    renderContent({ proposal: { ...baseProposal, expired: true } });
+    expect(screen.queryByTestId('approvalContent-confirm')).not.toBeInTheDocument();
+  });
+
   it('renders the previous-execution-error callout between the body and the footer while pending', () => {
-    renderContent({ previousExecutionError: 'HTTP 400: something went wrong' });
+    renderContent({
+      proposal: { ...baseProposal, previousExecutionError: 'HTTP 400: something went wrong' },
+    });
     expect(screen.getByText('A previous attempt at this action failed')).toBeInTheDocument();
     expect(screen.getByText('HTTP 400: something went wrong')).toBeInTheDocument();
     expect(
       isBefore(
         screen.getByText('A previous attempt at this action failed'),
-        screen.getByTestId('content-confirm')
+        screen.getByTestId('approvalContent-confirm')
       )
     ).toBe(true);
   });
 
   it('hides the previous-execution-error callout once the proposal is decided', () => {
     renderContent({
-      previousExecutionError: 'HTTP 400: something went wrong',
-      decision: { status: 'applied' },
+      proposal: {
+        ...baseProposal,
+        previousExecutionError: 'HTTP 400: something went wrong',
+        decision: 'approved',
+        status: 'succeeded',
+        decidedAt: '2026-01-01T00:00:00.000Z',
+      },
     });
     expect(screen.queryByText('A previous attempt at this action failed')).not.toBeInTheDocument();
   });
 
-  it('renders an expiry explanation when isExpired is set', () => {
-    renderContent({ isExpired: true });
+  it('renders an expiry explanation when the proposal has expired', () => {
+    renderContent({ proposal: { ...baseProposal, expired: true } });
     expect(
       screen.getByText('The decision deadline has passed. This proposal can no longer be actioned.')
     ).toBeInTheDocument();
@@ -207,13 +230,13 @@ describe('ApprovalContent', () => {
       expect(screen.queryByTestId('card-dismiss')).not.toBeInTheDocument();
     });
 
-    it('disables the Decline trigger whenever the primary action is disabled', () => {
+    it('hides the Decline trigger too, once the proposal has expired', () => {
       renderContent({
         onDismiss: jest.fn(),
-        primaryAction: { label: 'Approve', onClick: jest.fn(), isDisabled: true },
+        proposal: { ...baseProposal, expired: true },
         'data-test-subj': 'card',
       });
-      expect(screen.getByTestId('card-dismiss')).toBeDisabled();
+      expect(screen.queryByTestId('card-dismiss')).not.toBeInTheDocument();
     });
 
     it('swaps the comment for the reason form, and the footer for Cancel/Decline, once the trigger is clicked', () => {
@@ -224,7 +247,7 @@ describe('ApprovalContent', () => {
       expect(screen.getByTestId('card-decline-form')).toBeInTheDocument();
       expect(screen.getByTestId('card-cancel-decline')).toBeInTheDocument();
       expect(screen.getByTestId('card-confirm-decline')).toBeInTheDocument();
-      expect(screen.queryByTestId('content-confirm')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('card-confirm')).not.toBeInTheDocument();
     });
 
     it('returns to view without declining when Cancel is clicked', () => {

@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { render, fireEvent, waitFor } from '@testing-library/react';
-import type { ApprovalAction, ApprovalDecision, DeclineParams } from '@kbn/proposals-ui';
+import type { ApprovalProposal, DeclineParams } from '@kbn/proposals-ui';
 import { ProposalApprovalCard } from './proposal_approval_card';
 import {
   useProposal,
@@ -45,74 +45,76 @@ jest.mock('@kbn/ui-callout', () => ({
 
 /** Set by the `ApprovalContent` mock on every render, so a test can invoke an action directly
  *  (e.g. to assert what its promise rejects with) without going through a simulated click. */
-let latestPrimaryAction: ApprovalAction | undefined;
+let latestOnApprove: (() => void | Promise<void>) | undefined;
 let latestOnDismiss: ((params: DeclineParams) => Promise<void>) | undefined;
 
-jest.mock('@kbn/proposals-ui', () => ({
-  ...jest.requireActual('@kbn/proposals-ui'),
-  ApprovalContent: ({
-    primaryAction,
-    onDismiss,
-    tone,
-    comment,
-    decision,
-    isSubmitting,
-    currentActorName,
-    previousExecutionError,
-    isExpired,
-  }: {
-    tone?: string;
-    comment?: string;
-    decision?: ApprovalDecision;
-    isSubmitting?: 'applying' | 'declining';
-    currentActorName?: string;
-    previousExecutionError?: string;
-    isExpired?: boolean;
-    primaryAction?: {
-      label: string;
-      onClick: () => void | Promise<void>;
-      isDisabled?: boolean;
+jest.mock('@kbn/proposals-ui', () => {
+  const actual = jest.requireActual('@kbn/proposals-ui');
+  return {
+    ...actual,
+    // A thin stand-in rather than the real component: it exercises `ProposalApprovalCard`'s own
+    // hook wiring and loading/error/superseded logic, which is this file's job — `ApprovalContent`'s
+    // own rendering (tone, caption, decision, the Approve button's label/color/disablement) is
+    // already covered by `approval_content.test.tsx` and `approval_modal.test.tsx`. Derives
+    // decision/expiry from the real helpers rather than re-implementing them, so this mock can't
+    // quietly drift from what the real component actually does.
+    ApprovalContent: ({
+      proposal,
+      onApprove,
+      onDismiss,
+      isSubmitting,
+      currentActorName,
+      'data-test-subj': dataTestSubj,
+    }: {
+      proposal: ApprovalProposal;
+      onApprove?: () => void | Promise<void>;
+      onDismiss?: (params: DeclineParams) => Promise<void>;
+      isSubmitting?: 'applying' | 'declining';
+      currentActorName?: string;
       'data-test-subj'?: string;
-    };
-    onDismiss?: (params: DeclineParams) => Promise<void>;
-  }) => {
-    latestPrimaryAction = primaryAction;
-    latestOnDismiss = onDismiss;
-    return (
-      <div data-test-subj="approval-content" data-tone={tone}>
-        {primaryAction && (
-          <button
-            onClick={primaryAction.onClick}
-            disabled={primaryAction.isDisabled}
-            data-test-subj={primaryAction['data-test-subj']}
-          >
-            {primaryAction.label}
-          </button>
-        )}
-        {/* Surfaced so the comment and decision are observable: the real component renders
-            them as props rather than as children. */}
-        <div data-test-subj="approval-comment">{comment}</div>
-        {decision && (
-          <div data-test-subj="approval-decision">
-            {decision.status}:{decision.actorName}
-            {decision.reason ? `:${decision.reason}` : ''}
-          </div>
-        )}
-        {currentActorName && <div data-test-subj="approval-current-actor">{currentActorName}</div>}
-        {isSubmitting && <div data-test-subj="approval-is-submitting">{isSubmitting}</div>}
-        {/* Mirrors the real `ApprovalContent`'s own gating: only while still pending, i.e. no
-            `decision` yet. */}
-        {!decision && previousExecutionError && (
-          <div data-test-subj="warning-callout">
-            A previous attempt at this action failed
-            {previousExecutionError}
-          </div>
-        )}
-        {isExpired && <div data-test-subj="warning-callout">Expired</div>}
-      </div>
-    );
-  },
-}));
+    }) => {
+      latestOnApprove = onApprove;
+      latestOnDismiss = onDismiss;
+      const decision = actual.getProposalDecision(proposal);
+      const isExpired = actual.isProposalExpired(proposal);
+      return (
+        <div data-test-subj="approval-content">
+          {onApprove && (
+            <button
+              onClick={onApprove}
+              disabled={isExpired}
+              data-test-subj={dataTestSubj ? `${dataTestSubj}-confirm` : undefined}
+            >
+              Approve
+            </button>
+          )}
+          {/* Surfaced so the comment and decision are observable: the real component renders
+              them off the proposal rather than as separate props. */}
+          <div data-test-subj="approval-comment">{proposal.comment}</div>
+          {decision && (
+            <div data-test-subj="approval-decision">
+              {decision.status}:{decision.actorName}
+              {decision.reason ? `:${decision.reason}` : ''}
+            </div>
+          )}
+          {currentActorName && (
+            <div data-test-subj="approval-current-actor">{currentActorName}</div>
+          )}
+          {isSubmitting && <div data-test-subj="approval-is-submitting">{isSubmitting}</div>}
+          {/* Mirrors the real `ApprovalContent`'s own gating: only while still pending, i.e. no
+              `decision` yet. */}
+          {!decision && proposal.previousExecutionError && (
+            <div data-test-subj="warning-callout">
+              A previous attempt at this action failed
+              {proposal.previousExecutionError}
+            </div>
+          )}
+          {isExpired && <div data-test-subj="warning-callout">Expired</div>}
+        </div>
+      );
+    },
+  };
+});
 
 jest.mock('@kbn/core-http-browser', () => ({
   isHttpFetchError: (e: unknown) => {
@@ -203,7 +205,7 @@ describe('ProposalApprovalCard', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
-    latestPrimaryAction = undefined;
+    latestOnApprove = undefined;
     latestOnDismiss = undefined;
   });
 
@@ -250,16 +252,8 @@ describe('ProposalApprovalCard', () => {
       setupMocks();
       const { container } = render(<ProposalApprovalCard proposalId={PROPOSAL_ID} />);
       expect(
-        container.querySelector('[data-test-subj="proposalApprove-proposal-1"]')
+        container.querySelector('[data-test-subj="proposalCard-proposal-1-confirm"]')
       ).toBeInTheDocument();
-    });
-
-    it('uses the primary color for the Approve CTA, not success', () => {
-      // Regression check: the chat card's Approve button was briefly styled `success`,
-      // inconsistent with the AlertZero flyout's approval modal, which uses `primary`.
-      setupMocks();
-      render(<ProposalApprovalCard proposalId={PROPOSAL_ID} />);
-      expect(latestPrimaryAction?.color).toBe('primary');
     });
 
     it('passes onDismiss to ApprovalContent so its built-in decline flow is enabled', () => {
@@ -289,7 +283,7 @@ describe('ProposalApprovalCard', () => {
       setupMocks(baseProposal({ expired: true, status: 'pending' }));
       const { container } = render(<ProposalApprovalCard proposalId={PROPOSAL_ID} />);
       const approveBtn = container.querySelector(
-        '[data-test-subj="proposalApprove-proposal-1"]'
+        '[data-test-subj="proposalCard-proposal-1-confirm"]'
       ) as HTMLButtonElement;
       expect(approveBtn).toBeDisabled();
     });
@@ -385,7 +379,9 @@ describe('ProposalApprovalCard', () => {
         })
       );
       const { container } = render(<ProposalApprovalCard proposalId={PROPOSAL_ID} />);
-      expect(container.querySelector('[data-test-subj="proposalApprove-proposal-1"]')).toBeNull();
+      expect(
+        container.querySelector('[data-test-subj="proposalCard-proposal-1-confirm"]')
+      ).toBeNull();
       expect(latestOnDismiss).toBeUndefined();
     });
 
@@ -435,7 +431,9 @@ describe('ProposalApprovalCard', () => {
     it('does not render action buttons when proposal is executing', () => {
       setupMocks(baseProposal({ status: 'executing' }));
       const { container } = render(<ProposalApprovalCard proposalId={PROPOSAL_ID} />);
-      expect(container.querySelector('[data-test-subj="proposalApprove-proposal-1"]')).toBeNull();
+      expect(
+        container.querySelector('[data-test-subj="proposalCard-proposal-1-confirm"]')
+      ).toBeNull();
     });
   });
 
@@ -462,7 +460,7 @@ describe('ProposalApprovalCard', () => {
 
       expect(useProposalMock).toHaveBeenCalledWith('proposal-2');
       expect(
-        container.querySelector('[data-test-subj="proposalApprove-proposal-2"]')
+        container.querySelector('[data-test-subj="proposalCard-proposal-2-confirm"]')
       ).toBeInTheDocument();
       expect(container.querySelector('[data-test-subj="proposalCard-proposal-1"]')).toBeNull();
     });
@@ -489,7 +487,7 @@ describe('ProposalApprovalCard', () => {
 
       expect(useProposalMock).toHaveBeenCalledWith('proposal-3');
       expect(
-        container.querySelector('[data-test-subj="proposalApprove-proposal-3"]')
+        container.querySelector('[data-test-subj="proposalCard-proposal-3-confirm"]')
       ).toBeInTheDocument();
     });
 
@@ -525,7 +523,7 @@ describe('ProposalApprovalCard', () => {
 
       const { container } = render(<ProposalApprovalCard proposalId={PROPOSAL_ID} />);
       const approveBtn = container.querySelector(
-        '[data-test-subj="proposalApprove-proposal-1"]'
+        '[data-test-subj="proposalCard-proposal-1-confirm"]'
       ) as HTMLButtonElement;
       fireEvent.click(approveBtn);
 
@@ -557,7 +555,7 @@ describe('ProposalApprovalCard', () => {
       } as unknown as ReturnType<typeof useApproveProposal>);
       render(<ProposalApprovalCard proposalId={PROPOSAL_ID} />);
 
-      await expect(latestPrimaryAction!.onClick()).rejects.toThrow('Network failure');
+      await expect(latestOnApprove!()).rejects.toThrow('Network failure');
     });
 
     it('rejects with a conflict-specific message for a 409', async () => {
@@ -570,7 +568,7 @@ describe('ProposalApprovalCard', () => {
       } as unknown as ReturnType<typeof useApproveProposal>);
       render(<ProposalApprovalCard proposalId={PROPOSAL_ID} />);
 
-      await expect(latestPrimaryAction!.onClick()).rejects.toThrow(/already been decided/);
+      await expect(latestOnApprove!()).rejects.toThrow(/already been decided/);
     });
 
     it('rejects with an expiry-specific message for a 410', async () => {
@@ -583,7 +581,7 @@ describe('ProposalApprovalCard', () => {
       } as unknown as ReturnType<typeof useApproveProposal>);
       render(<ProposalApprovalCard proposalId={PROPOSAL_ID} />);
 
-      await expect(latestPrimaryAction!.onClick()).rejects.toThrow(/deadline has passed/);
+      await expect(latestOnApprove!()).rejects.toThrow(/deadline has passed/);
     });
   });
 

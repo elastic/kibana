@@ -11,14 +11,8 @@ import { EuiLoadingSpinner, useEuiTheme, useGeneratedHtmlId } from '@elastic/eui
 import { KbnDangerCallout, KbnWarningCallout } from '@kbn/ui-callout';
 import { i18n } from '@kbn/i18n';
 import { isHttpFetchError } from '@kbn/core-http-browser';
-import {
-  ApprovalContent,
-  getProposalCaption,
-  getProposalDecision,
-  getProposalTone,
-  isProposalExpired,
-} from '@kbn/proposals-ui';
-import type { ApprovalAction, DeclineParams } from '@kbn/proposals-ui';
+import { ApprovalContent } from '@kbn/proposals-ui';
+import type { DeclineParams } from '@kbn/proposals-ui';
 import { getUserDisplayName } from '@kbn/user-profile-components';
 import { isAwaitingDecision } from '@kbn/proposals-common';
 import {
@@ -173,20 +167,6 @@ export const ProposalApprovalCard = memo<ProposalApprovalCardProps>(
     }
 
     const isPending = isAwaitingDecision(liveProposal);
-    const isExpired = isProposalExpired(liveProposal);
-    const decision = getProposalDecision(liveProposal);
-
-    const primaryAction: ApprovalAction | undefined = isPending
-      ? {
-          label: i18n.translate('xpack.proposals.proposalCard.approve', {
-            defaultMessage: 'Approve',
-          }),
-          color: 'primary',
-          onClick: handleApprove,
-          isDisabled: isExpired,
-          'data-test-subj': `proposalApprove-${proposalId}`,
-        }
-      : undefined;
 
     return (
       <div
@@ -194,18 +174,12 @@ export const ProposalApprovalCard = memo<ProposalApprovalCardProps>(
         data-test-subj={`proposalCard-${proposalId}`}
       >
         <ApprovalContent
-          title={liveProposal.title}
+          proposal={liveProposal}
           titleId={titleId}
-          tone={getProposalTone(liveProposal)}
-          comment={liveProposal.comment}
-          caption={getProposalCaption(liveProposal, { includeRiskDetails: true })}
-          decision={decision}
           isSubmitting={isSubmitting}
           currentActorName={currentActorName}
-          primaryAction={primaryAction}
+          onApprove={isPending ? handleApprove : undefined}
           onDismiss={isPending ? handleDismiss : undefined}
-          previousExecutionError={liveProposal.previousExecutionError}
-          isExpired={isExpired}
           data-test-subj={`proposalCard-${proposalId}`}
         />
       </div>

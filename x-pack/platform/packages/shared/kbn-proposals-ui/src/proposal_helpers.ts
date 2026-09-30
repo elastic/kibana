@@ -6,8 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import type { ApprovalProposal } from './types';
-import type { ApprovalDecision } from './approval_content';
+import type { ApprovalProposal, ApprovalDecision } from './types';
 import type { ApprovalPhase } from './approval_outcome';
 import { APPROVAL_MODAL_TRANSLATIONS } from './translations';
 import { formatDismissReason } from './dismiss_reason';
