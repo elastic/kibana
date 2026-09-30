@@ -22,7 +22,12 @@ export type ResolveHostEnrollment = (hostName: string) => Promise<HostEnrollment
 
 export type RehydrateProcessSelectors = (args: {
   alerts: Array<{ alert_id: string; index: string }>;
-  events: Array<{ event_id: string; source_index: string }>;
+  events: Array<{
+    event_id: string;
+    source_index: string;
+    /** Present when the SSE attributed this event to a technique; preferred over a plain sample ref during dedupe. */
+    matched?: { technique_id?: string };
+  }>;
 }) => Promise<ProcessSelector[]>;
 
 /**
@@ -106,6 +111,7 @@ export const readCurrentRunState = async ({
     events: eventRefs.map((e) => ({
       event_id: e.event_id,
       source_index: e.source_index,
+      ...(e.matched?.technique_id ? { matched: { technique_id: e.matched.technique_id } } : {}),
     })),
   });
 

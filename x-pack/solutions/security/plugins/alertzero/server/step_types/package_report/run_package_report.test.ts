@@ -29,6 +29,34 @@ const isolateHost: ActionCatalogEntry = {
   },
 };
 
+const killProcess: ActionCatalogEntry = {
+  workflowId: 'system-security-action-kill-process',
+  name: 'Kill process',
+  category: 'respond',
+  inputSchema: {
+    type: 'object',
+    properties: {
+      endpoint_ids: { type: 'array', items: { type: 'string' } },
+      parameters: { type: 'object' },
+    },
+    required: ['endpoint_ids', 'parameters'],
+  },
+};
+
+const suspendProcess: ActionCatalogEntry = {
+  workflowId: 'system-security-action-suspend-process',
+  name: 'Suspend process',
+  category: 'respond',
+  inputSchema: {
+    type: 'object',
+    properties: {
+      endpoint_ids: { type: 'array', items: { type: 'string' } },
+      parameters: { type: 'object' },
+    },
+    required: ['endpoint_ids', 'parameters'],
+  },
+};
+
 const sseAttachment = ({
   hit,
   hostName,
@@ -196,6 +224,40 @@ describe('runPackageReport', () => {
     expect(result.proposals.length).toBe(1);
     expect(result.proposals[0].actionWorkflowId).toBe(isolateHost.workflowId);
     expect(result.expectedProposalCount).toBe(1);
+  });
+
+  it('mints kill-process and suspend-process from a rehydrated, host-scoped process selector', async () => {
+    const result = await runPackageReport({
+      spaceId: 'default',
+      reportId,
+      investigationConversationId: conversationId,
+      runId,
+      attachments: [sseAttachment({ hit: true, hostName: 'host-a' })],
+      deps: deps({
+        listRespondActions: async () => ({ ok: true, actions: [killProcess, suspendProcess] }),
+        rehydrateProcessSelectors: async () => [
+          {
+            entityId: 'ent-abc',
+            processKey: 'entity_id:ent-abc',
+            hostName: 'host-a',
+            summary: 'powershell.exe (entity_id ent-abc) observed 2026-09-26T10:00:00.000Z',
+          },
+        ],
+      }),
+    });
+    expect(result.status).toBe('packaged');
+    if (result.status !== 'packaged') {
+      return;
+    }
+    expect(result.proposals).toHaveLength(2);
+    expect(result.proposals.map((p) => p.actionWorkflowId).sort()).toEqual(
+      [killProcess.workflowId, suspendProcess.workflowId].sort()
+    );
+    for (const proposal of result.proposals) {
+      expect(proposal.hostName).toBe('host-a');
+      expect(proposal.actionInput?.parameters).toEqual({ entity_id: 'ent-abc' });
+      expect(proposal.actionInput?.endpoint_ids).toEqual(['agent-1']);
+    }
   });
 });
 

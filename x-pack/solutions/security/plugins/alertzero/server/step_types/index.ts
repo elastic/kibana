@@ -37,6 +37,7 @@ export const registerStepDefinitions = ({
       getConversations,
       getResolveHostEnrollment,
       isContextEngineEnabled,
+      logger,
     })
   );
   workflowsExtensions.registerStepDefinition(

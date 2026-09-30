@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import { createServerStepDefinition } from '@kbn/workflows-extensions/server';
 import { ExecutionError } from '@kbn/workflows/server';
 import type { AgentBuilderPluginStart } from '@kbn/agent-builder-server';
@@ -14,6 +15,7 @@ import {
 } from '../../../common/step_types/package_report';
 import type { ActionsService } from '../../services/actions/actions_service';
 import { buildCoverageSubject } from './coverage_ki_id';
+import { makeRehydrateProcessSelectors } from './rehydrate_process_selectors';
 import {
   PackageReportIdentityError,
   runPackageReport,
@@ -31,6 +33,15 @@ export interface PackageReportStepDependencies {
   isContextEngineEnabled?: (spaceId: string) => Promise<boolean>;
   /** Defaults to treating every host as unenrolled when not provided (e.g. no Fleet plugin). */
   getResolveHostEnrollment?: () => RunPackageReportDeps['resolveHostEnrollment'];
+  /**
+   * Defaults to the real `mget`-backed rehydrator built from the step's own scoped client, so
+   * the calling user's privileges apply. Overridable for tests and Fleet-less deployments.
+   */
+  getRehydrateProcessSelectors?: (
+    esClient: ElasticsearchClient,
+    logger?: Logger
+  ) => RunPackageReportDeps['rehydrateProcessSelectors'];
+  logger?: Logger;
 }
 
 interface EsCoverageClient {
@@ -163,9 +174,6 @@ export const createCoverageWriter = ({
   };
 };
 
-const defaultRehydrateProcessSelectors: RunPackageReportDeps['rehydrateProcessSelectors'] =
-  async () => [];
-
 const defaultResolveHostEnrollment: RunPackageReportDeps['resolveHostEnrollment'] = async () => ({
   enrolled: false,
 });
@@ -175,6 +183,8 @@ export const getPackageReportStepDefinition = ({
   getConversations,
   isContextEngineEnabled = async () => true,
   getResolveHostEnrollment = () => defaultResolveHostEnrollment,
+  getRehydrateProcessSelectors = makeRehydrateProcessSelectors,
+  logger,
 }: PackageReportStepDependencies) =>
   createServerStepDefinition({
     ...packageReportStepCommonDefinition,
@@ -211,6 +221,11 @@ export const getPackageReportStepDefinition = ({
           isContextEngineEnabled,
         });
 
+        const rehydrateProcessSelectors = getRehydrateProcessSelectors(
+          context.contextManager.getScopedEsClient(),
+          logger
+        );
+
         const output = await runPackageReport({
           spaceId,
           reportId: input.reportId,
@@ -221,7 +236,7 @@ export const getPackageReportStepDefinition = ({
             listRespondActions,
             writeCoverageKis,
             resolveHostEnrollment: getResolveHostEnrollment(),
-            rehydrateProcessSelectors: defaultRehydrateProcessSelectors,
+            rehydrateProcessSelectors,
           },
         });
 
