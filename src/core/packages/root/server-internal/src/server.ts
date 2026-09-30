@@ -19,6 +19,7 @@ import type { ILoggingSystem } from '@kbn/core-logging-server-internal';
 import { LoggingService } from '@kbn/core-logging-server-internal';
 import { ensureValidConfiguration } from '@kbn/core-config-server-internal';
 import { NodeService } from '@kbn/core-node-server-internal';
+import { ThreadsService } from '@kbn/core-threads-server-internal';
 import { AnalyticsService } from '@kbn/core-analytics-server-internal';
 import { EnvironmentService } from '@kbn/core-environment-server-internal';
 import { ExecutionContextService } from '@kbn/core-execution-context-server-internal';
@@ -27,7 +28,7 @@ import { PrebootService } from '@kbn/core-preboot-server-internal';
 import { ContextService } from '@kbn/core-http-context-server-internal';
 import { HttpService } from '@kbn/core-http-server-internal';
 import { ElasticsearchService } from '@kbn/core-elasticsearch-server-internal';
-import { MetricsService } from '@kbn/core-metrics-server-internal';
+import { EventLoopWatchdogService, MetricsService } from '@kbn/core-metrics-server-internal';
 import { CapabilitiesService } from '@kbn/core-capabilities-server-internal';
 import type { SavedObjectsServiceStart } from '@kbn/core-saved-objects-server';
 import { SavedObjectsService } from '@kbn/core-saved-objects-server-internal';
@@ -98,7 +99,9 @@ export class Server {
   private readonly uiSettings: UiSettingsService;
   private readonly environment: EnvironmentService;
   private readonly node: NodeService;
+  private readonly threads: ThreadsService;
   private readonly metrics: MetricsService;
+  private readonly eventLoopWatchdog: EventLoopWatchdogService;
   private readonly httpRateLimiter: HttpRateLimiterService;
   private readonly httpResources: HttpResourcesService;
   private readonly status: StatusService;
@@ -163,7 +166,9 @@ export class Server {
     this.capabilities = new CapabilitiesService(core);
     this.environment = new EnvironmentService(core);
     this.node = new NodeService(core);
+    this.threads = new ThreadsService();
     this.metrics = new MetricsService(core);
+    this.eventLoopWatchdog = new EventLoopWatchdogService(core);
     this.status = new StatusService(core);
     this.coreApp = new CoreAppsService(core);
     this.httpRateLimiter = new HttpRateLimiterService();
@@ -349,6 +354,7 @@ export class Server {
       pluginDependencies: new Map([...pluginTree.asOpaqueIds]),
     });
     const executionContextSetup = this.executionContext.setup();
+    this.eventLoopWatchdog.setup({ executionContext: executionContextSetup });
     const docLinksSetup = this.docLinks.setup();
     const securitySetup = this.security.setup();
     const userProfileSetup = this.userProfile.setup();
@@ -655,6 +661,10 @@ export class Server {
     });
 
     const featureFlagsStart = this.featureFlags.start();
+    await this.eventLoopWatchdog.start({
+      featureFlags: featureFlagsStart,
+      threads: this.threads.start(),
+    });
 
     const pricingStart = this.pricing.start();
 
@@ -710,6 +720,7 @@ export class Server {
     await this.elasticsearch.stop();
     await this.uiSettings.stop();
     await this.rendering.stop();
+    await this.eventLoopWatchdog.stop();
     await this.metrics.stop();
     await this.status.stop();
     await this.logging.stop();

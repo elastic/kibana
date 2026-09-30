@@ -17,6 +17,7 @@ project:
   owner: '@elastic/kibana-core'
   sourceRoot: src/core/packages/metrics/server-internal
 dependsOn:
+  - '@kbn/core-threads-server-internal'
   - '@kbn/logging'
   - '@kbn/config-schema'
   - '@kbn/core-base-server-internal'
@@ -34,6 +35,12 @@ dependsOn:
   - '@kbn/core-elasticsearch-server-mocks'
   - '@kbn/core-http-server'
   - '@kbn/safer-lodash-set'
+  - '@kbn/repo-info'
+  - '@kbn/core-execution-context-server-internal'
+  - '@kbn/core-execution-context-common'
+  - '@kbn/core-execution-context-server-mocks'
+  - '@kbn/core-feature-flags-server'
+  - '@kbn/core-feature-flags-server-mocks'
 tags:
   - shared-server
   - package

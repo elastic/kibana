@@ -11,6 +11,7 @@
     "**/*.ts",
   ],
   "kbn_references": [
+    "@kbn/core-threads-server-internal",
     "@kbn/utils",
     "@kbn/logging",
     "@kbn/config",

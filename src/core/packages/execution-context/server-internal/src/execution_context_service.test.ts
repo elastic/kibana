@@ -565,6 +565,120 @@ describe('ExecutionContextService', () => {
     });
   });
 
+  describe('activity observer', () => {
+    const context = { type: 'task manager', name: 'run x', id: '1' };
+
+    const setup = (enabled: boolean) => {
+      const core = mockCoreContext.create();
+      core.configService.atPath.mockReturnValue(new BehaviorSubject({ enabled }));
+      const service = new ExecutionContextService(core);
+      const setupContract = service.setup();
+      const onEnd = jest.fn();
+      const observer = jest.fn((ctx) => (ctx.type === 'task manager' ? onEnd : undefined));
+      setupContract.registerActivityObserver(observer);
+      return { service, setupContract, observer, onEnd };
+    };
+
+    it('ends synchronous activities when the function returns or throws', () => {
+      const { setupContract, observer, onEnd } = setup(true);
+      expect(setupContract.withContext(context, () => 42)).toBe(42);
+      expect(observer).toHaveBeenCalledWith(context);
+      expect(onEnd).toHaveBeenCalledTimes(1);
+
+      expect(() =>
+        setupContract.withContext(context, () => {
+          throw new Error('boom');
+        })
+      ).toThrow('boom');
+      expect(onEnd).toHaveBeenCalledTimes(2);
+    });
+
+    it('ends asynchronous activities when the promise settles', async () => {
+      const { setupContract, onEnd } = setup(true);
+      let resolve: (value: string) => void = () => {};
+      const result = setupContract.withContext(
+        context,
+        () => new Promise<string>((res) => (resolve = res))
+      );
+      await timer(1);
+      expect(onEnd).not.toHaveBeenCalled();
+      resolve('done');
+      expect(await result).toBe('done');
+      expect(onEnd).toHaveBeenCalledTimes(1);
+
+      await expect(
+        setupContract.withContext(context, () => Promise.reject(new Error('nope')))
+      ).rejects.toThrow('nope');
+      expect(onEnd).toHaveBeenCalledTimes(2);
+    });
+
+    it("returns a derived promise so that rejections stay the caller's to handle", async () => {
+      const { setupContract, onEnd } = setup(true);
+      const error = new Error('nope');
+      const original = Promise.reject(error);
+      const returned = setupContract.withContext(context, () => original);
+
+      // the observer must not mark the caller-visible promise as handled
+      expect(returned).not.toBe(original);
+      await expect(returned).rejects.toBe(error);
+      expect(onEnd).toHaveBeenCalledTimes(1);
+    });
+
+    it('keeps activities open until non-native thenables settle', async () => {
+      const { setupContract, onEnd } = setup(true);
+      let resolve: (value: string) => void = () => {};
+      const thenable: PromiseLike<string> = {
+        then: (onFulfilled, onRejected) =>
+          new Promise<string>((res) => (resolve = res)).then(onFulfilled, onRejected),
+      };
+      const returned = setupContract.withContext(context, () => thenable);
+      await timer(1);
+      expect(onEnd).not.toHaveBeenCalled();
+      resolve('done');
+      expect(await returned).toBe('done');
+      expect(onEnd).toHaveBeenCalledTimes(1);
+    });
+
+    it('ends the activity when probing the result throws', () => {
+      const { setupContract, onEnd } = setup(true);
+      const hostile = Object.defineProperty({}, 'then', {
+        get() {
+          throw new Error('bad then');
+        },
+      });
+      expect(() => setupContract.withContext(context, () => hostile)).toThrow('bad then');
+      expect(onEnd).toHaveBeenCalledTimes(1);
+    });
+
+    it('returns the original promise for untracked contexts', () => {
+      const { setupContract } = setup(true);
+      const original = Promise.resolve(1);
+      expect(setupContract.withContext({ type: 'application' }, () => original)).toBe(original);
+    });
+
+    it('observes even when execution context propagation is disabled', () => {
+      const { setupContract, onEnd } = setup(false);
+      setupContract.withContext(context, () => undefined);
+      expect(onEnd).toHaveBeenCalledTimes(1);
+    });
+
+    it('ignores contexts the observer does not track and undefined contexts', () => {
+      const { setupContract, observer, onEnd } = setup(true);
+      setupContract.withContext({ type: 'application' }, () => undefined);
+      setupContract.withContext(undefined, () => undefined);
+      expect(observer).toHaveBeenCalledTimes(1);
+      expect(onEnd).not.toHaveBeenCalled();
+    });
+
+    it('allows a single observer and clears it on stop', () => {
+      const { service, setupContract, observer } = setup(true);
+      expect(() => setupContract.registerActivityObserver(jest.fn())).toThrow(/already registered/);
+      service.stop();
+      setupContract.withContext(context, () => undefined);
+      expect(observer).not.toHaveBeenCalled();
+    });
+  });
+
   describe('config', () => {
     it('reacts to config changes', async () => {
       const core = mockCoreContext.create();

@@ -54,9 +54,22 @@ export interface IExecutionContext {
 }
 
 /**
+ * Notified when `withContext` starts running a function; returns a callback invoked once that
+ * function settles, or `undefined` when the context is not of interest. For contexts it opts
+ * into, a thenable result is returned to the caller as a derived native promise.
  * @internal
  */
-export type InternalExecutionContextSetup = IExecutionContext;
+export type ExecutionContextActivityObserver = (
+  context: KibanaExecutionContext
+) => (() => void) | undefined;
+
+/**
+ * @internal
+ */
+export interface InternalExecutionContextSetup extends IExecutionContext {
+  /** Registers the single process-wide observer of `withContext` activity (e.g. for diagnostics). */
+  registerActivityObserver(observer: ExecutionContextActivityObserver): void;
+}
 
 /**
  * @internal
@@ -71,6 +84,7 @@ export class ExecutionContextService
   private readonly requestIdStore: AsyncLocalStorage<{ requestId: string }>;
   private enabled = false;
   private configSubscription?: Subscription;
+  private activityObserver?: ExecutionContextActivityObserver;
 
   constructor(private readonly coreContext: CoreContext) {
     this.log = coreContext.logger.get('execution_context');
@@ -93,6 +107,12 @@ export class ExecutionContextService
       get: this.get.bind(this),
       getAsHeader: this.getAsHeader.bind(this),
       getAsLabels: this.getAsLabels.bind(this),
+      registerActivityObserver: (observer) => {
+        if (this.activityObserver) {
+          throw new Error('An execution context activity observer is already registered');
+        }
+        this.activityObserver = observer;
+      },
     };
   }
 
@@ -110,6 +130,7 @@ export class ExecutionContextService
 
   stop() {
     this.enabled = false;
+    this.activityObserver = undefined;
     if (this.configSubscription) {
       this.configSubscription.unsubscribe();
       this.configSubscription = undefined;
@@ -128,6 +149,44 @@ export class ExecutionContextService
   }
 
   private withContext<R>(
+    context: KibanaExecutionContext | undefined,
+    fn: (...args: any[]) => R
+  ): R {
+    const onActivityEnd = context ? this.activityObserver?.(context) : undefined;
+    if (!onActivityEnd) {
+      return this.runWithContext(context, fn);
+    }
+
+    try {
+      const result = this.runWithContext(context, fn);
+      if (!isThenable(result)) {
+        onActivityEnd();
+        return result;
+      }
+      // Return a derived native promise that re-throws, so that the activity ends when the result
+      // settles and a rejection the caller drops is still reported as unhandled instead of being
+      // swallowed by the bookkeeping. Callers of tracked contexts therefore receive a native
+      // promise rather than the original object. This is intentional: only contexts the observer
+      // opts into are affected (today Task Manager task runs, whose only caller awaits the result
+      // from an async function), and any observer must keep that property.
+      return Promise.resolve(result).then(
+        (value) => {
+          onActivityEnd();
+          return value;
+        },
+        (error) => {
+          onActivityEnd();
+          throw error;
+        }
+      ) as unknown as R;
+    } catch (error) {
+      // `onActivityEnd` is idempotent for the registry, so ending twice is harmless
+      onActivityEnd();
+      throw error;
+    }
+  }
+
+  private runWithContext<R>(
     context: KibanaExecutionContext | undefined,
     fn: (...args: any[]) => R
   ): R {
@@ -186,3 +245,6 @@ export class ExecutionContextService
     );
   }
 }
+
+const isThenable = <T>(value: T): value is T & PromiseLike<Awaited<T>> =>
+  typeof (value as Partial<PromiseLike<Awaited<T>>> | null | undefined)?.then === 'function';

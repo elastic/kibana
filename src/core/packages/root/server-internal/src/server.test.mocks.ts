@@ -103,9 +103,21 @@ jest.doMock('@kbn/core-node-server-internal', () => ({
   NodeService: jest.fn(() => mockNodeService),
 }));
 
+export const mockThreadsStart = { createWorker: jest.fn() };
+export const mockThreadsService = { start: jest.fn(() => mockThreadsStart) };
+jest.doMock('@kbn/core-threads-server-internal', () => ({
+  ThreadsService: jest.fn(() => mockThreadsService),
+}));
+
 export const mockMetricsService = metricsServiceMock.create();
+export const mockEventLoopWatchdogService = {
+  setup: jest.fn(),
+  start: jest.fn().mockResolvedValue(undefined),
+  stop: jest.fn().mockResolvedValue(undefined),
+};
 jest.doMock('@kbn/core-metrics-server-internal', () => ({
   MetricsService: jest.fn(() => mockMetricsService),
+  EventLoopWatchdogService: jest.fn(() => mockEventLoopWatchdogService),
 }));
 
 export const mockStatusService = statusServiceMock.create();

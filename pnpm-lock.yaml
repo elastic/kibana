@@ -1615,6 +1615,9 @@ importers:
       '@kbn/core-theme-browser-internal-types':
         specifier: workspace:*
         version: link:src/core/packages/theme/browser-internal-types
+      '@kbn/core-threads-server-internal':
+        specifier: workspace:*
+        version: link:src/core/packages/threads/server-internal
       '@kbn/core-ui-settings-browser':
         specifier: workspace:*
         version: link:src/core/packages/ui-settings/browser
@@ -7498,6 +7501,8 @@ importers:
   src/core/packages/theme/browser-internal-types: {}
 
   src/core/packages/theme/browser-mocks: {}
+
+  src/core/packages/threads/server-internal: {}
 
   src/core/packages/ui-settings/browser: {}
 

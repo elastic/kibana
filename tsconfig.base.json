@@ -929,6 +929,8 @@
       "@kbn/core-theme-browser-internal-types/*": ["./src/core/packages/theme/browser-internal-types/*"],
       "@kbn/core-theme-browser-mocks": ["./src/core/packages/theme/browser-mocks"],
       "@kbn/core-theme-browser-mocks/*": ["./src/core/packages/theme/browser-mocks/*"],
+      "@kbn/core-threads-server-internal": ["./src/core/packages/threads/server-internal"],
+      "@kbn/core-threads-server-internal/*": ["./src/core/packages/threads/server-internal/*"],
       "@kbn/core-ui-settings-browser": ["./src/core/packages/ui-settings/browser"],
       "@kbn/core-ui-settings-browser/*": ["./src/core/packages/ui-settings/browser/*"],
       "@kbn/core-ui-settings-browser-internal": ["./src/core/packages/ui-settings/browser-internal"],

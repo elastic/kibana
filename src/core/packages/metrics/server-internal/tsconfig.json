@@ -11,6 +11,7 @@
     "**/*.ts"
   ],
   "kbn_references": [
+    "@kbn/core-threads-server-internal",
     "@kbn/logging",
     "@kbn/config-schema",
     "@kbn/core-base-server-internal",
@@ -28,6 +29,12 @@
     "@kbn/core-elasticsearch-server-mocks",
     "@kbn/core-http-server",
     "@kbn/safer-lodash-set",
+    "@kbn/repo-info",
+    "@kbn/core-execution-context-server-internal",
+    "@kbn/core-execution-context-common",
+    "@kbn/core-execution-context-server-mocks",
+    "@kbn/core-feature-flags-server",
+    "@kbn/core-feature-flags-server-mocks",
   ],
   "exclude": [
     "target/**/*",
