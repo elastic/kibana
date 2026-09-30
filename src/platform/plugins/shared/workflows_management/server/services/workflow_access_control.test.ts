@@ -103,7 +103,7 @@ describe('WorkflowAccessControlService', () => {
       expect(core.security.audit.asScoped(request).log).not.toHaveBeenCalled();
     });
 
-    it('does not audit search filters or mapped rows for a superuser', async () => {
+    it('does not audit search filters or mapped rows for an administrator', async () => {
       core.userProfile.getCurrentProfileId.mockResolvedValue('admin');
       jest
         .spyOn(core.security.authc, 'getCurrentUser')
@@ -120,7 +120,7 @@ describe('WorkflowAccessControlService', () => {
       expect(core.security.audit.asScoped(request).log).not.toHaveBeenCalled();
     });
 
-    it('does not report an override for a superuser who created an ownerless workflow', async () => {
+    it('does not report an override for an administrator who created an ownerless workflow', async () => {
       jest.spyOn(core.security.authc, 'getCurrentUser').mockReturnValue(
         securityServiceMock.createMockAuthenticatedUser({
           username: 'alice',

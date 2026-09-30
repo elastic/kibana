@@ -435,7 +435,7 @@ Builder conversations: `access_mode` and `entries` with `type`, profile `id`,
 
 These permissions also require the corresponding feature privileges in the space.
 The shared `@kbn/entity-access-control` administrator check uses wildcard
-application privileges, including Stack superusers and Serverless project admins.
+application privileges, including those in the Stack `superuser` and Serverless project `admin` roles.
 Custom roles with those wildcard grants also qualify. Workflows All does not.
 API keys continue to use the normal ACL checks.
 Administrators can view private workflows and recover access after an owner is

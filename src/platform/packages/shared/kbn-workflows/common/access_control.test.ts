@@ -91,7 +91,7 @@ describe('workflow ACL permissions', () => {
   });
 
   it.each(['viewer', 'executor', 'editor'] as const)(
-    'uses a superuser ACL role for execution: %s',
+    'uses the administrator ACL role for editing and execution: %s',
     (role) => {
       const permissions = getWorkflowPermissions(
         {

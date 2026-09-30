@@ -30,7 +30,8 @@ can add that restriction without changing the stored shape.
 ## Administrator access
 
 `await isEntityAccessControlAdmin(core, request)` checks an unregistered Elasticsearch
-application privilege. Wildcard application grants, including Stack superusers and Serverless project admins, qualify. Ordinary
+application privilege. Administrators qualify through wildcard application grants,
+such as those in the Stack `superuser` and Serverless project `admin` roles. Ordinary
 feature grants do not. Routes must use full authentication. API keys and
 unauthenticated requests do not get the override. Failed privilege checks deny it.
 

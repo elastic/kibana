@@ -20,7 +20,7 @@ const recoveryTags = [
 
 apiTest.describe('Workflow administrator recovery', { tag: recoveryTags }, () => {
   const spaceId = `workflow-admin-${randomUUID()}`;
-  const adminUsername = `workflow-superuser-${randomUUID()}`;
+  const adminUsername = `workflow-administrator-${randomUUID()}`;
   const adminPassword = randomUUID();
   let workflowId: string | undefined;
   let workflowPath: string;
