@@ -343,7 +343,10 @@ export const normalizeAPIConfig = (monitor: CreateMonitorPayLoad) => {
   }
   return { formattedConfig };
 };
-const RecordSchema = schema.recordOf(schema.string(), schema.string());
+const RecordSchema = schema.recordOf(
+  schema.string({ maxLength: 256 }),
+  schema.string({ maxLength: 4096 })
+);
 
 const validateParams = (jsonString: string | any) => {
   if (typeof jsonString === 'string') {

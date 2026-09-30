@@ -25,7 +25,7 @@ export const inspectSyntheticsMonitorRoute: SyntheticsRestApiRouteFactory = () =
   validate: {
     body: schema.any(),
     query: schema.object({
-      id: schema.maybe(schema.string()),
+      id: schema.maybe(schema.string({ maxLength: 1024 })),
       hideParams: schema.maybe(schema.boolean()),
     }),
   },

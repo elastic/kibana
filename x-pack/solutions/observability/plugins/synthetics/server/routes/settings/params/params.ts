@@ -14,7 +14,7 @@ import { SYNTHETICS_API_URLS } from '../../../../common/constants';
 import type { SyntheticsParams, SyntheticsParamsReadonly } from '../../../../common/runtime_types';
 
 const RequestParamsSchema = schema.object({
-  id: schema.maybe(schema.string()),
+  id: schema.maybe(schema.string({ maxLength: 1024 })),
 });
 
 type RequestParams = TypeOf<typeof RequestParamsSchema>;

@@ -53,19 +53,18 @@ export async function fetchTrends(
   }, {});
 }
 
+export const overviewTrendsItemSchema = schema.object({
+  configId: schema.string({ maxLength: 1024 }),
+  locationIds: schema.arrayOf(schema.string({ maxLength: 256 }), { maxSize: 100 }),
+  schedule: schema.string({ maxLength: 256 }),
+});
+
 export const createOverviewTrendsRoute: SyntheticsRestApiRouteFactory = () => ({
   method: 'POST',
   writeAccess: false,
   path: SYNTHETICS_API_URLS.OVERVIEW_TRENDS,
   validate: {
-    body: schema.arrayOf(
-      schema.object({
-        configId: schema.string(),
-        locationIds: schema.arrayOf(schema.string(), { maxSize: 100 }),
-        schedule: schema.string(),
-      }),
-      { maxSize: 500 }
-    ) as unknown as ObjectType,
+    body: schema.arrayOf(overviewTrendsItemSchema, { maxSize: 500 }) as unknown as ObjectType,
   },
   handler: async (routeContext): Promise<TrendTable> => {
     const esClient = routeContext.syntheticsEsClient;

@@ -13,11 +13,11 @@ import type { SyntheticsRestApiRouteFactory } from '../types';
 import { SYNTHETICS_API_URLS } from '../../../common/constants';
 
 export const getLatestTestRunRouteQuerySchema = schema.object({
-  from: schema.maybe(schema.string()),
-  to: schema.maybe(schema.string()),
-  locationLabel: schema.maybe(schema.string()),
-  locationId: schema.maybe(schema.string()),
-  monitorId: schema.string(),
+  from: schema.maybe(schema.string({ maxLength: 256 })),
+  to: schema.maybe(schema.string({ maxLength: 256 })),
+  locationLabel: schema.maybe(schema.string({ maxLength: 256 })),
+  locationId: schema.maybe(schema.string({ maxLength: 1024 })),
+  monitorId: schema.string({ maxLength: 1024 }),
   remoteName: schema.maybe(schema.string({ maxLength: 256 })),
 });
 

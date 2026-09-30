@@ -19,10 +19,10 @@ export const createLastSuccessfulCheckRoute: UMRestApiRouteFactory = (libs: UMSe
   path: API_URLS.SYNTHETICS_SUCCESSFUL_CHECK,
   validate: {
     query: schema.object({
-      monitorId: schema.string(),
+      monitorId: schema.string({ maxLength: 1024 }),
       stepIndex: schema.number(),
-      timestamp: schema.string(),
-      location: schema.maybe(schema.string()),
+      timestamp: schema.string({ maxLength: 30 }),
+      location: schema.maybe(schema.string({ maxLength: 256 })),
     }),
   },
   handler: async (routeProps) => {

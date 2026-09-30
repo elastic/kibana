@@ -23,15 +23,21 @@ import {
 import { getAllLocations } from '../synthetics_service/get_all_locations';
 import type { PrivateLocation, ServiceLocation } from '../../common/runtime_types';
 import { syntheticsMonitorAttributes } from '../../common/types/saved_objects';
+import {
+  MAX_ARRAY_SIZE,
+  MAX_DATE_LENGTH,
+  MAX_ID_LENGTH,
+  MAX_SMALL_ARRAY_SIZE,
+  MAX_TEXT_LENGTH,
+} from '../constants/schema_validation';
 
-// A datemath expression or ISO-8601 timestamp is well under this; the cap only
-// exists to keep the date-range query params from being unbounded strings.
-const MAX_DATE_RANGE_PARAM_LENGTH = 256;
 const MAX_MONITOR_QUERY_IDS_IN_BODY = 10000;
-const MAX_MONITOR_QUERY_ID_LENGTH = 256;
 
 const StringOrArraySchema = schema.maybe(
-  schema.oneOf([schema.string(), schema.arrayOf(schema.string())])
+  schema.oneOf([
+    schema.string({ maxLength: MAX_ID_LENGTH }),
+    schema.arrayOf(schema.string({ maxLength: MAX_ID_LENGTH }), { maxSize: MAX_ARRAY_SIZE }),
+  ])
 );
 
 const UseLogicalAndFieldLiterals = useLogicalAndFields.map((f) => schema.literal(f)) as [
@@ -39,8 +45,8 @@ const UseLogicalAndFieldLiterals = useLogicalAndFields.map((f) => schema.literal
 ];
 
 const CommonQuerySchema = {
-  query: schema.maybe(schema.string()),
-  filter: schema.maybe(schema.string()),
+  query: schema.maybe(schema.string({ maxLength: MAX_TEXT_LENGTH })),
+  filter: schema.maybe(schema.string({ maxLength: MAX_TEXT_LENGTH })),
   tags: StringOrArraySchema,
   monitorTypes: StringOrArraySchema,
   locations: StringOrArraySchema,
@@ -56,7 +62,10 @@ const CommonQuerySchema = {
   configIds: StringOrArraySchema,
   showFromAllSpaces: schema.maybe(schema.boolean()),
   useLogicalAndFor: schema.maybe(
-    schema.oneOf([schema.string(), schema.arrayOf(schema.oneOf(UseLogicalAndFieldLiterals))])
+    schema.oneOf([
+      schema.string({ maxLength: MAX_TEXT_LENGTH }),
+      schema.arrayOf(schema.oneOf(UseLogicalAndFieldLiterals)),
+    ])
   ),
   // Date-range window for the overview list (see runtime type docs). The
   // overview page always sends these; their presence scopes each monitor's
@@ -64,8 +73,8 @@ const CommonQuerySchema = {
   // Bounded length: these only ever carry a short datemath expression
   // (`now-15m`) or an ISO-8601 timestamp, so cap the input to avoid unbounded
   // strings reaching `datemath.parse` (CodeQL: unbounded string DoS).
-  dateRangeStart: schema.maybe(schema.string({ maxLength: MAX_DATE_RANGE_PARAM_LENGTH })),
-  dateRangeEnd: schema.maybe(schema.string({ maxLength: MAX_DATE_RANGE_PARAM_LENGTH })),
+  dateRangeStart: schema.maybe(schema.string({ maxLength: MAX_DATE_LENGTH })),
+  dateRangeEnd: schema.maybe(schema.string({ maxLength: MAX_DATE_LENGTH })),
 };
 
 export const QuerySchema = schema.object({
@@ -74,7 +83,9 @@ export const QuerySchema = schema.object({
   perPage: schema.maybe(schema.number()),
   sortField: MonitorSortFieldSchema,
   sortOrder: schema.maybe(schema.oneOf([schema.literal('desc'), schema.literal('asc')])),
-  searchAfter: schema.maybe(schema.arrayOf(schema.string())),
+  searchAfter: schema.maybe(
+    schema.arrayOf(schema.string({ maxLength: MAX_TEXT_LENGTH }), { maxSize: MAX_SMALL_ARRAY_SIZE })
+  ),
   internal: schema.maybe(
     schema.boolean({
       defaultValue: false,
@@ -110,7 +121,7 @@ export const OverviewStatusSchema = schema.object({
 export type OverviewStatusQuery = TypeOf<typeof OverviewStatusSchema>;
 
 export const OverviewStatusStaleBodySchema = schema.object({
-  monitorQueryIds: schema.arrayOf(schema.string({ maxLength: MAX_MONITOR_QUERY_ID_LENGTH }), {
+  monitorQueryIds: schema.arrayOf(schema.string({ maxLength: MAX_ID_LENGTH }), {
     minSize: 1,
     maxSize: MAX_MONITOR_QUERY_IDS_IN_BODY,
   }),

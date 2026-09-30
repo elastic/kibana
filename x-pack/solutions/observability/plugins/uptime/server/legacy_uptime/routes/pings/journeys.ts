@@ -15,13 +15,16 @@ export const createJourneyRoute: UMRestApiRouteFactory = (libs: UMServerLibs) =>
   path: API_URLS.JOURNEY,
   validate: {
     params: schema.object({
-      checkGroup: schema.string(),
+      checkGroup: schema.string({ maxLength: 1024 }),
     }),
     query: schema.object({
       // provides a filter for the types of synthetic events to include
       // when fetching a journey's data
       syntheticEventTypes: schema.maybe(
-        schema.oneOf([schema.arrayOf(schema.string(), { maxSize: 10 }), schema.string()])
+        schema.oneOf([
+          schema.arrayOf(schema.string({ maxLength: 256 }), { maxSize: 10 }),
+          schema.string({ maxLength: 256 }),
+        ])
       ),
     }),
   },
@@ -58,7 +61,7 @@ export const createJourneyFailedStepsRoute: UMRestApiRouteFactory = (libs: UMSer
   path: API_URLS.JOURNEY_FAILED_STEPS,
   validate: {
     query: schema.object({
-      checkGroups: schema.arrayOf(schema.string(), { maxSize: 100 }),
+      checkGroups: schema.arrayOf(schema.string({ maxLength: 1024 }), { maxSize: 100 }),
     }),
   },
   handler: async ({ uptimeEsClient, request, response }): Promise<any> => {

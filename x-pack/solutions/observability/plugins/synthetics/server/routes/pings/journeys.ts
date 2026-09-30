@@ -12,13 +12,15 @@ import { getJourneyDetails } from '../../queries/get_journey_details';
 import type { SyntheticsRestApiRouteFactory } from '../types';
 import { SYNTHETICS_API_URLS } from '../../../common/constants';
 
+export const journeyParamsSchema = schema.object({
+  checkGroup: schema.string({ maxLength: 1024 }),
+});
+
 export const createJourneyRoute: SyntheticsRestApiRouteFactory = () => ({
   method: 'GET',
   path: SYNTHETICS_API_URLS.JOURNEY,
   validate: {
-    params: schema.object({
-      checkGroup: schema.string(),
-    }),
+    params: journeyParamsSchema,
     query: schema.object({
       remoteName: schema.maybe(schema.string({ maxLength: 256 })),
       timestamp: schema.maybe(schema.string({ maxLength: 30 })),

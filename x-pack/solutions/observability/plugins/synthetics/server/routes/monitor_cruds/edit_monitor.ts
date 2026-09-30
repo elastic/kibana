@@ -53,7 +53,7 @@ export const editSyntheticsMonitorRoute: SyntheticsRestApiRouteFactory = () => (
   validation: {
     request: {
       params: schema.object({
-        monitorId: schema.string(),
+        monitorId: schema.string({ maxLength: 1024 }),
       }),
       query: schema.object({
         internal: schema.maybe(

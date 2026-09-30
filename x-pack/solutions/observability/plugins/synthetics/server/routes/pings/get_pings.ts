@@ -10,19 +10,25 @@ import { schema } from '@kbn/config-schema';
 import { queryPings } from '../../queries/query_pings';
 import type { SyntheticsRestApiRouteFactory } from '../types';
 import { SYNTHETICS_API_URLS } from '../../../common/constants';
+import {
+  MAX_DATE_LENGTH,
+  MAX_ENUM_LENGTH,
+  MAX_ID_LENGTH,
+  MAX_LABEL_LENGTH,
+} from '../../constants/schema_validation';
 
 export const getPingsRouteQuerySchema = schema.object({
-  from: schema.string(),
-  to: schema.string(),
-  locations: schema.maybe(schema.string()),
-  excludedLocations: schema.maybe(schema.string()),
-  monitorId: schema.maybe(schema.string()),
+  from: schema.string({ maxLength: MAX_DATE_LENGTH }),
+  to: schema.string({ maxLength: MAX_DATE_LENGTH }),
+  locations: schema.maybe(schema.string({ maxLength: MAX_ID_LENGTH })),
+  excludedLocations: schema.maybe(schema.string({ maxLength: MAX_ID_LENGTH })),
+  monitorId: schema.maybe(schema.string({ maxLength: MAX_ID_LENGTH })),
   index: schema.maybe(schema.number()),
   size: schema.maybe(schema.number()),
   pageIndex: schema.maybe(schema.number()),
-  sort: schema.maybe(schema.string()),
-  status: schema.maybe(schema.string()),
-  remoteName: schema.maybe(schema.string({ maxLength: 256 })),
+  sort: schema.maybe(schema.string({ maxLength: MAX_ENUM_LENGTH })),
+  status: schema.maybe(schema.string({ maxLength: MAX_ENUM_LENGTH })),
+  remoteName: schema.maybe(schema.string({ maxLength: MAX_LABEL_LENGTH })),
 });
 
 type GetPingsRouteRequest = TypeOf<typeof getPingsRouteQuerySchema>;

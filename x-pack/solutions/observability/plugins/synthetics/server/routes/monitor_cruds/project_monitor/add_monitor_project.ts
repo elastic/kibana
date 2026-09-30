@@ -45,7 +45,7 @@ export const addSyntheticsProjectMonitorRoute: SyntheticsRestApiRouteFactory = (
       ),
     }),
     params: schema.object({
-      projectName: schema.string(),
+      projectName: schema.string({ maxLength: 256 }),
     }),
     body: schema.object({
       monitors: schema.arrayOf(schema.any(), {

@@ -8,6 +8,7 @@ import { i18n } from '@kbn/i18n';
 
 import { schema } from '@kbn/config-schema';
 import type { IntervalSchedule } from '@kbn/task-manager-plugin/server';
+import { MAX_LABEL_LENGTH, MAX_SMALL_ARRAY_SIZE } from '../../constants/schema_validation';
 import {
   getSyntheticsDynamicSettings,
   setSyntheticsDynamicSettings,
@@ -193,15 +194,29 @@ export const validateInteger = (value: number): string | undefined => {
 export const DynamicSettingsSchema = schema.object({
   certAgeThreshold: schema.maybe(schema.number({ min: 1, validate: validateInteger })),
   certExpirationThreshold: schema.maybe(schema.number({ min: 1, validate: validateInteger })),
-  defaultConnectors: schema.maybe(schema.arrayOf(schema.string())),
+  defaultConnectors: schema.maybe(
+    schema.arrayOf(schema.string({ maxLength: MAX_LABEL_LENGTH }), {
+      maxSize: MAX_SMALL_ARRAY_SIZE,
+    })
+  ),
   defaultStatusRuleEnabled: schema.maybe(schema.boolean()),
   defaultTLSRuleEnabled: schema.maybe(schema.boolean()),
   rebalancePrivateLocationShardsEnabled: schema.maybe(schema.boolean()),
   defaultEmail: schema.maybe(
     schema.object({
-      to: schema.arrayOf(schema.string()),
-      cc: schema.maybe(schema.arrayOf(schema.string())),
-      bcc: schema.maybe(schema.arrayOf(schema.string())),
+      to: schema.arrayOf(schema.string({ maxLength: MAX_LABEL_LENGTH }), {
+        maxSize: MAX_SMALL_ARRAY_SIZE,
+      }),
+      cc: schema.maybe(
+        schema.arrayOf(schema.string({ maxLength: MAX_LABEL_LENGTH }), {
+          maxSize: MAX_SMALL_ARRAY_SIZE,
+        })
+      ),
+      bcc: schema.maybe(
+        schema.arrayOf(schema.string({ maxLength: MAX_LABEL_LENGTH }), {
+          maxSize: MAX_SMALL_ARRAY_SIZE,
+        })
+      ),
     })
   ),
   privateLocationsSyncInterval: schema.maybe(

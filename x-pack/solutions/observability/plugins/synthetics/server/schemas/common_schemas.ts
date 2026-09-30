@@ -13,8 +13,8 @@ import { z } from '@kbn/zod';
  */
 export const monitorOptionSchema = z
   .object({
-    label: z.string().meta({ description: 'Display label for the filter option' }),
-    value: z.string().meta({ description: 'Value for the filter option' }),
+    label: z.string().max(256).meta({ description: 'Display label for the filter option' }),
+    value: z.string().max(256).meta({ description: 'Value for the filter option' }),
   })
   .strict();
 

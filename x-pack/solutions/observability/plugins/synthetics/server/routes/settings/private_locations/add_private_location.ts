@@ -20,18 +20,27 @@ import { SYNTHETICS_API_URLS } from '../../../../common/constants';
 import { toClientContract, toSavedObjectContract } from './helpers';
 import { assertCanEnableAgentSharding } from './agent_sharding_license';
 import type { PrivateLocation } from '../../../../common/runtime_types';
+import { MAX_LABEL_LENGTH, MAX_SMALL_ARRAY_SIZE } from '../../../constants/schema_validation';
 
 export const PrivateLocationSchema = schema.object({
-  label: schema.string(),
-  agentPolicyId: schema.string(),
-  tags: schema.maybe(schema.arrayOf(schema.string())),
+  label: schema.string({ maxLength: MAX_LABEL_LENGTH }),
+  agentPolicyId: schema.string({ maxLength: MAX_LABEL_LENGTH }),
+  tags: schema.maybe(
+    schema.arrayOf(schema.string({ maxLength: MAX_LABEL_LENGTH }), {
+      maxSize: MAX_SMALL_ARRAY_SIZE,
+    })
+  ),
   geo: schema.maybe(
     schema.object({
       lat: schema.number(),
       lon: schema.number(),
     })
   ),
-  spaces: schema.maybe(schema.arrayOf(schema.string(), { maxSize: 100 })),
+  spaces: schema.maybe(
+    schema.arrayOf(schema.string({ maxLength: MAX_LABEL_LENGTH }), {
+      maxSize: MAX_SMALL_ARRAY_SIZE,
+    })
+  ),
   isAgentSharding: schema.maybe(schema.boolean()),
 });
 

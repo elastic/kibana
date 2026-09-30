@@ -27,12 +27,14 @@ import { asyncGlobalParamsPropagation } from '../../../tasks/sync_global_params_
 const ParamsObjectSchema = schema.object({
   key: schema.string({
     minLength: 1,
+    maxLength: 256,
   }),
   value: schema.string({
     minLength: 1,
+    maxLength: 4096,
   }),
-  description: schema.maybe(schema.string()),
-  tags: schema.maybe(schema.arrayOf(schema.string())),
+  description: schema.maybe(schema.string({ maxLength: 1024 })),
+  tags: schema.maybe(schema.arrayOf(schema.string({ maxLength: 256 }), { maxSize: 100 })),
   share_across_spaces: schema.maybe(schema.boolean()),
 });
 

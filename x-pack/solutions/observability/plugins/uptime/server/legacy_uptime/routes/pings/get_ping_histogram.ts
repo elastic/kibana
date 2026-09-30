@@ -15,13 +15,13 @@ export const createGetPingHistogramRoute: UMRestApiRouteFactory = (libs: UMServe
   path: API_URLS.PING_HISTOGRAM,
   validate: {
     query: schema.object({
-      dateStart: schema.string(),
-      dateEnd: schema.string(),
-      monitorId: schema.maybe(schema.string()),
-      filters: schema.maybe(schema.string()),
-      bucketSize: schema.maybe(schema.string()),
-      query: schema.maybe(schema.string()),
-      timeZone: schema.string(),
+      dateStart: schema.string({ maxLength: 256 }),
+      dateEnd: schema.string({ maxLength: 256 }),
+      monitorId: schema.maybe(schema.string({ maxLength: 1024 })),
+      filters: schema.maybe(schema.string({ maxLength: 1024 })),
+      bucketSize: schema.maybe(schema.string({ maxLength: 50 })),
+      query: schema.maybe(schema.string({ maxLength: 1024 })),
+      timeZone: schema.string({ maxLength: 256 }),
     }),
   },
   handler: async ({ uptimeEsClient, request }): Promise<any> => {

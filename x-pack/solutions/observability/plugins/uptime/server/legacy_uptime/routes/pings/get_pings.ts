@@ -15,15 +15,15 @@ export const createGetPingsRoute: UMRestApiRouteFactory = (libs: UMServerLibs) =
   path: API_URLS.PINGS,
   validate: {
     query: schema.object({
-      from: schema.string(),
-      to: schema.string(),
-      locations: schema.maybe(schema.string()),
-      excludedLocations: schema.maybe(schema.string()),
-      monitorId: schema.maybe(schema.string()),
+      from: schema.string({ maxLength: 256 }),
+      to: schema.string({ maxLength: 256 }),
+      locations: schema.maybe(schema.string({ maxLength: 1024 })),
+      excludedLocations: schema.maybe(schema.string({ maxLength: 1024 })),
+      monitorId: schema.maybe(schema.string({ maxLength: 1024 })),
       index: schema.maybe(schema.number()),
       size: schema.maybe(schema.number()),
-      sort: schema.maybe(schema.string()),
-      status: schema.maybe(schema.string()),
+      sort: schema.maybe(schema.string({ maxLength: 50 })),
+      status: schema.maybe(schema.string({ maxLength: 50 })),
     }),
   },
   handler: async ({ uptimeEsClient, request, response }): Promise<any> => {

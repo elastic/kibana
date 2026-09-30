@@ -15,7 +15,7 @@ export const createNetworkEventsRoute: SyntheticsRestApiRouteFactory = () => ({
   path: SYNTHETICS_API_URLS.NETWORK_EVENTS,
   validate: {
     query: schema.object({
-      checkGroup: schema.string(),
+      checkGroup: schema.string({ maxLength: 1024 }),
       stepIndex: schema.number(),
       remoteName: schema.maybe(schema.string({ maxLength: 256 })),
       timestamp: schema.maybe(schema.string({ maxLength: 30 })),

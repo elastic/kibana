@@ -39,7 +39,7 @@ export const addSyntheticsMonitorRoute: SyntheticsRestApiRouteFactory = () => ({
     request: {
       body: schema.any(),
       query: schema.object({
-        id: schema.maybe(schema.string()),
+        id: schema.maybe(schema.string({ maxLength: 1024 })),
         preserve_namespace: schema.maybe(schema.boolean()),
         gettingStarted: schema.maybe(schema.boolean()),
         internal: schema.maybe(

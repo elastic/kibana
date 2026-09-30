@@ -13,6 +13,10 @@ import { SYNTHETICS_API_URLS } from '../../../../common/constants';
 import type { DeleteParamsResponse } from '../../../../common/runtime_types';
 import { asyncGlobalParamsPropagation } from '../../../tasks/sync_global_params_task';
 
+export const deleteParamsBulkBodySchema = schema.object({
+  ids: schema.arrayOf(schema.string({ maxLength: 1024 }), { maxSize: 1000 }),
+});
+
 export const deleteSyntheticsParamsBulkRoute: SyntheticsRestApiRouteFactory<
   DeleteParamsResponse[],
   unknown,
@@ -24,9 +28,7 @@ export const deleteSyntheticsParamsBulkRoute: SyntheticsRestApiRouteFactory<
   validate: {},
   validation: {
     request: {
-      body: schema.object({
-        ids: schema.arrayOf(schema.string()),
-      }),
+      body: deleteParamsBulkBodySchema,
     },
   },
   handler: async ({ savedObjectsClient, request, server, spaceId }) => {

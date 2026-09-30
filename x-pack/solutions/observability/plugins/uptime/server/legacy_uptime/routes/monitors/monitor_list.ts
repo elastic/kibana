@@ -14,12 +14,12 @@ export const createMonitorListRoute: UMRestApiRouteFactory = (libs) => ({
   path: API_URLS.MONITOR_LIST,
   validate: {
     query: schema.object({
-      dateRangeStart: schema.string(),
-      dateRangeEnd: schema.string(),
-      filters: schema.maybe(schema.string()),
-      pagination: schema.maybe(schema.string()),
-      statusFilter: schema.maybe(schema.string()),
-      query: schema.maybe(schema.string()),
+      dateRangeStart: schema.string({ maxLength: 256 }),
+      dateRangeEnd: schema.string({ maxLength: 256 }),
+      filters: schema.maybe(schema.string({ maxLength: 1024 })),
+      pagination: schema.maybe(schema.string({ maxLength: 1024 })),
+      statusFilter: schema.maybe(schema.string({ maxLength: 50 })),
+      query: schema.maybe(schema.string({ maxLength: 1024 })),
       pageSize: schema.number(),
     }),
   },

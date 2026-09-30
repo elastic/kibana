@@ -18,11 +18,11 @@ const MAX_SHARED_SPACES = 1_000;
 export const SyntheticsMultiSpaceSettingsSchema = schema.object({
   useAllRemoteClusters: schema.maybe(schema.boolean()),
   selectedRemoteClusters: schema.maybe(
-    schema.arrayOf(schema.string(), { maxSize: MAX_SELECTED_REMOTE_CLUSTERS })
+    schema.arrayOf(schema.string({ maxLength: 256 }), { maxSize: MAX_SELECTED_REMOTE_CLUSTERS })
   ),
   // Optional list of spaces the settings should be shared with. Accepts `*` for "all spaces".
   spaces: schema.maybe(
-    schema.arrayOf(schema.string({ minLength: 1 }), {
+    schema.arrayOf(schema.string({ minLength: 1, maxLength: 256 }), {
       minSize: 1,
       maxSize: MAX_SHARED_SPACES,
     })

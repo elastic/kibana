@@ -15,7 +15,7 @@ export const createJourneyScreenshotRoute: SyntheticsRestApiRouteFactory = () =>
   path: SYNTHETICS_API_URLS.JOURNEY_SCREENSHOT,
   validate: {
     params: schema.object({
-      checkGroup: schema.string(),
+      checkGroup: schema.string({ maxLength: 1024 }),
       stepIndex: schema.number(),
     }),
     query: schema.object({

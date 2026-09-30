@@ -28,13 +28,14 @@ export const deleteSyntheticsParamsRoute: SyntheticsRestApiRouteFactory<
     request: {
       body: schema.nullable(
         schema.object({
-          ids: schema.arrayOf(schema.string(), {
+          ids: schema.arrayOf(schema.string({ maxLength: 1024 }), {
             minSize: 1,
+            maxSize: 1000,
           }),
         })
       ),
       params: schema.object({
-        id: schema.maybe(schema.string()),
+        id: schema.maybe(schema.string({ maxLength: 1024 })),
       }),
     },
   },

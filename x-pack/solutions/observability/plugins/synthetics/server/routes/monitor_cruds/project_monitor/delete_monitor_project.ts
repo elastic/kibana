@@ -20,10 +20,12 @@ export const deleteSyntheticsMonitorProjectRoute: SyntheticsRestApiRouteFactory 
   path: SYNTHETICS_API_URLS.SYNTHETICS_MONITORS_PROJECT_DELETE,
   validate: {
     body: schema.object({
-      monitors: schema.arrayOf(schema.string(), { maxSize: MAX_MONITORS_TO_DELETE }),
+      monitors: schema.arrayOf(schema.string({ maxLength: 1024 }), {
+        maxSize: MAX_MONITORS_TO_DELETE,
+      }),
     }),
     params: schema.object({
-      projectName: schema.string(),
+      projectName: schema.string({ maxLength: 256 }),
     }),
   },
   handler: async (routeContext): Promise<any> => {

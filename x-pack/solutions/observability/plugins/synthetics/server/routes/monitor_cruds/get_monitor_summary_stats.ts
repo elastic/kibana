@@ -22,6 +22,14 @@ export interface MonitorSummaryStats {
   totalRuns: number;
 }
 
+export const monitorSummaryStatsQuerySchema = schema.object({
+  monitorId: schema.string({ maxLength: 1024 }),
+  locationLabel: schema.string({ maxLength: 256 }),
+  from: schema.string({ maxLength: 256, defaultValue: 'now-30d' }),
+  to: schema.string({ maxLength: 256, defaultValue: 'now' }),
+  remoteName: schema.maybe(schema.string({ maxLength: 256 })),
+});
+
 export const getMonitorSummaryStatsRoute: SyntheticsRestApiRouteFactory<
   MonitorSummaryStats
 > = () => ({
@@ -29,13 +37,7 @@ export const getMonitorSummaryStatsRoute: SyntheticsRestApiRouteFactory<
   writeAccess: false,
   path: SYNTHETICS_API_URLS.MONITOR_SUMMARY_STATS,
   validate: {
-    query: schema.object({
-      monitorId: schema.string(),
-      locationLabel: schema.string(),
-      from: schema.string({ defaultValue: 'now-30d' }),
-      to: schema.string({ defaultValue: 'now' }),
-      remoteName: schema.maybe(schema.string({ maxLength: 256 })),
-    }),
+    query: monitorSummaryStatsQuerySchema,
   },
   handler: async ({ syntheticsEsClient, request }): Promise<MonitorSummaryStats> => {
     const { monitorId, locationLabel, from, to, remoteName } = request.query as {

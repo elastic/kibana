@@ -30,12 +30,12 @@ const EditPrivateLocationSchema = schema.object({
       minLength: 1,
     })
   ),
-  tags: schema.maybe(schema.arrayOf(schema.string())),
+  tags: schema.maybe(schema.arrayOf(schema.string({ maxLength: 256 }), { maxSize: 100 })),
   isAgentSharding: schema.maybe(schema.boolean()),
 });
 
 const EditPrivateLocationQuery = schema.object({
-  locationId: schema.string(),
+  locationId: schema.string({ maxLength: 1024 }),
 });
 
 export type EditPrivateLocationAttributes = Pick<

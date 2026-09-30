@@ -15,7 +15,7 @@ export const getMonitorsHealthRoute: SyntheticsRestApiRouteFactory = () => ({
   writeAccess: false,
   validate: {
     body: schema.object({
-      monitorIds: schema.arrayOf(schema.string(), { minSize: 1, maxSize: 500 }),
+      monitorIds: schema.arrayOf(schema.string({ maxLength: 1024 }), { minSize: 1, maxSize: 500 }),
     }),
   },
   handler: async (routeContext) => {

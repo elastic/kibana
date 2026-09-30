@@ -13,7 +13,7 @@ import { SYNTHETICS_API_URLS } from '../../../../common/constants';
 import { MONITOR_SEARCH_FIELDS } from '../../common';
 
 const querySchema = schema.object({
-  search_after: schema.maybe(schema.string()),
+  search_after: schema.maybe(schema.string({ maxLength: 1024 })),
   per_page: schema.maybe(schema.number()),
 });
 
@@ -22,7 +22,7 @@ export const getSyntheticsProjectMonitorsRoute: SyntheticsRestApiRouteFactory = 
   path: SYNTHETICS_API_URLS.SYNTHETICS_MONITORS_PROJECT,
   validate: {
     params: schema.object({
-      projectName: schema.string(),
+      projectName: schema.string({ maxLength: 256 }),
     }),
     query: querySchema,
   },

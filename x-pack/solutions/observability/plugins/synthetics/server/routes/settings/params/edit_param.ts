@@ -18,7 +18,7 @@ import { SYNTHETICS_API_URLS } from '../../../../common/constants';
 import { asyncGlobalParamsPropagation } from '../../../tasks/sync_global_params_task';
 
 const RequestParamsSchema = schema.object({
-  id: schema.string(),
+  id: schema.string({ maxLength: 1024 }),
 });
 
 type RequestParams = TypeOf<typeof RequestParamsSchema>;
@@ -37,15 +37,17 @@ export const editSyntheticsParamsRoute: SyntheticsRestApiRouteFactory<
         key: schema.maybe(
           schema.string({
             minLength: 1,
+            maxLength: 256,
           })
         ),
         value: schema.maybe(
           schema.string({
             minLength: 1,
+            maxLength: 4096,
           })
         ),
-        description: schema.maybe(schema.string()),
-        tags: schema.maybe(schema.arrayOf(schema.string())),
+        description: schema.maybe(schema.string({ maxLength: 1024 })),
+        tags: schema.maybe(schema.arrayOf(schema.string({ maxLength: 256 }), { maxSize: 100 })),
       }),
     },
   },

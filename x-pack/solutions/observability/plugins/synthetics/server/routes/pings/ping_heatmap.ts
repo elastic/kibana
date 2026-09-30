@@ -16,11 +16,11 @@ export const syntheticsGetPingHeatmapRoute: SyntheticsRestApiRouteFactory = () =
   path: SYNTHETICS_API_URLS.MONITOR_STATUS_HEATMAP,
   validate: {
     query: schema.object({
-      from: schema.maybe(schema.oneOf([schema.number(), schema.string()])),
-      to: schema.maybe(schema.oneOf([schema.number(), schema.string()])),
+      from: schema.maybe(schema.oneOf([schema.number(), schema.string({ maxLength: 256 })])),
+      to: schema.maybe(schema.oneOf([schema.number(), schema.string({ maxLength: 256 })])),
       interval: schema.number(),
-      monitorId: schema.string(),
-      location: schema.string(),
+      monitorId: schema.string({ maxLength: 1024 }),
+      location: schema.string({ maxLength: 256 }),
       remoteName: schema.maybe(schema.string({ maxLength: 256 })),
     }),
   },

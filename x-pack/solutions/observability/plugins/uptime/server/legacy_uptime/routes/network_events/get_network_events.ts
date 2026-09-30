@@ -15,7 +15,7 @@ export const createNetworkEventsRoute: UMRestApiRouteFactory = (libs: UMServerLi
   path: API_URLS.NETWORK_EVENTS,
   validate: {
     query: schema.object({
-      checkGroup: schema.string(),
+      checkGroup: schema.string({ maxLength: 1024 }),
       stepIndex: schema.number(),
     }),
   },

@@ -22,8 +22,9 @@ export const deleteSyntheticsMonitorBulkRoute: SyntheticsRestApiRouteFactory<
   validation: {
     request: {
       body: schema.object({
-        ids: schema.arrayOf(schema.string(), {
+        ids: schema.arrayOf(schema.string({ maxLength: 1024 }), {
           minSize: 1,
+          maxSize: 1000,
         }),
       }),
     },

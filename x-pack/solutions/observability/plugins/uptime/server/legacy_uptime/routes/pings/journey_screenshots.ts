@@ -33,7 +33,7 @@ export const createJourneyScreenshotRoute: UMRestApiRouteFactory<ClientContract>
   path: API_URLS.JOURNEY_SCREENSHOT,
   validate: {
     params: schema.object({
-      checkGroup: schema.string(),
+      checkGroup: schema.string({ maxLength: 1024 }),
       stepIndex: schema.number(),
     }),
   },

@@ -15,9 +15,9 @@ export const createGetStatusBarRoute: UMRestApiRouteFactory = (libs: UMServerLib
   path: API_URLS.MONITOR_STATUS,
   validate: {
     query: schema.object({
-      monitorId: schema.string(),
-      dateStart: schema.string(),
-      dateEnd: schema.string(),
+      monitorId: schema.string({ maxLength: 1024 }),
+      dateStart: schema.string({ maxLength: 256 }),
+      dateEnd: schema.string({ maxLength: 256 }),
     }),
   },
   handler: async ({ uptimeEsClient, request, server, savedObjectsClient }): Promise<any> => {

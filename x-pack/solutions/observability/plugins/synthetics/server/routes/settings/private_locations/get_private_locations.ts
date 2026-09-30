@@ -26,7 +26,7 @@ export const getPrivateLocationsRoute: SyntheticsRestApiRouteFactory<
   validation: {
     request: {
       params: schema.object({
-        id: schema.maybe(schema.string()),
+        id: schema.maybe(schema.string({ maxLength: 1024 })),
       }),
     },
   },

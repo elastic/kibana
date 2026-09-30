@@ -15,8 +15,8 @@ export const createGetIndexStatusRoute: UMRestApiRouteFactory = (libs: UMServerL
   path: API_URLS.INDEX_STATUS,
   validate: {
     query: schema.object({
-      from: schema.maybe(schema.string()),
-      to: schema.maybe(schema.string()),
+      from: schema.maybe(schema.string({ maxLength: 256 })),
+      to: schema.maybe(schema.string({ maxLength: 256 })),
     }),
   },
   handler: async ({ uptimeEsClient, request, response }): Promise<any> => {
