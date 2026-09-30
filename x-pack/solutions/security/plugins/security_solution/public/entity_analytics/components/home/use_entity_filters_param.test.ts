@@ -138,7 +138,7 @@ describe('getEntityFilterESQL', () => {
 
   it('uses IN for scalar fields like entityTypes', () => {
     const clauses = getEntityFilterESQL({
-      entityTypes: ['host', 'user'],
+      entityTypes: [EntityType.host, EntityType.user],
       riskLevels: [],
       assetCriticality: [],
       watchlists: [],
