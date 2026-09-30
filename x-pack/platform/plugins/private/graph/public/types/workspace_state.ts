@@ -129,12 +129,6 @@ export interface Workspace {
    */
   mergeGraph(newData: GraphData): void;
 
-  /**
-   * Fills in missing connections between the selected nodes.
-   * @param connections The number of connections to fill in. Defaults to 10
-   */
-  fillConnections(nodeIds: string[], connections?: number): void;
-
   runLayout(): void;
   stopLayout(): void;
   isLayoutRunning(): boolean;
