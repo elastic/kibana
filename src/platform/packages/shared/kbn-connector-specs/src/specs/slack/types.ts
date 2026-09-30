@@ -756,14 +756,18 @@ export const SlackGetConversationRepliesInputSchema = lazySchema(() =>
       .string()
       .max(SLACK_MAX_CURSOR_LENGTH)
       .optional()
-      .describe('Pagination cursor from a previous getConversationReplies response. Omit for the first page.'),
+      .describe(
+        'Pagination cursor from a previous getConversationReplies response. Omit for the first page.'
+      ),
     raw: z
       .boolean()
       .optional()
       .describe('Return the full raw Slack API response instead of a compact result.'),
   })
 );
-export type SlackGetConversationRepliesInput = z.infer<typeof SlackGetConversationRepliesInputSchema>;
+export type SlackGetConversationRepliesInput = z.infer<
+  typeof SlackGetConversationRepliesInputSchema
+>;
 
 export interface SlackConversationsRepliesResponse extends SlackErrorFields {
   ok: boolean;
@@ -859,7 +863,9 @@ export const SlackUploadFileInputSchema = lazySchema(() =>
       .string()
       .max(SLACK_MAX_ID_LENGTH)
       .optional()
-      .describe('Conversation ID to share the uploaded file into (e.g. C...). Omit to upload without sharing.'),
+      .describe(
+        'Conversation ID to share the uploaded file into (e.g. C...). Omit to upload without sharing.'
+      ),
     title: z
       .string()
       .max(SLACK_MAX_UPLOAD_TITLE_LENGTH)
@@ -908,11 +914,7 @@ export const SlackAskQuestionInputSchema = lazySchema(() =>
     buttons: z
       .array(
         z.object({
-          text: z
-            .string()
-            .min(1)
-            .max(75)
-            .describe('Button label displayed in Slack.'),
+          text: z.string().min(1).max(75).describe('Button label displayed in Slack.'),
           value: z
             .string()
             .min(1)

@@ -1535,9 +1535,7 @@ describe('Slack', () => {
       };
       mockClient.post.mockResolvedValue(mockResponse);
 
-      const blocks = [
-        { type: 'section', text: { type: 'mrkdwn', text: '*Alert*: CPU high' } },
-      ];
+      const blocks = [{ type: 'section', text: { type: 'mrkdwn', text: '*Alert*: CPU high' } }];
       const result = await Slack.actions.sendBlockKitMessage.handler(
         mockContext,
         SlackSendBlockKitMessageInputSchema.parse({ channel: 'C123', blocks })
@@ -1919,7 +1917,10 @@ describe('Slack', () => {
     });
 
     it('should throw when getUploadURLExternal fails', async () => {
-      mockClient.post.mockResolvedValue({ data: { ok: false, error: 'missing_scope' }, headers: {} });
+      mockClient.post.mockResolvedValue({
+        data: { ok: false, error: 'missing_scope' },
+        headers: {},
+      });
 
       await expect(
         Slack.actions.uploadFile.handler(

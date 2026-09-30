@@ -1271,8 +1271,7 @@ export const Slack: ConnectorSpec = {
           ctx,
           action: 'getConversationReplies',
           maxRetries: SLACK_MAX_RETRIES,
-          request: () =>
-            ctx.client.get(`${SLACK_API_BASE}/conversations.replies`, { params }),
+          request: () => ctx.client.get(`${SLACK_API_BASE}/conversations.replies`, { params }),
         });
 
         if (!response.data.ok) {
@@ -1340,7 +1339,9 @@ export const Slack: ConnectorSpec = {
         if (typedInput.blocks !== undefined) payload.blocks = typedInput.blocks;
 
         try {
-          ctx.log.debug(`Slack updateMessage request: channel=${typedInput.channel} ts=${typedInput.ts}`);
+          ctx.log.debug(
+            `Slack updateMessage request: channel=${typedInput.channel} ts=${typedInput.ts}`
+          );
           const response = await slackRequestWithRateLimitRetry<SlackChatUpdateResponse>({
             ctx,
             action: 'updateMessage',
@@ -1650,9 +1651,9 @@ export const Slack: ConnectorSpec = {
     'addReaction adds a lightweight emoji acknowledgement to a message. Use it as a quick ack signal (e.g. "eyes" when seen, "white_check_mark" when resolved) without cluttering the channel with new messages.',
     'To read threaded replies on a message, use getConversationReplies with the channel ID and the parent message timestamp. Returns the full thread including the parent message itself.',
     'To read messages from a channel or DM, use getConversationHistory with a channel ID. Returns messages newest-first; pass nextCursor from the previous response (or use oldest/latest timestamps) to walk further back in time.',
-    'getConversationInfo returns metadata (name, privacy, topic, purpose) for a single channel/DM by ID. Prefer it over listChannels when you already have the ID and only need that conversation\'s details.',
+    "getConversationInfo returns metadata (name, privacy, topic, purpose) for a single channel/DM by ID. Prefer it over listChannels when you already have the ID and only need that conversation's details.",
     'To find a Slack user, prefer lookupUserByEmail when you have the email. Use listUsers only when you need to browse or enumerate the workspace; it is paginated.',
-    'listUserConversations returns the channels a given user (or the authenticated user, if user is omitted) is a member of. Prefer it over listChannels when you only care about a specific user\'s memberships.',
+    "listUserConversations returns the channels a given user (or the authenticated user, if user is omitted) is a member of. Prefer it over listChannels when you only care about a specific user's memberships.",
     'When a user identity comes back from one action as an ID (e.g. a message author_user_id) and you need their email or profile, resolve it via listUsers or by feeding a known email to lookupUserByEmail.',
     'For Slack files: use uploadFile to attach text or binary content (log snippets, reports, screenshots) to a channel; set encoding="base64" for binary content. Use getFileInfo with a file ID (F...) when a message references a file you need metadata for, and listFiles when browsing or scoping by channel/user/time range.',
     'For incident war-room orchestration: createConversation creates a new channel, then inviteToConversation adds the responders, and sendMessage or sendBlockKitMessage posts the initial alert briefing.',
