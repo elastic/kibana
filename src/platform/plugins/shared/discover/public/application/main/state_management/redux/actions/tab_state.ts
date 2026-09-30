@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { isFunction, isEqual } from 'lodash';
+import { isFunction, isEqual, omit } from 'lodash';
 import { type DataView, DataViewType } from '@kbn/data-views-plugin/common';
 import type { DataTableRecord } from '@kbn/discover-utils/types';
 import type { DocViewerShareableState } from '@kbn/unified-doc-viewer';
@@ -37,6 +37,7 @@ import {
   ExpandedDocLinkability,
   getExpandedDocLinkability,
   getExpandedDocRef,
+  matchesExpandedDocRef,
 } from '../../../utils/expanded_doc';
 import { DEFAULT_EXPANDED_DOC_OWNER } from '../constants';
 import { isEqualState } from '../../utils/state_comparators';
@@ -88,7 +89,11 @@ const mergeAppState = (
   { tabId, appState }: AppStatePayload
 ) => {
   const currentAppState = selectTab(currentState, tabId).appState;
-  const mergedAppState = { ...currentAppState, ...appState };
+  const nextAppState = { ...currentAppState, ...appState };
+  // The shareable doc viewer state is only restorable alongside an expanded document reference.
+  const mergedAppState: DiscoverAppState = nextAppState.expandedDoc
+    ? nextAppState
+    : omit(nextAppState, 'docViewerState');
   return { mergedAppState, hasStateChanges: !isEqualState(currentAppState, mergedAppState) };
 };
 
@@ -153,13 +158,20 @@ export const setExpandedDoc: InternalStateThunkActionCreator<[ExpandedDocPayload
       return;
     }
 
+    // Compare identities rather than references, since a shared link may omit the routing.
+    const isSameDocument = Boolean(
+      expandedDoc &&
+        appState.expandedDoc &&
+        matchesExpandedDocRef(expandedDoc, appState.expandedDoc)
+    );
+
     dispatch(
       updateAppState({
         tabId,
         appState: {
           expandedDoc: nextExpandedDocRef,
-          // Clear the shareable doc viewer state when the reference goes away, so it is not orphaned.
-          ...(nextExpandedDocRef ? {} : { docViewerState: undefined }),
+          // The shareable doc viewer state belongs to the document it was captured for.
+          ...(isSameDocument ? {} : { docViewerState: undefined }),
         },
       })
     );
