@@ -101,10 +101,14 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
     });
 
-    it('Create new graph page', async function () {
-      await appMenu.clickMenuItem('graphNewButton');
-      await testSubjects.click('confirmModalConfirmButton');
-      await a11y.testAppSnapshot();
+    // Mocha runs a suite's own tests before its nested suites, so this needs its own suite to keep
+    // running after 'Graph settings': it discards the datasource, disabling the settings button.
+    describe('Create new graph', () => {
+      it('Create new graph page', async function () {
+        await appMenu.clickMenuItem('graphNewButton');
+        await testSubjects.click('confirmModalConfirmButton');
+        await a11y.testAppSnapshot();
+      });
     });
   });
 }
