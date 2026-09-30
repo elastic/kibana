@@ -7,6 +7,7 @@
 
 import { z } from '@kbn/zod/v4';
 import pLimit from 'p-limit';
+import { v4 as uuidv4 } from 'uuid';
 import type {
   QueriesGetResponse,
   QueriesOccurrencesGetResponse,
@@ -622,6 +623,7 @@ const generateQueriesRoute = createServerRoute({
           .describe(
             'Optional connector ID override. When omitted the connector is resolved via the Inference Feature Registry.'
           ),
+        runId: z.string().trim().min(1).max(MAX_ID_LENGTH).optional(),
       })
       .nullish(),
   }),
@@ -652,7 +654,8 @@ const generateQueriesRoute = createServerRoute({
     await assertNotPaused({ maintenanceService, request });
 
     const { streamName } = params.path;
-    const { connectorId } = params.body ?? {};
+    const { connectorId, runId } = params.body ?? {};
+    const resolvedRunId = runId?.trim() || uuidv4();
 
     if (!server.agentBuilder) {
       throw new Error('Agent Builder is required to generate significant events queries');
@@ -663,6 +666,7 @@ const generateQueriesRoute = createServerRoute({
       {
         streamName,
         connectorId,
+        runId: resolvedRunId,
       },
       {
         streamsClient,

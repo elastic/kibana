@@ -61,7 +61,7 @@ const customContentContainerCss = (height: number) =>
     width: '100%',
   });
 
-interface VisualizeCustomContentProps {
+export interface VisualizeCustomContentProps {
   services: VisualizationServices;
   /** The HTML/Liquid template and its declared height. */
   visualization: Record<string, unknown> & { template?: string; height?: number };

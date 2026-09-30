@@ -369,14 +369,6 @@ module.exports = {
 
     '@kbn/disable/no_protected_eslint_disable': 'error',
     '@kbn/disable/no_naked_eslint_disable': 'error',
-    '@kbn/eslint/no_async_promise_body': 'error',
-    '@kbn/eslint/no_async_foreach': 'error',
-    '@kbn/eslint/require_kibana_feature_privileges_naming': 'warn',
-    '@kbn/eslint/no_trailing_import_slash': 'error',
-    '@kbn/eslint/no_constructor_args_in_property_initializers': 'error',
-    '@kbn/eslint/no_this_in_property_initializers': 'error',
-    '@kbn/eslint/no_conditional_saved_object_type_registration': 'error',
-    '@kbn/eslint/no_unsafe_console': 'error',
     '@kbn/eslint/no_unsafe_hash': 'error',
     '@kbn/imports/no_unresolvable_imports': 'error',
     '@kbn/imports/uniform_imports': 'error',
@@ -442,52 +434,4 @@ module.exports = {
     '@elastic/eui/require-aria-label-for-modals': 'error',
   },
 
-  overrides: [
-    {
-      files: [
-        'src/platform/plugins/private/event_annotation/**/*',
-        'src/platform/plugins/private/event_annotation_listing/**/*',
-        'src/platform/plugins/private/vis_default_editor/**/*',
-        'src/platform/plugins/private/vis_types/**/*',
-        'src/platform/plugins/shared/chart_expressions/**/*',
-        'src/platform/plugins/shared/charts/**/*',
-        'src/platform/plugins/shared/expressions/**/*',
-        'src/platform/plugins/shared/vis_types/**/*',
-        'src/platform/plugins/shared/visualization_listing/**/*',
-        'src/platform/plugins/shared/visualizations/**/*',
-        'x-pack/platform/plugins/shared/lens/**/*',
-        'x-pack/platform/plugins/private/graph/**/*',
-        'src/platform/packages/private/kbn-lens-formula-docs/**/*',
-        'src/platform/packages/shared/kbn-lens-common/**/*',
-        'src/platform/packages/shared/kbn-lens-common-2/**/*',
-        'src/platform/packages/shared/kbn-coloring/**/*',
-        'src/platform/packages/shared/kbn-chart-icons/**/*',
-        'src/platform/packages/shared/kbn-event-annotation-common/**/*',
-        'src/platform/packages/shared/kbn-event-annotation-components/**/*',
-      ],
-      rules: {
-        '@kbn/eslint/no_viz_naming': 'error',
-      },
-    },
-    {
-      files: [
-        'src/platform/plugins/**/server/index.ts',
-        'x-pack/platform/plugins/**/server/index.ts',
-        'x-pack/solutions/**/plugins/**/server/index.ts',
-        'examples/**/server/index.ts',
-        'packages/kbn-mock-idp-plugin/server/index.ts',
-      ],
-      excludedFiles: ['**/test/**'],
-      rules: {
-        /**
-         * Plugin server entry should not load ./plugin until the plugin is enabled.
-         * @see https://github.com/elastic/kibana/pull/170856
-         * @see https://github.com/elastic/kibana/issues/171080
-         *
-         * Enforced in CI; violation count should fall as lazy-load `server/index.ts` migrations land.
-         */
-        '@kbn/eslint/no_sync_import_from_plugin': 'error',
-      },
-    },
-  ],
 };

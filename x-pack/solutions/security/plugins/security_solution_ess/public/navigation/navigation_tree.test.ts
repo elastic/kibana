@@ -5,8 +5,9 @@
  * 2.0.
  */
 
+import { of } from 'rxjs';
 import { AIChatExperience } from '@kbn/ai-assistant-common';
-import type { NavigationTreeDefinition } from '@kbn/core-chrome-browser';
+import type { NavigationTreeDefinition, NodeDefinition } from '@kbn/core-chrome-browser';
 import { AGENT_BUILDER_NAV_AT_TOP_FLAG } from '@kbn/navigation-plugin/public';
 import { mockServices } from '../common/__mocks__/services.mock';
 import type { Services } from '../common/services';
@@ -18,12 +19,12 @@ describe('createNavigationTree', () => {
       ...mockServices,
       featureFlags: {
         ...mockServices.featureFlags,
-        getBooleanValue: jest.fn((flag: string, defaultValue?: boolean) => {
+        getBooleanValue$: jest.fn((flag: string, defaultValue?: boolean) => {
           if (flag === AGENT_BUILDER_NAV_AT_TOP_FLAG) {
-            return options?.agentBuilderNavAtTop ?? defaultValue ?? false;
+            return of(options?.agentBuilderNavAtTop ?? defaultValue ?? false);
           }
 
-          return defaultValue ?? false;
+          return of(defaultValue ?? false);
         }),
       },
       uiSettings: {
@@ -76,5 +77,25 @@ describe('createNavigationTree', () => {
 
     expect(agentBuilderIndex).toBe(0);
     expect(contextEngineIndex).toBe(1);
+  });
+
+  it('includes service accounts in Stack Management > Security', () => {
+    const { footer = [] } = createNavigationTree(
+      createServices(),
+      AIChatExperience.Classic
+    ) as NavigationTreeDefinition;
+
+    const findSecuritySection = (nodes: NodeDefinition[]): NodeDefinition | undefined =>
+      nodes
+        .map((node) =>
+          node.children?.some(({ link }) => link === 'management:role_mappings')
+            ? node
+            : findSecuritySection(node.children ?? [])
+        )
+        .find(Boolean);
+
+    expect(findSecuritySection(footer)?.children).toContainEqual(
+      expect.objectContaining({ link: 'management:service_accounts' })
+    );
   });
 });

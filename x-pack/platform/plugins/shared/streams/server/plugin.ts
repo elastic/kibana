@@ -302,8 +302,8 @@ export class StreamsPlugin
 
     // `encryptCredentials` is the distributor sidecar transform (project public
     // key → `credentials[]`). It is not wired until the project public key is
-    // available; publish with non-empty secrets fails rather than
-    // sending plaintext. At-rest encryption is Encrypted Saved Objects.
+    // available. Publish then omits the credentials sidecar instead of sending
+    // plaintext or failing the unit write. At-rest encryption is Encrypted Saved Objects.
     const unitConfigHooks: UnitConfigHooks = createConfigDistributorClient({
       config: this.config.distributor,
       logger: this.logger.get('config-distributor'),

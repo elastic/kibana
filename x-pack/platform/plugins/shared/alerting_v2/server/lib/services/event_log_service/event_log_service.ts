@@ -14,7 +14,7 @@ import type {
   IEventLogService,
   IValidatedEvent,
 } from '@kbn/event-log-plugin/server';
-import type { PolicyExecutionOutcome } from '@kbn/alerting-v2-schemas';
+import type { ActionPolicyEventAction } from '../../dispatcher/steps/constants';
 import type { AlertingServerSetupDependencies } from '../../../types';
 import { EsServiceInternalToken } from '../es_service/tokens';
 import { LoggerServiceToken, type LoggerServiceContract } from '../logger_service/logger_service';
@@ -35,7 +35,7 @@ export interface FindActionPolicyExecutionEventsParams {
   sortOrder?: 'asc' | 'desc';
   page?: number;
   perPage?: number;
-  outcomes?: PolicyExecutionOutcome[];
+  actions?: ActionPolicyEventAction[];
   policyIds?: string[];
   ruleIds?: string[];
   mandatoryRuleIds?: string[];
@@ -82,7 +82,7 @@ export class EventLogService implements EventLogServiceContract {
     sortOrder,
     page = DEFAULT_PAGE,
     perPage = DEFAULT_PAGE_SIZE,
-    outcomes,
+    actions,
     policyIds,
     ruleIds,
     mandatoryRuleIds,
@@ -93,7 +93,7 @@ export class EventLogService implements EventLogServiceContract {
       startDate,
       endDate,
       sortOrder,
-      outcomes,
+      actions,
       policyIds,
       ruleIds,
       mandatoryRuleIds,

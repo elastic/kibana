@@ -7,7 +7,15 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiPanel, EuiText, useEuiTheme } from '@elastic/eui';
+import {
+  EuiDescriptionList,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiIcon,
+  EuiPanel,
+  EuiText,
+  useEuiTheme,
+} from '@elastic/eui';
 import { css } from '@emotion/react';
 import React from 'react';
 
@@ -17,6 +25,7 @@ import type { JsonModelSchemaType } from '@kbn/workflows/spec/schema/common/json
 import { getExecutionStatusIcon } from './shared/status_badge';
 import { TokenUsageBadge } from './shared/token_usage_badge';
 import { StepExecutionDataView } from './step_execution_data_view';
+import { ServiceAccountName } from '../../../entities/service_accounts';
 import { formatDuration } from '../../../shared/lib/format_duration';
 import { getStatusLabel } from '../../../shared/translations/status_translations';
 import { FormattedRelativeEnhanced } from '../../../shared/ui/formatted_relative_enhanced/formatted_relative_enhanced';
@@ -75,10 +84,16 @@ export const WorkflowExecutionOverview = React.memo<WorkflowExecutionOverviewPro
     const { euiTheme } = useEuiTheme();
 
     const context = stepExecution.input as Record<string, unknown> | undefined;
-    const executionData = context?.execution as { isTestRun?: boolean } | undefined;
+    const executionData = context?.execution as
+      | {
+          isTestRun?: boolean;
+          executedBy?: string;
+          effectiveIdentity?: { type: 'service_account'; id: string };
+        }
+      | undefined;
     const isTestRun = executionData?.isTestRun === true;
     const executionStarted = stepExecution.startedAt;
-    const executionEnded = context?.now as string | undefined;
+    const executionEnded = stepExecution.finishedAt || (context?.now as string | undefined);
 
     return (
       <EuiPanel
@@ -92,6 +107,27 @@ export const WorkflowExecutionOverview = React.memo<WorkflowExecutionOverviewPro
           gutterSize="m"
           css={{ height: '100%', overflow: 'hidden' }}
         >
+          {executionData?.effectiveIdentity?.type === 'service_account' && (
+            <EuiFlexItem grow={false}>
+              <EuiDescriptionList
+                data-test-subj="workflowExecutionIdentity"
+                listItems={[
+                  {
+                    title: i18n.translate('workflows.execution.triggeredByLabel', {
+                      defaultMessage: 'Triggered by',
+                    }),
+                    description: executionData.executedBy ?? '-',
+                  },
+                  {
+                    title: i18n.translate('workflows.execution.runAsLabel', {
+                      defaultMessage: 'Run as',
+                    }),
+                    description: <ServiceAccountName id={executionData.effectiveIdentity.id} />,
+                  },
+                ]}
+              />
+            </EuiFlexItem>
+          )}
           <EuiFlexItem grow={false}>
             <EuiFlexGroup justifyContent="spaceBetween" alignItems="center" gutterSize="s">
               <EuiFlexItem grow={false}>

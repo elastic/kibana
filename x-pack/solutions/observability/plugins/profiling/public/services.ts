@@ -6,7 +6,8 @@
  */
 
 import type { HttpFetchQuery } from '@kbn/core/public';
-import type { TopNFunctions } from '@kbn/profiling-utils';
+import { buildPath } from '@kbn/core-http-browser';
+import type { ProfilingStatus, TopNFunctions } from '@kbn/profiling-utils';
 import {
   createFlameGraph,
   type BaseFlameGraph,
@@ -20,7 +21,7 @@ import type {
   StorageHostDetailsAPIResponse,
 } from '../common/storage_explorer';
 import type { TopNResponse } from '../common/topn';
-import type { SetupDataCollectionInstructions } from '../server/routes/setup/get_cloud_setup_instructions';
+import type { SetupDataCollectionInstructions } from '../server/routes/universal_profiling/setup/get_cloud_setup_instructions';
 import type { AutoAbortedHttpService } from './hooks/use_auto_aborted_http_client';
 
 export interface APMTransactionsPerService {
@@ -30,14 +31,8 @@ export interface APMTransactionsPerService {
   };
 }
 
-export interface ProfilingSetupStatus {
-  type: 'cloud' | 'self-managed' | 'serverless';
-  profiling_enabled?: boolean;
-  has_setup: boolean;
-  has_data: boolean;
-  pre_8_9_1_data: boolean;
+export interface ProfilingSetupStatus extends ProfilingStatus {
   has_required_role: boolean;
-  unauthorized?: boolean;
 }
 
 export interface Services {
@@ -105,7 +100,9 @@ export function getServices(): Services {
         timeTo,
         kuery,
       };
-      return (await http.get(`${paths.TopN}/${type}`, { query })) as Promise<TopNResponse>;
+      return (await http.get(buildPath('/internal/profiling/topn/{type}', { type }), {
+        query,
+      })) as Promise<TopNResponse>;
     },
 
     fetchTopNFunctions: async ({ http, timeFrom, timeTo, startIndex, endIndex, kuery }) => {

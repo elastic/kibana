@@ -127,7 +127,6 @@
         "openai",
         "@types/json-schema",
         "table",
-        "@huggingface/hub",
         "cache-manager",
         "cache-manager-fs-hash",
         "keyv",
@@ -1282,29 +1281,11 @@
       "enabled": true
     },
     {
-      "groupName": "search-ui ai dependency",
-      "matchDepNames": ["ai", "@ai-sdk/langchain"],
-      "reviewers": ["team:search-ml-ux"],
-      "matchBaseBranches": ["main"],
-      "addLabels": ["Team:Search", "Team:Enterprise Search"],
-      "minimumReleaseAge": "14 days",
-      "enabled": true
-    },
-    {
       "groupName": "search-ui kea dependency",
       "matchDepNames": ["kea"],
       "reviewers": ["team:search-ml-ux"],
       "matchBaseBranches": ["main"],
       "addLabels": ["Team:Search", "Team:Enterprise Search", "effort:high", "upgrade-risk:medium"],
-      "minimumReleaseAge": "14 days",
-      "enabled": true
-    },
-    {
-      "groupName": "search-ui swr dependency",
-      "matchDepNames": ["swr"],
-      "reviewers": ["team:search-ml-ux"],
-      "matchBaseBranches": ["main"],
-      "addLabels": ["Team:Search", "Team:Enterprise Search"],
       "minimumReleaseAge": "14 days",
       "enabled": true
     },
@@ -2410,7 +2391,7 @@
     },
     {
       "groupName": "oxlint",
-      "matchDepNames": ["oxlint"],
+      "matchDepNames": ["oxlint", "@oxlint/plugins"],
       "reviewers": ["team:kibana-operations"],
       "matchBaseBranches": ["main"],
       "addLabels": ["Team:Operations"],

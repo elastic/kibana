@@ -204,7 +204,7 @@ export class GraphPageObject extends FtrService {
     await this.testSubjects.click('confirmSaveSavedObjectButton');
 
     // Confirm that the Graph has been saved.
-    return await this.testSubjects.exists('saveGraphSuccess', { timeout: 10000 });
+    return await this.testSubjects.waitForExists('saveGraphSuccess', { timeout: 10000 });
   }
 
   async searchForWorkspaceWithName(name: string) {
@@ -230,7 +230,7 @@ export class GraphPageObject extends FtrService {
       } else {
         await this.testSubjects.click('breadcrumb graphHomeBreadcrumb first');
       }
-      if (await this.testSubjects.exists('confirmModalConfirmButton', { timeout: 2000 })) {
+      if (await this.testSubjects.waitForExists('confirmModalConfirmButton', { timeout: 2000 })) {
         await this.common.clickConfirmOnModal();
       }
       await this.testSubjects.existOrFail('contentListToolbar-searchBox', { timeout: 5000 });

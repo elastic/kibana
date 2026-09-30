@@ -1,5 +1,5 @@
 {
-  "sha1": "b4d4192708960a4b54c53dc1b7aa1acbae9563f4",
+  "sha1": "bcbbbcf76aad6f6d4cc136277b0f3ddfe24c08f7",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -549,8 +549,8 @@
       }
     },
     {
-      "id": "2bd6d8da5d00a5a-d29b9decd15410e",
-      "title": "POST /internal/nightshift/investigations returns 400 for a significant event body without a title",
+      "id": "2bd6d8da5d00a5a-0052c9640bd5a03",
+      "title": "POST /internal/nightshift/investigations returns 400 for a significant event subject, which is not accepted by this route",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -576,8 +576,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/nightshift_investigations/test/scout_nightshift_investigations/api/tests/start_investigation.spec.ts",
-        "line": 50,
-        "column": 28
+        "line": 51,
+        "column": 30
       }
     },
     {
@@ -592,7 +592,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/nightshift_investigations/test/scout_nightshift_investigations/api/tests/start_investigation.spec.ts",
-        "line": 62,
+        "line": 65,
         "column": 58
       }
     },
@@ -608,7 +608,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/nightshift_investigations/test/scout_nightshift_investigations/api/tests/start_investigation.spec.ts",
-        "line": 75,
+        "line": 78,
         "column": 27
       }
     },
