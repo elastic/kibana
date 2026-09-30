@@ -104,6 +104,7 @@ const service = ({
 } = {}) =>
   new ExtractionService({
     lockManager,
+    logger: { warn: jest.fn() },
     managedWorkflows: {} as never,
     management: {} as never,
     createSourceSession,
