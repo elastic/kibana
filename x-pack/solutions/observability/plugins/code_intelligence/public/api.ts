@@ -7,21 +7,14 @@
 
 import type { HttpSetup } from '@kbn/core/public';
 
-export interface Repository {
-  repository: string;
-}
+import type { BatchRepositoryRequest, ExtractionBatchStatus } from '../common/extraction_batch';
+import type { RepositorySettings, RepositorySettingsInput } from '../common/repository_settings';
 
-export interface ExtractionStatus {
-  id: string;
-  repository: string;
-  revision: string;
-  status: 'running' | 'completed' | 'failed';
-  counts: Record<string, number>;
-  errors: string[];
-  warnings?: string[];
-  startedAt: string;
-  completedAt?: string;
-}
+export type { ExtractionBatchStatus, RepositoryExtractionStatus } from '../common/extraction_batch';
+export type { RepositorySettings, RepositorySettingsInput } from '../common/repository_settings';
+
+/** A repository row from the settings index. */
+export type Repository = RepositorySettings;
 
 export interface CatalogItem {
   id: string;
@@ -41,36 +34,43 @@ export interface CatalogResponse {
   items: CatalogItem[];
 }
 
-type RepositoriesResponse =
-  | string[]
-  | Array<string | { repository: string }>
-  | {
-      repositories?: Array<string | { repository: string }>;
-      items?: Array<string | { repository: string }>;
-    };
-
-const repositoryName = (value: string | { repository: string }): string =>
-  typeof value === 'string' ? value : value.repository;
-
-export const getRepositories = async (http: HttpSetup): Promise<Repository[]> => {
-  const response = await http.get<RepositoriesResponse>('/internal/code_intelligence/repositories');
-  const values = Array.isArray(response) ? response : response.repositories ?? response.items ?? [];
-  return values
-    .map(repositoryName)
-    .filter((repository) => repository.length >= 3 && repository.length <= 256)
-    .map((repository) => ({ repository }));
+const repositoryPath = (repository: string): string => {
+  const [owner = '', name = ''] = repository.split('/');
+  return `/internal/code_intelligence/repositories/${encodeURIComponent(
+    owner
+  )}/${encodeURIComponent(name)}`;
 };
 
-export const startExtraction = (
+export const getRepositories = async (http: HttpSetup): Promise<Repository[]> => {
+  const response = await http.get<{ repositories?: Repository[] }>(
+    '/internal/code_intelligence/repositories'
+  );
+  return response.repositories ?? [];
+};
+
+export const saveRepository = async (
   http: HttpSetup,
-  repository: string,
-  revision: string
+  input: RepositorySettingsInput
+): Promise<Repository> => {
+  const response = await http.put<{ repository: Repository }>(repositoryPath(input.repository), {
+    body: JSON.stringify(input),
+  });
+  return response.repository;
+};
+
+export const deleteRepository = (http: HttpSetup, repository: string): Promise<unknown> =>
+  http.delete(repositoryPath(repository));
+
+/** Starts 1 batch; without repositories, the server runs every enabled repository at its default ref. */
+export const startBatch = (
+  http: HttpSetup,
+  repositories?: BatchRepositoryRequest[]
 ): Promise<{ id: string }> =>
   http.post('/internal/code_intelligence/extractions', {
-    body: JSON.stringify({ repository, revision }),
+    body: JSON.stringify(repositories === undefined ? {} : { repositories }),
   });
 
-export const getExtraction = (http: HttpSetup, id: string): Promise<ExtractionStatus> =>
+export const getBatch = (http: HttpSetup, id: string): Promise<ExtractionBatchStatus> =>
   http.get(`/internal/code_intelligence/extractions/${encodeURIComponent(id)}`);
 
 export const getCatalog = (
