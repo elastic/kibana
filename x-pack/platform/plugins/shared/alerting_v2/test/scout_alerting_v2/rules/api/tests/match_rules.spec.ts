@@ -17,12 +17,17 @@ import {
 
 const MATCH_RULES_URL = testData.INTERNAL_RULE_MATCH_API_PATH;
 
-const RULES: ReadonlyArray<{ name: string; tags?: string[] }> = [
+const ALERT_RULES: ReadonlyArray<{ name: string; tags?: string[] }> = [
   { name: 'rule-cpu', tags: ['cpu'] },
   { name: 'rule-cpu-production', tags: ['cpu', 'production'] },
   { name: 'rule-memory', tags: ['memory'] },
   { name: 'rule-untagged' },
 ];
+
+const SIGNAL_RULE = {
+  name: 'signal-rule',
+  tags: ['cpu', 'production', 'memory', 'signal-only'],
+};
 
 const getRuleNames = (items: Array<{ metadata: { name: string } }>) =>
   items.map((rule) => rule.metadata.name);
@@ -39,11 +44,20 @@ apiTest.describe('Match rules API', { tag: '@local-stateful-classic' }, () => {
     readerHeaders = { ...testData.COMMON_HEADERS, ...readerCredentials.apiKeyHeader };
 
     await apiServices.alertingV2.rules.cleanUp();
-    await Promise.all(
-      RULES.map((metadata) =>
+    await Promise.all([
+      ...ALERT_RULES.map((metadata) =>
         apiServices.alertingV2.rules.create(buildCreateRuleData({ metadata }))
-      )
-    );
+      ),
+      apiServices.alertingV2.rules.create(
+        buildCreateRuleData({
+          kind: 'signal',
+          state_transition: undefined,
+          recovery: undefined,
+          no_data: undefined,
+          metadata: SIGNAL_RULE,
+        })
+      ),
+    ]);
   });
 
   apiTest.afterAll(async ({ apiServices }) => {
@@ -51,7 +65,7 @@ apiTest.describe('Match rules API', { tag: '@local-stateful-classic' }, () => {
   });
 
   apiTest(
-    'tags: should return the rules with any of the matcher tags, sorted by name',
+    'tags: should return the alert rules with any of the matcher tags, sorted by name',
     async ({ apiClient }) => {
       const response = await apiClient.post(MATCH_RULES_URL, {
         headers: readerHeaders,
@@ -92,7 +106,21 @@ apiTest.describe('Match rules API', { tag: '@local-stateful-classic' }, () => {
   );
 
   apiTest(
-    'catch-all: should return every rule when the matcher has no tags',
+    'kind: should not return signal rules, even when they have the matcher tags',
+    async ({ apiClient }) => {
+      const response = await apiClient.post(MATCH_RULES_URL, {
+        headers: readerHeaders,
+        body: { matcher: { tags: ['signal-only'] } },
+      });
+
+      expect(response).toHaveStatusCode(200);
+      expect(response.body.items).toStrictEqual([]);
+      expect(response.body.total).toBe(0);
+    }
+  );
+
+  apiTest(
+    'catch-all: should return every alert rule when the matcher has no tags',
     async ({ apiClient }) => {
       for (const body of [
         {},
@@ -103,8 +131,10 @@ apiTest.describe('Match rules API', { tag: '@local-stateful-classic' }, () => {
         const response = await apiClient.post(MATCH_RULES_URL, { headers: readerHeaders, body });
 
         expect(response).toHaveStatusCode(200);
-        expect(getRuleNames(response.body.items)).toStrictEqual(RULES.map(({ name }) => name));
-        expect(response.body.total).toBe(RULES.length);
+        expect(getRuleNames(response.body.items)).toStrictEqual(
+          ALERT_RULES.map(({ name }) => name)
+        );
+        expect(response.body.total).toBe(ALERT_RULES.length);
       }
     }
   );

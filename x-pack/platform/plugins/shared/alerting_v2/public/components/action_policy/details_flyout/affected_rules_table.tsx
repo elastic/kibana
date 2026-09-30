@@ -90,7 +90,8 @@ export const AffectedRulesTable = ({ matcher }: Props) => {
               defaultMessage: 'Loading rules…',
             })
           : i18n.translate('xpack.alertingV2.actionPolicy.affectedRules.noRules', {
-              defaultMessage: 'No rules have any of the tags in this policy scope.',
+              defaultMessage:
+                'No rules that create alerts have any of the tags in this policy scope.',
             })
       }
       pagination={{

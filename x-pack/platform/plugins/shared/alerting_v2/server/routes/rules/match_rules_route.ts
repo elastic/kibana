@@ -52,7 +52,7 @@ export class MatchRulesRoute extends BaseAlertingRoute {
     access: 'internal' as const,
     summary: 'Match rules',
     description:
-      "Returns the rules in scope of an action policy matcher, sorted by name. A rule matches when it has at least one of the tags in `matcher.tags`. When the matcher has no tags, every rule in the space matches. This endpoint does not evaluate `matcher.expression`, because it's evaluated against each alert at dispatch time.",
+      "Returns the alert rules (`kind: alert`) in scope of an action policy matcher, sorted by name. Signal rules are never returned, because they don't create alerts. A rule matches when it has at least one of the tags in `matcher.tags`. When the matcher has no tags, every alert rule in the space matches. This endpoint does not evaluate `matcher.expression`, because it's evaluated against each alert at dispatch time.",
     oasOperationObject: matchRulesOasExamples,
   } as const;
   static schemas = {

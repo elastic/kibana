@@ -197,12 +197,17 @@ const mapSortField = (sortField?: FindRulesSortField): string | undefined => {
   return sortFieldMap[sortField];
 };
 
-const buildRuleTagsFilter = (tags: string[]): string =>
-  toKqlExpression(
-    nodeBuilder.or(
-      tags.map((tag) => nodeBuilder.is('metadata.tags', nodeTypes.literal.buildNode(tag, true)))
-    )
+const buildMatchRulesFilter = (tags: string[]): string => {
+  const alertRules = nodeBuilder.is('kind', 'alert');
+  if (tags.length === 0) {
+    return toKqlExpression(alertRules);
+  }
+
+  const anyTag = nodeBuilder.or(
+    tags.map((tag) => nodeBuilder.is('metadata.tags', nodeTypes.literal.buildNode(tag, true)))
   );
+  return toKqlExpression(nodeBuilder.and([alertRules, anyTag]));
+};
 
 @injectable()
 export class RulesClient {
@@ -1080,8 +1085,9 @@ export class RulesClient {
   }
 
   /**
-   * Finds the rules in scope of a policy matcher: rules with at least one of its tags, or every rule
-   * when it has no tags. The matcher expression runs against alerts, so it can't narrow rules down.
+   * Finds the alert rules in scope of a policy matcher: those with at least one of its tags, or every
+   * alert rule when it has no tags. Signal rules never create alerts, so no policy applies to them.
+   * The matcher expression runs against alerts, so it can't narrow rules down.
    */
   @withApm
   public async matchRules({
@@ -1089,12 +1095,10 @@ export class RulesClient {
     page,
     perPage,
   }: MatchRulesArgs = {}): Promise<FindRulesResponse> {
-    const tags = matcher?.tags ?? [];
-
     return this.findRules({
       page,
       perPage,
-      filter: tags.length > 0 ? buildRuleTagsFilter(tags) : undefined,
+      filter: buildMatchRulesFilter(matcher?.tags ?? []),
       sortField: 'name',
       sortOrder: 'asc',
     });

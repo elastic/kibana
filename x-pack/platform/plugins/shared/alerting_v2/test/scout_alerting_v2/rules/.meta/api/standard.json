@@ -1,5 +1,5 @@
 {
-  "sha1": "0bbe7e2fbdba26195fdb291ce7e6afeb28255112",
+  "sha1": "c78fb8aff214edf3f48fb77eaa96485fd195b9c5",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -3189,16 +3189,16 @@
       }
     },
     {
-      "id": "43d3aea485b9312-cdb96ca5dbf7b2e",
-      "title": "Match rules API tags: should return the rules with any of the matcher tags, sorted by name",
+      "id": "43d3aea485b9312-5891588a5cd7d35",
+      "title": "Match rules API tags: should return the alert rules with any of the matcher tags, sorted by name",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/rules/api/tests/match_rules.spec.ts",
-        "line": 55,
-        "column": 30
+        "line": 73,
+        "column": 9
       }
     },
     {
@@ -3210,8 +3210,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/rules/api/tests/match_rules.spec.ts",
-        "line": 73,
-        "column": 24
+        "line": 92,
+        "column": 5
       }
     },
     {
@@ -3223,21 +3223,34 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/rules/api/tests/match_rules.spec.ts",
-        "line": 85,
-        "column": 52
+        "line": 110,
+        "column": 30
       }
     },
     {
-      "id": "43d3aea485b9312-810e63cbd660250",
-      "title": "Match rules API catch-all: should return every rule when the matcher has no tags",
+      "id": "43d3aea485b9312-e80fe324ca8c29e",
+      "title": "Match rules API kind: should not return signal rules, even when they have the matcher tags",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/rules/api/tests/match_rules.spec.ts",
-        "line": 100,
-        "column": 51
+        "line": 124,
+        "column": 30
+      }
+    },
+    {
+      "id": "43d3aea485b9312-77747c1d16f3ab6",
+      "title": "Match rules API catch-all: should return every alert rule when the matcher has no tags",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/rules/api/tests/match_rules.spec.ts",
+        "line": 131,
+        "column": 90
       }
     },
     {
@@ -3249,8 +3262,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/rules/api/tests/match_rules.spec.ts",
-        "line": 115,
-        "column": 62
+        "line": 153,
+        "column": 5
       }
     },
     {
@@ -3262,8 +3275,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/rules/api/tests/match_rules.spec.ts",
-        "line": 136,
-        "column": 5
+        "line": 171,
+        "column": 9
       }
     },
     {
@@ -3275,8 +3288,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/rules/api/tests/match_rules.spec.ts",
-        "line": 144,
-        "column": 14
+        "line": 184,
+        "column": 18
       }
     },
     {
@@ -3288,8 +3301,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/rules/api/tests/match_rules.spec.ts",
-        "line": 154,
-        "column": 51
+        "line": 188,
+        "column": 14
       }
     },
     {

@@ -2234,9 +2234,10 @@ describe('RulesClient', () => {
   });
 
   describe('matchRules', () => {
+    const kindFilter = `${RULE_SAVED_OBJECT_TYPE}.attributes.kind: alert`;
     const tagsField = `${RULE_SAVED_OBJECT_TYPE}.attributes.metadata.tags`;
 
-    it('finds the rules with any of the matcher tags, sorted by name', async () => {
+    it('finds the alert rules with any of the matcher tags, sorted by name', async () => {
       const client = createClient();
 
       await client.matchRules({ matcher: { tags: ['cpu', 'prod'] }, page: 2, perPage: 10 });
@@ -2245,7 +2246,7 @@ describe('RulesClient', () => {
         expect.objectContaining({
           page: 2,
           perPage: 10,
-          filter: `(${tagsField}: "cpu" OR ${tagsField}: "prod")`,
+          filter: `(${kindFilter} AND (${tagsField}: "cpu" OR ${tagsField}: "prod"))`,
           sortField: 'metadata.name.keyword',
           sortOrder: 'asc',
         })
@@ -2258,7 +2259,7 @@ describe('RulesClient', () => {
       await client.matchRules({ matcher: { tags: ['cpu'], expression: 'severity: critical' } });
 
       expect(rulesSavedObjectService.find).toHaveBeenCalledWith(
-        expect.objectContaining({ filter: `${tagsField}: "cpu"` })
+        expect.objectContaining({ filter: `(${kindFilter} AND ${tagsField}: "cpu")` })
       );
     });
 
@@ -2268,7 +2269,9 @@ describe('RulesClient', () => {
       await client.matchRules({ matcher: { tags: ['team "a" OR *'] } });
 
       expect(rulesSavedObjectService.find).toHaveBeenCalledWith(
-        expect.objectContaining({ filter: `${tagsField}: "team \\"a\\" OR *"` })
+        expect.objectContaining({
+          filter: `(${kindFilter} AND ${tagsField}: "team \\"a\\" OR *")`,
+        })
       );
     });
 
@@ -2277,17 +2280,16 @@ describe('RulesClient', () => {
       ['a null matcher', null],
       ['a catch-all matcher', { tags: null, expression: null }],
       ['an expression-only matcher', { tags: [], expression: 'severity: critical' }],
-    ])('finds every rule for %s', async (_, matcher) => {
+    ])('finds every alert rule for %s', async (_, matcher) => {
       const client = createClient();
 
       await client.matchRules({ matcher });
 
-      const [args] = rulesSavedObjectService.find.mock.calls[0];
-      expect(args.filter).toBeUndefined();
-      expect(args).toEqual(
+      expect(rulesSavedObjectService.find).toHaveBeenCalledWith(
         expect.objectContaining({
           page: 1,
           perPage: 20,
+          filter: kindFilter,
           sortField: 'metadata.name.keyword',
           sortOrder: 'asc',
         })

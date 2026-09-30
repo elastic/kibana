@@ -21,11 +21,11 @@ import {
 
 const ALL_RULES_CALLOUT_TITLES: Record<Exclude<PolicyScopeKind, 'tags'>, string> = {
   catchAll: i18n.translate('xpack.alertingV2.actionPolicy.affectedRules.catchAll', {
-    defaultMessage: 'All rules in this space are handled by this policy.',
+    defaultMessage: 'All rules in this space that create alerts are handled by this policy.',
   }),
   expressionOnly: i18n.translate('xpack.alertingV2.actionPolicy.affectedRules.expressionOnly', {
     defaultMessage:
-      'All rules in this space may be handled by this policy, depending on the matching query.',
+      'All rules in this space that create alerts may be handled by this policy, depending on the matching query.',
   }),
 };
 

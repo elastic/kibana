@@ -71,7 +71,7 @@ describe('AffectedRulesFlyout', () => {
     renderFlyout(null);
 
     expect(screen.getByTestId('actionPolicyAffectedRulesAllRulesCallout')).toHaveTextContent(
-      'All rules in this space are handled by this policy.'
+      'All rules in this space that create alerts are handled by this policy.'
     );
     expect(screen.queryByTestId('actionPolicyAffectedRulesTable')).not.toBeInTheDocument();
     expect(mockUseFetchMatchingRules).not.toHaveBeenCalled();
@@ -81,7 +81,7 @@ describe('AffectedRulesFlyout', () => {
     renderFlyout({ expression: 'data.severity : "critical"' });
 
     expect(screen.getByTestId('actionPolicyAffectedRulesAllRulesCallout')).toHaveTextContent(
-      'All rules in this space may be handled by this policy, depending on the matching query.'
+      'All rules in this space that create alerts may be handled by this policy, depending on the matching query.'
     );
     expect(screen.queryByTestId('actionPolicyAffectedRulesTable')).not.toBeInTheDocument();
     expect(mockUseFetchMatchingRules).not.toHaveBeenCalled();
@@ -136,7 +136,7 @@ describe('AffectedRulesFlyout', () => {
     ).toBeInTheDocument();
   });
 
-  it('says no rule matches when no rule has the policy tags', () => {
+  it('says no rule matches when no alert rule has the policy tags', () => {
     mockUseFetchMatchingRules.mockReturnValue({
       data: { items: [], total: 0, page: 1, per_page: 10 },
       isLoading: false,
@@ -147,7 +147,7 @@ describe('AffectedRulesFlyout', () => {
 
     expect(
       within(screen.getByTestId('actionPolicyAffectedRulesTable')).getByText(
-        'No rules have any of the tags in this policy scope.'
+        'No rules that create alerts have any of the tags in this policy scope.'
       )
     ).toBeInTheDocument();
   });
