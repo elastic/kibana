@@ -9,7 +9,7 @@
 
 import { setTimeout as timer } from 'timers/promises';
 import { parse as parseCookie } from 'tough-cookie';
-import supertest from 'supertest';
+import { kibanaSupertest as supertest } from '@kbn/test';
 import { duration as momentDuration } from 'moment';
 import { REPO_ROOT } from '@kbn/repo-info';
 import { ByteSizeValue } from '@kbn/config-schema';

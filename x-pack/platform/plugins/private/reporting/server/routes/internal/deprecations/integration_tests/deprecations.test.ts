@@ -12,7 +12,7 @@ import { licensingMock } from '@kbn/licensing-plugin/server/mocks';
 import { INTERNAL_ROUTES } from '@kbn/reporting-common';
 import { createMockConfigSchema } from '@kbn/reporting-mocks-server';
 import { securityMock } from '@kbn/security-plugin/server/mocks';
-import supertest from 'supertest';
+import { kibanaSupertest as supertest } from '@kbn/test';
 import {
   createMockPluginSetup,
   createMockPluginStart,

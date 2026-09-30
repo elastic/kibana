@@ -8,6 +8,7 @@
  */
 
 import { format as formatUrl } from 'url';
+import { wrapKibanaSupertestAgent } from '@kbn/test';
 import supertest from 'supertest';
 import type { FtrProviderContext } from './ftr_provider_context';
 
@@ -25,5 +26,6 @@ export function SupertestWithoutAuthProvider({ getService }: FtrProviderContext)
     auth: false,
   });
 
-  return supertest(kbnUrl);
+  const maxRetryMs = config.get('timeouts.try') as number;
+  return wrapKibanaSupertestAgent(supertest(kbnUrl), { maxRetryMs });
 }

@@ -43,6 +43,7 @@
     "@kbn/core-security-server",
     "@kbn/core-spaces-common",
     "@kbn/apm-utils",
+    "@kbn/test",
   ],
   "exclude": [
     "target/**/*",

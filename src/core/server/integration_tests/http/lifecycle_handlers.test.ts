@@ -7,7 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import supertest from 'supertest';
+import { kibanaSupertest as supertest } from '@kbn/test';
+import type { Test as SupertestTest } from 'supertest';
 import { kibanaPackageJson } from '@kbn/repo-info';
 import type { IRouter, RouteRegistrar } from '@kbn/core-http-server';
 import { contextServiceMock } from '@kbn/core-http-context-server-mocks';
@@ -178,8 +179,8 @@ describe('core lifecycle handlers', () => {
     const testPath = '/xsrf/test/route';
     const nonDestructiveMethods = ['GET', 'HEAD'];
 
-    const getSupertest = (method: string, path: string): supertest.Test => {
-      return (supertest(innerServer.listener) as any)[method.toLowerCase()](path) as supertest.Test;
+    const getSupertest = (method: string, path: string): SupertestTest => {
+      return (supertest(innerServer.listener) as any)[method.toLowerCase()](path) as SupertestTest;
     };
 
     beforeEach(async () => {
@@ -549,11 +550,8 @@ describe('xsrf post-auth handler with allowedSchemes (Authorization bypass)', ()
     await server.stop();
   });
 
-  const getSupertest = (
-    method: (typeof destructiveMethods)[number],
-    path: string
-  ): supertest.Test =>
-    (supertest(innerServer.listener) as any)[method.toLowerCase()](path) as supertest.Test;
+  const getSupertest = (method: (typeof destructiveMethods)[number], path: string): SupertestTest =>
+    (supertest(innerServer.listener) as any)[method.toLowerCase()](path) as SupertestTest;
 
   // These integration tests exercise only the seam between the real registerAuth →
   // toolkit.authenticated({ state }) → getAuthState pipeline and the xsrf handler. The full

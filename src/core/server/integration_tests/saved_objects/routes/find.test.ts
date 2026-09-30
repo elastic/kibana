@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import supertest from 'supertest';
+import { kibanaSupertest as supertest } from '@kbn/test';
 import querystring from 'querystring';
 
 import type { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks';

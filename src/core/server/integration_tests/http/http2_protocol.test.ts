@@ -9,7 +9,7 @@
 
 import type { Server } from 'http';
 import http2 from 'http2';
-import supertest from 'supertest';
+import { kibanaSupertest as supertest } from '@kbn/test';
 import { of } from 'rxjs';
 import { KBN_CERT_PATH, KBN_KEY_PATH } from '@kbn/dev-utils';
 import { Router } from '@kbn/core-http-router-server-internal';

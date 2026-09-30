@@ -8,7 +8,7 @@
  */
 
 import type { Server } from 'http';
-import supertest from 'supertest';
+import { kibanaSupertest as supertest } from '@kbn/test';
 import moment from 'moment';
 import { of } from 'rxjs';
 import { ByteSizeValue } from '@kbn/config-schema';

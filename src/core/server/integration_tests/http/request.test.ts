@@ -12,7 +12,7 @@ jest.mock('uuid', () => ({
   v4: jest.fn().mockReturnValue('xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx'),
 }));
 
-import supertest from 'supertest';
+import { kibanaSupertest as supertest } from '@kbn/test';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { executionContextServiceMock } from '@kbn/core-execution-context-server-mocks';
 import { userActivityServiceMock } from '@kbn/core-user-activity-server-mocks';

@@ -11,7 +11,7 @@ jest.mock('../../../lib/content_stream', () => ({
 
 import { BehaviorSubject } from 'rxjs';
 import { Readable } from 'stream';
-import supertest from 'supertest';
+import { kibanaSupertest as supertest } from '@kbn/test';
 
 import type { estypes } from '@elastic/elasticsearch';
 import type { SetupServerReturn } from '@kbn/core-test-helpers-test-utils';

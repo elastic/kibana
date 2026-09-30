@@ -8,7 +8,7 @@
  */
 
 import { BehaviorSubject, firstValueFrom } from 'rxjs';
-import supertest from 'supertest';
+import { kibanaSupertest as supertest } from '@kbn/test';
 import { omit } from 'lodash';
 
 import { ContextService } from '@kbn/core-http-context-server-internal';

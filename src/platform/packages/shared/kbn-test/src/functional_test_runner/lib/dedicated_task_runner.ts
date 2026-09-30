@@ -14,6 +14,7 @@ import Supertest from 'supertest';
 
 import { KbnClient } from '@kbn/kbn-client';
 import { DedicatedTaskRunnerConfig, getKibanaCliArg } from '@kbn/test-kibana-server';
+import { wrapKibanaSupertestAgent } from '../../supertest/kibana_supertest';
 import type { Config } from './config';
 
 export class DedicatedTaskRunner {
@@ -131,6 +132,6 @@ export class DedicatedTaskRunner {
    *  const response = await supertest.get('/status');
    */
   getSupertest() {
-    return Supertest(this.getUrl());
+    return wrapKibanaSupertestAgent(Supertest(this.getUrl()));
   }
 }
