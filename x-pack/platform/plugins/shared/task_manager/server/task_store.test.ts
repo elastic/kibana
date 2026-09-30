@@ -569,7 +569,9 @@ describe('TaskStore', () => {
 
       const firstErrorPromise = store.errors$.pipe(first()).toPromise();
       savedObjectsClient.create.mockRejectedValue(new Error('Failure'));
-      await expect(store.schedule(task)).rejects.toThrowErrorMatchingInlineSnapshot(`[Error: Failure]`);
+      await expect(store.schedule(task)).rejects.toThrowErrorMatchingInlineSnapshot(
+        `[Error: Failure]`
+      );
       expect(await firstErrorPromise).toMatchInlineSnapshot(`[Error: Failure]`);
     });
 
@@ -3564,7 +3566,9 @@ describe('TaskStore', () => {
     test('pushes error from saved objects client to errors$', async () => {
       const firstErrorPromise = store.errors$.pipe(first()).toPromise();
       savedObjectsClient.get.mockRejectedValue(new Error('Failure'));
-      await expect(store.get(randomId())).rejects.toThrowErrorMatchingInlineSnapshot(`[Error: Failure]`);
+      await expect(store.get(randomId())).rejects.toThrowErrorMatchingInlineSnapshot(
+        `[Error: Failure]`
+      );
       expect(await firstErrorPromise).toMatchInlineSnapshot(`[Error: Failure]`);
     });
   });

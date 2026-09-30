@@ -428,7 +428,9 @@ describe('computeParentPipelineColumns', () => {
     if (expected === null) {
       expect(computeParentPipelineColumns(...input)).toBeNull();
     } else if (Array.isArray(expected)) {
-      expect(computeParentPipelineColumns(...input)).toEqual(expected.map((item) => expect.objectContaining(item)));
+      expect(computeParentPipelineColumns(...input)).toEqual(
+        expected.map((item) => expect.objectContaining(item))
+      );
     } else {
       expect(computeParentPipelineColumns(...input)).toEqual(expect.objectContaining(expected));
     }

@@ -209,7 +209,9 @@ describe('getBucketsColumns', () => {
     if (expected === null) {
       expect(getBucketsColumns(...input)).toBeNull();
     } else if (Array.isArray(expected)) {
-      expect(getBucketsColumns(...input)).toEqual(expected.map((item) => expect.objectContaining(item)));
+      expect(getBucketsColumns(...input)).toEqual(
+        expected.map((item) => expect.objectContaining(item))
+      );
     } else {
       expect(getBucketsColumns(...input)).toEqual(expect.objectContaining(expected));
     }

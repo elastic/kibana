@@ -432,9 +432,7 @@ describe('The metric threshold rule type', () => {
       });
 
       expect(services.getDataViews).not.toHaveBeenCalled();
-      expect(
-        mockedEvaluateRule.mock.calls[0][6]
-      ).toBeUndefined();
+      expect(mockedEvaluateRule.mock.calls[0][6]).toBeUndefined();
     });
 
     test('fetches a data view when the rule uses a filtered custom count metric', async () => {
@@ -453,9 +451,7 @@ describe('The metric threshold rule type', () => {
         pattern: 'metrics-*,metricbeat-*',
         allowNoIndex: true,
       });
-      expect(mockedEvaluateRule.mock.calls[0][6]).toEqual(
-        mockDataView
-      );
+      expect(mockedEvaluateRule.mock.calls[0][6]).toEqual(mockDataView);
     });
   });
 

@@ -179,9 +179,13 @@ describe('AlertingPage', () => {
   });
 
   const renderComponent = (packageInfo: PackageInfo = basePackageInfo) => {
-    // eslint-disable-next-line
     const h = { useAuthz: 'x' };
-    console.log('DBG', String(h.useAuthz).slice(0, 80), JSON.stringify(mockUseAuthz()), mockUseAuthz.getMockImplementation?.());
+    console.log(
+      'DBG',
+      String(h.useAuthz).slice(0, 80),
+      JSON.stringify(mockUseAuthz()),
+      mockUseAuthz.getMockImplementation?.()
+    );
     return render(
       <I18nProvider>
         <MemoryRouter>
