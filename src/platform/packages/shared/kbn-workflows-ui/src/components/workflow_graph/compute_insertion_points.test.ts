@@ -89,7 +89,8 @@ describe('computeInsertionPoints', () => {
     const points = computeInsertionPoints(workflow, transformWorkflowToGraph(workflow));
     const gatePorts = points.byNodeId.get('gate');
     expect(gatePorts?.branches).toBeDefined();
-    expect(gatePorts?.step).toBeUndefined();
+    // Last-in-sequence if-nodes get a step port for the "after block" terminal.
+    expect(gatePorts?.step).toMatchObject({ sourceNodeId: 'gate', stepName: 'gate', isTerminal: true });
     // 'steps' key = if-node "then" branch; handle is 'then' in use_workflow_layout.
     expect(gatePorts?.branches?.get('steps')).toEqual({
       slot: { kind: 'steps' },

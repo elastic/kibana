@@ -120,8 +120,8 @@ afterEach(() => {
 });
 
 describe('WorkflowGraphEdge — fork bus routing gate', () => {
-  describe('if/else branch labels move to node ports', () => {
-    it('does not render mid-edge true/false pills (those sit under the ports)', () => {
+  describe('if/else branch labels render as dashed chips on the fork drop', () => {
+    it('renders true/false as dashed chip labels on branch edges', () => {
       renderSingleEdge(
         makeEdgeProps({
           id: 'e-then',
@@ -134,7 +134,7 @@ describe('WorkflowGraphEdge — fork bus routing gate', () => {
           data: { branchType: 'then', label: 'true' },
         })
       );
-      expect(screen.queryByText('true')).not.toBeInTheDocument();
+      expect(screen.queryByText('true')).toBeInTheDocument();
 
       cleanup();
 
@@ -150,7 +150,7 @@ describe('WorkflowGraphEdge — fork bus routing gate', () => {
           data: { branchType: 'else', label: 'false' },
         })
       );
-      expect(screen.queryByText('false')).not.toBeInTheDocument();
+      expect(screen.queryByText('false')).toBeInTheDocument();
     });
   });
 

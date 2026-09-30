@@ -46,7 +46,7 @@ export const TRIGGER_STEP_TYPES: ReadonlySet<string> = new Set([
   'document',
 ]);
 
-export type EdgeBranchType = 'then' | 'else' | 'switch';
+export type EdgeBranchType = 'then' | 'else' | 'switch' | 'parallel';
 
 export interface NodeStyle {
   width: number;

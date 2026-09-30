@@ -118,9 +118,8 @@ function WorkflowGraphEdgeInner(props: EdgeProps) {
   const fullLabel = displayEdgeLabel(edgeData?.label ?? '');
   const truncated =
     fullLabel.length > LABEL_TRUNCATE ? `${fullLabel.slice(0, LABEL_TRUNCATE - 1)}…` : fullLabel;
-  // true/false pills live under the if-node ports — suppress the mid-edge copies.
-  const rawLabel = edgeData?.label ?? '';
-  const showLabel = Boolean(fullLabel) && rawLabel !== 'true' && rawLabel !== 'false';
+  const showLabel = Boolean(fullLabel);
+  const isBranchEdge = edgeData?.branchType != null;
 
   return (
     <>
@@ -178,7 +177,7 @@ function WorkflowGraphEdgeInner(props: EdgeProps) {
                 background: isFailure
                   ? euiTheme.colors.backgroundBaseDanger
                   : euiTheme.colors.backgroundBasePlain,
-                border: `1px solid ${
+                border: `1px ${isBranchEdge && !isFailure ? 'dashed' : 'solid'} ${
                   isFailure
                     ? euiTheme.colors.borderBaseDanger
                     : euiTheme.colors.borderBaseProminent

@@ -63,6 +63,7 @@ export interface WorkflowGraphEditOverlaysProps {
   readonly insertionPoints: InsertionPoints;
   readonly direction: LayoutDirection;
   readonly edit: WorkflowGraphEditActions;
+  readonly forkNodeToJoinId?: ReadonlyMap<string, string>;
 }
 
 /**
@@ -76,6 +77,7 @@ export function WorkflowGraphEditOverlays({
   insertionPoints,
   direction,
   edit,
+  forkNodeToJoinId,
 }: WorkflowGraphEditOverlaysProps) {
   const { euiTheme } = useEuiTheme();
   const euiThemeContext = useEuiTheme();
@@ -94,8 +96,9 @@ export function WorkflowGraphEditOverlays({
         edges,
         insertionPoints,
         direction,
+        forkNodeToJoinId,
       }),
-    [nodes, edges, insertionPoints, direction]
+    [nodes, edges, insertionPoints, direction, forkNodeToJoinId]
   );
 
   const handleAddTrigger = useCallback(

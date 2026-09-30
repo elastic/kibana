@@ -9,7 +9,7 @@
 
 import type { Edge, Node } from '@xyflow/react';
 import type { InsertionPoints } from './compute_insertion_points';
-import { MERGE_BUS_TRUNK, TRUNK_LENGTH_TO_TARGET } from './compute_edge_path';
+import { FORK_BUS_LABEL_OFFSET, FORK_BUS_TRUNK, MERGE_BUS_TRUNK } from './compute_edge_path';
 import {
   approachTrunkSegment,
   computeWireInsertionControls,
@@ -138,7 +138,7 @@ describe('computeWireInsertionControls', () => {
     expect(wire!.centre).toEqual({ x: 250, y: 24 });
   });
 
-  it('places fork (true/false) controls on the post-curve approach trunk', () => {
+  it('places fork (true/false) controls below the chip (terminal kind, chip-adjacent)', () => {
     const forkNodes: Node[] = [
       {
         id: 'gate',
@@ -201,20 +201,24 @@ describe('computeWireInsertionControls', () => {
       insertionPoints: forkInsertion,
       direction: 'TB',
     });
-    const thenWire = controls.find((c) => c.id === 'wire:gate-then');
-    const elseWire = controls.find((c) => c.id === 'wire:gate-else');
-    expect(thenWire).toBeDefined();
-    expect(elseWire).toBeDefined();
-    // thenStep entry at (100, 200); approach trunk mid is half the stub above entry.
-    expect(thenWire!.centre).toEqual({
-      x: 100,
-      y: 200 - TRUNK_LENGTH_TO_TARGET / 2,
-    });
-    expect(elseWire!.centre).toEqual({
-      x: 300,
-      y: 200 - TRUNK_LENGTH_TO_TARGET / 2,
-    });
-    expect(thenWire!.segmentEnd.y - thenWire!.segmentStart.y).toBe(TRUNK_LENGTH_TO_TARGET);
+    // Fork controls are now terminal-kind chips below the bus label.
+    const thenCtrl = controls.find((c) => c.id === 'terminal:fork:gate-then');
+    const elseCtrl = controls.find((c) => c.id === 'terminal:fork:gate-else');
+    expect(thenCtrl).toBeDefined();
+    expect(elseCtrl).toBeDefined();
+    expect(thenCtrl!.kind).toBe('terminal');
+    expect(elseCtrl!.kind).toBe('terminal');
+    // gate exit = center-bottom of gate: x=200, y=48.
+    // Chip Y = gateExitY + FORK_BUS_TRUNK + FORK_BUS_LABEL_OFFSET.
+    // "+" centre Y = chipY + 14 (CHIP_PLUS_GAP).
+    const CHIP_PLUS_GAP = 14;
+    const chipOffset = FORK_BUS_TRUNK + FORK_BUS_LABEL_OFFSET;
+    const gateExitY = 48; // gate y=0, height=48
+    const expectedPlusY = gateExitY + chipOffset + CHIP_PLUS_GAP;
+    // then-branch chip X = thenStep center top X = 0 + 200/2 = 100.
+    expect(thenCtrl!.centre).toEqual({ x: 100, y: expectedPlusY });
+    // else-branch chip X = elseStep center top X = 200 + 200/2 = 300.
+    expect(elseCtrl!.centre).toEqual({ x: 300, y: expectedPlusY });
   });
 
   it('places one merge control on the shared lower trunk', () => {

@@ -181,6 +181,11 @@ export function computeInsertionPoints(
         ? new Map([...branches].filter(([k]) => k !== 'steps'))
         : branches;
 
+      // Fork nodes (if/switch/parallel) get an "after block" step port when they are
+      // the last step in their sequence. This produces the single "+" below the merge
+      // point. Container types already have this port unconditionally (line below).
+      const isForkType = !isContainerType && (type === 'if' || type === 'switch' || type === 'parallel');
+
       byNodeId.set(id, {
         branches: effectiveBranches.size > 0 ? effectiveBranches : undefined,
         // Container nodes (foreach/while) also get a flow port so steps can be
@@ -188,6 +193,8 @@ export function computeInsertionPoints(
         // relaxed for containers — a step after a loop is a common pattern.
         ...(isContainerType
           ? { step: { sourceNodeId: id, stepName: step.name, isTerminal: isLastInSeq } }
+          : isForkType && isLastInSeq
+          ? { step: { sourceNodeId: id, stepName: step.name, isTerminal: true } }
           : {}),
         ...(supportsFallback
           ? hasFallbackSteps(step)

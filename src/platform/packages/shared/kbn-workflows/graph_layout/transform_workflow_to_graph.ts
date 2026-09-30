@@ -44,9 +44,10 @@ export interface TransformResult {
   edges: GraphEdge[];
   foreachGroups: ForeachGroup[];
   /**
-   * Layout-only bypass lane nodes for unbalanced `if`/`switch` branches.
-   * Separate from domain `nodes` — callers pass these to the layout engine but
-   * must not render them as workflow steps or include them in `nodeRefs`.
+   * Layout-only bypass lane nodes for unbalanced `if`/`switch` branches and
+   * virtual join nodes for fork blocks. Separate from domain `nodes` — callers
+   * pass these to the layout engine but must not render them as workflow steps
+   * or include them in `nodeRefs`.
    */
   bypassLaneNodes: PreLayoutBypassLaneNode[];
   /**
@@ -62,6 +63,14 @@ export interface TransformResult {
    * the `mergeNodeIds` predicate so shape-2 rejoin edges route correctly.
    */
   fallbackLanes: FallbackLane[];
+  /**
+   * Maps each fork node id (if/switch/parallel) to its virtual join node id.
+   * The join node is a 1×1 invisible bypass-lane node that all branch exits
+   * connect to, giving the merge bus a shared render target. When no steps
+   * follow the fork block the join node is the terminal exit; when a step
+   * follows, the join node connects to it via a single outgoing edge.
+   */
+  forkNodeToJoinId: ReadonlyMap<string, string>;
 }
 
 interface InternalTransformResult extends TransformResult {
@@ -74,6 +83,8 @@ interface InternalTransformResult extends TransformResult {
    * `foreachGroups` push (group body, which is its own graph).
    */
   failureEdges: GraphEdge[];
+  /** Mutable local map — typed separately so inner merges can call `.set()`. */
+  forkNodeToJoinId: Map<string, string>;
 }
 
 /**
@@ -92,11 +103,20 @@ export function transformWorkflowToGraph(workflow: WorkflowYaml | undefined): Tr
       bypassLaneNodes: [],
       nodeRefs: {},
       fallbackLanes: [],
+      forkNodeToJoinId: new Map(),
     };
 
   const ids = new IdAllocator();
-  const { nodes, edges, failureEdges, foreachGroups, bypassLaneNodes, nodeRefs, fallbackLanes } =
-    transformInternal(workflow.triggers ?? [], workflow.steps ?? [], ids, { fallbackDepth: 0 });
+  const {
+    nodes,
+    edges,
+    failureEdges,
+    foreachGroups,
+    bypassLaneNodes,
+    nodeRefs,
+    fallbackLanes,
+    forkNodeToJoinId,
+  } = transformInternal(workflow.triggers ?? [], workflow.steps ?? [], ids, { fallbackDepth: 0 });
   // Boundary 1: concatenate all failure edges after all structural edges so
   // the outer graph's edge list keeps [structural, failure] order (plan step 6).
   return {
@@ -106,6 +126,7 @@ export function transformWorkflowToGraph(workflow: WorkflowYaml | undefined): Tr
     bypassLaneNodes,
     nodeRefs,
     fallbackLanes,
+    forkNodeToJoinId,
   };
 }
 
@@ -133,6 +154,7 @@ function transformInternal(
   const foreachGroups: ForeachGroup[] = [];
   const fallbackLanes: FallbackLane[] = [];
   const nodeRefs: Record<string, NodeRef> = {};
+  const forkNodeToJoinId: Map<string, string> = new Map();
 
   const triggerIds: string[] = [];
   let triggerIndex = 0;
@@ -229,6 +251,7 @@ function transformInternal(
       });
       const inner = transformInternal([], childSteps, ids, { graphId: id, fallbackDepth: 0 });
       Object.assign(nodeRefs, inner.nodeRefs);
+      for (const [k, v] of inner.forkNodeToJoinId) forkNodeToJoinId.set(k, v);
       // inner.bypassLaneNodes stay on the group only — do NOT hoist them to the
       // top-level list. The layout pipeline feeds group bypass nodes separately
       // as compound-group children (workflow_layout_pipeline.ts:65). Hoisting
@@ -274,6 +297,7 @@ function transformInternal(
       if (hasThen) {
         const inner = transformInternal([], thenSteps, ids, ctx);
         Object.assign(nodeRefs, inner.nodeRefs);
+        for (const [k, v] of inner.forkNodeToJoinId) forkNodeToJoinId.set(k, v);
         nodes.push(...inner.nodes);
         bypassLaneNodes.push(...inner.bypassLaneNodes);
         edges.push(...inner.edges);
@@ -322,6 +346,7 @@ function transformInternal(
       if (hasElse) {
         const inner = transformInternal([], elseSteps, ids, ctx);
         Object.assign(nodeRefs, inner.nodeRefs);
+        for (const [k, v] of inner.forkNodeToJoinId) forkNodeToJoinId.set(k, v);
         nodes.push(...inner.nodes);
         bypassLaneNodes.push(...inner.bypassLaneNodes);
         edges.push(...inner.edges);
@@ -366,7 +391,16 @@ function transformInternal(
         branchExits.push(elseBypassId);
       }
 
-      exitIds = dedupeIds(branchExits);
+      {
+        const ifExitIds = dedupeIds(branchExits);
+        const joinId = ids.allocate(`${step.name}-join`);
+        bypassLaneNodes.push({ id: joinId, style: { width: 1, height: 1 } });
+        for (const exitId of ifExitIds) {
+          edges.push({ id: `${exitId}:${joinId}`, source: exitId, target: joinId });
+        }
+        forkNodeToJoinId.set(id, joinId);
+        exitIds = [joinId];
+      }
     } else if (step.type === 'parallel') {
       const parallelStep = step as ParallelStep;
       const branches = Array.isArray(parallelStep.branches)
@@ -382,6 +416,7 @@ function transformInternal(
             id: `${id}:${bypassId}-branch-${idx}`,
             source: id,
             target: bypassId,
+            branchType: 'parallel' as const,
             branchIndex: idx,
             label: branch.name ?? `branch ${idx + 1}`,
           });
@@ -390,6 +425,7 @@ function transformInternal(
         }
         const inner = transformInternal([], branch.steps, ids, ctx);
         Object.assign(nodeRefs, inner.nodeRefs);
+        for (const [k, v] of inner.forkNodeToJoinId) forkNodeToJoinId.set(k, v);
         nodes.push(...inner.nodes);
         bypassLaneNodes.push(...inner.bypassLaneNodes);
         edges.push(...inner.edges);
@@ -402,13 +438,23 @@ function transformInternal(
             id: `${id}:${firstId}-branch-${idx}`,
             source: id,
             target: firstId,
+            branchType: 'parallel' as const,
             branchIndex: idx,
             label: branch.name ?? `branch ${idx + 1}`,
           });
         }
         branchExits.push(...inner.leafIds);
       });
-      if (branchExits.length > 0) exitIds = dedupeIds(branchExits);
+      if (branchExits.length > 0) {
+        const parExitIds = dedupeIds(branchExits);
+        const joinId = ids.allocate(`${step.name}-join`);
+        bypassLaneNodes.push({ id: joinId, style: { width: 1, height: 1 } });
+        for (const exitId of parExitIds) {
+          edges.push({ id: `${exitId}:${joinId}`, source: exitId, target: joinId });
+        }
+        forkNodeToJoinId.set(id, joinId);
+        exitIds = [joinId];
+      }
     } else if (step.type === 'switch') {
       const switchStep = step as SwitchStep;
       const cases = Array.isArray(switchStep.cases)
@@ -437,6 +483,7 @@ function transformInternal(
         }
         const inner = transformInternal([], caseItem.steps as Step[], ids, ctx);
         Object.assign(nodeRefs, inner.nodeRefs);
+        for (const [k, v] of inner.forkNodeToJoinId) forkNodeToJoinId.set(k, v);
         nodes.push(...inner.nodes);
         bypassLaneNodes.push(...inner.bypassLaneNodes);
         edges.push(...inner.edges);
@@ -460,6 +507,7 @@ function transformInternal(
       if (hasDefault) {
         const inner = transformInternal([], defaultSteps as Step[], ids, ctx);
         Object.assign(nodeRefs, inner.nodeRefs);
+        for (const [k, v] of inner.forkNodeToJoinId) forkNodeToJoinId.set(k, v);
         nodes.push(...inner.nodes);
         bypassLaneNodes.push(...inner.bypassLaneNodes);
         edges.push(...inner.edges);
@@ -493,12 +541,22 @@ function transformInternal(
         branchExits.push(bypassId);
       }
 
-      if (branchExits.length > 0) exitIds = dedupeIds(branchExits);
+      if (branchExits.length > 0) {
+        const swExitIds = dedupeIds(branchExits);
+        const joinId = ids.allocate(`${step.name}-join`);
+        bypassLaneNodes.push({ id: joinId, style: { width: 1, height: 1 } });
+        for (const exitId of swExitIds) {
+          edges.push({ id: `${exitId}:${joinId}`, source: exitId, target: joinId });
+        }
+        forkNodeToJoinId.set(id, joinId);
+        exitIds = [joinId];
+      }
     } else if (step.type === 'merge') {
       const mergeStep = step as MergeStep;
       const childSteps = (mergeStep.steps as Step[]) ?? [];
       const inner = transformInternal([], childSteps, ids, ctx);
       Object.assign(nodeRefs, inner.nodeRefs);
+      for (const [k, v] of inner.forkNodeToJoinId) forkNodeToJoinId.set(k, v);
       nodes.push(...inner.nodes);
       bypassLaneNodes.push(...inner.bypassLaneNodes);
       edges.push(...inner.edges);
@@ -528,6 +586,7 @@ function transformInternal(
         fallbackDepth: ctx.fallbackDepth + 1,
       });
       Object.assign(nodeRefs, inner.nodeRefs);
+      for (const [k, v] of inner.forkNodeToJoinId) forkNodeToJoinId.set(k, v);
 
       // Stamp fallbackOf on every non-trigger node in the lane (step and
       // foreachGroup containers). Stamping foreachGroup containers lets the
@@ -631,6 +690,7 @@ function transformInternal(
     bypassLaneNodes,
     nodeRefs,
     fallbackLanes,
+    forkNodeToJoinId,
     leafIds: prevExitIds,
   };
 }

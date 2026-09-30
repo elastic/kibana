@@ -61,7 +61,8 @@ describe('useWorkflowLayout', () => {
         ] as unknown as WorkflowYaml['steps'],
       });
       const { result } = renderHook(() => useWorkflowLayout({ workflow }));
-      const fanInEdges = result.current.edges.filter((e) => e.target === 'after');
+      // With join-node routing: both branch leaves target the virtual join node.
+      const fanInEdges = result.current.edges.filter((e) => e.target === 'gate-join');
       // Both the then-leaf edge and the bypass-lane edge must carry isMerge.
       expect(fanInEdges).toHaveLength(2);
       expect(fanInEdges.every((e) => (e.data as Record<string, unknown>)?.isMerge === true)).toBe(
@@ -69,7 +70,7 @@ describe('useWorkflowLayout', () => {
       );
       // Only the fork → bypass edge suppresses the arrowhead.
       const forkToBypass = result.current.edges.find(
-        (e) => e.source === 'gate' && e.target !== 'then-step' && e.target !== 'after'
+        (e) => e.source === 'gate' && e.target !== 'then-step' && e.target !== 'gate-join'
       );
       expect((forkToBypass?.data as Record<string, unknown>)?.hideEndMarker).toBe(true);
     });
@@ -87,7 +88,8 @@ describe('useWorkflowLayout', () => {
         ] as unknown as WorkflowYaml['steps'],
       });
       const { result } = renderHook(() => useWorkflowLayout({ workflow }));
-      const fanInEdges = result.current.edges.filter((e) => e.target === 'after');
+      // With join-node routing: both branch leaves target the virtual join node.
+      const fanInEdges = result.current.edges.filter((e) => e.target === 'sw-join');
       expect(fanInEdges).toHaveLength(2);
       expect(fanInEdges.every((e) => (e.data as Record<string, unknown>)?.isMerge === true)).toBe(
         true
@@ -113,7 +115,8 @@ describe('useWorkflowLayout', () => {
         ] as unknown as WorkflowYaml['steps'],
       });
       const { result } = renderHook(() => useWorkflowLayout({ workflow }));
-      const fanInEdges = result.current.edges.filter((e) => e.target === 'after');
+      // With join-node routing: both branch leaves target the virtual join node.
+      const fanInEdges = result.current.edges.filter((e) => e.target === 'gate-join');
       expect(fanInEdges).toHaveLength(2);
       expect(fanInEdges.every((e) => (e.data as Record<string, unknown>)?.isMerge === true)).toBe(
         true
@@ -218,7 +221,8 @@ describe('useWorkflowLayout', () => {
         ] as unknown as WorkflowYaml['steps'],
       });
       const { result } = renderHook(() => useWorkflowLayout({ workflow }));
-      const fanInEdges = result.current.edges.filter((e) => e.target === 'summary');
+      // With join-node routing: all six leaves target the virtual join node.
+      const fanInEdges = result.current.edges.filter((e) => e.target === 'route-join');
       expect(fanInEdges).toHaveLength(6);
       expect(fanInEdges.every((e) => (e.data as Record<string, unknown>)?.isMerge === true)).toBe(
         true
@@ -249,7 +253,8 @@ describe('useWorkflowLayout', () => {
         ] as unknown as WorkflowYaml['steps'],
       });
       const { result } = renderHook(() => useWorkflowLayout({ workflow }));
-      const fanInEdges = result.current.edges.filter((e) => e.target === 'inner-after');
+      // With join-node routing: both branch leaves target the virtual join node.
+      const fanInEdges = result.current.edges.filter((e) => e.target === 'inner-gate-join');
       expect(fanInEdges).toHaveLength(2);
       expect(fanInEdges.every((e) => (e.data as Record<string, unknown>)?.isMerge === true)).toBe(
         true
@@ -326,11 +331,11 @@ describe('useWorkflowLayout', () => {
       expect(traversedOf(thenEdge)).toBe(true);
       expect(traversedOf(elseEdge)).toBe(false);
 
-      // then-step -> merge is green; the empty else lane (bypass -> merge) is grey.
-      const thenLeafEdge = edges.find((e) => e.source === 'then-step' && e.target === 'after');
+      // then-step -> join is green; the empty else lane (bypass -> join) is grey.
+      const thenLeafEdge = edges.find((e) => e.source === 'then-step' && e.target === 'gate-join');
       expect(traversedOf(thenLeafEdge)).toBe(true);
       const bypassId = elseEdge!.target;
-      const bypassLeafEdge = edges.find((e) => e.source === bypassId && e.target === 'after');
+      const bypassLeafEdge = edges.find((e) => e.source === bypassId && e.target === 'gate-join');
       expect(traversedOf(bypassLeafEdge)).toBe(false);
     });
 
@@ -360,10 +365,10 @@ describe('useWorkflowLayout', () => {
       expect(traversedOf(thenEdge)).toBe(false);
 
       const bypassId = elseEdge!.target;
-      const bypassLeafEdge = edges.find((e) => e.source === bypassId && e.target === 'after');
+      const bypassLeafEdge = edges.find((e) => e.source === bypassId && e.target === 'gate-join');
       expect(traversedOf(bypassLeafEdge)).toBe(true);
       // The un-taken then step and its leaf edge stay grey.
-      const thenLeafEdge = edges.find((e) => e.source === 'then-step' && e.target === 'after');
+      const thenLeafEdge = edges.find((e) => e.source === 'then-step' && e.target === 'gate-join');
       expect(traversedOf(thenLeafEdge)).toBe(false);
 
       // The bypass lane node itself is marked traversed so the bridge line greens.
@@ -394,8 +399,8 @@ describe('useWorkflowLayout', () => {
 
       expect(traversedOf(findForkEdge(edges, 'gate', 'then'))).toBe(true);
       expect(traversedOf(findForkEdge(edges, 'gate', 'else'))).toBe(false);
-      expect(traversedOf(edges.find((e) => e.source === 'yes' && e.target === 'after'))).toBe(true);
-      expect(traversedOf(edges.find((e) => e.source === 'no' && e.target === 'after'))).toBe(false);
+      expect(traversedOf(edges.find((e) => e.source === 'yes' && e.target === 'gate-join'))).toBe(true);
+      expect(traversedOf(edges.find((e) => e.source === 'no' && e.target === 'gate-join'))).toBe(false);
     });
 
     it('highlights the else branch when the false path is taken (both populated)', () => {
@@ -421,8 +426,8 @@ describe('useWorkflowLayout', () => {
 
       expect(traversedOf(findForkEdge(edges, 'gate', 'else'))).toBe(true);
       expect(traversedOf(findForkEdge(edges, 'gate', 'then'))).toBe(false);
-      expect(traversedOf(edges.find((e) => e.source === 'no' && e.target === 'after'))).toBe(true);
-      expect(traversedOf(edges.find((e) => e.source === 'yes' && e.target === 'after'))).toBe(
+      expect(traversedOf(edges.find((e) => e.source === 'no' && e.target === 'gate-join'))).toBe(true);
+      expect(traversedOf(edges.find((e) => e.source === 'yes' && e.target === 'gate-join'))).toBe(
         false
       );
     });
@@ -456,11 +461,11 @@ describe('useWorkflowLayout', () => {
       );
       expect(traversedOf(caseEdge)).toBe(true);
       expect(traversedOf(defaultEdge)).toBe(false);
-      expect(traversedOf(edges.find((e) => e.source === 'on-a' && e.target === 'after'))).toBe(
+      expect(traversedOf(edges.find((e) => e.source === 'on-a' && e.target === 'sw-join'))).toBe(
         true
       );
       const bypassId = defaultEdge!.target;
-      expect(traversedOf(edges.find((e) => e.source === bypassId && e.target === 'after'))).toBe(
+      expect(traversedOf(edges.find((e) => e.source === bypassId && e.target === 'sw-join'))).toBe(
         false
       );
     });
@@ -497,7 +502,7 @@ describe('useWorkflowLayout', () => {
       expect(traversedOf(caseEdge)).toBe(false);
 
       const bypassId = defaultEdge!.target;
-      expect(traversedOf(edges.find((e) => e.source === bypassId && e.target === 'after'))).toBe(
+      expect(traversedOf(edges.find((e) => e.source === bypassId && e.target === 'sw-join'))).toBe(
         true
       );
       const bypassNode = nodes.find((n) => n.id === bypassId);

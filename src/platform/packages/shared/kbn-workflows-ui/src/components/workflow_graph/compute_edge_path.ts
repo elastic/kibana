@@ -32,7 +32,7 @@ const TB_LABEL_Y_OFFSET = 30;
 // fixed offset below/right of the bus so all branch labels sit on an aligned
 // row (TB) / column (LR) regardless of sibling node heights.
 export const FORK_BUS_TRUNK = 20;
-const FORK_BUS_LABEL_OFFSET = 20;
+export const FORK_BUS_LABEL_OFFSET = 20;
 
 // Merge single-bus routing: distance from the shared horizontal bus (TB) or
 // vertical bus (LR) to the target handle. Mirrors FORK_BUS_TRUNK so the
@@ -336,7 +336,11 @@ export const computeEdgePath = ({
   // branches) intentionally use the same bus shape so all empty-case stubs
   // spread out in a proper fan-out — consistent with non-empty branches and
   // ensures labels at different targetX values sit on an aligned row.
-  const isForkEdge = branchType === 'switch' || branchType === 'then' || branchType === 'else';
+  const isForkEdge =
+    branchType === 'switch' ||
+    branchType === 'then' ||
+    branchType === 'else' ||
+    branchType === 'parallel';
   // isLR checks both sides: the failure handle is unconditionally Position.Bottom (so that
   // the edge exits the bottom edge in both TB and LR), but spine/fork edges still anchor
   // on the right in LR. The target side is always direction-faithful, so checking it

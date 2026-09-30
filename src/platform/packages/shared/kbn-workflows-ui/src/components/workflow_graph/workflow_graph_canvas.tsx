@@ -1060,6 +1060,7 @@ function WorkflowGraphCanvasInner(props: WorkflowGraphCanvasProps) {
                   insertionPoints={insertionPoints}
                   direction={direction}
                   edit={edit}
+                  forkNodeToJoinId={graphTransform.forkNodeToJoinId}
                 />
               )}
               {edit && !suppressInsertionControls && !isEmptyWorkflow && (

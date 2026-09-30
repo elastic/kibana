@@ -38,7 +38,6 @@ import { resolveNodeChipStyle } from './resolve_node_chip_style';
 const FAILURE_PORT_RIGHT_INSET = 24;
 import { useWorkflowGraphActions } from './workflow_graph_actions_context';
 import type { RenderStepIcon, WorkflowGraphEditActions } from './workflow_graph_actions_context';
-import { FORK_BUS_TRUNK } from './compute_edge_path';
 import {
   handleAlongStyle,
   IF_PORT_FALSE,
@@ -723,66 +722,6 @@ function NodeActionCluster({
   );
 }
 
-/** true/false pills on the fork trunk past each branch port. */
-function BranchPortPills({ isHorizontal }: { readonly isHorizontal: boolean }) {
-  const { euiTheme } = useEuiTheme();
-  const pillShadow = useEuiShadow('xs', { border: 'none' });
-  const trunkMid = FORK_BUS_TRUNK / 2;
-  const pillCss = [
-    {
-      position: 'absolute' as const,
-      // Midpoint of the fork trunk so the pill sits on the straight stub before
-      // the outward curve (FORK_BUS_TRUNK is measured from the source handle).
-      ...(isHorizontal
-        ? {
-            right: -trunkMid,
-            transform: 'translate(50%, -50%)',
-          }
-        : {
-            bottom: -trunkMid,
-            transform: 'translate(-50%, 50%)',
-          }),
-      fontFamily: euiTheme.font.familyCode,
-      fontSize: 11,
-      fontWeight: 400,
-      lineHeight: '14px',
-      padding: `2px ${euiTheme.size.s}`,
-      borderRadius: euiTheme.size.l,
-      background: euiTheme.colors.backgroundBasePlain,
-      border: `${euiTheme.border.width.thin} solid ${euiTheme.colors.borderBasePlain}`,
-      color: euiTheme.colors.textParagraph,
-      whiteSpace: 'nowrap' as const,
-      pointerEvents: 'none' as const,
-      zIndex: 4,
-    },
-    pillShadow,
-  ];
-  return (
-    <>
-      <span
-        aria-hidden={true}
-        data-test-subj="workflowGraphBranchPill-true"
-        css={[
-          ...pillCss,
-          isHorizontal ? { top: IF_PORT_TRUE } : { left: IF_PORT_TRUE },
-        ]}
-      >
-        true
-      </span>
-      <span
-        aria-hidden={true}
-        data-test-subj="workflowGraphBranchPill-false"
-        css={[
-          ...pillCss,
-          isHorizontal ? { top: IF_PORT_FALSE } : { left: IF_PORT_FALSE },
-        ]}
-      >
-        false
-      </span>
-    </>
-  );
-}
-
 function WorkflowGraphNodeInner(node: NodeProps<Node<WorkflowGraphNodeData>>) {
   const { stepType, label, isTrigger, stepExecution, preview, step, fallbackOf, flash } = node.data;
   const euiThemeContext = useEuiTheme();
@@ -1023,7 +962,6 @@ function WorkflowGraphNodeInner(node: NodeProps<Node<WorkflowGraphNodeData>>) {
             )}
           </div>
         )}
-        {isIfNode && !preview && <BranchPortPills isHorizontal={isHorizontal} />}
         {editMode && edit && portTargets && (
           <WorkflowGraphConnectionPorts
             ports={portTargets}
