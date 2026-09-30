@@ -79,6 +79,8 @@ export const deselectNode = actionCreator<string>('DESELECT_NODE');
 export const toggleEdgeSelection = actionCreator<string>('TOGGLE_EDGE_SELECTION');
 export const deleteSelectedNodes = actionCreator('DELETE_SELECTED_NODES');
 export const blocklistSelectedNodes = actionCreator('BLOCKLIST_SELECTED_NODES');
+export const groupSelectedNodes = actionCreator<string>('GROUP_SELECTED_NODES');
+export const ungroupNode = actionCreator<string>('UNGROUP_NODE');
 export const submitSearch = actionCreator<string>('SUBMIT_SEARCH');
 
 export const workspaceReducer = reducerWithInitialState(initialWorkspaceState)
@@ -128,6 +130,34 @@ export const workspaceReducer = reducerWithInitialState(initialWorkspaceState)
       blocklistedNodeIds: [...state.blocklistedNodeIds, ...nodeIds],
     };
   })
+  .case(groupSelectedNodes, (state, parentId) => {
+    if (!state.nodesById[parentId]) {
+      return state;
+    }
+    return {
+      ...state,
+      nodesById: Object.fromEntries(
+        Object.entries(state.nodesById).map(([nodeId, node]) => [
+          nodeId,
+          state.selectedNodeIds.includes(nodeId) &&
+          nodeId !== parentId &&
+          node.parentId === undefined
+            ? { ...node, parentId }
+            : node,
+        ])
+      ),
+      selectedNodeIds: [parentId],
+    };
+  })
+  .case(ungroupNode, (state, parentId) => ({
+    ...state,
+    nodesById: Object.fromEntries(
+      Object.entries(state.nodesById).map(([nodeId, node]) => [
+        nodeId,
+        node.parentId === parentId ? { ...node, parentId: undefined } : node,
+      ])
+    ),
+  }))
   .build();
 
 export const workspaceSelector = (state: GraphState) => state.workspace;
@@ -253,7 +283,12 @@ const toNodeState = (node: WorkspaceNode): WorkspaceNodeState => ({
 const getEdgeId = ({ id, source, target }: Workspace['edges'][number]): string =>
   id ?? `${source.id}-${target.id}`;
 
-const topologyActionTypes = new Set([deleteSelectedNodes.type, blocklistSelectedNodes.type]);
+const topologyActionTypes = new Set([
+  deleteSelectedNodes.type,
+  blocklistSelectedNodes.type,
+  groupSelectedNodes.type,
+  ungroupNode.type,
+]);
 
 const selectionActionTypes = new Set([
   selectAllNodes.type,
@@ -313,8 +348,12 @@ export const registerWorkspaceListeners = (
 
       if (deleteSelectedNodes.match(action)) {
         workspace.deleteSelection();
-      } else {
+      } else if (blocklistSelectedNodes.match(action)) {
         workspace.blocklistSelection();
+      } else if (groupSelectedNodes.match(action)) {
+        workspace.groupSelections(workspace.nodesMap[action.payload]);
+      } else if (ungroupNode.match(action)) {
+        workspace.ungroup(workspace.nodesMap[action.payload]);
       }
       notifyReact();
     },
