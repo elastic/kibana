@@ -180,9 +180,33 @@ export class AlertsTablePage {
     await this.page.testSubj.locator('add-exception-menu-item').click();
   }
 
+  /**
+   * Wait until the alerts grid shows `ruleName`. The grid is not mounted while
+   * the alerts page is still loading, and a search that finished before the
+   * alert existed does not run again. Refresh only once the loaded grid is up
+   * and the rule cell is not in it.
+   */
   async waitForRuleAlert(ruleName: string) {
     const cell = this.alertsTable.getByTestId('ruleName').filter({ hasText: ruleName });
-    await expect(cell).toBeVisible({ timeout: 60_000 });
+    const refresh = this.page.testSubj.locator('kbnQueryBar').getByTestId('querySubmitButton');
+    const deadline = Date.now() + 60_000;
+
+    while (Date.now() < deadline) {
+      if (await cell.isVisible()) {
+        return cell;
+      }
+
+      if ((await this.alertsTable.isVisible()) && (await refresh.isVisible())) {
+        const disabled = await refresh.getAttribute('disabled', { timeout: 1_000 }).catch(() => '');
+        if (disabled === null) {
+          await refresh.click({ timeout: 1_000 }).catch(() => undefined);
+        }
+      }
+
+      await new Promise((resolve) => setTimeout(resolve, 1_000));
+    }
+
+    await expect(cell).toBeVisible({ timeout: 1_000 });
     return cell;
   }
 

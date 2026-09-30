@@ -24,9 +24,9 @@ const requireSeededAlert = (
 spaceTest.describe(
   'Alert flyout automated response results',
   {
-    // Cypress was `@ess`, `@serverless`, and `@skipInServerlessMKI`.
-    // Local serverless only: Cloud serverless (MKI) cannot provision the
-    // system-indices user this seed uses.
+    // Stateful classic, local and Cloud. Serverless is local Security complete
+    // only: Cloud serverless (MKI) cannot provision the system-indices user
+    // this seed uses.
     tag: [
       ...tags.stateful.classic,
       ...getPlaywrightTagsFor('serverless', 'security_complete', 'local'),
@@ -54,12 +54,7 @@ spaceTest.describe(
     });
 
     spaceTest.beforeEach(async ({ browserAuth }) => {
-      // soc_manager can read alerts and the response-actions log, but the
-      // stateful role descriptor has no `manage` on `.lists-*` or `.items-*`.
-      // A flaky run then showed the insufficient-privileges callout and the
-      // rule name never appeared in the alerts grid. platform_engineer has
-      // `all` on those indices and actions-log read.
-      await browserAuth.loginAsPlatformEngineer();
+      await browserAuth.loginAsSecurityRole('soc_manager');
     });
 
     spaceTest.afterAll(async () => {
@@ -81,6 +76,7 @@ spaceTest.describe(
       });
 
       await expect(responseTool.responseDetails).toContainText('executed isolate command');
+      await expect(responseTool.responseDetails).toContainText('isolate completed successfully');
     });
   }
 );

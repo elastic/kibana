@@ -216,9 +216,9 @@ export const deleteIndexedFleetAgents = async (
     };
 
     // Fleet rewrites these docs while a test is cleaning up. With
-    // `conflicts: 'proceed'` that rewrite is skipped and reported as success,
-    // so the agent stays active and the agent-policy delete is rejected.
-    // Refresh, then retry until a pass has no version conflicts.
+    // `conflicts: 'proceed'` that rewrite is skipped. When every hit conflicts,
+    // `refresh: true` does not refresh the index, so the next attempt can read
+    // the same version. Refresh the concrete index before retrying.
     let deleted: DeleteByQueryResponse | undefined;
     for (let attempt = 0; attempt < 5; attempt++) {
       deleted = await esClient
@@ -235,6 +235,9 @@ export const deleteIndexedFleetAgents = async (
         break;
       }
 
+      await esClient.indices
+        .refresh({ index: `${indexedData.fleetAgentsIndex}-*` })
+        .catch(wrapErrorAndRejectPromise);
       await new Promise((resolve) => setTimeout(resolve, 250));
     }
 
