@@ -81,6 +81,7 @@ export interface TermIntersect {
 export interface Workspace {
   options: WorkspaceOptions;
   nodesMap: Record<string, WorkspaceNode>;
+  edgesMap: Record<string, WorkspaceEdge>;
   nodes: WorkspaceNode[];
   selectedNodes: WorkspaceNode[];
   edges: WorkspaceEdge[];
