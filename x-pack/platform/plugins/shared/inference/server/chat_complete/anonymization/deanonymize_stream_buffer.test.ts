@@ -321,4 +321,58 @@ describe('DeanonymizeStreamBuffer', () => {
       });
     }
   });
+
+  describe('mask whose trailing characters match the start of a mask', () => {
+    // `entityClass` is user-configurable, so a mask can start with a lowercase hex letter (here
+    // `e` for `email_...`) and its lowercase hex hash can end with that same letter. The last
+    // character of a *complete* mask must not be held back as the start of a new one, or the
+    // mask gets split and its raw prefix leaks to the client.
+    const value = 'jorge@gmail.com';
+    const mask = `email_${'0123456789abcdef'.repeat(2)}01234567e`;
+    const anonymizations: Anonymization[] = [
+      { entity: { class_name: 'email', value, mask }, rule: { type: 'RegExp' } },
+    ];
+    const entitiesByMask = indexEntitiesByMask(anonymizations);
+
+    const texts = [
+      `Write to ${mask}`,
+      `Write to ${mask}.`,
+      `${mask} and ${mask}`,
+      `${mask}${mask}`,
+      `${mask} then e`,
+    ];
+
+    const streamThenCatchUp = (chunks: string[], fullText: string) => {
+      const buffer = new DeanonymizeStreamBuffer(anonymizations);
+      const streamed = chunks.map((chunk) => buffer.push(chunk)).join('');
+      return { streamed, ...buffer.catchUp(fullText) };
+    };
+
+    for (const text of texts) {
+      it(`streams a clean restored value for every two-way split of ${JSON.stringify(
+        text
+      )}`, () => {
+        const { output: expected } = replaceMasks(text, entitiesByMask);
+
+        for (let split = 0; split <= text.length; split += 1) {
+          const { streamed, content, diverged } = streamThenCatchUp(
+            [text.slice(0, split), text.slice(split)],
+            expected
+          );
+          expect(diverged).toBe(false);
+          expect(streamed).not.toContain('email_');
+          expect(streamed + content).toBe(expected);
+        }
+      });
+
+      it(`streams a clean restored value one character at a time: ${JSON.stringify(text)}`, () => {
+        const { output: expected } = replaceMasks(text, entitiesByMask);
+
+        const { streamed, content, diverged } = streamThenCatchUp([...text], expected);
+        expect(diverged).toBe(false);
+        expect(streamed).not.toContain('email_');
+        expect(streamed + content).toBe(expected);
+      });
+    }
+  });
 });

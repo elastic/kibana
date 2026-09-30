@@ -33,6 +33,21 @@ function buildMaskIndex(maskList: Iterable<string>): MaskIndex {
 }
 
 /**
+ * Whether `position` lies strictly inside a complete occurrence of a known mask in `value`.
+ * A suffix that starts inside a finished mask is part of that mask, not the start of a new one.
+ */
+function isInsideCompleteMask(value: string, position: number, masks: readonly string[]): boolean {
+  return masks.some((mask) => {
+    for (let start = Math.max(0, position - mask.length + 1); start < position; start += 1) {
+      if (value.startsWith(mask, start)) {
+        return true;
+      }
+    }
+    return false;
+  });
+}
+
+/**
  * Length of the longest suffix of `value` that is a proper prefix of a known mask (i.e. could
  * still turn out to be part of an incomplete mask), or 0 if none matches. Only tail positions
  * holding a mask's first character are compared, so the common case allocates nothing.
@@ -51,7 +66,13 @@ function longestHeldSuffixLength(
       continue;
     }
     const tail = value.slice(start);
-    if (masks.some((mask) => mask.length > tail.length && mask.startsWith(tail))) {
+    const couldBeIncompleteMask = masks.some(
+      (mask) => mask.length > tail.length && mask.startsWith(tail)
+    );
+    // Masks embed user-configurable entity classes and a hex hash, so the end of a finished
+    // mask can coincide with the start of another one (e.g. `email_…e`). Holding that would
+    // split the finished mask and leak its raw prefix.
+    if (couldBeIncompleteMask && !isInsideCompleteMask(value, start, masks)) {
       return tail.length;
     }
   }
