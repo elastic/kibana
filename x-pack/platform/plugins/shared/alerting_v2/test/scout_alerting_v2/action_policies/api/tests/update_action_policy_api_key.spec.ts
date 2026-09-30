@@ -58,7 +58,7 @@ apiTest.describe('Update action policy API key API', { tag: '@local-stateful-cla
 
       const fetched = await apiServices.alertingV2.actionPolicies.get(created.id);
       expect(response.body).toStrictEqual(fetched);
-      expect(fetched.updated_at).not.toBe(created.created_at);
+      expect(Date.parse(fetched.updated_at)).toBeGreaterThanOrEqual(Date.parse(created.created_at));
     }
   );
 

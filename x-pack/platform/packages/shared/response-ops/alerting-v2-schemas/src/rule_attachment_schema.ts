@@ -14,7 +14,7 @@ export const RULE_ATTACHMENT_TYPE = 'platform.alerting.rule' as const;
 /**
  * Data stored inside a rule attachment.
  *
- * Server-generated fields (id, version, enabled, created_at, updated_at) are optional so
+ * Server-generated fields (id, enabled, created_at, updated_at) are optional so
  * that the same schema covers both:
  *   - proposed rules (by-value, not yet saved — no id or audit fields)
  *   - saved rules    (by-reference, linked via attachment.origin = rule saved object id)
@@ -23,6 +23,12 @@ export const RULE_ATTACHMENT_TYPE = 'platform.alerting.rule' as const;
  * attachment side reads them, and we don't want per-user identity baked into a
  * conversation attachment. The timestamps stay because staleness detection
  * compares `updated_at` against the snapshot.
+ *
+ * `version` is excluded for the same reason — nothing here reads the counter —
+ * and declaring it would break older attachments: they captured the whole
+ * `RuleResponse` back when `version` was the saved-object OCC token, so the
+ * stored value is a string. A declared-but-mistyped key is a parse error,
+ * whereas an undeclared one is stripped.
  *
  * `.strip()` undoes the `.strict()` inherited from the create-rule base schema,
  * making this a projection rather than a validator: callers hand over a whole
@@ -35,10 +41,9 @@ export const RULE_ATTACHMENT_TYPE = 'platform.alerting.rule' as const;
 const { shape } = ruleResponseSchema;
 
 export const ruleAttachmentDataSchema = ruleResponseSchema
-  .omit({ created_by: true, updated_by: true })
+  .omit({ created_by: true, updated_by: true, version: true })
   .extend({
     id: opt(shape.id),
-    version: opt(shape.version),
     enabled: opt(shape.enabled),
     created_at: opt(shape.created_at),
     updated_at: opt(shape.updated_at),
