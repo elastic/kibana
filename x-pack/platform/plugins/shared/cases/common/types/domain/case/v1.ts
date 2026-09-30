@@ -68,6 +68,12 @@ export const CaseSeverityRt = rt.union([
  * Case
  */
 
+export const ExtractObservablesSourceRt = rt.union([
+  rt.literal('explicit'),
+  rt.literal('space_default'),
+  rt.literal('rule'),
+]);
+
 export const CaseSettingsRt = rt.intersection([
   rt.strict({
     syncAlerts: rt.boolean,
@@ -75,6 +81,7 @@ export const CaseSettingsRt = rt.intersection([
   rt.exact(
     rt.partial({
       extractObservables: rt.boolean,
+      extractObservablesSource: ExtractObservablesSourceRt,
     })
   ),
 ]);
