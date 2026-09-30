@@ -539,7 +539,7 @@ describe('createWorkerSettingsRegistration', () => {
       ).toMatch(/extras.*maxOpenChecks/);
     });
 
-    it.each([0, 91, 7.5])('rejects a lookback of %s in a patch and in storage', (lookbackDays) => {
+    it.each([7, 91, 10.5])('rejects a lookback of %s in a patch and in storage', (lookbackDays) => {
       const extras = { ...defaultExtras, lookbackDays };
 
       expect(expectInvalid(registration.applyPatch(storedDefaults, { extras }))).toContain(

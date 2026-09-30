@@ -51,7 +51,7 @@ export type RuleTuningWorkerExtras = z.infer<typeof RuleTuningWorkerExtras>;
 /**
  * How many days back the sweep looks for pending coverage gaps. Matches the coverage sweep's lookback_days input.
  */
-export const LookbackDays = lazySchema(() => z.number().int().min(1).max(90));
+export const LookbackDays = lazySchema(() => z.number().int().min(8).max(90));
 export type LookbackDays = z.infer<typeof LookbackDays>;
 
 /**

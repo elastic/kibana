@@ -53,7 +53,9 @@ components:
 
     LookbackDays:
       type: integer
-      minimum: 1
+      # A review can park 176h on its gate and an expired one is retried only while its gap
+      # is still inside the window, so the floor stays above a week.
+      minimum: 8
       maximum: 90
       description: >-
         How many days back the sweep looks for pending coverage gaps. Matches the coverage
