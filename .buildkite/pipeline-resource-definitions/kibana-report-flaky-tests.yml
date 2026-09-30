@@ -63,7 +63,7 @@ spec:
       schedules:
         Daily flaky tests (Kibana on-merge and Elastic Cloud testing pipelines):
           cronline: 0 6 * * * America/New_York
-          message: Daily flaky test report for the on-merge and Elastic Cloud pipelines
+          message: Daily flaky test report for the on-merge and Elastic Cloud testing pipelines
           branch: main
       tags:
         - kibana
