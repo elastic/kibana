@@ -11,7 +11,6 @@ import { i18n } from '@kbn/i18n';
 import type { EsqlDetectorConfig } from '../../../common/job_creator/esql_job_creator';
 import { useEsqlWizardContext } from './esql_wizard_context';
 import { describeDetector } from './esql_detector_functions';
-import { EsqlPreviewPanel } from './esql_preview_panel';
 import { EsqlCreateFlow } from './esql_create_flow';
 
 const describeDetectorRow = (detector: EsqlDetectorConfig): string => {
@@ -49,7 +48,7 @@ const describeDetectorRow = (detector: EsqlDetectorConfig): string => {
 /**
  * Step 4 (final) of the staged ES|QL wizard (LEAD DECISION 2026-09-29,
  * g2sz.10): a read-only summary of the configuration collected across the
- * previous steps, plus the bounded-window preview panel and the
+ * previous steps, plus the
  * create/open/start-in-real-time action (`EsqlCreateFlow`).
  */
 export const EsqlSummaryStep = () => {
@@ -103,8 +102,6 @@ export const EsqlSummaryStep = () => {
       </EuiTitle>
       <EuiSpacer size="s" />
       <EuiDescriptionList listItems={listItems} type="column" data-test-subj="mlEsqlSummaryList" />
-      <EuiSpacer size="l" />
-      <EsqlPreviewPanel />
       <EuiSpacer size="l" />
       <EuiFormRow
         helpText={i18n.translate('xpack.ml.esqlJob.summary.continueInRealTimeHelp', {

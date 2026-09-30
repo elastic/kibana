@@ -11,10 +11,6 @@ import { renderWithI18n } from '../../../../../test_utils/render_with_ml_context
 import { EsqlSummaryStep } from './esql_summary_step';
 import { EsqlWizardProvider, useEsqlWizardContext } from './esql_wizard_context';
 
-jest.mock('./esql_preview_panel', () => ({
-  EsqlPreviewPanel: () => <div data-test-subj="mlEsqlPreviewPanelStub" />,
-}));
-
 jest.mock('./esql_create_flow', () => ({
   EsqlCreateFlow: () => <div data-test-subj="mlEsqlCreateFlowStub" />,
 }));
@@ -51,7 +47,7 @@ describe('EsqlSummaryStep', () => {
     expect(summary).toHaveTextContent('team-a');
     expect(summary).toHaveTextContent('rare() by host over region');
     expect(summary).toHaveTextContent('host');
-    expect(screen.getByTestId('mlEsqlPreviewPanelStub')).toBeInTheDocument();
+    expect(screen.queryByTestId('mlEsqlPreviewPanel')).not.toBeInTheDocument();
     expect(screen.getByTestId('mlEsqlCreateFlowStub')).toBeInTheDocument();
   });
 

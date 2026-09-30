@@ -20,6 +20,10 @@ jest.mock('../../../../../contexts/kibana', () => ({
   useMlKibana: () => ({ services: { data: { search: { search: jest.fn() } } } }),
 }));
 
+jest.mock('./esql_query_output_preview', () => ({
+  EsqlQueryOutputPreview: () => <div data-test-subj="mlEsqlQueryOutputPreviewStub" />,
+}));
+
 jest.mock('./esql_histogram_chart', () => ({
   EsqlHistogramChart: () => <div data-test-subj="mlEsqlHistogramChartStub" />,
 }));

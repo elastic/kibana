@@ -26,6 +26,10 @@ jest.mock('./esql_histogram_executor', () => ({
   useEsqlHistogramExecutor: jest.fn(),
 }));
 
+jest.mock('./esql_query_output_preview', () => ({
+  EsqlQueryOutputPreview: () => <div data-test-subj="mlEsqlQueryOutputPreviewStub" />,
+}));
+
 jest.mock('./esql_histogram_chart', () => ({
   EsqlHistogramChart: () => <div data-test-subj="mlEsqlHistogramChartStub" />,
 }));
@@ -229,5 +233,15 @@ describe('EsqlQueryTimeRangeStep', () => {
 
     expect(screen.getByTestId('mlEsqlStartFromBeginningButton')).toBeInTheDocument();
     expect(container.querySelector('form')).toBeNull();
+  });
+
+  it('shows the query output preview directly under the histogram', () => {
+    renderStep();
+
+    const order = screen
+      .getAllByTestId(/^(mlEsqlHistogramChartStub|mlEsqlQueryOutputPreviewStub)$/)
+      .map((element) => element.getAttribute('data-test-subj'));
+
+    expect(order).toEqual(['mlEsqlHistogramChartStub', 'mlEsqlQueryOutputPreviewStub']);
   });
 });

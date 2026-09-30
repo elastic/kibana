@@ -23,6 +23,7 @@ import { i18n } from '@kbn/i18n';
 import { useEsqlWizardContext } from './esql_wizard_context';
 import { getEsqlQueryWarnings, type EsqlQueryWarningClause } from './esql_query_warnings';
 import { EsqlHistogramChart } from './esql_histogram_chart';
+import { EsqlQueryOutputPreview } from './esql_query_output_preview';
 import { EsqlStartFromBeginningButton } from './esql_start_from_beginning_button';
 
 const DATE_ESQL_TYPES = new Set(['date', 'date_nanos']);
@@ -53,8 +54,9 @@ const formatWarningClauses = (clauses: EsqlQueryWarningClause[]) =>
 
 /**
  * Step 1 of the staged ES|QL wizard (LEAD DECISION 2026-09-29, g2sz.10):
- * query editor + time range + a row-count histogram confirming the query
- * produces output before the user configures detectors. Column resolution
+ * query editor + time range + a row-count histogram and a plain query-output
+ * preview confirming the query produces output before the user configures
+ * detectors. Column resolution
  * itself is owned by `useEsqlColumnsResolver`, run once at the wizard root.
  */
 export const EsqlQueryTimeRangeStep = () => {
@@ -176,6 +178,8 @@ export const EsqlQueryTimeRangeStep = () => {
 
       <EuiSpacer size="m" />
       <EsqlHistogramChart />
+      <EuiSpacer size="l" />
+      <EsqlQueryOutputPreview />
     </EuiForm>
   );
 };
