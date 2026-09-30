@@ -29,16 +29,14 @@ const mockContext = {
   resolve: jest.fn(),
 };
 
-const call = (id: string, query: { page?: number; size?: number } = {}) => {
-  // @ts-expect-error -- mock intentionally omits unused handler context properties
-  return handler({
+const call = (id: string, query: { page?: number; size?: number } = {}) =>
+  handler({
     request: mockRequest,
     params: { path: { id }, query: { page: query.page ?? 1, size: query.size ?? 20 } },
     getAutomationsSoClient,
     getWorkflowsManagement,
     context: mockContext,
-  });
-};
+  } as never);
 
 beforeEach(() => jest.clearAllMocks());
 
