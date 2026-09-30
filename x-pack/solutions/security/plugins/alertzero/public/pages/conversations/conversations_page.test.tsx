@@ -43,8 +43,7 @@ jest.mock('../../components/scan_failure_callout/scan_failure_callout', () => ({
   ScanFailureCallout: () => <div data-test-subj="alertZeroScanFailureCallout" />,
 }));
 
-// Only the mutations are stubbed: the module also exports DISMISS_REASON_OPTIONS, which
-// the dismiss modal's select needs for real.
+// Only the mutations are stubbed — everything else this module exports stays real.
 jest.mock('@kbn/proposals-plugin/public', () => ({
   ...jest.requireActual('@kbn/proposals-plugin/public'),
   useApproveProposal: jest.fn(),
@@ -511,27 +510,49 @@ describe('ConversationsPage decisions', () => {
     expect(screen.getByRole('dialog', { name: 'Revoke sessions' })).toBeInTheDocument();
   });
 
-  it('hands Dismiss off to the dismiss modal rather than deciding without a reason', () => {
+  it('shows the reason form in the same modal, not a second one, when Decline is clicked', () => {
     renderPage('/');
     openApproval();
 
     fireEvent.click(approvalDialog().getByRole('button', { name: 'Decline' }));
 
-    // The approval modal closes and the reason form takes over for the same proposal: a
-    // dismissal is a decision with a reason, never a silent close.
-    expect(screen.queryByRole('dialog', { name: 'Revoke sessions' })).not.toBeInTheDocument();
+    // Same dialog, same title — its body swapped to the reason form rather than a second modal
+    // (the old flow's own) opening beside or instead of it.
+    expect(screen.getByRole('dialog', { name: 'Revoke sessions' })).toBeInTheDocument();
+    expect(screen.queryByRole('dialog', { name: 'Action modal' })).not.toBeInTheDocument();
+    expect(approvalDialog().getByRole('radio', { name: 'Decline without a reason' })).toBeChecked();
+  });
 
-    const dialog = within(screen.getByRole('dialog', { name: 'Action modal' }));
-    fireEvent.change(screen.getByTestId('alertZeroDismissReasonSelect'), {
-      target: { value: 'low_value' },
+  it('submits the selected reason and rationale, and returns to the read-only decided state', () => {
+    renderPage('/');
+    openApproval();
+    fireEvent.click(approvalDialog().getByRole('button', { name: 'Decline' }));
+
+    fireEvent.click(
+      approvalDialog().getByRole('radio', {
+        name: 'No actions needed (risk is acceptable)',
+      })
+    );
+    fireEvent.change(approvalDialog().getByRole('textbox'), {
+      target: { value: 'Not worth chasing.' },
     });
-    fireEvent.change(dialog.getByRole('textbox'), { target: { value: 'Not worth chasing.' } });
-    fireEvent.click(dialog.getByRole('button', { name: 'Dismiss' }));
+    fireEvent.click(approvalDialog().getByRole('button', { name: 'Decline' }));
 
     expect(dismissMutateAsync).toHaveBeenCalledWith({
       id: 'prop-1',
-      body: { dismissReason: 'low_value', rationale: 'Not worth chasing.' },
+      body: { dismissReason: 'risk_accepted', rationale: 'Not worth chasing.' },
     });
+  });
+
+  it('returns to the approval view without declining when Cancel is clicked', () => {
+    renderPage('/');
+    openApproval();
+    fireEvent.click(approvalDialog().getByRole('button', { name: 'Decline' }));
+
+    fireEvent.click(approvalDialog().getByRole('button', { name: 'Cancel' }));
+
+    expect(approvalDialog().getByRole('button', { name: 'Approve' })).toBeInTheDocument();
+    expect(dismissMutateAsync).not.toHaveBeenCalled();
   });
 
   it('opens the close-investigation modal when the ⋮ Close action is triggered with manage capability', () => {

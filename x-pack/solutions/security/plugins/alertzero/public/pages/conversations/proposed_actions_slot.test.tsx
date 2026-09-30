@@ -231,7 +231,7 @@ describe('ProposedActionsSlot', () => {
     ).toBeInTheDocument();
   });
 
-  it('opens the dismiss modal instead of dismissing directly', () => {
+  it('shows the reason form in the same modal instead of dismissing directly', () => {
     mockConversationProposalsPage([mockProposal]);
 
     renderSlot();
@@ -240,8 +240,30 @@ describe('ProposedActionsSlot', () => {
       screen.getByTestId('investigationFlyoutProposedAction-proposal-1-modal-dismiss')
     );
 
-    expect(screen.getByText('Close the investigation?')).toBeInTheDocument();
+    expect(
+      screen.getByTestId('investigationFlyoutProposedAction-proposal-1-modal-decline-form-reason')
+    ).toBeInTheDocument();
     expect(dismissMutateAsync).not.toHaveBeenCalled();
+  });
+
+  it('submits the selected reason once Decline is confirmed', async () => {
+    mockConversationProposalsPage([mockProposal]);
+
+    renderSlot();
+    fireEvent.click(screen.getByTestId('investigationFlyoutProposedAction-proposal-1'));
+    fireEvent.click(
+      screen.getByTestId('investigationFlyoutProposedAction-proposal-1-modal-dismiss')
+    );
+    fireEvent.click(
+      screen.getByTestId('investigationFlyoutProposedAction-proposal-1-modal-confirm-decline')
+    );
+
+    await waitFor(() =>
+      expect(dismissMutateAsync).toHaveBeenCalledWith({
+        id: 'proposal-1',
+        body: { dismissReason: 'no_reason', rationale: undefined },
+      })
+    );
   });
 
   it('offers Show more when the conversation has more proposals than the loaded page, and fetches the next one', () => {

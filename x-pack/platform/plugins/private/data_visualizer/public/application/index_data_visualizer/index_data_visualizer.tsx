@@ -33,6 +33,7 @@ import type { SavedSearch } from '@kbn/saved-search-plugin/public';
 import { ENABLE_ESQL } from '@kbn/esql-utils';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { KbnInfoCallout } from '@kbn/ui-callout';
+import type { GetAdditionalLinks } from '@kbn/file-upload-common';
 import { getCoreStart, getPluginsStart } from '../../kibana_services';
 import {
   type IndexDataVisualizerViewProps,
@@ -42,7 +43,6 @@ import { IndexDataVisualizerESQL } from './components/index_data_visualizer_view
 
 import { useDataVisualizerKibana } from '../kibana_context';
 import { DataVisualizerDataSourcePicker } from '../common/components/data_source_picker';
-import type { GetAdditionalLinks } from '../common/components/results_links';
 import { DATA_VISUALIZER_APP_LOCATOR, type IndexDataVisualizerLocatorParams } from './locator';
 import { DATA_VISUALIZER_INDEX_VIEWER } from './constants/index_data_visualizer_viewer';
 import { INDEX_DATA_VISUALIZER_NAME } from '../common/constants';
