@@ -7,14 +7,6 @@
 # self-hosted sandbox). SANDBOX_KIBANA_CONFIG points the `evals_nightshift_investigations` Scout
 # config set at kibana.sandbox.yml, which reads the credentials from the environment. Without an API
 # key it prints `{}`, so the config set falls back to plain `evals_tracing` and only smoke runs.
-#
-# The shared eval sandbox (dev-vault, ci-prod) authenticates with sandbox-api's certless "local-dev
-# credential auth" (elastic/sandbox-service, docs/mtls.md#local-dev-credential-auth-optional):
-# `sandbox.apiKey` holds a `<username>:<password>` pair and no client certificate is needed or
-# available (a real Cloud-issued client cert only exists on Hosted/Serverless Kibana). So the
-# client-cert paths are read only from the environment (SANDBOX_CLIENT_CERT_PATH/KEY/CA), for a
-# self-hosted sandbox-api that still requires mTLS; the config's `sandbox.ssl.*` is not read at all,
-# since the shared eval sandbox does not populate it with usable file paths.
 
 set -euo pipefail
 
@@ -44,11 +36,9 @@ resolve() {
 host="$(resolve SANDBOX_API_HOST '.sandbox.host')"
 port="$(resolve SANDBOX_API_PORT '.sandbox.port')"
 api_key="$(resolve SANDBOX_API_KEY '.sandbox.apiKey')"
-# Env-only: a self-hosted sandbox-api may still require mTLS. The shared eval sandbox authenticates
-# certlessly via api_key alone (see the module comment above), so these are not read from config.
-certificate="${SANDBOX_CLIENT_CERT_PATH:-}"
-key="${SANDBOX_CLIENT_KEY_PATH:-}"
-ca="${SANDBOX_CA_CERT_PATH:-}"
+certificate="$(resolve SANDBOX_CLIENT_CERT_PATH '.sandbox.ssl.certificate')"
+key="$(resolve SANDBOX_CLIENT_KEY_PATH '.sandbox.ssl.key')"
+ca="$(resolve SANDBOX_CA_CERT_PATH '.sandbox.ssl.certificateAuthorities')"
 
 telemetry_url="$(resolve NIGHTSHIFT_SANDBOX_ELASTICSEARCH_URL '.nightshift.telemetry.url')"
 telemetry_key="$(resolve NIGHTSHIFT_SANDBOX_ELASTICSEARCH_API_KEY '.nightshift.telemetry.apiKey')"
