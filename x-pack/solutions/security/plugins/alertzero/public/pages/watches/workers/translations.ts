@@ -123,7 +123,7 @@ export const WORKER_NAMES: Record<string, string> = {
   ),
   [SYSTEM_SECURITY_WORKER_DETECTION_RULE_CREATION_ID]: i18n.translate(
     'xpack.alertzero.watches.workers.detectionRuleCreation.name',
-    { defaultMessage: 'Rule Creation' }
+    { defaultMessage: 'Rule Coverage' }
   ),
 };
 
