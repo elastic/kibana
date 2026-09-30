@@ -12,5 +12,5 @@ export const SECURITY_DECISION_TREE_TYPE = 'security.decision_tree';
 
 export const SECURITY_DECISION_TREE_TAG = 'decision-tree';
 
-/** Trees written by this slice stay tentative until a later proposal hook confirms them. */
+/** Forensic writes stay tentative. The proposal bridge sets established after an analyst's action succeeds. */
 export const SECURITY_DECISION_TREE_STATUS_TENTATIVE = 'tentative';

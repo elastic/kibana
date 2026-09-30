@@ -7,9 +7,11 @@ description: >
   queue filters on `origin` by exact equality, and a wrong value hides the
   proposal from the analyst who was meant to see it.
 
-  Deliberately thin for now. It exists so AlertZero has one place to add
-  behaviour that must happen around every proposal it raises, rather than
-  repeating it at each call site.
+  Deliberately thin. It exists so AlertZero has one place to add behaviour
+  that must happen around every proposal it raises, rather than repeating it
+  at each call site. When the caller names a decision tree, a person's
+  decision is written back onto that tree after the gate returns. An
+  automatic approval does not.
 enabled: true
 tags:
   - security
@@ -79,9 +81,23 @@ triggers:
           description: >
             Set by the caller when its autonomy policy already permits this
             action. Defaults to false so the gate is fail-closed.
+        decisionTreeKiId:
+          type: string
+          maxLength: 512
+          description: >
+            Knowledge item to update once a person decides. Omit it and the
+            proposal changes no tree. Not forwarded to the gate.
+        decisionTreeAiIndex:
+          type: string
+          maxLength: 256
+          description: >
+            AI index that holds `decisionTreeKiId`. Required together with
+            that id. Not forwarded to the gate.
       # `origin` is absent on purpose: this workflow owns it. The gate closes
       # its own inputs to additional properties, so accepting one here would
       # only let a caller pass a value that the forward below has to discard.
+      # `decisionTreeKiId` and `decisionTreeAiIndex` stay here for the same
+      # reason: the gate would reject them.
       required:
         - conversationId
         - comment
@@ -96,6 +112,8 @@ outputs:
   - name: status
     type: string
   - name: decision
+    type: string
+  - name: decidedBy
     type: string
 
 steps:
@@ -122,7 +140,51 @@ steps:
         autoApprove: "${{ inputs.autoApprove }}"
         origin: alertzero
 
-  # `{{ }}` here, matching how the gate emits these same three values, so an
+  # A person confirmed the action and it ran. `decidedBy` is empty when
+  # autonomy approved without asking, so that path leaves the tree tentative.
+  # A missing tree continues: the decision already happened, and this write
+  # must not fail the proposal. `updateKi` merges `attributes`, so the diagram,
+  # symptom, and version stay.
+  - name: record_confirmed_decision_tree
+    type: context-engine.updateKi
+    if: >-
+      ${{ inputs.decisionTreeKiId != blank
+        and inputs.decisionTreeAiIndex != blank
+        and steps.create_proposal.output.decidedBy != blank
+        and steps.create_proposal.output.decision == 'approved'
+        and steps.create_proposal.output.status == 'succeeded' }}
+    on-failure:
+      continue: true
+    with:
+      ai_index_id: "{{ inputs.decisionTreeAiIndex }}"
+      ki_id: "{{ inputs.decisionTreeKiId }}"
+      refresh: true
+      ki:
+        attributes:
+          status: established
+          confirmed_action: "{{ inputs.actionWorkflowId }}"
+
+  # A person refused. Status stays where it was, so a sibling approval that
+  # already established the tree is not demoted. The refused action is recorded
+  # beside it.
+  - name: record_refused_decision_tree
+    type: context-engine.updateKi
+    if: >-
+      ${{ inputs.decisionTreeKiId != blank
+        and inputs.decisionTreeAiIndex != blank
+        and steps.create_proposal.output.decidedBy != blank
+        and steps.create_proposal.output.decision == 'dismissed' }}
+    on-failure:
+      continue: true
+    with:
+      ai_index_id: "{{ inputs.decisionTreeAiIndex }}"
+      ki_id: "{{ inputs.decisionTreeKiId }}"
+      refresh: true
+      ki:
+        attributes:
+          refused_action: "{{ inputs.actionWorkflowId }}"
+
+  # `{{ }}` here, matching how the gate emits these same values, so an
   # unset one reaches the caller as `''` exactly as it does today.
   - name: output_result
     type: workflow.output
@@ -131,3 +193,4 @@ steps:
       proposalId: "{{ steps.create_proposal.output.proposalId }}"
       status: "{{ steps.create_proposal.output.status }}"
       decision: "{{ steps.create_proposal.output.decision }}"
+      decidedBy: "{{ steps.create_proposal.output.decidedBy }}"

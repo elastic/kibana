@@ -889,6 +889,10 @@ steps:
             # rather than to this run
             confidence: "{{ foreach.item.confidence | default: '' }}"
             autoApprove: "${{ steps.resolve_autonomy.output.level == 'supervised' }}"
+            # Empty when this run has no symptom, and the bridge then skips the
+            # tree. The bridge promotes only after a person decides.
+            decisionTreeKiId: "{{ steps.resolve_symptom.output.ki_id }}"
+            decisionTreeAiIndex: "{{ consts.decision_tree_ai_index }}"
 
   # `0` when the step did not run: no host, findings did not land, the agent
   # did not propose, or the list was empty. A later check treats only a real

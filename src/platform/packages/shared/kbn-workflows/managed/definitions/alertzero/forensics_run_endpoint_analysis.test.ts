@@ -1297,5 +1297,14 @@ describe('Endpoint analysis run', () => {
       expect(String(reinforce?.if)).toContain('steps.resolve_symptom.output.skipped == false');
       expect(String(reinforce?.if)).toContain('steps.forensic_analysis.error == null');
     });
+
+    it('names the tree on the containment proposal so a later decision can update it', () => {
+      const inputs = (
+        stepByName('propose_action')?.with as { inputs?: Record<string, unknown> } | undefined
+      )?.inputs;
+
+      expect(inputs?.decisionTreeKiId).toBe('{{ steps.resolve_symptom.output.ki_id }}');
+      expect(inputs?.decisionTreeAiIndex).toBe('{{ consts.decision_tree_ai_index }}');
+    });
   });
 });

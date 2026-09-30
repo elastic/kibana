@@ -132,6 +132,11 @@ outputs:
     type: string
   - name: decision
     type: string
+  # Empty when autonomy approved without asking anyone. Callers that promote a
+  # learning only after a person decides key off this, not off `autoApprove`,
+  # because a later retry of an automatic failure is answered by an analyst.
+  - name: decidedBy
+    type: string
 
 steps:
   - name: create_proposal
@@ -531,3 +536,4 @@ steps:
       proposalId: '{{ variables.current_proposal_id }}'
       status: '{{ variables.final_status }}'
       decision: '{{ variables.final_decision }}'
+      decidedBy: '{{ variables.decided_by }}'

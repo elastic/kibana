@@ -16,6 +16,8 @@ import CREATE_PROPOSAL_YAML from '../proposals/create_proposal.yaml';
 interface WorkflowStep {
   name?: string;
   type?: string;
+  if?: string;
+  'on-failure'?: { continue?: boolean };
   with?: Record<string, unknown>;
 }
 
@@ -38,6 +40,9 @@ const gate = parse(CREATE_PROPOSAL_YAML) as ParsedWorkflow;
 
 const inputsOf = (workflow: ParsedWorkflow) => workflow.triggers[0].inputs ?? {};
 const propertiesOf = (workflow: ParsedWorkflow) => inputsOf(workflow).properties ?? {};
+
+// Kept on the bridge and never forwarded. The gate rejects unknown properties.
+const BRIDGE_LOCAL_INPUTS = ['decisionTreeAiIndex', 'decisionTreeKiId'];
 
 const forward = () => bridge.steps.find((step) => step.name === 'create_proposal')!;
 const forwardedInputs = () => (forward().with?.inputs ?? {}) as Record<string, string>;
@@ -69,16 +74,18 @@ describe('AlertZero create proposal bridge', () => {
       const expected = Object.keys(propertiesOf(gate))
         .filter((name) => name !== 'origin')
         .sort();
+      const declared = Object.keys(propertiesOf(bridge))
+        .filter((name) => !BRIDGE_LOCAL_INPUTS.includes(name))
+        .sort();
       // Guards the comparison itself: two empty lists would otherwise match.
       expect(expected.length).toBeGreaterThan(0);
-      expect(Object.keys(propertiesOf(bridge)).sort()).toEqual(expected);
+      expect(declared).toEqual(expected);
     });
 
     it('keeps the declared types identical', () => {
-      const bridgeTypes = Object.entries(propertiesOf(bridge)).map(([name, schema]) => [
-        name,
-        schema.type,
-      ]);
+      const bridgeTypes = Object.entries(propertiesOf(bridge))
+        .filter(([name]) => !BRIDGE_LOCAL_INPUTS.includes(name))
+        .map(([name, schema]) => [name, schema.type]);
       const gateTypes = Object.entries(propertiesOf(gate))
         .filter(([name]) => name !== 'origin')
         .map(([name, schema]) => [name, schema.type]);
@@ -92,9 +99,17 @@ describe('AlertZero create proposal bridge', () => {
     });
 
     it('forwards every input it declares', () => {
-      expect(Object.keys(forwardedInputs()).sort()).toEqual(
-        [...Object.keys(propertiesOf(bridge)), 'origin'].sort()
+      const declared = Object.keys(propertiesOf(bridge)).filter(
+        (name) => !BRIDGE_LOCAL_INPUTS.includes(name)
       );
+      expect(Object.keys(forwardedInputs()).sort()).toEqual([...declared, 'origin'].sort());
+    });
+
+    it('does not forward the decision-tree inputs the gate would reject', () => {
+      for (const name of BRIDGE_LOCAL_INPUTS) {
+        expect(propertiesOf(bridge)).toHaveProperty(name);
+        expect(forwardedInputs()).not.toHaveProperty(name);
+      }
     });
 
     // `{{ }}` renders through Liquid and turns an absent input into `''`, which
@@ -136,5 +151,38 @@ describe('AlertZero create proposal bridge', () => {
   it('outlives the gate it waits on', () => {
     const ceiling = parseDuration(bridge.settings?.timeout ?? '');
     expect(ceiling).toBeGreaterThan(parseDuration(gate.settings?.timeout ?? ''));
+  });
+
+  describe('the decision tree', () => {
+    const step = (name: string) => bridge.steps.find((candidate) => candidate.name === name);
+
+    it('establishes the tree only after a person approves and the action succeeds', () => {
+      const confirm = step('record_confirmed_decision_tree');
+      const condition = String(confirm?.if);
+
+      expect(confirm?.type).toBe('context-engine.updateKi');
+      expect(confirm?.['on-failure']).toEqual({ continue: true });
+      expect(condition).toContain('steps.create_proposal.output.decidedBy != blank');
+      expect(condition).toContain("steps.create_proposal.output.decision == 'approved'");
+      expect(condition).toContain("steps.create_proposal.output.status == 'succeeded'");
+      expect(confirm?.with?.ki).toEqual({
+        attributes: {
+          status: 'established',
+          confirmed_action: '{{ inputs.actionWorkflowId }}',
+        },
+      });
+    });
+
+    it('records a refusal without changing status', () => {
+      const refused = step('record_refused_decision_tree');
+
+      expect(refused?.type).toBe('context-engine.updateKi');
+      expect(refused?.['on-failure']).toEqual({ continue: true });
+      expect(String(refused?.if)).toContain("steps.create_proposal.output.decision == 'dismissed'");
+      expect(refused?.with?.ki).toEqual({
+        attributes: { refused_action: '{{ inputs.actionWorkflowId }}' },
+      });
+      expect(JSON.stringify(refused?.with)).not.toContain('established');
+    });
   });
 });

@@ -200,6 +200,7 @@ describe('create-investigation-proposal workflow', () => {
         'proposalId',
         'status',
         'decision',
+        'decidedBy',
       ]);
     });
   });
