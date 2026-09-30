@@ -107,9 +107,20 @@ interface ArmCollection {
  * returning only the first page silently truncates the result — a subscription
  * with more sites than fit in one page would appear to have fewer.
  *
- * `nextLink` is an absolute, fully-parameterised URL (it already carries
- * api-version and an opaque skip token), so it is requested as-is with no
- * additional params.
+ * `nextLink` already carries api-version and an opaque skip token, so its query
+ * string is preserved and no params of our own are re-applied.
+ *
+ * The link is server-supplied data and `ctx.client` carries the ARM bearer
+ * token, so its origin is checked before it is requested. Axios strips a
+ * standard authorization header when a redirect crosses to another host, but an
+ * explicit request like this one gets no such protection, and a link naming
+ * another host would hand the token over. Pagination stops instead, reporting
+ * the result as truncated.
+ *
+ * The link is resolved against the URL axios actually requested, obtained from
+ * `getUri`: axios concatenates `baseURL` and `url` rather than resolving them
+ * the way the URL constructor does, so rebuilding that base by hand would give
+ * the wrong path for a relative link.
  */
 async function getAllPages(
   ctx: ActionContext,
@@ -120,9 +131,18 @@ async function getAllPages(
   const value = [...(first.data?.value ?? [])];
   let nextLink = first.data?.nextLink;
 
+  const requested = new URL(ctx.client.getUri({ url, params }));
+
   let page = 1;
   while (nextLink && page < MAX_ARM_PAGES) {
-    const next = await ctx.client.get<ArmCollection>(nextLink);
+    const nextUrl = new URL(nextLink, requested);
+    if (nextUrl.origin !== requested.origin) {
+      // Treat a cross-origin continuation link as the end of the collection: the
+      // pages already collected are returned, flagged as incomplete.
+      return { value, truncated: true };
+    }
+
+    const next = await ctx.client.get<ArmCollection>(nextUrl.href);
     value.push(...(next.data?.value ?? []));
     nextLink = next.data?.nextLink;
     page++;
@@ -268,7 +288,7 @@ export const AzureFunctions: ConnectorSpec = {
       isTool: true,
       scope: 'destroy',
       description:
-        'Invoke an HTTP-triggered Azure Function and return its response status, headers, and body. This is the primary action: use it to run custom remediation or enrichment code from a workflow. Requires a function or host key unless the trigger is anonymous — get one from listFunctionKeys (this function only) or listHostKeys (any function in the app). Any HTTP status the function returns is reported in the "status" field rather than raised as an error, so check it: a 4xx or 5xx body is returned for inspection, and only an authentication failure or a transport error throws. Redirects are not followed, so a 3xx is returned as-is with its Location header — invoke the redirect target directly if you need it. Classified as a write/destroy action because the function body can do anything.',
+        "Invoke an HTTP-triggered Azure Function and return its response status, headers, and body. This is the primary action: use it to run custom remediation or enrichment code from a workflow. Requires a function or host key unless the trigger is anonymous — get one from listFunctionKeys (this function only) or listHostKeys (any function in the app). Runs in two phases. First it resolves the app's hostname over the Azure management API, which throws if the connector's credentials are rejected, the app does not exist, or the app has no hostname — those are configuration errors, not function output. Once the function itself is reached, every HTTP status it answers with is reported in the \"status\" field rather than raised, so check it: a 4xx or 5xx body is returned for inspection, and only a transport failure throws. A 401 or 403 is returned too, since it may be a missing or wrong function key rejected by the Functions host, or the function's own authorization decision — the two cannot be told apart by status, so read the body. Redirects are not followed, so a 3xx is returned as-is with its Location header — invoke the redirect target directly if you need it. Classified as a write/destroy action because the function body can do anything.",
       input: InvokeInputSchema,
       handler: async (ctx, input: InvokeInput) => {
         let defaultHostName: string | undefined;
@@ -318,10 +338,16 @@ export const AzureFunctions: ConnectorSpec = {
             // A function that deliberately answers 4xx/5xx is reporting its own
             // outcome, not failing the invoke: returning that response as a
             // result lets a workflow branch on the status and read the error
-            // body. 401/403 stay exceptions because they mean the *key* was
-            // wrong, which is a connector configuration problem rather than
-            // something the function chose to say.
-            validateStatus: (status: number) => status !== 401 && status !== 403,
+            // body.
+            //
+            // That includes 401 and 403. A function enforcing its own user
+            // authorization answers with those statuses too, and the status
+            // cannot be told apart from a wrong function key, so raising them
+            // would make the function's intended answer unreadable. Only a
+            // transport failure, which carries no status at all, throws. The
+            // action description and the skill text tell an agent that a 401
+            // here may be either a bad key or the function's own decision.
+            validateStatus: () => true,
           });
           return {
             status: response.status,
@@ -590,7 +616,7 @@ export const AzureFunctions: ConnectorSpec = {
     '- If the app and function are known: listFunctionKeys → invoke with that key as functionKey.',
     '- If they are not: listFunctionApps (pick a "kind" containing "functionapp") → listFunctions (read invoke_url_template and any custom route) → listFunctionKeys → invoke.',
     '- Pass the custom route in invoke\'s "route" only when the function declares one in function.json; otherwise omit it and the default "api/{functionName}" path is used.',
-    '- An anonymous trigger needs no key; omit functionKey. A 401 from invoke means the key was missing or wrong, not that the function failed.',
+    '- An anonymous trigger needs no key; omit functionKey. A 401 or 403 from invoke is usually a missing or wrong key, which the Functions host rejects before the function runs; a function that checks the caller itself answers the same way. Re-read the key with listFunctionKeys and check the body before concluding which of the two it was.',
     '',
     'RECOVERY:',
     '- A wedged app: getFunctionApp to read "state" → restartFunctionApp. Restart is the first choice, since it keeps the app up.',
@@ -600,7 +626,7 @@ export const AzureFunctions: ConnectorSpec = {
     '',
     "STALE TRIGGER METADATA: if listFunctions does not show a function that was just deployed, call listSyncFunctionTriggers to re-sync the app's trigger metadata, then list again. It returns only a sync status, not URLs or keys, and it mutates the app's metadata — do not call it as a read.",
     '',
-    'READING AN INVOKE RESULT: invoke reports whatever status the function returned in its "status" field, so check it rather than assuming success. A 4xx or 5xx means the function ran and rejected the request — its body explains why. Only a wrong or missing key (401/403) or a transport failure raises an error.',
+    'READING AN INVOKE RESULT: invoke reports whatever status the function returned in its "status" field, so check it rather than assuming success. A 4xx or 5xx other than 401/403 means the function ran and rejected the request — its body explains why. A 401 or 403 is different: the Functions host rejects a missing or wrong key before the function runs, so the function may never have executed, but a function that checks the caller itself answers the same way. Treat it as "either the key or the caller", check the key with listFunctionKeys before assuming the request was understood. Only a transport failure raises an error; a rejected connector credential or an unknown app raises during the hostname lookup instead, before the function is reached.',
     '',
     'LARGE RESULT SETS: listFunctionApps and listFunctions return every page. If the response carries "truncated": true, the inventory is incomplete — narrow it with resourceGroupName rather than acting on a partial list.',
     '',
