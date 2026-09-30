@@ -220,7 +220,7 @@ describe('graphui-workspace', function () {
           },
         ],
       };
-      workspace.expandGraph();
+      workspace.expandNodes([]);
       expect(workspace.nodes.length).toEqual(3); //we already had b from initial query
       expect(workspace.edges.length).toEqual(2);
     });
@@ -344,7 +344,7 @@ describe('graphui-workspace', function () {
       expect(typeof nodeA2).toEqual('object');
 
       workspace.selectNode(nodeA1);
-      workspace.deleteSelection();
+      workspace.deleteNodes([nodeA1.id]);
       expect(workspace.nodes.length).toEqual(1);
       nodeA1 = workspace.getNode(workspace.makeNodeId('field1', 'a1'));
       expect(nodeA1).toBe(undefined);
@@ -414,7 +414,7 @@ describe('graphui-workspace', function () {
       //Grouped deletes delete all grouped items
       workspace.selectNone();
       workspace.selectNode(nodeA1);
-      workspace.deleteSelection();
+      workspace.deleteNodes([nodeA1.id]);
       expect(workspace.nodes.length).toEqual(0);
       expect(workspace.selectedNodes.length).toEqual(0);
 
