@@ -283,6 +283,7 @@
     "@kbn/agent-builder-plugin",
     "@kbn/core-ui-settings-server-mocks",
     "@kbn/agent-builder-browser",
+    "@kbn/agentic-investigations-common",
     "@kbn/mitre-attack-plugin",
     "@kbn/security-mitre-attack-common",
     "@kbn/lazy-object",
@@ -302,6 +303,7 @@
     "@kbn/anonymization-plugin",
     "@kbn/anonymization-common",
     "@kbn/workflows-extensions",
+    "@kbn/alertzero-common",
     "@kbn/shared-ux-ai-components",
     "@kbn/shared-ux-markdown",
     "@kbn/controls-schemas",
@@ -319,8 +321,10 @@
     "@kbn/ui-callout",
     "@kbn/shared-ux-utility",
     "@kbn/app-header",
+    "@kbn/app-menu",
     "@kbn/core-execution-context-common",
     "@kbn/code-editor",
     "@kbn/code-editor-mock",
+    "@kbn/test-es-server",
   ]
 }

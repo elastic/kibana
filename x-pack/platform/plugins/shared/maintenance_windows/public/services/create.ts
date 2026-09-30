@@ -20,11 +20,13 @@ export interface CreateParams {
   rRule: MaintenanceWindowUI['rRule'];
   categoryIds?: MaintenanceWindowUI['categoryIds'];
   scopedQuery?: MaintenanceWindowUI['scopedQuery'];
+  scope?: MaintenanceWindowUI['scope'];
 }
 
 const transformCreateBodySchema = (
   createParams: CreateParams
 ): CreateMaintenanceWindowRequestBody => {
+  const { scope } = createParams;
   return {
     title: createParams.title,
     duration: createParams.duration,
@@ -36,6 +38,14 @@ const transformCreateBodySchema = (
         }
       : {}),
     ...(createParams.scopedQuery !== undefined ? { scoped_query: createParams.scopedQuery } : {}),
+    ...(scope !== undefined
+      ? {
+          scope: {
+            ...(scope.alerting !== undefined ? { alerting: scope.alerting } : {}),
+            ...(scope.alertingV2 !== undefined ? { alerting_v2: scope.alertingV2 } : {}),
+          },
+        }
+      : {}),
   };
 };
 

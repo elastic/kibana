@@ -43,8 +43,88 @@ describe('createInferenceEndpointExecutor', () => {
       {
         asStream: true,
         requestTimeout: 180_000,
-        headers: { 'X-Elastic-Product-Use-Case': 'inference' },
+        headers: { 'X-Elastic-Product-Use-Case': 'inference', 'accept-encoding': 'identity' },
       }
+    );
+  });
+
+  it('sets product and interaction attribution headers', async () => {
+    mockTransportRequest.mockResolvedValue(new PassThrough());
+
+    await executor.invoke({
+      body: {},
+      metadata: {
+        connectorTelemetry: {
+          pluginId: 'significant_events_discovery',
+          productSolution: 'observability',
+          productFeature: 'nightshift',
+          interactionId: 'execution-1',
+        },
+      },
+    });
+
+    expect(mockTransportRequest).toHaveBeenCalledWith(
+      expect.anything(),
+      expect.objectContaining({
+        headers: {
+          'X-Elastic-Product-Use-Case': 'significant_events_discovery',
+          'X-Elastic-Product-Solution': 'observability',
+          'X-Elastic-Product-Feature': 'nightshift',
+          'X-Elastic-Inference-Interaction-Id': 'execution-1',
+          'accept-encoding': 'identity',
+        },
+      })
+    );
+  });
+
+  it('omits empty product and interaction attribution headers', async () => {
+    mockTransportRequest.mockResolvedValue(new PassThrough());
+
+    await executor.invoke({
+      body: {},
+      metadata: {
+        connectorTelemetry: {
+          pluginId: 'significant_events_discovery',
+          productSolution: '',
+          productFeature: '',
+          interactionId: '',
+        },
+      },
+    });
+
+    expect(mockTransportRequest).toHaveBeenCalledWith(
+      expect.anything(),
+      expect.objectContaining({
+        headers: {
+          'X-Elastic-Product-Use-Case': 'significant_events_discovery',
+          'accept-encoding': 'identity',
+        },
+      })
+    );
+  });
+
+  it('sets an interaction header without product attribution', async () => {
+    mockTransportRequest.mockResolvedValue(new PassThrough());
+
+    await executor.invoke({
+      body: {},
+      metadata: {
+        connectorTelemetry: {
+          pluginId: 'alertzero',
+          interactionId: 'execution-1',
+        },
+      },
+    });
+
+    expect(mockTransportRequest).toHaveBeenCalledWith(
+      expect.anything(),
+      expect.objectContaining({
+        headers: {
+          'X-Elastic-Product-Use-Case': 'alertzero',
+          'X-Elastic-Inference-Interaction-Id': 'execution-1',
+          'accept-encoding': 'identity',
+        },
+      })
     );
   });
 

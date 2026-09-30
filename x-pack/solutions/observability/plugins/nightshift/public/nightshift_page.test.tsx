@@ -12,6 +12,7 @@ import { MockAppHeaderProvider } from '@kbn/app-header/mocks';
 import { openAppMenuOverflow } from '@kbn/app-header/test_helpers';
 import { I18nProvider } from '@kbn/i18n-react';
 import { OBSERVABILITY_OVERVIEW_APP_ID } from '@kbn/deeplinks-observability';
+import { NIGHTSHIFT_UI_PRIVILEGES } from '@kbn/nightshift-shared';
 import { NightshiftPage } from './nightshift_page';
 import { useKibana } from './hooks/use_kibana';
 import { useSignificantEventsAvailability } from './hooks/use_significant_events_availability';
@@ -50,7 +51,17 @@ describe('NightshiftPage', () => {
     mockUseSignificantEventsAvailability.mockReturnValue({ isAvailable: true, isLoading: false });
     mockUseKibana.mockReturnValue({
       services: {
-        application: { getUrlForApp, navigateToUrl, navigateToApp },
+        application: {
+          getUrlForApp,
+          navigateToUrl,
+          navigateToApp,
+          capabilities: {
+            nightshift: {
+              [NIGHTSHIFT_UI_PRIVILEGES.show]: true,
+              [NIGHTSHIFT_UI_PRIVILEGES.configure]: true,
+            },
+          },
+        },
         http: { basePath: { prepend: (path: string) => path } },
         serverless: undefined,
         observabilityShared: {
@@ -95,6 +106,34 @@ describe('NightshiftPage', () => {
     await act(async () => fireEvent.click(managementLink));
 
     expect(navigateToUrl).toHaveBeenCalledWith('/app/significant_events/streams');
+  });
+
+  it('hides the settings link without the Nightshift configure privilege', async () => {
+    mockUseKibana.mockReturnValue({
+      services: {
+        application: {
+          getUrlForApp,
+          navigateToUrl,
+          navigateToApp,
+          capabilities: {
+            nightshift: { [NIGHTSHIFT_UI_PRIVILEGES.show]: true },
+          },
+        },
+        http: { basePath: { prepend: (path: string) => path } },
+        serverless: undefined,
+        observabilityShared: {
+          navigation: {
+            PageTemplate: ({ children }: { children: React.ReactNode }) => <>{children}</>,
+          },
+        },
+      },
+    });
+
+    renderPage();
+    await openAppMenuOverflow();
+
+    expect(screen.queryByTestId('nightshiftSettingsLink')).not.toBeInTheDocument();
+    expect(screen.getByTestId('nightshiftManagementLink')).toBeInTheDocument();
   });
 
   it('links to Significant Events settings with EBT tracking', async () => {
