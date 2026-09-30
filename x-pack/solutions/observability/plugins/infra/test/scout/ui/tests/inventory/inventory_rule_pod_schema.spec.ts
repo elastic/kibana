@@ -20,6 +20,7 @@ import {
 } from '../../fixtures/sequential_pods_synthtrace';
 
 const RULE_NAME = 'Inventory pod schema selector rule';
+const RULE_FILTER = `alert.attributes.name:"${RULE_NAME}"`;
 
 test.describe(
   'Infrastructure Inventory - Rule flyout pod schema selector',
@@ -54,7 +55,7 @@ test.describe(
       log.info('Sequential suite: cleaning inventory rules created by this suite');
       const {
         data: { data: rules },
-      } = await apiServices.alerting.rules.find({ search: RULE_NAME, search_fields: ['name'] });
+      } = await apiServices.alerting.rules.find({ filter: RULE_FILTER });
       for (const rule of rules) {
         await apiServices.alerting.rules.delete(rule.id);
       }
@@ -126,7 +127,7 @@ test.describe(
       await test.step('the saved rule keeps the picked schema', async () => {
         const {
           data: { data: rules },
-        } = await apiServices.alerting.rules.find({ search: RULE_NAME, search_fields: ['name'] });
+        } = await apiServices.alerting.rules.find({ filter: RULE_FILTER });
 
         expect(rules).toHaveLength(1);
         expect(rules[0].params).toMatchObject({ nodeType: 'pod', schema: 'ecs' });
