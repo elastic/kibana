@@ -29,6 +29,7 @@ export interface WorkspaceNodeState {
   y: number;
   label: string;
   color: string;
+  scaledSize: number;
   data: WorkspaceNode['data'];
 }
 
@@ -40,6 +41,7 @@ export interface WorkspaceEdgeState {
   topTargetId: string;
   label: string;
   weight: number;
+  width: number;
 }
 
 export interface WorkspaceSnapshot {
@@ -342,6 +344,7 @@ export const createWorkspaceState = (workspace: Workspace): WorkspaceState => {
           topTargetId: edge.topTarget.id,
           label: edge.label,
           weight: edge.weight,
+          width: edge.width,
         },
       ];
     })
@@ -371,6 +374,7 @@ const toNodeState = (node: WorkspaceNode): WorkspaceNodeState => ({
   y: node.y,
   label: node.label,
   color: node.color,
+  scaledSize: node.scaledSize,
   data: node.data,
 });
 

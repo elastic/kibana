@@ -125,6 +125,7 @@ describe('workspace state', () => {
           y: 2,
           label: 'Parent',
           color: 'red',
+          scaledSize: undefined,
           data: { field: 'field', term: 'parent' },
         },
         child: {
@@ -134,6 +135,7 @@ describe('workspace state', () => {
           y: 4,
           label: 'Child',
           color: 'blue',
+          scaledSize: undefined,
           data: { field: 'field', term: 'child' },
         },
       },
@@ -147,6 +149,7 @@ describe('workspace state', () => {
           topTargetId: 'parent',
           label: 'connection',
           weight: 5,
+          width: undefined,
         },
       },
       edgeIds: ['edge'],

@@ -20,7 +20,7 @@ import { loadTemplates, templatesSelector } from './url_templates';
 import {
   migrateLegacyIndexPatternRef,
   savedWorkspaceToAppState,
-  appStateToSavedWorkspace,
+  reduxStateToSavedWorkspace,
   lookupIndexPatternId,
 } from '../services/persistence';
 import { updateMetaData, metaDataSelector } from './meta_data';
@@ -179,10 +179,10 @@ function showModal({
     const canSaveData =
       deps.savePolicy === 'configAndData' ||
       (deps.savePolicy === 'configAndDataWithConsent' && userHasConfirmedSaveWorkspaceData);
-    appStateToSavedWorkspace(
+    reduxStateToSavedWorkspace(
       savedWorkspace,
       {
-        workspace,
+        workspace: state.workspace,
         urlTemplates: templatesSelector(state),
         advancedSettings: settingsSelector(state),
         selectedIndex: selectedDatasource,

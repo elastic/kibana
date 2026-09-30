@@ -22,7 +22,7 @@ import { metaDataSelector, updateMetaData } from './meta_data';
 import { templatesSelector } from './url_templates';
 import {
   migrateLegacyIndexPatternRef,
-  appStateToSavedWorkspace,
+  reduxStateToSavedWorkspace,
   lookupIndexPatternId,
 } from '../services/persistence';
 import { settingsSelector } from './advanced_settings';
@@ -60,7 +60,7 @@ jest.mock('../services/persistence', () => ({
       },
     ] as WorkspaceField[],
   })),
-  appStateToSavedWorkspace: jest.fn(),
+  reduxStateToSavedWorkspace: jest.fn(),
 }));
 
 jest.mock('../services/save_modal', () => ({
@@ -145,7 +145,7 @@ describe('persistence listeners', () => {
     it('should serialize saved object and save after confirmation', async () => {
       env.store.dispatch(saveWorkspace({ id: '123' } as GraphWorkspaceSavedObject));
       (openSaveModal as jest.Mock).mock.calls[0][0].saveWorkspace({}, true);
-      expect(appStateToSavedWorkspace).toHaveBeenCalled();
+      expect(reduxStateToSavedWorkspace).toHaveBeenCalled();
       await waitForPromise();
 
       // three things are happening on saving: show toast, update state and update url
@@ -158,7 +158,7 @@ describe('persistence listeners', () => {
       env.store.dispatch(saveWorkspace({} as GraphWorkspaceSavedObject));
       (openSaveModal as jest.Mock).mock.calls[0][0].saveWorkspace({}, false);
       // serialize function is called with `canSaveData` set to false
-      expect(appStateToSavedWorkspace).toHaveBeenCalledWith(
+      expect(reduxStateToSavedWorkspace).toHaveBeenCalledWith(
         expect.anything(),
         expect.anything(),
         false
