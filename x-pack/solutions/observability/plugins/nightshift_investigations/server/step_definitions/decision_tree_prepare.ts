@@ -12,28 +12,9 @@ import type { Logger } from '@kbn/core/server';
 import { NIGHTSHIFT_INVESTIGATION_AGENT_ID } from '../agents/investigation';
 import type { InvestigationToolCall } from '../decision_trees/accessed_trees';
 import { prepareReinforcementTurn } from '../decision_trees/register_decision_trees';
+import { toolCallsSchema } from './tool_calls_schema';
 
 const MAX_INPUT_CHARS = 100_000;
-const MAX_TOOL_CALLS = 2_000;
-
-const toolCallSchema = z
-  .object({
-    tool_id: z.string().max(512).optional(),
-    tool_call_id: z.string().max(512).optional(),
-    params: z.record(z.string(), z.unknown()).optional(),
-  })
-  .passthrough();
-
-const toolCallsSchema = z.preprocess((value) => {
-  if (typeof value === 'string') {
-    try {
-      return JSON.parse(value) as unknown;
-    } catch {
-      return [];
-    }
-  }
-  return value;
-}, z.array(toolCallSchema).max(MAX_TOOL_CALLS).optional());
 
 export const decisionTreePrepareStepDefinition = ({
   getTelemetryConnectorId,
