@@ -50,14 +50,11 @@ vi.mock('@elastic/eui', async () => {
 });
 
 type AutoSizerChildren = (size: { height: number; width: number }) => React.ReactNode;
-vi.mock(
-  'react-virtualized/dist/commonjs/AutoSizer',
-  () => ({
-    default: ({ children }: { children: AutoSizerChildren }) => (
-      <div>{children({ height: 500, width: 500 })}</div>
-    ),
-  })
-);
+vi.mock('react-virtualized/dist/commonjs/AutoSizer', () => ({
+  default: ({ children }: { children: AutoSizerChildren }) => (
+    <div>{children({ height: 500, width: 500 })}</div>
+  ),
+}));
 
 export const renderProcessorEditor = (httpSetup: HttpSetup, props: Props) => {
   apiService.setup(httpSetup, uiMetricService);

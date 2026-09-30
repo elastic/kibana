@@ -26,7 +26,6 @@ interface Result {
   error: null | Error;
 }
 
-
 const response = {
   playbooks: [
     {

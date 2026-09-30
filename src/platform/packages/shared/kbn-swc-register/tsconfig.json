@@ -15,7 +15,8 @@
   "kbn_references": [
     "@kbn/repo-info",
     "@kbn/peggy",
-    "@kbn/swc-config"
+    "@kbn/swc-config",
+    "@kbn/test"
   ],
   "exclude": [
     "target/**/*"

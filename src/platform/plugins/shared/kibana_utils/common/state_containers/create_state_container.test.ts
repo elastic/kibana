@@ -197,11 +197,15 @@ test('throws when state is modified inline', () => {
 
   expect(() => {
     (container.getState().array as any).push('c');
-  }).toThrowErrorMatchingInlineSnapshot(`[TypeError: Cannot add property 1, object is not extensible]`);
+  }).toThrowErrorMatchingInlineSnapshot(
+    `[TypeError: Cannot add property 1, object is not extensible]`
+  );
 
   expect(() => {
     (container.getState().array[0] as any).c = 'b';
-  }).toThrowErrorMatchingInlineSnapshot(`[TypeError: Cannot add property c, object is not extensible]`);
+  }).toThrowErrorMatchingInlineSnapshot(
+    `[TypeError: Cannot add property c, object is not extensible]`
+  );
 
   expect(() => {
     container.set(null as any);

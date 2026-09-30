@@ -24,6 +24,7 @@ dependsOn:
   - '@kbn/dev-cli-errors'
   - '@kbn/tooling-log'
   - '@kbn/node-libs-browser-webpack-plugin'
+  - '@kbn/test'
 tags:
   - shared-common
   - package

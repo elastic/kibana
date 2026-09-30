@@ -420,7 +420,9 @@ test('throws if reading "enabled" when no schema exists', async () => {
 
   await expect(
     async () => await configService.isEnabledAtPath('foo')
-  ).rejects.toThrowErrorMatchingInlineSnapshot(`[Error: No validation schema has been defined for [foo]]`);
+  ).rejects.toThrowErrorMatchingInlineSnapshot(
+    `[Error: No validation schema has been defined for [foo]]`
+  );
 });
 
 test('throws if reading any config value when no schema exists', async () => {
@@ -435,7 +437,9 @@ test('throws if reading any config value when no schema exists', async () => {
 
   await expect(
     async () => await configService.isEnabledAtPath('foo')
-  ).rejects.toThrowErrorMatchingInlineSnapshot(`[Error: No validation schema has been defined for [foo]]`);
+  ).rejects.toThrowErrorMatchingInlineSnapshot(
+    `[Error: No validation schema has been defined for [foo]]`
+  );
 });
 
 test('allows plugins to specify "enabled" flag via validation schema', async () => {

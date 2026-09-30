@@ -36,6 +36,7 @@
     "@kbn/react-mute-legacy-root-warning",
     "@kbn/dot-text",
     "@kbn/apm-utils",
-    "@kbn/moon"
+    "@kbn/moon",
+    "@kbn/setup-node-env"
   ]
 }

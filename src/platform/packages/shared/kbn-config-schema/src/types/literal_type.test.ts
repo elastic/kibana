@@ -67,6 +67,8 @@ describe('literal', () => {
   test('includes namespace in failure', () => {
     expect(() =>
       literal('test').validate('foo', {}, 'foo-namespace')
-    ).toThrowErrorMatchingInlineSnapshot(`[Error: [foo-namespace]: expected value to equal [test]]`);
+    ).toThrowErrorMatchingInlineSnapshot(
+      `[Error: [foo-namespace]: expected value to equal [test]]`
+    );
   });
 });
