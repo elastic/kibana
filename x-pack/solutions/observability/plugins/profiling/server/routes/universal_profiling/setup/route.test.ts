@@ -7,9 +7,9 @@
 
 import { coreMock, httpServerMock, httpServiceMock } from '@kbn/core/server/mocks';
 import { loggerMock } from '@kbn/logging-mocks';
-import { getRoutePaths } from '../../../common';
-import type { ProfilingConfig } from '../..';
-import type { RouteRegisterParameters } from '..';
+import { getRoutePaths } from '../../../../common';
+import type { ProfilingConfig } from '../../..';
+import type { RouteRegisterParameters } from '../..';
 import { registerSetupRoute } from './route';
 
 function setup({
@@ -33,8 +33,8 @@ function setup({
     has_data: true,
     pre_8_9_1_data: false,
   });
-  const profilingStatus = jest.fn().mockResolvedValue({});
-  const createProfilingEsClient = jest.fn().mockReturnValue({ profilingStatus });
+  const status = jest.fn().mockResolvedValue({});
+  const createProfilingEsClient = jest.fn().mockReturnValue({ universalProfiling: { status } });
 
   registerSetupRoute({
     router,
@@ -43,7 +43,9 @@ function setup({
     dependencies: {
       start: {
         profilingDataAccess: {
-          services: { getCloudSetupState, getSelfManagedSetupState, getStatus },
+          services: {
+            universalProfiling: { getCloudSetupState, getSelfManagedSetupState, getStatus },
+          },
         },
       },
       setup: { cloud: { isCloudEnabled } },

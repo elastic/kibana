@@ -6,21 +6,20 @@
  */
 
 import type { RecursivePartial } from '@elastic/eui';
-import type { ProfilingCloudSetupOptions } from '../../../common';
-import type { CloudSetupState } from '../../../common/cloud_setup';
-import { createDefaultCloudSetupState } from '../../../common/cloud_setup';
+import type { CloudSetupState, ProfilingCloudSetupOptions } from '../../lib/cloud_setup';
+import { createDefaultCloudSetupState } from '../../lib/cloud_setup';
 import {
   validateMaximumBuckets,
   validateProfilingStatus,
   validateResourceManagement,
-} from '../../../common/cluster_settings';
+} from '../../lib/cluster_settings';
 import {
   validateCollectorPackagePolicy,
   validateProfilingInApmPackagePolicy,
   validateSymbolizerPackagePolicy,
-} from '../../../common/fleet_policies';
-import { hasProfilingData } from '../../../common/has_profiling_data';
-import { mergePartialSetupStates } from '../../../common/setup';
+} from '../../lib/fleet_policies';
+import { hasProfilingData } from '../../lib/has_profiling_data';
+import { mergePartialSetupStates } from '../../lib/setup';
 
 export async function cloudSetupState(
   params: ProfilingCloudSetupOptions

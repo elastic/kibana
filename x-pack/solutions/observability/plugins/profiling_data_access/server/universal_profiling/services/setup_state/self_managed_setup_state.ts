@@ -9,10 +9,10 @@ import {
   validateMaximumBuckets,
   validateProfilingStatus,
   validateResourceManagement,
-} from '../../../common/cluster_settings';
-import { hasProfilingData } from '../../../common/has_profiling_data';
-import type { ProfilingSetupOptions, SetupState } from '../../../common/setup';
-import { createDefaultSetupState, mergePartialSetupStates } from '../../../common/setup';
+} from '../../lib/cluster_settings';
+import { hasProfilingData } from '../../lib/has_profiling_data';
+import type { ProfilingSetupOptions, SetupState } from '../../lib/setup';
+import { createDefaultSetupState, mergePartialSetupStates } from '../../lib/setup';
 
 export async function selfManagedSetupState(params: ProfilingSetupOptions): Promise<SetupState> {
   const state = createDefaultSetupState();

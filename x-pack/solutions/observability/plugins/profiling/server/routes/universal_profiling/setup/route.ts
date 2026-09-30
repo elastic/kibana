@@ -5,13 +5,14 @@
  * 2.0.
  */
 
-import type { ProfilingSetupOptions } from '@kbn/profiling-data-access-plugin/common/setup';
+import type { ProfilingSetupOptions } from '@kbn/profiling-data-access-plugin/server';
 import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
-import type { RouteRegisterParameters } from '..';
-import { getRoutePaths } from '../../../common';
-import { getHasSetupPrivileges } from '../../lib/setup/get_has_setup_privileges';
-import { handleRouteHandlerError } from '../../utils/handle_route_error_handler';
-import { getClient } from '../compat';
+import { getRequestAbortedSignal } from '@kbn/data-plugin/server';
+import type { RouteRegisterParameters } from '../..';
+import { getRoutePaths } from '../../../../common';
+import { getHasSetupPrivileges } from './lib/get_has_setup_privileges';
+import { handleRouteHandlerError } from '../../../utils/handle_route_error_handler';
+import { getClient } from '../../compat';
 import { getCloudSetupInstructions } from './get_cloud_setup_instructions';
 import { getSelfManagedInstructions } from './get_self_managed_instructions';
 import { setupStatusOASOperationObject } from './oas_examples';
@@ -86,13 +87,15 @@ export function registerSetupRoute({
 
         const core = await context.core;
 
-        const profilingStatus = await dependencies.start.profilingDataAccess.services.getStatus({
-          esClient: core.elasticsearch.client,
-          soClient: core.savedObjects.client,
-          spaceId: dependencies.setup.spaces?.spacesService?.getSpaceId(request),
-        });
+        const status =
+          await dependencies.start.profilingDataAccess.services.universalProfiling.getStatus({
+            esClient: core.elasticsearch.client,
+            soClient: core.savedObjects.client,
+            spaceId: dependencies.setup.spaces?.spacesService?.getSpaceId(request),
+            abortSignal: getRequestAbortedSignal(request.events.aborted$),
+          });
 
-        return response.ok({ body: { ...profilingStatus, has_required_role: hasRequiredRole } });
+        return response.ok({ body: { ...status, has_required_role: hasRequiredRole } });
       } catch (error) {
         return handleRouteHandlerError({
           error,
@@ -166,7 +169,8 @@ export function registerSetupRoute({
         const esClient = await getClient(context);
         const core = await context.core;
 
-        const client = createProfilingEsClient({ esClient, request });
+        const abortSignal = getRequestAbortedSignal(request.events.aborted$);
+        const client = createProfilingEsClient({ esClient, abortSignal });
 
         const commonSetupParams: ProfilingSetupOptions = {
           client,
@@ -177,11 +181,12 @@ export function registerSetupRoute({
             dependencies.setup.spaces?.spacesService?.getSpaceId(request) ?? DEFAULT_SPACE_ID,
         };
 
-        const { services } = dependencies.start.profilingDataAccess;
+        const { universalProfiling } = dependencies.start.profilingDataAccess.services;
         const setupStateParams = {
           esClient: core.elasticsearch.client,
           soClient: core.savedObjects.client,
           spaceId: commonSetupParams.spaceId,
+          abortSignal,
         };
 
         const isCloudEnabled = dependencies.setup.cloud?.isCloudEnabled;
@@ -196,7 +201,7 @@ export function registerSetupRoute({
           }
           logger.debug('Setting up Universal Profiling on Cloud');
 
-          const setupState = await services.getCloudSetupState(setupStateParams);
+          const setupState = await universalProfiling.getCloudSetupState(setupStateParams);
           await setupCloud({
             setupState,
             setupParams: {
@@ -211,7 +216,7 @@ export function registerSetupRoute({
         } else {
           logger.debug('Setting up self-managed Universal Profiling');
 
-          const setupState = await services.getSelfManagedSetupState(setupStateParams);
+          const setupState = await universalProfiling.getSelfManagedSetupState(setupStateParams);
           await setupSelfManaged({
             setupState,
             setupParams: commonSetupParams,
@@ -221,7 +226,7 @@ export function registerSetupRoute({
         }
 
         // Wait until Profiling ES plugin creates all resources
-        await client.profilingStatus({ waitForResourcesCreated: true });
+        await client.universalProfiling.status({ waitForResourcesCreated: true });
 
         if (dependencies.telemetryUsageCounter) {
           dependencies.telemetryUsageCounter.incrementCounter({

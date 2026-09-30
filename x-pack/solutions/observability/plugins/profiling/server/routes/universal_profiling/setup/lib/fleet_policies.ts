@@ -11,9 +11,9 @@ import {
   ELASTIC_CLOUD_APM_POLICY,
   getApmPolicy,
   SYMBOLIZER_PACKAGE_POLICY_NAME,
-} from '@kbn/profiling-data-access-plugin/common';
+} from '@kbn/profiling-data-access-plugin/server';
 import { omit } from 'lodash';
-import type { PackageInputType } from '../..';
+import type { PackageInputType } from '../../../..';
 import type { ProfilingCloudSetupOptions } from './types';
 
 const CLOUD_AGENT_POLICY_ID = 'policy-elastic-agent-on-cloud';

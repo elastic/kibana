@@ -35,7 +35,6 @@ export interface ProfilingESClient {
     indices?: string[];
     stacktraceIdsField?: string;
   }): Promise<StackTraceResponse>;
-  profilingStatus(params?: { waitForResourcesCreated?: boolean }): Promise<ProfilingStatusResponse>;
   getEsClient(): ElasticsearchClient;
   profilingFlamegraph(params: {
     query: QueryDslQueryContainer;
@@ -67,4 +66,14 @@ export interface ProfilingESClient {
     costPervCPUPerHour?: number;
     durationSeconds: number;
   }): Promise<ESTopNFunctions>;
+  universalProfiling: {
+    status(params?: { waitForResourcesCreated?: boolean }): Promise<ProfilingStatusResponse>;
+  };
 }
+
+export interface CreateProfilingEsClientParams {
+  esClient: ElasticsearchClient;
+  abortSignal?: AbortSignal;
+}
+
+export type CreateProfilingEsClient = (params: CreateProfilingEsClientParams) => ProfilingESClient;

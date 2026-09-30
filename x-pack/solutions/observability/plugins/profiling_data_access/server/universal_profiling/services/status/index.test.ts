@@ -6,9 +6,9 @@
  */
 
 import type { IScopedClusterClient, SavedObjectsClientContract } from '@kbn/core/server';
-import { createDefaultCloudSetupState } from '../../../common/cloud_setup';
-import { createDefaultSetupState, mergePartialSetupStates } from '../../../common/setup';
-import type { RegisterServicesParams } from '../register_services';
+import { createDefaultCloudSetupState } from '../../lib/cloud_setup';
+import { createDefaultSetupState, mergePartialSetupStates } from '../../lib/setup';
+import type { RegisterServicesParams } from '../../../services/register_services';
 import { getCloudSetupState, getSelfManagedSetupState } from '../setup_state';
 import { createGetStatusService } from '.';
 
@@ -88,5 +88,17 @@ describe('createGetStatusService', () => {
       pre_8_9_1_data: true,
     });
     expect(mockedGetCloudSetupState).not.toHaveBeenCalled();
+  });
+
+  it('passes the abort signal to the setup state', async () => {
+    mockedGetSelfManagedSetupState.mockResolvedValue(createDefaultSetupState());
+    const abortSignal = new AbortController().signal;
+
+    const getStatus = createGetStatusService(createParams(false));
+    await getStatus({ soClient, esClient, abortSignal });
+
+    expect(mockedGetSelfManagedSetupState).toHaveBeenCalledWith(
+      expect.objectContaining({ esClient, soClient, abortSignal })
+    );
   });
 });

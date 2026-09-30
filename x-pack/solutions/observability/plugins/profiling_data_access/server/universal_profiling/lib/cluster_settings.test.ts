@@ -16,7 +16,7 @@ import {
 describe('cluster_settings validators', () => {
   function createSetupOptions() {
     const getSettings = jest.fn();
-    const profilingStatus = jest.fn();
+    const universalProfilingStatus = jest.fn();
 
     const client = {
       getEsClient: () => ({
@@ -24,7 +24,9 @@ describe('cluster_settings validators', () => {
           getSettings,
         },
       }),
-      profilingStatus,
+      universalProfiling: {
+        status: universalProfilingStatus,
+      },
     };
 
     const setupOptions = {
@@ -38,7 +40,7 @@ describe('cluster_settings validators', () => {
     return {
       setupOptions,
       getSettings,
-      profilingStatus,
+      universalProfilingStatus,
     };
   }
 
@@ -77,6 +79,16 @@ describe('cluster_settings validators', () => {
       });
     });
 
+    it('forwards the abort signal to getSettings', async () => {
+      const { setupOptions, getSettings } = createSetupOptions();
+      const abortSignal = new AbortController().signal;
+      getSettings.mockResolvedValue({ persistent: {} });
+
+      await validateMaximumBuckets({ ...setupOptions, abortSignal });
+
+      expect(getSettings).toHaveBeenCalledWith({}, { signal: abortSignal });
+    });
+
     it('returns configured false when getSettings throws', async () => {
       const { setupOptions, getSettings } = createSetupOptions();
       getSettings.mockRejectedValue(new Error('getSettings failed'));
@@ -90,9 +102,9 @@ describe('cluster_settings validators', () => {
   });
 
   describe('validateResourceManagement', () => {
-    it('returns resource management and resource flags from profilingStatus', async () => {
-      const { setupOptions, profilingStatus } = createSetupOptions();
-      profilingStatus.mockResolvedValue({
+    it('returns resource management and resource flags from status', async () => {
+      const { setupOptions, universalProfilingStatus } = createSetupOptions();
+      universalProfilingStatus.mockResolvedValue({
         resource_management: {
           enabled: true,
         },
@@ -113,9 +125,9 @@ describe('cluster_settings validators', () => {
       });
     });
 
-    it('returns fallback values when profilingStatus throws', async () => {
-      const { setupOptions, profilingStatus } = createSetupOptions();
-      profilingStatus.mockRejectedValue(new Error('profilingStatus failed'));
+    it('returns fallback values when status throws', async () => {
+      const { setupOptions, universalProfilingStatus } = createSetupOptions();
+      universalProfilingStatus.mockRejectedValue(new Error('profilingStatus failed'));
 
       await expect(validateResourceManagement(setupOptions)).resolves.toEqual({
         resource_management: {
@@ -130,9 +142,9 @@ describe('cluster_settings validators', () => {
   });
 
   describe('validateProfilingStatus', () => {
-    it('returns profiling enabled value from profilingStatus', async () => {
-      const { setupOptions, profilingStatus } = createSetupOptions();
-      profilingStatus.mockResolvedValue({
+    it('returns profiling enabled value from status', async () => {
+      const { setupOptions, universalProfilingStatus } = createSetupOptions();
+      universalProfilingStatus.mockResolvedValue({
         profiling: {
           enabled: true,
         },
@@ -146,9 +158,9 @@ describe('cluster_settings validators', () => {
     });
 
     it('rethrows when profilingStatus throws', async () => {
-      const { setupOptions, profilingStatus } = createSetupOptions();
+      const { setupOptions, universalProfilingStatus } = createSetupOptions();
       const error = new Error('profilingStatus failed');
-      profilingStatus.mockRejectedValue(error);
+      universalProfilingStatus.mockRejectedValue(error);
 
       await expect(validateProfilingStatus(setupOptions)).rejects.toBe(error);
     });

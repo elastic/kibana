@@ -11,9 +11,10 @@ export const MAX_BUCKETS = 150000;
 
 export async function validateMaximumBuckets({
   client,
+  abortSignal,
 }: ProfilingSetupOptions): Promise<PartialSetupState> {
   try {
-    const settings = await client.getEsClient().cluster.getSettings({});
+    const settings = await client.getEsClient().cluster.getSettings({}, { signal: abortSignal });
     const maxBuckets = settings.persistent.search?.max_buckets;
     return {
       settings: {
@@ -34,7 +35,7 @@ export async function validateResourceManagement({
   client,
 }: ProfilingSetupOptions): Promise<PartialSetupState> {
   try {
-    const statusResponse = await client.profilingStatus();
+    const statusResponse = await client.universalProfiling.status();
     return {
       resource_management: {
         enabled: statusResponse.resource_management.enabled,
@@ -63,7 +64,7 @@ export async function validateResourceManagement({
 export async function validateProfilingStatus({
   client,
 }: ProfilingSetupOptions): Promise<PartialSetupState> {
-  const statusResponse = await client.profilingStatus();
+  const statusResponse = await client.universalProfiling.status();
   return {
     profiling: {
       enabled: statusResponse.profiling.enabled,

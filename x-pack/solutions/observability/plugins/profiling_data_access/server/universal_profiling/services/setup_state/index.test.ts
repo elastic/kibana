@@ -6,7 +6,7 @@
  */
 
 import type { IScopedClusterClient, SavedObjectsClientContract } from '@kbn/core/server';
-import type { RegisterServicesParams } from '../register_services';
+import type { RegisterServicesParams } from '../../../services/register_services';
 import * as setupStateModule from '.';
 import { cloudSetupState } from './cloud_setup_state';
 import { selfManagedSetupState } from './self_managed_setup_state';
@@ -124,6 +124,54 @@ describe('setup state services', () => {
         spaceId: 'default',
       });
       expect(mockedCloudSetupState).not.toHaveBeenCalled();
+    });
+  });
+
+  describe.each([
+    ['createCloudSetupState', setupStateModule.createCloudSetupState, mockedCloudSetupState],
+    [
+      'createSelfManagedSetupState',
+      setupStateModule.createSelfManagedSetupState,
+      mockedSelfManagedSetupState,
+    ],
+  ])('%s', (_name, createService, mockedSetupState) => {
+    it('passes the abort signal to both profiling ES clients', async () => {
+      const abortSignal = new AbortController().signal;
+      const getSetupState = createService({
+        createProfilingEsClient,
+        deps: {
+          cloud: { isCloudEnabled: true } as RegisterServicesParams['deps']['cloud'],
+          fleet: { packagePolicyService } as RegisterServicesParams['deps']['fleet'],
+        },
+        logger,
+      });
+
+      await getSetupState({ esClient, soClient, abortSignal });
+
+      expect(createProfilingEsClient).toHaveBeenCalledWith({
+        esClient: internalEsClient,
+        abortSignal,
+      });
+      expect(createProfilingEsClient).toHaveBeenCalledWith({
+        esClient: currentEsClient,
+        abortSignal,
+      });
+    });
+
+    it('passes the abort signal to the setup state validators', async () => {
+      const abortSignal = new AbortController().signal;
+      const getSetupState = createService({
+        createProfilingEsClient,
+        deps: {
+          cloud: { isCloudEnabled: true } as RegisterServicesParams['deps']['cloud'],
+          fleet: { packagePolicyService } as RegisterServicesParams['deps']['fleet'],
+        },
+        logger,
+      });
+
+      await getSetupState({ esClient, soClient, abortSignal });
+
+      expect(mockedSetupState).toHaveBeenCalledWith(expect.objectContaining({ abortSignal }));
     });
   });
 });
