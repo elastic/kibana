@@ -49,7 +49,6 @@ import useAsync from 'react-use/lib/useAsync';
 import type { Query } from '@kbn/es-query';
 import { DEFAULT_SCHEMA } from '../../../../common/constants';
 import { getInventoryRuleSchema } from '../../../../common/inventory/get_inventory_rule_schema';
-import { useIsPodSchemaSelectorEnabled } from '../../../hooks/use_is_pod_schema_selector_enabled';
 import { isSchemaSelectableForInventoryRule } from '../is_schema_selectable_for_inventory_rule';
 import { schemaTranslationMap } from '../../../components/schema_selector';
 import { UnifiedSearchBar } from '../../../components/shared/unified_search_bar';
@@ -118,8 +117,6 @@ export const defaultExpression = {
 export const Expressions: React.FC<ExpressionsProps> = (props) => {
   const { setRuleParams, ruleParams, errors, metadata } = props;
   const { source } = useSourceContext();
-  const isPodSchemaSelectorEnabled = useIsPodSchemaSelectorEnabled();
-
   const [timeSize, setTimeSize] = useState<number | undefined>(1);
   const [timeUnit, setTimeUnit] = useState<TimeUnitChar>('m');
 
@@ -207,11 +204,11 @@ export const Expressions: React.FC<ExpressionsProps> = (props) => {
     (nt: InventoryItemType) => {
       setRuleParams('nodeType', nt);
 
-      if (!isSchemaSelectableForInventoryRule(nt, isPodSchemaSelectorEnabled)) {
+      if (!isSchemaSelectableForInventoryRule(nt)) {
         setRuleParams('schema', undefined);
       }
     },
-    [isPodSchemaSelectorEnabled, setRuleParams]
+    [setRuleParams]
   );
 
   const updateSchema = useCallback(
@@ -257,10 +254,7 @@ export const Expressions: React.FC<ExpressionsProps> = (props) => {
 
   useEffect(() => {
     const md = metadata;
-    const canSelectSchema = isSchemaSelectableForInventoryRule(
-      ruleParams.nodeType ?? md?.nodeType,
-      isPodSchemaSelectorEnabled
-    );
+    const canSelectSchema = isSchemaSelectableForInventoryRule(ruleParams.nodeType ?? md?.nodeType);
 
     if (!ruleParams.nodeType) {
       if (md && md.nodeType) {
@@ -291,25 +285,12 @@ export const Expressions: React.FC<ExpressionsProps> = (props) => {
       setRuleParams('sourceId', source?.id || 'default');
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [
-    metadata,
-    metricsView?.dataViewReference,
-    defaultExpression,
-    source,
-    isPodSchemaSelectorEnabled,
-  ]);
+  }, [metadata, metricsView?.dataViewReference, defaultExpression, source]);
 
   const nodeType = ruleParams.nodeType || 'host';
-  const schemaSelectionEnabled = isSchemaSelectableForInventoryRule(
-    nodeType,
-    isPodSchemaSelectorEnabled
-  );
+  const schemaSelectionEnabled = isSchemaSelectableForInventoryRule(nodeType);
 
-  const effectiveSchema = getInventoryRuleSchema(
-    nodeType,
-    ruleParams.schema,
-    isPodSchemaSelectorEnabled
-  );
+  const effectiveSchema = getInventoryRuleSchema(nodeType, ruleParams.schema);
 
   return (
     <>

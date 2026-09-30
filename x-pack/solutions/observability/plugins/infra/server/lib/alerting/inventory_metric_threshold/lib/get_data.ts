@@ -121,7 +121,6 @@ export const getData = async ({
   afterKey,
   previousNodes = {},
   schema,
-  isPodSchemaSelectorEnabled = false,
 }: {
   esClient: ElasticsearchClient;
   nodeType: InventoryItemType;
@@ -137,11 +136,10 @@ export const getData = async ({
   afterKey?: BucketKey;
   previousNodes?: Response;
   schema?: DataSchemaFormat;
-  isPodSchemaSelectorEnabled?: boolean;
 }): Promise<Response> => {
   // Resolved once here and passed down, so the search and the additionalContext parsing
   // below cannot disagree — ECS context comes from `_source`, SemConv from `docvalue_fields`.
-  const effectiveSchema = getInventoryRuleSchema(nodeType, schema, isPodSchemaSelectorEnabled);
+  const effectiveSchema = getInventoryRuleSchema(nodeType, schema);
 
   const handleResponse = (aggs: ResponseAggregations, previous: Response) => {
     const { nodes } = aggs;
@@ -181,7 +179,6 @@ export const getData = async ({
         afterKey: nextAfterKey,
         previousNodes: previous,
         schema: effectiveSchema,
-        isPodSchemaSelectorEnabled,
       });
     }
     return previous;
