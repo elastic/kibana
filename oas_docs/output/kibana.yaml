@@ -22867,6 +22867,7 @@ paths:
                           value: ai-index-ds-customer-support
                         id: customer_support
                         managed: false
+                        memory_enabled: true
                         sources:
                           - type: esql
                             value: FROM support-cases | LIMIT 100
@@ -23000,6 +23001,9 @@ paths:
                         managed:
                           description: Whether the AI Index is managed by a plugin and therefore immutable.
                           type: boolean
+                        memory_enabled:
+                          description: Whether this AI Index accepts memory writes.
+                          type: boolean
                         sources:
                           description: Additional sources that provide context for the AI Index.
                           items:
@@ -23046,6 +23050,7 @@ paths:
                       required:
                         - id
                         - managed
+                        - memory_enabled
                         - date_created
                         - date_modified
                         - dest
@@ -23322,6 +23327,9 @@ paths:
                   maxLength: 256
                   minLength: 1
                   type: string
+                memory_enabled:
+                  description: Whether this AI index accepts memory writes. Defaults to true when omitted.
+                  type: boolean
                 sources:
                   default: []
                   description: Additional sources that provide context for the AI Index. Defaults to an empty array when omitted.
@@ -24031,6 +24039,7 @@ paths:
                       value: ai-index-ds-customer-support
                     id: customer_support
                     managed: false
+                    memory_enabled: true
                     sources:
                       - type: esql
                         value: FROM support-cases | LIMIT 100
@@ -24163,6 +24172,9 @@ paths:
                   managed:
                     description: Whether the AI Index is managed by a plugin and therefore immutable.
                     type: boolean
+                  memory_enabled:
+                    description: Whether this AI Index accepts memory writes.
+                    type: boolean
                   sources:
                     description: Additional sources that provide context for the AI Index.
                     items:
@@ -24209,6 +24221,7 @@ paths:
                 required:
                   - id
                   - managed
+                  - memory_enabled
                   - date_created
                   - date_modified
                   - dest
@@ -24458,6 +24471,9 @@ paths:
                       description: Which signals the analysis reads. A read filter only.
                   required:
                     - enabled
+                memory_enabled:
+                  description: Whether this AI index accepts memory writes. Defaults to true when omitted.
+                  type: boolean
                 sources:
                   default: []
                   description: Additional sources that provide context for the AI Index. Defaults to an empty array when omitted.

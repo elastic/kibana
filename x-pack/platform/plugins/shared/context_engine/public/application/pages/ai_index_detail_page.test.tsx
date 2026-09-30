@@ -119,6 +119,7 @@ jest.mock('../hooks/use_signals', () => ({
 const aiIndex: GetAiIndexResponse = {
   id: 'my-ai-index',
   managed: false,
+  memory_enabled: false,
   dest: { type: 'data_stream', value: 'ai-index-ds-my-ai-index' },
   automations: [],
   sources: [{ type: 'esql', value: 'FROM My view' }],
@@ -514,6 +515,7 @@ describe('AiIndexDetailPage', () => {
         '/api/context_engine/ai_index/my-ai-index',
         expect.objectContaining({
           body: JSON.stringify({
+            memory_enabled: false,
             dest: { type: 'data_stream', value: 'ai-index-ds-my-ai-index' },
             automations: [],
             sources: [{ type: 'esql', value: 'FROM My view' }],
@@ -550,6 +552,7 @@ describe('AiIndexDetailPage', () => {
         '/api/context_engine/ai_index/my-ai-index',
         expect.objectContaining({
           body: JSON.stringify({
+            memory_enabled: false,
             dest: { type: 'data_stream', value: 'ai-index-ds-my-ai-index' },
             automations: [],
             sources: [{ type: 'esql', value: 'FROM My view' }],
@@ -604,6 +607,7 @@ describe('AiIndexDetailPage', () => {
         '/api/context_engine/ai_index/my-ai-index',
         expect.objectContaining({
           body: JSON.stringify({
+            memory_enabled: false,
             dest: { type: 'data_stream', value: 'ai-index-ds-my-ai-index' },
             automations: [],
             sources: [{ type: 'esql', value: 'FROM My view' }],
@@ -722,6 +726,7 @@ describe('AiIndexDetailPage', () => {
         '/api/context_engine/ai_index/my-ai-index',
         expect.objectContaining({
           body: JSON.stringify({
+            memory_enabled: false,
             dest: { type: 'data_stream', value: 'ai-index-ds-my-ai-index' },
             automations: [{ type: 'workflow', value: 'wf-created' }],
             sources: [{ type: 'esql', value: 'FROM My view' }],
@@ -821,6 +826,7 @@ describe('AiIndexDetailPage', () => {
         '/api/context_engine/ai_index/my-ai-index',
         expect.objectContaining({
           body: JSON.stringify({
+            memory_enabled: false,
             dest: { type: 'data_stream', value: 'ai-index-ds-my-ai-index' },
             automations: [],
             sources: [{ type: 'esql', value: 'FROM My view' }],
