@@ -6,12 +6,21 @@
  */
 
 import { z } from '@kbn/zod/v4';
+import {
+  KEYWORD_SUB_FIELD_IGNORE_ABOVE,
+  LUCENE_MAX_TERM_BYTES,
+  MAX_UTF8_BYTES_PER_CHAR,
+  mergeBuilderFieldMappings,
+} from './types';
 import type {
+  BuilderFieldsBackfill,
+  BuilderFieldsManifest,
+  BuilderFieldsVersion,
   BuilderTypeDefinition,
-  BuilderTypeManifest,
   DerivedRuleFields,
   GeneratedQuery,
   MappingProperty,
+  OpaqueBuilderFields,
   QueryGenerationInput,
   RuleEventEnrichment,
   RuleEventEnrichmentInput,
@@ -28,16 +37,6 @@ interface WriteTimeFields {
   query_text: string;
 }
 
-const writeTimeManifest: BuilderTypeManifest = {
-  type: 'test.write_time',
-  currentVersion: 1,
-  versions: {
-    1: {
-      // Version 1 declares no sub-field mappings.
-    },
-  },
-};
-
 /** Compile-time assertion: the object must satisfy BuilderTypeDefinition. */
 const writeTimeDef: BuilderTypeDefinition<WriteTimeFields> = {
   type: 'test.write_time',
@@ -51,7 +50,6 @@ const writeTimeDef: BuilderTypeDefinition<WriteTimeFields> = {
     }
     return [];
   },
-  manifest: writeTimeManifest,
   generateQuery: (_input: QueryGenerationInput<WriteTimeFields>): GeneratedQuery => ({
     query: { base: 'FROM logs-* | LIMIT 10' },
   }),
@@ -60,8 +58,8 @@ const writeTimeDef: BuilderTypeDefinition<WriteTimeFields> = {
 // ---------------------------------------------------------------------------
 // Execution-time fixture
 //
-// An execution_time builder type exercising every optional property: manifest
-// with sub-field mappings, validateFields, deriveRuleFields, and enrichRuleEvent.
+// An execution_time builder type exercising every optional property:
+// validateFields, deriveRuleFields, and enrichRuleEvent.
 // The run context is passed to generateQuery to verify the widened input shape.
 // ---------------------------------------------------------------------------
 
@@ -69,20 +67,6 @@ interface ExecTimeFields {
   risk_score: number;
   severity: 'low' | 'medium' | 'high' | 'critical';
 }
-
-const execTimeManifest: BuilderTypeManifest = {
-  type: 'test.execution_time',
-  currentVersion: 1,
-  versions: {
-    1: {
-      addedSubFieldMappings: {
-        risk_score: { type: 'integer' } satisfies MappingProperty,
-        severity: { type: 'keyword' } satisfies MappingProperty,
-      },
-      backfillFn: (fields) => fields,
-    },
-  },
-};
 
 /** Compile-time assertion: the object must satisfy BuilderTypeDefinition. */
 const execTimeDef: BuilderTypeDefinition<ExecTimeFields> = {
@@ -97,7 +81,6 @@ const execTimeDef: BuilderTypeDefinition<ExecTimeFields> = {
       severity: z.enum(['low', 'medium', 'high', 'critical']),
     })
     .strict(),
-  manifest: execTimeManifest,
   validateFields: (fields): string[] => {
     return fields.risk_score > 100 ? ['risk_score must be <= 100'] : [];
   },
@@ -132,11 +115,6 @@ describe('BuilderTypeDefinition — write_time fixture', () => {
     expect(writeTimeDef.type).toBe('test.write_time');
     expect(writeTimeDef.name).toBe('Write-time test type');
     expect(writeTimeDef.compilation).toBe('write_time');
-  });
-
-  it('has a manifest with the correct type and currentVersion', () => {
-    expect(writeTimeDef.manifest?.type).toBe('test.write_time');
-    expect(writeTimeDef.manifest?.currentVersion).toBe(1);
   });
 
   it('generateQuery returns a GeneratedQuery when given a QueryGenerationInput', () => {
@@ -185,19 +163,6 @@ describe('BuilderTypeDefinition — execution_time fixture', () => {
     expect(execTimeDef.compilation).toBe('execution_time');
     expect(execTimeDef.kind).toBe('signal');
     expect(execTimeDef.ownership).toEqual({ solution: 'test', domain: 'fixtures' });
-  });
-
-  it('has a manifest with version 1 declaring risk_score and severity sub-fields', () => {
-    const v1 = execTimeDef.manifest?.versions[1];
-    expect(v1?.addedSubFieldMappings).toEqual({
-      risk_score: { type: 'integer' },
-      severity: { type: 'keyword' },
-    });
-  });
-
-  it('manifest version 1 carries a backfillFn', () => {
-    const v1 = execTimeDef.manifest?.versions[1];
-    expect(typeof v1?.backfillFn).toBe('function');
   });
 
   it('generateQuery accepts a QueryGenerationInput without a run context', () => {
@@ -271,28 +236,43 @@ describe('BuilderTypeDefinition — execution_time fixture', () => {
 //
 // Verifies that every member of the union compiles and carries the right shape
 // at runtime. The compile-time check is the primary assertion.
+//
+// After the redesign the union has 8 members (keyword, text, integral group,
+// floating group, scaled_float, boolean, date, ip). Individual type strings are
+// still 14, but they are distributed across those 8 members.
 // ---------------------------------------------------------------------------
 
 describe('MappingProperty — allowlist coverage', () => {
   const examples: MappingProperty[] = [
-    { type: 'keyword' },
+    // keyword requires ignore_above
+    { type: 'keyword', ignore_above: KEYWORD_SUB_FIELD_IGNORE_ABOVE },
     { type: 'text' },
+    // integral group
     { type: 'integer' },
     { type: 'long' },
     { type: 'short' },
     { type: 'byte' },
+    { type: 'unsigned_long' },
+    // floating group
     { type: 'double' },
     { type: 'float' },
     { type: 'half_float' },
     { type: 'scaled_float', scaling_factor: 1000 },
-    { type: 'unsigned_long' },
     { type: 'date' },
     { type: 'ip' },
     { type: 'boolean' },
   ];
 
-  it('contains fourteen member types', () => {
+  it('contains fourteen example values covering all type strings', () => {
     expect(examples).toHaveLength(14);
+  });
+
+  it('keyword requires ignore_above and carries the ceiling constant', () => {
+    const kw = examples.find((e) => e.type === 'keyword') as Extract<
+      MappingProperty,
+      { type: 'keyword' }
+    >;
+    expect(kw.ignore_above).toBe(KEYWORD_SUB_FIELD_IGNORE_ABOVE);
   });
 
   it('scaled_float carries the required scaling_factor', () => {
@@ -311,5 +291,220 @@ describe('MappingProperty — allowlist coverage', () => {
     expect(types).toContain('date');
     expect(types).toContain('ip');
     expect(types).toContain('boolean');
+  });
+});
+
+// ---------------------------------------------------------------------------
+// Keyword ceiling constants
+//
+// The constants are derived, not hand-typed, so the tests verify the derivation.
+// ---------------------------------------------------------------------------
+
+describe('KEYWORD_SUB_FIELD_IGNORE_ABOVE — derivation', () => {
+  it('LUCENE_MAX_TERM_BYTES is 32,766', () => {
+    expect(LUCENE_MAX_TERM_BYTES).toBe(32_766);
+  });
+
+  it('MAX_UTF8_BYTES_PER_CHAR is 4', () => {
+    expect(MAX_UTF8_BYTES_PER_CHAR).toBe(4);
+  });
+
+  it('KEYWORD_SUB_FIELD_IGNORE_ABOVE equals Math.floor(LUCENE_MAX_TERM_BYTES / MAX_UTF8_BYTES_PER_CHAR)', () => {
+    expect(KEYWORD_SUB_FIELD_IGNORE_ABOVE).toBe(
+      Math.floor(LUCENE_MAX_TERM_BYTES / MAX_UTF8_BYTES_PER_CHAR)
+    );
+  });
+
+  it('KEYWORD_SUB_FIELD_IGNORE_ABOVE is 8,191', () => {
+    // 32,766 / 4 = 8,191.5 → floor → 8,191
+    expect(KEYWORD_SUB_FIELD_IGNORE_ABOVE).toBe(8_191);
+  });
+
+  it('8,192 characters would exceed the limit (the value above the ceiling is unsafe)', () => {
+    // Sanity check: 8,192 * 4 = 32,768 which exceeds 32,766.
+    expect((KEYWORD_SUB_FIELD_IGNORE_ABOVE + 1) * MAX_UTF8_BYTES_PER_CHAR).toBeGreaterThan(
+      LUCENE_MAX_TERM_BYTES
+    );
+  });
+});
+
+// ---------------------------------------------------------------------------
+// mergeBuilderFieldMappings
+// ---------------------------------------------------------------------------
+
+describe('mergeBuilderFieldMappings', () => {
+  it('merges two sources with no overlapping paths', () => {
+    const a: Record<string, MappingProperty> = {
+      risk_score: { type: 'integer' },
+    };
+    const b: Record<string, MappingProperty> = {
+      severity: { type: 'keyword', ignore_above: KEYWORD_SUB_FIELD_IGNORE_ABOVE },
+    };
+    const merged = mergeBuilderFieldMappings(a, b);
+    expect(merged).toEqual({
+      risk_score: { type: 'integer' },
+      severity: { type: 'keyword', ignore_above: KEYWORD_SUB_FIELD_IGNORE_ABOVE },
+    });
+  });
+
+  it('merges identical declarations at the same path silently', () => {
+    const a: Record<string, MappingProperty> = {
+      index: { type: 'keyword', ignore_above: KEYWORD_SUB_FIELD_IGNORE_ABOVE },
+      query: { type: 'text' },
+    };
+    const b: Record<string, MappingProperty> = {
+      // Same declarations as a — must merge without throwing.
+      index: { type: 'keyword', ignore_above: KEYWORD_SUB_FIELD_IGNORE_ABOVE },
+      query: { type: 'text' },
+      language: { type: 'keyword', ignore_above: KEYWORD_SUB_FIELD_IGNORE_ABOVE },
+    };
+    const merged = mergeBuilderFieldMappings(a, b);
+    expect(merged).toEqual({
+      index: { type: 'keyword', ignore_above: KEYWORD_SUB_FIELD_IGNORE_ABOVE },
+      query: { type: 'text' },
+      language: { type: 'keyword', ignore_above: KEYWORD_SUB_FIELD_IGNORE_ABOVE },
+    });
+  });
+
+  it('throws when two sources declare the same path with different types, naming the path', () => {
+    const a: Record<string, MappingProperty> = {
+      risk_score: { type: 'integer' },
+    };
+    const b: Record<string, MappingProperty> = {
+      risk_score: { type: 'long' },
+    };
+    expect(() => mergeBuilderFieldMappings(a, b)).toThrow(/risk_score/);
+  });
+
+  it('throw message names both conflicting declarations', () => {
+    const a: Record<string, MappingProperty> = {
+      score: { type: 'integer' },
+    };
+    const b: Record<string, MappingProperty> = {
+      score: { type: 'double' },
+    };
+    let errorMessage = '';
+    try {
+      mergeBuilderFieldMappings(a, b);
+    } catch (e) {
+      errorMessage = (e as Error).message;
+    }
+    // Both source A and source B declarations should appear in the message.
+    expect(errorMessage).toContain('integer');
+    expect(errorMessage).toContain('double');
+    expect(errorMessage).toContain('score');
+  });
+
+  it('throws when ignore_above differs on a keyword path', () => {
+    const a: Record<string, MappingProperty> = {
+      tag: { type: 'keyword', ignore_above: 256 },
+    };
+    const b: Record<string, MappingProperty> = {
+      tag: { type: 'keyword', ignore_above: KEYWORD_SUB_FIELD_IGNORE_ABOVE },
+    };
+    expect(() => mergeBuilderFieldMappings(a, b)).toThrow(/tag/);
+  });
+
+  it('merges three sources, deduplicating identical overlapping paths across all three', () => {
+    const common: Record<string, MappingProperty> = {
+      severity: { type: 'keyword', ignore_above: KEYWORD_SUB_FIELD_IGNORE_ABOVE },
+      risk_score: { type: 'integer' },
+      index: { type: 'keyword', ignore_above: KEYWORD_SUB_FIELD_IGNORE_ABOVE },
+      query: { type: 'text' },
+      language: { type: 'keyword', ignore_above: KEYWORD_SUB_FIELD_IGNORE_ABOVE },
+    };
+    const queryOnly: Record<string, MappingProperty> = {
+      // index, query, language are already in common — identical, must merge.
+      index: { type: 'keyword', ignore_above: KEYWORD_SUB_FIELD_IGNORE_ABOVE },
+      query: { type: 'text' },
+      language: { type: 'keyword', ignore_above: KEYWORD_SUB_FIELD_IGNORE_ABOVE },
+    };
+    const thresholdOnly: Record<string, MappingProperty> = {
+      // index, query, language are also in threshold — identical, must merge.
+      index: { type: 'keyword', ignore_above: KEYWORD_SUB_FIELD_IGNORE_ABOVE },
+      query: { type: 'text' },
+      language: { type: 'keyword', ignore_above: KEYWORD_SUB_FIELD_IGNORE_ABOVE },
+      'threshold.value': { type: 'integer' },
+    };
+    const merged = mergeBuilderFieldMappings(common, queryOnly, thresholdOnly);
+    expect(merged).toEqual({
+      severity: { type: 'keyword', ignore_above: KEYWORD_SUB_FIELD_IGNORE_ABOVE },
+      risk_score: { type: 'integer' },
+      index: { type: 'keyword', ignore_above: KEYWORD_SUB_FIELD_IGNORE_ABOVE },
+      query: { type: 'text' },
+      language: { type: 'keyword', ignore_above: KEYWORD_SUB_FIELD_IGNORE_ABOVE },
+      'threshold.value': { type: 'integer' },
+    });
+  });
+
+  it('returns a new object and does not mutate any source', () => {
+    const a: Record<string, MappingProperty> = { risk_score: { type: 'integer' } };
+    const b: Record<string, MappingProperty> = { severity: { type: 'keyword', ignore_above: 256 } };
+    const merged = mergeBuilderFieldMappings(a, b);
+    // The result is a distinct object.
+    expect(merged).not.toBe(a);
+    expect(merged).not.toBe(b);
+    // Sources are unchanged.
+    expect(Object.keys(a)).toEqual(['risk_score']);
+    expect(Object.keys(b)).toEqual(['severity']);
+  });
+});
+
+// ---------------------------------------------------------------------------
+// BuilderFieldsManifest compile-time shape check
+//
+// A synthetic manifest asserting the three interfaces compile together and
+// carry the expected runtime shapes.
+// ---------------------------------------------------------------------------
+
+describe('BuilderFieldsManifest — compile-time and runtime shape', () => {
+  const backfillFn = (fields: OpaqueBuilderFields): OpaqueBuilderFields => ({
+    ...fields,
+    migrated: true,
+  });
+
+  const backfill: BuilderFieldsBackfill = {
+    builderTypes: ['security.detection.query'],
+    migrate: backfillFn,
+  };
+
+  const version1: BuilderFieldsVersion = {
+    addedMappings: {
+      risk_score: { type: 'integer' },
+      severity: { type: 'keyword', ignore_above: KEYWORD_SUB_FIELD_IGNORE_ABOVE },
+    },
+    backfills: [backfill],
+  };
+
+  const manifest: BuilderFieldsManifest = {
+    builderTypes: ['security.detection.query'],
+    currentMappings: {
+      risk_score: { type: 'integer' },
+      severity: { type: 'keyword', ignore_above: KEYWORD_SUB_FIELD_IGNORE_ABOVE },
+    },
+    currentVersion: 1,
+    versions: { 1: version1 },
+  };
+
+  it('carries the expected builderTypes', () => {
+    expect(manifest.builderTypes).toEqual(['security.detection.query']);
+  });
+
+  it('carries the expected currentVersion', () => {
+    expect(manifest.currentVersion).toBe(1);
+  });
+
+  it('version 1 addedMappings includes the declared sub-fields', () => {
+    expect(manifest.versions[1].addedMappings).toHaveProperty('risk_score', { type: 'integer' });
+    expect(manifest.versions[1].addedMappings).toHaveProperty('severity', {
+      type: 'keyword',
+      ignore_above: KEYWORD_SUB_FIELD_IGNORE_ABOVE,
+    });
+  });
+
+  it('backfill migrate is callable and returns the expected shape', () => {
+    const fields: OpaqueBuilderFields = { risk_score: 50 };
+    const result = manifest.versions[1].backfills![0].migrate(fields);
+    expect(result).toEqual({ risk_score: 50, migrated: true });
   });
 });

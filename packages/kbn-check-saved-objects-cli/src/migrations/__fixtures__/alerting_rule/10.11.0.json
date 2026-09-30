@@ -281,9 +281,7 @@
         },
         "revision": 0,
         "ownership": {
-          "managed": true,
-          "solution": "security",
-          "domain": "detection"
+          "managed": false
         }
       },
       "time_field": "@timestamp",

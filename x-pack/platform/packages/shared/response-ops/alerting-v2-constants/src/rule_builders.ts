@@ -5,9 +5,33 @@
  * 2.0.
  */
 
-export const MAX_BUILDER_FIELDS_STRING_LENGTH = 8_192;
+/**
+ * Absolute maximum character count for any single string in a builder type's
+ * `builderFieldsSchema`, checked at `registerBuilderType` time.
+ *
+ * This is an absolute ceiling, not a tuned bound. Which bound is *safe* for a
+ * given leaf is a property of that leaf's mapping (keyword sub-fields are held
+ * at or below `KEYWORD_SUB_FIELD_IGNORE_ABOVE` by the total-mapping check;
+ * text sub-fields carry no length limit from Elasticsearch). The figure matches
+ * what the artifact surface already passes through the same bounded-schema walk
+ * (`MAX_ARTIFACT_STRING_LENGTH`), so the mechanism needs no change — only the
+ * number does.
+ */
+export const MAX_BUILDER_FIELDS_STRING_LENGTH = 65_536;
 export const MAX_BUILDER_FIELDS_ARRAY_ITEMS = 64;
-export const MAX_BUILDER_FIELDS_BYTES = 262_144;
+
+/**
+ * Ceiling for the worst-case byte size implied by a builder type's
+ * `builderFieldsSchema`, checked at `registerBuilderType` time.
+ *
+ * Set to half the default request payload (`server.maxPayload`, one megabyte),
+ * which leaves room for the long text bounds (note and setup) that the
+ * detection rule schema raises above the old 8,192-character limit. A route
+ * that accepts a one-megabyte body can therefore hold the whole builder-fields
+ * budget twice over, with no risk of a request being rejected for size before
+ * the schema even parses it.
+ */
+export const MAX_BUILDER_FIELDS_BYTES = 524_288;
 
 /**
  * The `ignore_above` threshold of the `metadata.builder_fields` flattened
@@ -15,12 +39,11 @@ export const MAX_BUILDER_FIELDS_BYTES = 262_144;
  * are stored but silently unsearchable as keywords. Shared between:
  *
  * - `rule_mappings.ts` (the static saved-object mapping definition)
- * - `from_builder_manifest.ts` (mappings_addition in model versions)
- * - `assert_valid_definition.ts` (check 4: ignore_above consistency)
+ * - `from_builder_fields_manifest.ts` (mappings_addition in model versions)
  *
- * All three must agree byte-for-byte so core's startup consistency check
+ * Both must agree byte-for-byte so core's startup consistency check
  * passes automatically.
  *
- * Ref: rule-type-registration.md "The fold into the saved-object registration"
+ * Ref: builder-type-registration-redesign.md "Assembling the saved-object type"
  */
 export const BUILDER_FIELDS_IGNORE_ABOVE = 4096;

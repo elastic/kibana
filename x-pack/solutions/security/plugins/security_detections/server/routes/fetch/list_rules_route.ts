@@ -98,8 +98,11 @@ export const listRulesQuerySchema = z.object({
     .optional()
     .describe('Filter on signature ids.'),
 
-  /** Prefix-match over rule names and descriptions. */
-  search: z.string().optional().describe('Prefix search over rule names and descriptions.'),
+  /** Prefix-match over rule names, descriptions, and text builder fields (note, setup, query). */
+  search: z
+    .string()
+    .optional()
+    .describe('Prefix search over rule names, descriptions, and text fields (note, setup, query).'),
 
   /**
    * Sort field. `severity` is NOT accepted — lexicographic ordering is wrong
