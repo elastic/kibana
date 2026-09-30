@@ -68,7 +68,10 @@ const ControlPanelComponent = ({
   selectSelected,
 }: ControlPanelProps & ControlPanelStateProps) => {
   const dispatch = useDispatch<GraphDispatch>();
-  useSelector(workspaceSelector);
+  const { selectedNodeIds } = useSelector(workspaceSelector);
+  const selectedNodes = selectedNodeIds
+    .map((nodeId) => workspace.nodesMap[nodeId])
+    .filter((node): node is WorkspaceNode => node !== undefined);
   const hasNodes = workspace.nodes.length === 0;
 
   const openUrlTemplate = (template: UrlTemplate) => {
@@ -111,7 +114,7 @@ const ControlPanelComponent = ({
         </div>
         <SelectionToolBar workspace={workspace} onSetControl={onSetControl} />
         <div css={styles.gphSelectionList}>
-          {workspace.selectedNodes.length === 0 && (
+          {selectedNodes.length === 0 && (
             <p className="help-block">
               {i18n.translate('xpack.graph.sidebar.selections.noSelectionsHelpText', {
                 defaultMessage: 'No selections. Click on vertices to add.',
@@ -119,7 +122,7 @@ const ControlPanelComponent = ({
             </p>
           )}
 
-          {workspace.selectedNodes.map((node) => (
+          {selectedNodes.map((node) => (
             <SelectedNodeItem
               key={node.id}
               node={node}
@@ -138,9 +141,9 @@ const ControlPanelComponent = ({
       {control === 'drillDowns' && (
         <DrillDowns urlTemplates={urlTemplates} openUrlTemplate={openUrlTemplate} />
       )}
-      {control === 'style' && workspace.selectedNodes.length > 0 && <SelectStyle colors={colors} />}
+      {control === 'style' && selectedNodes.length > 0 && <SelectStyle colors={colors} />}
       {control === 'editLabel' && selectedNode && (
-        <SelectedNodeEditor workspace={workspace} selectedNode={selectedNode} />
+        <SelectedNodeEditor selectedNodes={selectedNodes} selectedNode={selectedNode} />
       )}
       {control === 'mergeTerms' && (
         <MergeCandidates mergeCandidates={mergeCandidates} onSetControl={onSetControl} />

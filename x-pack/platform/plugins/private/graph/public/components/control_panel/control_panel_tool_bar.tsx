@@ -33,7 +33,7 @@ export const ControlPanelToolBar = ({
   liveResponseFields,
 }: ControlPanelToolBarProps) => {
   const dispatch = useDispatch<GraphDispatch>();
-  const { isLayoutRunning } = useSelector(workspaceSelector);
+  const { isLayoutRunning, selectedNodeIds } = useSelector(workspaceSelector);
   const haveNodes = workspace.nodes.length === 0;
 
   const undoButtonMsg = i18n.translate('xpack.graph.sidebar.topMenu.undoButtonTooltip', {
@@ -165,7 +165,7 @@ export const ControlPanelToolBar = ({
             iconType="eyeSlash"
             size="xs"
             aria-label={blocklistButtonMsg}
-            isDisabled={workspace.selectedNodes.length === 0}
+            isDisabled={selectedNodeIds.length === 0}
             onClick={onBlockListClick}
           />
         </EuiToolTip>
@@ -177,7 +177,7 @@ export const ControlPanelToolBar = ({
             iconType="brush"
             size="xs"
             aria-label={customStyleButtonMsg}
-            isDisabled={workspace.selectedNodes.length === 0}
+            isDisabled={selectedNodeIds.length === 0}
             onClick={onCustomStyleClick}
           />
         </EuiToolTip>
