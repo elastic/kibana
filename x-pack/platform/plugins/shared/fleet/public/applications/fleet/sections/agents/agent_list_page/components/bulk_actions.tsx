@@ -6,7 +6,7 @@
  */
 
 import React, { useMemo, useState } from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiPortal } from '@elastic/eui';
+import { EuiBetaBadge, EuiFlexGroup, EuiFlexItem, EuiPortal } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 
 import { ExperimentalFeaturesService } from '../../../../services';
@@ -281,11 +281,14 @@ export const AgentBulkActions: React.FunctionComponent<Props> = ({
             {
               id: 'restart',
               name: (
-                <FormattedMessage
-                  id="xpack.fleet.agentBulkActions.restartAgents"
-                  defaultMessage="Restart {agentCount, plural, one {# agent} other {# agents}}"
-                  values={{ agentCount }}
-                />
+                <>
+                  <FormattedMessage
+                    id="xpack.fleet.agentBulkActions.restartAgents"
+                    defaultMessage="Restart {agentCount, plural, one {# agent} other {# agents}}"
+                    values={{ agentCount }}
+                  />{' '}
+                  <EuiBetaBadge label="Beta" size="s" />
+                </>
               ),
               icon: 'refresh',
               disabled: !authz.fleet.allAgents,
