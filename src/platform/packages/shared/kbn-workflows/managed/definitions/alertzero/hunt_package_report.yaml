@@ -31,10 +31,16 @@ triggers:
         # The hunt's own verdict, passed down because a run that confirmed no hit leaves no
         # SSE attachment behind: without these, packaging cannot tell that from a run whose
         # state is genuinely missing, and reports every no-hit run as incomplete.
+        #
+        # Deliberately a plain string rather than an enum of the three values the step
+        # accepts. A trigger input is validated before any step runs, so an unexpected value
+        # here would abort the child ahead of its own on-failure handling and leave the
+        # sweep with no conclusion at all -- the same failure the `technology` enum caused on
+        # `hunt.yaml`. The step's own schema rejects a bad value inside that envelope, where
+        # `emit_package_failed` can still report it.
         huntStatus:
           type: string
-          enum: [success, partial, failed]
-          description: Hunt child's result status; `partial` and `failed` mean absence of a hit is not a clean verdict.
+          description: Hunt child's result status, one of `success`, `partial` or `failed`; the latter two mean absence of a hit is not a clean verdict.
         hasConfirmedHit:
           type: boolean
           description: Whether the hunt cleared the confirmed-hit bar.

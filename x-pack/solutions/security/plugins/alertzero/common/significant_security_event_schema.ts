@@ -341,6 +341,11 @@ const mapsToProposalSchema = z
 /**
  * Hunt-owned Significant Security Event payload: the finding a watch surfaces when its
  * hunt confirms a hit, plus the context needed to render and act on it without a live fetch.
+ *
+ * Writes only. Read an already-persisted attachment through
+ * {@link significantSecurityEventAttachmentReadSchema} instead: the two have the same
+ * inferred type, so nothing here will stop this one parsing a stored payload, it will just
+ * silently drop anything written before a field was renamed.
  */
 export const significantSecurityEventAttachmentDataSchema = alertZeroAttachmentDataSchema.extend({
   title: z.string().trim().min(1).max(512),

@@ -133,7 +133,7 @@ export class AlertZeroPlugin
       getConversations: () => this.requireAgentBuilderConversations(),
       getReportsEsClient: () => this.requireReportsEsClient(),
       getResolveHostEnrollment: makeScopedResolveHostEnrollment(() => this.fleetAgentService),
-      isContextEngineEnabled: makeIsContextEngineEnabled(() => this.coreStart),
+      isContextEngineEnabled: makeIsContextEngineEnabled(() => this.requireCoreStart()),
       logger: this.logger.get('steps'),
     });
     // Registered in setup so the builtin tool is available to Agent Builder before
@@ -316,6 +316,10 @@ export class AlertZeroPlugin
 
   private requireHuntServices(): HuntServices {
     return this.requireStarted(this.huntServices, 'Hunt services');
+  }
+
+  private requireCoreStart(): CoreStart {
+    return this.requireStarted(this.coreStart, 'CoreStart');
   }
 
   private requireReportsEsClient(): ElasticsearchClient {

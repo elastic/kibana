@@ -11,19 +11,12 @@ import type { ResolveHostEnrollment } from '../../step_types/package_report/read
 const escapeKuery = (value: string): string => value.replace(/(["\\])/g, '\\$1');
 
 /**
- * Resolves a host name to its enrolled Elastic Defend agent id via Fleet.
- * `showInactive: false` excludes unenrolled/inactive agents, matching
- * Fleet's own definition of an active agent.
+ * Resolves a host name to its enrolled Elastic Defend agent id via a space-scoped Fleet client.
  *
- * Both `local_metadata.host.hostname` and `local_metadata.host.name` are matched, because
- * the caller feeds this entities collected from either `host.name` or `host.hostname` and
- * the two routinely differ on the same machine (a configured or fully-qualified name
- * against a short one). Matching only one field silently reports an enrolled host as
- * unenrolled, which downgrades an executable response action to a recommendation.
- *
- * The client must be space-scoped: hostnames are not unique across spaces, and an
- * unscoped search returns the first global match, which can enroll — and later act
- * on — an agent belonging to a different space.
+ * Both Fleet name fields are matched: the caller collects entities from either `host.name` or
+ * `host.hostname`, and the two routinely differ on one machine. `showInactive: false` matches
+ * Fleet's own definition of an active agent. Reporting an enrolled host as unenrolled is not
+ * cosmetic -- it downgrades an executable response action to a recommendation.
  */
 export const makeResolveHostEnrollment = (
   agentClient: AgentClient | undefined
@@ -44,14 +37,13 @@ export const makeResolveHostEnrollment = (
 };
 
 /**
- * Binds host enrollment lookups to the space the caller is running in. The service is read
- * through a getter because step definitions register during `setup` but only run after
- * `start`, which is when Fleet's service becomes available.
+ * Binds host enrollment lookups to the space the caller runs in, because hostnames are not
+ * unique across spaces and an unscoped search can act on another space's agent.
  *
- * Without a space to scope to there is no correct lookup to make, so the resolver reports
- * every host unenrolled -- the same answer as a Fleet-less deployment. That mints a
- * recommendation instead of an executable action, which is the safe direction to fail: the
- * alternative is acting on whichever space's host happened to match first.
+ * The service is read through a getter because step definitions register during `setup` but
+ * run after `start`. Without a space there is no correct lookup to make, so every host reports
+ * unenrolled -- a recommendation instead of an action, rather than acting on whichever space's
+ * host matched first.
  */
 export const makeScopedResolveHostEnrollment =
   (getAgentService: () => AgentService | undefined) =>

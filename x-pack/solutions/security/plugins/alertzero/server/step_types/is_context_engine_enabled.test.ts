@@ -46,19 +46,24 @@ describe('makeIsContextEngineEnabled', () => {
     expect(scopedClient.get).toHaveBeenCalledWith(CONTEXT_ENGINE_ENABLED_SETTING_ID);
   });
 
-  // The setting ships off, so an unresolvable answer must not licence a write into the
-  // Context Engine's backing index.
-  it('reports disabled when start has not run', async () => {
-    const isEnabled = makeIsContextEngineEnabled(() => undefined);
+  // Surfacing the plugin's own `requireStarted` error keeps "not started yet" distinct from
+  // "the Context Engine is off": the caller skips coverage either way, but reports the first
+  // as a storage failure rather than claiming the deployment turned the feature off.
+  it('propagates the not-started error instead of reporting disabled', async () => {
+    const isEnabled = makeIsContextEngineEnabled(() => {
+      throw new Error('CoreStart is not available until the AlertZero plugin has started');
+    });
 
-    await expect(isEnabled(request)).resolves.toBe(false);
+    await expect(isEnabled(request)).rejects.toThrow('not available until');
   });
 
   it('reads CoreStart lazily, so registering during setup still sees a later start', async () => {
-    const getCoreStart = jest.fn<CoreStart | undefined, []>().mockReturnValue(undefined);
+    const getCoreStart = jest.fn<CoreStart, []>().mockImplementation(() => {
+      throw new Error('not started');
+    });
     const isEnabled = makeIsContextEngineEnabled(getCoreStart);
 
-    await expect(isEnabled(request)).resolves.toBe(false);
+    await expect(isEnabled(request)).rejects.toThrow('not started');
 
     getCoreStart.mockReturnValue(coreStartWith(true));
 

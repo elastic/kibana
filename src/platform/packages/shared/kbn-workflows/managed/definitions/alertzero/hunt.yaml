@@ -138,7 +138,10 @@ steps:
         #
         # A failure for any other reason (validation, a conversation that vanished)
         # also lands here, and the update fails in turn, which `continue` then
-        # swallows exactly as before.
+        # swallows exactly as before. That is not silent, though: the coordinator
+        # only prepares an attachment for a confirmed hit, so packaging finds no
+        # current-run state and returns `run_incomplete`, which the Worker reports
+        # as a partial sweep. A genuinely broken attachment is visible there.
         on-failure:
           fallback:
             - name: update_sse_attachment
@@ -318,18 +321,26 @@ steps:
         {%- else -%}
         failed
         {%- endif -%}
-      # No `else`: a complete run has nothing to explain and renders empty,
-      # which is what the previous shape produced too (it fell through to a nil
-      # `error.message`).
+      # A complete run has nothing to explain, so it renders empty -- the same
+      # output the previous shape produced for it (it fell through to a nil
+      # `error.message`). It gets an explicit branch rather than falling into
+      # the `else` so that the `else` can carry a real catch-all:
+      # `HuntCompleteness` is named rather than counted precisely so the list
+      # can grow, and a fourth value must not render `result_status: partial`
+      # with no reason beside it, which is the silent-gap shape this file is
+      # otherwise careful to avoid.
       result_reason: |-
         {%- if inputs.investigationConversationId == nil or inputs.investigationConversationId == empty -%}
         no Investigation available (find_or_create failed upstream; hunt coordinator was not called)
         {%- elsif steps.run_hunt_coordinator.output == nil -%}
         {{ steps.run_hunt_coordinator.error.message }}
+        {%- elsif steps.run_hunt_coordinator.output.completeness == "complete" -%}
         {%- elsif steps.run_hunt_coordinator.output.completeness == "incomplete_retryable" -%}
         The hunt was incomplete but retryable ({{ steps.run_hunt_coordinator.output.message }}), so no hunt evidence was recorded and the report stays eligible for a later sweep.
         {%- elsif steps.run_hunt_coordinator.output.completeness == "incomplete_final" -%}
         The hunt left a gap a later run could not close ({{ steps.run_hunt_coordinator.output.message }}), so the report is retired without having been fully searched and its evidence is recorded as incomplete rather than clean.
+        {%- else -%}
+        The hunt reported a completeness this workflow does not recognise ({{ steps.run_hunt_coordinator.output.completeness }}: {{ steps.run_hunt_coordinator.output.message }}), so its result is not recorded as a clean verdict.
         {%- endif -%}
       result_headline: |-
         {%- if steps.run_hunt_coordinator.output.headline != nil -%}
