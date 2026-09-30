@@ -32,7 +32,10 @@ interface ServiceAccountFieldProps {
   workerName: string;
   current?: string;
   isDisabled?: boolean;
-  onChange: (serviceAccountId: string | null) => void;
+  fullWidth?: boolean;
+  /** Overrides the per-worker aria label when one control covers several workers. */
+  ariaLabel?: string;
+  onChange: (serviceAccountId: string | null, accountName?: string) => void;
 }
 
 /**
@@ -43,6 +46,8 @@ const ServiceAccountFieldComponent: React.FC<ServiceAccountFieldProps> = ({
   workerName,
   current,
   isDisabled,
+  fullWidth,
+  ariaLabel,
   onChange,
 }) => {
   const {
@@ -94,15 +99,21 @@ const ServiceAccountFieldComponent: React.FC<ServiceAccountFieldProps> = ({
 
   return (
     <EuiSelect
-      aria-label={settingsI18n.serviceAccountSelectAriaLabel(workerName)}
+      aria-label={ariaLabel ?? settingsI18n.serviceAccountSelectAriaLabel(workerName)}
       data-test-subj={`alertZeroServiceAccountSelect-${workerId}`}
       disabled={isDisabled}
+      fullWidth={fullWidth}
       isLoading={accounts === null}
       options={options}
       value={current ?? CURRENT_USER_VALUE}
       onChange={(event) => {
         const value = event.target.value;
-        onChange(value === CURRENT_USER_VALUE ? null : value);
+        if (value === CURRENT_USER_VALUE) {
+          onChange(null);
+          return;
+        }
+        const account = selectable.find((entry) => entry.id === value);
+        onChange(value, account?.name ?? value);
       }}
     />
   );

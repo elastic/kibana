@@ -53,6 +53,34 @@ export const beforeYouEnableRunsAs = (email: string | undefined) =>
     },
   });
 
+export const beforeYouEnableRunsAsCurrentUser = (email: string | undefined) =>
+  i18n.translate('xpack.alertzero.onboarding.beforeYouEnable.runsAsCurrentUser', {
+    defaultMessage:
+      'Every worker runs as you{emailSuffix}, including workers you leave off. Anything they do is attributed to this account.',
+    values: {
+      emailSuffix: email ? ` ( ${email} )` : '',
+    },
+  });
+
+export const beforeYouEnableRunsAsServiceAccount = (accountName: string) =>
+  i18n.translate('xpack.alertzero.onboarding.beforeYouEnable.runsAsServiceAccount', {
+    defaultMessage:
+      'Every worker runs as {accountName}, including workers you leave off. Anything they do is attributed to that account.',
+    values: { accountName },
+  });
+
+export const ONBOARDING_SERVICE_ACCOUNT_HELP = i18n.translate(
+  'xpack.alertzero.onboarding.serviceAccountHelpDescription',
+  {
+    defaultMessage: 'Saved on every worker, including workers you leave off.',
+  }
+);
+
+export const ONBOARDING_SERVICE_ACCOUNT_ARIA_LABEL = i18n.translate(
+  'xpack.alertzero.onboarding.serviceAccountAriaLabel',
+  { defaultMessage: 'Run as' }
+);
+
 export const BEFORE_YOU_ENABLE_LLM = i18n.translate(
   'xpack.alertzero.onboarding.beforeYouEnable.llm',
   {

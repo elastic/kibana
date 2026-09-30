@@ -40,6 +40,7 @@ import { registerAlertZeroAttachmentTypesUI } from './agent_builder/attachment_t
 import { EscalationModalBoundary } from './pages/conversations/escalation_modal_boundary';
 import { ProposedActionsBoundary } from './pages/conversations/proposed_actions_boundary';
 import { getSharedAppQueryClient } from './shared_app_query_client';
+import { mergeKibanaServices } from './kibana_services';
 import type {
   AlertZeroClientConfig,
   AlertZeroPublicSetup,
@@ -175,7 +176,7 @@ export class AlertZeroPublicPlugin
           ]);
 
         const queryClient = new QueryClient();
-        const stableServices = { ...core, ...startDeps };
+        const stableServices = mergeKibanaServices(core, startDeps);
 
         const Wrapped: React.FC<P> = (props) =>
           React.createElement(
@@ -225,7 +226,7 @@ export class AlertZeroPublicPlugin
         getSharedAppQueryClient(),
       ]);
 
-      const stableServices = { ...core, ...startDeps };
+      const stableServices = mergeKibanaServices(core, startDeps);
 
       const WrappedSlot: React.FC<React.ComponentProps<typeof ProposedActionsSlot>> = (props) =>
         React.createElement(
