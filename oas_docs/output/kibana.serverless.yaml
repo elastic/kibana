@@ -19916,7 +19916,12 @@ paths:
                 properties:
                   cases:
                     items:
-                      $ref: '#/components/schemas/Cases_case_response_properties'
+                      allOf:
+                        - $ref: '#/components/schemas/Cases_case_response_properties'
+                        - type: object
+                          properties:
+                            extended_fields_labels:
+                              $ref: '#/components/schemas/Cases_case_extended_fields_labels'
                     maxItems: 10000
                     type: array
                   count_closed_cases:
