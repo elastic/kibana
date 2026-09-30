@@ -14,6 +14,7 @@ import type { DataSourceType } from '../../common/datasource_types';
 import type { CreateDataSourceFlyoutFormValues } from './types';
 import { CreateDataSourceFlyoutTypeSettingsAzure } from './create_data_source_flyout_type_settings_azure';
 import { CreateDataSourceFlyoutTypeSettingsGcs } from './create_data_source_flyout_type_settings_gcs';
+import { CreateDataSourceFlyoutTypeSettingsS3 } from './create_data_source_flyout_type_settings_s3';
 
 export function CreateDataSourceFlyoutTypeSettings({
   dataSourceType,
@@ -25,9 +26,7 @@ export function CreateDataSourceFlyoutTypeSettings({
   unregister: UseFormUnregister<CreateDataSourceFlyoutFormValues>;
 }) {
   if (dataSourceType === 's3') {
-    // S3 doesn't currently have any specific settings but this will change in the future
-    // return <CreateDataSourceFlyoutTypeSettingsS3 control={control} unregister={unregister} />;
-    return null;
+    return <CreateDataSourceFlyoutTypeSettingsS3 control={control} unregister={unregister} />;
   }
 
   if (dataSourceType === 'gcs') {

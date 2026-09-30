@@ -117,6 +117,7 @@ export const AGENT_BUILDER_BUILTIN_TOOLS = [
 
   // Platform – Context Engine
   `${internalNamespaces.platformContextEngine}.save_automation`,
+  `${internalNamespaces.platformContextEngine}.run_automation`,
   ...Object.values(contextEngineAiIndexTools),
 
   // Nightshift – Sandbox
@@ -362,6 +363,7 @@ export const AGENT_BUILDER_BUILTIN_ATTACHMENTS = [
 
   // Security Solution
   'security.alert',
+  'security.impact',
   'security.alerts',
   'security.entity',
   'security.entity_analytics_dashboard',
@@ -384,6 +386,7 @@ export const AGENT_BUILDER_BUILTIN_ATTACHMENTS = [
   // Security Solution – AlertZero (Hunt Watch)
   // gated behind xpack.alertzero.enabled
   'security.threat',
+  'security.significant_security_event',
 
   // Observability
   'observability.ai_insight',

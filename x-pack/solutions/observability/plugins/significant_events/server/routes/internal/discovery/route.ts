@@ -106,7 +106,7 @@ const discoveryStatusRoute = createServerRoute({
     await assertSignificantEventsAccess({ server, licensing });
 
     const spaceId = await getSpaceId(request);
-    return significantEventsDiscoveryClient.getStatus({ spaceId });
+    return significantEventsDiscoveryClient.getStatus({ spaceId, request });
   },
 });
 

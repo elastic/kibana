@@ -8,8 +8,10 @@
  */
 
 import { TASK_TYPE_BY_SUB_ACTION } from '@kbn/connector-schemas/inference/constants';
+import type { HttpSetup } from '@kbn/core-http-browser';
+import { loadConnectors } from '@kbn/inference-connectors';
 import { isHitlWaitStepType } from '@kbn/workflows';
-import type { ConnectorIdSelectionHandler } from '@kbn/workflows/types/v1';
+import type { ConnectorIdSelectionHandler, ConnectorInstance } from '@kbn/workflows/types/v1';
 import type { PublicStepDefinition } from '@kbn/workflows-extensions/public';
 import { stepSchemas } from '../../../common/step_schemas';
 
@@ -22,6 +24,47 @@ export function getCustomStepConnectorIdSelectionHandler(
     return editorHandlers?.config?.['connector-id']?.connectorIdSelection;
   }
   return undefined;
+}
+
+export async function loadInferenceConnectorsForRegisteredSteps(
+  http: HttpSetup
+): Promise<Map<string, ConnectorInstance[]>> {
+  const featureIds = new Set(
+    stepSchemas.getAllRegisteredStepDefinitions().flatMap((definition) => {
+      if (!('editorHandlers' in definition)) {
+        return [];
+      }
+      const featureId =
+        definition.editorHandlers?.config?.['connector-id']?.connectorIdSelection
+          ?.inferenceFeatureId;
+      return featureId ? [featureId] : [];
+    })
+  );
+
+  return new Map(
+    await Promise.all(
+      [...featureIds].map(
+        async (featureId) =>
+          [
+            featureId,
+            (
+              await loadConnectors({ http, featureId })
+            ).map((connector) => ({
+              id: connector.id,
+              name: connector.name,
+              connectorType: connector.actionTypeId,
+              isPreconfigured: connector.isPreconfigured,
+              isDeprecated: connector.isDeprecated || connector.isConnectorTypeDeprecated,
+              isInferenceEndpoint: connector.isInferenceEndpoint,
+              config:
+                'config' in connector && typeof connector.config.taskType === 'string'
+                  ? { taskType: connector.config.taskType }
+                  : undefined,
+            })),
+          ] as const
+      )
+    )
+  );
 }
 
 export function getConnectorTypesFromStepType(stepType: string): string[] {

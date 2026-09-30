@@ -12,8 +12,7 @@ const baseRule = {
   metadata: { name: 'High CPU', tags: ['ops'] },
   time_field: '@timestamp',
   schedule: { every: '5m', lookback: '15m' },
-  query: { format: 'standalone', breach: { query: 'FROM metrics-* | LIMIT 10' } },
-  state_transition: null,
+  query: { base: 'FROM metrics-* | LIMIT 10' },
 };
 
 describe('ruleAttachmentDataSchema', () => {

@@ -35,12 +35,19 @@ const makeDeps = (
     deps: {
       workflowsExtensions: {
         getAllTriggerDefinitions: () => listedTriggers as any,
+        isReady: jest.fn().mockResolvedValue(undefined),
         getTriggerDefinition: (triggerType: string) =>
           listedTriggers.find(({ id }) => id === triggerType) as any,
         getStepDefinition: (stepTypeId: string) => stepDefinitions[stepTypeId] as any,
       } as any,
       getActionsClient: jest.fn().mockResolvedValue(actionsClient) as any,
       getActionsClientWithRequest: jest.fn().mockResolvedValue(actionsClientWithRequest) as any,
+      getCoreStart: () =>
+        ({
+          featureFlags: {
+            getBooleanValue: jest.fn().mockResolvedValue(false),
+          },
+        } as any),
     },
     actionsClient,
     actionsClientWithRequest,
