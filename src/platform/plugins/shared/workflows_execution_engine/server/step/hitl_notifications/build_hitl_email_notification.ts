@@ -20,7 +20,6 @@ export interface HitlEmailChannelConfig {
   cc?: string[];
   bcc?: string[];
   subject?: string;
-  message?: string;
 }
 
 /** Converts an absolute Kibana URL into `kibanaFooterLink.path` (pathname + search). */
@@ -74,13 +73,11 @@ export function buildHitlEmailConnectorInput({
   subject,
   message,
   footerLinkPath,
-  footerLinkText = DEFAULT_HITL_EMAIL_FOOTER_LINK_TEXT,
 }: {
   emailConfig: HitlEmailChannelConfig;
   subject: string;
   message: string;
   footerLinkPath: string;
-  footerLinkText?: string;
 }): Record<string, unknown> {
   return {
     to: emailConfig.to,
@@ -90,7 +87,7 @@ export function buildHitlEmailConnectorInput({
     message,
     kibanaFooterLink: {
       path: footerLinkPath,
-      text: footerLinkText,
+      text: DEFAULT_HITL_EMAIL_FOOTER_LINK_TEXT,
     },
   };
 }
