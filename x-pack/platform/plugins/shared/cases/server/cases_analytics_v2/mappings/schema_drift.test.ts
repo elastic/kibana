@@ -75,6 +75,7 @@ const buildFullAttributes = (): {
   assignees: [{ uid: 'u-1', username: 'u1', full_name: 'User One', email: 'u1@e.com' }],
   severity: CasePersistedSeverity.HIGH,
   status: CasePersistedStatus.CLOSED,
+  status_key: 'closed_duplicate',
   created_at: '2026-05-01T00:00:00.000Z',
   updated_at: '2026-05-02T00:00:00.000Z',
   closed_at: '2026-05-03T00:00:00.000Z',

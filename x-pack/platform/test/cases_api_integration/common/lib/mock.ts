@@ -221,6 +221,7 @@ export const postCaseResp = (
     created_by: defaultUser,
     external_service: null,
     status: CaseStatuses.open,
+    status_key: null,
     updated_by: null,
     category: null,
     customFields: [],

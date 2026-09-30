@@ -385,6 +385,50 @@ describe('utils', () => {
       `);
     });
 
+    it('creates a filter with the status keys', () => {
+      expect(constructQueryOptions({ status_key: ['awaiting_customer', 'closed'] }).filter)
+        .toMatchInlineSnapshot(`
+        Object {
+          "arguments": Array [
+            Object {
+              "arguments": Array [
+                Object {
+                  "isQuoted": false,
+                  "type": "literal",
+                  "value": "cases.attributes.status_key",
+                },
+                Object {
+                  "isQuoted": false,
+                  "type": "literal",
+                  "value": "awaiting_customer",
+                },
+              ],
+              "function": "is",
+              "type": "function",
+            },
+            Object {
+              "arguments": Array [
+                Object {
+                  "isQuoted": false,
+                  "type": "literal",
+                  "value": "cases.attributes.status_key",
+                },
+                Object {
+                  "isQuoted": false,
+                  "type": "literal",
+                  "value": "closed",
+                },
+              ],
+              "function": "is",
+              "type": "function",
+            },
+          ],
+          "function": "or",
+          "type": "function",
+        }
+      `);
+    });
+
     it('creates a filter with the reporters', () => {
       expect(constructQueryOptions({ reporters: ['bob', 'sam'] }).filter).toMatchInlineSnapshot(`
         Object {

@@ -189,6 +189,7 @@ export function transformESModelToCase(
 
   const severity = SEVERITY_ESMODEL_TO_EXTERNAL[caseAttributes.severity] ?? CaseSeverity.LOW;
   const status = STATUS_ESMODEL_TO_EXTERNAL[caseAttributes.status] ?? CaseStatuses.open;
+  const status_key = caseAttributes.status_key ?? null;
   const category = !caseAttributes.category ? null : caseAttributes.category;
   const customFields = !caseAttributes.customFields
     ? []
@@ -212,6 +213,7 @@ export function transformESModelToCase(
     ...caseAttributes,
     severity,
     status,
+    status_key,
     connector,
     external_service: externalService,
     category,
@@ -280,6 +282,7 @@ export function transformSavedObjectToExternalModel(
   const severity =
     SEVERITY_ESMODEL_TO_EXTERNAL[caseSavedObjectAttributes.severity] ?? CaseSeverity.LOW;
   const status = STATUS_ESMODEL_TO_EXTERNAL[caseSavedObjectAttributes.status] ?? CaseStatuses.open;
+  const status_key = caseSavedObjectAttributes.status_key ?? null;
   const category = !caseSavedObjectAttributes.category ? null : caseSavedObjectAttributes.category;
   const customFields = !caseSavedObjectAttributes.customFields
     ? []
@@ -303,6 +306,7 @@ export function transformSavedObjectToExternalModel(
       ...caseSavedObjectAttributes,
       severity,
       status,
+      status_key,
       connector,
       external_service: externalService,
       category,

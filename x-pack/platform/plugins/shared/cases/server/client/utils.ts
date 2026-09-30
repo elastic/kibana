@@ -70,6 +70,9 @@ const addStatusFilter = (status: CaseStatuses | CaseStatuses[]): KueryNode | und
   );
 };
 
+const addStatusKeyFilter = (statusKey: string | string[]): KueryNode | undefined =>
+  buildFilter({ filters: statusKey, field: 'status_key', operator: 'or' });
+
 const addSeverityFilter = (severity: CaseSeverity | CaseSeverity[]): KueryNode | undefined => {
   if (Array.isArray(severity)) {
     return buildFilter({
@@ -343,6 +346,7 @@ export const constructQueryOptions = ({
   tags,
   reporters,
   status,
+  status_key: statusKey,
   severity,
   sortField,
   owner,
@@ -363,6 +367,7 @@ export const constructQueryOptions = ({
   const sortByField = convertSortField(sortField);
   const ownerFilter = buildFilter({ filters: owner, field: OWNER_FIELD, operator: 'or' });
   const statusFilter = status != null ? addStatusFilter(status) : undefined;
+  const statusKeyFilter = statusKey != null ? addStatusKeyFilter(statusKey) : undefined;
   const severityFilter = severity != null ? addSeverityFilter(severity) : undefined;
   const rangeFilter = buildRangeFilter({ from, to });
   const assigneesFilter = buildAssigneesFilter({ assignees });
@@ -371,6 +376,7 @@ export const constructQueryOptions = ({
 
   const filters = combineFilters([
     statusFilter,
+    statusKeyFilter,
     severityFilter,
     tagsFilter,
     reportersFilter,

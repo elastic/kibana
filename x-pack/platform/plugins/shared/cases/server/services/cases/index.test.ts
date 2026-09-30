@@ -263,6 +263,7 @@ describe('CasesService', () => {
                   },
                   "severity": "low",
                   "status": "open",
+                  "status_key": null,
                   "tags": Array [
                     "defacement",
                   ],
@@ -1801,6 +1802,7 @@ describe('CasesService', () => {
                   },
                   "severity": "medium",
                   "status": "open",
+                  "status_key": null,
                   "tags": Array [
                     "defacement",
                   ],
@@ -2308,6 +2310,7 @@ describe('CasesService', () => {
     const attributesToValidateIfMissing = omit(
       caseTransformedAttributesProps,
       'status',
+      'status_key',
       'severity',
       'connector',
       'external_service',
@@ -2478,6 +2481,7 @@ describe('CasesService', () => {
               },
               "severity": "low",
               "status": "open",
+              "status_key": null,
               "tags": Array [
                 "defacement",
               ],
@@ -2584,6 +2588,7 @@ describe('CasesService', () => {
                 },
                 "severity": "low",
                 "status": "open",
+                "status_key": null,
                 "tags": Array [
                   "defacement",
                 ],
@@ -2681,6 +2686,7 @@ describe('CasesService', () => {
                   },
                   "severity": "low",
                   "status": "open",
+                  "status_key": null,
                   "tags": Array [
                     "defacement",
                   ],
@@ -2778,6 +2784,7 @@ describe('CasesService', () => {
                   },
                   "severity": "low",
                   "status": "open",
+                  "status_key": null,
                   "tags": Array [
                     "defacement",
                   ],
@@ -2888,6 +2895,7 @@ describe('CasesService', () => {
                   },
                   "severity": "low",
                   "status": "open",
+                  "status_key": null,
                   "tags": Array [
                     "defacement",
                   ],
@@ -2948,6 +2956,7 @@ describe('CasesService', () => {
                   },
                   "severity": "low",
                   "status": "open",
+                  "status_key": null,
                   "tags": Array [
                     "defacement",
                   ],
@@ -3054,6 +3063,7 @@ describe('CasesService', () => {
               },
               "severity": "low",
               "status": "open",
+              "status_key": null,
               "tags": Array [
                 "defacement",
               ],
@@ -3176,6 +3186,7 @@ describe('CasesService', () => {
                   },
                   "severity": "low",
                   "status": "open",
+                  "status_key": null,
                   "tags": Array [
                     "defacement",
                   ],

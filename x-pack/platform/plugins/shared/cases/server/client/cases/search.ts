@@ -103,6 +103,7 @@ export const search = async (
       reporters: paramArgs.reporters,
       sortField: paramArgs.sortField,
       status: paramArgs.status,
+      status_key: paramArgs.status_key,
       severity: paramArgs.severity,
       owner: paramArgs.owner,
       from: paramArgs.from,

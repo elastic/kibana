@@ -168,6 +168,7 @@ export const getCasesByAlertID = async (
       title: caseInfo.attributes.title,
       description: caseInfo.attributes.description,
       status: caseInfo.attributes.status,
+      status_key: caseInfo.attributes.status_key ?? null,
       createdAt: caseInfo.attributes.created_at,
       totals: getAttachmentTotalsForCaseId(caseInfo.id, commentStats),
     }));
