@@ -18,6 +18,7 @@ import { EXTRACTION_MODE } from '../../../common/domain/definitions/entity_schem
 import { hasPriorityExtractionGate } from '../../../common/domain/definitions/registry';
 import { ENGINE_STATUS } from '../../domain/constants';
 import type { EngineDescriptor, EngineStatus } from '../../domain/saved_objects';
+import { pairedQualifies } from './utils/process_status';
 
 /** `both` reproduces the public start/stop behaviour; the other two toggle a single task. */
 const ProcessParam = z.enum(['priority', 'nonPriority', 'both']).default('both');
@@ -55,17 +56,6 @@ const needsStop = (status: EngineStatus | null | undefined): boolean =>
 /** Anything not already running is worth starting, ERROR from a failed attempt included. */
 const needsStart = (status: EngineStatus | null | undefined): boolean =>
   status !== ENGINE_STATUS.STARTED;
-
-/**
- * For `both`, a type qualifies when either of its processes does. `nonPriorityStatus` only counts
- * for types that run a non-priority process; the rest never have the field written.
- */
-const pairedQualifies = (
-  engine: EngineDescriptor,
-  qualifies: (status: EngineStatus | null | undefined) => boolean
-): boolean =>
-  qualifies(engine.status) ||
-  (hasPriorityExtractionGate(engine.type) && qualifies(engine.nonPriorityStatus));
 
 /**
  * Resolves the types to act on. An explicit list is taken as-is so an impossible request is
@@ -126,7 +116,9 @@ export async function handleInternalStart(
     // routes have been used, and `both` has to end with both running.
     const toStart = entityTypes.filter((type) => {
       const engine = installed.get(type);
-      return engine !== undefined && pairedQualifies(engine, needsStart);
+      // `dualProcessEnabledMiddleware` already 404s this route when the flag is off, so the
+      // non-priority process is always live by the time the handler runs.
+      return engine !== undefined && pairedQualifies(engine, needsStart, true);
     });
     await Promise.all(toStart.map((type) => assetManager.start(req, type)));
     if (toStart.length > 0) {
@@ -170,7 +162,8 @@ export async function handleInternalStop(
     // would make `both` skip the type and leave non-priority extraction running.
     const toStop = entityTypes.filter((type) => {
       const engine = installed.get(type);
-      return engine !== undefined && pairedQualifies(engine, needsStop);
+      // Same as the start branch: the route is not served with the flag off.
+      return engine !== undefined && pairedQualifies(engine, needsStop, true);
     });
     await Promise.all(toStop.map((type) => assetManager.stop(type)));
     if (toStop.length > 0) {
