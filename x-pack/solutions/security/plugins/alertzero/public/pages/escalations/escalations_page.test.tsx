@@ -23,8 +23,6 @@ import {
 import { useOpenInChat } from '../../hooks/use_open_in_chat';
 import { EscalationsPage } from './escalations_page';
 import { useAgenticInvestigationsCapabilities } from '../../hooks/use_agentic_investigations_capabilities';
-import { useInvestigationDetails } from '../conversations/use_investigation_details';
-import { useConversationsUrlParams } from '../conversations/conversations_url_params';
 import { EscalationsPage } from './escalations_page';
 
 jest.mock('../../hooks/use_agentic_investigations_capabilities');
