@@ -308,7 +308,7 @@ describe('EsqlCreateFlow', () => {
     ['opening the job', mockOpenJob, 'open rejected', [mockStartDatafeed]],
     ['starting the datafeed', mockStartDatafeed, 'start rejected', []],
   ])(
-    'stops after failure while %s and identifies the IDs and window',
+    'stops after failure while %s and identifies the IDs and the real-time window (start only)',
     async (phase, failingCall, reason, laterCalls) => {
       failingCall.mockRejectedValue(new Error(reason));
       renderCreateFlow();
@@ -317,11 +317,42 @@ describe('EsqlCreateFlow', () => {
       fireEvent.click(createButton);
 
       expect(await screen.findByText(new RegExp(phase))).toHaveTextContent(
-        'job: esql-job-1, datafeed: datafeed-esql-job-1, window: now-15m to now'
+        'job: esql-job-1, datafeed: datafeed-esql-job-1, window: starting at now-15m, continuing in real time'
       );
+      expect(screen.getByText(new RegExp(phase))).not.toHaveTextContent('now-15m to now');
       laterCalls.forEach((call) => expect(call).not.toHaveBeenCalled());
     }
   );
+
+  it('names both start and end in the failure message when real time is switched off', async () => {
+    const DisableRealTime = () => {
+      const { setContinueInRealTime } = useEsqlWizardContext();
+
+      useEffect(() => {
+        setContinueInRealTime(false);
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+      }, []);
+
+      return null;
+    };
+    mockStartDatafeed.mockRejectedValue(new Error('start rejected'));
+
+    renderWithI18n(
+      <EsqlWizardProvider>
+        <ValidWizardState />
+        <DisableRealTime />
+        <EsqlCreateFlow />
+      </EsqlWizardProvider>
+    );
+    const createButton = screen.getByTestId('mlEsqlCreateJobButton');
+    await waitFor(() => expect(createButton).toBeEnabled());
+    fireEvent.click(createButton);
+
+    expect(await screen.findByText(/starting the datafeed/)).toHaveTextContent(
+      'job: esql-job-1, datafeed: datafeed-esql-job-1, window: now-15m to now'
+    );
+    expect(screen.getByText(/starting the datafeed/)).not.toHaveTextContent('real time');
+  });
 
   it('maps by/over/partition fields through to the created job detector (g2sz.10)', async () => {
     renderCreateFlow({

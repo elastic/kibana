@@ -113,18 +113,30 @@ export const EsqlCreateFlow = () => {
       const failedPhase = phaseLabel[currentPhase];
       const reason = extractEsqlErrorReason(nextError, String(nextError));
       setError(
-        i18n.translate('xpack.ml.esqlJob.create.failureMessage', {
-          defaultMessage:
-            'Unable to complete ES|QL job setup while {failedPhase} (job: {jobId}, datafeed: {datafeedId}, window: {start} to {end}): {reason}',
-          values: {
-            failedPhase,
-            jobId,
-            datafeedId: nextDatafeedId,
-            start: state.wizardStart,
-            end: state.wizardEnd,
-            reason,
-          },
-        })
+        state.continueInRealTime
+          ? i18n.translate('xpack.ml.esqlJob.create.failureMessageRealTime', {
+              defaultMessage:
+                'Unable to complete ES|QL job setup while {failedPhase} (job: {jobId}, datafeed: {datafeedId}, window: starting at {start}, continuing in real time): {reason}',
+              values: {
+                failedPhase,
+                jobId,
+                datafeedId: nextDatafeedId,
+                start: state.wizardStart,
+                reason,
+              },
+            })
+          : i18n.translate('xpack.ml.esqlJob.create.failureMessage', {
+              defaultMessage:
+                'Unable to complete ES|QL job setup while {failedPhase} (job: {jobId}, datafeed: {datafeedId}, window: {start} to {end}): {reason}',
+              values: {
+                failedPhase,
+                jobId,
+                datafeedId: nextDatafeedId,
+                start: state.wizardStart,
+                end: state.wizardEnd,
+                reason,
+              },
+            })
       );
       setPhase('error');
     }
