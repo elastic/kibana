@@ -892,7 +892,7 @@ export const Bitbucket: ConnectorSpec = {
           // pipelines). Recognize that case for bearer auth specifically, rather
           // than reporting valid repository-scoped credentials as broken.
           const status = (error as { response?: { status?: number } }).response?.status;
-          if (ctx.config?.authType === 'bearer' && (status === 401 || status === 403)) {
+          if (ctx.secrets?.authType === 'bearer' && (status === 401 || status === 403)) {
             throw new Error(
               `Could not list repositories in workspace "${workspace}" with this access token (status ${status}). This is expected for a token scoped to a single repository - it cannot list the whole workspace, but can still be used with repoSlug in every other action. If you expect broader access, verify the token has the repository:write scope.`
             );
