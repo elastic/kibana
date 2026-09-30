@@ -14,6 +14,7 @@ import {
   buildNodeQuery,
   buildSearchExploreRequest,
 } from './graph_request_builders';
+import { transformExpandResponse, transformSearchResponse } from './graph_response_transformers';
 
 // Pluggable function to handle the comms with a server. Default impl here is
 // for use outside of Kibana server with direct access to elasticsearch
@@ -567,41 +568,8 @@ function GraphWorkspace(options) {
     self.lastRequest = JSON.stringify(request, null, '\t');
     graphExplorer(self.options.indexName, request, function (data) {
       self.lastResponse = JSON.stringify(data, null, '\t');
-      const edges = [];
-
-      //Label fields with a field number for CSS styling
-      data.vertices.forEach((node) => {
-        targetFields.some((fieldDef) => {
-          if (node.field === fieldDef.name) {
-            node.color = fieldDef.color;
-            node.icon = getIcon(fieldDef.icon);
-            node.fieldDef = fieldDef;
-            return true;
-          }
-          return false;
-        });
-      });
-
-      // Size the edges based on the maximum weight
-      const minLineSize = 2;
-      const maxLineSize = 10;
-      let maxEdgeWeight = 0.00000001;
-      data.connections.forEach((edge) => {
-        maxEdgeWeight = Math.max(maxEdgeWeight, edge.weight);
-        edges.push({
-          source: edge.source,
-          target: edge.target,
-          doc_count: edge.doc_count,
-          weight: edge.weight,
-          width: Math.max(minLineSize, (edge.weight / maxEdgeWeight) * maxLineSize),
-        });
-      });
-
       // Add the new nodes and edges into the existing workspace's graph
-      self.mergeGraph({
-        nodes: data.vertices,
-        edges: edges,
-      });
+      self.mergeGraph(transformExpandResponse(data, targetFields));
     });
     //===== End expand graph ========================
   };
@@ -1040,46 +1008,9 @@ function GraphWorkspace(options) {
     self.lastRequest = JSON.stringify(request, null, '\t');
     graphExplorer(self.options.indexName, request, function (data) {
       self.lastResponse = JSON.stringify(data, null, '\t');
-      const edges = [];
-      //Label the nodes with field number for CSS styling
-      data.vertices.forEach((node) => {
-        self.options.vertex_fields.some((fieldDef) => {
-          if (node.field === fieldDef.name) {
-            node.color = fieldDef.color;
-            node.icon = getIcon(fieldDef.icon);
-            node.fieldDef = fieldDef;
-            return true;
-          }
-          return false;
-        });
+      self.mergeGraph(transformSearchResponse(data, self.options.vertex_fields), {
+        labeller: self.options.labeller,
       });
-
-      //Size the edges depending on weight
-      const minLineSize = 2;
-      const maxLineSize = 10;
-      let maxEdgeWeight = 0.00000001;
-      data.connections.forEach((edge) => {
-        maxEdgeWeight = Math.max(maxEdgeWeight, edge.weight);
-      });
-      data.connections.forEach((edge) => {
-        edges.push({
-          source: edge.source,
-          target: edge.target,
-          doc_count: edge.doc_count,
-          weight: edge.weight,
-          width: Math.max(minLineSize, (edge.weight / maxEdgeWeight) * maxLineSize),
-        });
-      });
-
-      self.mergeGraph(
-        {
-          nodes: data.vertices,
-          edges: edges,
-        },
-        {
-          labeller: self.options.labeller,
-        }
-      );
     });
   };
 }
