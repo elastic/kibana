@@ -234,12 +234,12 @@ it.each([
   [
     CODE_INTELLIGENCE_LOGGING_CLASSIFICATION_WORKFLOW_ID,
     CODE_INTELLIGENCE_LOGGING_CLASSIFICATION_YAML,
-    '2:018c4eb1',
+    '3:0d6cb89c',
   ],
   [
     CODE_INTELLIGENCE_OTEL_CLASSIFICATION_WORKFLOW_ID,
     CODE_INTELLIGENCE_OTEL_CLASSIFICATION_YAML,
-    '2:25e79417',
+    '3:2942a700',
   ],
 ] as const)(
   'requires bumping %s definition.version together with the imported YAML fingerprint',
