@@ -894,7 +894,7 @@ class ConversationClientImpl implements ConversationClient {
 
         if (feedback.vote === null) {
           const { [roundId]: _removed, ...rest } = existing;
-          return { feedback: rest };
+          return { feedback: Object.keys(rest).length ? rest : undefined };
         }
 
         return {

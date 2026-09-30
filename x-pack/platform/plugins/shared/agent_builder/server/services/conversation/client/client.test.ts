@@ -1779,8 +1779,7 @@ describe('ConversationClient', () => {
       await client.updateRoundFeedback('conversation-1', 'round-1', { vote: null });
 
       const persistedDoc = mockEsClient.index.mock.calls[0][0].document as Record<string, unknown>;
-      const feedbackMap = persistedDoc.feedback as Record<string, unknown> | undefined;
-      expect(feedbackMap?.['round-1']).toBeUndefined();
+      expect(persistedDoc.feedback).toBeUndefined();
     });
 
     it('throws not found when the round does not exist in the conversation', async () => {
