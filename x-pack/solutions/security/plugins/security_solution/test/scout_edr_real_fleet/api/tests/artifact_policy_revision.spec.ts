@@ -68,35 +68,20 @@ apiTest.describe(
   'Endpoint artifact changes on a live host',
   { tag: ['@local-stateful-classic'] },
   () => {
-    let headers: Record<string, string> | undefined;
-
-    apiTest.beforeAll(async ({ requestAuth }) => {
-      const adminApiCredentials = await requestAuth.getApiKey('admin');
-      headers = {
-        ...adminApiCredentials.apiKeyHeader,
-        'kbn-xsrf': 'true',
-        ...PUBLIC_API_HEADERS,
-      };
-    });
-
-    apiTest.afterEach(async ({ apiClient }) => {
-      if (!headers) {
-        return;
-      }
-      const response = await apiClient.delete(
-        `/api/exception_lists?list_id=${TRUSTED_APPS_LIST_ID}&namespace_type=agnostic`,
-        { headers, responseType: 'json' }
-      );
-      expect(response).toHaveStatusCode({ oneOf: [200, 404] });
+    apiTest.afterEach(async ({ apiServices }) => {
+      await apiServices.endpointArtifacts.deleteList(TRUSTED_APPS_LIST_ID);
     });
 
     apiTest(
       'creating and deleting a global trusted application bumps the applied revision',
-      async ({ apiClient, enrolledEndpoint }) => {
-        if (!headers) {
-          throw new Error('admin API headers were not initialized');
-        }
+      async ({ apiClient, enrolledEndpoint, requestAuth }) => {
         apiTest.setTimeout(TEST_TIMEOUT_MS);
+        const adminApiCredentials = await requestAuth.getApiKey('admin');
+        const headers = {
+          ...adminApiCredentials.apiKeyHeader,
+          'kbn-xsrf': 'true',
+          ...PUBLIC_API_HEADERS,
+        };
 
         const read = async () => {
           const response = await apiClient.get(
