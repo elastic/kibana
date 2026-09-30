@@ -25,7 +25,6 @@ describe('graph_visualization', () => {
         prevName: '',
         label: '',
       },
-      isSelected: true,
       kx: 5,
       ky: 5,
       label: '1',
@@ -48,7 +47,6 @@ describe('graph_visualization', () => {
         prevName: '',
         label: '',
       },
-      isSelected: false,
       kx: 7,
       ky: 9,
       label: '2',
@@ -71,7 +69,6 @@ describe('graph_visualization', () => {
         prevName: '',
         label: '',
       },
-      isSelected: false,
       kx: 12,
       ky: 2,
       label: '3',
@@ -84,7 +81,6 @@ describe('graph_visualization', () => {
   ];
   const edges: WorkspaceEdge[] = [
     {
-      isSelected: true,
       label: '',
       topSrc: nodes[0],
       topTarget: nodes[1],
@@ -94,7 +90,6 @@ describe('graph_visualization', () => {
       width: 2,
     },
     {
-      isSelected: true,
       label: '',
       topSrc: nodes[1],
       topTarget: nodes[2],
@@ -107,16 +102,7 @@ describe('graph_visualization', () => {
   const workspace = {
     nodes,
     edges,
-    selectNone: () => {},
-    changeHandler: jest.fn(),
-    toggleNodeSelection: jest.fn().mockImplementation((node: WorkspaceNode) => {
-      return !node.isSelected;
-    }),
     getAllIntersections: jest.fn(),
-    removeEdgeFromSelection: jest.fn(),
-    addEdgeToSelection: jest.fn(),
-    getEdgeSelection: jest.fn().mockImplementation(() => []),
-    clearEdgeSelection: jest.fn(),
   } as unknown as jest.Mocked<Workspace>;
 
   const defaultSelectionProps = {

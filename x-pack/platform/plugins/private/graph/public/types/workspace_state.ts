@@ -24,7 +24,6 @@ export interface WorkspaceNode {
   parent: WorkspaceNode | null;
   color: string;
   numChildren: number;
-  isSelected?: boolean;
   kx: number;
   ky: number;
 }
@@ -38,7 +37,6 @@ export interface WorkspaceEdge {
   label: string;
   source: WorkspaceNode;
   target: WorkspaceNode;
-  isSelected?: boolean;
   topTarget: WorkspaceNode;
   topSrc: WorkspaceNode;
 }
