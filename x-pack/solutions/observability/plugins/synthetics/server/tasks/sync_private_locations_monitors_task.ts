@@ -39,6 +39,9 @@ export const PRIVATE_LOCATIONS_SYNC_TASK_ID = `${TASK_TYPE}-single-instance`;
  */
 export const DEFAULT_TASK_SCHEDULE = '24h';
 
+// A failed sync must not wait for the 24h safety net.
+export const FAILED_RUN_RETRY_DELAY_MS = 5 * 60 * 1000;
+
 export interface SyncTaskState extends Record<string, unknown> {
   lastStartedAt: string;
   disableAutoSync?: boolean;
@@ -218,7 +221,12 @@ export class SyncPrivateLocationMonitorsTask {
       }
     } catch (error) {
       logger.error(`Sync of private location monitors failed: ${error.message}`);
-      return { error, state: taskState, schedule };
+      // Keep the window start so the retry still sees the MW edits this run missed.
+      return {
+        error,
+        state: { ...taskState, lastStartedAt },
+        runAt: new Date(Date.now() + FAILED_RUN_RETRY_DELAY_MS),
+      };
     }
 
     return { state: taskState, schedule };
