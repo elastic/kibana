@@ -60,6 +60,7 @@ export const updateAutomationRoute = createNightshiftInvestigationsServerRoute({
           action: z.enum(['create_investigation', 'post_to_slack', 'silent']).optional(),
           targetMode: z.enum(['thread', 'channel', 'self']).optional(),
           destination: z.string().max(500).optional(),
+          connectorId: z.string().max(512).optional(),
         })
         .optional(),
       runtime: z

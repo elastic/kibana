@@ -178,6 +178,55 @@ describe('generateWorkflowYaml', () => {
       expect(yaml.steps[0].with.message).toBeUndefined();
     });
 
+    it('copies a Slack channel destination onto the investigation with the default connector', () => {
+      const automation = baseAutomation();
+      automation.completion = {
+        action: 'post_to_slack',
+        targetMode: 'channel',
+        destination: '#prod-alerts',
+      };
+      const yaml = parse(generateWorkflowYaml('auto-123', automation));
+      expect(yaml.steps[0].with.notifications).toEqual([
+        {
+          type: 'slack',
+          connector_id: 'elastic-apps-slack',
+          channel: '#prod-alerts',
+          automation_id: 'auto-123',
+          automation_name: 'Test automation',
+        },
+      ]);
+    });
+
+    it('uses an explicit Slack connector when the automation names one', () => {
+      const automation = baseAutomation();
+      automation.completion = {
+        action: 'post_to_slack',
+        targetMode: 'channel',
+        destination: 'C0123456789',
+        connectorId: 'my-slack-bot',
+      };
+      const yaml = parse(generateWorkflowYaml('auto-123', automation));
+      expect(yaml.steps[0].with.notifications[0]).toEqual(
+        expect.objectContaining({ connector_id: 'my-slack-bot', channel: 'C0123456789' })
+      );
+    });
+
+    it.each([
+      ['no completion', {}],
+      ['a silent completion', { action: 'silent', targetMode: 'channel', destination: '#x' }],
+      ['create_investigation', { action: 'create_investigation', destination: '#x' }],
+      [
+        'thread mode, which needs the Slack source',
+        { action: 'post_to_slack', targetMode: 'thread' },
+      ],
+      ['channel mode without a destination', { action: 'post_to_slack', targetMode: 'channel' }],
+    ] as const)('omits notifications for %s', (_label, completion) => {
+      const automation = baseAutomation();
+      automation.completion = { ...completion };
+      const yaml = parse(generateWorkflowYaml('auto-123', automation));
+      expect(yaml.steps[0].with.notifications).toBeUndefined();
+    });
+
     it('does not include execution.id anywhere in the output', () => {
       const raw = generateWorkflowYaml('auto-123', baseAutomation());
       expect(raw).not.toContain('execution.id');

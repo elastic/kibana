@@ -14,6 +14,11 @@ const ALERT_STATUS_TO_KQL: Record<string, string> = {
   inactive: 'recovered',
 };
 
+// ponytail: mirrors ELASTIC_APPS_SLACK_CONNECTOR_ID in significant_events/server/lib/slack_app/service.ts,
+// which this plugin cannot import (significant_events depends on this plugin). Move to
+// @kbn/connector-specs slack/constants.ts if a third consumer appears.
+const ELASTIC_APPS_SLACK_CONNECTOR_ID = 'elastic-apps-slack';
+
 // Maps our OverlapPolicy type to workflow engine concurrency strategy strings.
 const OVERLAP_POLICY_TO_STRATEGY: Record<OverlapPolicy, string> = {
   drop: 'drop',
@@ -45,6 +50,7 @@ export function generateWorkflowYaml(
   const strategy = automation.runtime.overlapPolicy
     ? OVERLAP_POLICY_TO_STRATEGY[automation.runtime.overlapPolicy]
     : 'drop';
+  const notifications = buildNotifications(automationId, automation);
 
   const workflowObj: Record<string, unknown> = {
     name: automation.name,
@@ -72,12 +78,43 @@ export function generateWorkflowYaml(
           ...(automation.execution.promptTemplate
             ? { message: automation.execution.promptTemplate }
             : {}),
+          ...(notifications ? { notifications } : {}),
         },
       },
     ],
   };
 
   return stringify(workflowObj, { lineWidth: 0 });
+}
+
+/**
+ * The Slack destination the investigation posts its outcome to, copied onto the run so delivery
+ * needs no automation lookup. Only `channel` mode is emitted: `thread` mode needs the triggering
+ * Slack message (`event.channel`, `event.threadId | default: event.messageId`, `event.connectorId`),
+ * which no current trigger row provides; rendering those on an alert trigger would produce empty
+ * strings and the investigation step would reject the run.
+ */
+function buildNotifications(
+  automationId: string,
+  automation: NightshiftAutomationAttributes
+): Array<Record<string, string>> | undefined {
+  const { completion } = automation;
+  if (
+    completion.action !== 'post_to_slack' ||
+    completion.targetMode !== 'channel' ||
+    !completion.destination
+  ) {
+    return undefined;
+  }
+  return [
+    {
+      type: 'slack',
+      connector_id: completion.connectorId ?? ELASTIC_APPS_SLACK_CONNECTOR_ID,
+      channel: completion.destination,
+      automation_id: automationId,
+      automation_name: automation.name,
+    },
+  ];
 }
 
 function buildTriggers(
