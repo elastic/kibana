@@ -22,7 +22,6 @@ import {
   EuiSpacer,
   EuiSplitPanel,
   EuiTitle,
-  EuiToolTip,
   useGeneratedHtmlId,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -44,33 +43,16 @@ import {
   getModelEOLDate,
   getModelReleaseDate,
   getModelStatus,
-  getRegionPlaceName,
-  getRegionZoneCounts,
+  getRegionOptions,
 } from '../../utils/eis_utils';
 import { isModelUnavailableUnderRegionPolicy } from '../../utils/is_model_unavailable_under_region_policy';
 import { ModelEolCallout } from './model_eol_callout';
 import { ModelInfoCallout } from './model_info_callout';
 import { ModelUnavailableCallout } from './model_unavailable_callout';
-import type { CspRegion, EisInferenceEndpoint } from '../../../common/types';
+import { RegionOptions } from './region_options';
+import type { EisInferenceEndpoint } from '../../../common/types';
 import { EisModelStatus } from '../../types';
 import { ModelStatusBadge } from '../model_status/model_status_badge';
-
-const TOOLTIP_MAX_VISIBLE_REGIONS = 5;
-
-const getRegionBadgeTooltipContent = (modelRegions: CspRegion[]): string => {
-  const names = modelRegions.map(getRegionPlaceName);
-  const visible = names.slice(0, TOOLTIP_MAX_VISIBLE_REGIONS).join(', ');
-  if (names.length > TOOLTIP_MAX_VISIBLE_REGIONS) {
-    return `${visible} ${i18n.translate(
-      'xpack.searchInferenceEndpoints.modelDetailFlyout.regionBadgeTooltip.andMore',
-      {
-        defaultMessage: 'and {count} more',
-        values: { count: names.length - TOOLTIP_MAX_VISIBLE_REGIONS },
-      }
-    )}`;
-  }
-  return visible;
-};
 
 export interface ModelDetailFlyoutProps {
   modelId: string;
@@ -110,7 +92,7 @@ export const ModelDetailFlyout: React.FC<ModelDetailFlyoutProps> = ({
     modelMetadata,
     modelReleaseDate,
     modelEOLDate,
-    regionZoneCounts,
+    regionOptions,
   } = useMemo(() => {
     const filtered = allEndpoints.filter((ep) => getModelId(ep) === modelId);
 
@@ -130,7 +112,7 @@ export const ModelDetailFlyout: React.FC<ModelDetailFlyoutProps> = ({
       modelMetadata: endpointModelMetadata,
       modelReleaseDate: getModelReleaseDate(endpointModelMetadata)?.format('l') ?? '--',
       modelEOLDate: getModelEOLDate(endpointModelMetadata)?.format('l') ?? '--',
-      regionZoneCounts: getRegionZoneCounts(filtered, allEndpoints),
+      regionOptions: getRegionOptions(filtered),
     };
   }, [allEndpoints, modelId]);
 
@@ -199,54 +181,6 @@ export const ModelDetailFlyout: React.FC<ModelDetailFlyoutProps> = ({
       }),
       description: modelEOLDate,
     },
-    ...(regionZoneCounts.length > 0
-      ? [
-          {
-            title: i18n.translate('xpack.searchInferenceEndpoints.modelDetailFlyout.regionsLabel', {
-              defaultMessage: 'Regions',
-            }),
-            description: (
-              <EuiBadgeGroup data-test-subj="flyoutRegionBadges">
-                {regionZoneCounts.map(({ geo, modelCount, totalCount, modelRegions, geoOnly }) =>
-                  geoOnly ? (
-                    <EuiToolTip
-                      key={geo}
-                      content={i18n.translate(
-                        'xpack.searchInferenceEndpoints.modelDetailFlyout.regionBadgeTooltip.geoOnly',
-                        {
-                          defaultMessage: 'Available in the {geo} zone',
-                          values: { geo: geo.toUpperCase() },
-                        }
-                      )}
-                    >
-                      <EuiBadge tabIndex={0} data-test-subj={`flyoutRegionBadge-${geo}`}>
-                        {geo.toUpperCase()}
-                      </EuiBadge>
-                    </EuiToolTip>
-                  ) : (
-                    <EuiToolTip
-                      key={geo}
-                      data-test-subj={`flyoutRegionBadgeTooltip-${geo}`}
-                      title={i18n.translate(
-                        'xpack.searchInferenceEndpoints.modelDetailFlyout.regionBadgeTooltip.title',
-                        {
-                          defaultMessage: 'Available in {count} of {total} regions',
-                          values: { count: modelCount, total: totalCount },
-                        }
-                      )}
-                      content={getRegionBadgeTooltipContent(modelRegions)}
-                    >
-                      <EuiBadge tabIndex={0} data-test-subj={`flyoutRegionBadge-${geo}`}>
-                        {`${geo.toUpperCase()} (${modelCount}/${totalCount})`}
-                      </EuiBadge>
-                    </EuiToolTip>
-                  )
-                )}
-              </EuiBadgeGroup>
-            ),
-          },
-        ]
-      : []),
     {
       title: i18n.translate('xpack.searchInferenceEndpoints.modelDetailFlyout.documentationLabel', {
         defaultMessage: 'Documentation',
@@ -301,6 +235,7 @@ export const ModelDetailFlyout: React.FC<ModelDetailFlyoutProps> = ({
           listItems={descriptionListItems}
           data-test-subj="flyoutModelDetails"
         />
+        <RegionOptions options={regionOptions} />
 
         <EuiHorizontalRule margin="xxl" />
 
