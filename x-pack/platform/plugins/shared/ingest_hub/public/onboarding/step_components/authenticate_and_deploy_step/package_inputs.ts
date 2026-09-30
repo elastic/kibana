@@ -61,7 +61,11 @@ export function buildStreamVars(
     const meta = resolveFieldMeta(service, activeInput, key);
     if (!meta) continue;
     const typed = toTyped(undefined, meta);
-    if (meta.isBool || (typeof typed === 'string' && typed !== '')) {
+    if (
+      meta.isBool ||
+      (typeof typed === 'string' && typed !== '') ||
+      (Array.isArray(typed) && typed.length > 0)
+    ) {
       result[key] = typed;
     }
   }

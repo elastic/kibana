@@ -874,13 +874,21 @@ export function buildAwsServiceMatrix(
           signalTypesSet.add(ptType as SignalType);
         }
 
+        // Detect input packages early so the all-package-DS fallback below is skipped.
+        // Without this, a PT with `input:` but no `data_streams` would pull in all package
+        // data_streams, making includedDsIds non-empty and bypassing the input-package branch.
+        const ptInputType = (pt as any)?.input as string | undefined;
+
         // When the PT doesn't list data_streams explicitly (e.g. single-PT packages like
         // aws_securityhub, aws_bedrock), fall back to all package-level data streams.
         // Packages like `aws` always list data_streams per PT, so the fallback never fires there.
-        const ptDataStreamIds: string[] =
-          (pt as any).data_streams?.length > 0
-            ? (pt as any).data_streams
-            : (packageInfo.data_streams ?? []).map((ds: any) => ds.path as string);
+        // Input packages have no data_streams at all — use an empty list so the input-package
+        // branch below runs instead of the regular DS loop.
+        const ptDataStreamIds: string[] = ptInputType
+          ? []
+          : (pt as any).data_streams?.length > 0
+          ? (pt as any).data_streams
+          : (packageInfo.data_streams ?? []).map((ds: any) => ds.path as string);
         const includedDsIds = ptDataStreamIds.filter(
           (dsId) => !(excludedDataStreams ?? []).includes(dsId)
         );
@@ -925,7 +933,6 @@ export function buildAwsServiceMatrix(
         }
 
         // Input package: no data_streams on the PT; use a synthetic DS entry.
-        const ptInputType = (pt as any)?.input as string | undefined;
         if (includedDsIds.length === 0 && ptInputType) {
           const inputPkgInfo = computeInputPackageInfo(entry, pt, ptType, ptInputType);
           const syntheticDsId = entry.id;

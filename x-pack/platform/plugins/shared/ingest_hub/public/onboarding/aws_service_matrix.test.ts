@@ -385,6 +385,42 @@ describe('AWS service matrix', () => {
     it('derives signalTypes from the PT type field', () => {
       expect(ec2Otel.signalTypes).toContain('metrics');
     });
+
+    it('uses a synthetic DS even when the package has data_streams (input package detection fix)', () => {
+      // Regression test: a PT with `input:` but no `data_streams` previously fell through to the
+      // all-package-DS fallback when packageInfo.data_streams was non-empty, causing the regular DS
+      // loop to run and the input-package branch to be skipped. This led to wrong stream keys like
+      // amazon_security_lake.application_activity instead of the Fleet-synthesized
+      // amazon_security_lake.amazon_security_lake.
+      const pkg = {
+        policy_templates: [
+          {
+            name: 'amazon_security_lake',
+            input: 'aws-sw',
+            type: 'logs',
+            title: 'Amazon Security Lake',
+          },
+        ],
+        data_streams: [
+          {
+            path: 'application_activity',
+            type: 'logs',
+            streams: [{ input: 'aws-sw', vars: [] }],
+          },
+        ],
+      };
+      const [result] = buildAwsServiceMatrix({ amazon_security_lake: pkg as any }, [
+        {
+          id: 'amazon_security_lake',
+          category: 'security_identity_compliance',
+          packageName: 'amazon_security_lake',
+        },
+      ]);
+      // Must use the synthetic dsId (entry.id), not the package data_stream path
+      expect(result.dataStreams).toEqual(['amazon_security_lake']);
+      expect(result.inputs).toEqual(['aws-sw']);
+      expect(result.signalTypes).toContain('logs');
+    });
   });
 
   describe('agent_based fallback deployment method', () => {
