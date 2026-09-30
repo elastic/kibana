@@ -17,8 +17,8 @@ env:
     {
       "kbn-evals": "6bf0df26",
       "workstream:investigate-act": "45a6cbd6",
-      "Team:SigEvents": "a20a3c00",
-      "Feature:SigEvents": "a20a3c00"
+      "Team:nightshift-sre-agent": "a20a3c00",
+      "Feature: NS Detection Engine": "a20a3c00"
     }
 
 jobs:
