@@ -19,7 +19,7 @@ import {
   HierarchicalActionsMenu,
 } from '../../components';
 import type { MenuItem } from '../../components';
-import { useAuthz, useLicense, useStartServices } from '../../../../hooks';
+import { useAuthz, useLicense, useRestartAgentAction, useStartServices } from '../../../../hooks';
 import {
   LICENSE_FOR_SCHEDULE_UPGRADE,
   AGENTS_PREFIX,
@@ -72,6 +72,7 @@ export const AgentBulkActions: React.FunctionComponent<Props> = ({
   const licenseService = useLicense();
   const authz = useAuthz();
   const { reporting } = useStartServices();
+  const { isRestartAgentActionEnabled } = useRestartAgentAction();
   const isLicenceAllowingScheduleUpgrade = licenseService.hasAtLeast(LICENSE_FOR_SCHEDULE_UPGRADE);
   const doesLicenseAllowMigration = licenseService.hasAtLeast(LICENSE_FOR_AGENT_MIGRATION);
   const doesLicenseAllowRollback = licenseService.hasAtLeast(LICENSE_FOR_AGENT_ROLLBACK);
@@ -275,22 +276,26 @@ export const AgentBulkActions: React.FunctionComponent<Props> = ({
         },
         'data-test-subj': 'agentBulkActionsUpgrade',
       },
-      {
-        id: 'restart',
-        name: (
-          <FormattedMessage
-            id="xpack.fleet.agentBulkActions.restartAgents"
-            defaultMessage="Restart {agentCount, plural, one {# agent} other {# agents}}"
-            values={{ agentCount }}
-          />
-        ),
-        icon: 'refresh',
-        disabled: !authz.fleet.allAgents,
-        onClick: () => {
-          setIsRestartModalOpen(true);
-        },
-        'data-test-subj': 'agentBulkActionsRestart',
-      },
+      ...(isRestartAgentActionEnabled
+        ? [
+            {
+              id: 'restart',
+              name: (
+                <FormattedMessage
+                  id="xpack.fleet.agentBulkActions.restartAgents"
+                  defaultMessage="Restart {agentCount, plural, one {# agent} other {# agents}}"
+                  values={{ agentCount }}
+                />
+              ),
+              icon: 'refresh',
+              disabled: !authz.fleet.allAgents,
+              onClick: () => {
+                setIsRestartModalOpen(true);
+              },
+              'data-test-subj': 'agentBulkActionsRestart',
+            } as MenuItem,
+          ]
+        : []),
       // Upgrade management submenu
       {
         id: 'upgrade-management',

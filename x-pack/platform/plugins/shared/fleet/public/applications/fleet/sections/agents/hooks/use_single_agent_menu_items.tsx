@@ -23,7 +23,7 @@ import {
 import { isStuckInUpdating } from '../../../../../../common/services/agent_status';
 
 import type { Agent, AgentPolicy } from '../../../types';
-import { useAuthz, useLicense } from '../../../hooks';
+import { useAuthz, useLicense, useRestartAgentAction } from '../../../hooks';
 import { ExperimentalFeaturesService, isAgentUpgradeable } from '../../../services';
 
 import type { MenuItem } from '../components/hierarchical_actions_menu';
@@ -66,6 +66,7 @@ export function useSingleAgentMenuItems({
 }: UseSingleAgentMenuItemsOptions): MenuItem[] {
   const authz = useAuthz();
   const licenseService = useLicense();
+  const { isRestartAgentActionEnabled } = useRestartAgentAction();
 
   const isUnenrolling = agent.status === 'unenrolling';
   const isAgentUpdating = isStuckInUpdating(agent);
@@ -184,21 +185,26 @@ export function useSingleAgentMenuItems({
           },
           'data-test-subj': 'upgradeBtn',
         },
-        {
-          id: 'restart',
-          name: (
-            <FormattedMessage
-              id="xpack.fleet.agentList.restartOneButton"
-              defaultMessage="Restart agent"
-            />
-          ),
-          icon: 'refresh',
-          disabled: !isAgentRestartSupported(agent) || agentPolicy?.supports_agentless === true,
-          onClick: () => {
-            callbacks.onRestartClick();
-          },
-          'data-test-subj': 'agentRestartBtn',
-        }
+        ...(isRestartAgentActionEnabled
+          ? [
+              {
+                id: 'restart',
+                name: (
+                  <FormattedMessage
+                    id="xpack.fleet.agentList.restartOneButton"
+                    defaultMessage="Restart agent"
+                  />
+                ),
+                icon: 'refresh',
+                disabled:
+                  !isAgentRestartSupported(agent) || agentPolicy?.supports_agentless === true,
+                onClick: () => {
+                  callbacks.onRestartClick();
+                },
+                'data-test-subj': 'agentRestartBtn',
+              } as MenuItem,
+            ]
+          : [])
       );
     }
 
@@ -426,6 +432,7 @@ export function useSingleAgentMenuItems({
     licenseService,
     isUnenrolling,
     authz.fleet.readAgentPolicies,
+    isRestartAgentActionEnabled,
   ]);
 
   return menuItems;
