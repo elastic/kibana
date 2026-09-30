@@ -43,6 +43,8 @@ export const packageReportMintPayloadSchema = z.object({
   /** Idempotency key: uuidv5(conversationId, endpointId, actionWorkflowId[, processKey]). */
   subjectKey: z.string(),
   conversationId: z.string(),
+  /** Short plain-text label naming what is proposed; omitting it falls back to the action's own name. */
+  title: z.string().max(256).optional(),
   comment: z.string(),
   category: z.string(),
   impact: z.string().optional(),

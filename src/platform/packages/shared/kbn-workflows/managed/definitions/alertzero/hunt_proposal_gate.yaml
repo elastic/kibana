@@ -25,6 +25,9 @@ triggers:
         conversationId:
           type: string
           description: Conversation this Proposal belongs to (create_proposal.yaml's own required field).
+        title:
+          type: string
+          description: Short plain-text label naming what is proposed; absent falls back to the action's own name.
         comment:
           type: string
           description: Explains what is being proposed, rendered as markdown.
@@ -87,6 +90,7 @@ steps:
       workflow-id: system-create-alertzero-proposal
       inputs:
         conversationId: "${{ inputs.conversationId }}"
+        title: "${{ inputs.title }}"
         comment: "${{ inputs.comment }}"
         actionWorkflowId: "${{ inputs.actionWorkflowId }}"
         actionInput: "${{ inputs.actionInput }}"

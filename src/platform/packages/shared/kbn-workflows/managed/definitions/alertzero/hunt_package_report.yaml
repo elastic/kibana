@@ -92,6 +92,7 @@ steps:
           workflow-id: system-security-hunt-proposal-gate
           inputs:
             conversationId: "{{ foreach.item.conversationId }}"
+            title: "{{ foreach.item.title }}"
             comment: "{{ foreach.item.comment }}"
             category: "{{ foreach.item.category }}"
             impact: "{{ foreach.item.impact }}"

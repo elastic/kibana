@@ -155,31 +155,27 @@ const buildClosureSummary = (state: CurrentRunState): string => {
 };
 
 /** Every fillable respond action today is an Elastic Defend action; naming that plainly in the
- *  headline is what tells an executable proposal apart from the "Recommend" companion below. */
-const DEFEND_HEADLINE_PREFIX = 'Defend';
-const RECOMMEND_HEADLINE_PREFIX = 'Recommend';
+ *  title is what tells an executable proposal apart from the "Recommend" companion below. */
+const DEFEND_TITLE_PREFIX = 'Defend';
+const RECOMMEND_TITLE_PREFIX = 'Recommend';
 
 const titleCase = (value: string): string => value.replace(/\b\w/g, (c) => c.toUpperCase());
 
-/**
- * One line naming what the proposal actually does, followed by the evidence. Per host and per
- * action so two proposals on the same run never read as duplicates of each other.
- */
-const buildHostActionComment = (
-  state: CurrentRunState,
-  host: CurrentRunHost,
-  actionName: string
-): string => {
-  const headline = `${DEFEND_HEADLINE_PREFIX} ${titleCase(actionName)}: ${host.name}`;
+/** Per-host variant so proposals fanned out across hosts read as distinct, not duplicates. */
+const buildHostClosureSummary = (state: CurrentRunState, host: CurrentRunHost): string => {
   const title = state.titles[0] ?? `Hunt run ${state.runId}`;
   const evidence =
     state.evidenceLines.length > 0
       ? ` Evidence: ${state.evidenceLines.slice(0, 5).join('; ')}.`
       : '';
-  return `${headline}\n\n${title}. Confirmed hit. Host: ${host.name}.${evidence}`;
+  return `${title}. Confirmed hit. Host: ${host.name}.${evidence}`;
 };
 
-const actionlessHeadline = ({
+/** What the Proposal's `title` shows in the queue row, attachment card, and agent prompt. */
+const buildHostActionTitle = (host: CurrentRunHost, actionName: string): string =>
+  `${DEFEND_TITLE_PREFIX} ${titleCase(actionName)}: ${host.name}`;
+
+const actionlessTitle = ({
   reason,
   unenrolledHosts,
 }: {
@@ -189,35 +185,21 @@ const actionlessHeadline = ({
   switch (reason) {
     case 'unenrolled':
       return unenrolledHosts.length > 0
-        ? `${RECOMMEND_HEADLINE_PREFIX}: Unenrolled host${
+        ? `${RECOMMEND_TITLE_PREFIX}: Unenrolled host${
             unenrolledHosts.length === 1 ? '' : 's'
           } need${unenrolledHosts.length === 1 ? 's' : ''} isolation: ${unenrolledHosts
             .map((h) => h.name)
             .join(', ')}`
-        : `${RECOMMEND_HEADLINE_PREFIX}: Unenrolled host needs isolation`;
+        : `${RECOMMEND_TITLE_PREFIX}: Unenrolled host needs isolation`;
     case 'hostless':
-      return `${RECOMMEND_HEADLINE_PREFIX}: No host entity to act on`;
+      return `${RECOMMEND_TITLE_PREFIX}: No host entity to act on`;
     case 'catalog_error':
-      return `${RECOMMEND_HEADLINE_PREFIX}: Response action catalog unavailable`;
+      return `${RECOMMEND_TITLE_PREFIX}: Response action catalog unavailable`;
     case 'catalog_empty':
-      return `${RECOMMEND_HEADLINE_PREFIX}: No response actions installed`;
+      return `${RECOMMEND_TITLE_PREFIX}: No response actions installed`;
     case 'no_fillable_action':
-      return `${RECOMMEND_HEADLINE_PREFIX}: No fillable response action`;
+      return `${RECOMMEND_TITLE_PREFIX}: No fillable response action`;
   }
-};
-
-const actionlessComment = ({
-  state,
-  reason,
-  unenrolledHosts,
-}: {
-  state: CurrentRunState;
-  reason: NonNullable<PackageReportMintPayload['actionlessReason']>;
-  unenrolledHosts: CurrentRunHost[];
-}): string => {
-  const headline = actionlessHeadline({ reason, unenrolledHosts });
-  const base = buildClosureSummary(state);
-  return `${headline}\n\n${base}`;
 };
 
 const actionlessProposal = ({
@@ -233,7 +215,8 @@ const actionlessProposal = ({
 }): PackageReportMintPayload => ({
   subjectKey: buildActionlessSubjectKey({ conversationId, reason }),
   conversationId,
-  comment: actionlessComment({ state, reason, unenrolledHosts }),
+  title: actionlessTitle({ reason, unenrolledHosts }),
+  comment: buildClosureSummary(state),
   category: 'respond',
   actionlessReason: reason,
 });
@@ -312,8 +295,9 @@ export const decidePackageReport = ({
     const hostProcessSelectors = state.processSelectors.filter(
       (selector) => selector.hostName === host.name
     );
+    const hostClosureSummary = buildHostClosureSummary(state, host);
     for (const entry of respondActions) {
-      const hostClosureSummary = buildHostActionComment(state, host, entry.name);
+      const title = buildHostActionTitle(host, entry.name);
       const schema = actionInputSchema(entry);
       const processScoped = needsProcessParameters(schema);
 
@@ -336,9 +320,10 @@ export const decidePackageReport = ({
           proposals.push({
             subjectKey,
             conversationId,
+            title,
             // The selector's own summary distinguishes two process-scoped proposals on the
             // same host (e.g. kill-process for two different pids) that would otherwise share
-            // an identical headline.
+            // an identical comment.
             comment: `${hostClosureSummary}\n\n${processSelector.summary}`,
             category: entry.category ?? 'respond',
             impact: entry.impact,
@@ -366,6 +351,7 @@ export const decidePackageReport = ({
       proposals.push({
         subjectKey,
         conversationId,
+        title,
         comment: hostClosureSummary,
         category: entry.category ?? 'respond',
         impact: entry.impact,

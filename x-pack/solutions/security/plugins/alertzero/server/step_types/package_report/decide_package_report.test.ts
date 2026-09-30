@@ -111,6 +111,10 @@ describe('decidePackageReport', () => {
     ]);
     expect(result.proposals.every((p) => p.actionInput?.endpoint_ids)).toBe(true);
     expect(new Set(result.proposals.map((p) => p.subjectKey)).size).toBe(2);
+    expect(result.proposals.map((p) => p.title).sort()).toEqual([
+      'Defend Isolate Host: host-a',
+      'Defend Isolate Host: host-b',
+    ]);
   });
 
   it('does not drop or duplicate subject keys when catalog order changes', () => {
@@ -145,6 +149,7 @@ describe('decidePackageReport', () => {
     expect(result.proposals).toHaveLength(1);
     expect(result.proposals[0].actionWorkflowId).toBeUndefined();
     expect(result.proposals[0].actionlessReason).toBe('hostless');
+    expect(result.proposals[0].title).toBe('Recommend: No host entity to act on');
   });
 
   it('mints an actionless recommendation naming unenrolled hosts', () => {
@@ -158,6 +163,7 @@ describe('decidePackageReport', () => {
     expect(result.proposals).toHaveLength(1);
     expect(result.proposals[0].actionlessReason).toBe('unenrolled');
     expect(result.proposals[0].comment).toContain('ghost');
+    expect(result.proposals[0].title).toBe('Recommend: Unenrolled host needs isolation: ghost');
   });
 
   it('mints executable plus companion actionless when some hosts are unenrolled', () => {
@@ -174,6 +180,10 @@ describe('decidePackageReport', () => {
     expect(result.proposals).toHaveLength(2);
     expect(result.proposals.some((p) => p.actionWorkflowId === isolateHost.workflowId)).toBe(true);
     expect(result.proposals.some((p) => p.actionlessReason === 'unenrolled')).toBe(true);
+    expect(result.proposals.some((p) => p.title === 'Defend Isolate Host: host-a')).toBe(true);
+    expect(
+      result.proposals.some((p) => p.title === 'Recommend: Unenrolled host needs isolation: ghost')
+    ).toBe(true);
   });
 
   it('returns actionless when the catalog errors', () => {
@@ -226,7 +236,10 @@ describe('decidePackageReport', () => {
     expect(result.proposals.every((p) => p.actionWorkflowId === killProcess.workflowId)).toBe(true);
     expect(result.proposals[0].actionInput?.parameters).toEqual({ pid: 100 });
     expect(result.proposals[1].actionInput?.parameters).toEqual({ entity_id: 'ent-9' });
-    // Each selector's own summary keeps the two proposals from reading as duplicates.
+    // Same title on both (same host, same action); the selector's own summary in the comment
+    // is what keeps the two proposals from reading as duplicates.
+    expect(result.proposals[0].title).toBe('Defend Kill Process: host-a');
+    expect(result.proposals[1].title).toBe('Defend Kill Process: host-a');
     expect(result.proposals[0].comment).toContain('a.exe (pid 100)');
     expect(result.proposals[1].comment).toContain('b.exe (entity_id ent-9)');
   });
