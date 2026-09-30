@@ -28,11 +28,9 @@ exports[`Should render icon select 1`] = `
     }
     closePopover={[Function]}
     display="block"
-    hasArrow={false}
     isOpen={false}
     ownFocus={true}
     panelPaddingSize="s"
-    repositionToCrossAxis={true}
   >
     <EuiFocusTrap
       clickOutsideDisables={true}
@@ -113,11 +111,9 @@ exports[`Should render icon select with custom icons 1`] = `
     }
     closePopover={[Function]}
     display="block"
-    hasArrow={false}
     isOpen={false}
     ownFocus={true}
     panelPaddingSize="s"
-    repositionToCrossAxis={true}
   >
     <EuiFocusTrap
       clickOutsideDisables={true}

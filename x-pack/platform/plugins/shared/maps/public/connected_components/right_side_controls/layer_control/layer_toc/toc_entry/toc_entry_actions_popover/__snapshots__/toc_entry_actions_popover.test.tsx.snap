@@ -38,12 +38,9 @@ exports[`TOCEntryActionsPopover is rendered 1`] = `
     }
     className="mapLayTocActions"
     closePopover={[Function]}
-    display="inline-block"
     hasArrow={true}
     isOpen={false}
-    ownFocus={true}
     panelPaddingSize="none"
-    repositionToCrossAxis={true}
   >
     <EuiContextMenuClass
       data-test-subj="layerTocActionsPanellayer1"
@@ -158,12 +155,9 @@ exports[`TOCEntryActionsPopover should disable Edit features when edit mode acti
     }
     className="mapLayTocActions"
     closePopover={[Function]}
-    display="inline-block"
     hasArrow={true}
     isOpen={false}
-    ownFocus={true}
     panelPaddingSize="none"
-    repositionToCrossAxis={true}
   >
     <EuiContextMenuClass
       data-test-subj="layerTocActionsPanellayer1"
@@ -278,12 +272,9 @@ exports[`TOCEntryActionsPopover should disable fit to data when supportsFitToBou
     }
     className="mapLayTocActions"
     closePopover={[Function]}
-    display="inline-block"
     hasArrow={true}
     isOpen={false}
-    ownFocus={true}
     panelPaddingSize="none"
-    repositionToCrossAxis={true}
   >
     <EuiContextMenuClass
       data-test-subj="layerTocActionsPanellayer1"
@@ -399,12 +390,9 @@ exports[`TOCEntryActionsPopover should have "show layer" action when layer is no
     }
     className="mapLayTocActions"
     closePopover={[Function]}
-    display="inline-block"
     hasArrow={true}
     isOpen={false}
-    ownFocus={true}
     panelPaddingSize="none"
-    repositionToCrossAxis={true}
   >
     <EuiContextMenuClass
       data-test-subj="layerTocActionsPanellayer1"
@@ -519,12 +507,9 @@ exports[`TOCEntryActionsPopover should not show edit actions in read only mode 1
     }
     className="mapLayTocActions"
     closePopover={[Function]}
-    display="inline-block"
     hasArrow={true}
     isOpen={false}
-    ownFocus={true}
     panelPaddingSize="none"
-    repositionToCrossAxis={true}
   >
     <EuiContextMenuClass
       data-test-subj="layerTocActionsPanellayer1"
@@ -605,12 +590,9 @@ exports[`TOCEntryActionsPopover should show "show this layer only" action when t
     }
     className="mapLayTocActions"
     closePopover={[Function]}
-    display="inline-block"
     hasArrow={true}
     isOpen={false}
-    ownFocus={true}
     panelPaddingSize="none"
-    repositionToCrossAxis={true}
   >
     <EuiContextMenuClass
       data-test-subj="layerTocActionsPanellayer1"

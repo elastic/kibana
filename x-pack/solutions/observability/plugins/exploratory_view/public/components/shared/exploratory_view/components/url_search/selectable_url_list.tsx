@@ -181,49 +181,51 @@ export function SelectableUrlList({
       allowExclusions={true}
       isPreFiltered={searchValue !== searchRef?.value}
     >
-      {(list, search) => (
-        <EuiPopover
-          aria-labelledby={selectableUrlListPopoverTitleId}
-          panelPaddingSize="none"
-          isOpen={popoverIsOpen}
-          display={'block'}
-          button={search}
-          closePopover={closePopover}
-          style={{ minWidth: 400 }}
-          anchorPosition="downLeft"
-          ownFocus={false}
-        >
-          <div
-            style={{
-              width: searchRef?.getBoundingClientRect().width ?? 600,
-              maxWidth: '100%',
-            }}
+      {(list, search) =>
+        search ? (
+          <EuiPopover
+            aria-labelledby={selectableUrlListPopoverTitleId}
+            panelPaddingSize="none"
+            isOpen={popoverIsOpen}
+            display={'block'}
+            button={search}
+            closePopover={closePopover}
+            style={{ minWidth: 400 }}
+            anchorPosition="downLeft"
+            ownFocus={false}
           >
-            <PopOverTitle />
-            {list}
-            <EuiPopoverFooter paddingSize="s">
-              <EuiFlexGroup style={{ justifyContent: 'flex-end' }}>
-                <EuiFlexItem grow={false}>
-                  <EuiButton
-                    data-test-subj="o11ySelectableUrlListApplyButton"
-                    fill
-                    size="s"
-                    onClick={() => {
-                      onSelectionApply();
-                      closePopover();
-                    }}
-                    isDisabled={!hasChanged()}
-                  >
-                    {i18n.translate('xpack.exploratoryView.apply.label', {
-                      defaultMessage: 'Apply',
-                    })}
-                  </EuiButton>
-                </EuiFlexItem>
-              </EuiFlexGroup>
-            </EuiPopoverFooter>
-          </div>
-        </EuiPopover>
-      )}
+            <div
+              style={{
+                width: searchRef?.getBoundingClientRect().width ?? 600,
+                maxWidth: '100%',
+              }}
+            >
+              <PopOverTitle />
+              {list}
+              <EuiPopoverFooter paddingSize="s">
+                <EuiFlexGroup style={{ justifyContent: 'flex-end' }}>
+                  <EuiFlexItem grow={false}>
+                    <EuiButton
+                      data-test-subj="o11ySelectableUrlListApplyButton"
+                      fill
+                      size="s"
+                      onClick={() => {
+                        onSelectionApply();
+                        closePopover();
+                      }}
+                      isDisabled={!hasChanged()}
+                    >
+                      {i18n.translate('xpack.exploratoryView.apply.label', {
+                        defaultMessage: 'Apply',
+                      })}
+                    </EuiButton>
+                  </EuiFlexItem>
+                </EuiFlexGroup>
+              </EuiPopoverFooter>
+            </div>
+          </EuiPopover>
+        ) : null
+      }
     </EuiSelectable>
   );
 }
