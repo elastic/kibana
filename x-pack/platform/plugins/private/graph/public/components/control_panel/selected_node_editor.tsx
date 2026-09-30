@@ -14,7 +14,12 @@ import type { Workspace, WorkspaceNode } from '../../types';
 import { IconRenderer } from '../icon_renderer';
 import { gphSidebarHeaderStyles, gphSidebarPanelStyles } from '../../styles';
 import { gphFormGroupSmallStyles } from './control_plane.styles';
-import { groupSelectedNodes, type GraphDispatch, ungroupNode } from '../../state_management';
+import {
+  groupSelectedNodes,
+  setNodeLabel,
+  type GraphDispatch,
+  ungroupNode,
+} from '../../state_management';
 
 interface SelectedNodeEditorProps {
   workspace: Workspace;
@@ -40,8 +45,7 @@ export const SelectedNodeEditor = ({ workspace, selectedNode }: SelectedNodeEdit
     dispatch(ungroupNode(selectedNode.id));
   };
   const onChangeSelectedVertexLabel = (event: React.ChangeEvent<HTMLInputElement>) => {
-    selectedNode.label = event.target.value;
-    workspace.changeHandler();
+    dispatch(setNodeLabel({ nodeId: selectedNode.id, label: event.target.value }));
   };
 
   return (

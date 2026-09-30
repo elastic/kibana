@@ -92,6 +92,8 @@ export const unblockNode = actionCreator<string>('UNBLOCK_NODE');
 export const unblockAllNodes = actionCreator('UNBLOCK_ALL_NODES');
 export const undoWorkspace = actionCreator('UNDO_WORKSPACE');
 export const redoWorkspace = actionCreator('REDO_WORKSPACE');
+export const setNodeLabel = actionCreator<{ nodeId: string; label: string }>('SET_NODE_LABEL');
+export const colorSelectedNodes = actionCreator<string>('COLOR_SELECTED_NODES');
 export const submitSearch = actionCreator<string>('SUBMIT_SEARCH');
 
 export const workspaceReducer = reducerWithInitialState(initialWorkspaceState)
@@ -193,6 +195,28 @@ export const workspaceReducer = reducerWithInitialState(initialWorkspaceState)
   }))
   .case(undoWorkspace, (state) => applyUndo(state))
   .case(redoWorkspace, (state) => applyRedo(state))
+  .case(setNodeLabel, (state, { nodeId, label }) => {
+    const node = state.nodesById[nodeId];
+    if (!node) {
+      return state;
+    }
+    return {
+      ...state,
+      nodesById: {
+        ...state.nodesById,
+        [nodeId]: { ...node, label },
+      },
+    };
+  })
+  .case(colorSelectedNodes, (state, color) => ({
+    ...state,
+    nodesById: Object.fromEntries(
+      Object.entries(state.nodesById).map(([nodeId, node]) => [
+        nodeId,
+        state.selectedNodeIds.includes(nodeId) ? { ...node, color } : node,
+      ])
+    ),
+  }))
   .build();
 
 export const workspaceSelector = (state: GraphState) => state.workspace;
@@ -353,6 +377,8 @@ const toNodeState = (node: WorkspaceNode): WorkspaceNodeState => ({
 const getEdgeId = ({ id, source, target }: Workspace['edges'][number]): string =>
   id ?? `${source.id}-${target.id}`;
 
+const presentationActionTypes = new Set([setNodeLabel.type, colorSelectedNodes.type]);
+
 const topologyActionTypes = new Set([
   deleteSelectedNodes.type,
   blocklistSelectedNodes.type,
@@ -408,6 +434,26 @@ export const registerWorkspaceListeners = (
       }
 
       synchronizeWorkspaceSelection(workspace, listenerApi.getState().workspace);
+      notifyReact();
+    },
+  });
+
+  startListening({
+    predicate: (action) => presentationActionTypes.has(action.type),
+    effect: (action) => {
+      const workspace = getWorkspace();
+      if (!workspace) {
+        return;
+      }
+
+      if (setNodeLabel.match(action)) {
+        const node = workspace.nodesMap[action.payload.nodeId];
+        if (node) {
+          node.label = action.payload.label;
+        }
+      } else if (colorSelectedNodes.match(action)) {
+        workspace.colorSelected(action.payload);
+      }
       notifyReact();
     },
   });

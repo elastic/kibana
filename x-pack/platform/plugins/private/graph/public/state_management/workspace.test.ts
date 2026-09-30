@@ -14,6 +14,7 @@ import { createMockGraphStore } from './mocks';
 import {
   blocklistSelectedNodes,
   clearNodeSelection,
+  colorSelectedNodes,
   createWorkspaceState,
   deleteSelectedNodes,
   groupSelectedNodes,
@@ -22,6 +23,7 @@ import {
   registerWorkspaceListeners,
   selectAllNodes,
   selectNeighborNodes,
+  setNodeLabel,
   submitSearch,
   toggleEdgeSelection,
   toggleNodeSelection,
@@ -313,6 +315,29 @@ describe('workspace state', () => {
     environment.store.dispatch(redoWorkspace());
     expect(environment.store.getState().workspace.nodeIds).toEqual(['remaining']);
     expect(environment.store.getState().workspace.undoHistory).toHaveLength(1);
+  });
+
+  it('updates labels and selected-node colors', () => {
+    const environment = createMockGraphStore({});
+    const state = {
+      ...environment.store.getState().workspace,
+      nodesById: {
+        selected: { id: 'selected', label: 'Old', color: 'red' },
+        other: { id: 'other', label: 'Other', color: 'green' },
+      },
+      nodeIds: ['selected', 'other'],
+      selectedNodeIds: ['selected'],
+    } as unknown as ReturnType<typeof environment.store.getState>['workspace'];
+    environment.store.dispatch(workspaceChanged(state));
+
+    environment.store.dispatch(setNodeLabel({ nodeId: 'selected', label: 'New' }));
+    environment.store.dispatch(colorSelectedNodes('blue'));
+
+    expect(environment.store.getState().workspace.nodesById.selected).toMatchObject({
+      label: 'New',
+      color: 'blue',
+    });
+    expect(environment.store.getState().workspace.nodesById.other.color).toBe('green');
   });
 
   it('keeps edge selection single-valued', () => {
