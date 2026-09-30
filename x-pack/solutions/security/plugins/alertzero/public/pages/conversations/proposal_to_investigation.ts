@@ -109,12 +109,15 @@ export const proposalToInvestigation = (proposal: ProposalItem): Investigation =
     // The page renders dismiss/assign modals only if modalState.recordId is set.
     recordId: proposal.id,
     conversationId: proposal.conversationId,
-    summary: proposal.comment,
-    primaryActionLabel: proposal.action?.name,
+    // The title, not the comment: the card renders this as plain text, so the
+    // comment's markdown came through as literal asterisks and headings.
+    summary: proposal.title,
+    primaryActionLabel: proposal.title,
     // `conversationAssignees` is an array but `Investigation.assignee` is singular,
     // because the flyout header renders one avatar. First entry wins, as in the
     // conversation adapter.
     assignee: proposal.conversationAssignees[0] ?? null,
+    assignees: proposal.conversationAssignees,
     events: [],
     entityIds: proposal.entityIds,
     // First id feeds the flyout Overview "Compromised" row until that surface

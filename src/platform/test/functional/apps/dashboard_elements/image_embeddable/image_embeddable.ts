@@ -73,7 +73,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await dashboardDrilldownsManage.saveChanges();
       await dashboardDrilldownsManage.closeFlyout();
 
-      expect(await dashboardDrilldownPanelActions.getPanelDrilldownCount()).to.be(1);
+      await dashboardDrilldownPanelActions.expectPanelDrilldownCount(1);
 
       const panel = (await dashboard.getDashboardPanels())[0];
       const img = await panel.findByCssSelector('img.euiImage');

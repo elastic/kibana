@@ -8,15 +8,16 @@
 import React, { useMemo, useState } from 'react';
 import useObservable from 'react-use/lib/useObservable';
 import {
-  EuiAccordion,
+  EuiFlexGroup,
+  EuiFlexItem,
   EuiLoadingSpinner,
   EuiPanel,
   EuiSpacer,
   EuiTitle,
-  useEuiTheme,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { GEN_AI_SETTINGS_TOKEN_USAGE_TRACKING } from '@kbn/management-settings-ids';
+import { DeveloperModeBadge } from '../../../../components/developer_mode_badge/developer_mode_badge';
 import { useKibana } from '../../../../hooks/use_kibana';
 import { useSignificantEventsCost } from '../../../../hooks/use_significant_events_cost';
 import { useRunQuotas } from '../../../../hooks/use_significant_events_run_quotas';
@@ -32,7 +33,6 @@ import {
 const INSTALL_TOKEN_USAGE_DASHBOARD_URL = '/internal/gen_ai_settings/install_token_usage_dashboard';
 
 export const CostEstimate = () => {
-  const { euiTheme } = useEuiTheme();
   const quotas = useRunQuotas();
   const [isEnablingTracking, setIsEnablingTracking] = useState(false);
   const { core } = useKibana();
@@ -215,17 +215,17 @@ export const CostEstimate = () => {
         grow={false}
         data-test-subj="significantEventsCostSection"
       >
-        <EuiPanel hasShadow={false} color="subdued" paddingSize="none">
-          <EuiAccordion
-            id="significantEventsCostAccordion"
-            initialIsOpen={false}
-            arrowProps={{ css: { marginInlineStart: euiTheme.size.m } }}
-            buttonProps={{
-              paddingSize: 'm',
-              css: { flexGrow: 0, inlineSize: 'auto' },
-              'data-test-subj': 'significantEventsCostAccordionButton',
-            }}
-            buttonContent={
+        <EuiPanel hasShadow={false} color="subdued" paddingSize="m">
+          <EuiFlexGroup
+            gutterSize="s"
+            alignItems="center"
+            responsive={false}
+            data-test-subj="significantEventsCostHeader"
+          >
+            <EuiFlexItem grow={false}>
+              <DeveloperModeBadge />
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
               <EuiTitle size="xs">
                 <h3>
                   {i18n.translate('xpack.significantEventsApp.settings.costEstimate.sectionTitle', {
@@ -233,14 +233,14 @@ export const CostEstimate = () => {
                   })}
                 </h3>
               </EuiTitle>
-            }
-            extraAction={<CostHeaderActions data={cost.data} />}
-            data-test-subj="significantEventsCostAccordion"
-          >
-            <EuiPanel hasShadow={false} borderRadius="none">
-              {renderBody()}
-            </EuiPanel>
-          </EuiAccordion>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <CostHeaderActions data={cost.data} />
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </EuiPanel>
+        <EuiPanel hasShadow={false} borderRadius="none">
+          {renderBody()}
         </EuiPanel>
       </EuiPanel>
     </>

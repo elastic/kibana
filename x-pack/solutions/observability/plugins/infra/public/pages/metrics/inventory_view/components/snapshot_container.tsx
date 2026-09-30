@@ -5,13 +5,16 @@
  * 2.0.
  */
 
-import React, { useEffect } from 'react';
+import React, { useEffect, useMemo } from 'react';
+import { findInventoryModel } from '@kbn/metrics-data-access-plugin/common';
 import { useAlertPrefillContext } from '../../../../alerting/use_alert_prefill';
 import { useSourceContext } from '../../../../containers/metrics_source';
 import { useSnapshot } from '../hooks/use_snaphot';
 import { useWaffleFiltersContext } from '../hooks/use_waffle_filters';
 import { useWaffleOptionsContext } from '../hooks/use_waffle_options';
+import { useInventoryRequestSchema } from '../hooks/use_inventory_request_schema';
 import { useWaffleTimeContext } from '../hooks/use_waffle_time';
+import { snapshotMetricForInventoryRequest } from '../lib/snapshot_metric_for_catalog';
 import { LayoutView } from './layout_view';
 
 export const SnapshotContainer = React.memo(function SnapshotContainer() {
@@ -20,6 +23,13 @@ export const SnapshotContainer = React.memo(function SnapshotContainer() {
     useWaffleOptionsContext();
   const { currentTime } = useWaffleTimeContext();
   const { filterQuery } = useWaffleFiltersContext();
+  const requestSchema = useInventoryRequestSchema(nodeType, preferredSchema);
+  const inventoryModel = findInventoryModel(nodeType);
+  const requestMetric = useMemo(
+    () =>
+      snapshotMetricForInventoryRequest(nodeType, metric, inventoryModel.metrics.defaultSnapshot),
+    [inventoryModel.metrics.defaultSnapshot, metric, nodeType]
+  );
 
   const { inventoryPrefill } = useAlertPrefillContext();
 
@@ -34,14 +44,14 @@ export const SnapshotContainer = React.memo(function SnapshotContainer() {
   } = useSnapshot(
     {
       kuery: filterQuery.query,
-      metrics: [metric],
+      metrics: [requestMetric],
       groupBy,
       nodeType,
       sourceId,
       currentTime,
       accountId,
       region,
-      schema: preferredSchema,
+      schema: requestSchema,
       includeTimeseries: true,
     },
     { sendRequestImmediately: true }

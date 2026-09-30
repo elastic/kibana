@@ -8,6 +8,7 @@
 import { setTimeout } from 'timers/promises';
 import type { HttpHandler } from '@kbn/core/public';
 import type { ConversationRound } from '@kbn/agent-builder-common';
+import { MAX_TEXT_LENGTH } from '@kbn/significant-events-schema';
 import type {
   StartInvestigationResponse,
   GetInvestigationResponse,
@@ -15,7 +16,27 @@ import type {
 import type { WorkflowExecutionDto } from '@kbn/workflows';
 import type { InvestigationExample, InvestigationTaskOutput } from './types';
 
-/** Runs a manual product investigation and retains its persisted report and conversation evidence. */
+export const INVESTIGATION_TIMEOUT_MS = 20 * 60_000;
+const MAX_PERSISTED_REPORT_BYTES = 512 * 1024;
+
+const boundOutput = (output: InvestigationTaskOutput): InvestigationTaskOutput => {
+  const { structured_report: report, execution_error: executionError } = output;
+  if (report && Buffer.byteLength(JSON.stringify(report), 'utf8') > MAX_PERSISTED_REPORT_BYTES) {
+    // Full evidence remains on the investigation and its agent traces, outside the score body.
+    output.structured_report = {
+      summary: report.summary?.slice(0, MAX_TEXT_LENGTH),
+      conclusion: report.conclusion?.slice(0, MAX_TEXT_LENGTH),
+      severity: report.severity,
+    };
+    output.report_truncated = true;
+  }
+  if (executionError && executionError.length > MAX_TEXT_LENGTH) {
+    output.execution_error = `${executionError.slice(0, MAX_TEXT_LENGTH)} [truncated]`;
+  }
+  return output;
+};
+
+/** Runs a manual investigation and retains a bounded report with references to its full evidence. */
 export const runInvestigation = async (
   fetch: HttpHandler,
   example: InvestigationExample
@@ -42,7 +63,7 @@ export const runInvestigation = async (
     while (investigation.status === 'pending' || investigation.status === 'running') {
       output.workflow_status = investigation.status;
       output.conversation_id = investigation.conversation_id;
-      if (Date.now() - started > 20 * 60_000) {
+      if (Date.now() - started > INVESTIGATION_TIMEOUT_MS) {
         throw new Error('Investigation did not reach a terminal status within 20 minutes');
       }
       await setTimeout(1000);
@@ -51,7 +72,7 @@ export const runInvestigation = async (
   } catch (error) {
     output.execution_error = error instanceof Error ? error.message : String(error);
   }
-  if (!investigation || !output.investigation_id) return output;
+  if (!investigation || !output.investigation_id) return boundOutput(output);
 
   // A timeout or failed poll must not discard the conversation accumulated before the failure.
   try {
@@ -78,7 +99,6 @@ export const runInvestigation = async (
       hypotheses,
       recommendations,
       blind_spots: blindSpots,
-      trigger_feedback: triggerFeedback,
       impact,
     } = investigation;
     output.structured_report = {
@@ -88,15 +108,15 @@ export const runInvestigation = async (
       hypotheses,
       recommendations,
       blind_spots: blindSpots,
-      trigger_feedback: triggerFeedback,
       impact,
     };
     if (output.conversation_id) {
-      output.conversation = await fetch<{ rounds: ConversationRound[] }>(
+      const conversation = await fetch<{ rounds: ConversationRound[] }>(
         `/api/agent_builder/conversations/${encodeURIComponent(output.conversation_id)}`,
         { headers: { 'elastic-api-version': '2023-10-31' } }
       );
-      output.traceId = output.conversation.rounds
+      output.conversation_round_count = conversation.rounds.length;
+      output.traceId = conversation.rounds
         .flatMap(({ trace_id: traceId }) =>
           typeof traceId === 'string' ? [traceId] : traceId ?? []
         )
@@ -108,5 +128,5 @@ export const runInvestigation = async (
   } catch (error) {
     output.execution_error ??= error instanceof Error ? error.message : String(error);
   }
-  return output;
+  return boundOutput(output);
 };

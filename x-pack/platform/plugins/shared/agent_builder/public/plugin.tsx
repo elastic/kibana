@@ -106,7 +106,7 @@ export class AgentBuilderPlugin
     removeAttachmentById: (attachmentId: string) => void;
   } | null = null;
   private appUpdater$ = new BehaviorSubject<AppUpdater>(() => ({}));
-  private isEarsEnabled = false;
+  private isEarsEnabled = true;
   private isEarsExperimentalEnabled = false;
   private experimentalDeepLinksSubscription?: Subscription;
   private sidebarOpenSubscription?: Subscription;
@@ -248,6 +248,7 @@ export class AgentBuilderPlugin
     const openConversationDetails = async ({
       conversationId,
       onClose,
+      trailingActions,
     }: OpenConversationDetailsOptions): Promise<() => void> => {
       const { openConversationDetailsFlyout } = await import(
         './flyout/open_conversation_details_flyout'
@@ -258,6 +259,7 @@ export class AgentBuilderPlugin
         conversationTemplatesService,
         conversationId,
         onClose,
+        trailingActions,
       });
     };
 

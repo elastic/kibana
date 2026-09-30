@@ -330,12 +330,6 @@ export function SettingsTab() {
 
       <EuiSpacer />
 
-      <StaleEventCleanupSection canManage={canManage} />
-
-      <CostEstimate />
-
-      <EuiSpacer />
-
       <RunLimitsSection />
 
       <EuiSpacer />
@@ -845,7 +839,8 @@ export function SettingsTab() {
             <EuiFlexItem grow={2}>
               <EuiText color="subdued" size="s">
                 {i18n.translate('xpack.significantEventsApp.settings.developerModeHelpText', {
-                  defaultMessage: 'Show extra details and configuration options for expert users.',
+                  defaultMessage:
+                    'Show extra tabs, details, and configuration options for expert users.',
                 })}
               </EuiText>
             </EuiFlexItem>
@@ -872,6 +867,14 @@ export function SettingsTab() {
           </EuiFlexGroup>
         </EuiSplitPanel.Inner>
       </EuiSplitPanel.Outer>
+
+      {isDeveloperMode && (
+        <>
+          <EuiSpacer />
+          <StaleEventCleanupSection canManage={canManage} />
+          <CostEstimate />
+        </>
+      )}
 
       {isDeveloperMode && !isDeveloperModeSaving && (
         <>
