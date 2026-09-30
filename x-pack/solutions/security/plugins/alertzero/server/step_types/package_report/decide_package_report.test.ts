@@ -115,7 +115,9 @@ describe('decidePackageReport', () => {
 
   it('does not drop or duplicate subject keys when catalog order changes', () => {
     const state = baseHitState({
-      processSelectors: [{ pid: 4242, processKey: 'pid:4242' }],
+      processSelectors: [
+        { pid: 4242, processKey: 'pid:4242', hostName: 'host-a', summary: 'proc.exe (pid 4242)' },
+      ],
     });
     const a = decidePackageReport({
       conversationId,
@@ -209,8 +211,13 @@ describe('decidePackageReport', () => {
       conversationId,
       state: baseHitState({
         processSelectors: [
-          { pid: 100, processKey: 'pid:100' },
-          { entityId: 'ent-9', processKey: 'entity:ent-9' },
+          { pid: 100, processKey: 'pid:100', hostName: 'host-a', summary: 'a.exe (pid 100)' },
+          {
+            entityId: 'ent-9',
+            processKey: 'entity:ent-9',
+            hostName: 'host-a',
+            summary: 'b.exe (entity_id ent-9)',
+          },
         ],
       }),
       catalog: { ok: true, actions: [killProcess] },
@@ -219,6 +226,30 @@ describe('decidePackageReport', () => {
     expect(result.proposals.every((p) => p.actionWorkflowId === killProcess.workflowId)).toBe(true);
     expect(result.proposals[0].actionInput?.parameters).toEqual({ pid: 100 });
     expect(result.proposals[1].actionInput?.parameters).toEqual({ entity_id: 'ent-9' });
+    // Each selector's own summary keeps the two proposals from reading as duplicates.
+    expect(result.proposals[0].comment).toContain('a.exe (pid 100)');
+    expect(result.proposals[1].comment).toContain('b.exe (entity_id ent-9)');
+  });
+
+  it('never applies a process selector observed on one host to a different host', () => {
+    const result = decidePackageReport({
+      conversationId,
+      state: baseHitState({
+        hosts: [
+          { name: 'host-a', enrolled: true, agentId: 'agent-a' },
+          { name: 'host-b', enrolled: true, agentId: 'agent-b' },
+        ],
+        processSelectors: [
+          { pid: 100, processKey: 'pid:100', hostName: 'host-a', summary: 'a.exe (pid 100)' },
+        ],
+      }),
+      catalog: { ok: true, actions: [killProcess] },
+    });
+    // host-a fills kill-process from its own selector; host-b, with no selector of its own,
+    // mints nothing rather than borrowing host-a's.
+    expect(result.proposals).toHaveLength(1);
+    expect(result.proposals[0].hostName).toBe('host-a');
+    expect(result.proposals[0].actionInput?.parameters).toEqual({ pid: 100 });
   });
 
   it('builds stable subject keys for the same host × action × process', () => {

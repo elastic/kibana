@@ -307,13 +307,18 @@ export const decidePackageReport = ({
 
   for (const host of eligible) {
     const agentId = host.agentId!;
+    // A selector's `hostName` names the host it was actually observed on; applying it to
+    // every enrolled host would mint a kill-process proposal against the wrong agent.
+    const hostProcessSelectors = state.processSelectors.filter(
+      (selector) => selector.hostName === host.name
+    );
     for (const entry of respondActions) {
       const hostClosureSummary = buildHostActionComment(state, host, entry.name);
       const schema = actionInputSchema(entry);
       const processScoped = needsProcessParameters(schema);
 
       if (processScoped) {
-        for (const processSelector of state.processSelectors) {
+        for (const processSelector of hostProcessSelectors) {
           const actionInput = buildActionInput({ entry, agentId, processSelector });
           if (!actionInput) {
             continue;
@@ -331,7 +336,10 @@ export const decidePackageReport = ({
           proposals.push({
             subjectKey,
             conversationId,
-            comment: hostClosureSummary,
+            // The selector's own summary distinguishes two process-scoped proposals on the
+            // same host (e.g. kill-process for two different pids) that would otherwise share
+            // an identical headline.
+            comment: `${hostClosureSummary}\n\n${processSelector.summary}`,
             category: entry.category ?? 'respond',
             impact: entry.impact,
             actionWorkflowId: entry.workflowId,

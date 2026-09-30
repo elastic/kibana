@@ -22,6 +22,15 @@ export interface ProcessSelector {
   entityId?: string;
   /** Stable key for the subject uuidv5 when process-scoped. */
   processKey: string;
+  /**
+   * host.name (or host.hostname) of the document the selector came from. A
+   * selector is only ever applied to the agent of the host it was observed
+   * on, never fanned out to every enrolled host.
+   */
+  hostName: string;
+  /** One line for the Proposal comment, e.g. `powershell.exe (pid 4312, entity_id abc) observed 2026-09-26T10:00:00.000Z; the process may have exited`. */
+  summary: string;
+  observedAt?: string;
 }
 
 /**
