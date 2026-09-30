@@ -7,8 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { EcsVersion } from '@elastic/ecs';
-import type { BlockReport, Candidate, LiveNoticeFormat, ProfileSummary } from './types';
+import type { BlockReport, Candidate, ProfileSummary } from './types';
 
 export interface LiveNotice {
   elapsedMs: number;
@@ -90,30 +89,4 @@ export const formatReportMessage = ({
       omittedCandidates
     )}.${suppressed}`
   );
-};
-
-const TEXT_LEVEL = 'WARN ';
-
-/**
- * Formats a single log line written directly by the worker, approximating the configured
- * console layout (ECS JSON or plain text) since core logging runs on the blocked main thread.
- */
-export const formatLogLine = (
-  format: LiveNoticeFormat,
-  loggerName: string,
-  message: string,
-  meta: Record<string, object>,
-  now: Date = new Date()
-): string => {
-  if (format === 'json') {
-    return `${JSON.stringify({
-      '@timestamp': now.toISOString(),
-      ecs: { version: EcsVersion },
-      log: { level: 'WARN', logger: loggerName },
-      message,
-      process: { pid: process.pid, uptime: process.uptime() },
-      ...meta,
-    })}\n`;
-  }
-  return `[${now.toISOString()}][${TEXT_LEVEL}][${loggerName}] ${message}\n`;
 };

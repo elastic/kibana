@@ -9,3 +9,6 @@
 
 export { ThreadsService } from './src/threads_service';
 export type { InternalThreadsStart } from './src/threads_service';
+export type { ManagedWorker, ManagedWorkerOptions } from './src/managed_worker';
+export { createWorkerLogger } from './src/worker_logger';
+export type { WorkerLoggingConfig } from './src/worker_logger';

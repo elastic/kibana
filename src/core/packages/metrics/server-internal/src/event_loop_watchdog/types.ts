@@ -7,6 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { WorkerLoggingConfig } from '@kbn/core-threads-server-internal';
+
+export const WATCHDOG_WORKER_NAME = 'kibana-event-loop-watchdog';
+
 /** Resolved, millisecond-based watchdog options shared with the worker. */
 export interface WatchdogOptions {
   thresholdMs: number;
@@ -26,17 +30,11 @@ export interface WatchdogOptions {
   maxFrames: number;
 }
 
-/** Output format of worker-written live notices, matching the process' console appender. */
-export type LiveNoticeFormat = 'json' | 'text';
-
 export interface WatchdogWorkerData {
   heartbeat: SharedArrayBuffer;
   options: WatchdogOptions;
-  /** Live notices are disabled when undefined (no console appender for the watchdog logger). */
-  liveNoticeFormat?: LiveNoticeFormat;
-  /** Logger context used in worker-written lines. */
-  loggerName: string;
-  /** File descriptor live notices are written to (stdout by default). */
+  logging: WorkerLoggingConfig;
+  /** File descriptor diagnostics are written to (stdout by default). */
   outputFd: number;
   /** Absolute path prefix stripped from profile frame URLs. */
   sanitizeRoot: string;
@@ -120,9 +118,3 @@ export type MainToWorkerMessage =
   | { type: 'snapshot'; activities: Array<[number, Activity]> }
   | { type: 'activity-start'; key: number; activity: Activity }
   | { type: 'activity-end'; key: number };
-
-export type WorkerToMainMessage =
-  | { type: 'ready' }
-  | { type: 'profiler-ready' }
-  | { type: 'report'; report: BlockReport }
-  | { type: 'worker-error'; message: string };

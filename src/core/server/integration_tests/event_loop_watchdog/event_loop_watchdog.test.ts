@@ -21,6 +21,7 @@ import { ActivityRegistry } from '@kbn/core-metrics-server-internal/src/event_lo
 import type {
   BlockReport,
   WatchdogOptions,
+  WatchdogWorkerData,
 } from '@kbn/core-metrics-server-internal/src/event_loop_watchdog/types';
 
 const baseOptions: WatchdogOptions = {
@@ -60,13 +61,21 @@ describe('EventLoopWatchdog (real worker)', () => {
   let watchdog: EventLoopWatchdog | undefined;
   let outputPath: string;
   let outputFd: number;
+  let heartbeat: BigInt64Array | undefined;
+
+  const records = (): Array<{
+    message: string;
+    kibana?: { event_loop_watchdog?: BlockReport; worker?: { name: string; thread_id: number } };
+  }> =>
+    Fs.readFileSync(outputPath, 'utf8')
+      .split('\n')
+      .slice(0, -1)
+      .map((line) => JSON.parse(line));
 
   const reports = (): BlockReport[] =>
-    logger.warn.mock.calls
-      .map(([, meta]) => meta as { kibana?: { event_loop_watchdog?: BlockReport } } | undefined)
-      .flatMap((meta) =>
-        meta?.kibana?.event_loop_watchdog ? [meta.kibana.event_loop_watchdog] : []
-      );
+    records().flatMap(({ kibana }) =>
+      kibana?.event_loop_watchdog?.blockedMs !== undefined ? [kibana.event_loop_watchdog] : []
+    );
 
   const nextReport = (count: number) =>
     waitFor(() => (reports().length >= count ? reports()[count - 1] : undefined));
@@ -77,16 +86,21 @@ describe('EventLoopWatchdog (real worker)', () => {
       .filter((line) => line.includes('Event loop still blocked'));
 
   const debugCount = (text: string) =>
-    logger.debug.mock.calls.filter(([message]) => String(message).includes(text)).length;
+    records().filter(({ message }) => message.includes(text)).length;
 
   const startWatchdog = async (options: Partial<WatchdogOptions> = {}) => {
+    const threads = new ThreadsService().start();
+    const createWorker = threads.createWorker;
+    threads.createWorker = (params) => {
+      heartbeat = new BigInt64Array((params.options.workerData as WatchdogWorkerData).heartbeat);
+      return createWorker(params);
+    };
     watchdog = new EventLoopWatchdog({
-      threads: new ThreadsService().start(),
+      threads,
       logger,
-      loggerName: 'metrics.event_loop_watchdog',
+      logging: { context: 'metrics.event_loop_watchdog', level: 'debug', format: 'json' },
       options: { ...baseOptions, ...options },
       registry,
-      liveNoticeFormat: 'json',
       sanitizeRoot: REPO_ROOT,
       outputFd,
     });
@@ -133,6 +147,11 @@ describe('EventLoopWatchdog (real worker)', () => {
       // written while the main thread was still blocked
       expect(Date.parse(parsed['@timestamp'])).toBeLessThan(blockEndedAt);
       expect(parsed.log).toEqual({ level: 'WARN', logger: 'metrics.event_loop_watchdog' });
+      expect(parsed.kibana.worker).toEqual({
+        name: 'kibana-event-loop-watchdog',
+        thread_id: expect.any(Number),
+      });
+      expect(parsed.kibana.worker.thread_id).toBeGreaterThan(0);
     }
 
     const report = await nextReport(1);
@@ -144,6 +163,78 @@ describe('EventLoopWatchdog (real worker)', () => {
     ]);
     expect(report.omittedCandidates).toBe(1);
     expect(report.liveNotices).toBe(notices.length);
+  });
+
+  it('writes a completed report without servicing the main event loop', async () => {
+    await startWatchdog({ profileAfterMs: 10_000 });
+    deliberatelyBlockTheEventLoop(500);
+    if (!heartbeat) throw new Error('missing test heartbeat');
+    // Simulate recovery without yielding: no main-thread message handler can log this report.
+    Atomics.store(heartbeat, 0, process.hrtime.bigint() / 1000n);
+    const deadline = Date.now() + 2_000;
+    while (reports().length === 0 && Date.now() < deadline) {
+      /* synchronous observation */
+    }
+    expect(reports()).toHaveLength(1);
+    expect(
+      records().find(({ kibana }) => kibana?.event_loop_watchdog?.blockedMs)?.kibana?.worker
+        ?.thread_id
+    ).toBeGreaterThan(0);
+    expect(logger.warn).not.toHaveBeenCalled();
+  });
+
+  it('writes worker errors while the main thread is blocked', async () => {
+    let triggerError = () => {};
+    const handle = new ThreadsService().start().createWorker<string>({
+      filename: `
+        require('@kbn/setup-node-env');
+        const { workerData, parentPort } = require('node:worker_threads');
+        const { createWorkerLogger } = require('@kbn/core-threads-server-internal');
+        const logger = createWorkerLogger(workerData.logging, 'test-worker', workerData.outputFd);
+        logger.debug('test worker ready');
+        parentPort.once('message', () => logger.error(new Error('worker-only failure')));
+        setInterval(() => {}, 1000);
+      `,
+      options: {
+        name: 'test-worker',
+        eval: true,
+        workerData: {
+          outputFd,
+          logging: { context: 'metrics.event_loop_watchdog', level: 'debug', format: 'json' },
+        },
+      },
+      logger,
+      unref: true,
+      restart: { maxAttempts: 0, delayMs: 0 },
+      onStart: (post) => {
+        triggerError = () => post('emit');
+      },
+      onExit: () => {},
+      onExhausted: () => {},
+    });
+    try {
+      handle.start();
+      await waitFor(
+        () => records().some(({ message }) => message === 'test worker ready') || undefined
+      );
+      const startedAt = Date.now();
+      triggerError();
+      deliberatelyBlockTheEventLoop(500);
+      const endedAt = Date.now();
+      const errorLine = Fs.readFileSync(outputPath, 'utf8')
+        .split('\n')
+        .find((line) => line.includes('worker-only failure'));
+      expect(errorLine).toBeDefined();
+      const error = JSON.parse(errorLine ?? '{}');
+      expect(Date.parse(error['@timestamp'])).toBeGreaterThanOrEqual(startedAt);
+      expect(Date.parse(error['@timestamp'])).toBeLessThan(endedAt);
+      expect(error.log.level).toBe('ERROR');
+      expect(error.error.message).toBe('worker-only failure');
+      expect(error.kibana.worker.thread_id).toBeGreaterThan(0);
+      expect(logger.error).not.toHaveBeenCalled();
+    } finally {
+      await handle.stop();
+    }
   });
 
   it('reports syscall blocks with a low CPU ratio', async () => {

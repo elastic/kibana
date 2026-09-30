@@ -10,15 +10,17 @@
 /*
  * Runs in the dedicated watchdog worker thread. Watches the main thread's heartbeat, writes
  * live notices directly to stdout while the main thread is blocked, optionally profiles long
- * blocks through the inspector and posts a report to the main thread once the block ends.
+ * blocks through the inspector and writes a report directly once the block ends.
  */
 
-import { writeSync } from 'node:fs';
+import { createWorkerLogger } from '@kbn/core-threads-server-internal';
 import { Session } from 'node:inspector';
+import type { LogMeta } from '@kbn/logging';
 import type { MessagePort } from 'node:worker_threads';
 import { isMainThread, parentPort, workerData } from 'node:worker_threads';
 import { BlockDetector, type DetectorEvent } from './block_detector';
-import { formatLiveNoticeMessage, formatLogLine } from './format';
+import { formatLiveNoticeMessage, formatReportMessage, type LiveNotice } from './format';
+import { WATCHDOG_WORKER_NAME } from './types';
 import { summarizeProfile, type CpuProfile } from './profile_summary';
 import type {
   Activity,
@@ -27,7 +29,6 @@ import type {
   MainToWorkerMessage,
   ProfileSummary,
   WatchdogWorkerData,
-  WorkerToMainMessage,
 } from './types';
 
 const hrUs = (): number => Number(process.hrtime.bigint() / 1000n);
@@ -37,6 +38,10 @@ const hrUs = (): number => Number(process.hrtime.bigint() / 1000n);
  * inspector stop responding; further reports are dropped (and counted) instead of queued.
  */
 const MAX_PENDING_REPORTS = 10;
+
+interface WatchdogLogMeta extends LogMeta {
+  kibana: { event_loop_watchdog: BlockReport | { still_blocked: LiveNotice } };
+}
 
 interface Capture {
   /** Detector id of the block that requested this capture. */
@@ -61,7 +66,8 @@ interface Block {
 }
 
 const runWatchdogWorker = (port: MessagePort, data: WatchdogWorkerData): void => {
-  const { options, liveNoticeFormat, loggerName, outputFd, sanitizeRoot } = data;
+  const { options, logging, outputFd, sanitizeRoot } = data;
+  const logger = createWorkerLogger(logging, WATCHDOG_WORKER_NAME, outputFd);
   const heartbeat = new BigInt64Array(data.heartbeat);
   const activities = new Map<number, Activity>();
   const detector = new BlockDetector(options);
@@ -72,16 +78,11 @@ const runWatchdogWorker = (port: MessagePort, data: WatchdogWorkerData): void =>
   let captureInFlight = false;
   let block: Block | undefined;
 
-  const post = (message: WorkerToMainMessage) => port.postMessage(message);
-
   const reportError = (context: string, error: unknown) => {
     // report each distinct failure once to bound log volume
     if (reportedErrors.has(context)) return;
     reportedErrors.add(context);
-    post({
-      type: 'worker-error',
-      message: `${context}: ${error instanceof Error ? error.message : String(error)}`,
-    });
+    logger.warn(`${context}: ${error instanceof Error ? error.message : String(error)}`);
   };
 
   const inspect = <T>(method: string, params: object = {}): Promise<T> =>
@@ -112,18 +113,9 @@ const runWatchdogWorker = (port: MessagePort, data: WatchdogWorkerData): void =>
       )
       .then(() => {
         profilerReady = true;
-        post({ type: 'profiler-ready' });
+        logger.debug('Event loop watchdog profiler ready');
       })
       .catch((error) => reportError('profiler setup failed', error));
-  };
-
-  const writeLine = (message: string, meta: Record<string, object>) => {
-    if (!liveNoticeFormat) return;
-    try {
-      writeSync(outputFd, formatLogLine(liveNoticeFormat, loggerName, message, meta));
-    } catch {
-      // best effort: never let output failures break detection
-    }
   };
 
   const snapshotCandidates = (
@@ -225,7 +217,7 @@ const runWatchdogWorker = (port: MessagePort, data: WatchdogWorkerData): void =>
       candidates: block.candidates,
       omittedCandidates: block.omittedCandidates,
     };
-    writeLine(formatLiveNoticeMessage(notice), {
+    logger.warn<WatchdogLogMeta>(formatLiveNoticeMessage(notice), {
       kibana: { event_loop_watchdog: { still_blocked: notice } },
     });
   };
@@ -275,7 +267,10 @@ const runWatchdogWorker = (port: MessagePort, data: WatchdogWorkerData): void =>
         droppedReports = 0;
         const profile = summarize(current, event.endedAt * 1000);
         if (profile) report.profile = profile;
-        post({ type: 'report', report });
+        logger.warn<WatchdogLogMeta>(formatReportMessage(report), {
+          tags: ['event-loop-watchdog'],
+          kibana: { event_loop_watchdog: report },
+        });
       })
       .catch((error) => reportError('reporting failed', error))
       .finally(() => {
@@ -330,7 +325,7 @@ const runWatchdogWorker = (port: MessagePort, data: WatchdogWorkerData): void =>
   });
 
   setUpProfiler();
-  post({ type: 'ready' });
+  logger.debug('Event loop watchdog worker ready');
 };
 
 if (!isMainThread && parentPort) {

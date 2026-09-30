@@ -17,7 +17,7 @@ import { MockEventLoopWatchdog, mockWatchdog } from './event_loop_watchdog_servi
 import {
   EVENT_LOOP_WATCHDOG_FEATURE_FLAG,
   EventLoopWatchdogService,
-  resolveLiveNoticeFormat,
+  resolveWorkerLogging,
   toWatchdogOptions,
 } from './event_loop_watchdog_service';
 import { opsConfig } from '../ops_config';
@@ -114,7 +114,9 @@ describe('toWatchdogOptions profiling', () => {
   });
 });
 
-describe('resolveLiveNoticeFormat', () => {
+describe('resolveWorkerLogging', () => {
+  const resolveLiveNoticeFormat = (...args: Parameters<typeof resolveWorkerLogging>) =>
+    resolveWorkerLogging(...args).format;
   const name = 'metrics.event_loop_watchdog';
   const appenders = new Map([
     ['json', { type: 'console', layout: { type: 'json' } }],
@@ -151,11 +153,17 @@ describe('resolveLiveNoticeFormat', () => {
     ).toBe('json');
   });
 
-  it('is disabled when the logger does not emit warnings', () => {
+  it('passes the effective level to the worker so it can filter each severity', () => {
+    expect(resolveWorkerLogging({ loggers: [{ name: 'metrics', level: 'error' }] }, name)).toEqual({
+      context: name,
+      level: 'error',
+      format: 'text',
+    });
+    expect(resolveWorkerLogging({ root: { level: 'off' } }, name).level).toBe('off');
     expect(
-      resolveLiveNoticeFormat({ loggers: [{ name: 'metrics', level: 'error' }] }, name)
-    ).toBeUndefined();
-    expect(resolveLiveNoticeFormat({ root: { level: 'off' } }, name)).toBeUndefined();
+      resolveWorkerLogging({ root: { level: 'error' }, loggers: [{ name, level: 'debug' }] }, name)
+        .level
+    ).toBe('debug');
   });
 });
 

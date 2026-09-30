@@ -16,7 +16,11 @@ project:
   channel: ''
   owner: '@elastic/kibana-core'
   sourceRoot: src/core/packages/threads/server-internal
-dependsOn: []
+dependsOn:
+  - '@kbn/logging'
+  - '@kbn/std'
+  - '@kbn/logging-mocks'
+  - '@kbn/core-logging-common-internal'
 tags:
   - shared-server
   - package

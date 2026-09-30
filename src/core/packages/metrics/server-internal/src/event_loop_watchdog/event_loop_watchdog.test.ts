@@ -44,10 +44,9 @@ describe('EventLoopWatchdog', () => {
     watchdog = new EventLoopWatchdog({
       threads: new ThreadsService().start(),
       logger,
-      loggerName: 'metrics.event_loop_watchdog',
+      logging: { context: 'metrics.event_loop_watchdog', level: 'debug', format: 'text' },
       options,
       registry,
-      liveNoticeFormat: 'text',
       sanitizeRoot: '/root',
     });
   });
@@ -64,9 +63,9 @@ describe('EventLoopWatchdog', () => {
 
     expect(MockWorker.instances).toHaveLength(1);
     const worker = lastWorker();
-    // `unref` must follow the `message` listener, which would otherwise re-ref the port
+    // Diagnostic output no longer needs a main-thread message listener.
     expect(worker.unref).toHaveBeenCalled();
-    expect(worker.messageListenersAtUnref).toBe(1);
+    expect(worker.messageListenersAtUnref).toBe(0);
     expect(worker.postMessage).toHaveBeenCalledWith({
       type: 'snapshot',
       activities: [[0, expect.objectContaining({ type: 'a', id: '1' })]],
@@ -182,7 +181,7 @@ describe('EventLoopWatchdog', () => {
     expect(MockWorker.instances).toHaveLength(2);
   });
 
-  it('logs reports', () => {
+  it('does not duplicate worker-side reports through the main-thread logger', () => {
     watchdog.start();
     const report: BlockReport = {
       blockedMs: 1200,
@@ -196,9 +195,6 @@ describe('EventLoopWatchdog', () => {
     };
     lastWorker().emit('message', { type: 'report', report });
 
-    expect(logger.warn).toHaveBeenCalledWith(
-      expect.stringContaining('Event loop was blocked for ~1200ms'),
-      { tags: ['event-loop-watchdog'], kibana: { event_loop_watchdog: report } }
-    );
+    expect(logger.warn).not.toHaveBeenCalled();
   });
 });

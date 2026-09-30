@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { describeCpuRatio, formatCandidates, formatLogLine, formatReportMessage } from './format';
+import { describeCpuRatio, formatCandidates, formatReportMessage } from './format';
 import type { BlockReport } from './types';
 
 const candidate = {
@@ -16,7 +16,6 @@ const candidate = {
   id: 't1',
   startedBeforeBlockMs: 40,
 };
-const now = new Date('2026-09-28T12:00:00.000Z');
 
 describe('formatCandidates', () => {
   it('lists candidates and omitted counts', () => {
@@ -106,32 +105,5 @@ describe('describeCpuRatio', () => {
     [0.5, 'mixed CPU work and waiting'],
   ])('describes %s', (ratio, description) => {
     expect(describeCpuRatio(ratio)).toBe(description);
-  });
-});
-
-describe('formatLogLine', () => {
-  it('writes ECS JSON lines', () => {
-    const line = formatLogLine(
-      'json',
-      'metrics.event_loop_watchdog',
-      'msg',
-      { kibana: { a: 1 } },
-      now
-    );
-    expect(line.endsWith('\n')).toBe(true);
-    expect(JSON.parse(line)).toEqual({
-      '@timestamp': '2026-09-28T12:00:00.000Z',
-      ecs: { version: expect.any(String) },
-      log: { level: 'WARN', logger: 'metrics.event_loop_watchdog' },
-      message: 'msg',
-      process: { pid: process.pid, uptime: expect.any(Number) },
-      kibana: { a: 1 },
-    });
-  });
-
-  it('writes plain text lines', () => {
-    expect(formatLogLine('text', 'metrics.event_loop_watchdog', 'msg', {}, now)).toBe(
-      '[2026-09-28T12:00:00.000Z][WARN ][metrics.event_loop_watchdog] msg\n'
-    );
   });
 });

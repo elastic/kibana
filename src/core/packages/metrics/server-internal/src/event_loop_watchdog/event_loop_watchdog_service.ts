@@ -9,15 +9,15 @@
 
 import { concatMap, distinctUntilChanged, firstValueFrom, type Subscription } from 'rxjs';
 import { REPO_ROOT } from '@kbn/repo-info';
-import type { Logger } from '@kbn/logging';
+import type { Logger, LogLevelId } from '@kbn/logging';
 import type { CoreContext } from '@kbn/core-base-server-internal';
 import type { InternalExecutionContextSetup } from '@kbn/core-execution-context-server-internal';
 import type { FeatureFlagsStart } from '@kbn/core-feature-flags-server';
-import type { InternalThreadsStart } from '@kbn/core-threads-server-internal';
+import type { InternalThreadsStart, WorkerLoggingConfig } from '@kbn/core-threads-server-internal';
 import { OPS_CONFIG_PATH, type OpsConfigType } from '../ops_config';
 import { ActivityRegistry } from './activity_registry';
 import { EventLoopWatchdog } from './event_loop_watchdog';
-import type { LiveNoticeFormat, WatchdogOptions } from './types';
+import type { WatchdogOptions } from './types';
 
 /** Feature flag enabling the event-loop watchdog at runtime. */
 export const EVENT_LOOP_WATCHDOG_FEATURE_FLAG = 'core.eventLoopWatchdog.enabled';
@@ -37,7 +37,7 @@ export interface EventLoopWatchdogStartDeps {
 interface LoggerConfigSubset {
   name?: string;
   appenders?: string[];
-  level?: string;
+  level?: LogLevelId;
 }
 
 interface LoggingConfigSubset {
@@ -48,18 +48,11 @@ interface LoggingConfigSubset {
 
 const ROOT_LOGGER = 'root';
 const BUILT_IN_CONSOLE_APPENDERS = new Set(['default', 'console']);
-const LEVELS_WITHOUT_WARN = new Set(['off', 'fatal', 'error']);
-
-/**
- * Resolves the format of worker-written live notices from the effective configuration of the
- * watchdog logger (nearest configured ancestor, as in core logging). Returns `undefined`, i.e.
- * live notices are disabled, unless that logger emits `warn` to a console appender: notices are
- * written to stdout and must not leak to a sink the logger is not routed to.
- */
-export const resolveLiveNoticeFormat = (
+/** Snapshots the logger's level and console format for independent worker diagnostics. */
+export const resolveWorkerLogging = (
   { appenders, loggers = [], root }: LoggingConfigSubset,
   loggerName: string
-): LiveNoticeFormat | undefined => {
+): WorkerLoggingConfig => {
   const byName = new Map<string, LoggerConfigSubset>([
     [ROOT_LOGGER, { appenders: ['default'], level: 'info', ...root }],
     ...loggers.map((logger): [string, LoggerConfigSubset] => [logger.name ?? '', logger]),
@@ -74,7 +67,6 @@ export const resolveLiveNoticeFormat = (
     });
 
   const level = chain.find((config) => config.level)?.level ?? 'info';
-  if (LEVELS_WITHOUT_WARN.has(level)) return undefined;
 
   const effectiveAppenders =
     chain.find((config) => (config.appenders ?? []).length > 0)?.appenders ?? [];
@@ -83,8 +75,12 @@ export const resolveLiveNoticeFormat = (
     if (appender) return appender.type === 'console' ? [appender.layout?.type] : [];
     return BUILT_IN_CONSOLE_APPENDERS.has(name) ? ['pattern'] : [];
   });
-  if (consoleLayouts.length === 0) return undefined;
-  return consoleLayouts.includes('json') ? 'json' : 'text';
+  return {
+    context: loggerName,
+    level,
+    format:
+      consoleLayouts.length === 0 ? undefined : consoleLayouts.includes('json') ? 'json' : 'text',
+  };
 };
 
 export const toWatchdogOptions = ({
@@ -141,10 +137,9 @@ export class EventLoopWatchdogService {
     const watchdog = new EventLoopWatchdog({
       threads,
       logger: this.logger,
-      loggerName: LOGGER_CONTEXT.join('.'),
+      logging: resolveWorkerLogging(loggingConfig, LOGGER_CONTEXT.join('.')),
       options: toWatchdogOptions(opsConfig),
       registry: this.registry,
-      liveNoticeFormat: resolveLiveNoticeFormat(loggingConfig, LOGGER_CONTEXT.join('.')),
       sanitizeRoot: REPO_ROOT,
     });
     this.watchdog = watchdog;

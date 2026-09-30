@@ -12,6 +12,7 @@ import Os from 'node:os';
 import Path from 'node:path';
 import { setTimeout as sleep } from 'node:timers/promises';
 import type { Root } from '@kbn/core-root-server-internal';
+import { ThreadsService } from '@kbn/core-threads-server-internal';
 import type { InternalCoreStart } from '@kbn/core-lifecycle-server-internal';
 import {
   createTestServers,
@@ -39,6 +40,7 @@ const readLogs = (): LogRecord[] =>
   Fs.existsSync(logFilePath)
     ? Fs.readFileSync(logFilePath, 'utf8')
         .split('\n')
+        .slice(0, -1)
         .filter(Boolean)
         .map((line) => JSON.parse(line) as LogRecord)
         .filter(({ log }) => log.logger === 'metrics.event_loop_watchdog')
@@ -47,7 +49,8 @@ const readLogs = (): LogRecord[] =>
 const countMessages = (pattern: RegExp) =>
   readLogs().filter(({ message }) => pattern.test(message)).length;
 
-const reports = () => readLogs().filter((record) => record.kibana?.event_loop_watchdog);
+const reports = () =>
+  readLogs().filter((record) => record.kibana?.event_loop_watchdog?.blockedMs !== undefined);
 
 const waitFor = async (predicate: () => boolean, timeoutMs = 15_000) => {
   const deadline = Date.now() + timeoutMs;
@@ -67,6 +70,8 @@ describe('event loop watchdog feature flag (Kibana root)', () => {
   let esServer: TestElasticsearchUtils;
   let root: Root;
   let coreStart: InternalCoreStart;
+  let outputFd: number;
+  const originalThreadsStart = ThreadsService.prototype.start;
 
   const setFlag = (value: boolean) =>
     request
@@ -86,6 +91,23 @@ describe('event loop watchdog feature flag (Kibana root)', () => {
 
   beforeAll(async () => {
     Fs.rmSync(logFilePath, { force: true });
+    outputFd = Fs.openSync(logFilePath, 'a');
+    // Capture the independent console sink in the same file as main-thread lifecycle logs.
+    jest
+      .spyOn(ThreadsService.prototype, 'start')
+      .mockImplementation(function (this: ThreadsService) {
+        const threads = originalThreadsStart.call(this);
+        return {
+          createWorker: (options) =>
+            threads.createWorker({
+              ...options,
+              options: {
+                ...options.options,
+                workerData: { ...options.options.workerData, outputFd },
+              },
+            }),
+        };
+      });
     const { startES, startKibana } = createTestServers({
       adjustTimeout: (t: number) => jest.setTimeout(t),
       settings: {
@@ -104,8 +126,15 @@ describe('event loop watchdog feature flag (Kibana root)', () => {
           logging: {
             appenders: {
               file: { type: 'file', fileName: logFilePath, layout: { type: 'json' } },
+              diagnostic: { type: 'console', layout: { type: 'json' } },
             },
-            loggers: [{ name: 'metrics.event_loop_watchdog', level: 'debug', appenders: ['file'] }],
+            loggers: [
+              {
+                name: 'metrics.event_loop_watchdog',
+                level: 'debug',
+                appenders: ['file', 'diagnostic'],
+              },
+            ],
           },
         },
       },
@@ -117,6 +146,8 @@ describe('event loop watchdog feature flag (Kibana root)', () => {
   afterAll(async () => {
     await root?.shutdown();
     await esServer?.stop();
+    jest.restoreAllMocks();
+    Fs.closeSync(outputFd);
     Fs.rmSync(logFilePath, { force: true });
   });
 

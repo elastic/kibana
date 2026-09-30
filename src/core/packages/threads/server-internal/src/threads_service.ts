@@ -7,19 +7,19 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { Worker } from 'node:worker_threads';
-import type { WorkerOptions } from 'node:worker_threads';
+import { ManagedWorkerHandle } from './managed_worker';
+import type { ManagedWorker, ManagedWorkerOptions } from './managed_worker';
 
-/** Internal worker creation contract; consumers own worker termination and lifecycle policy. */
+/** Internal managed worker contract; consumers supply policy rather than handling Node workers. */
 export interface InternalThreadsStart {
-  createWorker(filename: string | URL, options?: WorkerOptions): Worker;
+  createWorker<Message>(options: ManagedWorkerOptions<Message>): ManagedWorker;
 }
 
 /** Core's internal worker creation boundary, without pooling or scheduling. */
 export class ThreadsService {
   public start(): InternalThreadsStart {
     return {
-      createWorker: (filename, options) => new Worker(filename, options),
+      createWorker: (options) => new ManagedWorkerHandle(options),
     };
   }
 }
