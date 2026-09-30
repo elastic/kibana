@@ -548,39 +548,8 @@ export const discovery: DatasetConfig['discovery'] = [
     },
     output: {
       expected_ground_truth:
-        'The matching failure logs run at the same steady rate (~4/min) for hours before and after the change point — a chronic background pattern, not a new incident. Correct outcome: the rate aggregate runs after the on-topic sample, the verdict is inconclusive (rate-flat), and the event is inactive at low with the background rate noted in assessment_note — a rate-flat background pattern is verified-not-new, never "plausibly unverified", so it must not stay active at any severity; no topology is attached.',
-      expected_significant_events: [
-        {
-          status: 'inactive',
-          event_id: 'userservice__payment-token-cache-refresh-background',
-          title: 'User service — payment token cache refresh errors at background rate',
-          symptom_hypothesis:
-            'Payment token cache refresh errors occur at a steady background rate, indicating a chronic condition rather than a newly elevated failure.',
-          summary:
-            'Matching failure logs appear at similar pre/post rates around the change point; the mechanism is present but not newly elevated.',
-          severity: 'low',
-          confidence: 0.4,
-          stream_names: ['logs'],
-          signals: [
-            {
-              type: 'detection',
-              stream_name: 'logs',
-              verdict: 'inconclusive',
-              description:
-                'Found: matching failure logs at similar pre/post rates (~4/min). Impact: not a newly elevated failure.',
-              metadata: {
-                detection_id: 'e7c1a2d0-4f3b-5a86-9d21-6b0f5c9e8a44-det',
-                rule_name: 'User Service Payment Token Cache Refresh Errors',
-                rule_uuid: 'e7c1a2d0-4f3b-5a86-9d21-6b0f5c9e8a44',
-                change_point_type: 'non_stationary',
-                p_value: 0.004,
-              },
-            },
-          ],
-          causal_features: [],
-          blast_radius: [],
-        },
-      ],
+        'The matching failure logs run at the same steady rate (~4/min) for hours before and after the change point — a chronic background pattern, not a new incident. Correct outcome: the rate aggregate runs after the on-topic sample, the verdict is inconclusive (rate-flat), and no significant event is created — a rate-flat background pattern is verified-not-new, never "plausibly unverified", so it must not stay active at any severity; no topology is attached.',
+      expected_significant_events: [],
       criteria: [
         {
           id: 'chronic-rate-aggregate-ran',
@@ -594,17 +563,17 @@ export const discovery: DatasetConfig['discovery'] = [
         },
         {
           id: 'chronic-not-promoted-high',
-          text: 'Writes the event as inactive at low (never active at any severity) with a description and assessment_note stating the rate is not newly elevated.',
+          text: 'Does not create a significant event because the rate is not newly elevated (never active at any severity).',
           score: 3,
         },
         {
           id: 'chronic-no-topology-on-inconclusive',
-          text: 'Emits empty causal_features and blast_radius because no signal has verdict=confirms.',
+          text: 'Does not attach topology because no signal has verdict=confirms.',
           score: 2,
         },
         {
           id: 'chronic-description-template',
-          text: 'The signal description follows the background-rate form — names the found failure signature and states the rate is similar pre/post (not a newly elevated failure) — instead of an outage-style Impact.',
+          text: 'Records that the matching failure signature has a similar pre/post rate (not newly elevated), rather than treating it as an outage.',
           score: 1,
         },
       ],
