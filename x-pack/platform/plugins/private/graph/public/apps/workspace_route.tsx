@@ -156,10 +156,6 @@ export const WorkspaceRoute = ({
           nodeLabeller() {
             // console.log(newNodes);
           },
-          changeHandler: () =>
-            storeRef.current?.dispatch(
-              workspaceLayoutChanged(Boolean(workspaceRef.current?.isLayoutRunning()))
-            ),
           topologyChangeHandler: notifyWorkspaceChanged,
           exploreControls,
           layoutController,
