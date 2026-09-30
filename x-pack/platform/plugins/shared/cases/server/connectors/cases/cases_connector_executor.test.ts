@@ -284,6 +284,7 @@ describe('CasesConnectorExecutor', () => {
                       "owner": "cases",
                       "settings": Object {
                         "extractObservables": false,
+                        "extractObservablesSource": "space_default",
                         "syncAlerts": false,
                       },
                       "tags": Array [
@@ -311,6 +312,7 @@ describe('CasesConnectorExecutor', () => {
                       "owner": "cases",
                       "settings": Object {
                         "extractObservables": false,
+                        "extractObservablesSource": "space_default",
                         "syncAlerts": false,
                       },
                       "tags": Array [
@@ -338,6 +340,7 @@ describe('CasesConnectorExecutor', () => {
                       "owner": "cases",
                       "settings": Object {
                         "extractObservables": false,
+                        "extractObservablesSource": "space_default",
                         "syncAlerts": false,
                       },
                       "tags": Array [
@@ -1140,6 +1143,7 @@ describe('CasesConnectorExecutor', () => {
                     "id": "mock-id-4",
                     "owner": "cases",
                     "settings": Object {
+                      "extractObservablesSource": "space_default",
                       "syncAlerts": true,
                     },
                     "severity": "high",
@@ -1366,6 +1370,7 @@ fields: []
             expect(createdCase.settings).toEqual({
               syncAlerts: true,
               extractObservables: true,
+              extractObservablesSource: 'space_default',
             });
             expect(createdCase.assignees).toEqual([{ uid: 'assignee-uid-1' }]);
             expect(actionsClient.get).toHaveBeenCalledWith({ id: 'jira-1' });
@@ -1411,6 +1416,7 @@ fields: []
               expect(casesClientMock.cases.bulkCreate.mock.calls[0][0].cases[0].settings).toEqual({
                 syncAlerts: true,
                 extractObservables: false,
+                extractObservablesSource: 'rule',
               });
             });
 
@@ -1425,6 +1431,7 @@ fields: []
               expect(casesClientMock.cases.bulkCreate.mock.calls[0][0].cases[0].settings).toEqual({
                 syncAlerts: true,
                 extractObservables: true,
+                extractObservablesSource: 'space_default',
               });
             });
           });
