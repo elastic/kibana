@@ -283,4 +283,77 @@ describe('Table', () => {
     // runtime field - composite definition
     expect(showDelete(compositeRuntimeDefinition)).toBe(true);
   });
+
+  // Migrated from: src/platform/test/functional/apps/management/group1/_data_view_create_delete.ts
+  // ('should have expected table headers')
+  describe('column headers', () => {
+    it('should render all 7 expected column headers', async () => {
+      renderTable();
+      await screen.findByText('Elastic');
+      const expectedHeaders = [
+        'Name',
+        'Type',
+        'Format',
+        'Searchable',
+        'Aggregatable',
+        'Excluded',
+        'Actions',
+      ];
+      expect(screen.getAllByRole('columnheader')).toHaveLength(expectedHeaders.length);
+      for (const header of expectedHeaders) {
+        expect(
+          screen.getByRole('columnheader', { name: new RegExp(header, 'i') })
+        ).toBeInTheDocument();
+      }
+    });
+  });
+
+  // Migrated from: src/platform/test/functional/apps/management/group1/_index_pattern_results_sort.ts
+  // ('should sort ascending/descending' for Name and Type columns)
+  describe('sort order', () => {
+    const renderSorted = (direction: 'asc' | 'desc', field: 'displayName' | 'type') =>
+      renderWithI18n(
+        <Table
+          euiTablePersist={{
+            onTableChange: jest.fn(),
+            pageSize: 10,
+            sorting: { sort: { direction, field } },
+          }}
+          deleteField={jest.fn()}
+          editField={jest.fn()}
+          indexPattern={indexPattern}
+          items={items}
+          openModal={overlayServiceMock.createStartContract().openModal}
+          startServices={coreStart}
+        />
+      );
+
+    // Items by displayName: Elastic, conflictingField, customer, noedit, timestamp
+    // 'E' (69) < 'c' (99) in case-sensitive ASCII order.
+    it('should sort ascending by Name — first is Elastic, last is timestamp', async () => {
+      renderSorted('asc', 'displayName');
+      const cells = await screen.findAllByTestId('indexedFieldName');
+      expect(cells[0]).toHaveTextContent('Elastic');
+      expect(cells[cells.length - 1]).toHaveTextContent('timestamp');
+    });
+
+    it('should sort descending by Name — first is timestamp, last is Elastic', async () => {
+      renderSorted('desc', 'displayName');
+      const cells = await screen.findAllByTestId('indexedFieldName');
+      expect(cells[0]).toHaveTextContent('timestamp');
+      expect(cells[cells.length - 1]).toHaveTextContent('Elastic');
+    });
+
+    it('should sort ascending by Type — first field has type date', async () => {
+      renderSorted('asc', 'type');
+      const cells = await screen.findAllByTestId('indexedFieldType');
+      expect(cells[0]).toHaveTextContent('date');
+    });
+
+    it('should sort descending by Type — first field has conflict type', async () => {
+      renderSorted('desc', 'type');
+      const cells = await screen.findAllByTestId('indexedFieldType');
+      expect(cells[0]).toHaveTextContent('text, long');
+    });
+  });
 });

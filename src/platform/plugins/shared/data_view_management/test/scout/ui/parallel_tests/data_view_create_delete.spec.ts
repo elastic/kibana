@@ -172,6 +172,66 @@ spaceTest.describe(
       }
     );
 
+    // Migrated from: src/platform/test/functional/apps/management/group1/_data_view_create_delete.ts
+    // "can display errors" and "correctly validates timestamp after index pattern changes"
+    // Both tests verify that the editor shows a form error when saving with an invalid pattern.
+    // setTitle() is bypassed here because it waits for a valid (matching) pattern.
+
+    spaceTest(
+      'displays a form error when saving a pattern with no matching indices',
+      async ({ pageObjects, page }) => {
+        await spaceTest.step('open the create flyout', async () => {
+          await pageObjects.dataViewsManagement.goto();
+          await pageObjects.dataViewsManagement.openCreateWizard();
+        });
+
+        await spaceTest.step('fill in a pattern that matches no indices', async () => {
+          const titleInput = page.testSubj.locator('createIndexPatternTitleInput');
+          await titleInput.fill('log-fake*');
+          await titleInput
+            .and(page.locator('[data-is-validating="0"]'))
+            .waitFor({ state: 'visible' });
+        });
+
+        await spaceTest.step('click save and verify a form error is shown', async () => {
+          await pageObjects.dataViewEditorFlyout.saveButton.click();
+          await expect(page.locator('.euiFormErrorText')).toBeVisible();
+        });
+
+        await spaceTest.step('close the flyout', async () => {
+          await pageObjects.dataViewEditorFlyout.close();
+        });
+      }
+    );
+
+    spaceTest(
+      'redisplays a validation error when the pattern is changed to one with no matching indices',
+      async ({ pageObjects, page }) => {
+        await spaceTest.step('open the create flyout and enter a valid pattern', async () => {
+          await pageObjects.dataViewsManagement.goto();
+          await pageObjects.dataViewsManagement.openCreateWizard();
+          await pageObjects.dataViewEditorFlyout.setTitle('log*');
+        });
+
+        await spaceTest.step('change the pattern to one with no matching indices', async () => {
+          const titleInput = page.testSubj.locator('createIndexPatternTitleInput');
+          await titleInput.fill('log-fake-*');
+          await titleInput
+            .and(page.locator('[data-is-validating="0"]'))
+            .waitFor({ state: 'visible' });
+        });
+
+        await spaceTest.step('click save and verify a form error is shown', async () => {
+          await pageObjects.dataViewEditorFlyout.saveButton.click();
+          await expect(page.locator('.euiFormErrorText')).toBeVisible();
+        });
+
+        await spaceTest.step('close the flyout', async () => {
+          await pageObjects.dataViewEditorFlyout.close();
+        });
+      }
+    );
+
     spaceTest(
       'can delete a data view and navigate back to the listing page',
       async ({ pageObjects, page }) => {
