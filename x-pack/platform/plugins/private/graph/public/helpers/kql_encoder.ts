@@ -7,14 +7,31 @@
 
 import rison from '@kbn/rison';
 
-import type { Workspace } from '../types';
+import type { Workspace, WorkspaceNode } from '../types';
 
 function escapeQuotes(str: string) {
   return str.replace(/\\/g, '\\\\').replace(/"/g, '\\"');
 }
 
-export function asKQL(workspace: Workspace, joinBy: 'and' | 'or') {
-  const nodes = workspace.returnUnpackedGroupeds(workspace.getSelectedOrAllNodes());
+export function getSelectedOrAllNodes(
+  workspace: Workspace,
+  selectedNodeIds: readonly string[]
+): WorkspaceNode[] {
+  if (selectedNodeIds.length === 0) {
+    return workspace.nodes;
+  }
+  const selectedNodes = selectedNodeIds
+    .map((nodeId) => workspace.nodesMap[nodeId])
+    .filter((node): node is WorkspaceNode => node !== undefined);
+  return workspace.returnUnpackedGroupeds(selectedNodes);
+}
+
+export function asKQL(
+  workspace: Workspace,
+  selectedNodeIds: readonly string[],
+  joinBy: 'and' | 'or'
+) {
+  const nodes = getSelectedOrAllNodes(workspace, selectedNodeIds);
   const clauses = nodes.map(
     (node) => `"${escapeQuotes(node.data.field)}" : "${escapeQuotes(node.data.term)}"`
   );

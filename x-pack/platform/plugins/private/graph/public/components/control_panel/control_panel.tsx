@@ -76,7 +76,10 @@ const ControlPanelComponent = ({
 
   const openUrlTemplate = (template: UrlTemplate) => {
     const url = template.url;
-    const newUrl = url.replace(urlTemplateRegex, template.encoder.encode(workspace!));
+    const newUrl = url.replace(
+      urlTemplateRegex,
+      template.encoder.encode(workspace, selectedNodeIds)
+    );
     window.open(newUrl, '_blank', 'noopener,noreferrer');
   };
 

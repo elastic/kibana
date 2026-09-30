@@ -116,7 +116,6 @@ export interface Workspace {
   clearGraph: () => void;
 
   getQuery(startNodes?: WorkspaceNode[], loose?: boolean): JsonObject;
-  getSelectedOrAllNodes(): WorkspaceNode[];
   getLikeThisButNotThisQuery(startNodes?: WorkspaceNode[]): JsonObject;
 
   /**
