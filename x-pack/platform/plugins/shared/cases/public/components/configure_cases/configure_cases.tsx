@@ -183,7 +183,7 @@ export const ConfigureCasesRedesign: React.FC = React.memo(() => {
 
                 {showExtractObservablesSection && (
                   <SettingsSection
-                    data-test-subj="cases-redesign-extract-observables-section"
+                    data-test-subj="cases-extract-observables-section"
                     title={configureCasesI18n.EXTRACT_OBSERVABLES_DEFAULT_TITLE}
                     description={configureCasesI18n.EXTRACT_OBSERVABLES_DEFAULT_DESC}
                   >

@@ -386,9 +386,7 @@ describe('ConfigureCasesRedesign', () => {
     it('renders the extract observables section and switch checked by default', async () => {
       renderWithTestingProviders(<ConfigureCasesRedesign />);
 
-      expect(
-        await screen.findByTestId('cases-redesign-extract-observables-section')
-      ).toBeInTheDocument();
+      expect(await screen.findByTestId('cases-extract-observables-section')).toBeInTheDocument();
       expect(screen.getByTestId('extract-observables-default-switch')).toHaveAttribute(
         'aria-checked',
         'true'
@@ -481,11 +479,9 @@ describe('ConfigureCasesRedesign', () => {
         wrapperProps: { owner: ['observability'] },
       });
 
-      await screen.findByTestId('cases-redesign-settings-panel');
+      await screen.findByTestId('cases-settings-panel');
 
-      expect(
-        screen.queryByTestId('cases-redesign-extract-observables-section')
-      ).not.toBeInTheDocument();
+      expect(screen.queryByTestId('cases-extract-observables-section')).not.toBeInTheDocument();
       expect(screen.queryByTestId('extract-observables-default-switch')).not.toBeInTheDocument();
     });
 
@@ -494,11 +490,9 @@ describe('ConfigureCasesRedesign', () => {
         wrapperProps: { owner: ['cases'] },
       });
 
-      await screen.findByTestId('cases-redesign-settings-panel');
+      await screen.findByTestId('cases-settings-panel');
 
-      expect(
-        screen.queryByTestId('cases-redesign-extract-observables-section')
-      ).not.toBeInTheDocument();
+      expect(screen.queryByTestId('cases-extract-observables-section')).not.toBeInTheDocument();
       expect(screen.queryByTestId('extract-observables-default-switch')).not.toBeInTheDocument();
     });
   });
