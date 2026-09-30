@@ -104,6 +104,9 @@ describe('remember tool', () => {
     expect(tool.confirmation).toBeUndefined();
     expect(tool.schema.safeParse(params).success).toBe(true);
     expect(tool.schema.safeParse({ ...params, expires_at: null }).success).toBe(true);
+    expect(
+      tool.schema.safeParse({ ...params, expires_at: '2026-10-01T03:00:00+03:00' }).success
+    ).toBe(true);
     expect(tool.schema.safeParse({ ...params, expires_at: '' }).success).toBe(false);
     expect(tool.schema.safeParse({ ...params, type: 'document' }).success).toBe(false);
     expect(tool.schema.shape.aiIndexId.description).toContain(
@@ -253,8 +256,8 @@ describe('remember tool', () => {
     });
   });
 
-  it('uses a caller-supplied expiration instead of the default', async () => {
-    await run({ ...params, expires_at: '2026-10-01T00:00:00.000Z' }, 'conversation-1');
+  it('normalizes a caller-supplied expiration to UTC', async () => {
+    await run({ ...params, expires_at: '2026-10-01T03:00:00+03:00' }, 'conversation-1');
 
     expect(index).toHaveBeenCalledWith(
       expect.objectContaining({

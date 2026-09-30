@@ -54,10 +54,10 @@ const rememberSchema = z.object({
     .max(MAX_KI_ID_LENGTH)
     .optional()
     .describe(
-      'For external calls only: omit unless continuing a memory session using the sessionId returned by an earlier remember call. Do not invent a value. Agent Builder calls ignore this input and use the current conversation ID.'
+      'For MCP calls only: omit unless continuing a memory session using the sessionId returned by an earlier remember call. Do not invent a value. Agent Builder calls ignore this input and use the current conversation ID.'
     ),
   type: memoryTypeSchema.describe(
-    'Use memory.session_fact for a granular fact discovered during a session, or memory.session for a session synthesis'
+    'Use memory.session_fact for a granular fact discovered during a session, or memory.session for a session synthesis. When revising a memory, use its existing type.'
   ),
   title: z.string().min(1).max(MAX_KI_TITLE_LENGTH).describe('A short label for the memory'),
   description: z
@@ -74,13 +74,15 @@ const rememberSchema = z.object({
     .array(z.string().min(1).max(MAX_KI_TAG_LENGTH))
     .max(MAX_KI_TAGS)
     .optional()
-    .describe('Optional lowercase index names, feature areas, or tools associated with the memory'),
+    .describe(
+      'Optional lowercase index names, feature areas, or tools associated with the memory. When revising, omit to preserve existing tags or pass an empty array to clear them.'
+    ),
   expires_at: z.iso
-    .datetime()
+    .datetime({ offset: true })
     .nullable()
     .optional()
     .describe(
-      'Timestamp after which the memory must not be recalled. If omitted, this call sets the expiry to 90 days from now, including when revising an existing memory. Set to null to make the memory non-expiring.'
+      'ISO 8601 timestamp after which the memory must not be recalled. UTC (Z) and numeric timezone offsets are accepted. If omitted, this call sets the expiry to 90 days from now, including when revising an existing memory. Set to null to make the memory non-expiring.'
     ),
 });
 
@@ -118,8 +120,8 @@ export const createRememberTool = ({
     Use memory.session_fact for a granular fact discovered during a session.
     Use memory.session for a synthesis of what was tried, what worked, and what should be done
     differently. Omit id to create a memory; provide an id returned by an earlier call only when
-    deliberately revising that memory. This tool handles session metadata, conversation references,
-    and provenance server-side. For external calls, omit sessionId unless continuing with the
+    deliberately revising that memory. This tool handles session metadata, the conversation
+    reference, and provenance server-side. For MCP calls, omit sessionId unless continuing with the
     sessionId returned by an earlier remember call. Agent Builder calls ignore sessionId and use
     the current conversation ID. Memory expires 90 days after each write by default; provide
     expires_at to choose another time, or null to make it non-expiring.
@@ -244,7 +246,12 @@ export const createRememberTool = ({
           : {}),
         ...(params.expires_at === null
           ? {}
-          : { expires_at: params.expires_at ?? defaultExpiresAt }),
+          : {
+              expires_at:
+                params.expires_at !== undefined
+                  ? new Date(params.expires_at).toISOString()
+                  : defaultExpiresAt,
+            }),
         updated_at: now,
         references: createConversationReferences(conversationId),
         attributes: {
