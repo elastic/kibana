@@ -17,7 +17,7 @@ jest.mock('@kbn/esql-utils', () => ({
 }));
 
 describe('esqlLocatorGetLocation', () => {
-  it('creates the ES|QL ad hoc DataView without fetching field caps', async () => {
+  it('creates the ES|QL ad hoc DataView with fields so TSDB mode can be detected', async () => {
     const dataView = { id: 'esql-mock' };
     (getIndexForESQLQuery as jest.Mock).mockResolvedValue('logs-*');
     (getESQLAdHocDataview as jest.Mock).mockResolvedValue(dataView);
@@ -39,7 +39,6 @@ describe('esqlLocatorGetLocation', () => {
       dataViewsService: dataViews,
       query: 'FROM logs-*',
       http,
-      options: { skipFetchFields: true },
     });
     expect(discoverAppLocator.getLocation).toHaveBeenCalledWith({
       query: { esql: 'FROM logs-*' },
