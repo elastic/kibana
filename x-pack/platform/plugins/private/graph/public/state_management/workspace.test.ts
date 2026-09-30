@@ -20,6 +20,7 @@ import {
   colorSelectedNodes,
   createWorkspaceState,
   deleteSelectedNodes,
+  groupSelectedNodes,
   initializeWorkspace,
   invertNodeSelection,
   registerWorkspaceListeners,
@@ -29,6 +30,7 @@ import {
   submitSearch,
   toggleEdgeSelection,
   toggleNodeSelection,
+  ungroupNode,
   workspaceChanged,
   workspaceInitializedSelector,
 } from './workspace';
@@ -551,6 +553,30 @@ describe('workspace state', () => {
 
     expect(environment.store.getState().workspace.nodeIds).toEqual(['one']);
     expect(environment.store.getState().workspace.blocklistedNodeIds).toEqual([]);
+  });
+
+  it('groups selected top-level nodes and ungroups the children', () => {
+    const environment = createMockGraphStore({});
+    const state = {
+      ...environment.store.getState().workspace,
+      nodesById: {
+        parent: { id: 'parent' },
+        child: { id: 'child' },
+        alreadyGrouped: { id: 'alreadyGrouped', parentId: 'other' },
+      },
+      nodeIds: ['parent', 'child', 'alreadyGrouped'],
+      selectedNodeIds: ['parent', 'child', 'alreadyGrouped'],
+    } as unknown as ReturnType<typeof environment.store.getState>['workspace'];
+    environment.store.dispatch(workspaceChanged(state));
+
+    environment.store.dispatch(groupSelectedNodes('parent'));
+
+    expect(environment.store.getState().workspace.nodesById.child.parentId).toBe('parent');
+    expect(environment.store.getState().workspace.nodesById.alreadyGrouped.parentId).toBe('other');
+    expect(environment.store.getState().workspace.selectedNodeIds).toEqual(['parent']);
+
+    environment.store.dispatch(ungroupNode('parent'));
+    expect(environment.store.getState().workspace.nodesById.child.parentId).toBeUndefined();
   });
 
   it('keeps edge selection single-valued', () => {
