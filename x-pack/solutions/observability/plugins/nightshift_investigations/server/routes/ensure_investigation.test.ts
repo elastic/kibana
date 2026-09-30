@@ -7,13 +7,17 @@
 
 import { ensureInvestigationRoute } from './ensure_investigation';
 
-const { handler } =
+const { handler, params } =
   ensureInvestigationRoute['POST /internal/nightshift/investigations/{id}/_ensure'];
 
 const ensureOrCreate = jest.fn();
 const getInvestigationsClient = jest.fn().mockReturnValue({ ensureOrCreate });
 
 beforeEach(() => jest.clearAllMocks());
+
+it('accepts a request without a body', () => {
+  expect(params?.safeParse({ path: { id: 'exec-1' }, body: null }).success).toBe(true);
+});
 
 it('returns the conversation of a continued investigation', async () => {
   ensureOrCreate.mockResolvedValue('conv-1');

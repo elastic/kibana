@@ -24,9 +24,10 @@ export interface InvestigationAttributes extends InvestigationStructuredOutput {
   concurrency_key?: string;
   created_at: string;
   started_at?: string;
-  completed_at?: string;
+  /** `null` once a settled investigation is reopened. */
+  completed_at?: string | null;
   executed_by?: string;
-  error?: string;
+  error?: string | null;
   conversation_id?: string;
 }
 
@@ -48,9 +49,10 @@ export interface InvestigationPatch extends InvestigationStructuredOutput {
   title?: string;
   status?: InvestigationStatus;
   started_at?: string;
-  completed_at?: string;
+  /** `null` clears the field; a partial update ignores `undefined`. */
+  completed_at?: string | null;
   executed_by?: string;
-  error?: string;
+  error?: string | null;
   conversation_id?: string;
 }
 
