@@ -160,15 +160,18 @@ export const ensureOtlpPort = (endpoint: string): string => {
   try {
     const parsed = new URL(endpoint);
     // URL.port is '' for scheme-default ports, so check the raw string for an explicit port.
-    if (/^https?:\/\/[^/:]+:\d+/.test(endpoint)) return endpoint;
-    const port = parsed.protocol === 'https:' ? '443' : parsed.protocol === 'http:' ? '80' : null;
+    // Handles bracketed IPv6 ([::1]) and case-insensitive schemes (HTTPS://).
+    if (/^https?:\/\/(?:\[[^\]]+\]|[^/:[]+):\d+/i.test(endpoint)) return endpoint;
+    const port =
+      parsed.protocol === 'https:' ? '443' : parsed.protocol === 'http:' ? '80' : null;
     if (!port) return endpoint;
     // URL.hostname is lowercased; use the original authority string to preserve casing.
+    // Stop at /, ?, or # so a bare query (e.g. ?token=abc) is not included in the authority.
     const schemeEnd = endpoint.indexOf('://') + 3;
-    const pathStart = endpoint.indexOf('/', schemeEnd);
-    const originalAuthority =
-      pathStart === -1 ? endpoint.slice(schemeEnd) : endpoint.slice(schemeEnd, pathStart);
-    const rest = pathStart === -1 ? '' : endpoint.slice(pathStart);
+    const afterScheme = endpoint.slice(schemeEnd);
+    const authorityEnd = afterScheme.search(/[/?#]/);
+    const originalAuthority = authorityEnd === -1 ? afterScheme : afterScheme.slice(0, authorityEnd);
+    const rest = authorityEnd === -1 ? '' : afterScheme.slice(authorityEnd);
     return `${endpoint.slice(0, schemeEnd)}${originalAuthority}:${port}${rest}`;
   } catch {
     return endpoint;

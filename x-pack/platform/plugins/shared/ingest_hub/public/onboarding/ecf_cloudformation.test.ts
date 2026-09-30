@@ -480,6 +480,22 @@ describe('ensureOtlpPort()', () => {
     expect(ensureOtlpPort('https://INGEST.EXAMPLE.COM')).toBe('https://INGEST.EXAMPLE.COM:443');
   });
 
+  it('preserves existing port for uppercase scheme', () => {
+    expect(ensureOtlpPort('HTTPS://ingest.example.com:4317')).toBe(
+      'HTTPS://ingest.example.com:4317'
+    );
+  });
+
+  it('preserves existing port for IPv6 bracketed host', () => {
+    expect(ensureOtlpPort('https://[::1]:4317')).toBe('https://[::1]:4317');
+  });
+
+  it('appends port when query immediately follows host (no path slash)', () => {
+    expect(ensureOtlpPort('https://ingest.example.com?token=abc')).toBe(
+      'https://ingest.example.com:443?token=abc'
+    );
+  });
+
   it('returns the original string unchanged when URL is invalid', () => {
     expect(ensureOtlpPort('not-a-url')).toBe('not-a-url');
   });
