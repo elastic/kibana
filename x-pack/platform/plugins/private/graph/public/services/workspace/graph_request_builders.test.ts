@@ -9,6 +9,7 @@ import type { AdvancedSettings, WorkspaceField } from '../../types/app_state';
 import {
   buildExpandExploreRequest,
   buildFillConnectionsRequest,
+  buildIntersectionRequest,
   buildNodeQuery,
   buildSearchExploreRequest,
 } from './graph_request_builders';
@@ -39,6 +40,25 @@ describe('graph request builders', () => {
     expect(buildNodeQuery([user, host])).toEqual({
       bool: {
         should: [{ terms: { user: ['alice'] } }, { terms: { host: ['server-1'] } }],
+      },
+    });
+  });
+
+  it('builds intersection filters from ordered node queries', () => {
+    const firstQuery = { term: { user: 'alice' } };
+    const secondQuery = { term: { host: 'server-1' } };
+
+    expect(buildIntersectionRequest([firstQuery, secondQuery])).toEqual({
+      query: { bool: { should: [firstQuery, secondQuery] } },
+      size: 0,
+      aggs: {
+        all: { global: {} },
+        sources: {
+          filters: { filters: { bg0: firstQuery, bg1: secondQuery } },
+          aggs: {
+            targets: { filters: { filters: { fg0: firstQuery, fg1: secondQuery } } },
+          },
+        },
       },
     });
   });

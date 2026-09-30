@@ -75,6 +75,29 @@ export const buildNodeQuery = (nodes: RequestNode[]): Query => {
   };
 };
 
+export const buildIntersectionRequest = (nodeQueries: Query[]) => {
+  const sourceFilters = Object.fromEntries(
+    nodeQueries.map((query, index) => [`bg${index}`, query])
+  );
+  const targetFilters = Object.fromEntries(
+    nodeQueries.map((query, index) => [`fg${index}`, query])
+  );
+
+  return {
+    query: { bool: { should: nodeQueries } },
+    size: 0,
+    aggs: {
+      all: { global: {} },
+      sources: {
+        filters: { filters: sourceFilters },
+        aggs: {
+          targets: { filters: { filters: targetFilters } },
+        },
+      },
+    },
+  };
+};
+
 export const buildFillConnectionsRequest = (nodeQueries: Query[]) => {
   const filters = Object.fromEntries(nodeQueries.map((query, index) => [index, query]));
 
