@@ -1011,7 +1011,7 @@ const CellActions = React.memo(
             <EuiButtonIcon
               buttonRef={triggerRef}
               color="text"
-              display="empty"
+              display="base"
               iconType="ellipsis"
               size="xs"
               iconSize="s"
