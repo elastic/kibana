@@ -213,6 +213,7 @@ export class ServiceManager {
       spaces,
       agents,
       eventBus: conversationEventBus,
+      conversationEvents,
     });
 
     const runnerFactory = new RunnerFactoryImpl({
@@ -230,6 +231,7 @@ export class ServiceManager {
       conversationService: conversations,
       attachmentsService: attachments,
       renderersService: renderers,
+      conversationEventsService: conversationEvents,
       skillServiceStart: skillsServiceStart,
       pluginsServiceStart: plugins,
       trackingService,

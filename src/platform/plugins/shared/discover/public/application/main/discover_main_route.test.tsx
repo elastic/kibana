@@ -165,6 +165,29 @@ describe('DiscoverMainRoute', () => {
     expect(screen.getByTestId('kbnNoDataPage')).toBeVisible();
   });
 
+  test('renders no data page when a root profile contributes an ad hoc data view but there is no ES data', async () => {
+    const defaultAdHocDataViews = [{ id: 'example-profile-data-view', title: 'my-example-*' }];
+    mockRootProfileState = {
+      ...defaultRootProfileState,
+      getDefaultAdHocDataViews: () => defaultAdHocDataViews,
+    };
+
+    setupComponent({ hasESData: false, hasDataView: false });
+
+    await waitForLoad();
+
+    // The profile contributed its ad hoc data view on this render.
+    expect(discoverServiceMock.data.dataViews.create).toHaveBeenCalledWith(
+      { ...defaultAdHocDataViews[0], managed: true },
+      true
+    );
+
+    // A profile-contributed data view stands in for a missing user data view (see the test above),
+    // but it must not stand in for missing data: over an empty deployment it would only ever return
+    // nothing, so onboarding still has to win.
+    expect(screen.getByTestId('kbnNoDataPage')).toBeVisible();
+  });
+
   test('renders the main app when ES|QL datasets exist but no local ES data or data view', async () => {
     setupComponent({ hasESData: false, hasDataView: false, hasESQLDatasets: true });
 

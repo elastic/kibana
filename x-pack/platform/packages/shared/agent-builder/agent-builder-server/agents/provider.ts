@@ -14,8 +14,8 @@ import type {
   ConverseInput,
   ChatAgentEvent,
   AgentConfigurationOverrides,
-  ConversationAction,
   AgentExecutionMode,
+  AutoApprovedApi,
   ChatEvent,
   ExecutionStatus,
   InteractivityConfig,
@@ -37,6 +37,7 @@ import type {
   SkillsService,
   PluginsService,
   RenderersService,
+  ConversationEventTypesService,
   ToolManager,
   TodoStateManager,
   IFilesystemService,
@@ -97,6 +98,7 @@ export interface ExecuteSubAgentParams {
   parentExecutionId: string;
   prompt: string;
   connectorId?: string;
+  autoApprovedApis?: AutoApprovedApi[];
   abortSignal?: AbortSignal;
 }
 
@@ -111,6 +113,7 @@ export interface CreateSubAgentParams {
   conversationId: string;
   prompt: string;
   connectorId?: string;
+  autoApprovedApis?: AutoApprovedApi[];
   abortSignal?: AbortSignal;
 }
 
@@ -168,8 +171,8 @@ export interface ExperimentalFeatures {
   askUserQuestion: boolean;
   /** Whether the bash tool (and the just-bash runtime) is enabled */
   bash: boolean;
-  /** Whether the HTTP API introspection tools (discover/describe/execute) are enabled */
-  apiTools: boolean;
+  /** Whether the `discover_apis` tool is enabled. */
+  apiDiscovery: boolean;
 }
 
 export interface AgentHandlerContext {
@@ -228,6 +231,13 @@ export interface AgentHandlerContext {
    * runner (treated as no renderers).
    */
   renderers?: RenderersService;
+  /**
+   * Conversation event types service, giving read access to the custom conversation
+   * event types registered in agent builder (used to format stored events for the LLM).
+   * Optional: absent when the context is constructed outside agentBuilder's runner
+   * (custom events are then omitted from the agent context).
+   */
+  conversationEvents?: ConversationEventTypesService;
   /**
    * Skills service to interact with skills.
    */
@@ -398,10 +408,6 @@ export interface AgentParams {
    * These override the stored agent configuration for this execution only.
    */
   configurationOverrides?: AgentConfigurationOverrides;
-  /**
-   * The action to perform: "regenerate" re-executes the last round with original input (requires conversation_id).
-   */
-  action?: ConversationAction;
   /**
    * The execution ID for this run. Used for sub-agent parent tracking.
    */

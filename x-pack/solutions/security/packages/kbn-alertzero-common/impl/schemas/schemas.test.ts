@@ -5,130 +5,150 @@
  * 2.0.
  */
 
+import { SYSTEM_SECURITY_WATCH_IDS } from '../../constants';
+import { createCatalogWatchPlaceholder } from '../watches/watch_helpers';
+import { RULE_TUNING_DEFAULT_EXTRAS } from '../worker_settings';
+import type { Watch } from '.';
 import {
-  MOCK_INVESTIGATIONS,
-  MOCK_PROPOSALS,
-  SKILLS_SEED,
-  WATCHES_SEED,
-  WORKERS_SEED,
-} from '../samples';
-import type { Investigation, Proposal, Watch } from '.';
-import {
-  GetInvestigationResponse,
   GetWatchResponse,
-  ListInvestigationProposalsResponse,
-  ListInvestigationsResponse,
   ListWatchesResponse,
-  WatchSkill,
-  WatchWorker,
+  RuleTuningWorkerExtras,
+  UpdateWorkerRequestBody,
   Worker,
   WorkerSettings,
+  WorkerSettingsWrite,
 } from '.';
 
+// The catalog placeholders are what the watches routes actually return for a not-installed
+// Watch, so they are the right input for the response schemas.
+const CATALOG_WATCHES = SYSTEM_SECURITY_WATCH_IDS.map(createCatalogWatchPlaceholder);
+
 describe('AlertZero schema smoke tests', () => {
-  it('parses seed watches through ListWatchesResponse', () => {
-    const result = ListWatchesResponse.parse({ watches: WATCHES_SEED });
-    expect(result.watches).toHaveLength(5);
+  it('parses catalog watches through ListWatchesResponse', () => {
+    const result = ListWatchesResponse.parse({ watches: CATALOG_WATCHES });
+    expect(result.watches).toHaveLength(SYSTEM_SECURITY_WATCH_IDS.length);
     result.watches.forEach((watch: Watch) => {
       expect(watch.tags).toContain('watch');
       expect(watch.managed).toBe(true);
     });
   });
 
-  it('parses individual seed watches through GetWatchResponse', () => {
-    for (const watch of WATCHES_SEED) {
+  it('parses individual catalog watches through GetWatchResponse', () => {
+    for (const watch of CATALOG_WATCHES) {
       const result = GetWatchResponse.parse({ watch });
       expect(result.watch.id).toBe(watch.id);
     }
   });
 
-  it('parses seed workers through WatchWorker', () => {
-    for (const { lastRunSecondsAgo, ...rest } of WORKERS_SEED) {
-      const result = WatchWorker.parse({
-        ...rest,
-        lastRun: lastRunSecondsAgo == null ? null : new Date().toISOString(),
-      });
-      expect(result.watchIds.length).toBeGreaterThan(0);
-    }
-  });
-
   it('parses a live Worker without Worker-specific settings', () => {
-    const worker = Worker.parse({
-      id: 'system-security-dark-continuous-threat-hunt',
+    const workerBody = {
+      id: 'system-security-hunt-continuous-threat-hunt',
       name: 'Continuous Threat Hunt',
-      watchIds: ['system-security-watch-dark'],
+      watchIds: ['system-security-watch-hunt'],
       enabled: false,
       lastRun: null,
       state: 'paused',
       settings: {
-        workerId: 'system-security-dark-continuous-threat-hunt',
+        workerId: 'system-security-hunt-continuous-threat-hunt',
         autonomy: 'manual',
       },
       settingsRevision: null,
-    });
+      workflowId: null,
+    };
+    const worker = Worker.parse(workerBody);
 
     expect(WorkerSettings.parse(worker.settings)).toEqual(worker.settings);
     expect(worker.settings).toEqual({
-      workerId: 'system-security-dark-continuous-threat-hunt',
+      workerId: 'system-security-hunt-continuous-threat-hunt',
       autonomy: 'manual',
     });
+    expect(worker.workflowId).toBeNull();
+    expect(
+      Worker.parse({ ...workerBody, workflowId: 'opaque-installed-workflow' }).workflowId
+    ).toBe('opaque-installed-workflow');
+    const { workflowId, ...withoutWorkflowId } = workerBody;
+    expect(workflowId).toBeNull();
+    expect(Worker.safeParse(withoutWorkflowId).success).toBe(false);
   });
 
-  it('parses seed skills through WatchSkill', () => {
-    for (const { lastRunSecondsAgo, ...rest } of SKILLS_SEED) {
-      const result = WatchSkill.parse({
-        ...rest,
-        lastRun: lastRunSecondsAgo == null ? null : new Date().toISOString(),
-      });
-      expect(result.watchIds.length).toBeGreaterThan(0);
+  it('rejects unknown top-level settings keys but leaves extras open on the wire', () => {
+    expect(
+      WorkerSettings.safeParse({
+        workerId: 'system-security-dark-continuous-threat-hunt',
+        autonomy: 'manual',
+        unknownField: true,
+      }).success
+    ).toBe(false);
+    expect(WorkerSettingsWrite.safeParse({ analysisWindowDays: 7 }).success).toBe(false);
+
+    // Per-Worker strictness is applied by the complete schema, not the generic wire schema.
+    expect(
+      WorkerSettings.safeParse({
+        workerId: 'system-security-detection-rule-tuning',
+        autonomy: 'manual',
+        scheduleInterval: '2h',
+        extras: RULE_TUNING_DEFAULT_EXTRAS,
+      }).success
+    ).toBe(true);
+    expect(WorkerSettingsWrite.safeParse({ extras: { anything: true } }).success).toBe(true);
+  });
+
+  it('closes the Detection-owned Rule Tuning extras', () => {
+    expect(RuleTuningWorkerExtras.safeParse({}).success).toBe(false);
+    expect(
+      RuleTuningWorkerExtras.safeParse({ ...RULE_TUNING_DEFAULT_EXTRAS, extra: 1 }).success
+    ).toBe(false);
+    expect(RuleTuningWorkerExtras.safeParse(RULE_TUNING_DEFAULT_EXTRAS).success).toBe(true);
+  });
+
+  it.each(['analysisWindowDays', 'fpCountThreshold', 'fpRateThresholdPct'] as const)(
+    'rejects Rule Tuning extras missing %s',
+    (missing) => {
+      const incomplete: Record<string, number> = { ...RULE_TUNING_DEFAULT_EXTRAS };
+      delete incomplete[missing];
+
+      expect(RuleTuningWorkerExtras.safeParse(incomplete).success).toBe(false);
+    }
+  );
+
+  // Each field: a non-integer, one below its floor, one above its ceiling.
+  it.each([
+    ['analysisWindowDays', [7.5, 0, 31]],
+    ['fpCountThreshold', [1.5, 1, 101]],
+    ['fpRateThresholdPct', [50.5, -1, 101]],
+  ] as const)('rejects out-of-range %s', (field, values) => {
+    for (const value of values) {
+      expect(
+        RuleTuningWorkerExtras.safeParse({ ...RULE_TUNING_DEFAULT_EXTRAS, [field]: value }).success
+      ).toBe(false);
     }
   });
 
-  it('keeps worker watch ids within the managed catalog', () => {
-    const watchIds = new Set(WATCHES_SEED.map(({ id }) => id));
-
-    for (const worker of WORKERS_SEED) {
-      for (const watchId of worker.watchIds) {
-        expect(watchIds).toContain(watchId);
-      }
-    }
+  it.each([
+    [2, 100],
+    [100, 0],
+  ])('accepts fpCountThreshold %s and fpRateThresholdPct %s at the bounds', (count, rate) => {
+    expect(
+      RuleTuningWorkerExtras.safeParse({
+        ...RULE_TUNING_DEFAULT_EXTRAS,
+        fpCountThreshold: count,
+        fpRateThresholdPct: rate,
+      }).success
+    ).toBe(true);
   });
 
-  it('keeps skill watch ids within the managed catalog', () => {
-    const watchIds = new Set(WATCHES_SEED.map(({ id }) => id));
-
-    for (const skill of SKILLS_SEED) {
-      for (const watchId of skill.watchIds) {
-        expect(watchIds).toContain(watchId);
-      }
-    }
-  });
-
-  it('parses mock investigations through ListInvestigationsResponse', () => {
-    const result = ListInvestigationsResponse.parse({
-      investigations: MOCK_INVESTIGATIONS,
-      total: MOCK_INVESTIGATIONS.length,
-    });
-    expect(result.total).toBeGreaterThanOrEqual(8);
-    result.investigations.forEach((inv: Investigation) => {
-      expect(inv.template_id).toBe('investigation');
-    });
-  });
-
-  it('parses mock proposals through ListInvestigationProposalsResponse', () => {
-    const result = ListInvestigationProposalsResponse.parse({
-      proposals: MOCK_PROPOSALS,
-      total: MOCK_PROPOSALS.length,
-    });
-    expect(result.proposals.length).toBeGreaterThanOrEqual(8);
-    result.proposals.forEach((prop: Proposal) => {
-      expect(prop.template_id).toBe('proposal');
-    });
-  });
-
-  it('parses investigation detail through GetInvestigationResponse', () => {
-    const investigation = MOCK_INVESTIGATIONS[0];
-    const result = GetInvestigationResponse.parse({ investigation });
-    expect(result.investigation.id).toBe(investigation.id);
+  it('rejects leftover top-level settings fields on the update body', () => {
+    expect(
+      UpdateWorkerRequestBody.safeParse({
+        settingsRevision: 1,
+        autonomyLevel: 'assisted',
+      }).success
+    ).toBe(false);
+    expect(
+      UpdateWorkerRequestBody.safeParse({
+        settingsRevision: 1,
+        settings: { autonomy: 'assisted' },
+      }).success
+    ).toBe(true);
   });
 });

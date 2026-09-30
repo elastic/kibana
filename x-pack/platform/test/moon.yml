@@ -45,9 +45,7 @@ dependsOn:
   - '@kbn/aiops-log-rate-analysis'
   - '@kbn/aiops-test-utils'
   - '@kbn/ml-agg-utils'
-  - '@kbn/share-plugin'
   - '@kbn/tooling-log'
-  - '@kbn/snapshot-restore-plugin'
   - '@kbn/monitoring-plugin'
   - '@kbn/core-saved-objects-base-server-internal'
   - '@kbn/utils'
@@ -111,7 +109,6 @@ dependsOn:
   - '@kbn/embeddable-alerts-table-plugin'
   - '@kbn/synthtrace'
   - '@kbn/streams-schema'
-  - '@kbn/significant-events-schema'
   - '@kbn/evals-common'
   - '@kbn/streams-plugin'
   - '@kbn/content-packs-schema'
@@ -146,7 +143,6 @@ dependsOn:
   - '@kbn/setup-node-env'
   - '@kbn/connector-schemas'
   - '@kbn/es-types'
-  - '@kbn/streamlang'
   - '@kbn/dashboard-plugin'
   - '@kbn/automatic-import-plugin'
   - '@kbn/connector-specs'
@@ -156,9 +152,8 @@ dependsOn:
   - '@kbn/core-spaces-common'
   - '@kbn/deeplinks-analytics'
   - '@kbn/core-user-profile-common'
-  - '@kbn/synthtrace-client'
-  - '@kbn/significant-events-plugin'
   - '@kbn/alerting-v2-schemas'
+  - '@kbn/core-chrome-browser-components'
 tags:
   - test-helper
   - package

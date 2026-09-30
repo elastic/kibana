@@ -20,11 +20,12 @@ import type { PanelResolutionRequestBase } from '../../../resolve_panel';
 /**
  * Lens visualization panel logic.
  *
- * A visualization reaches a dashboard either via `source: 'config'` (its
- * already-resolved Lens config passed by value) or `source: 'request'` (resolved
- * from a natural-language / ES|QL query). This module owns the Lens embeddable
- * identity, the by-value config contract, the vis input schemas (add + edit), and
- * the vis resolution-request contract. The resolver that turns these requests into
+ * A visualization reaches a dashboard via `source: 'attachment'` (an existing
+ * visualization attachment, see `../attachment_source.ts`), `source: 'config'`
+ * (its already-resolved Lens or Vega config passed by value), or
+ * `source: 'request'` (resolved from a natural-language / ES|QL query). This
+ * module owns the Lens embeddable identity, the by-value config contract, the vis
+ * input schemas (add + edit), and the vis resolution-request contract. The resolver that turns these requests into
  * Lens panel content lives in `core/resolvers/vis_panel_resolver.ts`.
  */
 
@@ -49,6 +50,10 @@ export interface VisPanelResolutionRequest extends PanelResolutionRequestBase {
    * renderer.
    */
   renderer?: VisualizationRenderer;
+  /** Keep the panel's existing ES|QL query and column bindings instead of regenerating them. */
+  preserveESQL?: boolean;
+  /** Reauthor the presentation from the chart rules instead of applying only the requested changes. */
+  applyChartRules?: boolean;
 }
 
 const visPanelConfigSchema = z.record(z.string().max(256), z.unknown()).check((ctx) => {
@@ -58,7 +63,7 @@ const visPanelConfigSchema = z.record(z.string().max(256), z.unknown()).check((c
     ctx.issues.push({
       code: 'custom',
       message:
-        'config looks like a whole visualization attachment. Pass only its `visualization` field (a Lens API config, or a Vega `{ spec }` config), not the entire attachment.',
+        'config looks like a whole visualization attachment. If it has an attachment id, use source: "attachment" with that id instead. Otherwise pass only its `visualization` field (a Lens API config, or a Vega `{ spec }` config), not the entire attachment.',
       input: config,
     });
     return;
@@ -88,7 +93,7 @@ const visPanelConfigSchema = z.record(z.string().max(256), z.unknown()).check((c
     ctx.issues.push({
       code: 'custom',
       message:
-        'config is neither a Lens API config (missing a top-level `type`) nor a Vega config (missing `spec`). Pass the `visualization` field read from a visualization attachment.',
+        'config is neither a Lens API config (missing a top-level `type`) nor a Vega config (missing `spec`). To place an existing visualization attachment, use source: "attachment" with its id instead.',
       input: config,
     });
   }
@@ -103,7 +108,7 @@ export const visPanelConfigInputSchema = z.object({
   type: z.literal('vis'),
   grid: panelGridSchema,
   config: visPanelConfigSchema.describe(
-    'Already-resolved visualization config, passed by value from a visualization attachment\'s `visualization` field: either a Lens API config (has a top-level `type`) or a Vega config (`{ spec }`). Do not hand-build a config for a new visualization here — use source: "request" instead.'
+    'Already-resolved visualization config, passed by value: either a Lens API config (has a top-level `type`) or a Vega config (`{ spec }`). Accepted, but not preferred: to place a visualization attachment, use source: "attachment" with its id instead of copying its config here. Do not hand-build a config for a new visualization — use source: "request" instead.'
   ),
 });
 
@@ -123,7 +128,7 @@ const panelRequestBaseSchema = z.object({
     .max(256)
     .optional()
     .describe(
-      '(optional) Index, alias, or datastream to target. If not provided, the tool will attempt to discover the best index to use.'
+      'Exact index, alias, or datastream identified for this panel. Pass it whenever known, because each panel is generated independently without dashboard context. Omit only when the source is unknown and discovery is needed.'
     ),
   esql: z
     .string()
@@ -186,6 +191,18 @@ export const editPanelRequestInputSchema = panelRequestBaseSchema
       .optional()
       .describe(
         '(optional) Change the existing panel to this chart type. Omit it to let the visualization resolver interpret the edit using the existing configuration.'
+      ),
+    preserveESQL: z
+      .boolean()
+      .optional()
+      .describe(
+        '(optional) Set true to keep the existing ES|QL query of the panel instead of regenerating it, e.g. when the edit only changes presentation (title, legend, axes, colors, number formats, thresholds) or chart type. Omit it when the edit changes what the panel measures.'
+      ),
+    applyChartRules: z
+      .boolean()
+      .optional()
+      .describe(
+        '(optional) Lens only. Set true to apply all presentation defaults, replacing custom styling. Omit it to change only the requested settings. Independent of preserveESQL, so enhancement can accompany a query change.'
       ),
   });
 

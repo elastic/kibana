@@ -267,6 +267,7 @@ export const EvalsApp: React.FC<{
           breadcrumbPrefix={breadcrumbPrefix}
         />
         <div style={{ flex: 1, minHeight: 0 }}>
+          <EuiSpacer size="m" />
           <Suspense fallback={<EuiLoadingSpinner size="xl" />}>
             <Routes>
               <Route exact path={ROOT_PATH} component={ExperimentsListPage} />

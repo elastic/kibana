@@ -160,6 +160,7 @@ export const fromSavedObjectTabToSavedSearch = async ({
   jsonModeSettings: tab.jsonModeSettings,
   visContext: tab.visContext, // managed via Redux state now
   controlGroupJson: tab.controlGroupJson, // managed via Redux state now
+  tabTypeState: tab.tabTypeState,
 });
 
 export const fromTabStateToSavedObjectTab = ({
@@ -290,5 +291,6 @@ export const fromSavedSearchToSavedObjectTab = ({
         ? JSON.stringify(tab.attributes.controlGroupState)
         : undefined
       : savedSearch.controlGroupJson,
+    tabTypeState: savedSearch.tabTypeState,
   };
 };

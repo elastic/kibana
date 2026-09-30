@@ -8,6 +8,8 @@
 import { z } from '@kbn/zod/v4';
 import { buildRouteValidationWithZod } from '@kbn/zod-helpers/v4';
 import { i18n } from '@kbn/i18n';
+import type { KibanaRequest } from '@kbn/core/server';
+import { WorkflowsManagementOperationPrivileges } from '@kbn/workflows';
 import {
   API_VERSIONS,
   INTERNAL_API_ACCESS,
@@ -16,10 +18,16 @@ import {
 } from '@kbn/alertzero-common';
 import { ALERTZERO_API_PRIVILEGE_WRITE } from '../../../common/constants';
 import type { RouteDependencies } from '../register_routes';
+import { withAlertZeroEnabled } from '../with_alertzero_enabled';
 
 const UpdateWorkerRequestParams = z.object({
   workerId: z.string().min(1).max(128),
 });
+
+const hasManagedWorkflowUpdatePrivilege = (request: KibanaRequest): boolean =>
+  WorkflowsManagementOperationPrivileges.updateManaged.every(
+    (privilege) => request.authzResult?.[privilege] === true
+  );
 
 export const registerUpdateWorkerRoute = ({
   router,
@@ -34,6 +42,7 @@ export const registerUpdateWorkerRoute = ({
       security: {
         authz: {
           requiredPrivileges: [ALERTZERO_API_PRIVILEGE_WRITE],
+          extendedPrivileges: [...WorkflowsManagementOperationPrivileges.updateManaged],
         },
       },
       summary: 'Update a AlertZero worker and its settings',
@@ -48,8 +57,19 @@ export const registerUpdateWorkerRoute = ({
           },
         },
       },
-      async (_context, request, response) => {
+      withAlertZeroEnabled(async (_context, request, response) => {
         try {
+          if (request.body.enabled !== undefined && !hasManagedWorkflowUpdatePrivilege(request)) {
+            return response.forbidden({
+              body: {
+                message: i18n.translate('xpack.alertzero.workerEnableForbiddenErrorMessage', {
+                  defaultMessage:
+                    'Enabling or disabling a worker requires update access to managed workflows',
+                }),
+              },
+            });
+          }
+
           const { workerId } = request.params;
           const result = await getWorkersService().update(
             workerId,
@@ -76,6 +96,15 @@ export const registerUpdateWorkerRoute = ({
                   message: i18n.translate('xpack.alertzero.workerSettingsRejectedErrorMessage', {
                     defaultMessage: 'Cannot apply {setting} to worker "{workerId}"',
                     values: { setting: result.what, workerId },
+                  }),
+                },
+              });
+            case 'invalid':
+              return response.badRequest({
+                body: {
+                  message: i18n.translate('xpack.alertzero.workerSettingsInvalidErrorMessage', {
+                    defaultMessage: 'Invalid settings for worker "{workerId}": {details}',
+                    values: { details: result.message, workerId },
                   }),
                 },
               });
@@ -121,6 +150,6 @@ export const registerUpdateWorkerRoute = ({
             },
           });
         }
-      }
+      })
     );
 };

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { AvailableConnectorWithId } from '@kbn/gen-ai-functional-testing';
+import type { EvalConnector } from '@kbn/evals';
 import type { HttpHandler } from '@kbn/core/public';
 import type { ToolingLog } from '@kbn/tooling-log';
 import type { Client as EsClient } from '@elastic/elasticsearch';
@@ -29,7 +29,7 @@ evaluate.describe('Rule Creation Worker', { tag: tags.serverless.security.comple
       traceEsClient,
     }: {
       fetch: HttpHandler;
-      connector: AvailableConnectorWithId;
+      connector: EvalConnector;
       log: ToolingLog;
       ruleCreationClient: RuleCreationClient;
       traceEsClient: EsClient;
@@ -39,7 +39,7 @@ evaluate.describe('Rule Creation Worker', { tag: tags.serverless.security.comple
 
       // Trace reachability assertion. A run whose executions carry no traceId — or whose
       // agent tool spans never reach the tracing cluster — silently degrades every
-      // trace-based evaluator (Tool Routing) to N/A, and N/A is not a failure, so the suite
+      // trace-based evaluator (Tool Routing, Trajectory: *) to N/A, and N/A is not a failure, so the suite
       // would still report a pass. Probe once here and fail setup loudly instead.
       //
       // The probe input must be WINNABLE: the managed workflow's quality gate refuses
@@ -59,7 +59,7 @@ evaluate.describe('Rule Creation Worker', { tag: tags.serverless.security.comple
       });
       if (!probe.traceId) {
         throw new Error(
-          'Workflow execution carried no traceId — trace-based evaluators (Tool Routing) would ' +
+          'Workflow execution carried no traceId — trace-based evaluators (Tool Routing, Trajectory: *) would ' +
             'silently score N/A and the suite would report a false pass. This stack is not ' +
             'persisting OTEL trace ids (see #284701); fix the stack, not the suite.'
         );

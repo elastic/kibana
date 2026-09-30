@@ -5,10 +5,12 @@
  * 2.0.
  */
 
+import { httpServerMock } from '@kbn/core/server/mocks';
 import { listActionsTool } from './list_actions_tool';
 import type { ActionsService } from '../services/actions/actions_service';
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 
+const request = httpServerMock.createKibanaRequest();
 const logger = () => ({ error: jest.fn(), warn: jest.fn(), info: jest.fn(), debug: jest.fn() });
 
 const serviceWith = (list: jest.Mock) => ({ list } as Pick<ActionsService, 'list'>);
@@ -18,7 +20,11 @@ const run = async (
   input: { categories?: string[] } = {}
 ) => {
   const tool = listActionsTool(() => service);
-  const result = await tool.handler(input, { logger: logger() } as never);
+  const result = await tool.handler(input, {
+    logger: logger(),
+    request,
+    spaceId: 'space-a',
+  } as never);
   if (!('results' in result)) {
     throw new Error('expected a standard tool result');
   }
@@ -35,19 +41,37 @@ const ACTION = (over: Partial<Record<string, unknown>> = {}) => ({
 describe('listActionsTool', () => {
   it('lists all actions when called without categories', async () => {
     const list = jest.fn().mockResolvedValue({
-      actions: [ACTION(), ACTION({ workflowId: 'a2', name: 'Isolate host', category: 'contain' })],
+      actions: [
+        ACTION({
+          inputSchema: {
+            properties: {
+              actionInput: { type: 'object', properties: { name: { type: 'string' } } },
+            },
+            required: ['actionInput'],
+          },
+        }),
+        ACTION({ workflowId: 'a2', name: 'Isolate host', category: 'contain' }),
+      ],
       total: 2,
     });
     const result = await run(serviceWith(list));
-    expect(list).toHaveBeenCalledWith('default', undefined);
+    expect(list).toHaveBeenCalledWith('space-a', request, undefined);
     expect(result.results[0].type).toBe(ToolResultType.other);
-    expect(result.results[0].data).toMatchObject({ total: 2 });
+    expect(result.results[0].data).toMatchObject({
+      total: 2,
+      actions: [
+        expect.objectContaining({
+          inputSchema: expect.objectContaining({ required: ['actionInput'] }),
+        }),
+        expect.objectContaining({ workflowId: 'a2' }),
+      ],
+    });
   });
 
   it('forwards categories to the service and reports empty results explicitly', async () => {
     const list = jest.fn().mockResolvedValue({ actions: [], total: 0 });
     const result = await run(serviceWith(list), { categories: ['escalate'] });
-    expect(list).toHaveBeenCalledWith('default', ['escalate']);
+    expect(list).toHaveBeenCalledWith('space-a', request, ['escalate']);
     expect(result.results[0].data).toMatchObject({
       total: 0,
       message: 'No actions found in categories: escalate.',

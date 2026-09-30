@@ -66,10 +66,40 @@ describe('addAttachmentStepDefinition', () => {
       origin: undefined,
       description: undefined,
       hidden: undefined,
+      render_inline: undefined,
     });
     expect(result).toEqual({
       output: { attachment_id: 'att-1', type: 'text', current_version: 1 },
     });
+  });
+
+  it('forwards render_inline to the client', async () => {
+    const { create, getAttachmentClient } = createWorkflowStepAttachmentClientMock({
+      create: jest
+        .fn()
+        .mockResolvedValue({ id: 'att-1', type: 'text', current_version: 1, versions: [] }),
+    });
+    const definition = addAttachmentStepDefinition({
+      getAttachmentClient,
+      isExperimentalEnabled: experimentalEnabled,
+    });
+
+    expect(
+      definition.inputSchema.safeParse({
+        conversation_id: 'conv-1',
+        type: 'text',
+        data: {},
+        render_inline: true,
+      }).success
+    ).toBe(true);
+
+    await definition.handler(
+      createStepHandlerContext({
+        input: { conversation_id: 'conv-1', type: 'text', data: {}, render_inline: true },
+      })
+    );
+
+    expect(create).toHaveBeenCalledWith(expect.objectContaining({ render_inline: true }));
   });
 
   it('returns an error when experimental features are disabled', async () => {

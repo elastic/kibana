@@ -14,10 +14,14 @@ import { isEsqlResponseError } from './esql_response_error';
  * Values of the `error_category` label emitted alongside chart-section error
  * reports. `user_input` marks failures caused by what the user typed (e.g. an
  * invalid ES|QL or KQL expression) so incident detection can exclude them from
- * the failure rate without dropping the events themselves.
+ * the failure rate without dropping the events themselves. `resource_limit`
+ * marks failures where Elasticsearch refused the work for capacity reasons
+ * (e.g. a tripped circuit breaker or a saturated thread pool), which needs
+ * sizing or query changes rather than a Kibana fix.
  */
 export const ERROR_CATEGORY = {
   USER_INPUT: 'user_input',
+  RESOURCE_LIMIT: 'resource_limit',
   APPLICATION: 'application',
   UNKNOWN: 'unknown',
 } as const;
@@ -40,6 +44,19 @@ export interface ChartSectionErrorMeta {
  */
 const USER_INPUT_ERROR_TYPES: readonly string[] = ['parsing_exception', 'verification_exception'];
 
+/**
+ * Elasticsearch error types that mean the cluster ran out of a budget rather
+ * than that anything is broken: heap for the circuit breaker, thread-pool
+ * queue slots for a rejected execution. Matched anywhere in the cause chain,
+ * after user-input statuses (400/404) and before the generic status fallback,
+ * since these arrive with a 429 that would otherwise read as an application
+ * failure.
+ */
+const RESOURCE_LIMIT_ERROR_TYPES: readonly string[] = [
+  'circuit_breaking_exception',
+  'es_rejected_execution_exception',
+];
+
 const HTTP_BAD_REQUEST = 400;
 const HTTP_NOT_FOUND = 404;
 
@@ -47,8 +64,8 @@ const HTTP_NOT_FOUND = 404;
  * HTTP statuses that Elasticsearch only returns for something the user
  * typed: a query it cannot parse or resolve (400) or an index pattern that
  * matches nothing (404). Every other status, including the rest of the 4xx
- * range (e.g. 401, 403, 429), is outside the user's control and therefore
- * counted as an application failure.
+ * range (e.g. 401, 403), is outside the user's control and therefore counted
+ * as an application failure unless the cause names a resource limit.
  */
 const USER_INPUT_STATUSES: readonly number[] = [HTTP_BAD_REQUEST, HTTP_NOT_FOUND];
 
@@ -75,7 +92,7 @@ const getSearchErrorAttributes = (error: unknown): IEsErrorAttributes | undefine
  */
 const getErrorCause = (error: unknown): unknown => {
   if (isEsqlResponseError(error)) {
-    return { type: error.type, root_cause: error.rootCause };
+    return { type: error.type, root_cause: error.rootCause, caused_by: error.causedBy };
   }
 
   return getSearchErrorAttributes(error)?.error;
@@ -101,13 +118,30 @@ const collectCauseTypes = (cause: unknown, types: string[] = []): string[] => {
 };
 
 /**
+ * Picks the cause type the classification matched, so a generic wrapper (e.g.
+ * a `circuit_breaking_exception` nested under a `search_phase_execution_exception`)
+ * does not hide the reason behind the failure. Falls back to the outermost type
+ * when nothing in the chain is recognized.
+ */
+const getClassifiedCauseType = (error: unknown): string | undefined => {
+  const causeTypes = collectCauseTypes(getErrorCause(error));
+
+  return (
+    causeTypes.find((type) => RESOURCE_LIMIT_ERROR_TYPES.includes(type)) ??
+    causeTypes.find((type) => USER_INPUT_ERROR_TYPES.includes(type)) ??
+    causeTypes[0]
+  );
+};
+
+/**
  * Extracts the Elasticsearch error type and HTTP status behind a failed
  * chart-section fetch, for use as the `esql_error_type` / `esql_status` APM
- * labels and as the classification input.
+ * labels and as the classification input. The type is read from the cause
+ * chain rather than the outermost error, matching how the category is chosen.
  */
 export const getChartSectionErrorMeta = (error: unknown): ChartSectionErrorMeta => {
   if (isEsqlResponseError(error)) {
-    return { type: error.type, status: error.status };
+    return { type: getClassifiedCauseType(error), status: error.status };
   }
 
   const attributes = getSearchErrorAttributes(error);
@@ -115,10 +149,10 @@ export const getChartSectionErrorMeta = (error: unknown): ChartSectionErrorMeta 
     return {};
   }
 
-  const { error: cause, rawResponse } = attributes;
+  const { rawResponse } = attributes;
 
   return {
-    type: cause?.type,
+    type: getClassifiedCauseType(error),
     // `EsError` does not copy the HTTP `statusCode` off the rejected request,
     // so the Elasticsearch body kept in `rawResponse` is normally the only
     // place a status survives the search interceptor.
@@ -129,18 +163,25 @@ export const getChartSectionErrorMeta = (error: unknown): ChartSectionErrorMeta 
 
 /**
  * Classifies a chart-section error so telemetry can separate user-authored
- * query mistakes from genuine application failures.
+ * query mistakes and cluster resource limits from genuine application
+ * failures.
  */
 export const classifyChartSectionError = (error: unknown): ChartSectionErrorCategory => {
   const { status } = getChartSectionErrorMeta(error);
 
-  if (status !== undefined) {
-    return USER_INPUT_STATUSES.includes(status)
-      ? ERROR_CATEGORY.USER_INPUT
-      : ERROR_CATEGORY.APPLICATION;
+  if (status !== undefined && USER_INPUT_STATUSES.includes(status)) {
+    return ERROR_CATEGORY.USER_INPUT;
   }
 
   const causeTypes = collectCauseTypes(getErrorCause(error));
+  if (causeTypes.some((type) => RESOURCE_LIMIT_ERROR_TYPES.includes(type))) {
+    return ERROR_CATEGORY.RESOURCE_LIMIT;
+  }
+
+  if (status !== undefined) {
+    return ERROR_CATEGORY.APPLICATION;
+  }
+
   if (causeTypes.some((type) => USER_INPUT_ERROR_TYPES.includes(type))) {
     return ERROR_CATEGORY.USER_INPUT;
   }

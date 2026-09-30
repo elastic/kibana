@@ -61,6 +61,7 @@ import {
 import type {
   DiscoverAppState,
   DiscoverInternalState,
+  ExpandedDocCascadePath,
   TabState,
   UpdateESQLQueryActionPayload,
 } from '../types';
@@ -119,6 +120,7 @@ export const updateAppState: InternalStateThunkActionCreator<[AppStatePayload]> 
 type ExpandedDocPayload = TabActionPayload<{
   expandedDoc: DataTableRecord | undefined;
   expandedDocOwner?: string;
+  expandedDocCascadePath?: ExpandedDocCascadePath;
   initialDocViewerTabId?: string;
   initialDocViewerTabState?: object;
   shouldUpdateUrl?: boolean;
@@ -505,7 +507,12 @@ export const transitionFromDataViewToESQL: InternalStateThunkActionCreator<
     const filterQuery = query && isOfQueryType(query) ? query : undefined;
 
     const allFilters = [...(appState.filters ?? []), ...(tabState.globalState?.filters ?? [])];
-    const queryString = getInitialESQLQuery(dataView, filterQuery, allFilters);
+    const hasQuery = Boolean(filterQuery?.query && String(filterQuery.query).trim());
+    const hasFilters = allFilters.length > 0;
+    const queryString =
+      tabState.skipInitialFetch && !hasQuery && !hasFilters
+        ? ''
+        : getInitialESQLQuery(dataView, filterQuery, allFilters);
 
     dispatch(
       updateAppState({

@@ -28,6 +28,7 @@ describe('recordImprovements', () => {
   const run = (overrides: Partial<Parameters<typeof recordImprovements>[0]> = {}) =>
     recordImprovements({
       aiIndexId: 'orders',
+      spaceId: 'default',
       agentRunId: 'run-1',
       signalWindow: SIGNAL_WINDOW,
       signalSpaces: ['default'],
@@ -88,6 +89,13 @@ describe('recordImprovements', () => {
     const second = await run({ agentRunId: 'run-2' });
 
     expect(second.recorded[0].improvement_id).toBe(first.recorded[0].improvement_id);
+  });
+
+  it('scopes the derived id to the space so the same change in two spaces is two improvements', async () => {
+    const first = await run({ spaceId: 'default' });
+    const second = await run({ spaceId: 'marketing' });
+
+    expect(second.recorded[0].improvement_id).not.toBe(first.recorded[0].improvement_id);
   });
 
   it('skips an action the index does not permit and keeps the rest', async () => {

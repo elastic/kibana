@@ -116,7 +116,7 @@ describe('Starred and History queries components', () => {
           name: 'Status',
           render: expect.anything(),
           sortable: false,
-          width: '40px',
+          width: '55px',
         },
         {
           'data-test-subj': 'queryString',
@@ -154,7 +154,7 @@ describe('Starred and History queries components', () => {
           name: 'Status',
           render: expect.anything(),
           sortable: false,
-          width: '40px',
+          width: '55px',
         },
         {
           'data-test-subj': 'queryString',

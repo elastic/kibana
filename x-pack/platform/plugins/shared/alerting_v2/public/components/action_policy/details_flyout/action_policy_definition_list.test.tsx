@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { render, screen, fireEvent } from '@testing-library/react';
+import { render, screen } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
 import { ActionPolicyDefinitionList } from './action_policy_definition_list';
 import type { ActionPolicyDefinitionListProps } from './action_policy_definition_list';
@@ -41,14 +41,17 @@ jest.mock('./destination_row', () => ({
 }));
 
 jest.mock('../labels', () => ({
+  DISPATCH_PER_LABEL: 'Dispatch per',
+  FREQUENCY_LABEL: 'Frequency',
+  GROUP_BY_LABEL: 'Group by',
   getGroupingModeLabel: (mode: string | undefined) => mode ?? 'Not configured',
-  getThrottleStrategyLabel: (strategy: string | undefined) => strategy ?? 'Not configured',
+  getFrequencyLabel: (throttle: { strategy?: string } | null | undefined) =>
+    throttle?.strategy ?? 'Not configured',
 }));
 
 const defaultProps: ActionPolicyDefinitionListProps = {
   policy: {
     description: 'A test description',
-    tags: ['tag-a', 'tag-b'],
     matcher: { tags: ['abc'] },
     grouping_mode: 'per_episode',
     destinations: [
@@ -65,28 +68,11 @@ describe('ActionPolicyDefinitionList', () => {
 
     expect(screen.getByText('Description')).toBeDefined();
     expect(screen.getByText('A test description')).toBeDefined();
-    expect(screen.getByText('Tags')).toBeDefined();
-    expect(screen.getByText('tag-a')).toBeDefined();
     expect(screen.getByText('Matcher')).toBeDefined();
     expect(screen.getByText('Dispatch per')).toBeDefined();
     expect(screen.getByText('Frequency')).toBeDefined();
     expect(screen.getByText('Destinations')).toBeDefined();
     expect(screen.getAllByTestId('mockDestinationRow')).toHaveLength(2);
-  });
-
-  it('renders a expandable list of tags when there are more than one', () => {
-    renderWithI18n(defaultProps);
-
-    expect(screen.getByText('tag-a')).toBeDefined();
-    expect(screen.getByText('+1')).toBeDefined();
-  });
-
-  it('opens the tags popover when the "+N" button is clicked', () => {
-    renderWithI18n(defaultProps);
-
-    fireEvent.click(screen.getByText('+1'));
-
-    expect(screen.getByText('tag-b')).toBeInTheDocument();
   });
 
   it('renders empty values when fields are missing', () => {
@@ -122,9 +108,10 @@ describe('ActionPolicyDefinitionList', () => {
     expect(screen.getAllByTestId('mockDestinationRow')).toHaveLength(2);
   });
 
-  it('renders frequency interval when present', () => {
+  it('renders the frequency label', () => {
     renderWithI18n(defaultProps);
 
-    expect(screen.getByText(/Every 5m/)).toBeDefined();
+    // mock resolves strategy to its key; on_status_change is the fixture strategy
+    expect(screen.getByText('on_status_change')).toBeDefined();
   });
 });

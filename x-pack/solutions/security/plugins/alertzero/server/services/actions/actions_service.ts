@@ -5,8 +5,10 @@
  * 2.0.
  */
 
+import type { KibanaRequest } from '@kbn/core/server';
 import { ACTION_WORKFLOW_TAG, actionMetadataSchema } from '@kbn/workflows/managed';
-import type { WorkflowListDto } from '@kbn/workflows';
+import { ManualTriggerSchema } from '@kbn/workflows';
+import type { JsonSchema, WorkflowListDto } from '@kbn/workflows';
 import type { Logger } from '@kbn/logging';
 import type { ActionCatalogEntry, ListActionsResponse } from '@kbn/alertzero-common';
 import type { WatchWorkflowsManagementClient } from '../watches/watch_workflows_management_client';
@@ -14,6 +16,10 @@ import type { WatchWorkflowsManagementClient } from '../watches/watch_workflows_
 /** Structural subset of WorkflowListItemDto.definition the catalog reads. */
 interface ActionWorkflowDefinition {
   consts?: { actionMetadata?: unknown };
+  triggers?: Array<{
+    type?: string;
+    inputs?: unknown;
+  }>;
 }
 
 const PAGE_SIZE = 100;
@@ -33,7 +39,11 @@ export class ActionsService {
     private readonly logger: Logger
   ) {}
 
-  async list(spaceId: string, categories?: string[]): Promise<ListActionsResponse> {
+  async list(
+    spaceId: string,
+    request: KibanaRequest,
+    categories?: string[]
+  ): Promise<ListActionsResponse> {
     const management = this.getManagement();
     if (!management) {
       throw new Error('Workflows management is not available');
@@ -56,7 +66,8 @@ export class ActionsService {
           // service's `unmanaged` default would filter them all out.
           managedFilter: 'managed',
         },
-        spaceId
+        spaceId,
+        request
       );
       for (const item of response.results) {
         const entry = this.toEntry(item.id, item.definition as ActionWorkflowDefinition | null);
@@ -98,6 +109,7 @@ export class ActionsService {
       return undefined;
     }
     const { name, description, category, impact, approvalPolicy } = parsed.data;
+    const inputSchema = this.readInputSchema(definition);
     return {
       workflowId,
       name,
@@ -105,6 +117,32 @@ export class ActionsService {
       ...(category !== undefined && { category }),
       ...(impact !== undefined && { impact }),
       ...(approvalPolicy !== undefined && { approvalPolicy }),
+      ...(inputSchema !== undefined && { inputSchema }),
     };
+  }
+
+  /**
+   * Reads the JSON Schema the workflow declares on its manual trigger
+   * (`triggers[type=manual].inputs`) and returns it verbatim. The trigger is
+   * parsed with the workflow's own {@link ManualTriggerSchema}: definitions are
+   * validated and normalized by the workflow schema on the way in, and this
+   * guards the defensive path where an unnormalized or stale definition still
+   * carries legacy array-format inputs or a malformed schema — anything that
+   * does not parse yields `undefined` and the entry is returned without
+   * `inputSchema`, so a malformed schema is never published.
+   */
+  private readInputSchema(definition: ActionWorkflowDefinition | null): JsonSchema | undefined {
+    const manualTrigger = definition?.triggers?.find((t) => t.type === 'manual');
+    if (!manualTrigger) {
+      return undefined;
+    }
+    // Parse as a gate only: a successful parse means `inputs` is a well-formed
+    // JSON Schema (or the legacy array format), but the parsed copy strips
+    // unknown keys — the entry publishes the original value, verbatim.
+    if (!ManualTriggerSchema.safeParse(manualTrigger).success) {
+      return undefined;
+    }
+    const { inputs } = manualTrigger;
+    return Array.isArray(inputs) ? undefined : (inputs as JsonSchema);
   }
 }

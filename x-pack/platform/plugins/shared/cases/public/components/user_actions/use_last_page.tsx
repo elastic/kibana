@@ -10,7 +10,7 @@ import { useMemo } from 'react';
 
 import type { CaseUserActionsStats } from '../../containers/types';
 import type { UserActivityParams } from '../user_actions_activity_bar/types';
-import { hasSearchOrAuthorFilter } from '../user_actions_activity_bar/utils';
+import { hasNonTypeActivityFilter } from '../user_actions_activity_bar/utils';
 
 export const useLastPage = ({
   userActivityQueryParams,
@@ -24,13 +24,13 @@ export const useLastPage = ({
       return 1;
     }
 
-    // When searching or filtering by author, `userActionsStats` no longer
+    // When a non-type filter is set, `userActionsStats` no longer
     // reflects the filtered totals, so the split pagination (infinite pages
     // 1..N-1 + a separately fetched last page N) can't be computed from it.
     // Returning 1 here disables the separate last-page fetch and lets the
     // infinite query alone paginate through the filtered results using the
     // `total` returned by the API.
-    if (hasSearchOrAuthorFilter(userActivityQueryParams)) {
+    if (hasNonTypeActivityFilter(userActivityQueryParams)) {
       return 1;
     }
 

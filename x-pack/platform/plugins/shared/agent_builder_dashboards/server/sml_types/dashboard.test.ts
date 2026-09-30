@@ -204,12 +204,15 @@ describe('dashboardSmlType', () => {
         type: 'dashboard',
         title: 'System Overview',
         content: '...',
-        attributes: {
-          id: 'chunk-1',
-          origin: { uri: 'dashboard://dashboard-1' },
-          created_at: '2025-01-01T00:00:00.000Z',
-          updated_at: '2025-01-01T00:00:00.000Z',
-          ingestion_method: 'crawled',
+        id: 'chunk-1',
+        '@timestamp': '2025-01-01T00:00:00.000Z',
+        updated_at: '2025-01-01T00:00:00.000Z',
+        references: [{ uri: 'dashboard://dashboard-1', relation: 'derived_from' }],
+        governance: {
+          provenance: {
+            created_by: { uri: 'crawler://sml', metadata: { ingestion_method: 'crawled' } },
+            updated_by: { uri: 'crawler://sml', metadata: { ingestion_method: 'crawled' } },
+          },
         },
         permissions: {
           kibana: {
@@ -267,12 +270,15 @@ describe('dashboardSmlType', () => {
         type: 'dashboard',
         title: 'API Lens Dashboard',
         content: '...',
-        attributes: {
-          id: 'chunk-2',
-          origin: { uri: 'dashboard://dashboard-2' },
-          created_at: '2025-01-01T00:00:00.000Z',
-          updated_at: '2025-01-01T00:00:00.000Z',
-          ingestion_method: 'crawled',
+        id: 'chunk-2',
+        '@timestamp': '2025-01-01T00:00:00.000Z',
+        updated_at: '2025-01-01T00:00:00.000Z',
+        references: [{ uri: 'dashboard://dashboard-2', relation: 'derived_from' }],
+        governance: {
+          provenance: {
+            created_by: { uri: 'crawler://sml', metadata: { ingestion_method: 'crawled' } },
+            updated_by: { uri: 'crawler://sml', metadata: { ingestion_method: 'crawled' } },
+          },
         },
         permissions: {
           kibana: {

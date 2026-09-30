@@ -12,11 +12,7 @@ import { metaBlockPart } from './part';
 
 /** Declarative `FlyoutTemplate.Header.MetaBlock`. */
 export const MetaBlock = metaBlockPart.createComponent<FlyoutHeaderMetaBlockProps>({
-  resolve: ({ title, children, 'data-test-subj': dataTestSubj }) => ({
-    title,
-    value: children,
-    'data-test-subj': dataTestSubj,
-  }),
+  resolve: ({ children, id, ...blockProps }) => ({ ...blockProps, value: children }),
 });
 
 MetaBlock.displayName = 'FlyoutTemplate.Header.MetaBlock';

@@ -259,6 +259,68 @@ describe('StepIoService', () => {
       expect(service.getDataSetVariables()).toEqual({ foo: 1 });
     });
 
+    describe('getDataSetVariables scoped to parallel branches', () => {
+      const branchFrames = (fanOut: string, branch: number): StackFrame[] => [
+        {
+          stepId: fanOut,
+          nestedScopes: [
+            {
+              nodeId: `enter-${fanOut}`,
+              nodeType: 'enter-parallel',
+              scopeId: branch.toString(),
+            },
+          ],
+        },
+      ];
+      const seedDataSet = (
+        state: WorkflowExecutionState,
+        service: StepIoService,
+        id: string,
+        output: JsonValue,
+        scopeStack: StackFrame[]
+      ) => {
+        state.upsertStep({
+          id,
+          stepId: id,
+          stepType: 'data.set',
+          status: ExecutionStatus.COMPLETED,
+          scopeStack,
+        });
+        service.setStepOutput(id, output);
+      };
+
+      it('hides sibling branch writes and keeps root and earlier fan-out writes', () => {
+        const { state, service } = buildHarness();
+        seedDataSet(state, service, 'root', { who: 'root', rootOnly: 'kept' }, []);
+        seedDataSet(state, service, 'a-0', { who: 'a-0' }, branchFrames('fanOutA', 0));
+        seedDataSet(state, service, 'a-1', { who: 'a-1' }, branchFrames('fanOutA', 1));
+
+        expect(service.getDataSetVariables(branchFrames('fanOutA', 0))).toEqual({
+          who: 'a-0',
+          rootOnly: 'kept',
+        });
+        expect(service.getDataSetVariables(branchFrames('fanOutA', 2))).toEqual({
+          who: 'root',
+          rootOnly: 'kept',
+        });
+        expect(service.getDataSetVariables(branchFrames('fanOutB', 0))).toEqual({
+          who: 'a-1',
+          rootOnly: 'kept',
+        });
+        expect(service.getDataSetVariables()).toEqual({ who: 'a-1', rootOnly: 'kept' });
+      });
+
+      it('invalidates every branch view on a new data.set write', () => {
+        const { state, service } = buildHarness();
+        seedDataSet(state, service, 'a-0', { who: 'first' }, branchFrames('fanOutA', 0));
+        expect(service.getDataSetVariables(branchFrames('fanOutA', 0))).toEqual({ who: 'first' });
+
+        seedDataSet(state, service, 'a-0-again', { who: 'second' }, branchFrames('fanOutA', 0));
+        expect(service.getDataSetVariables(branchFrames('fanOutA', 0))).toEqual({ who: 'second' });
+        expect(service.getDataSetVariables(branchFrames('fanOutA', 1))).toEqual({});
+      });
+    });
+
     it('setStepOutput writes the output through state and records the size', () => {
       const { state, service } = buildHarness();
       // The runtime would write the lifecycle fields first; tests exercise
@@ -1763,6 +1825,137 @@ describe('StepIoService', () => {
       expect(rehydratedIds).toHaveLength(2);
     });
 
+    it('does not rehydrate from template-like text in persisted foreach items', async () => {
+      const workflow: WorkflowYaml = {
+        name: 'Foreach items are not a template source',
+        version: '1',
+        description: 'test',
+        enabled: true,
+        triggers: [],
+        steps: [
+          {
+            name: 'unrelated',
+            type: 'console',
+            with: { message: 'unrelated' },
+          } as ConnectorStep,
+          {
+            name: 'get_active_alerts',
+            type: 'console',
+            with: { message: 'alerts' },
+          } as ConnectorStep,
+          {
+            name: 'foreach_alert',
+            type: 'foreach',
+            foreach: '{{steps.get_active_alerts.output.hits.hits}}',
+            steps: [
+              {
+                name: 'create_new_case',
+                type: 'console',
+                with: { message: 'case' },
+              } as ConnectorStep,
+              {
+                name: 'add_alert_to_case',
+                type: 'console',
+                with: {
+                  message: 'case={{steps.create_new_case.output.id}} alert={{foreach.item._id}}',
+                },
+              } as ConnectorStep,
+            ],
+          },
+        ],
+      };
+      const graph = WorkflowGraph.fromWorkflowDefinition(workflow);
+      const addAlertNode = graph.topologicalOrder
+        .map((nodeId) => graph.getNode(nodeId))
+        .find((n) => n.stepId === 'add_alert_to_case')!;
+
+      const { state, service, stepExecutionRepository } = buildHarness({ evictionMinBytes: 0 });
+      const alertsOutput = { hits: { hits: [{ _id: 'alert-1' }] } };
+      seedCompletedStepWithSize(
+        state,
+        service,
+        'exec-unrelated',
+        'unrelated',
+        { ok: true },
+        1,
+        'connector'
+      );
+      seedCompletedStepWithSize(
+        state,
+        service,
+        'exec-alerts',
+        'get_active_alerts',
+        alertsOutput,
+        1,
+        'connector'
+      );
+      seedCompletedStepWithSize(
+        state,
+        service,
+        'exec-case',
+        'create_new_case',
+        { id: 'case-1' },
+        1,
+        'connector'
+      );
+      seedCompletedStepWithSize(
+        state,
+        service,
+        'exec-decoy',
+        'decoy',
+        { id: 'decoy' },
+        1,
+        'connector'
+      );
+      await service.flushStepChanges();
+      await service.flushStepChanges();
+
+      const scopeStack: StackFrame[] = [
+        {
+          stepId: 'foreach_alert',
+          nestedScopes: [
+            {
+              nodeId: 'enterForeach_foreach_alert',
+              nodeType: 'enter-foreach',
+              scopeId: '0',
+            },
+          ],
+        },
+      ];
+      const foreachExecutionId = buildStepExecutionId(
+        state.getWorkflowExecutionId(),
+        'foreach_alert',
+        []
+      );
+      state.updateWorkflowExecution({ scopeStack });
+      state.upsertStep({
+        id: foreachExecutionId,
+        stepId: 'foreach_alert',
+        stepType: 'foreach',
+        status: ExecutionStatus.RUNNING,
+        state: { index: 0, total: 2 },
+      } as Partial<EsWorkflowStepExecution>);
+      service.setStepInput(foreachExecutionId, {
+        foreach: '{{steps.get_active_alerts.output.hits.hits}}',
+        items: ['{{ steps.decoy.output }}', '{{ steps[variables.name].output }}'],
+      });
+
+      stepExecutionRepository.getStepExecutionsByIds.mockResolvedValue([
+        { id: 'exec-alerts', output: alertsOutput } as unknown as EsWorkflowStepExecution,
+        { id: 'exec-case', output: { id: 'case-1' } } as unknown as EsWorkflowStepExecution,
+      ]);
+
+      await service.prepareForRead({
+        node: addAlertNode,
+        predecessorsResolver: (n) => graph.getAllPredecessors(n.id),
+      });
+
+      const rehydratedIds = stepExecutionRepository.getStepExecutionsByIds.mock.calls[0][0];
+      expect(rehydratedIds).toEqual(expect.arrayContaining(['exec-alerts', 'exec-case']));
+      expect(rehydratedIds).not.toEqual(expect.arrayContaining(['exec-unrelated', 'exec-decoy']));
+      expect(rehydratedIds).toHaveLength(2);
+    });
+
     it('rehydrates outputs referenced by nested active foreach source expressions', async () => {
       const workflow = {
         name: 'Nested foreach source dependencies',
@@ -2586,6 +2779,136 @@ describe('StepIoService', () => {
         service.releaseReadPins('unrelated-exec');
         expect(service.getStepOutput('src-exec')).toBeUndefined();
       });
+    });
+  });
+
+  // The downstream symptom is a `parallel` step's aggregate reading back as
+  // `null` for every step after it. Every branch's `prepareForRead` names the
+  // enclosing parallel step as a rehydration target, so with `concurrency > 1`
+  // the same id is rehydrated more than once in a single tick.
+  describe('rehydration must not clobber a freshly written output', () => {
+    it('keeps an output that was rewritten after being rehydrated twice in one tick', async () => {
+      const { state, service, stepExecutionRepository } = buildHarness({
+        evictionMinBytes: EVICTION_THRESHOLD,
+      });
+      const id = 'exec_parallel';
+      state.upsertStep({ id, stepId: 'fan_out', status: ExecutionStatus.COMPLETED });
+
+      // Get it into the evicted set the ordinary way: a large output, then the
+      // two flush cycles the deferred eviction queue needs.
+      service.setStepOutput(id, null, EVICTION_THRESHOLD * 2);
+      await service.flushStepChanges();
+      await service.flushStepChanges();
+
+      // The step is still running, so its doc carries no aggregate yet.
+      (stepExecutionRepository.getStepExecutionsByIds as jest.Mock).mockResolvedValue([
+        { id, output: null, workflowRunId: 'test-workflow-execution-id' },
+      ]);
+
+      // Two branches in the same tick each name the enclosing parallel step.
+      // Concurrently, not in sequence: that is what `concurrency > 1` means
+      // here, and it is load-bearing. Both calls read `evictedOutputIds`
+      // before either finishes clearing it, so both fetch and both record a
+      // transient for the same id.
+      await Promise.all([service.rehydrateOutputs([id]), service.rehydrateOutputs([id])]);
+
+      // The parallel step then writes its real aggregate. Its own write must
+      // reclaim the id: the transient tracking no longer owns it.
+      const aggregate = { results: [1, 2], total: 2 } as unknown as JsonValue;
+      service.setStepOutput(id, aggregate, 10);
+
+      // A later step needs none of the transients. Before the fix the stale
+      // duplicate entry survived here and released the aggregate, after which
+      // the next read re-fetched the pre-write doc and installed `null`.
+      await service.prepareForRead({
+        node: { id: 'later', stepId: 'later', type: 'atomic' } as never,
+        predecessorsResolver: () => [],
+        consumerId: 'later',
+      });
+
+      expect(service.getStepOutput(id)).toEqual(aggregate);
+    });
+
+    // The ordering the previous test cannot reach: it completes both fetches
+    // before the aggregate is written. Here the fetch is still in flight when
+    // the owner writes, so the response that lands afterwards carries the
+    // pre-write document. Applying it unconditionally would replace the correct
+    // aggregate with the older `null` -- a direct overwrite, independent of the
+    // transient bookkeeping.
+    it('discards a fetch that lands after the owner rewrote the output', async () => {
+      const { state, service, stepExecutionRepository } = buildHarness({
+        evictionMinBytes: EVICTION_THRESHOLD,
+      });
+      const id = 'exec_parallel';
+      state.upsertStep({ id, stepId: 'fan_out', status: ExecutionStatus.COMPLETED });
+      service.setStepOutput(id, null, EVICTION_THRESHOLD * 2);
+      await service.flushStepChanges();
+      await service.flushStepChanges();
+
+      // Hold the read open so the write below lands mid-flight.
+      let releaseRead: (docs: unknown[]) => void = () => {};
+      (stepExecutionRepository.getStepExecutionsByIds as jest.Mock).mockReturnValue(
+        new Promise((resolve) => {
+          releaseRead = resolve as (docs: unknown[]) => void;
+        })
+      );
+
+      const inFlight = service.rehydrateOutputs([id]);
+
+      // The step settles and writes its real aggregate while the fetch is open.
+      const aggregate = { results: [1, 2], total: 2 } as unknown as JsonValue;
+      service.setStepOutput(id, aggregate, 10);
+
+      // Only now does Elasticsearch answer, with the document as it looked
+      // before that write.
+      releaseRead([{ id, output: null, workflowRunId: 'test-workflow-execution-id' }]);
+      await inFlight;
+
+      expect(service.getStepOutput(id)).toEqual(aggregate);
+    });
+
+    // The evicted flag alone cannot carry this one. An output over
+    // `evictionMinBytes` can be written, flushed and evicted AGAIN while a fetch
+    // from before the write is still outstanding, so by the time the response
+    // lands the flag is true for a second, unrelated reason. Applying it then
+    // would install the older value and clear the flag, leaving nothing to
+    // re-fetch the correct one. The per-id write generation is what separates
+    // "same eviction episode" from "a newer value exists".
+    it('discards a stale fetch even when the output was evicted again meanwhile', async () => {
+      const { state, service, stepExecutionRepository } = buildHarness({
+        evictionMinBytes: EVICTION_THRESHOLD,
+      });
+      const id = 'exec_parallel';
+      state.upsertStep({ id, stepId: 'fan_out', status: ExecutionStatus.COMPLETED });
+      service.setStepOutput(id, null, EVICTION_THRESHOLD * 2);
+      await service.flushStepChanges();
+      await service.flushStepChanges();
+
+      let releaseRead: (docs: unknown[]) => void = () => {};
+      (stepExecutionRepository.getStepExecutionsByIds as jest.Mock).mockReturnValue(
+        new Promise((resolve) => {
+          releaseRead = resolve as (docs: unknown[]) => void;
+        })
+      );
+
+      const inFlight = service.rehydrateOutputs([id]);
+
+      // Written large enough to be an eviction candidate once flushed.
+      const aggregate = { results: [1, 2], total: 2 } as unknown as JsonValue;
+      service.setStepOutput(id, aggregate, EVICTION_THRESHOLD * 2);
+
+      // Flush, then the deferred cycle evicts it -- the flag is true again.
+      await service.flushStepChanges();
+      await service.flushStepChanges();
+      expect(service.getStepOutput(id)).toBeUndefined();
+
+      releaseRead([{ id, output: null, workflowRunId: 'test-workflow-execution-id' }]);
+      await inFlight;
+
+      // The stale document must not be installed, and the id must stay evicted
+      // so the next read fetches the aggregate that IS now in Elasticsearch.
+      expect(service.getStepOutput(id)).toBeUndefined();
+      expect(service.hasEvictedOutputs()).toBe(true);
     });
   });
 });
