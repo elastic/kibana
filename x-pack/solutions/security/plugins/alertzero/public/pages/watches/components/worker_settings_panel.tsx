@@ -109,16 +109,10 @@ export const WorkerSettingsPanel = React.memo(function WorkerSettingsPanel({
       align-self: flex-start;
       width: 100%;
       min-width: 0;
-      padding: ${euiTheme.size.base};
+      padding-block: ${euiTheme.size.base};
+      padding-inline-end: ${euiTheme.size.base};
+      padding-inline-start: 0;
       text-align: left;
-    `,
-    [euiTheme]
-  );
-
-  const accordionHeaderActionStyles = useMemo(
-    () => css`
-      align-self: flex-start;
-      padding: ${euiTheme.size.base};
     `,
     [euiTheme]
   );
@@ -182,11 +176,12 @@ export const WorkerSettingsPanel = React.memo(function WorkerSettingsPanel({
           responsive={false}
           wrap={false}
           css={css`
+            width: 100%;
             min-width: 0;
           `}
         >
           <EuiFlexItem grow={false}>
-            <EuiTitle size="xs">
+            <EuiTitle size="s">
               <TitleTag id={titleId} css={{ margin: 0 }}>
                 {name}
               </TitleTag>
@@ -213,6 +208,10 @@ export const WorkerSettingsPanel = React.memo(function WorkerSettingsPanel({
               </EuiBadge>
             </EuiFlexItem>
           ) : null}
+          <EuiFlexItem />
+          <EuiFlexItem grow={false} onClick={stopAccordionToggle} onKeyDown={stopAccordionToggle}>
+            {headerActions}
+          </EuiFlexItem>
         </EuiFlexGroup>
         {description ? (
           <EuiText size="s" color="subdued" css={bandContentStyles.description}>
@@ -225,6 +224,7 @@ export const WorkerSettingsPanel = React.memo(function WorkerSettingsPanel({
 
   const enabledSwitch = (
     <EuiSwitch
+      compressed
       label={settingsI18n.ENABLED_SWITCH_LABEL}
       checked={enabled}
       disabled={controlsDisabled}
@@ -271,7 +271,6 @@ export const WorkerSettingsPanel = React.memo(function WorkerSettingsPanel({
           </EuiText>
         </>
       ) : null}
-      <EuiSpacer size="m" />
       <SettingRow
         label={settingsI18n.AUTONOMY_SECTION_TITLE}
         labelHelp={autonomyIntro}
@@ -358,15 +357,6 @@ export const WorkerSettingsPanel = React.memo(function WorkerSettingsPanel({
           // names, which are not public contract.
           buttonProps={{ css: accordionButtonStyles }}
           arrowProps={{ css: accordionArrowStyles }}
-          extraAction={
-            <div
-              css={accordionHeaderActionStyles}
-              onClick={stopAccordionToggle}
-              onKeyDown={stopAccordionToggle}
-            >
-              {headerActions}
-            </div>
-          }
           data-test-subj={`alertZeroWatchWorkerAccordion-${worker.id}`}
           css={css`
             .alertZeroWorkerAccordion__buttonContent {
@@ -391,16 +381,12 @@ export const WorkerSettingsPanel = React.memo(function WorkerSettingsPanel({
     <EuiPanel hasBorder hasShadow={false} paddingSize="none">
       <div
         css={css`
-          display: flex;
-          align-items: flex-start;
-          gap: ${euiTheme.size.m};
           width: 100%;
           padding: ${euiTheme.size.base};
           border-bottom: ${euiTheme.border.thin};
         `}
       >
-        <div css={{ flex: 1, minWidth: 0 }}>{headerBandContent(`${worker.id}-heading`, 'h2')}</div>
-        <div css={{ flexShrink: 0 }}>{headerActions}</div>
+        {headerBandContent(`${worker.id}-heading`, 'h2')}
       </div>
       <div css={{ padding: euiTheme.size.base }}>{settingsBody}</div>
     </EuiPanel>

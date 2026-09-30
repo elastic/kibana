@@ -947,6 +947,53 @@ describe('Actions Plugin', () => {
           expect(pluginStart.inMemoryConnectors[1].isPreconfigured).toBe(true);
           expect(pluginStart.inMemoryConnectors[1].isDynamic).toBe(true);
         });
+        it('drops inbound events on a dynamic connector when inbound events are disabled', () => {
+          const newDynamicConnector: InMemoryConnector = {
+            id: 'dynamic-slack',
+            actionTypeId: '.slack2',
+            name: 'Slack',
+            config: {},
+            secrets: {},
+            isPreconfigured: true,
+            isDeprecated: false,
+            isSystemAction: false,
+            isConnectorTypeDeprecated: false,
+            isInboundEventsEnabled: true,
+          };
+          expect(pluginStart.registerDynamicConnector(newDynamicConnector)).toEqual(true);
+
+          expect(pluginStart.inMemoryConnectors[1]).not.toHaveProperty('isInboundEventsEnabled');
+        });
+        it('keeps inbound events on a dynamic connector when inbound events are enabled', async () => {
+          setup(
+            getConfig({
+              inboundEvents: {
+                enabled: true,
+                maxBodyBytes: new ByteSizeValue(1024 * 1024),
+                maxEmitted: 25,
+              },
+            })
+          );
+          const enabledPluginSetup = await plugin.setup(coreSetup as any, pluginsSetup);
+          enabledPluginSetup.registerType(serverLogConnectorType);
+          const enabledPluginStart = await plugin.start(coreStart, pluginsStart);
+          const newDynamicConnector: InMemoryConnector = {
+            id: 'dynamic-slack',
+            actionTypeId: '.slack2',
+            name: 'Slack',
+            config: {},
+            secrets: {},
+            isPreconfigured: true,
+            isDeprecated: false,
+            isSystemAction: false,
+            isConnectorTypeDeprecated: false,
+            isInboundEventsEnabled: true,
+          };
+
+          expect(enabledPluginStart.registerDynamicConnector(newDynamicConnector)).toEqual(true);
+
+          expect(enabledPluginStart.inMemoryConnectors[1].isInboundEventsEnabled).toBe(true);
+        });
         it('should not allow adding a dynamic connector for an existing connector id', () => {
           const existingConnector = pluginStart.inMemoryConnectors[0];
 
