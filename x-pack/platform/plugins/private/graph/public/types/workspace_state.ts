@@ -96,12 +96,6 @@ export interface Workspace {
   expandSelecteds: (targetOptions: TargetOptions) => {};
   deleteSelection: () => void;
   blocklistSelection: () => void;
-  selectAll: () => void;
-  selectNone: () => void;
-  selectInvert: () => void;
-  selectNeighbours: () => void;
-  deselectNode: (node: WorkspaceNode) => void;
-  colorSelected: (color: string) => void;
   groupSelections: (node: WorkspaceNode | undefined) => void;
   ungroup: (node: WorkspaceNode | undefined) => void;
   callElasticsearch: (request: any) => void;
@@ -115,7 +109,6 @@ export interface Workspace {
     callback: (termIntersects: TermIntersect[]) => void,
     nodes: WorkspaceNode[]
   ) => void;
-  toggleNodeSelection: (node: WorkspaceNode) => boolean;
   mergeIds: (term1: string, term2: string) => void;
   changeHandler: () => void;
   unblockNode: (node: BlockListedNode) => void;
@@ -149,9 +142,7 @@ export interface Workspace {
   isLayoutRunning(): boolean;
 
   addEdgeToSelection(edge: WorkspaceEdge): void;
-  removeEdgeFromSelection(edge: WorkspaceEdge): void;
   clearEdgeSelection(): void;
-  getEdgeSelection(): WorkspaceEdge[];
 }
 
 export type ExploreRequest = any;

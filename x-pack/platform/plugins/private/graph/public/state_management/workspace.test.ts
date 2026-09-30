@@ -108,6 +108,7 @@ describe('workspace state', () => {
     };
     const edge = {
       id: 'edge',
+      isSelected: true,
       source: parent,
       target: child,
       topSrc: parent,
