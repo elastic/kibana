@@ -6,7 +6,7 @@
  */
 
 import d3 from 'd3';
-import type { WorkspaceEdge, WorkspaceNode } from '../../types';
+import type { WorkspaceEdge, WorkspaceLayoutController, WorkspaceNode } from '../../types';
 
 interface GraphLayoutControllerOptions {
   getNodes: () => WorkspaceNode[];
@@ -14,7 +14,7 @@ interface GraphLayoutControllerOptions {
   onTick?: () => void;
 }
 
-export class GraphLayoutController {
+export class GraphLayoutController implements WorkspaceLayoutController {
   private force: ReturnType<typeof d3.layout.force> | null = null;
 
   constructor(private readonly options: GraphLayoutControllerOptions) {}
