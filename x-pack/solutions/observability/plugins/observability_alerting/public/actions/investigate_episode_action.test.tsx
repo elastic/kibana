@@ -71,11 +71,11 @@ const makeNativeEpisode = (episodeId = 'v2-ep-1'): AlertEpisode =>
 const ebtProps = {
   investigateEbtProps: {
     'data-ebt-action': 'startInvestigation',
-    'data-ebt-element': 'alertingV2InboxRowActions',
+    'data-ebt-element': 'episodesTableRowActions',
   },
   viewInvestigationEbtProps: {
     'data-ebt-action': 'viewInvestigation',
-    'data-ebt-element': 'alertingV2InboxRowActions',
+    'data-ebt-element': 'episodesTableRowActions',
   },
 };
 
@@ -152,7 +152,7 @@ describe('createInvestigateEpisodeAction', () => {
 
     const button = screen.getByTestId('investigateAlert');
     expect(mockUseInvestigateAlert).toHaveBeenCalledWith(
-      expect.objectContaining({ ebtElement: 'alertingV2InboxRowActions' })
+      expect.objectContaining({ ebtElement: 'episodesTableRowActions' })
     );
     expect(button).toHaveAttribute('data-ebt-action', 'startInvestigation');
     expect(button).toBeInTheDocument();
@@ -177,7 +177,7 @@ describe('createInvestigateEpisodeAction', () => {
     );
 
     expect(mockUseInvestigateAlert).toHaveBeenCalledWith(
-      expect.objectContaining({ ebtElement: 'alertingV2InboxFlyoutActions' })
+      expect.objectContaining({ ebtElement: 'alertDetailsFlyoutActions' })
     );
   });
 

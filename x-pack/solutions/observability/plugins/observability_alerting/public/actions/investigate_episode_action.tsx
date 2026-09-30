@@ -58,7 +58,7 @@ export const InvestigateEpisodeMenuItem = ({
   } = useInvestigateAlert({
     alertId,
     ebtElement:
-      surface === 'details_flyout' ? 'alertingV2InboxFlyoutActions' : 'alertingV2InboxRowActions',
+      surface === 'details_flyout' ? 'alertDetailsFlyoutActions' : 'episodesTableRowActions',
     enabled: Boolean(alertId),
     onInvestigate: onSuccess,
   });

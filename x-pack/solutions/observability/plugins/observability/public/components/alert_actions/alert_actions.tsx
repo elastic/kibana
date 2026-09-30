@@ -55,7 +55,7 @@ function InvestigateAlertActionItem({
     markInvestigationViewed,
   } = useInvestigateAlert({
     alertId,
-    ebtElement: 'observabilityAlertsTableRowActions',
+    ebtElement: 'alertsTableRowActions',
     enabled,
     onInvestigate: onActionExecuted,
   });

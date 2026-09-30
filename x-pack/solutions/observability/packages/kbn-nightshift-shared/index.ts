@@ -103,5 +103,3 @@ export {
   hasMultipleSourceIndices,
   validateSourceQuery,
 } from './src/sources/validate_source_query';
-
-export { NIGHTSHIFT_EBT_ACTIONS } from './src/ebt_constants';

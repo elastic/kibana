@@ -5,7 +5,31 @@
  * 2.0.
  */
 
-export { NIGHTSHIFT_EBT_ACTIONS } from '@kbn/nightshift-shared';
+import { EBT_CLICK_ACTIONS } from '@kbn/ebt-click';
+
+export const NIGHTSHIFT_EBT_ACTIONS = {
+  CLEAR_IMPACTED_SERVICES_FILTER: 'clearImpactedServicesFilter',
+  CLOSE_FLYOUT: 'closeFlyout',
+  CLOSE_SIGNIFICANT_EVENT: 'closeSignificantEvent',
+  COLLAPSE_IMPACTED_SERVICES: 'collapseImpactedServices',
+  COLLAPSE_DETECTIONS: 'collapseDetections',
+  EXPAND_IMPACTED_SERVICES: 'expandImpactedServices',
+  EXPAND_DETECTIONS: 'expandDetections',
+  FILTER_BY_IMPACTED_SERVICES: 'filterByImpactedServices',
+  OPEN_IN_CHAT: 'openInChat',
+  OPEN_START_INVESTIGATION: 'openStartInvestigation',
+  RETRY_INVESTIGATIONS: 'retryInvestigations',
+  SHOW_MORE_INVESTIGATIONS: 'showMoreInvestigations',
+  START_INVESTIGATION: EBT_CLICK_ACTIONS.START_INVESTIGATION,
+  VIEW_ALL_SIGNIFICANT_EVENTS: 'viewAllSignificantEvents',
+  VIEW_DETECTION: 'viewDetection',
+  VIEW_ENTITY: 'viewEntity',
+  VIEW_INVESTIGATION: EBT_CLICK_ACTIONS.VIEW_INVESTIGATION,
+  VIEW_MANAGEMENT: 'viewManagement',
+  VIEW_SETTINGS: 'viewSettings',
+  VIEW_SIGNIFICANT_EVENT: 'viewSignificantEvent',
+  VIEW_SIGNIFICANT_EVENTS: 'viewSignificantEvents',
+} as const;
 
 export const NIGHTSHIFT_EBT_ELEMENTS = {
   IMPACTED_SERVICES: 'nightshiftImpactedServices',

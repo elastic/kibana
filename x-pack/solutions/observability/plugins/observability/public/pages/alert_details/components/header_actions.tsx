@@ -185,7 +185,7 @@ export function HeaderActions({
     markInvestigationViewed,
   } = useInvestigateAlert({
     alertId,
-    ebtElement: 'observabilityAlertDetailsActions',
+    ebtElement: 'alertDetailsPageActions',
     enabled: isPopoverOpen,
     onInvestigate: () => setIsPopoverOpen(false),
   });
