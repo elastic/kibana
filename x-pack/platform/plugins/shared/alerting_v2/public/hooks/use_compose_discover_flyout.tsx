@@ -26,8 +26,8 @@ import React, { useCallback, useMemo, useState } from 'react';
 import type { RuleApiResponse } from '../services/rules_api';
 import { CreateActionPolicyFormFlyout } from '../components/action_policy/form_flyout/create_action_policy_form_flyout';
 import { useBuilderToEsqlTransition } from './use_builder_to_esql_transition';
+import { useCreateActionPolicyDisabledReason } from './use_create_action_policy_disabled_reason';
 import { useCreateRule } from './use_create_rule';
-import { useIsActionPoliciesLicenseValid } from './use_is_action_policies_license_valid';
 import { useUpdateRule } from './use_update_rule';
 
 const templateToSyntheticRule = (template: RuleTemplateResponse): RuleApiResponse => ({
@@ -68,7 +68,7 @@ export const useComposeDiscoverFlyout = ({
     | DashboardStart
     | undefined;
   const cps = useService(PluginStart('cps'), { optional: true }) as CPSPluginStart | undefined;
-  const canCreateActionPolicy = useIsActionPoliciesLicenseValid();
+  const createActionPolicyDisabledReason = useCreateActionPolicyDisabledReason();
 
   const [flyoutOpen, setFlyoutOpen] = useState(false);
   const [flyoutMode, setFlyoutMode] = useState<ComposeDiscoverMode>('create');
@@ -115,7 +115,7 @@ export const useComposeDiscoverFlyout = ({
       esqlEditorActionsProvider: EsqlEditorActionsProvider,
       esqlEditorActionsRegister: EsqlEditorActionsRegister,
       createActionPolicyFormFlyout: CreateActionPolicyFormFlyout,
-      canCreateActionPolicy,
+      createActionPolicyDisabledReason,
     }),
     [
       http,
@@ -129,7 +129,7 @@ export const useComposeDiscoverFlyout = ({
       uiActions,
       dashboard,
       cps,
-      canCreateActionPolicy,
+      createActionPolicyDisabledReason,
     ]
   );
 
