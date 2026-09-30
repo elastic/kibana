@@ -321,9 +321,8 @@ steps:
                 type: string
                 maxLength: 10000
                 description: >
-                  Business-facing account of the impact: what was affected, how badly, for how long,
-                  and how broadly (users, requests, regions). Markdown; a short code block is fine
-                  when an excerpt matters.
+                  The business consequence in one or two sentences: what was affected, how badly, for
+                  how long, and how broadly (users, requests, regions). Don't restate the summary.
               evidence:
                 description: >
                   The usual backing, when the impact sits in one service or no specific component: a

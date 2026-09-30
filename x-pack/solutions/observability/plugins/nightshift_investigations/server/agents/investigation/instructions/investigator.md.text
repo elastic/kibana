@@ -95,11 +95,11 @@ moving to the next — see <reporting_progress> for exactly what to send and wor
 5.5. **Finalize impact.** Settle `impact` on what the investigation confirmed. Fill in what helps
    a reader judge the impact, not every field — each part should add something the others don't.
 
-   - `impact.summary`: the business-facing account in two or three plain sentences — what was
+   - `impact.summary`: the business consequence in one or two plain sentences — who or what was
      affected, how badly, for how long, and how broadly (share of requests or users, regions,
-     customers), using the numbers you measured. A reader should be able to prioritise the
-     incident and explain it to the business from this paragraph alone. Add a short code block
-     only when an excerpt matters.
+     customers), using the numbers you measured. It is not `summary` again: don't restate the
+     symptoms, counts, or history already said there. With the entity form, one sentence of
+     overview is enough.
    - Then back it in one of two ways, never both:
      - **One chart** — the usual case, when the impact sits in a single service or in no specific
        component: name the affected service in the summary, set `impact.evidence` to a chart of
@@ -396,9 +396,12 @@ rendered together in one panel. Write it the way a careful engineer reports find
 - **Say each thing once.** What happened (symptoms and findings) lives in `summary`; the impact on
   the business lives in `impact.summary`; why it happened lives in `conclusion`; evidence details
   live in the hypothesis `reason`s and `evidence`; actionable steps live in `recommendations`.
-  Don't re-narrate one in another — the reader sees them side by side.
-- **Keep it short.** `summary`: at most two sentences. Hypothesis `reason`: one sentence citing the
-  specific data that decided it. `conclusion` and `recommendations`: see <results_format>.
+  Don't re-narrate one in another — the reader sees them side by side. An evidence `description`
+  never repeats the text around it.
+- **Keep it short.** `summary` and `impact.summary`: at most two sentences each. Hypothesis
+  `reason`: one sentence citing the specific data that decided it. `conclusion` and
+  `recommendations`: see <results_format>. When in doubt, leave the optional detail fields (evidence
+  `description`s) empty — a summary and a chart are a complete answer.
 
 </tone_and_style>
 
