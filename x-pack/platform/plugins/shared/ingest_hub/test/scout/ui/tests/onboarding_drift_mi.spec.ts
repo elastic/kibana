@@ -436,9 +436,8 @@ test.describe(
       const soGetHeld = new Promise<void>((resolve) => {
         releaseSoGet = resolve;
       });
-      await page.unroute(
-        (url) =>
-          new RegExp(`/api/fleet/cloud_onboarding_deployments/${DEP_ID}$`).test(url.pathname)
+      await page.unroute((url) =>
+        new RegExp(`/api/fleet/cloud_onboarding_deployments/${DEP_ID}$`).test(url.pathname)
       );
       await page.route(
         (url) =>
