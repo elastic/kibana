@@ -137,9 +137,7 @@ const ControlPanelComponent = ({
       {control === 'drillDowns' && (
         <DrillDowns urlTemplates={urlTemplates} openUrlTemplate={openUrlTemplate} />
       )}
-      {control === 'style' && workspace.selectedNodes.length > 0 && (
-        <SelectStyle workspace={workspace} colors={colors} />
-      )}
+      {control === 'style' && workspace.selectedNodes.length > 0 && <SelectStyle colors={colors} />}
       {control === 'editLabel' && selectedNode && (
         <SelectedNodeEditor workspace={workspace} selectedNode={selectedNode} />
       )}
