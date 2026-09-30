@@ -243,22 +243,38 @@ describe('installAutomationTemplateHandler', () => {
     );
   });
 
-  it('skips reinstall of targeted_ki_writer when already attached', async () => {
-    getWorkflow.mockResolvedValue({
-      id: 'wf-ki-writer',
-      name: 'Targeted KI writer automation',
-      tags: [AUTOMATION_TEMPLATE_TAGS.targeted_ki_writer],
+  it('renders the targeted_ki_writer with the provided kis and attaches it', async () => {
+    const kisYaml = `- ki_id: constraint-foo\n  ki:\n    type: constraint\n    title: "Foo constraint"\n    description: "desc"\n    content: "content"\n    tags:\n      - constraint\n    references:\n      - uri: index://foo\n        relation: derived_from`;
+
+    await installAutomationTemplateHandler({
+      params: { template: 'targeted_ki_writer', kis: kisYaml },
+      ...createDeps([]),
     });
 
+    const yaml = saveAutomationHandlerMock.mock.calls[0][0].params.workflowYaml;
+    expect(yaml).toContain(AUTOMATION_TEMPLATE_TAGS.targeted_ki_writer);
+    expect(yaml).toContain('ki_id: constraint-foo');
+  });
+
+  it('overwrites targeted_ki_writer when already attached', async () => {
+    getWorkflow.mockResolvedValue({
+      id: 'wf-ki-writer',
+      name: 'Targeted KI writer',
+      tags: [AUTOMATION_TEMPLATE_TAGS.targeted_ki_writer],
+    });
+    const kisYaml = `- ki_id: constraint-foo\n  ki:\n    type: constraint\n    title: "T"\n    description: "D"\n    content: "C"\n    tags:\n      - constraint\n    references:\n      - uri: index://foo\n        relation: derived_from`;
+
     const result = await installAutomationTemplateHandler({
-      params: { template: 'targeted_ki_writer' },
+      params: { template: 'targeted_ki_writer', kis: kisYaml },
       ...createDeps([{ type: 'workflow', value: 'wf-ki-writer' }]),
     });
 
-    expect(result.skipped).toBe(true);
-    expect(result.replaced).toBe(false);
-    expect(result.workflowId).toBe('wf-ki-writer');
-    expect(saveAutomationHandlerMock).not.toHaveBeenCalled();
+    expect(result.replaced).toBe(true);
+    expect(saveAutomationHandlerMock).toHaveBeenCalledWith(
+      expect.objectContaining({
+        params: expect.objectContaining({ workflowId: 'wf-ki-writer' }),
+      })
+    );
   });
 
   it('does not create a second automation when reading an attached workflow fails', async () => {

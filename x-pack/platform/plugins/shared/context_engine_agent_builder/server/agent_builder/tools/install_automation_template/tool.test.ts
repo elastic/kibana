@@ -125,14 +125,27 @@ describe('install_automation_template schema', () => {
     ).toBe(false);
   });
 
-  it('accepts targeted_ki_writer with no extra fields', () => {
-    const parsed = schema.safeParse({ template: 'targeted_ki_writer' });
+  it('accepts targeted_ki_writer with a kis string', () => {
+    const parsed = schema.safeParse({
+      template: 'targeted_ki_writer',
+      kis: '- ki_id: foo\n  ki:\n    type: constraint\n    title: "T"\n    description: "D"\n    content: "C"\n    tags:\n      - constraint\n    references:\n      - uri: index://foo\n        relation: derived_from',
+    });
 
     expect(parsed.success).toBe(true);
   });
 
+  it('rejects targeted_ki_writer without kis', () => {
+    const parsed = schema.safeParse({ template: 'targeted_ki_writer' });
+
+    expect(parsed.success).toBe(false);
+  });
+
   it('rejects targeted_ki_writer with sourceIndex', () => {
-    const parsed = schema.safeParse({ template: 'targeted_ki_writer', sourceIndex: 'my-index' });
+    const parsed = schema.safeParse({
+      template: 'targeted_ki_writer',
+      sourceIndex: 'my-index',
+      kis: '- ki_id: foo\n  ki:\n    type: constraint\n    title: "T"\n    description: "D"\n    content: "C"\n    tags:\n      - constraint\n    references:\n      - uri: index://foo\n        relation: derived_from',
+    });
 
     expect(parsed.success).toBe(false);
   });

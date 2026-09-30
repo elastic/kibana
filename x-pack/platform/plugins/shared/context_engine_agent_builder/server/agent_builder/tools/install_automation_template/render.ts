@@ -133,11 +133,22 @@ export const renderIndexMetadataTemplate = (values: IndexMetadataTemplateValues)
 
 export interface TargetedKiWriterTemplateValues {
   aiIndexId: string;
+  /**
+   * The KI entries as a YAML-formatted string. Each entry must be a valid `- ki_id: / ki:` block.
+   * Each line is indented 4 spaces (to sit under the `kis:` key at 2-space indent).
+   */
+  kis: string;
 }
 
 export const renderTargetedKiWriterTemplate = (values: TargetedKiWriterTemplateValues): string => {
   assertSafeIdentifier('aiIndexId', values.aiIndexId);
+  // Indent every line of the kis block 4 spaces so it sits under `kis:` in the YAML.
+  const indentedKis = values.kis
+    .split('\n')
+    .map((line) => (line.trim() === '' ? '' : `    ${line}`))
+    .join('\n');
   return replaceTokens(CONTEXT_ENGINE_TARGETED_KI_WRITER_TEMPLATE, {
     __AI_INDEX_ID__: yamlString(values.aiIndexId),
+    __KIS__: indentedKis,
   });
 };

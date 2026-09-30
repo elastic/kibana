@@ -149,24 +149,39 @@ describe('automation template rendering', () => {
   });
 
   describe('targeted_ki_writer template', () => {
-    it('substitutes __AI_INDEX_ID__ and leaves no unreplaced tokens', () => {
-      const yaml = renderTargetedKiWriterTemplate({ aiIndexId: 'my-ai-index' });
+    const kisYaml = [
+      '- ki_id: constraint-foo',
+      '  ki:',
+      '    type: constraint',
+      '    title: "Foo"',
+      '    description: "desc"',
+      '    content: "content"',
+      '    tags:',
+      '      - constraint',
+      '    references:',
+      '      - uri: index://foo',
+      '        relation: derived_from',
+    ].join('\n');
+
+    it('substitutes __AI_INDEX_ID__ and __KIS__, leaves no unreplaced tokens', () => {
+      const yaml = renderTargetedKiWriterTemplate({ aiIndexId: 'my-ai-index', kis: kisYaml });
 
       expect(yaml).toContain('ai_index_id: "my-ai-index"');
       expect(yaml).toContain(AUTOMATION_TEMPLATE_TAGS.targeted_ki_writer);
+      expect(yaml).toContain('ki_id: constraint-foo');
       expect(yaml).not.toMatch(/__[A-Z0-9_]+__/);
     });
 
     it('produces valid YAML', () => {
-      const yaml = renderTargetedKiWriterTemplate({ aiIndexId: 'my-ai-index' });
+      const yaml = renderTargetedKiWriterTemplate({ aiIndexId: 'my-ai-index', kis: kisYaml });
 
       expect(() => parse(yaml)).not.toThrow();
     });
 
     it('rejects an aiIndexId containing a backtick', () => {
-      expect(() => renderTargetedKiWriterTemplate({ aiIndexId: 'my-ai`index' })).toThrow(
-        /aiIndexId/
-      );
+      expect(() =>
+        renderTargetedKiWriterTemplate({ aiIndexId: 'my-ai`index', kis: kisYaml })
+      ).toThrow(/aiIndexId/);
     });
   });
 });

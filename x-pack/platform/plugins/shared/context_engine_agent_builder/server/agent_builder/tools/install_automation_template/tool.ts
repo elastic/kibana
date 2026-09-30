@@ -24,6 +24,7 @@ const MAX_CORPUS_FILTER_LENGTH = 2000;
 const MAX_DOCUMENTS_LIMIT = 10_000;
 const MAX_BODY_CHARS_LIMIT = 50_000;
 const MAX_UNITS_LIMIT = 10_000;
+const MAX_KIS_LENGTH = 50_000;
 
 /**
  * Which arguments belong to which template. Anything listed against another template is rejected
@@ -39,14 +40,14 @@ const TEMPLATE_FIELDS = {
   ],
   index_metadata: ['categoryField'],
   unit_profile: ['unitKey', 'activityField', 'breakdownField', 'maxUnits'],
-  targeted_ki_writer: [],
+  targeted_ki_writer: ['kis'],
 } as const;
 
 const REQUIRED_TEMPLATE_FIELDS = {
   document_orchestration: ['titleField', 'bodyField', 'sourceIndex'],
   index_metadata: ['categoryField', 'sourceIndex'],
   unit_profile: ['unitKey', 'activityField', 'breakdownField', 'sourceIndex'],
-  targeted_ki_writer: [],
+  targeted_ki_writer: ['kis'],
 } as const;
 
 const installAutomationTemplateSchema = z
@@ -54,7 +55,7 @@ const installAutomationTemplateSchema = z
     template: z
       .enum(['document_orchestration', 'index_metadata', 'unit_profile', 'targeted_ki_writer'])
       .describe(
-        'Which automation to install. document_orchestration summarises each document. index_metadata profiles the index. unit_profile writes one profile per recurring unit. targeted_ki_writer installs a manual workflow whose kis array you edit and run yourself.'
+        'Which automation to install. document_orchestration summarises each document. index_metadata profiles the index. unit_profile writes one profile per recurring unit. targeted_ki_writer writes KIs verbatim from the kis parameter you provide.'
       ),
     sourceIndex: z
       .string()
@@ -140,6 +141,21 @@ const installAutomationTemplateSchema = z
       .describe(
         'Upper bound on units profiled in one run. Each costs a model call. unit_profile only. Defaults to 25.'
       ),
+    kis: z
+      .string()
+      .min(1)
+      .max(MAX_KIS_LENGTH)
+      .optional()
+      .describe(
+        dedent`
+          Required for targeted_ki_writer. YAML-formatted list of KI entries. Each entry is a
+          "- ki_id: <id>\\n  ki:\\n    type: <type>\\n    ..." block. Derive ki_id from the finding
+          (field, index, question class), not from a date. Put any ES|QL the KI recommends in
+          attributes.esql so the verifiers run it. Leave attributes.esql out entirely for KIs
+          with no runnable query — never pass an empty list. Use trace://, conversation://, and
+          index:// URIs in references. Never invent an id.
+        `
+      ),
   })
   .superRefine((value, ctx) => {
     for (const field of REQUIRED_TEMPLATE_FIELDS[value.template]) {
@@ -182,7 +198,10 @@ const toInstallParams = (
   input: InstallAutomationTemplateInput
 ): InstallAutomationTemplateParams => {
   if (input.template === 'targeted_ki_writer') {
-    return { template: 'targeted_ki_writer' };
+    if (!input.kis) {
+      throw new Error('kis is required for targeted_ki_writer.');
+    }
+    return { template: 'targeted_ki_writer', kis: input.kis };
   }
 
   if (input.template === 'document_orchestration') {
