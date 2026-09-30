@@ -12,6 +12,7 @@ import { uiSettingsServiceMock } from '@kbn/core-ui-settings-server-mocks';
 import {
   ConversationRoundStatus,
   ConversationRoundStepType,
+  ToolResultType,
   type ConversationRound,
 } from '@kbn/agent-builder-common';
 import { ExecutionStatus } from '@kbn/workflows';
@@ -325,6 +326,60 @@ describe('runAfterExecutionWorkflows', () => {
         const params = executeWorkflowMock.mock.calls[0][0].workflowParams;
         expect(params).toHaveProperty('round_connector_id', 'current-connector');
         expect(params).not.toHaveProperty('workflow_context');
+      });
+
+      describe('tool_results', () => {
+        const toolResults = [
+          { tool_result_id: 'r-1', type: ToolResultType.other, data: { rows: 5000 } },
+        ];
+        const roundWithToolCall = makeRound({
+          steps: [
+            {
+              type: ConversationRoundStepType.toolCall,
+              tool_id: 'my-tool',
+              tool_call_id: 'tc-1',
+              params: { key: 'val' },
+              results: toolResults,
+            },
+          ],
+        });
+
+        it('sends tool call results to a workflow that declares tool_results', async () => {
+          const { workflowApi, getInternalServices } = createDeps({
+            definition: strictDefinition([...legacyInputNames, 'tool_results']),
+          });
+
+          await runAfterExecutionWorkflows({
+            context: createContext({ round: roundWithToolCall }),
+            workflowApi,
+            getInternalServices,
+            logger,
+          });
+
+          const params = executeWorkflowMock.mock.calls[0][0].workflowParams;
+          expect(params.tool_results).toEqual([
+            { tool_id: 'my-tool', tool_call_id: 'tc-1', results: toolResults },
+          ]);
+          expect(params.tool_calls).toEqual([
+            { tool_id: 'my-tool', tool_call_id: 'tc-1', params: { key: 'val' } },
+          ]);
+        });
+
+        it('does not send tool_results to a workflow that does not declare it', async () => {
+          const { workflowApi, getInternalServices } = createDeps({
+            definition: strictDefinition(legacyInputNames),
+          });
+
+          await runAfterExecutionWorkflows({
+            context: createContext({ round: roundWithToolCall }),
+            workflowApi,
+            getInternalServices,
+            logger,
+          });
+
+          const params = executeWorkflowMock.mock.calls[0][0].workflowParams;
+          expect(Object.keys(params).sort()).toEqual([...legacyInputNames].sort());
+        });
       });
 
       it('sends the base inputs and still runs when the workflow cannot be read', async () => {

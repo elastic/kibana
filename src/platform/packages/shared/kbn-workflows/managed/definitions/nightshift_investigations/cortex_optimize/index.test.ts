@@ -30,5 +30,6 @@ describe('cortex optimize workflow', () => {
   // Liquid `{{ }}` would stringify the array, leaving the optimizer with no tool calls to read.
   it('hands the round tool calls to the optimizer as an array', () => {
     expect(workflow.steps[0].with?.tool_calls).toBe('${{ inputs.tool_calls }}');
+    expect(workflow.steps[0].with?.tool_results).toBe('${{ inputs.tool_results }}');
   });
 });

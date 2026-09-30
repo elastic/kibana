@@ -57,11 +57,19 @@ export const runAfterExecutionWorkflows = async ({
   const spaceId = getCurrentSpaceId({ request: context.request, spaces });
   const { round } = context;
 
-  const toolCalls = round.steps.filter(isToolCallStep).map((step: ToolCallStep) => ({
+  const toolCallSteps = round.steps.filter(isToolCallStep);
+  const toolCalls = toolCallSteps.map((step: ToolCallStep) => ({
     tool_id: step.tool_id,
     tool_call_id: step.tool_call_id,
     params: step.params as Record<string, unknown>,
   }));
+  const toolResults = toolCallSteps.map(
+    ({ tool_id: toolId, tool_call_id: toolCallId, results }: ToolCallStep) => ({
+      tool_id: toolId,
+      tool_call_id: toolCallId,
+      results,
+    })
+  );
 
   const roundConnectorId = context.connectorId?.trim() || round.model_usage?.connector_id?.trim();
   const workflowContext = round.steps.find(isPreExecutionWorkflowStep)?.workflow_context;
@@ -76,10 +84,11 @@ export const runAfterExecutionWorkflows = async ({
   };
   const optionalWorkflowParams: Pick<
     AfterExecutionWorkflowParams,
-    'round_connector_id' | 'workflow_context'
+    'round_connector_id' | 'workflow_context' | 'tool_results'
   > = {
     round_connector_id: roundConnectorId || undefined,
     workflow_context: workflowContext,
+    tool_results: toolResults.length > 0 ? toolResults : undefined,
   };
 
   for (const workflowId of workflowIds) {
