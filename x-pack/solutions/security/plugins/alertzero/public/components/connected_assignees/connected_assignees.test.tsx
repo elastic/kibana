@@ -9,16 +9,18 @@ import React from 'react';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { EuiProvider } from '@elastic/eui';
 import { I18nProvider } from '@kbn/i18n-react';
-import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
-import { coreMock } from '@kbn/core/public/mocks';
 import {
   useAssignEscalation,
   useAssignInvestigation,
   useUserProfiles,
   useSuggestUserProfiles,
 } from '@kbn/agentic-investigations-plugin/public';
+import { useAgenticInvestigationsCapabilities } from '../../hooks/use_agentic_investigations_capabilities';
 import { ConnectedAssignees } from './connected_assignees';
+
+jest.mock('../../hooks/use_agentic_investigations_capabilities');
+const mockUseCapabilities = useAgenticInvestigationsCapabilities as jest.Mock;
 
 jest.mock('@kbn/agentic-investigations-plugin/public', () => ({
   ...jest.requireActual('@kbn/agentic-investigations-plugin/public'),
@@ -73,33 +75,28 @@ const investigationMutate = jest.fn().mockResolvedValue({});
 
 const renderPicker = (
   props: Partial<React.ComponentProps<typeof ConnectedAssignees>> & {
-    capabilities?: Record<string, unknown>;
+    capabilities?: { manageEscalations?: boolean; manageInvestigations?: boolean };
   } = {}
 ) => {
   const { capabilities = { manageEscalations: true, manageInvestigations: true }, ...rest } = props;
-  const core = coreMock.createStart();
-  (core.application.capabilities as Record<string, unknown>).agenticInvestigations = capabilities;
+  mockUseCapabilities.mockReturnValue({ showEscalations: true, ...capabilities });
   const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } });
 
   render(
     <I18nProvider>
       <EuiProvider>
-        <KibanaContextProvider services={core}>
-          <QueryClientProvider client={queryClient}>
-            <ConnectedAssignees
-              conversationId="conv-1"
-              templateId="escalation"
-              assigneeUids={[]}
-              status="open"
-              {...rest}
-            />
-          </QueryClientProvider>
-        </KibanaContextProvider>
+        <QueryClientProvider client={queryClient}>
+          <ConnectedAssignees
+            conversationId="conv-1"
+            templateId="escalation"
+            assigneeUids={[]}
+            status="open"
+            {...rest}
+          />
+        </QueryClientProvider>
       </EuiProvider>
     </I18nProvider>
   );
-
-  return { core };
 };
 
 beforeEach(() => {
@@ -107,6 +104,11 @@ beforeEach(() => {
   mockUseAssignInvestigation.mockReturnValue({ mutateAsync: investigationMutate });
   mockUseUserProfiles.mockReturnValue({ data: [], isFetching: false });
   mockUseSuggestUserProfiles.mockReturnValue({ data: [], isLoading: false });
+  mockUseCapabilities.mockReturnValue({
+    showEscalations: true,
+    manageEscalations: true,
+    manageInvestigations: true,
+  });
 });
 
 afterEach(() => jest.clearAllMocks());

@@ -42,6 +42,16 @@ describe('EA_EXECUTION_CONTEXT_NAMES', () => {
     }
   );
 
+  it('ENTITY_RESOLUTION resolves to the exact expected string', () => {
+    expect(EA_EXECUTION_CONTEXT_NAMES.ENTITY_RESOLUTION).toBe('entity_analytics:entity_resolution');
+  });
+
+  it('ENTITY_STORE_MANAGEMENT resolves to the exact expected string', () => {
+    expect(EA_EXECUTION_CONTEXT_NAMES.ENTITY_STORE_MANAGEMENT).toBe(
+      'entity_analytics:entity_store_management'
+    );
+  });
+
   it('RISK_SCORE_MANAGEMENT resolves to the exact expected string', () => {
     expect(EA_EXECUTION_CONTEXT_NAMES.RISK_SCORE_MANAGEMENT).toBe(
       'entity_analytics:risk_score_management'

@@ -95,11 +95,15 @@ export const AiIndexDetailPage = () => {
     history.replace({ ...location, state: undefined });
   }, [location, history]);
 
-  const { summary } = useKiList({
+  const { summary, isLoading: isKiSummaryLoading } = useKiList({
     aiIndexId: aiIndex?.id,
     size: KI_SUMMARY_PAGE_SIZE,
     enabled: aiIndex !== undefined,
+    notifyOnError: true,
   });
+
+  const showKnowledgeIndicatorsTab =
+    aiIndex !== undefined && !isKiSummaryLoading && summary.total > 0;
 
   const { hideEditControls, showAutomationsPanel, showSignalsSection, showSignalsPanel } =
     useAiIndexOverviewSections({
@@ -144,45 +148,45 @@ export const AiIndexDetailPage = () => {
     />
   ) : (
     <>
-      <EuiTabs data-test-subj="contextAiIndexDetailTabs">
-        <EuiTab
-          isSelected={selectedTab === 'overview'}
-          onClick={() => setSelectedTab('overview')}
-          data-test-subj="contextAiIndexDetailTab-overview"
-          {...getEbtProps({
-            element: CONTEXT_ENGINE_UI_EBT.element.aiIndexDetailPage,
-            action: CONTEXT_ENGINE_UI_EBT.action.aiIndexDetail.TAB_OVERVIEW,
-          })}
-        >
-          <FormattedMessage
-            id="xpack.contextEngine.aiIndexDetail.tabs.overview"
-            defaultMessage="Overview"
-          />
-        </EuiTab>
-        <EuiTab
-          isSelected={selectedTab === 'knowledge_indicators'}
-          onClick={() => setSelectedTab('knowledge_indicators')}
-          append={
-            summary.total > 0 ? (
-              <EuiNotificationBadge>{summary.total}</EuiNotificationBadge>
-            ) : undefined
-          }
-          data-test-subj="contextAiIndexDetailTab-knowledge_indicators"
-          {...getEbtProps({
-            element: CONTEXT_ENGINE_UI_EBT.element.aiIndexDetailPage,
-            action: CONTEXT_ENGINE_UI_EBT.action.aiIndexDetail.TAB_KNOWLEDGE_INDICATORS,
-          })}
-        >
-          <FormattedMessage
-            id="xpack.contextEngine.aiIndexDetail.tabs.knowledgeIndicators"
-            defaultMessage="Knowledge Indicators"
-          />
-        </EuiTab>
-      </EuiTabs>
+      {showKnowledgeIndicatorsTab && (
+        <>
+          <EuiTabs data-test-subj="contextAiIndexDetailTabs">
+            <EuiTab
+              isSelected={selectedTab === 'overview'}
+              onClick={() => setSelectedTab('overview')}
+              data-test-subj="contextAiIndexDetailTab-overview"
+              {...getEbtProps({
+                element: CONTEXT_ENGINE_UI_EBT.element.aiIndexDetailPage,
+                action: CONTEXT_ENGINE_UI_EBT.action.aiIndexDetail.TAB_OVERVIEW,
+              })}
+            >
+              <FormattedMessage
+                id="xpack.contextEngine.aiIndexDetail.tabs.overview"
+                defaultMessage="Overview"
+              />
+            </EuiTab>
+            <EuiTab
+              isSelected={selectedTab === 'knowledge_indicators'}
+              onClick={() => setSelectedTab('knowledge_indicators')}
+              append={<EuiNotificationBadge>{summary.total}</EuiNotificationBadge>}
+              data-test-subj="contextAiIndexDetailTab-knowledge_indicators"
+              {...getEbtProps({
+                element: CONTEXT_ENGINE_UI_EBT.element.aiIndexDetailPage,
+                action: CONTEXT_ENGINE_UI_EBT.action.aiIndexDetail.TAB_KNOWLEDGE_INDICATORS,
+              })}
+            >
+              <FormattedMessage
+                id="xpack.contextEngine.aiIndexDetail.tabs.knowledgeIndicators"
+                defaultMessage="Knowledge Indicators"
+              />
+            </EuiTab>
+          </EuiTabs>
 
-      <EuiSpacer size="m" />
+          <EuiSpacer size="m" />
+        </>
+      )}
 
-      {selectedTab === 'overview' && (
+      {(selectedTab === 'overview' || !showKnowledgeIndicatorsTab) && (
         <>
           {showCreatedCallout && (
             <AiIndexCreatedCallout onDismiss={() => setShowCreatedCallout(false)} />
