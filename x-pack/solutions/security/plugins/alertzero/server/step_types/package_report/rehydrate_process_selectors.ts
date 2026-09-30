@@ -130,7 +130,7 @@ export const makeRehydrateProcessSelectors = (
     } catch (err) {
       logger?.warn(
         `rehydrateProcessSelectors: mget failed, returning no process selectors — ${
-          (err as Error).message
+          err instanceof Error ? err.message : String(err)
         }`
       );
       return [];

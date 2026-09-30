@@ -78,10 +78,6 @@ const HUNT_WORKER_DEFAULTS = {
 };
 
 /**
- * Manual autonomy: manual trigger only. Assisted/supervised: 4h (or configured)
- * schedule plus manual.
- */
-/**
  * The manual trigger's optional `reportIds` input (Phase 3 task 2): a manual-bypass
  * fan-out over named reports, capped at 10 to match `create_proposal.yaml`'s
  * trigger-input shape and the candidates route's own `report_ids` bound. Present on
@@ -98,6 +94,10 @@ const MANUAL_TRIGGER_WITH_REPORT_IDS_INPUT = [
   '          maxItems: 10',
 ].join('\n');
 
+/**
+ * Manual autonomy: manual trigger only. Assisted/supervised: 4h (or configured)
+ * schedule plus manual.
+ */
 export const renderHuntWorkerYaml = (yaml: string, values: HuntWorkerTemplateValues): string => {
   const triggers =
     values.autonomyLevel === 'manual'

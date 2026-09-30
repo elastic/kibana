@@ -61,7 +61,6 @@ const stepNamed = (workflow: ParsedWorkflow, name: string): NestedStep => {
  * The hunt child calls the coordinator over HTTP and writes the evidence the
  * candidate selection gate reads, so its contract with the routes and with
  * build_candidate_query.ts is pinned here rather than discovered at demo time.
- * Correlation lives on 3B under R.7.
  */
 describe(ALERTZERO_HUNT_WORKFLOW_ID, () => {
   let workflow: ParsedWorkflow;
@@ -217,8 +216,8 @@ describe(ALERTZERO_WORKER_HUNT_CONTINUOUS_THREAT_HUNT_WORKFLOW_ID, () => {
   });
 });
 
-// Phase 7 task 2's whole point: @kbn/alertzero-common's exported ids are checked against
-// the real registered workflow ids here, not against a second copy of the same literal --
+// @kbn/alertzero-common's exported ids are checked against the real registered
+// workflow ids here, not against a second copy of the same literal --
 // this file already safely depends on both @kbn/workflows/managed and
 // @kbn/alertzero-common, which is why this cross-check lives here rather than in
 // kbn-workflows' own hunt_worker_workflows.test.ts (a platform package with no dependency
@@ -229,7 +228,7 @@ describe('Hunt Watch public exports (kbn-alertzero-common)', () => {
     expect(SYSTEM_SECURITY_HUNT_PROPOSAL_GATE_ID).toBe(ALERTZERO_HUNT_PROPOSAL_GATE_WORKFLOW_ID);
   });
 
-  // 1f: no `kibana.request` step in any of the five hunt YAMLs calls a route path that
+  // No `kibana.request` step in any of the five hunt YAMLs calls a route path that
   // isn't one of the exported constants above -- a stale or hand-typed path string
   // would otherwise only 404 at runtime, on the first sweep that reaches that step.
   describe('every kibana.request step across the five hunt YAMLs', () => {
