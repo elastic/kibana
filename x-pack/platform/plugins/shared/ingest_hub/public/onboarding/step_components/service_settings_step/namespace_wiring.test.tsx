@@ -49,6 +49,9 @@ function makeService(deploymentMethods: AwsServiceMatrixEntry['deploymentMethods
     defaultEnabled: true,
     defaultEnabledInputs: [],
     showInUI: true,
+    isManifestLoaded: true,
+    isManifestError: false,
+    isStaticAgentBasedOnly: false,
   } as AwsServiceMatrixEntry;
 }
 

@@ -197,6 +197,28 @@ describe('useServiceDataDetection', () => {
     );
   });
 
+  it('keeps polling the original on resume when only its duplicate has saved serviceVars', async () => {
+    const { httpGet } = setup({
+      serviceSettings: {
+        globalRegion: 'us-east-1',
+        serviceVars: {
+          'cloudtrail__dup-1': {
+            enabledDataStreams: ['cloudtrail'],
+            varsByDataStream: {},
+            namespace: 'staging',
+          },
+        },
+      },
+    });
+    renderHook(() => useServiceDataDetection());
+
+    await mockUseQuery.mock.calls[0][0].queryFn();
+
+    expect(httpGet.mock.calls[0][1].query.dataStreams).toBe(
+      'logs-aws.cloudtrail-*,logs-aws.cloudtrail-staging'
+    );
+  });
+
   it('keeps the wildcard pattern when no namespace is set', async () => {
     const { httpGet } = setup({
       serviceSettings: { globalRegion: 'us-east-1', serviceVars: {} },

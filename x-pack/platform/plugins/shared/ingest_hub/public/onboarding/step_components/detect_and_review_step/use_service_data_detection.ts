@@ -53,12 +53,16 @@ function getServiceInstancePatterns(
   serviceSettings: ServiceSettingsPersistedState
 ): string[] {
   const { instances, serviceVars = {} } = serviceSettings;
-  // A resumed session restores serviceVars but not instances, so fall back to the serviceVars keys.
+  // A resumed session restores serviceVars but not instances. The original always exists but may
+  // have no saved vars, so rebuild it from the service id plus any saved duplicate keys.
   const instanceIds = instances
     ? instances.filter((inst) => inst.serviceId === serviceId).map((inst) => inst.instanceId)
-    : Object.keys(serviceVars).filter(
-        (id) => id === serviceId || id.startsWith(getDuplicateInstanceIdPrefix(serviceId))
-      );
+    : [
+        serviceId,
+        ...Object.keys(serviceVars).filter((id) =>
+          id.startsWith(getDuplicateInstanceIdPrefix(serviceId))
+        ),
+      ];
   if (instanceIds.length === 0) instanceIds.push(serviceId);
   const patterns = instanceIds.flatMap((instanceId) =>
     getServiceIndexPatterns(entry, serviceVars[instanceId]?.namespace)
