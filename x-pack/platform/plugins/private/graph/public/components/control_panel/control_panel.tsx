@@ -85,7 +85,6 @@ const ControlPanelComponent = ({
 
   const onSelectedFieldClick = (node: WorkspaceNode) => {
     selectSelected(node);
-    workspace.changeHandler();
   };
 
   const onDeselectNode = (node: WorkspaceNode) => {

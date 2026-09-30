@@ -7,6 +7,7 @@
 
 import { createWorkspace } from './graph_client_workspace';
 import { GraphLayoutController } from './graph_layout_controller';
+import { makeNodeId } from './graph_merge_planner';
 import { transformExpandResponse, transformSearchResponse } from './graph_response_transformers';
 
 describe('graphui-workspace', function () {
@@ -62,21 +63,17 @@ describe('graphui-workspace', function () {
         };
       };
     });
-    it('synchronizes merged topology before starting layout', function () {
-      const calls = [];
+    it('starts layout after merging topology', function () {
       const layoutController = {
         stop: jest.fn(),
-        start: jest.fn(() => calls.push('layout')),
+        start: jest.fn(),
         isRunning: jest.fn(() => false),
       };
-      const workspace = createWorkspace({
-        layoutController,
-        changeHandler: () => calls.push('change'),
-      });
+      const workspace = createWorkspace({ layoutController });
 
       workspace.mergeGraph({ nodes: [], edges: [] });
 
-      expect(calls).toEqual(['change', 'layout']);
+      expect(layoutController.start).toHaveBeenCalled();
     });
 
     it('initializeWorkspace', function () {
@@ -117,10 +114,10 @@ describe('graphui-workspace', function () {
       expect(workspace.edges.length).toEqual(1);
       expect(workspace.blocklistedNodes.length).toEqual(0);
 
-      const nodeA = workspace.getNode(workspace.makeNodeId('field1', 'a'));
+      const nodeA = workspace.nodesMap[makeNodeId('field1', 'a')];
       expect(typeof nodeA).toBe('object');
 
-      const nodeD = workspace.getNode(workspace.makeNodeId('field1', 'd'));
+      const nodeD = workspace.nodesMap[makeNodeId('field1', 'd')];
       expect(nodeD).toBe(undefined);
     });
 

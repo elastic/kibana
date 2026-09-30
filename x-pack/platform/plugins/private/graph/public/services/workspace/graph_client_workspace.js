@@ -7,8 +7,6 @@
 
 // Kibana wrapper
 import {
-  makeEdgeId,
-  makeNodeId,
   materializeRuntimeEdge,
   materializeRuntimeNode,
   planIncomingEdges,
@@ -17,7 +15,6 @@ import {
 
 // The main constructor for our GraphWorkspace
 function GraphWorkspace(options) {
-  const self = this;
   this.blocklistedNodes = [];
   this.options = options;
 
@@ -33,7 +30,6 @@ function GraphWorkspace(options) {
 
   this.nodes = [];
   this.edges = [];
-  this.changeHandler = options.changeHandler;
   const layoutController = options.layoutController;
 
   //======== Selection functions ========
@@ -96,10 +92,6 @@ function GraphWorkspace(options) {
     return layoutController.isRunning();
   };
 
-  this.makeNodeId = makeNodeId;
-
-  this.makeEdgeId = makeEdgeId;
-
   //=======  Adds new nodes retrieved from an elasticsearch search ========
   this.mergeGraph = function (newData) {
     this.stopLayout();
@@ -152,12 +144,7 @@ function GraphWorkspace(options) {
       this.edges.push(newEdge);
     });
 
-    self.changeHandler?.();
     this.runLayout();
-  };
-
-  this.getNode = function (nodeId) {
-    return this.nodesMap[nodeId];
   };
 }
 //=====================

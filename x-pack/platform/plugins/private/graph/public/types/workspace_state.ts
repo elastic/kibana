@@ -92,7 +92,6 @@ export interface Workspace {
   nodes: WorkspaceNode[];
   edges: WorkspaceEdge[];
   blocklistedNodes: BlockListedNode[];
-  changeHandler: () => void;
 
   /**
    * Flatten grouped nodes and return a flat array of nodes
@@ -130,7 +129,6 @@ export type WorkspaceOptions = {
   indexName: string;
   vertex_fields: WorkspaceField[];
   nodeLabeller: (newNodes: WorkspaceNode[]) => void;
-  changeHandler: () => void;
   exploreControls: AdvancedSettings;
 }>;
 

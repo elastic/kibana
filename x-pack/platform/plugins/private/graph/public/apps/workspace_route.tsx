@@ -150,7 +150,6 @@ export const WorkspaceRoute = ({
           nodeLabeller() {
             // console.log(newNodes);
           },
-          changeHandler: notifyWorkspaceChanged,
           exploreControls,
           layoutController,
         };
