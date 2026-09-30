@@ -69,14 +69,21 @@ Extract a fact only if a tool result in the investigation shows it. The final an
 - Credentials, tokens, or secrets.
 - Container internals (/proc, hex ports, Docker layers).
 - Information only relevant to this specific request (e.g. the single alert fingerprint being investigated).
-- Single-run details: timestamps, time windows, counts, percentiles, or ids from this run. Distil them into a reusable claim, or leave them out.
+- Ids from this run (trace, span, request, alert, or document ids).
+
+**TIME OF OBSERVATION** — the environment changes, so a memory must say when each changeable claim was true:
+- Any claim that can change over time (counts, rates, latencies, percentiles, error levels, versions, config values, which component is slowest) states when it was observed: the absolute UTC time or window of the data, with dates (e.g. "observed 2026-09-29T18:46–2026-09-30T18:46 UTC"). Take it from the tool calls and results; if they do not show it, use the run time given below.
+- Never write relative times such as "current window", "prior 21 hours", "now", or "recently".
+- Lead with the lasting pattern the measurements show, then the dated measurements that support it. Keep only the numbers that support the pattern; a table of every measurement is not a memory.
+- Structural facts that do not change from run to run (ownership, dependencies, naming, topology) need no time.
 
 **NEW OR REPLACE** — every entry has a title (its topic), content, replaces, and note. A writer turns each entry into the stored memory, and every memory in replaces is archived once it is written.
 - New topic: replaces is empty, content holds the facts, note is empty.
 - This run corrects or extends a recalled memory: replaces lists its id. content holds only what this run adds or corrects; the writer keeps what is still right in the replaced memory. note says what this run showed and what in the replaced memory is wrong or outdated.
 - Several recalled memories cover the same topic: replaces lists all of them. content holds anything this run adds, or is empty. note says what they share and anything that conflicts.
 - Replace a memory only when this run's evidence justifies it. A recalled memory that is still right and complete needs no entry.
-- The single-run rule applies to replacing entries too. Measurements from one time window (counts, averages, percentiles) are not durable: state the lasting pattern they show, such as which component is consistently slowest, or propose nothing.
+- The time-of-observation rules apply to replacing entries too: content dates this run's observations, and note says which replaced claims they supersede. Compare observations from different windows only if they measure the same thing the same way.
+- When two recalled memories cover the same topic or the same data, replace both with one entry instead of leaving them side by side.
 - The title names the topic as it should read now; for an unchanged topic, reuse the replaced memory's wording.
 
 Keep entries concise. Return an empty list if the conversation produced no reusable environment knowledge.`;
@@ -230,7 +237,10 @@ export const formatRecalled = (
 
   return formatEvidenceEntries(
     recalledMemories.map((memory, index) => ({
-      prefix: `${index === 0 ? '' : '\n'}- id=${memory.id}\n` + `  content: `,
+      prefix:
+        `${index === 0 ? '' : '\n'}- id=${memory.id}\n` +
+        `  updated: ${memory.updated_at}\n` +
+        `  content: `,
       content: memory.content,
     })),
     maxTokens
@@ -336,6 +346,8 @@ export const createLlmProposeMemoryExtractions = ({
       system: MEMORY_EXTRACT_SYSTEM_PROMPT,
       input: `${MEMORY_EXTRACT_GUIDELINES}
 
+Run time: ${new Date().toISOString()}
+
 Recalled memories (replace one only to correct, extend, or combine it):\n${formatRecalled(
         recalledMemories
       )}
@@ -421,12 +433,16 @@ Investigation transcript:\n${transcript}`,
 
 export const MEMORY_WRITER_SYSTEM_PROMPT = `You write one semantic memory for an AI SRE assistant: durable facts about one topic in the customer's environment.
 
-You get the topic, a note on why the entry is being written, the new information from this run, and the stored memories it replaces. The replaced memories are archived once your entry is written, so anything worth keeping from them must be in your content.
+You get the run time, the topic, a note on why the entry is being written, the new information from this run, and the stored memories it replaces. The replaced memories are archived once your entry is written, so anything worth keeping from them must be in your content.
 - Keep the facts from the replaced memories that are still correct and useful.
 - Where the new information or the note contradicts a replaced memory, keep the new information and drop the contradicted claim.
-- Drop what is outdated, not useful, or a single-run detail (timestamps, time windows, counts, percentiles, ids from one run).
-- Describe the environment as it is now. Never keep a history of earlier observations; when a newer observation supersedes an older one, keep only the durable conclusion.
-- The note explains what changed; these rules still apply where it suggests otherwise.
+- Drop what is not useful and ids from one run (trace, span, request, alert, or document ids).
+- Every claim that can change over time (counts, rates, latencies, percentiles, error levels, versions, config values, which component is slowest) states when it was observed, as an absolute UTC time or window with dates. Keep the times given in the inputs. A replaced memory's claim with no time was observed by that memory's updated date: say "as of <date>".
+- Never write relative times such as "current", "prior window", "now", or "recently".
+- Earlier observations may stay when they are still useful, labeled with their times. When a newer observation conflicts with an older one, the newer one is the current state; keep the older one only as a dated earlier observation.
+- Compare observations from different times only when they measure the same thing the same way; otherwise state each on its own.
+- Lead with the lasting conclusion, then the dated observations that support it.
+- These rules apply to the new information as well as to the replaced memories. The note explains what changed; the rules still apply where it suggests otherwise.
 - State each fact once. Add nothing that is in neither the new information nor the replaced memories: no new sections, fixes, or recommendations.
 - Be concise: no longer than the longest input unless the facts need it.
 
@@ -462,6 +478,7 @@ export const formatMemoryMergeSources = ({
         prefix:
           `${index === 0 ? (extract ? '\n\nMemories this entry replaces:\n' : '') : '\n'}` +
           `- id=${page.id}\n` +
+          `  updated: ${page.updated_at}\n` +
           `  context: ${(page.context ?? '').slice(0, MAX_RECALLED_CONTEXT_CHARS)}\n` +
           `  content: `,
         content: page.content,
@@ -492,7 +509,7 @@ export const createLlmSynthesizeMemoryGroup = ({
       id: 'nightshift_memory_write',
       abortSignal: signal,
       system: MEMORY_WRITER_SYSTEM_PROMPT,
-      input: `${entryBlock}${taskBlock}`,
+      input: `Run time: ${new Date().toISOString()}\n\n${entryBlock}${taskBlock}`,
       schema: {
         type: 'object',
         properties: {
