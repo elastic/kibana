@@ -86,11 +86,6 @@ export const STOP_SOURCE_ONBOARDING_BUTTON_LABEL = i18n.translate(
   { defaultMessage: 'Stop source onboarding' }
 );
 
-export const EDIT_SOURCE_ACTION_LABEL = i18n.translate(
-  'xpack.significantEventsApp.sources.editActionLabel',
-  { defaultMessage: 'Edit' }
-);
-
 export const RESET_SOURCE_KNOWLEDGE_ACTION_LABEL = i18n.translate(
   'xpack.significantEventsApp.sources.resetKnowledgeActionLabel',
   { defaultMessage: 'Reset knowledge' }

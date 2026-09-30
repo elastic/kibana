@@ -21,7 +21,11 @@ jest.mock('../../../../../hooks/use_kibana', () => ({
 jest.mock('../../../../../hooks/use_sources_api', () => ({
   useSourcesApi: () => ({ createSource: mockCreateSource, updateSource: mockUpdateSource }),
 }));
-jest.mock('./source_preview', () => ({ SourcePreview: () => null }));
+jest.mock('./source_preview', () => ({
+  SourcePreview: ({ esql }: { esql: string }) => (
+    <div data-test-subj="sourcePreviewMock">{esql}</div>
+  ),
+}));
 jest.mock('@kbn/esql/public', () => ({
   ESQLLangEditor: ({
     query,
@@ -57,10 +61,10 @@ const nginxSource: NightshiftSource = {
 
 const onClose = jest.fn();
 
-const setup = (source?: NightshiftSource) =>
+const setup = (source?: NightshiftSource, { readOnly = false }: { readOnly?: boolean } = {}) =>
   render(
     <I18nProvider>
-      <SourceFlyout source={source} onClose={onClose} />
+      <SourceFlyout source={source} readOnly={readOnly} onClose={onClose} />
     </I18nProvider>
   );
 
@@ -142,5 +146,34 @@ describe('SourceFlyout', () => {
         esql: 'FROM logs-nginx-* | WHERE status >= 500',
       },
     });
+  });
+
+  it('previews the typed query only when Run query is clicked', () => {
+    setup();
+    fillNewSource({ title: 'Nginx errors', esql: 'FROM logs-nginx-*' });
+
+    expect(screen.getByTestId('sourcePreviewMock')).toBeEmptyDOMElement();
+
+    fireEvent.click(screen.getByTestId('significantEventsAppSourceFlyoutRunQueryButton'));
+
+    expect(screen.getByTestId('sourcePreviewMock')).toHaveTextContent('FROM logs-nginx-*');
+  });
+
+  it('shows a source read-only, without a way to save it', () => {
+    setup(nginxSource, { readOnly: true });
+
+    expect(screen.getByText('Source details')).toBeInTheDocument();
+    expect(screen.getByTestId('significantEventsAppSourceFlyoutTitleInput')).toHaveAttribute(
+      'readonly'
+    );
+    expect(screen.getByTestId('significantEventsAppSourceFlyoutDescriptionInput')).toHaveAttribute(
+      'readonly'
+    );
+    expect(
+      screen.queryByTestId('significantEventsAppSourceFlyoutSaveButton')
+    ).not.toBeInTheDocument();
+    expect(screen.getByTestId('significantEventsAppSourceFlyoutCancelButton')).toHaveTextContent(
+      'Close'
+    );
   });
 });

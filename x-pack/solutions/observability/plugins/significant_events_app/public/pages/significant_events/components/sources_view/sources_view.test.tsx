@@ -53,8 +53,11 @@ jest.mock('./knowledge_indicators_column', () => ({ KnowledgeIndicatorsColumn: (
 jest.mock('./queries_column', () => ({ QueriesColumn: () => null }));
 jest.mock('./significant_events_column', () => ({ SignificantEventsColumn: () => null }));
 jest.mock('./source_flyout/source_flyout', () => ({
-  SourceFlyout: ({ source }: { source?: NightshiftSource }) => (
-    <div data-test-subj="sourceFlyoutMock">{source?.title ?? 'new source'}</div>
+  SourceFlyout: ({ source, readOnly }: { source?: NightshiftSource; readOnly?: boolean }) => (
+    <div data-test-subj="sourceFlyoutMock">
+      {source?.title ?? 'new source'}
+      {readOnly ? ' (read-only)' : ''}
+    </div>
   ),
 }));
 
@@ -130,13 +133,39 @@ describe('SourcesView', () => {
     expect(
       screen.getByTestId('significantEventsAppSourcesTableEnabledSwitch-source-1')
     ).toBeDisabled();
+    expect(
+      screen.queryByTestId('significantEventsAppSourceActions-source-1')
+    ).not.toBeInTheDocument();
+  });
+
+  it('opens the source read-only from its title without manage', () => {
+    setup({ sources: [nginxSource], canManage: false });
+
+    fireEvent.click(screen.getByTestId('significantEventsAppSourcesTableTitleLink-source-1'));
+
+    expect(screen.getByTestId('sourceFlyoutMock')).toHaveTextContent('Nginx errors (read-only)');
+  });
+
+  it('opens the source editable from its title with manage', () => {
+    setup({ sources: [nginxSource], canManage: true });
+
+    fireEvent.click(screen.getByTestId('significantEventsAppSourcesTableTitleLink-source-1'));
+
+    expect(screen.getByTestId('sourceFlyoutMock')).toHaveTextContent(/^Nginx errors$/);
+  });
+
+  it('shows the onboard, reset and delete actions inline, without an overflow menu', () => {
+    setup({ sources: [nginxSource], canManage: true });
+
+    expect(screen.getByTestId('significantEventsAppSourcesTableOnboardButton')).toBeEnabled();
+    expect(screen.getByTestId('significantEventsAppSourcesTableResetButton')).toBeEnabled();
+    expect(screen.getByTestId('significantEventsAppSourcesTableDeleteButton')).toBeEnabled();
     expect(screen.queryByTestId('euiCollapsedItemActionsButton')).not.toBeInTheDocument();
   });
 
   it('deletes a source only after the confirmation', () => {
     setup({ sources: [nginxSource], canManage: true });
 
-    fireEvent.click(screen.getByTestId('euiCollapsedItemActionsButton'));
     fireEvent.click(screen.getByTestId('significantEventsAppSourcesTableDeleteButton'));
     expect(mockDeleteSource.mutate).not.toHaveBeenCalled();
 

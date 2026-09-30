@@ -5,12 +5,7 @@
  * 2.0.
  */
 
-import type {
-  EuiBasicTableColumn,
-  EuiTableActionsColumnType,
-  EuiTableSelectionType,
-  Query,
-} from '@elastic/eui';
+import type { EuiBasicTableColumn, EuiTableSelectionType, Query } from '@elastic/eui';
 import {
   EuiCode,
   EuiFlexGroup,
@@ -26,7 +21,6 @@ import {
 import type { NightshiftSource } from '@kbn/nightshift-shared';
 import {
   SignificantEventsWorkflowStatus,
-  KIS_ONBOARDING_IN_PROGRESS_STATUSES,
   type SignificantEventsWorkflowStatusResult,
 } from '@kbn/significant-events-schema';
 import React from 'react';
@@ -35,24 +29,18 @@ import { useKibana } from '../../../../hooks/use_kibana';
 import { KnowledgeIndicatorsColumn } from './knowledge_indicators_column';
 import { QueriesColumn } from './queries_column';
 import { SignificantEventsColumn } from './significant_events_column';
+import { SourceActionsColumn } from './source_actions_column';
 import {
   ACTIONS_COLUMN_HEADER,
-  DELETE_SOURCE_ACTION_DESCRIPTION,
-  DELETE_SOURCE_ACTION_LABEL,
-  EDIT_SOURCE_ACTION_LABEL,
   ENABLED_COLUMN_HEADER,
   KNOWLEDGE_INDICATORS_COLUMN_HEADER,
   NO_SOURCES_MESSAGE,
   ONBOARDING_STATUS_COLUMN_HEADER,
   QUERIES_COLUMN_HEADER,
   QUERY_COLUMN_HEADER,
-  RESET_SOURCE_KNOWLEDGE_ACTION_DESCRIPTION,
-  RESET_SOURCE_KNOWLEDGE_ACTION_LABEL,
-  RUN_SOURCE_ONBOARDING_BUTTON_LABEL,
   SIGNIFICANT_EVENTS_COLUMN_HEADER,
   SIGNIFICANT_EVENTS_COLUMN_TOOLTIP,
   SOURCES_TABLE_CAPTION,
-  STOP_SOURCE_ONBOARDING_BUTTON_LABEL,
   TITLE_COLUMN_HEADER,
 } from './translations';
 import { filterSourcesByQuery, getOnboardSourceTooltip } from './utils';
@@ -67,7 +55,7 @@ export function SourcesTable({
   activityBlockTooltip,
   canManage,
   pendingEnabledSourceId,
-  onEditSource,
+  onOpenSource,
   onToggleSourceEnabled,
   onOnboardSource,
   onStopOnboarding,
@@ -86,7 +74,8 @@ export function SourcesTable({
   canManage: boolean;
   /** Source whose enable/disable request is in flight; its switch stays disabled until it settles. */
   pendingEnabledSourceId?: string;
-  onEditSource: (source: NightshiftSource) => void;
+  /** Opens the source flyout; it is read-only without `canManage`. */
+  onOpenSource: (source: NightshiftSource) => void;
   onToggleSourceEnabled: (source: NightshiftSource, enabled: boolean) => void;
   onOnboardSource: (sourceId: string) => void;
   onStopOnboarding: (sourceId: string) => void;
@@ -100,63 +89,23 @@ export function SourcesTable({
   } = useKibana();
   const isCpsMultiProject = useIsCpsMultiProject(cps?.cpsManager);
 
-  const isOnboardingInProgress = (source: NightshiftSource) =>
-    KIS_ONBOARDING_IN_PROGRESS_STATUSES.has(onboardingResultMap[source.id]?.status);
+  const onboardTooltip = getOnboardSourceTooltip({ activityBlockTooltip, isCpsMultiProject });
 
-  const actionsColumn: EuiTableActionsColumnType<NightshiftSource> = {
+  const actionsColumn: EuiBasicTableColumn<NightshiftSource> = {
     name: ACTIONS_COLUMN_HEADER,
-    width: '100px',
-    actions: [
-      {
-        name: STOP_SOURCE_ONBOARDING_BUTTON_LABEL,
-        description: STOP_SOURCE_ONBOARDING_BUTTON_LABEL,
-        icon: 'stop',
-        type: 'icon',
-        isPrimary: true,
-        'data-test-subj': 'significantEventsAppSourcesTableStopButton',
-        available: isOnboardingInProgress,
-        enabled: (source: NightshiftSource) =>
-          onboardingResultMap[source.id]?.status !== SignificantEventsWorkflowStatus.BeingCanceled,
-        onClick: (source: NightshiftSource) => onStopOnboarding(source.id),
-      },
-      {
-        name: RUN_SOURCE_ONBOARDING_BUTTON_LABEL,
-        description: getOnboardSourceTooltip({ activityBlockTooltip, isCpsMultiProject }),
-        icon: 'radar',
-        type: 'icon',
-        isPrimary: true,
-        'data-test-subj': 'significantEventsAppSourcesTableOnboardButton',
-        available: (source: NightshiftSource) => !isOnboardingInProgress(source),
-        // The onboarding route rejects disabled sources.
-        enabled: (source: NightshiftSource) => source.enabled && !blocksActivity,
-        onClick: (source: NightshiftSource) => onOnboardSource(source.id),
-      },
-      {
-        name: EDIT_SOURCE_ACTION_LABEL,
-        description: EDIT_SOURCE_ACTION_LABEL,
-        icon: 'pencil',
-        type: 'icon',
-        'data-test-subj': 'significantEventsAppSourcesTableEditButton',
-        onClick: onEditSource,
-      },
-      {
-        name: RESET_SOURCE_KNOWLEDGE_ACTION_LABEL,
-        description: RESET_SOURCE_KNOWLEDGE_ACTION_DESCRIPTION,
-        icon: 'eraser',
-        type: 'icon',
-        'data-test-subj': 'significantEventsAppSourcesTableResetButton',
-        onClick: onResetSourceKnowledge,
-      },
-      {
-        name: DELETE_SOURCE_ACTION_LABEL,
-        description: DELETE_SOURCE_ACTION_DESCRIPTION,
-        icon: 'trash',
-        type: 'icon',
-        color: 'danger',
-        'data-test-subj': 'significantEventsAppSourcesTableDeleteButton',
-        onClick: onDeleteSource,
-      },
-    ],
+    width: '110px',
+    render: (source: NightshiftSource) => (
+      <SourceActionsColumn
+        source={source}
+        onboardingStatus={onboardingResultMap[source.id]?.status}
+        blocksActivity={blocksActivity}
+        onboardTooltip={onboardTooltip}
+        onOnboard={onOnboardSource}
+        onStopOnboarding={onStopOnboarding}
+        onResetKnowledge={onResetSourceKnowledge}
+        onDelete={onDeleteSource}
+      />
+    ),
   };
 
   const columns: Array<EuiBasicTableColumn<NightshiftSource>> = [
@@ -164,19 +113,14 @@ export function SourcesTable({
       field: 'title',
       name: TITLE_COLUMN_HEADER,
       sortable: true,
-      render: (title: string, source: NightshiftSource) => {
-        const highlightedTitle = <EuiHighlight search={searchQuery.text}>{title}</EuiHighlight>;
-        return canManage ? (
-          <EuiLink
-            data-test-subj={`significantEventsAppSourcesTableTitleLink-${source.id}`}
-            onClick={() => onEditSource(source)}
-          >
-            {highlightedTitle}
-          </EuiLink>
-        ) : (
-          highlightedTitle
-        );
-      },
+      render: (title: string, source: NightshiftSource) => (
+        <EuiLink
+          data-test-subj={`significantEventsAppSourcesTableTitleLink-${source.id}`}
+          onClick={() => onOpenSource(source)}
+        >
+          <EuiHighlight search={searchQuery.text}>{title}</EuiHighlight>
+        </EuiLink>
+      ),
     },
     {
       field: 'esql',

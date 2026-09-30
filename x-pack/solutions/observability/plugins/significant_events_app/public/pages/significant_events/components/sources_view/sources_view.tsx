@@ -263,7 +263,7 @@ export function SourcesView() {
                 pendingEnabledSourceId={
                   setSourceEnabled.isLoading ? setSourceEnabled.variables?.sourceId : undefined
                 }
-                onEditSource={(source) => setFlyout({ source })}
+                onOpenSource={(source) => setFlyout({ source })}
                 onToggleSourceEnabled={(source, enabled) =>
                   setSourceEnabled.mutate({ sourceId: source.id, enabled })
                 }
@@ -277,7 +277,13 @@ export function SourcesView() {
         )}
       </EuiFlexGroup>
 
-      {flyout && <SourceFlyout source={flyout.source} onClose={() => setFlyout(undefined)} />}
+      {flyout && (
+        <SourceFlyout
+          source={flyout.source}
+          readOnly={!canManage}
+          onClose={() => setFlyout(undefined)}
+        />
+      )}
       {pendingAction && (
         <ConfirmSourceActionModal
           action={pendingAction.action}

@@ -11,6 +11,7 @@ import {
   EuiComboBox,
   EuiFieldText,
   EuiFlexGroup,
+  EuiFlexItem,
   EuiFlyout,
   EuiFlyoutFooter,
   EuiFlyoutHeader,
@@ -51,6 +52,8 @@ interface SourceFormValues {
 interface SourceFlyoutProps {
   /** Source to edit; the flyout creates a new source when it is absent. */
   source?: NightshiftSource;
+  /** Shows the source without letting the user change it, for users who cannot manage sources. */
+  readOnly?: boolean;
   onClose: () => void;
 }
 
@@ -59,7 +62,7 @@ interface SourceFlyoutProps {
 const isBadRequest = (error: unknown) =>
   isRecord(error) && isRecord(error.body) && error.body.statusCode === 400;
 
-export function SourceFlyout({ source, onClose }: SourceFlyoutProps) {
+export function SourceFlyout({ source, readOnly = false, onClose }: SourceFlyoutProps) {
   const {
     core: {
       notifications: { toasts },
@@ -70,7 +73,7 @@ export function SourceFlyout({ source, onClose }: SourceFlyoutProps) {
   // Only the query the user ran is previewed, so typing does not search on every keystroke.
   const [previewEsql, setPreviewEsql] = useState(source?.esql ?? '');
 
-  const { control, handleSubmit, setError, formState } = useForm<SourceFormValues>({
+  const { control, getValues, handleSubmit, setError, formState } = useForm<SourceFormValues>({
     defaultValues: {
       title: source?.title ?? '',
       description: source?.description ?? '',
@@ -111,7 +114,7 @@ export function SourceFlyout({ source, onClose }: SourceFlyoutProps) {
     >
       <EuiFlyoutHeader hasBorder>
         <EuiTitle size="m">
-          <h2 id={titleId}>{source ? EDIT_TITLE : CREATE_TITLE}</h2>
+          <h2 id={titleId}>{readOnly ? DETAILS_TITLE : source ? EDIT_TITLE : CREATE_TITLE}</h2>
         </EuiTitle>
       </EuiFlyoutHeader>
       {/* A flex child of the flyout, so both panels fill the height between header and footer. */}
@@ -143,6 +146,7 @@ export function SourceFlyout({ source, onClose }: SourceFlyoutProps) {
                         inputRef={field.ref}
                         maxLength={MAX_SOURCE_TITLE_LENGTH}
                         isInvalid={fieldState.invalid}
+                        readOnly={readOnly}
                       />
                     </EuiFormRow>
                   )}
@@ -161,6 +165,7 @@ export function SourceFlyout({ source, onClose }: SourceFlyoutProps) {
                         inputRef={field.ref}
                         maxLength={MAX_SOURCE_DESCRIPTION_LENGTH}
                         rows={3}
+                        readOnly={readOnly}
                       />
                     </EuiFormRow>
                   )}
@@ -200,7 +205,10 @@ export function SourceFlyout({ source, onClose }: SourceFlyoutProps) {
                     >
                       <EuiComboBox
                         data-test-subj="significantEventsAppSourceFlyoutTagsInput"
+                        fullWidth
                         noSuggestions
+                        // EuiComboBox has no read-only mode.
+                        isDisabled={readOnly}
                         isInvalid={fieldState.invalid}
                         selectedOptions={field.value.map((tag) => ({ label: tag }))}
                         onChange={(options) => field.onChange(options.map(({ label }) => label))}
@@ -240,10 +248,25 @@ export function SourceFlyout({ source, onClose }: SourceFlyoutProps) {
                         editorIsInline
                         expandToFitQueryOnMount
                         hasOutline
+                        // Replaced by the Run query button below, which lines up with the form.
+                        hideRunQueryButton
+                        isDisabled={readOnly}
                       />
                     </EuiFormRow>
                   )}
                 />
+                <EuiFlexGroup justifyContent="flexEnd">
+                  <EuiFlexItem grow={false}>
+                    <EuiButton
+                      data-test-subj="significantEventsAppSourceFlyoutRunQueryButton"
+                      size="s"
+                      iconType="play"
+                      onClick={() => setPreviewEsql(getValues('esql'))}
+                    >
+                      {RUN_QUERY_LABEL}
+                    </EuiButton>
+                  </EuiFlexItem>
+                </EuiFlexGroup>
               </EuiForm>
             </EuiResizablePanel>
             <EuiResizableButton indicator="border" />
@@ -261,16 +284,18 @@ export function SourceFlyout({ source, onClose }: SourceFlyoutProps) {
             flush="left"
             onClick={onClose}
           >
-            {CANCEL_LABEL}
+            {readOnly ? CLOSE_LABEL : CANCEL_LABEL}
           </EuiButtonEmpty>
-          <EuiButton
-            data-test-subj="significantEventsAppSourceFlyoutSaveButton"
-            fill
-            isLoading={formState.isSubmitting}
-            onClick={save}
-          >
-            {source ? SAVE_LABEL : CREATE_LABEL}
-          </EuiButton>
+          {!readOnly && (
+            <EuiButton
+              data-test-subj="significantEventsAppSourceFlyoutSaveButton"
+              fill
+              isLoading={formState.isSubmitting}
+              onClick={save}
+            >
+              {source ? SAVE_LABEL : CREATE_LABEL}
+            </EuiButton>
+          )}
         </EuiFlexGroup>
       </EuiFlyoutFooter>
     </EuiFlyout>
@@ -283,6 +308,10 @@ const CREATE_TITLE = i18n.translate('xpack.significantEventsApp.sources.flyout.c
 
 const EDIT_TITLE = i18n.translate('xpack.significantEventsApp.sources.flyout.editTitle', {
   defaultMessage: 'Edit source',
+});
+
+const DETAILS_TITLE = i18n.translate('xpack.significantEventsApp.sources.flyout.detailsTitle', {
+  defaultMessage: 'Source details',
 });
 
 const FORM_DESCRIPTION = i18n.translate('xpack.significantEventsApp.sources.flyout.description', {
@@ -323,8 +352,16 @@ const QUERY_HELP_TEXT = i18n.translate('xpack.significantEventsApp.sources.flyou
   defaultMessage: 'Start with FROM or TS; only WHERE may follow. Run the query to preview it.',
 });
 
+const RUN_QUERY_LABEL = i18n.translate('xpack.significantEventsApp.sources.flyout.runQueryLabel', {
+  defaultMessage: 'Run query',
+});
+
 const CANCEL_LABEL = i18n.translate('xpack.significantEventsApp.sources.flyout.cancelLabel', {
   defaultMessage: 'Cancel',
+});
+
+const CLOSE_LABEL = i18n.translate('xpack.significantEventsApp.sources.flyout.closeLabel', {
+  defaultMessage: 'Close',
 });
 
 const CREATE_LABEL = i18n.translate('xpack.significantEventsApp.sources.flyout.createLabel', {
