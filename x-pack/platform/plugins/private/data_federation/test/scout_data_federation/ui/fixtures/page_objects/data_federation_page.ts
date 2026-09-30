@@ -103,6 +103,11 @@ export class DataFederationPage {
     return this.dataSetsTable.locator('tr').filter({ hasText: dataSetName });
   }
 
+  async filterDataSets(dataSetName: string): Promise<void> {
+    await this.page.testSubj.locator('dataSetsSetsSearch').fill(`"${dataSetName}"`);
+    await this.getDataSetRow(dataSetName).waitFor({ state: 'visible' });
+  }
+
   private getConfirmModal() {
     return this.page.getByRole('alertdialog');
   }

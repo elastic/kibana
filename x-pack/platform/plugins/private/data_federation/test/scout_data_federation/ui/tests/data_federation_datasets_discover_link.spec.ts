@@ -46,19 +46,8 @@ test.describe(
     });
 
     test.afterAll(async ({ kbnClient }) => {
-      try {
-        await kbnClient.request({ method: 'DELETE', path: getDataSetByIdApiPath(dataSetName) });
-      } catch {
-        // ignore cleanup errors
-      }
-      try {
-        await kbnClient.request({
-          method: 'DELETE',
-          path: getDataSourceByIdApiPath(dataSourceName),
-        });
-      } catch {
-        // ignore cleanup errors
-      }
+      await kbnClient.request({ method: 'DELETE', path: getDataSetByIdApiPath(dataSetName) });
+      await kbnClient.request({ method: 'DELETE', path: getDataSourceByIdApiPath(dataSourceName) });
     });
 
     test('links the dataset to Discover with an ES|QL query', async ({
@@ -70,6 +59,7 @@ test.describe(
       await browserAuth.loginWithCustomRole(CUSTOM_ROLES.data_federation_manager_with_discover);
       await pageObjects.dataFederation.goto();
       await pageObjects.dataFederation.selectTab('Datasets');
+      await pageObjects.dataFederation.filterDataSets(dataSetName);
 
       const discoverLink = pageObjects.dataFederation
         .getDataSetRow(dataSetName)
@@ -95,6 +85,7 @@ test.describe(
       await browserAuth.loginWithCustomRole(CUSTOM_ROLES.data_federation_manager);
       await pageObjects.dataFederation.goto();
       await pageObjects.dataFederation.selectTab('Datasets');
+      await pageObjects.dataFederation.filterDataSets(dataSetName);
 
       const row = pageObjects.dataFederation.getDataSetRow(dataSetName);
       await expect(row).toBeVisible();
