@@ -443,10 +443,7 @@ class DownloadSourceService {
     }
   }
 
-  public async delete(
-    id: string,
-    options?: { request?: KibanaRequest }
-  ) {
+  public async delete(id: string, options?: { request?: KibanaRequest }) {
     const logger = appContextService.getLogger();
     logger.debug(`Deleting download source ${id}`);
 
