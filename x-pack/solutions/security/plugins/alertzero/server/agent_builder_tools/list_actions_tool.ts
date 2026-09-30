@@ -48,9 +48,9 @@ export const listActionsTool = (
   },
   schema: listByCategorySchema,
   tags: ['alertzero'],
-  handler: async ({ categories }, { logger }) => {
+  handler: async ({ categories }, { logger, request, spaceId }) => {
     try {
-      const { actions, total } = await getActionsService().list('default', categories);
+      const { actions, total } = await getActionsService().list(spaceId, request, categories);
       const message =
         total === 0
           ? categories

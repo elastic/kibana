@@ -33,6 +33,29 @@ describe('getFeedbackQuestionsForApp', () => {
     ]);
   });
 
+  it.each([
+    'alertzero',
+    'alertzero:alerts',
+    'alertzero:attacks',
+    'alertzero:threat_hunt',
+    'alertzero:streams',
+    'alertzero:escalations',
+    'alertzero:watches',
+  ])('returns the AlertZero feedback questions for %s', async (appId) => {
+    await expect(getFeedbackQuestionsForApp(appId)).resolves.toEqual([
+      expect.objectContaining({
+        id: 'alertzero_experience',
+        order: 1,
+        question: 'Describe your experience',
+      }),
+      expect.objectContaining({
+        id: 'alertzero_task_context',
+        order: 2,
+        question: 'What were you trying to do in AlertZero today?',
+      }),
+    ]);
+  });
+
   it('returns the default feedback questions for unknown apps', async () => {
     await expect(getFeedbackQuestionsForApp('unknown-app')).resolves.toEqual([
       expect.objectContaining({

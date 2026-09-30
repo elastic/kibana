@@ -29,6 +29,7 @@ import { EsqlRecoveryContent } from './esql_recovery_content';
 import { DetailsAndArtifactsStep } from './details_and_artifacts_step';
 import { LinkedActionPoliciesStep } from './linked_action_policies_step';
 import { QueryFieldRules } from './query_field_rules';
+import { NoDataFieldRules } from './no_data_field_rules';
 
 interface Props {
   state: ComposeDiscoverState;
@@ -79,6 +80,7 @@ const STEP_REGISTRY: Record<StepDefinition['id'], StepDefinition> = {
         renderCustomRecovery={props.renderCustomRecovery}
       />
     ),
+    fields: ['recovery', 'noData'],
   },
   details: {
     id: 'details',
@@ -93,7 +95,13 @@ const STEP_REGISTRY: Record<StepDefinition['id'], StepDefinition> = {
     title: i18n.translate('xpack.alertingV2.composeDiscover.notifications.stepTitle', {
       defaultMessage: 'Actions',
     }),
-    render: (props) => <LinkedActionPoliciesStep http={props.services.http} />,
+    render: (props) => (
+      <LinkedActionPoliciesStep
+        http={props.services.http}
+        canCreateActionPolicy={props.services.canCreateActionPolicy}
+        CreateActionPolicyFormFlyout={props.services.createActionPolicyFormFlyout}
+      />
+    ),
   },
 };
 
@@ -177,6 +185,7 @@ export const ComposeDiscoverForm = ({
     <>
       {/* Keep query rules mounted across steps so trigger(['query']) cannot no-op. */}
       {!builderType && <QueryFieldRules queryCommitted={state.queryCommitted} />}
+      <NoDataFieldRules />
       {!isAlertConditionStep ? (
         stepContent
       ) : (

@@ -39,6 +39,7 @@ export const naturalLanguageSearch = async ({
   customInstructions,
   timeRange,
   includeDatasets = false,
+  includeFrozen = false,
 }: {
   nlQuery: string;
   target: string;
@@ -50,6 +51,7 @@ export const naturalLanguageSearch = async ({
   customInstructions?: string;
   timeRange?: TimeRange;
   includeDatasets?: boolean;
+  includeFrozen?: boolean;
 }): Promise<NaturalLanguageSearchResponse> => {
   const queryGenResponse = await generateEsql({
     nlQuery,
@@ -63,6 +65,7 @@ export const naturalLanguageSearch = async ({
     additionalInstructions: customInstructions,
     timeRange,
     includeDatasets,
+    includeFrozen,
   });
 
   return {

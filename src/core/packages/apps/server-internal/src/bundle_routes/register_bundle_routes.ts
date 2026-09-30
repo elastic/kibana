@@ -22,14 +22,6 @@ import { FileHashCache } from './file_hash_cache';
 import { registerRouteForBundle } from './bundles_route';
 
 /**
- * Check if RSPack mode is enabled via environment variable
- */
-function isRspackMode(): boolean {
-  const v = process.env.KBN_USE_RSPACK;
-  return v === 'true' || v === '1';
-}
-
-/**
  *  Creates the routes that serves files from `bundlesPath`.
  *
  *  @param {Object} options
@@ -51,15 +43,14 @@ export function registerBundleRoutes({
   staticAssets: InternalStaticAssets;
 }) {
   const { dist: isDist } = packageInfo;
-  const useRspack = isRspackMode();
 
   // rather than calculate the fileHash on every request, we
   // provide a cache object to `resolveDynamicAssetResponse()` that
   // will store the most recently used hashes.
   const fileHashCache = new FileHashCache();
 
-  // Shared deps bundles are always served - they're built by webpack
-  // and used by both webpack and RSPack built plugins
+  // Shared deps bundles are built by webpack (see kbn-ui-shared-deps-npm/src) and
+  // loaded before the Rspack bundles
   const sharedNpmDepsPath = '/bundles/kbn-ui-shared-deps-npm/';
   registerRouteForBundle(router, {
     publicPath: staticAssets.prependPublicUrl(sharedNpmDepsPath) + '/',
@@ -85,55 +76,27 @@ export function registerBundleRoutes({
     isDist,
   });
 
-  if (useRspack) {
-    // RSPack mode: serve unified build bundles from central directory
-    const rspackBundlesPath = '/bundles/';
-    registerRouteForBundle(router, {
-      publicPath: staticAssets.prependPublicUrl(rspackBundlesPath) + '/',
-      routePath: staticAssets.prependServerPath(rspackBundlesPath) + '/',
-      bundlesPath: fromRoot('target/public/bundles'),
-      fileHashCache,
-      isDist,
-    });
+  // Unified Rspack build: core and all internal plugins are served from a central directory
+  const unifiedBundlesPath = '/bundles/';
+  registerRouteForBundle(router, {
+    publicPath: staticAssets.prependPublicUrl(unifiedBundlesPath) + '/',
+    routePath: staticAssets.prependServerPath(unifiedBundlesPath) + '/',
+    bundlesPath: fromRoot('target/public/bundles'),
+    fileHashCache,
+    isDist,
+  });
 
-    // External plugins live in the plugins/ directory and have standalone bundles
-    // built by kbn-plugin-helpers. Only check that directory — internal plugins are
-    // compiled into kibana.bundle.js and their directories may contain leftover
-    // webpack bundles that must not be loaded separately.
-    const externalPluginsDir = fromRoot('plugins') + Path.sep;
-    [...uiPlugins.internal.entries()].forEach(([id, { publicTargetDir, version }]) => {
-      if (!publicTargetDir.startsWith(externalPluginsDir)) {
-        return;
-      }
-      const standaloneBundle = Path.join(publicTargetDir, `${id}.plugin.js`);
-      if (Fs.existsSync(standaloneBundle)) {
-        const pluginBundlesPath = `/bundles/plugin/${id}/${version}/`;
-        registerRouteForBundle(router, {
-          publicPath: staticAssets.prependPublicUrl(pluginBundlesPath) + '/',
-          routePath: staticAssets.prependServerPath(pluginBundlesPath) + '/',
-          bundlesPath: publicTargetDir,
-          fileHashCache,
-          isDist,
-        });
-      }
-    });
-  } else {
-    // Legacy webpack mode: serve from individual plugin directories
-
-    // Core bundle
-    const coreBundlePath = '/bundles/core/';
-    registerRouteForBundle(router, {
-      publicPath: staticAssets.prependPublicUrl(coreBundlePath) + '/',
-      routePath: staticAssets.prependServerPath(coreBundlePath) + '/',
-      bundlesPath: isDist
-        ? fromRoot('node_modules/@kbn/core/target/public')
-        : fromRoot('src/core/target/public'),
-      fileHashCache,
-      isDist,
-    });
-
-    // Plugin bundles from their individual directories
-    [...uiPlugins.internal.entries()].forEach(([id, { publicTargetDir, version }]) => {
+  // External plugins live in the plugins/ directory and have standalone bundles
+  // built by kbn-plugin-helpers. Only check that directory — internal plugins are
+  // compiled into kibana.bundle.js and their directories may contain leftover
+  // bundles that must not be loaded separately.
+  const externalPluginsDir = fromRoot('plugins') + Path.sep;
+  [...uiPlugins.internal.entries()].forEach(([id, { publicTargetDir, version }]) => {
+    if (!publicTargetDir.startsWith(externalPluginsDir)) {
+      return;
+    }
+    const standaloneBundle = Path.join(publicTargetDir, `${id}.plugin.js`);
+    if (Fs.existsSync(standaloneBundle)) {
       const pluginBundlesPath = `/bundles/plugin/${id}/${version}/`;
       registerRouteForBundle(router, {
         publicPath: staticAssets.prependPublicUrl(pluginBundlesPath) + '/',
@@ -142,6 +105,6 @@ export function registerBundleRoutes({
         fileHashCache,
         isDist,
       });
-    });
-  }
+    }
+  });
 }

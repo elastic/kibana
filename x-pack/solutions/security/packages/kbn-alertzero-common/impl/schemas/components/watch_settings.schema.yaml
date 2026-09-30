@@ -91,6 +91,7 @@ components:
         - state
         - settings
         - settingsRevision
+        - workflowId
       properties:
         id:
           type: string
@@ -122,6 +123,13 @@ components:
           description: >-
             Logical workflow version for best-effort stale settings detection. Null when the
             per-space managed Worker has not been installed yet.
+        workflowId:
+          type: string
+          nullable: true
+          description: >-
+            Id of this Worker's installed per-space workflow. Null when that workflow has not
+            been installed yet. The client uses it to open the workflow's Executions tab and
+            does not derive it from the Worker id.
         skills:
           type: array
           items:

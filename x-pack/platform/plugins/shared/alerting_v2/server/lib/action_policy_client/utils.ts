@@ -61,15 +61,6 @@ export const toApiKeyAttributes = (auth: ApiKeyAttributes) => ({
   apiKeyCreatedByUser: auth.createdByUser,
 });
 
-const toAuthResponse = (
-  attributes: Pick<ActionPolicySavedObjectAttributes, 'apiKeyOwner' | 'apiKeyCreatedByUser'>
-): ActionPolicyResponse['auth'] => {
-  return {
-    owner: attributes.apiKeyOwner,
-    created_by_user: attributes.apiKeyCreatedByUser,
-  };
-};
-
 export const buildCreateActionPolicyAttributes = ({
   data,
   auth,
@@ -80,9 +71,9 @@ export const buildCreateActionPolicyAttributes = ({
 }: {
   data: CreateActionPolicyData;
   auth: ApiKeyAttributes;
-  createdBy: string | null;
+  createdBy: ActionPolicySavedObjectAttributes['createdBy'];
   createdAt: string;
-  updatedBy: string | null;
+  updatedBy: ActionPolicySavedObjectAttributes['updatedBy'];
   updatedAt: string;
 }): ActionPolicySavedObjectAttributes => {
   return {
@@ -114,7 +105,7 @@ export const buildUpdateActionPolicyAttributes = ({
   existing: ActionPolicySavedObjectAttributes;
   update: UpdateActionPolicyData;
   auth: ApiKeyAttributes;
-  updatedBy: string | null;
+  updatedBy: ActionPolicySavedObjectAttributes['updatedBy'];
   updatedAt: string;
 }): ActionPolicySavedObjectAttributes => {
   return {
@@ -159,7 +150,6 @@ export const transformActionPolicySoAttributesToApiResponse = ({
     grouping_mode: normalizeNullableField(attributes.groupingMode),
     throttle: normalizeThrottle(attributes.throttle),
     snoozed_until: normalizeNullableField(attributes.snoozedUntil),
-    auth: toAuthResponse(attributes),
     created_by: attributes.createdBy,
     created_at: attributes.createdAt,
     updated_by: attributes.updatedBy,

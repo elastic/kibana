@@ -7,10 +7,9 @@
 
 import { i18n } from '@kbn/i18n';
 import React, { useCallback, useEffect } from 'react';
-import type { LazyObservabilityPageTemplateProps } from '@kbn/observability-shared-plugin/public';
 import { useLogViewContext } from '@kbn/logs-shared-plugin/public';
 import { isJobStatusWithResults, logEntryCategoriesJobType } from '../../../../common/log_analysis';
-import { LoadingPage } from '../../../components/loading_page';
+import { LoadingPrompt } from '../../../components/loading_page';
 import {
   LogAnalysisSetupStatusUnknownPrompt,
   MissingSetupPrivilegesPrompt,
@@ -21,14 +20,11 @@ import {
 } from '../../../components/logging/log_analysis_setup/setup_flyout';
 import { useLogAnalysisCapabilitiesContext } from '../../../containers/logs/log_analysis';
 import { useLogEntryCategoriesModuleContext } from '../../../containers/logs/log_analysis/modules/log_entry_categories';
-import { LogsPageTemplate } from '../shared/page_template';
+import { LogsAppHeader, logCategoriesPageTitle } from '../header';
+import { LogsPageTemplate, type LogsPageTemplateProps } from '../shared/page_template';
 import { LogEntryCategoriesResultsContent } from './page_results_content';
 import { LogEntryCategoriesSetupContent } from './page_setup_content';
 import { useLogMlJobIdFormatsShimContext } from '../shared/use_log_ml_job_id_formats_shim';
-
-const logCategoriesTitle = i18n.translate('xpack.infra.logs.logCategoriesTitle', {
-  defaultMessage: 'Categories',
-});
 
 export const LogEntryCategoriesPageContent = () => {
   const { hasLogAnalysisReadCapabilities, hasLogAnalysisSetupCapabilities } =
@@ -52,11 +48,13 @@ export const LogEntryCategoriesPageContent = () => {
 
   if (setupStatus.type === 'initializing') {
     return (
-      <LoadingPage
-        message={i18n.translate('xpack.infra.logs.logEntryCategories.jobStatusLoadingMessage', {
-          defaultMessage: 'Checking status of categorization jobs...',
-        })}
-      />
+      <CategoriesPageTemplate isEmptyState={true}>
+        <LoadingPrompt
+          message={i18n.translate('xpack.infra.logs.logEntryCategories.jobStatusLoadingMessage', {
+            defaultMessage: 'Checking status of categorization jobs...',
+          })}
+        />
+      </CategoriesPageTemplate>
     );
   } else if (setupStatus.type === 'unknown') {
     return (
@@ -69,7 +67,7 @@ export const LogEntryCategoriesPageContent = () => {
       <>
         <LogEntryCategoriesResultsContent
           onOpenSetup={showCategoriesModuleSetup}
-          pageTitle={logCategoriesTitle}
+          pageTitle={logCategoriesPageTitle}
           idFormat={idFormats![logEntryCategoriesJobType]}
         />
         <LogAnalysisSetupFlyout allowedModules={allowedSetupModules} />
@@ -95,22 +93,13 @@ export const LogEntryCategoriesPageContent = () => {
 
 const allowedSetupModules = ['logs_ui_categories' as const];
 
-export const CategoriesPageTemplate: React.FC<LazyObservabilityPageTemplateProps> = ({
-  children,
-  ...rest
-}) => {
+export const CategoriesPageTemplate: React.FC<LogsPageTemplateProps> = ({ children, ...rest }) => {
   const { logViewStatus } = useLogViewContext();
   return (
     <LogsPageTemplate
       hasData={logViewStatus?.index !== 'missing'}
       data-test-subj="logsLogEntryCategoriesPage"
-      pageHeader={
-        rest.isEmptyState
-          ? undefined
-          : {
-              pageTitle: logCategoriesTitle,
-            }
-      }
+      header={<LogsAppHeader title={logCategoriesPageTitle} />}
       {...rest}
     >
       {children}

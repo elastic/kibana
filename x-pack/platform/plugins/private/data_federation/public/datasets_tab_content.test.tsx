@@ -18,31 +18,22 @@ type MockDatasetsClient = Pick<DataFederationKibanaServices['datasetsClient'], '
 
 jest.mock('./datasets_table', () => ({
   DatasetsTable: (props: Record<string, unknown>) => {
-    const filteredItems = (props.filteredItems as any[]) ?? [];
+    const items = (props.items as any[]) ?? [];
     const selectedItems = (props.selectedItems as any[]) ?? [];
 
     return (
       <div data-test-subj="mockDatasetsTable">
         <div data-test-subj="mockSelectedCount">{String(selectedItems.length)}</div>
-        <div data-test-subj="mockFilterValue">{String(props.dataSourceFilter ?? '')}</div>
         <div data-test-subj="mockCreateDisabled">{String(props.isCreateDisabled)}</div>
 
         <button data-test-subj="mockCreate" onClick={() => (props.onCreate as any)()} />
         <button
           data-test-subj="mockSelectFirst"
-          onClick={() => (props.onSelectionChange as any)([filteredItems[0]])}
-        />
-        <button
-          data-test-subj="mockChangeFilterToDs1"
-          onClick={() => (props.onDataSourceFilterChange as any)('ds1')}
-        />
-        <button
-          data-test-subj="mockChangeFilterToMissing"
-          onClick={() => (props.onDataSourceFilterChange as any)('missing')}
+          onClick={() => (props.onSelectionChange as any)([items[0]])}
         />
         <button
           data-test-subj="mockDeleteFirst"
-          onClick={() => (props.onDelete as any)(filteredItems[0])}
+          onClick={() => (props.onDelete as any)(items[0])}
         />
         <button
           data-test-subj="mockDeleteSelected"
@@ -271,66 +262,6 @@ describe('DatasetsTabContent', () => {
     await waitFor(() => {
       expect(deleteMock).toHaveBeenCalledWith('set1');
       expect(loadDataSets).toHaveBeenCalledTimes(1);
-    });
-  });
-
-  it('resets selected items when data source filter changes', async () => {
-    const loadDataSets = jest.fn().mockResolvedValue(undefined);
-
-    await renderComponent({
-      dataSources: [createDataSource('ds1')],
-      dataSets: [createDataSet({ name: 'set1', dataSource: 'ds1' })],
-      datasetsClient: { add: jest.fn(), delete: jest.fn() },
-      loadDataSets,
-    });
-
-    fireEvent.click(document.querySelector('[data-test-subj="mockSelectFirst"]') as Element);
-    await waitFor(() => {
-      expect(document.querySelector('[data-test-subj="mockSelectedCount"]')?.textContent).toBe('1');
-    });
-
-    fireEvent.click(document.querySelector('[data-test-subj="mockChangeFilterToDs1"]') as Element);
-
-    await waitFor(() => {
-      expect(document.querySelector('[data-test-subj="mockSelectedCount"]')?.textContent).toBe('0');
-    });
-  });
-
-  it('clears an invalid data source filter when the data source no longer exists', async () => {
-    const loadDataSets = jest.fn().mockResolvedValue(undefined);
-
-    const { rerender } = await renderComponent({
-      dataSources: [createDataSource('ds1'), createDataSource('missing')],
-      dataSets: [],
-      datasetsClient: { add: jest.fn(), delete: jest.fn() },
-      loadDataSets,
-    });
-
-    fireEvent.click(
-      document.querySelector('[data-test-subj="mockChangeFilterToMissing"]') as Element
-    );
-    await waitFor(() => {
-      expect(document.querySelector('[data-test-subj="mockFilterValue"]')?.textContent).toBe(
-        'missing'
-      );
-    });
-
-    rerender(
-      <EuiProvider>
-        <KibanaContextProvider
-          services={createServicesMock({ datasetsClient: { add: jest.fn(), delete: jest.fn() } })}
-        >
-          <DatasetsTabContent
-            dataSources={[createDataSource('ds1')]}
-            dataSets={[]}
-            loadDataSets={loadDataSets}
-          />
-        </KibanaContextProvider>
-      </EuiProvider>
-    );
-
-    await waitFor(() => {
-      expect(document.querySelector('[data-test-subj="mockFilterValue"]')?.textContent).toBe('');
     });
   });
 });

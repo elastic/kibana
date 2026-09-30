@@ -22,6 +22,7 @@ import { dashboardTools } from '../../../common';
 import { retrieveLatestVersion } from './attachment_state';
 import {
   createAttachmentPanelResolver,
+  createControlFieldCapabilitiesResolver,
   createVisPanelResolver,
   executeDashboardOperations,
   getErrorMessage,
@@ -113,8 +114,8 @@ Persists the resulting dashboard as an attachment and returns its id plus a comp
 
 Use operations[] to:
 1. set metadata
-2. add panels (resolved panel configs, or Lens/Vega visualizations from a natural-language query — pick the engine with the panel "renderer" field; defaults to Lens)
-3. edit existing Lens, Vega, or markdown panel content
+2. add panels: existing visualization attachments by id (\`source: "attachment"\`, preferred over copying their config), resolved panel configs (\`source: "config"\`), or Lens/Vega visualizations from a natural-language query (\`source: "request"\`; pick the engine with the panel "renderer" field, defaults to Lens)
+3. edit existing Lens, Vega, markdown, custom content, or ML anomaly panel content
 4. update panel layouts without changing content
 5. add / remove sections, including inline section panels during add_section
 6. remove panels
@@ -152,6 +153,9 @@ Use operations[] to:
             esClient,
           }),
           resolveAttachmentPanel: createAttachmentPanelResolver({ attachments }),
+          resolveControlFieldCapabilities: createControlFieldCapabilitiesResolver({
+            esClient: esClient.asCurrentUser,
+          }),
         });
 
         // Data-aware default time range computation
@@ -211,7 +215,7 @@ Use operations[] to:
               type: ToolResultType.error,
               data: {
                 message: `Failed to generate dashboard: ${errorMessage}`,
-                metadata: { dashboardAttachmentId: previousAttachmentId, operations },
+                metadata: { dashboardAttachmentId: previousAttachmentId },
               },
             },
           ],
