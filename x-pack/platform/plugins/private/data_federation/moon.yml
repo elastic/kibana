@@ -33,6 +33,8 @@ dependsOn:
   - '@kbn/storybook'
   - '@kbn/i18n-react'
   - '@kbn/utility-types'
+  - '@kbn/share-plugin'
+  - '@kbn/deeplinks-analytics'
 tags:
   - plugin
   - prod

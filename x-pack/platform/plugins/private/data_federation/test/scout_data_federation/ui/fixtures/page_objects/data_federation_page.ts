@@ -201,8 +201,8 @@ export class DataFederationPage {
     dataSetName: string;
     resource: string;
   }): Promise<void> {
-    const row = this.getDataSetRow(dataSetName);
-    await row.locator('[data-test-subj="dataSetsSetsEditButton"]').click();
+    await this.openDataSetActionsMenu(dataSetName);
+    await this.clickDataSetActionsMenuItem('Edit');
     await this.createDatasetWizard.waitFor({ state: 'visible' });
 
     await this.createDataSetResource.fill(resource);
@@ -278,9 +278,21 @@ export class DataFederationPage {
     await this.getMappingFieldRow(name).waitFor({ state: 'hidden' });
   }
 
+  async openDataSetActionsMenu(dataSetName: string): Promise<void> {
+    await this.getDataSetRow(dataSetName).getByRole('button', { name: 'More actions' }).click();
+  }
+
+  async clickDataSetActionsMenuItem(name: 'Edit' | 'Delete'): Promise<void> {
+    await this.page
+      .getByRole('dialog', { name: 'More actions' })
+      .getByRole('menuitem', { name, exact: true })
+      .click();
+  }
+
   async deleteDataSet(dataSetName: string): Promise<void> {
     const row = this.getDataSetRow(dataSetName);
-    await row.locator('[data-test-subj="dataSetsSetsDeleteIconButton"]').click();
+    await this.openDataSetActionsMenu(dataSetName);
+    await this.clickDataSetActionsMenuItem('Delete');
     await this.confirmModalConfirm();
     await row.waitFor({ state: 'hidden' });
   }

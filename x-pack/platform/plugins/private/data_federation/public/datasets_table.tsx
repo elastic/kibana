@@ -20,6 +20,7 @@ import { reactRouterNavigate, useKibana } from '@kbn/kibana-react-plugin/public'
 
 import type { DataSetWithName, DataSource } from '../common';
 import { CREATE_DATASET_PATH, getEditDatasetPath } from './app_paths';
+import { DatasetRowActions } from './dataset_row_actions';
 import { getDataSourceTypeVerbose } from './get_data_source_type_label';
 import { mainTranslations } from './main_i18n';
 import type { DataFederationKibanaServices } from './types';
@@ -45,7 +46,7 @@ export const DatasetsTable: FunctionComponent<DatasetsTableProps> = ({
   onDeleteSelected,
 }) => {
   const {
-    services: { docLinks },
+    services: { docLinks, discoverLocator },
   } = useKibana<DataFederationKibanaServices>();
   const history = useHistory();
   const createDatasetNav = reactRouterNavigate(history, CREATE_DATASET_PATH);
@@ -112,30 +113,21 @@ export const DatasetsTable: FunctionComponent<DatasetsTableProps> = ({
         width: '8%',
         actions: [
           {
-            name: mainTranslations.columns.dataSets.editAction,
-            description: mainTranslations.columns.dataSets.editActionDescription,
-            icon: 'pencil',
-            type: 'icon',
-            onClick: (item) => {
-              history.push(getEditDatasetPath(item.name));
-            },
-            'data-test-subj': 'dataSetsSetsEditButton',
-          },
-          {
-            name: mainTranslations.columns.dataSets.deleteAction,
-            description: mainTranslations.columns.dataSets.deleteActionDescription,
-            icon: 'trash',
-            color: 'danger',
-            type: 'icon',
-            onClick: (item) => {
-              onDelete(item);
-            },
-            'data-test-subj': 'dataSetsSetsDeleteIconButton',
+            render: (item, enabled) => (
+              <DatasetRowActions
+                disabled={!enabled}
+                discoverUrl={discoverLocator?.getRedirectUrl({
+                  query: { esql: `FROM "${item.name}"` },
+                })}
+                onEdit={() => history.push(getEditDatasetPath(item.name))}
+                onDelete={() => onDelete(item)}
+              />
+            ),
           },
         ],
       },
     ],
-    [history, onDelete]
+    [discoverLocator, history, onDelete]
   );
 
   return (

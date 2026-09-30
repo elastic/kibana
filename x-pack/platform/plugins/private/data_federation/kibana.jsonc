@@ -20,7 +20,8 @@
       "features"
     ],
     "optionalPlugins": [
-      "cloud"
+      "cloud",
+      "share"
     ],
     "requiredBundles": [
       "kibanaReact",

@@ -48,6 +48,10 @@ const createDataSetRow = ({
     description: '',
   } as DataSetWithName);
 
+interface DiscoverLocatorMock {
+  getRedirectUrl: jest.Mock;
+}
+
 describe('DatasetsTable', () => {
   const consoleWarnSpy = jest.spyOn(console, 'warn').mockImplementation((...args: unknown[]) => {
     const [first] = args;
@@ -60,12 +64,15 @@ describe('DatasetsTable', () => {
     consoleWarnSpy.mockRestore();
   });
 
-  const renderTable = (props: Partial<React.ComponentProps<typeof DatasetsTable>> = {}) => {
+  const renderTable = (
+    props: Partial<React.ComponentProps<typeof DatasetsTable>> = {},
+    discoverLocator?: DiscoverLocatorMock
+  ) => {
     const history = createMemoryHistory({ initialEntries: ['/datasets'] });
     const view = render(
       <EuiProvider>
         <Router history={history}>
-          <KibanaContextProvider services={{ docLinks: docLinksMock }}>
+          <KibanaContextProvider services={{ docLinks: docLinksMock, discoverLocator }}>
             <DatasetsTable
               items={[createDataSetRow({ name: 'set1', dataSource: 'ds1' })]}
               selectedItems={[]}
@@ -153,27 +160,57 @@ describe('DatasetsTable', () => {
     expect(onSelectionChange).toHaveBeenCalledWith([]);
   });
 
-  it('navigates to the edit wizard and calls onDelete for row actions', async () => {
-    const onDelete = jest.fn();
-    const { getAllByTestId, history } = renderTable({
-      items: [
-        createDataSetRow({ name: 'set1', dataSource: 'ds1' }),
-        createDataSetRow({ name: 'set2', dataSource: 'ds1' }),
-      ],
-      onDelete,
-    });
+  const twoRows = [
+    createDataSetRow({ name: 'set1', dataSource: 'ds1' }),
+    createDataSetRow({ name: 'set2', dataSource: 'ds1' }),
+  ];
 
-    const editButtons = getAllByTestId('dataSetsSetsEditButton');
-    const deleteButtons = getAllByTestId('dataSetsSetsDeleteIconButton');
-    expect(editButtons).toHaveLength(2);
-    expect(deleteButtons).toHaveLength(2);
+  it('navigates to the edit wizard from the row actions menu', async () => {
+    const { getAllByTestId, getByTestId, history } = renderTable({ items: twoRows });
 
-    fireEvent.click(editButtons[0]);
+    fireEvent.click(getAllByTestId('dataSetsSetsActionsButton')[0]);
+    fireEvent.click(getByTestId('dataSetsSetsEditButton'));
     expect(history.location.pathname).toBe(getEditDatasetPath('set1'));
+  });
 
-    fireEvent.click(deleteButtons[1]);
+  it('calls onDelete from the row actions menu', async () => {
+    const onDelete = jest.fn();
+    const { getAllByTestId, getByTestId } = renderTable({ items: twoRows, onDelete });
+
+    fireEvent.click(getAllByTestId('dataSetsSetsActionsButton')[1]);
+    fireEvent.click(getByTestId('dataSetsSetsDeleteIconButton'));
     expect(onDelete).toHaveBeenCalledTimes(1);
     expect(onDelete).toHaveBeenCalledWith(expect.objectContaining({ name: 'set2' }));
+  });
+
+  it('links each row to Discover with an ES|QL query for the dataset', async () => {
+    const getRedirectUrl = jest.fn(
+      ({ query }: { query: { esql: string } }) => `/discover?esql=${query.esql}`
+    );
+    const { getByTestId } = renderTable({}, { getRedirectUrl });
+
+    expect(getRedirectUrl).toHaveBeenCalledWith({ query: { esql: 'FROM "set1"' } });
+    expect(getByTestId('dataSetsSetsDiscoverButton')).toHaveAttribute(
+      'href',
+      '/discover?esql=FROM "set1"'
+    );
+  });
+
+  it('disables the row actions while rows are selected', async () => {
+    const selectedItems = [createDataSetRow({ name: 'set1', dataSource: 'ds1' })];
+    const { getByTestId } = renderTable(
+      { items: selectedItems, selectedItems },
+      { getRedirectUrl: jest.fn(() => '/discover') }
+    );
+
+    expect(getByTestId('dataSetsSetsActionsButton')).toBeDisabled();
+    expect(getByTestId('dataSetsSetsDiscoverButton')).toBeDisabled();
+  });
+
+  it('hides the Discover link when Discover is unavailable', async () => {
+    const { queryByTestId } = renderTable();
+
+    expect(queryByTestId('dataSetsSetsDiscoverButton')).not.toBeInTheDocument();
   });
 
   it('shows bulk delete when selection is non-empty and calls onDeleteSelected', async () => {
