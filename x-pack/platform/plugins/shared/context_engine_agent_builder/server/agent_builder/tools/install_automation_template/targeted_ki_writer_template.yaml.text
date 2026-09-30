@@ -37,45 +37,14 @@ enabled: true
 
 consts:
   # The Context Engine AI index the indicators are written into.
-  ai_index_id: my-ai-index
-  # One entry per KI. The example shows every field a targeted KI uses.
+  ai_index_id: __AI_INDEX_ID__
+  # One entry per KI. Provided by the install tool at installation time.
   kis:
-    - ki_id: constraint-my-source-index-backquoted-fields
-      ki:
-        type: constraint
-        title: "my-source-index: field names with spaces must be backquoted in ES|QL"
-        description: >-
-          Queries against my-source-index fail with "Unknown column" when `Order Date` or
-          `Unit Price USD` are written bare. Wrap them in backticks. Seen in 6 of 41 conversations
-          over 30 days.
-        content: |
-          Several fields in my-source-index contain spaces: `Order Date`, `Unit Price USD`,
-          `Product Name`. ES|QL rejects them unquoted ("Unknown column [Order]").
-
-          Write them in backticks:
-            FROM my-source-index | WHERE `Order Date` >= "2024-01-01" | STATS n = COUNT(*) | LIMIT 1
-
-          Applies to every field in the mapping whose name contains a space or a capital letter.
-        tags:
-          - constraint
-          - my-source-index
-        references:
-          - uri: trace://replace-with-a-real-trace-id
-            relation: derived_from
-          - uri: conversation://replace-with-a-real-conversation-id
-            relation: derived_from
-          - uri: index://my-source-index
-            relation: derived_from
-        attributes:
-          esql:
-            - 'FROM my-source-index | WHERE `Order Date` >= "2024-01-01" | STATS n = COUNT(*) | LIMIT 1'
-          error_text: 'Unknown column [Order], did you mean [`Order Date`]?'
-          # How many retrievals hit this out of how many, and over what window: the prevalence
-          # behind the finding, so a reader can judge it.
-          prevalence: "6 of 41 conversations, 30 days"
+__KIS__
 
 tags:
   - targeted-ki
+  - ce-template:targeted_ki_writer
 
 triggers:
   - type: manual

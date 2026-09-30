@@ -38,7 +38,11 @@ import type {
   SignificantEventStatus,
   Severity,
 } from '@kbn/significant-events-schema';
-import { useSignificantEventsUrlState } from './use_significant_events_url_state';
+import {
+  DEFAULT_SIGNIFICANT_EVENT_SEVERITY_FILTER,
+  DEFAULT_SIGNIFICANT_EVENT_STATUS_FILTER,
+  useSignificantEventsUrlState,
+} from './use_significant_events_url_state';
 import { RUNNING_POLL_INTERVAL_MS } from '../../../../constants';
 import { useFetchSignificantEvents } from '../../../../hooks/use_fetch_significant_events';
 import { useTimefilter } from '../../../../hooks/use_timefilter';
@@ -59,8 +63,6 @@ import { useTriggerInvestigation } from '../../../../hooks/use_trigger_investiga
 import { useUpdateSignificantEvent } from '../../../../hooks/use_update_significant_event';
 import { useBlocksNewActivity } from '../../../../hooks/use_significant_events_maintenance';
 import { DismissEventModal } from './dismiss_event_modal';
-
-export const DEFAULT_SIGNIFICANT_EVENT_SEVERITY_FILTER: Severity[] = ['80-critical', '60-high'];
 
 const RUN_ARIA_LABEL = i18n.translate(
   'xpack.significantEventsApp.significantEventsTab.runInvestigationButton.ariaLabel',
@@ -412,16 +414,22 @@ export const SignificantEventsTab = () => {
   const { updateTimeRange } = useTimeRangeUpdate();
 
   const { data: streamsData } = useFetchStreams();
-  // Closed events are hidden by default; users can opt back in via the Status filter.
-  const [statusFilter, setStatusFilter] = useState<SignificantEventStatus[]>(() =>
-    SIGNIFICANT_EVENT_STATUS_OPTIONS.filter((status) => status === 'open')
-  );
-  const [severityFilter, setSeverityFilter] = useState<Severity[]>(() => [
-    ...DEFAULT_SIGNIFICANT_EVENT_SEVERITY_FILTER,
-  ]);
-  const [streamFilter, setStreamFilter] = useState<string[]>([]);
-  const { selectedEventId, openEventId, toggleEvent, closeEvent, clearSelectedEvent } =
-    useSignificantEventsUrlState();
+  /**
+   * Filters live in the URL so they survive a reload. Closed events are hidden by default;
+   * users can opt back in via the Status filter.
+   */
+  const {
+    selectedEventId,
+    openEventId,
+    statusFilter,
+    severityFilter,
+    streamFilter,
+    setFilters,
+    resetFilters,
+    toggleEvent,
+    closeEvent,
+    clearSelectedEvent,
+  } = useSignificantEventsUrlState();
 
   // Pre-fill the search bar with the deep-linked event_id so the user can see what's active
   // and clear it naturally by clearing the search.
@@ -515,9 +523,14 @@ export const SignificantEventsTab = () => {
     const resolvedCreatedAt = resolvedSelectedEvent.created_at;
     const resolvedLatestAt = resolvedSelectedEvent['@timestamp'];
 
-    setStatusFilter([resolvedSelectedEvent.status]);
-    setSeverityFilter([resolvedSelectedEvent.severity]);
-    setStreamFilter(resolvedStreamNames ? resolvedStreamNames.split(',') : []);
+    setFilters(
+      {
+        status: [resolvedSelectedEvent.status],
+        severity: [resolvedSelectedEvent.severity],
+        stream: resolvedStreamNames ? resolvedStreamNames.split(',') : [],
+      },
+      { keepSelectedEvent: true }
+    );
 
     if (!resolvedCreatedAt || !resolvedLatestAt) {
       return;
@@ -531,7 +544,14 @@ export const SignificantEventsTab = () => {
     }
 
     updateTimeRange({ from: resolvedCreatedAt, to: resolvedLatestAt });
-  }, [resolvedSelectedEvent, resolvedStreamNames, timeState.start, timeState.end, updateTimeRange]);
+  }, [
+    resolvedSelectedEvent,
+    resolvedStreamNames,
+    setFilters,
+    timeState.start,
+    timeState.end,
+    updateTimeRange,
+  ]);
 
   const columns = useMemo(
     () =>
@@ -543,20 +563,17 @@ export const SignificantEventsTab = () => {
   );
 
   const handleResetFilters = useCallback(() => {
-    setStatusFilter(SIGNIFICANT_EVENT_STATUS_OPTIONS.filter((s) => s === 'open'));
-    setSeverityFilter([...DEFAULT_SIGNIFICANT_EVENT_SEVERITY_FILTER]);
-    setStreamFilter([]);
-    clearSelectedEvent();
+    resetFilters();
     if (priorTimeRangeRef.current) {
       updateTimeRange(priorTimeRangeRef.current);
       priorTimeRangeRef.current = null;
     }
-  }, [clearSelectedEvent, updateTimeRange]);
+  }, [resetFilters, updateTimeRange]);
 
   const areFiltersAtDefault = useMemo(
     () =>
-      statusFilter.length === 1 &&
-      statusFilter[0] === 'open' &&
+      statusFilter.length === DEFAULT_SIGNIFICANT_EVENT_STATUS_FILTER.length &&
+      DEFAULT_SIGNIFICANT_EVENT_STATUS_FILTER.every((s) => statusFilter.includes(s)) &&
       severityFilter.length === DEFAULT_SIGNIFICANT_EVENT_SEVERITY_FILTER.length &&
       DEFAULT_SIGNIFICANT_EVENT_SEVERITY_FILTER.every((s) => severityFilter.includes(s)) &&
       streamFilter.length === 0,
@@ -564,27 +581,20 @@ export const SignificantEventsTab = () => {
   );
 
   const onStatusChange = useCallback(
-    (opts: EuiSelectableOption[]) => {
-      setStatusFilter(extractCheckedKeys(opts).filter(isSignificantEventStatus));
-      clearSelectedEvent();
-    },
-    [clearSelectedEvent]
+    (opts: EuiSelectableOption[]) =>
+      setFilters({ status: extractCheckedKeys(opts).filter(isSignificantEventStatus) }),
+    [setFilters]
   );
 
   const onStreamChange = useCallback(
-    (opts: EuiSelectableOption[]) => {
-      setStreamFilter(extractCheckedKeys(opts));
-      clearSelectedEvent();
-    },
-    [clearSelectedEvent]
+    (opts: EuiSelectableOption[]) => setFilters({ stream: extractCheckedKeys(opts) }),
+    [setFilters]
   );
 
   const onSeverityChange = useCallback(
-    (opts: EuiSelectableOption[]) => {
-      setSeverityFilter(extractCheckedKeys(opts).filter(isSeverity));
-      clearSelectedEvent();
-    },
-    [clearSelectedEvent]
+    (opts: EuiSelectableOption[]) =>
+      setFilters({ severity: extractCheckedKeys(opts).filter(isSeverity) }),
+    [setFilters]
   );
 
   const filters = useMemo(
