@@ -96,8 +96,6 @@ function GraphWorkspace(options) {
 
   this.nodes = [];
   this.edges = [];
-  this.lastRequest = null;
-  this.lastResponse = null;
   this.changeHandler = options.changeHandler;
   const layoutController = options.layoutController;
 
@@ -214,7 +212,6 @@ function GraphWorkspace(options) {
     this.nodesMap = {};
     this.edgesMap = {};
     this.blocklistedNodes = [];
-    this.lastResponse = null;
   };
 
   this.arrRemoveAll = function remove(arr, items) {

@@ -55,6 +55,7 @@ describe('workspace_layout', () => {
         json: jest.fn(),
       }),
       reset: jest.fn(),
+      getRequests: jest.fn(() => []),
     } as unknown as RequestAdapter,
     workspace: {} as unknown as Workspace,
   };
