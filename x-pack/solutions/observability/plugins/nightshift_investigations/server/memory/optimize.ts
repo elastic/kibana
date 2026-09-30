@@ -791,14 +791,9 @@ export const applyMemoryEdits = async ({
   );
 
   const harmful = new Set(harmfulIds);
-  // A harmful memory that an entry replaces stays live until that entry is written, so the
-  // writer can keep what is still right in it; it is archived afterwards if nothing replaced it.
-  const replacedIds = new Set(extractions.flatMap((extra) => extra.replaces));
-  const deferredHarmfulIds = archiveIds.filter((id) => replacedIds.has(id));
+  // A harmful memory never reaches the writer, even when an entry replaces it; that entry is
+  // written from this run alone.
   for (const id of archiveIds) {
-    if (replacedIds.has(id)) {
-      continue;
-    }
     await store.archive(id, 'harmful');
     summary.harmfulArchiveCount += 1;
     logger.debug(`Memory archived ${id} reason=harmful`);
@@ -808,8 +803,6 @@ export const applyMemoryEdits = async ({
   const task = unwrapUserTask(context);
   const consumedIds = new Set<string>();
   const consumedExtracts = new Set<number>();
-  // Pages an entry was written to or archived into an entry this round.
-  const replacedDoneIds = new Set<string>();
   const archivedExactIds = new Set<string>();
   const otherTopicsOf = (extract: MemoryExtractProposal): string[] =>
     extractions.filter((other) => other !== extract).map((other) => other.title);
@@ -847,9 +840,19 @@ export const applyMemoryEdits = async ({
     const catalogHits =
       (await store.retrieve({ query: extra.title, size: 5, match: 'content' })) ?? [];
     const named = recalledMemories.filter(
-      (page) => extra.replaces.includes(page.id) && page.status !== 'archived'
+      (page) =>
+        extra.replaces.includes(page.id) && page.status !== 'archived' && !harmful.has(page.id)
     );
-    const unknownReplaces = extra.replaces.filter((id) => !named.some((page) => page.id === id));
+    const harmfulReplaces = extra.replaces.filter((id) => harmful.has(id));
+    if (harmfulReplaces.length > 0) {
+      logger.debug(
+        `Extraction "${extra.slug}" replaces harmful memories, archived without merging: ` +
+          `[${harmfulReplaces.join(', ')}]`
+      );
+    }
+    const unknownReplaces = extra.replaces.filter(
+      (id) => !harmful.has(id) && !named.some((page) => page.id === id)
+    );
     if (unknownReplaces.length > 0) {
       logger.debug(
         `Extraction "${extra.slug}" names ${unknownReplaces.length} replace id(s) that are not ` +
@@ -863,7 +866,7 @@ export const applyMemoryEdits = async ({
       recalledIds,
       recalledMemories,
       catalogHits: exactPage ? [exactPage, ...catalogHits] : catalogHits,
-    }).filter((page) => !named.some((source) => source.id === page.id));
+    }).filter((page) => !extra.replaces.includes(page.id));
     const live = [...named, ...unnamedOverlaps];
     if (live.some((page) => consumedIds.has(page.id))) {
       // A prior entry already replaces this source. Consuming later proposals avoids
@@ -921,26 +924,9 @@ export const applyMemoryEdits = async ({
     });
     if (mergeResult.writtenId) {
       summary.mergeSuccessCount += 1;
-      replacedDoneIds.add(mergeResult.writtenId);
-    }
-    for (const id of mergeResult.archivedSourceIds ?? []) {
-      replacedDoneIds.add(id);
     }
     summary.mergedSourceArchiveCount += mergeResult.archivedSourceCount;
     summary.writeFailureCount += mergeResult.writeFailureCount;
-  }
-
-  for (const id of deferredHarmfulIds) {
-    if (replacedDoneIds.has(id)) {
-      continue;
-    }
-    const page = await store.get(id);
-    if (!page || page.status === 'archived') {
-      continue;
-    }
-    await store.archive(id, 'harmful');
-    summary.harmfulArchiveCount += 1;
-    logger.debug(`Memory archived ${id} reason=harmful (no entry replaced it)`);
   }
 
   for (let index = 0; index < extractions.length; index++) {
@@ -1018,7 +1004,6 @@ export const applyMemoryEdits = async ({
 interface MergeMemoryGroupResult {
   /** The page the entry was written to; unset when nothing was written. */
   writtenId?: string;
-  archivedSourceIds?: string[];
   archivedSourceCount: number;
   writeFailureCount: number;
 }
@@ -1250,7 +1235,7 @@ const mergeMemoryGroup = async ({
     return { archivedSourceCount: 0, writeFailureCount: 1 };
   }
 
-  const archivedSourceIds: string[] = [];
+  let archivedSourceCount = 0;
   let writeFailureCount = 0;
   for (const source of committedSources) {
     const { page } = source;
@@ -1261,7 +1246,7 @@ const mergeMemoryGroup = async ({
       // A merge may only consume the source snapshot incorporated into the committed canonical.
       // Chasing a conflict here could archive a newer source that the canonical does not contain.
       await store.archiveVersioned(source, 'merged');
-      archivedSourceIds.push(page.id);
+      archivedSourceCount += 1;
     } catch (err) {
       writeFailureCount += 1;
       logger.warn('Memory merge wrote canonical but failed to archive a source');
@@ -1274,8 +1259,7 @@ const mergeMemoryGroup = async ({
   );
   return {
     writtenId: writtenCanonicalId,
-    archivedSourceIds,
-    archivedSourceCount: archivedSourceIds.length,
+    archivedSourceCount,
     writeFailureCount,
   };
 };

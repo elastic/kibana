@@ -1518,32 +1518,10 @@ describe('applyMemoryEdits entries: new, update, merge', () => {
     expect(store.archiveVersioned).toHaveBeenCalledTimes(2);
   });
 
-  it('lets an entry replace a harmful memory instead of archiving it as harmful', async () => {
+  it('archives a replaced harmful memory as harmful and writes the entry without it', async () => {
     const wrong = page('memory_pdt-skew', 'PDT skew', 'The host clock is 7 hours behind UTC.');
     const store = storeWith([wrong]);
-
-    await applyMemoryEdits({
-      store,
-      recalledIds: [wrong.id],
-      recalledMemories: [wrong],
-      labels: { useful: [], harmful: [wrong.id] },
-      extractions: [entry({ replaces: [wrong.id] })],
-      context: 'clock',
-      synthesizeMemoryGroup: jest.fn().mockResolvedValue({ content: 'Right.', context: 'clock' }),
-      logger: loggerMock.create(),
-    });
-
-    expect(store.archive).not.toHaveBeenCalled();
-    expect(store.create).toHaveBeenCalledWith(expect.objectContaining({ slug: 'host-clock-lag' }));
-    expect(store.archiveVersioned).toHaveBeenCalledWith(
-      expect.objectContaining({ page: expect.objectContaining({ id: wrong.id }) }),
-      'merged'
-    );
-  });
-
-  it('still archives a replaced harmful memory as harmful when its entry is not written', async () => {
-    const wrong = page('memory_pdt-skew', 'PDT skew', 'The host clock is 7 hours behind UTC.');
-    const store = storeWith([wrong]);
+    const synthesizeMemoryGroup = jest.fn();
 
     const summary = await applyMemoryEdits({
       store,
@@ -1552,12 +1530,93 @@ describe('applyMemoryEdits entries: new, update, merge', () => {
       labels: { useful: [], harmful: [wrong.id] },
       extractions: [entry({ replaces: [wrong.id] })],
       context: 'clock',
-      synthesizeMemoryGroup: jest.fn().mockRejectedValue(new Error('model down')),
+      synthesizeMemoryGroup,
       logger: loggerMock.create(),
     });
 
     expect(store.archive).toHaveBeenCalledWith(wrong.id, 'harmful');
-    expect(summary).toEqual(expect.objectContaining({ harmfulArchiveCount: 1 }));
+    expect(synthesizeMemoryGroup).not.toHaveBeenCalled();
+    expect(store.create).toHaveBeenCalledWith(
+      expect.objectContaining({
+        slug: 'host-clock-lag',
+        content: 'The host clock runs about 1 s behind the sandbox CA.',
+      })
+    );
+    expect(store.archiveVersioned).not.toHaveBeenCalled();
+    expect(summary).toEqual(
+      expect.objectContaining({ harmfulArchiveCount: 1, standaloneUpsertCount: 1 })
+    );
+  });
+
+  it('merges only the live memories when an entry also replaces a harmful one', async () => {
+    const wrong = page('memory_pdt-skew', 'PDT skew', 'The host clock is 7 hours behind UTC.');
+    const right = page('memory_x509-errors', 'x509 errors', 'x509 not yet valid errors on TLS.');
+    const store = storeWith([wrong, right]);
+    const synthesizeMemoryGroup = jest
+      .fn()
+      .mockResolvedValue({ content: 'Right.', context: 'x509 clock' });
+
+    await applyMemoryEdits({
+      store,
+      recalledIds: [wrong.id, right.id],
+      recalledMemories: [wrong, right],
+      labels: { useful: [], harmful: [wrong.id] },
+      extractions: [entry({ replaces: [wrong.id, right.id] })],
+      context: 'clock',
+      synthesizeMemoryGroup,
+      logger: loggerMock.create(),
+    });
+
+    expect(store.archive).toHaveBeenCalledWith(wrong.id, 'harmful');
+    expect(synthesizeMemoryGroup).toHaveBeenCalledWith(
+      expect.objectContaining({ sources: [right] })
+    );
+    expect(store.archiveVersioned).toHaveBeenCalledTimes(1);
+    expect(store.archiveVersioned).toHaveBeenCalledWith(
+      expect.objectContaining({ page: expect.objectContaining({ id: right.id }) }),
+      'merged'
+    );
+  });
+
+  it('writes a harmful memory replacement that keeps its title over the archived id', async () => {
+    const wrong = page('memory_host-clock-lag', 'Host clock lag', 'The clock is 7 h behind UTC.');
+    wrong.telemetry = {
+      impressions: 5,
+      conversions: 3,
+      last_impression_time: '2026-01-01T00:00:00.000Z',
+    };
+    let stored: MemoryPage = wrong;
+    const store = createStore({
+      get: jest.fn(async (id: string) => (id === wrong.id ? stored : undefined)),
+      archive: jest.fn(async (id: string, reason) => {
+        stored = { ...stored, status: 'archived', archive_reason: reason };
+        return stored;
+      }),
+    });
+
+    await applyMemoryEdits({
+      store,
+      recalledIds: [wrong.id],
+      recalledMemories: [wrong],
+      labels: { useful: [], harmful: [wrong.id] },
+      extractions: [entry({ replaces: [wrong.id] })],
+      context: 'clock',
+      synthesizeMemoryGroup: jest.fn(),
+      now: () => 1_790_000_000,
+      logger: loggerMock.create(),
+    });
+
+    expect(store.archive).toHaveBeenCalledWith(wrong.id, 'harmful');
+    expect(store.create).not.toHaveBeenCalled();
+    expect(store.update).toHaveBeenCalledWith(
+      wrong.id,
+      expect.objectContaining({
+        status: 'tentative',
+        content: 'The host clock runs about 1 s behind the sandbox CA.',
+        telemetry: expect.objectContaining({ impressions: 0, conversions: 0 }),
+      }),
+      expect.objectContaining({ page: expect.objectContaining({ status: 'archived' }) })
+    );
   });
 
   it('writes a new memory when replaces names only ids that were not recalled', async () => {
