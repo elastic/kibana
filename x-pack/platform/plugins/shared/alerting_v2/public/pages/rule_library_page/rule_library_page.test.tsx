@@ -100,7 +100,15 @@ jest.mock('../../hooks/use_compose_discover_flyout', () => {
 });
 
 jest.mock('./rule_library_list', () => ({
-  RuleLibraryList: () => <div data-test-subj="mockedRuleLibraryList" />,
+  RuleLibraryList: ({ urlSync = true }: { urlSync?: boolean }) => (
+    <div data-test-subj="mockedRuleLibraryList" data-url-sync={String(urlSync)} />
+  ),
+}));
+
+jest.mock('./v1_rule_library_list', () => ({
+  V1RuleLibraryList: ({ urlSync = true }: { urlSync?: boolean }) => (
+    <div data-test-subj="mockedV1RuleLibraryList" data-url-sync={String(urlSync)} />
+  ),
 }));
 
 const mockCreatePayload: CreateRuleData = {
@@ -167,14 +175,15 @@ describe('RuleLibraryPage', () => {
     expect(v1Tab).toHaveAttribute('aria-selected', 'false');
     expect(v2Tab).toHaveTextContent('V2');
     expect(v1Tab).toHaveTextContent('V1');
-    expect(screen.getByTestId('mockedRuleLibraryList')).toBeInTheDocument();
+    expect(screen.getByTestId('mockedRuleLibraryList')).toHaveAttribute('data-url-sync', 'false');
+    expect(screen.queryByTestId('mockedV1RuleLibraryList')).not.toBeInTheDocument();
   });
 
   it('hides the tab strip when the user can access only v2 rules', () => {
     renderPage();
 
     expect(screen.queryByRole('tab')).not.toBeInTheDocument();
-    expect(screen.getByTestId('mockedRuleLibraryList')).toBeInTheDocument();
+    expect(screen.getByTestId('mockedRuleLibraryList')).toHaveAttribute('data-url-sync', 'true');
   });
 
   it('hides the tab strip and the v2 list when the user can access only v1 rules', () => {
@@ -184,6 +193,7 @@ describe('RuleLibraryPage', () => {
 
     expect(screen.queryByRole('tab')).not.toBeInTheDocument();
     expect(screen.queryByTestId('mockedRuleLibraryList')).not.toBeInTheDocument();
+    expect(screen.getByTestId('mockedV1RuleLibraryList')).toHaveAttribute('data-url-sync', 'true');
   });
 
   it('switches to the v1 tab and unmounts the v2 list', async () => {
@@ -196,6 +206,7 @@ describe('RuleLibraryPage', () => {
     expect(screen.getByTestId('ruleLibraryV1Tab')).toHaveAttribute('aria-selected', 'true');
     expect(screen.getByTestId('ruleLibraryV2Tab')).toHaveAttribute('aria-selected', 'false');
     expect(screen.queryByTestId('mockedRuleLibraryList')).not.toBeInTheDocument();
+    expect(screen.getByTestId('mockedV1RuleLibraryList')).toHaveAttribute('data-url-sync', 'false');
   });
 
   it('does not open the v2 flyout from templateId while the v1 library is showing', async () => {

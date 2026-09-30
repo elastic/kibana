@@ -36,6 +36,9 @@ export const RULES_CONTENT_LIST_ID = 'alerting-v2-rules';
 /** Stable Content List `id` / query-key scope for the rule library page. */
 export const RULE_TEMPLATES_CONTENT_LIST_ID = 'alerting-v2-rule-templates';
 
+/** Stable Content List `id` / query-key scope for classic templates on the rule library page. */
+export const V1_RULE_TEMPLATES_CONTENT_LIST_ID = 'alerting-v1-rule-templates';
+
 export {
   ALERTING_V2_RULE_API_PATH,
   ALERTING_V2_INTERNAL_RULE_API_PATH,

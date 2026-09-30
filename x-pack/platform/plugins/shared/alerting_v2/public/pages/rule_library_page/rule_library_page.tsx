@@ -15,6 +15,7 @@ import { useBreadcrumbs } from '../../hooks/use_breadcrumbs';
 import { useComposeDiscoverFlyout } from '../../hooks/use_compose_discover_flyout';
 import { useCreateFromTemplateQuery } from '../../hooks/use_create_from_template_query';
 import { RuleLibraryList } from './rule_library_list';
+import { V1RuleLibraryList } from './v1_rule_library_list';
 import {
   getDefaultRuleLibraryEngine,
   useRuleLibraryAccess,
@@ -40,6 +41,7 @@ export const RuleLibraryPage = () => {
     getDefaultRuleLibraryEngine({ canAccessV1, canAccessV2 })
   );
   const showV2Library = selectedEngine === 'v2';
+  const shareListUrlState = !(canAccessV1 && canAccessV2);
   const { flyout, openCreateFromTemplateFlyout } = useComposeDiscoverFlyout();
   useCreateFromTemplateQuery(openCreateFromTemplateFlyout, { enabled: showV2Library });
 
@@ -76,7 +78,11 @@ export const RuleLibraryPage = () => {
         spacing="bleed"
       />
       <EuiSpacer size="m" />
-      {showV2Library && <RuleLibraryList />}
+      {showV2Library ? (
+        <RuleLibraryList urlSync={shareListUrlState} />
+      ) : (
+        <V1RuleLibraryList urlSync={shareListUrlState} />
+      )}
       {flyout}
     </div>
   );

@@ -87,6 +87,7 @@
     "@kbn/alerting-v2-utils",
     "@kbn/alerting-v2-episodes-ui",
     "@kbn/response-ops-alert-snooze",
+    "@kbn/response-ops-rules-apis",
     "@kbn/rule-data-utils",
     "@kbn/kibana-react-plugin",
     "@kbn/kibana-utils-plugin",

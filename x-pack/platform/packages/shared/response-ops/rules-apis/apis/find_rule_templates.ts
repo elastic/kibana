@@ -28,6 +28,7 @@ export interface RuleTemplate {
   name: string;
   ruleTypeId: string;
   tags: string[];
+  description?: string;
 }
 
 export interface FindRuleTemplatesResponse {

@@ -5,14 +5,8 @@
  * 2.0.
  */
 
-import React, { useMemo } from 'react';
-import {
-  EuiBadge,
-  EuiEmptyPrompt,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiLoadingSpinner,
-} from '@elastic/eui';
+import React, { useCallback, useMemo } from 'react';
+import { EuiBadge, EuiEmptyPrompt, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import {
   ContentList,
   ContentListFooter,
@@ -21,16 +15,18 @@ import {
   ContentListToolbar,
 } from '@kbn/content-list';
 import type { ContentListItem, ContentListItemConfig } from '@kbn/content-list';
-import { useService } from '@kbn/core-di-browser';
+import { useService, CoreStart } from '@kbn/core-di-browser';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { RULE_TEMPLATES_CONTENT_LIST_ID } from '../../constants';
-import { useInstallRuleTemplate } from '../../hooks/use_install_rule_template';
-import { UserCapabilities } from '../../services/user_capabilities';
 import {
-  useRuleTemplatesDataSource,
-  type RuleTemplateContentListItem,
-} from './rule_templates_data_source';
+  getCreateRuleFromTemplateRoute,
+  getTriggersActionsManagementPath,
+} from '@kbn/rule-data-utils';
+import { MANAGEMENT_APP_ID, V1_RULE_TEMPLATES_CONTENT_LIST_ID } from '../../constants';
+import {
+  useV1RuleTemplatesDataSource,
+  type V1RuleTemplateContentListItem,
+} from './v1_rule_templates_data_source';
 
 const { Column, Action } = ContentListTable;
 
@@ -38,45 +34,43 @@ const RULE_LIBRARY_LIST_TITLE = i18n.translate('xpack.alertingV2.ruleLibrary.pag
   defaultMessage: 'Rule library',
 });
 
-const INSTALL_ACTION_NAME = i18n.translate('xpack.alertingV2.ruleLibrary.installButtonLabel', {
-  defaultMessage: 'Install',
+const CREATE_ACTION_NAME = i18n.translate('xpack.alertingV2.ruleLibrary.createButtonLabel', {
+  defaultMessage: 'Create',
 });
 
-const INSTALL_RESTRICTED_REASON = i18n.translate(
-  'xpack.alertingV2.ruleLibrary.installRestrictedTooltip',
-  {
-    defaultMessage: 'You do not have permission to install rule templates',
-  }
-);
+const toTemplate = (item: ContentListItem) => (item as V1RuleTemplateContentListItem).template;
 
-const toTemplate = (item: ContentListItem) => (item as RuleTemplateContentListItem).template;
+export const V1RuleLibraryList = ({ urlSync = true }: { urlSync?: boolean }) => {
+  const application = useService(CoreStart('application'));
+  const dataSource = useV1RuleTemplatesDataSource();
 
-export const RuleLibraryList = ({ urlSync = true }: { urlSync?: boolean }) => {
-  const canWrite = useService(UserCapabilities).canWrite('rules');
-  const dataSource = useRuleTemplatesDataSource();
-  const {
-    mutate: installTemplate,
-    isLoading: isInstalling,
-    variables: installingTemplate,
-  } = useInstallRuleTemplate();
+  const onCreate = useCallback(
+    (templateId: string) => {
+      application.navigateToApp(MANAGEMENT_APP_ID, {
+        path: getTriggersActionsManagementPath(
+          getCreateRuleFromTemplateRoute(encodeURIComponent(templateId))
+        ),
+      });
+    },
+    [application]
+  );
 
   const itemConfig = useMemo(
     (): ContentListItemConfig => ({
       actions: {
-        install: {
+        create: {
           onItemAction: (item) => {
-            installTemplate(toTemplate(item));
+            onCreate(item.id);
           },
-          restriction: canWrite ? undefined : () => INSTALL_RESTRICTED_REASON,
         },
       },
     }),
-    [canWrite, installTemplate]
+    [onCreate]
   );
 
   const emptyState = (
     <EuiEmptyPrompt
-      data-test-subj="ruleLibraryEmptyPrompt"
+      data-test-subj="v1RuleLibraryEmptyPrompt"
       iconType="indexOpen"
       title={
         <h2>
@@ -99,8 +93,8 @@ export const RuleLibraryList = ({ urlSync = true }: { urlSync?: boolean }) => {
 
   return (
     <ContentListProvider
-      id={RULE_TEMPLATES_CONTENT_LIST_ID}
-      queryKeyScope={RULE_TEMPLATES_CONTENT_LIST_ID}
+      id={V1_RULE_TEMPLATES_CONTENT_LIST_ID}
+      queryKeyScope={V1_RULE_TEMPLATES_CONTENT_LIST_ID}
       labels={{
         entity: i18n.translate('xpack.alertingV2.ruleLibrary.entity', {
           defaultMessage: 'rule template',
@@ -138,7 +132,7 @@ export const RuleLibraryList = ({ urlSync = true }: { urlSync?: boolean }) => {
         selection: false,
       }}
     >
-      <ContentList emptyState={emptyState} data-test-subj="ruleLibraryList">
+      <ContentList emptyState={emptyState} data-test-subj="v1RuleLibraryList">
         <ContentListToolbar />
         <ContentListTable
           title={RULE_LIBRARY_LIST_TITLE}
@@ -154,8 +148,8 @@ export const RuleLibraryList = ({ urlSync = true }: { urlSync?: boolean }) => {
             width="10em"
             maxWidth="10em"
             render={(item: ContentListItem) => {
-              const tags = toTemplate(item).rule.metadata.tags;
-              if (!tags?.length) return null;
+              const tags = toTemplate(item).tags;
+              if (!tags.length) return null;
               return (
                 <EuiFlexGroup gutterSize="xs" wrap>
                   {tags.map((tag) => (
@@ -169,20 +163,11 @@ export const RuleLibraryList = ({ urlSync = true }: { urlSync?: boolean }) => {
           />
           <Column.Actions width="14em" sticky={false}>
             <Action
-              id="install"
-              name={(item: ContentListItem) =>
-                isInstalling && installingTemplate?.id === item.id ? (
-                  <EuiLoadingSpinner size="m" data-test-subj="ruleLibraryInstallLoading" />
-                ) : (
-                  INSTALL_ACTION_NAME
-                )
-              }
-              description={INSTALL_ACTION_NAME}
+              id="create"
+              name={CREATE_ACTION_NAME}
+              description={CREATE_ACTION_NAME}
               type="button"
-              enabled={(item: ContentListItem) =>
-                canWrite && !(isInstalling && installingTemplate?.id === item.id)
-              }
-              data-test-subj="ruleLibraryInstallAction"
+              data-test-subj="ruleLibraryCreateAction"
             />
           </Column.Actions>
         </ContentListTable>
