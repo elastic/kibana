@@ -4,13 +4,13 @@ Outcome eval for the Attack Discovery FP/TP analysis ([security-team#19285](http
 
 ## What it runs
 
-The suite runs the managed workflow `system-security-attack-discovery-fp-tp-analysis`. `src/sample_workflow/` is still in the package; the spec installs it only when `FP_TP_WORKFLOW_SOURCE` is `sample`.
+The suite runs the managed analysis workflow (`system-security-attack-discovery-fp-tp-analysis`, [security-team#19282](https://github.com/elastic/security-team/issues/19282)). The temporary sample workflow it used before the managed one shipped has been removed; prompt changes happen in the managed definition now.
 
 The workflow's `ai.agent` step runs `alertzero-thin-agent` with no tools and resolves its connector from the `alertzero_reasoning` inference feature. `beforeAll` routes that feature to the model under test and restores the previous inference settings in `afterAll`.
 
 ## Dataset
 
-The dataset is every example of every scenario registered in `src/scenarios/index.ts`. There are two scenarios.
+The dataset is every example of every scenario registered in `src/scenarios/index.ts`. Two scenarios are registered:
 
 `encoded-powershell` is authored: encoded PowerShell on a workstation vs. an Intune/SCCM box (see [its README](src/scenarios/encoded_powershell/README.md)):
 
@@ -25,15 +25,13 @@ The dataset is every example of every scenario registered in `src/scenarios/inde
 | `encoded-powershell.failed-missing-ad` | U6 | No Attack Discovery document | `failed` |
 | `encoded-powershell.failed-missing-cited-alert` | U6 | The discovery cites an alert that is not seeded | `failed` |
 
-`mimicrat-clickfix` replays the MIMICRAT ClickFix chain from [Elastic Security Labs](https://www.elastic.co/security-labs/threat-command/mimicrat-custom-rat-mimics-c2-frameworks), ported from [#293023](https://github.com/elastic/kibana/pull/293023). Its 15 examples are two base worlds, the replay and a benign mimic, and variants of them, so together they reach every branch of the verdict rules. See [its README](src/scenarios/mimicrat_clickfix/README.md) for the table.
+`mimicrat-clickfix` replays the MIMICRAT ClickFix chain from [Elastic Security Labs](https://www.elastic.co/security-labs/threat-command/mimicrat-custom-rat-mimics-c2-frameworks). Its examples cover the replay and a benign mimic plus evidence-state variants; see [its README](src/scenarios/mimicrat_clickfix/README.md) for the full table.
 
 A missing source is one-sided: it blocks `false_positive` (missing evidence cannot clear an alert) but not `true_positive`, which needs a supporting raw-event check (`process_parent` or `network_destination`). `entity_role` alone never escalates, so `tp-events-missing` stays `inconclusive`.
 
-Situations follow the contract: U1 lookalike, U2 benign alerts, U3 invented chain, U4 shared egress or jump box, U5 ambient, U6 true attack.
+Situations follow the contract: U1 lookalike, U2 benign alerts, U3 invented chain, U4 shared egress or jump box, U5 ambient, U6 true attack. U2–U5 have no scenario yet.
 
-Every example records its `provenance`, where its world came from: `authored` (written by hand) or `replay` (a published chain rendered as documents). A world whose checked facts are invented is `authored` even when it reuses a replay's alerts and discovery, as the MIMICRAT benign mimic does. An example derived from another example's world also records a `variant`: its `kind`, the base it changes (`of`), and a `description`; a variant has its base's provenance. Examples with `checks` state the result each world check should reach, and `registry.test.ts` requires the gold to follow from them under the workflow's verdict rules (`deriveFpTpOutcome`). A `mutation` must change at least one check result against its base; one that changes none, such as reordering events, tests nothing new. A `perturbation` changes evidence the checks do not read, so it must change none, and its gold stays that of its base. `provisional` marks a gold that is not agreed yet. `deriveFpTpOutcome` mirrors the rules as `FP_TP_VERDICT_RULES` states them, and a test fails when that text and `fp_tp_analysis.yaml` diverge.
-
-Each example's metadata carries its scenario, situation, evidence state, provenance, variant kind and base, and whether it is provisional, so reports can be sliced by any of them. Every task seeds its documents under a fresh run marker and suffix (`uniquify`), so repetitions and examples never share a document, and deletes them when it ends.
+Each example's metadata carries its scenario, situation, and evidence state, so reports can be sliced by any of them. Every task seeds its documents under a fresh run marker and suffix (`uniquify`), so repetitions and examples never share a document, and deletes them when it ends.
 
 Setup stops Entity Store log extraction (`PUT /api/security/entity_store/stop`) for the duration of the suite. Otherwise the store builds entities from the seeded raw events, and a world seeded without entities (`tp-entities-missing`) would gain them mid-run. Cleanup also deletes any entity on a seeded host. Teardown restarts extraction if it was running before the suite started. If a run is killed before teardown, run `PUT /api/security/entity_store/start` to resume it.
 
@@ -42,37 +40,32 @@ Setup stops Entity Store log extraction (`PUT /api/security/entity_store/stop`) 
 ```
 src/
   world/                  Scenario-agnostic: world and gold types, seeding and cleanup,
-                          uniquify, timestamp shifting, evidence-state helpers,
-                          chain builder, mutations, verdict rules
+                          uniquify, timestamp shifting, evidence-state helpers
   scenarios/
     index.ts              Registry: FP_TP_SCENARIOS, FP_TP_EXAMPLES, buildFpTpExampleWorld
     types.ts              FpTpScenario, FpTpExample, FpTpSituation, FpTpEvidenceState
     registry.test.ts      Invariants every scenario must hold
     encoded_powershell/   One authored scenario: ids, attack, entities, event overlays, gold, examples
-    mimicrat_clickfix/    One replayed chain, its benign mimic, and their variants
-  sample_workflow/        Installed only when FP_TP_WORKFLOW_SOURCE is sample
   workflow_task.ts        Runs the workflow and reads its output
   evaluators.ts
 ```
 
 ## Adding a scenario
 
-1. Create `src/scenarios/<scenario_key>/`. Either:
-   - model it on `encoded_powershell/`: build alerts and raw events from a registry scenario in `@kbn/evals-suite-attack-discovery-agent-builder` (`buildAd2SeedPlan`), then add the authored attack, entity documents, event overlays, and gold for each twin; or
-   - model it on `mimicrat_clickfix/`: write the chain as an `FpTpChainDefinition` (events, alert stages, discovery text) and render it with `buildChainWorld`, then derive variants with the helpers in `src/world/mutations.ts`. Each helper throws when no raw event matches, so a rewrite whose target moved fails the build instead of changing nothing.
+1. Create `src/scenarios/<scenario_key>/` modelled on `encoded_powershell/`. Build alerts and raw events from a registry scenario in `@kbn/evals-suite-attack-discovery-agent-builder` (`buildAd2SeedPlan`), then add the authored attack, entity documents, event overlays, and gold for each twin.
 2. Export an `FpTpScenario` from its `index.ts`:
    - `key`: the scenario key; every example id must start with `<key>.`.
    - `sharedNames`: every name the run marker does not make unique (attack id, host names, user names). `uniquify` suffixes them per run.
    - `twins`: the complete worlds a person can seed by hand, keyed by variant.
-   - `examples`: one entry per eval example, with its situation, evidence state, gold outcome, provenance, `variant` if it changes another example's world, `checks` where the gold follows from the verdict rules, and `buildWorld(runMarker)`. Use the helpers in `src/world/evidence_states.ts` for the degraded-evidence and failure examples.
+   - `examples`: one entry per eval example, with its situation, evidence state, gold outcome, and `buildWorld(runMarker)`. Use the helpers in `src/world/evidence_states.ts` for the degraded-evidence and failure examples.
 3. Add the scenario to `FP_TP_SCENARIOS` in `src/scenarios/index.ts`.
-4. Run the package's jest tests. `registry.test.ts` checks the new examples for unique ids, no unsuffixed shared names, disjoint documents across runs, raw events inside the workflow's ±2h window, golds that follow from `checks`, variants whose base is in the same scenario, mutations that change a check result against their base, and perturbations that change none.
+4. Run the package's jest tests. `registry.test.ts` checks the new examples for unique ids, no unsuffixed shared names, disjoint documents across runs, and raw events inside the workflow's ±2h window.
 
 ## Evaluators
 
 - `OutcomeAccuracy` (primary): the outcome matches the gold; a `failed` gold also needs an explicit `FAILED` execution, so a timeout or cancellation does not pass. The label is the predicted outcome, so the report reads as a confusion matrix.
 - `UnsafeClose`: 0 when the run predicts `false_positive` and the gold is anything else. A false positive closes the attack.
-- `PayloadConformance`: the run completed and has a supported verdict, a non-empty `summary_markdown` of at most 8000 characters, a `rationale_markdown` of at most 50000 characters when present, and an `attack_discovery_id` that echoes the input. A run whose gold is `failed` ended `FAILED` (a timeout or cancellation does not count) and produced no payload.
+- `PayloadConformance`: the run completed and has a supported verdict, a non-empty `summary_markdown` of at most 8000 characters, a non-empty `rationale_markdown` of at most 50000 characters whose first line is the mandatory evidence-gate source-status line (`entity_store: hits|empty|failed; raw_events: hits|empty|failed`, cross-checked against the run's own coverage -- missing coverage for a source never satisfies an `empty` claim), a `checks` array reporting all three mandatory world checks (`entity_role`, `process_parent`, `network_destination`), and an `attack_discovery_id` that echoes the input. A run whose gold is `failed` ended `FAILED` (a timeout or cancellation does not count) and produced no payload.
 - `trajectory`: the agent called no tools. N/A when traces are unavailable.
 - LLM criteria on the summary and rationale: cited ids exist in the seeded data, nothing is invented (the task output carries the seeded documents in `seededEvidence`), the discovery's and alerts' story is stated as fact only where the entities or raw events show it, the deciding checks are named, and an `inconclusive` verdict says what was missing or conflicting. N/A for failed runs.
 
@@ -93,10 +86,12 @@ Run with `--repetitions 5` or more. Each repetition is a separate run in the rep
 ## Acceptance criteria (proposed)
 
 - Hard gates on the core models: `PayloadConformance` = 1.0 and `UnsafeClose` = 1.0.
-- `OutcomeAccuracy`: record the sample workflow's numbers as the baseline #19282 has to beat, then set a threshold.
+- `OutcomeAccuracy`: set a threshold from the current baseline once the managed workflow's numbers are stable.
 
-## Sample workflow cleanup
+## Switching to the managed workflow (after #19282)
 
-`FP_TP_WORKFLOW_SOURCE` is `managed`. Still to do: delete `src/sample_workflow/` and the install and delete calls around it in the spec, and point the `FP_TP_VERDICT_RULES` text lock at the managed YAML.
+1. Set `FP_TP_WORKFLOW_SOURCE` in `src/constants.ts` to `managed`.
+2. ~~Delete `src/sample_workflow/`~~ — done; the suite runs the managed workflow.
+3. Add the claim-grounding evaluator.
 
-The suite also runs on demand through the `evals:security-attack-discovery-fp-tp` PR label.
+The suite is not yet wired into the weekly Buildkite sweep (`.buildkite/pipelines/evals/llm_evals.yml`); that step is deferred until a baseline eval run exists on this branch's prompt fixes. Until then it can be run on demand through the `evals:security-attack-discovery-fp-tp` PR label. Switching to the managed workflow does not require any change to that eventual weekly step — it just changes which workflow the schedule exercises once the step exists.

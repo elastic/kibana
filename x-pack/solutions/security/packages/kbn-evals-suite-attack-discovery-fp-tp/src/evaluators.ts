@@ -11,10 +11,11 @@ import { ExecutionStatus } from '@kbn/workflows';
 import {
   FP_TP_VERDICTS,
   RATIONALE_MARKDOWN_MAX_LENGTH,
+  SOURCE_STATUS_LINE_PATTERN,
   SUMMARY_MARKDOWN_MAX_LENGTH,
   type FpTpOutcome,
 } from './constants';
-import type { FpTpTaskOutput } from './workflow_task';
+import type { FpTpCoverage, FpTpTaskOutput } from './workflow_task';
 
 interface ExpectedOutcome {
   outcome: FpTpOutcome;
@@ -23,6 +24,76 @@ interface ExpectedOutcome {
 const asOutput = (output: unknown): FpTpTaskOutput => output as FpTpTaskOutput;
 const expectedOutcome = (expected: unknown): FpTpOutcome | undefined =>
   (expected as ExpectedOutcome | undefined)?.outcome;
+
+interface SourceStatusGroups {
+  entityStore: string;
+  rawEvents: string;
+}
+
+/**
+ * Cross-checks the source-status line's claimed status against what the run's own
+ * coverage says it actually retrieved, so a rationale cannot claim `hits` for a source
+ * whose query returned nothing (or claim `empty`/`failed` for a source that did return
+ * hits). It also distinguishes a genuine query failure (`coverage.*.failed`) from a
+ * successful zero-hit query: both produce `seen = 0`, but only the former may be
+ * claimed as `failed` in the line -- a claim of `failed` against a query that actually
+ * ran and legitimately found nothing is also a mismatch, and so is a claim of `empty`
+ * against a query that errored.
+ */
+const sourceStatusMismatches = (
+  { entityStore, rawEvents }: SourceStatusGroups,
+  coverage: FpTpCoverage | undefined
+): string[] => {
+  const checks: ReadonlyArray<{
+    label: string;
+    claimed: string;
+    seen: number | undefined;
+    failed: boolean | undefined;
+    coverageMissing: boolean;
+  }> = [
+    {
+      label: 'entity_store',
+      claimed: entityStore,
+      seen: coverage?.entities?.seen,
+      failed: coverage?.entities?.failed,
+      coverageMissing: coverage?.entities === undefined,
+    },
+    {
+      label: 'raw_events',
+      claimed: rawEvents,
+      seen: coverage?.events?.seen,
+      failed: coverage?.events?.failed,
+      coverageMissing: coverage?.events === undefined,
+    },
+  ];
+  return checks.flatMap(({ label, claimed, seen, failed, coverageMissing }) => {
+    if (claimed === 'hits' && !seen) {
+      return [`source-status line claims ${label} hits but coverage reports ${seen ?? 'no'} seen`];
+    }
+    if (claimed === 'empty') {
+      // Missing coverage is not evidence a source was empty -- it means the run never
+      // reported whether the query even ran. Reject the claim before trusting undefined
+      // seen/failed as "ran and found nothing".
+      if (coverageMissing) {
+        return [`source-status line claims ${label} empty but coverage for ${label} is missing`];
+      }
+      if (failed) {
+        return [`source-status line claims ${label} empty but the query actually failed`];
+      }
+      if (seen) {
+        return [`source-status line claims ${label} empty but coverage reports ${seen} seen`];
+      }
+    }
+    if (claimed === 'failed') {
+      if (!failed) {
+        return seen
+          ? [`source-status line claims ${label} failed but coverage reports ${seen} seen`]
+          : [`source-status line claims ${label} failed but the query did not fail (0 hits)`];
+      }
+    }
+    return [];
+  });
+};
 
 /**
  * Primary metric: does the run's outcome match the gold outcome? A `failed` gold also
@@ -93,13 +164,50 @@ const payloadProblems = (output: FpTpTaskOutput, attackDiscoveryId: string): str
   if (summary.length > SUMMARY_MARKDOWN_MAX_LENGTH) {
     problems.push(`summary_markdown longer than ${SUMMARY_MARKDOWN_MAX_LENGTH}`);
   }
-  if ((payload.rationale_markdown?.length ?? 0) > RATIONALE_MARKDOWN_MAX_LENGTH) {
+  const rationale = payload.rationale_markdown ?? '';
+  if (rationale.trim() === '') {
+    problems.push('missing rationale_markdown');
+  } else if (rationale.length > RATIONALE_MARKDOWN_MAX_LENGTH) {
     problems.push(`rationale_markdown longer than ${RATIONALE_MARKDOWN_MAX_LENGTH}`);
+  } else {
+    const sourceStatusMatch = SOURCE_STATUS_LINE_PATTERN.exec(rationale.split('\n')[0]);
+    if (!sourceStatusMatch?.groups) {
+      problems.push('rationale_markdown missing the evidence-gate source-status line');
+    } else {
+      problems.push(
+        ...sourceStatusMismatches(
+          sourceStatusMatch.groups as unknown as SourceStatusGroups,
+          output.raw?.coverage
+        )
+      );
+    }
   }
   if (attackDiscoveryIdEcho !== attackDiscoveryId) {
     problems.push(`attack_discovery_id "${attackDiscoveryIdEcho}" does not echo the input`);
   }
+  problems.push(...worldCheckProblems(output.raw?.checks));
   return problems;
+};
+
+/**
+ * The three world checks the prompt's mandatory self-check requires a bullet for
+ * (`alert_linkage` is a precondition, not a world check, and is excluded). Missing any
+ * one of these means the self-check was skipped without the evaluator ever noticing --
+ * the source-status line can pass while the run omits the checks meant to expose
+ * rationalized contradictions.
+ */
+const REQUIRED_WORLD_CHECKS = ['entity_role', 'process_parent', 'network_destination'] as const;
+
+const worldCheckProblems = (checks: unknown[] | undefined): string[] => {
+  const reported = new Set(
+    (checks ?? [])
+      .filter((check): check is { name?: unknown } => typeof check === 'object' && check !== null)
+      .map((check) => check.name)
+  );
+  const missing = REQUIRED_WORLD_CHECKS.filter((name) => !reported.has(name));
+  return missing.length > 0
+    ? [`checks is missing required world-check entries: ${missing.join(', ')}`]
+    : [];
 };
 
 const failureProblems = (output: FpTpTaskOutput): string[] => [

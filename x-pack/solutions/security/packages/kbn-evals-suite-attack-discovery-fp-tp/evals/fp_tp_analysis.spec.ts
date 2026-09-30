@@ -9,8 +9,7 @@
  * Outcome eval for the Attack Discovery FP/TP analysis workflow (security-team#19285).
  *
  * `beforeAll` routes the `alertzero_reasoning` inference feature to the model under test.
- * The suite runs the managed analysis workflow. It installs the sample workflow only when
- * `FP_TP_WORKFLOW_SOURCE` is `sample`. Each task seeds a
+ * The suite runs the managed analysis workflow. Each task seeds a
  * fresh copy of one example's world, creates an empty Investigation, runs the workflow,
  * and grades its execution output against the contract in security-team#19280.
  *
@@ -23,11 +22,7 @@ import type { HttpHandler } from '@kbn/core/public';
 import type { EvalConnector, EvaluationDataset, Example } from '@kbn/evals';
 import type { EsClient } from '@kbn/scout';
 import type { ToolingLog } from '@kbn/tooling-log';
-import {
-  FP_TP_INFERENCE_FEATURE_ID,
-  FP_TP_MANAGED_WORKFLOW_ID,
-  FP_TP_WORKFLOW_SOURCE,
-} from '../src/constants';
+import { FP_TP_INFERENCE_FEATURE_ID, FP_TP_MANAGED_WORKFLOW_ID } from '../src/constants';
 import { evaluate, selectEvaluators, tags } from '../src/evaluate';
 import {
   createFpTpTrajectoryEvaluator,
@@ -43,7 +38,6 @@ import {
   waitForConversationsReady,
 } from '../src/investigation';
 import { kbnRequestFromFetch } from '../src/kbn_request';
-import { deleteSampleWorkflow, installSampleWorkflow } from '../src/sample_workflow/install';
 import { buildFpTpExampleWorld, FP_TP_EXAMPLES } from '../src/scenarios';
 import { runFpTpAnalysisWorkflow } from '../src/workflow_task';
 import { ensureFpTpSeedPrerequisites, seedFixture, toSeededEvidence } from '../src/world';
@@ -73,9 +67,7 @@ interface FpTpDatasetExample extends Example {
 }
 
 evaluate.describe('Attack Discovery FP/TP analysis', { tag: tags.stateful.classic }, () => {
-  let workflowId: string = FP_TP_MANAGED_WORKFLOW_ID;
-  // Set only once the sample is installed, so teardown never deletes the managed workflow.
-  let installedSampleWorkflowId: string | undefined;
+  const workflowId = FP_TP_MANAGED_WORKFLOW_ID;
   let restoreInferenceSettings: (() => Promise<void>) | undefined;
   let restoreEntityExtraction: (() => Promise<void>) | undefined;
   // Cleanups that failed inside a task; afterAll retries them.
@@ -91,11 +83,6 @@ evaluate.describe('Attack Discovery FP/TP analysis', { tag: tags.stateful.classi
       connector: EvalConnector;
       log: ToolingLog;
     }) => {
-      if (FP_TP_WORKFLOW_SOURCE === 'sample') {
-        installedSampleWorkflowId = await installSampleWorkflow(fetch);
-        workflowId = installedSampleWorkflowId;
-        log.info(`Installed sample FP/TP analysis workflow ${workflowId}`);
-      }
       restoreInferenceSettings = await overrideInferenceFeature({
         fetch,
         featureId: FP_TP_INFERENCE_FEATURE_ID,
@@ -117,12 +104,6 @@ evaluate.describe('Attack Discovery FP/TP analysis', { tag: tags.stateful.classi
     await restoreInferenceSettings?.().catch((error: Error) =>
       log.warning(`Could not restore inference settings: ${error.message}`)
     );
-    if (installedSampleWorkflowId !== undefined) {
-      const sampleId = installedSampleWorkflowId;
-      await deleteSampleWorkflow(fetch, sampleId).catch((error: Error) =>
-        log.warning(`Could not delete sample workflow ${sampleId}: ${error.message}`)
-      );
-    }
   });
 
   evaluate(
