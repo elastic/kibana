@@ -1,9 +1,22 @@
 {
-  "sha1": "b71a8d1b159d50c5f839a3835a2761b3207a02f5",
+  "sha1": "73bfa760402d9e6abe5b529f6e5fedf10383149d",
   "testChannels": [
     "ci-on-commit"
   ],
   "tests": [
+    {
+      "id": "c281eaec665f4d5-73d40978613ea49",
+      "title": "Load Discover telemetry data",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/observability/test/scout_discover_telemetry/ui/tests/global.setup.ts",
+        "line": 5,
+        "column": 1
+      }
+    },
     {
       "id": "3b4cfbb9ec861da-26281ea9babd528",
       "title": "Discover observability telemetry context sets EBT context for the observability root profile",
@@ -13,8 +26,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability/test/scout_discover_telemetry/ui/tests/context.spec.ts",
-        "line": 23,
-        "column": 7
+        "line": 16,
+        "column": 48
       }
     },
     {
@@ -26,8 +39,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability/test/scout_discover_telemetry/ui/tests/context.spec.ts",
-        "line": 36,
-        "column": 22
+        "line": 33,
+        "column": 32
       }
     },
     {
@@ -39,8 +52,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability/test/scout_discover_telemetry/ui/tests/context.spec.ts",
-        "line": 66,
-        "column": 26
+        "line": 63,
+        "column": 18
       }
     },
     {
@@ -52,8 +65,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability/test/scout_discover_telemetry/ui/tests/field_usage.spec.ts",
-        "line": 24,
-        "column": 34
+        "line": 18,
+        "column": 52
       }
     },
     {
@@ -65,8 +78,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability/test/scout_discover_telemetry/ui/tests/field_usage.spec.ts",
-        "line": 41,
-        "column": 20
+        "line": 38,
+        "column": 28
       }
     },
     {
@@ -78,8 +91,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability/test/scout_discover_telemetry/ui/tests/field_usage.spec.ts",
-        "line": 55,
-        "column": 39
+        "line": 51,
+        "column": 22
       }
     },
     {
@@ -91,8 +104,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability/test/scout_discover_telemetry/ui/tests/field_usage.spec.ts",
-        "line": 81,
-        "column": 70
+        "line": 76,
+        "column": 20
       }
     },
     {
@@ -104,8 +117,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability/test/scout_discover_telemetry/ui/tests/field_usage.spec.ts",
-        "line": 112,
-        "column": 54
+        "line": 108,
+        "column": 25
       }
     },
     {
@@ -117,8 +130,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability/test/scout_discover_telemetry/ui/tests/profiles.spec.ts",
-        "line": 23,
-        "column": 7
+        "line": 16,
+        "column": 48
       }
     },
     {
@@ -130,8 +143,21 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability/test/scout_discover_telemetry/ui/tests/profiles.spec.ts",
-        "line": 58,
-        "column": 22
+        "line": 54,
+        "column": 9
+      }
+    },
+    {
+      "id": "589dce85f3e177a-02a9ab7c5eaf1e5",
+      "title": "Unload Discover telemetry data",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/observability/test/scout_discover_telemetry/ui/tests/global.teardown.ts",
+        "line": 5,
+        "column": 1
       }
     }
   ]

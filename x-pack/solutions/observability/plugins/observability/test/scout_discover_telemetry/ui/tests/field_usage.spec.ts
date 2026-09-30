@@ -8,24 +8,15 @@
 import { expect } from '@kbn/scout-oblt/ui';
 import { getEbtEvents, setEbtOptIn } from '../fixtures/ebt';
 import { test } from '../fixtures/discover_actions';
-import { loadDiscoverTelemetryData, unloadDiscoverTelemetryData } from '../fixtures/setup';
 
 test.describe(
   'Discover observability telemetry field usage',
   { tag: ['@local-serverless-observability_complete'] },
   () => {
-    test.beforeAll(async ({ esArchiver, kbnClient }) => {
-      await loadDiscoverTelemetryData({ esArchiver, kbnClient });
-    });
-
     test.beforeEach(async ({ browserAuth, pageObjects }) => {
       await browserAuth.loginAsAdmin();
       await pageObjects.discover.goto({ queryMode: 'classic' });
       await pageObjects.discover.waitUntilSearchingHasFinished();
-    });
-
-    test.afterAll(async ({ kbnClient }) => {
-      await unloadDiscoverTelemetryData({ kbnClient });
     });
 
     test('tracks a field added to the table', async ({ page, pageObjects, discoverEbt }) => {

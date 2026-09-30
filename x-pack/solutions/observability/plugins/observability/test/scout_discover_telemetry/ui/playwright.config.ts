@@ -14,4 +14,5 @@ import { createPlaywrightConfig } from '@kbn/scout-oblt';
  */
 export default createPlaywrightConfig({
   testDir: './tests',
+  runGlobalSetup: true,
 });

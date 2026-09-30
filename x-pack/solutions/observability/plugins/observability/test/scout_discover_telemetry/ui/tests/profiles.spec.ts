@@ -8,22 +8,13 @@
 import { expect } from '@kbn/scout-oblt/ui';
 import { getEbtEvents } from '../fixtures/ebt';
 import { test } from '../fixtures/discover_actions';
-import { loadDiscoverTelemetryData, unloadDiscoverTelemetryData } from '../fixtures/setup';
 
 test.describe(
   'Discover observability telemetry profiles',
   { tag: ['@local-serverless-observability_complete'] },
   () => {
-    test.beforeAll(async ({ esArchiver, kbnClient }) => {
-      await loadDiscoverTelemetryData({ esArchiver, kbnClient });
-    });
-
     test.beforeEach(async ({ browserAuth }) => {
       await browserAuth.loginAsAdmin();
-    });
-
-    test.afterAll(async ({ kbnClient }) => {
-      await unloadDiscoverTelemetryData({ kbnClient });
     });
 
     test('sends profile resolved events when the data source changes', async ({
