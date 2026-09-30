@@ -13,6 +13,15 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const PageObjects = getPageObjects(['settings', 'common', 'header']);
   const testSubjects = getService('testSubjects');
 
+  // Migration recommendation: MIGRATE TO SCOUT (borderline)
+  // Single test: navigates to Advanced Settings and asserts the `data_views:cache_max_age` element
+  // is present. This is the weakest Scout case in this group — it's essentially a DOM presence check
+  // that could alternatively live as a Jest component test verifying the setting is registered and
+  // rendered. The argument for keeping it as E2E is the serverless sibling:
+  // x-pack/platform/test/serverless/functional/test_suites/management/data_views/_cache.ts
+  // tests the OPPOSITE (setting absent on serverless), making the stateful/serverless pair a
+  // meaningful feature-flag integration check that requires the full stack. Both variants must be
+  // represented in the Scout migration.
   describe('Data view field caps cache advanced setting', function () {
     before(async () => {
       await PageObjects.settings.navigateTo();

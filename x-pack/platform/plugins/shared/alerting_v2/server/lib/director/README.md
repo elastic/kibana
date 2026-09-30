@@ -145,7 +145,7 @@ It supports:
 - timeframe only
 - count + timeframe with `AND` / `OR`
 
-For timeframe evaluation, it compares the current alert event timestamp with the last stored episode timestamp.
+For timeframe evaluation, it compares the director run time (`evaluatedAt`) with the last stored episode timestamp; the current event has no `@timestamp` yet, since ES sets it at ingest.
 
 ## When to add a new strategy
 

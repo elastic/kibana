@@ -40,9 +40,14 @@ esac
     `#!/usr/bin/env bash
 set -euo pipefail
 echo "gcloud $*" >> "$CALLS_FILE"
-if [[ "$1 $2" == "auth login" ]]; then
-  [[ "\${GOOGLE_EXTERNAL_ACCOUNT_ALLOW_EXECUTABLES:-}" == "1" ]]
+if [[ "$1 $2 \${3:-}" == "config set auth/access_token_file" ]]; then
+  echo "$4" > "$CLOUDSDK_CONFIG/access_token_file"
+elif [[ "$1 $2 \${3:-}" == "config unset auth/access_token_file" ]]; then
+  rm -f "$CLOUDSDK_CONFIG/access_token_file"
+elif [[ "$1 $2" == "auth print-access-token" ]]; then
+  echo "mock-token"
 elif [[ "$1 $2" == "storage cp" ]]; then
+  echo "gcloud-auth token=$(cat "$(cat "$CLOUDSDK_CONFIG/access_token_file")")" >> "$CALLS_FILE"
   src="\${3/gs:\\/\\//$FAKE_GCS/}"
   dest="\${4/gs:\\/\\//$FAKE_GCS/}"
   mkdir -p "$(dirname "$dest")"
@@ -147,6 +152,26 @@ describe('tmp artifact helpers', () => {
       '{"groups":[]}'
     );
     expect(download.calls.some((call) => call.includes('artifact download'))).toBe(false);
+  });
+
+  it('mints one access token per job and shares it across regional uploads and downloads', () => {
+    const { dirs, run } = sandbox;
+    const mints = (calls: string[]) =>
+      calls.filter((call) => call.startsWith('gcloud auth print-access-token'));
+    Fs.writeFileSync(Path.join(dirs.root, 'a.json'), '{}');
+
+    const upload = run(`upload_tmp_artifact "${dirs.root}/a.json" a.json "${BUILD_ID}"`);
+    expect(upload.status).toBe(0);
+    expect(mints(upload.calls)).toHaveLength(1);
+    const cpAuth = upload.calls.filter((call) => call.startsWith('gcloud-auth'));
+    expect(cpAuth).toHaveLength(7);
+    expect(new Set(cpAuth)).toEqual(new Set(['gcloud-auth token=mock-token']));
+
+    const download = run(`download_tmp_artifact a.json . "${BUILD_ID}"`);
+    const downloadCalls = download.calls.slice(upload.calls.length);
+    expect(download.status).toBe(0);
+    expect(mints(downloadCalls)).toHaveLength(0);
+    expect(downloadCalls).toContain('gcloud-auth token=mock-token');
   });
 
   it('discards a GCS object whose checksum does not match and falls back to buildkite', () => {

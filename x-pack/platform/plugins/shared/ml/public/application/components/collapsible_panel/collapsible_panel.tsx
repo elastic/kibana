@@ -42,16 +42,7 @@ export const CollapsiblePanel: FC<PropsWithChildren<CollapsiblePanelProps>> = ({
   const { euiTheme } = useEuiTheme();
 
   return (
-    <EuiSplitPanel.Outer
-      data-test-subj={dataTestSubj}
-      grow
-      hasShadow={false}
-      css={{
-        border: `${euiTheme.border.width.thin} solid ${
-          isOpen ? euiTheme.border.color : 'transparent'
-        }`,
-      }}
-    >
+    <EuiSplitPanel.Outer data-test-subj={dataTestSubj} grow hasShadow={false}>
       <EuiSplitPanel.Inner color={isOpen ? 'plain' : 'subdued'}>
         <EuiFlexGroup justifyContent={'spaceBetween'} alignItems={'center'}>
           <EuiFlexItem grow={false}>

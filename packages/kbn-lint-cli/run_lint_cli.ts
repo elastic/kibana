@@ -17,27 +17,36 @@ import type { ToolingLog } from '@kbn/tooling-log';
 
 const LINTABLE_EXTENSIONS = new Set(['.ts', '.tsx', '.js', '.jsx', '.cjs', '.mjs', '.cts', '.mts']);
 
+interface LintOptions {
+  fix: boolean;
+  quiet: boolean;
+  paths: string[];
+}
+
 run(
   async ({ log, flagsReader, procRunner, addCleanupTask }) => {
     const paths = flagsReader.getPositionals().map((t) => Path.resolve(t));
     const fix = flagsReader.boolean('fix');
+    const quiet = flagsReader.boolean('quiet');
     const watch = flagsReader.boolean('watch');
+    const options: LintOptions = { fix, quiet, paths };
 
     if (watch) {
-      await watchAndLintFiles({ procRunner, log, addCleanupTask, options: { fix, paths } });
+      await watchAndLintFiles({ procRunner, log, addCleanupTask, options });
     } else {
       log.info('Linting files...');
-      await lintFiles({ procRunner, options: { fix, paths } });
+      await lintFiles({ procRunner, options });
       log.success('Linting files completed');
     }
   },
   {
-    usage: `node scripts/lint [paths...] [--fix] [--watch]`,
+    usage: `node scripts/lint [paths...] [--fix] [--quiet] [--watch]`,
     flags: {
-      boolean: ['fix', 'watch'],
+      boolean: ['fix', 'quiet', 'watch'],
       alias: { f: 'fix', w: 'watch' },
       help: `
         --fix              Automatically fix some issues in tsconfig.json files
+        --quiet            Only report errors, not warnings
         --watch            Watch for changes and re-run linting
       `,
     },
@@ -50,11 +59,17 @@ async function lintFiles({
   options,
 }: {
   procRunner: ProcRunner;
-  options: { fix: boolean; paths: string[] };
+  options: LintOptions;
 }) {
   await procRunner.run('oxlint', {
     cmd: 'oxlint',
-    args: [...(options.fix ? ['--fix'] : []), '--config', '.oxlintrc.json', ...options.paths],
+    args: [
+      ...(options.fix ? ['--fix'] : []),
+      ...(options.quiet ? ['--quiet'] : []),
+      '--config',
+      '.oxlintrc.json',
+      ...options.paths,
+    ],
     cwd: REPO_ROOT,
     wait: true,
   });
@@ -69,7 +84,7 @@ async function watchAndLintFiles({
   procRunner: ProcRunner;
   log: ToolingLog;
   addCleanupTask: (task: CleanupTask) => void;
-  options: { fix: boolean; paths: string[] };
+  options: LintOptions;
 }) {
   log.info('Linting files in watch mode...');
 
@@ -120,7 +135,7 @@ async function watchAndLintFiles({
 
           isLinting = true;
 
-          await lintFiles({ procRunner, options: { fix: options.fix, paths: options.paths } });
+          await lintFiles({ procRunner, options });
         } catch {
           log.debug('Lint run failed, continuing to watch...');
         } finally {
@@ -138,7 +153,7 @@ async function watchAndLintFiles({
   });
 
   try {
-    await lintFiles({ procRunner, options: { fix: options.fix, paths: options.paths } });
+    await lintFiles({ procRunner, options });
   } catch {
     log.warning('Lint run failed, continuing to watch...');
   }
