@@ -22,6 +22,7 @@ import { dashboardTools } from '../../../common';
 import { retrieveLatestVersion } from './attachment_state';
 import {
   createAttachmentPanelResolver,
+  createControlFieldCapabilitiesResolver,
   createVisPanelResolver,
   executeDashboardOperations,
   getErrorMessage,
@@ -152,6 +153,9 @@ Use operations[] to:
             esClient,
           }),
           resolveAttachmentPanel: createAttachmentPanelResolver({ attachments }),
+          resolveControlFieldCapabilities: createControlFieldCapabilitiesResolver({
+            esClient: esClient.asCurrentUser,
+          }),
         });
 
         // Data-aware default time range computation

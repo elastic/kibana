@@ -81,7 +81,7 @@ describe('loadInboundConnector', () => {
       connectorTypeId: '.slack2',
       spaceId: 'default',
       config: { authType: 'relay' },
-      isInboundEventsEnabled: true,
+      hasPreconfiguredInboundEvents: true,
     });
     expect(result).not.toHaveProperty('hasInboundEventIdentity');
   });
