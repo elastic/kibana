@@ -40,8 +40,16 @@ import {
   type HasUniqueId,
 } from '@kbn/presentation-publishing';
 import type { UiActionsActionDefinition as ActionDefinition } from '@kbn/ui-actions-plugin/public';
+import { DASHBOARD_MANAGEMENT_SKILL_ID } from '../../common';
 import type { IdGenerator } from '../attachment_types';
 import { reportRefineWithChatClicked, type RefineWithChatChatState } from '../telemetry';
+
+/**
+ * Prefilled as a skill badge in the chat input so the user's first message loads the dashboard
+ * management skill. Skills are loaded by the model on request; without this the agent tends to
+ * answer a panel request in chat instead of editing the panel.
+ */
+export const REFINE_WITH_CHAT_INITIAL_MESSAGE = `[/${DASHBOARD_MANAGEMENT_SKILL_ID}](skill://${DASHBOARD_MANAGEMENT_SKILL_ID}) `;
 
 export interface RefineWithChatActionDeps {
   agentBuilder: Pick<
@@ -180,6 +188,8 @@ export const createRefineWithChatAction = ({
         agentBuilder.openChat({
           newConversation: true,
           sessionTag: 'dashboard',
+          initialMessage: REFINE_WITH_CHAT_INITIAL_MESSAGE,
+          autoSendInitialMessage: false,
           attachments: [
             buildDashboardAttachment(draftAttachmentId.current),
             buildPanelPointer(draftAttachmentId.current),

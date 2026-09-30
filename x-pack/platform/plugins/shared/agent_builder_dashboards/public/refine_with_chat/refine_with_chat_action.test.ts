@@ -23,6 +23,7 @@ import type { IdGenerator } from '../attachment_types';
 import { DASHBOARD_PANEL_REFINE_WITH_CHAT_CLICKED } from '../telemetry/event_types';
 import {
   createRefineWithChatAction,
+  REFINE_WITH_CHAT_INITIAL_MESSAGE,
   type RefineWithChatActionDeps,
 } from './refine_with_chat_action';
 
@@ -129,6 +130,12 @@ describe('createRefineWithChatAction', () => {
     expect(createAction().action.id).toBe(REFINE_WITH_CHAT_ACTION_ID);
   });
 
+  it('prefills the input with the dashboard management skill badge', () => {
+    expect(REFINE_WITH_CHAT_INITIAL_MESSAGE).toBe(
+      '[/dashboard-management](skill://dashboard-management) '
+    );
+  });
+
   describe('isCompatible', () => {
     it('accepts an ES|QL Lens panel of the dashboard open in the app, in edit mode', async () => {
       const { action, dashboardApi } = createAction();
@@ -216,6 +223,8 @@ describe('createRefineWithChatAction', () => {
       expect(openChat).toHaveBeenCalledWith({
         newConversation: true,
         sessionTag: 'dashboard',
+        initialMessage: REFINE_WITH_CHAT_INITIAL_MESSAGE,
+        autoSendInitialMessage: false,
         attachments: [
           expect.objectContaining({
             id: DRAFT_ID,

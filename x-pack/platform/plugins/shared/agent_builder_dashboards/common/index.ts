@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export { dashboardTools } from './constants';
+export { dashboardTools, DASHBOARD_MANAGEMENT_SKILL_ID } from './constants';
