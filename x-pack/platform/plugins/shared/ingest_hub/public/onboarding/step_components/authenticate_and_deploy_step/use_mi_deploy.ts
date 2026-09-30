@@ -272,9 +272,13 @@ export function useMiDeploy({
           byPolicy.get(policyId)!.push(instanceId);
         }
         if (byPolicy.size === 0) {
-          // Fail closed when policyIdsByInstance has entries but none resolved (e.g. ?deploymentId
-          // resume skipped Step 2) — prevents clearing isDirty without a Fleet PUT.
-          return Object.keys(policyIdsByInstance).length > 0
+          // Distinguish two empty-byPolicy cases:
+          // (a) All policyIdsByInstance entries are deselected (cleanup targets) — not a failure.
+          //     activeInstanceIds has the new selection, so it's non-empty.
+          // (b) Resume via ?deploymentId skipped Step 2 — deployGroups is empty, so
+          //     activeInstanceIds is empty too. Fail closed to prevent clearing isDirty without
+          //     a Fleet PUT.
+          return activeInstanceIds.size === 0 && Object.keys(policyIdsByInstance).length > 0
             ? { hadFailures: true, allFailedIds: Object.keys(policyIdsByInstance) }
             : { hadFailures: false, allFailedIds: [] };
         }

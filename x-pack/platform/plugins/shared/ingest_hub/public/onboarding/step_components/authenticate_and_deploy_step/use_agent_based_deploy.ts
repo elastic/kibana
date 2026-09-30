@@ -232,9 +232,12 @@ export function useAgentBasedDeploy(): UseAgentBasedDeployResult {
         }
 
         // Update deployed policies with current settings (isDirty). Runs before new targets so
-        // add-service+edit updates existing policies in the same run. Skipped on isNewPolicySwitch.
+        // add-service+edit updates existing policies in the same run. Skipped on isNewPolicyDeploy
+        // (covers both the initial new-policy switch and Retry of a failed creation) — updating
+        // old policies before the replacement is created would apply new settings to the wrong
+        // agents if the replacement creation fails again.
         let dirtyUpdateApplied = false;
-        if ((detectAndReviewStep.isDirty ?? false) && !isNewPolicySwitch) {
+        if ((detectAndReviewStep.isDirty ?? false) && !isNewPolicyDeploy) {
           const targetPolicyIds = agentPolicyId ? [agentPolicyId] : selectedAgentPolicyIds ?? [];
           // Active instances only — exclude cleanedLiveStale and deselected instances.
           const byPolicy = new Map<string, string[]>();

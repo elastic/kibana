@@ -428,17 +428,40 @@ test.describe(
         { key: SERVICE_SETTINGS_SESSION_KEY }
       );
 
-      // Await the drift effect's SO fetch before filling the form to prevent the effect's
-      // updateDetectAndReviewStep({ isDirty: false }) from racing with the form's isDirty: true.
-      const soResponsePromise = page.waitForResponse(
-        (resp) =>
-          new RegExp(`/api/fleet/cloud_onboarding_deployments/${DEP_ID}$`).test(
-            new URL(resp.url()).pathname
-          ) && resp.status() === 200
+      // Replace the SO route with a deferred one so we can verify that the drift callout appears
+      // immediately from the replace-keys form (before the drift effect's SO fetch settles).
+      // A regression that delays the indicator until after the SO response would still pass the
+      // previous approach (which awaited the SO GET before filling fields).
+      let releaseSoGet!: () => void;
+      const soGetHeld = new Promise<void>((resolve) => {
+        releaseSoGet = resolve;
+      });
+      await page.unroute(
+        (url) =>
+          new RegExp(`/api/fleet/cloud_onboarding_deployments/${DEP_ID}$`).test(url.pathname)
       );
+      await page.route(
+        (url) =>
+          new RegExp(`/api/fleet/cloud_onboarding_deployments/${DEP_ID}$`).test(url.pathname),
+        async (route) => {
+          if (route.request().method() === 'GET') {
+            await soGetHeld;
+            await route.fulfill({
+              status: 200,
+              contentType: 'application/json',
+              body: JSON.stringify({
+                item: makeSoItem(DEP_ID, { authMethod: 'static_keys', connectorId: null }),
+              }),
+            });
+          } else {
+            await route.continue();
+          }
+        }
+      );
+
       await page.reload();
       await expect(page.testSubj.locator('onboardingStep-authenticate-and-deploy')).toBeVisible();
-      await soResponsePromise;
+      // SO GET is still pending — drift effect has not settled.
 
       // Override the package mock to include credential vars at the package level
       // so the policy PUT body carries the new key values.
@@ -461,6 +484,20 @@ test.describe(
         .locator('staticKeysReplace-secretAccessKey')
         .fill('wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY');
 
+      // Callout must appear immediately from form-level isDirty, before the drift-effect SO
+      // response settles. A regression that delays the indicator would fail here.
+      await expect(page.testSubj.locator('authenticateAndDeployStep-driftCallout')).toBeVisible();
+
+      // Release the SO GET — drift effect processes the response (same auth/connector → auth
+      // drift false) and must not clear the form-level isDirty.
+      const soGetDonePromise = page.waitForResponse(
+        (resp) =>
+          new RegExp(`/api/fleet/cloud_onboarding_deployments/${DEP_ID}$`).test(
+            new URL(resp.url()).pathname
+          ) && resp.status() === 200
+      );
+      releaseSoGet();
+      await soGetDonePromise;
       await expect(page.testSubj.locator('authenticateAndDeployStep-driftCallout')).toBeVisible();
 
       await page.route(
