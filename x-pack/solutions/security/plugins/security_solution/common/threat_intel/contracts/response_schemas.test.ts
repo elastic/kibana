@@ -12,9 +12,11 @@
  */
 
 import {
+  assessRelevanceBodySchema,
   assessRelevanceResponseSchema,
   classifySeverityResponseSchema,
   createThreatReportResponseSchema,
+  enrichReportCoreResponseSchema,
   enrichTaxonomyResponseSchema,
   extractDiamondResponseSchema,
   extractIocsResponseSchema,
@@ -33,6 +35,12 @@ const assessRelevancePayload = {
   primary_links: ['https://vendor.test/report'],
   has_original_commentary: true,
   reason: 'Original Volt Typhoon IR with IOCs and TTPs.',
+  context: {
+    mode: 'full',
+    original_chars: 1_000,
+    selected_chars: 1_000,
+    coverage: 1,
+  },
 };
 
 const extractIocsPayload = {
@@ -58,6 +66,10 @@ const extractDiamondPayload = {
   model_id: 'test-connector',
   extracted_at: '2026-09-18T00:00:00.000Z',
   extraction_mode: 'single_call',
+  context_mode: 'full',
+  context_coverage: 1,
+  context_chars: 1_000,
+  source_chars: 1_000,
   report_id: 'default:abc',
 };
 
@@ -66,6 +78,38 @@ const enrichTaxonomyPayload = {
   regions: ['europe'],
   relevance: 0.75,
   diamond_suitable: true,
+};
+
+const enrichReportCorePayload = {
+  categories: ['malware'],
+  regions: ['global'],
+  relevance: 0.9,
+  diamond_suitable: true,
+  severity: { level: 'high', score: 75, rationale: 'Confirmed malware campaign.' },
+  ...extractIocsPayload,
+  anchor_iocs: extractIocsPayload.iocs,
+  promotable_count: 1,
+  adjudication: {
+    provider: 'semantic_model',
+    reviewed: 1,
+    approved: 1,
+    downgraded: 0,
+    deterministic_references: 0,
+    deferred_unreviewed: 0,
+  },
+  behaviors: [
+    {
+      id: 'behavior-id',
+      technique_id: 'T1059.003',
+      description: 'Executes commands through Windows Command Shell.',
+      telemetry_targets: ['process'],
+      confidence: 0.9,
+      llm_confidence: 0.9,
+    },
+  ],
+  artifacts: [{ type: 'malware_family', value: 'ExampleRAT', context: 'Payload family' }],
+  context: { mode: 'full', original_chars: 1_000, selected_chars: 1_000, coverage: 1 },
+  model_id: 'test-connector',
 };
 
 const classifySeverityPayload = {
@@ -153,6 +197,21 @@ describe('threat intel response schemas', () => {
     expect(enrichTaxonomyResponseSchema.validate(enrichTaxonomyPayload)).toEqual(
       enrichTaxonomyPayload
     );
+  });
+
+  it('returns the validated enrich_report_core success payload', () => {
+    expect(enrichReportCoreResponseSchema.validate(enrichReportCorePayload)).toEqual(
+      enrichReportCorePayload
+    );
+  });
+
+  it('accepts an empty optional URL from workflow interpolation', () => {
+    expect(
+      assessRelevanceBodySchema.validate({
+        text: 'Threat report',
+        url: '',
+      }).url
+    ).toBe('');
   });
 
   it('returns the validated classify_severity success payload', () => {
