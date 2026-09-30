@@ -9,6 +9,7 @@ import React, { useState } from 'react';
 import {
   EuiAccordion,
   EuiButtonEmpty,
+  EuiMarkdownFormat,
   EuiPanel,
   EuiSpacer,
   EuiText,
@@ -24,7 +25,6 @@ import type {
 } from '@kbn/significant-events-schema';
 import { EvidenceChart } from './evidence_chart';
 import { EvidenceItem } from './evidence_list';
-import { EvidenceMarkdown } from './evidence_markdown';
 import { getVisibleImpactParts } from './impact_layout_budget';
 
 export interface ImpactSectionProps {
@@ -106,9 +106,9 @@ export const ImpactSection: React.FC<ImpactSectionProps> = ({ impact }) => {
   return (
     <div data-test-subj="investigationOutputImpact">
       {hasSummary && (
-        <EvidenceMarkdown textSize="s" color="default">
+        <EuiMarkdownFormat textSize="s" color="default">
           {summary ?? ''}
-        </EvidenceMarkdown>
+        </EuiMarkdownFormat>
       )}
       {evidence && showEvidence && (
         <>
@@ -116,7 +116,11 @@ export const ImpactSection: React.FC<ImpactSectionProps> = ({ impact }) => {
           <div data-test-subj="investigationOutputImpactEvidence">
             {showEvidenceChart && evidence.chart && <EvidenceChart chart={evidence.chart} />}
             {showEvidenceChart && showEvidenceDescription && <EuiSpacer size="s" />}
-            {showEvidenceDescription && <EvidenceMarkdown>{evidence.description}</EvidenceMarkdown>}
+            {showEvidenceDescription && (
+              <EuiMarkdownFormat textSize="xs" color="subdued">
+                {evidence.description}
+              </EuiMarkdownFormat>
+            )}
           </div>
         </>
       )}

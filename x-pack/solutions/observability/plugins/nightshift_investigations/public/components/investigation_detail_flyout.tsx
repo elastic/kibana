@@ -17,17 +17,13 @@ import {
   EuiFlyoutBody,
   EuiFlyoutHeader,
   EuiLoadingSpinner,
+  EuiMarkdownFormat,
   EuiSpacer,
   EuiText,
   EuiTitle,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import {
-  EvidenceMarkdown,
-  FinalResults,
-  HypothesisRow,
-  ImpactSection,
-} from '@kbn/investigation-output';
+import { FinalResults, HypothesisRow, ImpactSection } from '@kbn/investigation-output';
 import type {
   InvestigationImpact,
   InvestigationState,
@@ -189,9 +185,9 @@ export function InvestigationDetailFlyout({
             </SectionTitle>
             <EuiSpacer size="s" />
             <div data-test-subj="nightshiftInvestigationDetailFlyoutSummary">
-              <EvidenceMarkdown textSize="s" color="default">
+              <EuiMarkdownFormat textSize="s" color="default">
                 {invState.summary}
-              </EvidenceMarkdown>
+              </EuiMarkdownFormat>
             </div>
             <EuiSpacer size="l" />
           </>

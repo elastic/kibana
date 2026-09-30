@@ -113,36 +113,4 @@ describe('EvidenceList', () => {
 
     expect(screen.getAllByTestId('investigationEvidenceItem')).toHaveLength(2);
   });
-
-  it('opens absolute links in a new tab', () => {
-    renderEvidence([{ description: 'See [the runbook](https://example.com/runbook).' }]);
-
-    const link = screen.getByRole('link', { name: /the runbook/ });
-    expect(link).toHaveAttribute('href', 'https://example.com/runbook');
-    expect(link).toHaveAttribute('target', '_blank');
-    expect(link).toHaveAttribute('rel', expect.stringContaining('noopener'));
-  });
-
-  it('does not link relative or non-http urls', () => {
-    renderEvidence([
-      { description: '[relative](/app/management) and [script](javascript:alert(1))' },
-    ]);
-
-    expect(screen.queryByRole('link')).not.toBeInTheDocument();
-  });
-
-  it('never renders images, which would fetch model-chosen urls', () => {
-    const { container } = renderEvidence([
-      { description: 'Before ![tracking pixel](https://attacker.example/p.png) after' },
-    ]);
-
-    expect(container.querySelector('img')).toBeNull();
-    expect(screen.getByText(/tracking pixel/)).toBeInTheDocument();
-  });
-
-  it('does not render raw html', () => {
-    const { container } = renderEvidence([{ description: '<img src="https://x.example/a.png">' }]);
-
-    expect(container.querySelector('img')).toBeNull();
-  });
 });

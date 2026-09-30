@@ -20,5 +20,4 @@ export {
   type EvidenceItemProps,
 } from './src/evidence_list';
 export { EvidenceChart, type EvidenceChartProps } from './src/evidence_chart';
-export { EvidenceMarkdown, type EvidenceMarkdownProps } from './src/evidence_markdown';
 export { ImpactSection, type ImpactSectionProps } from './src/impact_section';

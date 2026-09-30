@@ -6,11 +6,10 @@
  */
 
 import React from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiSpacer, useEuiTheme } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiMarkdownFormat, EuiSpacer, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import type { InvestigationEvidence } from '@kbn/significant-events-schema';
 import { EvidenceChart } from './evidence_chart';
-import { EvidenceMarkdown } from './evidence_markdown';
 
 export interface EvidenceItemProps {
   evidence: InvestigationEvidence;
@@ -25,7 +24,9 @@ export const EvidenceItem: React.FC<EvidenceItemProps> = ({ evidence: { descript
         <EuiSpacer size="s" />
       </>
     )}
-    <EvidenceMarkdown>{description}</EvidenceMarkdown>
+    <EuiMarkdownFormat textSize="xs" color="subdued">
+      {description}
+    </EuiMarkdownFormat>
   </>
 );
 
