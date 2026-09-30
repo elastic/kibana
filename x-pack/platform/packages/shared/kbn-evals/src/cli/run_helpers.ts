@@ -132,7 +132,7 @@ export const ensureEvalInit = async (
       }
     }
 
-    if (getAllAvailableConnectors(repoRoot).length === 0) {
+    if (getAllAvailableConnectors(repoRoot).length === 0 && !readCachedEisConnectors()) {
       if (!isTTY()) {
         throw createFlagError(
           'No connectors available. Set KIBANA_TESTING_INFERENCE_ENDPOINTS, or run with a TTY to use the setup wizard.'

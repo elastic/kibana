@@ -49,6 +49,16 @@ describe('parseRawFlags()', () => {
       ]
     `);
   });
+
+  it('keeps every --config in order', () => {
+    expect(parseRawFlags(['--config=a.yml', '--foo=bar', '--config=b.yml'])).toMatchInlineSnapshot(`
+      Array [
+        "--config=a.yml",
+        "--config=b.yml",
+        "--foo=bar",
+      ]
+    `);
+  });
 });
 
 describe('getArgValue()', () => {
