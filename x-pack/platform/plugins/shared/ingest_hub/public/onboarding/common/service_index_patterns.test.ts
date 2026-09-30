@@ -20,6 +20,9 @@ function makeEntry(overrides: Partial<AwsServiceMatrixEntry> = {}): AwsServiceMa
     defaultEnabled: true,
     defaultEnabledInputs: [],
     showInUI: true,
+    isManifestLoaded: true,
+    isManifestError: false,
+    isStaticAgentBasedOnly: false,
     ...overrides,
   };
 }

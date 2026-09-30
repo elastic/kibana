@@ -277,6 +277,11 @@ export interface PackagePolicyClient {
     options?: { force?: boolean }
   ): Promise<void>;
 
+  getSpacesForPoliciesUsingOutput(outputId: string): Promise<{
+    spaceIds: Set<string>;
+    truncated: boolean;
+  }>;
+
   /**
    * Returns an `AsyncIterable` for retrieving all integration policy IDs
    * @param soClient

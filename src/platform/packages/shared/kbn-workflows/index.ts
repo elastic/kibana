@@ -15,6 +15,7 @@ export { getElasticsearchConnectors } from './spec/elasticsearch';
 export { getKibanaConnectors } from './spec/kibana';
 export { resolveKibanaStepTypeAlias } from './spec/kibana/aliases';
 export * from './spec/schema';
+export * from './spec/ignored_kibana_fetcher';
 export {
   builtInStepDefinitions,
   getBuiltInStepDefinition,
