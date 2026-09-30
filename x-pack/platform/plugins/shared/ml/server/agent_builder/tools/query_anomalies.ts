@@ -274,15 +274,7 @@ export const rewriteMlAnomaliesViewQuery = (query: string): string => {
         : withWildcard.slice(0, firstPipe) + SCORE_EVAL_INJECTION + withWildcard.slice(firstPipe);
   }
 
-  // Drop view-only event.ingested when timestamp is already selected, then
-  // map remaining filter references to timestamp.
-  return withScoreEval
-    .replace(/,\s*`event\.ingested`/g, '')
-    .replace(/`event\.ingested`\s*,\s*/g, '')
-    .replace(/`event\.ingested`/g, 'timestamp')
-    .replace(/,\s*event\.ingested\b/g, '')
-    .replace(/\bevent\.ingested\s*,\s*/g, '')
-    .replace(/\bevent\.ingested\b/g, 'timestamp');
+  return withScoreEval;
 };
 
 export const isMlAnomaliesViewUnavailableError = (err: unknown): boolean => {
