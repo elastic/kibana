@@ -124,12 +124,14 @@ export const registerAttachmentUiDefinitions = ({
  */
 export const registerInvestigationTimelineAttachment = ({
   attachments,
+  resolveSecurityCanvasContext,
 }: {
   attachments: AttachmentServiceStartContract;
+  resolveSecurityCanvasContext: () => Promise<SecurityCanvasEmbeddedBundle>;
 }): void => {
   attachments.addAttachmentType(
     SecurityAgentBuilderAttachments.investigationTimeline,
-    createInvestigationTimelineAttachmentDefinition()
+    createInvestigationTimelineAttachmentDefinition({ resolveSecurityCanvasContext })
   );
 };
 

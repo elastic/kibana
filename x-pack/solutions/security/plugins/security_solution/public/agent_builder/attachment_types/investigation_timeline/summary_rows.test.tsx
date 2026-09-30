@@ -6,46 +6,83 @@
  */
 
 import React from 'react';
-import { render, screen } from '@testing-library/react';
+import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { I18nProvider } from '@kbn/i18n-react';
 import { renderInvestigationTimelineSummary } from './summary_rows';
 
+const mockOpener = jest.fn((_props: unknown) => null);
+jest.mock('./open_timeline_flyout_on_mount', () => ({
+  InvestigationTimelineFlyoutOpener: (props: unknown) => mockOpener(props),
+}));
+
+const resolveSecurityCanvasContext = jest.fn();
+
 const renderSummary = (data: unknown) =>
-  render(<I18nProvider>{renderInvestigationTimelineSummary({ data })}</I18nProvider>);
+  render(
+    <I18nProvider>
+      {renderInvestigationTimelineSummary({ data }, resolveSecurityCanvasContext)}
+    </I18nProvider>
+  );
 
 describe('renderInvestigationTimelineSummary', () => {
-  it('renders one read-only row per event, with the host and time on the icon', async () => {
+  beforeEach(() => {
+    mockOpener.mockClear();
+  });
+
+  it('renders a single row titled with the host, not a row per event', async () => {
     renderSummary({
+      attachmentLabel: 'Investigation timeline',
       events: [
         {
-          timestamp: '2026-09-01T10:00:00.000Z',
-          host: 'FIN-DB-02',
-          description: 'Archive assembled in temp',
+          timestamp: '2026-09-11T14:23:32.488Z',
+          host: 'WKSTN-RECV01',
+          description: 'OUTLOOK.EXE spawned powershell.exe',
         },
         {
-          timestamp: '2026-09-01T10:05:00.000Z',
-          host: 'FIN-WS-02',
-          description: 'Archive copied over SMB',
+          timestamp: '2026-09-11T15:05:32.488Z',
+          host: 'SRV-DC01',
+          description: 'svc.exe created a ransom note',
         },
       ],
     });
 
     expect(screen.getByText('Attack timeline')).toBeInTheDocument();
-    expect(screen.getByText('2')).toBeInTheDocument();
-    expect(screen.getByText('Archive assembled in temp')).toBeInTheDocument();
-    expect(screen.getByText('Archive copied over SMB')).toBeInTheDocument();
-    expect(screen.queryByTestId('attachmentSummaryRowButton')).not.toBeInTheDocument();
-
-    const icons = screen.getAllByTestId('attachmentSummaryRowIcon');
-    await userEvent.hover(icons[0]);
-    expect(await screen.findByRole('tooltip')).toHaveTextContent(
-      '2026-09-01T10:00:00.000Z on FIN-DB-02'
+    expect(screen.getByText('1')).toBeInTheDocument();
+    expect(screen.getByTestId('attachmentSummaryRowButton')).toHaveAccessibleName(
+      'Timeline: WKSTN-RECV01'
     );
-    await userEvent.unhover(icons[0]);
-    await userEvent.hover(icons[1]);
-    expect(await screen.findByRole('tooltip')).toHaveTextContent(
-      '2026-09-01T10:05:00.000Z on FIN-WS-02'
+    expect(screen.queryByText('OUTLOOK.EXE spawned powershell.exe')).not.toBeInTheDocument();
+    expect(screen.queryByText('svc.exe created a ransom note')).not.toBeInTheDocument();
+
+    await userEvent.click(screen.getByTestId('attachmentSummaryRowButton'));
+
+    await waitFor(() => expect(mockOpener).toHaveBeenCalled());
+    expect(mockOpener).toHaveBeenCalledWith(
+      expect.objectContaining({
+        title: 'WKSTN-RECV01',
+        events: [
+          expect.objectContaining({ host: 'WKSTN-RECV01' }),
+          expect.objectContaining({ host: 'SRV-DC01' }),
+        ],
+        resolveSecurityCanvasContext,
+      })
+    );
+  });
+
+  it('titles the row with the host the timeline starts on', () => {
+    renderSummary({
+      events: [
+        {
+          timestamp: '2026-09-11T14:23:32.488Z',
+          host: 'WKSTN-RECV01',
+          description: 'A process started',
+        },
+      ],
+    });
+
+    expect(screen.getByTestId('attachmentSummaryRowButton')).toHaveAccessibleName(
+      'Timeline: WKSTN-RECV01'
     );
   });
 

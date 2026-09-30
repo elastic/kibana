@@ -445,6 +445,8 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       if (this.experimentalFeatures.endpointForensicAnalysisSkill) {
         registerInvestigationTimelineAttachment({
           attachments: plugins.agentBuilder.attachments,
+          resolveSecurityCanvasContext: () =>
+            this.getSecurityCanvasContext(core, plugins as StartPluginsDependencies),
         });
         registerInvestigationIocsAttachment({
           attachments: plugins.agentBuilder.attachments,

@@ -102,7 +102,10 @@ describe('registerInvestigationTimelineAttachment', () => {
     const addAttachmentType = jest.fn();
     const attachments = { addAttachmentType } as unknown as AttachmentServiceStartContract;
 
-    registerInvestigationTimelineAttachment({ attachments });
+    registerInvestigationTimelineAttachment({
+      attachments,
+      resolveSecurityCanvasContext: jest.fn(),
+    });
 
     expect(addAttachmentType).toHaveBeenCalledWith(
       SecurityAgentBuilderAttachments.investigationTimeline,

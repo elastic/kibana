@@ -18,7 +18,9 @@ const makeAttachment = (
 });
 
 describe('createInvestigationTimelineAttachmentDefinition', () => {
-  const definition = createInvestigationTimelineAttachmentDefinition();
+  const definition = createInvestigationTimelineAttachmentDefinition({
+    resolveSecurityCanvasContext: jest.fn(),
+  });
 
   it('uses the timeline icon', () => {
     expect(definition.getIcon?.()).toBe('timeline');

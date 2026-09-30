@@ -62,6 +62,15 @@ describe('AttachmentSummaryRow', () => {
       expect(onClick).toHaveBeenCalledTimes(1);
     });
 
+    it('releases the click highlight so the row is not still focused once the flyout opens', async () => {
+      render(<AttachmentSummaryRow label="WKSTN-RECV01" typeName="Timeline" onClick={onClick} />);
+      const button = screen.getByRole('button');
+
+      await userEvent.click(button);
+
+      expect(button).not.toHaveFocus();
+    });
+
     it('keeps the label out of the tab order, since the row itself is the tab stop', () => {
       const restore = mockLabelOverflow({ scrollWidth: 500, clientWidth: 100 });
       try {

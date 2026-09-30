@@ -27,6 +27,7 @@ export const FLYOUT_TYPE = {
   GENERIC: 'generic',
   MISCONFIGURATION: 'misconfiguration',
   VULNERABILITY: 'vulnerability',
+  INVESTIGATION_TIMELINE: 'investigation_timeline',
 } as const;
 export type FlyoutType = (typeof FLYOUT_TYPE)[keyof typeof FLYOUT_TYPE];
 

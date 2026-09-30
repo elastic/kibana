@@ -48,6 +48,10 @@ export const AttachmentSummaryRow = memo<AttachmentSummaryRowProps>(
     const [labelElement, setLabelElement] = useState<HTMLDivElement | null>(null);
     const { width: labelWidth } = useResizeObserver(labelElement, 'width');
     const [isLabelTruncated, setIsLabelTruncated] = useState(false);
+    // A click leaves the button focused, and EuiPanel paints :focus as a highlight that stays
+    // after the flyout opened by the click is on screen. Drop focus, and keep the hover color
+    // off until the pointer leaves, so the row is not still highlighted underneath the flyout.
+    const [isHighlightSuppressed, setIsHighlightSuppressed] = useState(false);
 
     useEffect(() => {
       setIsLabelTruncated(
@@ -136,15 +140,36 @@ export const AttachmentSummaryRow = memo<AttachmentSummaryRowProps>(
             borderRadius="none"
             color="transparent"
             paddingSize="none"
-            onClick={onClick}
+            onClick={(event) => {
+              onClick?.();
+              event.currentTarget.blur();
+              if (event.detail > 0) {
+                setIsHighlightSuppressed(true);
+              }
+            }}
+            onMouseLeave={() => setIsHighlightSuppressed(false)}
             aria-label={attachmentSummaryRowAriaLabel(typeName, label)}
             data-test-subj="attachmentSummaryRowButton"
             css={css({
               padding,
-              '&:hover:not(:focus-visible)': {
-                boxShadow: 'none',
-                backgroundColor: euiTheme.colors.backgroundBaseSubdued,
-              },
+              ...(isHighlightSuppressed
+                ? {
+                    backgroundColor: 'transparent',
+                    boxShadow: 'none',
+                    '&:hover, &:focus': {
+                      backgroundColor: 'transparent',
+                      boxShadow: 'none',
+                    },
+                  }
+                : {
+                    '&:hover:not(:focus-visible)': {
+                      boxShadow: 'none',
+                      backgroundColor: euiTheme.colors.backgroundBaseSubdued,
+                    },
+                    '&:focus:not(:focus-visible)': {
+                      boxShadow: 'none',
+                    },
+                  }),
             })}
           >
             {content}
