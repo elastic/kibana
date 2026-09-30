@@ -144,7 +144,7 @@ export interface PackagePolicyClient {
     soClient: SavedObjectsClientContract,
     esClient: ElasticsearchClient,
     ids: string[],
-    options?: { user?: AuthenticatedUser; force?: boolean },
+    options?: { user?: AuthenticatedUser; force?: boolean; batchSize?: number },
     pkgVersion?: string
   ): Promise<UpgradePackagePolicyResponse>;
 
@@ -217,7 +217,7 @@ export interface PackagePolicyClient {
     soClient: SavedObjectsClientContract,
     esClient: ElasticsearchClient,
     id: string,
-    options?: { user?: AuthenticatedUser; force?: boolean; bumpRevision?: boolean },
+    options?: { user?: AuthenticatedUser; force?: boolean },
     packagePolicy?: PackagePolicy,
     pkgVersion?: string
   ): Promise<UpgradePackagePolicyResponse>;

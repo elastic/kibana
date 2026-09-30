@@ -7,7 +7,6 @@
 
 import { elasticsearchServiceMock, savedObjectsClientMock } from '@kbn/core/server/mocks';
 
-import { agentPolicyService } from '../agent_policy';
 import { packagePolicyService } from '../package_policy';
 import { getInstallation, getInstallations, getPackageInfo } from '../epm/packages';
 
@@ -16,7 +15,6 @@ import {
   setupUpgradeManagedPackagePolicies,
 } from './managed_package_policies';
 
-jest.mock('../agent_policy');
 jest.mock('../package_policy');
 jest.mock('../epm/packages');
 jest.mock('../epm/packages/deprecation_helpers');
@@ -41,7 +39,7 @@ describe('upgradeManagedPackagePolicies', () => {
     jest.clearAllMocks();
     jest.mocked(packagePolicyService.fetchAllItems).mockReset();
     jest.mocked(packagePolicyService.getUpgradeDryRunDiff).mockReset();
-    jest.mocked(packagePolicyService.upgrade).mockReset();
+    jest.mocked(packagePolicyService.bulkUpgrade).mockReset();
   });
 
   it('should not upgrade policies for installed package', async () => {
@@ -52,7 +50,7 @@ describe('upgradeManagedPackagePolicies', () => {
 
     await upgradeManagedPackagePolicies(soClient, esClient, 'testpkg');
 
-    expect(packagePolicyService.upgrade).not.toHaveBeenCalled();
+    expect(packagePolicyService.bulkUpgrade).not.toHaveBeenCalled();
   });
 
   it('should upgrade policies for managed package', async () => {
@@ -67,7 +65,6 @@ describe('upgradeManagedPackagePolicies', () => {
       updated_by: '',
       created_at: '',
       created_by: '',
-      policy_ids: ['agent-policy-1'],
       package: {
         name: 'managed-package',
         title: 'Managed Package',
@@ -86,7 +83,8 @@ describe('upgradeManagedPackagePolicies', () => {
       diff: [{ id: 'foo' }, { id: 'bar' }],
       hasErrors: false,
     });
-    (packagePolicyService.upgrade as jest.Mock).mockResolvedValueOnce([
+
+    (packagePolicyService.bulkUpgrade as jest.Mock).mockResolvedValueOnce([
       { id: 'managed-package-id', success: true },
     ]);
 
@@ -101,71 +99,69 @@ describe('upgradeManagedPackagePolicies', () => {
       { packagePolicyId: 'managed-package-id', diff: [{ id: 'foo' }, { id: 'bar' }], errors: [] },
     ]);
 
-    expect(packagePolicyService.upgrade).toHaveBeenCalledWith(
+    expect(packagePolicyService.bulkUpgrade).toHaveBeenCalledWith(
       soClient,
       esClient,
-      'managed-package-id',
-      { force: true, bumpRevision: false },
-      packagePolicy,
+      ['managed-package-id'],
+      { force: true, batchSize: 250 },
       '1.0.0'
-    );
-    expect(agentPolicyService.bumpRevision).toHaveBeenCalledTimes(1);
-    expect(agentPolicyService.bumpRevision).toHaveBeenCalledWith(
-      soClient,
-      esClient,
-      'agent-policy-1'
     );
   });
 
-  it('should bump each agent policy revision once after all package policies are upgraded', async () => {
+  it('should upgrade a page in one bulk call, skipping policies with dry run conflicts', async () => {
     const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
     const soClient = savedObjectsClientMock.create();
-    const makePackagePolicy = (id: string, policyIds: string[]) => ({
+    const makePackagePolicy = (id: string) => ({
       id,
       inputs: {},
-      policy_ids: policyIds,
       package: { name: 'managed-package', title: 'Managed Package', version: '0.0.1' },
     });
 
     (packagePolicyService.fetchAllItems as jest.Mock).mockResolvedValueOnce(
       (async function* () {
         yield [
-          makePackagePolicy('pp-1', ['agent-policy-1']),
-          makePackagePolicy('pp-2', ['agent-policy-1']),
+          makePackagePolicy('pp-1'),
+          makePackagePolicy('pp-conflict'),
+          makePackagePolicy('pp-2'),
         ];
-        yield [makePackagePolicy('pp-3', ['agent-policy-1', 'agent-policy-2'])];
+        yield [makePackagePolicy('pp-3')];
       })()
     );
-    (packagePolicyService.getUpgradeDryRunDiff as jest.Mock).mockResolvedValue({
-      diff: [],
-      hasErrors: false,
-    });
-    (packagePolicyService.upgrade as jest.Mock).mockImplementation(async (_so, _es, id) => [
-      { id, success: true },
-    ]);
+    (packagePolicyService.getUpgradeDryRunDiff as jest.Mock).mockImplementation(
+      async (_so, id: string) =>
+        id === 'pp-conflict'
+          ? { diff: [{}, { errors: [{ message: 'Conflict' }] }], hasErrors: true }
+          : { diff: [], hasErrors: false }
+    );
+    (packagePolicyService.bulkUpgrade as jest.Mock).mockImplementation(
+      async (_so, _es, ids: string[]) => ids.map((id) => ({ id, success: id !== 'pp-2' }))
+    );
     (getInstallation as jest.Mock).mockResolvedValueOnce({
       id: 'test-installation',
       version: '1.0.0',
       keep_policies_up_to_date: true,
     });
 
-    await upgradeManagedPackagePolicies(soClient, esClient, 'pkgname');
+    const results = await upgradeManagedPackagePolicies(soClient, esClient, 'pkgname');
 
-    expect(packagePolicyService.upgrade).toHaveBeenCalledTimes(3);
-    expect(agentPolicyService.bumpRevision).toHaveBeenCalledTimes(2);
-    expect(agentPolicyService.bumpRevision).toHaveBeenCalledWith(
+    expect(packagePolicyService.bulkUpgrade).toHaveBeenCalledTimes(2);
+    expect(packagePolicyService.bulkUpgrade).toHaveBeenNthCalledWith(
+      1,
       soClient,
       esClient,
-      'agent-policy-1'
+      ['pp-1', 'pp-2'],
+      expect.anything(),
+      '1.0.0'
     );
-    expect(agentPolicyService.bumpRevision).toHaveBeenCalledWith(
-      soClient,
-      esClient,
-      'agent-policy-2'
-    );
+    expect(results.map(({ packagePolicyId, errors }) => [packagePolicyId, errors.length])).toEqual([
+      ['pp-conflict', 1],
+      ['pp-1', 0],
+      ['pp-2', 1],
+      ['pp-3', 0],
+    ]);
   });
 
-  it('should not bump agent policies whose package policy upgrade failed', async () => {
+  it('should record an error for every policy in the batch when the bulk upgrade throws', async () => {
     const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
     const soClient = savedObjectsClientMock.create();
 
@@ -173,9 +169,8 @@ describe('upgradeManagedPackagePolicies', () => {
       (async function* () {
         yield [
           {
-            id: 'failing-package-policy',
+            id: 'pp-1',
             inputs: {},
-            policy_ids: ['agent-policy-1'],
             package: { name: 'managed-package', title: 'Managed Package', version: '0.0.1' },
           },
         ];
@@ -185,9 +180,7 @@ describe('upgradeManagedPackagePolicies', () => {
       diff: [],
       hasErrors: false,
     });
-    (packagePolicyService.upgrade as jest.Mock).mockResolvedValueOnce([
-      { id: 'failing-package-policy', success: false, body: { message: 'upgrade failed' } },
-    ]);
+    (packagePolicyService.bulkUpgrade as jest.Mock).mockRejectedValueOnce(new Error('boom'));
     (getInstallation as jest.Mock).mockResolvedValueOnce({
       id: 'test-installation',
       version: '1.0.0',
@@ -196,10 +189,7 @@ describe('upgradeManagedPackagePolicies', () => {
 
     const results = await upgradeManagedPackagePolicies(soClient, esClient, 'pkgname');
 
-    expect(results).toEqual([
-      { packagePolicyId: 'failing-package-policy', diff: [], errors: ['upgrade failed'] },
-    ]);
-    expect(agentPolicyService.bumpRevision).not.toHaveBeenCalled();
+    expect(results).toEqual([{ packagePolicyId: 'pp-1', diff: [], errors: [new Error('boom')] }]);
   });
 
   it('should not upgrade policy if newer than installed package version', async () => {
@@ -237,7 +227,7 @@ describe('upgradeManagedPackagePolicies', () => {
     await upgradeManagedPackagePolicies(soClient, esClient, 'pkgname');
 
     expect(packagePolicyService.getUpgradeDryRunDiff).not.toHaveBeenCalled();
-    expect(packagePolicyService.upgrade).not.toHaveBeenCalled();
+    expect(packagePolicyService.bulkUpgrade).not.toHaveBeenCalled();
   });
 
   describe('when dry run reports conflicts', () => {
@@ -310,7 +300,7 @@ describe('upgradeManagedPackagePolicies', () => {
         },
       ]);
 
-      expect(packagePolicyService.upgrade).not.toHaveBeenCalled();
+      expect(packagePolicyService.bulkUpgrade).not.toHaveBeenCalled();
     });
   });
 });
