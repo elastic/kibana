@@ -63,6 +63,7 @@ const createWorkspaceMock = () =>
     nodes: [],
     nodesMap: {},
     edges: [],
+    edgesMap: {},
     selectedNodes: [],
     clearEdgeSelection: jest.fn(),
     addEdgeToSelection: jest.fn(),
@@ -87,6 +88,7 @@ const createWorkspaceListenerEnvironment = () => {
     mockedDepsOverwrites: {
       getWorkspace: jest.fn(() => workspace),
       exploreGraph: jest.fn().mockResolvedValue({ vertices: [], connections: [] }),
+      searchGraph: jest.fn((_index: string, _request: object) => new Promise(() => {})),
     },
   });
 
@@ -450,7 +452,7 @@ describe('workspace listeners', () => {
       expect(environment.workspace.mergeGraph).toHaveBeenCalledWith({ nodes, edges: [] });
       expect(workspaceInitializedSelector(environment.store.getState())).toBe(true);
       expect(environment.mockedDeps.notifyReact).toHaveBeenCalled();
-      expect(environment.workspace.fillConnections).toHaveBeenCalledWith([], 10);
+      expect(environment.mockedDeps.searchGraph).toHaveBeenCalled();
     });
 
     it('does not apply a stale response after a newer request', async () => {
@@ -519,13 +521,22 @@ describe('workspace listeners', () => {
       expect(environment.workspace.mergeGraph).toHaveBeenCalledWith({ nodes: [], edges: [] });
     });
 
-    it('fills existing connections using the selected Redux node IDs', () => {
+    it('fills existing connections through the listener transport', async () => {
       const environment = createWorkspaceListenerEnvironment();
+      environment.mockedDeps.searchGraph.mockResolvedValue({
+        hits: { total: { value: 0 } },
+        aggregations: { matrix: { buckets: [] } },
+      });
       environment.store.dispatch(toggleNodeSelection({ nodeId: 'selected', replace: false }));
 
       environment.store.dispatch(fillWorkspaceConnections(20));
+      await flushPromises();
 
-      expect(environment.workspace.fillConnections).toHaveBeenCalledWith(['selected'], 20);
+      expect(environment.mockedDeps.searchGraph).toHaveBeenCalledWith(
+        'data-view-title',
+        expect.objectContaining({ size: 0 })
+      );
+      expect(environment.workspace.mergeGraph).toHaveBeenCalledWith({ nodes: [], edges: [] });
     });
 
     it('ignores stale expand responses', async () => {
