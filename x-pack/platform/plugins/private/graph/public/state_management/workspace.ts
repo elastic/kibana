@@ -95,6 +95,7 @@ export const deleteSelectedNodes = actionCreator('DELETE_SELECTED_NODES');
 export const blocklistSelectedNodes = actionCreator('BLOCKLIST_SELECTED_NODES');
 export const groupSelectedNodes = actionCreator<string>('GROUP_SELECTED_NODES');
 export const ungroupNode = actionCreator<string>('UNGROUP_NODE');
+export const mergeNodes = actionCreator<{ parentId: string; childId: string }>('MERGE_NODES');
 export const unblockNode = actionCreator<string>('UNBLOCK_NODE');
 export const unblockAllNodes = actionCreator('UNBLOCK_ALL_NODES');
 export const undoWorkspace = actionCreator('UNDO_WORKSPACE');
@@ -190,6 +191,17 @@ export const workspaceReducer = reducerWithInitialState(initialWorkspaceState)
       ),
     })
   )
+  .case(mergeNodes, (state, { parentId, childId }) => {
+    const child = state.nodesById[childId];
+    if (!state.nodesById[parentId] || !child) {
+      return state;
+    }
+    return recordUndo(state, {
+      ...state,
+      nodesById: { ...state.nodesById, [childId]: { ...child, parentId } },
+      selectedNodeIds: state.selectedNodeIds.filter((nodeId) => nodeId !== childId),
+    });
+  })
   .case(unblockNode, (state, nodeId) => {
     const blocklistedNodesById = { ...state.blocklistedNodesById };
     delete blocklistedNodesById[nodeId];
@@ -360,8 +372,8 @@ export const createWorkspaceState = (workspace: Workspace): WorkspaceSnapshot =>
           id,
           sourceId: edge.source.id,
           targetId: edge.target.id,
-          topSourceId: edge.topSrc.id,
-          topTargetId: edge.topTarget.id,
+          topSourceId: edge.topSrc?.id ?? edge.source.id,
+          topTargetId: edge.topTarget?.id ?? edge.target.id,
           label: edge.label,
           weight: edge.weight,
           width: edge.width,
@@ -415,6 +427,7 @@ const topologyActionTypes = new Set([
   blocklistSelectedNodes.type,
   groupSelectedNodes.type,
   ungroupNode.type,
+  mergeNodes.type,
   unblockNode.type,
   unblockAllNodes.type,
   undoWorkspace.type,
@@ -522,6 +535,8 @@ export const registerWorkspaceListeners = (
         workspace.groupSelections(workspace.nodesMap[action.payload]);
       } else if (ungroupNode.match(action)) {
         workspace.ungroup(workspace.nodesMap[action.payload]);
+      } else if (mergeNodes.match(action)) {
+        workspace.mergeIds(action.payload.parentId, action.payload.childId);
       } else if (unblockNode.match(action)) {
         const blockedNode = (workspace.blocklistedNodes as WorkspaceNode[]).find(
           ({ id }) => id === action.payload

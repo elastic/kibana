@@ -61,6 +61,23 @@ describe('graphui-workspace', function () {
         };
       };
     });
+    it('synchronizes merged topology before starting layout', function () {
+      const calls = [];
+      const layoutController = {
+        stop: jest.fn(),
+        start: jest.fn(() => calls.push('layout')),
+        isRunning: jest.fn(() => false),
+      };
+      const workspace = createWorkspace({
+        layoutController,
+        topologyChangeHandler: () => calls.push('topology'),
+      });
+
+      workspace.mergeGraph({ nodes: [], edges: [] });
+
+      expect(calls).toEqual(['topology', 'layout', 'topology']);
+    });
+
     it('initializeWorkspace', function () {
       const { workspace } = init();
       expect(workspace.nodes.length).toEqual(0);
@@ -74,12 +91,12 @@ describe('graphui-workspace', function () {
         edges: [],
       });
 
-      expect(topologyChangeHandler).toHaveBeenCalledTimes(1);
+      expect(topologyChangeHandler).toHaveBeenCalledTimes(2);
       expect(changeHandler).not.toHaveBeenCalled();
       expect(workspace.runLayout).toHaveBeenCalledTimes(1);
     });
 
-    it('initializes edge layout references before snapshotting topology changes', function () {
+    it('snapshots new edges safely before and after layout initializes references', function () {
       const { workspace, topologyChangeHandler } = init();
       topologyChangeHandler.mockImplementation(() => createWorkspaceState(workspace));
 
@@ -92,8 +109,8 @@ describe('graphui-workspace', function () {
           edges: [{ source: 0, target: 1, weight: 1, doc_count: 5 }],
         });
 
-        expect(topologyChangeHandler).toHaveBeenCalledTimes(1);
-        const snapshot = topologyChangeHandler.mock.results[0].value;
+        expect(topologyChangeHandler).toHaveBeenCalledTimes(2);
+        const snapshot = topologyChangeHandler.mock.results[1].value;
         const edge = snapshot.edgesById[snapshot.edgeIds[0]];
         expect(edge.topSourceId).toBe(workspace.nodes[0].id);
         expect(edge.topTargetId).toBe(workspace.nodes[1].id);

@@ -802,7 +802,7 @@ function GraphWorkspace(options) {
       self.addUndoLogEntry(lastOps);
     }
 
-    // Layout must initialize edge.topSrc/topTarget before the topology callback snapshots their IDs.
+    self.topologyChangeHandler?.();
     this.runLayout();
     self.topologyChangeHandler?.();
   };
