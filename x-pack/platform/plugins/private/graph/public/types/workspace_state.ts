@@ -135,7 +135,7 @@ export interface Workspace {
    * Fills in missing connections between the selected nodes.
    * @param connections The number of connections to fill in. Defaults to 10
    */
-  fillInGraph(connections?: number): void;
+  fillConnections(nodeIds: string[], connections?: number): void;
 
   runLayout(): void;
   stopLayout(): void;
