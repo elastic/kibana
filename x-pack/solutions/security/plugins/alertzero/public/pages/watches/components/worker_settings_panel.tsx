@@ -35,10 +35,10 @@ import { ScheduleIntervalField } from './schedule_interval_field';
 import { SettingRow } from './setting_row';
 import { getWorkerCustomSettingsComponent } from '../custom_settings/registry';
 import * as settingsI18n from '../settings_translations';
-import type { WorkerWarningReason } from '../worker_dependencies/worker_dependencies';
-import { WorkerWarningIcon } from '../worker_dependencies/worker_warning_icon';
 import { workerDescription, workerName } from '../workers/translations';
 import { workerScheduleCadenceLabel } from './worker_trigger_cadence';
+import type { WorkerWarningReason } from './worker_warning_content';
+import { WorkerWarningIcon } from './worker_warning_icon';
 
 interface WorkerSettingsPanelProps {
   worker: Worker;
@@ -50,7 +50,7 @@ interface WorkerSettingsPanelProps {
   settings: WorkerSettings;
   error?: string;
   /** Why this Worker has nothing to do, or what its being off costs others; one header icon. */
-  warningReasons?: WorkerWarningReason[];
+  warningReasons: WorkerWarningReason[];
   /** Settings could not be read for this Worker; controls are locked and the subtitle says why. */
   settingsLocked: boolean;
   /** A Watch save is in flight; controls are locked so edits cannot slip into a draft about to be cleared. */
@@ -65,8 +65,6 @@ interface WorkerSettingsPanelProps {
   draftResetKey?: number;
 }
 
-const NO_WARNING_REASONS: WorkerWarningReason[] = [];
-
 /**
  * A single Worker's settings. The header doubles as the accordion button when a Watch has several
  * Workers, so collapsed panels still summarise their state. Every control writes into the page
@@ -80,7 +78,7 @@ export const WorkerSettingsPanel = React.memo(function WorkerSettingsPanel({
   enabled,
   settings,
   error,
-  warningReasons = NO_WARNING_REASONS,
+  warningReasons,
   settingsLocked,
   isSaving,
   canWrite,
@@ -212,8 +210,8 @@ export const WorkerSettingsPanel = React.memo(function WorkerSettingsPanel({
             </EuiFlexItem>
           ) : null}
           {warningReasons.length > 0 ? (
-            // The band is the accordion's click target; opening the tooltip must not collapse it.
-            <EuiFlexItem grow={false} onClick={stopAccordionToggle} onKeyDown={stopAccordionToggle}>
+            // The band is the accordion's click target; clicking the icon must not collapse it.
+            <EuiFlexItem grow={false} onClick={stopAccordionToggle}>
               <WorkerWarningIcon workerId={worker.id} workerName={name} reasons={warningReasons} />
             </EuiFlexItem>
           ) : null}

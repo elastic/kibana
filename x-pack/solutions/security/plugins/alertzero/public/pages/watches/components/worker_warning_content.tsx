@@ -6,22 +6,26 @@
  */
 
 import React from 'react';
-import type { WorkerWarningReason } from './worker_dependencies';
+import { useEuiTheme } from '@elastic/eui';
+
+/** One entry in a Worker's header warning icon and post-save notice. */
+export interface WorkerWarningReason {
+  id: string;
+  message: React.ReactNode;
+}
 
 /**
  * Reason text shared by the header warning icon and the post-save notice, so the two cannot drift.
- * Several reasons stack as a list with no heading: the provider icon is not "blocked", so a
- * heading such as "This Worker can't run:" would misread there.
+ * Several reasons stack as a list with no heading: a Worker whose being off only hurts another
+ * Worker is not itself blocked, so a heading such as "This Worker can't run:" would misread.
  */
 export const WorkerWarningContent: React.FC<{ reasons: WorkerWarningReason[] }> = ({ reasons }) => {
-  if (reasons.length === 0) {
-    return null;
-  }
+  const { euiTheme } = useEuiTheme();
   if (reasons.length === 1) {
     return <p css={{ margin: 0 }}>{reasons[0].message}</p>;
   }
   return (
-    <ul css={{ margin: 0, paddingInlineStart: '1.25em', listStyle: 'disc' }}>
+    <ul css={{ margin: 0, paddingInlineStart: euiTheme.size.base, listStyle: 'disc' }}>
       {reasons.map((reason) => (
         <li key={reason.id}>{reason.message}</li>
       ))}

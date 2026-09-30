@@ -16,8 +16,10 @@ import {
   EuiText,
   useGeneratedHtmlId,
 } from '@elastic/eui';
-import type { WorkerWarningReason } from './worker_dependencies';
-import { WorkerWarningContent } from './worker_warning_content';
+import {
+  WorkerWarningContent,
+  type WorkerWarningReason,
+} from '../components/worker_warning_content';
 import * as i18n from './translations';
 
 interface WorkerBlockedAfterSaveModalProps {

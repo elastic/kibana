@@ -6,6 +6,7 @@
  */
 
 import React from 'react';
+import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import {
   SYSTEM_SECURITY_WORKER_DETECTION_RULE_CREATION_ID,
@@ -13,9 +14,14 @@ import {
   SYSTEM_SECURITY_WORKER_FORENSICS_ENDPOINT_ANALYSIS_ID,
   SYSTEM_SECURITY_WORKER_HUNT_CONTINUOUS_THREAT_HUNT_ID,
 } from '@kbn/alertzero-common';
+import type { WorkerWarningReason } from '../components/worker_warning_content';
 import { workerName } from '../workers/translations';
-import * as i18n from './translations';
-import type { WorkerDependencyNames } from './translations';
+import * as i18nShared from './translations';
+
+interface WorkerDependencyNames {
+  providerName: string;
+  dependentName: string;
+}
 
 const strong = (chunks: React.ReactNode) => <strong>{chunks}</strong>;
 
@@ -37,7 +43,8 @@ export interface WorkerDependency {
 
 export const WORKER_DEPENDENCIES: readonly WorkerDependency[] = [
   {
-    // Hunt is the only writer of the `security.coverage` records Rule Coverage works on.
+    // Hunt is the only writer of the `security.coverage` records Rule Coverage works on. Rule
+    // Coverage's id and name still read "Rule Creation" until that Worker is renamed.
     providerId: SYSTEM_SECURITY_WORKER_HUNT_CONTINUOUS_THREAT_HUNT_ID,
     dependentId: SYSTEM_SECURITY_WORKER_DETECTION_RULE_CREATION_ID,
     disableBody: ({ providerName, dependentName }) => (
@@ -47,8 +54,23 @@ export const WORKER_DEPENDENCIES: readonly WorkerDependency[] = [
         values={{ providerName, dependentName, strong }}
       />
     ),
-    providerReason: i18n.huntToRuleCoverageProviderReason,
-    dependentReason: i18n.huntToRuleCoverageDependentReason,
+    providerReason: ({ dependentName }) =>
+      i18n.translate(
+        'xpack.alertzero.watches.workerDependencies.huntToRuleCoverage.providerReason',
+        {
+          defaultMessage:
+            '{dependentName} is enabled but has no gap signals while this Worker is off.',
+          values: { dependentName },
+        }
+      ),
+    dependentReason: ({ providerName }) =>
+      i18n.translate(
+        'xpack.alertzero.watches.workerDependencies.huntToRuleCoverage.dependentReason',
+        {
+          defaultMessage: '{providerName} is disabled — no gap signals to act on.',
+          values: { providerName },
+        }
+      ),
   },
   {
     // Attack Discovery's forensics handoff is the only writer of `security.analyze_endpoint` records.
@@ -61,26 +83,41 @@ export const WORKER_DEPENDENCIES: readonly WorkerDependency[] = [
         values={{ providerName, dependentName, strong }}
       />
     ),
-    providerReason: i18n.attackDiscoveryToEndpointAnalysisProviderReason,
-    dependentReason: i18n.attackDiscoveryToEndpointAnalysisDependentReason,
+    providerReason: ({ dependentName }) =>
+      i18n.translate(
+        'xpack.alertzero.watches.workerDependencies.attackDiscoveryToEndpointAnalysis.providerReason',
+        {
+          defaultMessage:
+            '{dependentName} is enabled but has nothing to analyze while this Worker is off.',
+          values: { dependentName },
+        }
+      ),
+    dependentReason: ({ providerName }) =>
+      i18n.translate(
+        'xpack.alertzero.watches.workerDependencies.attackDiscoveryToEndpointAnalysis.dependentReason',
+        {
+          defaultMessage: '{providerName} is disabled — no attacks are handed off for analysis.',
+          values: { providerName },
+        }
+      ),
   },
 ];
 
 /**
- * Enabled state of every listed Worker, across all Watches. A Worker missing from the map is not
- * registered, so no dependency involving it applies.
+ * Enabled state of every Worker the list returned, across all Watches. A Worker missing from the
+ * map is either not registered or hidden by its skill gate; no dependency involving it applies.
  */
 export type WorkerEnabledById = ReadonlyMap<string, boolean>;
 
-/** One entry in a Worker's warning icon, dialog or post-save notice. */
-export interface WorkerWarningReason {
+/** One paragraph of the disable dialog, one per enabled dependent. */
+export interface WorkerDependencyMessage {
   id: string;
   message: React.ReactNode;
 }
 
 export interface WorkerDisableConfirmation {
   title: string;
-  paragraphs: WorkerWarningReason[];
+  paragraphs: WorkerDependencyMessage[];
 }
 
 export interface WorkerBlockedNotice {
@@ -109,7 +146,7 @@ export const getDisableConfirmation = (
     return undefined;
   }
   return {
-    title: i18n.disableWorkerTitle(workerName(workerId)),
+    title: i18nShared.disableWorkerTitle(workerName(workerId)),
     paragraphs: affected.map((dependency) => ({
       id: dependency.dependentId,
       message: dependency.disableBody(dependencyNames(dependency)),
@@ -130,7 +167,7 @@ export const getWorkerWarningReasons = (
   for (const dependency of WORKER_DEPENDENCIES) {
     if (dependency.dependentId === workerId && enabledById.get(dependency.providerId) === false) {
       reasons.push({
-        id: `${dependency.providerId}:dependent`,
+        id: `blockedBy:${dependency.providerId}`,
         message: dependency.dependentReason(dependencyNames(dependency)),
       });
     }
@@ -143,7 +180,7 @@ export const getWorkerWarningReasons = (
       enabledById.get(dependency.dependentId) === true
     ) {
       reasons.push({
-        id: `${dependency.dependentId}:provider`,
+        id: `blocking:${dependency.dependentId}`,
         message: dependency.providerReason(dependencyNames(dependency)),
       });
     }
@@ -153,15 +190,25 @@ export const getWorkerWarningReasons = (
 };
 
 /**
- * Post-save notices for the Workers just saved that are enabled yet still can't do anything. A
- * Worker saved as off is skipped: the disable dialog already confirmed that, and the Worker that
- * actually loses its input keeps its header icon.
+ * Post-save notices for the Workers the save just turned on that still can't do anything. A
+ * settings-only save of an already enabled Worker gets none; its header icon already says it. A
+ * Worker saved as off gets none either: the disable dialog already confirmed that, and the Worker
+ * that actually loses its input keeps its header icon. Being on is also what keeps the "blocking"
+ * reasons out, since they only arise while this Worker is off; a new reason kind must hold the
+ * same property or be filtered here.
  */
 export const getBlockedAfterSaveNotices = (
-  savedWorkerIds: readonly string[],
-  enabledById: WorkerEnabledById
+  enabledBeforeSave: WorkerEnabledById,
+  enabledAfterSave: WorkerEnabledById,
+  savedWorkerIds: readonly string[]
 ): WorkerBlockedNotice[] =>
   savedWorkerIds
-    .filter((workerId) => enabledById.get(workerId) === true)
-    .map((workerId) => ({ workerId, reasons: getWorkerWarningReasons(workerId, enabledById) }))
+    .filter(
+      (workerId) =>
+        enabledBeforeSave.get(workerId) === false && enabledAfterSave.get(workerId) === true
+    )
+    .map((workerId) => ({
+      workerId,
+      reasons: getWorkerWarningReasons(workerId, enabledAfterSave),
+    }))
     .filter((notice) => notice.reasons.length > 0);

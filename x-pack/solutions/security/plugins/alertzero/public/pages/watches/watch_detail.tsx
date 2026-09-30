@@ -75,7 +75,7 @@ export const WatchDetailPage: React.FC = () => {
     worker: Worker;
     confirmation: WorkerDisableConfirmation;
   } | null>(null);
-  const [blockedNotices, setBlockedNotices] = useState<WorkerBlockedNotice[]>([]);
+  const [blockedNoticeQueue, setBlockedNoticeQueue] = useState<WorkerBlockedNotice[]>([]);
   const [saveBlockedByInvalidDraft, setSaveBlockedByInvalidDraft] = useState(false);
   // Workers whose trigger control holds an uncommittable amount. That draft never reaches settings
   // state, so the page must hear about it directly or Save would persist the last valid cadence.
@@ -107,7 +107,12 @@ export const WatchDetailPage: React.FC = () => {
       setSaveBlockedByInvalidDraft(true);
       return;
     }
-    const workersBeforeSave = workersData?.workers ?? [];
+    // The notice judges against the state the user saved from, taken before `save()` clears the
+    // drafts, not against the refetch the save triggers.
+    const enabledSavedFrom = enabledById;
+    const storedEnabledById = new Map(
+      (workersData?.workers ?? []).map((worker) => [worker.id, worker.enabled])
+    );
     let savedWorkerIds: string[];
     try {
       savedWorkerIds = await save();
@@ -120,15 +125,17 @@ export const WatchDetailPage: React.FC = () => {
       throw saveError;
     }
     // A Worker whose write failed is still at its stored value.
-    const saved = new Set(savedWorkerIds);
+    const savedIds = new Set(savedWorkerIds);
     const enabledAfterSave: WorkerEnabledById = new Map(
-      workersBeforeSave.map((worker) => [
-        worker.id,
-        saved.has(worker.id) ? resolve(worker).enabled : worker.enabled,
+      [...enabledSavedFrom].map(([workerId, enabled]) => [
+        workerId,
+        savedIds.has(workerId) ? enabled : storedEnabledById.get(workerId) ?? enabled,
       ])
     );
-    setBlockedNotices(getBlockedAfterSaveNotices(savedWorkerIds, enabledAfterSave));
-  }, [save, hasInvalidDraft, resolve, workersData?.workers]);
+    setBlockedNoticeQueue(
+      getBlockedAfterSaveNotices(storedEnabledById, enabledAfterSave, savedWorkerIds)
+    );
+  }, [save, hasInvalidDraft, enabledById, workersData?.workers]);
 
   const handleEnabledChange = useCallback(
     (worker: Worker, enabled: boolean) => {
@@ -157,7 +164,7 @@ export const WatchDetailPage: React.FC = () => {
   }, [discard]);
 
   const isMultiWorker = members.length > 1;
-  const blockedNotice = blockedNotices[0];
+  const blockedNotice = blockedNoticeQueue[0];
 
   const headerPrimaryActionItem = useMemo(
     () => ({
@@ -202,7 +209,7 @@ export const WatchDetailPage: React.FC = () => {
     setSaveBlockedByInvalidDraft(false);
     setDraftResetKey((key) => key + 1);
     setPendingDisable(null);
-    setBlockedNotices([]);
+    setBlockedNoticeQueue([]);
   }, [watchId, discard]);
 
   const handleToggleWorker = useCallback((workerId: string, isOpen: boolean) => {
@@ -380,12 +387,9 @@ export const WatchDetailPage: React.FC = () => {
       ) : null}
       {blockedNotice ? (
         <WorkerBlockedAfterSaveModal
-          workerName={workerName(
-            blockedNotice.workerId,
-            workersData?.workers.find((worker) => worker.id === blockedNotice.workerId)?.name
-          )}
+          workerName={workerName(blockedNotice.workerId)}
           reasons={blockedNotice.reasons}
-          onAcknowledge={() => setBlockedNotices((current) => current.slice(1))}
+          onAcknowledge={() => setBlockedNoticeQueue((queue) => queue.slice(1))}
         />
       ) : null}
     </WatchesSectionLayout>

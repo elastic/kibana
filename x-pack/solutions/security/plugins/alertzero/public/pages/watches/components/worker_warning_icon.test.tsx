@@ -26,12 +26,6 @@ const openTooltip = async () => {
 };
 
 describe('WorkerWarningIcon', () => {
-  it('renders nothing without a reason', () => {
-    const { container } = renderIcon([]);
-
-    expect(container).toBeEmptyDOMElement();
-  });
-
   it('shows a single reason as a sentence', async () => {
     renderIcon(['Hunt is disabled.']);
     const icon = screen.getByTestId(`alertZeroWorkerWarningIcon-${WORKER_ID}`);

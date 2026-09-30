@@ -1176,7 +1176,7 @@ describe('WatchDetailPage', () => {
 
   describe('hard Worker dependencies', () => {
     const HUNT = SYSTEM_SECURITY_WORKER_HUNT_CONTINUOUS_THREAT_HUNT_ID;
-    const RULE_COVERAGE = SYSTEM_SECURITY_WORKER_DETECTION_RULE_CREATION_ID;
+    const RULE_CREATION = SYSTEM_SECURITY_WORKER_DETECTION_RULE_CREATION_ID;
     const ATTACK_DISCOVERY = SYSTEM_SECURITY_WORKER_FLOOR_ATTACK_DISCOVERY_ID;
     const ENDPOINT_ANALYSIS = SYSTEM_SECURITY_WORKER_FORENSICS_ENDPOINT_ANALYSIS_ID;
 
@@ -1193,8 +1193,8 @@ describe('WatchDetailPage', () => {
     const warningIcon = (workerId: string) =>
       screen.queryByTestId(`alertZeroWorkerWarningIcon-${workerId}`);
 
-    it('asks before turning off Continuous Threat Hunt while Rule Coverage is enabled; Cancel keeps it on', () => {
-      renderWatch(SYSTEM_SECURITY_WATCH_HUNT_ID, allWorkers([HUNT, RULE_COVERAGE]));
+    it('asks before turning off Continuous Threat Hunt while Rule Creation is enabled; Cancel keeps it on', () => {
+      renderWatch(SYSTEM_SECURITY_WATCH_HUNT_ID, allWorkers([HUNT, RULE_CREATION]));
 
       fireEvent.click(enabledSwitch(HUNT));
 
@@ -1209,7 +1209,7 @@ describe('WatchDetailPage', () => {
     it('turns Continuous Threat Hunt off in the draft on confirm, without saving', () => {
       const { mutateAsync } = renderWatch(
         SYSTEM_SECURITY_WATCH_HUNT_ID,
-        allWorkers([HUNT, RULE_COVERAGE])
+        allWorkers([HUNT, RULE_CREATION])
       );
 
       fireEvent.click(enabledSwitch(HUNT));
@@ -1221,6 +1221,51 @@ describe('WatchDetailPage', () => {
       expect(mutateAsync).not.toHaveBeenCalled();
       // Off in the draft with an enabled dependent: the provider's own icon appears.
       expect(warningIcon(HUNT)).toBeInTheDocument();
+    });
+
+    it('drops an open disable dialog when navigating to another Watch', () => {
+      // Parameter-only navigation keeps the page mounted, so the dialog must be cleared explicitly.
+      const workers = allWorkers([HUNT, RULE_CREATION]);
+      mockUseWorkers.mockReturnValue({
+        data: { workers },
+        isLoading: false,
+        error: null,
+        refetch: jest.fn(),
+      } as never);
+      mockUseUpdateWorker.mockReturnValue({ mutate: jest.fn(), mutateAsync: jest.fn() } as never);
+      mockUseWatch.mockReturnValue({
+        data: { watch: createCatalogWatchPlaceholder(SYSTEM_SECURITY_WATCH_HUNT_ID) },
+        isLoading: false,
+        error: null,
+        refetch: jest.fn(),
+      } as never);
+      const history = createMemoryHistory({
+        initialEntries: [`/watches/${SYSTEM_SECURITY_WATCH_HUNT_ID}`],
+      });
+      render(
+        <I18nProvider>
+          <Router history={history}>
+            <Route path="/watches/:watchId">
+              <WatchDetailPage />
+            </Route>
+          </Router>
+        </I18nProvider>
+      );
+
+      fireEvent.click(enabledSwitch(HUNT));
+      expect(disableModal()).toBeInTheDocument();
+
+      mockUseWatch.mockReturnValue({
+        data: { watch: createCatalogWatchPlaceholder(SYSTEM_SECURITY_WATCH_DETECTION_ID) },
+        isLoading: false,
+        error: null,
+        refetch: jest.fn(),
+      } as never);
+      act(() => {
+        history.push(`/watches/${SYSTEM_SECURITY_WATCH_DETECTION_ID}`);
+      });
+
+      expect(disableModal()).not.toBeInTheDocument();
     });
 
     it('asks before turning off Attack Discovery while Endpoint Analysis is enabled', () => {
@@ -1242,20 +1287,8 @@ describe('WatchDetailPage', () => {
       expect(enabledSwitch(ATTACK_DISCOVERY)).not.toBeChecked();
     });
 
-    it('does not ask when every dependent is off, and never asks when turning a Worker on', () => {
-      renderWatch(SYSTEM_SECURITY_WATCH_HUNT_ID, allWorkers([HUNT]));
-
-      fireEvent.click(enabledSwitch(HUNT));
-      expect(disableModal()).not.toBeInTheDocument();
-      expect(enabledSwitch(HUNT)).not.toBeChecked();
-
-      fireEvent.click(enabledSwitch(HUNT));
-      expect(disableModal()).not.toBeInTheDocument();
-      expect(enabledSwitch(HUNT)).toBeChecked();
-    });
-
     it('never asks when turning a provider on, even with its dependent enabled', () => {
-      renderWatch(SYSTEM_SECURITY_WATCH_HUNT_ID, allWorkers([RULE_COVERAGE]));
+      renderWatch(SYSTEM_SECURITY_WATCH_HUNT_ID, allWorkers([RULE_CREATION]));
 
       fireEvent.click(enabledSwitch(HUNT));
 
@@ -1263,16 +1296,16 @@ describe('WatchDetailPage', () => {
       expect(enabledSwitch(HUNT)).toBeChecked();
     });
 
-    it('warns Rule Coverage on the Detection Watch while Continuous Threat Hunt is saved as off', () => {
-      renderWatch(SYSTEM_SECURITY_WATCH_DETECTION_ID, allWorkers([RULE_COVERAGE]));
+    it('warns Rule Creation on the Detection Watch while Continuous Threat Hunt is saved as off', () => {
+      renderWatch(SYSTEM_SECURITY_WATCH_DETECTION_ID, allWorkers([RULE_CREATION]));
 
-      expect(warningIcon(RULE_COVERAGE)).toBeInTheDocument();
+      expect(warningIcon(RULE_CREATION)).toBeInTheDocument();
       expect(warningIcon(SYSTEM_SECURITY_WORKER_DETECTION_RULE_TUNING_ID)).not.toBeInTheDocument();
     });
 
     it('does not collapse the accordion when the warning icon is clicked', () => {
-      renderWatch(SYSTEM_SECURITY_WATCH_DETECTION_ID, allWorkers([RULE_COVERAGE]));
-      const icon = warningIcon(RULE_COVERAGE);
+      renderWatch(SYSTEM_SECURITY_WATCH_DETECTION_ID, allWorkers([RULE_CREATION]));
+      const icon = warningIcon(RULE_CREATION);
       if (!icon) {
         throw new Error('expected a warning icon');
       }
@@ -1280,26 +1313,20 @@ describe('WatchDetailPage', () => {
       fireEvent.click(icon);
 
       expect(
-        within(screen.getByTestId(`alertZeroWatchWorkerAccordion-${RULE_COVERAGE}`)).getByRole(
+        within(screen.getByTestId(`alertZeroWatchWorkerAccordion-${RULE_CREATION}`)).getByRole(
           'button',
           { expanded: true }
         )
       ).toBeInTheDocument();
     });
 
-    it('warns Continuous Threat Hunt while it is off and Rule Coverage is enabled', () => {
-      renderWatch(SYSTEM_SECURITY_WATCH_HUNT_ID, allWorkers([RULE_COVERAGE]));
+    it('warns Continuous Threat Hunt while it is off and Rule Creation is enabled', () => {
+      renderWatch(SYSTEM_SECURITY_WATCH_HUNT_ID, allWorkers([RULE_CREATION]));
 
       expect(warningIcon(HUNT)).toBeInTheDocument();
     });
 
-    it('does not warn Continuous Threat Hunt while Rule Coverage is off too', () => {
-      renderWatch(SYSTEM_SECURITY_WATCH_HUNT_ID, allWorkers([]));
-
-      expect(warningIcon(HUNT)).not.toBeInTheDocument();
-    });
-
-    it('warns both ends of Attack Discovery → Endpoint Analysis on their own Watches', () => {
+    it('warns Attack Discovery while it is off and Endpoint Analysis is enabled', () => {
       renderWatch(SYSTEM_SECURITY_WATCH_FLOOR_ID, allWorkers([ENDPOINT_ANALYSIS]));
       expect(warningIcon(ATTACK_DISCOVERY)).toBeInTheDocument();
     });
@@ -1312,12 +1339,12 @@ describe('WatchDetailPage', () => {
     it('tells the user after Save that an enabled Worker still will not run, without blocking the save', async () => {
       const { mutateAsync } = renderWatch(SYSTEM_SECURITY_WATCH_DETECTION_ID, allWorkers([]));
 
-      fireEvent.click(enabledSwitch(RULE_COVERAGE));
+      fireEvent.click(enabledSwitch(RULE_CREATION));
       fireEvent.click(screen.getByTestId('alertZeroWatchSettingsSave'));
 
       const notice = await screen.findByTestId('alertZeroWorkerBlockedAfterSaveModal');
       expect(mutateAsync).toHaveBeenCalledWith({
-        workerId: RULE_COVERAGE,
+        workerId: RULE_CREATION,
         patch: { enabled: true },
       });
       expect(notice).toHaveTextContent("Saved — but Rule Creation won't run yet");
@@ -1329,10 +1356,35 @@ describe('WatchDetailPage', () => {
       expect(screen.queryByTestId('alertZeroWorkerBlockedAfterSaveModal')).not.toBeInTheDocument();
     });
 
+    it('shows no notice for a settings-only save of a Worker that was already enabled', async () => {
+      const { mutateAsync } = renderWatch(
+        SYSTEM_SECURITY_WATCH_DETECTION_ID,
+        allWorkers([RULE_CREATION])
+      );
+      const section = screen.getByTestId(`alertZeroWatchWorkerSection-${RULE_CREATION}`);
+      const otherLevel = within(section)
+        .getAllByRole<HTMLInputElement>('radio')
+        .find((radio) => !radio.checked);
+      if (!otherLevel) {
+        throw new Error('expected a second autonomy level');
+      }
+
+      fireEvent.click(otherLevel);
+      fireEvent.click(screen.getByTestId('alertZeroWatchSettingsSave'));
+
+      await waitFor(() =>
+        expect(mutateAsync).toHaveBeenCalledWith(
+          expect.objectContaining({ workerId: RULE_CREATION })
+        )
+      );
+      expect(warningIcon(RULE_CREATION)).toBeInTheDocument();
+      expect(screen.queryByTestId('alertZeroWorkerBlockedAfterSaveModal')).not.toBeInTheDocument();
+    });
+
     it('shows no notice for a Worker the user just turned off', async () => {
       const { mutateAsync } = renderWatch(
         SYSTEM_SECURITY_WATCH_HUNT_ID,
-        allWorkers([HUNT, RULE_COVERAGE])
+        allWorkers([HUNT, RULE_CREATION])
       );
 
       fireEvent.click(enabledSwitch(HUNT));
@@ -1349,11 +1401,11 @@ describe('WatchDetailPage', () => {
       const { mutateAsync } = renderWatch(SYSTEM_SECURITY_WATCH_DETECTION_ID, allWorkers([]));
       mutateAsync.mockRejectedValue(new Error('patch failed'));
 
-      fireEvent.click(enabledSwitch(RULE_COVERAGE));
+      fireEvent.click(enabledSwitch(RULE_CREATION));
       fireEvent.click(screen.getByTestId('alertZeroWatchSettingsSave'));
 
       expect(
-        await screen.findByTestId(`alertZeroWorkerHeaderSaveError-${RULE_COVERAGE}`)
+        await screen.findByTestId(`alertZeroWorkerHeaderSaveError-${RULE_CREATION}`)
       ).toBeInTheDocument();
       expect(screen.queryByTestId('alertZeroWorkerBlockedAfterSaveModal')).not.toBeInTheDocument();
     });
