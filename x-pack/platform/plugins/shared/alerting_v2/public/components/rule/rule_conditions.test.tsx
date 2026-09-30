@@ -123,7 +123,7 @@ describe('RuleConditions', () => {
     expect(screen.getByTestId('alertingV2RuleDetailsLookback')).toHaveTextContent('10m');
     expect(screen.getByTestId('alertingV2RuleDetailsKind')).toHaveTextContent('Alerts');
     expect(screen.getByTestId('alertingV2RuleDetailsAlertDelay')).toHaveTextContent(
-      'After 3 matches or 5m'
+      'After 4 matches or 5m'
     );
     expect(screen.getByTestId('alertingV2RuleDetailsRecoveryDelay')).toHaveTextContent('-');
     expect(screen.getByTestId('alertingV2RuleDetailsNoDataStrategy')).toHaveTextContent(
@@ -205,7 +205,7 @@ describe('RuleConditions', () => {
       ...alertRule,
       state_transition: { pending: { count: 3 }, recovering: { count: 0 } },
     });
-    expect(screen.getByTestId('alertingV2RuleDetailsAlertDelay')).toHaveTextContent('After 3');
+    expect(screen.getByTestId('alertingV2RuleDetailsAlertDelay')).toHaveTextContent('After 4');
     expect(screen.getByTestId('alertingV2RuleDetailsRecoveryDelay')).toHaveTextContent('Immediate');
   });
 
@@ -215,7 +215,7 @@ describe('RuleConditions', () => {
       state_transition: { pending: { count: 0 }, recovering: { count: 5 } },
     });
     expect(screen.getByTestId('alertingV2RuleDetailsAlertDelay')).toHaveTextContent('Immediate');
-    expect(screen.getByTestId('alertingV2RuleDetailsRecoveryDelay')).toHaveTextContent('After 5');
+    expect(screen.getByTestId('alertingV2RuleDetailsRecoveryDelay')).toHaveTextContent('After 6');
   });
 
   it('renders alert delay with timeframe only', () => {
@@ -243,7 +243,7 @@ describe('RuleConditions', () => {
       },
     });
     expect(screen.getByTestId('alertingV2RuleDetailsAlertDelay')).toHaveTextContent(
-      'After 3 matches and 5m'
+      'After 4 matches and 5m'
     );
   });
 
@@ -256,7 +256,7 @@ describe('RuleConditions', () => {
       },
     });
     expect(screen.getByTestId('alertingV2RuleDetailsRecoveryDelay')).toHaveTextContent(
-      'After 4 recoveries or 20m'
+      'After 5 recoveries or 20m'
     );
   });
 

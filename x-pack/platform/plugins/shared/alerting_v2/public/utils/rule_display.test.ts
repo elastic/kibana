@@ -20,11 +20,14 @@ describe('formatAlertDelay', () => {
   });
 
   it.each([
-    [1, 'After 1 match'],
-    [3, 'After 3 matches'],
-  ])('describes a pending count of %i as a match delay', (count, expected) => {
-    expect(formatAlertDelay({ pending: { count } })).toBe(expected);
-  });
+    [1, 'After 2 matches'],
+    [3, 'After 4 matches'],
+  ])(
+    'describes a pending count of %i as a match delay for the evaluation it resolves on',
+    (count, expected) => {
+      expect(formatAlertDelay({ pending: { count } })).toBe(expected);
+    }
+  );
 
   it('describes a pending count of zero ORed with a timeframe as immediate', () => {
     expect(
@@ -42,12 +45,12 @@ describe('formatAlertDelay', () => {
     ).toBe('After 5 min');
   });
 
-  it('describes a count ANDed with a timeframe', () => {
+  it('describes a count ANDed with a timeframe for the evaluation it resolves on', () => {
     expect(
       formatAlertDelay({
         pending: { count: 2, timeframe: '5m', operator: 'and' },
       } as StateTransition)
-    ).toBe('After 2 matches and 5 min');
+    ).toBe('After 3 matches and 5 min');
   });
 
   it('describes a timeframe on its own', () => {
@@ -64,8 +67,8 @@ describe('formatRecoveryDelay', () => {
     expect(formatRecoveryDelay({ recovering: { count: 0 } })).toBe('Immediate');
   });
 
-  it('describes a recovering count above zero as a recovery delay', () => {
-    expect(formatRecoveryDelay({ recovering: { count: 2 } })).toBe('After 2 recoveries');
+  it('describes a recovering count above zero as a recovery delay for the evaluation it resolves on', () => {
+    expect(formatRecoveryDelay({ recovering: { count: 2 } })).toBe('After 3 recoveries');
   });
 
   it('describes a recovering count of zero ANDed with a timeframe as the timeframe alone', () => {

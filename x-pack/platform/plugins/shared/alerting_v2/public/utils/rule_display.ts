@@ -35,11 +35,15 @@ const QUERY_OVERFLOW_HEIGHT = 240;
 /**
  * Builds a human-readable delay string from a count, timeframe, and operator.
  *
- * Possible outputs:
- *  - count only:     "After 3 matches"
+ * `count` is the number of evaluations spent in the phase (as stored), which
+ * resolves on the evaluation after that — so the displayed match/recovery
+ * number is `count + 1`.
+ *
+ * Possible outputs (for a stored count of 3):
+ *  - count only:     "After 4 matches"
  *  - timeframe only: "After 5 min"
- *  - both (or):      "After 3 matches or 5 min"
- *  - both (and):     "After 3 matches and 5 min"
+ *  - both (or):      "After 4 matches or 5 min"
+ *  - both (and):     "After 4 matches and 5 min"
  */
 const formatDelay = ({
   count,
@@ -61,7 +65,7 @@ const formatDelay = ({
     return i18n.translate('xpack.alertingV2.ruleDetails.delayCountAndTimeframe', {
       defaultMessage: 'After {countPart} {connector} {timeframePart}',
       values: {
-        countPart: countLabel(count),
+        countPart: countLabel(count + 1),
         connector,
         timeframePart: formatDuration(timeframe),
       },
@@ -71,7 +75,7 @@ const formatDelay = ({
   if (hasCount) {
     return i18n.translate('xpack.alertingV2.ruleDetails.delayCountOnly', {
       defaultMessage: 'After {countPart}',
-      values: { countPart: countLabel(count) },
+      values: { countPart: countLabel(count + 1) },
     });
   }
 
@@ -99,7 +103,8 @@ const recoveryLabel = (n: number) =>
 
 /**
  * A count of 0 resolves the phase on the first evaluation, unless a timeframe is ANDed
- * with it, in which case the timeframe still has to elapse.
+ * with it, in which case the timeframe still has to elapse (see `isPhaseSkipped` on the
+ * server for the schedule-interval caveat this is subject to).
  */
 const isImmediateDelay = ({
   count,
