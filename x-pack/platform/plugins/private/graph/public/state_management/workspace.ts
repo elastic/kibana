@@ -358,7 +358,7 @@ export const createWorkspaceState = (workspace: Workspace): WorkspaceState => {
 
   return {
     isInitialized: true,
-    isLayoutRunning: Boolean(workspace.force),
+    isLayoutRunning: Boolean(workspace.isLayoutRunning?.()),
     nodesById,
     nodeIds: workspace.nodes.map(({ id }) => id),
     edgesById,

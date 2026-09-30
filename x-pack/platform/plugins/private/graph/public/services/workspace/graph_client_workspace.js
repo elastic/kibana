@@ -6,8 +6,8 @@
  */
 
 // Kibana wrapper
-import d3 from 'd3';
 import { getIcon } from '../../helpers/style_choices';
+import { GraphLayoutController } from './graph_layout_controller';
 
 // Pluggable function to handle the comms with a server. Default impl here is
 // for use outside of Kibana server with direct access to elasticsearch
@@ -123,6 +123,11 @@ function GraphWorkspace(options) {
   this.lastRequest = null;
   this.lastResponse = null;
   this.changeHandler = options.changeHandler;
+  const layoutController = new GraphLayoutController({
+    getNodes: () => self.nodes,
+    getEdges: () => self.edges,
+    onTick: self.changeHandler,
+  });
   if (options.graphExploreProxy) {
     graphExplorer = options.graphExploreProxy;
   }
@@ -486,105 +491,16 @@ function GraphWorkspace(options) {
    * @type void
    */
   this.stopLayout = function () {
-    if (this.force) {
-      this.force.stop();
-    }
-    this.force = null;
+    layoutController.stop();
   };
   /**
    * @type void
    */
   this.runLayout = function () {
-    this.stopLayout();
-    // The set of nodes and edges we present to the d3 layout algorithms
-    // is potentially a reduced set of nodes if the client has used any
-    // grouping of nodes into parent nodes.
-    const effectiveEdges = [];
-    self.edges.forEach((edge) => {
-      let topSrc = edge.source;
-      let topTarget = edge.target;
-      while (topSrc.parent !== undefined) {
-        topSrc = topSrc.parent;
-      }
-      while (topTarget.parent !== undefined) {
-        topTarget = topTarget.parent;
-      }
-      edge.topSrc = topSrc;
-      edge.topTarget = topTarget;
-
-      if (topSrc !== topTarget) {
-        effectiveEdges.push({
-          source: topSrc,
-          target: topTarget,
-        });
-      }
-    });
-    const visibleNodes = self.nodes.filter(function (n) {
-      return n.parent === undefined;
-    });
-    //reset then roll-up all the counts
-    const allNodes = self.nodes;
-    allNodes.forEach((node) => {
-      node.numChildren = 0;
-    });
-
-    for (const n in allNodes) {
-      if (!Object.hasOwn(allNodes, n)) {
-        continue;
-      }
-      let node = allNodes[n];
-      while (node.parent !== undefined) {
-        node = node.parent;
-        node.numChildren = node.numChildren + 1;
-      }
-    }
-    this.force = d3.layout
-      .force()
-      .nodes(visibleNodes)
-      .links(effectiveEdges)
-      .friction(0.8)
-      .linkDistance(100)
-      .charge(-1500)
-      .gravity(0.15)
-      .theta(0.99)
-      .alpha(0.5)
-      .size([800, 600])
-      .on('tick', function () {
-        const nodeArray = self.nodes;
-        let hasRollups = false;
-        //Update the position of all "top level nodes"
-        nodeArray.forEach((n) => {
-          //Code to support roll-ups
-          if (n.parent === undefined) {
-            n.kx = n.x;
-            n.ky = n.y;
-          } else {
-            hasRollups = true;
-          }
-        });
-        if (hasRollups) {
-          nodeArray.forEach((n) => {
-            //Code to support roll-ups
-            if (n.parent !== undefined) {
-              // Is a grouped node - inherit parent's position so edges point into parent
-              // d3 thinks it has moved it to x and y but we have final say using kx and ky.
-              let topLevelNode = n.parent;
-              while (topLevelNode.parent !== undefined) {
-                topLevelNode = topLevelNode.parent;
-              }
-
-              n.kx = topLevelNode.x;
-              n.ky = topLevelNode.y;
-            }
-          });
-        }
-        if (self.changeHandler) {
-          // Hook to allow any client to respond to position changes
-          // e.g. react adjusts and repaints node positions on screen.
-          self.changeHandler();
-        }
-      });
-    this.force.start();
+    layoutController.start();
+  };
+  this.isLayoutRunning = function () {
+    return layoutController.isRunning();
   };
 
   //========Grouping functions==========
