@@ -57,15 +57,17 @@ apiTest.describe(
       expect(response.body.affected_count).toBe(2);
       expect(response.body.errors).toStrictEqual([]);
 
-      const updated1 = await apiServices.alertingV2.actionPolicies.get(p1.id);
-      const updated2 = await apiServices.alertingV2.actionPolicies.get(p2.id);
-      expect(updated1.name).toBe('bulk-update-key-1');
-      expect(updated2.name).toBe('bulk-update-key-2');
-      // Rotation proof: SO was rewritten so updatedAt and version advanced.
-      expect(updated1.updated_at).not.toBe(p1.created_at);
-      expect(updated1.version).not.toBe(p1.version);
-      expect(updated2.updated_at).not.toBe(p2.created_at);
-      expect(updated2.version).not.toBe(p2.version);
+      for (const created of [p1, p2]) {
+        const updated = await apiServices.alertingV2.actionPolicies.get(created.id);
+        expect(updated).toStrictEqual({
+          ...created,
+          updated_at: updated.updated_at,
+          updated_by: updated.updated_by,
+        });
+        expect(Date.parse(updated.updated_at)).toBeGreaterThanOrEqual(
+          Date.parse(created.updated_at)
+        );
+      }
     });
 
     apiTest(

@@ -24,24 +24,25 @@ enabled: true
 
 consts:
   # The Context Engine AI index the indicators are written into.
-  ai_index_id: my-ai-index
+  ai_index_id: __AI_INDEX_ID__
   # The index the documents are read from.
-  source_index: my-source-index
+  source_index: __SOURCE_INDEX__
   # The field used as the document's title.
-  title_field: title
+  title_field: __TITLE_FIELD__
   # The field holding the document body.
-  body_field: body
+  body_field: __BODY_FIELD__
   # The agreed corpus filter, as a complete ES|QL line. Set to "" to take the whole index.
-  corpus_filter: "| WHERE published_at >= NOW() - 365 days"
+  corpus_filter: __CORPUS_FILTER__
   # The KI budget: one model call and one KI per document, 100 at most during onboarding. A
   # one-KI-per-claim variant multiplies it by the claims per document.
-  max_documents: 50
+  max_documents: __MAX_DOCUMENTS__
   # Bodies are truncated before they reach the prompt so one long document cannot exhaust the
   # context window and silently drop the rest of the batch.
-  body_max_chars: 12000
+  body_max_chars: __BODY_MAX_CHARS__
 
 tags:
   - document-ki
+  - ce-template:document_orchestration
 
 triggers:
   - type: manual
@@ -62,8 +63,8 @@ steps:
       query: |
         FROM {{ consts.source_index }} METADATA _id
         {{ consts.corpus_filter }}
-        | EVAL body = SUBSTRING({{ consts.body_field }}, 1, {{ consts.body_max_chars }})
-        | KEEP _id, {{ consts.title_field }}, body
+        | EVAL body = SUBSTRING(`{{ consts.body_field }}`, 1, {{ consts.body_max_chars }})
+        | KEEP _id, `{{ consts.title_field }}`, body
         | LIMIT {{ consts.max_documents }}
 
   - name: loop_documents
