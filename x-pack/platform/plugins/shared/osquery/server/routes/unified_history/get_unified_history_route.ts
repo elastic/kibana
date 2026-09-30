@@ -265,7 +265,6 @@ export const getUnifiedHistoryRoute = (router: IRouter, osqueryContext: OsqueryA
             liveHits,
             osqueryContext,
             request,
-            spaceId,
             integrationNamespaces,
             ccsEnabled,
             cpsActive,

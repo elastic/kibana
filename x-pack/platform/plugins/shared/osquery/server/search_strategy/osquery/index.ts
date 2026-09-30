@@ -8,6 +8,7 @@
 import { map, mergeMap, forkJoin, from, of } from 'rxjs';
 import type { ISearchStrategy, PluginStart } from '@kbn/data-plugin/server';
 import { shimHitsTotal } from '@kbn/data-plugin/server';
+import type { ISearchRequestParams } from '@kbn/search-types';
 import { ENHANCED_ES_SEARCH_STRATEGY } from '@kbn/data-plugin/common';
 import type { CoreStart } from '@kbn/core/server';
 import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
@@ -27,6 +28,8 @@ import { osqueryFactory } from './factory';
 import type { OsqueryFactory, OsqueryFactoryRequest } from './factory/types';
 import { hasConnectedRemoteClusters } from '../../utils/ccs_utils';
 import { shouldUseInternalSearchClient } from '../../utils/cps_read_routing';
+import { findOsqueryActionMetadata } from '../../utils/find_osquery_action_metadata';
+import { getReadEsClient } from '../../utils/get_read_es_client';
 
 /**
  * Factory query types constrained by an `action_id` and reading documents that
@@ -34,11 +37,11 @@ import { shouldUseInternalSearchClient } from '../../utils/cps_read_routing';
  * agent-carried `action_data.space_id` (see {@link buildSpaceIdFilter}).
  *
  * SECURITY: the id binding narrows the read to documents the caller named, but it
- * is not an authorization gate on its own — route-level ownership checks are
- * uneven (`get_action_results_route.ts` verifies the action document only when CPS
- * is active). Isolation rests on the clause itself matching only documents whose
- * surviving provenance already names the active space. Do not add a query type
- * here unless its builder unconditionally filters on an `action_id`.
+ * is not an authorization gate on its own. Where no action document gate runs
+ * (see {@link ACTION_DOC_GATED_FACTORY_QUERY_TYPES}), isolation rests on the clause
+ * itself matching only documents whose surviving provenance already names the
+ * active space. Do not add a query type here unless its builder unconditionally
+ * filters on an `action_id`.
  *
  * Types not allowlisted for `action_data.space_id`: `actions` enumerates across
  * actions; `exportResults` is not unconditionally id-bound in the factory
@@ -80,6 +83,40 @@ const isScheduleBoundRequest = <T extends FactoryQueryTypes>(
   'executionCount' in request &&
   request.executionCount != null;
 
+/**
+ * Factory query types whose live-query reads are authorized against the
+ * Kibana-written action document on `ACTIONS_INDEX` rather than by filtering
+ * agent-written documents on `space_id` (Defend's request-then-responses split).
+ *
+ * SECURITY: the provider looks up the request's `actionId` (parent or
+ * `queries.action_id`) in the active space itself, and only a hit omits the
+ * data-document space filter. A miss is a 404. Each builder here MUST filter on
+ * that `actionId` whenever it is set, or the skip would widen the read beyond the
+ * verified id. Schedule-bound requests are never gated: pack executions have no
+ * action document and keep the space filter.
+ */
+export const ACTION_DOC_GATED_FACTORY_QUERY_TYPES: readonly FactoryQueryTypes[] = [
+  OsqueryQueries.results,
+  OsqueryQueries.actionResults,
+  OsqueryQueries.exportResults,
+];
+
+const getActionDocGatedActionId = <T extends FactoryQueryTypes>(
+  request: StrategyRequestType<T>
+): string | undefined => {
+  if (
+    request.factoryQueryType == null ||
+    !ACTION_DOC_GATED_FACTORY_QUERY_TYPES.includes(request.factoryQueryType) ||
+    isScheduleBoundRequest(request)
+  ) {
+    return undefined;
+  }
+
+  return 'actionId' in request && typeof request.actionId === 'string' && request.actionId !== ''
+    ? request.actionId
+    : undefined;
+};
+
 export const osquerySearchStrategyProvider = <T extends FactoryQueryTypes>(
   data: PluginStart,
   esClient: CoreStart['elasticsearch']['client'],
@@ -119,6 +156,33 @@ export const osquerySearchStrategyProvider = <T extends FactoryQueryTypes>(
             cpsActive: from(osqueryContext.isCpsActive(deps.request)),
           });
         }),
+        mergeMap((context) => {
+          const gatedActionId = getActionDocGatedActionId(request);
+
+          // Without an osquery actions index (and no CPS fan-out to reach one), live
+          // actions exist only on `.fleet-actions`, which the gate never reads. Those
+          // reads keep the data-document space filter instead of failing.
+          if (gatedActionId == null || (!context.actionsIndexExists && !context.cpsActive)) {
+            return of({ ...context, skipSpaceFilter: false });
+          }
+
+          return from(
+            findOsqueryActionMetadata({
+              esClient: getReadEsClient(esClient, deps.request, context.cpsActive),
+              spaceId: context.activeSpace?.id ?? DEFAULT_SPACE_ID,
+              actionId: gatedActionId,
+              actionsIndexExists: context.actionsIndexExists,
+            })
+          ).pipe(
+            map((found) => {
+              if (!found) {
+                throw new KbnServerError('Action not found', 404);
+              }
+
+              return { ...context, skipSpaceFilter: true };
+            })
+          );
+        }),
         mergeMap(
           ({
             actionsIndexExists,
@@ -126,6 +190,7 @@ export const osquerySearchStrategyProvider = <T extends FactoryQueryTypes>(
             ccsEnabled,
             activeSpace,
             cpsActive,
+            skipSpaceFilter,
           }) => {
             // Single decision for hit-level enforceSpaceScope and for any
             // global-agg builder that cannot inherit the top-level query.
@@ -182,13 +247,15 @@ export const osquerySearchStrategyProvider = <T extends FactoryQueryTypes>(
               componentTemplateExists: actionsIndexExists,
               ccsEnabled,
               matchActionDataSpaceId,
+              skipSpaceFilter,
             } as OsqueryFactoryRequest<T>;
 
-            const dsl = enforceSpaceScope(
-              queryFactory.buildDsl(factoryRequest),
-              spaceId,
-              spaceScopeOptions
-            );
+            const scopeToSpace = (searchDsl: ISearchRequestParams) =>
+              skipSpaceFilter
+                ? searchDsl
+                : enforceSpaceScope(searchDsl, spaceId, spaceScopeOptions);
+
+            const dsl = scopeToSpace(queryFactory.buildDsl(factoryRequest));
 
             // Client selection is per search, not per request: the legacy and data-stream
             // reads below target different index families, so a single decision taken from
@@ -245,13 +312,11 @@ export const osquerySearchStrategyProvider = <T extends FactoryQueryTypes>(
                   factoryQueryType === OsqueryQueries.actionResults &&
                   (newDataStreamIndexExists || ccsEnabled || cpsActive)
                 ) {
-                  const dataStreamDsl = enforceSpaceScope(
+                  const dataStreamDsl = scopeToSpace(
                     queryFactory.buildDsl({
                       ...factoryRequest,
                       useNewDataStream: true,
-                    } as OsqueryFactoryRequest<T>),
-                    spaceId,
-                    spaceScopeOptions
+                    } as OsqueryFactoryRequest<T>)
                   );
 
                   const dataStreamEs = selectSearchClient(dataStreamDsl);
