@@ -6,6 +6,7 @@
  */
 import { get } from 'lodash';
 import { DEFAULT_FIELDS } from '../../../../common/constants/monitor_defaults';
+import { mergeHttpAuthDefaults } from '../../../../common/utils/merge_http_auth_defaults';
 import type { HTTPFields, TLSVersion } from '../../../../common/runtime_types/monitor_management';
 import {
   CodeEditorMode,
@@ -88,10 +89,10 @@ export const getNormalizeHTTPFields = ({
   };
 
   return {
-    normalizedFields: {
+    normalizedFields: mergeHttpAuthDefaults({
       ...defaultFields,
       ...normalizedFields,
-    },
+    }),
     unsupportedKeys,
     errors,
   };
