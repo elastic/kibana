@@ -182,9 +182,9 @@ export class AlertsTablePage {
 
   /**
    * Wait until the alerts grid shows `ruleName`. The grid is not mounted while
-   * the alerts page is still loading, and a search that finished before the
-   * alert existed does not run again. Refresh only once the loaded grid is up
-   * and the rule cell is not in it.
+   * the alerts page is still loading, or when the latest search returned no
+   * hits. A search that finished before the alert existed does not run again.
+   * Refresh from the query bar, which stays on the page for an empty result.
    */
   async waitForRuleAlert(ruleName: string) {
     const cell = this.alertsTable.getByTestId('ruleName').filter({ hasText: ruleName });
@@ -196,7 +196,7 @@ export class AlertsTablePage {
         return cell;
       }
 
-      if ((await this.alertsTable.isVisible()) && (await refresh.isVisible())) {
+      if (await refresh.isVisible()) {
         const disabled = await refresh.getAttribute('disabled', { timeout: 1_000 }).catch(() => '');
         if (disabled === null) {
           await refresh.click({ timeout: 1_000 }).catch(() => undefined);
