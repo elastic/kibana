@@ -17,16 +17,16 @@ Graph shows only up in the side bar if your server is running on a platinum or t
 
 ### Client `public/`
 
-Currently state handled by react/redux/saga and the core mutable `GraphWorkspace` instance, which managing the nodes and edges state. It should be rewritten in typescript and integrated into redux store.
+State is currently handled by React, Redux Toolkit listener middleware, and the mutable `GraphWorkspace` instance, which manages node and edge state. The remaining workspace state should eventually be integrated into the Redux store.
 
 * `apps/` contains all graph app routes
 * `components/` contains react components for various parts of the interface. Components can hold local UI state (e.g. current form data), everything else should be passed in from the caller. Styles should reside in a component-specific stylesheet
-* `services/` contains the core workspace logic and functions that encapsule other parts of Kibana. Stateful dependencies are passed in from the outside. Components should not rely on services directly but have callbacks passed in. Once the migration to redux/saga is complete, only sagas will use services
+* `services/` contains the core workspace logic and functions that encapsulate other parts of Kibana. Stateful dependencies are passed in from the outside. Components should not rely on services directly but have callbacks passed in; Redux listeners coordinate services with state updates.
 * `helpers/` contains side effect free helper functions that can be imported and used from components and services
-* `state_management/` contains reducers, action creators, selectors and sagas. It also exports the central store creator
-  * Each file covers one functional area (e.g. handling of fields, handling of url templates...)
-  * Generally there is no file separation between reducers, action creators, selectors and sagas of the same functional area
-  * Sagas may contain cross-references between multiple functional areas (e.g. the loading saga sets fields and meta data). Because of this it is possible that circular imports occur. In this case the sagas are moved to a separate file `<functional area>.sagas.ts`.
+* `state_management/` contains reducers, action creators, selectors, and RTK listeners. It also exports the central store creator.
+  * Each file covers one functional area (for example, fields or URL templates).
+  * Reducers, action creators, selectors, and listeners for the same functional area generally remain together.
+  * Listeners with cross-references between multiple functional areas may move to a separate `<functional_area>_listeners.ts` file to avoid circular imports.
 * `types/` contains type definitions for unmigrated `GraphWorkspace` methods
 * `router.tsx` is the central entrypoint of the app
 
