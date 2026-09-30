@@ -11,13 +11,25 @@ tags:
   - security
   - continuous-threat-hunt
 settings:
-  # Must cover system-create-proposal's own settings.timeout (168h): this
-  # child waits on it synchronously via workflow.execute, so its own ceiling
-  # has to be at least as long or the wait gets cut short first (same reasoning
-  # as attack_discovery_review.yaml's settings.timeout against its own
-  # escalation_gate). Pinned to exactly 168h, not padded, since the two
-  # requery/close steps after the wrap are near-instant.
-  timeout: '168h'
+  # This run parks in WAITING_FOR_CHILD for as long as the escalation gate holds the
+  # analyst's decision, and the workflow timeout is wall-clock from `startedAt` rather
+  # than active time, so that park counts against it. At the engine's 6h default the
+  # gate would be cancelled under the analyst, leaving the Investigation open and the
+  # proposal dangling.
+  #
+  # So this has to stay *above* the gate's own ceiling of `168h` — a 72h decision
+  # window plus a second full 72h for a proposal re-parked just before its deadline by
+  # a privilege denial or a failed action, plus margin. Equal is not enough: this
+  # clock starts before the gate is launched, so matching ceilings have the parent
+  # expire first and lose a decision the child had already reached (the same reasoning
+  # create_proposal.yaml gives for being strictly longer than `52w`). Hence the same
+  # 176h as every other human-gated AlertZero parent — attack_discovery_review,
+  # coverage_review, rule_creation, rule_tuning_review. The two requery/close steps
+  # after the wrap are near-instant, so the margin is all decision time.
+  #
+  # Not to be confused with the `53w` on system-create-alertzero-proposal, the bridge
+  # this child actually executes: that is a deliberate sentinel, not a decision window.
+  timeout: '176h'
 triggers:
   - type: manual
     inputs:

@@ -163,8 +163,8 @@ steps:
   # honest about degraded cases (optional-only matches, no searchable terms,
   # blocked scope) rather than always claiming a clean search happened, and it
   # is self-sufficient because the SSE attachment may not render everywhere
-  # yet (Steph, 2026-09-25: the user must be able to read the whole story of
-  # the hunt from the messages alone). Markdown, as every Investigation
+  # yet: the user must be able to read the whole story of the hunt from the
+  # messages alone. Markdown, as every Investigation
   # message is (Agent Builder conversations render it); literal block scalar so
   # the narrative's own line breaks survive. The SSE count appended here is
   # what the coordinator prepared; whether each attachment landed is not
@@ -202,9 +202,13 @@ steps:
   # mapping field (`index_templates.ts:311-313`) with no writer yet: the one
   # writer that used to compute it (`write_hunt_feedback.ts`) has since been
   # deleted and this step deliberately does not resurrect it, so it never sets
-  # that key. `last_hunt_event_hit_count` is omitted
-  # (never written as 0) on a clean run, matching the deleted writer's
-  # convention: a report that has never had a hit event has no count key.
+  # that key. `last_hunt_event_hit_count` *is* written as `0` on a run that
+  # matched nothing: Liquid's `default` filter only substitutes nil, false and
+  # empty, and `0` is none of those, so it passes through and the script's
+  # null check lets it land. That is the useful behaviour -- `0` says this run
+  # searched and found nothing, which a missing key cannot -- and nothing reads
+  # the field yet, so there is no convention to preserve. The `| default: null`
+  # remains as the guard for a genuinely absent count.
   - name: set_evidence_script
     type: data.set
     if: "${{ steps.run_hunt_coordinator.output.completed_successfully == true }}"

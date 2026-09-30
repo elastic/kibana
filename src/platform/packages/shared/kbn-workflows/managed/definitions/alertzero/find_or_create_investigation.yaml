@@ -70,7 +70,7 @@ steps:
     on-failure:
       continue: true
 
-  # Decoupled from the attachment above (Steph, 2026-09-25): a separate
+  # Decoupled from the attachment above: a separate
   # journal_note call rather than one converse call carrying both, since this
   # message type does not depend on the attachment landing to be useful on its
   # own. Same skip guard; a rerun gets its own trigger message on the same

@@ -34,6 +34,7 @@ interface NestedStep {
 
 interface ParsedWorkflow {
   tags?: string[];
+  settings?: { timeout?: string };
   outputs?: Array<{ name: string; type: string }>;
   steps: NestedStep[];
 }
@@ -185,6 +186,18 @@ describe(ALERTZERO_HUNT_PACKAGE_REPORT_WORKFLOW_ID, () => {
 });
 
 describe(ALERTZERO_HUNT_PROPOSAL_GATE_WORKFLOW_ID, () => {
+  // The timeout is wall-clock from `startedAt`, so the time this run parks waiting on the
+  // escalation gate counts against it. It has to clear the gate's own 168h ceiling (a 72h
+  // decision window plus a second 72h for a proposal re-parked on a denial or a failed
+  // action) and clear it strictly: this clock starts before the gate is launched, so equal
+  // ceilings expire the parent first and lose a decision the analyst already made. 176h is
+  // what every other human-gated AlertZero parent uses.
+  it('outlives the analyst decision window the escalation gate parks for', () => {
+    const workflow = parseChild(ALERTZERO_HUNT_PROPOSAL_GATE_WORKFLOW_ID);
+
+    expect(workflow.settings?.timeout).toBe('176h');
+  });
+
   // Both requeries swallow their own failure, so every settlement count has to fall
   // back to the earlier read. Reading the retry alone means a transient failure on
   // the second call discards a first call that succeeded, collapses created_count to
