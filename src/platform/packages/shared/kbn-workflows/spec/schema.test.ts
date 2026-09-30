@@ -30,7 +30,9 @@ import {
   PARALLEL_MODE_REFINEMENT_MESSAGE,
   ParallelStepSchema,
   TimeoutPropSchema,
+  WaitForApprovalChannelsSchema,
   WaitForApprovalStepSchema,
+  WaitForInputChannelsSchema,
   WaitForInputStepSchema,
   WaitStepSchema,
   WorkflowExecuteAsyncStepSchema,
@@ -1266,6 +1268,67 @@ describe('`if` condition on step schemas', () => {
 
     expect(IfStepSchema.safeParse({ ...ifStep, condition: atLimit }).success).toBe(true);
     expect(IfStepSchema.safeParse({ ...ifStep, condition: overLimit }).success).toBe(false);
+  });
+});
+
+describe('HITL external channel schemas', () => {
+  const channels = {
+    slack: { 'connector-id': 'slack-1', message: 'webhook note' },
+    slack_api: {
+      'connector-id': 'slack-api-1',
+      channels: ['#alerts'],
+      message: 'api note',
+    },
+    slack2: {
+      'connector-id': 'slack2-1',
+      channels: ['C0123'],
+      message: 'slack2 note',
+    },
+  };
+
+  const channelPropertyNames = (schema: z.ZodType): Record<string, string[]> => {
+    const json = z.toJSONSchema(schema, { target: 'draft-07', unrepresentable: 'any' }) as {
+      properties?: Record<string, { properties?: Record<string, unknown> }>;
+    };
+    return Object.fromEntries(
+      Object.entries(json.properties ?? {}).map(([channel, channelSchema]) => [
+        channel,
+        Object.keys(channelSchema.properties ?? {}),
+      ])
+    );
+  };
+
+  it('keeps an optional channel message on waitForInput', () => {
+    const result = WaitForInputStepSchema.safeParse({
+      name: 's',
+      type: 'waitForInput',
+      with: { channels },
+    });
+
+    expect(result.success).toBe(true);
+    if (result.success) {
+      expect(result.data.with?.channels).toEqual(channels);
+    }
+    expect(channelPropertyNames(WaitForInputChannelsSchema.unwrap())).toEqual({
+      slack: ['connector-id', 'message'],
+      slack_api: ['connector-id', 'channels', 'message'],
+      slack2: ['connector-id', 'channels', 'message'],
+    });
+  });
+
+  it('accepts a legacy approval channel message without offering it for autocomplete', () => {
+    const result = WaitForApprovalStepSchema.safeParse({
+      name: 's',
+      type: 'waitForApproval',
+      with: { channels },
+    });
+
+    expect(result.success).toBe(true);
+    expect(channelPropertyNames(WaitForApprovalChannelsSchema.unwrap())).toEqual({
+      slack: ['connector-id'],
+      slack_api: ['connector-id', 'channels'],
+      slack2: ['connector-id', 'channels'],
+    });
   });
 });
 
