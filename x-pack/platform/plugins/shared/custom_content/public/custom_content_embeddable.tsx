@@ -18,6 +18,8 @@ import type {
   PublishesWritableTimeRange,
 } from '@kbn/presentation-publishing';
 import {
+  CHILDREN_UNSAVED_CHANGES_DEBOUNCE,
+  UNSAVED_CHANGES_DEBOUNCE,
   initializeTitleManager,
   titleComparators,
   initializeTimeRangeManager,
@@ -48,8 +50,9 @@ import {
   skip,
   switchMap,
 } from 'rxjs';
-import { isRoundCompleteEvent } from '@kbn/agent-builder-common';
-import { ATTACHMENT_REF_ACTOR } from '@kbn/agent-builder-common/attachments';
+import { isExecutionTerminalEvent, isRoundStartedEvent } from '@kbn/agent-builder-common';
+import { getDashboardPanelAttachmentId } from '@kbn/agent-builder-dashboards-common';
+import { REFINE_WITH_CHAT_ACTION_ID } from '@kbn/dashboard-plugin/public';
 import {
   CUSTOM_CONTENT_EMBEDDABLE_TYPE,
   readEsqlQuery,
@@ -64,19 +67,16 @@ import { getESQLAdHocDataview } from '@kbn/esql-utils';
 import { css } from '@emotion/react';
 import { getServices } from './services';
 import { getTelemetry } from './telemetry';
-import {
-  CUSTOM_CONTENT_CONTEXT_ATTACHMENT_TYPE,
-  MAX_PREVIEW_HEIGHT,
-} from '../common/panel_context_attachment';
-import {
-  buildCustomContentContextAttachment,
-  type CustomContentFetchContext,
-} from './utils/chat_integration';
-import { registerPanelPreviewHandler } from './utils/panel_preview_registry';
-import { readPanelContextData } from '../common/read_panel_context_data';
 import type { CustomContentEmbeddableState } from '../server';
 
-const panelMeasureCss = css({
+/**
+ * The dashboard serializes panel configs only after its unsaved-changes debounces. The shared
+ * action snapshots the dashboard when it runs, so a draft applied to the panel has to land there
+ * first for the attached dashboard to carry it.
+ */
+const DASHBOARD_STATE_SETTLE_MS = UNSAVED_CHANGES_DEBOUNCE + CHILDREN_UNSAVED_CHANGES_DEBOUNCE;
+
+const panelLayoutCss = css({
   display: 'flex',
   flexDirection: 'column',
   flex: '1 1 100%',
@@ -97,27 +97,19 @@ export const customContentEmbeddableFactory: EmbeddablePublicDefinition<
 > = {
   type: CUSTOM_CONTENT_EMBEDDABLE_TYPE,
   buildEmbeddable: async ({ initialState, finalizeApi, parentApi, uuid }) => {
-    const { core, search, dataViews, agentBuilder } = getServices();
+    const { core, search, dataViews, uiActions, agentBuilder } = getServices();
     const rendererServices: CustomContentRendererServices = {
       http: core.http,
       uiSettings: core.uiSettings,
       search,
     };
-    // The panel's own container is outside the sandboxed iframe, so its height is readable.
-    // Captured when the panel is sent to chat so the preview there starts at the size the
-    // user was actually looking at.
-    const panelElement: { current: HTMLDivElement | null } = { current: null };
-    const currentFetchContext = (): CustomContentFetchContext => ({
-      timeRange: effectiveTimeRange$.getValue(),
-      esqlVariables: esqlVariables$.getValue(),
-      filters: filters$.getValue(),
-      query: query$.getValue(),
-      isApproximate: isApproximate$.getValue(),
-      projectRouting: projectRouting$.getValue(),
-    });
-    const measurePanelHeight = () => {
-      const measured = panelElement.current?.getBoundingClientRect().height;
-      return measured ? Math.min(MAX_PREVIEW_HEIGHT, Math.round(measured)) : undefined;
+    const panelPointerId = getDashboardPanelAttachmentId(uuid);
+    // Hands the panel to the shared "Refine with chat" action registered by agent_builder_dashboards.
+    // It attaches the dashboard and a pointer to this panel; the agent edits the panel through the
+    // dashboard and the change arrives via the dashboard live update.
+    const refineWithChat = async () => {
+      const action = await uiActions.getAction(REFINE_WITH_CHAT_ACTION_ID);
+      await action.execute({ embeddable: api });
     };
     const titleManager = initializeTitleManager(initialState);
     const timeRangeManager = initializeTimeRangeManager(initialState);
@@ -126,12 +118,6 @@ export const customContentEmbeddableFactory: EmbeddablePublicDefinition<
     const template$ = new BehaviorSubject<string | undefined>(initialState.template);
     const previewHtml$ = new BehaviorSubject<string | null>(null);
     const isGenerating$ = new BehaviorSubject<boolean>(false);
-    const chatGeneratingCallbacks = {
-      onSubmit: () => isGenerating$.next(true),
-      onClose: () => {
-        if (isGenerating$.getValue()) isGenerating$.next(false);
-      },
-    };
     const esql$ = new BehaviorSubject<AggregateQuery[]>([]);
     const approximationApplied$ = new BehaviorSubject<boolean | undefined>(undefined);
     const isApproximate$ = new BehaviorSubject<boolean>(false);
@@ -236,27 +222,20 @@ export const customContentEmbeddableFactory: EmbeddablePublicDefinition<
               closeFlyout();
             };
 
+            // The draft becomes the panel's state first, so the dashboard attachment the action
+            // sends already carries what the user was looking at in the editor.
             const handleGenerateWithChatFromFlyout = (
               draftTemplate: string,
               draftEsqlQuery: string | undefined
             ) => {
               if (!agentBuilder) return;
               hasSaved = true;
-              closeFlyout();
-              agentBuilder.openChat({
-                newConversation: true,
-                ...chatGeneratingCallbacks,
-                attachments: [
-                  buildCustomContentContextAttachment({
-                    template: draftTemplate,
-                    esqlQuery: draftEsqlQuery,
-                    embeddableId: uuid,
-                    panelTitle: titleManager.api.title$.getValue() ?? undefined,
-                    panelHeight: measurePanelHeight(),
-                    fetchContext: currentFetchContext(),
-                  }),
-                ],
+              applyConfigUpdate({
+                esqlQuery: draftEsqlQuery,
+                template: draftTemplate || undefined,
               });
+              closeFlyout();
+              setTimeout(refineWithChat, DASHBOARD_STATE_SETTLE_MS);
             };
 
             function FlyoutWithReactiveState() {
@@ -371,7 +350,6 @@ export const customContentEmbeddableFactory: EmbeddablePublicDefinition<
         const [
           esqlQuery,
           savedTemplate,
-          panelTitle,
           isApproximate,
           projectRouting,
           query,
@@ -383,7 +361,6 @@ export const customContentEmbeddableFactory: EmbeddablePublicDefinition<
         ] = useBatchedPublishingSubjects(
           esqlQuery$,
           template$,
-          titleManager.api.title$,
           isApproximate$,
           projectRouting$,
           query$,
@@ -409,15 +386,6 @@ export const customContentEmbeddableFactory: EmbeddablePublicDefinition<
           return () => sub.unsubscribe();
         }, []);
 
-        useEffect(
-          () =>
-            registerPanelPreviewHandler(uuid, (data) => {
-              template$.next(data.panel_template);
-              esqlQuery$.next(data.esql_query);
-            }),
-          []
-        );
-
         useEffect(() => {
           if (!agentBuilder) return;
 
@@ -439,38 +407,17 @@ export const customContentEmbeddableFactory: EmbeddablePublicDefinition<
               )
             )
             .subscribe((event) => {
-              if (!isRoundCompleteEvent(event)) return;
-              if (isGenerating$.getValue()) {
-                isGenerating$.next(false);
-              }
-
-              // A round can touch several attachments — the dashboard's, and one per custom content
-              // panel. Scan every agent-authored ref instead of only the first, or an unrelated
-              // attachment leading the list would make this panel skip its own update.
-              const agentRefs = event.data.round.input.attachment_refs?.filter(
-                (ref) =>
-                  ref.actor === ATTACHMENT_REF_ACTOR.agent &&
-                  (ref.operation === 'updated' || ref.operation === 'created')
-              );
-              if (!agentRefs?.length) return;
-
-              for (const ref of agentRefs) {
-                const updatedAttachment = event.data.attachments?.find(
-                  (a) =>
-                    a.id === ref.attachment_id && a.type === CUSTOM_CONTENT_CONTEXT_ATTACHMENT_TYPE
+              // A round that carries this panel's pointer is refining it: show the generating state
+              // until the round ends. The new template arrives through the dashboard live update.
+              if (isRoundStartedEvent(event)) {
+                const refersToThisPanel = event.data.input.attachment_refs?.some(
+                  ({ attachment_id: attachmentId }) => attachmentId === panelPointerId
                 );
-                if (!updatedAttachment) continue;
-
-                const data = readPanelContextData(updatedAttachment);
-                if (!data || data.embeddable_id !== uuid) continue;
-
-                template$.next(data.panel_template);
-                esqlQuery$.next(data.esql_query);
-                getTelemetry().trackAgentUpdateApplied({
-                  hasEsqlQuery: Boolean(data.esql_query),
-                  templateSizeBytes: data.panel_template.length,
-                });
-                break;
+                if (refersToThisPanel) isGenerating$.next(true);
+                return;
+              }
+              if (isExecutionTerminalEvent(event) && isGenerating$.getValue()) {
+                isGenerating$.next(false);
               }
             });
 
@@ -495,28 +442,11 @@ export const customContentEmbeddableFactory: EmbeddablePublicDefinition<
           });
           isRetained = true;
           if (tracksOverlays(parentApi)) parentApi.clearOverlays();
-          agentBuilder.openChat({
-            newConversation: true,
-            ...chatGeneratingCallbacks,
-            attachments: [
-              buildCustomContentContextAttachment({
-                template: '',
-                embeddableId: uuid,
-                panelTitle: panelTitle ?? undefined,
-                panelHeight: measurePanelHeight(),
-                fetchContext: currentFetchContext(),
-              }),
-            ],
-          });
-        }, [panelTitle]);
+          refineWithChat();
+        }, []);
 
         return (
-          <div
-            ref={(element) => {
-              panelElement.current = element;
-            }}
-            css={panelMeasureCss}
-          >
+          <div css={panelLayoutCss}>
             <CustomContentComponent
               services={rendererServices}
               embeddableId={uuid}

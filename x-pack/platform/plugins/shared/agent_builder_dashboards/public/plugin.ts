@@ -10,14 +10,21 @@ import { DASHBOARD_APP_LOCATOR } from '@kbn/deeplinks-analytics';
 import {
   OPEN_DASHBOARD_CHAT_ACTION_ID,
   ENHANCE_DASHBOARD_ACTION_ID,
+  REFINE_WITH_CHAT_ACTION_ID,
 } from '@kbn/dashboard-plugin/public';
+import { ON_OPEN_PANEL_MENU } from '@kbn/ui-actions-plugin/common/trigger_ids';
 import type {
   AgentBuilderDashboardsPluginPublicSetup,
   AgentBuilderDashboardsPluginPublicStart,
   AgentBuilderDashboardsPluginPublicSetupDependencies,
   AgentBuilderDashboardsPluginPublicStartDependencies,
 } from './types';
-import { createIdGenerator, registerDashboardAttachmentUiDefinition } from './attachment_types';
+import {
+  createIdGenerator,
+  registerDashboardAttachmentUiDefinition,
+  registerDashboardPanelAttachmentUiDefinition,
+} from './attachment_types';
+import { registerAgentBuilderDashboardsAnalyticsEvents } from './telemetry';
 
 export class AgentBuilderDashboardsPlugin
   implements
@@ -33,12 +40,13 @@ export class AgentBuilderDashboardsPlugin
   constructor(_initContext: PluginInitializerContext) {}
 
   public setup(
-    _core: CoreSetup<
+    core: CoreSetup<
       AgentBuilderDashboardsPluginPublicStartDependencies,
       AgentBuilderDashboardsPluginPublicStart
     >,
     _plugins: AgentBuilderDashboardsPluginPublicSetupDependencies
   ): AgentBuilderDashboardsPluginPublicSetup {
+    registerAgentBuilderDashboardsAnalyticsEvents(core.analytics);
     return {};
   }
 
@@ -60,6 +68,7 @@ export class AgentBuilderDashboardsPlugin
       dashboardPlugin: plugins.dashboard,
       draftAttachmentId,
     });
+    registerDashboardPanelAttachmentUiDefinition(plugins.agentBuilder);
 
     if (core.application.capabilities.agentBuilder?.show === true) {
       plugins.uiActions.registerActionAsync(OPEN_DASHBOARD_CHAT_ACTION_ID, async () => {
@@ -68,6 +77,20 @@ export class AgentBuilderDashboardsPlugin
         );
         return createOpenDashboardChatAction(plugins.agentBuilder.openChat);
       });
+
+      plugins.uiActions.registerActionAsync(REFINE_WITH_CHAT_ACTION_ID, async () => {
+        const { createRefineWithChatAction } = await import(
+          './refine_with_chat/refine_with_chat_action'
+        );
+        return createRefineWithChatAction({
+          agentBuilder: plugins.agentBuilder,
+          analytics: core.analytics,
+          dashboardAppApi$: plugins.dashboard.dashboardAppClientApi$,
+          canWriteDashboards,
+          draftAttachmentId,
+        });
+      });
+      plugins.uiActions.attachAction(ON_OPEN_PANEL_MENU, REFINE_WITH_CHAT_ACTION_ID);
 
       plugins.uiActions.registerActionAsync(ENHANCE_DASHBOARD_ACTION_ID, async () => {
         const { createEnhanceDashboardAction } = await import('./enhance/enhance_dashboard_action');

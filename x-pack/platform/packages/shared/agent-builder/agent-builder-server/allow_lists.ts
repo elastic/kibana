@@ -112,8 +112,8 @@ export const AGENT_BUILDER_BUILTIN_TOOLS = [
   `${internalNamespaces.streams}.create_partition`,
   `${internalNamespaces.streams}.delete_stream`,
 
-  // Custom content panels
-  'custom_content_update_panel',
+  // Platform – Dashboards
+  'platform.dashboard.panel_to_visualization',
 
   // Platform – Context Engine
   `${internalNamespaces.platformContextEngine}.save_automation`,
@@ -336,6 +336,7 @@ export const AGENT_BUILDER_BUILTIN_ATTACHMENTS = [
 
   // Platform – Dashboards
   'platform.dashboard.dashboard_state',
+  'platform.dashboard.panel',
 
   // Platform – Streams (significant events)
   'platform.sig_event',
@@ -407,9 +408,6 @@ export const AGENT_BUILDER_BUILTIN_ATTACHMENTS = [
   'ml.anomaly_swimlane',
   'ml.anomaly_charts',
   'ml.single_metric_viewer',
-
-  // Platform – Custom Content
-  'platform.custom_content.panel_context',
 
   // Platform – Proposals
   'platform.proposal',

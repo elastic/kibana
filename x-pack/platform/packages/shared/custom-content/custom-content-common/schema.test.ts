@@ -13,7 +13,6 @@ import {
 import {
   customContentStateSchema,
   customContentUpdateSchema,
-  customContentPanelUpdateSchema,
   readEsqlQuery,
   toEsqlQueryState,
   resolveEsqlQueryEdit,
@@ -105,25 +104,6 @@ describe('customContentUpdateSchema', () => {
     expect(customContentUpdateSchema.safeParse({ embeddable_id: 'p1', prompt: '' }).success).toBe(
       false
     );
-  });
-});
-
-describe('customContentPanelUpdateSchema', () => {
-  it('requires embeddable_id so the chat tool cannot act on the wrong panel', () => {
-    expect(customContentPanelUpdateSchema.safeParse({ prompt: 'Make it blue' }).success).toBe(
-      false
-    );
-  });
-
-  it('accepts an update targeted at a panel', () => {
-    expect(
-      customContentPanelUpdateSchema.safeParse({ embeddable_id: 'p1', prompt: 'Make it blue' })
-        .success
-    ).toBe(true);
-  });
-
-  it('still requires at least one of prompt or esqlQuery', () => {
-    expect(customContentPanelUpdateSchema.safeParse({ embeddable_id: 'p1' }).success).toBe(false);
   });
 });
 

@@ -12,7 +12,6 @@ import {
   CUSTOM_CONTENT_PANEL_SAVED,
   CUSTOM_CONTENT_EDIT_CANCELLED,
   CUSTOM_CONTENT_GENERATE_WITH_CHAT_CLICKED,
-  CUSTOM_CONTENT_AGENT_UPDATE_APPLIED,
 } from './event_types';
 
 export class CustomContentTelemetryService {
@@ -70,13 +69,6 @@ export class CustomContentTelemetryService {
     this._reportEvent(CUSTOM_CONTENT_GENERATE_WITH_CHAT_CLICKED, {
       trigger_source: params.triggerSource,
       has_existing_template: params.hasExistingTemplate,
-    });
-  }
-
-  trackAgentUpdateApplied(params: { hasEsqlQuery: boolean; templateSizeBytes: number }) {
-    this._reportEvent(CUSTOM_CONTENT_AGENT_UPDATE_APPLIED, {
-      has_esql_query: params.hasEsqlQuery,
-      template_size_bytes: params.templateSizeBytes,
     });
   }
 }
