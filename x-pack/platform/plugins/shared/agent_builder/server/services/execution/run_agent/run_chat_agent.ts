@@ -14,6 +14,7 @@ import type {
   ChatAgentEvent,
   ConversationRoundStep,
   MetadataFieldValue,
+  PreExecutionWorkflowStepData,
   RoundInput,
   SubagentEntry,
   TodosStep,
@@ -41,8 +42,6 @@ import {
   getPendingTurn,
   createPreExecutionSteps,
   estimatePerRoundTokens,
-  estimateFailedEntryTokens,
-  survivingFailedEntryTokens,
   type PendingTurn,
 } from './utils';
 import { registerInternalTools } from './tools/register_internal_tools';
@@ -58,6 +57,10 @@ import type { CompactedConversation } from './utils/conversation_compactor';
 import { computeContextBudget } from './utils/context_budget';
 import { DEFAULT_MAX_TOOL_RESULT_TOKENS } from './utils/tool_result_guardrail';
 import { compactConversation } from './utils/conversation_compactor';
+import { legacyEligibleRoundIds } from './utils/compaction_coverage';
+import { createSummarizationTransformer } from './utils/tool_summarization';
+import { sourceEvents } from '../../conversation/client/source_events';
+import { nextResumeIndex } from '../../conversation/client/rounds_to_events';
 import { createAgentGraph } from './graph';
 import { convertGraphEvents } from './convert_graph_events';
 import { RunTracker } from './run_tracker';
@@ -74,6 +77,7 @@ import type { StateUpdate } from './state';
 import {
   eventsForContext,
   groupTimelineEntries,
+  isTimelineCustomEvent,
   isTimelineRound,
   roundResponse,
 } from './utils/context_timeline';
@@ -224,8 +228,17 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
     nextInput: processedConversation.nextInput,
     agentId,
     conversationId: conversation?.id,
+    // Use raw persisted executions: the model-context timeline folds multiple resumes into one.
+    // Legacy rounds cannot recover exact history, but a pending turn is at least the first resume.
+    roundExecutionIndex: pendingTurn
+      ? Math.max(1, nextResumeIndex({ events: conversation?.events }, pendingTurn.id))
+      : 0,
   });
   processedConversation.nextInput = beforeHookResult.nextInput ?? processedConversation.nextInput;
+  // Only the first execution owns the round's workflow context step.
+  const preExecutionWorkflow: PreExecutionWorkflowStepData | undefined = pendingTurn
+    ? undefined
+    : beforeHookResult.preExecutionWorkflow;
 
   const relevantSkillsSelectionPromise: Promise<RelevantSkillSelection> | undefined =
     relevantSkillsEnabled && !pendingTurn
@@ -234,11 +247,15 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
           context: {
             userMessage: processedConversation.nextInput.message,
             recentContext: buildRecentContext(
-              groupTimelineEntries(processedConversation.timeline).map((entry) =>
-                isTimelineRound(entry)
-                  ? { input: entry.userMessage.data, response: roundResponse(entry) }
-                  : { input: entry.userMessage.data }
-              )
+              groupTimelineEntries(processedConversation.timeline).flatMap((entry) => {
+                // Custom events carry no user input to match skills against.
+                if (isTimelineCustomEvent(entry)) {
+                  return [];
+                }
+                return isTimelineRound(entry)
+                  ? [{ input: entry.userMessage.data, response: roundResponse(entry) }]
+                  : [{ input: entry.userMessage.data }];
+              })
             ),
           },
           modelProvider,
@@ -315,14 +332,14 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
 
   const graphRecursionLimit = getRecursionLimit(CYCLE_LIMIT);
 
-  const perRoundTokenCounts = await estimatePerRoundTokens(processedConversation.timeline, {
-    toolManager,
-    toolRegistry,
-  });
-  const failedEntryTokenCounts = estimateFailedEntryTokens(processedConversation.timeline);
-  const conversationTokenEstimate =
-    perRoundTokenCounts.reduce((sum, count) => sum + count, 0) +
-    survivingFailedEntryTokens(processedConversation.timeline, 0, failedEntryTokenCounts);
+  // One transformer instance for the estimate and for the summariser's rendering, so the
+  // compactor's chunk sizing matches what it sends.
+  const summarizationTransformer = createSummarizationTransformer({ toolManager, toolRegistry });
+  const perRoundTokenCounts = await estimatePerRoundTokens(
+    processedConversation.timeline,
+    summarizationTransformer
+  );
+  const conversationTokenEstimate = perRoundTokenCounts.reduce((sum, count) => sum + count, 0);
 
   // Create unified result transformer for tool result optimization
   const resultTransformer = createResultTransformer({
@@ -343,7 +360,10 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
     chatModel: model.chatModel,
     contextBudget,
     perRoundTokenCounts,
-    failedEntryTokenCounts,
+    resultTransformer: summarizationTransformer,
+    legacyEligibleRoundIds: conversation
+      ? legacyEligibleRoundIds(sourceEvents(conversation))
+      : new Set<string>(),
     existingSummary: conversation?.state?.compaction_summary,
     logger,
     abortSignal,
@@ -416,6 +436,7 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
       eventEmitter,
       tracker,
       compactionResult,
+      preExecutionWorkflow,
       relevantSkillsSelection,
       initialTodos,
     }),
@@ -431,12 +452,15 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
       },
       recursionLimit: graphRecursionLimit,
       callbacks: [],
-      // prevent LangGraph from inheriting the parent graph's
-      // abort signals via the __pregel_abort_signals configurable key. Without this,
-      // the parent graph's cleanup abort cascades to the standalone execution.
-      ...(context.executionMode === AgentExecutionMode.standalone
-        ? { configurable: { __pregel_abort_signals: undefined } }
-        : {}),
+      configurable: {
+        checkpoint_ns: '',
+        // prevent LangGraph from inheriting the parent graph's
+        // abort signals via the __pregel_abort_signals configurable key. Without this,
+        // the parent graph's cleanup abort cascades to the standalone execution.
+        ...(context.executionMode === AgentExecutionMode.standalone
+          ? { __pregel_abort_signals: undefined }
+          : {}),
+      },
     }
   );
 
@@ -550,6 +574,7 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
       agentId,
       round,
       conversationId: conversation?.id,
+      connectorId: model.connector.connectorId,
       agentConfiguration,
     });
   } catch (err) {
@@ -589,15 +614,17 @@ const getConversationState = ({
 };
 
 /**
- * The steps a fresh run starts with: compaction / relevant-skills bookkeeping, then the todos
- * carried over from the previous round (the trailing singleton the first `todo_write` replaces).
+ * The steps a fresh run starts with: compaction / workflow / relevant-skills bookkeeping, then
+ * the todos carried over from the previous round (the trailing singleton `todo_write` replaces).
  */
 const buildPreExecutionSteps = ({
   compactionResult,
+  preExecutionWorkflow,
   relevantSkillsSelection,
   initialTodos,
 }: {
   compactionResult?: CompactedConversation;
+  preExecutionWorkflow?: PreExecutionWorkflowStepData;
   relevantSkillsSelection?: RelevantSkillSelection;
   initialTodos?: TodoItem[];
 }): ConversationRoundStep[] => {
@@ -607,7 +634,11 @@ const buildPreExecutionSteps = ({
       ? [{ type: ConversationRoundStepType.updateTodos, todos: carried, carried_over: true }]
       : [];
   return [
-    ...createPreExecutionSteps({ compactionResult, relevantSkillsSelection }),
+    ...createPreExecutionSteps({
+      compactionResult,
+      preExecutionWorkflow,
+      relevantSkillsSelection,
+    }),
     ...carriedStep,
   ];
 };
@@ -620,6 +651,7 @@ const createInitializerCommand = ({
   eventEmitter,
   tracker,
   compactionResult,
+  preExecutionWorkflow,
   relevantSkillsSelection,
   initialTodos,
 }: {
@@ -630,12 +662,14 @@ const createInitializerCommand = ({
   eventEmitter: AgentEventEmitterFn;
   tracker: RunTracker;
   compactionResult?: CompactedConversation;
+  preExecutionWorkflow?: PreExecutionWorkflowStepData;
   relevantSkillsSelection?: RelevantSkillSelection;
   initialTodos?: TodoItem[];
 }): Command => {
   if (!pendingTurn) {
     const preExecutionSteps = buildPreExecutionSteps({
       compactionResult,
+      preExecutionWorkflow,
       relevantSkillsSelection,
       initialTodos,
     });

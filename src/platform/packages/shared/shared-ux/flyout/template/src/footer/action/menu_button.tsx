@@ -133,6 +133,8 @@ export const PrimaryActionMenuButton = ({
           type="button"
           element="button"
           isSelected={undefined}
+          color="primary"
+          size="m"
           fill
           iconType={isOpen ? 'chevronSingleUp' : 'chevronSingleDown'}
           iconSide="right"

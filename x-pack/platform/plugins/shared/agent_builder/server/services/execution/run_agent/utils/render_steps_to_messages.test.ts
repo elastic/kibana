@@ -55,6 +55,17 @@ const reasoning = (
   ...refs,
 });
 
+const workflowContextStep = (): ConversationRoundStep => ({
+  type: ConversationRoundStepType.preExecutionWorkflow,
+  model_context: '  <system_update>\nexact workflow context\n</system_update>  ',
+  workflow_context: {
+    'nightshift.semantic_memory.recall': {
+      version: 1,
+      data: { recalled_ids: ['never-render-this'] },
+    },
+  },
+});
+
 const rendered = (id: string, extra: Partial<ToolRenderStateMap[string]> = {}) => ({
   [id]: {
     toolName: 'my_tool',
@@ -137,6 +148,32 @@ describe('renderHistorySteps', () => {
     );
   });
 
+  it('renders a marked call as the interrupted tool message and an unmarked empty return as results: []', async () => {
+    const resultTransformer: ToolCallResultTransformer = jest.fn(async () => [other('summarized')]);
+    const messages = await renderHistorySteps({
+      steps: [call('a', { results: [], interrupted: true }), call('b', { results: [] })],
+      resultTransformer,
+    });
+
+    const tools = messages.filter((message) => message.getType() === 'tool') as ToolMessage[];
+    expect(tools).toHaveLength(2);
+    expect(tools[0].tool_call_id).toBe('a');
+    expect(String(tools[0].content)).toContain('"interrupted":true');
+    expect(String(tools[0].content)).toContain(
+      'The tool call was interrupted before it returned a result.'
+    );
+    // the interrupted call never went through the transformer; the unmarked one did
+    expect(resultTransformer).toHaveBeenCalledTimes(1);
+    expect(String(tools[1].content)).toContain('summarized');
+  });
+
+  it('renders an unmarked empty return as results: [] without a transformer', async () => {
+    const messages = await renderHistorySteps({ steps: [call('b', { results: [] })] });
+    expect((messages[1] as ToolMessage).content).toBe(
+      wrapToolResultContent(JSON.stringify({ results: [] }))
+    );
+  });
+
   it('renders an answered ask_user_question step as a tool call keyed on the prompt id', async () => {
     const step: ConversationRoundStep = {
       type: ConversationRoundStepType.askUserQuestion,
@@ -198,6 +235,34 @@ describe('renderHistorySteps', () => {
     ];
     const messages = await renderHistorySteps({ steps });
     expect(types(messages)).toEqual(['human', 'human', 'human']);
+  });
+
+  it('renders workflow model context before relevant skills and never renders workflow state', async () => {
+    const messages = await renderHistorySteps({
+      steps: [
+        workflowContextStep(),
+        {
+          type: ConversationRoundStepType.relevantSkills,
+          skills: [{ id: 's1', name: 'skill', path: '/s1', description: 'd' }],
+          source: 'implicit',
+        },
+      ],
+    });
+
+    expect(messages).toHaveLength(2);
+    expect(messages[0]).toBeInstanceOf(HumanMessage);
+    expect(messages[0].name).toBe('pre_execution_workflow_context');
+    expect(messages[0].content).toBe(
+      '  <system_update>\nexact workflow context\n</system_update>  '
+    );
+    expect(JSON.stringify(messages)).not.toContain('never-render-this');
+  });
+
+  it('replays persisted workflow model context byte-for-byte', async () => {
+    const first = await renderHistorySteps({ steps: [workflowContextStep()] });
+    const replay = await renderHistorySteps({ steps: [workflowContextStep()] });
+
+    expect(replay[0].toDict()).toEqual(first[0].toDict());
   });
 });
 
@@ -320,6 +385,14 @@ describe('renderCurrentRun', () => {
     const answer = await current([skills], {}, { phase: 'answer' });
     expect(research).toHaveLength(1);
     expect(answer).toHaveLength(0);
+  });
+
+  it('renders workflow model context in both research and answer phases', async () => {
+    const research = await current([workflowContextStep()], {});
+    const answer = await current([workflowContextStep()], {}, { phase: 'answer' });
+
+    expect(research[0].toDict()).toEqual(answer[0].toDict());
+    expect(research[0].name).toBe('pre_execution_workflow_context');
   });
 
   it('injects resolved images after the group and a notice for failed ones', async () => {

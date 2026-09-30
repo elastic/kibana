@@ -74,14 +74,14 @@ describe('useCloseSignificantEvent', () => {
     );
     const { result } = renderHook(() => useCloseSignificantEvent(), { wrapper });
 
-    act(() => result.current.closeSignificantEvent(event.event_uuid));
+    act(() => result.current.closeSignificantEvent(event.event_id));
 
     await waitFor(() => expect(addSuccess).toHaveBeenCalled());
 
     expect(significantEventsFetch).toHaveBeenCalledWith(
       'POST /internal/significant_events/events/{id}/update',
       {
-        params: { path: { id: 'event-1-v1' }, body: { status: 'closed' } },
+        params: { path: { id: 'event-1' }, body: { status: 'closed' } },
         signal: null,
       }
     );
@@ -109,7 +109,7 @@ describe('useCloseSignificantEvent', () => {
     );
     const { result } = renderHook(() => useCloseSignificantEvent(), { wrapper });
 
-    act(() => result.current.closeSignificantEvent(event.event_uuid));
+    act(() => result.current.closeSignificantEvent(event.event_id));
 
     await waitFor(() => expect(addError).toHaveBeenCalled());
     expect(addSuccess).not.toHaveBeenCalled();

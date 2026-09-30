@@ -17,6 +17,8 @@ import type { AlertActionEventPublisher } from '../events/alert_action_event_pub
 import type { AlertActionsClient } from './alert_actions_client';
 import { createAlertActionsClient } from './alert_actions_client.mock';
 import { getAlertEventESQLResponse, getEmptyESQLResponse } from './fixtures/query_responses';
+import { ALERT_ACTIONS_RESOURCE_KEY } from '../../resources/datastreams/alert_actions';
+import { ALERT_EVENTS_RESOURCE_KEY } from '../../resources/datastreams/alert_events';
 
 describe('AlertActionsClient', () => {
   jest.useFakeTimers().setSystemTime(new Date('2025-01-01T11:12:13.000Z'));
@@ -26,6 +28,7 @@ describe('AlertActionsClient', () => {
   let userProfileService: jest.Mocked<UserProfileServiceStart>;
   let alertActionEventPublisher: AlertActionEventPublisher;
   let emitEpisodeActionsSpy: jest.SpyInstance;
+  let resourceManager: ReturnType<typeof createAlertActionsClient>['resourceManager'];
 
   beforeEach(() => {
     ({
@@ -34,6 +37,7 @@ describe('AlertActionsClient', () => {
       storageServiceEsClient,
       userProfileService,
       alertActionEventPublisher,
+      resourceManager,
     } = createAlertActionsClient());
     emitEpisodeActionsSpy = jest.spyOn(alertActionEventPublisher, 'emitEpisodeActions');
     storageServiceEsClient.bulk.mockResolvedValueOnce({ items: [], errors: false, took: 1 });
@@ -56,7 +60,7 @@ describe('AlertActionsClient', () => {
         groupHash: 'test-group-hash',
         action: {
           action_type: ALERT_EPISODE_ACTION_TYPE.SNOOZE,
-          expiry: '2026-08-12T00:00:00.000Z',
+          snoozed_until: '2026-08-12T00:00:00.000Z',
         },
       });
 
@@ -254,7 +258,7 @@ describe('AlertActionsClient', () => {
           action: { action_type: ALERT_EPISODE_ACTION_TYPE.ACTIVATE, reason: 'reopen' },
         })
       ).rejects.toMatchObject({
-        output: { statusCode: 404 },
+        output: { statusCode: 409 },
         data: {
           code: 'ALERT_EPISODE_NOT_LATEST',
           details: { episode_id: 'old-episode', group_hash: 'group-1' },
@@ -301,6 +305,40 @@ describe('AlertActionsClient', () => {
       expect(emitEpisodeActionsSpy).not.toHaveBeenCalled();
     });
 
+    it('waits for both data streams to be ready before writing', async () => {
+      queryServiceEsClient.esql.query.mockResolvedValueOnce(
+        getAlertEventESQLResponse([{ episode_id: 'episode-3' }])
+      );
+
+      await client.createEpisodeAction({
+        episodeId: 'episode-3',
+        action: { action_type: ALERT_EPISODE_ACTION_TYPE.ACK },
+      });
+
+      expect(resourceManager.ensureResourceReady).toHaveBeenCalledWith(ALERT_ACTIONS_RESOURCE_KEY);
+      expect(resourceManager.ensureResourceReady).toHaveBeenCalledWith(ALERT_EVENTS_RESOURCE_KEY);
+      expect(
+        Math.max(...resourceManager.ensureResourceReady.mock.invocationCallOrder)
+      ).toBeLessThan(storageServiceEsClient.bulk.mock.invocationCallOrder[0]);
+    });
+
+    it('does not write or emit when a data stream fails to initialize', async () => {
+      queryServiceEsClient.esql.query.mockResolvedValueOnce(
+        getAlertEventESQLResponse([{ episode_id: 'episode-3' }])
+      );
+      resourceManager.ensureResourceReady.mockRejectedValueOnce(new Error('init failed'));
+
+      await expect(
+        client.createEpisodeAction({
+          episodeId: 'episode-3',
+          action: { action_type: ALERT_EPISODE_ACTION_TYPE.ACK },
+        })
+      ).rejects.toThrow('init failed');
+
+      expect(storageServiceEsClient.bulk).not.toHaveBeenCalled();
+      expect(emitEpisodeActionsSpy).not.toHaveBeenCalled();
+    });
+
     it('persists source and a null rule_id from the resolved alert event for external episodes', async () => {
       queryServiceEsClient.esql.query.mockResolvedValueOnce(
         getAlertEventESQLResponse([{ episode_id: 'episode-3', source: 'pagerduty', rule_id: null }])
@@ -326,7 +364,7 @@ describe('AlertActionsClient', () => {
         {
           group_hash: 'group-1',
           action_type: ALERT_EPISODE_ACTION_TYPE.SNOOZE,
-          expiry: '2026-08-12T00:00:00.000Z',
+          snoozed_until: '2026-08-12T00:00:00.000Z',
         },
         { group_hash: 'group-2', action_type: ALERT_EPISODE_ACTION_TYPE.SNOOZE },
       ];
