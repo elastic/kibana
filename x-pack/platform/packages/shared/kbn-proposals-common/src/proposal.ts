@@ -82,12 +82,13 @@ export const proposalCategorySchema = actionCategorySchema;
 export type ProposalCategory = z.infer<typeof proposalCategorySchema>;
 
 export const dismissReasonSchema = z.enum([
-  'wrong',
+  /** The default: an analyst can decline without picking a specific reason at all. */
+  'no_reason',
   'duplicate',
-  'insufficient_evidence',
-  'low_value',
-  'out_of_scope',
-  'already_handled',
+  'false_positive',
+  /** Covers what were previously two separate reasons: `out_of_scope` and `already_handled`. */
+  'handled_elsewhere',
+  'risk_accepted',
   'other',
 ]);
 export type DismissReason = z.infer<typeof dismissReasonSchema>;

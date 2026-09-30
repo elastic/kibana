@@ -522,6 +522,88 @@ describe('AWS service matrix', () => {
       expect(result.dataStreams).toEqual(['elb_logs']);
       expect(result.dataStreams).not.toContain('other_logs');
     });
+
+    it('populates full metadata (inputs, varDefs, signalTypes) for standalone no-PT packages', () => {
+      const pkg = {
+        policy_templates: [],
+        data_streams: [
+          {
+            path: 'log',
+            type: 'logs',
+            streams: [
+              {
+                input: 'http_endpoint',
+                vars: [{ name: 'listen_port', type: 'integer', required: true }],
+              },
+            ],
+          },
+        ],
+      };
+      const [result] = buildAwsServiceMatrix({ amazon_security_lake: pkg as any }, [
+        {
+          id: 'amazon_security_lake',
+          category: 'security_identity_compliance',
+          packageName: 'amazon_security_lake',
+          deploymentMethods: [{ method: 'agent_based', preferred: true }],
+        },
+      ]);
+      expect(result.dataStreams).toEqual(['log']);
+      expect(result.signalTypes).toContain('logs');
+      expect(result.inputs).toContain('http_endpoint');
+      expect(result.varDefsByDataStream?.log).toBeDefined();
+      expect(
+        result.varDefsByDataStream?.log?.varDefsByInput?.http_endpoint?.listen_port
+      ).toBeDefined();
+      expect(result.isManifestLoaded).toBe(true);
+    });
+
+    it('leaves varDefsByInput undefined when streams declare an input but no vars', () => {
+      // Streams with an input key but vars:[] must not create an empty varDefsByInput bucket —
+      // that would cause requiresCredentials=true for a credential-free service.
+      const pkg = {
+        policy_templates: [],
+        data_streams: [
+          {
+            path: 'log',
+            type: 'logs',
+            streams: [{ input: 'http_endpoint', vars: [] }],
+          },
+        ],
+      };
+      const [result] = buildAwsServiceMatrix({ amazon_security_lake: pkg as any }, [
+        {
+          id: 'amazon_security_lake',
+          category: 'security_identity_compliance',
+          packageName: 'amazon_security_lake',
+          deploymentMethods: [{ method: 'agent_based', preferred: true }],
+        },
+      ]);
+      expect(result.varDefsByInput).toBeUndefined();
+      expect(result.inputs).toContain('http_endpoint');
+    });
+
+    it('does not consume aws-package data streams when the entry has a policyTemplate set', () => {
+      // An `aws` entry whose PT is temporarily missing must not fall through to the no-PT
+      // fallback and pick up ALL package data streams (regression guard for Libra 4125759535).
+      const pkg = {
+        policy_templates: [{ name: 'other_pt', data_streams: ['other_ds'] }],
+        data_streams: [
+          { path: 'elb_logs', type: 'logs', streams: [{ input: 'aws-s3', vars: [] }] },
+          { path: 'other_ds', type: 'logs', streams: [{ input: 'aws-cloudwatch', vars: [] }] },
+        ],
+      };
+      const [result] = buildAwsServiceMatrix({ aws: pkg as any }, [
+        {
+          id: 'elb',
+          category: 'networking_content_delivery',
+          packageName: 'aws',
+          policyTemplate: 'elb',
+        },
+      ]);
+      // PT 'elb' not found in the package → no data streams should be assigned
+      expect(result.dataStreams).toEqual([]);
+      expect(result.inputs).toBeUndefined();
+    });
   });
 
   describe('defaultEnabledInputs derivation', () => {

@@ -40,6 +40,10 @@ const mockCreateServerStepDefinition = createServerStepDefinition as jest.Mocked
 describe('aiPromptStepDefinition', () => {
   let mockCoreSetup: jest.Mocked<CoreSetup<InferenceWorkflowsStartDeps>>;
   let mockInference: jest.Mocked<InferenceServerStart>;
+  let mockSearchInferenceEndpoints: {
+    features: { get: jest.Mock };
+    endpoints: { getForFeature: jest.Mock };
+  };
   let mockContextManager: jest.Mocked<ContextManager>;
   let mockContext: StepHandlerContext<any>;
   let mockChatModel: any;
@@ -63,6 +67,11 @@ describe('aiPromptStepDefinition', () => {
     mockInference = {
       getChatModel: jest.fn().mockResolvedValue(mockChatModel),
     } as any;
+
+    mockSearchInferenceEndpoints = {
+      features: { get: jest.fn() },
+      endpoints: { getForFeature: jest.fn() },
+    };
 
     mockContextManager = {
       getFakeRequest: jest.fn().mockReturnValue({} as KibanaRequest),
@@ -97,7 +106,12 @@ describe('aiPromptStepDefinition', () => {
     };
 
     mockCoreSetup = {
-      getStartServices: jest.fn().mockResolvedValue([{}, { inference: mockInference }]),
+      getStartServices: jest
+        .fn()
+        .mockResolvedValue([
+          {},
+          { inference: mockInference, searchInferenceEndpoints: mockSearchInferenceEndpoints },
+        ]),
     } as any;
 
     mockResolveConnectorId.mockResolvedValue('resolved-connector-id');
@@ -147,7 +161,7 @@ describe('aiPromptStepDefinition', () => {
           'test-connector-id',
           mockInference,
           expect.any(Object),
-          { featureId: 'ai_prompt', searchInferenceEndpoints: undefined }
+          { featureId: 'ai_prompt', searchInferenceEndpoints: mockSearchInferenceEndpoints }
         );
         expect(mockInference.getChatModel).toHaveBeenCalledWith({
           connectorId: 'resolved-connector-id',
@@ -227,7 +241,7 @@ describe('aiPromptStepDefinition', () => {
           undefined,
           mockInference,
           expect.any(Object),
-          { featureId: 'ai_prompt', searchInferenceEndpoints: undefined }
+          { featureId: 'ai_prompt', searchInferenceEndpoints: mockSearchInferenceEndpoints }
         );
       });
     });
@@ -419,7 +433,7 @@ describe('aiPromptStepDefinition', () => {
           'test-connector-id',
           mockInference,
           expect.any(Object),
-          { featureId: 'ai_prompt', searchInferenceEndpoints: undefined }
+          { featureId: 'ai_prompt', searchInferenceEndpoints: mockSearchInferenceEndpoints }
         );
         expect(mockInference.getChatModel).toHaveBeenCalledWith({
           connectorId: 'resolved-connector-id',
@@ -452,7 +466,7 @@ describe('aiPromptStepDefinition', () => {
           'test-connector-id',
           mockInference,
           mockFakeRequest,
-          { featureId: 'ai_prompt', searchInferenceEndpoints: undefined }
+          { featureId: 'ai_prompt', searchInferenceEndpoints: mockSearchInferenceEndpoints }
         );
 
         expect(mockInference.getChatModel).toHaveBeenCalledWith({
@@ -463,6 +477,94 @@ describe('aiPromptStepDefinition', () => {
             maxRetries: 0,
           },
         });
+      });
+    });
+
+    describe('connector-id-by-feature routing', () => {
+      it('resolves the connector via the feature endpoint when connector-id-by-feature is set', async () => {
+        const contextWithFeature = {
+          ...mockContext,
+          config: { 'connector-id-by-feature': 'context_engine_prompt' },
+          input: { prompt: 'Test prompt', temperature: 0.5 },
+        };
+
+        mockSearchInferenceEndpoints.features.get.mockReturnValue({ taskType: 'chat_completion' });
+        mockSearchInferenceEndpoints.endpoints.getForFeature.mockResolvedValue({
+          endpoints: [{ connectorId: 'gemini-flash-connector' }],
+        });
+        mockChatModel.invoke.mockResolvedValue({ content: 'ok', response_metadata: {} });
+
+        await handler(contextWithFeature);
+
+        expect(mockSearchInferenceEndpoints.endpoints.getForFeature).toHaveBeenCalledWith(
+          'context_engine_prompt',
+          expect.any(Object)
+        );
+        expect(mockResolveConnectorId).not.toHaveBeenCalled();
+        expect(mockInference.getChatModel).toHaveBeenCalledWith(
+          expect.objectContaining({ connectorId: 'gemini-flash-connector' })
+        );
+      });
+
+      it('throws when both connector-id and connector-id-by-feature are specified', async () => {
+        const contextWithBoth = {
+          ...mockContext,
+          config: {
+            'connector-id': 'explicit-connector',
+            'connector-id-by-feature': 'context_engine_prompt',
+          },
+        };
+
+        await expect(handler(contextWithBoth)).rejects.toThrow(
+          'Cannot specify both connector-id and connector-id-by-feature'
+        );
+        expect(mockResolveConnectorId).not.toHaveBeenCalled();
+      });
+
+      it('throws when the feature resolves to no endpoints', async () => {
+        const contextWithFeature = {
+          ...mockContext,
+          config: { 'connector-id-by-feature': 'context_engine_prompt' },
+        };
+
+        mockSearchInferenceEndpoints.features.get.mockReturnValue({ taskType: 'chat_completion' });
+        mockSearchInferenceEndpoints.endpoints.getForFeature.mockResolvedValue({ endpoints: [] });
+
+        await expect(handler(contextWithFeature)).rejects.toThrow(
+          'No connector available for feature "context_engine_prompt"'
+        );
+      });
+
+      it('throws when the feature is registered with a non-chat-completion task type', async () => {
+        const contextWithFeature = {
+          ...mockContext,
+          config: { 'connector-id-by-feature': 'context_engine_embed' },
+        };
+
+        mockSearchInferenceEndpoints.features.get.mockReturnValue({ taskType: 'text_embedding' });
+
+        await expect(handler(contextWithFeature)).rejects.toThrow('not a chat completion feature');
+        expect(mockSearchInferenceEndpoints.endpoints.getForFeature).not.toHaveBeenCalled();
+      });
+
+      it('falls through to feature endpoint lookup when the feature ID is unregistered (get returns undefined)', async () => {
+        const contextWithFeature = {
+          ...mockContext,
+          config: { 'connector-id-by-feature': 'unknown_feature' },
+        };
+
+        mockSearchInferenceEndpoints.features.get.mockReturnValue(undefined);
+        mockSearchInferenceEndpoints.endpoints.getForFeature.mockResolvedValue({
+          endpoints: [{ connectorId: 'some-connector' }],
+        });
+        mockChatModel.invoke.mockResolvedValue({ content: 'ok', response_metadata: {} });
+
+        await handler(contextWithFeature);
+
+        expect(mockSearchInferenceEndpoints.endpoints.getForFeature).toHaveBeenCalledWith(
+          'unknown_feature',
+          expect.any(Object)
+        );
       });
     });
 

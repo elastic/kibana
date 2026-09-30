@@ -185,16 +185,17 @@ describe('aiIndexAutomationsSkill', () => {
     }
   });
 
-  it('pins every ai.prompt to the default connector, which the user can change after the save', () => {
+  it('routes ai.prompt via the context-engine-prompt feature rather than a literal connector', () => {
     const blocks = templates().flatMap(({ content: yaml }) => aiPromptBlocks(yaml));
 
     expect(blocks.length).toBeGreaterThan(0);
     for (const block of blocks) {
-      expect(block).toMatch(/^\s*connector-id: \.google-gemini-3\.5-flash-chat_completion\s*$/m);
+      expect(block).toContain('connector-id-by-feature: context_engine_prompt');
+      expect(block).not.toMatch(/connector-id: /);
     }
-    // The connector belongs on the prompt steps only; nothing else in a template names one.
+    // The feature ref belongs on the prompt steps only; nothing else in a template names one.
     for (const reference of templates()) {
-      const pinned = reference.content.match(/connector-id:/g) ?? [];
+      const pinned = reference.content.match(/connector-id-by-feature:/g) ?? [];
       expect(pinned).toHaveLength(aiPromptBlocks(reference.content).length);
     }
   });
@@ -999,25 +1000,17 @@ describe('aiIndexAutomationsSkill', () => {
       expect(content).toMatch(/one call for the example library rather than one per step/);
     });
 
-    it('names the default connector for every prompt step, inside and outside the templates', () => {
-      expect(content).toMatch(
-        /set its\s+`connector-id` to `\.google-gemini-3\.5-flash-chat_completion`/
-      );
-      expect(content).toMatch(/default model for\s+every prompt step in every automation/);
-      expect(content).toMatch(
-        /a\s+workflow you assemble outside the templates carries it too, on each `ai\.prompt` and `ai\.agent`\s+step/
-      );
-      expect(content).toMatch(/Use a different connector only when the user names one/);
+    it('routes ai.prompt through a named feature rather than a literal connector-id', () => {
+      expect(content).toMatch(/`connector-id-by-feature`/);
+      expect(content).toContain('context_engine_prompt');
+      expect(content).toMatch(/Leave `connector-id`\s+off/);
     });
 
-    it('says the templates carry the default connector and it is not a placeholder', () => {
+    it('says the templates use connector-id-by-feature deliberately, so no literal connector is added', () => {
       expect(content).toMatch(
-        /Every `ai\.prompt` step in the templates carries `connector-id: \.google-gemini-3\.5-flash-chat_completion`/
+        /connector-id-by-feature: context_engine_prompt.*on their `ai\.prompt` steps/s
       );
-      expect(content).toMatch(/That is the default, not a placeholder/);
-      expect(content).toMatch(
-        /put the same id on any prompt step you add or write outside the templates/
-      );
+      expect(content).toMatch(/do not add a `connector-id`/);
     });
 
     it('requires ${{ }} for non-strings, since {{ }} stringifies objects and booleans', () => {
