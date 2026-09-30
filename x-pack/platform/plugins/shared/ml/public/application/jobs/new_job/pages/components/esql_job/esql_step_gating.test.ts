@@ -8,6 +8,7 @@
 import type { EsqlWizardState } from './esql_wizard_context';
 import {
   computeEsqlStepGating,
+  getQueryTimeRangeBlockedReason,
   isJobDetailsStepValid,
   isPickFieldsStepValid,
   isQueryTimeRangeStepValid,
@@ -43,6 +44,60 @@ const baseState: EsqlWizardState = {
   histogramSeries: [{ time: 0, value: 42 }],
   rangeRefreshToken: 0,
 };
+
+describe('getQueryTimeRangeBlockedReason', () => {
+  it('is undefined when step 1 is valid (Next enabled)', () => {
+    expect(getQueryTimeRangeBlockedReason(baseState)).toBeUndefined();
+  });
+
+  it('reports a loading histogram', () => {
+    expect(getQueryTimeRangeBlockedReason({ ...baseState, histogramStatus: 'loading' })).toEqual({
+      type: 'histogramLoading',
+    });
+  });
+
+  it('reports a failed histogram with its error reason', () => {
+    expect(
+      getQueryTimeRangeBlockedReason({
+        ...baseState,
+        histogramStatus: 'error',
+        histogramTotalRows: 0,
+        histogramErrorMessage: 'Unknown column [ts]',
+      })
+    ).toEqual({ type: 'histogramError', errorMessage: 'Unknown column [ts]' });
+  });
+
+  it('reports an empty histogram', () => {
+    expect(getQueryTimeRangeBlockedReason({ ...baseState, histogramTotalRows: 0 })).toEqual({
+      type: 'histogramEmpty',
+      previewHasRows: false,
+    });
+  });
+
+  it('flags when the output preview has rows but the histogram is empty', () => {
+    expect(
+      getQueryTimeRangeBlockedReason({
+        ...baseState,
+        histogramTotalRows: 0,
+        outputPreviewRowCount: 3,
+      })
+    ).toEqual({ type: 'histogramEmpty', previewHasRows: true });
+  });
+
+  it.each<[string, Partial<EsqlWizardState>]>([
+    ['columns did not resolve', { queryProbeState: 'error', columns: [], histogramStatus: 'idle' }],
+    ['probe still loading', { queryProbeState: 'loading', histogramStatus: 'idle' }],
+    ['invalid time range', { wizardStart: '', histogramStatus: 'idle' }],
+    ['histogram idle', { histogramStatus: 'idle', histogramTotalRows: 0 }],
+  ])('has no histogram reason when %s', (_description, partial) => {
+    expect(getQueryTimeRangeBlockedReason({ ...baseState, ...partial })).toBeUndefined();
+  });
+
+  it('never reports a reason when Next is enabled, for any histogram state', () => {
+    expect(isQueryTimeRangeStepValid(baseState)).toBe(true);
+    expect(getQueryTimeRangeBlockedReason(baseState)).toBeUndefined();
+  });
+});
 
 describe('isQueryTimeRangeStepValid', () => {
   it('is valid once columns, time range, and a non-empty histogram all resolve', () => {

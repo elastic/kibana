@@ -54,7 +54,7 @@ export const EsqlQueryOutputPreview = () => {
   const {
     services: { data },
   } = useMlKibana();
-  const { state } = useEsqlWizardContext();
+  const { state, setOutputPreviewRowCount } = useEsqlWizardContext();
   const { query, sourceTimeField, wizardStart, wizardEnd, queryProbeState, rangeRefreshToken } =
     state;
   const [result, setResult] = useState<PreviewResult>();
@@ -134,6 +134,14 @@ export const EsqlQueryOutputPreview = () => {
     wizardEnd,
     wizardStart,
   ]);
+
+  // Report the row count so step 1 can explain a blocked Next when the
+  // histogram is empty although this preview has rows.
+  const reportedRowCount =
+    canRun && !isLoading && error === undefined ? result?.rows.length : undefined;
+  useEffect(() => {
+    setOutputPreviewRowCount(reportedRowCount);
+  }, [reportedRowCount, setOutputPreviewRowCount]);
 
   const columns = useMemo<Array<EuiBasicTableColumn<PreviewRow>>>(
     () =>

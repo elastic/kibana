@@ -49,6 +49,12 @@ export interface EsqlWizardState extends EsqlQueryStepState {
    * step. The histogram and output preview re-run when it changes (g2sz.28).
    */
   rangeRefreshToken: number;
+  /**
+   * Row count reported by the step-1 output preview for the current query and
+   * range; `undefined` while it has not run, is loading, or failed. Used only to
+   * explain why Next is blocked when the histogram is empty.
+   */
+  outputPreviewRowCount?: number;
 }
 
 export interface EsqlWizardContextValue {
@@ -62,6 +68,7 @@ export interface EsqlWizardContextValue {
   setTimeRange: (range: { start: string; end: string }) => void;
   setContinueInRealTime: (continueInRealTime: boolean) => void;
   refreshTimeRange: () => void;
+  setOutputPreviewRowCount: (outputPreviewRowCount: number | undefined) => void;
   setHistogramState: (
     next: Partial<
       Pick<
@@ -131,6 +138,13 @@ export const EsqlWizardProvider = ({ children }: PropsWithChildren) => {
   const refreshTimeRange = useCallback(() => {
     setState((current) => ({ ...current, rangeRefreshToken: current.rangeRefreshToken + 1 }));
   }, []);
+  const setOutputPreviewRowCount = useCallback((outputPreviewRowCount: number | undefined) => {
+    setState((current) =>
+      current.outputPreviewRowCount === outputPreviewRowCount
+        ? current
+        : { ...current, outputPreviewRowCount }
+    );
+  }, []);
   const setHistogramState = useCallback(
     (
       next: Partial<
@@ -156,6 +170,7 @@ export const EsqlWizardProvider = ({ children }: PropsWithChildren) => {
       setTimeRange,
       setContinueInRealTime,
       refreshTimeRange,
+      setOutputPreviewRowCount,
       setHistogramState,
     }),
     [
@@ -166,6 +181,7 @@ export const EsqlWizardProvider = ({ children }: PropsWithChildren) => {
       setJobDescription,
       setJobGroups,
       setJobId,
+      setOutputPreviewRowCount,
       setQueryProbeState,
       setQueryState,
       setTimeRange,

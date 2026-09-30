@@ -47,11 +47,18 @@ const RefreshButton = () => {
   return <button type="button" data-test-subj="refresh" onClick={refreshTimeRange} />;
 };
 
+const RowCountProbe = () => {
+  const { state } = useEsqlWizardContext();
+
+  return <span data-test-subj="rowCount">{String(state.outputPreviewRowCount)}</span>;
+};
+
 const renderPreview = (probe?: 'success' | 'idle' | 'error') =>
   renderWithI18n(
     <EsqlWizardProvider>
       <Seed probe={probe} />
       <RefreshButton />
+      <RowCountProbe />
       <EsqlQueryOutputPreview />
     </EsqlWizardProvider>
   );
@@ -115,6 +122,28 @@ describe('EsqlQueryOutputPreview', () => {
     expect(table).toHaveTextContent('host');
     expect(table).toHaveTextContent('web-2');
     expect(table).toHaveTextContent('20');
+  });
+
+  it('reports the preview row count to wizard state, and undefined when it has no rows or fails', async () => {
+    mockedGetESQLResults.mockResolvedValueOnce(
+      response([{ name: 'host', type: 'keyword' }], [['web-1'], ['web-2']])
+    );
+    renderPreview();
+    await flushDebounce();
+    await screen.findByTestId('mlEsqlQueryOutputPreviewTable');
+    expect(screen.getByTestId('rowCount')).toHaveTextContent('2');
+
+    mockedGetESQLResults.mockResolvedValueOnce(response([{ name: 'host', type: 'keyword' }], []));
+    fireEvent.click(screen.getByTestId('refresh'));
+    await flushDebounce();
+    await screen.findByTestId('mlEsqlQueryOutputPreviewEmpty');
+    expect(screen.getByTestId('rowCount')).toHaveTextContent('0');
+
+    mockedGetESQLResults.mockRejectedValueOnce(new Error('boom'));
+    fireEvent.click(screen.getByTestId('refresh'));
+    await flushDebounce();
+    await screen.findByTestId('mlEsqlQueryOutputPreviewError');
+    expect(screen.getByTestId('rowCount')).toHaveTextContent('undefined');
   });
 
   it('re-resolves relative times when the time range is refreshed', async () => {

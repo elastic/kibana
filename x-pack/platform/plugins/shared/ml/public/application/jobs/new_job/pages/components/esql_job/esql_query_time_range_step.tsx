@@ -25,6 +25,7 @@ import { i18n } from '@kbn/i18n';
 import { useEsqlWizardContext } from './esql_wizard_context';
 import { getEsqlQueryWarnings, type EsqlQueryWarningClause } from './esql_query_warnings';
 import { EsqlHistogramChart } from './esql_histogram_chart';
+import { EsqlNextBlockedExplanation } from './esql_next_blocked_explanation';
 import { EsqlQueryOutputPreview } from './esql_query_output_preview';
 import { EsqlStartFromBeginningButton } from './esql_start_from_beginning_button';
 
@@ -198,6 +199,8 @@ export const EsqlQueryTimeRangeStep = () => {
       <EsqlHistogramChart />
       <EuiSpacer size="l" />
       <EsqlQueryOutputPreview />
+      <EuiSpacer size="m" />
+      <EsqlNextBlockedExplanation />
     </EuiForm>
   );
 };

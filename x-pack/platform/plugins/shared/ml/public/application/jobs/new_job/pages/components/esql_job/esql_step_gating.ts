@@ -60,6 +60,39 @@ export const isQueryTimeRangeStepValid = (state: EsqlWizardState): boolean =>
   state.histogramStatus === 'success' &&
   state.histogramTotalRows > 0;
 
+export type QueryTimeRangeBlockedReason =
+  | { type: 'histogramLoading' }
+  | { type: 'histogramError'; errorMessage?: string }
+  | { type: 'histogramEmpty'; previewHasRows: boolean };
+
+/**
+ * Why step 1's Next is disabled when the row-count histogram is the blocker
+ * (still loading, errored, or empty); `undefined` when Next is enabled or when
+ * another condition (columns, time range) is what blocks it. Explanation only —
+ * `isQueryTimeRangeStepValid` remains the single source of truth for gating.
+ */
+export const getQueryTimeRangeBlockedReason = (
+  state: EsqlWizardState
+): QueryTimeRangeBlockedReason | undefined => {
+  if (
+    state.queryProbeState !== 'success' ||
+    state.columns.length === 0 ||
+    !isValidRange(state.wizardStart, state.wizardEnd)
+  ) {
+    return undefined;
+  }
+
+  if (state.histogramStatus === 'loading') return { type: 'histogramLoading' };
+  if (state.histogramStatus === 'error') {
+    return { type: 'histogramError', errorMessage: state.histogramErrorMessage };
+  }
+  if (state.histogramStatus === 'success' && state.histogramTotalRows === 0) {
+    return { type: 'histogramEmpty', previewHasRows: (state.outputPreviewRowCount ?? 0) > 0 };
+  }
+
+  return undefined;
+};
+
 /**
  * Step 2 (Pick fields) is complete once at least one detector is configured
  * and valid, the bucket span and source time field are set, and the emitted

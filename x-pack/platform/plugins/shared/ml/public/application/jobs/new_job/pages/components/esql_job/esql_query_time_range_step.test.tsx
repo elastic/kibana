@@ -85,6 +85,22 @@ const renderStep = () =>
     </EsqlWizardProvider>
   );
 
+const SeedEmptyHistogram = () => {
+  const { setQueryProbeState, setQueryState, setHistogramState } = useEsqlWizardContext();
+
+  React.useEffect(() => {
+    setQueryProbeState('success');
+    setQueryState({
+      columns: [{ name: 'bucket', type: 'date', userDefined: false }],
+      emittedTimeField: 'bucket',
+    });
+    setHistogramState({ histogramStatus: 'success', histogramTotalRows: 0 });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  return null;
+};
+
 describe('EsqlQueryTimeRangeStep', () => {
   beforeEach(() => {
     jest.useFakeTimers();
@@ -262,5 +278,19 @@ describe('EsqlQueryTimeRangeStep', () => {
       .map((element) => element.getAttribute('data-test-subj'));
 
     expect(order).toEqual(['mlEsqlHistogramChartStub', 'mlEsqlQueryOutputPreviewStub']);
+  });
+
+  it('explains why Next is blocked when the histogram is empty', () => {
+    renderWithI18n(
+      <EsqlWizardProvider>
+        <SeedEmptyHistogram />
+        <EsqlQueryTimeRangeStep />
+      </EsqlWizardProvider>
+    );
+
+    expect(screen.getByTestId('mlEsqlNextBlockedReason')).toHaveAttribute(
+      'data-reason',
+      'histogramEmpty'
+    );
   });
 });
