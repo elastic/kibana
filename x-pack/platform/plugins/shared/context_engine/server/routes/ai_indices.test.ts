@@ -130,6 +130,7 @@ describe('ai indices routes', () => {
   let readServiceParams: GetAiIndexDataReadServiceParams[];
   let response: ReturnType<typeof httpServerMock.createResponseFactory>;
   let featureFlagEnabled: boolean;
+  let memoryFlagEnabled: boolean;
   let actionsClient: ReturnType<typeof actionsClientMock.create>;
   let actions: ReturnType<typeof actionsMock.createStart>;
   let auditLogger: { log: jest.Mock };
@@ -185,6 +186,7 @@ describe('ai indices routes', () => {
     jest.clearAllMocks();
     routes = {};
     featureFlagEnabled = true;
+    memoryFlagEnabled = true;
     response = httpServerMock.createResponseFactory();
     actionsClient = actionsClientMock.create();
     actions = actionsMock.createStart();
@@ -262,6 +264,7 @@ describe('ai indices routes', () => {
         return improvementsService as unknown as ImprovementsServiceApi;
       },
       getScheduleService: () => scheduleService as unknown as FeedbackAnalysisScheduleService,
+      isMemoryEnabled: async () => memoryFlagEnabled,
       getActions: async () => actions,
       getAgentBuilder,
       getWorkflowsManagementApi: async () => workflowsManagementApi,
@@ -412,6 +415,31 @@ describe('ai indices routes', () => {
         properties
       );
       expect(response.created).toHaveBeenCalledWith({ body: { status: 'created' } });
+    });
+
+    it('rejects explicitly enabling memory while the memory feature flag is disabled', async () => {
+      memoryFlagEnabled = false;
+
+      await callRoute('POST', AI_INDEX_PATH, {
+        body: { ...postBody, memory_enabled: true },
+      });
+
+      expect(aiIndexService.create).not.toHaveBeenCalled();
+      expect(response.badRequest).toHaveBeenCalledWith({
+        body: { message: expect.stringContaining('Context Engine memory is disabled') },
+      });
+    });
+
+    it('allows the default or explicit opt-out while the memory feature flag is disabled', async () => {
+      memoryFlagEnabled = false;
+      aiIndexService.create.mockResolvedValue(undefined);
+
+      await callRoute('POST', AI_INDEX_PATH, { body: postBody });
+      await callRoute('POST', AI_INDEX_PATH, {
+        body: { ...postBody, memory_enabled: false },
+      });
+
+      expect(aiIndexService.create).toHaveBeenCalledTimes(2);
     });
 
     it('returns 409 when the id already exists', async () => {
@@ -582,6 +610,37 @@ describe('ai indices routes', () => {
 
       await callRoute('PUT', AI_INDEX_BY_ID_PATH, putRequest);
 
+      expect(response.ok).toHaveBeenCalledWith({ body: { status: 'updated' } });
+    });
+
+    it('rejects explicitly enabling memory while the memory feature flag is disabled', async () => {
+      memoryFlagEnabled = false;
+
+      await callRoute('PUT', AI_INDEX_BY_ID_PATH, {
+        ...putRequest,
+        body: { ...putRequest.body, memory_enabled: true },
+      });
+
+      expect(aiIndexService.put).not.toHaveBeenCalled();
+      expect(response.badRequest).toHaveBeenCalledWith({
+        body: { message: expect.stringContaining('Context Engine memory is disabled') },
+      });
+    });
+
+    it('allows preserving enabled memory while updating another field with the feature flag disabled', async () => {
+      memoryFlagEnabled = false;
+      aiIndexService.get.mockResolvedValue({ ...aiIndexItem, memory_enabled: true });
+      aiIndexService.put.mockResolvedValue('updated');
+      const body = {
+        ...putRequest.body,
+        description: 'Updated description',
+        memory_enabled: true,
+      };
+
+      await callRoute('PUT', AI_INDEX_BY_ID_PATH, { ...putRequest, body });
+
+      expect(aiIndexService.get).toHaveBeenCalledWith('customer_support', defaultSpaceId);
+      expect(aiIndexService.put).toHaveBeenCalledWith('customer_support', defaultSpaceId, body);
       expect(response.ok).toHaveBeenCalledWith({ body: { status: 'updated' } });
     });
 
@@ -1491,6 +1550,7 @@ describe('ai indices routes', () => {
           getAiIndexDataReadService: () => readService,
           getImprovementsService: () => improvementsService as unknown as ImprovementsServiceApi,
           getScheduleService: () => scheduleService as unknown as FeedbackAnalysisScheduleService,
+          isMemoryEnabled: async () => memoryFlagEnabled,
           getActions: async () => actions,
           getAgentBuilder,
           getWorkflowsManagementApi: async () => undefined,
@@ -1980,8 +2040,8 @@ describe('ai indices routes', () => {
       expect(() => validateBody(validBody)).not.toThrow();
     });
 
-    it('defaults memory_enabled to true', () => {
-      expect(validateBody(validBody)).toMatchObject({ memory_enabled: true });
+    it('leaves memory_enabled unset for the service default', () => {
+      expect(validateBody(validBody)).not.toHaveProperty('memory_enabled');
     });
 
     it('accepts memory_enabled', () => {
@@ -2128,8 +2188,8 @@ describe('ai indices routes', () => {
       expect(() => validateBody(validBody)).not.toThrow();
     });
 
-    it('defaults memory_enabled to true', () => {
-      expect(validateBody(validBody)).toMatchObject({ memory_enabled: true });
+    it('leaves memory_enabled unset for the service default', () => {
+      expect(validateBody(validBody)).not.toHaveProperty('memory_enabled');
     });
 
     it('accepts memory_enabled', () => {

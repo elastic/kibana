@@ -6,6 +6,7 @@
  */
 
 import { randomUUID } from 'crypto';
+import { CONTEXT_ENGINE_MEMORY_ENABLED_SETTING_ID } from '@kbn/management-settings-ids';
 import type { KibanaRole, RoleApiCredentials } from '@kbn/scout';
 import { tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/api';
@@ -155,8 +156,9 @@ const registerAiIndex = (id: string, dest: { type: 'index' | 'data_stream'; valu
   sources: [],
 });
 
-// The `agent_builder` Scout config set pins `contextEngine:enabled=true` through `uiSettings.overrides`,
-// which is read-only and applies to every space, so the tests never toggle it.
+// The `agent_builder` Scout config set pins `contextEngine:enabled=true` through
+// `uiSettings.overrides`. Memory remains runtime-configurable so this suite enables only the
+// behavior it exercises.
 apiTest.describe('context engine AI index describe API', { tag: tags.stateful.classic }, () => {
   let adminCredentials: RoleApiCredentials;
   let describeCredentials: RoleApiCredentials;
@@ -164,7 +166,12 @@ apiTest.describe('context engine AI index describe API', { tag: tags.stateful.cl
   let metadataOnlyCredentials: RoleApiCredentials;
   let otherIndexCredentials: RoleApiCredentials;
 
-  apiTest.beforeAll(async ({ requestAuth, esClient, apiClient }) => {
+  apiTest.beforeAll(async ({ requestAuth, esClient, apiClient, kbnClient }) => {
+    await kbnClient.uiSettings.updateGlobal({
+      [CONTEXT_ENGINE_MEMORY_ENABLED_SETTING_ID]: true,
+    });
+    await kbnClient.uiSettings.waitForEventualCacheRefresh();
+
     adminCredentials = await requestAuth.getApiKey('admin');
     describeCredentials = await requestAuth.getApiKeyForCustomRole(DESCRIBE_ROLE);
     readOnlyCredentials = await requestAuth.getApiKeyForCustomRole(READ_ONLY_ROLE);
@@ -223,7 +230,12 @@ apiTest.describe('context engine AI index describe API', { tag: tags.stateful.cl
     }
   });
 
-  apiTest.afterAll(async ({ apiClient, esClient }) => {
+  apiTest.afterAll(async ({ apiClient, esClient, kbnClient }) => {
+    await kbnClient.uiSettings.updateGlobal({
+      [CONTEXT_ENGINE_MEMORY_ENABLED_SETTING_ID]: false,
+    });
+    await kbnClient.uiSettings.waitForEventualCacheRefresh();
+
     for (const id of [
       SINGLE_AI_INDEX_ID,
       TEMPLATE_AI_INDEX_ID,
@@ -295,20 +307,32 @@ apiTest.describe('context engine AI index describe API', { tag: tags.stateful.cl
     expect(fieldLine(block, '@timestamp')).toMatch(/^@timestamp: date/);
   });
 
-  apiTest('counts active non-memory KIs visible in the current space', async ({ apiClient }) => {
-    const response = await apiClient.get(describePath(SINGLE_AI_INDEX_ID), {
-      headers: { ...describeCredentials.apiKeyHeader, ...API_HEADERS },
-      responseType: 'json',
-    });
+  apiTest(
+    'describes memory capability and excludes stored memory from ordinary counts',
+    async ({ apiClient }) => {
+      const response = await apiClient.get(describePath(SINGLE_AI_INDEX_ID), {
+        headers: { ...describeCredentials.apiKeyHeader, ...API_HEADERS },
+        responseType: 'json',
+      });
 
-    expect(response).toHaveStatusCode(200);
-    const block = blockOf(response.body);
-    expect(sectionLines(block, 'Knowledge item types')).toStrictEqual([
-      '"document": 2',
-      '"detection": 1',
-    ]);
-    expect(sectionLines(block, 'Tags')).toStrictEqual(['"billing": 2', '"errors": 1']);
-  });
+      expect(response).toHaveStatusCode(200);
+      const block = blockOf(response.body);
+      expect(sectionLines(block, 'Memory')).toStrictEqual(
+        expect.arrayContaining([
+          'Memory writes are enabled for this AI-index registry entry.',
+          'memory.session',
+          'memory.session_fact',
+          'Use platform.context_engine.remember to write memory.',
+          'Use platform.context_engine.forget with a memory id to tombstone memory.',
+        ])
+      );
+      expect(sectionLines(block, 'Knowledge item types')).toStrictEqual([
+        '"document": 2',
+        '"detection": 1',
+      ]);
+      expect(sectionLines(block, 'Tags')).toStrictEqual(['"billing": 2', '"errors": 1']);
+    }
+  );
 
   apiTest('lists example queries that run as-is through _query', async ({ apiClient }) => {
     const described = await apiClient.get(describePath(SINGLE_AI_INDEX_ID), {
