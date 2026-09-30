@@ -691,7 +691,7 @@ describe('CasesParamsFields renders', () => {
         isAtLeastPlatinum: () => false,
       });
 
-      render(<CasesParamsFields {...defaultProps} />);
+      render(<CasesParamsFields {...defaultProps} producerId="siem" />);
 
       expect(await screen.findByTestId('time-window-size-input')).toBeInTheDocument();
       expect(screen.queryByTestId('extract-observables-select')).not.toBeInTheDocument();
