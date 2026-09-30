@@ -21,7 +21,6 @@ import type {
 import { EXTRACTION_MODE } from '../../../common/domain/definitions/entity_schema';
 import {
   getEntityDefinition,
-  hasPriorityExtractionGate,
   supportsNonPrioritySampling,
 } from '../../../common/domain/definitions/registry';
 import { resolveSamplingRate } from './sampling';
@@ -60,7 +59,6 @@ import {
 } from '../asset_manager/external_indices_contants';
 import { type LogExtractionConfig } from '../saved_objects';
 import {
-  applyOverrides,
   type EngineDescriptor,
   type EngineDescriptorClient,
   type EngineError,
@@ -404,51 +402,6 @@ export class LogsExtractionClient {
       logExtractionConfig: descriptor.logExtractionConfig ?? {},
       nonPriorityLogExtractionConfig: descriptor.nonPriorityLogExtractionConfig ?? {},
     };
-  }
-
-  /**
-   * The config each process would run with if the given blocks were written, keyed by extraction
-   * mode. Callers validate the result before committing: a block is valid on its own but can still
-   * produce a broken effective config once the layers below it are merged in.
-   */
-  public async previewTypeConfig(
-    type: EntityType,
-    {
-      logExtraction,
-      nonPriorityOverride,
-    }: {
-      logExtraction?: LogExtractionTypeOverride;
-      nonPriorityOverride?: NonPriorityLogExtractionTypeOverride;
-    }
-  ): Promise<Array<[ExtractionMode, LogExtractionConfig]>> {
-    const [globalOverrides, descriptor] = await Promise.all([
-      this.globalStateClient.findLogExtractionOverrides(),
-      this.engineDescriptorClient.findOrThrow(type),
-    ]);
-
-    const typeOverride = applyOverrides<LogExtractionTypeOverride>(
-      descriptor.logExtractionConfig,
-      logExtraction
-    );
-    const nonPriorityConfig = applyOverrides<NonPriorityLogExtractionTypeOverride>(
-      descriptor.nonPriorityLogExtractionConfig,
-      nonPriorityOverride
-    );
-
-    const modes: ExtractionMode[] = hasPriorityExtractionGate(type)
-      ? [EXTRACTION_MODE.single, EXTRACTION_MODE.priority, EXTRACTION_MODE.nonPriority]
-      : [EXTRACTION_MODE.single];
-
-    return modes.map((mode) => [
-      mode,
-      getMergedConfig(
-        type,
-        globalOverrides,
-        typeOverride,
-        mode,
-        mode === EXTRACTION_MODE.nonPriority ? nonPriorityConfig : undefined
-      ),
-    ]);
   }
 
   /** Same dependencies, different extraction process. */

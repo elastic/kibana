@@ -821,22 +821,6 @@
       }
     },
     {
-      "id": "7464d46f8495c10-ca05b7ca0ed3a51",
-      "title": "Entity Store per-process configuration and control rejects an effective config whose delay exceeds the stored lookback period",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic",
-        "@local-serverless-security_complete",
-        "@cloud-serverless-security_complete"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/entity_store/test/scout/lifecycle/api/tests/per_process_config.spec.ts",
-        "line": 206,
-        "column": 17
-      }
-    },
-    {
       "id": "7464d46f8495c10-beb169116b559c5",
       "title": "Entity Store per-process configuration and control does not serve start with the dual-process flag off",
       "expectedStatus": "passed",

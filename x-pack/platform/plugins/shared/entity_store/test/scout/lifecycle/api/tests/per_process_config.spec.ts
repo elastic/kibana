@@ -249,23 +249,6 @@ apiTest.describe(
       expect(response.statusCode).toBe(400);
     });
 
-    apiTest(
-      'rejects an effective config whose delay exceeds the stored lookback period',
-      async ({ apiClient }) => {
-        await apiClient.put(ENTITY_STORE_ROUTES.public.UPDATE, {
-          headers: publicHeaders,
-          responseType: 'json',
-          body: { logExtraction: { lookbackPeriod: '2m' } },
-        });
-
-        const response = await setEngineConfig(apiClient, {
-          nonPriorityOverride: { delay: '5m' },
-        });
-
-        expect(response.statusCode).toBe(400);
-      }
-    );
-
     // The handler unit tests call the handlers directly and the middleware test calls the guard
     // directly, so only an HTTP call proves these routes are still wired to the middleware.
     const disableDualProcess = (apiServices: { core: { settings: SettingsFn } }) =>
