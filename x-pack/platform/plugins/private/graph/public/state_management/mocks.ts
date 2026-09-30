@@ -94,6 +94,7 @@ export function createMockGraphStore({
     } as unknown as OverlayStart,
     handleSearchQueryError: jest.fn(),
     exploreGraph: jest.fn(),
+    searchGraph: jest.fn(),
     ...mockedDepsOverwrites,
   };
   const listenerMiddleware = createListenerMiddleware<GraphState, GraphStore['dispatch']>();
