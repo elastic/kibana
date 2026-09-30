@@ -764,6 +764,21 @@ describe('KibanaActionStepImpl', () => {
       expect(headers[EVENT_CHAIN_EMITTER_EXECUTION_ID_HEADER]).toBe('workflow-run-helper');
     });
 
+    it('always sends x-kbn-alerting-clone-api-key: true, even if the step tries to set it', async () => {
+      step = createStep({
+        request: {
+          method: 'POST',
+          path: '/api/detection_engine/rules',
+          body: { name: 'r' },
+          headers: { 'x-kbn-alerting-clone-api-key': 'false' },
+        },
+      });
+      await (step as any)._run();
+      const headers = new Headers((global.fetch as jest.Mock).mock.calls[0][1].headers);
+      expect(headers.get('authorization')).toBe('ApiKey test-key');
+      expect(headers.get('x-kbn-alerting-clone-api-key')).toBe('true');
+    });
+
     it('sends form_data as multipart FormData', async () => {
       step = createStep({
         path: '/api/saved_objects/_import',
