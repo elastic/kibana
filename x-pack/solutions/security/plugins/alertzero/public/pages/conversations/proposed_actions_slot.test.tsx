@@ -61,11 +61,12 @@ const mockProposal: ProposalWithMetadata = {
   id: 'proposal-1',
   spaceId: 'default',
   conversationId: 'conversation-1',
+  title: 'Isolate cfo-mbp-14 — host isolation',
   comment: 'Isolate the host to cut off the replayed session.',
   status: 'pending',
   impact: 'critical',
   confidence: 'high',
-  origin: 'worker',
+  origin: 'alertzero',
   createdAt: '2024-01-01T00:00:00Z',
   expired: false,
   action: { name: 'Isolate cfo-mbp-14 — host isolation', category: 'Response action' },
@@ -78,6 +79,7 @@ const decidedProposal: ProposalWithMetadata = {
   decision: 'approved',
   decidedBy: { fullName: 'Bonnie Fishel', username: 'bfishel', email: null },
   decidedAt: '2024-01-01T17:20:00.000Z',
+  title: 'After-hours domain admin logins — fin-dc-01',
   action: { name: 'After-hours domain admin logins — fin-dc-01', category: 'Response action' },
 };
 
@@ -229,7 +231,7 @@ describe('ProposedActionsSlot', () => {
     ).toBeInTheDocument();
   });
 
-  it('opens the dismiss modal instead of dismissing directly', () => {
+  it('shows the reason form in the same modal instead of dismissing directly', () => {
     mockConversationProposalsPage([mockProposal]);
 
     renderSlot();
@@ -238,8 +240,30 @@ describe('ProposedActionsSlot', () => {
       screen.getByTestId('investigationFlyoutProposedAction-proposal-1-modal-dismiss')
     );
 
-    expect(screen.getByText('Close the investigation?')).toBeInTheDocument();
+    expect(
+      screen.getByTestId('investigationFlyoutProposedAction-proposal-1-modal-decline-form-reason')
+    ).toBeInTheDocument();
     expect(dismissMutateAsync).not.toHaveBeenCalled();
+  });
+
+  it('submits the selected reason once Decline is confirmed', async () => {
+    mockConversationProposalsPage([mockProposal]);
+
+    renderSlot();
+    fireEvent.click(screen.getByTestId('investigationFlyoutProposedAction-proposal-1'));
+    fireEvent.click(
+      screen.getByTestId('investigationFlyoutProposedAction-proposal-1-modal-dismiss')
+    );
+    fireEvent.click(
+      screen.getByTestId('investigationFlyoutProposedAction-proposal-1-modal-confirm-decline')
+    );
+
+    await waitFor(() =>
+      expect(dismissMutateAsync).toHaveBeenCalledWith({
+        id: 'proposal-1',
+        body: { dismissReason: 'no_reason', rationale: undefined },
+      })
+    );
   });
 
   it('offers Show more when the conversation has more proposals than the loaded page, and fetches the next one', () => {
