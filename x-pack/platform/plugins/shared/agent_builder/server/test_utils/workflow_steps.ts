@@ -8,6 +8,7 @@
 import type { KibanaRequest } from '@kbn/core/server';
 import type { StepHandlerContext } from '@kbn/workflows-extensions/server';
 import type { AttachmentPublicClient } from '@kbn/agent-builder-server';
+import type { AgentExecutionService } from '@kbn/agent-builder-server/execution';
 import type { ConversationClient } from '../services/conversation';
 import type { AgentRegistry } from '../services/agents';
 
@@ -111,6 +112,17 @@ export const createWorkflowStepAgentRegistryMock = (
   } as unknown as AgentRegistry);
 
   return { get, getAgentRegistry };
+};
+
+export const createWorkflowStepExecutionServiceMock = (
+  overrides: Partial<{ maybeExecuteAgent: jest.Mock }> = {}
+) => {
+  const maybeExecuteAgent = overrides.maybeExecuteAgent ?? jest.fn();
+  const getExecutionService = jest.fn().mockReturnValue({
+    maybeExecuteAgent,
+  } as unknown as AgentExecutionService);
+
+  return { maybeExecuteAgent, getExecutionService };
 };
 
 export const createWorkflowStepAttachmentClientMock = (

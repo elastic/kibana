@@ -22,7 +22,9 @@ import type { LatestAlertEventState } from '../queries';
 
 const DEFAULT_STATUS_COUNT = 1;
 
-type Operator = NonNullable<NonNullable<RuleResponse['state_transition']>['pending_operator']>;
+type StateTransition = NonNullable<RuleResponse['state_transition']>;
+type StateTransitionPhase = NonNullable<StateTransition['pending']>;
+type Operator = NonNullable<StateTransitionPhase['operator']>;
 const DEFAULT_OPERATOR: Operator = 'or';
 
 interface ThresholdConfig {
@@ -122,14 +124,13 @@ export class CountTimeframeStrategy extends BasicTransitionStrategy {
   }
 
   override getNextState(ctx: StateTransitionContext): StateTransitionResult {
-    const { rule, previousEpisode, alertEvent } = ctx;
+    const { rule, previousEpisode, alertEvent, evaluatedAt } = ctx;
     const stateTransition = rule.state_transition;
     const currentEpisodeStatus = previousEpisode?.last_episode_status;
     const currentStatusCount = this.getCurrentStatusCount(previousEpisode);
     const currentEpisodeTimestamp = previousEpisode?.last_episode_timestamp;
-    const alertEventTimestamp = alertEvent['@timestamp'];
 
-    const elapsedMs = this.getElapsedMs(alertEventTimestamp, currentEpisodeTimestamp);
+    const elapsedMs = this.getElapsedMs(evaluatedAt, currentEpisodeTimestamp);
 
     // Delegate to the inherited basic state machine to get the "natural" next state.
     const basicResult = super.getNextState(ctx);
@@ -140,7 +141,7 @@ export class CountTimeframeStrategy extends BasicTransitionStrategy {
 
     if (
       alertEvent.status === alertEventStatus.no_data &&
-      rule.no_data_strategy === noDataStrategy.recover
+      rule.no_data?.strategy === noDataStrategy.resolve
     ) {
       return basicResult;
     }
@@ -160,10 +161,10 @@ export class CountTimeframeStrategy extends BasicTransitionStrategy {
       return this.getNextStateTransition({
         currentStatusCount,
         elapsedMs,
-        operator: stateTransition.pending_operator ?? DEFAULT_OPERATOR,
-        count: stateTransition.pending_count,
+        operator: stateTransition.pending?.operator ?? DEFAULT_OPERATOR,
+        count: stateTransition.pending?.count,
         timeframeMs: this.safeParseDurationToMs(
-          stateTransition.pending_timeframe,
+          stateTransition.pending?.timeframe,
           rule.id,
           'pending_timeframe'
         ),
@@ -177,10 +178,10 @@ export class CountTimeframeStrategy extends BasicTransitionStrategy {
       return this.getNextStateTransition({
         currentStatusCount,
         elapsedMs,
-        operator: stateTransition.recovering_operator ?? DEFAULT_OPERATOR,
-        count: stateTransition.recovering_count,
+        operator: stateTransition.recovering?.operator ?? DEFAULT_OPERATOR,
+        count: stateTransition.recovering?.count,
         timeframeMs: this.safeParseDurationToMs(
-          stateTransition.recovering_timeframe,
+          stateTransition.recovering?.timeframe,
           rule.id,
           'recovering_timeframe'
         ),
@@ -215,17 +216,17 @@ export class CountTimeframeStrategy extends BasicTransitionStrategy {
   }
 
   private shouldSkipPending(
-    stateTransition: NonNullable<RuleResponse['state_transition']>,
+    stateTransition: StateTransition,
     nextStatus: AlertEpisodeStatus
   ): boolean {
-    return stateTransition.pending_count === 0 && nextStatus === alertEpisodeStatus.pending;
+    return stateTransition.pending?.count === 0 && nextStatus === alertEpisodeStatus.pending;
   }
 
   private shouldSkipRecovering(
-    stateTransition: NonNullable<RuleResponse['state_transition']>,
+    stateTransition: StateTransition,
     nextStatus: AlertEpisodeStatus
   ): boolean {
-    return stateTransition.recovering_count === 0 && nextStatus === alertEpisodeStatus.recovering;
+    return stateTransition.recovering?.count === 0 && nextStatus === alertEpisodeStatus.recovering;
   }
 
   private isPendingToActiveTransition(
@@ -306,12 +307,12 @@ export class CountTimeframeStrategy extends BasicTransitionStrategy {
     }
   }
 
-  private getElapsedMs(currentTimestamp?: string, previousTimestamp?: string | null): number {
-    if (!currentTimestamp || !previousTimestamp) {
+  private getElapsedMs(evaluatedAt: string, previousTimestamp?: string | null): number {
+    if (!previousTimestamp) {
       return 0;
     }
 
-    const currentMs = Date.parse(currentTimestamp);
+    const currentMs = Date.parse(evaluatedAt);
     const previousMs = Date.parse(previousTimestamp);
 
     if (Number.isNaN(currentMs) || Number.isNaN(previousMs)) {

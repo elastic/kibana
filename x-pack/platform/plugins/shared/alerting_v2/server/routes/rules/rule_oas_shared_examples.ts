@@ -35,16 +35,14 @@ const SAMPLE_RULE_DATA = {
   },
   time_field: '@timestamp',
   schedule: { every: '1m', lookback: '5m' },
-  recovery_strategy: 'no_breach' as const,
   query: {
-    format: 'standalone' as const,
-    breach: {
-      query:
-        'FROM metrics-* | WHERE host.cpu.usage > 0.9 | STATS avg_cpu = AVG(host.cpu.usage) BY host.name',
-    },
+    base: 'FROM metrics-* | STATS avg_cpu = AVG(host.cpu.usage) BY host.name',
+    breach: { segment: 'WHERE avg_cpu > 0.9' },
   },
+  recovery: { strategy: 'no_breach' as const },
+  no_data: { strategy: 'keep_last' as const },
   grouping: { fields: ['host.name'] },
-  state_transition: { pending_count: 1, recovering_count: 1 },
+  state_transition: { pending: { count: 1 }, recovering: { count: 1 } },
 };
 
 export const CREATE_RULE_REQUEST: CreateRuleDataInput = SAMPLE_RULE_DATA;

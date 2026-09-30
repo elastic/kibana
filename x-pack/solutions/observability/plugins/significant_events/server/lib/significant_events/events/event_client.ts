@@ -12,17 +12,18 @@ import type { ElasticsearchClient } from '@kbn/core/server';
 import type {
   SignificantEvent,
   SignificantEventResponse,
-  Severity,
-  SignificantEventStatus,
   SignalEntry,
   SignalVerdict,
+  Severity,
+  SignificantEventStatus,
 } from '@kbn/significant-events-schema';
 import { SIGNIFICANT_EVENT_ACTIVE_STATUS_OPTIONS } from '@kbn/significant-events-schema';
 import {
   type BulkCreateOptions,
   type CommonSearchOptions,
-  type PaginatedSearchOptions,
   type PaginatedResponse,
+  type PaginatedSearchOptions,
+  MAX_DEDUP_SCAN_LIMIT,
   throwOnBulkCreateErrors,
 } from '../query_utils';
 import {
@@ -49,6 +50,46 @@ import type {
   SignificantEventsTriggerId,
   SignificantEventsTriggerPayloadMap,
 } from '../../../../common/workflows/triggers';
+
+/**
+ * Filters shared by every "latest current state" read path, whether backed by `EventClient`
+ * (`EVENTS_DATA_STREAM`) or `RuleEventsClient` (`.rule-events`, gated by
+ * `SIGNIFICANT_EVENTS_USE_RULE_EVENTS_READ`).
+ */
+export interface EventsFilterOptions {
+  status?: SignificantEventStatus[];
+  severity?: Severity[];
+  stream?: string[];
+  search?: string;
+  eventIds?: string[];
+  ruleUuids?: string[];
+  topologyFeatureIds?: string[];
+}
+
+export type EventsPaginatedSearchOptions = PaginatedSearchOptions & EventsFilterOptions;
+
+/**
+ * Read-only surface both `EventClient` and `RuleEventsClient` implement, so agent-side read call
+ * sites (`event_search`, `event_write`'s dedup scan, `attach_investigation`, SML) can depend on
+ * this interface instead of a concrete client and stay correct regardless of
+ * `SIGNIFICANT_EVENTS_USE_RULE_EVENTS_READ`. Write-only surface (`bulkCreate`, `emitTrigger`,
+ * `findByEventUuid`) is intentionally excluded — `RuleEventsClient` is read-only and
+ * `event_uuid` is not a real `.rule-events` field (see `RuleEventsClient` doc comment) — callers
+ * needing those must keep a separate `EventClient` obtained via `getEventClient()`.
+ */
+export interface SignificantEventsReadClient {
+  findLatestPaginated(
+    options?: EventsPaginatedSearchOptions
+  ): Promise<PaginatedResponse<SignificantEventResponse>>;
+  findLatestByCurrentStatePaginated(
+    options: EventsPaginatedSearchOptions
+  ): Promise<PaginatedResponse<SignificantEventResponse>>;
+  findLatestActive(
+    options: CommonSearchOptions & { streamNames?: string[]; ruleUuids?: string[] }
+  ): Promise<{ hits: SignificantEvent[] }>;
+  findByEventId(eventId: string): Promise<{ hits: SignificantEventResponse[] }>;
+  findLatestByEventId(eventId: string): Promise<SignificantEventResponse | undefined>;
+}
 
 export type EventDataStreamClient = IDataStreamClient<typeof eventsMappings, StoredEvent>;
 export type LegacySignal = Omit<SignalEntry, 'verdict'> & {
@@ -77,13 +118,6 @@ const normalizeLegacyVerification = (event: SignificantEvent): SignificantEvent 
   ...event,
   signals: event.signals?.map((signal) => normalizeLegacyVerdict(signal as LegacySignal)),
 });
-
-/**
- * Maximum number of distinct active events returned by findLatestActive. With stream+rule
- * narrowing the result is proportional to the write batch size, so this cap is a safety bound
- * rather than an operational limit.
- */
-const MAX_DEDUP_SCAN_LIMIT = 500;
 
 const multiValueContainsAnyFilter = ({
   where,
@@ -137,26 +171,14 @@ const topologyFeatureFilter = (
   )}, [${values}]) OR MV_INTERSECTS(${esql.col('blast_radius.feature_id')}, [${values}]))`;
 };
 
-export interface EventsFilterOptions {
-  status?: SignificantEventStatus[];
-  severity?: Severity[];
-  stream?: string[];
-  search?: string;
-  eventIds?: string[];
-  ruleUuids?: string[];
-  topologyFeatureIds?: string[];
-}
-
 type EventsCurrentStateSearchOptions = CommonSearchOptions & EventsFilterOptions;
-
-export type EventsPaginatedSearchOptions = PaginatedSearchOptions & EventsFilterOptions;
 
 export type EventsBatchSearchOptions = EventsCurrentStateSearchOptions & {
   afterEventId?: string;
   batchSize: number;
 };
 
-export class EventClient {
+export class EventClient implements SignificantEventsReadClient {
   constructor(
     private readonly clients: {
       dataStreamClient: EventDataStreamClient;
@@ -427,6 +449,16 @@ export class EventClient {
         created_at: event.created_at,
       })),
     };
+  }
+
+  /**
+   * Resolves the latest version for an event_id lineage. `findByEventId` returns all versions
+   * sorted ascending by `@timestamp`, so the latest version is always the last element — never
+   * the first (a caller-supplied id must never pin a read to a stale revision).
+   */
+  async findLatestByEventId(eventId: string): Promise<SignificantEventResponse | undefined> {
+    const { hits } = await this.findByEventId(eventId);
+    return hits.at(-1);
   }
 
   async findLatestByEventIds(eventIds: string[]): Promise<Map<string, SignificantEvent>> {

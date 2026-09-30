@@ -584,6 +584,52 @@ describe('EscalationsService.list', () => {
 
     expect(client.search).toHaveBeenCalledWith(expect.objectContaining({ query: undefined }));
   });
+
+  it('includes a metadata.linked_investigations filter when linked_investigation_id is set', async () => {
+    const { service, client } = makeService({
+      search: jest.fn().mockResolvedValue({ results: [], total: 0 }),
+    });
+
+    await service.list(request, {
+      page: 1,
+      per_page: 50,
+      status: 'open',
+      linked_investigation_id: 'inv-abc',
+    });
+
+    const { filter } = (client.search as jest.Mock).mock.calls[0][0] as { filter: string };
+    expect(filter).toContain('metadata.linked_investigations: "inv-abc"');
+  });
+
+  it('omits the linked_investigation_id clause when it is not set', async () => {
+    const { service, client } = makeService({
+      search: jest.fn().mockResolvedValue({ results: [], total: 0 }),
+    });
+
+    await service.list(request, { page: 1, per_page: 50, status: 'open' });
+
+    const { filter } = (client.search as jest.Mock).mock.calls[0][0] as { filter: string };
+    expect(filter).not.toContain('linked_investigations');
+  });
+
+  it('escapes double quotes in linked_investigation_id to prevent KQL injection', async () => {
+    const { service, client } = makeService({
+      search: jest.fn().mockResolvedValue({ results: [], total: 0 }),
+    });
+
+    // Although real conversation IDs are UUIDs, verify the escaping works for safety.
+    await service.list(request, {
+      page: 1,
+      per_page: 50,
+      status: 'open',
+      linked_investigation_id: 'inv-"malicious"',
+    });
+
+    const { filter } = (client.search as jest.Mock).mock.calls[0][0] as { filter: string };
+    expect(filter).toContain('metadata.linked_investigations: "inv-\\"malicious\\""');
+    // Should not leave a bare unescaped double-quote that would break the KQL.
+    expect(filter).not.toMatch(/linked_investigations: "inv-"malicious/);
+  });
 });
 
 describe('EscalationsService.getClosePreview', () => {

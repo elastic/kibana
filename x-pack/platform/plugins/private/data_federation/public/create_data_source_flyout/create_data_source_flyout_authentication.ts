@@ -122,6 +122,9 @@ export const applyAuthenticationModeToDataSource = (
 
   switch (data.type) {
     case 's3': {
+      // Unregistering the last settings field (anonymous S3 has none left) can remove the
+      // settings object from the submitted form values.
+      const settings = data.settings ?? {};
       const {
         access_key: _accessKey,
         secret_key: _secretKey,
@@ -132,22 +135,22 @@ export const applyAuthenticationModeToDataSource = (
         sts_region: _stsRegion,
         auth: _auth,
         ...rest
-      } = data.settings;
+      } = settings;
 
       let applied: Record<string, unknown> = {};
       if (mode === 'access_and_secret_keys') {
         applied = {
-          access_key: data.settings.access_key,
-          secret_key: data.settings.secret_key,
+          access_key: settings.access_key,
+          secret_key: settings.secret_key,
           auth: 'static_credentials',
         };
       } else if (mode === 'federated_identity') {
         applied = {
-          role_arn: data.settings.role_arn,
-          jwt_audience: data.settings.jwt_audience,
-          role_session_name: data.settings.role_session_name,
-          sts_endpoint: data.settings.sts_endpoint,
-          sts_region: data.settings.sts_region,
+          role_arn: settings.role_arn,
+          jwt_audience: settings.jwt_audience,
+          role_session_name: settings.role_session_name,
+          sts_endpoint: settings.sts_endpoint,
+          sts_region: settings.sts_region,
           auth: 'federated_identity',
         };
       }
@@ -162,6 +165,7 @@ export const applyAuthenticationModeToDataSource = (
       };
     }
     case 'gcs': {
+      const settings = data.settings ?? {};
       const {
         credentials: _credentials,
         jwt_audience: _jwtAudience,
@@ -169,17 +173,17 @@ export const applyAuthenticationModeToDataSource = (
         service_account_impersonation_url: _serviceAccountImpersonationUrl,
         auth: _auth,
         ...rest
-      } = data.settings;
-      const credentialsText = data.settings.credentials?.trim();
+      } = settings;
+      const credentialsText = settings.credentials?.trim();
 
       let applied: Record<string, unknown> = {};
       if (mode === 'access_and_secret_keys' && credentialsText) {
         applied = { credentials: credentialsText, auth: 'static_credentials' };
       } else if (mode === 'federated_identity') {
         applied = {
-          jwt_audience: data.settings.jwt_audience,
-          sts_audience: data.settings.sts_audience,
-          service_account_impersonation_url: data.settings.service_account_impersonation_url,
+          jwt_audience: settings.jwt_audience,
+          sts_audience: settings.sts_audience,
+          service_account_impersonation_url: settings.service_account_impersonation_url,
           auth: 'federated_identity',
         };
       }
@@ -193,6 +197,7 @@ export const applyAuthenticationModeToDataSource = (
       };
     }
     case 'azure': {
+      const settings = data.settings ?? {};
       const {
         account: _account,
         key: _key,
@@ -201,7 +206,7 @@ export const applyAuthenticationModeToDataSource = (
         jwt_audience: _jwtAudience,
         auth: _auth,
         ...rest
-      } = data.settings;
+      } = settings;
 
       const base = { ...rest };
 
@@ -210,8 +215,8 @@ export const applyAuthenticationModeToDataSource = (
           ...data,
           settings: {
             ...base,
-            account: data.settings.account,
-            key: data.settings.key,
+            account: settings.account,
+            key: settings.key,
             auth: 'static_credentials',
           },
         };
@@ -221,9 +226,9 @@ export const applyAuthenticationModeToDataSource = (
           ...data,
           settings: {
             ...base,
-            tenant_id: data.settings.tenant_id,
-            client_id: data.settings.client_id,
-            jwt_audience: data.settings.jwt_audience,
+            tenant_id: settings.tenant_id,
+            client_id: settings.client_id,
+            jwt_audience: settings.jwt_audience,
             auth: 'federated_identity',
           },
         };
