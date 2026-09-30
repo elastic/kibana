@@ -330,9 +330,8 @@ describe('RuleEventsClient', () => {
         {
           ...dataDoc,
           '@timestamp': '2026-01-02T00:00:00.000Z',
-          event_uuid: 'group-hash-1',
-          status: 'open',
-          severity: '40-medium',
+          status: 'active',
+          severity: 'medium',
         },
       ]);
     });

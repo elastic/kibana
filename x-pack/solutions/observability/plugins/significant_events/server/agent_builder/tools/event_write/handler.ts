@@ -362,7 +362,10 @@ const fetchPriorDocsByEventId = async (
           : await eventClient.findByEventId(c.eventId);
         const legacyHits = legacyResult ? legacyResult.hits : hits;
         priorDocsByEventId.set(c.eventId, hits);
-        const latest = hits.at(-1);
+        // `.rule-events` is dual-written asynchronously and can lag the write store. Use the
+        // canonical predecessor for fields copied into the new version (especially
+        // investigations), while retaining the read-store history for episode-context merging.
+        const latest = legacyHits.at(-1);
         if (latest !== undefined) {
           latestByEventId.set(c.eventId, latest);
         }
