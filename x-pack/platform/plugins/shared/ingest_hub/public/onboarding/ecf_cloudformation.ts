@@ -16,7 +16,6 @@
  * Three template families are supported, each producing its own Launch button:
  *   - Unified ECS (multi-signal): ecs_logs-cloudformation.yaml   → ECS data streams
  *   - OTel (multi-signal):        otel_logs-cloudformation.yaml  → OpenTelemetry data streams
- *                                                                   (uses `S3SourceBuckets` instead of `S3Buckets`)
  *   - CrowdStrike FDR (dedicated): crowdstrike_fdr_cloudformation.yaml
  *
  * Reference templates:
@@ -263,9 +262,8 @@ export const buildEcfCrowdstrikeCloudFormationUrl = ({
 /**
  * Builds a CloudFormation Quick Create URL for the OTel multi-signal ECF template.
  *
- * The OTel template uses `S3SourceBuckets` instead of `S3Buckets` (unlike the ECS unified
- * template). All other parameters — `CloudWatchLogGroups`, `LogTypes`, `OTLPEndpoint` — share
- * the same names and semantics.
+ * Parameters — `S3Buckets`, `CloudWatchLogGroups`, `LogTypes`, `OTLPEndpoint` — share the same
+ * names and semantics as the unified template.
  *
  * `ElasticAPIKey` is intentionally NOT pre-filled for the same security reasons as the unified
  * template: it must not appear in browser history or URL logs.
@@ -306,9 +304,8 @@ export const buildEcfOtelCloudFormationUrl = ({
   if (otlpEndpoint) {
     hashParams.set('param_OTLPEndpoint', otlpEndpoint);
   }
-  // OTel template uses S3SourceBuckets, not S3Buckets
   if (s3BucketArns.length > 0) {
-    hashParams.set('param_S3SourceBuckets', s3BucketArns.join(','));
+    hashParams.set('param_S3Buckets', s3BucketArns.join(','));
   }
   if (logGroupArns.length > 0) {
     hashParams.set('param_CloudWatchLogGroups', logGroupArns.join(','));

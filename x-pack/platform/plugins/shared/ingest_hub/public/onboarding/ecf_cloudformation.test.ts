@@ -393,15 +393,15 @@ describe('buildEcfOtelCloudFormationUrl()', () => {
     expect(url).toContain('stackName=my-otel-stack');
   });
 
-  it('uses S3SourceBuckets (not S3Buckets) for bucket ARNs', () => {
+  it('uses S3Buckets for bucket ARNs', () => {
     const url = buildEcfOtelCloudFormationUrl({
       ecfConfigs: otelConfigs,
       region: 'us-east-1',
       version: TEST_VERSION,
     });
     const hash = decodeURIComponent(url.split('#')[1]);
-    expect(hash).toContain('param_S3SourceBuckets=');
-    expect(hash).not.toContain('param_S3Buckets=');
+    expect(hash).toContain('param_S3Buckets=');
+    expect(hash).not.toContain('param_S3SourceBuckets=');
   });
 
   it('builds the comma-separated LogTypes param from service configs', () => {
