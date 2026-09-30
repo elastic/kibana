@@ -158,6 +158,26 @@ describe(ALERTZERO_HUNT_PACKAGE_REPORT_WORKFLOW_ID, () => {
   });
 });
 
+describe(ALERTZERO_HUNT_PROPOSAL_GATE_WORKFLOW_ID, () => {
+  // Both requeries swallow their own failure, so every settlement count has to fall
+  // back to the earlier read. Reading the retry alone means a transient failure on
+  // the second call discards a first call that succeeded, collapses created_count to
+  // 0, and leaves the Investigation open forever with every Proposal already decided.
+  it('falls back to the first requery for every settlement count', () => {
+    const workflow = parseChild(ALERTZERO_HUNT_PROPOSAL_GATE_WORKFLOW_ID);
+    const counts = stepNamed(workflow, 'resolve_settlement_counts').with as Record<string, string>;
+
+    for (const count of ['created_count', 'pending_count', 'executing_count']) {
+      expect(counts[count]).toEqual(
+        expect.stringContaining('steps.requery_proposals_retry.output')
+      );
+      expect(counts[count]).toEqual(
+        expect.stringContaining('default: steps.requery_proposals.output')
+      );
+    }
+  });
+});
+
 describe(ALERTZERO_WORKER_HUNT_CONTINUOUS_THREAT_HUNT_WORKFLOW_ID, () => {
   const renderWorker = (): ParsedWorkflow => {
     const definition = getManagedWorkflowDefinition(

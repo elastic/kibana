@@ -116,7 +116,9 @@ steps:
   # avoids entirely. Bounded (exactly one retry, always run) rather than
   # unbounded: a just-created Proposal must be visible (section C item 4), and
   # a second immediate read after the wrap has already returned is enough
-  # margin for the common case.
+  # margin for the common case. The later read is preferred and the first is its
+  # fallback (see resolve_settlement_counts), so the pair can only ever see more
+  # than a single call would -- never less.
   - name: requery_proposals
     type: kibana.request
     with:
@@ -143,17 +145,27 @@ steps:
     on-failure:
       continue: true
 
-  # `where`/`size` on a nil `.proposals` (a failed requery, on-failure
-  # swallowed) resolve to 0, not a hard-fail -- verified live, unlike
-  # `foreach` on a nil source (Phase 0 task 7 finding). No `default: []`
-  # guard needed. `total` (not the array length) is the created count per
-  # section C item 4: never assume one page is complete.
+  # Reads the later requery and falls back to the first one, rather than reading
+  # the retry alone: both calls swallow their own failure, so a transient failure
+  # on the second read would otherwise discard a first read that had succeeded,
+  # collapse created_count to 0, and leave `settled` false forever -- an
+  # Investigation that never closes even though every Proposal was decided. The
+  # retry exists to see *more* than the first read, so it must never be able to
+  # see less. `| default:` against another step's output is this package's
+  # existing idiom for that (forensics_run_endpoint_analysis.yaml's host_name
+  # chains two step outputs and a literal the same way).
+  #
+  # `where`/`size` on a nil `.proposals` (both requeries failed) resolve to 0,
+  # not a hard-fail -- verified live, unlike `foreach` on a nil source (Phase 0
+  # task 7 finding), so the trailing literal guard is only needed on the scalar.
+  # `total` (not the array length) is the created count per section C item 4:
+  # never assume one page is complete.
   - name: resolve_settlement_counts
     type: data.set
     with:
-      created_count: "${{ steps.requery_proposals_retry.output.total | default: 0 }}"
-      pending_count: "${{ steps.requery_proposals_retry.output.proposals | where: 'status', 'pending' | size }}"
-      executing_count: "${{ steps.requery_proposals_retry.output.proposals | where: 'status', 'executing' | size }}"
+      created_count: "${{ steps.requery_proposals_retry.output.total | default: steps.requery_proposals.output.total | default: 0 }}"
+      pending_count: "${{ steps.requery_proposals_retry.output.proposals | default: steps.requery_proposals.output.proposals | where: 'status', 'pending' | size }}"
+      executing_count: "${{ steps.requery_proposals_retry.output.proposals | default: steps.requery_proposals.output.proposals | where: 'status', 'executing' | size }}"
 
   # Three-term `and` chain, no `or` mixed in -- verified live this associates
   # left-to-right without the mixed and/or precedence hazard create_proposal.yaml
