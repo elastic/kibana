@@ -8,8 +8,7 @@
 import React, { memo } from 'react';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import { InputsModelId } from '../../../../common/store/inputs/constants';
-import { SearchBarWithDataViewPicker } from '../../../../common/components/search_bar/search_bar_with_data_view_picker';
-import { PageScope } from '../../../../data_view_manager/constants';
+import { SiemSearchBar } from '../../../../common/components/search_bar';
 
 export const SEARCH_BAR_TEST_ID = 'alerts-page-search-bar';
 
@@ -21,17 +20,15 @@ export interface SearchBarSectionProps {
 }
 
 /**
- * UI section of the alerts page that renders the data view picker next to the global search bar.
+ * UI section of the alerts page that renders the global search bar.
  */
 export const SearchBarSection = memo(({ dataView }: SearchBarSectionProps) => {
   return (
-    <SearchBarWithDataViewPicker
+    <SiemSearchBar
       dataTestSubj={SEARCH_BAR_TEST_ID}
       dataView={dataView}
+      displayStyle="inPage"
       id={InputsModelId.global}
-      scope={PageScope.alerts}
-      // Alerts keeps the data view picker read-only, matching GlobalHeader.
-      disabled
     />
   );
 });

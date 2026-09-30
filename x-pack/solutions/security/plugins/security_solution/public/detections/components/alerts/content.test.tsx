@@ -17,7 +17,6 @@ import { createStubDataView } from '@kbn/data-views-plugin/common/data_views/dat
 import { GO_TO_RULES_MENU_ITEM_TEST_ID } from './header/use_alerts_header_menu';
 import { ADD_INTEGRATIONS_MENU_ITEM_TEST_ID } from '../../../common/components/app_header/use_add_integrations_menu_item';
 import { ML_JOB_SETTINGS_MENU_ITEM_TEST_ID } from '../../../common/components/app_header/use_ml_job_settings_menu_item';
-import { DATA_VIEW_PICKER_TEST_ID } from '../../../common/components/search_bar/search_bar_with_data_view_picker';
 import { FILTER_BY_ASSIGNEES_BUTTON } from '../../../common/components/filter_by_assignees_popover/test_ids';
 import { useUserPrivileges } from '../../../common/components/user_privileges';
 import { getUserPrivilegesMockDefaultValue } from '../../../common/components/user_privileges/__mocks__';
@@ -65,7 +64,6 @@ describe('AlertsPageContent', () => {
     await waitFor(() => {
       expect(screen.getByTestId(SECURITY_SOLUTION_PAGE_WRAPPER_TEST_ID)).toBeInTheDocument();
       expect(screen.getByTestId(APP_HEADER_TEST_SUBJECTS.title)).toHaveTextContent('Alerts');
-      expect(screen.getByTestId(DATA_VIEW_PICKER_TEST_ID)).toBeInTheDocument();
       expect(screen.getByTestId(FILTER_BY_ASSIGNEES_BUTTON)).toBeInTheDocument();
       expect(screen.getByTestId('chartPanels')).toBeInTheDocument();
     });
@@ -74,6 +72,26 @@ describe('AlertsPageContent', () => {
     expect(screen.getByTestId(GO_TO_RULES_MENU_ITEM_TEST_ID)).toBeInTheDocument();
     expect(screen.getByTestId(ML_JOB_SETTINGS_MENU_ITEM_TEST_ID)).toBeInTheDocument();
     expect(screen.getByTestId(ADD_INTEGRATIONS_MENU_ITEM_TEST_ID)).toBeInTheDocument();
+  });
+
+  it('hides the header and search bar while the alerts table is in full screen', async () => {
+    renderWithProviders(<AlertsPageContent dataView={dataView} />);
+
+    await waitFor(() => {
+      expect(screen.getByTestId(APP_HEADER_TEST_SUBJECTS.title)).toBeVisible();
+    });
+
+    document.body.classList.add('euiDataGrid__restrictBody');
+
+    await waitFor(() => {
+      expect(screen.getByTestId(APP_HEADER_TEST_SUBJECTS.title)).not.toBeVisible();
+    });
+
+    document.body.classList.remove('euiDataGrid__restrictBody');
+
+    await waitFor(() => {
+      expect(screen.getByTestId(APP_HEADER_TEST_SUBJECTS.title)).toBeVisible();
+    });
   });
 
   describe('when the user has no rules privileges', () => {

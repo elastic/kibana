@@ -26,7 +26,10 @@ import { SearchBarSection } from './search_bar/search_bar_section';
 import { TableSection } from './table/table_section';
 import type { AssigneesIdsSelection } from '../../../common/components/assignees/types';
 import { SecuritySolutionPageWrapper } from '../../../common/components/page_wrapper';
-import { useGlobalFullScreen } from '../../../common/containers/use_full_screen';
+import {
+  useGlobalFullScreen,
+  useHasFullScreenContent,
+} from '../../../common/containers/use_full_screen';
 import { Display } from '../../../explore/hosts/pages/display';
 import {
   focusUtilityBarAction,
@@ -69,6 +72,8 @@ export const AlertsPageContent = memo(({ dataView }: AlertsPageContentProps) => 
   const containerElement = useRef<HTMLDivElement | null>(null);
 
   const { globalFullScreen } = useGlobalFullScreen();
+  // The sticky AppHeader and KQL input stack above EuiDataGrid's own full screen mode.
+  const hasFullScreenContent = useHasFullScreenContent();
   const headerMenu = useAlertsHeaderMenu();
 
   const [assignees, setAssignees] = useState<AssigneesIdsSelection[]>([]);
@@ -130,11 +135,11 @@ export const AlertsPageContent = memo(({ dataView }: AlertsPageContentProps) => 
         noPadding={globalFullScreen}
         data-test-subj={SECURITY_SOLUTION_PAGE_WRAPPER_TEST_ID}
       >
-        <Display show={!globalFullScreen}>
+        <Display show={!hasFullScreenContent}>
           <SecurityAppHeader title={PAGE_TITLE} menu={headerMenu} spacing="largeBleed" />
-          <EuiSpacer size="s" />
+          <EuiSpacer size="m" />
           <SearchBarSection dataView={dataView} />
-          <EuiSpacer size="s" />
+          <EuiSpacer size="m" />
           <EuiFlexGroup direction="row" responsive={false} wrap={true}>
             <EuiFlexItem grow={false} data-test-subj={ALERTS_PAGE_ASSIGNEE_FILTER_TEST_ID}>
               <FilterByAssigneesPopover
@@ -159,7 +164,7 @@ export const AlertsPageContent = memo(({ dataView }: AlertsPageContentProps) => 
               />
             </EuiFlexItem>
           </EuiFlexGroup>
-          <EuiSpacer size="l" />
+          <EuiSpacer size="m" />
           <KPIsSection assignees={assignees} pageFilters={pageFilters} dataView={dataView} />
           <EuiSpacer size="l" />
         </Display>
