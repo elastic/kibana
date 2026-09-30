@@ -31,7 +31,7 @@ user_activity:
 ```
 
 - `user_activity.enabled`: Enables or disables emitting user activity events.
-- `user_activity.appenders`: Logging appenders used by the service. This uses the same appender schema as Kibana logging. For more details, refer to [Logging settings](/reference/configuration-reference/logging-settings.md). By default, it uses a JSON console appender.
+- `user_activity.appenders`: Logging appenders used by the service. This uses the same appender schema as Kibana logging. For more details, refer to [Logging settings](/reference/configuration-reference/logging-settings.md). By default, it uses a JSON console appender. When events are shipped through an `otel` appender, Kibana adjusts the emitted fields. Refer to [OpenTelemetry output](#opentelemetry-output).
 - `user_activity.filters`: Optional list of filter rules applied to `event.action`.
 
 When enabled, events are logged under the logger context `user_activity.event` and include the fields `{ message, event, error, user, kibana.session.id, kibana.space.id, kibana.object, ...}`. Action-specific metadata is logged under a per-producer `kibana.*` bucket (for example, `kibana.dashboard`).
@@ -192,3 +192,32 @@ Some actions, such as `log_in_user` and `log_out_user`, are recorded on unauthen
 | `service.state`      | The status of Kibana.                          |
 | `service.type`       | `kibana`.                                      |
 | `service.version`    | Version of Kibana that emitted the event.      |
+
+### OpenTelemetry output
+
+When user activity events are shipped through an `otel` appender configured under `user_activity.appenders`, Kibana shapes the OTLP output as follows:
+
+- Every log record gets the attribute `log.type: user_activity`.
+- The `message` attribute is not emitted. The message text is carried as the OTLP body (`body.text`), which Elastic ingest aliases to the ECS `message` field.
+- The [service fields](#service-fields) (`service.id`, `service.node.roles`, `service.state`, `service.type`, and `service.version`) are dropped from the record attributes. Service identity is carried by the OTel resource instead.
+- The OTel resource is reduced to two attributes that identify the producer of the logs:
+  - `service.type` is always `kibana`.
+  - `service.name` identifies the deployment type: `serverless-kibana` on {{serverless-full}}, `hosted-kibana` on {{ech}}, and `self-managed-kibana` for self-managed deployments.
+
+  To override the detected `service.name`, use the appender `attributes` setting; values set there take precedence:
+
+  ```yaml
+  user_activity:
+    appenders:
+      otlp:
+        type: otel
+        url: https://collector:4318/v1/logs
+        attributes:
+          '[service.name]': hosted-kibana
+  ```
+
+- If a `project.id` resource attribute is present in the environment (for example, on {{serverless-full}}), it is copied onto every record as a per-record attribute.
+
+:::::{note}
+When these records are indexed into {{es}} through an OpenTelemetry ingest pipeline, per-record fields are stored under `attributes.*` (for example, `attributes.event.action`). Elastic's OpenTelemetry mappings are pass-through, so the fields remain queryable by the names documented on this page.
+:::::
