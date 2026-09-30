@@ -22,8 +22,9 @@ apiTest.describe(
   () => {
     apiTest(
       'classifies a session-authenticated request as a user',
-      async ({ apiClient, config: { organizationId, projectType } }) => {
+      async ({ apiClient, kbnUrl, config: { organizationId, projectType } }) => {
         const samlResponse = await createSAMLResponse({
+          kibanaUrl: kbnUrl.get('/api/security/saml/callback'),
           username: '1234567890',
           email: 'elastic_admin@elastic.co',
           roles: ['admin'],
