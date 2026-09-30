@@ -35,6 +35,21 @@ export const viewExecutionsAriaLabel = (workerName: string) =>
     values: { workerName },
   });
 
+export const READ_ONLY_CALLOUT_MESSAGE = i18n.translate(
+  'xpack.alertzero.watches.settings.readOnlyCalloutMessage',
+  {
+    defaultMessage:
+      'You have read-only access to Watch settings. Ask an administrator for the required privilege.',
+  }
+);
+
+export const READ_ONLY_TOOLTIP = i18n.translate(
+  'xpack.alertzero.watches.settings.readOnlyTooltip',
+  {
+    defaultMessage: 'Read-only access',
+  }
+);
+
 export const SAVE_WATCH_SETTINGS = i18n.translate(
   'xpack.alertzero.watches.settings.saveWatchSettings',
   { defaultMessage: 'Save' }

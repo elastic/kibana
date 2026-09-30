@@ -21,6 +21,14 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   // Stable UUID from src/platform/test/functional/fixtures/kbn_archiver/managed_data_view.json
   const MANAGED_DV_ID = '5f863f70-4728-4e8d-b441-db08f8c33b28';
 
+  // Migration recommendation: MIGRATE TO SCOUT
+  // Tests the "managed" data view concept: verifies the Managed badge is shown on the detail page,
+  // the data view editor flyout is in disabled state, the field editor flyout is disabled, the
+  // delete button is absent from the detail page, and the delete action is aria-disabled on the
+  // list page. No existing Scout coverage found. All four tests are straightforward UI assertions
+  // against a known fixture data view loaded via kbn_archiver (managed_data_view.json). The
+  // `aria-disabled` check on the list page is a good regression guard for the managed-flag feature.
+  // Requires the x-pack logstash_functional ES archive for underlying index data.
   describe('managed data view', function describeIndexTests() {
     before(async function () {
       await esArchiver.load('x-pack/platform/test/fixtures/es_archives/logstash_functional');

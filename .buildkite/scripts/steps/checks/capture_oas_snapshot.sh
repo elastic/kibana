@@ -21,6 +21,7 @@ cmd="node scripts/capture_oas_snapshot\
   --include-path /api/saved_objects \
   --include-path /api/maintenance_window \
   --include-path /api/agent_builder \
+  --include-path /api/context_engine \
   --include-path /api/workflows \
   --include-path /api/dashboards \
   --include-path /api/visualizations \

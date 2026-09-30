@@ -11,8 +11,13 @@ export { prepareMessages } from './to_langchain_messages';
 export { prepareConversation } from './prepare_conversation';
 export {
   groupTimelineRounds,
+  isTimelineCustomEvent,
+  customEvents,
+  type ContextTimelineEvent,
   type ProcessedTimelineEvent,
+  type ProcessedCustomEvent,
   type TimelineRound,
+  type TimelineCustomEvent,
 } from './context_timeline';
 export { selectSkills } from './select_skills';
 export { selectTools } from './select_tools';

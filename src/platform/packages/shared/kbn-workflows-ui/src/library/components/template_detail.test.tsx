@@ -188,6 +188,35 @@ describe('TemplateDetail', () => {
     expect(screen.getByTestId('workflowLibraryTemplateDetail-version')).toHaveTextContent('1.2.0');
   });
 
+  it('links to the template source and prefills the issue form with template details', () => {
+    mockUseTemplate.mockReturnValue({
+      data: {
+        ...TEMPLATE_BODY,
+        metadata: { ...TEMPLATE_BODY.metadata, name: 'My Template & Slack #1' },
+      },
+      isLoading: false,
+      isError: false,
+    });
+    renderDetail();
+
+    const reportLink = screen.getByRole('link', { name: 'Report an issue with this template' });
+    const url = new URL(reportLink.getAttribute('href') ?? '');
+    expect(url.origin + url.pathname).toBe('https://github.com/elastic/workflows/issues/new');
+    expect(url.searchParams.get('template')).toBe('template_issue.yml');
+    expect(url.searchParams.get('title')).toBe('[Template issue]: My Template & Slack #1');
+    expect(url.searchParams.get('template_details')).toBe(
+      'Name: My Template & Slack #1\n' +
+        'Slug: my-template\n' +
+        'Version: 1.2.0\n' +
+        'Availability: >=9.5.0\n' +
+        'Source: https://github.com/elastic/workflows/blob/main/library/workflows/my-template/my-template.yaml'
+    );
+    expect(screen.getByRole('link', { name: 'Edit this template' })).toHaveAttribute(
+      'href',
+      'https://github.com/elastic/workflows/edit/main/library/workflows/my-template/my-template.yaml'
+    );
+  });
+
   it('should render the solution logo and localized tag badges under the title', () => {
     renderDetail();
     expect(screen.getByText('Solutions')).toBeInTheDocument();
@@ -319,6 +348,10 @@ describe('TemplateDetail', () => {
         <TemplateDetail template={TEMPLATE_BODY} installMode="custom" />
       </WorkflowsUiServicesProvider>
     );
+    expect(
+      screen.queryByRole('link', { name: 'Report an issue with this template' })
+    ).not.toBeInTheDocument();
+    expect(screen.queryByRole('link', { name: 'Edit this template' })).not.toBeInTheDocument();
 
     expect(mockUseTemplate).toHaveBeenCalledWith(undefined);
     expect(screen.getByRole('heading', { name: 'My Template' })).toBeInTheDocument();

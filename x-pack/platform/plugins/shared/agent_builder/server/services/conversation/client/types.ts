@@ -16,6 +16,7 @@ import type {
   TodosStep,
   AskUserQuestionStep,
   RelevantSkillsStep,
+  PreExecutionWorkflowStep,
   SubagentRosterUpdatedStep,
   ConversationRoundStepType,
   Conversation,
@@ -164,6 +165,7 @@ export type PersistentConversationRoundStep =
   | TodosStep
   | AskUserQuestionStep
   | RelevantSkillsStep
+  | PreExecutionWorkflowStep
   | SubagentRosterUpdatedStep
   | SubstitutionStep;
 

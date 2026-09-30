@@ -15,6 +15,7 @@ import {
   EuiFocusTrap,
   EuiIconTip,
   EuiLoadingSpinner,
+  EuiPanel,
   EuiText,
   EuiTitle,
   useEuiShadow,
@@ -235,6 +236,19 @@ export const TemplateDetail = React.memo<TemplateDetailProps>(function TemplateD
   }
 
   const { metadata } = data;
+  const sourcePath = `library/workflows/${metadata.slug}/${metadata.slug}.yaml`;
+  const reportIssueUrl = new URL('https://github.com/elastic/workflows/issues/new');
+  reportIssueUrl.search = new URLSearchParams({
+    template: 'template_issue.yml',
+    title: `[Template issue]: ${metadata.name}`,
+    template_details: [
+      `Name: ${metadata.name}`,
+      `Slug: ${metadata.slug}`,
+      `Version: ${metadata.version}`,
+      `Availability: ${metadata.availability}`,
+      `Source: https://github.com/elastic/workflows/blob/main/${sourcePath}`,
+    ].join('\n'),
+  }).toString();
   // No specific solutions listed means all solutions are supported
   const solutions = metadata.solutions?.length ? metadata.solutions : Object.keys(SOLUTION_ICONS);
 
@@ -299,13 +313,11 @@ export const TemplateDetail = React.memo<TemplateDetailProps>(function TemplateD
     }),
     // 16px between the info card and the description (Figma "Details" gap).
     details: css({ gap: euiTheme.size.base }),
-    // Bordered, rounded metadata card: 12px/16px padding, 16px between columns.
+    // Bordered, rounded metadata card: 16px padding, 16px between columns.
     infoCard: css({
       display: 'flex',
       gap: euiTheme.size.base,
-      padding: `${euiTheme.size.m} ${euiTheme.size.base}`,
-      border: `${euiTheme.border.width.thin} solid ${euiTheme.colors.borderBaseSubdued}`,
-      borderRadius: euiTheme.border.radius.medium,
+      borderRadius: euiTheme.border.radius.control,
     }),
     infoBlock: css({
       display: 'flex',
@@ -357,7 +369,9 @@ export const TemplateDetail = React.memo<TemplateDetailProps>(function TemplateD
     panel: css({
       position: 'relative',
       minHeight: 0,
+      overflow: 'hidden',
       border: `${euiTheme.border.width.thin} solid ${euiTheme.colors.borderBaseSubdued}`,
+      borderRadius: euiTheme.border.radius.control,
       backgroundColor: euiTheme.colors.backgroundBaseSubdued,
     }),
     // "Preview" pill floats centered over the top of the editor (16px down).
@@ -468,7 +482,12 @@ export const TemplateDetail = React.memo<TemplateDetailProps>(function TemplateD
                     <EuiFlexItem grow={false}>
                       <EuiFlexGroup direction="column" gutterSize="none" css={styles.details}>
                         <EuiFlexItem grow={false}>
-                          <div css={styles.infoCard}>
+                          <EuiPanel
+                            hasBorder
+                            hasShadow={false}
+                            paddingSize="m"
+                            css={styles.infoCard}
+                          >
                             <div
                               css={styles.infoBlock}
                               data-test-subj="workflowLibraryTemplateDetail-solutions"
@@ -515,12 +534,54 @@ export const TemplateDetail = React.memo<TemplateDetailProps>(function TemplateD
                               </span>
                               <span css={styles.infoValue}>{metadata.version}</span>
                             </div>
-                          </div>
+                          </EuiPanel>
                         </EuiFlexItem>
 
                         <EuiFlexItem grow={false}>
                           <p css={styles.description}>{metadata.description}</p>
                         </EuiFlexItem>
+                        {installMode === 'catalog' ? (
+                          <EuiFlexItem grow={false}>
+                            <EuiFlexGroup direction="column" gutterSize="xs" alignItems="flexStart">
+                              <EuiFlexItem grow={false}>
+                                <EuiButtonEmpty
+                                  size="s"
+                                  flush="left"
+                                  iconType="logoGithub"
+                                  href={reportIssueUrl.toString()}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  data-test-subj="workflowLibraryTemplateReportIssueLink"
+                                >
+                                  {i18n.translate(
+                                    'workflows.library.templateDetail.reportIssueButtonLabel',
+                                    {
+                                      defaultMessage: 'Report an issue with this template',
+                                    }
+                                  )}
+                                </EuiButtonEmpty>
+                              </EuiFlexItem>
+                              <EuiFlexItem grow={false}>
+                                <EuiButtonEmpty
+                                  size="s"
+                                  flush="left"
+                                  iconType="pencil"
+                                  href={`https://github.com/elastic/workflows/edit/main/${sourcePath}`}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  data-test-subj="workflowLibraryTemplateEditLink"
+                                >
+                                  {i18n.translate(
+                                    'workflows.library.templateDetail.editTemplateButtonLabel',
+                                    {
+                                      defaultMessage: 'Edit this template',
+                                    }
+                                  )}
+                                </EuiButtonEmpty>
+                              </EuiFlexItem>
+                            </EuiFlexGroup>
+                          </EuiFlexItem>
+                        ) : null}
                       </EuiFlexGroup>
                     </EuiFlexItem>
                   </EuiFlexGroup>
