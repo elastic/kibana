@@ -28,10 +28,22 @@ triggers:
         runId:
           type: string
           description: Run id the Worker's fan-out minted for this sweep; packaging reads only attachments scoped to this run.
+        # The hunt's own verdict, passed down because a run that confirmed no hit leaves no
+        # SSE attachment behind: without these, packaging cannot tell that from a run whose
+        # state is genuinely missing, and reports every no-hit run as incomplete.
+        huntStatus:
+          type: string
+          enum: [success, partial, failed]
+          description: Hunt child's result status; `partial` and `failed` mean absence of a hit is not a clean verdict.
+        hasConfirmedHit:
+          type: boolean
+          description: Whether the hunt cleared the confirmed-hit bar.
       required:
         - reportId
         - investigationConversationId
         - runId
+        - huntStatus
+        - hasConfirmedHit
       additionalProperties: false
 outputs:
   - name: status
@@ -58,6 +70,10 @@ steps:
       reportId: "{{ inputs.reportId }}"
       investigationConversationId: "{{ inputs.investigationConversationId }}"
       runId: "{{ inputs.runId }}"
+      huntStatus: "{{ inputs.huntStatus }}"
+      # `${{ }}`, not `{{ }}`: the step schema types this as a boolean, and the text form
+      # renders it as the string "false", which fails input validation.
+      hasConfirmedHit: "${{ inputs.hasConfirmedHit }}"
     on-failure:
       fallback:
         - name: emit_package_failed

@@ -162,6 +162,13 @@ steps:
             reportId: "{{ foreach.item }}"
             investigationConversationId: "{{ steps.find_or_create_investigation.output.investigationConversationId }}"
             runId: "{{ execution.id }}"
+            # The hunt's verdict travels with the packaging call: a run that confirmed no
+            # hit writes no SSE attachment, so packaging needs to be told that outcome
+            # rather than inferring it from missing state (which is also what a rerun
+            # collision or a failed attach looks like). `failed` covers the hunt step
+            # having no output at all.
+            huntStatus: "{{ steps.hunt.output.status | default: 'failed' }}"
+            hasConfirmedHit: "${{ steps.hunt.output.hit == true }}"
 
       # Outcome derivation: find_or_create failing means no Investigation ever
       # existed, so no conclusion is possible (handled by

@@ -167,18 +167,52 @@ describe('runPackageReport', () => {
         reportId,
         investigationConversationId: 'wrong-id',
         runId,
+        huntStatus: 'success',
+        hasConfirmedHit: true,
         attachments: [sseAttachment({ hit: true, hostName: 'h1' })],
         deps: deps(),
       })
     ).rejects.toBeInstanceOf(PackageReportIdentityError);
   });
 
-  it('returns run_incomplete when no current-run SSE exists', async () => {
+  // A hunt that confirmed no hit writes no SSE attachment at all, so this is the shape of
+  // every no-hit run in production, not an edge case. It must close the Investigation.
+  it.each([
+    ['success', 'no confirmed hits'],
+    ['partial', 'not a clean verdict'],
+    ['failed', 'did not run'],
+  ] as const)('packages a no-hit %s run as a dismissal', async (huntStatus, expectedPhrase) => {
     const result = await runPackageReport({
       spaceId: 'default',
       reportId,
       investigationConversationId: conversationId,
       runId,
+      huntStatus,
+      hasConfirmedHit: false,
+      attachments: [],
+      deps: deps(),
+    });
+
+    expect(result.status).toBe('packaged');
+    if (result.status !== 'packaged') {
+      return;
+    }
+    expect(result.dismiss).toBe(true);
+    expect(result.proposals).toEqual([]);
+    expect(result.expectedProposalCount).toBe(0);
+    expect(result.closureSummary).toContain(expectedPhrase);
+  });
+
+  // Only reachable when the run said it confirmed a hit: the attachment should exist and
+  // does not, so the sweep has to report itself partial rather than close the Investigation.
+  it('returns run_incomplete when a confirmed hit has no current-run SSE', async () => {
+    const result = await runPackageReport({
+      spaceId: 'default',
+      reportId,
+      investigationConversationId: conversationId,
+      runId,
+      huntStatus: 'success',
+      hasConfirmedHit: true,
       attachments: [],
       deps: deps(),
     });
@@ -194,6 +228,8 @@ describe('runPackageReport', () => {
       reportId,
       investigationConversationId: conversationId,
       runId,
+      huntStatus: 'success',
+      hasConfirmedHit: false,
       attachments: [sseAttachment({ hit: false })],
       deps: deps(),
     });
@@ -213,6 +249,8 @@ describe('runPackageReport', () => {
       reportId,
       investigationConversationId: conversationId,
       runId,
+      huntStatus: 'success',
+      hasConfirmedHit: true,
       attachments: [sseAttachment({ hit: true, hostName: 'host-a' })],
       deps: deps(),
     });
@@ -232,6 +270,8 @@ describe('runPackageReport', () => {
       reportId,
       investigationConversationId: conversationId,
       runId,
+      huntStatus: 'success',
+      hasConfirmedHit: true,
       attachments: [sseAttachment({ hit: true, hostName: 'host-a' })],
       deps: deps({ resolveHostEnrollment: async () => ({ enrolled: false }) }),
     });
@@ -252,6 +292,8 @@ describe('runPackageReport', () => {
       reportId,
       investigationConversationId: conversationId,
       runId,
+      huntStatus: 'success',
+      hasConfirmedHit: true,
       attachments: [sseAttachment({ hit: true, hostName: 'host-a' })],
       deps: deps({
         listRespondActions: async () => ({ ok: true, actions: [killProcess, suspendProcess] }),

@@ -7,7 +7,10 @@
 
 import type { ActionCatalogEntry } from '@kbn/alertzero-common';
 import type { VersionedAttachment } from '@kbn/agent-builder-common';
-import type { PackageReportOutput } from '../../../common/step_types/package_report';
+import type {
+  PackageReportInput,
+  PackageReportOutput,
+} from '../../../common/step_types/package_report';
 import { buildHuntInvestigationConversationId } from '../../services/watches/hunt/common/hunt_investigation_id';
 import { decidePackageReport } from './decide_package_report';
 import { deriveCoverageSubjects } from './derive_coverage_subjects';
@@ -39,15 +42,37 @@ export interface RunPackageReportDeps {
 }
 
 /**
+ * Closure prose for a run with no findings. Absence of a hit is only a clean verdict when the
+ * run actually covered what it was asked to, so the three hunt statuses must not collapse into
+ * one sentence: an analyst reading a closed Investigation has to be able to tell "we looked and
+ * the environment is clean" from "we could not look".
+ */
+const noFindingsClosureSummary = (
+  huntStatus: PackageReportInput['huntStatus'],
+  reportId: string
+): string => {
+  if (huntStatus === 'success') {
+    return `Hunt for report ${reportId} found no confirmed hits. Closing: nothing in this environment matched the report at the confirming-index bar.`;
+  }
+  if (huntStatus === 'partial') {
+    return `Hunt for report ${reportId} found no confirmed hits, but did not cover everything it was asked to, so this is not a clean verdict. The report stays eligible for a later sweep.`;
+  }
+  return `Hunt for report ${reportId} did not run, so nothing was searched and no finding can be reported.`;
+};
+
+/**
  * Orchestrates packaging for one Investigation run. Throws
- * {@link PackageReportIdentityError} when the conversation id does not match
- * the report binding; returns typed `run_incomplete` when current-run SSE is missing.
+ * {@link PackageReportIdentityError} when the conversation id does not match the report
+ * binding; returns typed `run_incomplete` only when the run claimed a hit whose current-run
+ * SSE state cannot be read.
  */
 export const runPackageReport = async ({
   spaceId,
   reportId,
   investigationConversationId,
   runId,
+  huntStatus,
+  hasConfirmedHit,
   attachments,
   deps,
 }: {
@@ -55,6 +80,8 @@ export const runPackageReport = async ({
   reportId: string;
   investigationConversationId: string;
   runId: string;
+  huntStatus: PackageReportInput['huntStatus'];
+  hasConfirmedHit: boolean;
   attachments: VersionedAttachment[] | undefined;
   deps: RunPackageReportDeps;
 }): Promise<PackageReportOutput> => {
@@ -74,6 +101,22 @@ export const runPackageReport = async ({
   });
 
   if (!state) {
+    // The coordinator emits an SSE attachment only for a confirmed hit, so a run that
+    // cleared no hit legitimately has no current-run state to read. That is the normal
+    // outcome of a hunt and has to close the Investigation, not strand it: treat it as a
+    // dismissal. Reaching here with a confirmed hit means the state really is missing
+    // (a rerun colliding on the attachment id, or a failed attach), which stays
+    // `run_incomplete` so the Worker reports the sweep as partial.
+    if (!hasConfirmedHit) {
+      return {
+        status: 'packaged',
+        coverage: { written: [], skipped: [] },
+        proposals: [],
+        dismiss: true,
+        closureSummary: noFindingsClosureSummary(huntStatus, reportId),
+        expectedProposalCount: 0,
+      };
+    }
     return {
       status: 'run_incomplete',
       reason: `No current-run SSE attachment for runId=${runId}`,
