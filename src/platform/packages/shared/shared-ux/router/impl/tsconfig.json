@@ -13,7 +13,6 @@
     "**/*",
   ],
   "kbn_references": [
-    "@kbn/test",
   ],
   "exclude": [
     "target/**/*",

@@ -1438,7 +1438,7 @@ describe('TaskClaiming', () => {
 
       await expect(() =>
         taskClaiming.claimAvailableTasksIfCapacityIsAvailable({ claimOwnershipUntil: new Date() })
-      ).rejects.toThrowErrorMatchingInlineSnapshot(`"oh no"`);
+      ).rejects.toThrowErrorMatchingInlineSnapshot(`[Error: oh no]`);
 
       expect(apm.startTransaction).toHaveBeenCalledWith(
         TASK_MANAGER_MARK_AS_CLAIMED,
@@ -1801,7 +1801,7 @@ describe('TaskClaiming', () => {
 
       await expect(() =>
         taskClaiming.claimAvailableTasksIfCapacityIsAvailable({ claimOwnershipUntil: new Date() })
-      ).rejects.toThrowErrorMatchingInlineSnapshot(`"oh no"`);
+      ).rejects.toThrowErrorMatchingInlineSnapshot(`[Error: oh no]`);
 
       expect(apm.startTransaction).toHaveBeenCalledWith(
         TASK_MANAGER_MARK_AS_CLAIMED,

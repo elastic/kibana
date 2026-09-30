@@ -25,7 +25,6 @@ dependsOn:
   - '@kbn/profiler'
   - '@kbn/workspaces'
   - '@kbn/utility-types'
-  - '@kbn/test'
 tags:
   - shared-server
   - package

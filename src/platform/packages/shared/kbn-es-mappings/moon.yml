@@ -16,8 +16,7 @@ project:
   channel: ''
   owner: '@elastic/kibana-core'
   sourceRoot: src/platform/packages/shared/kbn-es-mappings
-dependsOn:
-  - '@kbn/test'
+dependsOn: []
 tags:
   - shared-common
   - package

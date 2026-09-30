@@ -46,7 +46,6 @@ dependsOn:
   - '@kbn/dot-text'
   - '@kbn/apm-utils'
   - '@kbn/moon'
-  - '@kbn/setup-node-env'
 tags:
   - shared-common
   - package

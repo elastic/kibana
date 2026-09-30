@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import Path from 'path';
+
 import { asyncForEachWithLimit } from '@kbn/std';
 import { addReferences, removeReferences, removeAllReferences } from '@kbn/json-ast';
 
@@ -70,7 +72,10 @@ export const referenceUsedPkgs = TsProjectRule.create('referenceUsedPkgs', {
       this.getCache(createCache);
 
     const usedTsProjects = new Set<RefableTsProject>();
-    await asyncForEachWithLimit(this.getAllFiles(), 30, async (path) => {
+    // vitest.config.js only loads the @kbn/test preset at test time (like the `preset: '@kbn/test'`
+    // string in jest configs); referencing @kbn/test from every package would create cycles.
+    const files = this.getAllFiles().filter(({ abs }) => Path.basename(abs) !== 'vitest.config.js');
+    await asyncForEachWithLimit(files, 30, async (path) => {
       const reqs = Array.from(await importLocator.read(path.abs)).flatMap(
         (req) => parseKbnImportReq(req) ?? []
       );

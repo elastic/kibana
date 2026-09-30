@@ -18,7 +18,6 @@ project:
   sourceRoot: src/platform/packages/private/kbn-repo-packages
 dependsOn:
   - '@kbn/projects-solutions-groups'
-  - '@kbn/test'
 tags:
   - shared-common
   - package

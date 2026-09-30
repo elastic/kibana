@@ -29,7 +29,6 @@ dependsOn:
   - '@kbn/saved-objects-finder-plugin'
   - '@kbn/expressions-plugin'
   - '@kbn/field-utils'
-  - '@kbn/test'
 tags:
   - shared-browser
   - package

@@ -16,7 +16,6 @@
     "@kbn/ui-callout",
     "@kbn/zod",
     "@kbn/calculate-width-from-char-count",
-    "@kbn/test"
   ],
   "exclude": [
     "target/**/*"

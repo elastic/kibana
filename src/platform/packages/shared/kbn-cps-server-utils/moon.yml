@@ -18,7 +18,6 @@ project:
   sourceRoot: src/platform/packages/shared/kbn-cps-server-utils
 dependsOn:
   - '@kbn/core-spaces-common'
-  - '@kbn/test'
 tags:
   - shared-server
   - package

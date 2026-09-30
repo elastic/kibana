@@ -89,10 +89,11 @@ const FakeStatefulEventsViewer = ({
     {'MockedStatefulEventsViewer'}
   </div>
 );
-vi.mock('../events_viewer', () => {
-  const mocked = { StatefulEventsViewer: FakeStatefulEventsViewer };
-  return { ...mocked, default: mocked };
-});
+vi.mock('../events_viewer', () => ({
+  get StatefulEventsViewer() {
+    return FakeStatefulEventsViewer;
+  },
+}));
 
 vi.mock('../../containers/use_full_screen', () => {
   const mocked = {

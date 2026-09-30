@@ -126,7 +126,7 @@ describe('taskTypeDictionary', () => {
       };
 
       expect(runsanitize).toThrowErrorMatchingInlineSnapshot(
-        `"[fail]: Additional properties are not allowed ('fail' was unexpected)"`
+        `[Error: [fail]: Additional properties are not allowed ('fail' was unexpected)]`
       );
     });
 
@@ -153,7 +153,7 @@ describe('taskTypeDictionary', () => {
       };
 
       expect(runsanitize).toThrowErrorMatchingInlineSnapshot(
-        `"Invalid timeout \\"15 days\\". Timeout must be of the form \\"{number}{cadance}\\" where number is an integer. Example: 5m."`
+        `[Error: Invalid timeout "15 days". Timeout must be of the form "{number}{cadance}" where number is an integer. Example: 5m.]`
       );
     });
 
@@ -180,7 +180,7 @@ describe('taskTypeDictionary', () => {
       };
 
       expect(runsanitize).toThrowErrorMatchingInlineSnapshot(
-        `"Invalid timeout \\"1.5h\\". Timeout must be of the form \\"{number}{cadance}\\" where number is an integer. Example: 5m."`
+        `[Error: Invalid timeout "1.5h". Timeout must be of the form "{number}{cadance}" where number is an integer. Example: 5m.]`
       );
     });
 
@@ -208,7 +208,7 @@ describe('taskTypeDictionary', () => {
       };
 
       expect(runsanitize).toThrowErrorMatchingInlineSnapshot(
-        `"Invalid priority \\"23\\". Priority must be one of Maintenance => 1,Deferrable => 40,Standard => 50,UserInteractive => 100"`
+        `[Error: Invalid priority "23". Priority must be one of Maintenance => 1,Deferrable => 40,Standard => 50,UserInteractive => 100]`
       );
     });
   });
@@ -311,7 +311,7 @@ describe('taskTypeDictionary', () => {
             createTaskRunner: vi.fn(),
           },
         });
-      }).toThrowErrorMatchingInlineSnapshot(`"Task foo is already defined!"`);
+      }).toThrowErrorMatchingInlineSnapshot(`[Error: Task foo is already defined!]`);
     });
 
     it('throws error when registering task type with invalid characters', () => {
@@ -322,7 +322,7 @@ describe('taskTypeDictionary', () => {
             createTaskRunner: vi.fn(),
           },
         });
-      }).toThrowErrorMatchingInlineSnapshot(`"Task type \\"abc,def\\" cannot contain a comma."`);
+      }).toThrowErrorMatchingInlineSnapshot(`[Error: Task type "abc,def" cannot contain a comma.]`);
     });
 
     it('throws error when registering removed task type', () => {
@@ -334,7 +334,7 @@ describe('taskTypeDictionary', () => {
           },
         });
       }).toThrowErrorMatchingInlineSnapshot(
-        `"Task sampleTaskRemovedType has been removed from registration!"`
+        `[Error: Task sampleTaskRemovedType has been removed from registration!]`
       );
     });
 
@@ -348,7 +348,7 @@ describe('taskTypeDictionary', () => {
           },
         });
       }).toThrowErrorMatchingInlineSnapshot(
-        `"maxConcurrency setting isn't allowed for task type: foo2"`
+        `[Error: maxConcurrency setting isn't allowed for task type: foo2]`
       );
     });
 
@@ -370,7 +370,7 @@ describe('taskTypeDictionary', () => {
           },
         });
       }).toThrowErrorMatchingInlineSnapshot(
-        `"Task type \\"sampleTaskSharedConcurrencyType2\\" shares concurrency limits with sampleTaskSharedConcurrencyType1 but has a different maxConcurrency."`
+        `[Error: Task type "sampleTaskSharedConcurrencyType2" shares concurrency limits with sampleTaskSharedConcurrencyType1 but has a different maxConcurrency.]`
       );
     });
 
@@ -393,7 +393,7 @@ describe('taskTypeDictionary', () => {
           },
         });
       }).toThrowErrorMatchingInlineSnapshot(
-        `"Task type \\"sampleTaskSharedConcurrencyType2\\" shares concurrency limits with sampleTaskSharedConcurrencyType1 but has a different cost."`
+        `[Error: Task type "sampleTaskSharedConcurrencyType2" shares concurrency limits with sampleTaskSharedConcurrencyType1 but has a different cost.]`
       );
     });
   });

@@ -17,6 +17,5 @@
   ],
   "kbn_references": [
     "@kbn/projects-solutions-groups",
-    "@kbn/test",
   ]
 }

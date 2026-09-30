@@ -195,7 +195,7 @@ describe('api_key_utils', () => {
       await expect(
         createApiKey([mockTask], request, coreStart.security)
       ).rejects.toThrowErrorMatchingInlineSnapshot(
-        `"Cannot use a user-provided Cloud (UIAM) API key to schedule tasks in this environment; an Elasticsearch API key is required."`
+        `[Error: Cannot use a user-provided Cloud (UIAM) API key to schedule tasks in this environment; an Elasticsearch API key is required.]`
       );
     });
 

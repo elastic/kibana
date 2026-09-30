@@ -27,7 +27,7 @@ describe('MetricCounterService', () => {
     expect(() => {
       new MetricCounterService([]);
     }).toThrowErrorMatchingInlineSnapshot(
-      `"Metrics counter service must be initialized with at least one key"`
+      `[Error: Metrics counter service must be initialized with at least one key]`
     );
   });
 

@@ -22,7 +22,6 @@ dependsOn:
   - '@kbn/safer-lodash-set'
   - '@kbn/esql-types'
   - '@kbn/es-query-constants'
-  - '@kbn/test'
 tags:
   - shared-common
   - package

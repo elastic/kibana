@@ -11,7 +11,7 @@ describe('SimpleHistogram', () => {
   test('should throw error when bucketSize is greater than range', () => {
     expect(() => {
       new SimpleHistogram(10, 100);
-    }).toThrowErrorMatchingInlineSnapshot(`"bucket size cannot be greater than value range"`);
+    }).toThrowErrorMatchingInlineSnapshot(`[Error: bucket size cannot be greater than value range]`);
   });
 
   test('should correctly initialize when bucketSize evenly divides range', () => {

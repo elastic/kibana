@@ -25,7 +25,8 @@
  * Usage: node src/platform/packages/shared/kbn-test/src/vitest/codemod/generate_vitest_configs.js
  */
 
-require('@kbn/setup-node-env');
+// get_jest_configs is TypeScript
+require('@kbn/swc-register').install();
 
 const Fs = require('fs');
 const Path = require('path');

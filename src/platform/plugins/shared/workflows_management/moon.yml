@@ -143,7 +143,6 @@ dependsOn:
   - '@kbn/es'
   - '@kbn/test-es-server'
   - '@kbn/core-security-common'
-  - '@kbn/test'
 tags:
   - plugin
   - prod

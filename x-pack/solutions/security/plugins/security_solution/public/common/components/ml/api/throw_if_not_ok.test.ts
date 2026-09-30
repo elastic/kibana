@@ -7,7 +7,6 @@
 
 import fetchMock from 'fetch-mock';
 
-import { ToasterError } from '../../toasters';
 import type { SetupMlResponse } from '../../ml_popover/types';
 import { isMlStartJobError } from './errors';
 import {
@@ -93,7 +92,7 @@ describe('throw_if_not_ok', () => {
         },
       };
       expect(() => throwIfErrorAttached(json, ['some-id'])).toThrow(
-        new ToasterError(['some message'])
+        expect.objectContaining({ message: 'some message' })
       );
     });
 

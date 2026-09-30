@@ -42,7 +42,6 @@ dependsOn:
   - '@kbn/react-kibana-mount'
   - '@kbn/core-http-browser'
   - '@kbn/ui-callout'
-  - '@kbn/test'
 tags:
   - shared-browser
   - package

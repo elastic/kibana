@@ -22,7 +22,6 @@ dependsOn:
   - '@kbn/dev-cli-errors'
   - '@kbn/scout'
   - '@kbn/workspaces'
-  - '@kbn/test'
 tags:
   - test-helper
   - package

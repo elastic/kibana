@@ -133,7 +133,7 @@ describe('TaskValidator', () => {
       expect(() =>
         taskValidator.getValidatedTaskInstanceFromReading(task)
       ).toThrowErrorMatchingInlineSnapshot(
-        `"[foo]: expected value of type [string] but got [boolean]"`
+        `[Error: [foo]: expected value of type [string] but got [boolean]]`
       );
     });
 
@@ -279,7 +279,7 @@ describe('TaskValidator', () => {
       expect(() =>
         taskValidator.getValidatedTaskInstanceFromReading(task)
       ).toThrowErrorMatchingInlineSnapshot(
-        `"[TaskValidator] state schema for foo missing version: 2"`
+        `[Error: [TaskValidator] state schema for foo missing version: 2]`
       );
     });
   });
@@ -435,7 +435,7 @@ describe('TaskValidator', () => {
       expect(() =>
         taskValidator.getValidatedTaskInstanceForUpdating(task)
       ).toThrowErrorMatchingInlineSnapshot(
-        `"[bar]: Additional properties are not allowed ('bar' was unexpected)"`
+        `[Error: [bar]: Additional properties are not allowed ('bar' was unexpected)]`
       );
     });
   });
@@ -554,11 +554,11 @@ describe('TaskValidator', () => {
         state: { foo: 'foo' },
       });
       expect(() => taskValidator.validateRrule(task)).toThrowErrorMatchingInlineSnapshot(`
-        "[TaskValidator] Invalid rrule \\"[object Object]\\". Value does not match the schema: types that failed validation:
+        [Error: [TaskValidator] Invalid rrule "[object Object]". Value does not match the schema: types that failed validation:
         - [0.freq]: expected value to equal [1]
         - [1.freq]: expected value to equal [2]
         - [2.freq]: expected value to equal [3]
-        - [3.freq]: expected value to equal [4]."
+        - [3.freq]: expected value to equal [4].]
       `);
     });
 
@@ -580,11 +580,11 @@ describe('TaskValidator', () => {
         state: { foo: 'foo' },
       });
       expect(() => taskValidator.validateRrule(task)).toThrowErrorMatchingInlineSnapshot(`
-        "[TaskValidator] Invalid rrule \\"[object Object]\\". Value does not match the schema: types that failed validation:
+        [Error: [TaskValidator] Invalid rrule "[object Object]". Value does not match the schema: types that failed validation:
         - [0.byweekday.0]: expected value of type [string] but got [number]
         - [1.freq]: expected value to equal [2]
         - [2.freq]: expected value to equal [3]
-        - [3.freq]: expected value to equal [4]."
+        - [3.freq]: expected value to equal [4].]
       `);
     });
   });

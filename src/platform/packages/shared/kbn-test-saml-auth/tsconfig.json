@@ -12,6 +12,5 @@
     "@kbn/mock-idp-utils",
     "@kbn/tooling-log",
     "@kbn/repo-info",
-    "@kbn/test"
   ]
 }

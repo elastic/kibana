@@ -58,7 +58,12 @@ describe('useAppToasts', () => {
 
       result.current.addError(error, { title: 'title' });
 
-      expect(addErrorMock).toHaveBeenCalledWith(error, { title: 'title' });
+      expect(addErrorMock).toHaveBeenCalledWith(
+        expect.objectContaining({ message: error.message }),
+        {
+          title: 'title',
+        }
+      );
     });
 
     it('converts an unknown error to an Error', () => {
@@ -68,9 +73,12 @@ describe('useAppToasts', () => {
 
       result.current.addError(unknownError, { title: 'title' });
 
-      expect(addErrorMock).toHaveBeenCalledWith(Error(`${undefined}`), {
-        title: 'title',
-      });
+      expect(addErrorMock).toHaveBeenCalledWith(
+        expect.objectContaining({ message: `${undefined}` }),
+        {
+          title: 'title',
+        }
+      );
     });
 
     it("uses a AppError's body.message as the toastMessage", async () => {
@@ -83,9 +91,12 @@ describe('useAppToasts', () => {
 
       result.current.addError(kibanaApiError, { title: 'title' });
 
-      expect(addErrorMock).toHaveBeenCalledWith(Error('Detailed Message (404)'), {
-        title: 'title',
-      });
+      expect(addErrorMock).toHaveBeenCalledWith(
+        expect.objectContaining({ message: 'Detailed Message (404)' }),
+        {
+          title: 'title',
+        }
+      );
     });
 
     it("parses AppError's body in the stack trace", async () => {
@@ -117,7 +128,7 @@ describe('useAppToasts', () => {
       const { result } = renderHook(() => useAppToasts());
 
       result.current.addError(error, { title: 'title' });
-      const expected = Error('some message (400)');
+      const expected = expect.objectContaining({ message: 'some message (400)' });
       expect(addErrorMock).toHaveBeenCalledWith(expected, { title: 'title' });
     });
 
@@ -147,7 +158,7 @@ describe('useAppToasts', () => {
     it('works normally with a regular error', async () => {
       const error = new Error('regular error');
       const result = errorToErrorStackAdapter(error);
-      expect(result).toEqual(error);
+      expect(result).toEqual(expect.objectContaining({ message: error.message }));
     });
 
     it('has a stack on the error with name, message, and a stack call', async () => {
@@ -162,7 +173,7 @@ describe('useAppToasts', () => {
     it('converts an unknown error to an Error', () => {
       const unknownError = undefined;
       const result = errorToErrorStackAdapter(unknownError);
-      expect(result).toEqual(Error('undefined'));
+      expect(result).toEqual(expect.objectContaining({ message: 'undefined' }));
     });
 
     it("uses a AppError's body.message", async () => {
@@ -171,7 +182,7 @@ describe('useAppToasts', () => {
         body: { status_code: 404, message: 'Detailed Message' },
       };
       const result = errorToErrorStackAdapter(kibanaApiError);
-      expect(result).toEqual(Error('Detailed Message (404)'));
+      expect(result).toEqual(expect.objectContaining({ message: 'Detailed Message (404)' }));
     });
 
     it("parses AppError's body in the stack trace", async () => {
@@ -195,7 +206,7 @@ describe('useAppToasts', () => {
         },
       } as unknown as IEsError;
       const result = errorToErrorStackAdapter(error);
-      expect(result).toEqual(Error('some message (400)'));
+      expect(result).toEqual(expect.objectContaining({ message: 'some message (400)' }));
     });
 
     it('parses a bsearch correctly in the stack and name', async () => {
@@ -225,7 +236,7 @@ describe('useAppToasts', () => {
         message: 'a message',
       };
       const result = esErrorToErrorStack(error);
-      expect(result).toEqual(Error('a message (200)'));
+      expect(result).toEqual(expect.objectContaining({ message: 'a message (200)' }));
     });
 
     it('creates a stack trace of a IEsError that is not an EsError', async () => {
@@ -245,7 +256,7 @@ describe('useAppToasts', () => {
         message: 'message we do not want',
       };
       const result = esErrorToErrorStack(error);
-      expect(result).toEqual(Error('message we want (200)'));
+      expect(result).toEqual(expect.objectContaining({ message: 'message we want (200)' }));
     });
 
     it('works with an EsError, by using the inner error and not outer error if available', async () => {
@@ -259,7 +270,7 @@ describe('useAppToasts', () => {
         message: 'main message we do not want',
       };
       const result = esErrorToErrorStack(error);
-      expect(result).toEqual(Error('message we want (200)'));
+      expect(result).toEqual(expect.objectContaining({ message: 'message we want (200)' }));
     });
 
     it('creates a stack trace of a EsError and not the outer object', async () => {
@@ -292,7 +303,7 @@ describe('useAppToasts', () => {
         },
       };
       const result = appErrorToErrorStack(error);
-      expect(result).toEqual(Error('a message (200)'));
+      expect(result).toEqual(expect.objectContaining({ message: 'a message (200)' }));
     });
 
     it('creates a stack trace of a KibanaError', async () => {
@@ -326,7 +337,7 @@ describe('useAppToasts', () => {
         },
       };
       const result = appErrorToErrorStack(error);
-      expect(result).toEqual(Error('a message (200)'));
+      expect(result).toEqual(expect.objectContaining({ message: 'a message (200)' }));
     });
 
     it('creates a stack trace of a SecurityAppError', async () => {
@@ -358,7 +369,7 @@ describe('useAppToasts', () => {
         name: 'some name',
       };
       const result = errorToErrorStack(error);
-      expect(result).toEqual(Error('message'));
+      expect(result).toEqual(expect.objectContaining({ message: 'message' }));
     });
 
     it('creates a stack trace of an Error', async () => {
@@ -379,19 +390,19 @@ describe('useAppToasts', () => {
     it('works with a string', async () => {
       const error = 'error';
       const result = unknownToErrorStack(error);
-      expect(result).toEqual(Error('error'));
+      expect(result).toEqual(expect.objectContaining({ message: 'error' }));
     });
 
     it('works with an object that has fields by using a stringification of it', async () => {
       const error = { a: 1, b: 1 };
       const result = unknownToErrorStack(error);
-      expect(result).toEqual(Error(JSON.stringify(error, null, 2)));
+      expect(result).toEqual(expect.objectContaining({ message: JSON.stringify(error, null, 2) }));
     });
 
     it('works with an an array that has fields by using a stringification of it', async () => {
       const error = [{ a: 1, b: 1 }];
       const result = unknownToErrorStack(error);
-      expect(result).toEqual(Error(JSON.stringify(error, null, 2)));
+      expect(result).toEqual(expect.objectContaining({ message: JSON.stringify(error, null, 2) }));
     });
 
     it('does create a stack error from a plain string of that string', async () => {

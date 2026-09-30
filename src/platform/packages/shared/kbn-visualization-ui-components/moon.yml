@@ -36,7 +36,6 @@ dependsOn:
   - '@kbn/shared-ux-button-toolbar'
   - '@kbn/kql'
   - '@kbn/chart-icons'
-  - '@kbn/test'
 tags:
   - shared-browser
   - package

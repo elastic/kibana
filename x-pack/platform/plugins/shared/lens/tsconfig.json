@@ -160,7 +160,6 @@
     "@kbn/app-header",
     "@kbn/managed-content-badge",
     "@kbn/core-http-common",
-    "@kbn/test"
   ],
   "exclude": ["target/**/*"]
 }

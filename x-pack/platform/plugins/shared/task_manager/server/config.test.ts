@@ -71,7 +71,7 @@ describe('config validation', () => {
     expect(() => {
       configSchema.validate(config);
     }).toThrowErrorMatchingInlineSnapshot(
-      `"The specified monitored_stats_required_freshness (100) is invalid, as it is below the poll_interval (500)"`
+      `[Error: The specified monitored_stats_required_freshness (100) is invalid, as it is below the poll_interval (500)]`
     );
   });
 
@@ -213,7 +213,7 @@ describe('config validation', () => {
     expect(() => {
       configSchema.validate(config);
     }).toThrowErrorMatchingInlineSnapshot(
-      `"[monitored_task_execution_thresholds.default]: warn_threshold (80) must be less than, or equal to, error_threshold (70)"`
+      `[Error: [monitored_task_execution_thresholds.default]: warn_threshold (80) must be less than, or equal to, error_threshold (70)]`
     );
   });
 
@@ -245,7 +245,7 @@ describe('config validation', () => {
     expect(() => {
       configSchema.validate(config);
     }).toThrowErrorMatchingInlineSnapshot(
-      `"[monitored_task_execution_thresholds.custom.alerting:always-fires]: warn_threshold (90) must be less than, or equal to, error_threshold (80)"`
+      `[Error: [monitored_task_execution_thresholds.custom.alerting:always-fires]: warn_threshold (90) must be less than, or equal to, error_threshold (80)]`
     );
   });
 
@@ -288,7 +288,7 @@ describe('config validation', () => {
     expect(() => {
       configSchema.validate(config);
     }).toThrowErrorMatchingInlineSnapshot(
-      `"[discovery.active_nodes_lookback]: active node lookback duration must be a valid duration string"`
+      `[Error: [discovery.active_nodes_lookback]: active node lookback duration must be a valid duration string]`
     );
   });
 
@@ -301,7 +301,7 @@ describe('config validation', () => {
     expect(() => {
       configSchema.validate(config);
     }).toThrowErrorMatchingInlineSnapshot(
-      `"[discovery.active_nodes_lookback]: active node lookback duration cannot exceed five minutes"`
+      `[Error: [discovery.active_nodes_lookback]: active node lookback duration cannot exceed five minutes]`
     );
   });
 

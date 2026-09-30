@@ -508,7 +508,7 @@ describe('getApiKeyIdsToInvalidate', () => {
           },
         ],
       })
-    ).rejects.toThrowErrorMatchingInlineSnapshot(`"failfail"`);
+    ).rejects.toThrowErrorMatchingInlineSnapshot(`[Error: failfail]`);
   });
 
   test('should throw error if malformed savedObjectsClient.find response', async () => {
@@ -592,6 +592,6 @@ describe('getApiKeyIdsToInvalidate', () => {
           },
         ],
       })
-    ).rejects.toThrowErrorMatchingInlineSnapshot(`"failfail"`);
+    ).rejects.toThrowErrorMatchingInlineSnapshot(`[Error: failfail]`);
   });
 });

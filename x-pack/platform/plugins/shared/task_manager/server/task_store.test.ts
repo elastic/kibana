@@ -569,7 +569,7 @@ describe('TaskStore', () => {
 
       const firstErrorPromise = store.errors$.pipe(first()).toPromise();
       savedObjectsClient.create.mockRejectedValue(new Error('Failure'));
-      await expect(store.schedule(task)).rejects.toThrowErrorMatchingInlineSnapshot(`"Failure"`);
+      await expect(store.schedule(task)).rejects.toThrowErrorMatchingInlineSnapshot(`[Error: Failure]`);
       expect(await firstErrorPromise).toMatchInlineSnapshot(`[Error: Failure]`);
     });
 
@@ -685,7 +685,7 @@ describe('TaskStore', () => {
     test('pushes error from call cluster to errors$', async () => {
       const firstErrorPromise = store.errors$.pipe(first()).toPromise();
       esClient.search.mockRejectedValue(new Error('Failure'));
-      await expect(store.fetch()).rejects.toThrowErrorMatchingInlineSnapshot(`"Failure"`);
+      await expect(store.fetch()).rejects.toThrowErrorMatchingInlineSnapshot(`[Error: Failure]`);
       expect(await firstErrorPromise).toMatchInlineSnapshot(`[Error: Failure]`);
     });
 
@@ -1339,7 +1339,7 @@ describe('TaskStore', () => {
     test('throws error when esClient.search throws error', async () => {
       esClient.search.mockRejectedValue(new Error('Failure'));
       await expect(store.aggregate({ aggs: {} })).rejects.toThrowErrorMatchingInlineSnapshot(
-        `"Failure"`
+        `[Error: Failure]`
       );
     });
   });
@@ -1499,7 +1499,7 @@ describe('TaskStore', () => {
       savedObjectsClient.update.mockRejectedValue(new Error('Failure'));
       await expect(
         store.update(task, { validate: true })
-      ).rejects.toThrowErrorMatchingInlineSnapshot(`"Failure"`);
+      ).rejects.toThrowErrorMatchingInlineSnapshot(`[Error: Failure]`);
       expect(await firstErrorPromise).toMatchInlineSnapshot(`[Error: Failure]`);
     });
 
@@ -1681,7 +1681,7 @@ describe('TaskStore', () => {
       savedObjectsClient.bulkUpdate.mockRejectedValue(new Error('Failure'));
       await expect(
         store.bulkUpdate([bulkUpdateTask], { validate: true })
-      ).rejects.toThrowErrorMatchingInlineSnapshot(`"Failure"`);
+      ).rejects.toThrowErrorMatchingInlineSnapshot(`[Error: Failure]`);
       expect(await firstErrorPromise).toMatchInlineSnapshot(`[Error: Failure]`);
     });
 
@@ -2438,7 +2438,7 @@ describe('TaskStore', () => {
           }
         )
       ).rejects.toThrowErrorMatchingInlineSnapshot(
-        `"Request is not defined but some of the tasks have API key or user scope. Cannot get the encrypted saved objects repository to bulk update tasks."`
+        `[Error: Request is not defined but some of the tasks have API key or user scope. Cannot get the encrypted saved objects repository to bulk update tasks.]`
       );
     });
 
@@ -2468,7 +2468,7 @@ describe('TaskStore', () => {
           options: {},
         })
       ).rejects.toThrowErrorMatchingInlineSnapshot(
-        `"Request is not defined but some of the tasks have API key or user scope. Cannot get the encrypted saved objects repository to bulk update tasks."`
+        `[Error: Request is not defined but some of the tasks have API key or user scope. Cannot get the encrypted saved objects repository to bulk update tasks.]`
       );
     });
 
@@ -2911,7 +2911,7 @@ describe('TaskStore', () => {
       const firstErrorPromise = store.errors$.pipe(first()).toPromise();
       esClient.bulk.mockRejectedValue(new Error('Failure'));
       await expect(store.bulkPartialUpdate([task])).rejects.toThrowErrorMatchingInlineSnapshot(
-        `"Failure"`
+        `[Error: Failure]`
       );
       expect(await firstErrorPromise).toMatchInlineSnapshot(`[Error: Failure]`);
     });
@@ -3269,7 +3269,7 @@ describe('TaskStore', () => {
       const firstErrorPromise = store.errors$.pipe(first()).toPromise();
       savedObjectsClient.delete.mockRejectedValue(new Error('Failure'));
       await expect(store.remove(randomId())).rejects.toThrowErrorMatchingInlineSnapshot(
-        `"Failure"`
+        `[Error: Failure]`
       );
       expect(await firstErrorPromise).toMatchInlineSnapshot(`[Error: Failure]`);
     });
@@ -3408,7 +3408,7 @@ describe('TaskStore', () => {
       const firstErrorPromise = store.errors$.pipe(first()).toPromise();
       savedObjectsClient.bulkDelete.mockRejectedValue(new Error('Failure'));
       await expect(store.bulkRemove(tasksIdsToDelete)).rejects.toThrowErrorMatchingInlineSnapshot(
-        `"Failure"`
+        `[Error: Failure]`
       );
       expect(await firstErrorPromise).toMatchInlineSnapshot(`[Error: Failure]`);
     });
@@ -3564,7 +3564,7 @@ describe('TaskStore', () => {
     test('pushes error from saved objects client to errors$', async () => {
       const firstErrorPromise = store.errors$.pipe(first()).toPromise();
       savedObjectsClient.get.mockRejectedValue(new Error('Failure'));
-      await expect(store.get(randomId())).rejects.toThrowErrorMatchingInlineSnapshot(`"Failure"`);
+      await expect(store.get(randomId())).rejects.toThrowErrorMatchingInlineSnapshot(`[Error: Failure]`);
       expect(await firstErrorPromise).toMatchInlineSnapshot(`[Error: Failure]`);
     });
   });
@@ -3690,7 +3690,7 @@ describe('TaskStore', () => {
       const firstErrorPromise = store.errors$.pipe(first()).toPromise();
       savedObjectsClient.bulkGet.mockRejectedValue(new Error('Failure'));
       await expect(store.bulkGet([randomId()])).rejects.toThrowErrorMatchingInlineSnapshot(
-        `"Failure"`
+        `[Error: Failure]`
       );
       expect(await firstErrorPromise).toMatchInlineSnapshot(`[Error: Failure]`);
     });
@@ -4586,7 +4586,7 @@ describe('TaskStore', () => {
       const firstErrorPromise = store.errors$.pipe(first()).toPromise();
       savedObjectsClient.bulkCreate.mockRejectedValue(new Error('Failure'));
       await expect(store.bulkSchedule([task])).rejects.toThrowErrorMatchingInlineSnapshot(
-        `"Failure"`
+        `[Error: Failure]`
       );
       expect(await firstErrorPromise).toMatchInlineSnapshot(`[Error: Failure]`);
     });

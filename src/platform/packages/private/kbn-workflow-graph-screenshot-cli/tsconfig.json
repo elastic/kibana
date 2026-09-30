@@ -20,7 +20,6 @@
     "@kbn/dev-cli-errors",
     "@kbn/tooling-log",
     "@kbn/node-libs-browser-webpack-plugin",
-    "@kbn/test",
   ],
   "exclude": [
     "target/**/*"

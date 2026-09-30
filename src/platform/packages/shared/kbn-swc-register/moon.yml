@@ -20,7 +20,6 @@ dependsOn:
   - '@kbn/repo-info'
   - '@kbn/peggy'
   - '@kbn/swc-config'
-  - '@kbn/test'
 tags:
   - shared-common
   - package

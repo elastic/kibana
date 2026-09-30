@@ -104,11 +104,11 @@ const SessionsViewerEventsViewer: React.FC<Props> = ({
   );
 };
 
-vi.mock('../events_viewer', () => {
-  return {
-    StatefulEventsViewer: SessionsViewerEventsViewer,
-  };
-});
+vi.mock('../events_viewer', () => ({
+  get StatefulEventsViewer() {
+    return SessionsViewerEventsViewer;
+  },
+}));
 
 mockGetDefaultControlColumn.mockReturnValue([
   {

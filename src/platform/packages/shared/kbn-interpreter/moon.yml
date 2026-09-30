@@ -18,7 +18,6 @@ project:
   sourceRoot: src/platform/packages/shared/kbn-interpreter
 dependsOn:
   - '@kbn/safer-lodash-set'
-  - '@kbn/test'
 tags:
   - shared-common
   - package

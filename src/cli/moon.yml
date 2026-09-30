@@ -29,7 +29,6 @@ dependsOn:
   - '@kbn/config'
   - '@kbn/dev-utils'
   - '@kbn/projects-solutions-groups'
-  - '@kbn/test'
 tags:
   - tooling
   - package

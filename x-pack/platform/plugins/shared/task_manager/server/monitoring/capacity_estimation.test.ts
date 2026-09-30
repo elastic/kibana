@@ -853,7 +853,7 @@ describe('estimateCapacity', () => {
           2
         ).value.observed
     ).toThrowErrorMatchingInlineSnapshot(
-      `"Task manager had an issue calculating capacity estimation. averageLoadPercentage: undefined"`
+      `[Error: Task manager had an issue calculating capacity estimation. averageLoadPercentage: undefined]`
     );
   });
 });

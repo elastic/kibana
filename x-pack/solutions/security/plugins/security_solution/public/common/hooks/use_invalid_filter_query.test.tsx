@@ -70,9 +70,12 @@ describe('useInvalidFilterQuery', () => {
     ]);
 
     expect(kibanaMock.notifications.toasts.addError).toHaveBeenCalledTimes(1);
-    expect(kibanaMock.notifications.toasts.addError).toHaveBeenCalledWith(props.kqlError, {
-      title: props.kqlError.name,
-    });
+    expect(kibanaMock.notifications.toasts.addError).toHaveBeenCalledWith(
+      expect.objectContaining({ message: props.kqlError.message }),
+      {
+        title: props.kqlError.name,
+      }
+    );
     expect(props.kqlError.stack).toBeUndefined();
   });
 
@@ -152,12 +155,18 @@ describe('useInvalidFilterQuery', () => {
       </TestProviders>
     );
     expect(kibanaMock.notifications.toasts.addError).toHaveBeenCalledTimes(2);
-    expect(kibanaMock.notifications.toasts.addError).toHaveBeenCalledWith(props.kqlError, {
-      title: props.kqlError.name,
-    });
-    expect(kibanaMock.notifications.toasts.addError).toHaveBeenCalledWith(kqlError2, {
-      title: kqlError2.name,
-    });
+    expect(kibanaMock.notifications.toasts.addError).toHaveBeenCalledWith(
+      expect.objectContaining({ message: props.kqlError.message }),
+      {
+        title: props.kqlError.name,
+      }
+    );
+    expect(kibanaMock.notifications.toasts.addError).toHaveBeenCalledWith(
+      expect.objectContaining({ message: kqlError2.message }),
+      {
+        title: kqlError2.name,
+      }
+    );
   });
 
   // BUG:
@@ -177,12 +186,18 @@ describe('useInvalidFilterQuery', () => {
     rerender({ ...props, kqlError: kqlError2 });
 
     expect(kibanaMock.notifications.toasts.addError).toHaveBeenCalledTimes(3);
-    expect(kibanaMock.notifications.toasts.addError).toHaveBeenCalledWith(props.kqlError, {
-      title: props.kqlError.name,
-    });
-    expect(kibanaMock.notifications.toasts.addError).toHaveBeenCalledWith(kqlError2, {
-      title: kqlError2.name,
-    });
+    expect(kibanaMock.notifications.toasts.addError).toHaveBeenCalledWith(
+      expect.objectContaining({ message: props.kqlError.message }),
+      {
+        title: props.kqlError.name,
+      }
+    );
+    expect(kibanaMock.notifications.toasts.addError).toHaveBeenCalledWith(
+      expect.objectContaining({ message: kqlError2.message }),
+      {
+        title: kqlError2.name,
+      }
+    );
   });
 
   // BUG:
@@ -232,9 +247,12 @@ describe('useInvalidFilterQuery', () => {
     });
 
     expect(kibanaMock.notifications.toasts.addError).toHaveBeenCalledTimes(1);
-    expect(kibanaMock.notifications.toasts.addError).toHaveBeenCalledWith(props.kqlError, {
-      title: props.kqlError.name,
-    });
+    expect(kibanaMock.notifications.toasts.addError).toHaveBeenCalledWith(
+      expect.objectContaining({ message: props.kqlError.message }),
+      {
+        title: props.kqlError.name,
+      }
+    );
   });
 
   it('does not invoke error toast, when query prop is changed', () => {

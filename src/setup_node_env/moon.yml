@@ -20,7 +20,6 @@ dependsOn:
   - '@kbn/repo-info'
   - '@kbn/swc-register'
   - '@kbn/security-hardening'
-  - '@kbn/test'
 tags:
   - shared-common
   - package
