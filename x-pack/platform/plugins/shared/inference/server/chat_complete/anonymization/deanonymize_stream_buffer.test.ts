@@ -6,6 +6,7 @@
  */
 
 import type { Anonymization } from '@kbn/inference-common';
+import { indexEntitiesByMask, replaceMasks } from './deanonymize';
 import { DeanonymizeStreamBuffer } from './deanonymize_stream_buffer';
 import { createMask } from '../../test_utils';
 
@@ -13,7 +14,7 @@ describe('DeanonymizeStreamBuffer', () => {
   it('emits plain text immediately when there is nothing token-like at the tail', () => {
     const buffer = new DeanonymizeStreamBuffer([]);
     expect(buffer.push('Hello, how can I help?')).toBe('Hello, how can I help?');
-    expect(buffer.emittedLength).toBe('Hello, how can I help?'.length);
+    expect(buffer.catchUp('Hello, how can I help?')).toEqual({ content: '', diverged: false });
   });
 
   it('holds back a mask split into small multi-character fragments and emits the restored value once complete', () => {
@@ -42,7 +43,7 @@ describe('DeanonymizeStreamBuffer', () => {
 
     expect(emitted).toBe(`Your email is ${value}.`);
     expect(emitted).not.toContain(mask);
-    expect(buffer.emittedLength).toBe(emitted.length);
+    expect(buffer.catchUp(emitted)).toEqual({ content: '', diverged: false });
   });
 
   it('resolves a mask correctly even when it streams in completely alone, one character at a time', () => {
@@ -154,7 +155,7 @@ describe('DeanonymizeStreamBuffer', () => {
     // match, which must be held in full — but never more than that.
     const delta = buffer.push(mask.slice(0, -1));
     expect(delta).toBe('');
-    expect(buffer.emittedLength).toBe(0);
+    expect(buffer.catchUp(value)).toEqual({ content: value, diverged: false });
   });
 
   it('holds only the longest tail that is a real mask prefix when an earlier character also matches a mask start', () => {
@@ -175,7 +176,7 @@ describe('DeanonymizeStreamBuffer', () => {
     expect(firstDelta + secondDelta).toBe(`E${value}`);
   });
 
-  it('emits text without any mask-start character untouched, keeps emittedLength accurate, and still restores masks in later chunks', () => {
+  it('emits text without any mask-start character untouched, tracks what was emitted, and still restores masks in later chunks', () => {
     const value = 'jorge@gmail.com';
     const mask = createMask('EMAIL', value);
     const anonymizations: Anonymization[] = [
@@ -185,11 +186,11 @@ describe('DeanonymizeStreamBuffer', () => {
 
     const plain = '123 - ok, done. ';
     expect(buffer.push(plain)).toBe(plain);
-    expect(buffer.emittedLength).toBe(plain.length);
+    expect(buffer.catchUp(plain)).toEqual({ content: '', diverged: false });
 
     const restored = buffer.push(`${mask}!`);
     expect(restored).toBe(`${value}!`);
-    expect(buffer.emittedLength).toBe(plain.length + restored.length);
+    expect(buffer.catchUp(`${plain}${value}!`)).toEqual({ content: '', diverged: false });
   });
 
   it('does not duplicate a replacement when several anonymization entries share the same mask', () => {
@@ -205,9 +206,120 @@ describe('DeanonymizeStreamBuffer', () => {
     expect(buffer.push(`Contact ${mask} today.`)).toBe(`Contact ${value} today.`);
   });
 
-  it('returns an empty delta and does not advance emittedLength for empty input', () => {
+  it('returns an empty delta and emits nothing for empty input', () => {
     const buffer = new DeanonymizeStreamBuffer([]);
     expect(buffer.push('')).toBe('');
-    expect(buffer.emittedLength).toBe(0);
+    expect(buffer.catchUp('')).toEqual({ content: '', diverged: false });
+  });
+
+  describe('catchUp', () => {
+    it('returns the held tail that was never released', () => {
+      const value = 'jorge@gmail.com';
+      const mask = createMask('EMAIL', value);
+      const buffer = new DeanonymizeStreamBuffer([
+        { entity: { class_name: 'EMAIL', value, mask }, rule: { type: 'RegExp' } },
+      ]);
+
+      const emitted = buffer.push('Hi, ends with E');
+
+      expect(emitted).toBe('Hi, ends with ');
+      expect(buffer.catchUp('Hi, ends with E')).toEqual({ content: 'E', diverged: false });
+    });
+
+    it('reports divergence and returns the text after the common prefix when the streamed text is not a prefix of the final text', () => {
+      const buffer = new DeanonymizeStreamBuffer([]);
+      buffer.push('Hello there');
+
+      expect(buffer.catchUp('Hello world, how are you')).toEqual({
+        content: 'world, how are you',
+        diverged: true,
+      });
+    });
+  });
+
+  describe('equivalence with full-text deanonymization', () => {
+    const emailValue = 'jorge@gmail.com';
+    const personValue = 'Bob';
+    const cityValue = 'Paris';
+    const emailMask = createMask('EMAIL', emailValue);
+    const personMask = createMask('PER', personValue);
+    const cityMask = createMask('LOC', cityValue);
+    const anonymizations: Anonymization[] = [
+      {
+        entity: { class_name: 'EMAIL', value: emailValue, mask: emailMask },
+        rule: { type: 'RegExp' },
+      },
+      {
+        entity: { class_name: 'PER', value: personValue, mask: personMask },
+        rule: { type: 'NER' },
+      },
+      { entity: { class_name: 'LOC', value: cityValue, mask: cityMask }, rule: { type: 'NER' } },
+    ];
+    const entitiesByMask = indexEntitiesByMask(anonymizations);
+
+    const texts = [
+      'No masks here, just text.',
+      `Write to ${emailMask}.`,
+      `${personMask} lives in ${cityMask} and writes from ${emailMask}`,
+      `${personMask}${cityMask}${emailMask}`,
+      `EMAIL PER LOC are not masks, but ${emailMask} is, and so is ${personMask}. E P L`,
+      `Ends on a partial lookalike: ${emailMask.slice(0, 7)}`,
+    ];
+
+    const streamThenCatchUp = (chunks: string[], fullText: string): string => {
+      const buffer = new DeanonymizeStreamBuffer(anonymizations);
+      const streamed = chunks.map((chunk) => buffer.push(chunk)).join('');
+      const { content, diverged } = buffer.catchUp(fullText);
+      expect(diverged).toBe(false);
+      return streamed + content;
+    };
+
+    for (const text of texts) {
+      it(`matches full-text output for every two-way split of ${JSON.stringify(text)}`, () => {
+        const { output: expected } = replaceMasks(text, entitiesByMask);
+
+        for (let split = 0; split <= text.length; split += 1) {
+          expect(streamThenCatchUp([text.slice(0, split), text.slice(split)], expected)).toBe(
+            expected
+          );
+        }
+      });
+    }
+
+    for (const text of texts) {
+      it(`matches full-text output when streamed one character at a time: ${JSON.stringify(
+        text
+      )}`, () => {
+        const { output: expected } = replaceMasks(text, entitiesByMask);
+
+        expect(streamThenCatchUp([...text], expected)).toBe(expected);
+      });
+    }
+
+    for (const text of texts) {
+      it(`matches full-text output for pseudo-random multi-way splits of ${JSON.stringify(
+        text
+      )}`, () => {
+        const { output: expected } = replaceMasks(text, entitiesByMask);
+
+        // Deterministic LCG so any failure is reproducible.
+        let seed = 42;
+        const nextInt = (max: number) => {
+          seed = (seed * 1664525 + 1013904223) % 4294967296;
+          return seed % max;
+        };
+
+        for (let run = 0; run < 50; run += 1) {
+          const chunks: string[] = [];
+          let cursor = 0;
+          while (cursor < text.length) {
+            const size = 1 + nextInt(12);
+            chunks.push(text.slice(cursor, cursor + size));
+            cursor += size;
+          }
+          expect(streamThenCatchUp(chunks, expected)).toBe(expected);
+        }
+      });
+    }
   });
 });

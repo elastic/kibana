@@ -28,6 +28,7 @@ import type { AIMessageChunk } from '@langchain/core/messages';
 import { deanonymizeMessage } from './deanonymize_message';
 import { chunkEvent, messageEvent, tokensEvent, createMask } from '../../test_utils';
 import { anonymizeMessages } from './anonymize_messages';
+import { mergeChunks } from '../utils/merge_chunks';
 import { RegexWorkerService } from './regex_worker_service';
 import type { AnonymizationWorkerConfig } from '../../config';
 import { loggerMock, type MockedLogger } from '@kbn/logging-mocks';
@@ -528,5 +529,140 @@ describe('deanonymizeMessage', () => {
         deanonymization.entity.value
       );
     }
+  });
+  describe('tool calls and refusals on streamed chunks', () => {
+    const value = 'jorge@gmail.com';
+    const mask = createMask('EMAIL', value);
+    const anonymizations: Anonymization[] = [
+      { entity: { class_name: 'EMAIL', value, mask }, rule: { type: 'RegExp' } },
+    ];
+    const anonymizationOutput: AnonymizationOutput = {
+      messages: [],
+      anonymizations,
+    } as AnonymizationOutput;
+
+    it('emits each tool call once, deanonymized, so concatenating chunks yields valid tool calls', async () => {
+      const maskedArguments = JSON.stringify({ email: mask });
+      const events = [
+        chunkEvent('', [
+          {
+            index: 0,
+            toolCallId: 'call_1',
+            function: { name: 'send_email', arguments: maskedArguments.slice(0, 15) },
+          },
+        ]),
+        chunkEvent('', [
+          {
+            index: 0,
+            toolCallId: '',
+            function: { name: '', arguments: maskedArguments.slice(15) },
+          },
+        ]),
+        messageEvent('', [
+          {
+            toolCallId: 'call_1',
+            function: { name: 'send_email', arguments: { email: mask } },
+          },
+        ]),
+      ];
+
+      const result = await lastValueFrom(
+        from(events).pipe(deanonymizeMessage(anonymizationOutput), toArray())
+      );
+
+      const chunkEvents = result.filter(
+        (event): event is ChatCompletionChunkEvent =>
+          event.type === ChatCompletionEventType.ChatCompletionChunk
+      );
+
+      // No chunk may carry the model's raw (masked) tool call fragments.
+      expect(JSON.stringify(chunkEvents.flatMap((chunk) => chunk.tool_calls))).not.toContain(mask);
+
+      const merged = mergeChunks(chunkEvents);
+      expect(merged.tool_calls).toEqual([
+        {
+          toolCallId: 'call_1',
+          function: { name: 'send_email', arguments: JSON.stringify({ email: value }) },
+        },
+      ]);
+      expect(JSON.parse(merged.tool_calls[0].function.arguments)).toEqual({ email: value });
+
+      const messageOut = result[result.length - 1] as ChatCompletionMessageEvent;
+      expect(messageOut.toolCalls).toEqual([
+        { toolCallId: 'call_1', function: { name: 'send_email', arguments: { email: value } } },
+      ]);
+    });
+
+    it('does not forward refusal fragments on streamed chunks', async () => {
+      const events: ChatCompletionEvent[] = [
+        { ...chunkEvent(`Hello ${mask}`), refusal: `cannot help with ${mask}` },
+        messageEvent(`Hello ${mask}`),
+      ];
+
+      const result = await lastValueFrom(
+        from(events).pipe(deanonymizeMessage(anonymizationOutput), toArray())
+      );
+
+      const chunkEvents = result.filter(
+        (event): event is ChatCompletionChunkEvent =>
+          event.type === ChatCompletionEventType.ChatCompletionChunk
+      );
+
+      expect(chunkEvents.length).toBeGreaterThan(0);
+      for (const chunk of chunkEvents) {
+        expect(chunk.refusal).toBeUndefined();
+      }
+      expect(concatenateChunkContent(result)).toBe(`Hello ${value}`);
+    });
+  });
+
+  describe('when streamed and final content disagree', () => {
+    it('warns, and still returns the authoritative deanonymized content on the final message event', async () => {
+      const value = 'Bob';
+      const mask = createMask('PER', value);
+      const warnLogger = loggerMock.create();
+
+      const result = await lastValueFrom(
+        from([chunkEvent('Hello there'), messageEvent(`Hello ${mask}`)]).pipe(
+          deanonymizeMessage(
+            {
+              messages: [],
+              anonymizations: [
+                { entity: { class_name: 'PER', value, mask }, rule: { type: 'NER' } },
+              ],
+            } as AnonymizationOutput,
+            warnLogger
+          ),
+          toArray()
+        )
+      );
+
+      expect(warnLogger.warn).toHaveBeenCalledTimes(1);
+      const messageOut = result[result.length - 1] as ChatCompletionMessageEvent;
+      expect(messageOut.content).toBe(`Hello ${value}`);
+    });
+
+    it('does not warn when the streamed and final content agree', async () => {
+      const value = 'Bob';
+      const mask = createMask('PER', value);
+      const warnLogger = loggerMock.create();
+
+      await lastValueFrom(
+        from([chunkEvent(`Hello ${mask}`), messageEvent(`Hello ${mask}`)]).pipe(
+          deanonymizeMessage(
+            {
+              messages: [],
+              anonymizations: [
+                { entity: { class_name: 'PER', value, mask }, rule: { type: 'NER' } },
+              ],
+            } as AnonymizationOutput,
+            warnLogger
+          ),
+          toArray()
+        )
+      );
+
+      expect(warnLogger.warn).not.toHaveBeenCalled();
+    });
   });
 });

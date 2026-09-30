@@ -293,7 +293,7 @@ function createChatCompletePipeline({
                 stream,
               }).pipe(chunksIntoMessage({ toolOptions: { toolChoice, tools }, logger }));
             }
-          ).pipe(deanonymizeMessage({ ...preparedAnonymization, replacementsId }));
+          ).pipe(deanonymizeMessage({ ...preparedAnonymization, replacementsId }, logger));
         }),
         tokenUsageLogger
           ? handleTokenUsageLogging({

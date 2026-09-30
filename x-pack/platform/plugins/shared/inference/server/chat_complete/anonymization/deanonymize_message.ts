@@ -6,6 +6,7 @@
  */
 
 import type { Message, ChatCompletionEvent, AnonymizationOutput } from '@kbn/inference-common';
+import type { Logger } from '@kbn/logging';
 import { MessageRole } from '@kbn/inference-common';
 import type { ChatCompletionChunkEvent } from '@kbn/inference-common/src/chat_complete/events';
 import { ChatCompletionEventType } from '@kbn/inference-common/src/chat_complete/events';
@@ -15,11 +16,13 @@ import { deanonymize } from './deanonymize';
 import { DeanonymizeStreamBuffer } from './deanonymize_stream_buffer';
 
 export function deanonymizeMessage<T extends ChatCompletionEvent>(
-  anonymization: AnonymizationOutput
+  anonymization: AnonymizationOutput,
+  logger?: Pick<Logger, 'warn'>
 ): OperatorFunction<T, T>;
 
 export function deanonymizeMessage(
-  anonymization: AnonymizationOutput
+  anonymization: AnonymizationOutput,
+  logger?: Pick<Logger, 'warn'>
 ): OperatorFunction<ChatCompletionEvent, ChatCompletionEvent> {
   if (!anonymization.anonymizations.length) {
     if (!anonymization.replacementsId) {
@@ -69,12 +72,22 @@ export function deanonymizeMessage(
         if (event.type === ChatCompletionEventType.ChatCompletionChunk) {
           const delta = buffer.push(event.content ?? '');
 
-          if (!delta && !event.tool_calls?.length) {
+          if (!delta) {
             // Nothing safe to emit yet; the content is held pending more chunks.
             return EMPTY;
           }
 
-          return of({ ...event, content: delta, metadata } satisfies ChatCompletionChunkEvent);
+          // Only `content` is streamed. Tool calls and refusals cannot be deanonymized
+          // incrementally (arguments are JSON and a mask can sit mid-string), and consumers
+          // concatenate `tool_calls` across chunks, so forwarding the model's raw (masked)
+          // fragments would be appended to the complete, deanonymized tool calls carried by
+          // the catch-up chunk below. Drop them here and emit them once, deanonymized.
+          return of({
+            type: ChatCompletionEventType.ChatCompletionChunk,
+            content: delta,
+            tool_calls: [],
+            metadata,
+          } satisfies ChatCompletionChunkEvent);
         }
 
         if (event.type === ChatCompletionEventType.ChatCompletionMessage) {
@@ -109,10 +122,16 @@ export function deanonymizeMessage(
             deanonymizations,
           };
 
-          // Catch up on whatever hasn't been streamed as incremental chunks yet
-          // (the held tail, plus a safety net for any drift between the
-          // incremental and full-text deanonymization passes).
-          const catchUpContent = (deanonymizedContent ?? '').slice(buffer.emittedLength);
+          // Catch up on whatever hasn't been streamed as incremental chunks yet (the held
+          // tail). This assumes the streamed text is a prefix of the authoritative full-text
+          // result; if the two passes ever disagree, the final message event below is still
+          // correct, but chunk-concatenating clients would see the mismatch, so surface it.
+          const { content: catchUpContent, diverged } = buffer.catchUp(deanonymizedContent ?? '');
+          if (diverged) {
+            logger?.warn(
+              'Streamed deanonymized content diverged from the final deanonymized message; chunk consumers may see inconsistent text'
+            );
+          }
 
           // Create a new chunk with the remaining deanonymized content. Downstream
           // consumers (e.g. observability_ai_assistant's emitWithConcatenatedMessage)

@@ -19,66 +19,60 @@ import { indexEntitiesByMask, replaceMasks } from './deanonymize';
 // the match); losing alignment costs a visibly wrong, permanently un-deanonymized value.
 const MIN_HOLDBACK_LENGTH = 1;
 
-interface MaskPrefixIndex {
-  /** Every proper prefix (length >= MIN_HOLDBACK_LENGTH, strictly shorter than the mask itself) of every known mask for this call. */
-  prefixes: ReadonlySet<string>;
-  /** First character of every known mask; a held suffix or a mask occurrence can only begin at one of these. */
+interface MaskIndex {
+  /** Every known mask for this call. */
+  masks: readonly string[];
+  /** First character of every known mask; a held tail can only begin at one of these. */
   firstChars: ReadonlySet<string>;
-  /** Longest prefix in `prefixes`, i.e. the most this buffer could ever hold at once. */
-  maxLength: number;
+  /** Longest tail that could still be an incomplete mask, i.e. the longest mask minus one. */
+  maxHeldLength: number;
 }
 
 /**
- * Indexes every proper prefix of every known mask for this call, so that streamed
- * content can be checked against exactly the masks that can actually appear in this
- * response — rather than a generic "looks token-shaped" heuristic, which would also
- * match ordinary capitalized words/acronyms and cause needless streaming gaps.
+ * Indexes the exact masks known for this call, so that streamed content can be checked
+ * against the masks that can actually appear in this response — rather than a generic
+ * "looks token-shaped" heuristic, which would also match ordinary capitalized words/acronyms
+ * and cause needless streaming gaps.
  */
-function buildMaskPrefixIndex(masks: Iterable<string>): MaskPrefixIndex {
-  const prefixes = new Set<string>();
-  const firstChars = new Set<string>();
-  let maxLength = 0;
-
-  for (const mask of masks) {
-    if (mask.length === 0) {
-      continue;
-    }
-    firstChars.add(mask[0]);
-    for (let length = MIN_HOLDBACK_LENGTH; length < mask.length; length += 1) {
-      prefixes.add(mask.slice(0, length));
-      maxLength = Math.max(maxLength, length);
-    }
-  }
-
-  return { prefixes, firstChars, maxLength };
+function buildMaskIndex(maskList: Iterable<string>): MaskIndex {
+  const masks = [...maskList].filter((mask) => mask.length > 0);
+  return {
+    masks,
+    firstChars: new Set(masks.map((mask) => mask[0])),
+    maxHeldLength: masks.reduce((max, mask) => Math.max(max, mask.length - 1), 0),
+  };
 }
 
 /**
- * Length of the longest suffix of `value` that is a known proper mask prefix, or 0 if
- * none matches. Only positions holding a mask's first character are sliced/looked up,
- * so the common case (no candidate start in the tail) allocates nothing.
+ * Length of the longest suffix of `value` that is a proper prefix of a known mask (i.e. could
+ * still turn out to be part of an incomplete mask), or 0 if none matches. Only tail positions
+ * holding a mask's first character are compared, so the common case allocates nothing.
  */
 function longestHeldSuffixLength(
   value: string,
-  { prefixes, firstChars, maxLength }: MaskPrefixIndex
+  { masks, firstChars, maxHeldLength }: MaskIndex
 ): number {
-  const earliestStart = Math.max(0, value.length - maxLength);
+  const earliestStart = Math.max(0, value.length - maxHeldLength);
   for (let start = earliestStart; start <= value.length - MIN_HOLDBACK_LENGTH; start += 1) {
-    if (firstChars.has(value[start]) && prefixes.has(value.slice(start))) {
-      return value.length - start;
+    if (!firstChars.has(value[start])) {
+      continue;
+    }
+    const tail = value.slice(start);
+    if (masks.some((mask) => mask.length > tail.length && mask.startsWith(tail))) {
+      return tail.length;
     }
   }
   return 0;
 }
 
-/** Whether `value` contains any character a mask could start with. */
-function mayContainMask(value: string, firstChars: ReadonlySet<string>): boolean {
-  for (let i = 0; i < value.length; i += 1) {
-    if (firstChars.has(value[i])) {
-      return true;
-    }
+/** Length of the longest shared prefix of `a` and `b`. */
+function commonPrefixLength(a: string, b: string): number {
+  const max = Math.min(a.length, b.length);
+  let length = 0;
+  while (length < max && a[length] === b[length]) {
+    length += 1;
   }
-  return false;
+  return length;
 }
 
 /**
@@ -94,24 +88,21 @@ function mayContainMask(value: string, firstChars: ReadonlySet<string>): boolean
  * invent new ones — this only ever holds back ordinary text that happens to share a
  * leading character with a real mask (for at most one extra chunk, until the next
  * chunk confirms or refutes the match), and the held tail is naturally bounded by the
- * longest known mask, with no artificial cap needed. Use `emittedLength` once the
- * full, authoritative deanonymized content is known to compute the final catch-up
- * delta still owed to the client.
+ * longest known mask, with no artificial cap needed.
+ *
+ * Once the full, authoritative deanonymized content is known, `catchUp` returns the
+ * remainder still owed to the client. It relies on the streamed text being a prefix of
+ * that content and reports when it is not.
  */
 export class DeanonymizeStreamBuffer {
   private held = '';
-  private _emittedLength = 0;
+  private emitted = '';
   private readonly entitiesByMask: ReadonlyMap<string, Anonymization['entity']>;
-  private readonly prefixIndex: MaskPrefixIndex;
+  private readonly maskIndex: MaskIndex;
 
   constructor(anonymizations: Anonymization[]) {
     this.entitiesByMask = indexEntitiesByMask(anonymizations);
-    this.prefixIndex = buildMaskPrefixIndex(this.entitiesByMask.keys());
-  }
-
-  /** Total number of deanonymized characters emitted via `push` so far. */
-  public get emittedLength(): number {
-    return this._emittedLength;
+    this.maskIndex = buildMaskIndex(this.entitiesByMask.keys());
   }
 
   /** Feed the next raw content delta; returns the safe-to-emit deanonymized delta (possibly empty). */
@@ -122,7 +113,7 @@ export class DeanonymizeStreamBuffer {
 
     this.held += contentDelta;
 
-    const heldLength = longestHeldSuffixLength(this.held, this.prefixIndex);
+    const heldLength = longestHeldSuffixLength(this.held, this.maskIndex);
     const safeLength = this.held.length - heldLength;
 
     const safePrefix = this.held.slice(0, safeLength);
@@ -132,14 +123,23 @@ export class DeanonymizeStreamBuffer {
       return '';
     }
 
-    // No character that could start a mask: nothing to replace, skip the per-mask scan.
-    if (!mayContainMask(safePrefix, this.prefixIndex.firstChars)) {
-      this._emittedLength += safePrefix.length;
-      return safePrefix;
-    }
-
     const { output } = replaceMasks(safePrefix, this.entitiesByMask);
-    this._emittedLength += output.length;
+    this.emitted += output;
     return output;
+  }
+
+  /**
+   * Given the authoritative full deanonymized text, returns what has not been emitted yet. If
+   * the text already streamed is not a prefix of `fullText`, the two passes disagreed:
+   * `diverged` is true and `content` is the part of `fullText` after their common prefix.
+   */
+  public catchUp(fullText: string): { content: string; diverged: boolean } {
+    if (fullText.startsWith(this.emitted)) {
+      return { content: fullText.slice(this.emitted.length), diverged: false };
+    }
+    return {
+      content: fullText.slice(commonPrefixLength(fullText, this.emitted)),
+      diverged: true,
+    };
   }
 }
