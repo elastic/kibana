@@ -117,7 +117,8 @@ export function cleanupUrlState(
   delete appStateFromUrl.isApproximate;
 
   // Drop shareable doc viewer state that isn't a plain object or exceeds the size budget, guarding
-  // against unbounded URL input. Per-tab slices are validated later against each tab's schema.
+  // against unbounded URL input. The doc viewer validates the per-tab slices against each tab's
+  // schema when restoring them.
   const { docViewerState } = appStateFromUrl;
   if (
     docViewerState &&

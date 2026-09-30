@@ -81,14 +81,19 @@ describe('capShareableState', () => {
 });
 
 describe('mergeShareableStateIntoRestorable', () => {
+  const withSchema = createDocView('a', z.object({ from: z.string().max(10) }));
+  const withoutSchema = createDocView('b');
+  const docViews = [withSchema, withoutSchema];
+
   it('returns the initial state when there is nothing to restore', () => {
     const initialState = { docViewerTabsState: { a: { local: true } } };
 
-    expect(mergeShareableStateIntoRestorable(initialState, undefined)).toBe(initialState);
+    expect(mergeShareableStateIntoRestorable(docViews, initialState, undefined)).toBe(initialState);
   });
 
   it('lets restored slices take precedence over local ones per tab', () => {
     const result = mergeShareableStateIntoRestorable(
+      docViews,
       { docViewerTabsState: { a: { from: 'local' }, b: { local: true } } },
       { tabsState: { a: { from: 'url' } } }
     );
@@ -96,5 +101,31 @@ describe('mergeShareableStateIntoRestorable', () => {
     expect(result).toEqual({
       docViewerTabsState: { a: { from: 'url' }, b: { local: true } },
     });
+  });
+
+  it('restores only the fields allowed by the tab schema', () => {
+    const result = mergeShareableStateIntoRestorable(docViews, undefined, {
+      tabsState: { a: { from: 'url', injected: 'value' } },
+    });
+
+    expect(result).toEqual({ docViewerTabsState: { a: { from: 'url' } } });
+  });
+
+  it('keeps the local slice when the restored one fails validation', () => {
+    const initialState = { docViewerTabsState: { a: { from: 'local' } } };
+
+    expect(
+      mergeShareableStateIntoRestorable(docViews, initialState, { tabsState: { a: { from: 42 } } })
+    ).toBe(initialState);
+  });
+
+  it('ignores restored slices for tabs without a schema', () => {
+    const initialState = { docViewerTabsState: { b: { local: true } } };
+
+    expect(
+      mergeShareableStateIntoRestorable(docViews, initialState, {
+        tabsState: { b: { injected: true } },
+      })
+    ).toBe(initialState);
   });
 });

@@ -11,7 +11,7 @@ Two things are required:
 1. **Declare a bounded `shareableStateSchema`** on the `DocView` registration — this decides _what_ is shareable.
 2. **Report the tab's state** through the render props `initialState` / `onInitialStateChange` (`DocViewRestorableStateProps`) — this decides _how the tab reports it_.
 
-Only what the tab reports is eligible for sharing, and only the fields the schema admits reach the URL. The host (Discover) projects the state through the schema, validates and size-caps it on read, and ties it to the expanded document.
+Only what the tab reports is eligible for sharing, and only the fields the schema admits reach the URL. The doc viewer projects the state through the schema and validates it again on restore; the host (Discover) persists it, size-caps it on read, and ties it to the expanded document.
 
 ### 1. Declare the schema
 
@@ -71,12 +71,13 @@ const ExampleTab = ({
 ## The round-trip
 
 ```
-report ─▶ project through shareableStateSchema ─▶ URL (_a.docViewerState) ─▶ seed initialState
-(tab)      (host: drop non-schema fields,           (single bounded envelope,     (tab reopens with
-            drop invalid slices)                      only while a doc is open)     the state restored)
+report ─▶ project through shareableStateSchema ─▶ URL (_a.docViewerState) ─▶ validate + seed initialState
+(tab)      (doc viewer: drop non-schema fields,      (host: single bounded         (doc viewer: drop invalid
+            drop invalid slices)                      envelope, only while a        slices; tab reopens with
+                                                      doc is open)                  the state restored)
 ```
 
-On the host side (Discover is the only one implementing it for now), the reported per-tab state is projected through each tab's `shareableStateSchema`, combined with the selected tab into a single `DocViewerShareableState` envelope (`{ selectedTabId, tabsState }`), written to the `_a` URL param **only while a document is expanded**, validated and size-capped on read, and seeded back into each tab's `initialState`.
+`DocViewer` projects each tab's reported state through its `shareableStateSchema` and emits it, combined with the selected tab, as a single `DocViewerShareableState` envelope (`{ selectedTabId, tabsState }`) through `onShareableStateChange`. The host (Discover is the only one implementing it for now) writes that envelope to the `_a` URL param **only while a document is expanded**, size-caps it on read, and passes it back as `initialShareableState`. `DocViewer` then validates each restored slice against the tab's schema before seeding it into the tab's `initialState`.
 
 Guidelines:
 

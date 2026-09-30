@@ -7,11 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { ComponentProps, ComponentRef, RefAttributes } from 'react';
+import type { ComponentProps, ComponentPropsWithoutRef, ComponentRef, RefAttributes } from 'react';
 import React, {
   forwardRef,
   useCallback,
   useImperativeHandle,
+  useMemo,
   useRef,
   useState,
   useEffect,
@@ -29,7 +30,11 @@ import {
   useRestorableStateValue,
   withRestorableState,
 } from './restorable_state';
-import { capShareableState, projectShareableTabsState } from './shareable_state';
+import {
+  capShareableState,
+  mergeShareableStateIntoRestorable,
+  projectShareableTabsState,
+} from './shareable_state';
 
 export const INITIAL_TAB = 'unifiedDocViewer:initialTab';
 
@@ -169,7 +174,30 @@ const InternalDocViewer = forwardRef<InternalDocViewerApi, InternalDocViewerProp
   }
 );
 
-export const DocViewer = withRestorableState(InternalDocViewer);
+const RestorableDocViewer = withRestorableState(InternalDocViewer);
+
+export const DocViewer = forwardRef<
+  ComponentRef<typeof RestorableDocViewer>,
+  ComponentPropsWithoutRef<typeof RestorableDocViewer> & {
+    initialShareableState?: DocViewerShareableState;
+  }
+>(({ docViews, initialTabId, initialState, initialShareableState, ...props }, ref) => {
+  // Restorable state built both from the initialState and the shareable state comming from the URL.
+  const restoredInitialState = useMemo(
+    () => mergeShareableStateIntoRestorable(docViews, initialState, initialShareableState),
+    [docViews, initialState, initialShareableState]
+  );
+
+  return (
+    <RestorableDocViewer
+      ref={ref}
+      {...props}
+      docViews={docViews}
+      initialTabId={initialTabId ?? initialShareableState?.selectedTabId}
+      initialState={restoredInitialState}
+    />
+  );
+});
 
 export type DocViewerProps = ComponentProps<typeof DocViewer>;
 export type DocViewerApi = ComponentRef<typeof DocViewer>;

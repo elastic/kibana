@@ -64,13 +64,17 @@ export const capShareableState = (state: DocViewerShareableState): DocViewerShar
 
 /**
  * Seeds the restorable state with the per-tab slices restored from a shared link, so a tab reopens
- * with its nested state. Restored (URL) slices take precedence over any local slice for the same tab.
+ * with its nested state. Restored slices are validated against each tab's `shareableStateSchema`
+ * (invalid ones are dropped) and take precedence over any local slice for the same tab.
  */
 export const mergeShareableStateIntoRestorable = (
+  docViews: DocView[],
   initialState: DocViewerRestorableState | undefined,
   shareable: DocViewerShareableState | undefined
 ): DocViewerRestorableState | undefined => {
-  if (!shareable?.tabsState) {
+  const restoredTabsState = projectShareableTabsState(docViews, shareable?.tabsState);
+
+  if (!restoredTabsState) {
     return initialState;
   }
 
@@ -78,7 +82,7 @@ export const mergeShareableStateIntoRestorable = (
     ...initialState,
     docViewerTabsState: {
       ...initialState?.docViewerTabsState,
-      ...shareable.tabsState,
+      ...restoredTabsState,
     },
   };
 };

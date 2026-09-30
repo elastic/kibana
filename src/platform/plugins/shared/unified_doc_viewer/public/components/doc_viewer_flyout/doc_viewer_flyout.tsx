@@ -44,7 +44,7 @@ import { UnresolvedDocument, type RequestStateMeta } from './unresolved_document
 export interface UnifiedDocViewerFlyoutProps
   extends Pick<
     DocViewerProps,
-    'initialTabId' | 'onUpdateSelectedTabId' | 'onShareableStateChange'
+    'initialTabId' | 'onUpdateSelectedTabId' | 'initialShareableState' | 'onShareableStateChange'
   > {
   docViewerRef?: DocViewerProps['ref'];
   'data-test-subj'?: string;
@@ -132,6 +132,7 @@ export function UnifiedDocViewerFlyout({
   onFilter,
   onInitialDocViewerStateChange,
   onUpdateSelectedTabId,
+  initialShareableState,
   onShareableStateChange,
 }: UnifiedDocViewerFlyoutProps) {
   const { euiTheme } = useEuiTheme();
@@ -345,6 +346,7 @@ export function UnifiedDocViewerFlyout({
                     initialState={initialDocViewerState}
                     onInitialStateChange={onInitialDocViewerStateChange}
                     onUpdateSelectedTabId={onUpdateSelectedTabId}
+                    initialShareableState={initialShareableState}
                     onShareableStateChange={onShareableStateChange}
                     originDocType={originDocType}
                     {...docViewRenderProps}

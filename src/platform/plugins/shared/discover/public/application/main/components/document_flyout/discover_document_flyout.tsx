@@ -24,7 +24,6 @@ import type {
   DocViewerRestorableState,
   DocViewerShareableState,
 } from '@kbn/unified-doc-viewer';
-import { mergeShareableStateIntoRestorable } from '@kbn/unified-doc-viewer';
 import { getDisplayedColumns, getTextBasedColumnsMeta } from '@kbn/unified-data-table';
 import type { DataTableColumnsMeta } from '@kbn/unified-data-table';
 import {
@@ -156,12 +155,6 @@ export const DiscoverDocumentFlyout = memo(
       [dispatch, setDocViewerShareableStateAction]
     );
 
-    // Restore the per-tab shareable slices from the URL by seeding the doc viewer's initial state.
-    const initialDocViewerState = useMemo(
-      () => mergeShareableStateIntoRestorable(docViewerUiState, docViewerState),
-      [docViewerUiState, docViewerState]
-    );
-
     const columnsMeta: DataTableColumnsMeta | undefined = useMemo(
       () =>
         documentState.esqlQueryColumns
@@ -201,7 +194,7 @@ export const DiscoverDocumentFlyout = memo(
         columnsMeta={flyoutColumnsMeta}
         savedSearchId={persistedDiscoverSession?.id}
         query={query}
-        initialTabId={initialDocViewerTabId ?? docViewerState?.selectedTabId}
+        initialTabId={initialDocViewerTabId}
         onFilter={onAddFilter}
         onRemoveColumn={onRemoveColumn}
         onAddColumn={onAddColumn}
@@ -210,8 +203,9 @@ export const DiscoverDocumentFlyout = memo(
         flyoutMenuTrailingActions={flyoutMenuTrailingActions}
         docViewerRef={docViewerRef}
         onUpdateSelectedTabId={onUpdateSelectedTabId}
-        initialDocViewerState={initialDocViewerState}
+        initialDocViewerState={docViewerUiState}
         onInitialDocViewerStateChange={onInitialDocViewerStateChange}
+        initialShareableState={docViewerState}
         onShareableStateChange={onShareableStateChange}
       />
     );
