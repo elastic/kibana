@@ -2,10 +2,10 @@
 apiVersion: backstage.io/v1alpha1
 kind: Resource
 metadata:
-  name: bk-kibana-scout-audit
+  name: bk-kibana-scout-quality-audit
   description: Runs the Scout quality audit on a schedule and posts findings to Slack
   links:
-    - url: 'https://buildkite.com/elastic/kibana-scout-audit'
+    - url: 'https://buildkite.com/elastic/kibana-scout-quality-audit'
       title: Pipeline link
 spec:
   type: buildkite-pipeline
@@ -15,7 +15,7 @@ spec:
     apiVersion: buildkite.elastic.dev/v1
     kind: Pipeline
     metadata:
-      name: kibana / scout / audit
+      name: kibana / scout / quality-audit
       description: Runs the Scout quality audit on a schedule and posts findings to Slack
     spec:
       env:
@@ -42,13 +42,7 @@ spec:
       teams:
         everyone:
           access_level: BUILD_AND_READ
-        kibana-operations:
-          access_level: MANAGE_BUILD_AND_READ
         apps-dx:
-          access_level: MANAGE_BUILD_AND_READ
-        appex-qa:
-          access_level: MANAGE_BUILD_AND_READ
-        kibana-tech-leads:
           access_level: MANAGE_BUILD_AND_READ
       schedules:
         Every two weeks (main):
