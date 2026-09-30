@@ -8,15 +8,16 @@
 import type { KibanaRequest, Logger } from '@kbn/core/server';
 import type { PluginStartContract as ActionsPluginStart } from '@kbn/actions-plugin/server';
 import type { SandboxSession } from '@kbn/sandbox-plugin/server';
+import type { SandboxSecretsClient } from '../../sandbox_secrets';
 import type { SandboxCallContext } from './tool_utils';
 import { authorizeConnector } from './connector_authorization';
 import { writeConnectorManifest } from './connector_manifest';
 import { writeElasticManifest } from './elastic_manifest';
 
 /**
- * Tracks per-conversation workspace state (connector IDs) and writes the connector manifest
- * (and, when configured, the Elasticsearch telemetry manifest) to the sandbox whenever the
- * session is reset or the allowed connector list changes.
+ * Tracks per-conversation workspace state (connector IDs and sandbox secret keys) and writes the
+ * connector manifest (and, when configured, the Elasticsearch telemetry manifest) to the sandbox
+ * whenever the session is reset or the allowed connector list or available secret keys change.
  *
  * Create one instance per plugin lifecycle and share it across all sandbox tools.
  */
@@ -26,13 +27,29 @@ export const createSandboxWorkspaceManager = ({
   telemetryReadableIndices,
   logger,
 }: {
-  getDeps: () => { actions?: ActionsPluginStart };
+  getDeps: () => {
+    actions?: ActionsPluginStart;
+    sandboxSecretsClient?: Pick<SandboxSecretsClient, 'listKeysForSandbox'>;
+  };
   /** When set, `/workspace/elastic.md` is (re-)seeded alongside the connector manifest. */
   telemetryConnectorId?: string;
   telemetryReadableIndices?: string;
   logger: Logger;
 }) => {
-  const lastConnectorIds = new Map<SandboxSession, string>();
+  const lastWorkspaceKeys = new Map<SandboxSession, string>();
+
+  const listSecretKeys = async (
+    sandboxSecretsClient: Pick<SandboxSecretsClient, 'listKeysForSandbox'> | undefined,
+    callContext: SandboxCallContext
+  ): Promise<string[]> => {
+    if (!sandboxSecretsClient) return [];
+    try {
+      return await sandboxSecretsClient.listKeysForSandbox(callContext.request);
+    } catch (err) {
+      logger.warn(`Listing sandbox secrets failed: ${(err as Error).message}`);
+      return [];
+    }
+  };
 
   return {
     async ensureWorkspaceReady({
@@ -42,7 +59,8 @@ export const createSandboxWorkspaceManager = ({
       session: SandboxSession;
       callContext: SandboxCallContext;
     }): Promise<void> {
-      const { actions } = getDeps();
+      const { actions, sandboxSecretsClient } = getDeps();
+      const secretKeys = await listSecretKeys(sandboxSecretsClient, callContext);
       const getActionsClient = actions
         ? (req: KibanaRequest) => actions.getActionsClientWithRequest(req)
         : undefined;
@@ -54,9 +72,10 @@ export const createSandboxWorkspaceManager = ({
       );
       const currentKey = JSON.stringify({
         connectorIds: [...callContext.allowedConnectorIds].sort(),
+        secretKeys: [...secretKeys].sort(),
         canUseTelemetry,
       });
-      const lastKey = lastConnectorIds.get(session);
+      const lastKey = lastWorkspaceKeys.get(session);
       if (!session.isReset && lastKey === currentKey) {
         // `isReset` is an edge-triggered signal and another sandbox RPC (for example the
         // before-agent allocation step) may consume it before tools run. Verify the actual
@@ -74,7 +93,7 @@ export const createSandboxWorkspaceManager = ({
       }
 
       if (!canUseTelemetry) {
-        lastConnectorIds.delete(session);
+        lastWorkspaceKeys.delete(session);
         // Clear previously seeded hints on revocation; a failed clear must block file access.
         const [result] = await session.writeFiles([
           {
@@ -86,7 +105,13 @@ export const createSandboxWorkspaceManager = ({
       }
 
       try {
-        await writeConnectorManifest({ session, callContext, getActionsClient, logger });
+        await writeConnectorManifest({
+          session,
+          callContext,
+          getActionsClient,
+          secretKeys,
+          logger,
+        });
         if (telemetryConnectorId && canUseTelemetry) {
           await writeElasticManifest({
             session,
@@ -95,9 +120,9 @@ export const createSandboxWorkspaceManager = ({
             logger,
           });
         }
-        lastConnectorIds.set(session, currentKey);
+        lastWorkspaceKeys.set(session, currentKey);
       } catch (err) {
-        lastConnectorIds.delete(session);
+        lastWorkspaceKeys.delete(session);
         logger.warn(`Sandbox manifest write failed: ${(err as Error).message}`);
       }
     },

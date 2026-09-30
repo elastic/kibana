@@ -174,7 +174,7 @@ An empty matcher is a catch-all.
 | Settle buffer               | `5` seconds                    | `SETTLE_BUFFER_SECONDS` — excludes the most recent slice to avoid scanning mid-write                                                                                                                                                    |
 | Stuck-tick limit            | `10` ticks (~50 s)             | `STUCK_TICK_LIMIT` — after this many stuck ticks the escape hatch fires                                                                                                                                                                 |
 | Pre-fetch force-advance lag | `15` minutes                   | `PRE_FETCH_STUCK_ADVANCE_LAG_MS` — if the hatch fires with no known episodes and lag exceeds this, skip the unread window                                                                                                               |
-| Dispatch chunk size         | `250` items                    | `DISPATCH_CHUNK_SIZE` — max items per `bulkScheduleWorkflow` call. Workflows are prefetched with `getWorkflowsByIds` (one call per space) and scheduled in chunks batched by policy API key. The tick signal is checked between chunks. |
+| Dispatch chunk size         | `250` items                    | `DISPATCH_CHUNK_SIZE` — max items per `bulkScheduleWorkflow` call. Workflows are prefetched with a single `getWorkflowsByIdsForRequests` call (one lookup per space and API key) and scheduled in chunks batched by policy API key. The tick signal is checked between chunks. |
 | Matcher language            | KQL                            | `@kbn/eval-kql`                                                                                                                                                                                                                         |
 
 ## Important pipeline state
@@ -399,7 +399,9 @@ If you are not adding a new pipeline phase, but instead want to support a new de
 - `steps/dispatch_step.ts` to add the new dispatch branch
 - any saved object / route validation that defines allowed destinations
 
-Current production delivery is workflow-based. `DispatchStep` uses the policy API key to craft a fake request, prefetches workflows with `getWorkflowsByIds`, and schedules them through `bulkScheduleWorkflow` on the workflows management plugin.
+Current production delivery is workflow-based. `DispatchStep` uses the policy API key to craft a fake request, prefetches workflows with `getWorkflowsByIdsForRequests`, and schedules them through `bulkScheduleWorkflow` on the request-scoped workflows management client (`getClient(request)`).
+
+Workflow delivery requires an active Enterprise (or trial) license. When the license does not allow action policies, `DispatchStep` schedules no workflow and records one `license_not_supported` failure per (group, workflow destination), which `StoreExecutionHistoryStep` emits as `dispatch_failed` events. Every other step runs unchanged, so `.alert-actions` still receives the same `fire` / `suppress` / `notified` / `unmatched` docs and throttling, deduplication, and watermark behavior match a licensed cluster.
 
 ## Testing
 

@@ -10,6 +10,7 @@
 // TODO: Remove eslint exceptions comments and fix the issues
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
+import { ALERTING_CLONE_API_KEY_HEADER } from '@kbn/alerting-plugin/common';
 import { UIAM_INTERNAL_CALLER_ATTESTATION_HEADER } from '@kbn/core-security-server';
 import {
   buildKibanaRequest,
@@ -356,6 +357,11 @@ export class KibanaActionStepImpl extends BaseAtomicNodeImplementation<BaseStep>
     } else {
       throw new Error('No authentication headers found');
     }
+    // Our API key dies after the workflow run (Task Manager revokes it). This header tells alerting
+    // to give any rule it creates or enables its own key instead of keeping ours.
+    // Only alerting reads this header. Other routes ignore it, so it is safe to send on every call.
+    // See: https://github.com/elastic/kibana/pull/291318
+    headers[ALERTING_CLONE_API_KEY_HEADER] = 'true';
     return headers;
   }
 

@@ -128,7 +128,6 @@ export const AgentConnectors = ({ agentId }: AgentConnectorsProps) => {
     isConnectorsLoading,
   ]);
 
-  const isAddDisabled = agentQuery.agent?.configuration?.connector_ids === undefined;
   const showCustomizeEmptyState = assignedConnectors.length === 0 && !searchQuery.trim();
 
   if (isLoading) {
@@ -146,7 +145,12 @@ export const AgentConnectors = ({ agentId }: AgentConnectorsProps) => {
   return (
     <PageWrapper>
       {showCustomizeEmptyState ? (
-        <ConnectorsCustomizeEmptyState canEditAgent={canEditAgent} onAddFromLibrary={openLibrary} />
+        <ConnectorsCustomizeEmptyState
+          canEditAgent={canEditAgent}
+          hasAllPrivileges={hasAllPrivileges}
+          onAddFromLibrary={openLibrary}
+          onCreateNew={openCreateFlyout}
+        />
       ) : (
         <>
           <div css={styles.header}>
@@ -197,7 +201,7 @@ export const AgentConnectors = ({ agentId }: AgentConnectorsProps) => {
                             <EuiContextMenuItem
                               key="from-library"
                               icon="download"
-                              disabled={isAddDisabled}
+                              data-test-subj="agentConnectorsAddFromLibraryMenuItem"
                               onClick={() => {
                                 setIsAddMenuOpen(false);
                                 openLibrary();
@@ -208,6 +212,7 @@ export const AgentConnectors = ({ agentId }: AgentConnectorsProps) => {
                             <EuiContextMenuItem
                               key="create-new"
                               icon="plusCircle"
+                              data-test-subj="agentConnectorsCreateNewMenuItem"
                               onClick={() => {
                                 setIsAddMenuOpen(false);
                                 openCreateFlyout();

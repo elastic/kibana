@@ -14,6 +14,8 @@ import type {
   PluginInitializerContext,
 } from '@kbn/core/server';
 import type { PluginStartContract as ActionsPluginStart } from '@kbn/actions-plugin/server';
+import type { BuiltinToolDefinition } from '@kbn/agent-builder-server';
+import type { ZodObject } from '@kbn/zod/v4';
 import { SECURITY_EXTENSION_ID } from '@kbn/core-saved-objects-server';
 import { registerRoutes } from '@kbn/server-route-repository';
 import type { KibanaRequest } from '@kbn/core/server';
@@ -60,11 +62,19 @@ import { createSandboxWriteFileTool } from './tools/sandbox_bash/write_file_tool
 import { createConnectorCredentialResolver } from './tools/sandbox_bash/connector_credentials';
 import { createSandboxWorkspaceManager } from './tools/sandbox_bash/sandbox_workspace_manager';
 import {
+  createSandboxOutputRedactorProvider,
+  withSandboxOutputRedaction,
+} from './tools/sandbox_bash/sandbox_output_redaction';
+import { createSandboxToolAvailability } from './tools/sandbox_bash/sandbox_tool_availability';
+import {
   nightshiftInvestigationSavedObjectType,
+  nightshiftSecretsEncryptionParams,
+  nightshiftSecretsSavedObjectType,
   NIGHTSHIFT_INVESTIGATION_SO_TYPE,
   nightshiftAutomationSavedObjectType,
   NIGHTSHIFT_AUTOMATION_SO_TYPE,
 } from './saved_objects';
+import { createSandboxSecretsClient } from './sandbox_secrets';
 import { createInvestigationSweepRepository, SavedObjectInvestigationRepository } from './storage';
 import {
   registerInvestigationReconciliationTask,
@@ -99,6 +109,8 @@ export class NightshiftInvestigationsPlugin
   private savedObjects?: CoreStart['savedObjects'];
   private featureFlags?: CoreStart['featureFlags'];
   private actionsStart?: ActionsPluginStart;
+  private encryptedSavedObjectsStart?: NightshiftInvestigationsStartDeps['encryptedSavedObjects'];
+  private securityStart?: NightshiftInvestigationsStartDeps['security'];
   private security?: CoreStart['security'];
   private investigationAvailability?: AvailabilityConfig;
   private cortexEnabled = false;
@@ -145,6 +157,20 @@ export class NightshiftInvestigationsPlugin
 
     core.savedObjects.registerType(nightshiftInvestigationSavedObjectType);
     core.savedObjects.registerType(nightshiftAutomationSavedObjectType);
+    core.savedObjects.registerType(nightshiftSecretsSavedObjectType);
+    plugins.encryptedSavedObjects?.registerType(nightshiftSecretsEncryptionParams);
+
+    const sandboxSecretsClient = createSandboxSecretsClient({
+      getDeps: () => ({
+        featureFlags: this.featureFlags,
+        savedObjects: this.savedObjects,
+        encryptedSavedObjects: this.encryptedSavedObjectsStart,
+        security: this.securityStart,
+        spaces: this.spaces,
+      }),
+      canEncrypt: plugins.encryptedSavedObjects?.canEncrypt ?? false,
+      logger: this.logger.get('sandbox_secrets'),
+    });
 
     registerInvestigationReconciliationTask({
       core,
@@ -190,7 +216,7 @@ export class NightshiftInvestigationsPlugin
         // Start deps are read lazily: tools are registered in setup() but only run after start().
         const getSandboxStart = () => this.sandboxStart;
         const sandboxWorkspaceManager = createSandboxWorkspaceManager({
-          getDeps: () => ({ actions: this.actionsStart }),
+          getDeps: () => ({ actions: this.actionsStart, sandboxSecretsClient }),
           telemetryConnectorId,
           telemetryReadableIndices: config.sandbox?.telemetry_readable_indices,
           logger: sandboxLogger,
@@ -199,30 +225,48 @@ export class NightshiftInvestigationsPlugin
           getDeps: () => ({ actions: this.actionsStart }),
           logger: sandboxLogger.get('connector_credentials'),
         });
+        const redaction = {
+          getOutputRedactor: createSandboxOutputRedactorProvider({
+            getDeps: () => ({ actions: this.actionsStart, sandboxSecretsClient }),
+          }),
+          logger: sandboxLogger.get('output_redaction'),
+        };
+        const availability = createSandboxToolAvailability({
+          getDeps: () => ({ featureFlags: this.featureFlags, security: this.securityStart }),
+        });
+        const { agentBuilder } = plugins;
+        const registerSandboxTool = <TSchema extends ZodObject>(
+          tool: BuiltinToolDefinition<TSchema>
+        ) =>
+          agentBuilder.tools.register({
+            ...withSandboxOutputRedaction(tool, redaction),
+            availability,
+          });
 
-        plugins.agentBuilder.tools.register(
+        registerSandboxTool(
           createSandboxBashTool({
             getSandboxStart,
             sandboxWorkspaceManager,
             resolveConnectorCredentials,
+            sandboxSecretsClient,
             logger: sandboxLogger,
           })
         );
-        plugins.agentBuilder.tools.register(
+        registerSandboxTool(
           createSandboxViewFileTool({
             getSandboxStart,
             sandboxWorkspaceManager,
             logger: sandboxLogger,
           })
         );
-        plugins.agentBuilder.tools.register(
+        registerSandboxTool(
           createSandboxStrReplaceTool({
             getSandboxStart,
             sandboxWorkspaceManager,
             logger: sandboxLogger,
           })
         );
-        plugins.agentBuilder.tools.register(
+        registerSandboxTool(
           createSandboxWriteFileTool({
             getSandboxStart,
             sandboxWorkspaceManager,
@@ -332,6 +376,7 @@ export class NightshiftInvestigationsPlugin
           getAutomationsSoClient: this.getAutomationsSoClient,
           getWorkflowsManagement: () => this.workflowsManagement,
           isCortexEnabled: () => this.cortexEnabled,
+          sandboxSecretsClient,
           getCortexPageStore: (request: KibanaRequest) => {
             if (!this.elasticsearch) {
               throw new Error(
@@ -392,6 +437,8 @@ export class NightshiftInvestigationsPlugin
     this.savedObjects = coreStart.savedObjects;
     this.featureFlags = coreStart.featureFlags;
     this.actionsStart = plugins.actions;
+    this.encryptedSavedObjectsStart = plugins.encryptedSavedObjects;
+    this.securityStart = plugins.security;
     this.security = coreStart.security;
 
     if (this.memoryEnabled) {
