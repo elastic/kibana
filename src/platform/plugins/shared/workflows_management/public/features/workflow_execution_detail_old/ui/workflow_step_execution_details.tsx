@@ -185,7 +185,13 @@ export const WorkflowStepExecutionDetails = React.memo<WorkflowStepExecutionDeta
 
     if (!stepExecution) {
       return (
-        <EuiPanel hasShadow={false} paddingSize="m">
+        <EuiPanel
+          hasShadow={false}
+          hasBorder={false}
+          borderRadius="none"
+          paddingSize="m"
+          css={{ borderRadius: 0 }}
+        >
           <EuiSkeletonText lines={1} />
           <EuiSpacer size="l" />
           <EuiSkeletonText lines={4} />
@@ -213,8 +219,14 @@ export const WorkflowStepExecutionDetails = React.memo<WorkflowStepExecutionDeta
     return (
       <EuiPanel
         hasShadow={false}
+        hasBorder={false}
+        borderRadius="none"
         paddingSize="m"
-        css={{ height: '100%', paddingTop: '13px' /* overrides EuiPanel's paddingTop */ }}
+        css={{
+          height: '100%',
+          paddingTop: '13px' /* overrides EuiPanel's paddingTop */,
+          borderRadius: 0,
+        }}
         data-test-subj={
           isTriggerPseudoStep ? 'workflowExecutionTrigger' : 'workflowStepExecutionDetails'
         }
@@ -281,7 +293,13 @@ export const WorkflowStepExecutionDetails = React.memo<WorkflowStepExecutionDeta
           {isFinished ? (
             <EuiFlexItem css={{ overflowY: 'auto' }}>
               {isLoadingStepData ? (
-                <EuiPanel hasShadow={false} paddingSize="m">
+                <EuiPanel
+                  hasShadow={false}
+                  hasBorder={false}
+                  borderRadius="none"
+                  paddingSize="m"
+                  css={{ borderRadius: 0 }}
+                >
                   <EuiSkeletonText lines={4} />
                 </EuiPanel>
               ) : (

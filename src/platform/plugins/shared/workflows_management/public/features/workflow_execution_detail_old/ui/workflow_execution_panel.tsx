@@ -96,7 +96,13 @@ export const WorkflowExecutionPanel = React.memo<WorkflowExecutionPanelProps>(
               aria-label={i18nTexts.backToExecutions}
               data-test-subj="workflowBackToExecutionsLink"
             >
-              <EuiPanel paddingSize="m" hasShadow={false} css={styles.linkCss}>
+              <EuiPanel
+                paddingSize="m"
+                hasShadow={false}
+                hasBorder={false}
+                borderRadius="none"
+                css={[styles.linkCss, { borderRadius: 0 }]}
+              >
                 <EuiFlexGroup alignItems="center" justifyContent="flexStart" gutterSize="s">
                   <EuiFlexItem grow={false}>
                     <EuiIcon type="sortLeft" aria-hidden={true} />
@@ -114,7 +120,19 @@ export const WorkflowExecutionPanel = React.memo<WorkflowExecutionPanelProps>(
         )}
 
         <EuiFlexItem css={{ overflow: 'hidden' }}>
-          <EuiPanel paddingSize="m" hasShadow={false} css={{ overflowY: 'auto' }}>
+          <EuiPanel
+            paddingSize="m"
+            hasShadow={false}
+            hasBorder={false}
+            borderRadius="none"
+            css={{ overflowY: 'auto', borderRadius: 0, height: '100%' }}
+          >
+            {execution && (
+              <StepExecutionsTruncatedCallout
+                executionId={execution.id}
+                loadedCount={execution.stepExecutions.length}
+              />
+            )}
             <WorkflowStepExecutionTree
               definition={definition}
               execution={execution ?? null}
@@ -128,9 +146,19 @@ export const WorkflowExecutionPanel = React.memo<WorkflowExecutionPanelProps>(
         </EuiFlexItem>
 
         {execution && (showCancelButton || showDoneButton) && (
-          <EuiFlexItem grow={false}>
-            <EuiHorizontalRule margin="none" />
-            <EuiPanel paddingSize="m" hasShadow={false}>
+          <EuiFlexItem
+            grow={false}
+            css={({ euiTheme }: UseEuiTheme) => ({
+              borderTop: euiTheme.border.thin,
+            })}
+          >
+            <EuiPanel
+              paddingSize="m"
+              hasShadow={false}
+              hasBorder={false}
+              borderRadius="none"
+              css={{ borderRadius: 0 }}
+            >
               {showCancelButton ? (
                 <CancelExecutionButton
                   executionId={execution.id}
