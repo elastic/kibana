@@ -111,8 +111,9 @@ export class AlertZeroPlugin
 
     this.workflowsManagementApi = workflowsManagement.management;
 
+    // Missing runtime dependencies must not make installed workflows eligible for orphan cleanup.
+    registerOwner({ workflowsExtensions });
     if (agentBuilder && proposals && agenticInvestigations) {
-      registerOwner({ workflowsExtensions });
       registerAgentType(agentBuilder);
       registerAttachments(agentBuilder);
       // Registered in setup so the builtin tool is available to Agent Builder before

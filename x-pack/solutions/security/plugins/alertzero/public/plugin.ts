@@ -268,11 +268,13 @@ export class AlertZeroPublicPlugin
         { QueryClientProvider },
         { ProposedActionsSlot },
         queryClient,
+        { AccessBoundary },
       ] = await Promise.all([
         import('@kbn/kibana-react-plugin/public'),
         import('@kbn/react-query'),
         import('./pages/conversations/proposed_actions_slot'),
         getSharedAppQueryClient(),
+        import('./components/access_boundary'),
       ]);
 
       const stableServices = { ...core, ...startDeps };
@@ -284,7 +286,11 @@ export class AlertZeroPublicPlugin
           React.createElement(
             QueryClientProvider,
             { client: queryClient },
-            React.createElement(ProposedActionsSlot, props)
+            React.createElement(
+              AccessBoundary,
+              { availability$: this.availability$ },
+              React.createElement(ProposedActionsSlot, props)
+            )
           )
         );
 
@@ -444,8 +450,24 @@ export class AlertZeroPublicPlugin
       core.http.basePath.serverBasePath
     );
 
+    const AttachmentAccessBoundary = React.lazy(async () => {
+      const [{ KibanaContextProvider }, { AccessBoundary }] = await Promise.all([
+        import('@kbn/kibana-react-plugin/public'),
+        import('./components/access_boundary'),
+      ]);
+      const services = { ...core, ...startDeps };
+      const Boundary: React.FC<React.PropsWithChildren> = ({ children }) =>
+        React.createElement(
+          KibanaContextProvider,
+          { services },
+          React.createElement(AccessBoundary, { availability$: this.availability$ }, children)
+        );
+      return { default: Boundary };
+    });
+
     this.attachmentRegistration = canAccess$.pipe(filter(Boolean), take(1)).subscribe(() => {
       registerAlertZeroAttachmentTypesUI(agentBuilder.attachments, {
+        AccessBoundary: AttachmentAccessBoundary,
         http: core.http,
         navigation: {
           share: startDeps.share,

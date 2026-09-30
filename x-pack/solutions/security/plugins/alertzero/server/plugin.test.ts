@@ -126,21 +126,31 @@ describe('AlertZeroPlugin feature-flag gating', () => {
   });
 
   describe('when xpack.alertzero.enabled is true', () => {
-    it('keeps the shell and routes available without starting feature work when dependencies are absent', () => {
-      const plugin = new AlertZeroPlugin(createContext(createConfig({ enabled: true })));
-      const coreSetup = coreMock.createSetup();
-      const result = plugin.setup(coreSetup, {
-        features: { registerKibanaFeature: jest.fn() },
-        workflowsExtensions: { registerManagedWorkflowOwner: jest.fn() },
-        workflowsManagement: { management: {} },
-      } as never);
-      plugin.start(coreMock.createStart(), {} as never);
-      expect(result.isEnabled).toBe(true);
-      expect(registerRoutes).toHaveBeenCalled();
-      expect(registerOwner).not.toHaveBeenCalled();
-      expect(initializeManagedWorkflows).not.toHaveBeenCalled();
-      expect(ensureAgentSafe).not.toHaveBeenCalled();
-    });
+    it.each(['agentBuilder', 'proposals', 'agenticInvestigations'] as const)(
+      'preserves workflow ownership without starting feature work when %s is absent',
+      (missingDependency) => {
+        const plugin = new AlertZeroPlugin(createContext(createConfig({ enabled: true })));
+        const coreSetup = coreMock.createSetup();
+        const workflowsExtensions = { registerManagedWorkflowOwner: jest.fn() };
+        const dependencies = {
+          features: { registerKibanaFeature: jest.fn() },
+          workflowsExtensions,
+          workflowsManagement: { management: {} },
+          agentBuilder: {},
+          proposals: {},
+          agenticInvestigations: {},
+          [missingDependency]: undefined,
+        };
+        const result = plugin.setup(coreSetup, dependencies as never);
+        plugin.start(coreMock.createStart(), {} as never);
+        expect(result.isEnabled).toBe(true);
+        expect(registerRoutes).toHaveBeenCalled();
+        expect(registerOwner).toHaveBeenCalledWith({ workflowsExtensions });
+        expect(registerAgentType).not.toHaveBeenCalled();
+        expect(initializeManagedWorkflows).not.toHaveBeenCalled();
+        expect(ensureAgentSafe).not.toHaveBeenCalled();
+      }
+    );
 
     it('registers ownership, feature privileges, and routes during setup', () => {
       const plugin = new AlertZeroPlugin(createContext(createConfig({ enabled: true })));
