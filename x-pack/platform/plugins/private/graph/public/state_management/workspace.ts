@@ -376,7 +376,7 @@ export const createWorkspaceState = (workspace: Workspace): WorkspaceState => {
     edgesById,
     edgeIds: Object.keys(edgesById),
     selectedNodeIds: workspace.selectedNodes.map(({ id }) => id),
-    selectedEdgeIds: workspace.getEdgeSelection().map(getEdgeId),
+    selectedEdgeIds: workspace.edges.filter(({ isSelected }) => isSelected).map(getEdgeId),
     blocklistedNodesById: Object.fromEntries(
       blocklistedNodes.map((node) => [node.id, toNodeState(node)])
     ),
@@ -483,7 +483,7 @@ export const registerWorkspaceListeners = (
 
   startListening({
     predicate: (action) => presentationActionTypes.has(action.type),
-    effect: (action) => {
+    effect: (action, listenerApi) => {
       const workspace = getWorkspace();
       if (!workspace) {
         return;
@@ -495,7 +495,13 @@ export const registerWorkspaceListeners = (
           node.label = action.payload.label;
         }
       } else if (colorSelectedNodes.match(action)) {
-        workspace.colorSelected(action.payload);
+        const { selectedNodeIds } = listenerApi.getState().workspace;
+        selectedNodeIds.forEach((nodeId) => {
+          const node = workspace.nodesMap[nodeId];
+          if (node) {
+            node.color = action.payload;
+          }
+        });
       }
       notifyReact();
     },
