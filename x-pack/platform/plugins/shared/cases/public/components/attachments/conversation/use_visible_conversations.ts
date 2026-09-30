@@ -12,10 +12,14 @@ import type {
   BulkGetConversationsResponse,
   ConversationSummary,
 } from '../../../../common/types/api/agent_builder/v1';
-import type { CaseUI } from '../../../../common/ui/types';
+import type { AttachmentUIV2, CaseUI } from '../../../../common/ui/types';
 import { useKibana } from '../../../common/lib/kibana';
 import { casesQueriesKeys } from '../../../containers/constants';
-import { applyConversationAccess, getConversationAttachmentIds } from './helpers';
+import {
+  applyConversationAccess,
+  applyConversationAccessToAttachments,
+  getConversationAttachmentIds,
+} from './helpers';
 
 /**
  * Resolves which of `ids` the current user can open, with their live title and
@@ -25,7 +29,7 @@ export const useBulkGetConversations = (ids: string[]) => {
   const {
     services: { http, application },
   } = useKibana();
-  const enabled = ids.length > 0 && application.capabilities.agentBuilder?.show === true;
+  const enabled = ids.length > 0 && application?.capabilities?.agentBuilder?.show === true;
 
   return useQuery<Map<string, ConversationSummary>>(
     casesQueriesKeys.conversationsAccess(ids),
@@ -44,4 +48,19 @@ export const useCaseDataWithVisibleConversations = (caseData: CaseUI): CaseUI =>
   const ids = useMemo(() => getConversationAttachmentIds(caseData.comments), [caseData.comments]);
   const { data } = useBulkGetConversations(ids);
   return useMemo(() => applyConversationAccess(caseData, data), [caseData, data]);
+};
+
+const NO_ATTACHMENTS: AttachmentUIV2[] = [];
+
+/**
+ * The activity feed reads attachments from the user actions response, not from
+ * the case; that list is undefined while a page is still loading.
+ */
+export const useVisibleConversationAttachments = (
+  attachments: AttachmentUIV2[] | undefined
+): AttachmentUIV2[] => {
+  const list = attachments ?? NO_ATTACHMENTS;
+  const ids = useMemo(() => getConversationAttachmentIds(list), [list]);
+  const { data } = useBulkGetConversations(ids);
+  return useMemo(() => applyConversationAccessToAttachments(list, data), [list, data]);
 };

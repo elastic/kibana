@@ -23,6 +23,7 @@ import { NEW_COMMENT_ID } from './constants';
 import { hasActiveUserActivityFilter } from '../user_actions_activity_bar/utils';
 import { UserActionsList } from './user_actions_list';
 import { useUserActionsPagination } from './hooks/use_user_actions_pagination';
+import { useVisibleConversationAttachments } from '../attachments/conversation/use_visible_conversations';
 import { useLastPageUserActions } from './use_user_actions_last_page';
 import { useLastPage } from './use_last_page';
 import { useUserPermissions } from './use_user_permissions';
@@ -119,15 +120,18 @@ export const UserActions = React.memo((props: UserActionsProps) => {
     handleDeleteComment,
   });
 
+  const visibleInfiniteAttachments = useVisibleConversationAttachments(infiniteLatestAttachments);
+  const visibleLastPageAttachments = useVisibleConversationAttachments(lastPageAttachments);
+
   const builtInfiniteActions = useBuildUserActions({
     caseUserActions: infiniteCaseUserActions,
-    attachments: infiniteLatestAttachments,
+    attachments: visibleInfiniteAttachments,
     ...builderContext,
   });
 
   const builtLastPageActions = useBuildUserActions({
     caseUserActions: lastPageUserActions,
-    attachments: lastPageAttachments,
+    attachments: visibleLastPageAttachments,
     ...builderContext,
   });
 

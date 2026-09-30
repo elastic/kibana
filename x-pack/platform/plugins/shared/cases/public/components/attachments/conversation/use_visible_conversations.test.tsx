@@ -12,7 +12,10 @@ import { basicCase } from '../../../containers/mock';
 import { AGENT_BUILDER_CONVERSATION_ATTACHMENT_TYPE } from '../../../../common/constants/attachments';
 import { INTERNAL_AGENT_BUILDER_CONVERSATIONS_BULK_GET_URL } from '../../../../common/constants';
 import type { AttachmentUIV2, CaseUI } from '../../../../common/ui/types';
-import { useCaseDataWithVisibleConversations } from './use_visible_conversations';
+import {
+  useCaseDataWithVisibleConversations,
+  useVisibleConversationAttachments,
+} from './use_visible_conversations';
 
 jest.mock('../../../common/lib/kibana');
 
@@ -82,6 +85,25 @@ describe('useCaseDataWithVisibleConversations', () => {
     });
 
     await waitFor(() => expect(result.current.comments).toEqual([basicCase.comments[0]]));
+    expect(mockPost).not.toHaveBeenCalled();
+  });
+
+  it('filters a plain attachment list the same way (activity feed)', async () => {
+    const { result } = renderHook(() => useVisibleConversationAttachments(caseData.comments), {
+      wrapper: TestProviders,
+    });
+
+    expect(result.current).toEqual([basicCase.comments[0]]);
+    await waitFor(() => expect(result.current).toHaveLength(2));
+    expect(result.current[1]).toEqual(expect.objectContaining({ id: 'c1' }));
+  });
+
+  it('tolerates an undefined attachment list while user actions load', () => {
+    const { result } = renderHook(() => useVisibleConversationAttachments(undefined), {
+      wrapper: TestProviders,
+    });
+
+    expect(result.current).toEqual([]);
     expect(mockPost).not.toHaveBeenCalled();
   });
 

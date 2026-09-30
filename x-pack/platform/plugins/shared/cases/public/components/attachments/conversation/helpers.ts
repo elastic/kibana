@@ -31,36 +31,44 @@ export const getConversationAttachmentIds = (comments: AttachmentUIV2[]): string
 
 /**
  * Drops conversation attachments the viewer cannot open and refreshes the title
- * and agent of the ones they can, so every consumer of `caseData.comments`
- * (activity feed, Attachments tab, counts, filters) sees the same visible set.
- * Until the access result arrives (`accessible` undefined) all conversation
- * attachments are hidden.
+ * and agent of the ones they can. Until the access result arrives (`accessible`
+ * undefined) all conversation attachments are hidden.
+ */
+export const applyConversationAccessToAttachments = (
+  attachments: AttachmentUIV2[],
+  accessible: Map<string, ConversationSummary> | undefined
+): AttachmentUIV2[] => {
+  if (!attachments.some(isConversationAttachment)) {
+    return attachments;
+  }
+
+  return attachments.flatMap((attachment) => {
+    if (!isConversationAttachment(attachment)) {
+      return [attachment];
+    }
+    const live = accessible?.get(attachment.attachmentId);
+    return live
+      ? [
+          {
+            ...attachment,
+            metadata: { ...attachment.metadata, title: live.title, agentId: live.agent_id },
+          },
+        ]
+      : [];
+  });
+};
+
+/**
+ * Same as {@link applyConversationAccessToAttachments} for a case's comments, so
+ * every consumer of `caseData.comments` (Attachments tab, counts, filters) sees
+ * the same visible set.
  */
 export const applyConversationAccess = (
   caseData: CaseUI,
   accessible: Map<string, ConversationSummary> | undefined
 ): CaseUI => {
-  if (!caseData.comments.some(isConversationAttachment)) {
-    return caseData;
-  }
-
-  return {
-    ...caseData,
-    comments: caseData.comments.flatMap((comment) => {
-      if (!isConversationAttachment(comment)) {
-        return [comment];
-      }
-      const live = accessible?.get(comment.attachmentId);
-      return live
-        ? [
-            {
-              ...comment,
-              metadata: { ...comment.metadata, title: live.title, agentId: live.agent_id },
-            },
-          ]
-        : [];
-    }),
-  };
+  const comments = applyConversationAccessToAttachments(caseData.comments, accessible);
+  return comments === caseData.comments ? caseData : { ...caseData, comments };
 };
 
 export const getConversationHref = (
