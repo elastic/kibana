@@ -11,9 +11,16 @@ export type {
   User,
   UserRealm,
   AuthenticatedUser,
+  AuthenticatedPrincipal,
   AuthenticationProvider,
 } from './src/authentication';
-export { isUserAnonymous, canUserHaveProfile } from './src/authentication';
+export {
+  isUserAnonymous,
+  canUserHaveProfile,
+  getAuthenticatedPrincipal,
+  SERVICE_ACCOUNT_REALM_TYPE,
+  CLOUD_SERVICE_ACCOUNT_REALM_TYPE,
+} from './src/authentication';
 export type {
   ServiceAccount,
   CreateServiceAccountParams,

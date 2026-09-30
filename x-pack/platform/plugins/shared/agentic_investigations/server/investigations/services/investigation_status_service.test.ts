@@ -165,7 +165,7 @@ describe('InvestigationStatusService.setStatus — expected_proposal_ids', () =>
     await expect(
       service.setStatus(request, 'conv-1', {
         status: 'closed',
-        dismiss_reason: 'wrong',
+        dismiss_reason: 'no_reason',
         expected_proposal_ids: ['p-1'],
       })
     ).rejects.toBeInstanceOf(CloseTargetsChangedError);
@@ -177,7 +177,7 @@ describe('InvestigationStatusService.setStatus — expected_proposal_ids', () =>
     await expect(
       service.setStatus(request, 'conv-1', {
         status: 'closed',
-        dismiss_reason: 'wrong',
+        dismiss_reason: 'no_reason',
         expected_proposal_ids: ['p-1', 'p-2'],
       })
     ).resolves.not.toThrow();
@@ -189,7 +189,7 @@ describe('InvestigationStatusService.setStatus — expected_proposal_ids', () =>
     await expect(
       service.setStatus(request, 'conv-1', {
         status: 'closed',
-        dismiss_reason: 'wrong',
+        dismiss_reason: 'no_reason',
       })
     ).resolves.not.toThrow();
   });
@@ -262,7 +262,7 @@ describe('InvestigationStatusService.setStatus — releaseGate conflict classifi
 
     const result = await service.setStatus(request, 'conv-1', {
       status: 'closed',
-      dismiss_reason: 'wrong',
+      dismiss_reason: 'no_reason',
     });
 
     // Conflict → re-read shows decided → skip, close succeeds.
@@ -282,7 +282,7 @@ describe('InvestigationStatusService.setStatus — releaseGate conflict classifi
 
     const result = await service.setStatus(request, 'conv-1', {
       status: 'closed',
-      dismiss_reason: 'wrong',
+      dismiss_reason: 'no_reason',
     });
 
     // First call failed → re-read says still pending → retry → success.
@@ -321,7 +321,7 @@ describe('InvestigationStatusService.setStatus — releaseGate conflict classifi
 
     // Throws ProposalDismissFailedError; patchMetadata is never called.
     await expect(
-      service.setStatus(request, 'conv-1', { status: 'closed', dismiss_reason: 'wrong' })
+      service.setStatus(request, 'conv-1', { status: 'closed', dismiss_reason: 'no_reason' })
     ).rejects.toBeInstanceOf(ProposalDismissFailedError);
     expect(client.patchMetadata).not.toHaveBeenCalled();
   });
@@ -334,7 +334,7 @@ describe('InvestigationStatusService.setStatus — releaseGate conflict classifi
 
     const result = await service.setStatus(request, 'conv-1', {
       status: 'closed',
-      dismiss_reason: 'wrong',
+      dismiss_reason: 'no_reason',
     });
 
     expect(releaseGate).toHaveBeenCalledTimes(1);
@@ -351,7 +351,7 @@ describe('InvestigationStatusService.setStatus — releaseGate conflict classifi
 
     const result = await service.setStatus(request, 'conv-1', {
       status: 'closed',
-      dismiss_reason: 'wrong',
+      dismiss_reason: 'no_reason',
     });
 
     expect(releaseGate).toHaveBeenCalledTimes(1);

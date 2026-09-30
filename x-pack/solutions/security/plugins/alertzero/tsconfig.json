@@ -60,8 +60,8 @@
     "@kbn/security-mitre-attack-common",
     "@kbn/inference-plugin",
     "@kbn/management-settings-ids",
-    "@kbn/ui-callout",
+    "@kbn/proposals-ui",
     "@kbn/core-chrome-browser-context-mocks",
-    "@kbn/core-chrome-browser-mocks",
+    "@kbn/core-chrome-browser-mocks"
   ]
 }
