@@ -5,11 +5,10 @@
  * 2.0.
  */
 
-import { BehaviorSubject, Subject } from 'rxjs';
+import { BehaviorSubject } from 'rxjs';
 import type { ChromeStart } from '@kbn/core/public';
 import type { AgentBuilderPluginStart } from '@kbn/agent-builder-browser';
 import type { ActiveConversation } from '@kbn/agent-builder-browser/events';
-import { ChatEventType, type ChatEvent } from '@kbn/agent-builder-common';
 import type { VersionedAttachment } from '@kbn/agent-builder-common/attachments';
 import type { SignificantEvent } from '@kbn/significant-events-schema';
 import { SIGNIFICANT_EVENT_ATTACHMENT_TYPE } from '@kbn/significant-events-plugin/common';
@@ -47,14 +46,6 @@ const createVersionedAttachment = (id: string): VersionedAttachment => ({
   current_version: 1,
 });
 
-const createRoundCompleteEvent = (attachmentId: string): ChatEvent => ({
-  type: ChatEventType.roundComplete,
-  data: {
-    round: {} as never,
-    attachments: [createVersionedAttachment(attachmentId)],
-  },
-});
-
 const createIdGenerator = (): IdGenerator => {
   let current = 'draft-id-1';
 
@@ -76,7 +67,6 @@ describe('registerSignificantEventAutoAttach', () => {
   let addAttachment: jest.Mock;
   let draftAttachmentId: IdGenerator;
   let cleanup: () => void;
-  let chatEventsByConversationId: Map<string, Subject<ChatEvent>>;
 
   beforeEach(() => {
     jest.useFakeTimers();
@@ -85,7 +75,6 @@ describe('registerSignificantEventAutoAttach', () => {
     focusedSignificantEventService = new FocusedSignificantEventService();
     addAttachment = jest.fn();
     draftAttachmentId = createIdGenerator();
-    chatEventsByConversationId = new Map();
 
     const chrome = {
       sidebar: {
@@ -97,16 +86,6 @@ describe('registerSignificantEventAutoAttach', () => {
       addAttachment,
       events: {
         ui: { activeConversation$: activeConversation$.asObservable() },
-        getChatEvents$: jest.fn((conversationId: string) => {
-          let chatEvents$ = chatEventsByConversationId.get(conversationId);
-
-          if (!chatEvents$) {
-            chatEvents$ = new Subject<ChatEvent>();
-            chatEventsByConversationId.set(conversationId, chatEvents$);
-          }
-
-          return chatEvents$.asObservable();
-        }),
       },
     } as unknown as AgentBuilderPluginStart;
 
@@ -176,14 +155,16 @@ describe('registerSignificantEventAutoAttach', () => {
     );
   });
 
-  it('rotates the draft id after it is created in a completed round', () => {
+  it('rotates the draft id once the active conversation contains it', () => {
     focusedSignificantEventService.setFocusedEvent(createEvent());
     currentAppId$.next('agentBuilder');
     activeConversation$.next({ id: undefined });
     jest.runOnlyPendingTimers();
 
-    activeConversation$.next({ id: 'conversation-1', conversation: undefined });
-    chatEventsByConversationId.get('conversation-1')?.next(createRoundCompleteEvent('draft-id-1'));
+    activeConversation$.next({
+      id: 'conversation-1',
+      conversation: { attachments: [createVersionedAttachment('draft-id-1')] } as never,
+    });
 
     currentAppId$.next(null);
     currentAppId$.next('agentBuilder');
@@ -191,6 +172,25 @@ describe('registerSignificantEventAutoAttach', () => {
     jest.runOnlyPendingTimers();
 
     expect(addAttachment).toHaveBeenLastCalledWith(expect.objectContaining({ id: 'draft-id-3' }));
+  });
+
+  it('does not rotate the draft id when the active conversation does not contain it', () => {
+    focusedSignificantEventService.setFocusedEvent(createEvent());
+    currentAppId$.next('agentBuilder');
+    activeConversation$.next({ id: undefined });
+    jest.runOnlyPendingTimers();
+
+    activeConversation$.next({
+      id: 'conversation-1',
+      conversation: { attachments: [createVersionedAttachment('other-attachment-id')] } as never,
+    });
+
+    currentAppId$.next(null);
+    currentAppId$.next('agentBuilder');
+    activeConversation$.next({ id: undefined });
+    jest.runOnlyPendingTimers();
+
+    expect(addAttachment).toHaveBeenLastCalledWith(expect.objectContaining({ id: 'draft-id-2' }));
   });
 
   it('unsubscribes on cleanup', () => {
