@@ -39,6 +39,7 @@ import {
   ungroupNode,
   workspaceChanged,
   workspaceLayoutChanged,
+  workspaceGraphMerged,
   workspaceInitializedSelector,
   workspaceRuntimeChanged,
 } from './workspace';
@@ -254,6 +255,22 @@ describe('workspace state', () => {
     environment.store.dispatch(workspaceChanged(snapshot));
 
     expect(workspaceInitializedSelector(environment.store.getState())).toBe(true);
+  });
+
+  it('records response merges in serializable undo history', () => {
+    const environment = createMockGraphStore({});
+    environment.store.dispatch(
+      workspaceGraphMerged({
+        nodes: [{ field: 'field', term: 'term', label: 'Term' }],
+        edges: [],
+      })
+    );
+
+    environment.store.dispatch(undoWorkspace());
+    expect(environment.store.getState().workspace.nodeIds).toEqual([]);
+
+    environment.store.dispatch(redoWorkspace());
+    expect(environment.store.getState().workspace.nodeIds).toEqual(['field..term']);
   });
 
   it('preserves Redux selection across runtime snapshots', () => {
