@@ -25,9 +25,19 @@ export const useUserMessageTextStyles = (): UserMessageTextStyles => {
       container: css`
         overflow-wrap: anywhere;
 
-        /* Resets the inherited \`white-space: pre-wrap\` (user_message.tsx) so the leftover "\\n" text node remark leaves after each <br> doesn't render as a second line break. */
-        .euiMarkdownFormat p {
+        /* Avoids extra blank lines: remark's leftover "\\n" text nodes would otherwise render under the inherited white-space: pre-wrap (user_message.tsx). */
+        .euiMarkdownFormat {
           white-space: normal;
+        }
+
+        /* Makes sure there is no gap below a blockquote when it's the last thing in the message. */
+        .euiMarkdownFormat blockquote > *:last-child {
+          margin-bottom: 0;
+        }
+
+        /* Makes sure there is no gap below a code block when it's the last thing in the message. */
+        .euiMarkdownFormat pre {
+          margin-bottom: 0;
         }
 
         ol > li:not(:first-child) {

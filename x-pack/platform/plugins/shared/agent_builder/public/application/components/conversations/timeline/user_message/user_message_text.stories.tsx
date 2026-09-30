@@ -39,7 +39,7 @@ export const PlainText: Story = {
 
 export const LineBreaks: Story = {
   args: {
-    input: 'First line\nSecond line (Shift+Enter)\nThird line',
+    input: 'First line (Shift+Enter)\nSecond line (2x Shift+Enter)\n\nThird line',
   },
 };
 
@@ -51,19 +51,26 @@ export const BoldItalicStrikethrough: Story = {
 
 export const Headings: Story = {
   args: {
-    input: '# Heading 1\n\nSome text under a heading.\n\n## Heading 2\n\nMore text.',
+    input:
+      '# Heading 1\n\n## Heading 2\n\n### Heading 3\n\n#### Heading 4\n\n##### Heading 5\n\n###### Heading 6',
   },
 };
 
 export const Lists: Story = {
   args: {
-    input: '- item one\n- item two\n  - nested item\n\n1. first\n2. second\n3. third',
+    input:
+      '- item one\n- item two\n  - nested item\n\n' +
+      '1. first\n2. second\n3. third\n\n' +
+      '- [ ] todo item\n- [x] done item',
   },
 };
 
 export const InlineAndBlockCode: Story = {
   args: {
-    input: 'Use `EuiMarkdownFormat` for this.\n\n```js\nconst x = 1;\nconsole.log(x);\n```',
+    input:
+      'Use `EuiMarkdownFormat` for this.\n\n' +
+      '```js\nconst x = 1;\nconsole.log(x);\n```\n\n' +
+      '```bash\nnpm install @elastic/eui\n```',
   },
 };
 
@@ -82,6 +89,14 @@ export const Blockquote: Story = {
 export const PlainLink: Story = {
   args: {
     input: 'Check out [Elastic](https://www.elastic.co) for more. Opens in a new tab, no modal.',
+  },
+};
+
+export const MarkdownImage: Story = {
+  args: {
+    input:
+      '![Dummy image](https://dummyimage.com/300x200/3b3b3b/ffffff&text=Dummy+image)\n\n' +
+      'Markdown Image',
   },
 };
 
