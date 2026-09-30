@@ -55,15 +55,49 @@ const REPORT_INDEX = '.kibana-threat-reports';
 const fullyMigratedReportMappings = () => ({
   properties: {
     content: {
-      properties: {},
+      properties: {
+        article_url: { ignore_above: 2048 },
+      },
     },
     lineage: { properties: { content_scrubbed_at: {} } },
     // v30: evidence is a space-keyed nested array; the guard checks the leaf.
     evidence: { properties: { space_id: {} } },
     extracted: {
       properties: {
-        diamond: {},
-        gate: {},
+        core: {
+          properties: {
+            model_id: {},
+            context_mode: {},
+            context_coverage: {},
+            context_chars: {},
+            source_chars: {},
+            adjudication: {
+              properties: {
+                provider: {},
+                reviewed: {},
+                approved: {},
+                downgraded: {},
+                deterministic_references: {},
+                deferred_unreviewed: {},
+              },
+            },
+          },
+        },
+        diamond: {
+          properties: {
+            context_mode: {},
+            context_coverage: {},
+            context_chars: {},
+            source_chars: {},
+          },
+        },
+        gate: {
+          properties: {
+            context_mode: {},
+            context_coverage: {},
+          },
+        },
+        artifacts: {},
         vulnerability: {},
         iocs: {
           properties: {
@@ -73,6 +107,7 @@ const fullyMigratedReportMappings = () => ({
             port: {},
             reference: { ignore_above: 2048 },
             block_index: {},
+            deferred_unreviewed: {},
             // v26 bounds these by value, not just existence.
             value: { ignore_above: 2048 },
             defanged: { ignore_above: 2048 },
@@ -205,6 +240,7 @@ describe('index_templates — migrations', () => {
   });
 
   it.each([
+    ['extracted.core', 'core'],
     ['extracted.diamond', 'diamond'],
     ['extracted.gate', 'gate'],
     ['extracted.vulnerability', 'vulnerability'],
@@ -239,6 +275,20 @@ describe('index_templates — migrations', () => {
     const { patchedPaths } = await runMigrations({ reportMappings: mappings });
 
     expect(patchedPaths).toContain('lineage.content_scrubbed_at');
+  });
+
+  it('repairs a partial Diamond context mapping missing char leaves', async () => {
+    const mappings = fullyMigratedReportMappings();
+    delete (mappings.properties.extracted.properties.diamond.properties as Record<string, unknown>)
+      .context_chars;
+    delete (mappings.properties.extracted.properties.diamond.properties as Record<string, unknown>)
+      .source_chars;
+
+    const { patchedPaths } = await runMigrations({ reportMappings: mappings });
+
+    expect(patchedPaths).toEqual(
+      expect.arrayContaining(['extracted.diamond.context_chars', 'extracted.diamond.source_chars'])
+    );
   });
 
   it('adds space_id to the indicators index when absent', async () => {
