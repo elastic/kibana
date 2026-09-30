@@ -6,7 +6,7 @@ $schema: https://moonrepo.dev/schemas/project.json
 id: '@kbn/custom-content-plugin'
 layer: unknown
 owners:
-  defaultOwner: '@elastic/kibana-visualizations'
+  defaultOwner: '@elastic/kibana-dashboards'
 toolchains:
   default: node
 language: typescript
@@ -14,7 +14,7 @@ project:
   title: '@kbn/custom-content-plugin'
   description: Moon project for @kbn/custom-content-plugin
   channel: ''
-  owner: '@elastic/kibana-visualizations'
+  owner: '@elastic/kibana-dashboards'
   sourceRoot: x-pack/platform/plugins/shared/custom_content
 dependsOn:
   - '@kbn/core'
@@ -22,14 +22,12 @@ dependsOn:
   - '@kbn/presentation-publishing'
   - '@kbn/presentation-publishing-schemas'
   - '@kbn/i18n'
-  - '@kbn/inference-plugin'
   - '@kbn/data-plugin'
   - '@kbn/esql-utils'
   - '@kbn/es-query'
-  - '@kbn/es-types'
-  - '@kbn/datemath'
   - '@kbn/search-types'
   - '@kbn/custom-content-common'
+  - '@kbn/custom-content-renderer'
   - '@kbn/custom-content-server'
   - '@kbn/agent-builder-browser'
   - '@kbn/agent-builder-server'
@@ -44,6 +42,9 @@ dependsOn:
   - '@kbn/data-views-plugin'
   - '@kbn/ui-actions-plugin'
   - '@kbn/presentation-util'
+  - '@kbn/scout'
+  - '@kbn/esql-types'
+  - '@kbn/i18n-react'
 tags:
   - plugin
   - prod
@@ -56,6 +57,7 @@ fileGroups:
     - common/**/*
     - public/**/*
     - server/**/*
+    - test/scout/**/*
     - '!target/**/*'
   jest-config:
     - jest.config.js

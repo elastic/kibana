@@ -23,6 +23,7 @@ import { RollupDeprecationTooltip } from '@kbn/rollup';
 import type { IndexPatternManagmentContext } from '../../types';
 import { Tabs } from './tabs';
 import { IndexHeader } from './index_header';
+import { dataViewsListTitle } from '../breadcrumbs';
 
 import { useStateSelector } from '../../management_app/state_utils';
 
@@ -174,8 +175,11 @@ export const EditIndexPattern = withRouter(
               deleteIndexPatternClick={dataView?.managed ? undefined : () => setFlyoutOpen(true)}
               defaultIndex={defaultIndex}
               canSave={userEditPermission}
+              back={{
+                href: history.createHref({ pathname: '/' }),
+                label: dataViewsListTitle,
+              }}
             />
-            <EuiSpacer size="l" />
             <EuiFlexGroup wrap gutterSize="l" alignItems="center">
               {Boolean(indexPattern.title) && (
                 <EuiFlexItem grow={false}>

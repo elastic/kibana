@@ -1,9 +1,0 @@
-prs:
-- https://github.com/elastic/kibana/pull/284374
-type: enhancement
-products:
-- product: cloud-serverless
-  target: 2026-08-18
-- product: kibana
-title: Improve AI index listing and workflow preview in Context Engine
-description: Improves the Context Engine landing page AI index list. The workflow YAML preview flyout fills the available height, and previewing a deleted workflow shows a not-found message instead of a generic error.

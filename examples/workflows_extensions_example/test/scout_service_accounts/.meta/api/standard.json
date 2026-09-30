@@ -1,0 +1,36 @@
+{
+  "sha1": "6046f34202f1c33034bb5eba8418ea72867d3886",
+  "testChannels": [
+    "ci-on-commit"
+  ],
+  "tests": [
+    {
+      "id": "5ee749a5e0e6bef-922a0b83dac19c1",
+      "title": "[NON-MKI] Managed workflow service account routes managed workflow installs, executes and rebinds with its service account",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-search",
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "examples/workflows_extensions_example/test/scout_service_accounts/api/tests/managed_service_accounts.spec.ts",
+        "line": 18,
+        "column": 42
+      }
+    },
+    {
+      "id": "5ee749a5e0e6bef-6d2618624b0b788",
+      "title": "[NON-MKI] Managed workflow service account routes managed workflow allows execution but rejects SA mutations without manage_security",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-search",
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "examples/workflows_extensions_example/test/scout_service_accounts/api/tests/managed_service_accounts.spec.ts",
+        "line": 45,
+        "column": 37
+      }
+    }
+  ]
+}

@@ -17,6 +17,7 @@ export const datasetExamplesStorageSettings = {
       input: types.object({ dynamic: false, properties: {} }),
       output: types.object({ dynamic: false, properties: {} }),
       metadata: types.object({ dynamic: false, properties: {} }),
+      source: types.keyword({}),
       created_at: types.date({}),
       updated_at: types.date({}),
     },
@@ -28,6 +29,7 @@ export interface DatasetExampleStorageProperties {
   input?: Record<string, unknown>;
   output?: Record<string, unknown>;
   metadata?: Record<string, unknown>;
+  source?: 'import';
   created_at: string;
   updated_at: string;
 }

@@ -55,14 +55,17 @@ const isMappingConflict = (error: unknown): boolean =>
 // installed, ES auto-created a regular index instead of a data stream.
 const detectPlainIndex = async (esClient: ElasticsearchClient, name: string): Promise<boolean> => {
   try {
-    await esClient.indices.getDataStream({ name });
-    return false; // name resolves to a real data stream
+    const { data_streams: dataStreams = [] } = await esClient.indices.getDataStream({ name });
+    if (dataStreams.some((dataStream) => dataStream.name === name)) {
+      return false; // name resolves to a real data stream
+    }
   } catch (err) {
     if (!isIndexNotFound(err)) {
       throw err;
     }
   }
-  // getDataStream 404'd — check if a plain index is occupying the name
+  // getDataStream 404'd, or resolved with no matching data stream — check if a
+  // plain index is occupying the name instead.
   return esClient.indices.exists({ index: name });
 };
 

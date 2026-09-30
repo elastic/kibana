@@ -25,7 +25,7 @@ describe('CidrMask', () => {
       ${'fffff::/128'}
       ${'ffff::/128/128'}
     `('should throw an error on $mask', ({ mask }) => {
-      expect(() => new CidrMask(mask)).toThrowError();
+      expect(() => new CidrMask(mask)).toThrow();
     });
   });
 

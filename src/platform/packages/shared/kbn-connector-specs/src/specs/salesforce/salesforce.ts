@@ -88,6 +88,7 @@ export const SalesforceConnector: ConnectorSpec = {
   actions: {
     query: {
       isTool: true,
+      scope: 'read',
       input: lazySchema(() =>
         z.object({
           soql: z
@@ -116,6 +117,7 @@ export const SalesforceConnector: ConnectorSpec = {
 
     get_record: {
       isTool: true,
+      scope: 'read',
       input: lazySchema(() =>
         z.object({
           sobjectName: z
@@ -146,6 +148,7 @@ export const SalesforceConnector: ConnectorSpec = {
 
     list_records: {
       isTool: true,
+      scope: 'read',
       input: lazySchema(() =>
         z.object({
           sobjectName: z.string().describe('SObject API name (e.g. Account, Contact, MyObject__c)'),
@@ -181,6 +184,7 @@ export const SalesforceConnector: ConnectorSpec = {
 
     search: {
       isTool: true,
+      scope: 'read',
       input: lazySchema(() =>
         z.object({
           searchTerm: z
@@ -221,6 +225,7 @@ export const SalesforceConnector: ConnectorSpec = {
 
     describe: {
       isTool: true,
+      scope: 'read',
       input: lazySchema(() =>
         z.object({
           sobjectName: z
@@ -245,6 +250,7 @@ export const SalesforceConnector: ConnectorSpec = {
 
     download_file: {
       isTool: true,
+      scope: 'read',
       description:
         'Download a file from Salesforce by its ContentVersion Id. Returns the file as base64-encoded data with its content type. WARNING: Returns potentially large base64 payloads. Only call this when you have a plan to process the binary data (e.g. via an Elasticsearch ingest pipeline attachment processor). Use SOQL on ContentDocumentLink and ContentVersion to discover file Ids first.',
       input: lazySchema(() =>

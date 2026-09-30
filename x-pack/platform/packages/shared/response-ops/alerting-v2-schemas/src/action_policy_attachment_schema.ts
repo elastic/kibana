@@ -40,7 +40,6 @@ export const actionPolicyAttachmentDataSchema = actionPolicyResponseSchema
     destinations: true,
     matcher: true,
     group_by: true,
-    tags: true,
     grouping_mode: true,
     throttle: true,
     enabled: true,

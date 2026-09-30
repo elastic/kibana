@@ -33,6 +33,7 @@ import { useStartTransaction } from '../../../../common/lib/apm/use_start_transa
 import { ALERTS_ACTIONS } from '../../../../common/lib/apm/user_actions';
 import { defaultUdtHeaders } from '../../../../timelines/components/timeline/body/column_headers/default_headers';
 import { useUserPrivileges } from '../../../../common/components/user_privileges';
+import { INVESTIGATE_IN_TIMELINE_ACTION_ID } from '../../../../common/constants/action_ids';
 
 interface UseInvestigateInTimelineActionProps {
   ecsRowData?: Ecs | Ecs[] | null;
@@ -205,7 +206,7 @@ export const useInvestigateInTimeline = ({
       canInvestigateInTimeline
         ? [
             {
-              key: 'investigate-in-timeline-action-item',
+              key: INVESTIGATE_IN_TIMELINE_ACTION_ID,
               'data-test-subj': 'investigate-in-timeline-action-item',
               disabled: ecsRowData == null,
               onClick: investigateInTimelineAlertClick,

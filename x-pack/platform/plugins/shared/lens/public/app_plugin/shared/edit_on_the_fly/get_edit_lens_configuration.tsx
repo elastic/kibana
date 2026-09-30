@@ -27,6 +27,8 @@ import type {
   LensSerializedState,
   LensByRefSerializedState,
   LensByValueSerializedState,
+  LensDatasourceId,
+  DatasourceStates,
 } from '@kbn/lens-common';
 import type { LensPluginStartDependencies } from '../../../plugin';
 import { getActiveDatasourceIdFromDoc } from '../../../utils';
@@ -38,10 +40,11 @@ import {
   initExisting,
   initEmpty,
   setSelectedLayerId,
+  selectAdHocDataViews,
 } from '../../../state_management';
 import { generateId } from '../../../id_generator';
 import { LensEditConfigurationFlyout } from './lens_configuration_flyout';
-import type { EditConfigPanelProps } from './types';
+import type { EditConfigPanelProps, LensPanelStateUpdater } from './types';
 import { LensDocumentService } from '../../../persistence';
 import { EditorFrameServiceProvider } from '../../../editor_frame_service/editor_frame_service_context';
 import { ESQLEditorContext } from '../../../editor_frame_service/editor_frame/config_panel/esql_editor_context';
@@ -64,15 +67,17 @@ function LoadingSpinnerWithOverlay() {
   );
 }
 
-type UpdaterType = (
-  datasourceState: unknown,
-  visualizationState: unknown,
-  visualizationType?: string
-) => void;
+const getDatasourceStateValues = (datasourceStates: DatasourceStates) =>
+  Object.fromEntries(
+    Object.entries(datasourceStates).map(([datasourceId, { state }]) => [datasourceId, state])
+  );
 
 // exported for testing
 export const updatingMiddleware =
-  (updater: UpdaterType) => (store: MiddlewareAPI) => (next: Dispatch) => (action: Action) => {
+  (updater: LensPanelStateUpdater) =>
+  (store: MiddlewareAPI) =>
+  (next: Dispatch) =>
+  (action: Action) => {
     const {
       datasourceStates: prevDatasourceStates,
       visualization: prevVisualization,
@@ -80,12 +85,15 @@ export const updatingMiddleware =
     } = store.getState().lens;
     next(action);
     const { datasourceStates, visualization, activeDatasourceId } = store.getState().lens;
+    // Mixed panels can update a datasource that is not the chart's active datasource. For
+    // example, an ES|QL chart keeps static reference-line values in formBased state while
+    // textBased remains active. Compare every datasource state so those edits update the panel,
+    // but ignore loading metadata because it does not affect the rendered visualization.
+    const previousDatasourceStateValues = getDatasourceStateValues(prevDatasourceStates);
+    const datasourceStateValues = getDatasourceStateValues(datasourceStates);
     if (
       prevActiveDatasourceId !== activeDatasourceId ||
-      !isEqual(
-        prevDatasourceStates[prevActiveDatasourceId].state,
-        datasourceStates[activeDatasourceId].state
-      ) ||
+      !isEqual(previousDatasourceStateValues, datasourceStateValues) ||
       !isEqual(prevVisualization, visualization)
     ) {
       // ignore the actions that initialize the store with the state from the attributes
@@ -104,7 +112,15 @@ export const updatingMiddleware =
       updater(
         datasourceStates[activeDatasourceId].state,
         visualization.state,
-        visualization.activeId
+        visualization.activeId,
+        // pass the store's active datasource id explicitly: during a datasource
+        // conversion (e.g. formBased -> textBased) the serialized attributes can
+        // lag behind the store, so re-deriving the id from them may pick a stale key
+        (activeDatasourceId as LensDatasourceId | null) ?? undefined,
+        datasourceStates,
+        // ad hoc data views created during the editing session (e.g. for a new
+        // reference line layer) are not part of the persisted attributes yet
+        selectAdHocDataViews(store.getState())
       );
     }
   };

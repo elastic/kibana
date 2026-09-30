@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useMemo } from 'react';
+import React, { useCallback, useEffect, useMemo } from 'react';
 import { useHistory, useLocation } from 'react-router-dom';
 import { EuiHorizontalRule, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 
@@ -78,11 +78,10 @@ export const AvailablePackages: React.FC<{ prereleaseIntegrationsEnabled: boolea
     setUrlandPushHistory,
     setUrlandReplaceHistory,
     filteredCards,
-    allCards,
     availableSubCategories,
     selectedSubCategory,
     setSelectedSubCategory,
-  } = useAvailablePackages({ prereleaseIntegrationsEnabled });
+  } = useAvailablePackages({ prereleaseIntegrationsEnabled, enableCollectionGrouping: true });
 
   const onCategoryChange = useCallback(
     ({ id }: { id: string }) => {
@@ -129,24 +128,38 @@ export const AvailablePackages: React.FC<{ prereleaseIntegrationsEnabled: boolea
     [filteredCards, openCollection]
   );
 
-  // Resolve the open collection card from allCards (not filteredCards so it survives
-  // category/search filters that may not include the group).
+  // Resolve the open collection card from filteredCards so the flyout variants
+  // reflect the active category/agentless filter state.
   const openCollectionCard = useMemo(
     () =>
       openCollectionGroupId
-        ? allCards.find((c) => c.isCollectionCard && c.name === openCollectionGroupId)
+        ? filteredCards.find((c) => c.isCollectionCard && c.name === openCollectionGroupId)
         : undefined,
-    [openCollectionGroupId, allCards]
+    [openCollectionGroupId, filteredCards]
   );
 
+  // Clear stale ?collection= param when active filters remove or degrade the open collection
+  // so it does not unexpectedly re-open the flyout after the filter is cleared.
+  // Guard on isLoading AND errors: filteredCards is empty while packages load or when the
+  // catalog fetch fails, so wipe the param only once the catalog has loaded successfully.
+  useEffect(() => {
+    if (isLoading || eprPackageLoadingError || !openCollectionGroupId || openCollectionCard) return;
+    closeCollection();
+  }, [
+    isLoading,
+    eprPackageLoadingError,
+    openCollectionGroupId,
+    openCollectionCard,
+    closeCollection,
+  ]);
+
   // Build the return path that member detail pages use to navigate back here with the flyout open.
-  const collectionReturnPath = useMemo(
-    () =>
-      openCollectionGroupId
-        ? `${pathname}?${COLLECTION_QUERYPARAM}=${openCollectionGroupId}`
-        : undefined,
-    [openCollectionGroupId, pathname]
-  );
+  const collectionReturnPath = useMemo(() => {
+    if (!openCollectionGroupId) return undefined;
+    const params = new URLSearchParams(search);
+    params.set(COLLECTION_QUERYPARAM, openCollectionGroupId);
+    return `${pathname}?${params.toString()}`;
+  }, [openCollectionGroupId, pathname, search]);
 
   const collectionVariants: CollectionVariant[] = useMemo(() => {
     if (!openCollectionCard?.groupMembers || !collectionReturnPath) return [];

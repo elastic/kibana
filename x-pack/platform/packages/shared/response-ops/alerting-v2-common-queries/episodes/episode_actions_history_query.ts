@@ -9,6 +9,21 @@ import { esql } from '@elastic/esql';
 import { ALERT_ACTIONS_DATA_STREAM } from '@kbn/alerting-v2-constants';
 import { asTypedEsqlQuery, type TypedEsqlQuery } from './typed_esql_query';
 
+/** Raw ES|QL row shape — `tags` may arrive as a string when ES|QL collapses a single-value multivalue field. */
+export interface RawEpisodeActionHistoryEntry {
+  _id: string;
+  '@timestamp': string;
+  action_type: string;
+  actor: string | null;
+  episode_id: string | null;
+  group_hash: string | null;
+  tags?: string | string[] | null;
+  assignee_uid: string | null;
+  expiry: string | null;
+  reason: string | null;
+}
+
+/** Normalized entry with `tags` guaranteed to be a string array. */
 export interface EpisodeActionHistoryEntry {
   _id: string;
   '@timestamp': string;
@@ -16,7 +31,7 @@ export interface EpisodeActionHistoryEntry {
   actor: string | null;
   episode_id: string | null;
   group_hash: string | null;
-  tags: string[] | null;
+  tags: string[];
   assignee_uid: string | null;
   expiry: string | null;
   reason: string | null;
@@ -41,7 +56,7 @@ export const buildEpisodeActionsHistoryQuery = (
   episodeId: string,
   groupHash: string,
   { before, limit }: BuildEpisodeActionsHistoryQueryOptions
-): TypedEsqlQuery<EpisodeActionHistoryEntry> => {
+): TypedEsqlQuery<RawEpisodeActionHistoryEntry> => {
   // prettier-ignore
   const query = esql
     .from([ALERT_ACTIONS_DATA_STREAM], ['_id'])

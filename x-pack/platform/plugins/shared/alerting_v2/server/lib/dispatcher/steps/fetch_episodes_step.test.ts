@@ -5,16 +5,30 @@
  * 2.0.
  */
 
+import type { DiagnosticResult } from '@elastic/elasticsearch';
+import { errors } from '@elastic/elasticsearch';
+import type { AlertEventSeverity } from '@kbn/alerting-v2-schemas';
 import { FetchEpisodesStep, parseAlertEpisodes } from './fetch_episodes_step';
 import { createQueryService } from '../../services/query_service/query_service.mock';
+import { createLoggerService } from '../../services/logger_service/logger_service.mock';
 import { createDispatchableAlertEventsResponse } from '../fixtures/dispatcher';
 import {
   createAlertEpisode,
   createDispatcherPipelineState,
   createStepLogger,
 } from '../fixtures/test_utils';
-import { EPISODE_QUERY_LIMIT } from '../queries';
-import type { AlertEventSeverity } from '../../../resources/datastreams/alert_events';
+import { ESQL_QUERY_ROW_LIMIT } from '../queries';
+
+const makeSubPlanError = () =>
+  new errors.ResponseError({
+    statusCode: 400,
+    body: {
+      error: {
+        type: 'illegal_argument_exception',
+        reason: 'sub-plan execution results too large [21mb] > [20mb]',
+      },
+    },
+  } as DiagnosticResult);
 
 const logger = createStepLogger();
 
@@ -35,8 +49,8 @@ describe('FetchEpisodesStep', () => {
 
     expect(result.type).toBe('continue');
     if (result.type !== 'continue') return;
-    expect(result.data?.episodes).toHaveLength(2);
-    expect(result.data?.episodes?.[0].rule_id).toBe('r1');
+    expect(result.data?.scan?.episodes).toHaveLength(2);
+    expect(result.data?.scan?.episodes[0].rule_id).toBe('r1');
   });
 
   it('halts with no_episodes when none are found', async () => {
@@ -76,11 +90,11 @@ describe('FetchEpisodesStep', () => {
     );
   });
 
-  it('sets truncated: true when the query returns exactly EPISODE_QUERY_LIMIT rows', async () => {
+  it('sets truncated: true when the query returns exactly ESQL_QUERY_ROW_LIMIT rows', async () => {
     const { queryService, mockEsClient } = createQueryService();
     const step = new FetchEpisodesStep(queryService);
 
-    const maxEpisodes = Array.from({ length: EPISODE_QUERY_LIMIT }, (_, i) =>
+    const maxEpisodes = Array.from({ length: ESQL_QUERY_ROW_LIMIT }, (_, i) =>
       createAlertEpisode({ episode_id: `ep-${i}`, group_hash: `h-${i}` })
     );
     mockEsClient.esql.query.mockResolvedValueOnce(
@@ -92,14 +106,14 @@ describe('FetchEpisodesStep', () => {
 
     expect(result.type).toBe('continue');
     if (result.type !== 'continue') return;
-    expect(result.data?.truncated).toBe(true);
+    expect(result.data?.scan?.truncated).toBe(true);
   });
 
-  it('sets truncated: false when the query returns fewer than EPISODE_QUERY_LIMIT rows', async () => {
+  it('sets truncated: false when the query returns fewer than ESQL_QUERY_ROW_LIMIT rows', async () => {
     const { queryService, mockEsClient } = createQueryService();
     const step = new FetchEpisodesStep(queryService);
 
-    const episodes = Array.from({ length: EPISODE_QUERY_LIMIT - 1 }, (_, i) =>
+    const episodes = Array.from({ length: ESQL_QUERY_ROW_LIMIT - 1 }, (_, i) =>
       createAlertEpisode({ episode_id: `ep-${i}`, group_hash: `h-${i}` })
     );
     mockEsClient.esql.query.mockResolvedValueOnce(createDispatchableAlertEventsResponse(episodes));
@@ -109,10 +123,10 @@ describe('FetchEpisodesStep', () => {
 
     expect(result.type).toBe('continue');
     if (result.type !== 'continue') return;
-    expect(result.data?.truncated).toBe(false);
+    expect(result.data?.scan?.truncated).toBe(false);
   });
 
-  it('propagates query errors', async () => {
+  it('propagates unclassified query errors', async () => {
     const { queryService, mockEsClient } = createQueryService();
     const step = new FetchEpisodesStep(queryService);
 
@@ -120,6 +134,56 @@ describe('FetchEpisodesStep', () => {
 
     const state = createDispatcherPipelineState();
     await expect(step.execute(state, logger)).rejects.toThrow('ES error');
+  });
+
+  it('halts with inline_stats_too_large on a 400 illegal_argument_exception sub-plan error', async () => {
+    const { queryService, mockEsClient } = createQueryService();
+    const step = new FetchEpisodesStep(queryService);
+
+    mockEsClient.esql.query.mockRejectedValueOnce(makeSubPlanError());
+
+    const state = createDispatcherPipelineState();
+    const result = await step.execute(state, logger);
+
+    expect(result).toEqual({ type: 'halt', reason: 'inline_stats_too_large' });
+  });
+
+  it('logs the held watermark, its lag, and the force-advance threshold on a sub-plan error', async () => {
+    const { queryService, mockEsClient } = createQueryService();
+    const { loggerService, mockLogger } = createLoggerService();
+    const step = new FetchEpisodesStep(queryService);
+
+    mockEsClient.esql.query.mockRejectedValueOnce(makeSubPlanError());
+
+    // Default input: startedAt=08:00, eventWatermark=07:30, windowStart=07:20, windowEnd=07:35.
+    await step.execute(createDispatcherPipelineState(), loggerService);
+
+    expect(mockLogger.error).toHaveBeenCalledWith(
+      'ES rejected the INLINE STATS pre-fetch query for ' +
+        '[2026-01-22T07:20:00.000Z, 2026-01-22T07:35:00.000Z] (sub-plan too large). ' +
+        'Watermark held at 2026-01-22T07:30:00.000Z (lag: 1800000ms); the escape hatch ' +
+        'force-advances on its first fire after lag exceeds 15m.',
+      expect.objectContaining({
+        labels: expect.objectContaining({ code: 'DISPATCHER_INLINE_STATS_TOO_LARGE' }),
+      })
+    );
+  });
+
+  it('propagates a 400 with a different reason (not sub-plan)', async () => {
+    const { queryService, mockEsClient } = createQueryService();
+    const step = new FetchEpisodesStep(queryService);
+
+    const otherError = new errors.ResponseError({
+      statusCode: 400,
+      body: {
+        error: { type: 'illegal_argument_exception', reason: 'field [foo] is not supported' },
+      },
+    } as DiagnosticResult);
+
+    mockEsClient.esql.query.mockRejectedValueOnce(otherError);
+
+    const state = createDispatcherPipelineState();
+    await expect(step.execute(state, logger)).rejects.toThrow();
   });
 });
 

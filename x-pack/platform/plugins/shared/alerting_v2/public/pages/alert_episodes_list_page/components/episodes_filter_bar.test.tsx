@@ -18,9 +18,31 @@ import { EpisodesFilterBar } from './episodes_filter_bar';
 
 jest.mock('react-use/lib/useDebounce', () => jest.fn());
 
+const mockUseEuiContainerQuery = jest.fn();
+
+jest.mock('@elastic/eui', () => ({
+  ...jest.requireActual('@elastic/eui'),
+  useEuiContainerQuery: (condition: string) => ({
+    ref: { current: null },
+    matches: mockUseEuiContainerQuery(condition),
+  }),
+}));
+
 jest.mock('@kbn/alerting-v2-browser-shared', () => ({
-  AlertingDateRangePicker: ({ 'data-test-subj': dataTestSubj }: { 'data-test-subj'?: string }) => (
-    <div data-test-subj={dataTestSubj} />
+  AlertingDateRangePicker: ({
+    collapsed,
+    showTimeWindowButtons,
+    'data-test-subj': dataTestSubj,
+  }: {
+    collapsed?: boolean;
+    showTimeWindowButtons?: boolean;
+    'data-test-subj'?: string;
+  }) => (
+    <div
+      data-test-subj={dataTestSubj}
+      data-collapsed={collapsed}
+      data-show-time-window-buttons={showTimeWindowButtons}
+    />
   ),
 }));
 
@@ -72,6 +94,7 @@ const renderFilterBar = () =>
 describe('EpisodesFilterBar', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    mockUseEuiContainerQuery.mockReturnValue(false);
     mockUseFetchEpisodeTagOptions.mockReturnValue({
       data: [],
       isLoading: false,
@@ -86,6 +109,7 @@ describe('EpisodesFilterBar', () => {
   it('renders search and all episode filters', () => {
     renderFilterBar();
 
+    expect(screen.getByRole('search', { name: 'Filter alert episodes' })).toBeInTheDocument();
     expect(screen.getByTestId('episodesFilterBar-search')).toBeInTheDocument();
     expect(screen.getByTestId('episodesFilterBar-status-button')).toBeInTheDocument();
     expect(screen.getByTestId('episodesFilterBar-severity-button')).toBeInTheDocument();
@@ -93,5 +117,20 @@ describe('EpisodesFilterBar', () => {
     expect(screen.getByTestId('episodesFilterBar-tags-button')).toBeInTheDocument();
     expect(screen.getByTestId('episodesFilterBar-assignee-button')).toBeInTheDocument();
     expect(screen.getByTestId('episodesFilterBar-datePicker')).toBeInTheDocument();
+  });
+
+  it('collapses the date picker and hides time window buttons in a narrow container', () => {
+    mockUseEuiContainerQuery.mockReturnValue(true);
+
+    renderFilterBar();
+
+    expect(screen.getByTestId('episodesFilterBar-datePicker')).toHaveAttribute(
+      'data-collapsed',
+      'true'
+    );
+    expect(screen.getByTestId('episodesFilterBar-datePicker')).toHaveAttribute(
+      'data-show-time-window-buttons',
+      'false'
+    );
   });
 });

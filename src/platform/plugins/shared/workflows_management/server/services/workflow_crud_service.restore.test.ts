@@ -8,8 +8,7 @@
  */
 
 import type { ChangeHistoryDocument } from '@kbn/change-history';
-import type { CoreStart } from '@kbn/core/server';
-import { elasticsearchServiceMock, httpServerMock } from '@kbn/core/server/mocks';
+import { coreMock, httpServerMock, securityServiceMock } from '@kbn/core/server/mocks';
 import { loggerMock } from '@kbn/logging-mocks';
 import type { UpdatedWorkflowResponseDto } from '@kbn/workflows';
 import { InvalidYamlSchemaError } from '@kbn/workflows-yaml';
@@ -322,8 +321,9 @@ describe('WorkflowCrudService.restoreWorkflowVersion integration', () => {
     } as unknown as WorkflowValidationService;
 
     const deps: WorkflowCrudDeps = {
+      getSpaceId: () => 'default',
+      getServiceAccountBindings: () => securityServiceMock.createStart().serviceAccounts,
       logger: loggerMock.create(),
-      esClient: elasticsearchServiceMock.createElasticsearchClient(),
       workflowStorage: { getClient: () => client } as any,
       getSecurity: () =>
         ({
@@ -337,8 +337,14 @@ describe('WorkflowCrudService.restoreWorkflowVersion integration', () => {
         getWorkflowExecutions: jest.fn().mockResolvedValue({ total: 0, results: [] }),
       } as unknown as WorkflowExecutionQueryService,
       validationService,
-      getCoreStart: () => ({} as CoreStart),
+      getCoreStart: () => coreMock.createStart(),
       changeHistoryService,
+      workflowExecutionsDataClient: {
+        deleteByQuery: jest.fn().mockResolvedValue({ deleted: 0 }),
+      } as any,
+      stepExecutionsDataClient: {
+        deleteByQuery: jest.fn().mockResolvedValue({ deleted: 0 }),
+      } as any,
     };
 
     client.search.mockResolvedValue({

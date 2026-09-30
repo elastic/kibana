@@ -9,14 +9,11 @@
 
 import Path from 'path';
 import Fs from 'fs';
-import {
-  rspack,
-  type RuleSetRule,
-  type Configuration,
-  type RspackPluginInstance,
-} from '@rspack/core';
+import type { RuleSetRule, Configuration, RspackPluginInstance } from '@rspack/core';
+import type { LegacySharedOptions } from 'sass-embedded';
 import { getSharedConfig } from '@kbn/transpiler-config';
 import { DEFAULT_THEME_TAGS } from '@kbn/core-ui-settings-common';
+import { rspack } from '../rspack_runtime';
 import type { ThemeTag } from '../types';
 
 /**
@@ -143,11 +140,10 @@ function getSwcOptions(dist: boolean, hmr: boolean = false) {
       //
       // NOTE: `@swc/plugin-emotion` is a WebAssembly plugin whose ABI is locked
       // to the `swc_core` version that RSPack's bundled SWC was built against.
-      // RSPack 1.7.11 reports `swc_core` 59.0.1; `@swc/plugin-emotion@14.7.0` is
-      // built against `swc_core` 58.0.1 (the closest release at/below the host —
-      // there is no release targeting 59/60, it jumps to 61.0.1 in 14.8.0). The
-      // pinned version must be re-checked whenever `@rspack/core` is bumped, or
-      // the build will panic on a plugin ABI mismatch.
+      // RSPack 2.1.8 reports `swc_core` 72.0.0; `@swc/plugin-emotion@14.15.0` is
+      // built against `swc_core` 72.0.0 (exact match). The pinned version must
+      // be re-checked whenever `@rspack/core` is bumped, or the build will panic
+      // on a plugin ABI mismatch.
       experimental: {
         plugins: [
           [
@@ -271,11 +267,37 @@ export function getCssLoaderRule(dist: boolean): RuleSetRule {
 }
 
 /**
+ * Sass options shared by every SCSS rule.
+ *
+ * `repoRoot` must be an include path: `@elastic/eui-theme-borealis` imports
+ * `node_modules/@elastic/eui-theme-common/...` relative to the repo root. Dart
+ * Sass's legacy `render` API (used by sass-loader 10) also searches the process
+ * cwd, which masked this for in-repo builds; external plugin builds run from
+ * the plugin directory and need it explicitly.
+ */
+export function getSassOptions(repoRoot: string, dist: boolean): LegacySharedOptions<'async'> {
+  return {
+    outputStyle: dist ? 'compressed' : 'expanded',
+    includePaths: [
+      repoRoot,
+      Path.resolve(repoRoot, 'node_modules'),
+      Path.resolve(repoRoot, 'src/core/public/styles'),
+      Path.resolve(repoRoot, 'packages'),
+    ],
+    quietDeps: true,
+    silenceDeprecations: ['color-functions', 'import', 'global-builtin', 'legacy-js-api'],
+  };
+}
+
+/**
  * Get the sass-loader chain for a specific theme.
  * Each theme uses different globals (light vs dark colors/shadows).
  */
-function getSassLoaderChain(repoRoot: string, theme: ThemeTag, dist: boolean): RuleSetRule['use'] {
-  const nodeModulesPath = Path.resolve(repoRoot, 'node_modules');
+function getSassLoaderChain(
+  repoRoot: string,
+  theme: ThemeTag,
+  dist: boolean
+): NonNullable<RuleSetRule['use']> {
   const globalsPath = Path.resolve(
     repoRoot,
     `src/core/public/styles/core_app/_globals_${theme}.scss`
@@ -292,17 +314,7 @@ function getSassLoaderChain(repoRoot: string, theme: ThemeTag, dist: boolean): R
       options: {
         additionalData: `@import "${globalsPath}";\n`,
         implementation: require('sass-embedded'),
-        sassOptions: {
-          outputStyle: dist ? 'compressed' : 'expanded',
-          includePaths: [
-            nodeModulesPath,
-            Path.resolve(repoRoot, 'src/core/public/styles'),
-            Path.resolve(repoRoot, 'packages'),
-          ],
-          loadPaths: [nodeModulesPath, Path.resolve(repoRoot, 'src/core/public/styles')],
-          quietDeps: true,
-          silenceDeprecations: ['color-functions', 'import', 'global-builtin', 'legacy-js-api'],
-        },
+        sassOptions: getSassOptions(repoRoot, dist),
       },
     },
   ];
@@ -354,8 +366,6 @@ export function getScssLoaderRule(
  * Node modules SCSS is compiled with light theme globals only.
  */
 export function getNodeModulesScssLoaderRule(repoRoot: string, dist: boolean): RuleSetRule {
-  const nodeModulesPath = Path.resolve(repoRoot, 'node_modules');
-
   return {
     test: /\.scss$/,
     include: /node_modules/,
@@ -374,17 +384,7 @@ export function getNodeModulesScssLoaderRule(repoRoot: string, dist: boolean): R
             'src/core/public/styles/core_app/_globals_borealislight.scss'
           ).replace(/\\/g, '/')}";\n`,
           implementation: require('sass-embedded'),
-          sassOptions: {
-            outputStyle: dist ? 'compressed' : 'expanded',
-            includePaths: [
-              nodeModulesPath,
-              Path.resolve(repoRoot, 'src/core/public/styles'),
-              Path.resolve(repoRoot, 'packages'),
-            ],
-            loadPaths: [nodeModulesPath, Path.resolve(repoRoot, 'src/core/public/styles')],
-            quietDeps: true,
-            silenceDeprecations: ['color-functions', 'import', 'global-builtin', 'legacy-js-api'],
-          },
+          sassOptions: getSassOptions(repoRoot, dist),
         },
       },
     ],
@@ -491,13 +491,102 @@ export function getSharedModuleRules(
  */
 export function getSharedIgnoreWarnings(): RegExp[] {
   return [
-    // Same as legacy webpack optimizer (STATS_WARNINGS_FILTER)
     /export .* was not found in/,
     /chunk .* \[mini-css-extract-plugin\].*Conflicting order between/,
-    // RSPack-specific: Node.js globals mocking (webpack silently mocks these)
+    // Node.js globals mocking (webpack silently mocks these)
     /__dirname.*is used and has been mocked/,
     /__filename.*is used and has been mocked/,
   ];
+}
+
+/**
+ * Shared module.parser options for all RSPack builds.
+ */
+export function getSharedModuleParserConfig(): NonNullable<Configuration['module']>['parser'] {
+  return {
+    javascript: {
+      // Rspack v2 changed the default from 'warn' to 'error'. Keep 'warn':
+      // known cases exist in the codebase (see getSharedIgnoreWarnings) and
+      // SWC-transpiled type re-exports would otherwise fail the build.
+      exportsPresence: 'warn',
+    },
+  };
+}
+
+/**
+ * Rspack v2 enables asset-size performance budget warnings by default. Kibana
+ * enforces bundle sizes via limits.yml + BundleMetricsPlugin instead, so the
+ * built-in budgets are disabled in all optimizer configs.
+ */
+export const SHARED_PERFORMANCE_CONFIG: Configuration['performance'] = false;
+
+/**
+ * Shared persistent cache configuration for all RSPack builds.
+ * (Rspack v2: the v1 experiments.cache option moved to the top-level `cache`.)
+ *
+ * Centralized so the storage layout and version-hash mechanics stay in sync
+ * between the main build and external plugin builds. The `versionPrefix`
+ * stays per-build-type; bump it when the Rspack major or the config semantics
+ * change in a cache-incompatible way.
+ */
+export function getSharedCacheConfig({
+  enabled,
+  dist,
+  repoRoot,
+  cacheRoot = repoRoot,
+  versionPrefix,
+  configFiles,
+  extraBuildDependencies = [],
+  managedNodeModules = false,
+}: {
+  enabled: boolean;
+  dist: boolean;
+  repoRoot: string;
+  /** Root under which node_modules/.cache/.rspack-cache is created (default: repoRoot) */
+  cacheRoot?: string;
+  /** Cache format/semantics version prefix, e.g. 'v9' or 'external-plugin-v4' */
+  versionPrefix: string;
+  /** Repo-relative files hashed into the version and tracked as build dependencies */
+  configFiles: readonly string[];
+  /** Absolute extra build dependencies (tracked, but not hashed into the version) */
+  extraBuildDependencies?: string[];
+  /** Treat repo node_modules as package-manager-managed for faster validation */
+  managedNodeModules?: boolean;
+}): Configuration['cache'] {
+  if (!enabled) {
+    return false;
+  }
+
+  return {
+    type: 'persistent',
+    // Treat node_modules/ as package-manager-managed. Rspack skips
+    // per-file stats during cache validation and relies on package.json
+    // changes (captured by buildDependencies below) instead.
+    ...(managedNodeModules
+      ? { snapshot: { managedPaths: [Path.resolve(repoRoot, 'node_modules')] } }
+      : {}),
+    buildDependencies: [
+      ...extraBuildDependencies,
+      ...configFiles.map((f) => Path.resolve(repoRoot, f)),
+    ],
+    // Version includes a hash of the config files for reliable invalidation;
+    // buildDependencies may not trigger on TypeScript file changes.
+    version: `${versionPrefix}-${dist ? 'prod' : 'dev'}-${computeConfigHash(
+      repoRoot,
+      configFiles
+    )}`,
+    // Separate cache directories for dev vs dist to avoid stale cache issues.
+    // Structure: .rspack-cache/dev or .rspack-cache/dist
+    // Clear all: rm -rf node_modules/.cache/.rspack-cache
+    storage: {
+      type: 'filesystem',
+      directory: Path.resolve(
+        cacheRoot,
+        'node_modules/.cache/.rspack-cache',
+        dist ? 'dist' : 'dev'
+      ),
+    },
+  };
 }
 
 /**

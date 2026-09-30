@@ -40,6 +40,8 @@ import { DEFAULT_CONNECTOR_TIMEOUT_MS } from '.';
 import { logStartupHealthCheck } from './lib/startup_health_check';
 import { workflowExecutor } from './lib/schedules/workflow_executor';
 import { registerRoutes } from './routes';
+import { createAttackDiscoveryAttachmentType } from './agent_builder/attachments/attack_discovery';
+import { createAttackDiscoveryVerdictAttachmentType } from './agent_builder/attachments/attack_discovery_verdict';
 import { createDiagnosticReportAttachmentType } from './agent_builder/attachments/diagnostic_report';
 import { registerSkills } from './agent_builder/skills/register_skills';
 import type {
@@ -172,7 +174,7 @@ export class DiscoveriesPlugin
     const ruleDataServiceOptions: IndexOptions = {
       // IMPORTANT: These values MUST match what elastic_assistant uses to ensure
       // both plugins read/write to the same index. See elastic_assistant/server/plugin.ts
-      // The resulting index pattern is: .adhoc.alerts-siem.security.attack.discovery-{namespace}
+      // The resulting index pattern is: .adhoc.alerts-security.attack.discovery.alerts-{namespace}
       feature: ATTACK_DISCOVERY_SCHEDULES_CONSUMER_ID,
       registrationContext: ATTACK_DISCOVERY_ALERTS_CONTEXT,
       dataset: Dataset.alerts,
@@ -243,9 +245,10 @@ export class DiscoveriesPlugin
       });
     }
 
-    // Register agent builder attachment types and skills — but only when the
-    // feature flag is ON, so nothing requiring agent-builder-team review is
-    // active while the flag is OFF. Registration is deferred through
+    // Register agent builder attachment types and skills. The
+    // `security.attack_discovery` attachment type is always registered, because
+    // Security Solution's "Add to chat" produces it; everything else is registered
+    // only when the feature flag is ON. Registration is deferred through
     // `getStartServices()` because the request-free feature flags reader
     // (`coreStart.featureFlags`) is only available at start. Attachment types
     // and skills are read lazily at request time, so registering here (rather
@@ -254,9 +257,24 @@ export class DiscoveriesPlugin
       const agentBuilder = plugins.agentBuilder;
       const logger = this.logger;
       const workflowsManagementApi = this.workflowsManagementApi;
+      const adhocAttackDiscoveryDataClient = this.adhocAttackDiscoveryDataClient;
 
       void getStartServices()
         .then(async ({ coreStart }) => {
+          // Registered regardless of the flag: Security Solution's "Add to chat" attaches
+          // discoveries as this type, so it must not depend on the workflows kill switch.
+          // The data client is assigned unconditionally in `setup()` above; the guard
+          // narrows the optional field rather than describing a reachable state.
+          if (adhocAttackDiscoveryDataClient != null) {
+            agentBuilder.attachments.registerType(
+              createAttackDiscoveryAttachmentType({
+                adhocAttackDiscoveryDataClient,
+                esClient: coreStart.elasticsearch.client,
+                logger,
+              })
+            );
+          }
+
           if (!(await isWorkflowsEnabled(coreStart.featureFlags))) {
             logger.debug(
               () =>
@@ -266,6 +284,10 @@ export class DiscoveriesPlugin
           }
 
           agentBuilder.attachments.registerType(createDiagnosticReportAttachmentType());
+
+          // By value, so unlike the discovery itself it needs no data client to
+          // resolve against.
+          agentBuilder.attachments.registerType(createAttackDiscoveryVerdictAttachmentType());
 
           await registerSkills(agentBuilder, logger, {
             getEventLogIndex,

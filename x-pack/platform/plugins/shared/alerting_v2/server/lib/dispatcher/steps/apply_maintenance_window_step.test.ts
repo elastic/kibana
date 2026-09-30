@@ -28,6 +28,9 @@ const buildMw = (overrides: Partial<ActiveMaintenanceWindow> = {}): ActiveMainte
       lteMs: Date.parse('2026-01-22T08:00:00.000Z'),
     },
   ],
+  // Default: v2 selected, no filter — suppress all v2 episodes in the window.
+  // Tests that need v2-not-selected must pass scope: {} or scope: undefined explicitly.
+  scope: { alertingV2: { enabled: true } },
   ...overrides,
 });
 
@@ -89,9 +92,9 @@ describe('ApplyMaintenanceWindowStep', () => {
     const result = await step.execute(state, logger);
 
     if (result.type !== 'continue') throw new Error('expected continue');
-    expect(result.data?.dispatchable).toHaveLength(0);
-    expect(result.data?.suppressed).toHaveLength(1);
-    expect(result.data?.suppressed?.[0]).toEqual(
+    expect(result.data?.triage?.dispatchable).toHaveLength(0);
+    expect(result.data?.triage?.suppressed).toHaveLength(1);
+    expect(result.data?.triage?.suppressed[0]).toEqual(
       expect.objectContaining({ rule_id: ep.rule_id, reason: 'maintenance_window:mw-1' })
     );
   });
@@ -113,7 +116,7 @@ describe('ApplyMaintenanceWindowStep', () => {
   it('suppresses episodes where the episode-data KQL filter matches', async () => {
     service.getEnabledMaintenanceWindows.mockResolvedValue([
       buildMw({
-        scope: { alertingV2: { kql: 'data.severity: "critical"' } },
+        scope: { alertingV2: { enabled: true, kql: 'data.severity: "critical"' } },
       }),
     ]);
 
@@ -130,14 +133,14 @@ describe('ApplyMaintenanceWindowStep', () => {
     const result = await step.execute(state, logger);
 
     if (result.type !== 'continue') throw new Error('expected continue');
-    expect(result.data?.suppressed).toHaveLength(1);
-    expect(result.data?.dispatchable).toHaveLength(0);
+    expect(result.data?.triage?.suppressed).toHaveLength(1);
+    expect(result.data?.triage?.dispatchable).toHaveLength(0);
   });
 
   it('keeps episodes where the episode-data KQL filter does not match', async () => {
     service.getEnabledMaintenanceWindows.mockResolvedValue([
       buildMw({
-        scope: { alertingV2: { kql: 'data.severity: "critical"' } },
+        scope: { alertingV2: { enabled: true, kql: 'data.severity: "critical"' } },
       }),
     ]);
 
@@ -159,7 +162,7 @@ describe('ApplyMaintenanceWindowStep', () => {
     service.getEnabledMaintenanceWindows.mockResolvedValue([
       buildMw({
         id: 'mw-non-matching',
-        scope: { alertingV2: { kql: 'data.severity: "low"' } },
+        scope: { alertingV2: { enabled: true, kql: 'data.severity: "low"' } },
       }),
       buildMw({ id: 'mw-matching' }),
     ]);
@@ -177,7 +180,7 @@ describe('ApplyMaintenanceWindowStep', () => {
     const result = await step.execute(state, logger);
 
     if (result.type !== 'continue') throw new Error('expected continue');
-    expect(result.data?.suppressed?.[0]).toEqual(
+    expect(result.data?.triage?.suppressed[0]).toEqual(
       expect.objectContaining({ reason: 'maintenance_window:mw-matching' })
     );
   });
@@ -218,8 +221,8 @@ describe('ApplyMaintenanceWindowStep', () => {
     const result = await step.execute(state, logger);
 
     if (result.type !== 'continue') throw new Error('expected continue');
-    expect(result.data?.suppressed).toHaveLength(2);
-    expect(result.data?.suppressed?.[0]).toEqual(previouslySuppressed);
+    expect(result.data?.triage?.suppressed).toHaveLength(2);
+    expect(result.data?.triage?.suppressed[0]).toEqual(previouslySuppressed);
   });
 
   it('suppresses an episode whose timestamp is inside an MW window that has already closed by now', async () => {
@@ -238,8 +241,8 @@ describe('ApplyMaintenanceWindowStep', () => {
     const result = await step.execute(state, logger);
 
     if (result.type !== 'continue') throw new Error('expected continue');
-    expect(result.data?.suppressed).toHaveLength(1);
-    expect(result.data?.suppressed?.[0]).toEqual(
+    expect(result.data?.triage?.suppressed).toHaveLength(1);
+    expect(result.data?.triage?.suppressed[0]).toEqual(
       expect.objectContaining({ reason: 'maintenance_window:mw-closed' })
     );
   });
@@ -277,9 +280,9 @@ describe('ApplyMaintenanceWindowStep', () => {
       const result = await step.execute(state, logger);
 
       if (result.type !== 'continue') throw new Error('expected continue');
-      expect(result.data?.dispatchable).toHaveLength(0);
-      expect(result.data?.suppressed).toHaveLength(1);
-      expect(result.data?.suppressed?.[0]).toEqual(
+      expect(result.data?.triage?.dispatchable).toHaveLength(0);
+      expect(result.data?.triage?.suppressed).toHaveLength(1);
+      expect(result.data?.triage?.suppressed[0]).toEqual(
         expect.objectContaining({ reason: 'maintenance_window:mw-1' })
       );
     });
@@ -307,7 +310,7 @@ describe('ApplyMaintenanceWindowStep', () => {
       service.getEnabledMaintenanceWindows.mockResolvedValue([
         buildMw({
           spaceId: 'default',
-          scope: { alertingV2: { kql: 'data.severity: "critical"' } },
+          scope: { alertingV2: { enabled: true, kql: 'data.severity: "critical"' } },
         }),
       ]);
 
@@ -327,9 +330,9 @@ describe('ApplyMaintenanceWindowStep', () => {
       const result = await step.execute(state, logger);
 
       if (result.type !== 'continue') throw new Error('expected continue');
-      expect(result.data?.dispatchable).toHaveLength(0);
-      expect(result.data?.suppressed).toHaveLength(1);
-      expect(result.data?.suppressed?.[0]).toEqual(
+      expect(result.data?.triage?.dispatchable).toHaveLength(0);
+      expect(result.data?.triage?.suppressed).toHaveLength(1);
+      expect(result.data?.triage?.suppressed[0]).toEqual(
         expect.objectContaining({ reason: 'maintenance_window:mw-1' })
       );
     });
@@ -338,7 +341,7 @@ describe('ApplyMaintenanceWindowStep', () => {
       service.getEnabledMaintenanceWindows.mockResolvedValue([
         buildMw({
           spaceId: 'default',
-          scope: { alertingV2: { kql: 'data.severity: "critical"' } },
+          scope: { alertingV2: { enabled: true, kql: 'data.severity: "critical"' } },
         }),
       ]);
 
@@ -358,5 +361,44 @@ describe('ApplyMaintenanceWindowStep', () => {
 
       expect(result).toEqual({ type: 'continue' });
     });
+
+    it('does not suppress an episode when the MW has no alertingV2 scope (v2 not selected)', async () => {
+      // A MW with scope.alertingV2 absent means v2 not selected — must not suppress v2 episodes.
+      service.getEnabledMaintenanceWindows.mockResolvedValue([
+        buildMw({ spaceId: 'default', scope: {} }),
+      ]);
+
+      const ep = createAlertEpisode({
+        source: 'pagerduty',
+        rule_id: null,
+        space_id: 'default',
+        last_event_timestamp: '2026-01-22T07:30:00.000Z',
+      });
+      const state = createDispatcherPipelineState({
+        dispatchable: [ep],
+        rules: new Map(),
+      });
+
+      const result = await step.execute(state, logger);
+
+      // v2 not selected → no suppression
+      expect(result).toEqual({ type: 'continue' });
+    });
+  });
+
+  it('does not suppress an episode when the MW has no scope at all (v2 not selected)', async () => {
+    service.getEnabledMaintenanceWindows.mockResolvedValue([buildMw({ scope: undefined })]);
+
+    const ep = createAlertEpisode({ last_event_timestamp: '2026-01-22T07:30:00.000Z' });
+    const state = createDispatcherPipelineState({
+      dispatchable: [ep],
+      rules: new Map([[ep.rule_id!, createRule({ id: ep.rule_id!, spaceId: 'default' })]]),
+      suppressed: [],
+    });
+
+    const result = await step.execute(state, logger);
+
+    // scope absent → alertingV2 absent → skip → no suppression
+    expect(result).toEqual({ type: 'continue' });
   });
 });

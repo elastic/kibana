@@ -6,16 +6,18 @@
  */
 
 import { httpServerMock } from '@kbn/core-http-server-mocks';
-import { editPrivateLocationRoute } from './edit_private_location';
+import { editPrivateLocationRoute, EditPrivateLocationSchema } from './edit_private_location';
 import { PrivateLocationRepository } from '../../../repositories/private_location_repository';
+import { updatePrivateLocationMonitors } from './helpers';
+import { getPrivateLocations } from '../../../synthetics_service/get_private_locations';
 
 jest.mock('../../../synthetics_service/get_private_locations', () => ({
   getPrivateLocations: jest.fn().mockResolvedValue([]),
   getPrivateLocationsForNamespaces: jest.fn().mockResolvedValue([]),
 }));
 
-// Only the privilege-check path (assertions below) is under test here; the
-// actual monitor-label sync is exercised by helpers.test.ts.
+// Privilege-check and label-sync wiring are under test here; the actual
+// monitor rewrite is exercised by helpers.test.ts.
 jest.mock('./helpers', () => {
   const actual = jest.requireActual('./helpers');
   return {
@@ -54,95 +56,86 @@ const makeRouteContext = (body: Record<string, unknown>) => {
   return { routeContext, response };
 };
 
-describe('editPrivateLocationRoute isAgentSharding', () => {
-  afterEach(() => jest.restoreAllMocks());
+describe('editPrivateLocationRoute', () => {
+  afterEach(() => {
+    jest.restoreAllMocks();
+    jest.clearAllMocks();
+  });
 
-  const stubRepo = (updatedAttributes = {}, existingAttributes = {}) => {
-    const location = {
-      ...existingLocation,
-      attributes: { ...existingLocation.attributes, ...existingAttributes },
-    };
+  const stubRepo = (updatedAttributes = {}) => {
     jest
       .spyOn(PrivateLocationRepository.prototype, 'getPrivateLocation')
-      .mockResolvedValue(location as any);
+      .mockResolvedValue(existingLocation as any);
     return jest
       .spyOn(PrivateLocationRepository.prototype, 'editPrivateLocation')
       .mockResolvedValue({
-        ...location,
-        attributes: { ...location.attributes, ...updatedAttributes },
+        ...existingLocation,
+        attributes: { ...existingLocation.attributes, ...updatedAttributes },
       } as any);
   };
 
-  it('persists isAgentSharding when it is the only change', async () => {
-    const edit = stubRepo({ isAgentSharding: true });
-    const { routeContext } = makeRouteContext({ isAgentSharding: true });
+  it('persists a tag-only edit without rewriting monitors', async () => {
+    const edit = stubRepo({ tags: ['new'] });
+    const { routeContext } = makeRouteContext({ tags: ['new'] });
 
     const result = await editPrivateLocationRoute().handler(routeContext);
 
-    expect(edit).toHaveBeenCalledWith('loc-1', expect.objectContaining({ isAgentSharding: true }));
-    expect(result).toEqual(expect.objectContaining({ isAgentSharding: true }));
+    expect(edit).toHaveBeenCalledWith('loc-1', { label: 'Loc', tags: ['new'] });
+    expect(updatePrivateLocationMonitors).not.toHaveBeenCalled();
+    expect(result).toEqual(expect.objectContaining({ tags: ['new'] }));
   });
 
-  it('overwrites an enabled isAgentSharding flag with false', async () => {
-    const edit = stubRepo({ isAgentSharding: false }, { isAgentSharding: true });
-    const { routeContext } = makeRouteContext({ isAgentSharding: false });
-
-    const result = await editPrivateLocationRoute().handler(routeContext);
-
-    expect(edit).toHaveBeenCalledWith('loc-1', expect.objectContaining({ isAgentSharding: false }));
-    expect(result).not.toHaveProperty('isAgentSharding');
-  });
-
-  it('does not write when the body omits isAgentSharding and other fields', async () => {
+  it('does not write when the body has no changes', async () => {
     const edit = stubRepo();
     const { routeContext } = makeRouteContext({});
 
     await editPrivateLocationRoute().handler(routeContext);
 
     expect(edit).not.toHaveBeenCalled();
+    expect(updatePrivateLocationMonitors).not.toHaveBeenCalled();
+  });
+
+  it('ignores the deprecated isAgentSharding field without writing', async () => {
+    const edit = stubRepo();
+    const { routeContext } = makeRouteContext({ isAgentSharding: true });
+
+    const result = await editPrivateLocationRoute().handler(routeContext);
+
+    expect(edit).not.toHaveBeenCalled();
+    expect(updatePrivateLocationMonitors).not.toHaveBeenCalled();
+    expect(result).not.toHaveProperty('isAgentSharding');
+  });
+
+  it('persists label and tags but not the deprecated isAgentSharding field', async () => {
+    const edit = stubRepo({ tags: ['new'] });
+    const { routeContext } = makeRouteContext({ tags: ['new'], isAgentSharding: false });
+
+    await editPrivateLocationRoute().handler(routeContext);
+
+    expect(edit).toHaveBeenCalledWith('loc-1', { label: 'Loc', tags: ['new'] });
   });
 
   it('returns forbidden when a monitor using the location belongs to an unauthorized space', async () => {
-    const response = httpServerMock.createResponseFactory();
+    const edit = stubRepo();
+    const { routeContext, response } = makeRouteContext({ label: 'New label' });
     const forbidden = { statusCode: 403 };
     response.forbidden.mockReturnValue(forbidden as any);
-    const edit = jest.spyOn(PrivateLocationRepository.prototype, 'editPrivateLocation');
-    jest.spyOn(PrivateLocationRepository.prototype, 'getPrivateLocation').mockResolvedValue({
-      id: 'location-1',
-      namespaces: ['default'],
-      attributes: {
-        id: 'location-1',
-        label: 'Old label',
-        agentPolicyId: 'agent-policy-1',
-        isServiceManaged: false,
-      },
-    } as any);
-
-    const result = await editPrivateLocationRoute().handler({
-      request: { params: { locationId: 'location-1' }, body: { label: 'New label' } },
-      response,
-      savedObjectsClient: {},
-      monitorConfigRepository: {
-        findDecryptedMonitors: jest
+    routeContext.monitorConfigRepository.findDecryptedMonitors.mockResolvedValue([
+      { namespaces: ['default', 'restricted-space'] },
+    ]);
+    routeContext.server.security = {
+      authz: {
+        checkSavedObjectsPrivilegesWithRequest: jest
           .fn()
-          .mockResolvedValue([{ namespaces: ['default', 'restricted-space'] }]),
+          .mockReturnValue(jest.fn().mockResolvedValue({ hasAllRequested: false })),
       },
-      server: {
-        coreStart: {
-          savedObjects: { createInternalRepository: jest.fn().mockReturnValue({}) },
-        },
-        security: {
-          authz: {
-            checkSavedObjectsPrivilegesWithRequest: jest
-              .fn()
-              .mockReturnValue(jest.fn().mockResolvedValue({ hasAllRequested: false })),
-          },
-        },
-      },
-    } as any);
+    };
+
+    const result = await editPrivateLocationRoute().handler(routeContext);
 
     expect(result).toBe(forbidden);
     expect(edit).not.toHaveBeenCalled();
+    expect(updatePrivateLocationMonitors).not.toHaveBeenCalled();
   });
 
   it('checks privileges across every monitor namespace, deduped, not just the first', async () => {
@@ -169,5 +162,62 @@ describe('editPrivateLocationRoute isAgentSharding', () => {
     // deduped: 'space-a' appears in both monitors but must only be checked once
     expect(spacesArg).toHaveLength(2);
     expect(edit).toHaveBeenCalled();
+  });
+
+  it('rewrites monitors before persisting a label change', async () => {
+    const edit = stubRepo({ label: 'Barcelona' });
+    const { routeContext } = makeRouteContext({ label: 'Barcelona' });
+
+    await editPrivateLocationRoute().handler(routeContext);
+
+    expect(updatePrivateLocationMonitors).toHaveBeenCalled();
+    expect(edit).toHaveBeenCalled();
+    expect((updatePrivateLocationMonitors as jest.Mock).mock.invocationCallOrder[0]).toBeLessThan(
+      edit.mock.invocationCallOrder[0]
+    );
+  });
+
+  it('does not persist the label when monitor rewrite throws', async () => {
+    const edit = stubRepo({ label: 'Barcelona' });
+    (updatePrivateLocationMonitors as jest.Mock).mockRejectedValueOnce(new Error('fleet down'));
+    const { routeContext } = makeRouteContext({ label: 'Barcelona' });
+
+    await expect(editPrivateLocationRoute().handler(routeContext)).rejects.toThrow('fleet down');
+    expect(edit).not.toHaveBeenCalled();
+  });
+
+  it('passes the new label to monitor rewrite before the saved object is persisted', async () => {
+    (getPrivateLocations as jest.Mock).mockResolvedValue([
+      { id: 'loc-1', label: 'Loc', agentPolicyId: 'ap-1', isServiceManaged: false },
+      { id: 'loc-2', label: 'Other', agentPolicyId: 'ap-2', isServiceManaged: false },
+    ]);
+    stubRepo({ label: 'Barcelona' });
+    const { routeContext } = makeRouteContext({ label: 'Barcelona' });
+
+    await editPrivateLocationRoute().handler(routeContext);
+
+    expect(updatePrivateLocationMonitors).toHaveBeenCalledWith(
+      expect.objectContaining({
+        newLocationLabel: 'Barcelona',
+        allPrivateLocations: [
+          expect.objectContaining({ id: 'loc-1', label: 'Barcelona' }),
+          expect.objectContaining({ id: 'loc-2', label: 'Other' }),
+        ],
+      })
+    );
+  });
+});
+
+describe('EditPrivateLocationSchema', () => {
+  it('rejects unknown keys so a typo-only update cannot succeed as a no-op', () => {
+    expect(EditPrivateLocationSchema.safeParse({ lable: 'x' }).success).toBe(false);
+  });
+
+  it('still accepts the deprecated isAgentSharding field', () => {
+    expect(EditPrivateLocationSchema.safeParse({ isAgentSharding: true }).success).toBe(true);
+  });
+
+  it('accepts a known partial update', () => {
+    expect(EditPrivateLocationSchema.parse({ label: 'x' })).toEqual({ label: 'x' });
   });
 });

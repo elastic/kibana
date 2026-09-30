@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { ChangeHistoryActionId } from '@kbn/change-history';
 import type { RuleResponse } from '@kbn/alerting-v2-schemas';
 
 /** Domain rule snapshot persisted as `object.snapshot` (API response minus SO OCC token). */
@@ -39,7 +40,7 @@ export interface LogRuleChangesParams {
   spaceId: string;
   author: RuleChangesHistoryAuthor;
   entries: RuleChangesHistoryEntry[];
-  action: string;
+  action: ChangeHistoryActionId;
   timestamp?: string | number | Date;
   /** ECS `event.type`. Defaults to `change` when omitted. */
   eventType?: RuleChangesHistoryEventType;

@@ -45,6 +45,7 @@ import type {
 } from '@kbn/ml-common-types/results';
 import type { CombinedJob } from '@kbn/ml-common-types/anomaly_detection_jobs/combined_job';
 import type { Datafeed } from '@kbn/ml-common-types/anomaly_detection_jobs/datafeed';
+import { getProjectRoutingFromDatafeed } from '@kbn/ml-cps-common';
 import { getSeverityThresholdMax } from '../../../common/util/severity_threshold';
 
 import {
@@ -63,6 +64,7 @@ import { getChartType } from '../../../common/util/chart_utils';
 
 import type { MlClient } from '../../lib/ml_client';
 import type { MlJob } from '../..';
+import { getIsMlCpsEnabled } from '../../lib/cps_utils';
 
 export function chartLimits(data: ChartPoint[] = []) {
   const domain = extent(data, (d) => {
@@ -155,6 +157,8 @@ export function anomalyChartsDataProvider(mlClient: MlClient, client: IScopedClu
     const scriptFields = datafeedConfig?.script_fields;
     const aggFields = getDatafeedAggregations(datafeedConfig);
 
+    const isMlCpsEnabled = await getIsMlCpsEnabled(client);
+
     // Build the criteria to use in the bool filter part of the request.
     // Add criteria for the time range, entity fields,
     // plus any additional supplied query.
@@ -206,6 +210,9 @@ export function anomalyChartsDataProvider(mlClient: MlClient, client: IScopedClu
       }
     });
 
+    const projectRouting =
+      isMlCpsEnabled && datafeedConfig ? getProjectRoutingFromDatafeed(datafeedConfig) : null;
+
     const esSearchRequest: estypes.SearchRequest = {
       index,
       query: {
@@ -225,6 +232,7 @@ export function anomalyChartsDataProvider(mlClient: MlClient, client: IScopedClu
       ...(isRuntimeMappings(datafeedConfig?.runtime_mappings)
         ? { runtime_mappings: datafeedConfig?.runtime_mappings }
         : {}),
+      ...(projectRouting !== null ? { project_routing: projectRouting } : {}),
       size: 0,
       _source: false,
     };
@@ -1241,13 +1249,16 @@ export function anomalyChartsDataProvider(mlClient: MlClient, client: IScopedClu
         };
       });
 
-    if (mapData.length) {
-      // push map data in if it's available
-      // @ts-ignore
-      seriesToPlot.push(...mapData);
-    }
-
-    data.seriesToPlot = seriesToPlot;
+    data.seriesToPlot = mapData.length
+      ? [
+          ...seriesToPlot,
+          ...mapData.map((series) => ({
+            ...series,
+            plotEarliest: chartRange.min,
+            plotLatest: chartRange.max,
+          })),
+        ]
+      : seriesToPlot;
 
     data.errorMessages = errorMessages
       ? Object.entries(errorMessages!).reduce((acc, [errorMessage, jobs]) => {
@@ -1684,6 +1695,11 @@ export function anomalyChartsDataProvider(mlClient: MlClient, client: IScopedClu
     }
 
     const datafeedQuery = get(config, 'datafeedConfig.query', null);
+    const isMlCpsEnabled = await getIsMlCpsEnabled(client);
+    const projectRouting =
+      isMlCpsEnabled && config.datafeedConfig
+        ? getProjectRoutingFromDatafeed(config.datafeedConfig) ?? undefined
+        : undefined;
 
     try {
       return await getEventDistributionData(
@@ -1699,7 +1715,7 @@ export function anomalyChartsDataProvider(mlClient: MlClient, client: IScopedClu
         range.min,
         range.max,
         config.bucketSpanSeconds * 1000,
-        config.datafeedConfig.project_routing
+        projectRouting
       );
     } catch (e) {
       handleError(

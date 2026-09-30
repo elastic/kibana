@@ -6,6 +6,25 @@
  */
 
 /**
+ * Version of the internal inference endpoint HTTP API (`/internal/_inference/*`).
+ */
+export const INFERENCE_ENDPOINT_INTERNAL_API_VERSION = '1';
+
+export interface InferenceEndpointRequestBody {
+  config: {
+    inferenceId: string;
+    provider: string;
+    taskType: string;
+    providerConfig?: Record<string, unknown>;
+    taskTypeConfig?: Record<string, unknown>;
+    headers?: Record<string, string>;
+  };
+  secrets: {
+    providerSecrets?: Record<string, unknown>;
+  };
+}
+
+/**
  * Constants for all default (preconfigured) inference endpoints.
  */
 export const defaultInferenceEndpoints = {
@@ -45,6 +64,7 @@ export interface CspRegion {
   csp: string;
   region: string;
   geo?: string;
+  region_display_name?: string;
 }
 
 /** A region entry that carries only a geographic zone with no CSP/region detail. */

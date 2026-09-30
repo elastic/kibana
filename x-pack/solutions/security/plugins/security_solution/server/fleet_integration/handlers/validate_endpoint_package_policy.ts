@@ -9,8 +9,12 @@ import moment from 'moment';
 
 import type { NewPackagePolicyInput } from '@kbn/fleet-plugin/common';
 import { EndpointIntegrationFleetError } from './errors';
-import { getControlledArtifactCutoffDate } from '../../../common/endpoint/utils/controlled_artifact_rollout';
-import { DeviceControlAccessLevel } from '../../../common/endpoint/types';
+import { getDeviceControlNotificationConflicts } from '../../../common/endpoint/models/policy_config_helpers';
+import {
+  classifyGlobalManifestVersion,
+  isPinnedGlobalManifestVersion,
+} from '../../../common/endpoint/utils/global_manifest_version';
+import { PolicyOperatingSystem } from '../../../common/endpoint/types';
 
 export const validateEndpointPackagePolicy = (
   inputs: NewPackagePolicyInput[],
@@ -32,22 +36,22 @@ export const validateEndpointPackagePolicy = (
   if (input?.config?.policy?.value?.global_manifest_version) {
     const globalManifestVersion = input.config.policy.value.global_manifest_version;
 
-    if (globalManifestVersion !== 'latest') {
-      const parsedDate = moment.utc(globalManifestVersion, 'YYYY-MM-DD', true);
-      if (!parsedDate.isValid()) {
+    const manifestStatus = classifyGlobalManifestVersion(globalManifestVersion);
+    if (isPinnedGlobalManifestVersion(manifestStatus)) {
+      if (manifestStatus === 'invalid_format') {
         throw createManifestVersionError(
           'Invalid date format. Use "latest" or "YYYY-MM-DD" format. UTC time.'
         );
       }
 
-      const maxAllowedDate = getControlledArtifactCutoffDate();
-      if (parsedDate.startOf('day').isBefore(maxAllowedDate.clone().startOf('day'))) {
+      if (manifestStatus === 'too_old') {
         throw createManifestVersionError(
           'Global manifest version is too far in the past. Please use either "latest" or a date within the last 18 months. The earliest valid date is October 1, 2023, in UTC time.'
         );
       }
-      const minAllowedDate = moment.utc().subtract(1, 'day');
-      if (parsedDate.isAfter(minAllowedDate)) {
+
+      if (manifestStatus === 'in_future') {
+        const minAllowedDate = moment.utc().subtract(1, 'day');
         throw createManifestVersionError(
           `Global manifest version cannot be in the future. Latest selectable date is ${minAllowedDate.format(
             'MMMM DD, YYYY'
@@ -59,29 +63,12 @@ export const validateEndpointPackagePolicy = (
 
   // Validate device control notifications
   const policyValue = input?.config?.policy?.value;
-  if (policyValue?.windows?.device_control || policyValue?.mac?.device_control) {
-    const windowsAccessLevel = policyValue?.windows?.device_control?.usb_storage;
-    const macAccessLevel = policyValue?.mac?.device_control?.usb_storage;
-    const windowsNotificationEnabled = policyValue?.windows?.popup?.device_control?.enabled;
-    const macNotificationEnabled = policyValue?.mac?.popup?.device_control?.enabled;
-
-    if (
-      windowsNotificationEnabled &&
-      windowsAccessLevel &&
-      windowsAccessLevel !== DeviceControlAccessLevel.deny_all
-    ) {
+  if (policyValue) {
+    const [conflict] = getDeviceControlNotificationConflicts(policyValue);
+    if (conflict !== undefined) {
+      const osLabel = conflict.os === PolicyOperatingSystem.windows ? 'Windows' : 'Mac';
       throw new EndpointIntegrationFleetError(
-        `Device Control user notifications are only supported when USB storage access level is set to deny_all. Current Windows access level is "${windowsAccessLevel}". Please either set the access level to deny_all or disable user notifications.`
-      );
-    }
-
-    if (
-      macNotificationEnabled &&
-      macAccessLevel &&
-      macAccessLevel !== DeviceControlAccessLevel.deny_all
-    ) {
-      throw new EndpointIntegrationFleetError(
-        `Device Control user notifications are only supported when USB storage access level is set to deny_all. Current Mac access level is "${macAccessLevel}". Please either set the access level to deny_all or disable user notifications.`
+        `Device Control user notifications are only supported when USB storage access level is set to deny_all. Current ${osLabel} access level is "${conflict.accessLevel}". Please either set the access level to deny_all or disable user notifications.`
       );
     }
   }

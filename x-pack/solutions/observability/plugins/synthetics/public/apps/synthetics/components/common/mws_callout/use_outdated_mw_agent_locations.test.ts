@@ -6,99 +6,79 @@
  */
 
 import { renderHook } from '@testing-library/react';
+import { FETCH_STATUS, useFetcher } from '@kbn/observability-shared-plugin/public';
+import { SYNTHETICS_API_URLS } from '../../../../../../common/constants';
+import { apiService } from '../../../../../utils/api_service/api_service';
+import { useUrlSpaceId } from '../../../hooks/use_url_space_id';
 import { useOutdatedMwAgentLocationIds } from './use_outdated_mw_agent_locations';
-import { useAgentStats } from '../../settings/private_locations/hooks/use_agent_stats';
-import type { AgentStat, LocationAgentStats } from '../../../../../../common/types';
 
-jest.mock('../../settings/private_locations/hooks/use_agent_stats');
+jest.mock('@kbn/observability-shared-plugin/public', () => ({
+  FETCH_STATUS: jest.requireActual('@kbn/observability-shared-plugin/public').FETCH_STATUS,
+  useFetcher: jest.fn(),
+}));
 
-const mockUseAgentStats = useAgentStats as jest.MockedFunction<typeof useAgentStats>;
+jest.mock('../../../hooks/use_url_space_id', () => ({
+  useUrlSpaceId: jest.fn(),
+}));
 
-const mockAgent = (overrides: Partial<AgentStat> = {}): AgentStat => ({
-  host: 'host-1',
-  lastCheckin: null,
-  healthy: true,
-  totalMemoryMib: null,
-  usedMemoryMib: null,
-  usedMemoryPct: null,
-  cpuPct: null,
-  agentId: 'agent-1',
-  agentVersion: '9.3.4',
-  agentStatus: 'online',
-  policyRevision: 1,
-  lastCheckinMessage: null,
-  platform: null,
-  tags: [],
-  monitorsAssigned: null,
-  ...overrides,
-});
+jest.mock('../../../contexts', () => ({
+  useSyntheticsRefreshContext: () => ({ lastRefresh: 0 }),
+}));
 
-const mockLocationStats = (
-  locationId: string,
-  agents: AgentStat[]
-): [string, LocationAgentStats] => [
-  locationId,
-  {
-    locationId,
-    locationLabel: locationId,
-    agentPolicyId: `policy-${locationId}`,
-    agentPolicyName: `Policy ${locationId}`,
-    isAgentSharding: false,
-    agents,
-  },
-];
+jest.mock('../../../../../utils/api_service/api_service', () => ({
+  apiService: { get: jest.fn() },
+}));
 
-const setByLocation = (entries: Array<[string, LocationAgentStats]>) => {
-  mockUseAgentStats.mockReturnValue({ byLocation: new Map(entries), loading: false });
+const mockUseFetcher = useFetcher as jest.MockedFunction<typeof useFetcher>;
+const mockUseUrlSpaceId = useUrlSpaceId as jest.MockedFunction<typeof useUrlSpaceId>;
+const mockApiGet = apiService.get as jest.MockedFunction<typeof apiService.get>;
+
+const setData = (outdatedLocationIds: string[] | undefined) => {
+  mockUseFetcher.mockReturnValue({
+    data: outdatedLocationIds == null ? undefined : { outdatedLocationIds },
+    loading: false,
+    status: FETCH_STATUS.SUCCESS,
+    refetch: jest.fn(),
+  });
 };
 
 describe('useOutdatedMwAgentLocationIds', () => {
-  it('returns an empty set when there are no private locations', () => {
-    setByLocation([]);
+  beforeEach(() => {
+    mockUseUrlSpaceId.mockReturnValue(undefined);
+  });
+
+  afterEach(() => jest.clearAllMocks());
+
+  it('returns an empty set while the request has not resolved', () => {
+    setData(undefined);
 
     const { result } = renderHook(() => useOutdatedMwAgentLocationIds());
 
     expect(result.current.outdatedLocationIds.size).toBe(0);
   });
 
-  it('excludes a location whose agents all support maintenance windows', () => {
-    setByLocation([mockLocationStats('loc-1', [mockAgent({ agentVersion: '8.19.0' })])]);
+  it('maps response ids onto a set', () => {
+    setData(['loc-outdated']);
 
     const { result } = renderHook(() => useOutdatedMwAgentLocationIds());
 
-    expect(result.current.outdatedLocationIds.has('loc-1')).toBe(false);
-  });
-
-  it('includes a location with at least one agent older than the MW support threshold', () => {
-    setByLocation([
-      mockLocationStats('loc-1', [
-        mockAgent({ agentId: 'a1', agentVersion: '9.3.4' }),
-        mockAgent({ agentId: 'a2', agentVersion: '8.17.2' }),
-      ]),
-    ]);
-
-    const { result } = renderHook(() => useOutdatedMwAgentLocationIds());
-
-    expect(result.current.outdatedLocationIds.has('loc-1')).toBe(true);
-  });
-
-  it('does not flag a location solely because of an unparsable agent version', () => {
-    setByLocation([mockLocationStats('loc-1', [mockAgent({ agentVersion: null })])]);
-
-    const { result } = renderHook(() => useOutdatedMwAgentLocationIds());
-
-    expect(result.current.outdatedLocationIds.has('loc-1')).toBe(false);
-  });
-
-  it('only flags the affected location out of several', () => {
-    setByLocation([
-      mockLocationStats('loc-ok', [mockAgent({ agentVersion: '9.3.4' })]),
-      mockLocationStats('loc-outdated', [mockAgent({ agentVersion: '8.17.2' })]),
-    ]);
-
-    const { result } = renderHook(() => useOutdatedMwAgentLocationIds());
-
-    expect(result.current.outdatedLocationIds.has('loc-ok')).toBe(false);
     expect(result.current.outdatedLocationIds.has('loc-outdated')).toBe(true);
+    expect(result.current.outdatedLocationIds.has('loc-ok')).toBe(false);
+  });
+
+  it('fetches in the viewed monitor space and refetches when that space or lastRefresh changes', async () => {
+    mockUseUrlSpaceId.mockReturnValue('team-a');
+    setData([]);
+    mockApiGet.mockResolvedValue({ outdatedLocationIds: [] });
+
+    renderHook(() => useOutdatedMwAgentLocationIds());
+
+    const [fetch, deps] = mockUseFetcher.mock.calls[0];
+    expect(deps).toEqual([fetch, 0]);
+    await fetch({ signal: new AbortController().signal });
+    expect(mockApiGet).toHaveBeenCalledWith(
+      SYNTHETICS_API_URLS.PRIVATE_LOCATION_OUTDATED_MW_AGENTS,
+      { spaceId: 'team-a' }
+    );
   });
 });

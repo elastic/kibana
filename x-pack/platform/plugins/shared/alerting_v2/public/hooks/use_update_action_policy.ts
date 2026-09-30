@@ -27,7 +27,6 @@ export const useUpdateActionPolicy = () => {
     onSuccess: (_, { id }) => {
       queryClient.invalidateQueries({ queryKey: actionPolicyKeys.lists(), exact: false });
       queryClient.invalidateQueries({ queryKey: actionPolicyKeys.detail(id), exact: false });
-      queryClient.invalidateQueries({ queryKey: actionPolicyKeys.allTags(), exact: false });
       toasts.addSuccess(
         i18n.translate('xpack.alertingV2.actionPolicy.updateSuccess', {
           defaultMessage: 'Action policy updated successfully',

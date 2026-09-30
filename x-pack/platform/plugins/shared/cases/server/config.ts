@@ -174,14 +174,6 @@ export const ConfigSchema = schema.object({
   runWorkflows: schema.object({
     enabled: schema.boolean({ defaultValue: false }),
   }),
-  // NOTE: exposed to the Browser via `exposeToBrowser` setting in cases/server/index.ts
-  // Temporary feature flag for the Cases UX redesign (elastic/security-team#17398).
-  // Once the redesigned UI fully replaces the current one, this config block will be removed.
-  casesRedesign: schema.object({
-    list: schema.boolean({ defaultValue: true }),
-    details: schema.boolean({ defaultValue: true }),
-    settings: schema.boolean({ defaultValue: true }),
-  }),
   enabled: schema.boolean({ defaultValue: true }),
 });
 

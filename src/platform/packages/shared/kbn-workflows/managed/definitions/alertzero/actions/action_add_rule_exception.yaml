@@ -1,0 +1,127 @@
+version: "1"
+name: Add detection rule exception
+description: >
+  AlertZero action: adds an exception item to an existing detection rule, so the
+  rule stops alerting on events matching every one of the item's conditions.
+  Executed by the investigation proposal gate once an analyst approves, so the
+  exception is attributed to the approver.
+enabled: true
+tags:
+  # Generic tag every action workflow carries, so the catalog can be
+  # discovered by tag rather than a hardcoded list.
+  - action
+  - alertzero
+consts:
+  # Self-describing catalog metadata, read back by the proposals service when a
+  # proposal referencing this workflow is created or rendered. Metadata has to
+  # live under `consts`: unknown top-level keys are stripped by the schema.
+  actionMetadata:
+    name: Add detection rule exception
+    description: Adds a scoped exception to a detection rule's own exception list, narrowing what the rule alerts on without changing its logic.
+    category: configure
+    impact: low
+    reversible: true
+    approvalPolicy: always-gate
+triggers:
+  - type: manual
+    inputs:
+      properties:
+        actionInput:
+          type: object
+          description: >
+            The exception item to create on the rule's default exception list.
+          properties:
+            rule_id:
+              type: string
+              minLength: 1
+              maxLength: 36
+              description: Saved-object id of the rule, a UUID.
+            name:
+              type: string
+              minLength: 1
+              maxLength: 256
+              description: Name shown on the exception item in the Detection Rules UI.
+            description:
+              type: string
+              maxLength: 2048
+              description: Why the exception exists, for whoever reads it later.
+            entries:
+              type: array
+              minItems: 1
+              maxItems: 100
+              description: Conditions that must all match for an event to be excluded.
+              items:
+                oneOf:
+                  - type: object
+                    properties:
+                      field:
+                        type: string
+                        minLength: 1
+                        maxLength: 1024
+                      operator:
+                        type: string
+                        enum: [is, is_not, matches, does_not_match]
+                      value:
+                        type: string
+                        minLength: 1
+                        maxLength: 1024
+                    required: [field, operator, value]
+                  - type: object
+                    properties:
+                      field:
+                        type: string
+                        minLength: 1
+                        maxLength: 1024
+                      operator:
+                        type: string
+                        enum: [is_one_of, is_not_one_of]
+                      values:
+                        type: array
+                        minItems: 1
+                        maxItems: 1000
+                        items:
+                          type: string
+                          minLength: 1
+                          maxLength: 1024
+                    required: [field, operator, values]
+                  - type: object
+                    properties:
+                      field:
+                        type: string
+                        minLength: 1
+                        maxLength: 1024
+                      operator:
+                        type: string
+                        enum: [exists, does_not_exist]
+                    required: [field, operator]
+          required:
+            - rule_id
+            - name
+            - description
+            - entries
+      required:
+        - actionInput
+      additionalProperties: false
+outputs:
+  - name: id
+    type: string
+  - name: outcome
+    type: string
+steps:
+  # `${{ }}` keeps the entries as objects; `{{ }}` would render a string.
+  - name: create_exception
+    type: security.createRuleException
+    with:
+      rule_id: "{{ inputs.actionInput.rule_id }}"
+      name: "{{ inputs.actionInput.name }}"
+      description: "{{ inputs.actionInput.description }}"
+      entries: "${{ inputs.actionInput.entries }}"
+
+  # `workflow.execute` declares its output as unknown, so the parent falls back
+  # to a heuristic read of the last step unless the child emits explicitly.
+  - name: emit_result
+    type: workflow.output
+    status: completed
+    with:
+      id: "{{ steps.create_exception.output.id }}"
+      outcome: "{{ steps.create_exception.output.outcome }}"

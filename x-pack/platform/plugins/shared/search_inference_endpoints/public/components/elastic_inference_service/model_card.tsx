@@ -8,20 +8,21 @@
 import React from 'react';
 
 import {
-  EuiAvatar,
   EuiBadge,
   EuiBadgeGroup,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiPanel,
+  EuiCard,
   EuiSpacer,
   EuiText,
-  EuiTitle,
+  EuiIcon,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { SERVICE_PROVIDERS } from '@kbn/inference-endpoint-ui-common';
 import type { GroupedModel } from '../../utils/eis_utils';
 import { getProviderKeyForCreator, TASK_TYPE_DISPLAY_NAME } from '../../utils/eis_utils';
+import { getModelId } from '../../utils/get_model_id';
+import { isModelUnavailableUnderRegionPolicy } from '../../utils/is_model_unavailable_under_region_policy';
 import { ModelStatusBadge } from '../model_status/model_status_badge';
 import { EisModelStatus } from '../../types';
 
@@ -32,33 +33,26 @@ interface ModelCardProps {
 
 export const ModelCard: React.FC<ModelCardProps> = ({ model, onClick }) => {
   const { modelName, modelCreator, taskTypes, categories } = model;
+  const modelId = model.endpoints[0] ? getModelId(model.endpoints[0]) : undefined;
   const providerKey = getProviderKeyForCreator(modelCreator);
   const provider = providerKey ? SERVICE_PROVIDERS[providerKey] : undefined;
 
   const taskTypeLabels = taskTypes.map((tt) => TASK_TYPE_DISPLAY_NAME[tt] ?? tt).join(', ');
 
   return (
-    <EuiPanel
-      paddingSize="l"
+    <EuiCard
+      icon={<EuiIcon type={provider?.icon ?? 'machineLearningApp'} size="l" aria-hidden={true} />}
+      title={modelName}
+      titleSize="xs"
+      textAlign="left"
+      paddingSize="m"
       data-test-subj={`eisModelCard-${modelName}`}
       hasBorder
       onClick={onClick}
-      color={model.modelStatus === EisModelStatus.DeprecatedEOL ? 'subdued' : undefined}
+      display={model.modelStatus === EisModelStatus.DeprecatedEOL ? 'subdued' : 'plain'}
     >
-      <EuiFlexGroup direction="column" gutterSize="m">
-        <EuiFlexItem grow={false}>
-          <EuiAvatar
-            name={modelCreator}
-            iconType={provider?.icon ?? 'machineLearningApp'}
-            color="subdued"
-            size="l"
-            type="space"
-          />
-        </EuiFlexItem>
+      <EuiFlexGroup direction="column" gutterSize="s">
         <EuiFlexItem>
-          <EuiTitle size="xs">
-            <h4>{modelName}</h4>
-          </EuiTitle>
           <EuiText size="xs" color="subdued">
             {i18n.translate('xpack.searchInferenceEndpoints.eisModelCard.supports', {
               defaultMessage: 'Supports {taskTypes}',
@@ -69,19 +63,29 @@ export const ModelCard: React.FC<ModelCardProps> = ({ model, onClick }) => {
         <EuiSpacer size="m" />
         <EuiFlexItem grow={false}>
           <EuiBadgeGroup>
-            <ModelStatusBadge
-              id={model.modelName}
-              metadata={model.modelMetadata}
-              status={model.modelStatus}
-            />
             {categories.map((cat) => (
               <EuiBadge key={cat} color="hollow">
                 {cat}
               </EuiBadge>
             ))}
+            {isModelUnavailableUnderRegionPolicy(model.endpoints, modelId ?? '') && (
+              <EuiBadge data-test-subj={`modelBlockedBadge-${model.modelName}`}>
+                {i18n.translate(
+                  'xpack.searchInferenceEndpoints.eisModelCard.blockedBadge.content',
+                  {
+                    defaultMessage: 'Blocked',
+                  }
+                )}
+              </EuiBadge>
+            )}
+            <ModelStatusBadge
+              id={model.modelName}
+              metadata={model.modelMetadata}
+              status={model.modelStatus}
+            />
           </EuiBadgeGroup>
         </EuiFlexItem>
       </EuiFlexGroup>
-    </EuiPanel>
+    </EuiCard>
   );
 };

@@ -13,10 +13,9 @@ import type {
   ConversationRoundAuthor,
   ConverseInput,
   ChatAgentEvent,
-  AgentCapabilities,
   AgentConfigurationOverrides,
-  ConversationAction,
   AgentExecutionMode,
+  AutoApprovedApi,
   ChatEvent,
   ExecutionStatus,
   InteractivityConfig,
@@ -38,6 +37,7 @@ import type {
   SkillsService,
   PluginsService,
   RenderersService,
+  ConversationEventTypesService,
   ToolManager,
   TodoStateManager,
   IFilesystemService,
@@ -49,6 +49,8 @@ import type { ExecutionConversationOrigin } from '../execution/types';
 import type { AgentBuilderHooks } from '../hooks/types';
 import type { ToolRegistry } from '../tools';
 import type { AgentBuilderAnalytics, AgentBuilderTracking } from '../telemetry';
+import type { AiIndexResolver } from './ai_index_resolver';
+import type { AgentRegistry } from './registry';
 
 /**
  * Read/write conversation store contract exposed to agent handlers.
@@ -56,6 +58,11 @@ import type { AgentBuilderAnalytics, AgentBuilderTracking } from '../telemetry';
 export interface ConversationClient {
   /** True if a conversation with the given id exists in the current scope. */
   exists(conversationId: string): Promise<boolean>;
+  /** Validates, serializes, and merges `updates` into the conversation metadata. */
+  patchMetadata(
+    conversationId: string,
+    updates: Record<string, unknown>
+  ): Promise<{ changedFields: string[] }>;
 }
 
 export type AgentHandlerFn = (
@@ -91,7 +98,7 @@ export interface ExecuteSubAgentParams {
   parentExecutionId: string;
   prompt: string;
   connectorId?: string;
-  capabilities?: AgentCapabilities;
+  autoApprovedApis?: AutoApprovedApi[];
   abortSignal?: AbortSignal;
 }
 
@@ -106,7 +113,7 @@ export interface CreateSubAgentParams {
   conversationId: string;
   prompt: string;
   connectorId?: string;
-  capabilities?: AgentCapabilities;
+  autoApprovedApis?: AutoApprovedApi[];
   abortSignal?: AbortSignal;
 }
 
@@ -117,7 +124,6 @@ export interface SendToSubAgentParams {
   conversationId: string;
   prompt: string;
   connectorId?: string;
-  capabilities?: AgentCapabilities;
   abortSignal?: AbortSignal;
 }
 
@@ -165,8 +171,8 @@ export interface ExperimentalFeatures {
   askUserQuestion: boolean;
   /** Whether the bash tool (and the just-bash runtime) is enabled */
   bash: boolean;
-  /** Whether the HTTP API introspection tools (discover/describe/execute) are enabled */
-  apiTools: boolean;
+  /** Whether the `discover_apis` tool is enabled. */
+  apiDiscovery: boolean;
 }
 
 export interface AgentHandlerContext {
@@ -225,6 +231,13 @@ export interface AgentHandlerContext {
    * runner (treated as no renderers).
    */
   renderers?: RenderersService;
+  /**
+   * Conversation event types service, giving read access to the custom conversation
+   * event types registered in agent builder (used to format stored events for the LLM).
+   * Optional: absent when the context is constructed outside agentBuilder's runner
+   * (custom events are then omitted from the agent context).
+   */
+  conversationEvents?: ConversationEventTypesService;
   /**
    * Skills service to interact with skills.
    */
@@ -310,10 +323,20 @@ export interface AgentHandlerContext {
    */
   subAgentExecutor: SubAgentExecutor;
   /**
+   * Agent registry scoped to the current user
+   */
+  agentRegistry: AgentRegistry;
+  /**
    * Conversation store client scoped to the current user. Prefer this over
    * issuing raw ES queries against the conversation index.
    */
   conversationClient: ConversationClient;
+  /**
+   * Resolved runtime configuration for the external Deductive execution path.
+   * Populated from Advanced Settings (agentBuilder:deductive*) when the
+   * per-deployment feature flag is enabled; empty when the path is inactive.
+   */
+  deductive?: DeductiveRuntimeConfig;
   /**
    * Optional analytics surface for emitting agent-runtime events such as
    * SkillInvoked. Provided by the plugin when telemetry is wired.
@@ -324,11 +347,22 @@ export interface AgentHandlerContext {
    * skill-invocation counts. Provided by the plugin when telemetry is wired.
    */
   trackingService?: AgentBuilderTracking;
+  /**
+   * Resolves AI index details. Absent when no resolver is registered, in which case
+   * non-default AI indices are omitted from the prompt.
+   */
+  aiIndexResolver?: AiIndexResolver;
 }
 
 /**
  * Event handler function to listen to run events during execution of tools, agents or other agentBuilder primitives.
  */
+export interface DeductiveRuntimeConfig {
+  enabled: boolean;
+  endpoint: string;
+  apiKey: string | undefined;
+}
+
 export type AgentEventEmitterFn = (event: ChatAgentEvent) => void;
 
 export interface AgentEventEmitter {
@@ -343,6 +377,10 @@ export interface AgentParams {
    */
   conversation?: Conversation;
   /**
+   * Pre-minted id for the round the agent is about to run.
+   */
+  roundId?: string;
+  /**
    * The input triggering this round.
    */
   nextInput: ConverseInput;
@@ -355,10 +393,6 @@ export interface AgentParams {
    * public conversations). Stamped onto the completed round.
    */
   author?: ConversationRoundAuthor;
-  /**
-   * Agent capabilities to enable.
-   */
-  capabilities?: AgentCapabilities;
   browserApiTools?: BrowserApiToolMetadata[];
   /**
    * Whether to use structured output mode. When true, the agent will return structured data instead of plain text.
@@ -374,10 +408,6 @@ export interface AgentParams {
    * These override the stored agent configuration for this execution only.
    */
   configurationOverrides?: AgentConfigurationOverrides;
-  /**
-   * The action to perform: "regenerate" re-executes the last round with original input (requires conversation_id).
-   */
-  action?: ConversationAction;
   /**
    * The execution ID for this run. Used for sub-agent parent tracking.
    */

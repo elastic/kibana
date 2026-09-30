@@ -1045,8 +1045,14 @@ export const PostBulkAgentRollbackResponseSchema = schema.oneOf([
 export const PostGenerateAgentsReportRequestSchema = {
   body: schema.object({
     agents: schema.oneOf([
-      schema.arrayOf(schema.string(), { maxSize: 10000 }),
+      schema.arrayOf(schema.string({ minLength: 1, maxLength: 512 }), {
+        minSize: 1,
+        maxSize: 10000,
+      }),
       schema.string({
+        // 10 000 chars matches the FLEET_SCHEMA_LONG_TEXT_MAX_LENGTH constant that will be
+        // introduced by #288283; inlined here to satisfy CodeQL without pulling in that PR.
+        maxLength: 10000,
         validate: (value: string) => {
           const validationObj = validateKuery(value, [AGENTS_PREFIX], AGENT_MAPPINGS, true);
           if (validationObj?.error) {

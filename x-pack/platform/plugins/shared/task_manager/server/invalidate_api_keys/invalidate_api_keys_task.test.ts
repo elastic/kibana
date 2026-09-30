@@ -56,4 +56,44 @@ describe('invalidate api keys task runner', () => {
       expect.objectContaining({ savedObjectsClient: expectedClient })
     );
   });
+
+  it('guards against invalidating both ES and UIAM keys that are still referenced by a task', async () => {
+    const coreStart = coreMock.createStart();
+    const coreStartServices = jest
+      .fn()
+      .mockResolvedValue([
+        coreStart as CoreStart,
+        {} as TaskManagerPluginsStart,
+        {} as TaskManagerStartContract,
+      ]);
+
+    const runner = taskRunner({
+      logger: loggingSystemMock.createLogger(),
+      configInterval: '5m',
+      coreStartServices,
+      getEncryptedSavedObjectsClient: () => undefined,
+      invalidateApiKeyFn: jest.fn(),
+      invalidateUiamApiKeyFn: () => undefined,
+      removalDelay: '1h',
+    })({ taskInstance: { state: {} } });
+
+    await runner.run();
+
+    // UIAM key ids live in their own attribute, so querying only `apiKeyId` would never find a
+    // UIAM key in use and would revoke it out from under a live task.
+    expect(runInvalidateMock).toHaveBeenCalledWith(
+      expect.objectContaining({
+        savedObjectTypesToQuery: [
+          {
+            type: TASK_SO_NAME,
+            apiKeyAttributePath: `${TASK_SO_NAME}.attributes.userScope.apiKeyId`,
+          },
+          {
+            type: TASK_SO_NAME,
+            apiKeyAttributePath: `${TASK_SO_NAME}.attributes.userScope.uiamApiKeyId`,
+          },
+        ],
+      })
+    );
+  });
 });

@@ -12,11 +12,20 @@ export {
   CUSTOM_CONTENT_MAX_TEMPLATE_BYTES,
   CUSTOM_CONTENT_MAX_TEMPLATE_SCHEMA_LENGTH,
   CUSTOM_CONTENT_SCRIPT_PATTERN,
-  CUSTOM_CONTENT_ENABLED_FLAG_KEY,
+  CUSTOM_CONTENT_DEFAULT_HEIGHT,
+  CUSTOM_CONTENT_MIN_HEIGHT,
+  CUSTOM_CONTENT_MAX_HEIGHT,
 } from './constants';
 
-export { customContentStateSchema, customContentUpdateSchema } from './schema';
+export {
+  customContentStateSchema,
+  customContentUpdateSchema,
+  customContentPanelUpdateSchema,
+  readEsqlQuery,
+  toEsqlQueryState,
+  resolveEsqlQueryEdit,
+} from './schema';
 export type { CustomContentUpdate } from './schema';
-export type { CustomContentState } from './schema';
+export type { ResolvedEsqlQueryEdit, CustomContentState } from './schema';
 
 export { stripMarkdownFences } from './strip_markdown_fences';

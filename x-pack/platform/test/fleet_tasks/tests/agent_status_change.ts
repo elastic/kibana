@@ -9,9 +9,10 @@ import expect from '@kbn/expect';
 import { AGENTS_INDEX } from '@kbn/fleet-plugin/common';
 import { AGENT_STATUS_CHANGE_DATA_STREAM } from '@kbn/fleet-plugin/common/constants/agent';
 
-const AGENT_STATUS_CHANGE_DATA_STREAM_NAME = `${AGENT_STATUS_CHANGE_DATA_STREAM.type}-${AGENT_STATUS_CHANGE_DATA_STREAM.dataset}-${AGENT_STATUS_CHANGE_DATA_STREAM.namespace}`;
 import type { FtrProviderContextWithServices } from '../ftr_provider_context';
 import { cleanupAgentDocs, createAgentDoc } from '../helpers';
+
+const DEFAULT_DS_INDEX = `${AGENT_STATUS_CHANGE_DATA_STREAM.type}-${AGENT_STATUS_CHANGE_DATA_STREAM.dataset}-default`;
 
 const TASK_INTERVAL_MS = 12000; // slightly longer than the 10s configured in config.ts
 
@@ -22,6 +23,7 @@ export default function (providerContext: FtrProviderContextWithServices) {
   const retry = getService('retry');
 
   let policyId: string;
+  let customPolicyId: string;
 
   describe('Agent status change task', () => {
     before(async () => {
@@ -32,21 +34,37 @@ export default function (providerContext: FtrProviderContextWithServices) {
         .send({ name: 'Status change test policy', namespace: 'default', force: true })
         .expect(200);
       policyId = body.item.id;
+
+      const { body: customBody } = await supertest
+        .post('/api/fleet/agent_policies')
+        .set('kbn-xsrf', 'xxxx')
+        .send({ name: 'Custom namespace test policy', namespace: 'custom_namespace', force: true })
+        .expect(200);
+      customPolicyId = customBody.item.id;
     });
 
     after(async () => {
-      await supertest
-        .post('/api/fleet/agent_policies/delete')
-        .send({ agentPolicyId: policyId })
-        .set('kbn-xsrf', 'xxxx')
-        .expect(200);
+      if (policyId) {
+        await supertest
+          .post('/api/fleet/agent_policies/delete')
+          .send({ agentPolicyId: policyId })
+          .set('kbn-xsrf', 'xxxx')
+          .expect(200);
+      }
+      if (customPolicyId) {
+        await supertest
+          .post('/api/fleet/agent_policies/delete')
+          .send({ agentPolicyId: customPolicyId })
+          .set('kbn-xsrf', 'xxxx')
+          .expect(200);
+      }
     });
 
     afterEach(async () => {
       await cleanupAgentDocs(providerContext);
       try {
         await es.deleteByQuery({
-          index: AGENT_STATUS_CHANGE_DATA_STREAM_NAME,
+          index: DEFAULT_DS_INDEX,
           ignore_unavailable: true,
           refresh: true,
           query: { match_all: {} },
@@ -80,7 +98,7 @@ export default function (providerContext: FtrProviderContextWithServices) {
       // Verify a status-change doc was written to the data stream
       await retry.tryForTime(30000, async () => {
         const dsRes = await es.search({
-          index: AGENT_STATUS_CHANGE_DATA_STREAM_NAME,
+          index: DEFAULT_DS_INDEX,
           ignore_unavailable: true,
           query: { term: { 'agent.id': 'agent-status-1' } },
         });
@@ -90,6 +108,46 @@ export default function (providerContext: FtrProviderContextWithServices) {
         const doc = dsRes.hits.hits[0]._source as any;
         expect(doc.status).to.be.a('string');
         expect(doc['agent.id'] ?? doc.agent?.id).to.be('agent-status-1');
+        expect(doc.policy_namespace).to.be('default');
+        expect(doc.data_stream?.namespace).to.be('default');
+      });
+    });
+
+    it('should write status-change doc with policy_namespace to default data stream when agent is enrolled under a custom namespace policy', async () => {
+      await createAgentDoc(providerContext, 'agent-custom-ns', customPolicyId, '8.17.0', true, {
+        local_metadata: { host: { hostname: 'host-custom' } },
+        namespaces: ['default'],
+      });
+
+      await new Promise((resolve) => setTimeout(resolve, TASK_INTERVAL_MS));
+
+      // Verify last_known_status was written back to .fleet-agents
+      await retry.tryForTime(30000, async () => {
+        const agentRes = await es.get({ index: AGENTS_INDEX, id: 'agent-custom-ns' });
+        const source = agentRes._source as any;
+        if (!source?.last_known_status) {
+          throw new Error(
+            `last_known_status not set yet, got: ${JSON.stringify(source?.last_known_status)}`
+          );
+        }
+        expect(source.last_known_status).to.be.a('string');
+      });
+
+      // Verify a status-change doc was written to the default data stream with policy_namespace
+      await retry.tryForTime(30000, async () => {
+        const dsRes = await es.search({
+          index: DEFAULT_DS_INDEX,
+          ignore_unavailable: true,
+          query: { term: { 'agent.id': 'agent-custom-ns' } },
+        });
+        if (dsRes.hits.hits.length === 0) {
+          throw new Error('No status-change doc found in default data stream yet');
+        }
+        const doc = dsRes.hits.hits[0]._source as any;
+        expect(doc.status).to.be.a('string');
+        expect(doc['agent.id'] ?? doc.agent?.id).to.be('agent-custom-ns');
+        expect(doc.policy_namespace).to.be('custom_namespace');
+        expect(doc.data_stream?.namespace).to.be('default');
       });
     });
 
@@ -110,13 +168,16 @@ export default function (providerContext: FtrProviderContextWithServices) {
         statusAfterFirstRun = source.last_known_status;
       });
 
-      // Count docs after first run
-      const countAfterFirst = await retry.tryForTime(10000, async () => {
+      // Count docs after first run. The task writes the status-change doc via a no-refresh bulk, so poll until it is searchable rather than trusting the first (possibly still-0) read.
+      const countAfterFirst = await retry.tryForTime(30000, async () => {
         const res = await es.count({
-          index: AGENT_STATUS_CHANGE_DATA_STREAM_NAME,
+          index: DEFAULT_DS_INDEX,
           ignore_unavailable: true,
           query: { term: { 'agent.id': 'agent-status-2' } },
         });
+        if (res.count < 1) {
+          throw new Error(`status-change doc not searchable yet (count=${res.count})`);
+        }
         return res.count;
       });
 
@@ -128,7 +189,7 @@ export default function (providerContext: FtrProviderContextWithServices) {
         TASK_INTERVAL_MS * 4,
         async () => {
           const res = await es.count({
-            index: AGENT_STATUS_CHANGE_DATA_STREAM_NAME,
+            index: DEFAULT_DS_INDEX,
             ignore_unavailable: true,
             query: { term: { 'agent.id': 'agent-status-2' } },
           });

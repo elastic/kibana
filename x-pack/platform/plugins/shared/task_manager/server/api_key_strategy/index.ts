@@ -7,6 +7,7 @@
 
 export type {
   ApiKeyStrategy,
+  ApiKeyInvalidationSource,
   ApiKeySOFields,
   InvalidationTarget,
   ApiKeyType,

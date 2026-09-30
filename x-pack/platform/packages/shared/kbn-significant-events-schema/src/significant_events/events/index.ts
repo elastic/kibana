@@ -7,7 +7,7 @@
 
 import { z } from '@kbn/zod/v4';
 import dedent from 'dedent';
-import { significantEventBaseSchema } from '../common_schemas';
+import { significantEventBaseSchema, type Severity } from '../common_schemas';
 import {
   ASSESSMENT_NOTE_ROLE_RULE,
   MAX_ASSESSMENT_NOTE_LENGTH,
@@ -20,9 +20,9 @@ export const SIGNIFICANT_EVENT_STATUS_OPTIONS = ['open', 'closed', 'dismissed'] 
 
 export const significantEventStatusSchema = z.enum(SIGNIFICANT_EVENT_STATUS_OPTIONS)
   .describe(dedent`
-    "open" = a current failure, material degradation, or sensitive-data exposure is confirmed or remains plausibly unverified;
+    "open" = a current failure, material degradation, or sensitive-data exposure is confirmed or remains plausibly unverified. A mechanism found at an unchanged background rate (rate-flat inconclusive) is verified as not newly elevated — it is not "plausibly unverified" and must not open a new event;
     "closed" = a failure condition is confirmed recovered;
-    "dismissed" = the proposed incident is a false alarm, benign/positive change, unrelated finding, or is not confirmed by evidence, with no plausible failure, degradation, or exposure left unverified.
+    "dismissed" = the proposed incident is a false alarm, benign/positive change, unrelated finding, a background pattern at its usual rate, or is not confirmed by evidence, with no plausible failure, degradation, or exposure left unverified.
   `);
 
 export type SignificantEventStatus = z.infer<typeof significantEventStatusSchema>;
@@ -72,9 +72,9 @@ export const significantEventSchema = significantEventBaseSchema.extend({
     .optional()
     .describe(
       dedent`
-        Concise operator-facing rationale for this assessment. Max ${MAX_ASSESSMENT_NOTE_LENGTH} chars.
+        Concise rationale for this assessment. Max ${MAX_ASSESSMENT_NOTE_LENGTH} chars.
         ${ASSESSMENT_NOTE_ROLE_RULE}
-        Record the reasoning, ambiguity, or caveat that is not already in the title, symptom_hypothesis, summary, or signal descriptions. Do not restate the observed condition, error signature, impact, query steps, detection artifacts, or memory-page presence.
+        Record the reasoning, ambiguity, or caveat that is not already in the title, symptom_hypothesis, summary, or signal descriptions. Do not restate the observed condition, error signature, impact, query steps, or detection artifacts.
 
         ${NO_RAW_SENSITIVE_VALUES_RULE}
       `
@@ -92,3 +92,30 @@ export type SignificantEvent = z.infer<typeof significantEventSchema>;
 export interface SignificantEventResponse extends SignificantEvent {
   created_at: string;
 }
+
+/**
+ * Maps SignificantEvent severity to the alerting v2 severity vocabulary.
+ * Typed as `Record<Severity, ...>` so a new Severity value causes a compile error here.
+ */
+export const SIGNIFICANT_EVENTS_SEVERITY_MAP: Record<
+  Severity,
+  'critical' | 'high' | 'medium' | 'low'
+> = {
+  '80-critical': 'critical',
+  '60-high': 'high',
+  '40-medium': 'medium',
+  '20-low': 'low',
+};
+
+/**
+ * Maps SignificantEvent status to the alerting v2 alert_status vocabulary.
+ * `closed` and `dismissed` are both inactive by decision — they are indistinguishable
+ * in `.rule-events`; the reason lives in `data.assessment_note`.
+ * Typed as `Record<SignificantEventStatus, ...>` so a new status value causes a compile error here.
+ */
+export const SIGNIFICANT_EVENTS_STATUS_MAP: Record<SignificantEventStatus, 'active' | 'inactive'> =
+  {
+    open: 'active',
+    closed: 'inactive',
+    dismissed: 'inactive',
+  };

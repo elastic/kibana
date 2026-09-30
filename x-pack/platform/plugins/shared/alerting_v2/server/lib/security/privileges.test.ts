@@ -45,6 +45,36 @@ describe('registerFeaturePrivileges', () => {
     );
   });
 
+  it('groups features under the Alerting V2 privilege section', () => {
+    const rulesFeature = getRegisteredFeature(ALERTING_V2_FEATURES.rules.id);
+
+    expect(rulesFeature.category).toEqual({
+      id: 'alerting',
+      label: 'Alerting V2',
+      order: 1000,
+      euiIconType: 'watchesApp',
+    });
+  });
+
+  it('describes access for every experimental feature', () => {
+    expect(getRegisteredFeature(ALERTING_V2_FEATURES.rules.id).description).toBe(
+      'Experimental. Controls access to rules in the experimental alerting system.'
+    );
+    expect(getRegisteredFeature(ALERTING_V2_FEATURES.alerts.id).description).toBe(
+      'Experimental. Controls access to alerts in the experimental alerting system.'
+    );
+    expect(getRegisteredFeature(ALERTING_V2_FEATURES.actionPolicies.id).description).toBe(
+      'Experimental. Controls access to action policies in the experimental alerting system.'
+    );
+    expect(getRegisteredFeature(ALERTING_V2_FEATURES.executionHistory.id).description).toBe(
+      'Experimental. Controls access to execution history in the experimental alerting system.'
+    );
+
+    for (const feature of Object.values(ALERTING_V2_FEATURES)) {
+      expect(getRegisteredFeature(feature.id).privilegesTooltip).toBeUndefined();
+    }
+  });
+
   it('forwards the `alerts` privilege to the `all` and `read` privileges of the alerts feature', () => {
     const alertsFeature = getRegisteredFeature(ALERTING_V2_FEATURES.alerts.id);
 

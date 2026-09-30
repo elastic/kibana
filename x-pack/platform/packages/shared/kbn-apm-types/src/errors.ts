@@ -18,6 +18,14 @@ export interface ErrorData {
   };
 }
 
+export type TraceErrorSource = 'apm' | 'unprocessedOtel';
+
+/**
+ * Per-row aggregate used in the waterfall click payload. A row carrying both
+ * classic APM errors and unprocessed OTel exception logs is 'mixed'.
+ */
+export type TraceErrorRowSource = TraceErrorSource | 'mixed';
+
 export interface Error {
   id: string;
   index?: string;
@@ -29,9 +37,10 @@ export interface Error {
   eventName?: string;
   error: ErrorData;
   timestamp: TimestampUs;
+  /** Identifies where this error document was fetched from. */
+  source: TraceErrorSource;
 }
 
 export interface ErrorsByTraceId {
   traceErrors: Error[];
-  source: 'apm' | 'unprocessedOtel';
 }

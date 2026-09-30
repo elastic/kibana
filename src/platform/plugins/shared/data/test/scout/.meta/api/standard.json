@@ -1,6 +1,29 @@
 {
-  "sha1": "fc9fbd00fc82ca0f7355491d44f285f8d1007a12",
+  "sha1": "5d4f5138f6e3341d0d97a335049aa714c9334349",
+  "testChannels": [
+    "ci-on-commit"
+  ],
   "tests": [
+    {
+      "id": "ea5fd1e61e8e168-d8c130fa37fd60e",
+      "title": "Saved query deletion across spaces deletes a shared query from both spaces",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/data/test/scout/api/tests/saved_query_shared_delete.spec.ts",
+        "line": 38,
+        "column": 23
+      }
+    },
     {
       "id": "99d18e3579dd960-646aa7dac1121c1",
       "title": "ese search - delete async search (SNAPSHOT only) should delete an in-progress search",
@@ -8,19 +31,13 @@
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
-        "@local-stateful-search",
-        "@cloud-stateful-search",
-        "@local-stateful-observability_complete",
-        "@cloud-stateful-observability_complete",
-        "@local-stateful-security_complete",
-        "@cloud-stateful-security_complete",
         "@local-serverless-search",
         "@cloud-serverless-search"
       ],
       "location": {
         "file": "src/platform/plugins/shared/data/test/scout/api/tests/search/ese_delete_async.spec.ts",
-        "line": 45,
-        "column": 12
+        "line": 39,
+        "column": 7
       }
     },
     {
@@ -30,19 +47,13 @@
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
-        "@local-stateful-search",
-        "@cloud-stateful-search",
-        "@local-stateful-observability_complete",
-        "@cloud-stateful-observability_complete",
-        "@local-stateful-security_complete",
-        "@cloud-stateful-security_complete",
         "@local-serverless-search",
         "@cloud-serverless-search"
       ],
       "location": {
         "file": "src/platform/plugins/shared/data/test/scout/api/tests/search/ese_delete_async.spec.ts",
-        "line": 75,
-        "column": 12
+        "line": 64,
+        "column": 55
       }
     },
     {
@@ -52,19 +63,13 @@
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
-        "@local-stateful-search",
-        "@cloud-stateful-search",
-        "@local-stateful-observability_complete",
-        "@cloud-stateful-observability_complete",
-        "@local-stateful-security_complete",
-        "@cloud-stateful-security_complete",
         "@local-serverless-search",
         "@cloud-serverless-search"
       ],
       "location": {
         "file": "src/platform/plugins/shared/data/test/scout/api/tests/search/ese_delete.spec.ts",
-        "line": 24,
-        "column": 12
+        "line": 21,
+        "column": 8
       }
     },
     {
@@ -74,19 +79,13 @@
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
-        "@local-stateful-search",
-        "@cloud-stateful-search",
-        "@local-stateful-observability_complete",
-        "@cloud-stateful-observability_complete",
-        "@local-stateful-security_complete",
-        "@cloud-stateful-security_complete",
         "@local-serverless-search",
         "@cloud-serverless-search"
       ],
       "location": {
         "file": "src/platform/plugins/shared/data/test/scout/api/tests/search/ese_delete.spec.ts",
-        "line": 32,
-        "column": 12
+        "line": 26,
+        "column": 23
       }
     },
     {
@@ -96,19 +95,13 @@
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
-        "@local-stateful-search",
-        "@cloud-stateful-search",
-        "@local-stateful-observability_complete",
-        "@cloud-stateful-observability_complete",
-        "@local-stateful-security_complete",
-        "@cloud-stateful-security_complete",
         "@local-serverless-search",
         "@cloud-serverless-search"
       ],
       "location": {
         "file": "src/platform/plugins/shared/data/test/scout/api/tests/search/ese_post_async.spec.ts",
-        "line": 45,
-        "column": 12
+        "line": 39,
+        "column": 7
       }
     },
     {
@@ -118,19 +111,13 @@
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
-        "@local-stateful-search",
-        "@cloud-stateful-search",
-        "@local-stateful-observability_complete",
-        "@cloud-stateful-observability_complete",
-        "@local-stateful-security_complete",
-        "@cloud-stateful-security_complete",
         "@local-serverless-search",
         "@cloud-serverless-search"
       ],
       "location": {
         "file": "src/platform/plugins/shared/data/test/scout/api/tests/search/ese_post_async.spec.ts",
-        "line": 67,
-        "column": 12
+        "line": 54,
+        "column": 15
       }
     },
     {
@@ -140,19 +127,13 @@
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
-        "@local-stateful-search",
-        "@cloud-stateful-search",
-        "@local-stateful-observability_complete",
-        "@cloud-stateful-observability_complete",
-        "@local-stateful-security_complete",
-        "@cloud-stateful-security_complete",
         "@local-serverless-search",
         "@cloud-serverless-search"
       ],
       "location": {
         "file": "src/platform/plugins/shared/data/test/scout/api/tests/search/ese_post_async.spec.ts",
-        "line": 103,
-        "column": 12
+        "line": 88,
+        "column": 62
       }
     },
     {
@@ -165,8 +146,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/data/test/scout/api/tests/search/ese_post_cancel.spec.ts",
-        "line": 44,
-        "column": 12
+        "line": 37,
+        "column": 9
       }
     },
     {
@@ -179,8 +160,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/data/test/scout/api/tests/search/ese_post_privileges.spec.ts",
-        "line": 42,
-        "column": 12
+        "line": 39,
+        "column": 46
       }
     },
     {
@@ -190,19 +171,13 @@
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
-        "@local-stateful-search",
-        "@cloud-stateful-search",
-        "@local-stateful-observability_complete",
-        "@cloud-stateful-observability_complete",
-        "@local-stateful-security_complete",
-        "@cloud-stateful-security_complete",
         "@local-serverless-search",
         "@cloud-serverless-search"
       ],
       "location": {
         "file": "src/platform/plugins/shared/data/test/scout/api/tests/search/ese_post_sync.spec.ts",
-        "line": 42,
-        "column": 12
+        "line": 38,
+        "column": 13
       }
     },
     {
@@ -212,19 +187,13 @@
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
-        "@local-stateful-search",
-        "@cloud-stateful-search",
-        "@local-stateful-observability_complete",
-        "@cloud-stateful-observability_complete",
-        "@local-stateful-security_complete",
-        "@cloud-stateful-security_complete",
         "@local-serverless-search",
         "@cloud-serverless-search"
       ],
       "location": {
         "file": "src/platform/plugins/shared/data/test/scout/api/tests/search/ese_post_sync.spec.ts",
-        "line": 64,
-        "column": 12
+        "line": 52,
+        "column": 13
       }
     },
     {
@@ -234,19 +203,13 @@
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
-        "@local-stateful-search",
-        "@cloud-stateful-search",
-        "@local-stateful-observability_complete",
-        "@cloud-stateful-observability_complete",
-        "@local-stateful-security_complete",
-        "@cloud-stateful-security_complete",
         "@local-serverless-search",
         "@cloud-serverless-search"
       ],
       "location": {
         "file": "src/platform/plugins/shared/data/test/scout/api/tests/search/ese_post_sync.spec.ts",
-        "line": 83,
-        "column": 12
+        "line": 74,
+        "column": 19
       }
     },
     {
@@ -256,19 +219,13 @@
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
-        "@local-stateful-search",
-        "@cloud-stateful-search",
-        "@local-stateful-observability_complete",
-        "@cloud-stateful-observability_complete",
-        "@local-stateful-security_complete",
-        "@cloud-stateful-security_complete",
         "@local-serverless-search",
         "@cloud-serverless-search"
       ],
       "location": {
         "file": "src/platform/plugins/shared/data/test/scout/api/tests/search/ese_post_sync.spec.ts",
-        "line": 98,
-        "column": 12
+        "line": 87,
+        "column": 19
       }
     },
     {
@@ -278,19 +235,13 @@
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
-        "@local-stateful-search",
-        "@cloud-stateful-search",
-        "@local-stateful-observability_complete",
-        "@cloud-stateful-observability_complete",
-        "@local-stateful-security_complete",
-        "@cloud-stateful-security_complete",
         "@local-serverless-search",
         "@cloud-serverless-search"
       ],
       "location": {
         "file": "src/platform/plugins/shared/data/test/scout/api/tests/search/ese_post_sync.spec.ts",
-        "line": 113,
-        "column": 12
+        "line": 100,
+        "column": 56
       }
     },
     {
@@ -303,8 +254,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/data/test/scout/api/tests/search/ese_rollup.spec.ts",
-        "line": 24,
-        "column": 10
+        "line": 19,
+        "column": 57
       }
     },
     {
@@ -317,8 +268,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/data/test/scout/api/tests/search/ese_rollup.spec.ts",
-        "line": 44,
-        "column": 10
+        "line": 30,
+        "column": 42
       }
     },
     {
@@ -331,8 +282,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/data/test/scout/api/tests/search/ese_rollup.spec.ts",
-        "line": 63,
-        "column": 10
+        "line": 53,
+        "column": 28
       }
     }
   ]

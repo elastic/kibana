@@ -188,7 +188,7 @@ Add an optional, nullable `outcome` to the `InboxAction` schema
             `response_mode` (human vs timeout).
 ```
 
-Regenerate `.gen.ts` (`yarn openapi:generate` in `kbn-inbox-common`, then eslint --fix the
+Regenerate `.gen.ts` (`pnpm openapi:generate` in `kbn-inbox-common`, then eslint --fix the
 generated files — see plugin README §"Regenerating OpenAPI schemas"). Thread `outcome`
 through `toInboxHistoryAction` (`to_inbox_action.ts`):
 - winner row → `outcome: 'applied'`,
