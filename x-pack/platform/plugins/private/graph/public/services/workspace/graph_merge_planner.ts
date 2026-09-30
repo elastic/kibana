@@ -5,18 +5,49 @@
  * 2.0.
  */
 
+import { getIcon } from '../../helpers/style_choices';
+
 interface IncomingNode {
   field: string;
   term: string;
   id?: string;
   label?: string;
+  icon?: Parameters<typeof getIcon>[0];
+  color?: string;
   [key: string]: unknown;
 }
 
-interface NormalizedIncomingNode extends IncomingNode {
+export interface NormalizedIncomingNode extends IncomingNode {
   id: string;
   label: string;
 }
+
+export const materializeRuntimeNode = (node: NormalizedIncomingNode, sequence: number) => ({
+  x: 1,
+  y: 1,
+  numChildren: 0,
+  parent: undefined,
+  id: node.id,
+  label: node.label,
+  color: node.color,
+  icon: getIcon(node.icon ?? ''),
+  data: node,
+  scaledSize: 15,
+  seqNumber: sequence,
+});
+
+export const materializeRuntimeEdge = (
+  operation: Extract<EdgeMergeOperation, { type: 'add' }>,
+  nodesById: Record<string, ReturnType<typeof materializeRuntimeNode>>
+) => ({
+  source: nodesById[operation.sourceId],
+  target: nodesById[operation.targetId],
+  weight: operation.edge.weight,
+  width: operation.edge.width,
+  id: operation.id,
+  doc_count: operation.edge.doc_count,
+  ...(operation.edge.label ? { label: operation.edge.label } : {}),
+});
 
 export const makeNodeId = (field: string, term: string): string => `${field}..${term}`;
 
