@@ -9,10 +9,14 @@ import { useMemo } from 'react';
 import { css, type SerializedStyles } from '@emotion/react';
 import { euiTextTruncate, useEuiTheme } from '@elastic/eui';
 import { COMMAND_BADGE_MAX_WIDTH_CH } from '../../conversation_input/message_editor/command_badge/constants';
-import type { UserMessageMarkdownStyles } from './user_message_markdown_plugins';
 
-export interface UserMessageTextStyles extends UserMessageMarkdownStyles {
+export interface UserMessageTextStyles {
   container: SerializedStyles;
+  badge: SerializedStyles;
+  commandBadgeWrapper: SerializedStyles;
+  commandBadgeInner: SerializedStyles;
+  imageBadgeWrapper: SerializedStyles;
+  imageBadgeInner: SerializedStyles;
 }
 
 export const useUserMessageTextStyles = (): UserMessageTextStyles => {

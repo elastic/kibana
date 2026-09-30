@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-import React from 'react';
-import type { SerializedStyles } from '@emotion/react';
+import React, { useMemo } from 'react';
 import {
   EuiToolTip,
   EuiIcon,
@@ -17,6 +16,10 @@ import {
 import type { PluggableList } from 'unified';
 import { sortedCommandDefinitions } from '../../conversation_input/message_editor/command_menu';
 import { IMAGE_ATTACHMENT_SCHEME } from '../../conversation_input/message_editor/image_placeholder';
+import {
+  useUserMessageTextStyles,
+  type UserMessageTextStyles,
+} from './user_message_text.styles';
 
 // Badges are serialized as markdown links, e.g. `[/Summarize](skill://skill-1)`. EUI's markdown
 // parser only allows http(s)/mailto links by default and rewrites anything else back to literal
@@ -47,22 +50,14 @@ export const decodeBadgeName = (path: string): string => {
   }
 };
 
-export interface UserMessageMarkdownStyles {
-  badge: SerializedStyles;
-  commandBadgeWrapper: SerializedStyles;
-  commandBadgeInner: SerializedStyles;
-  imageBadgeWrapper: SerializedStyles;
-  imageBadgeInner: SerializedStyles;
-}
-
-interface CreateUserMessageMarkdownPluginsArgs {
-  styles: UserMessageMarkdownStyles;
+interface UseUserMessageMarkdownPluginsArgs {
   onHoverImage?: (name: string | null) => void;
 }
 
 interface UserMessageMarkdownPlugins {
   parsingPluginList: PluggableList;
   processingPluginList: PluggableList;
+  styles: UserMessageTextStyles;
 }
 
 /**
@@ -70,71 +65,76 @@ interface UserMessageMarkdownPlugins {
  * text: badge schemes are allow-listed as links, and a custom `a` renderer turns those links back
  * into badges (image / command) while everything else opens as a plain link in a new tab.
  */
-export const createUserMessageMarkdownPlugins = ({
-  styles,
+export const useUserMessageMarkdownPlugins = ({
   onHoverImage,
-}: CreateUserMessageMarkdownPluginsArgs): UserMessageMarkdownPlugins => {
-  const parsingPluginList = getDefaultEuiMarkdownParsingPlugins({
-    linkValidator: { allowProtocols: ALLOWED_LINK_PROTOCOLS },
-  });
+}: UseUserMessageMarkdownPluginsArgs = {}): UserMessageMarkdownPlugins => {
+  const styles = useUserMessageTextStyles();
 
-  const defaultProcessingPlugins = getDefaultEuiMarkdownProcessingPlugins();
-  const [remarkToRehypePlugin, remarkToRehypeOptions] = defaultProcessingPlugins[0];
-  const [rehypeToReactPlugin, rehypeToReactOptions] = defaultProcessingPlugins[1];
+  const { parsingPluginList, processingPluginList } = useMemo(() => {
+    const parsingPlugins = getDefaultEuiMarkdownParsingPlugins({
+      linkValidator: { allowProtocols: ALLOWED_LINK_PROTOCOLS },
+    });
 
-  rehypeToReactOptions.components = {
-    ...rehypeToReactOptions.components,
-    a: ({
-      href,
-      children,
-      type,
-      color,
-      ...rest
-    }: React.AnchorHTMLAttributes<HTMLAnchorElement>) => {
-      const parsed = href ? parseSchemeAndPath(href) : undefined;
+    const defaultProcessingPlugins = getDefaultEuiMarkdownProcessingPlugins();
+    const [remarkToRehypePlugin, remarkToRehypeOptions] = defaultProcessingPlugins[0];
+    const [rehypeToReactPlugin, rehypeToReactOptions] = defaultProcessingPlugins[1];
 
-      if (parsed?.scheme === IMAGE_ATTACHMENT_SCHEME) {
-        const name = decodeBadgeName(parsed.path);
-        return (
-          <EuiToolTip content={name} disableScreenReaderOutput>
-            <span
-              css={styles.imageBadgeWrapper}
-              tabIndex={0}
-              onMouseEnter={onHoverImage ? () => onHoverImage(name) : undefined}
-              onMouseLeave={onHoverImage ? () => onHoverImage(null) : undefined}
-            >
-              <EuiIcon type="image" size="s" aria-hidden={true} />
-              <span className="image-badge-label" css={styles.imageBadgeInner}>
-                {name}
+    rehypeToReactOptions.components = {
+      ...rehypeToReactOptions.components,
+      a: ({
+        href,
+        children,
+        type,
+        color,
+        ...rest
+      }: React.AnchorHTMLAttributes<HTMLAnchorElement>) => {
+        const parsed = href ? parseSchemeAndPath(href) : undefined;
+
+        if (parsed?.scheme === IMAGE_ATTACHMENT_SCHEME) {
+          const name = decodeBadgeName(parsed.path);
+          return (
+            <EuiToolTip content={name} disableScreenReaderOutput>
+              <span
+                css={styles.imageBadgeWrapper}
+                tabIndex={0}
+                onMouseEnter={onHoverImage ? () => onHoverImage(name) : undefined}
+                onMouseLeave={onHoverImage ? () => onHoverImage(null) : undefined}
+              >
+                <EuiIcon type="image" size="s" aria-hidden={true} />
+                <span className="image-badge-label" css={styles.imageBadgeInner}>
+                  {name}
+                </span>
               </span>
-            </span>
-          </EuiToolTip>
-        );
-      }
+            </EuiToolTip>
+          );
+        }
 
-      if (parsed && COMMAND_SCHEMES.has(parsed.scheme)) {
+        if (parsed && COMMAND_SCHEMES.has(parsed.scheme)) {
+          return (
+            <EuiToolTip content={children} disableScreenReaderOutput>
+              <span css={[styles.badge, styles.commandBadgeWrapper]} tabIndex={0}>
+                <span css={styles.commandBadgeInner}>{children}</span>
+              </span>
+            </EuiToolTip>
+          );
+        }
+
         return (
-          <EuiToolTip content={children} disableScreenReaderOutput>
-            <span css={[styles.badge, styles.commandBadgeWrapper]} tabIndex={0}>
-              <span css={styles.commandBadgeInner}>{children}</span>
-            </span>
-          </EuiToolTip>
+          <EuiLink {...rest} href={href} target="_blank" rel="noreferrer" external={false}>
+            {children}
+          </EuiLink>
         );
-      }
+      },
+    };
 
-      return (
-        <EuiLink {...rest} href={href} target="_blank" rel="noreferrer" external={false}>
-          {children}
-        </EuiLink>
-      );
-    },
-  };
+    return {
+      parsingPluginList: parsingPlugins,
+      processingPluginList: [
+        [remarkToRehypePlugin, remarkToRehypeOptions],
+        [rehypeToReactPlugin, rehypeToReactOptions],
+      ] as PluggableList,
+    };
+  }, [styles, onHoverImage]);
 
-  return {
-    parsingPluginList,
-    processingPluginList: [
-      [remarkToRehypePlugin, remarkToRehypeOptions],
-      [rehypeToReactPlugin, rehypeToReactOptions],
-    ] as PluggableList,
-  };
+  return { parsingPluginList, processingPluginList, styles };
 };

@@ -5,10 +5,9 @@
  * 2.0.
  */
 
-import React, { useMemo } from 'react';
+import React from 'react';
 import { EuiMarkdownFormat } from '@elastic/eui';
-import { createUserMessageMarkdownPlugins } from './user_message_markdown_plugins';
-import { useUserMessageTextStyles } from './user_message_text.styles';
+import { useUserMessageMarkdownPlugins } from './user_message_markdown_plugins';
 
 interface UserMessageTextProps {
   text: string;
@@ -16,12 +15,9 @@ interface UserMessageTextProps {
 }
 
 export const UserMessageText: React.FC<UserMessageTextProps> = ({ text, onHoverImage }) => {
-  const styles = useUserMessageTextStyles();
-
-  const { parsingPluginList, processingPluginList } = useMemo(
-    () => createUserMessageMarkdownPlugins({ styles, onHoverImage }),
-    [styles, onHoverImage]
-  );
+  const { parsingPluginList, processingPluginList, styles } = useUserMessageMarkdownPlugins({
+    onHoverImage,
+  });
 
   return (
     <div css={styles.container}>
