@@ -6,9 +6,12 @@ type: object
 required:
   - message
   - subject
-  - anyOf:
+anyOf:
+  - required:
       - to
+  - required:
       - cc
+  - required:
       - bcc
 properties:
   bcc:

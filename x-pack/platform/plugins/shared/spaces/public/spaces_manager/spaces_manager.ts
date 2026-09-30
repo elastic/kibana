@@ -206,10 +206,10 @@ export class SpacesManager {
   public getContentForSpace(
     id: string
   ): Promise<{ summary: SpaceContentTypeSummaryItem[]; total: number }> {
-    return this.http.get(`/internal/spaces/${id}/content_summary`);
+    return this.http.get(`/internal/spaces/${encodeURIComponent(id)}/content_summary`);
   }
 
   public getRolesForSpace(id: string): Promise<Role[]> {
-    return this.http.get(`/internal/security/roles/${id}`);
+    return this.http.get(`/internal/security/roles/${encodeURIComponent(id)}`);
   }
 }
