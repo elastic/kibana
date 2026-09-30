@@ -6,6 +6,7 @@
  */
 
 import React, { useRef } from 'react';
+import { useDispatch } from 'react-redux';
 import type { ZoomEvent } from 'd3';
 import d3 from 'd3';
 import { css } from '@emotion/react';
@@ -20,12 +21,19 @@ import type {
 import { makeNodeId } from '../../services/persistence';
 import { getIconOffset, IconRenderer } from '../icon_renderer';
 import { noUserSelectStyles } from '../../styles';
+import {
+  toggleEdgeSelection,
+  toggleNodeSelection,
+  type GraphDispatch,
+} from '../../state_management';
 
 export interface GraphVisualizationProps {
   workspace: Workspace;
   onSetControl: (control: ControlType) => void;
   selectSelected: (node: WorkspaceNode) => void;
   onSetMergeCandidates: (terms: TermIntersect[]) => void;
+  onToggleNodeSelection?: (node: WorkspaceNode, replace: boolean) => boolean;
+  onToggleEdgeSelection?: (edge: WorkspaceEdge) => boolean;
 }
 
 function registerZooming(element: SVGSVGElement) {
@@ -58,6 +66,8 @@ export function GraphVisualization({
   selectSelected,
   onSetControl,
   onSetMergeCandidates,
+  onToggleNodeSelection,
+  onToggleEdgeSelection,
 }: GraphVisualizationProps) {
   const svgRoot = useRef<SVGSVGElement | null>(null);
 
@@ -67,6 +77,15 @@ export function GraphVisualization({
     // Selection logic - shift key+click helps selects multiple nodes
     // Without the shift key we deselect all prior selections (perhaps not
     // a great idea for touch devices with no concept of shift key)
+    if (onToggleNodeSelection) {
+      if (onToggleNodeSelection(n, !event.shiftKey)) {
+        selectSelected(n);
+      } else {
+        onSetControl('none');
+      }
+      return;
+    }
+
     if (!event.shiftKey) {
       const prevSelection = n.isSelected;
       workspace.selectNone();
@@ -87,19 +106,25 @@ export function GraphVisualization({
   };
 
   const edgeClick = (edge: WorkspaceEdge) => {
-    // no multiple selection for now
-    const currentSelection = workspace.getEdgeSelection();
-    if (currentSelection.length && currentSelection[0] !== edge) {
-      workspace.clearEdgeSelection();
-    }
-    if (!edge.isSelected) {
-      workspace.addEdgeToSelection(edge);
+    let isSelected: boolean;
+    if (onToggleEdgeSelection) {
+      isSelected = onToggleEdgeSelection(edge);
     } else {
-      workspace.removeEdgeFromSelection(edge);
+      // no multiple selection for now
+      const currentSelection = workspace.getEdgeSelection();
+      if (currentSelection.length && currentSelection[0] !== edge) {
+        workspace.clearEdgeSelection();
+      }
+      if (!edge.isSelected) {
+        workspace.addEdgeToSelection(edge);
+      } else {
+        workspace.removeEdgeFromSelection(edge);
+      }
+      isSelected = Boolean(edge.isSelected);
     }
     onSetControl('edgeSelection');
 
-    if (edge.isSelected) {
+    if (isSelected) {
       workspace.getAllIntersections(handleMergeCandidatesCallback, [edge.topSrc, edge.topTarget]);
     }
   };
@@ -296,6 +321,28 @@ const svgTextStyles = ({ euiTheme }: UseEuiTheme) =>
     fill: euiTheme.colors.darkShade,
     color: euiTheme.colors.darkShade,
   });
+
+export const ReduxGraphVisualization = (props: GraphVisualizationProps) => {
+  const dispatch = useDispatch<GraphDispatch>();
+
+  return (
+    <GraphVisualization
+      {...props}
+      onToggleNodeSelection={(node, replace) => {
+        const willBeSelected = replace
+          ? !node.isSelected || props.workspace.selectedNodes.length > 1
+          : !node.isSelected;
+        dispatch(toggleNodeSelection({ nodeId: node.id, replace }));
+        return willBeSelected;
+      }}
+      onToggleEdgeSelection={(edge) => {
+        const willBeSelected = !edge.isSelected;
+        dispatch(toggleEdgeSelection(edge.id ?? makeEdgeId(edge)));
+        return willBeSelected;
+      }}
+    />
+  );
+};
 
 const styles = {
   graph: css({
