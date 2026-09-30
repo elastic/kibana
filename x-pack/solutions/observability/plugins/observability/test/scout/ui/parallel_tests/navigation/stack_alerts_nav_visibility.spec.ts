@@ -24,10 +24,7 @@ test.describe(
       await pageObjects.observabilityNavigation.waitForLoad();
     });
 
-    test('hides Stack Alerts and Stack Rules', async ({
-      config,
-      pageObjects,
-    }) => {
+    test('hides Stack Alerts and Stack Rules', async ({ config, pageObjects }) => {
       const nav = pageObjects.observabilityNavigation;
       const panelId = config.serverless ? 'admin_and_settings' : 'stack_management';
       const opener = nav.navItemInFooterById(panelId);
