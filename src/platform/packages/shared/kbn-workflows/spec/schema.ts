@@ -533,6 +533,9 @@ export const KibanaStepInputSchema = z.union([
       method: KibanaHttpMethodSchema.optional().default('GET'),
       path: z.string().min(1),
       body: z.any().optional(),
+      // Each query param accepts a single value or an array (sent as repeated keys), matching
+      // how the execution engine builds the outgoing request's query string.
+      query: z.record(z.string(), z.union([z.string(), z.array(z.string())])).optional(),
       headers: z.record(z.string(), z.string()).optional(),
     }),
     fetcher: KibanaFetcherConfigSchema,

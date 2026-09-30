@@ -21,6 +21,7 @@ import {
   ElasticsearchStepSchema,
   EventTimestampSchema,
   IfStepSchema,
+  KibanaStepInputSchema,
   KibanaStepSchema,
   LIQUID_MEMORY_LIMIT_MAX,
   LIQUID_PARSE_LIMIT_MAX,
@@ -1301,6 +1302,28 @@ describe('`on-failure` on step schemas', () => {
   it.each(cases)('keeps `on-failure` on the $name step', ({ schema, step }) => {
     expect(getShape(schema)).toHaveProperty('on-failure');
     expect(schema.parse({ ...step, 'on-failure': onFailure })['on-failure']).toEqual(onFailure);
+  });
+});
+
+describe('KibanaStepInputSchema', () => {
+  it('accepts a single string query value on the raw request format', () => {
+    const result = KibanaStepInputSchema.safeParse({
+      request: { method: 'GET', path: '/api/cases', query: { page: '1' } },
+    });
+    expect(result.success).toBe(true);
+    if (result.success && 'request' in result.data) {
+      expect(result.data.request.query).toEqual({ page: '1' });
+    }
+  });
+
+  it('accepts an array query value on the raw request format, without stripping it', () => {
+    const result = KibanaStepInputSchema.safeParse({
+      request: { method: 'GET', path: '/api/cases', query: { status: ['running', 'upcoming'] } },
+    });
+    expect(result.success).toBe(true);
+    if (result.success && 'request' in result.data) {
+      expect(result.data.request.query).toEqual({ status: ['running', 'upcoming'] });
+    }
   });
 });
 

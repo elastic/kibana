@@ -903,7 +903,8 @@ export interface RequestOptions {
   method: string;
   path: string;
   body?: Record<string, unknown>;
-  query?: Record<string, string>;
+  /** A value may be a single string or an array, sent as repeated query-string keys. */
+  query?: Record<string, string | string[]>;
   headers?: Record<string, string>;
   /** Bulk body for elasticsearch.bulk step */
   bulkBody?: Array<Record<string, unknown>>;
