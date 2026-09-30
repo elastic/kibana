@@ -28,9 +28,11 @@ Follow only the steps for the chosen path. Do not mix them.
 ### Research the vendor API before writing schemas or handlers
 
 For a custom (non-MCP) connector, do this before Step 2. For each action you plan to implement, find the
-vendor's real API docs and verify — don't assume: update semantics (partial vs. full-replace), how array
-query params are encoded, whether optional modifier params (`scope`, filters, flags) on `POST`/`PATCH`
-actions belong in the query string or the JSON body, the auth scope each action actually needs, and
+vendor's real API docs and verify — don't assume: update semantics (partial vs. full-replace, including
+nested objects sent whole), the HTTP method and body shape of that exact route, how array query params
+are encoded, whether optional modifier params (`scope`, filters, flags) on `POST`/`PATCH` actions belong
+in the query string or the JSON body, the auth scope or cloud role (and the level it is granted at) each
+action needs, each identifier field's allowed format, the resource variants the vendor documents, and
 whether the service has regional/self-hosted domain variants. See "Research the Vendor API Before Writing
 Any Code" in
 [reference/custom-connector-setup.md](reference/custom-connector-setup.md) for the full checklist. Bugs
@@ -52,6 +54,10 @@ Follow the patterns in [reference/connector-patterns.md](reference/connector-pat
 2. **`types.ts`** — Zod input schemas and inferred TypeScript types for each action
 3. **`{connector_name}.test.ts`** — Unit tests
 4. **`icon/index.tsx`** — Brand icon component
+5. **Helper files, when the spec file passes 500 lines** — request plumbing, response shaping and
+   credential exchanges in sibling files, each with its own test file. Keep `{connector_name}.ts` under
+   500 lines and never over 1000; see
+   [Keep the spec file under 500 lines](reference/connector-patterns.md#keep-the-spec-file-under-500-lines)
 
 Register in `src/platform/packages/shared/kbn-connector-specs/src/all_specs.ts` and `connector_icons_map.ts`.
 
@@ -184,14 +190,38 @@ them with unit tests up front — each one only if your connector has the thing 
 - **if an input carries a size or byte bound** — an over-sized input rejected at the schema boundary,
   including a **non-ASCII** case for a byte bound
 - **if a regex constrains a URL path** — every accept *and* reject case, table-driven
+- **if an action polls an operation URL from a response** (`Location`, `Azure-AsyncOperation`) — an
+  off-origin URL, asserting no authenticated request is made; and a 403 during polling, asserting it is
+  raised at once rather than after the poll timeout
+- **if an action accepts a URL-shaped cursor from the caller** — a same-host URL for a different
+  tenant or repository, asserting it is rejected
+- **if a handler replaces a nested object** — the least obvious field of that object set on the current
+  resource, asserting it survives an update that does not mention it
+- **if the connector has more than one auth type** — each auth-specific branch, with `authType` in
+  `ctx.secrets` and the connector's config in `ctx.config`, as the executor builds them
+- **if the vendor documents resource variants** — one fixture per variant (e.g. DNS-only cluster, System
+  pool), asserting each variant's output and constraint
 
 A connector with none of these (an MCP-only spec, or one whose actions are plain `GET` reads) owes none
 of them. Write the tests its own surface needs instead.
 
 ### Self-review before handing off
 
-Before treating the connector as done, re-read the whole diff once, end to end, specifically hunting for:
+First run the deterministic checks, and fix every failure for your connector:
 
+```bash
+node scripts/jest src/platform/packages/shared/kbn-connector-specs/src/connector_spec_quality_contract.test.ts
+```
+
+They check that the docs page exists at the URL derived from the connector id, that an Agent Builder-only
+connector's page says so, that the docs page avoids internal wording ("custom connector", "MCP-native",
+"connector spec"), that the navigation links resolve, that every tool action and input parameter has a
+description, and that every input string and array has a `.max()`. Do not re-check those by hand.
+
+Then, before treating the connector as done, re-read the whole diff once, end to end, specifically hunting for:
+
+- A spec file over 500 lines — move request plumbing, response shaping and credential exchanges into
+  sibling helper files with their own tests, and fold duplicated handler code into one shared function
 - Any `isTool: true` action missing a `scope` field — every tool action must have one
 - A `scope` that looks wrong: a "get"/"list"/"search" action marked `write` or `destroy`, or an update/delete/patch action marked `read`
 - A `scope: 'read'` on an action whose request is a `POST`/`PATCH` — read the vendor's documentation for
@@ -210,6 +240,28 @@ Before treating the connector as done, re-read the whole diff once, end to end, 
   continuation link, or that follows a continuation URL with `ctx.client` without resolving it against
   `ctx.client.getUri()` and checking its origin first — that sends the connector's credentials to
   whatever host the link names
+- Any other URL the connector did not build — a `Location`/`Azure-AsyncOperation` header, an operation
+  link, a caller-supplied cursor — requested with `ctx.client` without an origin check, and for a
+  caller-supplied URL, without checking its path belongs to the configured tenant and requested resource
+- A list action that can return `hasMore: true` with no cursor or page input to fetch the next page,
+  while a sibling list action has one
+- A poll or retry loop that retries every error instead of only transient statuses (short-lived 404,
+  429, 5xx), or an error explanation that treats 401 and 403 as the same thing
+- `ctx.config.authType` anywhere — the discriminator is in `ctx.secrets.authType`
+- A handler that `PUT`s a nested object built from input, without copying every field of that object's
+  vendor type that the input does not set
+- A method or body shape written by analogy with a neighbouring endpoint rather than read from that
+  route's OpenAPI/swagger entry
+- A returned handle (operation ID, job ID) missing an input the follow-up action needs, such as a
+  project or subscription that overrides the connector default; a discovery action whose results no
+  other action accepts as input
+- An output field computed by the connector but named as if the vendor reported it
+- A `create`/`set` action that replaces an existing value under the same key, marked `write` instead of
+  `destroy`
+- A `skill` recipe step whose action does not return the field the step reads; a state an action can put
+  a resource into (draft, stopped) with no action to leave it
+- One regex helper shared by identifier fields whose vendor formats differ, or an identifier pattern that
+  rejects the vendor's fully qualified form
 - A size bound measured with `.length` on a serialized string where the message says "bytes"
 - A regex guarding a URL path that has only been tested for what it accepts, never for what it must reject
 - Handlers still typed with implicit `any` (missing the `input: XInput` annotation)
@@ -276,6 +328,8 @@ This step requires documentation skills from https://github.com/elastic/elastic-
      ```
 
      Check the opening sentence too: "a workflow or agent can..." promises the same thing in prose.
+     An `isTool: false` action on such a connector is reachable only through the `_execute` API, so do
+     not describe it as available in workflows or agents either.
    - **Do not use internal vocabulary.** "custom connector", "MCP-native", "connector spec" and
      "stack connector" are our words for our implementation; a reader has no way to tell what a
      *non*-custom connector would be. Describe what the connector does instead.
@@ -299,6 +353,12 @@ This step requires documentation skills from https://github.com/elastic/elastic-
    (the generator inserts a placeholder row here too — replace its `TODO` description), ordered
    alphabetically within the correct category (most connectors belong in "Third-party search"; check for
    a better-fitting category like "Threat intelligence" or "Identity management" first).
+3. **Check every shared file you touched.** Run `git diff` on `toc.yml`, the connector-list snippet,
+   `all_specs.ts`, `connector_icons_map.ts`, and `CODEOWNERS`. Every added line must refer to *this*
+   connector, and every linked file must exist in this branch. The AKS PR added an Azure DevOps entry to
+   both `toc.yml` and the snippet, pointing at a page that did not exist, most likely carried over from
+   another connector built in the same session. This matters most when building several connectors in
+   a row.
 
 Once you are done developing the connector spec, tests, and documentation, let the user review your work before next steps.
 

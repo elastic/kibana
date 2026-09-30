@@ -44,6 +44,17 @@ action you plan to implement, find the vendor's official API reference and confi
   does it fully replace the resource (a `PUT` that 400s if you omit any required field)? If it's
   replace-only, the handler must `GET` the current resource first and backfill every field the input
   didn't provide — not just the fields you happened to test.
+- **Nested objects sent whole**: the same applies one level down. Many "set X config" endpoints take a
+  whole sub-object (`masterAuthorizedNetworksConfig`, `management`, `autoscaling`) and reset any field
+  you omit inside it to its default. List every field of the vendor's type for that sub-object, and for
+  each one decide whether the input sets it or the handler copies it from the current resource. The GKE
+  connector copied `gcpPublicCidrsAccessEnabled` but not `privateEndpointEnforcementEnabled`, so
+  changing the CIDR allowlist silently removed the private-endpoint restriction.
+- **HTTP method and body shape per route**: take both from the vendor's OpenAPI/swagger or REST
+  reference for *that exact route*, never by analogy with a neighbouring endpoint. The AKS connector sent
+  `PATCH` to an agent-pool route that only supports `GET`/`PUT`/`DELETE` (ARM answered with a misleading
+  `InvalidAPIVersion`), and wrapped the `runCommand` body in `properties` like the resource bodies around
+  it, while `RunCommandRequest` is flat. Both failed on every real call and passed every mocked test.
 - **Array/list query parameters**: how does the API expect repeated values encoded — `?id=1&id=2`,
   `?id[]=1&id[]=2`, or a comma-joined string? Axios's default array serialization (`id[]=1&id[]=2`) is
   not universal; check the docs and, if needed, set a custom `paramsSerializer`.
@@ -78,6 +89,12 @@ action you plan to implement, find the vendor's official API reference and confi
   documenting it at all: a user creating the connector sees the in-product `helpText`, not the docs, so an
   extra scope that's only in the docs' setup steps still produces a 403 for anyone who follows the in-UI
   hint.
+  - **Cloud roles have a scope level as well as a name.** For Azure RBAC, GCP IAM, and AWS IAM, write down
+    *where* each role must be granted (subscription, resource group, project, or a single resource), not
+    just which role. The AKS docs granted a role on each cluster, but `listResourceGroups` calls a
+    subscription-level route, so a user following the setup steps got a 403 on the first discovery step.
+    Also list roles needed on *other* resources (GKE's `iam.serviceAccountUser` on the node service
+    account for `createCluster`).
 - **Regional/self-hosted variants**: does the service run on multiple regional domains (e.g.
   `us.example.com`, `eu.example.com`) in addition to a default SaaS host, or support self-hosting? If so,
   the base-URL config field's help text must say so — otherwise requests silently 404 for a subset of users.
@@ -89,6 +106,16 @@ action you plan to implement, find the vendor's official API reference and confi
   elsewhere — check the vendor's actual example request body. Many APIs expect a JSON object/map (e.g.
   `{"team": "backend", "priority": "high"}`) or an array of objects, not a delimited string, and will 500
   or silently misparse a string sent where an object is expected.
+- **Identifier formats, per field**: take each identifier's allowed format from the vendor's docs for
+  that specific field, including fully qualified and cross-project forms. Do not reuse one regex helper
+  across fields with different rules. The GKE connector validated Kubernetes node labels with the GCP
+  resource-label regex, which rejects `example.com/workload`, and accepted only bare network names, which
+  rejects the `projects/host/global/networks/shared` form Shared VPC needs.
+- **Resource variants and modes**: list the variants the vendor documents for each resource (GKE
+  Standard vs. Autopilot, clusters with only a DNS endpoint; AKS System vs. User node pools; regional vs.
+  zonal) and note which fields are absent or which operations are rejected for each. The AKS connector
+  allowed scaling any pool to 0, which AKS rejects for System pools. Check variant-specific constraints
+  in the handler before sending the request, and add a test fixture per variant.
 - **Compound-document / sideloading conventions**: if the vendor's response envelope follows JSON:API
   (`data`/`attributes`/`relationships`/`included`) or a similar sparse-fieldset pattern, check whether
   related objects are populated by default or require an explicit param (e.g. `?include=services,groups`,
