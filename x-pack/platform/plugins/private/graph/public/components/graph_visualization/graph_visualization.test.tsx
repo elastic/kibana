@@ -110,6 +110,7 @@ describe('graph_visualization', () => {
     selectedEdgeIds: ['A..1-B..2', 'B..2-C..3'],
     onToggleNodeSelection: jest.fn(() => true),
     onToggleEdgeSelection: jest.fn(() => true),
+    getMergeCandidates: jest.fn().mockResolvedValue([]),
   };
 
   beforeEach(() => {
@@ -207,9 +208,10 @@ describe('graph_visualization', () => {
 
     instance.find('.gphEdge').at(1).simulate('click');
 
-    expect(workspace.getAllIntersections).toHaveBeenCalled();
-    expect(edges[0].topSrc).toEqual(workspace.getAllIntersections.mock.calls[0][1][0]);
-    expect(edges[0].topTarget).toEqual(workspace.getAllIntersections.mock.calls[0][1][1]);
+    expect(defaultSelectionProps.getMergeCandidates).toHaveBeenCalledWith([
+      edges[0].topSrc,
+      edges[0].topTarget,
+    ]);
     expect(defaultSelectionProps.onToggleEdgeSelection).toHaveBeenCalledWith(edges[0]);
   });
 });

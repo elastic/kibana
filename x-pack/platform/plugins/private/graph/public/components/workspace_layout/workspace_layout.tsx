@@ -53,6 +53,7 @@ type WorkspaceLayoutProps = Pick<
   indexPatternProvider: IndexPatternProvider;
   sharingSavedObjectProps?: SharingSavedObjectProps;
   requestAdapter: RequestAdapter;
+  getMergeCandidates?: (nodes: WorkspaceNode[]) => Promise<TermIntersect[]>;
 };
 
 interface WorkspaceLayoutStateProps {
@@ -76,6 +77,7 @@ export const WorkspaceLayoutComponent = ({
   spaces,
   inspect,
   requestAdapter,
+  getMergeCandidates,
 }: WorkspaceLayoutProps & WorkspaceLayoutStateProps) => {
   const [currentIndexPattern, setCurrentIndexPattern] = useState<DataView>();
   const [pickerOpen, setPickerOpen] = useState(false);
@@ -217,6 +219,7 @@ export const WorkspaceLayoutComponent = ({
               selectSelected={selectSelected}
               onSetControl={onSetControl}
               onSetMergeCandidates={onSetMergeCandidates}
+              getMergeCandidates={getMergeCandidates}
             />
           </div>
 
