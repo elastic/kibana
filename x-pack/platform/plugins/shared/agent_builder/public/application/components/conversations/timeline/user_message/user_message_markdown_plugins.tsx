@@ -16,7 +16,7 @@ import {
 import type { PluggableList } from 'unified';
 import { sortedCommandDefinitions } from '../../conversation_input/message_editor/command_menu';
 import { IMAGE_ATTACHMENT_SCHEME } from '../../conversation_input/message_editor/image_placeholder';
-import { useUserMessageTextStyles, type UserMessageTextStyles } from './user_message_text.styles';
+import { useUserMessageTextStyles, type UserMessageTextStyles } from './use_user_message_text_styles';
 
 // Badges are serialized as markdown links, e.g. `[/Summarize](skill://skill-1)`. EUI's markdown
 // parser only allows http(s)/mailto links by default and rewrites anything else back to literal
