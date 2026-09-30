@@ -592,10 +592,11 @@ describe('deanonymizeMessage', () => {
       ]);
     });
 
-    it('does not forward refusal fragments on streamed chunks', async () => {
+    it('emits the refusal once, deanonymized, on the catch-up chunk instead of forwarding fragments', async () => {
       const events: ChatCompletionEvent[] = [
-        { ...chunkEvent(`Hello ${mask}`), refusal: `cannot help with ${mask}` },
-        messageEvent(`Hello ${mask}`),
+        { ...chunkEvent('Hello '), refusal: 'cannot help with ' },
+        { ...chunkEvent(mask), refusal: mask },
+        { ...messageEvent(`Hello ${mask}`), refusal: `cannot help with ${mask}` },
       ];
 
       const result = await lastValueFrom(
@@ -607,11 +608,30 @@ describe('deanonymizeMessage', () => {
           event.type === ChatCompletionEventType.ChatCompletionChunk
       );
 
-      expect(chunkEvents.length).toBeGreaterThan(0);
-      for (const chunk of chunkEvents) {
-        expect(chunk.refusal).toBeUndefined();
-      }
+      // Streamed fragments are dropped; only the catch-up chunk carries the refusal.
+      const chunksWithRefusal = chunkEvents.filter((chunk) => chunk.refusal !== undefined);
+      expect(chunksWithRefusal).toHaveLength(1);
+      expect(chunksWithRefusal[0]).toBe(chunkEvents[chunkEvents.length - 1]);
+
+      // Assembling the response from chunks alone yields the deanonymized refusal.
+      expect(mergeChunks(chunkEvents).refusal).toBe(`cannot help with ${value}`);
       expect(concatenateChunkContent(result)).toBe(`Hello ${value}`);
+
+      const messageOut = result[result.length - 1] as ChatCompletionMessageEvent;
+      expect(messageOut.refusal).toBe(`cannot help with ${value}`);
+    });
+
+    it('does not add a refusal to the catch-up chunk when the model did not refuse', async () => {
+      const result = await lastValueFrom(
+        from([chunkEvent(`Hello ${mask}`), messageEvent(`Hello ${mask}`)]).pipe(
+          deanonymizeMessage(anonymizationOutput),
+          toArray()
+        )
+      );
+
+      for (const event of result) {
+        expect(event).not.toHaveProperty('refusal');
+      }
     });
   });
 
