@@ -235,6 +235,7 @@ editor:
         - feature_securitySolutionTimeline.all
         - feature_securitySolutionNotes.all
         - feature_securitySolutionCases.all
+        - feature_securitySolutionCasesV3.cases_manage_templates
         - feature_securitySolutionAssistant.all
         - feature_securitySolutionAttackDiscovery.all
         - feature_actions.read
@@ -456,6 +457,7 @@ t2_analyst:
         - feature_securitySolutionTimeline.read
         - feature_securitySolutionNotes.read
         - feature_securitySolutionCases.all
+        - feature_securitySolutionCasesV3.cases_manage_templates
         - feature_securitySolutionAssistant.all
         - feature_securitySolutionAttackDiscovery.minimal_all
         - feature_actions.read
@@ -592,6 +594,7 @@ t3_analyst:
         - feature_securitySolutionTimeline.all
         - feature_securitySolutionNotes.all
         - feature_securitySolutionCases.all
+        - feature_securitySolutionCasesV3.cases_manage_templates
         - feature_securitySolutionAssistant.all
         - feature_securitySolutionAttackDiscovery.all
         - feature_actions.read
@@ -707,6 +710,7 @@ threat_intelligence_analyst:
         - feature_securitySolutionTimeline.all
         - feature_securitySolutionNotes.all
         - feature_securitySolutionCases.all
+        - feature_securitySolutionCasesV3.cases_manage_templates
         - feature_securitySolutionAssistant.all
         - feature_securitySolutionAttackDiscovery.all
         - feature_actions.read
@@ -829,6 +833,7 @@ rule_author:
         - feature_securitySolutionTimeline.all
         - feature_securitySolutionNotes.all
         - feature_securitySolutionCases.all
+        - feature_securitySolutionCasesV3.cases_manage_templates
         - feature_securitySolutionAssistant.all
         - feature_securitySolutionAttackDiscovery.all
         - feature_actions.read
@@ -962,6 +967,7 @@ soc_manager:
         - feature_siemV5.soc_management_all
         - feature_securitySolutionRulesV2.all
         - feature_securitySolutionCases.all
+        - feature_securitySolutionCasesV3.cases_manage_templates
         - feature_securitySolutionAssistant.all
         - feature_securitySolutionAttackDiscovery.all
         - feature_securitySolutionTimeline.all
@@ -1063,6 +1069,7 @@ detections_admin:
         - feature_securitySolutionTimeline.all
         - feature_securitySolutionNotes.all
         - feature_securitySolutionCases.all
+        - feature_securitySolutionCasesV3.cases_manage_templates
         - feature_securitySolutionAssistant.all
         - feature_securitySolutionAttackDiscovery.all
         - feature_actions.all
@@ -1186,6 +1193,7 @@ platform_engineer:
         - feature_securitySolutionTimeline.all
         - feature_securitySolutionNotes.all
         - feature_securitySolutionCases.all
+        - feature_securitySolutionCasesV3.cases_manage_templates
         - feature_securitySolutionAssistant.all
         - feature_securitySolutionAttackDiscovery.all
         - feature_actions.all
@@ -1321,6 +1329,7 @@ endpoint_operations_analyst:
         - feature_securitySolutionTimeline.all
         - feature_securitySolutionNotes.all
         - feature_securitySolutionCases.all
+        - feature_securitySolutionCasesV3.cases_manage_templates
         - feature_securitySolutionAssistant.all
         - feature_securitySolutionAttackDiscovery.all
         - feature_actions.all
@@ -1438,6 +1447,7 @@ endpoint_policy_manager:
         - feature_siemV5.workflow_insights_all
         - feature_securitySolutionRulesV2.all
         - feature_securitySolutionCases.all
+        - feature_securitySolutionCasesV3.cases_manage_templates
         - feature_securitySolutionAssistant.all
         - feature_securitySolutionAttackDiscovery.all
         - feature_securitySolutionTimeline.all
