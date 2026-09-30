@@ -237,6 +237,7 @@ export class ActionPolicyClient {
 
     const attributes = buildCreateActionPolicyAttributes({
       data: parsed,
+      enabled: params.options?.enabled ?? true,
       auth: apiKeyAttrs,
       createdBy: actor,
       createdAt: now,
@@ -913,6 +914,7 @@ export class ActionPolicyClient {
     const replacementAttrs: ActionPolicySavedObjectAttributes = {
       ...buildCreateActionPolicyAttributes({
         data: parsed,
+        enabled: existingAttrs.enabled,
         auth: apiKeyAttrs,
         createdBy: existingAttrs.createdBy,
         createdAt: existingAttrs.createdAt,

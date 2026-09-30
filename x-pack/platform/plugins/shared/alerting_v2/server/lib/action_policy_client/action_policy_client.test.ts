@@ -225,6 +225,55 @@ describe('ActionPolicyClient', () => {
       expect(res.destinations).toEqual([{ type: 'workflow', id: 'my-workflow' }]);
     });
 
+    it('creates a disabled policy when options.enabled is false', async () => {
+      mockSavedObjectsClient.create.mockResolvedValueOnce({
+        id: 'policy-id-disabled',
+        type: ACTION_POLICY_SAVED_OBJECT_TYPE,
+        attributes: {} as ActionPolicySavedObjectAttributes,
+        references: [],
+        version: 'WzEsMV0=',
+      });
+
+      const res = await client.createActionPolicy({
+        data: {
+          name: 'my-policy',
+          description: 'my-policy description',
+          destinations: [{ type: 'workflow', id: 'my-workflow' }],
+        },
+        options: { id: 'policy-id-disabled', enabled: false },
+      });
+
+      expect(mockSavedObjectsClient.create).toHaveBeenCalledWith(
+        ACTION_POLICY_SAVED_OBJECT_TYPE,
+        expect.objectContaining({ enabled: false }),
+        { id: 'policy-id-disabled', overwrite: false }
+      );
+      expect(res).toEqual(expect.objectContaining({ id: 'policy-id-disabled', enabled: false }));
+    });
+
+    it('defaults to an enabled policy when options.enabled is omitted', async () => {
+      mockSavedObjectsClient.create.mockResolvedValueOnce({
+        id: 'policy-id-default-enabled',
+        type: ACTION_POLICY_SAVED_OBJECT_TYPE,
+        attributes: {} as ActionPolicySavedObjectAttributes,
+        references: [],
+        version: 'WzEsMV0=',
+      });
+
+      const res = await client.createActionPolicy({
+        data: {
+          name: 'my-policy',
+          description: 'my-policy description',
+          destinations: [{ type: 'workflow', id: 'my-workflow' }],
+        },
+        options: { id: 'policy-id-default-enabled' },
+      });
+
+      expect(res).toEqual(
+        expect.objectContaining({ id: 'policy-id-default-enabled', enabled: true })
+      );
+    });
+
     it('stores tags as null on create', async () => {
       mockSavedObjectsClient.create.mockResolvedValueOnce({
         id: 'policy-no-tags',
