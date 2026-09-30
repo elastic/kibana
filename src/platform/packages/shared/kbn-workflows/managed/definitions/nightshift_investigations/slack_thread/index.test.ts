@@ -36,12 +36,11 @@ const requireStep = (name: string): WorkflowStep => {
 };
 
 describe('Nightshift Slack thread workflow', () => {
-  it('starts on a mention and continues on human thread replies only', () => {
+  it('continues an existing investigation on human thread replies only', () => {
     expect(workflow.triggers).toEqual([
-      { type: 'slack2.app_mention', 'connector-id': '*' },
       {
         type: 'slack2.message',
-        'connector-id': '*',
+        'connector-id': 'elastic-apps-slack',
         on: {
           condition:
             'event.threadId:* and not event.botId:* and (not event.subtype:* or event.subtype:thread_broadcast)',
@@ -49,7 +48,7 @@ describe('Nightshift Slack thread workflow', () => {
       },
     ]);
     expect(requireStep('find_investigation').with?.body).toMatchObject({
-      create: "${{ execution.triggeredBy == 'slack2.app_mention' }}",
+      create: false,
     });
   });
 

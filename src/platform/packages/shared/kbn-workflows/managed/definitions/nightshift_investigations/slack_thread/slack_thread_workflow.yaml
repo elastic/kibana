@@ -1,8 +1,8 @@
 version: '1'
 name: Nightshift Slack Thread Investigation
 description: >
-  Keeps one Nightshift investigation per Slack thread. Mentioning the app starts it; every later
-  human reply in the thread re-runs it in the same conversation. The thread has one status
+  Keeps one Nightshift investigation per Slack thread. Every human reply in a thread that already
+  has an investigation re-runs it in the same conversation. The thread has one status
   message: the first run posts it, and every run edits it with the findings or the failure. A
   later run leaves it showing the previous findings until its own are ready.
 enabled: true
@@ -20,18 +20,16 @@ tags:
   - nightshift
 
 triggers:
-  - type: slack2.app_mention
-    connector-id: '*'
   # Only human replies in a thread. The app's own posts and edits come back as message events:
   # posts carry botId, and edits carry a message_changed subtype that may lack botId. A reply also
   # sent to the channel carries the thread_broadcast subtype.
   - type: slack2.message
-    connector-id: '*'
+    connector-id: elastic-apps-slack
     on:
       condition: 'event.threadId:* and not event.botId:* and (not event.subtype:* or event.subtype:thread_broadcast)'
 
 steps:
-  # A mention creates the thread's investigation; a reply only continues an existing one.
+  # A reply only continues an existing investigation; this workflow never creates one.
   - name: find_investigation
     type: kibana.request
     with:
@@ -44,7 +42,7 @@ steps:
         channel: '{{ event.channel }}'
         thread_ts: '{{ event.threadId | default: event.messageId }}'
         text: '${{ event.text }}'
-        create: "${{ execution.triggeredBy == 'slack2.app_mention' }}"
+        create: false
 
   - name: in_investigation_thread
     type: if
