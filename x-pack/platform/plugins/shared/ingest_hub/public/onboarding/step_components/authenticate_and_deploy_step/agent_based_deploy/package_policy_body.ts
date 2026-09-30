@@ -205,10 +205,12 @@ export async function buildGroupPackagePolicy(
   // so only keep dsIds the current service matrix actually recognises.
   const serviceVarsMap: Record<string, ServiceVars> = {};
   for (const { instance, service } of members) {
-    const rawVars =
-      storedServiceVars[instance.instanceId] ?? storedServiceVars[instance.serviceId];
+    const rawVars = storedServiceVars[instance.instanceId] ?? storedServiceVars[instance.serviceId];
     if (!rawVars) {
-      serviceVarsMap[service.id] = { enabledDataStreams: service.dataStreams, varsByDataStream: {} };
+      serviceVarsMap[service.id] = {
+        enabledDataStreams: service.dataStreams,
+        varsByDataStream: {},
+      };
     } else {
       const filtered = rawVars.enabledDataStreams.filter((dsId) =>
         service.dataStreams.includes(dsId)

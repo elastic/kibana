@@ -124,9 +124,7 @@ function resolveServiceVars(
   // fall back to service defaults — an empty list is the "intentional opt-out" sentinel.
   const filtered = rawVars.enabledDataStreams.filter((dsId) => service.dataStreams.includes(dsId));
   const enabledDataStreams =
-    filtered.length === 0 && rawVars.enabledDataStreams.length > 0
-      ? service.dataStreams
-      : filtered;
+    filtered.length === 0 && rawVars.enabledDataStreams.length > 0 ? service.dataStreams : filtered;
   return enabledDataStreams === rawVars.enabledDataStreams
     ? rawVars
     : { ...rawVars, enabledDataStreams };
