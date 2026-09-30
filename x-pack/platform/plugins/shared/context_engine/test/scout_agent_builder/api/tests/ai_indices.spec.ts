@@ -7,6 +7,7 @@
 
 import { agentBuilderDefaultAgentId } from '@kbn/agent-builder-common';
 import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
+import { CONTEXT_ENGINE_MEMORY_ENABLED_SETTING_ID } from '@kbn/management-settings-ids';
 import type { RoleApiCredentials } from '@kbn/scout';
 import { tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/api';
@@ -118,7 +119,7 @@ apiTest.describe('context engine AI indices API', { tag: tags.stateful.classic }
     }
   });
 
-  apiTest('round-trips the toggle', async ({ apiClient, esClient, requestAuth }) => {
+  apiTest('round-trips the toggle', async ({ apiClient, esClient, kbnClient, requestAuth }) => {
     const id = 'scout_memory_toggle_ai_index';
     const path = aiIndexPath(id);
     const dest = 'ai-index-ds-scout-memory-toggle';
@@ -131,10 +132,32 @@ apiTest.describe('context engine AI indices API', { tag: tags.stateful.classic }
       sources: [],
     };
 
+    await kbnClient.uiSettings.updateGlobal({
+      [CONTEXT_ENGINE_MEMORY_ENABLED_SETTING_ID]: false,
+    });
+    await kbnClient.uiSettings.waitForEventualCacheRefresh();
     await apiClient.delete(path, { headers, responseType: 'json' });
     await esClient.indices.createDataStream({ name: dest }, { ignore: [400] });
 
     try {
+      const rejectedResponse = await apiClient.post(COLLECTION, {
+        headers,
+        responseType: 'json',
+        body: { id, ...body, memory_enabled: true },
+      });
+      expect(rejectedResponse).toHaveStatusCode(400);
+
+      const missingResponse = await apiClient.get(path, {
+        headers,
+        responseType: 'json',
+      });
+      expect(missingResponse).toHaveStatusCode(404);
+
+      await kbnClient.uiSettings.updateGlobal({
+        [CONTEXT_ENGINE_MEMORY_ENABLED_SETTING_ID]: true,
+      });
+      await kbnClient.uiSettings.waitForEventualCacheRefresh();
+
       const createResponse = await apiClient.post(COLLECTION, {
         headers,
         responseType: 'json',
@@ -165,6 +188,10 @@ apiTest.describe('context engine AI indices API', { tag: tags.stateful.classic }
     } finally {
       await apiClient.delete(path, { headers, responseType: 'json' });
       await esClient.indices.deleteDataStream({ name: dest }, { ignore: [404] });
+      await kbnClient.uiSettings.updateGlobal({
+        [CONTEXT_ENGINE_MEMORY_ENABLED_SETTING_ID]: false,
+      });
+      await kbnClient.uiSettings.waitForEventualCacheRefresh();
     }
   });
 
