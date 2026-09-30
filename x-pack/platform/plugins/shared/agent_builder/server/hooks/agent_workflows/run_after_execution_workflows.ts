@@ -10,7 +10,9 @@ import {
   ConversationRoundStatus,
   isPreExecutionWorkflowStep,
   isToolCallStep,
+  ToolResultType,
   type ToolCallStep,
+  type ToolResult,
 } from '@kbn/agent-builder-common';
 import { WORKFLOWS_UI_SETTING_ID, ExecutionStatus } from '@kbn/workflows';
 import type { Logger } from '@kbn/logging';
@@ -22,6 +24,24 @@ import type { AfterExecutionWorkflowParams } from './types';
 import { withDeclaredInputs } from './with_declared_inputs';
 
 type WorkflowApi = WorkflowsServerPluginSetup['management'];
+
+/** Tool results can be megabytes (file reads, command output); cap what each workflow execution receives. */
+export const MAX_TOOL_RESULT_DATA_CHARS = 4_000;
+
+const boundToolResult = (result: ToolResult): ToolResult => {
+  const serialized = JSON.stringify(result.data) ?? '';
+  if (serialized.length <= MAX_TOOL_RESULT_DATA_CHARS) {
+    return result;
+  }
+  return {
+    tool_result_id: result.tool_result_id,
+    type: ToolResultType.other,
+    data: {
+      original_type: result.type,
+      truncated_data: serialized.slice(0, MAX_TOOL_RESULT_DATA_CHARS),
+    },
+  };
+};
 
 export interface RunAfterExecutionWorkflowsParams {
   context: AfterExecutionHookContext;
@@ -67,7 +87,7 @@ export const runAfterExecutionWorkflows = async ({
     ({ tool_id: toolId, tool_call_id: toolCallId, results }: ToolCallStep) => ({
       tool_id: toolId,
       tool_call_id: toolCallId,
-      results,
+      results: results?.map(boundToolResult),
     })
   );
 

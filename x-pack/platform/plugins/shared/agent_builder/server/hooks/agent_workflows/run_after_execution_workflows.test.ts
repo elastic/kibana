@@ -16,7 +16,10 @@ import {
   type ConversationRound,
 } from '@kbn/agent-builder-common';
 import { ExecutionStatus } from '@kbn/workflows';
-import { runAfterExecutionWorkflows } from './run_after_execution_workflows';
+import {
+  MAX_TOOL_RESULT_DATA_CHARS,
+  runAfterExecutionWorkflows,
+} from './run_after_execution_workflows';
 import { executeWorkflow } from '@kbn/agent-builder-tools-base/workflows';
 import { getCurrentSpaceId } from '../../utils/spaces';
 
@@ -362,6 +365,54 @@ describe('runAfterExecutionWorkflows', () => {
           ]);
           expect(params.tool_calls).toEqual([
             { tool_id: 'my-tool', tool_call_id: 'tc-1', params: { key: 'val' } },
+          ]);
+        });
+
+        it('truncates oversized result data before handing it to the workflow', async () => {
+          const { workflowApi, getInternalServices } = createDeps({
+            definition: strictDefinition([...legacyInputNames, 'tool_results']),
+          });
+          const roundWithBigResult = makeRound({
+            steps: [
+              {
+                type: ConversationRoundStepType.toolCall,
+                tool_id: 'my-tool',
+                tool_call_id: 'tc-1',
+                params: {},
+                results: [
+                  {
+                    tool_result_id: 'r-big',
+                    type: ToolResultType.other,
+                    data: { stdout: 'x'.repeat(MAX_TOOL_RESULT_DATA_CHARS * 10) },
+                  },
+                ],
+              },
+            ],
+          });
+
+          await runAfterExecutionWorkflows({
+            context: createContext({ round: roundWithBigResult }),
+            workflowApi,
+            getInternalServices,
+            logger,
+          });
+
+          const params = executeWorkflowMock.mock.calls[0][0].workflowParams;
+          expect(params.tool_results).toEqual([
+            {
+              tool_id: 'my-tool',
+              tool_call_id: 'tc-1',
+              results: [
+                {
+                  tool_result_id: 'r-big',
+                  type: ToolResultType.other,
+                  data: {
+                    original_type: ToolResultType.other,
+                    truncated_data: `{"stdout":"${'x'.repeat(MAX_TOOL_RESULT_DATA_CHARS - 11)}`,
+                  },
+                },
+              ],
+            },
           ]);
         });
 
