@@ -1,6 +1,6 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`AddItemPopover renders the popover 1`] = `
+exports[`AddItemPopover > renders the popover 1`] = `
 <div>
   <div
     class="euiPopover emotion-euiPopover-inline-block"

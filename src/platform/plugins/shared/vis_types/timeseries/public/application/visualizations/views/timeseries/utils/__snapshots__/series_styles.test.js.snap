@@ -1,6 +1,6 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`src/legacy/core_plugins/metrics/public/visualizations/views/timeseries/utils/series_styles.js getAreaStyles() should match a snapshot 1`] = `
+exports[`src/legacy/core_plugins/metrics/public/visualizations/views/timeseries/utils/series_styles.js > getAreaStyles() > should match a snapshot 1`] = `
 Object {
   "areaSeriesStyle": Object {
     "area": Object {
@@ -24,7 +24,7 @@ Object {
 }
 `;
 
-exports[`src/legacy/core_plugins/metrics/public/visualizations/views/timeseries/utils/series_styles.js getAreaStyles() should set default values if points, lines and color are empty 1`] = `
+exports[`src/legacy/core_plugins/metrics/public/visualizations/views/timeseries/utils/series_styles.js > getAreaStyles() > should set default values if points, lines and color are empty 1`] = `
 Object {
   "areaSeriesStyle": Object {
     "area": Object {
@@ -48,7 +48,7 @@ Object {
 }
 `;
 
-exports[`src/legacy/core_plugins/metrics/public/visualizations/views/timeseries/utils/series_styles.js getBarStyles() should match a snapshot 1`] = `
+exports[`src/legacy/core_plugins/metrics/public/visualizations/views/timeseries/utils/series_styles.js > getBarStyles() > should match a snapshot 1`] = `
 Object {
   "barSeriesStyle": Object {
     "rect": Object {
@@ -64,7 +64,7 @@ Object {
 }
 `;
 
-exports[`src/legacy/core_plugins/metrics/public/visualizations/views/timeseries/utils/series_styles.js getBarStyles() should set default values if bars and colors are empty 1`] = `
+exports[`src/legacy/core_plugins/metrics/public/visualizations/views/timeseries/utils/series_styles.js > getBarStyles() > should set default values if bars and colors are empty 1`] = `
 Object {
   "barSeriesStyle": Object {
     "rect": Object {

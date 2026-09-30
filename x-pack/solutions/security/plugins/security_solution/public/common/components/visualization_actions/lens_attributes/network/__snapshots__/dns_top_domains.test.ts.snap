@@ -1,6 +1,6 @@
 // Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`getDnsTopDomainsLensAttributes should render 1`] = `
+exports[`getDnsTopDomainsLensAttributes > should render 1`] = `
 Object {
   "references": Array [
     Object {

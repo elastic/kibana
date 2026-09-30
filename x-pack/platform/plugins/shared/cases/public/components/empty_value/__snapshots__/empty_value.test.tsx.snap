@@ -1,6 +1,6 @@
 // Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`EmptyValue it renders against snapshot 1`] = `
+exports[`EmptyValue > it renders against snapshot 1`] = `
 <p>
   (Empty String)
 </p>

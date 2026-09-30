@@ -1,6 +1,6 @@
 // Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`Title it renders title 1`] = `
+exports[`Title > it renders title 1`] = `
 .c0,
 .c0 * {
   display: inline-block;

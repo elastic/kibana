@@ -1,6 +1,6 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`ExplorerChartLabelBadge renders the chart label in one line 1`] = `
+exports[`ExplorerChartLabelBadge > renders the chart label in one line 1`] = `
 <span>
   <span>
     high_sum(nginx.access.body_sent.bytes) over nginx.access.remote_ip (population-03)
@@ -44,7 +44,7 @@ exports[`ExplorerChartLabelBadge renders the chart label in one line 1`] = `
 </span>
 `;
 
-exports[`ExplorerChartLabelBadge renders the chart label in two lines 1`] = `
+exports[`ExplorerChartLabelBadge > renders the chart label in two lines 1`] = `
 <span>
   <span>
     high_sum(nginx.access.body_sent.bytes) over nginx.access.remote_ip (population-03)

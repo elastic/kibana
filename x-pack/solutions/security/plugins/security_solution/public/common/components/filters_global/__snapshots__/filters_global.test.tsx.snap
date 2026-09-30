@@ -1,6 +1,6 @@
 // Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`rendering renders correctly 1`] = `
+exports[`rendering > renders correctly 1`] = `
 <InPortal
   node={
     Object {

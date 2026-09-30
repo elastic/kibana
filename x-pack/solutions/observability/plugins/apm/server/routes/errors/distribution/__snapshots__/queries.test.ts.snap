@@ -1,6 +1,6 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`error distribution queries fetches an error distribution 1`] = `
+exports[`error distribution queries > fetches an error distribution 1`] = `
 Object {
   "aggs": Object {
     "distribution": Object {
@@ -53,7 +53,7 @@ Object {
 }
 `;
 
-exports[`error distribution queries fetches an error distribution with a group id 1`] = `
+exports[`error distribution queries > fetches an error distribution with a group id 1`] = `
 Object {
   "aggs": Object {
     "distribution": Object {

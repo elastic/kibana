@@ -1,6 +1,6 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`TransactionActionMenu  matches the snapshot 1`] = `
+exports[`TransactionActionMenu  > matches the snapshot 1`] = `
 <div>
   <div
     class="euiPopover euiPopover-isOpen emotion-euiPopover-inline-block"

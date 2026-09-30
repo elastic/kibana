@@ -1,6 +1,6 @@
 // Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`SUPERVISES_INTEGRATION_RELATIONSHIP_CONFIGS golden snapshots entityanalytics_entra_id: targets-per-actor ES|QL is locked (no watermark) 1`] = `
+exports[`SUPERVISES_INTEGRATION_RELATIONSHIP_CONFIGS > golden snapshots > entityanalytics_entra_id: targets-per-actor ES|QL is locked (no watermark) 1`] = `
 "SET unmapped_fields=\\"nullify\\";
 FROM entities-latest-__namespace__
 | WHERE (entity.relationships.supervises.raw_identifiers.user.email IS NOT NULL OR entity.relationships.supervises.raw_identifiers.user.id IS NOT NULL OR entity.relationships.supervises.raw_identifiers.user.name IS NOT NULL)
@@ -18,7 +18,7 @@ FROM entities-latest-__namespace__
 | LIMIT 3500"
 `;
 
-exports[`SUPERVISES_INTEGRATION_RELATIONSHIP_CONFIGS golden snapshots entityanalytics_entra_id: targets-per-actor ES|QL with watermark is locked 1`] = `
+exports[`SUPERVISES_INTEGRATION_RELATIONSHIP_CONFIGS > golden snapshots > entityanalytics_entra_id: targets-per-actor ES|QL with watermark is locked 1`] = `
 "FROM entities-latest-__namespace__
 | WHERE (entity.relationships.supervises.raw_identifiers.user.email IS NOT NULL OR entity.relationships.supervises.raw_identifiers.user.id IS NOT NULL OR entity.relationships.supervises.raw_identifiers.user.name IS NOT NULL)
     AND entity.source IN (\\"entityanalytics_entra_id\\", \\"entityanalytics_entra_id.user\\")
@@ -36,7 +36,7 @@ exports[`SUPERVISES_INTEGRATION_RELATIONSHIP_CONFIGS golden snapshots entityanal
 | LIMIT 3500"
 `;
 
-exports[`SUPERVISES_INTEGRATION_RELATIONSHIP_CONFIGS golden snapshots entityanalytics_okta: targets-per-actor ES|QL is locked (no watermark) 1`] = `
+exports[`SUPERVISES_INTEGRATION_RELATIONSHIP_CONFIGS > golden snapshots > entityanalytics_okta: targets-per-actor ES|QL is locked (no watermark) 1`] = `
 "SET unmapped_fields=\\"nullify\\";
 FROM entities-latest-__namespace__
 | WHERE (entity.relationships.supervises.raw_identifiers.user.email IS NOT NULL OR entity.relationships.supervises.raw_identifiers.user.id IS NOT NULL OR entity.relationships.supervises.raw_identifiers.user.name IS NOT NULL)
@@ -54,7 +54,7 @@ FROM entities-latest-__namespace__
 | LIMIT 3500"
 `;
 
-exports[`SUPERVISES_INTEGRATION_RELATIONSHIP_CONFIGS golden snapshots entityanalytics_okta: targets-per-actor ES|QL with watermark is locked 1`] = `
+exports[`SUPERVISES_INTEGRATION_RELATIONSHIP_CONFIGS > golden snapshots > entityanalytics_okta: targets-per-actor ES|QL with watermark is locked 1`] = `
 "FROM entities-latest-__namespace__
 | WHERE (entity.relationships.supervises.raw_identifiers.user.email IS NOT NULL OR entity.relationships.supervises.raw_identifiers.user.id IS NOT NULL OR entity.relationships.supervises.raw_identifiers.user.name IS NOT NULL)
     AND entity.source IN (\\"entityanalytics_okta\\", \\"entityanalytics_okta.user\\")
@@ -72,7 +72,7 @@ exports[`SUPERVISES_INTEGRATION_RELATIONSHIP_CONFIGS golden snapshots entityanal
 | LIMIT 3500"
 `;
 
-exports[`SUPERVISES_INTEGRATION_RELATIONSHIP_CONFIGS golden snapshots workday: targets-per-actor ES|QL is locked (no watermark) 1`] = `
+exports[`SUPERVISES_INTEGRATION_RELATIONSHIP_CONFIGS > golden snapshots > workday: targets-per-actor ES|QL is locked (no watermark) 1`] = `
 "SET unmapped_fields=\\"nullify\\";
 FROM logs-workday.user-__namespace__
 | WHERE (workday.user.Manager_Email IS NOT NULL OR workday.user.Manager_ID IS NOT NULL)
@@ -113,7 +113,7 @@ TRUE, _euid_branch_1_formula, NULL))
 | LIMIT 7000"
 `;
 
-exports[`SUPERVISES_INTEGRATION_RELATIONSHIP_CONFIGS golden snapshots workday: targets-per-actor ES|QL with watermark is locked 1`] = `
+exports[`SUPERVISES_INTEGRATION_RELATIONSHIP_CONFIGS > golden snapshots > workday: targets-per-actor ES|QL with watermark is locked 1`] = `
 "FROM logs-workday.user-__namespace__
 | WHERE (workday.user.Manager_Email IS NOT NULL OR workday.user.Manager_ID IS NOT NULL)
     AND event.ingested >= NOW() - 30 day

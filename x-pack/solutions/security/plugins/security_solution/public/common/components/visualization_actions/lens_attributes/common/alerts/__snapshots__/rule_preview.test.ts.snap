@@ -1,6 +1,6 @@
 // Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`getRulePreviewLensAttributes should render without extra options 1`] = `
+exports[`getRulePreviewLensAttributes > should render without extra options 1`] = `
 Object {
   "description": "",
   "references": Array [],

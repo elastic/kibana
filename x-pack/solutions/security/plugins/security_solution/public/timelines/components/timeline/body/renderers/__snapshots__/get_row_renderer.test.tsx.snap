@@ -1,3 +1,3 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`get_column_renderer renders correctly against snapshot 1`] = `<span />`;
+exports[`get_column_renderer > renders correctly against snapshot 1`] = `<span />`;

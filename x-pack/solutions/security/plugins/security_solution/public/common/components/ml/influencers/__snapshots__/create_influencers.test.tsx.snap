@@ -1,6 +1,6 @@
 // Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`create_influencers renders correctly against snapshot 1`] = `
+exports[`create_influencers > renders correctly against snapshot 1`] = `
 <span>
   <EuiFlexItem
     grow={false}

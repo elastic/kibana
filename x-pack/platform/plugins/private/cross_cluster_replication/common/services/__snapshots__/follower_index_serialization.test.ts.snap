@@ -1,6 +1,6 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`[CCR] follower index serialization deserializeFollowerIndex() deserializes Elasticsearch follower index object 1`] = `
+exports[`[CCR] follower index serialization > deserializeFollowerIndex() > deserializes Elasticsearch follower index object 1`] = `
 Object {
   "leaderIndex": "leader 1",
   "maxOutstandingReadRequests": 1,
@@ -77,7 +77,7 @@ Object {
 }
 `;
 
-exports[`[CCR] follower index serialization deserializeShard() deserializes shard 1`] = `
+exports[`[CCR] follower index serialization > deserializeShard() > deserializes shard 1`] = `
 Object {
   "bytesReadCount": 1,
   "failedReadRequestsCount": 1,
@@ -110,7 +110,7 @@ Object {
 }
 `;
 
-exports[`[CCR] follower index serialization serializeFollowerIndex() serializes object to Elasticsearch follower index object 1`] = `
+exports[`[CCR] follower index serialization > serializeFollowerIndex() > serializes object to Elasticsearch follower index object 1`] = `
 Object {
   "leader_index": "leader index",
   "max_outstanding_read_requests": 1,

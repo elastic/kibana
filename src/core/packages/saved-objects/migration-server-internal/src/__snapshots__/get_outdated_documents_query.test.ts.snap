@@ -174,7 +174,7 @@ Object {
 }
 `;
 
-exports[`getOutdatedDocumentsQuery should not select documents if there are no migrations 1`] = `
+exports[`getOutdatedDocumentsQuery > should not select documents if there are no migrations 1`] = `
 Object {
   "bool": Object {
     "should": Array [],
@@ -182,7 +182,7 @@ Object {
 }
 `;
 
-exports[`getOutdatedDocumentsQuery should select documents with outdated both core and type migration versions 1`] = `
+exports[`getOutdatedDocumentsQuery > should select documents with outdated both core and type migration versions 1`] = `
 Object {
   "bool": Object {
     "should": Array [
@@ -252,7 +252,7 @@ Object {
 }
 `;
 
-exports[`getOutdatedDocumentsQuery should select documents with outdated core migration version 1`] = `
+exports[`getOutdatedDocumentsQuery > should select documents with outdated core migration version 1`] = `
 Object {
   "bool": Object {
     "should": Array [
@@ -285,7 +285,7 @@ Object {
 }
 `;
 
-exports[`getOutdatedDocumentsQuery should select documents with outdated type migration version 1`] = `
+exports[`getOutdatedDocumentsQuery > should select documents with outdated type migration version 1`] = `
 Object {
   "bool": Object {
     "should": Array [

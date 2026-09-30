@@ -1,6 +1,6 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`TooltipRow should render label and value if both are specified 1`] = `
+exports[`TooltipRow > should render label and value if both are specified 1`] = `
 <tr>
   <td
     css="unknown styles"

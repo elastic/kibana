@@ -1,6 +1,6 @@
 // Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`GroupsFilterPopover renders correctly against snapshot 1`] = `
+exports[`GroupsFilterPopover > renders correctly against snapshot 1`] = `
 <EuiPopover
   anchorPosition="downLeft"
   aria-label="Groups"

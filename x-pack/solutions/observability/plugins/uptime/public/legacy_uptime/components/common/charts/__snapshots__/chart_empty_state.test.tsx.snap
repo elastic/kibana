@@ -1,6 +1,6 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`ChartEmptyState renders JSX values 1`] = `
+exports[`ChartEmptyState > renders JSX values 1`] = `
 <EuiEmptyPrompt
   body={
     <p>
@@ -30,7 +30,7 @@ exports[`ChartEmptyState renders JSX values 1`] = `
 />
 `;
 
-exports[`ChartEmptyState renders string values 1`] = `
+exports[`ChartEmptyState > renders string values 1`] = `
 <EuiEmptyPrompt
   body={
     <p>

@@ -1,6 +1,6 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`getMetrics and getSeries should return metrics with derivative metric 1`] = `
+exports[`getMetrics and getSeries > should return metrics with derivative metric 1`] = `
 Object {
   "cluster_search_request_rate": Array [
     Object {
@@ -386,7 +386,7 @@ Object {
 }
 `;
 
-exports[`getMetrics and getSeries should return metrics with metric containing custom aggs 1`] = `
+exports[`getMetrics and getSeries > should return metrics with metric containing custom aggs 1`] = `
 Object {
   "cluster_index_latency": Array [
     Object {
@@ -767,7 +767,7 @@ Object {
 }
 `;
 
-exports[`getMetrics and getSeries should return metrics with metric that uses default calculation 1`] = `
+exports[`getMetrics and getSeries > should return metrics with metric that uses default calculation 1`] = `
 Object {
   "kibana_max_response_times": Array [
     Object {
@@ -1145,7 +1145,7 @@ Object {
 }
 `;
 
-exports[`getMetrics and getSeries should return metrics with non-derivative metric 1`] = `
+exports[`getMetrics and getSeries > should return metrics with non-derivative metric 1`] = `
 Object {
   "node_cpu_utilization": Array [
     Object {
@@ -1522,7 +1522,7 @@ Object {
 }
 `;
 
-exports[`getMetrics and getSeries should return metrics with object structure for metric 1`] = `
+exports[`getMetrics and getSeries > should return metrics with object structure for metric 1`] = `
 Object {
   "index_3": Array [
     Object {

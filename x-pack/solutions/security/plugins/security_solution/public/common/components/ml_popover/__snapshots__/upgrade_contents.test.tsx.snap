@@ -1,6 +1,6 @@
 // Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`JobsTableFilters renders correctly against snapshot 1`] = `
+exports[`JobsTableFilters > renders correctly against snapshot 1`] = `
 <PopoverContentsDiv
   data-test-subj="ml-popover-upgrade-contents"
 >

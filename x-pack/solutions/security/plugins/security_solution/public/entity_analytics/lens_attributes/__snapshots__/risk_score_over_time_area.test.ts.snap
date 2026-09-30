@@ -1,6 +1,6 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`getRiskScoreOverTimeAreaAttributes should render 1`] = `
+exports[`getRiskScoreOverTimeAreaAttributes > should render 1`] = `
 Object {
   "description": "",
   "references": Array [],

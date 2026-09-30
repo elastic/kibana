@@ -1,6 +1,6 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`getSupportedUrlParams provides defaults for empty string array values 1`] = `
+exports[`getSupportedUrlParams > provides defaults for empty string array values 1`] = `
 Object {
   "absoluteDateRangeEnd": 20,
   "absoluteDateRangeStart": 20,
@@ -18,7 +18,7 @@ Object {
 }
 `;
 
-exports[`getSupportedUrlParams provides defaults for undefined values 1`] = `
+exports[`getSupportedUrlParams > provides defaults for undefined values 1`] = `
 Object {
   "absoluteDateRangeEnd": 20,
   "absoluteDateRangeStart": 20,
@@ -36,7 +36,7 @@ Object {
 }
 `;
 
-exports[`getSupportedUrlParams returns custom values 1`] = `
+exports[`getSupportedUrlParams > returns custom values 1`] = `
 Object {
   "absoluteDateRangeEnd": 20,
   "absoluteDateRangeStart": 20,
@@ -54,7 +54,7 @@ Object {
 }
 `;
 
-exports[`getSupportedUrlParams returns default values 1`] = `
+exports[`getSupportedUrlParams > returns default values 1`] = `
 Object {
   "absoluteDateRangeEnd": 20,
   "absoluteDateRangeStart": 20,
@@ -72,7 +72,7 @@ Object {
 }
 `;
 
-exports[`getSupportedUrlParams returns the first item for string arrays 1`] = `
+exports[`getSupportedUrlParams > returns the first item for string arrays 1`] = `
 Object {
   "absoluteDateRangeEnd": 20,
   "absoluteDateRangeStart": 20,

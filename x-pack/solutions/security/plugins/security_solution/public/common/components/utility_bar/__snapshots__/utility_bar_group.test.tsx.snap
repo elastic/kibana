@@ -1,6 +1,6 @@
 // Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`UtilityBarGroup it renders 1`] = `
+exports[`UtilityBarGroup > it renders 1`] = `
 <UtilityBarGroup>
   <UtilityBarText>
     Test text

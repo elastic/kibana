@@ -1,6 +1,6 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`src/legacy/core_plugins/metrics/server/lib/vis_data/helpers/bucket_transform.js bucketTransform moving_average should return a moving function aggregation API and match a snapshot 1`] = `
+exports[`src/legacy/core_plugins/metrics/server/lib/vis_data/helpers/bucket_transform.js > bucketTransform > moving_average > should return a moving function aggregation API and match a snapshot 1`] = `
 Object {
   "moving_fn": Object {
     "buckets_path": "61ca57f2-469d-11e7-af02-69e470af7417",

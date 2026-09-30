@@ -1,6 +1,6 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`scaling form should disable clusters option when clustering is not supported 1`] = `
+exports[`scaling form > should disable clusters option when clustering is not supported 1`] = `
 <Fragment>
   <EuiTitle
     size="xs"
@@ -64,7 +64,7 @@ exports[`scaling form should disable clusters option when clustering is not supp
 </Fragment>
 `;
 
-exports[`scaling form should render 1`] = `
+exports[`scaling form > should render 1`] = `
 <Fragment>
   <EuiTitle
     size="xs"

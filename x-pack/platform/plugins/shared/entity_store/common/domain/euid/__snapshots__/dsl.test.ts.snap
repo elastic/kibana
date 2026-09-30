@@ -1,4 +1,4 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
 exports[
   `getEuidDslDocumentsContainsIdFilter user: returns documentsFilter AND postAggFilter DSL (IDP or non-IDP only) 1`
@@ -101,7 +101,7 @@ Object {
 }
 `;
 
-exports[`getEuidDslFilterBasedOnDocument user evaluates correctly for real non-IDP document 1`] = `
+exports[`getEuidDslFilterBasedOnDocument > user > evaluates correctly for real non-IDP document 1`] = `
 Object {
   "bool": Object {
     "filter": Array [

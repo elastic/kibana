@@ -1,6 +1,6 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`ES|QL matcher query builder buildMatchGroupsQuery emits a valid query for UPN cross-field 1`] = `
+exports[`ES|QL matcher query builder > buildMatchGroupsQuery > emits a valid query for UPN cross-field 1`] = `
 "SET unmapped_fields=\\"nullify\\";
 FROM \\".entities.v2.latest.default\\"
 | WHERE entity.EngineMetadata.Type == \\"user\\"
@@ -26,7 +26,7 @@ FROM \\".entities.v2.latest.default\\"
 | LIMIT 5000"
 `;
 
-exports[`ES|QL matcher query builder buildMatchGroupsQuery emits a valid query for email 1`] = `
+exports[`ES|QL matcher query builder > buildMatchGroupsQuery > emits a valid query for email 1`] = `
 "SET unmapped_fields=\\"nullify\\";
 FROM \\".entities.v2.latest.default\\"
 | WHERE entity.EngineMetadata.Type == \\"user\\"
@@ -50,7 +50,7 @@ FROM \\".entities.v2.latest.default\\"
 | LIMIT 5000"
 `;
 
-exports[`ES|QL matcher query builder buildMatchGroupsQuery emits a valid query for entra GUID 1`] = `
+exports[`ES|QL matcher query builder > buildMatchGroupsQuery > emits a valid query for entra GUID 1`] = `
 "SET unmapped_fields=\\"nullify\\";
 FROM \\".entities.v2.latest.default\\"
 | WHERE entity.EngineMetadata.Type == \\"user\\"
@@ -76,7 +76,7 @@ FROM \\".entities.v2.latest.default\\"
 | LIMIT 5000"
 `;
 
-exports[`ES|QL matcher query builder buildMatchGroupsQuery emits a valid query for crowdstrike SID 1`] = `
+exports[`ES|QL matcher query builder > buildMatchGroupsQuery > emits a valid query for crowdstrike SID 1`] = `
 "SET unmapped_fields=\\"nullify\\";
 FROM \\".entities.v2.latest.default\\"
 | WHERE entity.EngineMetadata.Type == \\"user\\"
@@ -103,7 +103,7 @@ FROM \\".entities.v2.latest.default\\"
 | LIMIT 5000"
 `;
 
-exports[`ES|QL matcher query builder buildMatchGroupsQuery emits a valid query for windows SID 1`] = `
+exports[`ES|QL matcher query builder > buildMatchGroupsQuery > emits a valid query for windows SID 1`] = `
 "SET unmapped_fields=\\"nullify\\";
 FROM \\".entities.v2.latest.default\\"
 | WHERE entity.EngineMetadata.Type == \\"user\\"
@@ -130,7 +130,7 @@ FROM \\".entities.v2.latest.default\\"
 | LIMIT 5000"
 `;
 
-exports[`ES|QL matcher query builder buildMatchGroupsQuery pages with an exclusive keyset on match_value 1`] = `
+exports[`ES|QL matcher query builder > buildMatchGroupsQuery > pages with an exclusive keyset on match_value 1`] = `
 "SET unmapped_fields=\\"nullify\\";
 FROM \\".entities.v2.latest.default\\"
 | WHERE entity.EngineMetadata.Type == \\"user\\"
@@ -155,7 +155,7 @@ FROM \\".entities.v2.latest.default\\"
 | LIMIT 5"
 `;
 
-exports[`ES|QL matcher query builder buildWatermarkQuery emits a valid max first_seen query 1`] = `
+exports[`ES|QL matcher query builder > buildWatermarkQuery > emits a valid max first_seen query 1`] = `
 "SET unmapped_fields=\\"nullify\\";
 FROM \\".entities.v2.latest.default\\"
 | WHERE entity.EngineMetadata.Type == \\"user\\"

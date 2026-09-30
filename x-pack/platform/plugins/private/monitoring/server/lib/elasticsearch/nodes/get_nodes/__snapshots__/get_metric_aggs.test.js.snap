@@ -1,6 +1,6 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`get metric aggs should create aggregations for "basic" metrics 1`] = `
+exports[`get metric aggs > should create aggregations for "basic" metrics 1`] = `
 Object {
   "odh_node_cpu_utilization__metric": Object {
     "max": Object {
@@ -27,7 +27,7 @@ Object {
 }
 `;
 
-exports[`get metric aggs should incorporate a metric custom aggs 1`] = `
+exports[`get metric aggs > should incorporate a metric custom aggs 1`] = `
 Object {
   "odh_node_index_latency__event_time_in_millis": Object {
     "max": Object {

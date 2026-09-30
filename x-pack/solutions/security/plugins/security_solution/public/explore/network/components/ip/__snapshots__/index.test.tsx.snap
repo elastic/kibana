@@ -1,6 +1,6 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`Port renders correctly against snapshot 1`] = `
+exports[`Port > renders correctly against snapshot 1`] = `
 <button
   class="euiLink emotion-euiLink-text"
   data-test-subj="network-details"

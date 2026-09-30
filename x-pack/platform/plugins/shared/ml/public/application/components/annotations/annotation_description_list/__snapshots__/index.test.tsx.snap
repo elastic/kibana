@@ -1,6 +1,6 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`AnnotationDescriptionList Initialization with annotation. 1`] = `
+exports[`AnnotationDescriptionList > Initialization with annotation. 1`] = `
 <dl
   class="euiDescriptionList emotion-euiDescriptionList-column-left-s-s"
   data-test-subj="mlAnnotationDescriptionList"

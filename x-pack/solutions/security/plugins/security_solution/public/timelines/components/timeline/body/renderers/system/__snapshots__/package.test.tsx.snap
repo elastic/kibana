@@ -1,6 +1,6 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`Package rendering it renders against shallow snapshot 1`] = `
+exports[`Package > rendering > it renders against shallow snapshot 1`] = `
 <Fragment>
   <TokensFlexItem
     component="span"

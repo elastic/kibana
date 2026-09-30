@@ -1,6 +1,6 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`Tree view Breadcrumb component When Breadcrumb is mounted renders Breadcrumb button content correctly 1`] = `
+exports[`Tree view Breadcrumb component > When Breadcrumb is mounted > renders Breadcrumb button content correctly 1`] = `
 <div>
   <div
     class="css-1k5fyt8"
@@ -123,7 +123,7 @@ exports[`Tree view Breadcrumb component When Breadcrumb is mounted renders Bread
 </div>
 `;
 
-exports[`Tree view Breadcrumb component When Breadcrumb is mounted should display cluster icon button when no cluster name is provided 1`] = `
+exports[`Tree view Breadcrumb component > When Breadcrumb is mounted > should display cluster icon button when no cluster name is provided 1`] = `
 <div>
   <div
     class="css-1k5fyt8"
@@ -246,7 +246,7 @@ exports[`Tree view Breadcrumb component When Breadcrumb is mounted should displa
 </div>
 `;
 
-exports[`Tree view Breadcrumb component When Breadcrumb is mounted should render breadcrumb icons 1`] = `
+exports[`Tree view Breadcrumb component > When Breadcrumb is mounted > should render breadcrumb icons 1`] = `
 <div>
   <div
     class="css-1k5fyt8"
@@ -392,7 +392,7 @@ exports[`Tree view Breadcrumb component When Breadcrumb is mounted should render
 </div>
 `;
 
-exports[`Tree view Breadcrumb component When Breadcrumb is mounted should render last  breadcrumb content only 1`] = `
+exports[`Tree view Breadcrumb component > When Breadcrumb is mounted > should render last  breadcrumb content only 1`] = `
 <div>
   <div
     class="css-1k5fyt8"

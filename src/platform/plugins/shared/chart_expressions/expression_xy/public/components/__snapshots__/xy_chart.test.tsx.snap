@@ -1,6 +1,6 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`XYChart component annotations should render basic line annotation 1`] = `
+exports[`XYChart component > annotations > should render basic line annotation 1`] = `
 <LineAnnotation
   customTooltip={[Function]}
   dataValues={
@@ -50,7 +50,7 @@ exports[`XYChart component annotations should render basic line annotation 1`] =
 />
 `;
 
-exports[`XYChart component annotations should render basic range annotation 1`] = `
+exports[`XYChart component > annotations > should render basic range annotation 1`] = `
 Array [
   <RectAnnotation
     customTooltipDetails={[Function]}
@@ -94,7 +94,7 @@ Array [
 ]
 `;
 
-exports[`XYChart component annotations should render grouped line annotations preserving the shared styles 1`] = `
+exports[`XYChart component > annotations > should render grouped line annotations preserving the shared styles 1`] = `
 <LineAnnotation
   customTooltip={[Function]}
   dataValues={
@@ -149,7 +149,7 @@ exports[`XYChart component annotations should render grouped line annotations pr
 />
 `;
 
-exports[`XYChart component annotations should render grouped line annotations with default styles 1`] = `
+exports[`XYChart component > annotations > should render grouped line annotations with default styles 1`] = `
 <LineAnnotation
   customTooltip={[Function]}
   dataValues={
@@ -201,7 +201,7 @@ exports[`XYChart component annotations should render grouped line annotations wi
 />
 `;
 
-exports[`XYChart component annotations should render simplified annotations when simpleView is true 1`] = `
+exports[`XYChart component > annotations > should render simplified annotations when simpleView is true 1`] = `
 <LineAnnotation
   customTooltip={[Function]}
   dataValues={
@@ -230,7 +230,7 @@ exports[`XYChart component annotations should render simplified annotations when
 />
 `;
 
-exports[`XYChart component annotations should render simplified annotations when simpleView is true 2`] = `
+exports[`XYChart component > annotations > should render simplified annotations when simpleView is true 2`] = `
 Array [
   <RectAnnotation
     customTooltipDetails={[Function]}
@@ -274,7 +274,7 @@ Array [
 ]
 `;
 
-exports[`XYChart component it renders area 1`] = `
+exports[`XYChart component > it renders area 1`] = `
 <Fragment>
   <GlobalXYChartStyles />
   <div
@@ -1751,7 +1751,7 @@ exports[`XYChart component it renders area 1`] = `
 </Fragment>
 `;
 
-exports[`XYChart component it renders bar 1`] = `
+exports[`XYChart component > it renders bar 1`] = `
 <Fragment>
   <GlobalXYChartStyles />
   <div
@@ -3228,7 +3228,7 @@ exports[`XYChart component it renders bar 1`] = `
 </Fragment>
 `;
 
-exports[`XYChart component it renders horizontal bar 1`] = `
+exports[`XYChart component > it renders horizontal bar 1`] = `
 <Fragment>
   <GlobalXYChartStyles />
   <div
@@ -4705,7 +4705,7 @@ exports[`XYChart component it renders horizontal bar 1`] = `
 </Fragment>
 `;
 
-exports[`XYChart component it renders line 1`] = `
+exports[`XYChart component > it renders line 1`] = `
 <Fragment>
   <GlobalXYChartStyles />
   <div
@@ -6182,7 +6182,7 @@ exports[`XYChart component it renders line 1`] = `
 </Fragment>
 `;
 
-exports[`XYChart component it renders stacked area 1`] = `
+exports[`XYChart component > it renders stacked area 1`] = `
 <Fragment>
   <GlobalXYChartStyles />
   <div
@@ -7659,7 +7659,7 @@ exports[`XYChart component it renders stacked area 1`] = `
 </Fragment>
 `;
 
-exports[`XYChart component it renders stacked bar 1`] = `
+exports[`XYChart component > it renders stacked bar 1`] = `
 <Fragment>
   <GlobalXYChartStyles />
   <div
@@ -9136,7 +9136,7 @@ exports[`XYChart component it renders stacked bar 1`] = `
 </Fragment>
 `;
 
-exports[`XYChart component it renders stacked horizontal bar 1`] = `
+exports[`XYChart component > it renders stacked horizontal bar 1`] = `
 <Fragment>
   <GlobalXYChartStyles />
   <div
@@ -10613,7 +10613,7 @@ exports[`XYChart component it renders stacked horizontal bar 1`] = `
 </Fragment>
 `;
 
-exports[`XYChart component split chart should render split chart if both, splitRowAccessor and splitColumnAccessor are specified 1`] = `
+exports[`XYChart component > split chart > should render split chart if both, splitRowAccessor and splitColumnAccessor are specified 1`] = `
 <Fragment>
   <GlobalXYChartStyles />
   <div
@@ -12186,7 +12186,7 @@ exports[`XYChart component split chart should render split chart if both, splitR
 </Fragment>
 `;
 
-exports[`XYChart component split chart should render split chart if splitColumnAccessor is specified 1`] = `
+exports[`XYChart component > split chart > should render split chart if splitColumnAccessor is specified 1`] = `
 <Fragment>
   <GlobalXYChartStyles />
   <div
@@ -13746,7 +13746,7 @@ exports[`XYChart component split chart should render split chart if splitColumnA
 </Fragment>
 `;
 
-exports[`XYChart component split chart should render split chart if splitRowAccessor is specified 1`] = `
+exports[`XYChart component > split chart > should render split chart if splitRowAccessor is specified 1`] = `
 <Fragment>
   <GlobalXYChartStyles />
   <div

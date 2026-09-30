@@ -1,6 +1,6 @@
 // Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`getAlertsHistogramLensAttributes should render with extra options - filters 1`] = `
+exports[`getAlertsHistogramLensAttributes > should render with extra options - filters 1`] = `
 Object {
   "description": "",
   "references": Array [
@@ -197,7 +197,7 @@ Object {
 }
 `;
 
-exports[`getAlertsHistogramLensAttributes should render without extra options 1`] = `
+exports[`getAlertsHistogramLensAttributes > should render without extra options 1`] = `
 Object {
   "description": "",
   "references": Array [

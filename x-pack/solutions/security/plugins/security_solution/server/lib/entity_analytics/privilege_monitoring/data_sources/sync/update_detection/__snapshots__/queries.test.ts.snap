@@ -1,6 +1,6 @@
 // Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`Integration sync queries buildPrivilegedSearchBody constructs the correct search body for a single matcher 1`] = `
+exports[`Integration sync queries > buildPrivilegedSearchBody > constructs the correct search body for a single matcher 1`] = `
 Object {
   "aggs": Object {
     "privileged_user_status_since_last_run": Object {
@@ -61,7 +61,7 @@ Object {
 }
 `;
 
-exports[`Integration sync queries buildPrivilegedSearchBody constructs the correct search body for empty matchers 1`] = `
+exports[`Integration sync queries > buildPrivilegedSearchBody > constructs the correct search body for empty matchers 1`] = `
 Object {
   "aggs": Object {
     "privileged_user_status_since_last_run": Object {
@@ -120,7 +120,7 @@ Object {
 }
 `;
 
-exports[`Integration sync queries buildPrivilegedSearchBody constructs the correct search body for multiple matchers 1`] = `
+exports[`Integration sync queries > buildPrivilegedSearchBody > constructs the correct search body for multiple matchers 1`] = `
 Object {
   "aggs": Object {
     "privileged_user_status_since_last_run": Object {

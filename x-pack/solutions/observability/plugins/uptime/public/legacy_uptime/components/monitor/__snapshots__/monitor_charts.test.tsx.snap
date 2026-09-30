@@ -1,6 +1,6 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`MonitorCharts component renders the component without errors 1`] = `
+exports[`MonitorCharts component > renders the component without errors 1`] = `
 <Router
   history={
     Object {

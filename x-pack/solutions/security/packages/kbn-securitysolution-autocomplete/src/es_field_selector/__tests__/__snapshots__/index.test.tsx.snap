@@ -1,6 +1,6 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`FieldComponent should allow user to clear values if isClearable is true 1`] = `
+exports[`FieldComponent > should allow user to clear values if isClearable is true 1`] = `
 <div>
   <div
     class="euiComboBox emotion-euiComboBox-fullWidth"
@@ -71,7 +71,7 @@ exports[`FieldComponent should allow user to clear values if isClearable is true
 </div>
 `;
 
-exports[`FieldComponent should render the component disabled if isDisabled is true 1`] = `
+exports[`FieldComponent > should render the component disabled if isDisabled is true 1`] = `
 <div>
   <div
     class="euiComboBox euiComboBox-isDisabled emotion-euiComboBox-fullWidth"
@@ -114,7 +114,7 @@ exports[`FieldComponent should render the component disabled if isDisabled is tr
 </div>
 `;
 
-exports[`FieldComponent should render the component enabled and displays the selected field correctly 1`] = `
+exports[`FieldComponent > should render the component enabled and displays the selected field correctly 1`] = `
 <div>
   <div
     class="euiComboBox emotion-euiComboBox-fullWidth"
@@ -174,7 +174,7 @@ exports[`FieldComponent should render the component enabled and displays the sel
 </div>
 `;
 
-exports[`FieldComponent should render the loading spinner if isLoading is true when clicked 1`] = `
+exports[`FieldComponent > should render the loading spinner if isLoading is true when clicked 1`] = `
 <div>
   <div
     class="euiComboBox euiComboBox-isDisabled emotion-euiComboBox-fullWidth"

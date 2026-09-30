@@ -1,6 +1,6 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`Tooltip should render plain tooltip 1`] = `
+exports[`Tooltip > should render plain tooltip 1`] = `
 <div
   css="unknown styles"
 >
@@ -36,7 +36,7 @@ exports[`Tooltip should render plain tooltip 1`] = `
 </div>
 `;
 
-exports[`Tooltip should render tooltip with partial buckets 1`] = `
+exports[`Tooltip > should render tooltip with partial buckets 1`] = `
 <div
   css="unknown styles"
 >
@@ -77,7 +77,7 @@ exports[`Tooltip should render tooltip with partial buckets 1`] = `
 </div>
 `;
 
-exports[`Tooltip should render tooltip with partial buckets 2`] = `
+exports[`Tooltip > should render tooltip with partial buckets 2`] = `
 <div
   css="unknown styles"
 >
@@ -118,7 +118,7 @@ exports[`Tooltip should render tooltip with partial buckets 2`] = `
 </div>
 `;
 
-exports[`Tooltip should render tooltip with xDomain 1`] = `
+exports[`Tooltip > should render tooltip with xDomain 1`] = `
 <div
   css="unknown styles"
 >
@@ -154,7 +154,7 @@ exports[`Tooltip should render tooltip with xDomain 1`] = `
 </div>
 `;
 
-exports[`Tooltip should render tooltip without split-column-values 1`] = `
+exports[`Tooltip > should render tooltip without split-column-values 1`] = `
 <div
   css="unknown styles"
 >
@@ -185,7 +185,7 @@ exports[`Tooltip should render tooltip without split-column-values 1`] = `
 </div>
 `;
 
-exports[`Tooltip should render tooltip without split-row-values 1`] = `
+exports[`Tooltip > should render tooltip without split-row-values 1`] = `
 <div
   css="unknown styles"
 >
@@ -216,7 +216,7 @@ exports[`Tooltip should render tooltip without split-row-values 1`] = `
 </div>
 `;
 
-exports[`Tooltip should render tooltip without splitAccessors-values 1`] = `
+exports[`Tooltip > should render tooltip without splitAccessors-values 1`] = `
 <div
   css="unknown styles"
 >
@@ -247,7 +247,7 @@ exports[`Tooltip should render tooltip without splitAccessors-values 1`] = `
 </div>
 `;
 
-exports[`Tooltip should render tooltip without x-value 1`] = `
+exports[`Tooltip > should render tooltip without x-value 1`] = `
 <div
   css="unknown styles"
 >
@@ -278,7 +278,7 @@ exports[`Tooltip should render tooltip without x-value 1`] = `
 </div>
 `;
 
-exports[`Tooltip should render tooltip without x-value 2`] = `
+exports[`Tooltip > should render tooltip without x-value 2`] = `
 <div
   css="unknown styles"
 >
@@ -309,7 +309,7 @@ exports[`Tooltip should render tooltip without x-value 2`] = `
 </div>
 `;
 
-exports[`Tooltip should render tooltip without y-value 1`] = `
+exports[`Tooltip > should render tooltip without y-value 1`] = `
 <div
   css="unknown styles"
 >

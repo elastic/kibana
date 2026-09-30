@@ -1,6 +1,6 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`APM telemetry helpers getApmTelemetry generates a JSON object with the telemetry mapping 1`] = `
+exports[`APM telemetry helpers > getApmTelemetry > generates a JSON object with the telemetry mapping 1`] = `
 {
   "properties": {
     "stack_stats": {

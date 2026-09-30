@@ -1,6 +1,6 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`useComparisonCss should render with basic diff mode and diff decorations 1`] = `
+exports[`useComparisonCss > should render with basic diff mode and diff decorations 1`] = `
 Object {
   "name": "q5zi8p-indicatorCss",
   "next": undefined,
@@ -26,7 +26,7 @@ Object {
 }
 `;
 
-exports[`useComparisonCss should render with basic diff mode and no diff decorations 1`] = `
+exports[`useComparisonCss > should render with basic diff mode and no diff decorations 1`] = `
 Object {
   "name": "q5zi8p-indicatorCss",
   "next": undefined,
@@ -52,7 +52,7 @@ Object {
 }
 `;
 
-exports[`useComparisonCss should render with chars diff mode and diff decorations 1`] = `
+exports[`useComparisonCss > should render with chars diff mode and diff decorations 1`] = `
 Object {
   "name": "6qao0p-indicatorCss",
   "next": undefined,
@@ -68,7 +68,7 @@ Object {
 }
 `;
 
-exports[`useComparisonCss should render with chars diff mode and no diff decorations 1`] = `
+exports[`useComparisonCss > should render with chars diff mode and no diff decorations 1`] = `
 Object {
   "name": "fba2wd-indicatorCss",
   "next": undefined,
@@ -76,7 +76,7 @@ Object {
 }
 `;
 
-exports[`useComparisonCss should render with lines diff mode and diff decorations 1`] = `
+exports[`useComparisonCss > should render with lines diff mode and diff decorations 1`] = `
 Object {
   "name": "1ko0e72-indicatorCss-indicatorCss-indicatorCss",
   "next": undefined,
@@ -104,7 +104,7 @@ Object {
 }
 `;
 
-exports[`useComparisonCss should render with lines diff mode and no diff decorations 1`] = `
+exports[`useComparisonCss > should render with lines diff mode and no diff decorations 1`] = `
 Object {
   "name": "1y8ojq4-indicatorCss",
   "next": undefined,
@@ -118,7 +118,7 @@ Object {
 }
 `;
 
-exports[`useComparisonCss should render with no diff mode and no diff decorations 1`] = `
+exports[`useComparisonCss > should render with no diff mode and no diff decorations 1`] = `
 Object {
   "name": "fba2wd-indicatorCss",
   "next": undefined,
@@ -126,7 +126,7 @@ Object {
 }
 `;
 
-exports[`useComparisonCss should render with words diff mode and diff decorations 1`] = `
+exports[`useComparisonCss > should render with words diff mode and diff decorations 1`] = `
 Object {
   "name": "6qao0p-indicatorCss",
   "next": undefined,
@@ -142,7 +142,7 @@ Object {
 }
 `;
 
-exports[`useComparisonCss should render with words diff mode and no diff decorations 1`] = `
+exports[`useComparisonCss > should render with words diff mode and no diff decorations 1`] = `
 Object {
   "name": "fba2wd-indicatorCss",
   "next": undefined,

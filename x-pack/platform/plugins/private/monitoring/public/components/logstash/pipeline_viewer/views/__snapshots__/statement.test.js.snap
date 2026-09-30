@@ -1,6 +1,6 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`Statement component renders a CollapsibleStatement with else body for non-IfElement 1`] = `
+exports[`Statement component > renders a CollapsibleStatement with else body for non-IfElement 1`] = `
 <li
   className="monPipelineViewer__listItem"
 >
@@ -35,7 +35,7 @@ exports[`Statement component renders a CollapsibleStatement with else body for n
 </li>
 `;
 
-exports[`Statement component renders a CollapsibleStatement with if body for branch model 1`] = `
+exports[`Statement component > renders a CollapsibleStatement with if body for branch model 1`] = `
 <li
   className="monPipelineViewer__listItem"
 >
@@ -80,7 +80,7 @@ exports[`Statement component renders a CollapsibleStatement with if body for bra
 </li>
 `;
 
-exports[`Statement component renders a PluginStatement component for plugin model 1`] = `
+exports[`Statement component > renders a PluginStatement component for plugin model 1`] = `
 <li
   className="monPipelineViewer__listItem"
 >

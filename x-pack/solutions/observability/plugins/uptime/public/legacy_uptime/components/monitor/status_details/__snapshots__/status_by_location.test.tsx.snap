@@ -1,6 +1,6 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`StatusByLocation component renders all locations are down 1`] = `
+exports[`StatusByLocation component > renders all locations are down 1`] = `
 <h2
   class="euiTitle emotion-euiTitle-s"
 >
@@ -8,7 +8,7 @@ exports[`StatusByLocation component renders all locations are down 1`] = `
 </h2>
 `;
 
-exports[`StatusByLocation component renders properly against props 1`] = `
+exports[`StatusByLocation component > renders properly against props 1`] = `
 <EuiTitle
   size="s"
 >
@@ -27,7 +27,7 @@ exports[`StatusByLocation component renders properly against props 1`] = `
 </EuiTitle>
 `;
 
-exports[`StatusByLocation component renders when down in some locations 1`] = `
+exports[`StatusByLocation component > renders when down in some locations 1`] = `
 <h2
   class="euiTitle emotion-euiTitle-s"
 >
@@ -35,7 +35,7 @@ exports[`StatusByLocation component renders when down in some locations 1`] = `
 </h2>
 `;
 
-exports[`StatusByLocation component renders when only one location and it is down 1`] = `
+exports[`StatusByLocation component > renders when only one location and it is down 1`] = `
 <h2
   class="euiTitle emotion-euiTitle-s"
 >
@@ -43,7 +43,7 @@ exports[`StatusByLocation component renders when only one location and it is dow
 </h2>
 `;
 
-exports[`StatusByLocation component renders when only one location and it is up 1`] = `
+exports[`StatusByLocation component > renders when only one location and it is up 1`] = `
 <h2
   class="euiTitle emotion-euiTitle-s"
 >
@@ -51,7 +51,7 @@ exports[`StatusByLocation component renders when only one location and it is up 
 </h2>
 `;
 
-exports[`StatusByLocation component renders when up in all locations 1`] = `
+exports[`StatusByLocation component > renders when up in all locations 1`] = `
 <h2
   class="euiTitle emotion-euiTitle-s"
 >

@@ -1,6 +1,6 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`ExplorerChartsContainer Minimal Initialization 1`] = `
+exports[`ExplorerChartsContainer > Minimal Initialization 1`] = `
 <div
   class="euiFlexGrid emotion-euiFlexGrid-m-row-stretch-responsive"
   data-test-subj="mlExplorerChartsContainer"

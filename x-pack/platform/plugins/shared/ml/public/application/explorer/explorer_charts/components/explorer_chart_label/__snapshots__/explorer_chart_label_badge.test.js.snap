@@ -1,6 +1,6 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`ExplorerChartLabelBadge renders entity label badge 1`] = `
+exports[`ExplorerChartLabelBadge > renders entity label badge 1`] = `
 <span>
   <span
     class="euiBadge emotion-euiBadge-hollow-resetFontWeightCss"

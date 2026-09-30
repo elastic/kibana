@@ -1,6 +1,6 @@
 // Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`getAlertsTableLensAttributes should render with extra options - breakdownField 1`] = `
+exports[`getAlertsTableLensAttributes > should render with extra options - breakdownField 1`] = `
 Object {
   "description": "",
   "references": Array [
@@ -172,7 +172,7 @@ Object {
 }
 `;
 
-exports[`getAlertsTableLensAttributes should render with extra options - filters 1`] = `
+exports[`getAlertsTableLensAttributes > should render with extra options - filters 1`] = `
 Object {
   "description": "",
   "references": Array [
@@ -338,7 +338,7 @@ Object {
 }
 `;
 
-exports[`getAlertsTableLensAttributes should render without extra options 1`] = `
+exports[`getAlertsTableLensAttributes > should render without extra options 1`] = `
 Object {
   "description": "",
   "references": Array [

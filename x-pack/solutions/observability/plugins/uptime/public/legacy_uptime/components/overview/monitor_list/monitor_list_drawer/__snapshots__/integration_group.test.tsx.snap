@@ -1,6 +1,6 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`IntegrationGroup will not display APM links when APM is unavailable 1`] = `
+exports[`IntegrationGroup > will not display APM links when APM is unavailable 1`] = `
 <EuiFlexGroup
   direction="column"
 >
@@ -64,7 +64,7 @@ exports[`IntegrationGroup will not display APM links when APM is unavailable 1`]
 </EuiFlexGroup>
 `;
 
-exports[`IntegrationGroup will not display infra links when infra is unavailable 1`] = `
+exports[`IntegrationGroup > will not display infra links when infra is unavailable 1`] = `
 <EuiFlexGroup
   direction="column"
 >
@@ -128,7 +128,7 @@ exports[`IntegrationGroup will not display infra links when infra is unavailable
 </EuiFlexGroup>
 `;
 
-exports[`IntegrationGroup will not display logging links when logging is unavailable 1`] = `
+exports[`IntegrationGroup > will not display logging links when logging is unavailable 1`] = `
 <EuiFlexGroup
   direction="column"
 >

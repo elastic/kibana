@@ -1,6 +1,6 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`SnapshotHeading renders custom heading for no down monitors 1`] = `
+exports[`SnapshotHeading > renders custom heading for no down monitors 1`] = `
 <EuiTitle
   size="s"
 >
@@ -12,7 +12,7 @@ exports[`SnapshotHeading renders custom heading for no down monitors 1`] = `
 </EuiTitle>
 `;
 
-exports[`SnapshotHeading renders custom heading for no monitors 1`] = `
+exports[`SnapshotHeading > renders custom heading for no monitors 1`] = `
 <EuiTitle
   size="s"
 >
@@ -24,7 +24,7 @@ exports[`SnapshotHeading renders custom heading for no monitors 1`] = `
 </EuiTitle>
 `;
 
-exports[`SnapshotHeading renders standard heading for valid counts 1`] = `
+exports[`SnapshotHeading > renders standard heading for valid counts 1`] = `
 <EuiTitle
   size="s"
 >

@@ -17,7 +17,7 @@ import setImmediate from 'core-js/stable/set-immediate';
 import clearImmediate from 'core-js/stable/clear-immediate';
 import { configure } from '@testing-library/react';
 import { matchers } from '@emotion/jest';
-import { createRequire } from 'module';
+import { createRequire, registerHooks } from 'module';
 import { TextDecoder as NodeTextDecoder, TextEncoder as NodeTextEncoder } from 'util';
 import { i18n } from '@kbn/i18n';
 
@@ -45,6 +45,18 @@ try {
 }
 Error.prepareStackTrace = vitestPrepareStackTrace;
 
+// Jest's resolver stubbed style imports for every module. Natively loaded code (node_modules and
+// `jest.requireActual`, e.g. monaco-editor's ESM) would otherwise fail on `import './x.css'`.
+const STYLE_HOOKS = Symbol.for('kbn.vitest.styleHooks');
+if (!global[STYLE_HOOKS]) {
+  global[STYLE_HOOKS] = registerHooks({
+    load: (url, context, nextLoad) =>
+      /\.(css|less|scss)$/.test(url)
+        ? { format: 'module', source: 'export default {};', shortCircuit: true }
+        : nextLoad(url, context),
+  });
+}
+
 // Jest's jsdom sandbox had no fetch, so polyfills.jsdom.js installed whatwg-fetch (XHR based,
 // relative URLs, jsdom Blob bodies). Vitest's jsdom global inherits Node's undici fetch, which made
 // that polyfill a no-op; install it explicitly.
@@ -62,8 +74,16 @@ const getCallerFile = () => {
 };
 
 const requireActual = (id) => createRequire(getCallerFile())(id);
-global.jest = new Proxy(vi, {
+const jestProxy = new Proxy(vi, {
   get: (target, key) => (key === 'requireActual' ? requireActual : Reflect.get(target, key)),
+});
+// Storybook previews loaded by story tests assign `window.jest = require('jest-mock')`. Jest's
+// `jest` was module-scoped so that never mattered; here it would replace the global that
+// libraries like @testing-library read to drive fake timers, so writes are ignored.
+Object.defineProperty(global, 'jest', {
+  configurable: true,
+  get: () => jestProxy,
+  set: () => {},
 });
 
 global.ReadableStream = ReadableStream;

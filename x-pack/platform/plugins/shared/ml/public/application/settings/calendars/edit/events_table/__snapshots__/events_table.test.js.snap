@@ -1,6 +1,6 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`EventsTable Renders events table with no search bar 1`] = `
+exports[`EventsTable > Renders events table with no search bar 1`] = `
 <div>
   <div
     class="euiSpacer euiSpacer--m emotion-euiSpacer-m"
@@ -321,7 +321,7 @@ exports[`EventsTable Renders events table with no search bar 1`] = `
 </div>
 `;
 
-exports[`EventsTable Renders events table with search bar 1`] = `
+exports[`EventsTable > Renders events table with search bar 1`] = `
 <div>
   <div
     class="euiSpacer euiSpacer--m emotion-euiSpacer-m"

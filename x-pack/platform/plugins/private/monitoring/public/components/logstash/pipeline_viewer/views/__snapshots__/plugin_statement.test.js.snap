@@ -1,6 +1,6 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`PluginStatement component adds warning highlight for cpu time 1`] = `
+exports[`PluginStatement component > adds warning highlight for cpu time 1`] = `
 <EuiFlexGroup
   alignItems="center"
   css="unknown styles"
@@ -74,7 +74,7 @@ exports[`PluginStatement component adds warning highlight for cpu time 1`] = `
 </EuiFlexGroup>
 `;
 
-exports[`PluginStatement component adds warning highlight for event millis 1`] = `
+exports[`PluginStatement component > adds warning highlight for event millis 1`] = `
 <EuiFlexGroup
   alignItems="center"
   css="unknown styles"
@@ -148,7 +148,7 @@ exports[`PluginStatement component adds warning highlight for event millis 1`] =
 </EuiFlexGroup>
 `;
 
-exports[`PluginStatement component does not render explicit id field if no id is specified 1`] = `
+exports[`PluginStatement component > does not render explicit id field if no id is specified 1`] = `
 <EuiFlexGroup
   alignItems="center"
   css="unknown styles"
@@ -199,7 +199,7 @@ exports[`PluginStatement component does not render explicit id field if no id is
 </EuiFlexGroup>
 `;
 
-exports[`PluginStatement component renders input metrics and explicit id fields 1`] = `
+exports[`PluginStatement component > renders input metrics and explicit id fields 1`] = `
 <EuiFlexGroup
   alignItems="center"
   css="unknown styles"
@@ -261,7 +261,7 @@ exports[`PluginStatement component renders input metrics and explicit id fields 
 </EuiFlexGroup>
 `;
 
-exports[`PluginStatement component renders processor statement metrics 1`] = `
+exports[`PluginStatement component > renders processor statement metrics 1`] = `
 <EuiFlexGroup
   alignItems="center"
   css="unknown styles"

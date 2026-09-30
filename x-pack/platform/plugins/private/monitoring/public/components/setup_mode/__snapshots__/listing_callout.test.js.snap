@@ -1,6 +1,6 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`setupMode ListingCallOut all internally collected should render for apm 1`] = `
+exports[`setupMode ListingCallOut > all internally collected > should render for apm 1`] = `
 <Fragment>
   <EuiCallOut
     announceOnMount={false}
@@ -19,7 +19,7 @@ exports[`setupMode ListingCallOut all internally collected should render for apm
 </Fragment>
 `;
 
-exports[`setupMode ListingCallOut all internally collected should render for beats 1`] = `
+exports[`setupMode ListingCallOut > all internally collected > should render for beats 1`] = `
 <Fragment>
   <EuiCallOut
     announceOnMount={false}
@@ -38,7 +38,7 @@ exports[`setupMode ListingCallOut all internally collected should render for bea
 </Fragment>
 `;
 
-exports[`setupMode ListingCallOut all internally collected should render for elasticsearch 1`] = `
+exports[`setupMode ListingCallOut > all internally collected > should render for elasticsearch 1`] = `
 <Fragment>
   <EuiCallOut
     announceOnMount={false}
@@ -57,7 +57,7 @@ exports[`setupMode ListingCallOut all internally collected should render for ela
 </Fragment>
 `;
 
-exports[`setupMode ListingCallOut all internally collected should render for kibana 1`] = `
+exports[`setupMode ListingCallOut > all internally collected > should render for kibana 1`] = `
 <Fragment>
   <EuiCallOut
     announceOnMount={false}
@@ -76,7 +76,7 @@ exports[`setupMode ListingCallOut all internally collected should render for kib
 </Fragment>
 `;
 
-exports[`setupMode ListingCallOut all internally collected should render for logstash 1`] = `
+exports[`setupMode ListingCallOut > all internally collected > should render for logstash 1`] = `
 <Fragment>
   <EuiCallOut
     announceOnMount={false}
@@ -95,7 +95,7 @@ exports[`setupMode ListingCallOut all internally collected should render for log
 </Fragment>
 `;
 
-exports[`setupMode ListingCallOut all migrated should render for apm 1`] = `
+exports[`setupMode ListingCallOut > all migrated > should render for apm 1`] = `
 <Fragment>
   <EuiCallOut
     announceOnMount={false}
@@ -109,7 +109,7 @@ exports[`setupMode ListingCallOut all migrated should render for apm 1`] = `
 </Fragment>
 `;
 
-exports[`setupMode ListingCallOut all migrated should render for beats 1`] = `
+exports[`setupMode ListingCallOut > all migrated > should render for beats 1`] = `
 <Fragment>
   <EuiCallOut
     announceOnMount={false}
@@ -123,7 +123,7 @@ exports[`setupMode ListingCallOut all migrated should render for beats 1`] = `
 </Fragment>
 `;
 
-exports[`setupMode ListingCallOut all migrated should render for elasticsearch 1`] = `
+exports[`setupMode ListingCallOut > all migrated > should render for elasticsearch 1`] = `
 <Fragment>
   <EuiCallOut
     announceOnMount={false}
@@ -137,7 +137,7 @@ exports[`setupMode ListingCallOut all migrated should render for elasticsearch 1
 </Fragment>
 `;
 
-exports[`setupMode ListingCallOut all migrated should render for kibana 1`] = `
+exports[`setupMode ListingCallOut > all migrated > should render for kibana 1`] = `
 <Fragment>
   <EuiCallOut
     announceOnMount={false}
@@ -151,7 +151,7 @@ exports[`setupMode ListingCallOut all migrated should render for kibana 1`] = `
 </Fragment>
 `;
 
-exports[`setupMode ListingCallOut all migrated should render for logstash 1`] = `
+exports[`setupMode ListingCallOut > all migrated > should render for logstash 1`] = `
 <Fragment>
   <EuiCallOut
     announceOnMount={false}
@@ -165,7 +165,7 @@ exports[`setupMode ListingCallOut all migrated should render for logstash 1`] = 
 </Fragment>
 `;
 
-exports[`setupMode ListingCallOut all partially migrated should render for apm 1`] = `
+exports[`setupMode ListingCallOut > all partially migrated > should render for apm 1`] = `
 <Fragment>
   <EuiCallOut
     announceOnMount={false}
@@ -183,7 +183,7 @@ exports[`setupMode ListingCallOut all partially migrated should render for apm 1
 </Fragment>
 `;
 
-exports[`setupMode ListingCallOut all partially migrated should render for beats 1`] = `
+exports[`setupMode ListingCallOut > all partially migrated > should render for beats 1`] = `
 <Fragment>
   <EuiCallOut
     announceOnMount={false}
@@ -201,7 +201,7 @@ exports[`setupMode ListingCallOut all partially migrated should render for beats
 </Fragment>
 `;
 
-exports[`setupMode ListingCallOut all partially migrated should render for elasticsearch 1`] = `
+exports[`setupMode ListingCallOut > all partially migrated > should render for elasticsearch 1`] = `
 <Fragment>
   <EuiCallOut
     announceOnMount={false}
@@ -219,7 +219,7 @@ exports[`setupMode ListingCallOut all partially migrated should render for elast
 </Fragment>
 `;
 
-exports[`setupMode ListingCallOut all partially migrated should render for kibana 1`] = `
+exports[`setupMode ListingCallOut > all partially migrated > should render for kibana 1`] = `
 <Fragment>
   <EuiCallOut
     announceOnMount={false}
@@ -237,7 +237,7 @@ exports[`setupMode ListingCallOut all partially migrated should render for kiban
 </Fragment>
 `;
 
-exports[`setupMode ListingCallOut all partially migrated should render for logstash 1`] = `
+exports[`setupMode ListingCallOut > all partially migrated > should render for logstash 1`] = `
 <Fragment>
   <EuiCallOut
     announceOnMount={false}
@@ -255,7 +255,7 @@ exports[`setupMode ListingCallOut all partially migrated should render for logst
 </Fragment>
 `;
 
-exports[`setupMode ListingCallOut no detectable instances should render for apm 1`] = `
+exports[`setupMode ListingCallOut > no detectable instances > should render for apm 1`] = `
 <Fragment>
   <EuiCallOut
     announceOnMount={false}
@@ -272,7 +272,7 @@ exports[`setupMode ListingCallOut no detectable instances should render for apm 
 </Fragment>
 `;
 
-exports[`setupMode ListingCallOut no detectable instances should render for beats 1`] = `
+exports[`setupMode ListingCallOut > no detectable instances > should render for beats 1`] = `
 <Fragment>
   <EuiCallOut
     announceOnMount={false}
@@ -289,7 +289,7 @@ exports[`setupMode ListingCallOut no detectable instances should render for beat
 </Fragment>
 `;
 
-exports[`setupMode ListingCallOut no detectable instances should render for elasticsearch 1`] = `
+exports[`setupMode ListingCallOut > no detectable instances > should render for elasticsearch 1`] = `
 <Fragment>
   <EuiCallOut
     announceOnMount={false}
@@ -306,7 +306,7 @@ exports[`setupMode ListingCallOut no detectable instances should render for elas
 </Fragment>
 `;
 
-exports[`setupMode ListingCallOut no detectable instances should render for kibana 1`] = `
+exports[`setupMode ListingCallOut > no detectable instances > should render for kibana 1`] = `
 <Fragment>
   <EuiCallOut
     announceOnMount={false}
@@ -323,7 +323,7 @@ exports[`setupMode ListingCallOut no detectable instances should render for kiba
 </Fragment>
 `;
 
-exports[`setupMode ListingCallOut no detectable instances should render for logstash 1`] = `
+exports[`setupMode ListingCallOut > no detectable instances > should render for logstash 1`] = `
 <Fragment>
   <EuiCallOut
     announceOnMount={false}
@@ -340,7 +340,7 @@ exports[`setupMode ListingCallOut no detectable instances should render for logs
 </Fragment>
 `;
 
-exports[`setupMode ListingCallOut only detectable instances should render for apm 1`] = `
+exports[`setupMode ListingCallOut > only detectable instances > should render for apm 1`] = `
 <Fragment>
   <EuiCallOut
     announceOnMount={false}
@@ -358,7 +358,7 @@ exports[`setupMode ListingCallOut only detectable instances should render for ap
 </Fragment>
 `;
 
-exports[`setupMode ListingCallOut only detectable instances should render for beats 1`] = `
+exports[`setupMode ListingCallOut > only detectable instances > should render for beats 1`] = `
 <Fragment>
   <EuiCallOut
     announceOnMount={false}
@@ -376,7 +376,7 @@ exports[`setupMode ListingCallOut only detectable instances should render for be
 </Fragment>
 `;
 
-exports[`setupMode ListingCallOut only detectable instances should render for elasticsearch 1`] = `
+exports[`setupMode ListingCallOut > only detectable instances > should render for elasticsearch 1`] = `
 <Fragment>
   <EuiCallOut
     announceOnMount={false}
@@ -394,7 +394,7 @@ exports[`setupMode ListingCallOut only detectable instances should render for el
 </Fragment>
 `;
 
-exports[`setupMode ListingCallOut only detectable instances should render for kibana 1`] = `
+exports[`setupMode ListingCallOut > only detectable instances > should render for kibana 1`] = `
 <Fragment>
   <EuiCallOut
     announceOnMount={false}
@@ -412,7 +412,7 @@ exports[`setupMode ListingCallOut only detectable instances should render for ki
 </Fragment>
 `;
 
-exports[`setupMode ListingCallOut only detectable instances should render for logstash 1`] = `
+exports[`setupMode ListingCallOut > only detectable instances > should render for logstash 1`] = `
 <Fragment>
   <EuiCallOut
     announceOnMount={false}

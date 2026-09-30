@@ -1,6 +1,6 @@
 // Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`fetchBaselineBehavior rare detector search request matches snapshot 1`] = `
+exports[`fetchBaselineBehavior > rare detector > search request matches snapshot 1`] = `
 Object {
   "aggs": Object {
     "anomaly": Object {
@@ -72,7 +72,7 @@ Object {
 }
 `;
 
-exports[`fetchBaselineBehavior time_of_day detector search request matches snapshot 1`] = `
+exports[`fetchBaselineBehavior > time_of_day detector > search request matches snapshot 1`] = `
 Object {
   "aggs": Object {
     "time_bucket": Object {

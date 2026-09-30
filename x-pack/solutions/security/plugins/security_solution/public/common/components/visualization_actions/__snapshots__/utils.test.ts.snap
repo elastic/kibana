@@ -1,6 +1,6 @@
 // Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`getRequestsAndResponses should parse requests and responses 1`] = `
+exports[`getRequestsAndResponses > should parse requests and responses 1`] = `
 Object {
   "requests": Array [
     "{

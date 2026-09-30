@@ -1,6 +1,6 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`Embeddable it renders 1`] = `
+exports[`Embeddable > it renders 1`] = `
 <section
   class="siemEmbeddable"
   data-test-subj="siemEmbeddable"

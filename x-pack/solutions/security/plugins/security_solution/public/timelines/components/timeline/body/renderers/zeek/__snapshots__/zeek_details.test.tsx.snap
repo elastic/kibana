@@ -1,6 +1,6 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`ZeekDetails rendering it renders the default ZeekDetails 1`] = `
+exports[`ZeekDetails > rendering > it renders the default ZeekDetails 1`] = `
 <ZeekDetails
   data={
     Object {

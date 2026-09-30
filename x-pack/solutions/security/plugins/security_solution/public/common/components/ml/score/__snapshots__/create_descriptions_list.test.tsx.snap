@@ -1,6 +1,6 @@
 // Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`create_description_list renders correctly against snapshot 1`] = `
+exports[`create_description_list > renders correctly against snapshot 1`] = `
 <ContextProvider
   value={
     Object {

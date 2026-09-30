@@ -1,6 +1,6 @@
 // Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`text_field_value TextFieldValue should render long text correctly, when there is limit 1`] = `
+exports[`text_field_value > TextFieldValue > should render long text correctly, when there is limit 1`] = `
 <EuiToolTip
   content={
     <EuiFlexGroup
@@ -29,7 +29,7 @@ exports[`text_field_value TextFieldValue should render long text correctly, when
 </EuiToolTip>
 `;
 
-exports[`text_field_value TextFieldValue should render long text correctly, when there is no limit 1`] = `
+exports[`text_field_value > TextFieldValue > should render long text correctly, when there is no limit 1`] = `
 <EuiToolTip
   content={
     <EuiFlexGroup
@@ -58,7 +58,7 @@ exports[`text_field_value TextFieldValue should render long text correctly, when
 </EuiToolTip>
 `;
 
-exports[`text_field_value TextFieldValue should render small text correctly, when there is limit 1`] = `
+exports[`text_field_value > TextFieldValue > should render small text correctly, when there is limit 1`] = `
 <EuiToolTip
   content={
     <EuiFlexGroup
@@ -87,7 +87,7 @@ exports[`text_field_value TextFieldValue should render small text correctly, whe
 </EuiToolTip>
 `;
 
-exports[`text_field_value TextFieldValue should render small text correctly, when there is no limit 1`] = `
+exports[`text_field_value > TextFieldValue > should render small text correctly, when there is no limit 1`] = `
 <EuiToolTip
   content={
     <EuiFlexGroup

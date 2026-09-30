@@ -1,6 +1,6 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`FilterStatusButton renders without errors for valid props 1`] = `
+exports[`FilterStatusButton > renders without errors for valid props 1`] = `
 <div
   class="euiFilterButton__wrapper css-gf1zx3-wrapper-withNext"
 >
@@ -26,7 +26,7 @@ exports[`FilterStatusButton renders without errors for valid props 1`] = `
 </div>
 `;
 
-exports[`FilterStatusButton shallow renders without errors for valid props 1`] = `
+exports[`FilterStatusButton > shallow renders without errors for valid props 1`] = `
 <Router
   history={
     Object {

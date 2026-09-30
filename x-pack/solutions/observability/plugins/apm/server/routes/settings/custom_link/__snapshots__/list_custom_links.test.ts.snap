@@ -1,6 +1,6 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`List Custom Links fetches all custom links 1`] = `
+exports[`List Custom Links > fetches all custom links 1`] = `
 Object {
   "index": ".apm-custom-link",
   "query": Object {
@@ -19,7 +19,7 @@ Object {
 }
 `;
 
-exports[`List Custom Links filters custom links 1`] = `
+exports[`List Custom Links > filters custom links 1`] = `
 Object {
   "index": ".apm-custom-link",
   "query": Object {

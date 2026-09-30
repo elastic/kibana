@@ -1,6 +1,6 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`IndexPatternsMissingPrompt renders correctly against snapshot 1`] = `
+exports[`IndexPatternsMissingPrompt > renders correctly against snapshot 1`] = `
 <div
   class="euiPanel euiPanel--transparent euiEmptyPrompt emotion-euiPanel-m-transparent-euiEmptyPrompt-vertical"
 >

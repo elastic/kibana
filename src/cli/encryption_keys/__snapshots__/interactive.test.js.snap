@@ -1,6 +1,6 @@
 // Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`encryption key generation interactive should write to disk partial keys 1`] = `
+exports[`encryption key generation interactive > should write to disk partial keys 1`] = `
 Array [
   Array [
     "/foo/bar",

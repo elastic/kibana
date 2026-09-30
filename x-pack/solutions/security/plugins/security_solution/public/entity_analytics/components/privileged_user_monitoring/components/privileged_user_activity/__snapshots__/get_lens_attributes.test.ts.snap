@@ -1,6 +1,6 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`getLensAttributes should generate lens attributes with default values 1`] = `
+exports[`getLensAttributes > should generate lens attributes with default values 1`] = `
 Object {
   "description": "",
   "references": Array [],

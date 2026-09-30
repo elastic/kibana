@@ -1,6 +1,6 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`LoginPage disabled form states renders CTA and browser settings warning when cookies are disabled, document is embedded inside iframe, and cross-origin cookies are allowed 1`] = `
+exports[`LoginPage > disabled form states > renders CTA and browser settings warning when cookies are disabled, document is embedded inside iframe, and cross-origin cookies are allowed 1`] = `
 <div
   class="css-yd0ea2-fullScreenGraphicsFadeIn"
   data-test-subj="loginForm"
@@ -72,7 +72,7 @@ exports[`LoginPage disabled form states renders CTA and browser settings warning
 </div>
 `;
 
-exports[`LoginPage disabled form states renders CTA and cross-origin cookie warning when cookies are disabled, document is embedded inside iframe, and cross-origin cookies are blocked 1`] = `
+exports[`LoginPage > disabled form states > renders CTA and cross-origin cookie warning when cookies are disabled, document is embedded inside iframe, and cross-origin cookies are blocked 1`] = `
 <div
   class="css-yd0ea2-fullScreenGraphicsFadeIn"
   data-test-subj="loginForm"
@@ -144,7 +144,7 @@ exports[`LoginPage disabled form states renders CTA and cross-origin cookie warn
 </div>
 `;
 
-exports[`LoginPage disabled form states renders as expected when a connection to ES is not available 1`] = `
+exports[`LoginPage > disabled form states > renders as expected when a connection to ES is not available 1`] = `
 <div
   class="css-yd0ea2-fullScreenGraphicsFadeIn"
   data-test-subj="loginForm"
@@ -206,7 +206,7 @@ exports[`LoginPage disabled form states renders as expected when a connection to
 </div>
 `;
 
-exports[`LoginPage disabled form states renders as expected when an unknown loginState layout is provided 1`] = `
+exports[`LoginPage > disabled form states > renders as expected when an unknown loginState layout is provided 1`] = `
 <div
   class="css-yd0ea2-fullScreenGraphicsFadeIn"
   data-test-subj="loginForm"
@@ -268,7 +268,7 @@ exports[`LoginPage disabled form states renders as expected when an unknown logi
 </div>
 `;
 
-exports[`LoginPage disabled form states renders as expected when login is not enabled 1`] = `
+exports[`LoginPage > disabled form states > renders as expected when login is not enabled 1`] = `
 <div
   class="css-yd0ea2-fullScreenGraphicsFadeIn"
   data-test-subj="loginForm"
@@ -330,7 +330,7 @@ exports[`LoginPage disabled form states renders as expected when login is not en
 </div>
 `;
 
-exports[`LoginPage disabled form states renders as expected when secure connection is required but not present 1`] = `
+exports[`LoginPage > disabled form states > renders as expected when secure connection is required but not present 1`] = `
 <div
   class="css-yd0ea2-fullScreenGraphicsFadeIn"
   data-test-subj="loginForm"
@@ -392,7 +392,7 @@ exports[`LoginPage disabled form states renders as expected when secure connecti
 </div>
 `;
 
-exports[`LoginPage disabled form states renders as expected when xpack is not available 1`] = `
+exports[`LoginPage > disabled form states > renders as expected when xpack is not available 1`] = `
 <div
   class="css-yd0ea2-fullScreenGraphicsFadeIn"
   data-test-subj="loginForm"
@@ -454,7 +454,7 @@ exports[`LoginPage disabled form states renders as expected when xpack is not av
 </div>
 `;
 
-exports[`LoginPage disabled form states renders warning when cookies are disabled and document is not embedded inside iframe 1`] = `
+exports[`LoginPage > disabled form states > renders warning when cookies are disabled and document is not embedded inside iframe 1`] = `
 <div
   class="css-yd0ea2-fullScreenGraphicsFadeIn"
   data-test-subj="loginForm"
@@ -516,7 +516,7 @@ exports[`LoginPage disabled form states renders warning when cookies are disable
 </div>
 `;
 
-exports[`LoginPage enabled form state renders as expected 1`] = `
+exports[`LoginPage > enabled form state > renders as expected 1`] = `
 <div
   class="css-yd0ea2-fullScreenGraphicsFadeIn"
   data-test-subj="loginForm"
@@ -700,7 +700,7 @@ exports[`LoginPage enabled form state renders as expected 1`] = `
 </div>
 `;
 
-exports[`LoginPage enabled form state renders as expected when loginAssistanceMessage is set 1`] = `
+exports[`LoginPage > enabled form state > renders as expected when loginAssistanceMessage is set 1`] = `
 <div
   class="css-yd0ea2-fullScreenGraphicsFadeIn"
   data-test-subj="loginForm"
@@ -903,7 +903,7 @@ exports[`LoginPage enabled form state renders as expected when loginAssistanceMe
 </div>
 `;
 
-exports[`LoginPage enabled form state renders as expected when loginHelp is set 1`] = `
+exports[`LoginPage > enabled form state > renders as expected when loginHelp is set 1`] = `
 <div
   class="css-yd0ea2-fullScreenGraphicsFadeIn"
   data-test-subj="loginForm"
@@ -1101,7 +1101,7 @@ exports[`LoginPage enabled form state renders as expected when loginHelp is set 
 </div>
 `;
 
-exports[`LoginPage page renders as expected 1`] = `
+exports[`LoginPage > page > renders as expected 1`] = `
 <div
   class="css-yd0ea2-fullScreenGraphicsFadeIn"
   data-test-subj="loginForm"
@@ -1285,7 +1285,7 @@ exports[`LoginPage page renders as expected 1`] = `
 </div>
 `;
 
-exports[`LoginPage page renders with custom branding 1`] = `
+exports[`LoginPage > page > renders with custom branding 1`] = `
 <div
   class="css-yd0ea2-fullScreenGraphicsFadeIn"
   data-test-subj="loginForm"

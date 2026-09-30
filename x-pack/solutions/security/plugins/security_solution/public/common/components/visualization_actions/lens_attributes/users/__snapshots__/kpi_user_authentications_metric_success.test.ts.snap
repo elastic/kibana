@@ -1,6 +1,6 @@
 // Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`kpiUserAuthenticationsMetricSuccessLensAttributes should render 1`] = `
+exports[`kpiUserAuthenticationsMetricSuccessLensAttributes > should render 1`] = `
 Object {
   "description": "",
   "references": Array [

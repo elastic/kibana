@@ -1,6 +1,6 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`src/legacy/core_plugins/metrics/public/components/splits/terms.test.js <SplitByTermsUI /> should render and match a snapshot 1`] = `
+exports[`src/legacy/core_plugins/metrics/public/components/splits/terms.test.js > <SplitByTermsUI /> > should render and match a snapshot 1`] = `
 <div>
   <EuiFlexGroup>
     <EuiFlexItem>

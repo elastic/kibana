@@ -1,6 +1,6 @@
 // Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`buildTimestampRuntimeMapping builds a correct timestamp fallback runtime mapping 1`] = `
+exports[`buildTimestampRuntimeMapping > builds a correct timestamp fallback runtime mapping 1`] = `
 Object {
   "kibana.combined_timestamp": Object {
     "script": Object {

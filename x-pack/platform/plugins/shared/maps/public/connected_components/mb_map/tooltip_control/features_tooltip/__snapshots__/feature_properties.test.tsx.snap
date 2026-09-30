@@ -1,6 +1,6 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`FeatureProperties should render 1`] = `
+exports[`FeatureProperties > should render 1`] = `
 <div
   css="unknown styles"
 >
@@ -41,7 +41,7 @@ exports[`FeatureProperties should render 1`] = `
 </div>
 `;
 
-exports[`FeatureProperties should show error message if unable to load tooltip content 1`] = `
+exports[`FeatureProperties > should show error message if unable to load tooltip content 1`] = `
 <KbnDangerCallout
   announceOnMount={true}
   size="s"
@@ -50,7 +50,7 @@ exports[`FeatureProperties should show error message if unable to load tooltip c
 />
 `;
 
-exports[`FeatureProperties should show filter button for filterable properties 1`] = `
+exports[`FeatureProperties > should show filter button for filterable properties 1`] = `
 <div
   css="unknown styles"
 >
@@ -104,7 +104,7 @@ exports[`FeatureProperties should show filter button for filterable properties 1
 </div>
 `;
 
-exports[`FeatureProperties should show view actions button when there are available actions 1`] = `
+exports[`FeatureProperties > should show view actions button when there are available actions 1`] = `
 <div
   css="unknown styles"
 >

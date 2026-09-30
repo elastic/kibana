@@ -1,6 +1,6 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`renderCustomToolbar should render correctly for smaller screens 1`] = `
+exports[`renderCustomToolbar > should render correctly for smaller screens 1`] = `
 <React.Fragment>
   <EuiFlexGroup
     alignItems="center"
@@ -47,7 +47,7 @@ exports[`renderCustomToolbar should render correctly for smaller screens 1`] = `
 </React.Fragment>
 `;
 
-exports[`renderCustomToolbar should render correctly with an element 1`] = `
+exports[`renderCustomToolbar > should render correctly with an element 1`] = `
 <React.Fragment>
   <EuiFlexGroup
     alignItems="center"
@@ -127,7 +127,7 @@ exports[`renderCustomToolbar should render correctly with an element 1`] = `
 </React.Fragment>
 `;
 
-exports[`renderCustomToolbar should render successfully 1`] = `
+exports[`renderCustomToolbar > should render successfully 1`] = `
 <React.Fragment>
   <EuiFlexGroup
     alignItems="center"

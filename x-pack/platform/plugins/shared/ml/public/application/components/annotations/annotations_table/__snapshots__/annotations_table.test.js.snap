@@ -1,6 +1,6 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`AnnotationsTable Initialization with annotations prop. 1`] = `
+exports[`AnnotationsTable > Initialization with annotations prop. 1`] = `
 <div
   data-test-subj="mockEuiInMemoryTable"
 >
@@ -8,7 +8,7 @@ exports[`AnnotationsTable Initialization with annotations prop. 1`] = `
 </div>
 `;
 
-exports[`AnnotationsTable Initialization with job config prop. 1`] = `
+exports[`AnnotationsTable > Initialization with job config prop. 1`] = `
 <div
   class="euiFlexGroup emotion-euiFlexGroup-responsive-m-spaceAround-stretch-row"
 >
@@ -24,7 +24,7 @@ exports[`AnnotationsTable Initialization with job config prop. 1`] = `
 </div>
 `;
 
-exports[`AnnotationsTable Minimal initialization without props. 1`] = `
+exports[`AnnotationsTable > Minimal initialization without props. 1`] = `
 <div
   class="euiPanel euiPanel--primary euiCallOut euiCallOut--primary emotion-euiPanel-none-primary-euiCallOut-primary"
   data-size="m"

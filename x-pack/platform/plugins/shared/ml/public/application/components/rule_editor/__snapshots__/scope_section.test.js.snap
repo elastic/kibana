@@ -1,8 +1,8 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`ScopeSection don't render when no partitioning fields 1`] = `<div />`;
+exports[`ScopeSection > don't render when no partitioning fields 1`] = `<div />`;
 
-exports[`ScopeSection false canGetFilters privilege show NoPermissionCallOut when no filter list IDs 1`] = `
+exports[`ScopeSection false canGetFilters privilege > show NoPermissionCallOut when no filter list IDs 1`] = `
 <div>
   <h2
     class="euiTitle emotion-euiTitle-m"
@@ -80,7 +80,7 @@ exports[`ScopeSection false canGetFilters privilege show NoPermissionCallOut whe
 </div>
 `;
 
-exports[`ScopeSection renders when enabled with no scope supplied 1`] = `
+exports[`ScopeSection > renders when enabled with no scope supplied 1`] = `
 <div>
   <h2
     class="euiTitle emotion-euiTitle-m"
@@ -204,7 +204,7 @@ exports[`ScopeSection renders when enabled with no scope supplied 1`] = `
 </div>
 `;
 
-exports[`ScopeSection renders when enabled with scope supplied 1`] = `
+exports[`ScopeSection > renders when enabled with scope supplied 1`] = `
 <div>
   <h2
     class="euiTitle emotion-euiTitle-m"
@@ -329,7 +329,7 @@ exports[`ScopeSection renders when enabled with scope supplied 1`] = `
 </div>
 `;
 
-exports[`ScopeSection renders when not enabled 1`] = `
+exports[`ScopeSection > renders when not enabled 1`] = `
 <div>
   <h2
     class="euiTitle emotion-euiTitle-m"
@@ -377,7 +377,7 @@ exports[`ScopeSection renders when not enabled 1`] = `
 </div>
 `;
 
-exports[`ScopeSection show NoFilterListsCallOut when no filter list IDs 1`] = `
+exports[`ScopeSection > show NoFilterListsCallOut when no filter list IDs 1`] = `
 <div>
   <h2
     class="euiTitle emotion-euiTitle-m"

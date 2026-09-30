@@ -1,6 +1,6 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`transaction queries fetches a transaction 1`] = `
+exports[`transaction queries > fetches a transaction 1`] = `
 Object {
   "_source": Array [
     "span.links",
@@ -51,7 +51,7 @@ Object {
 }
 `;
 
-exports[`transaction queries fetches breakdown data for transactions 1`] = `
+exports[`transaction queries > fetches breakdown data for transactions 1`] = `
 Object {
   "aggs": Object {
     "by_date": Object {
@@ -174,7 +174,7 @@ Object {
 }
 `;
 
-exports[`transaction queries fetches breakdown data for transactions for a transaction name 1`] = `
+exports[`transaction queries > fetches breakdown data for transactions for a transaction name 1`] = `
 Object {
   "aggs": Object {
     "by_date": Object {
@@ -302,7 +302,7 @@ Object {
 }
 `;
 
-exports[`transaction queries fetches transaction trace samples 1`] = `
+exports[`transaction queries > fetches transaction trace samples 1`] = `
 Object {
   "_source": Array [
     "transaction.id",

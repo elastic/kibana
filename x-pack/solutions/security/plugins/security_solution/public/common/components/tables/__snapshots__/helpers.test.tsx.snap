@@ -1,6 +1,6 @@
 // Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`Table Helpers #RowItemOverflow it returns correctly against snapshot 1`] = `
+exports[`Table Helpers > #RowItemOverflow > it returns correctly against snapshot 1`] = `
 <div
   class="css-du0w0-subtext"
 >
@@ -19,7 +19,7 @@ exports[`Table Helpers #RowItemOverflow it returns correctly against snapshot 1`
 </div>
 `;
 
-exports[`Table Helpers OverflowField it renders 1`] = `
+exports[`Table Helpers > OverflowField > it renders 1`] = `
 <span>
   This string is exactly fifty-one chars in length!!
   <span

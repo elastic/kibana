@@ -1,6 +1,6 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`ZeekSignature rendering it renders the default Zeek 1`] = `
+exports[`ZeekSignature > rendering > it renders the default Zeek 1`] = `
 <Fragment>
   <EuiFlexGroup
     gutterSize="none"

@@ -1,6 +1,6 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`PipelineViewer component passes expected props 1`] = `
+exports[`PipelineViewer component > passes expected props 1`] = `
 <EuiPage>
   <EuiPageBody>
     <EuiScreenReaderOnly>
@@ -75,7 +75,7 @@ exports[`PipelineViewer component passes expected props 1`] = `
 </EuiPage>
 `;
 
-exports[`PipelineViewer component renders DetailDrawer when selected vertex is not null 1`] = `
+exports[`PipelineViewer component > renders DetailDrawer when selected vertex is not null 1`] = `
 <EuiPage>
   <EuiPageBody>
     <EuiScreenReaderOnly>

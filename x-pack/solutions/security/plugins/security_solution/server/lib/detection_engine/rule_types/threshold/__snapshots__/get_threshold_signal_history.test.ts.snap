@@ -1,6 +1,6 @@
 // Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`buildPreviousThresholdAlertRequest should generate a proper request when bucketByFields contains multiple fields 1`] = `
+exports[`buildPreviousThresholdAlertRequest > should generate a proper request when bucketByFields contains multiple fields 1`] = `
 Object {
   "query": Object {
     "bool": Object {
@@ -72,7 +72,7 @@ Object {
 }
 `;
 
-exports[`buildPreviousThresholdAlertRequest should generate a proper request when bucketByFields is empty 1`] = `
+exports[`buildPreviousThresholdAlertRequest > should generate a proper request when bucketByFields is empty 1`] = `
 Object {
   "query": Object {
     "bool": Object {

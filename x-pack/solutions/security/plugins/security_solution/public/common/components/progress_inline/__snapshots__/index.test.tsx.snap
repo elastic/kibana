@@ -1,6 +1,6 @@
 // Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`ProgressInline it renders 1`] = `
+exports[`ProgressInline > it renders 1`] = `
 <Wrapper
   className="siemProgressInline"
 >

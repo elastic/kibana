@@ -1,6 +1,6 @@
 // Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`ACCESSES_INTEGRATION_RELATIONSHIP_CONFIGS golden snapshots aws_cloudtrail: targets-per-actor ES|QL is locked 1`] = `
+exports[`ACCESSES_INTEGRATION_RELATIONSHIP_CONFIGS > golden snapshots > aws_cloudtrail: targets-per-actor ES|QL is locked 1`] = `
 "SET unmapped_fields=\\"nullify\\";
 FROM logs-aws.cloudtrail-__namespace__
 | WHERE event.module == \\"aws\\"
@@ -59,7 +59,7 @@ TRUE, _euid_branch_1_formula, NULL))
 | LIMIT 3500"
 `;
 
-exports[`ACCESSES_INTEGRATION_RELATIONSHIP_CONFIGS golden snapshots crowdstrike_fdr: targets-per-actor ES|QL is locked 1`] = `
+exports[`ACCESSES_INTEGRATION_RELATIONSHIP_CONFIGS > golden snapshots > crowdstrike_fdr: targets-per-actor ES|QL is locked 1`] = `
 "SET unmapped_fields=\\"nullify\\";
 FROM logs-crowdstrike.fdr-__namespace__
 | WHERE event.action == \\"UserLogon\\"
@@ -87,7 +87,7 @@ FROM logs-crowdstrike.fdr-__namespace__
 | LIMIT 3500"
 `;
 
-exports[`ACCESSES_INTEGRATION_RELATIONSHIP_CONFIGS golden snapshots elastic_defend: targets-per-actor ES|QL is locked 1`] = `
+exports[`ACCESSES_INTEGRATION_RELATIONSHIP_CONFIGS > golden snapshots > elastic_defend: targets-per-actor ES|QL is locked 1`] = `
 "SET unmapped_fields=\\"nullify\\";
 FROM logs-endpoint.events.security-__namespace__
 | WHERE event.action == \\"log_on\\"
@@ -146,7 +146,7 @@ TRUE, _euid_branch_1_formula, NULL))
 | LIMIT 3500"
 `;
 
-exports[`ACCESSES_INTEGRATION_RELATIONSHIP_CONFIGS golden snapshots system_auth: targets-per-actor ES|QL is locked 1`] = `
+exports[`ACCESSES_INTEGRATION_RELATIONSHIP_CONFIGS > golden snapshots > system_auth: targets-per-actor ES|QL is locked 1`] = `
 "SET unmapped_fields=\\"nullify\\";
 FROM logs-system.auth-__namespace__
 | WHERE (MV_CONTAINS(TO_STRING(event.category), \\"authentication\\") OR MV_CONTAINS(TO_STRING(event.category), \\"session\\"))
@@ -171,7 +171,7 @@ FROM logs-system.auth-__namespace__
 | LIMIT 3500"
 `;
 
-exports[`ACCESSES_INTEGRATION_RELATIONSHIP_CONFIGS golden snapshots system_security: targets-per-actor ES|QL is locked 1`] = `
+exports[`ACCESSES_INTEGRATION_RELATIONSHIP_CONFIGS > golden snapshots > system_security: targets-per-actor ES|QL is locked 1`] = `
 "SET unmapped_fields=\\"nullify\\";
 FROM logs-system.security-__namespace__
 | WHERE event.action IN (\\"logged-in\\", \\"logged-in-explicit\\")

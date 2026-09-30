@@ -1,6 +1,6 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`DetailDrawer component If vertices shows basic info and no stats for if 1`] = `
+exports[`DetailDrawer component > If vertices > shows basic info and no stats for if 1`] = `
 <EuiFlyout
   aria-labelledby="generated-id"
   onClose={[MockFunction]}
@@ -56,7 +56,7 @@ exports[`DetailDrawer component If vertices shows basic info and no stats for if
 </EuiFlyout>
 `;
 
-exports[`DetailDrawer component Plugin vertices Plugin does not have explicit ID shows basic info and stats for plugin, suggesting that user set explicit ID 1`] = `
+exports[`DetailDrawer component > Plugin vertices > Plugin does not have explicit ID > shows basic info and stats for plugin, suggesting that user set explicit ID 1`] = `
 <EuiFlyout
   aria-labelledby="generated-id"
   onClose={[MockFunction]}
@@ -308,7 +308,7 @@ exports[`DetailDrawer component Plugin vertices Plugin does not have explicit ID
 </EuiFlyout>
 `;
 
-exports[`DetailDrawer component Plugin vertices Plugin has explicit ID shows basic info and stats for plugin, including explicit ID 1`] = `
+exports[`DetailDrawer component > Plugin vertices > Plugin has explicit ID > shows basic info and stats for plugin, including explicit ID 1`] = `
 <EuiFlyout
   aria-labelledby="generated-id"
   onClose={[MockFunction]}
@@ -554,7 +554,7 @@ exports[`DetailDrawer component Plugin vertices Plugin has explicit ID shows bas
 </EuiFlyout>
 `;
 
-exports[`DetailDrawer component Queue vertices shows basic info and no stats for queue 1`] = `
+exports[`DetailDrawer component > Queue vertices > shows basic info and no stats for queue 1`] = `
 <EuiFlyout
   aria-labelledby="generated-id"
   onClose={[MockFunction]}
@@ -602,7 +602,7 @@ exports[`DetailDrawer component Queue vertices shows basic info and no stats for
 </EuiFlyout>
 `;
 
-exports[`DetailDrawer component shows vertex title 1`] = `
+exports[`DetailDrawer component > shows vertex title 1`] = `
 <EuiFlyout
   aria-labelledby="generated-id"
   onClose={[MockFunction]}

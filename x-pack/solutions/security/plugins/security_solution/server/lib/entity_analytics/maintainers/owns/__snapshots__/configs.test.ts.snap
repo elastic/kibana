@@ -1,6 +1,6 @@
 // Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`OWNS_INTEGRATION_RELATIONSHIP_CONFIGS entityanalytics_entra_id (log-based) targets-per-actor ES|QL is locked 1`] = `
+exports[`OWNS_INTEGRATION_RELATIONSHIP_CONFIGS > entityanalytics_entra_id (log-based) > targets-per-actor ES|QL is locked 1`] = `
 "SET unmapped_fields=\\"nullify\\";
 FROM logs-entityanalytics_entra_id.device-__namespace__
 | WHERE host.id IS NOT NULL
@@ -17,7 +17,7 @@ FROM logs-entityanalytics_entra_id.device-__namespace__
 | LIMIT 3500"
 `;
 
-exports[`OWNS_INTEGRATION_RELATIONSHIP_CONFIGS golden snapshots entityanalytics_entra_id: targets-per-actor ES|QL is locked (no watermark) 1`] = `
+exports[`OWNS_INTEGRATION_RELATIONSHIP_CONFIGS > golden snapshots > entityanalytics_entra_id: targets-per-actor ES|QL is locked (no watermark) 1`] = `
 "SET unmapped_fields=\\"nullify\\";
 FROM logs-entityanalytics_entra_id.device-__namespace__
 | WHERE host.id IS NOT NULL
@@ -34,7 +34,7 @@ FROM logs-entityanalytics_entra_id.device-__namespace__
 | LIMIT 3500"
 `;
 
-exports[`OWNS_INTEGRATION_RELATIONSHIP_CONFIGS golden snapshots entityanalytics_okta: targets-per-actor ES|QL is locked (no watermark) 1`] = `
+exports[`OWNS_INTEGRATION_RELATIONSHIP_CONFIGS > golden snapshots > entityanalytics_okta: targets-per-actor ES|QL is locked (no watermark) 1`] = `
 "SET unmapped_fields=\\"nullify\\";
 FROM entities-latest-__namespace__
 | WHERE (entity.relationships.owns.raw_identifiers.host.id IS NOT NULL)
@@ -50,7 +50,7 @@ FROM entities-latest-__namespace__
 | LIMIT 3500"
 `;
 
-exports[`OWNS_INTEGRATION_RELATIONSHIP_CONFIGS golden snapshots entityanalytics_okta: targets-per-actor ES|QL with watermark is locked 1`] = `
+exports[`OWNS_INTEGRATION_RELATIONSHIP_CONFIGS > golden snapshots > entityanalytics_okta: targets-per-actor ES|QL with watermark is locked 1`] = `
 "FROM entities-latest-__namespace__
 | WHERE (entity.relationships.owns.raw_identifiers.host.id IS NOT NULL)
     AND entity.source == \\"entityanalytics_okta\\"

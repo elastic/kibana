@@ -1,6 +1,6 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`<SpaceAwarePrivilegeSection> with user profile disabling "manageSpaces" renders a warning message instead of the privilege form 1`] = `
+exports[`<SpaceAwarePrivilegeSection> > with user profile disabling "manageSpaces" > renders a warning message instead of the privilege form 1`] = `
 <EuiCallOut
   announceOnMount={true}
   color="danger"

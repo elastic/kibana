@@ -1,6 +1,6 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`NoData should show a default message if reason is unknown 1`] = `
+exports[`NoData > should show a default message if reason is unknown 1`] = `
 <div
   class="euiPage emotion-euiPage-row-transparent-grow"
   data-test-subj="noDataContainer"
@@ -222,7 +222,7 @@ exports[`NoData should show a default message if reason is unknown 1`] = `
 </div>
 `;
 
-exports[`NoData should show text next to the spinner while checking a setting 1`] = `
+exports[`NoData > should show text next to the spinner while checking a setting 1`] = `
 <div
   class="euiPage emotion-euiPage-row-transparent-grow"
   data-test-subj="noDataContainer"

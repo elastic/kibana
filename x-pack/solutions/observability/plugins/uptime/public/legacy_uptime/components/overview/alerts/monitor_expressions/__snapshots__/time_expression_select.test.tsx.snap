@@ -1,6 +1,6 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`TimeExpressionSelect component should renders against props 1`] = `
+exports[`TimeExpressionSelect component > should renders against props 1`] = `
 <div
   class="euiFlexGroup emotion-euiFlexGroup-responsive-s-flexStart-stretch-row"
 >
@@ -57,7 +57,7 @@ exports[`TimeExpressionSelect component should renders against props 1`] = `
 </div>
 `;
 
-exports[`TimeExpressionSelect component should shallow renders against props 1`] = `
+exports[`TimeExpressionSelect component > should shallow renders against props 1`] = `
 <EuiFlexGroup
   gutterSize="s"
 >

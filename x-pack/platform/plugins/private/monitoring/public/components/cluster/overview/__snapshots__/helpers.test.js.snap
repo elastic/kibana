@@ -1,6 +1,6 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`Bytes Usage should format correctly with only usedBytes 1`] = `
+exports[`Bytes Usage > should format correctly with only usedBytes 1`] = `
 <span>
   <div
     class="euiText emotion-euiText-s"
@@ -10,7 +10,7 @@ exports[`Bytes Usage should format correctly with only usedBytes 1`] = `
 </span>
 `;
 
-exports[`Bytes Usage should format correctly with used and max bytes 1`] = `
+exports[`Bytes Usage > should format correctly with used and max bytes 1`] = `
 <span>
   <div
     class="euiText emotion-euiText-s"
@@ -20,7 +20,7 @@ exports[`Bytes Usage should format correctly with used and max bytes 1`] = `
 </span>
 `;
 
-exports[`BytesPercentageUsage should format correctly with used bytes and max bytes 1`] = `
+exports[`BytesPercentageUsage > should format correctly with used bytes and max bytes 1`] = `
 <span>
   <div
     class="euiText emotion-euiText-s"
@@ -35,7 +35,7 @@ exports[`BytesPercentageUsage should format correctly with used bytes and max by
 </span>
 `;
 
-exports[`BytesPercentageUsage should return zero bytes if both parameters are not present 1`] = `
+exports[`BytesPercentageUsage > should return zero bytes if both parameters are not present 1`] = `
 <div
   class="euiText emotion-euiText-s"
 >

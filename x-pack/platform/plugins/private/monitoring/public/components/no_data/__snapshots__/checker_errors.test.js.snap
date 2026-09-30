@@ -1,8 +1,8 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`CheckerErrors should render nothing if errors is empty 1`] = `null`;
+exports[`CheckerErrors > should render nothing if errors is empty 1`] = `null`;
 
-exports[`CheckerErrors should render typical boom errors from api response 1`] = `
+exports[`CheckerErrors > should render typical boom errors from api response 1`] = `
 Array [
   <div
     class="euiSpacer euiSpacer--m emotion-euiSpacer-m"

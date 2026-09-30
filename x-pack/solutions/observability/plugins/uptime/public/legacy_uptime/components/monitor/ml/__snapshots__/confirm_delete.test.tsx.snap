@@ -1,6 +1,6 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`ML Confirm Job Delete shallow renders without errors 1`] = `
+exports[`ML Confirm Job Delete > shallow renders without errors 1`] = `
 <EuiConfirmModal
   aria-labelledby="generated-id"
   buttonColor="danger"
@@ -32,7 +32,7 @@ exports[`ML Confirm Job Delete shallow renders without errors 1`] = `
 </EuiConfirmModal>
 `;
 
-exports[`ML Confirm Job Delete shallow renders without errors while loading 1`] = `
+exports[`ML Confirm Job Delete > shallow renders without errors while loading 1`] = `
 <EuiConfirmModal
   aria-labelledby="generated-id"
   buttonColor="danger"

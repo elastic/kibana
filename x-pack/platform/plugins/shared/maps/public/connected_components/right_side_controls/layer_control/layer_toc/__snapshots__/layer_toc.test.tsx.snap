@@ -1,6 +1,6 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`LayerTOC is rendered 1`] = `
+exports[`LayerTOC > is rendered 1`] = `
 <div
   data-test-subj="mapLayerTOC"
 >
@@ -20,7 +20,7 @@ exports[`LayerTOC is rendered 1`] = `
 </div>
 `;
 
-exports[`LayerTOC props isReadOnly 1`] = `
+exports[`LayerTOC > props > isReadOnly 1`] = `
 <div
   data-test-subj="mapLayerTOC"
 >

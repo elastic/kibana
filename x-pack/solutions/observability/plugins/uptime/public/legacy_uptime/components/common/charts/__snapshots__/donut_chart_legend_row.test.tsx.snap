@@ -1,6 +1,6 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`DonutChartLegendRow passes appropriate props 1`] = `
+exports[`DonutChartLegendRow > passes appropriate props 1`] = `
 <EuiFlexGroup
   gutterSize="l"
   responsive={false}

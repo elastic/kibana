@@ -1,6 +1,6 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`Filter Lists Table renders with filter lists and selection supplied 1`] = `
+exports[`Filter Lists Table > renders with filter lists and selection supplied 1`] = `
 <div
   data-test-subj="mlFilterListTableContainer"
 >
@@ -608,7 +608,7 @@ exports[`Filter Lists Table renders with filter lists and selection supplied 1`]
 </div>
 `;
 
-exports[`Filter Lists Table renders with filter lists supplied 1`] = `
+exports[`Filter Lists Table > renders with filter lists supplied 1`] = `
 <div
   data-test-subj="mlFilterListTableContainer"
 >

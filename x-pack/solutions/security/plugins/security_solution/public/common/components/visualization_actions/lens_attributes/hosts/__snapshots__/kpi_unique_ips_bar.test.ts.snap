@@ -1,6 +1,6 @@
 // Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`getKpiUniqueIpsBarLensAttributes should render 1`] = `
+exports[`getKpiUniqueIpsBarLensAttributes > should render 1`] = `
 Object {
   "description": "",
   "references": Array [

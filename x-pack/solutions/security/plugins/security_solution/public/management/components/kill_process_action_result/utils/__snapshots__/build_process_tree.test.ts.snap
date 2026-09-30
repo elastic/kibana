@@ -1,6 +1,6 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`buildProcessTree() should return a full process tree 1`] = `
+exports[`buildProcessTree() > should return a full process tree 1`] = `
 Object {
   "456": Object {
     "children": Object {

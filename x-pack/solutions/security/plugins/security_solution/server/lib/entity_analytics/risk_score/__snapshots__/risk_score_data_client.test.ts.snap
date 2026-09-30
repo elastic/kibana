@@ -1,6 +1,6 @@
 // Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`RiskScoreDataClient init success should initialize risk engine resources in the appropriate space 1`] = `
+exports[`RiskScoreDataClient > init success > should initialize risk engine resources in the appropriate space 1`] = `
 Object {
   "mappings": Object {
     "dynamic": "strict",

@@ -1,8 +1,8 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`TooltipControl render should not render tooltips when there are no open tooltips 1`] = `""`;
+exports[`TooltipControl > render > should not render tooltips when there are no open tooltips 1`] = `""`;
 
-exports[`TooltipControl render should render hover tooltip 1`] = `
+exports[`TooltipControl > render > should render hover tooltip 1`] = `
 <TooltipPopover
   addFilters={[Function]}
   closeTooltip={[Function]}
@@ -39,7 +39,7 @@ exports[`TooltipControl render should render hover tooltip 1`] = `
 />
 `;
 
-exports[`TooltipControl render should render locked tooltip 1`] = `
+exports[`TooltipControl > render > should render locked tooltip 1`] = `
 <TooltipPopover
   addFilters={[Function]}
   closeTooltip={[Function]}

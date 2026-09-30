@@ -1,6 +1,6 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`Select Flow Direction rendering it renders the basic group button for uni-direction and bi-direction 1`] = `
+exports[`Select Flow Direction > rendering > it renders the basic group button for uni-direction and bi-direction 1`] = `
 <div
   class="euiFilterGroup emotion-euiFilterGroup-uncompressed"
   data-display="regular"

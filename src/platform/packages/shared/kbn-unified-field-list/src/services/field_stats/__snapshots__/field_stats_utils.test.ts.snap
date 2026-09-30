@@ -1,6 +1,6 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`fieldStatsUtils buildSearchParams() should work correctly for aggregations and a data view time field 1`] = `
+exports[`fieldStatsUtils > buildSearchParams() > should work correctly for aggregations and a data view time field 1`] = `
 Object {
   "_source": undefined,
   "aggs": Object {
@@ -68,7 +68,7 @@ Object {
 }
 `;
 
-exports[`fieldStatsUtils buildSearchParams() should work correctly for aggregations without a data view time field 1`] = `
+exports[`fieldStatsUtils > buildSearchParams() > should work correctly for aggregations without a data view time field 1`] = `
 Object {
   "_source": undefined,
   "aggs": Object {
@@ -120,7 +120,7 @@ Object {
 }
 `;
 
-exports[`fieldStatsUtils buildSearchParams() should work correctly for fetching field examples 1`] = `
+exports[`fieldStatsUtils > buildSearchParams() > should work correctly for fetching field examples 1`] = `
 Object {
   "_source": false,
   "aggs": undefined,

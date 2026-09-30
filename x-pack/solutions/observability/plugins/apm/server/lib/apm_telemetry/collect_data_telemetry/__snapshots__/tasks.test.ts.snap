@@ -1,6 +1,6 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`data telemetry collection tasks agents should return agent data per agent name 1`] = `
+exports[`data telemetry collection tasks > agents > should return agent data per agent name 1`] = `
 Object {
   "agents": Object {
     "android/java": Object {
@@ -713,7 +713,7 @@ Object {
 }
 `;
 
-exports[`data telemetry collection tasks indices_stats returns a map of index stats 1`] = `
+exports[`data telemetry collection tasks > indices_stats > returns a map of index stats 1`] = `
 Object {
   "indices": Object {
     "all": Object {
@@ -1021,7 +1021,7 @@ Object {
 }
 `;
 
-exports[`data telemetry collection tasks indices_stats with no results 1`] = `
+exports[`data telemetry collection tasks > indices_stats > with no results 1`] = `
 Object {
   "indices": Object {
     "all": Object {
@@ -1329,7 +1329,7 @@ Object {
 }
 `;
 
-exports[`data telemetry collection tasks services should return services per agent name 1`] = `
+exports[`data telemetry collection tasks > services > should return services per agent name 1`] = `
 Object {
   "has_any_services": true,
   "has_any_services_per_official_agent": true,

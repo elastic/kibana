@@ -1,132 +1,132 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`parseRulePreviewCommand — snapshots: error messages --anomaly-threshold is a float 1`] = `
+exports[`parseRulePreviewCommand — snapshots: error messages > --anomaly-threshold is a float 1`] = `
 Object {
   "kind": "error",
   "message": "--anomaly-threshold must be an integer between 0 and 100, got \\"2.5\\"",
 }
 `;
 
-exports[`parseRulePreviewCommand — snapshots: error messages --anomaly-threshold is out of range (> 100) 1`] = `
+exports[`parseRulePreviewCommand — snapshots: error messages > --anomaly-threshold is out of range (> 100) 1`] = `
 Object {
   "kind": "error",
   "message": "--anomaly-threshold must be an integer between 0 and 100, got \\"999\\"",
 }
 `;
 
-exports[`parseRulePreviewCommand — snapshots: error messages --threat-mapping is a JSON object (not an array) 1`] = `
+exports[`parseRulePreviewCommand — snapshots: error messages > --threat-mapping is a JSON object (not an array) 1`] = `
 Object {
   "kind": "error",
   "message": "--threat-mapping must be a JSON array",
 }
 `;
 
-exports[`parseRulePreviewCommand — snapshots: error messages --threat-mapping is invalid JSON 1`] = `
+exports[`parseRulePreviewCommand — snapshots: error messages > --threat-mapping is invalid JSON 1`] = `
 Object {
   "kind": "error",
   "message": "--threat-mapping: invalid JSON — not-json",
 }
 `;
 
-exports[`parseRulePreviewCommand — snapshots: error messages --threshold-value is NaN 1`] = `
+exports[`parseRulePreviewCommand — snapshots: error messages > --threshold-value is NaN 1`] = `
 Object {
   "kind": "error",
   "message": "--threshold-value must be a positive integer, got \\"NaN\\"",
 }
 `;
 
-exports[`parseRulePreviewCommand — snapshots: error messages empty command 1`] = `
+exports[`parseRulePreviewCommand — snapshots: error messages > empty command 1`] = `
 Object {
   "kind": "error",
   "message": "No command provided. Run --help to see usage.",
 }
 `;
 
-exports[`parseRulePreviewCommand — snapshots: error messages eql missing --query 1`] = `
+exports[`parseRulePreviewCommand — snapshots: error messages > eql missing --query 1`] = `
 Object {
   "kind": "error",
   "message": "Missing required argument: query",
 }
 `;
 
-exports[`parseRulePreviewCommand — snapshots: error messages esql missing --query 1`] = `
+exports[`parseRulePreviewCommand — snapshots: error messages > esql missing --query 1`] = `
 Object {
   "kind": "error",
   "message": "Missing required argument: query",
 }
 `;
 
-exports[`parseRulePreviewCommand — snapshots: error messages machine_learning missing --anomaly-threshold 1`] = `
+exports[`parseRulePreviewCommand — snapshots: error messages > machine_learning missing --anomaly-threshold 1`] = `
 Object {
   "kind": "error",
   "message": "Missing required argument: anomaly-threshold",
 }
 `;
 
-exports[`parseRulePreviewCommand — snapshots: error messages machine_learning missing --job-id 1`] = `
+exports[`parseRulePreviewCommand — snapshots: error messages > machine_learning missing --job-id 1`] = `
 Object {
   "kind": "error",
   "message": "Missing required argument: job-id",
 }
 `;
 
-exports[`parseRulePreviewCommand — snapshots: error messages new_terms missing --history-window-start 1`] = `
+exports[`parseRulePreviewCommand — snapshots: error messages > new_terms missing --history-window-start 1`] = `
 Object {
   "kind": "error",
   "message": "Missing required argument: history-window-start",
 }
 `;
 
-exports[`parseRulePreviewCommand — snapshots: error messages no subcommand given 1`] = `
+exports[`parseRulePreviewCommand — snapshots: error messages > no subcommand given 1`] = `
 Object {
   "kind": "error",
   "message": "Specify a rule type. Run --help to see all types and examples.",
 }
 `;
 
-exports[`parseRulePreviewCommand — snapshots: error messages saved_query missing --saved-id 1`] = `
+exports[`parseRulePreviewCommand — snapshots: error messages > saved_query missing --saved-id 1`] = `
 Object {
   "kind": "error",
   "message": "Missing required argument: saved-id",
 }
 `;
 
-exports[`parseRulePreviewCommand — snapshots: error messages threat_match missing --threat-mapping 1`] = `
+exports[`parseRulePreviewCommand — snapshots: error messages > threat_match missing --threat-mapping 1`] = `
 Object {
   "kind": "error",
   "message": "Missing required argument: threat-mapping",
 }
 `;
 
-exports[`parseRulePreviewCommand — snapshots: error messages threshold missing --query 1`] = `
+exports[`parseRulePreviewCommand — snapshots: error messages > threshold missing --query 1`] = `
 Object {
   "kind": "error",
   "message": "Missing required argument: query",
 }
 `;
 
-exports[`parseRulePreviewCommand — snapshots: error messages threshold missing --threshold-value 1`] = `
+exports[`parseRulePreviewCommand — snapshots: error messages > threshold missing --threshold-value 1`] = `
 Object {
   "kind": "error",
   "message": "Missing required argument: threshold-value",
 }
 `;
 
-exports[`parseRulePreviewCommand — snapshots: error messages unknown flag on known subcommand 1`] = `
+exports[`parseRulePreviewCommand — snapshots: error messages > unknown flag on known subcommand 1`] = `
 Object {
   "kind": "error",
   "message": "Unknown argument: bogus",
 }
 `;
 
-exports[`parseRulePreviewCommand — snapshots: error messages unknown subcommand 1`] = `
+exports[`parseRulePreviewCommand — snapshots: error messages > unknown subcommand 1`] = `
 Object {
   "kind": "error",
   "message": "Unknown argument: invalid_type",
 }
 `;
 
-exports[`parseRulePreviewCommand — snapshots: help output -h shorthand 1`] = `
+exports[`parseRulePreviewCommand — snapshots: help output > -h shorthand 1`] = `
 Object {
   "kind": "help",
   "text": "  <command>
@@ -149,7 +149,7 @@ Options:
 }
 `;
 
-exports[`parseRulePreviewCommand — snapshots: help output eql --help 1`] = `
+exports[`parseRulePreviewCommand — snapshots: help output > eql --help 1`] = `
 Object {
   "kind": "help",
   "text": "  eql
@@ -174,7 +174,7 @@ Examples:
 }
 `;
 
-exports[`parseRulePreviewCommand — snapshots: help output esql --help 1`] = `
+exports[`parseRulePreviewCommand — snapshots: help output > esql --help 1`] = `
 Object {
   "kind": "help",
   "text": "  esql
@@ -194,7 +194,7 @@ Examples:
 }
 `;
 
-exports[`parseRulePreviewCommand — snapshots: help output global --help 1`] = `
+exports[`parseRulePreviewCommand — snapshots: help output > global --help 1`] = `
 Object {
   "kind": "help",
   "text": "  <command>
@@ -217,7 +217,7 @@ Options:
 }
 `;
 
-exports[`parseRulePreviewCommand — snapshots: help output machine_learning --help 1`] = `
+exports[`parseRulePreviewCommand — snapshots: help output > machine_learning --help 1`] = `
 Object {
   "kind": "help",
   "text": "  machine_learning
@@ -238,7 +238,7 @@ Examples:
 }
 `;
 
-exports[`parseRulePreviewCommand — snapshots: help output new_terms --help 1`] = `
+exports[`parseRulePreviewCommand — snapshots: help output > new_terms --help 1`] = `
 Object {
   "kind": "help",
   "text": "  new_terms
@@ -263,7 +263,7 @@ Examples:
 }
 `;
 
-exports[`parseRulePreviewCommand — snapshots: help output query --help 1`] = `
+exports[`parseRulePreviewCommand — snapshots: help output > query --help 1`] = `
 Object {
   "kind": "help",
   "text": "  query
@@ -286,7 +286,7 @@ Examples:
 }
 `;
 
-exports[`parseRulePreviewCommand — snapshots: help output saved_query --help 1`] = `
+exports[`parseRulePreviewCommand — snapshots: help output > saved_query --help 1`] = `
 Object {
   "kind": "help",
   "text": "  saved_query
@@ -310,7 +310,7 @@ Examples:
 }
 `;
 
-exports[`parseRulePreviewCommand — snapshots: help output threat_match --help 1`] = `
+exports[`parseRulePreviewCommand — snapshots: help output > threat_match --help 1`] = `
 Object {
   "kind": "help",
   "text": "  threat_match
@@ -338,7 +338,7 @@ Examples:
 }
 `;
 
-exports[`parseRulePreviewCommand — snapshots: help output threshold --help 1`] = `
+exports[`parseRulePreviewCommand — snapshots: help output > threshold --help 1`] = `
 Object {
   "kind": "help",
   "text": "  threshold

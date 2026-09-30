@@ -1,6 +1,6 @@
 // Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`EmptyPage component renders actions with descriptions 1`] = `
+exports[`EmptyPage component > renders actions with descriptions 1`] = `
 <div
   class="euiPanel euiPanel--transparent euiEmptyPrompt emkfseg0 emotion-euiPanel-m-transparent-euiEmptyPrompt-vertical-EmptyPrompt"
 >
@@ -89,7 +89,7 @@ exports[`EmptyPage component renders actions with descriptions 1`] = `
 </div>
 `;
 
-exports[`EmptyPage component renders actions without descriptions 1`] = `
+exports[`EmptyPage component > renders actions without descriptions 1`] = `
 <div
   class="euiPanel euiPanel--transparent euiEmptyPrompt emkfseg0 emotion-euiPanel-m-transparent-euiEmptyPrompt-vertical-EmptyPrompt"
 >

@@ -1,6 +1,6 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`NetworkKpiComponent rendering it renders the default widget 1`] = `
+exports[`NetworkKpiComponent > rendering > it renders the default widget 1`] = `
 <div
   class="euiFlexGroup emotion-euiFlexGroup-responsive-wrap-m-flexStart-stretch-row"
 >

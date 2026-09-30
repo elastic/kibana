@@ -1,6 +1,6 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`CertificateForm shallow renders expected elements for valid props 1`] = `
+exports[`CertificateForm > shallow renders expected elements for valid props 1`] = `
 <Router
   history={
     Object {

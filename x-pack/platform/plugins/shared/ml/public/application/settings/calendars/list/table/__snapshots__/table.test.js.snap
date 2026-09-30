@@ -1,6 +1,6 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`CalendarsListTable renders the table with all calendars 1`] = `
+exports[`CalendarsListTable > renders the table with all calendars 1`] = `
 <div
   data-test-subj="mlCalendarTableContainer"
 >

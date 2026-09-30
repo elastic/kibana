@@ -1,6 +1,6 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`map nodes metrics should summarize the info 1`] = `
+exports[`map nodes metrics > should summarize the info 1`] = `
 Object {
   "sg-ldUAbRUCOPIytxxhcIA": Object {
     "node_cpu_utilization": Object {

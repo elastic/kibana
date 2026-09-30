@@ -1,6 +1,6 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`DownNoExpressionSelect component should renders against props 1`] = `
+exports[`DownNoExpressionSelect component > should renders against props 1`] = `
 <div
   class="euiPopover emotion-euiPopover-inline-block"
   id="ping-count"
@@ -25,7 +25,7 @@ exports[`DownNoExpressionSelect component should renders against props 1`] = `
 </div>
 `;
 
-exports[`DownNoExpressionSelect component should shallow renders against props 1`] = `
+exports[`DownNoExpressionSelect component > should shallow renders against props 1`] = `
 <AlertExpressionPopover
   aria-label="Open the popover for down count input"
   content={

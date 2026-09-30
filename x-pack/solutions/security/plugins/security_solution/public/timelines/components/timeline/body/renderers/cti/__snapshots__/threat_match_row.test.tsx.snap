@@ -1,6 +1,6 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`ThreatMatchRowView matches the registered snapshot 1`] = `
+exports[`ThreatMatchRowView > matches the registered snapshot 1`] = `
 <EuiFlexGroup
   alignItems="center"
   data-test-subj="threat-match-row"

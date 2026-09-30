@@ -1,6 +1,6 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`renderDataMappingPopover Should render OrdinalDataMappingPopover 1`] = `
+exports[`renderDataMappingPopover > Should render OrdinalDataMappingPopover 1`] = `
 <OrdinalDataMappingPopover
   dataMappingFunction="INTERPOLATE"
   fieldMetaOptions={
@@ -20,7 +20,7 @@ exports[`renderDataMappingPopover Should render OrdinalDataMappingPopover 1`] = 
 />
 `;
 
-exports[`renderLegendDetailRow categorical Should render categorical legend with breaks from color ramp 1`] = `
+exports[`renderLegendDetailRow > categorical > Should render categorical legend with breaks from color ramp 1`] = `
 <div>
   <EuiFlexGroup
     gutterSize="xs"
@@ -83,9 +83,9 @@ exports[`renderLegendDetailRow categorical Should render categorical legend with
 </div>
 `;
 
-exports[`renderLegendDetailRow categorical Should render categorical legend with breaks from custom 1`] = `""`;
+exports[`renderLegendDetailRow > categorical > Should render categorical legend with breaks from custom 1`] = `""`;
 
-exports[`renderLegendDetailRow ordinal Should render custom ordinal legend with breaks 1`] = `
+exports[`renderLegendDetailRow > ordinal > Should render custom ordinal legend with breaks 1`] = `
 <div>
   <EuiFlexGroup
     gutterSize="xs"
@@ -148,7 +148,7 @@ exports[`renderLegendDetailRow ordinal Should render custom ordinal legend with 
 </div>
 `;
 
-exports[`renderLegendDetailRow ordinal Should render interpolate bands 1`] = `
+exports[`renderLegendDetailRow > ordinal > Should render interpolate bands 1`] = `
 <div>
   <EuiFlexGroup
     gutterSize="xs"
@@ -277,7 +277,7 @@ exports[`renderLegendDetailRow ordinal Should render interpolate bands 1`] = `
 </div>
 `;
 
-exports[`renderLegendDetailRow ordinal Should render percentile bands 1`] = `
+exports[`renderLegendDetailRow > ordinal > Should render percentile bands 1`] = `
 <div>
   <EuiFlexGroup
     gutterSize="xs"
@@ -384,7 +384,7 @@ exports[`renderLegendDetailRow ordinal Should render percentile bands 1`] = `
 </div>
 `;
 
-exports[`renderLegendDetailRow ordinal Should render single band when interpolate range is 0 1`] = `
+exports[`renderLegendDetailRow > ordinal > Should render single band when interpolate range is 0 1`] = `
 <div>
   <EuiFlexGroup
     gutterSize="xs"

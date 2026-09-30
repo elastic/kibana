@@ -1,6 +1,6 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`TooltipPopover render should render tooltip popover 1`] = `
+exports[`TooltipPopover > render > should render tooltip popover 1`] = `
 <EuiPopover
   anchorPosition="upCenter"
   aria-label="Feature tooltip"
@@ -62,7 +62,7 @@ exports[`TooltipPopover render should render tooltip popover 1`] = `
 </EuiPopover>
 `;
 
-exports[`TooltipPopover render should render tooltip popover with custom tooltip content when renderTooltipContent provided 1`] = `
+exports[`TooltipPopover > render > should render tooltip popover with custom tooltip content when renderTooltipContent provided 1`] = `
 <EuiPopover
   anchorPosition="upCenter"
   aria-label="Feature tooltip"

@@ -1,6 +1,6 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`<CodeEditor /> hint element should be tabable 1`] = `
+exports[`<CodeEditor /> > hint element > should be tabable 1`] = `
 <div
   aria-label="Code Editor, activate edit mode"
   class="css-1299t9-keyboardHint"

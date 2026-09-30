@@ -1,6 +1,6 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`InTableSearchInput renders input 1`] = `
+exports[`InTableSearchInput > renders input 1`] = `
 <div>
   <div
     class="euiFormControlLayout euiFormControlLayout--group emotion-euiFormControlLayout-compressed-group"
@@ -96,7 +96,7 @@ exports[`InTableSearchInput renders input 1`] = `
 </div>
 `;
 
-exports[`InTableSearchInput renders input when loading 1`] = `
+exports[`InTableSearchInput > renders input when loading 1`] = `
 <div>
   <div
     class="euiFormControlLayout euiFormControlLayout--group emotion-euiFormControlLayout-compressed-group"

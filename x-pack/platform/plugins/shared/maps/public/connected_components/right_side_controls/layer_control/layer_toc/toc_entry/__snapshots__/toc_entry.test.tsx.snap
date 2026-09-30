@@ -1,6 +1,6 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`TOCEntry is rendered 1`] = `
+exports[`TOCEntry > is rendered 1`] = `
 <div
   className="mapTocEntry"
   data-layerid="1"
@@ -101,7 +101,7 @@ exports[`TOCEntry is rendered 1`] = `
 </div>
 `;
 
-exports[`TOCEntry props Should indent child layer 1`] = `
+exports[`TOCEntry > props > Should indent child layer 1`] = `
 <div
   className="mapTocEntry"
   data-layerid="1"
@@ -206,7 +206,7 @@ exports[`TOCEntry props Should indent child layer 1`] = `
 </div>
 `;
 
-exports[`TOCEntry props Should shade background when not selected layer 1`] = `
+exports[`TOCEntry > props > Should shade background when not selected layer 1`] = `
 <div
   className="mapTocEntry"
   data-layerid="1"
@@ -307,7 +307,7 @@ exports[`TOCEntry props Should shade background when not selected layer 1`] = `
 </div>
 `;
 
-exports[`TOCEntry props Should shade background when selected layer 1`] = `
+exports[`TOCEntry > props > Should shade background when selected layer 1`] = `
 <div
   className="mapTocEntry mapTocEntry-isSelected"
   data-layerid="1"
@@ -408,7 +408,7 @@ exports[`TOCEntry props Should shade background when selected layer 1`] = `
 </div>
 `;
 
-exports[`TOCEntry props isReadOnly 1`] = `
+exports[`TOCEntry > props > isReadOnly 1`] = `
 <div
   className="mapTocEntry"
   data-layerid="1"
@@ -485,7 +485,7 @@ exports[`TOCEntry props isReadOnly 1`] = `
 </div>
 `;
 
-exports[`TOCEntry props should display layer details when isLegendDetailsOpen is true 1`] = `
+exports[`TOCEntry > props > should display layer details when isLegendDetailsOpen is true 1`] = `
 <div
   className="mapTocEntry"
   data-layerid="1"

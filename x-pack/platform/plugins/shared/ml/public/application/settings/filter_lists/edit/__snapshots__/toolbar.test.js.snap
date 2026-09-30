@@ -1,6 +1,6 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`EditFilterListToolbar renders the toolbar with no items selected 1`] = `
+exports[`EditFilterListToolbar > renders the toolbar with no items selected 1`] = `
 <div
   class="euiFlexGroup emotion-euiFlexGroup-responsive-xl-flexStart-center-row"
 >
@@ -104,7 +104,7 @@ exports[`EditFilterListToolbar renders the toolbar with no items selected 1`] = 
 </div>
 `;
 
-exports[`EditFilterListToolbar renders the toolbar with one item selected 1`] = `
+exports[`EditFilterListToolbar > renders the toolbar with one item selected 1`] = `
 <div
   class="euiFlexGroup emotion-euiFlexGroup-responsive-xl-flexStart-center-row"
 >

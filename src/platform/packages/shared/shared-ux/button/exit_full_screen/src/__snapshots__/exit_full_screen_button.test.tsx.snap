@@ -1,6 +1,6 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`<ExitFullScreenButton /> with kibana services is rendered 1`] = `
+exports[`<ExitFullScreenButton /> > with kibana services > is rendered 1`] = `
 <div>
   <div
     aria-atomic="true"
@@ -42,7 +42,7 @@ exports[`<ExitFullScreenButton /> with kibana services is rendered 1`] = `
 </div>
 `;
 
-exports[`<ExitFullScreenButton /> with kibana services renders custom logo 1`] = `
+exports[`<ExitFullScreenButton /> > with kibana services > renders custom logo 1`] = `
 <div>
   <div
     aria-atomic="true"
@@ -90,7 +90,7 @@ exports[`<ExitFullScreenButton /> with kibana services renders custom logo 1`] =
 </div>
 `;
 
-exports[`<ExitFullScreenButton /> with manual services is rendered 1`] = `
+exports[`<ExitFullScreenButton /> > with manual services > is rendered 1`] = `
 <div>
   <div
     aria-atomic="true"

@@ -1,6 +1,6 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`SSL Certificate component renders 1`] = `
+exports[`SSL Certificate component > renders 1`] = `
 Array [
   <dt
     class="euiDescriptionList__title emotion-euiDescriptionList__title-row-normal-s"
@@ -45,7 +45,7 @@ Array [
 ]
 `;
 
-exports[`SSL Certificate component renders null if invalid date 1`] = `
+exports[`SSL Certificate component > renders null if invalid date 1`] = `
 Array [
   <dt
     class="euiDescriptionList__title emotion-euiDescriptionList__title-row-normal-s"
@@ -67,7 +67,7 @@ Array [
 ]
 `;
 
-exports[`SSL Certificate component shallow renders 1`] = `
+exports[`SSL Certificate component > shallow renders 1`] = `
 <Router
   history={
     Object {

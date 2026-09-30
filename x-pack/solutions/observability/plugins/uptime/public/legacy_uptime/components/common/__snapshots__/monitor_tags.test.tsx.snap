@@ -1,6 +1,6 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`MonitorTags component it shows expand tag on too many tags 1`] = `
+exports[`MonitorTags component > it shows expand tag on too many tags 1`] = `
 <div
   class="euiBadgeGroup emotion-euiBadgeGroup-xs"
 >
@@ -101,7 +101,7 @@ exports[`MonitorTags component it shows expand tag on too many tags 1`] = `
 </div>
 `;
 
-exports[`MonitorTags component render against summary 1`] = `
+exports[`MonitorTags component > render against summary 1`] = `
 <Router
   history={
     Object {
@@ -300,7 +300,7 @@ exports[`MonitorTags component render against summary 1`] = `
 </Router>
 `;
 
-exports[`MonitorTags component renders against ping 1`] = `
+exports[`MonitorTags component > renders against ping 1`] = `
 <Router
   history={
     Object {

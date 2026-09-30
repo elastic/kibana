@@ -1,6 +1,6 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`AttributionControl is rendered 1`] = `
+exports[`AttributionControl > is rendered 1`] = `
 <AttributionContainer
   isFullScreen={true}
 >

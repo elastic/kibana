@@ -1,6 +1,6 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`Metrics UI Observability Homepage Functions createMetricsFetchData() should just work 1`] = `
+exports[`Metrics UI Observability Homepage Functions > createMetricsFetchData() > should just work 1`] = `
 Object {
   "appLink": "/app/metrics/inventory?waffleTime=(currentTime:1593696311629,isAutoReloading:!f)",
   "series": Array [],

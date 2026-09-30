@@ -1,6 +1,6 @@
 // Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`buildAlertFields it creates the expected alert fields 1`] = `
+exports[`buildAlertFields > it creates the expected alert fields 1`] = `
 Object {
   "@timestamp": "2020-01-01T00:00:00.000Z",
   "event.kind": "signal",
@@ -227,7 +227,7 @@ Object {
 }
 `;
 
-exports[`buildAlertFields it creates the expected alert fields for manual run 1`] = `
+exports[`buildAlertFields > it creates the expected alert fields for manual run 1`] = `
 Object {
   "@timestamp": "2020-01-01T00:00:00.000Z",
   "event.kind": "signal",

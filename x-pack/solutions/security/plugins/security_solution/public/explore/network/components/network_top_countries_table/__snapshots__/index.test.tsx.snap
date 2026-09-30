@@ -1,6 +1,6 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`NetworkTopCountries Table Component rendering it renders the IP Details NetworkTopCountries table 1`] = `
+exports[`NetworkTopCountries Table Component > rendering > it renders the IP Details NetworkTopCountries table 1`] = `
 .c0 {
   width: 100%;
   display: -webkit-box;
@@ -689,7 +689,7 @@ exports[`NetworkTopCountries Table Component rendering it renders the IP Details
 </div>
 `;
 
-exports[`NetworkTopCountries Table Component rendering it renders the default NetworkTopCountries table 1`] = `
+exports[`NetworkTopCountries Table Component > rendering > it renders the default NetworkTopCountries table 1`] = `
 .c0 {
   width: 100%;
   display: -webkit-box;

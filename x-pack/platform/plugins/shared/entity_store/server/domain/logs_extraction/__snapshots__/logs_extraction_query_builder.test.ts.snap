@@ -1,6 +1,6 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`buildLogsExtractionEsqlQuery generates the expected query for generic entity description 1`] = `
+exports[`buildLogsExtractionEsqlQuery > generates the expected query for generic entity description 1`] = `
 "SET unmapped_fields=\\"nullify\\";
 FROM test-index-*
   | WHERE
@@ -256,7 +256,7 @@ asset*,
 @timestamp"
 `;
 
-exports[`buildLogsExtractionEsqlQuery generates the expected query for host entity description 1`] = `
+exports[`buildLogsExtractionEsqlQuery > generates the expected query for host entity description 1`] = `
 "SET unmapped_fields=\\"nullify\\";
 FROM test-index-*
   | WHERE
@@ -554,7 +554,7 @@ data_stream*,
 @timestamp"
 `;
 
-exports[`buildLogsExtractionEsqlQuery generates the expected query for host with pagination 1`] = `
+exports[`buildLogsExtractionEsqlQuery > generates the expected query for host with pagination 1`] = `
 "SET unmapped_fields=\\"nullify\\";
 FROM test-index-*
   | WHERE
@@ -853,7 +853,7 @@ data_stream*,
 @timestamp"
 `;
 
-exports[`buildLogsExtractionEsqlQuery generates the expected query for service entity description 1`] = `
+exports[`buildLogsExtractionEsqlQuery > generates the expected query for service entity description 1`] = `
 "SET unmapped_fields=\\"nullify\\";
 FROM test-index-*
   | WHERE
@@ -1080,7 +1080,7 @@ data_stream*,
 @timestamp"
 `;
 
-exports[`buildLogsExtractionEsqlQuery generates the expected query for user entity description 1`] = `
+exports[`buildLogsExtractionEsqlQuery > generates the expected query for user entity description 1`] = `
 "SET unmapped_fields=\\"nullify\\";
 FROM test-index-*
   | WHERE
@@ -1353,7 +1353,7 @@ host*,
 @timestamp"
 `;
 
-exports[`buildLogsExtractionEsqlQuery sampling stage emits SAMPLE after the source clause and before EVAL when the rate is below 1 1`] = `
+exports[`buildLogsExtractionEsqlQuery > sampling stage > emits SAMPLE after the source clause and before EVAL when the rate is below 1 1`] = `
 "SET unmapped_fields=\\"nullify\\";
 FROM test-index-*
   | WHERE

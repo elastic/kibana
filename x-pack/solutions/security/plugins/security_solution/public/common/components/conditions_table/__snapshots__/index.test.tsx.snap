@@ -1,6 +1,6 @@
 // Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`conditions_table ConditionsTable should render multi item table with and badge correctly 1`] = `
+exports[`conditions_table > ConditionsTable > should render multi item table with and badge correctly 1`] = `
 <EuiFlexGroup
   direction="row"
   gutterSize="none"
@@ -71,7 +71,7 @@ exports[`conditions_table ConditionsTable should render multi item table with an
 </EuiFlexGroup>
 `;
 
-exports[`conditions_table ConditionsTable should render multi item table with or badge correctly 1`] = `
+exports[`conditions_table > ConditionsTable > should render multi item table with or badge correctly 1`] = `
 <EuiFlexGroup
   direction="row"
   gutterSize="none"
@@ -142,7 +142,7 @@ exports[`conditions_table ConditionsTable should render multi item table with or
 </EuiFlexGroup>
 `;
 
-exports[`conditions_table ConditionsTable should render single item table correctly 1`] = `
+exports[`conditions_table > ConditionsTable > should render single item table correctly 1`] = `
 <EuiFlexGroup
   direction="row"
   gutterSize="none"

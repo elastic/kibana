@@ -1,6 +1,6 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`Latest Types that latest active component renders normally 1`] = `
+exports[`Latest Types > that latest active component renders normally 1`] = `
 <EuiBasicTable
   columns={
     Array [

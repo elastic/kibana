@@ -1,6 +1,6 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`TOCEntryActionsPopover is rendered 1`] = `
+exports[`TOCEntryActionsPopover > is rendered 1`] = `
 <Fragment>
   <EuiPopover
     anchorPosition="leftUp"
@@ -120,7 +120,7 @@ exports[`TOCEntryActionsPopover is rendered 1`] = `
 </Fragment>
 `;
 
-exports[`TOCEntryActionsPopover should disable Edit features when edit mode active for layer 1`] = `
+exports[`TOCEntryActionsPopover > should disable Edit features when edit mode active for layer 1`] = `
 <Fragment>
   <EuiPopover
     anchorPosition="leftUp"
@@ -240,7 +240,7 @@ exports[`TOCEntryActionsPopover should disable Edit features when edit mode acti
 </Fragment>
 `;
 
-exports[`TOCEntryActionsPopover should disable fit to data when supportsFitToBounds is false 1`] = `
+exports[`TOCEntryActionsPopover > should disable fit to data when supportsFitToBounds is false 1`] = `
 <Fragment>
   <EuiPopover
     anchorPosition="leftUp"
@@ -360,7 +360,7 @@ exports[`TOCEntryActionsPopover should disable fit to data when supportsFitToBou
 </Fragment>
 `;
 
-exports[`TOCEntryActionsPopover should have "show layer" action when layer is not visible 1`] = `
+exports[`TOCEntryActionsPopover > should have "show layer" action when layer is not visible 1`] = `
 <Fragment>
   <EuiPopover
     anchorPosition="leftUp"
@@ -481,7 +481,7 @@ exports[`TOCEntryActionsPopover should have "show layer" action when layer is no
 </Fragment>
 `;
 
-exports[`TOCEntryActionsPopover should not show edit actions in read only mode 1`] = `
+exports[`TOCEntryActionsPopover > should not show edit actions in read only mode 1`] = `
 <Fragment>
   <EuiPopover
     anchorPosition="leftUp"
@@ -567,7 +567,7 @@ exports[`TOCEntryActionsPopover should not show edit actions in read only mode 1
 </Fragment>
 `;
 
-exports[`TOCEntryActionsPopover should show "show this layer only" action when there are more then 2 layers 1`] = `
+exports[`TOCEntryActionsPopover > should show "show this layer only" action when there are more then 2 layers 1`] = `
 <Fragment>
   <EuiPopover
     anchorPosition="leftUp"

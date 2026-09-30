@@ -1,6 +1,6 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`UnifiedFieldList useGroupedFields() should work correctly for no data 1`] = `
+exports[`UnifiedFieldList useGroupedFields() > should work correctly for no data 1`] = `
 Object {
   "AvailableFields": Object {
     "defaultNoFieldsMessage": "No available fields containing data.",
@@ -86,7 +86,7 @@ Object {
 }
 `;
 
-exports[`UnifiedFieldList useGroupedFields() should work correctly in loading state 1`] = `
+exports[`UnifiedFieldList useGroupedFields() > should work correctly in loading state 1`] = `
 Object {
   "AvailableFields": Object {
     "defaultNoFieldsMessage": "No available fields containing data.",
@@ -172,7 +172,7 @@ Object {
 }
 `;
 
-exports[`UnifiedFieldList useGroupedFields() should work correctly when global filters are set 1`] = `
+exports[`UnifiedFieldList useGroupedFields() > should work correctly when global filters are set 1`] = `
 Object {
   "AvailableFields": Object {
     "defaultNoFieldsMessage": "No available fields containing data.",

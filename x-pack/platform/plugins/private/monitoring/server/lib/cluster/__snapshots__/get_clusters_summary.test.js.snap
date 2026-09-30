@@ -1,6 +1,6 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`getClustersSummary should summarize cluster data with a primary cluster 1`] = `
+exports[`getClustersSummary > should summarize cluster data with a primary cluster 1`] = `
 Array [
   Object {
     "alerts": Object {
@@ -177,7 +177,7 @@ Array [
 ]
 `;
 
-exports[`getClustersSummary should summarize cluster data with no primary cluster 1`] = `
+exports[`getClustersSummary > should summarize cluster data with no primary cluster 1`] = `
 Array [
   Object {
     "alerts": Object {

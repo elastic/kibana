@@ -1,6 +1,6 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`getLayerIcon Layers with non-elasticsearch sources should display icon 1`] = `
+exports[`getLayerIcon > Layers with non-elasticsearch sources should display icon 1`] = `
 <PolygonIcon
   style={
     Object {

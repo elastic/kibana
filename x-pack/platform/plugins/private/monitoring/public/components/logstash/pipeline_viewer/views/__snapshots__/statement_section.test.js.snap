@@ -1,6 +1,6 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`StatementSection component renders heading text, correct icon type, and elements for StatementSection 1`] = `
+exports[`StatementSection component > renders heading text, correct icon type, and elements for StatementSection 1`] = `
 <div
   data-test-subj="pipelineViewerSection_Inputs"
 >

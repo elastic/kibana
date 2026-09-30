@@ -1,6 +1,6 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`Tls Table Component Rendering it renders the default Domains table 1`] = `
+exports[`Tls Table Component > Rendering > it renders the default Domains table 1`] = `
 .c0 {
   width: 100%;
   display: -webkit-box;

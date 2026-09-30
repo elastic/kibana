@@ -1,6 +1,6 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`ExplainCollectionInterval collection interval setting updates should show a success message while updated = true 1`] = `
+exports[`ExplainCollectionInterval > collection interval setting updates > should show a success message while updated = true 1`] = `
 Array [
   <h2
     class="euiTitle emotion-euiTitle-l"
@@ -28,7 +28,7 @@ Array [
 ]
 `;
 
-exports[`ExplainCollectionInterval collection interval setting updates should show a waiting indicator while updating = true 1`] = `
+exports[`ExplainCollectionInterval > collection interval setting updates > should show a waiting indicator while updating = true 1`] = `
 Array [
   <h2
     class="euiTitle emotion-euiTitle-l"
@@ -102,7 +102,7 @@ Array [
 ]
 `;
 
-exports[`ExplainCollectionInterval should explain about xpack.monitoring.collection.interval setting 1`] = `
+exports[`ExplainCollectionInterval > should explain about xpack.monitoring.collection.interval setting 1`] = `
 Array [
   <h2
     class="euiTitle emotion-euiTitle-l"

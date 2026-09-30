@@ -1,6 +1,6 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`NewNote renders correctly 1`] = `
+exports[`NewNote > renders correctly 1`] = `
 <NewNoteTabs
   data-test-subj="new-note-tabs"
 >

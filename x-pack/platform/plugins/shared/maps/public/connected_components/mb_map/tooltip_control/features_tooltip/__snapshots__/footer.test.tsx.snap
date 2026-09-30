@@ -1,6 +1,6 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`Footer multiple features, multiple layers: locked should show pagination controls, features count, and layer select 1`] = `
+exports[`Footer > multiple features, multiple layers: > locked > should show pagination controls, features count, and layer select 1`] = `
 <Fragment>
   <EuiHorizontalRule
     margin="xs"
@@ -56,7 +56,7 @@ exports[`Footer multiple features, multiple layers: locked should show paginatio
 </Fragment>
 `;
 
-exports[`Footer multiple features, multiple layers: mouseover (unlocked) should only show features count 1`] = `
+exports[`Footer > multiple features, multiple layers: > mouseover (unlocked) > should only show features count 1`] = `
 <Fragment>
   <EuiHorizontalRule
     margin="xs"
@@ -88,7 +88,7 @@ exports[`Footer multiple features, multiple layers: mouseover (unlocked) should 
 </Fragment>
 `;
 
-exports[`Footer multiple features, single layer: locked should show pagination controls and features count 1`] = `
+exports[`Footer > multiple features, single layer: > locked > should show pagination controls and features count 1`] = `
 <Fragment>
   <EuiHorizontalRule
     margin="xs"
@@ -113,7 +113,7 @@ exports[`Footer multiple features, single layer: locked should show pagination c
 </Fragment>
 `;
 
-exports[`Footer multiple features, single layer: mouseover (unlocked) should only show features count 1`] = `
+exports[`Footer > multiple features, single layer: > mouseover (unlocked) > should only show features count 1`] = `
 <Fragment>
   <EuiHorizontalRule
     margin="xs"
@@ -145,4 +145,4 @@ exports[`Footer multiple features, single layer: mouseover (unlocked) should onl
 </Fragment>
 `;
 
-exports[`Footer single feature: mouseover (unlocked) should not render header 1`] = `""`;
+exports[`Footer > single feature: > mouseover (unlocked) > should not render header 1`] = `""`;

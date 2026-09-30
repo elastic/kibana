@@ -1,6 +1,6 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`NetworkHttp Table Component rendering it renders the default NetworkHttp table 1`] = `
+exports[`NetworkHttp Table Component > rendering > it renders the default NetworkHttp table 1`] = `
 .c0 {
   width: 100%;
   display: -webkit-box;

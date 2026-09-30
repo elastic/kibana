@@ -1,6 +1,6 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`stream handler findChangedStatusJobs finds changed status jobs 1`] = `
+exports[`stream handler > findChangedStatusJobs > finds changed status jobs 1`] = `
 Object {
   "completed": Array [
     Object {
@@ -36,7 +36,7 @@ Object {
 }
 `;
 
-exports[`stream handler showNotifications show csv formulas warning 1`] = `
+exports[`stream handler > showNotifications > show csv formulas warning 1`] = `
 Array [
   Array [
     Object {
@@ -92,7 +92,7 @@ Array [
 ]
 `;
 
-exports[`stream handler showNotifications show failed job toast 1`] = `
+exports[`stream handler > showNotifications > show failed job toast 1`] = `
 Array [
   Array [
     Object {
@@ -145,7 +145,7 @@ Array [
 ]
 `;
 
-exports[`stream handler showNotifications show max length warning 1`] = `
+exports[`stream handler > showNotifications > show max length warning 1`] = `
 Array [
   Array [
     Object {
@@ -197,7 +197,7 @@ Array [
 ]
 `;
 
-exports[`stream handler showNotifications show success 1`] = `
+exports[`stream handler > showNotifications > show success 1`] = `
 Array [
   Array [
     Object {

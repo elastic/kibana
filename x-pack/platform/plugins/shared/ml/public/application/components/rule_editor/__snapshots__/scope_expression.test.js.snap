@@ -1,6 +1,6 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`ScopeExpression renders when empty list of filter IDs is supplied 1`] = `
+exports[`ScopeExpression > renders when empty list of filter IDs is supplied 1`] = `
 <div
   class="euiFlexGroup emotion-euiFlexGroup-responsive-m-flexStart-center-row"
 >
@@ -54,7 +54,7 @@ exports[`ScopeExpression renders when empty list of filter IDs is supplied 1`] =
 </div>
 `;
 
-exports[`ScopeExpression renders when enabled set to false 1`] = `
+exports[`ScopeExpression > renders when enabled set to false 1`] = `
 <div
   class="euiFlexGroup emotion-euiFlexGroup-responsive-m-flexStart-center-row"
 >
@@ -132,7 +132,7 @@ exports[`ScopeExpression renders when enabled set to false 1`] = `
 </div>
 `;
 
-exports[`ScopeExpression renders when filter ID and type supplied 1`] = `
+exports[`ScopeExpression > renders when filter ID and type supplied 1`] = `
 <div
   class="euiFlexGroup emotion-euiFlexGroup-responsive-m-flexStart-center-row"
 >
@@ -211,7 +211,7 @@ exports[`ScopeExpression renders when filter ID and type supplied 1`] = `
 </div>
 `;
 
-exports[`ScopeExpression renders when no filter ID or type supplied 1`] = `
+exports[`ScopeExpression > renders when no filter ID or type supplied 1`] = `
 <div
   class="euiFlexGroup emotion-euiFlexGroup-responsive-m-flexStart-center-row"
 >

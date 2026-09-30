@@ -1,6 +1,6 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`getExecutionSummaryAggregation should correctly generate the aggregation 1`] = `
+exports[`getExecutionSummaryAggregation > should correctly generate the aggregation 1`] = `
 Object {
   "executionsCount": Object {
     "filter": Object {

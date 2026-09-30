@@ -1,6 +1,6 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`VisitorBreakdownChart getVisitorBreakdownLensAttributes generates expected lens attributes 1`] = `
+exports[`VisitorBreakdownChart > getVisitorBreakdownLensAttributes > generates expected lens attributes 1`] = `
 Object {
   "references": Array [],
   "state": Object {

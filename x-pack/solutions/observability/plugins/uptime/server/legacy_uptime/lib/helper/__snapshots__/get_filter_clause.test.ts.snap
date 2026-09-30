@@ -1,6 +1,6 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`getFilterClause returns a filter object with additional fields 1`] = `
+exports[`getFilterClause > returns a filter object with additional fields 1`] = `
 Array [
   Object {
     "range": Object {
@@ -29,7 +29,7 @@ Array [
 ]
 `;
 
-exports[`getFilterClause returns a filter object with range when only dates are supplied 1`] = `
+exports[`getFilterClause > returns a filter object with range when only dates are supplied 1`] = `
 Array [
   Object {
     "range": Object {

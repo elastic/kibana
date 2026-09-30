@@ -1,6 +1,6 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`Listing should render with certain data pieces missing 1`] = `
+exports[`Listing > should render with certain data pieces missing 1`] = `
 <EuiMonitoringTable
   columns={
     Array [
@@ -102,7 +102,7 @@ exports[`Listing should render with certain data pieces missing 1`] = `
 />
 `;
 
-exports[`Listing should render with expected props 1`] = `
+exports[`Listing > should render with expected props 1`] = `
 <EuiMonitoringTable
   columns={
     Array [

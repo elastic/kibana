@@ -1,6 +1,6 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`ConditionExpression renders with appliesTo, operator and value supplied 1`] = `
+exports[`ConditionExpression > renders with appliesTo, operator and value supplied 1`] = `
 <div
   class="euiFlexGroup emotion-euiFlexGroup-responsive-m-flexStart-stretch-row"
 >
@@ -76,7 +76,7 @@ exports[`ConditionExpression renders with appliesTo, operator and value supplied
 </div>
 `;
 
-exports[`ConditionExpression renders with only value supplied 1`] = `
+exports[`ConditionExpression > renders with only value supplied 1`] = `
 <div
   class="euiFlexGroup emotion-euiFlexGroup-responsive-m-flexStart-stretch-row"
 >

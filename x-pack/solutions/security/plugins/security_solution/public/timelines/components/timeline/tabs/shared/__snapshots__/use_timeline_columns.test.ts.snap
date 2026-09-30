@@ -1,8 +1,8 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`useTimelineColumns augmentedColumnHeaders should return the default unified data table (udt) columns 1`] = `Array []`;
+exports[`useTimelineColumns > augmentedColumnHeaders > should return the default unified data table (udt) columns 1`] = `Array []`;
 
-exports[`useTimelineColumns augmentedColumnHeaders should return the provided columns 1`] = `
+exports[`useTimelineColumns > augmentedColumnHeaders > should return the provided columns 1`] = `
 Array [
   Object {
     "aggregatable": true,
@@ -25,7 +25,7 @@ Array [
 ]
 `;
 
-exports[`useTimelineColumns getTimelineQueryFieldsFromColumns should have a width of 152 for 5 actions 1`] = `
+exports[`useTimelineColumns > getTimelineQueryFieldsFromColumns > should have a width of 152 for 5 actions 1`] = `
 Array [
   "source.ip",
   "agent.type",
@@ -59,7 +59,7 @@ Array [
 ]
 `;
 
-exports[`useTimelineColumns getTimelineQueryFieldsFromColumns should return the list of all the fields 1`] = `
+exports[`useTimelineColumns > getTimelineQueryFieldsFromColumns > should return the list of all the fields 1`] = `
 Array [
   "@timestamp",
   "kibana.alert.workflow_status",

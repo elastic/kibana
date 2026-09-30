@@ -1,10 +1,10 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`ActionConnectorWarnings should not render if importedActionConnectorsCount is falsy and empty warnings array 1`] = `<div />`;
+exports[`ActionConnectorWarnings > should not render if importedActionConnectorsCount is falsy and empty warnings array 1`] = `<div />`;
 
-exports[`ActionConnectorWarnings should not render if importedActionConnectorsCount is truthy and empty warnings array 1`] = `<div />`;
+exports[`ActionConnectorWarnings > should not render if importedActionConnectorsCount is truthy and empty warnings array 1`] = `<div />`;
 
-exports[`ActionConnectorWarnings should render if 1 connectors were imported and use the warning message with the correct imported number 1`] = `
+exports[`ActionConnectorWarnings > should render if 1 connectors were imported and use the warning message with the correct imported number 1`] = `
 <div>
   <div
     class="euiPanel euiPanel--warning euiCallOut euiCallOut--warning emotion-euiPanel-none-warning-euiCallOut-warning"
@@ -85,7 +85,7 @@ exports[`ActionConnectorWarnings should render if 1 connectors were imported and
 </div>
 `;
 
-exports[`ActionConnectorWarnings should render if 2 connectors were imported and use the button label when is set 1`] = `
+exports[`ActionConnectorWarnings > should render if 2 connectors were imported and use the button label when is set 1`] = `
 <div>
   <div
     class="euiPanel euiPanel--warning euiCallOut euiCallOut--warning emotion-euiPanel-none-warning-euiCallOut-warning"
@@ -166,7 +166,7 @@ exports[`ActionConnectorWarnings should render if 2 connectors were imported and
 </div>
 `;
 
-exports[`ActionConnectorWarnings should render if 2 connectors were imported and use the warning message with the correct imported number 1`] = `
+exports[`ActionConnectorWarnings > should render if 2 connectors were imported and use the warning message with the correct imported number 1`] = `
 <div>
   <div
     class="euiPanel euiPanel--warning euiCallOut euiCallOut--warning emotion-euiPanel-none-warning-euiCallOut-warning"

@@ -1,6 +1,6 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`get buckets should make the correct query 1`] = `
+exports[`get buckets > should make the correct query 1`] = `
 Array [
   Array [
     "get_error_distribution_buckets",

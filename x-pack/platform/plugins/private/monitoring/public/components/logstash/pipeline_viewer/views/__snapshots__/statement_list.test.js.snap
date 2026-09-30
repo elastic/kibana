@@ -1,6 +1,6 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`StatementList renders nested elements as expected 1`] = `
+exports[`StatementList > renders nested elements as expected 1`] = `
 <ul
   className="monPipelineViewer__list"
 >

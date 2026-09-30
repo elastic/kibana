@@ -1,6 +1,6 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`TopNavMenu when setMenuMountPoint is provided should render badges and search bar 1`] = `
+exports[`TopNavMenu > when setMenuMountPoint is provided > should render badges and search bar 1`] = `
 <div
   class="euiBadgeGroup emotion-euiBadgeGroup-xs-TopNavMenuBadges"
   data-test-subj="kbn-top-nav-menu-badge-group"

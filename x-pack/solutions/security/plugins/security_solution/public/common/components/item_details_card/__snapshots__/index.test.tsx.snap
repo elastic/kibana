@@ -1,6 +1,6 @@
 // Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`item_details_card ItemDetailsAction should render correctly 1`] = `
+exports[`item_details_card > ItemDetailsAction > should render correctly 1`] = `
 <div>
   <EuiButton
     className="eui-fullWidth "
@@ -12,7 +12,7 @@ exports[`item_details_card ItemDetailsAction should render correctly 1`] = `
 </div>
 `;
 
-exports[`item_details_card ItemDetailsCard should render correctly with actions 1`] = `
+exports[`item_details_card > ItemDetailsCard > should render correctly with actions 1`] = `
 <EuiPanel
   hasBorder={true}
   paddingSize="none"
@@ -114,7 +114,7 @@ exports[`item_details_card ItemDetailsCard should render correctly with actions 
 </EuiPanel>
 `;
 
-exports[`item_details_card ItemDetailsCard should render correctly with no actions 1`] = `
+exports[`item_details_card > ItemDetailsCard > should render correctly with no actions 1`] = `
 <EuiPanel
   hasBorder={true}
   paddingSize="none"
@@ -179,7 +179,7 @@ exports[`item_details_card ItemDetailsCard should render correctly with no actio
 </EuiPanel>
 `;
 
-exports[`item_details_card ItemDetailsPropertySummary should render correctly 1`] = `
+exports[`item_details_card > ItemDetailsPropertySummary > should render correctly 1`] = `
 <Fragment>
   <Styled(EuiDescriptionListTitle)
     className="eui-textTruncate"

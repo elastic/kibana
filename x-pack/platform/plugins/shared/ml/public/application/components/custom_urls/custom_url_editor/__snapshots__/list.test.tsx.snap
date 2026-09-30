@@ -1,6 +1,6 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`CustomUrlList renders a list of custom URLs 1`] = `
+exports[`CustomUrlList > renders a list of custom URLs 1`] = `
 <div
   aria-label="Custom URL configurations"
   data-test-subj="mlJobEditCustomUrlsList"

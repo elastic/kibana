@@ -1,10 +1,10 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`ConditionsSectionExpression don't render when not enabled with conditions 1`] = `<div />`;
+exports[`ConditionsSectionExpression > don't render when not enabled with conditions 1`] = `<div />`;
 
-exports[`ConditionsSectionExpression don't render when the section is not enabled 1`] = `<div />`;
+exports[`ConditionsSectionExpression > don't render when the section is not enabled 1`] = `<div />`;
 
-exports[`ConditionsSectionExpression renders when enabled with empty conditions supplied 1`] = `
+exports[`ConditionsSectionExpression > renders when enabled with empty conditions supplied 1`] = `
 <div>
   <div
     class="euiSpacer euiSpacer--s emotion-euiSpacer-s"
@@ -26,7 +26,7 @@ exports[`ConditionsSectionExpression renders when enabled with empty conditions 
 </div>
 `;
 
-exports[`ConditionsSectionExpression renders when enabled with no conditions supplied 1`] = `
+exports[`ConditionsSectionExpression > renders when enabled with no conditions supplied 1`] = `
 <div>
   <div
     class="euiSpacer euiSpacer--s emotion-euiSpacer-s"
@@ -48,7 +48,7 @@ exports[`ConditionsSectionExpression renders when enabled with no conditions sup
 </div>
 `;
 
-exports[`ConditionsSectionExpression renders when enabled with one condition 1`] = `
+exports[`ConditionsSectionExpression > renders when enabled with one condition 1`] = `
 <div>
   <div
     class="euiFlexGroup emotion-euiFlexGroup-responsive-m-flexStart-stretch-row"
@@ -143,7 +143,7 @@ exports[`ConditionsSectionExpression renders when enabled with one condition 1`]
 </div>
 `;
 
-exports[`ConditionsSectionExpression renders when enabled with two conditions 1`] = `
+exports[`ConditionsSectionExpression > renders when enabled with two conditions 1`] = `
 <div>
   <div
     class="euiFlexGroup emotion-euiFlexGroup-responsive-m-flexStart-stretch-row"

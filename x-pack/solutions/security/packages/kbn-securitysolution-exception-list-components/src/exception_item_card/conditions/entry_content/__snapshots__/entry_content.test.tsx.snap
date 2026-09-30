@@ -1,6 +1,6 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`EntryContent should render a nested value 1`] = `
+exports[`EntryContent > should render a nested value 1`] = `
 <div>
   <div
     data-test-subj="EntryContentlistlist_id0EntryContent"

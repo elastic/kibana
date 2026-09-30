@@ -1,6 +1,6 @@
 // Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`build_group_by_field_aggregation Build Group-by-field aggregation 1`] = `
+exports[`build_group_by_field_aggregation > Build Group-by-field aggregation 1`] = `
 Object {
   "eventGroups": Object {
     "aggs": Object {

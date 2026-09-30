@@ -1,6 +1,6 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`agent configuration queries findExactConfiguration find configuration by service.environment 1`] = `
+exports[`agent configuration queries > findExactConfiguration > find configuration by service.environment 1`] = `
 Object {
   "index": ".apm-agent-configuration",
   "query": Object {
@@ -28,7 +28,7 @@ Object {
 }
 `;
 
-exports[`agent configuration queries findExactConfiguration find configuration by service.name 1`] = `
+exports[`agent configuration queries > findExactConfiguration > find configuration by service.name 1`] = `
 Object {
   "index": ".apm-agent-configuration",
   "query": Object {
@@ -56,7 +56,7 @@ Object {
 }
 `;
 
-exports[`agent configuration queries findExactConfiguration find configuration by service.name and service.environment 1`] = `
+exports[`agent configuration queries > findExactConfiguration > find configuration by service.name and service.environment 1`] = `
 Object {
   "index": ".apm-agent-configuration",
   "query": Object {
@@ -78,7 +78,7 @@ Object {
 }
 `;
 
-exports[`agent configuration queries getAllEnvironments fetches all environments 1`] = `
+exports[`agent configuration queries > getAllEnvironments > fetches all environments 1`] = `
 Object {
   "aggs": Object {
     "environments": Object {
@@ -112,7 +112,7 @@ Object {
 }
 `;
 
-exports[`agent configuration queries getExistingEnvironmentsForService fetches unavailable environments 1`] = `
+exports[`agent configuration queries > getExistingEnvironmentsForService > fetches unavailable environments 1`] = `
 Object {
   "aggs": Object {
     "environments": Object {
@@ -139,14 +139,14 @@ Object {
 }
 `;
 
-exports[`agent configuration queries listConfigurations fetches configurations 1`] = `
+exports[`agent configuration queries > listConfigurations > fetches configurations 1`] = `
 Object {
   "index": ".apm-agent-configuration",
   "size": 200,
 }
 `;
 
-exports[`agent configuration queries searchConfigurations fetches filtered configurations with an environment 1`] = `
+exports[`agent configuration queries > searchConfigurations > fetches filtered configurations with an environment 1`] = `
 Object {
   "index": ".apm-agent-configuration",
   "query": Object {
@@ -201,7 +201,7 @@ Object {
 }
 `;
 
-exports[`agent configuration queries searchConfigurations fetches filtered configurations without an environment 1`] = `
+exports[`agent configuration queries > searchConfigurations > fetches filtered configurations without an environment 1`] = `
 Object {
   "index": ".apm-agent-configuration",
   "query": Object {

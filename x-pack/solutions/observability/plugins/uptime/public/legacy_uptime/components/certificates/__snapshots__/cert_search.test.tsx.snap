@@ -1,6 +1,6 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`CertificatesSearch renders expected elements for valid props 1`] = `
+exports[`CertificatesSearch > renders expected elements for valid props 1`] = `
 .c0 {
   max-width: 700px;
 }
@@ -40,7 +40,7 @@ exports[`CertificatesSearch renders expected elements for valid props 1`] = `
 </div>
 `;
 
-exports[`CertificatesSearch shallow renders expected elements for valid props 1`] = `
+exports[`CertificatesSearch > shallow renders expected elements for valid props 1`] = `
 <Router
   history={
     Object {

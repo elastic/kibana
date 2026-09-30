@@ -1,6 +1,6 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`IP Overview Component rendering it renders the default IP Overview 1`] = `
+exports[`IP Overview Component > rendering > it renders the default IP Overview 1`] = `
 .c0 {
   width: 100%;
   display: -webkit-box;
@@ -432,7 +432,7 @@ exports[`IP Overview Component rendering it renders the default IP Overview 1`] 
 </div>
 `;
 
-exports[`IP Overview Component rendering it renders the side panel IP overview 1`] = `
+exports[`IP Overview Component > rendering > it renders the side panel IP overview 1`] = `
 .c0 {
   width: 100%;
   display: -webkit-box;

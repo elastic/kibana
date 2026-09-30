@@ -1,6 +1,6 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`IntegrationLink component renders a disabled link when href is undefined 1`] = `
+exports[`IntegrationLink component > renders a disabled link when href is undefined 1`] = `
 <EuiFlexGroup
   responsive={false}
 >
@@ -22,7 +22,7 @@ exports[`IntegrationLink component renders a disabled link when href is undefine
 </EuiFlexGroup>
 `;
 
-exports[`IntegrationLink component renders without errors 1`] = `
+exports[`IntegrationLink component > renders without errors 1`] = `
 <EuiLink
   aria-label="foo"
   data-test-subj="syntheticsIntegrationLinkLink"

@@ -1,6 +1,6 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`source editor geo_grid_source should not allow editing multiple metrics for heatmap 1`] = `
+exports[`source editor geo_grid_source > should not allow editing multiple metrics for heatmap 1`] = `
 <Fragment>
   <EuiPanel>
     <EuiTitle
@@ -59,7 +59,7 @@ exports[`source editor geo_grid_source should not allow editing multiple metrics
 </Fragment>
 `;
 
-exports[`source editor geo_grid_source should render editor 1`] = `
+exports[`source editor geo_grid_source > should render editor 1`] = `
 <Fragment>
   <EuiPanel>
     <EuiTitle

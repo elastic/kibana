@@ -1,6 +1,6 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`Logs should render a default message 1`] = `
+exports[`Logs > should render a default message 1`] = `
 <EuiCallOut
   color="warning"
   iconType="question"
@@ -28,7 +28,7 @@ exports[`Logs should render a default message 1`] = `
 </EuiCallOut>
 `;
 
-exports[`Logs should render with a bad indices reason 1`] = `
+exports[`Logs > should render with a bad indices reason 1`] = `
 <EuiCallOut
   color="warning"
   iconType="question"
@@ -53,7 +53,7 @@ exports[`Logs should render with a bad indices reason 1`] = `
 </EuiCallOut>
 `;
 
-exports[`Logs should render with a no cluster found reason 1`] = `
+exports[`Logs > should render with a no cluster found reason 1`] = `
 <EuiCallOut
   color="warning"
   iconType="question"
@@ -78,7 +78,7 @@ exports[`Logs should render with a no cluster found reason 1`] = `
 </EuiCallOut>
 `;
 
-exports[`Logs should render with a no index found reason 1`] = `
+exports[`Logs > should render with a no index found reason 1`] = `
 <EuiCallOut
   color="warning"
   iconType="question"
@@ -103,7 +103,7 @@ exports[`Logs should render with a no index found reason 1`] = `
 </EuiCallOut>
 `;
 
-exports[`Logs should render with a no index pattern found reason 1`] = `
+exports[`Logs > should render with a no index pattern found reason 1`] = `
 <EuiCallOut
   color="warning"
   iconType="question"
@@ -128,7 +128,7 @@ exports[`Logs should render with a no index pattern found reason 1`] = `
 </EuiCallOut>
 `;
 
-exports[`Logs should render with a no node found reason 1`] = `
+exports[`Logs > should render with a no node found reason 1`] = `
 <EuiCallOut
   color="warning"
   iconType="question"
@@ -153,7 +153,7 @@ exports[`Logs should render with a no node found reason 1`] = `
 </EuiCallOut>
 `;
 
-exports[`Logs should render with a no structured logs reason 1`] = `
+exports[`Logs > should render with a no structured logs reason 1`] = `
 <EuiCallOut
   color="warning"
   iconType="question"
@@ -181,7 +181,7 @@ exports[`Logs should render with a no structured logs reason 1`] = `
 </EuiCallOut>
 `;
 
-exports[`Logs should render with a no type found reason 1`] = `
+exports[`Logs > should render with a no type found reason 1`] = `
 <EuiCallOut
   color="warning"
   iconType="question"
@@ -206,7 +206,7 @@ exports[`Logs should render with a no type found reason 1`] = `
 </EuiCallOut>
 `;
 
-exports[`Logs should render with a time period reason 1`] = `
+exports[`Logs > should render with a time period reason 1`] = `
 <EuiCallOut
   color="warning"
   iconType="question"
@@ -221,7 +221,7 @@ exports[`Logs should render with a time period reason 1`] = `
 </EuiCallOut>
 `;
 
-exports[`Logs should render with a time period reason for both scenarios 1`] = `
+exports[`Logs > should render with a time period reason for both scenarios 1`] = `
 <EuiCallOut
   color="warning"
   iconType="question"

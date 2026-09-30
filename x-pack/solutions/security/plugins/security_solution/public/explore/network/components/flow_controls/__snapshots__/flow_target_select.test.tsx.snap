@@ -1,6 +1,6 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`FlowTargetSelect Component it renders the FlowTargetSelect 1`] = `
+exports[`FlowTargetSelect Component > it renders the FlowTargetSelect 1`] = `
 <div
   class="euiPopover euiInputPopover euiSuperSelect emotion-euiPopover-block-EuiInputPopover"
 >

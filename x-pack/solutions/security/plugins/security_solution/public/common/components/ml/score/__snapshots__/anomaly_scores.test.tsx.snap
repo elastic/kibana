@@ -1,6 +1,6 @@
 // Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`anomaly_scores renders correctly against snapshot 1`] = `
+exports[`anomaly_scores > renders correctly against snapshot 1`] = `
 <Fragment>
   <EuiFlexGroup
     data-test-subj="anomaly-scores"

@@ -1,6 +1,6 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`ProcessDraggable rendering it renders against shallow snapshot 1`] = `
+exports[`ProcessDraggable > rendering > it renders against shallow snapshot 1`] = `
 <EuiFlexGroup
   alignItems="center"
   gutterSize="none"

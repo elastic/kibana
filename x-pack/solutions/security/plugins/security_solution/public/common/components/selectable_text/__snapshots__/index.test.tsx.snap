@@ -1,6 +1,6 @@
 // Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`SelectableText renders correctly against snapshot 1`] = `
+exports[`SelectableText > renders correctly against snapshot 1`] = `
 .c0 {
   -webkit-user-select: text;
   -moz-user-select: text;

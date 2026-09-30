@@ -1,5 +1,5 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`global throws Error if unrecognized global privilege is specified 1`] = `"Unrecognized global base privilege"`;
+exports[`global > throws Error if unrecognized global privilege is specified 1`] = `[Error: Unrecognized global base privilege]`;
 
-exports[`space throws Error if unrecognized space privilege is specified 1`] = `"Unrecognized space base privilege"`;
+exports[`space > throws Error if unrecognized space privilege is specified 1`] = `[Error: Unrecognized space base privilege]`;

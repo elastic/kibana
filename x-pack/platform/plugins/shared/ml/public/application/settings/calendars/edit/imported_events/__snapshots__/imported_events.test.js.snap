@@ -1,6 +1,6 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`ImportedEvents Renders imported events 1`] = `
+exports[`ImportedEvents > Renders imported events 1`] = `
 <div>
   <div
     class="euiSpacer euiSpacer--s emotion-euiSpacer-s"

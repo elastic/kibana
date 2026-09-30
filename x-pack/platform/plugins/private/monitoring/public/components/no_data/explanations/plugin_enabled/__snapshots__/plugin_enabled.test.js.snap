@@ -1,6 +1,6 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`ExplainPluginEnabled should explain about xpack.monitoring.enabled setting 1`] = `
+exports[`ExplainPluginEnabled > should explain about xpack.monitoring.enabled setting 1`] = `
 Array [
   <h2
     class="euiTitle emotion-euiTitle-l"

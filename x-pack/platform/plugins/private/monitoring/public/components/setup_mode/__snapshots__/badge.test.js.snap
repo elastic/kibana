@@ -1,6 +1,6 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`setupMode SetupModeBadge internal collection should render each product consistently 1`] = `
+exports[`setupMode SetupModeBadge > internal collection > should render each product consistently 1`] = `
 <EuiBadge
   color="danger"
   iconType="pencil"
@@ -11,7 +11,7 @@ exports[`setupMode SetupModeBadge internal collection should render each product
 </EuiBadge>
 `;
 
-exports[`setupMode SetupModeBadge metricbeat collection should render each product consistently 1`] = `
+exports[`setupMode SetupModeBadge > metricbeat collection > should render each product consistently 1`] = `
 <EuiBadge
   color="primary"
   iconType="pencil"
@@ -20,7 +20,7 @@ exports[`setupMode SetupModeBadge metricbeat collection should render each produ
 </EuiBadge>
 `;
 
-exports[`setupMode SetupModeBadge net new user should render each product consistently 1`] = `
+exports[`setupMode SetupModeBadge > net new user > should render each product consistently 1`] = `
 <EuiBadge
   color="danger"
   iconType="pencil"
@@ -31,7 +31,7 @@ exports[`setupMode SetupModeBadge net new user should render each product consis
 </EuiBadge>
 `;
 
-exports[`setupMode SetupModeBadge partially migrated should render each product consistently 1`] = `
+exports[`setupMode SetupModeBadge > partially migrated > should render each product consistently 1`] = `
 <EuiBadge
   color="warning"
   iconType="pencil"
@@ -42,7 +42,7 @@ exports[`setupMode SetupModeBadge partially migrated should render each product 
 </EuiBadge>
 `;
 
-exports[`setupMode SetupModeBadge should use a text status if internal collection cannot be disabled yet for elasticsearch 1`] = `
+exports[`setupMode SetupModeBadge > should use a text status if internal collection cannot be disabled yet for elasticsearch 1`] = `
 <Fragment>
   <EuiIcon
     aria-hidden={true}
@@ -57,7 +57,7 @@ exports[`setupMode SetupModeBadge should use a text status if internal collectio
 </Fragment>
 `;
 
-exports[`setupMode SetupModeBadge unknown should render each product consistently 1`] = `
+exports[`setupMode SetupModeBadge > unknown > should render each product consistently 1`] = `
 <EuiBadge
   color="danger"
   iconType="pencil"

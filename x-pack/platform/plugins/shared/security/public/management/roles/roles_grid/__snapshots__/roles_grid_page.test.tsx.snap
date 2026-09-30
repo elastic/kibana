@@ -1,6 +1,6 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`<RolesGridPage /> renders permission denied if required 1`] = `
+exports[`<RolesGridPage /> > renders permission denied if required 1`] = `
 <section
   class="emotion-euiPageSection-l-center-danger"
 >

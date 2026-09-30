@@ -1,6 +1,6 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`useUrlParams deletes keys that do not have truthy values 1`] = `
+exports[`useUrlParams > deletes keys that do not have truthy values 1`] = `
 <MountWithReduxProvider>
   <Provider
     store={
@@ -100,7 +100,7 @@ exports[`useUrlParams deletes keys that do not have truthy values 1`] = `
 </MountWithReduxProvider>
 `;
 
-exports[`useUrlParams gets the expected values using the context 1`] = `
+exports[`useUrlParams > gets the expected values using the context 1`] = `
 <MountWithReduxProvider>
   <Provider
     store={

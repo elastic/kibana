@@ -1,6 +1,6 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`renderLegendDetailRow Should render categorical legend with breaks 1`] = `
+exports[`renderLegendDetailRow > Should render categorical legend with breaks 1`] = `
 <div>
   <EuiFlexGroup
     gutterSize="xs"
@@ -95,7 +95,7 @@ exports[`renderLegendDetailRow Should render categorical legend with breaks 1`] 
 </div>
 `;
 
-exports[`renderLegendDetailRow Should render categorical legend with custom icons in breaks 1`] = `
+exports[`renderLegendDetailRow > Should render categorical legend with custom icons in breaks 1`] = `
 <div>
   <EuiFlexGroup
     gutterSize="xs"

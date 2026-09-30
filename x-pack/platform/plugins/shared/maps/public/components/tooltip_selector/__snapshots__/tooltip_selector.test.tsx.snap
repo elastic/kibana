@@ -1,6 +1,6 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`TooltipSelector should render component 1`] = `
+exports[`TooltipSelector > should render component 1`] = `
 <div>
   <EuiDragDropContext
     onDragEnd={[Function]}

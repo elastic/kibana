@@ -1,6 +1,6 @@
 // Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`kpiNetworkEventsLensAttributes should render 1`] = `
+exports[`kpiNetworkEventsLensAttributes > should render 1`] = `
 Object {
   "description": "",
   "references": Array [

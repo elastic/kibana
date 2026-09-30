@@ -1,6 +1,6 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`DateRangePicker renders 1`] = `
+exports[`DateRangePicker > renders 1`] = `
 <div
   class="css-1k1pkml-containerStyles"
 >

@@ -1,6 +1,6 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`MetaInfoDetails should render lastUpdate as JSX Element 1`] = `
+exports[`MetaInfoDetails > should render lastUpdate as JSX Element 1`] = `
 <div>
   <div
     class="euiFlexGroup emotion-euiFlexGroup-responsive-wrap-s-flexStart-center-row"
@@ -76,7 +76,7 @@ exports[`MetaInfoDetails should render lastUpdate as JSX Element 1`] = `
 </div>
 `;
 
-exports[`MetaInfoDetails should render lastUpdate as string 1`] = `
+exports[`MetaInfoDetails > should render lastUpdate as string 1`] = `
 <div>
   <div
     class="euiFlexGroup emotion-euiFlexGroup-responsive-wrap-s-flexStart-center-row"

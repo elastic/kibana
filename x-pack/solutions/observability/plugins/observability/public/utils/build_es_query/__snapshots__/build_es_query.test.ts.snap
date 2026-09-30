@@ -1,6 +1,6 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`buildEsQuery should generate correct es query for {"timeRange":{"from":"2022-08-30T15:23:23.721Z","to":"2022-08-30T15:38:28.171Z"},"kuery":""} 1`] = `
+exports[`buildEsQuery > should generate correct es query for {"timeRange":{"from":"2022-08-30T15:23:23.721Z","to":"2022-08-30T15:38:28.171Z"},"kuery":""} 1`] = `
 Object {
   "bool": Object {
     "filter": Array [
@@ -21,7 +21,7 @@ Object {
 }
 `;
 
-exports[`buildEsQuery should generate correct es query for {"timeRange":{"from":"2022-08-30T15:23:23.721Z","to":"2022-08-30T15:38:28.171Z"},"kuery":"kibana.alert.status: \\"active\\""} 1`] = `
+exports[`buildEsQuery > should generate correct es query for {"timeRange":{"from":"2022-08-30T15:23:23.721Z","to":"2022-08-30T15:38:28.171Z"},"kuery":"kibana.alert.status: \\"active\\""} 1`] = `
 Object {
   "bool": Object {
     "filter": Array [
@@ -54,7 +54,7 @@ Object {
 }
 `;
 
-exports[`buildEsQuery should generate correct es query for {"timeRange":{"from":"2022-08-30T15:23:23.721Z","to":"2022-08-30T15:38:28.171Z"},"kuery":"kibana.alert.status: \\"recovered\\" and kibana.alert.duration.us >= 120","filters":[{"meta":{},"query":{"service.name":{"value":"synth-node-0"}}}]} 1`] = `
+exports[`buildEsQuery > should generate correct es query for {"timeRange":{"from":"2022-08-30T15:23:23.721Z","to":"2022-08-30T15:38:28.171Z"},"kuery":"kibana.alert.status: \\"recovered\\" and kibana.alert.duration.us >= 120","filters":[{"meta":{},"query":{"service.name":{"value":"synth-node-0"}}}]} 1`] = `
 Object {
   "bool": Object {
     "filter": Array [
@@ -112,7 +112,7 @@ Object {
 }
 `;
 
-exports[`buildEsQuery should generate correct es query for {"timeRange":{"from":"2022-08-30T15:23:23.721Z","to":"2022-08-30T15:38:28.171Z"},"kuery":"kibana.alert.status: \\"recovered\\" and kibana.alert.duration.us >= 120"} 1`] = `
+exports[`buildEsQuery > should generate correct es query for {"timeRange":{"from":"2022-08-30T15:23:23.721Z","to":"2022-08-30T15:38:28.171Z"},"kuery":"kibana.alert.status: \\"recovered\\" and kibana.alert.duration.us >= 120"} 1`] = `
 Object {
   "bool": Object {
     "filter": Array [
@@ -165,7 +165,7 @@ Object {
 }
 `;
 
-exports[`buildEsQuery should generate correct es query for {"timeRange":{"from":"2022-08-30T15:23:23.721Z","to":"2022-08-30T15:38:28.171Z"},"kuery":"nestedField: { child: \\"something\\" }"} 1`] = `
+exports[`buildEsQuery > should generate correct es query for {"timeRange":{"from":"2022-08-30T15:23:23.721Z","to":"2022-08-30T15:38:28.171Z"},"kuery":"nestedField: { child: \\"something\\" }"} 1`] = `
 Object {
   "bool": Object {
     "filter": Array [
@@ -204,7 +204,7 @@ Object {
 }
 `;
 
-exports[`buildEsQuery should generate correct es query for {"timeRange":{"from":"2022-08-30T15:23:23.721Z","to":"2022-08-30T15:38:28.171Z"}} 1`] = `
+exports[`buildEsQuery > should generate correct es query for {"timeRange":{"from":"2022-08-30T15:23:23.721Z","to":"2022-08-30T15:38:28.171Z"}} 1`] = `
 Object {
   "bool": Object {
     "filter": Array [

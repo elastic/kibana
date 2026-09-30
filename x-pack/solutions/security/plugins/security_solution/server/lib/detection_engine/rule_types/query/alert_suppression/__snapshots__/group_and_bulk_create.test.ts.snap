@@ -1,6 +1,6 @@
 // Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`groupAndBulkCreate utils buildBucketHistoryFilter should create the expected query 1`] = `
+exports[`groupAndBulkCreate utils > buildBucketHistoryFilter should create the expected query 1`] = `
 Array [
   Object {
     "bool": Object {

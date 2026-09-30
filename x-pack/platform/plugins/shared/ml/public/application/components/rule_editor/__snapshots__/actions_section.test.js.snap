@@ -1,6 +1,6 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`ActionsSection renders with no actions selected 1`] = `
+exports[`ActionsSection > renders with no actions selected 1`] = `
 <div>
   <div
     class="euiText emotion-euiText-s"
@@ -120,7 +120,7 @@ exports[`ActionsSection renders with no actions selected 1`] = `
 </div>
 `;
 
-exports[`ActionsSection renders with skip_result and skip_model_update selected 1`] = `
+exports[`ActionsSection > renders with skip_result and skip_model_update selected 1`] = `
 <div>
   <div
     class="euiText emotion-euiText-s"
@@ -242,7 +242,7 @@ exports[`ActionsSection renders with skip_result and skip_model_update selected 
 </div>
 `;
 
-exports[`ActionsSection renders with skip_result selected 1`] = `
+exports[`ActionsSection > renders with skip_result selected 1`] = `
 <div>
   <div
     class="euiText emotion-euiText-s"

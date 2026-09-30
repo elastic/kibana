@@ -1,6 +1,6 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`Paginated Table Component rendering it renders the default load more table 1`] = `
+exports[`Paginated Table Component > rendering > it renders the default load more table 1`] = `
 .c0 {
   width: 100%;
   display: -webkit-box;

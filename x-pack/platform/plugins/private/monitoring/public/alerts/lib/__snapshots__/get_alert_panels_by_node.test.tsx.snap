@@ -1,6 +1,6 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`getAlertPanelsByNode should not show any alert if none are firing 1`] = `
+exports[`getAlertPanelsByNode > should not show any alert if none are firing 1`] = `
 Array [
   Object {
     "id": 0,
@@ -10,7 +10,7 @@ Array [
 ]
 `;
 
-exports[`getAlertPanelsByNode should properly group for alerts in a single category 1`] = `
+exports[`getAlertPanelsByNode > should properly group for alerts in a single category 1`] = `
 Array [
   Object {
     "id": 0,
@@ -215,7 +215,7 @@ Array [
 ]
 `;
 
-exports[`getAlertPanelsByNode should properly group for alerts in each category 1`] = `
+exports[`getAlertPanelsByNode > should properly group for alerts in each category 1`] = `
 Array [
   Object {
     "id": 0,

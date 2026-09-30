@@ -1,6 +1,6 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`CertStatus renders expected elements for valid props 1`] = `
+exports[`CertStatus > renders expected elements for valid props 1`] = `
 .c0 {
   display: inline-block;
   margin-left: 5px;
@@ -36,7 +36,7 @@ exports[`CertStatus renders expected elements for valid props 1`] = `
 </div>
 `;
 
-exports[`CertStatus shallow renders expected elements for valid props 1`] = `
+exports[`CertStatus > shallow renders expected elements for valid props 1`] = `
 <Router
   history={
     Object {

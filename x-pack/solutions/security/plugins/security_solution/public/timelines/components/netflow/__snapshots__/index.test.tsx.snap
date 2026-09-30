@@ -1,6 +1,6 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`Netflow renders correctly against snapshot 1`] = `
+exports[`Netflow > renders correctly against snapshot 1`] = `
 <DocumentFragment>
   .c3 {
   margin-right: 5px;

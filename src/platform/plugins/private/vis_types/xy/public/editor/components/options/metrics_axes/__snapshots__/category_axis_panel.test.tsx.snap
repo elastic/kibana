@@ -1,6 +1,6 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`CategoryAxisPanel component should init with the default set of props 1`] = `
+exports[`CategoryAxisPanel component > should init with the default set of props 1`] = `
 <EuiPanel
   paddingSize="s"
 >

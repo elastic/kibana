@@ -1,13 +1,13 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`flatten_object it flattens an object 1`] = `
+exports[`flatten_object > it flattens an object 1`] = `
 Object {
   "bar": 3,
   "foo.nested.field": 1,
 }
 `;
 
-exports[`flatten_object it flattens an object that contains an array in a field 1`] = `
+exports[`flatten_object > it flattens an object that contains an array in a field 1`] = `
 Object {
   "bar": 3,
   "foo.nested.field": Array [

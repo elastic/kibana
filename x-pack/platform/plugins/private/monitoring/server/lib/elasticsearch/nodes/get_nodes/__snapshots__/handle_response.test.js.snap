@@ -1,6 +1,6 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`map response of nodes data should handle empty clusterStats 1`] = `
+exports[`map response of nodes data > should handle empty clusterStats 1`] = `
 Array [
   Object {
     "isOnline": false,
@@ -29,9 +29,9 @@ Array [
 ]
 `;
 
-exports[`map response of nodes data should handle empty pageOfNodes 1`] = `Array []`;
+exports[`map response of nodes data > should handle empty pageOfNodes 1`] = `Array []`;
 
-exports[`map response of nodes data should handle empty shardStats 1`] = `
+exports[`map response of nodes data > should handle empty shardStats 1`] = `
 Array [
   Object {
     "isOnline": true,
@@ -299,7 +299,7 @@ Array [
 ]
 `;
 
-exports[`map response of nodes data should handle empty time options 1`] = `
+exports[`map response of nodes data > should handle empty time options 1`] = `
 Array [
   Object {
     "isOnline": true,
@@ -340,7 +340,7 @@ Array [
 ]
 `;
 
-exports[`map response of nodes data should summarize response data, with cgroup metrics 1`] = `
+exports[`map response of nodes data > should summarize response data, with cgroup metrics 1`] = `
 Array [
   Object {
     "isOnline": true,

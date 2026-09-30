@@ -1,6 +1,6 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`LineToolTipContent renders correctly against snapshot 1`] = `
+exports[`LineToolTipContent > renders correctly against snapshot 1`] = `
 <div
   class="euiFlexGroup emotion-euiFlexGroup-responsive-none-center-stretch-row"
 >
@@ -147,7 +147,7 @@ exports[`LineToolTipContent renders correctly against snapshot 1`] = `
 </div>
 `;
 
-exports[`LineToolTipContent renders correctly against snapshot when rendering client & server 1`] = `
+exports[`LineToolTipContent > renders correctly against snapshot when rendering client & server 1`] = `
 <div
   class="euiFlexGroup emotion-euiFlexGroup-responsive-none-center-stretch-row"
 >

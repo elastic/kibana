@@ -1,6 +1,6 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`LoginForm login selector properly switches to login form -> login help and back: Login Help 1`] = `
+exports[`LoginForm > login selector > properly switches to login form -> login help and back > Login Help 1`] = `
 <div
   class="euiPanel euiPanel--plain euiPanel--paddingMedium emotion-euiPanel-grow-m-m-plain-hasBorder"
   data-test-subj="loginHelp"
@@ -17,7 +17,7 @@ exports[`LoginForm login selector properly switches to login form -> login help 
 </div>
 `;
 
-exports[`LoginForm login selector properly switches to login help: Login Help 1`] = `
+exports[`LoginForm > login selector > properly switches to login help > Login Help 1`] = `
 <div
   class="euiPanel euiPanel--plain euiPanel--paddingMedium emotion-euiPanel-grow-m-m-plain-hasBorder"
   data-test-subj="loginHelp"
@@ -34,7 +34,7 @@ exports[`LoginForm login selector properly switches to login help: Login Help 1`
 </div>
 `;
 
-exports[`LoginForm properly switches to login help: Login Help 1`] = `
+exports[`LoginForm > properly switches to login help > Login Help 1`] = `
 <div
   class="euiPanel euiPanel--plain euiPanel--paddingMedium emotion-euiPanel-grow-m-m-plain-hasBorder"
   data-test-subj="loginHelp"
@@ -51,7 +51,7 @@ exports[`LoginForm properly switches to login help: Login Help 1`] = `
 </div>
 `;
 
-exports[`LoginForm renders as expected 1`] = `
+exports[`LoginForm > renders as expected 1`] = `
 <div
   class="euiPanel euiPanel--plain euiPanel--paddingMedium emotion-euiPanel-grow-m-m-plain-hasBorder"
   data-test-subj="loginForm"

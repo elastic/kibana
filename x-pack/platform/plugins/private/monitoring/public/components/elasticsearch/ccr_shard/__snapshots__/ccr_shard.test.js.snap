@@ -1,6 +1,6 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`CcrShard that is renders an exception properly 1`] = `
+exports[`CcrShard > that is renders an exception properly 1`] = `
 <EuiPanel>
   <Status
     formattedLeader="leader on remote"
@@ -46,7 +46,7 @@ exports[`CcrShard that is renders an exception properly 1`] = `
 </EuiPanel>
 `;
 
-exports[`CcrShard that it renders normally 1`] = `
+exports[`CcrShard > that it renders normally 1`] = `
 <EuiPage>
   <EuiPageBody>
     <EuiPanel>

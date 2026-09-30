@@ -1,6 +1,6 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`getIsUsingTransactionEvents with config xpack.apm.searchAggregatedTransactions: always should query for data when kuery is set 1`] = `
+exports[`getIsUsingTransactionEvents > with config xpack.apm.searchAggregatedTransactions: always > should query for data when kuery is set 1`] = `
 Object {
   "apm": Object {
     "events": Array [
@@ -36,7 +36,7 @@ Object {
 }
 `;
 
-exports[`getIsUsingTransactionEvents with config xpack.apm.searchAggregatedTransactions: auto should query for data once if metrics data found 1`] = `
+exports[`getIsUsingTransactionEvents > with config xpack.apm.searchAggregatedTransactions: auto > should query for data once if metrics data found 1`] = `
 Object {
   "apm": Object {
     "events": Array [
@@ -60,7 +60,7 @@ Object {
 }
 `;
 
-exports[`getIsUsingTransactionEvents with config xpack.apm.searchAggregatedTransactions: auto should query for data twice if metrics data not found 1`] = `
+exports[`getIsUsingTransactionEvents > with config xpack.apm.searchAggregatedTransactions: auto > should query for data twice if metrics data not found 1`] = `
 Array [
   Array [
     "get_has_aggregated_transactions",

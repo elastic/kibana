@@ -1,6 +1,6 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`CertMonitors renders expected elements for valid props 1`] = `
+exports[`CertMonitors > renders expected elements for valid props 1`] = `
 <span>
   <span>
     <span
@@ -52,7 +52,7 @@ exports[`CertMonitors renders expected elements for valid props 1`] = `
 </span>
 `;
 
-exports[`CertMonitors shallow renders expected elements for valid props 1`] = `
+exports[`CertMonitors > shallow renders expected elements for valid props 1`] = `
 <Router
   history={
     Object {

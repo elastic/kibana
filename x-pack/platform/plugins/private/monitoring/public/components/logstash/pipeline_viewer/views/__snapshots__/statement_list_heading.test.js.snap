@@ -1,6 +1,6 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`StatementListHeading component renders title and icon type 1`] = `
+exports[`StatementListHeading component > renders title and icon type 1`] = `
 <EuiFlexGroup
   alignItems="baseline"
   gutterSize="s"

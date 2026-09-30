@@ -1,6 +1,6 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`useComparisonCellValue should render cells with diff mode "Chars" 1`] = `
+exports[`useComparisonCellValue > should render cells with diff mode "Chars" 1`] = `
 <div
   class="unifiedDataTable__comparisonBaseDocCell"
   data-test-subj="0_1_0"
@@ -13,7 +13,7 @@ exports[`useComparisonCellValue should render cells with diff mode "Chars" 1`] =
 </div>
 `;
 
-exports[`useComparisonCellValue should render cells with diff mode "Chars" 2`] = `
+exports[`useComparisonCellValue > should render cells with diff mode "Chars" 2`] = `
 <div
   data-test-subj="1_2_0"
 >
@@ -89,7 +89,7 @@ exports[`useComparisonCellValue should render cells with diff mode "Chars" 2`] =
 </div>
 `;
 
-exports[`useComparisonCellValue should render cells with diff mode "Chars" 3`] = `
+exports[`useComparisonCellValue > should render cells with diff mode "Chars" 3`] = `
 <div
   data-test-subj="2_3_0"
 >
@@ -105,7 +105,7 @@ exports[`useComparisonCellValue should render cells with diff mode "Chars" 3`] =
 </div>
 `;
 
-exports[`useComparisonCellValue should render cells with diff mode "Full value" 1`] = `
+exports[`useComparisonCellValue > should render cells with diff mode "Full value" 1`] = `
 <div
   class="unifiedDataTable__comparisonBaseDocCell"
   data-test-subj="0_1_0"
@@ -118,7 +118,7 @@ exports[`useComparisonCellValue should render cells with diff mode "Full value" 
 </div>
 `;
 
-exports[`useComparisonCellValue should render cells with diff mode "Full value" 2`] = `
+exports[`useComparisonCellValue > should render cells with diff mode "Full value" 2`] = `
 <div
   class="unifiedDataTable__comparisonDiffCell"
   data-test-subj="1_2_0"
@@ -131,7 +131,7 @@ exports[`useComparisonCellValue should render cells with diff mode "Full value" 
 </div>
 `;
 
-exports[`useComparisonCellValue should render cells with diff mode "Full value" 3`] = `
+exports[`useComparisonCellValue > should render cells with diff mode "Full value" 3`] = `
 <div
   class="unifiedDataTable__comparisonMatchCell"
   data-test-subj="2_3_0"
@@ -144,7 +144,7 @@ exports[`useComparisonCellValue should render cells with diff mode "Full value" 
 </div>
 `;
 
-exports[`useComparisonCellValue should render cells with diff mode "Lines" 1`] = `
+exports[`useComparisonCellValue > should render cells with diff mode "Lines" 1`] = `
 <div
   class="unifiedDataTable__comparisonBaseDocCell"
   data-test-subj="0_1_1"
@@ -160,7 +160,7 @@ exports[`useComparisonCellValue should render cells with diff mode "Lines" 1`] =
 </div>
 `;
 
-exports[`useComparisonCellValue should render cells with diff mode "Lines" 2`] = `
+exports[`useComparisonCellValue > should render cells with diff mode "Lines" 2`] = `
 <div
   data-test-subj="1_2_1"
 >
@@ -200,7 +200,7 @@ exports[`useComparisonCellValue should render cells with diff mode "Lines" 2`] =
 </div>
 `;
 
-exports[`useComparisonCellValue should render cells with diff mode "Lines" 3`] = `
+exports[`useComparisonCellValue > should render cells with diff mode "Lines" 3`] = `
 <div
   data-test-subj="2_3_1"
 >
@@ -219,7 +219,7 @@ exports[`useComparisonCellValue should render cells with diff mode "Lines" 3`] =
 </div>
 `;
 
-exports[`useComparisonCellValue should render cells with diff mode "Words" 1`] = `
+exports[`useComparisonCellValue > should render cells with diff mode "Words" 1`] = `
 <div
   class="unifiedDataTable__comparisonBaseDocCell"
   data-test-subj="0_1_0"
@@ -232,7 +232,7 @@ exports[`useComparisonCellValue should render cells with diff mode "Words" 1`] =
 </div>
 `;
 
-exports[`useComparisonCellValue should render cells with diff mode "Words" 2`] = `
+exports[`useComparisonCellValue > should render cells with diff mode "Words" 2`] = `
 <div
   data-test-subj="1_2_0"
 >
@@ -283,7 +283,7 @@ exports[`useComparisonCellValue should render cells with diff mode "Words" 2`] =
 </div>
 `;
 
-exports[`useComparisonCellValue should render cells with diff mode "Words" 3`] = `
+exports[`useComparisonCellValue > should render cells with diff mode "Words" 3`] = `
 <div
   data-test-subj="2_3_0"
 >
@@ -299,7 +299,7 @@ exports[`useComparisonCellValue should render cells with diff mode "Words" 3`] =
 </div>
 `;
 
-exports[`useComparisonCellValue should render cells with no diff mode 1`] = `
+exports[`useComparisonCellValue > should render cells with no diff mode 1`] = `
 <div
   class="unifiedDataTable__comparisonBaseDocCell"
   data-test-subj="0_1_0"
@@ -312,7 +312,7 @@ exports[`useComparisonCellValue should render cells with no diff mode 1`] = `
 </div>
 `;
 
-exports[`useComparisonCellValue should render cells with no diff mode 2`] = `
+exports[`useComparisonCellValue > should render cells with no diff mode 2`] = `
 <div
   data-test-subj="1_2_0"
 >
@@ -324,7 +324,7 @@ exports[`useComparisonCellValue should render cells with no diff mode 2`] = `
 </div>
 `;
 
-exports[`useComparisonCellValue should render cells with no diff mode 3`] = `
+exports[`useComparisonCellValue > should render cells with no diff mode 3`] = `
 <div
   data-test-subj="2_3_0"
 >
@@ -336,7 +336,7 @@ exports[`useComparisonCellValue should render cells with no diff mode 3`] = `
 </div>
 `;
 
-exports[`useComparisonCellValue should render exmpty cell if doc is not found 1`] = `
+exports[`useComparisonCellValue > should render exmpty cell if doc is not found 1`] = `
 <div
   data-test-subj="unknown_1_0"
 >
@@ -348,7 +348,7 @@ exports[`useComparisonCellValue should render exmpty cell if doc is not found 1`
 </div>
 `;
 
-exports[`useComparisonCellValue should render field cells 1`] = `
+exports[`useComparisonCellValue > should render field cells 1`] = `
 <div
   data-test-subj="fieldColumnId_0_0"
 >
@@ -384,7 +384,7 @@ exports[`useComparisonCellValue should render field cells 1`] = `
 </div>
 `;
 
-exports[`useComparisonCellValue should render field cells 2`] = `
+exports[`useComparisonCellValue > should render field cells 2`] = `
 <div
   data-test-subj="fieldColumnId_0_1"
 >
@@ -420,7 +420,7 @@ exports[`useComparisonCellValue should render field cells 2`] = `
 </div>
 `;
 
-exports[`useComparisonCellValue should render field cells 3`] = `
+exports[`useComparisonCellValue > should render field cells 3`] = `
 <div
   data-test-subj="fieldColumnId_0_2"
 >

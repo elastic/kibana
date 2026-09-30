@@ -1,6 +1,6 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`TopNavMenu Should render an icon-only item 1`] = `
+exports[`TopNavMenu > Should render an icon-only item 1`] = `
 <EuiToolTip
   content="Test"
   position="bottom"
@@ -16,7 +16,7 @@ exports[`TopNavMenu Should render an icon-only item 1`] = `
 </EuiToolTip>
 `;
 
-exports[`TopNavMenu Should render emphasized item which should be clickable 1`] = `
+exports[`TopNavMenu > Should render emphasized item which should be clickable 1`] = `
 <EuiButton
   color="primary"
   fill={true}

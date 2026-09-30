@@ -1,6 +1,6 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`OsCondition should render one OS_LABELS 1`] = `
+exports[`OsCondition > should render one OS_LABELS 1`] = `
 <div>
   <div
     data-test-subj="OsConditionMacOs"
@@ -41,7 +41,7 @@ exports[`OsCondition should render one OS_LABELS 1`] = `
 </div>
 `;
 
-exports[`OsCondition should render two OS_LABELS 1`] = `
+exports[`OsCondition > should render two OS_LABELS 1`] = `
 <div>
   <div
     data-test-subj="OsConditionMacOs"
@@ -82,7 +82,7 @@ exports[`OsCondition should render two OS_LABELS 1`] = `
 </div>
 `;
 
-exports[`OsCondition should return any os sent 1`] = `
+exports[`OsCondition > should return any os sent 1`] = `
 <div>
   <div
     data-test-subj="OsConditionMacOs"
@@ -123,4 +123,4 @@ exports[`OsCondition should return any os sent 1`] = `
 </div>
 `;
 
-exports[`OsCondition should return empty body 1`] = `<div />`;
+exports[`OsCondition > should return empty body 1`] = `<div />`;

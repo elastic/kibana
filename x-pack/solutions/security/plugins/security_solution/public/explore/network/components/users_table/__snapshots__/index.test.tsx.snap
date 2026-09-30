@@ -1,6 +1,6 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`Users Table Component Rendering it renders the default Users table 1`] = `
+exports[`Users Table Component > Rendering > it renders the default Users table 1`] = `
 .c1 .siemSubtitle__item {
   color: #98A8C3;
   font-size: 12px;

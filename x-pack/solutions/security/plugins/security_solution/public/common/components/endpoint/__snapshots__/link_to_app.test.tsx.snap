@@ -1,6 +1,6 @@
 // Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`LinkToApp component should render with href 1`] = `
+exports[`LinkToApp component > should render with href 1`] = `
 <a
   class="euiLink emotion-euiLink-text"
   href="/app/fleet"
@@ -10,7 +10,7 @@ exports[`LinkToApp component should render with href 1`] = `
 </a>
 `;
 
-exports[`LinkToApp component should render with minimum input 1`] = `
+exports[`LinkToApp component > should render with minimum input 1`] = `
 <button
   class="euiLink emotion-euiLink-text"
   type="button"

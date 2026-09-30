@@ -1,6 +1,6 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`DonutChart component renders a donut chart 1`] = `
+exports[`DonutChart component > renders a donut chart 1`] = `
 .c1.c1 {
   margin-left: 0px;
   margin-right: 0px;
@@ -149,7 +149,7 @@ exports[`DonutChart component renders a donut chart 1`] = `
 </div>
 `;
 
-exports[`DonutChart component renders a green check when all monitors are up 1`] = `
+exports[`DonutChart component > renders a green check when all monitors are up 1`] = `
 .c2.c2 {
   margin-left: 0px;
   margin-right: 0px;

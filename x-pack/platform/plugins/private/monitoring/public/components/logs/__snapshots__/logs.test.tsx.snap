@@ -1,6 +1,6 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`Logs should render a link to filter by cluster uuid 1`] = `
+exports[`Logs > should render a link to filter by cluster uuid 1`] = `
 <EuiCallOut
   announceOnMount={true}
   iconType="logsApp"
@@ -26,7 +26,7 @@ exports[`Logs should render a link to filter by cluster uuid 1`] = `
 </EuiCallOut>
 `;
 
-exports[`Logs should render a link to filter by cluster uuid and index uuid 1`] = `
+exports[`Logs > should render a link to filter by cluster uuid and index uuid 1`] = `
 <EuiCallOut
   announceOnMount={true}
   iconType="logsApp"
@@ -52,7 +52,7 @@ exports[`Logs should render a link to filter by cluster uuid and index uuid 1`] 
 </EuiCallOut>
 `;
 
-exports[`Logs should render a link to filter by cluster uuid and node uuid 1`] = `
+exports[`Logs > should render a link to filter by cluster uuid and node uuid 1`] = `
 <EuiCallOut
   announceOnMount={true}
   iconType="logsApp"
@@ -78,7 +78,7 @@ exports[`Logs should render a link to filter by cluster uuid and node uuid 1`] =
 </EuiCallOut>
 `;
 
-exports[`Logs should render a reason if the logs are disabled 1`] = `
+exports[`Logs > should render a reason if the logs are disabled 1`] = `
 <div
   data-test-subj="monitoringLogs"
 >
@@ -106,7 +106,7 @@ exports[`Logs should render a reason if the logs are disabled 1`] = `
 </div>
 `;
 
-exports[`Logs should render fewer columns for node or index view 1`] = `
+exports[`Logs > should render fewer columns for node or index view 1`] = `
 Array [
   Object {
     "field": "timestamp",
@@ -138,7 +138,7 @@ Array [
 ]
 `;
 
-exports[`Logs should render normally 1`] = `
+exports[`Logs > should render normally 1`] = `
 <div
   data-test-subj="monitoringLogs"
 >

@@ -1,6 +1,6 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`ElasticsearchMonitorsAdapter getMonitorChartsData will provide expected filters 1`] = `
+exports[`ElasticsearchMonitorsAdapter > getMonitorChartsData will provide expected filters 1`] = `
 Array [
   Object {
     "aggs": Object {
@@ -80,7 +80,7 @@ Array [
 ]
 `;
 
-exports[`ElasticsearchMonitorsAdapter inserts empty buckets for missing data 1`] = `
+exports[`ElasticsearchMonitorsAdapter > inserts empty buckets for missing data 1`] = `
 Object {
   "locationDurationLines": Array [
     Object {

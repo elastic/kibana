@@ -1,6 +1,6 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`CustomExtentsOptions component should init with the default set of props 1`] = `
+exports[`CustomExtentsOptions component > should init with the default set of props 1`] = `
 <Fragment>
   <SwitchOption
     label="Scale to data bounds"

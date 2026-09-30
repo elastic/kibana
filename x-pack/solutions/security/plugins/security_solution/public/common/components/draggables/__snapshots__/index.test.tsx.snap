@@ -1,6 +1,6 @@
 // Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`draggables rendering it renders the default Badge 1`] = `
+exports[`draggables > rendering > it renders the default Badge 1`] = `
 <CellActionsRenderer
   field="some-field"
   queryValue="some-query-value"

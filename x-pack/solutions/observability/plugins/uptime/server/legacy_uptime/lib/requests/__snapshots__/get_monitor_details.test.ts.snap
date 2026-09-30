@@ -1,6 +1,6 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`getMonitorDetails getMonitorAlerts should use expected filters for the query 1`] = `
+exports[`getMonitorDetails > getMonitorAlerts > should use expected filters for the query 1`] = `
 Array [
   Object {
     "aggs": Object {
@@ -66,7 +66,7 @@ Array [
 ]
 `;
 
-exports[`getMonitorDetails getMonitorDetails will provide expected calls 1`] = `
+exports[`getMonitorDetails > getMonitorDetails will provide expected calls 1`] = `
 Array [
   Object {
     "_source": Array [

@@ -1,6 +1,6 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`custom link get transaction fetches with all filter 1`] = `
+exports[`custom link get transaction > fetches with all filter 1`] = `
 Object {
   "apm": Object {
     "sources": Array [
@@ -50,7 +50,7 @@ Object {
 }
 `;
 
-exports[`custom link get transaction fetches without filter 1`] = `
+exports[`custom link get transaction > fetches without filter 1`] = `
 Object {
   "apm": Object {
     "sources": Array [

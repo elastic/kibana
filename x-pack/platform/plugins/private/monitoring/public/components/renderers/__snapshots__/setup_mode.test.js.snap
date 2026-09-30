@@ -1,6 +1,6 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`SetupModeRenderer should render the flyout open 1`] = `
+exports[`SetupModeRenderer > should render the flyout open 1`] = `
 <Fragment>
   <Flyout
     instance={null}
@@ -85,7 +85,7 @@ exports[`SetupModeRenderer should render the flyout open 1`] = `
 </Fragment>
 `;
 
-exports[`SetupModeRenderer should render with setup mode disabled 1`] = `
+exports[`SetupModeRenderer > should render with setup mode disabled 1`] = `
 <Fragment>
   <ChildComponent
     setupMode={
@@ -106,7 +106,7 @@ exports[`SetupModeRenderer should render with setup mode disabled 1`] = `
 </Fragment>
 `;
 
-exports[`SetupModeRenderer should render with setup mode enabled 1`] = `
+exports[`SetupModeRenderer > should render with setup mode enabled 1`] = `
 <Fragment>
   <ChildComponent
     setupMode={

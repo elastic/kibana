@@ -1,6 +1,6 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`<SimplePrivilegeForm> renders without crashing 1`] = `
+exports[`<SimplePrivilegeForm> > renders without crashing 1`] = `
 <EuiProviderNestedCheck>
   <EuiCacheProvider
     cache={

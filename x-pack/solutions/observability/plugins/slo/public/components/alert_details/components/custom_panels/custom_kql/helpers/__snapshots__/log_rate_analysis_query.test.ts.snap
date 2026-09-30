@@ -479,7 +479,7 @@ Object {
 }
 `;
 
-exports[`buildEsQuery should generate correct es query for rule with good query (as KQL), no optional filter and no total 1`] = `
+exports[`buildEsQuery > should generate correct es query for rule with good query (as KQL), no optional filter and no total 1`] = `
 Object {
   "bool": Object {
     "filter": Array [
@@ -535,7 +535,7 @@ Object {
 }
 `;
 
-exports[`buildEsQuery should generate correct es query for rule with good query (as KQL), with optional filter (as KQL) and not total filter 1`] = `
+exports[`buildEsQuery > should generate correct es query for rule with good query (as KQL), with optional filter (as KQL) and not total filter 1`] = `
 Object {
   "bool": Object {
     "filter": Array [
@@ -604,7 +604,7 @@ Object {
 }
 `;
 
-exports[`buildEsQuery should generate correct es query for rule with good query (as KQL), with optional filter (as KQL) and total filter (as KQL) 1`] = `
+exports[`buildEsQuery > should generate correct es query for rule with good query (as KQL), with optional filter (as KQL) and total filter (as KQL) 1`] = `
 Object {
   "bool": Object {
     "filter": Array [
@@ -686,7 +686,7 @@ Object {
 }
 `;
 
-exports[`buildEsQuery should generate correct es query for rule with good query (as KQL), with optional filter (as KQL), total filter (as KQL) and group by two fields 1`] = `
+exports[`buildEsQuery > should generate correct es query for rule with good query (as KQL), with optional filter (as KQL), total filter (as KQL) and group by two fields 1`] = `
 Object {
   "bool": Object {
     "filter": Array [
@@ -779,7 +779,7 @@ Object {
 }
 `;
 
-exports[`buildEsQuery should generate correct es query for rule with good query (as KQL), with optional filter (as filter) and not total filter 1`] = `
+exports[`buildEsQuery > should generate correct es query for rule with good query (as KQL), with optional filter (as filter) and not total filter 1`] = `
 Object {
   "bool": Object {
     "filter": Array [
@@ -841,7 +841,7 @@ Object {
 }
 `;
 
-exports[`buildEsQuery should generate correct es query for rule with good query (as filter), no optional filter and no total 1`] = `
+exports[`buildEsQuery > should generate correct es query for rule with good query (as filter), no optional filter and no total 1`] = `
 Object {
   "bool": Object {
     "filter": Array [
@@ -890,7 +890,7 @@ Object {
 }
 `;
 
-exports[`buildEsQuery should generate correct es query for rule with good query (as filter), with optional filter (as filter) and total filter (as KQL) 1`] = `
+exports[`buildEsQuery > should generate correct es query for rule with good query (as filter), with optional filter (as filter) and total filter (as KQL) 1`] = `
 Object {
   "bool": Object {
     "filter": Array [

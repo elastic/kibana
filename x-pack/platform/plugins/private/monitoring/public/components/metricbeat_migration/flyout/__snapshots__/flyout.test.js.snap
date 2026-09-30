@@ -1,6 +1,6 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`Flyout apm part one should render normally 1`] = `
+exports[`Flyout > apm > part one > should render normally 1`] = `
 <EuiFlyout
   aria-labelledby="flyoutTitle"
   onClose={[Function]}
@@ -74,7 +74,7 @@ exports[`Flyout apm part one should render normally 1`] = `
 </EuiFlyout>
 `;
 
-exports[`Flyout apm part two should show instructions to disable internal collection 1`] = `
+exports[`Flyout > apm > part two > should show instructions to disable internal collection 1`] = `
 <EuiFlyoutBody>
   <EuiSteps
     steps={
@@ -142,7 +142,7 @@ exports[`Flyout apm part two should show instructions to disable internal collec
 </EuiFlyoutBody>
 `;
 
-exports[`Flyout apm part two should show instructions to migrate to metricbeat 1`] = `
+exports[`Flyout > apm > part two > should show instructions to migrate to metricbeat 1`] = `
 <EuiFlyoutBody>
   <EuiSteps
     steps={
@@ -325,7 +325,7 @@ exports[`Flyout apm part two should show instructions to migrate to metricbeat 1
 </EuiFlyoutBody>
 `;
 
-exports[`Flyout beats part one should render normally 1`] = `
+exports[`Flyout > beats > part one > should render normally 1`] = `
 <EuiFlyout
   aria-labelledby="flyoutTitle"
   onClose={[Function]}
@@ -399,7 +399,7 @@ exports[`Flyout beats part one should render normally 1`] = `
 </EuiFlyout>
 `;
 
-exports[`Flyout beats part two should show instructions to disable internal collection 1`] = `
+exports[`Flyout > beats > part two > should show instructions to disable internal collection 1`] = `
 <EuiFlyoutBody>
   <EuiSteps
     steps={
@@ -473,7 +473,7 @@ exports[`Flyout beats part two should show instructions to disable internal coll
 </EuiFlyoutBody>
 `;
 
-exports[`Flyout beats part two should show instructions to migrate to metricbeat 1`] = `
+exports[`Flyout > beats > part two > should show instructions to migrate to metricbeat 1`] = `
 <EuiFlyoutBody>
   <EuiSteps
     steps={
@@ -692,7 +692,7 @@ exports[`Flyout beats part two should show instructions to migrate to metricbeat
 </EuiFlyoutBody>
 `;
 
-exports[`Flyout elasticsearch part one should render normally 1`] = `
+exports[`Flyout > elasticsearch > part one > should render normally 1`] = `
 <EuiFlyout
   aria-labelledby="flyoutTitle"
   onClose={[Function]}
@@ -766,7 +766,7 @@ exports[`Flyout elasticsearch part one should render normally 1`] = `
 </EuiFlyout>
 `;
 
-exports[`Flyout elasticsearch part two should show instructions to disable internal collection 1`] = `
+exports[`Flyout > elasticsearch > part two > should show instructions to disable internal collection 1`] = `
 <EuiFlyoutBody>
   <EuiSteps
     steps={
@@ -829,7 +829,7 @@ exports[`Flyout elasticsearch part two should show instructions to disable inter
 </EuiFlyoutBody>
 `;
 
-exports[`Flyout elasticsearch part two should show instructions to migrate to metricbeat 1`] = `
+exports[`Flyout > elasticsearch > part two > should show instructions to migrate to metricbeat 1`] = `
 <EuiFlyoutBody>
   <EuiSteps
     steps={
@@ -1020,7 +1020,7 @@ exports[`Flyout elasticsearch part two should show instructions to migrate to me
 </EuiFlyoutBody>
 `;
 
-exports[`Flyout kibana part one should render normally 1`] = `
+exports[`Flyout > kibana > part one > should render normally 1`] = `
 <EuiFlyout
   aria-labelledby="flyoutTitle"
   onClose={[Function]}
@@ -1094,7 +1094,7 @@ exports[`Flyout kibana part one should render normally 1`] = `
 </EuiFlyout>
 `;
 
-exports[`Flyout kibana part two should show instructions to disable internal collection 1`] = `
+exports[`Flyout > kibana > part two > should show instructions to disable internal collection 1`] = `
 <EuiFlyoutBody>
   <EuiSteps
     steps={
@@ -1172,7 +1172,7 @@ exports[`Flyout kibana part two should show instructions to disable internal col
 </EuiFlyoutBody>
 `;
 
-exports[`Flyout kibana part two should show instructions to migrate to metricbeat 1`] = `
+exports[`Flyout > kibana > part two > should show instructions to migrate to metricbeat 1`] = `
 <EuiFlyoutBody>
   <EuiSteps
     steps={
@@ -1355,7 +1355,7 @@ exports[`Flyout kibana part two should show instructions to migrate to metricbea
 </EuiFlyoutBody>
 `;
 
-exports[`Flyout logstash part one should render normally 1`] = `
+exports[`Flyout > logstash > part one > should render normally 1`] = `
 <EuiFlyout
   aria-labelledby="flyoutTitle"
   onClose={[Function]}
@@ -1429,7 +1429,7 @@ exports[`Flyout logstash part one should render normally 1`] = `
 </EuiFlyout>
 `;
 
-exports[`Flyout logstash part two should show instructions to disable internal collection 1`] = `
+exports[`Flyout > logstash > part two > should show instructions to disable internal collection 1`] = `
 <EuiFlyoutBody>
   <EuiSteps
     steps={
@@ -1497,7 +1497,7 @@ exports[`Flyout logstash part two should show instructions to disable internal c
 </EuiFlyoutBody>
 `;
 
-exports[`Flyout logstash part two should show instructions to migrate to metricbeat 1`] = `
+exports[`Flyout > logstash > part two > should show instructions to migrate to metricbeat 1`] = `
 <EuiFlyoutBody>
   <EuiSteps
     steps={
@@ -1678,7 +1678,7 @@ exports[`Flyout logstash part two should show instructions to migrate to metricb
 </EuiFlyoutBody>
 `;
 
-exports[`Flyout should render a consistent completion state for all products 1`] = `
+exports[`Flyout > should render a consistent completion state for all products 1`] = `
 Object {
   "children": <EuiCallOut
     announceOnMount={true}
@@ -1695,7 +1695,7 @@ Object {
 }
 `;
 
-exports[`Flyout should render the beat type for beats for the disabling internal collection step 1`] = `
+exports[`Flyout > should render the beat type for beats for the disabling internal collection step 1`] = `
 <EuiFlyoutBody>
   <EuiSteps
     steps={
@@ -1770,7 +1770,7 @@ exports[`Flyout should render the beat type for beats for the disabling internal
 </EuiFlyoutBody>
 `;
 
-exports[`Flyout should render the beat type for beats for the enabling metricbeat step 1`] = `
+exports[`Flyout > should render the beat type for beats for the enabling metricbeat step 1`] = `
 <EuiFlyoutBody>
   <EuiSteps
     steps={
@@ -1989,7 +1989,7 @@ exports[`Flyout should render the beat type for beats for the enabling metricbea
 </EuiFlyoutBody>
 `;
 
-exports[`Flyout should show a restart warning for restarting the primary Kibana 1`] = `
+exports[`Flyout > should show a restart warning for restarting the primary Kibana 1`] = `
 <EuiFlyoutBody>
   <EuiSteps
     steps={

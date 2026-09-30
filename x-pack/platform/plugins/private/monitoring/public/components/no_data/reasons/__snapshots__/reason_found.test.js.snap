@@ -1,6 +1,6 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`ReasonFound should load ExplainCollectionInterval component 1`] = `
+exports[`ReasonFound > should load ExplainCollectionInterval component 1`] = `
 Array [
   <h2
     class="euiTitle emotion-euiTitle-l"
@@ -67,7 +67,7 @@ Array [
 ]
 `;
 
-exports[`ReasonFound should load ExplainExporters component 1`] = `
+exports[`ReasonFound > should load ExplainExporters component 1`] = `
 Array [
   <h2
     class="euiTitle emotion-euiTitle-l"
@@ -136,7 +136,7 @@ Array [
 ]
 `;
 
-exports[`ReasonFound should load ExplainExportersCloud component 1`] = `
+exports[`ReasonFound > should load ExplainExportersCloud component 1`] = `
 Array [
   <span
     class="emotion-euiTextColor-subdued"
@@ -218,7 +218,7 @@ Array [
 ]
 `;
 
-exports[`ReasonFound should load ExplainPluginEnabled component 1`] = `
+exports[`ReasonFound > should load ExplainPluginEnabled component 1`] = `
 Array [
   <h2
     class="euiTitle emotion-euiTitle-l"

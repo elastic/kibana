@@ -1,6 +1,6 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`TextWithEdit should not render the edit icon when isReadonly is true 1`] = `
+exports[`TextWithEdit > should not render the edit icon when isReadonly is true 1`] = `
 <div>
   <span
     class="euiFlexGroup emotion-euiFlexGroup-responsive-xs-flexStart-stretch-row-textWithEditContainerCss"
@@ -22,7 +22,7 @@ exports[`TextWithEdit should not render the edit icon when isReadonly is true 1`
 </div>
 `;
 
-exports[`TextWithEdit should render the edit icon  when isReadonly is false 1`] = `
+exports[`TextWithEdit > should render the edit icon  when isReadonly is false 1`] = `
 <div>
   <span
     class="euiFlexGroup emotion-euiFlexGroup-responsive-xs-flexStart-stretch-row-textWithEditContainerCss"

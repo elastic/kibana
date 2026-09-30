@@ -1,6 +1,6 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`buildLogPaginationCursorProbeEsql samples, sorts ASC, limits to the scaled sample size, then aggregates MAX(timestamp) and COUNT(*) 1`] = `
+exports[`buildLogPaginationCursorProbeEsql > samples, sorts ASC, limits to the scaled sample size, then aggregates MAX(timestamp) and COUNT(*) 1`] = `
 "SET unmapped_fields=\\"nullify\\";
 FROM logs-*
   | WHERE

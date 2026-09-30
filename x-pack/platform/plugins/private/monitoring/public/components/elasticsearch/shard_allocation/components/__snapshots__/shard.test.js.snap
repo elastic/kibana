@@ -1,6 +1,6 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`Shard should show for assigned primary shards 1`] = `
+exports[`Shard > should show for assigned primary shards 1`] = `
 <div
   className="shard monShard primary started master"
   data-shard-classification="shard monShard primary started master 0"
@@ -17,7 +17,7 @@ exports[`Shard should show for assigned primary shards 1`] = `
 </div>
 `;
 
-exports[`Shard should show for assigned replica shards 1`] = `
+exports[`Shard > should show for assigned replica shards 1`] = `
 <div
   className="shard monShard replica started master"
   data-shard-classification="shard monShard replica started master 0"
@@ -34,7 +34,7 @@ exports[`Shard should show for assigned replica shards 1`] = `
 </div>
 `;
 
-exports[`Shard should show for initializing shards 1`] = `
+exports[`Shard > should show for initializing shards 1`] = `
 <div
   className="shard monShard primary initializing master"
   data-shard-classification="shard monShard primary initializing master 0"
@@ -51,7 +51,7 @@ exports[`Shard should show for initializing shards 1`] = `
 </div>
 `;
 
-exports[`Shard should show for relocating shards 1`] = `
+exports[`Shard > should show for relocating shards 1`] = `
 <div
   className="shard monShard primary relocating master"
   data-shard-classification="shard monShard primary relocating master 0"
@@ -68,7 +68,7 @@ exports[`Shard should show for relocating shards 1`] = `
 </div>
 `;
 
-exports[`Shard should show unassigned primary shards 1`] = `
+exports[`Shard > should show unassigned primary shards 1`] = `
 <div
   className="shard monShard primary unassigned emergency master"
   data-shard-classification="shard monShard primary unassigned emergency master 0"
@@ -85,7 +85,7 @@ exports[`Shard should show unassigned primary shards 1`] = `
 </div>
 `;
 
-exports[`Shard should show unassigned replica shards 1`] = `
+exports[`Shard > should show unassigned replica shards 1`] = `
 <div
   className="shard monShard replica unassigned"
   data-shard-classification="shard monShard replica unassigned 0"

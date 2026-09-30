@@ -1,6 +1,6 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`GenericFileDetails rendering it renders the default GenericFileDetails 1`] = `
+exports[`GenericFileDetails > rendering > it renders the default GenericFileDetails 1`] = `
 <Details>
   <AuditdGenericFileLine
     contextId="contextid-123"

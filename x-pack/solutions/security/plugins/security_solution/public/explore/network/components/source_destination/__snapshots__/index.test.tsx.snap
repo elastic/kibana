@@ -1,3 +1,3 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`SourceDestination renders correctly against snapshot 1`] = `[Function]`;
+exports[`SourceDestination > renders correctly against snapshot 1`] = `[Function]`;

@@ -1,6 +1,6 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`GenericRowRenderer #createGenericAuditRowRenderer renders correctly against snapshot 1`] = `
+exports[`GenericRowRenderer > #createGenericAuditRowRenderer > renders correctly against snapshot 1`] = `
 <span>
   <RowRendererContainer>
     <AuditdGenericDetails
@@ -104,7 +104,7 @@ exports[`GenericRowRenderer #createGenericAuditRowRenderer renders correctly aga
 </span>
 `;
 
-exports[`GenericRowRenderer #createGenericFileRowRenderer renders correctly against snapshot 1`] = `
+exports[`GenericRowRenderer > #createGenericFileRowRenderer > renders correctly against snapshot 1`] = `
 <span>
   <RowRendererContainer>
     <AuditdGenericFileDetails

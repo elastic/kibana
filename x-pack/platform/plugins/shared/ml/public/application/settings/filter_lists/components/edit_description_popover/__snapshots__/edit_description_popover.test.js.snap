@@ -1,6 +1,6 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`FilterListUsagePopover renders the popover with a description 1`] = `
+exports[`FilterListUsagePopover > renders the popover with a description 1`] = `
 <div>
   <div
     class="euiPopover emotion-euiPopover-inline-block"
@@ -28,7 +28,7 @@ exports[`FilterListUsagePopover renders the popover with a description 1`] = `
 </div>
 `;
 
-exports[`FilterListUsagePopover renders the popover with no description 1`] = `
+exports[`FilterListUsagePopover > renders the popover with no description 1`] = `
 <div>
   <div
     class="euiPopover emotion-euiPopover-inline-block"

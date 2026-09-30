@@ -1,6 +1,6 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`getAlertPanelsByCategory non setup mode should allow for state filtering 1`] = `
+exports[`getAlertPanelsByCategory > non setup mode > should allow for state filtering 1`] = `
 Array [
   Object {
     "id": 0,
@@ -128,7 +128,7 @@ Array [
 ]
 `;
 
-exports[`getAlertPanelsByCategory non setup mode should not show any alert if none are firing 1`] = `
+exports[`getAlertPanelsByCategory > non setup mode > should not show any alert if none are firing 1`] = `
 Array [
   Object {
     "id": 0,
@@ -138,7 +138,7 @@ Array [
 ]
 `;
 
-exports[`getAlertPanelsByCategory non setup mode should properly group for alerts in a single category 1`] = `
+exports[`getAlertPanelsByCategory > non setup mode > should properly group for alerts in a single category 1`] = `
 Array [
   Object {
     "id": 0,
@@ -351,7 +351,7 @@ Array [
 ]
 `;
 
-exports[`getAlertPanelsByCategory non setup mode should properly group for alerts in each category 1`] = `
+exports[`getAlertPanelsByCategory > non setup mode > should properly group for alerts in each category 1`] = `
 Array [
   Object {
     "id": 0,
@@ -883,7 +883,7 @@ Array [
 ]
 `;
 
-exports[`getAlertPanelsByCategory setup mode should properly group for alerts in a single category 1`] = `
+exports[`getAlertPanelsByCategory > setup mode > should properly group for alerts in a single category 1`] = `
 Array [
   Object {
     "id": 0,
@@ -949,7 +949,7 @@ Array [
 ]
 `;
 
-exports[`getAlertPanelsByCategory setup mode should properly group for alerts in each category 1`] = `
+exports[`getAlertPanelsByCategory > setup mode > should properly group for alerts in each category 1`] = `
 Array [
   Object {
     "id": 0,
@@ -1125,7 +1125,7 @@ Array [
 ]
 `;
 
-exports[`getAlertPanelsByCategory setup mode should still show alerts if none are firing 1`] = `
+exports[`getAlertPanelsByCategory > setup mode > should still show alerts if none are firing 1`] = `
 Array [
   Object {
     "id": 0,

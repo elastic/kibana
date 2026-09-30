@@ -1,6 +1,6 @@
 // Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`AreaChartBaseComponent render with default configs if no customized configs given should 2 render AreaSeries 1`] = `
+exports[`AreaChartBaseComponent > render with default configs if no customized configs given > should 2 render AreaSeries 1`] = `
 <div
   data-test-subj="areaChartBaseComponent"
   style="height: 100px; width: 120px; position: relative;"
@@ -27,7 +27,7 @@ exports[`AreaChartBaseComponent render with default configs if no customized con
 </div>
 `;
 
-exports[`AreaChartBaseComponent should render with customized configs should render 2 AreaSeries 1`] = `
+exports[`AreaChartBaseComponent > should render with customized configs > should render 2 AreaSeries 1`] = `
 <div
   data-test-subj="areaChartBaseComponent"
   style="height: 100px; width: 120px; position: relative;"

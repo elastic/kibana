@@ -1,8 +1,8 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`Auto-follow pattern validators validateAutoFollowPattern() returns empty object when autoFollowPattern is undefined 1`] = `Object {}`;
+exports[`Auto-follow pattern validators > validateAutoFollowPattern() > returns empty object when autoFollowPattern is undefined 1`] = `Object {}`;
 
-exports[`Auto-follow pattern validators validateAutoFollowPattern() should validate all props from auto-follow patten 1`] = `
+exports[`Auto-follow pattern validators > validateAutoFollowPattern() > should validate all props from auto-follow patten 1`] = `
 Object {
   "followIndexPatternPrefix": <Memo(MemoizedFormattedMessage)
     defaultMessage="Remove the {characterListLength, plural, one {character} other {characters}} {characterList} from the prefix."

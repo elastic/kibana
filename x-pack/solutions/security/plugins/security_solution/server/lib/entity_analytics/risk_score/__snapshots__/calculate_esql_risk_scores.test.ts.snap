@@ -1,6 +1,6 @@
 // Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`Calculate risk scores with ESQL ESQL query matches snapshot 1`] = `
+exports[`Calculate risk scores with ESQL > ESQL query > matches snapshot 1`] = `
 "
   SET unmapped_fields=\\"nullify\\";
   FROM .alerts-security.alerts-default METADATA _index

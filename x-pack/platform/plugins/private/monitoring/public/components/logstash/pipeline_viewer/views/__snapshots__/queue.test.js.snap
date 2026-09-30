@@ -1,6 +1,6 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`Queue component renders default elements 1`] = `
+exports[`Queue component > renders default elements 1`] = `
 <div>
   <StatementListHeading
     iconType="queue"

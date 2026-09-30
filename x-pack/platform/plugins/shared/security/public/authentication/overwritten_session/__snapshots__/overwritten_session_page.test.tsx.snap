@@ -1,6 +1,6 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`OverwrittenSessionPage renders as expected 1`] = `
+exports[`OverwrittenSessionPage > renders as expected 1`] = `
 <div
   class="css-e5l8dj-fullScreenGraphicsFadeIn"
   data-test-subj="secAuthenticationStatePage"

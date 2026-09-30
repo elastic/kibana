@@ -1,6 +1,6 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`MonitorBarSeries component renders if the data series is present 1`] = `
+exports[`MonitorBarSeries component > renders if the data series is present 1`] = `
 <div
   style="height:50px;width:100%;max-width:1200px;margin-right:15px"
 >
@@ -34,7 +34,7 @@ exports[`MonitorBarSeries component renders if the data series is present 1`] = 
 </div>
 `;
 
-exports[`MonitorBarSeries component shallow renders a series when there are down items 1`] = `
+exports[`MonitorBarSeries component > shallow renders a series when there are down items 1`] = `
 <Router
   history={
     Object {

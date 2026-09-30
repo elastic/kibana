@@ -1,6 +1,6 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`StatusFilterComponent renders without errors for valid props 1`] = `
+exports[`StatusFilterComponent > renders without errors for valid props 1`] = `
 <div
   class="euiFilterGroup emotion-euiFilterGroup-uncompressed"
   data-display="regular"
@@ -78,7 +78,7 @@ exports[`StatusFilterComponent renders without errors for valid props 1`] = `
 </div>
 `;
 
-exports[`StatusFilterComponent shallow renders without errors for valid props 1`] = `
+exports[`StatusFilterComponent > shallow renders without errors for valid props 1`] = `
 <Router
   history={
     Object {

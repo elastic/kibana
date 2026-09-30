@@ -1,6 +1,6 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`Metric component does not render warning badge when no warning present 1`] = `
+exports[`Metric component > does not render warning badge when no warning present 1`] = `
 <EuiFlexItem
   css="unknown styles"
   grow={false}
@@ -17,7 +17,7 @@ exports[`Metric component does not render warning badge when no warning present 
 </EuiFlexItem>
 `;
 
-exports[`Metric component renders warning badge 1`] = `
+exports[`Metric component > renders warning badge 1`] = `
 <EuiFlexItem
   css="unknown styles"
   grow={false}

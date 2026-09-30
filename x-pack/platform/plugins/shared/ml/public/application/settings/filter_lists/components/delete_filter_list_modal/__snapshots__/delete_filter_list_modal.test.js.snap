@@ -1,6 +1,6 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`DeleteFilterListModal false canDeleteFilter privilege renders as disabled delete button 1`] = `
+exports[`DeleteFilterListModal false canDeleteFilter privilege > renders as disabled delete button 1`] = `
 <div>
   <button
     class="euiButton emotion-euiButtonDisplay-m-isDisabled-base-disabled"
@@ -21,7 +21,7 @@ exports[`DeleteFilterListModal false canDeleteFilter privilege renders as disabl
 </div>
 `;
 
-exports[`DeleteFilterListModal renders as disabled delete button when no lists selected 1`] = `
+exports[`DeleteFilterListModal > renders as disabled delete button when no lists selected 1`] = `
 <div>
   <button
     class="euiButton emotion-euiButtonDisplay-m-isDisabled-base-disabled"
@@ -42,7 +42,7 @@ exports[`DeleteFilterListModal renders as disabled delete button when no lists s
 </div>
 `;
 
-exports[`DeleteFilterListModal renders as enabled delete button when a list is selected 1`] = `
+exports[`DeleteFilterListModal > renders as enabled delete button when a list is selected 1`] = `
 <div>
   <button
     class="euiButton emotion-euiButtonDisplay-m-base-danger"

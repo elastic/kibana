@@ -1,6 +1,6 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`SessionUserHostWorkingDir rendering it renders the default SessionUserHostWorkingDir 1`] = `
+exports[`SessionUserHostWorkingDir > rendering > it renders the default SessionUserHostWorkingDir 1`] = `
 <span
   className="euiFlexItem"
 >

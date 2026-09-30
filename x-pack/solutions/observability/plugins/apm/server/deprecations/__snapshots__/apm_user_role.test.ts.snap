@@ -1,6 +1,6 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`apm_user deprecation roles mapped to a removed role logs a deprecation when a role was found that maps to the removed apm_user role 1`] = `
+exports[`apm_user deprecation > roles mapped to a removed role > logs a deprecation when a role was found that maps to the removed apm_user role 1`] = `
 Array [
   Object {
     "correctiveActions": Object {
@@ -18,7 +18,7 @@ Array [
 ]
 `;
 
-exports[`apm_user deprecation users assigned to a removed role logs a deprecation when a user was found with a removed apm_user role 1`] = `
+exports[`apm_user deprecation > users assigned to a removed role > logs a deprecation when a user was found with a removed apm_user role 1`] = `
 Array [
   Object {
     "correctiveActions": Object {

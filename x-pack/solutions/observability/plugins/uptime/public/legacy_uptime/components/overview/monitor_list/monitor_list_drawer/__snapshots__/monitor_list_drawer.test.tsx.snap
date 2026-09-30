@@ -1,6 +1,6 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`MonitorListDrawer component renders a MonitorListDrawer when there are many checks 1`] = `
+exports[`MonitorListDrawer component > renders a MonitorListDrawer when there are many checks 1`] = `
 <Router
   history={
     Object {
@@ -131,7 +131,7 @@ exports[`MonitorListDrawer component renders a MonitorListDrawer when there are 
 </Router>
 `;
 
-exports[`MonitorListDrawer component renders a MonitorListDrawer when there is only one check 1`] = `
+exports[`MonitorListDrawer component > renders a MonitorListDrawer when there is only one check 1`] = `
 <Router
   history={
     Object {

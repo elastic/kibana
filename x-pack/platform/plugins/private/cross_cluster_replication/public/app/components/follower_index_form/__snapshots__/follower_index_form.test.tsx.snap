@@ -1,6 +1,6 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`<FollowerIndexForm /> state transitions updateFields() should merge new fields value with existing followerIndex 1`] = `
+exports[`<FollowerIndexForm /> state transitions > updateFields() should merge new fields value with existing followerIndex 1`] = `
 Object {
   "followerIndex": Object {
     "leaderIndex": "bar",
@@ -10,7 +10,7 @@ Object {
 }
 `;
 
-exports[`<FollowerIndexForm /> state transitions updateFormErrors() should merge errors with existing fieldsErrors 1`] = `
+exports[`<FollowerIndexForm /> state transitions > updateFormErrors() should merge errors with existing fieldsErrors 1`] = `
 Object {
   "fieldsErrors": Object {
     "leaderIndex": null,

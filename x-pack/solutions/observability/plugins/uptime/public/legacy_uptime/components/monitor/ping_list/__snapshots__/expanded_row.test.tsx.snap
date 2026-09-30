@@ -1,6 +1,6 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`PingListExpandedRow doesn't render list items if the body field is undefined 1`] = `
+exports[`PingListExpandedRow > doesn't render list items if the body field is undefined 1`] = `
 <EuiFlexGroup
   direction="column"
 >
@@ -16,7 +16,7 @@ exports[`PingListExpandedRow doesn't render list items if the body field is unde
 </EuiFlexGroup>
 `;
 
-exports[`PingListExpandedRow doesn't render list items if the http field is undefined 1`] = `
+exports[`PingListExpandedRow > doesn't render list items if the http field is undefined 1`] = `
 <EuiFlexGroup
   direction="column"
 >
@@ -32,7 +32,7 @@ exports[`PingListExpandedRow doesn't render list items if the http field is unde
 </EuiFlexGroup>
 `;
 
-exports[`PingListExpandedRow doesn't render list items if the response field is undefined 1`] = `
+exports[`PingListExpandedRow > doesn't render list items if the response field is undefined 1`] = `
 <EuiFlexGroup
   direction="column"
 >
@@ -48,7 +48,7 @@ exports[`PingListExpandedRow doesn't render list items if the response field is 
 </EuiFlexGroup>
 `;
 
-exports[`PingListExpandedRow renders error information when an error field is present 1`] = `
+exports[`PingListExpandedRow > renders error information when an error field is present 1`] = `
 <EuiFlexGroup
   direction="column"
 >
@@ -93,7 +93,7 @@ exports[`PingListExpandedRow renders error information when an error field is pr
 </EuiFlexGroup>
 `;
 
-exports[`PingListExpandedRow renders expected elements for valid props 1`] = `
+exports[`PingListExpandedRow > renders expected elements for valid props 1`] = `
 <EuiFlexGroup
   direction="column"
 >
@@ -132,7 +132,7 @@ exports[`PingListExpandedRow renders expected elements for valid props 1`] = `
 </EuiFlexGroup>
 `;
 
-exports[`PingListExpandedRow renders link to docs if body is not recorded but it is present 1`] = `
+exports[`PingListExpandedRow > renders link to docs if body is not recorded but it is present 1`] = `
 <div
   class="euiFlexGroup emotion-euiFlexGroup-m-flexStart-stretch-column"
 >
@@ -221,7 +221,7 @@ exports[`PingListExpandedRow renders link to docs if body is not recorded but it
 </div>
 `;
 
-exports[`PingListExpandedRow shallow renders link to docs if body is not recorded but it is present 1`] = `
+exports[`PingListExpandedRow > shallow renders link to docs if body is not recorded but it is present 1`] = `
 <EuiFlexGroup
   direction="column"
 >

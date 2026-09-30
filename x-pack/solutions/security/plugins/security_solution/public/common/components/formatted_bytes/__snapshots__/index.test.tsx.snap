@@ -1,6 +1,6 @@
 // Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`PreferenceFormattedBytes renders correctly against snapshot 1`] = `
+exports[`PreferenceFormattedBytes > renders correctly against snapshot 1`] = `
 <Fragment>
   2.7MB
 </Fragment>

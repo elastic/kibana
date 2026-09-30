@@ -1,6 +1,6 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`Data table columns Summary column returns eui grid columns with summary column 1`] = `
+exports[`Data table columns > Summary column > returns eui grid columns with summary column 1`] = `
 Array [
   Object {
     "actions": Object {
@@ -43,7 +43,7 @@ Array [
 ]
 `;
 
-exports[`Data table columns Textbased languages grid columns returns columns in correct format when column customisation is provided 1`] = `
+exports[`Data table columns > Textbased languages grid columns > returns columns in correct format when column customisation is provided 1`] = `
 Array [
   Object {
     "actions": Object {
@@ -302,7 +302,7 @@ Array [
 ]
 `;
 
-exports[`Data table columns column tokens returns eui grid columns with tokens 1`] = `
+exports[`Data table columns > column tokens > returns eui grid columns with tokens 1`] = `
 Array [
   Object {
     "actions": Object {
@@ -891,7 +891,7 @@ Array [
 ]
 `;
 
-exports[`Data table columns column tokens returns eui grid columns with tokens for custom column types 1`] = `
+exports[`Data table columns > column tokens > returns eui grid columns with tokens for custom column types 1`] = `
 Array [
   Object {
     "actions": Object {
@@ -1300,7 +1300,7 @@ Array [
 ]
 `;
 
-exports[`Data table columns getEuiGridColumns returns eui grid columns showing default columns 1`] = `
+exports[`Data table columns > getEuiGridColumns > returns eui grid columns showing default columns 1`] = `
 Array [
   Object {
     "actions": Object {
@@ -1675,7 +1675,7 @@ Array [
 ]
 `;
 
-exports[`Data table columns getEuiGridColumns returns eui grid columns with time column 1`] = `
+exports[`Data table columns > getEuiGridColumns > returns eui grid columns with time column 1`] = `
 Array [
   Object {
     "actions": Object {
@@ -2262,7 +2262,7 @@ Array [
 ]
 `;
 
-exports[`Data table columns getEuiGridColumns returns eui grid with in memory sorting 1`] = `
+exports[`Data table columns > getEuiGridColumns > returns eui grid with in memory sorting 1`] = `
 Array [
   Object {
     "actions": Object {

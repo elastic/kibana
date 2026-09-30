@@ -1,6 +1,6 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`src/legacy/core_plugins/metrics/public/components/icon_select/icon_select.js <IconSelect /> should render and match a snapshot 1`] = `
+exports[`src/legacy/core_plugins/metrics/public/components/icon_select/icon_select.js > <IconSelect /> > should render and match a snapshot 1`] = `
 <EuiComboBox
   aria-label="Icon selection"
   async={false}
@@ -87,7 +87,7 @@ exports[`src/legacy/core_plugins/metrics/public/components/icon_select/icon_sele
 />
 `;
 
-exports[`src/legacy/core_plugins/metrics/public/components/icon_select/icon_select.js <IconView /> should render and match a snapshot 1`] = `
+exports[`src/legacy/core_plugins/metrics/public/components/icon_select/icon_select.js > <IconView /> > should render and match a snapshot 1`] = `
 <span>
   <EuiIcon
     aria-hidden={true}
@@ -97,7 +97,7 @@ exports[`src/legacy/core_plugins/metrics/public/components/icon_select/icon_sele
 </span>
 `;
 
-exports[`src/legacy/core_plugins/metrics/public/components/icon_select/icon_select.js ICONS should match and save an icons collection snapshot 1`] = `
+exports[`src/legacy/core_plugins/metrics/public/components/icon_select/icon_select.js > ICONS > should match and save an icons collection snapshot 1`] = `
 Array [
   Object {
     "label": "Asterisk",
