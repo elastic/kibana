@@ -34,7 +34,6 @@ jest.mock('react-router-dom', () => {
 
 describe('workspace_layout', () => {
   const defaultProps = {
-    renderCounter: 1,
     loading: false,
     savedWorkspace: { id: 'test' } as GraphWorkspaceSavedObject,
     hasFields: true,

@@ -77,6 +77,7 @@ const initialWorkspaceState: WorkspaceState = {
 
 export const initializeWorkspace = actionCreator('INITIALIZE_WORKSPACE');
 export const workspaceChanged = actionCreator<WorkspaceSnapshot>('WORKSPACE_CHANGED');
+export const workspaceLayoutChanged = actionCreator('WORKSPACE_LAYOUT_CHANGED');
 export const selectAllNodes = actionCreator('SELECT_ALL_NODES');
 export const clearNodeSelection = actionCreator('CLEAR_NODE_SELECTION');
 export const invertNodeSelection = actionCreator('INVERT_NODE_SELECTION');
@@ -100,6 +101,7 @@ export const submitSearch = actionCreator<string>('SUBMIT_SEARCH');
 
 export const workspaceReducer = reducerWithInitialState(initialWorkspaceState)
   .case(reset, () => initialWorkspaceState)
+  .case(workspaceLayoutChanged, (state) => ({ ...state }))
   .case(initializeWorkspace, (state) => ({ ...state, isInitialized: true }))
   .case(workspaceChanged, (state, workspace) => ({
     ...workspace,

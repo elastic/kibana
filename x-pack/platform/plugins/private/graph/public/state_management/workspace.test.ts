@@ -33,6 +33,7 @@ import {
   undoWorkspace,
   ungroupNode,
   workspaceChanged,
+  workspaceLayoutChanged,
   workspaceInitializedSelector,
 } from './workspace';
 
@@ -449,6 +450,27 @@ describe('workspace state', () => {
       color: 'blue',
     });
     expect(environment.store.getState().workspace.nodesById.other.color).toBe('green');
+  });
+
+  it('notifies layout subscribers without replacing graph collections or history', () => {
+    const environment = createMockGraphStore({});
+    environment.store.dispatch(initializeWorkspace());
+    const previousState = environment.store.getState().workspace;
+
+    environment.store.dispatch(workspaceLayoutChanged());
+
+    const nextState = environment.store.getState().workspace;
+    expect(nextState).not.toBe(previousState);
+    expect(nextState).toEqual(previousState);
+    expect(nextState.nodesById).toBe(previousState.nodesById);
+    expect(nextState.nodeIds).toBe(previousState.nodeIds);
+    expect(nextState.edgesById).toBe(previousState.edgesById);
+    expect(nextState.edgeIds).toBe(previousState.edgeIds);
+    expect(nextState.blocklistedNodesById).toBe(previousState.blocklistedNodesById);
+    expect(nextState.blocklistedNodeIds).toBe(previousState.blocklistedNodeIds);
+    expect(nextState.undoHistory).toBe(previousState.undoHistory);
+    expect(nextState.redoHistory).toBe(previousState.redoHistory);
+    expect(nextState.isInitialized).toBe(true);
   });
 
   it('keeps edge selection single-valued', () => {
