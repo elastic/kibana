@@ -274,10 +274,17 @@ export const CreateServiceAccountFlyout = ({
                     )}
                     content={
                       <>
-                        <FormattedMessage
-                          id="xpack.security.management.serviceAccounts.create.rolesHelpDescription"
-                          defaultMessage="An account can only use privileges allowed by both its selected roles and your access at creation time. Selecting a role does not grant privileges you do not have."
-                        />
+                        {isServerless ? (
+                          <FormattedMessage
+                            id="xpack.security.management.serviceAccounts.create.serverlessRolesHelpDescription"
+                            defaultMessage="An account can only use privileges allowed by both its selected roles and your access at creation time. Selecting a role does not grant privileges you do not have."
+                          />
+                        ) : (
+                          <FormattedMessage
+                            id="xpack.security.management.serviceAccounts.create.rolesHelpDescription"
+                            defaultMessage="The account receives the privileges granted by its selected roles."
+                          />
+                        )}
                         {isServerless && (
                           <p>
                             <FormattedMessage

@@ -67,7 +67,9 @@ const renderApp = ({
 
 const fillForm = async () => {
   await waitFor(() => expect(screen.getByRole('button', { name: 'Select roles' })).toBeEnabled());
-  await user.type(screen.getByTestId('serviceAccountNameInput'), account.name);
+  fireEvent.change(screen.getByTestId('serviceAccountNameInput'), {
+    target: { value: account.name },
+  });
   await user.click(screen.getByRole('button', { name: 'Select roles' }));
   await user.click(await screen.findByTestId('roleOption-workflow_reader'));
   await user.click(screen.getByTestId('serviceAccountNameInput'));
@@ -233,10 +235,8 @@ describe('ServiceAccountsApp', () => {
     await fillForm();
     getRoles.mockResolvedValue([availableRoles[1]]);
     fireEvent.focus(window);
-    await waitFor(() => expect(screen.getByRole('button', { name: 'Select roles' })).toBeEnabled());
-    await user.click(screen.getByTestId('createServiceAccountSubmit'));
-
-    expect(screen.getByText(/Remove roles that are no longer available/)).toBeVisible();
+    expect(await screen.findByText(/Remove roles that are no longer available/)).toBeVisible();
+    expect(screen.getByTestId('createServiceAccountSubmit')).toBeDisabled();
     expect(create).not.toHaveBeenCalled();
     await user.click(screen.getByRole('button', { name: 'Select roles' }));
     await user.click(screen.getByTestId('roleOption-workflow_reader'));
@@ -279,7 +279,7 @@ describe('ServiceAccountsApp', () => {
   });
 
   it.each([true, false])(
-    'explains cross-project role behavior only on serverless (%s)',
+    'explains privileges for the deployment (serverless: %s)',
     async (isServerless) => {
       renderApp({ isServerless });
       await waitFor(() =>
@@ -287,12 +287,14 @@ describe('ServiceAccountsApp', () => {
       );
 
       await user.hover(screen.getByText('About role privileges'));
-      await screen.findByText(/An account can only use privileges/);
-      const explanation = screen.queryByText(/For cross-project search/);
       if (isServerless) {
-        expect(explanation).toBeVisible();
+        expect(await screen.findByText(/An account can only use privileges/)).toBeVisible();
+        expect(screen.getByText(/For cross-project search/)).toBeVisible();
+        expect(screen.queryByText(/The account receives the privileges/)).not.toBeInTheDocument();
       } else {
-        expect(explanation).not.toBeInTheDocument();
+        expect(await screen.findByText(/The account receives the privileges/)).toBeVisible();
+        expect(screen.queryByText(/An account can only use privileges/)).not.toBeInTheDocument();
+        expect(screen.queryByText(/For cross-project search/)).not.toBeInTheDocument();
       }
     }
   );
