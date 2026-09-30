@@ -10,6 +10,7 @@ import { expect } from '@kbn/scout-security/api';
 import { ExceptionListTypeEnum } from '@kbn/securitysolution-io-ts-list-types';
 import { ENDPOINT_ARTIFACT_LISTS } from '@kbn/securitysolution-list-constants';
 import { HOST_METADATA_GET_ROUTE } from '../../../../common/endpoint/constants';
+import { GLOBAL_ARTIFACT_TAG } from '../../../../common/endpoint/service/artifacts';
 import type { HostInfo } from '../../../../common/endpoint/types';
 import { apiTest } from '../fixtures';
 
@@ -120,6 +121,7 @@ apiTest.describe(
             list_id: TRUSTED_APPS_LIST_ID,
             entries: TRUSTED_APP_ENTRIES,
             os_types: ['windows'],
+            tags: [GLOBAL_ARTIFACT_TAG],
           },
         });
         expect(createItemResponse).toHaveStatusCode(200);

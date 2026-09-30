@@ -13,6 +13,7 @@ import { ExceptionListTypeEnum } from '@kbn/securitysolution-io-ts-list-types';
 import { ENDPOINT_ARTIFACT_LISTS } from '@kbn/securitysolution-list-constants';
 import { setupFleetForEndpoint } from '../../../../../common/endpoint/data_loaders/setup_fleet_for_endpoint';
 import type { IndexedFleetEndpointPolicyResponse } from '../../../../../common/endpoint/data_loaders/index_fleet_endpoint_policy';
+import { GLOBAL_ARTIFACT_TAG } from '../../../../../common/endpoint/service/artifacts';
 import {
   createScoutEndpointPolicy,
   deleteScoutEndpointPolicy,
@@ -169,6 +170,7 @@ apiTest.describe(
             list_id: TRUSTED_APPS_LIST_ID,
             entries: TRUSTED_APP_ENTRIES,
             os_types: ['windows'],
+            tags: [GLOBAL_ARTIFACT_TAG],
           },
         });
         expect(createResponse).toHaveStatusCode(200);
