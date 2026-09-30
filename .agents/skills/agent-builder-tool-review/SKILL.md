@@ -80,7 +80,7 @@ Check the tool's description string, `ToolResultType` usage in the handler, and 
 
 ### C5: Confirmation policy for destructive operations
 
-Tools that create, update, or delete resources must:
+Tools that create, update, or delete resources — or trigger destructive/irreversible side effects (e.g., executing workflows with destructive steps, triggering external actions) — must:
 1. Set `annotations.destructiveHint: true` (for delete/irreversible overwrite) or ensure `annotations.readOnlyHint` is not `true` (for create/update)
 2. If `annotations.destructiveHint: true`: set `confirmation.askUser` to `'always'`. Using `'once'` is permitted but should be flagged as a **warning** (non-blocking) — `once` reuses the first confirmation for all subsequent calls to the same tool in a conversation, which can silently authorize deletes of different resources
 3. Never set both `readOnlyHint: true` and `destructiveHint: true`
@@ -167,7 +167,7 @@ Apply this gate to every finding before reporting:
 
 1. Before flagging a missing availability handler, verify the tool's underlying feature is actually gated — read the plugin's `kibana.jsonc` and feature registration to confirm.
 2. Before claiming a tool conflicts with another, read both tool descriptions and schemas. A shared domain doesn't mean a conflict.
-3. Before claiming `excludeFromMcp` is needed, verify the tool's description or return values actually reference internal concepts — read the handler implementation.
+3. Before claiming `excludeFromMcp` is needed, verify the tool's handler implementation, description, or return values depend on or reference internal concepts. Handler dependencies (e.g., accessing `context.attachments`) are sufficient evidence even if the tool's public description and return values appear clean.
 4. Treat `read_file` failures, truncated results, and incomplete tool responses as unresolved verification, not evidence of absence. If a required premise stays unresolved, omit the finding.
 5. Before submitting findings, re-read each claim and evidence value for accuracy.
 
