@@ -166,10 +166,9 @@ export const ruleModelVersions: SavedObjectsModelVersionMap = {
   '8': {
     /**
      * v8 moves the server-managed version counter from `metadata.version` to the
-     * attributes root, so that `metadata` holds only client-supplied fields now
-     * that the counter is no longer part of the API response. Documents written
-     * before the v3 backfill have no counter at all and are seeded with `1`, the
-     * same baseline v3 used.
+     * attributes root, so that `metadata` holds only client-supplied fields.
+     * Documents written before the v3 backfill have no counter at all and are
+     * seeded with `1`, the same baseline v3 used.
      *
      * Still not indexed, so there is no mappings change.
      *

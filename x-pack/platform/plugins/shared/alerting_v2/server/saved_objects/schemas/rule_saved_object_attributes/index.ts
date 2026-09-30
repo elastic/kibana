@@ -22,7 +22,7 @@ export type RuleSavedObjectAttributesV2 = TypeOf<typeof ruleSavedObjectAttribute
  */
 export type RuleSavedObjectAttributesV4 = TypeOf<typeof ruleSavedObjectAttributesSchemaV4>;
 
-/** Latest attributes shape, introduced by model version 7. */
+/** Introduced by model version 7. */
 export type RuleSavedObjectAttributesV5 = TypeOf<typeof ruleSavedObjectAttributesSchemaV5>;
 
 /** Latest attributes shape, introduced by model version 8. */

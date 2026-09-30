@@ -767,7 +767,7 @@ describe('utils', () => {
       expect(result.metadata.builder_type).toBeUndefined();
     });
 
-    it('exposes the persisted version counter on the internal rule', () => {
+    it('exposes the persisted version counter on the rule', () => {
       const attrs = createRuleSoAttributes({ metadata: { name: 'test-rule' }, version: 7 });
 
       const result = transformRuleSoAttributesToRuleApiResponse('rule-id-1', attrs);
