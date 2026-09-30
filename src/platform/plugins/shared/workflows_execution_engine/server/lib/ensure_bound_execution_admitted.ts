@@ -17,7 +17,11 @@ export const ensureBoundExecutionAdmitted = async (
   workflows: WorkflowRepository,
   executions: WorkflowExecutionRepository
 ): Promise<void> => {
-  if (!execution.workflowDefinition?.settings?.run_as) return;
+  if (
+    !execution.workflowDefinition?.settings?.run_as &&
+    !execution.effectiveIdentity?.inheritedFrom
+  )
+    return;
   const { id, workflowId, spaceId } = execution;
   if (!id || !workflowId || !spaceId) throw new Error('Missing bound execution coordinates.');
   try {

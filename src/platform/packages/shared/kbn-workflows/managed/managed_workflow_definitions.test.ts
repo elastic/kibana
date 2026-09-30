@@ -31,6 +31,7 @@ import {
   ALERTZERO_WORKER_FORENSICS_ENDPOINT_ANALYSIS_WORKFLOW_ID,
   ALERTZERO_WORKER_HUNT_CONTINUOUS_THREAT_HUNT_WORKFLOW_ID,
   CONTEXT_ENGINE_FEEDBACK_ANALYSIS_WORKFLOW_ID,
+  EXAMPLE_INHERITED_SERVICE_ACCOUNT_WORKFLOW_ID,
   EXAMPLE_MANAGED_WORKFLOW_ID,
   EXAMPLE_SERVICE_ACCOUNT_WORKFLOW_ID,
   SECURITY_ALERT_ANALYSIS_WORKFLOW_ID,
@@ -68,6 +69,11 @@ type YamlTemplateManagedWorkflowDefinition = ManagedWorkflowDefinition & {
 };
 
 const templateRepresentativeValuesById: ManagedWorkflowTemplateValuesById = {
+  [EXAMPLE_INHERITED_SERVICE_ACCOUNT_WORKFLOW_ID]: {
+    serviceAccountId: 'parent-account',
+    childWorkflowId: 'child',
+    runAsMode: 'inherit',
+  },
   [EXAMPLE_SERVICE_ACCOUNT_WORKFLOW_ID]: { serviceAccountId: 'example-account' },
   [EXAMPLE_MANAGED_WORKFLOW_ID]: {
     recipient: 'World',

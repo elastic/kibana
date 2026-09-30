@@ -974,8 +974,20 @@ export const ConsoleStepInputSchema = z.object({
 
 // Base schema shared by both workflow.execute and workflow.executeAsync
 export const WorkflowExecuteStepInputSchema = z.object({
-  'workflow-id': z.string().min(1),
+  'workflow-id': z.string().min(1).max(1024),
   inputs: z.record(z.string(), z.unknown()).optional(),
+  inheritRunAs: z
+    .boolean()
+    .optional()
+    .describe(
+      'Execute a managed child as the parent service account; the child must not have its own run_as.'
+    ),
+  runAsMode: z
+    .enum(['default', 'inherit', 'override'])
+    .optional()
+    .describe(
+      'Use default identity, inherit the parent service account, or override the managed child service account for this execution. Do not combine with inheritRunAs.'
+    ),
 });
 
 const WorkflowExecuteBaseSchema = BaseStepSchema.extend({
@@ -1231,15 +1243,29 @@ export const WorkflowStepTokenUsageSchema = WorkflowTokenUsageSchema.extend({
     .describe('Id of the LLM connector the step resolved to, when reported by the model.'),
 });
 
+export const WorkflowEffectiveIdentitySchema = z.object({
+  type: z.literal('service_account'),
+  id: z.string().max(1024),
+  inheritedFrom: z
+    .object({
+      workloadId: z.string().max(1024),
+      workflowId: z.string().max(1024),
+      executionId: z.string().max(1024),
+      revision: z
+        .string()
+        .length(64)
+        .regex(/^[a-f0-9]{64}$/),
+    })
+    .optional(),
+});
+
 export const WorkflowExecutionContextSchema = z.object({
   id: z.string(),
   isTestRun: z.boolean(),
   startedAt: z.date(),
   url: z.string(),
   executedBy: z.string().optional(),
-  effectiveIdentity: z
-    .object({ type: z.literal('service_account'), id: z.string().max(1024) })
-    .optional(),
+  effectiveIdentity: WorkflowEffectiveIdentitySchema.optional(),
   triggeredBy: z.string().optional(),
   usage: WorkflowTokenUsageSchema.optional(),
 });

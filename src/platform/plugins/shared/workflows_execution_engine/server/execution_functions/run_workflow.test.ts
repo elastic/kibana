@@ -71,7 +71,7 @@ const mockHandleQueuedWorkflowRunAtTaskStart =
   >;
 
 describe('runWorkflow', () => {
-  it('finalizes pending steps before publishing an identity failure', async () => {
+  it.each([false, true])('finalizes identity failure (inherited: %s)', async (inherited) => {
     jest.clearAllMocks();
     const dependencies = mockContextDependencies();
     jest.spyOn(dependencies.coreStart.security.serviceAccounts, 'isEnabled').mockReturnValue(true);
@@ -99,13 +99,25 @@ describe('runWorkflow', () => {
       workflowId: 'workflow',
       spaceId: 'default',
       status: ExecutionStatus.WAITING_FOR_INPUT,
+      effectiveIdentity: inherited
+        ? {
+            type: 'service_account',
+            id: 'account-a',
+            inheritedFrom: {
+              workloadId: 'root-parent',
+              workflowId: 'parent',
+              executionId: 'parent-run',
+              revision: 'a'.repeat(64),
+            },
+          }
+        : undefined,
       workflowDefinition: {
         version: '1',
         name: 'Identity test',
         enabled: true,
         triggers: [{ type: 'manual' }],
         steps: [],
-        settings: { run_as: 'account-a' },
+        settings: inherited ? undefined : { run_as: 'account-a' },
       },
     });
     const execution = await workflowExecutionRepository.getWorkflowExecutionById(

@@ -1,0 +1,41 @@
+# Managed child service-account inheritance
+
+`workflow.execute` and `workflow.executeAsync` can delegate the parent's service account to a managed child. The service-account feature flag must be enabled. The engine uses the latest saved child definition when the call is admitted, with the normal execution snapshot retained for that run; there is no revision pinning or child approval bundle.
+
+```yaml
+- name: child
+  type: workflow.execute
+  with:
+    workflow-id: system-example-inherited-service-account-child
+    runAsMode: inherit
+```
+
+| Mode | Behavior |
+| --- | --- |
+| Omitted / `default` | Child's own SA when configured, otherwise the original caller. |
+| `inherit` | Parent's SA; rejects a child with its own `settings.run_as`. |
+| `override` | Parent's SA for this execution, even when the child has its own SA. Its saved binding is unchanged. |
+
+`inheritRunAs: true` is shorthand for `runAsMode: inherit`. Combining the two fields is rejected. The child ID and identity mode must be literal values in the saved parent definition. Input values may use expressions. Existing child visibility rules still apply: managed parents can call managed children; unmanaged parents cannot discover them through workflow composition.
+
+## Authorization and lifetime
+
+Every inherited hop requires a managed child in the same space and a live parent SA request. The original caller must still have execution access to the child. Admission checks that the loaded managed definition is current and the root parent's workload binding still matches. Further inherited calls retain that root binding.
+
+The child execution stores its effective identity, immediate parent workflow/execution, root workload ID, and a hash of the executed YAML for audit. The hash is internal metadata, not a user-maintained revision. Run and resume obtain fresh scoped credentials from the root binding, including after an async parent completes. Binding changes, revocation, or disabling SAs fail the child without falling back to the caller. `executedBy` continues to identify the initiating caller.
+
+## Trust assumption
+
+This approach trusts managed-workflow publishers. Ordinary workflow APIs reject managed definition edits, but the privileged managed-update API remains unchanged. A holder of `workflowsManagement:managed:update` with the required workflow access can edit a managed child and thereby affect code that executes under an inherited SA. Managed-only inheritance does not mitigate that privileged path. Trusted publisher updates are picked up by subsequent calls without revision approval.
+
+## Local examples
+
+Enable SAs and load `examples/developer_examples` and `examples/workflows_extensions_example`. The example-only `/internal/workflows_extensions_example/managed_identity/{suffix}` endpoint installs the registered managed template, accepting bounded options rather than arbitrary YAML.
+
+- `POST` with `{}` installs an unbound managed child.
+- `POST` with `{"serviceAccountId":"<SA>","childWorkflowId":"system-example-inherited-service-account-child","runAsMode":"inherit"}` installs a managed parent.
+- Set `asynchronous: true` for `workflow.executeAsync`, or `waitForInput: true` on the child to test durable resume.
+- Set `runAsMode: override` to use the parent SA over a child's saved SA.
+- `POST .../{suffix}/run` executes the example; `DELETE .../{suffix}` uninstalls it.
+
+The Scout `service_account_inheritance.spec.ts` suite covers these paths using real plugin installation and scoped execution credentials.
