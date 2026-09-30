@@ -6,42 +6,27 @@
  */
 
 import type {
-  CompactionStep,
   PreExecutionWorkflowStep,
   PreExecutionWorkflowStepData,
   RelevantSkillsStep,
 } from '@kbn/agent-builder-common';
 import {
-  ConversationRoundStepType,
   createPreExecutionWorkflowStep,
   createRelevantSkillsStep,
 } from '@kbn/agent-builder-common';
-import type { CompactedConversation } from './conversation_compactor';
 import type { RelevantSkillSelection } from './relevant_skills/select_relevant_skills';
 
-export type PreExecutionStep = CompactionStep | PreExecutionWorkflowStep | RelevantSkillsStep;
+export type PreExecutionStep = PreExecutionWorkflowStep | RelevantSkillsStep;
 
 /** The bookkeeping steps a run starts with, before the agent produces anything. */
 export const createPreExecutionSteps = ({
-  compactionResult,
   preExecutionWorkflow,
   relevantSkillsSelection,
 }: {
-  compactionResult?: CompactedConversation;
   preExecutionWorkflow?: PreExecutionWorkflowStepData;
   relevantSkillsSelection?: RelevantSkillSelection;
 }): PreExecutionStep[] => {
   const steps: PreExecutionStep[] = [];
-
-  if (compactionResult?.compactionTriggered && compactionResult.summary) {
-    const compactionStep: CompactionStep = {
-      type: ConversationRoundStepType.compaction,
-      token_count_before: compactionResult.tokensBefore ?? 0,
-      token_count_after: compactionResult.tokensAfter ?? 0,
-      summarized_round_count: compactionResult.summary.summarized_round_count,
-    };
-    steps.push(compactionStep);
-  }
 
   if (
     preExecutionWorkflow?.model_context !== undefined ||

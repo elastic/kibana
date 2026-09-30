@@ -385,7 +385,9 @@ export const WaitForInputStepInputSchema = z
 export const WaitForInputStepSchema = BaseStepSchema.extend({
   type: z.literal('waitForInput').describe('Pause execution until external input is provided'),
   with: WaitForInputStepInputSchema,
-}).merge(DynamicTimeoutPropSchema);
+})
+  .merge(DynamicTimeoutPropSchema)
+  .merge(StepWithOnFailureSchema);
 export type WaitForInputStep = z.infer<typeof WaitForInputStepSchema>;
 
 export const WaitForApprovalStepInputSchema = z
@@ -414,7 +416,9 @@ export const WaitForApprovalStepSchema = BaseStepSchema.extend({
     .literal('waitForApproval')
     .describe('Pause execution until approval or rejection is received'),
   with: WaitForApprovalStepInputSchema,
-}).merge(DynamicTimeoutPropSchema);
+})
+  .merge(DynamicTimeoutPropSchema)
+  .merge(StepWithOnFailureSchema);
 export type WaitForApprovalStep = z.infer<typeof WaitForApprovalStepSchema>;
 
 export const DataSetStepInputSchema = z
@@ -975,7 +979,7 @@ export const WorkflowExecuteStepInputSchema = z.object({
 
 const WorkflowExecuteBaseSchema = BaseStepSchema.extend({
   with: WorkflowExecuteStepInputSchema,
-});
+}).merge(StepWithOnFailureSchema);
 
 export const WorkflowExecuteStepSchema = WorkflowExecuteBaseSchema.extend({
   type: z.literal('workflow.execute'),
