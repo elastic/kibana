@@ -58,11 +58,15 @@ describe('GET_ATTACK_DISCOVERY_STATUS_TOOL_ID', () => {
 describe('getAttackDiscoveryStatusTool', () => {
   const mockLogger = loggingSystemMock.createLogger();
   const mockEsClient = elasticsearchClientMock.createScopedClusterClient();
-  const mockGetEventLogIndex = vi.fn<Promise<string>, []>().mockResolvedValue('event-log-*');
-  const mockGetWorkflowExecution = vi.fn<
-    ReturnType<WorkflowExecutionLookup['getWorkflowExecution']>,
-    Parameters<WorkflowExecutionLookup['getWorkflowExecution']>
-  >();
+  const mockGetEventLogIndex = vi
+    .fn<(...args: []) => Promise<string>>()
+    .mockResolvedValue('event-log-*');
+  const mockGetWorkflowExecution =
+    vi.fn<
+      (
+        ...args: Parameters<WorkflowExecutionLookup['getWorkflowExecution']>
+      ) => ReturnType<WorkflowExecutionLookup['getWorkflowExecution']>
+    >();
 
   const mockContext = {
     ...agentBuilderMocks.tools.createHandlerContext(),

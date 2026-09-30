@@ -98,39 +98,41 @@ vi.mock('../../applications/fleet/components/fleet_server_instructions/advanced_
 });
 
 /**
- * These steps functions use hooks inside useMemo which is not compatible with jest currently
+ * These steps functions use hooks inside useMemo which is not compatible with jest currently.
+ * They are mocked per module (not via `./steps`): `compute_steps` imports them from the steps
+ * index while that index's mock would still be loading its actual module.
  */
-vi.mock('./steps', async () => {
-  const module = await vi.importActual('./steps');
-  return {
-    ...module,
-    AgentPolicySelectionStep: vi.fn().mockReturnValue({
-      'data-test-subj': 'agent-policy-selection-step',
-      title: 'agent-policy-selection-step',
-      children: <>TEST</>,
-    }),
-    AgentEnrollmentKeySelectionStep: vi.fn().mockReturnValue({
-      'data-test-subj': 'agent-enrollment-key-selection-step',
-      title: 'agent-enrollment-key-selection-step',
-      children: <>TEST</>,
-    }),
-    ConfigureStandaloneAgentStep: vi.fn().mockReturnValue({
-      'data-test-subj': 'configure-standalone-step',
-      title: 'configure-standalone-step',
-      children: <>TEST</>,
-    }),
-    DownloadStep: vi.fn().mockReturnValue({
-      'data-test-subj': 'download-step',
-      title: 'download-step',
-      children: <>TEST</>,
-    }),
-    IncomingDataConfirmationStep: vi.fn().mockReturnValue({
-      'data-test-subj': 'incoming-data-confirmation-step',
-      title: 'incoming-data-confirmation-step',
-      children: <>TEST</>,
-    }),
-  };
-});
+vi.mock('./steps/agent_policy_selection_step', () => ({
+  AgentPolicySelectionStep: vi.fn().mockReturnValue({
+    'data-test-subj': 'agent-policy-selection-step',
+    title: 'agent-policy-selection-step',
+    children: <>TEST</>,
+  }),
+}));
+
+vi.mock('./steps/agent_enrollment_key_selection_step', () => ({
+  AgentEnrollmentKeySelectionStep: vi.fn().mockReturnValue({
+    'data-test-subj': 'agent-enrollment-key-selection-step',
+    title: 'agent-enrollment-key-selection-step',
+    children: <>TEST</>,
+  }),
+}));
+
+vi.mock('./steps/configure_standalone_agent_step', () => ({
+  ConfigureStandaloneAgentStep: vi.fn().mockReturnValue({
+    'data-test-subj': 'configure-standalone-step',
+    title: 'configure-standalone-step',
+    children: <>TEST</>,
+  }),
+}));
+
+vi.mock('./steps/incoming_data_confirmation_step', () => ({
+  IncomingDataConfirmationStep: vi.fn().mockReturnValue({
+    'data-test-subj': 'incoming-data-confirmation-step',
+    title: 'incoming-data-confirmation-step',
+    children: <>TEST</>,
+  }),
+}));
 
 vi.mock('../../../common/services/agent_policies_helpers', () => {
   return {

@@ -78,7 +78,7 @@ const mockUseApmIndexSettingsContext = useApmIndexSettingsContext as MockedFunct
 const mockUseApmPluginContext = useApmPluginContext as MockedFunction<typeof useApmPluginContext>;
 const mockUseApmParams = useApmParams as MockedFunction<typeof useApmParams>;
 
-const mockGetRedirectUrl = vi.fn<string | undefined, [unknown]>();
+const mockGetRedirectUrl = vi.fn<(...args: [unknown]) => string | undefined>();
 const mockLocatorGet = vi.fn().mockReturnValue({ getRedirectUrl: mockGetRedirectUrl });
 
 async function renderTraceOverview() {

@@ -40,8 +40,8 @@ describe('inference_tracer_provider', () => {
       const mockProcessor: tracing.SpanProcessor = {
         onStart: vi.fn(),
         onEnd: vi.fn(),
-        forceFlush: vi.fn<Promise<void>, []>().mockResolvedValue(undefined),
-        shutdown: vi.fn<Promise<void>, []>().mockResolvedValue(undefined),
+        forceFlush: vi.fn<(...args: []) => Promise<void>>().mockResolvedValue(undefined),
+        shutdown: vi.fn<(...args: []) => Promise<void>>().mockResolvedValue(undefined),
       };
 
       initInferenceTracerProvider({
@@ -60,8 +60,8 @@ describe('inference_tracer_provider', () => {
       const mockProcessor: tracing.SpanProcessor = {
         onStart: vi.fn(),
         onEnd: vi.fn(),
-        forceFlush: vi.fn<Promise<void>, []>().mockResolvedValue(undefined),
-        shutdown: vi.fn<Promise<void>, []>().mockResolvedValue(undefined),
+        forceFlush: vi.fn<(...args: []) => Promise<void>>().mockResolvedValue(undefined),
+        shutdown: vi.fn<(...args: []) => Promise<void>>().mockResolvedValue(undefined),
       };
 
       const resource = resources.defaultResource();
@@ -86,8 +86,8 @@ describe('inference_tracer_provider', () => {
       const mockProcessor: tracing.SpanProcessor = {
         onStart: vi.fn(),
         onEnd: vi.fn(),
-        forceFlush: vi.fn<Promise<void>, []>().mockResolvedValue(undefined),
-        shutdown: vi.fn<Promise<void>, []>().mockResolvedValue(undefined),
+        forceFlush: vi.fn<(...args: []) => Promise<void>>().mockResolvedValue(undefined),
+        shutdown: vi.fn<(...args: []) => Promise<void>>().mockResolvedValue(undefined),
       };
 
       initInferenceTracerProvider({
@@ -104,8 +104,8 @@ describe('inference_tracer_provider', () => {
       const mockProcessor: tracing.SpanProcessor = {
         onStart: vi.fn(),
         onEnd: vi.fn(),
-        forceFlush: vi.fn<Promise<void>, []>().mockResolvedValue(undefined),
-        shutdown: vi.fn<Promise<void>, []>().mockResolvedValue(undefined),
+        forceFlush: vi.fn<(...args: []) => Promise<void>>().mockResolvedValue(undefined),
+        shutdown: vi.fn<(...args: []) => Promise<void>>().mockResolvedValue(undefined),
       };
 
       initInferenceTracerProvider({

@@ -26,7 +26,7 @@ import {
   createUpdateIndexState,
 } from '../test_utils/helpers';
 
-const mockUseIndexContext = vi.fn<IndexStateContext, []>();
+const mockUseIndexContext = vi.fn<(...args: []) => IndexStateContext>();
 
 vi.mock('./context', () => {
   const mocked = {
@@ -70,9 +70,9 @@ const unfreezeDeprecation = {
 } satisfies EnrichedDeprecationInfo;
 
 describe('ReindexActionCell', () => {
-  const mockOpenFlyout = vi.fn<void, []>();
-  const mockOpenModal = vi.fn<void, []>();
-  const mockSetSelectedResolutionType = vi.fn<void, [step: string]>();
+  const mockOpenFlyout = vi.fn<(...args: []) => void>();
+  const mockOpenModal = vi.fn<(...args: []) => void>();
+  const mockSetSelectedResolutionType = vi.fn<(...args: [step: string]) => void>();
 
   beforeEach(() => {
     mockUseIndexContext.mockReset();

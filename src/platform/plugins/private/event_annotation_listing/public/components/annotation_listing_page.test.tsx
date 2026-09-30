@@ -116,7 +116,7 @@ const renderPage = (
   (core.application.capabilities as unknown as Record<string, unknown>).visualize_v2 =
     overrides.visualizeCapabilities ?? { delete: true, save: true };
 
-  const searchSessionStartMethod = vi.fn<string, []>(() => 'some-session-id');
+  const searchSessionStartMethod = vi.fn<(...args: []) => string>(() => 'some-session-id');
 
   // `useNavigateToLens` only invokes `embeddable.getStateTransfer()` when the
   // empty-state CTA is clicked, which none of these tests reach. An empty

@@ -24,8 +24,8 @@ import {
 vi.mock('@kbn/core-di-browser');
 
 const mockUseService = useService as MockedFunction<typeof useService>;
-const mockCanRead = vi.fn<boolean, [AlertingV2Feature]>();
-const mockCanWrite = vi.fn<boolean, [AlertingV2Feature]>();
+const mockCanRead = vi.fn<(...args: [AlertingV2Feature]) => boolean>();
+const mockCanWrite = vi.fn<(...args: [AlertingV2Feature]) => boolean>();
 
 const mockReadableFeatures = (readable: (feature: AlertingV2Feature) => boolean) => {
   mockCanRead.mockImplementation(readable);

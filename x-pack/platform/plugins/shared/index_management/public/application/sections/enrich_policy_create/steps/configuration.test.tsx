@@ -58,8 +58,8 @@ const renderConfigurationStep = async () => {
   const draft: DraftPolicy = {};
   const completionState: CompletionState = { configurationStep: false, fieldsSelectionStep: false };
   const onNext = vi.fn();
-  const updateDraft = vi.fn<void, [SetStateAction<DraftPolicy>]>();
-  const updateCompletionState = vi.fn<void, [SetStateAction<CompletionState>]>();
+  const updateDraft = vi.fn<(...args: [SetStateAction<DraftPolicy>]) => void>();
+  const updateCompletionState = vi.fn<(...args: [SetStateAction<CompletionState>]) => void>();
   const application = applicationServiceMock.createStartContract();
   application.getUrlForApp.mockReturnValue(uploadFileUrl);
   const appDependencies = { core: { application } } as unknown as AppDependencies;

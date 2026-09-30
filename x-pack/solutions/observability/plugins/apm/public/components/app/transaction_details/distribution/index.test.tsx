@@ -34,7 +34,7 @@ interface CapturedWaterfallProps {
   traceSamples?: Array<{ traceId: string; transactionId: string }>;
 }
 
-const mockWaterfallWithSummarySpy = vi.fn<void, [CapturedWaterfallProps]>();
+const mockWaterfallWithSummarySpy = vi.fn<(...args: [CapturedWaterfallProps]) => void>();
 
 vi.mock('../waterfall_with_summary', () => {
   const mocked = {

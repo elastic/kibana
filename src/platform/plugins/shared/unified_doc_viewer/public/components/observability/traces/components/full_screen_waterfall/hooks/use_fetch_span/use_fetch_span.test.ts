@@ -22,7 +22,7 @@ vi.mock('../../../../../../../plugin', () => {
   return { ...mocked, default: mocked };
 });
 
-const mockFetchSpan = vi.fn<Promise<UnifiedSpanDocument | undefined>, any>();
+const mockFetchSpan = vi.fn<(...args: any) => Promise<UnifiedSpanDocument | undefined>>();
 const mockAddDanger = vi.fn();
 const mockGetAbsoluteTime = vi.fn(() => ({
   from: '2023-01-01T00:00:00.000Z',

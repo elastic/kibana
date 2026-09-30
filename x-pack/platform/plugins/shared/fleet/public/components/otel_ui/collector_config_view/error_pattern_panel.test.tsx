@@ -16,7 +16,7 @@ import { createFleetTestRendererMock } from '../../../mock';
 import type { UseErrorPatternsResult } from './use_error_patterns';
 import { ErrorPatternPanel } from './error_pattern_panel';
 
-const mockUseErrorPatterns = vi.fn<UseErrorPatternsResult, any>();
+const mockUseErrorPatterns = vi.fn<(...args: any) => UseErrorPatternsResult>();
 vi.mock('./use_error_patterns', () => {
   const mocked = {
     useErrorPatterns: (...args: any[]) => mockUseErrorPatterns(...args),

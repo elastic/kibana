@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-import { AsyncLocalStorage } from 'node:async_hooks';
-import { AsyncLocalStorageProviderSingleton } from '@langchain/core/singletons';
 import {
   Command,
   END,
@@ -22,9 +20,6 @@ describe('typedInterrupt', () => {
   beforeAll(() => {
     // @ts-ignore
     delete global.window;
-    // The jsdom config resolves the `browser` (web) build of @langchain/langgraph, which does not
-    // register the AsyncLocalStorage that `interrupt()` relies on; do what its Node entry does.
-    AsyncLocalStorageProviderSingleton.initializeGlobalInstance(new AsyncLocalStorage());
   });
 
   it('interrupt updates state', async () => {

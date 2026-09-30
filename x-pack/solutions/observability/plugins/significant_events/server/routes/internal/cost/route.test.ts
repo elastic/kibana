@@ -73,7 +73,7 @@ const emptySearch = {
 };
 
 const search = vi.fn();
-const getPrices = vi.fn<Promise<PriceResult | null>, []>();
+const getPrices = vi.fn<(...args: []) => Promise<PriceResult | null>>();
 const priceService: PriceService = { getPrices };
 
 const server = {

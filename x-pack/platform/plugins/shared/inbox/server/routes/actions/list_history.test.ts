@@ -34,16 +34,18 @@ const fakeProviderWithHistory = (
   history: InboxAction[]
 ): Mocked<InboxActionProvider> => ({
   sourceApp,
-  list: vi.fn<ReturnType<InboxActionProvider['list']>, Parameters<InboxActionProvider['list']>>(
-    async () => ({ actions: [], total: 0 })
-  ),
+  list: vi.fn<
+    (...args: Parameters<InboxActionProvider['list']>) => ReturnType<InboxActionProvider['list']>
+  >(async () => ({ actions: [], total: 0 })),
   listProcessed: vi.fn<
-    ReturnType<NonNullable<InboxActionProvider['listProcessed']>>,
-    Parameters<NonNullable<InboxActionProvider['listProcessed']>>
+    (
+      ...args: Parameters<NonNullable<InboxActionProvider['listProcessed']>>
+    ) => ReturnType<NonNullable<InboxActionProvider['listProcessed']>>
   >(async () => ({ actions: history, total: history.length })),
   respond: vi.fn<
-    ReturnType<InboxActionProvider['respond']>,
-    Parameters<InboxActionProvider['respond']>
+    (
+      ...args: Parameters<InboxActionProvider['respond']>
+    ) => ReturnType<InboxActionProvider['respond']>
   >(async () => {}),
 });
 

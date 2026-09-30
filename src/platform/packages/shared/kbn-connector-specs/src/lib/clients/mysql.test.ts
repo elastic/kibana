@@ -17,7 +17,7 @@ interface MockPool {
   end: Mock;
 }
 
-const mockCreatePool = vi.fn<MockPool, [unknown?]>(() => ({
+const mockCreatePool = vi.fn<(...args: [unknown?]) => MockPool>(() => ({
   end: vi.fn().mockResolvedValue(undefined),
 }));
 

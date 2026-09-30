@@ -103,10 +103,12 @@ interface UseStepExecutionQueryStub {
   isLoading: boolean;
 }
 
-const mockUseStepExecution = vi.fn<UseStepExecutionQueryStub, UseStepExecutionParams>(() => ({
-  data: undefined,
-  isLoading: false,
-}));
+const mockUseStepExecution = vi.fn<(...args: UseStepExecutionParams) => UseStepExecutionQueryStub>(
+  () => ({
+    data: undefined,
+    isLoading: false,
+  })
+);
 
 vi.mock('../../workflow_execution_detail/model/use_step_execution', () => {
   const mocked = {

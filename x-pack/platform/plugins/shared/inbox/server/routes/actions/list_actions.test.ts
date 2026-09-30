@@ -36,15 +36,16 @@ const fakeProvider = (
   actions = createStubInboxActions(3, { source_app: sourceApp })
 ): Mocked<InboxActionProvider> => ({
   sourceApp,
-  list: vi.fn<ReturnType<InboxActionProvider['list']>, Parameters<InboxActionProvider['list']>>(
-    async ({ status }) => {
-      const filtered = actions.filter((action) => !status || action.status === status);
-      return { actions: filtered, total: filtered.length };
-    }
-  ),
+  list: vi.fn<
+    (...args: Parameters<InboxActionProvider['list']>) => ReturnType<InboxActionProvider['list']>
+  >(async ({ status }) => {
+    const filtered = actions.filter((action) => !status || action.status === status);
+    return { actions: filtered, total: filtered.length };
+  }),
   respond: vi.fn<
-    ReturnType<InboxActionProvider['respond']>,
-    Parameters<InboxActionProvider['respond']>
+    (
+      ...args: Parameters<InboxActionProvider['respond']>
+    ) => ReturnType<InboxActionProvider['respond']>
   >(async () => {}),
 });
 

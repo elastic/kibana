@@ -19,24 +19,23 @@ import { ClusterSettingsTableRow } from './table_row';
 
 type UpdateClusterSettings = (settings: string[]) => Promise<{ error: ResponseError | null }>;
 
-const mockUpdateClusterSettings = vi.fn<
-  ReturnType<UpdateClusterSettings>,
-  Parameters<UpdateClusterSettings>
->();
+const mockUpdateClusterSettings =
+  vi.fn<(...args: Parameters<UpdateClusterSettings>) => ReturnType<UpdateClusterSettings>>();
 
 const mockAddContent = vi.fn<
-  void,
-  [
-    {
-      id: string;
-      Component: React.ComponentType<unknown>;
-      props: {
-        removeClusterSettings: (settings: string[]) => Promise<void>;
-      };
-    }
-  ]
+  (
+    ...args: [
+      {
+        id: string;
+        Component: React.ComponentType<unknown>;
+        props: {
+          removeClusterSettings: (settings: string[]) => Promise<void>;
+        };
+      }
+    ]
+  ) => void
 >();
-const mockRemoveContent = vi.fn<void, [id: string]>();
+const mockRemoveContent = vi.fn<(...args: [id: string]) => void>();
 
 vi.mock('../../../../app_context', async () => {
   const actual = await vi.importActual('../../../../app_context');

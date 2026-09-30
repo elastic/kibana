@@ -26,7 +26,7 @@ vi.mock('../../../../hooks/use_significant_events_run_quotas');
 const mockUseRunQuotas = useRunQuotas as MockedFunction<typeof useRunQuotas>;
 const mockUseUpdateRunQuotas = useUpdateRunQuotas as MockedFunction<typeof useUpdateRunQuotas>;
 
-const save = vi.fn<Promise<RunQuotasResponse>, [RunQuotaSettingsUpdate]>();
+const save = vi.fn<(...args: [RunQuotaSettingsUpdate]) => Promise<RunQuotasResponse>>();
 const refetch = vi.fn();
 
 const response = (overrides: Partial<RunQuotasResponse> = {}): RunQuotasResponse => ({

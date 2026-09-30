@@ -15,7 +15,7 @@ import { createPriceService, type PriceService, type PriceServiceFetch } from '.
 
 const mockFetchFn = (): Mock<
   (...args: Parameters<PriceServiceFetch>) => ReturnType<PriceServiceFetch>
-> => vi.fn<ReturnType<PriceServiceFetch>, Parameters<PriceServiceFetch>>();
+> => vi.fn<(...args: Parameters<PriceServiceFetch>) => ReturnType<PriceServiceFetch>>();
 
 const FIXTURE: unknown[] = JSON.parse(
   readFileSync(resolve(__dirname, '__fixtures__/base_prices.json'), 'utf8')

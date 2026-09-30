@@ -21,8 +21,10 @@ import { TutorialDirectory } from './tutorial_directory';
 
 const mockSetBreadcrumbs = vi.fn();
 const mockHistoryPush = vi.fn();
-const mockGetAddDataTabs = vi.fn<AddDataTab[], []>(() => []);
-const mockGetDirectoryHeaderLinks = vi.fn<TutorialDirectoryHeaderLinkComponent[], []>(() => []);
+const mockGetAddDataTabs = vi.fn<(...args: []) => AddDataTab[]>(() => []);
+const mockGetDirectoryHeaderLinks = vi.fn<(...args: []) => TutorialDirectoryHeaderLinkComponent[]>(
+  () => []
+);
 const mockGetUrlForApp = vi.fn(
   (appId: string, { path }: { path: string }) => `/app/${appId}${path}`
 );

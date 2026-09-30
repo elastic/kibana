@@ -72,10 +72,12 @@ describe('GET_EXECUTION_SUMMARY_TOOL_ID', () => {
 describe('getExecutionSummaryTool', () => {
   const mockLogger = loggingSystemMock.createLogger();
   const mockEsClient = elasticsearchClientMock.createScopedClusterClient();
-  const mockGetWorkflowExecution = vi.fn<
-    ReturnType<WorkflowExecutionFetcher['getWorkflowExecution']>,
-    Parameters<WorkflowExecutionFetcher['getWorkflowExecution']>
-  >();
+  const mockGetWorkflowExecution =
+    vi.fn<
+      (
+        ...args: Parameters<WorkflowExecutionFetcher['getWorkflowExecution']>
+      ) => ReturnType<WorkflowExecutionFetcher['getWorkflowExecution']>
+    >();
 
   const mockContext = {
     ...agentBuilderMocks.tools.createHandlerContext(),

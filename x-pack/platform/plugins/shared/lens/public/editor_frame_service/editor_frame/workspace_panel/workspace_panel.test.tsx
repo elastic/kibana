@@ -848,7 +848,7 @@ describe('workspace_panel', () => {
 
       const mockRemoveUserMessages = vi.fn();
       const mockAddUserMessages = vi.fn(() => mockRemoveUserMessages);
-      const mockGetUserMessages = vi.fn<UserMessage[], unknown[]>(() => []);
+      const mockGetUserMessages = vi.fn<(...args: unknown[]) => UserMessage[]>(() => []);
 
       const mounted = mountWithReduxStore(
         <EditorFrameServiceProvider

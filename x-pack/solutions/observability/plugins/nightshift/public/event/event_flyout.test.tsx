@@ -27,7 +27,7 @@ vi.mock('@kbn/kibana-react-plugin/public', () => {
   return { ...mocked, default: mocked };
 });
 
-const mockUseInvestigationState = vi.fn<UseInvestigationStateResult, [unknown]>();
+const mockUseInvestigationState = vi.fn<(...args: [unknown]) => UseInvestigationStateResult>();
 
 vi.mock('@kbn/investigation-output', () => {
   const mocked = {

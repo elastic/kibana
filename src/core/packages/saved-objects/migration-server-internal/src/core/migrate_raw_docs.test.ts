@@ -22,7 +22,7 @@ import { TransformSavedObjectDocumentError } from './transform_saved_object_docu
 
 describe('migrateRawDocs', () => {
   test('converts raw docs to saved objects', async () => {
-    const transform = vi.fn<any, any>((doc: any) => [
+    const transform = vi.fn<(...args: any) => any>((doc: any) => [
       set(_.cloneDeep(doc), 'attributes.name', 'HOI!'),
     ]);
     const result = await migrateRawDocs(
@@ -99,7 +99,7 @@ describe('migrateRawDocs', () => {
   });
 
   test('throws when encountering a corrupt saved object document', async () => {
-    const transform = vi.fn<any, any>((doc: any) => [
+    const transform = vi.fn<(...args: any) => any>((doc: any) => [
       set(_.cloneDeep(doc), 'attributes.name', 'TADA'),
     ]);
     const result = migrateRawDocs(
@@ -119,7 +119,7 @@ describe('migrateRawDocs', () => {
   });
 
   test('handles when one document is transformed into multiple documents', async () => {
-    const transform = vi.fn<any, any>((doc: any) => [
+    const transform = vi.fn<(...args: any) => any>((doc: any) => [
       set(_.cloneDeep(doc), 'attributes.name', 'HOI!'),
       { id: 'bar', type: 'foo', attributes: { name: 'baz' } },
     ]);
@@ -152,7 +152,7 @@ describe('migrateRawDocs', () => {
   });
 
   test('rejects when the transform function throws an error', async () => {
-    const transform = vi.fn<any, any>((doc: any) => {
+    const transform = vi.fn<(...args: any) => any>((doc: any) => {
       throw new Error('error during transform');
     });
     await expect(
@@ -169,7 +169,7 @@ describe('migrateRawDocsSafely', () => {
   });
 
   test('converts raw docs to saved objects', async () => {
-    const transform = vi.fn<any, any>((doc: any) => [
+    const transform = vi.fn<(...args: any) => any>((doc: any) => [
       set(_.cloneDeep(doc), 'attributes.name', 'HOI!'),
     ]);
     const task = migrateRawDocsSafely({
@@ -247,7 +247,7 @@ describe('migrateRawDocsSafely', () => {
   });
 
   test('returns a `left` tag when encountering a corrupt saved object document', async () => {
-    const transform = vi.fn<any, any>((doc: any) => [
+    const transform = vi.fn<(...args: any) => any>((doc: any) => [
       set(_.cloneDeep(doc), 'attributes.name', 'TADA'),
     ]);
     const task = migrateRawDocsSafely({
@@ -273,7 +273,7 @@ describe('migrateRawDocsSafely', () => {
   });
 
   test('handles when one document is transformed into multiple documents', async () => {
-    const transform = vi.fn<any, any>((doc: any) => [
+    const transform = vi.fn<(...args: any) => any>((doc: any) => [
       set(_.cloneDeep(doc), 'attributes.name', 'HOI!'),
       { id: 'bar', type: 'foo', attributes: { name: 'baz' } },
     ]);
@@ -307,7 +307,7 @@ describe('migrateRawDocsSafely', () => {
   });
 
   test('instance of Either.left containing transform errors when the transform function throws a TransformSavedObjectDocument error', async () => {
-    const transform = vi.fn<any, any>((doc: any) => {
+    const transform = vi.fn<(...args: any) => any>((doc: any) => {
       throw new TransformSavedObjectDocumentError(new Error('error during transform'), '8.0.0');
     });
     const task = migrateRawDocsSafely({

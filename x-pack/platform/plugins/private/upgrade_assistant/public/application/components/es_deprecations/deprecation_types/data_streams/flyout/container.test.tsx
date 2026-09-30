@@ -125,13 +125,13 @@ describe('DataStreamReindexFlyout', () => {
       <DataStreamReindexFlyout
         deprecation={mockDeprecation}
         closeFlyout={vi.fn()}
-        loadDataStreamMetadata={vi.fn<Promise<void>, []>()}
+        loadDataStreamMetadata={vi.fn<(...args: []) => Promise<void>>()}
         migrationState={migrationState}
-        initMigration={vi.fn<void, [resolutionType: 'reindex' | 'readonly']>()}
-        startReindex={vi.fn<Promise<void>, []>()}
-        cancelReindex={vi.fn<Promise<void>, []>()}
-        startReadonly={vi.fn<Promise<void>, []>()}
-        cancelReadonly={vi.fn<Promise<void>, []>()}
+        initMigration={vi.fn<(...args: [resolutionType: 'reindex' | 'readonly']) => void>()}
+        startReindex={vi.fn<(...args: []) => Promise<void>>()}
+        cancelReindex={vi.fn<(...args: []) => Promise<void>>()}
+        startReadonly={vi.fn<(...args: []) => Promise<void>>()}
+        cancelReadonly={vi.fn<(...args: []) => Promise<void>>()}
       />
     );
 

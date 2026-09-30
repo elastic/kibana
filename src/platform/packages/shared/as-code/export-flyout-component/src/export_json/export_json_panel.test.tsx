@@ -70,7 +70,7 @@ describe('ExportJsonPanel', () => {
     const request = `POST kbn:/api/object\n${jsonValue}`;
     const devToolsDataUri = compressToEncodedURIComponent(request);
     const getRequest = vi.fn(() => request);
-    const useUrl = vi.fn<ReturnType<UseConsoleUrl>, Parameters<UseConsoleUrl>>(
+    const useUrl = vi.fn<(...args: Parameters<UseConsoleUrl>) => ReturnType<UseConsoleUrl>>(
       () => '/app/dev_tools'
     );
 

@@ -788,10 +788,8 @@ describe('executeDashboardOperations', () => {
   });
 
   it('adds non-visualization section panels without invoking the visualization resolver', async () => {
-    const resolvePanelContent = vi.fn<
-      ReturnType<ResolvePanelContent>,
-      Parameters<ResolvePanelContent>
-    >();
+    const resolvePanelContent =
+      vi.fn<(...args: Parameters<ResolvePanelContent>) => ReturnType<ResolvePanelContent>>();
 
     const result = await executeDashboardOperations({
       dashboardData: {
@@ -842,8 +840,7 @@ describe('executeDashboardOperations', () => {
     const firstSectionPanel = createDeferred<PanelContentAttempt>();
     const secondSectionPanel = createDeferred<PanelContentAttempt>();
     const resolvePanelContent = vi.fn<
-      ReturnType<ResolvePanelContent>,
-      Parameters<ResolvePanelContent>
+      (...args: Parameters<ResolvePanelContent>) => ReturnType<ResolvePanelContent>
     >(async ({ nlQuery }) => {
       if (nlQuery === 'show total requests') {
         return firstSectionPanel.promise;
@@ -943,8 +940,7 @@ describe('executeDashboardOperations', () => {
     const sectionPanel = createDeferred<PanelContentAttempt>();
     const topLevelPanel = createDeferred<PanelContentAttempt>();
     const resolvePanelContent = vi.fn<
-      ReturnType<ResolvePanelContent>,
-      Parameters<ResolvePanelContent>
+      (...args: Parameters<ResolvePanelContent>) => ReturnType<ResolvePanelContent>
     >(async ({ nlQuery }) => {
       if (nlQuery === 'show total requests') {
         return sectionPanel.promise;
@@ -1565,8 +1561,7 @@ describe('executeDashboardOperations', () => {
 
     it('does not resolve visualization edits for panels removed earlier in the sequence', async () => {
       const resolvePanelContent = vi.fn<
-        ReturnType<ResolvePanelContent>,
-        Parameters<ResolvePanelContent>
+        (...args: Parameters<ResolvePanelContent>) => ReturnType<ResolvePanelContent>
       >(async () =>
         createResolvedPanelContent({ type: LENS_EMBEDDABLE_TYPE, config: { type: 'bar' } })
       );
@@ -1725,8 +1720,7 @@ describe('executeDashboardOperations', () => {
       ]);
 
       const resolvePanelContent = vi.fn<
-        ReturnType<ResolvePanelContent>,
-        Parameters<ResolvePanelContent>
+        (...args: Parameters<ResolvePanelContent>) => ReturnType<ResolvePanelContent>
       >(({ identifier }) => {
         const deferred = deferredByPanelId.get(identifier);
         if (!deferred) {
@@ -1813,8 +1807,7 @@ describe('executeDashboardOperations', () => {
 
     it('records a failure for each occurrence when a panelId is duplicated within one op', async () => {
       const resolvePanelContent = vi.fn<
-        ReturnType<ResolvePanelContent>,
-        Parameters<ResolvePanelContent>
+        (...args: Parameters<ResolvePanelContent>) => ReturnType<ResolvePanelContent>
       >(async ({ identifier }) =>
         createResolvedPanelContent({
           type: LENS_EMBEDDABLE_TYPE,
@@ -1887,10 +1880,8 @@ describe('executeDashboardOperations', () => {
     });
 
     it('edits a markdown panel content in place by panelId', async () => {
-      const resolvePanelContent = vi.fn<
-        ReturnType<ResolvePanelContent>,
-        Parameters<ResolvePanelContent>
-      >();
+      const resolvePanelContent =
+        vi.fn<(...args: Parameters<ResolvePanelContent>) => ReturnType<ResolvePanelContent>>();
 
       const result = await executeDashboardOperations({
         dashboardData: {
@@ -1930,10 +1921,8 @@ describe('executeDashboardOperations', () => {
     });
 
     it('records a failure when a markdown config-source edit targets a non-markdown panel', async () => {
-      const resolvePanelContent = vi.fn<
-        ReturnType<ResolvePanelContent>,
-        Parameters<ResolvePanelContent>
-      >();
+      const resolvePanelContent =
+        vi.fn<(...args: Parameters<ResolvePanelContent>) => ReturnType<ResolvePanelContent>>();
 
       const result = await executeDashboardOperations({
         dashboardData: {
@@ -1978,10 +1967,8 @@ describe('executeDashboardOperations', () => {
     });
 
     it('edits an ML anomaly charts panel in place by panelId', async () => {
-      const resolvePanelContent = vi.fn<
-        ReturnType<ResolvePanelContent>,
-        Parameters<ResolvePanelContent>
-      >();
+      const resolvePanelContent =
+        vi.fn<(...args: Parameters<ResolvePanelContent>) => ReturnType<ResolvePanelContent>>();
 
       const result = await executeDashboardOperations({
         dashboardData: {
@@ -2029,10 +2016,8 @@ describe('executeDashboardOperations', () => {
     });
 
     it('records a failure when an ML charts config-source edit targets a non-ML panel', async () => {
-      const resolvePanelContent = vi.fn<
-        ReturnType<ResolvePanelContent>,
-        Parameters<ResolvePanelContent>
-      >();
+      const resolvePanelContent =
+        vi.fn<(...args: Parameters<ResolvePanelContent>) => ReturnType<ResolvePanelContent>>();
 
       const result = await executeDashboardOperations({
         dashboardData: {
@@ -2068,10 +2053,8 @@ describe('executeDashboardOperations', () => {
     });
 
     it('edits an ML anomaly swimlane panel in place by panelId', async () => {
-      const resolvePanelContent = vi.fn<
-        ReturnType<ResolvePanelContent>,
-        Parameters<ResolvePanelContent>
-      >();
+      const resolvePanelContent =
+        vi.fn<(...args: Parameters<ResolvePanelContent>) => ReturnType<ResolvePanelContent>>();
 
       const result = await executeDashboardOperations({
         dashboardData: {
@@ -2121,10 +2104,8 @@ describe('executeDashboardOperations', () => {
     });
 
     it('records a failure when an ML swimlane config-source edit targets a non-swimlane panel', async () => {
-      const resolvePanelContent = vi.fn<
-        ReturnType<ResolvePanelContent>,
-        Parameters<ResolvePanelContent>
-      >();
+      const resolvePanelContent =
+        vi.fn<(...args: Parameters<ResolvePanelContent>) => ReturnType<ResolvePanelContent>>();
 
       const result = await executeDashboardOperations({
         dashboardData: {
@@ -2160,10 +2141,8 @@ describe('executeDashboardOperations', () => {
     });
 
     it('edits an ML single metric viewer panel in place by panelId', async () => {
-      const resolvePanelContent = vi.fn<
-        ReturnType<ResolvePanelContent>,
-        Parameters<ResolvePanelContent>
-      >();
+      const resolvePanelContent =
+        vi.fn<(...args: Parameters<ResolvePanelContent>) => ReturnType<ResolvePanelContent>>();
 
       const result = await executeDashboardOperations({
         dashboardData: {
@@ -2211,10 +2190,8 @@ describe('executeDashboardOperations', () => {
     });
 
     it('records a failure when an ML single metric viewer config-source edit targets a non-SMV panel', async () => {
-      const resolvePanelContent = vi.fn<
-        ReturnType<ResolvePanelContent>,
-        Parameters<ResolvePanelContent>
-      >();
+      const resolvePanelContent =
+        vi.fn<(...args: Parameters<ResolvePanelContent>) => ReturnType<ResolvePanelContent>>();
 
       const result = await executeDashboardOperations({
         dashboardData: {
@@ -2250,10 +2227,8 @@ describe('executeDashboardOperations', () => {
     });
 
     it('edits a custom_content panel in place by panelId, passing the existing template to the resolver', async () => {
-      const resolvePanelContent = vi.fn<
-        ReturnType<ResolvePanelContent>,
-        Parameters<ResolvePanelContent>
-      >();
+      const resolvePanelContent =
+        vi.fn<(...args: Parameters<ResolvePanelContent>) => ReturnType<ResolvePanelContent>>();
       const resolveCustomContentTemplate = vi
         .fn()
         .mockResolvedValue({ template: '<div>Server generated</div>', height: 320 });
@@ -2358,10 +2333,8 @@ describe('executeDashboardOperations', () => {
     });
 
     it('records a failure when a custom_content config-source edit targets a non-custom_content panel', async () => {
-      const resolvePanelContent = vi.fn<
-        ReturnType<ResolvePanelContent>,
-        Parameters<ResolvePanelContent>
-      >();
+      const resolvePanelContent =
+        vi.fn<(...args: Parameters<ResolvePanelContent>) => ReturnType<ResolvePanelContent>>();
 
       const result = await executeDashboardOperations({
         dashboardData: {
@@ -2441,8 +2414,7 @@ describe('executeDashboardOperations', () => {
     it('mixes markdown and visualization edits in one op, parallelizing only the visualization resolves', async () => {
       const deferred = createDeferred<PanelContentAttempt>();
       const resolvePanelContent = vi.fn<
-        ReturnType<ResolvePanelContent>,
-        Parameters<ResolvePanelContent>
+        (...args: Parameters<ResolvePanelContent>) => ReturnType<ResolvePanelContent>
       >(() => deferred.promise);
 
       const operationPromise = executeDashboardOperations({

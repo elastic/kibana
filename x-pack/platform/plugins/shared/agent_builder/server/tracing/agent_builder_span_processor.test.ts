@@ -44,8 +44,8 @@ describe('AgentBuilderSpanProcessor', () => {
   const mockBatch: tracing.SpanProcessor = {
     onStart: vi.fn(),
     onEnd: vi.fn(),
-    forceFlush: vi.fn<Promise<void>, []>().mockResolvedValue(undefined),
-    shutdown: vi.fn<Promise<void>, []>().mockResolvedValue(undefined),
+    forceFlush: vi.fn<(...args: []) => Promise<void>>().mockResolvedValue(undefined),
+    shutdown: vi.fn<(...args: []) => Promise<void>>().mockResolvedValue(undefined),
   };
 
   beforeEach(() => {
@@ -151,8 +151,8 @@ describe('AgentBuilderSpanProcessor', () => {
   function createExporter(): tracing.SpanExporter {
     return {
       export: vi.fn(),
-      shutdown: vi.fn<Promise<void>, []>().mockResolvedValue(undefined),
-      forceFlush: vi.fn<Promise<void>, []>().mockResolvedValue(undefined),
+      shutdown: vi.fn<(...args: []) => Promise<void>>().mockResolvedValue(undefined),
+      forceFlush: vi.fn<(...args: []) => Promise<void>>().mockResolvedValue(undefined),
     };
   }
 

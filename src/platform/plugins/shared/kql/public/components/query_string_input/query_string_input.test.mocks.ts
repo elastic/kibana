@@ -17,9 +17,11 @@ export const mockPersistedLog = {
   get: vi.fn(() => ['response:200']),
 };
 
-export const mockPersistedLogFactory = vi.fn<Mocked<typeof mockPersistedLog>, any>(() => {
-  return mockPersistedLog;
-});
+export const mockPersistedLogFactory = vi.fn<(...args: any) => Mocked<typeof mockPersistedLog>>(
+  () => {
+    return mockPersistedLog;
+  }
+);
 
 export const mockFetchIndexPatterns = vi.fn().mockReturnValue(Promise.resolve([stubIndexPattern]));
 

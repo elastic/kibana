@@ -57,8 +57,9 @@ const setup = ({
 } = {}) => {
   lastFieldRowProps = undefined;
 
-  const handleFieldChange = vi.fn<ReturnType<OnFieldChangeFn>, Parameters<OnFieldChangeFn>>();
-  const reportEvent = vi.fn<ReturnType<ReportEvent>, Parameters<ReportEvent>>();
+  const handleFieldChange =
+    vi.fn<(...args: Parameters<OnFieldChangeFn>) => ReturnType<OnFieldChangeFn>>();
+  const reportEvent = vi.fn<(...args: Parameters<ReportEvent>) => ReturnType<ReportEvent>>();
 
   const unsavedChanges: Record<string, UnsavedFieldChange> = {};
   const fields: Record<string, FieldDefinition> = hasField

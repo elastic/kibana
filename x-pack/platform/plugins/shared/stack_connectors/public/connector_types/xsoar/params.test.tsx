@@ -151,7 +151,8 @@ const mockUseSubActionPlaybooks = vi.fn().mockImplementation(() => ({
   response,
   error: null,
 }));
-const mockUseSubAction = vi.fn<Result, [UseSubActionParams<unknown>]>(mockUseSubActionPlaybooks);
+const mockUseSubAction =
+  vi.fn<(...args: [UseSubActionParams<unknown>]) => Result>(mockUseSubActionPlaybooks);
 
 const mockToasts = { addDanger: vi.fn(), addWarning: vi.fn() };
 vi.mock('@kbn/triggers-actions-ui-plugin/public', async () => {

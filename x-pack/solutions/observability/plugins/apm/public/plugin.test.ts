@@ -28,7 +28,7 @@ describe('ApmPlugin', () => {
   // `CPSPluginStart['cpsManager']` is optional and not deep-mocked, so own the spy to keep the
   // registered resolvers typed.
   const createCpsStart = () => {
-    const registerAppAccess = vi.fn<void, [string, CPSAppAccessResolver]>();
+    const registerAppAccess = vi.fn<(...args: [string, CPSAppAccessResolver]) => void>();
     const startContract = cpsPluginMock.createStartContract();
 
     return {

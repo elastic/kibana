@@ -13,7 +13,7 @@ import { createBashTool } from './bash';
 
 describe('bash tool', () => {
   it('delegates to BashService.exec with the command', async () => {
-    const exec = vi.fn<Promise<BashExecResult>, [string]>().mockResolvedValue({
+    const exec = vi.fn<(...args: [string]) => Promise<BashExecResult>>().mockResolvedValue({
       stdout: 'ok\n',
       stderr: '',
       exit_code: 0,
@@ -40,7 +40,9 @@ describe('bash tool', () => {
       stderr: 'boom\n',
       exit_code: 2,
     };
-    const exec = vi.fn<Promise<BashExecResult>, [string]>().mockResolvedValue(execResult);
+    const exec = vi
+      .fn<(...args: [string]) => Promise<BashExecResult>>()
+      .mockResolvedValue(execResult);
     const bashService = { exec } as unknown as IBashService;
     const tool = createBashTool({ bashService });
     const result = (await tool.handler({ command: 'do-it' }, {} as never)) as {
@@ -53,7 +55,7 @@ describe('bash tool', () => {
   });
 
   it('returns an other result when the command exits non-zero without stderr (e.g. grep no match)', async () => {
-    const exec = vi.fn<Promise<BashExecResult>, [string]>().mockResolvedValue({
+    const exec = vi.fn<(...args: [string]) => Promise<BashExecResult>>().mockResolvedValue({
       stdout: '',
       stderr: '',
       exit_code: 1,

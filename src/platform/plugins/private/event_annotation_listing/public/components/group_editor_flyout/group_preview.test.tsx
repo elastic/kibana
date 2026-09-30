@@ -92,7 +92,7 @@ describe('group editor preview', () => {
         title: 'My Data View',
         timeFieldName: '@timestamp',
         fields: {
-          getByType: vi.fn<DataViewField[], []>(() => [
+          getByType: vi.fn<(...args: []) => DataViewField[]>(() => [
             {
               type: 'date',
               name: '@timestamp',
@@ -109,7 +109,7 @@ describe('group editor preview', () => {
         title: 'My Data View',
         timeFieldName: 'other-time-field',
         fields: {
-          getByType: vi.fn<DataViewField[], []>(() => [
+          getByType: vi.fn<(...args: []) => DataViewField[]>(() => [
             {
               type: 'date',
               name: '@timestamp',

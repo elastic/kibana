@@ -12,7 +12,7 @@ import { vi } from 'vitest';
 import { resolveHoverTarget } from './resolve_hover_target';
 import { makeRect } from '../lib/tests/helpers';
 
-const mockGetElementUnder = vi.fn<HTMLElement | null, [number, number]>();
+const mockGetElementUnder = vi.fn<(...args: [number, number]) => HTMLElement | null>();
 vi.mock('../lib/dom/get_element_under', () => {
   const mocked = {
     getElementUnder: (x: number, y: number) => mockGetElementUnder(x, y),
@@ -28,8 +28,8 @@ vi.mock('./resize_helpers', () => {
   return { ...mocked, default: mocked };
 });
 
-const mockIsInRoundedDeadZone = vi.fn<boolean, [number, number, DOMRect]>();
-const mockHasSignificantRounding = vi.fn<boolean, [HTMLElement]>();
+const mockIsInRoundedDeadZone = vi.fn<(...args: [number, number, DOMRect]) => boolean>();
+const mockHasSignificantRounding = vi.fn<(...args: [HTMLElement]) => boolean>();
 vi.mock('./rounded_dead_zone', () => {
   const mocked = {
     isInRoundedDeadZone: (...args: unknown[]) =>

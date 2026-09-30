@@ -26,7 +26,7 @@ import {
   createUpdateIndexState,
 } from '../test_utils/helpers';
 
-const mockUseIndexContext = vi.fn<IndexStateContext, []>();
+const mockUseIndexContext = vi.fn<(...args: []) => IndexStateContext>();
 
 vi.mock('./context', () => {
   const mocked = {

@@ -28,7 +28,7 @@ interface SetupProps {
 }
 
 const setup = ({ defaultValue = '-15m', roundRelativeTime = false }: SetupProps = {}) => {
-  const onChange = vi.fn<void, Parameters<DateRangePickerProps['onChange']>>();
+  const onChange = vi.fn<(...args: Parameters<DateRangePickerProps['onChange']>) => void>();
   const { result } = renderHook(() => useDateRangePickerContext(), {
     wrapper: ({ children }) => (
       <DateRangePickerProvider

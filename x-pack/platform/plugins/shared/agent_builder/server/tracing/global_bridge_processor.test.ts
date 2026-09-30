@@ -18,8 +18,8 @@ describe('GlobalBridgeProcessor', () => {
     mockGlobalProcessor = {
       onStart: vi.fn(),
       onEnd: vi.fn(),
-      forceFlush: vi.fn<Promise<void>, []>().mockResolvedValue(undefined),
-      shutdown: vi.fn<Promise<void>, []>().mockResolvedValue(undefined),
+      forceFlush: vi.fn<(...args: []) => Promise<void>>().mockResolvedValue(undefined),
+      shutdown: vi.fn<(...args: []) => Promise<void>>().mockResolvedValue(undefined),
     };
   });
 

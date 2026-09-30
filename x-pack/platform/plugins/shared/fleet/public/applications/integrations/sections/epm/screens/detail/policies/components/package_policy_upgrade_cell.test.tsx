@@ -16,6 +16,14 @@ import { allowedExperimentalValues } from '../../../../../../../../../common/exp
 
 import { PackagePolicyUpgradeCell } from './package_policy_upgrade_cell';
 
+// These real hooks import the components index (directly or via the alerting page), which reaches
+// `use_agentless_policy_upgrade`, so loading them from the hooks mock factory below would evaluate
+// that module against the actual hooks (Jest re-entered the factory instead).
+vi.mock('../../../../../../hooks/use_confirm_force_install', () => ({
+  useConfirmForceInstall: vi.fn(),
+}));
+vi.mock('../../../../../../hooks/use_alerting_assets', () => ({ useAlertingAssets: vi.fn() }));
+
 vi.mock('../../../../../../hooks', async () => {
   const mocked = {
     ...(await vi.importActual('../../../../../../hooks')),

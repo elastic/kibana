@@ -195,7 +195,7 @@ describe('react monaco editor onChange performance', () => {
       },
     });
 
-    const onChange = vi.fn<void, [string, monaco.editor.IModelContentChangedEvent]>();
+    const onChange = vi.fn<(...args: [string, monaco.editor.IModelContentChangedEvent]) => void>();
 
     render(
       <MonacoEditor value={null} defaultValue="abcdefghij" onChange={onChange} options={{}} />
@@ -236,7 +236,7 @@ describe('react monaco editor onChange performance', () => {
       onPushUndoStop: editorPushUndoStop,
     });
 
-    const onChange = vi.fn<void, [string, monaco.editor.IModelContentChangedEvent]>();
+    const onChange = vi.fn<(...args: [string, monaco.editor.IModelContentChangedEvent]) => void>();
     const { rerender } = render(
       <MonacoEditor value="abcdefghij" onChange={onChange} options={{}} />
     );
@@ -280,7 +280,8 @@ describe('react monaco editor onChange performance', () => {
         },
       });
 
-      const onChange = vi.fn<void, [string, monaco.editor.IModelContentChangedEvent]>();
+      const onChange =
+        vi.fn<(...args: [string, monaco.editor.IModelContentChangedEvent]) => void>();
       const { rerender } = render(<MonacoEditor value="" onChange={onChange} options={{}} />);
 
       await screen.findByTestId(OVERFLOW_WIDGETS_TEST_ID);
@@ -319,7 +320,8 @@ describe('react monaco editor onChange performance', () => {
         },
       });
 
-      const onChange = vi.fn<void, [string, monaco.editor.IModelContentChangedEvent]>();
+      const onChange =
+        vi.fn<(...args: [string, monaco.editor.IModelContentChangedEvent]) => void>();
       const { rerender } = render(<MonacoEditor value="" onChange={onChange} options={{}} />);
 
       await screen.findByTestId(OVERFLOW_WIDGETS_TEST_ID);
@@ -357,7 +359,7 @@ describe('react monaco editor onChange performance', () => {
       onPushUndoStop: editorPushUndoStop,
     });
 
-    const onChange = vi.fn<void, [string, monaco.editor.IModelContentChangedEvent]>();
+    const onChange = vi.fn<(...args: [string, monaco.editor.IModelContentChangedEvent]) => void>();
     const { rerender } = render(<MonacoEditor value="initial" onChange={onChange} options={{}} />);
 
     await screen.findByTestId(OVERFLOW_WIDGETS_TEST_ID);

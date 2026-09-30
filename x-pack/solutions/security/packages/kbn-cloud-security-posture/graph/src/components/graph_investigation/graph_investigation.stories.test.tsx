@@ -555,10 +555,12 @@ describe('GraphInvestigation Component', () => {
       ])(
         'includes the origin with query=$hasQuery and node filter=$hasNodeFilter',
         async ({ hasQuery, hasNodeFilter }) => {
-          const onInvestigateInTimeline = vi.fn<
-            void,
-            Parameters<NonNullable<GraphInvestigationProps['onInvestigateInTimeline']>>
-          >();
+          const onInvestigateInTimeline =
+            vi.fn<
+              (
+                ...args: Parameters<NonNullable<GraphInvestigationProps['onInvestigateInTimeline']>>
+              ) => void
+            >();
           const timeRange = { from: 'now-30d', to: 'now' };
           const { getByTestId, container } = renderStory({
             onInvestigateInTimeline,

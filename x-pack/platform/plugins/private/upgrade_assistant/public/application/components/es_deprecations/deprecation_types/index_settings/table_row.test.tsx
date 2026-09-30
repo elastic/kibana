@@ -22,24 +22,23 @@ type UpdateIndexSettings = (
   settings: string[]
 ) => Promise<{ error: ResponseError | null }>;
 
-const mockUpdateIndexSettings = vi.fn<
-  ReturnType<UpdateIndexSettings>,
-  Parameters<UpdateIndexSettings>
->();
+const mockUpdateIndexSettings =
+  vi.fn<(...args: Parameters<UpdateIndexSettings>) => ReturnType<UpdateIndexSettings>>();
 
 const mockAddContent = vi.fn<
-  void,
-  [
-    {
-      id: string;
-      Component: React.ComponentType<unknown>;
-      props: {
-        removeIndexSettings: (index: string, settings: string[]) => Promise<void>;
-      };
-    }
-  ]
+  (
+    ...args: [
+      {
+        id: string;
+        Component: React.ComponentType<unknown>;
+        props: {
+          removeIndexSettings: (index: string, settings: string[]) => Promise<void>;
+        };
+      }
+    ]
+  ) => void
 >();
-const mockRemoveContent = vi.fn<void, [id: string]>();
+const mockRemoveContent = vi.fn<(...args: [id: string]) => void>();
 
 vi.mock('../../../../app_context', async () => {
   const actual = await vi.importActual('../../../../app_context');

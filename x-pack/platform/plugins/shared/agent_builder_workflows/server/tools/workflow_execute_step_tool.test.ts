@@ -182,7 +182,7 @@ const createMockContext = (yaml?: string, options: MockContextOptions = {}) => {
 
 describe('registerWorkflowExecuteStepTool', () => {
   let registeredTool: BuiltinToolDefinition;
-  const getSecurity = vi.fn<SecurityPluginStart | undefined, []>();
+  const getSecurity = vi.fn<(...args: []) => SecurityPluginStart | undefined>();
 
   const mockApi = {
     testStep: vi.fn(),

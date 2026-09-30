@@ -37,12 +37,13 @@ const fakeProvider = (
 ): Mocked<InboxActionProvider> => {
   const provider: Mocked<InboxActionProvider> = {
     sourceApp,
-    list: vi.fn<ReturnType<InboxActionProvider['list']>, Parameters<InboxActionProvider['list']>>(
-      async () => ({ actions, total: actions.length })
-    ),
+    list: vi.fn<
+      (...args: Parameters<InboxActionProvider['list']>) => ReturnType<InboxActionProvider['list']>
+    >(async () => ({ actions, total: actions.length })),
     respond: vi.fn<
-      ReturnType<InboxActionProvider['respond']>,
-      Parameters<InboxActionProvider['respond']>
+      (
+        ...args: Parameters<InboxActionProvider['respond']>
+      ) => ReturnType<InboxActionProvider['respond']>
     >(async () => {}),
   };
   if (options.withListProcessed) {

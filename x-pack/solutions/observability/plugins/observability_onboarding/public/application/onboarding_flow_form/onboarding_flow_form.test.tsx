@@ -31,7 +31,7 @@ vi.mock('@kbn/ebt-tools', () => {
   return { ...mocked, default: mocked };
 });
 
-const mockUseCustomCards = vi.fn<IntegrationCardItem[], []>(() => []);
+const mockUseCustomCards = vi.fn<(...args: []) => IntegrationCardItem[]>(() => []);
 
 vi.mock('./use_custom_cards', () => {
   const mocked = {

@@ -142,16 +142,18 @@ interface UseStepExecutionQueryStub {
   isLoading: boolean;
 }
 
-const mockUseStepExecution = vi.fn<UseStepExecutionQueryStub, UseStepExecutionParams>(() => ({
-  data: {
-    id: 'step-wait',
-    stepId: 'request_approval',
-    stepType: 'waitForInput',
-    status: 'waiting_for_input',
-    input: { message: 'Approve this' },
-  },
-  isLoading: false,
-}));
+const mockUseStepExecution = vi.fn<(...args: UseStepExecutionParams) => UseStepExecutionQueryStub>(
+  () => ({
+    data: {
+      id: 'step-wait',
+      stepId: 'request_approval',
+      stepType: 'waitForInput',
+      status: 'waiting_for_input',
+      input: { message: 'Approve this' },
+    },
+    isLoading: false,
+  })
+);
 
 vi.mock('../model/use_step_execution', () => {
   const mocked = {

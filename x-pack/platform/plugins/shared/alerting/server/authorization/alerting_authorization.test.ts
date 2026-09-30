@@ -146,13 +146,13 @@ describe('AlertingAuthorization', () => {
   const allRegisteredConsumers = new Set<string>();
   const ruleTypesConsumersMap = new Map<string, Set<string>>();
 
-  const checkPrivileges = vi.fn<Promise<CheckPrivilegesResponseWithoutES>, [{ kibana: string[] }]>(
-    async () => ({
-      username: 'elastic',
-      hasAllRequested: true,
-      privileges: { kibana: [] },
-    })
-  );
+  const checkPrivileges = vi.fn<
+    (privileges: { kibana: string[] }) => Promise<CheckPrivilegesResponseWithoutES>
+  >(async () => ({
+    username: 'elastic',
+    hasAllRequested: true,
+    privileges: { kibana: [] },
+  }));
   const atSpacesMock = vi.fn((_spaces: string[], privileges: { kibana: string[] }) =>
     checkPrivileges(privileges)
   );

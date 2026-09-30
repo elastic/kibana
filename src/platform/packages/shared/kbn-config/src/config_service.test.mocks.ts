@@ -24,8 +24,7 @@ const changedPaths = {
 export { changedPaths as mockedChangedPaths };
 
 export const mockApplyDeprecations = vi.fn<
-  ReturnType<typeof applyDeprecations>,
-  Parameters<typeof applyDeprecations>
+  (...args: Parameters<typeof applyDeprecations>) => ReturnType<typeof applyDeprecations>
 >((config, deprecations, createAddDeprecation) => ({ config, changedPaths }));
 
 vi.mock('./deprecation/apply_deprecations', () => {

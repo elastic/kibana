@@ -111,9 +111,9 @@ async function mountComponent({
   dataStateContainer.data$.documents$.next = vi.fn();
 
   const props = {
-    renderViewModeToggle: vi.fn<ReturnType<RenderViewModeToggle>, Parameters<RenderViewModeToggle>>(
-      () => <div data-test-subj="viewModeToggle">test</div>
-    ),
+    renderViewModeToggle: vi.fn<
+      (...args: Parameters<RenderViewModeToggle>) => ReturnType<RenderViewModeToggle>
+    >(() => <div data-test-subj="viewModeToggle">test</div>),
     dataView: dataViewMock,
     onAddFilter: vi.fn(),
     onFieldEdited: vi.fn(),

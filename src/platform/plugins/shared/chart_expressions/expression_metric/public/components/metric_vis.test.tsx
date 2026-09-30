@@ -40,7 +40,7 @@ const mockDeserialize = vi.fn(({ id }: { id: string }) => {
   return { convertToText: convertFn };
 });
 
-const mockGetColorForValue = vi.fn<undefined | string, any>(() => undefined);
+const mockGetColorForValue = vi.fn<(...args: any) => undefined | string>(() => undefined);
 
 const CURRENCY_DEFAULT_FORMAT = '$0.0';
 

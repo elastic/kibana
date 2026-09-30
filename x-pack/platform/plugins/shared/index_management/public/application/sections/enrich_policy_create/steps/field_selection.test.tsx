@@ -60,8 +60,8 @@ const renderFieldSelectionStep = async (draft: DraftPolicy = configuredDraft) =>
   const completionState: CompletionState = { configurationStep: true, fieldsSelectionStep: false };
   const onNext = vi.fn();
   const onBack = vi.fn();
-  const updateDraft = vi.fn<void, [SetStateAction<DraftPolicy>]>();
-  const updateCompletionState = vi.fn<void, [SetStateAction<CompletionState>]>();
+  const updateDraft = vi.fn<(...args: [SetStateAction<DraftPolicy>]) => void>();
+  const updateCompletionState = vi.fn<(...args: [SetStateAction<CompletionState>]) => void>();
 
   render(
     <I18nProvider>

@@ -30,7 +30,8 @@ vi.mock('../../../../lib/ui_metric', async () => {
 
 describe('RemoveIndexSettingsFlyout', () => {
   const closeFlyout = vi.fn();
-  const removeIndexSettings = vi.fn<Promise<void>, [index: string, settings: string[]]>();
+  const removeIndexSettings =
+    vi.fn<(...args: [index: string, settings: string[]]) => Promise<void>>();
 
   beforeEach(() => {
     closeFlyout.mockClear();

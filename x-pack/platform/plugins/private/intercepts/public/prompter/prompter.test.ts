@@ -86,8 +86,9 @@ describe('ProductInterceptPrompter', () => {
       // default return value for the mockGetUserTriggerData$ function is unset,
       // implying user has not interacted with the intercept yet
       const mockGetUserTriggerData$ = vi.fn<
-        Rx.Observable<{ lastInteractedInterceptId: number | null }>,
-        [triggerId: string]
+        (
+          ...args: [triggerId: string]
+        ) => Rx.Observable<{ lastInteractedInterceptId: number | null }>
       >(() => Rx.of({ lastInteractedInterceptId: null }));
 
       const interceptSteps: Intercept['steps'] = [

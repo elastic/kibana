@@ -27,7 +27,7 @@ const condition = (overrides: Partial<AlertCondition> = {}): AlertCondition => (
 });
 
 const renderSection = (props: { severity?: SeverityConfig; alertConditions: AlertCondition[] }) => {
-  const onChange = vi.fn<void, [SeverityConfig | undefined]>();
+  const onChange = vi.fn<(...args: [SeverityConfig | undefined]) => void>();
   render(
     <IntlProvider locale="en">
       <SeveritySection

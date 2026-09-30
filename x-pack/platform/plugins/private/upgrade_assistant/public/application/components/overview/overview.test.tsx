@@ -30,10 +30,10 @@ vi.mock('../../app_context', () => {
   return { ...mocked, default: mocked };
 });
 
-const mockUseCloudStackVersionInfo = vi.fn<
-  CloudStackVersionState,
-  [Pick<ApiService, 'getCloudStackVersionInfo'>, string]
->();
+const mockUseCloudStackVersionInfo =
+  vi.fn<
+    (...args: [Pick<ApiService, 'getCloudStackVersionInfo'>, string]) => CloudStackVersionState
+  >();
 vi.mock('./use_cloud_stack_version_info', () => {
   const mocked = {
     useCloudStackVersionInfo: (

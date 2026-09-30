@@ -14,15 +14,13 @@ import type { ServiceFlyoutTransactionsSection } from '@kbn/apm-ui-shared';
 import type { ServiceFlyoutService } from '..';
 import { ServiceFlyoutOverview } from '.';
 
-const mockUseServiceHasSystemMetrics = vi.fn<
-  { hasSystemMetrics: boolean | undefined; isLoading: boolean },
-  []
->();
+const mockUseServiceHasSystemMetrics =
+  vi.fn<(...args: []) => { hasSystemMetrics: boolean | undefined; isLoading: boolean }>();
 let transactionsSectionProps: React.ComponentProps<typeof ServiceFlyoutTransactionsSection> | null =
   null;
 
 const mockUseServiceFlyoutContext = vi.fn();
-const mockUseProjectRouting = vi.fn<string | undefined, []>(() => undefined);
+const mockUseProjectRouting = vi.fn<(...args: []) => string | undefined>(() => undefined);
 vi.mock('../service_flyout_context', () => {
   const mocked = {
     useServiceFlyoutContext: () => mockUseServiceFlyoutContext(),

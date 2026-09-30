@@ -7,7 +7,7 @@
 
 import React from 'react';
 
-const MockPrompt = vi.fn<null, [object]>(() => null);
+const MockPrompt = vi.fn<(...args: [object]) => null>(() => null);
 vi.mock('react-router-dom', () => {
   const mocked = {
     Prompt: (props: object) => MockPrompt(props),

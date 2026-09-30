@@ -38,8 +38,10 @@ const createServiceMock = (
   getDefaultPresets: vi.fn(() => defaultPresets),
   getPresets$: vi.fn(() => of(lockedPresets)),
   canPersist: vi.fn(() => true),
-  savePreset: vi.fn<Promise<SavePresetOutcome>, [PresetItem]>().mockResolvedValue('saved'),
-  deletePreset: vi.fn<Promise<void>, [PresetItem]>().mockResolvedValue(undefined),
+  savePreset: vi
+    .fn<(...args: [PresetItem]) => Promise<SavePresetOutcome>>()
+    .mockResolvedValue('saved'),
+  deletePreset: vi.fn<(...args: [PresetItem]) => Promise<void>>().mockResolvedValue(undefined),
   ...overrides,
 });
 
@@ -106,7 +108,7 @@ describe('useDateRangePickerPresets', () => {
     it('warns when the preset limit is reached', async () => {
       const service = createServiceMock({
         savePreset: vi
-          .fn<Promise<SavePresetOutcome>, [PresetItem]>()
+          .fn<(...args: [PresetItem]) => Promise<SavePresetOutcome>>()
           .mockResolvedValue('limit-reached'),
       });
       const { hook, notifications } = renderPresetsHook({ service });
@@ -121,7 +123,7 @@ describe('useDateRangePickerPresets', () => {
     it('shows a danger toast when saving fails', async () => {
       const service = createServiceMock({
         savePreset: vi
-          .fn<Promise<SavePresetOutcome>, [PresetItem]>()
+          .fn<(...args: [PresetItem]) => Promise<SavePresetOutcome>>()
           .mockRejectedValue(new Error('boom')),
       });
       const { hook, notifications } = renderPresetsHook({ service });
@@ -144,7 +146,9 @@ describe('useDateRangePickerPresets', () => {
 
     it('shows a danger toast when deleting fails', async () => {
       const service = createServiceMock({
-        deletePreset: vi.fn<Promise<void>, [PresetItem]>().mockRejectedValue(new Error('boom')),
+        deletePreset: vi
+          .fn<(...args: [PresetItem]) => Promise<void>>()
+          .mockRejectedValue(new Error('boom')),
       });
       const { hook, notifications } = renderPresetsHook({ service });
       await waitFor(() => expect(hook.result.current.onPresetDelete).toBeDefined());

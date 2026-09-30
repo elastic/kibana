@@ -101,9 +101,9 @@ describe('name column', () => {
       it('should NOT navigate in app when onBackgroundSearchOpened prevents the default behavior', async () => {
         // Given
         const mockSession = getUiSessionMock({ status: SearchSessionStatus.COMPLETE });
-        const onBackgroundSearchOpened = vi.fn<void, Parameters<BackgroundSearchOpenedHandler>>(
-          ({ event }) => event.preventDefault()
-        );
+        const onBackgroundSearchOpened = vi.fn<
+          (...args: Parameters<BackgroundSearchOpenedHandler>) => void
+        >(({ event }) => event.preventDefault());
 
         // When
         const { user, navigateToUrl } = setup({ uiSession: mockSession, onBackgroundSearchOpened });

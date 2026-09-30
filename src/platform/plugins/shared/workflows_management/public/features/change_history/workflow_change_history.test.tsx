@@ -33,12 +33,12 @@ import {
 import type { WorkflowChangesHistoryResponse } from '../../../common/lib/workflow_change_history/types';
 import { createMockStore } from '../../entities/workflows/store/__mocks__/store.mock';
 import { setWorkflow, setYamlString } from '../../entities/workflows/store/workflow_detail/slice';
+import * as useKibanaModule from '../../hooks/use_kibana';
 import {
   createStartServicesMock,
   createUseKibanaMockValue,
   type StartServicesMock,
 } from '../../mocks';
-import * as useKibanaModule from '../../hooks/use_kibana';
 import { TestWrapper } from '../../shared/test_utils';
 
 const restorableWorkflow: WorkflowDetailDto = {

@@ -17,7 +17,7 @@ import { useCasesContext as useCasesContextFn } from '../../cases_context/use_ca
 import { useCasesConfig as useCasesConfigFn } from '../../../common/lib/kibana';
 
 // Hoist mock state so factories can reference them
-const mockCanRunWorkflow = vi.fn<boolean, []>();
+const mockCanRunWorkflow = vi.fn<(...args: []) => boolean>();
 const mockUseWorkflowsCapabilities = vi.fn();
 const mockUseWorkflowsUIEnabledSetting = vi.fn();
 

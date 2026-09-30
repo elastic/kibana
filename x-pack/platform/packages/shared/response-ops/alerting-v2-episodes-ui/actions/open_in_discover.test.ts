@@ -25,8 +25,9 @@ const makeEpisode = (overrides: Partial<AlertEpisode> = {}): AlertEpisode => ({
 const makeDeps = () => ({
   application: applicationServiceMock.createStartContract(),
   getDiscoverHref: vi.fn<
-    string | undefined | Promise<string | undefined>,
-    [{ episodeIsoTimestamp: string; ruleId: string }]
+    (
+      ...args: [{ episodeIsoTimestamp: string; ruleId: string }]
+    ) => string | undefined | Promise<string | undefined>
   >((_args) => '/discover?query=...'),
 });
 

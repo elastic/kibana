@@ -55,10 +55,11 @@ describe('ingestInboundEvent', () => {
   const unsecuredSavedObjectsClient = savedObjectsClientMock.create();
   const getUnsecuredSavedObjectsClient = vi.fn().mockResolvedValue(unsecuredSavedObjectsClient);
   const emitConnectorEvents = vi
-    .fn<Promise<DispatchConnectorEventsResult>, []>()
+    .fn<(...args: []) => Promise<DispatchConnectorEventsResult>>()
     .mockResolvedValue({ ok: true });
   const storedApiKey = encodeApiKey('es-id', 'es-secret')!;
-  const getDecryptedConnectorAttributes = vi.fn<Promise<RawAction>, [string, string]>();
+  const getDecryptedConnectorAttributes =
+    vi.fn<(...args: [string, string]) => Promise<RawAction>>();
 
   const connectorId = 'connector-1';
   const credentialId = 'cred-1';

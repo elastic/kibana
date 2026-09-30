@@ -16,8 +16,8 @@ import type { DeprecationTableColumns } from '../../../types';
 import { mockDefaultDeprecation } from '../../__fixtures__/es_deprecations';
 import { DefaultTableRow } from './table_row';
 
-const mockAddContent = vi.fn<void, [params: { id: string }]>();
-const mockRemoveContent = vi.fn<void, [id: string]>();
+const mockAddContent = vi.fn<(...args: [params: { id: string }]) => void>();
+const mockRemoveContent = vi.fn<(...args: [id: string]) => void>();
 
 vi.mock('../../../../../shared_imports', async () => {
   const actual = await vi.importActual('../../../../../shared_imports');

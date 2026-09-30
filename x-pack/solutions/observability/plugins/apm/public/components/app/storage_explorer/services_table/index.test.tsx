@@ -20,9 +20,9 @@ import type { APIReturnType } from '../../../../services/rest/create_call_apm_ap
 import type { AgentName } from '../../../../../typings/es_schemas/ui/fields/agent';
 
 // Mock the hooks
-const mockUseProgressiveFetcher = vi.fn<any, any>();
-const mockUseApmParams = vi.fn<any, any>();
-const mockUseTimeRange = vi.fn<any, any>();
+const mockUseProgressiveFetcher = vi.fn<(...args: any) => any>();
+const mockUseApmParams = vi.fn<(...args: any) => any>();
+const mockUseTimeRange = vi.fn<(...args: any) => any>();
 
 vi.mock('../../../../hooks/use_progressive_fetcher', () => {
   const mocked = {

@@ -45,14 +45,18 @@ describe('GET_WORKFLOW_HEALTH_CHECK_TOOL_ID', () => {
 describe('getWorkflowHealthCheckTool', () => {
   const mockLogger = loggingSystemMock.createLogger();
   const mockEsClient = elasticsearchClientMock.createScopedClusterClient();
-  const mockGetWorkflow = vi.fn<
-    ReturnType<WorkflowFetcher['getWorkflow']>,
-    Parameters<WorkflowFetcher['getWorkflow']>
-  >();
-  const mockGetWorkflowExecution = vi.fn<
-    ReturnType<WorkflowFetcher['getWorkflowExecution']>,
-    Parameters<WorkflowFetcher['getWorkflowExecution']>
-  >();
+  const mockGetWorkflow =
+    vi.fn<
+      (
+        ...args: Parameters<WorkflowFetcher['getWorkflow']>
+      ) => ReturnType<WorkflowFetcher['getWorkflow']>
+    >();
+  const mockGetWorkflowExecution =
+    vi.fn<
+      (
+        ...args: Parameters<WorkflowFetcher['getWorkflowExecution']>
+      ) => ReturnType<WorkflowFetcher['getWorkflowExecution']>
+    >();
 
   const mockContext = {
     ...agentBuilderMocks.tools.createHandlerContext(),

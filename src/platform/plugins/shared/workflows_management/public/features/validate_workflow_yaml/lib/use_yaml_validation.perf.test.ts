@@ -29,7 +29,7 @@
  * -------------------
  * Run on an idle machine:
  *
- *   node scripts/jest \
+ *   node scripts/vitest \
  *     src/platform/plugins/shared/workflows_management/public/features/validate_workflow_yaml/lib/use_yaml_validation.perf.test.ts
  *
  * Read the "derived units" column in the logged table, copy the values to SUITES[*].config.
@@ -433,7 +433,10 @@ async function runE2EBenchmark(
 const EXAMPLES_DIR = '../../../../common/examples';
 
 /**
- * Units derived on an Apple M-series Mac (September 2026). calibrationMs ≈ 2.6 ms/unit.
+ * Units derived under Vitest on an Apple M-series Mac (September 2026), max of 4 runs.
+ * calibrationMs ≈ 1.2–1.5 ms/unit. Units derived under Jest do not carry over: Jest ran tests in a
+ * `vm` context where the calibration workload's global lookups (`Map`, `Math`) are ~2.6× slower,
+ * while the validators are affected by a different factor per step.
  * To re-derive: run this file locally on an idle machine, read the "derived units" column, and
  * update these values (2 sig. figs, round up).  Do NOT measure on a loaded machine.
  *
@@ -447,16 +450,17 @@ const SUITES = [
     yamlPath: `${EXAMPLES_DIR}/case_response.yaml`,
     config: {
       iterations: 100,
-      // All per-step timings are < 0.1 units; FLOOR_MS=20 is the binding ceiling for each.
-      defaultUnits: 0.1,
-      // E2E total local min: 9.7ms → 3.7 units. ceiling = max(4.5 × calMs × 3, 20ms).
-      totalUnits: 4.5,
+      // All other steps are < 0.8 units (largest: collectAllVariables E2E, 0.72 units);
+      // FLOOR_MS=20 is the binding ceiling for each.
+      defaultUnits: 0.8,
+      // E2E total local min: 11.5–13.5ms → 7.6–10.2 units. ceiling = max(11 × calMs × 3, 20ms).
+      totalUnits: 11,
       stepUnits: {
-        // validateVariables (66 vars) per-step: 1.3ms → 0.49 units; E2E: 1.5ms → 0.57.
-        // FLOOR_MS=20ms is binding; kept explicit to document the measured cost.
-        validateVariables: 0.6,
-        // performComputation appears in E2E only: 6.9ms → 2.7 units.
-        performComputation: 3.0,
+        // validateVariables (66 vars) per-step: 1.0–1.2ms → 0.78–0.83 units; E2E: 1.2–1.5ms →
+        // 0.82–1.12. FLOOR_MS=20ms is binding; kept explicit to document the measured cost.
+        validateVariables: 1.2,
+        // performComputation appears in E2E only: 8.3–9.6ms → 5.5–7.5 units.
+        performComputation: 7.5,
       },
     },
   },
@@ -465,29 +469,31 @@ const SUITES = [
     yamlPath: `${EXAMPLES_DIR}/infosec_demo.yaml`,
     config: {
       iterations: 20,
-      // Most steps are < 0.25 units; FLOOR_MS=20ms is binding for all unlisted steps.
-      defaultUnits: 0.25,
-      // E2E total local min: 101.6ms → 39.5 units. ceiling = max(42 × calMs × 3, 20ms).
-      totalUnits: 42,
+      // All other steps are < 1.5 units (largest: validateStepNameUniqueness E2E, 1.41 units);
+      // FLOOR_MS=20ms is binding for all unlisted steps.
+      defaultUnits: 1.5,
+      // E2E total local min: 68–74ms → 45–62 units. ceiling = max(62 × calMs × 3, 20ms).
+      totalUnits: 62,
       stepUnits: {
-        // performComputation (E2E only): 24.7ms → 9.6 units.
-        performComputation: 10,
-        // validateLiquidTemplate per-step: 2.8ms → 1.09 units; E2E: 2.9ms → 1.13.
-        // FLOOR_MS=20ms is binding (1.2 × calMs × 3 ≈ 9ms < 20ms).
-        validateLiquidTemplate: 1.2,
-        // collectAllVariables per-step: 1.0ms → 0.4 units; E2E: 2.2ms → 0.84.
-        collectAllVariables: 0.9,
-        // validateIfConditions per-step: 2.7ms → 1.04 units; E2E: 2.9ms → 1.14.
+        // performComputation (E2E only): 29–34ms → 19–28 units.
+        performComputation: 29,
+        // validateLiquidTemplate per-step: 2.4–3.1ms → 2.0–2.2 units; E2E: 2.7–3.2ms → 1.8–2.6.
+        // FLOOR_MS=20ms is binding (2.7 × calMs × 3 ≈ 12ms < 20ms).
+        validateLiquidTemplate: 2.7,
+        // collectAllVariables per-step: 0.3–0.4ms → 0.24–0.26 units; E2E: 5.6–7.1ms → 3.7–5.9.
         // FLOOR_MS=20ms is binding.
-        validateIfConditions: 1.2,
+        collectAllVariables: 6.0,
+        // validateIfConditions per-step: 2.1–2.5ms → 1.6–1.9 units; E2E: 2.1–2.9ms → 1.4–2.4.
+        // FLOOR_MS=20ms is binding.
+        validateIfConditions: 2.4,
         // validateVariables was the step that failed on CI (#261389) at 507ms.
-        // Per-step local min: 55.8ms → 21.7 units. E2E: 55.9ms → 21.7.
-        // ceiling = max(22 × calMs × 3, 20ms). On 2.5× slower CI: ceiling ≈ 55.8ms × 7.5 ≈ 419ms.
+        // Per-step local min: 19.5–23ms → 14–16.4 units. E2E: 18.4–20.5ms → 13.4–16.3.
+        // ceiling = max(17 × calMs × 3, 20ms). On 2.5× slower CI: ceiling ≈ 20ms × 7.5 ≈ 150ms.
         // Key without var count matches both "validateVariables (N vars)" (per-step, via prefix)
         // and "validateVariables" (E2E, exact).
-        validateVariables: 22,
-        // connectorIds (E2E combined step): 0.5ms → 0.2 units; FLOOR_MS=20ms binding.
-        'connectorIds (collect+validate)': 0.25,
+        validateVariables: 17,
+        // connectorIds (E2E combined step): 0.8–1.0ms → 0.53–0.83 units; FLOOR_MS=20ms binding.
+        'connectorIds (collect+validate)': 0.9,
       },
     },
   },

@@ -22,9 +22,9 @@ describe('EditingColumn', () => {
     name: 'foo',
     field: 'foo',
     render: vi.fn(),
-    editingRender: vi.fn<React.ReactNode, [any, (value: string) => void, EditingRenderFlags]>(
-      () => <div data-test-subj="editing-view" />
-    ),
+    editingRender: vi.fn<
+      (...args: [any, (value: string) => void, EditingRenderFlags]) => React.ReactNode
+    >(() => <div data-test-subj="editing-view" />),
   };
 
   const requiredProps = {

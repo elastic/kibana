@@ -75,8 +75,9 @@ describe('DataViewFieldEditorPlugin', () => {
   const createFlyoutMock = () => {
     const { close, overlayRef } = createOverlayRef();
     const openFlyout = vi.fn<
-      ReturnType<CoreStart['overlays']['openFlyout']>,
-      Parameters<CoreStart['overlays']['openFlyout']>
+      (
+        ...args: Parameters<CoreStart['overlays']['openFlyout']>
+      ) => ReturnType<CoreStart['overlays']['openFlyout']>
     >(() => overlayRef);
 
     return { closeFlyout: close, openFlyout };
@@ -85,8 +86,9 @@ describe('DataViewFieldEditorPlugin', () => {
   const createModalMock = () => {
     const { close, overlayRef } = createOverlayRef();
     const openModal = vi.fn<
-      ReturnType<CoreStart['overlays']['openModal']>,
-      Parameters<CoreStart['overlays']['openModal']>
+      (
+        ...args: Parameters<CoreStart['overlays']['openModal']>
+      ) => ReturnType<CoreStart['overlays']['openModal']>
     >(() => overlayRef);
 
     return { closeModal: close, openModal };

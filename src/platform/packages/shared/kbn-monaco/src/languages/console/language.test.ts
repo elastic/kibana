@@ -25,27 +25,27 @@ import { monaco } from '../../monaco_imports';
 import { createParser } from './parser';
 import { ESQL_AUTOCOMPLETE_TRIGGER_CHARS, ESQLLang } from '../esql';
 
-const mockWorkerSetup = vi.fn<void, []>();
+const mockWorkerSetup = vi.fn<(...args: []) => void>();
 const mockGetRequests = vi.fn();
 
-const mockSuggest = vi.fn<ReturnType<typeof suggestFn>, Parameters<typeof suggestFn>>();
-const mockWrapAsMonacoSuggestions = vi.fn<ReturnType<typeof wrapFn>, Parameters<typeof wrapFn>>();
-const mockCheckForTripleQuotesAndEsqlQuery = vi.fn<
-  ReturnType<typeof checkFn>,
-  Parameters<typeof checkFn>
->();
-const mockUnescapeInvalidChars = vi.fn<
-  ReturnType<typeof unescapeFn>,
-  Parameters<typeof unescapeFn>
->();
-const mockSetupConsoleErrorsProvider = vi.fn<
-  ReturnType<typeof setupErrorsProviderFn>,
-  Parameters<typeof setupErrorsProviderFn>
->();
-const mockConsoleParsedRequestsProvider = vi.fn<
-  InstanceType<typeof ParsedProviderCtor>,
-  ConstructorParameters<typeof ParsedProviderCtor>
->();
+const mockSuggest =
+  vi.fn<(...args: Parameters<typeof suggestFn>) => ReturnType<typeof suggestFn>>();
+const mockWrapAsMonacoSuggestions =
+  vi.fn<(...args: Parameters<typeof wrapFn>) => ReturnType<typeof wrapFn>>();
+const mockCheckForTripleQuotesAndEsqlQuery =
+  vi.fn<(...args: Parameters<typeof checkFn>) => ReturnType<typeof checkFn>>();
+const mockUnescapeInvalidChars =
+  vi.fn<(...args: Parameters<typeof unescapeFn>) => ReturnType<typeof unescapeFn>>();
+const mockSetupConsoleErrorsProvider =
+  vi.fn<
+    (...args: Parameters<typeof setupErrorsProviderFn>) => ReturnType<typeof setupErrorsProviderFn>
+  >();
+const mockConsoleParsedRequestsProvider =
+  vi.fn<
+    (
+      ...args: ConstructorParameters<typeof ParsedProviderCtor>
+    ) => InstanceType<typeof ParsedProviderCtor>
+  >();
 
 vi.mock('@kbn/esql-language', () => {
   const mocked = {
@@ -123,8 +123,7 @@ const createActionsProvider = (): {
 } => {
   const completionList: monaco.languages.CompletionList = { suggestions: [] };
   const provideCompletionItems = vi.fn<
-    ReturnType<ProvideCompletionItems>,
-    Parameters<ProvideCompletionItems>
+    (...args: Parameters<ProvideCompletionItems>) => ReturnType<ProvideCompletionItems>
   >(() => completionList);
 
   const actionsProvider: MutableRefObject<{

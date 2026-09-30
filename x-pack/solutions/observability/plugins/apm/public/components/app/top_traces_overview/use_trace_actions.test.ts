@@ -17,7 +17,7 @@ vi.mock('../../../context/apm_plugin/use_apm_plugin_context');
 
 const mockUseApmPluginContext = useApmPluginContext as MockedFunction<typeof useApmPluginContext>;
 
-const mockGetRedirectUrl = vi.fn<string | undefined, [unknown]>();
+const mockGetRedirectUrl = vi.fn<(...args: [unknown]) => string | undefined>();
 const mockLocatorGet = vi.fn().mockReturnValue({ getRedirectUrl: mockGetRedirectUrl });
 
 const TRACES_INDEX = 'traces-apm-*';

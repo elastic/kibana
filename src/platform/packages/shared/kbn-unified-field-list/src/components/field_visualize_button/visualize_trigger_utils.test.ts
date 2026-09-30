@@ -25,9 +25,9 @@ const field = {
   visualizable: true,
 } as DataViewField;
 
-const mockGetActions = vi.fn<Promise<Array<Action<object>>>, [string, { fieldName: string }]>(() =>
-  Promise.resolve([])
-);
+const mockGetActions = vi.fn<
+  (...args: [string, { fieldName: string }]) => Promise<Array<Action<object>>>
+>(() => Promise.resolve([]));
 
 const uiActions = {
   getTriggerCompatibleActions: mockGetActions,

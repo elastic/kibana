@@ -20,17 +20,17 @@ interface Result {
   response: Record<string, unknown>;
   error: null | Error;
 }
-const mockUseSubActionStories = vi.fn<Result, [UseSubActionParams<unknown>]>(() => ({
+const mockUseSubActionStories = vi.fn<(...args: [UseSubActionParams<unknown>]) => Result>(() => ({
   isLoading: false,
   response: { stories: [story], incompleteResponse: false },
   error: null,
 }));
-const mockUseSubActionWebhooks = vi.fn<Result, [UseSubActionParams<unknown>]>(() => ({
+const mockUseSubActionWebhooks = vi.fn<(...args: [UseSubActionParams<unknown>]) => Result>(() => ({
   isLoading: false,
   response: { webhooks: [webhook], incompleteResponse: false },
   error: null,
 }));
-const mockUseSubAction = vi.fn<Result, [UseSubActionParams<unknown>]>((params) =>
+const mockUseSubAction = vi.fn<(...args: [UseSubActionParams<unknown>]) => Result>((params) =>
   params.subAction === 'stories'
     ? mockUseSubActionStories(params)
     : mockUseSubActionWebhooks(params)

@@ -28,8 +28,7 @@ vi.mock('../queries', () => {
 type GenerateMonitoringLabelsFn =
   typeof import('./generate_monitoring_labels').generateMonitoringLabels;
 const mockGenerateMonitoringLabels = vi.fn<
-  MonitoringLabel[],
-  Parameters<GenerateMonitoringLabelsFn>
+  (...args: Parameters<GenerateMonitoringLabelsFn>) => MonitoringLabel[]
 >(() => []);
 vi.mock('./generate_monitoring_labels', () => {
   const mocked = {

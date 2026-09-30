@@ -115,12 +115,14 @@ describe('useIndexSources', () => {
   describe('with getDatasets', () => {
     it('merges federated datasets into the options list', async () => {
       mockGetESQLSources.mockResolvedValue([{ name: 'logs-*', hidden: false }]);
-      const mockGetDatasets = vi.fn<Promise<EsqlDatasetsResult>, []>().mockResolvedValue({
-        datasets: [
-          { name: 'federation.orders', data_source: 's3', resource: 'orders' },
-          { name: 'federation.customers', data_source: 's3', resource: 'customers' },
-        ],
-      });
+      const mockGetDatasets = vi
+        .fn<(...args: []) => Promise<EsqlDatasetsResult>>()
+        .mockResolvedValue({
+          datasets: [
+            { name: 'federation.orders', data_source: 's3', resource: 'orders' },
+            { name: 'federation.customers', data_source: 's3', resource: 'customers' },
+          ],
+        });
 
       const { result } = renderHook(
         () => useIndexSources({ http, application, getDatasets: mockGetDatasets }),
@@ -140,12 +142,14 @@ describe('useIndexSources', () => {
 
     it('deduplicates datasets that share a name with an existing index', async () => {
       mockGetESQLSources.mockResolvedValue([{ name: 'logs-*', hidden: false }]);
-      const mockGetDatasets = vi.fn<Promise<EsqlDatasetsResult>, []>().mockResolvedValue({
-        datasets: [
-          { name: 'logs-*', data_source: 's3', resource: 'logs' },
-          { name: 'federation.events', data_source: 's3', resource: 'events' },
-        ],
-      });
+      const mockGetDatasets = vi
+        .fn<(...args: []) => Promise<EsqlDatasetsResult>>()
+        .mockResolvedValue({
+          datasets: [
+            { name: 'logs-*', data_source: 's3', resource: 'logs' },
+            { name: 'federation.events', data_source: 's3', resource: 'events' },
+          ],
+        });
 
       const { result } = renderHook(
         () => useIndexSources({ http, application, getDatasets: mockGetDatasets }),
@@ -162,7 +166,7 @@ describe('useIndexSources', () => {
     it('returns only index options when getDatasets resolves with an empty list', async () => {
       mockGetESQLSources.mockResolvedValue([{ name: 'logs-*', hidden: false }]);
       const mockGetDatasets = vi
-        .fn<Promise<EsqlDatasetsResult>, []>()
+        .fn<(...args: []) => Promise<EsqlDatasetsResult>>()
         .mockResolvedValue({ datasets: [] });
 
       const { result } = renderHook(
@@ -179,9 +183,11 @@ describe('useIndexSources', () => {
 
     it('returns only datasets when getESQLSources fails', async () => {
       mockGetESQLSources.mockRejectedValue(new Error('Sources unavailable'));
-      const mockGetDatasets = vi.fn<Promise<EsqlDatasetsResult>, []>().mockResolvedValue({
-        datasets: [{ name: 'federation.orders', data_source: 's3', resource: 'orders' }],
-      });
+      const mockGetDatasets = vi
+        .fn<(...args: []) => Promise<EsqlDatasetsResult>>()
+        .mockResolvedValue({
+          datasets: [{ name: 'federation.orders', data_source: 's3', resource: 'orders' }],
+        });
 
       const { result } = renderHook(
         () => useIndexSources({ http, application, getDatasets: mockGetDatasets }),
@@ -198,7 +204,7 @@ describe('useIndexSources', () => {
     it('returns only index options when getDatasets fails', async () => {
       mockGetESQLSources.mockResolvedValue([{ name: 'logs-*', hidden: false }]);
       const mockGetDatasets = vi
-        .fn<Promise<EsqlDatasetsResult>, []>()
+        .fn<(...args: []) => Promise<EsqlDatasetsResult>>()
         .mockRejectedValue(new Error('Datasets unavailable'));
 
       const { result } = renderHook(

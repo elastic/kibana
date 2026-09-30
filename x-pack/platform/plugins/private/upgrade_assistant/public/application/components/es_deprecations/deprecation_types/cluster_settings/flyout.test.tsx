@@ -30,7 +30,7 @@ vi.mock('../../../../lib/ui_metric', async () => {
 
 describe('RemoveClusterSettingsFlyout', () => {
   const closeFlyout = vi.fn();
-  const removeClusterSettings = vi.fn<Promise<void>, [settings: string[]]>();
+  const removeClusterSettings = vi.fn<(...args: [settings: string[]]) => Promise<void>>();
 
   beforeEach(() => {
     closeFlyout.mockClear();

@@ -10,6 +10,10 @@
 import { renderHook } from '@testing-library/react';
 import { vi } from 'vitest';
 import type { Mock } from 'vitest';
+// Transform and load the module graph once at collection time (the use_kibana mock pulls in the
+// heavy plugin mocks). Tests re-import fresh copies after vi.resetModules(), which then only
+// re-evaluate already transformed modules instead of spending the test timeout on a cold load.
+import './use_telemetry';
 
 vi.mock('./use_kibana');
 

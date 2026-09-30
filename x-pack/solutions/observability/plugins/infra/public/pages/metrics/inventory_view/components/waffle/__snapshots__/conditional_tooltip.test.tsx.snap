@@ -1,8 +1,6 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[
-  `ConditionalToolTip renders only the semconv metric set (no legacy cpu/tx/rx) when preferredSchema=semconv 1`
-] = `
+exports[`ConditionalToolTip renders only the semconv metric set (no legacy cpu/tx/rx) when preferredSchema=semconv 1`] = `
 <div
   aria-label="host-01"
   data-test-subj="conditionalTooltipContent-host-01"
@@ -118,9 +116,7 @@ exports[
 </div>
 `;
 
-exports[
-  `ConditionalToolTip renders the ECS metric set (including legacy cpu/tx/rx) when preferredSchema=ecs 1`
-] = `
+exports[`ConditionalToolTip renders the ECS metric set (including legacy cpu/tx/rx) when preferredSchema=ecs 1`] = `
 <div
   aria-label="host-01"
   data-test-subj="conditionalTooltipContent-host-01"

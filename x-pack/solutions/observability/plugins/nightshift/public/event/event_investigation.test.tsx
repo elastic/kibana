@@ -17,7 +17,7 @@ import type { InvestigationStatus } from '@kbn/investigation-output';
 import { EventInvestigation } from './event_investigation';
 
 const mockOpenChat = vi.fn();
-const mockGetRedirectUrl = vi.fn<string | undefined, [unknown]>();
+const mockGetRedirectUrl = vi.fn<(...args: [unknown]) => string | undefined>();
 
 vi.mock('@kbn/kibana-react-plugin/public', () => {
   const mocked = {

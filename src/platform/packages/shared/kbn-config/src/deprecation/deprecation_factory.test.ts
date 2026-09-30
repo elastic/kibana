@@ -18,7 +18,7 @@ describe('DeprecationFactory', () => {
     configDeprecationFactory;
   const context = createMockedContext();
 
-  const addDeprecation = vi.fn<void, [DeprecatedConfigDetails]>();
+  const addDeprecation = vi.fn<(...args: [DeprecatedConfigDetails]) => void>();
 
   beforeEach(() => {
     addDeprecation.mockClear();

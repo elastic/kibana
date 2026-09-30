@@ -3633,7 +3633,11 @@ describe('The metric threshold rule type', () => {
       payload: {
         ...(alertState !== 'ERROR'
           ? {
-              [ALERT_EVALUATION_VALUES]: conditions.map((c) => c.evaluation_value),
+              // Conditions without an evaluation result contribute no value (Jest's non-strict
+              // array equality ignored the trailing `undefined` entries this used to produce).
+              [ALERT_EVALUATION_VALUES]: conditions.flatMap((c) =>
+                'evaluation_value' in c ? [c.evaluation_value] : []
+              ),
               [ALERT_EVALUATION_THRESHOLD]: getThresholds(conditions),
               ...(groupByKeys
                 ? group

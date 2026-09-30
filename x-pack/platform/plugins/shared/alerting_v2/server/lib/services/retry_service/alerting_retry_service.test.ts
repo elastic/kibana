@@ -43,7 +43,7 @@ describe('AlertingRetryService', () => {
     const service = new AlertingRetryService(logger);
 
     const callback = vi
-      .fn<Promise<string>, []>()
+      .fn<(...args: []) => Promise<string>>()
       .mockRejectedValueOnce(new errors.ResponseError({ statusCode: 503 } as DiagnosticResult))
       .mockResolvedValueOnce('ok');
 
@@ -59,7 +59,7 @@ describe('AlertingRetryService', () => {
     const service = new AlertingRetryService(logger);
 
     const err = new errors.ResponseError({ statusCode: 500 } as DiagnosticResult);
-    const callback = vi.fn<Promise<never>, []>().mockRejectedValueOnce(err);
+    const callback = vi.fn<(...args: []) => Promise<never>>().mockRejectedValueOnce(err);
 
     const promise = service.retry(callback);
     const assertion = expect(promise).rejects.toBe(err);

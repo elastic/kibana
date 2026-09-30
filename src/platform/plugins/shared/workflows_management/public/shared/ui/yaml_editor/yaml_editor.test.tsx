@@ -13,12 +13,18 @@ import React from 'react';
 import type { Mock } from 'vitest';
 import { vi } from 'vitest';
 import type { CodeEditorProps, monaco } from '@kbn/code-editor';
+import * as kbnMonaco from '@kbn/monaco';
 import { YamlEditor } from './yaml_editor';
 import { yamlLanguageService } from './yaml_language_service';
 
 // Create a mock for monacoYaml
 const mockDispose = vi.fn();
 const mockUpdate = vi.fn();
+
+// Read the mocked module lazily and synchronously, like Jest's requireMock did. An awaited
+// vi.importMock resolves asynchronously and can outlast the tests' single setTimeout(0) wait
+// under load. The cast is needed because the mock factory replaces the typed export.
+const mockedKbnMonaco = kbnMonaco as unknown as { configureMonacoYamlSchema: Mock };
 
 // Mock the yaml_language_service
 vi.mock('./yaml_language_service', () => {
@@ -28,16 +34,14 @@ vi.mock('./yaml_language_service', () => {
   return {
     yamlLanguageService: {
       initialize: vi.fn().mockImplementation(async () => {
-        const { configureMonacoYamlSchema } = await vi.importMock('@kbn/monaco');
-        mockState.instance = await configureMonacoYamlSchema();
+        mockState.instance = await mockedKbnMonaco.configureMonacoYamlSchema();
         return mockState.instance;
       }),
       update: vi.fn().mockImplementation(async (schemas) => {
         if (!mockState.instance) {
           // Initialize if not already done
-          const { configureMonacoYamlSchema } = await vi.importMock('@kbn/monaco');
           // eslint-disable-next-line require-atomic-updates
-          mockState.instance = await configureMonacoYamlSchema(schemas);
+          mockState.instance = await mockedKbnMonaco.configureMonacoYamlSchema(schemas);
           // @ts-expect-error - mockState.instance is not typed
         } else if (mockState.instance.update) {
           // @ts-expect-error - mockState.instance is not typed

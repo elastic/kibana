@@ -187,7 +187,7 @@ const createOrchestrationDeps = (): OrchestrationDeps => {
     },
   } as unknown as PackageService;
   const logger = loggerMock.create();
-  const isPluginInitialized = vi.fn<boolean, []>(() => true);
+  const isPluginInitialized = vi.fn<(...args: []) => boolean>(() => true);
 
   return {
     esClient,

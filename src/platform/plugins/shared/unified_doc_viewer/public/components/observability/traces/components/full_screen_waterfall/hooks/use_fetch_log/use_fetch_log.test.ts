@@ -22,14 +22,13 @@ vi.mock('../../../../../../../plugin', () => {
 });
 
 const mockFetchLogDocumentById = vi.fn<
-  Promise<
+  (...args: any) => Promise<
     | {
         _index: string;
         fields: Record<PropertyKey, any> | undefined;
       }
     | undefined
-  >,
-  any
+  >
 >();
 const mockAdd = vi.fn();
 

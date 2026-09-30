@@ -69,10 +69,12 @@ const TagListConsumer = ({ tagIds }: { tagIds: string[] }) => {
 
 describe('ContentEditorKibanaProvider', () => {
   test('adapts tag IDs to saved object references for the plugin TagList', () => {
-    const PluginTagList = vi.fn<React.ReactElement | null, [PluginTagListProps]>(() => null);
-    const SavedObjectSaveModalTagSelector = vi.fn<React.ReactElement | null, [TagSelectorProps]>(
+    const PluginTagList = vi.fn<(...args: [PluginTagListProps]) => React.ReactElement | null>(
       () => null
     );
+    const SavedObjectSaveModalTagSelector = vi.fn<
+      (...args: [TagSelectorProps]) => React.ReactElement | null
+    >(() => null);
 
     render(<TagListConsumer tagIds={['tag-1', 'tag-2']} />, {
       wrapper: createWrapper({

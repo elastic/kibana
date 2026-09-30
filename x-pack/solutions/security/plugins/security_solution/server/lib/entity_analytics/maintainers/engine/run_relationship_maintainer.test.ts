@@ -45,8 +45,8 @@ const makeEsClient = (): {
   search: Mock<(...args: unknown[]) => Promise<SearchResponse>>;
   esql: Mock<(...args: unknown[]) => Promise<EsqlResponse>>;
 } => {
-  const search = vi.fn<Promise<SearchResponse>, unknown[]>();
-  const esql = vi.fn<Promise<EsqlResponse>, unknown[]>();
+  const search = vi.fn<(...args: unknown[]) => Promise<SearchResponse>>();
+  const esql = vi.fn<(...args: unknown[]) => Promise<EsqlResponse>>();
   const esClient = {
     search,
     esql: { query: esql },

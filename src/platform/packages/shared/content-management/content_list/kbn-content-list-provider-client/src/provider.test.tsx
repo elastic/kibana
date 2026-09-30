@@ -544,7 +544,9 @@ describe('ContentListClientProvider', () => {
   describe('content editor wiring', () => {
     /** Returns the spy `useOpenContentEditor` will hand back on the next render. */
     const stubOpenContentEditor = () => {
-      const openContentEditor = vi.fn<() => void, [OpenContentEditorParams]>(() => vi.fn());
+      const openContentEditor = vi.fn<(...args: [OpenContentEditorParams]) => () => void>(() =>
+        vi.fn()
+      );
       mockUseOpenContentEditor.mockReturnValue(openContentEditor);
       return openContentEditor;
     };

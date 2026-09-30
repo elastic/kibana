@@ -17,7 +17,7 @@ import { formatFieldValueReact, formatFieldValueText } from './format_value';
 
 const services = {
   fieldFormats: {
-    getDefaultInstance: vi.fn<FieldFormat, [string]>(
+    getDefaultInstance: vi.fn<(...args: [string]) => FieldFormat>(
       () =>
         ({
           convertToText: (value: unknown) => value,

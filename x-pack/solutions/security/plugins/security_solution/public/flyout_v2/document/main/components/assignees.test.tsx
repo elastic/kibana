@@ -154,10 +154,8 @@ describe('<Assignees />', () => {
       reportHeaderItemClicked: mockReportHeaderItemClicked,
     });
 
-    setAlertAssigneesMock = vi.fn<
-      ReturnType<SetAlertAssigneesFunc>,
-      Parameters<SetAlertAssigneesFunc>
-    >();
+    setAlertAssigneesMock =
+      vi.fn<(...args: Parameters<SetAlertAssigneesFunc>) => ReturnType<SetAlertAssigneesFunc>>();
     (useSetAlertAssignees as Mock).mockReturnValue(setAlertAssigneesMock);
   });
 

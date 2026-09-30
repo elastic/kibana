@@ -36,8 +36,9 @@ vi.mock('../../kibana', async () => {
 });
 
 const mockPackageList = vi.fn<
-  React.JSX.Element,
-  Array<{ showSearchTools?: boolean; searchTerm: string; list: unknown[] }>
+  (
+    ...args: Array<{ showSearchTools?: boolean; searchTerm: string; list: unknown[] }>
+  ) => React.JSX.Element
 >(() => <div data-test-subj="packageList" />);
 
 vi.mock('@kbn/fleet-plugin/public');

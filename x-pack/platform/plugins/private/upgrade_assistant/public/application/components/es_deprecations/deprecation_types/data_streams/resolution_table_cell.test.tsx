@@ -18,7 +18,7 @@ import type { MigrationStateContext } from './context';
 import { DataStreamReindexResolutionCell } from './resolution_table_cell';
 import { LoadingState } from '../../../types';
 
-const mockUseDataStreamMigrationContext = vi.fn<MigrationStateContext, []>();
+const mockUseDataStreamMigrationContext = vi.fn<(...args: []) => MigrationStateContext>();
 
 vi.mock('./context', () => {
   const mocked = {
@@ -45,12 +45,12 @@ describe('DataStreamReindexResolutionCell', () => {
   });
 
   const makeDefaultMigrationContextMock = (): MigrationStateContext => ({
-    loadDataStreamMetadata: vi.fn<Promise<void>, []>(),
-    initMigration: vi.fn<void, [resolutionType: 'reindex' | 'readonly']>(),
-    startReindex: vi.fn<Promise<void>, []>(),
-    cancelReindex: vi.fn<Promise<void>, []>(),
-    startReadonly: vi.fn<Promise<void>, []>(),
-    cancelReadonly: vi.fn<Promise<void>, []>(),
+    loadDataStreamMetadata: vi.fn<(...args: []) => Promise<void>>(),
+    initMigration: vi.fn<(...args: [resolutionType: 'reindex' | 'readonly']) => void>(),
+    startReindex: vi.fn<(...args: []) => Promise<void>>(),
+    cancelReindex: vi.fn<(...args: []) => Promise<void>>(),
+    startReadonly: vi.fn<(...args: []) => Promise<void>>(),
+    cancelReadonly: vi.fn<(...args: []) => Promise<void>>(),
     migrationState: {
       loadingState: LoadingState.Success,
       status: DataStreamMigrationStatus.notStarted,

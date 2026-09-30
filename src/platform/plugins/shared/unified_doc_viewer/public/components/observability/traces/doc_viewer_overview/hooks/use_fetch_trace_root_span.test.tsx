@@ -23,7 +23,7 @@ vi.mock('../../../../../plugin', () => {
   return { ...mocked, default: mocked };
 });
 
-const mockFetchRootSpanByTraceId = vi.fn<Promise<TraceRootSpan | undefined>, any>();
+const mockFetchRootSpanByTraceId = vi.fn<(...args: any) => Promise<TraceRootSpan | undefined>>();
 const mockGetAbsoluteTime = vi.fn(() => ({
   from: '2023-01-01T00:00:00.000Z',
   to: '2023-01-01T01:00:00.000Z',

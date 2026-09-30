@@ -28,11 +28,11 @@ const mockChatRef = {
   close: vi.fn(),
 };
 
-const mockOpenAgentBuilderChat = vi.fn<unknown, Parameters<AgentBuilderPluginStart['openChat']>>(
-  () => ({
-    chatRef: mockChatRef,
-  })
-);
+const mockOpenAgentBuilderChat = vi.fn<
+  (...args: Parameters<AgentBuilderPluginStart['openChat']>) => unknown
+>(() => ({
+  chatRef: mockChatRef,
+}));
 
 const createWrapper = (agentBuilderService?: AgentBuilderPluginStart) => {
   const mockStartServices = createStartServicesMock();

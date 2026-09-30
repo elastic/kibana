@@ -166,7 +166,7 @@ describe('<UseField />', () => {
         );
       };
 
-      const onStateChangeSpy = vi.fn<void, [FieldState]>();
+      const onStateChangeSpy = vi.fn<(...args: [FieldState]) => void>();
       const lastFieldState = (): FieldState =>
         onStateChangeSpy.mock.calls[onStateChangeSpy.mock.calls.length - 1][0];
       const toString = (value: unknown): string =>

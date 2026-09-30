@@ -12,7 +12,8 @@ import type { MatchedActionPolicy } from '@kbn/alerting-v2-schemas';
 import type { UseMatchedActionPoliciesResult } from '@kbn/alerting-v2-rule-form';
 import { useLinkedActionPolicies, sortMatchedActionPolicies } from './use_linked_action_policies';
 
-const mockUseMatchedActionPolicies = vi.fn<UseMatchedActionPoliciesResult, [unknown]>();
+const mockUseMatchedActionPolicies =
+  vi.fn<(...args: [unknown]) => UseMatchedActionPoliciesResult>();
 const mockHttp = { fake: 'http-start-contract' };
 
 vi.mock('@kbn/alerting-v2-rule-form', () => {
