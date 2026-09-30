@@ -1,5 +1,5 @@
 {
-  "sha1": "415a0d27175d97a64342863c20de3da5f18755cd",
+  "sha1": "a9f1c5c27d29bc58b7d67f3aef644a1e92b3e624",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -14,8 +14,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout/edr_endpoints/api/tests/endpoint_list_isolation_filter.spec.ts",
-        "line": 128,
-        "column": 7
+        "line": 113,
+        "column": 27
       }
     }
   ]

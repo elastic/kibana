@@ -6,7 +6,7 @@
  */
 
 import { randomUUID } from 'crypto';
-import { tags } from '@kbn/scout-security';
+import { tags, type ApiClientFixture } from '@kbn/scout-security';
 import { expect } from '@kbn/scout-security/api';
 import { EndpointMetadataGenerator } from '../../../../../common/endpoint/data_generators/endpoint_metadata_generator';
 import {
@@ -75,6 +75,12 @@ const indexHost = ({
     isServerless
   );
 
+const INDEXING_TIMEOUT_MS = 10 * 60 * 1000;
+// The united transform is started and not awaited. Give it time to copy both hosts
+// into the index the metadata list route reads.
+const UNITED_METADATA_SYNC_TIMEOUT_MS = 120_000;
+const FILTER_TEST_TIMEOUT_MS = UNITED_METADATA_SYNC_TIMEOUT_MS * 2 + 30_000;
+
 const hostnameOf = (indexed: IndexedHostsAndAlertsResponse): string => {
   const hostname = indexed.hosts.at(-1)?.host.hostname;
   if (!hostname) {
@@ -90,7 +96,7 @@ apiTest.describe('Endpoint list isolation filter', { tag: tags.stateful.classic 
   const indexedHosts: IndexedHostsAndAlertsResponse[] = [];
 
   apiTest.beforeAll(async ({ requestAuth, esClient, kbnClient, config }) => {
-    apiTest.setTimeout(10 * 60 * 1000);
+    apiTest.setTimeout(INDEXING_TIMEOUT_MS);
 
     const { apiKeyHeader } = await requestAuth.getApiKeyForPrivilegedUser();
     headers = {
@@ -144,26 +150,50 @@ apiTest.describe('Endpoint list isolation filter', { tag: tags.stateful.classic 
     }
   });
 
-  const listByIsolation = async (
-    apiClient: {
-      get: (
-        path: string,
-        options: { headers: Record<string, string>; responseType: 'json' }
-      ) => Promise<{ statusCode: number; body: unknown }>;
-    },
+  const listByIsolation = (apiClient: ApiClientFixture, hostname: string, isolation: boolean) => {
+    const kuery = `united.endpoint.Endpoint.state.isolation:${isolation} and united.endpoint.host.hostname:"${hostname}"`;
+    return apiClient.get<MetadataListBody>(
+      `${HOST_METADATA_LIST_ROUTE}?kuery=${encodeURIComponent(kuery)}`,
+      {
+        headers,
+        responseType: 'json',
+      }
+    );
+  };
+
+  // indexHostsAndAlerts starts the united metadata transform and returns before those docs
+  // are searchable. Poll the list route until the unisolated host is returned for
+  // isolation:false, so a later isolation:true miss cannot pass while that host is absent.
+  // The isolated host can land in a later checkpoint, so wait for it too.
+  const waitUntilHostIsListed = async (
+    apiClient: ApiClientFixture,
     hostname: string,
     isolation: boolean
   ) => {
-    const kuery = `united.endpoint.Endpoint.state.isolation:${isolation} and united.endpoint.host.hostname:"${hostname}"`;
-    return apiClient.get(`${HOST_METADATA_LIST_ROUTE}?kuery=${encodeURIComponent(kuery)}`, {
-      headers,
-      responseType: 'json',
-    });
+    await expect
+      .poll(
+        async () => {
+          const response = await listByIsolation(apiClient, hostname, isolation);
+          if (response.statusCode !== 200) {
+            return `status ${response.statusCode}: ${JSON.stringify(response.body)}`;
+          }
+          return response.body.total;
+        },
+        {
+          timeout: UNITED_METADATA_SYNC_TIMEOUT_MS,
+          intervals: [2_000],
+        }
+      )
+      .toBe(1);
   };
 
   apiTest(
     'metadata list returns only the host whose isolation state matches the kuery',
     async ({ apiClient }) => {
+      apiTest.setTimeout(FILTER_TEST_TIMEOUT_MS);
+      await waitUntilHostIsListed(apiClient, unisolatedHostname, false);
+      await waitUntilHostIsListed(apiClient, isolatedHostname, true);
+
       const isolated = await listByIsolation(apiClient, isolatedHostname, true);
       expect(isolated.statusCode).toBe(200);
       const isolatedBody = isolated.body as MetadataListBody;
