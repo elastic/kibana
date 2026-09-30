@@ -8,7 +8,7 @@
 /**
  * Seeds Nightshift investigations for local development. Run from the repo root:
  *
- *   node -r @kbn/setup-node-env x-pack/solutions/observability/plugins/nightshift/scripts/seed_nightshift.ts
+ *   node -r @kbn/setup-node-env x-pack/solutions/observability/plugins/nightshift/scripts/seed_nightshift_investigations.ts
  *
  * Add --help to list the connection flags.
  */
