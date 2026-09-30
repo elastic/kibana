@@ -24092,7 +24092,6 @@
     "xpack.globalSearchBar.searchBar.helpText.helpTextPrefix": "筛选依据",
     "xpack.globalSearchBar.searchBar.noResults": "尝试搜索应用程序、仪表板和可视化等。",
     "xpack.globalSearchBar.searchBar.noResultsHeading": "找不到结果",
-    "xpack.globalSearchBar.searchBar.noResultsImageAlt": "黑洞的图示",
     "xpack.globalSearchBar.searchBar.optionTagListAriaLabel": "标签",
     "xpack.globalSearchBar.searchbar.overflowTagsAriaLabel": "另外 {n} 个{n, plural, one {tag} other {标签}}：{tags}",
     "xpack.globalSearchBar.searchBar.placeholder": "查找应用、内容等。",
