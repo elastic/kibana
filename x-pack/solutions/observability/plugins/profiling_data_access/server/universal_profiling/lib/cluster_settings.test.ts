@@ -79,6 +79,16 @@ describe('cluster_settings validators', () => {
       });
     });
 
+    it('forwards the abort signal to getSettings', async () => {
+      const { setupOptions, getSettings } = createSetupOptions();
+      const abortSignal = new AbortController().signal;
+      getSettings.mockResolvedValue({ persistent: {} });
+
+      await validateMaximumBuckets({ ...setupOptions, abortSignal });
+
+      expect(getSettings).toHaveBeenCalledWith({}, { signal: abortSignal });
+    });
+
     it('returns configured false when getSettings throws', async () => {
       const { setupOptions, getSettings } = createSetupOptions();
       getSettings.mockRejectedValue(new Error('getSettings failed'));

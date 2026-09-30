@@ -38,7 +38,7 @@ function getProfilingClients({
 
 /** Reads the Universal Profiling setup state of a cloud deployment, which requires Fleet. */
 export async function getCloudSetupState(params: GetSetupStateParams): Promise<CloudSetupState> {
-  const { deps, logger, soClient, spaceId } = params;
+  const { deps, logger, soClient, spaceId, abortSignal } = params;
 
   if (!deps.fleet) {
     throw new Error('Elastic Fleet is required to set up Universal Profiling on Cloud');
@@ -51,18 +51,20 @@ export async function getCloudSetupState(params: GetSetupStateParams): Promise<C
     spaceId: spaceId ?? DEFAULT_SPACE_ID,
     packagePolicyClient: deps.fleet.packagePolicyService,
     isCloudEnabled: Boolean(deps.cloud?.isCloudEnabled),
+    abortSignal,
   });
 }
 
 /** Reads the Universal Profiling setup state of a self-managed deployment. */
 export async function getSelfManagedSetupState(params: GetSetupStateParams): Promise<SetupState> {
-  const { logger, soClient, spaceId } = params;
+  const { logger, soClient, spaceId, abortSignal } = params;
 
   return selfManagedSetupState({
     ...getProfilingClients(params),
     logger,
     soClient,
     spaceId: spaceId ?? DEFAULT_SPACE_ID,
+    abortSignal,
   });
 }
 

@@ -15,6 +15,8 @@ export interface ProfilingSetupOptions {
   soClient: SavedObjectsClientContract;
   logger: Logger;
   spaceId: string;
+  /** When provided, ES calls are cancelled once the signal aborts. */
+  abortSignal?: AbortSignal;
 }
 
 export interface SetupState {
