@@ -38,12 +38,6 @@ function wildcardToRegex(str: string) {
 
 const ADDITIONAL_CONTEXT_ALLOW_LIST = ['host.*', 'labels.*', 'tags', 'cloud.*', 'orchestrator.*'];
 
-/**
- * Kubeletstats equivalents of the ECS orchestrator context. SemConv pod documents index
- * these flat (`k8s.pod.uid`, `k8s.namespace.name`, ...), matching the pod model's
- * `schemaFields.semconv`. Without them a SemConv pod alert fires with empty context.
- */
-const SEMCONV_POD_CONTEXT_ALLOW_LIST = ['k8s.*'];
 export const ADDITIONAL_CONTEXT_BLOCKED_LIST = ['host.cpu.*', 'host.disk.*', 'host.network.*'];
 
 export const ADDITIONAL_CONTEXT_BLOCKED_LIST_REGEX = new RegExp(
@@ -105,12 +99,9 @@ export const createRequest = async (
         }
       : undefined;
 
-  const baseAllowList =
-    schema === 'semconv' && nodeType === 'pod'
-      ? ADDITIONAL_CONTEXT_ALLOW_LIST.concat(SEMCONV_POD_CONTEXT_ALLOW_LIST)
-      : ADDITIONAL_CONTEXT_ALLOW_LIST;
-
-  const allowList = !containerContextAgg ? baseAllowList.concat('container.*') : baseAllowList;
+  const allowList = !containerContextAgg
+    ? ADDITIONAL_CONTEXT_ALLOW_LIST.concat('container.*')
+    : ADDITIONAL_CONTEXT_ALLOW_LIST;
 
   const additionalContextAgg: Record<string, estypes.AggregationsAggregationContainer> = {
     additionalContext: {
