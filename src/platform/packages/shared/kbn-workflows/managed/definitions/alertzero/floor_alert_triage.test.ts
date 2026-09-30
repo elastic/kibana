@@ -11,6 +11,7 @@ import { parse } from 'yaml';
 import FLOOR_ALERT_TRIAGE_YAML from './floor_alert_triage.yaml';
 import FLOOR_ALERT_TRIAGE_REVIEW_YAML from './floor_alert_triage_review.yaml';
 import { createWorkflowLiquidEngine } from '../../../common/utils';
+import { ExecutionStatus } from '../../../types/latest';
 
 interface YamlStep {
   name: string;
@@ -635,6 +636,18 @@ describe('floor_alert_triage — closure review hand-off', () => {
       expect(resolveDispatch(read)).toBe(expected);
     });
 
+    // The Worker matches the review's status by string. Tie each literal to the engine's enum so a
+    // rename there fails here instead of silently sending every batch down the "started" branch.
+    it('only matches statuses the engine can report', () => {
+      const matched = [...outcomeTemplate.matchAll(/status == '([a-z_]+)'/g)].map(
+        ([, status]) => status
+      );
+      expect(matched).toEqual(expect.arrayContaining(['skipped', 'failed']));
+      matched.forEach((status) => {
+        expect(Object.values(ExecutionStatus)).toContain(status);
+      });
+    });
+
     it.each([
       ['handle_review_started', 'started'],
       ['handle_review_limit', 'limit'],
@@ -703,6 +716,24 @@ describe('floor_alert_triage — closure review hand-off', () => {
       expect(template).toContain(
         `already has ${review.settings.concurrency.max} closure proposals`
       );
+    });
+
+    // Every other message that mentions the limit does so without a number, so the one above is
+    // the only one that can go stale.
+    it('does not hard-code the limit in any other hand-off message', () => {
+      const messagesOf = (steps: YamlStep[] | undefined): string[] =>
+        (steps ?? []).flatMap((step) => [
+          ...(typeof step.with?.message === 'string' ? [step.with.message] : []),
+          ...messagesOf(step.steps),
+          ...messagesOf(step['on-failure']?.fallback),
+        ]);
+      const others = messagesOf(stepByName('gate_fp_close')?.steps).filter(
+        (message) => !message.includes('closure proposals waiting for a decision')
+      );
+      expect(others.length).toBeGreaterThan(0);
+      others.forEach((message) => {
+        expect(message).not.toMatch(new RegExp(`\\b${review.settings.concurrency.max}\\b`));
+      });
     });
   });
 

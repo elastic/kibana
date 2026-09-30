@@ -11,6 +11,8 @@ import { parse } from 'yaml';
 import ACTION_CLOSE_ALERTS_FALSE_POSITIVE_YAML from './actions/action_close_alerts_false_positive.yaml';
 import FLOOR_ALERT_TRIAGE_REVIEW_YAML from './floor_alert_triage_review.yaml';
 import { createWorkflowLiquidEngine } from '../../../common/utils';
+import { ConcurrencySettingsSchema } from '../../../spec/schema';
+import { ConcurrencySlotOccupyingExecutionStatuses, ExecutionStatus } from '../../../types/latest';
 
 interface YamlStep {
   name: string;
@@ -112,6 +114,36 @@ describe('floor_alert_triage_review — per-rule concurrency', () => {
     expect(renderString(concurrency.key, { inputs: { rule_id: 'rule-b' } })).not.toBe(
       renderString(concurrency.key, { inputs: { rule_id: 'rule-a' } })
     );
+  });
+});
+
+// The limit only works if the engine counts what this workflow does. The engine's own tests cover
+// the drop strategy and the skip itself (concurrency_manager.test.ts); these pin the pieces of that
+// contract this definition depends on, so a change on either side fails here and not in production.
+describe('floor_alert_triage_review — what the per-rule limit relies on in the engine', () => {
+  const { concurrency } = parsed.settings;
+
+  it('is a concurrency setting the engine accepts', () => {
+    expect(ConcurrencySettingsSchema.safeParse(concurrency).success).toBe(true);
+  });
+
+  // The review parks in WAITING_FOR_CHILD on its proposal for as long as an analyst takes; if that
+  // status stopped counting, the limit would only ever see the brief pending and running window.
+  it.each([ExecutionStatus.PENDING, ExecutionStatus.RUNNING, ExecutionStatus.WAITING_FOR_CHILD])(
+    'counts a review that is %s against the limit',
+    (status) => {
+      expect(ConcurrencySlotOccupyingExecutionStatuses).toContain(status);
+    }
+  );
+
+  it.each([
+    ExecutionStatus.SKIPPED,
+    ExecutionStatus.COMPLETED,
+    ExecutionStatus.FAILED,
+    ExecutionStatus.CANCELLED,
+    ExecutionStatus.TIMED_OUT,
+  ])('frees the slot of a review that is %s', (status) => {
+    expect(ConcurrencySlotOccupyingExecutionStatuses).not.toContain(status);
   });
 });
 

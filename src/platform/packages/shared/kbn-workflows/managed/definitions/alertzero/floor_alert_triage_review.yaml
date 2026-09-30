@@ -8,9 +8,9 @@ description: >
   leaves the tags alone.
 
   Started by the Worker with `workflow.executeAsync` after the batch has been
-  classified, tagged and noted, so the Worker never waits for a human. At most
-  10 reviews per rule wait at once; further ones are skipped and the alerts stay
-  open and tagged `az:false_positive`.
+  classified, tagged and noted, so the Worker never waits for a human. A
+  per-rule limit caps how many reviews wait at once; further ones are skipped and
+  the alerts stay open and tagged `az:false_positive`.
 enabled: true
 tags:
   - security
@@ -25,10 +25,19 @@ settings:
   # Manual autonomy, and a failed or unauthorized attempt re-parks within the same deadline, so
   # the Worker Investigation lifecycle contract puts the ceiling at 168 h. Keep this above it.
   timeout: "170h"
-  # At most 10 reviews per rule wait for a decision at once (the engine counts pending, waiting and
-  # running executions of the group, and a review parked on its proposal is one of them). An eleventh
-  # is SKIPPED at dispatch, before any step runs, and the Worker sees that on the execution record
-  # and says so in the Investigation.
+  # `concurrency.max` reviews per rule wait for a decision at once. The engine counts pending,
+  # waiting and running executions of the group, and a review parked on its proposal is one of
+  # them. One more is SKIPPED at dispatch, before any step runs, and the Worker sees that on the
+  # execution record and says so in the Investigation.
+  #
+  # A slot is held until the proposal is decided or expires (up to 72 h at Manual autonomy), so a
+  # rule that fires faster than analysts decide fills its slots and then raises no further closure
+  # proposals until some are decided. The alerts of a skipped batch are not revisited later.
+  #
+  # The limit is a ceiling, not a guarantee. The engine counts first and then starts the run, so
+  # concurrent dispatches can overshoot it slightly, and it lets a run start when the count itself
+  # fails. Running reviews hold a slot too, including at supervised autonomy where nothing waits
+  # for a human.
   #
   # `drop`, not `queue` or `cancel-in-progress`. `queue` holds the review until an analyst decides
   # the older ones, and expires it after 24h. `cancel-in-progress` cancels the oldest review while
