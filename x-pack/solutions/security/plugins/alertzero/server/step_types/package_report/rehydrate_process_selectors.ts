@@ -47,8 +47,12 @@ interface Candidate {
   entityId?: string;
   processName: string;
   timestamp: string;
-  /** From a technique-attributed SSE ref, not a plain Tier 1 sample; preferred on dedupe. */
-  techniqueMatched: boolean;
+  /**
+   * From a technique-attributed SSE ref, not a plain Tier 1 sample; preferred on dedupe, and
+   * carried onto the selector so the proposal comment can name the one technique this process
+   * is implicated in.
+   */
+  techniqueId?: string;
 }
 
 const asTypeList = (value: string | string[] | undefined): string[] =>
@@ -74,15 +78,15 @@ const extractCandidate = (source: RehydrateSource, ref: RehydrateRef): Candidate
     entityId,
     processName: source.process?.name ?? source.process?.executable ?? 'unknown process',
     timestamp: source['@timestamp'] ?? new Date(0).toISOString(),
-    techniqueMatched: Boolean(ref.matched?.technique_id),
+    techniqueId: ref.matched?.technique_id,
   };
 };
 
 /** True when `next` should replace `current` in the dedupe map: a technique-attributed ref wins
  *  outright, and within the same attribution tier the newest observation wins. */
 const isBetterCandidate = (next: Candidate, current: Candidate): boolean =>
-  next.techniqueMatched !== current.techniqueMatched
-    ? next.techniqueMatched
+  Boolean(next.techniqueId) !== Boolean(current.techniqueId)
+    ? Boolean(next.techniqueId)
     : next.timestamp > current.timestamp;
 
 /**
@@ -178,6 +182,7 @@ export const makeRehydrateProcessSelectors = (
           hostName: candidate.hostName,
           observedAt: candidate.timestamp,
           processName: candidate.processName,
+          techniqueId: candidate.techniqueId,
         });
       }
     }

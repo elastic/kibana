@@ -31,6 +31,13 @@ export interface ProcessSelector {
   /** e.g. `powershell.exe`; drives both the Proposal title and comment. */
   processName: string;
   observedAt?: string;
+  /**
+   * ATT&CK technique this specific process was matched against (from the source event's
+   * `matched.technique_id`), when the event that produced this selector carried one. Lets the
+   * proposal comment name the one technique this process is actually implicated in instead of
+   * every technique confirmed anywhere on the host.
+   */
+  techniqueId?: string;
 }
 
 /** One confirmed Tier 2 behavior, deduped by `technique_id` across current-run SSEs. */

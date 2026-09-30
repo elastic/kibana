@@ -7,7 +7,12 @@
 
 import type { ActionCatalogEntry } from '@kbn/alertzero-common';
 import { MAX_COMMENT_LENGTH, MAX_TITLE_LENGTH } from '@kbn/proposals-common';
-import type { CurrentRunHost, CurrentRunState, ProcessSelector } from './types';
+import type {
+  CurrentRunHost,
+  CurrentRunState,
+  HuntEvidenceTechnique,
+  ProcessSelector,
+} from './types';
 
 const sentenceCase = (value: string): string =>
   value.length === 0 ? value : `${value[0].toUpperCase()}${value.slice(1)}`;
@@ -75,6 +80,74 @@ const processLastSeenText = (selector: ProcessSelector): string | undefined =>
   selector.observedAt
     ? `${describeProcess(selector)} last seen ${selector.observedAt}; it may have already exited`
     : undefined;
+
+const findConfirmedTechnique = (
+  state: CurrentRunState,
+  techniqueId: string
+): HuntEvidenceTechnique | undefined =>
+  state.evidence.tier2Confirmed.find((t) => t.techniqueId === techniqueId);
+
+/**
+ * The one technique this specific process was matched against, not every technique confirmed
+ * anywhere on the host — that host-wide list belongs to a host-scoped proposal (e.g. isolate),
+ * not a proposal about this one process. Falls back to the report's Tier 1 hit count when the
+ * process has no technique attribution (a plain Tier 1 sample, not a behavior-derived match).
+ */
+const processTechniqueText = (
+  state: CurrentRunState,
+  selector: ProcessSelector
+): string | undefined => {
+  if (selector.techniqueId) {
+    const technique = findConfirmedTechnique(state, selector.techniqueId);
+    const label = technique?.techniqueName
+      ? `${technique.techniqueId} (${technique.techniqueName})`
+      : selector.techniqueId;
+    return technique
+      ? `Implicated in ${label}: ${pluralize(
+          technique.rowCount,
+          'row'
+        )} of matching activity confirmed in the hunt window`
+      : `Implicated in ${label}, confirmed in the hunt window`;
+  }
+  return state.evidence.tier1HitCount !== undefined
+    ? `Observed during the report's confirmed hunt window (Tier 1 matched ${pluralize(
+        state.evidence.tier1HitCount,
+        'event'
+      )})`
+    : undefined;
+};
+
+/**
+ * Fixed, per-action-type sentence naming what the action actually does and why that closes this
+ * finding — the catalog entry itself carries no such field. Matched by the action's own display
+ * name (already used to build the verb-first title/Action line above), not a hardcoded workflow
+ * id, so an unrecognized future action still gets a sensible generic line instead of nothing.
+ */
+const buildActionRationale = ({
+  entry,
+  processSelector,
+}: {
+  entry: ActionCatalogEntry;
+  processSelector?: ProcessSelector;
+}): string => {
+  const name = entry.name.trim().toLowerCase();
+  if (processSelector) {
+    if (name.startsWith('kill')) {
+      return 'Killing it stops execution immediately';
+    }
+    if (name.startsWith('suspend')) {
+      return 'Suspending it pauses execution without terminating the process, preserving state for investigation';
+    }
+    return 'This action responds to the process directly';
+  }
+  if (isHostAction(entry.name.trim())) {
+    if (name.startsWith('isolate')) {
+      return 'Isolating the host cuts off its network access, stopping further command-and-control, lateral movement, or data exfiltration while this activity is investigated';
+    }
+    return 'This action responds to the host directly';
+  }
+  return 'This action directly addresses the confirmed activity above';
+};
 
 /** One-line hunt context for the recommendation, combining the confirmed title and evidence summary. */
 const buildHuntContextLine = (state: CurrentRunState): string | undefined => {
@@ -149,11 +222,10 @@ export const buildProposalComment = ({
   processSelector?: ProcessSelector;
 }): string => {
   const actionLine = buildActionLine({ entry, host, processSelector });
-  const whyLines = [
-    huntConfirmedText(state, host),
-    evidenceSummaryText(state),
-    processSelector ? processLastSeenText(processSelector) : undefined,
-  ]
+  const evidenceLines = processSelector
+    ? [processTechniqueText(state, processSelector), processLastSeenText(processSelector)]
+    : [huntConfirmedText(state, host), evidenceSummaryText(state)];
+  const whyLines = [...evidenceLines, buildActionRationale({ entry, processSelector })]
     .filter((line): line is string => line !== undefined)
     .map(addPeriod);
 

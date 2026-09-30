@@ -54,6 +54,11 @@ const withEntityOnly: ProcessSelector = {
   processName: 'aws.exe',
 };
 
+const withTechnique: ProcessSelector = {
+  ...withPid,
+  techniqueId: 'T1059.001',
+};
+
 const baseState = (overrides: Partial<CurrentRunState> = {}): CurrentRunState => ({
   runId: 'run-1',
   reportId: 'rpt-1',
@@ -116,7 +121,7 @@ describe('buildProposalTitle', () => {
 });
 
 describe('buildProposalComment', () => {
-  it('builds the Action / Why body for a process-scoped action', () => {
+  it('builds the Action / Why body for a process-scoped action with no technique attribution', () => {
     const state = baseState();
     const comment = buildProposalComment({
       entry: killProcess,
@@ -130,16 +135,80 @@ describe('buildProposalComment', () => {
     );
     expect(comment).toContain('**Why**');
     expect(comment).toContain(
-      'Hunt Watch confirmed *Hunt: PowerShell (T1059.001) [ti-repor]* on WIN-ANALYST01.'
+      "Observed during the report's confirmed hunt window (Tier 1 matched 4 events)."
     );
-    expect(comment).toContain('Tier 1 matched 4 events');
     expect(comment).toContain('`powershell.exe` (PID 4212) last seen 2026-09-27T16:34:41.000Z');
+    expect(comment).toContain('Killing it stops execution immediately.');
+    // A process-scoped Why should not fall back to the host-wide hunt summary.
+    expect(comment).not.toContain('Hunt Watch confirmed');
   });
 
-  it('builds the Action line for a host-scoped action', () => {
+  it('names the one technique a process is implicated in, not every technique on the host', () => {
+    const state = baseState({
+      evidence: {
+        tier1HitCount: 4,
+        tier2Confirmed: [
+          { techniqueId: 'T1059.001', rowCount: 3, techniqueName: 'PowerShell' },
+          { techniqueId: 'T1078.004', rowCount: 4, techniqueName: 'Cloud Accounts' },
+        ],
+      },
+    });
+    const comment = buildProposalComment({
+      entry: killProcess,
+      host,
+      state,
+      processSelector: withTechnique,
+    });
+    expect(comment).toContain(
+      'Implicated in T1059.001 (PowerShell): 3 rows of matching activity confirmed in the hunt window.'
+    );
+    expect(comment).not.toContain('T1078.004');
+  });
+
+  it('gives kill and suspend proposals for the same process distinct action rationale', () => {
+    const state = baseState();
+    const killComment = buildProposalComment({
+      entry: killProcess,
+      host,
+      state,
+      processSelector: withPid,
+    });
+    const suspendComment = buildProposalComment({
+      entry: suspendProcess,
+      host,
+      state,
+      processSelector: withPid,
+    });
+    expect(killComment).toContain('Killing it stops execution immediately.');
+    expect(suspendComment).toContain(
+      'Suspending it pauses execution without terminating the process, preserving state for investigation.'
+    );
+  });
+
+  it('builds the Action / Why body for a host-scoped action', () => {
     const state = baseState();
     const comment = buildProposalComment({ entry: isolateHost, host, state });
     expect(comment).toContain('**Action:** Isolate host **WIN-ANALYST01** with Elastic Defend.');
+    expect(comment).toContain(
+      'Hunt Watch confirmed *Hunt: PowerShell (T1059.001) [ti-repor]* on WIN-ANALYST01.'
+    );
+    expect(comment).toContain(
+      'Isolating the host cuts off its network access, stopping further command-and-control, lateral movement, or data exfiltration while this activity is investigated.'
+    );
+  });
+
+  it('gives a kill proposal and an isolate proposal on the same host distinct Why text', () => {
+    const state = baseState();
+    const killComment = buildProposalComment({
+      entry: killProcess,
+      host,
+      state,
+      processSelector: withPid,
+    });
+    const isolateComment = buildProposalComment({ entry: isolateHost, host, state });
+    expect(killComment).not.toBe(isolateComment);
+    expect(killComment).toContain('Killing it stops execution immediately.');
+    expect(isolateComment).toContain('Isolating the host cuts off its network access');
   });
 
   it('includes exactly one Tier 1 line even when three SSEs carried the same evidence', () => {
@@ -169,7 +238,7 @@ describe('buildProposalComment', () => {
     expect(comment).not.toContain('hunt_result');
   });
 
-  it('summarizes confirmed Tier 2 techniques when present', () => {
+  it('summarizes confirmed Tier 2 techniques on a host-scoped proposal when present', () => {
     const state = baseState({
       evidence: {
         tier1HitCount: 4,
@@ -179,23 +248,13 @@ describe('buildProposalComment', () => {
         ],
       },
     });
-    const comment = buildProposalComment({
-      entry: killProcess,
-      host,
-      state,
-      processSelector: withPid,
-    });
+    const comment = buildProposalComment({ entry: isolateHost, host, state });
     expect(comment).toContain('Tier 2 confirmed T1059.001 (3 rows) and T1078.004 (4 rows)');
   });
 
-  it('falls back to the plain technique list when no Tier 2 behavior is confirmed', () => {
+  it('falls back to the plain technique list on a host-scoped proposal when no Tier 2 behavior is confirmed', () => {
     const state = baseState({ techniques: ['T1078.004'], evidence: { tier2Confirmed: [] } });
-    const comment = buildProposalComment({
-      entry: killProcess,
-      host,
-      state,
-      processSelector: withPid,
-    });
+    const comment = buildProposalComment({ entry: isolateHost, host, state });
     expect(comment).toContain('Techniques: T1078.004');
   });
 

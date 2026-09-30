@@ -186,6 +186,38 @@ describe('makeRehydrateProcessSelectors', () => {
     expect(selectors[0].processName).toBe('confirmed.exe');
   });
 
+  it('carries the matched technique id onto the selector', async () => {
+    const esClient = esClientWith([
+      found('logs-endpoint.events-default', 'ev-1', {
+        '@timestamp': '2026-09-26T10:00:00.000Z',
+        host: { name: 'h1' },
+        process: { pid: 100, name: 'confirmed.exe' },
+        event: { type: 'start' },
+      }),
+    ]);
+    const selectors = await makeRehydrateProcessSelectors(esClient)({
+      alerts: [],
+      events: [eventRef('logs-endpoint.events-default', 'ev-1', 'T1059.001')],
+    });
+    expect(selectors[0].techniqueId).toBe('T1059.001');
+  });
+
+  it('leaves techniqueId undefined for a plain sample ref with no technique match', async () => {
+    const esClient = esClientWith([
+      found('logs-endpoint.events-default', 'ev-1', {
+        '@timestamp': '2026-09-26T10:00:00.000Z',
+        host: { name: 'h1' },
+        process: { pid: 100, name: 'sample.exe' },
+        event: { type: 'start' },
+      }),
+    ]);
+    const selectors = await makeRehydrateProcessSelectors(esClient)({
+      alerts: [],
+      events: [eventRef('logs-endpoint.events-default', 'ev-1')],
+    });
+    expect(selectors[0].techniqueId).toBeUndefined();
+  });
+
   it('caps at 5 selectors per host, keeping the newest', async () => {
     const docs = Array.from({ length: 7 }, (_, i) =>
       found('logs-endpoint.events-default', `ev-${i}`, {
