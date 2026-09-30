@@ -1,33 +1,85 @@
 {
-  "sha1": "0b13eaafbdd16637cedc5ec0a95841beba8dcd5e",
+  "sha1": "cd6522b764938e6aaa4b8dbdc79f85e4f5b99b45",
   "testChannels": [
     "ci-on-commit"
   ],
   "tests": [
     {
-      "id": "9c74fe5c346746e-196d8e231090b17",
-      "title": "Create Elasticsearch service accounts creates the account, mints its token, and reports only the id and name",
+      "id": "9c74fe5c346746e-5cff0607f7ce78a",
+      "title": "Create Elasticsearch service accounts creates the account with the requested roles, mints its token, and reports the id, name and roles",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/security/test/scout_service_accounts/api/tests/create_service_account.spec.ts",
-        "line": 37,
-        "column": 86
+        "line": 54,
+        "column": 1
       }
     },
     {
-      "id": "9c74fe5c346746e-898df34d70c19e3",
-      "title": "Create Elasticsearch service accounts assigns the roles the caller asked for",
+      "id": "9c74fe5c346746e-e45d71c299b3890",
+      "title": "Create Elasticsearch service accounts refuses a request that names no roles",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/security/test/scout_service_accounts/api/tests/create_service_account.spec.ts",
-        "line": 61,
-        "column": 23
+        "line": 90,
+        "column": 14
+      }
+    },
+    {
+      "id": "9c74fe5c346746e-25bc3a44a987915",
+      "title": "Create Elasticsearch service accounts creates an account with 1000 roles, the most Elasticsearch allows",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/security/test/scout_service_accounts/api/tests/create_service_account.spec.ts",
+        "line": 108,
+        "column": 38
+      }
+    },
+    {
+      "id": "9c74fe5c346746e-e941ece115bbfac",
+      "title": "Create Elasticsearch service accounts refuses more than 1000 roles without writing anything",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/security/test/scout_service_accounts/api/tests/create_service_account.spec.ts",
+        "line": 130,
+        "column": 18
+      }
+    },
+    {
+      "id": "9c74fe5c346746e-8839e1389c31119",
+      "title": "Create Elasticsearch service accounts creates an account with a 507-character role name, the longest Elasticsearch allows",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/security/test/scout_service_accounts/api/tests/create_service_account.spec.ts",
+        "line": 155,
+        "column": 50
+      }
+    },
+    {
+      "id": "9c74fe5c346746e-1676a66f5c799ce",
+      "title": "Create Elasticsearch service accounts refuses a role name longer than 507 characters without writing anything",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/security/test/scout_service_accounts/api/tests/create_service_account.spec.ts",
+        "line": 175,
+        "column": 14
       }
     },
     {
@@ -39,8 +91,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/security/test/scout_service_accounts/api/tests/create_service_account.spec.ts",
-        "line": 86,
-        "column": 29
+        "line": 197,
+        "column": 15
       }
     },
     {
@@ -52,34 +104,21 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/security/test/scout_service_accounts/api/tests/create_service_account.spec.ts",
-        "line": 103,
-        "column": 38
+        "line": 224,
+        "column": 9
       }
     },
     {
-      "id": "9c74fe5c346746e-0a5d0fc0a66f02c",
-      "title": "Create Elasticsearch service accounts API-key caller: falls back to `superuser` when the roles cannot be derived",
+      "id": "9c74fe5c346746e-4199c3d47ea42a5",
+      "title": "Create Elasticsearch service accounts API-key caller: creates the account with the requested roles",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/security/test/scout_service_accounts/api/tests/create_service_account.spec.ts",
-        "line": 129,
-        "column": 26
-      }
-    },
-    {
-      "id": "9c74fe5c346746e-eec3d266a2e3611",
-      "title": "Create Elasticsearch service accounts API-key caller: creates the account when the roles are named explicitly",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/security/test/scout_service_accounts/api/tests/create_service_account.spec.ts",
-        "line": 159,
-        "column": 33
+        "line": 245,
+        "column": 21
       }
     },
     {
@@ -91,8 +130,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/security/test/scout_service_accounts/api/tests/create_service_account.spec.ts",
-        "line": 193,
-        "column": 9
+        "line": 282,
+        "column": 55
       }
     },
     {
@@ -104,7 +143,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/security/test/scout_service_accounts/api/tests/create_service_account.spec.ts",
-        "line": 226,
+        "line": 318,
         "column": 18
       }
     },

@@ -55,7 +55,7 @@ const rule: RuleApiResponse = {
   metadata: { name: 'Test rule', version: 1 },
   time_field: '@timestamp',
   schedule: { every: '5m' },
-  query: { format: 'standalone', breach: { query: 'FROM logs-*' } },
+  query: { base: 'FROM logs-*' },
   created_by: { profile_uid: 'alice@example.com' },
   created_at: '2026-03-01T12:00:00.000Z',
   updated_by: { profile_uid: 'bob@example.com' },

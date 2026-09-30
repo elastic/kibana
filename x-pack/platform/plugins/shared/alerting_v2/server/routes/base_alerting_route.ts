@@ -14,6 +14,7 @@ import type {
 } from '@kbn/core-http-server';
 import type { RouteHandler } from '@kbn/core-di-server';
 import { errorResponseSchema, type ErrorResponse } from '@kbn/alerting-v2-schemas';
+import { treeifyError } from '@kbn/zod/v4';
 import { injectable } from 'inversify';
 import merge from 'lodash/merge';
 import { ALERTING_V2_ENABLED_SETTING_ID } from '@kbn/alerting-v2-constants';
@@ -25,6 +26,7 @@ import { getCommonErrorOasOperationObject } from './common_error_oas_examples';
 import { deepMergeRouteOptions } from './deep_merge_route_options';
 import { deriveErrorCodeFromStatus } from './derive_error_code';
 import { computeRouteValidate, type AlertingRouteSchemas } from './compute_route_validate';
+import { ZodRequestValidationError } from './zod_request_validation';
 
 /**
  * Re-exported so route authors keep a single import surface
@@ -120,7 +122,9 @@ export abstract class BaseAlertingRoute implements RouteHandler {
   /**
    * Maps a request schema-validation failure to the alerting v2
    * {@link ErrorResponse} shape so validation errors are indistinguishable from
-   * the domain errors produced by {@link BaseAlertingRoute.onError}. Wired into
+   * the domain errors produced by {@link BaseAlertingRoute.onError}. `details.errors`
+   * mirrors the tree the domain-level parsers attach, so a caller reads one
+   * shape whichever layer rejected the body. Wired into
    * `validate.onRequestValidationError` by the `validate` getter for routes that
    * declare request schemas. `bypassErrorFormat` keeps the flat body verbatim,
    * matching `errorResponseSchema` (see `onError` for the rationale).
@@ -130,11 +134,18 @@ export abstract class BaseAlertingRoute implements RouteHandler {
     _request,
     response
   ) => {
+    const { rawError } = error;
+
     const body: ErrorResponse = {
       code: deriveErrorCodeFromStatus(400),
       error: 'Bad Request',
       message: error.message,
-      details: { source: error.source },
+      details: {
+        source: error.source,
+        ...(rawError instanceof ZodRequestValidationError && {
+          errors: treeifyError(rawError.zodError),
+        }),
+      },
     };
 
     return response.customError({ statusCode: 400, body, bypassErrorFormat: true });

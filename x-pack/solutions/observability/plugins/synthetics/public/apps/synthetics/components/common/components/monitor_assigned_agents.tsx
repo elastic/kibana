@@ -18,7 +18,9 @@ import {
 import { i18n } from '@kbn/i18n';
 import { useSyntheticsSettingsContext } from '../../../contexts';
 import { useFleetPermissions } from '../../../hooks';
+import { useLicense } from '../../../hooks/use_license';
 import { useMonitorAgentAssignments } from '../../settings/private_locations/hooks/use_monitor_agent_assignments';
+import { AGENT_SHARDING_MIN_LICENSE } from '../../../../../../common/constants/license';
 import {
   isAgentVersionMwCompatible,
   MIN_MW_SUPPORTED_AGENT_VERSION,
@@ -46,6 +48,7 @@ export const MonitorAssignedAgents = ({
   );
   const { basePath } = useSyntheticsSettingsContext();
   const { canReadAgents, canReadAgentPolicies } = useFleetPermissions();
+  const { hasAtLeast } = useLicense();
 
   if (privateLocations.length === 0) {
     return null;
@@ -60,9 +63,7 @@ export const MonitorAssignedAgents = ({
   const allSharded =
     entries.length > 0
       ? entries.every((entry) => entry.isAgentSharding)
-      : privateLocations.every(
-          (location) => 'isAgentSharding' in location && location.isAgentSharding === true
-        );
+      : hasAtLeast(AGENT_SHARDING_MIN_LICENSE) === true;
 
   const title = (
     <EuiDescriptionListTitle>

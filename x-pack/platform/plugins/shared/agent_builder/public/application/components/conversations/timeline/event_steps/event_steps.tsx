@@ -26,6 +26,7 @@ interface EventStepsProps {
   conversationAttachments?: VersionedAttachment[];
   attachmentRefs?: AttachmentVersionRef[];
   conversationId?: string;
+  isAborted?: boolean;
 }
 
 export const EventSteps: React.FC<EventStepsProps> = ({
@@ -33,10 +34,10 @@ export const EventSteps: React.FC<EventStepsProps> = ({
   conversationAttachments,
   attachmentRefs,
   conversationId,
+  isAborted = false,
 }) => {
-  if (steps.length === 0) return null;
-
   const displayItems = groupSteps(steps);
+  if (displayItems.length === 0) return null;
 
   return (
     <EuiFlexGroup direction="column" data-test-subj="agentBuilderThinkingPanel">
@@ -47,9 +48,9 @@ export const EventSteps: React.FC<EventStepsProps> = ({
               return (
                 <EuiFlexItem grow={false} key={`group-${item.steps[0].tool_call_id}`}>
                   {item.steps.length === 1 ? (
-                    <ToolCallStep step={item.steps[0]} />
+                    <ToolCallStep step={item.steps[0]} isAborted={isAborted} />
                   ) : (
-                    <ToolCallGroup steps={item.steps} />
+                    <ToolCallGroup steps={item.steps} isAborted={isAborted} />
                   )}
                 </EuiFlexItem>
               );

@@ -6,14 +6,19 @@
  */
 
 import React, { useMemo } from 'react';
-import { EuiAvatar, EuiBadge, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { EuiBadge } from '@elastic/eui';
 import { InfoBlocks, type InfoBlockItem } from '@kbn/flyout-info-blocks';
-import type { Investigation } from '../../types';
+import { AssigneeAvatarStack } from '../escalation_queue/assignee_avatar_stack';
 import { getEmptyValue } from '../helpers';
 import { TEMPLATE_UI_LABELS } from '../../template_ui/translations';
 
 export interface ConversationHeaderBlocksProps {
   status?: string;
+  /**
+   * Pre-rendered interactive status widget from the consuming plugin (e.g. a toggle).
+   * Falls back to a read-only badge when absent.
+   */
+  statusNode?: React.ReactNode;
   /** Pre-rendered assignee content. Falls back to a read-only avatar stack when absent. */
   assigneesNode?: React.ReactNode;
   /** Fallback assignee uid list used to render read-only avatars when `assigneesNode` is absent. */
@@ -29,6 +34,7 @@ export interface ConversationHeaderBlocksProps {
  */
 export const ConversationHeaderBlocks = ({
   status,
+  statusNode,
   assigneesNode,
   assigneeUids = [],
   'data-test-subj': dataTestSubj = 'investigationHeaderBlocks',
@@ -40,23 +46,32 @@ export const ConversationHeaderBlocks = ({
     if (assigneeUids.length === 0) {
       return null;
     }
-    return (
-      <EuiFlexGroup gutterSize="xs" responsive={false} alignItems="center">
-        {assigneeUids.map((uid) => (
-          <EuiFlexItem key={uid} grow={false}>
-            <EuiAvatar size="s" name={uid} />
-          </EuiFlexItem>
-        ))}
-      </EuiFlexGroup>
-    );
+    const profiles = assigneeUids.map((uid) => ({
+      uid,
+      enabled: true as const,
+      user: { username: uid },
+      data: {},
+    }));
+    return <AssigneeAvatarStack profiles={profiles} />;
   }, [assigneesNode, assigneeUids]);
+
+  const statusValue = useMemo<React.ReactNode>(() => {
+    if (statusNode !== undefined) {
+      return statusNode;
+    }
+    return (
+      <EuiBadge color={status === 'open' ? 'primary' : 'hollow'}>
+        {status ?? getEmptyValue()}
+      </EuiBadge>
+    );
+  }, [status, statusNode]);
 
   const items = useMemo<InfoBlockItem[]>(
     () => [
       {
         id: 'status',
         title: TEMPLATE_UI_LABELS.status,
-        value: <EuiBadge color="hollow">{status ?? getEmptyValue()}</EuiBadge>,
+        value: statusValue,
       },
       {
         id: 'assignees',
@@ -64,36 +79,8 @@ export const ConversationHeaderBlocks = ({
         value: assigneesValue,
       },
     ],
-    [status, assigneesValue]
+    [statusValue, assigneesValue]
   );
 
   return <InfoBlocks items={items} maxColumns={2} data-test-subj={dataTestSubj} />;
 };
-
-// ---------------------------------------------------------------------------
-// Legacy wrapper kept for API stability.
-// ---------------------------------------------------------------------------
-
-export interface InvestigationHeaderBlocksProps {
-  investigation: Investigation;
-  /** Optional pre-rendered interactive assignee picker from the consuming plugin. */
-  assigneesNode?: React.ReactNode;
-}
-
-/**
- * @deprecated Use `ConversationHeaderBlocks` directly. This wrapper exists only
- * so existing call sites don't need to be updated all at once.
- */
-export const InvestigationHeaderBlocks = ({
-  investigation,
-  assigneesNode,
-}: InvestigationHeaderBlocksProps) => (
-  <ConversationHeaderBlocks
-    status={investigation.status}
-    assigneesNode={assigneesNode}
-    assigneeUids={
-      investigation.assignees ?? (investigation.assignee ? [investigation.assignee] : [])
-    }
-    data-test-subj="investigationHeaderBlocks"
-  />
-);
