@@ -79,12 +79,12 @@ create_sync_pr() {
 # _notify_existing_pr pr_title slack_key
 #
 # Posts a Slack message via buildkite-agent metadata when
-# KIBANA_SLACK_NOTIFICATIONS_ENABLED is set. Uses a per call slack_key so that
+# ELASTIC_SLACK_NOTIFICATIONS_ENABLED is set. Uses a per call slack_key so that
 # multiple syncs skipping in the same build each deliver their own message.
 _notify_existing_pr() {
   local pr_title="$1" slack_key="$2"
   local msg="It looks like there is an open \"${pr_title}\" PR that hasn't been merged yet. This week's sync skipped opening a new one — please review/merge the existing PR."
-  if [[ "${KIBANA_SLACK_NOTIFICATIONS_ENABLED:-}" =~ ^(1|true)$ ]]; then
+  if [[ "${ELASTIC_SLACK_NOTIFICATIONS_ENABLED:-}" =~ ^(1|true)$ ]]; then
     buildkite-agent meta-data set "slack:${slack_key}:body" "$msg" >/dev/null 2>&1 || true
   fi
 }
