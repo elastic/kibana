@@ -55,11 +55,6 @@ const errorTitle = i18n.translate(
   { defaultMessage: 'Failed to load linked action policies' }
 );
 
-const createPolicyLicenseTooltip = i18n.translate(
-  'xpack.responseOps.alertingV2RuleForm.linkedActionPolicies.createLicenseTooltip',
-  { defaultMessage: 'An active Enterprise license is required to create action policies.' }
-);
-
 // TODO: replace with paths.actionPolicyEdit from alerting_v2/public/constants.ts
 //       once exported from the plugin or moved to a shared package.
 const ACTION_POLICY_EDIT_BASE = '/app/management/alertingV2/action_policies/edit';
@@ -72,7 +67,7 @@ const getEditLabel = (name: string) =>
 
 interface Props {
   http: HttpStart;
-  canCreateActionPolicy?: boolean;
+  createActionPolicyDisabledReason?: string;
   CreateActionPolicyFormFlyout?: React.ComponentType<{
     onClose: () => void;
     onSuccess: () => void;
@@ -81,7 +76,7 @@ interface Props {
 
 export const LinkedActionPoliciesStep = ({
   http,
-  canCreateActionPolicy = true,
+  createActionPolicyDisabledReason,
   CreateActionPolicyFormFlyout,
 }: Props) => {
   const metadata = useWatch<FormValues, 'metadata'>({ name: 'metadata' });
@@ -183,14 +178,12 @@ export const LinkedActionPoliciesStep = ({
       {CreateActionPolicyFormFlyout && (
         <>
           <EuiSpacer size="m" />
-          <EuiToolTip
-            content={canCreateActionPolicy ? undefined : createPolicyLicenseTooltip}
-            position="top"
-          >
+          <EuiToolTip content={createActionPolicyDisabledReason} position="top">
             <EuiButton
               iconType="plus"
               onClick={() => setIsCreateFlyoutOpen(true)}
-              disabled={!canCreateActionPolicy}
+              isDisabled={Boolean(createActionPolicyDisabledReason)}
+              hasAriaDisabled
               data-test-subj="createActionPolicyButton"
             >
               {i18n.translate(
