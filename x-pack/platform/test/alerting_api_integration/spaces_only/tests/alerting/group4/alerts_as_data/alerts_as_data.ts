@@ -33,6 +33,7 @@ import {
   ALERT_START,
   ALERT_STATUS,
   ALERT_TIME_RANGE,
+  ALERT_TRACKED,
   ALERT_UUID,
   ALERT_WORKFLOW_STATUS,
   EVENT_ACTION,
@@ -131,7 +132,7 @@ export default function createAlertsAsDataInstallResourcesTest({ getService }: F
         const alertDocsRun1 = await queryForAlertDocs<PatternFiringAlert>(ruleId);
 
         // Get alert state from task document
-        let state: any = await getTaskState(ruleId);
+        let state: any = await getTaskState(ruleId, 0);
         expect(state.alertInstances.alertA.state.patternIndex).to.equal(0);
         expect(state.alertInstances.alertB.state.patternIndex).to.equal(0);
         expect(state.alertInstances.alertC.state.patternIndex).to.equal(0);
@@ -169,6 +170,9 @@ export default function createAlertsAsDataInstallResourcesTest({ getService }: F
 
           // status should be active
           expect(source[ALERT_STATUS]).to.equal('active');
+
+          // new alerts are in the executor working set
+          expect(source[ALERT_TRACKED]).to.equal(true);
 
           // flapping information for new alert
           expect(source[ALERT_FLAPPING]).to.equal(false);
@@ -222,7 +226,7 @@ export default function createAlertsAsDataInstallResourcesTest({ getService }: F
         const alertDocsRun2 = await queryForAlertDocs<PatternFiringAlert>(ruleId);
 
         // Get alert state from task document
-        state = await getTaskState(ruleId);
+        state = await getTaskState(ruleId, 1);
         expect(state.alertInstances.alertA.state.patternIndex).to.equal(1);
         expect(state.alertInstances.alertB).to.be(undefined);
         expect(state.alertInstances.alertC).to.be(undefined);
@@ -261,6 +265,7 @@ export default function createAlertsAsDataInstallResourcesTest({ getService }: F
         expect(alertADocRun2[ALERT_RULE_EXECUTION_TIMESTAMP]).to.equal(alertADocRun2['@timestamp']);
         // status should still be active
         expect(alertADocRun2[ALERT_STATUS]).to.equal('active');
+        expect(alertADocRun2[ALERT_TRACKED]).to.equal(true);
         // flapping false, flapping history updated with additional entry
         expect(alertADocRun2[ALERT_FLAPPING]).to.equal(false);
         expect(alertADocRun2[ALERT_FLAPPING_HISTORY]).to.eql(
@@ -301,6 +306,8 @@ export default function createAlertsAsDataInstallResourcesTest({ getService }: F
         expect(alertBDocRun2[ALERT_END]).to.match(timestampPattern);
         // status should be set to recovered
         expect(alertBDocRun2[ALERT_STATUS]).to.equal('recovered');
+        // stayed in task state only while flapping history still has state changes
+        expect(alertBDocRun2[ALERT_TRACKED]).to.equal(enableFlapping);
         // flapping false, flapping history updated with additional entry
         expect(alertBDocRun2[ALERT_FLAPPING]).to.equal(false);
         expect(alertBDocRun2[ALERT_FLAPPING_HISTORY]).to.eql(
@@ -343,6 +350,7 @@ export default function createAlertsAsDataInstallResourcesTest({ getService }: F
         expect(alertCDocRun2[ALERT_END]).to.match(timestampPattern);
         // status should be set to recovered
         expect(alertCDocRun2[ALERT_STATUS]).to.equal('recovered');
+        expect(alertCDocRun2[ALERT_TRACKED]).to.equal(enableFlapping);
         // flapping false, flapping history updated with additional entry
         expect(alertCDocRun2[ALERT_FLAPPING]).to.equal(false);
         expect(alertCDocRun2[ALERT_FLAPPING_HISTORY]).to.eql(
@@ -380,7 +388,7 @@ export default function createAlertsAsDataInstallResourcesTest({ getService }: F
         const alertDocsRun3 = await queryForAlertDocs<PatternFiringAlert>(ruleId);
 
         // Get alert state from task document
-        state = await getTaskState(ruleId);
+        state = await getTaskState(ruleId, 2);
         expect(state.alertInstances.alertA.state.patternIndex).to.equal(2);
         expect(state.alertInstances.alertB).to.be(undefined);
         expect(state.alertInstances.alertC.state.patternIndex).to.equal(2);
@@ -415,6 +423,7 @@ export default function createAlertsAsDataInstallResourcesTest({ getService }: F
         expect(alertADocRun3[ALERT_RULE_EXECUTION_TIMESTAMP]).to.equal(alertADocRun3['@timestamp']);
         // status should still be active
         expect(alertADocRun3[ALERT_STATUS]).to.equal('active');
+        expect(alertADocRun3[ALERT_TRACKED]).to.equal(true);
         // flapping false, flapping history updated with additional entry
         expect(alertADocRun3[ALERT_FLAPPING]).to.equal(false);
         expect(alertADocRun3[ALERT_FLAPPING_HISTORY]).to.eql(
@@ -439,6 +448,7 @@ export default function createAlertsAsDataInstallResourcesTest({ getService }: F
         expect(omit(alertBDocRun3, fieldsToOmitInComparison)).to.eql(
           omit(alertBDocRun2, fieldsToOmitInComparison)
         );
+        expect(alertBDocRun3[ALERT_TRACKED]).to.equal(enableFlapping);
 
         // execution uuid should be overwritten
         expect(alertBDocRun3[ALERT_RULE_EXECUTION_UUID]).to.eql(
@@ -462,11 +472,16 @@ export default function createAlertsAsDataInstallResourcesTest({ getService }: F
         const alertCDocs = alertDocsRun3.filter(
           (doc) => doc._source![ALERT_INSTANCE_ID] === 'alertC'
         );
-        // alertC recovered doc should be exactly the same as the alertC doc from prior run
+        // alertC recovered doc should match the prior recovered span, except tracked is
+        // cleared: the new active span uses a new UUID, so the old doc is no longer in
+        // this run's working set.
         const recoveredAlertCDoc = alertCDocs.find(
           (doc) => doc._source![ALERT_RULE_EXECUTION_UUID] !== executionUuid
         )!._source!;
-        expect(recoveredAlertCDoc).to.eql(alertCDocRun2);
+        expect(omit(recoveredAlertCDoc, [ALERT_TRACKED])).to.eql(
+          omit(alertCDocRun2, [ALERT_TRACKED])
+        );
+        expect(recoveredAlertCDoc[ALERT_TRACKED]).to.equal(false);
 
         // alertC doc from current execution
         const alertCDocRun3 = alertCDocs.find(
@@ -476,6 +491,7 @@ export default function createAlertsAsDataInstallResourcesTest({ getService }: F
         // uuid is the different from prior run]
         expect(alertCDocRun3[ALERT_UUID]).not.to.equal(alertCDocRun2[ALERT_UUID]);
         expect(alertCDocRun3[ALERT_ACTION_GROUP]).to.equal('default');
+        expect(alertCDocRun3[ALERT_TRACKED]).to.equal(true);
         // patternIndex should be 2 for the third run
         expect(alertCDocRun3.patternIndex).to.equal(2);
         // start time should be defined and different from the prior run
@@ -536,6 +552,9 @@ export default function createAlertsAsDataInstallResourcesTest({ getService }: F
   }
 
   async function queryForAlertDocs<T>(ruleId?: string): Promise<Array<SearchHit<T>>> {
+    // `es.search` is not realtime and the alerts-as-data bulk write isn't refresh-forced,
+    // so refresh first to make docs written during the just-completed run searchable.
+    await es.indices.refresh({ index: alertsAsDataIndex });
     const query: any = ruleId
       ? {
           bool: {
@@ -557,13 +576,23 @@ export default function createAlertsAsDataInstallResourcesTest({ getService }: F
     return searchResult.hits.hits as Array<SearchHit<T>>;
   }
 
-  async function getTaskState(ruleId: string) {
-    const task = await es.get<TaskManagerDoc>({
-      id: `task:${ruleId}`,
-      index: '.kibana_task_manager',
-    });
-
-    return JSON.parse(task._source!.task.state);
+  async function getTaskState(ruleId: string, expectedAlertAPatternIndex: number) {
+    // The `execute` event log doc is written before Task Manager persists the updated task
+    // state, so the `execute` count is not a valid barrier for this read. Poll the task doc
+    // until alertA's patternIndex reaches the just-completed run's value.
+    let state: any;
+    await retry.waitFor(
+      `task state for rule ${ruleId} to reach patternIndex ${expectedAlertAPatternIndex}`,
+      async () => {
+        const task = await es.get<TaskManagerDoc>({
+          id: `task:${ruleId}`,
+          index: '.kibana_task_manager',
+        });
+        state = JSON.parse(task._source!.task.state);
+        return state.alertInstances?.alertA?.state?.patternIndex === expectedAlertAPatternIndex;
+      }
+    );
+    return state;
   }
 
   async function waitForEventLogDocs(

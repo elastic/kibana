@@ -20,6 +20,8 @@ import type { ActionPolicySavedObjectServiceContract } from '../services/action_
 import { createActionPolicySavedObjectService } from '../services/action_policy_saved_object_service/action_policy_saved_object_service.mock';
 import type { EventLogServiceContract } from '../services/event_log_service/event_log_service';
 import { createEventLogService } from '../services/event_log_service/event_log_service.mock';
+import type { LicenseServiceContract } from '../services/license_service/license_service';
+import { createMockLicenseService } from '../services/license_service/license_service.mock';
 import { createLoggerService } from '../services/logger_service/logger_service.mock';
 import type { MaintenanceWindowServiceContract } from '../services/maintenance_window_service/maintenance_window_service';
 import { createMaintenanceWindowServiceMock } from '../services/maintenance_window_service/maintenance_window_service.mock';
@@ -45,7 +47,7 @@ import {
   createEpisodeDataResponse,
   createLastNotifiedTimestampsResponse,
 } from './fixtures/dispatcher';
-import { createAlertEpisode } from './fixtures/test_utils';
+import { createAlertEpisode, createAlertEpisodeSuppression } from './fixtures/test_utils';
 import { EpisodeScan } from './state';
 import { getDispatchableAlertEventsQuery } from './queries';
 import {
@@ -63,7 +65,7 @@ import {
   StoreActionsStep,
   StoreExecutionHistoryStep,
 } from './steps';
-import type { AlertEpisode, AlertEpisodeSuppression } from './types';
+import type { AlertEpisode, AlertEpisodeSuppression, DispatcherHaltReason } from './types';
 
 function mockRulesFindByIds(
   spy: jest.SpyInstance,
@@ -113,8 +115,14 @@ function mockNpFindAllDecrypted(
 
 const createMockWorkflowsManagement = (): jest.Mocked<WorkflowsServerPluginSetup['management']> =>
   ({
-    getWorkflowsByIds: jest.fn().mockResolvedValue([]),
-    bulkScheduleWorkflow: jest.fn().mockResolvedValue([]),
+    getWorkflowsByIdsForRequests: jest.fn(
+      async (
+        lookups: Parameters<
+          WorkflowsServerPluginSetup['management']['getWorkflowsByIdsForRequests']
+        >[0]
+      ) => lookups.map(() => ({ status: 'fulfilled' as const, value: [] }))
+    ),
+    getClient: jest.fn(() => ({ bulkScheduleWorkflow: jest.fn().mockResolvedValue([]) })),
   } as unknown as jest.Mocked<WorkflowsServerPluginSetup['management']>);
 
 function buildDispatcherService(deps: {
@@ -125,6 +133,7 @@ function buildDispatcherService(deps: {
   workflowsManagement: WorkflowsServerPluginSetup['management'];
   maintenanceWindowService: MaintenanceWindowServiceContract;
   eventLogService: EventLogServiceContract;
+  licenseService?: LicenseServiceContract;
 }): DispatcherService {
   const pipeline = new DispatcherPipeline([
     new FetchEpisodesStep(deps.queryService),
@@ -137,7 +146,7 @@ function buildDispatcherService(deps: {
     new EvaluateMatchersStep(),
     new BuildGroupsStep(),
     new ApplyThrottlingStep(deps.queryService),
-    new DispatchStep(deps.workflowsManagement),
+    new DispatchStep(deps.workflowsManagement, deps.licenseService ?? createMockLicenseService()),
     new StoreActionsStep(deps.storageService),
     new StoreExecutionHistoryStep(deps.eventLogService),
   ]);
@@ -157,6 +166,7 @@ describe('DispatcherService', () => {
   let mockWfm: jest.Mocked<WorkflowsServerPluginSetup['management']>;
   let mockMwService: jest.Mocked<MaintenanceWindowServiceContract>;
   let mockEventLogService: EventLogServiceContract;
+  let mockLicenseService: ReturnType<typeof createMockLicenseService>;
 
   beforeEach(() => {
     ({ queryService, mockEsClient: queryEsClient } = createQueryService());
@@ -175,6 +185,7 @@ describe('DispatcherService', () => {
     mockWfm = createMockWorkflowsManagement();
     mockMwService = createMaintenanceWindowServiceMock();
     ({ eventLogService: mockEventLogService } = createEventLogService());
+    mockLicenseService = createMockLicenseService();
 
     dispatcherService = buildDispatcherService({
       queryService,
@@ -184,6 +195,7 @@ describe('DispatcherService', () => {
       workflowsManagement: mockWfm,
       maintenanceWindowService: mockMwService,
       eventLogService: mockEventLogService,
+      licenseService: mockLicenseService,
     });
   });
 
@@ -417,6 +429,83 @@ describe('DispatcherService', () => {
           }),
         ])
       );
+    });
+
+    it('records alert actions but schedules no workflow when the license does not support action policies', async () => {
+      mockLicenseService.getActionPoliciesLicenseState.mockResolvedValue({
+        isValid: false,
+        type: 'basic',
+        status: 'active',
+      });
+      const logEventSpy = jest.spyOn(mockEventLogService, 'logEvent');
+
+      const secondEpisode = {
+        rule_id: 'rule-2',
+        group_hash: 'hash-2',
+        episode_id: 'episode-2',
+      };
+      queryEsClient.esql.query
+        .mockResolvedValueOnce(
+          createDispatchableAlertEventsResponse([
+            createAlertEpisode(),
+            createAlertEpisode({
+              ...secondEpisode,
+              last_event_timestamp: '2026-01-22T07:15:00.000Z',
+            }),
+          ])
+        )
+        .mockResolvedValueOnce(
+          createAlertEpisodeSuppressionsResponse([
+            createAlertEpisodeSuppression({ should_suppress: true }),
+            createAlertEpisodeSuppression(secondEpisode),
+          ])
+        )
+        .mockResolvedValueOnce(
+          createEpisodeDataResponse([{ episode_id: 'episode-2', data_json: null }])
+        )
+        .mockResolvedValueOnce(createLastNotifiedTimestampsResponse());
+
+      storageEsClient.bulk.mockResolvedValue({
+        items: [
+          { create: { _id: '1', status: 201 } },
+          { create: { _id: '2', status: 201 } },
+          { create: { _id: '3', status: 201 } },
+        ],
+        errors: false,
+      } as BulkResponse);
+
+      const eventWatermark = new Date('2026-01-22T07:30:00.000Z');
+      const result = await dispatcherService.run({ eventWatermark, taskId: 'task-1' });
+
+      expect(mockWfm.getWorkflowsByIdsForRequests).not.toHaveBeenCalled();
+      expect(mockWfm.getClient).not.toHaveBeenCalled();
+
+      const [{ operations }] = storageEsClient.bulk.mock.calls[0];
+      const docs = (operations ?? []).filter((_, index) => index % 2 === 1);
+      expect(docs).toEqual(
+        expect.arrayContaining([
+          expect.objectContaining({ group_hash: 'hash-1', action_type: 'suppress' }),
+          expect.objectContaining({ group_hash: 'hash-2', action_type: 'fire' }),
+          expect.objectContaining({ group_hash: 'hash-2', action_type: 'notified' }),
+        ])
+      );
+      expect(docs).toHaveLength(3);
+
+      expect(logEventSpy).toHaveBeenCalledWith(
+        expect.objectContaining({
+          event: { action: 'dispatch_failed', outcome: 'failure' },
+          kibana: expect.objectContaining({
+            alerting_v2: {
+              dispatcher: expect.objectContaining({
+                failure_reason: 'license_not_supported',
+                workflow_ids: ['workflow-test-id'],
+                episode_ids: ['episode-2'],
+              }),
+            },
+          }),
+        })
+      );
+      expect(result.nextWatermark.getTime()).toBeGreaterThan(eventWatermark.getTime());
     });
 
     it('handles empty alert episode responses', async () => {
@@ -816,7 +905,7 @@ describe('DispatcherService', () => {
 
     it('only matches episodes whose hydrated data satisfies a KQL matcher', async () => {
       mockNpFindAllDecrypted(mockFindAllDecrypted, ['policy_456'], {
-        matcher: 'data.severity: "critical"',
+        matcher: { expression: 'data.severity: "critical"' },
       });
 
       const alertEpisodes: AlertEpisode[] = [
@@ -1212,10 +1301,13 @@ describe('DispatcherService', () => {
   // ── Phase 5: stuck-watermark escape hatch ────────────────────────────────────
   describe('stuck-watermark escape hatch (STUCK_TICK_LIMIT)', () => {
     // Returns a pipeline whose watermark stays pinned. `haltReason: 'aborted'` with
-    // no `recordedEpisodes` is the only path through computeNextWatermark that
-    // returns `input.eventWatermark` unchanged — simulating a tick where the pipeline
-    // was interrupted before StoreActionsStep wrote any records.
-    function buildStuckPipeline(episodes: AlertEpisode[]): jest.Mocked<DispatcherPipelineContract> {
+    // no `recordedEpisodes` returns `input.eventWatermark` unchanged from
+    // computeNextWatermark — simulating a tick where the pipeline was interrupted
+    // before StoreActionsStep wrote any records. `inline_stats_too_large` pins it too.
+    function buildStuckPipeline(
+      episodes: AlertEpisode[],
+      haltReason: DispatcherHaltReason = 'aborted'
+    ): jest.Mocked<DispatcherPipelineContract> {
       return {
         execute: jest
           .fn()
@@ -1231,7 +1323,7 @@ describe('DispatcherService', () => {
               };
               return Promise.resolve({
                 completed: false,
-                haltReason: 'aborted',
+                haltReason,
                 finalState: {
                   input,
                   scan: EpisodeScan.of({ episodes }),
@@ -1425,6 +1517,66 @@ describe('DispatcherService', () => {
       expect(escapeMockEsClient.bulk).not.toHaveBeenCalled();
       expect(mockLogger.error).toHaveBeenCalledWith(
         expect.any(String),
+        expect.objectContaining({
+          labels: expect.objectContaining({
+            code: 'DISPATCHER_ESCAPE_HATCH_PRE_FETCH_FORCED_ADVANCE',
+          }),
+        })
+      );
+    });
+
+    it('holds the watermark on an inline_stats_too_large tick within one max window and logs the halt reason', async () => {
+      const { loggerService, mockLogger } = createLoggerService();
+      const { storageService: escapeStorage, mockEsClient: escapeMockEsClient } =
+        createStorageService();
+      const eventWatermark = new Date(Date.now() - 60_000);
+
+      const mockPipeline = buildStuckPipeline([], 'inline_stats_too_large');
+      const service = new DispatcherService(mockPipeline, escapeStorage, loggerService);
+
+      const result = await service.run({
+        eventWatermark,
+        stuckTicks: STUCK_TICK_LIMIT - 1,
+        taskId: 'task-1',
+      });
+
+      expect(result.nextWatermark.toISOString()).toBe(eventWatermark.toISOString());
+      expect(result.nextStuckTicks).toBe(0);
+      expect(escapeMockEsClient.bulk).not.toHaveBeenCalled();
+      expect(mockLogger.warn).toHaveBeenCalledWith(
+        expect.any(Function),
+        expect.objectContaining({
+          labels: expect.objectContaining({ code: 'DISPATCHER_ESCAPE_HATCH_PRE_FETCH_STUCK' }),
+        })
+      );
+      const [[warnMessage]] = mockLogger.warn.mock.calls;
+      expect(typeof warnMessage === 'function' ? warnMessage() : warnMessage).toContain(
+        'halt_reason: inline_stats_too_large'
+      );
+    });
+
+    it('force-advances on an inline_stats_too_large tick past one max window and logs the halt reason', async () => {
+      const { loggerService, mockLogger } = createLoggerService();
+      const { storageService: escapeStorage, mockEsClient: escapeMockEsClient } =
+        createStorageService();
+      const eventWatermark = new Date(Date.now() - PRE_FETCH_STUCK_ADVANCE_LAG_MS - 60_000);
+
+      const mockPipeline = buildStuckPipeline([], 'inline_stats_too_large');
+      const service = new DispatcherService(mockPipeline, escapeStorage, loggerService);
+
+      const result = await service.run({
+        eventWatermark,
+        stuckTicks: STUCK_TICK_LIMIT - 1,
+        taskId: 'task-1',
+      });
+
+      expect(result.nextWatermark.getTime()).toBe(
+        eventWatermark.getTime() + (MAX_WINDOW_MINUTES - OVERLAP_WINDOW_MINUTES) * 60_000
+      );
+      expect(result.nextStuckTicks).toBe(0);
+      expect(escapeMockEsClient.bulk).not.toHaveBeenCalled();
+      expect(mockLogger.error).toHaveBeenCalledWith(
+        expect.stringContaining('halt_reason: inline_stats_too_large'),
         expect.objectContaining({
           labels: expect.objectContaining({
             code: 'DISPATCHER_ESCAPE_HATCH_PRE_FETCH_FORCED_ADVANCE',

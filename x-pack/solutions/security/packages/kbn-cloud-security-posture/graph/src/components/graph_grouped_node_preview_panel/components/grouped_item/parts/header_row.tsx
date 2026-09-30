@@ -23,6 +23,7 @@ import {
   DOCUMENT_TYPE_EVENT,
   DOCUMENT_TYPE_ALERT,
 } from '@kbn/cloud-security-posture-common/schema/graph/v1';
+import { useEntityStoreEuidApi } from '@kbn/entity-store/public';
 import {
   GROUPED_ITEM_TITLE_TEST_ID_LINK,
   GROUPED_ITEM_TITLE_TEST_ID_TEXT,
@@ -59,6 +60,9 @@ export interface HeaderRowProps {
 
 export const HeaderRow = ({ item, scopeId, onShowDocument, onShowEntity }: HeaderRowProps) => {
   const { euiTheme } = useEuiTheme();
+  // Async-hydrated: `null` until the EUID chunk loads, in which case entity filters fall back to
+  // the unnarrowed sourceFields (see getIdentityFilterFields).
+  const euidApi = useEntityStoreEuidApi()?.euid;
 
   const title = useMemo(() => {
     switch (item.itemType) {
@@ -169,6 +173,7 @@ export const HeaderRow = ({ item, scopeId, onShowDocument, onShowEntity }: Heade
             scopeId={scopeId}
             isInitialEntity={isInitialEntityForScope(scopeId, (item as EntityItem).id)}
             onShowEntity={onShowEntity}
+            euidApi={euidApi}
           />
         ) : (
           <EventActionsButton

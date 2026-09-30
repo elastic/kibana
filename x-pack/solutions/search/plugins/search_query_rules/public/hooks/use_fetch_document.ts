@@ -19,7 +19,7 @@ export const useFetchDocument = (indexName: string, documentId: string) => {
     queryKey: ['fetchDocument', indexName, documentId],
     queryFn: async () => {
       const response = await http.get<SearchQueryDocumentResponse>(
-        `/internal/search_query_rules/document/${indexName}/${documentId}`
+        `/internal/search_query_rules/document/${indexName}/${encodeURIComponent(documentId)}`
       );
       return response;
     },

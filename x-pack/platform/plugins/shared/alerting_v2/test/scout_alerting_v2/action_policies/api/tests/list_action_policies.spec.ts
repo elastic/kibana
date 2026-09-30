@@ -10,8 +10,6 @@ import type { RoleApiCredentials } from '@kbn/scout';
 import {
   ACTION_POLICY_PER_PAGE_MAX,
   ACTION_POLICY_SEARCH_MAX_LENGTH,
-  ACTION_POLICY_TAG_MAX_LENGTH,
-  ACTION_POLICY_TAGS_MAX_COUNT,
   ALERTING_V2_ACTION_POLICIES_ALL_ROLE,
   ALERTING_V2_ACTION_POLICIES_READ_ROLE,
   apiTest,
@@ -28,7 +26,6 @@ const createActionPolicies = async (apiServices: AlertingApiServicesFixture) => 
       name: 'Alpha Policy',
       description: 'Monitors CPU usage',
       destinations: [{ type: 'workflow', id: 'wf-alpha-001' }],
-      tags: ['production', 'critical'],
     })
   );
   const beta = await apiServices.alertingV2.actionPolicies.create(
@@ -36,7 +33,6 @@ const createActionPolicies = async (apiServices: AlertingApiServicesFixture) => 
       name: 'Beta Policy',
       description: 'Tracks memory alerts',
       destinations: [{ type: 'workflow', id: 'wf-beta-002' }],
-      tags: ['staging'],
     })
   );
   const gamma = await apiServices.alertingV2.actionPolicies.create(
@@ -106,7 +102,6 @@ apiTest.describe('List action policies API', { tag: '@local-stateful-classic' },
         enabled: true,
         matcher: null,
         group_by: null,
-        tags: null,
         grouping_mode: null,
         throttle: null,
         snoozed_until: null,
@@ -224,62 +219,6 @@ apiTest.describe('List action policies API', { tag: '@local-stateful-classic' },
     expect(disabledResponse.body.total).toBe(1);
     expect(disabledResponse.body.items[0].name).toBe('Alpha Policy');
   });
-
-  apiTest('filter by tags: by a single tag (string)', async ({ apiClient, apiServices }) => {
-    await createActionPolicies(apiServices);
-
-    const response = await apiClient.get(getListActionPoliciesUrl({ tags: 'production' }), {
-      headers: { ...testData.COMMON_HEADERS, ...readerHeaders },
-    });
-    expect(response).toHaveStatusCode(200);
-    expect(response.body.total).toBe(1);
-    expect(response.body.items[0].name).toBe('Alpha Policy');
-    expect(response.body.items[0].tags).toStrictEqual(['production', 'critical']);
-  });
-
-  apiTest('filter by tags: by multiple tags (array)', async ({ apiClient, apiServices }) => {
-    await createActionPolicies(apiServices);
-
-    const response = await apiClient.get(
-      getListActionPoliciesUrl({ tags: ['production', 'staging'] }),
-      {
-        headers: { ...testData.COMMON_HEADERS, ...readerHeaders },
-      }
-    );
-    expect(response).toHaveStatusCode(200);
-    expect(response.body.total).toBe(2);
-    const names = response.body.items.map((item: { name: string }) => item.name);
-    expect(names).toContain('Alpha Policy');
-    expect(names).toContain('Beta Policy');
-  });
-
-  apiTest(
-    'filter by tags: returns empty when no policies match',
-    async ({ apiClient, apiServices }) => {
-      await createActionPolicies(apiServices);
-
-      const response = await apiClient.get(getListActionPoliciesUrl({ tags: 'nonexistent' }), {
-        headers: { ...testData.COMMON_HEADERS, ...readerHeaders },
-      });
-      expect(response).toHaveStatusCode(200);
-      expect(response.body.total).toBe(0);
-      expect(response.body.items).toStrictEqual([]);
-    }
-  );
-
-  apiTest(
-    'filter by tags: accepts a single tag wrapped in array',
-    async ({ apiClient, apiServices }) => {
-      await createActionPolicies(apiServices);
-
-      const response = await apiClient.get(getListActionPoliciesUrl({ tags: ['staging'] }), {
-        headers: { ...testData.COMMON_HEADERS, ...readerHeaders },
-      });
-      expect(response).toHaveStatusCode(200);
-      expect(response.body.total).toBe(1);
-      expect(response.body.items[0].name).toBe('Beta Policy');
-    }
-  );
 
   apiTest('sort: by name ascending', async ({ apiClient, apiServices }) => {
     await createActionPolicies(apiServices);
@@ -434,29 +373,6 @@ apiTest.describe('List action policies API', { tag: '@local-stateful-classic' },
     const response = await apiClient.get(getListActionPoliciesUrl({ sort_order: 'sideways' }), {
       headers: { ...testData.COMMON_HEADERS, ...readerHeaders },
     });
-    expect(response).toHaveStatusCode(400);
-    expect(response.body.code).toBe('BAD_REQUEST');
-  });
-
-  apiTest('validation: rejects more than the maximum number of tags', async ({ apiClient }) => {
-    const tooManyTags = Array.from(
-      { length: ACTION_POLICY_TAGS_MAX_COUNT + 1 },
-      (_, i) => `tag-${i}`
-    );
-    const response = await apiClient.get(getListActionPoliciesUrl({ tags: tooManyTags }), {
-      headers: { ...testData.COMMON_HEADERS, ...readerHeaders },
-    });
-    expect(response).toHaveStatusCode(400);
-    expect(response.body.code).toBe('BAD_REQUEST');
-  });
-
-  apiTest('validation: rejects tag over the maximum length', async ({ apiClient }) => {
-    const response = await apiClient.get(
-      getListActionPoliciesUrl({ tags: 'a'.repeat(ACTION_POLICY_TAG_MAX_LENGTH + 1) }),
-      {
-        headers: { ...testData.COMMON_HEADERS, ...readerHeaders },
-      }
-    );
     expect(response).toHaveStatusCode(400);
     expect(response.body.code).toBe('BAD_REQUEST');
   });

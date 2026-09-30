@@ -19,7 +19,7 @@ import {
   type SavedObjectsCheckFinding,
   type SavedObjectsCheckReport,
   type TypeChangeDetails,
-} from './notify_saved_objects_changes';
+} from './notify_saved_objects_changes.ts';
 
 const finding = (overrides: Partial<SavedObjectsCheckFinding> = {}): SavedObjectsCheckFinding => ({
   ruleId: 'existing-type/mutated-existing-model-version',

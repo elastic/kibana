@@ -9,6 +9,7 @@ import type {
   AssistantMessage,
   ChatCompleteCacheControl,
   ChatCompleteCompositeResponse,
+  ChatCompletionReasoning,
   Message,
   Model,
   ToolCall,
@@ -28,6 +29,7 @@ import { SpanKind } from '@opentelemetry/api';
 import { isObservable, tap } from 'rxjs';
 import { isPromise } from 'util/types';
 import { withActiveInferenceSpan } from './with_active_inference_span';
+import { getGenAiToolDefinitions } from './gen_ai_tool_definitions';
 import type {
   GenAIInputMessage,
   GenAIMessagePart,
@@ -174,6 +176,7 @@ interface InferenceGenerationOptions {
   toolChoice?: ToolChoice;
   cacheControl?: ChatCompleteCacheControl;
   sessionId?: string;
+  reasoning?: ChatCompletionReasoning;
 }
 
 /**
@@ -190,8 +193,17 @@ export function withChatCompleteSpan(
   options: InferenceGenerationOptions,
   cb: (span?: Span) => ChatCompleteCompositeResponse
 ): ChatCompleteCompositeResponse {
-  const { system, messages, model, toolChoice, tools, cacheControl, sessionId, ...attributes } =
-    options;
+  const {
+    system,
+    messages,
+    model,
+    toolChoice,
+    tools,
+    cacheControl,
+    sessionId,
+    reasoning,
+    ...attributes
+  } = options;
 
   const modelProvider = model?.provider ?? 'unknown';
   const modelId = model?.id ?? model?.family ?? 'unknown';
@@ -206,7 +218,9 @@ export function withChatCompleteSpan(
         [GenAISemanticConventions.GenAIRequestModel]: modelId,
         [GenAISemanticConventions.GenAIProviderName]: modelProvider,
         [ElasticGenAIAttributes.InferenceSpanKind]: 'LLM',
-        [GenAISemanticConventions.GenAIToolDefinitions]: tools ? JSON.stringify(tools) : undefined,
+        [GenAISemanticConventions.GenAIToolDefinitions]: tools
+          ? JSON.stringify(getGenAiToolDefinitions(tools))
+          : undefined,
         [ElasticGenAIAttributes.ToolChoice]: toolChoice ? JSON.stringify(toolChoice) : toolChoice,
         ...(cacheControl
           ? {
@@ -217,6 +231,9 @@ export function withChatCompleteSpan(
             }
           : {}),
         ...(sessionId ? { [ElasticGenAIAttributes.CacheControlSessionId]: sessionId } : {}),
+        ...(reasoning?.effort
+          ? { [GenAISemanticConventions.GenAIRequestReasoningLevel]: reasoning.effort }
+          : {}),
       },
     },
     (span) => {

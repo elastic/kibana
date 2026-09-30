@@ -60,8 +60,7 @@ const SEED_HOST_NAME = 'scout-host';
 
 // ── Test suite ────────────────────────────────────────────────────────────────
 
-// Failing: See https://github.com/elastic/kibana/issues/281574
-spaceTest.describe.skip(
+spaceTest.describe(
   'Entity attachment cases – flyout add-to-case actions and Entities accordion',
   { tag: [...tags.stateful.classic] },
   () => {

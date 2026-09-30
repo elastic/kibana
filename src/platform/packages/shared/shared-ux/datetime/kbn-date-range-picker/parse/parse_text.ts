@@ -160,9 +160,15 @@ export function textToTimeRange(text: string, options?: TimeRangeTransformOption
   const trimmed = normalizeDigits(text.trim());
   if (!trimmed) return buildInvalidRange(text);
 
-  const { presets = [], delimiter, dateFormat, roundRelativeTime, locale } = options ?? {};
+  const {
+    presets = [],
+    delimiter,
+    inputDateFormats = [],
+    roundRelativeTime,
+    locale,
+  } = options ?? {};
   const compiled = getCompiledGrammar(locale ?? i18n.getLocale());
-  const formats = dateFormat ? [dateFormat, ...ABSOLUTE_FORMATS] : ABSOLUTE_FORMATS;
+  const formats = [...inputDateFormats, ...ABSOLUTE_FORMATS];
 
   // (1) Preset label match
   const preset = matchPreset(trimmed, presets);

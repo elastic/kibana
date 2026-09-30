@@ -90,3 +90,50 @@ describe('custom_content panel schemas', () => {
     ).toBe(true);
   });
 });
+
+describe('ML anomaly panel schemas', () => {
+  const chartsBase = {
+    source: 'config' as const,
+    type: 'ml_anomaly_charts' as const,
+    grid: { x: 0, y: 0, w: 24, h: 15 },
+    config: { job_ids: ['job-1'], title: 'Anomaly charts of job-1' },
+  };
+
+  it.each([
+    ['add_panels', addPanelsItemSchema],
+    ['add_section', addSectionPanelItemSchema],
+  ])('accepts an anomaly charts panel with title through %s', (_, schema) => {
+    expect(schema.safeParse(chartsBase).success).toBe(true);
+  });
+
+  it('accepts ML anomaly panel edit_panels items', () => {
+    expect(
+      editPanelItemSchema.safeParse({
+        source: 'config' as const,
+        type: 'ml_anomaly_charts' as const,
+        panelId: 'charts-1',
+        config: { job_ids: ['job-1'], severity_threshold: 50 },
+      }).success
+    ).toBe(true);
+    expect(
+      editPanelItemSchema.safeParse({
+        source: 'config' as const,
+        type: 'ml_anomaly_swimlane' as const,
+        panelId: 'swim-1',
+        config: {
+          job_ids: ['job-1'],
+          swimlane_type: 'overall',
+          severity_threshold: 75,
+        },
+      }).success
+    ).toBe(true);
+    expect(
+      editPanelItemSchema.safeParse({
+        source: 'config' as const,
+        type: 'ml_single_metric_viewer' as const,
+        panelId: 'smv-1',
+        config: { job_ids: ['job-1'], selected_entities: { 'host.name': 'web-01' } },
+      }).success
+    ).toBe(true);
+  });
+});

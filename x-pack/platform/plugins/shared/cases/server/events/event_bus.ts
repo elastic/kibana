@@ -7,13 +7,14 @@
 
 import { EventEmitter } from 'events';
 
-import type { KibanaRequest } from '@kbn/core/server';
+import type { KibanaRequest, Logger } from '@kbn/core/server';
 import type {
   CasesEventPayload,
   CasesDomainEventType,
   CaseCreatedEventPayload,
   CaseUpdatedEventPayload,
   AttachmentsAddedEventPayload,
+  ObservablesAddedEventPayload,
   AlertStatusChangedEventPayload,
 } from './types';
 import type { Case } from '../../common';
@@ -22,6 +23,7 @@ import type { CaseSavedObjectTransformed } from '../common/types/case';
 export const CASE_CREATED_EVENT = 'caseCreated';
 export const CASE_UPDATED_EVENT = 'caseUpdated';
 export const ATTACHMENTS_ADDED_EVENT = 'attachmentsAdded';
+export const OBSERVABLES_ADDED_EVENT = 'observablesAdded';
 export const CASE_STATUS_CHANGED_EVENT = 'caseStatusChanged';
 export const ALERT_STATUS_CHANGED_EVENT = 'alertStatusChanged';
 
@@ -42,7 +44,7 @@ export type CaseUpdatedEventBusListener<TType extends CasesDomainEventType = Cas
  * Replaces direct client-to-workflows emission with a single bridge listener.
  */
 export class CasesEventBus extends EventEmitter {
-  constructor() {
+  constructor(private readonly logger?: Logger) {
     super();
     this.setMaxListeners(50);
   }
@@ -63,16 +65,24 @@ export class CasesEventBus extends EventEmitter {
     this.emit(ATTACHMENTS_ADDED_EVENT, { type: 'attachmentsAdded', payload, request });
   }
 
+  emitObservablesAdded(request: KibanaRequest, payload: ObservablesAddedEventPayload) {
+    this.emit(OBSERVABLES_ADDED_EVENT, { type: 'observablesAdded', payload, request });
+  }
+
   onCaseCreated(listener: CasesEventBusListener<'caseCreated'>) {
-    this.on(CASE_CREATED_EVENT, listener);
+    this.subscribeIsolated(CASE_CREATED_EVENT, listener);
   }
 
   onCaseUpdated(listener: CaseUpdatedEventBusListener<'caseUpdated'>) {
-    this.on(CASE_UPDATED_EVENT, listener);
+    this.subscribeIsolated(CASE_UPDATED_EVENT, listener);
   }
 
   onAttachmentsAdded(listener: CasesEventBusListener<'attachmentsAdded'>) {
-    this.on(ATTACHMENTS_ADDED_EVENT, listener);
+    this.subscribeIsolated(ATTACHMENTS_ADDED_EVENT, listener);
+  }
+
+  onObservablesAdded(listener: CasesEventBusListener<'observablesAdded'>) {
+    this.subscribeIsolated(OBSERVABLES_ADDED_EVENT, listener);
   }
 
   emitAlertStatusChanged(request: KibanaRequest, payload: AlertStatusChangedEventPayload) {
@@ -80,18 +90,39 @@ export class CasesEventBus extends EventEmitter {
   }
 
   onAlertStatusChanged(listener: CasesEventBusListener<'alertStatusChanged'>) {
-    this.on(ALERT_STATUS_CHANGED_EVENT, (event: CasesEventPayload<'alertStatusChanged'>) => {
+    this.subscribeIsolated(ALERT_STATUS_CHANGED_EVENT, listener);
+  }
+
+  /**
+   * Registers a listener in an isolated context so that synchronous exceptions
+   * do not propagate to the emitter and async rejections do not become
+   * unhandled rejections. Later subscribers still receive the event.
+   *
+   * The variadic signature covers both single-arg listeners (all `on*` methods
+   * except `onCaseUpdated`) and multi-arg listeners (`onCaseUpdated` passes
+   * both the event and `extraInfo`).
+   */
+  private subscribeIsolated<TArgs extends unknown[]>(
+    eventName: string,
+    listener: (...args: TArgs) => void | Promise<void>
+  ): void {
+    this.on(eventName, (...args: TArgs) => {
       try {
-        const result = listener(event);
+        const result = listener(...args);
         if (result instanceof Promise) {
           // Prevent async listener rejections from becoming unhandled rejections.
           // The Cases mutation has already completed at this point.
-          result.catch(() => {});
+          result.catch((error) => this.logListenerError(eventName, error));
         }
-      } catch {
+      } catch (error) {
         // Isolate sync exceptions so later subscribers still receive the event.
+        this.logListenerError(eventName, error);
       }
     });
+  }
+
+  private logListenerError(eventName: string, error: unknown): void {
+    this.logger?.warn(`Cases event bus listener for "${eventName}" failed: ${error}`);
   }
 
   hasAlertStatusChangedListeners(): boolean {

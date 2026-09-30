@@ -9,6 +9,7 @@ import React from 'react';
 import { screen, render, within, fireEvent, waitFor } from '@testing-library/react';
 import { CreateAlert } from '.';
 import userEvent from '@testing-library/user-event';
+import * as i18n from './translations';
 
 describe('CreateAlert', () => {
   const editSubAction = jest.fn();
@@ -49,6 +50,12 @@ describe('CreateAlert', () => {
     expect(screen.getByTestId('jsm-tags')).toBeInTheDocument();
     expect(screen.getByTestId('jsm-prioritySelect')).toBeInTheDocument();
     expect(screen.getByText('Description')).toBeInTheDocument();
+  });
+
+  it('renders the message field helper text', () => {
+    render(<CreateAlert {...options} />);
+
+    expect(screen.getByText(i18n.MESSAGE_FIELD_HELP)).toBeInTheDocument();
   });
 
   it('renders the form fields with the subActionParam values', () => {

@@ -21,6 +21,8 @@ import {
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
+import { useLocation } from 'react-router-dom';
+
 import { ServiceRow } from './service_row';
 import { SIGNAL_TYPE_LABELS } from './signal_type_badge';
 import { useServicesStep } from './use_services_step';
@@ -58,11 +60,13 @@ export function ServicesStep({ onContinue, onBack }: ServicesStepProps) {
   } = useServicesStep({ onContinue });
 
   const { detectAndReviewStep } = useOnboardingFlow();
+  const location = useLocation();
+  // Lock format when in edit mode (SO persisted) OR when deploy has started without a persisted SO
+  // (SO create is best-effort — policies may exist even if ?deploymentId= was never added to URL).
   const isFormatDisabled =
-    Object.keys(detectAndReviewStep.policyIdsByInstance).length > 0 ||
-    Object.values(detectAndReviewStep.serviceStatuses).some(
-      (s) => s !== 'error' && s !== 'timeout'
-    );
+    new URLSearchParams(location.search).has('deploymentId') ||
+    Object.keys(detectAndReviewStep.serviceStatuses).length > 0 ||
+    Object.keys(detectAndReviewStep.policyIdsByInstance).length > 0;
 
   return (
     <div data-test-subj="onboardingStep-services">

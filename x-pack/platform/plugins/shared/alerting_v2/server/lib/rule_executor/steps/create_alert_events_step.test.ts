@@ -6,6 +6,7 @@
  */
 
 import { coreMock } from '@kbn/core/server/mocks';
+import { ByteSizeValue } from '@kbn/config-schema';
 import type { Logger } from '@kbn/core/server';
 import { CreateAlertEventsStep } from './create_alert_events_step';
 import {
@@ -35,11 +36,10 @@ describe('CreateAlertEventsStep', () => {
         run: {
           alerts: { max: 10000 },
           maxGroupsPerExecution: 10000,
-          query: { maxResponseSize: 50 * 1024 * 1024 },
+          query: { maxResponseSize: ByteSizeValue.parse('50mb') },
         },
         ...rulesConfigOverrides,
       },
-      esql: { responseFormat: 'json' },
     };
 
     const pluginConfigAccessor =
@@ -67,7 +67,6 @@ describe('CreateAlertEventsStep', () => {
     expect(result.state.alertEventsBatch).toHaveLength(2);
 
     expect(result.state.alertEventsBatch?.[0]).toEqual({
-      '@timestamp': expect.any(String),
       scheduled_timestamp: input.scheduledAt,
       rule: { id: rule.id, version: 1 },
       group_hash: expect.any(String),
@@ -79,7 +78,6 @@ describe('CreateAlertEventsStep', () => {
     });
 
     expect(result.state.alertEventsBatch?.[1]).toEqual({
-      '@timestamp': expect.any(String),
       scheduled_timestamp: input.scheduledAt,
       rule: { id: rule.id, version: 1 },
       group_hash: expect.any(String),
@@ -172,7 +170,7 @@ describe('CreateAlertEventsStep', () => {
         run: {
           alerts: { max: 10000 },
           maxGroupsPerExecution: 2,
-          query: { maxResponseSize: 50 * 1024 * 1024 },
+          query: { maxResponseSize: ByteSizeValue.parse('50mb') },
         },
       });
 
@@ -219,7 +217,7 @@ describe('CreateAlertEventsStep', () => {
         run: {
           alerts: { max: 10000 },
           maxGroupsPerExecution: 1,
-          query: { maxResponseSize: 50 * 1024 * 1024 },
+          query: { maxResponseSize: ByteSizeValue.parse('50mb') },
         },
       });
 
@@ -255,7 +253,7 @@ describe('CreateAlertEventsStep', () => {
         run: {
           alerts: { max: 10000 },
           maxGroupsPerExecution: 10,
-          query: { maxResponseSize: 50 * 1024 * 1024 },
+          query: { maxResponseSize: ByteSizeValue.parse('50mb') },
         },
       });
 
@@ -283,7 +281,7 @@ describe('CreateAlertEventsStep', () => {
         run: {
           alerts: { max: 10000 },
           maxGroupsPerExecution: 2,
-          query: { maxResponseSize: 50 * 1024 * 1024 },
+          query: { maxResponseSize: ByteSizeValue.parse('50mb') },
         },
       });
 
@@ -340,7 +338,7 @@ describe('CreateAlertEventsStep', () => {
         run: {
           alerts: { max: 10000 },
           maxGroupsPerExecution: 1,
-          query: { maxResponseSize: 50 * 1024 * 1024 },
+          query: { maxResponseSize: ByteSizeValue.parse('50mb') },
         },
       });
 

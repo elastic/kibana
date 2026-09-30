@@ -9,7 +9,7 @@ import React from 'react';
 import { render, screen, waitFor, getByTitle, within, fireEvent } from '@testing-library/react';
 import { EuiThemeProvider } from '@elastic/eui';
 import { faker } from '@faker-js/faker';
-import userEvent from '@testing-library/user-event';
+import userEvent, { type UserEvent } from '@testing-library/user-event';
 import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
 // Static EUI token values for assertions
 // eslint-disable-next-line @elastic/eui/no-restricted-eui-imports
@@ -46,6 +46,7 @@ const SELECTORS = {
 type NameVisibility = NonNullable<MetricVisualizationState['secondaryNameVisibility']>;
 
 const NAME_VISIBILITY_TITLES: Record<NameVisibility, string> = {
+  tooltip: 'Tooltip',
   hidden: 'Hide',
   before: 'Before',
   after: 'After',
@@ -386,13 +387,9 @@ describe('dimension editor', () => {
         if (!nameVisibilityGroup) {
           throw new Error('Name visibility group not found');
         }
-        const option = getByTitle(nameVisibilityGroup, NAME_VISIBILITY_TITLES[visibility], {
-          exact: false,
+        return within(nameVisibilityGroup).getByRole('button', {
+          name: NAME_VISIBILITY_TITLES[visibility],
         });
-        if (!option) {
-          throw new Error(`Name visibility option '${visibility}' not found`);
-        }
-        return option;
       };
       const clickOnNameVisibility = async (visibility: NameVisibility) => {
         await userEvent.click(getNameVisibilityOption(visibility));
@@ -448,14 +445,14 @@ describe('dimension editor', () => {
         expect(screen.queryByRole('group', { name: /Label position/i })).not.toBeInTheDocument();
       });
 
-      it.each(['hidden', 'before', 'after'] as const)(
+      it.each(['hidden', 'before', 'after', 'tooltip'] as const)(
         'renders %s as the selected visibility',
         (visibility) => {
           const { getNameVisibilityOption } = renderSecondaryMetricEditor({
             state: { ...localState, secondaryNameVisibility: visibility },
           });
 
-          for (const option of ['hidden', 'before', 'after'] as const) {
+          for (const option of ['hidden', 'before', 'after', 'tooltip'] as const) {
             expect(getNameVisibilityOption(option)).toHaveAttribute(
               'aria-pressed',
               `${option === visibility}`
@@ -472,7 +469,7 @@ describe('dimension editor', () => {
         expect(getNameVisibilityOption('hidden')).toHaveAttribute('aria-pressed', 'true');
       });
 
-      it.each(['hidden', 'before', 'after'] as const)(
+      it.each(['hidden', 'before', 'after', 'tooltip'] as const)(
         'sets the visibility to %s',
         async (visibility) => {
           const setState = jest.fn();
@@ -737,7 +734,7 @@ describe('dimension editor', () => {
 
     afterEach(() => mockSetState.mockClear());
 
-    function renderBreakdownEditor(overrides = {}) {
+    function renderBreakdownEditor(overrides = {}, user: UserEvent = userEvent.setup()) {
       const rtlRender = render(
         <DimensionEditor
           {...props}
@@ -750,8 +747,8 @@ describe('dimension editor', () => {
 
       const setMaxCols = async (maxCols: number) => {
         const maxColsInput = screen.getByLabelText(/layout columns/i);
-        await userEvent.clear(maxColsInput);
-        await userEvent.type(maxColsInput, maxCols.toString());
+        await user.clear(maxColsInput);
+        await user.type(maxColsInput, maxCols.toString());
       };
 
       return {
@@ -780,19 +777,25 @@ describe('dimension editor', () => {
     });
 
     it('sets max columns', async () => {
-      const { setMaxCols } = renderBreakdownEditor();
-      await setMaxCols(1);
-      await waitFor(() =>
-        expect(mockSetState).toHaveBeenCalledWith(expect.objectContaining({ maxCols: 1 }))
-      );
-      await setMaxCols(2);
-      await waitFor(() =>
-        expect(mockSetState).toHaveBeenCalledWith(expect.objectContaining({ maxCols: 2 }))
-      );
-      await setMaxCols(3);
-      await waitFor(() =>
-        expect(mockSetState).toHaveBeenCalledWith(expect.objectContaining({ maxCols: 3 }))
-      );
+      jest.useFakeTimers();
+      const user = userEvent.setup({ advanceTimers: jest.advanceTimersByTime });
+      try {
+        const { setMaxCols } = renderBreakdownEditor({}, user);
+        await setMaxCols(1);
+        await waitFor(() =>
+          expect(mockSetState).toHaveBeenCalledWith(expect.objectContaining({ maxCols: 1 }))
+        );
+        await setMaxCols(2);
+        await waitFor(() =>
+          expect(mockSetState).toHaveBeenCalledWith(expect.objectContaining({ maxCols: 2 }))
+        );
+        await setMaxCols(3);
+        await waitFor(() =>
+          expect(mockSetState).toHaveBeenCalledWith(expect.objectContaining({ maxCols: 3 }))
+        );
+      } finally {
+        jest.useRealTimers();
+      }
     });
 
     describe('data section', () => {

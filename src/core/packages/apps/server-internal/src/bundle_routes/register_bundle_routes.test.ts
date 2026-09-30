@@ -65,27 +65,19 @@ const createExternalPluginsUiPlugins = (...ids: string[]): UiPlugins => ({
 describe('registerBundleRoutes', () => {
   let router: ReturnType<typeof httpServiceMock.createRouter>;
   let staticAssets: StaticAssets;
-  let kbnUseRspackBeforeEach: string | undefined;
 
   beforeEach(() => {
-    kbnUseRspackBeforeEach = process.env.KBN_USE_RSPACK;
-    delete process.env.KBN_USE_RSPACK;
-
     router = httpServiceMock.createRouter();
     const basePath = httpServiceMock.createBasePath('/server-base-path') as unknown as BasePath;
     staticAssets = new StaticAssets({ basePath, cdnConfig: {} as any, shaDigest: 'sha' });
   });
 
   afterEach(() => {
-    if (kbnUseRspackBeforeEach === undefined) {
-      delete process.env.KBN_USE_RSPACK;
-    } else {
-      process.env.KBN_USE_RSPACK = kbnUseRspackBeforeEach;
-    }
+    jest.restoreAllMocks();
     registerRouteForBundleMock.mockReset();
   });
 
-  it('registers core and shared-dep bundles', () => {
+  it('registers shared-dep bundles and the unified /bundles/ route', () => {
     registerBundleRoutes({
       router,
       staticAssets,
@@ -122,13 +114,13 @@ describe('registerBundleRoutes', () => {
     expect(registerRouteForBundleMock).toHaveBeenCalledWith(router, {
       fileHashCache: expect.any(FileHashCache),
       isDist: true,
-      bundlesPath: expect.stringMatching(/\/@kbn\/core\/target\/public$/),
-      publicPath: '/server-base-path/sha/bundles/core/',
-      routePath: '/sha/bundles/core/',
+      bundlesPath: fromRoot('target/public/bundles'),
+      publicPath: '/server-base-path/sha/bundles/',
+      routePath: '/sha/bundles/',
     });
   });
 
-  it('registers plugin bundles', () => {
+  it('does not register per-plugin routes for internal plugins', () => {
     registerBundleRoutes({
       router,
       staticAssets,
@@ -136,154 +128,52 @@ describe('registerBundleRoutes', () => {
       uiPlugins: createUiPlugins('plugin-a', 'plugin-b'),
     });
 
-    expect(registerRouteForBundleMock).toHaveBeenCalledTimes(6);
-
-    expect(registerRouteForBundleMock).toHaveBeenCalledWith(router, {
-      fileHashCache: expect.any(FileHashCache),
-      isDist: true,
-      bundlesPath: '/plugins/plugin-a/public-target-dir',
-      publicPath: '/server-base-path/sha/bundles/plugin/plugin-a/8.0.0/',
-      routePath: '/sha/bundles/plugin/plugin-a/8.0.0/',
-    });
-
-    expect(registerRouteForBundleMock).toHaveBeenCalledWith(router, {
-      fileHashCache: expect.any(FileHashCache),
-      isDist: true,
-      bundlesPath: '/plugins/plugin-b/public-target-dir',
-      publicPath: '/server-base-path/sha/bundles/plugin/plugin-b/8.0.0/',
-      routePath: '/sha/bundles/plugin/plugin-b/8.0.0/',
-    });
+    expect(registerRouteForBundleMock).toHaveBeenCalledTimes(4);
+    expect(registerRouteForBundleMock).not.toHaveBeenCalledWith(
+      router,
+      expect.objectContaining({
+        routePath: expect.stringContaining('/bundles/plugin/'),
+      })
+    );
   });
 
-  describe('rspack mode', () => {
-    describe('when KBN_USE_RSPACK is enabled', () => {
-      let kbnUseRspackPrevious: string | undefined;
+  it('registers external plugin bundle route only when standalone bundle exists on disk', () => {
+    jest.spyOn(Fs, 'existsSync').mockReturnValue(false);
 
-      beforeEach(() => {
-        kbnUseRspackPrevious = process.env.KBN_USE_RSPACK;
-        process.env.KBN_USE_RSPACK = 'true';
-      });
-
-      afterEach(() => {
-        if (kbnUseRspackPrevious === undefined) {
-          delete process.env.KBN_USE_RSPACK;
-        } else {
-          process.env.KBN_USE_RSPACK = kbnUseRspackPrevious;
-        }
-        jest.restoreAllMocks();
-        registerRouteForBundleMock.mockReset();
-      });
-
-      it('registers unified /bundles/ route instead of the legacy core bundle route', () => {
-        registerBundleRoutes({
-          router,
-          staticAssets,
-          packageInfo: createPackageInfo(),
-          uiPlugins: createUiPlugins(),
-        });
-
-        expect(registerRouteForBundleMock).toHaveBeenCalledTimes(4);
-
-        expect(registerRouteForBundleMock).toHaveBeenCalledWith(router, {
-          fileHashCache: expect.any(FileHashCache),
-          isDist: true,
-          bundlesPath: fromRoot('target/public/bundles'),
-          publicPath: '/server-base-path/sha/bundles/',
-          routePath: '/sha/bundles/',
-        });
-
-        expect(registerRouteForBundleMock).not.toHaveBeenCalledWith(
-          router,
-          expect.objectContaining({
-            routePath: '/sha/bundles/core/',
-          })
-        );
-      });
-
-      it('registers external plugin bundle route only when standalone bundle exists on disk', () => {
-        jest.spyOn(Fs, 'existsSync').mockReturnValue(false);
-
-        registerBundleRoutes({
-          router,
-          staticAssets,
-          packageInfo: createPackageInfo(),
-          uiPlugins: createExternalPluginsUiPlugins('ext-plugin'),
-        });
-
-        expect(registerRouteForBundleMock).toHaveBeenCalledTimes(4);
-        expect(registerRouteForBundleMock).not.toHaveBeenCalledWith(
-          router,
-          expect.objectContaining({
-            routePath: '/sha/bundles/plugin/ext-plugin/8.0.0/',
-          })
-        );
-
-        registerRouteForBundleMock.mockClear();
-        jest.restoreAllMocks();
-
-        jest.spyOn(Fs, 'existsSync').mockReturnValue(true);
-
-        registerBundleRoutes({
-          router,
-          staticAssets,
-          packageInfo: createPackageInfo(),
-          uiPlugins: createExternalPluginsUiPlugins('ext-plugin'),
-        });
-
-        expect(registerRouteForBundleMock).toHaveBeenCalledTimes(5);
-        expect(registerRouteForBundleMock).toHaveBeenCalledWith(router, {
-          fileHashCache: expect.any(FileHashCache),
-          isDist: true,
-          bundlesPath: Path.join(fromRoot('plugins'), 'ext-plugin', 'target'),
-          publicPath: '/server-base-path/sha/bundles/plugin/ext-plugin/8.0.0/',
-          routePath: '/sha/bundles/plugin/ext-plugin/8.0.0/',
-        });
-      });
+    registerBundleRoutes({
+      router,
+      staticAssets,
+      packageInfo: createPackageInfo(),
+      uiPlugins: createExternalPluginsUiPlugins('ext-plugin'),
     });
 
-    it('when KBN_USE_RSPACK is unset, registers legacy core and per-plugin bundle routes', () => {
-      const previous = process.env.KBN_USE_RSPACK;
-      try {
-        delete process.env.KBN_USE_RSPACK;
+    expect(registerRouteForBundleMock).toHaveBeenCalledTimes(4);
+    expect(registerRouteForBundleMock).not.toHaveBeenCalledWith(
+      router,
+      expect.objectContaining({
+        routePath: '/sha/bundles/plugin/ext-plugin/8.0.0/',
+      })
+    );
 
-        registerBundleRoutes({
-          router,
-          staticAssets,
-          packageInfo: createPackageInfo(),
-          uiPlugins: createUiPlugins('plugin-a', 'plugin-b'),
-        });
+    registerRouteForBundleMock.mockClear();
+    jest.restoreAllMocks();
 
-        expect(registerRouteForBundleMock).toHaveBeenCalledTimes(6);
+    jest.spyOn(Fs, 'existsSync').mockReturnValue(true);
 
-        expect(registerRouteForBundleMock).toHaveBeenCalledWith(router, {
-          fileHashCache: expect.any(FileHashCache),
-          isDist: true,
-          bundlesPath: expect.stringMatching(/\/@kbn\/core\/target\/public$/),
-          publicPath: '/server-base-path/sha/bundles/core/',
-          routePath: '/sha/bundles/core/',
-        });
+    registerBundleRoutes({
+      router,
+      staticAssets,
+      packageInfo: createPackageInfo(),
+      uiPlugins: createExternalPluginsUiPlugins('ext-plugin'),
+    });
 
-        expect(registerRouteForBundleMock).toHaveBeenCalledWith(router, {
-          fileHashCache: expect.any(FileHashCache),
-          isDist: true,
-          bundlesPath: '/plugins/plugin-a/public-target-dir',
-          publicPath: '/server-base-path/sha/bundles/plugin/plugin-a/8.0.0/',
-          routePath: '/sha/bundles/plugin/plugin-a/8.0.0/',
-        });
-
-        expect(registerRouteForBundleMock).not.toHaveBeenCalledWith(
-          router,
-          expect.objectContaining({
-            bundlesPath: fromRoot('target/public/bundles'),
-          })
-        );
-      } finally {
-        if (previous === undefined) {
-          delete process.env.KBN_USE_RSPACK;
-        } else {
-          process.env.KBN_USE_RSPACK = previous;
-        }
-      }
+    expect(registerRouteForBundleMock).toHaveBeenCalledTimes(5);
+    expect(registerRouteForBundleMock).toHaveBeenCalledWith(router, {
+      fileHashCache: expect.any(FileHashCache),
+      isDist: true,
+      bundlesPath: Path.join(fromRoot('plugins'), 'ext-plugin', 'target'),
+      publicPath: '/server-base-path/sha/bundles/plugin/ext-plugin/8.0.0/',
+      routePath: '/sha/bundles/plugin/ext-plugin/8.0.0/',
     });
   });
 });

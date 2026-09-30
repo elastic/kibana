@@ -93,29 +93,38 @@ export const KillSuspendProcessActionResult = memo<KillSuspendProcessActionResul
                     )}
                   </div>
                 )}
-
-                {hostActionOutput && hostActionOutput.descendants && command === 'kill-process' && (
-                  <div>
-                    <EuiSpacer />
-                    <FormattedMessage
-                      id="xpack.securitySolution.management.killProcessActionResult.descendantsLabel"
-                      defaultMessage="Descendants ({count})"
-                      values={{ count: hostActionOutput.descendants.length }}
-                    />
-                    <EuiSpacer size="s" />
-                    <ProcessTree
-                      processList={hostActionOutput.descendants}
-                      data-test-subj={getTestId(`${agentId}-processTree`)}
-                    />
-                  </div>
-                )}
               </div>
             ) : (
-              <EndpointActionFailureMessage
-                action={action}
-                agentId={agentId}
-                data-test-subj={getTestId(`${agentId}-outputFailureMessage`)}
-              />
+              <>
+                {hostActionOutput ? (
+                  <>
+                    <EuiSpacer size="s" />
+                    <ProcessResult command={command} processResult={hostActionOutput} />
+                  </>
+                ) : (
+                  <EndpointActionFailureMessage
+                    action={action}
+                    agentId={agentId}
+                    data-test-subj={getTestId(`${agentId}-outputFailureMessage`)}
+                  />
+                )}
+              </>
+            )}
+
+            {hostActionOutput && hostActionOutput.descendants && command === 'kill-process' && (
+              <div>
+                <EuiSpacer />
+                <FormattedMessage
+                  id="xpack.securitySolution.management.killProcessActionResult.descendantsLabel"
+                  defaultMessage="Descendants ({count})"
+                  values={{ count: hostActionOutput.descendants.length }}
+                />
+                <EuiSpacer size="s" />
+                <ProcessTree
+                  processList={hostActionOutput.descendants}
+                  data-test-subj={getTestId(`${agentId}-processTree`)}
+                />
+              </div>
             )}
           </div>
         )}

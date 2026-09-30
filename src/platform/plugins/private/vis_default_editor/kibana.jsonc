@@ -2,7 +2,7 @@
   "type": "plugin",
   "id": "@kbn/vis-default-editor-plugin",
   "owner": [
-    "@elastic/kibana-visualizations"
+    "@elastic/kibana-dashboards"
   ],
   "group": "platform",
   "visibility": "private",

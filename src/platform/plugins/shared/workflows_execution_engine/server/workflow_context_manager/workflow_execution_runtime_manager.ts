@@ -16,7 +16,7 @@ import {
   isEventDrivenWorkflowTriggerSource,
   isTerminalStatus,
 } from '@kbn/workflows';
-import type { GraphNodeUnion, WorkflowGraph } from '@kbn/workflows/graph';
+import type { GraphNodeUnion } from '@kbn/workflows/graph';
 import { ExecutionError } from '@kbn/workflows/server';
 import {
   getActiveOtelSpanId,
@@ -31,6 +31,7 @@ import type { StepIoService } from './step_io_service';
 import type { ContextDependencies } from './types';
 import type { WorkflowExecutionCursor } from './workflow_execution_cursor';
 import type { WorkflowExecutionState } from './workflow_execution_state';
+import type { WorkflowRuntimeGraph } from './workflow_runtime_graph';
 import type { ScopeData } from './workflow_scope_stack';
 import { WorkflowScopeStack } from './workflow_scope_stack';
 import type { WorkflowExecutionTelemetryClient } from '../lib/telemetry/workflow_execution_telemetry_client';
@@ -40,7 +41,7 @@ interface WorkflowExecutionRuntimeManagerInit {
   workflowExecutionState: WorkflowExecutionState;
   stepIoService: StepIoService;
   workflowExecution: EsWorkflowExecution;
-  workflowExecutionGraph: WorkflowGraph;
+  workflowExecutionGraph: WorkflowRuntimeGraph;
   workflowExecutionCursor: WorkflowExecutionCursor;
   workflowLogger: IWorkflowEventLogger;
   coreStart?: CoreStart;
@@ -76,7 +77,7 @@ export class WorkflowExecutionRuntimeManager {
   private stepIoService: StepIoService;
   private entryTransactionId?: string;
   private workflowTransaction?: agent.Transaction; // APM transaction instance
-  private workflowGraph: WorkflowGraph;
+  private workflowGraph: WorkflowRuntimeGraph;
   private coreStart?: CoreStart;
   private dependencies?: ContextDependencies;
   private telemetryClient?: WorkflowExecutionTelemetryClient;
@@ -135,6 +136,10 @@ export class WorkflowExecutionRuntimeManager {
 
   public navigateToAfterNode(nodeId: string): void {
     this.workflowExecutionCursor.navigateToAfterNode(nodeId);
+  }
+
+  public navigateToSynthetic(params: { stepId: string; stepType: string }): void {
+    this.workflowExecutionCursor.navigateToSynthetic(params);
   }
 
   public getCurrentNodeScope(): StackFrame[] {
@@ -510,7 +515,14 @@ export class WorkflowExecutionRuntimeManager {
         this.workflowExecutionCursor.error
       ).toSerializableObject();
     } else if (!this.workflowExecutionCursor.currentNode) {
-      workflowExecutionUpdate.status = ExecutionStatus.COMPLETED;
+      // Parked waits must stay WAITING*; COMPLETED here races TM resume.
+      const isParkedWait =
+        workflowExecution.status === ExecutionStatus.WAITING ||
+        workflowExecution.status === ExecutionStatus.WAITING_FOR_INPUT ||
+        workflowExecution.status === ExecutionStatus.WAITING_FOR_CHILD;
+      if (!isParkedWait) {
+        workflowExecutionUpdate.status = ExecutionStatus.COMPLETED;
+      }
     }
 
     if (
@@ -521,6 +533,9 @@ export class WorkflowExecutionRuntimeManager {
       const finishDate = new Date();
       workflowExecutionUpdate.finishedAt = finishDate.toISOString();
       workflowExecutionUpdate.duration = finishDate.getTime() - startedAt.getTime();
+      // Persist the stored context, not the Liquid render alias. Minting a
+      // typeless `event` here makes the execution tree label the trigger
+      // `document` instead of `manual`.
       workflowExecutionUpdate.context = buildWorkflowContext(
         this.workflowExecution,
         this.coreStart,

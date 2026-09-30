@@ -16,6 +16,7 @@ import type {
 } from '@kbn/core/server';
 import type { elasticsearchServiceMock } from '@kbn/core/server/mocks';
 import { httpServerMock, loggingSystemMock } from '@kbn/core/server/mocks';
+import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import { createMockConfigSchema } from '@kbn/reporting-mocks-server';
 import { createMockReportingCore } from '../../test_helpers';
 import type { ReportingCore } from '../..';
@@ -167,7 +168,7 @@ const nextRunResponse: BulkGetResult = [
       partition: 146,
       userScope: {
         apiKeyId: 'ueR7EJkB2N4RCOVIjhec',
-        spaceId: 'default',
+        spaceId: DEFAULT_SPACE_ID,
         apiKeyCreatedByUser: false,
       },
       apiKey: 'dWVSN0VKa0IyTjRSQ09WSWpoZWM6OEUyZUYtWDlSNndKckdMY0hPTElpZw==',
@@ -208,7 +209,7 @@ const nextRunResponse: BulkGetResult = [
       partition: 146,
       userScope: {
         apiKeyId: 'ueR7EJkB2N4RCOVIjhec',
-        spaceId: 'default',
+        spaceId: DEFAULT_SPACE_ID,
         apiKeyCreatedByUser: false,
       },
       apiKey: 'dWVSN0VKa0IyTjRSQ09WSWpoZWM6OEUyZUYtWDlSNndKckdMY0hPTElpZw==',
