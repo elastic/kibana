@@ -562,6 +562,38 @@ describe('check_contracts', () => {
       });
     });
 
+    it('prints the report-only detail in the log when nothing gates', async () => {
+      mockFormatFailure.mockReturnValue('FORMATTED REPORT');
+      mockParseOasdiff.mockReturnValue([
+        {
+          ...stableChange,
+          oasdiffId: 'response-property-one-of-added',
+          reportOnly: true,
+          policyReason: 'Adding a variant to a response oneOf is additive.',
+        },
+      ]);
+      primeLoadOas(baseSpec({ '/api/x': { post: { 'x-state': 'Generally available' } } }));
+
+      await runCallback({ flags: defaultFlags, log: mockLog });
+
+      expect(mockFormatFailure).toHaveBeenCalledWith([
+        expect.objectContaining({ path: '/api/x', reportOnly: true }),
+      ]);
+      expect(mockLog.info).toHaveBeenCalledWith('FORMATTED REPORT');
+      expect(mockLog.error).not.toHaveBeenCalled();
+    });
+
+    it('prints the experimental detail in the log when nothing gates', async () => {
+      mockFormatFailure.mockReturnValue('FORMATTED REPORT');
+      mockParseOasdiff.mockReturnValue([experimentalChange]);
+      primeLoadOas(baseSpec({ '/api/exp': { post: { 'x-state': 'Experimental' } } }));
+
+      await runCallback({ flags: defaultFlags, log: mockLog });
+
+      expect(mockLog.info).toHaveBeenCalledWith('FORMATTED REPORT');
+      expect(mockLog.error).not.toHaveBeenCalled();
+    });
+
     it('still gates on a stable change when a report-only change is present', async () => {
       mockParseOasdiff.mockReturnValue([
         stableChange,

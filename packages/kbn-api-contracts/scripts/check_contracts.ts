@@ -286,6 +286,7 @@ run(
       }
 
       if (gatingEntries.length === 0) {
+        log.info(formatFailure(entries));
         log.success('No breaking changes detected in stable or tech_preview APIs');
         return;
       }

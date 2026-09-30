@@ -31,6 +31,23 @@ Need help? ${ESCALATION_LINK}
 
 `.split('\n');
 
+const INFORMATIONAL_HEADER = `
+╔════════════════════════════════════════════════════════════════════════════╗
+║                API CONTRACT CHANGES REPORTED, NOT BLOCKING                 ║
+╚════════════════════════════════════════════════════════════════════════════╝
+
+`.split('\n');
+
+const INFORMATIONAL_FOOTER = `
+────────────────────────────────────────────────────────────────────────────
+
+Nothing here blocks merge. Consider whether a release note is worth adding for
+the listed change(s).
+
+Need help? ${ESCALATION_LINK}
+
+`.split('\n');
+
 const TIER_LABEL: Record<StabilityTier, string> = {
   stable: 'Stable (GA)',
   tech_preview: 'Technical Preview',
@@ -80,8 +97,10 @@ release note is still worth adding.
  * Format the CI-log summary for detected breaking changes. Gating tiers (stable
  * first, then tech_preview) lead the report and drive the summary count;
  * experimental changes and report-only rules, if any, follow in clearly
- * non-blocking sections. Entries are already tier-classified and policy-labeled
- * by check_contracts, so this is presentation only.
+ * non-blocking sections. When nothing gates, the same sections are printed under
+ * an informational header with no failure count or allowlist prompt. Entries are
+ * already tier-classified and policy-labeled by check_contracts, so this is
+ * presentation only.
  */
 export function formatFailure(entries: ImpactReportEntry[]): string {
   const reportOnly = entries.filter((e) => e.reportOnly);
@@ -96,6 +115,17 @@ export function formatFailure(entries: ImpactReportEntry[]): string {
 
   const reportOnlySection =
     reportOnly.length > 0 ? [...REPORT_ONLY_HEADING, ...reportOnly.flatMap(formatEntry)] : [];
+
+  if (gating.length === 0) {
+    return [
+      ...INFORMATIONAL_HEADER,
+      'No breaking changes detected in stable/tech_preview APIs.',
+      '',
+      ...experimentalSection,
+      ...reportOnlySection,
+      ...INFORMATIONAL_FOOTER,
+    ].join('\n');
+  }
 
   return [
     ...HEADER,
