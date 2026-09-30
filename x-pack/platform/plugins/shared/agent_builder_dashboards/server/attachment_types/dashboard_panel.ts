@@ -11,6 +11,7 @@ import {
   dashboardPanelAttachmentDataSchema,
   type DashboardPanelAttachmentData,
 } from '@kbn/agent-builder-dashboards-common';
+import { CUSTOM_CONTENT_EMBEDDABLE_TYPE } from '@kbn/custom-content-common';
 import { dashboardTools } from '../../common';
 
 /**
@@ -38,9 +39,12 @@ export const createDashboardPanelAttachmentType = (): AttachmentTypeDefinition<
     }),
   }),
   getAgentDescription: () =>
-    `A dashboard panel attachment is a pointer to one item on a dashboard attachment in this conversation (a panel, control, or section); it means the user is referring to that item. It carries no configuration: read the panel from the dashboard attachment it names. To change the panel, load the dashboard-management skill and call \`${dashboardTools.generateDashboard}\` with that dashboard attachment id as \`dashboardAttachmentId\` and an \`edit_panels\` operation targeting the panel id. This attachment's id is a valid \`source: "attachment"\` panel input wherever one is accepted; the tool copies the panel verbatim, so use it for any copy of the panel (duplicate, add to a section, add to another dashboard). Never create a new visualization attachment to refine a panel that already exists on the dashboard. After editing, render only the dashboard attachment.`,
+    `A dashboard panel attachment is a pointer to one item on a dashboard attachment in this conversation (a panel, control, or section); it means the user is referring to that item. Treat requests made while it is attached as requests about that panel: create, generate, fill or change the panel through the dashboard tool instead of answering with the content in chat. It carries no configuration: read the panel from the dashboard attachment it names. To change the panel, load the dashboard-management skill and call \`${dashboardTools.generateDashboard}\` with that dashboard attachment id as \`dashboardAttachmentId\` and an \`edit_panels\` operation targeting the panel id. This attachment's id is a valid \`source: "attachment"\` panel input wherever one is accepted; the tool copies the panel verbatim, so use it for any copy of the panel (duplicate, add to a section, add to another dashboard). Never create a new visualization attachment to refine a panel that already exists on the dashboard. After editing, render only the dashboard attachment.`,
   getTools: () => [],
 });
+
+const customContentHint = `This is a custom panel: an HTML template, optionally driven by an ES|QL query, generated server-side. To fill or change it, use \`edit_panels\` with \`source: "config"\`, \`type: "${CUSTOM_CONTENT_EMBEDDABLE_TYPE}"\` and \`config: { prompt: <what the panel should show>, esqlQuery?: <ES|QL> }\`; never write the template yourself and never paste the content into the chat instead.
+`;
 
 const formatDashboardPanelAttachment = ({
   dashboard_attachment_id: dashboardAttachmentId,
@@ -51,9 +55,14 @@ const formatDashboardPanelAttachment = ({
   `The user is referring to the panel ${
     label ? `"${label}" ` : ''
   }(panelId: "${panelId}", type: ${panelType}) on the dashboard attachment "${dashboardAttachmentId}".
+Whatever the user asks for while this is attached is about this panel: apply it to the panel through \`${
+    dashboardTools.generateDashboard
+  }\` (load the dashboard-management skill first); do not answer with the content in chat or create a standalone visualization.
 Read the panel's current configuration from that dashboard attachment; this pointer holds none.
 Edit it with \`${
     dashboardTools.generateDashboard
   }\` using \`dashboardAttachmentId: "${dashboardAttachmentId}"\` and an \`edit_panels\` operation with \`panelId: "${panelId}"\`.
-To copy it anywhere (duplicate, section, another dashboard), pass this attachment's id as a \`source: "attachment"\` panel input; the tool copies the panel verbatim.
+${
+  panelType === CUSTOM_CONTENT_EMBEDDABLE_TYPE ? customContentHint : ''
+}To copy it anywhere (duplicate, section, another dashboard), pass this attachment's id as a \`source: "attachment"\` panel input; the tool copies the panel verbatim.
 If the panel no longer exists on that dashboard, tell the user instead of recreating it.`;

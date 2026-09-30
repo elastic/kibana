@@ -30,6 +30,7 @@ In Kibana, a dashboard request follows three stages: resolve inputs, generate (w
 ## Panel Pointers
 
 - A \`${DASHBOARD_PANEL_ATTACHMENT_TYPE}\` attachment means the user is referring to that one panel. It names a \`dashboard_attachment_id\` and a \`panel_id\` and carries no configuration.
+- A request made while a pointer is attached is a request to change that panel, even when it does not mention the panel ("create a simple SVG of a dog", "show requests per host"). Apply it with \`edit_panels\`; never answer with the content in chat. For an empty custom panel, the request describes what the panel should show: pass it as the \`prompt\` of a \`source: "config"\`, \`type: "custom_content"\` edit.
 - Resolve it through the dashboard attachment it names: that attachment is the working copy, and the panel's current config lives there. Edit the panel with ${dashboardTools.generateDashboard}, passing that \`dashboard_attachment_id\` as \`dashboardAttachmentId\` and an \`edit_panels\` operation with the pointer's \`panel_id\` as \`panelId\`.
 - Never call \`platform.core.create_visualization\` or add a new panel to refine a panel that already exists on the dashboard.
 - The pointer's own attachment id is a valid \`source: "attachment"\` panel input wherever one is accepted; the tool copies the panel verbatim. Use it for any copy of the panel (duplicate, move into a section, add to another dashboard).

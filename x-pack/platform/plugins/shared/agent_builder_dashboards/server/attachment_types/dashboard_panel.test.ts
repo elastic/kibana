@@ -64,6 +64,22 @@ describe('createDashboardPanelAttachmentType', () => {
     expect(text).toContain('`source: "attachment"`');
   });
 
+  it('tells the agent to apply the request to the panel instead of answering in chat', async () => {
+    const text = await formatPointer(pointerData);
+
+    expect(text).toContain('is about this panel');
+    expect(text).toContain('do not answer with the content in chat');
+    expect(text).not.toContain('This is a custom panel');
+  });
+
+  it('explains how to fill a custom panel through edit_panels', async () => {
+    const text = await formatPointer({ ...pointerData, panel_type: 'custom_content' });
+
+    expect(text).toContain('This is a custom panel');
+    expect(text).toContain('`type: "custom_content"`');
+    expect(text).toContain('prompt');
+  });
+
   it('omits the label from the text when the panel has none', async () => {
     const text = await formatPointer({ ...pointerData, label: '' });
 
