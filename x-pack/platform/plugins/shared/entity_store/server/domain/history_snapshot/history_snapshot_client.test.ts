@@ -382,6 +382,33 @@ describe('HistorySnapshotClient', () => {
       expect(mockDeleteExpiredHistorySnapshots).toHaveBeenCalledTimes(1);
     });
 
+    it('passes configured retentionDays to cleanup on a full reindex+reset run', async () => {
+      // Exercises the complete success path (docs present → reindex → reset) with a
+      // non-default retentionDays so a regression that always uses the default is caught.
+      mockCreateIndex.mockResolvedValue(undefined);
+      mockReindex.mockResolvedValue({
+        created: 5,
+        updated: 0,
+        versionConflicts: 0,
+        total: 5,
+        failures: [],
+      });
+      mockUpdateByQueryWithScript.mockResolvedValue({ updated: 5, total: 5 });
+      mockGlobalStateClient.findOrThrow.mockResolvedValue({
+        ...mockGlobalStateStarted,
+        historySnapshot: { ...mockGlobalStateStarted.historySnapshot, retentionDays: 90 },
+      });
+
+      const result = await client.runHistorySnapshot();
+
+      expect(result.ok).toBe(true);
+      expect(mockDeleteExpiredHistorySnapshots).toHaveBeenCalledWith(
+        expect.objectContaining({
+          retentionDays: 90,
+        })
+      );
+    });
+
     it('calls deleteExpiredHistorySnapshots with configured retentionDays when set in global state', async () => {
       mockCreateIndex.mockResolvedValue(undefined);
       mockReindex.mockResolvedValue({
