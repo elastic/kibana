@@ -23,6 +23,8 @@ import {
 } from '@elastic/eui';
 import { css } from '@emotion/css';
 import { FormattedMessage, FormattedRelative } from '@kbn/i18n-react';
+import { getNightshiftCapabilities } from '@kbn/nightshift-shared';
+import { useKibana } from '../../../../hooks/use_kibana';
 import { MemoryLineage } from './lineage';
 import { MemoryTelemetryPanel } from './telemetry_panel';
 import { useDeleteMemoryPage, useMemoryPage, useSetMemoryArchived } from './use_memory';
@@ -39,6 +41,18 @@ interface MemoryPageViewProps {
 }
 
 export function MemoryPageView({ pageId, onSelectPage, onDeleted }: MemoryPageViewProps) {
+  const {
+    core: {
+      application: {
+        capabilities: { nightshift },
+      },
+    },
+  } = useKibana();
+  // Mirrors the privilege tiers the routes enforce: archiving needs the
+  // Nightshift manage privilege and deleting additionally needs configure. Read
+  // users see the page but not the actions, rather than clicking into a 403.
+  const { canManage, canConfigure } = getNightshiftCapabilities(nightshift);
+
   const { data, isLoading, isError } = useMemoryPage(pageId);
   const setArchived = useSetMemoryArchived();
   const deletePage = useDeleteMemoryPage();
@@ -99,51 +113,55 @@ export function MemoryPageView({ pageId, onSelectPage, onDeleted }: MemoryPageVi
             <h2 data-test-subj="nightshiftMemoryPageTitle">{page.title}</h2>
           </EuiTitle>
         </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <EuiToolTip
-            content={
-              <FormattedMessage
-                id="xpack.significantEventsApp.memory.archiveTooltip"
-                defaultMessage="Archived memories are excluded from recall."
-              />
-            }
-          >
+        {canManage && (
+          <EuiFlexItem grow={false}>
+            <EuiToolTip
+              content={
+                <FormattedMessage
+                  id="xpack.significantEventsApp.memory.archiveTooltip"
+                  defaultMessage="Archived memories are excluded from recall."
+                />
+              }
+            >
+              <EuiButton
+                size="s"
+                iconType={page.archived ? 'refresh' : 'archive'}
+                isLoading={busy}
+                onClick={() => runAction(() => setArchived(page.id, !page.archived))}
+                data-test-subj="nightshiftMemoryArchiveToggle"
+              >
+                {page.archived ? (
+                  <FormattedMessage
+                    id="xpack.significantEventsApp.memory.unarchiveButton"
+                    defaultMessage="Restore"
+                  />
+                ) : (
+                  <FormattedMessage
+                    id="xpack.significantEventsApp.memory.archiveButton"
+                    defaultMessage="Archive"
+                  />
+                )}
+              </EuiButton>
+            </EuiToolTip>
+          </EuiFlexItem>
+        )}
+        {canConfigure && (
+          <EuiFlexItem grow={false}>
             <EuiButton
               size="s"
-              iconType={page.archived ? 'refresh' : 'archive'}
-              isLoading={busy}
-              onClick={() => runAction(() => setArchived(page.id, !page.archived))}
-              data-test-subj="nightshiftMemoryArchiveToggle"
+              color="danger"
+              iconType="trash"
+              isDisabled={busy}
+              onClick={() => setConfirmingDelete(true)}
+              data-test-subj="nightshiftMemoryDeleteButton"
             >
-              {page.archived ? (
-                <FormattedMessage
-                  id="xpack.significantEventsApp.memory.unarchiveButton"
-                  defaultMessage="Restore"
-                />
-              ) : (
-                <FormattedMessage
-                  id="xpack.significantEventsApp.memory.archiveButton"
-                  defaultMessage="Archive"
-                />
-              )}
+              <FormattedMessage
+                id="xpack.significantEventsApp.memory.deleteButton"
+                defaultMessage="Delete"
+              />
             </EuiButton>
-          </EuiToolTip>
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <EuiButton
-            size="s"
-            color="danger"
-            iconType="trash"
-            isDisabled={busy}
-            onClick={() => setConfirmingDelete(true)}
-            data-test-subj="nightshiftMemoryDeleteButton"
-          >
-            <FormattedMessage
-              id="xpack.significantEventsApp.memory.deleteButton"
-              defaultMessage="Delete"
-            />
-          </EuiButton>
-        </EuiFlexItem>
+          </EuiFlexItem>
+        )}
       </EuiFlexGroup>
 
       {actionError !== undefined && (

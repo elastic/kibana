@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import { EuiEmptyPrompt, EuiFlexGroup, EuiFlexItem, EuiPanel, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/css';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -21,10 +21,10 @@ export function MemoryTab() {
   const [filter, setFilter] = useState<MemoryFilter>('active');
   const [selection, setSelection] = useState<MemorySidebarSelection>({ kind: 'home' });
 
-  // Home and Activity both read the same list the sidebar does, so one query
-  // serves all three panes rather than each fetching its own.
-  const { rows, stats, isError, isLoading } = useMemoryPages(filter);
-  const livePages = rows.filter((page) => !page.archived);
+  // One query serves the sidebar, Home and Activity, matching the Cortex tab.
+  const { rows, stats, isError, isLoading, hasNextPage, isFetchingNextPage, fetchNextPage } =
+    useMemoryPages(filter);
+  const livePages = useMemo(() => rows.filter((page) => !page.archived), [rows]);
 
   if (isLoading) {
     return <div data-test-subj="nightshiftMemoryLoading" />;
@@ -87,6 +87,12 @@ export function MemoryTab() {
             onFilterChange={setFilter}
             selection={selection}
             onSelect={setSelection}
+            pages={rows}
+            isLoading={isLoading}
+            isError={isError}
+            hasNextPage={hasNextPage}
+            isFetchingNextPage={isFetchingNextPage}
+            onLoadMore={() => fetchNextPage()}
           />
         </EuiPanel>
       </EuiFlexItem>

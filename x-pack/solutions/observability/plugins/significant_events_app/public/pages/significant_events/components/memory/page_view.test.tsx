@@ -9,16 +9,32 @@ import React from 'react';
 import { render, screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { I18nProvider } from '@kbn/i18n-react';
+import { useKibana } from '../../../../hooks/use_kibana';
 import { MemoryPageView } from './page_view';
 import { useDeleteMemoryPage, useMemoryPage, useSetMemoryArchived } from './use_memory';
 import type { MemoryPage } from './types';
 
 jest.mock('./use_memory');
+jest.mock('../../../../hooks/use_kibana');
 // The lineage component issues its own fetch; stub it so these tests stay about
 // the page's own actions.
 jest.mock('./lineage', () => ({
   MemoryLineage: () => <div data-test-subj="nightshiftMemoryLineage" />,
 }));
+
+const mockUseKibana = useKibana as jest.MockedFunction<typeof useKibana>;
+
+/**
+ * Grant the privilege set the routes require. Archive needs manage; delete needs
+ * configure. Defaults to both so the action tests can reach the buttons.
+ */
+const givenCapabilities = (nightshift: Record<string, boolean>) => {
+  mockUseKibana.mockReturnValue({
+    core: {
+      application: { capabilities: { nightshift } },
+    },
+  } as unknown as ReturnType<typeof useKibana>);
+};
 
 const mockUseMemoryPage = useMemoryPage as jest.MockedFunction<typeof useMemoryPage>;
 const mockSetArchived = jest.fn();
@@ -66,6 +82,7 @@ const renderView = (onDeleted = jest.fn(), onSelectPage = jest.fn()) => {
 
 beforeEach(() => {
   jest.clearAllMocks();
+  givenCapabilities({ manage: true, configure: true });
   mockUseSetArchived.mockReturnValue(mockSetArchived);
   mockUseDelete.mockReturnValue(mockDelete);
   mockSetArchived.mockResolvedValue(undefined);
@@ -90,6 +107,27 @@ describe('MemoryPageView', () => {
     expect(screen.getByTestId('nightshiftMemoryContext')).toHaveTextContent(
       'Checkout latency spike'
     );
+  });
+
+  it('hides archive and delete from a read-only viewer', () => {
+    // The routes require manage for archive and configure for delete. A viewer
+    // granted neither should see the page without actions that would 403.
+    givenCapabilities({});
+    mockUseMemoryPage.mockReturnValue(asDetail());
+    renderView();
+
+    expect(screen.getByTestId('nightshiftMemoryPageTitle')).toBeInTheDocument();
+    expect(screen.queryByTestId('nightshiftMemoryArchiveToggle')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('nightshiftMemoryDeleteButton')).not.toBeInTheDocument();
+  });
+
+  it('offers delete only to a viewer who may also configure', () => {
+    givenCapabilities({ manage: true });
+    mockUseMemoryPage.mockReturnValue(asDetail());
+    renderView();
+
+    expect(screen.getByTestId('nightshiftMemoryArchiveToggle')).toBeInTheDocument();
+    expect(screen.queryByTestId('nightshiftMemoryDeleteButton')).not.toBeInTheDocument();
   });
 
   it('archives the memory when the archive button is clicked', async () => {

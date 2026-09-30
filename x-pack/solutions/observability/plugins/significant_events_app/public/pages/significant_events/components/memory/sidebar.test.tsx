@@ -10,12 +10,7 @@ import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { I18nProvider } from '@kbn/i18n-react';
 import { MemorySidebar } from './sidebar';
-import { useMemoryPages } from './use_memory';
 import type { MemoryFilter, MemorySidebarSelection, MemorySummary } from './types';
-
-jest.mock('./use_memory');
-
-const mockUseMemoryPages = useMemoryPages as jest.MockedFunction<typeof useMemoryPages>;
 
 const summary = (overrides: Partial<MemorySummary> = {}): MemorySummary =>
   ({
@@ -38,24 +33,25 @@ const summary = (overrides: Partial<MemorySummary> = {}): MemorySummary =>
     ...overrides,
   } as MemorySummary);
 
-const asQuery = (overrides: Record<string, unknown> = {}) =>
-  ({
-    rows: [],
-    stats: undefined,
-    isLoading: false,
-    isError: false,
-    hasNextPage: false,
-    isFetchingNextPage: false,
-    fetchNextPage: jest.fn(),
-    ...overrides,
-  } as unknown as ReturnType<typeof useMemoryPages>);
+/** Defaults for a settled, empty, first-page query. */
+const listProps = (overrides: Record<string, unknown> = {}) => ({
+  pages: [] as MemorySummary[],
+  isLoading: false,
+  isError: false,
+  hasNextPage: false,
+  isFetchingNextPage: false,
+  onLoadMore: jest.fn(),
+  ...overrides,
+});
 
 const renderSidebar = (
+  list: Record<string, unknown> = {},
   selection: MemorySidebarSelection = { kind: 'home' },
   onSelect = jest.fn(),
   onFilterChange = jest.fn(),
   filter: MemoryFilter = 'active'
 ) => {
+  const props = listProps(list);
   render(
     <I18nProvider>
       <MemorySidebar
@@ -63,16 +59,21 @@ const renderSidebar = (
         onFilterChange={onFilterChange}
         selection={selection}
         onSelect={onSelect}
+        pages={props.pages}
+        isLoading={props.isLoading}
+        isError={props.isError}
+        hasNextPage={props.hasNextPage}
+        isFetchingNextPage={props.isFetchingNextPage}
+        onLoadMore={props.onLoadMore}
       />
     </I18nProvider>
   );
-  return { onSelect, onFilterChange };
+  return { onSelect, onFilterChange, onLoadMore: props.onLoadMore };
 };
 
 describe('MemorySidebar', () => {
   it('lists a memory and reports the selection', async () => {
-    mockUseMemoryPages.mockReturnValue(asQuery({ rows: [summary()] }));
-    const { onSelect } = renderSidebar();
+    const { onSelect } = renderSidebar({ pages: [summary()] });
 
     await userEvent.click(screen.getByTestId('nightshiftMemoryLink-memory_kafka-lag'));
 
@@ -80,10 +81,9 @@ describe('MemorySidebar', () => {
   });
 
   it('narrows the loaded rows as the operator types', async () => {
-    mockUseMemoryPages.mockReturnValue(
-      asQuery({ rows: [summary(), summary({ id: 'memory_redis', title: 'Redis evictions' })] })
-    );
-    renderSidebar();
+    renderSidebar({
+      pages: [summary(), summary({ id: 'memory_redis', title: 'Redis evictions' })],
+    });
 
     expect(screen.getByText('Kafka consumer lag')).toBeInTheDocument();
     expect(screen.getByText('Redis evictions')).toBeInTheDocument();
@@ -97,8 +97,7 @@ describe('MemorySidebar', () => {
   });
 
   it('says so when a search matches nothing', async () => {
-    mockUseMemoryPages.mockReturnValue(asQuery({ rows: [summary()] }));
-    renderSidebar();
+    renderSidebar({ pages: [summary()] });
 
     await userEvent.type(screen.getByTestId('nightshiftMemorySearch'), 'zzzz');
 
@@ -108,7 +107,6 @@ describe('MemorySidebar', () => {
   });
 
   it('changes the filter through the button group', async () => {
-    mockUseMemoryPages.mockReturnValue(asQuery({ rows: [] }));
     const { onFilterChange } = renderSidebar();
 
     await userEvent.click(screen.getByTestId('nightshiftMemoryFilter-archived'));
@@ -117,26 +115,20 @@ describe('MemorySidebar', () => {
   });
 
   it('asks for the next page only when the server offered a cursor', async () => {
-    const fetchNextPage = jest.fn();
-    mockUseMemoryPages.mockReturnValue(
-      asQuery({ rows: [summary()], hasNextPage: true, fetchNextPage })
-    );
-    renderSidebar();
+    const { onLoadMore } = renderSidebar({ pages: [summary()], hasNextPage: true });
 
     await userEvent.click(screen.getByTestId('nightshiftMemoryLoadMore'));
 
-    expect(fetchNextPage).toHaveBeenCalled();
+    expect(onLoadMore).toHaveBeenCalled();
   });
 
   it('offers no load-more control on the last page', () => {
-    mockUseMemoryPages.mockReturnValue(asQuery({ rows: [summary()], hasNextPage: false }));
-    renderSidebar();
+    renderSidebar({ pages: [summary()], hasNextPage: false });
 
     expect(screen.queryByTestId('nightshiftMemoryLoadMore')).not.toBeInTheDocument();
   });
 
   it('renders a spinner then the empty state, not a stale list', async () => {
-    mockUseMemoryPages.mockReturnValue(asQuery({ rows: [], isLoading: true }));
     const { rerender } = render(
       <I18nProvider>
         <MemorySidebar
@@ -144,12 +136,12 @@ describe('MemorySidebar', () => {
           onFilterChange={jest.fn()}
           selection={{ kind: 'home' }}
           onSelect={jest.fn()}
+          {...listProps({ isLoading: true })}
         />
       </I18nProvider>
     );
     expect(screen.getByTestId('nightshiftMemorySidebarLoading')).toBeInTheDocument();
 
-    mockUseMemoryPages.mockReturnValue(asQuery({ rows: [] }));
     rerender(
       <I18nProvider>
         <MemorySidebar
@@ -157,6 +149,7 @@ describe('MemorySidebar', () => {
           onFilterChange={jest.fn()}
           selection={{ kind: 'home' }}
           onSelect={jest.fn()}
+          {...listProps()}
         />
       </I18nProvider>
     );

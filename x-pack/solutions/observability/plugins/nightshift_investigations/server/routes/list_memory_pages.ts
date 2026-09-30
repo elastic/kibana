@@ -8,9 +8,8 @@
 import { notFound } from '@hapi/boom';
 import { z } from '@kbn/zod/v4';
 import { MEMORY_FILTERS } from '../../common/memory';
+import { MAX_PAGE_SIZE } from '../memory/page_store';
 import { createNightshiftInvestigationsServerRoute } from './create_server_route';
-
-const MAX_PAGE_SIZE = 200;
 
 export const listMemoryPagesRoute = createNightshiftInvestigationsServerRoute({
   endpoint: 'GET /internal/nightshift/memory/pages',

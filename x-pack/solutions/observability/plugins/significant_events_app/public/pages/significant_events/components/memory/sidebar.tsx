@@ -21,14 +21,23 @@ import { css } from '@emotion/css';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { getMemoryFilterLabel } from './labels';
-import { useMemoryPages } from './use_memory';
-import { MEMORY_FILTERS, type MemoryFilter, type MemorySidebarSelection } from './types';
+import type { MemoryFilter, MemorySidebarSelection, MemorySummary } from './types';
+import { MEMORY_FILTERS } from './types';
 
 interface MemorySidebarProps {
   filter: MemoryFilter;
   onFilterChange: (filter: MemoryFilter) => void;
   selection: MemorySidebarSelection;
   onSelect: (selection: MemorySidebarSelection) => void;
+  /** The pages the sidebar lists. The tab owns the query, as Cortex does. */
+  pages: MemorySummary[];
+  /** The flags below are optional in react-query's result, so accept undefined. */
+  isLoading: boolean | undefined;
+  isError: boolean | undefined;
+  /** Undefined while the query has not produced a cursor yet. */
+  hasNextPage: boolean | undefined;
+  isFetchingNextPage: boolean | undefined;
+  onLoadMore: () => void;
 }
 
 const matchesSearch = (title: string, context: string | undefined, query: string): boolean => {
@@ -36,16 +45,25 @@ const matchesSearch = (title: string, context: string | undefined, query: string
   return `${title} ${context ?? ''}`.toLowerCase().includes(query.toLowerCase());
 };
 
-export function MemorySidebar({ filter, onFilterChange, selection, onSelect }: MemorySidebarProps) {
+export function MemorySidebar({
+  filter,
+  onFilterChange,
+  selection,
+  onSelect,
+  pages,
+  isLoading,
+  isError,
+  hasNextPage,
+  isFetchingNextPage,
+  onLoadMore,
+}: MemorySidebarProps) {
   const [searchQuery, setSearchQuery] = useState('');
-  const { rows, isLoading, isError, hasNextPage, isFetchingNextPage, fetchNextPage } =
-    useMemoryPages(filter);
 
   // The list is already paginated server-side, so this only narrows what has
   // been fetched rather than pretending to search the whole store.
   const visible = useMemo(
-    () => rows.filter((page) => matchesSearch(page.title, page.context, searchQuery)),
-    [rows, searchQuery]
+    () => pages.filter((page) => matchesSearch(page.title, page.context, searchQuery)),
+    [pages, searchQuery]
   );
 
   return (
@@ -174,7 +192,7 @@ export function MemorySidebar({ filter, onFilterChange, selection, onSelect }: M
             size="s"
             fullWidth
             isLoading={isFetchingNextPage}
-            onClick={() => fetchNextPage()}
+            onClick={onLoadMore}
             data-test-subj="nightshiftMemoryLoadMore"
           >
             <FormattedMessage

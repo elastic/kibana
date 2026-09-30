@@ -23,7 +23,11 @@ import { applyUpdate, displayTelemetry, type CounterState, type CounterUpdate } 
 
 const MAX_LIST_SIZE = 500;
 const DEFAULT_PAGE_SIZE = 25;
-const MAX_PAGE_SIZE = 200;
+/**
+ * Largest slice the list route may request. Exported so the route's zod bound and
+ * the store's own clamp cannot drift apart.
+ */
+export const MAX_PAGE_SIZE = 200;
 const MAX_ARCHIVE_ATTEMPTS = 3;
 const MAX_COUNTER_UPDATE_ATTEMPTS = 3;
 const MEMORY_TAG = 'memory';

@@ -45,10 +45,11 @@ export const getMemoryLineageRoute = createNightshiftInvestigationsServerRoute({
     }
 
     const nowSec = Date.now() / 1000;
+    // Ids already emitted as ancestors, plus the root. Used to reject cycles and
+    // duplicates. A frontier id is added only once it has been *processed* —
+    // marking the frontier up front would make every fetched page look already
+    // seen and silently drop the whole chain.
     const seen = new Set<string>([root.id]);
-    const note = (id: string) => {
-      seen.add(id);
-    };
     const ancestors: Array<{
       id: string;
       title: string;
@@ -57,15 +58,20 @@ export const getMemoryLineageRoute = createNightshiftInvestigationsServerRoute({
     }> = [];
 
     let frontier = (root.merged_from ?? []).filter((id) => !seen.has(id));
-    for (const id of frontier) note(id);
+
+    // How deep the walk actually got, which is not always MAX_LINEAGE_DEPTH: a
+    // chain of one reports 1. Truncated by the cap, this also reports that the
+    // walk stopped early, so a caller can tell a short chain from a clipped one.
+    let reachedDepth = 0;
 
     for (let depth = 0; depth < MAX_LINEAGE_DEPTH && frontier.length > 0; depth++) {
       // One mget per level rather than one get per ancestor.
       const pages = await store.getMany(frontier);
+      reachedDepth = depth + 1;
       const next: string[] = [];
       for (const page of pages) {
         if (seen.has(page.id)) continue;
-        note(page.id);
+        seen.add(page.id);
         ancestors.push({
           id: page.id,
           title: page.title,
@@ -75,9 +81,8 @@ export const getMemoryLineageRoute = createNightshiftInvestigationsServerRoute({
         next.push(...(page.merged_from ?? []));
       }
       frontier = [...new Set(next)].filter((id) => !seen.has(id));
-      for (const id of frontier) note(id);
     }
 
-    return { ancestors, depth: ancestors.length > 0 ? MAX_LINEAGE_DEPTH : 0 };
+    return { ancestors, depth: reachedDepth };
   },
 });
