@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { JsonObject } from '@kbn/utility-types';
 import type { GenericIcon } from '../helpers/style_choices';
 import type { WorkspaceField, AdvancedSettings } from './app_state';
 
@@ -109,9 +108,6 @@ export interface Workspace {
   unblockNode: (node: BlockListedNode) => void;
   unblockAll: () => void;
   clearGraph: () => void;
-
-  getQuery(startNodes?: WorkspaceNode[], loose?: boolean): JsonObject;
-  getLikeThisButNotThisQuery(startNodes?: WorkspaceNode[]): JsonObject;
 
   /**
    * Flatten grouped nodes and return a flat array of nodes
