@@ -173,4 +173,68 @@ describe('getServiceIndexPatterns', () => {
     });
     expect(getServiceIndexPatterns(entry)).toEqual(['logs-aws.vpcflow-*']);
   });
+
+  describe('OTel entries (dataFormat === otel)', () => {
+    it('returns logs-aws.<ecfLogType>.otel-* for ECF OTel log twins', () => {
+      const entry = makeEntry({ dataFormat: 'otel', ecfLogType: 'cloudtrail' as any });
+      expect(getServiceIndexPatterns(entry)).toEqual(['logs-aws.cloudtrail.otel-*']);
+    });
+
+    it('keeps the wildcard for ECF OTel log twins even when a namespace is given', () => {
+      const entry = makeEntry({ dataFormat: 'otel', ecfLogType: 'cloudtrail' as any });
+      expect(getServiceIndexPatterns(entry, 'prod')).toEqual(['logs-aws.cloudtrail.otel-*']);
+    });
+
+    it('uses ecfLogType over any ECS-derived varDefsByDataStream dataset', () => {
+      // ECF OTel twins alias ECS policy templates — varDefsByDataStream carries ECS datasets.
+      const entry = makeEntry({
+        dataFormat: 'otel',
+        ecfLogType: 'vpcflow' as any,
+        varDefsByDataStream: {
+          vpcflow: {
+            type: 'logs',
+            dataset: 'aws.vpcflow',
+            inputs: ['aws-s3'],
+            defaultEnabledInputs: {},
+            varDefsByInput: { 'aws-s3': { queue_url: { type: 'text' } as any } },
+          } as any,
+        },
+      });
+      expect(getServiceIndexPatterns(entry)).toEqual(['logs-aws.vpcflow.otel-*']);
+    });
+
+    it('uses ecfLogType for elbaccess (differs from elb_logs data stream id)', () => {
+      const entry = makeEntry({ dataFormat: 'otel', ecfLogType: 'elbaccess' as any });
+      expect(getServiceIndexPatterns(entry)).toEqual(['logs-aws.elbaccess.otel-*']);
+    });
+
+    it('extracts dataset/type from varDefsByInput for OTel input packages', () => {
+      // aws_cloudwatch_input_otel entries store data_stream.dataset/type as var defaults.
+      const entry = makeEntry({
+        dataFormat: 'otel',
+        packageName: 'aws_cloudwatch_input_otel',
+        varDefsByDataStream: {
+          ec2_otel: {
+            type: 'metrics',
+            dataset: undefined,
+            inputs: ['otelcol'],
+            defaultEnabledInputs: {},
+            varDefsByInput: {
+              otelcol: {
+                'data_stream.dataset': { type: 'text', default: 'aws.ec2' } as any,
+                'data_stream.type': { type: 'text', default: 'metrics' } as any,
+              },
+            },
+          } as any,
+        },
+      });
+      expect(getServiceIndexPatterns(entry)).toEqual(['metrics-aws.ec2-*']);
+      expect(getServiceIndexPatterns(entry, 'prod')).toEqual(['metrics-aws.ec2-prod']);
+    });
+
+    it('falls back to logs-packageName.*-* for OTel entry with no ecfLogType and no varDefsByDataStream', () => {
+      const entry = makeEntry({ dataFormat: 'otel', packageName: 'aws_cloudwatch_input_otel' });
+      expect(getServiceIndexPatterns(entry)).toEqual(['logs-aws_cloudwatch_input_otel.*-*']);
+    });
+  });
 });

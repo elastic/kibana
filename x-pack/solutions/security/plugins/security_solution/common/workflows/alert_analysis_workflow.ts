@@ -265,6 +265,8 @@ export interface RuleAttachmentPage extends RuleAttachmentStats {
 
 export interface RuleAttachmentSelection extends RuleAttachmentStats {
   selectable: number;
+  /** Matching rules left out because the caller cannot edit them (ML rules without ML authz). */
+  skippedRuleCount: number;
   attachedRuleIds: string[];
   ruleIds: string[];
 }
