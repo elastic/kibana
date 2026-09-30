@@ -35,6 +35,8 @@ export interface GraphVisualizationProps {
   onSetMergeCandidates: (terms: TermIntersect[]) => void;
   onToggleNodeSelection?: (node: WorkspaceNode, replace: boolean) => boolean;
   onToggleEdgeSelection?: (edge: WorkspaceEdge) => boolean;
+  selectedNodeIds?: readonly string[];
+  selectedEdgeIds?: readonly string[];
 }
 
 function registerZooming(element: SVGSVGElement) {
@@ -69,6 +71,8 @@ export function GraphVisualization({
   onSetMergeCandidates,
   onToggleNodeSelection,
   onToggleEdgeSelection,
+  selectedNodeIds,
+  selectedEdgeIds,
 }: GraphVisualizationProps) {
   const svgRoot = useRef<SVGSVGElement | null>(null);
 
@@ -163,7 +167,9 @@ export function GraphVisualization({
                   css={[
                     styles.edge(euiThemeContext),
                     // the stroke and stroke-opacity are overridden
-                    edge.isSelected &&
+                    (selectedEdgeIds
+                      ? selectedEdgeIds.includes(edge.id ?? makeEdgeId(edge))
+                      : edge.isSelected) &&
                       css`
                         stroke: ${euiThemeContext.euiTheme.colors.darkShade};
                         stroke-opacity: 0.95;
@@ -226,7 +232,7 @@ export function GraphVisualization({
                       css`
                         fill: ${node.color};
                       `,
-                      node.isSelected &&
+                      (selectedNodeIds ? selectedNodeIds.includes(node.id) : node.isSelected) &&
                         css`
                           stroke-width: ${euiThemeContext.euiTheme.size.xs};
                           stroke: ${euiThemeContext.euiTheme.colors.borderBasePrimary};
@@ -333,6 +339,8 @@ export const ReduxGraphVisualization = (props: GraphVisualizationProps) => {
   return (
     <GraphVisualization
       {...props}
+      selectedNodeIds={selectedNodeIds}
+      selectedEdgeIds={selectedEdgeIds}
       onToggleNodeSelection={(node, replace) => {
         const isSelected = selectedNodeIds.includes(node.id);
         const willBeSelected = replace ? !isSelected || selectedNodeIds.length > 1 : !isSelected;
