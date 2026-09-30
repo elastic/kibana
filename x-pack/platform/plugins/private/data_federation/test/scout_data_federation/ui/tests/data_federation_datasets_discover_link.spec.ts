@@ -66,6 +66,7 @@ test.describe(
       page,
       pageObjects,
     }) => {
+      const expectedQuery = `FROM "${dataSetName}"`;
       await browserAuth.loginWithCustomRole(CUSTOM_ROLES.data_federation_manager_with_discover);
       await pageObjects.dataFederation.goto();
       await pageObjects.dataFederation.selectTab('Datasets');
@@ -79,7 +80,12 @@ test.describe(
       const searchParams = new URL(href ?? '', page.url()).searchParams;
       expect(searchParams.get('l')).toBe('DISCOVER_APP_LOCATOR');
       const params = JSON.parse(decompressFromBase64(searchParams.get('lz') ?? '') ?? '{}');
-      expect(params.query).toStrictEqual({ esql: `FROM "${dataSetName}"` });
+      expect(params.query).toStrictEqual({ esql: expectedQuery });
+
+      await discoverLink.click();
+      await expect(page).toHaveURL(/\/app\/discover/);
+      await expect(page.testSubj.locator('ESQLEditor')).toBeVisible();
+      await expect.poll(() => pageObjects.discover.getEsqlQueryValue()).toBe(expectedQuery);
     });
 
     test('hides the Discover link without Discover access', async ({
