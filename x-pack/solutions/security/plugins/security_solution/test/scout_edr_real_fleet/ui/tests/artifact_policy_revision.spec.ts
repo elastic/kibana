@@ -105,9 +105,11 @@ test.describe(
       });
 
       const afterCreate = await waitForAppliedRevisionAbove(read, baseline);
+      expect(afterCreate).toBeGreaterThan(baseline);
 
       await apiServices.endpointArtifacts.deleteList(TRUSTED_APPS_LIST_ID);
-      await waitForAppliedRevisionAbove(read, afterCreate);
+      const afterDelete = await waitForAppliedRevisionAbove(read, afterCreate);
+      expect(afterDelete).toBeGreaterThan(afterCreate);
     });
   }
 );
