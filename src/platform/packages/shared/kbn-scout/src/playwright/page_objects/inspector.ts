@@ -161,7 +161,6 @@ export class InspectorPage {
     await this.requests.statisticsTab.click();
   }
 
-
   /**
    * Returns the table rows as a nested string array. Each inner array is one row's cell texts.
    */
