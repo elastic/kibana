@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { Action } from 'typescript-fsa';
 import actionCreatorFactory from 'typescript-fsa';
 import { i18n } from '@kbn/i18n';
 import { reducerWithInitialState } from 'typescript-fsa-reducers';
@@ -18,6 +17,8 @@ import { liveResponseFieldsSelector, selectedFieldsSelector } from './fields';
 import { fetchTopNodes } from '../services/fetch_top_nodes';
 import type { Workspace } from '../types';
 import type { ServerResultNode } from '../types';
+import type { MatchedAction } from './helpers';
+import { matchesAction } from './helpers';
 
 const actionCreator = actionCreatorFactory('x-pack/graph/workspace');
 
@@ -94,10 +95,9 @@ export const registerWorkspaceListeners = (
   });
 
   startListening({
-    predicate: submitSearch.match,
-    effect: (unknownAction, listenerApi) => {
+    matcher: matchesAction(submitSearch),
+    effect: (action: MatchedAction<string>, listenerApi) => {
       listenerApi.cancelActiveListeners();
-      const action = unknownAction as unknown as Action<string>;
       listenerApi.dispatch(initializeWorkspace());
 
       // type casting is safe, at this point workspace should be loaded
