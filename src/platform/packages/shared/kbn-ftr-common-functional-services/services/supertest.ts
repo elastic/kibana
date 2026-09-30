@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { systemIndicesSuperuser } from '@kbn/test';
+import { systemIndicesSuperuser, wrapKibanaSupertestAgent } from '@kbn/test';
 
 import { format as formatUrl } from 'url';
 
@@ -32,7 +32,8 @@ export function KibanaSupertestProvider({ getService }: FtrProviderContext): sup
     options.http2 = true;
   }
 
-  return supertest(kibanaServerUrl, options);
+  const maxRetryMs = config.get('timeouts.try') as number;
+  return wrapKibanaSupertestAgent(supertest(kibanaServerUrl, options), { maxRetryMs });
 }
 
 export function ElasticsearchSupertestProvider({
