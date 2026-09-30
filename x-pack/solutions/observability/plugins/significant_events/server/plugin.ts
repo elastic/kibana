@@ -641,7 +641,8 @@ export class SignificantEventsPlugin
     // Editable discovery agents: installed via agents.ensure when significant events is
     // available. skip(1) on availabilityEnabled$ drops the initial emission, so catch up at
     // startup as well. Per-space installs also happen just-in-time from scheduled discovery
-    // enablement and manual discovery execute.
+    // enablement and manual discovery execute, and for the feature identification and KI query
+    // generation agents from the routes that run them.
     // Pause re-assert runs inside ensureSignificantEventsInstalled after every install.
     if (plugins.agentBuilder && this.server) {
       const agentBuilder = plugins.agentBuilder;

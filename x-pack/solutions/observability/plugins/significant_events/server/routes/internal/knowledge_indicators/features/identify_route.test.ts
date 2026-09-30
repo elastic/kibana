@@ -6,6 +6,7 @@
  */
 
 import type { SignificantEventsMaintenanceState } from '../../../../../common/maintenance/state_machine';
+import { FEATURE_IDENTIFICATION_AGENT_ID } from '../../../../agent_builder/agents/feature_identification';
 import {
   MAX_INFERENCE_DOCUMENT_BYTES,
   MAX_INFERENCE_DOCUMENT_FIELDS,
@@ -117,7 +118,7 @@ const makeInferredHandlerParams = ({
     view_name: '$.nightshift.sources.default.logs',
   };
   const kiClient = {};
-  const agentBuilder = {};
+  const agentBuilder = { agents: { ensure: jest.fn().mockResolvedValue(undefined) } };
   const server = {
     searchInferenceEndpoints: {},
     agentBuilder,
@@ -397,6 +398,30 @@ describe('inferred feature identification route', () => {
     );
     expect(telemetry.trackFeaturesIdentified).not.toHaveBeenCalled();
     expect(ensureEnabled).toHaveBeenCalledWith({ request, spaceId: 'space-a' });
+  });
+
+  it('installs the feature identification agent in the request space before identifying', async () => {
+    const { handlerParams, agentBuilder } = makeInferredHandlerParams();
+
+    await inferredRoute.handler(handlerParams);
+
+    expect(agentBuilder.agents.ensure).toHaveBeenCalledWith(
+      expect.objectContaining({
+        spaceId: 'space-a',
+        agent: expect.objectContaining({ id: FEATURE_IDENTIFICATION_AGENT_ID }),
+      })
+    );
+    expect(agentBuilder.agents.ensure.mock.invocationCallOrder[0]).toBeLessThan(
+      mockIdentifyInferredFeatures.mock.invocationCallOrder[0]
+    );
+  });
+
+  it('fails the request when the agent cannot be installed', async () => {
+    const { handlerParams, agentBuilder } = makeInferredHandlerParams();
+    agentBuilder.agents.ensure.mockRejectedValue(new Error('agents index unavailable'));
+
+    await expect(inferredRoute.handler(handlerParams)).rejects.toThrow('agents index unavailable');
+    expect(mockIdentifyInferredFeatures).not.toHaveBeenCalled();
   });
 
   it('normalizes a blank run id before identifying inferred features', async () => {

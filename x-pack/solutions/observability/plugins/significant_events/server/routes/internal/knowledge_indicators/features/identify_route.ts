@@ -37,6 +37,7 @@ import type { SyncWorkflowService } from '../../../../lib/workflows/sync_workflo
 import type { SignificantEventsMaintenanceService } from '../../../../lib/maintenance/maintenance_service';
 import { stateBlocksNewActivity } from '../../../../../common/maintenance/state_machine';
 import { sourceToAnalysisTarget } from '../../../../lib/significant_events/stream_to_analysis_target';
+import { installFeatureIdentificationAgent } from '../../../../agent_builder/agents/feature_identification';
 
 const getSerializedByteLength = (value: unknown) =>
   Buffer.byteLength(JSON.stringify(value), 'utf8');
@@ -244,6 +245,15 @@ const identifyInferredFeaturesRoute = createServerRoute({
       sourcesClient.get(streamName),
       scopedClients.getKnowledgeIndicatorClient(),
     ]);
+
+    // Startup installs the agent in the default space only, and onboarding runs in the space of
+    // the request. Without this every iteration outside the default space fails on a missing agent.
+    if (server.agentBuilder) {
+      await installFeatureIdentificationAgent({
+        agentBuilder: server.agentBuilder,
+        spaceId: request.spaceId,
+      });
+    }
 
     try {
       const result = await identifyInferredFeatures({
