@@ -38,32 +38,6 @@ function GraphWorkspace(options) {
 
   //======== Selection functions ========
 
-  this.deleteNodes = function (nodeIds) {
-    const selectedNodes = nodeIds
-      .map((nodeId) => self.nodesMap[nodeId])
-      .filter((node) => node !== undefined);
-    let allAndGrouped = self.returnUnpackedGroupeds(selectedNodes);
-
-    // Nothing selected so process all nodes
-    if (allAndGrouped.length === 0) {
-      allAndGrouped = self.nodes.slice(0);
-    }
-
-    allAndGrouped.forEach((node) => {
-      delete self.nodesMap[node.id];
-    });
-    self.arrRemoveAll(self.nodes, allAndGrouped);
-
-    const danglingEdges = self.edges.filter(function (edge) {
-      return self.nodes.indexOf(edge.source) < 0 || self.nodes.indexOf(edge.target) < 0;
-    });
-    danglingEdges.forEach((edge) => {
-      delete self.edgesMap[edge.id];
-    });
-    self.arrRemoveAll(self.edges, danglingEdges);
-    self.runLayout();
-  };
-
   this.returnUnpackedGroupeds = function (topLevelNodeArray) {
     //Gather any grouped nodes that are part of this top-level selection
     const result = topLevelNodeArray.slice();
@@ -104,33 +78,6 @@ function GraphWorkspace(options) {
     return result;
   };
 
-  // ======= Miscellaneous functions
-  /**
-   * @type void
-   */
-  this.clearGraph = function () {
-    this.stopLayout();
-    this.nodes = [];
-    this.edges = [];
-    this.nodesMap = {};
-    this.edgesMap = {};
-    this.blocklistedNodes = [];
-  };
-
-  this.arrRemoveAll = function remove(arr, items) {
-    for (let i = items.length; i--; ) {
-      self.arrRemove(arr, items[i]);
-    }
-  };
-
-  this.arrRemove = function remove(arr, item) {
-    for (let i = arr.length; i--; ) {
-      if (arr[i] === item) {
-        arr.splice(i, 1);
-      }
-    }
-  };
-
   //====== Layout functions ========
 
   /**
@@ -147,62 +94,6 @@ function GraphWorkspace(options) {
   };
   this.isLayoutRunning = function () {
     return layoutController.isRunning();
-  };
-
-  //========Grouping functions==========
-
-  //Merges all selected nodes into node
-  this.groupNodes = function (parentId, nodeIds) {
-    const node = self.nodesMap[parentId];
-    const selectedNodeIds = new Set(nodeIds);
-    self.nodes.forEach(function (otherNode) {
-      if (
-        otherNode !== node &&
-        selectedNodeIds.has(otherNode.id) &&
-        otherNode.parent === undefined
-      ) {
-        otherNode.parent = node;
-      }
-    });
-    self.runLayout();
-  };
-
-  this.ungroup = function (node) {
-    self.nodes.forEach(function (other) {
-      if (other.parent === node) {
-        other.parent = undefined;
-      }
-    });
-    self.runLayout();
-  };
-
-  this.unblockNode = function (node) {
-    self.arrRemove(self.blocklistedNodes, node);
-  };
-
-  this.unblockAll = function () {
-    self.arrRemoveAll(self.blocklistedNodes, self.blocklistedNodes);
-  };
-
-  this.blocklistNodes = function (nodeIds) {
-    const selectedNodes = nodeIds
-      .map((nodeId) => self.nodesMap[nodeId])
-      .filter((node) => node !== undefined);
-    const selection = self.returnUnpackedGroupeds(selectedNodes);
-    const danglingEdges = [];
-    self.edges.forEach(function (edge) {
-      if (selection.indexOf(edge.source) >= 0 || selection.indexOf(edge.target) >= 0) {
-        delete self.edgesMap[edge.id];
-        danglingEdges.push(edge);
-      }
-    });
-    selection.forEach((node) => {
-      delete self.nodesMap[node.id];
-      self.blocklistedNodes.push(node);
-    });
-    self.arrRemoveAll(self.nodes, selection);
-    self.arrRemoveAll(self.edges, danglingEdges);
-    self.runLayout();
   };
 
   this.makeNodeId = makeNodeId;
@@ -263,13 +154,6 @@ function GraphWorkspace(options) {
 
     self.changeHandler?.();
     this.runLayout();
-  };
-
-  this.mergeIds = function (parentId, childId) {
-    const parent = self.getNode(parentId);
-    const child = self.getNode(childId);
-    child.parent = parent;
-    self.runLayout();
   };
 
   this.getNode = function (nodeId) {
