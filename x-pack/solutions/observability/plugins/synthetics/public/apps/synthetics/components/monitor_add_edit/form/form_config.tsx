@@ -34,7 +34,7 @@ const MAINTENANCE_WINDOWS_OPTIONS = (readOnly: boolean) => ({
     'xpack.synthetics.monitorConfig.section.maintenanceWindows.description',
     {
       defaultMessage:
-        'Configure maintenance windows to pause this monitor during scheduled downtime. The monitor will not run and will not generate alerts during these times.',
+        'Configure maintenance windows to pause this monitor during scheduled downtime. The monitor will not run and will not generate alerts during these times. To pause only alerts, create a maintenance window with filters and do not attach it to monitors.',
     }
   ),
   components: [FIELD(readOnly)[ConfigKey.MAINTENANCE_WINDOWS]],
