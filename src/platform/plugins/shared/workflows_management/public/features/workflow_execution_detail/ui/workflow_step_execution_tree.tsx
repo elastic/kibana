@@ -532,6 +532,7 @@ function convertTreeToOpenNodes(
           }
           const gapId = iterationGapId(foreachParentId, entry.from, entry.to);
           const selectedIteration = selectedId ? parseIterationVirtualId(selectedId) : null;
+          const revealStepId = options?.waitingAction?.stepExecutionId ?? null;
           const selectedInThisGap =
             (selectedIteration != null &&
               selectedIteration.parentStepId === foreachParentStepId &&
@@ -540,7 +541,9 @@ function convertTreeToOpenNodes(
             (selectedId != null &&
               selectedIteration == null &&
               stepTreeContainsExecutionId(gapChildren, selectedId));
-          const isExpanded = expandedGapIds.has(gapId) || selectedInThisGap;
+          const waitingStepInThisGap =
+            revealStepId != null && stepTreeContainsExecutionId(gapChildren, revealStepId);
+          const isExpanded = expandedGapIds.has(gapId) || selectedInThisGap || waitingStepInThisGap;
           nodes.push(
             buildIterationGapNode(
               foreachParentId,
@@ -997,6 +1000,28 @@ const collectContainingIterationIds = (
   return ids;
 };
 
+/** Ancestors that start collapsed (iterations, parallel branches) on the path to `targetId`. */
+const collectCollapsedAncestorIds = (nodes: OpenTreeNode[], targetId: string | null): string[] => {
+  if (!targetId) {
+    return [];
+  }
+  const collapsedTypes = new Set<string>(COLLAPSED_BY_DEFAULT_STEP_TYPES);
+  const ids: string[] = [];
+  const walk = (list: OpenTreeNode[]) => {
+    for (const node of list) {
+      if (!nodeContainsId(node, targetId) || node.id === targetId) {
+        continue;
+      }
+      if (node.row?.stepType && collapsedTypes.has(node.row.stepType)) {
+        ids.push(node.id);
+      }
+      walk(node.children);
+    }
+  };
+  walk(nodes);
+  return ids;
+};
+
 const withSelectedIterationExpanded = (
   base: Set<string>,
   forceExpandIds: string[],
@@ -1016,14 +1041,23 @@ const withSelectedIterationExpanded = (
   return next;
 };
 
-const useTreeExpandedIds = (openNodes: OpenTreeNode[], selectedId: string | null) => {
+const useTreeExpandedIds = (
+  openNodes: OpenTreeNode[],
+  selectedId: string | null,
+  /** Step execution to keep visible even when it is not the selection (active waitForInput). */
+  revealId: string | null = null
+) => {
   const [userExpandedIds, setUserExpandedIds] = useState<Set<string> | null>(null);
   const [collapseOverride, setCollapseOverride] = useState<{
-    selectedId: string;
+    selectedId: string | null;
+    revealId: string | null;
     ids: Set<string>;
   } | null>(null);
 
-  if (collapseOverride && collapseOverride.selectedId !== selectedId) {
+  if (
+    collapseOverride &&
+    (collapseOverride.selectedId !== selectedId || collapseOverride.revealId !== revealId)
+  ) {
     setCollapseOverride(null);
   }
 
@@ -1033,13 +1067,18 @@ const useTreeExpandedIds = (openNodes: OpenTreeNode[], selectedId: string | null
     return ids;
   }, [openNodes]);
 
-  const forceExpandIds = useMemo(
-    () => collectContainingIterationIds(openNodes, selectedId),
-    [openNodes, selectedId]
-  );
+  const forceExpandIds = useMemo(() => {
+    const ids = new Set<string>(collectContainingIterationIds(openNodes, selectedId));
+    for (const id of collectCollapsedAncestorIds(openNodes, revealId)) {
+      ids.add(id);
+    }
+    return [...ids];
+  }, [openNodes, revealId, selectedId]);
 
   const userCollapsedIds =
-    collapseOverride && selectedId && collapseOverride.selectedId === selectedId
+    collapseOverride &&
+    collapseOverride.selectedId === selectedId &&
+    collapseOverride.revealId === revealId
       ? collapseOverride.ids
       : EMPTY_ID_SET;
 
@@ -1062,20 +1101,22 @@ const useTreeExpandedIds = (openNodes: OpenTreeNode[], selectedId: string | null
         }
         return next;
       });
-      if (!selectedId || !forceExpandIds.includes(id)) {
+      if (!forceExpandIds.includes(id)) {
         return;
       }
       setCollapseOverride((prev) => {
-        const ids = new Set(prev?.selectedId === selectedId ? prev.ids : []);
+        const ids = new Set(
+          prev?.selectedId === selectedId && prev.revealId === revealId ? prev.ids : []
+        );
         if (isCurrentlyExpanded) {
           ids.add(id);
         } else {
           ids.delete(id);
         }
-        return { selectedId, ids };
+        return { selectedId, revealId, ids };
       });
     },
-    [defaultExpandedIds, expandedIds, forceExpandIds, selectedId]
+    [defaultExpandedIds, expandedIds, forceExpandIds, revealId, selectedId]
   );
 
   return { expandedIds, onToggleExpand };
@@ -1463,7 +1504,11 @@ export const WorkflowStepExecutionTree = ({
     waitingAction,
   ]);
 
-  const { expandedIds, onToggleExpand } = useTreeExpandedIds(openNodes, selectedId);
+  const { expandedIds, onToggleExpand } = useTreeExpandedIds(
+    openNodes,
+    selectedId,
+    waitingAction?.stepExecutionId ?? null
+  );
 
   if (error) {
     return (

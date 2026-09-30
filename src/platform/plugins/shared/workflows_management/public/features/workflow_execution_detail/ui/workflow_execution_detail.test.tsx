@@ -49,21 +49,25 @@ const mockStepExecutionDetailsProps: { current: Record<string, unknown> } = {
   current: {},
 };
 
+const mockExecutionPanelProps: { current: Record<string, unknown> } = { current: {} };
+
 jest.mock('./workflow_execution_panel', () => ({
-  WorkflowExecutionPanel: ({
-    execution,
-    error,
-    showBackButton,
-  }: {
+  WorkflowExecutionPanel: (props: {
     execution: WorkflowExecutionDto | null;
     error: Error | null;
     showBackButton: boolean;
-  }) => (
-    <div data-test-subj="execution-panel">
-      <div data-test-subj="show-back-button">{String(showBackButton)}</div>
-      <div data-test-subj="panel-execution-status">{execution?.status ?? 'no-execution'}</div>
-    </div>
-  ),
+    waitingAction?: { submitState?: unknown };
+  }) => {
+    mockExecutionPanelProps.current = props;
+    return (
+      <div data-test-subj="execution-panel">
+        <div data-test-subj="show-back-button">{String(props.showBackButton)}</div>
+        <div data-test-subj="panel-execution-status">
+          {props.execution?.status ?? 'no-execution'}
+        </div>
+      </div>
+    );
+  },
 }));
 
 jest.mock('./workflow_step_execution_details', () => ({
@@ -541,6 +545,7 @@ describe('WorkflowExecutionDetail - resume input resolution', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     mockStepExecutionDetailsProps.current = {};
+    mockExecutionPanelProps.current = {};
     mockRemoveQueries = jest.fn();
     mockUseQueryClient.mockReturnValue({ removeQueries: mockRemoveQueries } as any);
     mockUseWorkflowUrlState.mockReturnValue({
@@ -593,6 +598,10 @@ describe('WorkflowExecutionDetail - resume input resolution', () => {
     expectPausedStepFetchArgs('exec-waiting', 'step-exec-1');
     expect(mockStepExecutionDetailsProps.current.resumeMessage).toBe('Top-level approval required');
     expect(mockStepExecutionDetailsProps.current.resumeSchema).toMatchObject({ type: 'object' });
+    const waitingAction = mockExecutionPanelProps.current.waitingAction as {
+      submitState?: unknown;
+    };
+    expect(mockStepExecutionDetailsProps.current.submitState).toBe(waitingAction.submitState);
   });
 
   it('passes undefined resumeMessage and resumeSchema when the paused-step fetch returns no data', () => {

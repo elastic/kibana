@@ -46,6 +46,8 @@ interface WorkflowStepExecutionDetailsProps {
   resumeSchema?: JsonModelSchemaType;
   approvalLabels?: ApprovalLabels;
   shouldAutoResume?: boolean;
+  /** Shared with the tree-row Provide action so one submit disables both. */
+  submitState?: React.ComponentProps<typeof ResumeExecutionButton>['submitState'];
   waitingStepExecutionId?: string;
   hasResumeError?: boolean;
   onRetryResume?: () => void;
@@ -69,6 +71,7 @@ export const WorkflowStepExecutionDetails = React.memo<WorkflowStepExecutionDeta
     resumeSchema,
     approvalLabels,
     shouldAutoResume = false,
+    submitState,
     waitingStepExecutionId,
     hasResumeError,
     onRetryResume,
@@ -185,6 +188,7 @@ export const WorkflowStepExecutionDetails = React.memo<WorkflowStepExecutionDeta
                     <EuiFlexItem grow={false}>
                       {isWaitingForInput && (
                         <>
+                          {/* Tree row owns auto-open. This button shares submit state so it cannot open a second modal or resume again. */}
                           <ResumeExecutionButton
                             executionId={workflowExecutionId}
                             workflowId={stepExecution?.workflowId}
@@ -192,8 +196,8 @@ export const WorkflowStepExecutionDetails = React.memo<WorkflowStepExecutionDeta
                             resumeMessage={resumeMessage}
                             resumeSchema={resumeSchema}
                             approvalLabels={approvalLabels}
-                            autoOpen={shouldAutoResume}
                             waitingStepExecutionId={stepExecution?.id}
+                            submitState={submitState}
                           />
                           <EuiSpacer size="m" />
                         </>

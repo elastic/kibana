@@ -8,7 +8,7 @@
  */
 
 import { EuiPanel } from '@elastic/eui';
-import React, { useCallback, useEffect, useMemo } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux-v7';
 import useLocalStorage from 'react-use/lib/useLocalStorage';
 
@@ -144,6 +144,28 @@ export const WorkflowExecutionDetail: React.FC<WorkflowExecutionDetailProps> = R
       retryResume,
     } = useWaitingStepResume(executionId, workflowExecution);
 
+    const [isResumeSubmitting, setIsResumeSubmitting] = useState(false);
+    const [isResumeSubmitted, setIsResumeSubmitted] = useState(false);
+    const resumeSubmitState = useMemo(
+      () => ({
+        isSubmitting: isResumeSubmitting,
+        isSubmitted: isResumeSubmitted,
+        setSubmitting: setIsResumeSubmitting,
+        setSubmitted: setIsResumeSubmitted,
+      }),
+      [isResumeSubmitting, isResumeSubmitted]
+    );
+
+    useEffect(() => {
+      setIsResumeSubmitting(false);
+      setIsResumeSubmitted(false);
+    }, [executionId]);
+
+    useEffect(() => {
+      setIsResumeSubmitting(false);
+      setIsResumeSubmitted(false);
+    }, [waitingStepExecutionId]);
+
     const waitingAction = useMemo(
       () =>
         waitingStepExecutionId
@@ -156,6 +178,7 @@ export const WorkflowExecutionDetail: React.FC<WorkflowExecutionDetailProps> = R
               resumeSchema,
               approvalLabels,
               autoOpen: shouldAutoResume,
+              submitState: resumeSubmitState,
             }
           : undefined,
       [
@@ -163,6 +186,7 @@ export const WorkflowExecutionDetail: React.FC<WorkflowExecutionDetailProps> = R
         executionId,
         resumeMessage,
         resumeSchema,
+        resumeSubmitState,
         shouldAutoResume,
         waitingStepExecutionId,
         waitingStepStartedAt,
@@ -299,6 +323,7 @@ export const WorkflowExecutionDetail: React.FC<WorkflowExecutionDetailProps> = R
               resumeSchema={resumeSchema}
               approvalLabels={approvalLabels}
               shouldAutoResume={shouldAutoResume}
+              submitState={resumeSubmitState}
               waitingStepExecutionId={waitingStepExecutionId}
               hasResumeError={hasResumeError}
               onRetryResume={retryResume}
