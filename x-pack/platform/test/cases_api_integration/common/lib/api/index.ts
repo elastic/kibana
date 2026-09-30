@@ -152,7 +152,19 @@ export const deleteAllCaseItems = async (es: Client) => {
     deleteMappings(es),
     deleteTemplates(es),
     deleteFieldDefinitions(es),
+    deleteTasks(es),
   ]);
+};
+
+export const deleteTasks = async (es: Client): Promise<void> => {
+  await es.deleteByQuery({
+    index: ALERTING_CASES_SAVED_OBJECT_INDEX,
+    q: 'type:cases-tasks OR type:cases-task-templates',
+    wait_for_completion: true,
+    refresh: true,
+    body: {},
+    conflicts: 'proceed',
+  });
 };
 
 export const deleteCasesUserActions = async (es: Client): Promise<void> => {
