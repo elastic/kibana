@@ -7,3 +7,6 @@
 
 /** Logical mapping field name the dataset API reads to enable time filtering. */
 export const TIMESTAMP_LOGICAL_FIELD_NAME = '@timestamp';
+
+/** Stable mapping editor field id for the timestamp field managed by the timeseries section. */
+export const TIMESTAMP_FIELD_ID = '__timestamp__';

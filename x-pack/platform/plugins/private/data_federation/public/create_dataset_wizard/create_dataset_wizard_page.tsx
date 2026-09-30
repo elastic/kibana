@@ -20,6 +20,7 @@ import { DATASETS_PATH } from '../app_paths';
 import { getFlyoutSaveErrorMessage } from '../get_flyout_save_error_message';
 import type { DataFederationKibanaServices } from '../types';
 import { buildDatasetPayload } from './build_dataset_payload';
+import { TIMESTAMP_FIELD_ID, TIMESTAMP_LOGICAL_FIELD_NAME } from './constants';
 import { type CreateDatasetFormValues } from './create_dataset_form_state';
 import { createDatasetWizardStrings } from './create_dataset_wizard_i18n';
 import { dataSetToFormValues, emptyDatasetFormValues } from './dataset_form_initial_values';
@@ -31,8 +32,6 @@ import type { DatasetWizardContent, DatasetWizardSection } from './types';
 
 const { FormWizard, FormWizardStep } = Forms;
 
-const TIMESTAMP_LOGICAL_FIELD_NAME = '@timestamp';
-const TIMESTAMP_FIELD_ID = '__timestamp__';
 const wizardContentFromFormValues = (values: CreateDatasetFormValues): DatasetWizardContent => ({
   dataset: {
     name: values.name,

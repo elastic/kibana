@@ -24,8 +24,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import type { MappingEditorValue } from './mapping_editor';
 import { DatetimeFormatComboBox } from '../components/datetime_format_combo_box';
 import { DatetimeFormatHelpText } from '../components/datetime_format_help_text';
-
-const TIMESTAMP_LOGICAL_FIELD_NAME = '@timestamp';
+import { TIMESTAMP_LOGICAL_FIELD_NAME } from '../constants';
 
 export interface TimeseriesDataSectionProps {
   isEnabled: boolean;

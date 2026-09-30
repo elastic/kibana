@@ -21,9 +21,7 @@ import type { DataFederationKibanaServices } from '../../types';
 import { MappingEditor, type MappingEditorValue } from './mapping_editor';
 import { createDatasetWizardStrings } from '../create_dataset_wizard_i18n';
 import type { DatasetWizardContent } from '../types';
-
-const TIMESTAMP_LOGICAL_FIELD_NAME = '@timestamp';
-const TIMESTAMP_FIELD_ID = '__timestamp__';
+import { TIMESTAMP_FIELD_ID, TIMESTAMP_LOGICAL_FIELD_NAME } from '../constants';
 
 const isTimestampField = (f: MappingEditorValue['fields'][number]): boolean => {
   return f.id === TIMESTAMP_FIELD_ID || f.name.trim() === TIMESTAMP_LOGICAL_FIELD_NAME;
@@ -230,7 +228,7 @@ export function StepMapping() {
         <MappingEditor
           value={{ ...field.value, fields: splitFields.otherFields }}
           onChange={onEditorChange}
-          reservedFieldNames={isTimeseriesEnabled ? ['@timestamp'] : undefined}
+          reservedFieldNames={isTimeseriesEnabled ? [TIMESTAMP_LOGICAL_FIELD_NAME] : undefined}
         />
       </div>
     </div>

@@ -14,6 +14,7 @@ import type {
 } from '../../common/dataset_types';
 import type { MappingEditorValue } from './mapping_step/mapping_editor';
 import { emptyMappingEditorValue } from './mapping_step/mapping_editor';
+import { TIMESTAMP_FIELD_ID, TIMESTAMP_LOGICAL_FIELD_NAME } from './constants';
 import {
   emptyCreateDatasetSettingsFormValues,
   encodeEscapeCharacterToFormValue,
@@ -38,9 +39,6 @@ const mappingsToEditorValue = (mappings: DatasetMappings | undefined): MappingEd
     fields,
   };
 };
-
-const TIMESTAMP_LOGICAL_FIELD_NAME = '@timestamp';
-const TIMESTAMP_FIELD_ID = '__timestamp__';
 
 const getUnmanagedDatasetSettings = (
   settings: DataSetWithName['settings'] | undefined
