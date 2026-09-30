@@ -60,6 +60,11 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
         '--csp.warnLegacyBrowsers=false',
         // For testing Import flyout with Endpoint artifacts
         '--xpack.securitySolution.enableExperimental=["endpointExceptionsMovedUnderManagement"]',
+        // FTR functional suites disable animations via `uiSettings.defaults`, but the Cypress
+        // runner boots Kibana without applying this config's `uiSettings` section, so animations
+        // stay enabled and EUI transitions (e.g. the flyout slide-in) move elements mid-test,
+        // breaking hover interactions. Enforce the setting at the server level instead.
+        '--uiSettings.overrides.accessibility:disableAnimations=true',
       ],
       runOptions: {
         wait: FLEET_PLUGIN_READY_LOG_MESSAGE_REGEXP,
