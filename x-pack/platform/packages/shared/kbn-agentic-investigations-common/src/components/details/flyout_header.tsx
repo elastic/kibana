@@ -64,7 +64,11 @@ export const ConversationDetailsFlyoutHeader = ({
         </EuiFlexItem>
       </EuiFlexGroup>
       <EuiSpacer size="m" />
-      <ConversationHeaderBlocks status={investigation.status} assigneesNode={assigneesNode} />
+      <ConversationHeaderBlocks
+        status={investigation.status}
+        statusNode={statusNode}
+        assigneesNode={assigneesNode}
+      />
     </>
   );
 };

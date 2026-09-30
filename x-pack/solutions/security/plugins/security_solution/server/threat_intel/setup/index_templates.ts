@@ -98,6 +98,11 @@ const threatReportsTemplate = {
             },
             body_text_bm25: { type: 'text' as const },
             language: { type: 'keyword' as const },
+            // Linked article URL when the source provides one (RSS link, etc.).
+            article_url: {
+              type: 'keyword' as const,
+              ignore_above: FEED_TEXT_IGNORE_ABOVE,
+            },
           },
         },
         severity: {
@@ -137,6 +142,9 @@ const threatReportsTemplate = {
                 // Index of the Maltrail block this IOC belongs to (v19). Used by the sync task
                 // to associate each IOC with its source reference URL.
                 block_index: { type: 'integer' as const },
+                // Semantic review did not run (batch/overflow budget). Heuristic tier is kept
+                // for debugging; promote_threat_indicators skips these so they never go live.
+                deferred_unreviewed: { type: 'boolean' as const },
               },
             },
             ioc_set_hash: { type: 'keyword' as const },
@@ -162,6 +170,14 @@ const threatReportsTemplate = {
                 telemetry_targets: { type: 'keyword' as const },
                 llm_confidence: { type: 'float' as const },
                 confidence: { type: 'float' as const },
+              },
+            },
+            artifacts: {
+              type: 'nested' as const,
+              properties: {
+                type: { type: 'keyword' as const },
+                value: { type: 'keyword' as const, ignore_above: FEED_TEXT_IGNORE_ABOVE },
+                context: { type: 'text' as const, index: false },
               },
             },
             threat_actors: { type: 'keyword' as const },
@@ -222,6 +238,31 @@ const threatReportsTemplate = {
                 extraction_mode: { type: 'keyword' as const },
                 // Whether extract_diamond considered this report suitable (observability).
                 suitable: { type: 'boolean' as const },
+                context_mode: { type: 'keyword' as const },
+                context_coverage: { type: 'float' as const },
+                context_chars: { type: 'integer' as const },
+                source_chars: { type: 'integer' as const },
+              },
+            },
+            core: {
+              properties: {
+                model_id: { type: 'keyword' as const },
+                context_mode: { type: 'keyword' as const },
+                context_coverage: { type: 'float' as const },
+                context_chars: { type: 'integer' as const },
+                source_chars: { type: 'integer' as const },
+                // Coverage for semantic IOC review: deferred candidates kept a
+                // heuristic tier and were never model-judged.
+                adjudication: {
+                  properties: {
+                    provider: { type: 'keyword' as const },
+                    reviewed: { type: 'integer' as const },
+                    approved: { type: 'integer' as const },
+                    downgraded: { type: 'integer' as const },
+                    deterministic_references: { type: 'integer' as const },
+                    deferred_unreviewed: { type: 'integer' as const },
+                  },
+                },
               },
             },
             // assess_relevance gate verdict — persisted on every enrichment run.
@@ -234,6 +275,8 @@ const threatReportsTemplate = {
                 has_original_commentary: { type: 'boolean' as const },
                 reason: { type: 'text' as const, index: false },
                 assessed_at: { type: 'date' as const },
+                context_mode: { type: 'keyword' as const },
+                context_coverage: { type: 'float' as const },
               },
             },
             // Structured vulnerability fields from the kev adapter (keyword/date, aggregatable).
@@ -881,6 +924,147 @@ const migrateExistingContentScrubbedMapping = async (
  * indices before `index.hidden` was set still expose them to index patterns and
  * `*` searches. Settings updates are cheap and idempotent.
  */
+
+/** Consolidated core artifacts and context metadata for enrichment pipeline upgrades. */
+const migrateExistingCoreEnrichmentMappings = async (
+  esClient: ElasticsearchClient,
+  reportIndices: readonly string[],
+  logger: Logger
+): Promise<void> => {
+  const log = logger.get('core-enrichment-mapping-migration');
+
+  for (const indexName of reportIndices) {
+    try {
+      const { [indexName]: indexMappings } = await esClient.indices.getMapping({
+        index: indexName,
+      });
+      const contentProps = (
+        (
+          indexMappings?.mappings?.properties as
+            | Record<string, { properties?: Record<string, unknown> }>
+            | undefined
+        )?.content as { properties?: Record<string, unknown> } | undefined
+      )?.properties;
+      const extractedProps = (
+        (
+          indexMappings?.mappings?.properties as
+            | Record<string, { properties?: Record<string, unknown> }>
+            | undefined
+        )?.extracted as { properties?: Record<string, unknown> } | undefined
+      )?.properties;
+      const coreProps = (
+        extractedProps?.core as { properties?: Record<string, unknown> } | undefined
+      )?.properties;
+      const diamondProps = (
+        extractedProps?.diamond as { properties?: Record<string, unknown> } | undefined
+      )?.properties;
+      const gateProps = (
+        extractedProps?.gate as { properties?: Record<string, unknown> } | undefined
+      )?.properties;
+
+      const adjudicationProps = (
+        coreProps?.adjudication as { properties?: Record<string, unknown> } | undefined
+      )?.properties;
+      const iocProps = (
+        extractedProps?.iocs as { properties?: Record<string, unknown> } | undefined
+      )?.properties;
+
+      const needsMigration = !(
+        contentProps?.article_url &&
+        extractedProps?.artifacts &&
+        iocProps?.deferred_unreviewed &&
+        coreProps?.model_id &&
+        coreProps?.context_mode &&
+        coreProps?.context_coverage &&
+        coreProps?.context_chars &&
+        coreProps?.source_chars &&
+        adjudicationProps?.provider &&
+        adjudicationProps?.reviewed &&
+        adjudicationProps?.approved &&
+        adjudicationProps?.downgraded &&
+        adjudicationProps?.deterministic_references &&
+        adjudicationProps?.deferred_unreviewed &&
+        diamondProps?.context_mode &&
+        diamondProps?.context_coverage &&
+        diamondProps?.context_chars &&
+        diamondProps?.source_chars &&
+        gateProps?.context_mode &&
+        gateProps?.context_coverage
+      );
+
+      if (needsMigration) {
+        await esClient.indices.putMapping({
+          index: indexName,
+          properties: {
+            content: {
+              properties: {
+                article_url: { type: 'keyword', ignore_above: FEED_TEXT_IGNORE_ABOVE },
+              },
+            },
+            extracted: {
+              properties: {
+                artifacts: {
+                  type: 'nested',
+                  properties: {
+                    type: { type: 'keyword' },
+                    value: { type: 'keyword', ignore_above: FEED_TEXT_IGNORE_ABOVE },
+                    context: { type: 'text', index: false },
+                  },
+                },
+                iocs: {
+                  properties: {
+                    deferred_unreviewed: { type: 'boolean' },
+                  },
+                },
+                core: {
+                  properties: {
+                    model_id: { type: 'keyword' },
+                    context_mode: { type: 'keyword' },
+                    context_coverage: { type: 'float' },
+                    context_chars: { type: 'integer' },
+                    source_chars: { type: 'integer' },
+                    adjudication: {
+                      properties: {
+                        provider: { type: 'keyword' },
+                        reviewed: { type: 'integer' },
+                        approved: { type: 'integer' },
+                        downgraded: { type: 'integer' },
+                        deterministic_references: { type: 'integer' },
+                        deferred_unreviewed: { type: 'integer' },
+                      },
+                    },
+                  },
+                },
+                diamond: {
+                  properties: {
+                    context_mode: { type: 'keyword' },
+                    context_coverage: { type: 'float' },
+                    context_chars: { type: 'integer' },
+                    source_chars: { type: 'integer' },
+                  },
+                },
+                gate: {
+                  properties: {
+                    context_mode: { type: 'keyword' },
+                    context_coverage: { type: 'float' },
+                  },
+                },
+              },
+            },
+          },
+        });
+        log.info(`Migrated consolidated core mappings on ${indexName}`);
+      }
+    } catch (err) {
+      log.error(
+        `Failed to migrate consolidated core mappings on ${indexName}: ${
+          err instanceof Error ? err.message : String(err)
+        }. Core enrichment writes will fail until the mapping is updated.`
+      );
+    }
+  }
+};
+
 const migrateExistingIndicesToHidden = async (
   esClient: ElasticsearchClient,
   reportIndices: readonly string[],
@@ -1390,11 +1574,32 @@ interface RequiredMapping {
 }
 
 const REQUIRED_REPORT_FIELDS: readonly RequiredMapping[] = [
+  { path: 'content.article_url', ignoreAbove: FEED_TEXT_IGNORE_ABOVE },
+  { path: 'extracted.artifacts' },
+  { path: 'extracted.core.model_id' },
+  { path: 'extracted.core.context_mode' },
+  { path: 'extracted.core.context_coverage' },
+  { path: 'extracted.core.context_chars' },
+  { path: 'extracted.core.source_chars' },
+  { path: 'extracted.core.adjudication' },
+  { path: 'extracted.core.adjudication.provider' },
+  { path: 'extracted.core.adjudication.reviewed' },
+  { path: 'extracted.core.adjudication.approved' },
+  { path: 'extracted.core.adjudication.downgraded' },
+  { path: 'extracted.core.adjudication.deterministic_references' },
+  { path: 'extracted.core.adjudication.deferred_unreviewed' },
   { path: 'extracted.diamond' },
+  { path: 'extracted.diamond.context_mode' },
+  { path: 'extracted.diamond.context_coverage' },
+  { path: 'extracted.diamond.context_chars' },
+  { path: 'extracted.diamond.source_chars' },
   { path: 'extracted.gate' },
+  { path: 'extracted.gate.context_mode' },
+  { path: 'extracted.gate.context_coverage' },
   { path: 'extracted.vulnerability' },
   { path: 'extracted.iocs.tier' },
   { path: 'extracted.iocs.port' },
+  { path: 'extracted.iocs.deferred_unreviewed' },
   // v19 writes `reference` and `block_index` (Maltrail chunking) in one putMapping, so
   // this leaf is checked on its own: a failed v19 followed by a successful v26
   // keyword-bounds putMapping re-adds `reference` but not `block_index`, so verifying
@@ -1616,6 +1821,7 @@ export const installIndexTemplates = async ({
   await migrateExistingVulnerabilityMappings(esClient, reportIndices, log);
   await backfillKevRankScore(esClient, reportIndices, log);
   await migrateExistingContentScrubbedMapping(esClient, reportIndices, log);
+  await migrateExistingCoreEnrichmentMappings(esClient, reportIndices, log);
   await migrateExistingIndicesToHidden(esClient, reportIndices, log);
 
   // Fails the install (and therefore bootstrap readiness) when a migration left the

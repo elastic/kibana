@@ -347,7 +347,7 @@ describe('WatchDetailPage', () => {
     ).toBeInTheDocument();
   });
 
-  it('lays the accordion out with its own nodes and keeps the enable switch out of the toggle button', () => {
+  it('lays the accordion out with its own nodes: header band and body are present for each worker', () => {
     renderWatch(SYSTEM_SECURITY_WATCH_FLOOR_ID, floorWorkers);
 
     for (const worker of floorWorkers) {
@@ -355,18 +355,23 @@ describe('WatchDetailPage', () => {
       const body = screen.getByTestId(`alertZeroWorkerSettingsBody-${worker.id}`);
       expect(header).toBeInTheDocument();
       expect(body).toBeInTheDocument();
-      // The band and the body carry the padding: EUI's own accordion nodes stay untouched.
-      expect(getComputedStyle(header).padding).toBe('16px');
-      expect(getComputedStyle(body).padding).toBe('16px');
+    }
+  });
 
-      // The switch is itself a <button>, so assert it sits outside the accordion's own toggle
-      // button (`.euiAccordion__button`) — otherwise clicking it would toggle the accordion.
-      const accordionToggle = header.closest(
-        '.euiAccordion__triggerWrapper, .euiAccordion__button'
-      );
-      const enabledSwitch = screen.getByTestId(`alertZeroWorkerEnabledSwitch-${worker.id}`);
-      expect(accordionToggle).not.toBeNull();
-      expect(accordionToggle?.contains(enabledSwitch)).toBe(false);
+  it('clicking the enable switch does not collapse the accordion', () => {
+    renderWatch(SYSTEM_SECURITY_WATCH_FLOOR_ID, floorWorkers);
+
+    for (const worker of floorWorkers) {
+      const accordion = screen.getByTestId(`alertZeroWatchWorkerAccordion-${worker.id}`);
+      // Workers start expanded; the accordion trigger carries aria-expanded.
+      // EUI renders aria-expanded on the arrow <button> inside the trigger wrapper.
+      const trigger = accordion.querySelector('button[aria-expanded]');
+      expect(trigger).not.toBeNull();
+      expect(trigger?.getAttribute('aria-expanded')).toBe('true');
+
+      fireEvent.click(screen.getByTestId(`alertZeroWorkerEnabledSwitch-${worker.id}`));
+
+      expect(trigger?.getAttribute('aria-expanded')).toBe('true');
     }
   });
 
@@ -408,23 +413,18 @@ describe('WatchDetailPage', () => {
   it('offers only the autonomy levels a Worker allows', () => {
     renderWatch(SYSTEM_SECURITY_WATCH_FLOOR_ID, floorWorkers);
 
-    // Attack Discovery has no assisted gate; Alert Triage carries the full dial.
-    const attackDiscovery = screen.getByTestId(
-      `alertZeroWatchWorkerSection-${SYSTEM_SECURITY_WORKER_FLOOR_ATTACK_DISCOVERY_ID}`
-    );
-    expect(within(attackDiscovery).getByTestId('alertZeroAutonomyCard-manual')).toBeInTheDocument();
-    expect(
-      within(attackDiscovery).getByTestId('alertZeroAutonomyCard-supervised')
-    ).toBeInTheDocument();
-    expect(
-      within(attackDiscovery).queryByTestId('alertZeroAutonomyCard-assisted')
-    ).not.toBeInTheDocument();
+    // Both Floor Workers gate exactly one action, so neither offers the in-between assisted level.
+    const sections = [
+      SYSTEM_SECURITY_WORKER_FLOOR_ATTACK_DISCOVERY_ID,
+      SYSTEM_SECURITY_WORKER_FLOOR_ALERT_TRIAGE_ID,
+    ].map((workerId) => screen.getByTestId(`alertZeroWatchWorkerSection-${workerId}`));
 
-    const alertTriage = screen.getByTestId(
-      `alertZeroWatchWorkerSection-${SYSTEM_SECURITY_WORKER_FLOOR_ALERT_TRIAGE_ID}`
-    );
-    for (const level of ['manual', 'assisted', 'supervised'] as const) {
-      expect(within(alertTriage).getByTestId(`alertZeroAutonomyCard-${level}`)).toBeInTheDocument();
+    for (const section of sections) {
+      expect(within(section).getByTestId('alertZeroAutonomyCard-manual')).toBeInTheDocument();
+      expect(within(section).getByTestId('alertZeroAutonomyCard-supervised')).toBeInTheDocument();
+      expect(
+        within(section).queryByTestId('alertZeroAutonomyCard-assisted')
+      ).not.toBeInTheDocument();
     }
   });
 

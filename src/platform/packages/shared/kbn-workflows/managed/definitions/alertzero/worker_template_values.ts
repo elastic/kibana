@@ -116,3 +116,18 @@ export const renderHuntWorkerYaml = (yaml: string, values: HuntWorkerTemplateVal
     .replaceAll('__WORKER_FAN_OUT_MAX__', String(HUNT_WORKER_DEFAULTS.fanOutMax))
     .replaceAll('__WORKER_TECHNOLOGY__', JSON.stringify(HUNT_WORKER_DEFAULTS.technology ?? ''));
 };
+
+export interface AlertTriageWorkerTemplateValues extends CommonWorkerTemplateValues {
+  extras: {
+    autoCloseConfidenceScoreMinThreshold: number;
+  };
+}
+
+export const renderAlertTriageWorkerYaml = (
+  yaml: string,
+  values: AlertTriageWorkerTemplateValues
+): string =>
+  renderCommonWorkerYaml(yaml, values).replaceAll(
+    '__WORKER_AUTO_CLOSE_CONFIDENCE_MIN_THRESHOLD__',
+    String(values.extras.autoCloseConfidenceScoreMinThreshold)
+  );

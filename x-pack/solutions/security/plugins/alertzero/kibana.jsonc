@@ -11,7 +11,7 @@
     "server": true,
     "configPath": ["xpack", "alertzero"],
     "requiredPlugins": ["agentBuilder", "agenticInvestigations", "features", "proposals", "workflowsExtensions", "workflowsManagement"],
-    "optionalPlugins": ["inference", "searchInferenceEndpoints", "spaces", "share", "fleet"],
+    "optionalPlugins": ["inference", "searchInferenceEndpoints", "security", "spaces", "share", "fleet"],
     "requiredBundles": ["kibanaReact"]
   }
 }
