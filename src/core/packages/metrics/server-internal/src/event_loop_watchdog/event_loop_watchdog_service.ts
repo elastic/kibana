@@ -13,6 +13,7 @@ import type { Logger } from '@kbn/logging';
 import type { CoreContext } from '@kbn/core-base-server-internal';
 import type { InternalExecutionContextSetup } from '@kbn/core-execution-context-server-internal';
 import type { FeatureFlagsStart } from '@kbn/core-feature-flags-server';
+import type { InternalThreadsStart } from '@kbn/core-threads-server-internal';
 import { OPS_CONFIG_PATH, type OpsConfigType } from '../ops_config';
 import { ActivityRegistry } from './activity_registry';
 import { EventLoopWatchdog } from './event_loop_watchdog';
@@ -29,6 +30,7 @@ export interface EventLoopWatchdogSetupDeps {
 }
 
 export interface EventLoopWatchdogStartDeps {
+  threads: InternalThreadsStart;
   featureFlags: FeatureFlagsStart;
 }
 
@@ -129,7 +131,7 @@ export class EventLoopWatchdogService {
     executionContext.registerActivityObserver(this.registry.observe);
   }
 
-  public async start({ featureFlags }: EventLoopWatchdogStartDeps): Promise<void> {
+  public async start({ featureFlags, threads }: EventLoopWatchdogStartDeps): Promise<void> {
     const { configService } = this.coreContext;
     const [opsConfig, loggingConfig] = await Promise.all([
       firstValueFrom(configService.atPath<OpsConfigType>(OPS_CONFIG_PATH)),
@@ -137,6 +139,7 @@ export class EventLoopWatchdogService {
     ]);
 
     const watchdog = new EventLoopWatchdog({
+      threads,
       logger: this.logger,
       loggerName: LOGGER_CONTEXT.join('.'),
       options: toWatchdogOptions(opsConfig),

@@ -8,6 +8,7 @@
  */
 
 import { BehaviorSubject } from 'rxjs';
+import type { InternalThreadsStart } from '@kbn/core-threads-server-internal';
 import moment from 'moment';
 import { mockCoreContext } from '@kbn/core-base-server-mocks';
 import { executionContextServiceMock } from '@kbn/core-execution-context-server-mocks';
@@ -27,9 +28,11 @@ describe('EventLoopWatchdogService', () => {
   let flag$: BehaviorSubject<boolean>;
   let featureFlags: ReturnType<typeof coreFeatureFlagsMock.createStart>;
   let service: EventLoopWatchdogService;
+  let threads: InternalThreadsStart;
 
   beforeEach(() => {
     jest.clearAllMocks();
+    threads = { createWorker: jest.fn() };
     const coreContext = mockCoreContext.create();
     const ops = opsConfig.schema.validate({});
     coreContext.configService.atPath.mockImplementation((path) =>
@@ -48,12 +51,13 @@ describe('EventLoopWatchdogService', () => {
   });
 
   it('follows the feature flag, defaulting to disabled', async () => {
-    await service.start({ featureFlags });
+    await service.start({ featureFlags, threads });
     expect(featureFlags.getBooleanValue$).toHaveBeenCalledWith(
       EVENT_LOOP_WATCHDOG_FEATURE_FLAG,
       false
     );
     expect(MockEventLoopWatchdog).toHaveBeenCalledTimes(1);
+    expect(MockEventLoopWatchdog).toHaveBeenCalledWith(expect.objectContaining({ threads }));
     await flush();
     expect(mockWatchdog.start).not.toHaveBeenCalled();
 
@@ -73,7 +77,7 @@ describe('EventLoopWatchdogService', () => {
   });
 
   it('stops the watchdog and the subscription on stop', async () => {
-    await service.start({ featureFlags });
+    await service.start({ featureFlags, threads });
     await service.stop();
     const stops = mockWatchdog.stop.mock.calls.length;
     flag$.next(true);

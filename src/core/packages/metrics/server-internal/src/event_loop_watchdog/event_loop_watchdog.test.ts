@@ -9,6 +9,7 @@
 
 import { loggerMock, type MockedLogger } from '@kbn/logging-mocks';
 import { MockWorker } from './event_loop_watchdog.test.mocks';
+import { ThreadsService } from '@kbn/core-threads-server-internal';
 import { ActivityRegistry } from './activity_registry';
 import { EventLoopWatchdog, MAX_RESTARTS, RESTART_BASE_DELAY_MS } from './event_loop_watchdog';
 import type { BlockReport, WatchdogOptions } from './types';
@@ -41,6 +42,7 @@ describe('EventLoopWatchdog', () => {
     logger = loggerMock.create();
     registry = new ActivityRegistry();
     watchdog = new EventLoopWatchdog({
+      threads: new ThreadsService().start(),
       logger,
       loggerName: 'metrics.event_loop_watchdog',
       options,

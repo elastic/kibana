@@ -19,6 +19,7 @@ import type { ILoggingSystem } from '@kbn/core-logging-server-internal';
 import { LoggingService } from '@kbn/core-logging-server-internal';
 import { ensureValidConfiguration } from '@kbn/core-config-server-internal';
 import { NodeService } from '@kbn/core-node-server-internal';
+import { ThreadsService } from '@kbn/core-threads-server-internal';
 import { AnalyticsService } from '@kbn/core-analytics-server-internal';
 import { EnvironmentService } from '@kbn/core-environment-server-internal';
 import { ExecutionContextService } from '@kbn/core-execution-context-server-internal';
@@ -98,6 +99,7 @@ export class Server {
   private readonly uiSettings: UiSettingsService;
   private readonly environment: EnvironmentService;
   private readonly node: NodeService;
+  private readonly threads: ThreadsService;
   private readonly metrics: MetricsService;
   private readonly eventLoopWatchdog: EventLoopWatchdogService;
   private readonly httpRateLimiter: HttpRateLimiterService;
@@ -164,6 +166,7 @@ export class Server {
     this.capabilities = new CapabilitiesService(core);
     this.environment = new EnvironmentService(core);
     this.node = new NodeService(core);
+    this.threads = new ThreadsService();
     this.metrics = new MetricsService(core);
     this.eventLoopWatchdog = new EventLoopWatchdogService(core);
     this.status = new StatusService(core);
@@ -658,7 +661,10 @@ export class Server {
     });
 
     const featureFlagsStart = this.featureFlags.start();
-    await this.eventLoopWatchdog.start({ featureFlags: featureFlagsStart });
+    await this.eventLoopWatchdog.start({
+      featureFlags: featureFlagsStart,
+      threads: this.threads.start(),
+    });
 
     const pricingStart = this.pricing.start();
 

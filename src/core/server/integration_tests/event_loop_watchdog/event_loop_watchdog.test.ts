@@ -14,6 +14,7 @@ import { execSync } from 'node:child_process';
 import { pbkdf2Sync } from 'node:crypto';
 import { setTimeout as sleep } from 'node:timers/promises';
 import { REPO_ROOT } from '@kbn/repo-info';
+import { ThreadsService } from '@kbn/core-threads-server-internal';
 import { loggerMock, type MockedLogger } from '@kbn/logging-mocks';
 import { EventLoopWatchdog } from '@kbn/core-metrics-server-internal/src/event_loop_watchdog/event_loop_watchdog';
 import { ActivityRegistry } from '@kbn/core-metrics-server-internal/src/event_loop_watchdog/activity_registry';
@@ -80,6 +81,7 @@ describe('EventLoopWatchdog (real worker)', () => {
 
   const startWatchdog = async (options: Partial<WatchdogOptions> = {}) => {
     watchdog = new EventLoopWatchdog({
+      threads: new ThreadsService().start(),
       logger,
       loggerName: 'metrics.event_loop_watchdog',
       options: { ...baseOptions, ...options },

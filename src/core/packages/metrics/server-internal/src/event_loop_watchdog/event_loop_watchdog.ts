@@ -8,7 +8,8 @@
  */
 
 import Path from 'node:path';
-import { Worker } from 'node:worker_threads';
+import type { Worker } from 'node:worker_threads';
+import type { InternalThreadsStart } from '@kbn/core-threads-server-internal';
 import type { Logger, LogMeta } from '@kbn/logging';
 import type { ActivityRegistry } from './activity_registry';
 import { formatReportMessage } from './format';
@@ -32,6 +33,7 @@ interface WatchdogLogMeta extends LogMeta {
 }
 
 export interface EventLoopWatchdogParams {
+  threads: InternalThreadsStart;
   logger: Logger;
   /** Logger context written in worker-emitted lines, e.g. `metrics.event_loop_watchdog`. */
   loggerName: string;
@@ -141,7 +143,7 @@ export class EventLoopWatchdog {
       sanitizeRoot,
     };
 
-    const worker = new Worker(workerEntry ?? WORKER_ENTRY, {
+    const worker = this.params.threads.createWorker(workerEntry ?? WORKER_ENTRY, {
       workerData,
       name: 'kibana-event-loop-watchdog',
       resourceLimits: { maxOldGenerationSizeMb: 64, maxYoungGenerationSizeMb: 16 },
