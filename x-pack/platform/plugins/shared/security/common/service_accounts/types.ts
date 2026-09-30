@@ -35,10 +35,8 @@ export interface ServiceAccountDirectoryEntry {
    * account at all, so everything Kibana can see is assumable. On Elasticsearch it is Kibana
    * holding the token it minted, which an account created outside Kibana never had.
    *
-   * The Elasticsearch token exchange is still landing
-   * (https://github.com/elastic/kibana/issues/284466). Until it does, `true` there means the
-   * account is ready to be assumed rather than that assuming it works today. Binding a workload
-   * asks for more again, so treat this as the account's half of that answer and not the whole.
+   * Binding and execution also require a valid workload binding and a credential that can be
+   * exchanged successfully; this directory field alone does not guarantee execution will succeed.
    *
    * Reading one account confirms the answer against Elasticsearch. Listing them does not, so a
    * listed account deleted and recreated outside Kibana keeps a stale `true` until it is opened,

@@ -1,5 +1,5 @@
 {
-  "sha1": "f3d41557efeea824bc7f37158f7ce7d5cbce2f30",
+  "sha1": "b8b0bc91cc93a2a814e94535e1548a3455bbab23",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -14,7 +14,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agentic_investigations/test/scout_agentic_investigations/api/tests/escalations/access_control.spec.ts",
-        "line": 107,
+        "line": 136,
         "column": 10
       }
     },
@@ -28,13 +28,13 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agentic_investigations/test/scout_agentic_investigations/api/tests/escalations/access_control.spec.ts",
-        "line": 122,
+        "line": 151,
         "column": 7
       }
     },
     {
-      "id": "d7094cddc0c6f94-5c58b0d8e5bb2ed",
-      "title": "Escalation access control — private escalations and collaborators PATCH from a collaborator returns 404 — current limitation: only owner can mutate (tracked in follow-up)",
+      "id": "d7094cddc0c6f94-a1846c3e5b72580",
+      "title": "Escalation access control — private escalations and collaborators PATCH title from a collaborator returns 404 — title update requires owner access",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -42,7 +42,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agentic_investigations/test/scout_agentic_investigations/api/tests/escalations/access_control.spec.ts",
-        "line": 133,
+        "line": 162,
         "column": 30
       }
     },
@@ -299,8 +299,8 @@
       }
     },
     {
-      "id": "5af0373339972fa-c376f456e27cca0",
-      "title": "GET /internal/investigations/escalations — list escalations viewer (escalations_read via includeIn: read) can list escalations",
+      "id": "5af0373339972fa-311310053946bbf",
+      "title": "GET /internal/investigations/escalations — list escalations viewer (escalations_read) can list escalations",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -322,8 +322,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agentic_investigations/test/scout_agentic_investigations/api/tests/escalations/list.spec.ts",
-        "line": 212,
-        "column": 18
+        "line": 211,
+        "column": 24
       }
     },
     {
@@ -336,7 +336,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agentic_investigations/test/scout_agentic_investigations/api/tests/escalations/list.spec.ts",
-        "line": 222,
+        "line": 219,
         "column": 7
       }
     },

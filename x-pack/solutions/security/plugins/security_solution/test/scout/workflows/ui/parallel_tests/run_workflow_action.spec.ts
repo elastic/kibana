@@ -98,7 +98,7 @@ spaceTest.describe.skip('Run workflow alert action', { tag: [...tags.stateful.cl
 
         // Assert the "View workflow execution" link button is present in the toast
         const viewExecutionButton = page
-          .locator(euiSelectors.toast.TOAST_SELECTOR)
+          .locator(euiSelectors.globalToastList.TOAST_SELECTOR)
           .getByRole('button', { name: 'View workflow execution' });
         await expect(viewExecutionButton).toBeVisible();
 

@@ -11,6 +11,13 @@ import { TEMPLATE_ID_INVESTIGATION } from '@kbn/alertzero-common';
 import type { RouteDependencies } from '../register_routes';
 import { registerGetInvestigationsCountRoute } from './get_investigations_count';
 
+/** Context stub that satisfies `withAlertZeroEnabled` — setting returns `true` so the route proceeds. */
+const makeContext = () => ({
+  core: Promise.resolve({
+    uiSettings: { client: { get: jest.fn().mockResolvedValue(true) } },
+  }),
+});
+
 const makeDeps = (listFn: jest.Mock) => {
   const addVersion = jest.fn();
   const router = {
@@ -53,7 +60,7 @@ describe('registerGetInvestigationsCountRoute', () => {
     const response = httpServerMock.createResponseFactory();
     const request = httpServerMock.createKibanaRequest();
 
-    await handler({}, request, response);
+    await handler(makeContext(), request, response);
 
     expect(conversations.getScopedClient).toHaveBeenCalledWith({ request });
     expect(list).toHaveBeenCalledWith({
@@ -67,7 +74,7 @@ describe('registerGetInvestigationsCountRoute', () => {
     const { handler } = makeDeps(list);
     const response = httpServerMock.createResponseFactory();
 
-    await handler({}, httpServerMock.createKibanaRequest(), response);
+    await handler(makeContext(), httpServerMock.createKibanaRequest(), response);
 
     expect(response.ok).toHaveBeenCalledWith({ body: { total: 7 } });
   });
@@ -77,7 +84,7 @@ describe('registerGetInvestigationsCountRoute', () => {
     const { handler, logger } = makeDeps(list);
     const response = httpServerMock.createResponseFactory();
 
-    await handler({}, httpServerMock.createKibanaRequest(), response);
+    await handler(makeContext(), httpServerMock.createKibanaRequest(), response);
 
     expect(logger.error).toHaveBeenCalledWith(expect.stringContaining('Failed to count'));
     expect(response.customError).toHaveBeenCalledWith({

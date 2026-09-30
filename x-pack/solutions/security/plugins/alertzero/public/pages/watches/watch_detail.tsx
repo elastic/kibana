@@ -10,6 +10,7 @@ import { css } from '@emotion/react';
 import {
   EuiButton,
   EuiButtonEmpty,
+  EuiCallOut,
   EuiEmptyPrompt,
   EuiFlexGroup,
   EuiFlexItem,
@@ -20,9 +21,11 @@ import {
 import { useHistory, useParams } from 'react-router-dom';
 import { isHttpFetchError } from '@kbn/core-http-browser';
 import { useAlertZeroDocTitle } from '../../hooks/use_alertzero_doc_title';
+import { useCanWriteAlertZero } from '../../hooks/use_can_write_alertzero';
 import { useWatchSettingsDraft } from '../../hooks/use_watch_settings_draft';
 import { useWatch } from '../../hooks/use_watches_api';
 import { useWorkers } from '../../hooks/use_workers_api';
+import { SettingsSection } from './components/settings_section';
 import { WatchesSectionLayout } from './components/watches_section_layout';
 import { WorkerSettingsPanel } from './components/worker_settings_panel';
 import * as i18n from './translations';
@@ -31,6 +34,7 @@ import * as settingsI18n from './settings_translations';
 export const WatchDetailPage: React.FC = () => {
   const history = useHistory();
   const { watchId } = useParams<{ watchId: string }>();
+  const canWrite = useCanWriteAlertZero();
   const { euiTheme } = useEuiTheme();
   const { data, isLoading, error, refetch } = useWatch(watchId);
   const {
@@ -107,11 +111,12 @@ export const WatchDetailPage: React.FC = () => {
       label: settingsI18n.SAVE_WATCH_SETTINGS,
       iconType: 'save' as const,
       isLoading: isSaving,
-      disableButton: !isDirty || isSaving || Boolean(workersError) || hasInvalidDraft,
+      disableButton: !canWrite || !isDirty || isSaving || Boolean(workersError) || hasInvalidDraft,
+      tooltipContent: !canWrite ? settingsI18n.READ_ONLY_TOOLTIP : undefined,
       testId: 'alertZeroWatchSettingsSave',
       run: onSave,
     }),
-    [isSaving, isDirty, workersError, hasInvalidDraft, onSave]
+    [canWrite, isSaving, isDirty, workersError, hasInvalidDraft, onSave]
   );
 
   const headerItems = useMemo(
@@ -121,12 +126,13 @@ export const WatchDetailPage: React.FC = () => {
         label: settingsI18n.DISCARD_WATCH_SETTINGS,
         iconType: 'cross' as const,
         // A flagged trigger amount is not part of the draft, so it can be the only thing to undo.
-        disableButton: (!isDirty && !hasInvalidDraft) || isSaving,
+        disableButton: !canWrite || (!isDirty && !hasInvalidDraft) || isSaving,
+        tooltipContent: !canWrite ? settingsI18n.READ_ONLY_TOOLTIP : undefined,
         testId: 'alertZeroWatchSettingsDiscard',
         run: onDiscard,
       },
     ],
-    [isDirty, isSaving, hasInvalidDraft, onDiscard]
+    [canWrite, isDirty, isSaving, hasInvalidDraft, onDiscard]
   );
   // Collapsed Workers (default: all expanded). Parameter-only navigation keeps this page mounted,
   // so the initializer runs only on the first Watch — reset whenever watchId changes.
@@ -259,6 +265,7 @@ export const WatchDetailPage: React.FC = () => {
                 error={draft.error}
                 settingsLocked={worker.state === 'unavailable'}
                 isSaving={isSaving}
+                canWrite={canWrite}
                 onEnabledChange={(enabled) => updateEnabled(worker, enabled)}
                 onSettingsChange={(patch) => updateSettings(worker, patch)}
                 onTriggerValidityChange={(isValid) =>
@@ -282,6 +289,19 @@ export const WatchDetailPage: React.FC = () => {
       headerItems={headerItems}
     >
       <EuiFlexGroup direction="column" gutterSize="l" responsive={false}>
+        {!canWrite ? (
+          <EuiFlexItem grow={false}>
+            <EuiCallOut
+              announceOnMount
+              size="s"
+              color="warning"
+              iconType="lock"
+              data-test-subj="alertZeroReadOnlyCallout"
+            >
+              {settingsI18n.READ_ONLY_CALLOUT_MESSAGE}
+            </EuiCallOut>
+          </EuiFlexItem>
+        ) : null}
         {saveBlockedByInvalidDraft || hasInvalidDraft ? (
           <EuiFlexItem grow={false}>
             <EuiText size="s" color="danger" data-test-subj="alertZeroWatchSettingsInvalid">
@@ -291,7 +311,13 @@ export const WatchDetailPage: React.FC = () => {
         ) : null}
 
         <EuiFlexItem grow={false}>
-          <div data-test-subj="alertZeroWatchWorkersSection">{renderWorkers()}</div>
+          <SettingsSection
+            title={settingsI18n.WORKERS_SECTION_TITLE}
+            subtitle={settingsI18n.WORKERS_SECTION_SUBTITLE}
+            data-test-subj="alertZeroWatchWorkersSection"
+          >
+            {renderWorkers()}
+          </SettingsSection>
         </EuiFlexItem>
       </EuiFlexGroup>
     </WatchesSectionLayout>

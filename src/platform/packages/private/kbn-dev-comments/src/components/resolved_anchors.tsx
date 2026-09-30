@@ -52,13 +52,14 @@ export const ResolvedAnchorsProvider = ({ children }: PropsWithChildren) => {
   );
 
   // Searches put off for being too frequent are made once their time has come, even on a page that went quiet.
+  // No dependencies: a timer kept for a given `retryAt` is lost for good when the render it wakes finds the wait a moment short of over.
   useEffect(() => {
     if (retryAt === undefined) {
       return;
     }
     const timer = setTimeout(retry, Math.max(0, retryAt - Date.now()));
     return () => clearTimeout(timer);
-  }, [retryAt]);
+  });
 
   // After every render, so the watched set follows what resolved; the tracker only diffs.
   useEffect(() => {

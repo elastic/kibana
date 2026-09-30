@@ -51,6 +51,7 @@ steps:
         x-elastic-internal-origin: "kibana"
       body:
         connectorId: "${{ inputs.connectorId }}"
+        runId: "${{ execution.id }}"
         maxExistingQueriesForContext: "${{ inputs.maxExistingQueriesForContext }}"
     on-failure:
       retry:

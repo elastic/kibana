@@ -194,9 +194,9 @@ export class RulesAdapterV2 implements IRulesManagementClient {
     const definitionsById = new Map(
       [...rulesToCreate, ...knownConflicts].map(({ id, definition }) => [id, definition])
     );
-    const { rules: created, errors } =
+    const { items: created, errors } =
       rulesToCreate.length === 0
-        ? { rules: [], errors: [] }
+        ? { items: [], errors: [] }
         : await this.rulesClient.bulkCreateRules({
             rules: rulesToCreate.map(({ id, definition }) => ({
               ...toV2CreateBody({ definition, isServerless: this.isServerless }),
@@ -330,14 +330,11 @@ function toV2CommonBody({ definition, isServerless }: ToV2BodyParams) {
     },
     grouping: { fields: [...METRIC_SERIES_GROUPING_FIELDS] },
     query: {
-      format: 'standalone' as const,
-      breach: {
-        query: toV2BreachQuery({
-          esqlQuery: definition.esqlQuery,
-          timestampField: definition.timestampField,
-          isServerless,
-        }),
-      },
+      base: toV2BreachQuery({
+        esqlQuery: definition.esqlQuery,
+        timestampField: definition.timestampField,
+        isServerless,
+      }),
     },
   };
 }

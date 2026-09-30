@@ -17,7 +17,7 @@ import { z } from '@kbn/zod/v4';
 import { getStreamTypeFromDefinition, type StreamType } from '@kbn/streams-schema';
 import { baseFeatureSchema } from '@kbn/significant-events-schema';
 import dedent from 'dedent';
-import type { StreamsServer } from '@kbn/streams-plugin/server/types';
+import type { SignificantEventsServer } from '../../../types';
 import type { GetScopedClients } from '../../../routes/types';
 import { assertSignificantEventsAccess } from '../../../routes/utils/assert_significant_events_access';
 import type { EbtTelemetryClient } from '../../../lib/telemetry/ebt';
@@ -43,7 +43,7 @@ export function createFeatureKnowledgeIndicatorTool({
   telemetry,
 }: {
   getScopedClients: GetScopedClients;
-  server: StreamsServer;
+  server: SignificantEventsServer;
   logger: Logger;
   telemetry: EbtTelemetryClient;
 }): StaticToolRegistration<typeof createFeatureKISchema> {
