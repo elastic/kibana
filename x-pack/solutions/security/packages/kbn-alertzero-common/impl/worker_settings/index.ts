@@ -81,5 +81,6 @@ export {
   RULE_TUNING_DEFAULT_EXTRAS,
 } from './detection_watch';
 export { applyMissingWorkerSettingDefaults } from './apply_missing_defaults';
+export { ALERT_TRIAGE_DEFAULT_EXTRAS } from './floor_watch';
 export { migrateStoredTemplateValues, renameStoredField } from './migrate';
 export type { WorkerSettingsDeclaration, WorkerSettingsMigration } from './types';

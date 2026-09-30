@@ -8,6 +8,7 @@
 import {
   ALERT_DURATION,
   ALERT_END,
+  ALERT_FLAPPING,
   ALERT_GROUPING,
   ALERT_INSTANCE_ID,
   ALERT_RULE_CATEGORY,
@@ -55,6 +56,7 @@ export const CLASSIC_ALERT_EPISODE_SOURCE_FIELDS = [
   ALERT_WORKFLOW_STATUS,
   ALERT_WORKFLOW_TAGS,
   ALERT_GROUPING,
+  ALERT_FLAPPING,
 ] as const;
 
 /**
@@ -87,6 +89,7 @@ export interface ClassicAlertSource {
   [ALERT_WORKFLOW_STATUS]?: string;
   [ALERT_WORKFLOW_TAGS]?: string | string[];
   [ALERT_GROUPING]?: Record<string, unknown>;
+  [ALERT_FLAPPING]?: boolean;
 }
 
 export interface ClassicAlertActionContext {
@@ -169,6 +172,7 @@ export const mapClassicAlertToEpisode = (
     supports_timeline: false,
     source_action_context: actionContext,
     source_grouping: grouping ? flattenObject(grouping) : undefined,
+    is_flapping: source[ALERT_FLAPPING] ?? false,
   };
 };
 

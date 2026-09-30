@@ -288,7 +288,6 @@ export const useAiButtonGradientStyles = ({
 
     const buttonCss = css`
       background: ${buttonBackground} !important;
-      border-radius: ${euiTheme.border.radius.medium};
       color: ${labelColor} !important;
       ${borderGradient ? outlinedBorderGradientCss(borderGradient, euiTheme) : ''}
 

@@ -28,6 +28,7 @@ export {
   ALERTZERO_REASONING_INFERENCE_FEATURE_ID,
   ALERTZERO_ACTIONS_URL,
   ALERTZERO_INVESTIGATIONS_COUNT_URL,
+  ALERTZERO_SCAN_FAILURES_URL,
   ALERTZERO_ACTIONS_LIST_TOOL_ID,
   ALERTZERO_PROPOSALS_CATEGORY_URL,
   ALERTZERO_PROPOSALS_CLOSED_URL,
@@ -68,6 +69,8 @@ export {
   buildWorkerUrl,
 } from './constants';
 
+export type { ScanFailureWorker, ScanFailuresResponse } from './constants';
+
 export type {
   ActionApprovalPolicy,
   ActionCategory,
@@ -102,6 +105,8 @@ export {
   FpCountThreshold,
   FpRateThresholdPct,
   RuleTuningWorkerExtras,
+  AutoCloseConfidenceScoreMinThreshold,
+  AlertTriageWorkerExtras,
   Worker,
   WorkerRunState,
   WorkerScheduleInterval,
@@ -153,6 +158,7 @@ export type {
 } from './impl/watches/watch_helpers';
 
 export {
+  ALERT_TRIAGE_DEFAULT_EXTRAS,
   ANALYSIS_WINDOW_DAYS_DEFAULT,
   ANALYSIS_WINDOW_DAYS_MAX,
   ANALYSIS_WINDOW_DAYS_MIN,

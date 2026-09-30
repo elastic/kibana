@@ -6,7 +6,8 @@
  */
 
 import { z } from '@kbn/zod/v4';
-import { ALERT_TRIAGE_SETTINGS, ATTACK_DISCOVERY_SETTINGS } from './floor_watch';
+import { ATTACK_DISCOVERY_SETTINGS } from './floor_watch';
+import { CONTINUOUS_THREAT_HUNT_SETTINGS } from './hunt_watch';
 import { migrateStoredTemplateValues, renameStoredField } from './migrate';
 import type { WorkerSettingsDeclaration } from './types';
 
@@ -72,7 +73,7 @@ describe('migrateStoredTemplateValues', () => {
 
   it('drops a schedule interval from a worker that no longer declares one', () => {
     expect(
-      migrateStoredTemplateValues(ALERT_TRIAGE_SETTINGS, {
+      migrateStoredTemplateValues(CONTINUOUS_THREAT_HUNT_SETTINGS, {
         settingsVersion: 1,
         autonomyLevel: 'manual',
         scheduleInterval: '30m',

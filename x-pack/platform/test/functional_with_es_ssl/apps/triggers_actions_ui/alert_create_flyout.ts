@@ -601,8 +601,10 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       );
 
       await testSubjects.click('ESQLEditor-footerPopoverButton-warning');
-      const warningContent = await testSubjects.find('ESQLEditor-errors-warnings-content');
-      const warningContentText = await warningContent.getVisibleText();
+      await testSubjects.existOrFail('ESQLEditor-errors-warnings-content');
+      const warningContentText = await testSubjects.getVisibleText(
+        'ESQLEditor-errors-warnings-content'
+      );
 
       expect(warningContentText).contain('KEEP processing command is recommended');
 
