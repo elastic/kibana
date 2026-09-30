@@ -63,8 +63,6 @@ import { useTriggerInvestigation } from '../../../../hooks/use_trigger_investiga
 import { useBlocksNewActivity } from '../../../../hooks/use_significant_events_maintenance';
 import { DismissEventModal } from './dismiss_event_modal';
 
-export const DEFAULT_SIGNIFICANT_EVENT_SEVERITY_FILTER: Severity[] = ['critical', 'high'];
-
 const RUN_ARIA_LABEL = i18n.translate(
   'xpack.significantEventsApp.significantEventsTab.runInvestigationButton.ariaLabel',
   {

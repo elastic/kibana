@@ -175,7 +175,7 @@ describe('SignificantEventFlyout actions menu', () => {
     });
   });
 
-  it('shows Dismiss and Close for an open event and opens the dismiss modal', () => {
+  it('shows Dismiss and Close for an active event and opens the dismiss modal', () => {
     // Use mockReturnValue (not Once) so re-renders triggered by fireEvent keep the same value.
     lifecycleMock.mockReturnValue({
       data: { events: [event], detections: [] },
@@ -224,8 +224,8 @@ describe('selectedEvent deep link', () => {
   const defaultUrlState = {
     selectedEventId: event.event_id,
     openEventId: event.event_id,
-    statusFilter: ['open'],
-    severityFilter: ['80-critical', '60-high'],
+    statusFilter: ['active'],
+    severityFilter: ['critical', 'high'],
     streamFilter: [],
     setFilters: jest.fn(),
     resetFilters: jest.fn(),
@@ -359,7 +359,7 @@ describe('selectedEvent deep link', () => {
   });
 
   it('adapts status/severity/stream filters to the linked event once it resolves', () => {
-    // event is status:open, severity:40-medium, stream:logs.test
+    // event is status:active, severity:medium, stream:logs.test
     mockUseFetchSignificantEvents.mockReturnValue({
       ...emptyListResult,
       data: { hits: [event], total: 1 },
@@ -379,15 +379,15 @@ describe('selectedEvent deep link', () => {
       ...defaultUrlState,
       selectedEventId: undefined,
       openEventId: undefined,
-      statusFilter: ['closed'],
-      severityFilter: ['20-low'],
+      statusFilter: ['inactive'],
+      severityFilter: ['low'],
       streamFilter: ['logs.test'],
     });
 
     render(<SignificantEventsTab />);
 
-    expect(lastFetchArgs().status).toEqual(['closed']);
-    expect(lastFetchArgs().severity).toEqual(['20-low']);
+    expect(lastFetchArgs().status).toEqual(['inactive']);
+    expect(lastFetchArgs().severity).toEqual(['low']);
     expect(lastFetchArgs().stream).toEqual(['logs.test']);
     expect(screen.getByTestId('significantEventsAppSignificantEventsTabButton')).toBeEnabled();
   });
