@@ -40,15 +40,6 @@ export const getReopenInvestigationStepDefinition = ({
           return { output: { reopened: false, title: conv.title } };
         }
 
-        // Status writes need converse access but renames need ownership, so check
-        // up front rather than reopen and then fail on the title.
-        if (!conv.permissions.rename) {
-          throw new ExecutionError({
-            type: 'PermissionError',
-            message: `Not allowed to rename investigation ${input.conversationId}, so it cannot be reopened`,
-          });
-        }
-
         // Title before status: the investigation stays closed until the last write,
         // so a retry after any partial failure still takes this branch and reports
         // `reopened: true`, which is what keeps the caller from auto-approving.
@@ -56,6 +47,14 @@ export const getReopenInvestigationStepDefinition = ({
           ? conv.title
           : `${REOPEN_PREFIX}${conv.title}`;
         if (newTitle !== conv.title) {
+          // Status writes need converse access but renames need ownership, so check
+          // before either write rather than reopen and then fail on the title.
+          if (!conv.permissions.rename) {
+            throw new ExecutionError({
+              type: 'PermissionError',
+              message: `Not allowed to rename investigation ${input.conversationId}, so it cannot be reopened`,
+            });
+          }
           await client.update({ id: input.conversationId, title: newTitle });
         }
 

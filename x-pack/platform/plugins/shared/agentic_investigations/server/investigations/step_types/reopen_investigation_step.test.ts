@@ -140,6 +140,20 @@ describe('investigations.reopen step', () => {
     expect(setStatusMock).not.toHaveBeenCalled();
   });
 
+  it('should reopen an already-prefixed investigation without requiring rename permission', async () => {
+    const { definition, setStatusMock, updateMock } = makeDefinition({
+      status: 'closed',
+      title: '[Reopen] My Investigation',
+      rename: false,
+    });
+
+    const result = await definition.handler(createContext({ conversationId: 'conv-1' }));
+
+    expect(updateMock).not.toHaveBeenCalled();
+    expect(setStatusMock).toHaveBeenCalledWith(FAKE_REQUEST, 'conv-1', { status: 'open' });
+    expect(result.output).toEqual({ reopened: true, title: '[Reopen] My Investigation' });
+  });
+
   it('should leave the investigation closed when the rename fails', async () => {
     const { definition, setStatusMock } = makeDefinition(
       { status: 'closed', title: 'My Investigation' },
