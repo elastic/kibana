@@ -377,7 +377,16 @@ export const ListCommitsInputSchema = lazySchema(() =>
       .describe(
         'Optional file or directory path; only commits that changed this path are returned, e.g. "src/config.yml" or "src/".'
       ),
-    page: page(),
+    // Bitbucket's commits endpoint uses an opaque cursor embedded in `next`, not
+    // sequential page numbers - its own docs say to follow `next` rather than
+    // constructing page links. Accept the cursor back instead of a page number.
+    cursor: z
+      .string()
+      .max(2000)
+      .optional()
+      .describe(
+        "Opaque pagination cursor from a previous response's nextCursor. Omit to get the first page."
+      ),
     pageSize: pageSize(),
   })
 );
@@ -422,6 +431,19 @@ export const CreateCommitBuildStatusInputSchema = lazySchema(() =>
   })
 );
 export type CreateCommitBuildStatusInput = z.infer<typeof CreateCommitBuildStatusInputSchema>;
+
+export const ListCommitBuildStatusesInputSchema = lazySchema(() =>
+  z.object({
+    repoSlug: repoSlug(),
+    commit: commitHash(),
+    refname: branchName()
+      .optional()
+      .describe(
+        "Only return statuses created with this refname, or without one. Set it to a pull request's source branch to see only the statuses relevant to that pull request."
+      ),
+  })
+);
+export type ListCommitBuildStatusesInput = z.infer<typeof ListCommitBuildStatusesInputSchema>;
 
 // =============================================================================
 // Pipelines

@@ -55,8 +55,9 @@ Authentication
 | `getBranch` | Get a branch and its tip commit. Parameters: `repoSlug` (required), `name` (required). |
 | `deleteBranch` | Delete a branch. Parameters: `repoSlug` (required), `name` (required). |
 | `getCommit` | Get a commit's message, author, date, and parents. Parameters: `repoSlug` (required), `commit` (required). |
-| `listCommits` | List commits from a branch, tag, or commit, optionally limited to a path. Parameters: `repoSlug` (required), `revision`, `path`, `page`, `pageSize`. |
+| `listCommits` | List commits from a branch, tag, or commit, optionally limited to a path. Parameters: `repoSlug` (required), `revision`, `path`, `cursor`, `pageSize`. |
 | `createCommitBuildStatus` | Report a build status (`INPROGRESS`, `SUCCESSFUL`, `FAILED`, or `STOPPED`) on a commit. Parameters: `repoSlug` (required), `commit` (required), `state` (required), `key` (required), `url` (required), `name`, `description`, `refname`. |
+| `listCommitBuildStatuses` | List the build statuses reported on a commit, optionally filtered by refname. Parameters: `repoSlug` (required), `commit` (required), `refname`. |
 | `triggerPipeline` | Start a Bitbucket Pipelines run for a branch or commit. Parameters: `repoSlug` (required), at least one of `branch` or `commit`, `customPipeline`, `variables`. |
 | `getPipeline` | Get a pipeline run's state and result. Parameters: `repoSlug` (required), `pipelineUuid` (required). |
 | `stopPipeline` | Stop a pending or running pipeline. Parameters: `repoSlug` (required), `pipelineUuid` (required). |

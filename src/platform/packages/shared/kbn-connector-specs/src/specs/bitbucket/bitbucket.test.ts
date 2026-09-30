@@ -678,10 +678,11 @@ describe('Bitbucket', () => {
         parse('listCommits', { repoSlug: 'my-repo', revision: 'main', path: 'src/', pageSize: 20 })
       );
       expect(mockClient.get).toHaveBeenCalledWith(`${REPO_URL}/commits/main`, {
-        params: { path: 'src/', page: undefined, pagelen: 20 },
+        params: { path: 'src/', pagelen: 20 },
       });
       expect(result.values).toEqual([expect.objectContaining({ hash: 'abc1234' })]);
       expect(result.hasMore).toBe(false);
+      expect(result.nextCursor).toBeUndefined();
     });
 
     it('lists commits from the default branch when revision is omitted', async () => {
@@ -691,6 +692,39 @@ describe('Bitbucket', () => {
         parse('listCommits', { repoSlug: 'my-repo' })
       );
       expect(mockClient.get).toHaveBeenCalledWith(`${REPO_URL}/commits`, expect.anything());
+    });
+
+    it('exposes a nextCursor when Bitbucket returns a next link', async () => {
+      const nextUrl = `${REPO_URL}/commits?pagelen=1&ctx=abc&page=2`;
+      mockClient.get.mockResolvedValue({ data: { values: [commit], next: nextUrl } });
+      const result = await Bitbucket.actions.listCommits.handler(
+        mockContext,
+        parse('listCommits', { repoSlug: 'my-repo' })
+      );
+      expect(result.hasMore).toBe(true);
+      expect(result.nextCursor).toBe(nextUrl);
+    });
+
+    it('requests the cursor URL directly on the next page instead of rebuilding it', async () => {
+      const nextUrl = `${REPO_URL}/commits?pagelen=1&ctx=abc&page=2`;
+      mockClient.get.mockResolvedValue({ data: { values: [commit] } });
+      await Bitbucket.actions.listCommits.handler(
+        mockContext,
+        parse('listCommits', { repoSlug: 'my-repo', cursor: nextUrl })
+      );
+      expect(mockClient.get).toHaveBeenCalledWith(nextUrl);
+    });
+
+    it('rejects a cursor that is not a Bitbucket API URL', async () => {
+      await expect(
+        Bitbucket.actions.listCommits.handler(
+          mockContext,
+          parse('listCommits', { repoSlug: 'my-repo', cursor: 'https://evil.example/x' })
+        )
+      ).rejects.toThrow(
+        'cursor must be a nextCursor value returned by a previous listCommits call'
+      );
+      expect(mockClient.get).not.toHaveBeenCalled();
     });
 
     it('creates a build status on a commit', async () => {
@@ -733,6 +767,40 @@ describe('Bitbucket', () => {
           refname: 'fix/config-drift',
         })
       );
+    });
+
+    it('is classified as destroy because reposting a key overwrites the previous status', () => {
+      expect(Bitbucket.actions.createCommitBuildStatus.scope).toBe('destroy');
+    });
+
+    it('lists build statuses on a commit, optionally filtered by refname', async () => {
+      mockClient.get.mockResolvedValue({
+        data: {
+          values: [
+            {
+              key: 'KIBANA-CHECK',
+              state: 'SUCCESSFUL',
+              name: 'Policy check',
+              url: 'https://kibana.example.com/run/1',
+              refname: 'fix/config-drift',
+            },
+          ],
+        },
+      });
+      const result = await Bitbucket.actions.listCommitBuildStatuses.handler(
+        mockContext,
+        parse('listCommitBuildStatuses', {
+          repoSlug: 'my-repo',
+          commit: 'abc1234',
+          refname: 'fix/config-drift',
+        })
+      );
+      expect(mockClient.get).toHaveBeenCalledWith(`${REPO_URL}/commit/abc1234/statuses`, {
+        params: { refname: 'fix/config-drift' },
+      });
+      expect(result.values).toEqual([
+        expect.objectContaining({ key: 'KIBANA-CHECK', state: 'SUCCESSFUL' }),
+      ]);
     });
   });
 
@@ -875,6 +943,22 @@ describe('Bitbucket', () => {
       mockClient.get.mockResolvedValue({ data: { values: [] } });
       const result = await Bitbucket.test.handler(mockContext);
       expect(result.message).toContain('no repositories are visible');
+    });
+
+    it('explains a repository-scoped bearer token cannot list the whole workspace', async () => {
+      mockClient.get.mockRejectedValue({ response: { status: 403 } });
+      const ctx = {
+        ...mockContext,
+        config: { workspace: 'my-workspace', authType: 'bearer' },
+      } as unknown as ActionContext;
+      await expect(Bitbucket.test.handler(ctx)).rejects.toThrow('scoped to a single repository');
+    });
+
+    it('does not reinterpret a basic-auth 403 as a repository-scoped token', async () => {
+      mockClient.get.mockRejectedValue({ response: { status: 403 } });
+      await expect(Bitbucket.test.handler(mockContext)).rejects.toThrow(
+        'Bitbucket test failed (status 403)'
+      );
     });
   });
 });

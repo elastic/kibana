@@ -44,6 +44,7 @@ import type {
   GetCommitInput,
   GetPipelineInput,
   GetPullRequestInput,
+  ListCommitBuildStatusesInput,
   ListCommitsInput,
   ListPullRequestsInput,
   ListRepositoriesInput,
@@ -64,6 +65,7 @@ import {
   GetCommitInputSchema,
   GetPipelineInputSchema,
   GetPullRequestInputSchema,
+  ListCommitBuildStatusesInputSchema,
   ListCommitsInputSchema,
   ListPullRequestsInputSchema,
   ListRepositoriesInputSchema,
@@ -270,6 +272,17 @@ const toPage = <T, U>(data: BitbucketPaginated<T>, mapItem: (item: T) => U) => (
   page: data.page,
   pageSize: data.pagelen,
   size: data.size,
+  hasMore: Boolean(data.next),
+});
+
+// Bitbucket's own docs for the commits endpoint say to follow the `next` link
+// verbatim rather than constructing page URLs, because it carries an opaque
+// `ctx` cursor alongside `page`. Surface that whole URL as an opaque cursor
+// rather than exposing the internals, so a caller can round-trip it without
+// needing to know it is a URL.
+const toCursorPage = <T, U>(data: BitbucketPaginated<T>, mapItem: (item: T) => U) => ({
+  values: (data.values ?? []).map(mapItem),
+  nextCursor: data.next,
   hasMore: Boolean(data.next),
 });
 
@@ -656,22 +669,40 @@ export const Bitbucket: ConnectorSpec = {
       isTool: true,
       scope: 'read',
       description:
-        'List commits in reverse chronological order starting from a branch, tag, or commit (like git log), optionally limited to commits that touched a file or directory path. Returns paginated commit summaries. Use this to build a changelog or audit trail.',
+        'List commits in reverse chronological order starting from a branch, tag, or commit (like git log), optionally limited to commits that touched a file or directory path. Returns paginated commit summaries and, when there are more, a nextCursor to pass back in to get the next page. Use this to build a changelog or audit trail.',
       input: ListCommitsInputSchema,
       handler: async (ctx, input: ListCommitsInput) =>
         runAction('listCommits', async () => {
-          const baseUrl = `${buildRepoUrl(ctx, input.repoSlug)}/commits`;
-          const url = input.revision ? `${baseUrl}/${encodeURIComponent(input.revision)}` : baseUrl;
-          const response = await ctx.client.get<BitbucketPaginated<BitbucketCommit>>(url, {
-            params: { path: input.path, page: input.page, pagelen: input.pageSize },
-          });
-          return toPage(response.data, (commit) => toCommitSummary(commit));
+          // Bitbucket's commits endpoint paginates with an opaque cursor embedded
+          // in the `next` link, not sequential page numbers - its docs say to
+          // follow that link rather than build one. A cursor from a prior page
+          // is itself the full next-page URL, already scoped to this workspace
+          // and repository, so request it directly instead of rebuilding it.
+          // The cursor is caller-supplied text, though, and ctx.client carries
+          // this connector's credentials, so reject anything that is not
+          // actually a Bitbucket API URL before sending it.
+          if (input.cursor && !input.cursor.startsWith(`${BITBUCKET_API_BASE_URL}/`)) {
+            throw new Error(
+              `cursor must be a nextCursor value returned by a previous listCommits call, starting with ${BITBUCKET_API_BASE_URL}/.`
+            );
+          }
+          const response = input.cursor
+            ? await ctx.client.get<BitbucketPaginated<BitbucketCommit>>(input.cursor)
+            : await ctx.client.get<BitbucketPaginated<BitbucketCommit>>(
+                input.revision
+                  ? `${buildRepoUrl(ctx, input.repoSlug)}/commits/${encodeURIComponent(
+                      input.revision
+                    )}`
+                  : `${buildRepoUrl(ctx, input.repoSlug)}/commits`,
+                { params: { path: input.path, pagelen: input.pageSize } }
+              );
+          return toCursorPage(response.data, (commit) => toCommitSummary(commit));
         }),
     },
 
     createCommitBuildStatus: {
       isTool: true,
-      scope: 'write',
+      scope: 'destroy',
       description:
         'Report an external check result onto a commit as a build status (INPROGRESS, SUCCESSFUL, FAILED, or STOPPED) with a stable key, a details URL, and an optional name and description. Posting the same key again overwrites the earlier status, so report INPROGRESS first and then the final result with the same key. Set refname to the pull request source branch so the status shows on, and can gate, that pull request.',
       input: CreateCommitBuildStatusInputSchema,
@@ -691,6 +722,24 @@ export const Bitbucket: ConnectorSpec = {
             }
           );
           return toCommitStatusSummary(response.data);
+        }),
+    },
+
+    listCommitBuildStatuses: {
+      isTool: true,
+      scope: 'read',
+      description:
+        "List the build statuses reported on a commit, optionally filtered to a refname. Returns each status's key, state (INPROGRESS, SUCCESSFUL, FAILED, or STOPPED), name, and URL. Use this before mergePullRequest to check that required checks reported by createCommitBuildStatus have passed, since getPullRequest does not include statuses.",
+      input: ListCommitBuildStatusesInputSchema,
+      handler: async (ctx, input: ListCommitBuildStatusesInput) =>
+        runAction('listCommitBuildStatuses', async () => {
+          const response = await ctx.client.get<BitbucketPaginated<BitbucketCommitStatus>>(
+            `${buildRepoUrl(ctx, input.repoSlug)}/commit/${encodeURIComponent(
+              input.commit
+            )}/statuses`,
+            { params: { refname: input.refname } }
+          );
+          return toPage(response.data, toCommitStatusSummary);
         }),
     },
 
@@ -780,11 +829,11 @@ export const Bitbucket: ConnectorSpec = {
     'Typical patterns:',
     '  - Propose a change: `getBranch` (main) to get the tip hash, `createBranch` from it, push commits through git/CI tooling, then `createPullRequest` from the new branch. Add reviewers by UUID at creation or later with `updatePullRequest`.',
     '  - Gate a pull request: `getPullRequest` to read `sourceCommit` and `sourceBranch`, run your check, then `createCommitBuildStatus` with `refname` set to the source branch (INPROGRESS first, then SUCCESSFUL/FAILED with the same `key`). Approve with `approvePullRequest` or reject with `addPullRequestComment` + `declinePullRequest`.',
-    '  - Land a change: confirm `state` is OPEN and `approvalCount`/statuses satisfy your policy via `getPullRequest`, then `mergePullRequest` (optionally `closeSourceBranch: true`); otherwise clean up later with `deleteBranch`.',
+    '  - Land a change: confirm `state` is OPEN and `approvalCount` satisfies your policy via `getPullRequest`, and check required build statuses with `listCommitBuildStatuses` on `sourceCommit` (its output has no status fields), then `mergePullRequest` (optionally `closeSourceBranch: true`); otherwise clean up later with `deleteBranch`.',
     '  - Run CI on demand: `triggerPipeline` for a branch or commit (add `customPipeline` and `variables` for custom pipelines), then poll `getPipeline` until `state` is COMPLETED and branch on `result` (SUCCESSFUL, FAILED, STOPPED, ERROR, EXPIRED). Use `stopPipeline` to abort a run that is no longer needed.',
     '  - Review or cleanup pass: `listPullRequests` with `state: ["OPEN"]` (default) or `["MERGED", "DECLINED"]` and a `query` such as `source.branch.name ~ "remediation/"`, then act on each `id`. List results omit reviewers, participants, and `approvalCount`; call `getPullRequest` for those.',
     '',
-    'Pagination: list actions return `values`, `page`, `pageSize`, and `hasMore`; request the next page by incrementing `page`. `size` (total count) is omitted by Bitbucket when it is expensive to compute.',
+    'Pagination: listRepositories and listPullRequests return `values`, `page`, `pageSize`, and `hasMore`; request the next page by incrementing `page`. listCommits instead returns `values`, `nextCursor`, and `hasMore` - Bitbucket paginates commits with an opaque cursor, not page numbers, so pass the returned `nextCursor` back as the `cursor` input to get the next page, and stop once `hasMore` is false. `size` (total count) is omitted by Bitbucket when it is expensive to compute.',
     '',
     'Gotchas: `mergePullRequest` fails with 4xx when branch restrictions, required approvals, or required builds are unmet - inspect `getPullRequest` and the error message rather than retrying. `triggerPipeline` returns 404 if Pipelines is not enabled on the repository. Repository access tokens (bearer) act as a service identity and cannot `approvePullRequest`.',
   ].join('\n'),
@@ -798,16 +847,32 @@ export const Bitbucket: ConnectorSpec = {
     handler: async (ctx) =>
       runAction('test', async () => {
         const workspace = getWorkspace(ctx);
-        const response = await ctx.client.get<BitbucketPaginated<BitbucketRepository>>(
-          `${BITBUCKET_API_BASE_URL}/repositories/${encodeURIComponent(workspace)}`,
-          { params: { pagelen: 1 } }
-        );
-        const hasRepositories = (response.data.values?.length ?? 0) > 0;
-        return {
-          message: hasRepositories
-            ? `Connected to Bitbucket workspace "${workspace}".`
-            : `Connected to Bitbucket workspace "${workspace}", but no repositories are visible. Verify the workspace slug and that the token has the read:repository:bitbucket scope.`,
-        };
+        try {
+          const response = await ctx.client.get<BitbucketPaginated<BitbucketRepository>>(
+            `${BITBUCKET_API_BASE_URL}/repositories/${encodeURIComponent(workspace)}`,
+            { params: { pagelen: 1 } }
+          );
+          const hasRepositories = (response.data.values?.length ?? 0) > 0;
+          return {
+            message: hasRepositories
+              ? `Connected to Bitbucket workspace "${workspace}".`
+              : `Connected to Bitbucket workspace "${workspace}", but no repositories are visible. Verify the workspace slug and that the token has the read:repository:bitbucket scope.`,
+          };
+        } catch (error) {
+          // A Bitbucket repository, project, or workspace access token (the bearer
+          // auth option) can be scoped to a single repository and is then denied
+          // by this workspace-wide listing call even though the same token works
+          // for every repository-scoped action (pull requests, branches,
+          // pipelines). Recognize that case for bearer auth specifically, rather
+          // than reporting valid repository-scoped credentials as broken.
+          const status = (error as { response?: { status?: number } }).response?.status;
+          if (ctx.config?.authType === 'bearer' && (status === 401 || status === 403)) {
+            throw new Error(
+              `Could not list repositories in workspace "${workspace}" with this access token (status ${status}). This is expected for a token scoped to a single repository - it cannot list the whole workspace, but can still be used with repoSlug in every other action. If you expect broader access, verify the token has the repository:write scope.`
+            );
+          }
+          throw error;
+        }
       }),
   },
 };
