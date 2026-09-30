@@ -15,7 +15,10 @@ import { reset } from './global';
 import { datasourceSelector } from './datasource';
 import { liveResponseFieldsSelector, selectedFieldsSelector } from './fields';
 import { fetchTopNodes } from '../services/fetch_top_nodes';
-import type { Workspace, WorkspaceField, WorkspaceNode } from '../types';
+import { makeEdgeId, makeNodeId } from '../services/workspace/graph_merge_planner';
+import { buildSearchExploreRequest } from '../services/workspace/graph_request_builders';
+import { transformSearchResponse } from '../services/workspace/graph_response_transformers';
+import type { GraphData, Workspace, WorkspaceField, WorkspaceNode } from '../types';
 import type { ServerResultNode } from '../types';
 import type { MatchedAction } from './helpers';
 import { matchesAction } from './helpers';
@@ -80,6 +83,7 @@ const initialWorkspaceState: WorkspaceState = {
 export const initializeWorkspace = actionCreator('INITIALIZE_WORKSPACE');
 export const workspaceChanged = actionCreator<WorkspaceState>('WORKSPACE_CHANGED');
 export const workspaceRuntimeChanged = actionCreator<WorkspaceState>('WORKSPACE_RUNTIME_CHANGED');
+export const workspaceGraphMerged = actionCreator<GraphData>('WORKSPACE_GRAPH_MERGED');
 export const selectAllNodes = actionCreator('SELECT_ALL_NODES');
 export const clearNodeSelection = actionCreator('CLEAR_NODE_SELECTION');
 export const invertNodeSelection = actionCreator('INVERT_NODE_SELECTION');
@@ -119,6 +123,53 @@ export const workspaceReducer = reducerWithInitialState(initialWorkspaceState)
     undoHistory: state.undoHistory,
     redoHistory: state.redoHistory,
   }))
+  .case(workspaceGraphMerged, (state, graph) => {
+    const nodesById = { ...state.nodesById };
+    const nodeIds = [...state.nodeIds];
+    const edgesById = { ...state.edgesById };
+    const edgeIds = [...state.edgeIds];
+
+    graph.nodes.forEach((node) => {
+      const id = makeNodeId(node.field, node.term);
+      if (nodesById[id]) return;
+      nodesById[id] = {
+        id,
+        x: 1,
+        y: 1,
+        label: node.label ?? node.term,
+        color: node.color ?? '#000000',
+        scaledSize: 15,
+        data: { field: node.field, term: node.term },
+      };
+      nodeIds.push(id);
+    });
+
+    graph.edges.forEach((edge) => {
+      const source = graph.nodes[edge.source];
+      const target = graph.nodes[edge.target];
+      const sourceId = makeNodeId(source.field, source.term);
+      const targetId = makeNodeId(target.field, target.term);
+      const id = makeEdgeId(sourceId, targetId);
+      const existingEdge = edgesById[id];
+      if (existingEdge) {
+        edgesById[id] = { ...existingEdge, weight: Math.max(existingEdge.weight, edge.weight) };
+        return;
+      }
+      edgesById[id] = {
+        id,
+        sourceId,
+        targetId,
+        topSourceId: sourceId,
+        topTargetId: targetId,
+        label: '',
+        weight: edge.weight,
+        width: edge.width,
+      };
+      edgeIds.push(id);
+    });
+
+    return { ...state, nodesById, nodeIds, edgesById, edgeIds };
+  })
   .case(selectAllNodes, (state) => ({
     ...state,
     selectedNodeIds: state.nodeIds.filter((id) => state.nodesById[id].parentId === undefined),
@@ -433,7 +484,14 @@ const topologyActionTypes = new Set([
  */
 export const registerWorkspaceListeners = (
   startListening: StartGraphListening,
-  { getWorkspace, notifyReact, http, notifications, handleSearchQueryError }: GraphStoreDependencies
+  {
+    getWorkspace,
+    notifyReact,
+    http,
+    notifications,
+    handleSearchQueryError,
+    exploreGraph,
+  }: GraphStoreDependencies
 ) => {
   startListening({
     predicate: (action) => requestActionTypes.has(action.type),
@@ -576,7 +634,7 @@ export const registerWorkspaceListeners = (
 
   startListening({
     matcher: matchesAction(submitSearch),
-    effect: (action: MatchedAction<string>, listenerApi) => {
+    effect: async (action: MatchedAction<string>, listenerApi) => {
       listenerApi.cancelActiveListeners();
       listenerApi.dispatch(initializeWorkspace());
 
@@ -584,22 +642,39 @@ export const registerWorkspaceListeners = (
       const workspace = getWorkspace() as Workspace;
       const liveResponseFields = liveResponseFieldsSelector(listenerApi.getState());
       const numHops = 2;
-
-      if (!action.payload.startsWith('{')) {
-        workspace.simpleSearch(action.payload, liveResponseFields, numHops);
-        return;
-      }
+      const { exploreControls, indexName, vertex_fields: vertexFields } = workspace.options;
+      if (!exploreControls || !indexName || !vertexFields) return;
 
       try {
-        const query = JSON.parse(action.payload);
-        if (query.vertices) {
-          // Is a graph explore request
-          workspace.callElasticsearch(query);
+        let request;
+        if (!action.payload.startsWith('{')) {
+          request = buildSearchExploreRequest({
+            query: { query_string: { query: action.payload } },
+            fields: liveResponseFields,
+            numHops,
+            blocklistedNodes: workspace.blocklistedNodes,
+            settings: exploreControls,
+          });
         } else {
-          // Is a regular query DSL query
-          workspace.search(query, liveResponseFields, numHops);
+          const query = JSON.parse(action.payload);
+          request = query.vertices
+            ? query
+            : buildSearchExploreRequest({
+                query,
+                fields: liveResponseFields,
+                numHops,
+                blocklistedNodes: workspace.blocklistedNodes,
+                settings: exploreControls,
+              });
         }
+
+        const response = await exploreGraph(indexName, request);
+        listenerApi.throwIfCancelled();
+        const graph = transformSearchResponse(response, vertexFields);
+        listenerApi.dispatch(workspaceGraphMerged(graph));
+        workspace.mergeGraph(graph);
       } catch (error) {
+        if (listenerApi.signal.aborted) return;
         handleSearchQueryError(error as Error);
       }
     },
