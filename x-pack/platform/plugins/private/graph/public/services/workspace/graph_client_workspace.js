@@ -13,7 +13,11 @@ import {
   planIncomingEdges,
   prepareIncomingNodes,
 } from './graph_merge_planner';
-import { buildFillConnectionsRequest, buildNodeQuery } from './graph_request_builders';
+import {
+  buildFillConnectionsRequest,
+  buildIntersectionRequest,
+  buildNodeQuery,
+} from './graph_request_builders';
 
 let searcher = function (indexName, request, responseHandler) {
   const dataForServer = JSON.stringify(request);
@@ -783,40 +787,7 @@ function GraphWorkspace(options) {
       return buildNodeQuery(self.returnUnpackedGroupeds([node]));
     });
 
-    const allQuery = {
-      bool: {
-        should: allQueries,
-      },
-    };
-    //====================
-    const request = {
-      query: allQuery,
-      size: 0,
-      aggs: {
-        all: {
-          global: {},
-        },
-        sources: {
-          // Could use significant_terms not filters to get stats but
-          // for the fact some of the nodes are groups of terms.
-          filters: {
-            filters: {},
-          },
-          aggs: {
-            targets: {
-              filters: {
-                filters: {},
-              },
-            },
-          },
-        },
-      },
-    };
-    allQueries.forEach((query, n) => {
-      // Add aggs to get intersection stats with root node.
-      request.aggs.sources.filters.filters['bg' + n] = query;
-      request.aggs.sources.aggs.targets.filters.filters['fg' + n] = query;
-    });
+    const request = buildIntersectionRequest(allQueries);
     searcher(self.options.indexName, request, function (data) {
       const termIntersects = [];
       const fullDocCounts = [];
