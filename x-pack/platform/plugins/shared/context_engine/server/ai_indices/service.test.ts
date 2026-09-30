@@ -1044,15 +1044,13 @@ describe('AiIndexService', () => {
       );
     });
 
-    it('resolves a managed AI index against its registration', async () => {
+    it('reads dest from the registration for a managed AI index, leaving the rest as stored', async () => {
       const staleDocument: AiIndexDocument = {
         ...aiIndexDocument,
         id: 'elastic',
         managed: true,
         dest: { type: 'index', value: 'ai-index-idx-sml-data' },
-        automations: [{ type: 'workflow', value: 'user-added' }],
-        sources: [{ type: 'esql', value: 'FROM registered' }],
-        traces: [{ type: 'index', value: 'user-trace' }],
+        traces: [],
       };
       mockSearchHits(
         storedHit(staleDocument, { id: buildManagedAiIndexDocId(DEFAULT_SPACE, 'elastic') })
@@ -1066,25 +1064,20 @@ describe('AiIndexService', () => {
           getRegistration: () => ({
             description: 'from code',
             dest: { type: 'index', value: '.ai-index-idx-elastic-index' },
-            automations: [],
-            sources: [{ type: 'esql', value: 'FROM registered' }],
-            traces: [{ type: 'index', value: 'registered-trace' }],
+            automations: [{ type: 'workflow', value: 'from-code' }],
+            sources: [{ type: 'esql', value: 'FROM code' }],
+            traces: [{ type: 'index', value: 'from-code' }],
           }),
           ensure: jest.fn(),
         },
       });
 
-      await expect(service.get('elastic', DEFAULT_SPACE)).resolves.toEqual({
-        ...toHttpItem({
+      await expect(service.get('elastic', DEFAULT_SPACE)).resolves.toEqual(
+        toHttpItem({
           ...staleDocument,
           dest: { type: 'index', value: '.ai-index-idx-elastic-index' },
-          sources: [{ type: 'esql', value: 'FROM registered' }],
-        }),
-        traces: [
-          { type: 'index', value: 'registered-trace', query: 'FROM registered-trace' },
-          { type: 'index', value: 'user-trace', query: 'FROM user-trace' },
-        ],
-      });
+        })
+      );
     });
 
     it('returns a user-owned AI index squatting a managed id as stored', async () => {

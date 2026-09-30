@@ -9,7 +9,6 @@ import type { estypes } from '@elastic/elasticsearch';
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import { isResponseError } from '@kbn/es-errors';
-import { uniqBy } from 'lodash';
 import pRetry from 'p-retry';
 import {
   AI_INDEX_DATA_STREAM_PREFIX as DATA_STREAM_PREFIX,
@@ -66,19 +65,13 @@ const toAiIndexItem = (document: AiIndexDocument): AiIndexHttpItem => ({
   date_modified: document.date_modified,
 });
 
-const mergeEntries = <T extends { type: string; value: string }>(base: T[], delta: T[]): T[] =>
-  uniqBy([...base, ...delta], ({ type, value }) => `${type}:${value}`);
-
-/** The registration owns `dest` and is the floor for the list fields; the rest is what the space stored. */
+/** Some fields need to be read from config (registration object), and some from storage. */
 const mergeManagedAiIndex = (
   registration: AiIndexProperties,
   document: AiIndexDocument
 ): AiIndexDocument => ({
   ...document,
   dest: registration.dest,
-  automations: mergeEntries(registration.automations, document.automations),
-  sources: mergeEntries(registration.sources, document.sources),
-  traces: mergeEntries(registration.traces, document.traces ?? []),
 });
 
 const ADD_AUTOMATION_CONFLICT_RETRIES = 2;
