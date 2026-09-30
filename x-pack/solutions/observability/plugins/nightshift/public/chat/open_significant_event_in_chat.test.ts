@@ -35,7 +35,7 @@ describe('open_significant_event_in_chat', () => {
         initialMessage: 'Explain this significant event: Latency spike',
         attachments: [
           expect.objectContaining({
-            id: 'evt-uuid-1',
+            id: 'evt-1',
             origin: 'evt-1',
           }),
         ],
