@@ -290,7 +290,7 @@ export const Expressions: React.FC<ExpressionsProps> = (props) => {
   const nodeType = ruleParams.nodeType || 'host';
   const schemaSelectionEnabled = isSchemaSelectableForInventoryRule(nodeType);
 
-  const effectiveSchema = getInventoryRuleSchema(nodeType, ruleParams.schema);
+  const effectiveSchema = getInventoryRuleSchema(ruleParams.schema);
 
   return (
     <>

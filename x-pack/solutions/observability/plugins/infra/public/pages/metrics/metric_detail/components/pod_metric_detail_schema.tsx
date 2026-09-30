@@ -31,7 +31,6 @@ const ResolvedPodDetailSchema = ({ nodeId }: { nodeId: string }) => {
   const schema = resolveDetailSchema({
     urlSchema: urlState?.preferredSchema,
     timeRangeMetadata,
-    nodeType: 'pod',
   });
 
   const value = useMemo(

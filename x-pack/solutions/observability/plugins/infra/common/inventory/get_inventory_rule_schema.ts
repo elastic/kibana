@@ -15,13 +15,12 @@ import {
 /**
  * Schema an Inventory Threshold rule evaluates, and the flyout preview requests.
  *
- * Pods follow the stored schema like Hosts and other schema-aware types. An
- * omitted schema stays omitted. Do not substitute `DEFAULT_SCHEMA`: that
- * constant is `semconv`, which drops the legacy `cpu`/`tx`/`rx` aggregations
- * and filters the search down to OpenTelemetry documents.
+ * Returns the stored schema unchanged. An omitted schema stays omitted (Hosts
+ * legacy open path). Do not substitute `DEFAULT_SCHEMA`: that constant is
+ * `semconv`, which drops the legacy `cpu`/`tx`/`rx` aggregations and filters
+ * the search down to OpenTelemetry documents.
  */
 export const getInventoryRuleSchema = (
-  _nodeType: InventoryItemType,
   schema: DataSchemaFormat | null | undefined
 ): DataSchemaFormat | undefined => {
   return schema ?? undefined;
@@ -41,5 +40,5 @@ export const getInventoryAlertGroupingField = (
     return undefined;
   }
 
-  return findInventoryFields(nodeType, getInventoryRuleSchema(nodeType, schema)).id;
+  return findInventoryFields(nodeType, getInventoryRuleSchema(schema)).id;
 };

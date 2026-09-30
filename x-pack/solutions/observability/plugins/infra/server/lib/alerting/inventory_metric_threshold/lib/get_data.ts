@@ -139,7 +139,7 @@ export const getData = async ({
 }): Promise<Response> => {
   // Resolved once here and passed down, so the search and the additionalContext parsing
   // below cannot disagree — ECS context comes from `_source`, SemConv from `docvalue_fields`.
-  const effectiveSchema = getInventoryRuleSchema(nodeType, schema);
+  const effectiveSchema = getInventoryRuleSchema(schema);
 
   const handleResponse = (aggs: ResponseAggregations, previous: Response) => {
     const { nodes } = aggs;

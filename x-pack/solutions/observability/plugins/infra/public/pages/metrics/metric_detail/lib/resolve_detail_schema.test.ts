@@ -18,7 +18,6 @@ describe('resolveDetailSchema', () => {
       resolveDetailSchema({
         urlSchema: 'semconv',
         timeRangeMetadata: undefined,
-        nodeType: 'pod',
       })
     ).toBeUndefined();
   });
@@ -28,7 +27,6 @@ describe('resolveDetailSchema', () => {
       resolveDetailSchema({
         urlSchema: 'ecs',
         timeRangeMetadata: detected,
-        nodeType: 'pod',
       })
     ).toBe('ecs');
   });
@@ -38,7 +36,6 @@ describe('resolveDetailSchema', () => {
       resolveDetailSchema({
         urlSchema: 'semconv',
         timeRangeMetadata: { schemas: ['ecs'], preferredSchema: 'ecs' },
-        nodeType: 'pod',
       })
     ).toBe('ecs');
   });
@@ -48,7 +45,6 @@ describe('resolveDetailSchema', () => {
       resolveDetailSchema({
         urlSchema: null,
         timeRangeMetadata: { schemas: ['ecs'], preferredSchema: null },
-        nodeType: 'pod',
       })
     ).toBeUndefined();
   });
@@ -58,7 +54,6 @@ describe('resolveDetailSchema', () => {
       resolveDetailSchema({
         urlSchema: 'semconv',
         timeRangeMetadata: detected,
-        nodeType: 'pod',
       })
     ).toBe('semconv');
   });

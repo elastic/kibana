@@ -9,28 +9,13 @@ import { DEFAULT_SCHEMA } from '../../../../../common/constants';
 import { getInventoryRequestSchema } from './get_inventory_request_schema';
 
 describe('getInventoryRequestSchema', () => {
-  it('follows the selected schema for Kubernetes Pods, including leftover Hosts OpenTelemetry', () => {
-    expect(getInventoryRequestSchema('pod', 'semconv')).toBe('semconv');
-    expect(getInventoryRequestSchema('pod', 'ecs')).toBe('ecs');
+  it('follows preferredSchema when set', () => {
+    expect(getInventoryRequestSchema('semconv')).toBe('semconv');
+    expect(getInventoryRequestSchema('ecs')).toBe('ecs');
   });
 
-  it('falls through to DEFAULT_SCHEMA for Kubernetes Pods when preferredSchema is unset', () => {
-    expect(getInventoryRequestSchema('pod', null)).toBe(DEFAULT_SCHEMA);
-    expect(getInventoryRequestSchema('pod', undefined)).toBe(DEFAULT_SCHEMA);
-  });
-
-  it('forwards Hosts preferredSchema, including leftover OpenTelemetry', () => {
-    expect(getInventoryRequestSchema('host', 'semconv')).toBe('semconv');
-    expect(getInventoryRequestSchema('host', 'ecs')).toBe('ecs');
-  });
-
-  it('falls through to DEFAULT_SCHEMA for Hosts when preferredSchema is unset', () => {
-    expect(getInventoryRequestSchema('host', null)).toBe(DEFAULT_SCHEMA);
-    expect(getInventoryRequestSchema('host', undefined)).toBe(DEFAULT_SCHEMA);
-  });
-
-  it('forwards preferredSchema for other node types', () => {
-    expect(getInventoryRequestSchema('container', 'semconv')).toBe('semconv');
-    expect(getInventoryRequestSchema('awsRDS', 'ecs')).toBe('ecs');
+  it('falls through to DEFAULT_SCHEMA when preferredSchema is unset', () => {
+    expect(getInventoryRequestSchema(null)).toBe(DEFAULT_SCHEMA);
+    expect(getInventoryRequestSchema(undefined)).toBe(DEFAULT_SCHEMA);
   });
 });

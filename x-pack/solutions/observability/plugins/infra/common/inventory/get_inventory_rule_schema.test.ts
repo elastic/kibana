@@ -5,50 +5,26 @@
  * 2.0.
  */
 
-import type { InventoryItemType } from '@kbn/metrics-data-access-plugin/common';
 import {
   getInventoryAlertGroupingField,
   getInventoryRuleSchema,
 } from './get_inventory_rule_schema';
 
 describe('getInventoryRuleSchema', () => {
-  it('follows the stored pod schema like every other node type', () => {
-    expect(getInventoryRuleSchema('pod', 'semconv')).toBe('semconv');
-    expect(getInventoryRuleSchema('pod', 'ecs')).toBe('ecs');
-    // An omitted schema stays omitted, so the search is not narrowed to one schema.
-    expect(getInventoryRuleSchema('pod', undefined)).toBeUndefined();
-    expect(getInventoryRuleSchema('pod', null)).toBeUndefined();
+  it('returns the stored schema unchanged', () => {
+    expect(getInventoryRuleSchema('semconv')).toBe('semconv');
+    expect(getInventoryRuleSchema('ecs')).toBe('ecs');
   });
 
-  it('keeps a stored schema for every node type', () => {
-    const nodeTypes: InventoryItemType[] = [
-      'host',
-      'pod',
-      'container',
-      'awsEC2',
-      'awsS3',
-      'awsSQS',
-      'awsRDS',
-    ];
-    for (const nodeType of nodeTypes) {
-      expect(getInventoryRuleSchema(nodeType, 'semconv')).toBe('semconv');
-      expect(getInventoryRuleSchema(nodeType, 'ecs')).toBe('ecs');
-    }
-  });
-
-  it('keeps a stored host schema', () => {
-    expect(getInventoryRuleSchema('host', 'semconv')).toBe('semconv');
-    expect(getInventoryRuleSchema('host', 'ecs')).toBe('ecs');
-  });
-
-  it('leaves a host rule that has no schema omitted', () => {
-    expect(getInventoryRuleSchema('host', undefined)).toBeUndefined();
-    expect(getInventoryRuleSchema('host', null)).toBeUndefined();
+  it('leaves an omitted schema omitted', () => {
+    // Hosts parity: do not substitute DEFAULT_SCHEMA (semconv).
+    expect(getInventoryRuleSchema(undefined)).toBeUndefined();
+    expect(getInventoryRuleSchema(null)).toBeUndefined();
   });
 });
 
 describe('getInventoryAlertGroupingField', () => {
-  it('groups a pod rule by its stored schema, defaulting to ecs when omitted', () => {
+  it('groups a pod rule by its stored schema, defaulting to ecs identity when omitted', () => {
     expect(getInventoryAlertGroupingField('pod', 'semconv')).toBe('k8s.pod.uid');
     expect(getInventoryAlertGroupingField('pod', 'ecs')).toBe('kubernetes.pod.uid');
     expect(getInventoryAlertGroupingField('pod', undefined)).toBe('kubernetes.pod.uid');
