@@ -108,28 +108,33 @@ describe('buildDataReferenceCatalog', () => {
     expect(stepsGroup?.description).toMatch(/evaluated after the run finishes/);
   });
 
-  it('lists consts in their own Constants group', () => {
+  it('nests consts under Workflow context as a consts parent', () => {
     const catalog = buildDataReferenceCatalog({
       definition,
       currentStepName: 'second',
       connectors: [],
     });
-    expect(catalog.groups.map((g) => g.id)).toEqual(['triggers', 'steps', 'consts', 'context']);
+    expect(catalog.groups.map((g) => g.id)).toEqual(['triggers', 'steps', 'context']);
 
-    const consts = catalog.groups.find((g) => g.id === 'consts');
-    expect(consts).toMatchObject({
-      title: 'Constants',
+    const context = catalog.groups.find((g) => g.id === 'context');
+    const constsParent = context?.items.find((i) => i.path === 'consts');
+    expect(constsParent).toMatchObject({
+      label: 'consts',
+      typeLabel: 'object',
+      drillable: true,
     });
-    expect(consts?.iconType).toBeUndefined();
-    const region = consts?.items.find((i) => i.path === 'consts.region');
+    expect(isDataReferenceInsertable(constsParent!)).toBe(false);
+    expect(isDataReferenceDraggable(constsParent!)).toBe(false);
+
+    const region = constsParent?.children?.find((i) => i.path === 'consts.region');
     expect(region).toMatchObject({
       label: 'region',
       subtitle: 'us-east-1',
       typeLabel: 'string',
+      originLabel: 'Workflow context',
     });
+    expect(isDataReferenceDraggable(region!)).toBe(true);
 
-    const context = catalog.groups.find((g) => g.id === 'context');
-    expect(context?.items.find((i) => i.path === 'consts.region')).toBeUndefined();
     expect(context?.items.find((i) => i.path === 'kibanaUrl')).toMatchObject({
       label: 'kibanaUrl',
       typeLabel: 'string',
