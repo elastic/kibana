@@ -93,6 +93,7 @@ export {
   getListExecutionHistoryUrl,
   listRuleExecutionsUrl,
   getFindRuleTemplatesUrl,
+  getRuleTemplateTagsUrl,
   getRuleTemplateUrl,
 } from '../../urls';
 export {

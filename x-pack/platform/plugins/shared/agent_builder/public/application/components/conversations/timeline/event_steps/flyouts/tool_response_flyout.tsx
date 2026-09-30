@@ -63,6 +63,8 @@ export const ToolResponseFlyout: React.FC<ToolResponseFlyoutProps> = ({
   const isSubAgentCall = step.tool_id === internalTools.runSubagent;
   const subAgentExecutionId = isSubAgentCall ? getSubAgentExecutionId(step) : undefined;
   const showExecutionSection = isSubAgentCall;
+  const progressionSteps = (step.progression ?? []).filter((p) => !p.metadata?.agent_execution_id);
+  const showProgressionSection = progressionSteps.length > 0;
   const isSubAgentRunning = isSubAgentCall && step.results.length === 0;
   const showResultSection = step.results.length > 0;
   const hasErrorResult = step.results.some(isErrorResult);
@@ -73,6 +75,34 @@ export const ToolResponseFlyout: React.FC<ToolResponseFlyoutProps> = ({
       status: 'complete' as const,
       children: <JsonCodeBlock data={step.params} lineNumbers={false} background="subdued" />,
     },
+    ...(showProgressionSection
+      ? [
+          {
+            title: executionLabel,
+            status: (showResultSection ? 'complete' : 'loading') as 'loading' | 'complete',
+            children: (
+              <ul
+                css={css`
+                  list-style-type: none;
+                  padding: 0;
+                  margin: 0;
+                  display: flex;
+                  flex-direction: column;
+                  gap: ${euiTheme.size.xs};
+                `}
+              >
+                {progressionSteps.map((p, index) => (
+                  <li key={`progression-${index}`}>
+                    <EuiText size="s" color="subdued">
+                      {p.message}
+                    </EuiText>
+                  </li>
+                ))}
+              </ul>
+            ),
+          },
+        ]
+      : []),
     ...(showExecutionSection
       ? [
           {

@@ -5,7 +5,12 @@
  * 2.0.
  */
 
-import { LogExtractionOverride, LogExtractionTypeOverride } from './constants';
+import {
+  DEFAULT_HISTORY_SNAPSHOT_RETENTION_DAYS,
+  HistorySnapshotState,
+  LogExtractionOverride,
+  LogExtractionTypeOverride,
+} from './constants';
 
 describe('LogExtractionTypeOverride', () => {
   it('accepts an empty object (no fields set)', () => {
@@ -73,5 +78,13 @@ describe('LogExtractionOverride', () => {
 
   it('accepts an empty object', () => {
     expect(LogExtractionOverride.safeParse({}).success).toBe(true);
+  });
+});
+
+describe('HistorySnapshotState', () => {
+  it('defaults retentionDays to 30', () => {
+    expect(HistorySnapshotState.parse({}).retentionDays).toBe(
+      DEFAULT_HISTORY_SNAPSHOT_RETENTION_DAYS
+    );
   });
 });
