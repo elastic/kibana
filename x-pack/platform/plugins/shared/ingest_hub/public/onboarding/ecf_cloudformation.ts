@@ -162,15 +162,15 @@ export const ensureOtlpPort = (endpoint: string): string => {
     // URL.port is '' for scheme-default ports, so check the raw string for an explicit port.
     // Handles bracketed IPv6 ([::1]) and case-insensitive schemes (HTTPS://).
     if (/^https?:\/\/(?:\[[^\]]+\]|[^/:[]+):\d+/i.test(endpoint)) return endpoint;
-    const port =
-      parsed.protocol === 'https:' ? '443' : parsed.protocol === 'http:' ? '80' : null;
+    const port = parsed.protocol === 'https:' ? '443' : parsed.protocol === 'http:' ? '80' : null;
     if (!port) return endpoint;
     // URL.hostname is lowercased; use the original authority string to preserve casing.
     // Stop at /, ?, or # so a bare query (e.g. ?token=abc) is not included in the authority.
     const schemeEnd = endpoint.indexOf('://') + 3;
     const afterScheme = endpoint.slice(schemeEnd);
     const authorityEnd = afterScheme.search(/[/?#]/);
-    const originalAuthority = authorityEnd === -1 ? afterScheme : afterScheme.slice(0, authorityEnd);
+    const originalAuthority =
+      authorityEnd === -1 ? afterScheme : afterScheme.slice(0, authorityEnd);
     const rest = authorityEnd === -1 ? '' : afterScheme.slice(authorityEnd);
     return `${endpoint.slice(0, schemeEnd)}${originalAuthority}:${port}${rest}`;
   } catch {
