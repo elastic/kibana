@@ -91,8 +91,7 @@ const SearchBarHarness = (props: SearchBarProps) => {
   );
 };
 
-// Failing: See https://github.com/elastic/kibana/issues/229631
-describe.skip('search_bar', () => {
+describe('search_bar', () => {
   let dispatchSpy: jest.Mock;
   let store: GraphStore;
   const defaultProps: SearchBarProps = {
