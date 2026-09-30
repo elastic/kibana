@@ -35,15 +35,15 @@ Evaluate how retrieved *memory* affected an agent's work.
 The transcript has the user task; the investigation, in order (the agent's notes and every tool call with an excerpt of its result); and the final answer. Use it to see whether the agent opened, followed, or contradicted a recalled memory: reading a memory's file shows it was opened, and what the agent did next shows whether it was followed. If results are unavailable, tool calls show parameters only.
 
 **Definitions**
-- *Positive signal* ("helpful"): memory was quoted, aligned with, or enabled correct decisions.
-- *Negative signal* ("harmful"): memory caused contradiction, wasted steps, or misinformation.
-- Neutral / unused: omit.
+- *Positive signal* ("helpful"): the agent used the memory's content: quoted it, aligned with it, or it enabled correct decisions. Opening the file is not use.
+- *Negative signal* ("harmful"): the memory's content was wrong, outdated, or misleading, and caused contradiction, wasted steps, or misinformation. A memory that the investigation or the final answer corrects or contradicts is harmful, even if it pointed the agent to the right area.
+- Neutral / unused: omit. This includes a memory that does not apply to this task, even if the agent opened it. Not applying is not harm.
 
 Be conservative with labeling useful memories: only identify as useful if definitely helpful.
 
 Return only recalled memory ids (the id= value, e.g. memory_checkout-redis-evictions). Never titles, content, or the full recalled line.`;
 
-export const MEMORY_EXTRACT_SYSTEM_PROMPT = `You are a knowledge distillation engine for an AI SRE assistant. After each conversation you extract **1 to 3** reusable facts that would help the same assistant on a *similar but not exactly the same* task in this same customer environment in the future.
+export const MEMORY_EXTRACT_SYSTEM_PROMPT = `You are a knowledge distillation engine for an AI SRE assistant. After each conversation you extract **up to 3** reusable facts that would help the same assistant on a *similar but not exactly the same* task in this same customer environment in the future.
 
 Focus strictly on durable, tool-output-verifiable knowledge about the customer's environment — how this organization's systems are structured and how its components behave. Do **not** extract generic tool, connector, or API usage — that belongs to the tool/connector's own documentation, not to per-customer memory.`;
 
@@ -69,6 +69,7 @@ Extract a fact only if a tool result in the investigation shows it. The final an
 - Credentials, tokens, or secrets.
 - Container internals (/proc, hex ports, Docker layers).
 - Information only relevant to this specific request (e.g. the single alert fingerprint being investigated).
+- Single-run details: timestamps, time windows, counts, percentiles, or ids from this run. Distil them into a reusable claim, or leave them out.
 
 Keep entries concise. Return an empty list if the conversation produced no reusable environment knowledge.`;
 
@@ -426,6 +427,7 @@ const normalizeMergeTargets = (raw: unknown): string[][] => {
 export const MEMORY_MERGE_SYSTEM_PROMPT = `You merge overlapping semantic memories into one canonical page.
 
 Return title, markdown content, and context.
+content states each distinct fact from the sources once, and only facts the sources contain: no new sections, fixes, or details. Keep it about as long as the longest source.
 context is the recall key: compact, semantically rich phrases covering the union of the sources' task and goal descriptors. Not verbatim sentences. Not a concatenation of full prompts. Not one source's task copied when the others differ.
 If you cannot write a non-empty context that covers that union, return an empty context string.`;
 
