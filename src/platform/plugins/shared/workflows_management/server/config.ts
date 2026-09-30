@@ -73,13 +73,12 @@ const configSchema = schema.object({
    */
   library: librarySchema,
   /**
-   * Workflow pages (proof of concept): hosted, tokenized forms for the `page`
-   * trigger. Both `enabled` and `signingKey` are required before the
+   * Workflow pages (proof of concept): hosted forms for the `page` trigger, keyed by
+   * the trigger's `page-id`. Both `enabled` and `runAsApiKey` are required before the
    * unauthenticated routes are mounted.
    */
   pages: schema.object({
     enabled: schema.boolean({ defaultValue: false }),
-    signingKey: schema.maybe(schema.string({ minLength: 32, maxLength: 256 })),
     /**
      * Encoded Elasticsearch API key every page submission runs as. A page
      * visitor has no Kibana identity and the execution engine requires one.

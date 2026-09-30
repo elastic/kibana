@@ -8,10 +8,10 @@
  */
 
 import { isPageTrigger } from '@kbn/workflows';
-import type { PageTrigger } from '@kbn/workflows';
+import type { PageTrigger, WorkflowDetailDto } from '@kbn/workflows';
 import type { JsonModelSchemaType } from '@kbn/workflows/spec/schema/common/json_model_schema';
 import { PAGE_FORM_API_PATH } from './constants';
-import { verifyPageToken } from './page_token';
+import { PAGE_ID_KEY } from './page_ids';
 import { ExternalResumeError } from '../external_resume/external_resume_error';
 import {
   buildExternalResumeFormFieldsHtml,
@@ -27,84 +27,65 @@ export interface PageSubmitter {
   at: string;
 }
 
-export interface ResolvedPage<T extends WorkflowLike = WorkflowLike> {
-  /** The workflow backing the page, narrowed to non-null by the checks below. */
-  workflow: T;
+export interface ResolvedPage {
+  workflow: WorkflowDetailDto;
   trigger: PageTrigger;
   inputsSchema: JsonModelSchemaType | undefined;
 }
 
-export interface WorkflowLike {
-  enabled: boolean;
-  valid: boolean;
-  definition?: { triggers?: Array<{ type?: string }> } | null;
-}
+type FindEnabledPageWorkflows = (
+  triggerId: string,
+  spaceId: string
+) => Promise<WorkflowDetailDto[]>;
 
 /**
- * Resolves the page trigger for a workflow and verifies the caller's token.
+ * Finds the enabled workflow whose `type: page` trigger carries this `page-id`.
  *
- * Every failure raises the same non-exposed error so an unauthenticated caller
- * cannot tell "no such workflow" from "wrong token" from "page disabled".
+ * Only enabled workflows are searched, so disabling the workflow or removing the
+ * trigger takes the page offline with nothing to clean up — n8n's "live while active".
+ * The POC filters in memory after the indexed `triggerTypes: page` query; production
+ * would index page IDs next to `triggerTypes`.
+ *
+ * Every miss raises the same non-exposed 404, so a caller cannot tell "no such page"
+ * from "page disabled".
  */
-export const resolvePage = <T extends WorkflowLike>(
-  workflow: T | undefined | null,
-  {
-    signingKey,
-    spaceId,
-    workflowId,
-    token,
-  }: { signingKey: string; spaceId: string; workflowId: string; token: string }
-): ResolvedPage<T> => {
-  if (!verifyPageToken(signingKey, spaceId, workflowId, token)) {
-    throw new ExternalResumeError('Invalid page token', 401);
+export const resolvePage = async (
+  findEnabledPageWorkflows: FindEnabledPageWorkflows,
+  { pageId, spaceId }: { pageId: string; spaceId: string }
+): Promise<ResolvedPage> => {
+  const workflows = await findEnabledPageWorkflows('page', spaceId);
+  for (const workflow of workflows) {
+    if (workflow.valid && workflow.definition) {
+      const trigger = workflow.definition.triggers
+        .filter(isPageTrigger)
+        .find((candidate) => candidate[PAGE_ID_KEY] === pageId);
+      if (trigger) {
+        return {
+          workflow,
+          trigger,
+          inputsSchema: trigger.inputs as JsonModelSchemaType | undefined,
+        };
+      }
+    }
   }
-  if (!workflow || !workflow.valid || !workflow.definition) {
-    throw new ExternalResumeError('Page not found', 404);
-  }
-  if (!workflow.enabled) {
-    throw new ExternalResumeError('Page is not published', 404);
-  }
-
-  const trigger = (workflow.definition.triggers ?? []).find(isPageTrigger);
-  if (!trigger) {
-    throw new ExternalResumeError('Workflow does not define a page trigger', 404);
-  }
-
-  return {
-    workflow,
-    trigger,
-    inputsSchema: trigger.inputs as JsonModelSchemaType | undefined,
-  };
+  throw new ExternalResumeError('Page not found', 404);
 };
 
-export const buildPageFormUrl = ({
-  basePath,
-  workflowId,
-  token,
-}: {
-  basePath: string;
-  workflowId: string;
-  token: string;
-}): string => {
-  const path = PAGE_FORM_API_PATH.replace('{workflowId}', encodeURIComponent(workflowId));
-  const params = new URLSearchParams({ token });
-  return `${basePath}${path}?${params.toString()}`;
-};
+export const buildPageUrl = ({ basePath, pageId }: { basePath: string; pageId: string }): string =>
+  `${basePath}${PAGE_FORM_API_PATH.replace('{pageId}', encodeURIComponent(pageId))}`;
 
 export const renderPageForm = ({
   page,
   basePath,
-  workflowId,
-  token,
+  pageId,
 }: {
   page: ResolvedPage;
   basePath: string;
-  workflowId: string;
-  token: string;
+  pageId: string;
 }): string =>
   renderExternalResumeFormPage({
     message: page.trigger.description ?? page.trigger.title,
-    formActionUrl: buildPageFormUrl({ basePath, workflowId, token }),
+    formActionUrl: buildPageUrl({ basePath, pageId }),
     fieldsHtml: buildExternalResumeFormFieldsHtml(page.inputsSchema),
   });
 

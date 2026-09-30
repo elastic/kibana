@@ -590,7 +590,7 @@ export class WorkflowsManagementApi {
       { yaml: clonedYaml },
       spaceId,
       request,
-      { nameFallback: cloneName }
+      { nameFallback: cloneName, regeneratePageIds: true }
     );
     this.notifySml(result.id, spaceId, 'create', request);
     return result;

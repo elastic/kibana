@@ -23,6 +23,7 @@ import { validateWorkflowYaml } from '../../../common/lib/validate_workflow_yaml
 import { updateWorkflowYamlFields } from '../../../common/lib/yaml';
 import { INITIAL_WORKFLOW_VERSION } from '../../lib/workflow_version';
 import type { WorkflowProperties } from '../../storage/workflow_storage';
+import { reconcilePageIds } from '../pages/page_ids';
 
 /** Persist-time warning for ignored kibana YAML `fetcher` settings. */
 export const logIgnoredKibanaFetcherOnPersist = (params: {
@@ -115,10 +116,12 @@ export const prepareWorkflowDocumentFromYaml = (params: {
   nameFallback?: string;
   logger?: Logger;
   warnIgnoredKibanaFetcher?: boolean;
+  /** Clone and import: give every page a new `page-id` so copies never share a URL. */
+  regeneratePageIds?: boolean;
 }): { id: string; workflowData: WorkflowProperties; definition?: WorkflowYaml } => {
   const {
     id: providedId,
-    yaml,
+    yaml: rawYaml,
     zodSchema,
     authenticatedUser,
     now,
@@ -127,8 +130,15 @@ export const prepareWorkflowDocumentFromYaml = (params: {
     nameFallback,
     logger,
     warnIgnoredKibanaFetcher = false,
+    regeneratePageIds = false,
   } = params;
 
+  // Assign page IDs before validation so the stored YAML and definition both carry them.
+  const { yaml } = reconcilePageIds({
+    yaml: rawYaml,
+    definition: undefined,
+    regenerate: regeneratePageIds,
+  });
   const looseMetadata = extractLooseMetadataFields(yaml);
   let workflowToCreate: EsWorkflowCreate = {
     // Prefer the YAML-embedded name so the stored name round-trips with the YAML.

@@ -23,8 +23,20 @@ export const PAGE_DESCRIPTION_MAX_LENGTH = 1000;
  * deliberately live outside the YAML so an admin can change them without
  * producing a new workflow version. The trigger owns only the input contract.
  */
+export const PAGE_ID_MAX_LENGTH = 64;
+
 export const PageTriggerSchema = z.object({
   type: z.literal('page'),
+  /**
+   * Stable key of the page's public URL. Kibana assigns it on first save and keeps it
+   * across edits; clone and import assign a new one.
+   */
+  'page-id': z
+    .string()
+    .min(1)
+    .max(PAGE_ID_MAX_LENGTH)
+    .regex(/^[A-Za-z0-9_-]+$/)
+    .optional(),
   title: z.string().max(PAGE_TITLE_MAX_LENGTH).optional(),
   description: z.string().max(PAGE_DESCRIPTION_MAX_LENGTH).optional(),
   inputs: WorkflowInputSchema.optional(),

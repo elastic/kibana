@@ -8,22 +8,22 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { toWorkflowExecutionEngineModel } from '@kbn/workflows';
+import { isPageTrigger, toWorkflowExecutionEngineModel } from '@kbn/workflows';
 import {
   PAGE_FORM_API_PATH,
+  PAGE_ID_PARAM_MAX_LENGTH,
   PAGE_LINK_API_PATH,
-  PAGE_TOKEN_MAX_LENGTH,
   PAGE_WORKFLOW_ID_MAX_LENGTH,
 } from '../../pages/constants';
+import { PAGE_ID_KEY } from '../../pages/page_ids';
 import { buildPageRunRequest } from '../../pages/page_run_identity';
 import {
-  buildPageFormUrl,
+  buildPageUrl,
   getPageSubmitter,
   parsePageSubmission,
   renderPageForm,
   resolvePage,
 } from '../../pages/page_service';
-import { computePageToken } from '../../pages/page_token';
 import {
   EXTERNAL_RESUME_POST_ROUTE_OPTIONS,
   EXTERNAL_RESUME_ROUTE_OPTIONS,
@@ -38,21 +38,21 @@ import { WORKFLOW_EXECUTE_SECURITY } from '../utils/route_security';
 import { withAvailabilityCheck } from '../utils/with_availability_check';
 
 const pageParamsSchema = schema.object({
+  pageId: schema.string({
+    maxLength: PAGE_ID_PARAM_MAX_LENGTH,
+    meta: { description: 'The `page-id` of the workflow page trigger.' },
+  }),
+});
+
+const workflowParamsSchema = schema.object({
   workflowId: schema.string({
     maxLength: PAGE_WORKFLOW_ID_MAX_LENGTH,
-    meta: { description: 'ID of the workflow backing this page.' },
+    meta: { description: 'ID of the workflow that defines the page.' },
   }),
 });
 
-const pageQuerySchema = schema.object({
-  token: schema.string({
-    maxLength: PAGE_TOKEN_MAX_LENGTH,
-    meta: { description: 'The page token authenticating this request.' },
-  }),
-});
-
-/** GET the hosted form for a workflow page. */
-export function registerPageFormRoute(deps: RouteDependencies, signingKey: string) {
+/** GET the hosted form for a workflow page. The unguessable `page-id` is the credential. */
+export function registerPageFormRoute(deps: RouteDependencies) {
   const { router, api, spaces, logger } = deps;
 
   router.versioned
@@ -62,26 +62,19 @@ export function registerPageFormRoute(deps: RouteDependencies, signingKey: strin
       security: EXTERNAL_RESUME_SECURITY,
       summary: 'Get the hosted input form for a workflow page',
       description:
-        'Renders the workflow page trigger inputs as an HTML form. Authenticated by a page token, not a Kibana session.',
+        'Renders the page trigger inputs as an HTML form. Live only while the workflow is enabled.',
       options: EXTERNAL_RESUME_ROUTE_OPTIONS,
     })
     .addVersion(
-      {
-        version: API_VERSION,
-        validate: { request: { params: pageParamsSchema, query: pageQuerySchema } },
-      },
+      { version: API_VERSION, validate: { request: { params: pageParamsSchema } } },
       withAvailabilityCheck(async (context, request, response) => {
         try {
-          const { workflowId } = request.params;
-          const { token } = request.query;
-          const spaceId = spaces.getSpaceId(request);
-          const workflow = await api.getWorkflow(workflowId, spaceId);
-          const page = resolvePage(workflow, { signingKey, spaceId, workflowId, token });
-
-          return htmlOk(
-            response,
-            renderPageForm({ page, basePath: request.basePath, workflowId, token })
-          );
+          const { pageId } = request.params;
+          const page = await resolvePage(api.getWorkflowsSubscribedToTrigger.bind(api), {
+            pageId,
+            spaceId: spaces.getSpaceId(request),
+          });
+          return htmlOk(response, renderPageForm({ page, basePath: request.basePath, pageId }));
         } catch (error) {
           return handleExternalResumeError(response, error, logger);
         }
@@ -90,11 +83,7 @@ export function registerPageFormRoute(deps: RouteDependencies, signingKey: strin
 }
 
 /** POST a page submission, which validates the input and runs the workflow. */
-export function registerPageSubmitRoute(
-  deps: RouteDependencies,
-  signingKey: string,
-  runAsApiKey: string
-) {
+export function registerPageSubmitRoute(deps: RouteDependencies, runAsApiKey: string) {
   const { router, api, spaces, logger, audit } = deps;
 
   router.versioned
@@ -113,47 +102,48 @@ export function registerPageSubmitRoute(
         validate: {
           request: {
             params: pageParamsSchema,
-            query: pageQuerySchema,
             body: schema.recordOf(schema.string({ maxLength: 256 }), schema.any()),
           },
         },
       },
       withAvailabilityCheck(async (context, request, response) => {
-        const { workflowId } = request.params;
+        const { pageId } = request.params;
+        let workflowId: string | undefined;
         try {
-          const { token } = request.query;
           const spaceId = spaces.getSpaceId(request);
-          const workflow = await api.getWorkflow(workflowId, spaceId);
-          const page = resolvePage(workflow, { signingKey, spaceId, workflowId, token });
+          const page = await resolvePage(api.getWorkflowsSubscribedToTrigger.bind(api), {
+            pageId,
+            spaceId,
+          });
+          workflowId = page.workflow.id;
           const inputs = parsePageSubmission(request.body, page.inputsSchema);
           const submitter = getPageSubmitter(request.headers, request.socket?.remoteAddress);
 
-          // The visitor has no Kibana identity, so the run carries the
-          // configured one. `request` stays the visitor's only for audit.
-          const runRequest = buildPageRunRequest(runAsApiKey);
+          // The visitor has no Kibana identity, so the run carries the configured one.
+          // Production uses the workflow's `run_as` service account instead.
           const { workflowExecutionId } = await api.runWorkflowWithAlertPreprocessing({
             workflow: toWorkflowExecutionEngineModel(page.workflow),
             spaceId,
             inputs,
-            request: runRequest,
+            request: buildPageRunRequest(runAsApiKey),
             preprocessingContext: context,
-            // No stored run identity yet. The submitter's network details are the
-            // only attribution a page run has, so keep them on the execution.
-            metadata: { submittedVia: 'page', submitter },
+            metadata: { submittedVia: 'page', pageId, submitter },
           });
 
           audit.logWorkflowRun(request, { workflowId, executionId: workflowExecutionId });
           return htmlSuccess(response);
         } catch (error) {
-          audit.logWorkflowRun(request, { workflowId, error });
+          if (workflowId) {
+            audit.logWorkflowRun(request, { workflowId, error });
+          }
           return handleExternalResumeError(response, error, logger);
         }
       })
     );
 }
 
-/** Authenticated helper that returns the shareable page URL for an author. */
-export function registerPageLinkRoute(deps: RouteDependencies, signingKey: string) {
+/** Authenticated helper that lists the public URLs of a workflow's pages. */
+export function registerPageLinkRoute(deps: RouteDependencies) {
   const { router, api, spaces } = deps;
 
   router.versioned
@@ -161,23 +151,32 @@ export function registerPageLinkRoute(deps: RouteDependencies, signingKey: strin
       path: PAGE_LINK_API_PATH,
       access: 'internal',
       security: WORKFLOW_EXECUTE_SECURITY,
-      summary: 'Get the shareable link for a workflow page',
+      summary: 'Get the shareable links for a workflow page',
     })
     .addVersion(
-      { version: INTERNAL_API_VERSION, validate: { request: { params: pageParamsSchema } } },
+      { version: INTERNAL_API_VERSION, validate: { request: { params: workflowParamsSchema } } },
       withAvailabilityCheck(async (context, request, response) => {
-        const { workflowId } = request.params;
-        const spaceId = spaces.getSpaceId(request);
-        const workflow = await api.getWorkflow(workflowId, spaceId);
-        if (!workflow?.definition?.triggers?.some((trigger) => trigger.type === 'page')) {
-          return response.notFound({
-            body: { message: 'Workflow does not define a page trigger.' },
-          });
+        const workflow = await api.getWorkflow(
+          request.params.workflowId,
+          spaces.getSpaceId(request),
+          request
+        );
+        const pageIds = (workflow?.definition?.triggers ?? [])
+          .filter(isPageTrigger)
+          .map((trigger) => trigger[PAGE_ID_KEY])
+          .filter((id): id is string => typeof id === 'string');
+        if (!workflow || pageIds.length === 0) {
+          return response.notFound({ body: { message: 'Workflow does not define a page.' } });
         }
 
-        const token = computePageToken(signingKey, spaceId, workflowId);
         return response.ok({
-          body: { url: buildPageFormUrl({ basePath: request.basePath, workflowId, token }), token },
+          body: {
+            enabled: workflow.enabled,
+            pages: pageIds.map((pageId) => ({
+              pageId,
+              url: buildPageUrl({ basePath: request.basePath, pageId }),
+            })),
+          },
         });
       })
     );
