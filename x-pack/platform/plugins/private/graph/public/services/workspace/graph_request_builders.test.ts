@@ -9,6 +9,7 @@ import type { AdvancedSettings, WorkspaceField } from '../../types/app_state';
 import {
   buildExpandExploreRequest,
   buildFillConnectionsRequest,
+  buildNodeQuery,
   buildSearchExploreRequest,
 } from './graph_request_builders';
 
@@ -26,6 +27,22 @@ const fields = [
 ] as WorkspaceField[];
 
 describe('graph request builders', () => {
+  it('builds queries for simple and grouped nodes', () => {
+    const user = { data: { field: 'user', term: 'alice' } };
+    const secondUser = { data: { field: 'user', term: 'bob' } };
+    const host = { data: { field: 'host', term: 'server-1' } };
+
+    expect(buildNodeQuery([user])).toEqual({ term: { user: 'alice' } });
+    expect(buildNodeQuery([user, secondUser])).toEqual({
+      terms: { user: ['alice', 'bob'] },
+    });
+    expect(buildNodeQuery([user, host])).toEqual({
+      bool: {
+        should: [{ terms: { user: ['alice'] } }, { terms: { host: ['server-1'] } }],
+      },
+    });
+  });
+
   it('builds an adjacency matrix request from ordered node queries', () => {
     const firstQuery = { term: { user: 'alice' } };
     const secondQuery = { term: { host: 'server-1' } };

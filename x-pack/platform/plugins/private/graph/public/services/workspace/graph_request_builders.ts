@@ -51,6 +51,30 @@ export const buildExploreControls = (settings: AdvancedSettings) => {
   return controls;
 };
 
+export const buildNodeQuery = (nodes: RequestNode[]): Query => {
+  const [firstNode] = nodes;
+  if (nodes.length === 1) {
+    return { term: { [firstNode.data.field]: firstNode.data.term } };
+  }
+
+  const termsByField: Record<string, string[]> = {};
+  nodes.forEach((node) => {
+    (termsByField[node.data.field] ??= []).push(node.data.term);
+  });
+
+  if (Object.keys(termsByField).length === 1) {
+    return { terms: termsByField };
+  }
+
+  return {
+    bool: {
+      should: Object.entries(termsByField).map(([field, terms]) => ({
+        terms: { [field]: terms },
+      })),
+    },
+  };
+};
+
 export const buildFillConnectionsRequest = (nodeQueries: Query[]) => {
   const filters = Object.fromEntries(nodeQueries.map((query, index) => [index, query]));
 
