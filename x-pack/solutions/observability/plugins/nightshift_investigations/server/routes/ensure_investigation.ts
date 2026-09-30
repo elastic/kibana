@@ -19,7 +19,8 @@ export const ensureInvestigationRoute = createNightshiftInvestigationsServerRout
       'Creates the investigation record for a workflow execution if it does not exist yet. ' +
       'Called by the investigation workflow (after ensuring the agent exists) so every run is ' +
       'tracked regardless of how it was triggered. All attributes derive from the execution document, ' +
-      'never from the request. A run continuing an investigation gets back its conversation_id.',
+      'never from the request. A run that sets `continue` reopens an existing investigation ' +
+      'instead and gets back its conversation_id.',
   },
   security: {
     authz: {
@@ -32,8 +33,8 @@ export const ensureInvestigationRoute = createNightshiftInvestigationsServerRout
     }),
     body: z
       .object({
-        /** The run's own execution, when it continues an investigation it did not create. */
-        execution_id: z.string().min(1).max(MAX_KEYWORD_LENGTH).optional(),
+        /** Set by a run that continues an investigation rather than starting one. */
+        continue: z.boolean().optional(),
       })
       .nullish(),
   }),
@@ -41,7 +42,9 @@ export const ensureInvestigationRoute = createNightshiftInvestigationsServerRout
     const client = getInvestigationsClient(request);
     let conversationId: string | undefined;
     try {
-      conversationId = await client.ensureOrCreate(params.path.id, params.body?.execution_id);
+      conversationId = await client.ensureOrCreate(params.path.id, {
+        continues: params.body?.continue === true,
+      });
     } catch (error) {
       rethrowInvestigationClientError(error);
     }

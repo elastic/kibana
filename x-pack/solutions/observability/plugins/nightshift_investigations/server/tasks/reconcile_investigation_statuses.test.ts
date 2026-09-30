@@ -19,7 +19,7 @@ import {
 
 const HOUR_MS = 60 * 60 * 1000;
 
-type SweepFields = 'created_at';
+type SweepFields = 'created_at' | 'started_at';
 type SweepResult = FindInvestigationsAcrossSpacesResult<SweepFields>;
 type SweepInvestigation = SweepResult['results'][number];
 
@@ -28,16 +28,19 @@ const investigation = ({
   spaceId = 'default',
   version = 'WzEsMV0=',
   createdAt = new Date().toISOString(),
+  startedAt,
 }: {
   id: string;
   spaceId?: string;
   version?: string;
   createdAt?: string;
+  startedAt?: string;
 }): SweepInvestigation => ({
   investigation: {
     id,
     version,
     created_at: createdAt,
+    ...(startedAt && { started_at: startedAt }),
   },
   spaceId,
 });
@@ -243,6 +246,57 @@ describe('reconcileInvestigationStatuses', () => {
     await run();
 
     expect(investigationSweepRepository.updateInSpace).not.toHaveBeenCalled();
+  });
+
+  describe('an investigation reopened after its first execution finished', () => {
+    const reopened = (msAgo: number) =>
+      page([
+        investigation({
+          id: 'inv-1',
+          startedAt: new Date(Date.now() - msAgo).toISOString(),
+        }),
+      ]);
+
+    it('is not settled by that execution while its continuing run may still be going', async () => {
+      const { investigationSweepRepository, resolveAllExecutionsTo, run } = setup();
+      investigationSweepRepository.findAcrossSpaces.mockResolvedValueOnce(reopened(HOUR_MS));
+      resolveAllExecutionsTo(execution(ExecutionStatus.COMPLETED));
+
+      const result = await run();
+
+      expect(investigationSweepRepository.updateInSpace).not.toHaveBeenCalled();
+      expect(result).toEqual({ scanned: 1, reconciled: 0 });
+    });
+
+    it('is failed once it outlives the workflow timeout', async () => {
+      const { investigationSweepRepository, resolveAllExecutionsTo, run } = setup();
+      investigationSweepRepository.findAcrossSpaces.mockResolvedValueOnce(reopened(2 * HOUR_MS));
+      resolveAllExecutionsTo(execution(ExecutionStatus.COMPLETED));
+
+      await run();
+
+      const update = investigationSweepRepository.updateInSpace.mock.calls[0][0];
+      expect(update.patch).toEqual({
+        status: 'failed',
+        completed_at: expect.any(String),
+        error: 'Continued investigation did not finish within the workflow timeout',
+      });
+    });
+  });
+
+  it('settles an investigation from an execution that finished after it started', async () => {
+    const { investigationSweepRepository, resolveAllExecutionsTo, run } = setup();
+    investigationSweepRepository.findAcrossSpaces.mockResolvedValueOnce(
+      page([investigation({ id: 'inv-1', startedAt: '2024-06-01T11:00:00.000Z' })])
+    );
+    resolveAllExecutionsTo(execution(ExecutionStatus.COMPLETED));
+
+    await run();
+
+    expect(investigationSweepRepository.updateInSpace.mock.calls[0][0].patch).toEqual({
+      status: 'completed',
+      completed_at: FINISHED_AT,
+    });
   });
 
   it('does not reconcile an execution from a removed workflow', async () => {

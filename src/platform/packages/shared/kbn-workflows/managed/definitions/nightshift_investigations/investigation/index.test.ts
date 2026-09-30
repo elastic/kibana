@@ -143,7 +143,7 @@ describe('Nightshift investigation workflow', () => {
       expect(params?.path).toContain('{{ inputs.investigation_id | default: execution.id }}');
     }
     expect(requireStep('persist_investigation_started').with?.body).toEqual({
-      execution_id: '{{ execution.id }}',
+      continue: '${{ inputs.investigation_id != null }}',
     });
   });
 

@@ -1628,46 +1628,31 @@ describe('NightshiftInvestigationsClient.ensureOrCreate()', () => {
 
 describe('NightshiftInvestigationsClient.ensureOrCreate() continuing an investigation', () => {
   const INVESTIGATION_ID = 'inv-slack';
-  const EXECUTION_ID = 'exec-follow-up';
+  const NOW = '2024-01-02T00:00:00.000Z';
 
-  const makeFollowUpExecution = (inputs: Record<string, unknown> = {}) => ({
-    id: EXECUTION_ID,
-    workflowId: NIGHTSHIFT_INVESTIGATION_WORKFLOW_ID,
-    status: ExecutionStatus.RUNNING,
-    startedAt: '2024-01-02T00:00:00Z',
-    executedBy: 'slack-app',
-    context: { inputs: { investigation_id: INVESTIGATION_ID, ...inputs } },
-  });
+  beforeEach(() => jest.useFakeTimers().setSystemTime(new Date(NOW)));
+  afterEach(() => jest.useRealTimers());
 
   it.each<[InvestigationStatus, Record<string, unknown>]>([
     ['pending', {}],
+    ['running', {}],
     ['completed', { completed_at: null, error: null }],
     ['failed', { completed_at: null, error: null }],
-  ])('moves a %s investigation to running for the run that names it', async (status, cleared) => {
+  ])('moves a %s investigation to running from now', async (status, cleared) => {
     repository.get.mockResolvedValue(
       makeRecord({ status, conversation_id: 'conv-slack' }, { id: INVESTIGATION_ID, version: 'v2' })
     );
-    mockManagement.getWorkflowExecution.mockResolvedValue(makeFollowUpExecution());
 
-    await expect(makeClient().ensureOrCreate(INVESTIGATION_ID, EXECUTION_ID)).resolves.toBe(
+    await expect(makeClient().ensureOrCreate(INVESTIGATION_ID, { continues: true })).resolves.toBe(
       'conv-slack'
     );
 
-    expect(mockManagement.getWorkflowExecution).toHaveBeenCalledWith(
-      EXECUTION_ID,
-      SPACE_ID,
-      expect.anything()
-    );
     expect(repository.update).toHaveBeenCalledWith({
       id: INVESTIGATION_ID,
-      patch: {
-        status: 'running',
-        started_at: '2024-01-02T00:00:00Z',
-        executed_by: 'slack-app',
-        ...cleared,
-      },
+      patch: { status: 'running', started_at: NOW, ...cleared },
       version: 'v2',
     });
+    expect(mockManagement.getWorkflowExecution).not.toHaveBeenCalled();
   });
 
   it('reports a reopened investigation without its previous completion or error', async () => {
@@ -1681,22 +1666,10 @@ describe('NightshiftInvestigationsClient.ensureOrCreate() continuing an investig
     expect(investigation.error).toBeUndefined();
   });
 
-  it('rejects a run that names a different investigation', async () => {
-    repository.get.mockResolvedValue(makeRecord({}, { id: INVESTIGATION_ID }));
-    mockManagement.getWorkflowExecution.mockResolvedValue(
-      makeFollowUpExecution({ investigation_id: 'someone-else' })
-    );
-
-    await expect(makeClient().ensureOrCreate(INVESTIGATION_ID, EXECUTION_ID)).rejects.toThrow(
-      InvestigationNotFoundError
-    );
-    expect(repository.update).not.toHaveBeenCalled();
-  });
-
   it('rejects a continuation of an investigation that does not exist', async () => {
-    await expect(makeClient().ensureOrCreate(INVESTIGATION_ID, EXECUTION_ID)).rejects.toThrow(
-      InvestigationNotFoundError
-    );
-    expect(mockManagement.getWorkflowExecution).not.toHaveBeenCalled();
+    await expect(
+      makeClient().ensureOrCreate(INVESTIGATION_ID, { continues: true })
+    ).rejects.toThrow(InvestigationNotFoundError);
+    expect(repository.update).not.toHaveBeenCalled();
   });
 });

@@ -541,14 +541,15 @@ export class NightshiftInvestigationsClient {
    * run's executor, and stamping the transition with the wall clock would date the record to when
    * the persist step happened to run rather than to when the run began.
    *
-   * Resolves to the conversation a continuing run resumes, so callers name only the investigation.
+   * A run that `continues` an existing investigation reopens it instead, and resolves to the
+   * conversation it resumes, so callers name only the investigation.
    */
   async ensureOrCreate(
     investigationId: string,
-    executionId = investigationId
+    { continues = false }: { continues?: boolean } = {}
   ): Promise<string | undefined> {
-    if (executionId !== investigationId) {
-      return this.continueInvestigation(investigationId, executionId);
+    if (continues) {
+      return this.continueInvestigation(investigationId);
     }
 
     const existing = await this.investigationRepository.get(investigationId);
@@ -615,45 +616,20 @@ export class NightshiftInvestigationsClient {
 
   /**
    * Marks an existing investigation running for a run that continues it, such as a reply in its
-   * Slack thread. Unlike a first run, a settled record is reopened. The run must name this
-   * investigation in its own inputs, so a caller cannot reopen one it did not start. Resolves to
-   * the investigation's conversation.
+   * Slack thread. Unlike a first run, a settled record is reopened. `started_at` is when the
+   * reopen happened, which is what the reconciliation task compares against the investigation's
+   * first execution. Resolves to the investigation's conversation.
    */
-  private async continueInvestigation(
-    investigationId: string,
-    executionId: string
-  ): Promise<string | undefined> {
+  private async continueInvestigation(investigationId: string): Promise<string | undefined> {
     const existing = await this.investigationRepository.get(investigationId);
     if (!existing) {
-      throw new InvestigationNotFoundError(investigationId);
-    }
-
-    if (!this.workflowsManagement) {
-      throw new InvestigationUnavailableError('workflowsManagement is not available');
-    }
-
-    const execution = await this.workflowsManagement.management.getWorkflowExecution(
-      executionId,
-      this.getSpaceId(),
-      { includeOutput: false, request: this.request }
-    );
-    const context = execution?.context;
-    const inputs =
-      isPlainObject(context) && isPlainObject(context.inputs) ? context.inputs : undefined;
-
-    if (
-      !execution ||
-      !isInvestigationWorkflowExecution(execution) ||
-      inputs?.investigation_id !== investigationId
-    ) {
       throw new InvestigationNotFoundError(investigationId);
     }
 
     await this.transitionToRunning({
       investigationId,
       version: existing.version,
-      startedAt: execution.startedAt ?? new Date().toISOString(),
-      executedBy: execution.executedBy,
+      startedAt: new Date().toISOString(),
       reopen: isTerminalStatus(existing.status),
     });
     return existing.conversation_id;
@@ -682,7 +658,7 @@ export class NightshiftInvestigationsClient {
         patch: {
           status: 'running',
           started_at: startedAt,
-          executed_by: executedBy,
+          ...(executedBy && { executed_by: executedBy }),
           ...(reopen && { completed_at: null, error: null }),
         },
         version,
