@@ -42,9 +42,44 @@ export const CATEGORY_LABELS: Record<InvestigationIocCategory, string> = {
   ),
 };
 
+/** Compact labels for the summary row, where space is limited. */
+export const CATEGORY_SHORT_LABELS: Record<InvestigationIocCategory, string> = {
+  shas: i18n.translate('xpack.securitySolution.agentBuilder.investigationIocs.shortCategory.shas', {
+    defaultMessage: 'SHAs',
+  }),
+  ips: i18n.translate('xpack.securitySolution.agentBuilder.investigationIocs.shortCategory.ips', {
+    defaultMessage: 'IPs',
+  }),
+  file_paths: i18n.translate(
+    'xpack.securitySolution.agentBuilder.investigationIocs.shortCategory.filePaths',
+    { defaultMessage: 'File paths' }
+  ),
+  malicious_commands: i18n.translate(
+    'xpack.securitySolution.agentBuilder.investigationIocs.shortCategory.maliciousCommands',
+    { defaultMessage: 'Commands' }
+  ),
+  ransom_note: i18n.translate(
+    'xpack.securitySolution.agentBuilder.investigationIocs.shortCategory.ransomNote',
+    { defaultMessage: 'Ransom notes' }
+  ),
+  encryption_marker: i18n.translate(
+    'xpack.securitySolution.agentBuilder.investigationIocs.shortCategory.encryptionMarker',
+    { defaultMessage: 'Encryption markers' }
+  ),
+  compromised_identities: i18n.translate(
+    'xpack.securitySolution.agentBuilder.investigationIocs.shortCategory.compromisedIdentities',
+    { defaultMessage: 'Identities' }
+  ),
+  affected_hosts: i18n.translate(
+    'xpack.securitySolution.agentBuilder.investigationIocs.shortCategory.affectedHosts',
+    { defaultMessage: 'Hosts' }
+  ),
+};
+
 export interface IocCategoryRow {
   id: InvestigationIocCategory;
   typeLabel: string;
+  shortLabel: string;
   items: InvestigationIoc[];
 }
 
@@ -73,6 +108,13 @@ export const parseIocCategoryRows = (data: unknown): IocCategoryRow[] => {
     if (items.length === 0) {
       return [];
     }
-    return [{ id: category, typeLabel: CATEGORY_LABELS[category], items }];
+    return [
+      {
+        id: category,
+        typeLabel: CATEGORY_LABELS[category],
+        shortLabel: CATEGORY_SHORT_LABELS[category],
+        items,
+      },
+    ];
   });
 };

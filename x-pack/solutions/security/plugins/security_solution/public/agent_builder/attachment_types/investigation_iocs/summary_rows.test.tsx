@@ -6,35 +6,57 @@
  */
 
 import React from 'react';
-import { render, screen } from '@testing-library/react';
+import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { I18nProvider } from '@kbn/i18n-react';
 import { renderInvestigationIocsSummary } from './summary_rows';
 
+const mockOpener = jest.fn((_props: unknown) => null);
+jest.mock('./open_iocs_flyout_on_mount', () => ({
+  InvestigationIocsFlyoutOpener: (props: unknown) => mockOpener(props),
+}));
+
+const resolveSecurityCanvasContext = jest.fn();
+
 const renderSummary = (data: unknown) =>
-  render(<I18nProvider>{renderInvestigationIocsSummary({ data })}</I18nProvider>);
+  render(
+    <I18nProvider>
+      {renderInvestigationIocsSummary({ data }, resolveSecurityCanvasContext)}
+    </I18nProvider>
+  );
 
 describe('renderInvestigationIocsSummary', () => {
-  it('renders one read-only row per indicator, in category order', async () => {
+  beforeEach(() => {
+    mockOpener.mockClear();
+  });
+
+  it('renders one row labeled with the populated categories', async () => {
     renderSummary({
       ips: [{ value: '203.0.113.8', comment: 'C2 contacted by FIN-DB-02' }],
       shas: [{ value: 'abc123' }],
-      file_paths: [],
+      file_paths: [{ value: 'C:\\Users\\Public\\update.dll' }],
     });
 
-    expect(screen.getByText('Indicators of compromise')).toBeInTheDocument();
-    const labels = screen.getAllByTestId('attachmentSummaryRowLabel').map((el) => el.textContent);
-    expect(labels).toEqual(['abc123', '203.0.113.8']);
-
-    const icons = screen.getAllByTestId('attachmentSummaryRowIcon');
-    await userEvent.hover(icons[0]);
-    expect(await screen.findByRole('tooltip')).toHaveTextContent('SHA256');
-    await userEvent.unhover(icons[0]);
-    await userEvent.hover(icons[1]);
-    expect(await screen.findByRole('tooltip')).toHaveTextContent(
-      'IP addresses — C2 contacted by FIN-DB-02'
+    expect(screen.getByText('IOC')).toBeInTheDocument();
+    expect(screen.getByText('1')).toBeInTheDocument();
+    expect(screen.getByTestId('attachmentSummaryRowButton')).toHaveAccessibleName(
+      'IOC: SHAs, IPs, File paths'
     );
-    expect(screen.queryByTestId('attachmentSummaryRowButton')).not.toBeInTheDocument();
+    expect(screen.queryByText('abc123')).not.toBeInTheDocument();
+
+    await userEvent.click(screen.getByTestId('attachmentSummaryRowButton'));
+
+    await waitFor(() => expect(mockOpener).toHaveBeenCalled());
+    expect(mockOpener).toHaveBeenCalledWith(
+      expect.objectContaining({
+        categories: [
+          expect.objectContaining({ id: 'shas' }),
+          expect.objectContaining({ id: 'ips' }),
+          expect.objectContaining({ id: 'file_paths' }),
+        ],
+        resolveSecurityCanvasContext,
+      })
+    );
   });
 
   it.each([

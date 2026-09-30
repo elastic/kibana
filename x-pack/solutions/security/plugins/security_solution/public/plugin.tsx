@@ -450,6 +450,8 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
         });
         registerInvestigationIocsAttachment({
           attachments: plugins.agentBuilder.attachments,
+          resolveSecurityCanvasContext: () =>
+            this.getSecurityCanvasContext(core, plugins as StartPluginsDependencies),
         });
       }
     }

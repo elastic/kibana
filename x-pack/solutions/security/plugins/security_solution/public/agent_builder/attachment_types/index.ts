@@ -142,12 +142,14 @@ export const registerInvestigationTimelineAttachment = ({
  */
 export const registerInvestigationIocsAttachment = ({
   attachments,
+  resolveSecurityCanvasContext,
 }: {
   attachments: AttachmentServiceStartContract;
+  resolveSecurityCanvasContext: () => Promise<SecurityCanvasEmbeddedBundle>;
 }): void => {
   attachments.addAttachmentType(
     SecurityAgentBuilderAttachments.investigationIocs,
-    createInvestigationIocsAttachmentDefinition()
+    createInvestigationIocsAttachmentDefinition({ resolveSecurityCanvasContext })
   );
 };
 

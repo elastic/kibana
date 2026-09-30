@@ -16,7 +16,9 @@ const makeAttachment = (data: InvestigationIocsAttachmentData): InvestigationIoc
 });
 
 describe('createInvestigationIocsAttachmentDefinition', () => {
-  const definition = createInvestigationIocsAttachmentDefinition();
+  const definition = createInvestigationIocsAttachmentDefinition({
+    resolveSecurityCanvasContext: jest.fn(),
+  });
 
   it('uses the flag icon', () => {
     expect(definition.getIcon?.()).toBe('flag');

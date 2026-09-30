@@ -121,7 +121,10 @@ describe('registerInvestigationIocsAttachment', () => {
     const addAttachmentType = jest.fn();
     const attachments = { addAttachmentType } as unknown as AttachmentServiceStartContract;
 
-    registerInvestigationIocsAttachment({ attachments });
+    registerInvestigationIocsAttachment({
+      attachments,
+      resolveSecurityCanvasContext: jest.fn(),
+    });
 
     expect(addAttachmentType).toHaveBeenCalledWith(
       SecurityAgentBuilderAttachments.investigationIocs,

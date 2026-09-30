@@ -12,6 +12,7 @@ import type {
   AttachmentUIDefinition,
   AttachmentRenderProps,
 } from '@kbn/agent-builder-browser/attachments';
+import type { SecurityCanvasEmbeddedBundle } from '../../components/security_redux_embedded_provider';
 import { renderInvestigationIocsSummary } from './summary_rows';
 import type { InvestigationIocsAttachment } from './types';
 
@@ -26,15 +27,18 @@ const LazyInvestigationIocsInlineContent = React.lazy(() =>
   }))
 );
 
-export const createInvestigationIocsAttachmentDefinition =
-  (): AttachmentUIDefinition<InvestigationIocsAttachment> => ({
-    getLabel: (attachment) => attachment?.data?.attachmentLabel ?? DEFAULT_LABEL,
-    getIcon: () => 'flag',
-    renderInlineContent: (props: AttachmentRenderProps<InvestigationIocsAttachment>) => (
-      <React.Suspense fallback={<EuiSkeletonText lines={4} />}>
-        <LazyInvestigationIocsInlineContent {...props} />
-      </React.Suspense>
-    ),
-    renderConversationDetailsContent: ({ attachment }) =>
-      renderInvestigationIocsSummary(attachment),
-  });
+export const createInvestigationIocsAttachmentDefinition = ({
+  resolveSecurityCanvasContext,
+}: {
+  resolveSecurityCanvasContext: () => Promise<SecurityCanvasEmbeddedBundle>;
+}): AttachmentUIDefinition<InvestigationIocsAttachment> => ({
+  getLabel: (attachment) => attachment?.data?.attachmentLabel ?? DEFAULT_LABEL,
+  getIcon: () => 'flag',
+  renderInlineContent: (props: AttachmentRenderProps<InvestigationIocsAttachment>) => (
+    <React.Suspense fallback={<EuiSkeletonText lines={4} />}>
+      <LazyInvestigationIocsInlineContent {...props} />
+    </React.Suspense>
+  ),
+  renderConversationDetailsContent: ({ attachment }) =>
+    renderInvestigationIocsSummary(attachment, resolveSecurityCanvasContext),
+});
