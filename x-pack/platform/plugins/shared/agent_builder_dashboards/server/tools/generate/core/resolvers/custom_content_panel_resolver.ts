@@ -12,23 +12,14 @@ import {
   toEsqlQueryState,
   type CustomContentState,
 } from '@kbn/custom-content-common';
-import type { ResolvedCustomContentTemplate } from '@kbn/custom-content-server';
+import type { CustomContentTemplateResolver } from '@kbn/custom-content-server';
 import { createPanelFailureResult, type PanelContentAttempt } from '../resolve_panel';
 import { getErrorMessage } from '../utils';
 import type { CustomContentPanelResolutionRequest } from '../operations/panels';
 
-/** Generates (or refines) a custom content HTML template. */
-export type ResolveCustomContentTemplate = (params: {
-  prompt: string;
-  esqlQuery?: string;
-  existingTemplate?: string;
-  /** True when the panel already has an ES|QL query that is not changing, so the resolver can skip re-sampling. */
-  hasExistingQuery?: boolean;
-}) => Promise<ResolvedCustomContentTemplate>;
-
 const resolveCustomContentState = async (
   request: CustomContentPanelResolutionRequest,
-  resolveTemplate: ResolveCustomContentTemplate
+  resolveTemplate: CustomContentTemplateResolver
 ): Promise<CustomContentState> => {
   const { nlQuery, esql, existingPanel } = request;
   if (!existingPanel) {
@@ -59,7 +50,7 @@ const resolveCustomContentState = async (
 export const createCustomContentPanelResolver = ({
   resolveTemplate,
 }: {
-  resolveTemplate: ResolveCustomContentTemplate;
+  resolveTemplate: CustomContentTemplateResolver;
 }) => {
   return async (request: CustomContentPanelResolutionRequest): Promise<PanelContentAttempt> => {
     const { operationType, identifier } = request;
