@@ -91,7 +91,8 @@ export const createGraphStore = (deps: GraphStoreDependencies): Store => {
     reducer: rootReducer,
     middleware: (getDefaultMiddleware) =>
       getDefaultMiddleware({
-        // graph uses RTK listeners for action-driven workflows; default thunks remain enabled
+        // graph uses listeners instead of thunks
+        thunk: false,
         // graph state and actions carry non-serializable values (e.g. Workspace instances)
         serializableCheck: false,
         immutableCheck: false,
