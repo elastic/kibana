@@ -7,7 +7,12 @@
 
 // Kibana wrapper
 import { getIcon } from '../../helpers/style_choices';
-import { makeEdgeId, makeNodeId, prepareIncomingNodes } from './graph_merge_planner';
+import {
+  makeEdgeId,
+  makeNodeId,
+  planIncomingEdges,
+  prepareIncomingNodes,
+} from './graph_merge_planner';
 import {
   buildExpandExploreRequest,
   buildExploreControls,
@@ -466,32 +471,29 @@ function GraphWorkspace(options) {
       this.nodesMap[node.id] = node;
     });
 
-    newData.edges.forEach((edge) => {
-      const src = newData.nodes[edge.source];
-      const target = newData.nodes[edge.target];
-      edge.id = this.makeEdgeId(src.id, target.id);
-
-      //Lookup the wrappers object that will hold display Info like x/y coordinates
-      const srcWrapperObj = this.nodesMap[src.id];
-      const targetWrapperObj = this.nodesMap[target.id];
-
-      const existingEdge = this.edgesMap[edge.id];
-      if (existingEdge) {
-        existingEdge.weight = Math.max(existingEdge.weight, edge.weight);
+    planIncomingEdges({
+      edges: newData.edges,
+      nodes: normalizedNodes,
+      existingEdges: this.edgesMap,
+    }).forEach((operation) => {
+      if (operation.type === 'update') {
+        const existingEdge = this.edgesMap[operation.id];
+        existingEdge.weight = operation.weight;
         //TODO update width too?
-        existingEdge.doc_count = Math.max(existingEdge.doc_count, edge.doc_count);
+        existingEdge.doc_count = operation.docCount;
         return;
       }
+
       const newEdge = {
-        source: srcWrapperObj,
-        target: targetWrapperObj,
-        weight: edge.weight,
-        width: edge.width,
-        id: edge.id,
-        doc_count: edge.doc_count,
+        source: this.nodesMap[operation.sourceId],
+        target: this.nodesMap[operation.targetId],
+        weight: operation.edge.weight,
+        width: operation.edge.width,
+        id: operation.id,
+        doc_count: operation.edge.doc_count,
       };
-      if (edge.label) {
-        newEdge.label = edge.label;
+      if (operation.edge.label) {
+        newEdge.label = operation.edge.label;
       }
 
       this.edgesMap[newEdge.id] = newEdge;
