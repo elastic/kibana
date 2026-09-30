@@ -89,6 +89,11 @@ export const contextEngineAiIndexTools = {
   queryAiIndices: `${internalNamespaces.platformContextEngine}.query_ai_indices`,
 } as const;
 
+export const customAppsTools = {
+  createApp: `${internalNamespaces.platformCustomApps}.create_app`,
+  listApps: `${internalNamespaces.platformCustomApps}.list_apps`,
+} as const;
+
 export const attachmentTools = {
   read: `${internalNamespaces.attachments}.read`,
   update: `${internalNamespaces.attachments}.update`,
