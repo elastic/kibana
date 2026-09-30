@@ -97,8 +97,8 @@ export const composeEvidenceText = (report: InvestigationStructuredOutput | unde
   const lines: string[] = [];
   for (const hypothesis of report.hypotheses ?? []) {
     for (const evidence of hypothesis.evidence ?? []) {
-      const query = evidence.esql_query ? ` [esql: ${truncate(evidence.esql_query, 200)}]` : '';
-      lines.push(`- ${evidence.description}${query}`);
+      const chart = evidence.chart ? ` [chart: ${truncate(evidence.chart.title, 200)}]` : '';
+      lines.push(`- ${evidence.description}${chart}`);
     }
   }
   for (const recommendation of report.recommendations ?? []) {

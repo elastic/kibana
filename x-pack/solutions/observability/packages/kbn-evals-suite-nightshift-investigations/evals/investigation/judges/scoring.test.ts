@@ -115,14 +115,25 @@ describe('composeEvidenceText', () => {
           candidate: 'throttling',
           confidence: 0.9,
           status: 'confirmed',
-          evidence: [{ description: 'ES rejected bulk writes', esql_query: 'FROM logs-*' }],
+          evidence: [
+            {
+              description: 'ES rejected bulk writes',
+              chart: {
+                type: 'line',
+                title: 'Rejected bulk writes',
+                x_axis: { type: 'time' },
+                y_axis: {},
+                series: [{ name: 'rejections', points: [{ x: '2024-01-01T00:00:00Z', y: 12 }] }],
+              },
+            },
+          ],
         },
       ],
       recommendations: [{ title: 'Raise write queue size', confidence: 0.8 }],
     } as unknown as InvestigationStructuredOutput;
     const text = composeEvidenceText(report);
     expect(text).toContain('ES rejected bulk writes');
-    expect(text).toContain('esql: FROM logs-*');
+    expect(text).toContain('chart: Rejected bulk writes');
     expect(text).toContain('recommendation: Raise write queue size');
   });
 });
