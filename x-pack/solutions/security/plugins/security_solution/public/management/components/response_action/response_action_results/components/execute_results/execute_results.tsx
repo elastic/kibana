@@ -26,6 +26,10 @@ export interface ExecuteResultsProps {
   'data-test-subj'?: string;
 }
 
+/**
+ * DO NOT USE as it is undergoing refactoring. Use `<ResponseActionResults>` component intead
+ * @deprecated
+ */
 export const ExecuteResults = memo<ExecuteResultsProps>(
   ({ action, agentId, textSize, 'data-test-subj': dataTestSubj }) => {
     const getTestId = useTestIdGenerator(dataTestSubj);

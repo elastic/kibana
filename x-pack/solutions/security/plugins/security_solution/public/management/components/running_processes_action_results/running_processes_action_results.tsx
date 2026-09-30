@@ -32,6 +32,10 @@ export interface RunningProcessesActionResultsProps {
   'data-test-subj'?: string;
 }
 
+/**
+ * DO NOT USE as it is undergoing refactoring. Use `<ResponseActionResults>` component intead
+ * @deprecated
+ */
 export const RunningProcessesActionResults = memo<RunningProcessesActionResultsProps>(
   ({ action, agentId, textSize = 's', 'data-test-subj': dataTestSubj }) => {
     return (

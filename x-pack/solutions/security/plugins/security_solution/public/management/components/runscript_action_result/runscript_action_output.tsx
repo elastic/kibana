@@ -55,7 +55,7 @@ const StyledEuiText = styled(EuiText)`
 interface RunscriptActionOutputProps {
   content?: string | React.ReactNode;
   initialIsOpen?: boolean;
-  textSize?: Exclude<EuiTextProps['size'], 'm' | 'relative'>;
+  textSize?: EuiTextProps['size'];
   type: 'error' | 'output';
   'data-test-subj'?: string;
 }
@@ -107,6 +107,10 @@ export interface RunscriptOutputProps {
   textSize?: EuiTextProps['size'];
 }
 
+/**
+ * DO NOT USE as it is undergoing refactoring. Use `<ResponseActionResults>` component intead
+ * @deprecated
+ */
 export const RunscriptOutput = memo<RunscriptOutputProps>(
   ({ action, agentId, 'data-test-subj': dataTestSubj, textSize = 'xs' }) => {
     const outputContent = useMemo(

@@ -58,6 +58,10 @@ interface EndpointUploadActionResultProps {
   'data-test-subj'?: string;
 }
 
+/**
+ * DO NOT USE as it is undergoing refactoring. Use `<ResponseActionResults>` component intead
+ * @deprecated
+ */
 export const EndpointUploadActionResult = memo<EndpointUploadActionResultProps>(
   ({ action: _action, agentId, textSize = 's', 'data-test-subj': dataTestSubj }) => {
     const action = _action as ActionDetails<

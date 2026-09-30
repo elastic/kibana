@@ -18,6 +18,7 @@ export interface IsolationResultsProps {
 
 /**
  * Used for both `isolate` and `unisolate` response actions.
+ * @private
  */
 export const IsolationResults = memo<IsolationResultsProps>(
   ({ action, agentId, 'data-test-subj': dataTestSubj }) => {

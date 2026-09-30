@@ -117,7 +117,7 @@ export const ResponseActionResults = memo<ResponseActionResultsProps>(
                     <IsolationResults
                       action={action}
                       agentId={hostAgentId}
-                      data-test-subj={getTestId('results')}
+                      data-test-subj={getTestId('isolatationResults')}
                     />
                   )}
 
@@ -126,7 +126,7 @@ export const ResponseActionResults = memo<ResponseActionResultsProps>(
                       action={action}
                       agentId={hostAgentId}
                       textSize={textSize}
-                      data-test-subj={getTestId('results')}
+                      data-test-subj={getTestId('killSuspendProcessResults')}
                     />
                   )}
 
@@ -135,7 +135,7 @@ export const ResponseActionResults = memo<ResponseActionResultsProps>(
                       action={action}
                       agentId={hostAgentId}
                       textSize={textSize}
-                      data-test-subj={getTestId('results')}
+                      data-test-subj={getTestId('processesResults')}
                     />
                   )}
 
@@ -144,7 +144,7 @@ export const ResponseActionResults = memo<ResponseActionResultsProps>(
                       action={action}
                       agentId={hostAgentId}
                       textSize={textSize}
-                      data-test-subj={getTestId('results')}
+                      data-test-subj={getTestId('getFileResults')}
                     />
                   )}
 
@@ -153,7 +153,7 @@ export const ResponseActionResults = memo<ResponseActionResultsProps>(
                       action={action}
                       agentId={hostAgentId}
                       textSize={textSize}
-                      data-test-subj={getTestId('results')}
+                      data-test-subj={getTestId('executeResults')}
                     />
                   )}
 
@@ -162,7 +162,7 @@ export const ResponseActionResults = memo<ResponseActionResultsProps>(
                       action={action}
                       agentId={hostAgentId}
                       textSize={textSize}
-                      data-test-subj={getTestId('results')}
+                      data-test-subj={getTestId('uploadResults')}
                     />
                   )}
 
@@ -170,7 +170,7 @@ export const ResponseActionResults = memo<ResponseActionResultsProps>(
                     <ScanResults
                       action={action}
                       agentId={hostAgentId}
-                      data-test-subj={getTestId('results')}
+                      data-test-subj={getTestId('scanResults')}
                     />
                   )}
 
@@ -179,7 +179,7 @@ export const ResponseActionResults = memo<ResponseActionResultsProps>(
                       action={action}
                       agentId={hostAgentId}
                       textSize={textSize}
-                      data-test-subj={getTestId('results')}
+                      data-test-subj={getTestId('runscriptResults')}
                     />
                   )}
 
@@ -188,7 +188,7 @@ export const ResponseActionResults = memo<ResponseActionResultsProps>(
                       action={action}
                       agentId={hostAgentId}
                       textSize={textSize}
-                      data-test-subj={getTestId('results')}
+                      data-test-subj={getTestId('cancelResults')}
                     />
                   )}
 
@@ -197,7 +197,7 @@ export const ResponseActionResults = memo<ResponseActionResultsProps>(
                       action={action}
                       agentId={hostAgentId}
                       textSize={textSize}
-                      data-test-subj={getTestId('results')}
+                      data-test-subj={getTestId('memoryDumpResults')}
                     />
                   )}
                 </>
