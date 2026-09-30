@@ -1623,6 +1623,59 @@ describe('UiamService', () => {
     });
   });
 
+  describe('#revokeServiceAccount', () => {
+    it('authenticates with the mTLS client certificate only, sending no credential headers', async () => {
+      fetchSpy.mockResolvedValue({ ok: true, status: 204 });
+
+      await expect(uiamService.revokeServiceAccount('service-account-id')).resolves.toBeUndefined();
+
+      expect(fetchSpy).toHaveBeenCalledTimes(1);
+      expect(fetchSpy).toHaveBeenCalledWith(
+        'https://uiam.service/uiam/api/v1/service-accounts/service-account-id',
+        {
+          method: 'DELETE',
+          headers: { 'User-Agent': 'Kibana/9.0.0' },
+          dispatcher: AGENT_MOCK,
+        }
+      );
+
+      const [, { headers }] = fetchSpy.mock.calls[0];
+      expect(headers).not.toHaveProperty('Authorization');
+      expect(headers).not.toHaveProperty('authorization');
+      expect(headers).not.toHaveProperty(ES_CLIENT_AUTHENTICATION_HEADER);
+    });
+
+    it('URL-encodes the service account id', async () => {
+      fetchSpy.mockResolvedValue({ ok: true, status: 204 });
+
+      await uiamService.revokeServiceAccount('id/with spaces');
+
+      expect(fetchSpy).toHaveBeenCalledWith(
+        'https://uiam.service/uiam/api/v1/service-accounts/id%2Fwith%20spaces',
+        expect.anything()
+      );
+    });
+
+    it('reproduces a 403 when UIAM refuses the revoke', async () => {
+      fetchSpy.mockResolvedValue({
+        ok: false,
+        status: 403,
+        headers: new Headers(),
+        json: async () => ({
+          error: {
+            code: 'AUTHZ_DENY',
+            type: 'forbidden',
+            message: 'Forbidden',
+          },
+        }),
+      });
+
+      await expect(uiamService.revokeServiceAccount('service-account-id')).rejects.toMatchObject({
+        output: { statusCode: 403 },
+      });
+    });
+  });
+
   describe('#exchangeServiceAccountToken', () => {
     const exchangeLogger = loggingSystemMock.createLogger();
 

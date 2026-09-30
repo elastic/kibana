@@ -55,8 +55,6 @@ export interface CoreServiceAccountsService {
    */
   isEnabled(): boolean;
 
-  authorize(request: KibanaRequest): Promise<void>;
-
   /**
    * Create a service account whose privileges are bounded by those of the user
    * bound to the provided request.
@@ -66,6 +64,11 @@ export interface CoreServiceAccountsService {
    * in the security plugin and are not accepted from an HTTP body.
    */
   create(request: KibanaRequest, params: CreateServiceAccountServerParams): Promise<ServiceAccount>;
+
+  /**
+   * Revokes a service account. Requires `manage_security`.
+   */
+  delete(request: KibanaRequest, id: string): Promise<void>;
 
   /**
    * Binds a service account to a workload, so that the workload runs as that account until it is

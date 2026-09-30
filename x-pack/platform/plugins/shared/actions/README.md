@@ -86,13 +86,12 @@ The setting is rejected outside Serverless; with it off (the default) the header
 Relay identifies Kibana from the mTLS leg alone.
 
 The same flag chooses the Slack install credential. With it off (ECH, or Serverless with the
-default), install sends `kibana_api_key`; with it on, install creates or reuses a user-managed UIAM
-service account with Relay's platform service account (`relay-service`) in `assumable_by` and sends
-only `uiam_service_account_id`. The two credentials are mutually exclusive, and HTTP callers cannot
-name an assumer: the create-service-account route accepts `{ name }` only. Kibana has no
-service-account revoke API, so accounts are retained across failed installs and disconnects, and
-the id is recorded so the next connect reuses the same account. A Relay 403 on a reused id clears
-it, and the next connect creates a new account.
+default), install sends `kibana_api_key`; with it on, install creates a user-managed UIAM service
+account with Relay's platform service account (`relay-service`) in `assumable_by` and sends only
+`uiam_service_account_id`. Each connect creates a new account. The previous one is revoked after
+the new install is accepted, and a failed install revokes the account it just created. Disconnect
+revokes the stored account. The two credentials are mutually exclusive, and HTTP callers cannot
+name an assumer: the create-service-account route accepts `{ name }` only.
 
 ### Configuration Utilities
 

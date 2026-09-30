@@ -27,8 +27,8 @@ import { lazyObject } from '@kbn/lazy-object';
 const createServiceAccountsStartMock = (): jest.MockedObjectDeep<CoreServiceAccountsService> =>
   lazyObject({
     isEnabled: jest.fn().mockReturnValue(false),
-    authorize: jest.fn(),
     create: jest.fn(),
+    delete: jest.fn(),
     bindWorkload: jest.fn(),
     unbindWorkload: jest.fn(),
     getWorkloadBinding: jest.fn().mockResolvedValue(null),

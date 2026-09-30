@@ -35,9 +35,9 @@ export interface ListServiceAccountsParams {
  * ones, so the route and contract layers stay backend-agnostic.
  */
 export interface ServiceAccountsBackend {
-  authorize(request: KibanaRequest): Promise<void>;
-
   create(request: KibanaRequest, params: CreateServiceAccountServerParams): Promise<ServiceAccount>;
+
+  delete(request: KibanaRequest, id: string): Promise<void>;
 
   /**
    * Lists the service accounts this Kibana can see, one page at a time.

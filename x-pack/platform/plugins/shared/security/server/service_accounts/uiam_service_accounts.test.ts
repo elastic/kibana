@@ -356,29 +356,6 @@ describe('UiamServiceAccounts', () => {
       expect(JSON.stringify(logger.error.mock.calls)).not.toContain('attacker-principal');
     });
 
-    it('authorizes use of a stored account with `manage_security` and does not call UIAM', async () => {
-      const request = createMockRequest('Bearer essu_my_token');
-
-      await expect(serviceAccounts.authorize(request)).resolves.toBeUndefined();
-
-      expect(mockCheckPrivilegesWithRequest).toHaveBeenCalledWith(request);
-      expect(mockUiam.createServiceAccount).not.toHaveBeenCalled();
-      expect(mockUiam.exchangeServiceAccountToken).not.toHaveBeenCalled();
-    });
-
-    it('rejects use of a stored account when the caller lacks `manage_security`', async () => {
-      mockCheckPrivileges.globally.mockResolvedValue(clusterPrivilegesResponse(false));
-
-      await expect(
-        serviceAccounts.authorize(createMockRequest('Bearer essu_my_token'))
-      ).rejects.toMatchObject({ output: { statusCode: 403 } });
-
-      expect(logger.warn).toHaveBeenCalledWith(
-        'Refused to use a service account: missing `manage_security` cluster privilege'
-      );
-      expect(mockUiam.createServiceAccount).not.toHaveBeenCalled();
-    });
-
     it.each(['Bearer essu_my_token', 'ApiKey essu_key'])(
       'rejects %s when the caller lacks the `manage_security` cluster privilege',
       async (authorization) => {
@@ -581,6 +558,41 @@ describe('UiamServiceAccounts', () => {
       await expect(
         serviceAccounts.create(createMockRequest('Bearer essu_my_token'), createParams)
       ).rejects.toBe(error);
+    });
+  });
+
+  describe('#delete', () => {
+    it('requires `manage_security` and revokes the account as Kibana', async () => {
+      const request = createMockRequest('Bearer essu_my_token');
+
+      await expect(serviceAccounts.delete(request, 'service-account-id')).resolves.toBeUndefined();
+
+      expect(mockCheckPrivileges.globally).toHaveBeenCalledWith({
+        elasticsearch: { cluster: ['manage_security'], index: {} },
+      });
+      expect(mockUiam.revokeServiceAccount).toHaveBeenCalledTimes(1);
+      expect(mockUiam.revokeServiceAccount).toHaveBeenCalledWith('service-account-id');
+    });
+
+    it('rejects when the caller lacks `manage_security` and does not call UIAM', async () => {
+      mockCheckPrivileges.globally.mockResolvedValue(clusterPrivilegesResponse(false));
+
+      await expect(
+        serviceAccounts.delete(createMockRequest('Bearer essu_my_token'), 'service-account-id')
+      ).rejects.toMatchObject({ output: { statusCode: 403 } });
+
+      expect(logger.warn).toHaveBeenCalledWith(
+        'Refused to delete a service account: missing `manage_security` cluster privilege'
+      );
+      expect(mockUiam.revokeServiceAccount).not.toHaveBeenCalled();
+    });
+
+    it('propagates a UIAM refusal', async () => {
+      mockUiam.revokeServiceAccount.mockRejectedValue(Boom.forbidden('not assumable'));
+
+      await expect(
+        serviceAccounts.delete(createMockRequest('Bearer essu_my_token'), 'service-account-id')
+      ).rejects.toMatchObject({ output: { statusCode: 403 } });
     });
   });
 

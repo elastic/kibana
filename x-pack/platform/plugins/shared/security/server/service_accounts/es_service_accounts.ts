@@ -159,22 +159,6 @@ export class EsServiceAccounts implements ServiceAccountsBackend {
     );
   }
 
-  async authorize(request: KibanaRequest): Promise<void> {
-    if (!this.license.isEnabled()) {
-      throw Boom.forbidden(
-        'Cannot use a service account: security features are disabled in Elasticsearch'
-      );
-    }
-
-    await ensureClusterPrivilege({
-      request,
-      checkPrivilegesWithRequest: this.checkPrivilegesWithRequest,
-      logger: this.logger,
-      privilege: 'manage_security',
-      action: 'use a service account',
-    });
-  }
-
   async create(
     request: KibanaRequest,
     params: CreateServiceAccountServerParams
@@ -193,6 +177,55 @@ export class EsServiceAccounts implements ServiceAccountsBackend {
       });
       throw e;
     }
+  }
+
+  async delete(request: KibanaRequest, id: string): Promise<void> {
+    if (!this.license.isEnabled()) {
+      throw Boom.forbidden(
+        'Cannot delete a service account: security features are disabled in Elasticsearch'
+      );
+    }
+
+    await ensureClusterPrivilege({
+      request,
+      checkPrivilegesWithRequest: this.checkPrivilegesWithRequest,
+      logger: this.logger,
+      privilege: 'manage_security',
+      action: 'delete a service account',
+    });
+
+    const principal = parseEsServiceAccountId(id);
+    if (
+      !principal ||
+      principal.namespace !== ES_SERVICE_ACCOUNT_NAMESPACE ||
+      principal.name.length > SERVICE_ACCOUNT_NAME_MAX_LENGTH ||
+      !SERVICE_ACCOUNT_NAME_REGEX.test(principal.name)
+    ) {
+      throw Boom.badRequest('Invalid Elasticsearch service account ID.');
+    }
+
+    const { namespace, name } = principal;
+    const esClient = this.clusterClient.asScoped(request).asCurrentUser;
+
+    await esClient.transport.request(
+      {
+        method: 'DELETE',
+        path:
+          `/_security/service/${encodeURIComponent(namespace)}/${encodeURIComponent(name)}` +
+          `/credential/token/${encodeURIComponent(ES_SERVICE_ACCOUNT_TOKEN_NAME)}`,
+      },
+      { ignore: [404] }
+    );
+    // Elasticsearch refuses an unforced delete while any token remains.
+    await esClient.transport.request(
+      {
+        method: 'DELETE',
+        path: `/_security/service/${encodeURIComponent(namespace)}/${encodeURIComponent(name)}`,
+        querystring: { force: 'true' },
+      },
+      { ignore: [404] }
+    );
+    await this.credentialStore.delete(id);
   }
 
   private async createAccount(

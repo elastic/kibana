@@ -706,18 +706,45 @@ describe('EsServiceAccounts', () => {
     });
   });
 
-  describe('#authorize', () => {
-    it('checks `manage_security` and does not call Elasticsearch', async () => {
-      await expect(serviceAccounts.authorize(request)).resolves.toBeUndefined();
+  describe('#delete', () => {
+    const ACCOUNT_ID = 'kibana/nightshift-relay';
 
-      expect(esClient.asCurrentUser.transport.request).not.toHaveBeenCalled();
+    it('deletes the token, the account, and the stored credential', async () => {
+      await expect(serviceAccounts.delete(request, ACCOUNT_ID)).resolves.toBeUndefined();
+
+      expect(mockCheckPrivileges.globally).toHaveBeenCalledWith({
+        elasticsearch: { cluster: ['manage_security'], index: {} },
+      });
+      expect(esClient.asCurrentUser.transport.request).toHaveBeenNthCalledWith(
+        1,
+        { method: 'DELETE', path: TOKEN_PATH },
+        { ignore: [404] }
+      );
+      expect(esClient.asCurrentUser.transport.request).toHaveBeenNthCalledWith(
+        2,
+        {
+          method: 'DELETE',
+          path: ACCOUNT_PATH,
+          querystring: { force: 'true' },
+        },
+        { ignore: [404] }
+      );
+      expect(credentialStore.delete).toHaveBeenCalledWith(ACCOUNT_ID);
     });
 
-    it('rejects with a 403 when the caller lacks `manage_security`', async () => {
+    it('rejects when the caller lacks `manage_security` and does not call Elasticsearch', async () => {
       mockCheckPrivileges.globally.mockResolvedValue(clusterPrivilegesResponse(false));
 
-      await expect(serviceAccounts.authorize(request)).rejects.toMatchObject({
+      await expect(serviceAccounts.delete(request, ACCOUNT_ID)).rejects.toMatchObject({
         output: { statusCode: 403 },
+      });
+      expect(esClient.asCurrentUser.transport.request).not.toHaveBeenCalled();
+      expect(credentialStore.delete).not.toHaveBeenCalled();
+    });
+
+    it('rejects an id outside the kibana namespace', async () => {
+      await expect(serviceAccounts.delete(request, 'elastic/fleet-server')).rejects.toMatchObject({
+        output: { statusCode: 400 },
       });
       expect(esClient.asCurrentUser.transport.request).not.toHaveBeenCalled();
     });

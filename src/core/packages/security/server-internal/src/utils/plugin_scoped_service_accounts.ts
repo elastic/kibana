@@ -62,8 +62,8 @@ export const createPluginScopedServiceAccounts = ({
   // throw, which callers of a promise-returning API would not expect.
   return {
     isEnabled: delegate.isEnabled,
-    authorize: delegate.authorize,
     create: delegate.create,
+    delete: delegate.delete,
     bindWorkload: async (request, params) => {
       ensureValid(params);
       return await delegate.bindWorkload(pluginId, request, params);

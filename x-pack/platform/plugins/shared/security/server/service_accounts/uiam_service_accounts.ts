@@ -205,22 +205,6 @@ export class UiamServiceAccounts implements ServiceAccountsBackend {
     );
   }
 
-  async authorize(request: KibanaRequest): Promise<void> {
-    if (!this.license.isEnabled()) {
-      throw Boom.forbidden(
-        'Cannot use a service account: security features are disabled in Elasticsearch'
-      );
-    }
-
-    await ensureClusterPrivilege({
-      request,
-      checkPrivilegesWithRequest: this.checkPrivilegesWithRequest,
-      logger: this.logger,
-      privilege: 'manage_security',
-      action: 'use a service account',
-    });
-  }
-
   async create(
     request: KibanaRequest,
     params: CreateServiceAccountServerParams
@@ -237,6 +221,29 @@ export class UiamServiceAccounts implements ServiceAccountsBackend {
         outcome: 'failure',
         serviceAccountBackend: 'uiam',
       });
+      throw e;
+    }
+  }
+
+  async delete(request: KibanaRequest, id: string): Promise<void> {
+    if (!this.license.isEnabled()) {
+      throw Boom.forbidden(
+        'Cannot delete a service account: security features are disabled in Elasticsearch'
+      );
+    }
+
+    await ensureClusterPrivilege({
+      request,
+      checkPrivilegesWithRequest: this.checkPrivilegesWithRequest,
+      logger: this.logger,
+      privilege: 'manage_security',
+      action: 'delete a service account',
+    });
+
+    try {
+      await this.uiam.revokeServiceAccount(id);
+    } catch (e) {
+      this.logger.error(`Failed to delete service account [${id}]: ${getDetailedErrorMessage(e)}`);
       throw e;
     }
   }

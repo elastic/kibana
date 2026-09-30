@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { randomUUID } from 'crypto';
 import { firstValueFrom } from 'rxjs';
 import type { KibanaRequest, Logger, SavedObjectsClientContract } from '@kbn/core/server';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
@@ -42,10 +43,9 @@ const ELASTIC_APPS_SLACK_CONNECTOR_TYPE_ID = '.slack2';
 
 const ELASTIC_APPS_SLACK_CONNECTOR_NAME = 'Slack (Elastic app)';
 
-/** Stable name for the user-managed account Relay assumes on Serverless. */
-const RELAY_SERVICE_ACCOUNT_NAME = 'nightshift-relay-agent-builder';
+const RELAY_SERVICE_ACCOUNT_NAME_PREFIX = 'nightshift-relay-agent-builder';
 
-const RELAY_SERVICE_ACCOUNT_ROLES = ['editor']; // TODO check if we could do better
+const RELAY_SERVICE_ACCOUNT_ROLES = ['editor'];
 
 /**
  * Selects the server-owned Relay platform assumer. The id (`relay-service`) is
@@ -218,6 +218,20 @@ export class SlackAppService {
       });
   }
 
+  private async revokeServiceAccount(
+    request: KibanaRequest,
+    serviceAccountId: string,
+    context: string
+  ): Promise<void> {
+    await this.server.core.security.serviceAccounts
+      .delete(request, serviceAccountId)
+      .catch((error) => {
+        this.logger.warn(
+          `Failed to revoke service account ${serviceAccountId} ${context}: ${error.message}`
+        );
+      });
+  }
+
   private toErrorMessage(error: unknown): string {
     if (error instanceof RelayRequestError) {
       return error.relayMessage ?? error.message;
@@ -357,11 +371,6 @@ export class SlackAppService {
     return { authorizeUrl: installResponse.authorize_url };
   }
 
-  /**
-   * Serverless install path. There is no service-account revoke API, so a failed install keeps the
-   * account and records its id for the retry; a Relay 403 on a reused id clears it so the next
-   * connect creates a new account.
-   */
   private async connectWithServiceAccount(
     request: KibanaRequest,
     relayClient: RelayClientContract,
@@ -376,29 +385,21 @@ export class SlackAppService {
     }
 
     const serviceAccounts = this.server.core.security.serviceAccounts;
+
     if (!serviceAccounts.isEnabled()) {
       throw new SlackAppUnavailableError(
         'Relay UIAM install requires UIAM service accounts. Enable `xpack.security.serviceAccounts` and configure `xpack.security.uiam`.'
       );
     }
 
-    // Runs even when reusing a stored id: the stored id must not let a caller skip `manage_security`.
-    await serviceAccounts.authorize(request);
-
-    const storedServiceAccountId = existingConnection?.serviceAccountId ?? null;
-    const selectingStoredAccount = storedServiceAccountId !== null;
-    const serviceAccountId =
-      storedServiceAccountId ??
-      (
-        await serviceAccounts.create(request, {
-          name: RELAY_SERVICE_ACCOUNT_NAME,
-          roles: RELAY_SERVICE_ACCOUNT_ROLES,
-          trustedPlatformAssumers: RELAY_PLATFORM_ASSUMERS,
-        })
-      ).id;
-
     const username = this.server.security.authc.getCurrentUser(request)?.username;
     const license = await this.server.licensing.getLicense();
+
+    const { id: serviceAccountId } = await serviceAccounts.create(request, {
+      name: `${RELAY_SERVICE_ACCOUNT_NAME_PREFIX}-${randomUUID()}`, // Add an uuid as name could collide even after a deletion
+      roles: RELAY_SERVICE_ACCOUNT_ROLES,
+      trustedPlatformAssumers: RELAY_PLATFORM_ASSUMERS,
+    });
 
     let installResponse;
     try {
@@ -411,33 +412,19 @@ export class SlackAppService {
       });
     } catch (error) {
       this.logger.error(`Slack app install failed: ${this.toErrorMessage(error)}`);
-      if (
-        selectingStoredAccount &&
-        error instanceof RelayRequestError &&
-        error.statusCode === 403
-      ) {
-        await this.writeConnection(soClient, { ...existingConnection!, serviceAccountId: null });
-      } else if (!selectingStoredAccount) {
-        if (existingConnection) {
-          await this.writeConnection(soClient, { ...existingConnection, serviceAccountId });
-        } else {
-          await this.writeConnection(soClient, {
-            status: RELAY_APP_CONNECTION_STATUS.error,
-            apiKeyId: null,
-            serviceAccountId,
-            tenantKey: null,
-            surface: 'slack',
-            createdBy: username,
-            createdAt: now,
-            error: this.toErrorMessage(error),
-          });
-        }
-      }
+      await this.revokeServiceAccount(request, serviceAccountId, 'after Relay install error');
       throw error;
     }
 
     if (existingConnection?.apiKeyId) {
       await this.invalidateApiKey(existingConnection.apiKeyId, 'after successful reconnect');
+    }
+    if (existingConnection?.serviceAccountId) {
+      await this.revokeServiceAccount(
+        request,
+        existingConnection.serviceAccountId,
+        'after successful reconnect'
+      );
     }
 
     await this.writeConnection(soClient, {
@@ -634,6 +621,9 @@ export class SlackAppService {
     if (connection.apiKeyId) {
       await this.invalidateApiKey(connection.apiKeyId, 'on disconnect');
     }
+    if (connection.serviceAccountId) {
+      await this.revokeServiceAccount(request, connection.serviceAccountId, 'on disconnect');
+    }
 
     if (relayClient && connection.tenantKey) {
       try {
@@ -645,6 +635,7 @@ export class SlackAppService {
           ...connection,
           status: RELAY_APP_CONNECTION_STATUS.error,
           apiKeyId: null,
+          serviceAccountId: null,
           error: message,
         });
         throw error;
@@ -655,6 +646,7 @@ export class SlackAppService {
       ...connection,
       status: RELAY_APP_CONNECTION_STATUS.notConnected,
       apiKeyId: null,
+      serviceAccountId: null,
       tenantKey: null,
     });
 

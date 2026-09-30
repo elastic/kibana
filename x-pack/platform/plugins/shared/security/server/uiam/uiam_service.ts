@@ -298,6 +298,12 @@ export interface UiamServicePublic {
   getServiceAccount(serviceAccountId: string): Promise<UiamServiceAccountDetails>;
 
   /**
+   * Revokes a service account via the UIAM service. Authenticated as Kibana over mTLS, the same
+   * way as {@link getServiceAccount}. A second revoke of the same id succeeds.
+   */
+  revokeServiceAccount(serviceAccountId: string): Promise<void>;
+
+  /**
    * Exchanges a service account ID for an ephemeral access token via the UIAM service.
    *
    * UIAM authorizes the exchange against the service account's `assumable_by` policy.
@@ -879,6 +885,36 @@ export class UiamService implements UiamServicePublic {
       return response;
     } catch (err) {
       this.#logger.error(() => `Failed to get service account: ${getDetailedErrorMessage(err)}`);
+
+      throw err;
+    }
+  }
+
+  /**
+   * See {@link UiamServicePublic.revokeServiceAccount}.
+   */
+  async revokeServiceAccount(serviceAccountId: string): Promise<void> {
+    try {
+      this.#logger.debug(`Attempting to revoke service account ${serviceAccountId}.`);
+
+      await UiamService.#parseUiamResponse(
+        await fetch(
+          `${this.#config.url}/uiam/api/v1/service-accounts/${encodeURIComponent(
+            serviceAccountId
+          )}`,
+          {
+            method: 'DELETE',
+            // No credential headers on purpose, for the same reason as `getServiceAccount`.
+            headers: { 'User-Agent': this.#userAgentHeader },
+            // @ts-expect-error Undici `fetch` supports `dispatcher` option, see https://github.com/nodejs/undici/pull/1411.
+            dispatcher: this.#dispatcher,
+          }
+        )
+      );
+
+      this.#logger.debug(`Successfully revoked service account ${serviceAccountId}.`);
+    } catch (err) {
+      this.#logger.error(() => `Failed to revoke service account: ${getDetailedErrorMessage(err)}`);
 
       throw err;
     }
