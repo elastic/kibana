@@ -17,6 +17,11 @@ import type { EsqlDetectorConfig } from '../../../common/job_creator/esql_job_cr
 export interface EsqlQueryStepState {
   query: string;
   sourceTimeField: string;
+  /**
+   * True once the user edited `sourceTimeField` by hand; while false the wizard
+   * re-infers it from the query (g2sz.18, see `inferSourceTimeField`).
+   */
+  sourceTimeFieldTouched: boolean;
   bucketSpan: string;
   columns: ESQLFieldWithMetadata[];
   emittedTimeField: string;

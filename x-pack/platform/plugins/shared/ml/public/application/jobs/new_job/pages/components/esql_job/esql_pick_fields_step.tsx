@@ -64,7 +64,9 @@ export const EsqlPickFieldsStep = () => {
           })}
           fullWidth
           value={state.sourceTimeField}
-          onChange={(event) => setQueryState({ sourceTimeField: event.target.value })}
+          onChange={(event) =>
+            setQueryState({ sourceTimeField: event.target.value, sourceTimeFieldTouched: true })
+          }
           data-test-subj="mlEsqlSourceTimeField"
         />
       </EuiFormRow>

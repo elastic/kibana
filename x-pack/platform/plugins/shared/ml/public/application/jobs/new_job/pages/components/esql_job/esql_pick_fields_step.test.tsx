@@ -213,4 +213,83 @@ describe('EsqlPickFieldsStep', () => {
       within(screen.getByTestId('mlEsqlInfluencers')).queryByText('host')
     ).not.toBeInTheDocument();
   });
+
+  describe('source time field inference (g2sz.18)', () => {
+    const renderWithQuerySetter = () => {
+      const SetQuery = () => {
+        const { setQueryState } = useEsqlWizardContext();
+
+        useEffect(() => {
+          (window as unknown as { __setQuery: (q: string) => void }).__setQuery = (q: string) =>
+            setQueryState({ query: q });
+        }, [setQueryState]);
+
+        return null;
+      };
+
+      renderWithI18n(
+        <EsqlWizardProvider>
+          <Harness />
+          <SetQuery />
+        </EsqlWizardProvider>
+      );
+    };
+
+    const setQueryAndResolve = async (query: string) => {
+      await act(async () => {
+        (window as unknown as { __setQuery: (q: string) => void }).__setQuery(query);
+      });
+      await act(async () => {
+        jest.advanceTimersByTime(300);
+        await Promise.resolve();
+      });
+    };
+
+    it('pre-fills the source time field from the query while it has not been edited', async () => {
+      renderWithQuerySetter();
+      await act(async () => {
+        jest.advanceTimersByTime(300);
+        await Promise.resolve();
+      });
+      expect(screen.getByTestId('mlEsqlSourceTimeField')).toHaveValue('@timestamp');
+
+      await setQueryAndResolve(
+        'FROM logs-* | STATS doc_count = COUNT(*) BY bucket = BUCKET(event.ingested, 1 hour)'
+      );
+      expect(screen.getByTestId('mlEsqlSourceTimeField')).toHaveValue('event.ingested');
+
+      await setQueryAndResolve(
+        'FROM logs-* | STATS doc_count = COUNT(*) BY bucket = BUCKET(event.created, 1 hour)'
+      );
+      expect(screen.getByTestId('mlEsqlSourceTimeField')).toHaveValue('event.created');
+    });
+
+    it('keeps the current value when the query is not inferable', async () => {
+      renderWithQuerySetter();
+      await act(async () => {
+        jest.advanceTimersByTime(300);
+        await Promise.resolve();
+      });
+
+      await setQueryAndResolve('FROM logs-* | STATS doc_count = COUNT(*) BY host');
+      expect(screen.getByTestId('mlEsqlSourceTimeField')).toHaveValue('@timestamp');
+    });
+
+    it('stops re-inferring once the user edits the source time field', async () => {
+      renderWithQuerySetter();
+      await act(async () => {
+        jest.advanceTimersByTime(300);
+        await Promise.resolve();
+      });
+
+      fireEvent.change(screen.getByTestId('mlEsqlSourceTimeField'), {
+        target: { value: 'my_custom_time' },
+      });
+      await setQueryAndResolve(
+        'FROM logs-* | STATS doc_count = COUNT(*) BY bucket = BUCKET(event.ingested, 1 hour)'
+      );
+
+      expect(screen.getByTestId('mlEsqlSourceTimeField')).toHaveValue('my_custom_time');
+    });
+  });
 });

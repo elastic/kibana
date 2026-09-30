@@ -66,6 +66,7 @@ const initialState: EsqlWizardState = {
   columnsErrorMessage: undefined,
   query: GOLD_ESQL_DATAFEED_QUERY,
   sourceTimeField: '@timestamp',
+  sourceTimeFieldTouched: false,
   bucketSpan: '1h',
   columns: [],
   emittedTimeField: '',

@@ -18,6 +18,7 @@ import {
 import { pruneEsqlSelections } from './esql_prune_selections';
 import { NUMERIC_ESQL_TYPES } from './esql_numeric_types';
 import { DEFAULT_DETECTOR_FUNCTION } from './esql_detector_functions';
+import { inferSourceTimeField } from './esql_source_time_field';
 
 const DEBOUNCE_MS = 300;
 const DATE_ESQL_TYPES = new Set(['date', 'date_nanos']);
@@ -69,6 +70,13 @@ export const useEsqlColumnsResolver = (): void => {
     };
   }, [state.detectors, state.influencers, state.summaryCountFieldName, state.emittedTimeField]);
 
+  // Read (not subscribed to) by the probe below so that a manual edit of the
+  // source time field never re-triggers a columns request.
+  const sourceTimeFieldTouched = useRef(state.sourceTimeFieldTouched);
+  useEffect(() => {
+    sourceTimeFieldTouched.current = state.sourceTimeFieldTouched;
+  }, [state.sourceTimeFieldTouched]);
+
   useEffect(() => {
     const generation = ++requestGeneration.current;
     const trimmedQuery = state.query.trim();
@@ -116,8 +124,17 @@ export const useEsqlColumnsResolver = (): void => {
             emittedTimeField,
           };
 
+          // Pre-fill the source time field from the query text until the user edits
+          // it by hand; an un-inferable query keeps the current value.
+          const inferredSourceTimeField = sourceTimeFieldTouched.current
+            ? undefined
+            : inferSourceTimeField(state.query, nextColumns);
+
           setQueryState({
             columns: nextColumns,
+            ...(inferredSourceTimeField !== undefined
+              ? { sourceTimeField: inferredSourceTimeField }
+              : {}),
             emittedTimeField,
             detectors,
             influencers: pruned.influencers,

@@ -22,6 +22,7 @@ const baseState: EsqlWizardState = {
   columnsErrorMessage: undefined,
   query: 'FROM logs-*',
   sourceTimeField: '@timestamp',
+  sourceTimeFieldTouched: false,
   bucketSpan: '1h',
   columns: [
     { name: 'bucket', type: 'date', userDefined: false },
