@@ -8,7 +8,7 @@
  */
 
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
-import { parseDuration } from '../../../../utils/parse-duration/parse-duration';
+import { parseDuration } from '@kbn/workflows';
 
 const DEFAULT_REFRESH_INTERVAL_MS = 60 * 60 * 1000;
 const THIRTY_DAYS_MS = 30 * 24 * 60 * 60 * 1000;
