@@ -125,7 +125,7 @@ describe('WorkflowsPlugin', () => {
       expect(coreSetup.application.register).not.toHaveBeenCalled();
     });
 
-    it('should register the workflows list and library deep links but not executions at bootstrap', () => {
+    it('should register the workflows list, executions, and library deep links at bootstrap', () => {
       plugin = createPlugin();
       coreSetup.uiSettings.get.mockImplementation((key: string, fallback?: unknown) => {
         if (key === WORKFLOWS_UI_SETTING_ID) return true;
@@ -140,10 +140,11 @@ describe('WorkflowsPlugin', () => {
           id: PLUGIN_ID,
           title: 'Workflows',
           appRoute: '/app/workflows',
-          // Library is registered by default at bootstrap; the executions link is gated by the
-          // global uiSetting (off by default). Both are refined reactively at start().
+          // Both links are on at bootstrap, matching getDeepLinks defaults, then refined
+          // reactively at start() from the global uiSettings.
           deepLinks: [
             expect.objectContaining({ id: 'list', path: '/' }),
+            expect.objectContaining({ id: 'executions', path: '/executions' }),
             expect.objectContaining({ id: 'library', path: '/library' }),
           ],
         })
@@ -404,25 +405,23 @@ describe('WorkflowsPlugin', () => {
         expect(updates[updates.length - 1].deepLinks).toBeDefined();
       });
 
-      it('should add the executions deep link when the executions view uiSetting is enabled', () => {
+      it('should include the executions deep link by default and drop it when the uiSetting is disabled', () => {
         setReadCapability(true);
         setLicenseValid(true);
         const updates = captureAppUpdates();
 
         plugin.start(coreStart, startDeps as any);
 
-        // Off by default → no executions deep link.
-        expect(updates[updates.length - 1].deepLinks).not.toEqual(
-          expect.arrayContaining([expect.objectContaining({ id: 'executions' })])
-        );
-
-        // Enabling the global uiSetting adds the executions deep link reactively.
-        deepLinkSettings$.get(WORKFLOWS_GLOBAL_EXECUTIONS_VIEW_ENABLED_SETTING_ID)?.next(true);
-
         expect(updates[updates.length - 1].deepLinks).toEqual(
           expect.arrayContaining([
             expect.objectContaining({ id: 'executions', path: '/executions' }),
           ])
+        );
+
+        deepLinkSettings$.get(WORKFLOWS_GLOBAL_EXECUTIONS_VIEW_ENABLED_SETTING_ID)?.next(false);
+
+        expect(updates[updates.length - 1].deepLinks).not.toEqual(
+          expect.arrayContaining([expect.objectContaining({ id: 'executions' })])
         );
       });
     });
