@@ -180,13 +180,13 @@ describe('GenerateSplitButton model selection', () => {
     });
   });
 
-  it('shows a generic callout when Default connector only is enabled', () => {
+  it('shows a generic callout when the configured default model is required', () => {
     renderButton({ defaultConnectorOnly: true });
 
     const callouts = screen.getAllByTestId('significant_events_default_connector_only_callout');
-    expect(callouts[0]).toHaveTextContent('Default connector only');
+    expect(callouts[0]).toHaveTextContent('Configured default model only');
     expect(callouts[0]).toHaveTextContent(
-      'Generation succeeds only with the configured default connector.'
+      'Generation succeeds only with the configured default model.'
     );
     expect(callouts[0]).not.toHaveTextContent(featuresConnector.connectorId);
   });
