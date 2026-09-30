@@ -159,22 +159,7 @@ export class ManagedWorkflowsService {
           `Managed workflows: removing ${orphanWorkflows.length} hard-orphaned workflow(s) in space '${spaceId}' ` +
             `(unregistered owner or removed definition)`
         );
-        await this.deps.crudService.deleteWorkflows(
-          orphanWorkflows.map(({ id }) => id),
-          spaceId,
-          { force: true }
-        );
-        for (const { id: workflowId, source } of orphanWorkflows) {
-          this.deps.audit?.logWorkflowDeleted(undefined, {
-            id: workflowId,
-            force: true,
-            managed: true,
-            originalWorkflowId: source.originManagedWorkflowId,
-            ownerPlugin: source.managedBy,
-            spaceId,
-            reason: 'orphan_cleanup',
-          });
-        }
+        await this.forceDeleteOrphans(orphanWorkflows, spaceId, 'orphan_cleanup');
       }
     }
   }
@@ -640,22 +625,7 @@ export class ManagedWorkflowsService {
           `Managed workflows: removing ${orphanWorkflows.length} orphaned static workflow(s) ` +
             `for plugin '${pluginId}' in space '${spaceId}'`
         );
-        await this.deps.crudService.deleteWorkflows(
-          orphanWorkflows.map(({ id }) => id),
-          spaceId,
-          { force: true }
-        );
-        for (const { id: workflowId, source } of orphanWorkflows) {
-          this.deps.audit?.logWorkflowDeleted(undefined, {
-            id: workflowId,
-            force: true,
-            managed: true,
-            originalWorkflowId: source.originManagedWorkflowId,
-            ownerPlugin: source.managedBy,
-            spaceId,
-            reason: 'ready_reconciliation',
-          });
-        }
+        await this.forceDeleteOrphans(orphanWorkflows, spaceId, 'ready_reconciliation');
       }
     }
 
@@ -697,6 +667,61 @@ export class ManagedWorkflowsService {
             `Consider using lifecycle: 'dynamic' or installing during start().`
         );
       }
+    }
+  }
+
+  private async forceDeleteOrphans(
+    orphanWorkflows: Array<{ id: string; source: WorkflowProperties }>,
+    spaceId: string,
+    reason: 'orphan_cleanup' | 'ready_reconciliation'
+  ): Promise<void> {
+    for (const { id: workflowId, source } of orphanWorkflows) {
+      let deleted = false;
+      try {
+        const result = await this.deps.crudService.deleteWorkflows([workflowId], spaceId, {
+          force: true,
+        });
+        deleted = result.successfulIds?.includes(workflowId) ?? false;
+        if (!deleted) {
+          const failure = result.failures.find((item) => item.id === workflowId);
+          this.logger.error(
+            `Managed workflows: failed to remove orphaned workflow '${workflowId}' in space '${spaceId}': ${
+              failure?.error ?? 'not deleted'
+            }`
+          );
+        }
+      } catch (error) {
+        this.logger.error(
+          `Managed workflows: failed to remove orphaned workflow '${workflowId}' in space '${spaceId}'`,
+          { error }
+        );
+      }
+
+      if (deleted) {
+        this.deps.audit?.logWorkflowDeleted(undefined, {
+          id: workflowId,
+          force: true,
+          managed: true,
+          originalWorkflowId: source.originManagedWorkflowId,
+          ownerPlugin: source.managedBy,
+          spaceId,
+          reason,
+        });
+      } else {
+        await this.disableUndeletedOrphan(workflowId, spaceId);
+      }
+    }
+  }
+
+  /** Stops new runs of an orphan that could not be deleted, so a later sweep can remove it. */
+  private async disableUndeletedOrphan(workflowId: string, spaceId: string): Promise<void> {
+    try {
+      await this.deps.crudService.disableWorkflow(workflowId, spaceId);
+    } catch (error) {
+      this.logger.error(
+        `Managed workflows: failed to disable orphaned workflow '${workflowId}' in space '${spaceId}'`,
+        { error }
+      );
     }
   }
 
