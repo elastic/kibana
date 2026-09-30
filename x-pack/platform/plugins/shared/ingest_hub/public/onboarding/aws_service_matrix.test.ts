@@ -264,21 +264,23 @@ describe('AWS service matrix', () => {
   });
 
   describe('ECF OTel twins', () => {
-    // firewall_otel aliases the 'firewall' ECS policy template. Its PT is agentless-enabled in
-    // this mock (matching a realistic EPR layout), but ecfOnly: true must suppress that flag so
-    // the entry stays ECF-only and the trigger-var restriction fires correctly.
-    const FIREWALL_PKG = {
+    // waf_otel is a retained static twin that aliases the 'waf' ECS policy template. Its PT is
+    // agentless-enabled in this mock (matching a realistic EPR layout), but ecfOnly: true must
+    // suppress that flag so the entry stays ECF-only and the trigger-var restriction fires correctly.
+    // Using a real AWS_SERVICES_STATIC entry ensures that removing or misconfiguring waf_otel
+    // (e.g. losing ecfOnly or policyTemplate) breaks this test.
+    const WAF_PKG = {
       policy_templates: [
         {
-          name: 'firewall',
-          data_streams: ['firewall_logs', 'firewall_metrics'],
+          name: 'waf',
+          data_streams: ['waf'],
           deployment_modes: { agentless: { enabled: true } },
-          inputs: [{ type: 'aws-s3', title: 'Firewall S3' }],
+          inputs: [{ type: 'aws-s3', title: 'WAF S3' }],
         },
       ],
       data_streams: [
         {
-          path: 'firewall_logs',
+          path: 'waf',
           type: 'logs',
           streams: [
             {
@@ -287,41 +289,33 @@ describe('AWS service matrix', () => {
             },
           ],
         },
-        {
-          path: 'firewall_metrics',
-          type: 'metrics',
-          streams: [{ input: 'aws-s3', vars: [] }],
-        },
       ],
     };
 
-    const FIREWALL_OTEL_STATIC = AWS_SERVICES_STATIC.filter((e) => e.id === 'firewall_otel');
-    const FIREWALL_OTEL_MATRIX = buildAwsServiceMatrix(
-      { aws: FIREWALL_PKG as any },
-      FIREWALL_OTEL_STATIC
-    );
-    const firewallOtel = FIREWALL_OTEL_MATRIX[0];
+    const WAF_OTEL_STATIC = AWS_SERVICES_STATIC.filter((e) => e.id === 'waf_otel');
+    const WAF_OTEL_MATRIX = buildAwsServiceMatrix({ aws: WAF_PKG as any }, WAF_OTEL_STATIC as any);
+    const wafOtel = WAF_OTEL_MATRIX[0];
 
-    it('resolves vars from the aliased firewall PT despite having no *_otel PT in the manifest', () => {
-      expect(firewallOtel).toBeDefined();
-      expect(firewallOtel.varDefsByInput?.['aws-s3']).toBeDefined();
+    it('resolves vars from the aliased waf PT despite having no *_otel PT in the manifest', () => {
+      expect(wafOtel).toBeDefined();
+      expect(wafOtel.varDefsByInput?.['aws-s3']).toBeDefined();
     });
 
     it('keeps deploymentMethods as ECF-only even though the aliased PT is agentless-enabled', () => {
-      expect(firewallOtel.deploymentMethods).toEqual([{ method: 'ecf', preferred: true }]);
+      expect(wafOtel.deploymentMethods).toEqual([{ method: 'ecf', preferred: true }]);
     });
 
-    it('collapses dataStreams to the single ecfDataStream (firewall_logs), excluding firewall_metrics', () => {
-      expect(firewallOtel.dataStreams).toEqual(['firewall_logs']);
+    it('collapses dataStreams to the single ecfDataStream (waf)', () => {
+      expect(wafOtel.dataStreams).toEqual(['waf']);
     });
 
     it('restricts requiredConfig to ECF trigger vars only (bucket_arn)', () => {
-      expect(firewallOtel.requiredConfig).toEqual(['bucket_arn']);
+      expect(wafOtel.requiredConfig).toEqual(['bucket_arn']);
     });
 
     it('sets identityFederationSupported based on the aliased PT inputs', () => {
-      // firewall's aws-s3 input has no hide_in_var_group_options → supported.
-      expect(firewallOtel.identityFederationSupported).toBe(true);
+      // waf's aws-s3 input has no hide_in_var_group_options → supported.
+      expect(wafOtel.identityFederationSupported).toBe(true);
     });
   });
 
@@ -521,6 +515,88 @@ describe('AWS service matrix', () => {
       ]);
       expect(result.dataStreams).toEqual(['elb_logs']);
       expect(result.dataStreams).not.toContain('other_logs');
+    });
+
+    it('populates full metadata (inputs, varDefs, signalTypes) for standalone no-PT packages', () => {
+      const pkg = {
+        policy_templates: [],
+        data_streams: [
+          {
+            path: 'log',
+            type: 'logs',
+            streams: [
+              {
+                input: 'http_endpoint',
+                vars: [{ name: 'listen_port', type: 'integer', required: true }],
+              },
+            ],
+          },
+        ],
+      };
+      const [result] = buildAwsServiceMatrix({ amazon_security_lake: pkg as any }, [
+        {
+          id: 'amazon_security_lake',
+          category: 'security_identity_compliance',
+          packageName: 'amazon_security_lake',
+          deploymentMethods: [{ method: 'agent_based', preferred: true }],
+        },
+      ]);
+      expect(result.dataStreams).toEqual(['log']);
+      expect(result.signalTypes).toContain('logs');
+      expect(result.inputs).toContain('http_endpoint');
+      expect(result.varDefsByDataStream?.log).toBeDefined();
+      expect(
+        result.varDefsByDataStream?.log?.varDefsByInput?.http_endpoint?.listen_port
+      ).toBeDefined();
+      expect(result.isManifestLoaded).toBe(true);
+    });
+
+    it('leaves varDefsByInput undefined when streams declare an input but no vars', () => {
+      // Streams with an input key but vars:[] must not create an empty varDefsByInput bucket —
+      // that would cause requiresCredentials=true for a credential-free service.
+      const pkg = {
+        policy_templates: [],
+        data_streams: [
+          {
+            path: 'log',
+            type: 'logs',
+            streams: [{ input: 'http_endpoint', vars: [] }],
+          },
+        ],
+      };
+      const [result] = buildAwsServiceMatrix({ amazon_security_lake: pkg as any }, [
+        {
+          id: 'amazon_security_lake',
+          category: 'security_identity_compliance',
+          packageName: 'amazon_security_lake',
+          deploymentMethods: [{ method: 'agent_based', preferred: true }],
+        },
+      ]);
+      expect(result.varDefsByInput).toBeUndefined();
+      expect(result.inputs).toContain('http_endpoint');
+    });
+
+    it('does not consume aws-package data streams when the entry has a policyTemplate set', () => {
+      // An `aws` entry whose PT is temporarily missing must not fall through to the no-PT
+      // fallback and pick up ALL package data streams (regression guard for Libra 4125759535).
+      const pkg = {
+        policy_templates: [{ name: 'other_pt', data_streams: ['other_ds'] }],
+        data_streams: [
+          { path: 'elb_logs', type: 'logs', streams: [{ input: 'aws-s3', vars: [] }] },
+          { path: 'other_ds', type: 'logs', streams: [{ input: 'aws-cloudwatch', vars: [] }] },
+        ],
+      };
+      const [result] = buildAwsServiceMatrix({ aws: pkg as any }, [
+        {
+          id: 'elb',
+          category: 'networking_content_delivery',
+          packageName: 'aws',
+          policyTemplate: 'elb',
+        },
+      ]);
+      // PT 'elb' not found in the package → no data streams should be assigned
+      expect(result.dataStreams).toEqual([]);
+      expect(result.inputs).toBeUndefined();
     });
   });
 
