@@ -94,13 +94,15 @@ export type CasesSearchParams = Partial<
 /**
  * The source that created a cases client.
  * - `plugin_contract`: called via another plugin's contract (e.g. Security Solution, Fleet).
+ * - `external_sync`: automatic push triggered by a case change.
  */
 export type CasesClientSource =
   | 'rest_api'
   | 'connector'
   | 'workflow'
   | 'agent_builder'
-  | 'plugin_contract';
+  | 'plugin_contract'
+  | 'external_sync';
 
 export interface GetCasesClientOptions {
   actionSource?: ActionSource;
