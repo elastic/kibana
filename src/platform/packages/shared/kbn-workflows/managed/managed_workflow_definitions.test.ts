@@ -47,6 +47,8 @@ import CONTEXT_ENGINE_DREAMING_YAML from './definitions/context_engine/dreaming.
 import CONTEXT_ENGINE_TRACE_DREAMING_YAML from './definitions/context_engine/dreaming_traces.yaml';
 import CONTEXT_ENGINE_TRACE_DREAMING_BATCH_YAML from './definitions/context_engine/dreaming_traces_batch.yaml';
 import CONTEXT_ENGINE_RELATIONSHIPS_YAML from './definitions/context_engine/relationships.yaml';
+import CODE_INTELLIGENCE_LOGGING_CLASSIFICATION_YAML from './definitions/code_intelligence/classify_logging_candidates.yaml';
+import CODE_INTELLIGENCE_OTEL_CLASSIFICATION_YAML from './definitions/code_intelligence/classify_otel_candidates.yaml';
 import type { ManagedWorkflowDefinition, ManagedWorkflowTemplateValues } from './types';
 import { isDynamicValue, isLiquidTagValue, isVariableValue } from '../common/utils';
 import { visitNestedSteps } from '../definition/definition_utils';
@@ -285,6 +287,16 @@ it.each([
     CONTEXT_ENGINE_TRACE_DREAMING_BATCH_WORKFLOW_ID,
     CONTEXT_ENGINE_TRACE_DREAMING_BATCH_YAML,
     '5:85da232f',
+  ],
+  [
+    CODE_INTELLIGENCE_LOGGING_CLASSIFICATION_WORKFLOW_ID,
+    CODE_INTELLIGENCE_LOGGING_CLASSIFICATION_YAML,
+    '2:018c4eb1',
+  ],
+  [
+    CODE_INTELLIGENCE_OTEL_CLASSIFICATION_WORKFLOW_ID,
+    CODE_INTELLIGENCE_OTEL_CLASSIFICATION_YAML,
+    '2:25e79417',
   ],
 ] as const)(
   'requires bumping %s definition.version together with the fingerprint of its render inputs',
