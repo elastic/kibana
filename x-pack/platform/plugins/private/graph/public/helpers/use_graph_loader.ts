@@ -132,7 +132,12 @@ export const useGraphLoader = ({ toastNotifications, coreStart }: UseGraphLoader
 
   // Helper function for the graphClientWorkspace to perform a query
   const callSearchNodeProxy = useCallback(
-    (indexName: string, query: SearchRequest, responseHandler: GraphSearchCallback) => {
+    (
+      indexName: string,
+      query: SearchRequest,
+      responseHandler: GraphSearchCallback,
+      errorHandler?: (error: Error) => void
+    ) => {
       const dsl = { index: indexName, body: query };
       const request = { body: JSON.stringify(dsl) };
       setLoading(true);
@@ -151,6 +156,7 @@ export const useGraphLoader = ({ toastNotifications, coreStart }: UseGraphLoader
         .catch((e) => {
           inspectRequest.error({ json: e });
           handleHttpError(e);
+          errorHandler?.(e);
         })
         .finally(() => setLoading(false));
     },

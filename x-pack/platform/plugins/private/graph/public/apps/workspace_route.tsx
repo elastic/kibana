@@ -9,7 +9,13 @@ import React, { useMemo, useRef, useState } from 'react';
 import { Provider } from 'react-redux';
 import { useHistory } from 'react-router-dom';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
-import type { ExploreRequest, ExploreResults, Workspace } from '../types';
+import type {
+  ExploreRequest,
+  ExploreResults,
+  SearchRequest,
+  SearchResults,
+  Workspace,
+} from '../types';
 import {
   createGraphStore,
   createWorkspaceState,
@@ -87,6 +93,14 @@ export const WorkspaceRoute = ({
     [callNodeProxy]
   );
 
+  const searchGraph = useMemo(
+    () => (index: string, request: SearchRequest) =>
+      new Promise<SearchResults>((resolve, reject) => {
+        callSearchNodeProxy(index, request, resolve, reject);
+      }),
+    [callSearchNodeProxy]
+  );
+
   const notifyWorkspaceChanged = () => {
     const workspace = workspaceRef.current;
     if (workspace) {
@@ -132,6 +146,7 @@ export const WorkspaceRoute = ({
       notifyReact: notifyWorkspaceChanged,
       handleSearchQueryError,
       exploreGraph,
+      searchGraph,
       ...coreStart,
     })
   );
