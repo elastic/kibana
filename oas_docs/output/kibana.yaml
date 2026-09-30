@@ -13490,6 +13490,7 @@ paths:
                         updated_at: '2026-01-15T12:00:00.000Z'
                         updated_by:
                           profile_uid: u_elastic_0
+                        version: 1
                     page: 1
                     per_page: 20
                     total: 1
@@ -13672,6 +13673,7 @@ paths:
                     updated_at: '2026-01-15T12:00:00.000Z'
                     updated_by:
                       profile_uid: u_elastic_0
+                    version: 1
               schema:
                 $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_rule_response'
           description: Returns the newly created rule.
@@ -13881,6 +13883,7 @@ paths:
                         updated_at: '2026-01-15T12:00:00.000Z'
                         updated_by:
                           profile_uid: u_elastic_0
+                        version: 1
                       - created_at: '2026-01-15T12:00:00.000Z'
                         created_by:
                           profile_uid: u_elastic_0
@@ -13916,6 +13919,7 @@ paths:
                         updated_at: '2026-01-15T12:00:00.000Z'
                         updated_by:
                           profile_uid: u_elastic_0
+                        version: 1
               schema:
                 $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_bulk_create_rules_response'
           description: Created rules are returned in `items`. Failures are returned in `errors`.
@@ -14430,6 +14434,7 @@ paths:
                         updated_at: '2026-01-15T12:00:00.000Z'
                         updated_by:
                           profile_uid: u_elastic_0
+                        version: 1
               schema:
                 $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_bulk_get_rules_response'
           description: Returns the requested rules.
@@ -15318,6 +15323,7 @@ paths:
                     updated_at: '2026-01-15T12:00:00.000Z'
                     updated_by:
                       profile_uid: u_elastic_0
+                    version: 1
               schema:
                 $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_rule_response'
           description: Returns the requested rule.
@@ -15497,6 +15503,7 @@ paths:
                     updated_at: '2026-01-15T12:00:00.000Z'
                     updated_by:
                       profile_uid: u_elastic_0
+                    version: 1
               schema:
                 $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_rule_response'
           description: Returns the updated rule.
@@ -15712,6 +15719,7 @@ paths:
                     updated_at: '2026-01-15T12:00:00.000Z'
                     updated_by:
                       profile_uid: u_elastic_0
+                    version: 1
               schema:
                 $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_rule_response'
           description: Returns the replaced rule.
@@ -15757,6 +15765,7 @@ paths:
                     updated_at: '2026-01-15T12:00:00.000Z'
                     updated_by:
                       profile_uid: u_elastic_0
+                    version: 1
               schema:
                 $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_rule_response'
           description: Returns the newly created rule.
@@ -15922,6 +15931,7 @@ paths:
                     updated_at: '2026-01-15T12:00:00.000Z'
                     updated_by:
                       profile_uid: u_elastic_0
+                    version: 1
               schema:
                 $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_rule_response'
           description: Returns the disabled rule.
@@ -16105,6 +16115,7 @@ paths:
                     updated_at: '2026-01-15T12:00:00.000Z'
                     updated_by:
                       profile_uid: u_elastic_0
+                    version: 1
               schema:
                 $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_rule_response'
           description: Returns the enabled rule.
@@ -152545,12 +152556,18 @@ components:
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_actor'
           description: Actor who last updated the rule.
           nullable: true
+        version:
+          description: Monotonically increasing integer number representing a rule configuration version, incremented on every change. Used on generated rule events as `rule.version`.
+          maximum: 9007199254740991
+          minimum: 1
+          type: integer
       required:
         - kind
         - metadata
         - schedule
         - query
         - id
+        - version
         - enabled
         - created_by
         - created_at
