@@ -10,14 +10,14 @@
 /**
  * Public page endpoint. GET renders the form, POST submits it.
  *
- * The POC addresses a page by workflow id. The real feature routes by an
- * admin-owned slug held on a saved object, so a link survives a workflow rename
- * and one workflow can back several pages.
+ * Keyed by the trigger's `page-id` (like n8n's `webhookId`): assigned on first save,
+ * kept across edits, and replaced on clone and import. The ID is unguessable, so it is
+ * the credential for "anyone with the link" pages.
  */
-export const PAGE_FORM_API_PATH = '/api/workflows/pages/{workflowId}';
+export const PAGE_FORM_API_PATH = '/api/workflows/pages/{pageId}';
 
-/** Authenticated helper that hands the author the shareable link. */
+/** Authenticated helper that lists a workflow's page URLs for its author. */
 export const PAGE_LINK_API_PATH = '/internal/workflows/pages/{workflowId}/link';
 
 export const PAGE_WORKFLOW_ID_MAX_LENGTH = 128;
-export const PAGE_TOKEN_MAX_LENGTH = 128;
+export const PAGE_ID_PARAM_MAX_LENGTH = 64;
