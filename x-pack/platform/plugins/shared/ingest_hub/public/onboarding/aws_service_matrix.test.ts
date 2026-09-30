@@ -618,6 +618,48 @@ describe('AWS service matrix', () => {
       expect(result.inputs).toContain('http_endpoint');
     });
 
+    it('excludes data streams claimed by other PTs when the target PT has no data_streams list', () => {
+      // Regression: for multi-PT packages like amazon_security_lake, the all-package-DS fallback
+      // was including data streams owned by other policy templates, producing cross-PT stream keys
+      // that Fleet rejected as "stream not found".
+      const pkg = {
+        policy_templates: [
+          {
+            name: 'amazon_security_lake',
+            // no data_streams list — triggers fallback
+            inputs: [{ type: 'aws-s3', title: 'S3' }],
+          },
+          {
+            name: 'amazon_security_lake_application',
+            data_streams: ['application_activity'],
+          },
+        ],
+        data_streams: [
+          {
+            path: 'vpc_flow',
+            type: 'logs',
+            streams: [{ input: 'aws-s3', vars: [] }],
+          },
+          {
+            path: 'application_activity',
+            type: 'logs',
+            streams: [{ input: 'aws-s3', vars: [] }],
+          },
+        ],
+      };
+      const [result] = buildAwsServiceMatrix({ amazon_security_lake: pkg as any }, [
+        {
+          id: 'amazon_security_lake',
+          category: 'security_identity_compliance',
+          packageName: 'amazon_security_lake',
+          deploymentMethods: [{ method: 'agent_based', preferred: true }],
+        },
+      ]);
+      // application_activity is owned by the other PT — must be excluded
+      expect(result.dataStreams).toEqual(['vpc_flow']);
+      expect(result.dataStreams).not.toContain('application_activity');
+    });
+
     it('does not consume aws-package data streams when the entry has a policyTemplate set', () => {
       // An `aws` entry whose PT is temporarily missing must not fall through to the no-PT
       // fallback and pick up ALL package data streams (regression guard for Libra 4125759535).

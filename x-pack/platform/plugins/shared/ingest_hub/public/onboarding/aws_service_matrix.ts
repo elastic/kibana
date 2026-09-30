@@ -884,11 +884,22 @@ export function buildAwsServiceMatrix(
         // Packages like `aws` always list data_streams per PT, so the fallback never fires there.
         // Input packages have no data_streams at all — use an empty list so the input-package
         // branch below runs instead of the regular DS loop.
+        //
+        // For multi-PT packages (e.g. amazon_security_lake), some data streams belong to other
+        // policy templates. Include only those NOT explicitly claimed by another PT so we don't
+        // send cross-PT stream keys that Fleet rejects as "stream not found".
+        const otherPtDataStreamIds = new Set<string>(
+          (packageInfo.policy_templates ?? [])
+            .filter((p: any) => p.name !== (pt as any).name)
+            .flatMap((p: any) => (p.data_streams ?? []) as string[])
+        );
         const ptDataStreamIds: string[] = ptInputType
           ? []
           : (pt as any).data_streams?.length > 0
           ? (pt as any).data_streams
-          : (packageInfo.data_streams ?? []).map((ds: any) => ds.path as string);
+          : (packageInfo.data_streams ?? [])
+              .map((ds: any) => ds.path as string)
+              .filter((dsId) => !otherPtDataStreamIds.has(dsId));
         const includedDsIds = ptDataStreamIds.filter(
           (dsId) => !(excludedDataStreams ?? []).includes(dsId)
         );
