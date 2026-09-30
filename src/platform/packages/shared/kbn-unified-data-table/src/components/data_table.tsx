@@ -137,6 +137,7 @@ const VIRTUALIZATION_OPTIONS: EuiDataGridProps['virtualizationOptions'] = {
   // the view minimizes pop-in when scrolling quickly
   overscanRowCount: 20,
 };
+const SCROLL_THROTTLE_OPTIONS = { wait: 200 };
 
 export type SortOrder = [string, string];
 
@@ -1514,40 +1515,44 @@ const InternalUnifiedDataTable = React.forwardRef<
       rowLineHeight: rowLineHeightOverride,
     });
 
-    const handleOnScroll = useCallback(
-      (event: { scrollTop: number }) => {
-        setHasScrolledToBottom((prevHasScrolledToBottom) => {
-          if (loadingState !== DataLoadingState.loaded) {
-            return prevHasScrolledToBottom;
-          }
+    const updateHasScrolledToBottom = useCallback(() => {
+      setHasScrolledToBottom((prevHasScrolledToBottom) => {
+        if (loadingState !== DataLoadingState.loaded) {
+          return prevHasScrolledToBottom;
+        }
 
-          // We need to manually query the react-window wrapper since EUI doesn't
-          // expose outerRef in virtualizationOptions, but we should request it
-          const outerRef = dataGridWrapper?.querySelector<HTMLElement>(VIRTUALIZED_SELECTOR);
+        // We need to manually query the react-window wrapper since EUI doesn't
+        // expose outerRef in virtualizationOptions, but we should request it
+        const outerRef = dataGridWrapper?.querySelector<HTMLElement>(VIRTUALIZED_SELECTOR);
 
-          if (!outerRef) {
-            return prevHasScrolledToBottom;
-          }
+        if (!outerRef) {
+          return prevHasScrolledToBottom;
+        }
 
-          // Account for footer height when it's visible to avoid flickering
-          const scrollBottomMargin = prevHasScrolledToBottom ? 140 : 100;
-          const isScrollable = outerRef.scrollHeight > outerRef.offsetHeight;
-          const isScrolledToBottom =
-            event.scrollTop + outerRef.offsetHeight >= outerRef.scrollHeight - scrollBottomMargin;
+        // Account for footer height when it's visible to avoid flickering
+        const scrollBottomMargin = prevHasScrolledToBottom ? 140 : 100;
+        const isScrollable = outerRef.scrollHeight > outerRef.offsetHeight;
+        const isScrolledToBottom =
+          outerRef.scrollTop + outerRef.offsetHeight >= outerRef.scrollHeight - scrollBottomMargin;
 
-          return isScrollable && isScrolledToBottom;
-        });
-      },
-      [dataGridWrapper, loadingState]
+        return isScrollable && isScrolledToBottom;
+      });
+    }, [dataGridWrapper, loadingState]);
+
+    const { run: throttledHandleOnScroll } = useThrottleFn(
+      updateHasScrolledToBottom,
+      SCROLL_THROTTLE_OPTIONS
     );
-
-    const { run: throttledHandleOnScroll } = useThrottleFn(handleOnScroll, { wait: 200 });
 
     useEffect(() => {
       if (loadingState === DataLoadingState.loadingMore) {
         setHasScrolledToBottom(false);
+      } else if (loadingState === DataLoadingState.loaded) {
+        // Scrolls that land while the grid is fetching are ignored above, so re-read the position
+        // once loading settles rather than leaving the footer hidden until the next scroll event.
+        updateHasScrolledToBottom();
       }
-    }, [loadingState]);
+    }, [loadingState, updateHasScrolledToBottom]);
 
     const virtualizationOptions = useMemo(() => {
       const options = {

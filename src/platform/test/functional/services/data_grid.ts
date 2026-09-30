@@ -37,10 +37,11 @@ interface SelectOptions {
   renderMoreRows?: boolean;
 }
 
-interface VirtualizedGridScrollState {
+interface VirtualizedGridRenderState {
   /** Highest mounted `data-grid-row-index`, or `-1` when no row is rendered. */
   lastRenderedRowIndex: number;
-  isScrolledToBottom: boolean;
+  /** Rows the grid reports holding via `aria-rowcount`, or `-1` when it reports none. */
+  rowCount: number;
 }
 
 export class DataGridService extends FtrService {
@@ -1057,19 +1058,21 @@ export class DataGridService extends FtrService {
     return (await this.getInTableSearchCellMatchElements(rowIndex, columnName)).length;
   }
 
-  private async getVirtualizedGridScrollState(): Promise<VirtualizedGridScrollState> {
+  private async getVirtualizedGridRenderState(): Promise<VirtualizedGridRenderState> {
     const container = await this.find.byCssSelector(VIRTUALIZED_GRID_SELECTOR);
 
-    return await this.browser.execute<[WebElementWrapper], VirtualizedGridScrollState>(
+    return await this.browser.execute<[WebElementWrapper], VirtualizedGridRenderState>(
       `const container = arguments[0];
        const rowIndices = Array.from(container.querySelectorAll('.euiDataGridRow')).map((row) =>
          Number(row.getAttribute('data-grid-row-index'))
        );
+       const reportedRowCount = Number(
+         container.closest('[role="grid"]')?.getAttribute('aria-rowcount')
+       );
 
        return {
          lastRenderedRowIndex: rowIndices.length ? Math.max(...rowIndices) : -1,
-         isScrolledToBottom:
-           container.scrollHeight - container.scrollTop <= container.clientHeight + 1,
+         rowCount: reportedRowCount > 0 ? reportedRowCount : -1,
        };`,
       container
     );
@@ -1081,32 +1084,25 @@ export class DataGridService extends FtrService {
   }
 
   public async scrollTo(rowCount: number, finalScrollIncrement: number = 100) {
-    const dataGridTargetIndex = rowCount - 1; // 0-based index
-    let scrollState = await this.getVirtualizedGridScrollState();
+    let renderState = await this.getVirtualizedGridRenderState();
+    // Callers may ask for more rows than the grid holds, so its own row count bounds the target.
+    const targetRowIndex =
+      (renderState.rowCount > 0 ? Math.min(rowCount, renderState.rowCount) : rowCount) - 1;
 
-    // Ends on scroll geometry, which can't mistake a lagging re-render for the end of the grid.
-    while (
-      scrollState.lastRenderedRowIndex < dataGridTargetIndex &&
-      !scrollState.isScrolledToBottom
-    ) {
-      const { lastRenderedRowIndex } = scrollState;
+    while (renderState.lastRenderedRowIndex < targetRowIndex) {
+      const { lastRenderedRowIndex } = renderState;
 
       await this.scrollVirtualizedGridBy(500);
       await this.retry.waitFor(
         `data grid to render rows past index ${lastRenderedRowIndex}`,
         async () => {
-          scrollState = await this.getVirtualizedGridScrollState();
-          return (
-            scrollState.lastRenderedRowIndex > lastRenderedRowIndex ||
-            scrollState.isScrolledToBottom
-          );
+          renderState = await this.getVirtualizedGridRenderState();
+          return renderState.lastRenderedRowIndex > lastRenderedRowIndex;
         }
       );
     }
 
-    if (scrollState.lastRenderedRowIndex >= dataGridTargetIndex) {
-      await this.scrollVirtualizedGridBy(finalScrollIncrement);
-    }
+    await this.scrollVirtualizedGridBy(finalScrollIncrement);
   }
 
   public async getScrollPosition() {
