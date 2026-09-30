@@ -7,9 +7,10 @@
 
 import React, { memo, useCallback, useState } from 'react';
 import { EuiButtonIcon, EuiFlexGroup, EuiFlexItem, EuiToolTip } from '@elastic/eui';
-import { UserAvatar, UserProfilesPopover, UserToolTip } from '@kbn/user-profile-components';
+import { UserProfilesPopover } from '@kbn/user-profile-components';
 import type { UserProfileWithAvatar } from '@kbn/user-profile-components';
 import { ESCALATION_QUEUE_LABELS } from './translations';
+import { AssigneeAvatarStack } from './assignee_avatar_stack';
 
 interface AssignToUsersProps {
   conversationId: string;
@@ -81,20 +82,8 @@ export const AssignToUsers = memo<AssignToUsersProps>(
       [onChange]
     );
 
-    const avatarStack = selected.map((profile) => (
-      <EuiFlexItem key={profile.uid} grow={false}>
-        <UserToolTip user={profile.user} avatar={profile.data?.avatar}>
-          <UserAvatar user={profile.user} avatar={profile.data?.avatar} size="s" />
-        </UserToolTip>
-      </EuiFlexItem>
-    ));
-
     if (!canManage) {
-      return (
-        <EuiFlexGroup alignItems="center" gutterSize="xs" responsive={false}>
-          {avatarStack}
-        </EuiFlexGroup>
-      );
+      return <AssigneeAvatarStack profiles={selected} />;
     }
 
     const button = (
@@ -113,7 +102,9 @@ export const AssignToUsers = memo<AssignToUsersProps>(
 
     return (
       <EuiFlexGroup alignItems="center" gutterSize="xs" responsive={false}>
-        {avatarStack}
+        <EuiFlexItem grow={false}>
+          <AssigneeAvatarStack profiles={selected} />
+        </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <UserProfilesPopover
             isOpen={isPopoverOpen}

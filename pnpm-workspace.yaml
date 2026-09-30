@@ -769,6 +769,7 @@ packages:
   - 'src/platform/packages/shared/kbn-data-source'
   - 'src/platform/packages/shared/kbn-data-view-utils'
   - 'src/platform/packages/shared/kbn-data-view-validation'
+  - 'src/platform/packages/shared/kbn-data-views-types'
   - 'src/platform/packages/shared/kbn-datemath'
   - 'src/platform/packages/shared/kbn-default-tracer'
   - 'src/platform/packages/shared/kbn-design-tools'
