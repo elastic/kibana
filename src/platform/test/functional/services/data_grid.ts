@@ -23,6 +23,8 @@ import type {
 } from '@kbn/ftr-common-functional-ui-services';
 import { FtrService } from '../ftr_provider_context';
 
+const VIRTUALIZED_GRID_SELECTOR = '.euiDataGrid__virtualized';
+
 export interface TabbedGridData {
   columns: string[];
   rows: string[][];
@@ -33,6 +35,12 @@ interface SelectOptions {
   rowIndex?: number;
   columnIndex?: number;
   renderMoreRows?: boolean;
+}
+
+interface VirtualizedGridScrollState {
+  /** Highest mounted `data-grid-row-index`, or `-1` when no row is rendered. */
+  lastRenderedRowIndex: number;
+  isScrolledToBottom: boolean;
 }
 
 export class DataGridService extends FtrService {
@@ -1049,40 +1057,60 @@ export class DataGridService extends FtrService {
     return (await this.getInTableSearchCellMatchElements(rowIndex, columnName)).length;
   }
 
+  private async getVirtualizedGridScrollState(): Promise<VirtualizedGridScrollState> {
+    const container = await this.find.byCssSelector(VIRTUALIZED_GRID_SELECTOR);
+
+    return await this.browser.execute<[WebElementWrapper], VirtualizedGridScrollState>(
+      `const container = arguments[0];
+       const rowIndices = Array.from(container.querySelectorAll('.euiDataGridRow')).map((row) =>
+         Number(row.getAttribute('data-grid-row-index'))
+       );
+
+       return {
+         lastRenderedRowIndex: rowIndices.length ? Math.max(...rowIndices) : -1,
+         isScrolledToBottom:
+           container.scrollHeight - container.scrollTop <= container.clientHeight + 1,
+       };`,
+      container
+    );
+  }
+
+  private async scrollVirtualizedGridBy(offset: number) {
+    const container = await this.find.byCssSelector(VIRTUALIZED_GRID_SELECTOR);
+    await this.browser.execute(`arguments[0].scrollTop += ${offset}`, container);
+  }
+
   public async scrollTo(rowCount: number, finalScrollIncrement: number = 100) {
     const dataGridTargetIndex = rowCount - 1; // 0-based index
-    let lastRowIndex = -1;
+    let scrollState = await this.getVirtualizedGridScrollState();
 
-    while (true) {
-      const rows = await this.find.allByCssSelector('.euiDataGridRow');
-      const lastRow = rows[rows.length - 1];
-      const currentLastRowIndex = parseInt(
-        (await lastRow.getAttribute('data-grid-row-index')) as string,
-        10
+    // Ends on scroll geometry, which can't mistake a lagging re-render for the end of the grid.
+    while (
+      scrollState.lastRenderedRowIndex < dataGridTargetIndex &&
+      !scrollState.isScrolledToBottom
+    ) {
+      const { lastRenderedRowIndex } = scrollState;
+
+      await this.scrollVirtualizedGridBy(500);
+      await this.retry.waitFor(
+        `data grid to render rows past index ${lastRenderedRowIndex}`,
+        async () => {
+          scrollState = await this.getVirtualizedGridScrollState();
+          return (
+            scrollState.lastRenderedRowIndex > lastRenderedRowIndex ||
+            scrollState.isScrolledToBottom
+          );
+        }
       );
+    }
 
-      const container = await this.find.byCssSelector('.euiDataGrid__virtualized');
-
-      if (currentLastRowIndex === lastRowIndex) {
-        break; // Exit if no further scrolling is possible
-      }
-
-      if (currentLastRowIndex >= dataGridTargetIndex) {
-        await this.browser.execute(`arguments[0].scrollTop += ${finalScrollIncrement}`, container); // Final scroll increment
-        break; // Exit if reached the target index
-      }
-
-      lastRowIndex = currentLastRowIndex;
-
-      await this.browser.execute('arguments[0].scrollTop += 500', container); // Increase scroll increment
-
-      // Delay to make sure content is loaded
-      await new Promise((resolve) => setTimeout(resolve, 100));
+    if (scrollState.lastRenderedRowIndex >= dataGridTargetIndex) {
+      await this.scrollVirtualizedGridBy(finalScrollIncrement);
     }
   }
 
   public async getScrollPosition() {
-    const container = await this.find.byCssSelector('.euiDataGrid__virtualized');
+    const container = await this.find.byCssSelector(VIRTUALIZED_GRID_SELECTOR);
     const scrollTop = await this.browser.execute(
       'return arguments[0].scrollTop',
       container._webElement
