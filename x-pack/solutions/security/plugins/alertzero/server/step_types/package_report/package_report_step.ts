@@ -128,7 +128,12 @@ export const createCoverageWriter = ({
             skipped.push({ kiId: subject.kiId, subject: subjectLabel(subject), reason: 'denied' });
             continue;
           }
-          if (code !== undefined && code !== 404) {
+          // Only a 404 licenses the write below: it is the one answer that says the item is
+          // not there. Anything else -- including an error carrying no status code at all,
+          // such as a connection reset or a timeout -- leaves the current status unknown, and
+          // falling through would index `status: pending` over an item that may already have
+          // been processed, which is the no-reset rule this function promises.
+          if (code !== 404) {
             skipped.push({
               kiId: subject.kiId,
               subject: subjectLabel(subject),

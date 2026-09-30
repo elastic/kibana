@@ -385,4 +385,68 @@ describe('createCoverageWriter', () => {
     ]);
     expect(storageResult.skipped[0].reason).toBe('storage_failure');
   });
+
+  const coverageSubject = {
+    kiId: 'ki-no-reset',
+    reportId: 'rpt',
+    investigationConversationId: 'conv-1',
+    title: 't',
+    description: 'd',
+    content: 'c',
+  };
+
+  it('skips an already-processed item rather than rewriting it', async () => {
+    const index = jest.fn();
+    const write = createCoverageWriter({
+      spaceId: 'default',
+      isContextEngineEnabled: async () => true,
+      getEsClient: () => ({
+        get: jest.fn().mockResolvedValue({ _source: { attributes: { status: 'accepted' } } }),
+        index,
+      }),
+    });
+
+    const result = await write([coverageSubject]);
+
+    expect(result.skipped[0].reason).toBe('already_processed');
+    expect(index).not.toHaveBeenCalled();
+  });
+
+  // The write below stamps `status: pending`, so reaching it without knowing the current status
+  // resets an item that may already have been processed. Only a 404 says the item is not there;
+  // an error carrying no status code (a connection reset, a timeout) says nothing at all.
+  it.each([
+    ['no status code', new Error('socket hang up')],
+    ['a 503', { statusCode: 503 }],
+  ])(
+    'treats a get that failed with %s as a storage failure, not a write',
+    async (_label, error) => {
+      const index = jest.fn();
+      const write = createCoverageWriter({
+        spaceId: 'default',
+        isContextEngineEnabled: async () => true,
+        getEsClient: () => ({ get: jest.fn().mockRejectedValue(error), index }),
+      });
+
+      const result = await write([coverageSubject]);
+
+      expect(result.skipped[0].reason).toBe('storage_failure');
+      expect(index).not.toHaveBeenCalled();
+    }
+  );
+
+  it('writes when the get proves the item is absent', async () => {
+    const index = jest.fn().mockResolvedValue({});
+    const write = createCoverageWriter({
+      spaceId: 'default',
+      isContextEngineEnabled: async () => true,
+      getEsClient: () => ({ get: jest.fn().mockRejectedValue({ statusCode: 404 }), index }),
+    });
+
+    const result = await write([coverageSubject]);
+
+    expect(result.skipped).toEqual([]);
+    expect(result.written[0].kiId).toBe(coverageSubject.kiId);
+    expect(index).toHaveBeenCalledTimes(1);
+  });
 });
