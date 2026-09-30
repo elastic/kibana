@@ -70,6 +70,7 @@
     ".slack2",
     ".slack_api",
     ".snowflake",
+    ".ssh",
     ".sublime_security",
     ".swimlane",
     ".tavily_mcp",
@@ -826,6 +827,10 @@
     "snowflake.listTables",
     "snowflake.listViews",
     "snowflake.runQuery",
+    "ssh",
+    "ssh.downloadFile",
+    "ssh.run",
+    "ssh.uploadFile",
     "sublime_security.getAsaVerdict",
     "sublime_security.getAttackScore",
     "sublime_security.getMessage",
@@ -983,11 +988,11 @@
   "variants": {
     "strict": {
       "path": "strict/schema.json",
-      "sha256": "364bd131bc78f85db0f341fddf77e4ad7839ce0a026267bcb8fbec34b7ded4e8"
+      "sha256": "928d97960ac7ef85c1e4956f9f113474f726a74dff6a3d97819f57126c146f65"
     },
     "template": {
       "path": "template/schema.json",
-      "sha256": "0962c6e10447888334c0f1d667d49f308e0033bb8390c2e0baf178f45c5cdca6"
+      "sha256": "7ecf261b034a966adf498421fa4c6dfa758521dcbbc187534645b55ab6a49825"
     }
   }
 }
