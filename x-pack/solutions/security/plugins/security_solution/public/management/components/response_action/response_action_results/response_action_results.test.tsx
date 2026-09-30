@@ -16,66 +16,6 @@ import { OUTPUT_MESSAGES } from '../../endpoint_response_actions_list/translatio
 import { ResponseActionResults } from './response_action_results';
 import type { ResponseActionResultsProps } from './types';
 
-// jest.mock('./components/isolation_results', () => ({
-//   IsolationResults: jest.fn((props: { 'data-test-subj'?: string }) => (
-//     <div data-test-subj={props['data-test-subj']} />
-//   )),
-// }));
-//
-// jest.mock('../../kill_process_action_result', () => ({
-//   KillSuspendProcessActionResult: jest.fn((props: { 'data-test-subj'?: string }) => (
-//     <div data-test-subj={props['data-test-subj']} />
-//   )),
-// }));
-//
-// jest.mock('./components/processes_results', () => ({
-//   RunningProcessesActionResults: jest.fn((props: { 'data-test-subj'?: string }) => (
-//     <div data-test-subj={props['data-test-subj']} />
-//   )),
-// }));
-//
-// jest.mock('./components/get_file_results', () => ({
-//   GetFileResults: jest.fn((props: { 'data-test-subj'?: string }) => (
-//     <div data-test-subj={props['data-test-subj']} />
-//   )),
-// }));
-//
-// jest.mock('./components/execute_results', () => ({
-//   ExecuteResults: jest.fn((props: { 'data-test-subj'?: string }) => (
-//     <div data-test-subj={props['data-test-subj']} />
-//   )),
-// }));
-//
-// jest.mock('../../endpoint_upload_action_result', () => ({
-//   EndpointUploadActionResult: jest.fn((props: { 'data-test-subj'?: string }) => (
-//     <div data-test-subj={props['data-test-subj']} />
-//   )),
-// }));
-//
-// jest.mock('./components/scan_results', () => ({
-//   ScanResults: jest.fn((props: { 'data-test-subj'?: string }) => (
-//     <div data-test-subj={props['data-test-subj']} />
-//   )),
-// }));
-//
-// jest.mock('./components/runscript_results', () => ({
-//   RunscriptOutput: jest.fn((props: { 'data-test-subj'?: string }) => (
-//     <div data-test-subj={props['data-test-subj']} />
-//   )),
-// }));
-//
-// jest.mock('../../cancel_action_results', () => ({
-//   CancelActionResults: jest.fn((props: { 'data-test-subj'?: string }) => (
-//     <div data-test-subj={props['data-test-subj']} />
-//   )),
-// }));
-//
-// jest.mock('../../memory_dump_response_action_output_result', () => ({
-//   MemoryDumpResponseActionOutputResult: jest.fn((props: { 'data-test-subj'?: string }) => (
-//     <div data-test-subj={props['data-test-subj']} />
-//   )),
-// }));
-
 describe('ResponseActionResults component', () => {
   const testPrefix = 'test';
 
