@@ -7,7 +7,7 @@
 
 import rison from '@kbn/rison';
 import { BehaviorSubject } from 'rxjs';
-import supertest from 'supertest';
+import { kibanaSupertest as supertest } from '@kbn/test';
 
 import type { SetupServerReturn } from '@kbn/core-test-helpers-test-utils';
 import { setupServer } from '@kbn/core-test-helpers-test-utils';

@@ -9,7 +9,7 @@
 
 import { resolve } from 'path';
 import { readFile } from 'fs/promises';
-import supertest from 'supertest';
+import { kibanaSupertest as supertest } from '@kbn/test';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { executionContextServiceMock } from '@kbn/core-execution-context-server-mocks';
 import { contextServiceMock } from '@kbn/core-http-context-server-mocks';

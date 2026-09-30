@@ -96,10 +96,20 @@ export async function runKibanaServer(options: RunKibanaServerOptions) {
   const serverArgs: string[] =
     (config.get('kbnTestServer.serverArgs') as string[] | undefined) || [];
 
+  // FTR runs Kibana under startup load; default-on ELU rate limiting causes widespread 429 flakes.
+  // Temporary until elastic/kibana#293805 lands (FTR supertest ELU 429 retry). Scout uses uiEphemeralDirPrefix `scout`.
+  const isFtr = (options.uiEphemeralDirPrefix ?? 'ftr') === 'ftr';
+  const serverArgsForLaunch = [
+    ...(isFtr ? ['--server.rateLimiter.enabled=false'] : []),
+    ...serverArgs,
+  ];
+
   let kbnFlags = parseRawFlags([
     // When installDir is passed, we run from a built version of Kibana which uses different command line
     // arguments. If installDir is not passed, we run from source code.
-    ...(installDir ? [...buildArgs, ...serverArgs] : [...sourceArgs, ...serverArgs]),
+    ...(installDir
+      ? [...buildArgs, ...serverArgsForLaunch]
+      : [...sourceArgs, ...serverArgsForLaunch]),
 
     // We also allow passing in extra Kibana server options, tack those on here so they always take precedence
     ...(options.extraKbnOpts ?? []),

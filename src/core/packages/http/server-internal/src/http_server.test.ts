@@ -10,7 +10,7 @@
 import { setTlsConfigMock } from './http_server.test.mocks';
 import type { Server } from 'http';
 import { rm, mkdtemp, readFile, writeFile } from 'fs/promises';
-import supertest from 'supertest';
+import { kibanaSupertest as supertest } from '@kbn/test';
 import { omit } from 'lodash';
 import { join } from 'path';
 import { ByteSizeValue, schema } from '@kbn/config-schema';

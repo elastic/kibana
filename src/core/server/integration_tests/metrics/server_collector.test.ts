@@ -10,7 +10,7 @@
 import { setTimeout as timer } from 'timers/promises';
 import { BehaviorSubject, Subject } from 'rxjs';
 import { take, filter } from 'rxjs';
-import supertest from 'supertest';
+import { kibanaSupertest as supertest } from '@kbn/test';
 import type { Server as HapiServer } from '@hapi/hapi';
 import type { IRouter } from '@kbn/core-http-server';
 import type { HttpService } from '@kbn/core-http-server-internal';

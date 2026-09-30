@@ -62,6 +62,14 @@ export * from './src/functional_test_runner';
 
 export { getUrl } from './src/jest/get_url';
 
+export {
+  kibanaSupertest,
+  wrapKibanaSupertestAgent,
+  isEluRateLimiter429,
+  getEluRateLimiterRetryDelayMs,
+} from './src/supertest/kibana_supertest';
+export type { WrapKibanaSupertestAgentOptions } from './src/supertest/kibana_supertest';
+
 export { getCallsites } from './src/callsites';
 
 export { runCheckJestConfigsCli } from './src/jest/run_check_jest_configs_cli';

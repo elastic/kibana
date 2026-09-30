@@ -12,7 +12,7 @@ import type {
   TermsEnumRequest,
   SearchSearchRequestBody,
 } from '@elastic/elasticsearch/lib/api/types';
-import supertest from 'supertest';
+import { kibanaSupertest as supertest } from '@kbn/test';
 import { APMEventClient, type APMEventESSearchRequest, type APMEventFieldCapsRequest } from '.';
 import type { APMIndices } from '@kbn/apm-sources-access-plugin/server';
 

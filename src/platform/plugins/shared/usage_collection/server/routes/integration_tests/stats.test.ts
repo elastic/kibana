@@ -19,7 +19,7 @@ import {
 import type { HttpIntegrationServiceSetupContractMock } from '@kbn/core-http-server-mocks';
 import { createHttpService } from '@kbn/core-http-server-mocks';
 import { registerStatsRoute } from '../stats';
-import supertest from 'supertest';
+import { kibanaSupertest as supertest } from '@kbn/test';
 import { CollectorSet } from '../../collector';
 
 type HttpService = ReturnType<typeof createHttpService>;

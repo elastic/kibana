@@ -17,11 +17,7 @@ import {
 import { metricsServiceMock } from '@kbn/core-metrics-server-mocks';
 import { ServiceStatusLevels } from '@kbn/core-status-common';
 import type { UnwrapObservable } from '@kbn/utility-types';
-import {
-  HttpRateLimiterService,
-  RATE_LIMITER_STARTUP_DELAY_MS,
-  type InternalRateLimiterSetup,
-} from './service';
+import { HttpRateLimiterService, type InternalRateLimiterSetup } from './service';
 
 describe('HttpRateLimiterService', () => {
   let service: HttpRateLimiterService;
@@ -61,7 +57,6 @@ describe('HttpRateLimiterService', () => {
       const throttled = 'throttled' as unknown as ReturnType<typeof response.customError>;
 
       beforeEach(() => {
-        jest.useFakeTimers();
         config.enabled = true;
         config.elu = 0.5;
         config.term = 'short';
@@ -75,15 +70,6 @@ describe('HttpRateLimiterService', () => {
         setup = service.setup({ http, metrics });
         [handler] = http.registerOnPreAuth.mock.lastCall!;
       });
-
-      afterEach(() => {
-        jest.useRealTimers();
-      });
-
-      const startAfterStartupDelay = () => {
-        service.start();
-        jest.advanceTimersByTime(RATE_LIMITER_STARTUP_DELAY_MS);
-      };
 
       it('should return `available` status initially', async () => {
         await expect(firstValueFrom(setup.status$)).resolves.toHaveProperty(
@@ -120,14 +106,8 @@ describe('HttpRateLimiterService', () => {
         expect(handler(request, response, toolkit)).toBe(ignored);
       });
 
-      it('should not throttle during the startup delay after start', () => {
+      it('should throttle when started', () => {
         service.start();
-        elu$.next({ short: 0.9, medium: 0.9, long: 0.9 });
-        expect(handler(request, response, toolkit)).toBe(ignored);
-      });
-
-      it('should throttle when started after the startup delay', () => {
-        startAfterStartupDelay();
         elu$.next({ short: 0.9, medium: 0.9, long: 0.9 });
         expect(handler(request, response, toolkit)).toBe(throttled);
       });
@@ -140,7 +120,7 @@ describe('HttpRateLimiterService', () => {
       });
 
       it('should not throttle excluded routes', () => {
-        startAfterStartupDelay();
+        service.start();
         elu$.next({ short: 0.9, medium: 0.9, long: 0.9 });
         expect(
           handler(
@@ -176,7 +156,7 @@ describe('HttpRateLimiterService', () => {
           service.setup({ http, metrics });
           [handler] = http.registerOnPreAuth.mock.lastCall!;
 
-          startAfterStartupDelay();
+          service.start();
           elu$.next({ short, medium, long });
           expect(handler(request, response, toolkit)).toBe(expected);
         }
@@ -193,7 +173,7 @@ describe('HttpRateLimiterService', () => {
           config.term = term;
           service.setup({ http, metrics });
           [handler] = http.registerOnPreAuth.mock.lastCall!;
-          startAfterStartupDelay();
+          service.start();
 
           elu$.next({ short: 0.9, medium: 0.9, long: 0.9 });
           handler(request, response, toolkit);
@@ -210,11 +190,13 @@ describe('HttpRateLimiterService', () => {
       );
 
       it('should not reset timer on consecutive overload', () => {
-        startAfterStartupDelay();
+        service.start();
         elu$.next({ short: 0.9, medium: 0.9, long: 0.9 });
-        jest.setSystemTime(Date.now() + 7 * 1000);
+        jest.useFakeTimers().setSystemTime(Date.now() + 7 * 1000);
         elu$.next({ short: 0.9, medium: 0.9, long: 0.9 });
         handler(request, response, toolkit);
+        jest.useRealTimers();
+
         expect(response.customError).toHaveBeenCalledWith(
           expect.objectContaining({
             headers: {
@@ -226,12 +208,14 @@ describe('HttpRateLimiterService', () => {
       });
 
       it('should reset timer when it is below collection interval', () => {
-        startAfterStartupDelay();
+        jest.useFakeTimers();
+        service.start();
         for (let i = 0; i < 3; i++) {
           jest.setSystemTime(Date.now() + 5 * 1000);
           elu$.next({ short: 0.9, medium: 0.9, long: 0.9 });
         }
         handler(request, response, toolkit);
+        jest.useRealTimers();
 
         expect(response.customError).toHaveBeenCalledWith(
           expect.objectContaining({

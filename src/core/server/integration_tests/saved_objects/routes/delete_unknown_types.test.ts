@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import supertest from 'supertest';
+import { kibanaSupertest as supertest } from '@kbn/test';
 import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
 import { typeRegistryMock } from '@kbn/core-saved-objects-base-server-mocks';
 import type { SetupServerReturn } from '@kbn/core-test-helpers-test-utils';

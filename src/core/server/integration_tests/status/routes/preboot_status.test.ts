@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import supertest from 'supertest';
+import { kibanaSupertest as supertest } from '@kbn/test';
 import { createCoreContext } from '@kbn/core-http-server-mocks';
 import type { HttpService, InternalHttpServicePreboot } from '@kbn/core-http-server-internal';
 import { contextServiceMock } from '@kbn/core-http-context-server-mocks';

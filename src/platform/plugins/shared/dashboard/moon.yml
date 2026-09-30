@@ -136,6 +136,7 @@ dependsOn:
   - '@kbn/ui-callout'
   - '@kbn/zod-helpers'
   - '@kbn/as-code-dashboard-schema'
+  - '@kbn/test'
 tags:
   - plugin
   - prod
@@ -153,6 +154,7 @@ fileGroups:
     - test/scout_oas_schema/**/*.json
     - test/scout_anonymous_authc/**/*
     - test/scout_search_sessions/**/*
+    - test/scout_test_plugins/**/*
     - '!target/**/*'
   jest-config:
     - jest.config.js

@@ -11,7 +11,9 @@ import { captureErrorMock } from './router.test.mocks';
 
 import { Stream } from 'stream';
 import Boom from '@hapi/boom';
-import supertest from 'supertest';
+import { kibanaSupertest as supertest } from '@kbn/test';
+import type { Test as SupertestTest } from 'supertest';
+import type { Response as SupertestResponse } from 'supertest';
 import { schema } from '@kbn/config-schema';
 import { z } from '@kbn/zod/v4';
 
@@ -451,8 +453,8 @@ describe('Options', () => {
   });
 
   describe('timeout', () => {
-    const writeBodyCharAtATime = (request: supertest.Test, body: string, interval: number) => {
-      return new Promise((resolve, reject) => {
+    const writeBodyCharAtATime = (request: SupertestTest, body: string, interval: number) => {
+      return new Promise<SupertestResponse>((resolve, reject) => {
         let i = 0;
         const intervalId = setInterval(() => {
           if (i < body.length) {
@@ -460,11 +462,15 @@ describe('Options', () => {
           } else {
             clearInterval(intervalId);
             void request.end((err, res) => {
+              if (err) {
+                reject(err);
+                return;
+              }
               resolve(res);
             });
           }
         }, interval);
-        void request.on('error', (err) => {
+        void request.on('error', (err: Error) => {
           clearInterval(intervalId);
           reject(err);
         });
