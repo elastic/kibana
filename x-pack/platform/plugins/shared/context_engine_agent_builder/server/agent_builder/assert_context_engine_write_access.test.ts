@@ -25,6 +25,7 @@ describe('assertContextEngineWriteAccess', () => {
     security.authz.checkPrivilegesWithRequest.mockReturnValue({
       atSpace: jest.fn().mockResolvedValue({ hasAllRequested }),
     });
+    security.authz.actions.api.get = jest.fn((privilege: string) => `api:${privilege}`);
     return security;
   };
 
@@ -97,10 +98,11 @@ describe('assertContextEngineWriteAccess', () => {
     ).toHaveBeenCalledWith(marketingSpaceId);
     expect(uiSettingsClient.get).toHaveBeenCalledWith(CONTEXT_ENGINE_ENABLED_SETTING_ID);
     expect(security.authz.checkPrivilegesWithRequest).toHaveBeenCalledWith(request);
+    expect(security.authz.actions.api.get).toHaveBeenCalledWith(apiPrivileges.writeContextEngine);
     expect(security.authz.checkPrivilegesWithRequest().atSpace).toHaveBeenCalledWith(
       marketingSpaceId,
       {
-        kibana: [apiPrivileges.writeContextEngine],
+        kibana: [`api:${apiPrivileges.writeContextEngine}`],
       }
     );
   });
