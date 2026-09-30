@@ -70,14 +70,15 @@ const createStore = (overrides: Partial<MemoryPageStore> = {}): MemoryPageStore 
 };
 
 describe('formatRecalled', () => {
-  it('includes context and facts beyond character 150', () => {
+  it('shows id and facts beyond character 150, and hides the recall key', () => {
     const memory = page('memory_long');
     memory.context = 'checkout latency';
     memory.content = `${'x'.repeat(150)}FACT_AFTER_150`;
 
     const formatted = formatRecalled([memory]);
 
-    expect(formatted).toContain('context: checkout latency');
+    expect(formatted).not.toContain('checkout latency');
+    expect(formatted).not.toContain('context:');
     expect(formatted).toContain('FACT_AFTER_150');
   });
 
@@ -98,7 +99,7 @@ describe('formatRecalled', () => {
     expect(formatted).not.toContain('z'.repeat(65_000));
   });
 
-  it('bounds huge metadata while retaining every selected id and some content', () => {
+  it('bounds a huge title and recall key while retaining every selected id and some content', () => {
     const first = page('memory_huge-first', 't'.repeat(65_000), 'FIRST_CONTENT_VISIBLE');
     first.context = 'c'.repeat(65_000);
     const second = page('memory_huge-second', 'u'.repeat(65_000), 'SECOND_CONTENT_VISIBLE');
@@ -111,8 +112,8 @@ describe('formatRecalled', () => {
     expect(formatted).toContain('id=memory_huge-second');
     expect(formatted).toContain('FIRST_CONTENT_VISIBLE');
     expect(formatted).toContain('SECOND_CONTENT_VISIBLE');
-    expect(formatted).not.toContain('c'.repeat(1_025));
-    expect(formatted).not.toContain('d'.repeat(1_025));
+    expect(formatted).not.toContain('c'.repeat(100));
+    expect(formatted).not.toContain('d'.repeat(100));
   });
 });
 

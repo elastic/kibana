@@ -219,10 +219,7 @@ export const formatRecalled = (
 
   return formatEvidenceEntries(
     recalledMemories.map((memory, index) => ({
-      prefix:
-        `${index === 0 ? '' : '\n'}- id=${memory.id}\n` +
-        `  context: ${(memory.context ?? '').slice(0, MAX_RECALLED_CONTEXT_CHARS)}\n` +
-        `  content: `,
+      prefix: `${index === 0 ? '' : '\n'}- id=${memory.id}\n` + `  content: `,
       content: memory.content,
     })),
     maxTokens
