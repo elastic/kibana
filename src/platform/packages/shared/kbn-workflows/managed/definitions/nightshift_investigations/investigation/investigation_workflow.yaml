@@ -613,8 +613,8 @@ steps:
         strategy: exponential
 
   # The canvas: one attachment per investigation, keyed by its ID, that each successful run
-  # replaces. Update fails when no earlier run created it, and add creates it then. A failed run
-  # leaves the previous canvas as it was.
+  # replaces. A new investigation adds it. A continued one updates it, and adds it when no earlier
+  # run created it. A failed run leaves the previous canvas as it was.
   - name: render_investigation_canvas
     type: data.set
     if: '${{ steps.investigate.error == null }}'
@@ -637,7 +637,7 @@ steps:
 
   - name: update_investigation_canvas
     type: ai.attachment.update
-    if: '${{ steps.investigate.error == null }}'
+    if: '${{ steps.investigate.error == null and inputs.investigation_id != null }}'
     with:
       conversation_id: '${{ steps.investigate.output.conversation_id }}'
       attachment_id: '{{ inputs.investigation_id | default: execution.id }}'
@@ -646,9 +646,11 @@ steps:
     on-failure:
       continue: true
 
+  # Liquid has no parentheses. The update only runs after a successful investigation, so this
+  # holds whichever way `and` and `or` group.
   - name: add_investigation_canvas
     type: ai.attachment.add
-    if: '${{ steps.investigate.error == null and steps.update_investigation_canvas.error != null }}'
+    if: '${{ steps.investigate.error == null and inputs.investigation_id == null or steps.update_investigation_canvas.error != null }}'
     with:
       conversation_id: '${{ steps.investigate.output.conversation_id }}'
       id: '{{ inputs.investigation_id | default: execution.id }}'
