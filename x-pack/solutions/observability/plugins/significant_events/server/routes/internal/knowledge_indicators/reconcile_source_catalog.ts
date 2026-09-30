@@ -149,9 +149,9 @@ async function applySourceEnabled({
 
 /**
  * Applies a source change as soon as it is committed, in the space of the request that made it,
- * instead of waiting for the next catalog reconcile. A deleted source loses its knowledge, and a
- * disabled or re-enabled one has its onboarding and owned rules aligned. Other edits are left to
- * the reconcile.
+ * instead of waiting for the next catalog reconcile. A deleted source, or one whose query changed,
+ * loses its knowledge; a disabled or re-enabled one has its onboarding and owned rules aligned.
+ * Title, description and tag edits change nothing here.
  */
 export const createSourceChangeListener =
   ({
@@ -165,15 +165,19 @@ export const createSourceChangeListener =
   }): SourceChangeListener =>
   async (event) => {
     const isDeleted = event.type === 'deleted';
+    // `esql_updated_at` only moves when the normalized query changes. Knowledge built on the old
+    // query describes other data, and its rules would read the new data as a sudden shift.
+    const isQueryChanged =
+      event.type === 'updated' && event.previous.esql_updated_at !== event.source.esql_updated_at;
     const isEnabledToggled =
       event.type === 'updated' && event.previous.enabled !== event.source.enabled;
-    if (!isDeleted && !isEnabledToggled) {
+    if (!isDeleted && !isQueryChanged && !isEnabledToggled) {
       return;
     }
 
     const { getKnowledgeIndicatorClient } = await getScopedClients({ request: event.request });
     const kiClient = await getKnowledgeIndicatorClient();
-    if (isDeleted) {
+    if (isDeleted || isQueryChanged) {
       await resetSourceKnowledge({
         source: event.source,
         kiClient,

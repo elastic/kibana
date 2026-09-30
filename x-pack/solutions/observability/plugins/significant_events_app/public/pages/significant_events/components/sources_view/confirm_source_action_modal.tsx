@@ -13,8 +13,11 @@ import React from 'react';
 /** Destructive row actions that ask for confirmation first. */
 export type SourceAction = 'delete' | 'reset';
 
+/** What the modal confirms: a row action, or saving a new query from the source flyout. */
+type ConfirmedSourceAction = SourceAction | 'changeQuery';
+
 const ACTION_COPY: Record<
-  SourceAction,
+  ConfirmedSourceAction,
   {
     getTitle: (title: string) => string;
     body: string;
@@ -49,6 +52,20 @@ const ACTION_COPY: Record<
       defaultMessage: 'Reset knowledge',
     }),
   },
+  changeQuery: {
+    getTitle: (title) =>
+      i18n.translate('xpack.significantEventsApp.sources.changeQueryModal.title', {
+        defaultMessage: 'Save the new query of "{title}"?',
+        values: { title },
+      }),
+    body: i18n.translate('xpack.significantEventsApp.sources.changeQueryModal.body', {
+      defaultMessage:
+        'Its knowledge indicators and rules describe the old query, so they are deleted and any running onboarding is stopped. Onboard the source again to rebuild them.',
+    }),
+    confirmLabel: i18n.translate('xpack.significantEventsApp.sources.changeQueryModal.confirm', {
+      defaultMessage: 'Save and reset knowledge',
+    }),
+  },
 };
 
 const CANCEL_LABEL = i18n.translate('xpack.significantEventsApp.sources.confirmModal.cancel', {
@@ -56,7 +73,7 @@ const CANCEL_LABEL = i18n.translate('xpack.significantEventsApp.sources.confirmM
 });
 
 interface ConfirmSourceActionModalProps {
-  action: SourceAction;
+  action: ConfirmedSourceAction;
   source: NightshiftSource;
   isLoading: boolean;
   onCancel: () => void;

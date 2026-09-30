@@ -49,6 +49,12 @@ interface WorkflowExecutionCancelParams {
  * `TInput` types the inputs passed to `execute`; the cast to
  * `Record<string, unknown>` for the underlying API is done internally.
  */
+/** Whether the execution started before the given ISO time. */
+export const isStartedBefore = (
+  execution: Pick<WorkflowExecutionListItemDto, 'startedAt'>,
+  isoTime: string
+): boolean => Date.parse(execution.startedAt) < Date.parse(isoTime);
+
 export class WorkflowExecutionService<TInput extends object = {}> {
   private readonly managementApi: WorkflowsServerPluginSetup['management'];
   private readonly workflowId: string;
@@ -138,14 +144,20 @@ export class WorkflowExecutionService<TInput extends object = {}> {
     request,
     spaceId,
     queryParams,
+    ignoreStartedBefore,
   }: {
     request: KibanaRequest;
     spaceId: string;
     queryParams?: WorkflowExecutionQueryParams;
+    /** ISO time; a last execution that started earlier counts as no execution. */
+    ignoreStartedBefore?: string;
   }): Promise<SignificantEventsWorkflowStatusResult> {
     const lastExecution = await this.getLastExecution(spaceId, request, queryParams);
 
-    if (!lastExecution) {
+    if (
+      !lastExecution ||
+      (ignoreStartedBefore !== undefined && isStartedBefore(lastExecution, ignoreStartedBefore))
+    ) {
       return { status: SignificantEventsWorkflowStatus.NotStarted, executionId: null };
     }
 

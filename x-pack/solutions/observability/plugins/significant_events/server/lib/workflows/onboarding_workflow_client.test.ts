@@ -173,6 +173,31 @@ describe('StreamsKIsOnboardingClient', () => {
       });
     });
 
+    it('ignores a run that started before the current query, or before the source existed', async () => {
+      const { client } = createClient({
+        getWorkflowExecutions: jest.fn().mockResolvedValue({
+          results: [
+            {
+              id: 'exec-of-deleted-source',
+              status: ExecutionStatus.COMPLETED,
+              startedAt: '2026-09-01T00:00:00.000Z',
+            },
+          ],
+        }),
+      });
+
+      const result = await client.getStatus({
+        request: statusRequest,
+        streamName: 'logs.nginx',
+        queryUpdatedAt: '2026-09-02T00:00:00.000Z',
+      });
+
+      expect(result).toEqual({
+        status: SignificantEventsWorkflowStatus.NotStarted,
+        executionId: null,
+      });
+    });
+
     it('returns InProgress for a running execution', async () => {
       const { client } = createClient({
         getWorkflowExecutions: jest.fn().mockResolvedValue({
@@ -449,6 +474,30 @@ describe('StreamsKIsOnboardingClient', () => {
       const result = await client.getStatuses({
         request: statusRequest,
         sources: [source('logs.nginx')],
+      });
+
+      expect(result).toEqual({
+        'logs.nginx': { status: SignificantEventsWorkflowStatus.NotStarted, executionId: null },
+      });
+    });
+
+    it('ignores the run of an earlier source that had the same slug', async () => {
+      const { client } = createClient({
+        getWorkflowExecutions: jest.fn().mockResolvedValue({
+          results: [
+            {
+              id: 'exec-of-deleted-source',
+              status: ExecutionStatus.FAILED,
+              startedAt: '2026-09-01T00:00:00.000Z',
+              concurrencyGroupKey: `nightshift-source-onboarding-${slugOf('logs.nginx')}`,
+            },
+          ],
+        }),
+      });
+
+      const result = await client.getStatuses({
+        request: statusRequest,
+        sources: [{ ...source('logs.nginx'), esql_updated_at: '2026-09-02T00:00:00.000Z' }],
       });
 
       expect(result).toEqual({

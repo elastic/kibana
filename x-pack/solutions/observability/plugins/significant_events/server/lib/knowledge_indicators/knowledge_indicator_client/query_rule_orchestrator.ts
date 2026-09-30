@@ -476,7 +476,7 @@ export class QueryRuleOrchestrator {
     const totals: PromoteQueriesResult = { ...EMPTY_PROMOTE_RESULT };
     for (const [sourceId, ids] of bySource) {
       if (!knownSourceIds.has(sourceId)) {
-        this.logger.warn(`Skipping promotion for missing source ${sourceId}`);
+        this.logger.warn(`Skipping promotion for source ${sourceId}: missing or disabled`);
         continue;
       }
       const result = await this.promoteQueries(sourceId, ids);

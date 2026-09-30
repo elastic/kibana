@@ -165,6 +165,44 @@ describe('SourceFlyout', () => {
     expect(screen.getByTestId('sourcePreviewMock')).toHaveTextContent('FROM logs-nginx-*');
   });
 
+  it('asks before saving a new query, since that resets the source knowledge', async () => {
+    setup(nginxSource);
+    fireEvent.change(screen.getByTestId('significantEventsAppSourceFlyoutQueryEditor'), {
+      target: { value: 'FROM logs-nginx-* | WHERE status >= 400' },
+    });
+
+    fireEvent.click(screen.getByTestId('significantEventsAppSourceFlyoutSaveButton'));
+
+    expect(
+      await screen.findByTestId('significantEventsAppSources-changeQuery-confirmModal')
+    ).toBeInTheDocument();
+    expect(mockUpdateSource.mutateAsync).not.toHaveBeenCalled();
+
+    fireEvent.click(screen.getByTestId('confirmModalConfirmButton'));
+
+    await waitFor(() => expect(onClose).toHaveBeenCalled());
+    expect(mockUpdateSource.mutateAsync).toHaveBeenCalledWith({
+      sourceId: 'source-1',
+      body: expect.objectContaining({ esql: 'FROM logs-nginx-* | WHERE status >= 400' }),
+    });
+  });
+
+  it('does not save when the new query is not confirmed', async () => {
+    setup(nginxSource);
+    fireEvent.change(screen.getByTestId('significantEventsAppSourceFlyoutQueryEditor'), {
+      target: { value: 'FROM logs-nginx-*' },
+    });
+    fireEvent.click(screen.getByTestId('significantEventsAppSourceFlyoutSaveButton'));
+    await screen.findByTestId('significantEventsAppSources-changeQuery-confirmModal');
+
+    fireEvent.click(screen.getByTestId('confirmModalCancelButton'));
+
+    expect(
+      screen.queryByTestId('significantEventsAppSources-changeQuery-confirmModal')
+    ).not.toBeInTheDocument();
+    expect(mockUpdateSource.mutateAsync).not.toHaveBeenCalled();
+  });
+
   it('runs the preview again when the same query is run twice', () => {
     setup(nginxSource);
     const runQuery = screen.getByTestId('significantEventsAppSourceFlyoutRunQueryButton');

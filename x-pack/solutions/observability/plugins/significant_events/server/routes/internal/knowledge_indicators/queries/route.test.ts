@@ -498,6 +498,35 @@ describe('getDiscoveryQueriesOccurrencesRoute stream resolution', () => {
   });
 });
 
+describe('promoteUnbackedQueriesRoute', () => {
+  const promoteRoute = internalKIQueriesRoutes['POST /internal/streams/queries/_promote'];
+
+  it('offers only enabled sources for promotion, so disabled sources get no live rules', async () => {
+    const promoteUnbackedQueries = jest
+      .fn()
+      .mockResolvedValue({ promoted: 1, skipped_stats: 0, skipped_ineligible: 0 });
+    const list = jest.fn().mockResolvedValue({ sources: [{ id: 'enabled-source' }], total: 1 });
+    const handlerParams = {
+      params: { body: { queryIds: ['q1'] } },
+      request: {},
+      getScopedClients: jest.fn().mockResolvedValue({
+        sourcesClient: { list },
+        licensing: {},
+        getKnowledgeIndicatorClient: jest.fn().mockResolvedValue({ promoteUnbackedQueries }),
+      }),
+      server: {},
+      maintenanceService: makeMaintenanceService(),
+    } as unknown as Parameters<typeof promoteRoute.handler>[0];
+
+    await promoteRoute.handler(handlerParams);
+
+    expect(list).toHaveBeenCalledWith(expect.objectContaining({ enabled: true }));
+    expect(promoteUnbackedQueries).toHaveBeenCalledWith(
+      expect.objectContaining({ queryIds: ['q1'], sourceIds: ['enabled-source'] })
+    );
+  });
+});
+
 describe('generateQueriesRoute', () => {
   const generateRoute =
     internalKIQueriesRoutes['POST /internal/streams/{streamName}/queries/_generate'];

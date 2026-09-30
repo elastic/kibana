@@ -385,6 +385,18 @@ describe('createSourceChangeListener', () => {
     expect(kiClient.setSourceRulesEnabled).not.toHaveBeenCalled();
   });
 
+  it('resets the knowledge of a source whose query changed', async () => {
+    const { listener, kiClient, cancelBySourceSlug } = setup();
+    const edited = { ...enabledSource, esql_updated_at: '2026-02-01T00:00:00.000Z' };
+
+    await listener({ type: 'updated', source: edited, previous: enabledSource, request });
+
+    expect(cancelBySourceSlug).toHaveBeenCalledWith({ sourceSlug: 'toggled-source-slug', request });
+    expect(kiClient.deleteOwnedRules).toHaveBeenCalledWith('toggled-source');
+    expect(kiClient.deleteIndicators).toHaveBeenCalledWith('toggled-source');
+    expect(kiClient.setSourceRulesEnabled).not.toHaveBeenCalled();
+  });
+
   it('ignores created sources and updates that keep the enabled flag', async () => {
     const { listener, getScopedClients } = setup();
     const events: SourceChangeEvent[] = [

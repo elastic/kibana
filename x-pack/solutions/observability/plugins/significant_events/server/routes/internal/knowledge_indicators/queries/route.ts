@@ -42,6 +42,7 @@ import {
 import { searchModeSchema } from '../../../utils/search_mode';
 import { assertValidDateRange, makeIsoDateFromString } from '../../../utils/iso_date_param';
 import { resolveSourceIds } from '../../../utils/resolve_source_ids';
+import { listAllSources } from '../../../utils/list_all_sources';
 import type { PersistQueriesResult } from '../../../../lib/significant_events/persist_queries';
 import { persistQueries } from '../../../../lib/significant_events/persist_queries';
 import { queryFromLink } from '../../../../lib/knowledge_indicators/knowledge_indicator_client/serializers';
@@ -126,7 +127,8 @@ const promoteUnbackedQueriesRoute = createServerRoute({
     await assertNotPaused({ maintenanceService, request });
 
     const kiClient = await scopedClients.getKnowledgeIndicatorClient();
-    const sourceIds = await resolveSourceIds(undefined, sourcesClient);
+    // A disabled source's rules must stay off, so its queries wait until the source is enabled.
+    const sourceIds = (await listAllSources(sourcesClient, { enabled: true })).map(({ id }) => id);
 
     return kiClient.promoteUnbackedQueries({
       queryIds: params?.body?.queryIds,

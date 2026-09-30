@@ -24,6 +24,7 @@ import {
 } from '../../../common/maintenance/state_machine';
 import { MAINTENANCE_FEATURE_FLAG_ACTOR } from '../../../common/maintenance/actors';
 import type { GetScopedClients } from '../../routes/types';
+import { listAllSources } from '../../routes/utils/list_all_sources';
 import {
   SIGNIFICANT_EVENTS_MAINTENANCE_STATE_SO_ID,
   SIGNIFICANT_EVENTS_MAINTENANCE_STATE_SO_TYPE,
@@ -535,18 +536,33 @@ export const createSignificantEventsMaintenanceService = ({
       return { failedIds: [], toggledCount: 0 };
     }
     try {
-      const { getSignificantEventsAlertingContext } = await getScopedClients({ request });
+      const { getSignificantEventsAlertingContext, getKnowledgeIndicatorClient, sourcesClient } =
+        await getScopedClients({ request });
       const { alertingV2RulesClient } = await getSignificantEventsAlertingContext();
       if (!alertingV2RulesClient) {
         failures.push({ target: 'rules', error: 'Alerting v2 rules client is not available' });
         // Keep every rule recorded so a later resume can retry them.
         return { failedIds: ruleIds, toggledCount: 0 };
       }
+      // A source disabled before or during the pause keeps its rules off: its enabled flag owns
+      // them now, and enabling the source turns them back on. They leave the record here.
+      const [links, disabledSources] = await Promise.all([
+        (await getKnowledgeIndicatorClient()).getRuleBackedQueryLinks(),
+        listAllSources(sourcesClient, { enabled: false }),
+      ]);
+      const disabledSourceIds = new Set(disabledSources.map(({ id }) => id));
+      const disabledSourceRuleIds = new Set(
+        links.filter((link) => disabledSourceIds.has(link.stream_name)).map((link) => link.rule_id)
+      );
+      const ruleIdsToEnable = ruleIds.filter((id) => !disabledSourceRuleIds.has(id));
+      if (ruleIdsToEnable.length === 0) {
+        return { failedIds: [], toggledCount: 0 };
+      }
       const {
         toggledIds,
         failedIds,
         failures: ruleFailures,
-      } = await setV2RulesEnabled(alertingV2RulesClient, ruleIds, true);
+      } = await setV2RulesEnabled(alertingV2RulesClient, ruleIdsToEnable, true);
       failures.push(...ruleFailures);
       return { failedIds, toggledCount: toggledIds.length };
     } catch (error) {
