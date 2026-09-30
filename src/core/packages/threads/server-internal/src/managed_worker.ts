@@ -34,7 +34,7 @@ export class ManagedWorkerHandle<Message> implements ManagedWorker {
   private restarts = 0;
   private running = false;
   private stopping?: Promise<void>;
-  private readonly terminations = new Set<Promise<void>>();
+  private termination: Promise<void> = Promise.resolve();
 
   constructor(private readonly params: ManagedWorkerOptions<Message>) {}
 
@@ -52,11 +52,9 @@ export class ManagedWorkerHandle<Message> implements ManagedWorker {
     clearTimeout(this.restartTimer);
     this.restartTimer = undefined;
     this.discardWorker();
-    this.stopping = Promise.all(this.terminations)
-      .then(() => {})
-      .finally(() => {
-        this.stopping = undefined;
-      });
+    this.stopping = this.termination.finally(() => {
+      this.stopping = undefined;
+    });
     return this.stopping;
   }
 
@@ -114,16 +112,12 @@ export class ManagedWorkerHandle<Message> implements ManagedWorker {
     worker.removeAllListeners('error');
     // An error emitted during termination must not become an unhandled main-thread exception.
     worker.on('error', () => {});
-    const termination = worker.terminate().then(() => {});
-    this.terminations.add(termination);
-    void termination.then(
-      () => this.terminations.delete(termination),
-      (error: Error) => {
-        // Keep failures observable by stop(), even when cleanup began during initialization.
-        this.params.logger.warn(
-          `Worker ${this.params.options.name} termination failed: ${error.message}`
-        );
-      }
-    );
+    this.termination = Promise.all([this.termination, worker.terminate()]).then(() => {});
+    // Observe background cleanup failures without hiding them from stop().
+    void this.termination.catch((error: Error) => {
+      this.params.logger.warn(
+        `Worker ${this.params.options.name} termination failed: ${error.message}`
+      );
+    });
   }
 }

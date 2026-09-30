@@ -39,19 +39,17 @@ const heartbeatNowUs = (): bigint => process.hrtime.bigint() / 1000n;
 export class EventLoopWatchdog {
   private worker?: ManagedWorker;
   private heartbeatTimer?: NodeJS.Timeout;
-  private running = false;
   private stopping?: Promise<void>;
 
   constructor(private readonly params: EventLoopWatchdogParams) {}
 
   public get isRunning(): boolean {
-    return this.running;
+    return this.worker !== undefined;
   }
 
   public start(): void {
-    if (this.running) return;
+    if (this.worker) return;
     if (this.stopping) throw new Error('Cannot start the watchdog while it is stopping');
-    this.running = true;
     const buffer = new SharedArrayBuffer(BigInt64Array.BYTES_PER_ELEMENT);
     const heartbeat = new BigInt64Array(buffer);
     Atomics.store(heartbeat, 0, heartbeatNowUs());
@@ -101,19 +99,19 @@ export class EventLoopWatchdog {
 
   public stop(): Promise<void> {
     if (this.stopping) return this.stopping;
-    if (!this.running) return Promise.resolve();
-    this.running = false;
+    const { worker } = this;
+    if (!worker) return Promise.resolve();
+    this.worker = undefined;
     clearInterval(this.heartbeatTimer);
     this.heartbeatTimer = undefined;
-    this.stopping = this.worker
-      ?.stop()
+    this.stopping = worker
+      .stop()
       .then(() => {
-        this.worker = undefined;
         this.params.logger.info('Event loop watchdog stopped');
       })
       .finally(() => {
         this.stopping = undefined;
       });
-    return this.stopping ?? Promise.resolve();
+    return this.stopping;
   }
 }

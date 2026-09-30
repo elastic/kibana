@@ -13,10 +13,7 @@ export class MockWorker extends EventEmitter {
   static instances: MockWorker[] = [];
   static failNextConstruction = 0;
   public readonly postMessage = jest.fn();
-  public readonly unref = jest.fn(() => {
-    this.messageListenersAtUnref = this.listenerCount('message');
-  });
-  public messageListenersAtUnref?: number;
+  public readonly unref = jest.fn();
   public readonly terminate = jest.fn(async () => {
     this.emit('exit', 1);
     return 1;

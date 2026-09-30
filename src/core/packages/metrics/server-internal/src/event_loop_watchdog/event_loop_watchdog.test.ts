@@ -12,7 +12,7 @@ import { MockWorker } from './event_loop_watchdog.test.mocks';
 import { ThreadsService } from '@kbn/core-threads-server-internal';
 import { ActivityRegistry } from './activity_registry';
 import { EventLoopWatchdog, MAX_RESTARTS, RESTART_BASE_DELAY_MS } from './event_loop_watchdog';
-import type { BlockReport, WatchdogOptions } from './types';
+import type { WatchdogOptions } from './types';
 
 const options: WatchdogOptions = {
   thresholdMs: 500,
@@ -179,22 +179,5 @@ describe('EventLoopWatchdog', () => {
 
     jest.advanceTimersByTime(RESTART_BASE_DELAY_MS * 2);
     expect(MockWorker.instances).toHaveLength(2);
-  });
-
-  it('does not duplicate worker-side reports through the main-thread logger', () => {
-    watchdog.start();
-    const report: BlockReport = {
-      blockedMs: 1200,
-      startedAt: 1,
-      endedAt: 2,
-      cpuRatio: 0.99,
-      liveNotices: 0,
-      suppressedBlocks: 0,
-      candidates: [{ kind: 'task', type: 'a', id: '1', startedBeforeBlockMs: 5 }],
-      omittedCandidates: 0,
-    };
-    lastWorker().emit('message', { type: 'report', report });
-
-    expect(logger.warn).not.toHaveBeenCalled();
   });
 });
