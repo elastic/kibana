@@ -87,6 +87,7 @@ import {
   prepareWorkflowDocumentFromYaml,
   workflowYamlDeclaresTopLevelEnabled,
 } from '../api/lib/workflow_prepare';
+import { reconcilePageIds } from '../api/pages/page_ids';
 import type { DeleteWorkflowsResponse } from '../api/workflows_management_api';
 import type { BulkFailureEntry, BulkWorkflowEntry } from '../lib/bulk_id_helpers';
 import {
@@ -644,7 +645,7 @@ export class WorkflowCrudService {
     workflow: CreateWorkflowCommand,
     spaceId: string,
     request: KibanaRequest,
-    options?: { nameFallback?: string }
+    options?: { nameFallback?: string; regeneratePageIds?: boolean }
   ): Promise<WorkflowDetailDto> {
     if (workflow.id) {
       validateWorkflowId(workflow.id);
@@ -674,6 +675,7 @@ export class WorkflowCrudService {
       nameFallback: options?.nameFallback,
       logger: this.deps.logger,
       warnIgnoredKibanaFetcher: await this.shouldWarnIgnoredKibanaFetcher(),
+      regeneratePageIds: options?.regeneratePageIds,
     });
 
     const profileId =
@@ -772,6 +774,8 @@ export class WorkflowCrudService {
           triggerDefinitions,
           logger: this.deps.logger,
           warnIgnoredKibanaFetcher,
+          // A fresh import is a copy and gets new page URLs; overwrite restores the same workflow.
+          regeneratePageIds: !options?.overwrite,
         });
 
         if (profileId) {
@@ -998,6 +1002,14 @@ export class WorkflowCrudService {
             yaml: yamlResult.workflowYaml,
             ...yamlResult.updatedDataPatch,
           };
+          // Keep each page's URL across edits, even if the incoming YAML dropped its page-id.
+          const reconciled = reconcilePageIds({
+            yaml: yamlResult.workflowYaml,
+            definition: updatedData.definition,
+            previousDefinition: existingSource.definition,
+          });
+          updatedData.yaml = reconciled.yaml;
+          updatedData.definition = reconciled.definition ?? null;
           validationErrors.length = 0;
           validationErrors.push(...yamlResult.validationErrors);
           shouldUpdateScheduler = shouldUpdateScheduler || yamlResult.shouldUpdateScheduler;

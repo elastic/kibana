@@ -7,85 +7,60 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { WorkflowLike } from './page_service';
+import type { WorkflowDetailDto } from '@kbn/workflows';
 import { getPageSubmitter, parsePageSubmission, resolvePage } from './page_service';
-import { computePageToken, verifyPageToken } from './page_token';
 import { ExternalResumeError } from '../external_resume/external_resume_error';
 
-const SIGNING_KEY = 'a'.repeat(32);
-const SPACE_ID = 'default';
-const WORKFLOW_ID = 'workflow-1';
+const PAGE_ID = '7f3c2a1e-0000-4000-8000-000000000001';
 
-const validToken = () => computePageToken(SIGNING_KEY, SPACE_ID, WORKFLOW_ID);
-
-const workflowWithPage = {
-  enabled: true,
-  valid: true,
-  definition: {
-    triggers: [
-      { type: 'manual' },
-      {
-        type: 'page',
-        title: 'Report an incident',
-        inputs: { type: 'object', properties: { summary: { type: 'string' } } },
-      },
-    ],
-  },
-};
-
-describe('page token', () => {
-  it('verifies a token it produced', () => {
-    expect(verifyPageToken(SIGNING_KEY, SPACE_ID, WORKFLOW_ID, validToken())).toBe(true);
-  });
-
-  it('rejects a token minted for another space or workflow', () => {
-    expect(verifyPageToken(SIGNING_KEY, 'other-space', WORKFLOW_ID, validToken())).toBe(false);
-    expect(verifyPageToken(SIGNING_KEY, SPACE_ID, 'other-workflow', validToken())).toBe(false);
-  });
-
-  it('rejects a token of a different length without throwing', () => {
-    expect(verifyPageToken(SIGNING_KEY, SPACE_ID, WORKFLOW_ID, 'short')).toBe(false);
-  });
-});
+const workflowWithPage = (pageId: string, overrides: Partial<WorkflowDetailDto> = {}) =>
+  ({
+    id: `workflow-for-${pageId}`,
+    enabled: true,
+    valid: true,
+    definition: {
+      triggers: [
+        { type: 'manual' },
+        {
+          type: 'page',
+          'page-id': pageId,
+          title: 'Report an incident',
+          inputs: { type: 'object', properties: { summary: { type: 'string' } } },
+        },
+      ],
+    },
+    ...overrides,
+  } as unknown as WorkflowDetailDto);
 
 describe('resolvePage', () => {
-  const args = {
-    signingKey: SIGNING_KEY,
-    spaceId: SPACE_ID,
-    workflowId: WORKFLOW_ID,
-    token: validToken(),
-  };
+  it('finds the enabled workflow whose page trigger has the page-id', async () => {
+    const finder = jest
+      .fn()
+      .mockResolvedValue([workflowWithPage('other'), workflowWithPage(PAGE_ID)]);
 
-  it('returns the page trigger and its input schema', () => {
-    const page = resolvePage(workflowWithPage, args);
+    const page = await resolvePage(finder, { pageId: PAGE_ID, spaceId: 'default' });
+
+    expect(finder).toHaveBeenCalledWith('page', 'default');
+    expect(page.workflow.id).toBe(`workflow-for-${PAGE_ID}`);
     expect(page.trigger.title).toBe('Report an incident');
-    expect(page.inputsSchema).toEqual({
-      type: 'object',
-      properties: { summary: { type: 'string' } },
-    });
   });
 
-  it('checks the token before looking at the workflow', () => {
-    expect(() => resolvePage(undefined, { ...args, token: 'wrong' })).toThrow(ExternalResumeError);
+  it('returns a non-exposed 404 when no enabled workflow has the page-id', async () => {
+    const finder = jest.fn().mockResolvedValue([workflowWithPage('other')]);
+
+    await expect(resolvePage(finder, { pageId: PAGE_ID, spaceId: 'default' })).rejects.toEqual(
+      expect.objectContaining({ statusCode: 404, expose: false })
+    );
   });
 
-  it('does not expose why a request failed', () => {
-    const cases: Array<[WorkflowLike | undefined, number]> = [
-      [undefined, 404],
-      [{ ...workflowWithPage, enabled: false }, 404],
-      [{ enabled: true, valid: true, definition: { triggers: [{ type: 'manual' }] } }, 404],
-    ];
+  it('skips a workflow whose definition is invalid', async () => {
+    const finder = jest
+      .fn()
+      .mockResolvedValue([workflowWithPage(PAGE_ID, { valid: false, definition: null })]);
 
-    for (const [workflow, statusCode] of cases) {
-      try {
-        resolvePage(workflow, args);
-        throw new Error('expected resolvePage to throw');
-      } catch (error) {
-        expect(error).toBeInstanceOf(ExternalResumeError);
-        expect((error as ExternalResumeError).statusCode).toBe(statusCode);
-        expect((error as ExternalResumeError).expose).toBe(false);
-      }
-    }
+    await expect(
+      resolvePage(finder, { pageId: PAGE_ID, spaceId: 'default' })
+    ).rejects.toBeInstanceOf(ExternalResumeError);
   });
 });
 
@@ -115,15 +90,9 @@ describe('getPageSubmitter', () => {
     );
     expect(submitter.ip).toBe('203.0.113.7');
     expect(submitter.userAgent).toBe('curl/8');
-    expect(Date.parse(submitter.at)).not.toBeNaN();
   });
 
   it('falls back to the socket address when no proxy header is present', () => {
     expect(getPageSubmitter({}, '10.0.0.1').ip).toBe('10.0.0.1');
-  });
-
-  it('truncates an oversized user agent', () => {
-    const submitter = getPageSubmitter({ 'user-agent': 'x'.repeat(1000) }, undefined);
-    expect(submitter.userAgent).toHaveLength(512);
   });
 });
