@@ -20,6 +20,7 @@ import {
 import { createCustomContentTemplateResolver } from '@kbn/custom-content-server';
 import { dashboardTools } from '../../../common';
 import { retrieveLatestVersion } from './attachment_state';
+import { refreshDashboardPanelPointers } from './panel_pointers';
 import {
   createAttachmentPanelResolver,
   createControlFieldCapabilitiesResolver,
@@ -183,6 +184,15 @@ Use operations[] to:
         }
 
         logger.info(`Dashboard payload ${isNewDashboard ? 'generated' : 'updated'}`);
+
+        if (!isNewDashboard) {
+          await refreshDashboardPanelPointers({
+            attachments,
+            operations,
+            dashboardData: finalDashboardData,
+            logger,
+          });
+        }
 
         return {
           results: [

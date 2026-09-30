@@ -6,7 +6,10 @@
  */
 
 import { platformCoreTools } from '@kbn/agent-builder-common';
-import { DASHBOARD_ATTACHMENT_TYPE } from '@kbn/agent-builder-dashboards-common';
+import {
+  DASHBOARD_ATTACHMENT_TYPE,
+  DASHBOARD_PANEL_ATTACHMENT_TYPE,
+} from '@kbn/agent-builder-dashboards-common';
 import { dashboardTools } from '../../../common';
 import type { DashboardGuidanceModule } from '../guidance_module';
 
@@ -23,6 +26,14 @@ In Kibana, a dashboard request follows three stages: resolve inputs, generate (w
 3. **Render**:
    - Render the persisted attachment inline with a render-attachment tag using the returned \`attachment_id\` and \`version\`:
      \`<render_attachment id="{attachment_id}" version="{version}" />\`
+
+## Panel Pointers
+
+- A \`${DASHBOARD_PANEL_ATTACHMENT_TYPE}\` attachment means the user is referring to that one panel. It names a \`dashboard_attachment_id\` and a \`panel_id\` and carries no configuration.
+- Resolve it through the dashboard attachment it names: that attachment is the working copy, and the panel's current config lives there. Edit the panel with ${dashboardTools.generateDashboard}, passing that \`dashboard_attachment_id\` as \`dashboardAttachmentId\` and an \`edit_panels\` operation with the pointer's \`panel_id\` as \`panelId\`.
+- Never call \`platform.core.create_visualization\` or add a new panel to refine a panel that already exists on the dashboard.
+- After the edit, render only the dashboard attachment. Do not render the pointer or any visualization attachment.
+- If the named panel is missing from the dashboard attachment, tell the user instead of recreating it.
 
 ## Discovering Dashboards
 

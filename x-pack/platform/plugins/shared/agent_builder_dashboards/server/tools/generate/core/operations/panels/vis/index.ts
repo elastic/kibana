@@ -108,7 +108,7 @@ export const visPanelConfigInputSchema = z.object({
   type: z.literal('vis'),
   grid: panelGridSchema,
   config: visPanelConfigSchema.describe(
-    'Already-resolved visualization config, passed by value: either a Lens API config (has a top-level `type`) or a Vega config (`{ spec }`). Accepted, but not preferred: to place a visualization attachment, use source: "attachment" with its id instead of copying its config here. Do not hand-build a config for a new visualization — use source: "request" instead.'
+    'Already-resolved visualization config, passed by value: either a Lens API config (has a top-level `type`) or a Vega config (`{ spec }`). Use it to duplicate a panel that already exists on the dashboard attachment (copy its config verbatim). To place a visualization attachment, prefer source: "attachment" with its id instead of copying its config here. Do not invent a config for a new visualization — use source: "request" instead.'
   ),
 });
 
