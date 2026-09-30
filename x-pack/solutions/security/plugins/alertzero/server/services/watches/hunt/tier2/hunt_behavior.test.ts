@@ -211,51 +211,29 @@ describe('huntBehavior', () => {
     ]);
   });
 
-  it('returns generateEsql targeting only allowlisted matched indices', async () => {
+  it('ignores matched_indices and targets the full required_indices union, even when a matched index sits inside it', async () => {
+    // Decided (Q2): one query over the union for the demo. Narrowing to whichever
+    // concrete index Tier 1's per-index buckets happened to hit is exactly what this
+    // must not do — a coincidental IOC match landing in an unrelated dataset that
+    // shares a baseline wildcard must not misdirect the FROM to that dataset alone.
     await huntBehavior(
       buildMockModel([t1078Candidate]),
       logger,
       {
         text: REPORT_TEXT,
-        required_indices: ['logs-aws.*'],
+        required_indices: ['logs-aws.*', 'logs-endpoint.events.*'],
         article_context: {
-          matched_indices: [
-            '.ds-logs-aws.cloudtrail-default-2026.09.01-000001',
-            '.kibana',
-            'logs-okta.system-default',
-          ],
+          matched_indices: ['.ds-logs-aws.cloudtrail-default-2026.09.01-000001', '.kibana'],
         },
       },
       esClient
     );
     expect(generateEsqlMock).toHaveBeenCalledWith(
-      expect.objectContaining({ index: 'logs-aws.cloudtrail-default*' })
+      expect.objectContaining({ index: 'logs-aws.*,logs-endpoint.events.*' })
     );
   });
 
-  it('returns generateEsql targeting the integrations that produced Tier 1 hits', async () => {
-    await huntBehavior(
-      buildMockModel([t1078Candidate]),
-      logger,
-      {
-        text: REPORT_TEXT,
-        required_indices: ['logs-*'],
-        article_context: {
-          matched_indices: [
-            '.ds-logs-aws.cloudtrail-default-2026.09.01-000001',
-            '.ds-logs-aws.cloudtrail-default-2026.09.02-000002',
-            'logs-okta.system-default',
-          ],
-        },
-      },
-      esClient
-    );
-    expect(generateEsqlMock).toHaveBeenCalledWith(
-      expect.objectContaining({ index: 'logs-aws.cloudtrail-default*,logs-okta.system-default*' })
-    );
-  });
-
-  it('does not double the wildcard on matched indices that already carry one', async () => {
+  it('ignores matched_indices entirely under a broad scope too, targeting the broad pattern', async () => {
     await huntBehavior(
       buildMockModel([t1078Candidate]),
       logger,
@@ -263,36 +241,29 @@ describe('huntBehavior', () => {
         text: REPORT_TEXT,
         required_indices: ['logs-*'],
         article_context: {
-          // A discovered scope hands over wildcard patterns, not concrete backing indices.
-          matched_indices: ['logs-cisco_asa.log-*', 'logs-aws.*'],
+          matched_indices: [
+            '.ds-logs-aws.cloudtrail-default-2026.09.01-000001',
+            'logs-okta.system-default',
+          ],
         },
       },
       esClient
     );
-    expect(generateEsqlMock).toHaveBeenCalledWith(
-      expect.objectContaining({ index: 'logs-cisco_asa.log-*,logs-aws.*' })
-    );
+    expect(generateEsqlMock).toHaveBeenCalledWith(expect.objectContaining({ index: 'logs-*' }));
   });
 
-  it('keeps an exact matched index when wildcarding it would cross a broad-scope exclusion', async () => {
-    // `logs-elastic` is searchable under `logs-*` with `-logs-elastic_agent*`, but
-    // `logs-elastic*` would expand into the excluded agent streams and the gate
-    // would refuse both that wildcard and the `logs-*` fallback.
+  it('strips exclusion entries from required_indices before building the FROM target', async () => {
+    // Exclusion entries (`-logs-elastic_agent*`) belong to the search, not to a FROM.
     await huntBehavior(
       buildMockModel([t1078Candidate]),
       logger,
       {
         text: REPORT_TEXT,
         required_indices: ['logs-*', '-logs-elastic_agent*', '-logs-fleet_server*'],
-        article_context: {
-          matched_indices: ['logs-elastic'],
-        },
       },
       esClient
     );
-    expect(generateEsqlMock).toHaveBeenCalledWith(
-      expect.objectContaining({ index: 'logs-elastic' })
-    );
+    expect(generateEsqlMock).toHaveBeenCalledWith(expect.objectContaining({ index: 'logs-*' }));
   });
 
   it('returns generateEsql targeting the required indices when Tier 1 had no hits', async () => {

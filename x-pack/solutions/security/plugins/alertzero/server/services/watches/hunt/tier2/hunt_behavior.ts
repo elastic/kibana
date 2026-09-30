@@ -17,7 +17,7 @@ import type {
   HuntIncompleteness,
   HuntIncompleteReason,
 } from '@kbn/alertzero-common';
-import { buildMatchesRequired, isIndexPatternAllowed } from '../common/matches_required';
+import { buildMatchesRequired } from '../common/matches_required';
 import { getKnownHuntIndexPatterns } from '../common/resolve_index_scope';
 import {
   huntBehaviorLlmExtractionSchema,
@@ -352,64 +352,18 @@ const executeValidatedEsql = async ({
 };
 
 /**
- * Strip a concrete backing index to the integration stream the hit came from
- * (`.ds-logs-okta.system-default-2026.09.01-000001` → `logs-okta.system-default`).
- * A discovered scope already hands over wildcard patterns; those stay as-is.
+ * Target for `generateEsql`: one query over the full allowed scope
+ * (`tier2_targets`, threaded through as `requiredIndices`), not narrowed to
+ * whichever concrete index Tier 1's per-index buckets happened to hit. A
+ * coincidental IOC match landing in an unrelated dataset that shares a
+ * baseline wildcard can no longer misdirect the FROM this way, since the FROM
+ * always covers the whole allowed scope regardless of which specific bucket
+ * confirmed the hit. Per-behavior host-vs-cloud target choice is future work.
  */
-const matchedIndexBase = (index: string): string => {
-  const base = index.replace(/^\.ds-/, '').replace(/[-.]\d{4}[.-]\d{2}[.-]\d{2}.*$/, '');
-  return base;
-};
-
-/**
- * Wildcard patterns for the integrations that produced Tier 1 hits. Prefer the
- * stream wildcard (`logs-okta.system-default*`) so generation covers every
- * generation of that stream, but keep the exact allowed name when adding `*`
- * would cross an exclusion (`logs-elastic` is searchable under `logs-*` with
- * `-logs-elastic_agent*`, while `logs-elastic*` is not).
- */
-const matchedIndexPatterns = (
-  articleContext: HuntBehaviorArticleContext | undefined,
-  allowlist: string[]
-): string[] => [
-  ...new Set(
-    (articleContext?.matched_indices ?? [])
-      .map((index) => {
-        const base = matchedIndexBase(index);
-        if (base.endsWith('*')) {
-          return isIndexPatternAllowed(base, allowlist) ? base : null;
-        }
-        const wildcarded = `${base}*`;
-        if (isIndexPatternAllowed(wildcarded, allowlist)) return wildcarded;
-        if (isIndexPatternAllowed(base, allowlist)) return base;
-        return null;
-      })
-      .filter((pattern): pattern is string => pattern !== null)
-  ),
-];
-
-/**
- * Target for `generateEsql`. Prefer integrations with confirmed hits that sit
- * inside the allowlist (required scope when present, otherwise every known
- * technology pattern), then the scope's required patterns, then the generic
- * logs pattern. Caller-supplied `matched_indices` never steer generation at
- * indices outside that allowlist.
- */
-const resolveGenerationIndex = (
-  articleContext: HuntBehaviorArticleContext | undefined,
-  requiredIndices: string[]
-): string => {
-  const allowlist = requiredIndices.length > 0 ? requiredIndices : getKnownHuntIndexPatterns();
-  const matched = matchedIndexPatterns(articleContext, allowlist);
-  if (matched.length > 0) return matched.join(',');
+const resolveGenerationIndex = (requiredIndices: string[]): string => {
   // Exclusion entries (`-logs-elastic_agent*`) belong to the search, not to a FROM.
-  // Filter positives the same way matched indices are filtered: under a broad scope
-  // `logs-*` itself is refused because it overlaps the agent exclusions.
-  const positives = requiredIndices
-    .filter((pattern) => !pattern.startsWith('-'))
-    .filter((pattern) => isIndexPatternAllowed(pattern, allowlist));
-  if (positives.length > 0) return positives.join(',');
-  return DEFAULT_GENERATION_INDEX;
+  const positives = requiredIndices.filter((pattern) => !pattern.startsWith('-'));
+  return positives.length > 0 ? positives.join(',') : DEFAULT_GENERATION_INDEX;
 };
 
 /** Report-level grounding shared by every per-behavior generation call. */
@@ -469,7 +423,7 @@ const generateGroundedEsql = async ({
   requiredIndices: string[];
   rowLimit: number;
 }): Promise<Map<string, string>> => {
-  const index = resolveGenerationIndex(articleContext, requiredIndices);
+  const index = resolveGenerationIndex(requiredIndices);
   const additionalContext = buildGenerationContext({ text, iocs, articleContext });
   // The schema probe runs the model's FROM before the publish/execute scope gate, so gate the
   // client it runs on with the same allowlist — an out-of-scope probe is refused before it
