@@ -11,7 +11,10 @@ import { css } from '@emotion/react';
 import { AppHeader } from '@kbn/app-header';
 import type { AppHeaderBadge, AppHeaderMenu, AppHeaderTitle } from '@kbn/app-header';
 import type { AppMenuItemType, AppMenuPrimaryActionItem } from '@kbn/app-menu';
-import { ALERTZERO_WATCHES_SUBNAV_WIDTH } from '../../../components/layout/constants';
+import {
+  ALERTZERO_WATCH_SETTINGS_WIDTH,
+  ALERTZERO_WATCHES_SUBNAV_WIDTH,
+} from '../../../components/layout/constants';
 import { AlertZeroWatchesNav, type WatchesSectionId } from './alertzero_watches_nav';
 
 interface WatchesSectionLayoutProps {
@@ -99,7 +102,17 @@ export const WatchesSectionLayout: React.FC<WatchesSectionLayoutProps> = ({
         <AlertZeroWatchesNav active={active} />
       </EuiPageTemplate.Sidebar>
       <AppHeader title={title} badges={badges} menu={menu} spacing="compact" />
-      <EuiPageTemplate.Section paddingSize="l" grow>
+      <EuiPageTemplate.Section
+        paddingSize="l"
+        grow
+        contentProps={{
+          css: css`
+            width: ${ALERTZERO_WATCH_SETTINGS_WIDTH}px;
+            max-width: 100%;
+            margin-inline: auto;
+          `,
+        }}
+      >
         {children}
       </EuiPageTemplate.Section>
     </EuiPageTemplate>
