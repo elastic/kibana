@@ -73,12 +73,16 @@ steps:
         | LIMIT {{ consts.max_units }}
         | KEEP `{{ consts.unit_key }}`
 
+  # Profiling one unit costs two ES|QL queries and a model call, and no unit's profile
+  # depends on another's, so five run at a time rather than the batch running end to end.
   - name: loop_units
-    type: foreach
+    type: parallel
     foreach: "{{ steps.discover_units.output.values | json }}"
-    # One unit that fails to profile should not cost the rest.
-    iteration-on-failure:
-      continue: true
+    concurrency: 5
+    # One unit that fails to profile should not cost the rest: `settled` runs every branch to a
+    # terminal state, where the default `fail-fast` stops scheduling on the first failure.
+    # This is what `iteration-on-failure: continue` does for a sequential loop.
+    mode: settled
     steps:
       # `foreach.item[0]` is the unit key, the one column `discover_units` keeps.
       - name: unit_context
