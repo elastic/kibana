@@ -22,6 +22,7 @@ jest.mock('./core', () => ({
   hasValidCreateMetadataOperations: jest.fn(),
   createVisPanelResolver: jest.fn(),
   createAttachmentPanelResolver: jest.fn(),
+  createControlFieldCapabilitiesResolver: jest.fn(),
 }));
 jest.mock('./time_range', () => ({
   applyDefaultDashboardTimeRange: jest.fn(
@@ -56,6 +57,7 @@ const callHandler = async (dashboardAttachmentId?: string) => {
       update: jest.fn(async (id: string) => ({ id, current_version: 2, origin: 'saved-id' })),
     },
     events: { sendUiEvent },
+    esClient: { asCurrentUser: {} },
   };
   const ret = await tool.handler(
     { dashboardAttachmentId, operations: [] } as unknown as Parameters<typeof tool.handler>[0],
