@@ -24,8 +24,6 @@ jest.mock('./datasets_table', () => ({
     return (
       <div data-test-subj="mockDatasetsTable">
         <div data-test-subj="mockSelectedCount">{String(selectedItems.length)}</div>
-        <div data-test-subj="mockCreateDisabled">{String(props.isCreateDisabled)}</div>
-
         <button
           data-test-subj="mockSelectFirst"
           onClick={() => (props.onSelectionChange as any)([items[0]])}
@@ -147,19 +145,6 @@ const renderComponent = async ({
 };
 
 describe('DatasetsTabContent', () => {
-  it('disables create when there are no data sources', async () => {
-    await renderComponent({
-      dataSources: [],
-      dataSets: [],
-      datasetsClient: { add: jest.fn(), delete: jest.fn() },
-      loadDataSets: jest.fn().mockResolvedValue(undefined),
-    });
-
-    expect(document.querySelector('[data-test-subj="mockCreateDisabled"]')?.textContent).toBe(
-      'true'
-    );
-  });
-
   it('confirms single delete via client and reloads', async () => {
     const loadDataSets = jest.fn().mockResolvedValue(undefined);
     const deleteMock = jest.fn().mockResolvedValue(undefined);

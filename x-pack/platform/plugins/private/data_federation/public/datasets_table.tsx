@@ -25,7 +25,6 @@ export interface DatasetsTableProps {
   items: DataSetListRow[];
   selectedItems: DataSetListRow[];
   dataSourceNames: string[];
-  isCreateDisabled: boolean;
   onSelectionChange: (next: DataSetListRow[]) => void;
   onDelete: (item: DataSetListRow) => void;
   onDeleteSelected: (items: DataSetListRow[]) => void;
@@ -35,7 +34,6 @@ export const DatasetsTable: FunctionComponent<DatasetsTableProps> = ({
   items,
   selectedItems,
   dataSourceNames,
-  isCreateDisabled,
   onSelectionChange,
   onDelete,
   onDeleteSelected,
@@ -178,11 +176,7 @@ export const DatasetsTable: FunctionComponent<DatasetsTableProps> = ({
                 {mainTranslations.actions.deleteButtonLabel}
               </EuiButton>
             ) : undefined,
-          toolsRight: isCreateDisabled ? (
-            <EuiButton fill color="primary" data-test-subj="dataSetsSetsCreateButton" disabled>
-              {mainTranslations.columns.dataSets.addButtonLabel}
-            </EuiButton>
-          ) : (
+          toolsRight: (
             <EuiButton
               fill
               color="primary"

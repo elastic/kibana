@@ -131,7 +131,6 @@ export const DatasetsTabContent: FunctionComponent<DatasetsTabContentProps> = ({
         items={dataSetItems}
         selectedItems={selectedDataSets}
         dataSourceNames={dataSourceNames}
-        isCreateDisabled={dataSources.length === 0}
         onSelectionChange={setSelectedDataSets}
         onDelete={handleDeleteDataSet}
         onDeleteSelected={handleDeleteSelectedDataSets}

@@ -70,7 +70,6 @@ describe('DatasetsTable', () => {
               items={[createDataSetRow({ name: 'set1', dataSource: 'ds1' })]}
               selectedItems={[]}
               dataSourceNames={['ds1']}
-              isCreateDisabled={false}
               onSelectionChange={jest.fn()}
               onDelete={jest.fn()}
               onDeleteSelected={jest.fn()}
@@ -83,20 +82,20 @@ describe('DatasetsTable', () => {
     return { ...view, history };
   };
 
-  it('disables create when isCreateDisabled is true', async () => {
-    const { getByTestId, history } = renderTable({ isCreateDisabled: true });
-
-    const createButton = getByTestId('dataSetsSetsCreateButton');
-    expect(createButton).toBeDisabled();
-
-    fireEvent.click(createButton);
-    expect(history.location.pathname).toBe('/datasets');
-  });
-
   it('links the add dataset button to the create wizard', async () => {
     const { getByTestId, history } = renderTable();
 
     fireEvent.click(getByTestId('dataSetsSetsCreateButton'));
+    expect(history.location.pathname).toBe(CREATE_DATASET_PATH);
+  });
+
+  it('keeps the add dataset button enabled when there are no data sources', async () => {
+    const { getByTestId, history } = renderTable({ items: [], dataSourceNames: [] });
+
+    const createButton = getByTestId('dataSetsSetsCreateButton');
+    expect(createButton).toBeEnabled();
+
+    fireEvent.click(createButton);
     expect(history.location.pathname).toBe(CREATE_DATASET_PATH);
   });
 
