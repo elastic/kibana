@@ -12,8 +12,10 @@ import { loadFields } from './fields';
 import { fillWorkspace } from './persistence';
 import { createMockGraphStore } from './mocks';
 import {
+  createWorkspaceState,
   registerWorkspaceListeners,
   submitSearch,
+  workspaceChanged,
   workspaceInitializedSelector,
 } from './workspace';
 
@@ -60,6 +62,98 @@ const createWorkspaceListenerEnvironment = () => {
 
   return { ...environment, workspace };
 };
+
+describe('workspace state', () => {
+  it('normalizes the mutable workspace into serializable graph state', () => {
+    const parent = {
+      id: 'parent',
+      x: 1,
+      y: 2,
+      label: 'Parent',
+      color: 'red',
+      data: { field: 'field', term: 'parent' },
+    };
+    const child = {
+      id: 'child',
+      x: 3,
+      y: 4,
+      label: 'Child',
+      color: 'blue',
+      data: { field: 'field', term: 'child' },
+      parent,
+    };
+    const edge = {
+      id: 'edge',
+      source: parent,
+      target: child,
+      topSrc: parent,
+      topTarget: parent,
+      label: 'connection',
+      weight: 5,
+    };
+    const workspace = {
+      nodes: [parent, child],
+      edges: [edge],
+      selectedNodes: [parent],
+      getEdgeSelection: () => [edge],
+    } as unknown as Workspace;
+
+    expect(createWorkspaceState(workspace)).toEqual({
+      isInitialized: true,
+      nodesById: {
+        parent: {
+          id: 'parent',
+          parentId: undefined,
+          x: 1,
+          y: 2,
+          label: 'Parent',
+          color: 'red',
+          data: { field: 'field', term: 'parent' },
+        },
+        child: {
+          id: 'child',
+          parentId: 'parent',
+          x: 3,
+          y: 4,
+          label: 'Child',
+          color: 'blue',
+          data: { field: 'field', term: 'child' },
+        },
+      },
+      nodeIds: ['parent', 'child'],
+      edgesById: {
+        edge: {
+          id: 'edge',
+          sourceId: 'parent',
+          targetId: 'child',
+          topSourceId: 'parent',
+          topTargetId: 'parent',
+          label: 'connection',
+          weight: 5,
+        },
+      },
+      edgeIds: ['edge'],
+      selectedNodeIds: ['parent'],
+      selectedEdgeIds: ['edge'],
+    });
+  });
+
+  it('stores normalized workspace snapshots', () => {
+    const environment = createMockGraphStore({});
+    const workspace = createWorkspaceMock();
+    Object.assign(workspace, {
+      nodes: [],
+      edges: [],
+      selectedNodes: [],
+      getEdgeSelection: () => [],
+    });
+    const snapshot = createWorkspaceState(workspace);
+
+    environment.store.dispatch(workspaceChanged(snapshot));
+
+    expect(environment.store.getState().workspace).toEqual(snapshot);
+  });
+});
 
 describe('workspace listeners', () => {
   beforeEach(() => {
