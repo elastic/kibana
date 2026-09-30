@@ -12,8 +12,10 @@ import { loadFields } from './fields';
 import { fillWorkspace } from './persistence';
 import { createMockGraphStore } from './mocks';
 import {
+  blocklistSelectedNodes,
   clearNodeSelection,
   createWorkspaceState,
+  deleteSelectedNodes,
   initializeWorkspace,
   invertNodeSelection,
   registerWorkspaceListeners,
@@ -40,6 +42,7 @@ const createWorkspaceMock = () =>
     search: jest.fn(),
     callElasticsearch: jest.fn(),
     options: {},
+    blocklistedNodes: [],
   } as unknown as jest.Mocked<Workspace>);
 
 const createWorkspaceListenerEnvironment = () => {
@@ -246,6 +249,73 @@ describe('workspace state', () => {
 
     environment.store.dispatch(clearNodeSelection());
     expect(environment.store.getState().workspace.selectedNodeIds).toEqual([]);
+  });
+
+  it('removes selected groups and their dangling edges', () => {
+    const environment = createMockGraphStore({});
+    const state = {
+      ...environment.store.getState().workspace,
+      nodesById: {
+        parent: { id: 'parent' },
+        child: { id: 'child', parentId: 'parent' },
+        remaining: { id: 'remaining' },
+      },
+      nodeIds: ['parent', 'child', 'remaining'],
+      edgesById: {
+        removed: { id: 'removed', sourceId: 'child', targetId: 'remaining' },
+      },
+      edgeIds: ['removed'],
+      selectedNodeIds: ['parent'],
+    } as unknown as ReturnType<typeof environment.store.getState>['workspace'];
+    environment.store.dispatch(workspaceChanged(state));
+
+    environment.store.dispatch(deleteSelectedNodes());
+
+    expect(environment.store.getState().workspace.nodeIds).toEqual(['remaining']);
+    expect(environment.store.getState().workspace.edgeIds).toEqual([]);
+  });
+
+  it('moves selected nodes into the blocklist', () => {
+    const environment = createMockGraphStore({});
+    const state = {
+      ...environment.store.getState().workspace,
+      nodesById: { selected: { id: 'selected' }, remaining: { id: 'remaining' } },
+      nodeIds: ['selected', 'remaining'],
+      selectedNodeIds: ['selected'],
+    } as unknown as ReturnType<typeof environment.store.getState>['workspace'];
+    environment.store.dispatch(workspaceChanged(state));
+
+    environment.store.dispatch(blocklistSelectedNodes());
+
+    expect(environment.store.getState().workspace.nodeIds).toEqual(['remaining']);
+    expect(environment.store.getState().workspace.blocklistedNodeIds).toEqual(['selected']);
+  });
+
+  it('keeps blocklisted IDs consistent with their map when blocking an existing ID', () => {
+    const environment = createMockGraphStore({});
+    const workspace = createWorkspaceMock();
+    const existing = {
+      id: 'field..term',
+      data: { field: 'field', term: 'term' },
+      label: 'Existing',
+    };
+    const selected = { ...existing, label: 'Selected' };
+    Object.assign(workspace, {
+      nodes: [selected],
+      edges: [],
+      blocklistedNodes: [existing],
+      selectedNodes: [selected],
+    });
+    environment.store.dispatch(workspaceChanged(createWorkspaceState(workspace)));
+
+    environment.store.dispatch(blocklistSelectedNodes());
+
+    const { blocklistedNodeIds, blocklistedNodesById, nodeIds } =
+      environment.store.getState().workspace;
+    expect(nodeIds).toEqual([]);
+    expect(blocklistedNodeIds).toEqual([selected.id]);
+    expect(blocklistedNodeIds).toEqual(Object.keys(blocklistedNodesById));
+    expect(blocklistedNodesById[selected.id].label).toBe('Selected');
   });
 
   it('keeps edge selection single-valued', () => {
