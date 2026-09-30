@@ -221,6 +221,7 @@ export const ProposalApprovalCard = memo<ProposalApprovalCardProps>(
                   {liveProposal.previousExecutionError}
                 </KbnWarningCallout>
               </div>
+              <EuiSpacer size="m" />
             </>
           )}
 
