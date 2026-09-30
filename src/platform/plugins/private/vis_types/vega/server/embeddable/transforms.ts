@@ -77,7 +77,7 @@ export function getTransforms(drilldownTransforms: DrilldownTransforms, logger?:
       return {
         ...drilldownsState,
         filters: transformFiltersOut(drilldownsState.filters, panelReferences, logger),
-      } as VegaByValueState;
+      };
     },
   };
 }
