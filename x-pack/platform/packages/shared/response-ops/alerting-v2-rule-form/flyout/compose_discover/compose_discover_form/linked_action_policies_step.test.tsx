@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { render, screen } from '@testing-library/react';
+import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { httpServiceMock } from '@kbn/core-http-browser-mocks';
@@ -151,7 +151,9 @@ describe('LinkedActionPoliciesStep', () => {
     expect(mockInvalidateQueries).toHaveBeenCalledWith({ queryKey: ['matchedActionPolicies'] });
   });
 
-  it('disables action policy creation when the license does not allow it', () => {
+  it('disables action policy creation with a keyboard-reachable reason', async () => {
+    const user = userEvent.setup();
+    const disabledReason = 'You do not have permission to create action policies';
     mockUseMatchedActionPolicies.mockReturnValue({
       isLoading: false,
       isPreviousData: false,
@@ -163,9 +165,19 @@ describe('LinkedActionPoliciesStep', () => {
 
     const CreateActionPolicyFormFlyout = () => <div data-test-subj="actionPolicyFormFlyout" />;
 
-    renderComponent({ canCreateActionPolicy: false, CreateActionPolicyFormFlyout });
+    renderComponent({
+      createActionPolicyDisabledReason: disabledReason,
+      CreateActionPolicyFormFlyout,
+    });
 
-    expect(screen.getByRole('button', { name: 'Create action policy' })).toBeDisabled();
+    const createButton = screen.getByRole('button', { name: 'Create action policy' });
+    expect(createButton).toHaveAttribute('aria-disabled', 'true');
+
+    await user.tab();
+    expect(createButton).toHaveFocus();
+    await waitFor(() => expect(createButton).toHaveAccessibleDescription(disabledReason));
+
+    await user.keyboard('{Enter}');
     expect(screen.queryByTestId('actionPolicyFormFlyout')).not.toBeInTheDocument();
   });
 

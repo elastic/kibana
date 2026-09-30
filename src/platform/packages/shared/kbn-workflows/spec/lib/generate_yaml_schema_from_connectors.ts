@@ -139,6 +139,11 @@ function createRecursiveStepSchema(
     // autocomplete.
     const aliasSchemas = generateAliasSchemas(connectors, stepSchema, loose);
 
+    // Static schemas use BaseStepSchema fallbacks; override so nested steps keep `with`.
+    const stepLevelOnFailure = {
+      'on-failure': getOnFailureStepSchema(stepSchema, loose).optional(),
+    };
+
     cachedUnion = z.discriminatedUnion('type', [
       forEachSchema,
       whileSchema,
@@ -147,11 +152,11 @@ function createRecursiveStepSchema(
       parallelSchema,
       mergeSchema,
       WaitStepSchema,
-      WaitForInputStepSchema,
-      WaitForApprovalStepSchema,
+      WaitForInputStepSchema.extend(stepLevelOnFailure),
+      WaitForApprovalStepSchema.extend(stepLevelOnFailure),
       DataSetStepSchema,
-      WorkflowExecuteStepSchema,
-      WorkflowExecuteAsyncStepSchema,
+      WorkflowExecuteStepSchema.extend(stepLevelOnFailure),
+      WorkflowExecuteAsyncStepSchema.extend(stepLevelOnFailure),
       WorkflowOutputStepSchema,
       WorkflowFailStepSchema,
       LoopBreakStepSchema,
