@@ -430,10 +430,10 @@ describe('create_dataset_form_state', () => {
       ).toEqual({ format: 'csv' });
     });
 
-    it('omits default UTF-8 encoding and includes other encodings', () => {
+    it('includes an explicit encoding, including the default UTF-8', () => {
       expect(
         buildDatasetSettingsFromFormValues({ ...empty(), format: 'csv', encoding: 'UTF-8' })
-      ).toEqual({ format: 'csv' });
+      ).toEqual({ format: 'csv', encoding: 'UTF-8' });
       expect(
         buildDatasetSettingsFromFormValues({ ...empty(), format: 'csv', encoding: 'UTF-16' })
       ).toEqual({ format: 'csv', encoding: 'UTF-16' });
@@ -449,16 +449,20 @@ describe('create_dataset_form_state', () => {
       ).toEqual({ format: 'csv', datetime_format: 'strict_date_optional_time' });
     });
 
-    it('omits default CSV quote and escape characters', () => {
-      expect(
-        buildDatasetSettingsFromFormValues({
-          ...empty(),
-          format: 'csv',
-          quote: '"',
-          escape: '\\',
-        })
-      ).toEqual({ format: 'csv' });
-    });
+    it.each(['', 'quoted', 'escaped', 'plain'] as const)(
+      'includes explicit CSV quote and escape characters matching the defaults with mode %p',
+      (mode) => {
+        expect(
+          buildDatasetSettingsFromFormValues({
+            ...empty(),
+            format: 'csv',
+            mode,
+            quote: '"',
+            escape: '\\',
+          })
+        ).toEqual({ format: 'csv', ...(mode ? { mode } : {}), quote: '"', escape: '\\' });
+      }
+    );
 
     it('includes non-default CSV quote and escape characters', () => {
       expect(
@@ -497,14 +501,20 @@ describe('create_dataset_form_state', () => {
       ).toEqual({ format: 'tsv', escape: '\\' });
     });
 
-    it('omits a double backslash for CSV because it decodes to the default escape character', () => {
+    it('includes an explicit column_prefix, including the default col', () => {
+      expect(
+        buildDatasetSettingsFromFormValues({ ...empty(), format: 'csv', column_prefix: 'col' })
+      ).toEqual({ format: 'csv', column_prefix: 'col' });
+    });
+
+    it('includes a double backslash for CSV decoded into a single backslash', () => {
       expect(
         buildDatasetSettingsFromFormValues({
           ...empty(),
           format: 'csv',
           escape: '\\\\',
         })
-      ).toEqual({ format: 'csv' });
+      ).toEqual({ format: 'csv', escape: '\\' });
     });
 
     it('includes trim_spaces when explicitly set and omits it when unset', () => {

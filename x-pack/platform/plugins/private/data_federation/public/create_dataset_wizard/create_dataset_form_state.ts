@@ -35,11 +35,8 @@ export const DEFAULT_FILE_EXCLUSIONS = [
   '**/_delta_log/**',
 ] as const;
 
-export const DEFAULT_ENCODING = 'UTF-8';
 export const DEFAULT_DATETIME_FORMAT = 'strict_date_optional_time';
 export const DEFAULT_COLUMN_PREFIX = 'col';
-export const DEFAULT_CSV_QUOTE = '"';
-export const DEFAULT_CSV_ESCAPE = '\\';
 
 const CHARACTER_TO_ESCAPE_SEQUENCE: Partial<Record<string, '\\t' | '\\n' | '\\r'>> = {
   '\t': '\\t',
@@ -272,24 +269,11 @@ export const buildDatasetSettingsFromFormValues = (
     if (skipRows !== undefined) applied.skip_rows = skipRows;
 
     if (settings.null_value) applied.null_value = settings.null_value;
-    if (settings.encoding && settings.encoding !== DEFAULT_ENCODING) {
-      applied.encoding = settings.encoding;
-    }
+    if (settings.encoding) applied.encoding = settings.encoding;
+    if (settings.quote) applied.quote = settings.quote;
     const escape = decodeEscapeCharacterFormValue(settings.escape);
-    if (format === 'csv') {
-      if (settings.quote && settings.quote !== DEFAULT_CSV_QUOTE) {
-        applied.quote = settings.quote;
-      }
-      if (escape && escape !== DEFAULT_CSV_ESCAPE) {
-        applied.escape = escape;
-      }
-    } else {
-      if (settings.quote) applied.quote = settings.quote;
-      if (escape) applied.escape = escape;
-    }
-    if (settings.column_prefix && settings.column_prefix !== DEFAULT_COLUMN_PREFIX) {
-      applied.column_prefix = settings.column_prefix;
-    }
+    if (escape) applied.escape = escape;
+    if (settings.column_prefix) applied.column_prefix = settings.column_prefix;
     const trimSpaces = parseBooleanFormValue(settings.trim_spaces);
     if (trimSpaces !== undefined) applied.trim_spaces = trimSpaces;
   }

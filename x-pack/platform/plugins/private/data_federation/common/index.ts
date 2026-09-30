@@ -120,6 +120,30 @@ const resolveActiveCharacter = (
   return CHARACTER_SEQUENCES[value] ?? value;
 };
 
+export type CsvQuotingSettings = Partial<
+  Record<'format' | 'mode' | 'quote' | 'multi_value_syntax', string>
+>;
+
+/**
+ * Whether Elasticsearch reads quoted fields, applying format and mode defaults. Without a mode,
+ * `multi_value_syntax: brackets` selects `quoted`.
+ */
+export const isCsvQuotingEnabled = ({
+  format,
+  mode,
+  quote,
+  multi_value_syntax: multiValueSyntax,
+}: CsvQuotingSettings): boolean => {
+  if (quote) return quote.toLowerCase() !== CSV_CHARACTER_NONE;
+  const effectiveMode = mode || (multiValueSyntax === 'brackets' ? 'quoted' : undefined);
+  const defaults = effectiveMode
+    ? QUOTING_AND_ESCAPING_BY_MODE[effectiveMode]
+    : format
+    ? CSV_CHARACTER_DEFAULTS_BY_FORMAT[format]
+    : undefined;
+  return defaults?.quoting ?? false;
+};
+
 /**
  * Returns the explicitly set delimiter/quote/escape settings that resolve to the same character as another
  * active one, applying the format and mode defaults the same way Elasticsearch does.
