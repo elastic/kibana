@@ -52,12 +52,16 @@ export const LandingPage: React.FC = () => {
     setDecision(showQueue ? 'queue' : 'onboarding');
   }, [decision, showQueue, isUnresolved]);
 
-  // showQueue is always checked so background data updates (another admin enabling a worker,
-  // or a successful save invalidating the cache) transition the page without needing a reload.
+  // Once latched to 'queue', always show the queue regardless of showQueue's current value.
+  // A window-focus workers refetch can temporarily report no enabled workers (e.g. if another
+  // admin disables them) while an investigation still exists, and the stale investigations
+  // count (frozen because queryEnabled is false after latching) would make showQueue false.
+  // Keeping the latch prevents the queue from being replaced by onboarding mid-session;
+  // a full reload will re-evaluate from fresh data.
   // savingInProgress suppresses the transition during the PATCH fan-out: a window-focus
   // refetch between individual PATCHes can return partially-committed state, and we must
   // not unmount the onboarding form before the user's save has fully settled.
-  if (showQueue && !savingInProgress) return <ConversationsPage />;
+  if ((showQueue || decision === 'queue') && !savingInProgress) return <ConversationsPage />;
 
   // Guard on decision === null so the spinner only appears before the initial
   // resolution; after the onboarding decision is latched we render directly.

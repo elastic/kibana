@@ -20,6 +20,7 @@ import {
   SYSTEM_SECURITY_WORKER_DETECTION_RULE_TUNING_ID,
   SYSTEM_SECURITY_WORKER_FORENSICS_ENDPOINT_ANALYSIS_ID,
   SYSTEM_SECURITY_WORKER_HUNT_CONTINUOUS_THREAT_HUNT_ID,
+  SYSTEM_SECURITY_WORKER_DETECTION_RULE_CREATION_ID,
 } from '@kbn/alertzero-common';
 import { SECURITY_APP_ID } from '@kbn/deeplinks-security';
 import { queryKeys } from '../../query_keys';
@@ -35,6 +36,7 @@ const ALL_ONBOARDING_WORKER_IDS = [
   SYSTEM_SECURITY_WORKER_DETECTION_RULE_TUNING_ID,
   SYSTEM_SECURITY_WORKER_FORENSICS_ENDPOINT_ANALYSIS_ID,
   SYSTEM_SECURITY_WORKER_HUNT_CONTINUOUS_THREAT_HUNT_ID,
+  SYSTEM_SECURITY_WORKER_DETECTION_RULE_CREATION_ID,
 ];
 
 const ALL_WORKERS_RESPONSE = {
@@ -45,10 +47,12 @@ const renderPage = ({
   canWrite = false,
   httpPatch = jest.fn().mockResolvedValue({ worker: { id: 'mock', enabled: true } }),
   serverWorkers = ALL_WORKERS_RESPONSE,
+  security,
 }: {
   canWrite?: boolean;
   httpPatch?: jest.Mock;
   serverWorkers?: { workers: Array<{ id: string; enabled: boolean }> };
+  security?: { authc: { getCurrentUser: jest.Mock } };
 } = {}) => {
   const coreStart = coreMock.createStart();
   // coreMock.createStart() does not populate feature capabilities; set the
@@ -58,7 +62,11 @@ const renderPage = ({
   // (including on background refetches), and http.patch so mutation calls are
   // interceptable per-test.
   const httpGet = jest.fn().mockResolvedValue(serverWorkers);
-  const core = { ...coreStart, http: { ...coreStart.http, get: httpGet, patch: httpPatch } };
+  const core = {
+    ...coreStart,
+    http: { ...coreStart.http, get: httpGet, patch: httpPatch },
+    ...(security ? { security } : {}),
+  };
   const history = createMemoryHistory();
   const queryClient = new QueryClient({
     defaultOptions: { queries: { retry: false }, mutations: { retry: false } },
@@ -113,6 +121,18 @@ describe('OnboardingPage', () => {
       expect(screen.getByText('Before you enable')).toBeInTheDocument();
     });
 
+    it('shows the current user email in the runs-as callout when security is wired up', async () => {
+      const getCurrentUser = jest
+        .fn()
+        .mockResolvedValue({ email: 'test@example.com', username: 'testuser' });
+      renderPage({
+        canWrite: true,
+        security: { authc: { getCurrentUser } },
+      });
+
+      await waitFor(() => expect(screen.getByText(/test@example\.com/)).toBeInTheDocument());
+    });
+
     it('calls the API for all workers and navigates to /watches when Enable and continue is clicked', async () => {
       const httpPatch = jest.fn().mockResolvedValue({ worker: { id: 'mock', enabled: true } });
       const { history } = renderPage({ canWrite: true, httpPatch });
@@ -120,7 +140,7 @@ describe('OnboardingPage', () => {
       fireEvent.click(screen.getByRole('button', { name: 'Enable and continue' }));
 
       await waitFor(() => expect(history.location.pathname).toBe('/watches'));
-      expect(httpPatch).toHaveBeenCalledTimes(5);
+      expect(httpPatch).toHaveBeenCalledTimes(6);
     });
 
     it('keeps controls disabled while save is in-flight and does not allow a second submission', async () => {
@@ -136,7 +156,7 @@ describe('OnboardingPage', () => {
 
       fireEvent.click(screen.getByRole('button', { name: 'Enable and continue' }));
 
-      // While all five PATCHes are pending, the button must be disabled.
+      // While all six PATCHes are pending, the button must be disabled.
       await waitFor(() =>
         expect(screen.getByRole('button', { name: 'Enable and continue' })).toHaveAttribute(
           'disabled'
@@ -145,7 +165,7 @@ describe('OnboardingPage', () => {
 
       // A second click while in-flight must not trigger additional requests.
       fireEvent.click(screen.getByRole('button', { name: 'Enable and continue' }));
-      expect(httpPatch).toHaveBeenCalledTimes(5);
+      expect(httpPatch).toHaveBeenCalledTimes(6);
 
       // Resolve all pending PATCHes and verify the button re-enables.
       resolvers.forEach((r) => r());
@@ -231,7 +251,8 @@ describe('OnboardingPage', () => {
       const httpPatch = jest.fn().mockResolvedValue({ worker: { id: 'mock', enabled: false } });
       renderPage({ canWrite: true, httpPatch });
 
-      // Toggle the second worker off.
+      // Catalog order: Alert Triage (0), Attack Discovery (1), ...
+      // Toggle Attack Discovery (index 1) off.
       const toggles = screen.getAllByRole('switch');
       fireEvent.click(toggles[1]);
 
@@ -239,12 +260,12 @@ describe('OnboardingPage', () => {
 
       await waitFor(() =>
         expect(httpPatch).toHaveBeenCalledWith(
-          expect.stringContaining(SYSTEM_SECURITY_WORKER_FLOOR_ALERT_TRIAGE_ID),
+          expect.stringContaining(SYSTEM_SECURITY_WORKER_FLOOR_ATTACK_DISCOVERY_ID),
           expect.objectContaining({ body: JSON.stringify({ enabled: false }) })
         )
       );
       expect(httpPatch).toHaveBeenCalledWith(
-        expect.stringContaining(SYSTEM_SECURITY_WORKER_FLOOR_ATTACK_DISCOVERY_ID),
+        expect.stringContaining(SYSTEM_SECURITY_WORKER_FLOOR_ALERT_TRIAGE_ID),
         expect.objectContaining({ body: JSON.stringify({ enabled: true }) })
       );
     });
@@ -252,7 +273,7 @@ describe('OnboardingPage', () => {
 
   describe('skill-gated workers (partial server response)', () => {
     it('omits a worker that is absent from the server response', () => {
-      // Server only knows about 4 of the 5 onboarding workers — the hunt worker is gated.
+      // Server only knows about 5 of the 6 onboarding workers — the hunt worker is gated.
       const serverWorkers = {
         workers: ALL_ONBOARDING_WORKER_IDS.filter(
           (id) => id !== SYSTEM_SECURITY_WORKER_HUNT_CONTINUOUS_THREAT_HUNT_ID
@@ -286,8 +307,8 @@ describe('OnboardingPage', () => {
       fireEvent.click(screen.getByRole('button', { name: 'Enable and continue' }));
 
       await waitFor(() => expect(history.location.pathname).toBe('/watches'));
-      // Only the 4 present workers should be PATCHed — not the skill-gated absent one.
-      expect(httpPatch).toHaveBeenCalledTimes(4);
+      // Only the 5 present workers should be PATCHed — not the skill-gated absent one.
+      expect(httpPatch).toHaveBeenCalledTimes(5);
       expect(httpPatch).not.toHaveBeenCalledWith(
         expect.stringContaining(SYSTEM_SECURITY_WORKER_HUNT_CONTINUOUS_THREAT_HUNT_ID),
         expect.anything()

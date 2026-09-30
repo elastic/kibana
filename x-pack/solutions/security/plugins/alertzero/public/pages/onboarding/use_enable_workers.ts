@@ -17,7 +17,7 @@ import { queryKeys } from '../../query_keys';
 
 const PARTIAL_SUCCESS_WARNING = i18n.translate('xpack.alertzero.onboarding.partialSuccessWarning', {
   defaultMessage:
-    'Some workers were enabled before the error. Check Watches to review their status.',
+    'Some settings were saved before the error. Check Watches to review the current status.',
 });
 
 type WorkerEnabledMap = Record<string, boolean>;

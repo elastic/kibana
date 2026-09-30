@@ -25,15 +25,7 @@ import {
 import { css } from '@emotion/react';
 import type { CoreStart } from '@kbn/core/public';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import {
-  ALERTZERO_FEATURE_ID,
-  SYSTEM_SECURITY_WORKER_CATALOG,
-  SYSTEM_SECURITY_WORKER_FLOOR_ATTACK_DISCOVERY_ID,
-  SYSTEM_SECURITY_WORKER_FLOOR_ALERT_TRIAGE_ID,
-  SYSTEM_SECURITY_WORKER_DETECTION_RULE_TUNING_ID,
-  SYSTEM_SECURITY_WORKER_FORENSICS_ENDPOINT_ANALYSIS_ID,
-  SYSTEM_SECURITY_WORKER_HUNT_CONTINUOUS_THREAT_HUNT_ID,
-} from '@kbn/alertzero-common';
+import { ALERTZERO_FEATURE_ID, SYSTEM_SECURITY_WORKER_CATALOG } from '@kbn/alertzero-common';
 import { SECURITY_APP_ID } from '@kbn/deeplinks-security';
 import { AlertZeroPageSection } from '../../components/layout/alertzero_page_section';
 import { ScanFailureCallout } from '../../components/scan_failure_callout/scan_failure_callout';
@@ -44,29 +36,10 @@ import { workerName } from '../watches/workers/translations';
 import { useEnableWorkers } from './use_enable_workers';
 import * as i18n from './translations';
 
-// Ordered subset of catalog workers shown on the onboarding screen.
-const ONBOARDING_WORKER_IDS = [
-  SYSTEM_SECURITY_WORKER_FLOOR_ATTACK_DISCOVERY_ID,
-  SYSTEM_SECURITY_WORKER_FLOOR_ALERT_TRIAGE_ID,
-  SYSTEM_SECURITY_WORKER_DETECTION_RULE_TUNING_ID,
-  SYSTEM_SECURITY_WORKER_FORENSICS_ENDPOINT_ANALYSIS_ID,
-  SYSTEM_SECURITY_WORKER_HUNT_CONTINUOUS_THREAT_HUNT_ID,
-] as const;
-
-type OnboardingWorkerId = (typeof ONBOARDING_WORKER_IDS)[number];
-type WorkerToggleState = Record<OnboardingWorkerId, boolean>;
+type WorkerToggleState = Record<string, boolean>;
 
 const initialToggleState = (): WorkerToggleState =>
-  Object.fromEntries(ONBOARDING_WORKER_IDS.map((id) => [id, true])) as WorkerToggleState;
-
-// Stable catalog slice in display order — used to derive the live available set.
-const ONBOARDING_WORKERS_CATALOG = SYSTEM_SECURITY_WORKER_CATALOG.filter(({ id }) =>
-  (ONBOARDING_WORKER_IDS as readonly string[]).includes(id)
-).sort(
-  (a, b) =>
-    (ONBOARDING_WORKER_IDS as readonly string[]).indexOf(a.id) -
-    (ONBOARDING_WORKER_IDS as readonly string[]).indexOf(b.id)
-);
+  Object.fromEntries(SYSTEM_SECURITY_WORKER_CATALOG.map(({ id }) => [id, true]));
 
 interface Props {
   onSavingChange?: (saving: boolean) => void;
@@ -92,11 +65,11 @@ export const OnboardingPage: React.FC<Props> = ({ onSavingChange }) => {
     [workersData]
   );
   const onboardingWorkers = useMemo(
-    () => ONBOARDING_WORKERS_CATALOG.filter(({ id }) => serverWorkerIds.has(id)),
+    () => SYSTEM_SECURITY_WORKER_CATALOG.filter(({ id }) => serverWorkerIds.has(id)),
     [serverWorkerIds]
   );
   const availableWorkerIds = useMemo(
-    () => onboardingWorkers.map(({ id }) => id as OnboardingWorkerId),
+    () => onboardingWorkers.map(({ id }) => id),
     [onboardingWorkers]
   );
 
@@ -111,7 +84,7 @@ export const OnboardingPage: React.FC<Props> = ({ onSavingChange }) => {
 
   const enabledCount = availableWorkerIds.filter((id) => workerEnabled[id]).length;
 
-  const handleToggle = (workerId: OnboardingWorkerId, checked: boolean) => {
+  const handleToggle = (workerId: string, checked: boolean) => {
     if (!checked && enabledCount <= 1) return;
     setWorkerEnabled((prev) => ({ ...prev, [workerId]: checked }));
   };
@@ -166,9 +139,8 @@ export const OnboardingPage: React.FC<Props> = ({ onSavingChange }) => {
         ) : (
           <>
             {onboardingWorkers.map(({ id, name }, index) => {
-              const wid = id as OnboardingWorkerId;
               const description = i18n.onboardingWorkerDescription(id);
-              const checked = workerEnabled[wid];
+              const checked = workerEnabled[id] ?? false;
               const isLastEnabled = checked && enabledCount <= 1;
 
               return (
@@ -199,7 +171,7 @@ export const OnboardingPage: React.FC<Props> = ({ onSavingChange }) => {
                         showLabel={false}
                         checked={checked}
                         disabled={isLastEnabled || isSaving}
-                        onChange={(e) => handleToggle(wid, e.target.checked)}
+                        onChange={(e) => handleToggle(id, e.target.checked)}
                         data-test-subj={`alertZeroOnboardingWorkerToggle-${id}`}
                         aria-describedby={
                           description ? `alertZeroOnboardingWorkerDescription-${id}` : undefined
@@ -249,7 +221,7 @@ export const OnboardingPage: React.FC<Props> = ({ onSavingChange }) => {
           <EuiButton
             fill
             isLoading={isSaving}
-            disabled={availableWorkerIds.length === 0}
+            disabled={availableWorkerIds.length === 0 || enabledCount === 0}
             onClick={handleEnableAndContinue}
             data-test-subj="alertZeroOnboardingEnableButton"
           >
