@@ -16,7 +16,10 @@ node scripts/scout.js audit --format text | tee "$report_file"
 node scripts/scout.js audit > "$json_file"
 
 # Full report goes to the build annotation. Slack gets counts and a link.
-buildkite-agent annotate --style info --context scout-audit < "$report_file"
+# The report uses Slack syntax; annotations render Markdown, so convert bold titles and bullets.
+awk '/^\*.*\*$/ { sub(/^\*/, "**"); sub(/\*$/, "**"); print; print ""; next }
+     /^• / { sub(/^• /, "- "); print; next }
+     { print }' "$report_file" | buildkite-agent annotate --style info --context scout-audit
 
 summary="$(jq -r '
   [
