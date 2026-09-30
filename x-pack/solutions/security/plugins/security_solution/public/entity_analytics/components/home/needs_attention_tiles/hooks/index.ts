@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-export { useHighCriticalCount } from './use_high_critical_count';
-
 export { useAlertBasedTiles } from './use_entities_with_alerts_tiles';
 export { useEntitiesWithAnomaliesCount } from './use_entities_with_anomalies_count';
 export { useNewEntityCount } from './use_new_entity_count';
