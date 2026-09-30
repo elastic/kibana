@@ -445,7 +445,7 @@ class DownloadSourceService {
 
   public async delete(
     id: string,
-    options?: { fromPreconfiguration?: boolean; request?: KibanaRequest }
+    options?: { request?: KibanaRequest }
   ) {
     const logger = appContextService.getLogger();
     logger.debug(`Deleting download source ${id}`);
@@ -454,12 +454,6 @@ class DownloadSourceService {
 
     if (targetDS.is_default) {
       throw new DownloadSourceError(`Default Download source ${id} cannot be deleted.`);
-    }
-
-    if (targetDS.is_preconfigured && !options?.fromPreconfiguration) {
-      throw new DownloadSourceError(
-        `Preconfigured download source ${id} cannot be deleted outside of kibana config file.`
-      );
     }
 
     if (options?.request) {
