@@ -7,82 +7,271 @@
 
 import type { IRouter } from '@kbn/core/server';
 
+import type { RepositorySettings } from '../common/repository_settings';
+import { settingsMappings } from './adapters/elasticsearch_settings';
 import { ExtractionAlreadyRunningError } from './extraction_already_running_error';
 import { ExtractionCapacityExhaustedError } from './extraction_capacity_exhausted_error';
 import type { ExtractionService } from './extraction_service';
-import { registerRoutes } from './routes';
+import { registerRoutes, type RouteServices } from './routes';
+import { SourceUnavailableError } from './source_session';
 
 type Handler = (context: unknown, request: unknown, response: unknown) => Promise<unknown>;
 
-const startHandler = (start: ExtractionService['start']): Handler => {
+/** Keeps settings documents in memory with the calls the settings store makes. */
+const fakeElasticsearch = (documents = new Map<string, Record<string, unknown>>()) => {
+  const created: unknown[] = [];
+  let exists = documents.size > 0;
+  const client = {
+    indices: {
+      exists: jest.fn(async () => exists),
+      create: jest.fn(async (request: unknown) => {
+        created.push(request);
+        exists = true;
+      }),
+    },
+    search: jest.fn(async () => ({
+      hits: {
+        hits: [...documents.entries()]
+          .sort(([a], [b]) => a.localeCompare(b))
+          .map(([id, source]) => ({ _id: id, _source: source })),
+      },
+    })),
+    get: jest.fn(async ({ id }: { id: string }) =>
+      documents.has(id) ? { found: true, _id: id, _source: documents.get(id) } : { found: false }
+    ),
+    index: jest.fn(async ({ id, document }: { id: string; document: Record<string, unknown> }) => {
+      documents.set(id, document);
+    }),
+    delete: jest.fn(async ({ id }: { id: string }) => ({
+      result: documents.delete(id) ? 'deleted' : 'not_found',
+    })),
+  };
+  return { client, documents, created };
+};
+
+const settings = (repository: string, extra: Partial<RepositorySettings> = {}) => ({
+  repository,
+  remoteUrl: `https://github.com/${repository}.git`,
+  defaultRef: 'HEAD',
+  enabled: true,
+  createdAt: '2026-09-01T00:00:00.000Z',
+  updatedAt: '2026-09-01T00:00:00.000Z',
+  ...extra,
+});
+
+const setup = ({
+  services = {},
+  stored = [],
+}: {
+  services?: Partial<RouteServices>;
+  stored?: Array<ReturnType<typeof settings>>;
+} = {}) => {
   const handlers = new Map<string, Handler>();
-  const register = (config: { path: string }, handler: Handler) =>
-    handlers.set(config.path, handler);
+  const register = (method: string) => (config: { path: string }, handler: Handler) =>
+    handlers.set(`${method} ${config.path}`, handler);
+  const es = fakeElasticsearch(new Map(stored.map((entry) => [entry.repository, entry])));
   registerRoutes({
     catalogIndex: 'catalog',
-    getServices: () => ({
-      extractionService: { start } as unknown as ExtractionService,
-      getSpaceId: () => 'default',
-    }),
-    repositories: new Set(['elastic/example']),
-    router: { get: register, post: register } as unknown as IRouter,
+    settingsIndex: 'settings',
+    getServices: () => ({ getSpaceId: () => 'default', ...services }),
+    router: {
+      get: register('GET'),
+      put: register('PUT'),
+      post: register('POST'),
+      delete: register('DELETE'),
+    } as unknown as IRouter,
   });
-  const handler = handlers.get('/internal/code_intelligence/extractions');
-  if (handler === undefined) throw new Error('Extraction route was not registered.');
-  return handler;
+  const call = async (route: string, request: Record<string, unknown> = {}) => {
+    const handler = handlers.get(route);
+    if (handler === undefined) throw new Error(`${route} was not registered.`);
+    const response = {
+      ok: jest.fn(),
+      accepted: jest.fn(),
+      badRequest: jest.fn(),
+      conflict: jest.fn(),
+      customError: jest.fn(),
+      notFound: jest.fn(),
+    };
+    const context = {
+      core: Promise.resolve({
+        elasticsearch: { client: { asCurrentUser: es.client, asInternalUser: es.client } },
+      }),
+    };
+    await handler(context, request, response);
+    return response;
+  };
+  return { call, es };
 };
 
-const invoke = (handler: Handler, repository = 'elastic/example') => {
-  const response = {
-    accepted: jest.fn(),
-    badRequest: jest.fn(),
-    conflict: jest.fn(),
-    customError: jest.fn(),
-  };
-  const context = { core: Promise.resolve({ elasticsearch: { client: { asCurrentUser: {} } } }) };
-  const request = { body: { repository, revision: 'HEAD' } };
-  return handler(context, request, response).then(() => response);
-};
+const withStart = (start: ExtractionService['start']): Partial<RouteServices> => ({
+  extractionService: { start } as unknown as ExtractionService,
+});
+
+const startBatch = (
+  start: ExtractionService['start'],
+  body: Record<string, unknown> = {},
+  stored = [settings('elastic/example')]
+) =>
+  setup({ services: withStart(start), stored }).call(
+    'POST /internal/code_intelligence/extractions',
+    { body }
+  );
+
+describe('repository settings routes', () => {
+  it('lists stored repositories in identity order', async () => {
+    const { call } = setup({ stored: [settings('elastic/zeta'), settings('elastic/alpha')] });
+
+    const response = await call('GET /internal/code_intelligence/repositories');
+
+    expect(response.ok).toHaveBeenCalledWith({
+      body: { repositories: [settings('elastic/alpha'), settings('elastic/zeta')] },
+    });
+  });
+
+  it('creates the strict settings index and stores a repository under its identity', async () => {
+    const { call, es } = setup();
+
+    const response = await call('PUT /internal/code_intelligence/repositories/{owner}/{name}', {
+      params: { owner: 'elastic', name: 'eis-gateway' },
+      body: {
+        repository: 'elastic/eis-gateway',
+        remoteUrl: 'https://github.com/elastic/eis-gateway.git',
+      },
+    });
+
+    expect(es.created).toEqual([{ index: 'settings', mappings: settingsMappings }]);
+    expect(es.documents.get('elastic/eis-gateway')).toMatchObject({
+      repository: 'elastic/eis-gateway',
+      defaultRef: 'HEAD',
+      enabled: true,
+    });
+    expect(response.ok).toHaveBeenCalledWith({
+      body: { repository: expect.objectContaining({ repository: 'elastic/eis-gateway' }) },
+    });
+  });
+
+  it('keeps the original creation time when a repository is replaced', async () => {
+    const { call, es } = setup({ stored: [settings('elastic/example')] });
+
+    await call('PUT /internal/code_intelligence/repositories/{owner}/{name}', {
+      params: { owner: 'elastic', name: 'example' },
+      body: {
+        repository: 'elastic/example',
+        remoteUrl: 'https://github.com/elastic/example.git',
+        enabled: false,
+      },
+    });
+
+    expect(es.documents.get('elastic/example')).toMatchObject({
+      enabled: false,
+      createdAt: '2026-09-01T00:00:00.000Z',
+    });
+  });
+
+  it('rejects a body whose repository differs from the path', async () => {
+    const { call, es } = setup();
+
+    const response = await call('PUT /internal/code_intelligence/repositories/{owner}/{name}', {
+      params: { owner: 'elastic', name: 'one' },
+      body: { repository: 'elastic/two', remoteUrl: 'https://github.com/elastic/two.git' },
+    });
+
+    expect(response.badRequest).toHaveBeenCalledWith({
+      body: { message: 'The repository in the path must match the repository in the body.' },
+    });
+    expect(es.client.index).not.toHaveBeenCalled();
+  });
+
+  it('rejects remotes that are not plain https URLs', async () => {
+    const { call, es } = setup();
+
+    const response = await call('PUT /internal/code_intelligence/repositories/{owner}/{name}', {
+      params: { owner: 'elastic', name: 'example' },
+      body: {
+        repository: 'elastic/example',
+        remoteUrl: 'https://token@github.com/elastic/example.git',
+      },
+    });
+
+    expect(response.badRequest).toHaveBeenCalledWith({
+      body: expect.objectContaining({
+        attributes: { problems: [expect.objectContaining({ field: 'remoteUrl' })] },
+      }),
+    });
+    expect(es.client.index).not.toHaveBeenCalled();
+  });
+
+  it('deletes a repository and reports a missing one as 404', async () => {
+    const { call, es } = setup({ stored: [settings('elastic/example')] });
+    const route = 'DELETE /internal/code_intelligence/repositories/{owner}/{name}';
+
+    const deleted = await call(route, { params: { owner: 'elastic', name: 'example' } });
+    const missing = await call(route, { params: { owner: 'elastic', name: 'example' } });
+
+    expect(deleted.ok).toHaveBeenCalledWith({ body: { deleted: true } });
+    expect(missing.notFound).toHaveBeenCalled();
+    expect(es.documents.size).toBe(0);
+  });
+});
 
 describe('POST /internal/code_intelligence/extractions', () => {
-  it('maps a run this instance tracks to 409 Conflict with its extraction id', async () => {
-    const response = await invoke(
-      startHandler(() => {
-        throw new ExtractionAlreadyRunningError('elastic/example', 'running-id');
-      })
-    );
+  it('runs every enabled repository at its default ref when no repositories are given', async () => {
+    const start = jest.fn(async () => 'batch-id');
 
-    expect(response.conflict).toHaveBeenCalledWith({
-      body: {
-        message: 'An extraction for elastic/example is already running.',
-        attributes: {
-          code: 'extraction_already_running',
-          repository: 'elastic/example',
-          extractionId: 'running-id',
+    const response = await startBatch(start, {}, [
+      settings('elastic/one', { defaultRef: 'main' }),
+      settings('elastic/off', { enabled: false }),
+      settings('elastic/two', { githubConnectorId: 'connector' }),
+    ]);
+
+    expect(start).toHaveBeenCalledWith(
+      [
+        {
+          repository: 'elastic/one',
+          revision: 'main',
+          remoteUrl: 'https://github.com/elastic/one.git',
         },
-      },
-    });
-    expect(response.customError).not.toHaveBeenCalled();
+        {
+          repository: 'elastic/two',
+          revision: 'HEAD',
+          remoteUrl: 'https://github.com/elastic/two.git',
+          githubConnectorId: 'connector',
+        },
+      ],
+      expect.anything(),
+      'default',
+      expect.anything()
+    );
+    expect(response.accepted).toHaveBeenCalledWith({ body: { id: 'batch-id' } });
   });
 
-  it('omits the extraction id when another instance holds the run', async () => {
-    const response = await invoke(
-      startHandler(() => {
-        throw new ExtractionAlreadyRunningError('elastic/example');
-      })
+  it('runs the named repositories at the requested revisions, including disabled ones', async () => {
+    const start = jest.fn(async () => 'batch-id');
+
+    await startBatch(
+      start,
+      { repositories: [{ repository: 'elastic/off', revision: 'a'.repeat(40) }] },
+      [settings('elastic/off', { enabled: false })]
     );
 
-    expect(response.conflict).toHaveBeenCalledWith({
-      body: {
-        message: 'An extraction for elastic/example is already running.',
-        attributes: { code: 'extraction_already_running', repository: 'elastic/example' },
-      },
-    });
+    expect(start).toHaveBeenCalledWith(
+      [
+        {
+          repository: 'elastic/off',
+          revision: 'a'.repeat(40),
+          remoteUrl: 'https://github.com/elastic/off.git',
+        },
+      ],
+      expect.anything(),
+      'default',
+      expect.anything()
+    );
   });
 
-  it('maps a repository missing from the configuration to 400 with its code', async () => {
+  it('maps a repository missing from the settings index to 400 with its code', async () => {
     const start = jest.fn();
-    const response = await invoke(startHandler(start), 'elastic/unknown');
+
+    const response = await startBatch(start, { repositories: [{ repository: 'elastic/unknown' }] });
 
     expect(response.badRequest).toHaveBeenCalledWith({
       body: {
@@ -93,32 +282,115 @@ describe('POST /internal/code_intelligence/extractions', () => {
     expect(start).not.toHaveBeenCalled();
   });
 
+  it('rejects unsafe revisions and duplicate repositories before starting', async () => {
+    const start = jest.fn();
+
+    const unsafe = await startBatch(start, {
+      repositories: [{ repository: 'elastic/example', revision: '--upload-pack=x' }],
+    });
+    const duplicate = await startBatch(start, {
+      repositories: [{ repository: 'elastic/example' }, { repository: 'elastic/example' }],
+    });
+
+    expect(unsafe.badRequest).toHaveBeenCalled();
+    expect(duplicate.badRequest).toHaveBeenCalledWith({
+      body: { message: 'Each repository may appear only once.' },
+    });
+    expect(start).not.toHaveBeenCalled();
+  });
+
+  it('answers 400 when no repository is enabled', async () => {
+    const start = jest.fn();
+
+    const response = await startBatch(start, {}, [settings('elastic/off', { enabled: false })]);
+
+    expect(response.badRequest).toHaveBeenCalledWith({
+      body: {
+        message: 'No enabled repositories to extract.',
+        attributes: { code: 'no_repositories_to_extract' },
+      },
+    });
+    expect(start).not.toHaveBeenCalled();
+  });
+
+  it('maps a batch this instance tracks to 409 Conflict with its batch id', async () => {
+    const response = await startBatch(() => {
+      throw new ExtractionAlreadyRunningError('running-id');
+    });
+
+    expect(response.conflict).toHaveBeenCalledWith({
+      body: {
+        message: 'An extraction batch is already running.',
+        attributes: { code: 'extraction_already_running', extractionId: 'running-id' },
+      },
+    });
+  });
+
+  it('omits the batch id when another instance holds the batch lock', async () => {
+    const response = await startBatch(() => {
+      throw new ExtractionAlreadyRunningError();
+    });
+
+    expect(response.conflict).toHaveBeenCalledWith({
+      body: {
+        message: 'An extraction batch is already running.',
+        attributes: { code: 'extraction_already_running' },
+      },
+    });
+  });
+
   it('maps tracking capacity errors to 429 with their code', async () => {
-    const response = await invoke(
-      startHandler(() => {
-        throw new ExtractionCapacityExhaustedError();
-      })
-    );
+    const response = await startBatch(() => {
+      throw new ExtractionCapacityExhaustedError();
+    });
 
     expect(response.customError).toHaveBeenCalledWith({
       statusCode: 429,
       body: {
         message: 'Extraction tracking capacity is full.',
-        attributes: { code: 'extraction_capacity_exhausted', repository: 'elastic/example' },
+        attributes: { code: 'extraction_capacity_exhausted' },
       },
     });
-    expect(response.conflict).not.toHaveBeenCalled();
   });
 
-  it('leaves unexpected errors to the router instead of reporting them as capacity', async () => {
+  it('answers 503 when the sandbox was unavailable at start', async () => {
+    const { call } = setup({
+      services: { extractionUnavailableReason: 'Set `xpack.sandbox.enabled: true`.' },
+      stored: [settings('elastic/example')],
+    });
+
+    const response = await call('POST /internal/code_intelligence/extractions', { body: {} });
+
+    expect(response.customError).toHaveBeenCalledWith({
+      statusCode: 503,
+      body: {
+        message: 'Set `xpack.sandbox.enabled: true`.',
+        attributes: { code: 'sandbox_unavailable' },
+      },
+    });
+  });
+
+  it('answers 503 when the sandbox refuses a session', async () => {
+    const response = await startBatch(() => {
+      throw new SourceUnavailableError('Sandbox is not configured in this deployment.');
+    });
+
+    expect(response.customError).toHaveBeenCalledWith({
+      statusCode: 503,
+      body: {
+        message: 'Sandbox is not configured in this deployment.',
+        attributes: { code: 'sandbox_unavailable' },
+      },
+    });
+  });
+
+  it('leaves unexpected errors to the router', async () => {
     const failure = new Error('Elasticsearch is unavailable.');
 
     await expect(
-      invoke(
-        startHandler(() => {
-          throw failure;
-        })
-      )
+      startBatch(() => {
+        throw failure;
+      })
     ).rejects.toBe(failure);
   });
 });
