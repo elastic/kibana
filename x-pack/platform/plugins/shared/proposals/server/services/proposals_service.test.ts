@@ -890,7 +890,7 @@ describe('ProposalsService', () => {
         'proposal-1',
         releaseParams({
           approved: false,
-          dismissReason: 'low_value',
+          dismissReason: 'risk_accepted',
           rationale: 'Noise, not worth a rule',
         })
       );
@@ -898,7 +898,7 @@ describe('ProposalsService', () => {
       const [[indexArgs]] = storage.index.mock.calls;
       expect(indexArgs.document).toEqual(
         expect.objectContaining({
-          dismissReason: 'low_value',
+          dismissReason: 'risk_accepted',
           rationale: 'Noise, not worth a rule',
           // The decision is the workflow's to write, not the route's.
           status: 'pending',
@@ -955,7 +955,7 @@ describe('ProposalsService', () => {
       await expect(
         service.releaseGate(
           'proposal-1',
-          releaseParams({ approved: false, dismissReason: 'low_value' })
+          releaseParams({ approved: false, dismissReason: 'risk_accepted' })
         )
       ).rejects.toBeInstanceOf(ProposalConflictError);
       expect(storage.index).not.toHaveBeenCalled();
@@ -971,7 +971,7 @@ describe('ProposalsService', () => {
       await expect(
         service.releaseGate(
           'proposal-1',
-          releaseParams({ approved: false, dismissReason: 'low_value' })
+          releaseParams({ approved: false, dismissReason: 'risk_accepted' })
         )
       ).rejects.toBeInstanceOf(ProposalConflictError);
     });

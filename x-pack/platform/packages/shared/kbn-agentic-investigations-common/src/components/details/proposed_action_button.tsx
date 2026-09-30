@@ -9,7 +9,6 @@ import React, { memo, useCallback, useState } from 'react';
 import { css } from '@emotion/react';
 import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiText, useEuiTheme } from '@elastic/eui';
 import { FormattedMessage, FormattedTime } from '@kbn/i18n-react';
-import type { DismissReason } from '@kbn/proposals-common';
 import {
   ApprovalModal,
   getApprovalOutcomeBadge,
@@ -18,14 +17,10 @@ import {
   ProposedActionStatusBadge,
   type ApprovalPhase,
   type ApprovalProposal,
+  type DeclineParams,
 } from '@kbn/proposals-ui';
 import { DETAILS_FLYOUT_LABELS } from './translations';
 import { getEmptyValue } from '../helpers';
-
-export interface DismissProposalParams {
-  dismissReason: DismissReason;
-  rationale: string;
-}
 
 export interface ProposedActionButtonProps {
   /** Same shape the card's recommended-action menu item reads its proposal from. */
@@ -33,19 +28,11 @@ export interface ProposedActionButtonProps {
   /** Commits the approval — pass the mutation's own promise (`mutateAsync`). */
   onConfirm: () => Promise<void>;
   /**
-   * Records the dismissal. Omitted by hosts that cannot record a dismissal, which also hides the
-   * modal's Dismiss button.
+   * Records the dismissal, with its structured reason. Awaited by the modal, which shows the
+   * Decline button's own loading state for as long as this takes — omitted by hosts that cannot
+   * record one, which also hides the modal's Decline trigger rather than leaving it inert.
    */
-  onDismiss?: (params: DismissProposalParams) => Promise<void>;
-  /**
-   * Renders the host's own dismiss-reason modal once the analyst clicks Decline. `onConfirm` here
-   * is this row's own wrapper around `onDismiss` above — wiring the host's modal to it, rather
-   * than straight to the mutation, is what lets the row's badge track the same submission.
-   */
-  renderDismissModal?: (props: {
-    onClose: () => void;
-    onConfirm: (params: DismissProposalParams) => Promise<void>;
-  }) => React.ReactNode;
+  onDismiss?: (params: DeclineParams) => Promise<void>;
   /**
    * Whether this proposal's approve/decline is currently in flight. Sourced from the host's own
    * mutation cache (e.g. `useIsMutating`) rather than tracked here, so this row and the modal it
@@ -82,37 +69,16 @@ export const ProposedActionButton = memo<ProposedActionButtonProps>(
     proposal,
     onConfirm,
     onDismiss,
-    renderDismissModal,
     isSubmitting,
     currentActorName,
     'data-test-subj': dataTestSubj,
   }) => {
     const { euiTheme } = useEuiTheme();
     const [isModalOpen, setIsModalOpen] = useState(false);
-    const [isDismissModalOpen, setIsDismissModalOpen] = useState(false);
     const decision = getProposalDecision(proposal);
 
     const openModal = useCallback(() => setIsModalOpen(true), []);
     const closeModal = useCallback(() => setIsModalOpen(false), []);
-    const closeDismissModal = useCallback(() => setIsDismissModalOpen(false), []);
-
-    // The approval modal's own Dismiss hands off to the host's dismiss-reason modal rather than
-    // recording anything itself — closing one and opening the other keeps exactly one open.
-    const openDismissModal = useCallback(() => {
-      closeModal();
-      setIsDismissModalOpen(true);
-    }, [closeModal]);
-
-    const wrappedOnDismiss = useCallback(
-      async (params: DismissProposalParams) => {
-        if (!onDismiss) {
-          return;
-        }
-        await onDismiss(params);
-        closeDismissModal();
-      },
-      [onDismiss, closeDismissModal]
-    );
 
     const approvalPhase: ApprovalPhase = decision ? decision.status : isSubmitting ?? 'pending';
 
@@ -215,15 +181,12 @@ export const ProposedActionButton = memo<ProposedActionButtonProps>(
             proposal={proposal}
             onConfirm={onConfirm}
             onClose={closeModal}
-            onDismiss={onDismiss ? openDismissModal : undefined}
+            onDismiss={onDismiss}
             isSubmitting={isSubmitting}
             currentActorName={currentActorName}
             data-test-subj={dataTestSubj ? `${dataTestSubj}-modal` : undefined}
           />
         )}
-
-        {isDismissModalOpen &&
-          renderDismissModal?.({ onClose: closeDismissModal, onConfirm: wrappedOnDismiss })}
       </>
     );
   }
