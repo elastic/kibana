@@ -65,7 +65,10 @@ export {
   type CatalogWriteResult,
 } from './models/catalog_document_codec';
 export { candidateIdFor, candidateIdRt, type CandidateId } from './models/candidate_id_codec';
-export { validateClassificationCompleteness } from './models/classification_completeness';
+export {
+  partitionClassificationResults,
+  type ClassificationPartition,
+} from './models/classification_completeness';
 export {
   MAX_CLASSIFICATION_CANDIDATES,
   MAX_CLASSIFICATION_EVIDENCE,

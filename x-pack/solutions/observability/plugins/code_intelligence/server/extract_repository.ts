@@ -16,9 +16,9 @@ import {
   extractLogSignatures,
   generateLogTemplates,
   generateOtelTemplates,
+  partitionClassificationResults,
   semanticDigest,
   sha256Digest,
-  validateClassificationCompleteness,
   type CatalogWriteRequest,
   type CatalogWriteResult,
   type CatalogWriter,
@@ -70,7 +70,7 @@ export interface ExtractRepositoryDependencies {
 
 /** Encodes source text for byte limits enforced by workflow DTO contracts. */
 const utf8Encoder = new TextEncoder();
-/** Allows one bounded retry for transient or incomplete model classification output. */
+/** Allows one bounded retry for transient workflow failures. */
 const workflowBatchAttempts = 2;
 
 /** Converts an operational source or workflow failure into the orchestrator result shape. */
@@ -174,7 +174,16 @@ const firstWorkflowExcerpt = (source: string): string => workflowExcerptChunks(s
 const workflowEvidence = (evidence: readonly SourceLocation[]): readonly SourceLocation[] =>
   evidence.map((location) => ({ ...location, excerpt: firstWorkflowExcerpt(location.excerpt) }));
 
-/** Runs a classification batch with one bounded retry for transient or incomplete output. */
+/** Caps the share of one batch that may stay unclassified before the repository fails. */
+const maxUnclassifiedShare = 0.05;
+
+/** Holds one decision per classified candidate and the candidates the workflow never decided. */
+interface ClassifiedBatch<Decision> {
+  readonly decisions: readonly Decision[];
+  readonly unclassifiedIds: readonly string[];
+}
+
+/** Runs a classification batch, retrying transient failures and then only the candidates the model skipped. */
 const classifyWorkflowBatch = async <
   Candidate extends { readonly id: string },
   Decision extends { readonly id: string }
@@ -183,22 +192,43 @@ const classifyWorkflowBatch = async <
   run,
 }: {
   readonly candidates: readonly Candidate[];
-  readonly run: () => Promise<OperationResult<readonly Decision[]>>;
-}): Promise<OperationResult<readonly Decision[]>> => {
+  readonly run: (candidates: readonly Candidate[]) => Promise<OperationResult<readonly Decision[]>>;
+}): Promise<OperationResult<ClassifiedBatch<Decision>>> => {
+  let classification: OperationResult<readonly Decision[]> | undefined;
   for (let attempt = 1; attempt <= workflowBatchAttempts; attempt += 1) {
-    /** Executes the same immutable candidate batch so a retry cannot alter membership. */
-    const classification = await run();
-    if (classification.status === 'failure') {
-      if (!classification.error.retryable || attempt === workflowBatchAttempts) {
-        return classification;
-      }
-      continue;
-    }
-    /** Rejects omissions, duplicates, and unknown IDs before model output reaches generation. */
-    const complete = validateClassificationCompleteness(candidates, classification.value);
-    if (complete.status === 'success' || attempt === workflowBatchAttempts) return complete;
+    classification = await run(candidates);
+    if (classification.status === 'success' || !classification.error.retryable) break;
   }
-  return failure('workflow_retry_exhausted', 'Workflow classification retry was exhausted.');
+  if (classification === undefined) {
+    return failure('workflow_retry_exhausted', 'Workflow classification retry was exhausted.');
+  }
+  if (classification.status === 'failure') return classification;
+  /** Unknown IDs are ignored; omitted and duplicated IDs get one more request of their own. */
+  const first = partitionClassificationResults(candidates, classification.value);
+  let decisions = first.results;
+  let unclassifiedIds = first.unresolvedIds;
+  if (unclassifiedIds.length > 0) {
+    const pending = new Set(unclassifiedIds);
+    const retryCandidates = candidates.filter(({ id }) => pending.has(id));
+    const retry = await run(retryCandidates);
+    if (retry.status === 'success') {
+      const second = partitionClassificationResults(retryCandidates, retry.value);
+      decisions = [...decisions, ...second.results];
+      unclassifiedIds = second.unresolvedIds;
+    }
+  }
+  /** A large gap signals a broken workflow rather than an occasional skipped ID. */
+  const allowed = Math.min(
+    candidates.length - 1,
+    Math.max(1, Math.floor(candidates.length * maxUnclassifiedShare))
+  );
+  if (unclassifiedIds.length > allowed) {
+    return failure(
+      'incomplete_classification',
+      `Workflow left ${unclassifiedIds.length} of ${candidates.length} candidates unclassified after a retry.`
+    );
+  }
+  return { status: 'success', value: { decisions, unclassifiedIds } };
 };
 
 /** Converts deduplicated validated templates into codec-valid catalog write requests. */
@@ -304,22 +334,25 @@ export const extractRepository = async (
     values: loggingWorkflowCandidates,
   });
   if (loggingBatches.status === 'failure') return loggingBatches;
+  /** Counts candidates the workflow never decided; they produce no templates and block the prune. */
+  let unclassifiedLogging = 0;
   /** Retains source-backed templates only after every required logging batch succeeds. */
   const loggingTemplates: GeneratedTemplate[] = [];
   for (const candidates of loggingBatches.value) {
-    /** Requires one complete workflow response per candidate, with one bounded retry. */
-    const complete = await classifyWorkflowBatch({
+    const classified = await classifyWorkflowBatch({
       candidates,
-      run: () =>
+      run: (batch) =>
         dependencies.workflows.classifyLogging({
-          candidates: candidates.map(({ source: _source, ...candidate }) => candidate),
+          candidates: batch.map(({ source: _source, ...candidate }) => candidate),
         }),
     });
-    if (complete.status === 'failure') return complete;
-    /** Resolves source candidates only after strict decision coverage has been proven. */
-    const decisions = new Map(complete.value.map((decision) => [decision.id, decision]));
+    if (classified.status === 'failure') return classified;
+    unclassifiedLogging += classified.value.unclassifiedIds.length;
+    const decisions = new Map(
+      classified.value.decisions.map((decision) => [decision.id, decision])
+    );
     for (const candidate of candidates) {
-      /** Complete workflow contracts ensure this branch is defensive rather than permissive. */
+      /** Unclassified candidates have no decision and are skipped like rejected ones. */
       const decision = decisions.get(candidate.id);
       if (decision?.keep !== true) continue;
       /** Classifier text is optional; source extraction remains the deterministic fallback. */
@@ -366,22 +399,24 @@ export const extractRepository = async (
     values: otelWorkflowCandidates,
   });
   if (otelBatches.status === 'failure') return otelBatches;
+  let unclassifiedOtel = 0;
   /** Retains source-backed templates only after every required OTel batch succeeds. */
   const otelTemplates: GeneratedTemplate[] = [];
   for (const candidates of otelBatches.value) {
-    /** Sends source-derived signal facts with one bounded retry for incomplete output. */
-    const complete = await classifyWorkflowBatch({
+    const classified = await classifyWorkflowBatch({
       candidates,
-      run: () =>
+      run: (batch) =>
         dependencies.workflows.classifyOtel({
-          candidates: candidates.map(({ source: _source, ...candidate }) => candidate),
+          candidates: batch.map(({ source: _source, ...candidate }) => candidate),
         }),
     });
-    if (complete.status === 'failure') return complete;
-    /** Resolves source candidates only after strict decision coverage has been proven. */
-    const decisions = new Map(complete.value.map((decision) => [decision.id, decision]));
+    if (classified.status === 'failure') return classified;
+    unclassifiedOtel += classified.value.unclassifiedIds.length;
+    const decisions = new Map(
+      classified.value.decisions.map((decision) => [decision.id, decision])
+    );
     for (const candidate of candidates) {
-      /** Complete workflow contracts ensure this branch is defensive rather than permissive. */
+      /** Unclassified candidates have no decision and are skipped like rejected ones. */
       const decision = decisions.get(candidate.id);
       if (decision?.keep !== true) continue;
       /** Workflow metadata enriches presentation only; query text and evidence remain deterministic source facts. */
@@ -404,6 +439,12 @@ export const extractRepository = async (
   const validation = new Map<string, QueryValidationResult>();
   /** Explains invalid template exclusion without converting it into a required workflow failure. */
   const diagnostics: ExtractionDiagnostic[] = [];
+  if (unclassifiedLogging + unclassifiedOtel > 0) {
+    diagnostics.push({
+      code: 'unclassified_candidates',
+      message: `The classification workflow skipped ${unclassifiedLogging} logging and ${unclassifiedOtel} OTel candidates even after a retry, so they were left out of the catalog.`,
+    });
+  }
   for (const template of templates) {
     try {
       const outcome = await dependencies.validator.validate(template.query);
@@ -445,8 +486,16 @@ export const extractRepository = async (
   /** Catalog writes happen only after all required source and workflow stages have completed successfully. */
   const write = await dependencies.catalogWriter.write(requests);
   if (write.status === 'failure') return write;
+  /** Skipped candidates may match documents from earlier extractions, so those must not be pruned. */
+  if (write.value.failures.length === 0 && unclassifiedLogging + unclassifiedOtel > 0) {
+    diagnostics.push({
+      code: 'prune_skipped_unclassified_candidates',
+      message:
+        'Some candidates were not classified, so documents from earlier extractions of this repository were kept and may be stale.',
+    });
+  }
   /** Prunes only after a fully successful write, so a partial write never removes the previous catalog. */
-  if (write.value.failures.length === 0) {
+  if (write.value.failures.length === 0 && unclassifiedLogging + unclassifiedOtel === 0) {
     const prune = await dependencies.catalogWriter.prune({
       keepIds: write.value.writtenIds,
       repository: repository.repository,

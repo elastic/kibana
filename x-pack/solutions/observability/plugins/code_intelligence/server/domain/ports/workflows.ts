@@ -15,11 +15,11 @@ import type { OperationError, OperationResult } from '../models/operation_result
 
 /** Runs required classification workflows without exposing their transport. */
 export interface ClassificationWorkflowClient {
-  /** Classifies a caller-batched, byte-bounded logging request and enforces complete response coverage. */
+  /** Classifies a caller-batched, byte-bounded logging request; callers check response coverage. */
   classifyLogging(
     request: LoggingClassificationRequest
   ): Promise<OperationResult<readonly LoggingClassification[]>>;
-  /** Classifies a caller-batched, byte-bounded OTel request and enforces complete response coverage. */
+  /** Classifies a caller-batched, byte-bounded OTel request; callers check response coverage. */
   classifyOtel(
     request: OtelClassificationRequest
   ): Promise<OperationResult<readonly OtelClassification[]>>;

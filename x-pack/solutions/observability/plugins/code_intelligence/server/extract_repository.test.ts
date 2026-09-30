@@ -77,7 +77,54 @@ const successfulWriter = (): jest.Mocked<CatalogWriter> => ({
   })),
 });
 
-const run = (catalogWriter: CatalogWriter, reader: SourceReader = oneLogReader) =>
+/** Yields one standard logging emission in each of 3 files, so one batch holds 3 candidates. */
+const threeLogReader: SourceReader = {
+  grep: async ({ pattern }) =>
+    pattern === loggingIdiomPatterns[0]
+      ? {
+          items: ['a', 'b', 'c'].map((name) => ({
+            line: 1,
+            path: `src/${name}.ts`,
+            text: `logger.info("started ${name}")`,
+          })),
+          status: 'complete',
+        }
+      : { items: [], status: 'complete' },
+  listSourcePage: async () => ({ items: [], status: 'complete' }),
+  readWindow: async ({ path, startLine }) => ({
+    status: 'success',
+    value: {
+      endLine: 1,
+      lines: [`logger.info("started ${path.slice(4, 5)}")`],
+      path,
+      startLine,
+    },
+  }),
+};
+
+/** Keeps every candidate, but leaves out the first candidate on the listed calls. */
+const skippingWorkflows = (
+  skipOnCalls: readonly number[]
+): jest.Mocked<ClassificationWorkflowClient> => {
+  let call = 0;
+  return {
+    classifyLogging: jest.fn(async ({ candidates }) => {
+      call += 1;
+      const answered = skipOnCalls.includes(call) ? candidates.slice(1) : candidates;
+      return {
+        status: 'success' as const,
+        value: answered.map(({ id }) => ({ id, keep: true })),
+      };
+    }),
+    classifyOtel: jest.fn(workflows.classifyOtel),
+  };
+};
+
+const run = (
+  catalogWriter: CatalogWriter,
+  reader: SourceReader = oneLogReader,
+  classificationWorkflows: ClassificationWorkflowClient = workflows
+) =>
   extractRepository({
     catalogWriter,
     extractorVersion: 'test',
@@ -86,7 +133,7 @@ const run = (catalogWriter: CatalogWriter, reader: SourceReader = oneLogReader) 
     repositoryRequest: { repository: 'elastic/example', revision: 'main' },
     repositoryResolver,
     validator,
-    workflows,
+    workflows: classificationWorkflows,
   });
 
 describe('extractRepository', () => {
@@ -158,6 +205,58 @@ describe('extractRepository', () => {
 
     expect(result.status).toBe('success');
     expect(catalogWriter.prune).not.toHaveBeenCalled();
+  });
+
+  it('retries only the skipped candidate and prunes when the retry classifies it', async () => {
+    const catalogWriter = successfulWriter();
+    const classification = skippingWorkflows([1]);
+
+    const result = await run(catalogWriter, threeLogReader, classification);
+
+    expect(result.status).toBe('success');
+    expect(classification.classifyLogging).toHaveBeenCalledTimes(2);
+    const [first, retry] = classification.classifyLogging.mock.calls.map(
+      ([request]) => request.candidates
+    );
+    expect(first).toHaveLength(3);
+    expect(retry).toEqual([first?.[0]]);
+    expect(result.status === 'success' && result.value.diagnostics).toEqual([]);
+    expect(result.status === 'success' && result.value.generatedTemplates).toHaveLength(3);
+    expect(catalogWriter.prune).toHaveBeenCalledTimes(1);
+  });
+
+  it('leaves out a candidate skipped twice, warns, and keeps earlier documents', async () => {
+    const catalogWriter = successfulWriter();
+
+    const result = await run(catalogWriter, threeLogReader, skippingWorkflows([1, 2]));
+
+    expect(result).toMatchObject({
+      status: 'success',
+      value: {
+        diagnostics: [
+          expect.objectContaining({
+            code: 'unclassified_candidates',
+            message: expect.stringContaining('skipped 1 logging and 0 OTel candidates'),
+          }),
+          expect.objectContaining({ code: 'prune_skipped_unclassified_candidates' }),
+        ],
+      },
+    });
+    expect(result.status === 'success' && result.value.generatedTemplates).toHaveLength(2);
+    expect(catalogWriter.write).toHaveBeenCalledTimes(1);
+    expect(catalogWriter.prune).not.toHaveBeenCalled();
+  });
+
+  it('fails when the workflow leaves every candidate in a batch unclassified', async () => {
+    const catalogWriter = successfulWriter();
+
+    const result = await run(catalogWriter, oneLogReader, skippingWorkflows([1, 2]));
+
+    expect(result).toMatchObject({
+      error: { code: 'incomplete_classification' },
+      status: 'failure',
+    });
+    expect(catalogWriter.write).not.toHaveBeenCalled();
   });
 
   it('returns a prune failure as the run failure', async () => {
