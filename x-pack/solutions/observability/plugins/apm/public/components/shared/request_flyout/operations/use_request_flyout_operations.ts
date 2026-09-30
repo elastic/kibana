@@ -16,17 +16,23 @@ import { useRequestFlyoutContext } from '../request_flyout_context';
  */
 export function useRequestFlyoutOperations() {
   const {
-    connection: { sourceServiceName, dependencyName },
+    connection: { sourceServiceName, dependencyName, dependencies },
     filters: { environment, start, end },
   } = useRequestFlyoutContext();
 
+  // For service→dependency edges dependencyName comes from the target node's
+  // SPAN_DESTINATION_SERVICE_RESOURCE. For service→service edges the target
+  // node is a service node (no resource field), so dependencyName is undefined —
+  // fall back to the first entry in the resources array from the edge.
+  const resolvedDependencyName = dependencyName ?? dependencies[0];
+
   const { data, status } = useFetcher(
     (callApmApi) => {
-      if (sourceServiceName && dependencyName && start && end) {
+      if (sourceServiceName && resolvedDependencyName && start && end) {
         return callApmApi('GET /internal/apm/dependencies/operations', {
           params: {
             query: {
-              dependencyName,
+              dependencyName: resolvedDependencyName,
               environment,
               start,
               end,
@@ -37,7 +43,7 @@ export function useRequestFlyoutOperations() {
         });
       }
     },
-    [sourceServiceName, dependencyName, environment, start, end]
+    [sourceServiceName, resolvedDependencyName, environment, start, end]
   );
 
   return {

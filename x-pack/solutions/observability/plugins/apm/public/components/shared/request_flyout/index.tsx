@@ -168,7 +168,7 @@ export function RequestFlyout({
                     data-test-subj="requestFlyoutTabAffectedEndpoints"
                   >
                     {i18n.translate('xpack.apm.requestFlyout.tabs.affectedEndpoints', {
-                      defaultMessage: 'Affected {source} endpoints',
+                      defaultMessage: '{source} transactions',
                       values: { source: connection.sourceLabel },
                     })}
                   </EuiTab>

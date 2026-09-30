@@ -55,8 +55,8 @@ export function RequestFlyoutAffectedEndpoints() {
   const columns: Array<EuiBasicTableColumn<ConnectionTransactionGroup>> = [
     {
       field: 'name',
-      name: i18n.translate('xpack.apm.requestFlyout.affectedEndpoints.column.endpoint', {
-        defaultMessage: 'Endpoint',
+      name: i18n.translate('xpack.apm.requestFlyout.affectedEndpoints.column.transaction', {
+        defaultMessage: 'Transaction',
       }),
       truncateText: true,
       render: (name: string) => (
@@ -80,7 +80,8 @@ export function RequestFlyoutAffectedEndpoints() {
     {
       field: 'callCount',
       name: i18n.translate('xpack.apm.requestFlyout.affectedEndpoints.column.calls', {
-        defaultMessage: 'Calls',
+        defaultMessage: 'Calls to {target}',
+        values: { target: targetLabel },
       }),
       align: 'right' as const,
       render: (value: number) => value.toLocaleString(),
