@@ -207,11 +207,7 @@ export const WorkerSettingsPanel = React.memo(function WorkerSettingsPanel({
             </EuiFlexItem>
           ) : null}
           <EuiFlexItem />
-          <EuiFlexItem
-            grow={false}
-            onClick={stopAccordionToggle}
-            onKeyDown={stopAccordionToggle}
-          >
+          <EuiFlexItem grow={false} onClick={stopAccordionToggle} onKeyDown={stopAccordionToggle}>
             {headerActions}
           </EuiFlexItem>
         </EuiFlexGroup>
