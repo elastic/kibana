@@ -122,8 +122,10 @@ steps:
 
   apiTest(
     "Workflows All cannot read or change another owner's private access",
-    async ({ apiClient, samlAuth }) => {
-      const reader = await samlAuth.asInteractiveUser('editor');
+    async ({ apiClient, samlAuth, config }) => {
+      const reader = await samlAuth.asInteractiveUser(
+        config.projectType === 'es' ? 'developer' : 'editor'
+      );
       const readerHeaders = { ...headers, ...reader.cookieHeader };
       expect(await apiClient.get(workflowPath, { headers: readerHeaders })).toHaveStatusCode(404);
       expect(
@@ -336,8 +338,10 @@ steps:
 
   apiTest(
     'an administrator can restore public access without changing the owner',
-    async ({ apiClient, samlAuth }) => {
-      const reader = await samlAuth.asInteractiveUser('editor');
+    async ({ apiClient, samlAuth, config }) => {
+      const reader = await samlAuth.asInteractiveUser(
+        config.projectType === 'es' ? 'developer' : 'editor'
+      );
       const readerHeaders = { ...headers, ...reader.cookieHeader };
       const updated = await apiClient.put(accessPath, {
         headers: adminHeaders,
