@@ -90,7 +90,7 @@ describe('composeAnswerText', () => {
     severity: 'high',
     hypotheses: [
       { candidate: 'throttling', confidence: 0.9, status: 'confirmed', reason: 'latency spiked' },
-      { candidate: 'network', confidence: 0.2, status: 'rejected' },
+      { candidate: 'network', confidence: 0.2, status: 'dismissed' },
     ],
   };
 
