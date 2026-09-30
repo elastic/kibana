@@ -29,7 +29,8 @@ summary="$(jq -r '
     ((.configSets.sameAsDefault | length) | tostring) + " config sets identical to the default",
     ((.configSets.identical | length) | tostring) + " groups of identical config sets",
     ((.configSets.subsets | map(.set) | unique | length) | tostring) + " config sets covered by another set",
-    ((.configSets.runtimeOnly | length) | tostring) + " config sets that only change runtime settings"
+    ((.configSets.runtimeOnly | length) | tostring) + " config sets that only change runtime settings",
+    ((.configSets.failed | length) | tostring) + " config sets the audit could not load"
   ] | map(select(startswith("0 ") | not)) | join(", ")
 ' "$json_file")"
 [[ -z "$summary" ]] && summary="no findings"
