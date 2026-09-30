@@ -5,14 +5,13 @@
  * 2.0.
  */
 
-/** Signals that the repository already has a running extraction that a new run would prune against. */
+/** Signals that an extraction batch is already running; only 1 batch runs at a time because each run prunes the catalog. */
 export class ExtractionAlreadyRunningError extends Error {
-  public constructor(
-    public readonly repository: string,
-    /** Known only when this instance tracks the running extraction, not when another instance holds the lock. */
+  constructor(
+    /** Known only when this instance tracks the running batch, not when another instance holds the lock. */
     public readonly extractionId?: string
   ) {
-    super(`An extraction for ${repository} is already running.`);
+    super('An extraction batch is already running.');
     this.name = 'ExtractionAlreadyRunningError';
   }
 }

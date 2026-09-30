@@ -8,79 +8,239 @@
 import { schema } from '@kbn/config-schema';
 import type { IRouter, KibanaRequest } from '@kbn/core/server';
 
+import { MAX_BATCH_REPOSITORIES } from '../common/extraction_batch';
+import {
+  MAX_CONNECTOR_ID_LENGTH,
+  MAX_REMOTE_URL_LENGTH,
+  MAX_REPOSITORY_IDENTITY_LENGTH,
+  MAX_REVISION_LENGTH,
+  isRepositoryIdentity,
+  isSafeRevision,
+  validateRepositorySettings,
+} from '../common/repository_settings';
 import {
   START_EXTRACTION_ERROR_CODES,
   type StartExtractionErrorAttributes,
 } from '../common/start_extraction_errors';
 import { ElasticsearchCatalogWriter } from './adapters/elasticsearch_catalog';
+import {
+  ElasticsearchRepositorySettingsStore,
+  ensureSettingsIndex,
+} from './adapters/elasticsearch_settings';
 import { ExtractionAlreadyRunningError } from './extraction_already_running_error';
 import { ExtractionCapacityExhaustedError } from './extraction_capacity_exhausted_error';
-import type { ExtractionService } from './extraction_service';
+import type { BatchRepository, ExtractionService } from './extraction_service';
+import { SourceUnavailableError } from './source_session';
 
 const errorAttributes = (
   attributes: StartExtractionErrorAttributes
 ): StartExtractionErrorAttributes & Record<string, unknown> => ({ ...attributes });
 
-const repositoryIdentity = schema.string({ minLength: 3, maxLength: 256 });
-const revision = schema.string({ minLength: 1, maxLength: 255 });
+const repositoryIdentity = schema.string({
+  minLength: 3,
+  maxLength: MAX_REPOSITORY_IDENTITY_LENGTH,
+});
+const revision = schema.string({ minLength: 1, maxLength: MAX_REVISION_LENGTH });
+const identitySegment = schema.string({ minLength: 1, maxLength: MAX_REPOSITORY_IDENTITY_LENGTH });
+const repositoryParams = schema.object({ owner: identitySegment, name: identitySegment });
+
+/** Services available once the plugin has started; extraction is absent when its source is unavailable. */
+export interface RouteServices {
+  readonly extractionService?: ExtractionService;
+  /** Explains why extraction is unavailable, for example a missing `xpack.sandbox` configuration. */
+  readonly extractionUnavailableReason?: string;
+  readonly getSpaceId: (request: KibanaRequest) => string;
+}
 
 export const registerRoutes = ({
   catalogIndex,
+  settingsIndex,
   getServices,
-  repositories,
   router,
 }: {
   readonly catalogIndex: string;
-  readonly getServices: () => {
-    readonly extractionService: ExtractionService;
-    readonly getSpaceId: (request: KibanaRequest) => string;
-  };
-  readonly repositories: ReadonlySet<string>;
+  readonly settingsIndex: string;
+  readonly getServices: () => RouteServices;
   readonly router: IRouter;
 }): void => {
   router.get(
     {
       path: '/internal/code_intelligence/repositories',
-      options: { access: 'internal' },
+      options: { access: 'internal', description: 'Lists every repository in the settings index.' },
       security: { authz: { enabled: false, reason: 'This private route is feature gated.' } },
       validate: false,
     },
-    async (_context, _request, response) =>
-      response.ok({
-        body: {
-          repositories: [...repositories].sort().map((repository) => ({ repository })),
-        },
-      })
+    async (context, _request, response) => {
+      const { elasticsearch } = await context.core;
+      const store = new ElasticsearchRepositorySettingsStore(
+        elasticsearch.client.asCurrentUser,
+        settingsIndex
+      );
+      return response.ok({ body: { repositories: await store.list() } });
+    }
+  );
+
+  router.put(
+    {
+      path: '/internal/code_intelligence/repositories/{owner}/{name}',
+      options: {
+        access: 'internal',
+        description:
+          'Adds or replaces the settings of the repository `{owner}/{name}`. The body `repository` must match the path.',
+      },
+      security: { authz: { enabled: false, reason: 'This private route is feature gated.' } },
+      validate: {
+        params: repositoryParams,
+        body: schema.object({
+          repository: repositoryIdentity,
+          remoteUrl: schema.string({ minLength: 1, maxLength: MAX_REMOTE_URL_LENGTH }),
+          defaultRef: schema.maybe(revision),
+          enabled: schema.maybe(schema.boolean()),
+          githubConnectorId: schema.maybe(
+            schema.string({ minLength: 1, maxLength: MAX_CONNECTOR_ID_LENGTH })
+          ),
+        }),
+      },
+    },
+    async (context, request, response) => {
+      const identity = `${request.params.owner}/${request.params.name}`;
+      if (identity !== request.body.repository) {
+        return response.badRequest({
+          body: { message: 'The repository in the path must match the repository in the body.' },
+        });
+      }
+      const problems = validateRepositorySettings(request.body);
+      if (problems.length > 0) {
+        return response.badRequest({
+          body: {
+            message: problems.map(({ message }) => message).join(' '),
+            attributes: { problems },
+          },
+        });
+      }
+      const { elasticsearch } = await context.core;
+      await ensureSettingsIndex(elasticsearch.client.asInternalUser, settingsIndex);
+      const store = new ElasticsearchRepositorySettingsStore(
+        elasticsearch.client.asCurrentUser,
+        settingsIndex
+      );
+      return response.ok({ body: { repository: await store.upsert(request.body) } });
+    }
+  );
+
+  router.delete(
+    {
+      path: '/internal/code_intelligence/repositories/{owner}/{name}',
+      options: {
+        access: 'internal',
+        description:
+          'Removes the settings of the repository `{owner}/{name}`. Its documents in the catalog index are not deleted.',
+      },
+      security: { authz: { enabled: false, reason: 'This private route is feature gated.' } },
+      validate: { params: repositoryParams },
+    },
+    async (context, request, response) => {
+      const identity = `${request.params.owner}/${request.params.name}`;
+      if (!isRepositoryIdentity(identity)) {
+        return response.badRequest({ body: { message: 'Repository identity is invalid.' } });
+      }
+      const { elasticsearch } = await context.core;
+      const store = new ElasticsearchRepositorySettingsStore(
+        elasticsearch.client.asCurrentUser,
+        settingsIndex
+      );
+      return (await store.delete(identity))
+        ? response.ok({ body: { deleted: true } })
+        : response.notFound({ body: { message: 'Repository was not found.' } });
+    }
   );
 
   router.post(
     {
       path: '/internal/code_intelligence/extractions',
-      options: { access: 'internal' },
+      options: {
+        access: 'internal',
+        description:
+          'Starts 1 extraction batch. Without `repositories`, the batch covers every enabled repository at its default ref.',
+      },
       security: { authz: { enabled: false, reason: 'This private route is feature gated.' } },
       validate: {
-        body: schema.object({ repository: repositoryIdentity, revision }),
+        body: schema.object({
+          repositories: schema.maybe(
+            schema.arrayOf(
+              schema.object({ repository: repositoryIdentity, revision: schema.maybe(revision) }),
+              { maxSize: MAX_BATCH_REPOSITORIES }
+            )
+          ),
+        }),
       },
     },
     async (context, request, response) => {
-      const { extractionService, getSpaceId } = getServices();
-      const { repository } = request.body;
-      if (!repositories.has(repository)) {
+      const { extractionService, extractionUnavailableReason, getSpaceId } = getServices();
+      const sourceUnavailable = (message: string) =>
+        response.customError({
+          statusCode: 503,
+          body: {
+            message,
+            attributes: errorAttributes({ code: START_EXTRACTION_ERROR_CODES.sandboxUnavailable }),
+          },
+        });
+      if (extractionService === undefined) {
+        return sourceUnavailable(extractionUnavailableReason ?? 'Extraction is unavailable.');
+      }
+      const requested = request.body.repositories ?? [];
+      if (new Set(requested.map(({ repository }) => repository)).size !== requested.length) {
+        return response.badRequest({ body: { message: 'Each repository may appear only once.' } });
+      }
+      const { elasticsearch } = await context.core;
+      const settings = await new ElasticsearchRepositorySettingsStore(
+        elasticsearch.client.asCurrentUser,
+        settingsIndex
+      ).list();
+      const byIdentity = new Map(settings.map((entry) => [entry.repository, entry]));
+      const selected: BatchRepository[] = [];
+      for (const entry of requested.length === 0
+        ? settings.filter(({ enabled }) => enabled).map(({ repository }) => ({ repository }))
+        : requested) {
+        const configured = byIdentity.get(entry.repository);
+        if (configured === undefined) {
+          return response.badRequest({
+            body: {
+              message: 'Repository is not configured.',
+              attributes: errorAttributes({
+                code: START_EXTRACTION_ERROR_CODES.repositoryNotConfigured,
+                repository: entry.repository,
+              }),
+            },
+          });
+        }
+        const entryRevision =
+          ('revision' in entry ? entry.revision : undefined) ?? configured.defaultRef;
+        if (!isSafeRevision(entryRevision)) {
+          return response.badRequest({
+            body: { message: `Revision for ${entry.repository} is invalid.` },
+          });
+        }
+        selected.push({
+          repository: configured.repository,
+          revision: entryRevision,
+          remoteUrl: configured.remoteUrl,
+          ...(configured.githubConnectorId === undefined
+            ? {}
+            : { githubConnectorId: configured.githubConnectorId }),
+        });
+      }
+      if (selected.length === 0) {
         return response.badRequest({
           body: {
-            message: 'Repository is not configured.',
-            attributes: errorAttributes({
-              code: START_EXTRACTION_ERROR_CODES.repositoryNotConfigured,
-              repository,
-            }),
+            message: 'No enabled repositories to extract.',
+            attributes: errorAttributes({ code: START_EXTRACTION_ERROR_CODES.noRepositories }),
           },
         });
       }
       try {
-        const { elasticsearch } = await context.core;
         const id = await extractionService.start(
-          repository,
-          request.body.revision,
+          selected,
           request,
           getSpaceId(request),
           new ElasticsearchCatalogWriter(elasticsearch.client.asCurrentUser, catalogIndex)
@@ -93,7 +253,6 @@ export const registerRoutes = ({
               message: error.message,
               attributes: errorAttributes({
                 code: START_EXTRACTION_ERROR_CODES.alreadyRunning,
-                repository,
                 ...(error.extractionId === undefined ? {} : { extractionId: error.extractionId }),
               }),
             },
@@ -104,13 +263,11 @@ export const registerRoutes = ({
             statusCode: 429,
             body: {
               message: error.message,
-              attributes: errorAttributes({
-                code: START_EXTRACTION_ERROR_CODES.capacityExhausted,
-                repository,
-              }),
+              attributes: errorAttributes({ code: START_EXTRACTION_ERROR_CODES.capacityExhausted }),
             },
           });
         }
+        if (error instanceof SourceUnavailableError) return sourceUnavailable(error.message);
         // The router logs unexpected errors and answers 500 without leaking their details.
         throw error;
       }
@@ -127,8 +284,7 @@ export const registerRoutes = ({
       },
     },
     async (_context, request, response) => {
-      const { extractionService } = getServices();
-      const status = extractionService.get(request.params.id);
+      const status = getServices().extractionService?.get(request.params.id);
       return status === undefined
         ? response.notFound({ body: { message: 'Extraction was not found.' } })
         : response.ok({ body: status });

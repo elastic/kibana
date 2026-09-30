@@ -9,7 +9,9 @@
 export const START_EXTRACTION_ERROR_CODES = {
   alreadyRunning: 'extraction_already_running',
   repositoryNotConfigured: 'repository_not_configured',
+  noRepositories: 'no_repositories_to_extract',
   capacityExhausted: 'extraction_capacity_exhausted',
+  sandboxUnavailable: 'sandbox_unavailable',
 } as const;
 
 export type StartExtractionErrorCode =
@@ -21,7 +23,8 @@ export type StartExtractionErrorCode =
  */
 export interface StartExtractionErrorAttributes {
   readonly code: StartExtractionErrorCode;
-  readonly repository: string;
-  /** Present only when the refusing instance tracks the running extraction. */
+  /** Present when the refusal is about one repository, for example one that is not configured. */
+  readonly repository?: string;
+  /** The running batch, present only when the refusing instance tracks it. */
   readonly extractionId?: string;
 }

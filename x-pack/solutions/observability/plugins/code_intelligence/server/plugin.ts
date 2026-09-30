@@ -7,8 +7,15 @@
 
 import { randomBytes } from 'node:crypto';
 
-import type { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/server';
+import type {
+  CoreSetup,
+  CoreStart,
+  Logger,
+  Plugin,
+  PluginInitializerContext,
+} from '@kbn/core/server';
 import { LockManagerService } from '@kbn/lock-manager';
+import type { SandboxPluginSetup, SandboxPluginStart } from '@kbn/sandbox-plugin/server';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import {
   CODE_INTELLIGENCE_LOGGING_CLASSIFICATION_WORKFLOW_ID,
@@ -24,68 +31,82 @@ import type {
   WorkflowsServerPluginStart,
 } from '@kbn/workflows-management-plugin/server';
 
+import { ensureSettingsIndex } from './adapters/elasticsearch_settings';
 import {
   LocalBareGitRepositoryResolver,
   LocalBareGitSourceReader,
 } from './adapters/local_git/local_bare_git';
+import {
+  ConfigGitCredentialsProvider,
+  sandboxGitSourceSessionFactory,
+} from './adapters/sandbox_git/sandbox_git';
 import { SkippedQueryValidator } from './adapters/workflows/skipped_query_validator';
 import type { CodeIntelligenceConfig } from './config';
 import { ExtractionService } from './extraction_service';
-import { registerRoutes } from './routes';
+import { registerRoutes, type RouteServices } from './routes';
+import type { SourceSessionFactory } from './source_session';
 
 const managedWorkflowOwner = 'codeIntelligence';
 
+const SANDBOX_UNAVAILABLE_MESSAGE =
+  'Code Intelligence extraction uses the sandbox source, but the sandbox is not available in this deployment. Set `xpack.sandbox.enabled: true`, `xpack.sandbox.api_key`, and `xpack.sandbox.host`/`xpack.sandbox.port`, or set `xpack.code_intelligence.source: local_git`.';
+
 interface SetupDependencies {
+  sandbox?: SandboxPluginSetup;
   workflowsExtensions: WorkflowsExtensionsServerPluginSetup;
   workflowsManagement: WorkflowsServerPluginSetup;
 }
 
 interface StartDependencies {
+  sandbox?: SandboxPluginStart;
   spaces?: SpacesPluginStart;
   workflowsExtensions: WorkflowsExtensionsServerPluginStart;
   workflowsManagement: WorkflowsServerPluginStart;
-}
-
-interface StartedServices {
-  readonly extractionService: ExtractionService;
-  readonly getSpaceId: (
-    request: Parameters<SpacesPluginStart['spacesService']['getSpaceId']>[0]
-  ) => string;
 }
 
 export class CodeIntelligencePlugin
   implements Plugin<void, void, SetupDependencies, StartDependencies>
 {
   private readonly config: CodeIntelligenceConfig;
+  private readonly logger: Logger;
   private lockManager: LockManagerService | undefined;
-  private services: StartedServices | undefined;
+  private sandboxAvailable = false;
+  private services: RouteServices | undefined;
   private workflowsManagement: WorkflowsServerPluginSetup['management'] | undefined;
 
-  public constructor(private readonly context: PluginInitializerContext<CodeIntelligenceConfig>) {
+  constructor(context: PluginInitializerContext<CodeIntelligenceConfig>) {
     this.config = context.config.get();
+    this.logger = context.logger.get();
   }
 
   public setup(core: CoreSetup<StartDependencies>, plugins: SetupDependencies): void {
     if (!this.config.enabled) return;
-    if (this.config.workflowConnectorId === undefined || this.config.repositories.length === 0) {
-      this.context.logger
-        .get()
-        .warn('Code Intelligence is enabled but connector or repository configuration is missing.');
+    if (this.config.workflowConnectorId === undefined) {
+      this.logger.warn(
+        'Code Intelligence is enabled but `xpack.code_intelligence.workflowConnectorId` is missing.'
+      );
+      return;
+    }
+    if (this.config.source === 'local_git' && this.config.repositories.length === 0) {
+      this.logger.warn(
+        'Code Intelligence uses the local_git source but `xpack.code_intelligence.repositories` is empty.'
+      );
       return;
     }
 
+    this.sandboxAvailable = plugins.sandbox?.isAvailable === true;
     plugins.workflowsExtensions.registerManagedWorkflowOwner(managedWorkflowOwner);
     this.workflowsManagement = plugins.workflowsManagement.management;
-    this.lockManager = new LockManagerService(core, this.context.logger.get());
+    this.lockManager = new LockManagerService(core, this.logger);
     registerRoutes({
       catalogIndex: this.config.catalogIndex,
+      settingsIndex: this.config.settingsIndex,
       getServices: () => {
         if (this.services === undefined) {
           throw new Error('Code Intelligence server has not started.');
         }
         return this.services;
       },
-      repositories: new Set(this.config.repositories.map(({ repository }) => repository)),
       router: core.http.createRouter(),
     });
   }
@@ -95,10 +116,23 @@ export class CodeIntelligencePlugin
       !this.config.enabled ||
       this.workflowsManagement === undefined ||
       this.lockManager === undefined ||
-      this.config.workflowConnectorId === undefined ||
-      this.config.repositories.length === 0
+      this.config.workflowConnectorId === undefined
     ) {
       return;
+    }
+
+    try {
+      await ensureSettingsIndex(
+        core.elasticsearch.client.asInternalUser,
+        this.config.settingsIndex
+      );
+    } catch (error: unknown) {
+      // Saving repository settings creates the index again, so start continues.
+      this.logger.error(
+        `Code Intelligence could not create the settings index [${this.config.settingsIndex}]: ${
+          error instanceof Error ? error.message : String(error)
+        }`
+      );
     }
 
     const managedClient = await plugins.workflowsExtensions.initManagedWorkflowsClient(
@@ -115,22 +149,46 @@ export class CodeIntelligencePlugin
     });
     await managedClient.ready();
 
-    const options = {
-      repositories: this.config.repositories,
-      cursorSecret: randomBytes(32).toString('hex'),
-    };
+    const getSpaceId: RouteServices['getSpaceId'] = (request) =>
+      plugins.spaces?.spacesService.getSpaceId(request) ?? 'default';
+    const createSourceSession = this.sourceSessionFactory(plugins.sandbox);
+    if (createSourceSession === undefined) {
+      this.logger.error(SANDBOX_UNAVAILABLE_MESSAGE);
+      this.services = { extractionUnavailableReason: SANDBOX_UNAVAILABLE_MESSAGE, getSpaceId };
+      return;
+    }
     this.services = {
       extractionService: new ExtractionService({
         lockManager: this.lockManager,
         managedWorkflows: managedClient,
         management: this.workflowsManagement,
-        reader: new LocalBareGitSourceReader(options),
-        repositoryResolver: new LocalBareGitRepositoryResolver(options),
+        createSourceSession,
         validator: new SkippedQueryValidator(),
       }),
-      getSpaceId: (request) => plugins.spaces?.spacesService.getSpaceId(request) ?? 'default',
+      getSpaceId,
     };
   }
 
   public stop(): void {}
+
+  private sourceSessionFactory(sandbox?: SandboxPluginStart): SourceSessionFactory | undefined {
+    const cursorSecret = randomBytes(32).toString('hex');
+    if (this.config.source === 'local_git') {
+      const options = { repositories: this.config.repositories, cursorSecret };
+      const session = {
+        reader: new LocalBareGitSourceReader(options),
+        repositoryResolver: new LocalBareGitRepositoryResolver(options),
+        finishRepository: async () => {},
+        close: async () => {},
+      };
+      return () => session;
+    }
+    if (!this.sandboxAvailable || sandbox === undefined) return undefined;
+    return sandboxGitSourceSessionFactory({
+      sandbox,
+      credentials: new ConfigGitCredentialsProvider(this.config.github.token),
+      cursorSecret,
+      logger: this.logger.get('sandbox_git'),
+    });
+  }
 }
