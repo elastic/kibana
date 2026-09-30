@@ -35,6 +35,29 @@ const registerThreatAttachmentUI = async (
   );
 };
 
+/**
+ * Registers the `security.significant_security_event` attachment UI definition. Same dynamic
+ * `import()` reasoning as the threat attachment above: the renderer pulls in the distribution
+ * bar and the shared attachment primitives, which stay out of the initial bundle.
+ */
+const registerSignificantSecurityEventAttachmentUI = async (
+  attachments: AttachmentServiceStartContract,
+  {
+    navigation,
+  }: {
+    navigation: AttachmentNavigationDeps;
+  }
+): Promise<void> => {
+  const { createSignificantSecurityEventAttachmentDefinition } = await import(
+    /* webpackChunkName: "alertzero_sse_attachment" */
+    './significant_security_event'
+  );
+  attachments.addAttachmentType(
+    ALERTZERO_ATTACHMENT_TYPES.significantSecurityEvent,
+    createSignificantSecurityEventAttachmentDefinition({ navigation })
+  );
+};
+
 /** Registers all Hunt Watch attachment UI definitions with the Agent Builder attachments service. */
 export const registerAlertZeroAttachmentTypesUI = async (
   attachments: AttachmentServiceStartContract,
@@ -46,5 +69,8 @@ export const registerAlertZeroAttachmentTypesUI = async (
     navigation: AttachmentNavigationDeps;
   }
 ): Promise<void> => {
-  await Promise.all([registerThreatAttachmentUI(attachments, { http, navigation })]);
+  await Promise.all([
+    registerThreatAttachmentUI(attachments, { http, navigation }),
+    registerSignificantSecurityEventAttachmentUI(attachments, { navigation }),
+  ]);
 };

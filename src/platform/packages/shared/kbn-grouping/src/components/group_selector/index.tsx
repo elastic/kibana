@@ -11,11 +11,11 @@ import type {
   EuiContextMenuPanelDescriptor,
   EuiContextMenuPanelItemDescriptor,
 } from '@elastic/eui';
-import { useEuiTheme, EuiButtonEmpty } from '@elastic/eui';
+import { EuiButtonEmpty } from '@elastic/eui';
 import { EuiPopover } from '@elastic/eui';
 import { i18n as i18nCore } from '@kbn/i18n';
 import React, { useCallback, useMemo, useState } from 'react';
-import type { FieldSpec } from '@kbn/data-views-plugin/common';
+import type { FieldSpec } from '@kbn/data-views-types';
 import type { UiCounterMetricType } from '@kbn/analytics';
 import { METRIC_TYPE } from '@kbn/analytics';
 import { CustomFieldPanel } from './custom_field_panel';
@@ -99,8 +99,6 @@ const GroupSelectorComponent = ({
       !!groupsSelected.find((selectedGroupKey) => selectedGroupKey === groupKey),
     [groupsSelected]
   );
-
-  const { euiTheme } = useEuiTheme();
 
   const panels: EuiContextMenuPanelDescriptor[] = useMemo(() => {
     const isOptionDisabled = (key?: string) => {
@@ -253,7 +251,6 @@ const GroupSelectorComponent = ({
         data-test-subj="groupByContextMenu"
         initialPanelId="firstPanel"
         panels={panels}
-        border={euiTheme.border}
       />
     </EuiPopover>
   );

@@ -12,6 +12,7 @@ import {
   type ConnectorContractUnion,
   toCustomTriggerSchemaConfigs,
   type ValidateWorkflowResponseDto,
+  WORKFLOWS_CORE_SELF_CLIENT_ENABLED_FLAG,
 } from '@kbn/workflows';
 import type { GetAvailableConnectorsResponse } from '@kbn/workflows/types/v1';
 import type { ServerTriggerDefinition } from '@kbn/workflows-extensions/server';
@@ -79,8 +80,12 @@ export class WorkflowValidationService {
       allConnectors,
       toCustomTriggerSchemaConfigs(triggerDefinitions)
     );
+    const warnIgnoredKibanaFetcher = await this.deps
+      .getCoreStart()
+      .featureFlags.getBooleanValue(WORKFLOWS_CORE_SELF_CLIENT_ENABLED_FLAG, false);
     return validateWorkflowYaml(yaml, zodSchema, {
       triggerDefinitions,
+      warnIgnoredKibanaFetcher,
       ...(includeVariableRules && {
         variableValidationRegistry: this.createContextRegistry(allConnectors),
       }),
