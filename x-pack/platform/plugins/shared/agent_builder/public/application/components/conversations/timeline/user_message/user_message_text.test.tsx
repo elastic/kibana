@@ -6,15 +6,56 @@
  */
 
 import React from 'react';
-import { render, screen, fireEvent } from '@testing-library/react';
+import { render, screen, fireEvent, within } from '@testing-library/react';
 import { EuiProvider } from '@elastic/eui';
+import { I18nProvider } from '@kbn/i18n-react';
+import { useKibana } from '../../../../hooks/use_kibana';
+import { useConversationContext } from '../../../../context/conversation/conversation_context';
 import { UserMessageText } from './user_message_text';
 
+jest.mock('../../../../hooks/use_kibana', () => ({
+  useKibana: jest.fn(),
+}));
+
+jest.mock('../../../../context/conversation/conversation_context', () => ({
+  useConversationContext: jest.fn(),
+}));
+
+const mockUseKibana = jest.mocked(useKibana);
+const mockUseConversationContext = jest.mocked(useConversationContext);
+
+const navigateToUrl = jest.fn();
+const reportEvent = jest.fn();
+const isInternalUrl = (url: string) =>
+  new URL(url, window.location.href).origin === window.location.origin;
+
 const renderWithProvider = (ui: React.ReactElement) => {
-  return render(<EuiProvider>{ui}</EuiProvider>);
+  return render(
+    <I18nProvider>
+      <EuiProvider>{ui}</EuiProvider>
+    </I18nProvider>
+  );
+};
+
+const mockConversationContext = (isEmbeddedContext: boolean) => {
+  mockUseConversationContext.mockReturnValue({
+    isEmbeddedContext,
+  } as ReturnType<typeof useConversationContext>);
 };
 
 describe('UserMessageText', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+    mockUseKibana.mockReturnValue({
+      services: {
+        http: { externalUrl: { isInternalUrl } },
+        application: { navigateToUrl },
+        analytics: { reportEvent },
+      },
+    } as unknown as ReturnType<typeof useKibana>);
+    mockConversationContext(false);
+  });
+
   describe('plain text', () => {
     it('renders plain text without badges', () => {
       renderWithProvider(<UserMessageText text="hello world" />);
@@ -120,17 +161,83 @@ describe('UserMessageText', () => {
   });
 
   describe('plain links', () => {
-    it('renders a real link that opens in a new tab without a confirmation modal', () => {
+    it('renders a real link that opens in a new tab', () => {
       renderWithProvider(<UserMessageText text="Check out [Elastic](https://www.elastic.co)." />);
 
       const link = screen.getByRole('link', { name: 'Elastic' });
       expect(link).toHaveAttribute('href', 'https://www.elastic.co');
       expect(link).toHaveAttribute('target', '_blank');
       expect(link).toHaveAttribute('rel', expect.stringContaining('noreferrer'));
-      fireEvent.click(link);
-      // No confirmation dialog should appear — clicking is a no-op in jsdom, but nothing should throw
-      // or render a modal.
-      expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
+    });
+
+    it('shows the external link confirmation modal when clicking an external link', () => {
+      renderWithProvider(<UserMessageText text="Check out [Elastic](https://www.elastic.co)." />);
+
+      const link = screen.getByRole('link', { name: 'Elastic' });
+      const notPrevented = fireEvent.click(link);
+
+      expect(notPrevented).toBe(false);
+      const dialog = screen.getByRole('alertdialog');
+      expect(within(dialog).getByText('https://www.elastic.co')).toBeInTheDocument();
+      expect(navigateToUrl).not.toHaveBeenCalled();
+    });
+
+    it('closes the modal without opening the link when cancelled', () => {
+      const openSpy = jest.spyOn(window, 'open').mockImplementation(() => null);
+      renderWithProvider(<UserMessageText text="[Elastic](https://www.elastic.co)" />);
+
+      fireEvent.click(screen.getByRole('link', { name: 'Elastic' }));
+      fireEvent.click(screen.getByRole('button', { name: 'Cancel' }));
+
+      expect(screen.queryByRole('alertdialog')).not.toBeInTheDocument();
+      expect(openSpy).not.toHaveBeenCalled();
+      openSpy.mockRestore();
+    });
+
+    it('opens the link in a new tab when confirmed', () => {
+      const openSpy = jest.spyOn(window, 'open').mockImplementation(() => null);
+      renderWithProvider(<UserMessageText text="[Elastic](https://www.elastic.co)" />);
+
+      fireEvent.click(screen.getByRole('link', { name: 'Elastic' }));
+      fireEvent.click(screen.getByRole('button', { name: 'Open in new tab' }));
+
+      expect(openSpy).toHaveBeenCalledWith('https://www.elastic.co', '_blank', 'noreferrer');
+      expect(screen.queryByRole('alertdialog')).not.toBeInTheDocument();
+      openSpy.mockRestore();
+    });
+
+    it('treats protocol-relative links as external', () => {
+      renderWithProvider(<UserMessageText text="[Other host](//example.com/path)" />);
+
+      const notPrevented = fireEvent.click(screen.getByRole('link', { name: 'Other host' }));
+
+      expect(notPrevented).toBe(false);
+      expect(
+        within(screen.getByRole('alertdialog')).getByText('//example.com/path')
+      ).toBeInTheDocument();
+    });
+
+    it('lets target="_blank" handle internal links on the full page', () => {
+      const href = `${window.location.origin}/app/dashboards`;
+      renderWithProvider(<UserMessageText text={`[Dashboards](${href})`} />);
+
+      const notPrevented = fireEvent.click(screen.getByRole('link', { name: 'Dashboards' }));
+
+      expect(notPrevented).toBe(true);
+      expect(navigateToUrl).not.toHaveBeenCalled();
+      expect(screen.queryByRole('alertdialog')).not.toBeInTheDocument();
+    });
+
+    it('navigates in the current window for internal links in the sidebar', () => {
+      mockConversationContext(true);
+      const href = `${window.location.origin}/app/dashboards`;
+      renderWithProvider(<UserMessageText text={`[Dashboards](${href})`} />);
+
+      const notPrevented = fireEvent.click(screen.getByRole('link', { name: 'Dashboards' }));
+
+      expect(notPrevented).toBe(false);
+      expect(navigateToUrl).toHaveBeenCalledWith(href);
+      expect(screen.queryByRole('alertdialog')).not.toBeInTheDocument();
     });
 
     it('falls back to literal text for a disallowed URL scheme', () => {
@@ -147,6 +254,14 @@ describe('UserMessageText', () => {
 
       expect(screen.getByText('/Summarize')).toBeInTheDocument();
       expect(screen.queryByRole('link')).not.toBeInTheDocument();
+    });
+
+    it('does not show the external link modal when clicking a badge', () => {
+      renderWithProvider(<UserMessageText text="[/Summarize](skill://skill-1)" />);
+
+      fireEvent.click(screen.getByText('/Summarize'));
+
+      expect(screen.queryByRole('alertdialog')).not.toBeInTheDocument();
     });
 
     it('renders mixed text and command badges', () => {

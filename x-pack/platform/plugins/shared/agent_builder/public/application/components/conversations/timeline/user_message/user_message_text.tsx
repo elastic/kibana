@@ -7,6 +7,7 @@
 
 import React from 'react';
 import { EuiMarkdownFormat } from '@elastic/eui';
+import { useMarkdownLinkClick } from '../response/use_markdown_link_click';
 import { useUserMessageMarkdownPlugins } from './user_message_markdown_plugins';
 
 interface UserMessageTextProps {
@@ -15,19 +16,25 @@ interface UserMessageTextProps {
 }
 
 export const UserMessageText: React.FC<UserMessageTextProps> = ({ text, onHoverImage }) => {
+  const { handleLinkClick, externalLinkModal } = useMarkdownLinkClick();
+
   const { parsingPluginList, processingPluginList, styles } = useUserMessageMarkdownPlugins({
     onHoverImage,
+    onLinkClick: handleLinkClick,
   });
 
   return (
-    <div css={styles.container}>
-      <EuiMarkdownFormat
-        textSize="s"
-        parsingPluginList={parsingPluginList}
-        processingPluginList={processingPluginList}
-      >
-        {text}
-      </EuiMarkdownFormat>
-    </div>
+    <>
+      <div css={styles.container}>
+        <EuiMarkdownFormat
+          textSize="s"
+          parsingPluginList={parsingPluginList}
+          processingPluginList={processingPluginList}
+        >
+          {text}
+        </EuiMarkdownFormat>
+      </div>
+      {externalLinkModal}
+    </>
   );
 };

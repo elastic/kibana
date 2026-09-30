@@ -6,7 +6,7 @@
  */
 
 import { css } from '@emotion/css';
-import React, { useMemo, useState, useCallback } from 'react';
+import React, { useMemo } from 'react';
 import {
   EuiCodeBlock,
   EuiTable,
@@ -47,7 +47,7 @@ import {
 } from './markdown_plugins';
 import { useStepsFromSavedTurns } from '../../../../hooks/use_steps_from_saved_turns';
 import { useConversationContext } from '../../../../context/conversation/conversation_context';
-import { ExternalLinkModal } from './external_link_modal';
+import { useMarkdownLinkClick } from './use_markdown_link_click';
 
 interface Props {
   content: string;
@@ -98,24 +98,7 @@ export function ChatMessageText({
     services: { http, application, uiSettings },
   } = useKibana();
 
-  const [pendingExternalUrl, setPendingExternalUrl] = useState<string | null>(null);
-
-  const handleLinkClick = useCallback(
-    (href: string, e: React.MouseEvent) => {
-      const internal = http?.externalUrl?.isInternalUrl(href);
-      if (!internal) {
-        // External links always show the confirmation modal
-        e.preventDefault();
-        setPendingExternalUrl(href);
-      } else if (isSidebar) {
-        // Internal link in flyout: navigate in current window
-        e.preventDefault();
-        application.navigateToUrl(new URL(href, window.location.href).toString());
-      }
-      // Internal link in full page: target="_blank" handles navigation
-    },
-    [isSidebar, http?.externalUrl, application]
-  );
+  const { handleLinkClick, externalLinkModal } = useMarkdownLinkClick();
 
   const visualizationRenderer = useMemo(
     () =>
@@ -269,7 +252,7 @@ export function ChatMessageText({
           {content}
         </EuiMarkdownFormat>
       </EuiText>
-      <ExternalLinkModal url={pendingExternalUrl} onClose={() => setPendingExternalUrl(null)} />
+      {externalLinkModal}
     </>
   );
 }

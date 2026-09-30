@@ -16,10 +16,7 @@ import {
 import type { PluggableList } from 'unified';
 import { sortedCommandDefinitions } from '../../conversation_input/message_editor/command_menu';
 import { IMAGE_ATTACHMENT_SCHEME } from '../../conversation_input/message_editor/image_placeholder';
-import {
-  useUserMessageTextStyles,
-  type UserMessageTextStyles,
-} from './user_message_text.styles';
+import { useUserMessageTextStyles, type UserMessageTextStyles } from './user_message_text.styles';
 
 // Badges are serialized as markdown links, e.g. `[/Summarize](skill://skill-1)`. EUI's markdown
 // parser only allows http(s)/mailto links by default and rewrites anything else back to literal
@@ -52,6 +49,7 @@ export const decodeBadgeName = (path: string): string => {
 
 interface UseUserMessageMarkdownPluginsArgs {
   onHoverImage?: (name: string | null) => void;
+  onLinkClick?: (href: string, e: React.MouseEvent<HTMLAnchorElement>) => void;
 }
 
 interface UserMessageMarkdownPlugins {
@@ -63,10 +61,12 @@ interface UserMessageMarkdownPlugins {
 /**
  * Builds the parsing/processing plugin lists that make `EuiMarkdownFormat` render user message
  * text: badge schemes are allow-listed as links, and a custom `a` renderer turns those links back
- * into badges (image / command) while everything else opens as a plain link in a new tab.
+ * into badges (image / command) while everything else renders as a plain link whose clicks are
+ * delegated to `onLinkClick`.
  */
 export const useUserMessageMarkdownPlugins = ({
   onHoverImage,
+  onLinkClick,
 }: UseUserMessageMarkdownPluginsArgs = {}): UserMessageMarkdownPlugins => {
   const styles = useUserMessageTextStyles();
 
@@ -120,7 +120,16 @@ export const useUserMessageMarkdownPlugins = ({
         }
 
         return (
-          <EuiLink {...rest} href={href} target="_blank" rel="noreferrer" external={false}>
+          <EuiLink
+            {...rest}
+            href={href}
+            target="_blank"
+            rel="noreferrer"
+            external={false}
+            onClick={(e: React.MouseEvent<HTMLAnchorElement>) => {
+              if (href && onLinkClick) onLinkClick(href, e);
+            }}
+          >
             {children}
           </EuiLink>
         );
@@ -134,7 +143,7 @@ export const useUserMessageMarkdownPlugins = ({
         [rehypeToReactPlugin, rehypeToReactOptions],
       ] as PluggableList,
     };
-  }, [styles, onHoverImage]);
+  }, [styles, onHoverImage, onLinkClick]);
 
   return { parsingPluginList, processingPluginList, styles };
 };

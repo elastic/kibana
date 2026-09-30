@@ -88,7 +88,8 @@ export const Blockquote: Story = {
 
 export const PlainLink: Story = {
   args: {
-    input: 'Check out [Elastic](https://www.elastic.co) for more. Opens in a new tab, no modal.',
+    input:
+      'Check out [Elastic](https://www.elastic.co) for more. External links ask for confirmation before opening in a new tab.',
   },
 };
 
