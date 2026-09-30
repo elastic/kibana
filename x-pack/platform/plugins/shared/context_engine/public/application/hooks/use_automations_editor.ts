@@ -22,7 +22,7 @@ export interface UseAutomationsEditorResult {
   isSaving: boolean;
   isCreating: boolean;
   isBusy: boolean;
-  deleteAutomation: (value: string) => Promise<void>;
+  deleteAutomation: (value: string) => Promise<boolean>;
   /** Resolves with the new workflow id once it is attached and persisted. */
   createAndAttach: () => Promise<string | undefined>;
 }
@@ -66,7 +66,7 @@ export const useAutomationsEditor = ({
 
   const deleteAutomation = useCallback(
     async (value: string) => {
-      await persist(automations.filter((automation) => automation.value !== value));
+      return persist(automations.filter((automation) => automation.value !== value));
     },
     [automations, persist]
   );

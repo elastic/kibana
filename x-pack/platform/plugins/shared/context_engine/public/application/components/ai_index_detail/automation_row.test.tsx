@@ -39,7 +39,7 @@ jest.mock('./automation_delete_confirm_modal', () => ({
   }: {
     name: string;
     onCancel: () => void;
-    onConfirm: () => Promise<void>;
+    onConfirm: () => Promise<boolean | void>;
   }) => (
     <div data-test-subj="contextAutomationDeleteConfirmModalStub">
       <button type="button" onClick={onCancel}>
@@ -73,7 +73,7 @@ const createDefaultProps = (
   editHref: '/app/workflows/workflow-1',
   isReadOnly: false,
   isDisabled: false,
-  onDelete: jest.fn().mockResolvedValue(undefined),
+  onDelete: jest.fn().mockResolvedValue(true),
   ...overrides,
 });
 
@@ -189,6 +189,18 @@ describe('AutomationRow', () => {
       expect(onDelete).toHaveBeenCalledTimes(1);
     });
     expect(screen.queryByTestId('contextAutomationDeleteConfirmModalStub')).not.toBeInTheDocument();
+  });
+
+  it('keeps the modal open when onDelete reports a failed save', async () => {
+    renderAutomationRow({ onDelete: jest.fn().mockResolvedValue(false) });
+
+    openActionsMenu();
+    fireEvent.click(screen.getByTestId('contextRemoveAutomationButton'));
+    fireEvent.click(screen.getByRole('button', { name: 'Confirm' }));
+
+    await waitFor(() => {
+      expect(screen.getByTestId('contextAutomationDeleteConfirmModalStub')).toBeInTheDocument();
+    });
   });
 
   it('does not call onDelete and closes the modal when delete is cancelled', () => {

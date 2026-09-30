@@ -90,10 +90,12 @@ describe('useAutomationsEditor', () => {
   it('deletes an automation and notifies on save', async () => {
     const { result, onSaved } = renderEditor();
 
+    let deleted: boolean | undefined;
     await act(async () => {
-      await result.current.deleteAutomation('wf-saved');
+      deleted = await result.current.deleteAutomation('wf-saved');
     });
 
+    expect(deleted).toBe(true);
     expect(mockSaveAutomations).toHaveBeenCalledWith(aiIndex, []);
     expect(onSaved).toHaveBeenCalledTimes(1);
   });
@@ -102,20 +104,24 @@ describe('useAutomationsEditor', () => {
     mockSaveAutomations.mockResolvedValueOnce(false);
     const { result, onSaved } = renderEditor();
 
+    let deleted: boolean | undefined;
     await act(async () => {
-      await result.current.deleteAutomation('wf-saved');
+      deleted = await result.current.deleteAutomation('wf-saved');
     });
 
+    expect(deleted).toBe(false);
     expect(onSaved).not.toHaveBeenCalled();
   });
 
   it('does not delete when the AI index has not loaded yet', async () => {
     const { result } = renderEditor({ index: undefined });
 
+    let deleted: boolean | undefined;
     await act(async () => {
-      await result.current.deleteAutomation('wf-saved');
+      deleted = await result.current.deleteAutomation('wf-saved');
     });
 
+    expect(deleted).toBe(false);
     expect(mockSaveAutomations).not.toHaveBeenCalled();
   });
 

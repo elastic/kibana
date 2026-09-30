@@ -33,7 +33,7 @@ interface AutomationRowProps {
   editHref: string;
   isReadOnly: boolean;
   isDisabled: boolean;
-  onDelete: () => Promise<void>;
+  onDelete: () => Promise<boolean>;
 }
 
 export const AutomationRow = ({
@@ -133,8 +133,10 @@ export const AutomationRow = ({
           name={displayName}
           onCancel={() => setIsDeleteModalOpen(false)}
           onConfirm={async () => {
-            await onDelete();
-            setIsDeleteModalOpen(false);
+            const saved = await onDelete();
+            if (saved) {
+              setIsDeleteModalOpen(false);
+            }
           }}
         />
       ) : null}
