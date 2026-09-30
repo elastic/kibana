@@ -4,7 +4,7 @@ Outcome eval for the Attack Discovery FP/TP analysis ([security-team#19285](http
 
 ## What it runs
 
-Until the managed analysis workflow ships ([security-team#19282](https://github.com/elastic/security-team/issues/19282)), the suite installs `src/sample_workflow/fp_tp_analysis.yaml` for the run and deletes it afterwards. The sample follows the contract's inputs, evidence sources, checks, and output shape, but it has **no claim-verification gate**: the verdict it returns is the model's proposal as-is. Its scores measure the prompt, not the product.
+The suite runs the managed analysis workflow (`system-security-attack-discovery-fp-tp-analysis`, [security-team#19282](https://github.com/elastic/security-team/issues/19282)). The temporary sample workflow it used before the managed one shipped has been removed; prompt changes happen in the managed definition now.
 
 The workflow's `ai.agent` step runs `alertzero-thin-agent` with no tools and resolves its connector from the `alertzero_reasoning` inference feature. `beforeAll` routes that feature to the model under test and restores the previous inference settings in `afterAll`.
 
@@ -46,7 +46,6 @@ src/
     types.ts              FpTpScenario, FpTpExample, FpTpSituation, FpTpEvidenceState
     registry.test.ts      Invariants every scenario must hold
     encoded_powershell/   One authored scenario: ids, attack, entities, event overlays, gold, examples
-  sample_workflow/        The workflow under test until #19282 ships
   workflow_task.ts        Runs the workflow and reads its output
   evaluators.ts
 ```
@@ -87,12 +86,12 @@ Run with `--repetitions 5` or more. Each repetition is a separate run in the rep
 ## Acceptance criteria (proposed)
 
 - Hard gates on the core models: `PayloadConformance` = 1.0 and `UnsafeClose` = 1.0.
-- `OutcomeAccuracy`: record the sample workflow's numbers as the baseline #19282 has to beat, then set a threshold.
+- `OutcomeAccuracy`: set a threshold from the current baseline once the managed workflow's numbers are stable.
 
 ## Switching to the managed workflow (after #19282)
 
 1. Set `FP_TP_WORKFLOW_SOURCE` in `src/constants.ts` to `managed`.
-2. Delete `src/sample_workflow/` and the install and delete calls around it in the spec.
+2. ~~Delete `src/sample_workflow/`~~ — done; the suite runs the managed workflow.
 3. Add the claim-grounding evaluator.
 
 The suite is not yet wired into the weekly Buildkite sweep (`.buildkite/pipelines/evals/llm_evals.yml`); that step is deferred until a baseline eval run exists on this branch's prompt fixes. Until then it can be run on demand through the `evals:security-attack-discovery-fp-tp` PR label. Switching to the managed workflow does not require any change to that eventual weekly step — it just changes which workflow the schedule exercises once the step exists.
