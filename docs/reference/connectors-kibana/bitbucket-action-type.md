@@ -16,6 +16,10 @@ The Bitbucket connector lets a workflow or agent drive the pull request, branch,
 - Report external check results back onto a commit as build statuses.
 - Trigger, poll, and stop Bitbucket Pipelines runs.
 
+::::{note}
+This connector is currently available in **Agent Builder** only. Workflow support is planned for a future release.
+::::
+
 ## Overview
 
 The connector calls the [Bitbucket Cloud REST API 2.0](https://developer.atlassian.com/cloud/bitbucket/rest/) directly. Every action runs against the workspace configured on the connector, and repositories are addressed by their slug. Bitbucket Server and Data Center are not supported.

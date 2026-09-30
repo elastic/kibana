@@ -112,6 +112,31 @@ describe('Bitbucket', () => {
     ).rejects.toThrow('Bitbucket getBranch failed (status 404): Not found - No such branch');
   });
 
+  it('falls back to err.message when the error body has no Bitbucket error shape', async () => {
+    mockClient.get.mockRejectedValue({
+      message: 'Request failed with status code 500',
+      response: { status: 500, data: 'internal server error' },
+    });
+    await expect(
+      Bitbucket.actions.getBranch.handler(
+        mockContext,
+        parse('getBranch', { repoSlug: 'my-repo', name: 'nope' })
+      )
+    ).rejects.toThrow(
+      'Bitbucket getBranch failed (status 500): Request failed with status code 500'
+    );
+  });
+
+  it('falls back to a fixed message on a transport failure with no response and no message', async () => {
+    mockClient.get.mockRejectedValue({});
+    await expect(
+      Bitbucket.actions.getBranch.handler(
+        mockContext,
+        parse('getBranch', { repoSlug: 'my-repo', name: 'nope' })
+      )
+    ).rejects.toThrow('Bitbucket getBranch failed (status unknown): Unknown error');
+  });
+
   describe('listRepositories', () => {
     it('lists repositories in the configured workspace with filters', async () => {
       mockClient.get.mockResolvedValue({
@@ -237,6 +262,23 @@ describe('Bitbucket', () => {
         close_source_branch: undefined,
         draft: undefined,
       });
+    });
+
+    it('rejects a title over the 500 character bound, including a non-ASCII title', () => {
+      expect(() =>
+        parse('createPullRequest', {
+          repoSlug: 'my-repo',
+          title: 'a'.repeat(501),
+          sourceBranch: 'b',
+        })
+      ).toThrow();
+      expect(() =>
+        parse('createPullRequest', {
+          repoSlug: 'my-repo',
+          title: '\u{1F600}'.repeat(501),
+          sourceBranch: 'b',
+        })
+      ).toThrow();
     });
   });
 

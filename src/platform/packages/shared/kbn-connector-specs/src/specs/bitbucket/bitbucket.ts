@@ -102,7 +102,13 @@ const withBraces = (uuid: string): string => {
 const formatBitbucketError = (action: string, error: unknown): Error => {
   const err = error as AxiosError<{ error?: { message?: string; detail?: string } }>;
   const apiError = err.response?.data?.error;
-  const detail = [apiError?.message, apiError?.detail].filter(Boolean).join(' - ') || err.message;
+  // A transport-level failure (network error, timeout, DNS failure) has no `response`,
+  // and a non-JSON or empty error body has no `apiError`. Fall back to `err.message`,
+  // and finally to a fixed string so the connector never surfaces a bare "undefined".
+  const detail =
+    [apiError?.message, apiError?.detail].filter(Boolean).join(' - ') ||
+    err.message ||
+    'Unknown error';
   return new Error(
     `Bitbucket ${action} failed (status ${err.response?.status ?? 'unknown'}): ${detail}`
   );
