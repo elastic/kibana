@@ -232,13 +232,41 @@ describe('Import rules route', () => {
     );
     actions.mockResolvedValue({ validatedActionRules: rules, missingActionErrors: [] });
     responseActions.mockResolvedValue({ valid: rules, errors: [] });
-    clients.detectionRulesClient.importRules.mockResolvedValue({
-      successes: [],
-      errors: [],
-    });
+    clients.detectionRulesClient.importRules
+      .mockResolvedValueOnce({
+        successes: [
+          {
+            rule_id: 'rule-0',
+            telemetry: { id: 'id-0', type: 'query', rule_source: { type: 'internal' } },
+          },
+        ],
+        errors: [createRuleImportErrorObject({ ruleId: 'rule-1', message: 'first batch' })],
+      })
+      .mockResolvedValueOnce({
+        successes: [
+          {
+            rule_id: `rule-${RULE_IMPORT_BATCH_SIZE}`,
+            telemetry: { id: 'id-last', type: 'query', rule_source: { type: 'internal' } },
+          },
+        ],
+        errors: [
+          createRuleImportErrorObject({
+            ruleId: 'rule-2',
+            message: 'second batch',
+            type: 'conflict',
+          }),
+        ],
+      });
 
-    await inject();
+    const response = await inject();
 
+    expect(response.status).toEqual(200);
+    expect(response.body.success).toEqual(false);
+    expect(response.body.success_count).toEqual(2);
+    expect(response.body.errors).toEqual([
+      { rule_id: 'rule-1', error: { status_code: 400, message: 'first batch' } },
+      { rule_id: 'rule-2', error: { status_code: 409, message: 'second batch' } },
+    ]);
     expect(clients.detectionRulesClient.importRules).toHaveBeenCalledTimes(2);
     expect(clients.detectionRulesClient.importRules.mock.calls[0][0].rules).toHaveLength(
       RULE_IMPORT_BATCH_SIZE
