@@ -52,7 +52,6 @@ const flushPromises = () => new Promise((resolve) => setTimeout(resolve));
 const createWorkspaceMock = () =>
   ({
     mergeGraph: jest.fn(),
-    fillConnections: jest.fn(),
     simpleSearch: jest.fn(),
     search: jest.fn(),
     callElasticsearch: jest.fn(),
