@@ -406,6 +406,8 @@ export class AlertZeroPublicPlugin
       navigation: {
         share: startDeps.share,
         spaceId,
+        prependPath: (path) => core.http.basePath.prepend(path),
+        getUrlForApp: core.application.getUrlForApp,
       },
     }).catch((error) => {
       this.logger.error('Failed to register AlertZero attachment UI definitions', error);

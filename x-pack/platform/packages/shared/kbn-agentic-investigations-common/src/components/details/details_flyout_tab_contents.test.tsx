@@ -41,6 +41,7 @@ const attachmentsService = {
   getAttachmentUiDefinition: () => ({
     getLabel: () => 'Session cookie replayed',
     getIcon: () => 'bell',
+    renderConversationDetailsContent: () => <div>Session cookie replayed</div>,
   }),
 } as unknown as AttachmentServiceStartContract;
 

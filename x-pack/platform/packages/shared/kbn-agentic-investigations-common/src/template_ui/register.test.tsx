@@ -22,6 +22,7 @@ import {
   registerEscalationTemplateUI,
 } from './register';
 import type { RenderAssignees, RenderLinkedInvestigations } from './types';
+import { ACTIONS_TRANSLATIONS } from '../components/actions/translations';
 
 const conversation: Conversation = {
   id: 'conversation-1',
@@ -234,6 +235,20 @@ describe('registerAgenticInvestigationTemplateUI', () => {
       agentId: 'agent',
       openDetails: true,
     });
+  });
+
+  it('hides the footer slot Open in chat when the flyout was opened from within chat', async () => {
+    const { contract } = createFakeService();
+    // The escalation button loads on the same lazy chunk as Open in chat; wiring one in gives a
+    // reliable element to await, so the assertion below cannot pass merely because the chunk
+    // has not resolved yet (the Suspense fallback is `null`).
+    register(contract, { renderEscalationModal: jest.fn(() => <div>Escalation modal</div>) });
+    const Footer = getSlot(contract, 'investigation', 'footer');
+
+    renderWithKibanaRenderContext(<Footer conversation={conversation} isOpenedFromChat />);
+
+    await screen.findByText(ACTIONS_TRANSLATIONS.buttons.openEscalation);
+    expect(screen.queryByTestId('investigationFlyoutOpenChat')).not.toBeInTheDocument();
   });
 
   it('calls renderAssignees with the conversation id, templateId, uids, and refetchConversation', async () => {

@@ -1,8 +1,0 @@
-{
-  "type": "shared-common",
-  "id": "@kbn/nightshift-decision-trees",
-  "owner": ["@elastic/nightshift-investigations-team"],
-  "group": "platform",
-  "visibility": "shared",
-  "description": "Mermaid decision-tree parsing, prompts and submission guardrails shared by the Nightshift reinforcement agent and its evals"
-}

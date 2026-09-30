@@ -26,7 +26,4 @@ export const ESCALATIONS_PAGE_INFO = Object.freeze({
   assignSuccess: i18n.translate('xpack.alertzero.escalationsPage.assignSuccess', {
     defaultMessage: 'Assignees updated',
   }),
-  flyoutTitle: i18n.translate('xpack.alertzero.escalationsPage.flyoutTitle', {
-    defaultMessage: 'Escalation',
-  }),
 });

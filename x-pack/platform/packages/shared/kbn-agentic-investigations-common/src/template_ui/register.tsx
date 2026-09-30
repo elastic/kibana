@@ -161,10 +161,11 @@ export const registerAgenticInvestigationTemplateUI = ({
             </Suspense>
           );
         },
-        footer: function InvestigationFlyoutFooter({ conversation }) {
+        footer: function InvestigationFlyoutFooter({ conversation, isOpenedFromChat }) {
           return (
             <Suspense fallback={null}>
               <LazyFooterSlot
+                isOpenedFromChat={isOpenedFromChat}
                 conversation={conversation}
                 // Full screen rather than the sidebar: the chat is the investigation's own record,
                 // so it gets the whole page instead of a panel beside the flyout that opened it.

@@ -120,6 +120,9 @@ const mockUpdateRuleMutate = jest.fn();
 jest.mock('../../hooks/use_update_rule', () => ({
   useUpdateRule: () => ({ mutate: mockUpdateRuleMutate, isLoading: false }),
 }));
+jest.mock('../../hooks/use_is_action_policies_license_valid', () => ({
+  useIsActionPoliciesLicenseValid: () => true,
+}));
 
 const mockDeleteMutate = jest.fn();
 const mockUseDeleteRule = jest.fn();
@@ -161,7 +164,7 @@ const createRule = (overrides: Partial<RuleApiResponse> = {}): RuleApiResponse =
       tags: ['prod'],
     },
     schedule: { every: '1m' },
-    query: { format: 'standalone', breach: { query: 'FROM logs-* | LIMIT 1' } },
+    query: { base: 'FROM logs-* | LIMIT 1' },
     time_field: '@timestamp',
     createdBy: 'elastic',
     createdAt: '2026-01-01T00:00:00.000Z',
@@ -175,9 +178,9 @@ const mockRules: RuleApiResponse[] = [
   createRule({
     id: 'rule-2',
     enabled: false,
-    metadata: { name: 'Rule Two', tags: [] as string[], version: 1 },
+    metadata: { name: 'Rule Two', tags: [] as string[] },
     schedule: { every: '5m' },
-    query: { format: 'standalone', breach: { query: 'FROM metrics-*' } },
+    query: { base: 'FROM metrics-*' },
   }),
 ];
 
@@ -952,11 +955,11 @@ describe('RulesListPage', () => {
       const page2 = [
         createRule({
           id: 'rule-3',
-          metadata: { name: 'Rule Three', tags: [] as string[], version: 1 },
+          metadata: { name: 'Rule Three', tags: [] as string[] },
         }),
         createRule({
           id: 'rule-4',
-          metadata: { name: 'Rule Four', tags: [] as string[], version: 1 },
+          metadata: { name: 'Rule Four', tags: [] as string[] },
         }),
       ];
 

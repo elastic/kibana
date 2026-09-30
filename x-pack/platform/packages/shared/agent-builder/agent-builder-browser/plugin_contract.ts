@@ -6,6 +6,7 @@
  */
 
 import type { ComponentType, RefAttributes } from 'react';
+import type { EuiFlyoutMenuAction } from '@elastic/eui';
 import type {
   AttachmentInput,
   ConversationAttachment,
@@ -157,8 +158,8 @@ export interface OpenConversationSidebarOptions extends EmbeddableConversationPr
 }
 
 /**
- * Opens conversation details as a Flyout V2 session root so a child flyout can offer Back.
- * Callers that omit this keep the legacy flyout, which cannot host a child session.
+ * Overrides the conversation details flyout's history session.
+ * Omit it to use `CONVERSATION_DETAILS_FLYOUT_HISTORY_KEY` and the default chat-info title.
  */
 export interface OpenConversationDetailsSystemFlyout {
   /** Shared with child flyouts so Back returns to this conversation. */
@@ -174,10 +175,12 @@ export interface OpenConversationDetailsOptions {
   conversationId: string;
   onClose?: () => void;
   /**
-   * When set, the flyout starts a Flyout V2 session on `historyKey`. Other callers stay on the
-   * legacy flyout.
+   * Overrides the flyout history key and title. Omit to use
+   * `CONVERSATION_DETAILS_FLYOUT_HISTORY_KEY` and the default chat-info title.
    */
   systemFlyout?: OpenConversationDetailsSystemFlyout;
+  /** Icon buttons rendered in the flyout menu bar, before the close button (e.g. copy link). */
+  trailingActions?: EuiFlyoutMenuAction[];
 }
 
 /**
@@ -338,5 +341,9 @@ export interface AgentBuilderPluginStart {
   EmbeddableConversationInput: ComponentType<
     PublicEmbeddableConversationInputProps & RefAttributes<EmbeddableConversationInputRef>
   >;
+  /**
+   * Opens the conversation details flyout. Flyouts opened from its content stack on top of it with
+   * a Back button when opened with `session: 'start'` and `CONVERSATION_DETAILS_FLYOUT_HISTORY_KEY`.
+   */
   openConversationDetails: (options: OpenConversationDetailsOptions) => Promise<() => void>;
 }

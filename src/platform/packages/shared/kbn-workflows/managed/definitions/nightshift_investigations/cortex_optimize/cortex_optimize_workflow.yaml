@@ -32,7 +32,9 @@ triggers:
           description: Agent id that produced the round.
         tool_calls:
           type: array
-          description: Tool calls from the completed round. Unused by this workflow.
+          description: >
+            Tool calls from the completed round. Shows the optimizer which services,
+            indices, and integrations the investigator queried.
           items:
             type: object
             additionalProperties: true
@@ -47,5 +49,7 @@ steps:
       agent_id: '{{ inputs.agent_id }}'
       conversation_id: '{{ inputs.conversation_id }}'
       round_id: '{{ inputs.round_id }}'
+      # ${{ }} keeps the array. Liquid `{{ }}` stringifies it as "[object Object]…".
+      tool_calls: '${{ inputs.tool_calls }}'
     on-failure:
       continue: true

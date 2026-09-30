@@ -520,11 +520,14 @@ export class SecurityPageObject extends FtrService {
 
   async getElasticsearchRoles() {
     const roles = [];
-    await this.testSubjects.exists('rolesTable');
+    await this.testSubjects.existOrFail('rolesTable');
     await this.testSubjects.click('tablePaginationPopoverButton');
     await this.testSubjects.click('tablePagination-100-rows');
-    await this.testSubjects.exists('rolesTableLoading');
-    await this.testSubjects.exists('rolesTable');
+    // the roles grid is paginated server-side, so the click above starts a fresh request
+    await this.retry.waitFor('roles table to reload at 100 rows per page', async () => {
+      const rowsPerPage = await this.testSubjects.getVisibleText('tablePaginationPopoverButton');
+      return rowsPerPage.includes('100') && (await this.testSubjects.exists('rolesTable'));
+    });
 
     for (const role of await this.testSubjects.findAll('roleRow')) {
       const [rolename, reserved, deprecated] = await Promise.all([
