@@ -623,13 +623,20 @@ describe('DetailPanel', () => {
         />
       );
 
-      // Advance to timeout
+      // Advance to just before the timeout
       await act(async () => {
-        vi.advanceTimersByTime(POLL_TIMEOUT_MS);
+        vi.advanceTimersByTime(POLL_TIMEOUT_MS - 1);
       });
 
-      // Should have polled 5 times (at 1s, 2s, 3s, 4s, 5s)
-      expect(getFollowerIndex).toHaveBeenCalledTimes(5);
+      // Should have polled 4 times (at 1s, 2s, 3s, 4s) and still be polling
+      expect(getFollowerIndex).toHaveBeenCalledTimes(4);
+      expect(routing.navigate).not.toHaveBeenCalled();
+
+      // Advance to the timeout. The last poll tick shares the timeout's deadline, and the order
+      // of timers with the same deadline is an implementation detail of the timer queue.
+      await act(async () => {
+        vi.advanceTimersByTime(1);
+      });
 
       // Should clear URL param
       expect(routing.navigate).toHaveBeenCalledWith('/follower_indices', {

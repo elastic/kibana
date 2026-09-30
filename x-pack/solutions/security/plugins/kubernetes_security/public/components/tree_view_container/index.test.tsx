@@ -14,6 +14,8 @@ import type { AppContextTestRender } from '../../test';
 import { createAppRootMockRenderer } from '../../test';
 import * as context from './contexts';
 
+const actualContext = await vi.importActual<typeof context>('./contexts');
+
 describe('TreeNav component', () => {
   let render: () => ReturnType<AppContextTestRender['render']>;
   let renderResult: ReturnType<typeof render>;
@@ -37,8 +39,8 @@ describe('TreeNav component', () => {
   });
 
   it('shows empty message when there is no results', () => {
-    spy.mockImplementation(async () => ({
-      ...(await vi.importActual('./contexts')).useTreeViewContext,
+    spy.mockImplementation(() => ({
+      ...actualContext.useTreeViewContext,
       noResults: true,
       treeNavSelection: {},
     }));

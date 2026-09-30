@@ -98,26 +98,3 @@ export const createMockMonacoEditor = (
     model,
   };
 };
-
-/**
- * A mock `@kbn/monaco` module to be used with `jest.mock('@kbn/monaco', () => mockMonacoModule)`.
- * Stubs the `Range` constructor so tests do not need the real Monaco environment.
- *
- * Usage in test files:
- * ```ts
- * import { mockMonacoModule } from '../../shared/test_utils';
- * jest.mock('@kbn/monaco', () => mockMonacoModule);
- * ```
- */
-export const mockMonacoModule = {
-  ...jest.requireActual('@kbn/monaco'),
-  monaco: {
-    ...jest.requireActual<typeof import('@kbn/monaco')>('@kbn/monaco').monaco,
-    Range: jest.fn((startLine: number, startCol: number, endLine: number, endCol: number) => ({
-      startLineNumber: startLine,
-      startColumn: startCol,
-      endLineNumber: endLine,
-      endColumn: endCol,
-    })),
-  },
-};

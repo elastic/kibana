@@ -129,6 +129,9 @@ if (typeof window !== 'undefined') {
 if (typeof window !== 'undefined' && global.jsdom?.window) {
   global.AbortController = global.jsdom.window.AbortController;
   global.AbortSignal = global.jsdom.window.AbortSignal;
+  // jsdom has no BroadcastChannel; Node's leaked into Vitest's jsdom global, so helpers such as
+  // stubBroadcastChannel() (which only stubs a missing one) never installed their stub.
+  delete global.BroadcastChannel;
 }
 
 // Same as src/jest/setup/setup_test.js: jsdom 20's AbortSignal lacks throwIfAborted.
