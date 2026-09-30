@@ -288,7 +288,8 @@ export class CasePlugin
           this.caseConfig,
           workflowRunService && getWorkflowRunContext
             ? { service: workflowRunService, getSpaceId, getWorkflowRunContext }
-            : undefined
+            : undefined,
+          getAgentBuilder
         ),
       ],
       logger: this.logger,
