@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { connect, useDispatch } from 'react-redux';
+import { connect, useDispatch, useSelector } from 'react-redux';
 import { type UseEuiTheme, useEuiShadow, euiFontSize } from '@elastic/eui';
 import { css } from '@emotion/react';
 import type {
@@ -32,6 +32,7 @@ import {
   type GraphDispatch,
   liveResponseFieldsSelector,
   templatesSelector,
+  workspaceSelector,
 } from '../../state_management';
 import { SelectedNodeItem } from './selected_node_item';
 import { gphSidebarHeaderStyles } from '../../styles';
@@ -41,7 +42,6 @@ export interface TargetOptions {
 }
 
 interface ControlPanelProps {
-  renderCounter: number;
   workspace: Workspace;
   control: ControlType;
   selectedNode?: WorkspaceNode;
@@ -68,6 +68,7 @@ const ControlPanelComponent = ({
   selectSelected,
 }: ControlPanelProps & ControlPanelStateProps) => {
   const dispatch = useDispatch<GraphDispatch>();
+  useSelector(workspaceSelector);
   const hasNodes = workspace.nodes.length === 0;
 
   const openUrlTemplate = (template: UrlTemplate) => {
