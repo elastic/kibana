@@ -10,7 +10,7 @@ import { alertsMock } from '@kbn/alerting-plugin/server/mocks';
 import { SavedObjectsErrorHelpers } from '@kbn/core-saved-objects-server';
 import { searchSourceCommonMock } from '@kbn/data-plugin/common/search/search_source/mocks';
 import type { ISearchSource } from '@kbn/data-plugin/common';
-import { ALERT_GROUP } from '@kbn/rule-data-utils';
+import { ALERT_GROUP, ALERT_GROUPING } from '@kbn/rule-data-utils';
 import {
   getErrorSource,
   TaskErrorSource,
@@ -1925,6 +1925,11 @@ describe('The custom threshold alert type', () => {
                     value: 'host-0',
                   },
                 ],
+                [ALERT_GROUPING]: {
+                  host: {
+                    name: 'host-0',
+                  },
+                },
               },
             },
           ];

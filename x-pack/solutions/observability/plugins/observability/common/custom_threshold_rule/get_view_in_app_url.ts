@@ -5,7 +5,14 @@
  * 2.0.
  */
 
-import type { TimeRange } from '@kbn/es-query';
+import {
+  FilterStateStore,
+  buildCustomFilter,
+  fromKueryExpression,
+  toElasticsearchQuery,
+  type Filter,
+  type TimeRange,
+} from '@kbn/es-query';
 import { getPaddedAlertTimeRange } from '@kbn/observability-get-padded-alert-time-range-util';
 import type { LocatorPublic } from '@kbn/share-plugin/common';
 import type { DiscoverAppLocatorParams } from '@kbn/discover-plugin/common';
@@ -15,6 +22,32 @@ import { getGroupFilters } from './helpers/get_group';
 import type { SearchConfigurationWithExtractedReferenceType } from './types';
 import type { BaseMetricExpressionParams, CustomThresholdExpressionMetric } from './types';
 import type { Group } from '../typings';
+
+const getMetricFilterChips = (
+  metrics: CustomThresholdExpressionMetric[],
+  dataViewId?: string
+): Filter[] => {
+  if (!dataViewId) {
+    return [];
+  }
+
+  const metricFilters = metrics.flatMap((metric) =>
+    typeof metric.filter === 'string' && metric.filter.length > 0 ? [metric.filter] : []
+  );
+  const disabled = metricFilters.length !== 1;
+
+  return metricFilters.map((filter) =>
+    buildCustomFilter(
+      dataViewId,
+      toElasticsearchQuery(fromKueryExpression(filter)),
+      disabled,
+      false,
+      null,
+      FilterStateStore.APP_STATE
+    )
+  );
+};
+
 export interface GetViewInAppUrlArgs {
   searchConfiguration?: SearchConfigurationWithExtractedReferenceType;
   dataViewId?: string;
@@ -51,18 +84,9 @@ export const getViewInAppLocatorParams = ({
   timeRange.to = endedAt ? timeRange.to : 'now';
 
   const query = {
-    query: '',
+    query: searchConfigurationQuery ?? '',
     language: 'kuery',
   };
-  const isOneCountConditionWithFilter =
-    metrics.length === 1 && metrics[0].aggType === 'count' && metrics[0].filter;
-  if (searchConfigurationQuery && isOneCountConditionWithFilter) {
-    query.query = `${searchConfigurationQuery} and ${metrics[0].filter}`;
-  } else if (isOneCountConditionWithFilter) {
-    query.query = metrics[0].filter!;
-  } else if (searchConfigurationQuery) {
-    query.query = searchConfigurationQuery;
-  }
   let dataViewSpec;
 
   if (
@@ -78,7 +102,11 @@ export const getViewInAppLocatorParams = ({
     dataViewSpec,
     timeRange,
     query,
-    filters: [...searchConfigurationFilters, ...groupFilters],
+    filters: [
+      ...searchConfigurationFilters,
+      ...groupFilters,
+      ...getMetricFilterChips(metrics, dataViewId),
+    ],
   };
 };
 

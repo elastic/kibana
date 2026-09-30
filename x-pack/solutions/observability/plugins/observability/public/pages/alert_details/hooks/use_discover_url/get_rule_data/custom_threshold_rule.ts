@@ -5,31 +5,42 @@
  * 2.0.
  */
 
-import type { CustomThresholdParams } from '@kbn/response-ops-rule-params/custom_threshold';
 import type { Rule } from '@kbn/alerts-ui-shared';
-import type { Filter } from '@kbn/es-query';
-import {
-  FilterStateStore,
-  buildCustomFilter,
-  fromKueryExpression,
-  toElasticsearchQuery,
-} from '@kbn/es-query';
 import type { DataViewSpec } from '@kbn/data-views-plugin/common';
+import { ALERT_GROUPING, ALERT_RULE_PARAMETERS } from '@kbn/rule-data-utils';
 import { getViewInAppLocatorParams } from '../../../../../../common/custom_threshold_rule/get_view_in_app_url';
-import type { BaseMetricExpressionParams } from '../../../../../../common/custom_threshold_rule/types';
+import { getGroupsFromGroupingObject } from '../../../../../../common/custom_threshold_rule/helpers/get_group';
+import type {
+  CustomThresholdExpressionMetric,
+  SearchConfigurationWithExtractedReferenceType,
+} from '../../../../../../common/custom_threshold_rule/types';
+import type { TopAlert } from '../../../../../typings/alerts';
 
-const TIME_UNIT_CHARS: ReadonlyArray<BaseMetricExpressionParams['timeUnit']> = ['s', 'm', 'h', 'd'];
+interface SnapshotCriterion {
+  metrics?: CustomThresholdExpressionMetric[];
+}
 
-const isTimeUnitChar = (
-  timeUnit: string | undefined
-): timeUnit is BaseMetricExpressionParams['timeUnit'] =>
-  TIME_UNIT_CHARS.includes(timeUnit as BaseMetricExpressionParams['timeUnit']);
+const toCriteria = (criteria: unknown): SnapshotCriterion[] => {
+  if (Array.isArray(criteria)) {
+    return criteria as SnapshotCriterion[];
+  }
+  return criteria ? [criteria as SnapshotCriterion] : [];
+};
 
-export const getCustomThresholdRuleData = ({ rule }: { rule: Rule }) => {
-  const ruleParams = rule.params as CustomThresholdParams;
-  const firstCriterion = ruleParams.criteria[0];
-  const timeUnit = isTimeUnitChar(firstCriterion?.timeUnit) ? firstCriterion.timeUnit : undefined;
-  const { index } = ruleParams.searchConfiguration;
+export const getCustomThresholdRuleData = ({ alert }: { rule: Rule; alert: TopAlert }) => {
+  const ruleParams = alert.fields[ALERT_RULE_PARAMETERS] as
+    | {
+        searchConfiguration?: SearchConfigurationWithExtractedReferenceType;
+        criteria?: unknown;
+      }
+    | undefined;
+  const searchConfiguration = ruleParams?.searchConfiguration;
+  if (!searchConfiguration) {
+    return {};
+  }
+
+  const criteria = toCriteria(ruleParams?.criteria);
+  const { index } = searchConfiguration;
   let dataViewId: string | undefined;
   if (typeof index === 'string') {
     dataViewId = index;
@@ -37,36 +48,16 @@ export const getCustomThresholdRuleData = ({ rule }: { rule: Rule }) => {
     dataViewId = index.title;
   }
 
-  const filters = ruleParams.criteria
-    .flatMap(({ metrics }) =>
-      metrics.map((metric) => {
-        return metric.filter && dataViewId
-          ? buildCustomFilter(
-              dataViewId,
-              toElasticsearchQuery(fromKueryExpression(metric.filter)),
-              true,
-              false,
-              null,
-              FilterStateStore.APP_STATE
-            )
-          : undefined;
-      })
-    )
-    .filter((f): f is Filter => f !== undefined);
-
   return {
-    discoverAppLocatorParams: {
-      ...getViewInAppLocatorParams({
-        dataViewId,
-        searchConfiguration: {
-          index: ruleParams.searchConfiguration.index as DataViewSpec | string,
-          query: ruleParams.searchConfiguration.query,
-          filter: ruleParams.searchConfiguration.filter,
-        },
-        timeSize: firstCriterion?.timeSize,
-        timeUnit,
-      }),
-      filters,
-    },
+    discoverAppLocatorParams: getViewInAppLocatorParams({
+      dataViewId,
+      groups: getGroupsFromGroupingObject(alert.fields[ALERT_GROUPING]),
+      metrics: criteria.flatMap((criterion) => criterion.metrics ?? []),
+      searchConfiguration: {
+        index: searchConfiguration.index as DataViewSpec | string,
+        query: searchConfiguration.query,
+        filter: searchConfiguration.filter,
+      },
+    }),
   };
 };

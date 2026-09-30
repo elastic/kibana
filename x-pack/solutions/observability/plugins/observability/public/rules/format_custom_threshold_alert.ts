@@ -44,7 +44,9 @@ export const formatCustomThresholdAlert = (
     Array.isArray(criteriaRaw) ? criteriaRaw : criteriaRaw ? [criteriaRaw] : []
   ) as MetricExpression[];
   const singleCriterion = criteria.length === 1 ? criteria[0] : undefined;
-  const metrics: CustomThresholdExpressionMetric[] = singleCriterion?.metrics ?? [];
+  const metrics: CustomThresholdExpressionMetric[] = criteria.flatMap(
+    (criterion) => criterion.metrics ?? []
+  );
 
   const dataViewId = getDataViewId(searchConfiguration);
 
