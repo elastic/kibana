@@ -87,7 +87,7 @@ const buildItem = (
   policy: { id: 'policy-1', name: 'My Policy' },
   rules: [{ id: 'rule-1', name: 'My Rule' }],
   total_rule_count: 1,
-  outcome: 'dispatched',
+  outcome: 'success',
   episode_count: 3,
   episodes: [],
   action_group_count: 2,
@@ -207,7 +207,7 @@ describe('PoliciesExecutionHistoryTable', () => {
     renderTable({
       items: [
         buildItem({
-          outcome: 'dispatch_failed',
+          outcome: 'failure',
           failure_reason: 'workflow_not_found',
           error: { message: 'Workflow not found', stack_trace: null },
         }),

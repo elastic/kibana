@@ -35,6 +35,7 @@ describe('createConversationStepDefinition', () => {
     const definition = createConversationStepDefinition({
       getConversationClient: conv.getConversationClient,
       getAgentRegistry: agents.getAgentRegistry,
+      getExecutionService: jest.fn(),
       isExperimentalEnabled,
     });
     return { conv, agents, definition };
@@ -164,6 +165,7 @@ describe('createConversationStepDefinition', () => {
     const schema = createConversationStepDefinition({
       getConversationClient: jest.fn(),
       getAgentRegistry: jest.fn(),
+      getExecutionService: jest.fn(),
       isExperimentalEnabled,
     }).inputSchema;
 

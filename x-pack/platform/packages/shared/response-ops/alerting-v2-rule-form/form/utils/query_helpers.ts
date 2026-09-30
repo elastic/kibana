@@ -5,9 +5,10 @@
  * 2.0.
  */
 
-import type { RuleQuery } from '../types';
+import { recoveryStrategy } from '@kbn/alerting-v2-schemas';
+import type { RuleQuery, RuleRecovery } from '../types';
 
-const joinComposedQuerySegment = (base: string, segment: string): string => {
+const joinQuerySegment = (base: string, segment: string): string => {
   const trimmedBase = base.trim();
   const trimmedSegment = segment.trim();
 
@@ -24,15 +25,19 @@ const joinComposedQuerySegment = (base: string, segment: string): string => {
   return `${trimmedBase}\n${normalizedSegment}`;
 };
 
+/** Returns the effective breach query — `base` with the breach segment appended. */
 export const getBreachQuery = (query: RuleQuery | undefined): string => {
   if (!query) return '';
-  if (query.format === 'standalone') return query.breach.query;
-  return joinComposedQuerySegment(query.base, query.breach.segment);
+  return joinQuerySegment(query.base, query.breach.segment);
 };
 
-export const getRecoverQuery = (query: RuleQuery | undefined): string => {
-  if (!query) return '';
-  if (query.format === 'standalone') return query.recovery?.query ?? '';
-  if (!query.recovery?.segment.trim()) return '';
-  return joinComposedQuerySegment(query.base, query.recovery.segment);
+/** Returns the recovery query for the strategies that run one, otherwise an empty string. */
+export const getRecoverQuery = (
+  query: RuleQuery | undefined,
+  recovery: RuleRecovery | undefined
+): string => {
+  if (recovery?.strategy === recoveryStrategy.query) return recovery.query ?? '';
+  if (recovery?.strategy !== recoveryStrategy.condition) return '';
+  if (!query || !recovery.segment?.trim()) return '';
+  return joinQuerySegment(query.base, recovery.segment);
 };

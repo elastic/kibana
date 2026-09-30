@@ -8,6 +8,7 @@
 import type {
   ConversationRound,
   ConversationRoundStep,
+  PreExecutionWorkflowStep,
   RoundModelUsageStats,
 } from '@kbn/agent-builder-common';
 import {
@@ -100,7 +101,56 @@ describe('mergeRounds', () => {
   });
 });
 
+describe('mergeRounds — last call input tokens', () => {
+  it("keeps the resume's last call, else the previous round's", () => {
+    const previous = baseRound({
+      model_usage: { ...usage(1, 5, 5), last_call_input_tokens: 5 },
+    });
+
+    expect(
+      mergeRounds(
+        previous,
+        baseRound({ model_usage: { ...usage(1, 9, 5), last_call_input_tokens: 9 } })
+      ).model_usage.last_call_input_tokens
+    ).toBe(9);
+    expect(
+      mergeRounds(previous, baseRound({ model_usage: usage(1, 9, 5) })).model_usage
+        .last_call_input_tokens
+    ).toBe(5);
+  });
+});
+
 describe('applyResumeResolution', () => {
+  it('retains exactly the initial pre-execution workflow step after an HITL fold', () => {
+    const workflowStep: PreExecutionWorkflowStep = {
+      type: ConversationRoundStepType.preExecutionWorkflow,
+      model_context: '<system_update>original context</system_update>',
+      workflow_context: {
+        'nightshift.semantic_memory.recall': {
+          version: 1,
+          data: { recalled_ids: ['memory-original'] },
+        },
+      },
+    };
+    const previous = baseRound({
+      status: ConversationRoundStatus.awaitingPrompt,
+      input: { message: 'original request' },
+      steps: [workflowStep],
+      response: { message: '' },
+    });
+    const next = baseRound({
+      input: { message: '' },
+      response: { message: 'final answer' },
+    });
+
+    const merged = applyResumeResolution(previous, next, new Map());
+
+    expect(merged.input).toEqual(previous.input);
+    expect(
+      merged.steps.filter((step) => step.type === ConversationRoundStepType.preExecutionWorkflow)
+    ).toEqual([workflowStep]);
+  });
+
   it('answers a pending ask_user_question step from the answers map', () => {
     const previous = baseRound({
       status: ConversationRoundStatus.awaitingPrompt,

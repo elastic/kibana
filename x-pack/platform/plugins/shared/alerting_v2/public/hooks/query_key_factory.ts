@@ -28,6 +28,8 @@ export const ruleKeys = {
 
 export const ruleTemplateKeys = {
   all: ['ruleTemplate'] as const,
+  allTags: () => [...ruleTemplateKeys.all, 'tags'] as const,
+  tags: (search?: string) => [...ruleTemplateKeys.allTags(), { search }] as const,
   lists: () => [...ruleTemplateKeys.all, 'list'] as const,
   list: (filters: {
     page: number;
@@ -77,11 +79,11 @@ export const executionHistoryKeys = {
     perPage: number;
     search?: string;
     ruleIds?: string[];
-    outcome?: PolicyExecutionOutcomeFilter;
+    outcomes?: PolicyExecutionOutcomeFilter;
     episodeIds?: string[];
     from?: string;
     to?: string;
-    sort?: 'dispatchedAt';
+    sortField?: 'dispatchedAt';
     sortOrder?: 'asc' | 'desc';
   }) => [...executionHistoryKeys.all, 'list', filters] as const,
   newEventsSince: (
@@ -89,7 +91,7 @@ export const executionHistoryKeys = {
     filters: {
       search?: string;
       ruleIds?: string[];
-      outcome?: PolicyExecutionOutcomeFilter;
+      outcomes?: PolicyExecutionOutcomeFilter;
     } = {}
   ) => [...executionHistoryKeys.all, 'newEventsSince', since, filters] as const,
 };

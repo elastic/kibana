@@ -110,6 +110,16 @@ describe('getAiIndicesInstructions', () => {
     expect(instructions).not.toContain('sml_');
   });
 
+  it('limits query_ai_indices to AI Indices and routes other data to execute_esql', () => {
+    const instructions = render();
+
+    expect(instructions).toContain('`query_ai_indices` is only for AI Indices');
+    expect(instructions).toContain(
+      'Query every other index, data stream, or alias with your other data tools, such as `generate_esql` and `execute_esql`'
+    );
+    expect(instructions).toContain('This includes sources a KI points you to.');
+  });
+
   it('describes describe_ai_index as a context block to read and copy ES|QL from', () => {
     const instructions = render();
 

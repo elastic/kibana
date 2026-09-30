@@ -5,29 +5,44 @@
  * 2.0.
  */
 
+import Path from 'path';
 import type { Logger } from '@kbn/core/server';
-import type { InferenceClient } from '@kbn/inference-common';
+import type { BoundInferenceClient } from '@kbn/inference-common';
 import {
+  CORTEX_EDIT_ACTIONS,
   CORTEX_ENTITY_TYPES,
+  type CortexEditAction,
   type CortexEntityType,
-  type CortexPageStatus,
   type CortexPageSummary,
 } from '../../common/cortex';
+import type { AppliedCortexEdit, CortexTelemetry } from '../telemetry';
 import { isReinforcementOwnedSlug } from '../../common/decision_trees';
+import type { InvestigationToolCall } from '../decision_trees/accessed_trees';
+import { DECISION_TREE_WORKSPACE_ROOT } from '../decision_trees/materialize';
+import { SANDBOX_VIEW_FILE_TOOL_ID } from '../tools/sandbox_bash/view_file_tool';
+import { CORTEX_WORKSPACE_ROOT } from './materialize';
 import type { CortexPageStore } from './page_store';
-import { canonicalizeSlug, slugFromCortexId, toCortexKiId } from './page_store';
+import {
+  canonicalizeSlug,
+  slugFromCortexId,
+  statusAfterCorroboration,
+  toCortexKiId,
+} from './page_store';
 
 const MAX_TRANSCRIPT_CHARS = 12_000;
+const MAX_TOOL_CALLS_CHARS = 32_000;
+const MAX_TOOL_CALL_PARAMS_CHARS = 1_000;
+const MAX_TOOL_CALL_RESULT_CHARS = 2_000;
+const MAX_TOOL_CALL_PARAM_ARRAY_ITEMS = 20;
 const MAX_PROPOSALS = 8;
 
 export interface CortexEditProposal {
-  action: 'upsert' | 'corroborate' | 'archive';
+  action: CortexEditAction;
   entity_type: CortexEntityType;
   slug: string;
   title: string;
   description?: string;
   content?: string;
-  status?: Exclude<CortexPageStatus, 'archived'>;
 }
 
 export type ProposeCortexEdits = (input: {
@@ -38,8 +53,8 @@ export type ProposeCortexEdits = (input: {
 const isEntityType = (value: unknown): value is CortexEntityType =>
   typeof value === 'string' && (CORTEX_ENTITY_TYPES as readonly string[]).includes(value);
 
-const isAction = (value: unknown): value is CortexEditProposal['action'] =>
-  value === 'upsert' || value === 'corroborate' || value === 'archive';
+const isAction = (value: unknown): value is CortexEditAction =>
+  typeof value === 'string' && (CORTEX_EDIT_ACTIONS as readonly string[]).includes(value);
 
 const normalizeSlug = (value: string): string =>
   value
@@ -90,9 +105,6 @@ const normalizeProposal = (value: unknown): CortexEditProposal | undefined => {
     return undefined;
   }
 
-  const status =
-    record.status === 'established' || record.status === 'tentative' ? record.status : undefined;
-
   return {
     action: record.action,
     entity_type: record.entity_type,
@@ -102,16 +114,98 @@ const normalizeProposal = (value: unknown): CortexEditProposal | undefined => {
       ? { description: record.description.slice(0, 2048) }
       : {}),
     ...(typeof record.content === 'string' ? { content: record.content.slice(0, 65536) } : {}),
-    ...(status !== undefined ? { status } : {}),
   };
+};
+
+// Params can carry multi-megabyte values (e.g. file contents), so long strings and arrays are cut
+// while serializing rather than after.
+const boundToolCallParam = (_key: string, value: unknown): unknown => {
+  if (typeof value === 'string') {
+    return value.slice(0, MAX_TOOL_CALL_PARAMS_CHARS);
+  }
+  if (Array.isArray(value)) {
+    return value.slice(0, MAX_TOOL_CALL_PARAM_ARRAY_ITEMS);
+  }
+  return value;
+};
+
+const boundToolCallResult = (_key: string, value: unknown): unknown => {
+  if (typeof value === 'string') {
+    return value.slice(0, MAX_TOOL_CALL_RESULT_CHARS);
+  }
+  if (Array.isArray(value)) {
+    return value.slice(0, MAX_TOOL_CALL_PARAM_ARRAY_ITEMS);
+  }
+  return value;
+};
+
+// Nightshift writes these trees into the sandbox before the run, so reading them back is not
+// evidence, and echoing the wiki into its own optimizer would spend the budget on known pages.
+const SEEDED_WORKSPACE_ROOTS = [CORTEX_WORKSPACE_ROOT, DECISION_TREE_WORKSPACE_ROOT];
+
+const isSeededWorkspaceRead = ({ tool_id: toolId, params }: InvestigationToolCall): boolean => {
+  const filePath = params?.file_path;
+  if (toolId !== SANDBOX_VIEW_FILE_TOOL_ID || typeof filePath !== 'string') {
+    return false;
+  }
+  const resolved = Path.posix.resolve('/workspace', filePath);
+  return SEEDED_WORKSPACE_ROOTS.some((root) => resolved.startsWith(`${root}/`));
+};
+
+const renderToolResultValue = (value: unknown): string =>
+  typeof value === 'string' ? value : JSON.stringify(value, boundToolCallResult) ?? '';
+
+// Top-level string fields (e.g. `stdout`) are rendered raw so command output isn't JSON-escaped.
+const renderToolResultData = (data: unknown): string => {
+  if (typeof data !== 'object' || data === null || Array.isArray(data)) {
+    return renderToolResultValue(data);
+  }
+  return Object.entries(data)
+    .map(([key, value]) => `${key}: ${renderToolResultValue(value)}`)
+    .join('\n');
+};
+
+const renderToolCallResults = (results: unknown[]): string =>
+  results
+    .map((result) =>
+      renderToolResultData(
+        typeof result === 'object' && result !== null && 'data' in result ? result.data : result
+      )
+    )
+    .join('\n')
+    .slice(0, MAX_TOOL_CALL_RESULT_CHARS);
+
+/**
+ * Renders tool calls one per line, followed by a bounded result line when the call's results are
+ * known, dropping the tail once the transcript budget is spent.
+ */
+export const renderToolCalls = (toolCalls: InvestigationToolCall[]): string => {
+  const lines: string[] = [];
+  let used = 0;
+  for (const call of toolCalls) {
+    const { tool_id: toolId, params, results } = call;
+    const callLine = `- ${toolId ?? 'unknown'} ${JSON.stringify(
+      params ?? {},
+      boundToolCallParam
+    ).slice(0, MAX_TOOL_CALL_PARAMS_CHARS)}`;
+    const line =
+      results && !isSeededWorkspaceRead(call)
+        ? `${callLine}\n  result: ${renderToolCallResults(results)}`
+        : callLine;
+    if (used + line.length > MAX_TOOL_CALLS_CHARS) {
+      lines.push(`- (${toolCalls.length - lines.length} more tool calls omitted)`);
+      break;
+    }
+    lines.push(line);
+    used += line.length + 1;
+  }
+  return lines.length === 0 ? '(none)' : lines.join('\n');
 };
 
 export const createLlmProposeCortexEdits = ({
   inferenceClient,
-  connectorId,
 }: {
-  inferenceClient: InferenceClient;
-  connectorId: string;
+  inferenceClient: BoundInferenceClient;
 }): ProposeCortexEdits => {
   return async ({ transcript, catalog }) => {
     const catalogLines =
@@ -129,14 +223,34 @@ export const createLlmProposeCortexEdits = ({
 
     const response = await inferenceClient.output({
       id: 'nightshift_cortex_optimize',
-      connectorId,
       system: `You maintain a team-wide wiki called Cortex. After an investigation, propose a small set of durable page edits.
+
+The wiki is read before every future task — investigations, alert triage, questions — so capture facts that help any of them understand the system faster, not only facts that would solve this exact investigation again.
+
+What each entity type holds (use these markdown sections; skip ones that would be empty):
+- integration — one page per connector, data source, or external system the investigator reads from (an Elasticsearch cluster, a cross-cluster search remote, Kubernetes, GitHub, …). This includes the telemetry cluster the investigator queries: its index patterns, field conventions and quirks, and query pitfalls belong on its integration page, not on a service page. Sections: ## Overview, ## Access, ## Capabilities, ## Common pitfalls.
+- service — one page per logical or deployable service: what it does, what it depends on, where its logs, metrics, and traces live, and how it fails. Sections: ## Overview, ## Dependencies, ## Telemetry, ## Failure modes.
+- alert — one page per alert rule. Sections: ## Symptom, ## Likely causes, ## First-look checks.
+- runbook — a symptom-triggered playbook; many alerts can share one. Sections: ## Trigger, ## Investigation steps, ## Resolution.
+- query — a reusable ES|QL or DSL query. Sections: ## Purpose, ## Query (fenced code block), ## Notes.
+- dashboard — a canonical dashboard. Sections: ## URL, ## What it shows.
+- postmortem — one page per incident mechanism; a later firing of the same mechanism corroborates it. Sections: ## Incident summary, ## Root cause, ## Detection signals, ## Remediation.
+- topic — cross-cutting concepts that fit no other type. Sections: ## Overview, ## Established facts, ## Open questions.
+- glossary — a one-paragraph definition of a term or acronym.
+
+Services and integrations:
+- When the transcript establishes a durable fact about a service or an integration — what it does, what it depends on, which indices or fields hold its telemetry, how to query it, how it fails — record it on that service or integration page, not only inside a postmortem, alert, or topic. Create the page when the catalog has none.
+- The tool calls show what the investigator ran and, on the "result:" line under a call, a truncated excerpt of what it returned. Use them to learn which services, indices, and integrations were queried, how, and what the data showed. A result is evidence, not a conclusion: treat a causal claim as established only when the assistant's answer confirms it.
 
 Rules:
 - Only propose facts that the transcript actually established. No speculation.
+- Never include credentials, tokens, API keys, or personal data.
+- Keep single-run details — timestamps, alert ids, counts, uptime values — out of page content. Distil them into reusable claims.
 - Prefer corroborating an existing page over creating a near-duplicate.
 - New pages use action "upsert" with markdown content. Keep content short and reusable.
 - Use "corroborate" when the investigation confirms an existing page without changing it.
+- A slug names a recurring condition, never one occurrence of it. Never put a date, region, cloud, availability zone, cluster, node, or host in a slug — those belong in the page content. "constructor-plan-failed-capacity" is a slug; "constructor-plan-failed-capacity-aws-us-east-1-2026-09-22" is not.
+- When this investigation is another instance of a condition the catalog already documents, "corroborate" that page — and "upsert" the same slug when there is genuinely new detail to fold in. Never open a second page for the same mechanism because the date, region, or cluster differs.
 - Use "archive" only when the transcript shows a page is wrong or obsolete.
 - entity_type must be one of: ${CORTEX_ENTITY_TYPES.join(', ')}.
 - slug is a short kebab-case identifier. Reuse an existing page's slug exactly. Never prefix slug with "cortex", the entity type, or a document id.
@@ -150,13 +264,12 @@ Rules:
             items: {
               type: 'object',
               properties: {
-                action: { type: 'string', enum: ['upsert', 'corroborate', 'archive'] },
+                action: { type: 'string', enum: [...CORTEX_EDIT_ACTIONS] },
                 entity_type: { type: 'string', enum: [...CORTEX_ENTITY_TYPES] },
                 slug: { type: 'string' },
                 title: { type: 'string' },
                 description: { type: 'string' },
                 content: { type: 'string' },
-                status: { type: 'string', enum: ['established', 'tentative'] },
               },
               required: ['action', 'entity_type', 'slug', 'title'],
             },
@@ -179,54 +292,82 @@ Rules:
 export const applyCortexEdits = async ({
   store,
   edits,
+  telemetry,
   logger,
 }: {
   store: CortexPageStore;
   edits: CortexEditProposal[];
+  telemetry: CortexTelemetry;
   logger: Logger;
 }): Promise<void> => {
   const { pages } = await store.list();
-  for (const edit of edits) {
-    const slug = resolveSlug(edit, pages);
-    // The reinforcement agent validates every write to its own pages against the Mermaid node
-    // contract or the learning length budget. A free-form wiki edit would bypass those guardrails.
-    if (isReinforcementOwnedSlug(slug)) {
-      logger.debug(`Skipped Cortex edit targeting reinforcement-owned page ${slug}`);
-      continue;
-    }
-    const id = toCortexKiId(edit.entity_type, slug);
-    if (edit.action === 'corroborate') {
-      const updated = await store.corroborate(id);
-      if (updated) {
-        logger.info(`Corroborated Cortex page ${id}`);
+  const applied: AppliedCortexEdit[] = [];
+  // A run confirms a page at most once, and never one it created: promotion needs a confirmation
+  // from a later run.
+  const touchedIds = new Set<string>();
+  // Pages are mutated one at a time, so a failure part way through leaves the earlier edits
+  // persisted. Reporting from `finally` keeps the counts honest for those partial runs.
+  try {
+    for (const edit of edits) {
+      const slug = resolveSlug(edit, pages);
+      // The reinforcement agent validates every write to its own pages against the Mermaid node
+      // contract or the learning length budget. A free-form wiki edit would bypass those
+      // guardrails.
+      if (isReinforcementOwnedSlug(slug)) {
+        logger.debug(`Skipped Cortex edit targeting reinforcement-owned page ${slug}`);
+        continue;
       }
-      continue;
-    }
-
-    if (edit.action === 'archive') {
-      const updated = await store.archive(id);
-      if (updated) {
-        logger.info(`Archived Cortex page ${id}`);
+      const id = toCortexKiId(edit.entity_type, slug);
+      if (edit.action === 'corroborate') {
+        if (touchedIds.has(id)) {
+          continue;
+        }
+        const updated = await store.corroborate(id);
+        if (updated) {
+          touchedIds.add(id);
+          applied.push({ action: 'corroborate', entityType: edit.entity_type });
+          logger.info(`Corroborated Cortex page ${id}`);
+        }
+        continue;
       }
-      continue;
-    }
 
-    const existing = await store.get(id);
-    await store.upsert({
-      entityType: edit.entity_type,
-      slug,
-      title: edit.title,
-      description: edit.description ?? existing?.description,
-      content: edit.content ?? existing?.content ?? '',
-      // Same rule as corroborate: rewriting an archived page revives it as tentative, so a
-      // proposal cannot promote a retired fact straight back to established.
-      status:
-        existing?.status === 'archived'
-          ? 'tentative'
-          : edit.status ?? existing?.status ?? 'tentative',
-      corroborations: existing?.corroborations,
-    });
-    logger.info(`Upserted Cortex page ${id}`);
+      if (edit.action === 'archive') {
+        const updated = await store.archive(id);
+        if (updated) {
+          applied.push({ action: 'archive', entityType: edit.entity_type });
+          logger.info(`Archived Cortex page ${id}`);
+        }
+        continue;
+      }
+
+      const existing = await store.get(id);
+      // Rewriting a live page means this run re-established it, so it counts as a corroboration.
+      // New pages start tentative, and rewriting an archived page revives it as tentative, so a
+      // single run can never publish a fact as established. A page already touched this run keeps
+      // its status, so a page revived earlier in the run is not promoted on its old count.
+      const alreadyTouched = touchedIds.has(id);
+      const confirms = existing !== undefined && existing.status !== 'archived' && !alreadyTouched;
+      const corroborations = confirms ? existing.corroborations + 1 : existing?.corroborations;
+      touchedIds.add(id);
+      const status = !existing
+        ? 'tentative'
+        : alreadyTouched
+        ? existing.status
+        : statusAfterCorroboration(existing.status, corroborations ?? 0);
+      await store.upsert({
+        entityType: edit.entity_type,
+        slug,
+        title: edit.title,
+        description: edit.description ?? existing?.description,
+        content: edit.content ?? existing?.content ?? '',
+        status,
+        corroborations,
+      });
+      applied.push({ action: 'upsert', entityType: edit.entity_type });
+      logger.info(`Upserted Cortex page ${id}`);
+    }
+  } finally {
+    telemetry.reportEditsApplied(applied);
   }
 };
 
@@ -235,12 +376,16 @@ export const optimizeCortex = async ({
   proposeEdits,
   userMessage,
   assistantMessage,
+  toolCalls,
+  telemetry,
   logger,
 }: {
   store: CortexPageStore;
   proposeEdits: ProposeCortexEdits;
   userMessage: string;
   assistantMessage: string;
+  toolCalls: InvestigationToolCall[];
+  telemetry: CortexTelemetry;
   logger: Logger;
 }): Promise<void> => {
   await store.pruneDuplicates();
@@ -253,6 +398,9 @@ export const optimizeCortex = async ({
     '## User',
     userMessage.slice(0, MAX_TRANSCRIPT_CHARS),
     '',
+    '## Tool calls',
+    renderToolCalls(toolCalls),
+    '',
     '## Assistant',
     assistantMessage.slice(0, MAX_TRANSCRIPT_CHARS),
   ].join('\n');
@@ -263,5 +411,5 @@ export const optimizeCortex = async ({
     return;
   }
 
-  await applyCortexEdits({ store, edits, logger });
+  await applyCortexEdits({ store, edits, telemetry, logger });
 };
