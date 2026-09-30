@@ -171,7 +171,7 @@ export const unwrapUserTask = (prompt: string | undefined): string => {
   return prompt?.trim() ?? '';
 };
 
-export const MERGED_CONTENT_MAX_CHARS = 3000;
+export const MERGED_CONTENT_MAX_CHARS = 6000;
 
 export const capMergedContent = (content: string, maxChars = MERGED_CONTENT_MAX_CHARS): string => {
   if (maxChars <= 0 || content.length <= maxChars) {
@@ -453,12 +453,12 @@ The transcript is the evidence. It has the user task; the investigation, in orde
 - History stays short: give the newest observation in full, and each earlier one as a single dated line with only the numbers that show the change (e.g. "2026-09-29T19:06Z–2026-09-30T19:06Z: reinforce avg 78.6 s, p95 332.5 s"). Delete the tables of earlier observations; the content has at most one table.
 - A problem the evidence shows has stopped is written in the past tense throughout, cause included, with when it was observed and when it stopped. Write "From 2026-09-30T06:57Z to 07:30Z the host clock was 1 s behind the CA", not "The host clock runs 1 s behind the CA". Keep its signature (error text, affected component) so a recurrence is recognized, but never describe the problem or its cause as ongoing.
 - State facts only; never address the reader or give instructions (no "should be used to", "watch for").
-- Before returning, reread the content: rewrite any present-tense sentence about a problem that has stopped.
+- Before returning, reread the content: rewrite any present-tense sentence about a problem that has stopped, and replace every table except the newest observation's with one dated line per earlier observation. This applies however much room is left.
 - Compare observations from different times only when they measure the same thing the same way; otherwise state each on its own.
 - Lead with the lasting conclusion, then the dated observations that support it.
 - These rules apply to the new information as well as to the replaced memories. The note explains what changed; the rules still apply where it suggests otherwise.
 - State each fact once. Add nothing that is not in the new information, the replaced memories, or this run's tool results: no fixes or recommendations.
-- Be concise: at most 2,000 characters. Cut earlier observations and detail before cutting the conclusion or the newest observation.
+- Be concise: at most 4,000 characters. Cut earlier observations and detail before cutting the conclusion or the newest observation.
 
 Return markdown content and context.
 context is the recall key: compact, semantically rich phrases covering the union of the replaced memories' contexts and this round's task goal. Not verbatim sentences. Not a concatenation of full prompts. Not one task copied when the others differ.
