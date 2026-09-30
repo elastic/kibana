@@ -62,6 +62,12 @@ export abstract class NavigationMixin extends DiscoverAppBase {
   }
 
   async waitUntilSearchingHasFinished() {
+    // The query bar swaps `querySubmitButton` for `queryCancelButton` while a fetch is in
+    // flight. Unlike the grid and hit count indicators below, which are not rendered during
+    // a first fetch with no prior results, it is present only once the fetch has settled.
+    await expect(this.page.testSubj.locator('querySubmitButton')).toBeVisible({
+      timeout: 30_000,
+    });
     await this.dataGrid.waitForLoad();
     await this.waitUntilHitCountHasSettled();
   }
