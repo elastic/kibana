@@ -162,7 +162,9 @@ evaluate.describe(
 
             if (!replayedSnapshotKeys.has(key)) {
               // Ensure KI features index is available by replaying the snapshot once per source.
-              await cleanSignificantEventsDataStreams(esClient, log);
+              await cleanSignificantEventsDataStreams(esClient, log, {
+                includeRuleEvents: useRuleEventsRead,
+              });
               for (const name of SIGEVENTS_WIRED_ROOTS) {
                 await esClient.indices.deleteDataStream({ name }).catch(() => {});
                 await esClient.indices
@@ -271,10 +273,15 @@ evaluate.describe(
 
                   // Each scenario must start with an empty events index. Scenarios that share a
                   // snapshot (e.g. ledger-db-disconnect-misgrouped-auth) are independent episodes.
-                  await cleanSignificantEventsDataStreams(esClient, log, { includeLogs: false });
+                  await cleanSignificantEventsDataStreams(esClient, log, {
+                    includeLogs: false,
+                    includeRuleEvents: useRuleEventsRead,
+                  });
 
                   if (snapshotKey !== lastReplayedSnapshotKey) {
-                    await cleanSignificantEventsDataStreams(esClient, log);
+                    await cleanSignificantEventsDataStreams(esClient, log, {
+                      includeRuleEvents: useRuleEventsRead,
+                    });
                     for (const name of SIGEVENTS_WIRED_ROOTS) {
                       await esClient.indices.deleteDataStream({ name }).catch(() => {});
                       await esClient.indices
@@ -503,7 +510,10 @@ evaluate.describe(
 
                     // Continuation examples must not inherit events from a previous path.
                     // The cycles within this task still share state.
-                    await cleanSignificantEventsDataStreams(esClient, log, { includeLogs: false });
+                    await cleanSignificantEventsDataStreams(esClient, log, {
+                      includeLogs: false,
+                      includeRuleEvents: useRuleEventsRead,
+                    });
 
                     const snapshotSource = snapshotSources.get(input.scenario_id);
                     if (!snapshotSource) {
@@ -513,7 +523,9 @@ evaluate.describe(
                     }
 
                     if (run.snapshotKey !== lastReplayedSnapshotKey) {
-                      await cleanSignificantEventsDataStreams(esClient, log);
+                      await cleanSignificantEventsDataStreams(esClient, log, {
+                        includeRuleEvents: useRuleEventsRead,
+                      });
                       for (const name of SIGEVENTS_WIRED_ROOTS) {
                         await esClient.indices.deleteDataStream({ name }).catch(() => {});
                         await esClient.indices
@@ -723,7 +735,9 @@ evaluate.describe(
           log.debug('Cleaning up discovery test data');
           await deleteTemporaryReplayIndices(esClient, log);
           await apiServices.streams.disable().catch(() => {});
-          await cleanSignificantEventsDataStreams(esClient, log);
+          await cleanSignificantEventsDataStreams(esClient, log, {
+            includeRuleEvents: useRuleEventsRead,
+          });
         });
       });
     }
