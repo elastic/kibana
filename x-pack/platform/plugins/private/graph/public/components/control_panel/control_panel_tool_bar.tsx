@@ -6,9 +6,15 @@
  */
 
 import React from 'react';
+import { useDispatch } from 'react-redux';
 import { i18n } from '@kbn/i18n';
 import { EuiButtonIcon, EuiFlexGroup, EuiFlexItem, EuiToolTip } from '@elastic/eui';
 import type { ControlType, Workspace, WorkspaceField } from '../../types';
+import {
+  blocklistSelectedNodes,
+  deleteSelectedNodes,
+  type GraphDispatch,
+} from '../../state_management';
 
 interface ControlPanelToolBarProps {
   workspace: Workspace;
@@ -21,6 +27,7 @@ export const ControlPanelToolBar = ({
   onSetControl,
   liveResponseFields,
 }: ControlPanelToolBarProps) => {
+  const dispatch = useDispatch<GraphDispatch>();
   const haveNodes = workspace.nodes.length === 0;
 
   const undoButtonMsg = i18n.translate('xpack.graph.sidebar.topMenu.undoButtonTooltip', {
@@ -75,9 +82,9 @@ export const ControlPanelToolBar = ({
   const onAddLinksClick = () => workspace.fillInGraph();
   const onRemoveVerticesClick = () => {
     onSetControl('none');
-    workspace.deleteSelection();
+    dispatch(deleteSelectedNodes());
   };
-  const onBlockListClick = () => workspace.blocklistSelection();
+  const onBlockListClick = () => dispatch(blocklistSelectedNodes());
   const onCustomStyleClick = () => onSetControl('style');
   const onDrillDownClick = () => onSetControl('drillDowns');
   const onRunLayoutClick = () => workspace.runLayout();

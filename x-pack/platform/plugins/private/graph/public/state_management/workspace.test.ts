@@ -12,8 +12,10 @@ import { loadFields } from './fields';
 import { fillWorkspace } from './persistence';
 import { createMockGraphStore } from './mocks';
 import {
+  blocklistSelectedNodes,
   clearNodeSelection,
   createWorkspaceState,
+  deleteSelectedNodes,
   invertNodeSelection,
   registerWorkspaceListeners,
   selectAllNodes,
@@ -39,6 +41,7 @@ const createWorkspaceMock = () =>
     search: jest.fn(),
     callElasticsearch: jest.fn(),
     options: {},
+    blocklistedNodes: [],
   } as unknown as jest.Mocked<Workspace>);
 
 const createWorkspaceListenerEnvironment = () => {
@@ -141,6 +144,8 @@ describe('workspace state', () => {
       edgeIds: ['edge'],
       selectedNodeIds: ['parent'],
       selectedEdgeIds: ['edge'],
+      blocklistedNodesById: {},
+      blocklistedNodeIds: [],
     });
   });
 
@@ -195,6 +200,46 @@ describe('workspace state', () => {
 
     environment.store.dispatch(clearNodeSelection());
     expect(environment.store.getState().workspace.selectedNodeIds).toEqual([]);
+  });
+
+  it('removes selected groups and their dangling edges', () => {
+    const environment = createMockGraphStore({});
+    const state = {
+      ...environment.store.getState().workspace,
+      nodesById: {
+        parent: { id: 'parent' },
+        child: { id: 'child', parentId: 'parent' },
+        remaining: { id: 'remaining' },
+      },
+      nodeIds: ['parent', 'child', 'remaining'],
+      edgesById: {
+        removed: { id: 'removed', sourceId: 'child', targetId: 'remaining' },
+      },
+      edgeIds: ['removed'],
+      selectedNodeIds: ['parent'],
+    } as unknown as ReturnType<typeof environment.store.getState>['workspace'];
+    environment.store.dispatch(workspaceChanged(state));
+
+    environment.store.dispatch(deleteSelectedNodes());
+
+    expect(environment.store.getState().workspace.nodeIds).toEqual(['remaining']);
+    expect(environment.store.getState().workspace.edgeIds).toEqual([]);
+  });
+
+  it('moves selected nodes into the blocklist', () => {
+    const environment = createMockGraphStore({});
+    const state = {
+      ...environment.store.getState().workspace,
+      nodesById: { selected: { id: 'selected' }, remaining: { id: 'remaining' } },
+      nodeIds: ['selected', 'remaining'],
+      selectedNodeIds: ['selected'],
+    } as unknown as ReturnType<typeof environment.store.getState>['workspace'];
+    environment.store.dispatch(workspaceChanged(state));
+
+    environment.store.dispatch(blocklistSelectedNodes());
+
+    expect(environment.store.getState().workspace.nodeIds).toEqual(['remaining']);
+    expect(environment.store.getState().workspace.blocklistedNodeIds).toEqual(['selected']);
   });
 
   it('keeps edge selection single-valued', () => {
