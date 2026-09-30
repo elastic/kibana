@@ -160,7 +160,9 @@ A count of `N` is the number of evaluations the episode spends in the phase. The
 
 `recovering.count` behaves the same way for `recovering -> inactive`.
 
-A count of `0` skips the phase, unless a `timeframe` is combined with it using `and`: then the timeframe still has to elapse, so `{ count: 0, timeframe: '5m', operator: 'and' }` holds the phase for 5 minutes. With `or`, the count alone is enough and the phase is skipped.
+A count of `0` skips the phase, unless a `timeframe` is combined with it using `and`: then the timeframe still has to elapse, so `{ count: 0, timeframe: '5m', operator: 'and' }` holds the phase until the timeframe is met. With `or`, the count alone is enough and the phase is skipped.
+
+**Caveat:** elapsed time for an `and`-combined `timeframe` is measured against the previous evaluation's stored timestamp, not against when the phase was entered (see above), so it never accumulates past roughly one schedule interval. An `and`-combined `timeframe` therefore only resolves reliably when the rule's schedule interval is >= the timeframe; on a shorter schedule it holds the phase indefinitely. This applies to any count, not just `0`.
 
 ## When to add a new strategy
 

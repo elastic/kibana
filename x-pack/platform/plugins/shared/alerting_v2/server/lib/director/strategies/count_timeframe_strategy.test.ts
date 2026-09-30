@@ -591,11 +591,15 @@ describe('CountTimeframeStrategy', () => {
           return evaluation;
         }
 
+        // Mirrors production: last_episode_timestamp is the timestamp of the most
+        // recently stored event, not the timestamp the phase was entered. So elapsed
+        // time on the next evaluation is measured against *this* evaluation, not a
+        // fixed baseline.
         previousEpisode = buildLatestAlertEvent({
           episodeStatus: result.status,
           eventStatus: on,
           statusCount: result.statusCount,
-          previousTimestamp: minute(0),
+          previousTimestamp: minute(evaluation - 1),
         });
       }
 
@@ -633,37 +637,71 @@ describe('CountTimeframeStrategy', () => {
       ).toBe(expected);
     });
 
-    it.each([
-      ['or', 1],
-      ['and', 6],
-    ] as const)(
-      'pending count 0 with a 5m timeframe ORed/ANDed (%s) becomes active on evaluation %i',
-      (operator, expected) => {
-        expect(
-          evaluationThatResolves({
-            stateTransition: { pending: { count: 0, timeframe: '5m', operator } },
-            on: alertEventStatus.breached,
-            until: alertEpisodeStatus.active,
-          })
-        ).toBe(expected);
-      }
-    );
+    // These evaluations are 1 minute apart (see `minute`), so a timeframe below
+    // 1m models a schedule interval longer than the timeframe (works), and a
+    // timeframe above 1m models a schedule interval shorter than the timeframe
+    // (never resolves — see the doc comment on `isPhaseSkipped`).
+    it('pending count 0 ORed with any timeframe is immediate regardless of schedule', () => {
+      expect(
+        evaluationThatResolves({
+          stateTransition: { pending: { count: 0, timeframe: '5m', operator: 'or' } },
+          on: alertEventStatus.breached,
+          until: alertEpisodeStatus.active,
+        })
+      ).toBe(1);
+    });
 
-    it.each([
-      ['or', 1],
-      ['and', 6],
-    ] as const)(
-      'recovering count 0 with a 5m timeframe ORed/ANDed (%s) becomes inactive on evaluation %i',
-      (operator, expected) => {
-        expect(
-          evaluationThatResolves({
-            stateTransition: { recovering: { count: 0, timeframe: '5m', operator } },
-            from: alertEpisodeStatus.active,
-            on: alertEventStatus.recovered,
-            until: alertEpisodeStatus.inactive,
-          })
-        ).toBe(expected);
-      }
-    );
+    it('pending count 0 ANDed with a timeframe shorter than the schedule interval resolves on evaluation 2', () => {
+      expect(
+        evaluationThatResolves({
+          stateTransition: { pending: { count: 0, timeframe: '30s', operator: 'and' } },
+          on: alertEventStatus.breached,
+          until: alertEpisodeStatus.active,
+        })
+      ).toBe(2);
+    });
+
+    it('pending count 0 ANDed with a timeframe longer than the schedule interval never resolves', () => {
+      expect(
+        evaluationThatResolves({
+          stateTransition: { pending: { count: 0, timeframe: '5m', operator: 'and' } },
+          on: alertEventStatus.breached,
+          until: alertEpisodeStatus.active,
+        })
+      ).toBe(-1);
+    });
+
+    it('recovering count 0 ORed with any timeframe is immediate regardless of schedule', () => {
+      expect(
+        evaluationThatResolves({
+          stateTransition: { recovering: { count: 0, timeframe: '5m', operator: 'or' } },
+          from: alertEpisodeStatus.active,
+          on: alertEventStatus.recovered,
+          until: alertEpisodeStatus.inactive,
+        })
+      ).toBe(1);
+    });
+
+    it('recovering count 0 ANDed with a timeframe shorter than the schedule interval resolves on evaluation 2', () => {
+      expect(
+        evaluationThatResolves({
+          stateTransition: { recovering: { count: 0, timeframe: '30s', operator: 'and' } },
+          from: alertEpisodeStatus.active,
+          on: alertEventStatus.recovered,
+          until: alertEpisodeStatus.inactive,
+        })
+      ).toBe(2);
+    });
+
+    it('recovering count 0 ANDed with a timeframe longer than the schedule interval never resolves', () => {
+      expect(
+        evaluationThatResolves({
+          stateTransition: { recovering: { count: 0, timeframe: '5m', operator: 'and' } },
+          from: alertEpisodeStatus.active,
+          on: alertEventStatus.recovered,
+          until: alertEpisodeStatus.inactive,
+        })
+      ).toBe(-1);
+    });
   });
 });
