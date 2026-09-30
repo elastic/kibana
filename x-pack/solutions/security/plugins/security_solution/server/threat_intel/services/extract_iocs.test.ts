@@ -165,6 +165,12 @@ describe('extract_iocs — refang pre-pass and value normalization', () => {
       expect(urlValues(r)).toContain('https://evil.example/a');
     });
 
+    test('a Markdown inline-code backtick is not encoded into the URL', () => {
+      const r = extractIocs({ text: 'C2: `hxxps://evil[.]example/api/payload`' });
+      expect(urlValues(r)).toContain('https://evil.example/api/payload');
+      expect(urlValues(r)).not.toContain('https://evil.example/api/payload%60');
+    });
+
     test('a balanced paren inside the path survives', () => {
       const r = extractIocs({ text: 'ref https://evil.example/Foo_(bar) here' });
       expect(urlValues(r)).toContain('https://evil.example/Foo_(bar)');
@@ -1769,6 +1775,116 @@ describe('extract_iocs — Elastic-style end-to-end (Observations + GitHub IOC l
   });
 });
 
+// ── Adjudication context window ──────────────────────────────────────────────
+//
+// adjudicate_iocs.ts no longer re-finds a value in the article: it judges
+// whatever `context` window extract_iocs attaches to url/domain candidates,
+// built from the exact offset the regex matched. These tests cover picking
+// the best occurrence and the field's shape, not any re-matching logic (there
+// is none left to test).
+
+describe('extract_iocs — adjudication context window', () => {
+  it('emits a context window around a url candidate', () => {
+    const url = 'https://evil.example/payload';
+    const result = extractIocs({ text: `The attacker downloaded ${url} during staging.` });
+    const ioc = result.iocs.find((entry) => entry.type === 'url' && entry.value === url);
+
+    expect(ioc?.context).toContain('attacker downloaded');
+    expect(ioc?.context).toContain(url);
+  });
+
+  it('emits a context window around a domain candidate', () => {
+    const result = extractIocs({
+      text: 'Docs mention evil.com as the C2 domain in this campaign.',
+    });
+    const ioc = result.iocs.find((entry) => entry.type === 'domain' && entry.value === 'evil.com');
+
+    expect(ioc?.context).toContain('Docs mention');
+    expect(ioc?.context).toContain('evil.com');
+  });
+
+  it('does not attach a context window to non-url/domain candidates', () => {
+    const hash = 'a'.repeat(64);
+    const result = extractIocs({ text: `Payload SHA-256: ${hash}` });
+    const ioc = result.iocs.find((entry) => entry.type === 'hash');
+
+    expect(ioc?.context).toBeUndefined();
+  });
+
+  it('prefers a later occurrence with an attribution cue over an earlier citation', () => {
+    // No cue word in the value itself, so the cue can only come from prose.
+    const url = 'https://evil.example/x1a9f';
+    const result = extractIocs({
+      text:
+        `See the vendor write-up at ${url} for background. ` +
+        `${'unrelated prose. '.repeat(40)}` +
+        `The attacker later staged ${url} during the campaign.`,
+    });
+    const ioc = result.iocs.find((entry) => entry.type === 'url' && entry.value === url);
+
+    expect(ioc?.context).toContain('attacker later staged');
+    expect(ioc?.context).not.toContain('vendor write-up');
+  });
+
+  it('prefers an earlier occurrence with an attribution cue over a later bare mention', () => {
+    // No cue word in the value itself (unlike '/payload'), so the cue can only
+    // come from surrounding prose.
+    const url = 'https://evil.example/x1a9f';
+    const result = extractIocs({
+      text:
+        `The attacker staged ${url} for the campaign. ` +
+        `${'unrelated prose. '.repeat(40)}` +
+        `See the vendor write-up at ${url} for background.`,
+    });
+    const ioc = result.iocs.find((entry) => entry.type === 'url' && entry.value === url);
+
+    expect(ioc?.context).toContain('attacker staged');
+    expect(ioc?.context).not.toContain('vendor write-up');
+  });
+
+  it('prefers the later occurrence when neither mention has an attribution cue', () => {
+    const domain = 'evil.com';
+    const result = extractIocs({
+      text:
+        `Docs mention ${domain} in passing. ` +
+        `${'filler prose. '.repeat(40)}` +
+        `Later, documentation again lists ${domain} as an old sample.`,
+    });
+    const ioc = result.iocs.find((entry) => entry.type === 'domain' && entry.value === domain);
+
+    expect(ioc?.context).toContain('again lists');
+    expect(ioc?.context).not.toContain('Docs mention');
+  });
+
+  it("does not let the value's own path text satisfy its own attribution cue", () => {
+    // The URL's own path contains "payload", a cue word. Without excluding the
+    // matched span from cue scoring, both occurrences would trivially match and
+    // the tie-break would fall back to "later occurrence" regardless of which
+    // one has real attribution.
+    const url = 'https://evil.example/payload';
+    const result = extractIocs({
+      text:
+        `The attacker downloaded ${url} during the intrusion. ` +
+        `${'unrelated prose. '.repeat(40)}` +
+        `See the vendor write-up at ${url} for background.`,
+    });
+    const ioc = result.iocs.find((entry) => entry.type === 'url' && entry.value === url);
+
+    expect(ioc?.context).toContain('attacker downloaded');
+    expect(ioc?.context).not.toContain('vendor write-up');
+  });
+
+  it('builds context from the refanged text, so a defanged occurrence is included', () => {
+    const canonical = 'https://evil.example/payload.exe';
+    const defanged = 'hxxps://evil[.]example/payload.exe';
+    const result = extractIocs({ text: `The dropper fetched ${defanged} over HTTPS.` });
+    const ioc = result.iocs.find((entry) => entry.type === 'url' && entry.value === canonical);
+
+    expect(ioc?.context).toContain('dropper fetched');
+    expect(ioc?.context).toContain(canonical);
+  });
+});
+
 // ── Mapping coverage guard ────────────────────────────────────────────────────
 //
 // This test prevents a repeat of the _offset and port bugs: if extract_iocs
@@ -1801,9 +1917,15 @@ describe('extract_iocs — mapping coverage guard', () => {
     'port',
     'reference',
     'block_index',
+    'deferred_unreviewed',
   ]);
 
-  test('all ExtractedIoc fields are declared in the extracted.iocs mapping', () => {
+  // `context` is prompt-only: enrichReportCore's reconcileIocAdjudication strips it
+  // from every output IOC before persist_extractions writes extracted.iocs, so it
+  // must never be added to DECLARED_IOC_MAPPING_FIELDS above.
+  const PROMPT_ONLY_FIELDS = new Set<string>(['context']);
+
+  test('all ExtractedIoc fields are declared in the extracted.iocs mapping, or are prompt-only', () => {
     // Build an IOC with every optional field populated so Object.keys captures them all.
     const fullIoc: ExtractedIoc = {
       type: 'ip',
@@ -1813,9 +1935,11 @@ describe('extract_iocs — mapping coverage guard', () => {
       tier_heuristic: 'discriminating' as IocTier,
       tier_basis: 'ioc_section',
       port: 443,
+      deferred_unreviewed: true,
+      context: 'context window text',
     };
 
-    for (const key of Object.keys(fullIoc)) {
+    for (const key of Object.keys(fullIoc).filter((k) => !PROMPT_ONLY_FIELDS.has(k))) {
       expect(DECLARED_IOC_MAPPING_FIELDS.has(key)).toBe(true);
     }
   });

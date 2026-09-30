@@ -11,6 +11,9 @@ export const IGNORE_ATTR = 'data-devtool-ignore';
 
 export const IGNORE_SELECTOR = `[${IGNORE_ATTR}]`;
 
+/** Marks the panel's menus, which close themselves on Escape rather than leave comment mode. */
+export const MENU_ATTR = 'data-devtool-menu';
+
 export const DISPLAY_NAME_STORAGE_KEY = 'dev_comments_display_name';
 
 /** Session storage: a guide handed over a page load, see `createCommentsController`. */
