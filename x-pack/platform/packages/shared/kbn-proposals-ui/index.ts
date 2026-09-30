@@ -12,6 +12,7 @@ export {
   type ApprovalAction,
   type ApprovalDecision,
   type AlwaysAllowOption,
+  type DeclineParams,
 } from './src/approval_content';
 export {
   getApprovalOutcomeBadge,
@@ -30,3 +31,9 @@ export {
   isProposalExpired,
 } from './src/proposal_helpers';
 export type { ApprovalProposal } from './src/types';
+export {
+  DISMISS_REASON_LABELS,
+  DISMISS_REASON_OPTIONS,
+  formatDismissReason,
+} from './src/dismiss_reason';
+export { DeclineReasonForm, type DeclineReasonFormProps } from './src/decline_reason_form';
