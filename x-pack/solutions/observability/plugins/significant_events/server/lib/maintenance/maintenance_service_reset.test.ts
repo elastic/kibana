@@ -500,6 +500,44 @@ describe('SignificantEventsMaintenanceService', () => {
       expect(esClient.indices.deleteDataStream).not.toHaveBeenCalled();
     });
 
+    it('persists the swept workflows while still paused before destroying data', async () => {
+      const { api } = makeManagementApi();
+      const { service, soClient, esClient } = makeService({
+        management: api,
+        dataStreams: { [DETECTIONS_DATA_STREAM]: 1 },
+      });
+
+      await service.reset({ request: REQUEST });
+
+      const inventoryWrite = soClient.create.mock.calls[1][1] as {
+        state: string;
+        disabledWorkflows: Array<{ id: string }>;
+      };
+      expect(inventoryWrite.state).toBe('paused');
+      expect(inventoryWrite.disabledWorkflows.map(({ id }) => id)).toContain(
+        SIGNIFICANT_EVENTS_DETECTION_WORKFLOW_ID
+      );
+      expect(soClient.create.mock.invocationCallOrder[1]).toBeLessThan(
+        esClient.indices.deleteDataStream.mock.invocationCallOrder[0]
+      );
+    });
+
+    it('fails before destructive work when the swept inventory cannot be persisted', async () => {
+      const { api, updateWorkflow } = makeManagementApi();
+      const { service, soClient, esClient } = makeService({
+        management: api,
+        dataStreams: { [DETECTIONS_DATA_STREAM]: 1 },
+      });
+      soClient.create
+        .mockResolvedValueOnce({} as never)
+        .mockRejectedValueOnce(new Error('inventory write failed'));
+
+      await expect(service.reset({ request: REQUEST })).rejects.toThrow('inventory write failed');
+
+      expect(updateWorkflow).toHaveBeenCalled();
+      expect(esClient.indices.deleteDataStream).not.toHaveBeenCalled();
+    });
+
     it('throws when the final maintenance state write fails after destructive side effects', async () => {
       const { api } = makeManagementApi();
       const { service, soClient, esClient } = makeService({
@@ -511,7 +549,8 @@ describe('SignificantEventsMaintenanceService', () => {
         },
       });
       soClient.create
-        .mockResolvedValueOnce({} as never)
+        .mockResolvedValueOnce({} as never) // paused intent
+        .mockResolvedValueOnce({} as never) // swept inventory
         .mockRejectedValueOnce(new Error('reset state write failed'));
 
       await expect(service.reset({ request: REQUEST })).rejects.toThrow('reset state write failed');

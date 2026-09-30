@@ -703,6 +703,28 @@ export const createSignificantEventsMaintenanceService = ({
           failures,
         });
 
+        // Persist the swept inventory before destroying data: an interrupted reset must
+        // leave Resume (or a repeated Reset) the workflows it disabled, since a later
+        // sweep only records what it toggles itself.
+        try {
+          await writeState({
+            state: 'paused',
+            updatedAt: new Date().toISOString(),
+            updatedBy,
+            disabledWorkflows: [...recoveryByKey.values()],
+            disabledRuleIds: existing?.disabledRuleIds ?? [],
+            pausedSettings: existing?.pausedSettings,
+            lastSummary: normalizeSummary(existing?.lastSummary) ?? emptySummary('paused'),
+          });
+        } catch (writeError) {
+          log.error(
+            `Significant Events reset failed before destructive cleanup: could not persist disabled workflows: ${toMessage(
+              writeError
+            )}`
+          );
+          throw writeError;
+        }
+
         // The snapshot below searches the knowledge-indicator stream; refresh it first so
         // unrefreshed revisions are counted (and their rules found) before the wipe.
         const internalEsClient = server.core.elasticsearch.client.asInternalUser;
