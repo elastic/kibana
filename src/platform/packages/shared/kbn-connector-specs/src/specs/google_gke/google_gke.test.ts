@@ -917,6 +917,27 @@ describe('GoogleGke', () => {
       );
     });
 
+    it.each([
+      { label: 'ASCII at the limit', value: 'a'.repeat(1024), shouldThrow: false },
+      { label: 'ASCII over the limit', value: 'a'.repeat(1025), shouldThrow: true },
+      { label: 'non-ASCII over the limit', value: '\u{1F600}'.repeat(1025), shouldThrow: true },
+    ])(
+      'createCluster.description enforces its .max(1024) bound: $label',
+      ({ value, shouldThrow }) => {
+        const attempt = () =>
+          parse('createCluster', {
+            location: 'us-central1',
+            clusterId: 'staging',
+            description: value,
+          });
+        if (shouldThrow) {
+          expect(attempt).toThrow();
+        } else {
+          expect(attempt).not.toThrow();
+        }
+      }
+    );
+
     it('createCluster builds an Autopilot cluster without node pools', async () => {
       mockClient.post.mockResolvedValue({ data: sampleOperation });
       await run('createCluster', {
