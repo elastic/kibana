@@ -21,6 +21,7 @@ import { CaseDetailsLink } from '../links';
 import { TruncatedText } from '../truncated_text';
 import { SeverityHealth } from '../severity/config';
 import { useCasesColumnsConfiguration } from '../all_cases/hooks/use_cases_columns_configuration';
+import { useCaseStatuses } from '../status/use_case_statuses';
 import * as i18n from './translations';
 
 type SimilarCasesColumns =
@@ -47,6 +48,7 @@ export interface UseSimilarCasesColumnsReturnValue {
 
 export const useSimilarCasesColumns = (): UseSimilarCasesColumnsReturnValue => {
   const casesColumnsConfig = useCasesColumnsConfiguration(false);
+  const { getStatus } = useCaseStatuses();
 
   const columns: SimilarCasesColumns[] = useMemo(
     () => [
@@ -142,9 +144,9 @@ export const useSimilarCasesColumns = (): UseSimilarCasesColumnsReturnValue => {
         field: casesColumnsConfig.status.field,
         name: casesColumnsConfig.status.name,
         sortable: false,
-        render: (status: CaseUI['status']) => {
+        render: (status: CaseUI['status'], theCase: SimilarCaseUI) => {
           if (status != null) {
-            return <Status status={status} />;
+            return <Status status={status} label={getStatus(theCase.statusKey, status).label} />;
           }
 
           return getEmptyCellValue();
@@ -239,6 +241,7 @@ export const useSimilarCasesColumns = (): UseSimilarCasesColumnsReturnValue => {
       casesColumnsConfig.tags.name,
       casesColumnsConfig.title.field,
       casesColumnsConfig.title.name,
+      getStatus,
     ]
   );
 

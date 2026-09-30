@@ -218,6 +218,7 @@ describe('Cases API', () => {
           reporters: [{ username: 'username', full_name: null, email: null }],
           tags,
           status: [CaseStatuses.open],
+          statusKey: [],
           severity: [CaseSeverity.HIGH],
           search: 'hello',
           owner: [SECURITY_SOLUTION_OWNER],

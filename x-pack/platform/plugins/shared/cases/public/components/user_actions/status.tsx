@@ -14,12 +14,24 @@ import type { StatusUserAction, CaseStatuses } from '../../../common/types/domai
 import type { UserActionBuilder } from './types';
 import { createCommonUpdateUserActionBuilder } from './common';
 import { statuses } from '../status';
+import { useCaseStatuses } from '../status/use_case_statuses';
 import * as i18n from './translations';
 
 const isStatusValid = (status: string): status is CaseStatuses => Object.hasOwn(statuses, status);
 
+const StatusBadge: React.FC<{ status: CaseStatuses; statusKey?: string }> = ({
+  status,
+  statusKey,
+}) => {
+  const { getStatus } = useCaseStatuses();
+
+  return <Status status={status} label={getStatus(statusKey, status).label} />;
+};
+StatusBadge.displayName = 'StatusBadge';
+
 const getLabelTitle = (userAction: SnakeToCamelCase<StatusUserAction>) => {
   const status = userAction.payload.status ?? '';
+  const statusKey = userAction.payload.statusKey;
   const closeReason = userAction.payload.closeReason;
   const syncedAlertCount = userAction.payload.syncedAlertCount;
 
@@ -35,7 +47,7 @@ const getLabelTitle = (userAction: SnakeToCamelCase<StatusUserAction>) => {
       >
         <EuiFlexItem grow={false}>{i18n.MARKED_CASE_AS}</EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <Status status={status} />
+          <StatusBadge status={status} statusKey={statusKey} />
         </EuiFlexItem>
         {shouldRenderSyncDetails && (
           <>

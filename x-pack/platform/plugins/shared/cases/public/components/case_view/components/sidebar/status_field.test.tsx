@@ -10,10 +10,12 @@ import { render, screen } from '@testing-library/react';
 import { waitForEuiPopoverOpen } from '@elastic/eui/lib/test/rtl';
 import userEvent from '@testing-library/user-event';
 import { CaseStatuses } from '../../../../../common/types/domain';
+import { getBuiltInStatuses } from '../../../../../common/utils/statuses';
 import { StatusField } from './status_field';
 
 describe('StatusField', () => {
   const onStatusChange = jest.fn();
+  const statuses = getBuiltInStatuses();
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -22,7 +24,8 @@ describe('StatusField', () => {
   it('renders the currently selected status', () => {
     render(
       <StatusField
-        selectedStatus={CaseStatuses.open}
+        statuses={statuses}
+        selectedStatusKey={CaseStatuses.open}
         onStatusChange={onStatusChange}
         isLoading={false}
         isDisabled={false}
@@ -35,7 +38,8 @@ describe('StatusField', () => {
   it('disables the selector when isDisabled is true', () => {
     render(
       <StatusField
-        selectedStatus={CaseStatuses.open}
+        statuses={statuses}
+        selectedStatusKey={CaseStatuses.open}
         onStatusChange={onStatusChange}
         isLoading={false}
         isDisabled={true}
@@ -48,7 +52,8 @@ describe('StatusField', () => {
   it('persists the change immediately, with no confirm step', async () => {
     render(
       <StatusField
-        selectedStatus={CaseStatuses.open}
+        statuses={statuses}
+        selectedStatusKey={CaseStatuses.open}
         onStatusChange={onStatusChange}
         isLoading={false}
         isDisabled={false}
@@ -59,7 +64,9 @@ describe('StatusField', () => {
     await waitForEuiPopoverOpen();
     await userEvent.click(screen.getByTestId('case-status-selection-in-progress'));
 
-    expect(onStatusChange).toHaveBeenCalledWith(CaseStatuses['in-progress']);
+    expect(onStatusChange).toHaveBeenCalledWith(
+      expect.objectContaining({ key: CaseStatuses['in-progress'] })
+    );
     expect(screen.queryByTestId('template-field-confirm-status')).not.toBeInTheDocument();
     expect(screen.queryByTestId('template-field-cancel-status')).not.toBeInTheDocument();
   });

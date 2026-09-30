@@ -200,6 +200,7 @@ describe('useAllCasesQueryParams', () => {
         assignees: ['elastic'],
         reporters: [],
         status: [CaseStatuses.closed],
+        statusKey: [],
         tags: ['test-tag'],
         owner: ['cases'],
         category: ['test-category'],

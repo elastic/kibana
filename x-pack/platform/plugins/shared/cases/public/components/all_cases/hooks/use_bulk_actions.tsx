@@ -9,9 +9,10 @@ import type {
   EuiContextMenuPanelDescriptor,
   EuiContextMenuPanelItemDescriptor,
 } from '@elastic/eui';
-import React, { useCallback, useMemo } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import { CaseStatuses } from '@kbn/cases-components';
 
+import type { CaseStatusConfiguration } from '../../../../common/types/domain';
 import type { CasesUI } from '../../../containers/types';
 import { useDeleteAction } from '../../actions/delete/use_delete_action';
 import { useSeverityAction } from '../../actions/severity/use_severity_action';
@@ -58,7 +59,10 @@ export const useBulkActions = ({
     isDisabled,
     onAction,
     onActionSuccess,
+    entryPoint: 'list_bulk_action',
   });
+  // The closed-category status picked from the menu; the close-reason modal applies it.
+  const [closingStatus, setClosingStatus] = useState<CaseStatusConfiguration | null>(null);
 
   const severityAction = useSeverityAction({
     isDisabled,
@@ -92,27 +96,27 @@ export const useBulkActions = ({
 
   const onCloseCase = useCallback(
     (closeReason?: string) => {
-      statusAction.handleUpdateCaseStatus(selectedCases, CaseStatuses.closed, closeReason);
+      statusAction.handleUpdateCaseStatus(
+        selectedCases,
+        closingStatus ?? CaseStatuses.closed,
+        closeReason
+      );
     },
-    [selectedCases, statusAction]
+    [closingStatus, selectedCases, statusAction]
   );
   const { openCloseCaseModal, closeCaseModal } = useCloseCaseModal({
     canSyncCloseReasonToAlerts,
     onCloseCase,
   });
 
-  const statusActions = useMemo((): EuiContextMenuPanelItemDescriptor[] => {
-    return statusAction.getActions(selectedCases).map((statusActionMenuItem) => {
-      if (statusActionMenuItem.key === 'cases-bulk-action-status-closed') {
-        return {
-          ...statusActionMenuItem,
-          onClick: openCloseCaseModal,
-        } as EuiContextMenuPanelItemDescriptor;
-      }
-
-      return statusActionMenuItem;
-    });
-  }, [openCloseCaseModal, selectedCases, statusAction]);
+  const statusActions = useMemo(
+    (): EuiContextMenuPanelItemDescriptor[] =>
+      statusAction.getActions(selectedCases, (status) => {
+        setClosingStatus(status);
+        openCloseCaseModal();
+      }),
+    [openCloseCaseModal, selectedCases, statusAction]
+  );
 
   const panels = useMemo((): EuiContextMenuPanelDescriptor[] => {
     const mainPanelItems: EuiContextMenuPanelItemDescriptor[] = [];

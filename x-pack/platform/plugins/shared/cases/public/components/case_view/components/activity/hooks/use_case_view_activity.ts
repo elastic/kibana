@@ -17,6 +17,7 @@ import type {
 import { useStatusAction } from '../../../../actions/status/use_status_action';
 import { useRefreshCaseViewPage } from '../../../use_on_refresh_case_view_page';
 import { LOCAL_STORAGE_KEYS } from '../../../../../../common/constants';
+import { useStatusChangedEBT } from '../../../../../analytics/statuses';
 
 /**
  * Local-storage-backed activity filters/pagination, plus status and
@@ -44,9 +45,13 @@ export const useCaseViewActivity = ({ caseData }: { caseData: CaseUI }) => {
     isDisabled: false,
     onAction: () => {},
     onActionSuccess: refreshCaseViewPage,
+    entryPoint: 'case_view_activity_button',
     selectedStatus: caseData.status,
+    selectedStatusKey: caseData.statusKey,
   });
+  const reportStatusChanged = useStatusChangedEBT();
 
+  // The button moves between categories; the server lands the case on the category's default.
   const changeStatus = useCallback(
     (status: CaseStatuses, closeReason?: string) => {
       if (status !== CaseStatuses.closed) {
@@ -54,11 +59,16 @@ export const useCaseViewActivity = ({ caseData }: { caseData: CaseUI }) => {
           key: 'status',
           value: status,
         });
+        reportStatusChanged({
+          category: status,
+          isCustom: false,
+          entryPoint: 'case_view_activity_button',
+        });
       } else {
         statusAction.handleUpdateCaseStatus([caseData], status, closeReason);
       }
     },
-    [caseData, onUpdateField, statusAction]
+    [caseData, onUpdateField, reportStatusChanged, statusAction]
   );
 
   const handleUserActivityParamsChanged = useCallback(

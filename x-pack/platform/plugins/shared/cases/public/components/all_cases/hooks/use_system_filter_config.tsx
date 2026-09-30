@@ -84,11 +84,13 @@ export const getSystemFilterConfig = ({
       getEmptyOptions: () => {
         return {
           status: [],
+          statusKey: [],
         };
       },
       render: ({ filterOptions }: FilterConfigRenderParams) => (
         <StatusFilter
           selectedOptionKeys={filterOptions?.status}
+          selectedStatusKeys={filterOptions?.statusKey}
           onChange={onSystemFilterChange}
           hiddenStatuses={hiddenStatuses}
           countClosedCases={countClosedCases}

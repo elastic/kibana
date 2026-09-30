@@ -14,15 +14,20 @@ import { useUserPermissions } from '../../user_actions/use_user_permissions';
 import { useShouldDisableStatus } from './use_should_disable_status';
 import { TestProviders } from '../../../common/mock';
 import { useUpdateCases } from '../../../containers/use_bulk_update_case';
+import { useStatusChangedEBT } from '../../../analytics/statuses';
+import { getBuiltInStatuses } from '../../../../common/utils/statuses';
 
 jest.mock('../../user_actions/use_user_permissions');
 jest.mock('./use_should_disable_status');
 jest.mock('../../../containers/use_bulk_update_case');
+jest.mock('../../../analytics/statuses');
 
 describe('useStatusAction', () => {
   const onAction = jest.fn();
   const onActionSuccess = jest.fn();
   const mutate = jest.fn();
+  const reportStatusChanged = jest.fn();
+  const entryPoint = 'list_bulk_action' as const;
 
   const getUpdateSuccessToastFromLastCall = (updateSummary?: UpdateSummary[]) => {
     const updateCall = mutate.mock.calls.at(-1)?.[0] as
@@ -44,6 +49,7 @@ describe('useStatusAction', () => {
       isLoading: false,
     });
     (useShouldDisableStatus as jest.Mock).mockReturnValue(() => false);
+    (useStatusChangedEBT as jest.Mock).mockReturnValue(reportStatusChanged);
 
     (useUserPermissions as jest.Mock).mockReturnValue({
       canUpdate: true,
@@ -58,6 +64,7 @@ describe('useStatusAction', () => {
           onAction,
           onActionSuccess,
           isDisabled: false,
+          entryPoint,
         }),
       {
         wrapper: TestProviders,
@@ -88,6 +95,7 @@ describe('useStatusAction', () => {
           "icon": "empty",
           "key": "cases-bulk-action-status-closed",
           "name": "Closed",
+          "onClick": [Function],
         },
       ]
     `);
@@ -95,7 +103,7 @@ describe('useStatusAction', () => {
 
   it('update the status cases', async () => {
     const { result } = renderHook(
-      () => useStatusAction({ onAction, onActionSuccess, isDisabled: false }),
+      () => useStatusAction({ onAction, onActionSuccess, isDisabled: false, entryPoint }),
       {
         wrapper: TestProviders,
       }
@@ -117,7 +125,7 @@ describe('useStatusAction', () => {
         expect.objectContaining({
           cases: [{ status, id: basicCase.id, version: basicCase.version }],
         }),
-        expect.objectContaining({ onSuccess: onActionSuccess })
+        expect.objectContaining({ onSuccess: expect.any(Function) })
       );
     }
 
@@ -130,14 +138,81 @@ describe('useStatusAction', () => {
         expect.objectContaining({
           cases: [{ status: CaseStatuses.closed, id: basicCase.id, version: basicCase.version }],
         }),
-        expect.objectContaining({ onSuccess: onActionSuccess })
+        expect.objectContaining({ onSuccess: expect.any(Function) })
       );
     });
   });
 
+  it('reports the change and refreshes once the update succeeds', async () => {
+    const { result } = renderHook(
+      () => useStatusAction({ onAction, onActionSuccess, isDisabled: false, entryPoint }),
+      { wrapper: TestProviders }
+    );
+
+    act(() => {
+      result.current.handleUpdateCaseStatus([basicCase], CaseStatuses.closed);
+    });
+
+    await waitFor(() => {
+      expect(mutate).toHaveBeenCalled();
+    });
+
+    act(() => {
+      mutate.mock.calls.at(-1)?.[1].onSuccess();
+    });
+
+    expect(reportStatusChanged).toHaveBeenCalledWith({
+      category: CaseStatuses.closed,
+      isCustom: false,
+      entryPoint,
+    });
+    expect(onActionSuccess).toHaveBeenCalled();
+  });
+
+  it('routes closed-category picks through onSelectClosed', async () => {
+    const onSelectClosed = jest.fn();
+    const { result } = renderHook(
+      () => useStatusAction({ onAction, onActionSuccess, isDisabled: false, entryPoint }),
+      { wrapper: TestProviders }
+    );
+
+    const actions = result.current.getActions([basicCase], onSelectClosed);
+
+    act(() => {
+      // @ts-expect-error: onClick expects a MouseEvent argument
+      actions[2]!.onClick();
+    });
+
+    expect(onSelectClosed).toHaveBeenCalledWith(
+      getBuiltInStatuses().find((status) => status.key === CaseStatuses.closed)
+    );
+    expect(mutate).not.toHaveBeenCalled();
+  });
+
+  it('marks the selected status key', () => {
+    const { result } = renderHook(
+      () =>
+        useStatusAction({
+          onAction,
+          onActionSuccess,
+          isDisabled: false,
+          entryPoint,
+          selectedStatus: CaseStatuses['in-progress'],
+          selectedStatusKey: 'in-progress',
+        }),
+      { wrapper: TestProviders }
+    );
+
+    expect(result.current.getActions([basicCase]).map((action) => action.icon)).toEqual([
+      'empty',
+      'check',
+      'empty',
+    ]);
+  });
+
   it('shows closed alert count details when closing with a reason', async () => {
     const { result } = renderHook(
-      () => useStatusAction({ onAction, onActionSuccess, isDisabled: false }),
+      () => useStatusAction({ onAction, onActionSuccess, isDisabled: false, entryPoint }),
       {
         wrapper: TestProviders,
       }
@@ -170,7 +245,7 @@ describe('useStatusAction', () => {
 
   it('shows only summary text for bulk close with reason', async () => {
     const { result } = renderHook(
-      () => useStatusAction({ onAction, onActionSuccess, isDisabled: false }),
+      () => useStatusAction({ onAction, onActionSuccess, isDisabled: false, entryPoint }),
       {
         wrapper: TestProviders,
       }
@@ -208,7 +283,7 @@ describe('useStatusAction', () => {
     'shows the success toaster correctly when updating the status of the case: %s',
     async (_, index, expectedMessage) => {
       const { result } = renderHook(
-        () => useStatusAction({ onAction, onActionSuccess, isDisabled: false }),
+        () => useStatusAction({ onAction, onActionSuccess, isDisabled: false, entryPoint }),
         {
           wrapper: TestProviders,
         }
@@ -232,7 +307,7 @@ describe('useStatusAction', () => {
 
   it('shows the success toaster correctly when updating a single case to closed', async () => {
     const { result } = renderHook(
-      () => useStatusAction({ onAction, onActionSuccess, isDisabled: false }),
+      () => useStatusAction({ onAction, onActionSuccess, isDisabled: false, entryPoint }),
       {
         wrapper: TestProviders,
       }
@@ -259,7 +334,7 @@ describe('useStatusAction', () => {
     'shows the success toaster correctly when updating the status of the case: %s',
     async (_, index, expectedMessage) => {
       const { result } = renderHook(
-        () => useStatusAction({ onAction, onActionSuccess, isDisabled: false }),
+        () => useStatusAction({ onAction, onActionSuccess, isDisabled: false, entryPoint }),
         {
           wrapper: TestProviders,
         }
@@ -283,7 +358,7 @@ describe('useStatusAction', () => {
 
   it('shows the success toaster correctly when updating multiple cases to closed', async () => {
     const { result } = renderHook(
-      () => useStatusAction({ onAction, onActionSuccess, isDisabled: false }),
+      () => useStatusAction({ onAction, onActionSuccess, isDisabled: false, entryPoint }),
       {
         wrapper: TestProviders,
       }
@@ -311,7 +386,7 @@ describe('useStatusAction', () => {
     (useShouldDisableStatus as jest.Mock).mockReturnValue(() => true);
 
     const { result } = renderHook(
-      () => useStatusAction({ onAction, onActionSuccess, isDisabled: false }),
+      () => useStatusAction({ onAction, onActionSuccess, isDisabled: false, entryPoint }),
       {
         wrapper: TestProviders,
       }
@@ -325,7 +400,7 @@ describe('useStatusAction', () => {
     'disables the status button correctly if isDisabled=true: %s',
     async (status, index) => {
       const { result } = renderHook(
-        () => useStatusAction({ onAction, onActionSuccess, isDisabled: true }),
+        () => useStatusAction({ onAction, onActionSuccess, isDisabled: true, entryPoint }),
         {
           wrapper: TestProviders,
         }
@@ -343,7 +418,7 @@ describe('useStatusAction', () => {
     });
 
     const { result } = renderHook(
-      () => useStatusAction({ onAction, onActionSuccess, isDisabled: false }),
+      () => useStatusAction({ onAction, onActionSuccess, isDisabled: false, entryPoint }),
       {
         wrapper: TestProviders,
       }
@@ -359,7 +434,7 @@ describe('useStatusAction', () => {
     });
 
     const { result } = renderHook(
-      () => useStatusAction({ onAction, onActionSuccess, isDisabled: false }),
+      () => useStatusAction({ onAction, onActionSuccess, isDisabled: false, entryPoint }),
       {
         wrapper: TestProviders,
       }

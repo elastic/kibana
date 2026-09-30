@@ -12,13 +12,16 @@ import type { UpdateSummary } from '../../../../common/types/api';
 import { useUpdateCases } from '../../../containers/use_bulk_update_case';
 import type { CasesUI } from '../../../../common';
 import { CASE_VIEW_PAGE_TABS } from '../../../../common/types';
+import type { CaseStatusConfiguration } from '../../../../common/types/domain';
 import { CaseStatuses } from '../../../../common/types/domain';
 import { OWNER_INFO } from '../../../../common/constants';
 import { isValidOwner } from '../../../../common/utils/owner';
+import { useStatusChangedEBT } from '../../../analytics/statuses';
+import type { StatusChangeEntryPoint } from '../../../analytics/statuses';
 
 import * as i18n from './translations';
 import type { UseActionProps } from '../types';
-import { statuses } from '../../status';
+import { useCaseStatuses } from '../../status/use_case_statuses';
 import { useUserPermissions } from '../../user_actions/use_user_permissions';
 import { useShouldDisableStatus } from './use_should_disable_status';
 import { useKibana } from '../../../common/lib/kibana';
@@ -112,24 +115,40 @@ const getUpdateSuccessToast = ({
 };
 
 interface UseStatusActionProps extends UseActionProps {
+  entryPoint: StatusChangeEntryPoint;
+  /** Category of the single selected case, when there is one */
   selectedStatus?: CaseStatuses;
+  /** Configured status key of the single selected case, when there is one */
+  selectedStatusKey?: string | null;
 }
 
 export const useStatusAction = ({
   onAction,
   onActionSuccess,
   isDisabled,
+  entryPoint,
   selectedStatus,
+  selectedStatusKey,
 }: UseStatusActionProps) => {
   const { mutate: updateCases, isLoading: isUpdatingStatus } = useUpdateCases();
   const { canUpdate, canReopenCase } = useUserPermissions();
   const { appId } = useApplication();
   const { application } = useKibana().services;
+  const { enabledStatuses, getStatus, isCustomStatusesEnabled } = useCaseStatuses();
+  const reportStatusChanged = useStatusChangedEBT();
+
   const handleUpdateCaseStatus = useCallback(
-    (selectedCases: CasesUI, status: CaseStatuses, closeReason?: string) => {
+    (
+      selectedCases: CasesUI,
+      status: CaseStatuses | CaseStatusConfiguration,
+      closeReason?: string
+    ) => {
       onAction();
+      // A bare category lands on its default status.
+      const target = typeof status === 'string' ? getStatus(undefined, status) : status;
       const casesToUpdate = selectedCases.map((theCase) => ({
-        status,
+        status: target.category,
+        ...(isCustomStatusesEnabled && { status_key: target.key }),
         id: theCase.id,
         version: theCase.version,
         closeReason,
@@ -140,7 +159,7 @@ export const useStatusAction = ({
           cases: casesToUpdate,
           getUpdateSuccessToast: ({ updateSummary }: { updateSummary?: UpdateSummary[] }) => {
             return getUpdateSuccessToast({
-              status,
+              status: target.category,
               cases: selectedCases,
               updateSummary,
               appId,
@@ -149,44 +168,56 @@ export const useStatusAction = ({
           },
           originalCases: selectedCases,
         },
-        { onSuccess: onActionSuccess }
+        {
+          onSuccess: () => {
+            reportStatusChanged({
+              category: target.category,
+              isCustom: target.key !== target.category,
+              entryPoint,
+            });
+            onActionSuccess();
+          },
+        }
       );
     },
-    [onAction, updateCases, onActionSuccess, appId, application]
+    [
+      onAction,
+      getStatus,
+      isCustomStatusesEnabled,
+      updateCases,
+      appId,
+      application,
+      reportStatusChanged,
+      entryPoint,
+      onActionSuccess,
+    ]
   );
 
   const shouldDisableStatus = useShouldDisableStatus();
 
-  const getStatusIcon = (status: CaseStatuses): string =>
-    selectedStatus && selectedStatus === status ? 'check' : 'empty';
+  const isSelected = (status: CaseStatusConfiguration): boolean =>
+    selectedStatusKey != null
+      ? status.key === selectedStatusKey
+      : selectedStatus === status.category && status.isDefault;
 
-  const getActions = (selectedCases: CasesUI): EuiContextMenuPanelItemDescriptor[] => {
-    return [
-      {
-        name: statuses[CaseStatuses.open].label,
-        icon: getStatusIcon(CaseStatuses.open),
-        onClick: () => handleUpdateCaseStatus(selectedCases, CaseStatuses.open),
-        disabled: isDisabled || shouldDisableStatus(selectedCases),
-        'data-test-subj': 'cases-bulk-action-status-open',
-        key: 'cases-bulk-action-status-open',
-      },
-      {
-        name: statuses[CaseStatuses['in-progress']].label,
-        icon: getStatusIcon(CaseStatuses['in-progress']),
-        onClick: () => handleUpdateCaseStatus(selectedCases, CaseStatuses['in-progress']),
-        disabled: isDisabled || shouldDisableStatus(selectedCases),
-        'data-test-subj': 'cases-bulk-action-status-in-progress',
-        key: 'cases-bulk-action-status-in-progress',
-      },
-      {
-        name: statuses[CaseStatuses.closed].label,
-        icon: getStatusIcon(CaseStatuses.closed),
-        disabled: isDisabled || shouldDisableStatus(selectedCases),
-        'data-test-subj': 'cases-bulk-action-status-closed',
-        key: 'cases-bulk-action-status-closed',
-      },
-    ];
-  };
+  /**
+   * @param onSelectClosed intercepts closed-category picks, for callers that collect a close reason first
+   */
+  const getActions = (
+    selectedCases: CasesUI,
+    onSelectClosed?: (status: CaseStatusConfiguration) => void
+  ): EuiContextMenuPanelItemDescriptor[] =>
+    enabledStatuses.map((status) => ({
+      name: status.label,
+      icon: isSelected(status) ? 'check' : 'empty',
+      onClick: () =>
+        status.category === CaseStatuses.closed && onSelectClosed
+          ? onSelectClosed(status)
+          : handleUpdateCaseStatus(selectedCases, status),
+      disabled: isDisabled || shouldDisableStatus(selectedCases),
+      'data-test-subj': `cases-bulk-action-status-${status.key}`,
+      key: `cases-bulk-action-status-${status.key}`,
+    }));
 
   return {
     getActions,

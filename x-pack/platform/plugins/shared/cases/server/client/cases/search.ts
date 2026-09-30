@@ -11,6 +11,7 @@ import Boom from '@hapi/boom';
 import { spaceIdToNamespace } from '@kbn/spaces-plugin/server/lib/utils/namespace';
 import { DEFAULT_NAMESPACE_STRING } from '@kbn/core-saved-objects-utils-server';
 import type { CustomFieldsConfiguration } from '../../../common/types/domain';
+import { getEffectiveStatuses } from '../../../common/utils/statuses';
 import type { CasesSearchRequest, CasesSearchResponse } from '../../../common/types/api';
 import { CasesSearchRequestRt, CasesSearchResponseRt } from '../../../common/types/api';
 import { decodeWithExcessOrThrow, decodeOrThrow } from '../../common/runtime_types';
@@ -56,6 +57,9 @@ export const search = async (
     const customFieldsConfiguration: CustomFieldsConfiguration = configurations
       .map((configuration) => configuration.customFields)
       .flat();
+    const statuses = configurations.flatMap((configuration) =>
+      getEffectiveStatuses(configuration.statuses)
+    );
 
     /**
      * Assign users to a case is only available to Platinum+
@@ -116,7 +120,9 @@ export const search = async (
     const statusStatsOptions = constructQueryOptions({
       ...options,
       status: undefined,
+      status_key: undefined,
       customFieldsConfiguration,
+      statuses,
       authorizationFilter,
       searchType: 'search',
     });
@@ -124,6 +130,7 @@ export const search = async (
     const caseQueryOptions = constructQueryOptions({
       ...options,
       customFieldsConfiguration,
+      statuses,
       authorizationFilter,
       searchType: 'search',
     });

@@ -199,6 +199,8 @@ export interface SystemFilterOptions {
   searchFields: string[];
   severity: CaseSeverity[];
   status: CaseStatuses[];
+  /** Configured status keys; used instead of `status` when custom statuses are on */
+  statusKey: string[];
   tags: string[];
   assignees: Array<string | null>;
   reporters: User[];

@@ -45,7 +45,10 @@ export const getActiveFilterDimensions = (
   if (isActive(filterOptions.severity, defaultFilterOptions.severity)) {
     dimensions.push('severity');
   }
-  if (isActive(filterOptions.status, defaultFilterOptions.status)) {
+  if (
+    isActive(filterOptions.status, defaultFilterOptions.status) ||
+    isActive(filterOptions.statusKey, defaultFilterOptions.statusKey)
+  ) {
     dimensions.push('status');
   }
   if (isActive(filterOptions.tags, defaultFilterOptions.tags)) {

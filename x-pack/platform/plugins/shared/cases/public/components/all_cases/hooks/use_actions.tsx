@@ -14,13 +14,14 @@ import type {
 import { EuiButtonIcon, EuiContextMenu, EuiPopover, EuiToolTip } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { CaseStatuses } from '@kbn/cases-components';
+import type { CaseStatusConfiguration } from '../../../../common/types/domain';
 import type { CaseUI } from '../../../containers/types';
 import { useDeleteAction } from '../../actions/delete/use_delete_action';
 import { ConfirmDeleteCaseModal } from '../../confirm_delete_case';
 import { useStatusAction } from '../../actions/status/use_status_action';
 import { useRefreshCases } from './use_on_refresh_cases';
 import * as i18n from '../translations';
-import { statuses } from '../../status';
+import { useCaseStatuses } from '../../status/use_case_statuses';
 import { useCasesContext } from '../../cases_context/use_cases_context';
 import { useSeverityAction } from '../../actions/severity/use_severity_action';
 import { severities } from '../../severity/config';
@@ -66,8 +67,12 @@ export const ActionColumnComponent: React.FC<{ theCase: CaseUI; disableActions: 
     isDisabled: false,
     onAction: closePopover,
     onActionSuccess: refreshCases,
+    entryPoint: 'list_row_action',
     selectedStatus: theCase.status,
+    selectedStatusKey: theCase.statusKey,
   });
+  const { getStatus } = useCaseStatuses();
+  const [closingStatus, setClosingStatus] = useState<CaseStatusConfiguration | null>(null);
 
   const severityAction = useSeverityAction({
     isDisabled: false,
@@ -95,9 +100,13 @@ export const ActionColumnComponent: React.FC<{ theCase: CaseUI; disableActions: 
 
   const onCloseCase = useCallback(
     (closeReason?: string) => {
-      statusAction.handleUpdateCaseStatus([theCase], CaseStatuses.closed, closeReason);
+      statusAction.handleUpdateCaseStatus(
+        [theCase],
+        closingStatus ?? CaseStatuses.closed,
+        closeReason
+      );
     },
-    [statusAction, theCase]
+    [closingStatus, statusAction, theCase]
   );
   const canSyncCloseReasonToAlerts = useCanSyncCloseReasonToAlerts({
     totalAlerts: theCase.totalAlerts,
@@ -109,22 +118,24 @@ export const ActionColumnComponent: React.FC<{ theCase: CaseUI; disableActions: 
     onCloseCase,
   });
 
-  const statusActions: EuiContextMenuPanelItemDescriptor[] = useMemo(() => {
-    return statusAction
-      .getActions([theCase])
-      .map((statusActionMenuItem: EuiContextMenuPanelItemDescriptor) => {
-        if (
-          statusActionMenuItem.key === 'cases-bulk-action-status-closed' &&
-          theCase.status !== CaseStatuses.closed
-        ) {
-          return {
-            ...statusActionMenuItem,
-            onClick: openCloseCaseModal,
-          } as EuiContextMenuPanelItemDescriptor;
-        }
-        return statusActionMenuItem;
-      });
-  }, [openCloseCaseModal, statusAction, theCase]);
+  const statusActions: EuiContextMenuPanelItemDescriptor[] = useMemo(
+    () =>
+      statusAction.getActions(
+        [theCase],
+        theCase.status !== CaseStatuses.closed
+          ? (status) => {
+              setClosingStatus(status);
+              openCloseCaseModal();
+            }
+          : // An already-closed case keeps its reason; only a different closed status is applied.
+            (status) => {
+              if (status.key !== getStatus(theCase.statusKey, theCase.status).key) {
+                statusAction.handleUpdateCaseStatus([theCase], status);
+              }
+            }
+      ),
+    [getStatus, openCloseCaseModal, statusAction, theCase]
+  );
 
   const canDelete = deleteAction.canDelete;
   const canUpdate = statusAction.canUpdateStatus;
@@ -142,7 +153,7 @@ export const ActionColumnComponent: React.FC<{ theCase: CaseUI; disableActions: 
           <FormattedMessage
             defaultMessage="Status: {status}"
             id="xpack.cases.allCasesView.statusWithValue"
-            values={{ status: <b>{statuses[theCase.status]?.label ?? '-'}</b> }}
+            values={{ status: <b>{getStatus(theCase.statusKey, theCase.status).label}</b> }}
           />
         ),
         panel: 1,
@@ -228,6 +239,7 @@ export const ActionColumnComponent: React.FC<{ theCase: CaseUI; disableActions: 
     tagsAction,
     theCase,
     shouldDisableStatus,
+    getStatus,
   ]);
 
   return (
