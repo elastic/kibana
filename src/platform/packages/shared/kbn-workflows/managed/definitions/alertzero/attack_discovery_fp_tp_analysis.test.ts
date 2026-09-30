@@ -375,10 +375,8 @@ describe('Attack Discovery FP/TP analysis workflow', () => {
       expect(loadAttack?.type).toBe('elasticsearch.search');
     });
 
-    it('reads it from the space-scoped ad-hoc discovery index', () => {
-      expect(loadAttack?.with?.index).toBe(
-        '.adhoc.alerts-security.attack.discovery.alerts-{{ workflow.spaceId }}'
-      );
+    it('reads it from the product-managed Attack Discovery alerts data stream', () => {
+      expect(loadAttack?.with?.index).toBe('.alerts-security.attack.discovery.alerts-default');
     });
 
     // The persisted document is indexed UNDER `kibana.alert.uuid`, so `_id` is the
