@@ -8,7 +8,7 @@
 import React from 'react';
 import { render, screen, waitFor, fireEvent, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { MAX_TAG_LENGTH } from '@kbn/alerting-v2-constants';
+import { MAX_TAG_LENGTH, MAX_TAGS } from '@kbn/alerting-v2-constants';
 import type { CreateRuleData, RuleTemplateResponse } from '@kbn/alerting-v2-schemas';
 import { CONTENT_LIST_TEST_SUBJECTS } from '@kbn/content-list-common';
 import { ListPageTestProviders } from '../../test_utils/test_providers';
@@ -224,6 +224,41 @@ describe('RuleLibraryList', () => {
     });
     expect(within(options).getByText('nginx')).toBeInTheDocument();
     expect(within(options).getByText('kubernetes')).toBeInTheDocument();
+  });
+
+  it('hides additional search results after reaching the tag selection limit', async () => {
+    const selectedTags = Array.from({ length: MAX_TAGS }, (_, index) => `tag-${index + 1}`);
+    const additionalTag = `tag-${MAX_TAGS + 1}`;
+    mockUseFetchRuleTemplateTags.mockImplementation(({ search }: { search?: string }) => ({
+      data: search === additionalTag ? [additionalTag] : selectedTags,
+      isLoading: false,
+      isError: false,
+    }));
+    resolveTemplateList();
+    renderList();
+    await screen.findByText('CPU usage');
+
+    fireEvent.click(screen.getByTestId('ruleLibraryTagsFilter'));
+    const options = await screen.findByTestId('ruleLibraryTagsFilter-list');
+    for (const tag of selectedTags) {
+      fireEvent.click(within(options).getByText(tag));
+    }
+
+    fireEvent.change(screen.getByTestId('ruleLibraryTagsFilterSearch'), {
+      target: { value: additionalTag },
+    });
+    await waitFor(() => {
+      expect(mockUseFetchRuleTemplateTags).toHaveBeenCalledWith({ search: additionalTag });
+    });
+
+    expect(within(options).queryByText(additionalTag)).not.toBeInTheDocument();
+    expect(
+      screen.getByText(`Maximum of ${MAX_TAGS} tags selected. Remove one to select another.`)
+    ).toBeInTheDocument();
+
+    fireEvent.click(within(options).getByText(selectedTags[MAX_TAGS - 1]));
+
+    expect(await within(options).findByText(additionalTag)).toBeInTheDocument();
   });
 
   it('installs a template from the row action', async () => {

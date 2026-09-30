@@ -7,7 +7,7 @@
 
 import React, { useMemo, useState } from 'react';
 import { EuiFieldSearch, EuiText, type Query } from '@elastic/eui';
-import { MAX_TAG_LENGTH, TAGS_RESPONSE_LIMIT } from '@kbn/alerting-v2-constants';
+import { MAX_TAG_LENGTH, MAX_TAGS, TAGS_RESPONSE_LIMIT } from '@kbn/alerting-v2-constants';
 import { SelectableFilterPopover, StandardFilterOption } from '@kbn/content-list';
 import { TAG_FILTER_ID } from '@kbn/content-list-provider';
 import { filter, useFieldQueryFilter } from '@kbn/content-list-toolbar';
@@ -23,6 +23,14 @@ const TAG_SEARCH_LABEL = i18n.translate('xpack.alertingV2.tagsFilter.searchPlace
 });
 const TAGS_FETCH_ERROR_MESSAGE = i18n.translate('xpack.alertingV2.tagsFilter.fetchError', {
   defaultMessage: 'Unable to load tags',
+});
+const TAGS_SELECTION_LIMIT_MESSAGE = i18n.translate('xpack.alertingV2.tagsFilter.selectionLimit', {
+  defaultMessage: 'Maximum of {limit} tags selected. Remove one to select another.',
+  values: { limit: MAX_TAGS },
+});
+const TAGS_CAP_GUIDANCE_MESSAGE = i18n.translate('xpack.alertingV2.tagsFilter.capGuidance', {
+  defaultMessage: 'Showing first {cap} most-used, type to search',
+  values: { cap: TAGS_RESPONSE_LIMIT },
 });
 
 /** Creates a content-list tag filter backed by the supplied tag query hook. */
@@ -59,13 +67,19 @@ export const createTagsFilter = ({
       search: debouncedTagSearch || undefined,
     });
 
+    const selectedTags = useMemo(() => Object.keys(selection), [selection]);
+    const selectionLimitReached = selectedTags.length >= MAX_TAGS;
     const options = useMemo(() => {
+      if (selectionLimitReached) {
+        return selectedTags.map((tag) => ({ key: tag, label: tag }));
+      }
+
       const apiTagSet = new Set(tagNames);
-      const orphans = Object.keys(selection)
+      const orphans = selectedTags
         .filter((tag) => !apiTagSet.has(tag))
         .map((tag) => ({ key: tag, label: tag }));
       return [...orphans, ...tagNames.map((tag) => ({ key: tag, label: tag }))];
-    }, [tagNames, selection]);
+    }, [tagNames, selectedTags, selectionLimitReached]);
 
     const showCapGuidance = tagNames.length >= TAGS_RESPONSE_LIMIT;
 
@@ -91,12 +105,17 @@ export const createTagsFilter = ({
           />
         }
         footerContent={
-          showCapGuidance ? (
+          selectionLimitReached ? (
+            <EuiText
+              size="xs"
+              color="subdued"
+              data-test-subj={`${testSubjectPrefix}SelectionLimitGuidance`}
+            >
+              {TAGS_SELECTION_LIMIT_MESSAGE}
+            </EuiText>
+          ) : showCapGuidance ? (
             <EuiText size="xs" color="subdued" data-test-subj={`${testSubjectPrefix}CapGuidance`}>
-              {i18n.translate('xpack.alertingV2.tagsFilter.capGuidance', {
-                defaultMessage: 'Showing first {cap} most-used, type to search',
-                values: { cap: TAGS_RESPONSE_LIMIT },
-              })}
+              {TAGS_CAP_GUIDANCE_MESSAGE}
             </EuiText>
           ) : undefined
         }
