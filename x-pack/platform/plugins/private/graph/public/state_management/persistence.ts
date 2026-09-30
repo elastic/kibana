@@ -135,15 +135,19 @@ export const registerPersistenceListeners = (
         return;
       }
 
-      const savedObjectId = await showModal({
-        deps,
-        workspace,
-        savedWorkspace: action.payload,
-        state,
-        selectedDatasource,
-      });
-      listenerApi.throwIfCancelled();
-      if (savedObjectId) {
+      const savedObjectId = await Promise.race([
+        showModal({
+          deps,
+          workspace,
+          savedWorkspace: action.payload,
+          state,
+          selectedDatasource,
+        }),
+        new Promise<undefined>((resolve) => {
+          listenerApi.signal.addEventListener('abort', () => resolve(undefined), { once: true });
+        }),
+      ]);
+      if (!listenerApi.signal.aborted && savedObjectId) {
         listenerApi.dispatch(updateMetaData({ savedObjectId }));
       }
     },
@@ -212,6 +216,7 @@ function showModal({
       resolveSavedObjectId(id);
       return { id };
     } catch (error) {
+      resolveSavedObjectId(undefined);
       deps.notifications.toasts.addDanger(
         i18n.translate('xpack.graph.saveWorkspace.savingErrorMessage', {
           defaultMessage: 'Failed to save workspace: {message}',
@@ -230,6 +235,7 @@ function showModal({
     workspace: savedWorkspace,
     saveWorkspace: saveWorkspaceHandler,
     services: deps,
+    onClose: () => resolveSavedObjectId(undefined),
   });
 
   return savedObjectIdPromise;
