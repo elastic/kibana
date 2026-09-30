@@ -562,6 +562,15 @@ export const CASES_TEMPLATE_APPLIED_EVENT_TYPE = 'cases_template_applied' as con
 export const CASES_TEMPLATE_CLEARED_EVENT_TYPE = 'cases_template_cleared' as const;
 
 /**
+ * Custom statuses. One event per confirmed status change or settings edit; each carries the
+ * category and whether a custom status is involved, never the label or key.
+ */
+export const CASES_STATUS_CHANGED_EVENT_TYPE = 'cases_status_changed' as const;
+
+export const CASES_STATUS_CONFIGURATION_EDITED_EVENT_TYPE =
+  'cases_status_configuration_edited' as const;
+
+/**
  * Field Library management events. One confirmed UI write each, never a total — see
  * `register_management_events`.
  */

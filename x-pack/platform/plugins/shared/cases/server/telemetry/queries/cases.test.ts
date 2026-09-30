@@ -163,6 +163,25 @@ describe('getCasesTelemetryData', () => {
             },
           ],
         },
+        customStatuses: {
+          buckets: [
+            {
+              key: 'awaiting_customer',
+              doc_count: 3,
+              status: { buckets: [{ key: CasePersistedStatus.IN_PROGRESS, doc_count: 3 }] },
+            },
+            {
+              key: 'triage',
+              doc_count: 2,
+              status: {
+                buckets: [
+                  { key: CasePersistedStatus.IN_PROGRESS, doc_count: 1 },
+                  { key: CasePersistedStatus.OPEN, doc_count: 1 },
+                ],
+              },
+            },
+          ],
+        },
         totalsByOwner: {
           buckets: [
             {
@@ -376,6 +395,11 @@ describe('getCasesTelemetryData', () => {
             closed: 0,
             inProgress: 0,
             open: 2,
+          },
+          customStatuses: {
+            closed: 0,
+            inProgress: 4,
+            open: 1,
           },
           syncAlertsOff: 1,
           syncAlertsOn: 1,
@@ -615,6 +639,24 @@ describe('getCasesTelemetryData', () => {
                     "to": "now",
                   },
                 ],
+              },
+            },
+            "customStatuses": Object {
+              "aggs": Object {
+                "status": Object {
+                  "terms": Object {
+                    "field": "cases.attributes.status",
+                  },
+                },
+              },
+              "terms": Object {
+                "exclude": Array [
+                  "open",
+                  "in-progress",
+                  "closed",
+                ],
+                "field": "cases.attributes.status_key",
+                "size": 100,
               },
             },
             "extractObservables": Object {

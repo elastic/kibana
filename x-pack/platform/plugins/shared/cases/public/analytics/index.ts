@@ -20,6 +20,7 @@ import {
   CASES_LIST_VIEW_MODE_CHANGED_EVENT_TYPE,
 } from '../../common/constants';
 import { registerFieldLibraryAnalytics } from './field_library';
+import { registerStatusAnalytics } from './statuses';
 import { registerTemplateAnalytics } from './templates';
 
 export const registerAnalytics = ({
@@ -277,4 +278,6 @@ export const registerAnalytics = ({
   registerTemplateAnalytics({ analyticsService });
 
   registerFieldLibraryAnalytics({ analyticsService });
+
+  registerStatusAnalytics({ analyticsService });
 };

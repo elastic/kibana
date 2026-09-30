@@ -63,6 +63,12 @@ describe('configuration', () => {
         totalsByType: {},
       },
     };
+    const emptyCustomStatusesMock = {
+      customStatuses: {
+        configurations: 0,
+        statuses: { open: 0, inProgress: 0, closed: 0 },
+      },
+    };
 
     beforeEach(() => {
       jest.clearAllMocks();
@@ -80,6 +86,7 @@ describe('configuration', () => {
             automatic: 2,
           },
           ...emptyCustomFieldsMock,
+          ...emptyCustomStatusesMock,
         },
         sec: { ...emptyCustomFieldsMock },
         obs: { ...emptyCustomFieldsMock },
@@ -164,6 +171,7 @@ describe('configuration', () => {
               foo: 2,
             },
           },
+          ...emptyCustomStatusesMock,
         },
         sec: { ...emptyCustomFieldsMock },
         obs: {
@@ -188,6 +196,71 @@ describe('configuration', () => {
             },
           },
         },
+      });
+    });
+
+    it('counts configured custom statuses per category', async () => {
+      const builtIn = (key: string) => ({
+        key,
+        label: key,
+        category: key,
+        order: 0,
+        isDefault: true,
+        disabled: false,
+      });
+      const custom = (key: string, category: string) => ({
+        key,
+        label: key,
+        category,
+        order: 1,
+        isDefault: false,
+        disabled: false,
+      });
+
+      savedObjectsClient.find.mockResolvedValue({
+        total: 5,
+        saved_objects: [
+          {
+            score: 1,
+            id: 'test',
+            references: [],
+            type: 'cases',
+            attributes: {
+              owner: 'securitySolution',
+              statuses: [
+                builtIn('open'),
+                builtIn('in-progress'),
+                builtIn('closed'),
+                custom('awaiting_customer', 'in-progress'),
+                custom('on_hold', 'in-progress'),
+                custom('closed_duplicate', 'closed'),
+              ],
+            },
+          },
+          {
+            score: 1,
+            id: 'test1',
+            references: [],
+            type: 'cases',
+            attributes: {
+              owner: 'observability',
+              statuses: [builtIn('open'), builtIn('in-progress'), builtIn('closed')],
+            },
+          },
+        ],
+        per_page: 5,
+        page: 1,
+        aggregations: { closureType: { buckets: [] } },
+      });
+
+      const res = await getConfigurationTelemetryData({
+        savedObjectsClient: telemetrySavedObjectsClient,
+        logger,
+      });
+
+      expect(res.all.customStatuses).toEqual({
+        configurations: 1,
+        statuses: { open: 0, inProgress: 2, closed: 1 },
       });
     });
 
@@ -237,6 +310,7 @@ describe('configuration', () => {
               foo: 1,
             },
           },
+          ...emptyCustomStatusesMock,
         },
         sec: {
           customFields: {

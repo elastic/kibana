@@ -142,6 +142,7 @@ export type CaseAggregationResult = Record<
   extractObservables: Buckets;
   observables: ObservablesAggregationResult;
   status: Buckets;
+  customStatuses?: { buckets: Array<Bucket<string> & { status: Buckets<number> }> };
   users: Cardinality;
   tags: Cardinality;
   totalAssignees: ValueCount;
@@ -313,6 +314,8 @@ export interface CasesTelemetry {
       AttachmentFramework & {
         assignees: Assignees;
         status: Status;
+        /** Cases currently on a custom (non built-in) status, per category */
+        customStatuses: Status;
         syncAlertsOn: number;
         syncAlertsOff: number;
         extractObservablesOn: number;
@@ -354,6 +357,12 @@ export interface CasesTelemetry {
         automatic: number;
       };
       customFields: CustomFieldsTelemetry;
+      customStatuses: {
+        /** Configurations with at least one custom status */
+        configurations: number;
+        /** Configured custom statuses, per category */
+        statuses: Status;
+      };
     };
     sec: CustomFieldsSolutionTelemetry;
     obs: CustomFieldsSolutionTelemetry;

@@ -8233,6 +8233,19 @@
                     }
                   }
                 },
+                "customStatuses": {
+                  "properties": {
+                    "open": {
+                      "type": "long"
+                    },
+                    "inProgress": {
+                      "type": "long"
+                    },
+                    "closed": {
+                      "type": "long"
+                    }
+                  }
+                },
                 "syncAlertsOn": {
                   "type": "long"
                 },
@@ -9073,6 +9086,29 @@
                     },
                     "required": {
                       "type": "long"
+                    }
+                  }
+                },
+                "customStatuses": {
+                  "properties": {
+                    "configurations": {
+                      "type": "long",
+                      "_meta": {
+                        "description": "Number of configurations with at least one custom status"
+                      }
+                    },
+                    "statuses": {
+                      "properties": {
+                        "open": {
+                          "type": "long"
+                        },
+                        "inProgress": {
+                          "type": "long"
+                        },
+                        "closed": {
+                          "type": "long"
+                        }
+                      }
                     }
                   }
                 }

@@ -322,6 +322,7 @@ export const casesSchema: CasesTelemetrySchema = {
       attachmentFramework: attachmentFrameworkSchema,
       assignees: assigneesSchema,
       status: statusSchema,
+      customStatuses: statusSchema,
       syncAlertsOn: long,
       syncAlertsOff: long,
       extractObservablesOn: {
@@ -419,6 +420,13 @@ export const casesSchema: CasesTelemetrySchema = {
         automatic: long,
       },
       ...customFieldsSolutionTelemetrySchema,
+      customStatuses: {
+        configurations: {
+          type: 'long',
+          _meta: { description: 'Number of configurations with at least one custom status' },
+        },
+        statuses: statusSchema,
+      },
     },
     sec: customFieldsSolutionTelemetrySchema,
     obs: customFieldsSolutionTelemetrySchema,
