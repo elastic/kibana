@@ -220,16 +220,22 @@ export abstract class SaveMixin extends NavigationMixin {
     const timeout = options?.timeout ?? 30_000;
 
     // Arm the response interceptor before clicking so we never miss it.
-    // Use an explicit timeout — the page default (10s) is too short for 3 button clicks + HTTP.
+    // Use the caller's timeout — the page default (10s) is too short for 3 button clicks + HTTP.
     const generateResponsePromise = this.page.waitForResponse(
       (r) => r.url().includes('/internal/reporting/generate/') && r.request().method() === 'POST',
-      { timeout: 30_000 }
+      { timeout }
     );
 
     // Export may live in the top nav or the overflow menu depending on viewport / Discover layout.
-    await this.clickAppMenuItem('exportTopNavButton');
-    await this.page.testSubj.click('exportMenuItem-CSV');
-    await this.page.testSubj.click('generateReportButton');
+    // Settle the interceptor on click errors so it never produces an unhandled rejection.
+    try {
+      await this.clickAppMenuItem('exportTopNavButton');
+      await this.page.testSubj.click('exportMenuItem-CSV');
+      await this.page.testSubj.click('generateReportButton');
+    } catch (clickErr) {
+      generateResponsePromise.catch(() => {});
+      throw clickErr;
+    }
 
     const generateResponse = await generateResponsePromise;
     if (!generateResponse.ok()) {
@@ -264,7 +270,7 @@ export abstract class SaveMixin extends NavigationMixin {
 
   private async pollJobStatus(jobId: string, timeout: number): Promise<JobPollResult> {
     const baseUrl = new URL(this.page.url()).origin;
-    let job: { status: string; error?: unknown } | undefined;
+    let job: { status: string; output?: { warnings?: string[] } } | undefined;
 
     await expect
       .poll(
@@ -274,7 +280,7 @@ export abstract class SaveMixin extends NavigationMixin {
               `${baseUrl}/internal/reporting/jobs/info/${jobId}`
             );
             if (!response.ok()) return 'pending';
-            job = (await response.json()) as { status: string; error?: unknown };
+            job = (await response.json()) as { status: string; output?: { warnings?: string[] } };
             return job.status;
           } catch {
             return 'pending';
@@ -285,9 +291,11 @@ export abstract class SaveMixin extends NavigationMixin {
       .toMatch(/completed|warnings|failed/);
 
     const failed = job?.status === 'failed';
+    // Failed reports surface their error via output.warnings[0] — the jobs/info endpoint
+    // serialises via Report.toApiJSON() which does not expose the raw `error` field.
     return {
       failed,
-      errorText: failed && job?.error ? JSON.stringify(job.error) : undefined,
+      errorText: failed ? job?.output?.warnings?.[0] : undefined,
     };
   }
 }
