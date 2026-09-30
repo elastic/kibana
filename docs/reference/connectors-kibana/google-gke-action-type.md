@@ -125,6 +125,7 @@ Every cluster action accepts an optional `projectId` and a `location` (the zone 
 * A safe upgrade reads `getServerConfig`, upgrades the control plane with `updateCluster` and `desiredMasterVersion`, polls the operation, then upgrades each node pool with `desiredNodeVersion` and `desiredNodePoolId`. If a node upgrade fails, `rollbackNodePoolUpgrade` reverts the nodes that already moved.
 * `autoUpgrade` cannot be turned off on clusters enrolled in a release channel. Leave the channel first with `updateCluster` and `desiredReleaseChannel: "UNSPECIFIED"`.
 * Organizations that enforce tagging on Compute Engine instances can pass `resourceManagerTags` to `createCluster` and `createNodePool`; without the required tags node creation is denied by the organization policy and the operation ends in an error.
+* `createCluster`'s `network` and `subnetwork` accept either a bare name in the connector's own project (for example `default`) or a fully qualified Shared VPC reference (for example `projects/host-project/global/networks/shared` and `projects/host-project/regions/us-central1/subnetworks/nodes`) to provision into another project's VPC.
 * To manage workloads in a cluster, call `getCluster`, then create a Kubernetes connector with the returned `kubernetesConnector.apiUrl`, the **Google Kubernetes Engine (GKE)** authentication type, the same service account JSON key, and `caCertificatePem` as the cluster CA certificate.
 
 ## Connector networking configuration [google-gke-connector-networking-configuration]
