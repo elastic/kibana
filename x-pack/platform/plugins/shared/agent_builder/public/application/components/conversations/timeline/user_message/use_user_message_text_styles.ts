@@ -9,6 +9,8 @@ import { useMemo } from 'react';
 import { css, type SerializedStyles } from '@emotion/react';
 import { euiTextTruncate, useEuiTheme } from '@elastic/eui';
 import { COMMAND_BADGE_MAX_WIDTH_CH } from '../../conversation_input/message_editor/command_badge/constants';
+import { MARKDOWN_BLOCK_SPACER_CLASS_NAME } from '../response/markdown_plugins';
+import { markdownContainerStyles } from '../response/markdown_container.styles';
 
 export interface UserMessageTextStyles {
   container: SerializedStyles;
@@ -24,10 +26,8 @@ export const useUserMessageTextStyles = (): UserMessageTextStyles => {
 
   return useMemo(
     () => ({
-      // Mirrors ChatMessageText's container tweaks so list spacing matches the assistant side —
-      // EUI's markdown defaults render lists looser than this bubble's compact style wants.
       container: css`
-        overflow-wrap: anywhere;
+        ${markdownContainerStyles(euiTheme)}
 
         /* Avoids extra blank lines: remark's leftover "\\n" text nodes would otherwise render under the inherited white-space: pre-wrap (user_message.tsx). */
         .euiMarkdownFormat {
@@ -44,17 +44,9 @@ export const useUserMessageTextStyles = (): UserMessageTextStyles => {
           margin-bottom: 0;
         }
 
-        ol > li:not(:first-child) {
-          margin-top: ${euiTheme.size.s};
-        }
-
-        ol > li > p {
-          margin-bottom: ${euiTheme.size.s};
-        }
-
-        .euiMarkdownFormat > ul > li,
-        .euiMarkdownFormat > ol > li {
-          line-height: ${euiTheme.size.l};
+        /* Makes sure there is no gap below a code block or table when it's the last thing in the message. */
+        .${MARKDOWN_BLOCK_SPACER_CLASS_NAME}:last-child {
+          display: none;
         }
       `,
       badge: css`

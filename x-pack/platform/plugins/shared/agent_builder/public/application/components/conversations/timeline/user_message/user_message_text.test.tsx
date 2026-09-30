@@ -145,6 +145,14 @@ describe('UserMessageText', () => {
       expect(container.querySelector('pre')).toHaveTextContent('const x = 1;');
     });
 
+    it('renders ES|QL fenced code blocks', () => {
+      const { container } = renderWithProvider(
+        <UserMessageText text={'```esql\nFROM logs-* | LIMIT 10\n```'} />
+      );
+
+      expect(container.querySelector('pre')).toHaveTextContent('FROM logs-* | LIMIT 10');
+    });
+
     it('renders GFM tables', () => {
       renderWithProvider(<UserMessageText text={'| A | B |\n| --- | --- |\n| foo | bar |'} />);
 

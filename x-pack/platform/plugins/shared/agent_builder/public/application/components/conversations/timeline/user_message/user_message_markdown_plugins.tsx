@@ -9,14 +9,20 @@ import React, { useMemo } from 'react';
 import {
   EuiToolTip,
   EuiIcon,
-  EuiLink,
   getDefaultEuiMarkdownParsingPlugins,
   getDefaultEuiMarkdownProcessingPlugins,
 } from '@elastic/eui';
 import type { PluggableList } from 'unified';
 import { sortedCommandDefinitions } from '../../conversation_input/message_editor/command_menu';
 import { IMAGE_ATTACHMENT_SCHEME } from '../../conversation_input/message_editor/image_placeholder';
-import { useUserMessageTextStyles, type UserMessageTextStyles } from './use_user_message_text_styles';
+import {
+  createConversationMarkdownComponents,
+  esqlLanguagePlugin,
+} from '../response/markdown_plugins';
+import {
+  useUserMessageTextStyles,
+  type UserMessageTextStyles,
+} from './use_user_message_text_styles';
 
 // Badges are serialized as markdown links, e.g. `[/Summarize](skill://skill-1)`. EUI's markdown
 // parser only allows http(s)/mailto links by default and rewrites anything else back to literal
@@ -49,7 +55,7 @@ export const decodeBadgeName = (path: string): string => {
 
 interface UseUserMessageMarkdownPluginsArgs {
   onHoverImage?: (name: string | null) => void;
-  onLinkClick?: (href: string, e: React.MouseEvent<HTMLAnchorElement>) => void;
+  onLinkClick: (href: string, e: React.MouseEvent<HTMLAnchorElement>) => void;
 }
 
 interface UserMessageMarkdownPlugins {
@@ -60,14 +66,13 @@ interface UserMessageMarkdownPlugins {
 
 /**
  * Builds the parsing/processing plugin lists that make `EuiMarkdownFormat` render user message
- * text: badge schemes are allow-listed as links, and a custom `a` renderer turns those links back
- * into badges (image / command) while everything else renders as a plain link whose clicks are
- * delegated to `onLinkClick`.
+ * text with the same renderers as agent responses, except that badge schemes are allow-listed as
+ * links and a custom `a` renderer turns those links back into badges (image / command).
  */
 export const useUserMessageMarkdownPlugins = ({
   onHoverImage,
   onLinkClick,
-}: UseUserMessageMarkdownPluginsArgs = {}): UserMessageMarkdownPlugins => {
+}: UseUserMessageMarkdownPluginsArgs): UserMessageMarkdownPlugins => {
   const styles = useUserMessageTextStyles();
 
   const { parsingPluginList, processingPluginList } = useMemo(() => {
@@ -79,15 +84,15 @@ export const useUserMessageMarkdownPlugins = ({
     const [remarkToRehypePlugin, remarkToRehypeOptions] = defaultProcessingPlugins[0];
     const [rehypeToReactPlugin, rehypeToReactOptions] = defaultProcessingPlugins[1];
 
+    const { a: MarkdownLink, ...conversationComponents } = createConversationMarkdownComponents({
+      onLinkClick,
+    });
+
     rehypeToReactOptions.components = {
       ...rehypeToReactOptions.components,
-      a: ({
-        href,
-        children,
-        type,
-        color,
-        ...rest
-      }: React.AnchorHTMLAttributes<HTMLAnchorElement>) => {
+      ...conversationComponents,
+      a: (props: React.AnchorHTMLAttributes<HTMLAnchorElement>) => {
+        const { href, children } = props;
         const parsed = href ? parseSchemeAndPath(href) : undefined;
 
         if (parsed?.scheme === IMAGE_ATTACHMENT_SCHEME) {
@@ -119,25 +124,12 @@ export const useUserMessageMarkdownPlugins = ({
           );
         }
 
-        return (
-          <EuiLink
-            {...rest}
-            href={href}
-            target="_blank"
-            rel="noreferrer"
-            external={false}
-            onClick={(e: React.MouseEvent<HTMLAnchorElement>) => {
-              if (href && onLinkClick) onLinkClick(href, e);
-            }}
-          >
-            {children}
-          </EuiLink>
-        );
+        return <MarkdownLink {...props} />;
       },
     };
 
     return {
-      parsingPluginList: parsingPlugins,
+      parsingPluginList: [esqlLanguagePlugin, ...parsingPlugins],
       processingPluginList: [
         [remarkToRehypePlugin, remarkToRehypeOptions],
         [rehypeToReactPlugin, rehypeToReactOptions],

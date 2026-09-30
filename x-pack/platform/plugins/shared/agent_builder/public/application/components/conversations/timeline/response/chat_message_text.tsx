@@ -5,21 +5,13 @@
  * 2.0.
  */
 
-import { css } from '@emotion/css';
 import React, { useMemo } from 'react';
 import {
-  EuiCodeBlock,
-  EuiTable,
-  EuiTableRow,
-  EuiTableRowCell,
-  EuiTableHeaderCell,
   EuiMarkdownFormat,
-  EuiSpacer,
   EuiText,
   getDefaultEuiMarkdownParsingPlugins,
   getDefaultEuiMarkdownProcessingPlugins,
   useEuiTheme,
-  EuiLink,
 } from '@elastic/eui';
 import { type PluggableList } from 'unified';
 import type { ConversationRoundStep } from '@kbn/agent-builder-common';
@@ -44,7 +36,9 @@ import {
   createRenderAttachmentRenderer,
   renderTagParser,
   createRenderRenderer,
+  createConversationMarkdownComponents,
 } from './markdown_plugins';
+import { markdownContainerStyles } from './markdown_container.styles';
 import { useStepsFromSavedTurns } from '../../../../hooks/use_steps_from_saved_turns';
 import { useConversationContext } from '../../../../context/conversation/conversation_context';
 import { useMarkdownLinkClick } from './use_markdown_link_click';
@@ -71,24 +65,6 @@ export function ChatMessageText({
   isStreaming = false,
 }: Props) {
   const { euiTheme } = useEuiTheme();
-
-  const containerClassName = css`
-    overflow-wrap: anywhere;
-
-    /* Standardize spacing between numbered list items */
-    ol > li:not(:first-child) {
-      margin-top: ${euiTheme.size.s};
-    }
-
-    ol > li > p {
-      margin-bottom: ${euiTheme.size.s};
-    }
-
-    .euiMarkdownFormat > ul > li,
-    .euiMarkdownFormat > ol > li {
-      line-height: ${euiTheme.size.l};
-    }
-  `;
 
   const { attachmentsService, renderersService, conversationsService, startDependencies } =
     useAgentBuilderServices();
@@ -158,71 +134,8 @@ export function ChatMessageText({
 
     rehypeToReactOptions.components = {
       ...rehypeToReactOptions.components,
-      a: (props) => (
-        <EuiLink
-          {...props}
-          target="_blank"
-          rel="noreferrer"
-          external={false}
-          onClick={(e: React.MouseEvent<HTMLAnchorElement>) => {
-            if (props.href) handleLinkClick(props.href, e);
-          }}
-        />
-      ),
+      ...createConversationMarkdownComponents({ onLinkClick: handleLinkClick }),
       cursor: Cursor,
-      codeBlock: (props) => {
-        return (
-          <>
-            <EuiCodeBlock>{props.value}</EuiCodeBlock>
-            <EuiSpacer size="m" />
-          </>
-        );
-      },
-      esql: (props) => {
-        return (
-          <>
-            <EuiCodeBlock language="esql" isCopyable>
-              {props.value}
-            </EuiCodeBlock>
-            <EuiSpacer size="m" />
-          </>
-        );
-      },
-      table: (props) => (
-        <>
-          <EuiTable {...props} tableLayout="auto" scrollableInline responsiveBreakpoint={false} />
-          <EuiSpacer size="m" />
-        </>
-      ),
-      th: (props) => {
-        const { children, ...rest } = props;
-        return (
-          <EuiTableHeaderCell
-            minWidth="10em"
-            // This is just a recommendation and will be ignored if there aren't
-            // enough columns to fill the entire container's width.
-            maxWidth="30em"
-            {...rest}
-          >
-            {children}
-          </EuiTableHeaderCell>
-        );
-      },
-      tr: (props) => <EuiTableRow {...props} />,
-      td: (props) => {
-        const { children, ...rest } = props;
-        return (
-          <EuiTableRowCell
-            minWidth="10em"
-            // This is just a recommendation and will be ignored if there aren't
-            // enough columns to fill the entire container's width.
-            maxWidth="30em"
-            {...rest}
-          >
-            {children}
-          </EuiTableRowCell>
-        );
-      },
       [visualizationElement.tagName]: visualizationRenderer,
       [renderAttachmentElement.tagName]: renderAttachmentRenderer,
       [renderElement.tagName]: renderRenderer,
@@ -243,7 +156,7 @@ export function ChatMessageText({
 
   return (
     <>
-      <EuiText size="s" className={containerClassName}>
+      <EuiText size="s" css={markdownContainerStyles(euiTheme)}>
         <EuiMarkdownFormat
           textSize="s"
           parsingPluginList={parsingPluginList}
