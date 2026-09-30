@@ -102,7 +102,6 @@ describe('graph_visualization', () => {
   const workspace = {
     nodes,
     edges,
-    getAllIntersections: jest.fn(),
   } as unknown as jest.Mocked<Workspace>;
 
   const defaultSelectionProps = {
