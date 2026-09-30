@@ -92,10 +92,6 @@ export interface Workspace {
   nodes: WorkspaceNode[];
   edges: WorkspaceEdge[];
   blocklistedNodes: BlockListedNode[];
-  undoLog: string;
-  redoLog: string;
-  undo: () => void;
-  redo: () => void;
   deleteNodes: (nodeIds: string[]) => void;
   blocklistNodes: (nodeIds: string[]) => void;
   groupNodes: (parentId: string, nodeIds: string[]) => void;
