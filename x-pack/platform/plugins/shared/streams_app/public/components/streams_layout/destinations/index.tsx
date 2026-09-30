@@ -9,7 +9,7 @@ import React from 'react';
 import { css } from '@emotion/react';
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 import { CreateDestinationModal } from './create_destination_modal';
-import { UnitDestinationFlyout } from './destination_details_flyout';
+import { UnitDestinationFlyout } from './unit_destination_flyout';
 import { getDestinationSortableValue, DestinationsGrid } from './destinations_grid';
 import { DestinationsToolbar } from './destinations_toolbar';
 import { useDestinationsTable } from './destinations_context';

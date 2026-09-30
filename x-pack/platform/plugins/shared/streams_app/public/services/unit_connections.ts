@@ -317,7 +317,8 @@ export const canConnectSourceToDestination = (
   sourceId: string,
   destinationId: string
 ): boolean => {
-  if (telemetryFit(unit, sourceId, destinationId) === 'incompatible') {
+  const fit = telemetryFit(unit, sourceId, destinationId);
+  if (fit === 'incompatible') {
     return false;
   }
   const pipelineIndex = findSourcePipelineIndex(unit.unit.pipelines, sourceId);
@@ -325,8 +326,7 @@ export const canConnectSourceToDestination = (
     return true;
   }
   const pipeline = unit.unit.pipelines[pipelineIndex];
-  const fit = telemetryFit(unit, sourceId, destinationId);
-  if (fit !== 'unknown' && fit !== 'incompatible') {
+  if (fit !== 'unknown') {
     const pipelineSignals = new Set(pipeline.supported_telemetry);
     if (!fit.some((signal) => pipelineSignals.has(signal))) {
       return false;

@@ -89,7 +89,7 @@ import { CreateSourceModal } from '../../../streams_layout/sources/create_source
 import { SourceDetailsFlyout } from '../../../streams_layout/sources/source_details_flyout';
 import { useDestinations } from '../../../streams_layout/destinations/destinations_context';
 import { CreateDestinationModal } from '../../../streams_layout/destinations/create_destination_modal';
-import { UnitDestinationFlyout } from '../../../streams_layout/destinations/destination_details_flyout';
+import { UnitDestinationFlyout } from '../../../streams_layout/destinations/unit_destination_flyout';
 import type { DestinationViewModel } from '../../../streams_layout/destinations/types';
 import {
   getUnitDestinations,
@@ -670,6 +670,21 @@ function StreamsCanvasInner() {
     redo();
   }, [canRedo, isSaving, redo]);
 
+  // Each new placeholder is its own undo step. Reopening the create modal does not add one.
+  const addUnconfiguredSource = useCallback(() => {
+    if (!isCreateModalOpen) {
+      record();
+    }
+    openCreateModal();
+  }, [isCreateModalOpen, openCreateModal, record]);
+
+  const addUnconfiguredDestination = useCallback(() => {
+    if (!isCreateDestinationModalOpen) {
+      record();
+    }
+    openCreateDestinationModal();
+  }, [isCreateDestinationModalOpen, openCreateDestinationModal, record]);
+
   // Escape closes the context menu and clears any node selection.
   const onEscape = useCallback(() => {
     closeContextMenu();
@@ -862,8 +877,8 @@ function StreamsCanvasInner() {
           <CanvasToolbar
             onUndo={handleUndo}
             onRedo={handleRedo}
-            onAddSource={openCreateModal}
-            onAddDestination={openCreateDestinationModal}
+            onAddSource={addUnconfiguredSource}
+            onAddDestination={addUnconfiguredDestination}
             canUndo={canUndo && !isSaving}
             canRedo={canRedo && !isSaving}
             canAdd={!isSaving}
