@@ -61,6 +61,19 @@ export const DEFAULT_HITL_INPUT_OPEN_FORM_LABEL = 'Open form' as const;
 export const DEFAULT_HITL_INPUT_CHANNEL_MESSAGE =
   'Respond here: {{context.hitl.externalFormLink}}' as const;
 
+export const MAX_HITL_EMAIL_RECIPIENTS = 100 as const;
+
+export const MAX_HITL_EMAIL_ADDRESS_LENGTH = 512 as const;
+
+export const MAX_HITL_EMAIL_SUBJECT_LENGTH = 998 as const;
+
+export const DEFAULT_HITL_INPUT_EMAIL_SUBJECT = 'Input required' as const;
+
+export const DEFAULT_HITL_APPROVAL_EMAIL_SUBJECT = 'Approval required' as const;
+
+/** `kibanaFooterLink.text` for HITL emails (matches Elastic connector footer pattern). */
+export const DEFAULT_HITL_EMAIL_FOOTER_LINK_TEXT = 'View in Kibana' as const;
+
 /**
  * YAML schema description for `with.channels` on HITL wait steps with scope boundary definition.
  */
@@ -80,6 +93,7 @@ export const isHitlWaitStepType = (stepType: string | undefined): stepType is Hi
 export const HITL_CHANNEL_CONNECTOR_TYPES = {
   slack: 'slack',
   slack_api: 'slack_api',
+  email: 'email',
 } as const satisfies Record<string, string>;
 
 export type HitlChannelKey = keyof typeof HITL_CHANNEL_CONNECTOR_TYPES;

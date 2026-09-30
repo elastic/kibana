@@ -12,6 +12,12 @@ import {
   DEFAULT_HITL_INPUT_CHANNEL_MESSAGE,
   DEFAULT_HITL_INPUT_OPEN_FORM_LABEL,
 } from '@kbn/workflows/server';
+import {
+  absoluteUrlToKibanaFooterPath,
+  buildDefaultHitlInputEmailMessage,
+  buildHitlEmailConnectorInput,
+  resolveHitlEmailSubject,
+} from './build_hitl_email_notification';
 import { hasExternalHitlChannels } from './has_external_hitl_channels';
 import { assertConnectorSucceeded, slackApiChannelTarget } from './hitl_connector_helpers';
 import type { ConnectorExecutor } from '../../connector_executor';
@@ -171,5 +177,34 @@ export async function sendWaitForInputNotifications({
       });
       assertConnectorSucceeded(result);
     }
+  }
+
+  const emailConfig = channels.email;
+  if (emailConfig?.['connector-id'] && emailConfig.to?.length) {
+    const message =
+      emailConfig.message != null
+        ? resolveWaitForInputChannelMessage({
+            channelMessageTemplate: emailConfig.message,
+            stepMessage,
+            formUrl,
+            renderTemplate,
+          })
+        : buildDefaultHitlInputEmailMessage({ stepMessage, formUrl });
+
+    const result = await connectorExecutor.execute({
+      connectorType: 'email',
+      connectorNameOrId: emailConfig['connector-id'],
+      input: buildHitlEmailConnectorInput({
+        emailConfig,
+        subject: resolveHitlEmailSubject(
+          emailConfig.subject != null ? renderTemplate(emailConfig.subject) : undefined,
+          'input'
+        ),
+        message,
+        footerLinkPath: absoluteUrlToKibanaFooterPath(formUrl),
+      }),
+      abortController,
+    });
+    assertConnectorSucceeded(result);
   }
 }

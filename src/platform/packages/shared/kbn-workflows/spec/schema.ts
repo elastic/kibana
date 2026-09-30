@@ -23,6 +23,9 @@ import {
   HITL_EXTERNAL_FORM_LINK_CONTEXT_KEY,
   HITL_EXTERNAL_QUERY_LINK_CONTEXT_KEY,
   MAX_HITL_ACTION_LABEL_LENGTH,
+  MAX_HITL_EMAIL_ADDRESS_LENGTH,
+  MAX_HITL_EMAIL_RECIPIENTS,
+  MAX_HITL_EMAIL_SUBJECT_LENGTH,
   MAX_HITL_EXTERNAL_LINK_LENGTH,
   MAX_HITL_MESSAGE_LENGTH,
   MAX_HITL_SLACK_CHANNEL_LENGTH,
@@ -313,12 +316,7 @@ export const WaitStepSchema = BaseStepSchema.extend({
 });
 export type WaitStep = z.infer<typeof WaitStepSchema>;
 
-export const WaitForApprovalSlackChannelSchema = z.object({
-  'connector-id': z
-    .string()
-    .min(1)
-    .max(CONNECTOR_ID_MAX_LENGTH)
-    .describe('Slack webhook connector saved object id or name (posts to the webhook channel)'),
+const hitlChannelMessageField = {
   message: z
     .string()
     .max(MAX_HITL_MESSAGE_LENGTH)
@@ -326,9 +324,17 @@ export const WaitForApprovalSlackChannelSchema = z.object({
     .describe(
       'Optional notification template. Use {{context.hitl.externalFormLink}} for the external input form link.'
     ),
+};
+
+export const HitlSlackChannelSchema = z.object({
+  'connector-id': z
+    .string()
+    .min(1)
+    .max(CONNECTOR_ID_MAX_LENGTH)
+    .describe('Slack webhook connector saved object id or name (posts to the webhook channel)'),
 });
 
-export const WaitForApprovalSlackApiChannelSchema = z.object({
+export const HitlSlackApiChannelSchema = z.object({
   'connector-id': z
     .string()
     .min(1)
@@ -346,28 +352,62 @@ export const WaitForApprovalSlackApiChannelSchema = z.object({
     .describe(
       'Slack channels to notify. Each entry may be a channel ID (e.g. C0123456789) or a channel name (e.g. #alerts). Must be allowed on the Slack API connector when an allowlist is configured.'
     ),
-  message: z
-    .string()
-    .max(MAX_HITL_MESSAGE_LENGTH)
-    .optional()
-    .describe(
-      'Optional notification template. Use {{context.hitl.externalFormLink}} for the external input form link.'
-    ),
 });
 
-export const WaitForApprovalChannelsSchema = z
+export const HitlEmailRecipientListSchema = z
+  .array(z.string().min(1).max(MAX_HITL_EMAIL_ADDRESS_LENGTH))
+  .min(1)
+  .max(MAX_HITL_EMAIL_RECIPIENTS);
+
+export const HitlEmailChannelSchema = z.object({
+  'connector-id': z
+    .string()
+    .min(1)
+    .max(CONNECTOR_ID_MAX_LENGTH)
+    .describe('Email connector saved object id or name'),
+  to: HitlEmailRecipientListSchema.describe('Primary email recipients'),
+  cc: HitlEmailRecipientListSchema.optional().describe('CC recipients'),
+  bcc: HitlEmailRecipientListSchema.optional().describe('BCC recipients'),
+  subject: z
+    .string()
+    .min(1)
+    .max(MAX_HITL_EMAIL_SUBJECT_LENGTH)
+    .optional()
+    .describe('Email subject. Defaults to a built-in subject when omitted.'),
+});
+
+const hitlChannelDescriptions = {
+  slack: 'Notify via a Slack incoming-webhook connector (posts to the webhook configured channel)',
+  slack_api:
+    'Notify via a Slack API connector. Set connector-id and one or more channel IDs and/or #channel names.',
+  email: 'Notify via an Email connector. Requires connector-id and at least one `to` recipient.',
+} as const;
+
+export const WaitForInputChannelsSchema = z
   .object({
-    slack: WaitForApprovalSlackChannelSchema.optional().describe(
-      'Notify via a Slack incoming-webhook connector (posts to the webhook configured channel)'
-    ),
-    slack_api: WaitForApprovalSlackApiChannelSchema.optional().describe(
-      'Notify via a Slack API connector. Set connector-id and one or more channel IDs and/or #channel names.'
-    ),
+    slack: HitlSlackChannelSchema.extend(hitlChannelMessageField)
+      .optional()
+      .describe(hitlChannelDescriptions.slack),
+    slack_api: HitlSlackApiChannelSchema.extend(hitlChannelMessageField)
+      .optional()
+      .describe(hitlChannelDescriptions.slack_api),
+    email: HitlEmailChannelSchema.extend(hitlChannelMessageField)
+      .optional()
+      .describe(hitlChannelDescriptions.email),
   })
   .optional()
   .describe(HITL_EXTERNAL_CHANNELS_DESCRIPTION);
 
-export const HitlExternalChannelsSchema = WaitForApprovalChannelsSchema;
+export const WaitForApprovalChannelsSchema = z
+  .object({
+    slack: HitlSlackChannelSchema.loose().optional().describe(hitlChannelDescriptions.slack),
+    slack_api: HitlSlackApiChannelSchema.loose()
+      .optional()
+      .describe(hitlChannelDescriptions.slack_api),
+    email: HitlEmailChannelSchema.loose().optional().describe(hitlChannelDescriptions.email),
+  })
+  .optional()
+  .describe(HITL_EXTERNAL_CHANNELS_DESCRIPTION);
 
 export const WaitForInputStepInputSchema = z
   .object({
@@ -379,7 +419,7 @@ export const WaitForInputStepInputSchema = z
     schema: JsonModelSchema.optional().describe(
       'JSON Schema describing the expected input payload. Used for validation, autocomplete, and default values in the resume UI'
     ),
-    channels: HitlExternalChannelsSchema,
+    channels: WaitForInputChannelsSchema,
   })
   .optional();
 export const WaitForInputStepSchema = BaseStepSchema.extend({

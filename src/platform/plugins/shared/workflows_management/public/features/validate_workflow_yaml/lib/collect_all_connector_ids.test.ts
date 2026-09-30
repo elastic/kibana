@@ -114,16 +114,21 @@ steps:
         slack_api:
           connector-id: my-slack-api
           channels: ["C0123"]
+        email:
+          connector-id: my-email
+          to: ["oncall@example.com"]
 `;
     const lineCounter = new LineCounter();
     const yamlDocument = parseDocument(yaml, { lineCounter });
     const result = collectAllConnectorIds(yamlDocument, lineCounter);
 
-    expect(result).toHaveLength(2);
+    expect(result).toHaveLength(3);
     expect(result[0].key).toBe('my-slack');
     expect(result[0].connectorType).toBe('slack');
     expect(result[1].key).toBe('my-slack-api');
     expect(result[1].connectorType).toBe('slack_api');
+    expect(result[2].key).toBe('my-email');
+    expect(result[2].connectorType).toBe('email');
   });
 
   it('should resolve connector type for waitForInput notification channel connector-id', () => {

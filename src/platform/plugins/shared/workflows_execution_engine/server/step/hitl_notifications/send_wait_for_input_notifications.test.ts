@@ -35,4 +35,37 @@ describe('sendWaitForInputNotifications', () => {
       expect.objectContaining({ channelIds: ['C0123'] })
     );
   });
+
+  it('sends a Kibana-style email notification with Open form markdown and footer path', async () => {
+    const execute = jest.fn().mockResolvedValue({ status: 'ok' });
+
+    await sendWaitForInputNotifications({
+      channels: {
+        email: { 'connector-id': 'email-1', to: ['analyst@example.com'] },
+      },
+      stepMessage: 'Please provide input',
+      formUrl:
+        'https://kibana.example/s/space/api/workflows/executions/e1/steps/s1/resume/external/form?token=abc',
+      renderTemplate,
+      connectorExecutor: { execute } as never,
+      abortController: new AbortController(),
+    });
+
+    expect(execute).toHaveBeenCalledTimes(1);
+    expect(execute.mock.calls[0][0]).toEqual({
+      connectorType: 'email',
+      connectorNameOrId: 'email-1',
+      input: {
+        to: ['analyst@example.com'],
+        subject: 'Input required',
+        message:
+          'Please provide input\n\n[Open form](https://kibana.example/s/space/api/workflows/executions/e1/steps/s1/resume/external/form?token=abc)',
+        kibanaFooterLink: {
+          path: '/s/space/api/workflows/executions/e1/steps/s1/resume/external/form?token=abc',
+          text: 'View in Kibana',
+        },
+      },
+      abortController: expect.any(AbortController),
+    });
+  });
 });

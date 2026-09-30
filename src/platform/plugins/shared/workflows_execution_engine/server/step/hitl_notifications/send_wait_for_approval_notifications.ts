@@ -9,6 +9,12 @@
 
 import type { WaitForApprovalStep } from '@kbn/workflows';
 import { buildExternalResumeUrl } from '@kbn/workflows/server';
+import {
+  buildDefaultHitlApprovalEmailMessage,
+  buildHitlEmailConnectorInput,
+  buildHitlExecutionFooterPath,
+  resolveHitlEmailSubject,
+} from './build_hitl_email_notification';
 import { assertConnectorSucceeded, slackApiChannelTarget } from './hitl_connector_helpers';
 import type { ConnectorExecutor } from '../../connector_executor';
 
@@ -131,6 +137,8 @@ export async function sendWaitForApprovalNotifications({
   approveLabel,
   rejectLabel,
   resumeLinks,
+  spaceId,
+  executionId,
   connectorExecutor,
   abortController,
 }: {
@@ -139,6 +147,8 @@ export async function sendWaitForApprovalNotifications({
   approveLabel: string;
   rejectLabel: string;
   resumeLinks: WaitForApprovalResumeLinks;
+  spaceId: string;
+  executionId: string;
   connectorExecutor: ConnectorExecutor;
   abortController: AbortController;
 }): Promise<void> {
@@ -176,5 +186,21 @@ export async function sendWaitForApprovalNotifications({
       });
       assertConnectorSucceeded(result);
     }
+  }
+
+  const emailConfig = channels.email;
+  if (emailConfig?.['connector-id'] && emailConfig.to?.length) {
+    const result = await connectorExecutor.execute({
+      connectorType: 'email',
+      connectorNameOrId: emailConfig['connector-id'],
+      input: buildHitlEmailConnectorInput({
+        emailConfig,
+        subject: resolveHitlEmailSubject(emailConfig.subject, 'approval'),
+        message: buildDefaultHitlApprovalEmailMessage(linkParams),
+        footerLinkPath: buildHitlExecutionFooterPath({ spaceId, executionId }),
+      }),
+      abortController,
+    });
+    assertConnectorSucceeded(result);
   }
 }
