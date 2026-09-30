@@ -65,7 +65,17 @@ const createWorkspaceMock = () =>
     selectedNodes: [],
     clearEdgeSelection: jest.fn(),
     addEdgeToSelection: jest.fn(),
-    options: {},
+    options: {
+      indexName: 'data-view-title',
+      vertex_fields: [],
+      exploreControls: {
+        sampleSize: 100,
+        useSignificance: true,
+        minDocCount: 3,
+        maxValuesPerDoc: 1,
+        timeoutMillis: 5000,
+      },
+    },
     blocklistedNodes: [],
   } as unknown as jest.Mocked<Workspace>);
 
@@ -75,6 +85,7 @@ const createWorkspaceListenerEnvironment = () => {
     listeners: [registerWorkspaceListeners],
     mockedDepsOverwrites: {
       getWorkspace: jest.fn(() => workspace),
+      exploreGraph: jest.fn().mockResolvedValue({ vertices: [], connections: [] }),
     },
   });
 
@@ -521,30 +532,69 @@ describe('workspace listeners', () => {
   });
 
   describe('submit search', () => {
-    it('submits a plain text search', () => {
+    it('merges plain text search results into Redux before the runtime', async () => {
       const environment = createWorkspaceListenerEnvironment();
+      environment.mockedDeps.exploreGraph.mockResolvedValue({
+        vertices: [{ field: 'field-name', term: 'result', weight: 1 }],
+        connections: [],
+      });
+      environment.workspace.mergeGraph.mockImplementation(() => {
+        expect(environment.store.getState().workspace.nodeIds).toEqual(['field-name..result']);
+      });
 
       environment.store.dispatch(submitSearch('search text'));
+      await flushPromises();
 
-      expect(environment.workspace.simpleSearch).toHaveBeenCalledWith('search text', [], 2);
+      expect(environment.mockedDeps.exploreGraph).toHaveBeenCalledWith(
+        'data-view-title',
+        expect.objectContaining({ query: { query_string: { query: 'search text' } } })
+      );
+      expect(environment.workspace.mergeGraph).toHaveBeenCalledWith(
+        expect.objectContaining({
+          nodes: [expect.objectContaining({ field: 'field-name', term: 'result' })],
+          edges: [],
+        })
+      );
     });
 
-    it('submits a query DSL search', () => {
+    it('submits a query DSL search through the listener transport', async () => {
       const environment = createWorkspaceListenerEnvironment();
       const query = { query: { match_all: {} } };
 
       environment.store.dispatch(submitSearch(JSON.stringify(query)));
+      await flushPromises();
 
-      expect(environment.workspace.search).toHaveBeenCalledWith(query, [], 2);
+      expect(environment.mockedDeps.exploreGraph).toHaveBeenCalledWith(
+        'data-view-title',
+        expect.objectContaining({ query })
+      );
     });
 
-    it('submits a Graph explore request', () => {
+    it('submits a Graph explore request unchanged', async () => {
       const environment = createWorkspaceListenerEnvironment();
       const query = { vertices: [{ field: 'field-name' }] };
 
       environment.store.dispatch(submitSearch(JSON.stringify(query)));
+      await flushPromises();
 
-      expect(environment.workspace.callElasticsearch).toHaveBeenCalledWith(query);
+      expect(environment.mockedDeps.exploreGraph).toHaveBeenCalledWith('data-view-title', query);
+    });
+
+    it('ignores stale search responses', async () => {
+      const environment = createWorkspaceListenerEnvironment();
+      const resolvers: Array<(response: { vertices: []; connections: [] }) => void> = [];
+      environment.mockedDeps.exploreGraph.mockImplementation(
+        () => new Promise((resolve) => resolvers.push(resolve))
+      );
+
+      environment.store.dispatch(submitSearch('first'));
+      environment.store.dispatch(submitSearch('second'));
+      resolvers[1]({ vertices: [], connections: [] });
+      await flushPromises();
+      resolvers[0]({ vertices: [], connections: [] });
+      await flushPromises();
+
+      expect(environment.workspace.mergeGraph).toHaveBeenCalledTimes(1);
     });
 
     it('reports malformed JSON', () => {
