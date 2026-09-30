@@ -24,7 +24,7 @@ dependsOn:
   - '@kbn/alerting-v2-rule-builders'
   - '@kbn/alerting-v2-schemas'
   - '@kbn/alerting-v2-constants'
-  - '@kbn/security-detection-rule-schema'
+  - '@kbn/security-detection-rule-builder-fields'
   - '@kbn/zod'
   - '@kbn/zod-helpers'
   - '@kbn/logging-mocks'

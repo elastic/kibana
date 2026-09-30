@@ -6,9 +6,10 @@
  */
 
 export type {
+  BuilderFieldsBackfill,
+  BuilderFieldsManifest,
+  BuilderFieldsVersion,
   BuilderTypeDefinition,
-  BuilderTypeManifest,
-  BuilderTypeVersion,
   DerivedRuleFields,
   GenerateQuery,
   GeneratedQuery,

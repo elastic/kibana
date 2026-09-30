@@ -9,8 +9,8 @@
  * Public detection rule response schema.
  *
  * The shape every Detections API endpoint returns. Fields are composed from
- * the `@kbn/security-detection-rule-schema` package wherever that package
- * owns the bounds, so the public bound and the stored bound cannot drift.
+ * the detection rule field schemas in common/detection_rule_fields/, so the
+ * public bound and the stored bound cannot drift.
  *
  * Key invariants from the design:
  *   - Defaultable fields are always present (never optional in the response).
@@ -24,13 +24,13 @@
  */
 
 import { z } from '@kbn/zod/v4';
+import { MAX_NAME_LENGTH, MAX_DESCRIPTION_LENGTH } from '@kbn/alerting-v2-schemas';
+import { MAX_TAG_LENGTH, MAX_TAGS } from '@kbn/alerting-v2-constants';
 import {
   detectionRuleCommonFields,
   customQueryBuilderFieldsSchema,
   thresholdBuilderFieldsSchema,
-} from '@kbn/security-detection-rule-schema';
-import { MAX_NAME_LENGTH, MAX_DESCRIPTION_LENGTH } from '@kbn/alerting-v2-schemas';
-import { MAX_TAG_LENGTH, MAX_TAGS } from '@kbn/alerting-v2-constants';
+} from '../detection_rule_fields';
 
 // ---------------------------------------------------------------------------
 // Nested object sub-schemas

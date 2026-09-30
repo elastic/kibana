@@ -6,8 +6,9 @@
  */
 
 import { BUILDER_FIELDS_IGNORE_ABOVE } from '@kbn/alerting-v2-constants';
+import { KEYWORD_SUB_FIELD_IGNORE_ABOVE } from '@kbn/alerting-v2-rule-builders';
 import { ruleMappings } from './rule_mappings';
-// Importing ruleModelVersions triggers fromBuilderManifest() side effects
+// Importing ruleModelVersions triggers fromBuilderFieldsManifest() side effects
 // (globalFoldedVersions population) needed by the cross-check below.
 import { ruleModelVersions } from './model_versions/rule_model_versions';
 
@@ -46,7 +47,12 @@ describe('ruleMappings', () => {
       // This test proves that statically, so the failure surface is a test run
       // rather than a Kibana boot failure.
       //
-      // Ref: rule-type-registration.md "The fold into the saved-object registration"
+      // Both sides of the check come from one source: every mappings_addition a
+      // folded version declares is in the static mapping because both came from the
+      // same manifest (builder_fields_manifests.ts). validateAddedMappings passes
+      // by construction.
+      //
+      // Ref: builder-type-registration-redesign.md "Assembling the saved-object type"
       const staticBuilderFieldsProperties = (getBuilderFieldsMapping()?.properties ?? {}) as Record<
         string,
         unknown
@@ -77,28 +83,128 @@ describe('ruleMappings', () => {
       }
     });
 
-    it('carries the merged sub-field mappings from the two detection-type manifests', () => {
-      // Step 3.5 routes securityDetectionQueryManifest and
-      // securityDetectionThresholdManifest into BUILDER_MANIFESTS. Both declare
-      // the shared detection fragment's sub-fields (risk_score, max_signals,
-      // note, setup) plus `query` as text. Identical declarations across
-      // manifests merge silently; the merged result is the union.
+    it('carries the merged sub-field mappings from the detection rule builder fields manifest (32 leaves)', () => {
+      // BUILDER_FIELDS_MANIFESTS contains detectionRuleBuilderFieldsManifest, which declares
+      // 32 sub-fields: 25 common leaves, 3 shared by both query and threshold types (index, query,
+      // language), and 4 threshold-only leaves. The static mapping must carry all of them so that
+      // core's startup consistency check (validateAddedMappings) passes for every folded version.
       //
-      // Core requires every mappings_addition declared in a model version to be
-      // verbatim present in the static mappings. This test confirms that the
-      // static mapping carries exactly those sub-fields so core's startup
-      // consistency check passes.
-      //
-      // Ref: rule-type-registration.md "The fold into the saved-object registration"
+      // Ref: builder-type-registration-redesign.md "The sub-field mappings"
       const mapping = getBuilderFieldsMapping();
       expect(mapping).toHaveProperty('properties');
-      expect(mapping?.properties).toEqual({
-        risk_score: { type: 'integer' },
-        max_signals: { type: 'integer' },
-        note: { type: 'text' },
-        setup: { type: 'text' },
-        query: { type: 'text' },
+
+      const properties = mapping?.properties as Record<string, unknown>;
+      expect(Object.keys(properties)).toHaveLength(32);
+
+      // Common fields (25)
+      expect(properties.severity).toEqual({
+        type: 'keyword',
+        ignore_above: KEYWORD_SUB_FIELD_IGNORE_ABOVE,
       });
+      expect(properties.risk_score).toEqual({ type: 'integer' });
+      expect(properties.max_signals).toEqual({ type: 'integer' });
+      expect(properties['threat.framework']).toEqual({
+        type: 'keyword',
+        ignore_above: KEYWORD_SUB_FIELD_IGNORE_ABOVE,
+      });
+      expect(properties['threat.tactic.id']).toEqual({
+        type: 'keyword',
+        ignore_above: KEYWORD_SUB_FIELD_IGNORE_ABOVE,
+      });
+      expect(properties['threat.tactic.name']).toEqual({
+        type: 'keyword',
+        ignore_above: KEYWORD_SUB_FIELD_IGNORE_ABOVE,
+      });
+      expect(properties['threat.tactic.reference']).toEqual({
+        type: 'keyword',
+        ignore_above: KEYWORD_SUB_FIELD_IGNORE_ABOVE,
+      });
+      expect(properties['threat.technique.id']).toEqual({
+        type: 'keyword',
+        ignore_above: KEYWORD_SUB_FIELD_IGNORE_ABOVE,
+      });
+      expect(properties['threat.technique.name']).toEqual({
+        type: 'keyword',
+        ignore_above: KEYWORD_SUB_FIELD_IGNORE_ABOVE,
+      });
+      expect(properties['threat.technique.reference']).toEqual({
+        type: 'keyword',
+        ignore_above: KEYWORD_SUB_FIELD_IGNORE_ABOVE,
+      });
+      expect(properties['threat.technique.subtechnique.id']).toEqual({
+        type: 'keyword',
+        ignore_above: KEYWORD_SUB_FIELD_IGNORE_ABOVE,
+      });
+      expect(properties['threat.technique.subtechnique.name']).toEqual({
+        type: 'keyword',
+        ignore_above: KEYWORD_SUB_FIELD_IGNORE_ABOVE,
+      });
+      expect(properties['threat.technique.subtechnique.reference']).toEqual({
+        type: 'keyword',
+        ignore_above: KEYWORD_SUB_FIELD_IGNORE_ABOVE,
+      });
+      expect(properties.setup).toEqual({ type: 'text' });
+      expect(properties.note).toEqual({ type: 'text' });
+      expect(properties.references).toEqual({
+        type: 'keyword',
+        ignore_above: KEYWORD_SUB_FIELD_IGNORE_ABOVE,
+      });
+      expect(properties.false_positives).toEqual({
+        type: 'keyword',
+        ignore_above: KEYWORD_SUB_FIELD_IGNORE_ABOVE,
+      });
+      expect(properties.author).toEqual({
+        type: 'keyword',
+        ignore_above: KEYWORD_SUB_FIELD_IGNORE_ABOVE,
+      });
+      expect(properties.license).toEqual({
+        type: 'keyword',
+        ignore_above: KEYWORD_SUB_FIELD_IGNORE_ABOVE,
+      });
+      expect(properties['related_integrations.package']).toEqual({
+        type: 'keyword',
+        ignore_above: KEYWORD_SUB_FIELD_IGNORE_ABOVE,
+      });
+      expect(properties['related_integrations.version']).toEqual({
+        type: 'keyword',
+        ignore_above: KEYWORD_SUB_FIELD_IGNORE_ABOVE,
+      });
+      expect(properties['related_integrations.integration']).toEqual({
+        type: 'keyword',
+        ignore_above: KEYWORD_SUB_FIELD_IGNORE_ABOVE,
+      });
+      expect(properties['required_fields.name']).toEqual({
+        type: 'keyword',
+        ignore_above: KEYWORD_SUB_FIELD_IGNORE_ABOVE,
+      });
+      expect(properties['required_fields.type']).toEqual({
+        type: 'keyword',
+        ignore_above: KEYWORD_SUB_FIELD_IGNORE_ABOVE,
+      });
+      expect(properties['required_fields.ecs']).toEqual({ type: 'boolean' });
+
+      // Shared by query and threshold (3 — merge silently from both types)
+      expect(properties.index).toEqual({
+        type: 'keyword',
+        ignore_above: KEYWORD_SUB_FIELD_IGNORE_ABOVE,
+      });
+      expect(properties.query).toEqual({ type: 'text' });
+      expect(properties.language).toEqual({
+        type: 'keyword',
+        ignore_above: KEYWORD_SUB_FIELD_IGNORE_ABOVE,
+      });
+
+      // Threshold-only (4)
+      expect(properties['threshold.field']).toEqual({
+        type: 'keyword',
+        ignore_above: KEYWORD_SUB_FIELD_IGNORE_ABOVE,
+      });
+      expect(properties['threshold.value']).toEqual({ type: 'integer' });
+      expect(properties['threshold.cardinality.field']).toEqual({
+        type: 'keyword',
+        ignore_above: KEYWORD_SUB_FIELD_IGNORE_ABOVE,
+      });
+      expect(properties['threshold.cardinality.value']).toEqual({ type: 'integer' });
     });
   });
 });
