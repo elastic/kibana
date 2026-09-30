@@ -7,16 +7,22 @@
 
 import * as rt from 'io-ts';
 import { ItemTypeRT } from '@kbn/metrics-data-access-plugin/common';
+import { DataSchemaFormatRT } from './shared/data_schema_format';
 
-export const InfraMetadataRequestRT = rt.type({
-  nodeId: rt.string,
-  nodeType: ItemTypeRT,
-  sourceId: rt.string,
-  timeRange: rt.type({
-    from: rt.number,
-    to: rt.number,
+export const InfraMetadataRequestRT = rt.intersection([
+  rt.type({
+    nodeId: rt.string,
+    nodeType: ItemTypeRT,
+    sourceId: rt.string,
+    timeRange: rt.type({
+      from: rt.number,
+      to: rt.number,
+    }),
   }),
-});
+  rt.partial({
+    schema: DataSchemaFormatRT,
+  }),
+]);
 
 export const InfraMetadataFeatureRT = rt.type({
   name: rt.string,

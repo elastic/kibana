@@ -19,9 +19,9 @@ import {
   UnifiedValueAttachmentPayloadSchema,
 } from '../../domain_zod/attachment/v2';
 
-export const UnifiedAttachmentPatchRequestSchema = z.union([
-  UnifiedReferenceAttachmentPayloadSchema.extend({ id: z.string(), version: z.string() }),
-  UnifiedValueAttachmentPayloadSchema.extend({ id: z.string(), version: z.string() }),
+export const UnifiedAttachmentPutRequestSchema = z.union([
+  UnifiedReferenceAttachmentPayloadSchema.extend({ version: z.string() }),
+  UnifiedValueAttachmentPayloadSchema.extend({ version: z.string() }),
 ]);
 
 export const AttachmentRequestSchemaV2 = z.union([
@@ -36,7 +36,7 @@ export const AttachmentRequestWithoutRefsSchemaV2 = z.union([
 
 export const AttachmentPatchRequestSchemaV2 = z.union([
   AttachmentPatchRequestSchema,
-  UnifiedAttachmentPatchRequestSchema,
+  UnifiedAttachmentPutRequestSchema.and(z.object({ id: z.string() })),
 ]);
 
 export const BulkCreateAttachmentsRequestSchemaV2 = limitedArraySchema({

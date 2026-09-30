@@ -14,7 +14,6 @@ import { i18n } from '@kbn/i18n';
  * These are used to provide granular user feedback.
  */
 export type EsqlConversionFailureReason =
-  | 'multi_layer_not_supported'
   | 'formula_not_supported'
   | 'time_shift_not_supported'
   | 'runtime_field_not_supported'
@@ -26,18 +25,13 @@ export type EsqlConversionFailureReason =
   | 'terms_other_bucket_not_supported'
   | 'terms_order_by_not_supported'
   | 'saved_to_library_not_supported'
+  | 'query_annotations_not_supported'
+  | 'reference_line_not_supported'
   | 'trendline_not_supported'
   | 'unsupported_settings'
   | 'unknown';
 
 export const esqlConversionFailureReasonMessages: Record<EsqlConversionFailureReason, string> = {
-  multi_layer_not_supported: i18n.translate(
-    'xpack.lens.config.cannotConvertToEsqlMultiLayerTooltip',
-    {
-      defaultMessage:
-        'Cannot convert to ES|QL: Multi-layer visualizations will be supported in an upcoming update.',
-    }
-  ),
   formula_not_supported: i18n.translate('xpack.lens.config.cannotConvertToEsqlFormulaTooltip', {
     defaultMessage:
       'Cannot convert to ES|QL: Formula operations will be supported in an upcoming update.',
@@ -103,6 +97,20 @@ export const esqlConversionFailureReasonMessages: Record<EsqlConversionFailureRe
     {
       defaultMessage:
         'Cannot convert to ES|QL: Charts saved to library will be supported in an upcoming update.',
+    }
+  ),
+  query_annotations_not_supported: i18n.translate(
+    'xpack.lens.config.cannotConvertToEsqlQueryAnnotationsTooltip',
+    {
+      defaultMessage:
+        'Cannot convert to ES|QL: Query-based annotations will be supported in an upcoming update.',
+    }
+  ),
+  reference_line_not_supported: i18n.translate(
+    'xpack.lens.config.cannotConvertToEsqlReferenceLineTooltip',
+    {
+      defaultMessage:
+        'Cannot convert to ES|QL: Only static value reference lines are supported for conversion.',
     }
   ),
   trendline_not_supported: i18n.translate('xpack.lens.config.cannotConvertToEsqlTrendlineTooltip', {
