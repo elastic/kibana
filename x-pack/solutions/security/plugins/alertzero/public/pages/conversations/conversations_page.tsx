@@ -34,6 +34,7 @@ import { getUserDisplayName } from '@kbn/user-profile-components';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { CoreStart } from '@kbn/core/public';
 import { useAssignInvestigation } from '@kbn/agentic-investigations-plugin/public';
+import type { DeclineParams } from '@kbn/proposals-ui';
 import { useCanWriteAlertZero } from '../../hooks/use_can_write_alertzero';
 import { useQueueAssignees } from '../../components/connected_assignees/use_queue_assignees';
 import { useStatusSignal } from '../../components/connected_status/use_status_signal';
@@ -149,10 +150,6 @@ const ConversationsPageContent: React.FC = () => {
     recordId: Investigation['recordId'] | null;
   }>({ type: null, recordId: null });
 
-  // Separate state for the dismiss-from-approval flow: when the user clicks "Dismiss" in
-  // the approval modal we only dismiss that one proposal, not the whole investigation.
-  const [dismissProposalId, setDismissProposalId] = useState<string | null>(null);
-
   // From chartsSummary rather than the pages: no page-size cap, and every
   // category. Shares the chart row's query key, so it costs no extra request.
   const { data: chartsSummary, isLoading, error } = useProposalChartsSummary();
@@ -250,19 +247,21 @@ const ConversationsPageContent: React.FC = () => {
     [approveDecision, dropDecided, onDecisionError]
   );
 
-  // Dismissing is a decision with a reason, so the approval modal hands off to the dismiss
-  // modal rather than growing a second form of its own. It uses its own separate state so that
-  // the ⋮ "Close investigation" action (which closes the whole investigation) is not confused
-  // with dismissing a single proposal from the approval flow.
+  // The approval modal collects its own decline reason inline now, so this is a direct mutation
+  // call — distinct from the ⋮ "Close investigation" action below, which closes the whole
+  // investigation rather than dismissing a single proposal.
   const dismissApproval = useCallback(
-    (proposal: ProposalItem) => {
-      closeApproval();
-      setDismissProposalId(proposal.id);
+    async (proposal: ProposalItem, { dismissReason, rationale }: DeclineParams) => {
+      try {
+        await dismissDecision({ id: proposal.id, body: { dismissReason, rationale } });
+        void dropDecided(proposal.id);
+      } catch (err) {
+        onDecisionError(err);
+        throw err;
+      }
     },
-    [closeApproval]
+    [dismissDecision, dropDecided, onDecisionError]
   );
-
-  const closeDismissModal = useCallback(() => setDismissProposalId(null), []);
 
   const renderCloseModal = useCallback(
     ({ investigation, onClose }: { investigation: Investigation; onClose: () => void }) => (
@@ -387,24 +386,6 @@ const ConversationsPageContent: React.FC = () => {
         renderDismissModal={renderDismissModal}
         renderEscalationModal={renderEscalationModal}
       />
-
-      {/* Dismiss a single proposal from the approval-modal "Dismiss" button. This is separate
-          from closing the full investigation via the ⋮ "Close" action. */}
-      {dismissProposalId ? (
-        <DismissProposalModal
-          proposalId={dismissProposalId}
-          onClose={closeDismissModal}
-          onConfirm={async ({ dismissReason, rationale }) => {
-            try {
-              await dismissDecision({ id: dismissProposalId, body: { dismissReason, rationale } });
-              void dropDecided(dismissProposalId);
-              closeDismissModal();
-            } catch (err) {
-              onDecisionError(err);
-            }
-          }}
-        />
-      ) : null}
 
       <EuiFlexGroup gutterSize="l" direction="column" wrap>
         <EuiFlexItem grow={false}>

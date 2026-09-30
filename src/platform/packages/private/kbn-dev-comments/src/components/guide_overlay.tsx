@@ -11,12 +11,14 @@ import React, { useEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { css, keyframes } from '@emotion/react';
 import {
+  EuiButton,
   EuiButtonEmpty,
   EuiFlexGroup,
   EuiFlexItem,
   EuiIcon,
   EuiLoadingSpinner,
   EuiPanel,
+  EuiSpacer,
   EuiText,
   euiCanAnimate,
   useEuiTheme,
@@ -116,6 +118,7 @@ export const GuideOverlay = ({ comment }: { comment: Comment }) => {
   const [done, setDone] = useState<ReadonlySet<number>>(() => new Set());
   const [settled, setSettled] = useState(false);
   const buttonRef = useRef<HTMLButtonElement | HTMLAnchorElement>(null);
+  const showRef = useRef<HTMLButtonElement>(null);
   const placed = useResolvedAnchor(comment.id);
   useLayoutTick();
 
@@ -160,6 +163,14 @@ export const GuideOverlay = ({ comment }: { comment: Comment }) => {
       buttonRef.current?.focus({ preventScroll: true });
     }
   }, [stepElement]);
+
+  // The element cannot be found: the way on is the comment itself, in the panel, with its screenshot.
+  const lost = !navigating && settled && !step && found === null && coveredStep === null;
+  useEffect(() => {
+    if (lost) {
+      showRef.current?.focus({ preventScroll: true });
+    }
+  }, [lost]);
 
   // Only a real click completes a step: keyboard activation of a control fires one as well.
   useEffect(() => {
@@ -230,7 +241,7 @@ export const GuideOverlay = ({ comment }: { comment: Comment }) => {
         />
       )}
       <EuiPanel
-        paddingSize="s"
+        paddingSize="m"
         hasShadow
         css={css`
           position: fixed;
@@ -243,7 +254,8 @@ export const GuideOverlay = ({ comment }: { comment: Comment }) => {
         `}
         data-test-subj="devCommentsGuide"
       >
-        <EuiFlexGroup gutterSize="m" alignItems="center" responsive={false}>
+        {/* The message spans the width, the actions below it, the same in every state so that nothing jumps. */}
+        <EuiFlexGroup gutterSize="s" alignItems="flexStart" responsive={false}>
           <EuiFlexItem grow={false}>
             {searching ? (
               <EuiLoadingSpinner size="m" />
@@ -260,6 +272,9 @@ export const GuideOverlay = ({ comment }: { comment: Comment }) => {
               {message}
             </EuiText>
           </EuiFlexItem>
+        </EuiFlexGroup>
+        <EuiSpacer size="s" />
+        <EuiFlexGroup gutterSize="s" justifyContent="flexEnd" responsive={false}>
           <EuiFlexItem grow={false}>
             <EuiButtonEmpty
               size="s"
@@ -275,6 +290,27 @@ export const GuideOverlay = ({ comment }: { comment: Comment }) => {
                   })}
             </EuiButtonEmpty>
           </EuiFlexItem>
+          {lost && (
+            <EuiFlexItem grow={false}>
+              {/* Where the reader is taken instead: the screenshot is what shows the element as it was. */}
+              <EuiButton
+                size="s"
+                iconType={comment.snapshot ? 'image' : undefined}
+                buttonRef={showRef}
+                aria-describedby={messageId}
+                onClick={() => controller.showInPanel(comment.id)}
+                data-test-subj="devCommentsGuideShow"
+              >
+                {comment.snapshot
+                  ? i18n.translate('devComments.guide.viewScreenshot', {
+                      defaultMessage: 'View screenshot',
+                    })
+                  : i18n.translate('devComments.guide.viewThread', {
+                      defaultMessage: 'View thread',
+                    })}
+              </EuiButton>
+            </EuiFlexItem>
+          )}
         </EuiFlexGroup>
       </EuiPanel>
     </>,

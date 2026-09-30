@@ -95,7 +95,13 @@ const STEP_REGISTRY: Record<StepDefinition['id'], StepDefinition> = {
     title: i18n.translate('xpack.alertingV2.composeDiscover.notifications.stepTitle', {
       defaultMessage: 'Actions',
     }),
-    render: (props) => <LinkedActionPoliciesStep http={props.services.http} />,
+    render: (props) => (
+      <LinkedActionPoliciesStep
+        http={props.services.http}
+        canCreateActionPolicy={props.services.canCreateActionPolicy}
+        CreateActionPolicyFormFlyout={props.services.createActionPolicyFormFlyout}
+      />
+    ),
   },
 };
 

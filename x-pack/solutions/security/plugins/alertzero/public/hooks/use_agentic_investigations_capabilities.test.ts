@@ -8,17 +8,29 @@
 import type { Capabilities } from '@kbn/core/public';
 import { getAgenticInvestigationsCapabilities } from './use_agentic_investigations_capabilities';
 
-const caps = (overrides: object = {}): Capabilities =>
+const caps = (
+  overrides: {
+    showEscalations?: unknown;
+    manageEscalations?: unknown;
+    manageInvestigations?: unknown;
+  } = {}
+): Capabilities =>
   ({
     alertzero: { show: true, write: true },
     navLinks: {},
     management: {},
     catalogue: {},
     agenticInvestigations: {
+      manageInvestigations: false,
+      ...('manageInvestigations' in overrides
+        ? { manageInvestigations: overrides.manageInvestigations }
+        : {}),
       showEscalations: false,
       manageEscalations: false,
-      manageInvestigations: false,
-      ...overrides,
+      ...('showEscalations' in overrides ? { showEscalations: overrides.showEscalations } : {}),
+      ...('manageEscalations' in overrides
+        ? { manageEscalations: overrides.manageEscalations }
+        : {}),
     },
   } as unknown as Capabilities);
 

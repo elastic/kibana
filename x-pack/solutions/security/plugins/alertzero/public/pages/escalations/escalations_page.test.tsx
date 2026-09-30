@@ -20,9 +20,13 @@ import {
   useUserProfiles,
   useSuggestUserProfiles,
 } from '@kbn/agentic-investigations-plugin/public';
+import { useAgenticInvestigationsCapabilities } from '../../hooks/use_agentic_investigations_capabilities';
 import { useInvestigationDetails } from '../conversations/use_investigation_details';
 import { useConversationsUrlParams } from '../conversations/conversations_url_params';
 import { EscalationsPage } from './escalations_page';
+
+jest.mock('../../hooks/use_agentic_investigations_capabilities');
+const mockUseCapabilities = useAgenticInvestigationsCapabilities as jest.Mock;
 
 // These hooks open the Agent Builder flyout and manage the URL; stub them out here.
 jest.mock('../conversations/use_investigation_details', () => ({
@@ -107,18 +111,16 @@ const closedEscalation = {
 
 const assignMutate = jest.fn().mockResolvedValue({});
 
-const renderPage = (overrides: { capabilities?: object } = {}) => {
-  const core = coreMock.createStart();
-  core.application.capabilities = {
-    ...core.application.capabilities,
-    alertzero: { show: true, write: true },
-  };
-  // Grant both show and manage by default.
-  (core.application.capabilities as Record<string, unknown>).agenticInvestigations = {
+const renderPage = (
+  overrides: { capabilities?: { showEscalations?: boolean; manageEscalations?: boolean } } = {}
+) => {
+  mockUseCapabilities.mockReturnValue({
     showEscalations: true,
     manageEscalations: true,
-    ...((overrides.capabilities as object | undefined) ?? {}),
-  };
+    manageInvestigations: true,
+    ...overrides.capabilities,
+  });
+  const core = coreMock.createStart();
   const history = createMemoryHistory();
   // A fresh client per test so cache from one test never bleeds into the next.
   const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } });
@@ -146,6 +148,11 @@ const renderPage = (overrides: { capabilities?: object } = {}) => {
 beforeEach(() => {
   selectConversation = jest.fn();
   clearSelectedConversation = jest.fn();
+  mockUseCapabilities.mockReturnValue({
+    showEscalations: true,
+    manageEscalations: true,
+    manageInvestigations: true,
+  });
   mockUseConversationsUrlParams.mockReturnValue({
     selectedConversationId: undefined,
     selectConversation,

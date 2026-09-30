@@ -24,6 +24,8 @@ const mockProposal: ApprovalProposal = {
   status: 'pending',
   expired: false,
   actionWorkflowId: 'system-alertzero-action-edit-rule',
+  // What the server stores when the caller names nothing itself.
+  title: 'Apply monitored exception',
   action: { name: 'Apply monitored exception' },
 };
 
@@ -51,6 +53,18 @@ describe('ApprovalModal', () => {
     fireEvent.click(screen.getByTestId('approvalModal-confirm'));
     fireEvent.click(screen.getByTestId('approvalModal-dismiss'));
     expect(baseProps.onConfirm).not.toHaveBeenCalled();
+    expect(baseProps.onDismiss).not.toHaveBeenCalled();
+  });
+
+  it('prevents declining if the modal becomes read-only while the decline form is open', () => {
+    const { rerender } = renderModal();
+    fireEvent.click(screen.getByTestId('approvalModal-dismiss'));
+    expect(screen.getByTestId('approvalModal-confirm-decline')).toBeEnabled();
+
+    rerender(<ApprovalModal {...baseProps} readOnly />);
+
+    expect(screen.getByTestId('approvalModal-confirm-decline')).toBeDisabled();
+    fireEvent.click(screen.getByTestId('approvalModal-confirm-decline'));
     expect(baseProps.onDismiss).not.toHaveBeenCalled();
   });
 
@@ -104,18 +118,6 @@ describe('ApprovalModal', () => {
     renderModal({ proposal: { ...mockProposal, category: undefined, action: undefined } });
     expect(screen.queryByText(/reversible/i)).not.toBeInTheDocument();
     expect(screen.getByText('Low impact')).toBeInTheDocument();
-  });
-
-  it('falls back to the workflow id when the action metadata carries no name', () => {
-    renderModal({ proposal: { ...mockProposal, action: undefined } });
-    expect(screen.getByText('system-alertzero-action-edit-rule')).toBeInTheDocument();
-  });
-
-  it('falls back to the no-action label when the proposal carries no action at all', () => {
-    renderModal({
-      proposal: { ...mockProposal, action: undefined, actionWorkflowId: undefined },
-    });
-    expect(screen.getByText('No automated action')).toBeInTheDocument();
   });
 
   it("renders the proposal's own comment as the body", () => {
@@ -307,16 +309,110 @@ describe('ApprovalModal', () => {
     expect(screen.queryByTestId('approvalModal-dismiss')).not.toBeInTheDocument();
   });
 
-  it('routes Dismiss to onDismiss rather than silently closing', () => {
-    renderModal();
-    fireEvent.click(screen.getByTestId('approvalModal-dismiss'));
-    expect(baseProps.onDismiss).toHaveBeenCalledTimes(1);
-    expect(baseProps.onClose).not.toHaveBeenCalled();
-  });
-
   it('omits Dismiss for a host that cannot record one', () => {
     renderModal({ onDismiss: undefined });
     expect(screen.queryByTestId('approvalModal-dismiss')).not.toBeInTheDocument();
+  });
+
+  describe('declining', () => {
+    const openDeclineForm = () => fireEvent.click(screen.getByTestId('approvalModal-dismiss'));
+
+    it('shows the reason form in place of the body, keeping the header context visible', () => {
+      renderModal();
+      openDeclineForm();
+
+      // Header context (title, badge, caption) stays exactly where it was.
+      expect(screen.getByText('Apply monitored exception')).toBeInTheDocument();
+      expect(screen.getByText('Needs review')).toBeInTheDocument();
+      // The comment (proposal body) is replaced by the reason form.
+      expect(
+        screen.queryByText('This action suppresses qualys-scan on the DMZ scan pool only.')
+      ).not.toBeInTheDocument();
+      expect(screen.getByTestId('approvalModal-decline-form-reason')).toBeInTheDocument();
+    });
+
+    it('defaults to "Decline without a reason" and enables Decline immediately', () => {
+      renderModal();
+      openDeclineForm();
+
+      expect(screen.getByRole('radio', { name: 'Decline without a reason' })).toBeChecked();
+      expect(screen.getByTestId('approvalModal-confirm-decline')).not.toBeDisabled();
+    });
+
+    it('requires free text only when Other is selected', () => {
+      renderModal();
+      openDeclineForm();
+
+      fireEvent.click(screen.getByRole('radio', { name: 'Other' }));
+      expect(screen.getByTestId('approvalModal-confirm-decline')).toBeDisabled();
+
+      fireEvent.change(screen.getByTestId('approvalModal-decline-form-rationale'), {
+        target: { value: 'Fixed the underlying rule instead.' },
+      });
+      expect(screen.getByTestId('approvalModal-confirm-decline')).not.toBeDisabled();
+    });
+
+    it('returns to the approval modal without declining when Cancel is clicked', () => {
+      renderModal();
+      openDeclineForm();
+      fireEvent.click(screen.getByRole('radio', { name: 'Other' }));
+
+      fireEvent.click(screen.getByTestId('approvalModal-cancel-decline'));
+
+      expect(screen.getByTestId('approvalModal-confirm')).toBeInTheDocument();
+      expect(baseProps.onDismiss).not.toHaveBeenCalled();
+
+      // Cancelling resets the form rather than remembering the abandoned selection.
+      openDeclineForm();
+      expect(screen.getByRole('radio', { name: 'Decline without a reason' })).toBeChecked();
+    });
+
+    it('submits the selected reason and free text together', async () => {
+      const onDismiss = jest.fn().mockResolvedValue(undefined);
+      renderModal({ onDismiss });
+      openDeclineForm();
+
+      fireEvent.click(
+        screen.getByRole('radio', { name: 'Already reported elsewhere (duplicate)' })
+      );
+      fireEvent.change(screen.getByTestId('approvalModal-decline-form-rationale'), {
+        target: { value: 'Same as INV-42.' },
+      });
+      fireEvent.click(screen.getByTestId('approvalModal-confirm-decline'));
+
+      await waitFor(() =>
+        expect(onDismiss).toHaveBeenCalledWith({
+          dismissReason: 'duplicate',
+          rationale: 'Same as INV-42.',
+        })
+      );
+    });
+
+    it('omits rationale entirely when the field was left blank', async () => {
+      const onDismiss = jest.fn().mockResolvedValue(undefined);
+      renderModal({ onDismiss });
+      openDeclineForm();
+
+      fireEvent.click(screen.getByTestId('approvalModal-confirm-decline'));
+
+      await waitFor(() =>
+        expect(onDismiss).toHaveBeenCalledWith({ dismissReason: 'no_reason', rationale: undefined })
+      );
+    });
+
+    it('shows an error and keeps the form open when the decline request fails', async () => {
+      const onDismiss = jest.fn().mockRejectedValue(new Error('The action rejected its inputs.'));
+      renderModal({ onDismiss });
+      openDeclineForm();
+
+      fireEvent.click(screen.getByTestId('approvalModal-confirm-decline'));
+
+      await waitFor(() =>
+        expect(screen.getByText('The action rejected its inputs.')).toBeInTheDocument()
+      );
+      // Same error-banner path `onConfirm` uses — consistent with other proposed-action errors.
+      expect(screen.getByTestId('approvalModal-decline-form-reason')).toBeInTheDocument();
+    });
   });
 
   it('wires aria-labelledby to the rendered title', () => {

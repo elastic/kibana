@@ -30,11 +30,12 @@ export const getAgenticInvestigationsCapabilities = (
   capabilities: Capabilities
 ): AgenticInvestigationsCapabilities => {
   const canWrite = capabilities[ALERTZERO_FEATURE_ID]?.write === true;
-  const cap = capabilities[AGENTIC_INVESTIGATIONS_PLUGIN_ID];
+  const investigationsCap = capabilities[AGENTIC_INVESTIGATIONS_PLUGIN_ID];
   return {
-    showEscalations: cap?.[ESCALATIONS_UI_CAPABILITY_SHOW] === true,
-    manageEscalations: canWrite && cap?.[ESCALATIONS_UI_CAPABILITY_MANAGE] === true,
-    manageInvestigations: canWrite && cap?.[INVESTIGATIONS_UI_CAPABILITY_MANAGE] === true,
+    showEscalations: investigationsCap?.[ESCALATIONS_UI_CAPABILITY_SHOW] === true,
+    manageEscalations: canWrite && investigationsCap?.[ESCALATIONS_UI_CAPABILITY_MANAGE] === true,
+    manageInvestigations:
+      canWrite && investigationsCap?.[INVESTIGATIONS_UI_CAPABILITY_MANAGE] === true,
   };
 };
 
