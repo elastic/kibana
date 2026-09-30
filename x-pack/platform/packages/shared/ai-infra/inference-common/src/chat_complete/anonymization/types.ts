@@ -38,12 +38,25 @@ export interface RegexAnonymizationRule extends AnonymizationRuleBase {
   pattern: string;
   entityClass: AnonymizationEntityClass;
   mask?: RuleMaskType;
+  /** Stable identifier, used by the management UI to reference a rule (e.g. for edit/delete). */
+  id?: string;
+  /** Human-readable label shown in the management UI (e.g. "Email addresses"). */
+  name?: string;
+  /** Whether this rule is an Elastic-maintained default (non-editable pattern) vs. user-authored. */
+  builtIn?: boolean;
 }
 
 export type AnonymizationRule = NamedEntityRecognitionRule | RegexAnonymizationRule;
 
+/** How the pipeline reacts when anonymization cannot run (e.g. a regex rule fails to compile/execute). */
+export type AnonymizationFailureMode = 'block' | 'allow_unsafe';
+
 export interface AnonymizationSettings {
   rules: AnonymizationRule[];
+  /** Master switch for the whole anonymization pipeline. Defaults to `false`. */
+  maskingEnabled?: boolean;
+  /** `block` (default) fails the chatComplete call; `allow_unsafe` proceeds unmasked. */
+  onFailure?: AnonymizationFailureMode;
 }
 
 enum RuleMaskType {

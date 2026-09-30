@@ -101,9 +101,11 @@ export type {
   RegexAnonymizationRule,
   NamedEntityRecognitionRule,
   AnonymizationSettings,
+  AnonymizationFailureMode,
   AnonymizationResponseMetadata,
   DeanonymizedMessageData,
 } from './anonymization';
+export { DEFAULT_BUILTIN_REGEX_RULES, refreshBuiltInAnonymizationRules } from './anonymization';
 
 export type {
   InferenceCallbacks,

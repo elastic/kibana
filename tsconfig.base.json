@@ -73,6 +73,8 @@
       "@kbn/agentic-investigations-common/*": ["./x-pack/platform/packages/shared/kbn-agentic-investigations-common/*"],
       "@kbn/agentic-investigations-plugin": ["./x-pack/platform/plugins/shared/agentic_investigations"],
       "@kbn/agentic-investigations-plugin/*": ["./x-pack/platform/plugins/shared/agentic_investigations/*"],
+      "@kbn/ai-anonymization-settings-plugin": ["./x-pack/platform/plugins/private/ai_anonymization_settings"],
+      "@kbn/ai-anonymization-settings-plugin/*": ["./x-pack/platform/plugins/private/ai_anonymization_settings/*"],
       "@kbn/ai-assistant": ["./x-pack/platform/packages/shared/kbn-ai-assistant"],
       "@kbn/ai-assistant/*": ["./x-pack/platform/packages/shared/kbn-ai-assistant/*"],
       "@kbn/ai-assistant-common": ["./x-pack/platform/packages/shared/ai-assistant/common"],
