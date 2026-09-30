@@ -1837,6 +1837,9 @@ importers:
       '@kbn/data-views-plugin':
         specifier: workspace:*
         version: link:src/platform/plugins/shared/data_views
+      '@kbn/data-views-types':
+        specifier: workspace:*
+        version: link:src/platform/packages/shared/kbn-data-views-types
       '@kbn/data-visualizer-plugin':
         specifier: workspace:*
         version: link:x-pack/platform/plugins/private/data_visualizer
@@ -8001,6 +8004,8 @@ importers:
   src/platform/packages/shared/kbn-data-view-utils: {}
 
   src/platform/packages/shared/kbn-data-view-validation: {}
+
+  src/platform/packages/shared/kbn-data-views-types: {}
 
   src/platform/packages/shared/kbn-datemath: {}
 
@@ -19960,8 +19965,8 @@ packages:
     peerDependencies:
       fp-ts: ^2.5.0
 
-  ip-address@10.7.1:
-    resolution: {integrity: sha512-4OUAqU9Z1i3vCnS05hzGiFnEMDpQ+62pAD/MVQOp83fYyNC8GleCqaS0QikQBmcWCrKFiUs/B8ztRRiYOAXuCA==}
+  ip-address@10.7.2:
+    resolution: {integrity: sha512-7H/2gFSIitxc0hG3nOI1glS8QLo/EHBFFLk8vEUjXY/xu0AdL8jZ9U1IzO2PUm0d2D/ofQcAifb0g6OBkt8U7w==}
     engines: {node: '>= 12'}
 
   ip-regex@2.1.0:
@@ -36820,7 +36825,7 @@ snapshots:
     dependencies:
       debug: 4.4.3(supports-color@10.2.2)
       express: 5.2.1(supports-color@10.2.2)
-      ip-address: 10.7.1
+      ip-address: 10.7.2
     transitivePeerDependencies:
       - supports-color
 
@@ -38376,7 +38381,7 @@ snapshots:
     dependencies:
       fp-ts: 2.16.11
 
-  ip-address@10.7.1: {}
+  ip-address@10.7.2: {}
 
   ip-regex@2.1.0: {}
 
@@ -43657,7 +43662,7 @@ snapshots:
 
   socks@2.8.10:
     dependencies:
-      ip-address: 10.7.1
+      ip-address: 10.7.2
       smart-buffer: 4.2.0
 
   sonic-boom@3.8.1:
