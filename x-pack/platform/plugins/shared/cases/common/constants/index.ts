@@ -425,6 +425,7 @@ export const KIBANA_SYSTEM_USERNAME = 'elastic/kibana';
 export const MAX_OBSERVABLES_PER_CASE = 50;
 export const MAX_TASKS_PER_CASE = 100;
 export const MAX_TASK_TEMPLATES_PER_OWNER = 100;
+export const MAX_TASK_LISTS_PER_TEMPLATE = 10;
 
 /**
  * Delays

@@ -19,14 +19,13 @@ import {
   TasksFindRequestRt,
 } from '../../../common/types/api/task/v1';
 import type { CaseTask } from '../../../common/types/domain/task/v1';
-import type { CaseTaskTemplate } from '../../../common/types/domain/task_template/v1';
 import { UserActionTypes } from '../../../common/types/domain/user_action/action/v1';
 import { Operations, ReadOperations, WriteOperations } from '../../authorization';
 import { LICENSING_CASE_TASKS_FEATURE } from '../../common/constants';
 import { createCaseError } from '../../common/error';
 import { decodeWithExcessOrThrow } from '../../common/runtime_types';
-import type { TaskInput } from '../../services/tasks/types';
 import type { CasesClientArgs } from '../types';
+import { applyTaskListToCase, ensureTaskCapacity } from './apply_task_list';
 
 export interface TasksSubClient {
   create(caseId: string, params: TaskCreateRequest): Promise<CaseTask>;
@@ -43,15 +42,6 @@ export interface TasksSubClient {
 
 const asArray = <T>(value: T | T[] | undefined): T[] | undefined =>
   value === undefined ? undefined : Array.isArray(value) ? value : [value];
-
-const dueDateFrom = (relativeDays: number | null, anchor: Date): string | null => {
-  if (relativeDays === null) {
-    return null;
-  }
-  const due = new Date(anchor);
-  due.setDate(due.getDate() + relativeDays);
-  return due.toISOString();
-};
 
 export const createTasksSubClient = (clientArgs: CasesClientArgs): TasksSubClient => {
   const {
@@ -104,34 +94,6 @@ export const createTasksSubClient = (clientArgs: CasesClientArgs): TasksSubClien
       entities: [{ id: caseId, owner }],
     });
 
-  const ensureCapacity = async (caseId: string, adding: number) => {
-    const { total } = await taskService.findTasks({ caseIds: [caseId], perPage: 1 });
-    if (total + adding > MAX_TASKS_PER_CASE) {
-      throw Boom.badRequest(`A case can have at most ${MAX_TASKS_PER_CASE} tasks`);
-    }
-  };
-
-  const templateToInputs = (template: CaseTaskTemplate, anchor: Date) =>
-    template.tasks.map((task) => ({
-      root: {
-        title: task.title,
-        description: task.description,
-        priority: task.priority,
-        due_date: dueDateFrom(task.relative_due_days, anchor),
-        template_id: template.id,
-      } satisfies TaskInput,
-      children: task.subtasks.map(
-        (sub) =>
-          ({
-            title: sub.title,
-            description: sub.description,
-            priority: sub.priority,
-            due_date: dueDateFrom(sub.relative_due_days, anchor),
-            template_id: template.id,
-          } satisfies TaskInput)
-      ),
-    }));
-
   return Object.freeze<TasksSubClient>({
     async create(caseId, params) {
       try {
@@ -141,7 +103,7 @@ export const createTasksSubClient = (clientArgs: CasesClientArgs): TasksSubClien
         if (request.assignees?.length) {
           await ensureAssignAuthorized(caseId, theCase.attributes.owner);
         }
-        await ensureCapacity(caseId, 1);
+        await ensureTaskCapacity(taskService, caseId, 1);
 
         const task = await taskService.createTask({
           ...request,
@@ -336,45 +298,14 @@ export const createTasksSubClient = (clientArgs: CasesClientArgs): TasksSubClien
           entities: [{ id: template.id, owner: template.owner }],
         });
 
-        const groups = templateToInputs(template, new Date());
-        await ensureCapacity(
+        return await applyTaskListToCase({
           caseId,
-          groups.reduce((count, g) => count + 1 + g.children.length, 0)
-        );
-
-        const owner = theCase.attributes.owner;
-        const roots = await taskService.bulkCreateTasks({
-          caseId,
-          owner,
+          owner: theCase.attributes.owner,
+          template,
           user,
-          tasks: groups.map((g) => g.root),
+          taskService,
+          userActionService,
         });
-        const children = await taskService.bulkCreateTasks({
-          caseId,
-          owner,
-          user,
-          refresh: 'wait_for',
-          tasks: groups.flatMap((g, i) =>
-            g.children.map((child) => ({ ...child, parent_task_id: roots[i].id }))
-          ),
-        });
-        const tasks = [...roots, ...children];
-
-        await userActionService.creator.createUserAction({
-          userAction: {
-            type: UserActionTypes.apply_task_template,
-            caseId,
-            owner,
-            user,
-            payload: {
-              template_id: template.id,
-              template_name: template.name,
-              tasks_created: tasks.length,
-            },
-          },
-        });
-
-        return tasks;
       } catch (error) {
         throw createCaseError({
           message: `Failed to apply task list ${templateId} to case ${caseId}: ${error}`,
