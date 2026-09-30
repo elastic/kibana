@@ -275,9 +275,12 @@ export const PACK_TI_SCENARIOS: Record<string, PackTiScenario[]> = {
         'finance and IT accounts including cfo@corp.example and it-admin@corp.example. Immediate ' +
         'business impact includes system.api_token.create and privileged app group membership while ' +
         'payroll and ERP SSO remain exposed. The Super Admin grant and the API token creation both ' +
-        "landed from it-admin's workstation ADMIN-WS02. This is an ongoing breach with " +
+        "landed from it-admin's workstation ADMIN-WS02, where explorer.exe launched powershell.exe, " +
+        'which spawned curl.exe to replay the stolen session against the Okta admin API (T1059.001) ' +
+        'just before the grant. This is an ongoing breach with ' +
         'ransomware-adjacent extortion risk; revoke sessions and lock down Super Admin immediately. ' +
-        'Hunt ATT&CK T1078.004, T1556, T1098, and T1136.003 across okta.system telemetry.',
+        'Hunt ATT&CK T1078.004, T1556, T1098, T1136.003, and T1059.001 across okta.system telemetry ' +
+        'and the ADMIN-WS02 process chain.',
       historicArticles: [
         {
           title: 'Follow-up: Okta session replay still tied to finance SSO abuse',
@@ -285,7 +288,8 @@ export const PACK_TI_SCENARIOS: Record<string, PackTiScenario[]> = {
             'A follow-up bulletin revisits stolen Okta sessions from 192[.]0[.]2[.]50 (192.0.2.50) ' +
             'where operators continue targeting cfo@corp.example and it-admin@corp.example. Watch for ' +
             'user.mfa.factor.deactivate ahead of Super Admin grants and api token creation, both ' +
-            'issued from workstation ADMIN-WS02. Prior detections still map to ATT&CK T1078.004, ' +
+            'issued from workstation ADMIN-WS02, where powershell.exe spawned curl.exe to replay the ' +
+            'session (T1059.001). Prior detections still map to ATT&CK T1078.004, ' +
             'T1556, T1098, and T1136.003 in okta.system.',
         },
         {
@@ -294,7 +298,8 @@ export const PACK_TI_SCENARIOS: Record<string, PackTiScenario[]> = {
             'Campaign analysts catalogued MFA strip sequences (user.mfa.factor.deactivate) before ' +
             'privileged role changes. Related infrastructure includes 192[.]0[.]2[.]50 (192.0.2.50) and ' +
             'mailbox pivots into cfo@corp.example plus it-admin@corp.example, whose workstation ' +
-            'ADMIN-WS02 issued the role change. Map hunts to T1078.004, T1556, T1098, and T1136.003 ' +
+            'ADMIN-WS02 issued the role change after powershell.exe spawned curl.exe against the ' +
+            'Okta admin API (T1059.001). Map hunts to T1078.004, T1556, T1098, and T1136.003 ' +
             'when reviewing Okta admin audit trails.',
         },
         {
@@ -302,7 +307,8 @@ export const PACK_TI_SCENARIOS: Record<string, PackTiScenario[]> = {
           body:
             'Hardening guidance after session theft from Russian IP space 192[.]0[.]2[.]50 (192.0.2.50). ' +
             'Validate that cfo@corp.example and it-admin@corp.example cannot receive Super Admin without ' +
-            'break-glass review, and alert on user.mfa.factor.deactivate from workstation ADMIN-WS02. ' +
+            'break-glass review, and alert on user.mfa.factor.deactivate from workstation ADMIN-WS02, ' +
+            'including powershell.exe launching curl.exe (T1059.001). ' +
             'Coverage should include T1078.004, T1556, T1098, and T1136.003 across identity telemetry.',
         },
         {
@@ -310,24 +316,27 @@ export const PACK_TI_SCENARIOS: Record<string, PackTiScenario[]> = {
           body:
             'Research summary of LAPSUS$-style Okta privilege chains using 192[.]0[.]2[.]50 (192.0.2.50). ' +
             'Observed mailbox and admin targets include cfo@corp.example and it-admin@corp.example, ' +
-            'operating from workstation ADMIN-WS02, with user.mfa.factor.deactivate as an early signal. ' +
-            'Technique coverage: T1078.004, T1556, T1098, and T1136.003.',
+            'operating from workstation ADMIN-WS02, where powershell.exe spawns curl.exe to reuse the ' +
+            'session, with user.mfa.factor.deactivate as an early signal. ' +
+            'Technique coverage: T1078.004, T1556, T1098, T1136.003, and T1059.001.',
         },
         {
           title: 'Okta API token creation spikes after stolen session reuse',
           body:
             'Operators reusing stolen sessions from 192[.]0[.]2[.]50 (192.0.2.50) were seen creating API ' +
             'tokens from workstation ADMIN-WS02 after elevating cfo@corp.example and ' +
-            'it-admin@corp.example. Correlate user.mfa.factor.deactivate with Super Admin membership ' +
-            'changes. Hunt ATT&CK T1078.004, T1556, T1098, and T1136.003 in okta.system logs.',
+            'it-admin@corp.example, driving the admin API with powershell.exe and curl.exe. ' +
+            'Correlate user.mfa.factor.deactivate with Super Admin membership ' +
+            'changes. Hunt ATT&CK T1078.004, T1556, T1098, T1136.003, and T1059.001 in okta.system logs.',
         },
         {
           title: 'Detection coverage refresh for Okta Super Admin and MFA disable events',
           body:
             'Detection engineering refresh for Okta Super Admin abuse. Seed hunts with IP ' +
             '192[.]0[.]2[.]50 (192.0.2.50), users cfo@corp.example and it-admin@corp.example, ' +
-            'workstation ADMIN-WS02, and user.mfa.factor.deactivate. Retain ATT&CK mappings ' +
-            'T1078.004, T1556, T1098, and T1136.003 for identity takeover playbooks.',
+            'workstation ADMIN-WS02, the powershell.exe to curl.exe chain, and ' +
+            'user.mfa.factor.deactivate. Retain ATT&CK mappings ' +
+            'T1078.004, T1556, T1098, T1136.003, and T1059.001 for identity takeover playbooks.',
         },
       ],
       categories: ['insider-threat', 'cloud-security'],
@@ -344,13 +353,15 @@ export const PACK_TI_SCENARIOS: Record<string, PackTiScenario[]> = {
       narrative: [
         'user.mfa.factor.deactivate',
         'ADMIN-WS02',
+        'powershell.exe',
+        'curl.exe',
         'T1078.004',
         'T1556',
         'T1098',
         'T1136.003',
       ],
       tags: ['threat-intel', 'pack:okta', 'okta', 'identity'],
-      mitre: ['T1078.004', 'T1556', 'T1098', 'T1136.003'],
+      mitre: ['T1078.004', 'T1556', 'T1098', 'T1136.003', 'T1059.001'],
     },
   ],
   'aws-iam': [

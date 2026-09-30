@@ -9,6 +9,7 @@ import type { Client } from '@elastic/elasticsearch';
 import type { ToolingLog } from '@kbn/tooling-log';
 import {
   dateSuffixesBetween,
+  deleteIndicesChunked,
   episodeIndexNames,
   ensureIndex,
   bulkIndex,
@@ -177,9 +178,6 @@ export const PACK_HOST_CORRELATION_CONFIGS: Record<string, PackHostCorrelationCo
       },
     ],
   },
-  // No process tree: an isolate-host-only pin (see plan 11's Live proof 2 — Tier 2's
-  // ES|QL stays scoped to the pack's required index regardless of narrative wording, so a
-  // process tree here would not make kill-process/suspend-process provable).
   okta: {
     packId: 'okta',
     hostName: 'ADMIN-WS02',
@@ -202,6 +200,45 @@ export const PACK_HOST_CORRELATION_CONFIGS: Record<string, PackHostCorrelationCo
     },
     userName: 'it-admin',
     userDomain: 'CORP',
+    // explorer.exe -> powershell.exe -> curl.exe, replaying the stolen Okta admin session
+    // against the Okta admin API from ADMIN-WS02, shortly before the Super Admin grant.
+    processTree: [
+      {
+        pid: 5120,
+        entityId: 'b2t0YS1hZG1pbi13czAyLTUxMjA=',
+        name: 'explorer.exe',
+        executable: 'C:\\Windows\\explorer.exe',
+        commandLine: 'C:\\Windows\\explorer.exe',
+        offsetMs: 0,
+      },
+      {
+        pid: 5244,
+        entityId: 'b2t0YS1hZG1pbi13czAyLTUyNDQ=',
+        name: 'powershell.exe',
+        executable: 'C:\\Windows\\System32\\WindowsPowerShell\\v1.0\\powershell.exe',
+        commandLine:
+          'powershell.exe -NoProfile -Command "curl.exe -s https://corp.okta.com/api/v1/users/me"',
+        parent: {
+          pid: 5120,
+          entityId: 'b2t0YS1hZG1pbi13czAyLTUxMjA=',
+          name: 'explorer.exe',
+        },
+        offsetMs: 12_000,
+      },
+      {
+        pid: 5310,
+        entityId: 'b2t0YS1hZG1pbi13czAyLTUzMTA=',
+        name: 'curl.exe',
+        executable: 'C:\\Windows\\System32\\curl.exe',
+        commandLine: 'curl.exe -s https://corp.okta.com/api/v1/users/me',
+        parent: {
+          pid: 5244,
+          entityId: 'b2t0YS1hZG1pbi13czAyLTUyNDQ=',
+          name: 'powershell.exe',
+        },
+        offsetMs: 19_000,
+      },
+    ],
   },
   kubernetes: {
     packId: 'kubernetes',
@@ -425,7 +462,7 @@ export const cleanPackHostCorrelation = async ({
         .endpointEvents
   );
   try {
-    await esClient.indices.delete({ index: indices, ignore_unavailable: true });
+    await deleteIndicesChunked({ esClient, indices });
     log.info(`--clean: deleted ${config.packId} host correlation process index/indices.`);
   } catch (e) {
     log.warning(
