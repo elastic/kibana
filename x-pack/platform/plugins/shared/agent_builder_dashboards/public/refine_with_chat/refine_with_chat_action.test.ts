@@ -33,11 +33,12 @@ const POINTER_ID = getDashboardPanelAttachmentId('panel-1');
 const createDashboardApi = ({
   viewMode = 'edit',
   unsaved = false,
-}: { viewMode?: string; unsaved?: boolean } = {}): DashboardApi =>
+  panels = [],
+}: { viewMode?: string; unsaved?: boolean; panels?: unknown[] } = {}): DashboardApi =>
   ({
     viewMode$: new BehaviorSubject(viewMode),
     savedObjectId$: new BehaviorSubject<string | undefined>(unsaved ? undefined : 'dash-1'),
-    getSerializedState: () => ({ attributes: { title: 'Test', panels: [] } }),
+    getSerializedState: () => ({ attributes: { title: 'Test', panels } }),
   } as unknown as DashboardApi);
 
 const createEmbeddable = ({
@@ -307,6 +308,33 @@ describe('createRefineWithChatAction', () => {
       expect(openChat).toHaveBeenCalledWith(
         expect.objectContaining({
           attachments: [expect.anything(), expectedPointer(DRAFT_ID, '')],
+        })
+      );
+    });
+
+    it('derives the label of an untitled Lens panel from its chart config', async () => {
+      const { action, dashboardApi, openChat } = createAction({
+        dashboardApi: createDashboardApi({
+          panels: [
+            {
+              type: LENS_EMBEDDABLE_TYPE,
+              id: 'panel-1',
+              grid: { x: 0, y: 0, w: 24, h: 15 },
+              config: {
+                type: 'metric',
+                metrics: [{ type: 'primary', column: 'Total Web Requests' }],
+                data_source: { type: 'esql', query: 'FROM logs | STATS c = COUNT(*)' },
+              },
+            },
+          ],
+        }),
+      });
+
+      await execute(action, createEmbeddable({ parentApi: dashboardApi, untitled: true }));
+
+      expect(openChat).toHaveBeenCalledWith(
+        expect.objectContaining({
+          attachments: [expect.anything(), expectedPointer(DRAFT_ID, 'Total Web Requests')],
         })
       );
     });

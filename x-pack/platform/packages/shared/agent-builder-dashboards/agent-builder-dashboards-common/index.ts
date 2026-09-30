@@ -41,3 +41,5 @@ export type {
   DashboardPanelAttachment,
   PendingDashboardPanelAttachment,
 } from './dashboard_panel_attachment';
+
+export { getPanelLabel, getLensConfigLabel, findPanelById } from './panel_label';

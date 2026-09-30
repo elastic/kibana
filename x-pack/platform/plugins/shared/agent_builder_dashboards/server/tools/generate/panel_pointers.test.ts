@@ -89,6 +89,33 @@ describe('refreshDashboardPanelPointers', () => {
     );
   });
 
+  it('derives the label from the primary metric of an untitled metric panel', async () => {
+    const { attachments, update } = createAttachments({ [pointerId]: pointerRecord() });
+
+    await refreshDashboardPanelPointers({
+      attachments,
+      operations: [editPanels()],
+      dashboardData: {
+        title: 'Dashboard',
+        panels: [
+          {
+            type: LENS_EMBEDDABLE_TYPE,
+            id: 'panel-1',
+            grid: { x: 0, y: 0, w: 24, h: 15 },
+            config: { type: 'metric', metrics: [{ type: 'primary', column: 'Errors' }] },
+          },
+        ],
+      },
+      logger,
+    });
+
+    expect(update).toHaveBeenCalledWith(
+      pointerId,
+      { data: expect.objectContaining({ label: 'Errors' }) },
+      ATTACHMENT_REF_ACTOR.agent
+    );
+  });
+
   it('does nothing when no edit_panels operation ran', async () => {
     const { attachments, update } = createAttachments({ [pointerId]: pointerRecord() });
 

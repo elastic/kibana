@@ -16,8 +16,11 @@ import {
   DASHBOARD_PANEL_ATTACHMENT_TYPE,
   DASHBOARD_PANEL_LABEL_MAX_LENGTH,
   dashboardStateToAttachmentData,
+  findPanelById,
   getDashboardPanelAttachmentId,
+  getPanelLabel as getAttachmentPanelLabel,
   isDashboardAttachment,
+  type DashboardAttachmentData,
   type PendingDashboardAttachment,
   type PendingDashboardPanelAttachment,
 } from '@kbn/agent-builder-dashboards-common';
@@ -88,15 +91,18 @@ const isRefinablePanel = (embeddable: unknown): embeddable is HasUniqueId =>
       embeddable.esql$.getValue().length > 0));
 
 /**
- * The panel title when it has one. Untitled Lens panels get no label (Lens reports the generic
- * "visualization" type name); untitled custom panels keep their "Custom panel" type name.
+ * The panel title when it has one, else a label derived from the chart config in the dashboard
+ * state (for example the primary metric of an untitled metric chart). Untitled custom panels keep
+ * their "Custom panel" type name; Lens's generic "visualization" type name is never used.
  */
-const getPanelLabel = (embeddable: unknown): string => {
+const getPanelLabel = (embeddable: HasUniqueId, dashboardData: DashboardAttachmentData): string => {
   const title = apiPublishesTitle(embeddable) ? getTitle(embeddable) : undefined;
+  const panel = findPanelById(dashboardData.panels, embeddable.uuid);
+  const derived = panel ? getAttachmentPanelLabel(panel) : undefined;
   const typeDisplayName = apiIsOfType(embeddable, CUSTOM_CONTENT_EMBEDDABLE_TYPE)
     ? (embeddable as Partial<HasTypeDisplayName>).getTypeDisplayName?.()
     : undefined;
-  return (title || typeDisplayName || '').slice(0, DASHBOARD_PANEL_LABEL_MAX_LENGTH);
+  return (title || derived || typeDisplayName || '').slice(0, DASHBOARD_PANEL_LABEL_MAX_LENGTH);
 };
 
 /**
@@ -156,6 +162,9 @@ export const createRefineWithChatAction = ({
       }
 
       const dashboardId = dashboardApi.savedObjectId$.getValue();
+      const dashboardData = dashboardStateToAttachmentData(
+        dashboardApi.getSerializedState().attributes
+      );
       const panelType = apiIsOfType(embeddable, CUSTOM_CONTENT_EMBEDDABLE_TYPE)
         ? CUSTOM_CONTENT_EMBEDDABLE_TYPE
         : LENS_EMBEDDABLE_TYPE;
@@ -169,7 +178,7 @@ export const createRefineWithChatAction = ({
         id,
         origin: dashboardId,
         type: DASHBOARD_ATTACHMENT_TYPE,
-        data: dashboardStateToAttachmentData(dashboardApi.getSerializedState().attributes),
+        data: dashboardData,
       });
       const buildPanelPointer = (
         dashboardAttachmentId: string
@@ -179,7 +188,7 @@ export const createRefineWithChatAction = ({
         data: {
           dashboard_attachment_id: dashboardAttachmentId,
           panel_id: embeddable.uuid,
-          label: getPanelLabel(embeddable),
+          label: getPanelLabel(embeddable, dashboardData),
           panel_type: panelType,
         },
       });

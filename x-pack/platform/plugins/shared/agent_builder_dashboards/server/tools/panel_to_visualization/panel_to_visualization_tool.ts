@@ -13,6 +13,7 @@ import { getToolResultId } from '@kbn/agent-builder-server';
 import type { BuiltinToolDefinition } from '@kbn/agent-builder-server/tools/builtin';
 import {
   DASHBOARD_PANEL_ATTACHMENT_TYPE,
+  getPanelLabel,
   isDashboardAttachment,
   isDashboardPanelAttachment,
   type AttachmentPanel,
@@ -42,9 +43,6 @@ const panelToVisualizationSchema = z.object({
     ),
 });
 
-const getPanelTitle = ({ config }: AttachmentPanel): string | undefined =>
-  typeof config.title === 'string' && config.title.length > 0 ? config.title : undefined;
-
 /**
  * Maps a dashboard panel onto the visualization attachment payload its renderer expects. This is
  * the reverse of the attachment panel resolver: ES|QL Lens panels carry their Lens API config,
@@ -60,7 +58,7 @@ const panelToVisualizationData = (
       throw new Error('This custom panel has no template yet, so there is nothing to show.');
     }
     const esql = readEsqlQuery(config);
-    const title = getPanelTitle(panel);
+    const title = getPanelLabel(panel);
     return {
       renderer: 'custom_content',
       query,
@@ -163,7 +161,7 @@ Supports ES|QL Lens panels and custom panels.`,
       );
     }
 
-    const title = getPanelTitle(panel) ?? pointerData.label;
+    const title = getPanelLabel(panel) ?? pointerData.label;
     const query = (
       title
         ? `Panel "${title}" from dashboard "${dashboardData.title}"`

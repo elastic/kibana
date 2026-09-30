@@ -10,9 +10,9 @@ import type { AttachmentStateManager } from '@kbn/agent-builder-server/attachmen
 import { ATTACHMENT_REF_ACTOR, getLatestVersion } from '@kbn/agent-builder-common/attachments';
 import {
   getDashboardPanelAttachmentId,
+  getPanelLabel,
   isDashboardPanelAttachment,
   DASHBOARD_PANEL_LABEL_MAX_LENGTH,
-  type AttachmentPanel,
   type DashboardAttachmentData,
 } from '@kbn/agent-builder-dashboards-common';
 import { indexPanelsById } from './core/dashboard_state';
@@ -25,16 +25,10 @@ interface RefreshDashboardPanelPointersParams {
   logger: Logger;
 }
 
-const getPanelTitle = ({ config }: AttachmentPanel): string | undefined => {
-  const { title } = config;
-  return typeof title === 'string' && title.length > 0
-    ? title.slice(0, DASHBOARD_PANEL_LABEL_MAX_LENGTH)
-    : undefined;
-};
-
 /**
  * Keeps panel pointer attachments in step with the panels they name: after `edit_panels`
- * changes a panel's title, the pointer's label follows. Pointers use a deterministic id, so no
+ * changes a panel's title, or the measure an untitled chart is named after, the pointer's label
+ * follows. Pointers use a deterministic id, so no
  * lookup by type is needed. Pointers to removed panels are left alone; their text already tells
  * the agent to check that the panel still exists.
  */
@@ -63,7 +57,9 @@ export const refreshDashboardPanelPointers = async ({
 
     const panel = panelIndex.get(panelId);
     const latestVersion = getLatestVersion(pointer);
-    const label = panel ? getPanelTitle(panel) : undefined;
+    const label = panel
+      ? getPanelLabel(panel)?.slice(0, DASHBOARD_PANEL_LABEL_MAX_LENGTH)
+      : undefined;
     if (!panel || !latestVersion || !label || label === latestVersion.data.label) {
       continue;
     }

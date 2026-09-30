@@ -68,6 +68,25 @@ describe('syncPanelPointerLabels', () => {
     });
   });
 
+  it('derives the label of an untitled metric panel from its primary metric', () => {
+    syncPanelPointerLabels({
+      agentBuilder: { addAttachment },
+      api: createApi([
+        {
+          type: LENS_EMBEDDABLE_TYPE,
+          id: 'panel-1',
+          grid,
+          config: { type: 'metric', metrics: [{ type: 'primary', column: 'Errors' }] },
+        },
+      ]),
+      pointers: [createPointer('panel-1', '')],
+    });
+
+    expect(addAttachment).toHaveBeenCalledWith(
+      expect.objectContaining({ data: expect.objectContaining({ label: 'Errors' }) })
+    );
+  });
+
   it('finds panels inside sections', () => {
     syncPanelPointerLabels({
       agentBuilder: { addAttachment },

@@ -159,6 +159,25 @@ describe('createPanelToVisualizationTool', () => {
     });
   });
 
+  it('names an untitled Lens copy after its primary metric', async () => {
+    const { add } = await run({
+      [POINTER_ID]: pointer(),
+      'dashboard-1': dashboard([
+        lensPanel({
+          type: 'metric',
+          metrics: [{ type: 'primary', column: 'Errors' }],
+          data_source: { type: 'esql', query: 'FROM logs | STATS c = COUNT(*)' },
+        }),
+      ]),
+    });
+
+    expect(add).toHaveBeenCalledWith(
+      expect.objectContaining({
+        data: expect.objectContaining({ query: 'Panel "Errors" from dashboard "Web Traffic"' }),
+      })
+    );
+  });
+
   it('falls back to the pointer label when the panel has no title', async () => {
     const { add } = await run({
       [POINTER_ID]: pointer(),

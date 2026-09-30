@@ -12,6 +12,7 @@ import {
   DASHBOARD_PANEL_ATTACHMENT_TYPE,
   DASHBOARD_PANEL_LABEL_MAX_LENGTH,
   dashboardStateToAttachmentData,
+  getPanelLabel,
   isSection,
   type DashboardPanelAttachmentData,
 } from '@kbn/agent-builder-dashboards-common';
@@ -21,24 +22,25 @@ export type DashboardPanelPointer = VersionedAttachment<
   DashboardPanelAttachmentData
 >;
 
-const getPanelTitles = (api: DashboardApi): Map<string, string> => {
-  const titleByPanelId = new Map<string, string>();
+const getPanelLabels = (api: DashboardApi): Map<string, string> => {
+  const labelByPanelId = new Map<string, string>();
   const { panels } = dashboardStateToAttachmentData(api.getSerializedState().attributes);
   for (const widget of panels) {
     for (const panel of isSection(widget) ? widget.panels : [widget]) {
-      const { title } = panel.config;
-      if (typeof title === 'string' && title.length > 0) {
-        titleByPanelId.set(panel.id, title.slice(0, DASHBOARD_PANEL_LABEL_MAX_LENGTH));
+      const label = getPanelLabel(panel);
+      if (label) {
+        labelByPanelId.set(panel.id, label.slice(0, DASHBOARD_PANEL_LABEL_MAX_LENGTH));
       }
     }
   }
-  return titleByPanelId;
+  return labelByPanelId;
 };
 
 /**
- * Keeps panel pointer pills in step with panels the user renames on the dashboard. Re-adding a
- * pointer under its own id replaces it, mirroring how the dashboard attachment itself is synced.
- * Pointers to panels without a title, or to removed panels, are left alone.
+ * Keeps panel pointer pills in step with panels the user renames on the dashboard, or whose
+ * chart measure changes while the panel is untitled. Re-adding a pointer under its own id replaces
+ * it, mirroring how the dashboard attachment itself is synced. Pointers to panels with no
+ * derivable name, or to removed panels, are left alone.
  */
 export const syncPanelPointerLabels = ({
   agentBuilder,
@@ -53,18 +55,18 @@ export const syncPanelPointerLabels = ({
     return;
   }
 
-  const titleByPanelId = getPanelTitles(api);
+  const labelByPanelId = getPanelLabels(api);
 
   for (const pointer of pointers) {
     const data = getLatestVersion(pointer)?.data;
-    const title = data ? titleByPanelId.get(data.panel_id) : undefined;
-    if (!data || !title || title === data.label) {
+    const label = data ? labelByPanelId.get(data.panel_id) : undefined;
+    if (!data || !label || label === data.label) {
       continue;
     }
     agentBuilder.addAttachment({
       id: pointer.id,
       type: DASHBOARD_PANEL_ATTACHMENT_TYPE,
-      data: { ...data, label: title },
+      data: { ...data, label },
     });
   }
 };
