@@ -61,8 +61,11 @@ spaceTest.describe(
   'Overview threat intelligence panel',
   { tag: [...tags.stateful.classic, ...tags.serverless.security.complete] },
   () => {
-    spaceTest.beforeAll(async ({ scoutSpace }) => {
-      await scoutSpace.setSolutionView('security');
+    spaceTest.beforeAll(async ({ config, scoutSpace }) => {
+      // Serverless projects do not support per-space solution views.
+      if (!config.serverless) {
+        await scoutSpace.setSolutionView('security');
+      }
       // A per-space threat index keeps parallel workers from reading each other's indicators.
       await scoutSpace.uiSettings.set({
         [THREAT_INDEX_SETTING]: [indexNames(scoutSpace.id).threat],
