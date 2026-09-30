@@ -82,7 +82,7 @@ export const registerWorkspaceListeners = (
         if (listenerApi.signal.aborted) {
           return;
         }
-        const message = error instanceof Error ? error.message : String(error);
+        const message = getErrorMessage(error);
         notifications.toasts.addDanger({
           title: i18n.translate('xpack.graph.fillWorkspaceError', {
             defaultMessage: 'Fetching top terms failed: {message}',
@@ -124,4 +124,20 @@ export const registerWorkspaceListeners = (
       }
     },
   });
+};
+
+const getErrorMessage = (error: unknown): string => {
+  if (
+    typeof error === 'object' &&
+    error !== null &&
+    'body' in error &&
+    typeof error.body === 'object' &&
+    error.body !== null &&
+    'message' in error.body &&
+    typeof error.body.message === 'string'
+  ) {
+    return error.body.message;
+  }
+
+  return error instanceof Error ? error.message : String(error);
 };
