@@ -140,6 +140,8 @@ describe('workspace state', () => {
       edgeIds: ['edge'],
       blocklistedNodesById: {},
       blocklistedNodeIds: [],
+      selectedNodeIds: ['parent'],
+      selectedEdgeIds: ['edge'],
     });
 
     parent.data.term = 'mutated';

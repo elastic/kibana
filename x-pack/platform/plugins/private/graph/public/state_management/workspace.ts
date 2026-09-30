@@ -51,6 +51,8 @@ export interface WorkspaceSnapshot {
   edgeIds: string[];
   blocklistedNodesById: Record<string, WorkspaceNodeState>;
   blocklistedNodeIds: string[];
+  selectedNodeIds: string[];
+  selectedEdgeIds: string[];
 }
 
 export interface WorkspaceState extends WorkspaceSnapshot {
@@ -65,6 +67,8 @@ const initialWorkspaceState: WorkspaceState = {
   edgeIds: [],
   blocklistedNodesById: {},
   blocklistedNodeIds: [],
+  selectedNodeIds: [],
+  selectedEdgeIds: [],
 };
 
 export const initializeWorkspace = actionCreator('INITIALIZE_WORKSPACE');
@@ -84,6 +88,11 @@ export const workspaceSelector = (state: GraphState) => state.workspace;
 export const workspaceInitializedSelector = createSelector(
   workspaceSelector,
   (workspace: WorkspaceState) => workspace.isInitialized
+);
+
+export const selectedNodeIdsSelector = createSelector(
+  workspaceSelector,
+  (workspace: WorkspaceState) => workspace.selectedNodeIds
 );
 
 export const createWorkspaceState = (workspace: Workspace): WorkspaceSnapshot => {
@@ -121,6 +130,8 @@ export const createWorkspaceState = (workspace: Workspace): WorkspaceSnapshot =>
     edgeIds: Object.keys(edgesById),
     blocklistedNodesById,
     blocklistedNodeIds: Object.keys(blocklistedNodesById),
+    selectedNodeIds: (workspace.selectedNodes ?? []).map(({ id }) => id),
+    selectedEdgeIds: (workspace.getEdgeSelection?.() ?? []).map(getEdgeId),
   };
 };
 
