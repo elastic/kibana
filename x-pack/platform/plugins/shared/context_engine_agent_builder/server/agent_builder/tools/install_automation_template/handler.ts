@@ -23,6 +23,8 @@ import {
 export interface InstallAutomationTemplateResult extends SaveAutomationResult {
   /** True when an automation already attached to the AI index was overwritten. */
   replaced: boolean;
+  /** True when the install was skipped because the template is already attached and must not be overwritten. */
+  skipped?: boolean;
 }
 import {
   AUTOMATION_TEMPLATE_TAGS,
@@ -178,6 +180,10 @@ export const installAutomationTemplateHandler = async ({
     getAiIndexService,
     getWorkflowsManagement,
   });
+
+  if (params.template === 'targeted_ki_writer' && existingWorkflowId !== undefined) {
+    return { aiIndexId, workflowId: existingWorkflowId, status: 'already_attached', replaced: false, skipped: true };
+  }
 
   const result = await saveAutomationHandler({
     params: {

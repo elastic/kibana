@@ -63,8 +63,8 @@ steps:
       query: |
         FROM {{ consts.source_index }} METADATA _id
         {{ consts.corpus_filter }}
-        | EVAL body = SUBSTRING({{ consts.body_field }}, 1, {{ consts.body_max_chars }})
-        | KEEP _id, {{ consts.title_field }}, body
+        | EVAL body = SUBSTRING(`{{ consts.body_field }}`, 1, {{ consts.body_max_chars }})
+        | KEEP _id, `{{ consts.title_field }}`, body
         | LIMIT {{ consts.max_documents }}
 
   - name: loop_documents

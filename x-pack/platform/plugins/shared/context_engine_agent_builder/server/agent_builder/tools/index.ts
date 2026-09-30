@@ -12,6 +12,7 @@ import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugi
 import type { ContextEnginePluginStart } from '@kbn/context-engine-plugin/server';
 import { createSaveAutomationTool } from './save_automation/tool';
 import { createInstallAutomationTemplateTool } from './install_automation_template/tool';
+import { createRunAutomationTool } from './run_automation/tool';
 import { createListAiIndicesTool } from './list_ai_indices/tool';
 import { createDescribeAiIndexTool } from './describe_ai_index/tool';
 import { createQueryAiIndicesTool } from './query_ai_indices/tool';
@@ -43,6 +44,14 @@ export const registerAgentBuilderTools = ({
   agentBuilder.tools.register(
     createInstallAutomationTemplateTool({
       getAiIndexService: async () => (await getContextEngineStart()).getAiIndexService(),
+      getCoreStart,
+      getSecurityStart,
+      getWorkflowsManagement,
+    })
+  );
+
+  agentBuilder.tools.register(
+    createRunAutomationTool({
       getCoreStart,
       getSecurityStart,
       getWorkflowsManagement,

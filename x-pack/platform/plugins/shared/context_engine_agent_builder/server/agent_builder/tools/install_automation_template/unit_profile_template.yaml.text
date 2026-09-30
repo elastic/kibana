@@ -66,12 +66,12 @@ steps:
     with:
       query: |
         FROM {{ consts.unit_index }}
-        | WHERE {{ consts.unit_key }} IS NOT NULL
+        | WHERE `{{ consts.unit_key }}` IS NOT NULL
         {{ consts.corpus_filter }}
-        | STATS docs = COUNT(*) BY {{ consts.unit_key }}
-        | SORT docs DESC
+        | STATS docs = COUNT(*) BY `{{ consts.unit_key }}`
+        | SORT docs DESC, `{{ consts.unit_key }}` ASC
         | LIMIT {{ consts.max_units }}
-        | KEEP {{ consts.unit_key }}
+        | KEEP `{{ consts.unit_key }}`
 
   - name: loop_units
     type: foreach
@@ -101,12 +101,12 @@ steps:
         with:
           query: |
             FROM {{ consts.unit_index }}
-            | WHERE {{ consts.unit_key }} == "{{ steps.unit_context.output.unit_escaped }}"
+            | WHERE `{{ consts.unit_key }}` == "{{ steps.unit_context.output.unit_escaped }}"
             {{ consts.corpus_filter }}
             | STATS records = COUNT(*),
-                    `distinct {{ consts.breakdown_field | remove: '`' }} values` = COUNT_DISTINCT({{ consts.breakdown_field }}),
-                    `first {{ consts.activity_field | remove: '`' }}` = MIN({{ consts.activity_field }}),
-                    `last {{ consts.activity_field | remove: '`' }}` = MAX({{ consts.activity_field }})
+                    `distinct {{ consts.breakdown_field | remove: '`' }} values` = COUNT_DISTINCT(`{{ consts.breakdown_field }}`),
+                    `first {{ consts.activity_field | remove: '`' }}` = MIN(`{{ consts.activity_field }}`),
+                    `last {{ consts.activity_field | remove: '`' }}` = MAX(`{{ consts.activity_field }}`)
 
       # Grounding 2: the unit's distribution over the breakdown field.
       - name: unit_breakdown
@@ -114,9 +114,9 @@ steps:
         with:
           query: |
             FROM {{ consts.unit_index }}
-            | WHERE {{ consts.unit_key }} == "{{ steps.unit_context.output.unit_escaped }}"
+            | WHERE `{{ consts.unit_key }}` == "{{ steps.unit_context.output.unit_escaped }}"
             {{ consts.corpus_filter }}
-            | STATS count = COUNT(*) BY {{ consts.breakdown_field }}
+            | STATS count = COUNT(*) BY `{{ consts.breakdown_field }}`
             | SORT count DESC
             | LIMIT 10
 

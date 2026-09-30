@@ -243,6 +243,24 @@ describe('installAutomationTemplateHandler', () => {
     );
   });
 
+  it('skips reinstall of targeted_ki_writer when already attached', async () => {
+    getWorkflow.mockResolvedValue({
+      id: 'wf-ki-writer',
+      name: 'Targeted KI writer automation',
+      tags: [AUTOMATION_TEMPLATE_TAGS.targeted_ki_writer],
+    });
+
+    const result = await installAutomationTemplateHandler({
+      params: { template: 'targeted_ki_writer' },
+      ...createDeps([{ type: 'workflow', value: 'wf-ki-writer' }]),
+    });
+
+    expect(result.skipped).toBe(true);
+    expect(result.replaced).toBe(false);
+    expect(result.workflowId).toBe('wf-ki-writer');
+    expect(saveAutomationHandlerMock).not.toHaveBeenCalled();
+  });
+
   it('does not create a second automation when reading an attached workflow fails', async () => {
     getWorkflow.mockRejectedValue(new Error('workflow read failed'));
 
