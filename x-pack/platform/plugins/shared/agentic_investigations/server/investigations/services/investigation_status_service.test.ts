@@ -94,9 +94,14 @@ describe('InvestigationStatusService.getPreview', () => {
   };
 
   it('maps action name from action.name', async () => {
-    const { service } = makeDeps([{ id: 'p-1', action: { name: 'Block IP' } }]);
+    const { service, proposalsService } = makeDeps([{ id: 'p-1', action: { name: 'Block IP' } }]);
     const result = await service.getPreview(request, 'conv-1');
     expect(result.pending_proposals).toEqual([{ id: 'p-1', action_name: 'Block IP' }]);
+    expect(proposalsService.list).toHaveBeenCalledWith(
+      expect.objectContaining({ conversationId: 'conv-1' }),
+      SPACE_ID,
+      request
+    );
   });
 
   it('falls back to actionWorkflowId when action is absent', async () => {
@@ -160,7 +165,7 @@ describe('InvestigationStatusService.setStatus — expected_proposal_ids', () =>
     await expect(
       service.setStatus(request, 'conv-1', {
         status: 'closed',
-        dismiss_reason: 'wrong',
+        dismiss_reason: 'no_reason',
         expected_proposal_ids: ['p-1'],
       })
     ).rejects.toBeInstanceOf(CloseTargetsChangedError);
@@ -172,7 +177,7 @@ describe('InvestigationStatusService.setStatus — expected_proposal_ids', () =>
     await expect(
       service.setStatus(request, 'conv-1', {
         status: 'closed',
-        dismiss_reason: 'wrong',
+        dismiss_reason: 'no_reason',
         expected_proposal_ids: ['p-1', 'p-2'],
       })
     ).resolves.not.toThrow();
@@ -184,7 +189,7 @@ describe('InvestigationStatusService.setStatus — expected_proposal_ids', () =>
     await expect(
       service.setStatus(request, 'conv-1', {
         status: 'closed',
-        dismiss_reason: 'wrong',
+        dismiss_reason: 'no_reason',
       })
     ).resolves.not.toThrow();
   });
@@ -243,7 +248,7 @@ describe('InvestigationStatusService.setStatus — releaseGate conflict classifi
       getSpaceId: jest.fn().mockReturnValue(SPACE_ID),
       logger,
     });
-    return { service, releaseGate, patchMetadata: client.patchMetadata };
+    return { service, releaseGate, get, patchMetadata: client.patchMetadata };
   };
 
   it('skips a proposal that was already decided (conflict, re-read shows decided)', async () => {
@@ -257,7 +262,7 @@ describe('InvestigationStatusService.setStatus — releaseGate conflict classifi
 
     const result = await service.setStatus(request, 'conv-1', {
       status: 'closed',
-      dismiss_reason: 'wrong',
+      dismiss_reason: 'no_reason',
     });
 
     // Conflict → re-read shows decided → skip, close succeeds.
@@ -269,7 +274,7 @@ describe('InvestigationStatusService.setStatus — releaseGate conflict classifi
 
   it('retries and succeeds when the proposal is still pending after a conflict', async () => {
     const conflictErr = Object.assign(new Error('occ lost'), { name: 'ProposalConflictError' });
-    const { service, releaseGate, patchMetadata } = makeDismissService({
+    const { service, releaseGate, get, patchMetadata } = makeDismissService({
       releaseGateSideEffect: conflictErr,
       // Re-read: still pending.
       getProposalResult: { decision: undefined, status: 'pending', expired: false },
@@ -277,10 +282,11 @@ describe('InvestigationStatusService.setStatus — releaseGate conflict classifi
 
     const result = await service.setStatus(request, 'conv-1', {
       status: 'closed',
-      dismiss_reason: 'wrong',
+      dismiss_reason: 'no_reason',
     });
 
     // First call failed → re-read says still pending → retry → success.
+    expect(get).toHaveBeenCalledWith('p-1', SPACE_ID, request);
     expect(releaseGate).toHaveBeenCalledTimes(2);
     expect(patchMetadata).toHaveBeenCalled();
     expect(result.dismissed_proposal_ids).toEqual(['p-1']);
@@ -315,7 +321,7 @@ describe('InvestigationStatusService.setStatus — releaseGate conflict classifi
 
     // Throws ProposalDismissFailedError; patchMetadata is never called.
     await expect(
-      service.setStatus(request, 'conv-1', { status: 'closed', dismiss_reason: 'wrong' })
+      service.setStatus(request, 'conv-1', { status: 'closed', dismiss_reason: 'no_reason' })
     ).rejects.toBeInstanceOf(ProposalDismissFailedError);
     expect(client.patchMetadata).not.toHaveBeenCalled();
   });
@@ -328,7 +334,7 @@ describe('InvestigationStatusService.setStatus — releaseGate conflict classifi
 
     const result = await service.setStatus(request, 'conv-1', {
       status: 'closed',
-      dismiss_reason: 'wrong',
+      dismiss_reason: 'no_reason',
     });
 
     expect(releaseGate).toHaveBeenCalledTimes(1);
@@ -345,7 +351,7 @@ describe('InvestigationStatusService.setStatus — releaseGate conflict classifi
 
     const result = await service.setStatus(request, 'conv-1', {
       status: 'closed',
-      dismiss_reason: 'wrong',
+      dismiss_reason: 'no_reason',
     });
 
     expect(releaseGate).toHaveBeenCalledTimes(1);

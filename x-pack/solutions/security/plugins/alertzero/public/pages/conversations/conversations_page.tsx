@@ -17,6 +17,7 @@ import {
   InvestigationActionModals,
   type EscalationModalRenderProps,
   Impact,
+  impactPills,
 } from '@kbn/agentic-investigations-common';
 import {
   useApproveProposal,
@@ -31,6 +32,7 @@ import { getUserDisplayName } from '@kbn/user-profile-components';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { CoreStart } from '@kbn/core/public';
 import { useAssignInvestigation } from '@kbn/agentic-investigations-plugin/public';
+import type { DeclineParams } from '@kbn/proposals-ui';
 import { useQueueAssignees } from '../../components/connected_assignees/use_queue_assignees';
 import { useStatusSignal } from '../../components/connected_status/use_status_signal';
 import { useAgenticInvestigationsCapabilities } from '../../hooks/use_agentic_investigations_capabilities';
@@ -51,6 +53,7 @@ import { useQueueSections } from './queue/use_queue_sections';
 import { useDropDecidedProposal } from './queue/use_drop_decided_proposal';
 import { QueueSection } from './queue/queue_section';
 import { ConnectedCloseInvestigationModal } from '../../components/connected_status/connected_close_investigation_modal';
+import { ScanFailureCallout } from '../../components/scan_failure_callout/scan_failure_callout';
 
 // Lazy-loaded so that the escalation modal tree (React Query hooks, form components,
 // translations, and user-profile API) stays out of alertzero's main chunk.
@@ -77,7 +80,20 @@ export const ConversationsPage: React.FC = () => {
   const currentActorName = currentUserProfile
     ? getUserDisplayName(currentUserProfile.user)
     : undefined;
-  const [surfaceFilter, setSurfaceFilter] = useState<string | null>(null);
+  const [entityFilter, setEntityFilter] = useState<string | null>(null);
+  const availableEntityIds = useMemo(
+    () => new Set(impactPills(conversations).map((pill) => pill.entityId)),
+    [conversations]
+  );
+  // A poll or a collapsed section can drop the selected entity from the loaded
+  // rows. Keep filtering only while that pill is still there to clear.
+  const effectiveEntityFilter =
+    entityFilter !== null && availableEntityIds.has(entityFilter) ? entityFilter : null;
+  useEffect(() => {
+    if (entityFilter !== effectiveEntityFilter) {
+      setEntityFilter(effectiveEntityFilter);
+    }
+  }, [entityFilter, effectiveEntityFilter]);
   useAlertZeroDocTitle(QUEUE_PAGE_INFO.pageTitle);
 
   const [selectedIdForRecommendedAction, setSelectedIdForRecommendedAction] = useState<
@@ -97,10 +113,6 @@ export const ConversationsPage: React.FC = () => {
     type: CardActionType | null;
     recordId: Investigation['recordId'] | null;
   }>({ type: null, recordId: null });
-
-  // Separate state for the dismiss-from-approval flow: when the user clicks "Dismiss" in
-  // the approval modal we only dismiss that one proposal, not the whole investigation.
-  const [dismissProposalId, setDismissProposalId] = useState<string | null>(null);
 
   // From chartsSummary rather than the pages: no page-size cap, and every
   // category. Shares the chart row's query key, so it costs no extra request.
@@ -173,6 +185,7 @@ export const ConversationsPage: React.FC = () => {
       assignSuccess: QUEUE_PAGE_INFO.assignSuccess,
       assignError: QUEUE_PAGE_INFO.assignError,
     },
+    buttonIconSize: 's',
   });
 
   // Both decisions close on success only, and surface the refusal otherwise: an expired
@@ -197,19 +210,21 @@ export const ConversationsPage: React.FC = () => {
     [approveDecision, dropDecided, onDecisionError]
   );
 
-  // Dismissing is a decision with a reason, so the approval modal hands off to the dismiss
-  // modal rather than growing a second form of its own. It uses its own separate state so that
-  // the ⋮ "Close investigation" action (which closes the whole investigation) is not confused
-  // with dismissing a single proposal from the approval flow.
+  // The approval modal collects its own decline reason inline now, so this is a direct mutation
+  // call — distinct from the ⋮ "Close investigation" action below, which closes the whole
+  // investigation rather than dismissing a single proposal.
   const dismissApproval = useCallback(
-    (proposal: ProposalItem) => {
-      closeApproval();
-      setDismissProposalId(proposal.id);
+    async (proposal: ProposalItem, { dismissReason, rationale }: DeclineParams) => {
+      try {
+        await dismissDecision({ id: proposal.id, body: { dismissReason, rationale } });
+        void dropDecided(proposal.id);
+      } catch (err) {
+        onDecisionError(err);
+        throw err;
+      }
     },
-    [closeApproval]
+    [dismissDecision, dropDecided, onDecisionError]
   );
-
-  const closeDismissModal = useCallback(() => setDismissProposalId(null), []);
 
   const renderCloseModal = useCallback(
     ({ investigation, onClose }: { investigation: Investigation; onClose: () => void }) => (
@@ -334,24 +349,6 @@ export const ConversationsPage: React.FC = () => {
         renderEscalationModal={renderEscalationModal}
       />
 
-      {/* Dismiss a single proposal from the approval-modal "Dismiss" button. This is separate
-          from closing the full investigation via the ⋮ "Close" action. */}
-      {dismissProposalId ? (
-        <DismissProposalModal
-          proposalId={dismissProposalId}
-          onClose={closeDismissModal}
-          onConfirm={async ({ dismissReason, rationale }) => {
-            try {
-              await dismissDecision({ id: dismissProposalId, body: { dismissReason, rationale } });
-              void dropDecided(dismissProposalId);
-              closeDismissModal();
-            } catch (err) {
-              onDecisionError(err);
-            }
-          }}
-        />
-      ) : null}
-
       <EuiFlexGroup gutterSize="l" direction="column" wrap>
         <EuiFlexItem grow={false}>
           <AlertZeroPageHeader
@@ -365,6 +362,7 @@ export const ConversationsPage: React.FC = () => {
             isQueueEmpty={openCount === 0}
             eventCount={openCount}
           />
+          <ScanFailureCallout />
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <ProposalsTrendChartRow />
@@ -372,8 +370,8 @@ export const ConversationsPage: React.FC = () => {
         <EuiFlexItem>
           <Impact
             investigations={conversations}
-            surfaceFilter={surfaceFilter}
-            onSurfaceFilterChange={setSurfaceFilter}
+            entityFilter={effectiveEntityFilter}
+            onEntityFilterChange={setEntityFilter}
           />
         </EuiFlexItem>
 
@@ -383,7 +381,7 @@ export const ConversationsPage: React.FC = () => {
           <EuiFlexItem key={section.id} grow={false}>
             <QueueSection
               section={section}
-              surfaceFilter={surfaceFilter}
+              entityFilter={effectiveEntityFilter}
               selectedConversationId={selectedConversationId}
               onClickRecommendedAction={onClickRecommendedAction}
               onClickAction={onClickAction}

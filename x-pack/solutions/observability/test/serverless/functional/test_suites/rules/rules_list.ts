@@ -661,18 +661,10 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
 
       await find.waitForDeletedByCssSelector('.euiBasicTable-loading');
       await testSubjects.click('ruleTypeFilterButton');
-
-      await retry.try(async () => {
-        const isOpen = await testSubjects.exists('ruleType0Group');
-        if (!isOpen) {
-          await testSubjects.click('ruleTypeFilterButton');
-        }
-
-        expect(await (await testSubjects.find('ruleType0Group')).getVisibleText()).toEqual(
-          'Applications'
-        );
-      });
-
+      await testSubjects.existOrFail('ruleType0Group', { timeout: 5000 });
+      expect(await (await testSubjects.find('ruleType0Group')).getVisibleText()).toEqual(
+        'Applications'
+      );
       await testSubjects.click('ruleTypeapm.anomalyFilterOption');
 
       await retry.try(async () => {

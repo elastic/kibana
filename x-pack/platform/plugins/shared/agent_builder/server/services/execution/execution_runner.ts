@@ -23,7 +23,6 @@ import {
   take,
 } from 'rxjs';
 import type { Observable } from 'rxjs';
-import { v4 as uuidv4 } from 'uuid';
 import type { Logger } from '@kbn/logging';
 import type { KibanaRequest } from '@kbn/core-http-server';
 import type { UiSettingsServiceStart } from '@kbn/core-ui-settings-server';
@@ -36,7 +35,6 @@ import {
   isRoundCompleteEvent,
   isRoundStartedEvent,
   isRoundInterruptedEvent,
-  isConversationCreatedEvent,
   isAgentBuilderError,
   AgentExecutionMode,
   createInternalError,
@@ -61,21 +59,20 @@ import {
   handleCancellation,
   createAbortedError,
   executeAgent$,
-  getConversation,
-  persistRoundInput,
   appendRoundTerminated$,
   appendResumeExecution$,
   executionStartedEvents$,
+  getConversation,
   resolveServices,
   convertErrors,
   toClientError,
   isPendingResumeConversation,
+  isPlaceholderUser,
   resolveTelemetryOrigin,
   persistExecutionInterruption,
   trackExecutionInterruption,
   type ConversationWithOperation,
 } from './utils';
-import { createConversationIdSetEvent } from './utils/events';
 import type { AnalyticsService, TrackingService } from '../../telemetry';
 import { loadTracingPrivacySettings, withConverseSpan } from '../../tracing';
 import { getCurrentSpaceId } from '../../utils/spaces';
@@ -180,7 +177,8 @@ const handleConversationExecution = async ({
     structuredOutput,
     outputSchema,
     storeConversation = true,
-    autoCreateConversationWithId = false,
+    accessControl,
+    readOnly,
     origin,
     nextInput,
     browserApiTools,
@@ -188,69 +186,67 @@ const handleConversationExecution = async ({
     telemetryMetadata,
     maxContentLength,
     reasoningLevel,
-    accessControl,
     subagentCreation,
-    readOnly,
     projectRouting,
+    roundId,
+    conversationOperation,
+    receivedAt: receivedAtIso,
   } = execution.agentParams;
+
+  const { owner } = execution;
+
+  // A record written before the execution service resolved all of these cannot be run.
+  if (!conversationId || !roundId || !conversationOperation || !owner || !receivedAtIso) {
+    throw createInternalError('Execution is missing required conversation parameters');
+  }
 
   const { logger, runAgent, trackingService, analyticsService, meteringService, agentService } =
     deps;
 
-  // Resolve scoped services
-  const { conversationClient, modelProvider, selectedConnectorId } = await resolveServices({
-    agentId,
-    connectorId,
-    telemetryMetadata,
+  const conversationClient = await deps.conversationService.getScopedClientAsUser({
     request,
-    ...deps,
+    user: { ...owner, isAdmin: false },
   });
 
-  // Get conversation — only the conversation-level part of the origin is persisted on it
-  const conversation = await getConversation({
-    agentId,
-    conversationId,
-    autoCreateConversationWithId,
-    conversationClient,
-    accessControl,
-    readOnly,
-    origin: origin ? { external_conversation_id: origin.external_conversation_id } : undefined,
-    subagentCreation,
-  });
+  const author = conversationClient.getAuthor(origin?.author);
 
-  const author = await deps.conversationService.getConversationRoundAuthor({
-    request,
-    origin,
-  });
+  // The execution service resolved the conversation, created it when it was new and wrote the
+  // opening user message before this run was dispatched: the run reads the stored document and is
+  // told how the request resolved it, since its own read only ever sees an update. A run that does
+  // not store its conversation wrote nothing to read, so it resolves the placeholder here.
+  const conversation: ConversationWithOperation = storeConversation
+    ? { ...(await conversationClient.get(conversationId)), operation: conversationOperation }
+    : await getConversation({
+        agentId,
+        conversationId,
+        autoCreateConversationWithId: true,
+        conversationClient,
+        accessControl,
+        readOnly,
+        origin: origin ? { external_conversation_id: origin.external_conversation_id } : undefined,
+        subagentCreation,
+      });
 
-  const roundId = uuidv4();
-  const receivedAt = new Date();
-
-  const useTwoPhase = !isPendingResumeConversation(conversation);
-  if (storeConversation && useTwoPhase) {
-    await persistRoundInput({
-      conversation,
-      conversationClient,
-      roundId,
-      receivedAt,
-      input: nextInput,
-      author,
-      origin: origin ? { type: origin.type } : undefined,
-    });
-  }
+  // Matches the receipt-time write's timestamp, so a rebuilt interruption event lands with the
+  // same created_at rather than moving to when this run picked the record up.
+  const receivedAt = new Date(receivedAtIso);
 
   const roundOrigin = origin ? { type: origin.type } : undefined;
   const telemetryOrigin = resolveTelemetryOrigin({ conversation, requestOrigin: origin?.type });
 
   // From here on the receipt-time `user_message` is stored (fresh round) or a pending round is
   // being resumed: any rejection before the stream exists would leave it dangling, so the setup
-  // window is guarded and its failure recorded as an interrupted execution.
+  // window is guarded and its failure recorded as an interrupted execution. Service/connector
+  // resolution moved inside this guard too, so a run that fails to resolve one still gets a
+  // terminal recorded next to the message that was already persisted.
   try {
-    // Emit conversation ID for new conversations (only when persisting)
-    const conversationIdEvent$ =
-      storeConversation && conversation.operation === 'CREATE'
-        ? of(createConversationIdSetEvent(conversation.id))
-        : EMPTY;
+    const { modelProvider, selectedConnectorId } = await resolveServices({
+      agentId,
+      connectorId,
+      telemetryMetadata,
+      request,
+      ...deps,
+    });
 
     // Execute agent
     const agentEvents$ = executeAgent$({
@@ -279,9 +275,7 @@ const handleConversationExecution = async ({
 
     // Generate title when creating a new conversation
     // OR when the conversation still carries the default placeholder title
-    const needsTitle =
-      (conversation.operation === 'CREATE' || conversationNeedsTitle(conversation)) &&
-      !subagentCreation;
+    const needsTitle = conversationNeedsTitle(conversation) && !subagentCreation;
     const title$ = (
       needsTitle
         ? generateTitle({
@@ -342,7 +336,9 @@ const handleConversationExecution = async ({
         opikHeaders,
       },
       (span) => {
-        if (author || conversation.operation !== 'CREATE') {
+        // The conversation is stored by now, so its owner is known — except for a run that does
+        // not store one, whose placeholder owner is nobody and stays unreported.
+        if (author || !isPlaceholderUser(conversation.user)) {
           setUserAttributes(span, {
             id: author?.id ?? conversation.user.id,
             username: author?.username ?? conversation.user.username,
@@ -358,13 +354,7 @@ const handleConversationExecution = async ({
             )
           : EMPTY;
 
-        return merge(
-          conversationIdEvent$,
-          agentEvents$,
-          startedEvents$,
-          persistenceEvents$,
-          titleAttr$
-        ).pipe(
+        return merge(agentEvents$, startedEvents$, persistenceEvents$, titleAttr$).pipe(
           // Graceful cancellation first, so an abort is normalised to RequestAbortedError before the
           // interruption tracker classifies the error.
           handleCancellation(abortSignal),
@@ -392,13 +382,6 @@ const handleConversationExecution = async ({
           // it from the client-facing stream so it doesn't duplicate the follow-up round's steps.
           map(stripResumeExecution),
           tap((event) => {
-            if (isConversationCreatedEvent(event) && !author) {
-              setUserAttributes(span, {
-                id: event.data.user.id,
-                username: event.data.user.username,
-              });
-            }
-
             try {
               if (isRoundCompleteEvent(event)) {
                 const isReplacingRound = event.data?.resumed === true;
@@ -596,10 +579,7 @@ const buildPersistenceEvents = ({
 
   if (useTwoPhase) {
     const roundStartedEvents$ = agentEvents$.pipe(filter(isRoundStartedEvent));
-    const endTitle$ =
-      conversation.operation === 'CREATE' || conversationNeedsTitle(conversation)
-        ? title$
-        : undefined;
+    const endTitle$ = conversationNeedsTitle(conversation) ? title$ : undefined;
 
     return roundStartedEvents$.pipe(
       concatMap((startEvent) =>

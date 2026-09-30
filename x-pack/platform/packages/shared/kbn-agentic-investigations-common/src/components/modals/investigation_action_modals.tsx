@@ -7,11 +7,10 @@
 
 import React from 'react';
 import { ApprovalModal } from '@kbn/proposals-ui';
-import type { ApprovalProposal } from '@kbn/proposals-ui';
+import type { ApprovalProposal, DeclineParams } from '@kbn/proposals-ui';
 import type { Investigation } from '../../types';
 import type { CardActionType } from '../actions/base_actions';
 import type { EscalationModalMode } from './escalation_modal/types';
-import { AssignActionModal } from './assign_action_modal';
 import { BaseActionModal } from './base_action_modal';
 import { MODAL_TRANSLATIONS } from './translations';
 
@@ -52,10 +51,12 @@ export interface InvestigationActionModalsProps<
    */
   onConfirmApproval?: (proposal: TProposal) => Promise<void>;
   /**
-   * Records a dismissal from the approval modal. Omitted by hosts that cannot capture one,
-   * which also hides the Dismiss button rather than leaving it inert.
+   * Records a dismissal from the approval modal, with its structured reason. Awaited by the
+   * modal — same contract as `onConfirmApproval` — so a rejection surfaces in its own error
+   * banner. Omitted by hosts that cannot capture one, which also hides the Decline button rather
+   * than leaving it inert.
    */
-  onDismissApproval?: (proposal: TProposal) => void;
+  onDismissApproval?: (proposal: TProposal, params: DeclineParams) => Promise<void>;
   /**
    * Whether `approvalProposal`'s approve/decline is currently in flight. Sourced from the host's
    * own mutation cache (e.g. `useIsMutating`), so this modal agrees with anything else showing the
@@ -84,7 +85,7 @@ export interface InvestigationActionModalsProps<
    */
   renderCloseModal?: (props: CloseInvestigationModalRenderProps) => React.ReactNode;
   /**
-   * Renders the escalation modal when a 'createEscalation' or 'addToEscalation' action is
+   * Renders the escalation modal when a 'createEscalation' or 'attachToEscalation' action is
    * triggered. Provided by the caller so the modal can use Kibana HTTP hooks that are not
    * available in this package.
    */
@@ -100,7 +101,6 @@ export interface InvestigationActionModalsProps<
 export const InvestigationActionModals = <TProposal extends ApprovalProposal = ApprovalProposal>({
   action,
   recordId,
-  initialAssignee,
   investigation,
   approvalProposal,
   onCloseAction,
@@ -125,19 +125,11 @@ export const InvestigationActionModals = <TProposal extends ApprovalProposal = A
           }
         }}
         onClose={onCloseApproval}
-        onDismiss={onDismissApproval ? () => onDismissApproval(approvalProposal) : undefined}
+        onDismiss={
+          onDismissApproval ? (params) => onDismissApproval(approvalProposal, params) : undefined
+        }
         isSubmitting={isSubmitting}
         currentActorName={currentActorName}
-      />
-    ) : null}
-
-    {action === 'assign' && recordId ? (
-      <AssignActionModal
-        recordId={recordId}
-        initialAssignee={initialAssignee}
-        onClose={onCloseAction}
-        // TODO: use assign action API call hook
-        onAssign={onCloseAction}
       />
     ) : null}
 
@@ -163,7 +155,7 @@ export const InvestigationActionModals = <TProposal extends ApprovalProposal = A
         : null
       : null}
 
-    {(action === 'createEscalation' || action === 'addToEscalation') && investigation
+    {(action === 'createEscalation' || action === 'attachToEscalation') && investigation
       ? renderEscalationModal?.({
           mode: action === 'createEscalation' ? 'create' : 'addToExisting',
           investigation,

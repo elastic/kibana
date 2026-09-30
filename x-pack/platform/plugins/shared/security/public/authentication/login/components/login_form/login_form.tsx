@@ -247,7 +247,7 @@ export class LoginForm extends Component<LoginFormProps, State> {
     ) : null;
 
     return (
-      <EuiPanel data-test-subj="loginForm" color="transparent">
+      <EuiPanel data-test-subj="loginForm" color="plain">
         <form onSubmit={this.submitLoginForm}>
           <EuiFormRow
             label={

@@ -8,6 +8,7 @@
  */
 
 import React, { useEffect } from 'react';
+import { MENU_ATTR } from '../constants';
 import { useComments, useCommentsState } from './comments_context';
 import { CommentModeOverlay } from './comment_mode_overlay';
 import { CommentsPanel } from './comments_panel';
@@ -45,6 +46,10 @@ export const CommentsLayer = () => {
       if (!state.active || state.overlayOpen) {
         return;
       }
+      // An open menu of the panel closes itself, and nothing else.
+      if (event.target instanceof Element && event.target.closest(`[${MENU_ATTR}]`)) {
+        return;
+      }
       if (state.pending) {
         // A draft being saved cannot be discarded; Escape waits for the save.
         if (!state.pending.saving) {
@@ -54,6 +59,9 @@ export const CommentsLayer = () => {
         controller.stopGuide();
       } else if (state.activeThreadId) {
         controller.openThread(null);
+      } else if (state.panelThreadId) {
+        // As Back does: the panel's list again.
+        controller.showInPanel(null);
       } else {
         controller.setActive(false);
       }
