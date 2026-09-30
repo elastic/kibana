@@ -244,20 +244,22 @@ export function makeService(params?: {
       }
     )
   );
-  // The caller's client only deletes; `createDataStream` is a sentinel that must stay uncalled.
+  // The caller's client refreshes and deletes (`kibana_system` lacks `maintenance` and
+  // `delete_index`); `createDataStream` is a sentinel that must stay uncalled.
   const esClient = {
     indices: {
       deleteDataStream: jest.fn(async ({ name }: { name: string }) => {
         streamDocuments.delete(name);
         return { acknowledged: true };
       }),
+      refresh: jest.fn(async () => ({})),
       createDataStream: jest.fn(async ({ name }: { name: string }) => {
         streamDocuments.set(name, 0);
         return { acknowledged: true };
       }),
     },
   };
-  // Everything else runs as `kibana_system`.
+  // Exists, count and create run as `kibana_system`.
   const internalEsClient = {
     indices: {
       exists: jest.fn(async ({ index }: { index: string }) => streamDocuments.has(index)),
@@ -265,7 +267,6 @@ export function makeService(params?: {
         streamDocuments.set(name, 0);
         return { acknowledged: true };
       }),
-      refresh: jest.fn(async () => ({})),
     },
     count: jest.fn(async ({ index }: { index: string }) => ({
       count: streamDocuments.get(index) ?? 0,

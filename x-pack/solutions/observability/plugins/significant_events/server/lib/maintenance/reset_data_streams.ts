@@ -22,12 +22,12 @@ export const RESET_REGISTERED_DATA_STREAMS = [
 ] as const;
 
 interface ResetDataStreamsParams {
-  /** Current-user client, used only to delete: `kibana_system` cannot delete these streams. */
-  esClient: ElasticsearchClient;
   /**
-   * `kibana_system` client for everything else (exists, refresh, count, create), so the
-   * caller needs nothing beyond delete privileges on the streams.
+   * Current-user client for delete and refresh: `kibana_system` has neither
+   * `delete_index` nor `maintenance` on these streams.
    */
+  esClient: ElasticsearchClient;
+  /** `kibana_system` client for exists, count and create, which it is allowed to do. */
   internalEsClient: ElasticsearchClient;
   dataStreams: DataStreamsStart;
   failures: SignificantEventsMaintenanceFailure[];
@@ -73,10 +73,15 @@ const wipeIfPopulated = async (
   name: string,
   { esClient, internalEsClient, failures }: ResetDataStreamsParams
 ): Promise<boolean> => {
+  // `_count` is search-based; refresh first so unrefreshed writes cannot masquerade as
+  // empty. A failed refresh is recorded but still lets the count decide.
+  try {
+    await esClient.indices.refresh({ index: name });
+  } catch (error) {
+    failures.push({ target: `data-stream:${name}:refresh`, error: toMessage(error) });
+  }
   let documentCount: number | undefined;
   try {
-    // `_count` is search-based; refresh first so unrefreshed writes cannot masquerade as empty.
-    await internalEsClient.indices.refresh({ index: name });
     documentCount = (await internalEsClient.count({ index: name })).count;
   } catch (error) {
     failures.push({ target: `data-stream:${name}:count`, error: toMessage(error) });

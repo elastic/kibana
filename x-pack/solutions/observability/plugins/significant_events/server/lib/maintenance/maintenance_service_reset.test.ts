@@ -114,11 +114,11 @@ describe('SignificantEventsMaintenanceService', () => {
       expect(streamDocuments.get(KNOWLEDGE_INDICATORS_DATA_STREAM)).toBe(0);
       expect(streamDocuments.has(DISCOVERIES_DATA_STREAM)).toBe(false);
       expect(esClient.indices.createDataStream).not.toHaveBeenCalled();
-      expect(internalEsClient.indices.refresh).toHaveBeenCalledWith({
+      expect(esClient.indices.refresh).toHaveBeenCalledWith({
         index: KNOWLEDGE_INDICATORS_DATA_STREAM,
         ignore_unavailable: true,
       });
-      expect(internalEsClient.indices.refresh.mock.invocationCallOrder[0]).toBeLessThan(
+      expect(esClient.indices.refresh.mock.invocationCallOrder[0]).toBeLessThan(
         countKnowledgeIndicators.mock.invocationCallOrder[0]
       );
       expect(asScoped).toHaveBeenCalledWith(REQUEST);
@@ -221,16 +221,31 @@ describe('SignificantEventsMaintenanceService', () => {
 
     it('refreshes a registered stream before counting so unrefreshed writes are wiped', async () => {
       const { api } = makeManagementApi();
-      const { service, internalEsClient } = makeService({
+      const { service, esClient, internalEsClient } = makeService({
         management: api,
         dataStreams: { [DETECTIONS_DATA_STREAM]: 1 },
       });
 
       await service.reset({ request: REQUEST });
 
-      expect(internalEsClient.indices.refresh.mock.invocationCallOrder[0]).toBeLessThan(
+      expect(esClient.indices.refresh.mock.invocationCallOrder[0]).toBeLessThan(
         internalEsClient.count.mock.invocationCallOrder[0]
       );
+    });
+
+    it('still trusts the count when the refresh is denied, so empty streams are not wiped', async () => {
+      const { api } = makeManagementApi();
+      const { service, esClient } = makeService({ management: api });
+      esClient.indices.refresh.mockRejectedValue(new Error('refresh denied'));
+
+      const summary = await service.reset({ request: REQUEST });
+
+      expect(esClient.indices.deleteDataStream).not.toHaveBeenCalled();
+      expect(summary.deleted?.dataStreams).toBe(0);
+      expect(summary.partialFailures).toContainEqual({
+        target: `data-stream:${DETECTIONS_DATA_STREAM}:refresh`,
+        error: 'refresh denied',
+      });
     });
 
     it('does not report indicators or queries as deleted when their stream could not be wiped', async () => {
@@ -534,7 +549,19 @@ describe('SignificantEventsMaintenanceService', () => {
 
       await expect(service.reset({ request: REQUEST })).rejects.toThrow('inventory write failed');
 
-      expect(updateWorkflow).toHaveBeenCalled();
+      // The sweep is rolled back so the unrecorded workflows are not stranded.
+      expect(updateWorkflow).toHaveBeenCalledWith(
+        SIGNIFICANT_EVENTS_DETECTION_WORKFLOW_ID,
+        { enabled: false },
+        expect.any(String),
+        REQUEST
+      );
+      expect(updateWorkflow).toHaveBeenCalledWith(
+        SIGNIFICANT_EVENTS_DETECTION_WORKFLOW_ID,
+        { enabled: true },
+        expect.any(String),
+        REQUEST
+      );
       expect(esClient.indices.deleteDataStream).not.toHaveBeenCalled();
     });
 

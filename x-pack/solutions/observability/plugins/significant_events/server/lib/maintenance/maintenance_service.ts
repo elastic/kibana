@@ -694,7 +694,8 @@ export const createSignificantEventsMaintenanceService = ({
         for (const workflow of existing?.disabledWorkflows ?? []) {
           recoveryByKey.set(workflowKey(workflow), workflow);
         }
-        for (const target of await sweepWorkflows({ mgmt, spaceIds, request, failures })) {
+        const newlyDisabled = await sweepWorkflows({ mgmt, spaceIds, request, failures });
+        for (const target of newlyDisabled) {
           recoveryByKey.set(workflowKey(target), target);
         }
         const settingsStillOn = await featureSettings.reassertFeatureSettingsOff({
@@ -717,19 +718,32 @@ export const createSignificantEventsMaintenanceService = ({
             lastSummary: normalizeSummary(existing?.lastSummary) ?? emptySummary('paused'),
           });
         } catch (writeError) {
-          log.error(
-            `Significant Events reset failed before destructive cleanup: could not persist disabled workflows: ${toMessage(
+          // Nothing durable records this sweep, so re-enable what it disabled (except
+          // settings-backed workflows whose toggles are now off) before aborting.
+          await restoreWorkflowsAfterReset({
+            mgmt,
+            workflows: newlyDisabled,
+            settingsStillOn,
+            request,
+            failures,
+          });
+          logFailures(
+            log,
+            `Significant Events reset failed before destructive cleanup: could not persist disabled workflows (${toMessage(
               writeError
-            )}`
+            )}); rolled back this sweep`,
+            failures
           );
           throw writeError;
         }
 
         // The snapshot below searches the knowledge-indicator stream; refresh it first so
         // unrefreshed revisions are counted (and their rules found) before the wipe.
+        // Refresh needs `maintenance`, which only the caller may hold.
+        const esClient = server.core.elasticsearch.client.asScoped(request).asCurrentUser;
         const internalEsClient = server.core.elasticsearch.client.asInternalUser;
         try {
-          await internalEsClient.indices.refresh({
+          await esClient.indices.refresh({
             index: KNOWLEDGE_INDICATORS_DATA_STREAM,
             ignore_unavailable: true,
           });
@@ -745,7 +759,7 @@ export const createSignificantEventsMaintenanceService = ({
           });
         const investigations = await deleteInvestigations(failures);
         const wipedDataStreams = await resetDataStreams({
-          esClient: server.core.elasticsearch.client.asScoped(request).asCurrentUser,
+          esClient,
           internalEsClient,
           dataStreams: server.core.dataStreams,
           failures,
