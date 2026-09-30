@@ -67,6 +67,7 @@ dependsOn:
   - '@kbn/core-spaces-common'
   - '@kbn/app-header'
   - '@kbn/ui-callout'
+  - '@kbn/core-http-browser'
 tags:
   - plugin
   - prod

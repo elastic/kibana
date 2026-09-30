@@ -6,6 +6,7 @@
  */
 
 import { parse } from 'yaml';
+import { MAX_TITLE_LENGTH } from '@kbn/proposals-common';
 import type { RuleTuningWorkerExtras } from '@kbn/alertzero-common';
 import type { WorkflowYaml } from '@kbn/workflows';
 import { createWorkflowLiquidEngine } from '@kbn/workflows';
@@ -16,12 +17,12 @@ import {
   ALERTZERO_COVERAGE_WORKER_WORKFLOW_ID,
   ALERTZERO_ACTION_ADD_RULE_EXCEPTION_WORKFLOW_ID,
   ALERTZERO_ACTION_EDIT_RULE_WORKFLOW_ID,
+  ALERTZERO_CREATE_PROPOSAL_WORKFLOW_ID,
   ALERTZERO_RULE_CREATION_WORKFLOW_ID,
   ALERTZERO_RULE_PREVIEW_WORKFLOW_ID,
   ALERTZERO_RULE_TUNING_REVIEW_WORKFLOW_ID,
   ALERTZERO_RULE_TUNING_WORKER_WORKFLOW_ID,
   ALERTZERO_WORKER_DETECTION_RULE_TUNING_WORKFLOW_ID,
-  CREATE_PROPOSAL_WORKFLOW_ID,
 } from '@kbn/workflows/managed';
 import { projectSkillsFromDefinition } from '../services/utils';
 import { workerRegistry } from './worker_registry';
@@ -222,25 +223,26 @@ describe('detection rule workflows', () => {
       }
     });
 
-    // Only `waitForApproval` renders the approve/reject buttons; a `waitForInput` gate
-    // makes an analyst hand-author the resume payload as JSON instead.
-    it('gates the creation worker on approval responses', () => {
+    // The decision lives on the investigation as a proposal, and the gate workflow
+    // creates the rule as the approver. The worker itself must neither gate nor create.
+    it('gates the creation worker through the investigation proposal', () => {
       const { steps } = parse(getManagedYaml(ALERTZERO_RULE_CREATION_WORKFLOW_ID)) as WorkflowYaml;
       const all = flattenSteps(steps as unknown as NestedStep[]);
-      const gates = all.filter(({ type }) => type === 'waitForApproval');
+      const types = all.map(({ type }) => type);
 
+      expect(types).not.toContain('waitForApproval');
+      expect(types).not.toContain('waitForInput');
+      expect(types).not.toContain('security.createRule');
+
+      const gates = all.filter(
+        ({ type, with: input }) =>
+          type === 'workflow.execute' &&
+          input?.['workflow-id'] === ALERTZERO_CREATE_PROPOSAL_WORKFLOW_ID
+      );
       expect(gates).toHaveLength(1);
-      expect(all.map(({ type }) => type)).not.toContain('waitForInput');
-
-      const [gate] = gates;
-      const conditions = all
-        .flatMap(({ if: stepIf }) => (stepIf ? [stepIf] : []))
-        .filter((expr) => expr.includes(gate.name));
-
-      expect(conditions.length).toBeGreaterThan(0);
-      for (const expr of conditions) {
-        expect(expr).toContain(`steps.${gate.name}.output.response.approved`);
-      }
+      const inputs = gates[0].with?.inputs as Record<string, unknown>;
+      expect(inputs.actionWorkflowId).toBe('system-alertzero-action-create-rule');
+      expect(inputs.actionInput).toBe('${{ steps.draft_creation.output.structured_output.rule }}');
     });
 
     // Every change type decides at the proposal gate, which runs the action as
@@ -256,7 +258,8 @@ describe('detection rule workflows', () => {
 
       const proposals = all.filter(
         ({ type, with: input }) =>
-          type === 'workflow.execute' && input?.['workflow-id'] === CREATE_PROPOSAL_WORKFLOW_ID
+          type === 'workflow.execute' &&
+          input?.['workflow-id'] === ALERTZERO_CREATE_PROPOSAL_WORKFLOW_ID
       );
       expect(proposals.map(({ name }) => name)).toEqual([
         'propose_entry',
@@ -379,13 +382,14 @@ describe('detection rule workflows', () => {
       const hours = (timeout: unknown) => Number(String(timeout).replace(/h$/, ''));
 
       // None of this workflow's gates passes `expiresIn`, so each takes the
-      // gate's 72h default. A gate that starts asking for its own deadline has
-      // to be checked against the ceiling here.
+      // gate's 72h default — the bridge forwards the field unset. A gate that
+      // starts asking for its own deadline has to be checked against the
+      // ceiling here.
       //
       // Flattened, not top-level: only `propose_entry` sits at the top, and
       // the other six hang off `propose_tuning`'s switch cases and default.
       const proposals = flattenSteps(review.steps as NestedStep[]).filter(
-        (step) => step.with?.['workflow-id'] === CREATE_PROPOSAL_WORKFLOW_ID
+        (step) => step.with?.['workflow-id'] === ALERTZERO_CREATE_PROPOSAL_WORKFLOW_ID
       );
       expect(proposals.length).toBe(7);
       for (const proposal of proposals) {
@@ -853,6 +857,21 @@ describe('detection rule workflows', () => {
         expect(comment).not.toContain('marks these alerts acknowledged');
       });
 
+      // The diagnosis schema leaves its title unbounded and the proposal step
+      // rejects anything longer, so an unbounded forward fails the whole review.
+      it('bounds the proposal title to what the proposal step accepts', async () => {
+        const compose = reviewSteps.find(({ name }) => name === 'compose_proposal')!;
+        const title = String((compose.with as Record<string, string>).title);
+
+        const rendered = await createWorkflowLiquidEngine().parseAndRender(title, {
+          steps: {
+            diagnose_rule: { output: { structured_output: { title: 'T'.repeat(900) } } },
+          },
+        });
+
+        expect(rendered.length).toBeLessThanOrEqual(MAX_TITLE_LENGTH);
+      });
+
       // A skipped step renders as nil, so `nil == 'succeeded'` is false and the
       // step that ran decides alone. A dismissal always carries `status: no_action`.
       it.each([
@@ -1269,13 +1288,24 @@ describe('detection rule workflows', () => {
           }>
         ).find(({ type }) => type === 'manual')!.inputs!.properties;
 
-        expect(consts.lookback_days).toBe(7);
+        expect(consts.lookback_days).toBe(14);
         expect(query).toContain(
           '"gte":"now-{{ inputs.lookback_days | default: consts.lookback_days }}d"'
         );
         expect(JSON.stringify(search.with?.sort)).toContain('"order":"asc"');
         expect(inputs.lookback_days.minimum).toBe(1);
         expect(inputs.lookback_days.maximum).toBe(90);
+      });
+
+      // A review parks on its proposal for up to its timeout, and an expired proposal
+      // leaves the indicator pending for the next sweep. That sweep only retries it if
+      // the indicator is still inside the window.
+      it('looks back further than the longest review can park', () => {
+        const { timeout } = (review as unknown as { settings: { timeout: string } }).settings;
+        const reviewHours = Number(timeout.replace(/h$/, ''));
+
+        expect(timeout).toMatch(/^\d+h$/);
+        expect(Number(consts.lookback_days) * 24).toBeGreaterThan(reviewHours);
       });
 
       // Async fan-out: the sweep starts one review per indicator and exits. Each review

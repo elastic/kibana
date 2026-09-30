@@ -14,6 +14,5 @@ export {
   reviseProposal,
   dismissProposal,
   spaceUrl,
-  trackProposal,
 } from './helpers';
 export type { SeedProposalOptions } from './helpers';

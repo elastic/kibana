@@ -13,7 +13,7 @@ import { useStartServices } from '../../../../../hooks';
 
 import type { IntegrationCardItem } from '..';
 
-// Keep in sync with @kbn/ingest-hub-plugin/common/constants
+// Keep in sync with @kbn/ingest-hub-plugin/common/core/constants
 const ONBOARDING_ENABLED_FLAG = 'ingestHub.onboardingEnabled';
 const ONBOARDING_APP_ID = 'onboarding';
 const ONBOARDING_AWS_PATH = '/aws';

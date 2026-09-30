@@ -5,9 +5,11 @@ set -euo pipefail
 # Reads credentials from a file, deletes the file immediately, then makes the API call.
 # This ensures credentials never appear in the calling process's output.
 #
-# When agentBuilder:experimentalFeatures is true, creating a connector automatically
-# indexes it into the Semantic Metadata Layer (SML), making its sub-actions
-# discoverable by AI agents.
+# Creating a connector does not by itself grant any agent access to it. An agent can only
+# call the connector's sub-actions once the connector's ID is added to that agent's assigned
+# connectors (the agent's Connectors tab, or its connector_ids config).
+# When agentBuilder:experimentalFeatures is also true, creating a connector additionally
+# indexes it into the Semantic Metadata Layer (SML), improving discoverability for AI agents.
 
 CONNECTOR_TYPE=""
 CONNECTOR_NAME=""
@@ -172,7 +174,9 @@ if [[ "$HTTP_CODE" -ge 200 && "$HTTP_CODE" -lt 300 ]]; then
     echo ""
     echo "Connector ID: $CONNECTOR_ID"
     echo ""
-    echo "The connector's sub-actions are now discoverable by AI agents via the SML."
+    echo "This connector isn't usable by any agent yet — add its ID to an agent's assigned"
+    echo "connectors (Connectors tab on the agent) before it can call this connector's sub-actions."
+    echo "If agentBuilder:experimentalFeatures is enabled, it's also indexed into the SML for discovery."
     echo "Use list_connectors.sh to verify."
   fi
 else

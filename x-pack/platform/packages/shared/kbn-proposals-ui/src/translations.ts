@@ -14,9 +14,6 @@ export const APPROVAL_MODAL_TRANSLATIONS = Object.freeze({
   dismiss: i18n.translate('xpack.proposals.approvalModal.dismiss', {
     defaultMessage: 'Decline',
   }),
-  noAction: i18n.translate('xpack.proposals.approvalModal.noAction', {
-    defaultMessage: 'No automated action',
-  }),
   modalAriaLabel: i18n.translate('xpack.proposals.approvalModal.ariaLabel', {
     defaultMessage: 'Approval required modal',
   }),
@@ -42,6 +39,9 @@ export const APPROVAL_MODAL_TRANSLATIONS = Object.freeze({
    */
   noActionBadge: i18n.translate('xpack.proposals.approvalModal.noActionBadge', {
     defaultMessage: 'Approved',
+  }),
+  expiredBadge: i18n.translate('xpack.proposals.approvalModal.expiredBadge', {
+    defaultMessage: 'Expired',
   }),
   applyingBadge: i18n.translate('xpack.proposals.approvalModal.applyingBadge', {
     defaultMessage: 'Applying',

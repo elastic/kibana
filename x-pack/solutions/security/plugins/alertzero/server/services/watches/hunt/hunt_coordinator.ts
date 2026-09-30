@@ -16,10 +16,15 @@ import type {
   HuntIoc,
   HuntTechnology,
 } from '@kbn/alertzero-common';
-import { completedSuccessfully, huntCompletenessOf } from './common/completeness';
+import {
+  completedSuccessfully,
+  FINAL_WHEN_NOTHING_SEARCHABLE,
+  huntCompletenessOf,
+} from './common/completeness';
 import { resolveHuntScope } from './common/resolve_index_scope';
+import { isTier1SearchableIoc } from './tier1/attribute_hits';
 import { loadReportHuntContext, MAX_HUNT_REPORT_TEXT_CHARS } from './common/load_report_context';
-import type { HuntScope } from './common/resolve_index_scope';
+import type { HuntScope, HuntScopeResolution } from './common/resolve_index_scope';
 import { SUMMARIZE_HIT_SOURCE_FIELDS, summarizeHit } from './common/summarize_hit';
 import { huntForThreat, emptyHuntForThreatResult } from './tier1/hunt_for_threat';
 import type { HuntForThreatServiceResult } from './tier1/types';
@@ -30,7 +35,19 @@ export type HuntCoordinatorTier2SkipReason =
   | 'configured_never'
   | 'no_inference'
   | 'no_environment_hits'
+  /**
+   * The scope was every log source (`discovered:broad`) and Tier 1 left no matched required index (no confirmed hit, or a hit reached only through an alias), so
+   * there is no matched index set for Tier 2 to generate against. Deterministic
+   * for this run; not counted as lost coverage.
+   */
+  | 'no_matched_scope'
   | 'no_report_text'
+  /**
+   * Tier 1 mapped no searchable term and, under `on_hits`, the run had nothing for Tier 2
+   * either: no report text and no vendor or product from the report. A run that has any of
+   * those is not gated here, because `on_hits` gates on Tier 1 having run clean and Tier 1
+   * never ran; it proceeds to Tier 2 as an `always` run would.
+   */
   | 'no_searchable_input'
   | 'report_not_found'
   | 'scope_blocked'
@@ -71,6 +88,13 @@ export interface HuntCoordinatorResult {
   run_id: string;
   /** Technologies whose indices the hunt actually ran against; empty when the scope was blocked. */
   technologies: HuntTechnology[];
+  /**
+   * Index patterns the hunt ran against: the scope's resolved required patterns, whether
+   * they came from a pinned or environment-resolved technology or from datasets discovered
+   * for the report. Empty when the scope was blocked, when resolution failed, or when the
+   * run stopped before a scope existed.
+   */
+  index_patterns: string[];
   tier1: HuntCoordinatorTier1;
   tier2?: HuntCoordinatorTier2;
   tier2_skipped_reason?: HuntCoordinatorTier2SkipReason;
@@ -234,13 +258,115 @@ const buildArticleContext = (
   return Object.keys(context).length === 0 ? undefined : context;
 };
 
-const decideTier2Skip = (
-  tier2When: 'on_hits' | 'always' | 'never',
-  tier1: HuntForThreatResult
-): HuntCoordinatorTier2SkipReason | null => {
+/**
+ * What to tell the caller when the scope is blocked, keyed on which path blocked it.
+ *
+ * A pinned technology (or any blocked scope while one is set) keeps the original
+ * wording. A bare call with nothing to match against does too. The dynamic paths say
+ * what actually happened: the report matched no dataset, no model was there to widen
+ * the match, no dataset was discovered at all, or discovery itself failed.
+ * `_resolve/index` is cluster-wide and privilege-scoped, so the dynamic wording talks
+ * about what is visible to this hunt rather than what exists in a space.
+ */
+const blockedScopeGuidance = ({
+  resolution,
+  technology,
+  spaceId,
+  missing,
+}: {
+  resolution: HuntScopeResolution;
+  technology: HuntTechnology | undefined;
+  spaceId: string;
+  missing: string[];
+}): { message: string; nextStep: string } => {
+  const checked = missing.join(', ');
+  const noKnownIndices = "No known technology's indices are visible to this hunt";
+
+  switch (resolution) {
+    case 'blocked:model_declined':
+      if (technology !== undefined) break;
+      return {
+        message: `${noKnownIndices} and no discovered dataset matched the report (checked: ${checked}).`,
+        nextStep:
+          "Install an integration for the report's vendor so its data is ingested, or pin a technology whose indices exist.",
+      };
+    case 'blocked:model_unavailable':
+      if (technology !== undefined) break;
+      return {
+        message: `${noKnownIndices} and the report's vendor matched no discovered dataset; no model was available to widen the match (checked: ${checked}).`,
+        nextStep:
+          "Configure a connector on the reasoning tier so scope resolution can use the model, install an integration for the report's vendor, or pin a technology.",
+      };
+    case 'blocked:no_datasets':
+      if (technology !== undefined) break;
+      return {
+        message: `${noKnownIndices} and no log datasets were discovered (checked: ${checked}).`,
+        nextStep: 'Install an integration whose data this hunt can search, or pin a technology.',
+      };
+    case 'blocked:discovery_failed':
+      if (technology !== undefined) break;
+      return {
+        message: `${noKnownIndices} and dataset discovery failed (checked: ${checked}).`,
+        nextStep:
+          "Check Elasticsearch connectivity and the calling user's index privileges, then retry.",
+      };
+    default:
+      break;
+  }
+
+  // `blocked:pinned`, `blocked:no_report`, and any blocked result while a technology
+  // is pinned: the static wording, unchanged.
+  const target = technology ?? 'any configured technology';
+  return {
+    message: `No required index resolved for ${target} in space ${spaceId} (missing: ${checked}).`,
+    nextStep:
+      'Install the integration whose indices this hunt needs, or pass a technology whose indices exist in this space.',
+  };
+};
+
+/**
+ * Whether Tier 2 sits this run out, and why. Checked in order:
+ *
+ * 1. `never` always wins: `configured_never`.
+ * 2. A `discovered:broad` scope with no confirmed Tier 1 hit: `no_matched_scope`, whatever
+ *    `tier2_when` says (`always` included). The scope was every discovered dataset, so
+ *    generating ES|QL against all of it is meaningless; Tier 2 needs the index set Tier 1
+ *    actually hit, and there is none.
+ * 3. Tier 1 mapped nothing to search (`no_searchable_terms`): `always` runs Tier 2;
+ *    `on_hits` runs it too when the run has Tier 2 input (report text, or a vendor or
+ *    product from the report), because `on_hits` means "skip Tier 2 when Tier 1 ran
+ *    clean" and Tier 1 never ran, so there is nothing to gate on. A real KEV report
+ *    carries no IOCs and no techniques, only a vulnerability and text; without this rule
+ *    it retired after a run that issued no query. Only a run with nothing for Tier 2
+ *    either returns `no_searchable_input`.
+ * 4. `on_hits` with no confirmed hit: `no_environment_hits`.
+ */
+const decideTier2Skip = ({
+  tier2When,
+  tier1,
+  hasTier2Input,
+  resolution,
+  hasMatchedRequiredIndex,
+}: {
+  tier2When: 'on_hits' | 'always' | 'never';
+  tier1: HuntForThreatResult;
+  /** True when the run has report text, or a vendor or product from the report context. */
+  hasTier2Input: boolean;
+  resolution: HuntScopeResolution;
+  /** Whether any `per_index` bucket is a required index Tier 2 could be pointed at. */
+  hasMatchedRequiredIndex: boolean;
+}): HuntCoordinatorTier2SkipReason | null => {
   if (tier2When === 'never') return 'configured_never';
+  // A broad scope is a wildcard, so Tier 2 needs the concrete indices Tier 1 hit. A
+  // hit that arrived through an alias (`logs-archive` over `archive-v1`) confirms
+  // the count but leaves no required-index bucket to generate against, and the
+  // broad wildcard itself is not an allowed Tier 2 source, so there is no safe
+  // target: skip rather than emit a query the source gate would refuse.
+  if (resolution === 'discovered:broad' && (!tier1.has_confirmed_hit || !hasMatchedRequiredIndex)) {
+    return 'no_matched_scope';
+  }
   if (tier1.status === 'no_searchable_terms') {
-    if (tier2When === 'always') return null;
+    if (tier2When === 'always' || hasTier2Input) return null;
     return 'no_searchable_input';
   }
   // Gate on the confirmed hit bar, not merely `environment_hits_found`: optional-only
@@ -357,6 +483,7 @@ export const huntCoordinator = async (
       report_id: reportId,
       run_id,
       technologies: [],
+      index_patterns: [],
       tier1: {
         tier: 1,
         ...emptyHuntForThreatResult(
@@ -440,10 +567,37 @@ export const huntCoordinator = async (
   };
 
   // Resolve the index scope from the environment: the named technology, or every
-  // technology whose required indices exist in this space.
+  // technology whose required indices exist in this space, or, failing that, the
+  // datasets present in the space that match what the report is about. The report
+  // context is only handed over when there is a report to match against, so a bare
+  // call with neither a report nor caller inputs resolves exactly as it always has.
+  const hasReportContext =
+    reportId !== undefined ||
+    callerText !== undefined ||
+    callerIocs !== undefined ||
+    callerTechniques !== undefined;
   let scope: HuntScope;
   try {
-    scope = await resolveHuntScope({ esClient, spaceId, technology });
+    scope = await resolveHuntScope({
+      esClient,
+      spaceId,
+      technology,
+      report: hasReportContext
+        ? {
+            vendor: reportContext?.vendor,
+            product: reportContext?.product,
+            text,
+            // Only IOCs Tier 1 can actually query. A broad scope exists so Tier 1 can
+            // search a report's IOCs across every dataset; an IOC Tier 1 will drop (a hash
+            // of no known length) must not send the hunt there to search for nothing and
+            // then retire the report as `nothing_searched`.
+            iocs: iocs.filter(isTier1SearchableIoc),
+            techniques,
+          }
+        : undefined,
+      model,
+      logger,
+    });
   } catch (err) {
     logger.warn(`hunt_coordinator: scope resolution failed — ${(err as Error).message}`);
     // Return a degraded result rather than hard-failing.
@@ -462,7 +616,12 @@ export const huntCoordinator = async (
       report_id: reportId,
       run_id,
       technologies: [],
+      index_patterns: [],
       tier1: emptyTier1,
+      // Not the `on_hits` gate: with no scope there is no required-index allowlist for
+      // Tier 2 to generate and execute against, so Tier 2 cannot run even when the run
+      // has report text. The run fails as retryable below, so the report stays eligible
+      // and is not retired without a query.
       tier2_skipped_reason: 'no_searchable_input',
       message: `Scope resolution failed: ${(err as Error).message}`,
       next_step: 'Verify the technology index patterns are configured correctly.',
@@ -480,15 +639,20 @@ export const huntCoordinator = async (
   // A blocked scope is a failed run, never a clean one: no required index exists,
   // so there is nothing to hunt and the caller must not write hunt evidence.
   if (indexScope.status === 'blocked') {
-    const target = technology ?? 'any configured technology';
-    const message = `No required index resolved for ${target} in space ${spaceId} (missing: ${indexScope.missing.join(
-      ', '
-    )}).`;
+    const { message, nextStep } = blockedScopeGuidance({
+      resolution: scope.resolution,
+      technology,
+      spaceId,
+      missing: indexScope.missing,
+    });
     return {
       status: 'blocked',
       report_id: reportId,
       run_id,
       technologies,
+      // The wire contract says empty when blocked, whatever the scope carried: nothing
+      // was hunted, so nothing is reported as hunted.
+      index_patterns: [],
       tier1: {
         tier: 1,
         ...emptyHuntForThreatResult(
@@ -501,8 +665,7 @@ export const huntCoordinator = async (
       },
       tier2_skipped_reason: 'scope_blocked',
       message,
-      next_step:
-        'Install the integration whose indices this hunt needs, or pass a technology whose indices exist in this space.',
+      next_step: nextStep,
       has_confirmed_hit: false,
       // Nothing about this run says whether the environment is clean, and a later run
       // can differ: the report may be indexed, the scope may resolve, the index may
@@ -569,6 +732,7 @@ export const huntCoordinator = async (
       report_id: reportId,
       run_id,
       technologies,
+      index_patterns: scope.index_patterns,
       tier1,
       tier2_skipped_reason: reason,
       message,
@@ -579,13 +743,25 @@ export const huntCoordinator = async (
     };
   };
 
-  const skipReason = decideTier2Skip(tier2When, tier1Raw);
+  // Report text, or the vendor or product the report names, is what Tier 2 can work
+  // from when Tier 1 had nothing to search; a run with any of them is not gated on a
+  // Tier 1 that never ran.
+  const hasTier2Input = Boolean(text || reportContext?.vendor || reportContext?.product);
+  const skipReason = decideTier2Skip({
+    tier2When,
+    tier1: tier1Raw,
+    hasTier2Input,
+    resolution: scope.resolution,
+    hasMatchedRequiredIndex: tier1Raw.per_index.some((bucket) => bucket.required),
+  });
   if (skipReason) {
     return tier1Only({
       reason: skipReason,
       message: `Tier 1: ${tier1Raw.status}. Tier 2 skipped (${skipReason}).`,
       nextStep:
-        tier1Raw.status === 'environment_hits_found'
+        skipReason === 'no_matched_scope'
+          ? "The scope was every log source and Tier 1 left no matched index Tier 2 could be pointed at (no hit, or a hit reached only through an alias), so Tier 2 had no safe target. Install an integration for the report's vendor, or pin a technology, to hunt its behaviors."
+          : tier1Raw.status === 'environment_hits_found'
           ? 'Tier 1 matched. Re-run with tier2_when: "always" for behavioral rule proposals.'
           : 'No environment matches. Consider widening time_range.',
     });
@@ -615,6 +791,7 @@ export const huntCoordinator = async (
       report_id: reportId,
       run_id,
       technologies,
+      index_patterns: scope.index_patterns,
       tier1,
       tier2_skipped_reason: 'no_report_text',
       message: `Tier 1: ${tier1Raw.status}. Tier 2 skipped (no report text).`,
@@ -691,13 +868,26 @@ export const huntCoordinator = async (
   // on the same techniques forever — but it retires as `incomplete_final`, so a caller
   // writing hunt evidence can tell a searched-and-clean environment from one this run
   // never reached.
-  const completeness = huntCompletenessOf(gaps);
+  //
+  // When Tier 1 had nothing to search and no Tier 2 query grounded either, the report
+  // has shown it carries nothing a query can be anchored to: no IOC, no technique, and
+  // prose the grounding gate refused on every behavior. That gap is deterministic for
+  // this report, since the same text yields the same refusal every sweep, and leaving it
+  // retryable turned every IOC-less KEV entry into a Tier 2 call per sweep that never
+  // retired (seen live). If even one behavior grounded and executed, the text does hold
+  // usable literals and the remaining ungrounded ones keep their retry.
+  const nothingGroundable = tier1Raw.status === 'no_searchable_terms' && !tier2Executed;
+  const completeness = huntCompletenessOf(
+    gaps,
+    nothingGroundable ? { treatAsFinal: FINAL_WHEN_NOTHING_SEARCHABLE } : {}
+  );
 
   return {
     status: 'tier1_and_tier2',
     report_id: reportId,
     run_id,
     technologies,
+    index_patterns: scope.index_patterns,
     tier1,
     tier2,
     message:
