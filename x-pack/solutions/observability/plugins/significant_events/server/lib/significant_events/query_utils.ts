@@ -53,3 +53,10 @@ export interface PaginatedSearchOptions extends CommonSearchOptions {
   page?: number;
   perPage?: number;
 }
+
+/**
+ * Maximum number of distinct active events returned by `findLatestActive`. With stream+rule
+ * narrowing the result is proportional to the write batch size, so this cap is a safety bound
+ * rather than an operational limit. Shared by `EventClient` and `RuleEventsClient`.
+ */
+export const MAX_DEDUP_SCAN_LIMIT = 500;

@@ -20,7 +20,7 @@ interface UseCountNewActionPolicyExecutionsParams {
   since: string;
   search?: string;
   ruleIds?: string[];
-  outcome?: PolicyExecutionOutcomeFilter;
+  outcomes?: PolicyExecutionOutcomeFilter;
   enabled?: boolean;
 }
 
@@ -28,20 +28,20 @@ export const useCountNewActionPolicyExecutions = ({
   since,
   search,
   ruleIds,
-  outcome,
+  outcomes,
   enabled = true,
 }: UseCountNewActionPolicyExecutionsParams) => {
   const executionHistoryApi = useService(ExecutionHistoryApi);
 
   return useQuery<ListPolicyExecutionHistoryResponse, Error>({
-    queryKey: executionHistoryKeys.newEventsSince(since, { search, ruleIds, outcome }),
+    queryKey: executionHistoryKeys.newEventsSince(since, { search, ruleIds, outcomes }),
     queryFn: () =>
       executionHistoryApi.listActionPolicyExecutions({
         from: since,
         per_page: 0,
         search,
         rule_ids: ruleIds,
-        outcome,
+        outcomes,
       }),
     refetchOnWindowFocus: true,
     refetchInterval: POLL_INTERVAL_MS,

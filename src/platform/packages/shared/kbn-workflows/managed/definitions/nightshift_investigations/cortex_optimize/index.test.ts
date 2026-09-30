@@ -12,7 +12,7 @@ import { NIGHTSHIFT_CORTEX_OPTIMIZE_WORKFLOW, NIGHTSHIFT_CORTEX_OPTIMIZE_WORKFLO
 
 const workflow = parse(NIGHTSHIFT_CORTEX_OPTIMIZE_WORKFLOW.yaml) as {
   name: string;
-  steps: Array<{ name: string; type?: string }>;
+  steps: Array<{ name: string; type?: string; with?: Record<string, unknown> }>;
 };
 
 describe('cortex optimize workflow', () => {
@@ -25,5 +25,10 @@ describe('cortex optimize workflow', () => {
         type: 'nightshift.cortexOptimize',
       }),
     ]);
+  });
+
+  // Liquid `{{ }}` would stringify the array, leaving the optimizer with no tool calls to read.
+  it('hands the round tool calls to the optimizer as an array', () => {
+    expect(workflow.steps[0].with?.tool_calls).toBe('${{ inputs.tool_calls }}');
   });
 });

@@ -559,6 +559,46 @@
       "approvedBy": "@elastic/security-defend-workflows",
       "oasdiffId": "response-property-one-of-added",
       "prUrl": "https://github.com/elastic/kibana/pull/275716"
+    },
+    {
+      "path": "/api/fleet/cloud_onboarding_deployments",
+      "method": "post",
+      "reason": "Intentional rename: agentPolicyId (singular) → agentPolicyIds (array) to support multiple agent policies in existing-policy mode. The SO type is experimental and was never populated in production.",
+      "approvedBy": "@elastic/fleet",
+      "oasdiffId": "response-optional-property-removed",
+      "prUrl": "https://github.com/elastic/kibana/pull/292385"
+    },
+    {
+      "path": "/api/fleet/cloud_onboarding_deployments/connector/{connectorId}",
+      "method": "get",
+      "reason": "Intentional rename: agentPolicyId (singular) → agentPolicyIds (array) to support multiple agent policies in existing-policy mode. The SO type is experimental and was never populated in production.",
+      "approvedBy": "@elastic/fleet",
+      "oasdiffId": "response-optional-property-removed",
+      "prUrl": "https://github.com/elastic/kibana/pull/292385"
+    },
+    {
+      "path": "/api/fleet/cloud_onboarding_deployments/{id}",
+      "method": "get",
+      "reason": "Intentional rename: agentPolicyId (singular) → agentPolicyIds (array) to support multiple agent policies in existing-policy mode. The SO type is experimental and was never populated in production.",
+      "approvedBy": "@elastic/fleet",
+      "oasdiffId": "response-optional-property-removed",
+      "prUrl": "https://github.com/elastic/kibana/pull/292385"
+    },
+    {
+      "path": "/api/fleet/cloud_onboarding_deployments/{id}",
+      "method": "put",
+      "reason": "Intentional rename: agentPolicyId (singular) → agentPolicyIds (array) to support multiple agent policies in existing-policy mode. The SO type is experimental and was never populated in production.",
+      "approvedBy": "@elastic/fleet",
+      "oasdiffId": "request-property-removed",
+      "prUrl": "https://github.com/elastic/kibana/pull/292385"
+    },
+    {
+      "path": "/api/fleet/cloud_onboarding_deployments/{id}",
+      "method": "put",
+      "reason": "Intentional rename: agentPolicyId (singular) → agentPolicyIds (array) to support multiple agent policies in existing-policy mode. The SO type is experimental and was never populated in production.",
+      "approvedBy": "@elastic/fleet",
+      "oasdiffId": "response-optional-property-removed",
+      "prUrl": "https://github.com/elastic/kibana/pull/292385"
     }
   ]
 }

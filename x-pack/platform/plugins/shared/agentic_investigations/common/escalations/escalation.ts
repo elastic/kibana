@@ -113,21 +113,12 @@ export const updateEscalationRequestSchema = z
       .min(1)
       .max(MAX_ESCALATION_LINKED_INVESTIGATIONS)
       .optional(),
-    /**
-     * Open/closed state of the escalation. Uses replace semantics on `metadata.status`.
-     *
-     * May be combined with `linked_investigations`.
-     * Cannot be combined with `title`.
-     */
-    status: escalationStatusSchema.optional(),
   })
   .refine(
     (value) =>
-      value.title !== undefined ||
-      value[ESCALATION_LINKED_INVESTIGATIONS_FIELD] !== undefined ||
-      value.status !== undefined,
+      value.title !== undefined || value[ESCALATION_LINKED_INVESTIGATIONS_FIELD] !== undefined,
     {
-      message: 'at least one of title, linked_investigations, or status must be provided',
+      message: 'at least one of title or linked_investigations must be provided',
     }
   )
   .refine(
@@ -137,10 +128,7 @@ export const updateEscalationRequestSchema = z
       message:
         'title and linked_investigations cannot be updated in the same request; send separate PATCH calls',
     }
-  )
-  .refine((value) => !(value.title !== undefined && value.status !== undefined), {
-    message: 'title and status cannot be updated in the same request; send separate PATCH calls',
-  });
+  );
 
 export type UpdateEscalationRequest = z.infer<typeof updateEscalationRequestSchema>;
 
@@ -166,6 +154,13 @@ export const listEscalationsQuerySchema = z
       .default(MAX_ESCALATIONS_PAGE_SIZE),
     status: z.enum(['open', 'closed', 'all']).default('open'),
     search: z.string().max(256).optional(),
+    /**
+     * When set, only escalations that have this investigation id in their
+     * `metadata.linked_investigations` array are returned. Useful for checking
+     * whether an investigation is already part of one or more escalations before
+     * opening the escalation creation modal.
+     */
+    linked_investigation_id: conversationIdSchema.optional(),
   })
   .refine(({ page, per_page: perPage }) => page * perPage <= MAX_ESCALATIONS_RESULT_WINDOW, {
     message: `page * per_page must not exceed ${MAX_ESCALATIONS_RESULT_WINDOW}; escalations beyond that are not reachable through this API`,
@@ -181,4 +176,24 @@ export type EscalationConversationSummary = ConversationWithoutRoundsWithPermiss
 export interface ListEscalationsResponse {
   pagination: { total: number; page: number; per_page: number };
   results: EscalationConversationSummary[];
+}
+
+/**
+ * A brief summary of an investigation linked to an escalation, as returned by the
+ * `GET /escalations/{id}/linked_investigations` route.
+ *
+ * `status` follows the same "missing or non-closed ⇒ open" rule as the escalations list filter.
+ */
+export interface LinkedInvestigationSummary {
+  /** Investigation conversation id. */
+  id: string;
+  title: string;
+  /** Open/closed status derived from `metadata.status`. */
+  status: 'open' | 'closed';
+  /** Agent Builder agent id, used for deep-linking to the conversation. */
+  agent_id: string;
+}
+
+export interface ListLinkedInvestigationsResponse {
+  results: LinkedInvestigationSummary[];
 }

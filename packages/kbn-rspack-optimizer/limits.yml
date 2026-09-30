@@ -12,7 +12,7 @@ pageLoadAssetSize:
   aiops: 586
   alerting: 8789
   alertingVTwo: 24358
-  alertzero: 18893
+  alertzero: 21199
   apm: 35746
   apmShared: 2226
   apmSourcesAccess: 1174
@@ -65,9 +65,9 @@ pageLoadAssetSize:
   embeddableAlertsTable: 1536
   enterpriseSearch: 28188
   entityStore: 2252
-  esql: 341
+  esql: 382
   esqlDataGrid: 215
-  esqlViews: 1205
+  esqlViews: 1332
   esUiShared: 2284
   evals: 4875
   eventAnnotation: 17278
@@ -175,12 +175,11 @@ pageLoadAssetSize:
   searchInferenceEndpoints: 4743
   searchNavigation: 8037
   searchNotebooks: 3490
-  searchPlayground: 5566
   searchprofiler: 2549
   searchQueryRules: 2461
   searchSynonyms: 2233
   security: 986
-  securitySolution: 156216
+  securitySolution: 174917
   securitySolutionEss: 19938
   securitySolutionServerless: 33422
   serverless: 1571
