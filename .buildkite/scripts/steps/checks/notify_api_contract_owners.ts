@@ -125,6 +125,21 @@ export const buildCommentBody = (entries: ImpactEntry[]): string => {
     .filter(Boolean)
     .join('\n');
 
+  const hasGating = gating.some((e) => e.tier !== 'experimental');
+
+  if (!hasGating) {
+    return `## API Contract Breaking Changes
+
+No stable or Technical Preview breaking changes were detected. The change(s) below are informational and do not fail this check.
+
+${sections}
+### What to do
+
+Nothing here blocks merge. Consider whether a release note is worth adding for the listed change(s).
+
+See the [\`@kbn/api-contracts\` README](https://github.com/elastic/kibana/blob/main/${README_PATH}) for tier definitions and the rule policy.`;
+  }
+
   return `## API Contract Breaking Changes
 
 The following breaking change(s) were detected across the public OpenAPI surface, grouped by stability tier. Stable and Technical Preview changes fail the check and should be resolved; Experimental and reported-only changes are informational.

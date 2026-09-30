@@ -133,4 +133,24 @@ describe('buildCommentBody', () => {
     expect(body).toContain('`source`');
     expect(body).toContain('scope the allowlist entry');
   });
+
+  it('keeps the fix-or-allowlist framing when a gating change exists', () => {
+    const body = buildCommentBody([entry(), entry({ reportOnly: true })]);
+
+    expect(body).toContain('were detected across the public OpenAPI surface');
+    expect(body).toContain('**Fix the breaking change**');
+  });
+
+  it('does not ask for a fix or an allowlist entry when nothing gates', () => {
+    const body = buildCommentBody([
+      entry({ reportOnly: true, policyReason: 'Additive response variant.' }),
+      entry({ path: '/api/exp', tier: 'experimental' }),
+    ]);
+
+    expect(body).toContain('No stable or Technical Preview breaking changes were detected');
+    expect(body).toContain('Nothing here blocks merge');
+    expect(body).not.toContain('were detected across the public OpenAPI surface');
+    expect(body).not.toContain('**Fix the breaking change**');
+    expect(body).not.toContain('allowlist.json');
+  });
 });

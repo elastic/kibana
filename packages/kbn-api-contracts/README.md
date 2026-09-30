@@ -65,7 +65,7 @@ oasdiff detects these as breaking:
 
 ### Rule policy
 
-oasdiff decides what changed. `src/diff/rule_policy.ts` decides what that means for Kibana, so the call is declared once instead of being re-argued per PR. Every entry carries a reason. A report-only reason is rendered with the change in the CI log and the PR comment. Blocking reasons are the ones in the table below.
+oasdiff decides what changed. `src/diff/rule_policy.ts` decides what that means for Kibana, so the call is declared once instead of being re-argued per PR. Every entry carries a reason. A report-only reason is rendered with the change in the CI log and the PR comment. The reasons for blocking rules are in the table below.
 
 Two dispositions:
 
@@ -74,16 +74,18 @@ Two dispositions:
 
 Rules that are not in the table keep oasdiff's own level: error gates, warning is dropped.
 
-| oasdiff ID                       | Disposition   | Why                                                                                      |
-| -------------------------------- | ------------- | ---------------------------------------------------------------------------------------- |
-| `request-property-removed`       | `blocking`    | Removing a request property breaks any client that sends it                              |
-| `request-parameter-removed`      | `blocking`    | Removing a request parameter breaks any client that sends it                             |
-| `response-optional-property-removed` | `blocking` | Removing an optional response property breaks any client that reads it                   |
-| `response-property-one-of-added` | `report_only` | Adding a variant to a response `oneOf` is additive; clients keep receiving what they handle |
-| `response-body-one-of-added`     | `report_only` | Same, for the response body `oneOf`                                                      |
+| oasdiff ID                           | Disposition   | Why                                                                                                                               |
+| ------------------------------------ | ------------- | --------------------------------------------------------------------------------------------------------------------------------- |
+| `request-property-removed`           | `blocking`    | Removing a request property breaks any client that sends it                                                                       |
+| `request-parameter-removed`          | `blocking`    | Removing a request parameter breaks any client that sends it                                                                      |
+| `response-optional-property-removed` | `blocking`    | Removing an optional response property breaks any client that reads it                                                            |
+| `response-property-one-of-added`     | `report_only` | Adding a variant to a response `oneOf` is additive; clients keep receiving what they handle                                       |
+| `response-body-one-of-added`         | `report_only` | Same, for the response body `oneOf`                                                                                               |
 | `response-property-enum-value-added` | `report_only` | Adding a response enum value is additive. oasdiff 1.15.1 warns; later versions error. Either way it is reported and does not gate |
 
 The request side stays strict. A new variant a client may have to send is not the same as a new variant it may receive, so request-side rules are not demoted.
+
+Whether generated clients tolerate a new response variant is a consumer concern. Reporting a change here does not make a client that validates response unions strictly accept it, and that follow-up sits with the consumer, not this table.
 
 Report-only changes still reach the PR comment in a non-blocking section, so the owning team can decide whether a release note is warranted. Suppressing a change entirely is the [allowlist](#allowlist)'s job, not this table's: the allowlist is per change, this table is per rule.
 
