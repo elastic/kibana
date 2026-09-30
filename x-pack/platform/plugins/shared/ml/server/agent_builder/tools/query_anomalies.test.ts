@@ -152,7 +152,7 @@ describe('queryUsesMlAnomaliesView', () => {
 });
 
 describe('rewriteMlAnomaliesViewQuery', () => {
-  it('rewrites the view to the wildcard, injects score EVAL, and maps event.ingested to timestamp', () => {
+  it('rewrites the view to the wildcard, injects score EVAL, and keeps event.ingested', () => {
     const rewritten = rewriteMlAnomaliesViewQuery(`FROM .ml-anomalies
 | WHERE result_type == "record"
   AND score >= ?min_score
@@ -162,15 +162,23 @@ describe('rewriteMlAnomaliesViewQuery', () => {
 
     expect(rewritten).toContain('FROM .ml-anomalies-*');
     expect(rewritten).not.toMatch(/FROM \.ml-anomalies\n/);
-    // EVAL must appear before the WHERE clause
+    // EVAL and the view result-type filter must run before the caller's WHERE.
     expect(rewritten).toMatch(/EVAL score = COALESCE\(record_score/);
     expect(rewritten).toMatch(/initial_score = COALESCE\(initial_record_score/);
+    expect(rewritten).toContain('WHERE result_type IN ("bucket", "influencer", "record")');
     expect(rewritten.indexOf('EVAL')).toBeLessThan(rewritten.indexOf('WHERE'));
-    expect(rewritten).not.toContain('event.ingested');
-    expect(rewritten).toContain('AND timestamp >= ?start_time');
-    expect(rewritten).toContain('AND timestamp <= ?end_time');
-    expect(rewritten).toContain('KEEP job_id, timestamp');
-    expect(rewritten).not.toMatch(/timestamp,\s*timestamp/);
+    expect(rewritten.indexOf('result_type IN')).toBeLessThan(rewritten.indexOf('result_type =='));
+    expect(rewritten).toContain('AND `event.ingested` >= ?start_time');
+    expect(rewritten).toContain('AND event.ingested <= ?end_time');
+    expect(rewritten).toContain('KEEP job_id, timestamp, `event.ingested`, score, initial_score');
+  });
+
+  it('restricts an unfiltered view aggregation to record, bucket, and influencer', () => {
+    const rewritten = rewriteMlAnomaliesViewQuery('FROM .ml-anomalies | STATS n = COUNT(*)');
+
+    expect(rewritten).toContain('FROM .ml-anomalies-*');
+    expect(rewritten).toContain('WHERE result_type IN ("bucket", "influencer", "record")');
+    expect(rewritten.indexOf('WHERE')).toBeLessThan(rewritten.indexOf('STATS'));
   });
 
   it('does not rewrite .ml-anomalies-* or .ml-anomalies-shared', () => {
@@ -476,8 +484,9 @@ describe('queryAnomaliesTool', () => {
       // Score EVAL must be injected before the WHERE clause.
       expect(executedQuery).toContain('EVAL score = COALESCE(record_score');
       expect(executedQuery.indexOf('EVAL')).toBeLessThan(executedQuery.indexOf('WHERE'));
-      expect(executedQuery).toContain('timestamp >= ?start_time');
-      expect(executedQuery).not.toContain('event.ingested');
+      expect(executedQuery).toContain('WHERE result_type IN ("bucket", "influencer", "record")');
+      expect(executedQuery).toContain('`event.ingested` >= ?start_time');
+      expect(executedQuery).not.toContain('timestamp >= ?start_time');
 
       const standardResult = result as {
         results: Array<{ type: string; data?: { esql?: string } }>;

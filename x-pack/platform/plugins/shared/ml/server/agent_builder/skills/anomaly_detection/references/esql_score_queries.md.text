@@ -4,7 +4,7 @@ Use `ml.query_anomalies` and pass the ES|QL below in the `query` parameter. Bind
 
 **Time fields:** never use `@timestamp`. Always filter on `timestamp` (the anomaly bucket time). Using `` `event.ingested` `` (the indexing timestamp) is wrong for investigation queries — batch jobs processing historical data have a current ingest time but historical bucket timestamps, so `event.ingested` filters return zero results for the analysis window. `event.ingested` is only appropriate for operational/polling use cases (e.g. "has this job written new output in the last hour?"), not for finding anomalies in a time window.
 
-- Record / bucket / influencer queries use `FROM .ml-anomalies`. Use `score` / `initial_score` (not `record_score` / `anomaly_score` / `influencer_score`). `ml.query_anomalies` falls back to `FROM .ml-anomalies-*` and automatically maps the raw per-type score fields on older clusters.
+- Record / bucket / influencer queries use `FROM .ml-anomalies`. Use `score` / `initial_score` (not `record_score` / `anomaly_score` / `influencer_score`). `ml.query_anomalies` falls back to `FROM .ml-anomalies-*` on older clusters, maps the raw per-type score fields, and keeps only `result_type IN ("bucket", "influencer", "record")`.
 - `model_plot`, `model_forecast`, and `model_snapshot` are **not** on the materialized view — query `FROM .ml-anomalies-*` and filter on `timestamp`.
 
 Only `record` / `bucket` / `influencer` fields listed in `esql-read-queries` exist on `.ml-anomalies`. Do not select `causes`, `probability`, `multi_bucket_impact`, or `anomaly_score_explanation.*`.

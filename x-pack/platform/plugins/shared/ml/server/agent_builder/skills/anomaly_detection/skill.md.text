@@ -4,7 +4,7 @@ Single skill covering all anomaly detection work. Use the **Mode Selector** belo
 
 ## Platform
 
-- Read path: `ml.query_anomalies` (internal user) against `.ml-anomalies` (results materialized view), `.ml-anomalies-*` (model plot / forecast / snapshot / categories / memory stats, and automatic fallback when the view is missing), `.ml-config`, `.ml-notifications-*`, `.ml-annotations-*`. Copy templates that use `FROM .ml-anomalies`; the tool probes the cluster and rewrites to `FROM .ml-anomalies-*` on older Elasticsearch.
+- Read path: `ml.query_anomalies` (internal user) against `.ml-anomalies` (results materialized view), `.ml-anomalies-*` (model plot / forecast / snapshot / categories / memory stats, and automatic fallback when the view is missing), `.ml-config`, `.ml-notifications-*`, `.ml-annotations-*`. Copy templates that use `FROM .ml-anomalies`; the tool probes the cluster and, on older Elasticsearch, rewrites to `FROM .ml-anomalies-*` while keeping only `record`, `bucket`, and `influencer`.
 - Source-data ES|QL only: `platform.core.execute_esql` (current user) for RCA evidence / ingest latency against datafeed indices
 - ES|QL query templates are in the referenced content files (`esql-read-queries`, `esql-metadata-queries`, `esql-score-queries`)
 - ML API write/state operations: `ml.ad_get_job_info`, `ml.ad_create_job`, `ml.ad_manage_job_state`, `ml.ad_update_job_config`

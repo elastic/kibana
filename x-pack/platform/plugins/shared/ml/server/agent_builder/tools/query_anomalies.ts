@@ -56,6 +56,15 @@ const SCORE_EVAL_INJECTION =
   '| EVAL score = COALESCE(record_score, anomaly_score, influencer_score),' +
   ' initial_score = COALESCE(initial_record_score, initial_anomaly_score, initial_influencer_score)\n';
 
+/**
+ * `.ml-anomalies-*` also stores model plots, forecasts, snapshots, categories, and
+ * memory stats. The materialized view contains only these three result types, so the
+ * fallback must filter them out or aggregations such as COUNT(*) diverge from the view.
+ */
+const VIEW_RESULT_TYPE_FILTER = '| WHERE result_type IN ("bucket", "influencer", "record")\n';
+
+const VIEW_FALLBACK_INJECTION = `${SCORE_EVAL_INJECTION}${VIEW_RESULT_TYPE_FILTER}`;
+
 // Kibana-style date math units → milliseconds for non-calendar units.
 const DATE_MATH_UNIT_MS: Record<string, number> = {
   s: 1_000,
@@ -256,25 +265,26 @@ export const queryUsesMlAnomaliesView = (query: string): boolean =>
  *   2. Injects a EVAL right after the FROM clause that aliases the raw per-result-type
  *      score fields to the unified `score` / `initial_score` column names used by all
  *      templates (matching the columns exposed by the view on new ES clusters).
- *   3. Drops or maps `event.ingested` (view-only) to `timestamp`.
+ *   3. Restricts `result_type` to `bucket`, `influencer`, and `record` so model plots,
+ *      forecasts, snapshots, categories, and memory stats are not included.
+ *
+ * `event.ingested` is left unchanged. Result documents store it as the indexing time,
+ * which is a different column from `timestamp` (the anomaly bucket time).
  */
 export const rewriteMlAnomaliesViewQuery = (query: string): string => {
   const withWildcard = query.replace(ML_ANOMALIES_VIEW_TOKEN, ML_ANOMALIES_WILDCARD);
 
-  // Only inject the score-aliasing EVAL when the view name was actually replaced.
   // Queries already targeting .ml-anomalies-* pass through unchanged.
-  let withScoreEval = withWildcard;
-  if (withWildcard !== query) {
-    // Inject immediately before the first pipe so all subsequent WHERE / SORT / KEEP
-    // steps can reference score / initial_score.
-    const firstPipe = withWildcard.indexOf('|');
-    withScoreEval =
-      firstPipe === -1
-        ? `${withWildcard}\n${SCORE_EVAL_INJECTION}`
-        : withWildcard.slice(0, firstPipe) + SCORE_EVAL_INJECTION + withWildcard.slice(firstPipe);
+  if (withWildcard === query) {
+    return query;
   }
 
-  return withScoreEval;
+  // Inject immediately before the first pipe so later WHERE / SORT / KEEP / STATS
+  // steps see score / initial_score and only the view's result types.
+  const firstPipe = withWildcard.indexOf('|');
+  return firstPipe === -1
+    ? `${withWildcard}\n${VIEW_FALLBACK_INJECTION}`
+    : withWildcard.slice(0, firstPipe) + VIEW_FALLBACK_INJECTION + withWildcard.slice(firstPipe);
 };
 
 export const isMlAnomaliesViewUnavailableError = (err: unknown): boolean => {
@@ -371,7 +381,7 @@ Execute an ES|QL query against ML anomaly-detection system indices (.ml-anomalie
 
 Pass the full ES|QL string in \`query\`. Only include \`params\` when the query contains \`?placeholders\` — omit the \`params\` field entirely when unused.
 
-For record / bucket / influencer results copy templates that use \`FROM .ml-anomalies\`. This tool probes whether that materialized view exists on the connected Elasticsearch cluster and automatically rewrites to \`FROM .ml-anomalies-*\` (and \`timestamp\` instead of \`event.ingested\`) when it does not — older ES versions will not have the view.
+For record / bucket / influencer results copy templates that use \`FROM .ml-anomalies\`. This tool probes whether that materialized view exists on the connected Elasticsearch cluster and, when it does not, rewrites to \`FROM .ml-anomalies-*\` and keeps only \`result_type IN ("bucket", "influencer", "record")\` — older ES versions will not have the view. \`event.ingested\` is the indexing time on the raw result indices; leave it unchanged.
 
 Prefer \`timestamp\` for time-range filters in templates — it is the anomaly bucket time and is correct for both real-time and historical batch jobs. Do not query \`causes\` — it is not supported on the view. Only the fields listed in \`esql-read-queries\` exist on that view.
 
