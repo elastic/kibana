@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { Action } from 'typescript-fsa';
 import actionCreatorFactory from 'typescript-fsa';
 import { i18n } from '@kbn/i18n';
 import type { DataView, DataViewListItem } from '@kbn/data-views-plugin/public';
@@ -29,6 +28,8 @@ import type { SaveWorkspaceHandler } from '../services/save_modal';
 import { openSaveModal } from '../services/save_modal';
 import { getEditPath } from '../services/url';
 import { saveSavedWorkspace } from '../helpers/saved_workspace_utils';
+import type { MatchedAction } from './helpers';
+import { matchesAction } from './helpers';
 
 export interface LoadSavedWorkspacePayload {
   dataViews: DataViewListItem[];
@@ -53,10 +54,9 @@ export const registerPersistenceListeners = (
   deps: GraphStoreDependencies
 ) => {
   startListening({
-    predicate: loadSavedWorkspace.match,
-    effect: async (unknownAction, listenerApi) => {
+    matcher: matchesAction(loadSavedWorkspace),
+    effect: async (action: MatchedAction<LoadSavedWorkspacePayload>, listenerApi) => {
       listenerApi.cancelActiveListeners();
-      const action = unknownAction as unknown as Action<LoadSavedWorkspacePayload>;
       const { dataViews, savedWorkspace, urlQuery } = action.payload;
       const migrationStatus = migrateLegacyIndexPatternRef(savedWorkspace, dataViews);
       if (!migrationStatus.success) {
@@ -124,10 +124,9 @@ export const registerPersistenceListeners = (
    * It will serialize everything and save it using the saved objects client
    */
   startListening({
-    predicate: saveWorkspace.match,
-    effect: async (unknownAction, listenerApi) => {
+    matcher: matchesAction(saveWorkspace),
+    effect: async (action: MatchedAction<GraphWorkspaceSavedObject>, listenerApi) => {
       listenerApi.cancelActiveListeners();
-      const action = unknownAction as unknown as Action<GraphWorkspaceSavedObject>;
       const state = listenerApi.getState();
       const workspace = deps.getWorkspace();
       const selectedDatasource = datasourceSelector(state).current;
