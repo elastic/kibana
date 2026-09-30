@@ -16,7 +16,6 @@ import type { UsageCounter } from '@kbn/usage-collection-plugin/server';
 
 import { VEGA_API_PATH, commonRouteConfig, PUBLIC_API_VERSION } from '../constants';
 import { isVegaApiEnabled } from '../is_vega_api_enabled';
-import { searchVegaOASOperationObject } from '../oas_examples';
 import { searchResponseBodySchema } from './schemas';
 import { search } from './search';
 
@@ -37,7 +36,8 @@ export const registerSearchRoute = (
     {
       version: PUBLIC_API_VERSION,
       options: {
-        oasOperationObject: () => searchVegaOASOperationObject,
+        oasOperationObject: async () =>
+          (await import('../oas_examples')).searchVegaOASOperationObject,
       },
       validate: {
         request: {

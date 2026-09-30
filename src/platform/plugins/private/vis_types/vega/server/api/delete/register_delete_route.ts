@@ -21,7 +21,6 @@ import {
   VEGA_LIBRARY_ITEM_PARAMS_ID_DESCRIPTION,
 } from '../constants';
 import { isVegaApiEnabled } from '../is_vega_api_enabled';
-import { deleteVegaOASOperationObject } from '../oas_examples';
 import { deleteItem } from './delete';
 
 const deleteRequestParamsSchema = z.object({
@@ -44,7 +43,8 @@ export const registerDeleteRoute = (
     {
       version: PUBLIC_API_VERSION,
       options: {
-        oasOperationObject: () => deleteVegaOASOperationObject,
+        oasOperationObject: async () =>
+          (await import('../oas_examples')).deleteVegaOASOperationObject,
       },
       validate: {
         request: {

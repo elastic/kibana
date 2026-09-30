@@ -15,7 +15,6 @@ import type { UsageCounter } from '@kbn/usage-collection-plugin/server';
 
 import { VEGA_API_PATH, commonRouteConfig, PUBLIC_API_VERSION } from '../constants';
 import { isVegaApiEnabled } from '../is_vega_api_enabled';
-import { createVegaOASOperationObject } from '../oas_examples';
 import { create } from './create';
 import { createRequestBodySchema, createResponseBodySchema } from './schemas';
 
@@ -35,7 +34,8 @@ export const registerCreateRoute = (
     {
       version: PUBLIC_API_VERSION,
       options: {
-        oasOperationObject: () => createVegaOASOperationObject,
+        oasOperationObject: async () =>
+          (await import('../oas_examples')).createVegaOASOperationObject,
       },
       validate: {
         request: {

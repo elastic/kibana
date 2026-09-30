@@ -15,7 +15,6 @@ import type { UsageCounter } from '@kbn/usage-collection-plugin/server';
 
 import { VEGA_API_PATH, commonRouteConfig, PUBLIC_API_VERSION } from '../constants';
 import { isVegaApiEnabled } from '../is_vega_api_enabled';
-import { readVegaOASOperationObject } from '../oas_examples';
 import { read } from './read';
 import { readRequestParamsSchema, readResponseBodySchema } from './schemas';
 
@@ -35,7 +34,8 @@ export const registerReadRoute = (
     {
       version: PUBLIC_API_VERSION,
       options: {
-        oasOperationObject: () => readVegaOASOperationObject,
+        oasOperationObject: async () =>
+          (await import('../oas_examples')).readVegaOASOperationObject,
       },
       validate: {
         request: {
