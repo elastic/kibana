@@ -163,7 +163,7 @@ Managed Worker definitions:
 - `system-security-floor-attack-discovery`
 - `system-security-hunt-continuous-threat-hunt`
 - `system-security-detection-rule-tuning`
-- `system-security-detection-rule-creation`
+- `system-security-detection-rule-coverage`
 - `system-security-forensics-endpoint-analysis`
 
 Those definitions live in `src/platform/packages/shared/kbn-workflows/managed/definitions/alertzero/`. Each Worker's settings contract is one `WorkerSettingsDeclaration` in `@kbn/alertzero-common` (`impl/worker_settings/`, one file per Watch team); AlertZero's `server/managed_workflows/workers/` derives defaults, validation, patch application and API projection from it, registered from `server/managed_workflows/worker_registry.ts`. Watch GET/list returns catalog placeholders only.
@@ -174,7 +174,9 @@ The prototype rule workflows remain static global installs and are not advertise
 
 - `system-security-rule-tuning-worker` — the tuning sweep; the Rule Tuning Worker dispatches it (`workflow.executeAsync`) on its schedule setting (default 2h) per enabled space, and it remains directly callable for manual runs
 - `system-security-rule-tuning-review` — launched per noisy rule by the tuning sweep, each run holding its own approval gate
-- `system-security-rule-creation` — implementation used by the Detection Rule Creation Worker
+- `system-security-coverage-worker` — the coverage sweep. The Rule Coverage Worker dispatches it (`workflow.execute`) on its schedule setting (default 1h) per enabled space with its lookback and max gaps settings
+- `system-security-coverage-review` — launched per pending coverage gap by the coverage sweep, each run holding its own approval gate
+- `system-security-rule-creation` — launched by a coverage review when nothing covers the gap
 - `system-security-rule-preview` — called by both of the above
 
 ### Managed definition `version` vs product “v1”
@@ -207,7 +209,7 @@ The Workers service owns per-space installation, reading persisted values, enabl
 
 Not every Worker is schedule-driven — the rest are alert- or event-triggered — so a schedule is a per-Worker opt-in rather than part of `CommonWorkerTemplateValues`. A Worker without one carries no interval in its template values and none in its projected settings.
 
-Scheduled Workers today: `system-security-floor-attack-discovery` (default `24h`) and `system-security-detection-rule-tuning` (default `2h`, also keeps a `manual` trigger for on-demand sweeps).
+Scheduled Workers today: `system-security-floor-attack-discovery` (default `24h`), `system-security-detection-rule-tuning` (default `2h`) and `system-security-detection-rule-coverage` (default `1h`). The two Detection Workers also keep a `manual` trigger for on-demand sweeps.
 
 The interval is a positive count with a unit of minutes, hours or days (`'30m'`, `'24h'`, `'7d'`). It is validated by the `WorkerScheduleInterval` OpenAPI schema at the route boundary and rendered verbatim into the trigger's `every`. Seconds are not offered: the workflow engine only accepts `s` at 60 or above. Changing an interval rewrites the workflow YAML, and the post-install `updateWorkflow` call is what re-registers the Task Manager task.
 

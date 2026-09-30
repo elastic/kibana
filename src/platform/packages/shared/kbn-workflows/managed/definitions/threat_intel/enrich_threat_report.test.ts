@@ -30,7 +30,7 @@ const findStepByName = (steps: unknown[], name: string): Record<string, unknown>
  * workflow-execution harness in this package, so this cannot prove how the engine
  * evaluates the gate at run time. What it does pin is the structure the fix depends
  * on, which is where the original bug lived: the completion gate probed only two of
- * the three continued steps.
+ * all continued steps.
  */
 describe('THREAT_INTEL_ENRICH_REPORT_WORKFLOW yaml', () => {
   const workflow = parse(THREAT_INTEL_ENRICH_REPORT_WORKFLOW.yaml) as {
@@ -39,7 +39,7 @@ describe('THREAT_INTEL_ENRICH_REPORT_WORKFLOW yaml', () => {
   };
 
   /** Steps whose failure must leave the report retryable. */
-  const GATED_STEPS = ['extract_iocs', 'classify_severity', 'enrich_taxonomy'] as const;
+  const GATED_STEPS = ['extract_iocs', 'enrich_report_core'] as const;
 
   const gateCondition = (name: string) => {
     const step = findStepByName(workflow.steps, name) as {
@@ -53,16 +53,16 @@ describe('THREAT_INTEL_ENRICH_REPORT_WORKFLOW yaml', () => {
   describe('completion gate', () => {
     // The bug: extract_iocs runs with on-failure continue, but the gate only probed
     // classify_severity and enrich_taxonomy. A transient IOC-route failure therefore
-    // wrote workflow_v2, which load_pending_reports filters on, so the report was
+    // wrote a completed workflow marker, which load_pending_reports filters on, so the report was
     // never revisited and never produced an indicator.
     it.each(GATED_STEPS)('requires %s to have succeeded before marking complete', (step) => {
       const gate = gateCondition('mark_llm_enrich_complete');
       expect(gate.if).toContain(`steps.${step}.error == null`);
     });
 
-    it('marks the report workflow_v2 when the gate passes', () => {
+    it('marks the report workflow_v4 when the gate passes', () => {
       const gate = gateCondition('mark_llm_enrich_complete');
-      expect(gate.with?.extraction_method).toBe('workflow_v2');
+      expect(gate.with?.extraction_method).toBe('workflow_v4');
     });
 
     it.each(GATED_STEPS)('leaves the report pending when %s failed', (step) => {
@@ -102,6 +102,89 @@ describe('THREAT_INTEL_ENRICH_REPORT_WORKFLOW yaml', () => {
     expect(s?.['on-failure']?.continue).toBe(true);
   });
 
+  it('persists adjudicated IOCs with the deterministic extract fingerprint', () => {
+    const step = findStepByName(workflow.steps, 'persist_extractions') as {
+      if?: string;
+      with?: {
+        doc?: {
+          extracted?: {
+            iocs?: string;
+            ioc_set_hash?: string;
+            core?: { adjudication?: { deferred_unreviewed?: string } };
+          };
+        };
+      };
+    };
+
+    expect(step.if).toContain('steps.enrich_report_core.error == null');
+    expect(step.with?.doc?.extracted?.iocs).toContain('steps.enrich_report_core.output.iocs');
+    expect(step.with?.doc?.extracted).not.toHaveProperty('anchor_iocs');
+    // Correlation hash stays on extract_iocs so boost:5 matches pre-adjudication docs.
+    expect(step.with?.doc?.extracted?.ioc_set_hash).toContain(
+      'steps.extract_iocs.output.ioc_set_hash'
+    );
+    expect(step.with?.doc?.extracted?.core?.adjudication?.deferred_unreviewed).toContain(
+      'steps.enrich_report_core.output.adjudication.deferred_unreviewed'
+    );
+  });
+
+  it('hard-stops rejected reports before deterministic, Sonnet, and Opus stages', () => {
+    expect(findStepByName(workflow.steps, 'persist_gate_rejection')).toBeDefined();
+    expect(findStepByName(workflow.steps, 'stop_rejected_report')).toMatchObject({
+      type: 'loop.continue',
+      if: 'variables.gate_is_intelligence: false',
+    });
+  });
+
+  it('excludes hard-rejected reports from related-report scoring', () => {
+    const step = findStepByName(workflow.steps, 'find_related_reports') as {
+      with?: { query?: { bool?: { must_not?: unknown[] } } };
+    };
+    const mustNot = step.with?.query?.bool?.must_not ?? [];
+    expect(mustNot).toEqual(
+      expect.arrayContaining([
+        { term: { 'lineage.extraction_method': 'workflow_v4_rejected' } },
+        { term: { 'extracted.gate.is_intelligence': false } },
+      ])
+    );
+  });
+
+  it('gates find_related_reports on enrich_report_core succeeding too', () => {
+    // Its query reads steps.enrich_report_core.output.anchor_iocs; without this
+    // guard an enrich_report_core error would run the step against undefined.
+    const step = findStepByName(workflow.steps, 'find_related_reports') as { if?: string };
+    expect(step.if).toContain('steps.enrich_report_core.error == null');
+  });
+
+  it('excludes hard-rejected reports from already-extracted fingerprint dedup', () => {
+    const step = findStepByName(workflow.steps, 'check_already_extracted') as {
+      with?: { query?: { bool?: { must_not?: unknown[] } } };
+    };
+    const mustNot = step.with?.query?.bool?.must_not ?? [];
+    expect(mustNot).toEqual(
+      expect.arrayContaining([
+        { term: { 'lineage.extraction_method': 'workflow_v4_rejected' } },
+        { term: { 'extracted.gate.is_intelligence': false } },
+      ])
+    );
+  });
+
+  it('skips a report on gate-rejection persist failure without aborting the foreach', () => {
+    const persist = findStepByName(workflow.steps, 'persist_gate_rejection') as {
+      'on-failure'?: { continue?: boolean };
+    };
+    expect(persist?.['on-failure']?.continue).toBe(true);
+    expect(findStepByName(workflow.steps, 'retry_gate_rejection_persist_failure')).toMatchObject({
+      type: 'loop.continue',
+      if: '${{ steps.persist_gate_rejection.error != null }}',
+    });
+  });
+
+  it('sends complete article text and contains no blind 30K prefix slice', () => {
+    expect(THREAT_INTEL_ENRICH_REPORT_WORKFLOW.yaml).not.toContain('slice: 0, 30000');
+    expect(THREAT_INTEL_ENRICH_REPORT_WORKFLOW.yaml).not.toContain('30000');
+  });
+
   // Dropped in this PR: it was a closed-set taxonomy field nothing consumed, and the
   // gate was using its presence as a stand-in for step health.
   it('no longer references detection_actionability anywhere', () => {
@@ -129,6 +212,17 @@ describe('THREAT_INTEL_ENRICH_REPORT_WORKFLOW yaml', () => {
     expect(THREAT_INTEL_ENRICH_REPORT_WORKFLOW.yaml).not.toMatch(/path:\s*"\/s\//);
     expect(THREAT_INTEL_ENRICH_REPORT_WORKFLOW.yaml).toContain(
       'path: "/internal/threat_intel/assess_relevance"'
+    );
+  });
+
+  it('sends the stored article URL to assess_relevance', () => {
+    // The gate prompt uses the URL to identify rollups and render failures;
+    // without it, a terse RSS summary can be permanently mis-gated.
+    const step = findStepByName(workflow.steps, 'assess_relevance') as {
+      with?: { body?: Record<string, unknown> };
+    };
+    expect(step.with?.body?.url).toBe(
+      '{{ steps.load_full_doc.output.hits.hits[0]._source.content.article_url }}'
     );
   });
 

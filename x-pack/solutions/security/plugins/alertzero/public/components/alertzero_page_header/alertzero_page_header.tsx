@@ -196,7 +196,10 @@ export const AlertZeroPageHeader: React.FC<AlertZeroPageHeaderProps> = ({
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiPageHeader>
-      <EuiSpacer size="l" />
+      {/* Pages stack sections with a large column gap; the reference design adds only a small
+          inset under the greeting, so the content sits close to the title. Keep in step with
+          `EscalationsPageHeader`, which mirrors this header. */}
+      <EuiSpacer size="s" />
     </>
   );
 };

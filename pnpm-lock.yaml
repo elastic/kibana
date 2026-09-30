@@ -1837,6 +1837,9 @@ importers:
       '@kbn/data-views-plugin':
         specifier: workspace:*
         version: link:src/platform/plugins/shared/data_views
+      '@kbn/data-views-types':
+        specifier: workspace:*
+        version: link:src/platform/packages/shared/kbn-data-views-types
       '@kbn/data-visualizer-plugin':
         specifier: workspace:*
         version: link:x-pack/platform/plugins/private/data_visualizer
@@ -5057,9 +5060,6 @@ importers:
       '@hey-api/openapi-ts':
         specifier: 0.90.3
         version: 0.90.3(typescript@6.0.3)
-      '@huggingface/hub':
-        specifier: 2.2.0
-        version: 2.2.0
       '@jest/console':
         specifier: 29.7.0
         version: 29.7.0
@@ -5072,9 +5072,6 @@ importers:
       '@jest/types':
         specifier: 29.6.3
         version: 29.6.3
-      '@kbn/ai-tools-cli':
-        specifier: workspace:*
-        version: link:x-pack/platform/packages/shared/kbn-ai-tools-cli
       '@kbn/alerting-api-integration-helpers':
         specifier: workspace:*
         version: link:x-pack/platform/test/alerting_api_integration/packages/helpers
@@ -8002,6 +7999,8 @@ importers:
 
   src/platform/packages/shared/kbn-data-view-validation: {}
 
+  src/platform/packages/shared/kbn-data-views-types: {}
+
   src/platform/packages/shared/kbn-datemath: {}
 
   src/platform/packages/shared/kbn-default-tracer: {}
@@ -8985,8 +8984,6 @@ importers:
   x-pack/platform/packages/shared/kbn-ai-assistant: {}
 
   x-pack/platform/packages/shared/kbn-ai-tools: {}
-
-  x-pack/platform/packages/shared/kbn-ai-tools-cli: {}
 
   x-pack/platform/packages/shared/kbn-alerting-comparators: {}
 
@@ -11685,14 +11682,6 @@ packages:
     engines: {node: '>=18.14.1'}
     peerDependencies:
       hono: ^4
-
-  '@huggingface/hub@2.2.0':
-    resolution: {integrity: sha512-G+VS1eMp80KovIHBlsiEigS6I6qmI4j+VQ1UZ8CaXT+pw2A7tj6e/crfxFdKNE2uOK5oQkRFiCBJykMwrWQ8OA==}
-    engines: {node: '>=18'}
-    hasBin: true
-
-  '@huggingface/tasks@0.19.90':
-    resolution: {integrity: sha512-nfV9luJbvwGQ/5oKXkKhCV9h4X7mwh1YaGG3ORd6UMLDSwr1OFSSatcBX0O9OtBtmNK19aGSjbLFqqgcIR6+IA==}
 
   '@humanwhocodes/config-array@0.11.14':
     resolution: {integrity: sha512-3T8LkOmg45BV5FICb15QQMsyUSWrQ8AygVfC7ZG32zOalnqrilm018ZVCw0eapXux8FtA33q8PSRSstjee3jSg==}
@@ -19960,8 +19949,8 @@ packages:
     peerDependencies:
       fp-ts: ^2.5.0
 
-  ip-address@10.7.1:
-    resolution: {integrity: sha512-4OUAqU9Z1i3vCnS05hzGiFnEMDpQ+62pAD/MVQOp83fYyNC8GleCqaS0QikQBmcWCrKFiUs/B8ztRRiYOAXuCA==}
+  ip-address@10.7.2:
+    resolution: {integrity: sha512-7H/2gFSIitxc0hG3nOI1glS8QLo/EHBFFLk8vEUjXY/xu0AdL8jZ9U1IzO2PUm0d2D/ofQcAifb0g6OBkt8U7w==}
     engines: {node: '>= 12'}
 
   ip-regex@2.1.0:
@@ -24248,8 +24237,8 @@ packages:
     resolution: {integrity: sha512-7++dFhtcx3353uBaq8DDR4NuxBetBzC7ZQOhmTQInHEd6bSrXdiEyzCvG07Z44UYdLShWUyXt5M/yhz8ekcb1A==}
     engines: {node: '>=8'}
 
-  shell-quote@1.10.0:
-    resolution: {integrity: sha512-w1aiOKwKuRgtwAReIIj89puqg+I7GvX4IbLrvmhXbzQsj1+Zwi4VO3+fa6ZF91TWSjIxoEkKnMeHcLEODK5ZXA==}
+  shell-quote@1.11.0:
+    resolution: {integrity: sha512-JdxDPD0DBTyu08pq0kPC0xSNet/qsU07qT6IsX1AS8oO2ICNRY4ldNa8OAI6PuwAH8tG3lxEhbqmyp4Dw4036g==}
     engines: {node: '>= 0.4'}
 
   shelljs@0.10.0:
@@ -28869,12 +28858,6 @@ snapshots:
   '@hono/node-server@1.19.17(hono@4.13.8)':
     dependencies:
       hono: 4.13.8
-
-  '@huggingface/hub@2.2.0':
-    dependencies:
-      '@huggingface/tasks': 0.19.90
-
-  '@huggingface/tasks@0.19.90': {}
 
   '@humanwhocodes/config-array@0.11.14(supports-color@10.2.2)':
     dependencies:
@@ -36820,7 +36803,7 @@ snapshots:
     dependencies:
       debug: 4.4.3(supports-color@10.2.2)
       express: 5.2.1(supports-color@10.2.2)
-      ip-address: 10.7.1
+      ip-address: 10.7.2
     transitivePeerDependencies:
       - supports-color
 
@@ -38376,7 +38359,7 @@ snapshots:
     dependencies:
       fp-ts: 2.16.11
 
-  ip-address@10.7.1: {}
+  ip-address@10.7.2: {}
 
   ip-regex@2.1.0: {}
 
@@ -39402,7 +39385,7 @@ snapshots:
   launch-editor@2.14.1:
     dependencies:
       picocolors: 1.1.1
-      shell-quote: 1.10.0
+      shell-quote: 1.11.0
 
   launchdarkly-eventsource@2.2.0: {}
 
@@ -43487,7 +43470,7 @@ snapshots:
 
   shebang-regex@3.0.0: {}
 
-  shell-quote@1.10.0: {}
+  shell-quote@1.11.0: {}
 
   shelljs@0.10.0:
     dependencies:
@@ -43657,7 +43640,7 @@ snapshots:
 
   socks@2.8.10:
     dependencies:
-      ip-address: 10.7.1
+      ip-address: 10.7.2
       smart-buffer: 4.2.0
 
   sonic-boom@3.8.1:

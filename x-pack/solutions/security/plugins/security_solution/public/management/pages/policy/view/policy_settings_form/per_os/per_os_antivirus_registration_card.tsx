@@ -127,10 +127,14 @@ export const PerOsAntivirusRegistrationCard = memo<PerOsAntivirusRegistrationCar
       [onChange, policy]
     );
 
-    const currentOutcome = useMemo(
-      () => (shouldEnableAntivirusRegistrationForSync(policy) ? ENABLED : DISABLED),
+    const isSyncRegistrationEnabled = useMemo(
+      () => shouldEnableAntivirusRegistrationForSync(policy),
       [policy]
     );
+    const currentOutcome = isSyncRegistrationEnabled ? ENABLED : DISABLED;
+    const isRegisteredAsAntivirus =
+      currentMode === AntivirusRegistrationModes.enabled ||
+      (currentMode === AntivirusRegistrationModes.sync && isSyncRegistrationEnabled);
 
     if (!isProtectionsAllowed) {
       return null;
@@ -174,46 +178,52 @@ export const PerOsAntivirusRegistrationCard = memo<PerOsAntivirusRegistrationCar
           isLast={true}
           data-test-subj={getTestId('windows')}
         >
-          {/* Matches the column gutter below, so the first line clears the select by the same
-              amount the lines clear each other. */}
-          <EuiSpacer size="xs" />
-          <EuiFlexGroup direction="column" gutterSize="xs">
-            <EuiFlexItem grow={false}>
-              <EuiText
-                color={isEditMode ? 'subdued' : undefined}
-                size="xs"
-                data-test-subj={getTestId('windows-defenderNotice')}
-              >
-                {WINDOWS_DEFENDER_NOTICE}
-              </EuiText>
-            </EuiFlexItem>
-            {currentMode === AntivirusRegistrationModes.sync && (
-              <>
-                <EuiFlexItem grow={false}>
-                  <EuiText
-                    color={isEditMode ? 'subdued' : undefined}
-                    size="xs"
-                    data-test-subj={getTestId('windows-syncExplanation')}
-                  >
-                    {SYNC_EXPLANATION}
-                  </EuiText>
-                </EuiFlexItem>
-                <EuiFlexItem grow={false}>
-                  <EuiText color={isEditMode ? 'subdued' : undefined} size="xs">
-                    {i18n.translate(
-                      'xpack.securitySolution.endpoint.policy.details.antivirusRegistration.syncWithMalwarePrevent.currentOutcome',
-                      {
-                        defaultMessage: '(Current level: {currentOutcome})',
-                        values: {
-                          currentOutcome,
-                        },
-                      }
-                    )}
-                  </EuiText>
-                </EuiFlexItem>
-              </>
-            )}
-          </EuiFlexGroup>
+          {currentMode !== AntivirusRegistrationModes.disabled && (
+            <>
+              {/* Matches the column gutter below, so the first line clears the select by the same
+                  amount the lines clear each other. */}
+              <EuiSpacer size="xs" />
+              <EuiFlexGroup direction="column" gutterSize="xs">
+                {currentMode === AntivirusRegistrationModes.sync && (
+                  <>
+                    <EuiFlexItem grow={false}>
+                      <EuiText
+                        color={isEditMode ? 'subdued' : undefined}
+                        size="xs"
+                        data-test-subj={getTestId('windows-syncExplanation')}
+                      >
+                        {SYNC_EXPLANATION}
+                      </EuiText>
+                    </EuiFlexItem>
+                    <EuiFlexItem grow={false}>
+                      <EuiText color={isEditMode ? 'subdued' : undefined} size="xs">
+                        {i18n.translate(
+                          'xpack.securitySolution.endpoint.policy.details.antivirusRegistration.syncWithMalwarePrevent.currentOutcome',
+                          {
+                            defaultMessage: '(Current level: {currentOutcome})',
+                            values: {
+                              currentOutcome,
+                            },
+                          }
+                        )}
+                      </EuiText>
+                    </EuiFlexItem>
+                  </>
+                )}
+                {isRegisteredAsAntivirus && (
+                  <EuiFlexItem grow={false}>
+                    <EuiText
+                      color={isEditMode ? 'subdued' : undefined}
+                      size="xs"
+                      data-test-subj={getTestId('windows-defenderNotice')}
+                    >
+                      {WINDOWS_DEFENDER_NOTICE}
+                    </EuiText>
+                  </EuiFlexItem>
+                )}
+              </EuiFlexGroup>
+            </>
+          )}
         </OsRow>
       </PerOsSettingCard>
     );
