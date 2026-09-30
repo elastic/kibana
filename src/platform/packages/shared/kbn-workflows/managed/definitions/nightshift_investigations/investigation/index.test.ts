@@ -61,6 +61,7 @@ describe('Nightshift investigation workflow', () => {
       'persist_investigation_failed',
       'emit_investigation_completed',
       'emit_investigation_failed',
+      'notify_destinations',
       'fail_investigation',
     ]);
     expect(investigation.steps.some((step) => step.name === 'merge_investigation_gaps')).toBe(
@@ -82,6 +83,14 @@ describe('Nightshift investigation workflow', () => {
       })
     );
     expect(requireStep('investigate').with?.message).toContain('{{ inputs.context | json }}');
+  });
+
+  it('notifies destinations from the settled record without failing the run on a Slack error', () => {
+    const notify = requireStep('notify_destinations');
+    expect(notify.type).toBe('nightshift.notifyInvestigation');
+    expect(notify.with).toEqual({ investigation_id: '{{ execution.id }}' });
+    expect(notify['on-failure']).toEqual({ continue: true });
+    expect(notify.if).toBeUndefined();
   });
 
   it('attributes agent calls to Nightshift under the shared investigation id', () => {

@@ -31,6 +31,7 @@ import { createInvestigationAvailability } from './create_investigation_availabi
 import { nightshiftInvestigationsRouteRepository } from './routes';
 import { isInvestigationAvailable } from './is_investigation_available';
 import { ensureInvestigationAgentStepDefinition } from './step_definitions/ensure_investigation_agent';
+import { notifyInvestigationStepDefinition } from './step_definitions/notify_investigation';
 import { triggerInvestigationStepDefinition } from './step_definitions/trigger_investigation';
 import { cortexHydrateStepDefinition } from './step_definitions/cortex_hydrate';
 import { cortexOptimizeStepDefinition } from './step_definitions/cortex_optimize';
@@ -240,6 +241,12 @@ export class NightshiftInvestigationsPlugin
           ensureInvestigationAgentStepDefinition({
             getAgentBuilder: () => this.agentBuilder,
             getAgentAvailability: () => this.getInvestigationAvailability(),
+          })
+        );
+        plugins.workflowsExtensions.registerStepDefinition(
+          notifyInvestigationStepDefinition({
+            getInvestigationsClient: this.getInvestigationsClient,
+            getActions: () => this.actionsStart,
           })
         );
         if (this.cortexEnabled) {

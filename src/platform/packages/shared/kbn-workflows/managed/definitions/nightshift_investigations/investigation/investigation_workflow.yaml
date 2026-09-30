@@ -493,6 +493,16 @@ steps:
     on-failure:
       continue: true
 
+  # Posts the outcome to every Slack destination the caller passed in. Reads the settled record
+  # rather than the agent output so the message matches what Kibana shows. Slack failures are
+  # recorded on the investigation, never fatal to the run.
+  - name: notify_destinations
+    type: nightshift.notifyInvestigation
+    with:
+      investigation_id: '{{ execution.id }}'
+    on-failure:
+      continue: true
+
   - name: fail_investigation
     type: workflow.fail
     if: '${{ steps.investigate.error != null }}'
