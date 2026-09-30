@@ -112,7 +112,7 @@ describe('getTimeRange', () => {
 
   test('throws an error when window is invalid', () => {
     expect(() => getTimeRange({ logger, window: '5k' })).toThrowErrorMatchingInlineSnapshot(
-      `"Invalid format for windowSize: \\"5k\\""`
+      `[Error: Invalid format for windowSize: "5k"]`
     );
     expect(logger.debug).not.toHaveBeenCalled();
   });

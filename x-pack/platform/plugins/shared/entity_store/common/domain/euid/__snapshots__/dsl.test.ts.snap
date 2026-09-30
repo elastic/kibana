@@ -1,8 +1,6 @@
 // Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[
-  `getEuidDslDocumentsContainsIdFilter user: returns documentsFilter AND postAggFilter DSL (IDP or non-IDP only) 1`
-] = `
+exports[`getEuidDslDocumentsContainsIdFilter > user: returns documentsFilter AND postAggFilter DSL (IDP or non-IDP only) 1`] = `
 Object {
   "bool": Object {
     "must": Array [
@@ -266,9 +264,7 @@ Object {
 }
 `;
 
-exports[
-  `getEuidDslFilterBasedOnDocument user generates distinct DSL filters for user:alice@aws vs user:alice@gcp (cloud.provider disambiguation): aws filter 1`
-] = `
+exports[`getEuidDslFilterBasedOnDocument > user > generates distinct DSL filters for user:alice@aws vs user:alice@gcp (cloud.provider disambiguation) > aws filter 1`] = `
 Object {
   "bool": Object {
     "filter": Array [
@@ -313,9 +309,7 @@ Object {
 }
 `;
 
-exports[
-  `getEuidDslFilterBasedOnDocument user generates distinct DSL filters for user:alice@aws vs user:alice@gcp (cloud.provider disambiguation): gcp filter 1`
-] = `
+exports[`getEuidDslFilterBasedOnDocument > user > generates distinct DSL filters for user:alice@aws vs user:alice@gcp (cloud.provider disambiguation) > gcp filter 1`] = `
 Object {
   "bool": Object {
     "filter": Array [
@@ -360,9 +354,7 @@ Object {
 }
 `;
 
-exports[
-  `getEuidDslFilterBasedOnEntityRecord user (trusts resolved entity.namespace, reverse-maps source clause) aws vs gcp: distinct cloud.provider disambiguation from the resolved namespace: aws record filter 1`
-] = `
+exports[`getEuidDslFilterBasedOnEntityRecord > user (trusts resolved entity.namespace, reverse-maps source clause) > aws vs gcp: distinct cloud.provider disambiguation from the resolved namespace > aws record filter 1`] = `
 Object {
   "bool": Object {
     "filter": Array [
@@ -478,9 +470,7 @@ Object {
 }
 `;
 
-exports[
-  `getEuidDslFilterBasedOnEntityRecord user (trusts resolved entity.namespace, reverse-maps source clause) aws vs gcp: distinct cloud.provider disambiguation from the resolved namespace: gcp record filter 1`
-] = `
+exports[`getEuidDslFilterBasedOnEntityRecord > user (trusts resolved entity.namespace, reverse-maps source clause) > aws vs gcp: distinct cloud.provider disambiguation from the resolved namespace > gcp record filter 1`] = `
 Object {
   "bool": Object {
     "filter": Array [

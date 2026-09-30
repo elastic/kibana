@@ -85,7 +85,7 @@ describe('validate unsnooze params', () => {
   it('should throw bad request for invalid params', async () => {
     // @ts-expect-error: testing invalid params
     await expect(unsnoozeRule(context, {})).rejects.toThrowErrorMatchingInlineSnapshot(
-      `"Error validating unsnooze params - [id]: expected value of type [string] but got [undefined]"`
+      `[Error: Error validating unsnooze params - [id]: expected value of type [string] but got [undefined]]`
     );
   });
 });

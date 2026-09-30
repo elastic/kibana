@@ -330,7 +330,7 @@ describe('updateRuleRoute', () => {
     );
 
     await expect(handler(context, req, res)).rejects.toThrowErrorMatchingInlineSnapshot(
-      `"Group is not defined in action 2"`
+      `[Error: Group is not defined in action 2]`
     );
   });
 
@@ -362,7 +362,7 @@ describe('updateRuleRoute', () => {
       );
 
       await expect(handler(context, req, res)).rejects.toThrowErrorMatchingInlineSnapshot(
-        `"Cannot update rule of type \\"test.internal-rule-type\\" because it is internally managed."`
+        `[Error: Cannot update rule of type "test.internal-rule-type" because it is internally managed.]`
       );
     });
   });

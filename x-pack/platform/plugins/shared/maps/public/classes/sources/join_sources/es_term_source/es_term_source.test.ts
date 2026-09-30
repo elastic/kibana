@@ -12,7 +12,7 @@ import type { DataFilters } from '../../../../../common/descriptor_types';
 import type { BucketProperties, PropertiesMap } from '../../../../../common/elasticsearch_util';
 import { ESTermSource, extractPropertiesMap } from './es_term_source';
 
-vi.mock('../../../layers/vector_layer', () => {});
+vi.mock('../../../layers/vector_layer', () => ({}));
 
 const termFieldName = 'myTermField';
 const sumFieldName = 'myFieldGettingSummed';

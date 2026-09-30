@@ -22,7 +22,6 @@ import { StepReview } from '../component_template_form/steps/step_review';
 import type { AppDependencies } from '../../../../app_context';
 import { AppContextProvider } from '../../../../app_context';
 
-
 describe('<ComponentTemplateCreate />', () => {
   let httpSetup: ReturnType<typeof setupEnvironment>['httpSetup'];
 

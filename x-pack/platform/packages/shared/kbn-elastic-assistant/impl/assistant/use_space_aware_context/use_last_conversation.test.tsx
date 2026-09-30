@@ -16,7 +16,9 @@ import {
   LAST_SELECTED_CONVERSATION_LOCAL_STORAGE_KEY,
 } from '../../assistant_context/constants';
 
-vi.mock('react-use/lib/useLocalStorage', () => ({ default: vi.fn().mockReturnValue([{ id: '456' }, vi.fn()]) }));
+vi.mock('react-use/lib/useLocalStorage', () => ({
+  default: vi.fn().mockReturnValue([{ id: '456' }, vi.fn()]),
+}));
 const spaceId = 'test';
 
 describe('useAssistantLastConversation', () => {

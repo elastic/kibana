@@ -105,14 +105,11 @@ describe('EmsVectorTileLayer', () => {
     });
 
     test('_setColorFilter should look up the color operation for the loaded tileLayerId', () => {
-      const replacedColorOperationDefaults = vi.replaceProperty(
-        TMSService,
-        'colorOperationDefaults',
-        [
-          { style: 'oldTheme', operation: 'oldOperation', percentage: 0.1 },
-          { style: 'newTheme', operation: 'newOperation', percentage: 0.2 },
-        ] as unknown as typeof TMSService.colorOperationDefaults
-      );
+      const originalColorOperationDefaults = TMSService.colorOperationDefaults;
+      TMSService.colorOperationDefaults = [
+        { style: 'oldTheme', operation: 'oldOperation', percentage: 0.1 },
+        { style: 'newTheme', operation: 'newOperation', percentage: 0.2 },
+      ] as unknown as typeof TMSService.colorOperationDefaults;
       const transformColorPropertiesSpy = vi
         .spyOn(TMSService, 'transformColorProperties')
         .mockReturnValue([]);
@@ -127,7 +124,7 @@ describe('EmsVectorTileLayer', () => {
 
       expect(transformColorPropertiesSpy).toHaveBeenCalledWith(mbLayer, '', 'oldOperation', 0.1);
 
-      replacedColorOperationDefaults.restore();
+      TMSService.colorOperationDefaults = originalColorOperationDefaults;
       transformColorPropertiesSpy.mockRestore();
     });
   });

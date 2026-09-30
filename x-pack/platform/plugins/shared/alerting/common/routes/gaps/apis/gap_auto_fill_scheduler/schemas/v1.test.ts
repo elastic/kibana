@@ -50,7 +50,7 @@ describe('gapAutoFillSchedulerBodySchema', () => {
     };
 
     expect(() => gapAutoFillSchedulerBodySchema.validate(body)).toThrowErrorMatchingInlineSnapshot(
-      `"schedule.interval must be at least 1 minute"`
+      `[Error: schedule.interval must be at least 1 minute]`
     );
   });
 
@@ -100,7 +100,7 @@ describe('gapAutoFillSchedulerLogsRequestQuerySchema', () => {
         sort_field: '@timestamp',
         sort_direction: 'desc',
       })
-    ).toThrowErrorMatchingInlineSnapshot(`"[start]: query start must be valid date"`);
+    ).toThrowErrorMatchingInlineSnapshot(`[Error: [start]: query start must be valid date]`);
   });
 
   test('rejects invalid end date', () => {
@@ -113,6 +113,6 @@ describe('gapAutoFillSchedulerLogsRequestQuerySchema', () => {
         sort_field: '@timestamp',
         sort_direction: 'desc',
       })
-    ).toThrowErrorMatchingInlineSnapshot(`"[end]: query end must be valid date"`);
+    ).toThrowErrorMatchingInlineSnapshot(`[Error: [end]: query end must be valid date]`);
   });
 });

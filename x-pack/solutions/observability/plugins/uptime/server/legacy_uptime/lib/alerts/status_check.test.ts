@@ -119,7 +119,8 @@ const mockCommonAlertDocumentFields = (monitorInfo: GetMonitorStatusResult['moni
   'observer.geo.name': monitorInfo.observer?.geo?.name
     ? [monitorInfo.observer.geo.name]
     : undefined,
-  'observer.name': [],
+  // The mocked monitors have no observer name; Jest's equality treated `[undefined]` like `[]`.
+  'observer.name': [undefined],
 });
 
 const mockStatusAlertDocument = (

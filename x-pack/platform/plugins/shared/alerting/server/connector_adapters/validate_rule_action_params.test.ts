@@ -45,7 +45,7 @@ describe('validateRuleActionParams', () => {
           params: { foo: 5 },
         })
       ).toThrowErrorMatchingInlineSnapshot(
-        `"Invalid system action params. System action type: .test - [foo]: expected value of type [string] but got [number]"`
+        `[Error: Invalid system action params. System action type: .test - [foo]: expected value of type [string] but got [number]]`
       );
     });
 
@@ -87,7 +87,7 @@ describe('validateRuleActionParams', () => {
           actions,
         })
       ).toThrowErrorMatchingInlineSnapshot(
-        `"Invalid system action params. System action type: .test - [foo]: expected value of type [string] but got [number]"`
+        `[Error: Invalid system action params. System action type: .test - [foo]: expected value of type [string] but got [number]]`
       );
     });
   });

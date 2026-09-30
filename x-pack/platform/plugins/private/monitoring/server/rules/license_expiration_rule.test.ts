@@ -112,6 +112,8 @@ describe('LicenseExpirationRule', () => {
     });
 
     it('should fire action', async () => {
+      // Fake timers must wrap the real Date (Jest's clock was bound to it at environment setup)
+      Date = RealDate;
       vi.useFakeTimers().setSystemTime(new Date('2023-03-30T00:00:00.000Z'));
       const alert = new LicenseExpirationRule();
       const type = alert.getRuleType();

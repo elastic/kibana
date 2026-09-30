@@ -13,6 +13,7 @@ import { Subject } from 'rxjs';
 import { DEFAULT_DASHBOARD_STATE } from '../../../common/default_dashboard_state';
 import { DASHBOARD_DURATION_START_MARK } from '../telemetry/dashboard_duration_start_mark';
 import { startTrackingDashboardLoadTelemetry } from '../telemetry/dashboard_load_telemetry';
+import { mockDashboardBackupService } from '../../services/mocks';
 import { loadDashboardApi } from './load_dashboard_api';
 
 vi.mock('../telemetry/dashboard_load_telemetry', () => {
@@ -48,15 +49,6 @@ vi.mock('../get_dashboard_api', async (importOriginal) => ({
   getDashboardApi: getDashboardApiMock,
 }));
 
-vi.mock('../../services/dashboard_api_services', async (importOriginal) => ({
-  ...(await importOriginal<Record<string, unknown>>()),
-  getDashboardBackupService: () => ({
-    getState: () => ({
-      query: lastSavedQuery,
-    }),
-  }),
-}));
-
 const lastSavedQuery = { expression: 'memory:>220000', language: 'kql' as const };
 
 describe('loadDashboardApi', () => {
@@ -67,6 +59,10 @@ describe('loadDashboardApi', () => {
       api: { userActivity$ },
       cleanUp: vi.fn(),
       internalApi: {},
+    });
+
+    mockDashboardBackupService.getState.mockReturnValue({
+      query: lastSavedQuery,
     });
 
     window.performance.getEntriesByName = vi.fn().mockReturnValue([

@@ -58,7 +58,7 @@ describe('create_exceptions_stream_logic', () => {
           ],
           1
         )
-      ).toThrowErrorMatchingInlineSnapshot(`"Can't import more than 1 exceptions"`);
+      ).toThrowErrorMatchingInlineSnapshot(`[Error: Can't import more than 1 exceptions]`);
     });
 
     describe('items validation', () => {

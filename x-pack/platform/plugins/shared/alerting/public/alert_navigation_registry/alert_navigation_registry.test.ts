@@ -116,7 +116,7 @@ describe('AlertNavigationRegistry', () => {
       expect(() => {
         registry.register('siem', ruleType.id, handler);
       }).toThrowErrorMatchingInlineSnapshot(
-        `"Navigation for Alert type \\"index_threshold\\" within \\"siem\\" is already registered."`
+        `[Error: Navigation for Alert type "index_threshold" within "siem" is already registered.]`
       );
     });
   });
@@ -145,7 +145,7 @@ describe('AlertNavigationRegistry', () => {
       expect(() => {
         registry.registerDefault('siem', handler);
       }).toThrowErrorMatchingInlineSnapshot(
-        `"Default Navigation within \\"siem\\" is already registered."`
+        `[Error: Default Navigation within "siem" is already registered.]`
       );
     });
   });
@@ -192,7 +192,7 @@ describe('AlertNavigationRegistry', () => {
       const ruleType = mockRuleType('index_threshold');
 
       expect(() => registry.get('siem', ruleType)).toThrowErrorMatchingInlineSnapshot(
-        `"Navigation for Alert type \\"index_threshold\\" within \\"siem\\" is not registered."`
+        `[Error: Navigation for Alert type "index_threshold" within "siem" is not registered.]`
       );
     });
   });

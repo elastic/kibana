@@ -41,12 +41,14 @@ const testTitle = 'SPL_QUERY_CONVERSION_TITLE';
 const testPrompt = 'SPL_QUERY_CONVERSION_PROMPT';
 const customTitle = 'A_CUSTOM_OPTION';
 
-vi.mock('react-use/lib/useMeasure', () => ({ default: () => [
-  () => {},
-  {
-    width: 500,
-  },
-] }));
+vi.mock('react-use/lib/useMeasure', () => ({
+  default: () => [
+    () => {},
+    {
+      width: 500,
+    },
+  ],
+}));
 
 vi.mock('../../assistant_context', async () => {
   const mocked = {

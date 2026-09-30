@@ -100,7 +100,7 @@ describe('validation', () => {
       } as unknown as Required<DashboardState>['pinned_panels'][number],
     ];
     expect(() => transformPinnedPanelsIn(pinnedPanels)).toThrowErrorMatchingInlineSnapshot(
-      `"Unable to transform 1 pinned panels"`
+      `[TransformPanelsInError: Unable to transform 1 pinned panels]`
     );
   });
 });

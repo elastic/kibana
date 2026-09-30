@@ -16,8 +16,10 @@ import { mockRef } from '../../lib/__mocks__/legacy_screenshot_ref.mock';
 
 vi.mock('@kbn/observability-shared-plugin/public');
 
-vi.mock('react-use/lib/useIntersection', () => () => ({
-  isIntersecting: true,
+vi.mock('react-use/lib/useIntersection', () => ({
+  default: () => ({
+    isIntersecting: true,
+  }),
 }));
 
 describe('StepScreenshotDisplayProps', () => {

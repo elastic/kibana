@@ -109,8 +109,10 @@ describe('usePolling', () => {
       const onTimeout = vi.fn();
       const { result } = renderHook(() => usePolling());
 
+      // The timeout doesn't coincide with an interval tick: the order of timers sharing a
+      // deadline is an implementation detail of the timer queue.
       act(() => {
-        result.current.startPolling(1000, onPoll, 3000, onTimeout);
+        result.current.startPolling(1000, onPoll, 3500, onTimeout);
       });
 
       expect(result.current.isPolling).toBe(true);
@@ -130,13 +132,21 @@ describe('usePolling', () => {
       expect(onPoll).toHaveBeenCalledTimes(2);
       expect(onTimeout).not.toHaveBeenCalled();
 
-      // Timeout at 3s (interval also fires at this time, so onPoll is called once more before stopping)
+      // Third poll at 3s, still before the timeout
       act(() => {
         vi.advanceTimersByTime(1000);
       });
+      expect(onPoll).toHaveBeenCalledTimes(3);
+      expect(onTimeout).not.toHaveBeenCalled();
+      expect(result.current.isPolling).toBe(true);
+
+      // Timeout at 3.5s
+      act(() => {
+        vi.advanceTimersByTime(500);
+      });
       expect(onTimeout).toHaveBeenCalledTimes(1);
       expect(result.current.isPolling).toBe(false);
-      expect(onPoll).toHaveBeenCalledTimes(3); // Third poll happens at the same time as timeout
+      expect(onPoll).toHaveBeenCalledTimes(3);
 
       // No more polling after timeout
       act(() => {
@@ -150,7 +160,7 @@ describe('usePolling', () => {
       const { result } = renderHook(() => usePolling());
 
       act(() => {
-        result.current.startPolling(1000, onPoll, 2000);
+        result.current.startPolling(1000, onPoll, 2500);
       });
 
       // Poll once at 1s
@@ -159,9 +169,16 @@ describe('usePolling', () => {
       });
       expect(onPoll).toHaveBeenCalledTimes(1);
 
-      // Timeout at 2s (interval also fires, so onPoll called once more)
+      // Second poll at 2s, still before the timeout
       act(() => {
         vi.advanceTimersByTime(1000);
+      });
+      expect(onPoll).toHaveBeenCalledTimes(2);
+      expect(result.current.isPolling).toBe(true);
+
+      // Timeout at 2.5s
+      act(() => {
+        vi.advanceTimersByTime(500);
       });
       expect(result.current.isPolling).toBe(false);
       expect(onPoll).toHaveBeenCalledTimes(2);

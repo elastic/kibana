@@ -377,5 +377,3 @@ exports[`Expanded mode > should render the side navigation 1`] = `
   </main>
 </div>
 `;
-
-

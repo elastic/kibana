@@ -132,7 +132,7 @@ describe('getRuleTypesByQuery', () => {
     await expect(
       rulesClient.getRuleTypesByQuery({ ids: ['rule-1', 'rule-2'], filter: 'a-filter' })
     ).rejects.toThrowErrorMatchingInlineSnapshot(
-      `"Failed to find rule types by query: Both 'filter' and 'ids' are supplied. Define either 'ids' or 'filter' properties in method arguments"`
+      `[Error: Failed to find rule types by query: Both 'filter' and 'ids' are supplied. Define either 'ids' or 'filter' properties in method arguments]`
     );
   });
 

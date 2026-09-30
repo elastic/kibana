@@ -140,9 +140,9 @@ describe('addGeneratedActionValues()', () => {
       )
     ).rejects.toThrowErrorMatchingInlineSnapshot(
       `
-      "Invalid KQL: Expected AND, OR, end of input but \\":\\" found.
+      [Error: Invalid KQL: Expected AND, OR, end of input but ":" found.
       foo:bar:1
-      -------^"
+      -------^]
     `
     );
   });

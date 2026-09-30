@@ -9,9 +9,9 @@ import { vi } from 'vitest';
 
 import { LAYER_STYLE_TYPE, LAYER_TYPE } from '../../common/constants';
 
-vi.mock('../classes/layers/heatmap_layer', () => {});
-vi.mock('../classes/layers/ems_vector_tile_layer/ems_vector_tile_layer', () => {});
-vi.mock('../classes/joins/inner_join', () => {});
+vi.mock('../classes/layers/heatmap_layer', () => ({}));
+vi.mock('../classes/layers/ems_vector_tile_layer/ems_vector_tile_layer', () => ({}));
+vi.mock('../classes/joins/inner_join', () => ({}));
 vi.mock('../kibana_services', () => {
   const mocked = {
     getTimeFilter: () => ({

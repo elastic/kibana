@@ -17,9 +17,9 @@ import {
   getToTime,
 } from './esql_data_generation';
 
-vi.mock('moment', () => {
-  return () => require('moment')('2025-03-07T12:00:00Z');
-});
+vi.mock('moment', () => ({
+  default: () => require('moment')('2025-03-07T12:00:00Z'),
+}));
 
 const getValue = getOrElse(() => 'error');
 

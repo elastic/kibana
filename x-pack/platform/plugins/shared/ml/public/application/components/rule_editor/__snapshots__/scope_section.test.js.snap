@@ -2,84 +2,6 @@
 
 exports[`ScopeSection > don't render when no partitioning fields 1`] = `<div />`;
 
-exports[`ScopeSection false canGetFilters privilege > show NoPermissionCallOut when no filter list IDs 1`] = `
-<div>
-  <h2
-    class="euiTitle emotion-euiTitle-m"
-  >
-    Scope
-  </h2>
-  <div
-    class="euiSpacer euiSpacer--s emotion-euiSpacer-s"
-  />
-  <div
-    class="euiCheckbox emotion-euiCheckbox"
-  >
-    <div
-      class="euiCheckbox__square emotion-euiCheckbox__square"
-    >
-      <span
-        class="euiCheckboxControl emotion-euiCheckboxControl-selected"
-      >
-        <span
-          class="emotion-euiCheckbox__icon-check"
-          data-euiicon-type="check"
-          role="presentation"
-        />
-      </span>
-      <input
-        checked=""
-        class="euiCheckbox__input emotion-euiCheckbox__input"
-        data-test-subj="mlScopeEnableCheckbox"
-        id="enable_scope_checkbox"
-        type="checkbox"
-      />
-    </div>
-    <label
-      class="euiCheckbox__label emotion-euiCheckbox__label"
-      for="enable_scope_checkbox"
-    >
-      Add a filter list to limit where the job rule applies.
-    </label>
-  </div>
-  <div
-    class="euiSpacer euiSpacer--s emotion-euiSpacer-s"
-  />
-  <div
-    class="euiPanel euiPanel--primary euiCallOut euiCallOut--primary emotion-euiPanel-none-primary-euiCallOut-primary"
-    data-size="m"
-    style="--euiCallOutTypeColor: #0B64DD;"
-  >
-    <div
-      class="css-1slkmya-wrapper"
-    >
-      <div
-        class="css-wlziyu-body"
-      >
-        <span
-          aria-hidden="true"
-          class="css-1cmanx3-icon-l-icon"
-          color="#0B64DD"
-          data-euiicon-type="gear"
-        />
-        <div
-          class="css-ak2bmi-content"
-        >
-          <p
-            class="euiTitle euiCallOutHeader__title emotion-euiTitle-xs-euiCallOutHeader"
-          >
-            You do not have permission to view filter lists
-          </p>
-        </div>
-      </div>
-    </div>
-  </div>
-  <div
-    class="euiSpacer euiSpacer--xxl emotion-euiSpacer-xxl"
-  />
-</div>
-`;
-
 exports[`ScopeSection > renders when enabled with no scope supplied 1`] = `
 <div>
   <h2
@@ -460,6 +382,84 @@ exports[`ScopeSection > show NoFilterListsCallOut when no filter list IDs 1`] = 
                settings page to create the list of values you want to include or exclude in the job rule.
             </p>
           </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div
+    class="euiSpacer euiSpacer--xxl emotion-euiSpacer-xxl"
+  />
+</div>
+`;
+
+exports[`ScopeSection false canGetFilters privilege > show NoPermissionCallOut when no filter list IDs 1`] = `
+<div>
+  <h2
+    class="euiTitle emotion-euiTitle-m"
+  >
+    Scope
+  </h2>
+  <div
+    class="euiSpacer euiSpacer--s emotion-euiSpacer-s"
+  />
+  <div
+    class="euiCheckbox emotion-euiCheckbox"
+  >
+    <div
+      class="euiCheckbox__square emotion-euiCheckbox__square"
+    >
+      <span
+        class="euiCheckboxControl emotion-euiCheckboxControl-selected"
+      >
+        <span
+          class="emotion-euiCheckbox__icon-check"
+          data-euiicon-type="check"
+          role="presentation"
+        />
+      </span>
+      <input
+        checked=""
+        class="euiCheckbox__input emotion-euiCheckbox__input"
+        data-test-subj="mlScopeEnableCheckbox"
+        id="enable_scope_checkbox"
+        type="checkbox"
+      />
+    </div>
+    <label
+      class="euiCheckbox__label emotion-euiCheckbox__label"
+      for="enable_scope_checkbox"
+    >
+      Add a filter list to limit where the job rule applies.
+    </label>
+  </div>
+  <div
+    class="euiSpacer euiSpacer--s emotion-euiSpacer-s"
+  />
+  <div
+    class="euiPanel euiPanel--primary euiCallOut euiCallOut--primary emotion-euiPanel-none-primary-euiCallOut-primary"
+    data-size="m"
+    style="--euiCallOutTypeColor: #0B64DD;"
+  >
+    <div
+      class="css-1slkmya-wrapper"
+    >
+      <div
+        class="css-wlziyu-body"
+      >
+        <span
+          aria-hidden="true"
+          class="css-1cmanx3-icon-l-icon"
+          color="#0B64DD"
+          data-euiicon-type="gear"
+        />
+        <div
+          class="css-ak2bmi-content"
+        >
+          <p
+            class="euiTitle euiCallOutHeader__title emotion-euiTitle-xs-euiCallOutHeader"
+          >
+            You do not have permission to view filter lists
+          </p>
         </div>
       </div>
     </div>

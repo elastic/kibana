@@ -9,6 +9,7 @@ import { vi } from 'vitest';
 import type { Mocked } from 'vitest';
 
 import { AIMessage, ToolMessage } from '@langchain/core/messages';
+import { ToolNode as ToolNodeImport } from '@langchain/langgraph/prebuilt';
 import type { Logger } from '@kbn/core/server';
 import type { ChatCompleteCacheControl } from '@kbn/inference-common';
 import type { InferenceChatModel } from '@kbn/inference-langchain';
@@ -34,8 +35,9 @@ vi.mock('@langchain/langgraph/prebuilt', () => {
 
 const askName = internalTools.askUserQuestion.replace(/\./g, '_');
 
-const mockToolNodeOnce = async (messages: ToolMessage[]) => {
-  const { ToolNode } = vi.mocked(await import('@langchain/langgraph/prebuilt'));
+const ToolNode = vi.mocked(ToolNodeImport);
+
+const mockToolNodeOnce = (messages: ToolMessage[]) => {
   ToolNode.mockImplementationOnce(() => ({
     invoke: vi.fn().mockResolvedValue(messages),
   }));
@@ -486,7 +488,6 @@ describe('createAgentGraph', () => {
     mockToolNodeOnce([
       new ToolMessage({ tool_call_id: 'c1', content: 'r1', artifact: { results: [] } }),
     ]);
-    const { ToolNode } = vi.mocked(await import('@langchain/langgraph/prebuilt'));
     ToolNode.mockImplementationOnce(() => ({
       invoke: vi.fn().mockRejectedValue(new Error('boom')),
     }));

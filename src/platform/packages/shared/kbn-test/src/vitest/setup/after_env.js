@@ -123,6 +123,14 @@ if (typeof window !== 'undefined') {
   global.ArrayBuffer = new NodeUint8Array(0).buffer.constructor;
 }
 
+// jest-environment-jsdom exposed jsdom's AbortController/AbortSignal; Vitest keeps Node's, whose
+// signals carry undefined-valued own symbols (kEvents, kReason, ...) that make `toEqual` on
+// objects holding a signal fail.
+if (typeof window !== 'undefined' && global.jsdom?.window) {
+  global.AbortController = global.jsdom.window.AbortController;
+  global.AbortSignal = global.jsdom.window.AbortSignal;
+}
+
 // Same as src/jest/setup/setup_test.js: jsdom 20's AbortSignal lacks throwIfAborted.
 if (
   typeof AbortSignal !== 'undefined' &&

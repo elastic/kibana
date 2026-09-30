@@ -34,7 +34,6 @@ import {
   INDEX_PATTERNS as DEFAULT_INDEX_PATTERNS,
 } from './constants';
 
-
 // Driving the full multi-step wizard in setup hooks is intrinsically heavy and runs
 // ~10x slower under CI parallel load, so give every hook and test a single generous budget.
 vi.setConfig({ testTimeout: 60000 });

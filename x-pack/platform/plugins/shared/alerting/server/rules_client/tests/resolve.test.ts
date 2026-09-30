@@ -349,7 +349,7 @@ describe('resolve()', () => {
       alias_target_id: '2',
     });
     await expect(rulesClient.resolve({ id: '1' })).rejects.toThrowErrorMatchingInlineSnapshot(
-      `"Action reference \\"action_0\\" not found in alert id: 1"`
+      `[Error: Action reference "action_0" not found in alert id: 1]`
     );
   });
 
@@ -422,7 +422,7 @@ describe('resolve()', () => {
       alias_target_id: '2',
     });
     await expect(rulesClient.resolve({ id: '1' })).rejects.toThrowErrorMatchingInlineSnapshot(
-      `"Error injecting reference into rule params for rule id 1 - something went wrong!"`
+      `[Error: Error injecting reference into rule params for rule id 1 - something went wrong!]`
     );
   });
 

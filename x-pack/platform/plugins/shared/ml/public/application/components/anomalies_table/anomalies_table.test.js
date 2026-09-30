@@ -29,15 +29,21 @@ vi.mock('../../capabilities/get_capabilities', () => {
   };
   return { ...mocked, default: mocked };
 });
-vi.mock('./links_menu', () => () => <div id="mocLinkCom">mocked link component</div>);
-vi.mock('./description_cell', () => () => (
-  <div id="mockDescriptorCom">mocked description component</div>
-));
-vi.mock('./detector_cell', () => () => <div id="mocDetectorCom">mocked detector component</div>);
-vi.mock('../entity_cell', () => () => <div id="mocEntityCom">mocked entity component</div>);
-vi.mock('./influencers_cell', () => () => (
-  <div id="mocInfluencerCom">mocked influencer component</div>
-));
+vi.mock('./links_menu', () => ({
+  default: () => <div id="mocLinkCom">mocked link component</div>,
+}));
+vi.mock('./description_cell', () => ({
+  default: () => <div id="mockDescriptorCom">mocked description component</div>,
+}));
+vi.mock('./detector_cell', () => ({
+  default: () => <div id="mocDetectorCom">mocked detector component</div>,
+}));
+vi.mock('../entity_cell', () => ({
+  default: () => <div id="mocEntityCom">mocked entity component</div>,
+}));
+vi.mock('./influencers_cell', () => ({
+  default: () => <div id="mocInfluencerCom">mocked influencer component</div>,
+}));
 
 const mlFieldFormatServiceMock = {
   getFieldFormat: () => {},

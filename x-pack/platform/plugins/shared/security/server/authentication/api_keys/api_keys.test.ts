@@ -489,7 +489,7 @@ describe('API Keys', () => {
           role_descriptors: {},
         })
       ).rejects.toThrowErrorMatchingInlineSnapshot(
-        `"Unable to grant an API Key, request does not contain an authorization header"`
+        `[Error: Unable to grant an API Key, request does not contain an authorization header]`
       );
       expect(mockClusterClient.asInternalUser.security.grantApiKey).not.toHaveBeenCalled();
     });
@@ -703,7 +703,7 @@ describe('API Keys', () => {
           }
         )
       ).rejects.toThrowErrorMatchingInlineSnapshot(
-        `"Unsupported scheme \\"Digest\\" for granting API Key"`
+        `[Error: Unsupported scheme "Digest" for granting API Key]`
       );
       expect(mockValidateKibanaPrivileges).not.toHaveBeenCalled();
       expect(mockClusterClient.asInternalUser.security.grantApiKey).not.toHaveBeenCalled();

@@ -37,8 +37,8 @@ const mockConnectors: unknown[] = [
   },
 ];
 
-vi.mock('react-use/lib/useLocalStorage', () =>
-  ({ default: vi.fn().mockImplementation((key, defaultValue) => {
+vi.mock('react-use/lib/useLocalStorage', () => ({
+  default: vi.fn().mockImplementation((key, defaultValue) => {
     // Return different values based on the localStorage key
     if (key.includes('START_LOCAL_STORAGE_KEY')) {
       return ['now-24h', vi.fn()];
@@ -51,9 +51,12 @@ vi.mock('react-use/lib/useLocalStorage', () =>
     }
     // For other keys, return the default value or 'test-id'
     return [defaultValue || 'test-id', vi.fn()];
-  }) }));
+  }),
+}));
 
-vi.mock('react-use/lib/useSessionStorage', () => ({ default: vi.fn().mockReturnValue([undefined, vi.fn()]) }));
+vi.mock('react-use/lib/useSessionStorage', () => ({
+  default: vi.fn().mockReturnValue([undefined, vi.fn()]),
+}));
 
 vi.mock(
   '@kbn/elastic-assistant/impl/assistant/api/anonymization_fields/use_fetch_anonymization_fields',

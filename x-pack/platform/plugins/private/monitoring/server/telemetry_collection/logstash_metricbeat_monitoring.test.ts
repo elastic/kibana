@@ -14,7 +14,9 @@ import {
   INDEX_PATTERN_LOGSTASH_STACK_MONITORING_STATE,
 } from '../../common/constants';
 
-const logstashStatsResultSetOfMetricbeatMonitoring = (await import('./__mocks__/fixtures/logstash_stats_metricbeat_monitoring_results.json')).default;
+const logstashStatsResultSetOfMetricbeatMonitoring = (
+  await import('./__mocks__/fixtures/logstash_stats_metricbeat_monitoring_results.json')
+).default;
 
 const logstashStateResultsMapOfMetricbeatMonitoring = new Map();
 

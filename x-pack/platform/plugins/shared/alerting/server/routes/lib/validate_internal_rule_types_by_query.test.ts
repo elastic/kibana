@@ -40,7 +40,7 @@ describe('internal rule types lib', () => {
       await expect(
         validateInternalRuleTypesByQuery({ req, rulesClient, ruleTypes, operationText })
       ).rejects.toThrowErrorMatchingInlineSnapshot(
-        `"Cannot edit rules of type \\"internal\\" because they are internally managed."`
+        `[Error: Cannot edit rules of type "internal" because they are internally managed.]`
       );
     });
 
@@ -59,7 +59,7 @@ describe('internal rule types lib', () => {
 
       await expect(
         validateInternalRuleTypesByQuery({ req, rulesClient, ruleTypes, operationText })
-      ).rejects.toThrowErrorMatchingInlineSnapshot(`"Rule types not found: internal"`);
+      ).rejects.toThrowErrorMatchingInlineSnapshot(`[Error: Rule types not found: internal]`);
     });
 
     it('should not throw an error if the ids and filter are undefined', async () => {
@@ -98,7 +98,7 @@ describe('internal rule types lib', () => {
             operationText,
           })
         ).rejects.toThrowErrorMatchingInlineSnapshot(
-          `"Cannot edit rules of type \\"internal\\" because they are internally managed."`
+          `[Error: Cannot edit rules of type "internal" because they are internally managed.]`
         );
       });
 

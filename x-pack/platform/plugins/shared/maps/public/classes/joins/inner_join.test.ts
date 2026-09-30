@@ -14,8 +14,8 @@ import type { IField } from '../fields/field';
 import { createJoinSource, InnerJoin } from './inner_join';
 import { AGG_TYPE, SOURCE_TYPES } from '../../../common/constants';
 
-vi.mock('../../kibana_services', () => {});
-vi.mock('../layers/vector_layer', () => {});
+vi.mock('../../kibana_services', () => ({}));
+vi.mock('../layers/vector_layer', () => ({}));
 
 const rightSource = {
   type: SOURCE_TYPES.ES_TERM_SOURCE,

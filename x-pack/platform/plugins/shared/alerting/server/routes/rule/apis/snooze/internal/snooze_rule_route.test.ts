@@ -220,7 +220,7 @@ describe('snoozeAlertRoute', () => {
       );
 
       await expect(handler(context, req, res)).rejects.toThrowErrorMatchingInlineSnapshot(
-        `"Cannot snooze rule of type \\"test.internal-rule-type\\" because it is internally managed."`
+        `[Error: Cannot snooze rule of type "test.internal-rule-type" because it is internally managed.]`
       );
     });
   });

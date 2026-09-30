@@ -238,7 +238,7 @@ describe('getBackfill()', () => {
         throw new Error('error getting SO!');
       });
       await expect(rulesClient.getBackfill('1')).rejects.toThrowErrorMatchingInlineSnapshot(
-        `"Failed to get backfill by id: 1: error getting SO!"`
+        `[Error: Failed to get backfill by id: 1: error getting SO!]`
       );
       expect(logger.error).toHaveBeenCalledWith(
         `Failed to get backfill by id: 1 - Error: error getting SO!`
@@ -250,7 +250,7 @@ describe('getBackfill()', () => {
         throw new Error('no access for you');
       });
       await expect(rulesClient.getBackfill('1')).rejects.toThrowErrorMatchingInlineSnapshot(
-        `"Failed to get backfill by id: 1: no access for you"`
+        `[Error: Failed to get backfill by id: 1: no access for you]`
       );
       expect(logger.error).toHaveBeenCalledWith(
         `Failed to get backfill by id: 1 - Error: no access for you`

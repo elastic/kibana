@@ -21,7 +21,10 @@ import type { MatchParams } from './actions_connectors_home';
 import ActionsConnectorsHome from './actions_connectors_home';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import userEvent from '@testing-library/user-event';
-import { loadAllActions as loadAllActionsFn, loadConnectorAuthStatus as loadConnectorAuthStatusFn } from '../../../lib/action_connector_api';
+import {
+  loadAllActions as loadAllActionsFn,
+  loadConnectorAuthStatus as loadConnectorAuthStatusFn,
+} from '../../../lib/action_connector_api';
 import { hasSaveActionsCapability as hasSaveActionsCapabilityFn } from '../../../lib/capabilities';
 
 let lastActionsConnectorsListProps: Record<string, unknown> | undefined;

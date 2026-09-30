@@ -660,7 +660,7 @@ describe('RulesClientFactory', () => {
       securityService.authc.apiKeys.uiam = uiamApiKeys as never;
 
       await expect(constructorCall.createAPIKey('test')).rejects.toThrowErrorMatchingInlineSnapshot(
-        `"UIAM service unavailable"`
+        `[Error: UIAM service unavailable]`
       );
       expect(securityService.authc.apiKeys.grantAsInternalUser).not.toHaveBeenCalled();
     });
@@ -678,7 +678,7 @@ describe('RulesClientFactory', () => {
       securityService.authc.apiKeys.uiam = uiamApiKeys as never;
 
       await expect(constructorCall.createAPIKey('test')).rejects.toThrowErrorMatchingInlineSnapshot(
-        `"Failed to create a Cloud API key for alerting rule : test"`
+        `[Error: Failed to create a Cloud API key for alerting rule : test]`
       );
       expect(securityService.authc.apiKeys.grantAsInternalUser).not.toHaveBeenCalled();
     });
@@ -788,7 +788,7 @@ describe('RulesClientFactory', () => {
       new Error('TLS disabled')
     );
     await expect(constructorCall.createAPIKey('test')).rejects.toThrowErrorMatchingInlineSnapshot(
-      `"TLS disabled"`
+      `[Error: TLS disabled]`
     );
   });
 
@@ -826,7 +826,7 @@ describe('RulesClientFactory', () => {
     );
 
     await expect(constructorCall.createAPIKey('test')).rejects.toThrowErrorMatchingInlineSnapshot(
-      `"TLS disabled"`
+      `[Error: TLS disabled]`
     );
     expect(uiamApiKeys.invalidate).toHaveBeenCalledWith(expect.any(Object), {
       id: 'uiam-id',
@@ -965,7 +965,7 @@ describe('RulesClientFactory', () => {
     expect(() =>
       constructorCall.getAuthenticationAPIKey('test')
     ).toThrowErrorMatchingInlineSnapshot(
-      `"UIAM API keys should only be used in serverless environments"`
+      `[Error: UIAM API keys should only be used in serverless environments]`
     );
   });
 
@@ -991,7 +991,7 @@ describe('RulesClientFactory', () => {
     expect(() =>
       constructorCall.getAuthenticationAPIKey('test')
     ).toThrowErrorMatchingInlineSnapshot(
-      `"Failed to parse API key credentials from authorization header for alerting rule : test"`
+      `[Error: Failed to parse API key credentials from authorization header for alerting rule : test]`
     );
   });
 
@@ -1081,7 +1081,7 @@ describe('RulesClientFactory', () => {
     expect(() =>
       constructorCall.getAuthenticationAPIKey('test')
     ).toThrowErrorMatchingInlineSnapshot(
-      `"Cannot use a Cloud API key to create or enable rule \\"test\\". Cloud API keys are only supported in serverless environments; use a project-scoped Elasticsearch API key instead."`
+      `[Error: Cannot use a Cloud API key to create or enable rule "test". Cloud API keys are only supported in serverless environments; use a project-scoped Elasticsearch API key instead.]`
     );
 
     // A client error, so it has to surface as a 4xx rather than an opaque 500.

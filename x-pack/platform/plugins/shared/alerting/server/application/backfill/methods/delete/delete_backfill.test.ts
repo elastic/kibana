@@ -185,7 +185,7 @@ describe('deleteBackfill()', () => {
         throw new Error('error getting SO!');
       });
       await expect(rulesClient.deleteBackfill('1')).rejects.toThrowErrorMatchingInlineSnapshot(
-        `"Failed to delete backfill by id: 1: error getting SO!"`
+        `[Error: Failed to delete backfill by id: 1: error getting SO!]`
       );
       expect(logger.error).toHaveBeenCalledWith(
         `Failed to delete backfill by id: 1 - Error: error getting SO!`
@@ -197,7 +197,7 @@ describe('deleteBackfill()', () => {
         throw new Error('no access for you');
       });
       await expect(rulesClient.deleteBackfill('1')).rejects.toThrowErrorMatchingInlineSnapshot(
-        `"Failed to delete backfill by id: 1: no access for you"`
+        `[Error: Failed to delete backfill by id: 1: no access for you]`
       );
       expect(logger.error).toHaveBeenCalledWith(
         `Failed to delete backfill by id: 1 - Error: no access for you`
@@ -228,7 +228,7 @@ describe('deleteBackfill()', () => {
         throw new Error('error deleting SO!');
       });
       await expect(rulesClient.deleteBackfill('1')).rejects.toThrowErrorMatchingInlineSnapshot(
-        `"Failed to delete backfill by id: 1: error deleting SO!"`
+        `[Error: Failed to delete backfill by id: 1: error deleting SO!]`
       );
       expect(logger.error).toHaveBeenCalledWith(
         `Failed to delete backfill by id: 1 - Error: error deleting SO!`
@@ -240,7 +240,7 @@ describe('deleteBackfill()', () => {
         throw new Error('error removing task!');
       });
       await expect(rulesClient.deleteBackfill('1')).rejects.toThrowErrorMatchingInlineSnapshot(
-        `"Failed to delete backfill by id: 1: error removing task!"`
+        `[Error: Failed to delete backfill by id: 1: error removing task!]`
       );
       expect(logger.error).toHaveBeenCalledWith(
         `Failed to delete backfill by id: 1 - Error: error removing task!`

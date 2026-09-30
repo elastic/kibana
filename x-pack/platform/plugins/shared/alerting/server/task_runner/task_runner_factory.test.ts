@@ -147,7 +147,7 @@ describe('Task Runner Factory', () => {
     factory.initialize(taskRunnerFactoryInitializerParams);
     expect(() =>
       factory.initialize(taskRunnerFactoryInitializerParams)
-    ).toThrowErrorMatchingInlineSnapshot(`"TaskRunnerFactory already initialized"`);
+    ).toThrowErrorMatchingInlineSnapshot(`[Error: TaskRunnerFactory already initialized]`);
   });
 
   test(`throws an error if create is called when factory isn't initialized`, () => {
@@ -158,13 +158,13 @@ describe('Task Runner Factory', () => {
         taskManagerMock.createRunContext({ taskInstance: mockedTaskInstance }),
         inMemoryMetrics
       )
-    ).toThrowErrorMatchingInlineSnapshot(`"TaskRunnerFactory not initialized"`);
+    ).toThrowErrorMatchingInlineSnapshot(`[Error: TaskRunnerFactory not initialized]`);
   });
 
   test(`throws an error if createAdHoc is called when factory isn't initialized`, () => {
     const factory = new TaskRunnerFactory();
     expect(() =>
       factory.createAdHoc(taskManagerMock.createRunContext({ taskInstance: mockedTaskInstance }))
-    ).toThrowErrorMatchingInlineSnapshot(`"TaskRunnerFactory not initialized"`);
+    ).toThrowErrorMatchingInlineSnapshot(`[Error: TaskRunnerFactory not initialized]`);
   });
 });

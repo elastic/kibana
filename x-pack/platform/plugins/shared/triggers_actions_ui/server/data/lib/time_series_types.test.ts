@@ -48,32 +48,32 @@ describe('TimeSeriesParams validate()', () => {
   it('fails for invalid dateStart', async () => {
     params.dateStart = 42;
     expect(onValidate()).toThrowErrorMatchingInlineSnapshot(
-      `"[dateStart]: expected value of type [string] but got [number]"`
+      `[Error: [dateStart]: expected value of type [string] but got [number]]`
     );
 
     params.dateStart = 'x';
-    expect(onValidate()).toThrowErrorMatchingInlineSnapshot(`"[dateStart]: invalid date x"`);
+    expect(onValidate()).toThrowErrorMatchingInlineSnapshot(`[Error: [dateStart]: invalid date x]`);
   });
 
   it('fails for invalid dateEnd', async () => {
     params.dateEnd = 42;
     expect(onValidate()).toThrowErrorMatchingInlineSnapshot(
-      `"[dateEnd]: expected value of type [string] but got [number]"`
+      `[Error: [dateEnd]: expected value of type [string] but got [number]]`
     );
 
     params.dateEnd = 'x';
-    expect(onValidate()).toThrowErrorMatchingInlineSnapshot(`"[dateEnd]: invalid date x"`);
+    expect(onValidate()).toThrowErrorMatchingInlineSnapshot(`[Error: [dateEnd]: invalid date x]`);
   });
 
   it('fails for invalid interval', async () => {
     params.interval = 42;
     expect(onValidate()).toThrowErrorMatchingInlineSnapshot(
-      `"[interval]: expected value of type [string] but got [number]"`
+      `[Error: [interval]: expected value of type [string] but got [number]]`
     );
 
     params.interval = 'x';
     expect(onValidate()).toThrowErrorMatchingInlineSnapshot(
-      `"[interval]: invalid duration: \\"x\\""`
+      `[Error: [interval]: invalid duration: "x"]`
     );
   });
 
@@ -82,7 +82,7 @@ describe('TimeSeriesParams validate()', () => {
     params.dateEnd = '2020-01-01T00:00:00.000Z';
     params.interval = '1s';
     expect(onValidate()).toThrowErrorMatchingInlineSnapshot(
-      `"[dateStart]: is greater than [dateEnd]"`
+      `[Error: [dateStart]: is greater than [dateEnd]]`
     );
   });
 
@@ -90,7 +90,7 @@ describe('TimeSeriesParams validate()', () => {
     params.dateStart = '2020-01-01T00:00:00.000Z';
     params.dateEnd = '2021-01-01T00:00:00.000Z';
     expect(onValidate()).toThrowErrorMatchingInlineSnapshot(
-      `"[interval]: must be specified if [dateStart] does not equal [dateEnd]"`
+      `[Error: [interval]: must be specified if [dateStart] does not equal [dateEnd]]`
     );
   });
 
@@ -99,7 +99,7 @@ describe('TimeSeriesParams validate()', () => {
     params.dateEnd = '2021-01-01T00:00:00.000Z';
     params.interval = '1s';
     expect(onValidate()).toThrowErrorMatchingInlineSnapshot(
-      `"calculated number of intervals 31622400 is greater than maximum 1000"`
+      `[Error: calculated number of intervals 31622400 is greater than maximum 1000]`
     );
   });
 
@@ -116,7 +116,7 @@ describe('TimeSeriesParams validate()', () => {
   it('fails for invalid project_routing type', async () => {
     params.project_routing = 99;
     expect(onValidate()).toThrowErrorMatchingInlineSnapshot(
-      `"[project_routing]: expected value of type [string] but got [number]"`
+      `[Error: [project_routing]: expected value of type [string] but got [number]]`
     );
   });
 

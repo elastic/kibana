@@ -25,7 +25,6 @@ import {
   testIndexDocumentsSampleResponse,
 } from '../../../../../../../__jest__/client_integration/index_details_page/mocks';
 
-
 const mockUseCloudConnectStatus = vi.fn();
 vi.mock('@kbn/search-api-panels', async () => {
   const mocked = {

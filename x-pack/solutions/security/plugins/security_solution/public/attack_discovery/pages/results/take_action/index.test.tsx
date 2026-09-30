@@ -29,12 +29,12 @@ import { useAgentBuilderAvailability } from '../../../../agent_builder/hooks/use
 import { useAlertsPrivileges } from '../../../../detections/containers/detection_engine/alerts/use_alerts_privileges';
 import { TakeAction } from '.';
 
-const defaultAgentBuilderAvailability = {
+const defaultAgentBuilderAvailability = vi.hoisted(() => ({
   isAgentBuilderEnabled: true,
   hasAgentBuilderPrivilege: true,
   isAgentChatExperienceEnabled: false,
   hasValidAgentBuilderLicense: true,
-};
+}));
 
 const mockMutateAsyncBulk = vi.fn().mockResolvedValue({});
 const mockMutateAsyncStatus = vi.fn().mockResolvedValue({});

@@ -108,10 +108,11 @@ describe('Create Lifecycle', () => {
 
       const invalidCharacters = [' ', ':', '*', '*', '/'];
       for (const char of invalidCharacters) {
-        expect(() =>
-          registry.register({ ...ruleType, id: `${ruleType.id}${char}` })
-        ).toThrowErrorMatchingInlineSnapshot(
-          `"expected RuleType Id not to include invalid character: ${char}"`
+        // Vitest keeps one inline snapshot per call site, so a loop can't use it.
+        expect(() => registry.register({ ...ruleType, id: `${ruleType.id}${char}` })).toThrowError(
+          expect.objectContaining({
+            message: `expected RuleType Id not to include invalid character: ${char}`,
+          })
         );
       }
 
@@ -119,7 +120,7 @@ describe('Create Lifecycle', () => {
       expect(() =>
         registry.register({ ...ruleType, id: `${first}${ruleType.id}${second}` })
       ).toThrowErrorMatchingInlineSnapshot(
-        `"expected RuleType Id not to include invalid characters: ${first}, ${second}"`
+        `[Error: expected RuleType Id not to include invalid characters: ${first}, ${second}]`
       );
     });
 
@@ -147,7 +148,7 @@ describe('Create Lifecycle', () => {
       const registry = new RuleTypeRegistry(ruleTypeRegistryParams);
 
       expect(() => registry.register(ruleType)).toThrowErrorMatchingInlineSnapshot(
-        `"expected value of type [string] but got [number]"`
+        `[Error: expected value of type [string] but got [number]]`
       );
     });
 
@@ -764,7 +765,7 @@ describe('Create Lifecycle', () => {
             params: { validate: (params) => params },
           },
         })
-      ).toThrowErrorMatchingInlineSnapshot(`"Rule type \\"test\\" is already registered."`);
+      ).toThrowErrorMatchingInlineSnapshot(`[Error: Rule type "test" is already registered.]`);
     });
 
     test('should initialize alerts as data resources if AlertsService is defined and alert definition is registered', () => {
@@ -1009,7 +1010,7 @@ describe('Create Lifecycle', () => {
     test(`should throw an error if type isn't registered`, () => {
       const registry = new RuleTypeRegistry(ruleTypeRegistryParams);
       expect(() => registry.get('test')).toThrowErrorMatchingInlineSnapshot(
-        `"Rule type \\"test\\" is not registered."`
+        `[Error: Rule type "test" is not registered.]`
       );
     });
   });
@@ -1382,7 +1383,7 @@ describe('Create Lifecycle', () => {
       });
       expect(() =>
         ruleTypeRegistry.ensureRuleTypeEnabled('test')
-      ).toThrowErrorMatchingInlineSnapshot(`"Fail"`);
+      ).toThrowErrorMatchingInlineSnapshot(`[Error: Fail]`);
     });
   });
 });

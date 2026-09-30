@@ -98,7 +98,7 @@ describe('getFields', () => {
     const client = new IndicesAPIClient(http);
 
     await expect(() => client.getFields('foo')).rejects.toThrowErrorMatchingInlineSnapshot(
-      `"AHHHH"`
+      `[Error: AHHHH]`
     );
   });
 });

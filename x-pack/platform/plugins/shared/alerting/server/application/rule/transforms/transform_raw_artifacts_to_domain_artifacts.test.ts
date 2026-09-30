@@ -84,7 +84,7 @@ describe('transformRawArtifactsToDomainArtifacts', () => {
     expect(() =>
       transformRawArtifactsToDomainArtifacts('1', rawArtifacts, references)
     ).toThrowErrorMatchingInlineSnapshot(
-      `"Artifacts reference \\"dashboard-1\\" not found in rule id: 1"`
+      `[Error: Artifacts reference "dashboard-1" not found in rule id: 1]`
     );
   });
 });

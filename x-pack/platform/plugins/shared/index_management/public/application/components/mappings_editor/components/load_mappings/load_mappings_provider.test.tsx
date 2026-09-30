@@ -22,7 +22,6 @@ vi.mock('lodash', () => {
   };
 });
 
-
 import { LoadMappingsProvider } from './load_mappings_provider';
 
 const ComponentToTest = ({ onJson }: { onJson: () => void }) => (

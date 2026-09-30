@@ -136,6 +136,7 @@ describe('use_field_value_autocomplete', () => {
       throw new TypeError('selectedField for this test should always be defined');
     }
 
+    const { signal } = new AbortController();
     renderHook(() =>
       useFieldValueAutocomplete({
         autocompleteService: {
@@ -168,7 +169,7 @@ describe('use_field_value_autocomplete', () => {
           title: 'logstash-*',
         },
         query: '',
-        signal: expect.any(AbortSignal),
+        signal,
         useTimeRange: false,
       })
     );
@@ -223,6 +224,7 @@ describe('use_field_value_autocomplete', () => {
   });
 
   test('returns suggestions', async () => {
+    const { signal } = new AbortController();
     const { result } = renderHook(() =>
       useFieldValueAutocomplete({
         autocompleteService: {
@@ -249,7 +251,7 @@ describe('use_field_value_autocomplete', () => {
         field: getField('@tags'),
         indexPattern: stubIndexPatternWithFields,
         query: '',
-        signal: expect.any(AbortSignal),
+        signal,
         useTimeRange: false,
       });
       expect(result.current).toEqual(expectedResult);

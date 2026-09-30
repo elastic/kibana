@@ -22,7 +22,6 @@ import { MappingsEditorProvider } from './mappings_editor_context';
 import { createKibanaReactContext } from './shared_imports';
 import { getFieldConfig } from './lib';
 
-
 type UseFieldType = typeof import('./shared_imports').UseField;
 type GetFieldConfigType = typeof import('./lib').getFieldConfig;
 

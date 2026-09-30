@@ -3499,7 +3499,7 @@ describe('Authenticator', () => {
       await expect(
         authenticator.acknowledgeAccessAgreement(httpServerMock.createKibanaRequest())
       ).rejects.toThrowErrorMatchingInlineSnapshot(
-        `"Cannot acknowledge access agreement for unauthenticated user."`
+        `[Error: Cannot acknowledge access agreement for unauthenticated user.]`
       );
 
       expect(mockOptions.session.update).not.toHaveBeenCalled();
@@ -3513,7 +3513,7 @@ describe('Authenticator', () => {
       await expect(
         authenticator.acknowledgeAccessAgreement(httpServerMock.createKibanaRequest())
       ).rejects.toThrowErrorMatchingInlineSnapshot(
-        `"Cannot acknowledge access agreement for unauthenticated user."`
+        `[Error: Cannot acknowledge access agreement for unauthenticated user.]`
       );
 
       expect(mockOptions.session.update).not.toHaveBeenCalled();
@@ -3529,7 +3529,7 @@ describe('Authenticator', () => {
       await expect(
         authenticator.acknowledgeAccessAgreement(httpServerMock.createKibanaRequest())
       ).rejects.toThrowErrorMatchingInlineSnapshot(
-        `"Current license does not allow access agreement acknowledgement."`
+        `[Error: Current license does not allow access agreement acknowledgement.]`
       );
 
       expect(mockOptions.session.update).not.toHaveBeenCalled();

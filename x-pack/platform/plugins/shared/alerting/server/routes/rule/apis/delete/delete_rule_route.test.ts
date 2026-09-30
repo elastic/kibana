@@ -171,7 +171,7 @@ describe('deleteRuleRoute', () => {
       );
 
       await expect(handler(context, req, res)).rejects.toThrowErrorMatchingInlineSnapshot(
-        `"Cannot delete rule of type \\"test.internal-rule-type\\" because it is internally managed."`
+        `[Error: Cannot delete rule of type "test.internal-rule-type" because it is internally managed.]`
       );
     });
   });

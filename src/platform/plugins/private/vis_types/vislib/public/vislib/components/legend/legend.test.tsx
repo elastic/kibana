@@ -19,7 +19,7 @@ import { EuiButtonGroup, EuiThemeProvider } from '@elastic/eui';
 import type { VisLegendProps } from './legend';
 import { VisLegend } from './legend';
 import { legendColors } from './models';
-import { act } from '@testing-library/react';
+import { act, waitFor } from '@testing-library/react';
 
 vi.mock('@elastic/eui', async () => {
   const original = await vi.importActual('@elastic/eui');
@@ -240,11 +240,14 @@ describe('VisLegend Component', () => {
       wrapper = await getWrapper();
     });
 
-    it('should show details when clicked', () => {
+    it('should show details when clicked', async () => {
       const first = getLegendItems(wrapper).first();
       first.simulate('click');
 
-      expect(wrapper.exists('.visColorPicker')).toBe(true);
+      await waitFor(() => {
+        wrapper.update();
+        expect(wrapper.exists('.visColorPicker')).toBe(true);
+      });
     });
   });
 
@@ -253,10 +256,14 @@ describe('VisLegend Component', () => {
       wrapper = await getWrapper();
     });
 
-    it('sets the color in the UI state', () => {
+    it('sets the color in the UI state', async () => {
       const first = getLegendItems(wrapper).first();
       first.simulate('click');
 
+      await waitFor(() => {
+        wrapper.update();
+        expect(wrapper.exists('.visColorPicker')).toBe(true);
+      });
       const popover = wrapper.find('.visColorPicker').first();
       const firstColor = popover.find('.visColorPicker__colorBtn input').first();
       firstColor.simulate('change');

@@ -167,7 +167,7 @@ describe('ruleType', () => {
     };
 
     expect(() => paramsSchema.validate(params)).toThrowErrorMatchingInlineSnapshot(
-      `"[aggType]: invalid aggType: \\"foo\\""`
+      `[Error: [aggType]: invalid aggType: "foo"]`
     );
   });
 

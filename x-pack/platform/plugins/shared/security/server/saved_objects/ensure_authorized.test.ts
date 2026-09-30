@@ -154,7 +154,9 @@ describe('ensureAuthorized', () => {
       deps.checkSavedObjectsPrivilegesAsCurrentUser.mockResolvedValue(resolvedPrivileges);
       await expect(
         ensureAuthorized(deps, types, actions, namespaces)
-      ).rejects.toThrowErrorMatchingInlineSnapshot(`"Unable to (bar a),(bar b),(bar c),(foo c)"`);
+      ).rejects.toThrowErrorMatchingInlineSnapshot(
+        `[Error: Unable to (bar a),(bar b),(bar c),(foo c)]`
+      );
     });
 
     test('with requireFullAuthorization=false', async () => {
@@ -205,7 +207,7 @@ describe('ensureAuthorized', () => {
       await expect(
         ensureAuthorized(deps, types, actions, namespaces)
       ).rejects.toThrowErrorMatchingInlineSnapshot(
-        `"Unable to (bar a),(bar b),(bar c),(foo a),(foo b),(foo c)"`
+        `[Error: Unable to (bar a),(bar b),(bar c),(foo a),(foo b),(foo c)]`
       );
     });
 

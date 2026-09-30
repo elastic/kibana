@@ -1684,7 +1684,7 @@ describe('update()', () => {
           },
         })
     ).rejects.toThrowErrorMatchingInlineSnapshot(
-      `"Error updating rule: could not create API key - no"`
+      `[Error: Error updating rule: could not create API key - no]`
     );
   });
 
@@ -1734,7 +1734,7 @@ describe('update()', () => {
         },
       })
     ).rejects.toThrowErrorMatchingInlineSnapshot(
-      `"params invalid: [param1]: expected value of type [string] but got [undefined]"`
+      `[Error: params invalid: [param1]: expected value of type [string] but got [undefined]]`
     );
   });
 
@@ -2142,7 +2142,7 @@ describe('update()', () => {
           ],
         },
       })
-    ).rejects.toThrowErrorMatchingInlineSnapshot(`"Fail"`);
+    ).rejects.toThrowErrorMatchingInlineSnapshot(`[Error: Fail]`);
     expect(bulkMarkApiKeysForInvalidationMock).toHaveBeenCalledTimes(1);
     expect(bulkMarkApiKeysForInvalidationMock).toHaveBeenCalledWith(
       {
@@ -2373,7 +2373,7 @@ describe('update()', () => {
           },
         })
       ).rejects.toThrowErrorMatchingInlineSnapshot(
-        `"Failed to validate actions due to the following error: Cannot specify per-action frequency params when notify_when or throttle are defined at the rule level: default, group2"`
+        `[Error: Failed to validate actions due to the following error: Cannot specify per-action frequency params when notify_when or throttle are defined at the rule level: default, group2]`
       );
       expect(unsecuredSavedObjectsClient.create).not.toHaveBeenCalled();
       expect(taskManager.schedule).not.toHaveBeenCalled();
@@ -2415,7 +2415,7 @@ describe('update()', () => {
           },
         })
       ).rejects.toThrowErrorMatchingInlineSnapshot(
-        `"Failed to validate actions due to the following error: Cannot specify per-action frequency params when notify_when or throttle are defined at the rule level: default"`
+        `[Error: Failed to validate actions due to the following error: Cannot specify per-action frequency params when notify_when or throttle are defined at the rule level: default]`
       );
       expect(unsecuredSavedObjectsClient.create).not.toHaveBeenCalled();
       expect(taskManager.schedule).not.toHaveBeenCalled();
@@ -2451,7 +2451,7 @@ describe('update()', () => {
           },
         })
       ).rejects.toThrowErrorMatchingInlineSnapshot(
-        `"Failed to validate actions due to the following error: Actions missing frequency parameters: default"`
+        `[Error: Failed to validate actions due to the following error: Actions missing frequency parameters: default]`
       );
       expect(unsecuredSavedObjectsClient.create).not.toHaveBeenCalled();
       expect(taskManager.schedule).not.toHaveBeenCalled();
@@ -2500,7 +2500,7 @@ describe('update()', () => {
           },
         })
       ).rejects.toThrowErrorMatchingInlineSnapshot(
-        `"Failed to validate actions due to the following error: Actions missing frequency parameters: default"`
+        `[Error: Failed to validate actions due to the following error: Actions missing frequency parameters: default]`
       );
       expect(unsecuredSavedObjectsClient.create).not.toHaveBeenCalled();
       expect(taskManager.schedule).not.toHaveBeenCalled();
@@ -2621,7 +2621,7 @@ describe('update()', () => {
         },
       })
     ).rejects.toThrowErrorMatchingInlineSnapshot(
-      `"Failed to validate actions due to the following error: Invalid connectors: another connector"`
+      `[Error: Failed to validate actions due to the following error: Invalid connectors: another connector]`
     );
     expect(unsecuredSavedObjectsClient.create).not.toHaveBeenCalled();
     expect(taskManager.schedule).not.toHaveBeenCalled();
@@ -2991,7 +2991,7 @@ describe('update()', () => {
         },
       })
     ).rejects.toThrowErrorMatchingInlineSnapshot(
-      `"Error updating rule: the interval is less than the allowed minimum interval of 1m"`
+      `[Error: Error updating rule: the interval is less than the allowed minimum interval of 1m]`
     );
     expect(unsecuredSavedObjectsClient.create).not.toHaveBeenCalled();
     expect(taskManager.schedule).not.toHaveBeenCalled();
@@ -3591,7 +3591,7 @@ describe('update()', () => {
           ],
         },
       })
-    ).rejects.toThrowErrorMatchingInlineSnapshot(`"Fail"`);
+    ).rejects.toThrowErrorMatchingInlineSnapshot(`[Error: Fail]`);
     expect(bulkMarkApiKeysForInvalidationMock).toHaveBeenCalledTimes(1);
     expect(bulkMarkApiKeysForInvalidationMock).toHaveBeenCalledWith(
       {

@@ -24,7 +24,7 @@ import {
   NO_DATA_ACTIONS,
   WARNING_ACTIONS,
 } from './metric_threshold_executor';
-import type { Evaluation } from './lib/evaluate_rule';
+import { evaluateRule, type Evaluation } from './lib/evaluate_rule';
 import type { LogMeta, Logger } from '@kbn/logging';
 import { DEFAULT_FLAPPING_SETTINGS } from '@kbn/alerting-plugin/common';
 import type { InfraConfig } from '../../../../common/plugin_config_types';
@@ -126,10 +126,10 @@ const mockOptions = {
   isServerless: false,
 };
 
-const setEvaluationResults = async (response: Array<Record<string, Evaluation>>) => {
-  return (await vi.importMock('./lib/evaluate_rule')).evaluateRule.mockImplementation(
-    () => response
-  );
+const mockedEvaluateRule = vi.mocked(evaluateRule);
+
+const setEvaluationResults = (response: Array<Record<string, Evaluation>>) => {
+  return mockedEvaluateRule.mockImplementation(async () => response);
 };
 
 describe('The metric threshold rule type', () => {
@@ -433,7 +433,7 @@ describe('The metric threshold rule type', () => {
 
       expect(services.getDataViews).not.toHaveBeenCalled();
       expect(
-        (await vi.importMock('./lib/evaluate_rule')).evaluateRule.mock.calls[0][6]
+        mockedEvaluateRule.mock.calls[0][6]
       ).toBeUndefined();
     });
 
@@ -453,7 +453,7 @@ describe('The metric threshold rule type', () => {
         pattern: 'metrics-*,metricbeat-*',
         allowNoIndex: true,
       });
-      expect((await vi.importMock('./lib/evaluate_rule')).evaluateRule.mock.calls[0][6]).toEqual(
+      expect(mockedEvaluateRule.mock.calls[0][6]).toEqual(
         mockDataView
       );
     });
@@ -2913,8 +2913,7 @@ describe('The metric threshold rule type', () => {
         });
       };
 
-      const trackedMissingGroups = async () =>
-        (await vi.importMock('./lib/evaluate_rule')).evaluateRule.mock.calls[0][4];
+      const trackedMissingGroups = () => mockedEvaluateRule.mock.calls[0][4];
 
       test('remainActive still tracks missing groups', async () => {
         await runWith({

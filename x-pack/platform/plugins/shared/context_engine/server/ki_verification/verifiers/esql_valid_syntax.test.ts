@@ -195,7 +195,7 @@ describe('esql-valid-syntax verifier', () => {
           ...context,
           abortSignal: abortController.signal,
         })
-      ).rejects.toMatchObject({ name: 'AbortError' });
+      ).rejects.toThrow('Aborted');
     });
 
     it('never calls the cluster', async () => {

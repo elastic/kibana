@@ -232,7 +232,7 @@ describe('ensureLicenseForRuleType()', () => {
     expect(() =>
       licenseState.ensureLicenseForRuleType(ruleType)
     ).toThrowErrorMatchingInlineSnapshot(
-      `"Rule type test is disabled because license information is not available at this time."`
+      `[Error: Rule type test is disabled because license information is not available at this time.]`
     );
   });
 
@@ -241,7 +241,7 @@ describe('ensureLicenseForRuleType()', () => {
     expect(() =>
       licenseState.ensureLicenseForRuleType(ruleType)
     ).toThrowErrorMatchingInlineSnapshot(
-      `"Rule type test is disabled because license information is not available at this time."`
+      `[Error: Rule type test is disabled because license information is not available at this time.]`
     );
   });
 
@@ -251,7 +251,7 @@ describe('ensureLicenseForRuleType()', () => {
     expect(() =>
       licenseState.ensureLicenseForRuleType(ruleType)
     ).toThrowErrorMatchingInlineSnapshot(
-      `"Rule type test is disabled because your basic license has expired."`
+      `[Error: Rule type test is disabled because your basic license has expired.]`
     );
   });
 
@@ -263,7 +263,7 @@ describe('ensureLicenseForRuleType()', () => {
     expect(() =>
       licenseState.ensureLicenseForRuleType(ruleType)
     ).toThrowErrorMatchingInlineSnapshot(
-      `"Rule test is disabled because it requires a Gold license. Go to License Management to view upgrade options."`
+      `[Error: Rule test is disabled because it requires a Gold license. Go to License Management to view upgrade options.]`
     );
   });
 
@@ -333,7 +333,7 @@ describe('ensureLicenseForMaintenanceWindow()', () => {
     expect(() =>
       licenseState.ensureLicenseForMaintenanceWindow()
     ).toThrowErrorMatchingInlineSnapshot(
-      `"Maintenance window is disabled because license information is not available at this time."`
+      `[Error: Maintenance window is disabled because license information is not available at this time.]`
     );
   });
 
@@ -342,7 +342,7 @@ describe('ensureLicenseForMaintenanceWindow()', () => {
     expect(() =>
       licenseState.ensureLicenseForMaintenanceWindow()
     ).toThrowErrorMatchingInlineSnapshot(
-      `"Maintenance window is disabled because license information is not available at this time."`
+      `[Error: Maintenance window is disabled because license information is not available at this time.]`
     );
   });
 
@@ -355,7 +355,7 @@ describe('ensureLicenseForMaintenanceWindow()', () => {
     expect(() =>
       licenseState.ensureLicenseForMaintenanceWindow()
     ).toThrowErrorMatchingInlineSnapshot(
-      `"Maintenance window is disabled because it requires a platinum license. Go to License Management to view upgrade options."`
+      `[Error: Maintenance window is disabled because it requires a platinum license. Go to License Management to view upgrade options.]`
     );
   });
 
@@ -381,7 +381,7 @@ describe('ensureLicenseForGapAutoFillScheduler()', () => {
     expect(() =>
       licenseState.ensureLicenseForGapAutoFillScheduler()
     ).toThrowErrorMatchingInlineSnapshot(
-      `"Gap auto fill scheduler is disabled because license information is not available at this time."`
+      `[Error: Gap auto fill scheduler is disabled because license information is not available at this time.]`
     );
   });
 
@@ -390,7 +390,7 @@ describe('ensureLicenseForGapAutoFillScheduler()', () => {
     expect(() =>
       licenseState.ensureLicenseForGapAutoFillScheduler()
     ).toThrowErrorMatchingInlineSnapshot(
-      `"Gap auto fill scheduler is disabled because license information is not available at this time."`
+      `[Error: Gap auto fill scheduler is disabled because license information is not available at this time.]`
     );
   });
 
@@ -403,7 +403,7 @@ describe('ensureLicenseForGapAutoFillScheduler()', () => {
     expect(() =>
       licenseState.ensureLicenseForGapAutoFillScheduler()
     ).toThrowErrorMatchingInlineSnapshot(
-      `"Gap auto fill scheduler is disabled because it requires an enterprise license. Go to License Management to view upgrade options."`
+      `[Error: Gap auto fill scheduler is disabled because it requires an enterprise license. Go to License Management to view upgrade options.]`
     );
   });
 

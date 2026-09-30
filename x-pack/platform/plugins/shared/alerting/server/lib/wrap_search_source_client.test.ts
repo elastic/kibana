@@ -161,7 +161,9 @@ describe('wrapSearchSourceClient', () => {
     const wrappedSearchSource = await searchSourceClient.create();
     const fetch = wrappedSearchSource.fetch();
 
-    await expect(fetch).rejects.toThrowErrorMatchingInlineSnapshot('"something went wrong!"');
+    await expect(fetch).rejects.toThrowErrorMatchingInlineSnapshot(
+      '[Error: something went wrong!]'
+    );
   });
 
   test('throws error when search throws abort error', async () => {
@@ -182,7 +184,7 @@ describe('wrapSearchSourceClient', () => {
     const fetch = wrappedSearchSource.fetch();
 
     await expect(fetch).rejects.toThrowErrorMatchingInlineSnapshot(
-      '"Search has been aborted due to cancelled execution"'
+      '[Error: Search has been aborted due to cancelled execution]'
     );
   });
 });

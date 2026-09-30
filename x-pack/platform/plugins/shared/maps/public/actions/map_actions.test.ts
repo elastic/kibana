@@ -111,7 +111,7 @@ describe('map_actions', () => {
     describe('mapState.buffer is defined', () => {
       const initialZoom = 10;
       beforeEach(async () => {
-        (await import('../selectors/map_selectors')).getDataFilters = async () => {
+        (await import('../selectors/map_selectors')).getDataFilters = () => {
           return {
             zoom: initialZoom,
             buffer: {
@@ -120,12 +120,6 @@ describe('map_actions', () => {
               minLat: 2.5,
               minLon: 92.5,
             },
-          };
-
-          (await import('../reducers/non_serializable_instances')).getInspectorAdapters = () => {
-            return {
-              vectorTiles: vectorTileAdapterMock,
-            };
           };
         };
       });

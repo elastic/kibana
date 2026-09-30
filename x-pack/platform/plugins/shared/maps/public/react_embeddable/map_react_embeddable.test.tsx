@@ -52,7 +52,7 @@ vi.mock('../kibana_services', () => {
 });
 
 vi.mock('../connected_components/map_container', () => {
-  return () => <div>MockMapContainer</div>;
+  return { MapContainer: () => <div>MockMapContainer</div> };
 });
 
 vi.mock('../licensed_features', () => {

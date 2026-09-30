@@ -20,6 +20,7 @@ import {
 import { createCustomThresholdExecutor } from './custom_threshold_executor';
 import { FIRED_ACTION, WARNING_ACTION, NO_DATA_ACTION } from './constants';
 import type { Evaluation } from './lib/evaluate_rule';
+import { evaluateRule } from './lib/evaluate_rule';
 import type { LogMeta, Logger } from '@kbn/logging';
 import { DEFAULT_FLAPPING_SETTINGS } from '@kbn/alerting-plugin/common';
 import { COMPARATORS } from '@kbn/alerting-comparators';
@@ -141,10 +142,12 @@ const mockOptions = {
 };
 
 const mockTimeRange = { start: Date.now() - 60000, end: Date.now() };
-const setEvaluationResults = async (response: Array<Record<string, Evaluation>>) => {
-  return (await vi.importMock('./lib/evaluate_rule')).evaluateRule.mockImplementation(() =>
-    response.map((evaluations) => ({ evaluations, timeRange: mockTimeRange }))
-  );
+const setEvaluationResults = (response: Array<Record<string, Evaluation>>) => {
+  return vi
+    .mocked(evaluateRule)
+    .mockImplementation(() =>
+      response.map((evaluations) => ({ evaluations, timeRange: mockTimeRange }))
+    );
 };
 
 const mockLibs: any = {
@@ -3135,8 +3138,7 @@ describe('The custom threshold alert type', () => {
           });
         };
 
-        const trackedMissingGroups = async () =>
-          (await vi.importMock('./lib/evaluate_rule')).evaluateRule.mock.calls[0][6];
+        const trackedMissingGroups = () => vi.mocked(evaluateRule).mock.calls[0][6];
 
         test('remainActive still tracks missing groups', async () => {
           await runWith({

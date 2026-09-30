@@ -147,7 +147,9 @@ describe('es_query executor', () => {
           },
           []
         )
-      ).rejects.toThrowErrorMatchingInlineSnapshot(`"invalid thresholdComparator specified: ?"`);
+      ).rejects.toThrowErrorMatchingInlineSnapshot(
+        `[Error: invalid thresholdComparator specified: ?]`
+      );
     });
 
     it('should call fetchEsQuery if searchType is esQuery', async () => {

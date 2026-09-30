@@ -165,7 +165,7 @@ describe('unsnoozeAlertRoute', () => {
       );
 
       await expect(handler(context, req, res)).rejects.toThrowErrorMatchingInlineSnapshot(
-        `"Cannot unsnooze rule of type \\"test.internal-rule-type\\" because it is internally managed."`
+        `[Error: Cannot unsnooze rule of type "test.internal-rule-type" because it is internally managed.]`
       );
     });
   });

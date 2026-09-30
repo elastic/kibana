@@ -169,7 +169,7 @@ describe('ruleType', () => {
       };
 
       expect(() => paramsSchema.validate(params)).toThrowErrorMatchingInlineSnapshot(
-        `"[threshold]: must have two elements for the \\"between\\" comparator"`
+        `[Error: [threshold]: must have two elements for the "between" comparator]`
       );
     });
 
@@ -212,7 +212,7 @@ describe('ruleType', () => {
       };
 
       expect(() => paramsSchema.validate(params)).toThrowErrorMatchingInlineSnapshot(
-        `"[size]: must be less than or equal to 100"`
+        `[Error: [size]: must be less than or equal to 100]`
       );
     });
 
@@ -678,7 +678,7 @@ describe('ruleType', () => {
       };
 
       expect(() => paramsSchema.validate(params)).toThrowErrorMatchingInlineSnapshot(
-        `"[esQuery]: a value wasn't expected to be present"`
+        `[Error: [esQuery]: a value wasn't expected to be present]`
       );
     });
 
@@ -811,7 +811,7 @@ describe('ruleType', () => {
       };
 
       expect(() => paramsSchema.validate(params)).toThrowErrorMatchingInlineSnapshot(
-        `"[esQuery]: a value wasn't expected to be present"`
+        `[Error: [esQuery]: a value wasn't expected to be present]`
       );
     });
 

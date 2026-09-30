@@ -130,7 +130,7 @@ describe('unmuteAll', () => {
 
     // @ts-expect-error wrong type for testing purposes
     await expect(unmuteAll(context, invalidParams)).rejects.toThrowErrorMatchingInlineSnapshot(
-      `"Error validating unmute all parameters - [id]: expected value of type [string] but got [number]"`
+      `[Error: Error validating unmute all parameters - [id]: expected value of type [string] but got [number]]`
     );
   });
 

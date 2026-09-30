@@ -120,7 +120,7 @@ describe('extractReferences', () => {
       references: [],
     };
     expect(() => extractReferences(doc, deps)).toThrowErrorMatchingInlineSnapshot(
-      `"\\"type\\" attribute is missing from panel \\"0\\""`
+      `[Error: "type" attribute is missing from panel "0"]`
     );
   });
 
@@ -297,6 +297,6 @@ describe('injectReferences', () => {
     };
     expect(() =>
       injectReferences({ attributes, references: [] }, deps)
-    ).toThrowErrorMatchingInlineSnapshot(`"Could not find reference \\"panel_0\\""`);
+    ).toThrowErrorMatchingInlineSnapshot(`[Error: Could not find reference "panel_0"]`);
   });
 });

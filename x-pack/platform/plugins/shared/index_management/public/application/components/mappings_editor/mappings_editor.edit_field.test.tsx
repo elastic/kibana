@@ -25,7 +25,6 @@ import { createKibanaReactContext } from './shared_imports';
 type UseFieldType = typeof import('./shared_imports').UseField;
 type GetFieldConfigType = typeof import('./lib').getFieldConfig;
 
-
 vi.mock('@elastic/eui', async () => {
   const actual = await vi.importActual('@elastic/eui');
 

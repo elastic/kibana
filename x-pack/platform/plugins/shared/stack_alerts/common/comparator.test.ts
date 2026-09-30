@@ -37,11 +37,11 @@ describe('getComparatorScript', () => {
   it('throws error when threshold is empty', () => {
     expect(() => {
       getComparatorScript(Comparator.LT, [], 'fieldName');
-    }).toThrowErrorMatchingInlineSnapshot(`"Threshold value required"`);
+    }).toThrowErrorMatchingInlineSnapshot(`[Error: Threshold value required]`);
   });
   it('throws error when comparator requires two thresholds and two thresholds are not defined', () => {
     expect(() => {
       getComparatorScript(Comparator.BETWEEN, [1], 'fieldName');
-    }).toThrowErrorMatchingInlineSnapshot(`"Threshold values required"`);
+    }).toThrowErrorMatchingInlineSnapshot(`[Error: Threshold values required]`);
   });
 });

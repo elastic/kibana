@@ -20,7 +20,6 @@ import { TemplateForm } from './template_form';
 import { AppContextProvider } from '../../app_context';
 import type { AppDependencies } from '../../app_context';
 
-
 vi.mock('../../services/documentation', () => {
   const mocked = {
     documentationService: {

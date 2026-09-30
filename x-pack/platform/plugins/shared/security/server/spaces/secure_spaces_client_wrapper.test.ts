@@ -368,7 +368,7 @@ describe('SecureSpacesClientWrapper', () => {
       authorization.checkPrivilegesWithRequest.mockReturnValue({ atSpace: checkPrivileges });
 
       await expect(wrapper.get(spaceId)).rejects.toThrowErrorMatchingInlineSnapshot(
-        `"Unauthorized to get default space"`
+        `[Error: Unauthorized to get default space]`
       );
 
       expect(baseClient.get).not.toHaveBeenCalled();
@@ -462,7 +462,7 @@ describe('SecureSpacesClientWrapper', () => {
 
       await expect(
         wrapper.getPersistedFeatureVisibility(spaceId)
-      ).rejects.toThrowErrorMatchingInlineSnapshot(`"Unauthorized to get default space"`);
+      ).rejects.toThrowErrorMatchingInlineSnapshot(`[Error: Unauthorized to get default space]`);
 
       expect(baseClient.getPersistedFeatureVisibility).not.toHaveBeenCalled();
 
@@ -547,7 +547,7 @@ describe('SecureSpacesClientWrapper', () => {
       await expect(
         wrapper.isInitialSolutionSetupRequired()
       ).rejects.toThrowErrorMatchingInlineSnapshot(
-        `"Unauthorized to get initial solution setup state"`
+        `[Error: Unauthorized to get initial solution setup state]`
       );
 
       expect(baseClient.isInitialSolutionSetupRequired).not.toHaveBeenCalled();
@@ -628,7 +628,7 @@ describe('SecureSpacesClientWrapper', () => {
       await expect(
         wrapper.completeInitialSolutionSetup('security')
       ).rejects.toThrowErrorMatchingInlineSnapshot(
-        `"Unauthorized to complete initial solution setup"`
+        `[Error: Unauthorized to complete initial solution setup]`
       );
 
       expect(baseClient.completeInitialSolutionSetup).not.toHaveBeenCalled();
@@ -712,7 +712,7 @@ describe('SecureSpacesClientWrapper', () => {
       authorization.checkPrivilegesWithRequest.mockReturnValue({ globally: checkPrivileges });
 
       await expect(wrapper.create(space)).rejects.toThrowErrorMatchingInlineSnapshot(
-        `"Unauthorized to create spaces"`
+        `[Error: Unauthorized to create spaces]`
       );
 
       expect(baseClient.create).not.toHaveBeenCalled();
@@ -807,7 +807,7 @@ describe('SecureSpacesClientWrapper', () => {
       authorization.checkPrivilegesWithRequest.mockReturnValue({ globally: checkPrivileges });
 
       await expect(wrapper.update(space.id, space)).rejects.toThrowErrorMatchingInlineSnapshot(
-        `"Unauthorized to update spaces"`
+        `[Error: Unauthorized to update spaces]`
       );
 
       expect(baseClient.update).not.toHaveBeenCalled();
@@ -901,7 +901,7 @@ describe('SecureSpacesClientWrapper', () => {
       authorization.checkPrivilegesWithRequest.mockReturnValue({ globally: checkPrivileges });
 
       await expect(wrapper.delete(space.id)).rejects.toThrowErrorMatchingInlineSnapshot(
-        `"Unauthorized to delete spaces"`
+        `[Error: Unauthorized to delete spaces]`
       );
 
       expect(baseClient.delete).not.toHaveBeenCalled();

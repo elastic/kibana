@@ -27,7 +27,8 @@ vi.mock('../../../common/containers/query_toggle');
 vi.mock('react', () => {
   const r = require('react');
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  return { ...r, memo: (x: any) => x };
+  const mocked = { ...r, memo: (x: any) => x };
+  return { ...mocked, default: mocked };
 });
 
 const mockTheme = getMockTheme({

@@ -331,10 +331,12 @@ describe('discover responsive sidebar', function () {
       undefined
     );
 
-    expect(screen.getByTestId('fieldListGroupedAvailableFields-countLoading')).toBeInTheDocument();
+    expect(
+      await screen.findByTestId('fieldListGroupedAvailableFields-countLoading')
+    ).toBeInTheDocument();
     expect(screen.queryByTestId('fieldListGroupedAvailableFields-count')).not.toBeInTheDocument();
 
-    expect(result.container.querySelector('.euiProgress')).not.toBeNull();
+    await waitFor(() => expect(result.container.querySelector('.euiProgress')).not.toBeNull());
 
     resolveFunction!({
       indexPatternTitle: 'test-loaded',
@@ -356,7 +358,9 @@ describe('discover responsive sidebar', function () {
   it('should have Selected Fields, Available Fields, Popular and Meta Fields sections', async function () {
     await renderComponent(props);
 
-    expect(screen.getByTestId('fieldListGroupedSelectedFields-count')).toHaveTextContent('1');
+    expect(await screen.findByTestId('fieldListGroupedSelectedFields-count')).toHaveTextContent(
+      '1'
+    );
     expect(screen.getByTestId('fieldListGroupedPopularFields-count')).toHaveTextContent('4');
     expect(screen.getByTestId('fieldListGroupedAvailableFields-count')).toHaveTextContent('3');
     expect(screen.getByTestId('fieldListGroupedEmptyFields-count')).toHaveTextContent('20');
@@ -375,13 +379,13 @@ describe('discover responsive sidebar', function () {
     it('should set a11y attributes for the search input in the field list', async function () {
       await renderComponent(props);
 
-      const a11yDescription = screen.getByTestId('fieldListGrouped__ariaDescription');
+      const a11yDescription = await screen.findByTestId('fieldListGrouped__ariaDescription');
       expect(a11yDescription).toHaveAttribute('aria-live', 'off');
       expect(a11yDescription).toHaveTextContent(
         '1 selected field. 4 popular fields. 3 available fields. 20 empty fields. 2 meta fields.'
       );
 
-      const searchInput = screen.getByTestId('fieldListFiltersFieldSearch');
+      const searchInput = await screen.findByTestId('fieldListFiltersFieldSearch');
       expect(searchInput).toHaveAttribute('aria-describedby', a11yDescription.id);
     });
   });
@@ -389,8 +393,8 @@ describe('discover responsive sidebar', function () {
   describe('when the input is focused', () => {
     it('should set a11y attributes for the search input in the field list', async function () {
       const { user } = await renderComponent(props);
-      const searchInput = screen.getByTestId('fieldListFiltersFieldSearch');
-      const a11yDescription = screen.getByTestId('fieldListGrouped__ariaDescription');
+      const searchInput = await screen.findByTestId('fieldListFiltersFieldSearch');
+      const a11yDescription = await screen.findByTestId('fieldListGrouped__ariaDescription');
       await user.click(searchInput);
       expect(searchInput).toHaveAttribute('aria-describedby', a11yDescription.id);
 

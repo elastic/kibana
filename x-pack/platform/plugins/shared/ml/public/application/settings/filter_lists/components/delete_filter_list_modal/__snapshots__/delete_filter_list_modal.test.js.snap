@@ -1,26 +1,5 @@
 // Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`DeleteFilterListModal false canDeleteFilter privilege > renders as disabled delete button 1`] = `
-<div>
-  <button
-    class="euiButton emotion-euiButtonDisplay-m-isDisabled-base-disabled"
-    data-test-subj="mlFilterListsDeleteButton"
-    disabled=""
-    type="button"
-  >
-    <span
-      class="emotion-euiButtonDisplayContent"
-    >
-      <span
-        color="inherit"
-        data-euiicon-type="trash"
-      />
-      Delete
-    </span>
-  </button>
-</div>
-`;
-
 exports[`DeleteFilterListModal > renders as disabled delete button when no lists selected 1`] = `
 <div>
   <button
@@ -47,6 +26,27 @@ exports[`DeleteFilterListModal > renders as enabled delete button when a list is
   <button
     class="euiButton emotion-euiButtonDisplay-m-base-danger"
     data-test-subj="mlFilterListsDeleteButton"
+    type="button"
+  >
+    <span
+      class="emotion-euiButtonDisplayContent"
+    >
+      <span
+        color="inherit"
+        data-euiicon-type="trash"
+      />
+      Delete
+    </span>
+  </button>
+</div>
+`;
+
+exports[`DeleteFilterListModal false canDeleteFilter privilege > renders as disabled delete button 1`] = `
+<div>
+  <button
+    class="euiButton emotion-euiButtonDisplay-m-isDisabled-base-disabled"
+    data-test-subj="mlFilterListsDeleteButton"
+    disabled=""
     type="button"
   >
     <span

@@ -14,7 +14,6 @@ import { I18nProvider } from '@kbn/i18n-react';
 import { MappingsEditor } from '../../mappings_editor';
 import { WithAppDependencies } from './helpers/setup_environment';
 
-
 vi.mock('../../../component_templates/component_templates_context', () => {
   const mocked = {
     useComponentTemplatesContext: vi.fn().mockReturnValue({

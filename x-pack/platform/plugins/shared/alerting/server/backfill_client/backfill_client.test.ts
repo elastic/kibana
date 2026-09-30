@@ -1671,12 +1671,14 @@ describe('BackfillClient', () => {
       const rule1 = getMockRule();
       const mockRules = [rule1];
 
+      const { calculateSchedule: realCalc } = await vi.importActual<{
+        calculateSchedule: typeof calculateSchedule;
+      }>('./lib/calculate_schedule');
       (calculateSchedule as Mock).mockImplementation(
-        async (interval: string, ranges: unknown[]) => {
-          const { calculateSchedule: realCalc } = await vi.importActual('./lib/calculate_schedule');
-          const result = realCalc(interval, ranges);
-          return { ...result, truncated: true };
-        }
+        (...args: Parameters<typeof calculateSchedule>) => ({
+          ...realCalc(...args),
+          truncated: true,
+        })
       );
 
       const mockAttributes = getMockAdHocRunAttributes({

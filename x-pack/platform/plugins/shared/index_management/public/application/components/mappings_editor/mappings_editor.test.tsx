@@ -25,7 +25,6 @@ import { createKibanaReactContext, documentationService, UseField } from './shar
 import { getFieldConfig } from './lib';
 import { loadSyntheticSourceStatus } from '../../services/api';
 
-
 vi.mock('../../services/api', () => {
   const mocked = {
     loadSyntheticSourceStatus: vi.fn(),

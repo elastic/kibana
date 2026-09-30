@@ -72,9 +72,9 @@ describe('ToolsService', () => {
 
       expect(() => serviceSetup.register(createMockedBuiltinTool()))
         .toThrowErrorMatchingInlineSnapshot(`
-        "Built-in tool with id \\"test-tool\\" is not in the list of allowed built-in tools.
-                     Please add it to the list of allowed built-in tools in the \\"@kbn/agent-builder-server/allow_lists.ts\\" file."
-      `);
+          [Error: Built-in tool with id "test-tool" is not in the list of allowed built-in tools.
+                       Please add it to the list of allowed built-in tools in the "@kbn/agent-builder-server/allow_lists.ts" file.]
+        `);
     });
   });
 });

@@ -31,11 +31,7 @@ describe('useRulesListFilterStore', () => {
   });
 
   beforeEach(() => {
-    useLocalStorage.mockImplementation(() => [
-      null,
-      setRulesListFilterLocalMock,
-      () => {},
-    ]);
+    useLocalStorage.mockImplementation(() => [null, setRulesListFilterLocalMock, () => {}]);
     useUrlStateStorageGetMock.mockReturnValue(null);
   });
 

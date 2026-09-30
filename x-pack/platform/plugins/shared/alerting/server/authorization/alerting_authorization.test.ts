@@ -652,7 +652,7 @@ describe('AlertingAuthorization', () => {
           entity: AlertingAuthorizationEntity.Rule,
         })
       ).rejects.toThrowErrorMatchingInlineSnapshot(
-        `"Unauthorized by \\"myApp\\" to create \\"myType\\" rule"`
+        `[Error: Unauthorized by "myApp" to create "myType" rule]`
       );
     });
 
@@ -677,7 +677,7 @@ describe('AlertingAuthorization', () => {
           entity: AlertingAuthorizationEntity.Alert,
         })
       ).rejects.toThrowErrorMatchingInlineSnapshot(
-        `"Unauthorized by \\"myApp\\" to update \\"myType\\" alert"`
+        `[Error: Unauthorized by "myApp" to update "myType" alert]`
       );
     });
 
@@ -698,7 +698,7 @@ describe('AlertingAuthorization', () => {
           entity: AlertingAuthorizationEntity.Rule,
         })
       ).rejects.toThrowErrorMatchingInlineSnapshot(
-        `"Unauthorized by \\"not-exist\\" to create \\"myType\\" rule"`
+        `[Error: Unauthorized by "not-exist" to create "myType" rule]`
       );
     });
 
@@ -718,7 +718,7 @@ describe('AlertingAuthorization', () => {
           entity: AlertingAuthorizationEntity.Rule,
         })
       ).rejects.toThrowErrorMatchingInlineSnapshot(
-        `"Unauthorized by \\"not-exist\\" to create \\"myType\\" rule"`
+        `[Error: Unauthorized by "not-exist" to create "myType" rule]`
       );
     });
 
@@ -740,7 +740,7 @@ describe('AlertingAuthorization', () => {
           entity: AlertingAuthorizationEntity.Rule,
         })
       ).rejects.toThrowErrorMatchingInlineSnapshot(
-        `"Unauthorized by \\"not-exist\\" to create \\"myType\\" rule"`
+        `[Error: Unauthorized by "not-exist" to create "myType" rule]`
       );
     });
 
@@ -778,7 +778,7 @@ describe('AlertingAuthorization', () => {
           entity: AlertingAuthorizationEntity.Rule,
         })
       ).rejects.toThrowErrorMatchingInlineSnapshot(
-        `"Unauthorized by \\"disabled-feature-consumer\\" to create \\"rule-type-1\\" rule"`
+        `[Error: Unauthorized by "disabled-feature-consumer" to create "rule-type-1" rule]`
       );
     });
 
@@ -1113,7 +1113,7 @@ describe('AlertingAuthorization', () => {
             operation: ReadOperations.Get,
           })
         ).rejects.toThrowErrorMatchingInlineSnapshot(
-          `"Unauthorized to get rules for any rule types."`
+          `[Error: Unauthorized to get rules for any rule types.]`
         );
       });
     });
@@ -1205,7 +1205,7 @@ describe('AlertingAuthorization', () => {
         expect(() =>
           ensureRuleTypeIsAuthorized('rule-type-id-2', 'consumer-a', 'rule')
         ).toThrowErrorMatchingInlineSnapshot(
-          `"Unauthorized by \\"consumer-a\\" to get \\"rule-type-id-2\\" rule"`
+          `[Error: Unauthorized by "consumer-a" to get "rule-type-id-2" rule]`
         );
       });
 
@@ -1247,7 +1247,7 @@ describe('AlertingAuthorization', () => {
         expect(() =>
           ensureRuleTypeIsAuthorized('rule-type-id-1', 'consumer-a', 'alert')
         ).toThrowErrorMatchingInlineSnapshot(
-          `"Unauthorized by \\"consumer-a\\" to get \\"rule-type-id-1\\" alert"`
+          `[Error: Unauthorized by "consumer-a" to get "rule-type-id-1" alert]`
         );
       });
 
@@ -1289,7 +1289,7 @@ describe('AlertingAuthorization', () => {
         expect(() =>
           ensureRuleTypeIsAuthorized('rule-type-id-1', 'consumer-b', 'rule')
         ).toThrowErrorMatchingInlineSnapshot(
-          `"Unauthorized by \\"consumer-b\\" to get \\"rule-type-id-1\\" rule"`
+          `[Error: Unauthorized by "consumer-b" to get "rule-type-id-1" rule]`
         );
       });
 
@@ -2500,7 +2500,7 @@ describe('AlertingAuthorization', () => {
           consumerRequiredPrivilege: 'read',
         })
       ).rejects.toThrowErrorMatchingInlineSnapshot(
-        `"Unauthorized to get \\"rule-type-id-1\\" rule"`
+        `[Error: Unauthorized to get "rule-type-id-1" rule]`
       );
     });
 
@@ -2522,7 +2522,7 @@ describe('AlertingAuthorization', () => {
           consumerRequiredPrivilege: 'read',
         })
       ).rejects.toThrowErrorMatchingInlineSnapshot(
-        `"Unauthorized to get \\"unknown-rule-type\\" rule"`
+        `[Error: Unauthorized to get "unknown-rule-type" rule]`
       );
     });
 
@@ -2667,7 +2667,7 @@ describe('AlertingAuthorization', () => {
       await expect(
         auth.getByRuleTypeAuthorizationFilter(findAuthParams)
       ).rejects.toThrowErrorMatchingInlineSnapshot(
-        `"Unauthorized to find rules for any rule types"`
+        `[Error: Unauthorized to find rules for any rule types]`
       );
     });
 
@@ -2733,7 +2733,7 @@ describe('AlertingAuthorization', () => {
       expect(() =>
         ensureRuleTypeIsAuthorized('rule-type-id-2', AlertingAuthorizationEntity.Rule)
       ).toThrowErrorMatchingInlineSnapshot(
-        `"Unauthorized by \\"any consumer\\" to find \\"rule-type-id-2\\" rule"`
+        `[Error: Unauthorized by "any consumer" to find "rule-type-id-2" rule]`
       );
     });
 
@@ -2767,7 +2767,7 @@ describe('AlertingAuthorization', () => {
       expect(() =>
         ensureRuleTypeIsAuthorized('rule-type-id-1', AlertingAuthorizationEntity.Alert)
       ).toThrowErrorMatchingInlineSnapshot(
-        `"Unauthorized by \\"any consumer\\" to find \\"rule-type-id-1\\" alert"`
+        `[Error: Unauthorized by "any consumer" to find "rule-type-id-1" alert]`
       );
     });
 

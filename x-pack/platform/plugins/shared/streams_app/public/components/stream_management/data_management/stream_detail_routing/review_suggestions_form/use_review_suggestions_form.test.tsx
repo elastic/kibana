@@ -13,14 +13,13 @@ import type { Condition } from '@kbn/streamlang';
 import { useFetchErrorToast } from '../../../../../hooks/use_fetch_error_toast';
 
 vi.mock('react-use/lib/useUpdateEffect', () => {
-  return {
-    default: (cb: () => void, deps: unknown[]) => {
-      // eslint-disable-next-line @typescript-eslint/no-var-requires
-      const ReactImport = require('react');
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      ReactImport.useEffect(cb, deps as any);
-    },
+  const useUpdateEffect = (cb: () => void, deps: unknown[]) => {
+    // eslint-disable-next-line @typescript-eslint/no-var-requires
+    const ReactImport = require('react');
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    ReactImport.useEffect(cb, deps as any);
   };
+  return { default: useUpdateEffect };
 });
 
 const mockStreamsRepositoryClient = {

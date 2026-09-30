@@ -23,8 +23,8 @@ const mockConnectors: unknown[] = [
   },
 ];
 
-vi.mock('react-use/lib/useLocalStorage', () =>
-  ({ default: vi.fn().mockImplementation((key, defaultValue) => {
+vi.mock('react-use/lib/useLocalStorage', () => ({
+  default: vi.fn().mockImplementation((key, defaultValue) => {
     if (key.includes('START_LOCAL_STORAGE_KEY')) {
       return ['now-24h', vi.fn()];
     }
@@ -35,7 +35,8 @@ vi.mock('react-use/lib/useLocalStorage', () =>
       return ['test-id', vi.fn()];
     }
     return [defaultValue || 'test-id', vi.fn()];
-  }) }));
+  }),
+}));
 
 vi.mock('@kbn/inference-connectors', () => {
   const mocked = {

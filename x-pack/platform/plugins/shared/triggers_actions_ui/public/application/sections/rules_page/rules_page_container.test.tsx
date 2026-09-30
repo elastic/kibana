@@ -46,7 +46,9 @@ vi.mock('../rules_list/components/rules_list', () => {
 
 vi.mock('../rule_details/components/global_rule_event_log_list', () => {
   return {
-    default: () => <div data-test-subj="globalRuleEventLogList">{'Render Logs list component'}</div>,
+    default: () => (
+      <div data-test-subj="globalRuleEventLogList">{'Render Logs list component'}</div>
+    ),
   };
 });
 

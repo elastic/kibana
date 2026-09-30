@@ -899,7 +899,7 @@ describe('findBackfill()', () => {
           end: '2024-03-29T02:07:55Z',
         })
       ).rejects.toThrowErrorMatchingInlineSnapshot(
-        `"Failed to find backfills: Could not validate find parameters \\"{\\"page\\":\\"foo\\",\\"perPage\\":10,\\"start\\":\\"2024-02-09T02:07:55Z\\",\\"end\\":\\"2024-03-29T02:07:55Z\\"}\\" - [page]: expected value of type [number] but got [string]"`
+        `[Error: Failed to find backfills: Could not validate find parameters "{"page":"foo","perPage":10,"start":"2024-02-09T02:07:55Z","end":"2024-03-29T02:07:55Z"}" - [page]: expected value of type [number] but got [string]]`
       );
       await expect(
         rulesClient.findBackfill({
@@ -910,7 +910,7 @@ describe('findBackfill()', () => {
           end: '2024-03-29T02:07:55Z',
         })
       ).rejects.toThrowErrorMatchingInlineSnapshot(
-        `"Failed to find backfills: Could not validate find parameters \\"{\\"page\\":1,\\"perPage\\":\\"foo\\",\\"start\\":\\"2024-02-09T02:07:55Z\\",\\"end\\":\\"2024-03-29T02:07:55Z\\"}\\" - [perPage]: expected value of type [number] but got [string]"`
+        `[Error: Failed to find backfills: Could not validate find parameters "{"page":1,"perPage":"foo","start":"2024-02-09T02:07:55Z","end":"2024-03-29T02:07:55Z"}" - [perPage]: expected value of type [number] but got [string]]`
       );
       await expect(
         rulesClient.findBackfill({
@@ -920,7 +920,7 @@ describe('findBackfill()', () => {
           end: '2024-03-29T02:07:55Z',
         })
       ).rejects.toThrowErrorMatchingInlineSnapshot(
-        `"Failed to find backfills: Could not validate find parameters \\"{\\"page\\":1,\\"perPage\\":10,\\"start\\":\\"foo\\",\\"end\\":\\"2024-03-29T02:07:55Z\\"}\\" - [start]: query start must be valid date"`
+        `[Error: Failed to find backfills: Could not validate find parameters "{"page":1,"perPage":10,"start":"foo","end":"2024-03-29T02:07:55Z"}" - [start]: query start must be valid date]`
       );
       await expect(
         rulesClient.findBackfill({
@@ -930,7 +930,7 @@ describe('findBackfill()', () => {
           start: '2024-03-29T02:07:55Z',
         })
       ).rejects.toThrowErrorMatchingInlineSnapshot(
-        `"Failed to find backfills: Could not validate find parameters \\"{\\"page\\":1,\\"perPage\\":10,\\"end\\":\\"foo\\",\\"start\\":\\"2024-03-29T02:07:55Z\\"}\\" - [end]: query end must be valid date"`
+        `[Error: Failed to find backfills: Could not validate find parameters "{"page":1,"perPage":10,"end":"foo","start":"2024-03-29T02:07:55Z"}" - [end]: query end must be valid date]`
       );
       await expect(
         rulesClient.findBackfill({
@@ -942,9 +942,9 @@ describe('findBackfill()', () => {
         })
       ).rejects.toThrowErrorMatchingInlineSnapshot(
         `
-"Failed to find backfills: Could not validate find parameters \\"{\\"page\\":1,\\"perPage\\":10,\\"sortField\\":\\"abc\\",\\"start\\":\\"2024-03-29T02:07:55Z\\"}\\" - [sortField]: types that failed validation:
+[Error: Failed to find backfills: Could not validate find parameters "{"page":1,"perPage":10,"sortField":"abc","start":"2024-03-29T02:07:55Z"}" - [sortField]: types that failed validation:
 - [sortField.0]: expected value to equal [createdAt]
-- [sortField.1]: expected value to equal [start]"
+- [sortField.1]: expected value to equal [start]]
 `
       );
       await expect(
@@ -957,9 +957,9 @@ describe('findBackfill()', () => {
         })
       ).rejects.toThrowErrorMatchingInlineSnapshot(
         `
-"Failed to find backfills: Could not validate find parameters \\"{\\"page\\":1,\\"perPage\\":10,\\"sortOrder\\":\\"abc\\",\\"start\\":\\"2024-03-29T02:07:55Z\\"}\\" - [sortOrder]: types that failed validation:
+[Error: Failed to find backfills: Could not validate find parameters "{"page":1,"perPage":10,"sortOrder":"abc","start":"2024-03-29T02:07:55Z"}" - [sortOrder]: types that failed validation:
 - [sortOrder.0]: expected value to equal [asc]
-- [sortOrder.1]: expected value to equal [desc]"
+- [sortOrder.1]: expected value to equal [desc]]
 `
       );
 
@@ -978,7 +978,9 @@ describe('findBackfill()', () => {
           start: '2024-02-09T02:07:55Z',
           end: '2024-03-29T02:07:55Z',
         })
-      ).rejects.toThrowErrorMatchingInlineSnapshot(`"Failed to find backfills: error error"`);
+      ).rejects.toThrowErrorMatchingInlineSnapshot(
+        `[Error: Failed to find backfills: error error]`
+      );
 
       expect(auditLogger.log).toHaveBeenCalledWith({
         error: { code: 'Error', message: 'error error' },
@@ -1005,7 +1007,9 @@ describe('findBackfill()', () => {
           start: '2024-02-09T02:07:55Z',
           end: '2024-03-29T02:07:55Z',
         })
-      ).rejects.toThrowErrorMatchingInlineSnapshot(`"Failed to find backfills: error finding"`);
+      ).rejects.toThrowErrorMatchingInlineSnapshot(
+        `[Error: Failed to find backfills: error finding]`
+      );
     });
   });
 });

@@ -15,20 +15,17 @@ import { PanelHeader } from './header';
 import { allThreeTabs } from './tabs';
 import { useBasicDataFromDetailsData } from '../shared/hooks/use_basic_data_from_details_data';
 import { useDocumentDetailsContext } from '../shared/context';
+import { mockSearchHit } from '../shared/mocks/mock_search_hit';
 
 const REMOTE_CALLOUT_TEXT =
   'This event originates from a remote cluster. Some features may not be available.';
 
 vi.mock('../shared/context', () => {
   const mocked = {
-    useDocumentDetailsContext: vi.fn().mockImplementation(async () => {
-      const { mockSearchHit } = await vi.importActual('../shared/mocks/mock_search_hit');
-
-      return {
-        dataFormattedForFieldBrowser: [],
-        searchHit: mockSearchHit,
-      };
-    }),
+    useDocumentDetailsContext: vi.fn().mockImplementation(() => ({
+      dataFormattedForFieldBrowser: [],
+      searchHit: mockSearchHit,
+    })),
   };
   return { ...mocked, default: mocked };
 });
@@ -95,9 +92,8 @@ describe('PanelHeader', () => {
     expect(queryByText(REMOTE_CALLOUT_TEXT)).not.toBeInTheDocument();
   });
 
-  it('should render the remote document callout for a remote document', async () => {
+  it('should render the remote document callout for a remote document', () => {
     mockUseBasicDataFromDetailsData.mockReturnValue({ isAlert: false });
-    const { mockSearchHit } = await vi.importActual('../shared/mocks/mock_search_hit');
     mockUseDocumentDetailsContext.mockReturnValueOnce({
       dataFormattedForFieldBrowser: [],
       searchHit: { ...mockSearchHit, _index: 'remote-cluster:.alerts-security.alerts-default' },

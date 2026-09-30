@@ -321,7 +321,7 @@ describe('delete()', () => {
     unsecuredSavedObjectsClient.get.mockRejectedValue(new Error('SOC Fail'));
 
     await expect(rulesClient.delete({ id: '1' })).rejects.toThrowErrorMatchingInlineSnapshot(
-      `"SOC Fail"`
+      `[Error: SOC Fail]`
     );
   });
 
@@ -329,7 +329,7 @@ describe('delete()', () => {
     taskManager.removeIfExists.mockRejectedValue(new Error('TM Fail'));
 
     await expect(rulesClient.delete({ id: '1' })).rejects.toThrowErrorMatchingInlineSnapshot(
-      `"TM Fail"`
+      `[Error: TM Fail]`
     );
   });
 
@@ -337,7 +337,7 @@ describe('delete()', () => {
     backfillClient.deleteBackfillForRules.mockRejectedValue(new Error('backfill Fail'));
 
     await expect(rulesClient.delete({ id: '1' })).rejects.toThrowErrorMatchingInlineSnapshot(
-      `"backfill Fail"`
+      `[Error: backfill Fail]`
     );
   });
 

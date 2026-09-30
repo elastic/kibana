@@ -37,6 +37,38 @@ vi.mock('../kibana_services', () => {
   };
 });
 
+type AnyFn = (...args: unknown[]) => unknown;
+type OverridableExport = 'notifyLicensedFeatureUsage' | 'getMapReady' | 'createLayerInstance';
+
+// Tests override these cross-module exports and, like the original CJS export mutation, keep them overridden.
+const mockOverrides = vi.hoisted(() => ({} as Partial<Record<OverridableExport, AnyFn>>));
+
+vi.mock('../licensed_features', async (importOriginal) => {
+  const actual = await importOriginal<Record<'notifyLicensedFeatureUsage', AnyFn>>();
+  return {
+    ...actual,
+    notifyLicensedFeatureUsage: (...args: unknown[]) =>
+      (mockOverrides.notifyLicensedFeatureUsage ?? actual.notifyLicensedFeatureUsage)(...args),
+  };
+});
+
+vi.mock('../reducers/non_serializable_instances', async (importOriginal) => {
+  const actual = await importOriginal<Record<'getMapReady', AnyFn>>();
+  return {
+    ...actual,
+    getMapReady: (...args: unknown[]) => (mockOverrides.getMapReady ?? actual.getMapReady)(...args),
+  };
+});
+
+vi.mock('../selectors/map_selectors', async (importOriginal) => {
+  const actual = await importOriginal<Record<'createLayerInstance', AnyFn>>();
+  return {
+    ...actual,
+    createLayerInstance: (...args: unknown[]) =>
+      (mockOverrides.createLayerInstance ?? actual.createLayerInstance)(...args),
+  };
+});
+
 const getStoreMock = vi.fn();
 const dispatchMock = vi.fn();
 
@@ -48,21 +80,16 @@ describe('layer_actions', () => {
   describe('addLayer', () => {
     const notifyLicensedFeatureUsageMock = vi.fn();
 
-    beforeEach(async () => {
-      // eslint-disable-next-line @typescript-eslint/no-var-requires
-      (await import('../licensed_features')).notifyLicensedFeatureUsage = (
-        feature: LICENSED_FEATURES
-      ) => {
+    beforeEach(() => {
+      mockOverrides.notifyLicensedFeatureUsage = (feature) => {
         notifyLicensedFeatureUsageMock(feature);
       };
 
-      // eslint-disable-next-line @typescript-eslint/no-var-requires
-      (await import('../reducers/non_serializable_instances')).getMapReady = () => {
+      mockOverrides.getMapReady = () => {
         return true;
       };
 
-      // eslint-disable-next-line @typescript-eslint/no-var-requires
-      (await import('../selectors/map_selectors')).createLayerInstance = () => {
+      mockOverrides.createLayerInstance = () => {
         return {
           getLicensedFeatures() {
             return [LICENSED_FEATURES.GEO_SHAPE_AGGS_GEO_TILE];

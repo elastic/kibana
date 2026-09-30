@@ -20,11 +20,18 @@ import { ConnectorUsageCollector } from '@kbn/actions-plugin/server/types';
 
 vi.mock('axios', () => {
   const actual = require('axios');
-  return {
-    ...jest.createMockFromModule<typeof import('axios')>('axios'),
+  // Automock like `jest.createMockFromModule`: every function export becomes a mock
+  const mocked = {
+    ...Object.fromEntries(
+      Object.entries(actual).map(([key, value]) => [
+        key,
+        typeof value === 'function' ? vi.fn() : value,
+      ])
+    ),
     AxiosError: actual.AxiosError,
     isAxiosError: actual.isAxiosError,
   };
+  return { ...mocked, default: mocked };
 });
 vi.mock('@kbn/actions-plugin/server/lib/axios_utils', async () => {
   const originalUtils = await vi.importActual('@kbn/actions-plugin/server/lib/axios_utils');
@@ -300,26 +307,26 @@ describe('IBM Resilient connector', () => {
 
       await expect(connector.createIncident(incidentMock, connectorUsageCollector)).rejects
         .toThrowErrorMatchingInlineSnapshot(`
-        "[Action][IBM Resilient]: Unable to create incident. Error: Response validation failed ([
+        [Error: [Action][IBM Resilient]: Unable to create incident. Error: Response validation failed ([
           {
-            \\"expected\\": \\"number\\",
-            \\"code\\": \\"invalid_type\\",
-            \\"received\\": \\"NaN\\",
-            \\"path\\": [
-              \\"id\\"
+            "expected": "number",
+            "code": "invalid_type",
+            "received": "NaN",
+            "path": [
+              "id"
             ],
-            \\"message\\": \\"Invalid input: expected number, received NaN\\"
+            "message": "Invalid input: expected number, received NaN"
           },
           {
-            \\"expected\\": \\"number\\",
-            \\"code\\": \\"invalid_type\\",
-            \\"received\\": \\"NaN\\",
-            \\"path\\": [
-              \\"create_date\\"
+            "expected": "number",
+            "code": "invalid_type",
+            "received": "NaN",
+            "path": [
+              "create_date"
             ],
-            \\"message\\": \\"Invalid input: expected number, received NaN\\"
+            "message": "Invalid input: expected number, received NaN"
           }
-        ])."
+        ]).]
       `);
     });
   });
@@ -455,16 +462,16 @@ describe('IBM Resilient connector', () => {
 
       await expect(connector.updateIncident(req, connectorUsageCollector)).rejects
         .toThrowErrorMatchingInlineSnapshot(`
-        "[Action][IBM Resilient]: Unable to update incident with id 1. Error: Response validation failed ([
+        [Error: [Action][IBM Resilient]: Unable to update incident with id 1. Error: Response validation failed ([
           {
-            \\"expected\\": \\"boolean\\",
-            \\"code\\": \\"invalid_type\\",
-            \\"path\\": [
-              \\"success\\"
+            "expected": "boolean",
+            "code": "invalid_type",
+            "path": [
+              "success"
             ],
-            \\"message\\": \\"Invalid input: expected boolean, received undefined\\"
+            "message": "Invalid input: expected boolean, received undefined"
           }
-        ])."
+        ]).]
       `);
     });
   });
@@ -572,16 +579,16 @@ describe('IBM Resilient connector', () => {
 
       await expect(connector.getIncidentTypes(undefined, connectorUsageCollector)).rejects
         .toThrowErrorMatchingInlineSnapshot(`
-        "[Action][IBM Resilient]: Unable to get incident types. Error: Response validation failed ([
+        [Error: [Action][IBM Resilient]: Unable to get incident types. Error: Response validation failed ([
           {
-            \\"expected\\": \\"array\\",
-            \\"code\\": \\"invalid_type\\",
-            \\"path\\": [
-              \\"values\\"
+            "expected": "array",
+            "code": "invalid_type",
+            "path": [
+              "values"
             ],
-            \\"message\\": \\"Invalid input: expected array, received undefined\\"
+            "message": "Invalid input: expected array, received undefined"
           }
-        ])."
+        ]).]
       `);
     });
   });
@@ -649,16 +656,16 @@ describe('IBM Resilient connector', () => {
 
       await expect(connector.getSeverity(undefined, connectorUsageCollector)).rejects
         .toThrowErrorMatchingInlineSnapshot(`
-        "[Action][IBM Resilient]: Unable to get severity. Error: Response validation failed ([
+        [Error: [Action][IBM Resilient]: Unable to get severity. Error: Response validation failed ([
           {
-            \\"expected\\": \\"array\\",
-            \\"code\\": \\"invalid_type\\",
-            \\"path\\": [
-              \\"values\\"
+            "expected": "array",
+            "code": "invalid_type",
+            "path": [
+              "values"
             ],
-            \\"message\\": \\"Invalid input: expected array, received undefined\\"
+            "message": "Invalid input: expected array, received undefined"
           }
-        ])."
+        ]).]
       `);
     });
   });
@@ -708,14 +715,14 @@ describe('IBM Resilient connector', () => {
 
       await expect(connector.getFields(undefined, connectorUsageCollector)).rejects
         .toThrowErrorMatchingInlineSnapshot(`
-        "[Action][IBM Resilient]: Unable to get fields. Error: Response validation failed ([
+        [Error: [Action][IBM Resilient]: Unable to get fields. Error: Response validation failed ([
           {
-            \\"expected\\": \\"array\\",
-            \\"code\\": \\"invalid_type\\",
-            \\"path\\": [],
-            \\"message\\": \\"Invalid input: expected array, received object\\"
+            "expected": "array",
+            "code": "invalid_type",
+            "path": [],
+            "message": "Invalid input: expected array, received object"
           }
-        ])."
+        ]).]
       `);
     });
   });

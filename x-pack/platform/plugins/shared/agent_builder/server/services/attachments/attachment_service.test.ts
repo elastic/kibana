@@ -52,9 +52,9 @@ describe('AttachmentService', () => {
 
       expect(() => serviceSetup.registerType(createMockedAttachmentType()))
         .toThrowErrorMatchingInlineSnapshot(`
-        "Built-in attachment with id \\"test-attachment\\" is not in the list of allowed built-in attachments.
-                     Please add it to the list of allowed built-in attachments in the \\"@kbn/agent-builder-server/allow_lists.ts\\" file."
-      `);
+          [Error: Built-in attachment with id "test-attachment" is not in the list of allowed built-in attachments.
+                       Please add it to the list of allowed built-in attachments in the "@kbn/agent-builder-server/allow_lists.ts" file.]
+        `);
     });
   });
 

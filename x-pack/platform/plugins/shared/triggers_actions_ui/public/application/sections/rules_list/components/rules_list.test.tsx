@@ -54,7 +54,10 @@ import { bulkUpdateAPIKey as bulkUpdateAPIKeyFn } from '../../../lib/rule_api/up
 import { loadRuleTags as loadRuleTagsFn } from '../../../lib/rule_api/aggregate';
 import { loadRuleAggregationsWithKueryFilter as loadRuleAggregationsWithKueryFilterFn } from '../../../lib/rule_api/aggregate_kuery_filter';
 import { loadRulesWithKueryFilter as loadRulesWithKueryFilterFn } from '../../../lib/rule_api/rules_kuery_filter';
-import { loadActionTypes as loadActionTypesFn, loadAllActions as loadAllActionsFn } from '../../../lib/action_connector_api';
+import {
+  loadActionTypes as loadActionTypesFn,
+  loadAllActions as loadAllActionsFn,
+} from '../../../lib/action_connector_api';
 import { hasExecuteActionsCapability as hasExecuteActionsCapabilityFn } from '../../../lib/capabilities';
 import { hasAllPrivilege as hasAllPrivilegeFn } from '../../../lib/capabilities';
 
@@ -523,8 +526,10 @@ describe('rules_list ', () => {
 
   afterEach(() => {
     vi.clearAllMocks();
-    queryClient.clear();
+    // Unmount first: clearing the cache while RulesList is still mounted makes its observers
+    // refetch into the fresh cache, and those results would leak into the next test.
     cleanup();
+    queryClient.clear();
   });
 
   it('sets the CPS picker access to DISABLED', () => {

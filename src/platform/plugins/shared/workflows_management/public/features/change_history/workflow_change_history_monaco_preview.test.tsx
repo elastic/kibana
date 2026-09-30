@@ -186,9 +186,12 @@ describe('WorkflowChangeHistoryMonacoPreview', () => {
   });
 
   afterEach(() => {
-    act(() => {
-      vi.runOnlyPendingTimers();
-    });
+    // Not every test fakes timers; Vitest throws when timer APIs are used on real timers.
+    if (vi.isFakeTimers()) {
+      act(() => {
+        vi.runOnlyPendingTimers();
+      });
+    }
     vi.useRealTimers();
   });
 

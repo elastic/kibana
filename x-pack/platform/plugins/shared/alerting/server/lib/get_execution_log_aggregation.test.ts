@@ -89,7 +89,7 @@ describe('getExecutionLogAggregation', () => {
         sort: [{ notsortable: { order: 'asc' } }],
       });
     }).toThrowErrorMatchingInlineSnapshot(
-      `"Invalid sort field \\"notsortable\\" - must be one of [timestamp,execution_duration,total_search_duration,es_search_duration,schedule_delay,num_triggered_actions,num_generated_actions,num_active_alerts,num_recovered_alerts,num_new_alerts]"`
+      `[Error: Invalid sort field "notsortable" - must be one of [timestamp,execution_duration,total_search_duration,es_search_duration,schedule_delay,num_triggered_actions,num_generated_actions,num_active_alerts,num_recovered_alerts,num_new_alerts]]`
     );
   });
 
@@ -101,7 +101,7 @@ describe('getExecutionLogAggregation', () => {
         sort: [{ notsortable: { order: 'asc' } }, { timestamp: { order: 'asc' } }],
       });
     }).toThrowErrorMatchingInlineSnapshot(
-      `"Invalid sort field \\"notsortable\\" - must be one of [timestamp,execution_duration,total_search_duration,es_search_duration,schedule_delay,num_triggered_actions,num_generated_actions,num_active_alerts,num_recovered_alerts,num_new_alerts]"`
+      `[Error: Invalid sort field "notsortable" - must be one of [timestamp,execution_duration,total_search_duration,es_search_duration,schedule_delay,num_triggered_actions,num_generated_actions,num_active_alerts,num_recovered_alerts,num_new_alerts]]`
     );
   });
 
@@ -112,7 +112,9 @@ describe('getExecutionLogAggregation', () => {
         perPage: 10,
         sort: [{ timestamp: { order: 'asc' } }],
       });
-    }).toThrowErrorMatchingInlineSnapshot(`"Invalid page field \\"0\\" - must be greater than 0"`);
+    }).toThrowErrorMatchingInlineSnapshot(
+      `[Error: Invalid page field "0" - must be greater than 0]`
+    );
   });
 
   test('should throw error when given bad perPage field', () => {
@@ -123,7 +125,7 @@ describe('getExecutionLogAggregation', () => {
         sort: [{ timestamp: { order: 'asc' } }],
       });
     }).toThrowErrorMatchingInlineSnapshot(
-      `"Invalid perPage field \\"0\\" - must be greater than 0"`
+      `[Error: Invalid perPage field "0" - must be greater than 0]`
     );
   });
 
@@ -1999,7 +2001,7 @@ describe('formatExecutionLogResult', () => {
       } as estypes.SearchHitsMetadata<unknown>,
     };
     expect(() => formatExecutionLogResult(results)).toThrowErrorMatchingInlineSnapshot(
-      `"Results are limited to 10,000 documents, refine your search to see others."`
+      `[Error: Results are limited to 10,000 documents, refine your search to see others.]`
     );
   });
 });
@@ -2977,7 +2979,7 @@ describe('formatExecutionKPIAggBuckets', () => {
       } as estypes.SearchHitsMetadata<unknown>,
     };
     expect(() => formatExecutionKPIResult(results)).toThrowErrorMatchingInlineSnapshot(
-      `"Results are limited to 10,000 documents, refine your search to see others."`
+      `[Error: Results are limited to 10,000 documents, refine your search to see others.]`
     );
   });
 });

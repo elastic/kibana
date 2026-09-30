@@ -115,7 +115,9 @@ describe('validateAggregationTerms', () => {
           },
         },
       });
-    }).toThrowErrorMatchingInlineSnapshot(`"Invalid aggregation term: alert.attributes.apiKey"`);
+    }).toThrowErrorMatchingInlineSnapshot(
+      `[Error: Invalid aggregation term: alert.attributes.apiKey]`
+    );
 
     expect(() => {
       validateRuleAggregationFields({
@@ -130,7 +132,9 @@ describe('validateAggregationTerms', () => {
           },
         },
       });
-    }).toThrowErrorMatchingInlineSnapshot(`"Invalid aggregation term: alert.attributes.bar"`);
+    }).toThrowErrorMatchingInlineSnapshot(
+      `[Error: Invalid aggregation term: alert.attributes.bar]`
+    );
   });
 
   it('should throw for nested aggregations with invalid fields', () => {
@@ -156,7 +160,9 @@ describe('validateAggregationTerms', () => {
           },
         },
       });
-    }).toThrowErrorMatchingInlineSnapshot(`"Invalid aggregation term: alert.attributes.apiKey"`);
+    }).toThrowErrorMatchingInlineSnapshot(
+      `[Error: Invalid aggregation term: alert.attributes.apiKey]`
+    );
 
     expect(() => {
       validateRuleAggregationFields({
@@ -180,7 +186,9 @@ describe('validateAggregationTerms', () => {
           },
         },
       });
-    }).toThrowErrorMatchingInlineSnapshot(`"Invalid aggregation term: alert.attributes.consumer"`);
+    }).toThrowErrorMatchingInlineSnapshot(
+      `[Error: Invalid aggregation term: alert.attributes.consumer]`
+    );
   });
 
   it('should throw for both aggs and aggregations at the same nesting level with invalid fields', () => {
@@ -206,7 +214,9 @@ describe('validateAggregationTerms', () => {
           },
         },
       });
-    }).toThrowErrorMatchingInlineSnapshot(`"Invalid aggregation term: alert.attributes.consumer"`);
+    }).toThrowErrorMatchingInlineSnapshot(
+      `[Error: Invalid aggregation term: alert.attributes.consumer]`
+    );
 
     expect(() => {
       validateRuleAggregationFields({
@@ -230,7 +240,9 @@ describe('validateAggregationTerms', () => {
           },
         },
       });
-    }).toThrowErrorMatchingInlineSnapshot(`"Invalid aggregation term: alert.attributes.consumer"`);
+    }).toThrowErrorMatchingInlineSnapshot(
+      `[Error: Invalid aggregation term: alert.attributes.consumer]`
+    );
   });
 
   it('should throw for nested aggregations with invalid root level aggs types', () => {
@@ -242,7 +254,7 @@ describe('validateAggregationTerms', () => {
           },
         },
       });
-    }).toThrowErrorMatchingInlineSnapshot(`"Invalid aggregation type: cardinality"`);
+    }).toThrowErrorMatchingInlineSnapshot(`[Error: Invalid aggregation type: cardinality]`);
 
     expect(() => {
       validateRuleAggregationFields({
@@ -265,7 +277,7 @@ describe('validateAggregationTerms', () => {
           },
         },
       } as unknown as Record<string, AggregationsAggregationContainer>);
-    }).toThrowErrorMatchingInlineSnapshot(`"Invalid aggregation type: max"`);
+    }).toThrowErrorMatchingInlineSnapshot(`[Error: Invalid aggregation type: max]`);
   });
 
   it('should throw for invalid multi_terms aggregations', () => {
@@ -284,7 +296,7 @@ describe('validateAggregationTerms', () => {
           },
         },
       });
-    }).toThrowErrorMatchingInlineSnapshot(`"Invalid aggregation type: multi_terms"`);
+    }).toThrowErrorMatchingInlineSnapshot(`[Error: Invalid aggregation type: multi_terms]`);
 
     expect(() => {
       validateRuleAggregationFields({
@@ -301,6 +313,6 @@ describe('validateAggregationTerms', () => {
           },
         },
       });
-    }).toThrowErrorMatchingInlineSnapshot(`"Invalid aggregation type: multi_terms"`);
+    }).toThrowErrorMatchingInlineSnapshot(`[Error: Invalid aggregation type: multi_terms]`);
   });
 });

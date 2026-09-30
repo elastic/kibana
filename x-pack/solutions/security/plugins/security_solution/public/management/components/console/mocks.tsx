@@ -256,7 +256,14 @@ export const triggerConsoleCommandInputEvent = async (
 
 export const getConsoleTestSetup = (): ConsoleTestSetup => {
   // Workaround for timeout via https://github.com/testing-library/user-event/issues/833#issuecomment-1171452841
-  const user = userEvent.setup({ advanceTimers: jest.advanceTimersByTime });
+  // Only advance faked timers: Vitest throws when timers aren't mocked (Jest only warned).
+  const user = userEvent.setup({
+    advanceTimers: (delay) => {
+      if ('clock' in setTimeout || jest.isMockFunction(setTimeout)) {
+        jest.advanceTimersByTime(delay);
+      }
+    },
+  });
   const mockedContext = createAppRootMockRenderer();
   const { startServices, coreStart, depsStart, queryClient, history, setExperimentalFlag } =
     mockedContext;

@@ -236,7 +236,7 @@ describe('bulkEditRuleParamsWithReadAuth()', () => {
           ],
         })
       ).rejects.toThrowErrorMatchingInlineSnapshot(
-        `"Error validating bulkEditRuleParamsWithReadAuth options - [operations.0.operation]: expected value to equal [set]"`
+        `[Error: Error validating bulkEditRuleParamsWithReadAuth options - [operations.0.operation]: expected value to equal [set]]`
       );
     });
 
@@ -266,7 +266,7 @@ describe('bulkEditRuleParamsWithReadAuth()', () => {
           ],
         })
       ).rejects.toThrowErrorMatchingInlineSnapshot(
-        `"Error validating bulkEditRuleParamsWithReadAuth options - [operations.0.operation]: expected value to equal [set]"`
+        `[Error: Error validating bulkEditRuleParamsWithReadAuth options - [operations.0.operation]: expected value to equal [set]]`
       );
     });
     test('should update exceptionsList', async () => {

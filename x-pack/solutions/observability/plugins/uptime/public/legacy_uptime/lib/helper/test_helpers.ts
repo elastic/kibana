@@ -29,7 +29,7 @@ export function mockMoment() {
 }
 
 export function mockMomentTimezone() {
-  jest.mock('moment-timezone', () => {
+  jest.doMock('moment-timezone', () => {
     return function () {
       return { tz: { guess: () => 'America/New_York' } };
     };
@@ -44,7 +44,7 @@ export function mockDate() {
 }
 
 export function mockDataPlugin() {
-  jest.mock('@kbn/data-plugin/public', () => {
+  jest.doMock('@kbn/data-plugin/public', () => {
     return function () {
       return {
         esKuery: {

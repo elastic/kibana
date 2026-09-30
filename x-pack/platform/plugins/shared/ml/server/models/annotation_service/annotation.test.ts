@@ -133,8 +133,8 @@ describe('annotation_service', () => {
         maxAnnotations: 500,
       };
 
-      await expect(getAnnotations(indexAnnotationArgsMock)).rejects.toEqual(
-        Error(`Annotations couldn't be retrieved from Elasticsearch.`)
+      await expect(getAnnotations(indexAnnotationArgsMock)).rejects.toThrow(
+        `Annotations couldn't be retrieved from Elasticsearch.`
       );
     });
   });

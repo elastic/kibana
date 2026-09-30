@@ -247,7 +247,7 @@ describe('buildSecurityApi', () => {
 
       await expect(
         api.serviceAccounts.create(httpServerMock.createKibanaRequest(), params)
-      ).rejects.toThrowErrorMatchingInlineSnapshot(`"Service accounts are not enabled"`);
+      ).rejects.toThrowErrorMatchingInlineSnapshot(`[Error: Service accounts are not enabled]`);
     });
   });
 
@@ -337,7 +337,7 @@ describe('buildSecurityApi', () => {
       serviceAccounts = null;
 
       await expect(invoke()).rejects.toThrowErrorMatchingInlineSnapshot(
-        `"Service accounts are not enabled"`
+        `[Error: Service accounts are not enabled]`
       );
     });
   });

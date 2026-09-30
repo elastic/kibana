@@ -144,7 +144,7 @@ describe('transformPanelsIn', () => {
         },
       ];
       expect(() => transformPanelsIn(panels, true)).toThrowErrorMatchingInlineSnapshot(
-        `"Unable to transform 1 panels"`
+        `[TransformPanelsInError: Unable to transform 1 panels]`
       );
     });
 

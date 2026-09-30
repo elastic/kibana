@@ -25,7 +25,16 @@ vi.mock('react-use/lib/useLocalStorage', () => ({ default: vi.fn() }));
 vi.mock('../use_conversation');
 vi.mock('../helpers');
 vi.mock('fast-deep-equal');
-vi.mock('lodash');
+// Natively loaded CJS lodash only exposes `default`, so automock every function as a named export too
+vi.mock('lodash', async (importOriginal) => {
+  const lodash = (await importOriginal<{ default: Record<string, unknown> }>()).default;
+  const mocked = Object.fromEntries(
+    Object.keys(lodash)
+      .filter((key) => typeof lodash[key] === 'function')
+      .map((key) => [key, vi.fn()])
+  );
+  return { ...mocked, default: mocked };
+});
 const MOCK_DATE = '2025-02-19T23:28:54.962Z';
 const defaultConnectorMock: AIConnector = createMockActionConnector({
   actionTypeId: '.gen-ai',

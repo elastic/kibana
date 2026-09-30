@@ -9,7 +9,9 @@ import sinon from 'sinon';
 import type { ElasticsearchClient } from '@kbn/core/server';
 import { LogstashAgentMonitoring } from './logstash_agent_monitoring';
 
-const logstashStatsResultSetOfAgentMonitoring = (await import('./__mocks__/fixtures/logstash_stats_agent_monitoring_results.json')).default;
+const logstashStatsResultSetOfAgentMonitoring = (
+  await import('./__mocks__/fixtures/logstash_stats_agent_monitoring_results.json')
+).default;
 
 const logstashStateResultsMapOfAgentMonitoring = new Map();
 

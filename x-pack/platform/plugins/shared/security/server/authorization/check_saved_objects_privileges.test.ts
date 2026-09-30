@@ -56,7 +56,7 @@ describe('#checkSavedObjectsPrivileges', () => {
       await expect(
         checkSavedObjectsPrivileges(actions, [])
       ).rejects.toThrowErrorMatchingInlineSnapshot(
-        `"Can't check saved object privileges for 0 namespaces"`
+        `[Error: Can't check saved object privileges for 0 namespaces]`
       );
     });
 

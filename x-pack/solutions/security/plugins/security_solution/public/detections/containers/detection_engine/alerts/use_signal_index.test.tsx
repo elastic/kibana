@@ -68,7 +68,7 @@ describe('useSignalIndex', () => {
     const { result } = renderHook(() => useSignalIndex(), {
       wrapper: TestProvidersWithPrivileges,
     });
-    await waitFor(() => expect(result.current.createDeSignalIndex).toBeDefined());
+    await waitFor(() => expect(result.current.createDeSignalIndex).toEqual(expect.any(Function)));
 
     await act(async () => {
       await result.current.createDeSignalIndex!();
@@ -91,7 +91,7 @@ describe('useSignalIndex', () => {
     const { result } = renderHook(() => useSignalIndex(), {
       wrapper: TestProvidersWithPrivileges,
     });
-    await waitFor(() => expect(result.current.createDeSignalIndex).toBeDefined());
+    await waitFor(() => expect(result.current.createDeSignalIndex).toEqual(expect.any(Function)));
 
     await act(async () => {
       await result.current.createDeSignalIndex!();
@@ -109,7 +109,7 @@ describe('useSignalIndex', () => {
       wrapper: TestProvidersWithPrivileges,
     });
 
-    await waitFor(() => expect(result.current.createDeSignalIndex).toBeDefined());
+    await waitFor(() => expect(result.current.createDeSignalIndex).toEqual(expect.any(Function)));
 
     await act(async () => {
       await result.current.createDeSignalIndex!();
@@ -135,7 +135,7 @@ describe('useSignalIndex', () => {
       wrapper: TestProvidersWithPrivileges,
     });
 
-    await waitFor(() => expect(result.current.createDeSignalIndex).toBeDefined());
+    await waitFor(() => expect(result.current.createDeSignalIndex).toEqual(expect.any(Function)));
 
     await act(async () => {
       await result.current.createDeSignalIndex!();

@@ -10,7 +10,7 @@ import React from 'react';
 type AnyRecord = Record<string, unknown>;
 
 // The `/index` subpath bypasses the exact-match alias that points `@kbn/code-editor` at this file.
-export * from '@kbn/code-editor/index';
+export * from '@kbn/code-editor';
 
 const getTestSubj = (props: AnyRecord) => {
   const testSubj = props['data-test-subj'];

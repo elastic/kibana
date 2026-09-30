@@ -13,12 +13,10 @@ import YAML from 'yaml';
 import { monaco } from '@kbn/monaco';
 import { WorkflowDefinitionProvider } from './workflow_definition_provider';
 import type { WorkflowLookup } from '../../../../entities/workflows/store/workflow_detail/utils/build_workflow_lookup';
+import { parseTemplateAtPosition } from '../template_expression/parse_template_at_position';
 
 vi.mock('../template_expression/parse_template_at_position');
 
-const { parseTemplateAtPosition } = await vi.importMock(
-  '../template_expression/parse_template_at_position'
-);
 
 const WORKFLOW_YAML = `name: test-workflow
 enabled: false
@@ -195,7 +193,7 @@ describe('WorkflowDefinitionProvider', () => {
 
   describe('steps', () => {
     it('navigates to step definition when cursor is on step name', () => {
-      parseTemplateAtPosition.mockReturnValue(
+      vi.mocked(parseTemplateAtPosition).mockReturnValue(
         makeTemplateInfo({
           pathSegments: ['steps', 'get_data', 'output'],
           cursorSegmentIndex: 1,
@@ -208,7 +206,7 @@ describe('WorkflowDefinitionProvider', () => {
     });
 
     it('navigates to steps section header when cursor is on "steps" keyword', () => {
-      parseTemplateAtPosition.mockReturnValue(
+      vi.mocked(parseTemplateAtPosition).mockReturnValue(
         makeTemplateInfo({
           pathSegments: ['steps', 'get_data', 'output'],
           cursorSegmentIndex: 0,
@@ -220,7 +218,7 @@ describe('WorkflowDefinitionProvider', () => {
     });
 
     it('does NOT navigate when cursor is on output/data (segment 2+)', () => {
-      parseTemplateAtPosition.mockReturnValue(
+      vi.mocked(parseTemplateAtPosition).mockReturnValue(
         makeTemplateInfo({
           pathSegments: ['steps', 'get_data', 'output'],
           cursorSegmentIndex: 2,
@@ -234,7 +232,7 @@ describe('WorkflowDefinitionProvider', () => {
 
   describe('consts', () => {
     it('navigates to const key definition', () => {
-      parseTemplateAtPosition.mockReturnValue(
+      vi.mocked(parseTemplateAtPosition).mockReturnValue(
         makeTemplateInfo({
           pathSegments: ['consts', 'my_setting'],
           cursorSegmentIndex: 1,
@@ -248,7 +246,7 @@ describe('WorkflowDefinitionProvider', () => {
 
   describe('inputs', () => {
     it('navigates to input definition in legacy array format', () => {
-      parseTemplateAtPosition.mockReturnValue(
+      vi.mocked(parseTemplateAtPosition).mockReturnValue(
         makeTemplateInfo({
           pathSegments: ['inputs', 'my_input'],
           cursorSegmentIndex: 1,
@@ -296,7 +294,7 @@ steps:
         getYamlDocument: () => jsonSchemaDoc,
       });
 
-      parseTemplateAtPosition.mockReturnValue(
+      vi.mocked(parseTemplateAtPosition).mockReturnValue(
         makeTemplateInfo({
           pathSegments: ['inputs', 'my_field'],
           cursorSegmentIndex: 1,
@@ -313,7 +311,7 @@ steps:
 
   describe('variables', () => {
     it('navigates to the data.set step that defines the variable', () => {
-      parseTemplateAtPosition.mockReturnValue(
+      vi.mocked(parseTemplateAtPosition).mockReturnValue(
         makeTemplateInfo({
           pathSegments: ['variables', 'result_count'],
           cursorSegmentIndex: 1,
@@ -328,7 +326,7 @@ steps:
 
   describe('foreach', () => {
     it('navigates to foreach property line when cursor is on "foreach" keyword', () => {
-      parseTemplateAtPosition.mockReturnValue(
+      vi.mocked(parseTemplateAtPosition).mockReturnValue(
         makeTemplateInfo({
           pathSegments: ['foreach', 'item'],
           cursorSegmentIndex: 0,
@@ -341,7 +339,7 @@ steps:
     });
 
     it('does NOT navigate when cursor is on foreach.item (runtime-only)', () => {
-      parseTemplateAtPosition.mockReturnValue(
+      vi.mocked(parseTemplateAtPosition).mockReturnValue(
         makeTemplateInfo({
           pathSegments: ['foreach', 'item'],
           cursorSegmentIndex: 1,
@@ -356,7 +354,7 @@ steps:
 
   describe('while', () => {
     it('navigates to while step when cursor is on "while" keyword', () => {
-      parseTemplateAtPosition.mockReturnValue(
+      vi.mocked(parseTemplateAtPosition).mockReturnValue(
         makeTemplateInfo({
           pathSegments: ['while', 'iteration'],
           cursorSegmentIndex: 0,
@@ -369,7 +367,7 @@ steps:
     });
 
     it('does NOT navigate when cursor is on while.iteration (runtime-only)', () => {
-      parseTemplateAtPosition.mockReturnValue(
+      vi.mocked(parseTemplateAtPosition).mockReturnValue(
         makeTemplateInfo({
           pathSegments: ['while', 'iteration'],
           cursorSegmentIndex: 1,
@@ -416,7 +414,7 @@ steps:
         getYamlDocument: () => outputDoc,
       });
 
-      parseTemplateAtPosition.mockReturnValue(
+      vi.mocked(parseTemplateAtPosition).mockReturnValue(
         makeTemplateInfo({
           pathSegments: ['outputs', 'result'],
           cursorSegmentIndex: 1,
@@ -430,7 +428,7 @@ steps:
 
   describe('filters', () => {
     it('does NOT navigate when cursor is on a filter even if cursorSegmentIndex matches', () => {
-      parseTemplateAtPosition.mockReturnValue(
+      vi.mocked(parseTemplateAtPosition).mockReturnValue(
         makeTemplateInfo({
           pathSegments: ['steps', 'get_data'],
           cursorSegmentIndex: 1,

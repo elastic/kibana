@@ -35,7 +35,10 @@ import { loadRuleAggregationsWithKueryFilter as loadRuleAggregationsWithKueryFil
 import { getRuleTypes as getRuleTypesFn } from '@kbn/response-ops-rules-apis/apis/get_rule_types';
 import { bulkEnableRules as bulkEnableRulesFn } from '../../../lib/rule_api/bulk_enable';
 import { loadRulesWithKueryFilter as loadRulesWithKueryFilterFn } from '../../../lib/rule_api/rules_kuery_filter';
-import { loadActionTypes as loadActionTypesFn, loadAllActions as loadAllActionsFn } from '../../../lib/action_connector_api';
+import {
+  loadActionTypes as loadActionTypesFn,
+  loadAllActions as loadAllActionsFn,
+} from '../../../lib/action_connector_api';
 
 vi.mock('../../../../common/lib/kibana');
 vi.mock('@kbn/kibana-react-plugin/public/ui_settings/use_ui_setting', () => {

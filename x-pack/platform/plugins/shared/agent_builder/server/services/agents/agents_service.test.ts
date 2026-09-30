@@ -86,8 +86,8 @@ describe('AgentsService', () => {
       const serviceSetup = service.setup({ logger });
 
       expect(() => serviceSetup.register(createMockedAgent())).toThrowErrorMatchingInlineSnapshot(`
-        "Built-in agent with id \\"test_agent\\" is not in the list of allowed built-in agents.
-                     Please add it to the list of allowed built-in agents in the \\"@kbn/agent-builder-server/allow_lists.ts\\" file."
+        [Error: Built-in agent with id "test_agent" is not in the list of allowed built-in agents.
+                     Please add it to the list of allowed built-in agents in the "@kbn/agent-builder-server/allow_lists.ts" file.]
       `);
     });
 

@@ -197,7 +197,7 @@ describe('previewTask', () => {
         'space-1'
       )
     ).rejects.toThrowErrorMatchingInlineSnapshot(
-      `"Invalid category id - invalid-category,management"`
+      `[Error: Invalid category id - invalid-category,management]`
     );
   });
 
@@ -214,7 +214,7 @@ describe('previewTask', () => {
         },
         'space-1'
       )
-    ).rejects.toThrowErrorMatchingInlineSnapshot(`"Fail to count alerts"`);
+    ).rejects.toThrowErrorMatchingInlineSnapshot(`[Error: Fail to count alerts]`);
 
     expect(esClient.count).toHaveBeenCalledTimes(1);
     expect(esClient.count).toHaveBeenCalledWith({

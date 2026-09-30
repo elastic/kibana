@@ -63,12 +63,10 @@ const ALLOWED_CALLERS = [
   // Vitest installs jsdom into the test realm (Jest keeps it outside the sandbox), so jsdom's
   // selector compiler (nwsapi) runs against the patched Function. Dev-only, this is OK.
   /node_modules\/nwsapi\//,
-  // lmdb's ordered-binary compiles its encoder at load time; under Jest jest-runtime was on that
-  // stack. Dev-only (swc-register cache), this is OK.
-  /node_modules\/(ordered-binary|msgpackr|lmdb)\//,
-  // ajv compiles schemas with new Function(); under Jest, jest-runtime frames were on those stacks
-  // (e.g. yaml-language-server in @kbn/workflows tests). Dev-only, this is OK.
-  /node_modules\/ajv\//,
+  // Under Jest, code generation while a module loads had jest-runtime frames on the stack (e.g.
+  // ajv compiling schemas at import time, lmdb's encoders). Vitest's equivalents are its module
+  // runner and Node's CJS loader. Dev-only, this is OK.
+  /at (?:ModuleRunner\.)?(?:runInlinedModule|directRequest) |at Module\._compile /,
   // kbn-handlebars tests intentionally exercise the eval-based Handlebars compiler
   // to verify parity with the safe AST-based replacement. The CSP probe
   // (kbnUnsafeEvalTest) is blocked separately above, so this exception only

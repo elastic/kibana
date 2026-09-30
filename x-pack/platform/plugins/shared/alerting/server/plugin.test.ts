@@ -195,7 +195,7 @@ describe('Alerting Plugin', () => {
                 // eslint-disable-next-line @typescript-eslint/no-explicit-any
                 minimumLicenseRequired: 'foo' as any,
               })
-            ).toThrowErrorMatchingInlineSnapshot(`"\\"foo\\" is not a valid license type"`);
+            ).toThrowErrorMatchingInlineSnapshot(`[Error: "foo" is not a valid license type]`);
           });
 
           it('should not throw when license type is gold', async () => {
@@ -468,7 +468,7 @@ describe('Alerting Plugin', () => {
             await expect(() =>
               startContract.getRulesClientWithRequest({} as KibanaRequest)
             ).rejects.toThrowErrorMatchingInlineSnapshot(
-              `"Unable to create alerts client because the Encrypted Saved Objects plugin is missing encryption key. Please set xpack.encryptedSavedObjects.encryptionKey in the kibana.yml or use the bin/kibana-encryption-keys command."`
+              `[Error: Unable to create alerts client because the Encrypted Saved Objects plugin is missing encryption key. Please set xpack.encryptedSavedObjects.encryptionKey in the kibana.yml or use the bin/kibana-encryption-keys command.]`
             );
           });
 

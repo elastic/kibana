@@ -198,7 +198,8 @@ const kbnSwcPlugin = () => ({
       return null;
     }
 
-    const prepared = prepareSource(code, path);
+    const source = TEST_FILE.test(path) ? code : hoistJestMocks(code);
+    const prepared = prepareSource(source, path);
     const result = await Swc.transform(prepared.code, {
       ...getJestSwcConfig(path),
       sourceMaps: true,
@@ -207,9 +208,8 @@ const kbnSwcPlugin = () => ({
     });
 
     const map = prepared.map ? remapping([result.map, prepared.map], () => null) : result.map;
-    // makeEmotionLabelsSafe: same fix-up as the Jest transformer so emotion class hashes match.
-    const transformed = makeEmotionLabelsSafe(result.code);
-    return { code: TEST_FILE.test(path) ? transformed : hoistJestMocks(transformed), map };
+    // Same fix-up as the Jest transformer so emotion class hashes (and snapshots) match.
+    return { code: makeEmotionLabelsSafe(result.code), map };
   },
 });
 

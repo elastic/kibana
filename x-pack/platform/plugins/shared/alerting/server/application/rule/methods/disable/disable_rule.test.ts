@@ -536,7 +536,7 @@ describe('disableRule()', () => {
     unsecuredSavedObjectsClient.update.mockRejectedValueOnce(new Error('Failed to update'));
 
     await expect(rulesClient.disableRule({ id: '1' })).rejects.toThrowErrorMatchingInlineSnapshot(
-      `"Failed to update"`
+      `[Error: Failed to update]`
     );
     expect(taskManager.bulkDisable).not.toHaveBeenCalled();
     expect(taskManager.removeIfExists).not.toHaveBeenCalledWith();
@@ -546,7 +546,7 @@ describe('disableRule()', () => {
     taskManager.bulkDisable.mockRejectedValueOnce(new Error('Failed to disable task'));
 
     await expect(rulesClient.disableRule({ id: '1' })).rejects.toThrowErrorMatchingInlineSnapshot(
-      `"Failed to disable task"`
+      `[Error: Failed to disable task]`
     );
     expect(taskManager.removeIfExists).not.toHaveBeenCalledWith();
   });
@@ -556,7 +556,7 @@ describe('disableRule()', () => {
       // @ts-ignore: this is what we are testing
       rulesClient.disableRule({ id: 1 })
     ).rejects.toThrowErrorMatchingInlineSnapshot(
-      `"Error validating disable rule parameters - [id]: expected value of type [string] but got [number]"`
+      `[Error: Error validating disable rule parameters - [id]: expected value of type [string] but got [number]]`
     );
     expect(taskManager.removeIfExists).not.toHaveBeenCalledWith();
   });
@@ -566,7 +566,7 @@ describe('disableRule()', () => {
       // @ts-ignore: this is what we are testing
       rulesClient.disableRule({ id: '1', untrack: 'foo' })
     ).rejects.toThrowErrorMatchingInlineSnapshot(
-      `"Error validating disable rule parameters - [untrack]: expected value of type [boolean] but got [string]"`
+      `[Error: Error validating disable rule parameters - [untrack]: expected value of type [boolean] but got [string]]`
     );
     expect(taskManager.removeIfExists).not.toHaveBeenCalledWith();
   });
@@ -633,7 +633,7 @@ describe('disableRule()', () => {
     });
     taskManager.removeIfExists.mockRejectedValueOnce(new Error('Failed to remove task'));
     await expect(rulesClient.disableRule({ id: '1' })).rejects.toThrowErrorMatchingInlineSnapshot(
-      `"Failed to remove task"`
+      `[Error: Failed to remove task]`
     );
     expect(unsecuredSavedObjectsClient.get).not.toHaveBeenCalled();
     expect(encryptedSavedObjects.getDecryptedAsInternalUser).toHaveBeenCalledWith(

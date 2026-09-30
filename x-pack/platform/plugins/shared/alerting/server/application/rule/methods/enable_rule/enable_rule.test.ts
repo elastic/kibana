@@ -416,7 +416,7 @@ describe('enable()', () => {
     });
     await expect(
       async () => await rulesClient.enableRule({ id: '1' })
-    ).rejects.toThrowErrorMatchingInlineSnapshot(`"Error creating API key for rule - no"`);
+    ).rejects.toThrowErrorMatchingInlineSnapshot(`[Error: Error creating API key for rule - no]`);
     expect(taskManager.bulkEnable).not.toHaveBeenCalled();
   });
 
@@ -425,7 +425,7 @@ describe('enable()', () => {
       // @ts-ignore: this is what we are testing
       async () => await rulesClient.enableRule({ id: 1 })
     ).rejects.toThrowErrorMatchingInlineSnapshot(
-      `"Error validating enable rule parameters - [id]: expected value of type [string] but got [number]"`
+      `[Error: Error validating enable rule parameters - [id]: expected value of type [string] but got [number]]`
     );
     expect(taskManager.bulkEnable).not.toHaveBeenCalled();
   });
@@ -446,7 +446,7 @@ describe('enable()', () => {
     unsecuredSavedObjectsClient.get.mockRejectedValueOnce(new Error('Fail to get'));
 
     await expect(rulesClient.enableRule({ id: '1' })).rejects.toThrowErrorMatchingInlineSnapshot(
-      `"Fail to get"`
+      `[Error: Fail to get]`
     );
     expect(rulesClientParams.getUserName).not.toHaveBeenCalled();
     expect(rulesClientParams.getProfileUid).not.toHaveBeenCalled();
@@ -464,7 +464,7 @@ describe('enable()', () => {
     unsecuredSavedObjectsClient.create.mockRejectedValueOnce(new Error('Fail to update'));
 
     await expect(rulesClient.enableRule({ id: '1' })).rejects.toThrowErrorMatchingInlineSnapshot(
-      `"Fail to update"`
+      `[Error: Fail to update]`
     );
     expect(rulesClientParams.getUserName).toHaveBeenCalled();
     expect(rulesClientParams.getProfileUid).toHaveBeenCalled();
@@ -485,7 +485,7 @@ describe('enable()', () => {
     unsecuredSavedObjectsClient.create.mockRejectedValueOnce(new Error('Fail to update'));
 
     await expect(rulesClient.enableRule({ id: '1' })).rejects.toThrowErrorMatchingInlineSnapshot(
-      `"Fail to update"`
+      `[Error: Fail to update]`
     );
     // The rule never took ownership of the key, so nothing else would ever clean it up.
     expect(bulkMarkApiKeysForInvalidation).toHaveBeenCalledTimes(1);
@@ -510,7 +510,7 @@ describe('enable()', () => {
     unsecuredSavedObjectsClient.create.mockRejectedValueOnce(new Error('Fail to update'));
 
     await expect(rulesClient.enableRule({ id: '1' })).rejects.toThrowErrorMatchingInlineSnapshot(
-      `"Fail to update"`
+      `[Error: Fail to update]`
     );
     expect(bulkMarkApiKeysForInvalidation).not.toHaveBeenCalled();
   });
@@ -562,7 +562,7 @@ describe('enable()', () => {
   test('throws error when enabling task fails', async () => {
     taskManager.bulkEnable.mockRejectedValueOnce(new Error('Failed to enable task'));
     await expect(rulesClient.enableRule({ id: '1' })).rejects.toThrowErrorMatchingInlineSnapshot(
-      `"Failed to enable task"`
+      `[Error: Failed to enable task]`
     );
     expect(unsecuredSavedObjectsClient.get).not.toHaveBeenCalled();
     expect(encryptedSavedObjects.getDecryptedAsInternalUser).toHaveBeenCalledWith(
@@ -754,7 +754,7 @@ describe('enable()', () => {
     });
     taskManager.schedule.mockRejectedValueOnce(new Error('Fail to schedule'));
     await expect(rulesClient.enableRule({ id: '1' })).rejects.toThrowErrorMatchingInlineSnapshot(
-      `"Fail to schedule"`
+      `[Error: Fail to schedule]`
     );
     expect(rulesClientParams.getUserName).toHaveBeenCalled();
     expect(rulesClientParams.getProfileUid).toHaveBeenCalled();
@@ -817,7 +817,7 @@ describe('enable()', () => {
     );
 
     await expect(rulesClient.enableRule({ id: '1' })).rejects.toThrowErrorMatchingInlineSnapshot(
-      `"Fail to update after scheduling task"`
+      `[Error: Fail to update after scheduling task]`
     );
     expect(rulesClientParams.getUserName).toHaveBeenCalled();
     expect(rulesClientParams.getProfileUid).toHaveBeenCalled();

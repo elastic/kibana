@@ -21,7 +21,6 @@ import {
   renderComponentTemplateEdit,
 } from './helpers/component_template_edit.helpers';
 
-
 describe('<ComponentTemplateEdit />', () => {
   let httpSetup: ReturnType<typeof setupEnvironment>['httpSetup'];
   let httpRequestsMockHelpers: ReturnType<typeof setupEnvironment>['httpRequestsMockHelpers'];
