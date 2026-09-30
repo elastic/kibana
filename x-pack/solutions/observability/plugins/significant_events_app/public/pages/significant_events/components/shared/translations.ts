@@ -167,18 +167,17 @@ export const SELECT_MODEL_LABEL = i18n.translate(
   }
 );
 
-export const DEFAULT_CONNECTOR_ONLY_CALLOUT_TITLE = i18n.translate(
-  'xpack.significantEventsApp.streamsView.defaultConnectorOnlyCalloutTitle',
+export const CONFIGURED_DEFAULT_MODEL_CALLOUT_TITLE = i18n.translate(
+  'xpack.significantEventsApp.streamsView.configuredDefaultModelCalloutTitle',
   {
-    defaultMessage: 'Default connector only',
+    defaultMessage: 'Configured default model only',
   }
 );
 
-export const DEFAULT_CONNECTOR_ONLY_CALLOUT_DESCRIPTION = i18n.translate(
-  'xpack.significantEventsApp.streamsView.defaultConnectorOnlyCalloutDescription',
+export const CONFIGURED_DEFAULT_MODEL_CALLOUT_DESCRIPTION = i18n.translate(
+  'xpack.significantEventsApp.streamsView.configuredDefaultModelCalloutDescription',
   {
-    defaultMessage:
-      'This setting is enabled. Generation succeeds only with the configured default connector.',
+    defaultMessage: 'Generation succeeds only with the configured default model.',
   }
 );
 

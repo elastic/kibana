@@ -11,8 +11,8 @@ import type { InferenceConnector } from '@kbn/inference-common';
 import React, { useCallback, useMemo } from 'react';
 import { ConnectorIcon } from '../../../../components/connector_icon';
 import {
-  DEFAULT_CONNECTOR_ONLY_CALLOUT_DESCRIPTION,
-  DEFAULT_CONNECTOR_ONLY_CALLOUT_TITLE,
+  CONFIGURED_DEFAULT_MODEL_CALLOUT_DESCRIPTION,
+  CONFIGURED_DEFAULT_MODEL_CALLOUT_TITLE,
   DEFAULT_MODEL_BADGE_LABEL,
 } from './translations';
 
@@ -63,10 +63,10 @@ export const ConnectorSubPanel = ({
             size="s"
             color="warning"
             iconType="warning"
-            title={DEFAULT_CONNECTOR_ONLY_CALLOUT_TITLE}
+            title={CONFIGURED_DEFAULT_MODEL_CALLOUT_TITLE}
             data-test-subj="significant_events_default_connector_only_callout"
           >
-            <p>{DEFAULT_CONNECTOR_ONLY_CALLOUT_DESCRIPTION}</p>
+            <p>{CONFIGURED_DEFAULT_MODEL_CALLOUT_DESCRIPTION}</p>
           </EuiCallOut>
           <EuiSpacer size="s" />
         </>
