@@ -50,6 +50,8 @@ import FLOOR_ATTACK_DISCOVERY_YAML from './definitions/alertzero/floor_attack_di
 import FORENSICS_ENDPOINT_ANALYSIS_YAML from './definitions/alertzero/forensics_endpoint_analysis.yaml';
 import FORENSICS_RUN_ENDPOINT_ANALYSIS_YAML from './definitions/alertzero/forensics_run_endpoint_analysis.yaml';
 import HUNT_CONTINUOUS_THREAT_HUNT_YAML from './definitions/alertzero/hunt_continuous_threat_hunt.yaml';
+import CODE_INTELLIGENCE_LOGGING_CLASSIFICATION_YAML from './definitions/code_intelligence/classify_logging_candidates.yaml';
+import CODE_INTELLIGENCE_OTEL_CLASSIFICATION_YAML from './definitions/code_intelligence/classify_otel_candidates.yaml';
 import type { ManagedWorkflowDefinition, ManagedWorkflowTemplateValues } from './types';
 import { WorkflowSchemaBase } from '../spec/schema';
 
@@ -229,6 +231,16 @@ it.each([
   [ALERTZERO_ACTION_ISOLATE_HOST_WORKFLOW_ID, ACTION_ISOLATE_HOST_YAML, '3:20440aaf'],
   [ALERTZERO_ACTION_KILL_PROCESS_WORKFLOW_ID, ACTION_KILL_PROCESS_YAML, '3:39ab48da'],
   [ALERTZERO_ACTION_SUSPEND_PROCESS_WORKFLOW_ID, ACTION_SUSPEND_PROCESS_YAML, '3:5bff8110'],
+  [
+    CODE_INTELLIGENCE_LOGGING_CLASSIFICATION_WORKFLOW_ID,
+    CODE_INTELLIGENCE_LOGGING_CLASSIFICATION_YAML,
+    '2:018c4eb1',
+  ],
+  [
+    CODE_INTELLIGENCE_OTEL_CLASSIFICATION_WORKFLOW_ID,
+    CODE_INTELLIGENCE_OTEL_CLASSIFICATION_YAML,
+    '2:25e79417',
+  ],
 ] as const)(
   'requires bumping %s definition.version together with the imported YAML fingerprint',
   (workflowId, importedYaml, expectedFingerprint) => {
