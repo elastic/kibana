@@ -4,10 +4,9 @@
  *
  * Sets up, against a locally running Kibana + Elasticsearch:
  *   1. A source index (poc_source) with a field per data type.
- *   2. Value lists (Kibana) + matching lookup-mode indices in ES (poc_vl_*),
- *      already normalized (deduped values / coalesced ranges) so LOOKUP JOIN
- *      is one-to-one. Value lists are NOT yet lookup-backed in Kibana; this
- *      script creates the lookup indices directly.
+ *   2. Value lists (Kibana). Value-list exceptions are applied by the existing
+ *      implementation (the DSL exception filter), not compiled into the query, so
+ *      no lookup indices are created. The `list_*` cases below exercise that path.
  *   3. One exception list + one ES|QL rule per (entry type, data type, operator)
  *      case, so included and excluded operators are tested in isolation (they
  *      cannot share a rule: an exclude-operator suppresses almost everything).
@@ -31,6 +30,9 @@ const POC_TAG = 'poc:esql-native-exceptions';
 const SOURCE_INDEX = 'poc_source';
 
 const authHeader = 'Basic ' + Buffer.from(`${USER}:${PASS}`).toString('base64');
+
+// Note: value-list exceptions are handled by the existing DSL implementation, so
+// this script no longer creates lookup-mode indices in Elasticsearch.
 
 const kbnHeaders = {
   Authorization: authHeader,
@@ -60,8 +62,6 @@ const kbn = (path, method, body, ignore) =>
 const es = (path, method, body, ignore) =>
   req(`${ES}${path}`, { method, headers: esHeaders, body: body && JSON.stringify(body) }, { ignore });
 
-const lookupIndexNameForList = (listId) => `poc_vl_${listId.toLowerCase().replace(/[^a-z0-9_]/g, '_')}`;
-
 // ---------------------------------------------------------------------------
 // Data-type catalog: a source field per ES type, with a matching value, a
 // non-matching value, a second value (for match_any), and a wildcard pattern.
@@ -89,7 +89,7 @@ const SOURCE_MAPPING = {
   f_txt: { type: 'text' },
 };
 
-// Value lists (equality + range). id -> definition. The lookup index is derived.
+// Value lists (equality + range). id -> definition.
 const VALUE_LISTS = {
   'poc-vl-kw': { vlType: 'keyword', field: 'f_kw', values: ['evil.example.com'], inVal: 'evil.example.com', outVal: 'good.example.com' },
   'poc-vl-ip': { vlType: 'ip', field: 'f_ip', values: ['10.10.10.10'], inVal: '10.10.10.10', outVal: '192.168.1.1' },
@@ -203,7 +203,6 @@ async function clean(cases) {
   }
   for (const listId of Object.keys(VALUE_LISTS)) {
     await kbn(`/api/lists?id=${listId}`, 'DELETE', undefined, [404, 409]);
-    await es(`/${lookupIndexNameForList(listId)}`, 'DELETE', undefined, [404]);
   }
   await es(`/${SOURCE_INDEX}`, 'DELETE', undefined, [404]);
 }
@@ -216,12 +215,13 @@ async function createSourceIndex() {
   console.log(`Created source index ${SOURCE_INDEX}`);
 }
 
-async function createValueListsAndLookupIndices() {
+async function createValueLists() {
   // Ensure the Kibana value-list data streams exist.
   await kbn('/api/lists/index', 'POST', undefined, [409]);
 
   for (const [listId, def] of Object.entries(VALUE_LISTS)) {
-    // 1. Kibana value list (so the exception `list` entry is valid).
+    // Kibana value list (so the exception `list` entry is valid). The exception is
+    // then applied by the existing DSL implementation, not compiled into the query.
     await kbn('/api/lists', 'POST', {
       id: listId,
       name: `POC value list ${listId}`,
@@ -232,27 +232,7 @@ async function createValueListsAndLookupIndices() {
     for (const value of items) {
       await kbn('/api/lists/items', 'POST', { list_id: listId, value }, [409]);
     }
-
-    // 2. Lookup-mode index in ES, normalized (one row per value / coalesced range).
-    const idx = lookupIndexNameForList(listId);
-    if (def.vlType === 'ip_range') {
-      await es(`/${idx}`, 'PUT', {
-        settings: { index: { mode: 'lookup' } },
-        mappings: { properties: { vl_start: { type: 'ip' }, vl_end: { type: 'ip' }, vl_mark: { type: 'keyword' } } },
-      });
-      const bulk = def.ranges.map((r) => `{"index":{}}\n${JSON.stringify({ vl_start: r[0], vl_end: r[1], vl_mark: '1' })}`).join('\n') + '\n';
-      await es(`/${idx}/_bulk?refresh=true`, 'POST', undefined, []).catch(() => {});
-      await req(`${ES}/${idx}/_bulk?refresh=true`, { method: 'POST', headers: { ...esHeaders, 'Content-Type': 'application/x-ndjson' }, body: bulk });
-    } else {
-      const esType = def.vlType; // 'keyword' | 'ip'
-      await es(`/${idx}`, 'PUT', {
-        settings: { index: { mode: 'lookup' } },
-        mappings: { properties: { vl_value: { type: esType }, vl_mark: { type: 'keyword' } } },
-      });
-      const bulk = def.values.map((v) => `{"index":{}}\n${JSON.stringify({ vl_value: v, vl_mark: '1' })}`).join('\n') + '\n';
-      await req(`${ES}/${idx}/_bulk?refresh=true`, { method: 'POST', headers: { ...esHeaders, 'Content-Type': 'application/x-ndjson' }, body: bulk });
-    }
-    console.log(`Created value list ${listId} + lookup index ${idx}`);
+    console.log(`Created value list ${listId}`);
   }
 }
 
@@ -315,7 +295,7 @@ async function main() {
   }
 
   await createSourceIndex();
-  await createValueListsAndLookupIndices();
+  await createValueLists();
 
   const allDocs = [];
   const summary = [];

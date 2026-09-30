@@ -10,7 +10,10 @@
  * containing "POC EXCEPTIONS" (POC path). Compare the surviving doc ids and content.
  * V1 is the baseline; the POC is checked against V1's output.
  *
- * Value lists exist both as Kibana value lists (V1) and as lookup indices (POC).
+ * Value-list exceptions are applied by the existing DSL implementation on both the
+ * V1 and POC paths (only scalar entries are compiled into the query), so the `vl_*`
+ * cases below check that the POC leaves value lists unchanged. Only Kibana value
+ * lists are created; no lookup indices.
  *
  * Usage: node poc_ab_compare.mjs   (add --clean to remove)
  */
@@ -24,7 +27,6 @@ const SRC = 'poc_ab_src';
 const PREVIEW_IDX = '.preview.alerts-security.alerts-default';
 const kbnH = { Authorization: auth, 'Content-Type': 'application/json', 'kbn-xsrf': 'true', 'elastic-api-version': '2023-10-31' };
 const esH = { Authorization: auth, 'Content-Type': 'application/json' };
-const lookupIndex = (id) => `poc_vl_${id.toLowerCase().replace(/[^a-z0-9_]/g, '_')}`;
 
 async function j(url, opts, ignore = []) {
   const res = await fetch(url, opts);
@@ -94,7 +96,6 @@ async function clean() {
   await kbn(`/api/detection_engine/rules?rule_id=poc-ab-poc`, 'DELETE', undefined, [404, 500]);
   for (const id of Object.keys(VALUE_LISTS)) {
     await kbn(`/api/lists?id=${id}`, 'DELETE', undefined, [404, 409]);
-    await es(`/${lookupIndex(id)}`, 'DELETE', undefined, [404]);
   }
   await es(`/${SRC}`, 'DELETE', undefined, [404]);
 }
@@ -122,14 +123,6 @@ async function setup() {
     await kbn('/api/lists', 'POST', { id, name: id, description: 'ab', type: def.vlType }, [409]);
     const items = def.vlType === 'ip_range' ? def.ranges.map((r) => `${r[0]}-${r[1]}`) : def.values;
     for (const value of items) await kbn('/api/lists/items', 'POST', { list_id: id, value }, [409]);
-    const idx = lookupIndex(id);
-    if (def.vlType === 'ip_range') {
-      await es(`/${idx}`, 'PUT', { settings: { index: { mode: 'lookup' } }, mappings: { properties: { vl_start: { type: 'ip' }, vl_end: { type: 'ip' }, vl_mark: { type: 'keyword' } } } });
-      await ndjson(idx, def.ranges.flatMap((r) => ['{"index":{}}', JSON.stringify({ vl_start: r[0], vl_end: r[1], vl_mark: '1' })]));
-    } else {
-      await es(`/${idx}`, 'PUT', { settings: { index: { mode: 'lookup' } }, mappings: { properties: { vl_value: { type: def.vlType }, vl_mark: { type: 'keyword' } } } });
-      await ndjson(idx, def.values.flatMap((v) => ['{"index":{}}', JSON.stringify({ vl_value: v, vl_mark: '1' })]));
-    }
   }
 
   const exLists = {};
