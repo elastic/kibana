@@ -20,7 +20,6 @@ export function useRequestFlyoutRedMetrics({
   const {
     connection: { sourceServiceName, dependencies },
     filters: { environment, start, end },
-    refreshToken,
   } = useRequestFlyoutContext();
 
   const {
@@ -29,7 +28,6 @@ export function useRequestFlyoutRedMetrics({
     error,
   } = useFetcher(
     (callApmApi) => {
-      void refreshToken;
       if (sourceServiceName && dependencies.length > 0 && start && end) {
         return callApmApi('GET /internal/apm/service-map/dependency', {
           params: {
@@ -45,7 +43,7 @@ export function useRequestFlyoutRedMetrics({
         });
       }
     },
-    [sourceServiceName, dependencies, environment, start, end, latencyAggregationType, refreshToken]
+    [sourceServiceName, dependencies, environment, start, end, latencyAggregationType]
   );
 
   const { currentPeriodColor: throughputColor } = getTimeSeriesColor(ChartType.THROUGHPUT);

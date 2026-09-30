@@ -5,26 +5,20 @@
  * 2.0.
  */
 
-import { useMemo } from 'react';
-import type { TransactionGroup } from '@kbn/apm-ui-shared';
 import { isPending, useFetcher } from '../../../../hooks/use_fetcher';
 import { useRequestFlyoutContext } from '../request_flyout_context';
-import type { LatencyAggregationType } from '../../../../../common/latency_aggregation_types';
+import type { ConnectionTransactionGroup } from '@kbn/apm-api-shared';
 
-export function useRequestFlyoutTransactions({
-  latencyAggregationType,
-}: {
-  latencyAggregationType: LatencyAggregationType;
-}) {
+export type { ConnectionTransactionGroup };
+
+export function useRequestFlyoutTransactions() {
   const {
     connection: { sourceServiceName, targetServiceName, dependencies },
     filters: { environment, start, end },
-    refreshToken,
   } = useRequestFlyoutContext();
 
   const { data, status } = useFetcher(
     (callApmApi) => {
-      void refreshToken;
       // For service→service edges targetServiceName is the join key (trace-based).
       // For service→dependency edges we join on resource names from dependencies[].
       // We require at least one of the two to avoid querying all transactions.
@@ -39,39 +33,16 @@ export function useRequestFlyoutTransactions({
               environment,
               start,
               end,
-              latencyAggregationType,
             },
           },
         });
       }
     },
-    [
-      sourceServiceName,
-      targetServiceName,
-      dependencies,
-      environment,
-      start,
-      end,
-      latencyAggregationType,
-      refreshToken,
-    ]
-  );
-
-  // Map the API response to the generic TransactionGroup shape the shared table expects.
-  const items = useMemo<TransactionGroup[]>(
-    () =>
-      (data?.transactionGroups ?? []).map((group) => ({
-        name: group.name,
-        transactionType: group.transactionType,
-        latency: { value: group.latency },
-        throughput: { value: group.throughput },
-        errorRate: { value: group.errorRate },
-      })),
-    [data?.transactionGroups]
+    [sourceServiceName, targetServiceName, dependencies, environment, start, end]
   );
 
   return {
-    items,
+    items: data?.transactionGroups ?? [],
     isLoading: isPending(status),
     isMaxTransactionsReached: data?.isMaxTransactionsReached ?? false,
   };

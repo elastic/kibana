@@ -5,28 +5,36 @@
  * 2.0.
  */
 import { z, lazySchema } from '@kbn/zod/v4';
-import { environmentSchema, latencyAggregationTypeSchema } from '@kbn/apm-types';
+import { environmentSchema } from '@kbn/apm-types';
 import { defineRoute } from '../types';
 import { rangeSchema } from '../../default_api_types';
 
-/** A single transaction group in the source service that calls the target connection. */
+/**
+ * A single endpoint group in the source service that calls the target connection.
+ * All latency/call metrics are measured from the source's exit spans, not the
+ * full transaction duration.
+ */
 export interface ConnectionTransactionGroup {
   name: string;
-  /** Most frequent transaction type for this group — needed to open the detail flyout. */
+  /** Most frequent transaction type — needed to open the transaction detail flyout. */
   transactionType: string;
-  /** Avg/p95/p99 latency in microseconds, based on latencyAggregationType. */
-  latency: number | null;
-  /** Transactions per minute. */
-  throughput: number | null;
-  /** Failed transaction rate 0-1. */
-  errorRate: number | null;
-  /** True when the result set was capped by MAX_TRANSACTION_IDS (1 000) — values may be biased. */
+  /** Average exit span duration for calls to the target, in µs. Null for unresolved OTel groups. */
+  avgCallLatency: number | null;
+  /** Exit span calls per minute to the target. */
+  callRate: number | null;
+  /** Total call count in the time window. */
+  callCount: number;
+  /** Failed exit span rate 0-1. Null if no outcome data. */
+  failedCallRate: number | null;
+  /** This group's share of total exit span time for the connection, 0-1. */
+  timeConsumedPct: number | null;
+  /** True when the result set was capped by MAX_IDS — values may be biased. */
   isSampled: boolean;
 }
 
 export interface ConnectionTransactionsResponse {
   transactionGroups: ConnectionTransactionGroup[];
-  /** True if the exit span join was capped at MAX_TRANSACTION_IDS = 1 000. */
+  /** True if the Phase 1 ID collection was capped at MAX_IDS = 1 000. */
   isMaxTransactionsReached: boolean;
 }
 
@@ -45,7 +53,6 @@ export const serviceMapConnectionTransactionsRoute = defineRoute<ConnectionTrans
           /** Set for service→service edges — triggers a parent-span join instead of resource-based. */
           targetServiceName: z.string().optional(),
         })
-        .merge(z.object({ latencyAggregationType: latencyAggregationTypeSchema }).partial())
         .merge(environmentSchema)
         .merge(rangeSchema),
     })

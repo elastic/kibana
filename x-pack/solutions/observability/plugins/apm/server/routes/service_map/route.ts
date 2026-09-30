@@ -199,7 +199,6 @@ const serviceMapConnectionTransactionsRoute = createApmServerRoute({
         environment,
         start,
         end,
-        latencyAggregationType,
       },
     } = params;
 
@@ -212,7 +211,6 @@ const serviceMapConnectionTransactionsRoute = createApmServerRoute({
       environment,
       start,
       end,
-      latencyAggregationType,
     });
   },
 });

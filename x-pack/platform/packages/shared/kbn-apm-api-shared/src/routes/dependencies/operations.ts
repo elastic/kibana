@@ -38,6 +38,8 @@ export const dependencyOperationsRoute = defineRoute<DependencyOperationsRespons
           z.object({
             dependencyName: z.string(),
             searchServiceDestinationMetrics: BooleanFromString.default(false),
+            /** Optional: when set, only include spans from this service. */
+            serviceName: z.string().optional(),
           })
         ),
     })

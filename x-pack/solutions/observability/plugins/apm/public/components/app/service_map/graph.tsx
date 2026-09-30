@@ -989,9 +989,9 @@ function GraphInner({
               key={selectedEdgeForFlyout?.id}
               deps={{ core, share, lens, dataViews }}
               connection={edgeFlyoutConnection}
-              initialEnvironment={environment}
-              initialRangeFrom={rangeFrom ?? start}
-              initialRangeTo={rangeTo ?? end}
+              environment={environment}
+              rangeFrom={rangeFrom ?? start}
+              rangeTo={rangeTo ?? end}
               onClose={handlePopoverClose}
             />
           )}

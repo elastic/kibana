@@ -12,6 +12,7 @@ import { kqlQuery, rangeQuery, termQuery } from '@kbn/observability-plugin/serve
 import type { Environment } from '../../../common/environment_rt';
 import {
   EVENT_OUTCOME,
+  SERVICE_NAME,
   SPAN_DESTINATION_SERVICE_RESOURCE,
   SPAN_DESTINATION_SERVICE_RESPONSE_TIME_COUNT,
   SPAN_DESTINATION_SERVICE_RESPONSE_TIME_SUM,
@@ -40,6 +41,7 @@ export async function getTopDependencyOperations({
   environment,
   kuery,
   searchServiceDestinationMetrics,
+  serviceName,
 }: {
   apmEventClient: APMEventClient;
   dependencyName: string;
@@ -49,6 +51,8 @@ export async function getTopDependencyOperations({
   environment: Environment;
   kuery: string;
   searchServiceDestinationMetrics: boolean;
+  /** Optional: when set, only include spans from this service (for the service map flyout). */
+  serviceName?: string;
 }): Promise<DependencyOperation[]> {
   const { startWithOffset, endWithOffset, offsetInMs } = getOffsetInMs({
     start,
@@ -104,6 +108,7 @@ export async function getTopDependencyOperations({
           ...environmentQuery(environment),
           ...kqlQuery(kuery),
           ...termQuery(SPAN_DESTINATION_SERVICE_RESOURCE, dependencyName),
+          ...termQuery(SERVICE_NAME, serviceName),
           ...getDocumentTypeFilterForServiceDestinationStatistics(searchServiceDestinationMetrics),
         ],
       },

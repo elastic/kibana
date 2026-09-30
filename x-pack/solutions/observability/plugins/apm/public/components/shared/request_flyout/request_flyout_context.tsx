@@ -15,12 +15,10 @@ import type { RequestFlyoutConnection } from './types';
 
 export interface RequestFlyoutFilters {
   environment: Environment;
-  setEnvironment: (env: Environment) => void;
   start: string;
   end: string;
   rangeFrom: string;
   rangeTo: string;
-  setRange: (r: { rangeFrom: string; rangeTo: string }) => void;
 }
 
 export interface RequestFlyoutContextValue {
@@ -32,9 +30,6 @@ export interface RequestFlyoutContextValue {
   };
   connection: RequestFlyoutConnection;
   filters: RequestFlyoutFilters;
-  /** Increments when the user presses the refresh button inside the flyout. */
-  refreshToken: number;
-  onRefresh: () => void;
 }
 
 const RequestFlyoutContext = createContext<RequestFlyoutContextValue | null>(null);

@@ -246,6 +246,7 @@ const dependencyOperationsRoute = createApmServerRoute({
         kuery,
         offset,
         searchServiceDestinationMetrics,
+        serviceName,
       },
     } = resources.params;
 
@@ -258,6 +259,7 @@ const dependencyOperationsRoute = createApmServerRoute({
       environment,
       kuery,
       searchServiceDestinationMetrics,
+      serviceName,
     });
 
     return { operations };

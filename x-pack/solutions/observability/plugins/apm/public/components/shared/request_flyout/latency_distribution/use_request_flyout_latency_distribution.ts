@@ -25,7 +25,6 @@ export function useRequestFlyoutLatencyDistribution() {
     deps: {
       core: { notifications },
     },
-    refreshToken,
   } = useRequestFlyoutContext();
 
   // All-spans fetch: establishes the durationMin/durationMax for the second fetch.
@@ -35,7 +34,6 @@ export function useRequestFlyoutLatencyDistribution() {
     error: overallLatencyError,
   } = useFetcher(
     (callApmApi) => {
-      void refreshToken;
       if (dependencies.length > 0 && environment && start && end) {
         return callApmApi('POST /internal/apm/latency/overall_distribution/spans', {
           params: {
@@ -52,7 +50,7 @@ export function useRequestFlyoutLatencyDistribution() {
         });
       }
     },
-    [dependencies, environment, start, end, refreshToken]
+    [dependencies, environment, start, end]
   );
 
   useEffect(() => {
@@ -83,7 +81,6 @@ export function useRequestFlyoutLatencyDistribution() {
   // Failed-spans fetch: uses durationMin/durationMax from the first fetch to align bucket sizes.
   const { data: errorHistogramData = {}, error: errorHistogramError } = useFetcher(
     (callApmApi) => {
-      void refreshToken;
       if (
         dependencies.length > 0 &&
         environment &&
@@ -122,7 +119,6 @@ export function useRequestFlyoutLatencyDistribution() {
       end,
       overallLatencyData.durationMin,
       overallLatencyData.durationMax,
-      refreshToken,
     ]
   );
 

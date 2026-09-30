@@ -5,27 +5,41 @@
  * 2.0.
  */
 
-import { EuiFlexGroup, EuiFlexItem, EuiFlyoutBody, EuiSpacer, EuiTitle, useGeneratedHtmlId } from '@elastic/eui';
+import {
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiFlyoutBody,
+  EuiSpacer,
+  EuiTab,
+  EuiTabs,
+  EuiText,
+  EuiTitle,
+  useGeneratedHtmlId,
+} from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import type { CoreStart } from '@kbn/core/public';
 import type { LensPublicStart } from '@kbn/lens-plugin/public';
 import type { SharePublicStart } from '@kbn/share-plugin/public/plugin';
 import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import type { Environment } from '../../../../common/environment_rt';
-import { LatencyAggregationType } from '../../../../common/latency_aggregation_types';
+import { ENVIRONMENT_ALL } from '../../../../common/environment_filter_values';
 import { TimeRangeMetadataContextProvider } from '../../../context/time_range_metadata/time_range_metadata_context';
 import { useTimeRange } from '../../../hooks/use_time_range';
 import { ResponsiveFlyout } from '../responsive_flyout';
 import { RequestFlyoutFooter } from './footer';
 import { RequestFlyoutHeader } from './header';
-import { RequestFlyoutQueryControls } from './query_controls';
 import { RequestFlyoutLatencyDistribution } from './latency_distribution';
 import { RequestFlyoutRedMetrics } from './red_metrics';
-import { RequestFlyoutTransactions } from './transactions';
+import { RequestFlyoutOperations } from './operations';
+import { RequestFlyoutAffectedEndpoints } from './transactions';
 import { RequestFlyoutNoMetricsMessage } from './no_metrics_message';
 import { RequestFlyoutContextProvider } from './request_flyout_context';
 import type { RequestFlyoutConnection } from './types';
+import type { LatencyAggregationType } from '../../../../common/latency_aggregation_types';
+import { LatencyAggregationType as LatencyAggregationTypeEnum } from '../../../../common/latency_aggregation_types';
+
+type TabId = 'operations' | 'affectedEndpoints';
 
 interface RequestFlyoutProps {
   deps: {
@@ -35,35 +49,28 @@ interface RequestFlyoutProps {
     dataViews?: DataViewsPublicPluginStart;
   };
   connection: RequestFlyoutConnection;
-  /** Initial environment — from the host page query params. */
-  initialEnvironment: Environment;
-  /** Initial time range — from the host page query params. */
-  initialRangeFrom: string;
-  initialRangeTo: string;
+  environment: Environment;
+  rangeFrom: string;
+  rangeTo: string;
   onClose: () => void;
 }
 
 export function RequestFlyout({
   deps,
   connection,
-  initialEnvironment,
-  initialRangeFrom,
-  initialRangeTo,
+  environment,
+  rangeFrom,
+  rangeTo,
   onClose,
 }: RequestFlyoutProps) {
   const titleId = useGeneratedHtmlId({ prefix: 'requestFlyoutTitle' });
 
-  // Flyout-local filter state — changes here do NOT affect the host page.
-  const [environment, setEnvironment] = useState<Environment>(initialEnvironment);
-  const [range, setRange] = useState({ rangeFrom: initialRangeFrom, rangeTo: initialRangeTo });
-  const [refreshToken, setRefreshToken] = useState(0);
-  const [latencyAggregationType, setLatencyAggregationType] = useState(LatencyAggregationType.avg);
+  const { start, end } = useTimeRange({ rangeFrom, rangeTo });
 
-  const { start, end } = useTimeRange(range);
-
-  const onRefresh = useCallback(() => {
-    setRefreshToken((prev) => prev + 1);
-  }, []);
+  const [latencyAggregationType, setLatencyAggregationType] = useState<LatencyAggregationType>(
+    LatencyAggregationTypeEnum.avg
+  );
+  const [activeTab, setActiveTab] = useState<TabId>('operations');
 
   const title = `${connection.sourceLabel} → ${connection.targetLabel}`;
 
@@ -73,18 +80,19 @@ export function RequestFlyout({
       connection,
       filters: {
         environment,
-        setEnvironment,
         start,
         end,
-        rangeFrom: range.rangeFrom,
-        rangeTo: range.rangeTo,
-        setRange,
+        rangeFrom,
+        rangeTo,
       },
-      refreshToken,
-      onRefresh,
     }),
-    [deps, connection, environment, start, end, range, refreshToken, onRefresh]
+    [deps, connection, environment, start, end, rangeFrom, rangeTo]
   );
+
+  const envLabel =
+    environment === ENVIRONMENT_ALL
+      ? i18n.translate('xpack.apm.requestFlyout.environmentAny', { defaultMessage: 'Any' })
+      : environment;
 
   return (
     <RequestFlyoutContextProvider value={contextValue}>
@@ -97,14 +105,9 @@ export function RequestFlyout({
       >
         <ResponsiveFlyout
           data-test-subj="requestFlyout"
-          flyoutMenuDisplayMode="always"
           onClose={onClose}
           ownFocus={false}
           size="m"
-          paddingSize="m"
-          minWidth={660}
-          session="start"
-          flyoutMenuProps={{ title }}
           aria-labelledby={titleId}
         >
           <RequestFlyoutHeader title={title} titleId={titleId} />
@@ -114,8 +117,18 @@ export function RequestFlyout({
           ) : (
             <>
               <EuiFlyoutBody>
-                <RequestFlyoutQueryControls />
+                {/* Read-only time/env inherited from the map */}
+                <EuiText size="s" color="subdued">
+                  {i18n.translate('xpack.apm.requestFlyout.inheritedFilters', {
+                    defaultMessage:
+                      '{rangeFrom} – {rangeTo} · Environment: {environment} · inherited from the map',
+                    values: { rangeFrom, rangeTo, environment: envLabel },
+                  })}
+                </EuiText>
+
                 <EuiSpacer size="m" />
+
+                {/* Key metrics section */}
                 <EuiFlexGroup alignItems="center" gutterSize="xs" responsive={false}>
                   <EuiFlexItem grow={false}>
                     <EuiTitle size="xs">
@@ -134,8 +147,36 @@ export function RequestFlyout({
                 />
                 <EuiSpacer size="m" />
                 <RequestFlyoutLatencyDistribution />
+
                 <EuiSpacer size="m" />
-                <RequestFlyoutTransactions latencyAggregationType={latencyAggregationType} />
+
+                {/* Breakdown tabs */}
+                <EuiTabs size="s">
+                  <EuiTab
+                    isSelected={activeTab === 'operations'}
+                    onClick={() => setActiveTab('operations')}
+                    data-test-subj="requestFlyoutTabOperations"
+                  >
+                    {i18n.translate('xpack.apm.requestFlyout.tabs.operations', {
+                      defaultMessage: 'Operations ({target} methods)',
+                      values: { target: connection.targetLabel },
+                    })}
+                  </EuiTab>
+                  <EuiTab
+                    isSelected={activeTab === 'affectedEndpoints'}
+                    onClick={() => setActiveTab('affectedEndpoints')}
+                    data-test-subj="requestFlyoutTabAffectedEndpoints"
+                  >
+                    {i18n.translate('xpack.apm.requestFlyout.tabs.affectedEndpoints', {
+                      defaultMessage: 'Affected {source} endpoints',
+                      values: { source: connection.sourceLabel },
+                    })}
+                  </EuiTab>
+                </EuiTabs>
+                <EuiSpacer size="s" />
+
+                {activeTab === 'operations' && <RequestFlyoutOperations />}
+                {activeTab === 'affectedEndpoints' && <RequestFlyoutAffectedEndpoints />}
               </EuiFlyoutBody>
               <RequestFlyoutFooter />
             </>

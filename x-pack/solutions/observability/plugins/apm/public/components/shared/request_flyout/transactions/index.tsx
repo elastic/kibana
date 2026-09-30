@@ -5,88 +5,144 @@
  * 2.0.
  */
 
-import { TransactionsTable } from '@kbn/apm-ui-shared';
-import type { TransactionGroup } from '@kbn/apm-ui-shared';
+import {
+  EuiBasicTable,
+  EuiCallOut,
+  EuiSpacer,
+  EuiText,
+  type EuiBasicTableColumn,
+} from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { useCallback, useState } from 'react';
-import type { LatencyAggregationType } from '../../../../../common/latency_aggregation_types';
+import { asMillisecondDuration, asPercent } from '../../../../../common/utils/formatters';
+import { ImpactBar } from '../../impact_bar';
 import { TransactionDetailFlyout } from '../../transaction_detail_flyout';
 import { useRequestFlyoutContext } from '../request_flyout_context';
 import { useRequestFlyoutTransactions } from './use_request_flyout_transactions';
+import type { ConnectionTransactionGroup } from './use_request_flyout_transactions';
 
 /**
- * Transaction groups in the source service that call the target connection.
- * Each group is derived from a two-phase join: exit spans → transaction docs.
- * Clicking a row opens a nested TransactionDetailFlyout for the selected group.
+ * "Affected endpoints" tab in the edge flyout.
  *
- * PoC concern #1: the join is capped at 1 000 unique transaction IDs, so
- * throughput / error rate values may be biased on high-volume connections.
+ * Shows source-service transaction groups that directly call the target.
+ * All metrics (call latency, calls, failed) are measured from the exit spans,
+ * NOT from the full transaction duration — so latency here means "time spent
+ * calling the target", not "transaction response time".
  */
-export function RequestFlyoutTransactions({
-  latencyAggregationType,
-}: {
-  latencyAggregationType: LatencyAggregationType;
-}) {
+export function RequestFlyoutAffectedEndpoints() {
   const {
     deps,
-    connection: { sourceServiceName },
+    connection: { sourceServiceName, targetLabel },
     filters: { environment, rangeFrom, rangeTo, start, end },
-    refreshToken,
   } = useRequestFlyoutContext();
 
-  const { items, isLoading, isMaxTransactionsReached } = useRequestFlyoutTransactions({
-    latencyAggregationType,
-  });
+  const { items, isLoading, isMaxTransactionsReached } = useRequestFlyoutTransactions();
 
   const [selectedTransaction, setSelectedTransaction] = useState<{
     name: string;
     transactionType: string;
   } | null>(null);
 
-  const onTransactionClick = useCallback((item: TransactionGroup) => {
-    const txType = item.transactionType ?? '';
-    if (!txType) {
-      return;
-    }
-    setSelectedTransaction((prev) => {
-      if (prev?.name === item.name && prev.transactionType === txType) {
-        return null;
-      }
-      return { name: item.name, transactionType: txType };
-    });
+  const onRowClick = useCallback((item: ConnectionTransactionGroup) => {
+    if (!item.transactionType) return;
+    setSelectedTransaction((prev) =>
+      prev?.name === item.name && prev.transactionType === item.transactionType
+        ? null
+        : { name: item.name, transactionType: item.transactionType }
+    );
   }, []);
 
-  const isTransactionExpanded = useCallback(
-    (item: TransactionGroup) => {
-      if (!selectedTransaction) return false;
-      return (
-        selectedTransaction.name === item.name &&
-        selectedTransaction.transactionType === (item.transactionType ?? '')
-      );
+  const columns: Array<EuiBasicTableColumn<ConnectionTransactionGroup>> = [
+    {
+      field: 'name',
+      name: i18n.translate('xpack.apm.requestFlyout.affectedEndpoints.column.endpoint', {
+        defaultMessage: 'Endpoint',
+      }),
+      truncateText: true,
+      render: (name: string) => (
+        <EuiText size="s" style={{ cursor: 'pointer' }}>
+          {name}
+        </EuiText>
+      ),
     },
-    [selectedTransaction]
-  );
+    {
+      field: 'avgCallLatency',
+      name: i18n.translate('xpack.apm.requestFlyout.affectedEndpoints.column.avgCallLatency', {
+        defaultMessage: 'Avg time in {target} calls',
+        values: { target: targetLabel },
+      }),
+      align: 'right' as const,
+      render: (value: number | null) =>
+        value == null
+          ? '—'
+          : asMillisecondDuration(value),
+    },
+    {
+      field: 'callCount',
+      name: i18n.translate('xpack.apm.requestFlyout.affectedEndpoints.column.calls', {
+        defaultMessage: 'Calls',
+      }),
+      align: 'right' as const,
+      render: (value: number) => value.toLocaleString(),
+    },
+    {
+      field: 'failedCallRate',
+      name: i18n.translate('xpack.apm.requestFlyout.affectedEndpoints.column.failed', {
+        defaultMessage: 'Failed',
+      }),
+      align: 'right' as const,
+      render: (value: number | null) => (value == null ? '—' : asPercent(value, 1)),
+    },
+    {
+      field: 'timeConsumedPct',
+      name: i18n.translate('xpack.apm.requestFlyout.affectedEndpoints.column.timeConsumed', {
+        defaultMessage: 'Time consumed',
+      }),
+      align: 'right' as const,
+      render: (value: number | null) =>
+        value == null ? '—' : <ImpactBar value={value * 100} size="m" />,
+    },
+  ];
 
   return (
     <>
-      <section data-test-subj="requestFlyoutSection-transactions">
-        <TransactionsTable
+      {isMaxTransactionsReached && (
+        <>
+          <EuiCallOut
+            size="s"
+            color="warning"
+            iconType="warning"
+            title={i18n.translate(
+              'xpack.apm.requestFlyout.affectedEndpoints.maxTransactionsWarning',
+              {
+                defaultMessage:
+                  'Not all transactions are shown. Results are based on a sample of {max} calls.',
+                values: { max: '1 000' },
+              }
+            )}
+          />
+          <EuiSpacer size="s" />
+        </>
+      )}
+      <section data-test-subj="requestFlyoutSection-affectedEndpoints">
+        <EuiBasicTable
+          columns={columns}
           items={items}
-          isLoading={isLoading}
-          maxCountExceeded={isMaxTransactionsReached}
-          showMaxTransactionGroupsExceededWarning
-          latencyAggregationType={latencyAggregationType}
-          showSparklines={false}
-          columnInteractions={{
-            name: {
-              onClick: onTransactionClick,
-              isExpanded: isTransactionExpanded,
-            },
-          }}
-          title={i18n.translate('xpack.apm.requestFlyout.transactions.title', {
-            defaultMessage: 'Transactions',
+          loading={isLoading}
+          noItemsMessage={
+            isLoading
+              ? i18n.translate('xpack.apm.requestFlyout.affectedEndpoints.loadingLabel', {
+                  defaultMessage: 'Loading endpoints…',
+                })
+              : i18n.translate('xpack.apm.requestFlyout.affectedEndpoints.noDataLabel', {
+                  defaultMessage: 'No transactions found between these services.',
+                })
+          }
+          rowProps={(item) => ({
+            onClick: () => onRowClick(item),
+            'data-test-subj': `affectedEndpointRow-${item.name}`,
           })}
-          data-test-subj="requestFlyoutTransactionsTable"
+          data-test-subj="requestFlyoutAffectedEndpointsTable"
         />
       </section>
       {selectedTransaction && (
@@ -102,7 +158,6 @@ export function RequestFlyoutTransactions({
             start,
             end,
           }}
-          refreshToken={refreshToken}
           onClose={() => setSelectedTransaction(null)}
         />
       )}

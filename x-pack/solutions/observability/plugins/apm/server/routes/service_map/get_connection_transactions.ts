@@ -5,41 +5,41 @@
  * 2.0.
  */
 
-import {
-  calculateFailedTransactionRate,
-  calculateThroughputWithRange,
-  getOutcomeAggregation,
-} from '@kbn/apm-data-access-plugin/server/utils';
-import { LatencyAggregationType } from '@kbn/apm-types';
+import { termQuery } from '@kbn/observability-plugin/server';
 import { ProcessorEvent } from '@kbn/observability-plugin/common';
 import { rangeQuery } from '@kbn/observability-plugin/server';
 import type { ConnectionTransactionsResponse } from '@kbn/apm-api-shared';
-import { ApmDocumentType } from '../../../common/document_type';
 import {
+  EVENT_OUTCOME,
   PARENT_ID,
   SERVICE_NAME,
   SPAN_DESTINATION_SERVICE_RESOURCE,
+  SPAN_DURATION,
   SPAN_ID,
   TRACE_ID,
-  TRANSACTION_DURATION,
   TRANSACTION_NAME,
   TRANSACTION_TYPE,
 } from '../../../common/es_fields/apm';
+import { EventOutcome } from '../../../common/event_outcome';
 import { environmentQuery } from '../../../common/utils/environment_query';
 import type { Environment } from '../../../common/environment_rt';
 import type { APMEventClient } from '../../lib/helpers/create_es_client/create_apm_event_client';
-import { getLatencyAggregation, getLatencyValue } from '../../lib/helpers/latency_aggregation_type';
 import { withApmSpan } from '../../utils/with_apm_span';
 
 /**
- * Maximum number of IDs collected from Phase 1.
- * This is an intentional PoC constraint — values are biased for high-volume connections.
- * See kibana#293244 concern #1 in the PR description.
+ * Maximum number of IDs collected from Phase 1 (service→service parent-span join).
+ * Biases results on very high-volume connections. See kibana#293244.
  */
 const MAX_IDS = 1000;
 
-/** Maximum number of distinct transaction name groups returned in Phase 2. */
+/** Maximum distinct endpoint (transaction name) groups returned. */
 const MAX_TRANSACTION_GROUPS = 100;
+
+/**
+ * Sentinel used as the `missing` parameter on the transaction.name terms agg so that
+ * OTel exit spans (which lack transaction.name) are collected in their own bucket.
+ */
+const OTEL_MISSING_KEY = '__otel_tx_name_missing__';
 
 export function getConnectionTransactions({
   apmEventClient,
@@ -49,7 +49,6 @@ export function getConnectionTransactions({
   environment,
   start,
   end,
-  latencyAggregationType = LatencyAggregationType.avg,
 }: {
   apmEventClient: APMEventClient;
   sourceServiceName: string;
@@ -59,31 +58,17 @@ export function getConnectionTransactions({
   environment: Environment;
   start: number;
   end: number;
-  latencyAggregationType?: LatencyAggregationType;
 }): Promise<ConnectionTransactionsResponse> {
   return withApmSpan('get_connection_transactions', async () => {
-    // trace.id is present on both APM-native and OTel-native spans/transactions,
-    // while transaction.id is absent on OTel exit spans. Using trace.id for the join
-    // means Phase 2 may include extra transactions in multi-tx traces (PoC trade-off).
-    let traceIds: string[];
-    let isMaxTransactionsReached: boolean;
+    // -----------------------------------------------------------------------
+    // Phase 1 (service→service): collect parent.id of s2 entry transactions.
+    // These are the span.id values of s1 exit spans that directly called s2.
+    // This join excludes s1→s3→s2 paths (Phase 1a exit spans are in s1 only).
+    // -----------------------------------------------------------------------
+    let scopeFilter: Array<Record<string, unknown>>;
+    let isMaxTransactionsReached = false;
 
     if (targetServiceName) {
-      //
-      // Service→service Phase 1: parent-span join.
-      //
-      // A trace-level join (find sourceService tx IDs in any trace that also contains
-      // targetService) is too broad: in multi-hop traces like A→B→C it would incorrectly
-      // include A→B transactions even when A never calls C directly.
-      //
-      // A parent-span join is precise: every targetService entry transaction has a
-      // parent.id that is the span.id of the exit span in sourceService that created it.
-      // Collecting those parent.id values and then looking up which sourceService
-      // transactions contain those span IDs gives exactly the sourceService transactions
-      // that directly called targetService.
-      //
-      // Phase 1a: collect the parent.id values of targetService entry transactions.
-      // These are the span.id values of exit spans in sourceService.
       const targetEntryResponse = await apmEventClient.search(
         'get_connection_transactions_target_parent_ids',
         {
@@ -116,162 +101,173 @@ export function getConnectionTransactions({
         return { transactionGroups: [], isMaxTransactionsReached: false };
       }
 
-      // Phase 1b: find sourceService spans whose span.id is in parentIds, then collect
-      // the trace.id. Using trace.id (not transaction.id) so OTel exit spans — which lack
-      // transaction.id — are handled correctly. Phase 2 filters by trace.id + service.name.
-      const sourceTxResponse = await apmEventClient.search(
-        'get_connection_transactions_source_tx_ids',
-        {
-          apm: { events: [ProcessorEvent.span, ProcessorEvent.transaction] },
-          track_total_hits: false,
-          size: 0,
-          query: {
-            bool: {
-              filter: [
-                { term: { [SERVICE_NAME]: sourceServiceName } },
-                { terms: { [SPAN_ID]: parentIds } },
-                ...rangeQuery(start, end),
-                ...environmentQuery(environment),
-              ],
-            },
-          },
-          aggs: {
-            trace_ids: {
-              terms: { field: TRACE_ID, size: MAX_IDS },
-            },
-          },
-        }
-      );
-
-      const sourceBuckets = sourceTxResponse.aggregations?.trace_ids.buckets ?? [];
-      traceIds = sourceBuckets.map((b) => String(b.key));
-      isMaxTransactionsReached = parentIds.length >= MAX_IDS || traceIds.length >= MAX_IDS;
+      isMaxTransactionsReached = parentIds.length >= MAX_IDS;
+      scopeFilter = [
+        { term: { [SERVICE_NAME]: sourceServiceName } },
+        { terms: { [SPAN_ID]: parentIds } },
+      ];
     } else {
-      //
-      // Service→dependency Phase 1: resource-based join.
-      //
-      // Spans have `trace.id` but NOT `transaction.name`.
-      // Transaction docs have `transaction.name` but NOT `span.destination.service.resource`.
-      // So we do a two-phase join on trace.id — present on both APM-native and OTel-native
-      // spans — then filter in Phase 2 by service.name + trace.id to find the right transactions.
-      //
-      // We query BOTH span and transaction documents. The service map's own exit span query
-      // (fetch_exit_span_samples.ts) does the same — in some cases (single-span transactions,
-      // certain agent types) `span.destination.service.resource` appears on a transaction
-      // document rather than a span document.
-      //
-      const spanAggResponse = await apmEventClient.search(
-        'get_connection_transactions_exit_span_ids',
-        {
-          apm: {
-            events: [ProcessorEvent.span, ProcessorEvent.transaction],
+      // Service→dependency: scope is source service + resource match.
+      scopeFilter = [
+        { term: { [SERVICE_NAME]: sourceServiceName } },
+        { terms: { [SPAN_DESTINATION_SERVICE_RESOURCE]: dependencies } },
+      ];
+    }
+
+    // -----------------------------------------------------------------------
+    // Phase 1b / "exit span aggregation":
+    // Query the scoped exit spans and aggregate by transaction.name.
+    // APM-native spans carry transaction.name; OTel spans don't (they land in
+    // the OTEL_MISSING_KEY bucket for later resolution via trace.id).
+    // -----------------------------------------------------------------------
+    const exitSpanResponse = await apmEventClient.search(
+      'get_connection_transactions_exit_span_agg',
+      {
+        apm: { events: [ProcessorEvent.span, ProcessorEvent.transaction] },
+        track_total_hits: false,
+        size: 0,
+        query: {
+          bool: {
+            filter: [
+              ...scopeFilter,
+              ...rangeQuery(start, end),
+              ...environmentQuery(environment),
+            ],
           },
-          track_total_hits: false,
-          size: 0,
-          query: {
-            bool: {
-              filter: [
-                { term: { [SERVICE_NAME]: sourceServiceName } },
-                { terms: { [SPAN_DESTINATION_SERVICE_RESOURCE]: dependencies } },
-                ...rangeQuery(start, end),
-                ...environmentQuery(environment),
-              ],
+        },
+        aggs: {
+          by_tx_name: {
+            terms: {
+              field: TRANSACTION_NAME,
+              size: MAX_TRANSACTION_GROUPS,
+              // OTel spans that lack transaction.name land here.
+              missing: OTEL_MISSING_KEY as unknown as string,
+            },
+            aggs: {
+              avg_call_latency: { avg: { field: SPAN_DURATION } },
+              total_call_time: { sum: { field: SPAN_DURATION } },
+              failed: { filter: { term: { [EVENT_OUTCOME]: EventOutcome.failure } } },
+              transaction_type: { terms: { field: TRANSACTION_TYPE, size: 1 } },
+              // Collect trace.ids for the OTel missing bucket.
+              trace_ids: { terms: { field: TRACE_ID, size: MAX_IDS } },
             },
           },
-          aggs: {
-            trace_ids: {
-              terms: {
-                field: TRACE_ID,
-                size: MAX_IDS,
-              },
-            },
-          },
-        }
+          total_call_time: { sum: { field: SPAN_DURATION } },
+        },
+      }
+    );
+
+    const totalCallTime = exitSpanResponse.aggregations?.total_call_time?.value ?? 0;
+    const allBuckets = exitSpanResponse.aggregations?.by_tx_name.buckets ?? [];
+
+    if (allBuckets.length === 0) {
+      return { transactionGroups: [], isMaxTransactionsReached };
+    }
+
+    // Separate APM (known transaction.name) from OTel (OTEL_MISSING_KEY bucket).
+    const apmBuckets = allBuckets.filter((b) => String(b.key) !== OTEL_MISSING_KEY);
+    const otelBucket = allBuckets.find((b) => String(b.key) === OTEL_MISSING_KEY);
+
+    const durationMs = (end - start) / 1000 / 60; // time window in minutes
+
+    // -----------------------------------------------------------------------
+    // Build APM groups (accurate call latency from exit span.duration.us).
+    // -----------------------------------------------------------------------
+    const apmGroups = apmBuckets.map((bucket) => {
+      const callCount = bucket.doc_count;
+      const avgCallLatency = (bucket as any).avg_call_latency?.value ?? null;
+      const totalTime = (bucket as any).total_call_time?.value ?? 0;
+      const failedCount = (bucket as any).failed?.doc_count ?? 0;
+      const transactionType = String(
+        (bucket as any).transaction_type?.buckets?.[0]?.key ?? ''
       );
-
-      const buckets = spanAggResponse.aggregations?.trace_ids.buckets ?? [];
-      traceIds = buckets.map((b) => String(b.key));
-      isMaxTransactionsReached = traceIds.length >= MAX_IDS;
-    }
-
-    if (traceIds.length === 0) {
-      return { transactionGroups: [], isMaxTransactionsReached: false };
-    }
-
-    //
-    // Phase 2: Aggregate transaction docs by transaction.name.
-    //
-    const outcomes = getOutcomeAggregation(ApmDocumentType.TransactionEvent);
-
-    const txAggResponse = await apmEventClient.search('get_connection_transactions_groups', {
-      apm: {
-        events: [ProcessorEvent.transaction],
-      },
-      track_total_hits: false,
-      size: 0,
-      query: {
-        bool: {
-          filter: [
-            { term: { [SERVICE_NAME]: sourceServiceName } },
-            { terms: { [TRACE_ID]: traceIds } },
-            ...rangeQuery(start, end),
-            ...environmentQuery(environment),
-          ],
-        },
-      },
-      aggs: {
-        transaction_groups: {
-          terms: {
-            field: TRANSACTION_NAME,
-            size: MAX_TRANSACTION_GROUPS,
-          },
-          aggs: {
-            ...outcomes,
-            ...getLatencyAggregation(latencyAggregationType, TRANSACTION_DURATION),
-            transaction_type: {
-              terms: {
-                field: TRANSACTION_TYPE,
-                size: 1,
-              },
-            },
-          },
-        },
-      },
-    });
-
-    const groups = txAggResponse.aggregations?.transaction_groups.buckets ?? [];
-
-    const transactionGroups = groups.map((bucket) => {
-      const totalCount = bucket.doc_count;
-      const latencyRaw = bucket.latency;
-      const latency = latencyRaw
-        ? getLatencyValue({
-            latencyAggregationType,
-            aggregation: latencyRaw as
-              | { value: number | null }
-              | { values: Record<string, number | null> },
-          })
-        : null;
-
-      const errorRate = calculateFailedTransactionRate(bucket);
-      const throughput = calculateThroughputWithRange({
-        start,
-        end,
-        value: totalCount,
-      });
-
-      const transactionType = String((bucket as any).transaction_type?.buckets?.[0]?.key ?? '');
 
       return {
         name: String(bucket.key),
         transactionType,
-        latency,
-        throughput,
-        errorRate,
+        avgCallLatency,
+        callCount,
+        callRate: durationMs > 0 ? callCount / durationMs : null,
+        failedCallRate: callCount > 0 ? failedCount / callCount : null,
+        timeConsumedPct: totalCallTime > 0 ? totalTime / totalCallTime : null,
         isSampled: isMaxTransactionsReached,
       };
     });
 
-    return { transactionGroups, isMaxTransactionsReached };
+    // -----------------------------------------------------------------------
+    // Resolve OTel groups: trace.id → transaction.name via a Phase 2 query.
+    // avgCallLatency for OTel groups is the overall average across the bucket
+    // (same for every resolved transaction — an approximation for the PoC).
+    // -----------------------------------------------------------------------
+    let otelGroups: Array<(typeof apmGroups)[number]> = [];
+
+    if (otelBucket && otelBucket.doc_count > 0) {
+      const otelTraceIds = ((otelBucket as any).trace_ids?.buckets ?? []).map((b: any) =>
+        String(b.key)
+      );
+
+      if (otelTraceIds.length > 0) {
+        const otelAvgCallLatency = (otelBucket as any).avg_call_latency?.value ?? null;
+        const otelFailedCount = (otelBucket as any).failed?.doc_count ?? 0;
+        const otelCallCount = otelBucket.doc_count;
+        const otelFailedCallRate = otelCallCount > 0 ? otelFailedCount / otelCallCount : null;
+
+        const txResponse = await apmEventClient.search(
+          'get_connection_transactions_otel_resolve',
+          {
+            apm: { events: [ProcessorEvent.transaction] },
+            track_total_hits: false,
+            size: 0,
+            query: {
+              bool: {
+                filter: [
+                  { term: { [SERVICE_NAME]: sourceServiceName } },
+                  { terms: { [TRACE_ID]: otelTraceIds } },
+                  ...rangeQuery(start, end),
+                  ...environmentQuery(environment),
+                ],
+              },
+            },
+            aggs: {
+              by_tx_name: {
+                terms: { field: TRANSACTION_NAME, size: MAX_TRANSACTION_GROUPS },
+                aggs: {
+                  transaction_type: { terms: { field: TRANSACTION_TYPE, size: 1 } },
+                },
+              },
+            },
+          }
+        );
+
+        const txBuckets = txResponse.aggregations?.by_tx_name.buckets ?? [];
+
+        otelGroups = txBuckets.map((bucket) => {
+          const transactionType = String(
+            (bucket as any).transaction_type?.buckets?.[0]?.key ?? ''
+          );
+          const groupCallCount = otelCallCount / (txBuckets.length || 1);
+
+          return {
+            name: String(bucket.key),
+            transactionType,
+            // OTel: use the overall bucket average — same for every resolved name.
+            avgCallLatency: otelAvgCallLatency,
+            callCount: Math.round(groupCallCount),
+            callRate: durationMs > 0 ? groupCallCount / durationMs : null,
+            failedCallRate: otelFailedCallRate,
+            timeConsumedPct:
+              totalCallTime > 0 ? (otelAvgCallLatency ?? 0) * groupCallCount / totalCallTime : null,
+            isSampled: isMaxTransactionsReached || otelTraceIds.length >= MAX_IDS,
+          };
+        });
+      }
+    }
+
+    const transactionGroups = [...apmGroups, ...otelGroups];
+
+    return {
+      transactionGroups,
+      isMaxTransactionsReached,
+    };
   });
 }

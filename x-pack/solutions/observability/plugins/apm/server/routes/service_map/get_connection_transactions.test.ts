@@ -6,7 +6,6 @@
  */
 
 import type { APMEventClient } from '../../lib/helpers/create_es_client/create_apm_event_client';
-import { LatencyAggregationType } from '@kbn/apm-types';
 import { getConnectionTransactions } from './get_connection_transactions';
 
 // withApmSpan is just a tracing wrapper — invoke the callback directly in tests.
@@ -17,7 +16,7 @@ jest.mock('../../utils/with_apm_span', () => ({
 type SearchMock = jest.Mock<Promise<unknown>>;
 
 const START = 1_700_000_000_000;
-const END = 1_700_000_900_000;
+const END = 1_700_000_900_000; // 15 minutes later
 const MAX_IDS = 1000;
 
 // ---------------------------------------------------------------------------
@@ -34,19 +33,17 @@ function makeOptions(
     environment: 'production',
     start: START,
     end: END,
-    latencyAggregationType: LatencyAggregationType.avg,
     ...overrides,
   };
 }
 
 /**
- * Build a minimal ES aggregation response that returns a list of string IDs
- * under the given aggregation name (used for Phase 1 responses).
+ * Phase 1a response: parent.id values of targetService entry transactions.
  */
-function idsAggResponse(ids: string[], aggName: string) {
+function parentIdsResponse(ids: string[]) {
   return {
     aggregations: {
-      [aggName]: {
+      parent_ids: {
         buckets: ids.map((id) => ({ key: id, doc_count: 1 })),
       },
     },
@@ -54,31 +51,80 @@ function idsAggResponse(ids: string[], aggName: string) {
 }
 
 /**
- * Build a Phase 2 ES aggregation response with one bucket per transaction name.
- * The bucket shape is the minimum needed so that `calculateFailedTransactionRate`,
- * `getLatencyValue`, and `calculateThroughputWithRange` do not throw.
- *
- * `calculateFailedTransactionRate` is called with the raw bucket, so the bucket
- * must contain the filter sub-aggregation keys produced by `getOutcomeAggregation`
- * for `ApmDocumentType.TransactionEvent`: `successful` and `successful_or_failed`,
- * each with a `doc_count` (filter aggregation response shape).
+ * Exit span aggregation response (Phase 1b/scope phase) — APM-native buckets only.
+ * Each bucket has the sub-aggs produced by the implementation.
  */
-function txGroupsAggResponse(txNames: string[]) {
+function exitSpanAggResponse(
+  groups: Array<{
+    name: string;
+    docCount?: number;
+    avgCallLatency?: number | null;
+    totalCallTime?: number;
+    failedCount?: number;
+    txType?: string;
+  }>,
+  totalCallTime?: number
+) {
+  const buckets = groups.map(
+    ({ name, docCount = 10, avgCallLatency = 150_000, totalCallTime: groupTotal, failedCount = 1, txType = 'request' }) => ({
+      key: name,
+      doc_count: docCount,
+      avg_call_latency: { value: avgCallLatency },
+      total_call_time: { value: groupTotal ?? docCount * (avgCallLatency ?? 0) },
+      failed: { doc_count: failedCount },
+      transaction_type: { buckets: txType ? [{ key: txType, doc_count: docCount }] : [] },
+      trace_ids: { buckets: [] },
+    })
+  );
   return {
     aggregations: {
-      transaction_groups: {
+      by_tx_name: { buckets },
+      total_call_time: { value: totalCallTime ?? buckets.reduce((acc, b) => acc + (b.total_call_time.value ?? 0), 0) },
+    },
+  };
+}
+
+/**
+ * Exit span aggregation response containing an OTel "missing" bucket.
+ * The sentinel key is __otel_tx_name_missing__.
+ */
+function exitSpanOtelResponse(
+  otelDocCount: number,
+  traceIds: string[],
+  avgCallLatency = 100_000
+) {
+  const OTEL_MISSING_KEY = '__otel_tx_name_missing__';
+  return {
+    aggregations: {
+      by_tx_name: {
+        buckets: [
+          {
+            key: OTEL_MISSING_KEY,
+            doc_count: otelDocCount,
+            avg_call_latency: { value: avgCallLatency },
+            total_call_time: { value: avgCallLatency * otelDocCount },
+            failed: { doc_count: 0 },
+            transaction_type: { buckets: [] },
+            trace_ids: { buckets: traceIds.map((id) => ({ key: id, doc_count: 1 })) },
+          },
+        ],
+      },
+      total_call_time: { value: avgCallLatency * otelDocCount },
+    },
+  };
+}
+
+/**
+ * OTel resolution response (Phase 2): transaction name → bucket mapping.
+ */
+function otelResolutionResponse(txNames: string[]) {
+  return {
+    aggregations: {
+      by_tx_name: {
         buckets: txNames.map((name) => ({
           key: name,
-          doc_count: 10,
-          // avg latency aggregation (used with LatencyAggregationType.avg)
-          latency: { value: 150_000 }, // 150 ms in µs
-          // outcome filter aggregations expected by calculateFailedTransactionRate
-          // for ApmDocumentType.TransactionEvent (filter aggs return doc_count).
-          successful: { doc_count: 9 },
-          successful_or_failed: { doc_count: 10 },
-          transaction_type: {
-            buckets: [{ key: 'request', doc_count: 10 }],
-          },
+          doc_count: 5,
+          transaction_type: { buckets: [{ key: 'request', doc_count: 5 }] },
         })),
       },
     },
@@ -93,71 +139,133 @@ describe('getConnectionTransactions', () => {
   // -------------------------------------------------------------------------
   // service→dependency path (no targetServiceName)
   // -------------------------------------------------------------------------
-  describe('service→dependency path (resource-based, no targetServiceName)', () => {
-    it('returns transaction groups when exit spans match the resource', async () => {
+  describe('service→dependency (resource-based)', () => {
+    it('returns transaction groups from exit span aggregation', async () => {
       const search: SearchMock = jest
         .fn()
-        // Phase 1: trace IDs from exit spans / transaction docs
-        .mockResolvedValueOnce(idsAggResponse(['trace-1', 'trace-2'], 'trace_ids'))
-        // Phase 2: transaction groups
-        .mockResolvedValueOnce(txGroupsAggResponse(['GET /foo', 'POST /bar']));
+        // single call: exit span agg with APM-native buckets
+        .mockResolvedValueOnce(exitSpanAggResponse([
+          { name: 'GET /foo' },
+          { name: 'POST /bar' },
+        ]));
 
       const apmEventClient = { search } as unknown as APMEventClient;
       const result = await getConnectionTransactions(makeOptions({ apmEventClient }));
 
-      expect(search).toHaveBeenCalledTimes(2);
+      expect(search).toHaveBeenCalledTimes(1);
       expect(result.transactionGroups).toHaveLength(2);
       expect(result.transactionGroups.map((g) => g.name)).toEqual(['GET /foo', 'POST /bar']);
       expect(result.isMaxTransactionsReached).toBe(false);
     });
 
-    it('returns empty groups and skips Phase 2 when no exit spans match the resource', async () => {
+    it('returns empty groups when exit span agg has no buckets', async () => {
       const search: SearchMock = jest
         .fn()
-        // Phase 1: no trace IDs found
-        .mockResolvedValueOnce(idsAggResponse([], 'trace_ids'));
+        .mockResolvedValueOnce(exitSpanAggResponse([]));
 
       const apmEventClient = { search } as unknown as APMEventClient;
       const result = await getConnectionTransactions(makeOptions({ apmEventClient }));
 
-      // Phase 2 must never be called when Phase 1 produces nothing.
       expect(search).toHaveBeenCalledTimes(1);
       expect(result.transactionGroups).toEqual([]);
-      expect(result.isMaxTransactionsReached).toBe(false);
     });
 
-    it('sets the correct operation name for Phase 1', async () => {
+    it('sets the correct operation name for the exit span aggregation', async () => {
       const search: SearchMock = jest
         .fn()
-        .mockResolvedValueOnce(idsAggResponse([], 'trace_ids'));
+        .mockResolvedValueOnce(exitSpanAggResponse([]));
 
       const apmEventClient = { search } as unknown as APMEventClient;
       await getConnectionTransactions(makeOptions({ apmEventClient }));
 
-      expect(search.mock.calls[0][0]).toBe('get_connection_transactions_exit_span_ids');
+      expect(search.mock.calls[0][0]).toBe('get_connection_transactions_exit_span_agg');
+    });
+
+    it('computes APM group metrics from exit span durations', async () => {
+      // Window = 15 minutes, call count = 10, avg latency = 150 ms = 150_000 µs
+      const search: SearchMock = jest.fn().mockResolvedValueOnce(
+        exitSpanAggResponse([
+          { name: 'GET /foo', docCount: 10, avgCallLatency: 150_000, failedCount: 2, txType: 'request' },
+        ], /* totalCallTime */ 1_500_000)
+      );
+
+      const apmEventClient = { search } as unknown as APMEventClient;
+      const result = await getConnectionTransactions(makeOptions({ apmEventClient }));
+
+      const group = result.transactionGroups[0];
+      expect(group.name).toBe('GET /foo');
+      expect(group.transactionType).toBe('request');
+      expect(group.callCount).toBe(10);
+      expect(group.avgCallLatency).toBe(150_000);
+      expect(group.failedCallRate).toBeCloseTo(0.2); // 2/10
+      expect(group.timeConsumedPct).toBeCloseTo(1.0); // 100% — only one group
+    });
+
+    it('isMaxTransactionsReached is always false for resource-based path (no Phase 1 cap)', async () => {
+      const search: SearchMock = jest
+        .fn()
+        .mockResolvedValueOnce(exitSpanAggResponse([{ name: 'GET /' }]));
+
+      const apmEventClient = { search } as unknown as APMEventClient;
+      const result = await getConnectionTransactions(makeOptions({ apmEventClient }));
+
+      expect(result.isMaxTransactionsReached).toBe(false);
+    });
+  });
+
+  // -------------------------------------------------------------------------
+  // OTel path (missing transaction.name bucket)
+  // -------------------------------------------------------------------------
+  describe('OTel span resolution (missing bucket → Phase 2)', () => {
+    it('resolves OTel spans via trace.id → transaction name', async () => {
+      const search: SearchMock = jest
+        .fn()
+        // exit span agg: only OTel spans (missing bucket)
+        .mockResolvedValueOnce(exitSpanOtelResponse(5, ['trace-1', 'trace-2']))
+        // Phase 2: transaction name resolution
+        .mockResolvedValueOnce(otelResolutionResponse(['POST /api/checkout']));
+
+      const apmEventClient = { search } as unknown as APMEventClient;
+      const result = await getConnectionTransactions(makeOptions({ apmEventClient }));
+
+      expect(search).toHaveBeenCalledTimes(2);
+      expect(search.mock.calls[1][0]).toBe('get_connection_transactions_otel_resolve');
+      expect(result.transactionGroups).toHaveLength(1);
+      expect(result.transactionGroups[0].name).toBe('POST /api/checkout');
+    });
+
+    it('skips Phase 2 when OTel bucket has no trace IDs', async () => {
+      const search: SearchMock = jest
+        .fn()
+        .mockResolvedValueOnce(exitSpanOtelResponse(0, [])); // 0 doc_count, no trace IDs
+
+      const apmEventClient = { search } as unknown as APMEventClient;
+      const result = await getConnectionTransactions(makeOptions({ apmEventClient }));
+
+      // OTel bucket has doc_count=0, so Phase 2 must NOT be called.
+      expect(search).toHaveBeenCalledTimes(1);
+      expect(result.transactionGroups).toEqual([]);
     });
   });
 
   // -------------------------------------------------------------------------
   // service→service path (parent-span join, targetServiceName present)
   // -------------------------------------------------------------------------
-  describe('service→service path (parent-span join, targetServiceName present)', () => {
-    it('returns transaction groups when parent.id chain resolves to source transactions', async () => {
+  describe('service→service (parent-span join)', () => {
+    it('returns transaction groups when parent.id chain resolves to exit spans', async () => {
       const search: SearchMock = jest
         .fn()
         // Phase 1a: parent.id values of targetService entry transactions
-        .mockResolvedValueOnce(idsAggResponse(['span-abc'], 'parent_ids'))
-        // Phase 1b: trace IDs from spans in sourceService matching those span IDs
-        .mockResolvedValueOnce(idsAggResponse(['trace-42'], 'trace_ids'))
-        // Phase 2: transaction groups
-        .mockResolvedValueOnce(txGroupsAggResponse(['GET /checkout']));
+        .mockResolvedValueOnce(parentIdsResponse(['span-abc']))
+        // exit span agg: source spans whose span.id ∈ parentIds
+        .mockResolvedValueOnce(exitSpanAggResponse([{ name: 'GET /checkout' }]));
 
       const apmEventClient = { search } as unknown as APMEventClient;
       const result = await getConnectionTransactions(
         makeOptions({ apmEventClient, targetServiceName: 'serviceB' })
       );
 
-      expect(search).toHaveBeenCalledTimes(3);
+      expect(search).toHaveBeenCalledTimes(2);
       expect(result.transactionGroups).toHaveLength(1);
       expect(result.transactionGroups[0].name).toBe('GET /checkout');
       expect(result.isMaxTransactionsReached).toBe(false);
@@ -166,41 +274,23 @@ describe('getConnectionTransactions', () => {
     it('returns empty and stops after Phase 1a when targetService has no parent IDs', async () => {
       const search: SearchMock = jest
         .fn()
-        // Phase 1a: empty — targetService has no entry transactions with a parent.id
-        .mockResolvedValueOnce(idsAggResponse([], 'parent_ids'));
+        .mockResolvedValueOnce(parentIdsResponse([]));
 
       const apmEventClient = { search } as unknown as APMEventClient;
       const result = await getConnectionTransactions(
         makeOptions({ apmEventClient, targetServiceName: 'serviceB' })
       );
 
-      // Phase 1b and Phase 2 must never be called.
+      // Exit span agg must never be called.
       expect(search).toHaveBeenCalledTimes(1);
       expect(result.transactionGroups).toEqual([]);
       expect(result.isMaxTransactionsReached).toBe(false);
     });
 
-    it('returns empty and stops after Phase 1b when no source spans carry those parent IDs', async () => {
+    it('sets the correct operation names', async () => {
       const search: SearchMock = jest
         .fn()
-        // Phase 1a: found parent IDs
-        .mockResolvedValueOnce(idsAggResponse(['span-abc'], 'parent_ids'))
-        // Phase 1b: no source trace IDs match
-        .mockResolvedValueOnce(idsAggResponse([], 'trace_ids'));
-
-      const apmEventClient = { search } as unknown as APMEventClient;
-      const result = await getConnectionTransactions(
-        makeOptions({ apmEventClient, targetServiceName: 'serviceB' })
-      );
-
-      // Phase 2 must never be called when Phase 1b produces nothing.
-      expect(search).toHaveBeenCalledTimes(2);
-      expect(result.transactionGroups).toEqual([]);
-      expect(result.isMaxTransactionsReached).toBe(false);
-    });
-
-    it('sets the correct operation names for Phase 1a and 1b', async () => {
-      const search: SearchMock = jest.fn().mockResolvedValueOnce(idsAggResponse([], 'parent_ids'));
+        .mockResolvedValueOnce(parentIdsResponse([]));
 
       const apmEventClient = { search } as unknown as APMEventClient;
       await getConnectionTransactions(
@@ -212,31 +302,16 @@ describe('getConnectionTransactions', () => {
   });
 
   // -------------------------------------------------------------------------
-  // isMaxTransactionsReached
+  // isMaxTransactionsReached (service→service only)
   // -------------------------------------------------------------------------
   describe('isMaxTransactionsReached', () => {
-    it('is true when Phase 1 (resource-based) returns exactly MAX_IDS trace IDs', async () => {
-      const maxIds = Array.from({ length: MAX_IDS }, (_, i) => `trace-${i}`);
-
-      const search: SearchMock = jest
-        .fn()
-        .mockResolvedValueOnce(idsAggResponse(maxIds, 'trace_ids'))
-        .mockResolvedValueOnce(txGroupsAggResponse(['GET /']));
-
-      const apmEventClient = { search } as unknown as APMEventClient;
-      const result = await getConnectionTransactions(makeOptions({ apmEventClient }));
-
-      expect(result.isMaxTransactionsReached).toBe(true);
-    });
-
-    it('is true when Phase 1a (parent-id) returns exactly MAX_IDS parent IDs', async () => {
+    it('is true when Phase 1a returns exactly MAX_IDS parent IDs', async () => {
       const maxParentIds = Array.from({ length: MAX_IDS }, (_, i) => `span-${i}`);
 
       const search: SearchMock = jest
         .fn()
-        .mockResolvedValueOnce(idsAggResponse(maxParentIds, 'parent_ids'))
-        .mockResolvedValueOnce(idsAggResponse(['trace-1'], 'trace_ids'))
-        .mockResolvedValueOnce(txGroupsAggResponse(['GET /']));
+        .mockResolvedValueOnce(parentIdsResponse(maxParentIds))
+        .mockResolvedValueOnce(exitSpanAggResponse([{ name: 'GET /' }]));
 
       const apmEventClient = { search } as unknown as APMEventClient;
       const result = await getConnectionTransactions(
@@ -246,63 +321,53 @@ describe('getConnectionTransactions', () => {
       expect(result.isMaxTransactionsReached).toBe(true);
     });
 
-    it('is true when Phase 1b (source span) returns exactly MAX_IDS trace IDs', async () => {
-      const maxTraceIds = Array.from({ length: MAX_IDS }, (_, i) => `trace-${i}`);
-
+    it('is false when Phase 1a returns fewer than MAX_IDS parent IDs', async () => {
       const search: SearchMock = jest
         .fn()
-        .mockResolvedValueOnce(idsAggResponse(['span-1'], 'parent_ids'))
-        .mockResolvedValueOnce(idsAggResponse(maxTraceIds, 'trace_ids'))
-        .mockResolvedValueOnce(txGroupsAggResponse(['GET /']));
+        .mockResolvedValueOnce(parentIdsResponse(['span-1', 'span-2']))
+        .mockResolvedValueOnce(exitSpanAggResponse([{ name: 'GET /' }]));
 
       const apmEventClient = { search } as unknown as APMEventClient;
       const result = await getConnectionTransactions(
         makeOptions({ apmEventClient, targetServiceName: 'serviceB' })
       );
-
-      expect(result.isMaxTransactionsReached).toBe(true);
-    });
-
-    it('is false when Phase 1 returns fewer than MAX_IDS trace IDs', async () => {
-      const search: SearchMock = jest
-        .fn()
-        .mockResolvedValueOnce(idsAggResponse(['trace-1', 'trace-2'], 'trace_ids'))
-        .mockResolvedValueOnce(txGroupsAggResponse(['GET /']));
-
-      const apmEventClient = { search } as unknown as APMEventClient;
-      const result = await getConnectionTransactions(makeOptions({ apmEventClient }));
 
       expect(result.isMaxTransactionsReached).toBe(false);
     });
 
-    it('propagates isSampled=true to every transaction group when the cap is reached', async () => {
-      const maxIds = Array.from({ length: MAX_IDS }, (_, i) => `trace-${i}`);
+    it('propagates isSampled=true to every group when cap is reached', async () => {
+      const maxParentIds = Array.from({ length: MAX_IDS }, (_, i) => `span-${i}`);
 
       const search: SearchMock = jest
         .fn()
-        .mockResolvedValueOnce(idsAggResponse(maxIds, 'trace_ids'))
-        .mockResolvedValueOnce(txGroupsAggResponse(['GET /a', 'POST /b']));
+        .mockResolvedValueOnce(parentIdsResponse(maxParentIds))
+        .mockResolvedValueOnce(exitSpanAggResponse([
+          { name: 'GET /a' },
+          { name: 'POST /b' },
+        ]));
 
       const apmEventClient = { search } as unknown as APMEventClient;
-      const result = await getConnectionTransactions(makeOptions({ apmEventClient }));
+      const result = await getConnectionTransactions(
+        makeOptions({ apmEventClient, targetServiceName: 'serviceB' })
+      );
 
       expect(result.isMaxTransactionsReached).toBe(true);
-      // Every group should carry isSampled=true when cap is reached.
       result.transactionGroups.forEach((g) => {
         expect(g.isSampled).toBe(true);
       });
     });
 
-    it('propagates isSampled=false to every transaction group when below the cap', async () => {
+    it('propagates isSampled=false to every group when below the cap', async () => {
       const search: SearchMock = jest
         .fn()
-        .mockResolvedValueOnce(idsAggResponse(['trace-1'], 'trace_ids'))
-        .mockResolvedValueOnce(txGroupsAggResponse(['GET /a']));
+        .mockResolvedValueOnce(parentIdsResponse(['span-1']))
+        .mockResolvedValueOnce(exitSpanAggResponse([{ name: 'GET /a' }]));
 
       const apmEventClient = { search } as unknown as APMEventClient;
-      const result = await getConnectionTransactions(makeOptions({ apmEventClient }));
+      const result = await getConnectionTransactions(
+        makeOptions({ apmEventClient, targetServiceName: 'serviceB' })
+      );
 
-      expect(result.isMaxTransactionsReached).toBe(false);
       result.transactionGroups.forEach((g) => {
         expect(g.isSampled).toBe(false);
       });
