@@ -24,6 +24,8 @@ import {
   selectAllNodes,
   selectNeighborNodes,
   setNodeLabel,
+  startWorkspaceLayout,
+  stopWorkspaceLayout,
   submitSearch,
   toggleEdgeSelection,
   toggleNodeSelection,
@@ -48,6 +50,8 @@ const createWorkspaceMock = () =>
     simpleSearch: jest.fn(),
     search: jest.fn(),
     callElasticsearch: jest.fn(),
+    runLayout: jest.fn(),
+    stopLayout: jest.fn(),
     options: {},
     blocklistedNodes: [],
   } as unknown as jest.Mocked<Workspace>);
@@ -117,6 +121,7 @@ describe('workspace state', () => {
 
     expect(createWorkspaceState(workspace)).toEqual({
       isInitialized: true,
+      isLayoutRunning: false,
       nodesById: {
         parent: {
           id: 'parent',
@@ -343,6 +348,16 @@ describe('workspace state', () => {
     expect(environment.store.getState().workspace.nodesById.other.color).toBe('green');
   });
 
+  it('tracks layout lifecycle state', () => {
+    const environment = createMockGraphStore({});
+
+    environment.store.dispatch(startWorkspaceLayout());
+    expect(environment.store.getState().workspace.isLayoutRunning).toBe(true);
+
+    environment.store.dispatch(stopWorkspaceLayout());
+    expect(environment.store.getState().workspace.isLayoutRunning).toBe(false);
+  });
+
   it('keeps edge selection single-valued', () => {
     const environment = createMockGraphStore({});
 
@@ -418,6 +433,19 @@ describe('workspace listeners', () => {
       expect(environment.mockedDeps.notifications.toasts.addDanger).toHaveBeenCalledWith({
         title: 'Fetching top terms failed: server failure',
       });
+    });
+  });
+
+  describe('layout lifecycle', () => {
+    it('starts and stops the legacy layout runtime', () => {
+      const environment = createWorkspaceListenerEnvironment();
+
+      environment.store.dispatch(startWorkspaceLayout());
+      environment.store.dispatch(stopWorkspaceLayout());
+
+      expect(environment.workspace.runLayout).toHaveBeenCalled();
+      expect(environment.workspace.stopLayout).toHaveBeenCalled();
+      expect(environment.mockedDeps.notifyReact).toHaveBeenCalled();
     });
   });
 

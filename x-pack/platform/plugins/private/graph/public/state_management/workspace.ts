@@ -46,6 +46,7 @@ export interface WorkspaceEdgeState {
 
 export interface WorkspaceSnapshot {
   isInitialized: boolean;
+  isLayoutRunning: boolean;
   nodesById: Record<string, WorkspaceNodeState>;
   nodeIds: string[];
   edgesById: Record<string, WorkspaceEdgeState>;
@@ -63,6 +64,7 @@ export interface WorkspaceState extends WorkspaceSnapshot {
 
 const initialWorkspaceState: WorkspaceState = {
   isInitialized: false,
+  isLayoutRunning: false,
   nodesById: {},
   nodeIds: [],
   edgesById: {},
@@ -96,6 +98,8 @@ export const undoWorkspace = actionCreator('UNDO_WORKSPACE');
 export const redoWorkspace = actionCreator('REDO_WORKSPACE');
 export const setNodeLabel = actionCreator<{ nodeId: string; label: string }>('SET_NODE_LABEL');
 export const colorSelectedNodes = actionCreator<string>('COLOR_SELECTED_NODES');
+export const startWorkspaceLayout = actionCreator('START_WORKSPACE_LAYOUT');
+export const stopWorkspaceLayout = actionCreator('STOP_WORKSPACE_LAYOUT');
 export const submitSearch = actionCreator<string>('SUBMIT_SEARCH');
 
 export const workspaceReducer = reducerWithInitialState(initialWorkspaceState)
@@ -219,6 +223,8 @@ export const workspaceReducer = reducerWithInitialState(initialWorkspaceState)
       ])
     ),
   }))
+  .case(startWorkspaceLayout, (state) => ({ ...state, isLayoutRunning: true }))
+  .case(stopWorkspaceLayout, (state) => ({ ...state, isLayoutRunning: false }))
   .build();
 
 export const workspaceSelector = (state: GraphState) => state.workspace;
@@ -352,6 +358,7 @@ export const createWorkspaceState = (workspace: Workspace): WorkspaceState => {
 
   return {
     isInitialized: true,
+    isLayoutRunning: Boolean(workspace.force),
     nodesById,
     nodeIds: workspace.nodes.map(({ id }) => id),
     edgesById,
@@ -380,6 +387,8 @@ const toNodeState = (node: WorkspaceNode): WorkspaceNodeState => ({
 
 const getEdgeId = ({ id, source, target }: Workspace['edges'][number]): string =>
   id ?? `${source.id}-${target.id}`;
+
+const layoutActionTypes = new Set([startWorkspaceLayout.type, stopWorkspaceLayout.type]);
 
 const presentationActionTypes = new Set([setNodeLabel.type, colorSelectedNodes.type]);
 
@@ -439,6 +448,23 @@ export const registerWorkspaceListeners = (
 
       synchronizeWorkspaceSelection(workspace, listenerApi.getState().workspace);
       notifyReact();
+    },
+  });
+
+  startListening({
+    predicate: (action) => layoutActionTypes.has(action.type),
+    effect: (action) => {
+      const workspace = getWorkspace();
+      if (!workspace) {
+        return;
+      }
+
+      if (startWorkspaceLayout.match(action)) {
+        workspace.runLayout();
+      } else {
+        workspace.stopLayout();
+        notifyReact();
+      }
     },
   });
 
