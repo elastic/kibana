@@ -12,5 +12,6 @@ export default function ({ loadTestFile }: FtrProviderContext) {
     loadTestFile(require.resolve('./automatic_upgrades'));
     loadTestFile(require.resolve('./version_specific_policy_assignment'));
     loadTestFile(require.resolve('./unenroll_inactive_agents'));
+    loadTestFile(require.resolve('./agent_status_change'));
   });
 }

@@ -5,37 +5,24 @@
  * 2.0.
  */
 
-import React, { type ReactNode } from 'react';
-import { FormattedMessage } from '@kbn/i18n-react';
-
-import { EuiSpacer, EuiPageHeader, EuiButtonEmpty } from '@elastic/eui';
+import React from 'react';
+import { EuiSpacer } from '@elastic/eui';
+import { AppHeader, type AppHeaderBack } from '@kbn/app-header';
 
 import { documentationLinks } from '../services/documentation_links';
 
 interface Props {
-  title: ReactNode;
+  title: string;
+  back: AppHeaderBack;
 }
 
-export const FollowerIndexPageTitle = ({ title }: Props) => (
+export const FollowerIndexPageTitle = ({ title, back }: Props) => (
   <>
-    <EuiPageHeader
-      bottomBorder
-      pageTitle={<span data-test-subj="pageTitle">{title}</span>}
-      rightSideItems={[
-        <EuiButtonEmpty
-          size="s"
-          flush="right"
-          href={documentationLinks.apis.createFollower}
-          target="_blank"
-          iconType="question"
-          data-test-subj="docsButton"
-        >
-          <FormattedMessage
-            id="xpack.crossClusterReplication.readDocsFollowerIndexButtonLabel"
-            defaultMessage="Follower index docs"
-          />
-        </EuiButtonEmpty>,
-      ]}
+    <AppHeader
+      title={title}
+      back={back}
+      docLink={documentationLinks.apis.createFollower}
+      spacing="bleed"
     />
 
     <EuiSpacer size="l" />

@@ -24,8 +24,8 @@ import {
   EuiText,
   EuiToolTip,
   useEuiTheme,
-  EuiCallOut,
 } from '@elastic/eui';
+import { KbnDangerCallout } from '@kbn/ui-callout';
 import type {
   EuiBasicTableColumn,
   EuiSearchBarProps,
@@ -746,7 +746,7 @@ export const ManageIntegrationsTable: React.FC<{
             )}
             button={
               <EuiFilterButton
-                iconType="arrowDown"
+                iconType="chevronSingleDown"
                 data-test-subj="manageIntegrationsActionsFilterBtn"
                 onClick={() => setIsActionsFilterOpen(!isActionsFilterOpen)}
                 isSelected={isActionsFilterOpen}
@@ -777,7 +777,7 @@ export const ManageIntegrationsTable: React.FC<{
             )}
             button={
               <EuiFilterButton
-                iconType="arrowDown"
+                iconType="chevronSingleDown"
                 data-test-subj="manageIntegrationsStatusFilterBtn"
                 onClick={() => setIsStatusFilterOpen(!isStatusFilterOpen)}
                 isSelected={isStatusFilterOpen}
@@ -860,7 +860,7 @@ export const ManageIntegrationsTable: React.FC<{
               <span tabIndex={0}>
                 <EuiButton
                   size="s"
-                  iconType="exportAction"
+                  iconType="upload"
                   isLoading={isBulkInstalling}
                   isDisabled={!canBulkInstall}
                   onClick={handleBulkInstall}
@@ -894,10 +894,8 @@ export const ManageIntegrationsTable: React.FC<{
 
   if (isError) {
     return (
-      <EuiCallOut
+      <KbnDangerCallout
         announceOnMount
-        color="danger"
-        iconType="error"
         title={
           <FormattedMessage
             id="xpack.fleet.epmList.manageIntegrations.errorTitle"

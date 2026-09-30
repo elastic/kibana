@@ -135,7 +135,7 @@ export const getActionPoliciesApiService = ({
           method: 'POST',
           path: `${ALERTING_V2_ACTION_POLICY_API_PATH}/${encodeURIComponent(id)}/_snooze`,
           headers: COMMON_HEADERS,
-          body: { snoozedUntil },
+          body: { snoozed_until: snoozedUntil },
         });
         return response.data;
       }),

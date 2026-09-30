@@ -9,7 +9,7 @@
 - [Parallelization](#parallelization)
 - [Fixtures](#fixtures)
 - [Package Organization](#package-organization)
-- [EUI Wrappers](#eui-wrappers)
+- [EUI Test Helpers](#eui-test-helpers)
 
 ## Testing Layer Priority
 
@@ -37,9 +37,10 @@ await expect.poll(async () => {
 }).toBeGreaterThan(0);
 ```
 
-### `waitFor()` defaults
+### Explicit readiness waits
 
-- `{ state: 'visible' }` is the default — omit it: `await element.waitFor()` not `await element.waitFor({ state: 'visible' })`
+- When `waitFor()` represents a readiness signal, make the expected state explicit: `await element.waitFor({ state: 'visible' })`.
+- Don't add a separate wait immediately before an auto-waiting action or web-first assertion.
 - Don't use short custom timeouts (e.g., 3s) — they cause CI flakiness. Use the default (10s) unless there is a strong, documented reason.
 
 ### Built-in auto-waiting
@@ -50,7 +51,7 @@ Many Playwright actions auto-wait before executing. Do not add explicit waits be
 
 ## Page Objects
 
-Extract **all locators as `readonly` properties** initialized in the constructor — never create locators inline in methods. This keeps selectors centralized and makes them easy to audit or update.
+Define static locators as `readonly` properties initialized in the constructor. Use named methods for locators that depend on parameters, such as a row name or resource ID. Avoid repeatedly constructing static locators inside action methods.
 
 ```typescript
 class DashboardPage {
@@ -146,14 +147,14 @@ spaceTest('full workflow', async ({ pageObjects }) => {
 
 Parallel test runs are encouraged but have trade-offs:
 
-- Test suites **must** be Space-isolated (`spaceTest` + `scoutSpace`)
-- Kibana archive ingestion must be done **within the test suite file**, not in the global setup hook
-- Kibana / ES may be slower because multiple workers ingest and interact with the UI concurrently
+- Use `spaceTest` + `scoutSpace` when tests create or mutate saved objects, UI settings, or other space-scoped state; each worker gets its own Kibana space.
+- Plain `test` is acceptable in a parallel config only when the suite is read-only in the default space or manually isolates every shared resource.
+- Space isolation does not isolate Elasticsearch indices, cluster settings, or other global state; use unique resource names and explicit cleanup for those resources.
+- Kibana archive ingestion must be done **within the test suite file**, not in the global setup hook.
+- Kibana / ES may be slower because multiple workers ingest and interact with the UI concurrently.
 
-Use `spaceTest` + `scoutSpace` — each worker gets its own Kibana space.
-
-- Pre-ingest shared ES data in `parallel_tests/global.setup.ts` via `globalSetupHook()`
-- Clean up space-scoped mutations in `afterAll`
+- Pre-ingest shared ES data in `parallel_tests/global.setup.ts` via `globalSetupHook()`.
+- Clean up space-scoped mutations in `afterAll`.
 - Place parallel specs in `test/scout*/ui/parallel_tests/`
 - Place sequential specs in `test/scout*/ui/tests/`
 
@@ -194,10 +195,17 @@ export const test = baseTest.extend<{}, MyWorkerFixtures>({
 
 Put shared code in `@kbn/scout`, security-specific code in `@kbn/scout-security`.
 
-## EUI Wrappers
+## EUI Test Helpers
 
-Scout provides wrappers for stable EUI interactions — import from `@kbn/scout`:
-`EuiComboBoxWrapper`, `EuiDataGridWrapper`, `EuiSelectableWrapper`, `EuiCheckBoxWrapper`, `EuiFieldTextWrapper`, `EuiCodeBlockWrapper`, `EuiSuperSelectWrapper`, `EuiToastWrapper`
+For EUI components that are non-trivial to drive, prefer the published `@elastic/eui-test-helpers` Component Objects exposed pre-bound to the page through `page.components.*`:
+
+```typescript
+await page.components.comboBox('fieldSelectorComboBox').setSelectedOptions(['host.name']);
+```
+
+Available factories include `page.components.comboBox(testSubj)`, `page.components.dataGrid(testSubj)`, `page.components.superSelect(testSubj)`, and `page.components.globalToastList()`. For simple, native-like components such as text fields and checkboxes, use plain Playwright locators.
+
+Use locators when no equivalent EUI test helpers exist. Do not add or extend component objects in a test suite.
 
 ## Kibana Component Interaction Patterns
 

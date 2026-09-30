@@ -70,7 +70,7 @@ export const WithProp: Story = {
 
 ## Running Storybook
 
-Launch Storybook with `yarn storybook <plugin>`, or build a static site with `yarn storybook --site <plugin>`.
+Launch Storybook with `pnpm storybook <plugin>`, or build a static site with `pnpm storybook --site <plugin>`.
 
 ## Embeddable Stories
 
@@ -93,9 +93,9 @@ export const Basic: EmbeddableStoryObj<StoryArgs> = {
 Build inline docs assets from embeddable stories for external documentation systems, (e.g. `docs-builder`):
 
 ```sh
-yarn storybook_docs <plugin> --dist   # registry + inline assets + tarball
-yarn storybook_docs <plugin> --build  # registry + inline assets, no tarball
-yarn storybook_docs <plugin> --dev    # serve with CORS, watch sources, start docs-builder
+pnpm storybook_docs <plugin> --dist   # registry + inline assets + tarball
+pnpm storybook_docs <plugin> --build  # registry + inline assets, no tarball
+pnpm storybook_docs <plugin> --dev    # serve with CORS, watch sources, start docs-builder
 ```
 
 ### Output
@@ -116,10 +116,16 @@ To keep the loop fast, `--dev` reuses an existing static Storybook build (`built
 
 ### Docs-Builder Integration
 
-When `--dev` finds a `docset.yml` colocated with the alias (e.g. `src/platform/kbn-ui/docset.yml` for `kbn_ui`) and `docs-builder` is on your `PATH`, it automatically launches `docs-builder serve` for that docset. It points `KIBANA_STORYBOOK_REGISTRY` at your local registry so embeds render live against your local assets.
+When `--dev` finds a `docset.yml` colocated with the alias and `docs-builder` is on your `PATH`, it automatically launches `docs-builder serve` for that docset. It points `KIBANA_STORYBOOK_REGISTRY` at your local registry so embeds render live against your local assets.
+
+Kibana's internal developer docs live in `docs-dev/` rather than beside the packages they document, so auto-detection finds nothing for aliases such as `kbn_ui`. Pass the docset explicitly:
+
+```bash
+pnpm storybook_docs kbn_ui --dev --docs-path docs-dev
+```
 
 Options for docs-builder integration:
-- `--docs-path <dir>`: Point at a different docset.
+- `--docs-path <dir>`: Point at a docset auto-detection won't find, or a different one.
 - `--docs-port <port>`: Override docs-builder's default port.
 - `--no-docs`: Skip launching docs-builder entirely.
 

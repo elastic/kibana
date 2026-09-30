@@ -50,7 +50,9 @@ spaceTest.describe(
         await spaceTest.step('seeds the inline editor with the default ES|QL query', async () => {
           await pageObjects.dashboard.clickPanelAction('embeddablePanelAction-editPanel');
           const codeEditor = new KibanaCodeEditorWrapper(page);
-          await expect.poll(() => codeEditor.getCodeEditorValue()).toBe('FROM logs*');
+          await expect
+            .poll(() => codeEditor.getCodeEditorValue())
+            .toBe('FROM logs* | SORT @timestamp DESC');
         });
       }
     );

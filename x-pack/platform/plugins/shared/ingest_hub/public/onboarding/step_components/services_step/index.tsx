@@ -21,10 +21,15 @@ import {
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
+import { useLocation } from 'react-router-dom';
+
 import { ServiceRow } from './service_row';
 import { SIGNAL_TYPE_LABELS } from './signal_type_badge';
 import { useServicesStep } from './use_services_step';
+import { getCategoryTitle } from '../../service_categories';
 import { ServiceSearchFilter } from '../service_search_filter';
+import { DataFormatSelect } from './data_format_select';
+import { useOnboardingFlow } from '../../onboarding_flow_context';
 
 interface ServicesStepProps {
   onContinue: () => void;
@@ -50,18 +55,40 @@ export function ServicesStep({ onContinue, onBack }: ServicesStepProps) {
     handleSelectAllInCategory,
     handleDeselectAllInCategory,
     handleNext,
+    dataFormat,
+    setDataFormat,
   } = useServicesStep({ onContinue });
+
+  const { detectAndReviewStep } = useOnboardingFlow();
+  const location = useLocation();
+  // Lock format when in edit mode (SO persisted) OR when deploy has started without a persisted SO
+  // (SO create is best-effort — policies may exist even if ?deploymentId= was never added to URL).
+  const isFormatDisabled =
+    new URLSearchParams(location.search).has('deploymentId') ||
+    Object.keys(detectAndReviewStep.serviceStatuses).length > 0 ||
+    Object.keys(detectAndReviewStep.policyIdsByInstance).length > 0;
 
   return (
     <div data-test-subj="onboardingStep-services">
-      <EuiTitle size="m">
-        <h2>
-          <FormattedMessage
-            id="xpack.ingestHub.servicesStep.title"
-            defaultMessage="Which AWS services do you want to monitor?"
+      <EuiFlexGroup alignItems="center" justifyContent="spaceBetween" responsive={false}>
+        <EuiFlexItem>
+          <EuiTitle size="m">
+            <h2>
+              <FormattedMessage
+                id="xpack.ingestHub.servicesStep.title"
+                defaultMessage="Which AWS services do you want to monitor?"
+              />
+            </h2>
+          </EuiTitle>
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <DataFormatSelect
+            dataFormat={dataFormat}
+            onChange={setDataFormat}
+            disabled={isFormatDisabled}
           />
-        </h2>
-      </EuiTitle>
+        </EuiFlexItem>
+      </EuiFlexGroup>
       <EuiSpacer size="s" />
       <EuiText color="subdued">
         <p>
@@ -106,7 +133,7 @@ export function ServicesStep({ onContinue, onBack }: ServicesStepProps) {
                 <EuiFlexGroup alignItems="center" gutterSize="m" responsive={false}>
                   <EuiFlexItem>
                     <EuiText size="s">
-                      <strong>{cat}</strong>
+                      <strong>{getCategoryTitle(cat)}</strong>
                     </EuiText>
                     <EuiText size="xs" color="subdued">
                       {preview}
@@ -150,7 +177,7 @@ export function ServicesStep({ onContinue, onBack }: ServicesStepProps) {
                   >
                     <EuiFlexItem grow={false}>
                       <EuiTitle size="xs">
-                        <h3>{activeCategory}</h3>
+                        <h3>{getCategoryTitle(activeCategory)}</h3>
                       </EuiTitle>
                     </EuiFlexItem>
                     <EuiFlexItem grow={false}>
@@ -190,7 +217,9 @@ export function ServicesStep({ onContinue, onBack }: ServicesStepProps) {
                           onToggle={handleToggle}
                           displayName={
                             duplicateNamesInCategory.has(service.name)
-                              ? `${service.name} ${SIGNAL_TYPE_LABELS[service.signalType]}`
+                              ? `${service.name} ${service.signalTypes
+                                  .map((t) => SIGNAL_TYPE_LABELS[t])
+                                  .join(' & ')}`
                               : undefined
                           }
                         />
@@ -209,7 +238,7 @@ export function ServicesStep({ onContinue, onBack }: ServicesStepProps) {
       <EuiFlexGroup justifyContent="spaceBetween">
         <EuiFlexItem grow={false}>
           {onBack && (
-            <EuiButtonEmpty iconType="arrowLeft" iconSide="left" onClick={onBack}>
+            <EuiButtonEmpty iconType="chevronSingleLeft" iconSide="left" onClick={onBack}>
               <FormattedMessage
                 id="xpack.ingestHub.servicesStep.backButton"
                 defaultMessage="Back"
@@ -224,10 +253,7 @@ export function ServicesStep({ onContinue, onBack }: ServicesStepProps) {
             isDisabled={!isReady}
             data-test-subj="servicesStep-continueButton"
           >
-            <FormattedMessage
-              id="xpack.ingestHub.servicesStep.continueButton"
-              defaultMessage="Continue"
-            />
+            <FormattedMessage id="xpack.ingestHub.servicesStep.nextButton" defaultMessage="Next" />
           </EuiButton>
         </EuiFlexItem>
       </EuiFlexGroup>

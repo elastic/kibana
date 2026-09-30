@@ -9,7 +9,8 @@ import type { FC } from 'react';
 import React from 'react';
 
 import type { EuiCallOutProps } from '@elastic/eui';
-import { EuiCallOut, EuiLink, EuiSpacer } from '@elastic/eui';
+import { EuiLink, EuiSpacer } from '@elastic/eui';
+import { KbnWarningCallout } from '@kbn/ui-callout';
 import { FormattedMessage } from '@kbn/i18n-react';
 import {
   TRIAL_MAX_RAM_FOR_ML_NODES,
@@ -26,7 +27,7 @@ interface Props {
 export const Warning: FC<Props> = ({ size, isCloud, isCloudTrial, deploymentId }) => {
   return (
     <>
-      <EuiCallOut
+      <KbnWarningCallout
         size={size}
         title={
           <FormattedMessage
@@ -34,8 +35,6 @@ export const Warning: FC<Props> = ({ size, isCloud, isCloudTrial, deploymentId }
             defaultMessage="No ML nodes available"
           />
         }
-        color="warning"
-        iconType="warning"
       >
         <div>
           <FormattedMessage
@@ -70,7 +69,7 @@ export const Warning: FC<Props> = ({ size, isCloud, isCloudTrial, deploymentId }
             />
           </div>
         )}
-      </EuiCallOut>
+      </KbnWarningCallout>
       <EuiSpacer size="m" />
     </>
   );

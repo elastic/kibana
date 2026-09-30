@@ -36,6 +36,21 @@ export abstract class NumeralFormat extends FieldFormat {
     alwaysShowSign: false,
   });
 
+  // memoized zero-formatted baseline used to detect values that round to zero under the
+  // current pattern/locale (see getConvertedValue); recomputed only when either changes
+  private zeroFormattedPattern: string | undefined;
+  private zeroFormattedLocale: string | undefined;
+  private zeroFormatted: string | undefined;
+
+  private getZeroFormatted(pattern: string, locale: string): string {
+    if (this.zeroFormattedPattern !== pattern || this.zeroFormattedLocale !== locale) {
+      this.zeroFormattedPattern = pattern;
+      this.zeroFormattedLocale = locale;
+      this.zeroFormatted = numeralInst.set(0).format(pattern);
+    }
+    return this.zeroFormatted!;
+  }
+
   protected getConvertedValue(val: unknown): string {
     const originalVal = val;
     if (val == null || val === MISSING_TOKEN) return NULL_LABEL;
@@ -63,12 +78,17 @@ export abstract class NumeralFormat extends FieldFormat {
       (this.getConfig && this.getConfig(FORMATS_UI_SETTINGS.FORMAT_NUMBER_DEFAULT_LOCALE)) || 'en';
     numeral.language(defaultLocale);
 
-    let pattern: string = this.param('pattern');
-    if (pattern && this.param('alwaysShowSign')) {
-      pattern = pattern.startsWith('+') || val === 0 ? pattern : `+ ${pattern}`;
-    }
+    const pattern: string = this.param('pattern');
+    let formatted = numeralInst.set(val).format(pattern);
 
-    const formatted = numeralInst.set(val).format(pattern);
+    if (pattern && this.param('alwaysShowSign') && !pattern.startsWith('+')) {
+      // add the sign only when the value doesn't round to zero under the pattern,
+      // otherwise e.g. -0.0001 with pattern '0,0' would render as '+0'
+      const roundsToZero = formatted === this.getZeroFormatted(pattern, String(defaultLocale));
+      if (!roundsToZero) {
+        formatted = numeralInst.set(val).format(`+ ${pattern}`);
+      }
+    }
 
     numeral.language(previousLocale);
 

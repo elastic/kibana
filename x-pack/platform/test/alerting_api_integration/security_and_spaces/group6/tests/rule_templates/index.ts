@@ -22,5 +22,6 @@ export default function rulesSettingsDisabledTests({
     });
 
     loadTestFile(require.resolve('./get_rule_template'));
+    loadTestFile(require.resolve('./find_rule_templates'));
   });
 }

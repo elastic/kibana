@@ -7,7 +7,7 @@
 
 import type { ServiceAnomalyScoreResponse } from '@kbn/apm-api-shared';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
-import { fireEvent, render, screen } from '@testing-library/react';
+import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import React from 'react';
 import type { ServiceFlyoutService } from '..';
 import { ServiceBadges } from './service_badges';
@@ -194,22 +194,32 @@ describe('ServiceBadges', () => {
       expect(screen.queryByTestId('serviceFlyoutAnomaliesBadge')).not.toBeInTheDocument();
     });
 
-    it('passes transactionType from context to the anomaly badge navigation link', () => {
+    it('passes transactionType from context to the anomaly badge navigation link', async () => {
+      const mockGetUrl = jest.fn().mockResolvedValue('/app/apm/services/opbeans-java/overview');
       const mockGetRedirectUrl = jest
         .fn()
-        .mockReturnValue('/app/apm/services/opbeans-java/overview');
+        .mockReturnValue('/app/r?l=APM_LOCATOR&lz=compressed-payload');
       setupContext({
         transactionType: 'request',
-        locators: { get: jest.fn().mockReturnValue({ getRedirectUrl: mockGetRedirectUrl }) },
+        locators: {
+          get: jest.fn().mockReturnValue({
+            getUrl: mockGetUrl,
+            getRedirectUrl: mockGetRedirectUrl,
+          }),
+        },
       });
       setupBadgesData({ anomalyData: { anomalyScore: 75, anomalyEnvironment: 'production' } });
       renderBadges();
 
-      expect(mockGetRedirectUrl).toHaveBeenCalledWith(
-        expect.objectContaining({
-          query: expect.objectContaining({ transactionType: 'request' }),
-        })
-      );
+      await waitFor(() => {
+        expect(mockGetUrl).toHaveBeenCalledWith(
+          expect.objectContaining({
+            query: expect.objectContaining({ transactionType: 'request' }),
+          }),
+          undefined
+        );
+      });
+      expect(mockGetRedirectUrl).not.toHaveBeenCalled();
     });
   });
 });

@@ -98,7 +98,7 @@ describe('addConnector lib function', () => {
     });
 
     // non-native connector should not generate API key or update secrets storage
-    expect(generateApiKey).toBeCalledTimes(0);
+    expect(generateApiKey).toHaveBeenCalledTimes(0);
   });
 
   it('should add a native connector', async () => {

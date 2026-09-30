@@ -187,7 +187,7 @@ export const RuleDetails = () => {
                       <EuiToolTip content={RULE_TAG_COPY_LABEL} disableScreenReaderOutput>
                         <EuiButtonIcon
                           css={copyButtonCss}
-                          iconType="copyClipboard"
+                          iconType="copy"
                           size="xs"
                           color="text"
                           onClick={copy}

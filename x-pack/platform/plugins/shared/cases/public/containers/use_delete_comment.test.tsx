@@ -54,7 +54,7 @@ describe('useDeleteComment', () => {
     });
 
     await waitFor(() =>
-      expect(spyOnDeleteComment).toBeCalledWith({
+      expect(spyOnDeleteComment).toHaveBeenCalledWith({
         caseId: basicCaseId,
         commentId,
       })
@@ -74,7 +74,7 @@ describe('useDeleteComment', () => {
       });
     });
 
-    await waitFor(() => expect(useRefreshCaseViewPage()).toBeCalled());
+    await waitFor(() => expect(useRefreshCaseViewPage()).toHaveBeenCalled());
   });
 
   it('shows a success toaster correctly', async () => {
@@ -115,7 +115,7 @@ describe('useDeleteComment', () => {
     });
 
     await waitFor(() => {
-      expect(spyOnDeleteComment).toBeCalledWith({
+      expect(spyOnDeleteComment).toHaveBeenCalledWith({
         caseId: basicCaseId,
         commentId,
       });

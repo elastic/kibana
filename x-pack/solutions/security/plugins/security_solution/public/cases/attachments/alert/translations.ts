@@ -11,11 +11,6 @@ export const ALERT_DISPLAY_NAME = i18n.translate('xpack.securitySolution.cases.a
   defaultMessage: 'Alerts',
 });
 
-export const ALERT_AVATAR_ARIA_LABEL = i18n.translate(
-  'xpack.securitySolution.cases.alertAttachment.avatarAriaLabel',
-  { defaultMessage: 'alert' }
-);
-
 export const ALERT_COMMENT_LABEL_TITLE = i18n.translate(
   'xpack.securitySolution.cases.alertAttachment.alertCommentLabelTitle',
   { defaultMessage: 'added an alert from' }
@@ -43,7 +38,7 @@ export const REMOVED_ALERTS_LABEL_TITLE = (totalAlerts: number) =>
     values: { totalAlerts },
   });
 
-export const DELETE_ALERTS_SUCCESS_TITLE = (totalAlerts: number) =>
+export const DELETE_ALERTS_SUCCESS_TOAST = (totalAlerts: number) =>
   i18n.translate('xpack.securitySolution.cases.alertAttachment.deleteAlertsSuccessTitle', {
     defaultMessage:
       'Deleted {totalAlerts, plural, =1 {one} other {{totalAlerts}}} {totalAlerts, plural, =1 {alert} other {alerts}}',

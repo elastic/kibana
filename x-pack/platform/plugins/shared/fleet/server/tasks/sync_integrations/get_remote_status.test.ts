@@ -123,7 +123,7 @@ describe('getRemoteSyncedIntegrationsInfoByOutputId', () => {
 
     await expect(
       getRemoteSyncedIntegrationsInfoByOutputId(soClientMock, 'not_remote')
-    ).rejects.toThrowError('Output not_remote is not a remote elasticsearch output');
+    ).rejects.toThrow('Output not_remote is not a remote elasticsearch output');
   });
 
   it('should throw error if the output has sync_integrations = false', async () => {
@@ -134,7 +134,7 @@ describe('getRemoteSyncedIntegrationsInfoByOutputId', () => {
 
     await expect(
       getRemoteSyncedIntegrationsInfoByOutputId(soClientMock, 'remote1')
-    ).rejects.toThrowError('Synced integrations not enabled');
+    ).rejects.toThrow('Synced integrations not enabled');
   });
 
   it('should throw error if kibanaUrl is not present', async () => {
@@ -145,7 +145,7 @@ describe('getRemoteSyncedIntegrationsInfoByOutputId', () => {
 
     await expect(
       getRemoteSyncedIntegrationsInfoByOutputId(soClientMock, 'remote1')
-    ).rejects.toThrowError(new FleetNotFoundError('Remote Kibana URL not set on the output.'));
+    ).rejects.toThrow(new FleetNotFoundError('Remote Kibana URL not set on the output.'));
   });
 
   it('should throw error if kibanaApiKey is not present', async () => {
@@ -160,7 +160,7 @@ describe('getRemoteSyncedIntegrationsInfoByOutputId', () => {
 
     await expect(
       getRemoteSyncedIntegrationsInfoByOutputId(soClientMock, 'remote1')
-    ).rejects.toThrowError(
+    ).rejects.toThrow(
       new FleetNotFoundError('Remote Kibana API key for http://remote-kibana-host not found')
     );
   });

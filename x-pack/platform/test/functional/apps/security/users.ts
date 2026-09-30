@@ -14,7 +14,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const PageObjects = getPageObjects(['security', 'settings']);
   const config = getService('config');
   const log = getService('log');
-  const retry = getService('retry');
   const toasts = getService('toasts');
   const browser = getService('browser');
   const security = getService('security');
@@ -173,12 +172,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           optionalUser.confirm_password = 'NewOptionalUserPwd';
 
           await PageObjects.security.updateUserPassword(optionalUser);
-          await retry.waitFor('', async () => {
-            const toastCount = await toasts.getCount();
-            return toastCount >= 1;
-          });
-          const successToast = await toasts.getElementByIndex(1);
-          expect(await successToast.getVisibleText()).to.be('Password successfully changed');
+          expect(await toasts.getTitleAndDismiss()).to.be('Password successfully changed');
         });
 
         it('of current user when submitting form', async () => {
@@ -192,12 +186,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           await PageObjects.security.clickElasticsearchUsers();
 
           await PageObjects.security.updateUserPassword(optionalUser, true);
-          await retry.waitFor('', async () => {
-            const toastCount = await toasts.getCount();
-            return toastCount >= 1;
-          });
-          const successToast = await toasts.getElementByIndex(1);
-          expect(await successToast.getVisibleText()).to.be('Password successfully changed');
+          expect(await toasts.getTitleAndDismiss()).to.be('Password successfully changed');
         });
       });
 

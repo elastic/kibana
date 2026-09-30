@@ -13,14 +13,19 @@ export const DESTINATION_NODE_TYPE = 'destination';
 export const ANIMATED_EDGE_TYPE = 'animated';
 
 export interface SourceNodeData extends Record<string, unknown> {
+  sourceId?: string;
+  unconfiguredNodeId?: string;
+  configurationLabel?: string;
   title: string;
   subtitle: string;
-  iconType: IconType;
+  iconType?: IconType;
 }
 
 export interface DestinationNodeData extends Record<string, unknown> {
+  streamName: string;
   title: string;
   hasProcessing: boolean;
+  onProcessingClick?: (streamName: string) => void;
 }
 
 export type SourceNode = Node<SourceNodeData, typeof SOURCE_NODE_TYPE>;

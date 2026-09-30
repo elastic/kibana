@@ -31,9 +31,9 @@ dependsOn:
   - '@kbn/std'
   - '@kbn/dev-utils'
   - '@kbn/utils'
-  - '@kbn/optimizer'
+  - '@kbn/rspack-optimizer'
   - '@kbn/peggy'
-  - '@kbn/babel-transform'
+  - '@kbn/swc-config'
   - '@kbn/import-resolver'
   - '@kbn/find-used-node-modules'
   - '@kbn/ts-projects'
@@ -51,7 +51,6 @@ dependsOn:
   - '@kbn/yarn-lock-validator'
   - '@kbn/sort-package-json'
   - '@kbn/swc-register'
-  - '@kbn/rspack-optimizer'
   - '@kbn/dev-validation-runner'
 tags:
   - tooling

@@ -554,6 +554,8 @@ export interface ActionStatusOptions {
   perPage?: number;
   date?: string;
   latest?: number;
+  /** Only return actions whose start_time is in the future (i.e. scheduled but not yet started) */
+  scheduledOnly?: boolean;
 }
 
 export interface AgentUpgradeDetails {

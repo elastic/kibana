@@ -30,7 +30,7 @@ export const UninitializedDataViewEmptyState = React.memo(
     return (
       <EuiEmptyPrompt
         data-test-subj={UNINITIALIZED_DATA_VIEW_EMPTY_STATE_TEST_ID}
-        iconType="search"
+        iconType="magnify"
         title={<h2>{i18n.UNINITIALIZED_DATA_VIEW_TITLE}</h2>}
         body={
           <p>

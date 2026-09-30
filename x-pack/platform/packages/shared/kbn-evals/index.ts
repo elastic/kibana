@@ -74,6 +74,7 @@ export type {
   ConverseStep,
 } from './src/utils/agent_builder_client';
 export type { DefaultEvaluators, EvaluatorKind, ReportDisplayOptions } from './src/types';
+export type { Direction } from '@kbn/evals-common';
 export type { EvaluationCriterion, EvaluationCriterionStructured } from './src/evaluators/criteria';
 export { createPlaywrightEvalsConfig } from './src/config/create_playwright_eval_config';
 export type {
@@ -101,6 +102,7 @@ export { createQuantitativeGroundednessEvaluator } from './src/evaluators/ground
 export type { EvaluationDataset, EvaluationWorkerFixtures, EvaluationReport } from './src/types';
 export { withEvaluatorSpan, withTaskSpan, getCurrentTraceId } from './src/utils/tracing';
 export { withRetry, type RetryOptions } from './src/utils/retry_utils';
+export { calculateSetMetrics, type SetMetrics } from './src/utils/set_metrics';
 export {
   containsAllTerms,
   extractAllStrings,
@@ -154,18 +156,23 @@ export {
 export { getGitMetadata, type GitMetadata } from './src/utils/git_metadata';
 
 export {
+  getEffectiveK,
   createPrecisionAtKEvaluator,
   createRecallAtKEvaluator,
   createF1AtKEvaluator,
-  createRagEvaluators,
-} from './src/evaluators/rag';
+  createHitRateAtKEvaluator,
+  createMrrAtKEvaluator,
+  createNdcgAtKEvaluator,
+  createMapAtKEvaluator,
+  createIrEvaluators,
+} from './src/evaluators/ir';
 export type {
   GroundTruth,
-  RagEvaluatorConfig,
+  IrEvaluatorConfig,
   RetrievedDocsExtractor,
   GroundTruthExtractor,
   RetrievedDoc,
-} from './src/evaluators/rag/types';
+} from './src/evaluators/ir/types';
 export { createEsqlEquivalenceEvaluator } from './src/evaluators/esql';
 
 export { createTrajectoryEvaluator } from './src/evaluators/trajectory';
@@ -178,7 +185,21 @@ export {
 } from './src/evaluators/security';
 export { createSimilarityEvaluator } from './src/evaluators/similarity';
 
-export { deleteConnectorById, getConnectorIdAsUuid } from './src/utils/create_connector_fixture';
+export { getConnectorIdAsUuid } from './src/utils/create_stack_connector_fixture';
+export {
+  loadInferenceEndpoints,
+  type InferenceEndpointDefinition,
+} from './src/utils/inference_endpoint_definition';
+export {
+  getConnectorActionTypeId,
+  getInferenceEndpointId,
+  isInferenceEndpointDefinition,
+  toStackConnectorDefinition,
+  type EvalConnector,
+  type StackConnectorDefinition,
+} from './src/utils/eval_connector';
+export { buildModelFromConnector } from './src/utils/build_model_from_connector';
+export { inferenceEndpointExists } from './src/utils/inference_endpoint_api';
 
 // Re-export Scout tags here to avoid requiring a direct dependency on @kbn/scout for modules using @kbn/evals
 export { tags } from '@kbn/scout';

@@ -8,12 +8,19 @@
 import { tags } from '@kbn/scout-oblt';
 import { globalTeardownHook } from '../fixtures';
 import { METRICS_AND_LOGS_INDEX_PATTERNS } from '../fixtures/constants';
+import { cleanNonTsdsSystemTemplate } from '../fixtures/sequential_hosts_synthtrace';
 import { deleteMetricsAnomaliesMlData } from '../fixtures/metrics_anomalies_ml';
 
 globalTeardownHook(
   'Clean up infra data after UI parallel tests',
   { tag: [...tags.stateful.classic, ...tags.serverless.observability.complete] },
-  async ({ infraSynthtraceEsClient, logsSynthtraceEsClient, apmSynthtraceEsClient, log }) => {
+  async ({
+    esClient,
+    infraSynthtraceEsClient,
+    logsSynthtraceEsClient,
+    apmSynthtraceEsClient,
+    log,
+  }) => {
     log.info('Running infra UI global teardown...');
 
     await infraSynthtraceEsClient.clean();
@@ -24,6 +31,8 @@ globalTeardownHook(
 
     await apmSynthtraceEsClient.clean();
     log.info('APM synthtrace data cleaned');
+
+    await cleanNonTsdsSystemTemplate(esClient, log);
 
     log.info('Infra UI global teardown complete');
   }

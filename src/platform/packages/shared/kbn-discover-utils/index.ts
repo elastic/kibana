@@ -29,8 +29,6 @@ export {
   SHOW_FIELD_STATISTICS,
   SHOW_MULTIFIELDS,
   SORT_DEFAULT_ORDER_SETTING,
-  DataGridDensity,
-  UnifiedHistogramSuggestionType,
   IgnoredReason,
   buildDataTableRecord,
   buildDataTableRecordList,
@@ -76,6 +74,7 @@ export {
   AppMenuRegistry,
   dismissAllFlyoutsExceptFor,
   dismissFlyouts,
+  openAfterDismissingOtherFlyouts,
   ErrorCallout,
   prepareDataViewForEditing,
   getEsqlDataView,
@@ -97,7 +96,11 @@ export {
   TABLE_HIDDEN_KEY,
   HISTOGRAM_HEIGHT_KEY,
   HISTOGRAM_BREAKDOWN_FIELD_KEY,
+  HistogramPercentileValue,
+  METRICS_GRID_HISTOGRAM_PERCENTILES,
+  METRICS_GRID_SIMPLE_AGGREGATIONS,
   METRICS_GRID_SETTINGS_DEFAULTS,
+  METRICS_GRID_SORT_DEFAULTS,
 } from './src';
 
 export type {
@@ -110,6 +113,9 @@ export type {
   DiscoverSessionFinderAttributes,
   HistogramPercentile,
   MetricsGridSettings,
+  MetricsGridSort,
+  MetricsGridSortDirection,
+  MetricsGridSortField,
   SimpleAggregation,
 } from './src';
 

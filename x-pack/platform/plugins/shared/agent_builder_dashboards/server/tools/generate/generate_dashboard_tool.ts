@@ -17,9 +17,11 @@ import {
   type DashboardAttachmentData,
 } from '@kbn/agent-builder-dashboards-common';
 
+import { createCustomContentTemplateResolver } from '@kbn/custom-content-server';
 import { dashboardTools } from '../../../common';
 import { retrieveLatestVersion } from './attachment_state';
 import {
+  createAttachmentPanelResolver,
   createVisPanelResolver,
   executeDashboardOperations,
   getErrorMessage,
@@ -111,12 +113,13 @@ Persists the resulting dashboard as an attachment and returns its id plus a comp
 
 Use operations[] to:
 1. set metadata
-2. add panels (resolved panel configs, or Lens/Vega visualizations from a natural-language query — pick the engine with the panel "renderer" field; defaults to Lens)
-3. edit existing Lens, Vega, or markdown panel content
+2. add panels: existing visualization attachments by id (\`source: "attachment"\`, preferred over copying their config), resolved panel configs (\`source: "config"\`), or Lens/Vega visualizations from a natural-language query (\`source: "request"\`; pick the engine with the panel "renderer" field, defaults to Lens)
+3. edit existing Lens, Vega, markdown, custom content, or ML anomaly panel content
 4. update panel layouts without changing content
 5. add / remove sections, including inline section panels during add_section
 6. remove panels
-7. add / remove controls (interactive filters pinned above the dashboard: dropdown, range slider, or time slider)`,
+7. add / remove controls (interactive filters pinned above the dashboard: dropdown, range slider, or time slider)
+8. add / edit custom content panels (\`source: "config"\`, \`type: "custom_content"\`) for HTML-based layouts that Lens and Vega cannot express`,
     schema: generateDashboardSchema,
     handler: async (
       { dashboardAttachmentId: previousAttachmentId, operations },
@@ -143,6 +146,12 @@ Use operations[] to:
             events,
             esClient,
           }),
+          resolveCustomContentTemplate: createCustomContentTemplateResolver({
+            logger,
+            modelProvider,
+            esClient,
+          }),
+          resolveAttachmentPanel: createAttachmentPanelResolver({ attachments }),
         });
 
         // Data-aware default time range computation
@@ -202,7 +211,7 @@ Use operations[] to:
               type: ToolResultType.error,
               data: {
                 message: `Failed to generate dashboard: ${errorMessage}`,
-                metadata: { dashboardAttachmentId: previousAttachmentId, operations },
+                metadata: { dashboardAttachmentId: previousAttachmentId },
               },
             },
           ],

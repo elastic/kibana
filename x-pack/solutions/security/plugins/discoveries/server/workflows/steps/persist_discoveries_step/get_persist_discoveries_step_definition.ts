@@ -41,6 +41,7 @@ export const getPersistDiscoveriesStepDefinition = ({
           attack_discoveries: attackDiscoveries,
           connector_name: connectorName,
           enable_field_rendering: enableFieldRendering = true,
+          generation_source: generationSource,
           generation_uuid: generationUuid,
           replacements,
           source,
@@ -122,6 +123,7 @@ export const getPersistDiscoveriesStepDefinition = ({
           adhocAttackDiscoveryDataClient,
           authenticatedUser,
           esClient,
+          generationSource,
           logger: tracedLogger,
           spaceId,
           validateRequestBody: {

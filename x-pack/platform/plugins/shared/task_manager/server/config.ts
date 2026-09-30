@@ -44,6 +44,10 @@ const FIVE_MIN_IN_MS = 5 * 60 * 1000;
 
 export const DEFAULT_KIBANAS_PER_PARTITION = 2;
 
+export const DEFAULT_EXECUTION_CONTROL_POLL_INTERVAL_MS = 5000; // 5 seconds
+const MIN_EXECUTION_CONTROL_POLL_INTERVAL_MS = 1000; // 1 second
+const MAX_EXECUTION_CONTROL_POLL_INTERVAL_MS = 1000 * 60; // 1 minute
+
 export enum ApiKeyType {
   ES = 'es',
   UIAM = 'uiam',
@@ -118,6 +122,14 @@ export const configSchema = schema.object(
         defaultValue: DEFAULT_DISCOVERY_INTERVAL_MS,
         min: MIN_DISCOVERY_INTERVAL_MS,
         max: MAX_DISCOVERY_INTERVAL_MS,
+      }),
+    }),
+    /* How often each node polls the runtime task execution control (pause/resume) state. */
+    execution_control: schema.object({
+      poll_interval: schema.number({
+        defaultValue: DEFAULT_EXECUTION_CONTROL_POLL_INTERVAL_MS,
+        min: MIN_EXECUTION_CONTROL_POLL_INTERVAL_MS,
+        max: MAX_EXECUTION_CONTROL_POLL_INTERVAL_MS,
       }),
     }),
     /* Allows for old kibana config to start kibana without crashing since ephemeral tasks are deprecated*/

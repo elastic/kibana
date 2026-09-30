@@ -16,6 +16,7 @@ const mockTrackRequest = jest.fn(
   }
 );
 const mockTrackMetricsInfo = jest.fn();
+const mockTrackEsqlQueryFailure = jest.fn();
 
 // Mock ALL external heavy dependencies with factory functions to avoid loading
 // their transitive dependency trees (e.g., @kbn/data-plugin/public).
@@ -30,6 +31,7 @@ jest.mock('../utils/get_esql_query', () => ({
 }));
 jest.mock('@kbn/esql-utils', () => ({
   buildMetricsInfoQuery: jest.fn((esql: string, dims?: string[], postFilter?: string) => {
+    if (!esql?.trim()) return '';
     const preFilter = dims?.length ? ' | WHERE dim IS NOT NULL' : '';
     const post = postFilter ? ` | WHERE ${postFilter}` : '';
     return `${esql}${preFilter} | METRICS_INFO${post}`;
@@ -39,7 +41,14 @@ jest.mock('@kbn/esql-utils', () => ({
     (fields: string[] | undefined, clause: (field: string) => string, separator = ' AND ') =>
       fields?.map(clause).join(separator) ?? ''
   ),
+  // Still required by getFetchParamsMock (kbn-unified-histogram) which imports it
+  // from @kbn/esql-utils to process breakdown fields. Not used by the hook itself.
   hasTransformationalCommand: jest.fn(() => false),
+  // Used by buildEsqlQueryFailureEvent for the `query_type` telemetry field.
+  getSourceCommandFromESQLQuery: jest.fn((esql?: string) => {
+    const sourceCommand = esql?.trim().match(/^(TS|FROM)\b/i);
+    return sourceCommand ? sourceCommand[1].toUpperCase() : '';
+  }),
 }));
 jest.mock('@kbn/field-utils', () => ({
   getFieldIconType: jest.fn(() => 'number'),
@@ -47,6 +56,7 @@ jest.mock('@kbn/field-utils', () => ({
 jest.mock('../../../../context/ebt_telemetry_context', () => ({
   useTelemetry: () => ({
     trackMetricsInfo: mockTrackMetricsInfo,
+    trackEsqlQueryFailure: mockTrackEsqlQueryFailure,
   }),
 }));
 jest.mock('../../../../context/chart_section_inspector', () => ({
@@ -69,6 +79,10 @@ import { executeEsqlQuery } from '../utils/execute_esql_query';
 import { EsqlResponseError } from '../../../../common/errors/esql_response_error';
 import { parseMetricsWithTelemetry } from '../utils/parse_metrics_response_with_telemetry';
 import { getFetchParamsMock } from '@kbn/unified-histogram/__mocks__/fetch_params';
+import {
+  METRICS_ESQL_QUERY_FAILURE_EVENT_TYPE,
+  METRICS_PROFILE_TELEMETRY_NAME,
+} from '../telemetry/constants';
 
 const mockExecuteEsqlQuery = executeEsqlQuery as jest.MockedFunction<typeof executeEsqlQuery>;
 const mockParseMetricsWithTelemetry = parseMetricsWithTelemetry as jest.MockedFunction<
@@ -157,10 +171,15 @@ describe('useFetchMetricsData', () => {
     const { getEsqlQuery } = jest.requireMock('../utils/get_esql_query');
     getEsqlQuery.mockImplementation((query: { esql?: string } | undefined) => query?.esql);
 
-    const { buildMetricsInfoQuery, buildJoinedFilter, hasTransformationalCommand } =
-      jest.requireMock('@kbn/esql-utils');
+    const {
+      buildMetricsInfoQuery,
+      buildJoinedFilter,
+      hasTransformationalCommand,
+      getSourceCommandFromESQLQuery,
+    } = jest.requireMock('@kbn/esql-utils');
     buildMetricsInfoQuery.mockImplementation(
       (esql: string, dims?: string[], postFilter?: string) => {
+        if (!esql?.trim()) return '';
         const preFilter = dims?.length ? ' | WHERE dim IS NOT NULL' : '';
         const post = postFilter ? ` | WHERE ${postFilter}` : '';
         return `${esql}${preFilter} | METRICS_INFO${post}`;
@@ -171,6 +190,10 @@ describe('useFetchMetricsData', () => {
         fields?.map(clause).join(separator) ?? ''
     );
     hasTransformationalCommand.mockImplementation(() => false);
+    getSourceCommandFromESQLQuery.mockImplementation((esql?: string) => {
+      const sourceCommand = esql?.trim().match(/^(TS|FROM)\b/i);
+      return sourceCommand ? sourceCommand[1].toUpperCase() : '';
+    });
 
     mockTrackRequest.mockImplementation(
       async (_name: string, _desc: string, fn: () => Promise<{ data: unknown }>) => {
@@ -277,8 +300,11 @@ describe('useFetchMetricsData', () => {
       expect(mockExecuteEsqlQuery).not.toHaveBeenCalled();
     });
 
-    it('does not fetch when query is undefined', async () => {
-      const params = createDefaultParams({ query: undefined });
+    it('does not fetch when metricsInfoQuery is empty', async () => {
+      const { buildMetricsInfoQuery } = jest.requireMock('@kbn/esql-utils');
+      buildMetricsInfoQuery.mockReturnValue('');
+
+      const params = createDefaultParams();
 
       renderHook(() => useFetchMetricsData(params));
 
@@ -291,21 +317,6 @@ describe('useFetchMetricsData', () => {
 
     it('does not fetch when dataView is undefined', async () => {
       const params = createDefaultParams({ dataView: undefined });
-
-      renderHook(() => useFetchMetricsData(params));
-
-      await act(async () => {
-        await new Promise((r) => setTimeout(r, 50));
-      });
-
-      expect(mockExecuteEsqlQuery).not.toHaveBeenCalled();
-    });
-
-    it('does not fetch when query has a transformational command', async () => {
-      const { hasTransformationalCommand } = jest.requireMock('@kbn/esql-utils');
-      hasTransformationalCommand.mockReturnValue(true);
-
-      const params = createDefaultParams();
 
       renderHook(() => useFetchMetricsData(params));
 
@@ -577,10 +588,80 @@ describe('useFetchMetricsData', () => {
       });
     });
 
+    it(`emits ${METRICS_ESQL_QUERY_FAILURE_EVENT_TYPE} for a circuit breaker reported on HTTP 200`, async () => {
+      // The scenario behind elastic/elasticsearch#154978: a `TS metrics-*`
+      // query trips the request circuit breaker, and Elasticsearch returns the
+      // failure embedded in a 200 body rather than as an HTTP error.
+      const circuitBreakerError = new EsqlResponseError(
+        {
+          type: 'circuit_breaking_exception',
+          reason: '[request] Data too large, data for [<reused_arrays>] would be [524288444/500mb]',
+        },
+        { status: 429 }
+      );
+      mockExecuteEsqlQuery.mockRejectedValue(circuitBreakerError);
+
+      const params = createDefaultParams();
+      const { result } = renderHook(() => useFetchMetricsData(params));
+
+      await waitFor(() => {
+        expect(result.current.error).toBe(circuitBreakerError);
+      });
+
+      expect(mockTrackEsqlQueryFailure).toHaveBeenCalledTimes(1);
+      expect(mockTrackEsqlQueryFailure).toHaveBeenCalledWith({
+        error_type: 'circuit_breaking_exception',
+        error_category: 'resource_limit',
+        status_code: 429,
+        query_type: 'TS',
+        profile: METRICS_PROFILE_TELEMETRY_NAME,
+      });
+    });
+
+    it(`emits ${METRICS_ESQL_QUERY_FAILURE_EVENT_TYPE} for a rejected HTTP request`, async () => {
+      const requestError = Object.assign(new Error('Bad Request'), {
+        attributes: {
+          error: { type: 'verification_exception', reason: 'Unknown column [x]' },
+          rawResponse: { status: 400 },
+        },
+      });
+      mockExecuteEsqlQuery.mockRejectedValue(requestError);
+
+      const params = createDefaultParams();
+      const { result } = renderHook(() => useFetchMetricsData(params));
+
+      await waitFor(() => {
+        expect(result.current.error).toBe(requestError);
+      });
+
+      expect(mockTrackEsqlQueryFailure).toHaveBeenCalledWith({
+        error_type: 'verification_exception',
+        error_category: 'user_input',
+        status_code: 400,
+        query_type: 'TS',
+        profile: METRICS_PROFILE_TELEMETRY_NAME,
+      });
+    });
+
+    it(`does not emit ${METRICS_ESQL_QUERY_FAILURE_EVENT_TYPE} for a cancelled refetch`, async () => {
+      const abortError = new Error('aborted');
+      abortError.name = 'AbortError';
+      mockExecuteEsqlQuery.mockRejectedValue(abortError);
+
+      const params = createDefaultParams();
+      const { result } = renderHook(() => useFetchMetricsData(params));
+
+      await waitFor(() => {
+        expect(result.current.error).toBeTruthy();
+      });
+
+      expect(mockTrackEsqlQueryFailure).not.toHaveBeenCalled();
+    });
+
     it('does not re-fire on re-renders that preserve the error reference', async () => {
       // `useAsyncFn` exposes a stable error reference for a given failed run,
-      // so the reporter useEffect (deps: [error, profileId]) does not re-fire
-      // on identity-preserving re-renders. Repeat failures with fresh Error
+      // so the reporter useEffect keyed on `error` does not re-fire on
+      // identity-preserving re-renders. Repeat failures with fresh Error
       // instances do produce fresh reports - exercised by the sibling test.
       const fetchError = new Error('re-render test');
       mockExecuteEsqlQuery.mockRejectedValue(fetchError);

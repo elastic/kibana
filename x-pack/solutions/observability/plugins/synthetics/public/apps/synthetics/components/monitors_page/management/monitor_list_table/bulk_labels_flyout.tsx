@@ -247,7 +247,7 @@ export const BulkLabelsFlyout = ({
             <EuiSpacer size="s" />
             <EuiButtonEmpty
               data-test-subj="syntheticsBulkLabelsAddRow"
-              iconType="plusInCircle"
+              iconType="plusCircle"
               size="s"
               flush="left"
               onClick={() => setPairs((prev) => [...prev, createEmptyPair()])}

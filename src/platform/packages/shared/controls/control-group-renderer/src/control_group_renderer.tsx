@@ -11,7 +11,7 @@ import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { BehaviorSubject, Subject, Subscription, combineLatest, map } from 'rxjs';
 
 import { ControlsRenderer, type ControlsRendererParentApi } from '@kbn/controls-renderer';
-import type { AggregateQuery, Filter, Query, TimeRange } from '@kbn/es-query';
+import type { AggregateQuery, Filter, ProjectRouting, Query, TimeRange } from '@kbn/es-query';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import {
   apiHasSerializableState,
@@ -47,6 +47,11 @@ export interface ControlGroupRendererProps {
   filters?: Filter[];
   timeRange?: TimeRange;
   query?: Query | AggregateQuery;
+  /**
+   * CPS (cross-project search) scope forwarded to child controls via the parent API's
+   * `projectRouting$`, so options list suggestions query the same projects as the host app.
+   */
+  projectRouting?: ProjectRouting;
   dataLoading?: boolean;
   compressed?: boolean;
 }
@@ -57,6 +62,7 @@ export const ControlGroupRenderer = ({
   filters,
   timeRange,
   query,
+  projectRouting,
   viewMode,
   dataLoading,
   compressed,
@@ -91,6 +97,18 @@ export const ControlGroupRenderer = ({
   });
   const propsApi = usePropsApi({ dataLoading, viewMode, compressed });
 
+  const projectRouting$ = useMemo(
+    () => new BehaviorSubject<ProjectRouting | undefined>(projectRouting),
+    // projectRouting only used as the initial value. Changes are published via the effect below.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    []
+  );
+  useEffect(() => {
+    if (projectRouting$.getValue() !== projectRouting) {
+      projectRouting$.next(projectRouting);
+    }
+  }, [projectRouting, projectRouting$]);
+
   const parentApi = useMemo(() => {
     if (!childrenApi || !layoutApi) return;
 
@@ -102,6 +120,7 @@ export const ControlGroupRenderer = ({
       ...layoutApi,
       ...searchApi,
       ...propsApi,
+      projectRouting$,
       reload$,
       panelIsPinned: () => true,
       getEditorConfig: getEditorConfig.current,
@@ -110,7 +129,7 @@ export const ControlGroupRenderer = ({
         disabledActionIds$.next(ids);
       },
     };
-  }, [childrenApi, layoutApi, searchApi, propsApi, getEditorConfig]);
+  }, [childrenApi, layoutApi, searchApi, propsApi, projectRouting$, getEditorConfig]);
 
   useEffect(() => {
     if (!parentApi || !input$) return;

@@ -34,7 +34,6 @@ import type { AppAction } from './actions';
 import type { Immutable } from '../../../common/endpoint/types';
 import type { State } from './types';
 import type { TimelineState } from '../../timelines/store/types';
-import type { SourcererDataView } from '../../sourcerer/store/model';
 import type { StartedSubPlugins, StartPlugins } from '../../types';
 import type { ExperimentalFeatures } from '../../../common/experimental_features';
 import type { AnalyzerState } from '../../resolver/types';
@@ -43,7 +42,6 @@ import { dataAccessLayerFactory } from '../../resolver/data_access_layer/factory
 import { createMiddlewares } from './middlewares';
 import { addNewTimeline } from '../../timelines/store/helpers';
 import { initialNotesState } from '../../notes/store/notes.slice';
-import { createDefaultDataView } from '../../data_view_manager/utils/create_default_data_view';
 
 let store: Store<State, Action> | null = null;
 
@@ -54,12 +52,6 @@ export const createStoreFactory = async (
   storage: Storage,
   enableExperimental: ExperimentalFeatures
 ): Promise<Store<State, Action>> => {
-  const { kibanaDataViews, defaultDataView, signal } = await createDefaultDataView({
-    application: coreStart.application,
-    http: coreStart.http,
-    skip: true,
-  });
-
   const timelineInitialState = {
     timeline: {
       // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
@@ -115,10 +107,6 @@ export const createStoreFactory = async (
       ...subPlugins.management.store.initialState,
     },
     {
-      defaultDataView,
-      kibanaDataViews,
-      signalIndexName: signal.name,
-      signalIndexMappingOutdated: signal.index_mapping_outdated,
       enableExperimental,
     },
     dataTableInitialState,
@@ -170,37 +158,12 @@ const actionSanitizer = (action: AnyAction) => {
   return action;
 };
 
-const sanitizeDataView = (dataView: SourcererDataView) => {
-  return {
-    ...dataView,
-    browserFields: 'browserFields',
-    indexFields: 'indexFields',
-    fields: 'fields',
-    dataView: 'dataView',
-  };
-};
-
 const sanitizeTimelineModel = (timeline: TimelineModel) => {
   return {
     ...timeline,
     footerText: 'footerText',
     loadingText: 'loadingText',
   };
-};
-
-const stateSanitizer = (state: State) => {
-  if (state.sourcerer) {
-    return {
-      ...state,
-      sourcerer: {
-        ...state.sourcerer,
-        defaultDataView: sanitizeDataView(state.sourcerer.defaultDataView),
-        kibanaDataViews: state.sourcerer.kibanaDataViews.map(sanitizeDataView),
-      },
-    };
-  } else {
-    return state;
-  }
 };
 
 /**
@@ -217,7 +180,6 @@ export const createStore = (
     name: 'Kibana Security Solution',
     actionsBlacklist: ['USER_MOVED_POINTER', 'USER_SET_RASTER_SIZE'],
     actionSanitizer: actionSanitizer as EnhancerOptions['actionSanitizer'],
-    stateSanitizer: stateSanitizer as EnhancerOptions['stateSanitizer'],
     // uncomment the following to enable redux action tracing
     // https://github.com/zalmoxisus/redux-devtools-extension/commit/64717bb9b3534ff616d9db56c2be680627c7b09d#diff-182cb140f8a0fd8bc37bbdcdad07bbadb9aebeb2d1b8ed026acd6132f2c88ce8R10
     // trace: true,

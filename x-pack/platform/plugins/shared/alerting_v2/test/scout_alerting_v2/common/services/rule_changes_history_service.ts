@@ -15,8 +15,8 @@ import type { RuleChangesHistoryActionType } from '../../../../server/lib/rule_c
 import {
   RULE_CHANGES_HISTORY_DATASET,
   RULE_CHANGES_HISTORY_MODULE,
-  RULE_CHANGES_HISTORY_OBJECT_TYPE,
-} from '../../../../server/lib/rule_changes_history/constants';
+} from '../../../../common/rule_changes_history_constants';
+import { RULE_CHANGES_HISTORY_OBJECT_TYPE } from '../../../../server/lib/rule_changes_history/constants';
 import { POLL_INTERVAL_MS, POLL_TIMEOUT_MS } from '../constants';
 import { createSystemIndicesEsClient } from './system_indices_es_client';
 

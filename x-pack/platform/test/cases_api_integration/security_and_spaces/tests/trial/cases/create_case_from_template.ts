@@ -8,6 +8,7 @@
 import expect from '@kbn/expect';
 import { stringify as yamlStringify } from 'yaml';
 import { CaseSeverity } from '@kbn/cases-plugin/common/types/domain';
+import { CASES_URL } from '@kbn/cases-plugin/common/constants';
 import { getPostCaseRequest } from '../../../../common/lib/mock';
 import { deleteAllCaseItems, createCase, getSpaceUrlPrefix } from '../../../../common/lib/api';
 import type { FtrProviderContext } from '../../../../common/ftr_provider_context';
@@ -191,17 +192,48 @@ export default ({ getService }: FtrProviderContext): void => {
       expect(JSON.stringify(res)).to.contain('not found');
     });
 
-    it('rejects a merged map that violates the template validation (unknown key)', async () => {
+    it('rejects an unknown key in extended_fields and lists the available keys', async () => {
       const template = await createTemplate(kitchenSinkDefinition);
 
-      await createCase(
-        supertest,
-        {
+      const { body } = await supertest
+        .post(`${CASES_URL}`)
+        .set('kbn-xsrf', 'true')
+        .set('x-elastic-internal-origin', 'foo')
+        .send({
           ...getPostCaseRequest({ owner: OWNER }),
           template: { id: template.templateId },
           extended_fields: { not_a_field_as_keyword: 'x' },
-        },
-        400
+        })
+        .expect(400);
+
+      // The exact wording is locked by the validate_extended_fields unit tests; this asserts
+      // the rejection reaches the API and carries the template's own keys.
+      expect(body.message).to.contain('Unknown extended field key: "not_a_field_as_keyword"');
+      expect(body.message).to.contain('Available keys:');
+      expect(body.message).to.contain('"priority_as_keyword" (Priority)');
+      expect(body.message).to.contain('"effort_as_integer" (Effort)');
+      // The display-only MARKDOWN field holds no value, so it is never offered as a key.
+      expect(body.message).not.to.contain('instructions');
+    });
+
+    it('points a near-miss key at the exact key to use', async () => {
+      // The caller sent the field name without its `_as_<type>` suffix — the error names the
+      // field and the key that sets it, instead of only reporting the key as unknown.
+      const template = await createTemplate(kitchenSinkDefinition);
+
+      const { body } = await supertest
+        .post(`${CASES_URL}`)
+        .set('kbn-xsrf', 'true')
+        .set('x-elastic-internal-origin', 'foo')
+        .send({
+          ...getPostCaseRequest({ owner: OWNER }),
+          template: { id: template.templateId },
+          extended_fields: { priority: 'urgent' },
+        })
+        .expect(400);
+
+      expect(body.message).to.contain(
+        'To set the "Priority" field, use its key "priority_as_keyword"'
       );
     });
 

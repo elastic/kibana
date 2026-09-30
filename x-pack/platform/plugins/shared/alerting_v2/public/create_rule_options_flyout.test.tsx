@@ -13,7 +13,7 @@ import { httpServiceMock } from '@kbn/core-http-browser-mocks';
 import { notificationServiceMock } from '@kbn/core-notifications-browser-mocks';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
-import { applicationServiceMock, uiSettingsServiceMock } from '@kbn/core/public/mocks';
+import { applicationServiceMock, coreMock, uiSettingsServiceMock } from '@kbn/core/public/mocks';
 import { lensPluginMock } from '@kbn/lens-plugin/public/mocks';
 import { uiActionsPluginMock } from '@kbn/ui-actions-plugin/public/mocks';
 import { AGENT_BUILDER_APP_ID } from '@kbn/deeplinks-agent-builder';
@@ -47,6 +47,7 @@ const createMockServices = (): AlertingV2KibanaServices => {
     lens: lensPluginMock.createStartContract(),
     uiActions: uiActionsPluginMock.createStartContract(),
     uiSettings,
+    featureFlags: coreMock.createStart().featureFlags,
     expressions: {} as AlertingV2KibanaServices['expressions'],
     container: {} as AlertingV2KibanaServices['container'],
   };
@@ -72,6 +73,15 @@ jest.mock('@kbn/alerting-v2-rule-form', () => ({
     capturedComposeProps = props;
     return <div data-test-subj="mockComposeDiscoverFlyout" />;
   },
+}));
+
+const mockCreateActionPolicyFormFlyout = () => null;
+jest.mock('./components/action_policy/form_flyout/create_action_policy_form_flyout', () => ({
+  CreateActionPolicyFormFlyout: mockCreateActionPolicyFormFlyout,
+}));
+
+jest.mock('./hooks/use_is_action_policies_license_valid', () => ({
+  useIsActionPoliciesLicenseValid: () => true,
 }));
 
 // Collects all pending resolvers from untilPluginStartServicesReady calls so the test
@@ -153,6 +163,12 @@ describe('CreateRuleOptionsFlyout', () => {
       expect(capturedComposeProps.mode).toBe('create');
       expect(capturedComposeProps.onClose).toBe(onClose);
       expect(capturedComposeProps.onCreateRule).toBeDefined();
+      expect(
+        (capturedComposeProps.services as AlertingV2KibanaServices).createActionPolicyFormFlyout
+      ).toBe(mockCreateActionPolicyFormFlyout);
+      expect(
+        (capturedComposeProps.services as AlertingV2KibanaServices).canCreateActionPolicy
+      ).toBe(true);
     });
 
     it('passes esqlVariables through to ComposeDiscoverFlyout', async () => {
@@ -222,8 +238,8 @@ describe('CreateRuleOptionsFlyout', () => {
         expect(screen.getByTestId('mockRuleCreateOptionsFlyout')).toBeInTheDocument();
       });
 
-      expect(capturedSelectorProps.createWithAgentDisabled).toBe(false);
-      expect(capturedSelectorProps.createWithAgentTooltipText).toBeUndefined();
+      expect(capturedSelectorProps).not.toHaveProperty('createWithAgentDisabled');
+      expect(capturedSelectorProps).not.toHaveProperty('createWithAgentTooltipText');
 
       fireEvent.click(screen.getByTestId('agentBtn'));
 
@@ -234,7 +250,7 @@ describe('CreateRuleOptionsFlyout', () => {
       expect(onClose).toHaveBeenCalledTimes(1);
     });
 
-    it('disables (does not hide) the agent option when agentBuilder capability is missing', async () => {
+    it('does not pass agent-builder availability through the external flyout boundary', async () => {
       mockServices.application.capabilities = {
         ...mockServices.application.capabilities,
         agentBuilder: {
@@ -254,11 +270,11 @@ describe('CreateRuleOptionsFlyout', () => {
       });
 
       expect(capturedSelectorProps.onCreateWithAgent).toEqual(expect.any(Function));
-      expect(capturedSelectorProps.createWithAgentDisabled).toBe(true);
-      expect(capturedSelectorProps.createWithAgentTooltipText).toEqual(expect.any(String));
+      expect(capturedSelectorProps).not.toHaveProperty('createWithAgentDisabled');
+      expect(capturedSelectorProps).not.toHaveProperty('createWithAgentTooltipText');
     });
 
-    it('disables (does not hide) the agent option when experimental features are disabled', async () => {
+    it('keeps experimental-setting resolution inside the Alerting V2 context', async () => {
       (mockServices.uiSettings.get as jest.Mock).mockReturnValue(false);
       renderFlyout();
       resolveServices(mockServices);
@@ -268,8 +284,8 @@ describe('CreateRuleOptionsFlyout', () => {
       });
 
       expect(capturedSelectorProps.onCreateWithAgent).toEqual(expect.any(Function));
-      expect(capturedSelectorProps.createWithAgentDisabled).toBe(true);
-      expect(capturedSelectorProps.createWithAgentTooltipText).toEqual(expect.any(String));
+      expect(capturedSelectorProps).not.toHaveProperty('createWithAgentDisabled');
+      expect(capturedSelectorProps).not.toHaveProperty('createWithAgentTooltipText');
     });
   });
 

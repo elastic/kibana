@@ -38,7 +38,7 @@ export const useStepDetailsBreadcrumbs = (extraCrumbs?: Array<{ text: string; hr
   useTestRunDetailsBreadcrumbs([
     {
       text: data ? moment(data.details?.timestamp).format('LLL') : '',
-      href: `${appPath}/${generatePath(TEST_RUN_DETAILS_ROUTE, params)}${testRunSearch}`,
+      href: `${appPath}${generatePath(TEST_RUN_DETAILS_ROUTE, params)}${testRunSearch}`,
     },
 
     {

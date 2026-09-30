@@ -94,16 +94,27 @@ const startDependenciesMock = {
 };
 const spy = jest.spyOn(AlertFlyoutComponentModule, 'getRuleFlyoutComponent');
 
-// FLAKY: https://github.com/elastic/kibana/issues/255104
-// FLAKY: https://github.com/elastic/kibana/issues/255103
-describe.skip('AlertRuleFromVisAction', () => {
+describe('AlertRuleFromVisAction', () => {
   const action = new AlertRuleFromVisAction(
     ruleTypeRegistry,
     actionTypeRegistry,
     startDependenciesMock
   );
 
+  // `execute` opens the flyout without awaiting its lazily-imported content, so flush pending
+  // async work after each call to ensure `getRuleFlyoutComponent` has been called before we read it.
+  const executeAndFlush = async (context: Parameters<typeof action.execute>[0]) => {
+    await act(async () => {
+      await action.execute(context);
+    });
+    await act(() => new Promise((resolve) => setTimeout(resolve, 0)));
+  };
+
   const getCreateAlertRuleLastCalledInitialValues = () => last(spy.mock.calls ?? [])?.[5];
+
+  beforeEach(() => {
+    spy.mockClear();
+  });
 
   afterAll(() => {
     // clear the spy created with spyOn
@@ -111,17 +122,14 @@ describe.skip('AlertRuleFromVisAction', () => {
   });
 
   it("creates a rule with the visualization's ES|QL query plus an additional threshold line", async () => {
-    await act(
-      async () =>
-        await action.execute({
-          embeddable: embeddableMock,
-          data: {
-            query: 'FROM index | STATS count = COUNT(*)',
-            thresholdValues: [{ values: { count: 210 }, yField: 'count' }],
-            xValues: {},
-          },
-        })
-    );
+    await executeAndFlush({
+      embeddable: embeddableMock,
+      data: {
+        query: 'FROM index | STATS count = COUNT(*)',
+        thresholdValues: [{ values: { count: 210 }, yField: 'count' }],
+        xValues: {},
+      },
+    });
 
     expect(getCreateAlertRuleLastCalledInitialValues()).toMatchInlineSnapshot(`
       Object {
@@ -142,17 +150,14 @@ describe.skip('AlertRuleFromVisAction', () => {
   });
 
   it('appends a single xValue to the threshold line with an AND operator', async () => {
-    await act(
-      async () =>
-        await action.execute({
-          embeddable: embeddableMock,
-          data: {
-            query: 'FROM index | STATS count = COUNT(*) BY uhhhhhhhh.field',
-            thresholdValues: [{ values: { count: 210 }, yField: 'count' }],
-            xValues: { 'uhhhhhhhh.field': 'zoop' },
-          },
-        })
-    );
+    await executeAndFlush({
+      embeddable: embeddableMock,
+      data: {
+        query: 'FROM index | STATS count = COUNT(*) BY uhhhhhhhh.field',
+        thresholdValues: [{ values: { count: 210 }, yField: 'count' }],
+        xValues: { 'uhhhhhhhh.field': 'zoop' },
+      },
+    });
 
     expect(getCreateAlertRuleLastCalledInitialValues()).toMatchInlineSnapshot(`
       Object {
@@ -173,19 +178,14 @@ describe.skip('AlertRuleFromVisAction', () => {
   });
 
   it('appends multiple fields in the threshold value with an AND operator', async () => {
-    await act(
-      async () =>
-        await action.execute({
-          embeddable: embeddableMock,
-          data: {
-            query: 'FROM index | STATS count = COUNT(*) BY uhhhhhhhh.field',
-            thresholdValues: [
-              { values: { count: 210, 'uhhhhhhhh.field': 'zoop' }, yField: 'count' },
-            ],
-            xValues: {},
-          },
-        })
-    );
+    await executeAndFlush({
+      embeddable: embeddableMock,
+      data: {
+        query: 'FROM index | STATS count = COUNT(*) BY uhhhhhhhh.field',
+        thresholdValues: [{ values: { count: 210, 'uhhhhhhhh.field': 'zoop' }, yField: 'count' }],
+        xValues: {},
+      },
+    });
     expect(getCreateAlertRuleLastCalledInitialValues()).toMatchInlineSnapshot(`
       Object {
         "name": "Elasticsearch query rule from visualization",
@@ -205,20 +205,17 @@ describe.skip('AlertRuleFromVisAction', () => {
   });
 
   it('appends multiple thresholdValues threshold line in parentheses separated by OR operators', async () => {
-    await act(
-      async () =>
-        await action.execute({
-          embeddable: embeddableMock,
-          data: {
-            query: 'FROM index | KEEP geo.dest, bytes, memory, extension.keyword',
-            thresholdValues: [
-              { values: { bytes: 5000, 'extension.keyword': 'deb' }, yField: 'bytes' },
-              { values: { memory: 50000, 'extension.keyword': 'rpm' }, yField: 'memory' },
-            ],
-            xValues: { 'geo.dest': 'JP' },
-          },
-        })
-    );
+    await executeAndFlush({
+      embeddable: embeddableMock,
+      data: {
+        query: 'FROM index | KEEP geo.dest, bytes, memory, extension.keyword',
+        thresholdValues: [
+          { values: { bytes: 5000, 'extension.keyword': 'deb' }, yField: 'bytes' },
+          { values: { memory: 50000, 'extension.keyword': 'rpm' }, yField: 'memory' },
+        ],
+        xValues: { 'geo.dest': 'JP' },
+      },
+    });
     expect(getCreateAlertRuleLastCalledInitialValues()).toMatchInlineSnapshot(`
       Object {
         "name": "Elasticsearch query rule from visualization",
@@ -238,17 +235,14 @@ describe.skip('AlertRuleFromVisAction', () => {
   });
 
   it('converts an array xValue to MATCH queries', async () => {
-    await act(
-      async () =>
-        await action.execute({
-          embeddable: embeddableMock,
-          data: {
-            query: 'FROM index | KEEP tags, something.else',
-            thresholdValues: [{ values: { 'something.else': 3087 }, yField: 'something.else' }],
-            xValues: { tags: 'shibbity,bee,bop,doowop' },
-          },
-        })
-    );
+    await executeAndFlush({
+      embeddable: embeddableMock,
+      data: {
+        query: 'FROM index | KEEP tags, something.else',
+        thresholdValues: [{ values: { 'something.else': 3087 }, yField: 'something.else' }],
+        xValues: { tags: 'shibbity,bee,bop,doowop' },
+      },
+    });
     expect(getCreateAlertRuleLastCalledInitialValues()).toMatchInlineSnapshot(`
       Object {
         "name": "Elasticsearch query rule from visualization",
@@ -268,25 +262,22 @@ describe.skip('AlertRuleFromVisAction', () => {
   });
 
   it('converts an array in a threshold value to MATCH queries', async () => {
-    await act(
-      async () =>
-        await action.execute({
-          embeddable: embeddableMock,
-          data: {
-            query: 'FROM index | KEEP something.else, @tags.keyword',
-            thresholdValues: [
-              {
-                values: {
-                  'something.else': 3087,
-                  '@tags.keyword': 'login,warning',
-                },
-                yField: 'something.else',
-              },
-            ],
-            xValues: {},
+    await executeAndFlush({
+      embeddable: embeddableMock,
+      data: {
+        query: 'FROM index | KEEP something.else, @tags.keyword',
+        thresholdValues: [
+          {
+            values: {
+              'something.else': 3087,
+              '@tags.keyword': 'login,warning',
+            },
+            yField: 'something.else',
           },
-        })
-    );
+        ],
+        xValues: {},
+      },
+    });
     expect(getCreateAlertRuleLastCalledInitialValues()).toMatchInlineSnapshot(`
       Object {
         "name": "Elasticsearch query rule from visualization",
@@ -306,22 +297,19 @@ describe.skip('AlertRuleFromVisAction', () => {
   });
 
   it('renders empty splitValues as empty strings', async () => {
-    await act(
-      async () =>
-        await action.execute({
-          embeddable: embeddableMock,
-          data: {
-            query: 'FROM index | KEEP tags, something.else',
-            thresholdValues: [
-              {
-                values: { 'something.else': 3087, tags: '' },
-                yField: 'something.else',
-              },
-            ],
-            xValues: {},
+    await executeAndFlush({
+      embeddable: embeddableMock,
+      data: {
+        query: 'FROM index | KEEP tags, something.else',
+        thresholdValues: [
+          {
+            values: { 'something.else': 3087, tags: '' },
+            yField: 'something.else',
           },
-        })
-    );
+        ],
+        xValues: {},
+      },
+    });
     expect(getCreateAlertRuleLastCalledInitialValues()).toMatchInlineSnapshot(`
       Object {
         "name": "Elasticsearch query rule from visualization",
@@ -341,25 +329,22 @@ describe.skip('AlertRuleFromVisAction', () => {
   });
 
   it('escapes unnamed function columns', async () => {
-    await act(
-      async () =>
-        await action.execute({
-          embeddable: embeddableMock,
-          data: {
-            query:
-              'FROM index | RENAME bytes as `meow bytes` | STATS COUNT(*), PERCENTILE(owowo, 99), COUNT(`meow bytes`)',
-            thresholdValues: [
-              {
-                values: { 'COUNT(*)': 210 },
-                yField: 'COUNT(*)',
-              },
-              { values: { 'PERCENTILE(owowo, 99)': 42.6 }, yField: 'PERCENTILE(owowo, 99)' },
-              { values: { 'COUNT(`meow bytes`)': 1312 }, yField: 'COUNT(`meow bytes`)' },
-            ],
-            xValues: {},
+    await executeAndFlush({
+      embeddable: embeddableMock,
+      data: {
+        query:
+          'FROM index | RENAME bytes as `meow bytes` | STATS COUNT(*), PERCENTILE(owowo, 99), COUNT(`meow bytes`)',
+        thresholdValues: [
+          {
+            values: { 'COUNT(*)': 210 },
+            yField: 'COUNT(*)',
           },
-        })
-    );
+          { values: { 'PERCENTILE(owowo, 99)': 42.6 }, yField: 'PERCENTILE(owowo, 99)' },
+          { values: { 'COUNT(`meow bytes`)': 1312 }, yField: 'COUNT(`meow bytes`)' },
+        ],
+        xValues: {},
+      },
+    });
     expect(getCreateAlertRuleLastCalledInitialValues()).toMatchInlineSnapshot(`
       Object {
         "name": "Elasticsearch query rule from visualization",
@@ -368,7 +353,7 @@ describe.skip('AlertRuleFromVisAction', () => {
             "esql": "// Original ES|QL query derived from the visualization:
       FROM index | RENAME bytes as \`meow bytes\` | STATS COUNT(*), PERCENTILE(owowo, 99), COUNT(\`meow bytes\`)
       // Rename the following columns so they can be used as part of the alerting threshold:
-      | RENAME \`COUNT(*)\` as _count | RENAME \`PERCENTILE(owowo,99)\` as _percentile_owowo_99 | RENAME \`COUNT(\`\`meow bytes\`\`)\` as _count_meow_bytes
+      | RENAME \`COUNT(*)\` as _count | RENAME \`PERCENTILE(owowo,99)\` as _percentile_owowo_99 | RENAME \`COUNT(\`\`meow bytes\`\`)\` as _count_meow_bytes 
       // Threshold automatically generated from the selected values on the chart. This rule will generate an alert based on the following conditions:
       | WHERE _count >= 210 OR _percentile_owowo_99 >= 42.6 OR _count_meow_bytes >= 1312",
           },
@@ -381,27 +366,24 @@ describe.skip('AlertRuleFromVisAction', () => {
   });
 
   it('does not duplicate function column renames when they are included in multiple threshold values', async () => {
-    await act(
-      async () =>
-        await action.execute({
-          embeddable: embeddableMock,
-          data: {
-            query:
-              'FROM logst* | RENAME bytes as `meow bytes` | STATS COUNT(`meow bytes`) BY clientip, extension',
-            thresholdValues: [
-              {
-                values: { 'COUNT(`meow bytes`)': 634, clientip: '131.250.144.62' },
-                yField: 'COUNT(`meow bytes`)',
-              },
-              {
-                values: { 'COUNT(`meow bytes`)': 682, clientip: '7.203.207.131' },
-                yField: 'COUNT(`meow bytes`)',
-              },
-            ],
-            xValues: { extension: 'jpg' },
+    await executeAndFlush({
+      embeddable: embeddableMock,
+      data: {
+        query:
+          'FROM logst* | RENAME bytes as `meow bytes` | STATS COUNT(`meow bytes`) BY clientip, extension',
+        thresholdValues: [
+          {
+            values: { 'COUNT(`meow bytes`)': 634, clientip: '131.250.144.62' },
+            yField: 'COUNT(`meow bytes`)',
           },
-        })
-    );
+          {
+            values: { 'COUNT(`meow bytes`)': 682, clientip: '7.203.207.131' },
+            yField: 'COUNT(`meow bytes`)',
+          },
+        ],
+        xValues: { extension: 'jpg' },
+      },
+    });
     expect(getCreateAlertRuleLastCalledInitialValues()).toMatchInlineSnapshot(`
       Object {
         "name": "Elasticsearch query rule from visualization",
@@ -410,7 +392,7 @@ describe.skip('AlertRuleFromVisAction', () => {
             "esql": "// Original ES|QL query derived from the visualization:
       FROM logst* | RENAME bytes as \`meow bytes\` | STATS COUNT(\`meow bytes\`) BY clientip, extension
       // Rename the following columns so they can be used as part of the alerting threshold:
-      | RENAME \`COUNT(\`\`meow bytes\`\`)\` as _count_meow_bytes
+      | RENAME \`COUNT(\`\`meow bytes\`\`)\` as _count_meow_bytes 
       // Threshold automatically generated from the selected values on the chart. This rule will generate an alert based on the following conditions:
       | WHERE extension == \\"jpg\\" AND ((clientip == \\"131.250.144.62\\" AND _count_meow_bytes >= 634) OR (clientip == \\"7.203.207.131\\" AND _count_meow_bytes >= 682))",
           },
@@ -423,25 +405,22 @@ describe.skip('AlertRuleFromVisAction', () => {
   });
 
   it('escapes string values with backlashes in them', async () => {
-    await act(
-      async () =>
-        await action.execute({
-          embeddable: embeddableMock,
-          data: {
-            query: 'FROM index | STATS count = COUNT(*) BY CATEGORIZE(message)',
-            thresholdValues: [
-              {
-                values: { 'COUNT(*)': 1 },
-                yField: 'COUNT(*)',
-              },
-            ],
-            xValues: {
-              'CATEGORIZE(message)':
-                '.*?GET .+?HTTP/1\\.1.+?Mozilla/5\\.0.+?X11.+?Linux.+?x86_64.+?rv.+?Gecko/20110421.+?Firefox/6\\.0a',
-            },
+    await executeAndFlush({
+      embeddable: embeddableMock,
+      data: {
+        query: 'FROM index | STATS count = COUNT(*) BY CATEGORIZE(message)',
+        thresholdValues: [
+          {
+            values: { 'COUNT(*)': 1 },
+            yField: 'COUNT(*)',
           },
-        })
-    );
+        ],
+        xValues: {
+          'CATEGORIZE(message)':
+            '.*?GET .+?HTTP/1\\.1.+?Mozilla/5\\.0.+?X11.+?Linux.+?x86_64.+?rv.+?Gecko/20110421.+?Firefox/6\\.0a',
+        },
+      },
+    });
     expect(getCreateAlertRuleLastCalledInitialValues()).toMatchInlineSnapshot(`
       Object {
         "name": "Elasticsearch query rule from visualization",
@@ -450,7 +429,7 @@ describe.skip('AlertRuleFromVisAction', () => {
             "esql": "// Original ES|QL query derived from the visualization:
       FROM index | STATS count = COUNT(*) BY CATEGORIZE(message)
       // Rename the following columns so they can be used as part of the alerting threshold:
-      | RENAME \`COUNT(*)\` as _count | RENAME \`CATEGORIZE(message)\` as _categorize_message
+      | RENAME \`COUNT(*)\` as _count | RENAME \`CATEGORIZE(message)\` as _categorize_message 
       // Threshold automatically generated from the selected value on the chart. This rule will generate an alert based on the following conditions:
       | WHERE _categorize_message == \\".*?GET .+?HTTP/1\\\\\\\\.1.+?Mozilla/5\\\\\\\\.0.+?X11.+?Linux.+?x86_64.+?rv.+?Gecko/20110421.+?Firefox/6\\\\\\\\.0a\\" AND _count >= 1",
           },
@@ -511,7 +490,7 @@ describe.skip('AlertRuleFromVisAction', () => {
         })) as unknown as LensApi['getLegacySerializedState'],
         parentApi: parentApiMock,
       });
-      await act(async () => await action.execute({ embeddable }));
+      await executeAndFlush({ embeddable });
       expect(getCreateAlertRuleLastCalledInitialValues()).toMatchInlineSnapshot(`
         Object {
           "name": "Elasticsearch query rule from visualization",
@@ -576,10 +555,7 @@ describe.skip('AlertRuleFromVisAction', () => {
           },
         })) as unknown as LensApi['getLegacySerializedState'],
       });
-      await act(async () => await action.execute({ embeddable }));
-      // wait for the async operations to complete
-
-      await act(() => new Promise((resolve) => setTimeout(resolve, 0)));
+      await executeAndFlush({ embeddable });
       expect(getCreateAlertRuleLastCalledInitialValues()).toMatchInlineSnapshot(`
         Object {
           "name": "Elasticsearch query rule from visualization",

@@ -148,8 +148,9 @@ export const MyConnector: ConnectorSpec = {
   test: {
     handler: async (ctx) => {
       await ctx.client.get(`${ctx.config.url}/health`);
-      return { ok: true, message: 'Connection successful' };
+      return {};
     },
+    enabled: true,
   },
 };
 ```
@@ -565,8 +566,11 @@ import type {
 
 - [Connector Spec](./src/connector_spec.ts) - Full API reference
 - [UI Metadata System](./src/connector_spec_ui.ts) - UI derivation documentation
+- [Client types](./src/lib/clients/README.md) - Authoring and review checklist for pooled `ctx.getClient` client types
 
 ## Contributing
+
+When adding a new **pooled client type** (`ctx.getClient`), follow [src/lib/clients/README.md](./src/lib/clients/README.md) — keep the client self-contained under `lib/<client>/`, apply `networkSettings` in `build`, register it on `clientTypes`, and leave `create_connector_from_spec.ts` alone unless you need an Actions-only override. Registration is a deliberate production enablement.
 
 When adding a new connector:
 

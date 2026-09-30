@@ -160,7 +160,7 @@ export const getTableColumns = (
             );
         }
       },
-      width: isOnReducedSpaceLayout ? 'auto' : '40px',
+      width: isOnReducedSpaceLayout ? 'auto' : '55px',
       css: { height: '100%' }, // Vertically align icon
     },
     {
@@ -322,7 +322,6 @@ export function QueryList({
                   tooltipProps={{ disableScreenReaderOutput: true }}
                 >
                   {(copy) => (
-                    /* eslint-disable-next-line @elastic/eui/tooltip-button-icon-wrap */
                     <EuiButtonIcon
                       iconType="copy"
                       iconSize="m"

@@ -13,6 +13,7 @@ import type {
   DatasourceMap,
   VisualizationMap,
 } from '@kbn/lens-common';
+import { getChartScopedFilterQuery } from '@kbn/lens-common';
 import { removePinnedFilters } from './save_modal_container';
 
 const removeNonSerializable = (obj: Parameters<JSON['stringify']>[0]) =>
@@ -24,7 +25,7 @@ export const isLensEqual = (
   injectFilterReferences: FilterManager['inject'],
   datasourceMap: DatasourceMap,
   visualizationMap: VisualizationMap,
-  annotationGroups: AnnotationGroups
+  annotationGroups?: AnnotationGroups
 ) => {
   if (doc1In === undefined || doc2In === undefined) {
     return doc1In === doc2In;
@@ -33,12 +34,13 @@ export const isLensEqual = (
   // we do this so that undefined props are the same as non-existant props
   const doc1 = removeNonSerializable(doc1In);
   const doc2 = removeNonSerializable(doc2In);
+  const annotations = removeNonSerializable(annotationGroups ?? {});
 
   if (doc1?.visualizationType !== doc2?.visualizationType) {
     return false;
   }
 
-  if (!isEqual(doc1.state.query, doc2.state.query)) {
+  if (!isEqual(normalizeChartFilter(doc1.state.query), normalizeChartFilter(doc2.state.query))) {
     return false;
   }
 
@@ -51,7 +53,7 @@ export const isLensEqual = (
             doc1.references,
             doc2.state.visualization,
             doc2.references,
-            annotationGroups
+            annotations
           );
         } catch (err) {
           return false;
@@ -97,6 +99,16 @@ export const isLensEqual = (
 
   return true;
 };
+
+/**
+ * Canonicalizes the chart-scoped filter slot for comparison: `undefined`,
+ * the empty KQL/Lucene default (`{ query: '', ... }`) and legacy aggregate
+ * (ES|QL) copies all mean "no chart filter" and must compare equal.
+ */
+function normalizeChartFilter(query: LensDocument['state']['query']) {
+  const filter = getChartScopedFilterQuery(query);
+  return filter && filter.query !== '' ? filter : undefined;
+}
 
 function injectDocFilterReferences(
   injectFilterReferences: FilterManager['inject'],

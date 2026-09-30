@@ -56,7 +56,7 @@ export function CreateDataSourceFlyoutTypeSettingsBlock(props: {
       <EuiButtonEmpty
         size="s"
         flush="left"
-        iconType={isOpen ? 'arrowDown' : 'arrowRight'}
+        iconType={isOpen ? 'chevronSingleDown' : 'chevronSingleRight'}
         aria-expanded={isOpen}
         aria-controls={contentId}
         onClick={() => setIsOpen((value) => !value)}

@@ -2,7 +2,7 @@
   "type": "plugin",
   "id": "@kbn/serverless-search",
   "owner": [
-    "@elastic/search-kibana"
+    "@elastic/search-ml-ux"
   ],
   "group": "search",
   "visibility": "private",
@@ -38,8 +38,6 @@
       "indexManagement",
       "contentConnectors",
       "searchInferenceEndpoints",
-      "searchPlayground",
-      "usageCollection",
       "workflowsManagement",
     ],
     "requiredBundles": [

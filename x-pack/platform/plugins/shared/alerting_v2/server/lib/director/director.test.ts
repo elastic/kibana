@@ -75,6 +75,7 @@ describe('DirectorService', () => {
   describe('run', () => {
     it('returns empty array and zero stats when no alert events provided', async () => {
       const result = await directorService.run({
+        spaceId: 'default',
         rule,
         executionContext: testExecutionContext,
         alertEvents: [],
@@ -98,6 +99,7 @@ describe('DirectorService', () => {
       mockEsClient.esql.query.mockResolvedValue(createLatestAlertEventStateResponse([]));
 
       const result = await directorService.run({
+        spaceId: 'default',
         rule,
         executionContext: testExecutionContext,
         alertEvents: [alertEvent],
@@ -116,6 +118,7 @@ describe('DirectorService', () => {
       mockEsClient.esql.query.mockResolvedValue(createLatestAlertEventStateResponse([]));
 
       const result = await directorService.run({
+        spaceId: 'default',
         rule,
         executionContext: testExecutionContext,
         alertEvents: [alertEvent],
@@ -150,6 +153,7 @@ describe('DirectorService', () => {
       );
 
       const result = await directorService.run({
+        spaceId: 'default',
         rule,
         executionContext: testExecutionContext,
         alertEvents: [alertEvent],
@@ -184,6 +188,7 @@ describe('DirectorService', () => {
       );
 
       const result = await directorService.run({
+        spaceId: 'default',
         rule,
         executionContext: testExecutionContext,
         alertEvents: [alertEvent],
@@ -217,6 +222,7 @@ describe('DirectorService', () => {
       );
 
       const result = await directorService.run({
+        spaceId: 'default',
         rule,
         executionContext: testExecutionContext,
         alertEvents: [alertEvent],
@@ -250,6 +256,7 @@ describe('DirectorService', () => {
       );
 
       const result = await directorService.run({
+        spaceId: 'default',
         rule,
         executionContext: testExecutionContext,
         alertEvents: [alertEvent],
@@ -283,6 +290,7 @@ describe('DirectorService', () => {
       );
 
       const result = await directorService.run({
+        spaceId: 'default',
         rule,
         executionContext: testExecutionContext,
         alertEvents: [alertEvent],
@@ -295,8 +303,8 @@ describe('DirectorService', () => {
       expect(result.stats.newEpisodeIds).toHaveLength(0);
     });
 
-    it("sets the episode status to active on a no_data event when no_data_strategy is 'emit'", async () => {
-      const ruleWithEmit = createRuleResponse({ no_data_strategy: 'emit' });
+    it("sets the episode status to active on a no_data event when no_data.strategy is 'alert'", async () => {
+      const ruleWithEmit = createRuleResponse({ no_data: { strategy: 'alert' } });
       const alertEvent = createAlertEvent({
         group_hash: 'hash-1',
         status: 'no_data',
@@ -317,6 +325,7 @@ describe('DirectorService', () => {
       );
 
       const result = await directorService.run({
+        spaceId: 'default',
         rule: ruleWithEmit,
         executionContext: testExecutionContext,
         alertEvents: [alertEvent],
@@ -328,8 +337,8 @@ describe('DirectorService', () => {
       });
     });
 
-    it("preserves the prior episode status on a no_data event when no_data_strategy is 'last_known_status'", async () => {
-      const ruleWithLastKnown = createRuleResponse({ no_data_strategy: 'last_known_status' });
+    it("preserves the prior episode status on a no_data event when no_data.strategy is 'keep_last'", async () => {
+      const ruleWithLastKnown = createRuleResponse({ no_data: { strategy: 'keep_last' } });
       const alertEvent = createAlertEvent({
         group_hash: 'hash-1',
         status: 'no_data',
@@ -350,6 +359,7 @@ describe('DirectorService', () => {
       );
 
       const result = await directorService.run({
+        spaceId: 'default',
         rule: ruleWithLastKnown,
         executionContext: testExecutionContext,
         alertEvents: [alertEvent],
@@ -389,6 +399,7 @@ describe('DirectorService', () => {
       );
 
       const result = await directorService.run({
+        spaceId: 'default',
         rule,
         executionContext: testExecutionContext,
         alertEvents,
@@ -427,6 +438,7 @@ describe('DirectorService', () => {
       );
 
       const result = await directorService.run({
+        spaceId: 'default',
         rule,
         executionContext: testExecutionContext,
         alertEvents: [alertEvent],
@@ -457,6 +469,7 @@ describe('DirectorService', () => {
       );
 
       const result = await directorService.run({
+        spaceId: 'default',
         rule,
         executionContext: testExecutionContext,
         alertEvents: [alertEvent],
@@ -475,6 +488,7 @@ describe('DirectorService', () => {
 
       await expect(
         directorService.run({
+          spaceId: 'default',
           rule,
           executionContext: abortedContext,
           alertEvents: [alertEvent],
@@ -490,6 +504,7 @@ describe('DirectorService', () => {
 
       await expect(
         directorService.run({
+          spaceId: 'default',
           rule,
           executionContext: testExecutionContext,
           alertEvents: [alertEvent],
@@ -499,7 +514,7 @@ describe('DirectorService', () => {
 
     it('includes status_count in episode when strategy returns one', async () => {
       const ruleWithTransition = createRuleResponse({
-        state_transition: { pending_count: 3 },
+        state_transition: { pending: { count: 3 } },
       });
 
       const alertEvent = createAlertEvent({
@@ -522,6 +537,7 @@ describe('DirectorService', () => {
       );
 
       const result = await directorService.run({
+        spaceId: 'default',
         rule: ruleWithTransition,
         executionContext: testExecutionContext,
         alertEvents: [alertEvent],
@@ -536,7 +552,7 @@ describe('DirectorService', () => {
 
     it('transitions to active when count threshold is met', async () => {
       const ruleWithTransition = createRuleResponse({
-        state_transition: { pending_count: 3 },
+        state_transition: { pending: { count: 3 } },
       });
 
       const alertEvent = createAlertEvent({
@@ -559,6 +575,7 @@ describe('DirectorService', () => {
       );
 
       const result = await directorService.run({
+        spaceId: 'default',
         rule: ruleWithTransition,
         executionContext: testExecutionContext,
         alertEvents: [alertEvent],
@@ -568,6 +585,51 @@ describe('DirectorService', () => {
         id: 'episode-1',
         status: alertEpisodeStatus.active,
       });
+    });
+
+    it('evaluates timeframe thresholds against the director clock, not the event', async () => {
+      // Incoming events carry no `@timestamp` (ES sets it at ingest), so the
+      // elapsed time must come from the director run time.
+      jest.useFakeTimers().setSystemTime(new Date('2026-01-01T00:10:00.000Z'));
+
+      try {
+        const ruleWithTransition = createRuleResponse({
+          state_transition: { pending: { timeframe: '5m' } },
+        });
+
+        const { '@timestamp': ignoredTimestamp, ...alertEvent } = createAlertEvent({
+          group_hash: 'hash-1',
+          status: 'breached',
+          episode: undefined,
+        });
+
+        mockEsClient.esql.query.mockResolvedValue(
+          createLatestAlertEventStateResponse([
+            {
+              last_episode_timestamp: '2026-01-01T00:00:00.000Z',
+              last_status: 'breached',
+              last_episode_id: 'episode-1',
+              last_episode_status: 'pending',
+              last_episode_status_count: 1,
+              group_hash: 'hash-1',
+            },
+          ])
+        );
+
+        const result = await directorService.run({
+          spaceId: 'default',
+          rule: ruleWithTransition,
+          executionContext: testExecutionContext,
+          alertEvents: [alertEvent],
+        });
+
+        expect(result.alertEvents[0].episode).toEqual({
+          id: 'episode-1',
+          status: alertEpisodeStatus.active,
+        });
+      } finally {
+        jest.useRealTimers();
+      }
     });
 
     it('aggregates newEpisodeCount only for fresh episodes across a mixed batch', async () => {
@@ -599,6 +661,7 @@ describe('DirectorService', () => {
       );
 
       const result = await directorService.run({
+        spaceId: 'default',
         rule,
         executionContext: testExecutionContext,
         alertEvents,
@@ -640,6 +703,7 @@ describe('DirectorService', () => {
         );
 
         const result = await directorService.run({
+          spaceId: 'default',
           rule,
           executionContext: testExecutionContext,
           alertEvents: [alertEvent],
@@ -678,6 +742,7 @@ describe('DirectorService', () => {
         );
 
         const result = await directorService.run({
+          spaceId: 'default',
           rule,
           executionContext: testExecutionContext,
           alertEvents: [alertEvent],
@@ -696,7 +761,7 @@ describe('DirectorService', () => {
         // BasicTransitionStrategy and CountTimeframeStrategy which never
         // emit status_count on the → active edge.
         const ruleWithTransition = createRuleResponse({
-          state_transition: { pending_count: 3 },
+          state_transition: { pending: { count: 3 } },
         });
 
         const alertEvent = createAlertEvent({
@@ -720,6 +785,7 @@ describe('DirectorService', () => {
         );
 
         const result = await directorService.run({
+          spaceId: 'default',
           rule: ruleWithTransition,
           executionContext: testExecutionContext,
           alertEvents: [alertEvent],
@@ -759,6 +825,7 @@ describe('DirectorService', () => {
         );
 
         const result = await directorService.run({
+          spaceId: 'default',
           rule,
           executionContext: testExecutionContext,
           alertEvents: [alertEvent],
@@ -795,6 +862,7 @@ describe('DirectorService', () => {
         );
 
         const result = await directorService.run({
+          spaceId: 'default',
           rule,
           executionContext: testExecutionContext,
           alertEvents: [alertEvent],
@@ -832,6 +900,7 @@ describe('DirectorService', () => {
         );
 
         const result = await directorService.run({
+          spaceId: 'default',
           rule,
           executionContext: testExecutionContext,
           alertEvents: [alertEvent],
@@ -879,6 +948,7 @@ describe('DirectorService', () => {
         );
 
         const result = await directorService.run({
+          spaceId: 'default',
           rule,
           executionContext: testExecutionContext,
           alertEvents,

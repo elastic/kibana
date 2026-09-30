@@ -68,7 +68,7 @@ describe('EventLogService', () => {
       );
     });
 
-    it('filters by provider, space and start date and orders by @timestamp desc', async () => {
+    it('filters by provider, space and start time and orders by @timestamp desc', async () => {
       const { eventLogService, mockEsClient } = createEventLogService();
       mockEsClient.search.mockResolvedValue(buildSearchResponse());
 
@@ -89,7 +89,7 @@ describe('EventLogService', () => {
       expect(args.track_total_hits).toBe(true);
     });
 
-    it('matches both dispatched and throttled when outcome is omitted', async () => {
+    it('matches dispatched, throttled, and dispatch_failed when actions is omitted', async () => {
       const { eventLogService, mockEsClient } = createEventLogService();
       mockEsClient.search.mockResolvedValue(buildSearchResponse());
 
@@ -106,6 +106,7 @@ describe('EventLogService', () => {
               'event.action': [
                 ACTION_POLICY_EVENT_ACTIONS.DISPATCHED,
                 ACTION_POLICY_EVENT_ACTIONS.THROTTLED,
+                ACTION_POLICY_EVENT_ACTIONS.DISPATCH_FAILED,
               ],
             },
           },
@@ -113,14 +114,14 @@ describe('EventLogService', () => {
       );
     });
 
-    it('narrows event.action to the provided outcomes', async () => {
+    it('narrows event.action to the provided actions', async () => {
       const { eventLogService, mockEsClient } = createEventLogService();
       mockEsClient.search.mockResolvedValue(buildSearchResponse());
 
       await eventLogService.findActionPolicyExecutionEvents({
         spaceId: 'default',
         startDate: SINCE,
-        outcomes: ['dispatched'],
+        actions: ['dispatched'],
       });
 
       const [args] = mockEsClient.search.mock.calls[0] as [any];

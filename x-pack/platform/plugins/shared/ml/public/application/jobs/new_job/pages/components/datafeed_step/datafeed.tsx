@@ -8,6 +8,8 @@
 import type { FC } from 'react';
 import React, { Fragment, useContext, useEffect, useState } from 'react';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { getIsMlCpsEnabled } from '../../../../../services/ml_server_info';
+import { useMlKibana } from '../../../../../contexts/kibana';
 import { WizardNav } from '../wizard_nav';
 import { QueryInput } from './components/query';
 import { QueryDelayInput } from './components/query_delay';
@@ -20,11 +22,16 @@ import type { StepProps } from '../step_types';
 import { WIZARD_STEPS } from '../step_types';
 import { JobCreatorContext } from '../job_creator_context';
 import { JsonEditorFlyout, EDITOR_MODE } from '../common/json_editor_flyout';
+import { ProjectRoutingSelect } from '../common/project_routing';
 
 export const DatafeedStep: FC<StepProps> = ({ setCurrentStep, isCurrentStep }) => {
   const { jobValidator, jobValidatorUpdated } = useContext(JobCreatorContext);
   const [nextActive, setNextActive] = useState(false);
   const [isValidQuery, setIsValidQuery] = useState(false);
+  const {
+    services: { cps },
+  } = useMlKibana();
+  const isMlCpsEnabled = getIsMlCpsEnabled();
 
   useEffect(() => {
     const active =
@@ -51,6 +58,7 @@ export const DatafeedStep: FC<StepProps> = ({ setCurrentStep, isCurrentStep }) =
               <ScrollSizeInput />
               <TimeField />
               <ChangeDataView isDisabled={false} />
+              {isMlCpsEnabled && cps?.cpsManager ? <ProjectRoutingSelect /> : null}
             </EuiFlexItem>
           </EuiFlexGroup>
           <ResetQueryButton />

@@ -1,5 +1,8 @@
 {
   "sha1": "56ac4aa5be360f157097370eda7ec120f4447c7d",
+  "testChannels": [
+    "ci-on-commit"
+  ],
   "tests": [
     {
       "id": "79abdadc4886132-c537aed5c2bba8c",
@@ -11,8 +14,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/maps/test/scout/api/tests/create_doc_source.spec.ts",
-        "line": 23,
-        "column": 10
+        "line": 20,
+        "column": 27
       }
     },
     {
@@ -25,8 +28,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/maps/test/scout/api/tests/create_doc_source.spec.ts",
-        "line": 49,
-        "column": 10
+        "line": 41,
+        "column": 70
       }
     },
     {
@@ -39,8 +42,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/maps/test/scout/api/tests/delete_feature.spec.ts",
-        "line": 20,
-        "column": 10
+        "line": 15,
+        "column": 57
       }
     },
     {
@@ -53,8 +56,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/maps/test/scout/api/tests/delete_feature.spec.ts",
-        "line": 45,
-        "column": 10
+        "line": 39,
+        "column": 39
       }
     },
     {
@@ -67,8 +70,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/maps/test/scout/api/tests/fonts_api.spec.ts",
-        "line": 19,
-        "column": 10
+        "line": 15,
+        "column": 45
       }
     },
     {
@@ -81,8 +84,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/maps/test/scout/api/tests/fonts_api.spec.ts",
-        "line": 32,
-        "column": 10
+        "line": 24,
+        "column": 23
       }
     },
     {
@@ -95,8 +98,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/maps/test/scout/api/tests/fonts_api.spec.ts",
-        "line": 44,
-        "column": 10
+        "line": 36,
+        "column": 23
       }
     },
     {
@@ -109,8 +112,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/maps/test/scout/api/tests/fonts_api.spec.ts",
-        "line": 53,
-        "column": 10
+        "line": 45,
+        "column": 22
       }
     },
     {
@@ -123,8 +126,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/maps/test/scout/api/tests/get_grid_tile.spec.ts",
-        "line": 66,
-        "column": 10
+        "line": 67,
+        "column": 22
       }
     },
     {
@@ -137,8 +140,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/maps/test/scout/api/tests/get_grid_tile.spec.ts",
-        "line": 82,
-        "column": 10
+        "line": 84,
+        "column": 14
       }
     },
     {
@@ -151,8 +154,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/maps/test/scout/api/tests/get_grid_tile.spec.ts",
-        "line": 111,
-        "column": 10
+        "line": 114,
+        "column": 29
       }
     },
     {
@@ -165,8 +168,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/maps/test/scout/api/tests/get_grid_tile.spec.ts",
-        "line": 141,
-        "column": 10
+        "line": 144,
+        "column": 76
       }
     },
     {
@@ -179,8 +182,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/maps/test/scout/api/tests/get_grid_tile.spec.ts",
-        "line": 179,
-        "column": 10
+        "line": 186,
+        "column": 69
       }
     },
     {
@@ -193,8 +196,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/maps/test/scout/api/tests/get_grid_tile.spec.ts",
-        "line": 219,
-        "column": 10
+        "line": 240,
+        "column": 28
       }
     },
     {
@@ -207,8 +210,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/maps/test/scout/api/tests/get_grid_tile.spec.ts",
-        "line": 257,
-        "column": 10
+        "line": 280,
+        "column": 12
       }
     },
     {
@@ -221,8 +224,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/maps/test/scout/api/tests/get_grid_tile.spec.ts",
-        "line": 300,
-        "column": 10
+        "line": 350,
+        "column": 27
       }
     },
     {
@@ -235,8 +238,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/maps/test/scout/api/tests/get_indexes_matching_pattern.spec.ts",
-        "line": 26,
-        "column": 10
+        "line": 19,
+        "column": 21
       }
     },
     {
@@ -249,8 +252,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/maps/test/scout/api/tests/get_indexes_matching_pattern.spec.ts",
-        "line": 39,
-        "column": 10
+        "line": 30,
+        "column": 18
       }
     },
     {
@@ -263,8 +266,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/maps/test/scout/api/tests/get_tile.spec.ts",
-        "line": 61,
-        "column": 10
+        "line": 67,
+        "column": 69
       }
     },
     {
@@ -277,8 +280,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/maps/test/scout/api/tests/get_tile.spec.ts",
-        "line": 119,
-        "column": 10
+        "line": 131,
+        "column": 14
       }
     },
     {
@@ -291,8 +294,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/maps/test/scout/api/tests/get_tile.spec.ts",
-        "line": 160,
-        "column": 10
+        "line": 171,
+        "column": 27
       }
     },
     {
@@ -305,8 +308,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/maps/test/scout/api/tests/get_tile.spec.ts",
-        "line": 170,
-        "column": 10
+        "line": 187,
+        "column": 7
       }
     },
     {
@@ -319,8 +322,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/maps/test/scout/api/tests/index_data.spec.ts",
-        "line": 26,
-        "column": 10
+        "line": 24,
+        "column": 5
       }
     },
     {
@@ -334,7 +337,7 @@
       "location": {
         "file": "x-pack/platform/plugins/shared/maps/test/scout/api/tests/index_data.spec.ts",
         "line": 47,
-        "column": 10
+        "column": 11
       }
     },
     {
@@ -347,8 +350,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/maps/test/scout/api/tests/index_data.spec.ts",
-        "line": 81,
-        "column": 10
+        "line": 91,
+        "column": 21
       }
     },
     {
@@ -361,8 +364,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/maps/test/scout/api/tests/index_data.spec.ts",
-        "line": 101,
-        "column": 10
+        "line": 158,
+        "column": 27
       }
     },
     {
@@ -375,8 +378,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/maps/test/scout/api/tests/index_settings.spec.ts",
-        "line": 21,
-        "column": 10
+        "line": 16,
+        "column": 27
       }
     },
     {
@@ -389,8 +392,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/maps/test/scout/api/tests/index_settings.spec.ts",
-        "line": 37,
-        "column": 10
+        "line": 27,
+        "column": 68
       }
     },
     {
@@ -403,8 +406,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/maps/test/scout/api/tests/maps_telemetry.spec.ts",
-        "line": 29,
-        "column": 10
+        "line": 25,
+        "column": 45
       }
     },
     {
@@ -417,8 +420,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/maps/test/scout/api/tests/migrations.spec.ts",
-        "line": 30,
-        "column": 10
+        "line": 26,
+        "column": 45
       }
     },
     {
@@ -431,8 +434,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/maps/test/scout/api/tests/migrations.spec.ts",
-        "line": 68,
-        "column": 10
+        "line": 66,
+        "column": 4
       }
     },
     {
@@ -445,8 +448,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/maps/test/scout/api/tests/migrations.spec.ts",
-        "line": 83,
-        "column": 10
+        "line": 78,
+        "column": 7
       }
     },
     {
@@ -459,8 +462,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/maps/test/scout/api/tests/search_esql.spec.ts",
-        "line": 22,
-        "column": 10
+        "line": 17,
+        "column": 57
       }
     },
     {
@@ -473,8 +476,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/maps/test/scout/api/tests/search_esql.spec.ts",
-        "line": 39,
-        "column": 10
+        "line": 34,
+        "column": 12
       }
     },
     {
@@ -487,8 +490,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/maps/test/scout/api/tests/validate_drawing_index.spec.ts",
-        "line": 26,
-        "column": 10
+        "line": 21,
+        "column": 39
       }
     },
     {
@@ -501,8 +504,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/maps/test/scout/api/tests/validate_drawing_index.spec.ts",
-        "line": 47,
-        "column": 10
+        "line": 35,
+        "column": 22
       }
     },
     {
@@ -515,8 +518,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/maps/test/scout/api/tests/validate_drawing_index.spec.ts",
-        "line": 57,
-        "column": 10
+        "line": 47,
+        "column": 71
       }
     }
   ]

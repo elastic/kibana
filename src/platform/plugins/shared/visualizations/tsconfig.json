@@ -5,6 +5,7 @@
   },
   "include": ["common/**/*", "public/**/*", "server/**/*", "../../../../../typings/**/*"],
   "kbn_references": [
+    "@kbn/app-header",
     "@kbn/core",
     "@kbn/charts-plugin",
     "@kbn/data-plugin",
@@ -62,7 +63,6 @@
     "@kbn/content-management-table-list-view-common",
     "@kbn/chart-expressions-common",
     "@kbn/shared-ux-utility",
-    "@kbn/managed-content-badge",
     "@kbn/presentation-publishing",
     "@kbn/shared-ux-markdown",
     "@kbn/react-kibana-context-render",

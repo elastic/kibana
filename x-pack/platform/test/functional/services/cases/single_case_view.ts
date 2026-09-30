@@ -22,6 +22,7 @@ export function CasesSingleViewServiceProvider(
   const header = getPageObject('header');
   const find = getService('find');
   const lensPage = getPageObject('lens');
+  const appMenu = getPageObject('appMenu');
   const retry = getService('retry');
 
   return {
@@ -29,11 +30,7 @@ export function CasesSingleViewServiceProvider(
       // The redesign moves the delete action to the app-header overflow menu; the legacy UI exposes it
       // through the action-bar property actions.
       if (await casesCommon.isRedesignEnabled()) {
-        await retry.try(async () => {
-          await testSubjects.click('app-menu-overflow-button');
-          await testSubjects.existOrFail('case-action-delete', { timeout: 100 });
-          await testSubjects.click('case-action-delete');
-        });
+        await appMenu.clickMenuItem('case-action-delete', { isInOverflowMenu: true });
         await testSubjects.click('confirmModalConfirmButton');
         await header.waitUntilLoadingHasFinished();
         return;
@@ -55,8 +52,7 @@ export function CasesSingleViewServiceProvider(
      */
     async assertDeleteCaseAbsent() {
       if (await casesCommon.isRedesignEnabled()) {
-        await testSubjects.click('app-menu-overflow-button');
-        await testSubjects.missingOrFail('case-action-delete');
+        expect(await appMenu.menuItemExists('case-action-delete')).to.be(false);
         return;
       }
 

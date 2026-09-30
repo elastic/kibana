@@ -66,8 +66,7 @@ const createAttachment = (overrides: { origin?: string; enabled?: boolean } = {}
     metadata: { name: 'My Rule', tags: ['tag1'], description: 'A test rule' },
     schedule: { every: '5m' },
     time_field: '@timestamp',
-    query: { format: 'standalone', breach: { query: 'FROM logs-*' } },
-    state_transition: null,
+    query: { base: 'FROM logs-*' },
     enabled: overrides.enabled,
   } as any,
 });
@@ -84,11 +83,11 @@ describe('createRuleAttachmentDefinition', () => {
   });
 
   describe('getIcon', () => {
-    it('returns bell', () => {
+    it('returns watchesApp', () => {
       const services = createMockServices();
       const definition = createRuleAttachmentDefinition(services);
 
-      expect(definition.getIcon!()).toBe('bell');
+      expect(definition.getIcon!()).toBe('watchesApp');
     });
   });
 

@@ -103,6 +103,7 @@ const basicConfigFields = {
       label: 'test observable type',
     },
   ],
+  extractObservables: true,
 };
 
 const createConfigUpdateParams = (connector?: CaseConnector): Partial<ConfigurationAttributes> => ({
@@ -247,6 +248,7 @@ describe('CaseConfigureService', () => {
                 "type": "text",
               },
             ],
+            "extractObservables": true,
             "observableTypes": Array [
               Object {
                 "key": "011c2c4e-794f-4837-8d94-22b07722ab14",
@@ -485,8 +487,28 @@ describe('CaseConfigureService', () => {
           Object {
             "references": undefined,
             "refresh": undefined,
+            "version": undefined,
           }
         `);
+      });
+
+      it('threads the original configuration version through for optimistic concurrency control', async () => {
+        unsecuredSavedObjectsClient.update.mockReturnValue(
+          Promise.resolve({} as SavedObjectsUpdateResponse<ConfigurationPatchRequest>)
+        );
+
+        await service.patch({
+          configurationId: '1',
+          unsecuredSavedObjectsClient,
+          updatedAttributes: createConfigUpdateParams(),
+          originalConfiguration: {
+            version: 'WzAsMV0=',
+          } as SavedObject<ConfigurationAttributes>,
+        });
+
+        const updateOptions = unsecuredSavedObjectsClient.update.mock
+          .calls[0][3] as SavedObjectsUpdateOptions;
+        expect(updateOptions.version).toBe('WzAsMV0=');
       });
 
       it('creates an update object with the none connector', async () => {
@@ -579,6 +601,7 @@ describe('CaseConfigureService', () => {
                 "type": "text",
               },
             ],
+            "extractObservables": true,
             "observableTypes": Array [
               Object {
                 "key": "011c2c4e-794f-4837-8d94-22b07722ab14",
@@ -872,6 +895,26 @@ describe('CaseConfigureService', () => {
           }
         `);
       });
+
+      it('defaults extractObservables to true when the persisted SO lacks the field', async () => {
+        const { extractObservables, ...fieldsWithoutExtract } = basicConfigFields;
+        const soWithoutExtract = {
+          type: CASE_CONFIGURE_SAVED_OBJECT,
+          id: '1',
+          attributes: {
+            ...fieldsWithoutExtract,
+            connector: { type: ConnectorTypes.none, name: 'none', fields: null },
+          },
+          references: [],
+          score: 0,
+        } as unknown as SavedObjectsFindResult<ConfigurationPersistedAttributes>;
+
+        const findMockReturn = createSOFindResponse([soWithoutExtract]);
+        unsecuredSavedObjectsClient.find.mockReturnValue(Promise.resolve(findMockReturn));
+
+        const res = await service.find({ unsecuredSavedObjectsClient });
+        expect(res.saved_objects[0].attributes.extractObservables).toBe(true);
+      });
     });
 
     describe('get', () => {
@@ -896,6 +939,24 @@ describe('CaseConfigureService', () => {
             "type": ".none",
           }
         `);
+      });
+
+      it('defaults extractObservables to true when the persisted SO lacks the field', async () => {
+        const { extractObservables, ...fieldsWithoutExtract } = basicConfigFields;
+        unsecuredSavedObjectsClient.get.mockReturnValue(
+          Promise.resolve({
+            attributes: {
+              ...fieldsWithoutExtract,
+              connector: { type: ConnectorTypes.none, name: 'none', fields: null },
+            },
+            id: '1',
+            type: CASE_CONFIGURE_SAVED_OBJECT,
+            references: [],
+          } as unknown as SavedObject<ConfigurationPersistedAttributes>)
+        );
+
+        const res = await service.get({ unsecuredSavedObjectsClient, configurationId: '1' });
+        expect(res.attributes.extractObservables).toBe(true);
       });
 
       it('defaults to the none connector when the persisted connector is undefined', async () => {

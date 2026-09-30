@@ -65,7 +65,7 @@ export function SloTemplatesTable({ state, onStateChange, onTemplateSelect }: Pr
       description: i18n.translate('xpack.slo.sloTemplatesTable.actions.createSloDescription', {
         defaultMessage: 'Create SLO from this template',
       }),
-      icon: 'plusInCircle',
+      icon: 'plusCircle',
       type: 'icon',
       'data-test-subj': 'sloTemplateActionCreate',
       enabled: () => !!permissions?.hasAllWriteRequested,

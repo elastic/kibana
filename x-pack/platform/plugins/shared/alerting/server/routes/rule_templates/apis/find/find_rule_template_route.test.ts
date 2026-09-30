@@ -82,7 +82,6 @@ describe('findInternalRuleTemplatesRoute', () => {
       perPage: 10,
       page: 1,
       search: undefined,
-      defaultSearchOperator: undefined,
       sortField: undefined,
       sortOrder: undefined,
       ruleTypeId: undefined,
@@ -148,7 +147,6 @@ describe('findInternalRuleTemplatesRoute', () => {
       perPage: 5,
       page: 2,
       search: 'test',
-      defaultSearchOperator: undefined,
       sortField: 'name',
       sortOrder: 'desc',
       ruleTypeId: 'test.rule.type',
@@ -210,37 +208,6 @@ describe('findInternalRuleTemplatesRoute', () => {
     expect(rulesClient.findTemplates.mock.calls[0][0]).toEqual(
       expect.objectContaining({
         tags: ['tag1'],
-      })
-    );
-  });
-
-  it('handles default_search_operator parameter', async () => {
-    const licenseState = licenseStateMock.create();
-    const router = httpServiceMock.createRouter();
-
-    findInternalRuleTemplatesRoute(router, licenseState);
-    const [, handler] = router.get.mock.calls[0];
-
-    rulesClient.findTemplates.mockResolvedValueOnce(findResult);
-
-    const [context, req, res] = mockHandlerArguments(
-      { rulesClient },
-      {
-        query: {
-          per_page: 10,
-          page: 1,
-          search: 'test',
-          default_search_operator: 'AND',
-        },
-      },
-      ['ok']
-    );
-    await handler(context, req, res);
-
-    expect(rulesClient.findTemplates.mock.calls[0][0]).toEqual(
-      expect.objectContaining({
-        search: 'test',
-        defaultSearchOperator: 'AND',
       })
     );
   });

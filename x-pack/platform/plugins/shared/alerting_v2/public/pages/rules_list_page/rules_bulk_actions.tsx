@@ -15,6 +15,7 @@ import {
   EuiIcon,
   EuiIconTip,
   EuiPopover,
+  EuiTextColor,
 } from '@elastic/eui';
 import { BULK_FILTER_MAX_RESOURCES } from '@kbn/alerting-v2-schemas';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -28,6 +29,7 @@ export interface RulesBulkActionsProps {
   onClearSelection: () => void;
   onBulkEnable: () => void;
   onBulkDisable: () => void;
+  onBulkUpdateApiKey: () => void;
   onBulkDelete: () => void;
 }
 
@@ -46,6 +48,7 @@ export const RulesBulkActions: React.FC<RulesBulkActionsProps> = ({
   onBulkEnable,
   onBulkDisable,
   onBulkDelete,
+  onBulkUpdateApiKey,
 }) => {
   const [isBulkActionsOpen, setIsBulkActionsOpen] = useState(false);
 
@@ -68,6 +71,11 @@ export const RulesBulkActions: React.FC<RulesBulkActionsProps> = ({
     onBulkDelete();
   };
 
+  const handleBulkUpdateApiKey = () => {
+    setIsBulkActionsOpen(false);
+    onBulkUpdateApiKey();
+  };
+
   return (
     <>
       <EuiFlexItem grow={false}>
@@ -75,7 +83,7 @@ export const RulesBulkActions: React.FC<RulesBulkActionsProps> = ({
           button={
             <EuiButtonEmpty
               size="xs"
-              iconType="arrowDown"
+              iconType="chevronSingleDown"
               iconSide="right"
               onClick={() => setIsBulkActionsOpen((open) => !open)}
               data-test-subj="bulkActionsButton"
@@ -109,7 +117,7 @@ export const RulesBulkActions: React.FC<RulesBulkActionsProps> = ({
               </EuiContextMenuItem>,
               <EuiContextMenuItem
                 key="disable"
-                icon={<EuiIcon type="crossInCircle" size="m" aria-hidden={true} />}
+                icon={<EuiIcon type="crossCircle" size="m" aria-hidden={true} />}
                 onClick={handleBulkDisable}
                 data-test-subj="bulkDisableRules"
               >
@@ -118,14 +126,26 @@ export const RulesBulkActions: React.FC<RulesBulkActionsProps> = ({
                 })}
               </EuiContextMenuItem>,
               <EuiContextMenuItem
+                key="updateApiKey"
+                icon={<EuiIcon type="key" size="m" aria-hidden={true} />}
+                onClick={handleBulkUpdateApiKey}
+                data-test-subj="bulkUpdateRuleApiKey"
+              >
+                {i18n.translate('xpack.alertingV2.rulesList.bulkAction.updateApiKey', {
+                  defaultMessage: 'Update API key',
+                })}
+              </EuiContextMenuItem>,
+              <EuiContextMenuItem
                 key="delete"
                 icon={<EuiIcon type="trash" size="m" color="danger" aria-hidden={true} />}
                 onClick={handleBulkDelete}
                 data-test-subj="bulkDeleteRules"
               >
-                {i18n.translate('xpack.alertingV2.rulesList.bulkAction.delete', {
-                  defaultMessage: 'Delete',
-                })}
+                <EuiTextColor color="danger">
+                  {i18n.translate('xpack.alertingV2.rulesList.bulkAction.delete', {
+                    defaultMessage: 'Delete',
+                  })}
+                </EuiTextColor>
               </EuiContextMenuItem>,
             ]}
           />

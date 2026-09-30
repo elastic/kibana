@@ -195,7 +195,7 @@ function SuccessState({
                   <EuiButtonEmpty
                     size="xs"
                     flush="right"
-                    iconType="copyClipboard"
+                    iconType="copy"
                     onClick={copy}
                     aria-label={i18n.translate('asCodeExport.exportJson.copyAriaLabel', {
                       defaultMessage: 'Copy JSON source',

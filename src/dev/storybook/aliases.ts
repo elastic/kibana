@@ -32,6 +32,7 @@ export const storybookAliases = {
   custom_icons: 'src/platform/packages/shared/kbn-custom-icons/.storybook',
   custom_integrations: 'src/platform/plugins/shared/custom_integrations/storybook',
   data: 'src/platform/plugins/shared/data/.storybook',
+  data_federation: 'x-pack/platform/plugins/private/data_federation/.storybook',
   discover: 'src/platform/plugins/shared/discover/.storybook',
   es_ui_shared: 'src/platform/plugins/shared/es_ui_shared/.storybook',
   esql_ast_inspector: 'examples/esql_ast_inspector/.storybook',
@@ -51,7 +52,6 @@ export const storybookAliases = {
   index_management: 'x-pack/platform/plugins/shared/index_management/.storybook',
   infra: 'x-pack/solutions/observability/plugins/infra/.storybook',
   ingest_pipelines: 'x-pack/platform/packages/shared/ingest-pipelines/.storybook',
-  kbn_split_button: 'src/platform/packages/private/kbn-split-button/.storybook',
   kbn_ui: 'src/platform/kbn-ui/storybook-config',
   language_documentation_popover:
     'src/platform/packages/private/kbn-language-documentation/.storybook',
@@ -76,6 +76,7 @@ export const storybookAliases = {
   shared_ux: 'src/platform/packages/private/shared-ux/storybook/config',
   streams_app: 'x-pack/platform/plugins/shared/streams_app/.storybook',
   triggers_actions_ui: 'x-pack/platform/plugins/shared/triggers_actions_ui/.storybook',
+  unified_data_table: 'src/platform/packages/shared/kbn-unified-data-table/.storybook',
   unified_doc_viewer: 'src/platform/plugins/shared/unified_doc_viewer/.storybook',
   unified_search: 'src/platform/plugins/shared/unified_search/.storybook',
   unified_tabs: 'src/platform/packages/shared/kbn-unified-tabs/.storybook',

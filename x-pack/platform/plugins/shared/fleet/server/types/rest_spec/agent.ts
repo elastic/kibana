@@ -841,6 +841,12 @@ export const GetActionStatusRequestSchema = {
     latest: schema.maybe(
       schema.number({ meta: { description: 'Return only the latest N actions' } })
     ),
+    scheduledOnly: schema.maybe(
+      schema.boolean({
+        defaultValue: false,
+        meta: { description: 'Return only actions whose start_time is in the future' },
+      })
+    ),
     errorSize: schema.number({
       defaultValue: 5,
       meta: { description: 'Number of error details to include per action' },
@@ -1039,8 +1045,14 @@ export const PostBulkAgentRollbackResponseSchema = schema.oneOf([
 export const PostGenerateAgentsReportRequestSchema = {
   body: schema.object({
     agents: schema.oneOf([
-      schema.arrayOf(schema.string(), { maxSize: 10000 }),
+      schema.arrayOf(schema.string({ minLength: 1, maxLength: 512 }), {
+        minSize: 1,
+        maxSize: 10000,
+      }),
       schema.string({
+        // 10 000 chars matches the FLEET_SCHEMA_LONG_TEXT_MAX_LENGTH constant that will be
+        // introduced by #288283; inlined here to satisfy CodeQL without pulling in that PR.
+        maxLength: 10000,
         validate: (value: string) => {
           const validationObj = validateKuery(value, [AGENTS_PREFIX], AGENT_MAPPINGS, true);
           if (validationObj?.error) {

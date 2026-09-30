@@ -7,17 +7,12 @@
 
 import React, { type FC } from 'react';
 
-import {
-  EuiLoadingSpinner,
-  EuiFlexGroup,
-  EuiCallOut,
-  EuiFlexItem,
-  useEuiTheme,
-} from '@elastic/eui';
+import { EuiLoadingSpinner, EuiFlexGroup, EuiFlexItem, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { KbnWarningCallout } from '@kbn/ui-callout';
 
 import type { TransformListRow } from '../../../../common';
 import { isTransformListRowWithStats } from '../../../../common/transform_list';
@@ -47,11 +42,9 @@ const NoStatsFallbackTabContent = ({
     <EuiLoadingSpinner />
   ) : (
     <EuiFlexItem grow={true}>
-      <EuiCallOut
+      <KbnWarningCallout
         announceOnMount
         size="s"
-        color="warning"
-        iconType="info"
         title={
           <FormattedMessage
             id="xpack.transform.transformList.noStatsAvailable"

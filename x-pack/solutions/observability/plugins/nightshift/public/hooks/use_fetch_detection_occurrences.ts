@@ -7,22 +7,14 @@
 
 import { useMemo } from 'react';
 import { useQuery, type UseQueryResult } from '@kbn/react-query';
-import type { RouteRepositoryClient } from '@kbn/server-route-repository';
-import type { SignificantEventsRouteRepository } from '@kbn/significant-events-plugin/server';
 import type { LifecycleDetection } from '@kbn/significant-events-schema';
-import type { StreamsRouteRepository } from '@kbn/streams-plugin/server';
-import type { StreamsRepositoryClientOptions } from '@kbn/streams-plugin/public/api';
+import { getNightshiftCapabilities } from '@kbn/nightshift-shared';
 import {
   DETECTION_OCCURRENCE_BUCKET_SIZE,
   getDetectionOccurrenceTimeRange,
   type OccurrencePoint,
 } from '../detection/change_point';
 import { useKibana } from './use_kibana';
-
-type MergedStreamsRepositoryClient = RouteRepositoryClient<
-  StreamsRouteRepository & SignificantEventsRouteRepository,
-  StreamsRepositoryClientOptions
->;
 
 export type DetectionOccurrencesByRuleUuid = ReadonlyMap<string, OccurrencePoint[]>;
 
@@ -92,19 +84,22 @@ export const mapOccurrencesByRuleUuid = (
 export const useFetchDetectionOccurrences = (
   detections: readonly LifecycleDetection[]
 ): UseQueryResult<DetectionOccurrencesByRuleUuid, Error> => {
-  const { streams } = useKibana().services;
-  const streamsRepositoryClient = streams.streamsRepositoryClient as MergedStreamsRepositoryClient;
+  const {
+    application,
+    significantEvents: { significantEventsRepositoryClient },
+  } = useKibana().services;
+  const { canShow } = getNightshiftCapabilities(application.capabilities.nightshift);
   const request = useMemo(() => buildDetectionOccurrencesRequest(detections), [detections]);
 
   return useQuery<DetectionOccurrencesByRuleUuid, Error>({
     queryKey: ['nightshift.detectionOccurrences', request],
-    enabled: request != null,
+    enabled: request != null && canShow,
     queryFn: async ({ signal }) => {
       if (!request) {
         return new Map();
       }
 
-      const response = await streamsRepositoryClient.fetch(
+      const response = await significantEventsRepositoryClient.fetch(
         'GET /internal/streams/_query_occurrences',
         {
           params: {

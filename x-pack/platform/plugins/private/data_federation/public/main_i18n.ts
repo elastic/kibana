@@ -25,6 +25,10 @@ export const mainTranslations = {
     defaultMessage: 'Learn more',
   }),
 
+  quickstartLink: i18n.translate('xpack.dataFederation.quickstartLink', {
+    defaultMessage: 'Quickstart',
+  }),
+
   columns: {
     dataSources: {
       name: i18n.translate('xpack.dataFederation.table.columnName', {
@@ -158,9 +162,6 @@ export const mainTranslations = {
   },
 
   filters: {
-    dataSource: i18n.translate('xpack.dataFederation.filters.dataSource', {
-      defaultMessage: 'Data source',
-    }),
     allDataSources: i18n.translate('xpack.dataFederation.filters.allDataSources', {
       defaultMessage: 'Data sources',
     }),

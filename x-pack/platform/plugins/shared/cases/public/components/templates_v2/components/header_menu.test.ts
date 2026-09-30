@@ -29,7 +29,7 @@ const getMenu = ({
 
 describe('getTemplateFormMenu', () => {
   it.each([
-    [{ name: i18n.TEMPLATE_NAME_REQUIRED }, false, i18n.PROVIDE_TEMPLATE_NAME_IN_CONFIGURATION],
+    [{ name: i18n.TEMPLATE_NAME_REQUIRED }, false, i18n.PROVIDE_TEMPLATE_NAME],
     [{}, true, i18n.FIX_FIELDS_YAML_ERRORS],
     [{ name: i18n.TEMPLATE_NAME_REQUIRED }, true, i18n.FIX_FIELDS_YAML_AND_TEMPLATE_NAME],
     [{ tags: 'Tag is too long.' }, false, i18n.FIX_CONFIGURATION_ERRORS],

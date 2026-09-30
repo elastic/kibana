@@ -134,14 +134,18 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
 
         await editCommentTextArea.type('Description with space     ');
 
+        await retry.waitFor('description save button to be enabled', () =>
+          testSubjects.isEnabled('editable-save-markdown')
+        );
         await testSubjects.click('editable-save-markdown');
         await header.waitUntilLoadingHasFinished();
 
-        const desc = await find.byCssSelector(
-          '[data-test-subj="description"] [data-test-subj="scrollable-markdown"]'
-        );
-
-        expect(await desc.getVisibleText()).equal('Description with space');
+        await retry.tryForTime(10000, async () => {
+          const desc = await find.byCssSelector(
+            '[data-test-subj="description"] [data-test-subj="scrollable-markdown"]'
+          );
+          expect(await desc.getVisibleText()).equal('Description with space');
+        });
       });
 
       it('comment area does not have focus on page load', async () => {
@@ -263,8 +267,8 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
 
       it('deletes a tag from a case', async () => {
         if (await cases.common.isRedesignEnabled()) {
+          // Clearing the combo box persists the removal immediately; there is no confirm step.
           await comboBox.clear('case-tags');
-          await testSubjects.click('template-field-confirm-tags');
           await header.waitUntilLoadingHasFinished();
         } else {
           await testSubjects.click('tag-list-edit-button');
@@ -666,6 +670,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
       });
     });
 
+    // FLAKY: https://github.com/elastic/kibana/issues/288565
     describe.skip('Lens visualization', () => {
       before(async () => {
         await cases.testResources.installKibanaSampleData('logs');

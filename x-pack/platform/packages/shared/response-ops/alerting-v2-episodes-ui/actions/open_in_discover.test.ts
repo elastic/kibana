@@ -7,7 +7,7 @@
 
 import { applicationServiceMock } from '@kbn/core-application-browser-mocks';
 import { createOpenInDiscoverAction } from './open_in_discover';
-import type { AlertEpisode } from '@kbn/alerting-v2-common-queries';
+import type { AlertEpisode } from '@kbn/alerting-v2-schemas';
 const makeEpisode = (overrides: Partial<AlertEpisode> = {}): AlertEpisode => ({
   '@timestamp': '2026-04-23T00:00:00Z',
   'episode.id': 'e1',

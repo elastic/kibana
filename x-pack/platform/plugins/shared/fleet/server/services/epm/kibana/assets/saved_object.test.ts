@@ -34,11 +34,13 @@ describe('getSpaceAwareSaveobjectsClients', () => {
 
     getSpaceAwareSaveobjectsClients('test1');
 
-    expect(appContextService.getInternalUserSOClientForSpaceId).toBeCalledWith('test1');
-    expect(soStartMock.createImporter).toBeCalledWith(scoppedSoClient, expect.anything());
-    expect(mockedSavedObjectTagging.createInternalAssignmentService).toBeCalledWith({
+    expect(appContextService.getInternalUserSOClientForSpaceId).toHaveBeenCalledWith('test1');
+    expect(soStartMock.createImporter).toHaveBeenCalledWith(scoppedSoClient, expect.anything());
+    expect(mockedSavedObjectTagging.createInternalAssignmentService).toHaveBeenCalledWith({
       client: scoppedSoClient,
     });
-    expect(mockedSavedObjectTagging.createTagClient).toBeCalledWith({ client: scoppedSoClient });
+    expect(mockedSavedObjectTagging.createTagClient).toHaveBeenCalledWith({
+      client: scoppedSoClient,
+    });
   });
 });

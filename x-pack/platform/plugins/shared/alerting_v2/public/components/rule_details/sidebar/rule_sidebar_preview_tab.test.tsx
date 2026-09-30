@@ -47,15 +47,11 @@ const baseRule: RuleApiResponse = {
   metadata: { name: 'Test Rule', version: 1 },
   time_field: '@timestamp',
   schedule: { every: '5m', lookback: '10m' },
-  query: {
-    format: 'composed' as const,
-    base: 'FROM logs-* | STATS count() BY host.name',
-    breach: { segment: '' },
-  },
-  createdBy: 'alice@example.com',
-  createdAt: '2026-03-01T12:00:00.000Z',
-  updatedBy: 'bob@example.com',
-  updatedAt: '2026-03-04T12:00:00.000Z',
+  query: { base: 'FROM logs-* | STATS count() BY host.name' },
+  created_by: { profile_uid: 'alice@example.com' },
+  created_at: '2026-03-01T12:00:00.000Z',
+  updated_by: { profile_uid: 'bob@example.com' },
+  updated_at: '2026-03-04T12:00:00.000Z',
 };
 
 const renderPreviewTab = (rule: RuleApiResponse = baseRule) =>

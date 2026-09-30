@@ -23,6 +23,7 @@ import type { SortFieldTimeline } from '../../../../common/api/timeline';
 import { TimelineId } from '../../../../common/types/timeline';
 import type { TimelineModel } from '../../store/model';
 import { timelineSelectors } from '../../store';
+import { useRefetchOnTimelineClose } from '../../../common/hooks/timeline/use_refetch_on_timeline_close';
 import { createTimeline as dispatchCreateNewTimeline } from '../../store/actions';
 import { useGetAllTimeline } from '../../containers/all';
 import { OpenTimeline } from './open_timeline';
@@ -208,6 +209,8 @@ export const StatefulOpenTimelineComponent = React.memo<OpenTimelineOwnProps>(
       timelineStatus,
       onlyFavorites,
     ]);
+
+    useRefetchOnTimelineClose(refetch);
 
     /** Invoked when the user presses enters to submit the text in the search input */
     const onQueryChange: OnQueryChange = useCallback((query: EuiSearchBarQuery) => {

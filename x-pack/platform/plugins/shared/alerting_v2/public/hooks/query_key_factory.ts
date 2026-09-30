@@ -22,7 +22,21 @@ export const ruleKeys = {
   }) => [...ruleKeys.lists(), filters] as const,
   details: () => [...ruleKeys.all, 'details'] as const,
   detail: (id: string) => [...ruleKeys.details(), id] as const,
-  tags: (filter?: string) => [...ruleKeys.all, 'tags', { filter }] as const,
+  allTags: () => [...ruleKeys.all, 'tags'] as const,
+  tags: (search?: string, kind?: string) => [...ruleKeys.allTags(), { search, kind }] as const,
+};
+
+export const ruleTemplateKeys = {
+  all: ['ruleTemplate'] as const,
+  lists: () => [...ruleTemplateKeys.all, 'list'] as const,
+  list: (filters: {
+    page: number;
+    perPage: number;
+    search?: string;
+    tags?: string[];
+    sortField?: string;
+    sortOrder?: 'asc' | 'desc';
+  }) => [...ruleTemplateKeys.lists(), filters] as const,
 };
 
 export const workflowKeys = {
@@ -48,13 +62,10 @@ export const actionPolicyKeys = {
     page: number;
     perPage: number;
     search?: string;
-    tags?: string[];
     enabled?: boolean;
     sortField?: string;
     sortOrder?: 'asc' | 'desc';
   }) => [...actionPolicyKeys.lists(), filters] as const,
-  allTags: () => [...actionPolicyKeys.all, 'tags'] as const,
-  tags: (search?: string) => [...actionPolicyKeys.allTags(), { search }] as const,
   linkedForRule: (ruleId: string) =>
     [...actionPolicyKeys.lists(), 'linkedForRule', ruleId] as const,
 };
@@ -66,16 +77,19 @@ export const executionHistoryKeys = {
     perPage: number;
     search?: string;
     ruleIds?: string[];
-    outcome?: PolicyExecutionOutcomeFilter;
+    outcomes?: PolicyExecutionOutcomeFilter;
     episodeIds?: string[];
-    startDate?: string;
+    from?: string;
+    to?: string;
+    sortField?: 'dispatchedAt';
+    sortOrder?: 'asc' | 'desc';
   }) => [...executionHistoryKeys.all, 'list', filters] as const,
   newEventsSince: (
     since: string,
     filters: {
       search?: string;
       ruleIds?: string[];
-      outcome?: PolicyExecutionOutcomeFilter;
+      outcomes?: PolicyExecutionOutcomeFilter;
     } = {}
   ) => [...executionHistoryKeys.all, 'newEventsSince', since, filters] as const,
 };

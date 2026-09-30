@@ -97,7 +97,7 @@ export function RuleChangesDiff({ item, isLoading }: ChangesPanelProps): JSX.Ele
     return (
       <EuiPanel hasBorder hasShadow={false} data-test-subj="ruleChangesHistoryNoChanges">
         <EuiEmptyPrompt
-          iconType="checkInCircleFilled"
+          iconType="checkCircleFill"
           title={<h2>{i18n.NO_VISIBLE_CHANGES_TITLE}</h2>}
         />
       </EuiPanel>

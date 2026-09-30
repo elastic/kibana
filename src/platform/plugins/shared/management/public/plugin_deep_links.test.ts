@@ -66,4 +66,24 @@ describe('ManagementPlugin appUpdater deep link visibleIn', () => {
 
     expect(app).toBeUndefined();
   });
+
+  it('keeps apps with explicit visibleIn even when hideFromGlobalSearch is true', () => {
+    const plugin = createPlugin();
+    const setup = plugin.setup(coreMock.createSetup(), { share: mockShare });
+
+    setup.sections.section.kibana.registerApp({
+      id: 'test-project-nav-only',
+      title: 'Project Nav Only',
+      mount: jest.fn(),
+      hideFromGlobalSearch: true,
+      visibleIn: ['projectSideNav'],
+    });
+
+    const deepLinks = getDeepLinksFromUpdater(plugin);
+    const kibana = deepLinks.find((s) => s.id === 'kibana');
+    const app = kibana?.deepLinks?.find((a) => a.id === 'test-project-nav-only');
+
+    expect(app).toBeDefined();
+    expect(app?.visibleIn).toEqual(['projectSideNav']);
+  });
 });

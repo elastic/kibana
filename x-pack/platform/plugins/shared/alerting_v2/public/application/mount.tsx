@@ -31,11 +31,20 @@ import type { UnifiedDocViewerStart } from '@kbn/unified-doc-viewer-plugin/publi
 import { I18nProvider } from '@kbn/i18n-react';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
 import { RulesApp } from './rules_app';
+import { RuleLibraryApp } from './rule_library_app';
 import { ActionPoliciesApp } from './action_policies_app';
 import { EpisodesApp } from './episodes_app';
 import { ExecutionHistoryApp } from './execution_history_app';
 import { BreadcrumbProvider } from './breadcrumb_context';
+import { LocatorProvider } from './locator_context';
+import { bindLocatorsToHost, getAlertingV2Locators } from './bind_locators_to_host';
+import { MANAGEMENT_HOST } from '../locators';
 import type { AlertEpisodesKibanaServices } from '../episodes_kibana_services';
+
+const locatorsForManagementHost = (container: Container) => {
+  const share = container.get(PluginStart('share')) as SharePluginStart;
+  return bindLocatorsToHost(getAlertingV2Locators(share), MANAGEMENT_HOST);
+};
 
 interface AlertingV2MountParams {
   element: HTMLElement;
@@ -55,18 +64,57 @@ export const mountAlertingV2App = async ({
   const { element, history, setBreadcrumbs } = params;
 
   const queryClient = new QueryClient();
+  const locators = locatorsForManagementHost(container);
 
   ReactDOM.render(
     coreStart.rendering.addContext(
       <Context.Provider value={container}>
         <QueryClientProvider client={queryClient}>
-          <BreadcrumbProvider setBreadcrumbs={setBreadcrumbs}>
-            <I18nProvider>
-              <Router history={history}>
-                <RulesApp />
-              </Router>
-            </I18nProvider>
-          </BreadcrumbProvider>
+          <LocatorProvider locators={locators}>
+            <BreadcrumbProvider setBreadcrumbs={setBreadcrumbs}>
+              <I18nProvider>
+                <Router history={history}>
+                  <RulesApp />
+                </Router>
+              </I18nProvider>
+            </BreadcrumbProvider>
+          </LocatorProvider>
+        </QueryClientProvider>
+      </Context.Provider>
+    ),
+    element
+  );
+
+  return () => ReactDOM.unmountComponentAtNode(element);
+};
+
+export const mountRuleLibraryApp = async ({
+  params,
+  container,
+  coreStart,
+}: {
+  params: AlertingV2MountParams;
+  container: Container;
+  coreStart: CoreStart;
+}): Promise<AppUnmount> => {
+  const { element, history, setBreadcrumbs } = params;
+
+  const queryClient = new QueryClient();
+  const locators = locatorsForManagementHost(container);
+
+  ReactDOM.render(
+    coreStart.rendering.addContext(
+      <Context.Provider value={container}>
+        <QueryClientProvider client={queryClient}>
+          <LocatorProvider locators={locators}>
+            <BreadcrumbProvider setBreadcrumbs={setBreadcrumbs}>
+              <I18nProvider>
+                <Router history={history}>
+                  <RuleLibraryApp />
+                </Router>
+              </I18nProvider>
+            </BreadcrumbProvider>
+          </LocatorProvider>
         </QueryClientProvider>
       </Context.Provider>
     ),
@@ -90,6 +138,7 @@ export const mountEpisodesApp = async ({
   element.classList.add(APP_WRAPPER_CLASS);
 
   const queryClient = new QueryClient();
+  const locators = locatorsForManagementHost(container);
 
   const data = container.get(PluginStart('data')) as DataPublicPluginStart;
   const dataViews = container.get(PluginStart('dataViews')) as DataViewsPublicPluginStart;
@@ -123,15 +172,17 @@ export const mountEpisodesApp = async ({
       <KibanaContextProvider services={kibanaReactServices}>
         <Context.Provider value={container}>
           <QueryClientProvider client={queryClient}>
-            <BreadcrumbProvider setBreadcrumbs={setBreadcrumbs}>
-              <I18nProvider>
-                <Router history={history}>
-                  <RedirectAppLinks coreStart={coreStart}>
-                    <EpisodesApp />
-                  </RedirectAppLinks>
-                </Router>
-              </I18nProvider>
-            </BreadcrumbProvider>
+            <LocatorProvider locators={locators}>
+              <BreadcrumbProvider setBreadcrumbs={setBreadcrumbs}>
+                <I18nProvider>
+                  <Router history={history}>
+                    <RedirectAppLinks coreStart={coreStart}>
+                      <EpisodesApp />
+                    </RedirectAppLinks>
+                  </Router>
+                </I18nProvider>
+              </BreadcrumbProvider>
+            </LocatorProvider>
           </QueryClientProvider>
         </Context.Provider>
       </KibanaContextProvider>
@@ -139,9 +190,7 @@ export const mountEpisodesApp = async ({
     element
   );
 
-  return () => {
-    ReactDOM.unmountComponentAtNode(element);
-  };
+  return () => ReactDOM.unmountComponentAtNode(element);
 };
 
 export const mountActionPoliciesApp = async ({
@@ -156,18 +205,21 @@ export const mountActionPoliciesApp = async ({
   const { element, history, setBreadcrumbs } = params;
 
   const queryClient = new QueryClient();
+  const locators = locatorsForManagementHost(container);
 
   ReactDOM.render(
     coreStart.rendering.addContext(
       <Context.Provider value={container}>
         <QueryClientProvider client={queryClient}>
-          <BreadcrumbProvider setBreadcrumbs={setBreadcrumbs}>
-            <I18nProvider>
-              <Router history={history}>
-                <ActionPoliciesApp />
-              </Router>
-            </I18nProvider>
-          </BreadcrumbProvider>
+          <LocatorProvider locators={locators}>
+            <BreadcrumbProvider setBreadcrumbs={setBreadcrumbs}>
+              <I18nProvider>
+                <Router history={history}>
+                  <ActionPoliciesApp />
+                </Router>
+              </I18nProvider>
+            </BreadcrumbProvider>
+          </LocatorProvider>
         </QueryClientProvider>
       </Context.Provider>
     ),
@@ -189,18 +241,21 @@ export const mountExecutionHistoryApp = async ({
   const { element, history, setBreadcrumbs } = params;
 
   const queryClient = new QueryClient();
+  const locators = locatorsForManagementHost(container);
 
   ReactDOM.render(
     coreStart.rendering.addContext(
       <Context.Provider value={container}>
         <QueryClientProvider client={queryClient}>
-          <BreadcrumbProvider setBreadcrumbs={setBreadcrumbs}>
-            <I18nProvider>
-              <Router history={history}>
-                <ExecutionHistoryApp />
-              </Router>
-            </I18nProvider>
-          </BreadcrumbProvider>
+          <LocatorProvider locators={locators}>
+            <BreadcrumbProvider setBreadcrumbs={setBreadcrumbs}>
+              <I18nProvider>
+                <Router history={history}>
+                  <ExecutionHistoryApp />
+                </Router>
+              </I18nProvider>
+            </BreadcrumbProvider>
+          </LocatorProvider>
         </QueryClientProvider>
       </Context.Provider>
     ),
