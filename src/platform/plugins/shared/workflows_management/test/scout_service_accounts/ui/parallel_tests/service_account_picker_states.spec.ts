@@ -8,6 +8,7 @@
  */
 
 import { randomUUID } from 'node:crypto';
+import { parse } from 'yaml';
 import { tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
 import { test, workflowYaml } from '../fixtures';
@@ -95,9 +96,7 @@ test.describe('Service account picker states', { tag: tags.stateful.classic }, (
     const editor = pageObjects.workflowEditor;
     await editor.gotoWorkflow(workflowId);
     await editor.focusServiceAccountSetting(workflowYaml);
-    await expect(editor.serviceAccountPopup).toContainText(
-      'No service accounts available to run this workflow.'
-    );
+    await expect(editor.serviceAccountPopup).toContainText('No service accounts available.');
     await expect(editor.serviceAccountPopup.getByText(/Ask your administrator/)).toBeHidden();
   });
 
@@ -146,7 +145,8 @@ test.describe('Service account picker states', { tag: tags.stateful.classic }, (
     const account = await response.json();
     createdAccountIds.push(account.id);
     expect(account.description).toBe(description);
-    expect(await editor.getYamlEditorValue()).toContain(JSON.stringify(account.id));
+    expect(parse(await editor.getYamlEditorValue()).settings.run_as).toBe(account.id);
+    await expect(page.getByText('No validation errors', { exact: true })).toBeVisible();
     expect((await apiServices.workflows.getWorkflow(workflowId)).yaml).toBe(saved.yaml);
     const directory = await kbnClient.request<{ description: string }>({
       method: 'GET',
