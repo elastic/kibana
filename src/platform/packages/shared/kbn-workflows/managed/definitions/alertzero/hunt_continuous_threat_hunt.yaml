@@ -33,13 +33,13 @@ consts:
     tier2When: __WORKER_TIER2_WHEN__
     candidateLimit: __WORKER_CANDIDATE_LIMIT__
     fanOutMax: __WORKER_FAN_OUT_MAX__
-    technology: __WORKER_TECHNOLOGY__
 steps:
-  # Tier 1 index check (which telemetry indices exist), not Security Solution
-  # threat-intel readiness. `continue: true` (no fallback capture): a route
-  # exception collapses totalTechnologies/blockedTechnologies to 0/0 below,
-  # which resolve_index_scope_gate treats the same as all-blocked, so
-  # selection and the fan-out are both skipped and the run ends with no writes.
+  # Whether the hunt has anything to search: one scope for the space, the
+  # Security Solution default data view and what resolved in it. Not Security
+  # Solution threat-intel readiness. `continue: true` (no fallback capture): a
+  # route exception leaves this step with no output, which
+  # resolve_index_scope_gate treats the same as blocked, so selection and the
+  # fan-out are both skipped and the run ends with no writes.
   - name: check_index_scope
     type: kibana.request
     with:
@@ -50,23 +50,15 @@ steps:
     on-failure:
       continue: true
 
-  # Filter chains and comparisons cannot combine in one expression (engine
-  # constraint, Phase 0 task 7); each resolves in its own step first.
-  - name: count_index_scope_statuses
-    type: data.set
-    with:
-      totalTechnologies: "${{ steps.check_index_scope.output | default: [] | size }}"
-      blockedTechnologies: "${{ steps.check_index_scope.output | default: [] | where: 'status', 'blocked' | size }}"
-
-  # Blocked stops selection: either every technology's required indices are
-  # missing, or check_index_scope errored outright (total and blocked both
-  # collapse to 0, and 0 >= 0 is blocked). Degraded (some optional pattern
-  # missing on an otherwise-usable technology) proceeds; the coordinator
-  # resolves per-technology scope itself.
+  # Blocked stops selection: nothing in the default data view is visible to
+  # this hunt, or check_index_scope errored outright (no output, so neither
+  # status matches). Only `ok` and `degraded` proceed: degraded means the
+  # universe resolved but a derived list could not be computed, and the
+  # coordinator resolves its own scope per report.
   - name: resolve_index_scope_gate
     type: data.set
     with:
-      index_scope_blocked: "${{ steps.count_index_scope_statuses.output.blockedTechnologies >= steps.count_index_scope_statuses.output.totalTechnologies }}"
+      index_scope_blocked: "${{ steps.check_index_scope.output.status != 'ok' and steps.check_index_scope.output.status != 'degraded' }}"
 
   # A manual trigger naming reportIds is a bypass sweep; the hunt child's own
   # `trigger` input needs this (hunt.yaml's hunt-once semantics), even though
@@ -150,7 +142,6 @@ steps:
             runId: "{{ execution.id }}"
             trigger: "{{ steps.resolve_trigger_mode.output.trigger_mode }}"
             tier2_when: "{{ consts.worker_settings.tier2When }}"
-            technology: "{{ consts.worker_settings.technology }}"
 
       # R.7: no correlation step here. 3B re-inserts workflow.execute
       # system-security-hunt-correlation between hunt and packaging.

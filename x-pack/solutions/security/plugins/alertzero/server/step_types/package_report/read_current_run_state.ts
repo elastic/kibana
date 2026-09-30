@@ -7,24 +7,10 @@
 
 import type { VersionedAttachment } from '@kbn/agent-builder-common';
 import { significantSecurityEventAttachmentDataSchema } from '../../../common/significant_security_event_schema';
-import { DEFAULT_BASELINE_TELEMETRY } from '../../services/watches/hunt/common/resolve_index_scope';
 import { buildMatchesRequired } from '../../services/watches/hunt/common/matches_required';
 import type { CurrentRunHost, CurrentRunState, ProcessSelector } from './types';
 
 const SSE_ATTACHMENT_TYPE = 'security.significant_security_event';
-
-/** Baseline patterns whose telemetry carries `process.entity_id`/`pid`, so a hit there is a
- *  process-shaped finding a process selector could in principle be rehydrated from. */
-const PROCESS_BEARING_BASELINE_PATTERNS = [
-  'logs-endpoint.events.*',
-  'logs-endpoint.alerts.*',
-  'logs-crowdstrike.fdr*',
-  'logs-sentinel_one_cloud_funnel.*',
-  'logs-m365_defender.event-*',
-];
-
-const matchesBaseline = buildMatchesRequired([...DEFAULT_BASELINE_TELEMETRY]);
-const matchesProcessBearing = buildMatchesRequired(PROCESS_BEARING_BASELINE_PATTERNS);
 
 const currentVersionData = (attachment: VersionedAttachment): unknown => {
   const version = attachment.versions.find((v) => v.version === attachment.current_version);
@@ -136,8 +122,16 @@ export const readCurrentRunState = async ({
   const hasIocIndicator = currentRun.some((sse) =>
     sse.security_knowledge_indicators.some((ski) => ski.type === 'ioc')
   );
-  const allEventsWithinBaseline = eventRefs.every((e) => matchesBaseline(e.source_index));
-  const hasProcessBearingEvent = eventRefs.some((e) => matchesProcessBearing(e.source_index));
+  // The hunt names where a hit can become a response action (`actionable_indices`: mappings
+  // that carry `process.entity_id` or `process.pid`) on each SSE, so packaging reads the
+  // evidence against what the customer's mappings say rather than a seed list. An empty
+  // list means nothing in this run is host-scoped, which is the right reading when the
+  // customer has no process telemetry.
+  const matchesActionable = buildMatchesRequired([
+    ...new Set(currentRun.flatMap((sse) => sse.hunt_result?.actionable_indices ?? [])),
+  ]);
+  const allEventsActionable = eventRefs.every((e) => matchesActionable(e.source_index));
+  const hasProcessBearingEvent = eventRefs.some((e) => matchesActionable(e.source_index));
   const manualRemediation = [
     ...new Set(currentRun.flatMap((sse) => sse.maps_to_proposal?.manual_remediation ?? [])),
   ];
@@ -151,7 +145,7 @@ export const readCurrentRunState = async ({
     techniques,
     hasNonHostEntity,
     hasIocIndicator,
-    allEventsWithinBaseline,
+    allEventsActionable,
     hasProcessBearingEvent,
     manualRemediation,
     hosts,

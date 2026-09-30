@@ -69,6 +69,24 @@ const toVendorPatterns = (pattern: string): string[] => {
 const uniqSorted = (values: string[]): string[] => Array.from(new Set(values)).sort();
 
 /**
+ * Bounds a list of `*`-suffixed target patterns to what a request path may carry: as given
+ * when it fits, else one pattern per dataset, else one wildcard pair per vendor. `fits` is
+ * false when even the vendor wildcards do not fit, and the caller decides what to do then.
+ */
+export const boundTargetPatterns = (
+  patterns: string[]
+): { patterns: string[]; collapsed: boolean; fits: boolean } => {
+  const unique = Array.from(new Set(patterns));
+  if (fitsRequestPath(unique)) return { patterns: unique, collapsed: false, fits: true };
+
+  const perDataset = uniqSorted(unique.map(toDatasetPattern));
+  if (fitsRequestPath(perDataset)) return { patterns: perDataset, collapsed: true, fits: true };
+
+  const perVendor = uniqSorted(unique.flatMap(toVendorPatterns));
+  return { patterns: perVendor, collapsed: true, fits: fitsRequestPath(perVendor) };
+};
+
+/**
  * Names the indices where a hit can become a Defend response action, from what the
  * customer's mappings say rather than a seed list: every index in the universe whose
  * mapping carries `process.entity_id` or `process.pid`. Returned as `*`-suffixed
@@ -118,14 +136,11 @@ export const classifyActionableIndices = async ({
   const patterns = uniqSorted(Array.from(named).map(collapseIndexName)).filter(
     (pattern) => !isInternalPattern(pattern)
   );
-  if (fitsRequestPath(patterns)) return { patterns, degraded: false };
+  const bounded = boundTargetPatterns(patterns);
+  if (!bounded.collapsed) return { patterns: bounded.patterns, degraded: false };
 
-  const perDataset = uniqSorted(patterns.map(toDatasetPattern));
-  const collapsed = fitsRequestPath(perDataset)
-    ? perDataset
-    : uniqSorted(patterns.flatMap(toVendorPatterns));
   logger?.warn(
-    `Actionable indices named ${patterns.length} pattern(s), more than a request may carry; collapsed to ${collapsed.length}`
+    `Actionable indices named ${patterns.length} pattern(s), more than a request may carry; collapsed to ${bounded.patterns.length}`
   );
-  return { patterns: collapsed, degraded: true };
+  return { patterns: bounded.patterns, degraded: true };
 };

@@ -16,6 +16,7 @@ import { buildRouteValidationWithZod } from '@kbn/zod-helpers/v4';
 import { ALERTZERO_API_PRIVILEGE_WRITE, HUNT_INTERNAL_ROUTE_BASE } from '../../../common/constants';
 import { huntBehavior } from '../../services/watches/hunt/tier2/hunt_behavior';
 import { resolveScopedModel } from './lib/scoped_model';
+import { resolveHuntUniverse } from './resolve_hunt_universe';
 import type { RouteDependencies } from '../register_routes';
 
 export const HUNT_BEHAVIOR_URL = `${HUNT_INTERNAL_ROUTE_BASE}/hunt_behavior` as const;
@@ -84,11 +85,20 @@ export const registerHuntBehaviorRoute = ({
 
           const { text, report_id, llm_confidence_threshold, iocs, article_context } = request.body;
           const esClient = core.elasticsearch.client.asCurrentUser;
+          // What the generated query may read: the same default data view Tier 1 searches.
+          const indexPatterns = await resolveHuntUniverse(context, logger);
 
           const body: HuntBehaviorResponse = await huntBehavior(
             modelOutcome.model,
             logger,
-            { text, report_id, llm_confidence_threshold, iocs, article_context },
+            {
+              text,
+              report_id,
+              llm_confidence_threshold,
+              iocs,
+              article_context,
+              required_indices: indexPatterns,
+            },
             esClient
           );
 

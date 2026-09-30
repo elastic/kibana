@@ -67,14 +67,12 @@ export type HuntWorkerTemplateValues = ScheduledWorkerTemplateValues;
 /**
  * Hunt Watch Continuous Threat Hunt has no configurable dials: enabled/disabled
  * (autonomy) and the schedule interval are its only settings. tier2When, candidateLimit,
- * fanOutMax, and technology are fixed implementation constants. Absent `technology`
- * renders as "" so the coordinator auto-resolves it.
+ * and fanOutMax are fixed implementation constants.
  */
 const HUNT_WORKER_DEFAULTS = {
   tier2When: 'always' as const,
   candidateLimit: 10,
   fanOutMax: 10,
-  technology: undefined as 'aws_iam' | 'fortigate' | undefined,
 };
 
 /**
@@ -113,6 +111,5 @@ export const renderHuntWorkerYaml = (yaml: string, values: HuntWorkerTemplateVal
     .replaceAll('__WORKER_TRIGGERS__', triggers)
     .replaceAll('__WORKER_TIER2_WHEN__', JSON.stringify(HUNT_WORKER_DEFAULTS.tier2When))
     .replaceAll('__WORKER_CANDIDATE_LIMIT__', String(HUNT_WORKER_DEFAULTS.candidateLimit))
-    .replaceAll('__WORKER_FAN_OUT_MAX__', String(HUNT_WORKER_DEFAULTS.fanOutMax))
-    .replaceAll('__WORKER_TECHNOLOGY__', JSON.stringify(HUNT_WORKER_DEFAULTS.technology ?? ''));
+    .replaceAll('__WORKER_FAN_OUT_MAX__', String(HUNT_WORKER_DEFAULTS.fanOutMax));
 };

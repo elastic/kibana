@@ -17,9 +17,10 @@ const baseResult = (
 ): HuntCoordinatorCoreResult => ({
   status: 'tier1_and_tier2',
   run_id: 'run-1',
-  technologies: ['aws_iam'],
   index_patterns: ['logs-aws.*'],
   tier2_targets: ['logs-aws.*', 'logs-endpoint.events.*'],
+  tier2_target_sources: ['report_match', 'actionable'],
+  actionable_indices: ['logs-endpoint.events.*'],
   tier1: {
     tier: 1,
     status: 'environment_hits_found',

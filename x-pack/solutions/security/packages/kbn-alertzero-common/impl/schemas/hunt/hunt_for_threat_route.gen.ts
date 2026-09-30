@@ -16,17 +16,11 @@
 
 import { z, lazySchema } from '@kbn/zod/v4';
 
-import {
-  HuntTechnology,
-  HuntIoc,
-  ResolvedIndexScope,
-  HuntForThreatResult,
-} from '../components/hunt.gen';
+import { HuntIoc, HuntScope, HuntForThreatResult } from '../components/hunt.gen';
 
 export const HuntForThreatRequestBody = lazySchema(() =>
   z
     .object({
-      technology: HuntTechnology,
       iocs: z.array(HuntIoc).max(100).optional(),
       techniques: z.array(z.string().min(1).max(32)).max(100).optional(),
       time_range: z
@@ -44,7 +38,7 @@ export type HuntForThreatRequestBodyInput = z.input<typeof HuntForThreatRequestB
 
 export const HuntForThreatResponse = lazySchema(() =>
   z.object({
-    scope: ResolvedIndexScope,
+    scope: HuntScope,
     result: HuntForThreatResult,
   })
 );

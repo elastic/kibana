@@ -58,9 +58,9 @@ export interface CurrentRunState {
   hasNonHostEntity: boolean;
   /** True when any current-run SSE security knowledge indicator is IOC-typed. */
   hasIocIndicator: boolean;
-  /** False when a current-run SSE event ref's `source_index` falls outside the baseline patterns. */
-  allEventsWithinBaseline: boolean;
-  /** True when a current-run SSE event ref's `source_index` is a process-bearing baseline pattern. */
+  /** False when a current-run SSE event ref's `source_index` falls outside the run's `actionable_indices`. */
+  allEventsActionable: boolean;
+  /** True when a current-run SSE event ref's `source_index` is one of the run's `actionable_indices`. */
   hasProcessBearingEvent: boolean;
   /** Analyst recommendation lines the hunt child wrote onto the current-run SSEs, deduped. */
   manualRemediation: string[];

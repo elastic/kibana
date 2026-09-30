@@ -318,12 +318,26 @@ describe('huntBehavior', () => {
     const result = await huntBehavior(
       buildMockModel([t1078Candidate]),
       logger,
-      { text: REPORT_TEXT },
+      executeParams,
       esClient
     );
     const rule = result.behaviors[0].validated_esql;
     expect(rule.startsWith('// Generated from hunt.hunt_behavior')).toBe(true);
     expect(rule.endsWith(`\n${GROUNDED_ESQL}`)).toBe(true);
+  });
+
+  it('refuses every generated query when required_indices is empty', async () => {
+    const result = await huntBehavior(
+      buildMockModel([t1078Candidate]),
+      logger,
+      { text: REPORT_TEXT, required_indices: [] },
+      esClient
+    );
+
+    expect(result.behaviors[0].validated_esql).toContain('Grounded ES|QL generation unavailable');
+    expect(result.behaviors[0].validated_esql).not.toContain('FROM ');
+    expect(result.behaviors[0].execution?.executed).toBe(false);
+    expect(executeEsqlMock).not.toHaveBeenCalled();
   });
 
   it('returns a non-executable placeholder when generateEsql reports an error', async () => {

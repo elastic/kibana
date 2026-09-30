@@ -78,7 +78,7 @@ const baseHitState = (overrides: Partial<CurrentRunState> = {}): CurrentRunState
   // Fully-covered defaults: no recommendation trigger fires unless a test overrides one.
   hasNonHostEntity: false,
   hasIocIndicator: false,
-  allEventsWithinBaseline: true,
+  allEventsActionable: true,
   hasProcessBearingEvent: false,
   manualRemediation: [],
   ...overrides,
@@ -237,7 +237,7 @@ describe('decidePackageReport', () => {
   it('mints executable plus a recommendation when evidence is not host-scoped (trigger: not host-scoped)', () => {
     const result = decidePackageReport({
       conversationId,
-      state: baseHitState({ allEventsWithinBaseline: false }),
+      state: baseHitState({ allEventsActionable: false }),
       catalog: { ok: true, actions: [isolateHost] },
     });
     expect(result.proposals).toHaveLength(2);

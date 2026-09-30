@@ -7,7 +7,7 @@
 
 import type { IndicesResolveIndexResponse } from '@elastic/elasticsearch/lib/api/types';
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
-import type { IndexScopeWindow } from '@kbn/alertzero-common';
+import type { HuntScope, HuntScopeResolution, IndexScopeWindow } from '@kbn/alertzero-common';
 import { classifyActionableIndices } from './classify_actionable_indices';
 import { discoverHuntDatasets } from './discover_hunt_datasets';
 import type { DiscoveredDataset } from './discover_hunt_datasets';
@@ -22,34 +22,14 @@ const DEFAULT_WINDOW_DAYS = 30;
 /** Default row limit per search. */
 const DEFAULT_ROW_LIMIT = 25;
 
-export type HuntScopeStatus = 'ok' | 'degraded' | 'blocked';
-
-/** How the scope was produced, for messages and audit logs. */
-export type HuntScopeResolution =
-  | 'universe' // at least one universe pattern resolves; Tier 1 searches the list
-  | 'blocked:empty_universe' // nothing under any universe pattern is visible to this user
-  | 'blocked:discovery_failed'; // `_resolve/index` threw (fail closed)
-
 /**
- * What a hunt searches, what the report matched inside it, and where an action can
- * land. Stage 1 of hunt scoping: it runs before Tier 1 and never reads a technology, an
- * alerts index, or a seed list.
+ * The wire `HuntScope` plus the datasets stage 1 discovered, which stay server-side.
+ * Stage 1 of hunt scoping: it runs before Tier 1 and reads only the caller's universe,
+ * never an alerts index or a seed list.
  */
-export interface HuntScope {
-  status: HuntScopeStatus;
-  resolution: HuntScopeResolution;
-  /** The universe as searched by Tier 1: the caller's patterns, exclusions kept. `[]` when blocked. */
-  index_patterns: string[];
-  /** Universe patterns that resolved nothing. Informational. */
-  missing: string[];
+export interface ResolvedHuntScope extends HuntScope {
   /** Datasets discovered inside the universe (data streams only). */
   discovered: DiscoveredDataset[];
-  /** `search_patterns` of datasets the report's vendor/product matched deterministically. */
-  report_matches: string[];
-  /** `*`-suffixed streams/indices whose mapping carries process.entity_id or process.pid. */
-  actionable_indices: string[];
-  window: IndexScopeWindow;
-  row_limit: number;
 }
 
 const uniq = (values: string[]): string[] => Array.from(new Set(values));
@@ -133,13 +113,13 @@ export const resolveHuntScope = async ({
   row_limit?: number;
   report?: HuntScopeReportContext;
   logger?: Logger;
-}): Promise<HuntScope> => {
+}): Promise<ResolvedHuntScope> => {
   const resolvedWindow = window ?? defaultWindow();
   const positivePatterns = indexPatterns.filter((pattern) => !isExclusion(pattern));
   const blocked = (
     resolution: Extract<HuntScopeResolution, `blocked:${string}`>,
     missing: string[]
-  ): HuntScope => {
+  ): ResolvedHuntScope => {
     logger?.debug(`Hunt scope for space ${spaceId} blocked: ${resolution}`);
     return {
       status: 'blocked',

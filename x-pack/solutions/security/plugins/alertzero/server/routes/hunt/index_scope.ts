@@ -6,26 +6,19 @@
  */
 
 import type { HuntIndexScopeResponse } from '@kbn/alertzero-common';
-import {
-  API_VERSIONS,
-  HuntIndexScopeRequestQuery,
-  INTERNAL_API_ACCESS,
-} from '@kbn/alertzero-common';
-import { buildRouteValidationWithZod } from '@kbn/zod-helpers/v4';
+import { API_VERSIONS, INTERNAL_API_ACCESS } from '@kbn/alertzero-common';
 import { ALERTZERO_API_PRIVILEGE_READ, HUNT_INDEX_SCOPE_URL } from '../../../common/constants';
-import {
-  HUNT_TECHNOLOGIES,
-  resolveIndexScope,
-} from '../../services/watches/hunt/common/resolve_index_scope';
+import { resolveHuntScope } from '../../services/watches/hunt/common/resolve_index_scope';
 import type { RouteDependencies } from '../register_routes';
+import { resolveHuntUniverse } from './resolve_hunt_universe';
 
 export { HUNT_INDEX_SCOPE_URL };
 
 /**
- * Index-scope projection over `resolveIndexScope`, one entry per technology
- * (or the single requested one), for the given space. Distinct from Security
- * Solution threat-intel readiness and SIEM Readiness; those stay as-is and
- * must not import this (one-way dependency rule).
+ * The hunt scope for the space: the Security Solution default data view the hunt
+ * searches and what resolved inside it, which the Worker's sweep gate reads as `status`.
+ * Distinct from Security Solution threat-intel readiness and SIEM Readiness; those stay
+ * as-is and must not import this (one-way dependency rule).
  */
 export const registerHuntIndexScopeRoute = ({ router, logger, getSpaceId }: RouteDependencies) => {
   router.versioned
@@ -37,27 +30,30 @@ export const registerHuntIndexScopeRoute = ({ router, logger, getSpaceId }: Rout
           requiredPrivileges: [ALERTZERO_API_PRIVILEGE_READ],
         },
       },
-      summary: 'Hunt index scope per technology',
+      summary: 'Hunt index scope',
     })
     .addVersion(
       {
         version: API_VERSIONS.internal.v1,
         validate: {
-          request: {
-            query: buildRouteValidationWithZod(HuntIndexScopeRequestQuery),
-          },
+          request: {},
         },
       },
       async (context, request, response) => {
         try {
-          const { technology } = request.query;
           const spaceId = getSpaceId(request);
           const esClient = (await context.core).elasticsearch.client.asCurrentUser;
-          const technologies = technology ? [technology] : HUNT_TECHNOLOGIES;
+          const indexPatterns = await resolveHuntUniverse(context, logger);
 
-          const body: HuntIndexScopeResponse = await Promise.all(
-            technologies.map((tech) => resolveIndexScope({ esClient, technology: tech, spaceId }))
-          );
+          // `discovered` is the datasets stage 1 parsed for the report matcher; the wire
+          // scope carries what they matched, not the list itself.
+          const { discovered: _discovered, ...scope } = await resolveHuntScope({
+            esClient,
+            spaceId,
+            indexPatterns,
+            logger,
+          });
+          const body: HuntIndexScopeResponse = scope;
 
           return response.ok({ body });
         } catch (err) {

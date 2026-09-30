@@ -328,7 +328,7 @@ export const decidePackageReport = ({
 
   const hasExecutable = proposals.length > 0;
   const notHostScoped =
-    state.hasNonHostEntity || state.hasIocIndicator || !state.allEventsWithinBaseline;
+    state.hasNonHostEntity || state.hasIocIndicator || !state.allEventsActionable;
   // Only worth flagging once something else did mint for a host with process evidence;
   // "nothing minted at all" is already covered by `!hasExecutable` above.
   const processUncovered =

@@ -18,7 +18,6 @@ import type {
   HuntIncompleteReason,
 } from '@kbn/alertzero-common';
 import { buildMatchesRequired } from '../common/matches_required';
-import { getKnownHuntIndexPatterns } from '../common/resolve_index_scope';
 import {
   huntBehaviorLlmExtractionSchema,
   EXTRACTION_PROMPT,
@@ -356,7 +355,7 @@ const executeValidatedEsql = async ({
  * (`tier2_targets`, threaded through as `requiredIndices`), not narrowed to
  * whichever concrete index Tier 1's per-index buckets happened to hit. A
  * coincidental IOC match landing in an unrelated dataset that shares a
- * baseline wildcard can no longer misdirect the FROM this way, since the FROM
+ * wildcard can no longer misdirect the FROM this way, since the FROM
  * always covers the whole allowed scope regardless of which specific bucket
  * confirmed the hit. Per-behavior host-vs-cloud target choice is future work.
  */
@@ -428,10 +427,7 @@ const generateGroundedEsql = async ({
   // The schema probe runs the model's FROM before the publish/execute scope gate, so gate the
   // client it runs on with the same allowlist — an out-of-scope probe is refused before it
   // reaches Elasticsearch, and generation falls back to the non-executable placeholder.
-  const probeClient = scopedEsqlProbeClient(
-    esClient,
-    requiredIndices.length > 0 ? requiredIndices : getKnownHuntIndexPatterns()
-  );
+  const probeClient = scopedEsqlProbeClient(esClient, requiredIndices);
 
   const entries = await pMap(
     behaviors,
@@ -738,13 +734,9 @@ export const huntBehavior = async (
       // grounded and authoritative to whoever picks it up in Investigation, so a
       // query reaching outside the indices a hunt may read must not be handed on
       // as one — it keeps the non-executable placeholder instead. The allowlist is
-      // the one generation was steered by: the required scope when there is one,
-      // every known technology pattern otherwise, since a caller that passed no
-      // scope still never asked for `.kibana-*` or `*`.
-      const sourcesAllowed = assertEsqlSourcesAllowed(
-        prepareEsqlForExecute(esql),
-        requiredIndices.length > 0 ? requiredIndices : getKnownHuntIndexPatterns()
-      );
+      // the one generation was steered by; an empty one allows nothing, so a caller
+      // that passed no scope cannot reach `.kibana-*` or `*`.
+      const sourcesAllowed = assertEsqlSourcesAllowed(prepareEsqlForExecute(esql), requiredIndices);
       if (!sourcesAllowed.ok) {
         logger.warn(
           `[hunt:esql] discarding the generated query for ${behavior.technique_id} — ` +

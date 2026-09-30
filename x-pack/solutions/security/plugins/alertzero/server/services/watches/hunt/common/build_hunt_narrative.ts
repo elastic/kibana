@@ -11,16 +11,15 @@ import type {
   HuntCoordinatorTier2SkipReason,
 } from '../hunt_coordinator';
 import type { ValidatedBehavior } from '../tier2/types';
+import type { Tier2TargetSource } from './resolve_tier2_targets';
 
 /**
- * Report and scope facts the coordinator learns while it runs, which the
- * result payload itself does not carry but the Investigation narrative cites.
+ * Report facts the coordinator learns while it runs, which the result payload
+ * itself does not carry but the Investigation narrative cites. The hunt's scope
+ * (`index_patterns`, `tier2_targets`, `tier2_target_sources`) is read off the result.
  */
 export interface HuntNarrativeContext {
   reportTitle?: string;
-  requiredIndexPatterns?: string[];
-  optionalIndexPatterns?: string[];
-  baselineIndexPatterns?: string[];
 }
 
 const MAX_LISTED = 6;
@@ -61,10 +60,12 @@ const describeReport = (result: HuntCoordinatorCoreResult, ctx: HuntNarrativeCon
     : `threat report ${code(result.report_id)}`;
 };
 
-const describeTechnologies = (result: HuntCoordinatorCoreResult): string =>
-  result.technologies.length > 0
-    ? `${result.technologies.map(code).join(', ')} telemetry`
-    : 'the environment';
+const TIER2_TARGET_SOURCE_LABELS: Record<Tier2TargetSource, string> = {
+  report_match: "the report's vendor or product",
+  tier1_hits: 'Tier 1 hits',
+  model: 'a model match',
+  actionable: 'process telemetry',
+};
 
 const describeTier2Skip = (reason: HuntCoordinatorTier2SkipReason): string => {
   switch (reason) {
@@ -74,8 +75,8 @@ const describeTier2Skip = (reason: HuntCoordinatorTier2SkipReason): string => {
       return 'Tier 2 behavior hunting was skipped because Tier 1 found no environment hits and this run only escalates to Tier 2 on a hit.';
     case 'no_inference':
       return 'Tier 2 behavior hunting was skipped because no GenAI connector was available.';
-    case 'no_matched_scope':
-      return 'Tier 2 behavior hunting was skipped because Tier 1 matched no index for it to generate against.';
+    case 'no_tier2_targets':
+      return 'Tier 2 behavior hunting was skipped because no index could be chosen for it: the report matched no dataset, Tier 1 hit no index, and no index in the default data view carries process telemetry.';
     case 'no_report_text':
       return 'Tier 2 behavior hunting was skipped because the report has no body text to derive behaviors from.';
     case 'no_searchable_input':
@@ -149,7 +150,7 @@ const describeTier2 = (result: HuntCoordinatorCoreResult): string[] => {
       behaviors.length === 1 ? 'it' : 'them'
     } against the ATT&CK catalog; ${
       executed.length
-    } executed as ES|QL against the required indices and ${confirmed.length} matched live activity.`
+    } executed as ES|QL against the Tier 2 targets and ${confirmed.length} matched live activity.`
   );
   for (const behavior of behaviors.slice(0, MAX_BEHAVIORS_NARRATED)) {
     lines.push(describeBehavior(behavior));
@@ -165,7 +166,7 @@ const describeTier2 = (result: HuntCoordinatorCoreResult): string[] => {
   return lines;
 };
 
-const describeTier1 = (tier1: HuntForThreatResult, hasConfirmedHit: boolean): string[] => {
+const describeTier1 = (tier1: HuntForThreatResult): string[] => {
   const lines: string[] = ['**Tier 1: indicator and technique search**'];
   if (tier1.status === 'no_searchable_terms') {
     lines.push(
@@ -178,37 +179,18 @@ const describeTier1 = (tier1: HuntForThreatResult, hasConfirmedHit: boolean): st
     return lines;
   }
 
-  const confirmingHits = tier1.per_index.filter((entry) => entry.confirming);
-  let confirmation: string;
-  if (!tier1.has_confirmed_hit && !hasConfirmedHit) {
-    confirmation =
-      'None of those matches were in a required or baseline index, so Tier 1 did not confirm the hit on its own.';
-  } else if (!tier1.has_confirmed_hit) {
-    confirmation = 'None of those matches were in a required or baseline index.';
-  } else if (confirmingHits.length > 0) {
-    confirmation = `${plural(
-      confirmingHits.reduce((sum, entry) => sum + entry.hit_count, 0),
-      'match',
-      'matches'
-    )} landed in ${
-      confirmingHits.length === 1 ? 'a required or baseline index' : 'required or baseline indices'
-    }, which confirms the hit.`;
-  } else {
-    confirmation = '';
-  }
   lines.push(
     `Tier 1 matched ${plural(tier1.counts.total_hits, 'document')} across ${plural(
       tier1.per_index.length,
       'index',
       'indices'
-    )}. ${confirmation}`.trim()
+    )}, which confirms the hit.`
   );
   for (const entry of tier1.per_index
     .slice()
     .sort((a, b) => b.hit_count - a.hit_count)
     .slice(0, MAX_LISTED)) {
-    const tag = entry.required ? ' (required)' : entry.confirming ? ' (baseline)' : '';
-    lines.push(`- ${code(entry.index)}${tag}: ${entry.hit_count}`);
+    lines.push(`- ${code(entry.index)}: ${entry.hit_count}`);
   }
   if (tier1.per_index.length > MAX_LISTED) {
     lines.push(`- ${plural(tier1.per_index.length - MAX_LISTED, 'more index', 'more indices')}`);
@@ -241,21 +223,21 @@ const describeTier1 = (tier1: HuntForThreatResult, hasConfirmedHit: boolean): st
   return lines;
 };
 
-const describeSearch = (result: HuntCoordinatorCoreResult, ctx: HuntNarrativeContext): string[] => {
+const describeSearch = (result: HuntCoordinatorCoreResult): string[] => {
   const { tier1 } = result;
   const lines: string[] = ['**What was searched**'];
   lines.push(`- **Window:** ${tier1.time_range.from} to ${tier1.time_range.to}`);
-  const scope: string[] = [];
-  if (ctx.requiredIndexPatterns && ctx.requiredIndexPatterns.length > 0) {
-    scope.push(`${ctx.requiredIndexPatterns.map(code).join(', ')} (required)`);
+  if (result.index_patterns.length > 0) {
+    lines.push(`- **Indices:** ${codeList(result.index_patterns)}`);
   }
-  if (ctx.baselineIndexPatterns && ctx.baselineIndexPatterns.length > 0) {
-    scope.push(`${ctx.baselineIndexPatterns.map(code).join(', ')} (baseline)`);
+  if (result.tier2_targets.length > 0) {
+    const sources = result.tier2_target_sources.map((source) => TIER2_TARGET_SOURCE_LABELS[source]);
+    lines.push(
+      `- **Tier 2 targets:** ${codeList(result.tier2_targets)}${
+        sources.length > 0 ? ` (from ${listOf(sources)})` : ''
+      }`
+    );
   }
-  if (ctx.optionalIndexPatterns && ctx.optionalIndexPatterns.length > 0) {
-    scope.push(`${ctx.optionalIndexPatterns.map(code).join(', ')} (optional)`);
-  }
-  if (scope.length > 0) lines.push(`- **Indices:** ${scope.join('; ')}`);
   const iocs = tier1.resolved_iocs;
   lines.push(
     iocs.length > 0
@@ -302,7 +284,6 @@ const describeOutcome = (
   ctx: HuntNarrativeContext
 ): { heading: string; summary: string } => {
   const report = describeReport(result, ctx);
-  const tech = describeTechnologies(result);
   const confirmedBehaviors = tier2Confirmed(result);
   const tier1Hit = result.tier1.has_confirmed_hit;
   const tier2Hit = confirmedBehaviors.length > 0;
@@ -310,11 +291,7 @@ const describeOutcome = (
   if (result.status === 'blocked') {
     return {
       heading: 'Hunt Watch could not hunt this report',
-      summary: `Hunt Watch could not hunt ${report}: no required index for ${
-        result.technologies.length > 0
-          ? result.technologies.map(code).join(', ')
-          : 'the configured technologies'
-      } exists in this space, so nothing was searched.`,
+      summary: `Hunt Watch could not hunt ${report}: no index in the space's default data view is visible to this hunt, so nothing was searched.`,
     };
   }
   if (result.tier2_skipped_reason === 'report_not_found') {
@@ -332,7 +309,7 @@ const describeOutcome = (
   if (tier1Hit && tier2Hit) {
     return {
       heading: 'Hunt Watch confirmed a hit',
-      summary: `Hunt Watch confirmed a hit for ${report} in ${tech}: Tier 1 matched the report's indicators in the environment and Tier 2 confirmed ${plural(
+      summary: `Hunt Watch confirmed a hit for ${report}: Tier 1 matched the report's indicators in the environment and Tier 2 confirmed ${plural(
         confirmedBehaviors.length,
         'behavior'
       )} derived from the report text.`,
@@ -349,13 +326,13 @@ const describeOutcome = (
     return {
       heading: 'Hunt Watch confirmed a hit',
       summary:
-        `Hunt Watch confirmed a hit for ${report} in ${tech}: Tier 1 matched the report's indicators in the environment. ${tier2Note}`.trim(),
+        `Hunt Watch confirmed a hit for ${report}: Tier 1 matched the report's indicators in the environment. ${tier2Note}`.trim(),
     };
   }
   if (tier2Hit) {
     return {
       heading: 'Hunt Watch confirmed a hit',
-      summary: `Hunt Watch confirmed a hit for ${report} in ${tech}: Tier 1 found no indicator matches, but Tier 2 confirmed ${plural(
+      summary: `Hunt Watch confirmed a hit for ${report}: Tier 1 found no indicator matches, but Tier 2 confirmed ${plural(
         confirmedBehaviors.length,
         'behavior'
       )} derived from the report text.`,
@@ -363,18 +340,14 @@ const describeOutcome = (
   }
   return {
     heading: 'Hunt Watch found no confirmed hits',
-    summary: `Hunt Watch found no confirmed hits for ${report} in ${tech}.`,
+    summary: `Hunt Watch found no confirmed hits for ${report}.`,
   };
 };
 
 /** One short clause for the run conclusion, e.g. "confirmed hit: Tier 1 matched 121 documents; Tier 2 confirmed 2 of 5 behaviors". */
 export const buildHuntHeadline = (result: HuntCoordinatorCoreResult): string => {
   if (result.status === 'blocked') {
-    return `hunt blocked, no required index for ${
-      result.technologies.length > 0
-        ? result.technologies.join(', ')
-        : 'the configured technologies'
-    }`;
+    return "hunt blocked, no index in the space's default data view is visible to this hunt";
   }
   if (result.tier2_skipped_reason === 'report_not_found') {
     return 'hunt failed, the report is not visible in this space';
@@ -385,9 +358,7 @@ export const buildHuntHeadline = (result: HuntCoordinatorCoreResult): string => 
       ? 'Tier 1 had nothing to search'
       : tier1.counts.total_hits === 0
       ? 'Tier 1 found no matches'
-      : tier1.has_confirmed_hit
-      ? `Tier 1 matched ${plural(tier1.counts.total_hits, 'document')}`
-      : `Tier 1 matched ${plural(tier1.counts.total_hits, 'document')} in optional indices only`;
+      : `Tier 1 matched ${plural(tier1.counts.total_hits, 'document')}`;
   let tier2Part: string;
   if (tier2) {
     const confirmed = tier2Confirmed(result).length;
@@ -423,8 +394,8 @@ export const buildHuntNarrative = (
     result.status === 'blocked' || result.tier2_skipped_reason === 'report_not_found';
   if (!terminal) {
     blocks.push(describeCoverage(result).join('\n'));
-    blocks.push(describeSearch(result, ctx).join('\n'));
-    blocks.push(describeTier1(result.tier1, result.has_confirmed_hit).join('\n'));
+    blocks.push(describeSearch(result).join('\n'));
+    blocks.push(describeTier1(result.tier1).join('\n'));
     blocks.push(describeTier2(result).join('\n'));
   }
   blocks.push(`_Hunt run ${code(result.run_id)}._`);

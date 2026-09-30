@@ -58,16 +58,13 @@ export {
   HuntIncompleteReason,
   HuntIoc,
   HuntIocType,
-  HuntTechnology,
+  HuntScope,
+  HuntScopeResolution,
   IndexScopeStatus,
   IndexScopeWindow,
-  ResolvedIndexScope,
 } from './components/hunt.gen';
 export { HuntForThreatRequestBody, HuntForThreatResponse } from './hunt/hunt_for_threat_route.gen';
-export {
-  HuntIndexScopeRequestQuery,
-  HuntIndexScopeResponse,
-} from './hunt/hunt_index_scope_route.gen';
+export { HuntIndexScopeResponse } from './hunt/hunt_index_scope_route.gen';
 export {
   HuntBehaviorArticleContext,
   HuntBehaviorIoc,

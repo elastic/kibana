@@ -7,7 +7,11 @@
 
 import type { ElasticsearchClient } from '@kbn/core/server';
 import { loggerMock } from '@kbn/logging-mocks';
-import { classifyActionableIndices, collapseIndexName } from './classify_actionable_indices';
+import {
+  boundTargetPatterns,
+  classifyActionableIndices,
+  collapseIndexName,
+} from './classify_actionable_indices';
 import { MAX_SCOPE_TARGETS } from './scope_bounds';
 
 const UNIVERSE = ['logs-*', 'filebeat-*', '-*elastic-cloud-logs-*'];
@@ -38,6 +42,61 @@ describe('collapseIndexName', () => {
     expect(collapseIndexName('logs-endpoint.events.e8c68216.2026.09.29')).toBe(
       'logs-endpoint.events.e8c68216.2026.09.29*'
     );
+  });
+});
+
+describe('boundTargetPatterns', () => {
+  it('returns a list that fits as given, deduped and in order', () => {
+    expect(
+      boundTargetPatterns(['logs-okta.system-*', 'logs-aws.cloudtrail-*', 'logs-okta.system-*'])
+    ).toEqual({
+      patterns: ['logs-okta.system-*', 'logs-aws.cloudtrail-*'],
+      collapsed: false,
+      fits: true,
+    });
+  });
+
+  it('collapses past the bound to one pattern per dataset', () => {
+    const datasets = MAX_SCOPE_TARGETS / 2;
+    const patterns = Array.from({ length: datasets }, (_, i) => [
+      `logs-vendor${i}.stream-default*`,
+      `logs-vendor${i}.stream-prod*`,
+      `logs-vendor${i}.stream-staging*`,
+    ]).flat();
+
+    const bounded = boundTargetPatterns(patterns);
+
+    expect(bounded.patterns).toHaveLength(datasets);
+    expect(bounded.patterns).toContain('logs-vendor0.stream-*');
+    expect(bounded).toEqual(expect.objectContaining({ collapsed: true, fits: true }));
+  });
+
+  it('collapses to a wildcard pair per vendor when per-dataset patterns still do not fit', () => {
+    const patterns = Array.from(
+      { length: MAX_SCOPE_TARGETS + 1 },
+      (_, i) => `logs-vendor0.stream${i}-default*`
+    );
+
+    expect(boundTargetPatterns(patterns)).toEqual({
+      patterns: ['logs-vendor0-*', 'logs-vendor0.*'],
+      collapsed: true,
+      fits: true,
+    });
+  });
+
+  it('reports that nothing fits when even the vendor wildcards overflow', () => {
+    const patterns = Array.from(
+      { length: MAX_SCOPE_TARGETS },
+      (_, i) => `logs-vendor${i}.stream-default*`
+    );
+
+    const bounded = boundTargetPatterns([
+      ...patterns,
+      ...patterns.map((p) => p.replace('logs-', 'metrics-')),
+    ]);
+
+    expect(bounded.collapsed).toBe(true);
+    expect(bounded.fits).toBe(false);
   });
 });
 
