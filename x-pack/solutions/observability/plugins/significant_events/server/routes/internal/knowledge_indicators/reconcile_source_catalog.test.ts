@@ -10,9 +10,10 @@ import type { NightshiftSource } from '@kbn/nightshift-shared';
 import type { SourcesClient } from '@kbn/nightshift-sources-plugin/server';
 import { ExecutionStatus } from '@kbn/workflows';
 import type { SourceChangeEvent } from '@kbn/nightshift-sources-plugin/server';
+import type { SignificantEventsMaintenanceState } from '../../../../common/maintenance/state_machine';
 import type { GetScopedClients } from '../../types';
 import {
-  createSourceDeletionListener,
+  createSourceChangeListener,
   reconcileSourceCatalog,
   resetSourceKnowledge,
 } from './reconcile_source_catalog';
@@ -278,25 +279,32 @@ describe('resetSourceKnowledge', () => {
   });
 });
 
-describe('createSourceDeletionListener', () => {
-  const setup = () => {
+describe('createSourceChangeListener', () => {
+  const setup = ({
+    maintenanceState = 'enabled',
+  }: { maintenanceState?: SignificantEventsMaintenanceState } = {}) => {
     const kiClient = {
       deleteOwnedRules: jest.fn().mockResolvedValue(undefined),
       deleteAllQueries: jest.fn().mockResolvedValue(undefined),
       deleteIndicators: jest.fn().mockResolvedValue(undefined),
+      setSourceRulesEnabled: jest.fn().mockResolvedValue(undefined),
     };
     const getScopedClients = jest.fn().mockResolvedValue({
       getKnowledgeIndicatorClient: jest.fn().mockResolvedValue(kiClient),
     });
     const cancelBySourceSlug = jest.fn().mockResolvedValue(null);
-    const listener = createSourceDeletionListener({
+    const maintenanceService = { getState: jest.fn().mockResolvedValue(maintenanceState) };
+    const listener = createSourceChangeListener({
       getScopedClients: getScopedClients as unknown as GetScopedClients,
       onboardingClient: { cancelBySourceSlug },
+      maintenanceService,
     });
     return { listener, kiClient, getScopedClients, cancelBySourceSlug };
   };
 
   const source = makeSource({ id: 'gone-source' });
+  const enabledSource = makeSource({ id: 'toggled-source', enabled: true });
+  const disabledSource = makeSource({ id: 'toggled-source', enabled: false });
 
   it('resets the knowledge of a deleted source in the space of the deleting request', async () => {
     const { listener, kiClient, getScopedClients, cancelBySourceSlug } = setup();
@@ -312,11 +320,68 @@ describe('createSourceDeletionListener', () => {
     expect(kiClient.deleteIndicators).toHaveBeenCalledWith('gone-source');
   });
 
-  it('ignores created and updated sources', async () => {
+  it('cancels onboarding, then disables the owned rules of a disabled source', async () => {
+    const { listener, kiClient, cancelBySourceSlug } = setup();
+
+    await listener({
+      type: 'updated',
+      source: disabledSource,
+      previous: enabledSource,
+      request,
+      spaceId: 'default',
+    });
+
+    expect(cancelBySourceSlug).toHaveBeenCalledWith({
+      sourceSlug: 'toggled-source-slug',
+      request,
+    });
+    expect(kiClient.setSourceRulesEnabled).toHaveBeenCalledWith('toggled-source', false);
+    expect(cancelBySourceSlug.mock.invocationCallOrder[0]).toBeLessThan(
+      kiClient.setSourceRulesEnabled.mock.invocationCallOrder[0]
+    );
+    expect(kiClient.deleteIndicators).not.toHaveBeenCalled();
+  });
+
+  it('enables the owned rules of a re-enabled source without touching onboarding', async () => {
+    const { listener, kiClient, cancelBySourceSlug } = setup();
+
+    await listener({
+      type: 'updated',
+      source: enabledSource,
+      previous: disabledSource,
+      request,
+      spaceId: 'default',
+    });
+
+    expect(kiClient.setSourceRulesEnabled).toHaveBeenCalledWith('toggled-source', true);
+    expect(cancelBySourceSlug).not.toHaveBeenCalled();
+  });
+
+  it('keeps the rules of a re-enabled source off while maintenance is paused', async () => {
+    const { listener, kiClient } = setup({ maintenanceState: 'paused' });
+
+    await listener({
+      type: 'updated',
+      source: enabledSource,
+      previous: disabledSource,
+      request,
+      spaceId: 'default',
+    });
+
+    expect(kiClient.setSourceRulesEnabled).not.toHaveBeenCalled();
+  });
+
+  it('ignores created sources and updates that keep the enabled flag', async () => {
     const { listener, getScopedClients } = setup();
     const events: SourceChangeEvent[] = [
       { type: 'created', source, request, spaceId: 'default' },
-      { type: 'updated', source, previous: source, request, spaceId: 'default' },
+      {
+        type: 'updated',
+        source: { ...enabledSource, title: 'Renamed' },
+        previous: enabledSource,
+        request,
+        spaceId: 'default',
+      },
     ];
 
     for (const event of events) {

@@ -70,26 +70,75 @@ export async function resetSourceKnowledge({
 }
 
 /**
- * Resets the knowledge of every deleted source in the space of the request that deleted it,
- * so its rules stop firing without waiting for the next catalog reconcile.
+ * Applies the enabled flag of one source to its onboarding and owned rules, the way
+ * `reconcileSourceCatalog` does for every source of the catalog.
  */
-export const createSourceDeletionListener =
+export async function applySourceEnabled({
+  source,
+  kiClient,
+  onboardingClient,
+  maintenanceService,
+  request,
+}: {
+  source: Pick<NightshiftSource, 'id' | 'slug' | 'enabled'>;
+  kiClient: Pick<CatalogKiClient, 'setSourceRulesEnabled'>;
+  onboardingClient?: Pick<OnboardingClient, 'cancelBySourceSlug'>;
+  maintenanceService: Pick<SignificantEventsMaintenanceService, 'getState'>;
+  request: KibanaRequest;
+}): Promise<void> {
+  if (!source.enabled) {
+    // Same order as the reconcile: cancel the run before its source's rules are disabled.
+    await onboardingClient?.cancelBySourceSlug({ sourceSlug: source.slug, request });
+    await kiClient.setSourceRulesEnabled(source.id, false);
+    return;
+  }
+  // A pause keeps rules off. Resume only restores the rules the pause disabled, so a source
+  // enabled meanwhile gets its rules back from the next catalog reconcile.
+  if ((await maintenanceService.getState({ request })) !== 'paused') {
+    await kiClient.setSourceRulesEnabled(source.id, true);
+  }
+}
+
+/**
+ * Applies a source change as soon as it is committed, in the space of the request that made it,
+ * instead of waiting for the next catalog reconcile. A deleted source loses its knowledge, and a
+ * disabled or re-enabled one has its onboarding and owned rules aligned. Other edits are left to
+ * the reconcile.
+ */
+export const createSourceChangeListener =
   ({
     getScopedClients,
     onboardingClient,
+    maintenanceService,
   }: {
     getScopedClients: GetScopedClients;
     onboardingClient?: Pick<OnboardingClient, 'cancelBySourceSlug'>;
+    maintenanceService: Pick<SignificantEventsMaintenanceService, 'getState'>;
   }): SourceChangeListener =>
   async (event) => {
-    if (event.type !== 'deleted') {
+    const isDeleted = event.type === 'deleted';
+    const isEnabledToggled =
+      event.type === 'updated' && event.previous.enabled !== event.source.enabled;
+    if (!isDeleted && !isEnabledToggled) {
       return;
     }
+
     const { getKnowledgeIndicatorClient } = await getScopedClients({ request: event.request });
-    await resetSourceKnowledge({
+    const kiClient = await getKnowledgeIndicatorClient();
+    if (isDeleted) {
+      await resetSourceKnowledge({
+        source: event.source,
+        kiClient,
+        onboardingClient,
+        request: event.request,
+      });
+      return;
+    }
+    await applySourceEnabled({
       source: event.source,
-      kiClient: await getKnowledgeIndicatorClient(),
+      kiClient,
       onboardingClient,
+      maintenanceService,
       request: event.request,
     });
   };
