@@ -201,26 +201,67 @@ export const deleteIndexedFleetAgents = async (
   };
 
   if (indexedData.agents.length) {
-    response.agents = await esClient
-      .deleteByQuery({
-        index: `${indexedData.fleetAgentsIndex}-*`,
-        wait_for_completion: true,
-        conflicts: 'proceed',
-        query: {
-          bool: {
-            filter: [
-              {
-                terms: {
-                  'local_metadata.elastic.agent.id': indexedData.agents.map(
-                    (agent) => agent.local_metadata.elastic.agent.id
-                  ),
-                },
-              },
-            ],
-          },
-        },
-      })
-      .catch(wrapErrorAndRejectPromise);
+    const agentIds = indexedData.agents.map((agent) => agent.local_metadata.elastic.agent.id);
+    // Documents are indexed into `.fleet-agents`. The legacy `-*` name only matches
+    // older versioned indices, so a delete against that pattern can leave the agents
+    // in place. Fleet then rejects the agent policy delete while any active agent
+    // remains. A concurrent Fleet update can also skip a document (`conflicts:
+    // proceed`), so repeat the delete until the count is zero.
+    const query = {
+      bool: {
+        should: [
+          { terms: { 'local_metadata.elastic.agent.id': agentIds } },
+          { terms: { 'agent.id': agentIds } },
+        ],
+        minimum_should_match: 1,
+      },
+    };
+    const index = [indexedData.fleetAgentsIndex, `${indexedData.fleetAgentsIndex}-*`];
+
+    for (let attempt = 0; attempt < 5; attempt++) {
+      response.agents = await esClient
+        .deleteByQuery({
+          index,
+          wait_for_completion: true,
+          conflicts: 'proceed',
+          refresh: true,
+          ignore_unavailable: true,
+          expand_wildcards: 'all',
+          query,
+        })
+        .catch(wrapErrorAndRejectPromise);
+
+      const remaining = await esClient
+        .count({
+          index: indexedData.fleetAgentsIndex,
+          ignore_unavailable: true,
+          query,
+        })
+        .catch(wrapErrorAndRejectPromise);
+
+      if (remaining.count === 0) {
+        break;
+      }
+
+      if (attempt === 4) {
+        await esClient
+          .updateByQuery({
+            index: indexedData.fleetAgentsIndex,
+            refresh: true,
+            conflicts: 'proceed',
+            ignore_unavailable: true,
+            query,
+            script: {
+              source: 'ctx._source.active = false',
+              lang: 'painless',
+            },
+          })
+          .catch(wrapErrorAndRejectPromise);
+        break;
+      }
+
+      await new Promise((resolve) => setTimeout(resolve, 500 * (attempt + 1)));
+    }
   }
 
   return response;
