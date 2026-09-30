@@ -29,9 +29,9 @@ export const FP_TP_VERDICT_RULES = `
 1. inconclusive — world checks both support and contradict; or you cannot cite
    an id from the hits below.
 2. false_positive — at least one world check contradicts, none supports, and
-   both the entity store and the raw events have hits. Missing evidence cannot
-   clear an alert: if either source is empty or its query failed, the verdict
-   is inconclusive.
+   both the entity store and the raw events have hits. (Blocked by the
+   evidence gate above when either source is empty or failed — inconclusive
+   applies instead.)
 3. true_positive — process_parent or network_destination supports and no world
    check contradicts. An empty or failed entity store does not block this.
    entity_role and alert_linkage corroborate but are never enough on their own.
