@@ -44,6 +44,7 @@ import { ScanFailuresService } from './services/scan_failures/scan_failures_serv
 import { ActionsService } from './services/actions/actions_service';
 import type { HuntServices } from './services/watches/hunt';
 import { listActionsTool } from './agent_builder_tools/list_actions_tool';
+import { createAssertAlertZeroAccess } from './agent_builder_tools/assert_alertzero_access';
 import { reviseProposalTool } from './agent_builder_tools/revise_proposal_tool';
 import { agentType, ensureAgent, ensureAgentSafe, registerAgentType } from './agent';
 import { registerAttachments } from './agent_builder/attachments/register_attachments';
@@ -114,15 +115,19 @@ export class AlertZeroPlugin
     // Missing runtime dependencies must not make installed workflows eligible for orphan cleanup.
     registerOwner({ workflowsExtensions });
     if (agentBuilder && proposals && agenticInvestigations) {
+      const assertAlertZeroAccess = createAssertAlertZeroAccess(async () => {
+        const [core, { security }] = await coreSetup.getStartServices();
+        return { core, security };
+      });
       registerAgentType(agentBuilder);
       registerAttachments(agentBuilder);
       // Registered in setup so the builtin tool is available to Agent Builder before
       // the first agent run; the handler resolves the service lazily like the routes do.
       agentBuilder.tools.register({
-        ...listActionsTool(() => this.requireActionsService()),
+        ...listActionsTool(() => this.requireActionsService(), assertAlertZeroAccess),
       });
       agentBuilder.tools.register({
-        ...reviseProposalTool(() => this.requireProposals()),
+        ...reviseProposalTool(() => this.requireProposals(), assertAlertZeroAccess),
       });
     }
 

@@ -18,6 +18,7 @@ import type {
   SearchInferenceEndpointsPluginStart,
 } from '@kbn/search-inference-endpoints/server';
 import type { InferenceServerStart } from '@kbn/inference-plugin/server';
+import type { SecurityPluginStart } from '@kbn/security-plugin-types-server';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import type { WorkflowsExtensionsServerPluginSetup } from '@kbn/workflows-extensions/server';
 import type { WorkflowsExtensionsServerPluginStart } from '@kbn/workflows-extensions/server';
@@ -54,6 +55,7 @@ export interface AlertZeroSetupDependencies {
 }
 
 export interface AlertZeroStartDependencies {
+  security?: SecurityPluginStart;
   spaces?: SpacesPluginStart;
   workflowsExtensions: WorkflowsExtensionsServerPluginStart;
   agentBuilder?: AgentBuilderPluginStart;

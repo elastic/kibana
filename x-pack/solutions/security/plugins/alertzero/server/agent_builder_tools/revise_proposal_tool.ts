@@ -19,6 +19,8 @@ import {
 } from '@kbn/proposals-common';
 import type { ProposalsPluginStart } from '@kbn/proposals-plugin/server';
 
+import type { AssertAlertZeroAccess } from './assert_alertzero_access';
+
 const reviseProposalSchema = z.object({
   proposalId: z
     .string()
@@ -57,7 +59,8 @@ const reviseProposalSchema = z.object({
  * direct in-process call bypasses both the route and the step wrapper.
  */
 export const reviseProposalTool = (
-  getProposals: () => ProposalsPluginStart
+  getProposals: () => ProposalsPluginStart,
+  assertAlertZeroAccess: AssertAlertZeroAccess
 ): BuiltinToolDefinition<typeof reviseProposalSchema> => ({
   id: ALERTZERO_PROPOSALS_REVISE_TOOL_ID,
   type: ToolType.builtin,
@@ -74,6 +77,7 @@ export const reviseProposalTool = (
   tags: ['alertzero'],
   handler: async ({ proposalId, ...overrides }, { logger, request, spaceId }) => {
     try {
+      await assertAlertZeroAccess(request, 'write');
       const proposals = getProposals();
       await proposals.getProposalPrivileges().assertCanManage(request);
 
