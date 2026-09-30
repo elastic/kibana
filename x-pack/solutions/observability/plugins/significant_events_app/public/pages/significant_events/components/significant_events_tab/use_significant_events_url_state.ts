@@ -9,6 +9,7 @@ import { castArray } from 'lodash';
 import { useCallback, useEffect, useMemo, useRef } from 'react';
 import { SEVERITY_OPTIONS, SIGNIFICANT_EVENT_STATUS_OPTIONS } from '@kbn/significant-events-schema';
 import type { Severity, SignificantEventStatus } from '@kbn/significant-events-schema';
+import { SIGNIFICANT_EVENTS_TAB } from '../../../../../common';
 import { useSignificantEventsAppParams } from '../../../../hooks/use_significant_events_app_params';
 import { useSignificantEventsAppRouter } from '../../../../hooks/use_significant_events_app_router';
 
@@ -44,6 +45,9 @@ const parseListParam = <T extends string>(
   const values = castArray(raw);
   return options.filter((option) => values.includes(option));
 };
+
+const parseStreamParam = (raw: ListParam): string[] =>
+  raw === undefined ? [] : castArray(raw).filter(Boolean);
 
 // `query-string` drops empty arrays, so an empty selection is written as '' (serialised as `key=`).
 const encodeListParam = (values: string[]): string | string[] => (values.length ? values : '');
@@ -84,17 +88,7 @@ export const useSignificantEventsUrlState = () => {
       parseListParam(query?.severity, SEVERITY_OPTIONS, DEFAULT_SIGNIFICANT_EVENT_SEVERITY_FILTER),
     [query?.severity]
   );
-  const streamFilter = useMemo(
-    () => (query?.stream === undefined ? [] : castArray(query.stream).filter(Boolean)),
-    [query?.stream]
-  );
-
-  const filtersRef = useRef<SignificantEventsFilters>({
-    status: statusFilter,
-    severity: severityFilter,
-    stream: streamFilter,
-  });
-  filtersRef.current = { status: statusFilter, severity: severityFilter, stream: streamFilter };
+  const streamFilter = useMemo(() => parseStreamParam(query?.stream), [query?.stream]);
 
   /**
    * Every URL write goes through here so that writes issued in the same tick compose: the ref is
@@ -106,32 +100,33 @@ export const useSignificantEventsUrlState = () => {
   const write = useCallback(
     (method: 'push' | 'replace', nextQuery: TabQuery) => {
       queryRef.current = nextQuery;
-      router[method]('/{tab}', { path: { tab: 'significant_events' }, query: nextQuery });
+      router[method]('/{tab}', { path: { tab: SIGNIFICANT_EVENTS_TAB }, query: nextQuery });
     },
     [router]
   );
 
   /**
-   * replace (not push): filter edits should not pile up history entries. A filter edit exits the
-   * deep-link selection context (drops `selectedEvent`) unless the caller is adapting the filters
-   * to that very event. `openEvent` is kept so an edit does not close the flyout while the event
-   * is still in the list; a later fetch that drops the event clears it separately.
+   * Only the filters present in `partial` are written; untouched params stay as they are in the
+   * URL, so absent still means "default". replace (not push): filter edits should not pile up
+   * history entries. A filter edit exits the deep-link selection context (drops `selectedEvent`)
+   * unless the caller is adapting the filters to that very event. `openEvent` is kept so an edit
+   * does not close the flyout while the event is still in the list; a later fetch that drops the
+   * event clears it separately.
    */
   const setFilters = useCallback(
-    (partial: Partial<SignificantEventsFilters>, { keepSelectedEvent = false } = {}) => {
-      const next = { ...filtersRef.current, ...partial };
-      filtersRef.current = next;
-      const {
-        status: _status,
-        severity: _severity,
-        stream: _stream,
-        ...rest
-      } = keepSelectedEvent ? queryRef.current ?? {} : omitSelectedEvent(queryRef.current);
+    (
+      { status, severity, stream }: Partial<SignificantEventsFilters>,
+      { keepSelectedEvent = false } = {}
+    ) => {
+      const { stream: currentStream, ...rest } = keepSelectedEvent
+        ? queryRef.current ?? {}
+        : omitSelectedEvent(queryRef.current);
+      const nextStream = stream ?? parseStreamParam(currentStream);
       write('replace', {
         ...rest,
-        status: encodeListParam(next.status),
-        severity: encodeListParam(next.severity),
-        ...(next.stream.length ? { stream: next.stream } : {}),
+        ...(status ? { status: encodeListParam(status) } : {}),
+        ...(severity ? { severity: encodeListParam(severity) } : {}),
+        ...(nextStream.length ? { stream: nextStream } : {}),
       });
     },
     [write]

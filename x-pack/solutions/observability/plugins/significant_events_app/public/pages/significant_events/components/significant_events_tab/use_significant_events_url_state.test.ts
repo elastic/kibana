@@ -6,6 +6,7 @@
  */
 
 import { act, renderHook } from '@testing-library/react';
+import { SIGNIFICANT_EVENTS_TAB } from '../../../../../common';
 import { useSignificantEventsUrlState } from './use_significant_events_url_state';
 
 const mockPush = jest.fn();
@@ -68,7 +69,7 @@ describe('useSignificantEventsUrlState', () => {
   });
 
   describe('setFilters', () => {
-    it('writes the merged filters with a single replace and drops selectedEvent', () => {
+    it('writes only the given filters with a single replace and drops selectedEvent', () => {
       mockQuery = {
         rangeFrom: 'now-24h',
         rangeTo: 'now',
@@ -83,15 +84,27 @@ describe('useSignificantEventsUrlState', () => {
 
       expect(mockReplace).toHaveBeenCalledTimes(1);
       expect(mockReplace).toHaveBeenCalledWith('/{tab}', {
-        path: { tab: 'significant_events' },
+        path: { tab: SIGNIFICANT_EVENTS_TAB },
         query: {
           rangeFrom: 'now-24h',
           rangeTo: 'now',
           openEvent: 'event-1',
           status: ['closed'],
-          severity: ['20-low'],
+          severity: '20-low',
           stream: ['logs'],
         },
+      });
+    });
+
+    it('leaves untouched filters absent so they keep meaning "default"', () => {
+      const { result } = renderHook(() => useSignificantEventsUrlState());
+
+      act(() => result.current.setFilters({ stream: ['logs'] }));
+
+      expect(lastReplaceQuery()).toEqual({
+        rangeFrom: 'now-24h',
+        rangeTo: 'now',
+        stream: ['logs'],
       });
     });
 
@@ -162,7 +175,7 @@ describe('useSignificantEventsUrlState', () => {
       act(() => result.current.resetFilters());
 
       expect(mockReplace).toHaveBeenCalledWith('/{tab}', {
-        path: { tab: 'significant_events' },
+        path: { tab: SIGNIFICANT_EVENTS_TAB },
         query: { rangeFrom: 'now-24h', rangeTo: 'now', openEvent: 'event-1' },
       });
     });
@@ -184,7 +197,7 @@ describe('useSignificantEventsUrlState', () => {
       act(() => result.current.openEvent('event-2'));
 
       expect(mockPush).toHaveBeenCalledWith('/{tab}', {
-        path: { tab: 'significant_events' },
+        path: { tab: SIGNIFICANT_EVENTS_TAB },
         query: { ...mockQuery, openEvent: 'event-2' },
       });
     });
@@ -196,7 +209,7 @@ describe('useSignificantEventsUrlState', () => {
       act(() => result.current.closeEvent());
 
       expect(mockPush).toHaveBeenLastCalledWith('/{tab}', {
-        path: { tab: 'significant_events' },
+        path: { tab: SIGNIFICANT_EVENTS_TAB },
         query: { status: 'closed', severity: ['20-low'], stream: 'logs', selectedEvent: 'event-1' },
       });
     });
@@ -208,7 +221,7 @@ describe('useSignificantEventsUrlState', () => {
 
       // openEvent was written by deep-link normalization on mount and must survive the clear.
       expect(mockReplace).toHaveBeenLastCalledWith('/{tab}', {
-        path: { tab: 'significant_events' },
+        path: { tab: SIGNIFICANT_EVENTS_TAB },
         query: { status: 'closed', severity: ['20-low'], stream: 'logs', openEvent: 'event-1' },
       });
     });
