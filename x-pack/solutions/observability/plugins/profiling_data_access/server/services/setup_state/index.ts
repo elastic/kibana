@@ -6,89 +6,63 @@
  */
 import type { IScopedClusterClient, SavedObjectsClientContract } from '@kbn/core/server';
 import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
-import type { CloudSetupStateType } from '../../../common/cloud_setup';
-import type { SetupStateType } from '../../../common/setup';
+import type { CloudSetupState } from '../../../common/cloud_setup';
+import type { SetupState } from '../../../common/setup';
 import type { RegisterServicesParams } from '../register_services';
 import { cloudSetupState } from './cloud_setup_state';
 import { selfManagedSetupState } from './self_managed_setup_state';
-import type { ServerlessSetupStateType } from '../../../common/serverless_setup';
-import { serverlessSetupState } from './serverless_setup_state';
 
 export interface SetupStateParams {
   soClient: SavedObjectsClientContract;
   esClient: IScopedClusterClient;
   spaceId?: string;
-  isServerless?: boolean;
 }
 
-export async function getSetupState({
-  createProfilingEsClient,
-  deps,
-  esClient,
-  logger,
-  soClient,
-  spaceId,
-  isServerless,
-}: RegisterServicesParams & SetupStateParams): Promise<
-  CloudSetupStateType | SetupStateType | ServerlessSetupStateType
-> {
-  const kibanaInternalProfilingESClient = createProfilingEsClient({
-    esClient: esClient.asInternalUser,
-  });
-  const profilingESClient = createProfilingEsClient({
-    esClient: esClient.asCurrentUser,
-  });
+type GetSetupStateParams = RegisterServicesParams & SetupStateParams;
 
-  if (isServerless) {
-    return {
-      type: 'serverless',
-      setupState: await serverlessSetupState({
-        client: kibanaInternalProfilingESClient,
-        clientWithProfilingAuth: profilingESClient,
-        logger,
-        soClient,
-        spaceId: spaceId ?? DEFAULT_SPACE_ID,
-      }),
-    };
+function getProfilingClients({ createProfilingEsClient, esClient }: GetSetupStateParams) {
+  return {
+    client: createProfilingEsClient({ esClient: esClient.asInternalUser }),
+    clientWithProfilingAuth: createProfilingEsClient({ esClient: esClient.asCurrentUser }),
+  };
+}
+
+/** Reads the Universal Profiling setup state of a cloud deployment, which requires Fleet. */
+export async function getCloudSetupState(params: GetSetupStateParams): Promise<CloudSetupState> {
+  const { deps, logger, soClient, spaceId } = params;
+
+  if (!deps.fleet) {
+    throw new Error('Elastic Fleet is required to set up Universal Profiling on Cloud');
   }
 
-  const isCloudEnabled = deps.cloud?.isCloudEnabled;
-  if (isCloudEnabled) {
-    if (!deps.fleet) {
-      throw new Error('Elastic Fleet is required to set up Universal Profiling on Cloud');
-    }
+  return cloudSetupState({
+    ...getProfilingClients(params),
+    logger,
+    soClient,
+    spaceId: spaceId ?? DEFAULT_SPACE_ID,
+    packagePolicyClient: deps.fleet.packagePolicyService,
+    isCloudEnabled: Boolean(deps.cloud?.isCloudEnabled),
+  });
+}
 
-    const setupState = await cloudSetupState({
-      client: kibanaInternalProfilingESClient,
-      clientWithProfilingAuth: profilingESClient,
-      logger,
-      soClient,
-      spaceId: spaceId ?? DEFAULT_SPACE_ID,
-      packagePolicyClient: deps.fleet.packagePolicyService,
-      isCloudEnabled,
-    });
+/** Reads the Universal Profiling setup state of a self-managed deployment. */
+export async function getSelfManagedSetupState(params: GetSetupStateParams): Promise<SetupState> {
+  const { logger, soClient, spaceId } = params;
 
-    return {
-      type: 'cloud',
-      setupState,
-    };
-  }
-
-  const setupState = await selfManagedSetupState({
-    client: kibanaInternalProfilingESClient,
-    clientWithProfilingAuth: profilingESClient,
+  return selfManagedSetupState({
+    ...getProfilingClients(params),
     logger,
     soClient,
     spaceId: spaceId ?? DEFAULT_SPACE_ID,
   });
-
-  return {
-    type: 'self-managed',
-    setupState,
-  };
 }
 
-export function createSetupState(params: RegisterServicesParams) {
+export function createCloudSetupState(params: RegisterServicesParams) {
   return async ({ esClient, soClient, spaceId }: SetupStateParams) =>
-    getSetupState({ ...params, esClient, soClient, spaceId });
+    getCloudSetupState({ ...params, esClient, soClient, spaceId });
+}
+
+export function createSelfManagedSetupState(params: RegisterServicesParams) {
+  return async ({ esClient, soClient, spaceId }: SetupStateParams) =>
+    getSelfManagedSetupState({ ...params, esClient, soClient, spaceId });
 }

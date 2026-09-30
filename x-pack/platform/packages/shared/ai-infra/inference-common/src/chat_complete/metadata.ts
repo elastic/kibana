@@ -22,8 +22,15 @@ export interface ChatCompleteMetadata {
  * Pass through for the connector telemetry
  */
 export interface ConnectorTelemetryMetadata {
+  /** Sent as the X-Elastic-Product-Use-Case header on inference endpoint requests. */
   pluginId?: string;
   aggregateBy?: string;
+  /** Sent as the X-Elastic-Product-Solution header on inference endpoint requests. */
+  productSolution?: string;
+  /** Sent as the X-Elastic-Product-Feature header on inference endpoint requests. */
+  productFeature?: string;
+  /** Sent as the X-Elastic-Inference-Interaction-Id header on inference endpoint requests. */
+  interactionId?: string;
 }
 
 export interface ChatCompleteAnonymizationTarget {

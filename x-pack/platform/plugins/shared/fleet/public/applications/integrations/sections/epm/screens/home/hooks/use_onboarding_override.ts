@@ -13,8 +13,10 @@ import { useStartServices } from '../../../../../hooks';
 
 import type { IntegrationCardItem } from '..';
 
-// Keep in sync with @kbn/ingest-hub-plugin/common/constants
+// Keep in sync with @kbn/ingest-hub-plugin/common/core/constants
 const ONBOARDING_ENABLED_FLAG = 'ingestHub.onboardingEnabled';
+const ONBOARDING_APP_ID = 'onboarding';
+const ONBOARDING_AWS_PATH = '/aws';
 const AWS_TITLE = i18n.translate('xpack.fleet.onboardingOverride.awsTitle', {
   defaultMessage: 'Amazon Web Services',
 });
@@ -22,17 +24,20 @@ const AWS_DESCRIPTION = i18n.translate('xpack.fleet.onboardingOverride.awsDescri
   defaultMessage: 'Collect logs and metrics from Amazon Web Services (AWS).',
 });
 
+export const AWS_ONBOARDING_PACKAGE_NAME = 'aws';
+
 // hiding tiles that are included in the AWS onboarding flow: https://github.com/elastic/kibana/blob/main/x-pack/platform/plugins/shared/ingest_hub/public/onboarding/aws_service_matrix.ts#L188
 const HIDDEN_TILE_NAMES = new Set([
   'aws',
   'aws_bedrock',
   'aws_bedrock_agentcore',
+  'aws_billing',
   'aws_cloudwatch_input_otel',
   'aws_logs',
   'aws_mq',
-  'awsfargate',
-  'awsfirehose',
   'aws_securityhub',
+  'amazon_security_lake',
+  'awsfargate',
   'aws_cloudtrail_otel',
   'aws_ec2_otel',
   'aws_ecs_otel',
@@ -50,8 +55,17 @@ export function useOnboardingOverride() {
   const { featureFlags, application } = useStartServices();
   const isOnboardingEnabled = featureFlags.useBooleanValue(ONBOARDING_ENABLED_FLAG, false);
 
+  const onboardingUrl = useMemo(
+    () => application.getUrlForApp(ONBOARDING_APP_ID, { path: ONBOARDING_AWS_PATH }),
+    [application]
+  );
+
+  // `newSession` makes the onboarding app drop session storage left over from an earlier run.
   const navigateToOnboarding = useCallback(() => {
-    application.navigateToApp('onboarding', { path: '/aws', state: { newSession: true } });
+    application.navigateToApp(ONBOARDING_APP_ID, {
+      path: ONBOARDING_AWS_PATH,
+      state: { newSession: true },
+    });
   }, [application]);
 
   const applyOnboardingOverride = useMemo(() => {
@@ -69,7 +83,7 @@ export function useOnboardingOverride() {
         title: AWS_TITLE,
         description: AWS_DESCRIPTION,
         icons: [{ type: 'eui', src: 'logoAWS' }],
-        url: application.getUrlForApp('onboarding', { path: '/aws' }),
+        url: onboardingUrl,
         integration: 'aws',
         name: 'aws-onboarding',
         version: '',
@@ -79,7 +93,7 @@ export function useOnboardingOverride() {
 
       return [onboardingAwsTile, ...filtered];
     };
-  }, [isOnboardingEnabled, navigateToOnboarding, application]);
+  }, [isOnboardingEnabled, navigateToOnboarding, onboardingUrl]);
 
-  return { applyOnboardingOverride, isOnboardingEnabled };
+  return { applyOnboardingOverride, isOnboardingEnabled, navigateToOnboarding, onboardingUrl };
 }

@@ -6,10 +6,21 @@
  */
 
 import React, { useState } from 'react';
-import { EuiButton, EuiCallOut, EuiConfirmModal, EuiPanel, EuiSpacer, EuiText } from '@elastic/eui';
+import {
+  EuiButton,
+  EuiCallOut,
+  EuiConfirmModal,
+  EuiSpacer,
+  EuiSplitPanel,
+  EuiText,
+  EuiTitle,
+} from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import type { SignificantEventsMaintenanceStatus } from '@kbn/significant-events-plugin/common';
+import {
+  MAINTENANCE_FEATURE_FLAG_ACTOR,
+  type SignificantEventsMaintenanceStatus,
+} from '@kbn/significant-events-plugin/common';
 import {
   useMaintenanceStatus,
   useSignificantEventsMaintenanceActions,
@@ -29,6 +40,7 @@ const SECTION_DESCRIPTION = i18n.translate(
 
 function PausedCallout({ status }: { status: SignificantEventsMaintenanceStatus }) {
   const { updatedBy, lastSummary } = status;
+  const pausedByFeatureFlag = updatedBy === MAINTENANCE_FEATURE_FLAG_ACTOR;
   const workflowsDisabled = lastSummary?.workflowsDisabled ?? 0;
   const rulesDisabled = lastSummary?.rulesDisabled ?? 0;
   const failureCount = lastSummary?.partialFailures.length ?? 0;
@@ -44,7 +56,15 @@ function PausedCallout({ status }: { status: SignificantEventsMaintenanceStatus 
         defaultMessage: 'Significant Events activity is paused',
       })}
     >
-      {updatedBy && (
+      {pausedByFeatureFlag && (
+        <p>
+          <FormattedMessage
+            id="xpack.significantEventsApp.settings.maintenance.pausedByFeatureFlag"
+            defaultMessage="Paused automatically because Nightshift was turned off. Activity stays paused until you resume it. The alerting rules backing knowledge indicator queries were left running."
+          />
+        </p>
+      )}
+      {updatedBy && !pausedByFeatureFlag && (
         <p>
           <FormattedMessage
             id="xpack.significantEventsApp.settings.maintenance.pausedBy"
@@ -94,13 +114,13 @@ export function MaintenanceSection({ canManage }: { canManage: boolean }) {
   };
 
   return (
-    <EuiPanel hasBorder={true} hasShadow={false} paddingSize="none" grow={false}>
-      <EuiPanel hasShadow={false} color="subdued">
-        <EuiText size="s">
+    <EuiSplitPanel.Outer hasBorder hasShadow={false} css={{ flexShrink: 0 }}>
+      <EuiSplitPanel.Inner color="subdued">
+        <EuiTitle size="xs">
           <h3>{SECTION_TITLE}</h3>
-        </EuiText>
-      </EuiPanel>
-      <EuiPanel hasShadow={false} hasBorder={false}>
+        </EuiTitle>
+      </EuiSplitPanel.Inner>
+      <EuiSplitPanel.Inner>
         <EuiText size="s">
           <p>{SECTION_DESCRIPTION}</p>
         </EuiText>
@@ -212,7 +232,7 @@ export function MaintenanceSection({ canManage }: { canManage: boolean }) {
                 defaultMessage: 'Pause Significant Events activity',
               })}
         </EuiButton>
-      </EuiPanel>
+      </EuiSplitPanel.Inner>
 
       {isModalOpen && statusReady && (
         <EuiConfirmModal
@@ -268,6 +288,6 @@ export function MaintenanceSection({ canManage }: { canManage: boolean }) {
           </p>
         </EuiConfirmModal>
       )}
-    </EuiPanel>
+    </EuiSplitPanel.Outer>
   );
 }

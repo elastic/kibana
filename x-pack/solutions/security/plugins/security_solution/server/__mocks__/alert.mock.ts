@@ -14,12 +14,10 @@ import {
   ReadOperations,
   WriteOperations,
 } from '@kbn/alerting-plugin/server/authorization';
-import { isMissingUiamApiKeyMessage } from '@kbn/alerting-plugin/server/lib/uiam_api_key_error';
 
 module.exports = {
   parseDuration,
   AlertingAuthorizationEntity,
   ReadOperations,
   WriteOperations,
-  isMissingUiamApiKeyMessage,
 };

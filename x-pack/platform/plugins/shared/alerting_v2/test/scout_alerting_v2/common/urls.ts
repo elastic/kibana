@@ -127,7 +127,9 @@ export const BULK_ASSIGN_EPISODE_ACTION_URL = `${EPISODES_API_PATH}/_bulk_assign
 export const BULK_ACTIVATE_EPISODE_ACTION_URL = `${EPISODES_API_PATH}/_bulk_activate`;
 export const BULK_DEACTIVATE_EPISODE_ACTION_URL = `${EPISODES_API_PATH}/_bulk_deactivate`;
 
-export const getListExecutionHistoryUrl = (query?: ListPolicyExecutionHistoryRequest): string => {
+export const getListExecutionHistoryUrl = (
+  query?: Partial<ListPolicyExecutionHistoryRequest>
+): string => {
   if (!query) return EXECUTION_HISTORY_API_PATH;
   const params = new URLSearchParams();
   for (const [key, value] of Object.entries(query)) {

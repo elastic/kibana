@@ -6,7 +6,8 @@
  */
 
 import type { IRouter, KibanaRequest, Logger } from '@kbn/core/server';
-import type { ResolveProposalUser } from '../proposals/services/resolve_proposal_user';
+import type { AttachmentPublicClient, ConversationPublicClient } from '@kbn/agent-builder-server';
+import type { ResolveUser } from '../services/resolve_user';
 import type { ImpactService } from './services/impact_service';
 
 export interface ImpactRouteDependencies {
@@ -14,5 +15,7 @@ export interface ImpactRouteDependencies {
   logger: Logger;
   getImpactService: () => ImpactService;
   getSpaceId: (request: KibanaRequest) => string;
-  resolveUser: ResolveProposalUser;
+  resolveUser: ResolveUser;
+  getAttachmentClient: (request: KibanaRequest) => Promise<AttachmentPublicClient>;
+  getConversationClient: (request: KibanaRequest) => Promise<ConversationPublicClient>;
 }

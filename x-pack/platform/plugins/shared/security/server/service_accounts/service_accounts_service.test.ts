@@ -82,6 +82,14 @@ describe('ServiceAccountsService', () => {
       ).toBeInstanceOf(UiamServiceAccounts);
     });
 
+    it('uses explicit namespaces for the workload binding store', () => {
+      const params = startParams({ serviceAccounts: { enabled: true } });
+      service.start(params);
+      expect(params.savedObjects.getUnsafeInternalClient).toHaveBeenCalledWith(
+        expect.objectContaining({ excludedExtensions: ['spaces'] })
+      );
+    });
+
     it('selects the Elasticsearch backend outside serverless', () => {
       expect(
         service.start(startParams({ serviceAccounts: { enabled: true } }, { isServerless: false }))
@@ -143,21 +151,22 @@ describe('ServiceAccountsService', () => {
       ).resolves.toBeNull();
     });
 
-    it('refuses workload bindings on the Elasticsearch backend', async () => {
-      const start = service.start(
-        startParams({ serviceAccounts: { enabled: true } }, { isServerless: false })
-      )!;
+    it('exposes real workload bindings on the Elasticsearch backend', async () => {
+      const params = startParams({ serviceAccounts: { enabled: true } }, { isServerless: false });
+      params.license.isEnabled.mockReturnValue(true);
+      const start = service.start(params);
+      if (!start) throw new Error('Expected ES backend');
 
       await expect(
         start.workloads.getBinding('alerting', {
           workloadType: 'rule',
           workloadId: 'rule-id',
-          spaceId: 'default',
+          spaceId: 'marketing',
         })
-      ).rejects.toMatchObject({
-        message:
-          'Service account workload bindings are not yet implemented for the Elasticsearch backend',
-        output: { statusCode: 501 },
+      ).resolves.toBeNull();
+      expect(params.savedObjects.getUnsafeInternalClient).toHaveBeenCalledWith({
+        includedHiddenTypes: ['service-account-workload-binding'],
+        excludedExtensions: ['spaces'],
       });
     });
   });

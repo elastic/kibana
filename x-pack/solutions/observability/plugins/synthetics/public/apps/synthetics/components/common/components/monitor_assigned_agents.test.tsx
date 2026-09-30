@@ -19,6 +19,11 @@ jest.mock('../../../hooks', () => ({
   useFleetPermissions: () => ({ canReadAgents: true, canReadAgentPolicies: true }),
 }));
 
+let mockHasEnterprise = false;
+jest.mock('../../../hooks/use_license', () => ({
+  useLicense: () => ({ hasAtLeast: () => mockHasEnterprise, getLicense: () => null }),
+}));
+
 jest.mock('../../settings/private_locations/hooks/use_monitor_agent_assignments', () => ({
   useMonitorAgentAssignments: jest.fn(),
 }));
@@ -44,6 +49,7 @@ const assignment = (
 
 describe('MonitorAssignedAgents', () => {
   beforeEach(() => {
+    mockHasEnterprise = false;
     mockUseAssignments.mockReturnValue({ assignments: [], loading: false, error: false });
   });
 
@@ -60,6 +66,7 @@ describe('MonitorAssignedAgents', () => {
   });
 
   it('keeps the block visible while assignments are loading', () => {
+    mockHasEnterprise = true;
     mockUseAssignments.mockReturnValue({
       assignments: [],
       loading: true,
@@ -75,7 +82,6 @@ describe('MonitorAssignedAgents', () => {
             label: 'Local Docker PL',
             isServiceManaged: false,
             agentPolicyId: 'policy-1',
-            isAgentSharding: true,
           },
         ]}
       />

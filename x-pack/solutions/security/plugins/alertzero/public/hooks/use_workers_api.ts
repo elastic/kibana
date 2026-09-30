@@ -17,7 +17,7 @@ import type {
   UpdateWorkerResponse,
   Worker,
 } from '@kbn/alertzero-common';
-import { retryOnTransientError } from '@kbn/agentic-investigations-plugin/public';
+import { retryOnTransientError } from './retry_on_transient_error';
 import { queryKeys } from '../query_keys';
 
 export const useWorkers = () => {

@@ -10,24 +10,24 @@ import type { Alert } from '@kbn/alerts-as-data-utils';
 import {
   ALERT_INSTANCE_ID,
   ALERT_RULE_UUID,
-  ALERT_RULE_EXECUTION_UUID,
   ALERT_STATUS,
   ALERT_STATUS_ACTIVE,
   ALERT_STATUS_RECOVERED,
   ALERT_STATUS_UNTRACKED,
   ALERT_STATUS_DELAYED,
+  ALERT_TRACKED,
   ALERT_UUID,
-  TIMESTAMP,
 } from '@kbn/rule-data-utils';
 import { get } from 'lodash';
 import type { RawAlertInstance, RuleAlertData } from '../../types';
 import type { TrackedAADAlerts, SearchResult } from '../types';
 import { retryTransientEsErrors } from '../../lib/retry_transient_es_errors';
 
+// Tracked docs cannot exceed ~2x maxAlerts; 10k is the ES default window and a safe cap.
+const TRACKED_ALERTS_FETCH_SIZE = 10000;
+
 export interface GetTrackedAlertsParams<AlertData extends RuleAlertData> {
   ruleId: string;
-  lookBackWindow: number;
-  maxAlertLimit: number;
   activeAlertsFromState: Record<string, RawAlertInstance>;
   recoveredAlertsFromState: Record<string, RawAlertInstance>;
   search: (queryBody: Record<string, unknown>) => Promise<SearchResult<AlertData>>;
@@ -38,8 +38,6 @@ export interface GetTrackedAlertsParams<AlertData extends RuleAlertData> {
 
 export async function getTrackedAlerts<AlertData extends RuleAlertData>({
   ruleId,
-  lookBackWindow,
-  maxAlertLimit,
   activeAlertsFromState,
   recoveredAlertsFromState,
   search,
@@ -52,10 +50,8 @@ export async function getTrackedAlerts<AlertData extends RuleAlertData>({
   const searchWithRetry = (queryBody: Record<string, unknown>) =>
     retryTransientEsErrors(() => search(queryBody), { logger });
 
-  const hits = await fetchTrackedAlertsByExecution({
+  const hits = await fetchTrackedAlerts({
     ruleId,
-    lookBackWindow,
-    maxAlertLimit,
     search: searchWithRetry,
   });
 
@@ -116,48 +112,20 @@ export function createEmptyTrackedAlerts<
   };
 }
 
-async function fetchTrackedAlertsByExecution<AlertData extends RuleAlertData>({
+async function fetchTrackedAlerts<AlertData extends RuleAlertData>({
   ruleId,
-  lookBackWindow,
-  maxAlertLimit,
   search,
 }: {
   ruleId: string;
-  lookBackWindow: number;
-  maxAlertLimit: number;
   search: (queryBody: Record<string, unknown>) => Promise<SearchResult<AlertData>>;
 }) {
-  const executions = await search({
-    size: lookBackWindow,
-    query: {
-      bool: {
-        must: [{ term: { [ALERT_RULE_UUID]: ruleId } }],
-      },
-    },
-    collapse: {
-      field: ALERT_RULE_EXECUTION_UUID,
-    },
-    _source: false,
-    sort: [{ [TIMESTAMP]: { order: 'desc' } }],
-  });
-
-  const executionUuids = (executions.hits || [])
-    .map((hit) => get(hit.fields, ALERT_RULE_EXECUTION_UUID))
-    .flat()
-    .filter((uuid): uuid is string => uuid !== null);
-
-  if (executionUuids.length === 0) {
-    return [];
-  }
-
   const alerts = await search({
-    size: maxAlertLimit * 2,
+    size: TRACKED_ALERTS_FETCH_SIZE,
     seq_no_primary_term: true,
     query: {
       bool: {
-        must: [{ term: { [ALERT_RULE_UUID]: ruleId } }],
+        must: [{ term: { [ALERT_RULE_UUID]: ruleId } }, { term: { [ALERT_TRACKED]: true } }],
         must_not: [{ term: { [ALERT_STATUS]: ALERT_STATUS_UNTRACKED } }],
-        filter: [{ terms: { [ALERT_RULE_EXECUTION_UUID]: executionUuids } }],
       },
     },
   });

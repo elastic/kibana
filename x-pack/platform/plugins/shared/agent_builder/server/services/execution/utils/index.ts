@@ -11,13 +11,13 @@ export { handleCancellation, createAbortedError } from './handle_cancellation';
 export { executeAgent$ } from './execute_agent';
 export {
   getConversation,
-  persistRoundInput,
+  persistUserMessage,
   appendRoundTerminated$,
   appendResumeExecution$,
   persistExecutionInterruption,
   isPendingResumeConversation,
+  isPlaceholderUser,
   placeholderConversation,
-  type ConversationOperation,
   type ConversationWithOperation,
   type PersistExecutionInterruptionParams,
 } from './conversations';
