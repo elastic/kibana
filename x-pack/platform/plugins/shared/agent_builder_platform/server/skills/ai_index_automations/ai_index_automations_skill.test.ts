@@ -936,7 +936,7 @@ describe('aiIndexAutomationsSkill', () => {
 
     it('confirms cleanup through the query tool, which hides deleted revisions', () => {
       expect(content).toMatch(
-        /FROM <destination>\n\| WHERE governance\.lifecycle\.status IS NULL OR governance\.lifecycle\.status == "active"\n\| WHERE expires_at IS NULL OR expires_at > NOW\(\)\n\| MV_EXPAND tags\n\| WHERE tags == "ce-pilot-<runId>"\n\| LIMIT 1/
+        /FROM <destination>\n\| MV_EXPAND tags\n\| WHERE tags == "ce-pilot-<runId>"\n\| LIMIT 1/
       );
       expect(content).not.toMatch(/\| INLINE STATS latest = MAX\(@timestamp\) BY id/);
     });
