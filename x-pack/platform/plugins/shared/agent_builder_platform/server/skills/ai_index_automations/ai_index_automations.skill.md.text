@@ -531,9 +531,11 @@ you nothing and buys a chain of follow-up calls. Pass `stepType` with an exact i
 
 The types these automations use are a closed set: `elasticsearch.esql.query`,
 `elasticsearch.search`, `elasticsearch.request`, `ai.prompt`, `parallel`, `foreach`, `if`,
-`data.set` and `console`, alongside the `context-engine` steps written out above,
-which no lookup can return at all. Every one of them appears in the templates already wired up
-correctly, so a lookup is worth a call only for a step type you are adding that no template uses.
+`data.set`, `console` and `workflow.execute`, alongside the `context-engine` steps written out
+above, which no lookup can return at all. All but `workflow.execute` appear in the templates
+already wired up correctly. Look up `workflow.execute` with `stepType` when a custom workflow
+needs it — the Selective / Outlier strategy's parallel branch is a `workflow.execute` — and do
+not skip the lookup because an older template used to show it.
 
 `platform.workflows.get_examples` is one call for the example library rather than one per step, and
 `platform.workflows.get_trigger_definitions` gives the event context a trigger provides.
