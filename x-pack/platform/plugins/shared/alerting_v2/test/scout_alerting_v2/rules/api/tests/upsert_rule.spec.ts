@@ -139,7 +139,10 @@ apiTest.describe('Upsert rule API', { tag: '@local-stateful-classic' }, () => {
       const id = 'rule-created-disabled';
       const response = await apiClient.put(getRuleUrl(id), {
         headers: writerHeaders,
-        body: { ...buildCreateRuleData({ metadata: { name: 'created-disabled' } }), enabled: false },
+        body: {
+          ...buildCreateRuleData({ metadata: { name: 'created-disabled' } }),
+          enabled: false,
+        },
       });
       expect(response).toHaveStatusCode(201);
       expect(response.body.enabled).toBe(false);
