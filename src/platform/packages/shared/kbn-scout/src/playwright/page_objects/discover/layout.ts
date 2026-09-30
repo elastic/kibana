@@ -10,6 +10,7 @@
 import type { Locator } from '../../../..';
 import { expect } from '../..';
 import { resolveSelector } from '../../utils';
+import { euiSelectors } from '../../eui_components';
 import { type DataViewOptions } from './base';
 import { SaveMixin } from './save';
 
@@ -101,7 +102,11 @@ export abstract class LayoutMixin extends SaveMixin {
     return this.getDataViewSwitchName(await this.getVisibleDataViewSwitch());
   }
 
-  private async fillAndSubmitDataViewEditor({ name, adHoc = false }: DataViewOptions) {
+  private async fillAndSubmitDataViewEditor({
+    name,
+    adHoc = false,
+    waitUntilLoaded = true,
+  }: DataViewOptions) {
     // Minimal inline interaction with the data view editor flyout. The full
     // `DataViewEditorPage` object lives in the `data_view_editor` plugin, but
     // `kbn-scout` is a base package and must not depend on a plugin, so the few
@@ -154,7 +159,11 @@ export abstract class LayoutMixin extends SaveMixin {
       await expect(this.getSelectedDataView()).toHaveAccessibleName(title, { timeout: 20_000 });
     }).toPass({ timeout: 45_000, intervals: [0] });
 
-    await this.waitUntilTabIsLoaded();
+    // New empty tabs stay uninitialized after a data-view change; the caller knows
+    // that and should pass `waitUntilLoaded: false` instead of probing the prompt.
+    if (waitUntilLoaded) {
+      await this.waitUntilTabIsLoaded();
+    }
   }
 
   /**
@@ -273,6 +282,12 @@ export abstract class LayoutMixin extends SaveMixin {
   }
 
   // ── Runtime field / field editor helpers ───────────────────────────────────
+
+  /** Opens the field editor from the sidebar's "Add a field" button, which is gated on `canEditDataView`. */
+  async openAddFieldEditorFromSidebar() {
+    await this.page.testSubj.click('dataView-add-field_btn');
+    await this.page.testSubj.locator('fieldEditor').waitFor({ state: 'visible' });
+  }
 
   async createRuntimeField({
     fieldName,
@@ -463,23 +478,6 @@ export abstract class LayoutMixin extends SaveMixin {
     await flyout.waitFor({ state: 'hidden' });
     await this.page.testSubj.locator('controls-group-wrapper').waitFor({ state: 'visible' });
   }
-
-  public readonly controls = {
-    getControlFrame: (controlId: string): Locator =>
-      this.page.locator(`[data-test-subj='control-frame']:has([data-control-id='${controlId}'])`),
-    getControlFrameSelectedValue: (controlId: string, value: string): Locator =>
-      this.controls.getControlFrame(controlId).getByText(value),
-    /**
-     * Locator for an options-list control's selected-values label, e.g. `AE` for a
-     * single selection or `AE, CN` for multiple. Unlike
-     * {@link getControlFrameSelectedValue} this matches the whole label, so it can
-     * assert that a value is the *only* selection.
-     */
-    getSelectionsLocator: (controlId: string): Locator =>
-      this.page.testSubj
-        .locator(`optionsList-control-${controlId}`)
-        .getByTestId('optionsListSelections'),
-  };
 
   // ── Sidebar ────────────────────────────────────────────────────────────────
 
@@ -700,17 +698,22 @@ export abstract class LayoutMixin extends SaveMixin {
     return (await button.getAttribute('data-selected-value')) || '';
   }
 
-  /**
-   * Pick a histogram chart interval (e.g. `"Day"`).
-   */
-  async setChartInterval(intervalTitle: string) {
+  /** Opens the histogram's interval selector popover without picking an option. */
+  async openChartIntervalSelector() {
     await this.page.testSubj.click('unifiedHistogramTimeIntervalSelectorButton');
     await this.page.testSubj.waitForSelector('unifiedHistogramTimeIntervalSelectorSelectable', {
       state: 'visible',
     });
+  }
+
+  /**
+   * Pick a histogram chart interval (e.g. `"Day"`).
+   */
+  async setChartInterval(intervalTitle: string) {
+    await this.openChartIntervalSelector();
     await this.page
       .locator(
-        `[data-test-subj="unifiedHistogramTimeIntervalSelectorSelectable"] .euiSelectableListItem[title="${intervalTitle}"]`
+        `[data-test-subj="unifiedHistogramTimeIntervalSelectorSelectable"] .euiSelectableListItem span[title="${intervalTitle}"]`
       )
       .click();
     await this.page.testSubj.waitForSelector('unifiedHistogramTimeIntervalSelectorSelectable', {
@@ -789,6 +792,41 @@ export abstract class LayoutMixin extends SaveMixin {
     await this.getLensEditFlyout().waitFor({ state: 'visible' });
   }
 
+  async changeVisualizationShape(seriesType: string) {
+    await this.openLensEditFlyout();
+    const chartSwitch = this.page.testSubj.locator('lnsChartSwitchPopover');
+    await chartSwitch.click();
+    await this.page.testSubj.fill('lnsChartSwitchSearch', seriesType);
+    await this.page.testSubj.locator(`lnsChartSwitchPopover_${seriesType.toLowerCase()}`).click();
+    await chartSwitch.getByText(seriesType, { exact: true }).waitFor({ state: 'visible' });
+    await this.page.testSubj.locator('applyFlyoutButton').scrollIntoViewIfNeeded();
+    await this.page.testSubj.click('applyFlyoutButton');
+    await this.page.testSubj.locator('customizeLens').waitFor({ state: 'hidden' });
+    await this.waitUntilSearchingHasFinished();
+  }
+
+  async chooseVisualizationSuggestion(suggestionType: string) {
+    await this.openLensEditFlyout();
+    await this.page.testSubj.click('lensSuggestionsPanelToggleButton');
+    const suggestion = this.page.testSubj.locator(`lnsSuggestion-${suggestionType}`);
+    await suggestion.waitFor({ state: 'visible' });
+    await suggestion.click();
+    await suggestion
+      .locator('[data-test-subj="lnsSuggestion"]')
+      .and(this.page.locator('[aria-current="true"]'))
+      .waitFor({ state: 'visible' });
+    await this.page.testSubj.locator('applyFlyoutButton').scrollIntoViewIfNeeded();
+    await this.page.testSubj.click('applyFlyoutButton');
+    await this.waitUntilSearchingHasFinished();
+  }
+
+  async getVisualizationTitle(): Promise<string> {
+    await this.openLensEditFlyout();
+    const title = await this.page.testSubj.innerText('lnsChartSwitchPopover');
+    await this.page.testSubj.click('cancelFlyoutButton');
+    return title;
+  }
+
   getLensEditFlyout(): Locator {
     return this.page.testSubj.locator('lnsChartSwitchPopover');
   }
@@ -822,8 +860,8 @@ export abstract class LayoutMixin extends SaveMixin {
     return this.getHitCountLocator().innerText();
   }
 
-  getRefreshDataButton(): Locator {
-    return this.page.testSubj.locator('refreshDataButton');
+  getQueryInEsqlButton(): Locator {
+    return this.page.testSubj.locator('queryInEsqlButton');
   }
 
   getQuerySubmitButton(): Locator {
@@ -872,8 +910,9 @@ export abstract class LayoutMixin extends SaveMixin {
   }
 
   getDocHeaderLabels(): Locator {
+    const headerCell = euiSelectors.dataGrid.HEADER_CELL_SELECTOR;
     return this.page.locator(
-      '.euiDataGridHeaderCell:not(.euiDataGridHeaderCell--controlColumn) .euiDataGridHeaderCell__content'
+      `${headerCell}:not(${headerCell}--controlColumn) ${headerCell}__content`
     );
   }
 
@@ -1005,10 +1044,14 @@ export abstract class LayoutMixin extends SaveMixin {
     }
   }
 
+  /** Switches to the Field statistics view and waits for its content to mount. */
   async selectFieldStatisticsView() {
     await this.page.testSubj.click('dscViewModeToggleButton');
     await this.page.testSubj.locator('dscViewModeToggleSelectable').waitFor({ state: 'visible' });
     await this.page.testSubj.click('dscViewModeFieldStatsOption');
+    // The Documents view stays mounted until the stats table renders, so callers
+    // need this gate to avoid acting on the previous view.
+    await this.page.testSubj.locator('dscFieldStatsEmbeddedContent').waitFor({ state: 'visible' });
   }
 
   async getFirstViewLensButtonFromFieldStatistics(): Promise<Locator> {

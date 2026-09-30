@@ -7,10 +7,12 @@
 
 import { EuiIcon, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
+import { getEbtProps } from '@kbn/ebt-click';
 import { SuppressChromeBackButton } from '@kbn/app-header';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 import type { ReactNode } from 'react';
 import React from 'react';
+import { CONTEXT_ENGINE_UI_EBT } from '../../../common/telemetry';
 
 export const CONTEXT_ENGINE_BACK_BUTTON_TEST_SUBJ = 'contextEngineBackButton';
 
@@ -21,6 +23,7 @@ interface ContextEngineSubPageHeaderProps {
   pageTitle: ReactNode;
   description?: ReactNode;
   'data-test-subj'?: string;
+  element?: (typeof CONTEXT_ENGINE_UI_EBT.element)[keyof typeof CONTEXT_ENGINE_UI_EBT.element];
 }
 
 export const ContextEngineSubPageHeader = ({
@@ -30,6 +33,7 @@ export const ContextEngineSubPageHeader = ({
   pageTitle,
   description,
   'data-test-subj': dataTestSubj,
+  element = CONTEXT_ENGINE_UI_EBT.element.aiIndexDetailPage,
 }: ContextEngineSubPageHeaderProps) => {
   const { euiTheme } = useEuiTheme();
 
@@ -54,6 +58,10 @@ export const ContextEngineSubPageHeader = ({
             color: 'primary',
             'aria-current': false,
             'data-test-subj': CONTEXT_ENGINE_BACK_BUTTON_TEST_SUBJ,
+            ...getEbtProps({
+              element,
+              action: CONTEXT_ENGINE_UI_EBT.action.navigation.BACK,
+            }),
           },
         ]}
         css={css`

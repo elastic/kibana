@@ -9,6 +9,7 @@ import {
   EuiButtonIcon,
   EuiContextMenuItem,
   EuiFlexItem,
+  EuiLoadingSpinner,
   EuiPopover,
   EuiToolTip,
 } from '@elastic/eui';
@@ -33,27 +34,68 @@ import { observabilityFeatureId } from '../..';
 
 function InvestigateAlertActionItem({
   alertId,
+  enabled,
   onActionExecuted,
 }: {
   alertId?: string;
+  enabled?: boolean;
   onActionExecuted: () => void;
 }) {
-  const { showInvestigateAction, handleInvestigate, isInvestigating, investigateActionLabel } =
-    useInvestigateAlert({
-      alertId,
-      onInvestigate: onActionExecuted,
-    });
+  const {
+    showInvestigateAction,
+    showInvestigateButton,
+    showViewInvestigation,
+    handleInvestigate,
+    isInvestigating,
+    investigateActionLabel,
+    viewInvestigationUrl,
+    viewInvestigationActionLabel,
+    markInvestigationViewed,
+  } = useInvestigateAlert({
+    alertId,
+    enabled,
+    onInvestigate: onActionExecuted,
+  });
 
   if (!showInvestigateAction) return null;
 
+  if (isInvestigating) {
+    return (
+      <EuiContextMenuItem
+        data-test-subj="investigateAlert"
+        disabled
+        icon={<EuiLoadingSpinner size="m" />}
+      >
+        {investigateActionLabel}
+      </EuiContextMenuItem>
+    );
+  }
+
   return (
-    <EuiContextMenuItem
-      data-test-subj="investigateAlert"
-      disabled={isInvestigating}
-      onClick={handleInvestigate}
-    >
-      {investigateActionLabel}
-    </EuiContextMenuItem>
+    <>
+      {showViewInvestigation && (
+        <EuiContextMenuItem
+          data-test-subj="viewAlertInvestigation"
+          href={viewInvestigationUrl}
+          icon="eye"
+          onClick={() => {
+            markInvestigationViewed();
+            onActionExecuted();
+          }}
+        >
+          {viewInvestigationActionLabel}
+        </EuiContextMenuItem>
+      )}
+      {showInvestigateButton && (
+        <EuiContextMenuItem
+          data-test-subj="investigateAlert"
+          icon="inspect"
+          onClick={handleInvestigate}
+        >
+          {investigateActionLabel}
+        </EuiContextMenuItem>
+      )}
+    </>
   );
 }
 
@@ -147,6 +189,7 @@ export function AlertActions(
     <InvestigateAlertActionItem
       key="investigateAlert"
       alertId={observabilityAlert.fields[ALERT_UUID]}
+      enabled={isPopoverOpen}
       onActionExecuted={closeActionsPopover}
     />,
 

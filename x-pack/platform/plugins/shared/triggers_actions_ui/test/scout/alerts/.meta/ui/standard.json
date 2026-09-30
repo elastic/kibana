@@ -1,5 +1,5 @@
 {
-  "sha1": "c6b86759a5674b9ae3f7554eac1c8373046b0a72",
+  "sha1": "83ee859a78bed5cafe729d90daf5316fd56ce792",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -374,6 +374,22 @@
         "file": "x-pack/platform/plugins/shared/triggers_actions_ui/test/scout/alerts/ui/tests/stack_alerts_page_roles.spec.ts",
         "line": 177,
         "column": 5
+      }
+    },
+    {
+      "id": "02b8d345de535de-46ab96f5c2988b7",
+      "title": "Stack Alerts visibility in Search project nav shows Stack Alerts under Alerts and Insights",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/triggers_actions_ui/test/scout/alerts/ui/tests/stack_alerts_search_nav_visibility.spec.ts",
+        "line": 33,
+        "column": 41
       }
     }
   ]

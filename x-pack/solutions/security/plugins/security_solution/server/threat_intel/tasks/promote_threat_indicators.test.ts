@@ -67,14 +67,24 @@ const makeReport = ({
   trailLabel,
   extractedAt = EXTRACTED_AT,
   spaceId = 'default',
+  isIntelligence,
+  extractionMethod,
 }: {
   id: string;
-  iocs: Array<{ type: string; value: string; reference?: string }>;
+  iocs: Array<{
+    type: string;
+    value: string;
+    reference?: string;
+    tier?: string;
+    deferred_unreviewed?: boolean;
+  }>;
   sourceName?: string;
   sourceUrl?: string;
   trailLabel?: string;
   extractedAt?: string;
   spaceId?: string;
+  isIntelligence?: boolean;
+  extractionMethod?: string;
 }) => ({
   _id: id,
   sort: [extractedAt, 0],
@@ -86,8 +96,14 @@ const makeReport = ({
     severity: { level: 'low' },
     // Only promotable tiers reach the index, so an IOC in a fixture that is not
     // about tiering needs one. Tier-specific cases pass it explicitly.
-    extracted: { iocs: iocs.map((ioc) => ({ tier: 'discriminating', ...ioc })) },
-    lineage: { extracted_at: extractedAt },
+    extracted: {
+      iocs: iocs.map((ioc) => ({ tier: 'discriminating', ...ioc })),
+      ...(isIntelligence !== undefined ? { gate: { is_intelligence: isIntelligence } } : {}),
+    },
+    lineage: {
+      extracted_at: extractedAt,
+      ...(extractionMethod !== undefined ? { extraction_method: extractionMethod } : {}),
+    },
   },
 });
 
@@ -274,7 +290,7 @@ describe('buildBulkOpsForTest — scripted upsert op shape', () => {
             ],
             sourceName: 'maltrail',
             sourceUrl:
-              'https://raw.githubusercontent.com/stamparm/maltrail/master/trails/static/malware/cobaltstrike.txt',
+              'https://raw.githubusercontent.com/stamparm/trails/main/malware/cobaltstrike.txt',
             trailLabel: 'cobaltstrike',
           }),
         ],
@@ -297,7 +313,7 @@ describe('buildBulkOpsForTest — scripted upsert op shape', () => {
             iocs: [{ type: 'ip', value: '9.9.9.9' }],
             sourceName: 'maltrail',
             sourceUrl:
-              'https://raw.githubusercontent.com/stamparm/maltrail/master/trails/static/malware/cobaltstrike.txt',
+              'https://raw.githubusercontent.com/stamparm/trails/main/malware/cobaltstrike.txt',
             trailLabel: 'cobaltstrike',
           }),
         ],
@@ -305,7 +321,7 @@ describe('buildBulkOpsForTest — scripted upsert op shape', () => {
       );
 
       expect(ops[0].scriptParams.reference).toBe(
-        'https://raw.githubusercontent.com/stamparm/maltrail/master/trails/static/malware/cobaltstrike.txt'
+        'https://raw.githubusercontent.com/stamparm/trails/main/malware/cobaltstrike.txt'
       );
     });
 
@@ -395,6 +411,56 @@ describe('buildBulkOpsForTest — scripted upsert op shape', () => {
       );
       expect(ops).toHaveLength(1);
       expect(ops[0]._id).toBe('default:ip:1.2.3.4');
+    });
+  });
+
+  describe('deferred and rejected reports are kept out of promotion', () => {
+    it('does not upsert an IOC that semantic review deferred', () => {
+      const ops = buildBulkOpsForTest(
+        [
+          makeReport({
+            id: 'r-deferred',
+            iocs: [
+              { type: 'ip', value: '1.2.3.4', deferred_unreviewed: true },
+              { type: 'ip', value: '5.6.7.8' },
+            ],
+          }),
+        ],
+        NOW
+      );
+
+      expect(ops).toHaveLength(1);
+      expect(ops[0]._id).toBe('default:ip:5.6.7.8');
+    });
+
+    it('produces no ops for a report the relevance gate rejected', () => {
+      const ops = buildBulkOpsForTest(
+        [
+          makeReport({
+            id: 'r-not-intel',
+            iocs: [{ type: 'ip', value: '1.2.3.4' }],
+            isIntelligence: false,
+          }),
+        ],
+        NOW
+      );
+
+      expect(ops).toHaveLength(0);
+    });
+
+    it('produces no ops for a report the workflow marked rejected', () => {
+      const ops = buildBulkOpsForTest(
+        [
+          makeReport({
+            id: 'r-workflow-rejected',
+            iocs: [{ type: 'ip', value: '1.2.3.4' }],
+            extractionMethod: 'workflow_v4_rejected',
+          }),
+        ],
+        NOW
+      );
+
+      expect(ops).toHaveLength(0);
     });
   });
 
@@ -630,9 +696,16 @@ describe('promote task runner', () => {
         .createTaskRunner(runContext({ taskInstance: { state: {}, params: {} } as never }))
         .run();
 
-      expect(esClient.openPointInTime).toHaveBeenCalledWith(
-        expect.objectContaining({ index: THREAT_REPORTS_INDEX_PATTERN })
-      );
+      const pitArg = (esClient.openPointInTime as jest.Mock).mock.calls[0][0];
+      expect(pitArg.index).toBe(THREAT_REPORTS_INDEX_PATTERN);
+      // `allow_no_indices` is search-only; ES rejects it on PIT open with
+      // x_content_parse_exception (the promotion task used to spread the full
+      // HIDDEN_INDEX_SEARCH_OPTIONS object and fail before scanning reports).
+      expect(pitArg.allow_no_indices).toBeUndefined();
+      expect(pitArg).toMatchObject({
+        expand_wildcards: ['open', 'hidden'],
+        ignore_unavailable: true,
+      });
 
       // The PIT pins the indices, so the search must not also pass `index`.
       const searchArg = (esClient.search as jest.Mock).mock.calls[0][0];

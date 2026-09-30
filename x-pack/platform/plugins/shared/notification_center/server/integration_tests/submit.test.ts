@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { of } from 'rxjs';
 import type { CoreSetup } from '@kbn/core/server';
 import type { DataStreamsStart } from '@kbn/core-data-streams-server';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
@@ -65,7 +66,7 @@ describe('notificationCenter forType().submit() [integration]', () => {
     // submit resolves its client via core.getStartServices().dataStreams,
     // so mock the start service to return the test client bound to the test ES cluster.
     const dataStreams = { initializeClient: async () => client } as unknown as DataStreamsStart;
-    const featureFlags = { getBooleanValue: async () => true };
+    const featureFlags = { getBooleanValue$: () => of(true) };
     const core = {
       getStartServices: async () => [{ dataStreams, featureFlags }],
     } as unknown as CoreSetup<NotificationCenterStartDependencies, NotificationCenterPluginStart>;

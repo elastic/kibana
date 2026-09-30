@@ -159,9 +159,9 @@ export async function runJest(configName = 'jest.config.js'): Promise<void> {
   log.debug('Setting up Jest with shared cache directory...');
 
   // Prepare Jest execution context
-  const { originalArgv, jestArgv } = await prepareJestExecution(baseConfig);
+  const { originalArgv, jestArgv } = await prepareJestExecution(baseConfig, configPath);
 
-  log.info('yarn jest', originalArgv.join(' '));
+  log.info('node scripts/jest', originalArgv.join(' '));
 
   log.debug('Setting up Jest with shared cache directory:', jestArgv.join(' '));
 
@@ -233,7 +233,7 @@ export function parseJestArguments(): ParsedJestArguments {
 
   If this flag is valid you might need to update the flags in "src/platform/packages/shared/kbn-test/src/jest/run.js".
 
-  Run 'yarn jest --help | node scripts/read_jest_help.cjs' to update this scripts knowledge of what
+  Run 'pnpm exec jest --help | node scripts/read_jest_help.cjs' to update this scripts knowledge of what
   flags jest supports
 
 `);
@@ -332,41 +332,37 @@ export async function resolveJestConfig(
   parsedArguments: any,
   resolvedConfigPath?: string
 ): Promise<{ config: Config.InitialOptions; configPath: string | undefined }> {
-  let initialOptions: Config.InitialOptions | undefined;
-
-  // If a config path was provided via argv, try to parse it as JSON first
   if (parsedArguments.config) {
     try {
-      initialOptions = JSON.parse(parsedArguments.config);
-    } catch (err) {
-      // If JSON parsing fails, treat it as a config file path
-      resolvedConfigPath = parsedArguments.config;
+      // Inline JSON has no file. Ignore resolvedConfigPath: runJest passes the raw
+      // --config string there, and that string is not a path.
+      return { config: JSON.parse(parsedArguments.config), configPath: undefined };
+    } catch {
+      // Not JSON. Fall through and load parsedArguments.config as a file.
     }
   }
 
-  if (!initialOptions && !resolvedConfigPath) {
+  const configFilePath = parsedArguments.config || resolvedConfigPath;
+  if (!configFilePath) {
     throw new Error(
       '--config is not set or invalid, and no config path was found for any listed files'
     );
   }
 
-  if (!initialOptions) {
-    const configFileExists = await fs
-      .stat(resolvedConfigPath!)
-      .then((stat) => stat.isFile())
-      .catch(() => false);
+  const configFileExists = await fs
+    .stat(configFilePath)
+    .then((stat) => stat.isFile())
+    .catch(() => false);
 
-    if (!configFileExists) {
-      throw new Error(`Config at ${resolvedConfigPath} does not exist`);
-    }
-
-    // readInitialOptions returns an object that includes the resolved Jest config at `config`
-    // along with some metadata (e.g. configPath). We only want to pass the actual Jest
-    // config object to --config, augmented with our overrides.
-    initialOptions = (await readInitialOptions(resolvedConfigPath!)).config;
+  if (!configFileExists) {
+    throw new Error(`Config at ${configFilePath} does not exist`);
   }
 
-  return { config: initialOptions, configPath: resolvedConfigPath };
+  // readInitialOptions returns an object that includes the resolved Jest config at `config`
+  // along with some metadata (e.g. configPath). We only want to pass the actual Jest
+  // config object to --config, augmented with our overrides.
+  const initialOptions = (await readInitialOptions(configFilePath)).config;
+  return { config: initialOptions, configPath: configFilePath };
 }
 
 interface JestExecutionContext {
@@ -376,15 +372,33 @@ interface JestExecutionContext {
 
 /**
  * Prepares Jest execution context by setting up configuration and arguments.
- * This will make sure Jest uses an inline JSON config which has a cache directory set.
+ * Configs without `projects` are inlined as JSON with a shared cache directory.
+ * Configs with `projects` keep their file path: a JSON `--config` has no config path,
+ * so Jest re-reads every project from that same JSON and collapses them onto the root config.
  *
  * @param baseConfig - Base Jest configuration
+ * @param configPath - Absolute path of the config file, when one was loaded
  * @returns Jest execution context with processed arguments (already sliced for Jest consumption)
  */
 export async function prepareJestExecution(
-  baseConfig: Config.InitialOptions
+  baseConfig: Config.InitialOptions,
+  configPath?: string
 ): Promise<JestExecutionContext> {
   const cacheDirectory = join(REPO_ROOT, JEST_CACHE_DIR);
+
+  // Create shared cache directory
+  await fs.mkdir(cacheDirectory, { recursive: true });
+
+  const argumentsWithoutConfig = removeFlagFromArgv(process.argv, 'config');
+  const originalArgv = process.argv.slice(NODE_ARGV_SLICE_INDEX);
+  const forwardedArgv = argumentsWithoutConfig.slice(NODE_ARGV_SLICE_INDEX);
+
+  if (configPath && baseConfig.projects?.length) {
+    return {
+      jestArgv: ['--config', configPath, '--cacheDirectory', cacheDirectory, ...forwardedArgv],
+      originalArgv,
+    };
+  }
 
   const inlineConfig = {
     ...baseConfig,
@@ -392,22 +406,8 @@ export async function prepareJestExecution(
     cacheDirectory,
   };
 
-  // Create shared cache directory
-  await fs.mkdir(cacheDirectory, { recursive: true });
-
-  // Remove existing --config flags and provide the inline JSON config
-  const argumentsWithoutConfig = removeFlagFromArgv(process.argv, 'config');
-
-  const jestArgv = [
-    `--config`,
-    JSON.stringify(inlineConfig),
-    ...argumentsWithoutConfig.slice(NODE_ARGV_SLICE_INDEX),
-  ];
-
-  const originalArgv = process.argv.slice(NODE_ARGV_SLICE_INDEX);
-
   return {
-    jestArgv,
+    jestArgv: ['--config', JSON.stringify(inlineConfig), ...forwardedArgv],
     originalArgv,
   };
 }

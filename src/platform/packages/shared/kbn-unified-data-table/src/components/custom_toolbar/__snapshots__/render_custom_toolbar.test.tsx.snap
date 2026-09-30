@@ -31,25 +31,15 @@ exports[`renderCustomToolbar should render correctly for smaller screens 1`] = `
         <EuiFlexItem
           grow={false}
         >
-          <div
+          <EuiButtonGroup
             className="unifiedDataTableToolbarControlGroup"
+            legend="Data grid controls"
+            variant="segmented"
           >
-            <div
-              className="unifiedDataTableToolbarControlIconButton"
-            >
-              keyboard
-            </div>
-            <div
-              className="unifiedDataTableToolbarControlIconButton"
-            >
-              display
-            </div>
-            <div
-              className="unifiedDataTableToolbarControlIconButton"
-            >
-              fullScreen
-            </div>
-          </div>
+            keyboard
+            display
+            fullScreen
+          </EuiButtonGroup>
         </EuiFlexItem>
       </EuiFlexGroup>
     </EuiFlexItem>
@@ -113,25 +103,15 @@ exports[`renderCustomToolbar should render correctly with an element 1`] = `
         <EuiFlexItem
           grow={false}
         >
-          <div
+          <EuiButtonGroup
             className="unifiedDataTableToolbarControlGroup"
+            legend="Data grid controls"
+            variant="segmented"
           >
-            <div
-              className="unifiedDataTableToolbarControlIconButton"
-            >
-              keyboard
-            </div>
-            <div
-              className="unifiedDataTableToolbarControlIconButton"
-            >
-              display
-            </div>
-            <div
-              className="unifiedDataTableToolbarControlIconButton"
-            >
-              fullScreen
-            </div>
-          </div>
+            keyboard
+            display
+            fullScreen
+          </EuiButtonGroup>
         </EuiFlexItem>
       </EuiFlexGroup>
     </EuiFlexItem>
@@ -206,25 +186,15 @@ exports[`renderCustomToolbar should render successfully 1`] = `
         <EuiFlexItem
           grow={false}
         >
-          <div
+          <EuiButtonGroup
             className="unifiedDataTableToolbarControlGroup"
+            legend="Data grid controls"
+            variant="segmented"
           >
-            <div
-              className="unifiedDataTableToolbarControlIconButton"
-            >
-              keyboard
-            </div>
-            <div
-              className="unifiedDataTableToolbarControlIconButton"
-            >
-              display
-            </div>
-            <div
-              className="unifiedDataTableToolbarControlIconButton"
-            >
-              fullScreen
-            </div>
-          </div>
+            keyboard
+            display
+            fullScreen
+          </EuiButtonGroup>
         </EuiFlexItem>
       </EuiFlexGroup>
     </EuiFlexItem>

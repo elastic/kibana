@@ -30,232 +30,21 @@ components:
         Run health of a long-running worker, shown instead of a timestamp when not ok. Workers only —
         a skill is invoked rather than run continuously, so it has no health of its own.
 
-    WatchWorker:
+    WorkerSettingsExtras:
       type: object
-      description: A worker in the global worker catalog.
-      required:
-        - id
-        - watchIds
-        - lastRun
-        - enabled
-        - state
-      properties:
-        id:
-          type: string
-          description: >-
-            Copy key — the UI resolves name and description from this id. Unique among workers only;
-            Containment and Case assembly each exist as both a worker and a skill.
-        watchIds:
-          type: array
-          items:
-            type: string
-          description: Watches this worker is attached to
-        lastRun:
-          type: string
-          nullable: true
-          description: ISO 8601 timestamp of last invocation, or null when never run or not running
-        enabled:
-          type: boolean
-          description: Global flag. Effective enablement is this AND the per-watch attachment flag.
-        state:
-          $ref: '#/components/schemas/WorkerRunState'
-        stateReason:
-          type: string
-          description: >-
-            Why the worker is not in the ok state, e.g. which dependency is unavailable. Free prose
-            rather than a copy key because it names runtime specifics, like WatchLedgerEntry.event.
-        lifecycle:
-          $ref: './watch.schema.yaml#/components/schemas/Lifecycle'
-          description: Omitted for generally available workers; badge shown otherwise
-
-    WatchSkill:
-      type: object
-      description: A skill in the global skill catalog.
-      required:
-        - id
-        - watchIds
-        - lastRun
-      properties:
-        id:
-          type: string
-          description: >-
-            Copy key — the UI resolves name and description from this id. Unique among skills only.
-        name:
-          type: string
-          description: >-
-            Display name resolved from the Agent Builder registry at projection time.
-        watchIds:
-          type: array
-          items:
-            type: string
-          description: Watches whose workers may call this skill
-        summary:
-          type: string
-          description: >-
-            Summary of the skill's purpose
-        lastRun:
-          type: string
-          nullable: true
-          description: ISO 8601 timestamp of last invocation, or null when never invoked
-        lifecycle:
-          $ref: './watch.schema.yaml#/components/schemas/Lifecycle'
-          description: Omitted for generally available skills; badge shown otherwise
-
-    WatchWorkerAttachment:
-      type: object
-      description: Per-watch enablement of a worker, ANDed with the worker's global flag
-      required:
-        - workerId
-        - enabled
-      properties:
-        workerId:
-          type: string
-        enabled:
-          type: boolean
-
-    WatchSkillAttachment:
-      type: object
-      description: Per-watch enablement of a skill, ANDed with the skill's global flag
-      required:
-        - skillId
-        - enabled
-      properties:
-        skillId:
-          type: string
-        enabled:
-          type: boolean
-
-    WatchSelectSetting:
-      type: object
-      description: A single-choice setting. Both ids resolve to copy in the UI.
-      required:
-        - optionIds
-        - selectedId
-      properties:
-        optionIds:
-          type: array
-          items:
-            type: string
-        selectedId:
-          type: string
-
-    WatchTriggersSettings:
-      type: object
-      required:
-        - sharedWithAttackDiscovery
-        - schedule
-        - allowManualRun
-      properties:
-        sharedWithAttackDiscovery:
-          type: boolean
-          description: >-
-            Renders the "Shared with Attack Discovery" callout. Mocked — not wired to the real
-            Attack Discovery API. Contested in the field, see programme decision D12.
-        schedule:
-          $ref: '#/components/schemas/WatchSelectSetting'
-        allowManualRun:
-          type: boolean
-
-    WatchScopeRoutingSettings:
-      type: object
+      additionalProperties: true
       description: >-
-        The data-boundary chips the design shows in this section are rendered from the watch's own
-        `scopes`, which already carry a name and an access level, so they are not duplicated here.
-      required:
-        - dataSources
-        - assigneeQueue
-        - escalationContact
-      properties:
-        dataSources:
-          $ref: '#/components/schemas/WatchSelectSetting'
-        assigneeQueue:
-          $ref: '#/components/schemas/WatchSelectSetting'
-        escalationContact:
-          $ref: '#/components/schemas/WatchSelectSetting'
-
-    ApprovalRequirement:
-      type: string
-      enum: [always, high-impact, in-scope]
-      description: >-
-        always and high-impact require a named approver; in-scope is informational (the action has
-        no side effects and runs within the watch's scope)
-
-    WatchApprovalGate:
-      type: object
-      required:
-        - id
-        - requirement
-        - requirementLocked
-        - approverRoleId
-      properties:
-        id:
-          type: string
-          description: Copy key for the action type and its qualifier line
-        requirement:
-          $ref: '#/components/schemas/ApprovalRequirement'
-        requirementLocked:
-          type: boolean
-          description: True renders static text instead of a select — consequential actions always gate
-        approverRoleId:
-          type: string
-          nullable: true
-          description: Null renders an em dash, used for gates that need no approver
-        approverRoleOptionIds:
-          type: array
-          items:
-            type: string
-          description: Omitted when approverRoleId is null
-
-    WatchRunOutcome:
-      type: string
-      enum: [awaiting-review, accepted, dismissed, executed, completed]
-
-    WatchLedgerEntry:
-      type: object
-      description: One row of the per-watch run ledger
-      required:
-        - id
-        - time
-        - callableId
-        - action
-        - event
-        - outcome
-      properties:
-        id:
-          type: string
-        time:
-          type: string
-          description: ISO 8601 timestamp
-        callableId:
-          type: string
-          description: Copy key for the workflow or skill that ran
-        action:
-          $ref: './watch.schema.yaml#/components/schemas/WatchRunAction'
-        event:
-          type: string
-          description: >-
-            Run-generated headline, e.g. "Drafted a case — mailbox rules are good". Free prose
-            rather than a copy key because it is produced per run, matching WatchRecentRun.summary.
-        outcome:
-          $ref: '#/components/schemas/WatchRunOutcome'
-
-    WatchSettings:
-      type: object
-      description: >-
-        Legacy per-watch settings projection. Watches are grouping-only; durable settings live on
-        WorkerSettings. Kept so unused mock fixtures continue to parse.
-      required:
-        - watchId
-        - autonomy
-      properties:
-        watchId:
-          type: string
-        autonomy:
-          $ref: '#/components/schemas/WatchAutonomyLevel'
+        Worker-specific settings owned by the Worker's Watch team. The wire schema is open so the
+        shared read/update path stays generic; each Worker declares a closed schema for its own
+        extras (see the Watch-owned `*_watch_settings.schema.yaml` files) and the server validates
+        against that declaration, rejecting unknown or missing fields by name.
 
     WorkerSettings:
       type: object
-      description: Durable per-Worker settings stored as managed template values.
+      additionalProperties: false
+      description: >-
+        Durable per-Worker settings stored as managed template values. Shared fields sit at the top
+        level; Worker-specific fields live under `extras`. Unknown top-level keys are rejected.
       required:
         - workerId
         - autonomy
@@ -269,6 +58,26 @@ components:
           description: >-
             Omitted for Workers that are not schedule-driven. Its presence is what tells the UI to
             render the interval control.
+        extras:
+          $ref: '#/components/schemas/WorkerSettingsExtras'
+          description: Omitted for Workers that declare no Worker-specific settings.
+
+    WorkerSettingsWrite:
+      type: object
+      additionalProperties: false
+      description: >-
+        Settings patch; the editable subset of WorkerSettings with the same names and nesting.
+        Shared fields are per-field: omitted keeps the stored value, supplied replaces it. `extras`
+        is whole-object: omitted keeps the stored extras, supplied must be the complete valid object
+        for this Worker and replaces the stored one. There is no deep merge and `null` has no
+        special meaning.
+      properties:
+        autonomy:
+          $ref: '#/components/schemas/WatchAutonomyLevel'
+        scheduleInterval:
+          $ref: '#/components/schemas/WorkerScheduleInterval'
+        extras:
+          $ref: '#/components/schemas/WorkerSettingsExtras'
 
     Worker:
       type: object
@@ -282,6 +91,7 @@ components:
         - state
         - settings
         - settingsRevision
+        - workflowId
       properties:
         id:
           type: string
@@ -313,6 +123,13 @@ components:
           description: >-
             Logical workflow version for best-effort stale settings detection. Null when the
             per-space managed Worker has not been installed yet.
+        workflowId:
+          type: string
+          nullable: true
+          description: >-
+            Id of this Worker's installed per-space workflow. Null when that workflow has not
+            been installed yet. The client uses it to open the workflow's Executions tab and
+            does not derive it from the Worker id.
         skills:
           type: array
           items:

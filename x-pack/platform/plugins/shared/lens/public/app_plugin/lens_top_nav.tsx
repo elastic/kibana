@@ -710,7 +710,8 @@ export const LensTopNavMenu = ({
       const datasourceLayers = getDatasourceLayers(
         datasourceStates,
         datasourceMap,
-        dataViews.indexPatterns
+        dataViews.indexPatterns,
+        activeData
       );
 
       const exportDatatables =
@@ -723,6 +724,9 @@ export const LensTopNavMenu = ({
         exportDatatables.length > 0 ? exportDatatables : Object.values(activeData ?? {});
       const sharingData = {
         datatables,
+        // Export missing values the way the visualization renders them: `-` for tables,
+        // `(null)` for charts.
+        missingValueDisplay: lensInspector.getInspectorAdapters().tables?.missingValueDisplay,
         csvEnabled,
         reportingDisabled: !csvEnabled,
         title: title || defaultLensTitle,

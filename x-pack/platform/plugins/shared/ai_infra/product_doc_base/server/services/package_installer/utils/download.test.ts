@@ -6,8 +6,11 @@
  */
 
 import { createReadStream } from 'fs';
+import Fs from 'fs/promises';
+import Os from 'os';
+import Path from 'path';
 import { ProxyAgent } from 'undici';
-import { downloadToDisk } from './download';
+import { ArtifactNotFoundError, checkArtifactAvailable, downloadToDisk } from './download';
 
 jest.mock('@kbn/fs', () => ({
   createWriteStream: jest.fn(() => ({
@@ -55,6 +58,8 @@ describe('downloadToDisk', () => {
     });
 
     fetchMock.mockResolvedValue({
+      ok: true,
+      status: 200,
       body: mockResponseBody,
     } as unknown as Response);
 
@@ -77,6 +82,8 @@ describe('downloadToDisk', () => {
     });
 
     fetchMock.mockResolvedValue({
+      ok: true,
+      status: 200,
       body: mockResponseBody,
     } as unknown as Response);
 
@@ -100,5 +107,82 @@ describe('downloadToDisk', () => {
     await expect(downloadToDisk(mockFileUrl, mockFilePathAtVolume)).rejects.toThrow(
       'Download failed'
     );
+  });
+
+  it('throws ArtifactNotFoundError on a 404 instead of writing the error body to disk', async () => {
+    fetchMock.mockResolvedValue({
+      ok: false,
+      status: 404,
+      statusText: 'Not Found',
+      body: new ReadableStream(),
+    } as unknown as Response);
+
+    await expect(downloadToDisk(mockFileUrl, mockFilePathAtVolume)).rejects.toBeInstanceOf(
+      ArtifactNotFoundError
+    );
+  });
+
+  it('fails on other non-2xx responses', async () => {
+    fetchMock.mockResolvedValue({
+      ok: false,
+      status: 503,
+      statusText: 'Service Unavailable',
+    } as unknown as Response);
+
+    await expect(downloadToDisk(mockFileUrl, mockFilePathAtVolume)).rejects.toThrow(
+      'Failed to fetch artifact [http://example.com/file.txt]: 503 Service Unavailable'
+    );
+  });
+});
+
+describe('checkArtifactAvailable', () => {
+  const mockFileUrl = 'http://example.com/file.zip';
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
+  it('issues a HEAD request and resolves when the artifact exists', async () => {
+    fetchMock.mockResolvedValue({ ok: true, status: 200 } as unknown as Response);
+
+    await checkArtifactAvailable(mockFileUrl);
+
+    expect(fetchMock).toHaveBeenCalledWith(mockFileUrl, { method: 'HEAD' });
+  });
+
+  it('passes the proxy dispatcher along with the HEAD method', async () => {
+    fetchMock.mockResolvedValue({ ok: true, status: 200 } as unknown as Response);
+
+    await checkArtifactAvailable(mockFileUrl, 'http://proxy.example.com:3128');
+
+    const fetchOptions = fetchMock.mock.calls[0][1] as { dispatcher?: ProxyAgent; method?: string };
+    expect(fetchOptions.method).toBe('HEAD');
+    expect(fetchOptions.dispatcher).toBeInstanceOf(ProxyAgent);
+  });
+
+  it('throws ArtifactNotFoundError on a 404', async () => {
+    fetchMock.mockResolvedValue({
+      ok: false,
+      status: 404,
+      statusText: 'Not Found',
+    } as unknown as Response);
+
+    await expect(checkArtifactAvailable(mockFileUrl)).rejects.toBeInstanceOf(ArtifactNotFoundError);
+  });
+
+  it('checks local repositories on disk without fetching', async () => {
+    const folder = await Fs.mkdtemp(Path.join(Os.tmpdir(), 'kb-artifacts-'));
+    try {
+      const file = Path.join(folder, 'present.zip');
+      await Fs.writeFile(file, Buffer.alloc(1));
+
+      await checkArtifactAvailable(`file://${file}`);
+      await expect(
+        checkArtifactAvailable(`file://${Path.join(folder, 'missing.zip')}`)
+      ).rejects.toBeInstanceOf(ArtifactNotFoundError);
+      expect(fetchMock).not.toHaveBeenCalled();
+    } finally {
+      await Fs.rm(folder, { recursive: true, force: true });
+    }
   });
 });

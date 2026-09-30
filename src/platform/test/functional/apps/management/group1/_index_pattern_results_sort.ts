@@ -10,6 +10,12 @@
 import expect from '@kbn/expect';
 import type { FtrProviderContext } from '../../../ftr_provider_context';
 
+/**
+ * Migration recommendation: MIXED. Move the table-header sorting interactions to Jest, where
+ * indexed_fields_table/components/table/table.test.tsx can use deterministic fixtures. Retain the
+ * field-count assertion in Scout because it verifies that a real `logstash-*` data view resolves
+ * fields from Elasticsearch.
+ */
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const kibanaServer = getService('kibanaServer');
   const retry = getService('retry');
@@ -48,6 +54,12 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       },
     ];
 
+    /**
+     * Migration recommendation: MIGRATE TO JEST. These four sort-direction interactions are pure
+     * table behavior. Add header-click assertions to src/platform/plugins/shared/
+     * data_view_management/public/components/edit_index_pattern/indexed_fields_table/components/
+     * table/table.test.tsx.
+     */
     columns.forEach(function (col) {
       describe('sort by heading - ' + col.heading, function indexPatternCreation() {
         it('should sort ascending', async function () {
@@ -67,6 +79,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
     describe('field list pagination', function () {
       const EXPECTED_FIELD_COUNT = 86;
+      /**
+       * Migration recommendation: MIGRATE TO SCOUT. This uses the makelogs archive to verify a
+       * newly created `logstash-*` data view resolves the expected real field count. A Jest table
+       * test with fixtures would not catch an Elasticsearch field-resolution regression.
+       */
       it('makelogs data should have expected number of fields', async function () {
         await retry.try(async function () {
           const TabCount = await PageObjects.settings.getFieldsTabCount();

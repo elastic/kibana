@@ -63,7 +63,7 @@ type EuiTheme = ReturnType<typeof useEuiTheme>['euiTheme'];
 
 // ----------- Pure color/state helpers -----------
 
-interface ExecutionState {
+export interface ExecutionState {
   readonly isRunning: boolean;
   readonly isSuccess: boolean;
   readonly isFailed: boolean;
@@ -83,7 +83,7 @@ interface ExecutionState {
  * execution". WAITING_FOR_CHILD gains a spinner it was missing (a foreach
  * waiting on children is executing).
  */
-function resolveExecutionState(execStatus: ExecutionStatus | undefined): ExecutionState {
+export function resolveExecutionState(execStatus: ExecutionStatus | undefined): ExecutionState {
   const isRunning =
     execStatus === ExecutionStatus.RUNNING ||
     execStatus === ExecutionStatus.PENDING ||

@@ -29,7 +29,7 @@ const mockServices = (
       agentBuilder,
       cloud: { isServerlessEnabled },
       featureFlags: {
-        getBooleanValue: jest
+        useBooleanValue: jest
           .fn()
           .mockImplementation((flag: string, defaultValue: boolean) =>
             flag === SEARCH_GETTING_STARTED_CHAT_FEATURE_FLAG ? featureFlagValue : defaultValue
@@ -49,17 +49,21 @@ describe('useGettingStartChatEnabled', () => {
   });
 
   it('returns false when cloud is not available', () => {
+    const useBooleanValue = jest.fn().mockReturnValue(true);
     mockUseKibana.mockReturnValue({
       services: {
         agentBuilder: {},
         cloud: undefined,
-        featureFlags: { getBooleanValue: jest.fn().mockReturnValue(true) },
+        featureFlags: { useBooleanValue },
       },
     });
 
     const { result } = renderHook(() => useGettingStartChatEnabled());
 
     expect(result.current).toBe(false);
+    // Must run before the cloud/agentBuilder guard so hook order stays stable
+    // if cloud becomes available on a later render.
+    expect(useBooleanValue).toHaveBeenCalledWith(SEARCH_GETTING_STARTED_CHAT_FEATURE_FLAG, false);
   });
 
   it('returns false when agentBuilder is not available', () => {

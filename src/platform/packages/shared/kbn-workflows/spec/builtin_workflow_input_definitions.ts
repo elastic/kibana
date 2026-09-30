@@ -30,6 +30,14 @@ export const ALERTING_V2_NOTIFICATION_GROUP_INPUT_DEFINITION_ID =
   'alertingV2NotificationGroup' as const;
 
 /**
+ * Stable registry key for the Security alert-analysis Worker caller `alerts` input definition.
+ * Use this constant in both the registry and any code that references the definition
+ * (e.g. `$ref: \`${KIBANA_WORKFLOW_INPUT_DEFINITION_REF_PREFIX}${SECURITY_ALERT_ANALYSIS_CALLER_ALERTS_INPUT_DEFINITION_ID}\``).
+ */
+export const SECURITY_ALERT_ANALYSIS_CALLER_ALERTS_INPUT_DEFINITION_ID =
+  'securityAlertAnalysisCallerAlerts' as const;
+
+/**
  * JSON Schema mirror of the alerting v2 action-policy dispatch payload for workflow input authoring.
  * Use as a workflow **input** when a step should receive the grouped notification context
  * (e.g. `inputs.payload` on workflows triggered by `action_policy`).
@@ -127,6 +135,90 @@ const alertingV2NotificationGroup: JsonSchema = {
 };
 
 /**
+ * JSON Schema mirror of the Security alert-analysis Worker caller `alerts` array.
+ * Reference from workflow YAML as `$ref: '#/kibana/definitions/securityAlertAnalysisCallerAlerts'`.
+ *
+ * `additionalProperties: true` (looseObject) is intentional: the sub-workflow builds the
+ * LLM prompt by reading ECS fields directly off each caller-supplied item (event.code,
+ * process.command_line, host.name, ~40 fields in the prompt template). Callers must pass
+ * full alert documents, not just the required keys. Stripping extras would remove the
+ * evidence the model reasons over.
+ *
+ * Per-item byte size is not enforced by this schema. The practical ceiling (~2–5 KB per
+ * alert for typical Security detection-rule alerts) is set by the platform's .workflows
+ * trigger, which bounds event.alerts before the Worker passes them here. `maxItems: 1000`
+ * is the only hard cap this schema applies.
+ *
+ * @see AlertAnalysisCallerAlertItem / AlertAnalysisCallerAlerts in
+ * security_solution/common/workflows/alert_analysis_workflow.ts
+ */
+const securityAlertAnalysisCallerAlerts: JsonSchema = {
+  type: 'array',
+  title: 'Security alert analysis caller alerts',
+  description:
+    'Full alert documents supplied by a workflow.execute caller (e.g. AlertZero Alert Triage Worker). Bounded to 1000 items; each item must include _id, _index (Security alerts alias or backing index), @timestamp, and kibana.alert.rule.uuid. Additional ECS/kibana.alert fields are passed through and used directly in the LLM prompt — callers should supply the complete alert document. Per-item byte size is not schema-enforced; it is bounded in practice by the platform .workflows trigger.',
+  maxItems: 1000,
+  items: {
+    type: 'object',
+    required: ['_id', '_index', '@timestamp', 'kibana'],
+    additionalProperties: true,
+    properties: {
+      _id: {
+        type: 'string',
+        minLength: 1,
+        maxLength: 512,
+      },
+      _index: {
+        type: 'string',
+        minLength: 1,
+        maxLength: 512,
+        pattern: '^\\.(internal\\.)?(preview\\.)?alerts-security\\.alerts-[a-zA-Z0-9._-]+$',
+        description:
+          'Security alerts alias or backing index. Related-alert graph search uses the executing-space alerts alias (not this value) so a cross-space index cannot leak enrichment; still required so caller payloads name a Security alerts index.',
+      },
+      '@timestamp': {
+        type: 'string',
+        format: 'date-time',
+        minLength: 1,
+        maxLength: 64,
+        description:
+          'UTC (`Z` suffix, as stored on Security alerts). Used verbatim as the ES date-math enrichment anchor (e.g. `||-24h`).',
+      },
+      kibana: {
+        type: 'object',
+        required: ['alert'],
+        additionalProperties: true,
+        properties: {
+          alert: {
+            type: 'object',
+            required: ['rule'],
+            additionalProperties: true,
+            properties: {
+              rule: {
+                type: 'object',
+                required: ['uuid'],
+                additionalProperties: true,
+                properties: {
+                  uuid: {
+                    type: 'string',
+                    minLength: 1,
+                    maxLength: 512,
+                  },
+                  name: {
+                    type: 'string',
+                    maxLength: 1024,
+                  },
+                },
+              },
+            },
+          },
+        },
+      },
+    },
+  },
+};
+
+/**
  * Central registry of reusable input shapes. Keys are the `<id>` segment only
  * (e.g. `alertingV2NotificationGroup` for `#/kibana/definitions/alertingV2NotificationGroup`).
  *
@@ -136,6 +228,7 @@ const alertingV2NotificationGroup: JsonSchema = {
  */
 export const builtinWorkflowInputDefinitions: Record<string, JsonSchema> = {
   [ALERTING_V2_NOTIFICATION_GROUP_INPUT_DEFINITION_ID]: alertingV2NotificationGroup,
+  [SECURITY_ALERT_ANALYSIS_CALLER_ALERTS_INPUT_DEFINITION_ID]: securityAlertAnalysisCallerAlerts,
 };
 
 const builtinRefList = Object.keys(builtinWorkflowInputDefinitions).map(

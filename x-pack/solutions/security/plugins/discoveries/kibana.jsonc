@@ -27,6 +27,7 @@
       "elasticAssistant",
       "inference",
       "ruleRegistry",
+      "searchInferenceEndpoints",
       "spaces",
       "workflowsManagement"
     ],

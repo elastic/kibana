@@ -51,6 +51,7 @@ import {
 import { render, screen, waitFor } from '@testing-library/react';
 import { servicesMock } from '../../__mocks__/services';
 import { useColumns } from '../hooks/use_data_grid_columns';
+import { UNIFIED_DATA_TABLE_FULL_SCREEN_CLASS } from '../hooks/use_full_screen_watcher';
 import { waitForEuiPopoverClose, waitForEuiPopoverOpen } from '@elastic/eui/lib/test/rtl';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 
@@ -1430,6 +1431,87 @@ describe('UnifiedDataTable', () => {
     );
   });
 
+  describe('full screen', () => {
+    it(
+      'applies the full screen styles to the body after switching the documents display mode',
+      async () => {
+        const props: UnifiedDataTableProps = { ...getProps(), documentsDisplayModeState: 'table' };
+        const { rerender } = await renderComponent(props);
+        // Enter and exit full screen first, so the initial data grid is watched before it's remounted
+        await userEvent.click(screen.getByTestId('dataGridFullScreenButton'));
+        await waitFor(() =>
+          expect(document.body).toHaveClass(UNIFIED_DATA_TABLE_FULL_SCREEN_CLASS)
+        );
+        await userEvent.click(screen.getByTestId('dataGridFullScreenButton'));
+        await waitFor(() =>
+          expect(document.body).not.toHaveClass(UNIFIED_DATA_TABLE_FULL_SCREEN_CLASS)
+        );
+
+        rerender(<DataTableWithI18n {...props} documentsDisplayModeState="json" />);
+        await userEvent.click(screen.getByTestId('dataGridFullScreenButton'));
+
+        await waitFor(() =>
+          expect(document.body).toHaveClass(UNIFIED_DATA_TABLE_FULL_SCREEN_CLASS)
+        );
+      },
+      EXTENDED_JEST_TIMEOUT
+    );
+
+    it(
+      'keeps the data grid in full screen when switching the documents display mode',
+      async () => {
+        const onFullScreenChange = jest.fn();
+        const props: UnifiedDataTableProps = {
+          ...getProps(),
+          documentsDisplayModeState: 'table',
+          onFullScreenChange,
+        };
+        const { rerender } = await renderComponent(props);
+        await userEvent.click(screen.getByTestId('dataGridFullScreenButton'));
+
+        rerender(<DataTableWithI18n {...props} documentsDisplayModeState="json" />);
+
+        expect(screen.getByTestId('dataGridFullScreenButton')).toHaveAttribute(
+          'aria-pressed',
+          'true'
+        );
+        expect(onFullScreenChange).toHaveBeenCalledTimes(1);
+        expect(onFullScreenChange).toHaveBeenCalledWith(true);
+        await waitFor(() =>
+          expect(document.body).toHaveClass(UNIFIED_DATA_TABLE_FULL_SCREEN_CLASS)
+        );
+      },
+      EXTENDED_JEST_TIMEOUT
+    );
+
+    it(
+      'removes the full screen styles from the body when exiting full screen after switching the documents display mode',
+      async () => {
+        const onFullScreenChange = jest.fn();
+        const props: UnifiedDataTableProps = {
+          ...getProps(),
+          documentsDisplayModeState: 'table',
+          onFullScreenChange,
+        };
+        const { rerender } = await renderComponent(props);
+        await userEvent.click(screen.getByTestId('dataGridFullScreenButton'));
+        rerender(<DataTableWithI18n {...props} documentsDisplayModeState="json" />);
+
+        await userEvent.click(screen.getByTestId('dataGridFullScreenButton'));
+
+        expect(screen.getByTestId('dataGridFullScreenButton')).toHaveAttribute(
+          'aria-pressed',
+          'false'
+        );
+        expect(onFullScreenChange).toHaveBeenLastCalledWith(false);
+        await waitFor(() =>
+          expect(document.body).not.toHaveClass(UNIFIED_DATA_TABLE_FULL_SCREEN_CLASS)
+        );
+      },
+      EXTENDED_JEST_TIMEOUT
+    );
+  });
+
   describe('document comparison', () => {
     const closeSelectedRowsMenu = async () => {
       await userEvent.click(await screen.findByTestId('unifiedDataTableSelectionBtn'));
@@ -2007,7 +2089,7 @@ describe('UnifiedDataTable', () => {
         const renderCustomToolbarMock = jest.fn((props) => {
           return (
             <div data-test-subj="custom-toolbar">
-              Custom layout {props.gridProps.inTableSearchControl}
+              Custom layout {props.gridProps.inTableSearchButton}
             </div>
           );
         });

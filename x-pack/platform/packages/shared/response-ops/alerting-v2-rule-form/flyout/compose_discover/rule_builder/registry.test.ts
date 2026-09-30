@@ -71,4 +71,93 @@ describe('threshold builder validate', () => {
 
     expect(validate!(STATE, values)).toBe(false);
   });
+
+  it('is valid with a well-formed multi-severity config', () => {
+    const values = makeValues({
+      severity: {
+        mode: 'multi',
+        singleLevelSeverity: 'high',
+        // Every level is a band at or beyond the condition (100).
+        levels: [
+          { id: 'l1', severity: 'low', threshold: 100 },
+          { id: 'l2', severity: 'high', threshold: 200 },
+        ],
+      },
+    });
+
+    expect(validate!(STATE, values)).toBe(true);
+  });
+
+  it('is invalid when multi-severity thresholds are out of order', () => {
+    const values = makeValues({
+      severity: {
+        mode: 'multi',
+        singleLevelSeverity: 'high',
+        levels: [
+          { id: 'l1', severity: 'low', threshold: 100 },
+          { id: 'l2', severity: 'medium', threshold: 300 },
+          { id: 'l3', severity: 'high', threshold: 200 },
+        ],
+      },
+    });
+
+    expect(validate!(STATE, values)).toBe(false);
+  });
+
+  it('is invalid when a stat is named severity while severity is configured', () => {
+    const values = makeValues({
+      stats: [{ id: 's1', label: 'severity', aggregation: Aggregation.COUNT }],
+      alertConditions: [
+        { id: 'cond-1', metric: 'severity', comparator: Comparator.GT, threshold: [100] },
+      ],
+      severity: { mode: 'single', singleLevelSeverity: 'high', levels: [] },
+    });
+
+    expect(validate!(STATE, values)).toBe(false);
+  });
+
+  it('is invalid when a group-by field is named severity while severity is configured', () => {
+    const values = makeValues({
+      groupByFields: ['severity'],
+      severity: { mode: 'single', singleLevelSeverity: 'high', levels: [] },
+    });
+
+    expect(validate!(STATE, values)).toBe(false);
+  });
+
+  it('is invalid when severity is set with multiple alert conditions', () => {
+    // ES|QL generation only emits severity for a single condition; without this guard a parsed
+    // state like this would validate and then lose its severity EVAL on save.
+    const values = makeValues({
+      stats: [
+        { id: 's1', label: 'count', aggregation: Aggregation.COUNT },
+        { id: 's2', label: 'errors', aggregation: Aggregation.COUNT },
+      ],
+      alertConditions: [
+        { id: 'cond-1', metric: 'count', comparator: Comparator.GT, threshold: [100] },
+        { id: 'cond-2', metric: 'errors', comparator: Comparator.GT, threshold: [5] },
+      ],
+      severity: { mode: 'single', singleLevelSeverity: 'high', levels: [] },
+    });
+
+    expect(validate!(STATE, values)).toBe(false);
+  });
+
+  it('is invalid for multi-severity with a range comparator', () => {
+    const values = makeValues({
+      alertConditions: [
+        { id: 'cond-1', metric: 'count', comparator: Comparator.BETWEEN, threshold: [100, 200] },
+      ],
+      severity: {
+        mode: 'multi',
+        singleLevelSeverity: 'high',
+        levels: [
+          { id: 'l1', severity: 'low', threshold: 120 },
+          { id: 'l2', severity: 'high', threshold: 150 },
+        ],
+      },
+    });
+
+    expect(validate!(STATE, values)).toBe(false);
+  });
 });

@@ -86,18 +86,11 @@ test.describe(
       });
 
       await test.step('filter by frequency', async () => {
-        const frequencyFilter = page.locator('.euiFilterButton__text', { hasText: 'Frequency' });
-        // eslint-disable-next-line playwright/no-nth-methods
-        const fiveMinOption = page.getByText('Every 5 minutes').first();
-        await frequencyFilter.click();
-        await fiveMinOption.click();
-        await page.getByText('Apply').click();
+        await pageObjects.syntheticsApp.selectFilterOption('Frequency', 'Every 5 minutes');
         await pageObjects.syntheticsApp.waitForMonitorManagementLoadingToFinish();
         await expect(page.getByText('1-1')).toBeVisible();
 
-        await frequencyFilter.click();
-        await fiveMinOption.click();
-        await page.getByText('Apply').click();
+        await pageObjects.syntheticsApp.clearAllFilters();
         await pageObjects.syntheticsApp.waitForMonitorManagementLoadingToFinish();
         await expect(page.getByText('1-3')).toBeVisible();
       });

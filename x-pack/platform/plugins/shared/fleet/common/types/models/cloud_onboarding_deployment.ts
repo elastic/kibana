@@ -24,7 +24,12 @@ export interface CloudOnboardingEcfStack {
 
 export type DeploymentMethod = 'managed_integration' | 'ecf' | 'agent_based';
 
-export type CloudOnboardingDeploymentAuthMethod = 'identity_federation' | 'static_keys';
+export type CloudOnboardingDeploymentAuthMethod =
+  | 'identity_federation'
+  | 'static_keys'
+  | 'temporary_keys'
+  | 'shared_credentials'
+  | 'assume_role';
 
 export type CloudOnboardingDeploymentStatus = 'pending' | 'deploying' | 'succeeded' | 'failed';
 
@@ -33,7 +38,8 @@ export type CloudOnboardingDeploymentServiceVars = Record<string, unknown>;
 export interface CloudOnboardingDeployment {
   id: string;
   provider: CloudProvider;
-  connectorId?: string;
+  /** Null after MI→ECF transition explicitly clears the connector association. */
+  connectorId?: string | null;
   mechanisms: DeploymentMethod[];
   deploymentId?: string;
   deploymentName?: string;
@@ -47,15 +53,20 @@ export interface CloudOnboardingDeployment {
   /** Data format selected in the Services step. Used to hydrate the services step on resume so service filtering is consistent. */
   dataFormat?: 'ecs' | 'otel';
   packagePolicyIds?: string[];
-  /** Agent policy ID for agent_based mechanism. Separate from packagePolicyIds (in agentless those are equal; for agent_based the agent policy is user-managed). */
-  agentPolicyId?: string;
+  /** instanceId → policyId mapping persisted after deploy. Used to reconstruct cleanup targets when a deployed onboarding URL is reopened. Covers the managed_integration and agent_based mechanisms; ECF has no package policies. */
+  policyIdsByInstance?: Record<string, string>;
+  /** Agent policy IDs for agent_based mechanism — one per targeted agent policy. For new-policy deploys this is a single-element array; for existing-policy deploys it contains every policy the package policies were attached to. */
+  agentPolicyIds?: string[];
   /** Elasticsearch API key ID for push mechanisms (ecf). Set by the backend after key creation; used to identify the key for rotation/revocation. */
   apiKeyId?: string;
   /** ECF CloudFormation stacks launched as part of this deployment. Written by the wizard after the user clicks Launch. */
   ecfStacks?: CloudOnboardingEcfStack[];
-  // TODO: add agent-based auth methods
-  /** Authentication method used for managed integrations. */
-  authMethod?: CloudOnboardingDeploymentAuthMethod;
+  /**
+   * Authentication method used for this deployment.
+   * - managed_integration: identity_federation | static_keys
+   * - agent_based: static_keys (direct_access_keys) | temporary_keys | shared_credentials | assume_role
+   */
+  authMethod?: CloudOnboardingDeploymentAuthMethod | null;
 }
 
 export type NewCloudOnboardingDeployment = Omit<CloudOnboardingDeployment, 'id'>;
@@ -68,10 +79,14 @@ export type CreateCloudOnboardingDeploymentInput = Omit<
   | 'deploymentId'
   | 'deploymentName'
   | 'packagePolicyIds'
-  | 'agentPolicyId'
   | 'apiKeyId'
 >;
 
 export type UpdateCloudOnboardingDeploymentInput = Partial<
-  Omit<CloudOnboardingDeployment, 'id' | 'provider' | 'connectorId' | 'globalRegion'>
->;
+  Omit<CloudOnboardingDeployment, 'id' | 'provider' | 'connectorId' | 'globalRegion' | 'authMethod'>
+> & {
+  /** Set to null to clear the connector association (e.g. on MI→ECF transition). */
+  connectorId?: string | null;
+  /** Set to null to clear the auth method (e.g. on MI→ECF transition). */
+  authMethod?: CloudOnboardingDeploymentAuthMethod | null;
+};

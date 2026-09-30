@@ -42,7 +42,7 @@ describe('AlertsSolutionSelector', () => {
     );
     expect(screen.queryByTestId(SOLUTION_SELECTOR_SUBJ)).toBeInTheDocument();
     await userEvent.click(screen.getByRole('button'));
-    await userEvent.click(screen.getByText('Observability'));
+    await userEvent.click(screen.getByRole('option', { name: /observability/i }));
     expect(onSolutionChange).toHaveBeenCalledWith('observability');
   });
 });

@@ -13,6 +13,9 @@ export const KI_RETRIEVAL_SKILL_ID = 'ki-retrieval' as const;
  */
 export const ANALYZE_AND_IMPROVE_SKILL_ID = 'analyze-and-improve' as const;
 
+/** Reads the retrieval signals an AI index has accumulated; the evidence every finding rests on. */
+export const CONTEXT_ENGINE_SIGNALS_SKILL_ID = 'context-engine-signals' as const;
+
 /** Chooses and configures the data an AI index draws on, and the corpus filter bounding it. */
 export const AI_INDEX_SOURCES_SKILL_ID = 'ai-index-sources' as const;
 

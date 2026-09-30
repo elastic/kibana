@@ -35,6 +35,7 @@ export const updateAttachmentStepDefinition = ({
           attachmentId: input.attachment_id,
           data: input.data,
           description: input.description,
+          render_inline: input.render_inline,
         });
 
         return {

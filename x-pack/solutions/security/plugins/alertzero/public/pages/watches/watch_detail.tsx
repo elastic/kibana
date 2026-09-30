@@ -5,87 +5,37 @@
  * 2.0.
  */
 
-import React, { useMemo } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import { css } from '@emotion/react';
 import {
   EuiButton,
   EuiButtonEmpty,
+  EuiCallOut,
   EuiEmptyPrompt,
   EuiFlexGroup,
   EuiFlexItem,
   EuiLoadingSpinner,
-  EuiSpacer,
-  EuiSwitch,
   EuiText,
+  useEuiTheme,
 } from '@elastic/eui';
 import { useHistory, useParams } from 'react-router-dom';
 import { isHttpFetchError } from '@kbn/core-http-browser';
-import type { Worker } from '@kbn/alertzero-common';
 import { useAlertZeroDocTitle } from '../../hooks/use_alertzero_doc_title';
+import { useCanWriteAlertZero } from '../../hooks/use_can_write_alertzero';
+import { useWatchSettingsDraft } from '../../hooks/use_watch_settings_draft';
 import { useWatch } from '../../hooks/use_watches_api';
-import { useUpdateWorker, useWorkers } from '../../hooks/use_workers_api';
-import { AutonomySlider } from './components/autonomy_slider';
-import { ScheduleIntervalField } from './components/schedule_interval_field';
+import { useWorkers } from '../../hooks/use_workers_api';
 import { SettingsSection } from './components/settings_section';
-import { WorkerSkillsTable } from './components/worker_skills_table';
 import { WatchesSectionLayout } from './components/watches_section_layout';
+import { WorkerSettingsPanel } from './components/worker_settings_panel';
 import * as i18n from './translations';
 import * as settingsI18n from './settings_translations';
-import { workerName } from './workers/translations';
-
-const WorkerSettingsCard: React.FC<{ worker: Worker }> = ({ worker }) => {
-  const { mutate: updateWorker } = useUpdateWorker();
-  const settingsLocked = worker.state === 'unavailable';
-
-  return (
-    <SettingsSection
-      title={workerName(worker.id, worker.name)}
-      subtitle={
-        settingsLocked
-          ? settingsI18n.WORKER_SETTINGS_UNAVAILABLE
-          : settingsI18n.WORKER_SECTION_SUBTITLE
-      }
-      data-test-subj={`alertZeroWatchWorkerSection-${worker.id}`}
-    >
-      <EuiSwitch
-        label={settingsI18n.ENABLED_SWITCH_LABEL}
-        checked={worker.enabled}
-        disabled={settingsLocked}
-        onChange={(event) =>
-          updateWorker({ workerId: worker.id, patch: { enabled: event.target.checked } })
-        }
-        data-test-subj={`alertZeroWorkerEnabledSwitch-${worker.id}`}
-      />
-      <EuiSpacer size="m" />
-      <AutonomySlider
-        current={worker.settings.autonomy}
-        isDisabled={settingsLocked}
-        onChange={(autonomyLevel) =>
-          updateWorker({ workerId: worker.id, patch: { autonomyLevel } })
-        }
-      />
-      {/* Only schedule-driven Workers project an interval; the others are alert- or
-          event-triggered and own no schedule to configure. */}
-      {worker.settings.scheduleInterval != null ? (
-        <>
-          <EuiSpacer size="m" />
-          <ScheduleIntervalField
-            current={worker.settings.scheduleInterval}
-            isDisabled={settingsLocked}
-            onChange={(scheduleInterval) =>
-              updateWorker({ workerId: worker.id, patch: { scheduleInterval } })
-            }
-          />
-        </>
-      ) : null}
-      <EuiSpacer size="m" />
-      <WorkerSkillsTable skills={worker.skills} />
-    </SettingsSection>
-  );
-};
 
 export const WatchDetailPage: React.FC = () => {
   const history = useHistory();
   const { watchId } = useParams<{ watchId: string }>();
+  const canWrite = useCanWriteAlertZero();
+  const { euiTheme } = useEuiTheme();
   const { data, isLoading, error, refetch } = useWatch(watchId);
   const {
     data: workersData,
@@ -101,6 +51,115 @@ export const WatchDetailPage: React.FC = () => {
     () => (workersData?.workers ?? []).filter((worker) => worker.watchIds.includes(watchId)),
     [workersData?.workers, watchId]
   );
+  const { discard, isDirty, isSaving, resolve, save, updateEnabled, updateSettings } =
+    useWatchSettingsDraft(members);
+  const [saveBlockedByInvalidDraft, setSaveBlockedByInvalidDraft] = useState(false);
+  // Workers whose trigger control holds an uncommittable amount. That draft never reaches settings
+  // state, so the page must hear about it directly or Save would persist the last valid cadence.
+  const [invalidTriggerWorkerIds, setInvalidTriggerWorkerIds] = useState<Set<string>>(
+    () => new Set()
+  );
+  // Bumped on Discard so trigger controls drop a flagged draft that no longer has anything behind it.
+  const [draftResetKey, setDraftResetKey] = useState(0);
+  const hasInvalidDraft = invalidTriggerWorkerIds.size > 0;
+
+  const handleTriggerValidityChange = useCallback((workerId: string, isValid: boolean) => {
+    setInvalidTriggerWorkerIds((current) => {
+      if (isValid === !current.has(workerId)) {
+        return current;
+      }
+      const next = new Set(current);
+      if (isValid) {
+        next.delete(workerId);
+      } else {
+        next.add(workerId);
+      }
+      return next;
+    });
+  }, []);
+
+  const onSave = useCallback(async () => {
+    // `save()` cannot see the flagged draft, so block here instead of persisting the stale value.
+    if (hasInvalidDraft) {
+      setSaveBlockedByInvalidDraft(true);
+      return;
+    }
+    try {
+      await save();
+      setSaveBlockedByInvalidDraft(false);
+    } catch (saveError) {
+      if (saveError instanceof Error && saveError.message === 'invalid') {
+        setSaveBlockedByInvalidDraft(true);
+        return;
+      }
+      throw saveError;
+    }
+  }, [save, hasInvalidDraft]);
+
+  const onDiscard = useCallback(() => {
+    discard();
+    setSaveBlockedByInvalidDraft(false);
+    setInvalidTriggerWorkerIds(new Set());
+    setDraftResetKey((key) => key + 1);
+  }, [discard]);
+
+  const isMultiWorker = members.length > 1;
+
+  const headerPrimaryActionItem = useMemo(
+    () => ({
+      id: 'alertZeroWatchSettingsSave',
+      label: settingsI18n.SAVE_WATCH_SETTINGS,
+      iconType: 'save' as const,
+      isLoading: isSaving,
+      disableButton: !canWrite || !isDirty || isSaving || Boolean(workersError) || hasInvalidDraft,
+      tooltipContent: !canWrite ? settingsI18n.READ_ONLY_TOOLTIP : undefined,
+      testId: 'alertZeroWatchSettingsSave',
+      run: onSave,
+    }),
+    [canWrite, isSaving, isDirty, workersError, hasInvalidDraft, onSave]
+  );
+
+  const headerItems = useMemo(
+    () => [
+      {
+        id: 'alertZeroWatchSettingsDiscard',
+        label: settingsI18n.DISCARD_WATCH_SETTINGS,
+        iconType: 'cross' as const,
+        // A flagged trigger amount is not part of the draft, so it can be the only thing to undo.
+        disableButton: !canWrite || (!isDirty && !hasInvalidDraft) || isSaving,
+        tooltipContent: !canWrite ? settingsI18n.READ_ONLY_TOOLTIP : undefined,
+        testId: 'alertZeroWatchSettingsDiscard',
+        run: onDiscard,
+      },
+    ],
+    [canWrite, isDirty, isSaving, hasInvalidDraft, onDiscard]
+  );
+  // Collapsed Workers (default: all expanded). Parameter-only navigation keeps this page mounted,
+  // so the initializer runs only on the first Watch — reset whenever watchId changes.
+  const [collapsedWorkerIds, setCollapsedWorkerIds] = useState<Set<string>>(() => new Set());
+
+  useEffect(() => {
+    setCollapsedWorkerIds(new Set());
+    // Overlays are keyed by `worker.id` and a shared Worker never remounts, so unsaved edits would
+    // follow the analyst to the next Watch and could be saved there. Drop drafts, clear flags, and
+    // bump the reset key so the controls re-read stored settings.
+    discard();
+    setInvalidTriggerWorkerIds(new Set());
+    setSaveBlockedByInvalidDraft(false);
+    setDraftResetKey((key) => key + 1);
+  }, [watchId, discard]);
+
+  const handleToggleWorker = useCallback((workerId: string, isOpen: boolean) => {
+    setCollapsedWorkerIds((current) => {
+      const next = new Set(current);
+      if (isOpen) {
+        next.delete(workerId);
+      } else {
+        next.add(workerId);
+      }
+      return next;
+    });
+  }, []);
 
   const hasCurrentWatch = watch?.id === watchId;
   const isNotFound =
@@ -145,15 +204,108 @@ export const WatchDetailPage: React.FC = () => {
     );
   }
 
-  const intro = settingsI18n.watchIntro(watch.id);
+  const workerCountBadges =
+    !workersLoading && !workersError
+      ? [
+          {
+            label: i18n.workerCountLabel(members.length),
+            color: 'hollow' as const,
+            'data-test-subj': 'alertZeroWatchWorkerCount',
+          },
+        ]
+      : undefined;
+
+  const renderWorkers = () => {
+    if (workersError) {
+      return (
+        <EuiEmptyPrompt
+          iconType="error"
+          title={<h2>{i18n.WORKERS_LOAD_ERROR_TITLE}</h2>}
+          body={<p>{i18n.WORKERS_LOAD_ERROR_BODY}</p>}
+          actions={<EuiButtonEmpty onClick={() => refetchWorkers()}>{i18n.RETRY}</EuiButtonEmpty>}
+          data-test-subj="alertZeroWatchWorkersLoadError"
+        />
+      );
+    }
+
+    if (workersLoading && members.length === 0) {
+      return <EuiLoadingSpinner size="m" aria-label={i18n.LOADING_WATCH} />;
+    }
+
+    if (members.length === 0) {
+      return (
+        <EuiEmptyPrompt
+          iconType="visTagCloud"
+          title={<h2>{settingsI18n.WORKERS_EMPTY_TITLE}</h2>}
+          body={<p>{settingsI18n.WORKERS_EMPTY_BODY}</p>}
+          data-test-subj="alertZeroWatchWorkersEmpty"
+        />
+      );
+    }
+
+    return (
+      <div
+        css={css`
+          display: flex;
+          flex-direction: column;
+          gap: ${euiTheme.size.m};
+        `}
+      >
+        {members.map((worker) => {
+          const draft = resolve(worker);
+          return (
+            <section key={worker.id} data-test-subj={`alertZeroWatchWorkerSection-${worker.id}`}>
+              <WorkerSettingsPanel
+                worker={worker}
+                isAccordion={isMultiWorker}
+                isExpanded={!collapsedWorkerIds.has(worker.id)}
+                onToggle={handleToggleWorker}
+                enabled={draft.enabled}
+                settings={draft.settings}
+                error={draft.error}
+                settingsLocked={worker.state === 'unavailable'}
+                isSaving={isSaving}
+                canWrite={canWrite}
+                onEnabledChange={(enabled) => updateEnabled(worker, enabled)}
+                onSettingsChange={(patch) => updateSettings(worker, patch)}
+                onTriggerValidityChange={(isValid) =>
+                  handleTriggerValidityChange(worker.id, isValid)
+                }
+                draftResetKey={draftResetKey}
+              />
+            </section>
+          );
+        })}
+      </div>
+    );
+  };
 
   return (
-    <WatchesSectionLayout active={watchId} title={watch.name}>
-      <EuiFlexGroup direction="column" gutterSize="xl" responsive={false}>
-        {intro ? (
+    <WatchesSectionLayout
+      active={watchId}
+      title={watch.name}
+      badges={workerCountBadges}
+      headerPrimaryActionItem={headerPrimaryActionItem}
+      headerItems={headerItems}
+    >
+      <EuiFlexGroup direction="column" gutterSize="l" responsive={false}>
+        {!canWrite ? (
           <EuiFlexItem grow={false}>
-            <EuiText size="s" color="subdued" data-test-subj="alertZeroWatchIntro">
-              <p>{intro}</p>
+            <EuiCallOut
+              announceOnMount
+              size="s"
+              color="warning"
+              iconType="lock"
+              data-test-subj="alertZeroReadOnlyCallout"
+            >
+              {settingsI18n.READ_ONLY_CALLOUT_MESSAGE}
+            </EuiCallOut>
+          </EuiFlexItem>
+        ) : null}
+        {saveBlockedByInvalidDraft || hasInvalidDraft ? (
+          <EuiFlexItem grow={false}>
+            <EuiText size="s" color="danger" data-test-subj="alertZeroWatchSettingsInvalid">
+              <p>{settingsI18n.WATCH_SETTINGS_INVALID}</p>
             </EuiText>
           </EuiFlexItem>
         ) : null}
@@ -164,27 +316,7 @@ export const WatchDetailPage: React.FC = () => {
             subtitle={settingsI18n.WORKERS_SECTION_SUBTITLE}
             data-test-subj="alertZeroWatchWorkersSection"
           >
-            {workersError ? (
-              <EuiEmptyPrompt
-                iconType="error"
-                title={<h2>{i18n.WORKERS_LOAD_ERROR_TITLE}</h2>}
-                body={<p>{i18n.WORKERS_LOAD_ERROR_BODY}</p>}
-                actions={
-                  <EuiButtonEmpty onClick={() => refetchWorkers()}>{i18n.RETRY}</EuiButtonEmpty>
-                }
-                data-test-subj="alertZeroWatchWorkersLoadError"
-              />
-            ) : workersLoading && members.length === 0 ? (
-              <EuiLoadingSpinner size="m" aria-label={i18n.LOADING_WATCH} />
-            ) : (
-              <EuiFlexGroup direction="column" gutterSize="l" responsive={false}>
-                {members.map((worker) => (
-                  <EuiFlexItem key={worker.id} grow={false}>
-                    <WorkerSettingsCard worker={worker} />
-                  </EuiFlexItem>
-                ))}
-              </EuiFlexGroup>
-            )}
+            {renderWorkers()}
           </SettingsSection>
         </EuiFlexItem>
       </EuiFlexGroup>
