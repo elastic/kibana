@@ -73,7 +73,9 @@ export const getEntityFilterESQL = (filters: EntityFilters): string[] =>
     if (MV_CONTAINS_FIELDS.has(key)) {
       return values.length === 1
         ? `| WHERE MV_CONTAINS(${field}, ${quoted})`
-        : `| WHERE ${values.map((v) => `MV_CONTAINS(${field}, "${v.replace(/["\\]/g, '\\$&')}")`).join(' OR ')}`;
+        : `| WHERE ${values
+            .map((v) => `MV_CONTAINS(${field}, "${v.replace(/["\\]/g, '\\$&')}")`)
+            .join(' OR ')}`;
     }
     return `| WHERE ${field} IN (${quoted})`;
   });
