@@ -144,9 +144,7 @@ describe('AlertZero create proposal bridge', () => {
     });
 
     it('sources autoApprove from the reopen guard rather than directly from inputs', () => {
-      expect(forwardedInputs().autoApprove).toBe(
-        '${{ steps.resolve_auto_approve.output.value }}'
-      );
+      expect(forwardedInputs().autoApprove).toBe('${{ steps.resolve_auto_approve.output.value }}');
     });
   });
 
