@@ -6,27 +6,42 @@
  */
 
 import React from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiMarkdownFormat, EuiSpacer, useEuiTheme } from '@elastic/eui';
+import {
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiMarkdownFormat,
+  EuiPanel,
+  EuiSpacer,
+  useEuiTheme,
+} from '@elastic/eui';
 import { css } from '@emotion/react';
 import type { InvestigationEvidence } from '@kbn/significant-events-schema';
 import { EvidenceChart } from './evidence_chart';
 
 export interface EvidenceItemProps {
   evidence: InvestigationEvidence;
+  /** Frame the chart in a bordered panel. Off when the evidence already sits inside one. */
+  outlineChart?: boolean;
 }
 
 /** One observation: its chart, when it has one, followed by its Markdown description. */
-export const EvidenceItem: React.FC<EvidenceItemProps> = ({ evidence: { description, chart } }) => {
+export const EvidenceItem: React.FC<EvidenceItemProps> = ({
+  evidence: { description, chart },
+  outlineChart = true,
+}) => {
   const hasDescription = Boolean(description?.trim());
   return (
     <>
-      {chart && <EvidenceChart chart={chart} />}
+      {chart &&
+        (outlineChart ? (
+          <EuiPanel hasBorder hasShadow={false} paddingSize="s">
+            <EvidenceChart chart={chart} />
+          </EuiPanel>
+        ) : (
+          <EvidenceChart chart={chart} />
+        ))}
       {chart && hasDescription && <EuiSpacer size="s" />}
-      {hasDescription && (
-        <EuiMarkdownFormat textSize="xs" color="subdued">
-          {description ?? ''}
-        </EuiMarkdownFormat>
-      )}
+      {hasDescription && <EuiMarkdownFormat textSize="s">{description ?? ''}</EuiMarkdownFormat>}
     </>
   );
 };

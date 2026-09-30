@@ -82,7 +82,7 @@ const ImpactEntityRow: React.FC<{ entity: InvestigationImpactEntity; isLast: boo
           data-test-subj="investigationOutputImpactEntityAccordion"
         >
           <EuiSpacer size="s" />
-          <EvidenceItem evidence={entity.evidence} />
+          <EvidenceItem evidence={entity.evidence} outlineChart={false} />
         </EuiAccordion>
       ) : (
         <EntityHeader entity={entity} />

@@ -78,7 +78,7 @@ export const HypothesisRow: React.FC<{
         </EuiBadge>
       }
     >
-      <EuiText size="xs" color="subdued">
+      <EuiText size="s">
         <p>
           {reason ??
             i18n.translate('xpack.investigationOutput.noReasonRecordedDescription', {
