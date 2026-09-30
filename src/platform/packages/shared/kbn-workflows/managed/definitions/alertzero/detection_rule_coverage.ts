@@ -8,19 +8,22 @@
  */
 
 import { ALERTZERO_MANAGED_WORKFLOW_PLUGIN_ID, ALERTZERO_WORKER_MANAGEMENT } from './constants';
-import DETECTION_RULE_CREATION_YAML from './detection_rule_creation.yaml';
-import { type CommonWorkerTemplateValues, renderCommonWorkerYaml } from './worker_template_values';
+import DETECTION_RULE_COVERAGE_YAML from './detection_rule_coverage.yaml';
+import {
+  renderRuleCoverageWorkerYaml,
+  type RuleCoverageWorkerTemplateValues,
+} from './worker_template_values';
 import type { ManagedWorkflowDefinition } from '../../types';
 
-export const ALERTZERO_WORKER_DETECTION_RULE_CREATION_WORKFLOW_ID =
-  'system-security-detection-rule-creation';
+export const ALERTZERO_WORKER_DETECTION_RULE_COVERAGE_WORKFLOW_ID =
+  'system-security-detection-rule-coverage';
 
-export const ALERTZERO_WORKER_DETECTION_RULE_CREATION_WORKFLOW = {
+export const ALERTZERO_WORKER_DETECTION_RULE_COVERAGE_WORKFLOW = {
   billable: false,
-  id: ALERTZERO_WORKER_DETECTION_RULE_CREATION_WORKFLOW_ID,
+  id: ALERTZERO_WORKER_DETECTION_RULE_COVERAGE_WORKFLOW_ID,
   management: ALERTZERO_WORKER_MANAGEMENT,
   pluginId: ALERTZERO_MANAGED_WORKFLOW_PLUGIN_ID,
   version: 1,
-  yamlTemplate: (values: CommonWorkerTemplateValues): string =>
-    renderCommonWorkerYaml(DETECTION_RULE_CREATION_YAML, values),
-} as const satisfies ManagedWorkflowDefinition<CommonWorkerTemplateValues>;
+  yamlTemplate: (values: RuleCoverageWorkerTemplateValues): string =>
+    renderRuleCoverageWorkerYaml(DETECTION_RULE_COVERAGE_YAML, values),
+} as const satisfies ManagedWorkflowDefinition<RuleCoverageWorkerTemplateValues>;
