@@ -481,7 +481,6 @@ class DownloadSourceService {
       }
     }
 
-
     await agentPolicyService.removeDefaultSourceFromAll(
       appContextService.getInternalUserESClient(),
       id

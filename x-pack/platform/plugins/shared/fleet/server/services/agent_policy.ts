@@ -2395,7 +2395,6 @@ class AgentPolicyService {
     }
   }
 
-
   private async getSpacesForPoliciesMatching(
     searchFields: string[],
     searchValue: string
@@ -2449,7 +2448,6 @@ class AgentPolicyService {
       });
     return result.total > 0;
   }
-
 
   public async bumpAllAgentPoliciesForDownloadSource(
     esClient: ElasticsearchClient,
