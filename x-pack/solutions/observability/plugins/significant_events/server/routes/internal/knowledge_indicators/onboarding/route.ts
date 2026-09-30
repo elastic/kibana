@@ -138,7 +138,7 @@ const onboardingExecuteRoute = createServerRoute({
     // return the real post-cancel status rather than assuming `canceled`.
     await streamsKIsOnboardingClient.cancel({ streamName, request });
 
-    return streamsKIsOnboardingClient.getStatus({ streamName });
+    return streamsKIsOnboardingClient.getStatus({ streamName, request });
   },
 });
 
@@ -178,7 +178,7 @@ const onboardingStatusRoute = createServerRoute({
 
     await streamsClient.assertReadAccess(streamName);
 
-    return streamsKIsOnboardingClient.getStatus({ streamName });
+    return streamsKIsOnboardingClient.getStatus({ streamName, request });
   },
 });
 
@@ -227,7 +227,7 @@ const onboardingBulkStatusRoute = createServerRoute({
       return {};
     }
 
-    return streamsKIsOnboardingClient.getStatuses({ streamNames: readableStreamNames });
+    return streamsKIsOnboardingClient.getStatuses({ streamNames: readableStreamNames, request });
   },
 });
 

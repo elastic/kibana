@@ -92,7 +92,7 @@ describe('AddToExistingEscalationForm', () => {
   it('keeps submit disabled when no escalation is selected', () => {
     renderForm();
 
-    expect(screen.getByTestId('escalationModalAddToEscalation')).toBeDisabled();
+    expect(screen.getByTestId('escalationModalattachToEscalation')).toBeDisabled();
   });
 
   it('enables submit after selecting an escalation', () => {
@@ -100,7 +100,7 @@ describe('AddToExistingEscalationForm', () => {
 
     fireEvent.click(screen.getByTestId('escalationModalIncident-esc-1'));
 
-    expect(screen.getByTestId('escalationModalAddToEscalation')).not.toBeDisabled();
+    expect(screen.getByTestId('escalationModalattachToEscalation')).not.toBeDisabled();
   });
 
   it('calls onSubmit with the selected escalation id', () => {
@@ -108,7 +108,7 @@ describe('AddToExistingEscalationForm', () => {
     renderForm({ onSubmit });
 
     fireEvent.click(screen.getByTestId('escalationModalIncident-esc-1'));
-    fireEvent.click(screen.getByTestId('escalationModalAddToEscalation'));
+    fireEvent.click(screen.getByTestId('escalationModalattachToEscalation'));
 
     expect(onSubmit).toHaveBeenCalledWith('esc-1');
   });
@@ -118,7 +118,7 @@ describe('AddToExistingEscalationForm', () => {
 
     fireEvent.click(screen.getByTestId('escalationModalIncident-esc-2'));
 
-    expect(screen.getByTestId('escalationModalAddToEscalation')).toBeDisabled();
+    expect(screen.getByTestId('escalationModalattachToEscalation')).toBeDisabled();
   });
 
   it('calls onCancel when cancel is clicked', () => {
@@ -145,13 +145,13 @@ describe('AddToExistingEscalationForm', () => {
     renderForm();
 
     fireEvent.click(screen.getByTestId('escalationModalIncident-esc-1'));
-    expect(screen.getByTestId('escalationModalAddToEscalation')).not.toBeDisabled();
+    expect(screen.getByTestId('escalationModalattachToEscalation')).not.toBeDisabled();
 
     fireEvent.change(screen.getByTestId('escalationModalIncidentSearch'), {
       target: { value: 'new query' },
     });
 
-    expect(screen.getByTestId('escalationModalAddToEscalation')).toBeDisabled();
+    expect(screen.getByTestId('escalationModalattachToEscalation')).toBeDisabled();
   });
 
   it('shows an error callout with a retry button when isError is true', () => {
@@ -176,6 +176,6 @@ describe('AddToExistingEscalationForm', () => {
 
     fireEvent.click(screen.getByTestId('escalationModalIncident-esc-3'));
 
-    expect(screen.getByTestId('escalationModalAddToEscalation')).toBeDisabled();
+    expect(screen.getByTestId('escalationModalattachToEscalation')).toBeDisabled();
   });
 });

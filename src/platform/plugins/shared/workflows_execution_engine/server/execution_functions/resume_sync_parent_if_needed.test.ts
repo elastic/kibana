@@ -228,6 +228,32 @@ describe('resumeSyncParentIfNeeded', () => {
     expect(mockMarkFailed).not.toHaveBeenCalled();
   });
 
+  it('retries ancestor cleanup when an earlier attempt already finalized the immediate parent', async () => {
+    const deps = createDeps();
+    deps.internalResumeWorkflowExecution.mockImplementation(async (id) => {
+      if (id === parentExecId) throw new Error('Parent task is gone');
+    });
+    deps.workflowExecutionRepository.getWorkflowExecutionById.mockResolvedValue(
+      createChild({
+        id: parentExecId,
+        status: ExecutionStatus.FAILED,
+        context: { parentWorkflowInvocation: 'sync', parentWorkflowExecutionId: 'grandparent' },
+      })
+    );
+    await resumeSyncParentIfNeeded({
+      childExecution: createChild(),
+      spaceId,
+      logger,
+      ...deps,
+      throwOnFailure: true,
+    });
+    expect(deps.internalResumeWorkflowExecution).toHaveBeenLastCalledWith(
+      'grandparent',
+      spaceId,
+      undefined
+    );
+  });
+
   it('does not fail-close the parent when it is already running', async () => {
     const { internalResumeWorkflowExecution, workflowExecutionRepository, ...repos } = createDeps();
     internalResumeWorkflowExecution.mockRejectedValue(new Error('not found'));

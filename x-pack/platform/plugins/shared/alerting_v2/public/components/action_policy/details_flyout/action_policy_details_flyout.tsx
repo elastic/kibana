@@ -24,11 +24,13 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import moment from 'moment';
 import React, { useState } from 'react';
 import { useBulkGetUserProfiles } from '../../../hooks/use_bulk_get_user_profiles';
+import { useIsActionPoliciesLicenseValid } from '../../../hooks/use_is_action_policies_license_valid';
 import { collectActorUids, resolveDisplayName } from '../../../utils/resolve_display_name';
 import { ActionPolicyActionsMenu } from '../action_policy_actions_menu';
 import { BadgeList } from '../badge_list';
 import { isSnoozed } from '../is_snoozed';
 import {
+  ACTION_POLICIES_LICENSE_REQUIRED_MESSAGE,
   DISPATCH_PER_LABEL,
   FREQUENCY_LABEL,
   GROUP_BY_LABEL,
@@ -89,6 +91,8 @@ export const ActionPolicyDetailsFlyout = ({
 
   const { snoozed_until: snoozedUntil, grouping_mode: groupingMode, group_by: groupBy } = policy;
   const snoozedActive = isSnoozed(snoozedUntil);
+  const isLicenseValid = useIsActionPoliciesLicenseValid();
+  const isEnableBlockedByLicense = !policy.enabled && !isLicenseValid;
 
   const [isTakeActionOpen, setIsTakeActionOpen] = useState(false);
 
@@ -173,7 +177,10 @@ export const ActionPolicyDetailsFlyout = ({
                 compressed
                 showLabel={false}
                 checked={policy.enabled}
-                disabled={!canWrite}
+                disabled={!canWrite || isEnableBlockedByLicense}
+                title={
+                  isEnableBlockedByLicense ? ACTION_POLICIES_LICENSE_REQUIRED_MESSAGE : undefined
+                }
                 label={
                   policy.enabled
                     ? i18n.translate('xpack.alertingV2.actionPolicy.stateBadge.enabled', {

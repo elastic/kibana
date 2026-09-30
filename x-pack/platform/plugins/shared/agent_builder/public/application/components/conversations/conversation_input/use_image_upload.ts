@@ -11,7 +11,6 @@ import { AttachmentType } from '@kbn/agent-builder-common/attachments';
 import type { ConversationAttachment } from '@kbn/agent-builder-common/attachments';
 import type { MessageEditorController } from './message_editor/use_message_editor';
 import { processImageFile, getUniqueName, rejectIfTooManyImages } from './upload_image';
-import { useExperimentalFeatures } from '../../../hooks/use_experimental_features';
 import { useAgentBuilderServices } from '../../../hooks/use_agent_builder_service';
 import { useKibana } from '../../../hooks/use_kibana';
 import { useConversationContext } from '../../../context/conversation/conversation_context';
@@ -27,9 +26,6 @@ export interface UseImageUploadResult {
   handleAfterInput: () => void;
   handleRemoveAttachment?: (attachment: ConversationAttachment) => void;
 }
-
-const EMPTY_UPLOADING_NAMES = new Set<string>();
-const NOOP = () => {};
 
 export const useImageUpload = ({
   addErrorToast,
@@ -179,23 +175,10 @@ export const useImageUpload = ({
     [removeAttachment, messageEditorController]
   );
 
-  const result: UseImageUploadResult = {
+  return {
     uploadingNames,
     handlePasteFile,
     handleAfterInput,
     handleRemoveAttachment,
   };
-
-  // #region FEATURE FLAG: image-upload
-  // This is the only code required to be deleted when the feature goes GA
-  const isImageUploadEnabled = useExperimentalFeatures();
-  if (!isImageUploadEnabled) {
-    result.uploadingNames = EMPTY_UPLOADING_NAMES;
-    result.handlePasteFile = undefined;
-    result.handleAfterInput = NOOP;
-    result.handleRemoveAttachment = undefined;
-  }
-  // #endregion FEATURE FLAG
-
-  return result;
 };
