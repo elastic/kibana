@@ -14,6 +14,7 @@ import { policyFactory } from '../../../../../common/endpoint/models/policy_conf
 import { ProtectionModes } from '../../../../../common/endpoint/types';
 import { createMockEndpointAppContextService } from '../../../../endpoint/mocks';
 import { createToolHandlerContext } from '../../../__mocks__/test_helpers';
+import { describePathWritability, getFieldRegistry } from '../domain/field_registry';
 import { hashPolicyConfig } from '../domain/hash_policy_config';
 import { normalize } from '../domain/normalize_policy_config';
 import type { EndpointPolicyBaseline } from '../domain/normalized_endpoint_policy';
@@ -219,10 +220,18 @@ describe('createComparePoliciesTool', () => {
       to: baseline,
       diffs: [
         {
+          path: 'windows.antivirus_registration.enabled',
+          from: true,
+          to: false,
+        },
+        {
           path: 'windows.malware.mode',
           from: ProtectionModes.prevent,
           to: ProtectionModes.detect,
         },
+        { path: 'windows.device_control.enabled', from: undefined, to: true },
+        { path: 'windows.device_control.usb_storage', from: undefined, to: 'deny_all' },
+        { path: 'windows.memory_protection.custom_yara_signatures', from: undefined, to: true },
         { path: 'linux.events.dns', from: undefined, to: true },
         { path: 'windows.advanced.alerts.rollback', from: { enabled: true }, to: undefined },
       ],
@@ -259,21 +268,60 @@ describe('createComparePoliciesTool', () => {
       value_total: number;
       value_truncated: boolean;
     };
-    expect(dto.value_total).toBe(3);
+    expect(dto.value_total).toBe(7);
     expect(dto.value_truncated).toBe(false);
-    const missingFrom = dto.diffs.find((entry) => entry.path === 'linux.events.dns');
-    const missingTo = dto.diffs.find((entry) => entry.path === 'windows.advanced.alerts.rollback');
-    expect(missingFrom).toEqual({ path: 'linux.events.dns', from: null, to: true });
-    expect(missingTo).toEqual({
-      path: 'windows.advanced.alerts.rollback',
-      from: { enabled: true },
-      to: null,
-    });
-    for (const entry of dto.diffs) {
-      expect('from' in entry).toBe(true);
-      expect('to' in entry).toBe(true);
-      expect(JSON.parse(JSON.stringify(entry))).toEqual(entry);
-    }
+    expect(dto.diffs).toEqual([
+      {
+        path: 'windows.malware.mode',
+        from: ProtectionModes.prevent,
+        to: ProtectionModes.detect,
+        writable: true,
+      },
+      {
+        path: 'windows.device_control.enabled',
+        from: null,
+        to: true,
+        absent_side: 'from',
+        writable: true,
+      },
+      {
+        path: 'windows.device_control.usb_storage',
+        from: null,
+        to: 'deny_all',
+        absent_side: 'from',
+        writable: true,
+      },
+      {
+        path: 'windows.memory_protection.custom_yara_signatures',
+        from: null,
+        to: true,
+        absent_side: 'from',
+        writable: true,
+      },
+      {
+        path: 'windows.antivirus_registration.enabled',
+        from: true,
+        to: false,
+        writable: false,
+        not_writable_reason: 'derived_setting',
+      },
+      {
+        path: 'linux.events.dns',
+        from: null,
+        to: true,
+        absent_side: 'from',
+        writable: false,
+        not_writable_reason: 'missing_on_one_side',
+      },
+      {
+        path: 'windows.advanced.alerts.rollback',
+        from: { enabled: true },
+        to: null,
+        absent_side: 'to',
+        writable: false,
+        not_writable_reason: 'unknown_path',
+      },
+    ]);
   });
 
   it('returns normalized_posture_equal true when the full deterministic diff is empty', async () => {
@@ -328,6 +376,46 @@ describe('createComparePoliciesTool', () => {
         to_truncation: { entries: [{ path: 'nested', reason: 'string_truncated' }] },
       })
     );
+  });
+
+  it('returns every writable row even when non-writable rows exceed the display cap', async () => {
+    const leftRead = createPolicyRead();
+    const rightRead = createPolicyRead({
+      policy: { ...leftRead.policy, id: 'policy-2' },
+    });
+    const writablePaths = getFieldRegistry()
+      .map((entry) => entry.path)
+      .filter((path) => describePathWritability(path).writable)
+      .slice(0, 55);
+    expect(writablePaths.length).toBeGreaterThan(50);
+    const fullDiff = [
+      ...Array.from({ length: 60 }, (_, index) => ({
+        path: `windows.advanced.extra_${index}`,
+        from: 'left',
+        to: 'right',
+      })),
+      ...writablePaths.map((path) => ({ path, from: 'left', to: 'right' })),
+    ];
+    mockedComparePolicies.mockResolvedValue({
+      from: leftRead,
+      to: rightRead,
+      diffs: fullDiff,
+    });
+
+    const result = await getResult({ idOrName: 'policy-1' }, { idOrName: 'policy-2' });
+    const dto = result.data as {
+      diffs: Array<Record<string, unknown>>;
+      value_total: number;
+      value_truncated: boolean;
+    };
+
+    const returnedPaths = new Set(dto.diffs.map((entry) => entry.path));
+    for (const path of writablePaths) {
+      expect(returnedPaths.has(path)).toBe(true);
+    }
+    expect(dto.diffs.filter((entry) => entry.writable === true)).toHaveLength(writablePaths.length);
+    expect(dto.diffs.filter((entry) => entry.writable === false)).toHaveLength(50);
+    expect(dto.value_total).toBe(fullDiff.length);
   });
 
   it('annotates primitive and array from/to truncation on the parent diff entry', async () => {

@@ -175,10 +175,11 @@ const assertEligibleAssessment = (assessment: PolicyChangeAssessment): void => {
 const throwWriteUnverified = async (
   access: PolicyWriteAccessContext,
   before: PolicyWriteIdentity,
-  policyId: string
+  policyId: string,
+  cause?: unknown
 ): Promise<never> => {
   const observed = await observePolicyIdentity(access, policyId);
-  throw new PolicyWriteUnverifiedError(before, observed);
+  throw new PolicyWriteUnverifiedError(before, observed, cause);
 };
 
 export const prepareApplyPolicyChange = async (
@@ -270,8 +271,8 @@ const persistPreparedApply = async (
     returned = await access.fleet.packagePolicy.update(soClient, esClient, policyId, payload, {
       user,
     });
-  } catch {
-    return throwWriteUnverified(access, policy, policyId);
+  } catch (error) {
+    return throwWriteUnverified(access, policy, policyId, error);
   }
 
   const usable = toUsableNormalizedPolicy(returned);

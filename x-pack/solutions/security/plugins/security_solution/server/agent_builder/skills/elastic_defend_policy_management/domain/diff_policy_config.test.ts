@@ -10,7 +10,7 @@ import { normalize } from './normalize_policy_config';
 import { diffPolicyConfig } from './diff_policy_config';
 
 describe('diffPolicyConfig', () => {
-  it('emits one row when a key exists on only one side', () => {
+  it('descends a key or section that exists on only one side down to its leaves', () => {
     const left = policyFactory();
     const right = policyFactory();
     right.linux.advanced = { ...(right.linux.advanced ?? {}), extra: 'only-right' };
@@ -20,6 +20,22 @@ describe('diffPolicyConfig', () => {
         path: 'linux.advanced.extra',
         from: undefined,
         to: 'only-right',
+      },
+    ]);
+
+    const withoutDeviceControl = policyFactory();
+    delete withoutDeviceControl.windows.device_control;
+
+    expect(diffPolicyConfig(normalize(withoutDeviceControl), normalize(policyFactory()))).toEqual([
+      {
+        path: 'windows.device_control.enabled',
+        from: undefined,
+        to: true,
+      },
+      {
+        path: 'windows.device_control.usb_storage',
+        from: undefined,
+        to: 'deny_all',
       },
     ]);
   });
