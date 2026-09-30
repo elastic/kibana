@@ -281,14 +281,18 @@ export const AgentBulkActions: React.FunctionComponent<Props> = ({
             {
               id: 'restart',
               name: (
-                <>
-                  <FormattedMessage
-                    id="xpack.fleet.agentBulkActions.restartAgents"
-                    defaultMessage="Restart {agentCount, plural, one {# agent} other {# agents}}"
-                    values={{ agentCount }}
-                  />{' '}
-                  <EuiBetaBadge label="Beta" size="s" />
-                </>
+                <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
+                  <EuiFlexItem grow={false}>
+                    <FormattedMessage
+                      id="xpack.fleet.agentBulkActions.restartAgents"
+                      defaultMessage="Restart {agentCount, plural, one {# agent} other {# agents}}"
+                      values={{ agentCount }}
+                    />
+                  </EuiFlexItem>
+                  <EuiFlexItem grow={false}>
+                    <EuiBetaBadge label="Beta" size="s" />
+                  </EuiFlexItem>
+                </EuiFlexGroup>
               ),
               icon: 'refresh',
               disabled: !authz.fleet.allAgents,

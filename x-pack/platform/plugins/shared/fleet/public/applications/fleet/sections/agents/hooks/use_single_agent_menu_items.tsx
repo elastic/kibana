@@ -7,7 +7,7 @@
 
 import { useMemo } from 'react';
 import React from 'react';
-import { EuiBetaBadge } from '@elastic/eui';
+import { EuiBetaBadge, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 
 import {
@@ -191,13 +191,17 @@ export function useSingleAgentMenuItems({
               {
                 id: 'restart',
                 name: (
-                  <>
-                    <FormattedMessage
-                      id="xpack.fleet.agentList.restartOneButton"
-                      defaultMessage="Restart agent"
-                    />{' '}
-                    <EuiBetaBadge label="Beta" size="s" />
-                  </>
+                  <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
+                    <EuiFlexItem grow={false}>
+                      <FormattedMessage
+                        id="xpack.fleet.agentList.restartOneButton"
+                        defaultMessage="Restart agent"
+                      />
+                    </EuiFlexItem>
+                    <EuiFlexItem grow={false}>
+                      <EuiBetaBadge label="Beta" size="s" />
+                    </EuiFlexItem>
+                  </EuiFlexGroup>
                 ),
                 icon: 'refresh',
                 disabled:
