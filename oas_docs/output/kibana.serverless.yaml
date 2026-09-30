@@ -22148,6 +22148,171 @@ paths:
       x-metaTags:
         - content: Kibana, Elastic Cloud Serverless
           name: product_name
+  /api/chat/message:
+    post:
+      description: |-
+        **Spaces method and path for this operation:**
+
+        <div><span class="operation-verb post">post</span>&nbsp;<span class="operation-path">/s/{space_id}/api/chat/message</span></div>
+
+        Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
+
+        Send one message to an agent and wait for its text answer. This synchronous endpoint is meant for scripts and command-line tools: it returns the answer and the conversation ID alone, never a stream or an event timeline. Pass the returned `conversation_id` on the next call to continue the conversation. The agent runs without a user to answer it, so any prompt it raises (tool confirmation, question, destructive API approval) is declined on its behalf and reported in `declined_prompts`; attachments are not supported. Requires the `agentBuilder:experimentalFeatures` advanced setting to be enabled; the endpoint answers 404 otherwise.<br/><br/>[Required authorization] Route required privileges: agentBuilder:read.
+      operationId: post-chat-message
+      parameters:
+        - description: A required header to protect against CSRF attacks
+          in: header
+          name: kbn-xsrf
+          required: true
+          schema:
+            example: 'true'
+            type: string
+      requestBody:
+        content:
+          application/json:
+            examples:
+              messageContinueConversationRequestExample:
+                description: Continue a conversation with the `conversation_id` returned by a previous call
+                value:
+                  agent_id: elastic-ai-agent
+                  conversation_id: 696ccd6d-4bff-4b26-a62e-522ccf2dcd16
+                  message: And how does it differ from Kibana?
+              messageRequestExample:
+                description: Send a message to the default agent, starting a new conversation. Requires the `agentBuilder:experimentalFeatures` advanced setting to be enabled.
+                value:
+                  message: What is Elasticsearch?
+              messageToAgentRequestExample:
+                description: Send a message to a specific agent
+                value:
+                  agent_id: elastic-ai-agent
+                  message: What is Elasticsearch?
+            schema:
+              additionalProperties: false
+              type: object
+              properties:
+                agent_id:
+                  default: elastic-ai-agent
+                  description: The ID of the agent to send the message to. Defaults to the default Elastic AI agent.
+                  maxLength: 64
+                  minLength: 1
+                  type: string
+                conversation_id:
+                  description: The ID of an existing conversation to continue. Omit it to start a new conversation; the response carries the ID to reuse on the next call.
+                  maxLength: 256
+                  type: string
+                message:
+                  description: The user message to send to the agent.
+                  maxLength: 100000
+                  minLength: 1
+                  type: string
+              required:
+                - message
+      responses:
+        '200':
+          content:
+            application/json:
+              examples:
+                messageDeclinedPromptResponseExample:
+                  description: The agent tried to call a tool that requires user confirmation. There is no user to ask on this endpoint, so the call was declined and the agent answered with what it could
+                  value:
+                    answer: I could not run the reindex because it requires confirmation, which is not available here. You can run it from a conversation in Kibana instead.
+                    conversation_id: 696ccd6d-4bff-4b26-a62e-522ccf2dcd16
+                    declined_prompts:
+                      - message: Agent running in non-interactive mode, user input not available - execution was declined
+                        tool_id: reindex-logs
+                messageResponseExample:
+                  description: The agent's answer and the ID of the conversation it was stored in
+                  value:
+                    answer: Elasticsearch is a distributed, RESTful search and analytics engine capable of addressing a growing number of use cases. As the heart of the Elastic Stack, it centrally stores your data for lightning fast search, fine‑tuned relevancy, and powerful analytics that scale with ease.
+                    conversation_id: 696ccd6d-4bff-4b26-a62e-522ccf2dcd16
+                    declined_prompts: []
+              schema:
+                additionalProperties: false
+                type: object
+                properties:
+                  answer:
+                    description: The agent's final text answer. Empty when the agent finished without a message.
+                    type: string
+                  conversation_id:
+                    description: 'The conversation the message was added to: the one requested, or the one created for it.'
+                    type: string
+                  declined_prompts:
+                    description: Prompts the agent raised that would have paused an interactive conversation (tool confirmations, questions to the user, destructive API approvals). This endpoint has no user to answer them, so each was declined and the agent told why; the list is empty when the agent asked for none.
+                    items:
+                      additionalProperties: false
+                      type: object
+                      properties:
+                        message:
+                          description: The explanation the agent received in place of the prompt.
+                          type: string
+                        tool_id:
+                          description: The tool whose call was declined.
+                          type: string
+                      required:
+                        - tool_id
+                        - message
+                    type: array
+                required:
+                  - conversation_id
+                  - answer
+                  - declined_prompts
+          description: Indicates a successful response
+        '400':
+          content:
+            application/json:
+              examples:
+                messageEmptyExample:
+                  description: The `message` is empty
+                  value:
+                    error: Bad Request
+                    message: '[request body.message]: value has length [0] but it must have a minimum length of [1].'
+                    statusCode: 400
+                messageUnexpectedKeyExample:
+                  description: The body carries a key this endpoint does not accept
+                  value:
+                    error: Bad Request
+                    message: "[request body.connector_id]: Additional properties are not allowed ('connector_id' was unexpected)"
+                    statusCode: 400
+          description: Bad Request — the `message` is empty or too long, the `conversation_id` is not a UUID, or the body carries a key this endpoint does not accept (for example `connector_id` or `attachments`).
+        '404':
+          content:
+            application/json:
+              examples:
+                messageNotFoundExample:
+                  description: The `conversation_id` is unknown, or the `agent_id` is unknown or not usable by the caller
+                  value:
+                    attributes:
+                      trace_id: 8d4f2a3b-1c5e-4a9b-9f0d-2e6c1a3d4f5e
+                    error: Not Found
+                    message: Conversation 696ccd6d-4bff-4b26-a62e-522ccf2dcd16 not found
+                    statusCode: 404
+          description: Not Found — the `conversation_id` does not exist, the `agent_id` does not name an agent the caller can use, or the `agentBuilder:experimentalFeatures` advanced setting is disabled. An unusable agent is reported as a missing conversation, matching the `conversationNotFound` shape of the conversation APIs, so callers cannot probe for hidden agents.
+      summary: Send a message and get the answer
+      tags:
+        - agent builder
+      x-codeSamples:
+        - lang: curl
+          source: |
+            curl \
+              -X POST "${KIBANA_URL}/api/chat/message" \
+              -H "Authorization: ApiKey ${API_KEY}" \
+              -H "kbn-xsrf: true" \
+              -H "Content-Type: application/json" \
+              -d '{
+                "message": "What is Elasticsearch?",
+                "agent_id": "elastic-ai-agent"
+              }'
+        - lang: Console
+          source: |
+            POST kbn://api/chat/message
+            {
+              "message": "What is Elasticsearch?",
+              "agent_id": "elastic-ai-agent"
+            }
+      x-state: Experimental
+      x-metaTags:
+        - content: Kibana, Elastic Cloud Serverless
+          name: product_name
   /api/context_engine/ai_index:
     get:
       description: |-
