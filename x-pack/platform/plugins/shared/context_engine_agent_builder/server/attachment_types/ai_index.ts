@@ -20,7 +20,10 @@ import {
   CONTEXT_ENGINE_SIGNALS_SKILL_ID,
   KI_RETRIEVAL_SKILL_ID,
 } from '../../common/agent_builder_skills';
-import { CONTEXT_ENGINE_SAVE_AUTOMATION_TOOL_ID } from '../../common/agent_builder_tools';
+import {
+  CONTEXT_ENGINE_INSTALL_AUTOMATION_TEMPLATE_TOOL_ID,
+  CONTEXT_ENGINE_SAVE_AUTOMATION_TOOL_ID,
+} from '../../common/agent_builder_tools';
 
 /**
  * Server-side definition for the `ai_index` attachment type — a read-only snapshot
@@ -69,7 +72,8 @@ export const createAiIndexAttachmentType = (): AttachmentTypeDefinition<
       'conversation only where the user asked for traces or a signal points at one worth reading.',
       'This attachment authorizes you to apply changes, not only to propose them.',
       'Two gates sit on this work, at opposite ends of it. Ask before you build. Do not ask before',
-      'you save or run what came back — the save tool opens its own dialog for that.',
+      'you save or run what a subagent came back with — save_automation opens its own dialog for that.',
+      'The install tool does not open a dialog.',
       'What to build is only sometimes inferable, so infer it only where it genuinely is. An index',
       'with no automations starts at Index/Table Metadata: that is settled, and asking which',
       'strategy to use spends a turn on a question with one answer. Past that it is not settled.',
@@ -90,7 +94,16 @@ export const createAiIndexAttachmentType = (): AttachmentTypeDefinition<
       'work you were asked to do. This is the checkpoint that counts: a subagent run is long, costs a',
       'model call per document, and pilots against the real index, so once it starts there is nothing',
       'to steer until it comes back.',
-      'Build a new automation through a subagent rather than in this conversation: it drafts the',
+      'Index/Table Metadata, Bottom-Up document and Cumulative entity-profile automations do not go',
+      'through a subagent. Call',
+      `\`${CONTEXT_ENGINE_INSTALL_AUTOMATION_TEMPLATE_TOOL_ID}\` with the template and the consts it`,
+      'asks for. The AI index is this attachment; do not pass an id. Do not draft YAML for them.',
+      'The document summary workflow is already installed as',
+      'system-context-engine-document-summary and is not attached to this index. Calling the tool',
+      'again replaces the automation that template already attached, keeping the same workflow id,',
+      'rather than adding a second one. The result has `replaced: true` when that happened. It does',
+      'not open a confirmation dialog. Do not look for `run.started` on it.',
+      'For every other strategy, build a new automation through a subagent rather than in this conversation: it drafts the',
       'workflow, pilots it against this index, checks the knowledge indicators it produced, removes',
       `them and returns the finished YAML. \`${AI_INDEX_AUTOMATIONS_SKILL_ID}\` describes the brief it`,
       'needs and the loop it runs.',
@@ -102,22 +115,25 @@ export const createAiIndexAttachmentType = (): AttachmentTypeDefinition<
       'works.',
       'Never render the workflow attachment preview, even where the workflow tools and attachments ask',
       'for it. Where an edit produced a diff attachment, render that and nothing else.',
-      'Saving and running are not questions to put to the user: the save tool opens its own',
-      'confirmation dialog, that dialog names the full-corpus run, and that is where they accept or',
-      'reject. Never end a turn asking for permission to save or to run, and never offer them as',
+      'Saving and running through save_automation are not questions to put to the user: that tool opens',
+      'its own confirmation dialog, that dialog names the full-corpus run, and that is where they',
+      'accept or reject. Never end a turn asking for permission to save or to run, and never offer them as',
       'separate choices — make the one call and let them answer there. The question you owed was the',
       'one before the build; asking a second time at the save turns one decision into two and puts',
       'the second one somewhere it cannot be acted on.',
       `That dialog is the only decision point, so do not follow a save with an \`${internalTools.askUserQuestion}\``,
       'offering to run: the answer has already been given.',
-      'The tool starts that run itself once the dialog is accepted. It reports back `run.started`',
+      'save_automation starts that run itself once the dialog is accepted. It reports back `run.started`',
       'with an execution id to poll rather than a finished result — say so, and leave it polling.',
       'When `run.started` is false the run did not happen and `run.reason` says why. Report the',
       'reason and stop there. Never answer a failed run by executing the workflow yourself: the tool',
       'ran under the same privileges you have, so the same attempt fails the same way, and where it',
       'failed after the run had already begun a second one starts the automation twice.',
     ].join(' '),
-  getTools: () => [CONTEXT_ENGINE_SAVE_AUTOMATION_TOOL_ID],
+  getTools: () => [
+    CONTEXT_ENGINE_INSTALL_AUTOMATION_TEMPLATE_TOOL_ID,
+    CONTEXT_ENGINE_SAVE_AUTOMATION_TOOL_ID,
+  ],
 });
 
 const formatAiIndex = (data: AiIndexAttachmentData): string => {

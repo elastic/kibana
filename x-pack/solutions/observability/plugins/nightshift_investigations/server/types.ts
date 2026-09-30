@@ -22,6 +22,11 @@ import type {
 } from '@kbn/task-manager-plugin/server';
 import type { RuleRegistryPluginStartContract } from '@kbn/rule-registry-plugin/server';
 import type { SandboxPluginSetup, SandboxPluginStart } from '@kbn/sandbox-plugin/server';
+import type {
+  EncryptedSavedObjectsPluginSetup,
+  EncryptedSavedObjectsPluginStart,
+} from '@kbn/encrypted-saved-objects-plugin/server';
+import type { SecurityPluginStart } from '@kbn/security-plugin/server';
 import type { NightshiftInvestigationsClient } from './client/investigations_client';
 import type { DeleteAllInvestigationsResult } from './storage';
 import type { TriggerEmitter } from './workflows/triggers/emit';
@@ -46,6 +51,7 @@ export interface NightshiftInvestigationsServerStart {
 export interface NightshiftInvestigationsSetupDeps {
   agentBuilder?: AgentBuilderPluginSetup;
   contextEngine?: ContextEnginePluginSetup;
+  encryptedSavedObjects?: EncryptedSavedObjectsPluginSetup;
   sandbox?: SandboxPluginSetup;
   taskManager: TaskManagerSetupContract;
   workflowsExtensions?: WorkflowsExtensionsServerPluginSetup;
@@ -55,9 +61,11 @@ export interface NightshiftInvestigationsSetupDeps {
 export interface NightshiftInvestigationsStartDeps {
   actions?: ActionsPluginStart;
   agentBuilder?: AgentBuilderPluginStart;
+  encryptedSavedObjects?: EncryptedSavedObjectsPluginStart;
   inference?: InferenceServerStart;
   ruleRegistry?: RuleRegistryPluginStartContract;
   sandbox?: SandboxPluginStart;
+  security?: SecurityPluginStart;
   spaces?: SpacesPluginStart;
   taskManager: TaskManagerStartContract;
   workflowsExtensions?: WorkflowsExtensionsServerPluginStart;
