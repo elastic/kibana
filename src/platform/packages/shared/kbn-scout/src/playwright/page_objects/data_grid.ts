@@ -122,6 +122,12 @@ export class DataGrid {
     const cell = this.getCell(rowIndex, columnId);
     const expandButton = cell.locator('[data-test-subj="euiDataGridCellExpandButton"]');
     const expansionPopover = this.page.testSubj.locator('euiDataGridExpansionPopover');
+    // The popover is portaled and not tied to a cell, so close one left open by an earlier
+    // action; any popover seen below is then this cell's.
+    if (await expansionPopover.isVisible()) {
+      await this.page.keyboard.press('Escape');
+      await expect(expansionPopover).toBeHidden();
+    }
     // A refetch can remount the cell (e.g. a grid embedded in a dashboard). The remounted
     // node gets no mouseenter under a stationary cursor, so its expand button stays hidden
     // and a pending click waits on a detached element; a remount right after the click takes
