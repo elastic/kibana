@@ -98,6 +98,7 @@ const baseRule: RuleApiResponse = {
   id: 'rule-1',
   kind: 'alert',
   enabled: true,
+  version: 1,
   metadata: { name: 'My Rule', description: 'A rule description' },
   artifacts: [],
   time_field: '@timestamp',

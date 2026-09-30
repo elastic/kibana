@@ -54,6 +54,7 @@ const baseRule: RuleApiResponse = {
   id: 'rule-1',
   kind: 'alert',
   enabled: true,
+  version: 1,
   metadata: { name: 'Test Rule', tags: ['prod'] },
   time_field: '@timestamp',
   schedule: { every: '5m', lookback: '10m' },

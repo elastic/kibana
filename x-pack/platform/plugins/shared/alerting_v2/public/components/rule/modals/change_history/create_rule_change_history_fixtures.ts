@@ -35,6 +35,7 @@ const buildBaseSnapshot = ({
   id: objectId,
   kind: 'alert',
   enabled: true,
+  version: 1,
   metadata: {
     name,
     description: 'Alert when destination weather is thunder and lightning.',
