@@ -51,6 +51,29 @@ export const buildExploreControls = (settings: AdvancedSettings) => {
   return controls;
 };
 
+export const buildFillConnectionsRequest = (nodeQueries: Query[]) => {
+  const filters = Object.fromEntries(nodeQueries.map((query, index) => [index, query]));
+
+  return {
+    size: 0,
+    query: {
+      bool: {
+        // Only match docs that share 2 nodes so can help describe their relationship
+        minimum_should_match: 2,
+        should: nodeQueries,
+      },
+    },
+    aggs: {
+      matrix: {
+        adjacency_matrix: {
+          separator: '|',
+          filters,
+        },
+      },
+    },
+  };
+};
+
 export const buildExpandExploreRequest = ({
   startNodes,
   existingNodes,

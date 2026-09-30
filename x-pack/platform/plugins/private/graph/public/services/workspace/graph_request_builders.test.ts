@@ -6,7 +6,11 @@
  */
 
 import type { AdvancedSettings, WorkspaceField } from '../../types/app_state';
-import { buildExpandExploreRequest, buildSearchExploreRequest } from './graph_request_builders';
+import {
+  buildExpandExploreRequest,
+  buildFillConnectionsRequest,
+  buildSearchExploreRequest,
+} from './graph_request_builders';
 
 const settings: AdvancedSettings = {
   sampleSize: 100,
@@ -22,6 +26,29 @@ const fields = [
 ] as WorkspaceField[];
 
 describe('graph request builders', () => {
+  it('builds an adjacency matrix request from ordered node queries', () => {
+    const firstQuery = { term: { user: 'alice' } };
+    const secondQuery = { term: { host: 'server-1' } };
+
+    expect(buildFillConnectionsRequest([firstQuery, secondQuery])).toEqual({
+      size: 0,
+      query: {
+        bool: {
+          minimum_should_match: 2,
+          should: [firstQuery, secondQuery],
+        },
+      },
+      aggs: {
+        matrix: {
+          adjacency_matrix: {
+            separator: '|',
+            filters: { 0: firstQuery, 1: secondQuery },
+          },
+        },
+      },
+    });
+  });
+
   it('builds expand vertices with boosts and exclusions', () => {
     const startNode = {
       data: { field: 'user.name', term: 'alice', weight: 7 },
