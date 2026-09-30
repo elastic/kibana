@@ -19,39 +19,36 @@ import {
   useEuiTheme,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import type { SourceStatus, SourceType } from './types';
-import type { SourceFilterOption } from './source_filter';
-import { SourceFilter } from './source_filter';
+import { FormattedMessage } from '@kbn/i18n-react';
+import { SourceFilter, type SourceFilterOption } from '../sources/source_filter';
+import { LOCAL_ELASTICSEARCH_LABEL } from './destination_type_config';
+import type { DestinationType } from './types';
 
-interface SourcesToolbarProps {
+interface DestinationsToolbarProps {
   query: string;
-  typeOptions: Array<SourceFilterOption<SourceType>>;
-  statusOptions: Array<SourceFilterOption<SourceStatus>>;
-  selectedTypes: SourceType[];
-  selectedStatuses: SourceStatus[];
+  selectedTypes: DestinationType[];
   isRefreshing: boolean;
   onQueryChange: (query: string) => void;
-  onSelectedTypesChange: (types: SourceType[]) => void;
-  onSelectedStatusesChange: (statuses: SourceStatus[]) => void;
+  onSelectedTypesChange: (types: DestinationType[]) => void;
   onRefresh: () => void;
-  onAddSource: () => void;
+  onAddDestination: () => void;
   isAddDisabled?: boolean;
 }
 
-export const SourcesToolbar = ({
+const TYPE_OPTIONS: Array<SourceFilterOption<DestinationType>> = [
+  { key: 'elasticsearch', label: LOCAL_ELASTICSEARCH_LABEL },
+];
+
+export const DestinationsToolbar = ({
   query,
-  typeOptions,
-  statusOptions,
   selectedTypes,
-  selectedStatuses,
   isRefreshing,
   onQueryChange,
   onSelectedTypesChange,
-  onSelectedStatusesChange,
   onRefresh,
-  onAddSource,
+  onAddDestination,
   isAddDisabled = false,
-}: SourcesToolbarProps) => {
+}: DestinationsToolbarProps) => {
   const { euiTheme } = useEuiTheme();
 
   return (
@@ -61,38 +58,30 @@ export const SourcesToolbar = ({
           fullWidth
           value={query}
           onChange={(event) => onQueryChange(event.target.value)}
-          placeholder={i18n.translate('xpack.streams.sources.searchPlaceholder', {
-            defaultMessage: 'Search sources — e.g. AWS, nginx, OTLP',
+          placeholder={i18n.translate('xpack.streams.destinations.searchPlaceholder', {
+            defaultMessage: 'Search destinations — e.g. logs, nginx, elasticsearch',
           })}
-          aria-label={i18n.translate('xpack.streams.sources.searchAriaLabel', {
-            defaultMessage: 'Search sources',
+          aria-label={i18n.translate('xpack.streams.destinations.searchAriaLabel', {
+            defaultMessage: 'Search destinations',
           })}
-          data-test-subj="streamsSourcesSearch"
+          data-test-subj="streamsDestinationsSearch"
         />
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
         <EuiFilterGroup>
           <SourceFilter
-            label={i18n.translate('xpack.streams.sources.typeFilterLabel', {
+            label={i18n.translate('xpack.streams.destinations.typeFilterLabel', {
               defaultMessage: 'Type',
             })}
-            options={typeOptions}
+            options={TYPE_OPTIONS}
             selectedValues={selectedTypes}
             onChange={onSelectedTypesChange}
-          />
-          <SourceFilter
-            label={i18n.translate('xpack.streams.sources.statusFilterLabel', {
-              defaultMessage: 'Status',
-            })}
-            options={statusOptions}
-            selectedValues={selectedStatuses}
-            onChange={onSelectedStatusesChange}
           />
         </EuiFilterGroup>
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
         <EuiToolTip
-          content={i18n.translate('xpack.streams.sources.refreshButtonLabel', {
+          content={i18n.translate('xpack.streams.destinations.refreshButtonLabel', {
             defaultMessage: 'Refresh',
           })}
           disableScreenReaderOutput
@@ -104,10 +93,10 @@ export const SourcesToolbar = ({
             size="m"
             isLoading={isRefreshing}
             onClick={onRefresh}
-            aria-label={i18n.translate('xpack.streams.sources.refreshButtonAriaLabel', {
-              defaultMessage: 'Refresh sources',
+            aria-label={i18n.translate('xpack.streams.destinations.refreshButtonAriaLabel', {
+              defaultMessage: 'Refresh destinations',
             })}
-            data-test-subj="streamsSourcesRefreshButton"
+            data-test-subj="streamsDestinationsRefreshButton"
           />
         </EuiToolTip>
       </EuiFlexItem>
@@ -123,13 +112,14 @@ export const SourcesToolbar = ({
       <EuiFlexItem grow={false}>
         <EuiButton
           fill
-          onClick={onAddSource}
+          onClick={onAddDestination}
           isDisabled={isAddDisabled}
-          data-test-subj="streamsAddSourceButton"
+          data-test-subj="streamsAddDestinationButton"
         >
-          {i18n.translate('xpack.streams.sources.addSourceButtonLabel', {
-            defaultMessage: 'Add source',
-          })}
+          <FormattedMessage
+            id="xpack.streams.destinations.addDestinationButtonLabel"
+            defaultMessage="Add destination"
+          />
         </EuiButton>
       </EuiFlexItem>
     </EuiFlexGroup>
