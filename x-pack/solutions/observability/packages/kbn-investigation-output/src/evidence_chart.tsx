@@ -36,7 +36,7 @@ import { getTimeZone } from '@kbn/visualization-utils';
 import moment from 'moment-timezone';
 import type { EvidenceChart as EvidenceChartSpec } from '@kbn/significant-events-schema';
 
-const CHART_HEIGHT = 200;
+const CHART_HEIGHT = 140;
 /** Room above the plot for point annotation markers, which are drawn above its top edge. */
 const ANNOTATION_MARKER_MARGIN = 16;
 
@@ -211,7 +211,7 @@ export const EvidenceChart: React.FC<EvidenceChartProps> = ({ chart }) => {
               position={Position.Left}
               title={chart.y_axis.label}
               tickFormat={yFormatter}
-              ticks={4}
+              ticks={3}
               gridLine={{ visible: true }}
             />
             {series.map(({ id, name, data }, index) =>

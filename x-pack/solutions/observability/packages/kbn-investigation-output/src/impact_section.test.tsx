@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { fireEvent, render, screen } from '@testing-library/react';
+import { fireEvent, render, screen, within } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
 import type { EvidenceChart } from '@kbn/significant-events-schema';
 import { ImpactSection } from './impact_section';
@@ -119,26 +119,40 @@ describe('ImpactSection', () => {
     expect(order.indexOf(chart)).toBeLessThan(order.indexOf(description));
   });
 
-  it('hides what does not fit behind "Show more" and reveals it on click', () => {
-    const entities = Array.from({ length: 20 }, (_, index) => ({ name: `service-${index}` }));
+  it('cuts a long summary short behind "Show more" and shows it in full on click', () => {
+    const summary = `${'Checkout failed for most shoppers. '.repeat(20)}Final sentence.`;
+    const entities = Array.from({ length: 8 }, (_, index) => ({ name: `service-${index}` }));
     render(
       <I18nProvider>
-        <ImpactSection impact={{ summary: 'Checkout failed.', entities }} />
+        <ImpactSection
+          impact={{ summary, evidence: { description: 'Failed requests.', chart: sampleChart } }}
+        />
+        <ImpactSection impact={{ summary, entities }} />
       </I18nProvider>
     );
 
-    const shownBefore = screen.getAllByTestId('investigationOutputImpactEntity').length;
-    expect(shownBefore).toBeLessThan(20);
+    const [withEvidence, withEntities] = screen.getAllByTestId('investigationOutputImpact');
+    const summaryOf = (section: HTMLElement) =>
+      within(section).getByTestId('investigationOutputImpactSummary');
+    const toggleOf = (section: HTMLElement) =>
+      within(section).getByTestId('investigationOutputImpactShowMore');
 
-    fireEvent.click(screen.getByTestId('investigationOutputImpactShowMore'));
-    expect(screen.getAllByTestId('investigationOutputImpactEntity')).toHaveLength(20);
-    expect(screen.getByTestId('investigationOutputImpactShowMore')).toHaveTextContent('Show less');
+    expect(summaryOf(withEvidence)).not.toHaveTextContent('Final sentence.');
+    expect(summaryOf(withEvidence)).toHaveTextContent('…');
+    // Only the summary is cut: evidence and every entity stay visible.
+    expect(within(withEvidence).getByTestId('investigationEvidenceChart')).toBeInTheDocument();
+    expect(within(withEvidence).getByText('Failed requests.')).toBeInTheDocument();
+    expect(within(withEntities).getAllByTestId('investigationOutputImpactEntity')).toHaveLength(8);
 
-    fireEvent.click(screen.getByTestId('investigationOutputImpactShowMore'));
-    expect(screen.getAllByTestId('investigationOutputImpactEntity')).toHaveLength(shownBefore);
+    fireEvent.click(toggleOf(withEvidence));
+    expect(summaryOf(withEvidence)).toHaveTextContent('Final sentence.');
+    expect(toggleOf(withEvidence)).toHaveTextContent('Show less');
+
+    fireEvent.click(toggleOf(withEvidence));
+    expect(summaryOf(withEvidence)).not.toHaveTextContent('Final sentence.');
   });
 
-  it('renders no "Show more" when everything fits', () => {
+  it('renders no "Show more" for a short summary', () => {
     render(
       <I18nProvider>
         <ImpactSection impact={{ summary: 'Checkout failed.', entities: [{ name: 'checkout' }] }} />

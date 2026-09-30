@@ -25,7 +25,16 @@ import type {
 } from '@kbn/significant-events-schema';
 import { EvidenceChart } from './evidence_chart';
 import { EvidenceItem } from './evidence_list';
-import { getVisibleImpactParts } from './impact_layout_budget';
+
+/** Impact summaries longer than this are cut short behind "Show more". */
+export const IMPACT_SUMMARY_MAX_LENGTH = 500;
+
+/** Cuts `text` to at most `maxLength` characters at a word boundary and marks the cut. */
+const truncateAtWord = (text: string, maxLength: number): string => {
+  const cut = text.slice(0, maxLength);
+  const lastSpace = cut.lastIndexOf(' ');
+  return `${(lastSpace > 0 ? cut.slice(0, lastSpace) : cut).trimEnd()}…`;
+};
 
 export interface ImpactSectionProps {
   impact: InvestigationImpact;
@@ -84,74 +93,43 @@ const ImpactEntityRow: React.FC<{ entity: InvestigationImpactEntity; isLast: boo
 };
 
 /**
- * What the investigation found was affected: the impact narrative, the evidence backing it (chart
- * first), then the impacted entities in one shared panel. Only as much as fits a rough height
- * budget is shown up front; the rest is behind "Show more".
+ * What the investigation found was affected: the impact summary (long ones cut short behind
+ * "Show more"), the evidence backing it (chart first), then the impacted entities in one shared
+ * panel.
  */
 export const ImpactSection: React.FC<ImpactSectionProps> = ({ impact }) => {
-  const { summary, evidence, entities = [] } = impact;
-  const [isExpanded, setIsExpanded] = useState(false);
-  const hasSummary = summary !== undefined && summary.trim() !== '';
-  if (!hasSummary && !evidence && entities.length === 0) {
+  const { summary = '', evidence, entities = [] } = impact;
+  const [isSummaryExpanded, setIsSummaryExpanded] = useState(false);
+  const trimmedSummary = summary.trim();
+  if (!trimmedSummary && !evidence && entities.length === 0) {
     return null;
   }
 
-  const visible = getVisibleImpactParts(impact);
-  const showEvidenceChart = Boolean(evidence?.chart) && (isExpanded || visible.showEvidenceChart);
-  const showEvidenceDescription =
-    Boolean(evidence?.description.trim()) && (isExpanded || visible.showEvidenceDescription);
-  const shownEntities = isExpanded ? entities : entities.slice(0, visible.visibleEntityCount);
-  const showEvidence = showEvidenceChart || showEvidenceDescription;
+  const isSummaryLong = trimmedSummary.length > IMPACT_SUMMARY_MAX_LENGTH;
+  const shownSummary =
+    isSummaryLong && !isSummaryExpanded
+      ? truncateAtWord(trimmedSummary, IMPACT_SUMMARY_MAX_LENGTH)
+      : trimmedSummary;
+  const hasEvidenceDescription = Boolean(evidence?.description.trim());
 
   return (
     <div data-test-subj="investigationOutputImpact">
-      {hasSummary && (
-        <EuiMarkdownFormat textSize="s" color="default">
-          {summary}
-        </EuiMarkdownFormat>
+      {trimmedSummary && (
+        <div data-test-subj="investigationOutputImpactSummary">
+          <EuiMarkdownFormat textSize="s" color="default">
+            {shownSummary}
+          </EuiMarkdownFormat>
+        </div>
       )}
-      {evidence && showEvidence && (
-        <>
-          {hasSummary && <EuiSpacer size="s" />}
-          <div data-test-subj="investigationOutputImpactEvidence">
-            {showEvidenceChart && evidence.chart && <EvidenceChart chart={evidence.chart} />}
-            {showEvidenceChart && showEvidenceDescription && <EuiSpacer size="s" />}
-            {showEvidenceDescription && (
-              <EuiMarkdownFormat textSize="xs" color="subdued">
-                {evidence.description}
-              </EuiMarkdownFormat>
-            )}
-          </div>
-        </>
-      )}
-      {shownEntities.length > 0 && (
-        <>
-          {(hasSummary || showEvidence) && <EuiSpacer size="s" />}
-          <EuiPanel
-            hasBorder
-            hasShadow={false}
-            paddingSize="none"
-            data-test-subj="investigationOutputImpactEntities"
-          >
-            {shownEntities.map((entity, index) => (
-              <ImpactEntityRow
-                key={`${entity.name}-${index}`}
-                entity={entity}
-                isLast={index === shownEntities.length - 1}
-              />
-            ))}
-          </EuiPanel>
-        </>
-      )}
-      {visible.isTruncated && (
+      {isSummaryLong && (
         <EuiButtonEmpty
           size="xs"
           flush="left"
-          onClick={() => setIsExpanded((expanded) => !expanded)}
-          aria-expanded={isExpanded}
+          onClick={() => setIsSummaryExpanded((expanded) => !expanded)}
+          aria-expanded={isSummaryExpanded}
           data-test-subj="investigationOutputImpactShowMore"
         >
-          {isExpanded
+          {isSummaryExpanded
             ? i18n.translate('xpack.investigationOutput.impact.showLess', {
                 defaultMessage: 'Show less',
               })
@@ -159,6 +137,39 @@ export const ImpactSection: React.FC<ImpactSectionProps> = ({ impact }) => {
                 defaultMessage: 'Show more',
               })}
         </EuiButtonEmpty>
+      )}
+      {evidence && (
+        <>
+          {trimmedSummary && <EuiSpacer size="s" />}
+          <div data-test-subj="investigationOutputImpactEvidence">
+            {evidence.chart && <EvidenceChart chart={evidence.chart} />}
+            {evidence.chart && hasEvidenceDescription && <EuiSpacer size="s" />}
+            {hasEvidenceDescription && (
+              <EuiMarkdownFormat textSize="xs" color="subdued">
+                {evidence.description}
+              </EuiMarkdownFormat>
+            )}
+          </div>
+        </>
+      )}
+      {entities.length > 0 && (
+        <>
+          {(trimmedSummary || evidence) && <EuiSpacer size="s" />}
+          <EuiPanel
+            hasBorder
+            hasShadow={false}
+            paddingSize="none"
+            data-test-subj="investigationOutputImpactEntities"
+          >
+            {entities.map((entity, index) => (
+              <ImpactEntityRow
+                key={`${entity.name}-${index}`}
+                entity={entity}
+                isLast={index === entities.length - 1}
+              />
+            ))}
+          </EuiPanel>
+        </>
       )}
     </div>
   );
