@@ -551,8 +551,9 @@ export class WorkflowsManagementApi {
         workflows.flatMap(({ id }) => (id ? [id] : [])),
         spaceId
       );
-      for (const { id } of existing)
-        await this.assertWorkflowAccess(id, spaceId, 'edit', request, { auditOverride: false });
+      for (const { id } of existing) {
+        await this.assertWorkflowAccess(id, spaceId, 'edit', request);
+      }
     }
     const result = await this.workflowsService.bulkCreateWorkflows(
       workflows,
@@ -605,7 +606,7 @@ export class WorkflowsManagementApi {
     request: KibanaRequest,
     options?: { allowManagedWorkflowMutation?: boolean }
   ): Promise<UpdatedWorkflowResponseDto> {
-    await this.assertWorkflowAccess(id, spaceId, 'edit', request, { auditOverride: false });
+    await this.assertWorkflowAccess(id, spaceId, 'edit', request);
     const originalWorkflow = await this.workflowsService.getWorkflow(id, spaceId);
     if (!originalWorkflow) {
       throw new WorkflowNotFoundError(id);
@@ -629,7 +630,7 @@ export class WorkflowsManagementApi {
     spaceId: string,
     request: KibanaRequest
   ): Promise<RestoreWorkflowVersionResponseDto> {
-    await this.assertWorkflowAccess(id, spaceId, 'edit', request, { auditOverride: false });
+    await this.assertWorkflowAccess(id, spaceId, 'edit', request);
     const originalWorkflow = await this.workflowsService.getWorkflow(id, spaceId);
     if (!originalWorkflow) {
       throw new WorkflowNotFoundError(id);

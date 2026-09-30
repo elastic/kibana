@@ -102,7 +102,7 @@ export const WorkflowAccessControlModal = ({
     isError: isSearchError,
   } = useQuery({
     queryKey: ['workflowAccessSuggestions', workflow.id, debouncedSearch],
-    enabled: value.access_mode === 'private' && Boolean(currentProfile),
+    enabled: value.access_mode === 'private' && Boolean(workflow.permissions?.manage),
     queryFn: () =>
       userProfile.suggest<UserProfileWithAvatar['data']>(
         `/internal/workflows/${encodeURIComponent(workflow.id)}/_suggest_user_profiles`,

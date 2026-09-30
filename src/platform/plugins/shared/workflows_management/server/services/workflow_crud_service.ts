@@ -12,7 +12,7 @@ import { randomBytes } from 'node:crypto';
 
 import pMap from 'p-map';
 import type { KibanaRequest } from '@kbn/core/server';
-import { buildEntityReadAccessQuery, isEntityAccessControlAdmin } from '@kbn/entity-access-control';
+import { buildEntityReadAccessQuery } from '@kbn/entity-access-control';
 import { isNotFoundError } from '@kbn/es-errors';
 import {
   DEFAULT_MAX_RETRIES,
@@ -969,7 +969,6 @@ export class WorkflowCrudService {
           existingSource,
           'edit',
           profileId,
-          false,
           this.accessAuditContext(request, id, spaceId)
         );
         let updatedData: Partial<WorkflowProperties> = {
@@ -1183,8 +1182,7 @@ export class WorkflowCrudService {
           versioned.source,
           getWorkflowDeleteOperation(versioned.source, options?.force),
           profileId,
-          false,
-          { ...this.accessAuditContext(request, id, spaceId), auditOverride: false }
+          this.accessAuditContext(request, id, spaceId)
         );
         const accountId = versioned.source.definition?.settings?.run_as;
         if (batch && !accountId && !options?.force) {
@@ -1329,7 +1327,6 @@ export class WorkflowCrudService {
           workflow,
           getWorkflowDeleteOperation(workflow, options?.force),
           options?.profileId,
-          false,
           this.accessAuditContext(options?.request, id, spaceId)
         ),
       storage: this.deps.workflowStorage,
@@ -1353,7 +1350,6 @@ export class WorkflowCrudService {
     const profileId = request
       ? (await this.deps.getCoreStart().userProfile.getCurrentProfileId({ request })) ?? undefined
       : undefined;
-    const isAdmin = await isEntityAccessControlAdmin(this.deps.getCoreStart(), request);
     let canModifyBoundWorkflows = !request;
     if (request && this.deps.getServiceAccountBindings?.()?.isEnabled()) {
       const privileges = await this.deps
@@ -1367,7 +1363,6 @@ export class WorkflowCrudService {
         ? {
             accessControlFilter: buildEntityReadAccessQuery({
               profileId,
-              isAdmin,
               ...WORKFLOW_READ_ACCESS_QUERY,
             }),
             assertCanEdit: (workflow: WorkflowProperties, id: string) =>
@@ -1375,7 +1370,6 @@ export class WorkflowCrudService {
                 workflow,
                 'edit',
                 profileId,
-                isAdmin,
                 this.accessAuditContext(request, id, workflow.spaceId)
               ),
           }
@@ -1622,7 +1616,6 @@ export class WorkflowCrudService {
                 existing,
                 'edit',
                 profileId,
-                false,
                 this.accessAuditContext(params.request, entry.id, spaceId)
               );
               return this.buildBulkOverwriteDocument(prepared, existing);
@@ -1654,7 +1647,6 @@ export class WorkflowCrudService {
             occHit._source,
             'edit',
             profileId,
-            false,
             this.accessAuditContext(params.request, entry.id, occHit._source.spaceId)
           );
           const document = await this.writeWorkflowDocumentWithOcc(entry.id, spaceId, {

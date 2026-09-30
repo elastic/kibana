@@ -143,7 +143,7 @@ describe('WorkflowAccessControlService', () => {
       expect(core.security.audit.asScoped(request).log).not.toHaveBeenCalled();
     });
 
-    it('records an override at the storage check, not the write precheck', async () => {
+    it('can suppress override events for user suggestions', async () => {
       core.userProfile.getCurrentProfileId.mockResolvedValue('admin');
       jest
         .spyOn(core.security.authc, 'getCurrentUser')
@@ -152,19 +152,14 @@ describe('WorkflowAccessControlService', () => {
         auditOverride: false,
       });
       expect(core.security.audit.asScoped(request).log).not.toHaveBeenCalled();
-      assertWorkflowOperation(document, 'manage', 'admin', true, {
-        core,
-        request,
-        id: 'id',
-        spaceId: 'default',
-      });
+      await service.assertAccess({ ...document, id: 'id' }, 'manage', request);
       expect(core.security.audit.asScoped(request).log).toHaveBeenCalledTimes(1);
     });
 
-    it('still records a denial when the precheck prevents the storage check', async () => {
+    it('still records a denial when override auditing is suppressed', async () => {
       core.userProfile.getCurrentProfileId.mockResolvedValue('outsider');
       await expect(
-        service.assertAccess({ ...document, id: 'id' }, 'edit', request, { auditOverride: false })
+        service.assertAccess({ ...document, id: 'id' }, 'manage', request, { auditOverride: false })
       ).rejects.toThrow(WorkflowAccessDeniedError);
       expect(core.security.audit.asScoped(request).log).toHaveBeenCalledWith(
         expect.objectContaining({

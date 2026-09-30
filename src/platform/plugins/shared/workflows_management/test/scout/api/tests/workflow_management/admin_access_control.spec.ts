@@ -137,11 +137,23 @@ steps:
 
   apiTest('a wildcard admin role can manage access', async ({ apiClient, samlAuth }) => {
     const equivalentAdmin = await samlAuth.asInteractiveUser('admin');
+    const equivalentAdminHeaders = { ...headers, ...equivalentAdmin.cookieHeader };
     expect(
       await apiClient.get(workflowPath, {
-        headers: { ...headers, ...equivalentAdmin.cookieHeader },
+        headers: equivalentAdminHeaders,
       })
     ).toHaveStatusCode(200);
+    const updated = await apiClient.put(accessPath, {
+      headers: equivalentAdminHeaders,
+      body: { access_mode: 'public', entries: [] },
+    });
+    expect(updated).toHaveStatusCode(200);
+    const saved = await apiClient.get(workflowPath, { headers: equivalentAdminHeaders });
+    expect(saved).toHaveStatusCode(200);
+    expect(saved.body).toMatchObject({
+      owner_id: ownerProfileId,
+      access_control: { access_mode: 'public', entries: [] },
+    });
   });
 
   apiTest(

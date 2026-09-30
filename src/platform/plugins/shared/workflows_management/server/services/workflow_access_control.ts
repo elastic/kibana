@@ -92,10 +92,9 @@ export const assertWorkflowOperation = (
   workflow: WorkflowAccessSubject,
   operation: WorkflowAccessOperation,
   profileId: string | undefined,
-  isAdmin = false,
   audit?: WorkflowAccessAuditContext
 ): void => {
-  const decision = getWorkflowAccessDecisions(workflow, profileId, isAdmin)[operation];
+  const decision = getWorkflowAccessDecisions(workflow, profileId)[operation];
   logWorkflowAccess(decision, operation, audit);
   if (decision === 'denied') throw new WorkflowAccessDeniedError();
 };

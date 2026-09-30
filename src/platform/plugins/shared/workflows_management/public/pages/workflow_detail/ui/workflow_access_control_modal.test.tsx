@@ -78,6 +78,43 @@ describe('WorkflowAccessControlModal', () => {
     expect(store.getState().detail.workflow?.owner_id).toBe('owner');
   });
 
+  it('lets an administrator without a profile find and add a user', async () => {
+    mockUserProfile.getCurrent.mockResolvedValue(null);
+    mockUserProfile.suggest.mockResolvedValue([
+      { uid: 'recipient', enabled: true, user: { username: 'recipient' }, data: {} },
+    ]);
+    const workflow = createMockWorkflowDetailDto({
+      owner_id: 'owner',
+      access_control: { access_mode: 'private', entries: [] },
+      permissions: { read: true, edit: false, execute: false, manage: true },
+    });
+    mockHttp.put.mockResolvedValue(workflow);
+    render(
+      <TestWrapper>
+        <EuiProvider>
+          <WorkflowAccessControlModal workflow={workflow} onClose={jest.fn()} />
+        </EuiProvider>
+      </TestWrapper>
+    );
+    expect(
+      await screen.findByText("You are editing another user's access settings")
+    ).toBeInTheDocument();
+    await userEvent.click(screen.getByRole('combobox', { name: 'Find users' }));
+    await userEvent.click(await screen.findByRole('option', { name: /recipient/ }));
+    await userEvent.click(screen.getByTestId('workflowAccessSave'));
+    await waitFor(() =>
+      expect(mockHttp.put).toHaveBeenCalledWith(
+        `/internal/workflows/${workflow.id}/access_control`,
+        {
+          body: JSON.stringify({
+            access_mode: 'private',
+            entries: [{ type: 'user', id: 'recipient', role: 'viewer' }],
+          }),
+        }
+      )
+    );
+  });
+
   it.each(['owner', undefined])(
     'waits for the current profile before showing the notice (%s)',
     async (uid) => {

@@ -14,6 +14,7 @@ import {
   httpServerMock,
   securityServiceMock,
 } from '@kbn/core/server/mocks';
+import { buildEntityReadAccessQuery } from '@kbn/entity-access-control';
 import { loggerMock } from '@kbn/logging-mocks';
 import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
 import type { EsWorkflow } from '@kbn/workflows';
@@ -3309,8 +3310,14 @@ describe('WorkflowCrudService administrator writes', () => {
     mockedDisableAllWorkflowsLib
       .mockReset()
       .mockImplementation(async ({ assertCanEdit, accessControlFilter }) => {
-        if (isAdmin) expect(accessControlFilter).toEqual({ match_all: {} });
-        else expect(accessControlFilter).not.toEqual({ match_all: {} });
+        expect(accessControlFilter).toEqual(
+          buildEntityReadAccessQuery({
+            profileId: 'non-owner',
+            ownerField: 'owner_id',
+            accessControlField: 'access_control',
+            includeMissing: true,
+          })
+        );
         const check = () =>
           assertCanEdit?.(
             makeSource({
@@ -3324,6 +3331,9 @@ describe('WorkflowCrudService administrator writes', () => {
       });
     await new WorkflowCrudService(deps).disableAllWorkflows('default', request);
     expect(mockedDisableAllWorkflowsLib).toHaveBeenCalledTimes(1);
+    expect(
+      core.elasticsearch.client.asScoped(request).asCurrentUser.security.hasPrivileges
+    ).not.toHaveBeenCalled();
   });
 });
 
