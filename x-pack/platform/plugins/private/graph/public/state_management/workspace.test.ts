@@ -12,9 +12,15 @@ import { loadFields } from './fields';
 import { fillWorkspace } from './persistence';
 import { createMockGraphStore } from './mocks';
 import {
+  clearNodeSelection,
   createWorkspaceState,
+  invertNodeSelection,
   registerWorkspaceListeners,
+  selectAllNodes,
+  selectNeighborNodes,
   submitSearch,
+  toggleEdgeSelection,
+  toggleNodeSelection,
   workspaceChanged,
   workspaceInitializedSelector,
 } from './workspace';
@@ -152,6 +158,56 @@ describe('workspace state', () => {
     environment.store.dispatch(workspaceChanged(snapshot));
 
     expect(environment.store.getState().workspace).toEqual(snapshot);
+  });
+
+  it('handles node selection operations using normalized IDs', () => {
+    const environment = createMockGraphStore({});
+    const workspace = createWorkspaceMock();
+    Object.assign(workspace, {
+      nodes: [
+        { id: 'one', parent: undefined, data: {} },
+        { id: 'two', parent: undefined, data: {} },
+        { id: 'child', parent: { id: 'one' }, data: {} },
+      ],
+      edges: [
+        {
+          id: 'edge',
+          source: { id: 'one' },
+          target: { id: 'two' },
+          topSrc: { id: 'one' },
+          topTarget: { id: 'two' },
+        },
+      ],
+      selectedNodes: [],
+      getEdgeSelection: () => [],
+    });
+    environment.store.dispatch(workspaceChanged(createWorkspaceState(workspace)));
+
+    environment.store.dispatch(selectAllNodes());
+    expect(environment.store.getState().workspace.selectedNodeIds).toEqual(['one', 'two']);
+
+    environment.store.dispatch(invertNodeSelection());
+    expect(environment.store.getState().workspace.selectedNodeIds).toEqual([]);
+
+    environment.store.dispatch(toggleNodeSelection({ nodeId: 'one', replace: false }));
+    environment.store.dispatch(selectNeighborNodes());
+    expect(environment.store.getState().workspace.selectedNodeIds).toEqual(['one', 'two']);
+
+    environment.store.dispatch(clearNodeSelection());
+    expect(environment.store.getState().workspace.selectedNodeIds).toEqual([]);
+  });
+
+  it('keeps edge selection single-valued', () => {
+    const environment = createMockGraphStore({});
+
+    environment.store.dispatch(toggleEdgeSelection('first'));
+    expect(environment.store.getState().workspace.selectedEdgeIds).toEqual(['first']);
+
+    environment.store.dispatch(toggleEdgeSelection('second'));
+    expect(environment.store.getState().workspace.selectedEdgeIds).toEqual(['second']);
+
+    environment.store.dispatch(toggleEdgeSelection('second'));
+    expect(environment.store.getState().workspace.selectedEdgeIds).toEqual([]);
   });
 });
 
