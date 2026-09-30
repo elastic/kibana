@@ -145,7 +145,7 @@ Skill: activate-connector
 Args: $ARGUMENTS
 ```
 
-This will list available types, ask the user for credentials, and create the connector instance via the Actions API. When `agentBuilder:experimentalFeatures` is true, the connector's sub-actions become available to agents.
+This will list available types, ask the user for credentials, and create the connector instance via the Actions API. Creating the connector does not by itself grant any agent access to it — its ID must be added to an agent's assigned connectors before that agent can call its sub-actions.
 
 **If the user reports `Error: No widget found for schema type: ZodNumberFormat...`** when opening the
 connector creation form in the Kibana UI, a `z.number()` field was used in the connector's config

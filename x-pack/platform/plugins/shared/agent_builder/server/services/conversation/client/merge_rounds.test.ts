@@ -8,6 +8,7 @@
 import type {
   ConversationRound,
   ConversationRoundStep,
+  PreExecutionWorkflowStep,
   RoundModelUsageStats,
 } from '@kbn/agent-builder-common';
 import {
@@ -101,6 +102,36 @@ describe('mergeRounds', () => {
 });
 
 describe('applyResumeResolution', () => {
+  it('retains exactly the initial pre-execution workflow step after an HITL fold', () => {
+    const workflowStep: PreExecutionWorkflowStep = {
+      type: ConversationRoundStepType.preExecutionWorkflow,
+      model_context: '<system_update>original context</system_update>',
+      workflow_context: {
+        'nightshift.semantic_memory.recall': {
+          version: 1,
+          data: { recalled_ids: ['memory-original'] },
+        },
+      },
+    };
+    const previous = baseRound({
+      status: ConversationRoundStatus.awaitingPrompt,
+      input: { message: 'original request' },
+      steps: [workflowStep],
+      response: { message: '' },
+    });
+    const next = baseRound({
+      input: { message: '' },
+      response: { message: 'final answer' },
+    });
+
+    const merged = applyResumeResolution(previous, next, new Map());
+
+    expect(merged.input).toEqual(previous.input);
+    expect(
+      merged.steps.filter((step) => step.type === ConversationRoundStepType.preExecutionWorkflow)
+    ).toEqual([workflowStep]);
+  });
+
   it('answers a pending ask_user_question step from the answers map', () => {
     const previous = baseRound({
       status: ConversationRoundStatus.awaitingPrompt,

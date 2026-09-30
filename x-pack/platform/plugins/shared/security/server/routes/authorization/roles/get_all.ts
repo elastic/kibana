@@ -5,7 +5,10 @@
  * 2.0.
  */
 
+import type { estypes } from '@elastic/elasticsearch';
+
 import { schema } from '@kbn/config-schema';
+import type { ElasticsearchClient } from '@kbn/core/server';
 import { AuthzDisabled } from '@kbn/core-security-server';
 
 import { getRolesResponseSchema } from './model';
@@ -14,6 +17,40 @@ import { API_VERSIONS } from '../../../../common/constants';
 import { compareRolesByName, transformElasticsearchRoleToRole } from '../../../authorization';
 import { wrapIntoCustomErrorResponse } from '../../../errors';
 import { createLicensedRouteHandler } from '../../licensed_route_handler';
+
+const queryAllRoles = async (
+  client: ElasticsearchClient
+): Promise<Record<string, estypes.SecurityRoleDescriptor>> => {
+  const roles: estypes.SecurityQueryRoleQueryRole[] = [];
+  let searchAfter: estypes.SortResults | undefined;
+
+  while (true) {
+    const page = await client.security.queryRole({
+      size: 1000,
+      sort: [{ name: 'asc' }],
+      ...(searchAfter ? { search_after: searchAfter } : {}),
+    });
+    roles.push(...page.roles);
+    if (roles.length >= page.total || page.roles.length === 0) {
+      return Object.fromEntries(
+        roles.map(({ name, ...role }) => [
+          name,
+          {
+            ...role,
+            cluster: role.cluster ?? [],
+            indices: role.indices ?? [],
+            applications: role.applications ?? [],
+            run_as: role.run_as ?? [],
+          },
+        ])
+      );
+    }
+    searchAfter = page.roles.at(-1)?._sort;
+    if (!searchAfter?.length) {
+      throw new Error('Missing sort values while querying roles');
+    }
+  }
+};
 
 export function defineGetAllRolesRoutes({
   router,
@@ -108,12 +145,16 @@ export function defineGetAllRolesRoutes({
           const esClient = (await context.core).elasticsearch.client;
           const [features, elasticsearchRoles] = await Promise.all([
             getFeatures(),
-            await esClient.asCurrentUser.security.getRole(),
+            buildFlavor === 'serverless' && request.query?.includeReservedRoles
+              ? queryAllRoles(esClient.asCurrentUser)
+              : esClient.asCurrentUser.security.getRole(),
           ]);
 
           // Transform elasticsearch roles into Kibana roles and return in a list sorted by the role name.
           return response.ok({
-            body: Object.entries(elasticsearchRoles)
+            body: Object.entries<estypes.SecurityGetRoleRole | estypes.SecurityRoleDescriptor>(
+              elasticsearchRoles
+            )
               .map(([roleName, elasticsearchRole]) =>
                 transformElasticsearchRoleToRole({
                   features,

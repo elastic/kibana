@@ -19,6 +19,7 @@ export type { ChangePasswordProps, CreateServiceAccountProps, PersonalInfoProps 
 interface GetUiApiOptions {
   core: CoreStart;
   isServerless?: boolean;
+  roleManagementEnabled?: boolean;
 }
 
 type LazyComponentFn<T> = (props: T) => ReactElement;
@@ -31,8 +32,8 @@ export interface UiApi {
   };
 }
 
-export const getUiApi = ({ core, isServerless }: GetUiApiOptions): UiApi => {
-  const components = getComponents({ core, isServerless });
+export const getUiApi = ({ core, isServerless, roleManagementEnabled }: GetUiApiOptions): UiApi => {
+  const components = getComponents({ core, isServerless, roleManagementEnabled });
 
   return {
     components,

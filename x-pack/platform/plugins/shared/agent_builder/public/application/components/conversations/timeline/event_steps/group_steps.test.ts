@@ -272,6 +272,17 @@ describe('groupSteps', () => {
     ]);
   });
 
+  it('hides a pre-execution workflow step without splitting tool groups', () => {
+    const a = toolStep('a');
+    const b = toolStep('b');
+    const workflowStep = {
+      type: ConversationRoundStepType.preExecutionWorkflow,
+      model_context: 'hidden context',
+    } as const;
+
+    expect(groupSteps([a, workflowStep, b])).toEqual([{ kind: 'group', steps: [a, b] }]);
+  });
+
   it('flushes the tool buffer when an AskUserQuestionStep arrives and renders it as a step', () => {
     const askUserQuestion: AskUserQuestionStep = {
       type: ConversationRoundStepType.askUserQuestion,

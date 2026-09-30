@@ -14,6 +14,7 @@ import type {
   ChatAgentEvent,
   ConversationRoundStep,
   MetadataFieldValue,
+  PreExecutionWorkflowStepData,
   RoundInput,
   SubagentEntry,
   TodosStep,
@@ -59,6 +60,7 @@ import { compactConversation } from './utils/conversation_compactor';
 import { legacyEligibleRoundIds } from './utils/compaction_coverage';
 import { createSummarizationTransformer } from './utils/tool_summarization';
 import { sourceEvents } from '../../conversation/client/source_events';
+import { nextResumeIndex } from '../../conversation/client/rounds_to_events';
 import { createAgentGraph } from './graph';
 import { convertGraphEvents } from './convert_graph_events';
 import { RunTracker } from './run_tracker';
@@ -226,8 +228,17 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
     nextInput: processedConversation.nextInput,
     agentId,
     conversationId: conversation?.id,
+    // Use raw persisted executions: the model-context timeline folds multiple resumes into one.
+    // Legacy rounds cannot recover exact history, but a pending turn is at least the first resume.
+    roundExecutionIndex: pendingTurn
+      ? Math.max(1, nextResumeIndex({ events: conversation?.events }, pendingTurn.id))
+      : 0,
   });
   processedConversation.nextInput = beforeHookResult.nextInput ?? processedConversation.nextInput;
+  // Only the first execution owns the round's workflow context step.
+  const preExecutionWorkflow: PreExecutionWorkflowStepData | undefined = pendingTurn
+    ? undefined
+    : beforeHookResult.preExecutionWorkflow;
 
   const relevantSkillsSelectionPromise: Promise<RelevantSkillSelection> | undefined =
     relevantSkillsEnabled && !pendingTurn
@@ -425,6 +436,7 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
       eventEmitter,
       tracker,
       compactionResult,
+      preExecutionWorkflow,
       relevantSkillsSelection,
       initialTodos,
     }),
@@ -562,6 +574,7 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
       agentId,
       round,
       conversationId: conversation?.id,
+      connectorId: model.connector.connectorId,
       agentConfiguration,
     });
   } catch (err) {
@@ -601,15 +614,17 @@ const getConversationState = ({
 };
 
 /**
- * The steps a fresh run starts with: compaction / relevant-skills bookkeeping, then the todos
- * carried over from the previous round (the trailing singleton the first `todo_write` replaces).
+ * The steps a fresh run starts with: compaction / workflow / relevant-skills bookkeeping, then
+ * the todos carried over from the previous round (the trailing singleton `todo_write` replaces).
  */
 const buildPreExecutionSteps = ({
   compactionResult,
+  preExecutionWorkflow,
   relevantSkillsSelection,
   initialTodos,
 }: {
   compactionResult?: CompactedConversation;
+  preExecutionWorkflow?: PreExecutionWorkflowStepData;
   relevantSkillsSelection?: RelevantSkillSelection;
   initialTodos?: TodoItem[];
 }): ConversationRoundStep[] => {
@@ -619,7 +634,11 @@ const buildPreExecutionSteps = ({
       ? [{ type: ConversationRoundStepType.updateTodos, todos: carried, carried_over: true }]
       : [];
   return [
-    ...createPreExecutionSteps({ compactionResult, relevantSkillsSelection }),
+    ...createPreExecutionSteps({
+      compactionResult,
+      preExecutionWorkflow,
+      relevantSkillsSelection,
+    }),
     ...carriedStep,
   ];
 };
@@ -632,6 +651,7 @@ const createInitializerCommand = ({
   eventEmitter,
   tracker,
   compactionResult,
+  preExecutionWorkflow,
   relevantSkillsSelection,
   initialTodos,
 }: {
@@ -642,12 +662,14 @@ const createInitializerCommand = ({
   eventEmitter: AgentEventEmitterFn;
   tracker: RunTracker;
   compactionResult?: CompactedConversation;
+  preExecutionWorkflow?: PreExecutionWorkflowStepData;
   relevantSkillsSelection?: RelevantSkillSelection;
   initialTodos?: TodoItem[];
 }): Command => {
   if (!pendingTurn) {
     const preExecutionSteps = buildPreExecutionSteps({
       compactionResult,
+      preExecutionWorkflow,
       relevantSkillsSelection,
       initialTodos,
     });

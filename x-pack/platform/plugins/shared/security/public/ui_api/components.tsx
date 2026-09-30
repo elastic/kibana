@@ -26,9 +26,14 @@ import { getPersonalInfoComponent } from './personal_info/personal_info_async';
 export interface GetComponentsOptions {
   core: CoreStart;
   isServerless?: boolean;
+  roleManagementEnabled?: boolean;
 }
 
-export const getComponents = ({ core, isServerless = false }: GetComponentsOptions) => {
+export const getComponents = ({
+  core,
+  isServerless = false,
+  roleManagementEnabled = true,
+}: GetComponentsOptions) => {
   /**
    * Returns a function that creates a lazy-loading version of a component.
    */
@@ -39,7 +44,9 @@ export const getComponents = ({ core, isServerless = false }: GetComponentsOptio
   }
 
   return {
-    getCreateServiceAccount: wrapLazy(() => getCreateServiceAccountComponent(core, isServerless)),
+    getCreateServiceAccount: wrapLazy(() =>
+      getCreateServiceAccountComponent(core, isServerless, roleManagementEnabled)
+    ),
     getPersonalInfo: wrapLazy(getPersonalInfoComponent),
     getChangePassword: wrapLazy(() => getChangePasswordComponent(core)),
   };

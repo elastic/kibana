@@ -6,7 +6,8 @@
  */
 
 import React from 'react';
-import { EuiFlyoutFooter, EuiPanel, EuiFlexGroup, EuiFlexItem, EuiButton } from '@elastic/eui';
+import { EuiFlyoutFooter, EuiFlexGroup, EuiFlexItem, EuiButton, useEuiTheme } from '@elastic/eui';
+import { css } from '@emotion/react';
 import { FormattedMessage } from '@kbn/i18n-react';
 
 export const WatchlistsFlyoutFooter = ({
@@ -18,26 +19,32 @@ export const WatchlistsFlyoutFooter = ({
   isLoading: boolean;
   isDisabled: boolean;
 }) => {
+  const { euiTheme } = useEuiTheme();
+
   return (
     <EuiFlyoutFooter>
-      <EuiPanel color="transparent">
-        <EuiFlexGroup justifyContent="flexEnd" alignItems="center">
-          <EuiFlexItem grow={false}>
-            <EuiButton
-              data-test-subj="watchlist-flyout-save"
-              fill
-              onClick={onSave}
-              isLoading={isLoading}
-              isDisabled={isDisabled}
-            >
-              <FormattedMessage
-                id="xpack.securitySolution.entityAnalytics.watchlists.flyout.saveButton"
-                defaultMessage="Save"
-              />
-            </EuiButton>
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      </EuiPanel>
+      <EuiFlexGroup
+        justifyContent="flexEnd"
+        alignItems="center"
+        css={css`
+          padding: ${euiTheme.size.m};
+        `}
+      >
+        <EuiFlexItem grow={false}>
+          <EuiButton
+            data-test-subj="watchlist-flyout-save"
+            fill
+            onClick={onSave}
+            isLoading={isLoading}
+            isDisabled={isDisabled}
+          >
+            <FormattedMessage
+              id="xpack.securitySolution.entityAnalytics.watchlists.flyout.saveButton"
+              defaultMessage="Save"
+            />
+          </EuiButton>
+        </EuiFlexItem>
+      </EuiFlexGroup>
     </EuiFlyoutFooter>
   );
 };

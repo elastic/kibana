@@ -17,16 +17,18 @@ export interface CreateServiceAccountProps {
 
 export const getCreateServiceAccountComponent = async (
   core: CoreStart,
-  isServerless: boolean
+  isServerless: boolean,
+  roleManagementEnabled: boolean
 ): Promise<React.FC<CreateServiceAccountProps>> => {
   const [{ CreateServiceAccountFlyout }, { RolesAPIClient }] = await Promise.all([
     import('../management/service_accounts/create_service_account_flyout'),
     import('../management/roles/roles_api_client'),
   ]);
   const rolesAPIClient = new RolesAPIClient(core.http);
-  const createRoleUrl = core.application.capabilities.roles?.save
-    ? core.application.getUrlForApp('management', { path: '/security/roles/edit' })
-    : undefined;
+  const createRoleUrl =
+    roleManagementEnabled && core.application.capabilities.roles?.save
+      ? core.application.getUrlForApp('management', { path: '/security/roles/edit' })
+      : undefined;
 
   return (props) =>
     core.security.serviceAccounts.isEnabled() && core.security.serviceAccounts.canCreate() ? (

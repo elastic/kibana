@@ -6,6 +6,7 @@
  */
 
 import type { HttpFetchQuery } from '@kbn/core/public';
+import { buildPath } from '@kbn/core-http-browser';
 import type { TopNFunctions } from '@kbn/profiling-utils';
 import {
   createFlameGraph,
@@ -105,7 +106,9 @@ export function getServices(): Services {
         timeTo,
         kuery,
       };
-      return (await http.get(`${paths.TopN}/${type}`, { query })) as Promise<TopNResponse>;
+      return (await http.get(buildPath('/internal/profiling/topn/{type}', { type }), {
+        query,
+      })) as Promise<TopNResponse>;
     },
 
     fetchTopNFunctions: async ({ http, timeFrom, timeTo, startIndex, endIndex, kuery }) => {

@@ -21,7 +21,6 @@ import type { ApprovalAction } from '@kbn/proposals-ui';
 import { getUserDisplayName } from '@kbn/user-profile-components';
 import { isAwaitingDecision } from '@kbn/proposals-common';
 import type { DismissReason } from '@kbn/proposals-common';
-import { PROPOSAL_WITHOUT_ACTION_LABEL } from '../translations';
 import {
   useApproveProposal,
   useDismissProposal,
@@ -186,9 +185,6 @@ export const ProposalApprovalCard = memo<ProposalApprovalCardProps>(
       );
     }
 
-    const actionName =
-      liveProposal.action?.name ?? liveProposal.actionWorkflowId ?? PROPOSAL_WITHOUT_ACTION_LABEL;
-
     const isPending = isAwaitingDecision(liveProposal);
     const isExpired = isProposalExpired(liveProposal);
     const decision = getProposalDecision(liveProposal);
@@ -249,9 +245,8 @@ export const ProposalApprovalCard = memo<ProposalApprovalCardProps>(
       >
         <ApprovalContent
           showHeader={false}
-          title={actionName}
+          title={liveProposal.title}
           tone={getProposalTone(liveProposal)}
-          iconType="lock"
           comment={liveProposal.comment}
           decision={decision}
           isSubmitting={isSubmitting}
@@ -259,9 +254,29 @@ export const ProposalApprovalCard = memo<ProposalApprovalCardProps>(
           primaryAction={primaryAction}
           secondaryActions={secondaryActions}
         >
-          {/* An expired proposal nobody decided is not itself an outcome `ApprovalContent`
-              models — `decision` covers only a human's actual approve/dismiss. */}
-          {isExpired && !decision && (
+          {/* Why this proposal is being offered again, when it is a retry. */}
+          {isPending && liveProposal.previousExecutionError && (
+            <>
+              <EuiSpacer size="m" />
+              <div css={css({ padding: `0 ${euiTheme.size.m}` })}>
+                <KbnWarningCallout
+                  announceOnMount
+                  size="s"
+                  title={i18n.translate('xpack.proposals.proposalCard.previousFailureCallout', {
+                    defaultMessage: 'A previous attempt at this action failed',
+                  })}
+                >
+                  {liveProposal.previousExecutionError}
+                </KbnWarningCallout>
+              </div>
+            </>
+          )}
+
+          {/* `ApprovalContent`'s own badge already says "Expired"; this callout adds the
+              explanation the badge alone has no room for. `getProposalDecision` reports a
+              gate timeout as a real (actor-less) decision, so `decision` is set here too —
+              gating on `isExpired` alone, not on `decision`'s absence. */}
+          {isExpired && (
             <>
               <EuiSpacer size="m" />
               <div css={css({ padding: `0 ${euiTheme.size.m}` })}>

@@ -11,13 +11,6 @@ import type { ApprovalDecision } from './approval_content';
 import type { ApprovalPhase } from './approval_outcome';
 import { APPROVAL_MODAL_TRANSLATIONS } from './translations';
 
-/**
- * Shared with anything that opens the approval decision for a proposal (the modal itself, the
- * flyout's proposed-action row), so they title it identically.
- */
-export const getProposalTitle = (proposal: ApprovalProposal): string =>
-  proposal.action?.name ?? proposal.actionWorkflowId ?? APPROVAL_MODAL_TRANSLATIONS.noAction;
-
 /** Stored lowercase (`configure`, `respond`, ...); the caption reads it in sentence case. */
 const toSentenceCase = (value: string): string =>
   value.length > 0 ? `${value[0].toUpperCase()}${value.slice(1)}` : value;
@@ -83,22 +76,26 @@ export const getProposalCaption = (
 
 /**
  * The read-only decision `ApprovalContent` renders in place of its Approve/Decline buttons.
- * `undefined` only while a proposal is still awaiting one — `decision` itself is the whole
- * condition. Missing `decidedBy`/`decidedAt` is not a reason to hide a real decision: `decidedBy`
- * can be genuinely absent (no resolvable identity), in which case a fallback name still names
- * *someone* rather than reverting to "awaiting a decision" for a proposal that plainly is not.
- * `decidedAt` is passed through as-is rather than defaulted to now — inventing a timestamp would
- * read as real audit attribution and would keep changing on every reopen; `ApprovalActorTime`
- * renders the actor alone when it is absent.
+ * `undefined` only while a proposal is genuinely still awaiting one: a proposal can reach a
+ * terminal state — expired, chiefly — without a `decision` ever being made, so `!proposal.decision`
+ * alone is not sufficient to mean "pending". Missing `decidedBy`/`decidedAt` is not a reason to hide
+ * a real decision: `decidedBy` can be genuinely absent (no resolvable identity), in which case a
+ * fallback name still names *someone* rather than reverting to "awaiting a decision" for a proposal
+ * that plainly is not. `decidedAt` is passed through as-is rather than defaulted to now — inventing
+ * a timestamp would read as real audit attribution and would keep changing on every reopen;
+ * `ApprovalActorTime` renders the actor alone when it is absent. `actorName` itself is left
+ * `undefined` when nobody actually decided (expiry is a timeout, not a decision by anyone), so a
+ * caller falls back to its own plain caption rather than rendering a fabricated "by Unknown".
  */
 export const getProposalDecision = (proposal: ApprovalProposal): ApprovalDecision | undefined => {
-  if (!proposal.decision) {
+  if (!proposal.decision && !isProposalExpired(proposal)) {
     return undefined;
   }
-  const actorName =
-    proposal.decidedBy?.fullName ??
-    proposal.decidedBy?.username ??
-    APPROVAL_MODAL_TRANSLATIONS.unknownActorFallback;
+  const actorName = proposal.decision
+    ? proposal.decidedBy?.fullName ??
+      proposal.decidedBy?.username ??
+      APPROVAL_MODAL_TRANSLATIONS.unknownActorFallback
+    : undefined;
   return {
     status: approvedStatusFor(proposal),
     actorName,
@@ -108,15 +105,22 @@ export const getProposalDecision = (proposal: ApprovalProposal): ApprovalDecisio
 };
 
 /**
+ * Expiry is checked first because it is orthogonal to the approved/declined axis below: a proposal
+ * whose gate timed out never received a `decision` at all, so `proposal.decision !== 'approved'`
+ * would otherwise read it as declined — an outcome nobody chose.
+ *
  * Approving only resumes the gate workflow — the action it starts still runs afterward, so a
  * `decision: 'approved'` proposal can read back `executing` or `failed` as well as `succeeded`.
  * Declining has no action to run, so it settles as soon as it is decided — `no_action` covers
- * that case too, but `'declined'` (the branch above) already accounts for every non-approved
+ * that case too, but `'declined'` (the branch below) already accounts for every non-approved
  * decision regardless of status, so this only ever sees `no_action` for an *approved* proposal
  * that simply carried no action to run — a distinct outcome from `'applied'`, which claims one
  * ran and succeeded.
  */
 const approvedStatusFor = (proposal: ApprovalProposal): Exclude<ApprovalPhase, 'pending'> => {
+  if (isProposalExpired(proposal)) {
+    return 'expired';
+  }
   if (proposal.decision !== 'approved') {
     return 'declined';
   }

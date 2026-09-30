@@ -61,11 +61,12 @@ const mockProposal: ProposalWithMetadata = {
   id: 'proposal-1',
   spaceId: 'default',
   conversationId: 'conversation-1',
+  title: 'Isolate cfo-mbp-14 — host isolation',
   comment: 'Isolate the host to cut off the replayed session.',
   status: 'pending',
   impact: 'critical',
   confidence: 'high',
-  origin: 'worker',
+  origin: 'alertzero',
   createdAt: '2024-01-01T00:00:00Z',
   expired: false,
   action: { name: 'Isolate cfo-mbp-14 — host isolation', category: 'Response action' },
@@ -78,6 +79,7 @@ const decidedProposal: ProposalWithMetadata = {
   decision: 'approved',
   decidedBy: { fullName: 'Bonnie Fishel', username: 'bfishel', email: null },
   decidedAt: '2024-01-01T17:20:00.000Z',
+  title: 'After-hours domain admin logins — fin-dc-01',
   action: { name: 'After-hours domain admin logins — fin-dc-01', category: 'Response action' },
 };
 

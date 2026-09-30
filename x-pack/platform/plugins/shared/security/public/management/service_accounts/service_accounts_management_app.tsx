@@ -28,13 +28,19 @@ import type { ServiceAccountsAPIClient } from '../../service_accounts';
 
 interface CreateParams {
   buildFlavor: BuildFlavor;
+  roleManagementEnabled: boolean;
   getStartServices: StartServicesAccessor<PluginStartDependencies>;
   serviceAccountsAPIClient: ServiceAccountsAPIClient;
 }
 
 export const serviceAccountsManagementApp = Object.freeze({
   id: 'service_accounts',
-  create({ buildFlavor, getStartServices, serviceAccountsAPIClient }: CreateParams) {
+  create({
+    buildFlavor,
+    roleManagementEnabled,
+    getStartServices,
+    serviceAccountsAPIClient,
+  }: CreateParams) {
     const title = i18n.translate('xpack.security.management.serviceAccountsTitle', {
       defaultMessage: 'Service accounts',
     });
@@ -51,9 +57,10 @@ export const serviceAccountsManagementApp = Object.freeze({
         ]);
         const canCreate = coreStart.security.serviceAccounts.canCreate();
         const rolesAPIClient = new RolesAPIClient(coreStart.http);
-        const createRoleUrl = coreStart.application.capabilities.roles?.save
-          ? coreStart.application.getUrlForApp('management', { path: '/security/roles/edit' })
-          : undefined;
+        const createRoleUrl =
+          roleManagementEnabled && coreStart.application.capabilities.roles?.save
+            ? coreStart.application.getUrlForApp('management', { path: '/security/roles/edit' })
+            : undefined;
 
         render(
           coreStart.rendering.addContext(

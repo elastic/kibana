@@ -27,6 +27,7 @@ import { isRoleDeprecated, isRoleReserved } from '../../../common/model';
 interface Props {
   id?: string;
   'aria-describedby'?: string;
+  'aria-labelledby'?: string;
   availableRoles: Role[];
   selectedRoleNames: string[];
   onChange: (roles: string[]) => void;
@@ -41,6 +42,7 @@ type RoleOption = EuiSelectableOption<{ data?: { description?: string } }>;
 export const ServiceAccountRoleSelector = ({
   id,
   'aria-describedby': describedBy,
+  'aria-labelledby': labelledBy,
   availableRoles,
   selectedRoleNames,
   onChange,
@@ -52,7 +54,6 @@ export const ServiceAccountRoleSelector = ({
   const { euiTheme } = useEuiTheme();
   const [isOpen, setIsOpen] = useState(false);
   const buttonRef = useRef<HTMLButtonElement>(null);
-  const menuRef = useRef<HTMLDivElement>(null);
   const selectRolesLabel = i18n.translate(
     'xpack.security.management.serviceAccounts.create.selectRolesLabel',
     {
@@ -159,7 +160,8 @@ export const ServiceAccountRoleSelector = ({
           iconSide="right"
           isDisabled={isDisabled}
           isLoading={isLoading}
-          aria-label={selectRolesLabel}
+          aria-label={labelledBy ? undefined : selectRolesLabel}
+          aria-labelledby={labelledBy}
           aria-haspopup="listbox"
           aria-expanded={isOpen && !isDisabled}
           aria-describedby={describedBy}
@@ -187,7 +189,7 @@ export const ServiceAccountRoleSelector = ({
         </EuiButtonEmpty>
       }
     >
-      <div ref={menuRef} css={css({ maxHeight: 288, overflowY: 'auto' })}>
+      <div>
         <div
           css={css({
             display: 'flex',
@@ -222,7 +224,7 @@ export const ServiceAccountRoleSelector = ({
         <EuiSelectable
           aria-label={selectRolesLabel}
           options={options}
-          height="full"
+          height={Math.min(256, Math.max(32, options.length * 32))}
           onChange={(nextOptions) =>
             onChange(
               nextOptions.filter((option) => option.checked === 'on').map(({ label }) => label)
@@ -231,18 +233,9 @@ export const ServiceAccountRoleSelector = ({
           listProps={{
             rowHeight: 32,
             showIcons: false,
-            isVirtualized: false,
             paddingSize: 'none',
             onFocusBadge: false,
             autoFocus: true,
-            onFocus: (event) => {
-              if (!selectedRoleNames.length && event.target.getAttribute('role') === 'listbox') {
-                // Focusing the list must not scroll its custom-role heading out of view.
-                requestAnimationFrame(() => {
-                  if (menuRef.current) menuRef.current.scrollTop = 0;
-                });
-              }
-            },
           }}
           renderOption={(option) => (
             <span>

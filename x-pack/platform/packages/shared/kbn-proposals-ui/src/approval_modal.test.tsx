@@ -24,6 +24,8 @@ const mockProposal: ApprovalProposal = {
   status: 'pending',
   expired: false,
   actionWorkflowId: 'system-alertzero-action-edit-rule',
+  // What the server stores when the caller names nothing itself.
+  title: 'Apply monitored exception',
   action: { name: 'Apply monitored exception' },
 };
 
@@ -93,18 +95,6 @@ describe('ApprovalModal', () => {
     renderModal({ proposal: { ...mockProposal, category: undefined, action: undefined } });
     expect(screen.queryByText(/reversible/i)).not.toBeInTheDocument();
     expect(screen.getByText('Low impact')).toBeInTheDocument();
-  });
-
-  it('falls back to the workflow id when the action metadata carries no name', () => {
-    renderModal({ proposal: { ...mockProposal, action: undefined } });
-    expect(screen.getByText('system-alertzero-action-edit-rule')).toBeInTheDocument();
-  });
-
-  it('falls back to the no-action label when the proposal carries no action at all', () => {
-    renderModal({
-      proposal: { ...mockProposal, action: undefined, actionWorkflowId: undefined },
-    });
-    expect(screen.getByText('No automated action')).toBeInTheDocument();
   });
 
   it("renders the proposal's own comment as the body", () => {
@@ -278,19 +268,22 @@ describe('ApprovalModal', () => {
     expect(screen.queryByTestId('approvalModal-dismiss')).not.toBeInTheDocument();
   });
 
-  it('disables approving a proposal whose deadline has passed', () => {
+  it('shows Expired rather than Needs review, hiding the actions, once the deadline has passed', () => {
     renderModal({ proposal: { ...mockProposal, expired: true } });
-    expect(screen.getByTestId('approvalModal-confirm')).toBeDisabled();
+    expect(screen.getByText('Expired')).toBeInTheDocument();
+    expect(screen.queryByText('Needs review')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('approvalModal-confirm')).not.toBeInTheDocument();
   });
 
-  it('disables approving a proposal the workflow settled as expired before its deadline', () => {
+  it('shows Expired for a proposal the workflow settled as expired before its deadline', () => {
     renderModal({ proposal: { ...mockProposal, expired: false, status: 'expired' } });
-    expect(screen.getByTestId('approvalModal-confirm')).toBeDisabled();
+    expect(screen.getByText('Expired')).toBeInTheDocument();
+    expect(screen.queryByTestId('approvalModal-confirm')).not.toBeInTheDocument();
   });
 
-  it('disables declining an expired proposal too, not just approving it', () => {
+  it('hides declining an expired proposal too, not just approving it', () => {
     renderModal({ proposal: { ...mockProposal, expired: true } });
-    expect(screen.getByTestId('approvalModal-dismiss')).toBeDisabled();
+    expect(screen.queryByTestId('approvalModal-dismiss')).not.toBeInTheDocument();
   });
 
   it('routes Dismiss to onDismiss rather than silently closing', () => {

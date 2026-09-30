@@ -12,7 +12,7 @@ import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import useObservable from 'react-use/lib/useObservable';
 import classNames from 'classnames';
 import deepEqual from 'fast-deep-equal';
-import { EMPTY, delay, distinctUntilChanged, mergeMap, of } from 'rxjs';
+import { EMPTY, delay, distinctUntilChanged, of, switchMap } from 'rxjs';
 import { map } from 'rxjs';
 import { throttle, debounce } from 'lodash';
 
@@ -482,8 +482,10 @@ export const QueryBarTopRow = React.memo(
 
     const backgroundSearchState = useObservable(
       data.search.session.state$.pipe(
-        mergeMap((state) => {
-          // We want to delay enabling the button to avoid flickering when searches are quick
+        switchMap((state) => {
+          // We want to delay enabling the button to avoid flickering when searches are quick.
+          // switchMap (not mergeMap) cancels any in-flight delayed Loading emission when the
+          // state transitions to Completed, preventing a stale re-enable of the button.
           if (state === SearchSessionState.Loading) return of(state).pipe(delay(500));
           return of(state);
         })

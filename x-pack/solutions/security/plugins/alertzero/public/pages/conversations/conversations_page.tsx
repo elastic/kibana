@@ -52,6 +52,7 @@ import { useQueueSections } from './queue/use_queue_sections';
 import { useDropDecidedProposal } from './queue/use_drop_decided_proposal';
 import { QueueSection } from './queue/queue_section';
 import { ConnectedCloseInvestigationModal } from '../../components/connected_status/connected_close_investigation_modal';
+import { ScanFailureCallout } from '../../components/scan_failure_callout/scan_failure_callout';
 
 // Lazy-loaded so that the escalation modal tree (React Query hooks, form components,
 // translations, and user-profile API) stays out of alertzero's main chunk.
@@ -380,6 +381,7 @@ export const ConversationsPage: React.FC = () => {
             isQueueEmpty={openCount === 0}
             eventCount={openCount}
           />
+          <ScanFailureCallout />
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <ProposalsTrendChartRow />

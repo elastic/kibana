@@ -34,8 +34,11 @@ jest.mock('@kbn/ui-callout', () => ({
   KbnDangerCallout: ({ title }: { title: string }) => (
     <div data-test-subj="danger-callout">{title}</div>
   ),
-  KbnWarningCallout: ({ title }: { title: string }) => (
-    <div data-test-subj="warning-callout">{title}</div>
+  KbnWarningCallout: ({ title, children }: { title: string; children?: React.ReactNode }) => (
+    <div data-test-subj="warning-callout">
+      {title}
+      {children}
+    </div>
   ),
 }));
 
@@ -171,11 +174,12 @@ const baseProposal = (overrides: Partial<ProposalWithMetadata> = {}): ProposalWi
   id: 'proposal-1',
   spaceId: 'default',
   conversationId: 'conv-1',
+  title: 'Tune the noisy rule',
   comment: 'Tune the noisy rule',
   status: 'pending',
   impact: 'low',
   confidence: 'medium',
-  origin: 'worker',
+  origin: 'alertzero',
   createdAt: '2026-01-01T00:00:00.000Z',
   expired: false,
   ...overrides,
@@ -309,6 +313,30 @@ describe('ProposalApprovalCard', () => {
     });
   });
 
+  describe('a proposal re-offered after a failed attempt', () => {
+    const FAILURE = 'Rule update rejected: invalid query';
+
+    it('explains why it is being offered again', () => {
+      setupMocks(baseProposal({ status: 'pending', previousExecutionError: FAILURE }));
+      const { getByTestId } = render(<ProposalApprovalCard proposalId={PROPOSAL_ID} />);
+
+      const callout = getByTestId('warning-callout');
+      expect(callout).toHaveTextContent('A previous attempt at this action failed');
+      // The reason is the actionable half: the title alone does not tell an
+      // analyst whether re-approving is likely to fail the same way.
+      expect(callout).toHaveTextContent(FAILURE);
+    });
+
+    it('drops the explanation once the proposal is no longer awaiting a decision', () => {
+      setupMocks(
+        baseProposal({ status: 'succeeded', decision: 'approved', previousExecutionError: FAILURE })
+      );
+      const { container } = render(<ProposalApprovalCard proposalId={PROPOSAL_ID} />);
+
+      expect(container).not.toHaveTextContent(FAILURE);
+    });
+  });
+
   describe('already-decided proposal', () => {
     it('passes an applying decision for an approved proposal whose action is still executing', () => {
       setupMocks(
@@ -395,15 +423,14 @@ describe('ProposalApprovalCard', () => {
     });
 
     it('explains an expiry the workflow settled before the deadline', () => {
-      // Attempt exhaustion settles `expired` while the computed `expired` flag
-      // is still false, and nobody decided — so this is the expiry callout,
-      // not a decision.
+      // Attempt exhaustion settles `expired` while the computed `expired` flag is still false,
+      // and nobody decided — `getProposalDecision` still reports a real (actor-less) decision
+      // for it, so `ApprovalContent`'s own "Expired" badge shows alongside this callout rather
+      // than instead of it.
       setupMocks(baseProposal({ expired: false, status: 'expired' }));
-      const { getByTestId, queryByTestId } = render(
-        <ProposalApprovalCard proposalId={PROPOSAL_ID} />
-      );
+      const { getByTestId } = render(<ProposalApprovalCard proposalId={PROPOSAL_ID} />);
       expect(getByTestId('warning-callout')).toBeInTheDocument();
-      expect(queryByTestId('approval-decision')).toBeNull();
+      expect(getByTestId('approval-decision')).toHaveTextContent('expired:');
     });
 
     it('names a fallback actor rather than hiding a decision that plainly exists', () => {

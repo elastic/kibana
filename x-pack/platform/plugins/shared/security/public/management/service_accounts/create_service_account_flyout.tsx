@@ -37,9 +37,11 @@ import type { PublicMethodsOf } from '@kbn/utility-types';
 
 import { ServiceAccountRoleSelector } from './service_account_role_selector';
 import {
+  ES_SERVICE_ACCOUNT_MAX_ROLES,
   SERVICE_ACCOUNT_DESCRIPTION_MAX_LENGTH,
   SERVICE_ACCOUNT_NAME_MAX_LENGTH,
   SERVICE_ACCOUNT_NAME_REGEX,
+  UIAM_SERVICE_ACCOUNT_MAX_ROLES,
 } from '../../../common/service_accounts/constants';
 import type { ServiceAccountsAPIClient } from '../../service_accounts';
 import type { RolesAPIClient } from '../roles';
@@ -93,7 +95,9 @@ export const CreateServiceAccountFlyout = ({
   const unavailableRoleNames = roles.filter(
     (roleName) => !availableRoles.value?.some((role) => role.name === roleName)
   );
-  const isRolesInvalid = roles.length === 0 || unavailableRoleNames.length > 0;
+  const maxRoles = isServerless ? UIAM_SERVICE_ACCOUNT_MAX_ROLES : ES_SERVICE_ACCOUNT_MAX_ROLES;
+  const hasTooManyRoles = roles.length > maxRoles;
+  const isRolesInvalid = roles.length === 0 || hasTooManyRoles || unavailableRoleNames.length > 0;
   const rolesError =
     unavailableRoleNames.length > 0
       ? i18n.translate(
@@ -101,6 +105,14 @@ export const CreateServiceAccountFlyout = ({
           {
             defaultMessage: 'Remove roles that are no longer available: {roles}.',
             values: { roles: i18n.formatList('conjunction', unavailableRoleNames) },
+          }
+        )
+      : hasTooManyRoles
+      ? i18n.translate(
+          'xpack.security.management.serviceAccounts.create.tooManyRolesErrorMessage',
+          {
+            defaultMessage: 'Select no more than {maxRoles} roles.',
+            values: { maxRoles },
           }
         )
       : i18n.translate('xpack.security.management.serviceAccounts.create.rolesErrorMessage', {
@@ -263,9 +275,11 @@ export const CreateServiceAccountFlyout = ({
               fullWidth
               label={
                 <span css={labelStyle}>
-                  {i18n.translate('xpack.security.management.serviceAccounts.create.rolesLabel', {
-                    defaultMessage: 'Set privileges',
-                  })}{' '}
+                  <span id={`${rolesId}-label-text`}>
+                    {i18n.translate('xpack.security.management.serviceAccounts.create.rolesLabel', {
+                      defaultMessage: 'Set privileges',
+                    })}
+                  </span>{' '}
                   <EuiIconTip
                     type="info"
                     aria-label={i18n.translate(
@@ -274,10 +288,17 @@ export const CreateServiceAccountFlyout = ({
                     )}
                     content={
                       <>
-                        <FormattedMessage
-                          id="xpack.security.management.serviceAccounts.create.rolesHelpDescription"
-                          defaultMessage="An account can only use privileges allowed by both its selected roles and your access at creation time. Selecting a role does not grant privileges you do not have."
-                        />
+                        {isServerless ? (
+                          <FormattedMessage
+                            id="xpack.security.management.serviceAccounts.create.serverlessRolesHelpDescription"
+                            defaultMessage="An account can only use privileges allowed by both its selected roles and your access at creation time. Selecting a role does not grant privileges you do not have."
+                          />
+                        ) : (
+                          <FormattedMessage
+                            id="xpack.security.management.serviceAccounts.create.rolesHelpDescription"
+                            defaultMessage="The account receives the privileges granted by its selected roles."
+                          />
+                        )}
                         {isServerless && (
                           <p>
                             <FormattedMessage
@@ -291,12 +312,19 @@ export const CreateServiceAccountFlyout = ({
                   />
                 </span>
               }
-              isInvalid={(hasSubmitted || unavailableRoleNames.length > 0) && isRolesInvalid}
+              isInvalid={
+                (hasSubmitted || hasTooManyRoles || unavailableRoleNames.length > 0) &&
+                isRolesInvalid
+              }
               error={rolesError}
             >
               <ServiceAccountRoleSelector
+                aria-labelledby={`${rolesId}-label-text`}
                 createRoleUrl={createRoleUrl}
-                isInvalid={(hasSubmitted || unavailableRoleNames.length > 0) && isRolesInvalid}
+                isInvalid={
+                  (hasSubmitted || hasTooManyRoles || unavailableRoleNames.length > 0) &&
+                  isRolesInvalid
+                }
                 availableRoles={availableRoles.value ?? []}
                 selectedRoleNames={roles}
                 onChange={setRoles}
