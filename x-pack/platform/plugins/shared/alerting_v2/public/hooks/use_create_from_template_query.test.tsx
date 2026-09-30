@@ -27,7 +27,7 @@ const mockCreatePayload: CreateRuleData = {
   metadata: { name: 'CPU usage' },
   time_field: '@timestamp',
   schedule: { every: '1m', lookback: '5m' },
-  query: { format: 'standalone', breach: { query: 'FROM logs-*' } },
+  query: { base: 'FROM logs-*' },
 };
 
 const mockTemplate: RuleTemplateResponse = {

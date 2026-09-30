@@ -60,10 +60,12 @@ const useMessageEditorInstance = ({
   ref,
   syncIsEmpty,
   onEditorFocus,
+  onContentChange,
 }: {
   ref: RefObject<HTMLDivElement>;
   syncIsEmpty: () => void;
   onEditorFocus?: () => void;
+  onContentChange?: () => void;
 }): MessageEditorInstance => {
   const {
     match: commandMatch,
@@ -79,6 +81,7 @@ const useMessageEditorInstance = ({
       // Sync empty state, maintain caret targets, and re-evaluate command menu on every input change
       onChange: () => {
         syncIsEmpty();
+        onContentChange?.();
         if (ref.current) {
           if (ensureCaretTargetBeforeFirstBadge(ref.current)) {
             const sel = window.getSelection();
@@ -127,11 +130,13 @@ const useMessageEditorInstance = ({
 
         syncIsEmpty();
         dismissCommandMenu();
+        onContentChange?.();
       },
     }),
     [
       ref,
       syncIsEmpty,
+      onContentChange,
       checkInputForCommand,
       prefetchCommandMenus,
       commandMatch,
@@ -231,12 +236,12 @@ const useMessageEditorController = ({
  * <MessageEditor messageEditor={messageEditor} onSubmit={handleSubmit} />
  */
 export const useMessageEditor = (
-  options: { onEditorFocus?: () => void } = {}
+  options: { onEditorFocus?: () => void; onContentChange?: () => void } = {}
 ): {
   messageEditor: MessageEditorInstance;
   controller: MessageEditorController;
 } => {
-  const { onEditorFocus } = options;
+  const { onEditorFocus, onContentChange } = options;
   const ref = useRef<HTMLDivElement>(null);
   const [isEmpty, setIsEmpty] = useState(true);
 
@@ -254,7 +259,7 @@ export const useMessageEditor = (
     setIsEmpty(nextIsEmpty);
   }, []);
 
-  const instance = useMessageEditorInstance({ ref, syncIsEmpty, onEditorFocus });
+  const instance = useMessageEditorInstance({ ref, syncIsEmpty, onEditorFocus, onContentChange });
   const controller = useMessageEditorController({ ref, syncIsEmpty, isEmpty, setIsEmpty });
   const messageEditor = useMemo(
     () => ({

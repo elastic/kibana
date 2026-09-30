@@ -12,6 +12,7 @@ import {
   SYSTEM_SECURITY_WORKER_DETECTION_RULE_TUNING_ID,
   SYSTEM_SECURITY_WORKER_FLOOR_ALERT_TRIAGE_ID,
   SYSTEM_SECURITY_WORKER_FLOOR_ATTACK_DISCOVERY_ID,
+  SYSTEM_SECURITY_WORKER_FORENSICS_ENDPOINT_ANALYSIS_ID,
   type WatchAutonomyLevel,
 } from '@kbn/alertzero-common';
 
@@ -107,6 +108,11 @@ export const workerNameForCards = (workerId: string): string => {
       return i18n.translate('xpack.alertzero.watches.settings.autonomyCards.names.threatHunt', {
         defaultMessage: 'Continuous threat hunt',
       });
+    case SYSTEM_SECURITY_WORKER_FORENSICS_ENDPOINT_ANALYSIS_ID:
+      return i18n.translate(
+        'xpack.alertzero.watches.settings.autonomyCards.names.endpointAnalysis',
+        { defaultMessage: 'Endpoint analysis' }
+      );
     default:
       return i18n.translate('xpack.alertzero.watches.settings.autonomyCards.names.worker', {
         defaultMessage: 'this Worker',
@@ -513,6 +519,76 @@ const AUTONOMY_LEVEL_CARDS: Record<string, AutonomyLevelCardsCopy> = {
             value: factValue(
               'xpack.alertzero.watches.settings.autonomyCards.ruleCoverage.assisted.proposalsValue',
               '<you> approve each'
+            ),
+          },
+        ],
+      },
+    ],
+  },
+  [SYSTEM_SECURITY_WORKER_FORENSICS_ENDPOINT_ANALYSIS_ID]: {
+    intro: i18n.translate('xpack.alertzero.watches.settings.autonomyCards.endpointAnalysis.intro', {
+      defaultMessage: 'Determines whether response actions run automatically.',
+    }),
+    levels: [
+      {
+        level: 'manual',
+        who: i18n.translate(
+          'xpack.alertzero.watches.settings.autonomyCards.endpointAnalysis.manual.who',
+          {
+            defaultMessage:
+              'Runs a forensics pass for an investigation and attaches findings to it.',
+          }
+        ),
+        facts: [
+          {
+            label: i18n.translate(
+              'xpack.alertzero.watches.settings.autonomyCards.endpointAnalysis.manual.findings',
+              { defaultMessage: 'Findings' }
+            ),
+            value: factValue(
+              'xpack.alertzero.watches.settings.autonomyCards.endpointAnalysis.manual.analysisValue',
+              '<worker> attaches a timeline, IOCs and its rationale to the investigation'
+            ),
+          },
+          {
+            label: i18n.translate(
+              'xpack.alertzero.watches.settings.autonomyCards.endpointAnalysis.manual.response',
+              { defaultMessage: 'Response' }
+            ),
+            value: factValue(
+              'xpack.alertzero.watches.settings.autonomyCards.endpointAnalysis.manual.containmentValue',
+              '<you> approve each proposed response — isolate host, kill process, or suspend process'
+            ),
+          },
+        ],
+      },
+      {
+        level: 'supervised',
+        who: i18n.translate(
+          'xpack.alertzero.watches.settings.autonomyCards.endpointAnalysis.supervised.who',
+          {
+            defaultMessage: 'Runs a forensics pass and executes responses automatically.',
+          }
+        ),
+        facts: [
+          {
+            label: i18n.translate(
+              'xpack.alertzero.watches.settings.autonomyCards.endpointAnalysis.supervised.findings',
+              { defaultMessage: 'Findings' }
+            ),
+            value: factValue(
+              'xpack.alertzero.watches.settings.autonomyCards.endpointAnalysis.supervised.analysisValue',
+              '<worker> attaches a timeline, IOCs and its rationale to the investigation'
+            ),
+          },
+          {
+            label: i18n.translate(
+              'xpack.alertzero.watches.settings.autonomyCards.endpointAnalysis.supervised.response',
+              { defaultMessage: 'Response' }
+            ),
+            value: factValue(
+              'xpack.alertzero.watches.settings.autonomyCards.endpointAnalysis.supervised.containmentValue',
+              '<worker> executes responses automatically'
             ),
           },
         ],
