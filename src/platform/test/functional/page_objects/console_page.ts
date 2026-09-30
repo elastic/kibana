@@ -100,8 +100,8 @@ export class ConsolePageObject extends FtrService {
   }
 
   public async promptAutocomplete(letter = 'b') {
-    await this.monacoEditor.appendToCodeEditor('consoleMonacoEditor', letter);
-    await this.monacoEditor.triggerSuggest('consoleMonacoEditor');
+    const textArea = await this.getTextArea();
+    await textArea.type(letter);
     await this.retry.waitFor(
       'autocomplete to be visible',
       async () => await this.isAutocompleteVisible()
@@ -118,7 +118,7 @@ export class ConsolePageObject extends FtrService {
   public async getAutocompleteSuggestion(index: number) {
     await this.retry.waitFor('suggestions widget has items', async () => {
       if (!(await this.isAutocompleteVisible())) return false;
-      const widget = await this.find.byClassName('suggest-widget').catch(() => null);
+      const widget = await this.monacoEditor.getCodeEditorSuggestWidget().catch(() => null);
       if (!widget) return false;
       const items = await widget.findAllByClassName('monaco-list-row');
       return items.length > 0;
@@ -135,7 +135,7 @@ export class ConsolePageObject extends FtrService {
   }
 
   public async getAllAutocompleteSuggestions() {
-    const suggestionsWidget = await this.find.byClassName('suggest-widget');
+    const suggestionsWidget = await this.monacoEditor.getCodeEditorSuggestWidget();
     const suggestions = await suggestionsWidget.findAllByClassName('monaco-list-row');
     const labels = await Promise.all(
       suggestions.map(async (suggestion) => {

@@ -308,4 +308,17 @@ export class MonacoEditorService extends FtrService {
       '[data-test-subj="kbnCodeEditorEditorOverflowWidgetsContainer"] .suggest-widget'
     );
   }
+
+  public async getAllCodeEditorSuggestionItems() {
+    const widget = await this.getCodeEditorSuggestWidget();
+    return widget.findAllByCssSelector('[role="listitem"]');
+  }
+
+  /**
+   * Returns a locator for a suggestion item by its label text.
+   */
+  public async getCodeEditorSuggestionItem(name: string) {
+    const widget = await this.getCodeEditorSuggestWidget();
+    return widget.findByCssSelector(`[role="listitem"][aria-label="${name}"]`);
+  }
 }

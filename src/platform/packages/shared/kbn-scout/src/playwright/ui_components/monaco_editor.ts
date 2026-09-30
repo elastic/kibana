@@ -246,6 +246,14 @@ export class KibanaCodeEditorWrapper {
   }
 
   /**
+   * Returns a locator for a suggestion item by its label text.
+   */
+  public async getCodeEditorSuggestionItem(name: string) {
+    const widget = await this.getCodeEditorSuggestWidget();
+    return widget.getByRole('option', { name }).or(widget.getByRole('listitem', { name }));
+  }
+
+  /**
    * Returns a locator for the Monaco suggestion detail panel (the documentation pop-up
    * displayed alongside the autocomplete suggestion list).
    *
