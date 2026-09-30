@@ -21,6 +21,8 @@ export type {
   UiApi,
   ChangePasswordProps,
   CreateServiceAccountProps,
+  ServiceAccountPickerProps,
+  ServiceAccountPickerDirectory,
   PersonalInfoProps,
 } from './ui_api';
 

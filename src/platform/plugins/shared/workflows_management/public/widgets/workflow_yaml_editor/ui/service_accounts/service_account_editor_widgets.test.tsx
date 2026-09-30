@@ -12,6 +12,7 @@ import React from 'react';
 import { monaco } from '@kbn/code-editor';
 import { I18nProvider } from '@kbn/i18n-react';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
+import { securityMock } from '@kbn/security-plugin/public/mocks';
 import { ServiceAccountEditorWidgets } from './service_account_editor_widgets';
 import { useKibana } from '../../../../hooks/use_kibana';
 import { createStartServicesMock, createUseKibanaMockValue } from '../../../../mocks';
@@ -68,6 +69,8 @@ const setup = (enabled = true, yaml = 'settings:\n  run_as: ', canManage = false
   };
   jest.mocked(useServiceAccountEditor).mockReturnValue(createServiceAccountEditor(directory));
   const services = createStartServicesMock();
+  services.security.serviceAccounts.isEnabled.mockReturnValue(enabled);
+  services.securityUi = securityMock.createUiApiWithComponents({ core: services });
   services.application.capabilities = {
     ...services.application.capabilities,
     management: { security: { service_accounts: canManage } },
@@ -383,9 +386,7 @@ describe('ServiceAccountEditorWidgets', () => {
   it('shows an empty directory separately from restricted access', async () => {
     const { directory } = setup();
     directory.list.mockResolvedValue({ serviceAccounts: [] });
-    expect(
-      await screen.findByText('No service accounts available to run this workflow.')
-    ).toBeInTheDocument();
+    expect(await screen.findByText('No service accounts available.')).toBeInTheDocument();
     expect(screen.queryByText(/Ask your administrator/)).not.toBeInTheDocument();
     expect(screen.queryByRole('option')).not.toBeInTheDocument();
   });

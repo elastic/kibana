@@ -1,10 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the "Elastic License
- * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
- * Public License v 1"; you may not use this file except in compliance with, at
- * your election, the "Elastic License 2.0", the "GNU Affero General Public
- * License v3.0 only", or the "Server Side Public License, v 1".
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import {
@@ -19,10 +17,12 @@ import {
 import { css } from '@emotion/react';
 import React from 'react';
 import type { PropsWithChildren } from 'react';
+
+import type { CoreStart } from '@kbn/core/public';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { useKibana } from '../../../../hooks/use_kibana';
 
 interface Props {
+  core: CoreStart;
   status: 'loading' | 'ready' | 'forbidden' | 'unavailable';
   hasSuggestions: boolean;
   filtered: boolean;
@@ -31,6 +31,7 @@ interface Props {
 }
 
 export const ServiceAccountPickerPanel = ({
+  core,
   status,
   hasSuggestions,
   filtered,
@@ -39,7 +40,7 @@ export const ServiceAccountPickerPanel = ({
   children,
 }: PropsWithChildren<Props>) => {
   const { euiTheme } = useEuiTheme();
-  const { application, docLinks, security } = useKibana().services;
+  const { application, docLinks, security } = core;
   const canManage = application.capabilities.management?.security?.service_accounts;
   return (
     <>
@@ -53,7 +54,7 @@ export const ServiceAccountPickerPanel = ({
           <EuiText size="s">
             <strong>
               <FormattedMessage
-                id="workflows.editor.serviceAccountPickerTitle"
+                id="xpack.security.serviceAccountPicker.serviceAccountPickerTitle"
                 defaultMessage="Service accounts"
               />
             </strong>
@@ -68,7 +69,7 @@ export const ServiceAccountPickerPanel = ({
               external
             >
               <FormattedMessage
-                id="workflows.editor.manageServiceAccountsLinkText"
+                id="xpack.security.serviceAccountPicker.manageServiceAccountsLinkText"
                 defaultMessage="Manage"
               />
             </EuiLink>
@@ -83,7 +84,7 @@ export const ServiceAccountPickerPanel = ({
             <div role="status">
               <EuiLoadingSpinner size="s" />{' '}
               <FormattedMessage
-                id="workflows.editor.loadingServiceAccountsDescription"
+                id="xpack.security.serviceAccountPicker.loadingServiceAccountsDescription"
                 defaultMessage="Loading service accounts…"
               />
             </div>
@@ -91,7 +92,7 @@ export const ServiceAccountPickerPanel = ({
           {status === 'forbidden' && (
             <p role="status">
               <FormattedMessage
-                id="workflows.editor.serviceAccountsRestrictedDescription"
+                id="xpack.security.serviceAccountPicker.serviceAccountsRestrictedDescription"
                 defaultMessage="Service accounts execute workloads without relying on individual user profiles. Ask your administrator for access."
               />
             </p>
@@ -100,13 +101,13 @@ export const ServiceAccountPickerPanel = ({
             <>
               <p role="alert">
                 <FormattedMessage
-                  id="workflows.editor.loadServiceAccountsErrorMessage"
+                  id="xpack.security.serviceAccountPicker.loadServiceAccountsErrorMessage"
                   defaultMessage="Unable to load service accounts."
                 />
               </p>
               <EuiButtonEmpty size="s" iconType="refresh" onClick={onRetry}>
                 <FormattedMessage
-                  id="workflows.editor.retryServiceAccountsButtonLabel"
+                  id="xpack.security.serviceAccountPicker.retryServiceAccountsButtonLabel"
                   defaultMessage="Try again"
                 />
               </EuiButtonEmpty>
@@ -116,13 +117,13 @@ export const ServiceAccountPickerPanel = ({
             <p role="status">
               {filtered ? (
                 <FormattedMessage
-                  id="workflows.editor.noMatchingServiceAccountsDescription"
+                  id="xpack.security.serviceAccountPicker.noMatchingServiceAccountsDescription"
                   defaultMessage="No matching service accounts."
                 />
               ) : (
                 <FormattedMessage
-                  id="workflows.editor.noAvailableServiceAccountsDescription"
-                  defaultMessage="No service accounts available to run this workflow."
+                  id="xpack.security.serviceAccountPicker.noAvailableServiceAccountsDescription"
+                  defaultMessage="No service accounts available."
                 />
               )}
             </p>
@@ -135,7 +136,7 @@ export const ServiceAccountPickerPanel = ({
         >
           <EuiButtonEmpty size="s" iconType="plusCircle" onClick={onCreate}>
             <FormattedMessage
-              id="workflows.editor.createServiceAccountButtonLabel"
+              id="xpack.security.serviceAccountPicker.createServiceAccountButtonLabel"
               defaultMessage="Create account"
             />
           </EuiButtonEmpty>
@@ -150,7 +151,7 @@ export const ServiceAccountPickerPanel = ({
             external
           >
             <FormattedMessage
-              id="workflows.editor.serviceAccountPermissionsDocsLinkText"
+              id="xpack.security.serviceAccountPicker.serviceAccountPermissionsDocsLinkText"
               defaultMessage="Learn more about permissions"
             />
           </EuiLink>

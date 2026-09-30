@@ -403,7 +403,7 @@ export class WorkflowEditorPage {
     const flyout = this.page.testSubj.locator('createServiceAccountFlyout');
     await this.page.testSubj.locator('serviceAccountNameInput').fill(name);
     await this.page.testSubj.locator('createServiceAccountDescription').fill(description);
-    await flyout.getByRole('button', { name: 'Select roles' }).click();
+    await flyout.getByRole('button', { name: 'Set privileges' }).click();
     await this.page.getByRole('listbox', { name: 'Select roles' }).press('End');
     await this.page.testSubj.locator('roleOption-viewer').click();
     await this.closeServiceAccountRoles();
