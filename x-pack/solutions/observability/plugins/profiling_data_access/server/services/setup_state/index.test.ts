@@ -10,7 +10,6 @@ import type { RegisterServicesParams } from '../register_services';
 import * as setupStateModule from '.';
 import { cloudSetupState } from './cloud_setup_state';
 import { selfManagedSetupState } from './self_managed_setup_state';
-import { serverlessSetupState } from './serverless_setup_state';
 
 jest.mock('./cloud_setup_state', () => ({
   cloudSetupState: jest.fn(),
@@ -20,15 +19,10 @@ jest.mock('./self_managed_setup_state', () => ({
   selfManagedSetupState: jest.fn(),
 }));
 
-jest.mock('./serverless_setup_state', () => ({
-  serverlessSetupState: jest.fn(),
-}));
-
 const mockedCloudSetupState = jest.mocked(cloudSetupState);
 const mockedSelfManagedSetupState = jest.mocked(selfManagedSetupState);
-const mockedServerlessSetupState = jest.mocked(serverlessSetupState);
 
-describe('getSetupState', () => {
+describe('setup state services', () => {
   const logger = {
     debug: jest.fn(),
   } as unknown as RegisterServicesParams['logger'];
@@ -61,96 +55,75 @@ describe('getSetupState', () => {
     jest.clearAllMocks();
   });
 
-  it('uses serverless setup state when isServerless is true', async () => {
-    const setupState = { serverless: true } as any;
-    mockedServerlessSetupState.mockResolvedValue(setupState);
+  describe('getCloudSetupState', () => {
+    it('reads the cloud setup state when Fleet is available', async () => {
+      const setupState = { cloud: true } as any;
+      mockedCloudSetupState.mockResolvedValue(setupState);
 
-    const result = await setupStateModule.getSetupState({
-      createProfilingEsClient,
-      deps: {
-        cloud: { isCloudEnabled: true } as RegisterServicesParams['deps']['cloud'],
-      },
-      esClient,
-      logger,
-      soClient,
-      isServerless: true,
-    });
-
-    expect(result).toEqual({
-      type: 'serverless',
-      setupState,
-    });
-
-    expect(mockedServerlessSetupState).toHaveBeenCalled();
-    expect(mockedCloudSetupState).not.toHaveBeenCalled();
-    expect(mockedSelfManagedSetupState).not.toHaveBeenCalled();
-  });
-
-  it('uses cloud setup state when cloud is enabled and Fleet is available', async () => {
-    const setupState = { cloud: true } as any;
-    mockedCloudSetupState.mockResolvedValue(setupState);
-
-    const result = await setupStateModule.getSetupState({
-      createProfilingEsClient,
-      deps: {
-        cloud: { isCloudEnabled: true } as RegisterServicesParams['deps']['cloud'],
-        fleet: { packagePolicyService } as RegisterServicesParams['deps']['fleet'],
-      },
-      esClient,
-      logger,
-      soClient,
-      spaceId: 'my-space',
-    });
-
-    expect(result).toEqual({
-      type: 'cloud',
-      setupState,
-    });
-
-    expect(mockedCloudSetupState).toHaveBeenCalled();
-    expect(mockedServerlessSetupState).not.toHaveBeenCalled();
-    expect(mockedSelfManagedSetupState).not.toHaveBeenCalled();
-  });
-
-  it('throws when cloud is enabled and Fleet is not available', async () => {
-    await expect(
-      setupStateModule.getSetupState({
+      const result = await setupStateModule.getCloudSetupState({
         createProfilingEsClient,
         deps: {
           cloud: { isCloudEnabled: true } as RegisterServicesParams['deps']['cloud'],
+          fleet: { packagePolicyService } as RegisterServicesParams['deps']['fleet'],
         },
         esClient,
         logger,
         soClient,
-      })
-    ).rejects.toThrow('Elastic Fleet is required to set up Universal Profiling on Cloud');
+        spaceId: 'my-space',
+      });
 
-    expect(mockedCloudSetupState).not.toHaveBeenCalled();
-    expect(mockedServerlessSetupState).not.toHaveBeenCalled();
-    expect(mockedSelfManagedSetupState).not.toHaveBeenCalled();
+      expect(result).toBe(setupState);
+      expect(mockedCloudSetupState).toHaveBeenCalledWith({
+        client: internalProfilingClient,
+        clientWithProfilingAuth: currentProfilingClient,
+        logger,
+        soClient,
+        spaceId: 'my-space',
+        packagePolicyClient: packagePolicyService,
+        isCloudEnabled: true,
+      });
+      expect(mockedSelfManagedSetupState).not.toHaveBeenCalled();
+    });
+
+    it('throws when Fleet is not available', async () => {
+      await expect(
+        setupStateModule.getCloudSetupState({
+          createProfilingEsClient,
+          deps: {
+            cloud: { isCloudEnabled: true } as RegisterServicesParams['deps']['cloud'],
+          },
+          esClient,
+          logger,
+          soClient,
+        })
+      ).rejects.toThrow('Elastic Fleet is required to set up Universal Profiling on Cloud');
+
+      expect(mockedCloudSetupState).not.toHaveBeenCalled();
+    });
   });
 
-  it('uses self-managed setup state when cloud is not enabled', async () => {
-    const setupState = { selfManaged: true } as any;
-    mockedSelfManagedSetupState.mockResolvedValue(setupState);
+  describe('getSelfManagedSetupState', () => {
+    it('reads the self-managed setup state in the default space', async () => {
+      const setupState = { selfManaged: true } as any;
+      mockedSelfManagedSetupState.mockResolvedValue(setupState);
 
-    const result = await setupStateModule.getSetupState({
-      createProfilingEsClient,
-      deps: {
-        cloud: { isCloudEnabled: false } as RegisterServicesParams['deps']['cloud'],
-      },
-      esClient,
-      logger,
-      soClient,
+      const result = await setupStateModule.getSelfManagedSetupState({
+        createProfilingEsClient,
+        deps: {},
+        esClient,
+        logger,
+        soClient,
+      });
+
+      expect(result).toBe(setupState);
+      expect(mockedSelfManagedSetupState).toHaveBeenCalledWith({
+        client: internalProfilingClient,
+        clientWithProfilingAuth: currentProfilingClient,
+        logger,
+        soClient,
+        spaceId: 'default',
+      });
+      expect(mockedCloudSetupState).not.toHaveBeenCalled();
     });
-
-    expect(result).toEqual({
-      type: 'self-managed',
-      setupState,
-    });
-
-    expect(mockedSelfManagedSetupState).toHaveBeenCalled();
-    expect(mockedCloudSetupState).not.toHaveBeenCalled();
-    expect(mockedServerlessSetupState).not.toHaveBeenCalled();
   });
 });

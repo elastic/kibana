@@ -9,23 +9,26 @@ import type { IScopedClusterClient, SavedObjectsClientContract } from '@kbn/core
 import { createDefaultCloudSetupState } from '../../../common/cloud_setup';
 import { createDefaultSetupState, mergePartialSetupStates } from '../../../common/setup';
 import type { RegisterServicesParams } from '../register_services';
-import { getSetupState } from '../setup_state';
+import { getCloudSetupState, getSelfManagedSetupState } from '../setup_state';
 import { createGetStatusService } from '.';
 
 jest.mock('../setup_state', () => ({
-  getSetupState: jest.fn(),
+  getCloudSetupState: jest.fn(),
+  getSelfManagedSetupState: jest.fn(),
 }));
 
-const mockedGetSetupState = jest.mocked(getSetupState);
+const mockedGetCloudSetupState = jest.mocked(getCloudSetupState);
+const mockedGetSelfManagedSetupState = jest.mocked(getSelfManagedSetupState);
 
 describe('createGetStatusService', () => {
-  const registerServicesParams = {
-    createProfilingEsClient: jest.fn(),
-    logger: {
-      debug: jest.fn(),
-    },
-    deps: {},
-  } as unknown as RegisterServicesParams;
+  const createParams = (isCloudEnabled: boolean) =>
+    ({
+      createProfilingEsClient: jest.fn(),
+      logger: {
+        debug: jest.fn(),
+      },
+      deps: { cloud: { isCloudEnabled } },
+    } as unknown as RegisterServicesParams);
 
   const soClient = {} as SavedObjectsClientContract;
   const esClient = {} as IScopedClusterClient;
@@ -50,20 +53,17 @@ describe('createGetStatusService', () => {
       },
     ]);
 
-    mockedGetSetupState.mockResolvedValue({
-      type: 'cloud',
-      setupState: cloudSetupState,
-    });
+    mockedGetCloudSetupState.mockResolvedValue(cloudSetupState);
 
-    const getStatus = createGetStatusService(registerServicesParams);
+    const getStatus = createGetStatusService(createParams(true));
 
     await expect(getStatus({ soClient, esClient, spaceId: 'test-space' })).resolves.toEqual({
-      type: 'cloud',
       profiling_enabled: true,
       has_setup: true,
       has_data: true,
       pre_8_9_1_data: false,
     });
+    expect(mockedGetSelfManagedSetupState).not.toHaveBeenCalled();
   });
 
   it('returns expected status for self-managed setup state', async () => {
@@ -77,64 +77,16 @@ describe('createGetStatusService', () => {
       },
     ]);
 
-    mockedGetSetupState.mockResolvedValue({
-      type: 'self-managed',
-      setupState,
-    });
+    mockedGetSelfManagedSetupState.mockResolvedValue(setupState);
 
-    const getStatus = createGetStatusService(registerServicesParams);
+    const getStatus = createGetStatusService(createParams(false));
 
     await expect(getStatus({ soClient, esClient, spaceId: 'test-space' })).resolves.toEqual({
-      type: 'self-managed',
       profiling_enabled: true,
       has_setup: true,
       has_data: true,
       pre_8_9_1_data: true,
     });
-  });
-
-  it('returns expected status for serverless setup state', async () => {
-    const setupState = mergePartialSetupStates(createDefaultSetupState(), [
-      {
-        profiling: { enabled: false },
-        data: { available: false },
-        resources: { pre_8_9_1_data: false },
-      },
-    ]);
-
-    mockedGetSetupState.mockResolvedValue({
-      type: 'serverless',
-      setupState,
-    });
-
-    const getStatus = createGetStatusService(registerServicesParams);
-
-    await expect(
-      getStatus({ soClient, esClient, spaceId: 'test-space', isServerless: true })
-    ).resolves.toEqual({
-      type: 'serverless',
-      profiling_enabled: false,
-      has_setup: false,
-      has_data: false,
-      pre_8_9_1_data: false,
-    });
-  });
-
-  it('handles 403 exceptions from getSetupState gracefully', async () => {
-    mockedGetSetupState.mockRejectedValue({
-      meta: {
-        statusCode: 403,
-      },
-    });
-
-    const getStatus = createGetStatusService(registerServicesParams);
-
-    await expect(getStatus({ soClient, esClient, spaceId: 'test-space' })).resolves.toEqual({
-      profiling_enabled: true,
-      has_setup: true,
-      pre_8_9_1_data: false,
-      has_data: true,
-      unauthorized: true,
-    });
+    expect(mockedGetCloudSetupState).not.toHaveBeenCalled();
   });
 });

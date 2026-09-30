@@ -30,6 +30,7 @@ dependsOn:
   - '@kbn/io-ts-utils'
   - '@kbn/unified-search-plugin'
   - '@kbn/es-query'
+  - '@kbn/config'
   - '@kbn/config-schema'
   - '@kbn/features-plugin'
   - '@kbn/logging'
