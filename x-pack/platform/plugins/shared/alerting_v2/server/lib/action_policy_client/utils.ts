@@ -12,7 +12,7 @@ import type {
   ThrottleStrategy,
   UpdateActionPolicyData,
 } from '@kbn/alerting-v2-schemas';
-import { needsInterval } from '@kbn/alerting-v2-schemas';
+import { needsInterval, type PolicyMatcher } from '@kbn/alerting-v2-schemas';
 import { z } from '@kbn/zod/v4';
 import type { ActionPolicySavedObjectAttributes } from '../../saved_objects';
 import { ALERTING_ERROR_CODES } from '../errors/error_codes';
@@ -61,15 +61,6 @@ export const toApiKeyAttributes = (auth: ApiKeyAttributes) => ({
   apiKeyCreatedByUser: auth.createdByUser,
 });
 
-const toAuthResponse = (
-  attributes: Pick<ActionPolicySavedObjectAttributes, 'apiKeyOwner' | 'apiKeyCreatedByUser'>
-): ActionPolicyResponse['auth'] => {
-  return {
-    owner: attributes.apiKeyOwner,
-    created_by_user: attributes.apiKeyCreatedByUser,
-  };
-};
-
 export const buildCreateActionPolicyAttributes = ({
   data,
   auth,
@@ -80,9 +71,9 @@ export const buildCreateActionPolicyAttributes = ({
 }: {
   data: CreateActionPolicyData;
   auth: ApiKeyAttributes;
-  createdBy: string | null;
+  createdBy: ActionPolicySavedObjectAttributes['createdBy'];
   createdAt: string;
-  updatedBy: string | null;
+  updatedBy: ActionPolicySavedObjectAttributes['updatedBy'];
   updatedAt: string;
 }): ActionPolicySavedObjectAttributes => {
   return {
@@ -92,7 +83,7 @@ export const buildCreateActionPolicyAttributes = ({
     destinations: data.destinations,
     matcher: data.matcher ?? null,
     groupBy: data.group_by ?? null,
-    tags: data.tags ?? null,
+    tags: null,
     groupingMode: data.grouping_mode ?? null,
     throttle: normalizeThrottle(data.throttle),
     snoozedUntil: null,
@@ -114,7 +105,7 @@ export const buildUpdateActionPolicyAttributes = ({
   existing: ActionPolicySavedObjectAttributes;
   update: UpdateActionPolicyData;
   auth: ApiKeyAttributes;
-  updatedBy: string | null;
+  updatedBy: ActionPolicySavedObjectAttributes['updatedBy'];
   updatedAt: string;
 }): ActionPolicySavedObjectAttributes => {
   return {
@@ -124,7 +115,9 @@ export const buildUpdateActionPolicyAttributes = ({
     destinations: update.destinations ?? existing.destinations,
     matcher: resolveNextNullableField(update.matcher, existing.matcher),
     groupBy: resolveNextNullableField(update.group_by, existing.groupBy),
-    tags: resolveNextNullableField(update.tags, existing.tags),
+    // Tags are excluded from the PATCH schema; always carry the stored value through.
+    // If tags is re-added to updateActionPolicyDataSchema, switch to resolveNextNullableField.
+    tags: normalizeNullableField(existing.tags),
     groupingMode: resolveNextNullableField(update.grouping_mode, existing.groupingMode),
     throttle: normalizeThrottle(resolveNextNullableField(update.throttle, existing.throttle)),
     snoozedUntil: normalizeNullableField(existing.snoozedUntil),
@@ -152,13 +145,11 @@ export const transformActionPolicySoAttributesToApiResponse = ({
     description: attributes.description,
     enabled: attributes.enabled,
     destinations: attributes.destinations,
-    matcher: normalizeNullableField(attributes.matcher),
+    matcher: normalizeNullableField(attributes.matcher) as PolicyMatcher | null,
     group_by: normalizeNullableField(attributes.groupBy),
-    tags: normalizeNullableField(attributes.tags),
     grouping_mode: normalizeNullableField(attributes.groupingMode),
     throttle: normalizeThrottle(attributes.throttle),
     snoozed_until: normalizeNullableField(attributes.snoozedUntil),
-    auth: toAuthResponse(attributes),
     created_by: attributes.createdBy,
     created_at: attributes.createdAt,
     updated_by: attributes.updatedBy,

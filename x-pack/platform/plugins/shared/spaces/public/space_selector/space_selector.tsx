@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-import './space_selector.scss';
-
 import {
   EuiButtonGroup,
   EuiFieldSearch,

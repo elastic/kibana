@@ -24,6 +24,8 @@ export interface CreateAttachmentArgs {
   description?: string;
   /** Whether the attachment should be hidden from the user. */
   hidden?: boolean;
+  /** When true, the UI renders the attachment inline when the conversation is opened. Defaults to false. */
+  render_inline?: boolean;
 }
 
 /**
@@ -44,6 +46,8 @@ export interface UpdateAttachmentArgs {
   data?: unknown;
   /** Optional new description. */
   description?: string;
+  /** When true, the UI renders the attachment inline when the conversation is opened. Defaults to false. */
+  render_inline?: boolean;
 }
 
 /**

@@ -8,6 +8,7 @@
 import type { ScopedClusterClientMock } from '@kbn/core/server/mocks';
 import { elasticsearchServiceMock, loggingSystemMock } from '@kbn/core/server/mocks';
 import {
+  countVectors,
   fetchApiKeysStats,
   fetchIndexStats,
   fetchMonitorPrivileges,
@@ -77,6 +78,95 @@ describe('fetchMonitorPrivileges', () => {
   });
 });
 
+describe('countVectors', () => {
+  let client: ScopedClusterClientMock;
+  const logger = loggingSystemMock.createLogger();
+
+  beforeEach(() => {
+    client = elasticsearchServiceMock.createScopedClusterClient();
+  });
+
+  afterEach(() => {
+    jest.clearAllMocks();
+  });
+
+  const mockVectorStats = (denseCount: number, sparseCount = 0) => {
+    client.asInternalUser.indices.stats.mockResolvedValue({
+      _shards: { total: 1, successful: 1, failed: 0 },
+      indices: {
+        vectordb: {
+          shards: {
+            '0': [
+              {
+                dense_vector: { value_count: denseCount },
+                sparse_vector: { value_count: sparseCount },
+              },
+            ],
+          },
+        },
+      },
+    } as any);
+  };
+
+  it('sums dense and sparse vector value_counts from operator indices.stats', async () => {
+    mockVectorStats(100, 25);
+
+    await expect(countVectors(client, logger)).resolves.toBe(125);
+
+    expect(client.asInternalUser.indices.stats).toHaveBeenCalledWith({
+      index: ['*', '-.*'],
+      expand_wildcards: ['open'],
+      level: 'shards',
+      metric: ['dense_vector', 'sparse_vector'],
+      filter_path: [
+        '_shards',
+        'indices.*.shards.*.dense_vector.value_count',
+        'indices.*.shards.*.sparse_vector.value_count',
+      ],
+    });
+  });
+
+  it('counts each logical shard once when multiple copies report vectors', async () => {
+    client.asInternalUser.indices.stats.mockResolvedValue({
+      _shards: { total: 2, successful: 2, failed: 0 },
+      indices: {
+        vectordb: {
+          shards: {
+            // the indexing shard and a search shard of the same logical shard
+            '0': [{ dense_vector: { value_count: 100 } }, { dense_vector: { value_count: 90 } }],
+            // a cold shard where only a search copy remains
+            '1': [{ sparse_vector: { value_count: 10 } }],
+          },
+        },
+      },
+    } as any);
+
+    await expect(countVectors(client, logger)).resolves.toBe(110);
+  });
+
+  it('treats missing dense/sparse stats as zero', async () => {
+    client.asInternalUser.indices.stats.mockResolvedValue({
+      _shards: { total: 1, successful: 1, failed: 0 },
+    } as any);
+
+    await expect(countVectors(client, logger)).resolves.toBe(0);
+  });
+
+  it('returns null when not all shards responded', async () => {
+    client.asInternalUser.indices.stats.mockResolvedValue({
+      _shards: { total: 3, successful: 2, failed: 0 },
+      indices: {
+        vectordb: {
+          shards: { '0': [{ dense_vector: { value_count: 100 } }] },
+        },
+      },
+    } as any);
+
+    await expect(countVectors(client, logger)).resolves.toBeNull();
+    expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('2 of 3 shards'));
+  });
+});
+
 describe('fetchIndexStats', () => {
   let client: ScopedClusterClientMock;
   const logger = loggingSystemMock.createLogger();
@@ -133,13 +223,20 @@ describe('fetchIndexStats', () => {
     } as any);
   };
 
-  // both privileges default to granted; individual tests drop the one they are exercising
-  const getIndexStats = (privileges: Partial<MonitorPrivileges> = {}) =>
-    fetchIndexStats(client, logger, {
-      canMonitorAllIndices: true,
-      canMonitorCluster: true,
-      ...privileges,
-    });
+  // both privileges default to granted; individual tests drop the one they are exercising.
+  // vectorCountEnabled defaults to false (matches the current constant) — pass true to exercise
+  // the canMonitorAllIndices guard independently of the flag.
+  const getIndexStats = (privileges: Partial<MonitorPrivileges> = {}, vectorCountEnabled = false) =>
+    fetchIndexStats(
+      client,
+      logger,
+      {
+        canMonitorAllIndices: true,
+        canMonitorCluster: true,
+        ...privileges,
+      },
+      vectorCountEnabled
+    );
 
   // metering takes no index pattern, so it is the one source that reports on system indices
   it('excludes dot-prefixed indices and aggregates count/size', async () => {
@@ -147,14 +244,13 @@ describe('fetchIndexStats', () => {
       { name: 'products', num_docs: 10, size_in_bytes: 100 },
       { name: '.kibana', num_docs: 999, size_in_bytes: 999 },
     ]);
-    mockVectorStats(0);
 
     const result = await getIndexStats();
 
     expect(result).toEqual({
       indicesCount: 1,
       storeSizeBytes: 100,
-      vectorCount: 0,
+      vectorCount: null,
       documentsCount: 0,
       newIndex: null,
     });
@@ -164,7 +260,6 @@ describe('fetchIndexStats', () => {
   it('surfaces a new index whose size metering has not reported yet', async () => {
     mockCatIndices([{ index: 'brand-new', 'creation.date': String(Date.now() - 60_000) }]);
     mockMetering([{ name: 'brand-new', num_docs: 0, size_in_bytes: 0 }]);
-    mockVectorStats(0);
     mockDocumentCount(42);
 
     const result = await getIndexStats();
@@ -175,55 +270,23 @@ describe('fetchIndexStats', () => {
     );
   });
 
-  it('sums dense and sparse vector value_counts from operator indices.stats', async () => {
+  it('does not fetch vector counts while they are disabled', async () => {
     mockMetering([{ name: 'vectordb', num_docs: 20, size_in_bytes: 500 }]);
+    mockDocumentCount(20);
     mockVectorStats(100, 25);
 
     const result = await getIndexStats();
 
-    expect(client.asInternalUser.indices.stats).toHaveBeenCalledWith({
-      index: ['*', '-.*'],
-      expand_wildcards: ['open'],
-      level: 'shards',
-      metric: ['dense_vector', 'sparse_vector'],
-      filter_path: [
-        '_shards',
-        'indices.*.shards.*.dense_vector.value_count',
-        'indices.*.shards.*.sparse_vector.value_count',
-      ],
-    });
-    expect(result.vectorCount).toBe(125);
-  });
-
-  it('counts each logical shard once when multiple copies report vectors', async () => {
-    mockMetering([{ name: 'vectordb', num_docs: 20, size_in_bytes: 500 }]);
-    client.asInternalUser.indices.stats.mockResolvedValue({
-      _shards: { total: 2, successful: 2, failed: 0 },
-      indices: {
-        vectordb: {
-          shards: {
-            // the indexing shard and a search shard of the same logical shard
-            '0': [{ dense_vector: { value_count: 100 } }, { dense_vector: { value_count: 90 } }],
-            // a cold shard where only a search copy remains
-            '1': [{ sparse_vector: { value_count: 10 } }],
-          },
-        },
-      },
-    } as any);
-
-    const result = await fetchIndexStats(client, logger, {
-      canMonitorAllIndices: true,
-      canMonitorCluster: true,
-    });
-
-    expect(result.vectorCount).toBe(110);
+    expect(result.vectorCount).toBeNull();
+    expect(client.asInternalUser.indices.stats).not.toHaveBeenCalled();
   });
 
   it('skips the vector lookup entirely when the caller cannot monitor every index', async () => {
     mockMetering([{ name: 'vectordb', num_docs: 20, size_in_bytes: 500 }]);
     mockDocumentCount(20);
 
-    const result = await getIndexStats({ canMonitorAllIndices: false });
+    // pass true so the canMonitorAllIndices guard is exercised independently of the feature flag
+    const result = await getIndexStats({ canMonitorAllIndices: false }, true);
 
     // the scoped counts still resolve; only the cluster-wide vector total is withheld
     expect(result).toEqual({
@@ -254,7 +317,8 @@ describe('fetchIndexStats', () => {
     mockCatIndices([{ index: 'vectordb', 'creation.date': String(Date.now() - 60_000) }]);
     mockDocumentCount(20);
 
-    const result = await getIndexStats({ canMonitorAllIndices: false });
+    // pass true so the canMonitorAllIndices guard is exercised independently of the feature flag
+    const result = await getIndexStats({ canMonitorAllIndices: false }, true);
 
     expect(result.newIndex).toEqual(expect.objectContaining({ indexName: 'vectordb' }));
     // the cluster-wide vector total is still withheld from a caller without index monitor on *
@@ -263,64 +327,24 @@ describe('fetchIndexStats', () => {
   });
 
   it('reports a null vectorCount for an unprivileged caller with an empty deployment', async () => {
-    const result = await getIndexStats({ canMonitorAllIndices: false });
+    // pass true so the canMonitorAllIndices guard is exercised independently of the feature flag
+    const result = await getIndexStats({ canMonitorAllIndices: false }, true);
 
     // 0 would imply "no vectors"; the caller simply isn't allowed to know
     expect(result.vectorCount).toBeNull();
     expect(result.indicesCount).toBe(0);
   });
 
-  it('treats missing dense/sparse stats as zero', async () => {
-    mockMetering([{ name: 'products', num_docs: 10, size_in_bytes: 100 }]);
-    client.asInternalUser.indices.stats.mockResolvedValue({
-      _shards: { total: 1, successful: 1, failed: 0 },
-    } as any);
-
+  it('reports a null vectorCount for a privileged caller while the fetch is disabled', async () => {
     const result = await getIndexStats();
-
-    expect(result.vectorCount).toBe(0);
-  });
-
-  it('returns a null vectorCount when not all shards responded', async () => {
-    mockMetering([{ name: 'vectordb', num_docs: 20, size_in_bytes: 500 }]);
-    client.asInternalUser.indices.stats.mockResolvedValue({
-      _shards: { total: 3, successful: 2, failed: 0 },
-      indices: {
-        vectordb: {
-          shards: { '0': [{ dense_vector: { value_count: 100 } }] },
-        },
-      },
-    } as any);
-
-    const result = await fetchIndexStats(client, logger, {
-      canMonitorAllIndices: true,
-      canMonitorCluster: true,
-    });
 
     expect(result.vectorCount).toBeNull();
-    expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('2 of 3 shards'));
-  });
-
-  it('returns a null vectorCount (not 0) when the vector stats call fails', async () => {
-    mockMetering([{ name: 'vectordb', num_docs: 10, size_in_bytes: 500 }]);
-    client.asInternalUser.indices.stats.mockRejectedValue(new Error('boom'));
-
-    const result = await getIndexStats();
-
-    // index/size counts are still valid; only the vector count is unavailable
-    expect(result).toEqual({
-      indicesCount: 1,
-      storeSizeBytes: 500,
-      vectorCount: null,
-      documentsCount: 0,
-      newIndex: null,
-    });
-    expect(logger.warn).toHaveBeenCalled();
+    expect(result.indicesCount).toBe(0);
+    expect(client.asInternalUser.indices.stats).not.toHaveBeenCalled();
   });
 
   it('returns a null indicesCount and storeSizeBytes when the metering call fails', async () => {
     client.asSecondaryAuthUser.transport.request.mockRejectedValue(new Error('metering down'));
-    mockVectorStats(10);
     mockDocumentCount(20);
 
     const result = await getIndexStats();
@@ -330,11 +354,12 @@ describe('fetchIndexStats', () => {
     expect(result).toEqual({
       indicesCount: null,
       storeSizeBytes: null,
-      vectorCount: 10,
+      vectorCount: null,
       documentsCount: 20,
       newIndex: null,
     });
     expect(logger.warn).toHaveBeenCalled();
+    expect(client.asInternalUser.indices.stats).not.toHaveBeenCalled();
   });
 
   it('treats an index_not_found_exception from metering as an empty deployment', async () => {
@@ -356,7 +381,6 @@ describe('fetchIndexStats', () => {
     client.asSecondaryAuthUser.transport.request.mockRejectedValue(
       Object.assign(new Error('no handler found for uri [/_metering/stats]'), { statusCode: 404 })
     );
-    mockVectorStats(10);
     mockDocumentCount(20);
 
     const result = await getIndexStats();
@@ -371,14 +395,13 @@ describe('fetchIndexStats', () => {
     client.asSecondaryAuthUser.transport.request.mockResolvedValue({
       _total: { num_docs: 0, size_in_bytes: 0 },
     });
-    mockVectorStats(0);
 
     const result = await getIndexStats();
 
     expect(result).toEqual({
       indicesCount: 0,
       storeSizeBytes: 0,
-      vectorCount: 0,
+      vectorCount: null,
       documentsCount: 0,
       newIndex: null,
     });
@@ -392,7 +415,6 @@ describe('fetchIndexStats', () => {
         { name: 'products', num_docs: 10, size_in_bytes: 100 },
       ],
     });
-    mockVectorStats(0);
 
     const result = await getIndexStats();
 
@@ -403,11 +425,11 @@ describe('fetchIndexStats', () => {
   it('skips the follow-up reads when the caller has no indices', async () => {
     const result = await getIndexStats();
 
-    // a genuinely empty deployment reports real zeros, not null
+    // a genuinely empty deployment reports real zeros for index/doc counts, not null
     expect(result).toEqual({
       indicesCount: 0,
       storeSizeBytes: 0,
-      vectorCount: 0,
+      vectorCount: null,
       documentsCount: 0,
       newIndex: null,
     });
@@ -419,7 +441,6 @@ describe('fetchIndexStats', () => {
   it('counts top-level documents rather than reusing the metering num_docs', async () => {
     // metering counts the hidden nested docs that `semantic_text` chunking creates
     mockMetering([{ name: 'vectordb', num_docs: 5000, size_in_bytes: 500 }]);
-    mockVectorStats(0);
     mockDocumentCount(500);
 
     const result = await getIndexStats();
@@ -433,29 +454,27 @@ describe('fetchIndexStats', () => {
 
   it('returns a null documentsCount when shards fail, rather than an undercount', async () => {
     mockMetering([{ name: 'vectordb', num_docs: 5000, size_in_bytes: 500 }]);
-    mockVectorStats(10);
     mockDocumentCount(120, 1);
 
     const result = await getIndexStats();
 
     expect(result.documentsCount).toBeNull();
-    expect(result.vectorCount).toBe(10);
+    expect(result.vectorCount).toBeNull();
     // a partial count resolves rather than throwing, so it needs its own warning
     expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('1 of 2 shards'));
   });
 
   it('returns a null documentsCount (not 0) when the count call fails', async () => {
     mockMetering([{ name: 'vectordb', num_docs: 10, size_in_bytes: 500 }]);
-    mockVectorStats(10);
     client.asCurrentUser.count.mockRejectedValue(new Error('boom'));
 
     const result = await getIndexStats();
 
-    // index/size/vector counts are still valid; only the document count is unavailable
+    // index/size counts are still valid; only the document count is unavailable
     expect(result).toEqual({
       indicesCount: 1,
       storeSizeBytes: 500,
-      vectorCount: 10,
+      vectorCount: null,
       documentsCount: null,
       newIndex: null,
     });

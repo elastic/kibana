@@ -104,7 +104,10 @@ Object {
     "xContentTypeOptions": "nosniff",
   },
   "selfHttp": Object {
-    "ssl": Object {},
+    "maxRedirects": 0,
+    "ssl": Object {
+      "verificationMode": "full",
+    },
     "target": "auto",
   },
   "serverTiming": false,
