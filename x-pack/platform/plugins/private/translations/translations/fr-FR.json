@@ -37645,7 +37645,6 @@
     "xpack.osquery.scheduleSection.frequencyLabel": "Fréquence",
     "xpack.osquery.scheduleSection.intervalFieldLabel": "Intervalles",
     "xpack.osquery.scheduleSection.intervalFieldUnit": "seconde(s)",
-    "xpack.osquery.scheduleSection.packQueryStaleIntervalError": "Une ou plusieurs requêtes utilisent encore un calendrier par intervalles. Les intervalles par requête ne s'appliquent pas lorsque le pack utilise un calendrier de date et d'heure et ne seront pas enregistrés.",
     "xpack.osquery.scheduleSection.queryOverrideToggleDescription": "Lorsqu'elle est activée, cette requête s'exécute selon son propre calendrier au lieu d'hériter de celui du pack. Le mode (intervalle ou récurrence) reste identique à celui du pack.",
     "xpack.osquery.scheduleSection.queryOverrideToggleLabel": "Remplacer le calendrier du pack",
     "xpack.osquery.scheduleSection.queryUsingPackScheduleLabel": "Utilisation du calendrier des packs",

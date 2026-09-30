@@ -37859,7 +37859,6 @@
     "xpack.osquery.scheduleSection.frequencyLabel": "频率",
     "xpack.osquery.scheduleSection.intervalFieldLabel": "时间间隔",
     "xpack.osquery.scheduleSection.intervalFieldUnit": "秒",
-    "xpack.osquery.scheduleSection.packQueryStaleIntervalError": "一个或多个查询仍然使用时间间隔计划。当包使用日期和时间计划时，每次查询间隔不适用，并且不会被保存。",
     "xpack.osquery.scheduleSection.queryOverrideToggleDescription": "启用后，此查询将按照其自身的计划运行，而不是继承包的计划。模式（间隔或重复）与包保持一致。",
     "xpack.osquery.scheduleSection.queryOverrideToggleLabel": "覆盖包计划",
     "xpack.osquery.scheduleSection.queryUsingPackScheduleLabel": "使用包计划",

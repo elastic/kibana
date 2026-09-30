@@ -37850,7 +37850,6 @@
     "xpack.osquery.scheduleSection.frequencyLabel": "頻度",
     "xpack.osquery.scheduleSection.intervalFieldLabel": "間隔",
     "xpack.osquery.scheduleSection.intervalFieldUnit": "秒",
-    "xpack.osquery.scheduleSection.packQueryStaleIntervalError": "1つ以上のクエリは依然として間隔スケジュールを使用しています。パックが日付と時間スケジュールを使用している間は、クエリごとの間隔は適用されず、保存されません。",
     "xpack.osquery.scheduleSection.queryOverrideToggleDescription": "有効にすると、このクエリはパックのスケジュールを継承するのではなく、独自のスケジュールで実行されます。モード（間隔または繰り返し）はパックと同じままです。",
     "xpack.osquery.scheduleSection.queryOverrideToggleLabel": "パックスケジュールの上書き",
     "xpack.osquery.scheduleSection.queryUsingPackScheduleLabel": "パックスケジュールの使用",
