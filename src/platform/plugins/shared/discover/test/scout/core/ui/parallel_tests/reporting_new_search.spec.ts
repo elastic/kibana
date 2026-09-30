@@ -8,13 +8,12 @@
  */
 
 import { expect } from '@kbn/scout/ui';
-import { spaceTest, tags } from '../../../common/ui/fixtures';
+import { spaceTest, tags, testData } from '../../../common/ui/fixtures';
 
-const REPORT_GENERATION_TIMEOUT = 120_000;
 const NEW_SEARCH_TITLE = 'Scout CSV export new search';
 
 spaceTest.describe('Discover CSV export', { tag: tags.deploymentAgnostic }, () => {
-  spaceTest.setTimeout(REPORT_GENERATION_TIMEOUT + 30_000);
+  spaceTest.setTimeout(testData.REPORT_GENERATION_TIMEOUT + 30_000);
 
   spaceTest.beforeAll(async ({ discoverScoutSpace }) => {
     await discoverScoutSpace.setupDiscoverDefaults();
@@ -34,7 +33,7 @@ spaceTest.describe('Discover CSV export', { tag: tags.deploymentAgnostic }, () =
     await pageObjects.discover.saveSearch(NEW_SEARCH_TITLE);
 
     const download = await pageObjects.discover.exportAsCsv({
-      timeout: REPORT_GENERATION_TIMEOUT,
+      timeout: testData.REPORT_GENERATION_TIMEOUT,
     });
 
     expect(download.suggestedFilename()).toMatch(/\.csv$/);
