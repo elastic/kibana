@@ -236,7 +236,7 @@ describe('EpisodeRuleCell', () => {
   const makeRule = (name: string, grouping?: { fields: string[] }): Rule =>
     ({
       metadata: { name },
-      query: { format: 'standalone', breach: { query: `FROM ${name}` } },
+      query: { base: `FROM ${name}` },
       ...(grouping ? { grouping } : {}),
     } as unknown as Rule);
 

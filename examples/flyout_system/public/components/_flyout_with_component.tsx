@@ -23,6 +23,7 @@ import {
 import { useBooleanUrlState } from '@kbn/shared-url-state';
 import { FlyoutTemplate } from '@kbn/flyout-template';
 import {
+  bodyCallouts,
   createChildFlyoutDescriptionItems,
   createMainFlyoutDescriptionItems,
   FLYOUT_MIN_WIDTH,
@@ -170,6 +171,7 @@ const SessionFlyout: React.FC<SessionFlyoutProps> = React.memo((props) => {
             {headerBlocks()}
           </FlyoutTemplate.Header>
           <FlyoutTemplate.Body>
+            {bodyCallouts()}
             <FlyoutTemplate.Body.Section title="Flyout properties">
               <EuiDescriptionList
                 type="column"

@@ -64,23 +64,28 @@ jest.mock('@kbn/workflows-ui', () => ({
   }),
 }));
 
+const mockUseKiList = jest.fn();
+
 jest.mock('../hooks/use_ki_list', () => ({
-  useKiList: () => ({
-    kis: [],
-    total: 25,
-    summary: {
-      total: 25,
-      countsByType: [
-        { type: 'index_metadata', count: 10 },
-        { type: 'document', count: 8 },
-        { type: 'detection', count: 7 },
-      ],
-    },
-    isLoading: false,
-    error: undefined,
-    refetch: jest.fn(),
-  }),
+  useKiList: (...args: unknown[]) => mockUseKiList(...args),
 }));
+
+const defaultKiListMock = {
+  kis: [],
+  total: 25,
+  summary: {
+    total: 25,
+    countsByType: [
+      { type: 'index_metadata', count: 10 },
+      { type: 'document', count: 8 },
+      { type: 'detection', count: 7 },
+    ],
+  },
+  isLoading: false,
+  isFetching: false,
+  error: undefined,
+  refetch: jest.fn(),
+};
 
 jest.mock('../hooks/use_signal_groups', () => ({
   useSignalGroups: () => ({ groups: [], isLoading: false, error: undefined, refetch: jest.fn() }),
@@ -190,19 +195,21 @@ describe('AiIndexDetailPage', () => {
     mockMgetWorkflows.mockResolvedValue([]);
     mockCreateWorkflow.mockResolvedValue({ id: 'wf-created' });
     mockUseFeedbackLoopEnabled.mockReturnValue(true);
+    mockUseKiList.mockImplementation(() => defaultKiListMock);
   });
 
   afterEach(() => {
     jest.clearAllMocks();
+    mockUseKiList.mockImplementation(() => defaultKiListMock);
   });
 
   it('shows a dismissible success callout when navigated from AI index creation', async () => {
     const services = createServices();
-    services.http.get.mockResolvedValue(aiIndex);
+    services.http.get.mockResolvedValue({ ...aiIndex, sources: [] });
 
     renderWithProviders(services, AI_INDEX_CREATED_LOCATION_STATE);
 
-    await waitForAiIndexDetailLoaded();
+    await screen.findByTestId('contextAiIndexSourcesEmpty');
 
     expect(screen.getByTestId('contextAiIndexCreatedCallout')).toBeInTheDocument();
     expect(screen.getByText('Your AI index is ready')).toBeInTheDocument();
@@ -232,9 +239,38 @@ describe('AiIndexDetailPage', () => {
     expect(screen.queryByTestId('contextAiIndexCreatedCallout')).not.toBeInTheDocument();
   });
 
+  it('dismisses the success callout when a source is added after creation', async () => {
+    const services = createServices();
+    const indexWithoutSources = { ...aiIndex, sources: [] };
+    const indexWithSources = {
+      ...aiIndex,
+      sources: [{ type: 'esql', value: 'FROM My view' }],
+    };
+    services.http.get
+      .mockResolvedValueOnce(indexWithoutSources)
+      .mockResolvedValueOnce(indexWithSources);
+    services.http.put.mockResolvedValue({ status: 'updated' });
+
+    renderWithProviders(services, AI_INDEX_CREATED_LOCATION_STATE);
+
+    await screen.findByTestId('contextAddSourcesButton');
+    expect(screen.getByTestId('contextAiIndexCreatedCallout')).toBeInTheDocument();
+
+    fireEvent.click(screen.getByTestId('contextAddSourcesButton'));
+
+    const editor = await screen.findByTestId('mockEsqlEditor');
+    fireEvent.change(editor, { target: { value: 'FROM My view' } });
+    fireEvent.click(screen.getByTestId('contextAddEsqlSourceButton'));
+    fireEvent.click(screen.getByTestId('contextEditSourcesDoneButton'));
+
+    await waitFor(() => {
+      expect(screen.queryByTestId('contextAiIndexCreatedCallout')).not.toBeInTheDocument();
+    });
+  });
+
   it('strips creation navigation state from history after showing the callout', async () => {
     const services = createServices();
-    services.http.get.mockResolvedValue(aiIndex);
+    services.http.get.mockResolvedValue({ ...aiIndex, sources: [] });
     const history = createMemoryHistory({
       initialEntries: [
         {
@@ -281,7 +317,7 @@ describe('AiIndexDetailPage', () => {
       </ChromeServiceProvider>
     );
 
-    await waitForAiIndexDetailLoaded();
+    await screen.findByTestId('contextAiIndexSourcesEmpty');
 
     expect(screen.getByTestId('contextAiIndexCreatedCallout')).toBeInTheDocument();
     expect(history.location.state).toBeUndefined();
@@ -306,7 +342,7 @@ describe('AiIndexDetailPage', () => {
     expect(screen.getByTestId('contextAiIndexDetailPageTitle')).toHaveTextContent('my-ai-index');
     expect(screen.getByTestId('contextAiIndexSourceRow')).toHaveTextContent('FROM My view');
     expect(screen.getByTestId('contextSourceTypeBadge')).toHaveTextContent('ES|QL');
-    expect(screen.getByTestId('contextAiIndexDetailTabs')).toBeInTheDocument();
+    expect(await screen.findByTestId('contextAiIndexDetailTabs')).toBeInTheDocument();
   });
 
   it('renders a back button linking to the AI indexes landing page', async () => {
@@ -447,7 +483,7 @@ describe('AiIndexDetailPage', () => {
     await waitForAiIndexDetailLoaded();
     expect(services.http.get).toHaveBeenCalledTimes(1);
 
-    fireEvent.click(screen.getByTestId('contextEditTracesButton'));
+    fireEvent.click(screen.getByTestId('contextAddTracesButton'));
 
     fireEvent.change(screen.getByTestId('contextTraceAgentComboBox').querySelector('input')!, {
       target: { value: 'Loyalty' },
@@ -490,7 +526,7 @@ describe('AiIndexDetailPage', () => {
     await waitForAiIndexDetailLoaded();
     expect(services.http.get).toHaveBeenCalledTimes(1);
 
-    fireEvent.click(screen.getByTestId('contextEditDescriptionButton'));
+    fireEvent.click(screen.getByTestId('contextAddDescriptionButton'));
 
     const textArea = await screen.findByTestId('contextDescriptionTextArea');
     fireEvent.change(textArea, { target: { value: 'A brand new description' } });
@@ -518,7 +554,7 @@ describe('AiIndexDetailPage', () => {
     expect(services.http.get).toHaveBeenCalledTimes(2);
   });
 
-  it('opens the edit sources flyout with the current sources selected', async () => {
+  it('opens the inline sources editor with the current sources selected', async () => {
     const services = createServices();
     services.http.get.mockResolvedValue(aiIndex);
 
@@ -528,7 +564,7 @@ describe('AiIndexDetailPage', () => {
 
     fireEvent.click(screen.getByTestId('contextEditSourcesButton'));
 
-    expect(await screen.findByTestId('contextEditSourcesFlyout')).toBeInTheDocument();
+    expect(await screen.findByTestId('contextEditSourcesInlineEditor')).toBeInTheDocument();
     expect(await screen.findByTestId('contextSelectedSource-esql-0')).toBeInTheDocument();
   });
 
@@ -539,10 +575,10 @@ describe('AiIndexDetailPage', () => {
 
     renderWithProviders(services);
 
-    await screen.findByTestId('contextEditSourcesButton');
+    await screen.findByTestId('contextAddSourcesButton');
     expect(services.http.get).toHaveBeenCalledTimes(1);
 
-    fireEvent.click(screen.getByTestId('contextEditSourcesButton'));
+    fireEvent.click(screen.getByTestId('contextAddSourcesButton'));
 
     // The ES|QL tab is selected by default; author a raw query and add it.
     const editor = await screen.findByTestId('mockEsqlEditor');
@@ -564,9 +600,8 @@ describe('AiIndexDetailPage', () => {
       );
     });
 
-    // Flyout closes and the detail data is refetched after a successful save.
     await waitFor(() => {
-      expect(screen.queryByTestId('contextEditSourcesFlyout')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('contextEditSourcesInlineEditor')).not.toBeInTheDocument();
     });
     expect(services.http.get).toHaveBeenCalledTimes(2);
   });
@@ -590,11 +625,11 @@ describe('AiIndexDetailPage', () => {
     renderWithProviders(services);
 
     expect(screen.queryByTestId('contextEditAutomationsButton')).not.toBeInTheDocument();
-    expect(screen.queryByTestId('contextEditDescriptionButton')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('contextAddDescriptionButton')).not.toBeInTheDocument();
 
     await waitForAiIndexDetailLoaded();
 
-    expect(screen.getByTestId('contextEditDescriptionButton')).toBeEnabled();
+    expect(screen.getByTestId('contextAddDescriptionButton')).toBeEnabled();
 
     expect(screen.getByTestId('contextEditAutomationsButton')).toBeEnabled();
   });
@@ -714,6 +749,7 @@ describe('AiIndexDetailPage', () => {
     expect(screen.getByTestId('contextAiIndexDetailManagedBadge')).toHaveTextContent('Managed');
     expect(screen.queryByTestId('contextEditDescriptionButton')).not.toBeInTheDocument();
     expect(screen.queryByTestId('contextEditSourcesButton')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('contextAddSourcesButton')).not.toBeInTheDocument();
     expect(screen.queryByTestId('contextEditAutomationsButton')).not.toBeInTheDocument();
   });
 
@@ -745,7 +781,7 @@ describe('AiIndexDetailPage', () => {
     await waitForAiIndexDetailLoaded();
 
     expect(screen.queryByTestId('contextAiIndexDetailManagedBadge')).not.toBeInTheDocument();
-    expect(screen.getByTestId('contextEditDescriptionButton')).toBeInTheDocument();
+    expect(screen.getByTestId('contextAddDescriptionButton')).toBeInTheDocument();
     expect(screen.getByTestId('contextEditSourcesButton')).toBeInTheDocument();
 
     expect(screen.getByTestId('contextEditAutomationsButton')).toBeInTheDocument();
@@ -815,8 +851,62 @@ describe('AiIndexDetailPage', () => {
 
     expect(screen.queryByTestId('contextKiListPanel')).not.toBeInTheDocument();
 
-    fireEvent.click(screen.getByTestId('contextAiIndexDetailTab-knowledge_indicators'));
+    fireEvent.click(await screen.findByTestId('contextAiIndexDetailTab-knowledge_indicators'));
 
     expect(screen.getByTestId('contextKiListPanel')).toBeInTheDocument();
+  });
+
+  it('hides the Knowledge Indicators tab when there are no KIs', async () => {
+    mockUseKiList.mockImplementation(() => ({
+      ...defaultKiListMock,
+      total: 0,
+      summary: { total: 0, countsByType: [] },
+    }));
+    const services = createServices();
+    services.http.get.mockResolvedValue(aiIndex);
+
+    renderWithProviders(services);
+
+    await waitForAiIndexDetailLoaded();
+
+    expect(screen.queryByTestId('contextAiIndexDetailTabs')).not.toBeInTheDocument();
+    expect(
+      screen.queryByTestId('contextAiIndexDetailTab-knowledge_indicators')
+    ).not.toBeInTheDocument();
+    expect(screen.getByTestId('contextAiIndexSourceRow')).toBeInTheDocument();
+  });
+
+  it('hides the Knowledge Indicators tab while the KI summary is loading', async () => {
+    mockUseKiList.mockImplementation(() => ({
+      ...defaultKiListMock,
+      isLoading: true,
+    }));
+    const services = createServices();
+    services.http.get.mockResolvedValue(aiIndex);
+
+    renderWithProviders(services);
+
+    await waitForAiIndexDetailLoaded();
+
+    expect(screen.queryByTestId('contextAiIndexDetailTabs')).not.toBeInTheDocument();
+    expect(screen.getByTestId('contextAiIndexSourceRow')).toBeInTheDocument();
+  });
+
+  it('hides the Knowledge Indicators tab when the KI summary request fails', async () => {
+    mockUseKiList.mockImplementation(() => ({
+      ...defaultKiListMock,
+      total: 0,
+      summary: { total: 0, countsByType: [] },
+      error: new Error('Request timed out'),
+    }));
+    const services = createServices();
+    services.http.get.mockResolvedValue(aiIndex);
+
+    renderWithProviders(services);
+
+    await waitForAiIndexDetailLoaded();
+
+    expect(screen.queryByTestId('contextAiIndexDetailTabs')).not.toBeInTheDocument();
+    expect(screen.getByTestId('contextAiIndexSourceRow')).toBeInTheDocument();
   });
 });

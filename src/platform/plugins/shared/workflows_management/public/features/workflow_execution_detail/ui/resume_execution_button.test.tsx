@@ -456,5 +456,31 @@ describe('ResumeExecutionButton', () => {
         });
       });
     });
+
+    it('shows loading only on the clicked button while both stay disabled', async () => {
+      let resolvePost!: () => void;
+      mockHttpPost.mockImplementationOnce(
+        () => new Promise<void>((resolve) => (resolvePost = resolve))
+      );
+
+      renderComponent(approvalProps);
+      fireEvent.click(screen.getByTestId('approveActionButton'));
+
+      await waitFor(() => {
+        expect(screen.getByTestId('approveActionButton')).toBeDisabled();
+        expect(screen.getByTestId('rejectActionButton')).toBeDisabled();
+      });
+      expect(
+        screen.getByTestId('approveActionButton').querySelector('.euiLoadingSpinner')
+      ).not.toBeNull();
+      expect(
+        screen.getByTestId('rejectActionButton').querySelector('.euiLoadingSpinner')
+      ).toBeNull();
+
+      resolvePost();
+      await waitFor(() => {
+        expect(mockAddSuccess).toHaveBeenCalledTimes(1);
+      });
+    });
   });
 });

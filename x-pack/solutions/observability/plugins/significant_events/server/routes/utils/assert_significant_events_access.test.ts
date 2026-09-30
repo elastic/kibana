@@ -73,6 +73,21 @@ describe('assertSignificantEventsAccess', () => {
     ).rejects.toBeInstanceOf(FeatureNotEnabledError);
   });
 
+  it('skips ignored requirements but still enforces the rest', async () => {
+    await expect(
+      assertSignificantEventsAccess({
+        ...buildArgs({ featureFlagAvailable: false }),
+        ignore: ['feature_flag'],
+      })
+    ).resolves.toBeUndefined();
+    await expect(
+      assertSignificantEventsAccess({
+        ...buildArgs({ featureFlagAvailable: false, hasEnterpriseLicense: false }),
+        ignore: ['feature_flag'],
+      })
+    ).rejects.toBeInstanceOf(FeatureNotEnabledError);
+  });
+
   it('fails closed (denies access) when the feature flag read rejects', async () => {
     const args = buildArgs();
     const { getBooleanValue$ } = (
