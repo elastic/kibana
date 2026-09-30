@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { createHash } from 'crypto';
 import { SIGNIFICANT_EVENTS_DISCOVERY_AGENT_ID } from '@kbn/significant-events-plugin/server';
 import { NIGHTSHIFT_ENABLED_FLAG } from '@kbn/nightshift-shared';
 import {
@@ -54,6 +55,13 @@ import {
 } from '../../src/evaluators/discovery/utils/parse_agent_output';
 import { buildDiscoveryInput } from '../../src/evaluators/discovery/discovery/build_agent_input';
 import type { ContinuationCycle } from '../../src/evaluators/discovery/discovery/continuation/continuation_stability';
+
+// Must match the `sha256(space:source:fingerprint)` series key written by `events_write`, so the
+// seed overrides the agent's dual-written version instead of starting a parallel series.
+const toRuleEventsGroupHash = (eventId: string): string =>
+  createHash('sha256')
+    .update(`default:${SIGNIFICANT_EVENTS_ALERT_SOURCE}:${eventId}`)
+    .digest('hex');
 
 const TRUST_UPSTREAM = process.env.SIGEVENTS_TRUST_UPSTREAM === 'true';
 const useRuleEventsRead = process.env.SIGNIFICANT_EVENTS_USE_RULE_EVENTS_READ === 'true';
@@ -548,8 +556,9 @@ evaluate.describe(
                     // produce spurious noise. Deleting by explicit IDs is safer than wiping the
                     // entire stream and works correctly even when concurrency > 1.
                     const seededEventUuids: string[] = [];
-                    // Tracks event_ids written to RULE_EVENTS_DATA_STREAM for flag-on cleanup.
-                    const seededEventIds: string[] = [];
+                    // Tracks series written to RULE_EVENTS_DATA_STREAM for flag-on cleanup; this also
+                    // removes the agent's dual-written versions of the same series.
+                    const seededGroupHashes: string[] = [];
 
                     try {
                       // Feed one detection per cycle, oldest first. After each cycle, seed a
@@ -634,11 +643,12 @@ evaluate.describe(
                           // RuleEventsClient (which reads from that index) can find the seeded
                           // episode in the next cycle's event_search call.
                           if (useRuleEventsRead && seededEvent.event_id) {
+                            const groupHash = toRuleEventsGroupHash(seededEvent.event_id);
                             await esClient.index({
                               index: RULE_EVENTS_DATA_STREAM,
                               document: {
                                 '@timestamp': seededEvent['@timestamp'],
-                                group_hash: seededEvent.event_id,
+                                group_hash: groupHash,
                                 source: SIGNIFICANT_EVENTS_ALERT_SOURCE,
                                 type: 'alert',
                                 space_id: 'default',
@@ -660,7 +670,7 @@ evaluate.describe(
                                 },
                               },
                             });
-                            seededEventIds.push(seededEvent.event_id);
+                            seededGroupHashes.push(groupHash);
                           }
                         }
                         if (producedEventIds.length > 0) {
@@ -682,10 +692,10 @@ evaluate.describe(
                           refresh: true,
                         });
                       }
-                      if (useRuleEventsRead && seededEventIds.length > 0) {
+                      if (useRuleEventsRead && seededGroupHashes.length > 0) {
                         await esClient.deleteByQuery({
                           index: RULE_EVENTS_DATA_STREAM,
-                          query: { terms: { group_hash: seededEventIds } },
+                          query: { terms: { group_hash: seededGroupHashes } },
                           refresh: true,
                         });
                       }
