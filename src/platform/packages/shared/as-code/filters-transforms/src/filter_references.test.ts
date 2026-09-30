@@ -8,12 +8,7 @@
  */
 
 import type { AsCodeFilter } from '@kbn/as-code-filters-schema';
-import {
-  extractFilterReferences,
-  injectFilterReference,
-  injectFilterReferences,
-} from './filter_references';
-import type { StoredAsCodeFilter } from './types';
+import { extractFilterReferences, injectFilterReferences } from './filter_references';
 
 const conditionFilter: AsCodeFilter = {
   type: 'condition',
@@ -117,11 +112,5 @@ describe('injectFilterReferences', () => {
     expect(() => injectFilterReferences(filters, [])).toThrow(
       'Could not find reference for filters[0].data_view_id'
     );
-  });
-});
-
-describe('injectFilterReference', () => {
-  it('returns filters without a reference name unchanged', () => {
-    expect(injectFilterReference(dslFilter as StoredAsCodeFilter)).toEqual(dslFilter);
   });
 });

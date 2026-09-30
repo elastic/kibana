@@ -65,20 +65,13 @@ const storedFilters = toStoredFilters(asCodeFilters);
 Use these helpers when a saved object persists filters in their **AsCodeFilter** shape instead of the **StoredFilter** shape. `extractFilterReferences` replaces each `data_view_id` with a `data_view_ref_name` and returns the matching `index-pattern` saved object references. `injectFilterReferences` restores `data_view_id` from the references and throws if a reference is missing.
 
 ```typescript
-import {
-  extractFilterReferences,
-  injectFilterReference,
-  injectFilterReferences,
-} from '@kbn/as-code-filters-transforms';
+import { extractFilterReferences, injectFilterReferences } from '@kbn/as-code-filters-transforms';
 
 const { filters: storedFilters, references } = extractFilterReferences(asCodeFilters);
 // storedFilters: [{ type: 'condition', data_view_ref_name: 'filters[0].data_view_id', condition: { ... } }]
 // references: [{ name: 'filters[0].data_view_id', type: 'index-pattern', id: 'my-data-view' }]
 
 const asCodeFiltersFromStorage = injectFilterReferences(storedFilters, references);
-
-// Inject a single filter to handle missing references per filter
-const filter = injectFilterReference(storedFilters[0], references);
 ```
 
 Pass `{ refNamePrefix }` to `extractFilterReferences` to namespace reference names when a saved object contains more than one list of filters.

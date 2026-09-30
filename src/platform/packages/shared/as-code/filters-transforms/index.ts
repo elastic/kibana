@@ -19,11 +19,7 @@ export { fromStoredFilter, fromStoredFilters } from './src/from_stored_filter';
 export { toStoredFilter, toStoredFilters } from './src/to_stored_filter';
 
 // Reference extraction for filters persisted in their as code shape
-export {
-  extractFilterReferences,
-  injectFilterReference,
-  injectFilterReferences,
-} from './src/filter_references';
+export { extractFilterReferences, injectFilterReferences } from './src/filter_references';
 
 // Type guards for filter detection
 export {

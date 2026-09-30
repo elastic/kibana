@@ -44,11 +44,7 @@ export function extractFilterReferences(
   return { filters: storedFilters, references };
 }
 
-/**
- * Restores the `data_view_id` of a filter from its `data_view_ref_name`.
- * Throws when the referenced name is not found in `references`.
- */
-export function injectFilterReference(
+function injectFilterReference(
   filter: StoredAsCodeFilter,
   references: Reference[] = []
 ): AsCodeFilter {

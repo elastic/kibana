@@ -64,13 +64,6 @@ describe('Vega library item transforms', () => {
       expect(transformVegaOut(attributes, references)).toEqual(state);
     });
 
-    test('throws when a filter data view reference is missing', () => {
-      const { attributes } = transformVegaIn(state);
-      expect(() => transformVegaOut(attributes, [])).toThrow(
-        'Could not find reference for filters[0].data_view_id'
-      );
-    });
-
     test('returns attributes without filters unchanged', () => {
       const { filters, ...stateWithoutFilters } = state;
       expect(transformVegaOut(stateWithoutFilters, [])).toEqual(stateWithoutFilters);

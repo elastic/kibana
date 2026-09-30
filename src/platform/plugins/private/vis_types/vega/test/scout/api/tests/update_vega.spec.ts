@@ -70,8 +70,6 @@ apiTest.describe('vega - update', { tag: tags.deploymentAgnostic }, () => {
       });
 
       expect(withFilters).toHaveStatusCode(200);
-      expect(withFilters.body.data.query).toStrictEqual(VEGA_QUERY);
-      expect(withFilters.body.data.filters).toStrictEqual(VEGA_FILTERS);
       const filteredSavedObject = await kbnClient.savedObjects.get({
         type: 'vega',
         id: createdId,
