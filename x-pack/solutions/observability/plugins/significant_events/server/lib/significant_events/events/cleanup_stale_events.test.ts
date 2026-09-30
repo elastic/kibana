@@ -68,6 +68,7 @@ describe('cleanupStaleEvents', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     updateStatusMock.mockResolvedValue({
+      found: true,
       updated: 1,
       ignored: 0,
       status: 'inactive',
@@ -206,6 +207,7 @@ describe('cleanupStaleEvents', () => {
       await Promise.resolve();
       activeUpdates -= 1;
       return {
+        found: true,
         updated: 1,
         ignored: 0,
         status: 'inactive',

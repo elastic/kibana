@@ -38,6 +38,7 @@ describe('useCloseSignificantEvent', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     significantEventsFetch.mockResolvedValue({
+      found: true,
       updated: 1,
       ignored: 0,
       status: 'inactive',
