@@ -150,6 +150,12 @@ describe('Significant Events timestamp rendering', () => {
     expect(screen.getByText(`formatted:${event.created_at}`)).toBeInTheDocument();
     expect(screen.queryByText(`formatted:${event['@timestamp']}`)).not.toBeInTheDocument();
   });
+
+  it('renders the canonical severity value', () => {
+    render(<SignificantEventFlyout event={{ ...event, severity: 'high' }} onClose={jest.fn()} />);
+
+    expect(screen.getByText('High')).toBeInTheDocument();
+  });
 });
 
 describe('SignificantEventFlyout actions menu', () => {

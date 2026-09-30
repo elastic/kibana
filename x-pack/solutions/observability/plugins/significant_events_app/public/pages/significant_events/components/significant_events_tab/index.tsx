@@ -309,9 +309,7 @@ export const getSignificantEventTableColumns = ({
       defaultMessage: 'Severity',
     }),
     width: '100px',
-    render: (severity: SignificantEvent['severity']) => (
-      <SeverityBadge score={Number.parseInt(severity, 10)} />
-    ),
+    render: (severity: SignificantEvent['severity']) => <SeverityBadge severity={severity} />,
   },
   {
     field: 'created_at',

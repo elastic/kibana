@@ -334,7 +334,7 @@ export const SignificantEventFlyout = ({ event, onClose }: SignificantEventFlyou
           </EuiFlexItem>
           <EuiFlexItem>
             <FlyoutMetadataCard title={SEVERITY_LABEL}>
-              <SeverityBadge score={Number.parseInt(event.severity, 10)} />
+              <SeverityBadge severity={event.severity} />
             </FlyoutMetadataCard>
           </EuiFlexItem>
           {event.confidence != null && (
