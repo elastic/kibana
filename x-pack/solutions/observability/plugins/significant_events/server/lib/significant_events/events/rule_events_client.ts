@@ -191,6 +191,11 @@ const buildFreeTextWhere = (search: string | undefined): ESQLAstExpression | und
   )})) == TO_LOWER(${esql.str(search)}))`;
 };
 
+const activeStatusWhere = (): ESQLAstExpression =>
+  esql.exp`${esql.col('episode.status')} IN (${SIGNIFICANT_EVENT_ACTIVE_STATUS_OPTIONS.map(
+    (status) => esql.str(SIGNIFICANT_EVENTS_STATUS_MAP[status])
+  )})`;
+
 const eventIdEquals = (eventId: string): ESQLAstExpression =>
   esql.exp`FIELD_EXTRACT(${esql.col('data')}, ${esql.str('event_id')}) == ${esql.str(eventId)}`;
 
@@ -282,11 +287,7 @@ export class RuleEventsClient implements SignificantEventsReadClient {
       query,
       from: options.from,
       to: options.to,
-      activeWhere: esql.exp`${esql.col(
-        'episode.status'
-      )} IN (${SIGNIFICANT_EVENT_ACTIVE_STATUS_OPTIONS.map((status) =>
-        esql.str(SIGNIFICANT_EVENTS_STATUS_MAP[status])
-      )})`,
+      activeWhere: activeStatusWhere(),
     });
 
     if (options.status?.length) {
@@ -415,11 +416,7 @@ export class RuleEventsClient implements SignificantEventsReadClient {
 
     query = pickLatestPerGroup(query, GROUP_HASH_FIELD);
 
-    query = query.where`${esql.col(
-      'episode.status'
-    )} IN (${SIGNIFICANT_EVENT_ACTIVE_STATUS_OPTIONS.map((status) =>
-      esql.str(SIGNIFICANT_EVENTS_STATUS_MAP[status])
-    )})`;
+    query = query.where`${activeStatusWhere()}`;
 
     if (options.streamNames?.length) {
       query = query.where`${streamNamesIntersects(options.streamNames)}`;

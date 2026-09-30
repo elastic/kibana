@@ -172,6 +172,11 @@ const topologyFeatureFilter = (
   )}, [${values}]) OR MV_INTERSECTS(${esql.col('blast_radius.feature_id')}, [${values}]))`;
 };
 
+const activeStatusWhere = (): ESQLAstExpression =>
+  esql.exp`${esql.col('status')} IN (${SIGNIFICANT_EVENT_ACTIVE_STATUS_OPTIONS.map((status) =>
+    esql.str(status)
+  )})`;
+
 type EventsCurrentStateSearchOptions = CommonSearchOptions & EventsFilterOptions;
 
 export type EventsBatchSearchOptions = EventsCurrentStateSearchOptions & {
@@ -256,9 +261,7 @@ export class EventClient implements SignificantEventsReadClient {
       query,
       from: options.from,
       to: options.to,
-      activeWhere: esql.exp`${esql.col('status')} IN (${SIGNIFICANT_EVENT_ACTIVE_STATUS_OPTIONS.map(
-        (status) => esql.str(status)
-      )})`,
+      activeWhere: activeStatusWhere(),
     });
 
     if (options.status?.length) {
@@ -403,9 +406,7 @@ export class EventClient implements SignificantEventsReadClient {
 
     query = pickLatestPerGroup(query, FIELD_EVENT_ID);
 
-    query = query.where`${esql.col('status')} IN (${SIGNIFICANT_EVENT_ACTIVE_STATUS_OPTIONS.map(
-      (s) => esql.str(s)
-    )})`;
+    query = query.where`${activeStatusWhere()}`;
 
     const candidateWhere = continuationCandidateFilter({
       streamNames: options.streamNames,
