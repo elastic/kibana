@@ -1,0 +1,88 @@
+requestBody:
+  content:
+    application/json:
+      examples:
+        messageRequestExample:
+          description: "Send a message to the default agent, starting a new conversation. Requires the `agentBuilder:experimentalFeatures` advanced setting to be enabled."
+          value:
+            message: "What is Elasticsearch?"
+        messageToAgentRequestExample:
+          description: "Send a message to a specific agent"
+          value:
+            message: "What is Elasticsearch?"
+            agent_id: "elastic-ai-agent"
+        messageContinueConversationRequestExample:
+          description: "Continue a conversation with the `conversation_id` returned by a previous call"
+          value:
+            message: "And how does it differ from Kibana?"
+            agent_id: "elastic-ai-agent"
+            conversation_id: "696ccd6d-4bff-4b26-a62e-522ccf2dcd16"
+responses:
+  200:
+    description: "Indicates a successful response"
+    content:
+      application/json:
+        examples:
+          messageResponseExample:
+            description: "The agent's answer and the ID of the conversation it was stored in"
+            value:
+              conversation_id: "696ccd6d-4bff-4b26-a62e-522ccf2dcd16"
+              answer: "Elasticsearch is a distributed, RESTful search and analytics engine capable of addressing a growing number of use cases. As the heart of the Elastic Stack, it centrally stores your data for lightning fast search, fine‑tuned relevancy, and powerful analytics that scale with ease."
+              declined_prompts: []
+          messageDeclinedPromptResponseExample:
+            description: "The agent tried to call a tool that requires user confirmation. There is no user to ask on this endpoint, so the call was declined and the agent answered with what it could"
+            value:
+              conversation_id: "696ccd6d-4bff-4b26-a62e-522ccf2dcd16"
+              answer: "I could not run the reindex because it requires confirmation, which is not available here. You can run it from a conversation in Kibana instead."
+              declined_prompts:
+              - tool_id: "reindex-logs"
+                message: "Agent running in non-interactive mode, user input not available - execution was declined"
+  400:
+    description: "Bad Request — the `message` is empty or too long, the `conversation_id` is not a UUID, or the body carries a key this endpoint does not accept (for example `connector_id` or `attachments`)."
+    content:
+      application/json:
+        examples:
+          messageUnexpectedKeyExample:
+            description: "The body carries a key this endpoint does not accept"
+            value:
+              statusCode: 400
+              error: "Bad Request"
+              message: "[request body.connector_id]: Additional properties are not allowed ('connector_id' was unexpected)"
+          messageEmptyExample:
+            description: "The `message` is empty"
+            value:
+              statusCode: 400
+              error: "Bad Request"
+              message: "[request body.message]: value has length [0] but it must have a minimum length of [1]."
+  404:
+    description: "Not Found — the `conversation_id` does not exist, the `agent_id` does not name an agent the caller can use, or the `agentBuilder:experimentalFeatures` advanced setting is disabled. An unusable agent is reported as a missing conversation, matching the `conversationNotFound` shape of the conversation APIs, so callers cannot probe for hidden agents."
+    content:
+      application/json:
+        examples:
+          messageNotFoundExample:
+            description: "The `conversation_id` is unknown, or the `agent_id` is unknown or not usable by the caller"
+            value:
+              statusCode: 404
+              error: "Not Found"
+              message: "Conversation 696ccd6d-4bff-4b26-a62e-522ccf2dcd16 not found"
+              attributes:
+                trace_id: "8d4f2a3b-1c5e-4a9b-9f0d-2e6c1a3d4f5e"
+x-codeSamples:
+- lang: curl
+  source: |
+    curl \
+      -X POST "${KIBANA_URL}/api/chat/message" \
+      -H "Authorization: ApiKey ${API_KEY}" \
+      -H "kbn-xsrf: true" \
+      -H "Content-Type: application/json" \
+      -d '{
+        "message": "What is Elasticsearch?",
+        "agent_id": "elastic-ai-agent"
+      }'
+- lang: Console
+  source: |
+    POST kbn://api/chat/message
+    {
+      "message": "What is Elasticsearch?",
+      "agent_id": "elastic-ai-agent"
+    }
