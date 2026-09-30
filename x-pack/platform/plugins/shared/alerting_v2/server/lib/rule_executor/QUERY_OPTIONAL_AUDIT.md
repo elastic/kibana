@@ -65,7 +65,7 @@ Design reference: rule-execution-logic.md "A rule without a persisted query".
 | `packages/response-ops/alerting-v2-episodes-ui/hooks/test_utils.tsx` | Uses `as RuleResponse` cast; no type error. |
 | `packages/response-ops/alerting-v2-rule-form/form/utils/is_non_representable.test.ts` | Uses `as unknown as RuleResponse` cast; no type error. |
 | `public/services/rules_api.ts` and Scout `rules_api_service.ts` | Only type HTTP responses as `RuleResponse`; do not dereference `query`. |
-| `packages/security-detection-rule-schema/*` | Only produces `GeneratedQuery`; never reads `RuleResponse.query`. |
+| `x-pack/solutions/security/plugins/security_detections/server/builder_types/` | Only produces `GeneratedQuery` (via `generateQuery`); never reads `RuleResponse.query`. |
 
 ---
 

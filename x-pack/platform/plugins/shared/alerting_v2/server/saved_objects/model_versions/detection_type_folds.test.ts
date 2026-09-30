@@ -6,81 +6,37 @@
  */
 
 /**
- * Step 3.5: detection-type manifest folds and the byte budget.
+ * Step 3.5 / step B.4: detection-type manifest folds and the static mapping assembly.
  *
  * Tests that:
  * 1. Importing rule_model_versions.ts populates globalFoldedVersions with both
  *    detection-type folds (security.detection.query v1, security.detection.threshold v1).
  * 2. The squashed model-version key '8' is present in ruleModelVersions and carries
  *    both detection-type folds (originally '8' and '9') plus the framework fields.
- * 3. assembleBuilderFieldsMappings produces the expected sub-field keys from both
- *    manifests (shared fragment plus type-specific fields, merged silently for
- *    identical declarations).
- * 4. assertBoundedSchema accepts both full builder-fields schemas — the
- *    bounded-schema check passes, meaning both types fit within the framework cap.
- * 5. The actual worst-case byte counts for both schemas are below MAX_BUILDER_FIELDS_BYTES.
- * 6. Registering both full BuilderTypeDefinitions passes all Phase 2 registration
- *    checks (checks 2–8).
+ * 3. The detection rule builder fields manifest's currentMappings produces the expected
+ *    32 sub-field leaves (step B.4: static mappings now come from currentMappings).
+ *
+ * Sections 4 (assertBoundedSchema), 5 (byte budget), and 6 (full registration) were
+ * removed in step B.6: they imported the real detection schemas from the old shared
+ * schema package, which is a solution-owned package the alerting_v2 build must not
+ * depend on.  The bounded-schema and byte-budget proofs for the fixture schemas live
+ * in detection_rule_schemas.bounded_schema.test.ts.  Full BuilderTypeDefinition
+ * registration coverage is rebuilt in the security_detections plugin at step B.9.
  *
  * Ref: rule-type-registration.md "The fold into the saved-object registration"
  *      rule-data-model.md "The bounded-schema budget"
  *      implementation-plan.md step 3.5
+ *      builder-type-registration-redesign.md "Assembling the saved-object type" (step B.4)
+ *      implementation-plan.md step B.6
  */
 
-// Importing ruleModelVersions triggers the fromBuilderManifest() calls that
+// Importing ruleModelVersions triggers the fromBuilderFieldsManifest() calls that
 // populate globalFoldedVersions as a side effect. This import must appear
 // before any code that consults globalFoldedVersions.
 import { ruleModelVersions } from './rule_model_versions';
 
-import {
-  MAX_BUILDER_FIELDS_ARRAY_ITEMS,
-  MAX_BUILDER_FIELDS_BYTES,
-  MAX_BUILDER_FIELDS_STRING_LENGTH,
-} from '@kbn/alerting-v2-constants';
-import {
-  securityDetectionQuery,
-  securityDetectionQueryManifest,
-  customQueryBuilderFieldsSchema,
-  securityDetectionThreshold,
-  securityDetectionThresholdManifest,
-  thresholdBuilderFieldsSchema,
-} from '@kbn/security-detection-rule-schema';
-import { defineBuilderType } from '@kbn/alerting-v2-rule-builders';
-import { assertBoundedSchema, computeWorstCaseBytes } from '../../lib/bounded_schema';
+import { detectionRuleBuilderFieldsManifest } from '@kbn/security-detection-rule-builder-fields';
 import { globalFoldedVersions } from '../../lib/builder_types/folded_versions';
-import { BuilderTypeRegistry } from '../../lib/builder_types/builder_type_registry';
-import { assembleBuilderFieldsMappings } from '../assemble_builder_fields_mappings';
-
-// Cast the typed definitions to RegisteredBuilderType (BuilderTypeDefinition<OpaqueBuilderFields>)
-// so they can be passed to BuilderTypeRegistry.register(). The registry stores all types in
-// their erased form; the concrete TFields generic only matters at the type-checking layer.
-// defineBuilderType is the canonical way to do this cast in the rule-builders package.
-const queryDefinition = defineBuilderType(securityDetectionQuery);
-const thresholdDefinition = defineBuilderType(securityDetectionThreshold);
-
-// The subject used by the production registration check (assert_valid_definition.ts).
-// Using the same limits here ensures the test and production checks are consistent.
-const BUILDER_FIELDS_SUBJECT = {
-  kind: 'Builder type',
-  schemaProperty: 'builderFieldsSchema',
-  rootPath: 'builder_fields',
-  limits: {
-    stringLength: MAX_BUILDER_FIELDS_STRING_LENGTH,
-    arrayItems: MAX_BUILDER_FIELDS_ARRAY_ITEMS,
-    totalBytes: MAX_BUILDER_FIELDS_BYTES,
-  },
-  builderChecks: true as const,
-};
-
-// Same subject but without the totalBytes cap, so computeWorstCaseBytes returns
-// the raw byte count rather than throwing when the result exceeds the cap.
-const BYTE_MEASUREMENT_SUBJECT = {
-  ...BUILDER_FIELDS_SUBJECT,
-  limits: {
-    ...BUILDER_FIELDS_SUBJECT.limits,
-    totalBytes: Number.MAX_SAFE_INTEGER,
-  },
-};
 
 // ---------------------------------------------------------------------------
 // 1. Fold registration: globalFoldedVersions is populated at import time
@@ -109,51 +65,32 @@ describe('ruleModelVersions fold lines', () => {
     expect(ruleModelVersions).toHaveProperty('8');
   });
 
-  it("squashed version '8' has a mappings_addition covering security.detection.query v1 sub-fields", () => {
+  it("squashed version '8' has exactly one manifest-fold mappings_addition covering all detection v1 sub-fields", () => {
     const v8 = ruleModelVersions['8'] as {
       changes: Array<{ type: string; addedMappings?: unknown }>;
     };
-    // The squashed '8' has four mappings_addition changes; the two manifest-fold
-    // ones nest their fields under metadata.builder_fields.properties.
-    const queryFoldChange = v8.changes.find(
-      (c) =>
-        c.type === 'mappings_addition' &&
-        (c.addedMappings as any)?.metadata?.properties?.builder_fields?.properties?.risk_score !==
-          undefined
-    );
-    expect(queryFoldChange).toBeDefined();
-    const bfProps = (queryFoldChange!.addedMappings as any).metadata.properties.builder_fields
-      .properties;
-    // Sub-fields declared by securityDetectionQueryManifest v1:
-    // the shared detection fragment (risk_score, max_signals, note, setup) plus query.
-    expect(bfProps).toHaveProperty('risk_score');
-    expect(bfProps).toHaveProperty('max_signals');
-    expect(bfProps).toHaveProperty('note');
-    expect(bfProps).toHaveProperty('setup');
-    expect(bfProps).toHaveProperty('query');
-  });
-
-  it("squashed version '8' has a mappings_addition covering security.detection.threshold v1 sub-fields", () => {
-    const v8 = ruleModelVersions['8'] as {
-      changes: Array<{ type: string; addedMappings?: unknown }>;
-    };
-    // Both manifest folds (query and threshold) declare the same sub-fields at v1;
-    // verify there are at least two manifest-fold mappings_additions (one per type).
+    // After step B.5 there is a single fromBuilderFieldsManifest() call for both
+    // security.detection.query and security.detection.threshold (they share one
+    // detectionRuleBuilderFieldsManifest). The squashed '8' therefore has exactly
+    // one manifest-fold mappings_addition — not two as under the old per-type design.
     const manifestFoldChanges = v8.changes.filter(
       (c) =>
         c.type === 'mappings_addition' &&
         (c.addedMappings as any)?.metadata?.properties?.builder_fields?.properties !== undefined
     );
-    expect(manifestFoldChanges.length).toBe(2);
-    const bfProps = (manifestFoldChanges[1].addedMappings as any).metadata.properties.builder_fields
+    expect(manifestFoldChanges.length).toBe(1);
+    const bfProps = (manifestFoldChanges[0].addedMappings as any).metadata.properties.builder_fields
       .properties;
-    // Sub-fields declared by securityDetectionThresholdManifest v1:
-    // the shared detection fragment (risk_score, max_signals, note, setup) plus query.
+    // Sub-fields from the shared manifest cover both types: the shared detection
+    // fragment (risk_score, max_signals, note, setup, query) plus threshold-only
+    // fields (threshold.value, etc.).
     expect(bfProps).toHaveProperty('risk_score');
     expect(bfProps).toHaveProperty('max_signals');
     expect(bfProps).toHaveProperty('note');
     expect(bfProps).toHaveProperty('setup');
     expect(bfProps).toHaveProperty('query');
+    // Threshold-specific sub-field: the manifest merges both types' leaves.
+    expect(bfProps).toHaveProperty(['threshold.value']);
   });
 
   it('dense version sequence runs from 1 to 8 with no gaps', () => {
@@ -167,152 +104,37 @@ describe('ruleModelVersions fold lines', () => {
 });
 
 // ---------------------------------------------------------------------------
-// 3. Static mapping assembly
+// 3. Static mapping assembly (step B.4)
+//
+// The static mapping now comes from detectionRuleBuilderFieldsManifest.currentMappings
+// rather than from an accumulation over every version (assembleBuilderFieldsMappings
+// was removed in step B.4). The currentMappings object carries all 32 leaf paths.
+// The rule_mappings.test.ts file carries the comprehensive 32-leaf assertion;
+// here we only verify representative leaves and the total count.
 // ---------------------------------------------------------------------------
 
-describe('assembleBuilderFieldsMappings with both detection manifests', () => {
-  const assembled = assembleBuilderFieldsMappings([
-    securityDetectionQueryManifest,
-    securityDetectionThresholdManifest,
-  ]);
+describe('detectionRuleBuilderFieldsManifest.currentMappings (step B.4)', () => {
+  const { currentMappings } = detectionRuleBuilderFieldsManifest;
 
-  it('includes risk_score as integer (shared fragment)', () => {
-    expect(assembled).toHaveProperty('risk_score', { type: 'integer' });
+  it('contains exactly 32 distinct leaf paths', () => {
+    expect(Object.keys(currentMappings)).toHaveLength(32);
   });
 
-  it('includes max_signals as integer (shared fragment)', () => {
-    expect(assembled).toHaveProperty('max_signals', { type: 'integer' });
+  it('includes risk_score as integer (common fragment)', () => {
+    expect(currentMappings).toHaveProperty('risk_score', { type: 'integer' });
   });
 
-  it('includes note as text (shared fragment)', () => {
-    expect(assembled).toHaveProperty('note', { type: 'text' });
-  });
-
-  it('includes setup as text (shared fragment)', () => {
-    expect(assembled).toHaveProperty('setup', { type: 'text' });
+  it('includes note as text (common fragment)', () => {
+    expect(currentMappings).toHaveProperty('note', { type: 'text' });
   });
 
   it('includes query as text (declared by both types — merges silently)', () => {
-    expect(assembled).toHaveProperty('query', { type: 'text' });
+    expect(currentMappings).toHaveProperty('query', { type: 'text' });
   });
 
-  it('does not contain any unexpected keys beyond the declared sub-fields', () => {
-    const expectedKeys = new Set(['risk_score', 'max_signals', 'note', 'setup', 'query']);
-    const actualKeys = new Set(Object.keys(assembled));
-    expect(actualKeys).toEqual(expectedKeys);
-  });
-});
-
-// ---------------------------------------------------------------------------
-// 4. assertBoundedSchema accepts both schemas (the cap is not exceeded)
-// ---------------------------------------------------------------------------
-
-describe('assertBoundedSchema acceptance for both detection schemas', () => {
-  it('accepts customQueryBuilderFieldsSchema under all framework limits', () => {
-    expect(() =>
-      assertBoundedSchema(
-        customQueryBuilderFieldsSchema,
-        'security.detection.query',
-        BUILDER_FIELDS_SUBJECT
-      )
-    ).not.toThrow();
-  });
-
-  it('accepts thresholdBuilderFieldsSchema under all framework limits', () => {
-    expect(() =>
-      assertBoundedSchema(
-        thresholdBuilderFieldsSchema,
-        'security.detection.threshold',
-        BUILDER_FIELDS_SUBJECT
-      )
-    ).not.toThrow();
-  });
-});
-
-// ---------------------------------------------------------------------------
-// 5. Byte budget measurement
-//
-// computeWorstCaseBytes returns the actual worst-case serialized size without
-// enforcing the cap, so the test can record and assert the concrete numbers.
-// If either number exceeds MAX_BUILDER_FIELDS_BYTES the design's predicted
-// ceiling is wrong — stop and report rather than silently loosening a bound.
-// ---------------------------------------------------------------------------
-
-describe('byte budget measurements (step 3.5)', () => {
-  let queryBytes: number;
-  let thresholdBytes: number;
-
-  beforeAll(() => {
-    queryBytes = computeWorstCaseBytes(
-      customQueryBuilderFieldsSchema,
-      'security.detection.query',
-      BYTE_MEASUREMENT_SUBJECT
-    );
-    thresholdBytes = computeWorstCaseBytes(
-      thresholdBuilderFieldsSchema,
-      'security.detection.threshold',
-      BYTE_MEASUREMENT_SUBJECT
-    );
-  });
-
-  it('security.detection.query worst-case bytes is below MAX_BUILDER_FIELDS_BYTES', () => {
-    expect(queryBytes).toBeLessThan(MAX_BUILDER_FIELDS_BYTES);
-  });
-
-  it('security.detection.threshold worst-case bytes is below MAX_BUILDER_FIELDS_BYTES', () => {
-    expect(thresholdBytes).toBeLessThan(MAX_BUILDER_FIELDS_BYTES);
-  });
-
-  it('both schemas fit well within the cap (at most 75 % of MAX_BUILDER_FIELDS_BYTES)', () => {
-    // Asserting a concrete upper bound catches accidental schema bloat before it
-    // hits the hard cap.  75 % (≈ 196 KB) gives the plan's recorded numbers
-    // (≈ 186–188 KB) a reasonable headroom.
-    const headroomCap = Math.floor(MAX_BUILDER_FIELDS_BYTES * 0.75);
-    expect(queryBytes).toBeLessThan(headroomCap);
-    expect(thresholdBytes).toBeLessThan(headroomCap);
-  });
-});
-
-// ---------------------------------------------------------------------------
-// 6. Full registration passes all checks 2–8
-//
-// Uses the global BuilderTypeRegistry (which reads globalFoldedVersions, already
-// populated by the rule_model_versions import above) to register both full
-// BuilderTypeDefinitions. This proves that all eight registration checks
-// (id format, bounded schema, ignore_above, kind pin, manifest consistency,
-// managed-type completeness, mode consistency) pass for the production definitions.
-// ---------------------------------------------------------------------------
-
-describe('full BuilderTypeDefinition registration passes all checks', () => {
-  let registry: BuilderTypeRegistry;
-
-  beforeEach(() => {
-    // A fresh registry per test so registrations do not bleed across tests.
-    // The registry reads globalFoldedVersions by default — no withFoldedVersions
-    // fixture needed because the fold lines in rule_model_versions.ts have
-    // already been evaluated (top-level import) and the global is populated.
-    registry = new BuilderTypeRegistry();
-  });
-
-  it('registers security.detection.query without throwing (all checks pass)', () => {
-    expect(() => registry.register(queryDefinition)).not.toThrow();
-  });
-
-  it('registers security.detection.threshold without throwing (all checks pass)', () => {
-    expect(() => registry.register(thresholdDefinition)).not.toThrow();
-  });
-
-  it('registers both types in a single registry without conflict', () => {
-    expect(() => {
-      registry.register(queryDefinition);
-      registry.register(thresholdDefinition);
-    }).not.toThrow();
-  });
-
-  it('after registering both types, the registry knows both', () => {
-    registry.register(queryDefinition);
-    registry.register(thresholdDefinition);
-    expect(registry.has('security.detection.query')).toBe(true);
-    expect(registry.has('security.detection.threshold')).toBe(true);
+  it('includes threshold.value as integer (threshold-only)', () => {
+    // Use array notation because the key contains a dot and toHaveProperty('a.b')
+    // navigates nested objects rather than looking up the literal key 'a.b'.
+    expect(currentMappings).toHaveProperty(['threshold.value'], { type: 'integer' });
   });
 });
