@@ -8,6 +8,7 @@
 import expect from '@kbn/expect';
 import {
   CaseSeverity,
+  CaseStatuses,
   ConnectorTypes,
   CustomFieldTypes,
 } from '@kbn/cases-plugin/common/types/domain';
@@ -45,6 +46,28 @@ export default ({ getService }: FtrProviderContext): void => {
     afterEach(async () => {
       await deleteConfiguration(es);
       await actionsRemover.removeAll();
+    });
+
+    it('rejects statuses while custom statuses are disabled', async () => {
+      const configuration = await createConfiguration(supertest);
+      await updateConfiguration(
+        supertest,
+        configuration.id,
+        {
+          version: configuration.version,
+          statuses: [
+            {
+              key: 'open',
+              label: 'New',
+              category: CaseStatuses.open,
+              order: 0,
+              isDefault: true,
+              disabled: false,
+            },
+          ],
+        },
+        400
+      );
     });
 
     it('should patch a configuration', async () => {
