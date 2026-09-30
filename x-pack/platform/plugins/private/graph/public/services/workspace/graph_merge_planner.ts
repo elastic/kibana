@@ -23,6 +23,70 @@ export const makeNodeId = (field: string, term: string): string => `${field}..${
 export const makeEdgeId = (sourceId: string, targetId: string): string =>
   sourceId > targetId ? `${targetId}->${sourceId}` : `${sourceId}->${targetId}`;
 
+interface IncomingEdge {
+  source: number;
+  target: number;
+  weight: number;
+  width: number;
+  doc_count: number;
+  label?: string;
+}
+
+interface ExistingEdge {
+  weight: number;
+  doc_count: number;
+}
+
+export type EdgeMergeOperation =
+  | {
+      type: 'add';
+      id: string;
+      sourceId: string;
+      targetId: string;
+      edge: IncomingEdge;
+    }
+  | {
+      type: 'update';
+      id: string;
+      weight: number;
+      docCount: number;
+    };
+
+export const planIncomingEdges = ({
+  edges,
+  nodes,
+  existingEdges,
+}: {
+  edges: IncomingEdge[];
+  nodes: NormalizedIncomingNode[];
+  existingEdges: Readonly<Record<string, ExistingEdge>>;
+}): EdgeMergeOperation[] => {
+  const currentEdges = new Map(Object.entries(existingEdges));
+
+  return edges.map((edge) => {
+    const sourceId = nodes[edge.source].id;
+    const targetId = nodes[edge.target].id;
+    const id = makeEdgeId(sourceId, targetId);
+    const existingEdge = currentEdges.get(id);
+    if (existingEdge) {
+      const updatedEdge = {
+        weight: Math.max(existingEdge.weight, edge.weight),
+        doc_count: Math.max(existingEdge.doc_count, edge.doc_count),
+      };
+      currentEdges.set(id, updatedEdge);
+      return {
+        type: 'update' as const,
+        id,
+        weight: updatedEdge.weight,
+        docCount: updatedEdge.doc_count,
+      };
+    }
+
+    currentEdges.set(id, edge);
+    return { type: 'add' as const, id, sourceId, targetId, edge };
+  });
+};
+
 export const prepareIncomingNodes = (
   nodes: IncomingNode[],
   existingNodeIds: ReadonlySet<string>
