@@ -88,7 +88,8 @@ export const findOrCreateInvestigationStepCommonDefinition: CommonStepDefinition
       'xpack.alertzero.workflows.steps.findOrCreateInvestigation.documentation.details',
       {
         defaultMessage:
-          'Derives the Investigation id via uuidv5(hunt:report:{reportId}) and creates the conversation. ' +
+          'Derives the Investigation id via uuidv5 over "hunt:report:" plus the report id, and creates ' +
+          'the conversation. ' +
           'A verified 409 (the Investigation already exists for this subject key) is treated as success: ' +
           'the existing conversation is read back to confirm it is reachable before returning its id. ' +
           'No route call: the deterministic id cannot be computed in workflow YAML, so this step owns the ' +
