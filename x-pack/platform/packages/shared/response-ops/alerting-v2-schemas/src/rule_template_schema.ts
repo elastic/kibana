@@ -73,6 +73,11 @@ export const findRuleTemplatesRequestSchema = z
       .describe(
         'Only return templates carrying at least one of these tags. Accepts a single tag or a repeated parameter.'
       ),
+    excluded_tags: arrayOrSingleSchema(z.string().min(1).max(MAX_TAG_LENGTH), MAX_TAGS)
+      .optional()
+      .describe(
+        'Exclude templates carrying any of these tags. Accepts a single tag or a repeated parameter.'
+      ),
   })
   .strict()
   .refine(

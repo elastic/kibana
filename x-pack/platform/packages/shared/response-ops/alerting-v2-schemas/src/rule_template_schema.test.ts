@@ -138,6 +138,7 @@ describe('findRuleTemplatesRequestSchema', () => {
         sort_field: 'name',
         sort_order: 'asc',
         tags: ['Kubernetes'],
+        excluded_tags: ['development'],
       })
     ).toEqual({
       page: 2,
@@ -146,6 +147,7 @@ describe('findRuleTemplatesRequestSchema', () => {
       sort_field: 'name',
       sort_order: 'asc',
       tags: ['Kubernetes'],
+      excluded_tags: ['development'],
     });
   });
 

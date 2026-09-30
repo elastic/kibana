@@ -13,7 +13,7 @@ import {
 import type { KueryNode } from '@kbn/es-query';
 import type { SavedObjectsFindOptions } from '@kbn/core/server';
 import { TAGS_RESPONSE_LIMIT } from '@kbn/alerting-v2-constants';
-import { nodeBuilder } from '@kbn/es-query';
+import { nodeBuilder, nodeTypes } from '@kbn/es-query';
 import { RULE_TEMPLATE_SAVED_OBJECT_TYPE } from '../../../common/saved_object_types';
 import { escapeTermsInclude } from '../escape_terms_include';
 
@@ -39,19 +39,26 @@ export const buildRuleTemplateTagsAggregation = (
   },
 });
 
-export const buildFindRuleTemplatesFilter = (tags?: string[]): KueryNode => {
+export const buildFindRuleTemplatesFilter = (
+  tags?: string[],
+  excludedTags?: string[]
+): KueryNode => {
   const engineFilter = buildEngineV2Filter();
+  const filters: KueryNode[] = [engineFilter];
 
-  if (!tags?.length) {
-    return engineFilter;
+  if (tags?.length) {
+    filters.push(nodeBuilder.or(tags.map((tag) => nodeBuilder.is(RULE_TEMPLATE_TAGS_FIELD, tag))));
   }
 
-  const tagFilters = tags.map((tag) => nodeBuilder.is(RULE_TEMPLATE_TAGS_FIELD, tag));
+  if (excludedTags?.length) {
+    filters.push(
+      ...excludedTags.map((tag) =>
+        nodeTypes.function.buildNode('not', nodeBuilder.is(RULE_TEMPLATE_TAGS_FIELD, tag))
+      )
+    );
+  }
 
-  return nodeBuilder.and([
-    engineFilter,
-    tagFilters.length === 1 ? tagFilters[0] : nodeBuilder.or(tagFilters),
-  ]);
+  return nodeBuilder.and(filters);
 };
 
 export const mapSortField = (sortField?: FindRuleTemplatesSortField): string => {

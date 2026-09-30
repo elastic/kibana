@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { nodeBuilder } from '@kbn/es-query';
+import { nodeBuilder, nodeTypes } from '@kbn/es-query';
 import { TAGS_RESPONSE_LIMIT } from '@kbn/alerting-v2-constants';
 import { RULE_TEMPLATE_SAVED_OBJECT_TYPE } from '../../../common/saved_object_types';
 import {
@@ -107,6 +107,20 @@ describe('rule templates client utils', () => {
             nodeBuilder.is(RULE_TEMPLATE_TAGS_FIELD, 'a'),
             nodeBuilder.is(RULE_TEMPLATE_TAGS_FIELD, 'b'),
           ]),
+        ])
+      );
+    });
+
+    it('excludes templates carrying any excluded tag', () => {
+      expect(buildFindRuleTemplatesFilter(['production'], ['deprecated', 'internal'])).toEqual(
+        nodeBuilder.and([
+          buildEngineV2Filter(),
+          nodeBuilder.is(RULE_TEMPLATE_TAGS_FIELD, 'production'),
+          nodeTypes.function.buildNode(
+            'not',
+            nodeBuilder.is(RULE_TEMPLATE_TAGS_FIELD, 'deprecated')
+          ),
+          nodeTypes.function.buildNode('not', nodeBuilder.is(RULE_TEMPLATE_TAGS_FIELD, 'internal')),
         ])
       );
     });

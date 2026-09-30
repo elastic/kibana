@@ -32,6 +32,10 @@ export class RuleTemplatesApi {
         per_page: params.per_page,
         search: params.search || undefined,
         tags: params.tags && params.tags.length > 0 ? params.tags : undefined,
+        excluded_tags:
+          params.excluded_tags && params.excluded_tags.length > 0
+            ? params.excluded_tags
+            : undefined,
         sort_field: params.sort_field,
         sort_order: params.sort_order,
       },

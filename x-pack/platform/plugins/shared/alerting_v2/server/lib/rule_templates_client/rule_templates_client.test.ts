@@ -8,7 +8,7 @@
 import type { SavedObjectsClientContract } from '@kbn/core/server';
 import { savedObjectsClientMock } from '@kbn/core/server/mocks';
 import { SavedObjectsErrorHelpers } from '@kbn/core-saved-objects-server';
-import { nodeBuilder } from '@kbn/es-query';
+import { nodeBuilder, nodeTypes } from '@kbn/es-query';
 import { RULE_TEMPLATE_SAVED_OBJECT_TYPE } from '../../../common/saved_object_types';
 import { ALERTING_ERROR_CODES, ALERTING_LOG_CODES } from '../errors/error_codes';
 import { createLoggerService } from '../services/logger_service/logger_service.mock';
@@ -172,6 +172,7 @@ describe('RuleTemplatesClient', () => {
         sortField: 'tags',
         sortOrder: 'desc',
         tags: ['Kubernetes', 'production'],
+        excludedTags: ['deprecated'],
       });
 
       expect(savedObjectsClient.find).toHaveBeenCalledWith(
@@ -195,6 +196,13 @@ describe('RuleTemplatesClient', () => {
                 'production'
               ),
             ]),
+            nodeTypes.function.buildNode(
+              'not',
+              nodeBuilder.is(
+                `${RULE_TEMPLATE_SAVED_OBJECT_TYPE}.attributes.rule.metadata.tags`,
+                'deprecated'
+              )
+            ),
           ]),
         })
       );

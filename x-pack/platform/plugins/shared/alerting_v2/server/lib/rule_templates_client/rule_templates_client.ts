@@ -68,7 +68,7 @@ export class RuleTemplatesClient {
       type: RULE_TEMPLATE_SAVED_OBJECT_TYPE,
       page,
       perPage,
-      filter: buildFindRuleTemplatesFilter(params.tags),
+      filter: buildFindRuleTemplatesFilter(params.tags, params.excludedTags),
       sortField: mapSortField(params.sortField),
       sortOrder: params.sortOrder ?? 'asc',
       ...(search

@@ -28,6 +28,7 @@ describe('RuleTemplatesApi', () => {
         per_page: 10,
         search: 'cpu',
         tags: ['prod'],
+        excluded_tags: ['deprecated'],
         sort_field: 'name',
         sort_order: 'asc',
       });
@@ -38,6 +39,7 @@ describe('RuleTemplatesApi', () => {
           per_page: 10,
           search: 'cpu',
           tags: ['prod'],
+          excluded_tags: ['deprecated'],
           sort_field: 'name',
           sort_order: 'asc',
         },
@@ -47,7 +49,7 @@ describe('RuleTemplatesApi', () => {
     it('omits empty search and tags', async () => {
       http.get.mockResolvedValue({ items: [], total: 0, page: 1, per_page: 20 });
 
-      await api.listRuleTemplates({ search: '', tags: [] });
+      await api.listRuleTemplates({ search: '', tags: [], excluded_tags: [] });
 
       expect(http.get).toHaveBeenCalledWith(ALERTING_V2_INTERNAL_RULE_TEMPLATE_API_PATH, {
         query: {
@@ -55,6 +57,7 @@ describe('RuleTemplatesApi', () => {
           per_page: undefined,
           search: undefined,
           tags: undefined,
+          excluded_tags: undefined,
           sort_field: undefined,
           sort_order: undefined,
         },
