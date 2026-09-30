@@ -148,7 +148,7 @@ export async function ingestInboundEvent({
     return { status: 'not_found' };
   }
 
-  const connectorEventsEnabled = connector.isInboundEventsEnabled === true;
+  const connectorEventsEnabled = connector.hasPreconfiguredInboundEvents === true;
 
   if (
     connectorTypeIsDual(connector.connectorTypeId) &&
