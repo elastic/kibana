@@ -302,9 +302,12 @@ export const ApplyFiltersPopover = ({
           </EuiFlexItem>
 
           <FilterSection
-            title={i18n.translate('securitySolutionPackages.csp.graph.filters.section.relationships', {
-              defaultMessage: 'Relationship types',
-            })}
+            title={i18n.translate(
+              'securitySolutionPackages.csp.graph.filters.section.relationships',
+              {
+                defaultMessage: 'Relationship types',
+              }
+            )}
           >
             {(
               Object.keys(filtersState.relationshipTypes) as Array<

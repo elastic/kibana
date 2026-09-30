@@ -40,7 +40,10 @@ import {
   EntityHoverActionsToolbar,
   GRAPH_ENTITY_HOVER_ACTIONS_TOOLBAR_ID,
 } from './entity_hover_actions_toolbar';
-import { GRAPH_SIMPLIFIED_ACTIONS_TRIGGER_ID, SimplifiedActionsTrigger } from './simplified_actions_trigger';
+import {
+  GRAPH_SIMPLIFIED_ACTIONS_TRIGGER_ID,
+  SimplifiedActionsTrigger,
+} from './simplified_actions_trigger';
 import {
   GRAPH_ENTITY_NODE_ID,
   GRAPH_ENTITY_NODE_HOVER_SHAPE_ID,
@@ -157,7 +160,6 @@ const GROUP_STACK_LAYER_OPACITY = 0.72;
 /** Total vertical space reserved under a group card (gap + 1 layer). */
 export const GROUP_STACK_TOTAL_HEIGHT = GROUP_STACK_GAP + GROUP_STACK_HEIGHT;
 
-
 const simplifiedCardHandleStyle: React.CSSProperties = {
   ...HandleStyleOverride,
   top: SIMPLIFIED_ICON_SIZE / 2,
@@ -259,8 +261,7 @@ const CardHeader = styled.div<{
   padding: 12px;
   background: ${({ bgColor }) => bgColor};
   position: relative;
-  ${({ $dividerColor }) =>
-    $dividerColor ? `border-bottom: 1px solid ${$dividerColor};` : ''}
+  ${({ $dividerColor }) => ($dividerColor ? `border-bottom: 1px solid ${$dividerColor};` : '')}
 `;
 
 const IconBox = styled.div<{
@@ -717,11 +718,7 @@ const CriticalityRange = ({
 
   if (highest === lowest) {
     return (
-      <EuiHealth
-        color={CRITICALITY_HEALTH_COLOR[highest]}
-        textSize="inherit"
-        css={metadataTextCss}
-      >
+      <EuiHealth color={CRITICALITY_HEALTH_COLOR[highest]} textSize="inherit" css={metadataTextCss}>
         {CRITICALITY_IMPACT_LABEL[highest]}
       </EuiHealth>
     );
@@ -736,19 +733,11 @@ const CriticalityRange = ({
         flex-wrap: wrap;
       `}
     >
-      <EuiHealth
-        color={CRITICALITY_HEALTH_COLOR[highest]}
-        textSize="inherit"
-        css={metadataTextCss}
-      >
+      <EuiHealth color={CRITICALITY_HEALTH_COLOR[highest]} textSize="inherit" css={metadataTextCss}>
         {CRITICALITY_IMPACT_LABEL[highest]}
       </EuiHealth>
       <EuiText css={metadataTextCss}>{'-'}</EuiText>
-      <EuiHealth
-        color={CRITICALITY_HEALTH_COLOR[lowest]}
-        textSize="inherit"
-        css={metadataTextCss}
-      >
+      <EuiHealth color={CRITICALITY_HEALTH_COLOR[lowest]} textSize="inherit" css={metadataTextCss}>
         {CRITICALITY_IMPACT_LABEL[lowest]}
       </EuiHealth>
     </div>
@@ -1247,7 +1236,6 @@ const CompactColoredCard = ({
 
 // ── Card node ─────────────────────────────────────────────────────────────────
 
-
 export const CardNode = memo<NodeProps>((props: NodeProps) => {
   const {
     icon,
@@ -1433,8 +1421,7 @@ export const CardNode = memo<NodeProps>((props: NodeProps) => {
   const headerPrimaryText = entityName;
   const headerSecondaryText = entityTypeLabel;
   // Tooltip shows the full hostname when the card truncates long labels (e.g. edge-sec-ubuntu-…).
-  const headerPrimaryTitle =
-    typeof headerPrimaryText === 'string' ? headerPrimaryText : undefined;
+  const headerPrimaryTitle = typeof headerPrimaryText === 'string' ? headerPrimaryText : undefined;
 
   // Figma default entity card: Borders/Base/Plain for all states — no primary/blue
   // border on the origin or when selected (same color as sibling entity cards).
@@ -1448,9 +1435,7 @@ export const CardNode = memo<NodeProps>((props: NodeProps) => {
   const iconAccent = '#000000';
   const originOutlineColor = euiTheme.colors.borderBaseProminent;
   // Group cards always use the stacked-cards glyph (`group_entities.svg`).
-  const resolvedIcon = isGroup
-    ? resolveIcon(GROUP_CARD_ICON)
-    : resolveIcon(icon, tag);
+  const resolvedIcon = isGroup ? resolveIcon(GROUP_CARD_ICON) : resolveIcon(icon, tag);
 
   // Risk badge is always shown in the header when score data is present (not a Layers toggle).
   const showRisk =
@@ -1627,9 +1612,7 @@ export const CardNode = memo<NodeProps>((props: NodeProps) => {
                             </FieldLabel>
                             <MetadataValueRow>
                               <FieldValue truncate>{primarySource}</FieldValue>
-                              {extraSourceCount > 0 && (
-                                <OverflowBadge count={extraSourceCount} />
-                              )}
+                              {extraSourceCount > 0 && <OverflowBadge count={extraSourceCount} />}
                             </MetadataValueRow>
                           </MetadataField>
                         )}
@@ -1684,7 +1667,11 @@ export const CardNode = memo<NodeProps>((props: NodeProps) => {
                                 const flag = getCountryFlag(code);
                                 if (!flag) return null;
                                 return (
-                                  <span key={code} css={metadataTextCss} title={getCountryName(code) ?? code}>
+                                  <span
+                                    key={code}
+                                    css={metadataTextCss}
+                                    title={getCountryName(code) ?? code}
+                                  >
                                     {flag}
                                   </span>
                                 );
@@ -1846,9 +1833,7 @@ export const CardNode = memo<NodeProps>((props: NodeProps) => {
                             </FieldLabel>
                             <MetadataValueRow>
                               <FieldValue truncate>{primarySource}</FieldValue>
-                              {extraSourceCount > 0 && (
-                                <OverflowBadge count={extraSourceCount} />
-                              )}
+                              {extraSourceCount > 0 && <OverflowBadge count={extraSourceCount} />}
                             </MetadataValueRow>
                           </MetadataField>
                         )}

@@ -48,8 +48,7 @@ export const GRAPH_PANEL_INSET = 4;
 export const GRAPH_NODE_SHADOW = 'box-shadow: 0 1px 2px 0 rgba(7, 16, 31, 0.06);';
 
 /** Same elevation as {@link GRAPH_NODE_SHADOW}, for SVG shape nodes via CSS `filter`. */
-export const GRAPH_NODE_SHADOW_FILTER =
-  'filter: drop-shadow(0 1px 2px rgba(7, 16, 31, 0.06));';
+export const GRAPH_NODE_SHADOW_FILTER = 'filter: drop-shadow(0 1px 2px rgba(7, 16, 31, 0.06));';
 
 /**
  * Radius diameter for background dots, in pixels.

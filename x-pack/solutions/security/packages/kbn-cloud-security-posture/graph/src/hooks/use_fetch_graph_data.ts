@@ -1042,8 +1042,9 @@ const overflowIps = (primary: string): string[] => [
 const overflowCountries = (primary: string, secondary?: string): string[] => [
   primary,
   ...(secondary ? [secondary] : []),
-  ...Array.from({ length: secondary ? 98 : 99 }, (_, index) =>
-    ['DE', 'GB', 'FR', 'JP', 'BR', 'CA', 'AU', 'IN'][index % 8]
+  ...Array.from(
+    { length: secondary ? 98 : 99 },
+    (_, index) => ['DE', 'GB', 'FR', 'JP', 'BR', 'CA', 'AU', 'IN'][index % 8]
   ),
 ];
 
@@ -1277,10 +1278,11 @@ const scenarioHostRiskPreview = (
     primary,
     ...Array.from({ length: 99 }, (_, i) => `10.${Math.floor(i / 254)}.${i % 254}.1`),
   ];
-  const manyCountries = (primary: string): string[] => [
-    primary,
-    ...['DE', 'GB', 'FR', 'JP', 'BR', 'CA', 'AU', 'IN'].flatMap((c) => Array(12).fill(c)),
-  ].slice(0, 100);
+  const manyCountries = (primary: string): string[] =>
+    [
+      primary,
+      ...['DE', 'GB', 'FR', 'JP', 'BR', 'CA', 'AU', 'IN'].flatMap((c) => Array(12).fill(c)),
+    ].slice(0, 100);
   const manySources = (primary: string, extras: string[]): string[] => [primary, ...extras];
 
   // Groups by entity subtype (not type) — EC2 vs S3 vs guests, all Host type.

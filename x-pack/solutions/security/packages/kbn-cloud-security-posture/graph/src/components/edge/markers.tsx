@@ -38,7 +38,13 @@ const ArrowMarker = ({
       refX={0}
       refY={0}
     >
-      <polygon points={points} fill={color} stroke={color} strokeWidth={0.5} strokeLinejoin="round" />
+      <polygon
+        points={points}
+        fill={color}
+        stroke={color}
+        strokeWidth={0.5}
+        strokeLinejoin="round"
+      />
     </marker>
   );
 };

@@ -62,7 +62,9 @@ export const GlobalGraphStyles = () => {
           opacity: ${GRAPH_NON_ORIGIN_NODE_OPACITY};
         }
 
-        .react-flow.graph-highlight-origins-only .react-flow__edge.graph-origin-edge .react-flow__edge-path,
+        .react-flow.graph-highlight-origins-only
+          .react-flow__edge.graph-origin-edge
+          .react-flow__edge-path,
         .react-flow.graph-highlight-origins-only .graph-origin-edge-path {
           animation: graph-origin-edge-dash 0.9s linear infinite;
         }

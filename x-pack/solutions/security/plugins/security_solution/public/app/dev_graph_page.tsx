@@ -442,11 +442,7 @@ export const DevGraphPage = () => {
         overflow: hidden;
       `}
     >
-      <DevGraphWithFlyout
-        dataView={dataView}
-        entityActionsMode="hover"
-        entityStyleMode="colored"
-      />
+      <DevGraphWithFlyout dataView={dataView} entityActionsMode="hover" entityStyleMode="colored" />
     </div>
   );
 };

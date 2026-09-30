@@ -43,14 +43,7 @@ interface MiniMapNodeRenderedProps extends MiniMapNodeProps {
   data?: NodeViewModel;
 }
 
-const MiniMapNode = ({
-  x,
-  y,
-  width = 0,
-  height = 0,
-  data,
-  id,
-}: MiniMapNodeRenderedProps) => {
+const MiniMapNode = ({ x, y, width = 0, height = 0, data, id }: MiniMapNodeRenderedProps) => {
   const { euiTheme } = useEuiTheme();
 
   const getEuiColor = useCallback(

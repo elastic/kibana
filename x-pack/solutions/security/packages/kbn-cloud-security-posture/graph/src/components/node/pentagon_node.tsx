@@ -7,8 +7,8 @@
 
 import React, { memo } from 'react';
 import { useEuiTheme } from '@elastic/eui';
-import { GRAPH_NODE_SHADOW_FILTER } from '../constants';
 import { Handle, Position } from '@xyflow/react';
+import { GRAPH_NODE_SHADOW_FILTER, NODE_HEIGHT, NODE_WIDTH } from '../constants';
 import {
   NodeContainer,
   NodeShapeContainer,
@@ -24,7 +24,6 @@ import {
 import type { EntityNodeViewModel, NodeProps } from '../types';
 import { PentagonHoverShape, PentagonShape } from './shapes/pentagon_shape';
 import { NodeExpandButton } from './node_expand_button';
-import { NODE_HEIGHT, NODE_WIDTH } from '../constants';
 import { NodeDetails } from './node_details';
 import {
   GRAPH_ENTITY_NODE_ID,

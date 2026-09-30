@@ -35,7 +35,9 @@ describe('useGraphZoomKeyboardShortcuts', () => {
     document.dispatchEvent(
       new KeyboardEvent('keydown', { code: 'Minus', key: '-', bubbles: true })
     );
-    document.dispatchEvent(new KeyboardEvent('keydown', { code: 'Digit0', key: '0', bubbles: true }));
+    document.dispatchEvent(
+      new KeyboardEvent('keydown', { code: 'Digit0', key: '0', bubbles: true })
+    );
     document.dispatchEvent(new KeyboardEvent('keydown', { code: 'KeyF', key: 'f', bubbles: true }));
     document.dispatchEvent(new KeyboardEvent('keydown', { code: 'KeyC', key: 'c', bubbles: true }));
 

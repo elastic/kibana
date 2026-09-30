@@ -33,13 +33,12 @@ import { DEFAULT_GRAPH_FILTERS } from '../controls/apply_filters_popover';
 import type { GraphFiltersState } from '../controls/apply_filters_popover';
 import { GraphFiltersProvider } from '../graph/graph_filters_context';
 import { AnimatedSearchBarContainer, useBorder } from './styles';
-import { GRAPH_PANEL_INSET } from '../constants';
+import { GRAPH_PANEL_INSET, GRAPH_SCOPE_ID } from '../constants';
 import { CONTROLLED_BY_GRAPH_INVESTIGATION_FILTER, addFilter } from '../filters/search_filters';
 import { useEntityNodeExpandPopover } from '../popovers/node_expand/use_entity_node_expand_popover';
 import { useLabelNodeExpandPopover } from '../popovers/node_expand/use_label_node_expand_popover';
 import type { EntityActionItem, NodeProps, NodeViewModel } from '../types';
 import { isLabelNode, isRelationshipNode, showErrorToast } from '../utils';
-import { GRAPH_SCOPE_ID } from '../constants';
 import { useGraphFilters } from '../filters/use_graph_filters';
 import { getEntityCardWidthForLabels } from '../node/card_node';
 
@@ -472,9 +471,7 @@ export const GraphInvestigation = memo<GraphInvestigationProps>(
 
     const nodes = useMemo(() => {
       const entityCardWidth = getEntityCardWidthForLabels(
-        (data?.nodes ?? [])
-          .filter(isEntityNode)
-          .map((node) => node.label ?? node.id)
+        (data?.nodes ?? []).filter(isEntityNode).map((node) => node.label ?? node.id)
       );
 
       return (
@@ -494,9 +491,7 @@ export const GraphInvestigation = memo<GraphInvestigationProps>(
               ips: nodeMetadata.ipAddress ? node.ips : undefined,
               countryCodes: nodeMetadata.geolocation ? node.countryCodes : undefined,
               sources: nodeMetadata.source ? node.sources : undefined,
-              assetCriticality: nodeMetadata.assetCriticality
-                ? node.assetCriticality
-                : undefined,
+              assetCriticality: nodeMetadata.assetCriticality ? node.assetCriticality : undefined,
               assetCriticalityCounts: nodeMetadata.assetCriticality
                 ? node.assetCriticalityCounts
                 : undefined,
@@ -512,9 +507,7 @@ export const GraphInvestigation = memo<GraphInvestigationProps>(
               entityActionsMode,
               entityStyleMode,
               cardWidth: entityCardWidth,
-              ipClickHandler: createIpClickHandler(
-                nodeMetadata.ipAddress ? nodeIps : []
-              ),
+              ipClickHandler: createIpClickHandler(nodeMetadata.ipAddress ? nodeIps : []),
               countryClickHandler: createCountryClickHandler(
                 nodeMetadata.geolocation ? nodeCountryCodes : []
               ),

@@ -8,10 +8,7 @@
 import type { Edge } from '@xyflow/react';
 import type { EdgeViewModel, NodeViewModel } from '../types';
 import { isConnectorShape } from '../utils';
-import {
-  GRAPH_ORIGIN_EDGE_CLASS,
-  isOriginEntityOrEventNode,
-} from '../graph/graph_origin_utils';
+import { GRAPH_ORIGIN_EDGE_CLASS, isOriginEntityOrEventNode } from '../graph/graph_origin_utils';
 
 export type GraphEdgeRenderColor = 'danger' | 'subdued';
 
@@ -66,10 +63,7 @@ export const shouldRenderGraphEdge = (
   targetShape: NodeViewModel['shape']
 ): boolean => !getEdgeHandleConfig(sourceShape, targetShape).isReturnStackEdge;
 
-const isOriginPathEdge = (
-  sourceNode: NodeViewModel,
-  targetNode: NodeViewModel
-): boolean => {
+const isOriginPathEdge = (sourceNode: NodeViewModel, targetNode: NodeViewModel): boolean => {
   if (isOriginEntityOrEventNode(sourceNode) || isOriginEntityOrEventNode(targetNode)) {
     return true;
   }

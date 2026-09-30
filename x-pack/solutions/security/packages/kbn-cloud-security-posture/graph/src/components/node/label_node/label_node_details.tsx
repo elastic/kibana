@@ -106,7 +106,11 @@ export const LabelNodeDetails = ({ ips, countryCodes }: LabelNodeDetailsProps) =
             </span>
           ))}
           {extraGeoCount > 0 && (
-            <GraphNotificationBadge size="m" color="subdued" data-test-subj={TEST_SUBJ_GEO_OVERFLOW}>
+            <GraphNotificationBadge
+              size="m"
+              color="subdued"
+              data-test-subj={TEST_SUBJ_GEO_OVERFLOW}
+            >
               {displayCount(extraGeoCount)}
             </GraphNotificationBadge>
           )}

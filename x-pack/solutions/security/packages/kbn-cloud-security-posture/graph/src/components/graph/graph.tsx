@@ -32,10 +32,7 @@ import { SvgDefsMarker } from '../edge/markers';
 import { CardNode, LabelNode, EdgeGroupNode, RelationshipNode } from '../node';
 import { layoutGraph } from './layout_graph';
 import { DefaultEdge } from '../edge';
-import {
-  assignBundleArrowLeaders,
-  mapEdgeViewModelToReactFlowEdge,
-} from '../edge/edge_processing';
+import { assignBundleArrowLeaders, mapEdgeViewModelToReactFlowEdge } from '../edge/edge_processing';
 import { Minimap } from '../minimap/minimap';
 import type { EdgeViewModel, NodeViewModel } from '../types';
 import {
@@ -47,12 +44,12 @@ import {
   GRAPH_BACKGROUND_DOT_SIZE,
   GRAPH_MAX_ZOOM,
   GRAPH_MIN_ZOOM,
+  GRAPH_PANEL_INSET,
 } from '../constants';
 
 import '@xyflow/react/dist/style.css';
 import { GlobalGraphStyles } from './styles';
 import { Controls, CONTROL_PANEL_MARGIN_LEFT } from '../controls/controls';
-import { GRAPH_PANEL_INSET } from '../constants';
 import { GraphInteractionToolContext } from '../controls/graph_interaction_tool_context';
 import { GRAPH_ID } from '../test_ids';
 import { useGraphFullscreen } from '../../hooks/use_graph_fullscreen';
@@ -739,9 +736,7 @@ const processGraph = (
 
   const initialEdges: Array<Edge<EdgeViewModel>> = assignBundleArrowLeaders(
     edgesModel
-      .map((edgeData) =>
-        mapEdgeViewModelToReactFlowEdge(edgeData, nodesById, highlightOriginsOnly)
-      )
+      .map((edgeData) => mapEdgeViewModelToReactFlowEdge(edgeData, nodesById, highlightOriginsOnly))
       .filter((edge): edge is Edge<EdgeViewModel> => edge !== null)
   );
 

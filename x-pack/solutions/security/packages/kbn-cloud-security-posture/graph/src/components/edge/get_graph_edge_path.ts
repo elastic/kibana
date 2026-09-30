@@ -170,14 +170,7 @@ export const getGraphEdgePath = ({
   // stays collinear with the edge leaving the pill (no snap-induced jog).
   const endpoints = isBundled
     ? { sourceX, sourceY, targetX, targetY }
-    : alignEdgeEndpoints(
-        sourceX,
-        sourceY,
-        targetX,
-        targetY,
-        sourcePosition,
-        targetPosition
-      );
+    : alignEdgeEndpoints(sourceX, sourceY, targetX, targetY, sourcePosition, targetPosition);
 
   const dx = Math.abs(endpoints.targetX - endpoints.sourceX);
   const dy = Math.abs(endpoints.targetY - endpoints.sourceY);
@@ -194,11 +187,7 @@ export const getGraphEdgePath = ({
       );
 
   // Bundled left/right fans: custom trunk so siblings can stop at the join.
-  if (
-    isBundled &&
-    isHorizontalHandle(sourcePosition) &&
-    isHorizontalHandle(targetPosition)
-  ) {
+  if (isBundled && isHorizontalHandle(sourcePosition) && isHorizontalHandle(targetPosition)) {
     return getBundledHorizontalEdgePath({
       ...endpoints,
       borderRadius,

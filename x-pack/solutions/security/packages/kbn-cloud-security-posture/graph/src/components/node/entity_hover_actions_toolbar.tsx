@@ -109,13 +109,16 @@ export const EntityHoverActionsToolbar = memo<EntityHoverActionsToolbarProps>(
     const entityDetailsIndex = items.findIndex(
       (item) => item.testSubject === GRAPH_NODE_POPOVER_SHOW_ENTITY_DETAILS_ITEM_ID
     );
-    const itemsBeforeDetails =
-      entityDetailsIndex >= 0 ? items.slice(0, entityDetailsIndex) : items;
-    const itemsAfterDetails =
-      entityDetailsIndex >= 0 ? items.slice(entityDetailsIndex) : [];
+    const itemsBeforeDetails = entityDetailsIndex >= 0 ? items.slice(0, entityDetailsIndex) : items;
+    const itemsAfterDetails = entityDetailsIndex >= 0 ? items.slice(entityDetailsIndex) : [];
 
     const renderActionItem = (item: EntityActionItem) => (
-      <EuiToolTip key={item.testSubject} content={item.label} position="top">
+      <EuiToolTip
+        key={item.testSubject}
+        content={item.label}
+        position="top"
+        disableScreenReaderOutput
+      >
         <EuiButtonIcon
           iconType={item.iconType}
           iconSize="m"
@@ -145,7 +148,11 @@ export const EntityHoverActionsToolbar = memo<EntityHoverActionsToolbarProps>(
           variant="nodeMetadata"
           anchorPosition="downCenter"
         >
-          <EuiToolTip content={entityMetadataShortcutLabel} position="top">
+          <EuiToolTip
+            content={entityMetadataShortcutLabel}
+            position="top"
+            disableScreenReaderOutput
+          >
             <EuiButtonIcon
               iconType="layers"
               iconSize="m"

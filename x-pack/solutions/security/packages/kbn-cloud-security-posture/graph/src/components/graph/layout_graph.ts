@@ -68,8 +68,7 @@ const estimateEntityCardLayoutHeight = (data: EntityNodeViewModel): number => {
   // Groups always expose a subtype row when metadata is on (derived from label).
   const showSubType = isGroup && Boolean(data.label);
   // Risk score lives in the card header badge — it does not add body height.
-  const hasBody =
-    showIp || showGeo || showEntityId || showCriticality || showSource || showSubType;
+  const hasBody = showIp || showGeo || showEntityId || showCriticality || showSource || showSubType;
 
   let height = CARD_LAYOUT_HEADER_HEIGHT;
 

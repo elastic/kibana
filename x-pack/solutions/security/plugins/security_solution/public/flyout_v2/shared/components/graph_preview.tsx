@@ -70,7 +70,7 @@ const ARROW_SIZE = 5;
 /** Relationships trunk floor — keep “8 rela…” readable next to cards. */
 const RELATIONSHIPS_TRUNK_MIN_WIDTH = 72;
 
-type PreviewEntityNode = {
+interface PreviewEntityNode {
   id: string;
   label?: string;
   icon?: string;
@@ -80,11 +80,11 @@ type PreviewEntityNode = {
   riskScore?: number;
   riskScoreMin?: number;
   riskScoreMax?: number;
-};
+}
 
 type PreviewRiskLevel = 'critical' | 'high' | 'moderate' | 'low' | 'unknown';
 
-type RiskGroup = {
+interface RiskGroup {
   level: PreviewRiskLevel;
   count: number;
   /** Representative score shown on the badge (max in the group). */
@@ -93,15 +93,9 @@ type RiskGroup = {
   riskScoreMax?: number;
   icon?: string;
   label?: string;
-};
+}
 
-const RISK_LEVEL_ORDER: PreviewRiskLevel[] = [
-  'critical',
-  'high',
-  'moderate',
-  'low',
-  'unknown',
-];
+const RISK_LEVEL_ORDER: PreviewRiskLevel[] = ['critical', 'high', 'moderate', 'low', 'unknown'];
 
 const stripEntityPrefix = (id: string): string => id.replace(/^(user|host|service):/i, '');
 
@@ -700,13 +694,7 @@ const RelationshipsPill = ({ count }: RelationshipsPillProps) => {
  * Fan-out from the relationships trunk to each risk-group card.
  * Uses SVG so branches share one continuous stroke (no floating stubs / gaps).
  */
-const FanOutConnectors = ({
-  groupCount,
-  edgeColor,
-}: {
-  groupCount: number;
-  edgeColor: string;
-}) => {
+const FanOutConnectors = ({ groupCount, edgeColor }: { groupCount: number; edgeColor: string }) => {
   if (groupCount <= 0) return null;
 
   const vbW = 100;
@@ -727,8 +715,7 @@ const FanOutConnectors = ({
   const spineBottom = rowYs[rowYs.length - 1];
 
   // Spine + branches only — the horizontal trunk through the pill is drawn by the parent.
-  const spinePath =
-    groupCount > 1 ? `M ${spineX} ${spineTop} L ${spineX} ${spineBottom}` : '';
+  const spinePath = groupCount > 1 ? `M ${spineX} ${spineTop} L ${spineX} ${spineBottom}` : '';
 
   return (
     <svg
@@ -781,18 +768,9 @@ const FanOutConnectors = ({
 };
 
 /** Non-scaling arrow heads positioned at each card's vertical center. */
-const FanOutArrows = ({
-  groupCount,
-  edgeColor,
-}: {
-  groupCount: number;
-  edgeColor: string;
-}) => {
+const FanOutArrows = ({ groupCount, edgeColor }: { groupCount: number; edgeColor: string }) => {
   if (groupCount <= 0) return null;
-  const rowPercents = Array.from(
-    { length: groupCount },
-    (_, i) => ((i + 0.5) / groupCount) * 100
-  );
+  const rowPercents = Array.from({ length: groupCount }, (_, i) => ((i + 0.5) / groupCount) * 100);
 
   return (
     <>
@@ -904,8 +882,8 @@ export const GraphPreview: React.FC<GraphPreviewProps> = memo(
     const mainRiskScore = originRiskUnknown
       ? undefined
       : originRiskScore !== undefined
-        ? originRiskScore
-        : resolveNodeRiskScore(mainNode);
+      ? originRiskScore
+      : resolveNodeRiskScore(mainNode);
     const mainLabel =
       mainNode.label ??
       stripEntityPrefix(mainNode.id) ??
@@ -939,7 +917,10 @@ export const GraphPreview: React.FC<GraphPreviewProps> = memo(
           );
           background-size: ${GRAPH_BACKGROUND_DOT_GAP}px ${GRAPH_BACKGROUND_DOT_GAP}px;
 
-          @container graph-preview (max-width: ${PREVIEW_CARD_MIN_WIDTH * 2 + RELATIONSHIPS_TRUNK_MIN_WIDTH + FANOUT_WIDTH + PREVIEW_CANVAS_PADDING * 2}px) {
+          @container graph-preview (max-width: ${PREVIEW_CARD_MIN_WIDTH * 2 +
+          RELATIONSHIPS_TRUNK_MIN_WIDTH +
+          FANOUT_WIDTH +
+          PREVIEW_CANVAS_PADDING * 2}px) {
             padding: 12px;
             gap: 4px;
           }
@@ -1045,8 +1026,7 @@ export const GraphPreview: React.FC<GraphPreviewProps> = memo(
                     i18n.translate(
                       'xpack.securitySolution.flyout.right.visualizations.graphPreview.groupEntityCount',
                       {
-                        defaultMessage:
-                          '{count} {count, plural, one {Entity} other {Entities}}',
+                        defaultMessage: '{count} {count, plural, one {Entity} other {Entities}}',
                         values: { count: group.count },
                       }
                     );
@@ -1061,9 +1041,7 @@ export const GraphPreview: React.FC<GraphPreviewProps> = memo(
                         count={isGroup ? group.count : undefined}
                         icon={isGroup ? GROUP_ENTITIES_ICON : group.icon ?? 'storage'}
                         label={groupLabel}
-                        riskScore={
-                          group.riskScoreMin === undefined ? group.riskScore : undefined
-                        }
+                        riskScore={group.riskScoreMin === undefined ? group.riskScore : undefined}
                         riskScoreMin={group.riskScoreMin}
                         riskScoreMax={group.riskScoreMax}
                       />

@@ -43,14 +43,12 @@ export const DefaultEdge = memo(
     const color = getGraphEdgeRenderColor(data);
     const sourceMargin = getShapeHandlePosition(data?.sourceShape);
     const targetMargin = getShapeHandlePosition(data?.targetShape);
-    const canHaveArrow =
-      !data?.targetShape || !NODES_WITHOUT_MARKER.includes(data?.targetShape);
+    const canHaveArrow = !data?.targetShape || !NODES_WITHOUT_MARKER.includes(data?.targetShape);
     // Bundle siblings: only the leader draws tip + final stem into the target.
     const showArrow = canHaveArrow && data?.showArrowHead !== false;
     const markerEnd = showArrow ? getMarkerEnd(color) : undefined;
     // Truncate for entity *and* group fans (groups have no tip, but still need one stem).
-    const truncateAtTrunk =
-      useBundledEdgeRouting && data?.showArrowHead === false;
+    const truncateAtTrunk = useBundledEdgeRouting && data?.showArrowHead === false;
 
     // Integer endpoints — sub-pixel handle drift was stacking parallel stems.
     // Same tX for every edge into a tipped target (clearance must not depend on leader).

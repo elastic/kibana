@@ -113,9 +113,7 @@ export const useGraphPreview = ({ hit }: UseGraphPreviewParams): UseGraphPreview
   // Prefer actor/target entity fields when present; for local demos / mock graph data,
   // timestamp + event ids are enough to show the Visualizations graph preview.
   const hasGraphData =
-    Boolean(timestamp) &&
-    eventIds.length > 0 &&
-    (Boolean(action?.length) || hasActor || hasTarget);
+    Boolean(timestamp) && eventIds.length > 0 && (Boolean(action?.length) || hasActor || hasTarget);
 
   const hasRequiredLicense = useHasGraphVisualizationLicense();
 

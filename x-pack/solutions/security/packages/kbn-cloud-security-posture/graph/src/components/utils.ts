@@ -24,10 +24,7 @@ import type {
   RelationshipNodeViewModel,
   EdgeViewModel,
 } from './types';
-import {
-  assignBundleArrowLeaders,
-  mapEdgeViewModelToReactFlowEdge,
-} from './edge/edge_processing';
+import { assignBundleArrowLeaders, mapEdgeViewModelToReactFlowEdge } from './edge/edge_processing';
 
 export const isEntityNode = (node: NodeViewModel): node is EntityNodeViewModel =>
   node.shape === 'ellipse' ||

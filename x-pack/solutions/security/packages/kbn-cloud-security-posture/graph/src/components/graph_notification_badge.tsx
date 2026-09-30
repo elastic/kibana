@@ -14,10 +14,7 @@ export const graphNotificationBadgeCss = css`
   border-radius: 999px;
 `;
 
-export const GraphNotificationBadge = ({
-  css: customCss,
-  ...props
-}: EuiNotificationBadgeProps) => (
+export const GraphNotificationBadge = ({ css: customCss, ...props }: EuiNotificationBadgeProps) => (
   <EuiNotificationBadge
     css={[graphNotificationBadgeCss, customCss as Interpolation<Theme>]}
     {...props}
