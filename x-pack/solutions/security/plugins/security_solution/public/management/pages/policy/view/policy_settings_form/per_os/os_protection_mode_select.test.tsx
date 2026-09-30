@@ -8,7 +8,7 @@
 import type { AppContextTestRender } from '../../../../../../common/mock/endpoint';
 import { createAppRootMockRenderer } from '../../../../../../common/mock/endpoint';
 import React from 'react';
-import { waitForElementToBeRemoved } from '@testing-library/react';
+import { act, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { ProtectionModes } from '../../../../../../../common/endpoint/types';
 import { OS_CONTROL_WIDTH } from './os_control_layout';
@@ -94,12 +94,27 @@ describe('OsProtectionModeSelect', () => {
     expect(formProps.onModeChange).toHaveBeenCalledWith(ProtectionModes.detect);
   });
 
-  it('closes the options list when the page scrolls', async () => {
-    render();
+  describe('when the page scrolls', () => {
+    beforeEach(() => {
+      jest.useFakeTimers();
+    });
 
-    await openOsControlAndScrollPage(renderResult, testSubj);
+    afterEach(() => {
+      act(() => {
+        jest.runOnlyPendingTimers();
+      });
+      jest.useRealTimers();
+    });
 
-    await waitForElementToBeRemoved(() => renderResult.queryByRole('listbox'));
+    it('closes the options list', async () => {
+      render();
+
+      await openOsControlAndScrollPage(renderResult, testSubj);
+
+      await waitFor(() => {
+        expect(renderResult.queryByRole('listbox')).not.toBeInTheDocument();
+      });
+    });
   });
 
   it('renders disabled when disabled is true', () => {

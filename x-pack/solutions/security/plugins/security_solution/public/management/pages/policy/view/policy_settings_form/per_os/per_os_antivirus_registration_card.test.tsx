@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { waitForElementToBeRemoved } from '@testing-library/react';
+import { act, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { cloneDeep } from 'lodash';
 import type { AppContextTestRender } from '../../../../../../common/mock/endpoint';
@@ -165,12 +165,27 @@ describe('PerOsAntivirusRegistrationCard', () => {
     expect(disabledOption.querySelector('[color="danger"]')).toBeInTheDocument();
   });
 
-  it('closes the mode options list when the page scrolls', async () => {
-    render();
+  describe('when the page scrolls', () => {
+    beforeEach(() => {
+      jest.useFakeTimers();
+    });
 
-    await openOsControlAndScrollPage(renderResult, testSubj.windows.modeSelect);
+    afterEach(() => {
+      act(() => {
+        jest.runOnlyPendingTimers();
+      });
+      jest.useRealTimers();
+    });
 
-    await waitForElementToBeRemoved(() => renderResult.queryByRole('listbox'));
+    it('closes the mode options list', async () => {
+      render();
+
+      await openOsControlAndScrollPage(renderResult, testSubj.windows.modeSelect);
+
+      await waitFor(() => {
+        expect(renderResult.queryByRole('listbox')).not.toBeInTheDocument();
+      });
+    });
   });
 
   it('selecting a mode updates windows.antivirus_registration.mode and leaves mac and linux byte-identical', async () => {
