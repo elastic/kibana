@@ -8,19 +8,21 @@
  */
 
 import type { Logger } from '@kbn/core/server';
-import type { DataStreamsStart } from '@kbn/core-data-streams-server';
-import { WorkflowEventLoggerService } from './workflow_event_logger_service';
+import { WorkflowLogsQueryService } from './workflow_logs_query_service';
+import type { LogsRepository } from '../repositories/logs_repository';
 
 const createLoggerMock = () =>
   ({
     error: jest.fn(),
   } as unknown as Logger);
 
-describe('WorkflowEventLoggerService', () => {
+describe('WorkflowLogsQueryService', () => {
   it('maps paging fields for repository search helpers', async () => {
-    const service = new WorkflowEventLoggerService({} as DataStreamsStart, createLoggerMock());
     const repository = { searchLogs: jest.fn().mockResolvedValue({ total: 0, logs: [] }) };
-    (service as any).logsRepository = repository;
+    const service = new WorkflowLogsQueryService(
+      repository as unknown as LogsRepository,
+      createLoggerMock()
+    );
 
     await service.getExecutionLogs({
       executionId: 'exec-1',
@@ -40,7 +42,7 @@ describe('WorkflowEventLoggerService', () => {
 
   it('throws validation errors for missing required params', async () => {
     const logger = createLoggerMock();
-    const service = new WorkflowEventLoggerService({} as DataStreamsStart, logger);
+    const service = new WorkflowLogsQueryService({} as LogsRepository, logger);
 
     expect(() => service.getExecutionLogs({} as any)).toThrow(
       'Execution logs: Execution ID is required'
@@ -54,43 +56,11 @@ describe('WorkflowEventLoggerService', () => {
     expect(logger.error).toHaveBeenCalledTimes(3);
   });
 
-  it('returns contextual logger instances from convenience factories', () => {
-    const service = new WorkflowEventLoggerService(
-      {} as DataStreamsStart,
-      createLoggerMock(),
-      true
-    );
-    const createLoggerSpy = jest.spyOn(service, 'createLogger');
-
-    service.createWorkflowLogger('wf-1', 'workflow');
-    service.createExecutionLogger('wf-1', 'exec-1', 'workflow');
-    service.createStepLogger('wf-1', 'exec-1', 'step-1', 'Step', 'wait', 'workflow');
-
-    expect(createLoggerSpy).toHaveBeenNthCalledWith(1, {
-      workflowId: 'wf-1',
-      workflowName: 'workflow',
-    });
-    expect(createLoggerSpy).toHaveBeenNthCalledWith(2, {
-      workflowId: 'wf-1',
-      workflowName: 'workflow',
-      executionId: 'exec-1',
-    });
-    expect(createLoggerSpy).toHaveBeenNthCalledWith(3, {
-      workflowId: 'wf-1',
-      workflowName: 'workflow',
-      executionId: 'exec-1',
-      stepId: 'step-1',
-      stepName: 'Step',
-      stepType: 'wait',
-    });
-  });
-
   it('rethrows repository failures from getRecentLogs', async () => {
     const logger = createLoggerMock();
-    const service = new WorkflowEventLoggerService({} as DataStreamsStart, logger);
     const repositoryError = new Error('repository down');
     const repository = { getRecentLogs: jest.fn().mockRejectedValue(repositoryError) };
-    (service as any).logsRepository = repository;
+    const service = new WorkflowLogsQueryService(repository as unknown as LogsRepository, logger);
 
     await expect(service.getRecentLogs(10)).rejects.toThrow(repositoryError);
     expect(repository.getRecentLogs).toHaveBeenCalledWith(10);

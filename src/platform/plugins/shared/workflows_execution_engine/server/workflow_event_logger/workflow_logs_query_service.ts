@@ -8,74 +8,25 @@
  */
 
 import type { Logger } from '@kbn/core/server';
-import type { DataStreamsStart } from '@kbn/core-data-streams-server';
 import type {
   BaseLogsParams,
   ExecutionLogsParams,
-  IWorkflowEventLogger,
-  IWorkflowEventLoggerService,
+  IWorkflowLogsQueryService,
   LogsByLevelParams,
+  SearchLogsParams,
   StepLogsParams,
-  WorkflowEventLoggerContext,
 } from './types';
-import { WorkflowEventLogger } from './workflow_event_logger';
-import type { LogSearchResult, SearchLogsParams } from '../repositories/logs_repository';
-import { LogsRepository } from '../repositories/logs_repository';
+import type {
+  LogSearchResult,
+  LogsRepository,
+  SearchLogsParams as RepositorySearchLogsParams,
+} from '../repositories/logs_repository';
 
-export class WorkflowEventLoggerService implements IWorkflowEventLoggerService {
-  private logsRepository: LogsRepository;
-  constructor(
-    dataStreams: DataStreamsStart,
-    private readonly logger: Logger,
-    private readonly enableConsoleLogging: boolean = false
-  ) {
-    this.logsRepository = new LogsRepository(dataStreams, logger);
-  }
+/** Reads workflow execution logs. */
+export class WorkflowLogsQueryService implements IWorkflowLogsQueryService {
+  constructor(private logsRepository: LogsRepository, private readonly logger: Logger) {}
 
-  public createLogger(context: WorkflowEventLoggerContext): IWorkflowEventLogger {
-    return new WorkflowEventLogger(this.logsRepository, this.logger, context, {
-      enableConsoleLogging: this.enableConsoleLogging,
-    });
-  }
-
-  public createWorkflowLogger(workflowId: string, workflowName?: string): IWorkflowEventLogger {
-    return this.createLogger({
-      workflowId,
-      workflowName,
-    });
-  }
-
-  public createExecutionLogger(
-    workflowId: string,
-    executionId: string,
-    workflowName?: string
-  ): IWorkflowEventLogger {
-    return this.createLogger({
-      workflowId,
-      workflowName,
-      executionId,
-    });
-  }
-
-  public createStepLogger(
-    workflowId: string,
-    executionId: string,
-    stepId: string,
-    stepName?: string,
-    stepType?: string,
-    workflowName?: string
-  ): IWorkflowEventLogger {
-    return this.createLogger({
-      workflowId,
-      workflowName,
-      executionId,
-      stepId,
-      stepName,
-      stepType,
-    });
-  }
-
-  private transformPaginationParams(params: BaseLogsParams): Partial<SearchLogsParams> {
+  private transformPaginationParams(params: BaseLogsParams): Partial<RepositorySearchLogsParams> {
     const { size = 200, page = 1, ...rest } = params;
     return {
       ...rest,
