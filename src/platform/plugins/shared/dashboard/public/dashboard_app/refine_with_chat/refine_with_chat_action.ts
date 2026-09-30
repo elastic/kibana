@@ -16,9 +16,4 @@ import type { EmbeddableApiContext } from '@kbn/presentation-publishing';
  */
 export const REFINE_WITH_CHAT_ACTION_ID = 'refinePanelWithChat';
 
-export interface RefineWithChatActionContext extends EmbeddableApiContext {
-  /** Called when the user submits a prompt in the chat opened by the action. */
-  onSubmit?: () => void;
-  /** Called when the chat opened by the action closes. */
-  onClose?: () => void;
-}
+export type RefineWithChatActionContext = EmbeddableApiContext;

@@ -137,7 +137,7 @@ export const createRefineWithChatAction = ({
             map(() => undefined)
           )
         : undefined,
-    execute: async ({ embeddable, onSubmit, onClose }) => {
+    execute: async ({ embeddable }) => {
       const dashboardApi = getDashboardAppApi(embeddable, dashboardAppApi$);
       if (!dashboardApi || !isRefinablePanel(embeddable) || !(await isCompatible(embeddable))) {
         return;
@@ -184,8 +184,6 @@ export const createRefineWithChatAction = ({
             buildDashboardAttachment(draftAttachmentId.current),
             buildPanelPointer(draftAttachmentId.current),
           ],
-          onSubmit,
-          onClose,
         });
         return;
       }
