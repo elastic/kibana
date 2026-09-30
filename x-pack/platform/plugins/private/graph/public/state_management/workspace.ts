@@ -641,37 +641,13 @@ export const registerWorkspaceListeners = (
 
   startListening({
     predicate: (action) => topologyActionTypes.has(action.type),
-    effect: (action, listenerApi) => {
-      const originalSelectedNodeIds = listenerApi.getOriginalState().workspace.selectedNodeIds;
+    effect: (_action, listenerApi) => {
       const workspace = getWorkspace();
       if (!workspace) {
         return;
       }
 
-      if (deleteSelectedNodes.match(action)) {
-        workspace.deleteNodes(originalSelectedNodeIds);
-      } else if (blocklistSelectedNodes.match(action)) {
-        workspace.blocklistNodes(originalSelectedNodeIds);
-      } else if (groupSelectedNodes.match(action)) {
-        workspace.groupNodes(action.payload, originalSelectedNodeIds);
-      } else if (ungroupNode.match(action)) {
-        workspace.ungroup(workspace.nodesMap[action.payload]);
-      } else if (mergeNodes.match(action)) {
-        workspace.mergeIds(action.payload.parentId, action.payload.childId);
-      } else if (unblockNode.match(action)) {
-        const blockedNode = (workspace.blocklistedNodes as WorkspaceNode[]).find(
-          ({ id }) => id === action.payload
-        );
-        if (blockedNode) {
-          workspace.unblockNode(blockedNode);
-        }
-      } else if (unblockAllNodes.match(action)) {
-        workspace.unblockAll();
-      } else if (undoWorkspace.match(action) || redoWorkspace.match(action)) {
-        syncRuntimeTopology(workspace, listenerApi.getState().workspace);
-        return;
-      }
-      notifyReact();
+      syncRuntimeTopology(workspace, listenerApi.getState().workspace);
     },
   });
 
