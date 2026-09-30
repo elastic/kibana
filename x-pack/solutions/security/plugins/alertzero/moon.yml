@@ -22,6 +22,7 @@ dependsOn:
   - '@kbn/config-schema'
   - '@kbn/datemath'
   - '@kbn/logging'
+  - '@kbn/nightshift-decision-trees'
   - '@kbn/features-plugin'
   - '@kbn/kibana-react-plugin'
   - '@kbn/alertzero-common'

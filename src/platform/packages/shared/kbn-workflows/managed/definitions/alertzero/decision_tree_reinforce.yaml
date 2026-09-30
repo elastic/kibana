@@ -1,0 +1,142 @@
+version: "1"
+name: Decision tree reinforce
+description: >
+  Distills one finished forensic analysis into the decision tree for its symptom.
+  Validates the draft with the shared decision-tree guardrails and writes a
+  tentative knowledge item. A skipped or invalid draft writes nothing.
+enabled: true
+tags:
+  - security
+  - decision-tree
+
+triggers:
+  - type: manual
+    inputs:
+      properties:
+        symptom:
+          type: string
+          maxLength: 80
+          description: Symptom slug the tree is stored under.
+        ki_id:
+          type: string
+          minLength: 1
+          maxLength: 512
+          description: Space-scoped knowledge item id for this symptom.
+        prior_mermaid:
+          type: string
+          maxLength: 65536
+          description: Current diagram. Empty when this symptom has no tree yet.
+        prior_version:
+          type: integer
+          minimum: 0
+          maximum: 1000000
+          description: Version already stored. Zero when there is no tree yet.
+        rationale:
+          type: string
+          maxLength: 7900
+          description: Forensic assessment to distill. The host and alert id stay out of the tree.
+        propose:
+          type: boolean
+          description: Whether the analysis recommended containment.
+        actions_summary:
+          type: string
+          maxLength: 4000
+          description: Recommended action ids, comma-separated. Empty when none were proposed.
+      required:
+        - symptom
+        - ki_id
+        - rationale
+        - propose
+      additionalProperties: false
+
+consts:
+  ai_index_id: security-decision-trees
+
+steps:
+  - name: prepare_turn
+    type: alertzero.prepareDecisionTreeTurn
+    with:
+      symptom: "{{ inputs.symptom }}"
+      prior_mermaid: "{{ inputs.prior_mermaid | default: '' }}"
+      rationale: "{{ inputs.rationale }}"
+      propose: "${{ inputs.propose }}"
+      actions_summary: "{{ inputs.actions_summary | default: '' }}"
+
+  - name: draft_decision_tree
+    type: ai.agent
+    if: "${{ steps.prepare_turn.output.skipped == false }}"
+    agent-id: alertzero-thin-agent
+    connector-id-by-feature: alertzero_agentic
+    plugin-id: alertzero_decision_tree_reinforce
+    aggregate-by: alertzero_parent
+    timeout: "5m"
+    create-conversation: true
+    on-failure:
+      continue: true
+    with:
+      message: "{{ steps.prepare_turn.output.message }}"
+      schema:
+        type: object
+        required:
+          - decision_tree_mermaid
+          - applicability
+        properties:
+          applicability:
+            type: string
+            maxLength: 2048
+            description: When a later investigation should follow this tree.
+          decision_tree_mermaid:
+            type: string
+            maxLength: 65536
+            description: flowchart TD diagram. Do not wrap it in code fences.
+          evidence_gatherer_metadata:
+            type: array
+            maxItems: 20
+            items:
+              type: string
+              maxLength: 2000
+          keywords:
+            type: array
+            maxItems: 20
+            items:
+              type: string
+              maxLength: 64
+
+  - name: validate_decision_tree
+    type: alertzero.persistDecisionTree
+    if: >-
+      ${{ steps.prepare_turn.output.skipped == false
+        and steps.draft_decision_tree.error == null }}
+    with:
+      symptom: "{{ inputs.symptom }}"
+      ki_id: "{{ inputs.ki_id }}"
+      prior_mermaid: "{{ inputs.prior_mermaid | default: '' }}"
+      prior_version: "${{ inputs.prior_version | default: 0 }}"
+      mermaid: "{{ steps.draft_decision_tree.output.structured_output.decision_tree_mermaid | default: '' }}"
+      applicability: "{{ steps.draft_decision_tree.output.structured_output.applicability | default: '' }}"
+      evidence_gatherer_metadata: "${{ steps.draft_decision_tree.output.structured_output.evidence_gatherer_metadata | default: [] }}"
+      keywords: "${{ steps.draft_decision_tree.output.structured_output.keywords | default: [] }}"
+
+  # createKi on an index replaces a document with the same id, so the first write and
+  # later versions share one step. A failing draft never reaches it.
+  - name: write_decision_tree
+    type: context-engine.createKi
+    if: "${{ steps.validate_decision_tree.output.skipped == false }}"
+    with:
+      ai_index_id: "{{ consts.ai_index_id }}"
+      ki_id: "{{ steps.validate_decision_tree.output.ki_id }}"
+      refresh: true
+      ki:
+        type: "{{ steps.validate_decision_tree.output.type }}"
+        title: "{{ steps.validate_decision_tree.output.title }}"
+        description: "{{ steps.validate_decision_tree.output.description }}"
+        content: "{{ steps.validate_decision_tree.output.content }}"
+        tags:
+          - "{{ steps.validate_decision_tree.output.tag }}"
+        attributes:
+          status: "{{ steps.validate_decision_tree.output.status }}"
+          version: "${{ steps.validate_decision_tree.output.version }}"
+          symptom: "{{ steps.validate_decision_tree.output.symptom }}"
+          space_id: "{{ workflow.spaceId }}"
+          evidence_gatherer_metadata: "${{ steps.validate_decision_tree.output.evidence_gatherer_metadata }}"
+          keywords: "${{ steps.validate_decision_tree.output.keywords }}"

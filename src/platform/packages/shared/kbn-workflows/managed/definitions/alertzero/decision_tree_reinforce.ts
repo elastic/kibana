@@ -11,21 +11,21 @@ import {
   ALERTZERO_INTERNAL_WORKFLOW_MANAGEMENT,
   ALERTZERO_MANAGED_WORKFLOW_PLUGIN_ID,
 } from './constants';
-import FORENSICS_RUN_ENDPOINT_ANALYSIS_YAML from './forensics_run_endpoint_analysis.yaml';
+import DECISION_TREE_REINFORCE_YAML from './decision_tree_reinforce.yaml';
 import type { ManagedWorkflowDefinition } from '../../types';
 
-export const ALERTZERO_FORENSICS_RUN_ENDPOINT_ANALYSIS_WORKFLOW_ID =
-  'system-security-forensics-run-endpoint-analysis';
+export const ALERTZERO_DECISION_TREE_REINFORCE_WORKFLOW_ID =
+  'system-security-decision-tree-reinforce';
 
 /**
- * The forensic pass itself, installed once globally and dispatched per indicator by
- * the per-space Endpoint analysis worker, which is the only scheduler authority.
+ * Post-analysis workflow that turns one forensic result into a tentative decision tree.
+ * The endpoint-analysis run calls it and continues when it fails.
  */
-export const ALERTZERO_FORENSICS_RUN_ENDPOINT_ANALYSIS_WORKFLOW = {
+export const ALERTZERO_DECISION_TREE_REINFORCE_WORKFLOW = {
   billable: false,
-  id: ALERTZERO_FORENSICS_RUN_ENDPOINT_ANALYSIS_WORKFLOW_ID,
+  id: ALERTZERO_DECISION_TREE_REINFORCE_WORKFLOW_ID,
   management: ALERTZERO_INTERNAL_WORKFLOW_MANAGEMENT,
   pluginId: ALERTZERO_MANAGED_WORKFLOW_PLUGIN_ID,
-  version: 4,
-  yaml: FORENSICS_RUN_ENDPOINT_ANALYSIS_YAML,
+  version: 1,
+  yaml: DECISION_TREE_REINFORCE_YAML,
 } as const satisfies ManagedWorkflowDefinition;

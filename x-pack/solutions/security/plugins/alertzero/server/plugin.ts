@@ -35,6 +35,7 @@ import { registerAlertZeroInferenceFeatures } from './inference_features';
 import { registerUiSettings } from './ui_settings';
 import { registerRoutes } from './routes/register_routes';
 import { registerOwner } from './managed_workflows/register_owner';
+import { registerDecisionTreeSteps } from './step_definitions/register_decision_tree_steps';
 import { initializeManagedWorkflows } from './managed_workflows/initialize_managed_workflows';
 import { WatchesService } from './services/watches/watches_service';
 import { WorkersService } from './services/workers/workers_service';
@@ -115,6 +116,7 @@ export class AlertZeroPlugin
     this.workflowsManagementApi = workflowsManagement.management;
 
     registerOwner({ workflowsExtensions });
+    registerDecisionTreeSteps(workflowsExtensions);
     registerAgentType(agentBuilder);
     registerAttachments(agentBuilder);
     registerAlertZeroInferenceFeatures(searchInferenceEndpoints, this.logger.get('inference'));

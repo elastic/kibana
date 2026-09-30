@@ -1354,7 +1354,7 @@ x-pack/solutions/observability/packages/kbn-evals-suite-observability-ai @elasti
 x-pack/solutions/observability/packages/kbn-evals-suite-significant-events @elastic/nightshift-sre-agent-team
 x-pack/solutions/observability/packages/kbn-genai-cli @elastic/nightshift-context-and-research-team
 x-pack/solutions/observability/packages/kbn-investigation-output @elastic/nightshift-context-and-research-team @elastic/nightshift-sre-agent-team @elastic/nightshift-investigations-team
-x-pack/solutions/observability/packages/kbn-nightshift-decision-trees @elastic/nightshift-investigations-team
+x-pack/platform/packages/shared/kbn-nightshift-decision-trees @elastic/nightshift-investigations-team
 x-pack/solutions/observability/packages/kbn-nightshift-shared @elastic/nightshift-context-and-research-team @elastic/nightshift-sre-agent-team
 x-pack/solutions/observability/packages/kbn-observability-schema @elastic/obs-signals-traces-team
 x-pack/solutions/observability/packages/kbn-scout-oblt @elastic/appex-qa
