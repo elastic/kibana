@@ -13,7 +13,6 @@ import type { SavedObjectsType } from '@kbn/core/server';
 import type { SavedObjectsFullModelVersion } from '@kbn/core-saved-objects-server';
 import { ANALYTICS_SAVED_OBJECT_INDEX } from '@kbn/core-saved-objects-server';
 import { VEGA_SAVED_OBJECT_TYPE } from '../../common/constants';
-import { MAX_VEGA_FILTERS } from '../api/constants';
 
 /**
  * Temporary duplicate `@kbn/config-schema` needed for `SavedObjectsType` compatibility.
@@ -52,8 +51,7 @@ export const vegaLibraryItemSavedObjectSchema = schema.object({
           data_view_ref_name: schema.maybe(schema.string()),
         },
         { unknowns: 'allow' }
-      ),
-      { maxSize: MAX_VEGA_FILTERS }
+      )
     )
   ),
 });

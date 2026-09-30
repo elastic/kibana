@@ -14,7 +14,6 @@ import {
   MAX_DESCRIPTION_LENGTH,
   MAX_TITLE_LENGTH,
 } from '@kbn/as-code-shared-schemas';
-import { MAX_VEGA_FILTERS } from './constants';
 
 export const vegaSpecSchema = z
   .discriminatedUnion('format', [
@@ -54,7 +53,7 @@ export const vegaLibraryItemSchema = z
       description:
         'KQL or Lucene query. Applied together with the dashboard query to Elasticsearch and ES|QL data sources that use `%context%: true`, and to Elasticsearch data sources that use `%dashboard_context-*%` placeholders.',
     }),
-    filters: z.array(asCodeFilterSchema).max(MAX_VEGA_FILTERS).optional().meta({
+    filters: z.array(asCodeFilterSchema).max(100).optional().meta({
       description:
         'Filters. Applied together with the dashboard filters to Elasticsearch and ES|QL data sources that use `%context%: true`, and to Elasticsearch data sources that use `%dashboard_context-*%` placeholders.',
     }),

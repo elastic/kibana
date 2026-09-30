@@ -9,8 +9,6 @@
 
 export const VEGA_API_PATH = '/api/vega';
 
-export const MAX_VEGA_FILTERS = 100;
-
 /** Used in response body `id` fields (create, read, update). */
 export const VEGA_LIBRARY_ITEM_ID_DESCRIPTION =
   'The unique ID of the Vega library item, as returned by the create or search endpoints.';

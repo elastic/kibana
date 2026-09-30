@@ -40,14 +40,6 @@ describe('Vega library item saved object schema', () => {
       { title: 'Unknown query', spec, query: { expression: 'a', language: 'sql' } },
     ],
     ['unknown filter type', { title: 'Unknown filter', spec, filters: [{ type: 'phrase' }] }],
-    [
-      'too many filters',
-      {
-        title: 'Too many filters',
-        spec,
-        filters: Array.from({ length: 101 }, () => ({ type: 'dsl', dsl: { match_all: {} } })),
-      },
-    ],
   ])('rejects %s', (_, attributes) => {
     expect(() => vegaLibraryItemSavedObjectSchema.validate(attributes)).toThrow();
   });

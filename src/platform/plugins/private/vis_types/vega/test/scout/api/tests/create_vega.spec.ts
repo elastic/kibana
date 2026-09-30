@@ -122,6 +122,20 @@ apiTest.describe('vega - create', { tag: tags.deploymentAgnostic }, () => {
     expect(response).toHaveStatusCode(400);
   });
 
+  apiTest('validation - returns 400 for more than 100 filters', async ({ apiClient }) => {
+    const response = await apiClient.post(VEGA_API_PATH, {
+      headers: { ...COMMON_HEADERS, ...editorCredentials.apiKeyHeader },
+      body: {
+        title: 'My Vega Chart',
+        spec: VEGA_SPEC_HJSON,
+        filters: Array.from({ length: 101 }, () => ({ type: 'dsl', dsl: { match_all: {} } })),
+      },
+      responseType: 'json',
+    });
+
+    expect(response).toHaveStatusCode(400);
+  });
+
   apiTest('validation - returns 400 for an invalid query language', async ({ apiClient }) => {
     const response = await apiClient.post(VEGA_API_PATH, {
       headers: { ...COMMON_HEADERS, ...editorCredentials.apiKeyHeader },
