@@ -168,7 +168,13 @@ export async function handleInternalStop(
     await Promise.all(toStop.map((type) => assetManager.stop(type)));
     if (toStop.length > 0) {
       const { engines: remaining } = await assetManager.getStatus();
-      if (!remaining.some((engine) => engine.status === ENGINE_STATUS.STARTED)) {
+      // Any process still extracting keeps the maintainers up. Reading the shared status alone
+      // would tear them down while a non-priority process the single-process routes left
+      // started is still running.
+      const anyStarted = remaining.some((engine) =>
+        pairedQualifies(engine, (status) => status === ENGINE_STATUS.STARTED, true)
+      );
+      if (!anyStarted) {
         await entityMaintainersClient.stopAll(req);
       }
     }

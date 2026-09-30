@@ -161,7 +161,11 @@ describe('internal start/stop', () => {
       const { ctx, maintainers, assetManager } = createCtx([engine({})]);
       assetManager.getStatus
         .mockResolvedValueOnce({ engines: [engine({})] })
-        .mockResolvedValueOnce({ engines: [engine({ status: ENGINE_STATUS.STOPPED })] });
+        .mockResolvedValueOnce({
+          engines: [
+            engine({ status: ENGINE_STATUS.STOPPED, nonPriorityStatus: ENGINE_STATUS.STOPPED }),
+          ],
+        });
 
       await handleInternalStop(
         ctx,
@@ -170,6 +174,32 @@ describe('internal start/stop', () => {
       );
 
       expect(maintainers.stopAll).toHaveBeenCalled();
+    });
+
+    // Stopping `host` must not tear the maintainers down while `user` is still extracting
+    // through a non-priority process the single-process route left started.
+    it('keeps the maintainers up while a non-priority process is still started', async () => {
+      const { ctx, maintainers, assetManager } = createCtx([
+        engine({ type: 'host', nonPriorityStatus: undefined }),
+      ]);
+      assetManager.getStatus
+        .mockResolvedValueOnce({
+          engines: [engine({ type: 'host', nonPriorityStatus: undefined })],
+        })
+        .mockResolvedValueOnce({
+          engines: [
+            engine({ type: 'host', status: ENGINE_STATUS.STOPPED, nonPriorityStatus: undefined }),
+            engine({ status: ENGINE_STATUS.STOPPED, nonPriorityStatus: ENGINE_STATUS.STARTED }),
+          ],
+        });
+
+      await handleInternalStop(
+        ctx,
+        createReq({ entityTypes: ['host'], process: 'both' }),
+        createRes()
+      );
+
+      expect(maintainers.stopAll).not.toHaveBeenCalled();
     });
   });
 
