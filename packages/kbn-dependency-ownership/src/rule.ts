@@ -53,6 +53,7 @@ export function packageFilter(pkg: string) {
     pkg !== '@elastic/eui-theme-borealis' &&
     pkg !== '@elastic/eui-theme-common' &&
     pkg !== '@elastic/eui-test-helpers' &&
+    pkg !== '@elastic/eui-theme-common' &&
     // Operations owns node, and is not covered by renovate
     pkg !== '@types/node'
   );
