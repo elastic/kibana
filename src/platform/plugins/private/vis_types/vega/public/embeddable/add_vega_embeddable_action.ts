@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { v4 as uuidv4 } from 'uuid';
 import { i18n } from '@kbn/i18n';
 import type { CoreStart } from '@kbn/core/public';
 import { ADD_PANEL_VISUALIZATION_GROUP } from '@kbn/embeddable-plugin/public';
@@ -46,8 +47,11 @@ export const getAddVegaEmbeddableAction = (
   isCompatible: async ({ embeddable }) => apiCanAddNewPanel(embeddable),
   execute: async ({ embeddable, returnFocus }) => {
     if (!apiCanAddNewPanel(embeddable)) throw new IncompatibleActionError();
+    // Known up front so the flyout can focus the panel before it has been added.
+    const uuid = uuidv4();
     const addDefaultPanel = async () => {
       const panel = await embeddable.addNewPanel<VegaByValueState, VegaEmbeddableApi>({
+        maybePanelId: uuid,
         panelType: VEGA_EMBEDDABLE_TYPE,
         serializedState: { spec: { format: 'hjson', value: getDefaultSpec() } },
       });
@@ -63,6 +67,7 @@ export const getAddVegaEmbeddableAction = (
       core,
       parentApi: embeddable,
       returnFocus,
+      focusedPanelId: uuid,
       isNewPanel: true,
       loadApi: addDefaultPanel,
     });

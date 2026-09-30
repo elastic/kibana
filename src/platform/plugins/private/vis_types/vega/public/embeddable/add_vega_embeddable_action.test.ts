@@ -70,10 +70,12 @@ describe('getAddVegaEmbeddableAction', () => {
       })
     );
 
-    const loadApi = mockOpenVegaEditor.mock.calls[0][0].loadApi;
+    const { loadApi, focusedPanelId } = mockOpenVegaEditor.mock.calls[0][0];
     const loading = loadApi();
 
+    expect(focusedPanelId).toEqual(expect.any(String));
     expect(addNewPanel).toHaveBeenCalledWith({
+      maybePanelId: focusedPanelId,
       panelType: VEGA_EMBEDDABLE_TYPE,
       serializedState: { spec: { format: 'hjson', value: getDefaultSpec() } },
     });
@@ -96,6 +98,7 @@ describe('getAddVegaEmbeddableAction', () => {
     expect(mockOpenVegaEditor).not.toHaveBeenCalled();
     expect(addNewPanel).toHaveBeenCalledTimes(1);
     expect(addNewPanel).toHaveBeenCalledWith({
+      maybePanelId: expect.any(String),
       panelType: VEGA_EMBEDDABLE_TYPE,
       serializedState: { spec: { format: 'hjson', value: getDefaultSpec() } },
     });
