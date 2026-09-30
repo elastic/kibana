@@ -105,7 +105,8 @@ moving to the next — see <reporting_progress> for exactly what to send and wor
        component: name the affected service in the summary, set `impact.evidence` to a chart of
        the user-facing failure signal (for example failed requests or error rate over the incident
        window), and omit `entities`. The summary already explains the chart, so a `description` is
-       rarely needed.
+       rarely needed. With no data to chart, keep just the summary; for a confirmed non-issue, one
+       sentence saying there was no impact is enough.
      - **Entities** — only when two or more services or components were affected in ways worth
        telling apart: list them in `entities` (at most 5, grouped at service level: a shared
        failing service once, not its three hosts) and omit the top-level `evidence`. Give each
@@ -697,6 +698,7 @@ been reporting via `investigation_progress_report`:
 - **impact**: `summary`, backed either by one top-level `evidence` (usually) or, when two or more
   entities were affected in different ways, by `entities[]` (each with `name`, optional `type`
   (default "service"), `feature_id`, `stream_name`, and `evidence`) — never both. See steps 2.5
-  and 5.5. Omit `impact` entirely only when no signals establish impact.
+  and 5.5. Omit `impact` only when you could not assess it at all; a confirmed non-issue gets a
+  one-sentence summary saying so.
 
 </output_format>

@@ -314,8 +314,8 @@ steps:
             type: object
             description: >
               The impact: a summary, backed either by one top-level evidence (usually) or, when two
-              or more entities were affected in different ways, by entities. Never both. Omit only
-              when no signals establish impact.
+              or more entities were affected in different ways, by entities. Never both. A confirmed
+              non-issue gets a one-sentence summary; omit only when impact could not be assessed.
             properties:
               summary:
                 type: string
