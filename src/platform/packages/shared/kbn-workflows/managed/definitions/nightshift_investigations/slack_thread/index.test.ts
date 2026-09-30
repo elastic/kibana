@@ -42,7 +42,10 @@ describe('Nightshift Slack thread workflow', () => {
       {
         type: 'slack2.message',
         'connector-id': '*',
-        on: { condition: 'event.threadId:* and not event.botId:* and not event.subtype:*' },
+        on: {
+          condition:
+            'event.threadId:* and not event.botId:* and (not event.subtype:* or event.subtype:thread_broadcast)',
+        },
       },
     ]);
     expect(requireStep('find_investigation').with?.body).toMatchObject({
@@ -68,7 +71,11 @@ describe('Nightshift Slack thread workflow', () => {
       'record_status_message',
       'investigate',
       'get_investigation',
+      'set_result',
       'post_result',
+      'repost_result',
+      'set_result_message',
+      'record_result_message',
     ]);
   });
 
@@ -80,9 +87,9 @@ describe('Nightshift Slack thread workflow', () => {
     });
     // A later run must not blank the previous findings for as long as its own run takes.
     expect(postStarted.with).not.toHaveProperty('messageTs');
-    expect(requireStep('record_status_message').with?.body).toMatchObject({
-      create: false,
-      slack_message_ts: '{{ steps.post_started.output.ts }}',
+    expect(requireStep('record_status_message')).toMatchObject({
+      with: { body: { create: false, slack_message_ts: '{{ steps.post_started.output.ts }}' } },
+      'on-failure': { retry: { 'max-attempts': 3 }, continue: true },
     });
   });
 
@@ -101,16 +108,36 @@ describe('Nightshift Slack thread workflow', () => {
     expect(investigate.with?.inputs).not.toHaveProperty('conversation_id');
   });
 
-  it('edits the status message with the result read back from the investigation', () => {
+  it("reports this run's result, not a previous run's record", () => {
+    const setResult = requireStep('set_result').with;
+    expect(setResult?.status_message_ts).toBe(
+      '${{ steps.post_started.output.ts | default: steps.find_investigation.output.slack_message_ts }}'
+    );
+    expect(setResult?.result_text).toContain(
+      "steps.investigate.error == null and steps.get_investigation.output.status == 'completed'"
+    );
+  });
+
+  it('edits the status message with the result, and posts a new one when it cannot', () => {
     expect(requireStep('post_result')).toMatchObject({
       type: 'slack2.sendMessage',
-      with: {
-        messageTs:
-          '${{ steps.post_started.output.ts | default: steps.find_investigation.output.slack_message_ts }}',
-      },
+      with: { messageTs: '{{ variables.status_message_ts }}', text: '{{ variables.result_text }}' },
     });
-    expect(requireStep('post_result').with?.text).toContain(
-      "steps.get_investigation.output.status == 'completed'"
+    const repostResult = requireStep('repost_result');
+    expect(repostResult).toMatchObject({
+      if: '${{ steps.post_result.error != null and variables.status_message_ts != null }}',
+      with: { text: '{{ variables.result_text }}' },
+    });
+    expect(repostResult.with).not.toHaveProperty('messageTs');
+  });
+
+  it('records the message holding the result when it is new or was not recorded', () => {
+    expect(requireStep('set_result_message').with?.result_message_ts).toBe(
+      '${{ steps.repost_result.output.ts | default: steps.post_result.output.ts }}'
     );
+    expect(requireStep('record_result_message')).toMatchObject({
+      if: '${{ variables.result_message_ts != null and (variables.result_message_ts != variables.status_message_ts or steps.record_status_message.error != null) }}',
+      with: { body: { create: false, slack_message_ts: '{{ variables.result_message_ts }}' } },
+    });
   });
 });
