@@ -15,74 +15,11 @@ import {
   prepareIncomingNodes,
 } from './graph_merge_planner';
 
-// ====== Undo operations =============
-
-function AddNodeOperation(node, owner) {
-  const self = this;
-  const vm = owner;
-  self.node = node;
-  self.undo = function () {
-    vm.arrRemove(vm.nodes, self.node);
-    delete vm.nodesMap[self.node.id];
-  };
-  self.redo = function () {
-    vm.nodes.push(self.node);
-    vm.nodesMap[self.node.id] = self.node;
-  };
-}
-
-function AddEdgeOperation(edge, owner) {
-  const self = this;
-  const vm = owner;
-  self.edge = edge;
-  self.undo = function () {
-    vm.arrRemove(vm.edges, self.edge);
-    delete vm.edgesMap[self.edge.id];
-  };
-  self.redo = function () {
-    vm.edges.push(self.edge);
-    vm.edgesMap[self.edge.id] = self.edge;
-  };
-}
-
-function ReverseOperation(operation) {
-  const self = this;
-  const reverseOperation = operation;
-  self.undo = reverseOperation.redo;
-  self.redo = reverseOperation.undo;
-}
-
-function GroupOperation(receiver, orphan) {
-  const self = this;
-  self.receiver = receiver;
-  self.orphan = orphan;
-  self.undo = function () {
-    self.orphan.parent = undefined;
-  };
-  self.redo = function () {
-    self.orphan.parent = self.receiver;
-  };
-}
-
-function UnGroupOperation(parent, child) {
-  const self = this;
-  self.parent = parent;
-  self.child = child;
-  self.undo = function () {
-    self.child.parent = self.parent;
-  };
-  self.redo = function () {
-    self.child.parent = undefined;
-  };
-}
-
 // The main constructor for our GraphWorkspace
 function GraphWorkspace(options) {
   const self = this;
   this.blocklistedNodes = [];
   this.options = options;
-  this.undoLog = [];
-  this.redoLog = [];
 
   if (!options) {
     this.options = {};
@@ -99,34 +36,6 @@ function GraphWorkspace(options) {
   this.changeHandler = options.changeHandler;
   const layoutController = options.layoutController;
 
-  this.addUndoLogEntry = function (undoOperations) {
-    self.undoLog.push(undoOperations);
-    if (self.undoLog.length > 50) {
-      //Remove the oldest
-      self.undoLog.splice(0, 1);
-    }
-    self.redoLog = [];
-  };
-
-  this.undo = function () {
-    const lastOps = this.undoLog.pop();
-    if (lastOps) {
-      this.stopLayout();
-      this.redoLog.push(lastOps);
-      lastOps.forEach((ops) => ops.undo());
-      this.runLayout();
-    }
-  };
-  this.redo = function () {
-    const lastOps = this.redoLog.pop();
-    if (lastOps) {
-      this.stopLayout();
-      this.undoLog.push(lastOps);
-      lastOps.forEach((ops) => ops.redo());
-      this.runLayout();
-    }
-  };
-
   //======== Selection functions ========
 
   this.deleteNodes = function (nodeIds) {
@@ -140,10 +49,8 @@ function GraphWorkspace(options) {
       allAndGrouped = self.nodes.slice(0);
     }
 
-    const undoOperations = [];
     allAndGrouped.forEach((node) => {
       delete self.nodesMap[node.id];
-      undoOperations.push(new ReverseOperation(new AddNodeOperation(node, self)));
     });
     self.arrRemoveAll(self.nodes, allAndGrouped);
 
@@ -152,9 +59,7 @@ function GraphWorkspace(options) {
     });
     danglingEdges.forEach((edge) => {
       delete self.edgesMap[edge.id];
-      undoOperations.push(new ReverseOperation(new AddEdgeOperation(edge, self)));
     });
-    self.addUndoLogEntry(undoOperations);
     self.arrRemoveAll(self.edges, danglingEdges);
     self.runLayout();
   };
@@ -207,8 +112,6 @@ function GraphWorkspace(options) {
     this.stopLayout();
     this.nodes = [];
     this.edges = [];
-    this.undoLog = [];
-    this.redoLog = [];
     this.nodesMap = {};
     this.edgesMap = {};
     this.blocklistedNodes = [];
@@ -252,7 +155,6 @@ function GraphWorkspace(options) {
   this.groupNodes = function (parentId, nodeIds) {
     const node = self.nodesMap[parentId];
     const selectedNodeIds = new Set(nodeIds);
-    const ops = [];
     self.nodes.forEach(function (otherNode) {
       if (
         otherNode !== node &&
@@ -260,22 +162,17 @@ function GraphWorkspace(options) {
         otherNode.parent === undefined
       ) {
         otherNode.parent = node;
-        ops.push(new GroupOperation(node, otherNode));
       }
     });
-    self.addUndoLogEntry(ops);
     self.runLayout();
   };
 
   this.ungroup = function (node) {
-    const ops = [];
     self.nodes.forEach(function (other) {
       if (other.parent === node) {
         other.parent = undefined;
-        ops.push(new UnGroupOperation(node, other));
       }
     });
-    self.addUndoLogEntry(ops);
     self.runLayout();
   };
 
@@ -319,7 +216,6 @@ function GraphWorkspace(options) {
     if (!newData.nodes) {
       newData.nodes = [];
     }
-    const lastOps = [];
 
     // === Commented out - not sure it was obvious to users what various circle sizes meant
     // var minCircleSize = 5;
@@ -344,7 +240,6 @@ function GraphWorkspace(options) {
     newNodes.forEach((dedupedNode) => {
       const node = materializeRuntimeNode(dedupedNode, this.seqNumber++);
       this.nodes.push(node);
-      lastOps.push(new AddNodeOperation(node, self));
       this.nodesMap[node.id] = node;
     });
 
@@ -364,12 +259,7 @@ function GraphWorkspace(options) {
       const newEdge = materializeRuntimeEdge(operation, this.nodesMap);
       this.edgesMap[newEdge.id] = newEdge;
       this.edges.push(newEdge);
-      lastOps.push(new AddEdgeOperation(newEdge, self));
     });
-
-    if (lastOps.length > 0) {
-      self.addUndoLogEntry(lastOps);
-    }
 
     self.changeHandler?.();
     this.runLayout();
@@ -379,7 +269,6 @@ function GraphWorkspace(options) {
     const parent = self.getNode(parentId);
     const child = self.getNode(childId);
     child.parent = parent;
-    self.addUndoLogEntry([new GroupOperation(parent, child)]);
     self.runLayout();
   };
 

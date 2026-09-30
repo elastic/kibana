@@ -35,7 +35,8 @@ export const ControlPanelToolBar = ({
   liveResponseFields,
 }: ControlPanelToolBarProps) => {
   const dispatch = useDispatch<GraphDispatch>();
-  const { isLayoutRunning, selectedNodeIds } = useSelector(workspaceSelector);
+  const { isLayoutRunning, selectedNodeIds, undoHistory, redoHistory } =
+    useSelector(workspaceSelector);
   const haveNodes = workspace.nodes.length === 0;
 
   const undoButtonMsg = i18n.translate('xpack.graph.sidebar.topMenu.undoButtonTooltip', {
@@ -107,7 +108,7 @@ export const ControlPanelToolBar = ({
             iconType={'undo'}
             size="xs"
             aria-label={undoButtonMsg}
-            isDisabled={workspace.undoLog.length < 1}
+            isDisabled={undoHistory.length < 1}
             onClick={onUndoClick}
           />
         </EuiToolTip>
@@ -120,7 +121,7 @@ export const ControlPanelToolBar = ({
             iconType="redo"
             size="xs"
             aria-label={redoButtonMsg}
-            isDisabled={workspace.redoLog.length === 0}
+            isDisabled={redoHistory.length === 0}
             onClick={onRedoClick}
           />
         </EuiToolTip>
