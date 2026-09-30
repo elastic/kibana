@@ -7,6 +7,7 @@
 
 export { createThreatReport } from './create_threat_report';
 export { extractIocs } from './extract_iocs';
+export { enrichReportCore } from './enrich_report_core';
 export { extractDiamond } from './extract_diamond';
 export { enrichTaxonomy } from './enrich_taxonomy';
 export { classifySeverity } from './classify_severity';
