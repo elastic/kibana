@@ -46,8 +46,8 @@ describe('useMenuHeaderStyle', () => {
     const { result } = renderHook(() => useMenuHeaderStyle('standard'));
     const { styles } = result.current;
 
-    expect(styles).toContain('padding: 16px');
-    expect(styles).toContain('min-height: 64px');
+    expect(styles).toContain('padding:16px');
+    expect(styles).toContain('min-height:64px');
     expect(styles).toContain('line-height: 2.25em');
   });
 
@@ -55,8 +55,8 @@ describe('useMenuHeaderStyle', () => {
     const { result } = renderHook(() => useMenuHeaderStyle('compact'));
     const { styles } = result.current;
 
-    expect(styles).toContain('padding: 8px');
-    expect(styles).toContain('min-height: 48px');
+    expect(styles).toContain('padding:8px');
+    expect(styles).toContain('min-height:48px');
     expect(styles).not.toContain('line-height: 2.25em');
   });
 });

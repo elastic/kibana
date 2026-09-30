@@ -26,6 +26,8 @@ export function useMenuHeaderStyle(spacing: SecondaryHeaderSpacing = 'standard')
 
   const isCompact = spacing === 'compact';
 
+  // Optical: secondary titles stay xs while App Header standard uses s.
+  // 2.25em lowers the xs baseline to match the adjacent app-header title.
   return css`
     --border-width: ${euiTheme.border.width.thin};
     // 20px is forced by section dividers
@@ -35,8 +37,6 @@ export function useMenuHeaderStyle(spacing: SecondaryHeaderSpacing = 'standard')
     padding: ${isCompact ? euiTheme.size.s : euiTheme.size.base} var(--horizontal-padding);
     margin: 0 1px;
     min-height: ${isCompact ? '48px' : '64px'};
-    // Optical: secondary titles stay `xs` while App Header standard uses `s`.
-    // 2.25em lowers the `xs` baseline to match the adjacent app-header title.
     ${!isCompact &&
     css`
       line-height: 2.25em;
