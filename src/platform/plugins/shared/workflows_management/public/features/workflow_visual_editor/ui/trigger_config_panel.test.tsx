@@ -69,7 +69,7 @@ const renderPanel = (
 };
 
 describe('TriggerConfigPanel', () => {
-  it('renders Visual builder / YAML tabs and the accent-colored header icon', () => {
+  it('renders Form / YAML tabs and the accent-colored header icon', () => {
     renderPanel();
     expect(screen.getByTestId('workflowTriggerConfigPanelTitle')).toHaveTextContent('Manual');
     expect(screen.getByTestId('workflowTriggerConfigPanelTabs')).toBeInTheDocument();
@@ -110,7 +110,7 @@ describe('TriggerConfigPanel', () => {
     expect(screen.getByTestId('workflowTriggerConfigPanelAlertInfo')).toBeInTheDocument();
   });
 
-  it('edits scheduled interval in Visual builder', () => {
+  it('edits scheduled interval in Form mode', () => {
     const { onSave } = renderPanel({
       triggerType: 'scheduled',
       triggerLabel: 'Scheduled',

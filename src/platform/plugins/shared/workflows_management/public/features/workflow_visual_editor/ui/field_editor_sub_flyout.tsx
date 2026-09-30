@@ -60,9 +60,13 @@ export function FieldEditorSubFlyout({
   const valueLabelId = useGeneratedHtmlId({ prefix: 'workflowFieldEditorValue' });
   const [draft, setDraft] = useState(value);
   const [isDragOver, setIsDragOver] = useState(false);
+  const isDragOverRef = useRef(false);
   const textareaRef = useRef<HTMLTextAreaElement | null>(null);
   const caretRef = useRef(value.length);
   const focusedOnceRef = useRef(false);
+  const dragOverCaretRafRef = useRef<number | null>(null);
+  const dragOverPointerRef = useRef({ x: 0, y: 0 });
+  const editorFocusedForDragRef = useRef(false);
 
   // Same kbd chip style as the inline data-reference picker footer.
   const keyChipCss = {
@@ -209,7 +213,8 @@ export function FieldEditorSubFlyout({
             <EuiButtonEmpty
               size="s"
               flush="left"
-              iconType="chevronSingleLeft"
+              color="text"
+              iconType="undo"
               onClick={onBack}
               data-test-subj="workflowFieldEditorSubFlyoutBack"
             >
@@ -262,22 +267,49 @@ export function FieldEditorSubFlyout({
             onDragOver={(e) => {
               e.preventDefault();
               e.dataTransfer.dropEffect = 'copy';
-              setIsDragOver(true);
+              // Avoid setState on every dragover — continuous re-renders make
+              // the custom drag ghost stutter while crossing into the editor.
+              if (!isDragOverRef.current) {
+                isDragOverRef.current = true;
+                setIsDragOver(true);
+              }
               const el = textareaRef.current;
               if (!el) return;
-              const offset = caretFromPointer(e.clientX, e.clientY, el);
-              caretRef.current = offset;
-              // Show the native text caret at the drop point while dragging.
-              el.focus({ preventScroll: true });
-              el.setSelectionRange(offset, offset);
+              dragOverPointerRef.current = { x: e.clientX, y: e.clientY };
+              if (dragOverCaretRafRef.current != null) return;
+              dragOverCaretRafRef.current = window.requestAnimationFrame(() => {
+                dragOverCaretRafRef.current = null;
+                const target = textareaRef.current;
+                if (!target) return;
+                const { x, y } = dragOverPointerRef.current;
+                const offset = caretFromPointer(x, y, target);
+                caretRef.current = offset;
+                if (!editorFocusedForDragRef.current) {
+                  editorFocusedForDragRef.current = true;
+                  target.focus({ preventScroll: true });
+                }
+                target.setSelectionRange(offset, offset);
+              });
             }}
             onDragLeave={(e) => {
               // Ignore leave events that stay within the pane.
               if (e.currentTarget.contains(e.relatedTarget as Node)) return;
+              isDragOverRef.current = false;
+              editorFocusedForDragRef.current = false;
+              if (dragOverCaretRafRef.current != null) {
+                window.cancelAnimationFrame(dragOverCaretRafRef.current);
+                dragOverCaretRafRef.current = null;
+              }
               setIsDragOver(false);
             }}
             onDrop={(e) => {
               e.preventDefault();
+              isDragOverRef.current = false;
+              editorFocusedForDragRef.current = false;
+              if (dragOverCaretRafRef.current != null) {
+                window.cancelAnimationFrame(dragOverCaretRafRef.current);
+                dragOverCaretRafRef.current = null;
+              }
               setIsDragOver(false);
               const token = e.dataTransfer.getData('text/plain');
               if (!token) return;

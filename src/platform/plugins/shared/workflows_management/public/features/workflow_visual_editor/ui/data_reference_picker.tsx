@@ -13,13 +13,14 @@ import {
   EuiFieldSearch,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiIcon,
   EuiIconTip,
   EuiPopover,
   EuiText,
   transparentize,
   useEuiTheme,
 } from '@elastic/eui';
-import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type {
@@ -34,6 +35,7 @@ import {
   isDataReferenceInsertable,
 } from '../lib/build_data_reference_catalog';
 import { DataReferenceItemRowContent } from './data_reference_item_row';
+import { getInputCaretCoordinates } from './get_input_caret_coordinates';
 
 const PICKER_MAX_HEIGHT = 400;
 /** Fixed floating-layer width — must not match the panel field width. */
@@ -82,12 +84,19 @@ export function DataReferencePicker({
   const searchRef = useRef<HTMLInputElement | null>(null);
   const panelElRef = useRef<HTMLElement | null>(null);
   const inputElRef = useRef<HTMLElement | null>(null);
+  const wrapperRef = useRef<HTMLDivElement | null>(null);
   const [search, setSearch] = useState('');
   const [drillStack, setDrillStack] = useState<DataReferenceItem[]>([]);
   const [highlightIndex, setHighlightIndex] = useState(0);
   const [expandedGroups, setExpandedGroups] = useState<ReadonlySet<DataReferenceGroupId>>(
     () => new Set()
   );
+  /** Caret-relative anchor inside the field wrapper so the popover sits under `@` / `{{`. */
+  const [caretAnchor, setCaretAnchor] = useState<{
+    top: number;
+    left: number;
+    height: number;
+  } | null>(null);
 
   useEffect(() => {
     if (!isOpen) {
@@ -95,10 +104,51 @@ export function DataReferencePicker({
       setDrillStack([]);
       setHighlightIndex(0);
       setExpandedGroups(new Set());
+      setCaretAnchor(null);
       return;
     }
     const id = window.setTimeout(() => searchRef.current?.focus(), 0);
     return () => window.clearTimeout(id);
+  }, [isOpen]);
+
+  // Position the popover under the caret (not the full field bbox). Critical for
+  // the expanded editor where the textarea fills the pane — downLeft on that
+  // box lands far from where the user typed `@`.
+  useLayoutEffect(() => {
+    if (!isOpen) return;
+
+    const findField = (): HTMLInputElement | HTMLTextAreaElement | null => {
+      const root = inputElRef.current;
+      if (!root) return null;
+      if (root instanceof HTMLInputElement || root instanceof HTMLTextAreaElement) return root;
+      return root.querySelector('textarea, input');
+    };
+
+    const updateAnchor = () => {
+      const field = findField();
+      const wrapper = wrapperRef.current;
+      if (!field || !wrapper) return;
+
+      const caret = field.selectionStart ?? field.value.length;
+      const coords = getInputCaretCoordinates(field, caret);
+      const fieldRect = field.getBoundingClientRect();
+      const wrapperRect = wrapper.getBoundingClientRect();
+
+      // Convert caret coords (relative to the field, including scrolled content)
+      // into absolute offsets within the position:relative wrapper.
+      setCaretAnchor({
+        top: fieldRect.top - wrapperRect.top + coords.top - field.scrollTop,
+        left: fieldRect.left - wrapperRect.left + coords.left - field.scrollLeft,
+        height: coords.height,
+      });
+    };
+
+    updateAnchor();
+    const field = findField();
+    field?.addEventListener('scroll', updateAnchor, { passive: true });
+    return () => {
+      field?.removeEventListener('scroll', updateAnchor);
+    };
   }, [isOpen]);
 
   // Close when an ancestor of the anchor scrolls (e.g. the config panel body).
@@ -110,6 +160,8 @@ export function DataReferencePicker({
       const inputEl = inputElRef.current;
       if (!panelEl || !inputEl || !(scrollTarget instanceof Node)) return;
       if (panelEl.contains(scrollTarget) || inputEl.contains(scrollTarget)) return;
+      // Field scroll repositions the caret anchor — don't close for that.
+      if (scrollTarget instanceof Element && inputEl.contains(scrollTarget)) return;
       if (scrollTarget instanceof Element && !scrollTarget.contains(inputEl)) return;
       onClose();
     };
@@ -354,25 +406,19 @@ export function DataReferencePicker({
       isOpen={isOpen}
       closePopover={onClose}
       button={
-        <div
-          ref={(el) => {
-            inputElRef.current = el;
-          }}
+        <span
+          aria-hidden
+          data-test-subj="workflowDataReferencePickerCaretAnchor"
           css={{
-            width: '100%',
-            ...(fillHeight
-              ? {
-                  flex: '1 1 auto',
-                  height: '100%',
-                  minHeight: 0,
-                  display: 'flex',
-                  flexDirection: 'column',
-                }
-              : {}),
+            position: 'absolute',
+            // Fall back to the field top-left until layout measures the caret.
+            top: caretAnchor?.top ?? 0,
+            left: caretAnchor?.left ?? 0,
+            width: 1,
+            height: caretAnchor?.height ?? 1,
+            pointerEvents: 'none',
           }}
-        >
-          {input}
-        </div>
+        />
       }
       display="block"
       panelPaddingSize="none"
@@ -542,6 +588,9 @@ export function DataReferencePicker({
                           background: euiTheme.colors.backgroundBaseSubdued,
                         }}
                       >
+                        {group.iconType ? (
+                          <EuiIcon type={group.iconType} size="s" color="subdued" aria-hidden />
+                        ) : null}
                         <EuiText
                           size="xs"
                           color="subdued"
@@ -599,30 +648,52 @@ export function DataReferencePicker({
     </EuiPopover>
   );
 
-  if (!fillHeight) {
-    return popover;
-  }
-
-  // Stretch the popover anchor through EUI's display:block root without
-  // overwriting EuiPopover's css prop (which would drop base styles).
   return (
     <div
+      ref={wrapperRef}
       css={{
-        flex: '1 1 auto',
-        alignSelf: 'stretch',
-        minHeight: 0,
-        height: '100%',
-        display: 'flex',
-        flexDirection: 'column',
+        position: 'relative',
+        width: '100%',
+        ...(fillHeight
+          ? {
+              flex: '1 1 auto',
+              alignSelf: 'stretch',
+              minHeight: 0,
+              height: '100%',
+              display: 'flex',
+              flexDirection: 'column',
+            }
+          : {}),
+        // Keep the popover chrome out of flex layout; the panel portals to body.
         '& > .euiPopover': {
-          flex: '1 1 auto',
-          minHeight: 0,
-          height: '100%',
-          display: 'flex !important',
-          flexDirection: 'column',
+          position: 'absolute',
+          top: 0,
+          left: 0,
+          width: 0,
+          height: 0,
+          display: 'block !important',
         },
       }}
     >
+      <div
+        ref={(el) => {
+          inputElRef.current = el;
+        }}
+        css={{
+          width: '100%',
+          ...(fillHeight
+            ? {
+                flex: '1 1 auto',
+                height: '100%',
+                minHeight: 0,
+                display: 'flex',
+                flexDirection: 'column',
+              }
+            : {}),
+        }}
+      >
+        {input}
+      </div>
       {popover}
     </div>
   );

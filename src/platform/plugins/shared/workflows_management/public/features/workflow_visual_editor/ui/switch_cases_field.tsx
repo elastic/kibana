@@ -11,28 +11,16 @@ import {
   EuiButtonEmpty,
   EuiButtonIcon,
   EuiConfirmModal,
-  EuiDragDropContext,
-  EuiDraggable,
-  EuiDroppable,
   EuiFieldText,
   EuiFlexGroup,
   EuiFlexItem,
   EuiFormRow,
-  EuiIcon,
   EuiSpacer,
   EuiText,
-  euiDragDropReorder,
-  transparentize,
   useEuiTheme,
-  useGeneratedHtmlId,
-  type DropResult,
-  type EuiDragDropContextProps,
 } from '@elastic/eui';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { i18n } from '@kbn/i18n';
-
-/** Compressed field height — matches the dashed drop-slot outline. */
-const CASE_FIELD_HEIGHT_PX = 32;
 
 export interface SwitchCaseFormValue {
   readonly match: string | number | boolean;
@@ -127,15 +115,9 @@ export interface SwitchCasesFieldProps {
 
 export function SwitchCasesField({ value, onChange }: SwitchCasesFieldProps) {
   const { euiTheme } = useEuiTheme();
-  const droppableId = useGeneratedHtmlId({ prefix: 'workflowSwitchCasesDrop' });
   const [rows, setRows] = useState<SwitchCaseRow[]>(() => toSwitchCaseRows(value));
   const [focusRowId, setFocusRowId] = useState<string | null>(null);
   const [pendingDelete, setPendingDelete] = useState<SwitchCaseRow | null>(null);
-  const [isReordering, setIsReordering] = useState(false);
-  const [dragOver, setDragOver] = useState<{
-    index: number;
-    edge: 'top' | 'bottom';
-  } | null>(null);
   const inputRefs = useRef<Map<string, HTMLInputElement | null>>(new Map());
   const valueFingerprint = useMemo(() => JSON.stringify(value ?? null), [value]);
 
@@ -209,35 +191,6 @@ export function SwitchCasesField({ value, onChange }: SwitchCasesFieldProps) {
     [commitDelete]
   );
 
-  const onDragStart = useCallback(() => {
-    setIsReordering(true);
-  }, []);
-
-  const onDragUpdate = useCallback<NonNullable<EuiDragDropContextProps['onDragUpdate']>>(
-    (update) => {
-      const { source, destination } = update;
-      if (!source || !destination || destination.index === source.index) {
-        setDragOver(null);
-        return;
-      }
-      setDragOver({
-        index: destination.index,
-        edge: destination.index > source.index ? 'bottom' : 'top',
-      });
-    },
-    []
-  );
-
-  const onDragEnd = useCallback(
-    ({ source, destination }: DropResult) => {
-      setDragOver(null);
-      setIsReordering(false);
-      if (!source || !destination || source.index === destination.index) return;
-      emit(euiDragDropReorder([...rows], source.index, destination.index));
-    },
-    [emit, rows]
-  );
-
   const pendingStepCount = pendingDelete ? countConfiguredSteps(pendingDelete.steps) : 0;
   const pendingLabel =
     pendingDelete?.match.trim() ||
@@ -257,213 +210,83 @@ export function SwitchCasesField({ value, onChange }: SwitchCasesFieldProps) {
         <div
           data-test-subj="workflowSwitchCasesField"
           css={{
-            // EUI always mounts the library placeholder as the last droppable
-            // child — keep its height for list sizing, but never paint it
-            // (otherwise the dashed slot looks stuck at the bottom).
-            '& .euiDroppable': {
-              display: 'flex',
-              flexDirection: 'column',
-              gap: euiTheme.size.s,
-              borderRadius: 8,
-              boxSizing: 'border-box',
-              overflow: 'visible',
-              backgroundColor: isReordering
-                ? transparentize(euiTheme.colors.primary, 0.08)
-                : 'transparent',
-              padding: isReordering ? 8 : 0,
-              transition: `background-color ${euiTheme.animation.fast} ease, padding ${euiTheme.animation.fast} ease`,
-            },
-            '& .euiDroppable__placeholder > *': {
-              opacity: 0,
-            },
+            display: 'flex',
+            flexDirection: 'column',
+            gap: euiTheme.size.s,
           }}
         >
-          <EuiDragDropContext
-            onDragStart={onDragStart}
-            onDragUpdate={onDragUpdate}
-            onDragEnd={onDragEnd}
-          >
-            <EuiDroppable
-              droppableId={droppableId}
-              spacing="none"
-              style={{
-                // Beat EUI's default green drag fill; keep the list chrome in sync
-                // with isReordering so translated rows stay inside the tint.
-                backgroundColor: isReordering
-                  ? transparentize(euiTheme.colors.primary, 0.08)
-                  : undefined,
-              }}
-            >
-              {rows.map((row, index) => {
-                const isDuplicate = duplicateIds.has(row.id);
-                const showInsertTop =
-                  dragOver?.index === index && dragOver.edge === 'top';
-                const showInsertBottom =
-                  dragOver?.index === index && dragOver.edge === 'bottom';
-
-                // Drawn into the gap rbd opens via transforms — out of flow so
-                // we don't stack a second empty row on top of the placeholder.
-                const dropSlot = (edge: 'top' | 'bottom') => (
-                  <div
-                    aria-hidden
-                    data-test-subj="workflowSwitchCaseDropSlot"
-                    css={{
-                      position: 'absolute',
-                      left: 0,
-                      right: 0,
-                      height: CASE_FIELD_HEIGHT_PX,
-                      boxSizing: 'border-box',
-                      borderRadius: euiTheme.border.radius.medium,
-                      border: `${euiTheme.border.width.thin} dashed ${euiTheme.colors.primary}`,
-                      backgroundColor: transparentize(euiTheme.colors.primary, 0.04),
-                      pointerEvents: 'none',
-                      zIndex: 1,
-                      ...(edge === 'top'
-                        ? {
-                            top: `calc(-1 * ${euiTheme.size.s} - ${CASE_FIELD_HEIGHT_PX}px)`,
-                          }
-                        : {
-                            bottom: `calc(-1 * ${euiTheme.size.s} - ${CASE_FIELD_HEIGHT_PX}px)`,
-                          }),
-                    }}
-                  />
-                );
-
-                return (
-                  <EuiDraggable
-                    key={row.id}
-                    index={index}
-                    draggableId={row.id}
-                    spacing="none"
-                    customDragHandle
-                    hasInteractiveChildren
-                  >
-                    {(provided, snapshot) => (
-                      <div
-                        css={{
-                          position: 'relative',
-                          opacity: snapshot.isDragging ? 0.45 : 1,
-                          transition: 'opacity 120ms ease',
-                          ...(!isReordering
-                            ? {
-                                '&:hover [data-drag-grip], &:focus-within [data-drag-grip]':
-                                  {
-                                    width: 16,
-                                    minWidth: 16,
-                                    opacity: 1,
-                                    marginInlineEnd: 6,
-                                  },
-                              }
-                            : {}),
+          {rows.map((row, index) => {
+            const isDuplicate = duplicateIds.has(row.id);
+            return (
+              <div key={row.id} data-test-subj={`workflowSwitchCaseRow-${index}`}>
+                <EuiFlexGroup gutterSize="none" alignItems="flexStart" responsive={false}>
+                  <EuiFlexItem grow>
+                    <EuiFormRow
+                      fullWidth
+                      compressed
+                      isInvalid={isDuplicate}
+                      error={
+                        isDuplicate
+                          ? i18n.translate('workflows.switchCasesField.duplicateWarning', {
+                              defaultMessage:
+                                'Duplicate value — only the first matching case will run.',
+                            })
+                          : undefined
+                      }
+                    >
+                      <EuiFieldText
+                        compressed
+                        fullWidth
+                        value={row.match}
+                        isInvalid={isDuplicate}
+                        placeholder={i18n.translate(
+                          'workflows.switchCasesField.matchPlaceholder',
+                          { defaultMessage: 'Match value' }
+                        )}
+                        inputRef={(el) => {
+                          inputRefs.current.set(row.id, el);
                         }}
-                        data-test-subj={`workflowSwitchCaseRow-${index}`}
-                      >
-                        {showInsertTop ? dropSlot('top') : null}
-                        {showInsertBottom ? dropSlot('bottom') : null}
-                        <EuiFlexGroup
-                          gutterSize="none"
-                          alignItems="flexStart"
-                          responsive={false}
-                        >
-                          <span
-                            {...provided.dragHandleProps}
-                            data-drag-grip
-                            css={{
-                              cursor: 'grab',
-                              display: 'inline-flex',
-                              alignItems: 'center',
-                              flexShrink: 0,
-                              height: 32,
-                              width: 0,
-                              minWidth: 0,
-                              opacity: 0,
-                              overflow: 'hidden',
-                              marginInlineEnd: 0,
-                              transition:
-                                'width 150ms ease, opacity 150ms ease, margin 150ms ease',
-                              '@media (prefers-reduced-motion: reduce)': {
-                                transition: 'none',
-                              },
-                            }}
-                          >
-                            <EuiIcon type="drag" color="subdued" size="s" />
-                          </span>
-                          <EuiFlexItem grow>
-                            <EuiFormRow
-                              fullWidth
-                              compressed
-                              isInvalid={isDuplicate}
-                              error={
-                                isDuplicate
-                                  ? i18n.translate(
-                                      'workflows.switchCasesField.duplicateWarning',
-                                      {
-                                        defaultMessage:
-                                          'Duplicate value — only the first matching case will run.',
-                                      }
-                                    )
-                                  : undefined
-                              }
-                            >
-                              <EuiFieldText
-                                compressed
-                                fullWidth
-                                value={row.match}
-                                isInvalid={isDuplicate}
-                                placeholder={i18n.translate(
-                                  'workflows.switchCasesField.matchPlaceholder',
-                                  { defaultMessage: 'Match value' }
-                                )}
-                                inputRef={(el) => {
-                                  inputRefs.current.set(row.id, el);
-                                }}
-                                onChange={(e) => handleMatchChange(row.id, e.target.value)}
-                                data-test-subj={`workflowSwitchCaseMatch-${index}`}
-                                aria-label={i18n.translate(
-                                  'workflows.switchCasesField.matchAriaLabel',
-                                  {
-                                    defaultMessage: 'Case {index} match value',
-                                    values: { index: index + 1 },
-                                  }
-                                )}
-                              />
-                            </EuiFormRow>
-                          </EuiFlexItem>
-                          {!isReordering ? (
-                            <EuiFlexItem grow={false}>
-                              <EuiButtonIcon
-                                iconType="trash"
-                                color="danger"
-                                aria-label={i18n.translate(
-                                  'workflows.switchCasesField.deleteAriaLabel',
-                                  {
-                                    defaultMessage: 'Delete case {index}',
-                                    values: { index: index + 1 },
-                                  }
-                                )}
-                                onClick={() => requestDelete(row)}
-                                data-test-subj={`workflowSwitchCaseDelete-${index}`}
-                                css={{
-                                  marginTop: 4,
-                                  marginInlineStart: euiTheme.size.s,
-                                }}
-                              />
-                            </EuiFlexItem>
-                          ) : null}
-                        </EuiFlexGroup>
-                      </div>
-                    )}
-                  </EuiDraggable>
-                );
-              })}
-            </EuiDroppable>
-          </EuiDragDropContext>
+                        onChange={(e) => handleMatchChange(row.id, e.target.value)}
+                        data-test-subj={`workflowSwitchCaseMatch-${index}`}
+                        aria-label={i18n.translate(
+                          'workflows.switchCasesField.matchAriaLabel',
+                          {
+                            defaultMessage: 'Case {index} match value',
+                            values: { index: index + 1 },
+                          }
+                        )}
+                      />
+                    </EuiFormRow>
+                  </EuiFlexItem>
+                  <EuiFlexItem grow={false}>
+                    <EuiButtonIcon
+                      iconType="trash"
+                      color="danger"
+                      aria-label={i18n.translate(
+                        'workflows.switchCasesField.deleteAriaLabel',
+                        {
+                          defaultMessage: 'Delete case {index}',
+                          values: { index: index + 1 },
+                        }
+                      )}
+                      onClick={() => requestDelete(row)}
+                      data-test-subj={`workflowSwitchCaseDelete-${index}`}
+                      css={{
+                        marginTop: 4,
+                        marginInlineStart: euiTheme.size.s,
+                      }}
+                    />
+                  </EuiFlexItem>
+                </EuiFlexGroup>
+              </div>
+            );
+          })}
 
           <EuiText size="xs" color="subdued">
             <p>
               {i18n.translate('workflows.switchCasesField.helpText', {
                 defaultMessage:
-                  'Ordered list of match-to-steps mappings. First matching case is executed.',
+                  'List of match-to-steps mappings. First matching case is executed.',
               })}
             </p>
           </EuiText>

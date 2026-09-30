@@ -28,7 +28,7 @@ import React, {
   useState,
 } from 'react';
 import { i18n } from '@kbn/i18n';
-import { WORKFLOWS_SURFACE_RADIUS } from './surface_radius';
+import { WORKFLOWS_CANVAS_CHROME_INSET, WORKFLOWS_SURFACE_RADIUS } from './surface_radius';
 
 export type WorkflowDetailBottomBarView = 'yaml' | 'graph';
 
@@ -125,7 +125,7 @@ function ViewToggle({
       css={{
         background: euiTheme.colors.backgroundBaseSubdued,
         border: euiTheme.border.thin,
-        borderRadius: euiTheme.border.radius.control,
+        borderRadius: WORKFLOWS_SURFACE_RADIUS,
         padding: euiTheme.size.xs,
         display: 'flex',
         alignItems: 'center',
@@ -364,7 +364,7 @@ export function WorkflowDetailBottomBar({
     position: 'absolute',
     left: -2,
     right: -2,
-    bottom: 12 + bottomOffset,
+    bottom: WORKFLOWS_CANVAS_CHROME_INSET + bottomOffset,
     zIndex: euiTheme.levels.header,
     display: 'flex',
     justifyContent: 'center',

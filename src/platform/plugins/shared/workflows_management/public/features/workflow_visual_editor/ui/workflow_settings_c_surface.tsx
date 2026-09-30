@@ -27,7 +27,11 @@ import {
 } from '@elastic/eui';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { i18n } from '@kbn/i18n';
-import { ensureWorkflowGraphEuiIcons, WORKFLOWS_SURFACE_RADIUS } from '@kbn/workflows-ui';
+import {
+  ensureWorkflowGraphEuiIcons,
+  WORKFLOWS_CANVAS_CHROME_INSET,
+  WORKFLOWS_SURFACE_RADIUS,
+} from '@kbn/workflows-ui';
 import { CANVAS_CONFIG_PANEL_MARGIN } from './canvas_config_panel_shell';
 import { useWorkflowSettingsDraft } from './use_workflow_settings_draft';
 import {
@@ -43,11 +47,10 @@ type SectionId = 'details' | 'constants' | 'outputs';
 /**
  * Space reserved under the popover so it never covers the canvas zoom cluster
  * (bottom-left Panel margin + control chrome) and keeps a 16px gap above it.
- * Matches `CORNER_CONTROLS_INSET` (12) + ~4× `EuiButtonIcon` size s + padding.
+ * Matches `WORKFLOWS_CANVAS_CHROME_INSET` + ~4× `EuiButtonIcon` size s + padding.
  */
-const ZOOM_CONTROLS_BOTTOM_INSET_PX = 12;
 const ZOOM_CONTROLS_HEIGHT_PX = 148;
-const GAP_ABOVE_ZOOM_CONTROLS_PX = 16;
+const GAP_ABOVE_ZOOM_CONTROLS_PX = WORKFLOWS_CANVAS_CHROME_INSET;
 
 const sectionStorageKey = (workflowId: string | undefined): string =>
   `workflows.settingsC.sections.${workflowId ?? 'new'}`;
@@ -193,7 +196,7 @@ export function WorkflowSettingsCSurface({
       CANVAS_CONFIG_PANEL_MARGIN -
       GAP_ABOVE_ZOOM_CONTROLS_PX -
       ZOOM_CONTROLS_HEIGHT_PX -
-      ZOOM_CONTROLS_BOTTOM_INSET_PX
+      WORKFLOWS_CANVAS_CHROME_INSET
   );
   const collapseLabel = i18n.translate('workflows.settingsSurface.c.collapse', {
     defaultMessage: 'Collapse workflow settings',

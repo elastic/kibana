@@ -32,7 +32,7 @@ import {
 import { AiIcon } from '@kbn/shared-ux-ai-components';
 import { aiIconTileCss } from './ai_icon_tile';
 import { resolveNodeColors } from './workflow_graph_node';
-import { getStepIconType } from '../step_icons';
+import { getStepIconType, getTriggerTypeIconType } from '../step_icons';
 
 export interface WorkflowGraphPendingNodeProps {
   readonly pending: PendingInsertVisual;
@@ -68,7 +68,11 @@ export function WorkflowGraphPendingNode({
   const origin = useMemo(() => {
     if (layoutOrigin) return layoutOrigin;
     // Empty-canvas insert: place the draft in the middle of the visible pane.
-    if (pending.context.mode !== 'step' || viewportWidth <= 0 || viewportHeight <= 0) {
+    if (
+      (pending.context.mode !== 'step' && pending.context.mode !== 'trigger') ||
+      viewportWidth <= 0 ||
+      viewportHeight <= 0
+    ) {
       return undefined;
     }
     const { x, y, zoom } = getViewport();
@@ -101,26 +105,41 @@ export function WorkflowGraphPendingNode({
   if (!origin) return null;
 
   const isConfiguring = pending.phase === 'configuring';
+  const isTriggerDraft = pending.context.mode === 'trigger';
   const isHorizontal = direction === 'LR';
-  const borderRadius = euiTheme.border.radius.small ?? 4;
+  const borderRadius = 8;
+  const chipBorderRadius = 4;
   const ariaLabel = isConfiguring
-    ? i18n.translate('workflowsUi.graph.pendingConfiguringAria', {
-        defaultMessage: 'Adding step {label}',
-        values: { label: pending.label },
-      })
+    ? isTriggerDraft
+      ? i18n.translate('workflowsUi.graph.pendingConfiguringTriggerAria', {
+          defaultMessage: 'Adding trigger {label}',
+          values: { label: pending.label },
+        })
+      : i18n.translate('workflowsUi.graph.pendingConfiguringAria', {
+          defaultMessage: 'Adding step {label}',
+          values: { label: pending.label },
+        })
     : i18n.translate('workflowsUi.graph.pendingChoosingAria', {
         defaultMessage: 'Choose a step to add here',
       });
 
   const colors = isConfiguring
-    ? resolveNodeColors(euiTheme, pending.stepType, false, {
+    ? resolveNodeColors(euiTheme, pending.stepType, isTriggerDraft, {
         isRunning: false,
         isSuccess: false,
         isFailed: false,
       })
     : undefined;
-  const iconType = isConfiguring ? getStepIconType(pending.stepType) : undefined;
-  const displayLabel = isConfiguring ? deslugifyStepName(pending.label) : undefined;
+  const iconType = isConfiguring
+    ? isTriggerDraft
+      ? getTriggerTypeIconType(pending.stepType)
+      : getStepIconType(pending.stepType)
+    : undefined;
+  const displayLabel = isConfiguring
+    ? isTriggerDraft
+      ? pending.label
+      : deslugifyStepName(pending.label)
+    : undefined;
 
   const edgeStroke = connector?.isFailure
     ? euiTheme.colors.danger
@@ -222,7 +241,7 @@ export function WorkflowGraphPendingNode({
                   alignSelf: 'stretch',
                   aspectRatio: '1 / 1',
                   width: 'auto',
-                  borderRadius,
+                  borderRadius: chipBorderRadius,
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
@@ -250,7 +269,7 @@ export function WorkflowGraphPendingNode({
                 >
                   {renderStepIcon({
                     stepType: pending.stepType,
-                    isTrigger: false,
+                    isTrigger: isTriggerDraft,
                     size: 'm',
                     color: colors.chipIconColor,
                   })}
@@ -279,14 +298,20 @@ export function WorkflowGraphPendingNode({
             </span>
           </>
         )}
-        <PendingDraftPorts isHorizontal={isHorizontal} />
+        <PendingDraftPorts isHorizontal={isHorizontal} isTrigger={isTriggerDraft} />
       </div>
     </ViewportPortal>
   );
 }
 
-/** Decorative step + error ports — match real nodes even before a type is chosen. */
-function PendingDraftPorts({ isHorizontal }: { readonly isHorizontal: boolean }) {
+/** Decorative ports — match real nodes even before a type is chosen. */
+function PendingDraftPorts({
+  isHorizontal,
+  isTrigger,
+}: {
+  readonly isHorizontal: boolean;
+  readonly isTrigger: boolean;
+}) {
   const { euiTheme } = useEuiTheme();
   const pinBase = {
     position: 'absolute' as const,
@@ -328,14 +353,16 @@ function PendingDraftPorts({ isHorizontal }: { readonly isHorizontal: boolean })
           background: euiTheme.colors.borderBaseProminent,
         }}
       />
-      <span
-        data-test-subj="workflowGraphPendingPort-error"
-        css={{
-          ...pinBase,
-          ...errorPortEdgeStyle(PORT_DOT_SIZE / 2),
-          background: euiTheme.colors.danger,
-        }}
-      />
+      {!isTrigger ? (
+        <span
+          data-test-subj="workflowGraphPendingPort-error"
+          css={{
+            ...pinBase,
+            ...errorPortEdgeStyle(PORT_DOT_SIZE / 2),
+            background: euiTheme.colors.danger,
+          }}
+        />
+      ) : null}
     </div>
   );
 }

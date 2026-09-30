@@ -11,6 +11,7 @@ import {
   EuiButton,
   EuiButtonGroup,
   type EuiButtonGroupOptionProps,
+  EuiCheckbox,
   EuiFlyout,
   EuiFlyoutBody,
   EuiFlyoutHeader,
@@ -25,6 +26,11 @@ import React, { useCallback, useEffect, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useKibana } from '../../../hooks/use_kibana';
+import {
+  getShowCreationEmptyState,
+  setShowCreationEmptyState,
+  subscribeShowCreationEmptyState,
+} from './workflow_creation_empty_state_prototype';
 import {
   getWorkflowSettingsBNodeLayout,
   getWorkflowSettingsSurfaceVariant,
@@ -65,16 +71,28 @@ const SettingsSurfacePrototypeNavControl = () => {
   const [bLayout, setBLayout] = useState<WorkflowSettingsBNodeLayout>(() =>
     getWorkflowSettingsBNodeLayout()
   );
+  const [showCreationEmptyState, setShowCreationEmptyStateLocal] = useState(() =>
+    getShowCreationEmptyState()
+  );
   const titleId = useGeneratedHtmlId({ prefix: 'workflowSettingsSurfacePrototype' });
   const radioAId = useGeneratedHtmlId({ prefix: 'settingsSurfaceA' });
   const radioBId = useGeneratedHtmlId({ prefix: 'settingsSurfaceB' });
   const radioCId = useGeneratedHtmlId({ prefix: 'settingsSurfaceC' });
+  const emptyStateCheckboxId = useGeneratedHtmlId({ prefix: 'creationEmptyState' });
 
   useEffect(
     () =>
       subscribeWorkflowSettingsSurfaceVariant(() => {
         setValue(getWorkflowSettingsSurfaceVariant());
         setBLayout(getWorkflowSettingsBNodeLayout());
+      }),
+    []
+  );
+
+  useEffect(
+    () =>
+      subscribeShowCreationEmptyState(() => {
+        setShowCreationEmptyStateLocal(getShowCreationEmptyState());
       }),
     []
   );
@@ -191,6 +209,23 @@ const SettingsSurfacePrototypeNavControl = () => {
                 })}
               />
             </div>
+            <EuiSpacer size="l" />
+            <EuiText size="s" color="subdued">
+              <FormattedMessage
+                id="workflows.settingsSurface.switcher.creationEmptyStateDescription"
+                defaultMessage="Empty-canvas creation experience (AI prompt, triggers, templates). Off by default — new workflows open on the visual builder."
+              />
+            </EuiText>
+            <EuiSpacer size="s" />
+            <EuiCheckbox
+              id={emptyStateCheckboxId}
+              checked={showCreationEmptyState}
+              onChange={(e) => setShowCreationEmptyState(e.target.checked)}
+              label={i18n.translate('workflows.settingsSurface.switcher.creationEmptyState', {
+                defaultMessage: 'Show empty state',
+              })}
+              data-test-subj="workflowCreationEmptyStatePrototypeCheckbox"
+            />
           </EuiFlyoutBody>
         </EuiFlyout>
       ) : null}

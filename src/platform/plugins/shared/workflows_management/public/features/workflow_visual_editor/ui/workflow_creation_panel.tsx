@@ -11,6 +11,7 @@ import {
   EuiButtonEmpty,
   EuiButtonGroup,
   EuiButtonIcon,
+  EuiCheckbox,
   EuiFlexGroup,
   EuiFlexItem,
   EuiIcon,
@@ -20,6 +21,7 @@ import {
   EuiToolTip,
   useEuiShadow,
   useEuiTheme,
+  useGeneratedHtmlId,
 } from '@elastic/eui';
 import type { EuiButtonGroupOptionProps } from '@elastic/eui';
 import React, { useCallback, useRef, useState } from 'react';
@@ -39,6 +41,7 @@ import {
 import { useKibana } from '../../../hooks/use_kibana';
 import { useWorkflowsExperimentalUiSetting } from '../../../hooks/use_workflows_experimental_ui_setting';
 import { StepIcon } from '../../../shared/ui/step_icons/step_icon';
+import { setShowCreationEmptyState } from './workflow_creation_empty_state_prototype';
 
 /** Prototype-only LLM hero states for empty-canvas demos. */
 export type LlmPrototypeState = 'enabled' | 'missing' | 'onPrem';
@@ -146,6 +149,7 @@ export function WorkflowCreationPanel({
     isAiAvailable ? 'enabled' : 'missing'
   );
   const promptInputRef = useRef<HTMLTextAreaElement | null>(null);
+  const emptyStateCheckboxId = useGeneratedHtmlId({ prefix: 'creationEmptyStatePanel' });
   const showGraphPreview = useWorkflowsExperimentalUiSetting(
     WORKFLOWS_EXPERIMENTAL_FEATURES_SETTING_ID
   );
@@ -312,6 +316,15 @@ export function WorkflowCreationPanel({
           onChange={(id) => setLlmPrototypeState(id as LlmPrototypeState)}
           buttonSize="compressed"
           color="primary"
+        />
+        <EuiCheckbox
+          id={emptyStateCheckboxId}
+          checked
+          onChange={(e) => setShowCreationEmptyState(e.target.checked)}
+          label={i18n.translate('workflows.creationPanel.showEmptyState', {
+            defaultMessage: 'Show empty state',
+          })}
+          data-test-subj="workflowCreationEmptyStatePrototypeCheckbox"
         />
       </div>
 

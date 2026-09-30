@@ -188,8 +188,8 @@ export function WorkflowSettingsBPanel({
               prepend={<EuiIcon type="workflow" aria-hidden />}
               data-test-subj="workflowSettingsBPanelView-form"
             >
-              {i18n.translate('workflows.settingsSurface.b.visualTab', {
-                defaultMessage: 'Visual builder',
+              {i18n.translate('workflows.settingsSurface.b.formTab', {
+                defaultMessage: 'Form',
               })}
             </EuiTab>
             <EuiTab

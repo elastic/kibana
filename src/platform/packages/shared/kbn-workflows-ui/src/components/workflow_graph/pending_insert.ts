@@ -16,9 +16,9 @@ import {
   type ErrorBranchPlacementResult,
 } from './error_branch_placement';
 import { errorPortCenter } from './port_geometry';
-import { WORKFLOW_RANK_SEP } from './workflow_layout_pipeline';
+import { WORKFLOW_NODE_SEP, WORKFLOW_RANK_SEP } from './workflow_layout_pipeline';
 
-/** Insertion sites that show an in-progress pending node (triggers insert immediately). */
+/** Insertion sites that show an in-progress pending node on the canvas. */
 export type PendingInsertStepContext =
   | {
       readonly mode: 'step';
@@ -26,10 +26,11 @@ export type PendingInsertStepContext =
       readonly path?: WorkflowStepInsertPath;
       readonly sourceNodeId?: string;
     }
-  | { readonly mode: 'error'; readonly stepId: string };
+  | { readonly mode: 'error'; readonly stepId: string }
+  | { readonly mode: 'trigger' };
 
 /**
- * Ephemeral canvas placeholder while the user is inserting a step.
+ * Ephemeral canvas placeholder while the user is inserting a step or trigger.
  * - `choosing`: Actions menu open — empty dashed card.
  * - `configuring`: Config panel open — filled solid card with icon + title.
  */
@@ -78,6 +79,7 @@ const resolvePendingSourceId = (
   nodes: readonly Node[],
   insertionPoints: InsertionPoints
 ): string | undefined => {
+  if (context.mode === 'trigger') return undefined;
   if (context.mode === 'error') return context.stepId;
   if (context.sourceNodeId) return context.sourceNodeId;
 
@@ -143,6 +145,26 @@ export const computePendingInsertOrigin = (
 
   if (context.mode === 'error') {
     return computePendingErrorBranchPlacement(context.stepId, nodes, direction)?.origin;
+  }
+
+  if (context.mode === 'trigger') {
+    const triggers = nodes.filter((n) => n.type === 'trigger');
+    if (triggers.length === 0) {
+      // Empty canvas — pending node centers itself in the viewport.
+      return undefined;
+    }
+    const last = absoluteBoundsOf(triggers[triggers.length - 1].id, nodes);
+    if (!last) return undefined;
+    // Match the ghost "+" placement: past the last trigger on the cross-axis.
+    return isHorizontal
+      ? {
+          x: (last.minX + last.maxX) / 2 - PENDING_NODE_WIDTH / 2,
+          y: last.maxY + WORKFLOW_NODE_SEP,
+        }
+      : {
+          x: last.maxX + WORKFLOW_NODE_SEP,
+          y: (last.minY + last.maxY) / 2 - PENDING_NODE_HEIGHT / 2,
+        };
   }
 
   if (context.sourceNodeId) {
@@ -240,6 +262,7 @@ export const computePendingInsertConnector = (
   insertionPoints: InsertionPoints,
   direction: LayoutDirection
 ): PendingInsertConnector | undefined => {
+  if (context.mode === 'trigger') return undefined;
   const sourceId = resolvePendingSourceId(context, nodes, insertionPoints);
   if (!sourceId) return undefined;
   const source = absoluteBoundsOf(sourceId, nodes);

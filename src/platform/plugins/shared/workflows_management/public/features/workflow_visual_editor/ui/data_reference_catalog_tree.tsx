@@ -7,7 +7,16 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { EuiFieldSearch, EuiIcon, EuiIconTip, EuiText, useEuiTheme } from '@elastic/eui';
+import {
+  EuiButtonIcon,
+  EuiFieldSearch,
+  EuiIcon,
+  EuiIconTip,
+  EuiLoadingSpinner,
+  EuiText,
+  EuiToolTip,
+  useEuiTheme,
+} from '@elastic/eui';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import type {
@@ -18,14 +27,86 @@ import {
   flattenDataReferenceLeaves,
   formatDataReferenceToken,
   isDataReferenceDraggable,
+  isDataReferenceEntity,
   isDataReferenceExpandable,
   isDataReferenceInsertable,
 } from '../lib/build_data_reference_catalog';
 import { DataReferenceItemRowContent } from './data_reference_item_row';
 
 const TREE_WIDTH = 340;
-const ROW_HEIGHT = 34;
-const NEST_INDENT = 16;
+/** Compact single-line row; grows when a subtitle/value is present. */
+const ROW_MIN_HEIGHT = 40;
+/** Vertical padding inside each tree row (top + bottom). */
+const ROW_PADDING_Y = 2;
+/** UI-shell mock latency for the catalog step Run control. */
+const SHELL_RUN_DELAY_MS = 1400;
+
+type StepRunStatus = 'running' | 'error';
+
+/** Fake output branch injected after a successful shell run. */
+const buildShellRunExtras = (stepItem: DataReferenceItem): readonly DataReferenceItem[] => {
+  const ranAt = new Date().toISOString();
+  const branchPath = `${stepItem.path}.__editor_run`;
+  return [
+    {
+      path: branchPath,
+      label: '__editor_run',
+      typeLabel: 'object',
+      drillable: true,
+      originLabel: stepItem.originLabel,
+      children: [
+        {
+          path: `${branchPath}.ran_at`,
+          label: 'ran_at',
+          typeLabel: 'string',
+          subtitle: ranAt,
+          drillable: false,
+          originLabel: stepItem.originLabel,
+        },
+        {
+          path: `${branchPath}.ok`,
+          label: 'ok',
+          typeLabel: 'boolean',
+          subtitle: 'true',
+          drillable: false,
+          originLabel: stepItem.originLabel,
+        },
+      ],
+    },
+  ];
+};
+
+const withShellRunChildren = (
+  item: DataReferenceItem,
+  extrasByPath: Readonly<Record<string, readonly DataReferenceItem[]>>
+): DataReferenceItem => {
+  const extras = extrasByPath[item.path];
+  if (!extras?.length) return item;
+  // Step entities share `steps.*.output` with their opaque output leaf. Prefer
+  // attaching run samples to that leaf so expand/collapse keys stay distinct.
+  if (
+    item.isEntity &&
+    (item.children ?? []).some((child) => child.path === item.path && !child.isEntity)
+  ) {
+    return item;
+  }
+  const existing = item.children ?? [];
+  const existingPaths = new Set(existing.map((child) => child.path));
+  const merged = [...existing, ...extras.filter((child) => !existingPaths.has(child.path))];
+  return { ...item, children: merged, drillable: true };
+};
+
+/**
+ * Expand/collapse identity. Step entities reuse their output path as `path`, so
+ * the nested opaque `output` leaf would share that string — keep them distinct.
+ */
+const getExpandKey = (item: DataReferenceItem): string =>
+  item.isEntity ? `entity:${item.path}` : item.path;
+/**
+ * Nested-row indent. Tuned so child icons optically line up with the parent
+ * category's label text (past the parent chevron + icon tile).
+ */
+const NEST_INDENT = 24;
 
 /** Transparent 1×1 used so the browser doesn't paint the default full-row drag image. */
 const EMPTY_DRAG_IMAGE =
@@ -63,6 +144,8 @@ const startCompactDragGhost = (
   }
 
   const width = source.getBoundingClientRect().width;
+  // Never transition `transform` — the ghost tracks the cursor every frame and
+  // a CSS ease on translate makes the chip lag behind the pointer.
   Object.assign(ghost.style, {
     position: 'fixed',
     top: '0',
@@ -71,7 +154,7 @@ const startCompactDragGhost = (
     pointerEvents: 'none',
     boxSizing: 'border-box',
     width: `${width}px`,
-    height: `${ROW_HEIGHT}px`,
+    height: `${ROW_MIN_HEIGHT}px`,
     margin: '0',
     padding: '0 8px',
     display: 'inline-flex',
@@ -83,19 +166,20 @@ const startCompactDragGhost = (
     borderRadius: '6px',
     boxShadow: '0 4px 12px rgba(0, 0, 0, 0.28)',
     overflow: 'hidden',
-    transform: `translate(${clientX + 12}px, ${clientY + 8}px)`,
-    transition: styles.reduceMotion
-      ? 'none'
-      : 'width 180ms ease, transform 180ms ease, box-shadow 180ms ease',
+    willChange: 'transform',
+    transform: `translate3d(${clientX + 12}px, ${clientY + 8}px, 0) scale(0.96)`,
+    transition: styles.reduceMotion ? 'none' : 'width 180ms ease, box-shadow 180ms ease',
   });
 
   document.body.appendChild(ghost);
 
-  // Shrink to icon + label only (badge already removed).
+  // Shrink to icon + label only (badge already removed). Do not touch
+  // `transform` here — drag handlers own position every frame.
   window.requestAnimationFrame(() => {
     ghost.style.width = 'max-content';
     ghost.style.maxWidth = '280px';
-    ghost.style.transform = `translate(${clientX + 12}px, ${clientY + 8}px) scale(0.96)`;
+    ghost.style.height = 'auto';
+    ghost.style.minHeight = `${ROW_MIN_HEIGHT}px`;
   });
 
   return ghost;
@@ -128,11 +212,30 @@ export function DataReferenceCatalogTree({
   const { euiTheme } = useEuiTheme();
   const [search, setSearch] = useState('');
   const [expandedPaths, setExpandedPaths] = useState<ReadonlySet<string>>(() => new Set());
-  const [activePath, setActivePath] = useState<string | null>(null);
+  const [activeExpandKey, setActiveExpandKey] = useState<string | null>(null);
   const listRef = useRef<HTMLDivElement | null>(null);
+  /** UI-shell only — not wired to test-step execution. */
+  const [stepRunStatus, setStepRunStatus] = useState<Readonly<Record<string, StepRunStatus>>>(
+    {}
+  );
+  const [stepRunErrors, setStepRunErrors] = useState<Readonly<Record<string, string>>>({});
+  const [shellRunExtras, setShellRunExtras] = useState<
+    Readonly<Record<string, readonly DataReferenceItem[]>>
+  >({});
+  const shellRunTimersRef = useRef<Map<string, number>>(new Map());
 
   const query = search.trim().toLowerCase();
   const isSearching = query.length > 0;
+
+  useEffect(
+    () => () => {
+      for (const timer of shellRunTimersRef.current.values()) {
+        window.clearTimeout(timer);
+      }
+      shellRunTimersRef.current.clear();
+    },
+    []
+  );
 
   const flatRows = useMemo((): readonly FlatRow[] => {
     if (isSearching) {
@@ -149,9 +252,10 @@ export function DataReferenceCatalogTree({
 
     const rows: FlatRow[] = [];
     const walk = (items: readonly DataReferenceItem[], depth: number, groupId: string) => {
-      for (const item of items) {
+      for (const raw of items) {
+        const item = withShellRunChildren(raw, shellRunExtras);
         rows.push({ item, depth, showOrigin: false, groupId });
-        if (isDataReferenceExpandable(item) && expandedPaths.has(item.path)) {
+        if (isDataReferenceExpandable(item) && expandedPaths.has(getExpandKey(item))) {
           walk(item.children ?? [], depth + 1, groupId);
         }
       }
@@ -160,7 +264,7 @@ export function DataReferenceCatalogTree({
       walk(group.items, 0, group.id);
     }
     return rows;
-  }, [catalog, expandedPaths, isSearching, query]);
+  }, [catalog, expandedPaths, isSearching, query, shellRunExtras]);
 
   const toggleExpanded = useCallback((path: string) => {
     setExpandedPaths((prev) => {
@@ -171,11 +275,85 @@ export function DataReferenceCatalogTree({
     });
   }, []);
 
+  const expandPath = useCallback((path: string) => {
+    setExpandedPaths((prev) => {
+      if (prev.has(path)) return prev;
+      const next = new Set(prev);
+      next.add(path);
+      return next;
+    });
+  }, []);
+
+  const clearStepRunError = useCallback((path: string) => {
+    setStepRunStatus((prev) => {
+      if (prev[path] !== 'error') return prev;
+      const next = { ...prev };
+      delete next[path];
+      return next;
+    });
+    setStepRunErrors((prev) => {
+      if (!(path in prev)) return prev;
+      const next = { ...prev };
+      delete next[path];
+      return next;
+    });
+  }, []);
+
+  const handleShellStepRun = useCallback(
+    (item: DataReferenceItem, forceError: boolean) => {
+      if (!isDataReferenceEntity(item) || stepRunStatus[item.path] === 'running') return;
+
+      const existingTimer = shellRunTimersRef.current.get(item.path);
+      if (existingTimer != null) window.clearTimeout(existingTimer);
+
+      setStepRunStatus((prev) => ({ ...prev, [item.path]: 'running' }));
+      setStepRunErrors((prev) => {
+        if (!(item.path in prev)) return prev;
+        const next = { ...prev };
+        delete next[item.path];
+        return next;
+      });
+
+      const timer = window.setTimeout(() => {
+        shellRunTimersRef.current.delete(item.path);
+        if (forceError) {
+          setStepRunStatus((prev) => ({ ...prev, [item.path]: 'error' }));
+          setStepRunErrors((prev) => ({
+            ...prev,
+            [item.path]: i18n.translate('workflows.dataReferenceTree.shellRunError', {
+              defaultMessage: 'Shell run failed for {step}. (Alt/Option+click forces this state.)',
+              values: { step: item.label },
+            }),
+          }));
+          return;
+        }
+
+        setStepRunStatus((prev) => {
+          const next = { ...prev };
+          delete next[item.path];
+          return next;
+        });
+        setShellRunExtras((prev) => ({
+          ...prev,
+          [item.path]: buildShellRunExtras(item),
+        }));
+        expandPath(getExpandKey(item));
+        // Opaque output leaf shares the entity liquid path — expand it too so
+        // shell samples nested under `output` are visible after a run.
+        expandPath(item.path);
+        expandPath(`${item.path}.__editor_run`);
+      }, SHELL_RUN_DELAY_MS);
+
+      shellRunTimersRef.current.set(item.path, timer);
+    },
+    [expandPath, stepRunStatus]
+  );
+
   const handleActivate = useCallback(
     (item: DataReferenceItem) => {
-      setActivePath(item.path);
+      setActiveExpandKey(getExpandKey(item));
       if (isDataReferenceExpandable(item)) {
-        toggleExpanded(item.path);
+        toggleExpanded(getExpandKey(item));
         return;
       }
       if (isDataReferenceInsertable(item)) {
@@ -187,8 +365,14 @@ export function DataReferenceCatalogTree({
 
   const [isDraggingPath, setIsDraggingPath] = useState<string | null>(null);
   const dragGhostRef = useRef<HTMLElement | null>(null);
+  const dragGhostRafRef = useRef<number | null>(null);
+  const dragPointerRef = useRef({ x: 0, y: 0 });
 
   const clearDragGhost = useCallback(() => {
+    if (dragGhostRafRef.current != null) {
+      window.cancelAnimationFrame(dragGhostRafRef.current);
+      dragGhostRafRef.current = null;
+    }
     dragGhostRef.current?.remove();
     dragGhostRef.current = null;
   }, []);
@@ -209,6 +393,7 @@ export function DataReferenceCatalogTree({
     const reduceMotion =
       typeof window !== 'undefined' &&
       window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    dragPointerRef.current = { x: event.clientX, y: event.clientY };
     dragGhostRef.current = startCompactDragGhost(source, event.clientX, event.clientY, {
       background: euiTheme.colors.backgroundBaseElevated,
       border: `${euiTheme.border.width.thin} solid ${euiTheme.colors.borderBasePlain}`,
@@ -221,9 +406,16 @@ export function DataReferenceCatalogTree({
   }, [clearDragGhost, euiTheme]);
 
   const handleDrag = useCallback((event: React.DragEvent) => {
-    const ghost = dragGhostRef.current;
-    if (!ghost || (event.clientX === 0 && event.clientY === 0)) return;
-    ghost.style.transform = `translate(${event.clientX + 12}px, ${event.clientY + 8}px) scale(0.96)`;
+    if (event.clientX === 0 && event.clientY === 0) return;
+    dragPointerRef.current = { x: event.clientX, y: event.clientY };
+    if (dragGhostRafRef.current != null) return;
+    dragGhostRafRef.current = window.requestAnimationFrame(() => {
+      dragGhostRafRef.current = null;
+      const ghost = dragGhostRef.current;
+      if (!ghost) return;
+      const { x, y } = dragPointerRef.current;
+      ghost.style.transform = `translate3d(${x + 12}px, ${y + 8}px, 0) scale(0.96)`;
+    });
   }, []);
 
   const handleDragEnd = useCallback(() => {
@@ -231,10 +423,10 @@ export function DataReferenceCatalogTree({
     clearDragGhost();
   }, [clearDragGhost]);
 
-  const focusRow = useCallback((path: string) => {
-    setActivePath(path);
+  const focusRow = useCallback((expandKey: string) => {
+    setActiveExpandKey(expandKey);
     const btn = listRef.current?.querySelector<HTMLElement>(
-      `[data-test-subj="workflowDataReferenceTreeRow-${CSS.escape(path)}"]`
+      `[data-test-subj="workflowDataReferenceTreeRow-${CSS.escape(expandKey)}"]`
     );
     btn?.focus();
   }, []);
@@ -242,25 +434,26 @@ export function DataReferenceCatalogTree({
   const handleKeyDown = useCallback(
     (event: React.KeyboardEvent, item: DataReferenceItem) => {
       const expandable = isDataReferenceExpandable(item);
-      const isOpen = expandedPaths.has(item.path);
-      const navIndex = flatRows.findIndex((row) => row.item.path === item.path);
+      const expandKey = getExpandKey(item);
+      const isOpen = expandedPaths.has(expandKey);
+      const navIndex = flatRows.findIndex((row) => getExpandKey(row.item) === expandKey);
 
       if (event.key === 'ArrowDown' || event.key === 'ArrowUp') {
         event.preventDefault();
         const delta = event.key === 'ArrowDown' ? 1 : -1;
         const next = flatRows[Math.max(0, Math.min(flatRows.length - 1, navIndex + delta))];
-        if (next) focusRow(next.item.path);
+        if (next) focusRow(getExpandKey(next.item));
         return;
       }
 
       if (event.key === 'ArrowRight' && expandable && !isOpen) {
         event.preventDefault();
-        toggleExpanded(item.path);
+        toggleExpanded(expandKey);
         return;
       }
       if (event.key === 'ArrowLeft' && expandable && isOpen) {
         event.preventDefault();
-        toggleExpanded(item.path);
+        toggleExpanded(expandKey);
         return;
       }
       if (event.key === 'Enter' || event.key === ' ') {
@@ -272,59 +465,91 @@ export function DataReferenceCatalogTree({
   );
 
   const renderItemRow = (row: FlatRow, isFirst: boolean) => {
-    const { item, depth, showOrigin } = row;
+    const { item, depth, showOrigin, groupId } = row;
     const expandable = isDataReferenceExpandable(item);
-    const isOpen = expandedPaths.has(item.path);
+    const expandKey = getExpandKey(item);
+    const isOpen = expandedPaths.has(expandKey);
     const draggable = isDataReferenceDraggable(item);
     const insertable = isDataReferenceInsertable(item);
     const isDragging = isDraggingPath === item.path;
+    const canShellRun =
+      !isSearching && groupId === 'steps' && isDataReferenceEntity(item);
+    const runStatus = stepRunStatus[item.path];
+    const runError = stepRunErrors[item.path];
 
-    const gripExpandedCss = {
+    const gripCss = {
       width: 16,
       minWidth: 16,
       opacity: 1,
       marginInlineStart: 6,
-    };
-    const gripCollapsedCss = {
-      width: 0,
-      minWidth: 0,
-      opacity: 0,
-      overflow: 'hidden' as const,
-      marginInlineStart: 0,
-      transition: 'width 140ms ease, opacity 140ms ease, margin 140ms ease',
-      '@media (prefers-reduced-motion: reduce)': { transition: 'none' },
+      display: 'inline-flex' as const,
+      alignItems: 'center' as const,
+      justifyContent: 'center' as const,
+      flexShrink: 0,
+      color: euiTheme.colors.textSubdued,
     };
 
+    const runLabel = i18n.translate('workflows.dataReferenceTree.runStep', {
+      defaultMessage: 'Test this step',
+    });
+
+    const rowHighlight =
+      activeExpandKey === expandKey && !isOpen
+        ? euiTheme.colors.backgroundBaseHighlighted
+        : 'transparent';
+
     return (
-      <div key={`${item.path}-${depth}`}>
+      <div
+        key={`${expandKey}-${depth}`}
+        css={{
+          display: 'flex',
+          alignItems: 'center',
+          width: '100%',
+          minHeight: ROW_MIN_HEIGHT,
+          background: rowHighlight,
+          '@media (prefers-reduced-motion: no-preference)': {
+            transition: 'background 120ms ease',
+          },
+          '&:hover, &:focus-within': {
+            background: isOpen ? 'transparent' : euiTheme.colors.backgroundBaseHighlighted,
+          },
+          // Hover-reveal Run; keep visible while running / errored / focused.
+          '& [data-run-control]': {
+            opacity: runStatus != null ? 1 : 0,
+          },
+          '&:hover [data-run-control], &:focus-within [data-run-control]': {
+            opacity: 1,
+          },
+        }}
+      >
         <button
           type="button"
           role="treeitem"
           aria-expanded={expandable ? isOpen : undefined}
           draggable={draggable}
-          data-test-subj={`workflowDataReferenceTreeRow-${item.path}`}
-          tabIndex={activePath === item.path || (activePath === null && isFirst) ? 0 : -1}
+          data-test-subj={`workflowDataReferenceTreeRow-${expandKey}`}
+          tabIndex={
+            activeExpandKey === expandKey || (activeExpandKey === null && isFirst) ? 0 : -1
+          }
           onClick={() => handleActivate(item)}
           onDragStart={(e) => handleDragStart(e, item)}
           onDrag={handleDrag}
           onDragEnd={handleDragEnd}
           onKeyDown={(e) => handleKeyDown(e, item)}
-          onFocus={() => setActivePath(item.path)}
+          onFocus={() => setActiveExpandKey(expandKey)}
           css={{
             display: 'flex',
             alignItems: 'center',
-            gap: euiTheme.size.s,
-            width: '100%',
-            height: ROW_HEIGHT,
+            gap: euiTheme.size.xs,
+            flex: '1 1 auto',
+            minWidth: 0,
+            minHeight: ROW_MIN_HEIGHT,
+            height: 'auto',
             textAlign: 'left',
-            padding: `0 ${euiTheme.size.s}`,
+            padding: `${ROW_PADDING_Y}px ${euiTheme.size.s}`,
+            paddingInlineEnd: canShellRun ? euiTheme.size.xs : euiTheme.size.s,
             border: 'none',
-            background:
-              // Expanded parents are containers — keep highlight for leaves /
-              // collapsed rows only so the open folder doesn't look selected.
-              activePath === item.path && !isOpen
-                ? euiTheme.colors.backgroundBaseHighlighted
-                : 'transparent',
+            background: 'transparent',
             cursor: draggable
               ? isDragging
                 ? 'grabbing'
@@ -332,22 +557,19 @@ export function DataReferenceCatalogTree({
               : insertable || expandable
                 ? 'pointer'
                 : 'default',
-            minWidth: 0,
-            '@media (prefers-reduced-motion: no-preference)': {
-              transition: 'background 120ms ease',
-            },
-            '&:hover, &:focus-visible': {
-              background: isOpen
-                ? 'transparent'
-                : euiTheme.colors.backgroundBaseHighlighted,
-              ...(draggable ? { '[data-drag-grip]': gripExpandedCss } : {}),
-            },
-            ...(draggable
-              ? { '&:focus-within': { '[data-drag-grip]': gripExpandedCss } }
-              : {}),
           }}
         >
-          {/* Fixed gutter — leaf chips stay aligned with container chips. */}
+          {/* Indent before the disclosure so nested chevrons sit next to their icons. */}
+          {depth > 0 ? (
+            <span
+              aria-hidden
+              css={{
+                width: depth * NEST_INDENT,
+                flexShrink: 0,
+              }}
+            />
+          ) : null}
+          {/* Fixed gutter — leaf chips stay aligned with sibling container chips. */}
           <span
             css={{
               width: euiTheme.size.base,
@@ -375,35 +597,68 @@ export function DataReferenceCatalogTree({
               gap: euiTheme.size.s,
               flex: '1 1 auto',
               minWidth: 0,
-              height: '100%',
-              // Nest under the parent's label column (past the arrow gutter).
-              ...(depth > 0
-                ? {
-                    marginLeft: depth * NEST_INDENT,
-                    paddingLeft: euiTheme.size.xs,
-                  }
-                : {}),
             }}
           >
             <DataReferenceItemRowContent item={item} showOrigin={showOrigin} hideChevron />
           </span>
           {draggable ? (
-            <span
-              data-drag-grip
-              aria-hidden
-              css={{
-                ...gripCollapsedCss,
-                display: 'inline-flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                flexShrink: 0,
-                color: euiTheme.colors.textSubdued,
-              }}
-            >
+            <span data-drag-grip aria-hidden css={gripCss}>
               <EuiIcon type="drag" size="s" />
             </span>
           ) : null}
         </button>
+        {canShellRun ? (
+          <span
+            data-run-control
+            data-drag-preview-hide
+            css={{
+              flex: '0 0 auto',
+              display: 'inline-flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              width: 28,
+              height: 28,
+              marginInlineEnd: euiTheme.size.xs,
+            }}
+          >
+            {runStatus === 'running' ? (
+              <EuiLoadingSpinner
+                size="m"
+                data-test-subj={`workflowDataReferenceTreeRunSpinner-${item.path}`}
+              />
+            ) : runStatus === 'error' ? (
+              <EuiToolTip content={runError} disableScreenReaderOutput>
+                <EuiButtonIcon
+                  iconType="error"
+                  color="danger"
+                  size="xs"
+                  aria-label={
+                    runError ??
+                    i18n.translate('workflows.dataReferenceTree.runStepError', {
+                      defaultMessage: 'Step run failed',
+                    })
+                  }
+                  data-test-subj={`workflowDataReferenceTreeRunError-${item.path}`}
+                  onMouseLeave={() => clearStepRunError(item.path)}
+                />
+              </EuiToolTip>
+            ) : (
+              <EuiToolTip content={runLabel} disableScreenReaderOutput>
+                <EuiButtonIcon
+                  iconType="play"
+                  size="xs"
+                  color="success"
+                  aria-label={runLabel}
+                  data-test-subj={`workflowDataReferenceTreeRun-${item.path}`}
+                  onClick={(e: React.MouseEvent) => {
+                    e.stopPropagation();
+                    handleShellStepRun(item, e.altKey);
+                  }}
+                />
+              </EuiToolTip>
+            )}
+          </span>
+        ) : null}
       </div>
     );
   };
@@ -485,6 +740,9 @@ export function DataReferenceCatalogTree({
                     background: euiTheme.colors.backgroundBasePlain,
                   }}
                 >
+                  {group.iconType ? (
+                    <EuiIcon type={group.iconType} size="s" color="subdued" aria-hidden />
+                  ) : null}
                   <EuiText
                     size="xs"
                     color="subdued"
