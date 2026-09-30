@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { connect } from 'react-redux';
+import { connect, useDispatch } from 'react-redux';
 import { type UseEuiTheme, useEuiShadow, euiFontSize } from '@elastic/eui';
 import { css } from '@emotion/react';
 import type {
@@ -27,7 +27,12 @@ import { MergeCandidates } from './merge_candidates';
 import { DrillDowns } from './drill_downs';
 import { DrillDownIconLinks } from './drill_down_icon_links';
 import type { GraphState } from '../../state_management';
-import { liveResponseFieldsSelector, templatesSelector } from '../../state_management';
+import {
+  deselectNode,
+  type GraphDispatch,
+  liveResponseFieldsSelector,
+  templatesSelector,
+} from '../../state_management';
 import { SelectedNodeItem } from './selected_node_item';
 import { gphSidebarHeaderStyles } from '../../styles';
 
@@ -62,6 +67,7 @@ const ControlPanelComponent = ({
   onSetControl,
   selectSelected,
 }: ControlPanelProps & ControlPanelStateProps) => {
+  const dispatch = useDispatch<GraphDispatch>();
   const hasNodes = workspace.nodes.length === 0;
 
   const openUrlTemplate = (template: UrlTemplate) => {
@@ -76,8 +82,7 @@ const ControlPanelComponent = ({
   };
 
   const onDeselectNode = (node: WorkspaceNode) => {
-    workspace.deselectNode(node);
-    workspace.changeHandler();
+    dispatch(deselectNode(node.id));
     onSetControl('none');
   };
 
