@@ -7,7 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { AppMenu, type Locator, type ScoutPage } from '@kbn/scout';
+import type { Locator } from '@playwright/test';
+import type { ScoutPage } from '..';
+import { AppMenu } from './app_menu';
 
 export type InspectorView = 'Requests' | 'Data';
 
@@ -16,7 +18,7 @@ const VIEW_CHOOSER_TEST_SUBJECTS: Record<InspectorView, string> = {
   Data: 'inspectorViewChooserData',
 };
 
-export class Inspector {
+export class InspectorPage {
   private readonly appMenu: AppMenu;
   public readonly panel: Locator;
   public readonly closeButton: Locator;
