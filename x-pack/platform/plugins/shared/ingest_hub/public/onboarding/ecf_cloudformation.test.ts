@@ -10,6 +10,7 @@ import {
   buildEcfUnifiedCloudFormationUrl,
   buildEcfOtelCloudFormationUrl,
   buildEcfCrowdstrikeCloudFormationUrl,
+  ensureOtlpPort,
   ECF_UNIFIED_TEMPLATE_FILE,
   ECF_OTEL_TEMPLATE_FILE,
   ECF_CROWDSTRIKE_TEMPLATE_FILE,
@@ -422,6 +423,56 @@ describe('buildEcfOtelCloudFormationUrl()', () => {
       otlpEndpoint: 'https://otlp.example.com',
     });
     expect(url).not.toContain('APIKey');
+  });
+
+  it('appends :443 to https OTLPEndpoint when port is missing', () => {
+    const url = buildEcfOtelCloudFormationUrl({
+      ecfConfigs: otelConfigs,
+      region: 'us-east-1',
+      version: TEST_VERSION,
+      otlpEndpoint: 'https://otlp.example.com',
+    });
+    const hash = decodeURIComponent(url.split('#')[1]);
+    expect(hash).toContain('param_OTLPEndpoint=https://otlp.example.com:443');
+  });
+
+  it('does not modify OTLPEndpoint when port is already present', () => {
+    const url = buildEcfOtelCloudFormationUrl({
+      ecfConfigs: otelConfigs,
+      region: 'us-east-1',
+      version: TEST_VERSION,
+      otlpEndpoint: 'https://otlp.example.com:4317',
+    });
+    const hash = decodeURIComponent(url.split('#')[1]);
+    expect(hash).toContain('param_OTLPEndpoint=https://otlp.example.com:4317');
+  });
+});
+
+// ── ensureOtlpPort ────────────────────────────────────────────────────────────
+
+describe('ensureOtlpPort()', () => {
+  it('appends 443 to https URL without port', () => {
+    expect(ensureOtlpPort('https://ingest.example.com')).toBe('https://ingest.example.com:443');
+  });
+
+  it('appends 80 to http URL without port', () => {
+    expect(ensureOtlpPort('http://ingest.example.com')).toBe('http://ingest.example.com:80');
+  });
+
+  it('preserves existing port', () => {
+    expect(ensureOtlpPort('https://ingest.example.com:4317')).toBe(
+      'https://ingest.example.com:4317'
+    );
+  });
+
+  it('preserves path and query when appending port', () => {
+    expect(ensureOtlpPort('https://ingest.example.com/v1/logs')).toBe(
+      'https://ingest.example.com:443/v1/logs'
+    );
+  });
+
+  it('returns the original string unchanged when URL is invalid', () => {
+    expect(ensureOtlpPort('not-a-url')).toBe('not-a-url');
   });
 });
 

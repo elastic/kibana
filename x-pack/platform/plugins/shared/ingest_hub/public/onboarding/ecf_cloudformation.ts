@@ -153,6 +153,25 @@ export const getEcfServiceConfigs = (
 const normaliseLogGroupArn = (arn: string): string => (arn.endsWith(':*') ? arn : `${arn}:*`);
 
 /**
+ * Ensures the OTLP endpoint URL contains an explicit port, as required by the OTel ECF
+ * CloudFormation template's exporter configuration. Appends 443 for https and 80 for http
+ * when no port is present; returns the original string for anything else.
+ */
+export const ensureOtlpPort = (endpoint: string): string => {
+  try {
+    const parsed = new URL(endpoint);
+    if (parsed.port) return endpoint;
+    const port =
+      parsed.protocol === 'https:' ? '443' : parsed.protocol === 'http:' ? '80' : null;
+    if (!port) return endpoint;
+    // URL.toString() silently drops default ports (80/443), so insert into the original string.
+    return endpoint.replace(`://${parsed.hostname}`, `://${parsed.hostname}:${port}`);
+  } catch {
+    return endpoint;
+  }
+};
+
+/**
  * Builds a CloudFormation Quick Create URL for the unified multi-signal ECF template.
  *
  * The URL pre-fills:
@@ -302,7 +321,7 @@ export const buildEcfOtelCloudFormationUrl = ({
   hashParams.set('stackName', stackName);
 
   if (otlpEndpoint) {
-    hashParams.set('param_OTLPEndpoint', otlpEndpoint);
+    hashParams.set('param_OTLPEndpoint', ensureOtlpPort(otlpEndpoint));
   }
   if (s3BucketArns.length > 0) {
     hashParams.set('param_S3Buckets', s3BucketArns.join(','));
