@@ -21,10 +21,7 @@ download_tmp_artifact() {
 
     if [[ -z "$expected_sha256" ]]; then
       echo "No recorded checksum for ${artifact_name} (build ${build_id}), skipping GCS download."
-    elif "${SCRIPTS_COMMON_DIR}/activate_service_account.sh" "kibana-ci-artifacts-${BUILDKITE_AGENT_GCP_REGION}" \
-      && gcloud storage cp \
-        "$(tmp_artifact_object "$BUILDKITE_AGENT_GCP_REGION" "$build_id" "$expected_sha256" "$artifact_name")" \
-        "${dest_dir}/${artifact_name}"; then
+    elif download_tmp_artifact_from_gcs "$artifact_name" "$dest_dir" "$build_id" "$expected_sha256"; then
       if [[ "$(sha256_of "${dest_dir}/${artifact_name}")" == "$expected_sha256" ]]; then
         return 0
       fi
@@ -53,7 +50,7 @@ upload_tmp_artifact() {
     return 0
   fi
 
-  if ! "${SCRIPTS_COMMON_DIR}/activate_service_account.sh" "kibana-ci-artifacts-${GCS_CI_ARTIFACT_REGIONS[0]}"; then
+  if ! "${SCRIPTS_COMMON_DIR}/activate_service_account.sh" "kibana-ci-artifacts-${GCS_CI_ARTIFACT_REGIONS[0]}" >&2; then
     echo "Service account activation failed; skipping GCS upload of ${artifact_name}. Same-region downloads will fall back to the buildkite artifact." >&2
     return 0
   fi
@@ -84,9 +81,20 @@ upload_tmp_artifact_to_region() (
   trap 'rm -rf "$config_dir"' EXIT
   cp -a "${CLOUDSDK_CONFIG:-$HOME/.config/gcloud}/." "$config_dir/"
   export CLOUDSDK_CONFIG="$config_dir"
+  # Composite uploads write and delete temporary component objects; tmp artifacts are write-once.
+  export CLOUDSDK_STORAGE_PARALLEL_COMPOSITE_UPLOAD_ENABLED=False
 
   retry 3 5 upload_tmp_artifact_object_if_missing "$local_path" "$object"
 )
+
+download_tmp_artifact_from_gcs() {
+  local artifact_name="$1" dest_dir="$2" build_id="$3" sha256="$4"
+
+  "${SCRIPTS_COMMON_DIR}/activate_service_account.sh" "kibana-ci-artifacts-${BUILDKITE_AGENT_GCP_REGION}" >&2 || return 1
+  gcloud storage cp \
+    "$(tmp_artifact_object "$BUILDKITE_AGENT_GCP_REGION" "$build_id" "$sha256" "$artifact_name")" \
+    "${dest_dir}/${artifact_name}"
+}
 
 # Uploads never replace an existing object; the object path already pins the content's checksum
 upload_tmp_artifact_object_if_missing() {

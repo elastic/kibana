@@ -7,14 +7,15 @@
 
 import React from 'react';
 import ReactDOM from 'react-dom';
-import type { AppMountParameters, CoreStart } from '@kbn/core/public';
+import type { AppMountParameters, AppUnmount, CoreStart } from '@kbn/core/public';
 import { Router } from '@kbn/shared-ux-router';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
-import { QueryClient, QueryClientProvider } from '@kbn/react-query';
+import { QueryClientProvider } from '@kbn/react-query';
 import { ALERTZERO_PLUGIN_NAME } from '@kbn/alertzero-common';
 import { AppChromeLayout } from './components/app_chrome';
 import type { AlertZeroStartDependencies } from './types';
 import { AlertZeroRoutes } from './routes';
+import { getSharedAppQueryClient } from './shared_app_query_client';
 
 interface RenderAppParams {
   coreStart: CoreStart;
@@ -29,18 +30,17 @@ const rootStyle: React.CSSProperties = {
   minHeight: 0,
 };
 
-export const renderApp = ({ coreStart, startDeps, params }: RenderAppParams) => {
+export const renderApp = async ({
+  coreStart,
+  startDeps,
+  params,
+}: RenderAppParams): Promise<AppUnmount> => {
   coreStart.chrome.docTitle.change(ALERTZERO_PLUGIN_NAME);
 
-  const queryClient = new QueryClient({
-    defaultOptions: {
-      queries: {
-        staleTime: 30_000,
-        refetchOnWindowFocus: 'always',
-        refetchOnMount: 'always',
-      },
-    },
-  });
+  // Shared with the investigation flyout's "Proposed actions" slot (see `plugin.ts`), so a
+  // decision made in either invalidates the other's cache directly instead of needing a
+  // cross-boundary signal to bridge two separate ones.
+  const queryClient = await getSharedAppQueryClient();
 
   /**
    * `KibanaContextProvider` backs `useKibana()` from `@kbn/kibana-react-plugin`, which the app uses

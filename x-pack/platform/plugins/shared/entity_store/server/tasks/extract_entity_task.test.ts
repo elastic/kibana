@@ -36,6 +36,7 @@ import { ENGINE_STATUS } from '../domain/constants';
 import { EngineDescriptorTypeName } from '../domain/saved_objects';
 import { entityStoreMetrics } from '../monitor/metrics';
 import { EntityStoreNotRunningError, NonPriorityExtractionDisabledError } from '../domain/errors';
+import { buildEaExecutionContext, EA_EXECUTION_CONTEXT_NAMES } from './execution_context';
 
 const createTaskInstance = (schedule?: ConcreteTaskInstance['schedule']): ConcreteTaskInstance =>
   ({
@@ -593,11 +594,7 @@ describe('registerExtractEntityTasks — execution context wrap', () => {
     await runner.run();
 
     expect(withContextSpy).toHaveBeenCalledWith(
-      {
-        type: 'security_solution',
-        name: 'entity_analytics-entity_store_extract_task',
-        id: 'task-1',
-      },
+      buildEaExecutionContext(EA_EXECUTION_CONTEXT_NAMES.ENTITY_STORE_EXTRACT_TASK, 'task-1'),
       expect.any(Function)
     );
   });

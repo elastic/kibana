@@ -9,6 +9,7 @@ export {
   AGENTIC_INVESTIGATIONS_API_VERSION,
   AGENTIC_INVESTIGATIONS_INTERNAL_URL,
   AGENTIC_INVESTIGATIONS_PLUGIN_ID,
+  SUGGEST_USER_PROFILES_URL,
 } from './constants';
 
 export { userSchema } from './user';
@@ -38,12 +39,13 @@ export {
   ESCALATION_ASSIGNEES_FIELD,
   ESCALATION_ASSIGN_URL,
   ESCALATION_BY_ID_URL,
+  ESCALATION_CLOSE_PREVIEW_URL,
   ESCALATION_LINKED_INVESTIGATIONS_FIELD,
   ESCALATION_LINKED_INVESTIGATIONS_URL,
   ESCALATION_STATUS_FIELD,
+  ESCALATION_STATUS_URL,
   ESCALATION_TEMPLATE_ID,
   ESCALATIONS_INTERNAL_URL,
-  ESCALATIONS_SUGGEST_USERS_URL,
   ESCALATIONS_UI_CAPABILITY_MANAGE,
   ESCALATIONS_UI_CAPABILITY_SHOW,
   INVESTIGATION_TEMPLATE_ID,
@@ -59,10 +61,27 @@ export {
 
 export {
   INVESTIGATION_ASSIGN_URL,
+  INVESTIGATION_CLOSE_PREVIEW_URL,
+  INVESTIGATION_STATUS_URL,
   INVESTIGATIONS_INTERNAL_URL,
   INVESTIGATIONS_UI_CAPABILITY_MANAGE,
   INVESTIGATIONS_UI_CAPABILITY_SHOW,
 } from './investigations/constants';
+
+export {
+  setInvestigationStatusRequestSchema,
+  setEscalationStatusRequestSchema,
+} from './investigations/status';
+
+export type {
+  SetInvestigationStatusRequest,
+  SetInvestigationStatusResponse,
+  InvestigationClosePreviewResponse,
+  ClosePreviewProposal,
+  SetEscalationStatusRequest,
+  SetEscalationStatusResponse,
+  EscalationClosePreviewResponse,
+} from './investigations/status';
 
 export {
   assignConversationRequestBodySchema,

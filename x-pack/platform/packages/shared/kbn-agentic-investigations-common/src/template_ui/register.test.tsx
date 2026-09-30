@@ -22,6 +22,7 @@ import {
   registerEscalationTemplateUI,
 } from './register';
 import type { RenderAssignees, RenderLinkedInvestigations } from './types';
+import { ACTIONS_TRANSLATIONS } from '../components/actions/translations';
 
 const conversation: Conversation = {
   id: 'conversation-1',
@@ -117,6 +118,45 @@ describe('registerAgenticInvestigationTemplateUI', () => {
     ]);
   });
 
+  it('threads renderProposedActions into the overview tab with the conversation id', async () => {
+    const { contract } = createFakeService();
+    const renderProposedActions = jest.fn(({ conversationId }: { conversationId: string }) => (
+      <span>proposed actions for {conversationId}</span>
+    ));
+    register(contract, { renderProposedActions });
+
+    const OverviewTabContent = contract.getTab('investigation.overview')?.content;
+    if (!OverviewTabContent) {
+      throw new Error('Expected a registered overview tab');
+    }
+
+    renderWithKibanaRenderContext(
+      <OverviewTabContent conversation={conversation} isOpenedFromChat={false} />
+    );
+
+    expect(await screen.findByText('proposed actions for conversation-1')).toBeInTheDocument();
+  });
+
+  it('omits the proposed actions section when no renderer is supplied', async () => {
+    const { contract } = createFakeService();
+    register(contract);
+
+    const OverviewTabContent = contract.getTab('investigation.overview')?.content;
+    if (!OverviewTabContent) {
+      throw new Error('Expected a registered overview tab');
+    }
+
+    renderWithKibanaRenderContext(
+      <OverviewTabContent conversation={conversation} isOpenedFromChat={false} />
+    );
+
+    // Waits for the lazy overview slot's chunk to resolve before asserting it stayed absent.
+    expect(
+      await screen.findByText('A second sign-in replayed the same session cookie.')
+    ).toBeInTheDocument();
+    expect(screen.queryByText('Proposed actions')).not.toBeInTheDocument();
+  });
+
   it('registers the template UI definition with a header and footer', () => {
     const { contract } = createFakeService();
 
@@ -193,6 +233,20 @@ describe('registerAgenticInvestigationTemplateUI', () => {
       agentId: 'agent',
       openDetails: true,
     });
+  });
+
+  it('hides the footer slot Open in chat when the flyout was opened from within chat', async () => {
+    const { contract } = createFakeService();
+    // The escalation button loads on the same lazy chunk as Open in chat; wiring one in gives a
+    // reliable element to await, so the assertion below cannot pass merely because the chunk
+    // has not resolved yet (the Suspense fallback is `null`).
+    register(contract, { renderEscalationModal: jest.fn(() => <div>Escalation modal</div>) });
+    const Footer = getSlot(contract, 'investigation', 'footer');
+
+    renderWithKibanaRenderContext(<Footer conversation={conversation} isOpenedFromChat />);
+
+    await screen.findByText(ACTIONS_TRANSLATIONS.buttons.openEscalation);
+    expect(screen.queryByTestId('investigationFlyoutOpenChat')).not.toBeInTheDocument();
   });
 
   it('calls renderAssignees with the conversation id, templateId, uids, and refetchConversation', async () => {

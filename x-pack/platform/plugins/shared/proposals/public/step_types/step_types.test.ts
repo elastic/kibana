@@ -11,6 +11,7 @@ import {
   CloneProposalStepId,
   CreateProposalStepId,
   GetProposalStepId,
+  SettleIncompleteProposalStepId,
   UpdateProposalStepId,
 } from '@kbn/proposals-common';
 import { registerProposalsPublicStepDefinitions } from '.';
@@ -30,16 +31,15 @@ describe('proposals public step definitions', () => {
   it('should register every step as a loader, so none reaches the page-load bundle', () => {
     const registered = register();
 
-    expect(registered).toHaveLength(5);
+    expect(registered).toHaveLength(6);
     for (const definition of registered) {
       expect(typeof definition).toBe('function');
     }
   });
 
-  it('should resolve to the five distinct step ids', async () => {
-    // Five near-identical modules, so a copy-paste slip would otherwise
-    // silently register the same definition twice and drop a step from the
-    // YAML editor.
+  it('should resolve to the six distinct step ids', async () => {
+    // Near-identical modules, so a copy-paste slip would otherwise silently
+    // register the same definition twice and drop a step from the YAML editor.
     const resolved = await Promise.all(register().map((load) => load()));
 
     expect(resolved.map((definition) => definition?.id)).toEqual([
@@ -48,6 +48,7 @@ describe('proposals public step definitions', () => {
       CheckDecidePrivilegesStepId,
       GetProposalStepId,
       CloneProposalStepId,
+      SettleIncompleteProposalStepId,
     ]);
   });
 

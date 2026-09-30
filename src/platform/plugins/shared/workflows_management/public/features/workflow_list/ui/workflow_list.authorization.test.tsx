@@ -214,6 +214,32 @@ describe('Authorization matrix', () => {
     mockUseWorkflows.mockReturnValue(workflowsQueryResult);
   });
 
+  it.each([
+    { role: 'viewer', execute: false, edit: false },
+    { role: 'executor', execute: true, edit: false },
+    { role: 'editor', execute: true, edit: true },
+  ])('applies $role ACL permissions to list actions', async ({ execute, edit }) => {
+    setKibanaCapabilities({
+      createWorkflow: true,
+      updateWorkflow: true,
+      deleteWorkflow: true,
+      executeWorkflow: true,
+    });
+    const item = createWorkflowListItem({
+      id: 'private-workflow',
+      enabled: true,
+      valid: true,
+      permissions: { read: true, execute, edit, manage: false },
+    });
+    renderList({ item });
+
+    expectControlDisabled('runWorkflowAction', !execute);
+    expectControlDisabled(`workflowToggleSwitch-${item.id}`, !edit);
+    expectControlDisabled('editWorkflowAction', !edit);
+    await openFirstRowCollapsedActions();
+    expectControlDisabled('deleteWorkflowAction', !edit);
+  });
+
   it.each<{
     label: string;
     createWorkflow: boolean;
@@ -385,6 +411,27 @@ describe('Bulk actions menu', () => {
     const boxes = within(table).getAllByRole('checkbox');
     await userEvent.click(boxes[boxes.length - 1]);
   }
+
+  it('omits bulk mutations when the selected workflow denies edit access', async () => {
+    setKibanaCapabilities({
+      createWorkflow: true,
+      updateWorkflow: true,
+      deleteWorkflow: true,
+      executeWorkflow: true,
+    });
+    renderList({
+      item: createWorkflowListItem({
+        permissions: { read: true, execute: true, edit: false, manage: false },
+      }),
+    });
+    await selectFirstDataRow();
+    await userEvent.click(screen.getByTestId('workflows-table-bulk-actions-button'));
+
+    expect(screen.queryByTestId('workflows-bulk-action-enable')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('workflows-bulk-action-disable')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('workflows-bulk-action-delete')).not.toBeInTheDocument();
+    expect(screen.getByTestId('workflows-bulk-action-export')).toBeInTheDocument();
+  });
 
   it('shows disable + export but not enable when the selected workflow is enabled', async () => {
     setKibanaCapabilities(

@@ -12,6 +12,7 @@ import { AppHeader } from '@kbn/app-header';
 import type { AppHeaderBadge, AppHeaderMenu, AppHeaderTitle } from '@kbn/app-header';
 import type { AppMenuItemType, AppMenuPrimaryActionItem } from '@kbn/app-menu';
 import { ALERTZERO_WATCHES_SUBNAV_WIDTH } from '../../../components/layout/constants';
+import { useAlertZeroDocumentationLink } from '../../../hooks/use_alertzero_documentation_link';
 import { AlertZeroWatchesNav, type WatchesSectionId } from './alertzero_watches_nav';
 
 interface WatchesSectionLayoutProps {
@@ -40,6 +41,7 @@ export const WatchesSectionLayout: React.FC<WatchesSectionLayoutProps> = ({
   headerItems,
   children,
 }) => {
+  const docLink = useAlertZeroDocumentationLink();
   const menu = useMemo<AppHeaderMenu | undefined>(
     () =>
       headerSwitch || headerPrimaryActionItem || headerItems
@@ -98,7 +100,7 @@ export const WatchesSectionLayout: React.FC<WatchesSectionLayoutProps> = ({
       >
         <AlertZeroWatchesNav active={active} />
       </EuiPageTemplate.Sidebar>
-      <AppHeader title={title} badges={badges} menu={menu} spacing="compact" />
+      <AppHeader title={title} badges={badges} menu={menu} spacing="compact" docLink={docLink} />
       <EuiPageTemplate.Section paddingSize="l" grow>
         {children}
       </EuiPageTemplate.Section>

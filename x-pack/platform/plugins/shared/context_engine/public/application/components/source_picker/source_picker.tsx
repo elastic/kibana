@@ -20,10 +20,12 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import React, { useMemo, useState } from 'react';
 import { CONTEXT_ENGINE_UI_EBT } from '../../../../common/telemetry';
 import { useDataConnectors } from '../../hooks/use_data_connectors';
+import { useHasRendered } from '../../hooks/use_has_rendered';
+import { createIndexEsqlQuery, hasSelectedEsqlQuery } from '../../utils/sources';
 import { getSourceDisplay } from '../source_display';
 import { SourceRow } from '../source_row';
 import { ConnectorsTab } from './connectors_tab';
-import { EsqlTab } from './esql_tab';
+import { ElasticsearchSourcesTab } from './elasticsearch_sources_tab';
 import type { SelectedSource } from './types';
 
 type TabId = 'esql' | 'connectors';
@@ -35,20 +37,15 @@ interface SourcePickerProps {
 
 export const SourcePicker = ({ selectedSources, onChange }: SourcePickerProps) => {
   const [selectedTab, setSelectedTab] = useState<TabId>('esql');
+  const hasRendered = useHasRendered();
 
   const hasSelectedConnectorSources = useMemo(
     () => selectedSources.some((source) => source.type === 'connector'),
     [selectedSources]
   );
 
-  const {
-    connectors,
-    connectorNameById,
-    connectorActionTypeById,
-    isLoading: isLoadingConnectors,
-    isError: isConnectorsError,
-  } = useDataConnectors({
-    enabled: selectedTab === 'connectors' || hasSelectedConnectorSources,
+  const { connectorNameById, connectorActionTypeById } = useDataConnectors({
+    enabled: hasSelectedConnectorSources,
   });
 
   const selectedEsqlCount = useMemo(
@@ -63,10 +60,14 @@ export const SourcePicker = ({ selectedSources, onChange }: SourcePickerProps) =
   );
 
   const addEsqlSource = (query: string) => {
-    if (selectedSources.some((current) => current.type === 'esql' && current.id === query)) {
+    if (hasSelectedEsqlQuery(selectedSources, query)) {
       return;
     }
-    onChange([...selectedSources, { type: 'esql', id: query, label: query, value: query }]);
+    onChange([{ type: 'esql', id: query, label: query, value: query }, ...selectedSources]);
+  };
+
+  const addIndexSource = (indexName: string) => {
+    addEsqlSource(createIndexEsqlQuery(indexName));
   };
 
   const toggleConnectorSource = ({
@@ -81,7 +82,7 @@ export const SourcePicker = ({ selectedSources, onChange }: SourcePickerProps) =
     const others = selectedSources.filter(
       (current) => !(current.type === 'connector' && current.value === id)
     );
-    onChange(checked ? [...others, { type: 'connector', id, label: name, value: id }] : others);
+    onChange(checked ? [{ type: 'connector', id, label: name, value: id }, ...others] : others);
   };
 
   const removeSource = (source: SelectedSource) => {
@@ -98,7 +99,7 @@ export const SourcePicker = ({ selectedSources, onChange }: SourcePickerProps) =
         <EuiTab
           isSelected={selectedTab === 'esql'}
           onClick={() => setSelectedTab('esql')}
-          prepend={<EuiIcon type="commandLine" aria-hidden={true} />}
+          prepend={<EuiIcon type="tablePlus" aria-hidden={true} />}
           append={
             selectedEsqlCount > 0 ? (
               <EuiNotificationBadge>{selectedEsqlCount}</EuiNotificationBadge>
@@ -111,8 +112,8 @@ export const SourcePicker = ({ selectedSources, onChange }: SourcePickerProps) =
           })}
         >
           <FormattedMessage
-            id="xpack.contextEngine.sourcePicker.tabs.esql"
-            defaultMessage="ES|QL"
+            id="xpack.contextEngine.sourcePicker.tabs.elasticsearch"
+            defaultMessage="Elasticsearch data"
           />
         </EuiTab>
         <EuiTab
@@ -139,12 +140,15 @@ export const SourcePicker = ({ selectedSources, onChange }: SourcePickerProps) =
 
       <EuiSpacer size="m" />
 
-      {selectedTab === 'esql' && <EsqlTab onAdd={addEsqlSource} />}
+      {selectedTab === 'esql' && (
+        <ElasticsearchSourcesTab
+          selectedSources={selectedSources}
+          onAddIndex={addIndexSource}
+          onAddEsql={addEsqlSource}
+        />
+      )}
       {selectedTab === 'connectors' && (
         <ConnectorsTab
-          connectors={connectors}
-          isLoading={isLoadingConnectors}
-          isError={isConnectorsError}
           selectedConnectorIds={selectedConnectorIds}
           onToggle={toggleConnectorSource}
         />
@@ -173,9 +177,11 @@ export const SourcePicker = ({ selectedSources, onChange }: SourcePickerProps) =
                   connectorActionTypeById,
                 }
               );
+
               return (
                 <EuiFlexItem key={`${source.type}-${source.id}`}>
                   <SourceRow
+                    animateOnMount={hasRendered}
                     label={label}
                     typeLabel={typeLabel}
                     icon={icon}

@@ -1,5 +1,5 @@
 {
-  "sha1": "52c53977285cce49042a26b1e58be799605dbd73",
+  "sha1": "b8b0bc91cc93a2a814e94535e1548a3455bbab23",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -14,7 +14,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agentic_investigations/test/scout_agentic_investigations/api/tests/escalations/access_control.spec.ts",
-        "line": 107,
+        "line": 136,
         "column": 10
       }
     },
@@ -28,7 +28,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agentic_investigations/test/scout_agentic_investigations/api/tests/escalations/access_control.spec.ts",
-        "line": 122,
+        "line": 151,
         "column": 7
       }
     },
@@ -42,7 +42,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agentic_investigations/test/scout_agentic_investigations/api/tests/escalations/access_control.spec.ts",
-        "line": 133,
+        "line": 162,
         "column": 30
       }
     },
@@ -299,8 +299,8 @@
       }
     },
     {
-      "id": "5af0373339972fa-c376f456e27cca0",
-      "title": "GET /internal/investigations/escalations — list escalations viewer (escalations_read via includeIn: read) can list escalations",
+      "id": "5af0373339972fa-311310053946bbf",
+      "title": "GET /internal/investigations/escalations — list escalations viewer (escalations_read) can list escalations",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -322,8 +322,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agentic_investigations/test/scout_agentic_investigations/api/tests/escalations/list.spec.ts",
-        "line": 212,
-        "column": 18
+        "line": 211,
+        "column": 24
       }
     },
     {
@@ -336,7 +336,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agentic_investigations/test/scout_agentic_investigations/api/tests/escalations/list.spec.ts",
-        "line": 222,
+        "line": 219,
         "column": 7
       }
     },
