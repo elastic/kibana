@@ -43,13 +43,13 @@ Be conservative with labeling useful memories: only identify as useful if defini
 
 Return only recalled memory ids (the id= value, e.g. memory_checkout-redis-evictions). Never titles, content, or the full recalled line.`;
 
-export const MEMORY_EXTRACT_SYSTEM_PROMPT = `You are a knowledge distillation engine for an AI SRE assistant. After each conversation you extract **up to 3** reusable facts that would help the same assistant on a *similar but not exactly the same* task in this same customer environment in the future.
+export const MEMORY_EXTRACT_SYSTEM_PROMPT = `You are a knowledge distillation engine for an AI SRE assistant. After each conversation you propose **up to 3** memory entries. Each entry is one topic: reusable facts that would help the same assistant on a *similar but not exactly the same* task in this same customer environment in the future. An entry is either new, or replaces recalled memories that this conversation corrects, extends, or shows to be duplicates.
 
 Focus strictly on durable, tool-output-verifiable knowledge about the customer's environment — how this organization's systems are structured and how its components behave. Do **not** extract generic tool, connector, or API usage — that belongs to the tool/connector's own documentation, not to per-customer memory.`;
 
 export const MEMORY_EXTRACT_GUIDELINES = `Review the conversation. Extract only facts that are directly substantiated by the transcript.
 
-The transcript has the user task; the investigation, in order (the agent's notes and every tool call with an excerpt of its result, where "ERROR" marks a failed call); and the final answer. Some calls only read the agent's own stored knowledge: other memories (/workspace/memories/), Cortex wiki pages (/workspace/cortex/), decision trees (/workspace/decision-trees/), and environment docs (/workspace/elastic.md, /workspace/connectors.md). Whatever they return is already stored, so it is not new evidence. Never restate information from Cortex, other memories, or decision trees, even when the final answer repeats it.
+The transcript has the user task; the investigation, in order (the agent's notes and every tool call with an excerpt of its result, where "ERROR" marks a failed call); and the final answer. Some calls only read the agent's own stored knowledge: other memories (/workspace/memories/), Cortex wiki pages (/workspace/cortex/), decision trees (/workspace/decision-trees/), and environment docs (/workspace/elastic.md, /workspace/connectors.md). Whatever they return is already stored, so it is not new evidence. Never restate information from Cortex, other memories, or decision trees, even when the final answer repeats it. The one exception is a recalled memory this run corrects, extends, or duplicates: replace it (see NEW OR REPLACE).
 
 Extract a fact only if a tool result in the investigation shows it. The final answer is a synthesis that can include the agent's inferences, so it is not evidence by itself. A failed call shows nothing about the environment. If results are unavailable (the section says so), you cannot see what any call returned, and the final answer is the only source. The answer often restates what the agent read from its own stored knowledge: anything it attributes to memories (/workspace/memories/), Cortex pages (/workspace/cortex/), decision trees (/workspace/decision-trees/), postmortems, runbooks, or earlier incidents is already stored, so do not restate it. Extract only what the answer says it observed in this environment during this run, through queries the tool calls show were actually run. Skip its inferences, hypotheses, and recommendations. When unsure, return an empty list.
 
@@ -59,7 +59,7 @@ Extract a fact only if a tool result in the investigation shows it. The final an
 - Environment topology: how services are named in traces/logs/metrics, how environments (prod/stage/etc.) are labeled, which hosts/clusters/regions serve what role.
 
 **NEVER EXTRACT:**
-- Knowledge already present in the memories recalled for this session — re-extracting them just bloats the store.
+- Knowledge already present in the memories recalled for this session — repeating it just bloats the store. To correct, extend, or combine recalled memories, replace them instead.
 - Common-sense or generic knowledge that isn't specific to this customer's environment (e.g. "Prometheus exposes /api/v1/query", "K8s pods restart on OOM").
 - Connector/tool mechanics: hosts, auth methods, base paths, tenant IDs, API endpoint patterns, query syntax, request/response shapes.
 - Generic "how to use X" tips that would apply to any customer running the same tool.
@@ -71,6 +71,14 @@ Extract a fact only if a tool result in the investigation shows it. The final an
 - Information only relevant to this specific request (e.g. the single alert fingerprint being investigated).
 - Single-run details: timestamps, time windows, counts, percentiles, or ids from this run. Distil them into a reusable claim, or leave them out.
 
+**NEW OR REPLACE** — every entry has a title (its topic), content, replaces, and note. A writer turns each entry into the stored memory, and every memory in replaces is archived once it is written.
+- New topic: replaces is empty, content holds the facts, note is empty.
+- This run corrects or extends a recalled memory: replaces lists its id. content holds only what this run adds or corrects; the writer keeps what is still right in the replaced memory. note says what this run showed and what in the replaced memory is wrong or outdated.
+- Several recalled memories cover the same topic: replaces lists all of them. content holds anything this run adds, or is empty. note says what they share and anything that conflicts.
+- Replace a memory only when this run's evidence justifies it. A recalled memory that is still right and complete needs no entry.
+- The single-run rule applies to replacing entries too. Measurements from one time window (counts, averages, percentiles) are not durable: state the lasting pattern they show, such as which component is consistently slowest, or propose nothing.
+- The title names the topic as it should read now; for an unchanged topic, reuse the replaced memory's wording.
+
 Keep entries concise. Return an empty list if the conversation produced no reusable environment knowledge.`;
 
 export interface MemoryLabelProposal {
@@ -81,9 +89,14 @@ export interface MemoryLabelProposal {
 export interface MemoryExtractProposal {
   slug: string;
   title: string;
+  /** What this run adds or corrects. Empty when the entry only combines the replaced memories. */
   content: string;
   tags: string[];
   categories: string[];
+  /** Recalled memory ids this entry supersedes; they are archived once it is written. */
+  replaces: string[];
+  /** For the writer: what this run showed and what in the replaced memories is wrong or outdated. */
+  note: string;
 }
 
 export type ProposeMemoryLabels = (input: {
@@ -93,12 +106,9 @@ export type ProposeMemoryLabels = (input: {
 
 export interface MemoryExtractionBatch {
   extractions: MemoryExtractProposal[];
-  /** Recalled ids the model says are the same fact. Each inner list is one group. */
-  mergeTargets: string[][];
 }
 
 export interface MemoryMergeSynthesis {
-  title: string;
   content: string;
   context: string;
 }
@@ -141,7 +151,7 @@ export type ProposeMemoryExtractions = (input: {
 
 export type SynthesizeMemoryGroup = (input: {
   sources: MemoryPage[];
-  extract?: MemoryExtractProposal;
+  extract: MemoryExtractProposal;
   task?: string;
 }) => Promise<MemoryMergeSynthesis>;
 
@@ -326,25 +336,14 @@ export const createLlmProposeMemoryExtractions = ({
       system: MEMORY_EXTRACT_SYSTEM_PROMPT,
       input: `${MEMORY_EXTRACT_GUIDELINES}
 
-If two or more recalled memories state the same fact, add each group to merge_targets as {"ids":["memory_a","memory_b"]}. Otherwise return an empty merge_targets.
-
-Recalled memories (do not re-extract these):\n${formatRecalled(recalledMemories)}
+Recalled memories (replace one only to correct, extend, or combine it):\n${formatRecalled(
+        recalledMemories
+      )}
 
 Investigation transcript:\n${transcript}`,
       schema: {
         type: 'object',
         properties: {
-          merge_targets: {
-            type: 'array',
-            items: {
-              type: 'object',
-              properties: {
-                ids: { type: 'array', items: { type: 'string' } },
-              },
-              required: ['ids'],
-            },
-            description: 'Groups of recalled memory ids that say the same thing.',
-          },
           extractions: {
             type: 'array',
             items: {
@@ -356,11 +355,25 @@ Investigation transcript:\n${transcript}`,
                     'Short, specific name for the fact. It becomes the memory file name ' +
                     '(lower-cased, hyphenated), e.g. "Checkout Redis evictions".',
                 },
-                content: { type: 'string' },
+                content: {
+                  type: 'string',
+                  description: 'What this run adds or corrects. May be empty only when replacing.',
+                },
+                replaces: {
+                  type: 'array',
+                  items: { type: 'string' },
+                  description: 'Recalled memory ids (the id= value) this entry supersedes.',
+                },
+                note: {
+                  type: 'string',
+                  description:
+                    'For the writer when replacing: what this run showed and what in the replaced ' +
+                    'memories is wrong or outdated.',
+                },
                 tags: { type: 'array', items: { type: 'string' } },
                 categories: { type: 'array', items: { type: 'string' } },
               },
-              required: ['title', 'content'],
+              required: ['title', 'content', 'replaces'],
             },
           },
         },
@@ -372,7 +385,6 @@ Investigation transcript:\n${transcript}`,
       ? response.output.extractions
       : [];
     return {
-      mergeTargets: normalizeMergeTargets(response.output?.merge_targets),
       extractions: extractions
         .map((entry) => {
           const candidate =
@@ -389,6 +401,10 @@ Investigation transcript:\n${transcript}`,
             content: String(candidate.content ?? '').trim(),
             tags: Array.isArray(candidate.tags) ? candidate.tags.map(String) : [],
             categories: Array.isArray(candidate.categories) ? candidate.categories.map(String) : [],
+            replaces: Array.isArray(candidate.replaces)
+              ? canonicalizeMemoryLabelIds(candidate.replaces.map(String))
+              : [],
+            note: String(candidate.note ?? '').trim(),
           };
         })
         .filter(
@@ -396,39 +412,26 @@ Investigation transcript:\n${transcript}`,
             entry !== undefined &&
             entry.slug.length > 0 &&
             entry.title.length > 0 &&
-            entry.content.length > 0
+            (entry.content.length > 0 || entry.replaces.length > 0)
         )
         .slice(0, MAX_EXTRACTIONS),
     };
   };
 };
 
-const normalizeMergeTargets = (raw: unknown): string[][] => {
-  if (!Array.isArray(raw)) {
-    return [];
-  }
-  const groups = raw.every((item) => typeof item === 'string')
-    ? [raw.map((id) => String(id))]
-    : raw.flatMap((item) => {
-        if (Array.isArray(item)) {
-          return [item.map((id: unknown) => String(id))];
-        }
-        if (typeof item === 'object' && item !== null) {
-          const ids = (item as { ids?: unknown }).ids;
-          return Array.isArray(ids) ? [ids.map((id: unknown) => String(id))] : [];
-        }
-        return [];
-      });
-  return groups
-    .map((group) => canonicalizeMemoryLabelIds(group))
-    .filter((group) => group.length >= 2);
-};
+export const MEMORY_WRITER_SYSTEM_PROMPT = `You write one semantic memory for an AI SRE assistant: durable facts about one topic in the customer's environment.
 
-export const MEMORY_MERGE_SYSTEM_PROMPT = `You merge overlapping semantic memories into one canonical page.
+You get the topic, a note on why the entry is being written, the new information from this run, and the stored memories it replaces. The replaced memories are archived once your entry is written, so anything worth keeping from them must be in your content.
+- Keep the facts from the replaced memories that are still correct and useful.
+- Where the new information or the note contradicts a replaced memory, keep the new information and drop the contradicted claim.
+- Drop what is outdated, not useful, or a single-run detail (timestamps, time windows, counts, percentiles, ids from one run).
+- Describe the environment as it is now. Never keep a history of earlier observations; when a newer observation supersedes an older one, keep only the durable conclusion.
+- The note explains what changed; these rules still apply where it suggests otherwise.
+- State each fact once. Add nothing that is in neither the new information nor the replaced memories: no new sections, fixes, or recommendations.
+- Be concise: no longer than the longest input unless the facts need it.
 
-Return title, markdown content, and context.
-content states each distinct fact from the sources once, and only facts the sources contain: no new sections, fixes, or details. Keep it about as long as the longest source.
-context is the recall key: compact, semantically rich phrases covering the union of the sources' task and goal descriptors. Not verbatim sentences. Not a concatenation of full prompts. Not one source's task copied when the others differ.
+Return markdown content and context.
+context is the recall key: compact, semantically rich phrases covering the union of the replaced memories' contexts and this round's task goal. Not verbatim sentences. Not a concatenation of full prompts. Not one task copied when the others differ.
 If you cannot write a non-empty context that covers that union, return an empty context string.`;
 
 export const MAX_MERGE_TASK_TOKENS = 4_096;
@@ -444,22 +447,25 @@ export const formatMemoryMergeSources = ({
 }): string =>
   formatEvidenceEntries(
     [
-      ...sources.map((page, index) => ({
-        prefix:
-          `${index === 0 ? '' : '\n'}- id=${page.id}\n` +
-          `  context: ${(page.context ?? '').slice(0, MAX_RECALLED_CONTEXT_CHARS)}\n` +
-          `  content: `,
-        content: page.content,
-      })),
       ...(extract
         ? [
             {
               prefix:
-                `\n\nNew extract to fold in:\n- id=${toMemoryKiId(extract.slug)}\n` + `  content: `,
-              content: extract.content,
+                `Topic: ${extract.title.slice(0, MAX_RECALLED_TITLE_CHARS)}\n` +
+                `Note: ${extract.note || '(none)'}\n` +
+                `New information from this run:\n`,
+              content: extract.content || '(none)',
             },
           ]
         : []),
+      ...sources.map((page, index) => ({
+        prefix:
+          `${index === 0 ? (extract ? '\n\nMemories this entry replaces:\n' : '') : '\n'}` +
+          `- id=${page.id}\n` +
+          `  context: ${(page.context ?? '').slice(0, MAX_RECALLED_CONTEXT_CHARS)}\n` +
+          `  content: `,
+        content: page.content,
+      })),
     ],
     maxTokens
   );
@@ -472,34 +478,31 @@ export const createLlmSynthesizeMemoryGroup = ({
   signal?: AbortSignal;
 }): SynthesizeMemoryGroup => {
   return async ({ sources, extract, task }) => {
-    const taskText = extract && task ? truncateTokens(task, MAX_MERGE_TASK_TOKENS) : '';
+    const taskText = task ? truncateTokens(task, MAX_MERGE_TASK_TOKENS) : '';
     const taskBlock = taskText
       ? `\n\nThis round's original task (cover its goal in context; do not copy it verbatim): ${taskText}`
       : '';
-    const inputPrefix = 'Sources:\n';
-    const framingTokens = estimateTokens(inputPrefix) + estimateTokens(taskBlock);
-    const sourceAndExtractBlock = formatMemoryMergeSources({
+    const framingTokens = estimateTokens(taskBlock);
+    const entryBlock = formatMemoryMergeSources({
       sources,
       extract,
       maxTokens: Math.max(0, OPTIMIZER_EVIDENCE_TOKEN_BUDGET - framingTokens),
     });
     const response = await inferenceClient.output({
-      id: 'nightshift_memory_merge',
+      id: 'nightshift_memory_write',
       abortSignal: signal,
-      system: MEMORY_MERGE_SYSTEM_PROMPT,
-      input: `${inputPrefix}${sourceAndExtractBlock}${taskBlock}`,
+      system: MEMORY_WRITER_SYSTEM_PROMPT,
+      input: `${entryBlock}${taskBlock}`,
       schema: {
         type: 'object',
         properties: {
-          title: { type: 'string' },
           content: { type: 'string' },
           context: { type: 'string' },
         },
-        required: ['title', 'content', 'context'],
+        required: ['content', 'context'],
       },
     });
     return {
-      title: String(response.output?.title ?? '').trim(),
       content: String(response.output?.content ?? '').trim(),
       context: String(response.output?.context ?? '').trim(),
     };
@@ -664,7 +667,6 @@ export const applyMemoryEdits = async ({
   recalledMemories = [],
   labels,
   extractions,
-  mergeTargets = [],
   context,
   synthesizeMemoryGroup,
   now = () => Date.now() / 1000,
@@ -675,7 +677,6 @@ export const applyMemoryEdits = async ({
   recalledMemories?: MemoryPage[];
   labels: MemoryLabelProposal;
   extractions: MemoryExtractProposal[];
-  mergeTargets?: string[][];
   /** Current user task — stored on new pages as the recall key. */
   context?: string;
   synthesizeMemoryGroup?: SynthesizeMemoryGroup;
@@ -722,7 +723,14 @@ export const applyMemoryEdits = async ({
   );
 
   const harmful = new Set(harmfulIds);
+  // A harmful memory that an entry replaces stays live until that entry is written, so the
+  // writer can keep what is still right in it; it is archived afterwards if nothing replaced it.
+  const replacedIds = new Set(extractions.flatMap((extra) => extra.replaces));
+  const deferredHarmfulIds = archiveIds.filter((id) => replacedIds.has(id));
   for (const id of archiveIds) {
+    if (replacedIds.has(id)) {
+      continue;
+    }
     await store.archive(id, 'harmful');
     summary.harmfulArchiveCount += 1;
     logger.debug(`Memory archived ${id} reason=harmful`);
@@ -732,10 +740,12 @@ export const applyMemoryEdits = async ({
   const task = unwrapUserTask(context);
   const consumedIds = new Set<string>();
   const consumedExtracts = new Set<number>();
+  // Pages an entry was written to or archived into an entry this round.
+  const replacedDoneIds = new Set<string>();
 
   interface MergeGroup {
     sourceIds: string[];
-    extract?: MemoryExtractProposal;
+    extract: MemoryExtractProposal;
     canonicalId?: string;
   }
   const groups: MergeGroup[] = [];
@@ -746,7 +756,7 @@ export const applyMemoryEdits = async ({
       `Memory extraction candidate slug=${extra.slug} title=${JSON.stringify(
         previewText(extra.title, 80)
       )} content=${JSON.stringify(previewText(extra.content))} ` +
-        `tags=${extra.tags.join(',') || '(none)'}`
+        `tags=${extra.tags.join(',') || '(none)'} replaces=[${extra.replaces.join(', ')}]`
     );
     if (looksLikeSecret(extractionSafetyText(extra, task))) {
       logger.warn('Skipped a memory extraction because proposed content looks secret');
@@ -765,26 +775,44 @@ export const applyMemoryEdits = async ({
     }
     const catalogHits =
       (await store.retrieve({ query: extra.title, size: 5, match: 'content' })) ?? [];
-    const overlaps = liveOverlapPages({
+    const named = recalledMemories.filter(
+      (page) => extra.replaces.includes(page.id) && page.status !== 'archived'
+    );
+    const unknownReplaces = extra.replaces.filter((id) => !named.some((page) => page.id === id));
+    if (unknownReplaces.length > 0) {
+      logger.debug(
+        `Extraction "${extra.slug}" names ${unknownReplaces.length} replace id(s) that are not ` +
+          `live recalled memories: [${unknownReplaces.join(', ')}]`
+      );
+    }
+    // Lexical overlap still catches a near-duplicate the model did not name, e.g. a page
+    // that was not recalled this round.
+    const unnamedOverlaps = liveOverlapPages({
       extra,
       recalledIds,
       recalledMemories,
       catalogHits: exactPage ? [exactPage, ...catalogHits] : catalogHits,
-    });
-    if (overlaps.some((page) => consumedIds.has(page.id))) {
-      // A prior extraction already owns this source's merge group. Consuming later proposals
-      // avoids publishing another live page for the same fact.
-      logger.debug(`Skipped extraction "${extra.slug}" — overlap already belongs to a merge group`);
+    }).filter((page) => !named.some((source) => source.id === page.id));
+    const live = [...named, ...unnamedOverlaps];
+    if (live.some((page) => consumedIds.has(page.id))) {
+      // A prior entry already replaces this source. Consuming later proposals avoids
+      // publishing another live page for the same fact.
+      logger.debug(`Skipped extraction "${extra.slug}" — a source already belongs to an entry`);
       consumedExtracts.add(index);
       continue;
     }
-    if (overlaps.some((page) => harmful.has(page.id))) {
-      logger.debug(`Skipped extraction "${extra.slug}" — merge group includes a harmful memory`);
+    if (unnamedOverlaps.some((page) => harmful.has(page.id))) {
+      logger.debug(
+        `Skipped extraction "${extra.slug}" — it overlaps a harmful memory it does not replace`
+      );
       consumedExtracts.add(index);
       continue;
     }
-    const live = overlaps;
     if (live.length === 0) {
+      if (extra.content.length === 0) {
+        logger.debug(`Skipped extraction "${extra.slug}" — no content and nothing to replace`);
+        consumedExtracts.add(index);
+      }
       continue;
     }
     for (const page of live) {
@@ -797,36 +825,12 @@ export const applyMemoryEdits = async ({
       ...(exactPage ? { canonicalId: exactId } : {}),
     });
     logger.debug(
-      `Memory merge group for "${extra.slug}" with ${formatPageRefs(live)} ` +
-        `(catalog=${formatPageRefs(catalogHits)})`
+      `Memory entry "${extra.slug}" replaces named=${formatPageRefs(named)} ` +
+        `overlap=${formatPageRefs(unnamedOverlaps)} (catalog=${formatPageRefs(catalogHits)})`
     );
-  }
-
-  for (const targets of mergeTargets) {
-    const ids = canonicalizeMemoryLabelIds(targets).filter(
-      (id) => recalled.has(id) && !harmful.has(id) && !consumedIds.has(id)
-    );
-    if (ids.length < 2) {
-      continue;
-    }
-    if (targets.some((id) => harmful.has(canonicalizeMemoryLabelId(id) ?? id))) {
-      continue;
-    }
-    for (const id of ids) {
-      consumedIds.add(id);
-    }
-    groups.push({ sourceIds: ids });
   }
 
   for (const group of groups) {
-    const memberCount = new Set([
-      ...group.sourceIds,
-      ...(group.canonicalId ? [group.canonicalId] : []),
-    ]).size;
-    if (memberCount < 1 || memberCount + (group.extract ? 1 : 0) < 2) {
-      logger.debug('Memory merge skipped — fewer than 2 members');
-      continue;
-    }
     if (!synthesizeMemoryGroup) {
       logger.warn('Memory merge skipped — no synthesizer configured');
       continue;
@@ -842,11 +846,28 @@ export const applyMemoryEdits = async ({
       now,
       logger,
     });
-    if (mergeResult.merged) {
+    if (mergeResult.writtenId) {
       summary.mergeSuccessCount += 1;
+      replacedDoneIds.add(mergeResult.writtenId);
+    }
+    for (const id of mergeResult.archivedSourceIds ?? []) {
+      replacedDoneIds.add(id);
     }
     summary.mergedSourceArchiveCount += mergeResult.archivedSourceCount;
     summary.writeFailureCount += mergeResult.writeFailureCount;
+  }
+
+  for (const id of deferredHarmfulIds) {
+    if (replacedDoneIds.has(id)) {
+      continue;
+    }
+    const page = await store.get(id);
+    if (!page || page.status === 'archived') {
+      continue;
+    }
+    await store.archive(id, 'harmful');
+    summary.harmfulArchiveCount += 1;
+    logger.debug(`Memory archived ${id} reason=harmful (no entry replaced it)`);
   }
 
   for (let index = 0; index < extractions.length; index++) {
@@ -889,7 +910,7 @@ export const applyMemoryEdits = async ({
             now,
             logger,
           });
-          if (mergeResult.merged) {
+          if (mergeResult.writtenId) {
             summary.mergeSuccessCount += 1;
           }
           summary.mergedSourceArchiveCount += mergeResult.archivedSourceCount;
@@ -913,7 +934,9 @@ export const applyMemoryEdits = async ({
 };
 
 interface MergeMemoryGroupResult {
-  merged: boolean;
+  /** The page the entry was written to; unset when nothing was written. */
+  writtenId?: string;
+  archivedSourceIds?: string[];
   archivedSourceCount: number;
   writeFailureCount: number;
 }
@@ -930,7 +953,7 @@ const mergeMemoryGroup = async ({
 }: {
   store: MemoryPageStore;
   sourceIds: string[];
-  extract?: MemoryExtractProposal;
+  extract: MemoryExtractProposal;
   canonicalId?: string;
   task: string;
   synthesizeMemoryGroup: SynthesizeMemoryGroup;
@@ -958,7 +981,7 @@ const mergeMemoryGroup = async ({
       logger.debug(
         `Memory merge aborted — required source ${requiredSourceIds[unavailableIndex]} is missing or archived`
       );
-      return { merged: false, archivedSourceCount: 0, writeFailureCount: 0 };
+      return { archivedSourceCount: 0, writeFailureCount: 0 };
     }
     const versionedSources = sourceSnapshots as VersionedMemoryPage[];
     const currentSources = versionedSources.map(({ page }) => page);
@@ -974,21 +997,21 @@ const mergeMemoryGroup = async ({
       synthesis = await synthesizeMemoryGroup({
         sources: currentSources,
         extract,
-        task: extract ? task : undefined,
+        task,
       });
     } catch (err) {
       logger.warn('Memory merge synthesis failed');
       logger.debug(`Memory merge synthesis error: ${(err as Error).message}`);
-      return { merged: false, archivedSourceCount: 0, writeFailureCount: 1 };
+      return { archivedSourceCount: 0, writeFailureCount: 1 };
     }
 
     const content = capMergedContent(synthesis.content);
-    // A page's title and slug are set once, together; merging into an existing canonical page
-    // keeps both, and only a newly minted canonical page takes the synthesized title.
-    const title = versionedCanonical?.page.title ?? synthesis.title;
+    // A page's title and slug are set once, together; writing into an existing canonical page
+    // keeps both, and only a newly minted canonical page takes the entry's topic.
+    const title = versionedCanonical?.page.title ?? extract.title;
     if (title.length === 0 || content.trim().length === 0) {
       logger.warn('Memory merge aborted — synthesis returned an empty title or content');
-      return { merged: false, archivedSourceCount: 0, writeFailureCount: 0 };
+      return { archivedSourceCount: 0, writeFailureCount: 0 };
     }
     if (
       looksLikeSecret(
@@ -996,19 +1019,19 @@ const mergeMemoryGroup = async ({
           title,
           content,
           synthesis.context,
-          ...(extract ? [extract.tags.join('\n'), extract.categories.join('\n')] : []),
+          extract.tags.join('\n'),
+          extract.categories.join('\n'),
         ].join('\n')
       )
     ) {
       logger.warn('Memory merge aborted — synthesised content looks like a secret');
-      return { merged: false, archivedSourceCount: 0, writeFailureCount: 0 };
+      return { archivedSourceCount: 0, writeFailureCount: 0 };
     }
     const hadRecallKey =
-      currentSources.some((page) => (page.context ?? '').trim().length > 0) ||
-      (extract !== undefined && task.length > 0);
+      currentSources.some((page) => (page.context ?? '').trim().length > 0) || task.length > 0;
     if (synthesis.context.length === 0 && hadRecallKey) {
       logger.warn('Memory merge aborted — synthesis returned an empty recall context');
-      return { merged: false, archivedSourceCount: 0, writeFailureCount: 0 };
+      return { archivedSourceCount: 0, writeFailureCount: 0 };
     }
 
     let slug = versionedCanonical?.page.slug;
@@ -1029,13 +1052,13 @@ const mergeMemoryGroup = async ({
       }
       if (!slug || !canonicalId) {
         logger.warn('Memory merge aborted — no free canonical slug found');
-        return { merged: false, archivedSourceCount: 0, writeFailureCount: 0 };
+        return { archivedSourceCount: 0, writeFailureCount: 0 };
       }
     }
 
     const mergedFrom = unionStrings(
       currentSources.flatMap((page) => [page.id, ...(page.merged_from ?? [])]),
-      extract ? [toMemoryKiId(extract.slug)] : []
+      [toMemoryKiId(extract.slug)]
     );
     let impressions = 0;
     let conversions = 0;
@@ -1051,11 +1074,11 @@ const mergeMemoryGroup = async ({
       context: synthesis.context,
       tags: unionStrings(
         currentSources.flatMap((page) => page.tags),
-        extract?.tags
+        extract.tags
       ).filter((tag) => tag !== 'memory'),
       categories: unionStrings(
         currentSources.flatMap((page) => page.categories),
-        extract?.categories
+        extract.categories
       ),
       references: unionStrings(currentSources.flatMap((page) => page.references)),
       status: currentSources.some((page) => page.status === 'established')
@@ -1072,7 +1095,7 @@ const mergeMemoryGroup = async ({
     };
     const targetCanonicalId = canonicalId;
     if (!targetCanonicalId) {
-      return { merged: false, archivedSourceCount: 0, writeFailureCount: 1 };
+      return { archivedSourceCount: 0, writeFailureCount: 1 };
     }
 
     const validatedSources = await Promise.all(
@@ -1085,7 +1108,7 @@ const mergeMemoryGroup = async ({
       logger.debug(
         `Memory merge aborted after synthesis — required source ${requiredSourceIds[unavailableAfterSynthesisIndex]} is missing or archived`
       );
-      return { merged: false, archivedSourceCount: 0, writeFailureCount: 0 };
+      return { archivedSourceCount: 0, writeFailureCount: 0 };
     }
     const revalidatedSources = validatedSources as VersionedMemoryPage[];
     const sourceChanged = versionedSources.some((source, index) => {
@@ -1095,7 +1118,7 @@ const mergeMemoryGroup = async ({
     if (sourceChanged) {
       if (attempt === 2) {
         logger.warn('Memory merge exhausted source changes; sources preserved');
-        return { merged: false, archivedSourceCount: 0, writeFailureCount: 1 };
+        return { archivedSourceCount: 0, writeFailureCount: 1 };
       }
       continue;
     }
@@ -1113,22 +1136,22 @@ const mergeMemoryGroup = async ({
       if (!isElasticsearchWriteConflict(err)) {
         logger.warn('Memory merge failed to write its canonical page');
         logger.debug(`Memory merge canonical write error: ${(err as Error).message}`);
-        return { merged: false, archivedSourceCount: 0, writeFailureCount: 1 };
+        return { archivedSourceCount: 0, writeFailureCount: 1 };
       }
       if (attempt === 2) {
         logger.warn('Memory merge exhausted version conflicts; sources preserved');
         logger.debug(`Memory merge conflict exhaustion canonical=${targetCanonicalId}`);
-        return { merged: false, archivedSourceCount: 0, writeFailureCount: 1 };
+        return { archivedSourceCount: 0, writeFailureCount: 1 };
       }
       canonicalIsSource = true;
     }
   }
 
   if (!writtenCanonicalId) {
-    return { merged: false, archivedSourceCount: 0, writeFailureCount: 1 };
+    return { archivedSourceCount: 0, writeFailureCount: 1 };
   }
 
-  let archivedSourceCount = 0;
+  const archivedSourceIds: string[] = [];
   let writeFailureCount = 0;
   for (const source of committedSources) {
     const { page } = source;
@@ -1139,7 +1162,7 @@ const mergeMemoryGroup = async ({
       // A merge may only consume the source snapshot incorporated into the committed canonical.
       // Chasing a conflict here could archive a newer source that the canonical does not contain.
       await store.archiveVersioned(source, 'merged');
-      archivedSourceCount += 1;
+      archivedSourceIds.push(page.id);
     } catch (err) {
       writeFailureCount += 1;
       logger.warn('Memory merge wrote canonical but failed to archive a source');
@@ -1148,9 +1171,14 @@ const mergeMemoryGroup = async ({
   }
   logger.debug(
     `Merged ${committedSources.map(({ page }) => page.id).join(', ')} into ${writtenCanonicalId}` +
-      (extract ? ` (folded extract ${extract.slug})` : '')
+      ` (entry ${extract.slug})`
   );
-  return { merged: true, archivedSourceCount, writeFailureCount };
+  return {
+    writtenId: writtenCanonicalId,
+    archivedSourceIds,
+    archivedSourceCount: archivedSourceIds.length,
+    writeFailureCount,
+  };
 };
 
 export const optimizeMemory = async ({
@@ -1233,7 +1261,6 @@ export const optimizeMemory = async ({
   signal?.throwIfAborted();
   const shouldExtract = assistantMessage.trim().length > 0;
   let extractions: MemoryExtractProposal[] = [];
-  let mergeTargets: string[][] = [];
   if (!shouldExtract) {
     logger.debug('Memory extract skipped — empty assistant message');
   } else {
@@ -1244,14 +1271,18 @@ export const optimizeMemory = async ({
     );
     const extracted = await proposeExtractions({ transcript, recalledMemories });
     extractions = extracted.extractions;
-    mergeTargets = extracted.mergeTargets;
     logger.debug(
       `Memory extract LLM done ${Date.now() - extractStarted}ms ` +
         `proposals=${extractions.length} ` +
         (extractions.length === 0
           ? '(none)'
           : extractions
-              .map((extra) => `${extra.slug} "${previewText(extra.title, 60)}"`)
+              .map(
+                (extra) =>
+                  `${extra.slug} "${previewText(extra.title, 60)}" replaces=${
+                    extra.replaces.length
+                  }`
+              )
               .join(', '))
     );
   }
@@ -1277,7 +1308,6 @@ export const optimizeMemory = async ({
     recalledMemories,
     labels,
     extractions,
-    mergeTargets,
     context: task,
     synthesizeMemoryGroup,
     logger,

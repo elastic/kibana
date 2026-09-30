@@ -130,6 +130,8 @@ describe('formatMemoryMergeSources', () => {
         content: `${'e'.repeat(1_600)}EXTRACT_FACT`,
         tags: [],
         categories: [],
+        replaces: [],
+        note: '',
       },
     });
 
@@ -160,7 +162,7 @@ describe('formatMemoryMergeSources', () => {
 
   it('budgets a 65K task together with source and extract signal', async () => {
     const output = jest.fn().mockResolvedValue({
-      output: { title: 'Merged', content: 'Merged content', context: 'Merged context' },
+      output: { content: 'Merged content', context: 'Merged context' },
     });
     const synthesize = createLlmSynthesizeMemoryGroup({
       inferenceClient: { output } as never,
@@ -177,6 +179,8 @@ describe('formatMemoryMergeSources', () => {
         content: `EXTRACT_SIGNAL${'e'.repeat(40_000)}`,
         tags: [],
         categories: [],
+        replaces: [],
+        note: '',
       },
       task,
     });
@@ -195,11 +199,18 @@ describe('formatMemoryMergeSources', () => {
 });
 
 describe('createLlmProposeMemoryExtractions', () => {
-  it('normalizes object-shaped merge target groups from the bound model', async () => {
+  it('parses replaces as canonical ids and keeps a content-free entry only when it replaces', async () => {
     const output = jest.fn().mockResolvedValue({
       output: {
-        merge_targets: [{ ids: ['memory_a', 'memory_b'] }],
-        extractions: [],
+        extractions: [
+          {
+            title: 'Kafka lag',
+            content: '',
+            replaces: ['id=memory_a | title=A', 'memory_b'],
+            note: 'Both say the same thing.',
+          },
+          { title: 'Empty', content: '', replaces: [] },
+        ],
       },
     });
     const propose = createLlmProposeMemoryExtractions({
@@ -207,26 +218,23 @@ describe('createLlmProposeMemoryExtractions', () => {
     });
 
     await expect(propose({ transcript: 'task', recalledMemories: [] })).resolves.toEqual({
-      mergeTargets: [['memory_a', 'memory_b']],
-      extractions: [],
+      extractions: [
+        {
+          slug: 'kafka-lag',
+          title: 'Kafka lag',
+          content: '',
+          tags: [],
+          categories: [],
+          replaces: ['memory_a', 'memory_b'],
+          note: 'Both say the same thing.',
+        },
+      ],
     });
-    expect(output).toHaveBeenCalledWith(
-      expect.objectContaining({
-        schema: expect.objectContaining({
-          properties: expect.objectContaining({
-            merge_targets: expect.objectContaining({
-              items: expect.objectContaining({ type: 'object' }),
-            }),
-          }),
-        }),
-      })
-    );
   });
 
   it('rejects a secret-bearing raw title before canonicalization can hide it', async () => {
     const output = jest.fn().mockResolvedValue({
       output: {
-        merge_targets: [],
         extractions: [
           {
             title: 'api_key=sk-live-not-a-real-key',
@@ -242,7 +250,6 @@ describe('createLlmProposeMemoryExtractions', () => {
     });
 
     await expect(propose({ transcript: 'task', recalledMemories: [] })).resolves.toEqual({
-      mergeTargets: [],
       extractions: [],
     });
   });
@@ -250,7 +257,6 @@ describe('createLlmProposeMemoryExtractions', () => {
   it('asks for one title and derives the slug from it', async () => {
     const output = jest.fn().mockResolvedValue({
       output: {
-        merge_targets: [],
         extractions: [
           {
             slug: 'ignored-model-slug',
@@ -265,7 +271,6 @@ describe('createLlmProposeMemoryExtractions', () => {
     });
 
     await expect(propose({ transcript: 'task', recalledMemories: [] })).resolves.toEqual({
-      mergeTargets: [],
       extractions: [
         {
           slug: 'checkout-redis-evictions',
@@ -273,13 +278,15 @@ describe('createLlmProposeMemoryExtractions', () => {
           content: 'Checkout latency followed Redis evictions.',
           tags: [],
           categories: [],
+          replaces: [],
+          note: '',
         },
       ],
     });
     const { schema } = output.mock.calls[0][0];
     const item = schema.properties.extractions.items;
     expect(Object.keys(item.properties)).not.toContain('slug');
-    expect(item.required).toEqual(['title', 'content']);
+    expect(item.required).toEqual(['title', 'content', 'replaces']);
   });
 });
 
@@ -386,12 +393,13 @@ describe('applyMemoryEdits', () => {
           content: 'Same fact, new slug.',
           tags: ['kafka'],
           categories: ['ops'],
+          replaces: [],
+          note: '',
         },
       ],
       context:
         'why is checkout slow?\n\n<system_update>\nSemantic memories materialized this turn:\n- `/x` — X\n</system_update>',
       synthesizeMemoryGroup: async () => ({
-        title: 'Checkout Kafka lag',
         content: 'Checkout consumer lag is a durable fact.',
         context: 'checkout latency kafka consumer lag',
       }),
@@ -401,7 +409,8 @@ describe('applyMemoryEdits', () => {
 
     expect(store.create).toHaveBeenCalledWith(
       expect.objectContaining({
-        slug: 'checkout-kafka-lag',
+        slug: 'kafka-consumer-lag',
+        title: 'Kafka consumer lag',
         context: 'checkout latency kafka consumer lag',
         status: 'established',
         source:
@@ -447,7 +456,6 @@ describe('applyMemoryEdits', () => {
       retrieve: jest.fn().mockResolvedValue([source]),
     });
     const synthesizeMemoryGroup = jest.fn().mockResolvedValue({
-      title: 'Checkout Redis',
       content: 'Checkout stores sessions in Redis.',
       context: 'checkout redis sessions',
     });
@@ -464,6 +472,8 @@ describe('applyMemoryEdits', () => {
           content: 'Checkout stores sessions in Redis.',
           tags: [],
           categories: [],
+          replaces: [],
+          note: '',
         },
         {
           slug: 'redis-session-backend',
@@ -471,6 +481,8 @@ describe('applyMemoryEdits', () => {
           content: 'Checkout stores sessions in Redis.',
           tags: [],
           categories: [],
+          replaces: [],
+          note: '',
         },
       ],
       synthesizeMemoryGroup,
@@ -514,6 +526,8 @@ describe('applyMemoryEdits', () => {
           content: 'Same fact.',
           tags: [],
           categories: [],
+          replaces: [],
+          note: '',
         },
       ],
       synthesizeMemoryGroup: async () => {
@@ -522,7 +536,7 @@ describe('applyMemoryEdits', () => {
           seqNo: 2,
           primaryTerm: 1,
         };
-        return { title: 'Merged', content: 'Body', context: 'kafka lag' };
+        return { content: 'Body', context: 'kafka lag' };
       },
       logger: loggerMock.create(),
     });
@@ -543,7 +557,7 @@ describe('applyMemoryEdits', () => {
       if (current.seqNo === 1) {
         current = { page: refreshed, seqNo: 2, primaryTerm: 1 };
       }
-      return { title: 'Merged Kafka', content: current.page.content, context: 'kafka lag' };
+      return { content: current.page.content, context: 'kafka lag' };
     });
     const store = createStore({
       get: jest
@@ -564,6 +578,8 @@ describe('applyMemoryEdits', () => {
           content: 'Same fact.',
           tags: [],
           categories: [],
+          replaces: [],
+          note: '',
         },
       ],
       synthesizeMemoryGroup,
@@ -616,6 +632,8 @@ describe('applyMemoryEdits', () => {
           content: 'Same fact.',
           tags: [],
           categories: [],
+          replaces: [],
+          note: '',
         },
       ],
       synthesizeMemoryGroup,
@@ -651,10 +669,11 @@ describe('applyMemoryEdits', () => {
           content: 'Same fact.',
           tags: [],
           categories: [],
+          replaces: [],
+          note: '',
         },
       ],
       synthesizeMemoryGroup: async () => ({
-        title: 'Merged Kafka',
         content: 'Merged fact.',
         context: 'kafka lag',
       }),
@@ -707,10 +726,11 @@ describe('applyMemoryEdits', () => {
           content: 'Same fact.',
           tags: [],
           categories: [],
+          replaces: [],
+          note: '',
         },
       ],
       synthesizeMemoryGroup: async () => ({
-        title: 'Merged Kafka',
         content: 'Merged original fact.',
         context: 'kafka lag',
       }),
@@ -756,11 +776,12 @@ describe('applyMemoryEdits', () => {
           content: 'Same fact.',
           tags: [],
           categories: [],
+          replaces: [],
+          note: '',
         },
       ],
       context: 'why is checkout slow?',
       synthesizeMemoryGroup: async () => ({
-        title: 'Merged',
         content: 'Body',
         context: '',
       }),
@@ -792,6 +813,8 @@ describe('applyMemoryEdits', () => {
           content: 'Same fact.',
           tags: [],
           categories: [],
+          replaces: [],
+          note: '',
         },
       ],
       synthesizeMemoryGroup: async () => {
@@ -826,11 +849,12 @@ describe('applyMemoryEdits', () => {
           content: 'Same fact.',
           tags: [],
           categories: [],
+          replaces: [],
+          note: '',
         },
       ],
       context: 'why is checkout slow?',
       synthesizeMemoryGroup: async () => ({
-        title: 'Merged',
         content: 'Body',
         context: 'kafka lag api_key=sk-live-not-a-real-key',
       }),
@@ -865,11 +889,12 @@ describe('applyMemoryEdits', () => {
           content: 'Same fact.',
           tags: [],
           categories: [],
+          replaces: [],
+          note: '',
         },
       ],
       context: 'source context',
       synthesizeMemoryGroup: async () => ({
-        title: 'Occupied canonical page',
         content: 'Merged body.',
         context: 'merged source context',
       }),
@@ -898,10 +923,17 @@ describe('applyMemoryEdits', () => {
       recalledMemories: [source],
       labels: { useful: [], harmful: [] },
       extractions: [
-        { slug: 'new-fact', title: source.title, content: 'Same fact.', tags: [], categories: [] },
+        {
+          slug: 'new-fact',
+          title: base,
+          content: 'Same fact.',
+          tags: [],
+          categories: [],
+          replaces: [source.id],
+          note: '',
+        },
       ],
       synthesizeMemoryGroup: async () => ({
-        title: base,
         content: 'Merged fact.',
         context: 'source fact',
       }),
@@ -937,10 +969,17 @@ describe('applyMemoryEdits', () => {
       recalledMemories: [source],
       labels: { useful: [], harmful: [] },
       extractions: [
-        { slug: 'new-fact', title: source.title, content: 'Same fact.', tags: [], categories: [] },
+        {
+          slug: 'new-fact',
+          title: base,
+          content: 'Same fact.',
+          tags: [],
+          categories: [],
+          replaces: [source.id],
+          note: '',
+        },
       ],
       synthesizeMemoryGroup: async () => ({
-        title: base,
         content: 'Merged fact.',
         context: 'source fact',
       }),
@@ -980,11 +1019,12 @@ describe('applyMemoryEdits', () => {
           content: 'Checkout uses Redis db 2 for sessions and evicts on memory pressure.',
           tags: [],
           categories: [],
+          replaces: [],
+          note: '',
         },
       ],
       context: 'redis eviction on cart cache',
       synthesizeMemoryGroup: async () => ({
-        title: 'Checkout cart cache',
         content: 'Checkout sessions live in Redis and evict under memory pressure.',
         context: 'checkout latency redis cart-cache evictions',
       }),
@@ -999,7 +1039,7 @@ describe('applyMemoryEdits', () => {
     });
     expect(store.create).toHaveBeenCalledWith(
       expect.objectContaining({
-        slug: 'checkout-cart-cache',
+        slug: 'checkout-redis-merged',
         telemetry: expect.objectContaining({ impressions: 4, conversions: 2 }),
       })
     );
@@ -1036,10 +1076,11 @@ describe('applyMemoryEdits', () => {
           content: 'Checkout uses Redis db 2 for sessions.',
           tags: [],
           categories: [],
+          replaces: [],
+          note: '',
         },
       ],
       synthesizeMemoryGroup: async () => ({
-        title: 'Checkout Redis canonical',
         content: 'Old and new facts.',
         context: 'checkout redis sessions',
       }),
@@ -1083,10 +1124,11 @@ describe('applyMemoryEdits', () => {
           content: 'New extracted fact.',
           tags: ['redis'],
           categories: [],
+          replaces: [],
+          note: '',
         },
       ],
       synthesizeMemoryGroup: async () => ({
-        title: 'Checkout Redis',
         content: 'Winner and extracted facts.',
         context: 'checkout redis',
       }),
@@ -1126,10 +1168,11 @@ describe('applyMemoryEdits', () => {
           content: 'New fact.',
           tags: [],
           categories: [],
+          replaces: [],
+          note: '',
         },
       ],
       synthesizeMemoryGroup: async () => ({
-        title: 'Checkout Redis',
         content: 'Merged fact.',
         context: 'checkout redis',
       }),
@@ -1159,6 +1202,8 @@ describe('applyMemoryEdits', () => {
           content: 'New fact.',
           tags: [],
           categories: [],
+          replaces: [],
+          note: '',
         },
       ],
       synthesizeMemoryGroup: jest.fn(),
@@ -1184,6 +1229,8 @@ describe('applyMemoryEdits', () => {
           content: 'api_key=sk-live-not-a-real-key',
           tags: [],
           categories: [],
+          replaces: [],
+          note: '',
         },
       ],
       logger: loggerMock.create(),
@@ -1208,6 +1255,8 @@ describe('applyMemoryEdits', () => {
           content: 'Checkout runs in the production cluster.',
           tags: [],
           categories: [],
+          replaces: [],
+          note: '',
         },
       ],
       context: 'Investigate checkout with api_key=sk-live-not-a-real-key',
@@ -1239,6 +1288,8 @@ describe('applyMemoryEdits', () => {
           title: 'Checkout environment',
           content: 'Checkout runs in production.',
           ...metadata,
+          replaces: [],
+          note: '',
         },
       ],
       synthesizeMemoryGroup,
@@ -1272,10 +1323,11 @@ describe('applyMemoryEdits', () => {
           content: 'Same customer-specific fact.',
           tags: [],
           categories: [],
+          replaces: [],
+          note: '',
         },
       ],
       synthesizeMemoryGroup: async () => ({
-        title: 'Merged customer service',
         content: 'Merged fact.',
         context: 'customer service',
       }),
@@ -1285,6 +1337,208 @@ describe('applyMemoryEdits', () => {
     const infoLogs = logger.info.mock.calls.flat().join('\n');
     expect(infoLogs).not.toContain('memory_customer-service');
     expect(infoLogs).not.toContain('customer-service-detail');
+  });
+});
+
+describe('applyMemoryEdits entries: new, update, merge', () => {
+  const entry = (
+    overrides: Partial<Parameters<typeof applyMemoryEdits>[0]['extractions'][number]>
+  ) => ({
+    slug: 'host-clock-lag',
+    title: 'Host clock lag',
+    content: 'The host clock runs about 1 s behind the sandbox CA.',
+    tags: [],
+    categories: [],
+    replaces: [],
+    note: '',
+    ...overrides,
+  });
+  const storeWith = (pages: MemoryPage[]) =>
+    createStore({
+      get: jest
+        .fn()
+        .mockImplementation(async (id: string) => pages.find((candidate) => candidate.id === id)),
+    });
+
+  it('updates one named memory into a new entry and archives the replaced one', async () => {
+    const wrong = page('memory_pdt-skew', 'PDT skew', 'The host clock is 7 hours behind UTC.');
+    const store = storeWith([wrong]);
+    const synthesizeMemoryGroup = jest.fn().mockResolvedValue({
+      content: 'The host clock runs about 1 s behind the sandbox CA.',
+      context: 'x509 not yet valid clock lag',
+    });
+
+    const summary = await applyMemoryEdits({
+      store,
+      recalledIds: [wrong.id],
+      recalledMemories: [wrong],
+      labels: { useful: [], harmful: [] },
+      extractions: [
+        entry({ replaces: [wrong.id], note: 'The -07:00 offset is the time zone, not the gap.' }),
+      ],
+      context: 'how large is the clock difference?',
+      synthesizeMemoryGroup,
+      logger: loggerMock.create(),
+    });
+
+    expect(synthesizeMemoryGroup).toHaveBeenCalledWith({
+      sources: [wrong],
+      extract: expect.objectContaining({
+        title: 'Host clock lag',
+        note: 'The -07:00 offset is the time zone, not the gap.',
+      }),
+      task: 'how large is the clock difference?',
+    });
+    expect(store.create).toHaveBeenCalledTimes(1);
+    expect(store.create).toHaveBeenCalledWith(
+      expect.objectContaining({ slug: 'host-clock-lag', title: 'Host clock lag' })
+    );
+    expect(store.archiveVersioned).toHaveBeenCalledWith(
+      expect.objectContaining({ page: expect.objectContaining({ id: wrong.id }) }),
+      'merged'
+    );
+    expect(summary).toEqual(
+      expect.objectContaining({ mergeSuccessCount: 1, standaloneUpsertCount: 0 })
+    );
+  });
+
+  it('rewrites a named memory in place when the entry keeps its topic', async () => {
+    const existing = page('memory_host-clock-lag', 'Host clock lag', 'The host clock drifts.');
+    const store = storeWith([existing]);
+
+    await applyMemoryEdits({
+      store,
+      recalledIds: [existing.id],
+      recalledMemories: [existing],
+      labels: { useful: [], harmful: [] },
+      extractions: [entry({ replaces: [existing.id] })],
+      context: 'clock',
+      synthesizeMemoryGroup: jest.fn().mockResolvedValue({ content: 'Updated.', context: 'clock' }),
+      logger: loggerMock.create(),
+    });
+
+    expect(store.update).toHaveBeenCalledWith(
+      existing.id,
+      expect.objectContaining({
+        slug: 'host-clock-lag',
+        title: 'Host clock lag',
+        content: 'Updated.',
+      }),
+      expect.objectContaining({ seqNo: 1 })
+    );
+    expect(store.create).not.toHaveBeenCalled();
+    expect(store.archiveVersioned).not.toHaveBeenCalled();
+  });
+
+  it('merges several named memories with no new content into one entry', async () => {
+    const first = page('memory_a', 'Clock skew A', 'Clock skew breaks TLS.');
+    const second = page('memory_b', 'Clock skew B', 'TLS fails on clock skew.');
+    const store = storeWith([first, second]);
+    const synthesizeMemoryGroup = jest
+      .fn()
+      .mockResolvedValue({ content: 'Clock skew breaks TLS.', context: 'tls clock skew' });
+
+    await applyMemoryEdits({
+      store,
+      recalledIds: [first.id, second.id],
+      recalledMemories: [first, second],
+      labels: { useful: [], harmful: [] },
+      extractions: [
+        entry({ title: 'Clock skew breaks TLS', content: '', replaces: [first.id, second.id] }),
+      ],
+      context: 'tls',
+      synthesizeMemoryGroup,
+      logger: loggerMock.create(),
+    });
+
+    expect(synthesizeMemoryGroup).toHaveBeenCalledWith(
+      expect.objectContaining({ sources: [first, second] })
+    );
+    expect(store.create).toHaveBeenCalledTimes(1);
+    expect(store.archiveVersioned).toHaveBeenCalledTimes(2);
+  });
+
+  it('lets an entry replace a harmful memory instead of archiving it as harmful', async () => {
+    const wrong = page('memory_pdt-skew', 'PDT skew', 'The host clock is 7 hours behind UTC.');
+    const store = storeWith([wrong]);
+
+    await applyMemoryEdits({
+      store,
+      recalledIds: [wrong.id],
+      recalledMemories: [wrong],
+      labels: { useful: [], harmful: [wrong.id] },
+      extractions: [entry({ replaces: [wrong.id] })],
+      context: 'clock',
+      synthesizeMemoryGroup: jest.fn().mockResolvedValue({ content: 'Right.', context: 'clock' }),
+      logger: loggerMock.create(),
+    });
+
+    expect(store.archive).not.toHaveBeenCalled();
+    expect(store.create).toHaveBeenCalledWith(expect.objectContaining({ slug: 'host-clock-lag' }));
+    expect(store.archiveVersioned).toHaveBeenCalledWith(
+      expect.objectContaining({ page: expect.objectContaining({ id: wrong.id }) }),
+      'merged'
+    );
+  });
+
+  it('still archives a replaced harmful memory as harmful when its entry is not written', async () => {
+    const wrong = page('memory_pdt-skew', 'PDT skew', 'The host clock is 7 hours behind UTC.');
+    const store = storeWith([wrong]);
+
+    const summary = await applyMemoryEdits({
+      store,
+      recalledIds: [wrong.id],
+      recalledMemories: [wrong],
+      labels: { useful: [], harmful: [wrong.id] },
+      extractions: [entry({ replaces: [wrong.id] })],
+      context: 'clock',
+      synthesizeMemoryGroup: jest.fn().mockRejectedValue(new Error('model down')),
+      logger: loggerMock.create(),
+    });
+
+    expect(store.archive).toHaveBeenCalledWith(wrong.id, 'harmful');
+    expect(summary).toEqual(expect.objectContaining({ harmfulArchiveCount: 1 }));
+  });
+
+  it('writes a new memory when replaces names only ids that were not recalled', async () => {
+    const store = storeWith([]);
+    const synthesizeMemoryGroup = jest.fn();
+
+    await applyMemoryEdits({
+      store,
+      recalledIds: [],
+      recalledMemories: [],
+      labels: { useful: [], harmful: [] },
+      extractions: [entry({ replaces: ['memory_not-recalled'] })],
+      context: 'clock',
+      synthesizeMemoryGroup,
+      logger: loggerMock.create(),
+    });
+
+    expect(synthesizeMemoryGroup).not.toHaveBeenCalled();
+    expect(store.create).toHaveBeenCalledWith(
+      expect.objectContaining({
+        slug: 'host-clock-lag',
+        content: 'The host clock runs about 1 s behind the sandbox CA.',
+      })
+    );
+  });
+
+  it('drops an entry with no content when nothing it names can be replaced', async () => {
+    const store = storeWith([]);
+
+    await applyMemoryEdits({
+      store,
+      recalledIds: [],
+      recalledMemories: [],
+      labels: { useful: [], harmful: [] },
+      extractions: [entry({ content: '', replaces: ['memory_not-recalled'] })],
+      context: 'clock',
+      synthesizeMemoryGroup: jest.fn(),
+      logger: loggerMock.create(),
+    });
+
+    expect(store.create).not.toHaveBeenCalled();
   });
 });
 
@@ -1303,6 +1557,8 @@ describe('isDuplicateExtraction / contentOverlap', () => {
           content: 'Scale the consumer.',
           tags: [],
           categories: [],
+          replaces: [],
+          note: '',
         },
         recalledIds: ['memory_kafka-lag'],
         recalledMemories: [page('memory_kafka-lag', 'Kafka consumer lag')],
@@ -1316,7 +1572,7 @@ describe('optimizeMemory', () => {
   it('passes the abort signal to every LLM call', async () => {
     const signal = new AbortController().signal;
     const output = jest.fn().mockResolvedValue({
-      output: { useful: [], harmful: [], extractions: [], merge_targets: [] },
+      output: { useful: [], harmful: [], extractions: [] },
     });
     const inferenceClient = { output } as never;
     await createLlmProposeMemoryLabels({ inferenceClient, signal })({
@@ -1327,9 +1583,18 @@ describe('optimizeMemory', () => {
       transcript: 't',
       recalledMemories: [],
     });
-    output.mockResolvedValueOnce({ output: { title: 'T', content: 'C', context: 'k' } });
+    output.mockResolvedValueOnce({ output: { content: 'C', context: 'k' } });
     await createLlmSynthesizeMemoryGroup({ inferenceClient, signal })({
       sources: [page('memory_a'), page('memory_b')],
+      extract: {
+        slug: 'a',
+        title: 'A',
+        content: '',
+        tags: [],
+        categories: [],
+        replaces: ['memory_a', 'memory_b'],
+        note: '',
+      },
     });
 
     expect(output).toHaveBeenCalledTimes(3);
@@ -1372,7 +1637,7 @@ describe('optimizeMemory', () => {
       get: jest.fn().mockImplementation(async (id: string) => page(id)),
     });
     const proposeLabels = jest.fn().mockResolvedValue({ useful: [], harmful: [] });
-    const proposeExtractions = jest.fn().mockResolvedValue({ extractions: [], mergeTargets: [] });
+    const proposeExtractions = jest.fn().mockResolvedValue({ extractions: [] });
 
     await optimizeMemory({
       store,
@@ -1404,7 +1669,7 @@ describe('optimizeMemory', () => {
       get: jest.fn().mockImplementation(async (id: string) => page(id)),
     });
     const proposeLabels = jest.fn().mockResolvedValue({ useful: [], harmful: [] });
-    const proposeExtractions = jest.fn().mockResolvedValue({ extractions: [], mergeTargets: [] });
+    const proposeExtractions = jest.fn().mockResolvedValue({ extractions: [] });
 
     await optimizeMemory({
       store,
@@ -1436,7 +1701,7 @@ describe('optimizeMemory', () => {
 
   it('marks an empty tool-call list explicitly', async () => {
     const store = createStore();
-    const proposeExtractions = jest.fn().mockResolvedValue({ extractions: [], mergeTargets: [] });
+    const proposeExtractions = jest.fn().mockResolvedValue({ extractions: [] });
 
     await optimizeMemory({
       store,
@@ -1458,7 +1723,7 @@ describe('optimizeMemory', () => {
       get: jest.fn().mockImplementation(async (id: string) => page(id)),
     });
     const proposeLabels = jest.fn().mockResolvedValue({ useful: ['memory_a'], harmful: [] });
-    const proposeExtractions = jest.fn().mockResolvedValue({ extractions: [], mergeTargets: [] });
+    const proposeExtractions = jest.fn().mockResolvedValue({ extractions: [] });
 
     await optimizeMemory({
       store,
@@ -1493,9 +1758,10 @@ describe('optimizeMemory', () => {
           content: 'Checkout uses Redis db 2 for sessions.',
           tags: ['redis'],
           categories: [],
+          replaces: [],
+          note: '',
         },
       ],
-      mergeTargets: [],
     });
 
     await optimizeMemory({
@@ -1531,9 +1797,10 @@ describe('optimizeMemory', () => {
           content: 'Checkout uses Redis db 2 for sessions.',
           tags: [],
           categories: [],
+          replaces: [],
+          note: '',
         },
       ],
-      mergeTargets: [],
     });
 
     await optimizeMemory({
