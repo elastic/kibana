@@ -45,7 +45,8 @@ const buildActionlessSubjectKey = ({
 }: {
   conversationId: string;
   reason: string;
-}): string => uuidv5(`${conversationId}|actionless|${reason}`, HUNT_PROPOSAL_SUBJECT_UUID_NAMESPACE);
+}): string =>
+  uuidv5(`${conversationId}|actionless|${reason}`, HUNT_PROPOSAL_SUBJECT_UUID_NAMESPACE);
 
 const schemaRequires = (schema: JsonSchema | undefined, key: string): boolean => {
   if (!schema || typeof schema !== 'object') {
@@ -153,14 +154,56 @@ const buildClosureSummary = (state: CurrentRunState): string => {
   return `${title}. Confirmed hit.${hostPart}${evidence}`;
 };
 
-/** Per-host variant so proposals fanned out across hosts read as distinct, not duplicates. */
-const buildHostClosureSummary = (state: CurrentRunState, host: CurrentRunHost): string => {
+/** Every fillable respond action today is an Elastic Defend action; naming that plainly in the
+ *  headline is what tells an executable proposal apart from the "Recommend" companion below. */
+const DEFEND_HEADLINE_PREFIX = 'Defend';
+const RECOMMEND_HEADLINE_PREFIX = 'Recommend';
+
+const titleCase = (value: string): string => value.replace(/\b\w/g, (c) => c.toUpperCase());
+
+/**
+ * One line naming what the proposal actually does, followed by the evidence. Per host and per
+ * action so two proposals on the same run never read as duplicates of each other.
+ */
+const buildHostActionComment = (
+  state: CurrentRunState,
+  host: CurrentRunHost,
+  actionName: string
+): string => {
+  const headline = `${DEFEND_HEADLINE_PREFIX} ${titleCase(actionName)}: ${host.name}`;
   const title = state.titles[0] ?? `Hunt run ${state.runId}`;
   const evidence =
     state.evidenceLines.length > 0
       ? ` Evidence: ${state.evidenceLines.slice(0, 5).join('; ')}.`
       : '';
-  return `${title}. Confirmed hit. Host: ${host.name}.${evidence}`;
+  return `${headline}\n\n${title}. Confirmed hit. Host: ${host.name}.${evidence}`;
+};
+
+const actionlessHeadline = ({
+  reason,
+  unenrolledHosts,
+}: {
+  reason: NonNullable<PackageReportMintPayload['actionlessReason']>;
+  unenrolledHosts: CurrentRunHost[];
+}): string => {
+  switch (reason) {
+    case 'unenrolled':
+      return unenrolledHosts.length > 0
+        ? `${RECOMMEND_HEADLINE_PREFIX}: Unenrolled host${
+            unenrolledHosts.length === 1 ? '' : 's'
+          } need${unenrolledHosts.length === 1 ? 's' : ''} isolation: ${unenrolledHosts
+            .map((h) => h.name)
+            .join(', ')}`
+        : `${RECOMMEND_HEADLINE_PREFIX}: Unenrolled host needs isolation`;
+    case 'hostless':
+      return `${RECOMMEND_HEADLINE_PREFIX}: No host entity to act on`;
+    case 'catalog_error':
+      return `${RECOMMEND_HEADLINE_PREFIX}: Response action catalog unavailable`;
+    case 'catalog_empty':
+      return `${RECOMMEND_HEADLINE_PREFIX}: No response actions installed`;
+    case 'no_fillable_action':
+      return `${RECOMMEND_HEADLINE_PREFIX}: No fillable response action`;
+  }
 };
 
 const actionlessComment = ({
@@ -172,20 +215,9 @@ const actionlessComment = ({
   reason: NonNullable<PackageReportMintPayload['actionlessReason']>;
   unenrolledHosts: CurrentRunHost[];
 }): string => {
+  const headline = actionlessHeadline({ reason, unenrolledHosts });
   const base = buildClosureSummary(state);
-  if (reason === 'unenrolled' && unenrolledHosts.length > 0) {
-    return `${base} Unenrolled hosts: ${unenrolledHosts.map((h) => h.name).join(', ')}.`;
-  }
-  if (reason === 'hostless') {
-    return `${base} No host entity on the finding; actionless recommendation.`;
-  }
-  if (reason === 'catalog_error') {
-    return `${base} Respond action catalog unavailable; actionless recommendation.`;
-  }
-  if (reason === 'catalog_empty') {
-    return `${base} No respond actions installed; actionless recommendation.`;
-  }
-  return `${base} No fillable respond action; actionless recommendation.`;
+  return `${headline}\n\n${base}`;
 };
 
 const actionlessProposal = ({
@@ -264,7 +296,9 @@ export const decidePackageReport = ({
     return {
       dismiss: false,
       closureSummary,
-      proposals: [actionlessProposal({ conversationId, state, reason, unenrolledHosts: unenrolled })],
+      proposals: [
+        actionlessProposal({ conversationId, state, reason, unenrolledHosts: unenrolled }),
+      ],
     };
   }
 
@@ -273,8 +307,8 @@ export const decidePackageReport = ({
 
   for (const host of eligible) {
     const agentId = host.agentId!;
-    const hostClosureSummary = buildHostClosureSummary(state, host);
     for (const entry of respondActions) {
+      const hostClosureSummary = buildHostActionComment(state, host, entry.name);
       const schema = actionInputSchema(entry);
       const processScoped = needsProcessParameters(schema);
 
