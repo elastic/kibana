@@ -60,7 +60,7 @@ describe('getAiIndicesInstructions', () => {
 
     expect(instructions).toContain('Available to this agent:');
     expect(instructions).toContain(
-      '- `elastic` (FROM `sml-main`) — Summaries of Kibana resources such as dashboards and connectors.'
+      '- `elastic` (FROM sml-main) — Summaries of Kibana resources such as dashboards and connectors.'
     );
   });
 
@@ -72,15 +72,15 @@ describe('getAiIndicesInstructions', () => {
       ],
     });
 
-    expect(instructions).toContain('- `elastic` (FROM `sml-main`)');
-    expect(instructions).toContain('- `my-custom` (FROM `ai-index-idx-custom`) — Support tickets.');
+    expect(instructions).toContain('- `elastic` (FROM sml-main)');
+    expect(instructions).toContain('- `my-custom` (FROM ai-index-idx-custom) — Support tickets.');
   });
 
   it('omits entries with no ES|QL target from the available list, keeping the resolved ones', () => {
     const instructions = render({ catalog: [...defaultCatalog, { id: 'unresolved-custom' }] });
 
     expect(instructions).toContain('Available to this agent:');
-    expect(instructions).toContain('- `elastic` (FROM `sml-main`)');
+    expect(instructions).toContain('- `elastic` (FROM sml-main)');
     expect(instructions).not.toContain('unresolved-custom');
   });
 
@@ -96,8 +96,8 @@ describe('getAiIndicesInstructions', () => {
   it('renders an entry without a description with no trailing dash', () => {
     const instructions = render({ catalog: [{ id: 'bare-id', esqlTarget: 'bare-target' }] });
 
-    expect(instructions).toContain('- `bare-id` (FROM `bare-target`)');
-    expect(instructions).not.toContain('(FROM `bare-target`) —');
+    expect(instructions).toContain('- `bare-id` (FROM bare-target)');
+    expect(instructions).not.toContain('(FROM bare-target) —');
   });
 
   it('points at list -> describe -> query and away from execute_esql', () => {
@@ -108,6 +108,16 @@ describe('getAiIndicesInstructions', () => {
     expect(instructions).toContain('3. `query_ai_indices`');
     expect(instructions).toContain('Do not query AI Indices with `execute_esql`');
     expect(instructions).not.toContain('sml_');
+  });
+
+  it('limits query_ai_indices to AI Indices and routes other data to execute_esql', () => {
+    const instructions = render();
+
+    expect(instructions).toContain('`query_ai_indices` is only for AI Indices');
+    expect(instructions).toContain(
+      'Query every other index, data stream, or alias with your other data tools, such as `generate_esql` and `execute_esql`'
+    );
+    expect(instructions).toContain('This includes sources a KI points you to.');
   });
 
   it('describes describe_ai_index as a context block to read and copy ES|QL from', () => {

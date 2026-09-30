@@ -23,7 +23,7 @@ const createRule = (overrides?: Partial<RuleResponse>): RuleResponse =>
     metadata: { name: 'Host CPU high', version: 1 },
     time_field: '@timestamp',
     schedule: { every: '5m' },
-    query: { format: 'standalone', breach: { query: 'FROM logs-*' } },
+    query: { base: 'FROM logs-*' },
     created_by: { profile_uid: 'alice' },
     created_at: '2026-01-01T00:00:00.000Z',
     updated_by: { profile_uid: 'alice' },

@@ -32,6 +32,9 @@ export const ArtifactConstants = {
 
   SUPPORTED_TRUSTED_DEVICES_OPERATING_SYSTEMS: ['macos', 'windows'],
   GLOBAL_TRUSTED_DEVICES_NAME: 'endpoint-trusteddevicelist',
+
+  SUPPORTED_CUSTOM_YARA_SIGNATURES_OPERATING_SYSTEMS: ['macos', 'windows', 'linux'],
+  GLOBAL_CUSTOM_YARA_SIGNATURES_NAME: 'endpoint-yararules',
 };
 
 export const ManifestConstants = {

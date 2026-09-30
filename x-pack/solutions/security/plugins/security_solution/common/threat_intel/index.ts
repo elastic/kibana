@@ -33,6 +33,7 @@ export {
   THREAT_INTEL_API_BASE,
   CREATE_THREAT_REPORT_API_PATH,
   EXTRACT_IOCS_API_PATH,
+  ENRICH_REPORT_CORE_API_PATH,
   EXTRACT_DIAMOND_API_PATH,
   ASSESS_RELEVANCE_API_PATH,
   ENRICH_TAXONOMY_API_PATH,
@@ -43,8 +44,6 @@ export {
   GET_THREAT_REPORT_API_PATH,
   READINESS_API_PATH,
   DIAMOND_SUMMARY_EMBEDDING_INFERENCE_ID,
-  THREAT_INTEL_ENRICH_INFERENCE_FEATURE_ID,
-  THREAT_INTEL_DIAMOND_INFERENCE_FEATURE_ID,
 } from './constants';
 export { CATALOG_SOURCE_URLS, resolveCatalogSourceUrl } from './catalog_source_urls';
 export type {
@@ -62,6 +61,7 @@ export type {
   ListSourcesResponse,
   UpdateSourceResponse,
   ExtractIocsResponse,
+  EnrichReportCoreResponse,
   ExtractDiamondResponse,
   AssessRelevanceResponse,
   EnrichTaxonomyResponse,
@@ -88,7 +88,11 @@ export {
   enumLiterals,
   extractIocsBodySchema,
   EXTRACT_IOCS_MAX_BODY_BYTES,
+  extractedIocSchema,
   extractIocsResponseSchema,
+  enrichReportCoreBodySchema,
+  ENRICH_REPORT_CORE_MAX_BODY_BYTES,
+  enrichReportCoreResponseSchema,
   extractDiamondBodySchema,
   EXTRACT_DIAMOND_MAX_BODY_BYTES,
   extractDiamondResponseSchema,

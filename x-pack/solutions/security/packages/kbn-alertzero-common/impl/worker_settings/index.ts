@@ -61,6 +61,7 @@ export const createDefaultWorkerSettings = (workerId: string): WorkerSettings =>
 export const getAllowedAutonomyLevels = (workerId: string): readonly WatchAutonomyLevel[] =>
   getContract(workerId).declaration.allowedAutonomyLevels;
 
+export { applyMissingWorkerSettingDefaults } from './apply_missing_defaults';
 export {
   applyWorkerSettingsWrite,
   diffWorkerSettings,
@@ -72,6 +73,12 @@ export {
   ANALYSIS_WINDOW_DAYS_DEFAULT,
   ANALYSIS_WINDOW_DAYS_MAX,
   ANALYSIS_WINDOW_DAYS_MIN,
+  FP_COUNT_THRESHOLD_DEFAULT,
+  FP_COUNT_THRESHOLD_MAX,
+  FP_COUNT_THRESHOLD_MIN,
+  FP_RATE_THRESHOLD_PCT_DEFAULT,
+  FP_RATE_THRESHOLD_PCT_MAX,
+  FP_RATE_THRESHOLD_PCT_MIN,
   RULE_TUNING_DEFAULT_EXTRAS,
 } from './detection_watch';
 export type { WorkerSettingsDeclaration } from './types';

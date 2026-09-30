@@ -6,7 +6,7 @@
  */
 import { z } from '@kbn/zod';
 import { PRIVATE_LOCATIONS_SYNC_TASK_ID } from '../../tasks/sync_private_locations_monitors_task';
-import { scheduleCleanUpTask } from '../../synthetics_service/private_location/clean_up_task';
+import { runCleanUpTaskNow } from '../../tasks/clean_up_package_policies_task';
 import type { SyntheticsRestApiRouteFactory } from '../types';
 import { SYNTHETICS_API_URLS } from '../../../common/constants';
 
@@ -27,8 +27,7 @@ export const getSyntheticsTriggerTaskRun: SyntheticsRestApiRouteFactory = () => 
         await server.pluginsStart.taskManager.runSoon(PRIVATE_LOCATIONS_SYNC_TASK_ID);
         break;
       case 'cleanUpPackagePolicyTask':
-        await scheduleCleanUpTask(server);
-
+        await runCleanUpTaskNow(server);
         break;
       default:
         throw new Error(`Unknown task type: ${taskType}`);

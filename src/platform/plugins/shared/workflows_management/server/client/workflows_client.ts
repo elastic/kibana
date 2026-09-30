@@ -42,7 +42,7 @@ export const createWorkflowsClientProvider = (
             );
             return;
           }
-          await workflowsService.installManagedWorkflow(id, options, pluginId);
+          await workflowsService.installManagedWorkflow(id, options, pluginId, request);
         },
         uninstall: async (pluginId, id, options) => {
           if (!isWorkflowsAvailable) {
@@ -51,7 +51,7 @@ export const createWorkflowsClientProvider = (
             );
             return;
           }
-          await workflowsService.uninstallManagedWorkflow(id, options, pluginId);
+          await workflowsService.uninstallManagedWorkflow(id, options, pluginId, request);
         },
         getWorkflowStatus: async (pluginId, id, options) => {
           if (!isWorkflowsAvailable) {

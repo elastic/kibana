@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { render, screen, waitFor } from '@testing-library/react';
+import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import type { HttpStart } from '@kbn/core-http-browser';
 import { fetchClassicAlertById } from '@kbn/alerting-v2-episodes-ui/classic_alerts/apis/fetch_classic_alert_by_id';
@@ -115,6 +115,38 @@ describe('ClassicAlertDetailsFlyout', () => {
 
     await waitFor(() => {
       expect(screen.getByTestId('classicAlertEpisodeDetailsError')).toBeInTheDocument();
+    });
+  });
+
+  it('renders EpisodeFooterActionMenu when actions are provided', async () => {
+    const mockAction = {
+      id: 'test-action',
+      order: 1,
+      displayName: 'Test Action',
+      iconType: 'star',
+      isCompatible: jest.fn(() => true),
+      execute: jest.fn(async () => {}),
+    };
+
+    mockFetchClassicAlertById.mockResolvedValue({
+      _index: '.internal.alerts-observability.apm.alerts-default-000001',
+      _id: 'alert-1',
+      'kibana.alert.uuid': 'alert-1',
+      'kibana.alert.status': 'active',
+      'kibana.alert.rule.name': 'CPU usage',
+      'kibana.alert.rule.rule_type_id': 'apm.error_rate',
+    });
+
+    renderFlyout({ actions: [mockAction] });
+
+    await waitFor(() => {
+      expect(screen.getByTestId('classicAlertEpisodeDetailsTabs')).toBeInTheDocument();
+    });
+
+    fireEvent.click(screen.getByTestId('alertingV2EpisodeFlyoutTakeActionButton'));
+    expect(await screen.findByTestId('alertingV2EpisodeFlyoutTakeAction')).toBeInTheDocument();
+    expect(mockAction.isCompatible).toHaveBeenCalledWith({
+      episodes: [expect.objectContaining({ source_id: 'v1' })],
     });
   });
 });

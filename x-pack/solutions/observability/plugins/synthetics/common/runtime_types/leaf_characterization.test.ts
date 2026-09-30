@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { describeCodecParity } from './test_helpers/parity';
+import { describeCodecCases } from './test_helpers/codec_cases';
 import { DateRangeType, LocationType, StatesIndexStatusType, SummaryType } from './common';
 import { CertFacetsType, CertType, GetCertsParamsType } from './certs';
 import { DynamicSettingsCodec, LocationMonitorsType } from './dynamic_settings';
@@ -27,15 +27,6 @@ import {
   RangeUnitType,
   StatusCheckParamsType,
 } from './alerts/status_check';
-import * as zodCommon from './zod/common';
-import * as zodCerts from './zod/certs';
-import * as zodDynamic from './zod/dynamic_settings';
-import * as zodNetwork from './zod/network_events';
-import * as zodSnapshot from './zod/snapshot';
-import * as zodSettings from './zod/settings';
-import * as zodRemote from './zod/remote';
-import * as zodAlerts from './zod/alerts';
-import './zod/type_parity';
 
 const fullCert = {
   monitors: [
@@ -113,50 +104,44 @@ const statusFilters = {
   'url.port': ['443'],
 };
 
-describeCodecParity({
+describeCodecCases({
   label: 'LocationType',
-  ioTs: LocationType,
-  zod: zodCommon.LocationType,
+  codec: LocationType,
   valid: [{ lat: '41.25', lon: '-95.86' }],
   invalid: [{ lat: 41.25, lon: '-95.86' }, { lat: '41.25' }, null],
 });
 
-describeCodecParity({
+describeCodecCases({
   label: 'SummaryType',
-  ioTs: SummaryType,
-  zod: zodCommon.SummaryType,
+  codec: SummaryType,
   valid: [{}, { up: 1, down: 0, geo: { name: 'Iowa', location: { lat: '1', lon: '2' } } }],
   invalid: [{ up: '1' }, { geo: { name: 1 } }],
 });
 
-describeCodecParity({
+describeCodecCases({
   label: 'StatesIndexStatusType',
-  ioTs: StatesIndexStatusType,
-  zod: zodCommon.StatesIndexStatusType,
+  codec: StatesIndexStatusType,
   valid: [{ indexExists: true, indices: 'heartbeat-*' }],
   invalid: [{ indexExists: true }, { indexExists: 'yes', indices: 'x' }],
 });
 
-describeCodecParity({
+describeCodecCases({
   label: 'DateRangeType',
-  ioTs: DateRangeType,
-  zod: zodCommon.DateRangeType,
+  codec: DateRangeType,
   valid: [{ from: 'now-15m', to: 'now' }],
   invalid: [{ from: 'now-15m' }, { from: 1, to: 'now' }],
 });
 
-describeCodecParity({
+describeCodecCases({
   label: 'remoteMonitorInfoSchema',
-  ioTs: remoteMonitorInfoSchema,
-  zod: zodRemote.remoteMonitorInfoSchema,
+  codec: remoteMonitorInfoSchema,
   valid: [{ remoteName: 'ccs-1' }, { remoteName: 'ccs-1', kibanaUrl: 'https://remote' }],
   invalid: [{}, { remoteName: 1 }],
 });
 
-describeCodecParity({
+describeCodecCases({
   label: 'GetCertsParamsType',
-  ioTs: GetCertsParamsType,
-  zod: zodCerts.GetCertsParamsType,
+  codec: GetCertsParamsType,
   valid: [
     {},
     {
@@ -184,10 +169,9 @@ describeCodecParity({
   invalid: [{ pageIndex: '0' }, { monitorIds: 'a' }],
 });
 
-describeCodecParity({
+describeCodecCases({
   label: 'CertType',
-  ioTs: CertType,
-  zod: zodCerts.CertType,
+  codec: CertType,
   valid: [fullCert],
   invalid: [
     { ...fullCert, configId: 1 },
@@ -195,10 +179,9 @@ describeCodecParity({
   ],
 });
 
-describeCodecParity({
+describeCodecCases({
   label: 'CertFacetsType',
-  ioTs: CertFacetsType,
-  zod: zodCerts.CertFacetsType,
+  codec: CertFacetsType,
   valid: [
     {
       monitorTypes: [{ value: 'http', count: 3 }],
@@ -212,10 +195,9 @@ describeCodecParity({
   invalid: [{ monitorTypes: [], tags: [], issuers: [], resourceTypes: [], certOrigin: [] }],
 });
 
-describeCodecParity({
+describeCodecCases({
   label: 'DynamicSettingsCodec',
-  ioTs: DynamicSettingsCodec,
-  zod: zodDynamic.DynamicSettingsCodec,
+  codec: DynamicSettingsCodec,
   valid: [
     { certAgeThreshold: 730, certExpirationThreshold: 30, defaultConnectors: [] },
     {
@@ -235,18 +217,16 @@ describeCodecParity({
   ],
 });
 
-describeCodecParity({
+describeCodecCases({
   label: 'LocationMonitorsType',
-  ioTs: LocationMonitorsType,
-  zod: zodDynamic.LocationMonitorsType,
+  codec: LocationMonitorsType,
   valid: [[], [{ id: 'us_central', count: 4 }]],
   invalid: [{ id: 'us_central', count: 4 }, [{ id: 'us_central' }]],
 });
 
-describeCodecParity({
+describeCodecCases({
   label: 'SyntheticsNetworkEventsApiResponseType',
-  ioTs: SyntheticsNetworkEventsApiResponseType,
-  zod: zodNetwork.SyntheticsNetworkEventsApiResponseType,
+  codec: SyntheticsNetworkEventsApiResponseType,
   valid: [
     {
       events: [fullNetworkEvent],
@@ -266,10 +246,9 @@ describeCodecParity({
   ],
 });
 
-describeCodecParity({
+describeCodecCases({
   label: 'SnapshotType',
-  ioTs: SnapshotType,
-  zod: zodSnapshot.SnapshotType,
+  codec: SnapshotType,
   valid: [{ down: 1, total: 10, up: 9 }],
   invalid: [
     { down: 1, total: 10 },
@@ -277,10 +256,9 @@ describeCodecParity({
   ],
 });
 
-describeCodecParity({
+describeCodecCases({
   label: 'syntheticsCCSSettingsSchema',
-  ioTs: syntheticsCCSSettingsSchema,
-  zod: zodSettings.syntheticsCCSSettingsSchema,
+  codec: syntheticsCCSSettingsSchema,
   valid: [{ useAllRemoteClusters: false, selectedRemoteClusters: ['ccs-1'] }],
   invalid: [
     { useAllRemoteClusters: false },
@@ -288,58 +266,51 @@ describeCodecParity({
   ],
 });
 
-describeCodecParity({
+describeCodecCases({
   label: 'syntheticsMultiSpaceSettingsSchema',
-  ioTs: syntheticsMultiSpaceSettingsSchema,
-  zod: zodSettings.syntheticsMultiSpaceSettingsSchema,
+  codec: syntheticsMultiSpaceSettingsSchema,
   valid: [{}, { useAllRemoteClusters: true, selectedRemoteClusters: ['ccs-1'] }],
   invalid: [{ useAllRemoteClusters: 'yes' }, { selectedRemoteClusters: 'ccs-1' }],
 });
 
-describeCodecParity({
+describeCodecCases({
   label: 'APIKeyCodec',
-  ioTs: APIKeyCodec,
-  zod: zodSettings.APIKeyCodec,
+  codec: APIKeyCodec,
   valid: [{ spaces: ['default', 'team'] }],
   invalid: [{}, { spaces: 'default' }],
 });
 
-describeCodecParity({
+describeCodecCases({
   label: 'SyntheticsServiceApiKeyType',
-  ioTs: SyntheticsServiceApiKeyType,
-  zod: zodSettings.SyntheticsServiceApiKeyType,
+  codec: SyntheticsServiceApiKeyType,
   valid: [{ id: 'id-1', name: 'synthetics-key', apiKey: 'secret' }],
   invalid: [{ id: 'id-1', name: 'synthetics-key' }],
 });
 
-describeCodecParity({
+describeCodecCases({
   label: 'SyntheticsServiceApiKeySaveType',
-  ioTs: SyntheticsServiceApiKeySaveType,
-  zod: zodSettings.SyntheticsServiceApiKeySaveType,
+  codec: SyntheticsServiceApiKeySaveType,
   valid: [{ success: true }, { success: false, error: 'denied' }],
   invalid: [{}, { success: 'yes' }],
 });
 
-describeCodecParity({
+describeCodecCases({
   label: 'TLSParamsType',
-  ioTs: TLSParamsType,
-  zod: zodAlerts.TLSParamsType,
+  codec: TLSParamsType,
   valid: [{}, { search: 'elastic', certAgeThreshold: 730, certExpirationThreshold: 30 }],
   invalid: [{ certAgeThreshold: '730' }],
 });
 
-describeCodecParity({
+describeCodecCases({
   label: 'RangeUnitType',
-  ioTs: RangeUnitType,
-  zod: zodAlerts.RangeUnitType,
+  codec: RangeUnitType,
   valid: ['s', 'm', 'h', 'd', 'w', 'M', 'y'],
   invalid: ['hour', 'S', 1, null],
 });
 
-describeCodecParity({
+describeCodecCases({
   label: 'StatusCheckParamsType',
-  ioTs: StatusCheckParamsType,
-  zod: zodAlerts.StatusCheckParamsType,
+  codec: StatusCheckParamsType,
   valid: [
     {
       locations: ['us_central'],
@@ -356,10 +327,9 @@ describeCodecParity({
   ],
 });
 
-describeCodecParity({
+describeCodecCases({
   label: 'AtomicStatusCheckParamsType',
-  ioTs: AtomicStatusCheckParamsType,
-  zod: zodAlerts.AtomicStatusCheckParamsType,
+  codec: AtomicStatusCheckParamsType,
   valid: [
     {
       numTimes: 3,
@@ -375,10 +345,9 @@ describeCodecParity({
   invalid: [{ numTimes: 3, timerangeCount: 15 }],
 });
 
-describeCodecParity({
+describeCodecCases({
   label: 'GetMonitorAvailabilityParamsType',
-  ioTs: GetMonitorAvailabilityParamsType,
-  zod: zodAlerts.GetMonitorAvailabilityParamsType,
+  codec: GetMonitorAvailabilityParamsType,
   valid: [{ range: 30, rangeUnit: 'd', threshold: '99.9', filters: 'tags:prod' }],
   invalid: [
     { range: 30, rangeUnit: 'days', threshold: '99.9' },
@@ -386,10 +355,9 @@ describeCodecParity({
   ],
 });
 
-describeCodecParity({
+describeCodecCases({
   label: 'MonitorAvailabilityType',
-  ioTs: MonitorAvailabilityType,
-  zod: zodAlerts.MonitorAvailabilityType,
+  codec: MonitorAvailabilityType,
   valid: [
     {
       availability: { range: 30, rangeUnit: 'd', threshold: '99.9' },
