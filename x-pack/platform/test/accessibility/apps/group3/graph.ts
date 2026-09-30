@@ -69,28 +69,36 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await testSubjects.click('saveCancelButton');
     });
 
-    it('Graph settings - advanced settings tab', async function () {
-      await graph.clickSettingsButton();
-      await a11y.testAppSnapshot();
-    });
+    describe('Graph settings', () => {
+      before(async () => {
+        await graph.clickSettingsButton();
+        await testSubjects.existOrFail('advancedSettings');
+      });
 
-    it('Graph settings - block list tab', async function () {
-      await testSubjects.click('blocklist');
-      await a11y.testAppSnapshot();
-    });
+      after(async () => {
+        await browser.pressKeys(browser.keys.ESCAPE);
+        await testSubjects.missingOrFail('graphSettingsFlyout');
+      });
 
-    it('Graph settings - drilldowns tab', async function () {
-      await testSubjects.click('drillDowns');
-      await a11y.testAppSnapshot();
-      await browser.pressKeys(browser.keys.ESCAPE);
-    });
+      it('advanced settings tab', async function () {
+        await a11y.testAppSnapshot();
+      });
 
-    it('Graph settings drilldown tab - add new drilldown', async function () {
-      await graph.clickSettingsButton();
-      await testSubjects.click('drillDowns');
-      await testSubjects.click('graphAddNewTemplate');
-      await a11y.testAppSnapshot();
-      await browser.pressKeys(browser.keys.ESCAPE);
+      it('block list tab', async function () {
+        await testSubjects.click('blocklist');
+        await a11y.testAppSnapshot();
+      });
+
+      it('drilldowns tab', async function () {
+        await testSubjects.click('drillDowns');
+        await a11y.testAppSnapshot();
+      });
+
+      it('drilldown tab - add new drilldown', async function () {
+        await testSubjects.click('drillDowns');
+        await testSubjects.click('graphAddNewTemplate');
+        await a11y.testAppSnapshot();
+      });
     });
 
     it('Create new graph page', async function () {
