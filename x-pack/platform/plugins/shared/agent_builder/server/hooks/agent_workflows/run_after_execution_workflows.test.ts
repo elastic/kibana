@@ -14,6 +14,7 @@ import {
   ConversationRoundStepType,
   ToolResultType,
   type ConversationRound,
+  type ToolCallStep,
 } from '@kbn/agent-builder-common';
 import { ExecutionStatus } from '@kbn/workflows';
 import {
@@ -413,6 +414,33 @@ describe('runAfterExecutionWorkflows', () => {
                 },
               ],
             },
+          ]);
+        });
+
+        it('omits tool calls whose step has no results', async () => {
+          const { workflowApi, getInternalServices } = createDeps({
+            definition: strictDefinition([...legacyInputNames, 'tool_results']),
+          });
+          const stepWithoutResults = {
+            type: ConversationRoundStepType.toolCall,
+            tool_id: 'other-tool',
+            tool_call_id: 'tc-2',
+            params: {},
+          } as ToolCallStep;
+          const roundWithMissingResults = makeRound({
+            steps: [...roundWithToolCall.steps, stepWithoutResults],
+          });
+
+          await runAfterExecutionWorkflows({
+            context: createContext({ round: roundWithMissingResults }),
+            workflowApi,
+            getInternalServices,
+            logger,
+          });
+
+          const params = executeWorkflowMock.mock.calls[0][0].workflowParams;
+          expect(params.tool_results).toEqual([
+            { tool_id: 'my-tool', tool_call_id: 'tc-1', results: toolResults },
           ]);
         });
 

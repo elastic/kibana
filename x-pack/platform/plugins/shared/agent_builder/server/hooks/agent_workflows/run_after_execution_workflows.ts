@@ -83,12 +83,11 @@ export const runAfterExecutionWorkflows = async ({
     tool_call_id: step.tool_call_id,
     params: step.params as Record<string, unknown>,
   }));
-  const toolResults = toolCallSteps.map(
-    ({ tool_id: toolId, tool_call_id: toolCallId, results }: ToolCallStep) => ({
-      tool_id: toolId,
-      tool_call_id: toolCallId,
-      results: results?.map(boundToolResult),
-    })
+  const toolResults = toolCallSteps.flatMap(
+    ({ tool_id: toolId, tool_call_id: toolCallId, results }: ToolCallStep) =>
+      results
+        ? [{ tool_id: toolId, tool_call_id: toolCallId, results: results.map(boundToolResult) }]
+        : []
   );
 
   const roundConnectorId = context.connectorId?.trim() || round.model_usage?.connector_id?.trim();
