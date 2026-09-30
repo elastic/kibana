@@ -10,22 +10,26 @@ import {
   EuiBasicTable,
   EuiButton,
   EuiCallOut,
+  EuiConfirmModal,
   EuiEmptyPrompt,
   EuiFieldText,
   EuiFlexGroup,
   EuiFlexItem,
   EuiHealth,
+  EuiHorizontalRule,
   EuiLoadingSpinner,
   EuiSpacer,
   EuiText,
+  useGeneratedHtmlId,
 } from '@elastic/eui';
 import type { HttpSetup } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 
-import type { ExtractionStatus, Repository } from './api';
-import { getExtraction, startExtraction } from './api';
+import type { ExtractionBatchStatus, Repository, RepositoryExtractionStatus } from './api';
+import { deleteRepository, getBatch, startBatch } from './api';
 import { describeStartError, type StartErrorDescription } from './describe_start_error';
+import { RepositoryForm } from './repository_form';
 
 interface Props {
   http: HttpSetup;
@@ -35,87 +39,111 @@ interface Props {
   reload: () => void;
 }
 
-const statusLabel = (status: ExtractionStatus['status']): string => {
-  const labels = {
-    running: i18n.translate('xpack.codeIntelligence.repositories.statusRunning', {
-      defaultMessage: 'Running',
-    }),
-    completed: i18n.translate('xpack.codeIntelligence.repositories.statusCompleted', {
-      defaultMessage: 'Completed',
-    }),
-    failed: i18n.translate('xpack.codeIntelligence.repositories.statusFailed', {
-      defaultMessage: 'Failed',
-    }),
-  };
-  return labels[status];
+type HealthColor = 'success' | 'danger' | 'warning' | 'primary' | 'subdued';
+
+const repositoryStatusLabels: Record<RepositoryExtractionStatus['status'], string> = {
+  pending: i18n.translate('xpack.codeIntelligence.repositories.statusPending', {
+    defaultMessage: 'Waiting',
+  }),
+  running: i18n.translate('xpack.codeIntelligence.repositories.statusRunning', {
+    defaultMessage: 'Running',
+  }),
+  completed: i18n.translate('xpack.codeIntelligence.repositories.statusCompleted', {
+    defaultMessage: 'Completed',
+  }),
+  failed: i18n.translate('xpack.codeIntelligence.repositories.statusFailed', {
+    defaultMessage: 'Failed',
+  }),
 };
+
+const batchStatusLabels: Record<ExtractionBatchStatus['status'], string> = {
+  running: i18n.translate('xpack.codeIntelligence.repositories.batchRunning', {
+    defaultMessage: 'Running',
+  }),
+  completed: i18n.translate('xpack.codeIntelligence.repositories.batchCompleted', {
+    defaultMessage: 'Completed',
+  }),
+  failed: i18n.translate('xpack.codeIntelligence.repositories.batchFailed', {
+    defaultMessage: 'Failed',
+  }),
+  partial: i18n.translate('xpack.codeIntelligence.repositories.batchPartial', {
+    defaultMessage: 'Partially completed',
+  }),
+};
+
+const statusColor = (
+  status: RepositoryExtractionStatus['status'] | ExtractionBatchStatus['status']
+): HealthColor =>
+  status === 'completed'
+    ? 'success'
+    : status === 'failed'
+    ? 'danger'
+    : status === 'partial'
+    ? 'warning'
+    : status === 'pending'
+    ? 'subdued'
+    : 'primary';
 
 export const RepositoriesView = ({ http, repositories, loading, error, reload }: Props) => {
   const [revisions, setRevisions] = useState<Record<string, string>>({});
-  const [statuses, setStatuses] = useState<Record<string, ExtractionStatus>>({});
-  const [starting, setStarting] = useState<string>();
+  const [selectedIds, setSelectedIds] = useState<string[]>([]);
+  const [batch, setBatch] = useState<ExtractionBatchStatus>();
+  const [starting, setStarting] = useState(false);
   const [actionError, setActionError] = useState<StartErrorDescription>();
   const [following, setFollowing] = useState(false);
+  const [editing, setEditing] = useState<Repository>();
+  const [pendingDelete, setPendingDelete] = useState<Repository>();
+  const [deleting, setDeleting] = useState(false);
+  const [deleteError, setDeleteError] = useState<string>();
+  const deleteTitleId = useGeneratedHtmlId({ prefix: 'codeIntelligenceDeleteTitle' });
 
-  const runningIds = Object.values(statuses)
-    .filter(({ status }) => status === 'running')
-    .map(({ id }) => id)
-    .sort()
-    .join(',');
+  const runningBatchId = batch?.status === 'running' ? batch.id : undefined;
 
   useEffect(() => {
-    if (runningIds.length === 0) return;
-    const poll = async () => {
-      const updates = await Promise.all(
-        runningIds.split(',').map(async (id) => {
-          try {
-            return await getExtraction(http, id);
-          } catch {
-            return undefined;
-          }
-        })
+    if (runningBatchId === undefined) return;
+    const interval = window.setInterval(() => {
+      void getBatch(http, runningBatchId).then(
+        (status) => setBatch((current) => (current?.id === status.id ? status : current)),
+        () => undefined
       );
-      setStatuses((current) => {
-        const next = { ...current };
-        updates.forEach((status) => {
-          if (status !== undefined) next[status.repository] = status;
-        });
-        return next;
-      });
-    };
-    const interval = window.setInterval(() => void poll(), 2000);
+    }, 2000);
     return () => window.clearInterval(interval);
-  }, [http, runningIds]);
+  }, [http, runningBatchId]);
 
-  const runExtraction = useCallback(
-    async (repository: string) => {
-      const revision = (revisions[repository] ?? 'HEAD').trim().slice(0, 255);
-      if (revision.length === 0) return;
-      setStarting(repository);
-      setActionError(undefined);
-      try {
-        const { id } = await startExtraction(http, repository.slice(0, 256), revision);
-        const status = await getExtraction(http, id);
-        setStatuses((current) => ({ ...current, [repository]: status }));
-      } catch (startError) {
-        setActionError(describeStartError(startError, repository));
-      } finally {
-        setStarting(undefined);
-      }
-    },
-    [http, revisions]
+  const selected = useMemo(
+    () => repositories.filter(({ repository }) => selectedIds.includes(repository)),
+    [repositories, selectedIds]
   );
 
-  const followRun = useCallback(
-    async ({ repository, extractionId }: StartErrorDescription) => {
-      if (extractionId === undefined) return;
+  const runBatch = useCallback(async () => {
+    setStarting(true);
+    setActionError(undefined);
+    try {
+      const { id } = await startBatch(
+        http,
+        selected.length === 0
+          ? undefined
+          : selected.map(({ repository, defaultRef }) => ({
+              repository,
+              revision: (revisions[repository] ?? defaultRef).trim() || defaultRef,
+            }))
+      );
+      setBatch(await getBatch(http, id));
+    } catch (startError) {
+      setActionError(describeStartError(startError));
+    } finally {
+      setStarting(false);
+    }
+  }, [http, revisions, selected]);
+
+  const followBatch = useCallback(
+    async (extractionId: string) => {
       setFollowing(true);
       try {
-        const status = await getExtraction(http, extractionId);
-        setStatuses((current) => ({ ...current, [repository]: status }));
+        setBatch(await getBatch(http, extractionId));
         setActionError(undefined);
       } catch {
-        // The suggestions still apply when the run can no longer be fetched.
+        // The suggestions still apply when the batch can no longer be fetched.
         setActionError((current) =>
           current?.extractionId === extractionId ? { ...current, extractionId: undefined } : current
         );
@@ -126,6 +154,29 @@ export const RepositoriesView = ({ http, repositories, loading, error, reload }:
     [http]
   );
 
+  const confirmDelete = useCallback(async () => {
+    if (pendingDelete === undefined) return;
+    setDeleting(true);
+    setDeleteError(undefined);
+    try {
+      await deleteRepository(http, pendingDelete.repository);
+      setSelectedIds((current) => current.filter((id) => id !== pendingDelete.repository));
+      if (editing?.repository === pendingDelete.repository) setEditing(undefined);
+      setPendingDelete(undefined);
+      reload();
+    } catch {
+      setDeleteError(
+        i18n.translate('xpack.codeIntelligence.repositories.deleteFailed', {
+          defaultMessage: '{repository} could not be deleted.',
+          values: { repository: pendingDelete.repository },
+        })
+      );
+      setPendingDelete(undefined);
+    } finally {
+      setDeleting(false);
+    }
+  }, [editing, http, pendingDelete, reload]);
+
   const columns = useMemo<Array<EuiBasicTableColumn<Repository>>>(
     () => [
       {
@@ -135,14 +186,35 @@ export const RepositoriesView = ({ http, repositories, loading, error, reload }:
         }),
       },
       {
+        field: 'remoteUrl',
+        name: i18n.translate('xpack.codeIntelligence.repositories.remoteUrlColumn', {
+          defaultMessage: 'Remote URL',
+        }),
+        truncateText: true,
+      },
+      {
+        field: 'enabled',
+        name: i18n.translate('xpack.codeIntelligence.repositories.enabledColumn', {
+          defaultMessage: 'In run all',
+        }),
+        render: (enabled: boolean) =>
+          enabled
+            ? i18n.translate('xpack.codeIntelligence.repositories.enabledYes', {
+                defaultMessage: 'Yes',
+              })
+            : i18n.translate('xpack.codeIntelligence.repositories.enabledNo', {
+                defaultMessage: 'No',
+              }),
+      },
+      {
         name: i18n.translate('xpack.codeIntelligence.repositories.revisionColumn', {
           defaultMessage: 'Revision',
         }),
-        render: ({ repository }: Repository) => (
+        render: ({ repository, defaultRef }: Repository) => (
           <EuiFieldText
             data-test-subj={`codeIntelligenceRevision-${repository}`}
             compressed
-            value={revisions[repository] ?? 'HEAD'}
+            value={revisions[repository] ?? defaultRef}
             maxLength={255}
             aria-label={i18n.translate('xpack.codeIntelligence.repositories.revisionLabel', {
               defaultMessage: 'Revision for {repository}',
@@ -159,15 +231,15 @@ export const RepositoriesView = ({ http, repositories, loading, error, reload }:
       },
       {
         name: i18n.translate('xpack.codeIntelligence.repositories.lastRunColumn', {
-          defaultMessage: 'Current or last run',
+          defaultMessage: 'Current or last batch',
         }),
         render: ({ repository }: Repository) => {
-          const status = statuses[repository];
+          const status = batch?.repositories.find((entry) => entry.repository === repository);
           if (status === undefined) {
             return (
               <EuiText size="s">
                 {i18n.translate('xpack.codeIntelligence.repositories.notRun', {
-                  defaultMessage: 'Not run in this session',
+                  defaultMessage: 'Not in a batch this session',
                 })}
               </EuiText>
             );
@@ -176,23 +248,17 @@ export const RepositoriesView = ({ http, repositories, loading, error, reload }:
             <EuiFlexGroup direction="column" gutterSize="xs">
               <EuiFlexItem grow={false}>
                 <EuiHealth
-                  color={
-                    status.status === 'completed'
-                      ? 'success'
-                      : status.status === 'failed'
-                      ? 'danger'
-                      : 'primary'
-                  }
+                  color={statusColor(status.status)}
+                  data-test-subj={`codeIntelligenceRepositoryStatus-${repository}`}
                 >
-                  {statusLabel(status.status)}
+                  {repositoryStatusLabels[status.status]}
                 </EuiHealth>
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
                 <EuiText size="xs">
-                  {i18n.translate('xpack.codeIntelligence.repositories.runStarted', {
-                    defaultMessage: 'Started {startedAt}',
-                    values: { startedAt: status.startedAt },
-                  })}
+                  {status.commitSha === undefined
+                    ? status.revision
+                    : `${status.revision} (${status.commitSha.slice(0, 12)})`}
                 </EuiText>
               </EuiFlexItem>
               {status.errors.length > 0 && (
@@ -202,10 +268,10 @@ export const RepositoriesView = ({ http, repositories, loading, error, reload }:
                   </EuiText>
                 </EuiFlexItem>
               )}
-              {(status.warnings?.length ?? 0) > 0 && (
+              {status.warnings.length > 0 && (
                 <EuiFlexItem grow={false}>
                   <EuiText size="xs" color="warning">
-                    {status.warnings?.join('; ')}
+                    {status.warnings.join('; ')}
                   </EuiText>
                 </EuiFlexItem>
               )}
@@ -219,24 +285,36 @@ export const RepositoriesView = ({ http, repositories, loading, error, reload }:
         }),
         actions: [
           {
-            name: i18n.translate('xpack.codeIntelligence.repositories.runAction', {
-              defaultMessage: 'Run extraction',
+            name: i18n.translate('xpack.codeIntelligence.repositories.editAction', {
+              defaultMessage: 'Edit',
             }),
             description: i18n.translate(
-              'xpack.codeIntelligence.repositories.runActionDescription',
-              { defaultMessage: 'Run extraction for this repository' }
+              'xpack.codeIntelligence.repositories.editActionDescription',
+              { defaultMessage: 'Edit this repository' }
             ),
-            icon: 'play',
+            icon: 'pencil',
             type: 'icon',
-            isPrimary: true,
-            enabled: ({ repository }) =>
-              starting !== repository && statuses[repository]?.status !== 'running',
-            onClick: ({ repository }) => void runExtraction(repository),
+            'data-test-subj': 'codeIntelligenceEditRepository',
+            onClick: (repository) => setEditing(repository),
+          },
+          {
+            name: i18n.translate('xpack.codeIntelligence.repositories.deleteAction', {
+              defaultMessage: 'Delete',
+            }),
+            description: i18n.translate(
+              'xpack.codeIntelligence.repositories.deleteActionDescription',
+              { defaultMessage: 'Delete this repository' }
+            ),
+            icon: 'trash',
+            type: 'icon',
+            color: 'danger',
+            'data-test-subj': 'codeIntelligenceDeleteRepository',
+            onClick: (repository) => setPendingDelete(repository),
           },
         ],
       },
     ],
-    [revisions, runExtraction, starting, statuses]
+    [batch, revisions]
   );
 
   if (loading) return <EuiLoadingSpinner size="xl" />;
@@ -267,80 +345,187 @@ export const RepositoriesView = ({ http, repositories, loading, error, reload }:
       />
     );
   }
-  if (repositories.length === 0) {
-    return (
-      <EuiEmptyPrompt
-        title={
-          <h2>
-            {i18n.translate('xpack.codeIntelligence.repositories.emptyTitle', {
-              defaultMessage: 'No repositories configured',
-            })}
-          </h2>
-        }
-        body={
-          <p>
-            {i18n.translate('xpack.codeIntelligence.repositories.emptyBody', {
-              defaultMessage: 'Configure a repository to run code intelligence extraction.',
-            })}
-          </p>
-        }
-      />
-    );
-  }
 
   return (
     <>
-      {actionError !== undefined && (
-        <EuiCallOut
-          announceOnMount
-          color="danger"
-          iconType="error"
-          data-test-subj="codeIntelligenceStartErrorCallout"
-          title={actionError.title}
-          onDismiss={() => setActionError(undefined)}
-        >
-          <EuiText size="s">
-            <p>{actionError.explanation}</p>
-            <p>
-              <strong>
-                {i18n.translate('xpack.codeIntelligence.repositories.startError.suggestionsTitle', {
-                  defaultMessage: 'What you can do',
-                })}
-              </strong>
-            </p>
-            <ul>
-              {actionError.suggestions.map((suggestion) => (
-                <li key={suggestion}>{suggestion}</li>
-              ))}
-            </ul>
-          </EuiText>
-          {actionError.extractionId !== undefined && (
-            <>
-              <EuiSpacer size="s" />
-              <EuiButton
-                data-test-subj="codeIntelligenceFollowRunButton"
-                color="danger"
-                size="s"
-                isLoading={following}
-                onClick={() => void followRun(actionError)}
-              >
-                {i18n.translate('xpack.codeIntelligence.repositories.startError.followRun', {
-                  defaultMessage: 'Follow that run',
-                })}
-              </EuiButton>
-            </>
-          )}
-        </EuiCallOut>
-      )}
-      <EuiBasicTable
-        tableCaption={i18n.translate('xpack.codeIntelligence.repositories.tableCaption', {
-          defaultMessage: 'Configured code repositories',
-        })}
-        items={repositories}
-        columns={columns}
-        rowHeader="repository"
-        loading={starting !== undefined}
+      <RepositoryForm
+        http={http}
+        editing={editing}
+        onSaved={() => {
+          setEditing(undefined);
+          reload();
+        }}
+        onCancelEdit={() => setEditing(undefined)}
       />
+      <EuiHorizontalRule />
+      {actionError !== undefined && (
+        <>
+          <EuiCallOut
+            announceOnMount
+            color="danger"
+            iconType="error"
+            data-test-subj="codeIntelligenceStartErrorCallout"
+            title={actionError.title}
+            onDismiss={() => setActionError(undefined)}
+          >
+            <EuiText size="s">
+              <p>{actionError.explanation}</p>
+              <p>
+                <strong>
+                  {i18n.translate(
+                    'xpack.codeIntelligence.repositories.startError.suggestionsTitle',
+                    { defaultMessage: 'What you can do' }
+                  )}
+                </strong>
+              </p>
+              <ul>
+                {actionError.suggestions.map((suggestion) => (
+                  <li key={suggestion}>{suggestion}</li>
+                ))}
+              </ul>
+            </EuiText>
+            {actionError.extractionId !== undefined && (
+              <>
+                <EuiSpacer size="s" />
+                <EuiButton
+                  data-test-subj="codeIntelligenceFollowRunButton"
+                  color="danger"
+                  size="s"
+                  isLoading={following}
+                  onClick={() =>
+                    actionError.extractionId !== undefined &&
+                    void followBatch(actionError.extractionId)
+                  }
+                >
+                  {i18n.translate('xpack.codeIntelligence.repositories.startError.followRun', {
+                    defaultMessage: 'Follow that batch',
+                  })}
+                </EuiButton>
+              </>
+            )}
+          </EuiCallOut>
+          <EuiSpacer size="m" />
+        </>
+      )}
+      {deleteError !== undefined && (
+        <>
+          <EuiCallOut
+            announceOnMount
+            color="danger"
+            iconType="error"
+            size="s"
+            data-test-subj="codeIntelligenceDeleteErrorCallout"
+            title={deleteError}
+            onDismiss={() => setDeleteError(undefined)}
+          />
+          <EuiSpacer size="m" />
+        </>
+      )}
+      {repositories.length === 0 ? (
+        <EuiEmptyPrompt
+          title={
+            <h2>
+              {i18n.translate('xpack.codeIntelligence.repositories.emptyTitle', {
+                defaultMessage: 'No repositories configured',
+              })}
+            </h2>
+          }
+          body={
+            <p>
+              {i18n.translate('xpack.codeIntelligence.repositories.emptyBody', {
+                defaultMessage: 'Add a repository with the form above to run extraction.',
+              })}
+            </p>
+          }
+        />
+      ) : (
+        <>
+          <EuiFlexGroup alignItems="center" gutterSize="m" responsive={false}>
+            <EuiFlexItem grow={false}>
+              <EuiButton
+                data-test-subj="codeIntelligenceRunBatchButton"
+                iconType="play"
+                isLoading={starting}
+                isDisabled={runningBatchId !== undefined}
+                onClick={() => void runBatch()}
+              >
+                {selected.length === 0
+                  ? i18n.translate('xpack.codeIntelligence.repositories.runAllEnabled', {
+                      defaultMessage: 'Run all enabled repositories',
+                    })
+                  : i18n.translate('xpack.codeIntelligence.repositories.runSelected', {
+                      defaultMessage:
+                        'Run {count, plural, one {# selected repository} other {# selected repositories}}',
+                      values: { count: selected.length },
+                    })}
+              </EuiButton>
+            </EuiFlexItem>
+            {batch !== undefined && (
+              <EuiFlexItem grow={false}>
+                <EuiHealth
+                  color={statusColor(batch.status)}
+                  data-test-subj="codeIntelligenceBatchStatus"
+                >
+                  {i18n.translate('xpack.codeIntelligence.repositories.batchSummary', {
+                    defaultMessage: 'Batch started {startedAt}: {status}',
+                    values: {
+                      startedAt: batch.startedAt,
+                      status: batchStatusLabels[batch.status],
+                    },
+                  })}
+                </EuiHealth>
+              </EuiFlexItem>
+            )}
+          </EuiFlexGroup>
+          <EuiSpacer size="m" />
+          <EuiBasicTable
+            tableCaption={i18n.translate('xpack.codeIntelligence.repositories.tableCaption', {
+              defaultMessage: 'Configured code repositories',
+            })}
+            items={repositories}
+            itemId="repository"
+            columns={columns}
+            rowHeader="repository"
+            selection={{
+              selected,
+              onSelectionChange: (items: Repository[]) =>
+                setSelectedIds(items.map(({ repository }) => repository)),
+            }}
+            loading={starting}
+          />
+        </>
+      )}
+      {pendingDelete !== undefined && (
+        <EuiConfirmModal
+          aria-labelledby={deleteTitleId}
+          titleProps={{ id: deleteTitleId }}
+          title={i18n.translate('xpack.codeIntelligence.repositories.deleteConfirmTitle', {
+            defaultMessage: 'Delete {repository}?',
+            values: { repository: pendingDelete.repository },
+          })}
+          onCancel={() => setPendingDelete(undefined)}
+          onConfirm={() => void confirmDelete()}
+          isLoading={deleting}
+          cancelButtonText={i18n.translate(
+            'xpack.codeIntelligence.repositories.deleteConfirmCancel',
+            { defaultMessage: 'Cancel' }
+          )}
+          confirmButtonText={i18n.translate(
+            'xpack.codeIntelligence.repositories.deleteConfirmButton',
+            { defaultMessage: 'Delete' }
+          )}
+          buttonColor="danger"
+          defaultFocusedButton="cancel"
+          data-test-subj="codeIntelligenceDeleteConfirmModal"
+        >
+          <p>
+            {i18n.translate('xpack.codeIntelligence.repositories.deleteConfirmBody', {
+              defaultMessage:
+                'The repository is removed from the settings. Documents it already added to the catalog stay there.',
+            })}
+          </p>
+        </EuiConfirmModal>
+      )}
     </>
   );
 };

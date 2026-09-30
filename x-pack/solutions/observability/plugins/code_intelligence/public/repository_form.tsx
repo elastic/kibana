@@ -1,0 +1,283 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import {
+  EuiButton,
+  EuiButtonEmpty,
+  EuiCallOut,
+  EuiFieldText,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiForm,
+  EuiFormRow,
+  EuiSpacer,
+  EuiSwitch,
+  EuiTitle,
+} from '@elastic/eui';
+import type { HttpSetup } from '@kbn/core/public';
+import { i18n } from '@kbn/i18n';
+import React, { useEffect, useState } from 'react';
+
+import {
+  DEFAULT_REPOSITORY_REF,
+  MAX_REMOTE_URL_LENGTH,
+  MAX_REPOSITORY_IDENTITY_LENGTH,
+  MAX_REVISION_LENGTH,
+  validateRepositorySettings,
+  type RepositorySettingsField,
+  type RepositorySettingsInput,
+} from '../common/repository_settings';
+import type { Repository } from './api';
+import { saveRepository } from './api';
+
+interface Props {
+  http: HttpSetup;
+  /** The repository being edited; absent when adding one. */
+  editing?: Repository;
+  onSaved: (repository: Repository) => void;
+  onCancelEdit: () => void;
+}
+
+const fieldErrors: Record<RepositorySettingsField, string> = {
+  repository: i18n.translate('xpack.codeIntelligence.repositoryForm.repositoryInvalid', {
+    defaultMessage:
+      'Use the form owner/name with only letters, digits, periods, underscores, or hyphens.',
+  }),
+  remoteUrl: i18n.translate('xpack.codeIntelligence.repositoryForm.remoteUrlInvalid', {
+    defaultMessage: 'Use an https:// URL without a user name, password, query, or fragment.',
+  }),
+  defaultRef: i18n.translate('xpack.codeIntelligence.repositoryForm.defaultRefInvalid', {
+    defaultMessage: 'Use HEAD, a branch, a tag, or a commit SHA.',
+  }),
+  githubConnectorId: i18n.translate(
+    'xpack.codeIntelligence.repositoryForm.githubConnectorIdInvalid',
+    { defaultMessage: 'The stored GitHub connector ID is invalid.' }
+  ),
+};
+
+/** Reads field problems from a rejected save without trusting the response shape. */
+const serverProblems = (error: unknown): RepositorySettingsField[] => {
+  const problems = (error as { body?: { attributes?: { problems?: unknown } } })?.body?.attributes
+    ?.problems;
+  if (!Array.isArray(problems)) return [];
+  return problems.flatMap((problem) =>
+    typeof problem?.field === 'string' && problem.field in fieldErrors
+      ? [problem.field as RepositorySettingsField]
+      : []
+  );
+};
+
+const serverMessage = (error: unknown): string | undefined => {
+  const message = (error as { body?: { message?: unknown } })?.body?.message;
+  return typeof message === 'string' && message.trim().length > 0 ? message : undefined;
+};
+
+export const RepositoryForm = ({ http, editing, onSaved, onCancelEdit }: Props) => {
+  const [repository, setRepository] = useState('');
+  const [remoteUrl, setRemoteUrl] = useState('');
+  const [defaultRef, setDefaultRef] = useState(DEFAULT_REPOSITORY_REF);
+  const [enabled, setEnabled] = useState(true);
+  const [invalid, setInvalid] = useState<RepositorySettingsField[]>([]);
+  const [saveError, setSaveError] = useState<string>();
+  const [saving, setSaving] = useState(false);
+
+  useEffect(() => {
+    setRepository(editing?.repository ?? '');
+    setRemoteUrl(editing?.remoteUrl ?? '');
+    setDefaultRef(editing?.defaultRef ?? DEFAULT_REPOSITORY_REF);
+    setEnabled(editing?.enabled ?? true);
+    setInvalid([]);
+    setSaveError(undefined);
+  }, [editing]);
+
+  const submit = async () => {
+    const input: RepositorySettingsInput = {
+      repository: repository.trim(),
+      remoteUrl: remoteUrl.trim(),
+      defaultRef: defaultRef.trim() || DEFAULT_REPOSITORY_REF,
+      enabled,
+      // The form does not edit the connector, so saving must not drop it.
+      ...(editing?.githubConnectorId === undefined
+        ? {}
+        : { githubConnectorId: editing.githubConnectorId }),
+    };
+    const problems = validateRepositorySettings(input).map(({ field }) => field);
+    setInvalid(problems);
+    setSaveError(undefined);
+    if (problems.length > 0) return;
+    setSaving(true);
+    try {
+      const saved = await saveRepository(http, input);
+      onSaved(saved);
+      if (editing === undefined) {
+        setRepository('');
+        setRemoteUrl('');
+        setDefaultRef(DEFAULT_REPOSITORY_REF);
+        setEnabled(true);
+      }
+    } catch (error) {
+      const fields = serverProblems(error);
+      setInvalid(fields);
+      if (fields.length === 0) {
+        setSaveError(
+          serverMessage(error) ??
+            i18n.translate('xpack.codeIntelligence.repositoryForm.saveFailed', {
+              defaultMessage: 'The repository could not be saved.',
+            })
+        );
+      }
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const rowError = (field: RepositorySettingsField) =>
+    invalid.includes(field) ? fieldErrors[field] : undefined;
+
+  return (
+    <EuiForm
+      component="form"
+      data-test-subj="codeIntelligenceRepositoryForm"
+      onSubmit={(event) => {
+        event.preventDefault();
+        void submit();
+      }}
+    >
+      <EuiTitle size="xs">
+        <h3>
+          {editing === undefined
+            ? i18n.translate('xpack.codeIntelligence.repositoryForm.addTitle', {
+                defaultMessage: 'Add a repository',
+              })
+            : i18n.translate('xpack.codeIntelligence.repositoryForm.editTitle', {
+                defaultMessage: 'Edit {repository}',
+                values: { repository: editing.repository },
+              })}
+        </h3>
+      </EuiTitle>
+      <EuiSpacer size="s" />
+      {saveError !== undefined && (
+        <>
+          <EuiCallOut
+            announceOnMount
+            color="danger"
+            iconType="error"
+            size="s"
+            data-test-subj="codeIntelligenceRepositorySaveError"
+            title={saveError}
+          />
+          <EuiSpacer size="s" />
+        </>
+      )}
+      <EuiFlexGroup gutterSize="m" alignItems="flexEnd" wrap>
+        <EuiFlexItem>
+          <EuiFormRow
+            label={i18n.translate('xpack.codeIntelligence.repositoryForm.repositoryLabel', {
+              defaultMessage: 'Repository',
+            })}
+            helpText={i18n.translate('xpack.codeIntelligence.repositoryForm.repositoryHelp', {
+              defaultMessage: 'owner/name, for example elastic/kibana',
+            })}
+            isInvalid={rowError('repository') !== undefined}
+            error={rowError('repository')}
+          >
+            <EuiFieldText
+              data-test-subj="codeIntelligenceRepositoryFormRepository"
+              value={repository}
+              disabled={editing !== undefined}
+              maxLength={MAX_REPOSITORY_IDENTITY_LENGTH}
+              isInvalid={rowError('repository') !== undefined}
+              onChange={(event) => setRepository(event.target.value)}
+            />
+          </EuiFormRow>
+        </EuiFlexItem>
+        <EuiFlexItem grow={2}>
+          <EuiFormRow
+            label={i18n.translate('xpack.codeIntelligence.repositoryForm.remoteUrlLabel', {
+              defaultMessage: 'Remote URL',
+            })}
+            helpText={i18n.translate('xpack.codeIntelligence.repositoryForm.remoteUrlHelp', {
+              defaultMessage: 'https://github.com/owner/name.git',
+            })}
+            isInvalid={rowError('remoteUrl') !== undefined}
+            error={rowError('remoteUrl')}
+          >
+            <EuiFieldText
+              data-test-subj="codeIntelligenceRepositoryFormRemoteUrl"
+              value={remoteUrl}
+              maxLength={MAX_REMOTE_URL_LENGTH}
+              isInvalid={rowError('remoteUrl') !== undefined}
+              onChange={(event) => setRemoteUrl(event.target.value)}
+            />
+          </EuiFormRow>
+        </EuiFlexItem>
+        <EuiFlexItem>
+          <EuiFormRow
+            label={i18n.translate('xpack.codeIntelligence.repositoryForm.defaultRefLabel', {
+              defaultMessage: 'Default ref',
+            })}
+            helpText={i18n.translate('xpack.codeIntelligence.repositoryForm.defaultRefHelp', {
+              defaultMessage: 'HEAD means the remote default branch.',
+            })}
+            isInvalid={rowError('defaultRef') !== undefined}
+            error={rowError('defaultRef')}
+          >
+            <EuiFieldText
+              data-test-subj="codeIntelligenceRepositoryFormDefaultRef"
+              value={defaultRef}
+              maxLength={MAX_REVISION_LENGTH}
+              isInvalid={rowError('defaultRef') !== undefined}
+              onChange={(event) => setDefaultRef(event.target.value)}
+            />
+          </EuiFormRow>
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiFormRow hasEmptyLabelSpace>
+            <EuiSwitch
+              data-test-subj="codeIntelligenceRepositoryFormEnabled"
+              label={i18n.translate('xpack.codeIntelligence.repositoryForm.enabledLabel', {
+                defaultMessage: 'Include when running all',
+              })}
+              checked={enabled}
+              onChange={(event) => setEnabled(event.target.checked)}
+            />
+          </EuiFormRow>
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiFormRow hasEmptyLabelSpace>
+            <EuiFlexGroup gutterSize="s" responsive={false}>
+              <EuiFlexItem grow={false}>
+                <EuiButton
+                  data-test-subj="codeIntelligenceRepositoryFormSave"
+                  type="submit"
+                  fill
+                  isLoading={saving}
+                >
+                  {i18n.translate('xpack.codeIntelligence.repositoryForm.save', {
+                    defaultMessage: 'Save',
+                  })}
+                </EuiButton>
+              </EuiFlexItem>
+              {editing !== undefined && (
+                <EuiFlexItem grow={false}>
+                  <EuiButtonEmpty
+                    data-test-subj="codeIntelligenceRepositoryFormCancel"
+                    onClick={onCancelEdit}
+                  >
+                    {i18n.translate('xpack.codeIntelligence.repositoryForm.cancel', {
+                      defaultMessage: 'Cancel',
+                    })}
+                  </EuiButtonEmpty>
+                </EuiFlexItem>
+              )}
+            </EuiFlexGroup>
+          </EuiFormRow>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    </EuiForm>
+  );
+};
