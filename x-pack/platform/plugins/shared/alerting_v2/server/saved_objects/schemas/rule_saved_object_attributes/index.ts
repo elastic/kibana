@@ -52,13 +52,18 @@ export {
 };
 
 /**
- * The current (latest) rule saved-object attributes schema.
+ * The current (latest) rule saved-object attributes schema, used by
+ * `assertBuilderFieldsIsOpenRecord` in `from_builder_fields_manifest.ts`.
  *
- * `fromBuilderManifest` uses this to build the forward-compatibility schema for
- * every fold line. Update this alias whenever a new versioned attributes schema
- * is created, so that all existing and future fold lines pick up the new schema
- * automatically without needing individual call-site updates.
+ * Do NOT use this alias as the schema argument to `fromBuilderFieldsManifest`.
+ * Each fold line in `rule_model_versions.ts` must name a frozen schema version
+ * explicitly (e.g. `ruleSavedObjectAttributesSchemaV11`). Re-pointing this alias
+ * when a new versioned schema is added would change the schema hash CI records for
+ * every already-published fold line, causing `validateAllMappingsInModelVersion`
+ * to run against an open record that names no leaf, which fails on the first
+ * sub-field.
  *
+ * Ref: builder-type-registration-redesign.md "The schemas a folded version carries"
  * Ref: rule-data-migration.md "Rollback behavior"
  */
 export const currentRuleSavedObjectAttributesSchema = ruleSavedObjectAttributesSchemaV13;

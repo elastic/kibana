@@ -1148,7 +1148,7 @@
     "@kbn/security-api-key-management": "workspace:*",
     "@kbn/security-authorization-core": "workspace:*",
     "@kbn/security-authorization-core-common": "workspace:*",
-    "@kbn/security-detection-rule-schema": "workspace:*",
+    "@kbn/security-detection-rule-builder-fields": "workspace:*",
     "@kbn/security-detections-plugin": "workspace:*",
     "@kbn/security-form-components": "workspace:*",
     "@kbn/security-hardening": "workspace:*",

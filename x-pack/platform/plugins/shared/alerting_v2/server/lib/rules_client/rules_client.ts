@@ -82,6 +82,7 @@ import type { PluginConfig } from '../../config';
 import { convertEveryToSchedulesPerMinute, parseDurationToMs } from '../duration';
 import { buildMatchingRulesFilter, buildRuleSoFilter } from './build_rule_filter';
 import { buildSoSearch, RULE_SEARCH_FIELDS } from './build_so_search';
+import { mergedBuilderFieldMappings } from '../../saved_objects/rule_mappings';
 import type {
   BulkByIdsParams,
   BulkByQueryParams,
@@ -207,24 +208,67 @@ const throwOnCreateError = (error: BulkOperationError): never => {
   });
 };
 
-const mapSortField = (sortField?: FindRulesSortField): string | undefined => {
+/**
+ * Fixed sort field names whose SO paths are determined by the framework's own
+ * mappings and do not change with registered builder-fields manifests. The
+ * `name` value targets the keyword sub-field of the `text` mapping so that
+ * lexicographic ordering works correctly.
+ */
+const FIXED_SORT_FIELD_MAP: Record<string, string> = {
+  kind: 'kind',
+  enabled: 'enabled',
+  // Targets the `.keyword` sub-field of the `text` mapping so sort is
+  // lexicographic rather than score-based.
+  name: 'metadata.name.keyword',
+  // Phase 4: builder_type is keyword-indexed (squashed model version '7';
+  // originally designed as a standalone model version '10' on this POC branch).
+  builder_type: 'metadata.builder_type',
+};
+
+/**
+ * The prefix that identifies a builder-fields sort request. Any
+ * `builder_fields.<path>` value not in the fixed map is resolved against the
+ * merged registered sub-fields from the manifests.
+ */
+const BUILDER_FIELDS_SORT_PREFIX = 'builder_fields.';
+
+/**
+ * Maps a client-facing sort field name to its saved-object path.
+ *
+ * - Fixed names (`kind`, `enabled`, `name`, `builder_type`) resolve to their
+ *   framework-owned SO paths and are not affected by registered manifests.
+ * - Any `builder_fields.<path>` is resolved against the merged sub-fields from
+ *   the registered builder-fields manifests. An unknown path or a `text` leaf
+ *   throws a 400: a sort on an unknown path would be silently wrong, and a `text`
+ *   leaf cannot be sorted because `simple_query_string` prefix queries reject it.
+ * - Any other value throws a 400.
+ *
+ * Ref: builder-type-registration-redesign.md "What this design needs from the framework"
+ */
+const mapSortField = (sortField?: FindRulesSortField | string): string | undefined => {
   if (!sortField) {
     return undefined;
   }
 
-  const sortFieldMap: Record<FindRulesSortField, string> = {
-    kind: 'kind',
-    enabled: 'enabled',
-    name: 'metadata.name.keyword',
-    // Phase 4: builder_type is keyword-indexed (squashed model version '7';
-    // originally designed as a standalone model version '10' on this POC branch).
-    // builder_fields.risk_score targets the integer typed sub-field of the
-    // flattened container — the only sub-field that supports numeric sort.
-    builder_type: 'metadata.builder_type',
-    'builder_fields.risk_score': 'metadata.builder_fields.risk_score',
-  };
+  if (Object.hasOwn(FIXED_SORT_FIELD_MAP, sortField)) {
+    return FIXED_SORT_FIELD_MAP[sortField];
+  }
 
-  return sortFieldMap[sortField];
+  if (sortField.startsWith(BUILDER_FIELDS_SORT_PREFIX)) {
+    const path = sortField.slice(BUILDER_FIELDS_SORT_PREFIX.length);
+    const subField = Object.hasOwn(mergedBuilderFieldMappings, path)
+      ? mergedBuilderFieldMappings[path]
+      : undefined;
+    if (subField === undefined) {
+      throw Boom.badRequest(`Unknown sort field: ${sortField}`);
+    }
+    if (subField.type === 'text') {
+      throw Boom.badRequest(`${sortField} is an analyzed field and cannot be sorted on`);
+    }
+    return `metadata.builder_fields.${path}`;
+  }
+
+  throw Boom.badRequest(`Unknown sort field: ${sortField}`);
 };
 
 @injectable()

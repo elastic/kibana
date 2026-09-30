@@ -6,11 +6,7 @@
  */
 
 import type { SavedObjectsModelVersionMap } from '@kbn/core-saved-objects-server';
-import {
-  securityDetectionQueryManifest,
-  securityDetectionThresholdManifest,
-  DETECTION_RULE_TYPE_OWNERSHIP,
-} from '@kbn/security-detection-rule-schema';
+import { detectionRuleBuilderFieldsManifest } from '@kbn/security-detection-rule-builder-fields';
 import {
   ruleSavedObjectAttributesSchemaV1,
   ruleSavedObjectAttributesSchemaV2,
@@ -25,7 +21,7 @@ import { migrateRuleArtifactsToData } from './migrate_rule_artifacts_to_data';
 import { migrateDashboardArtifactDataKey } from './migrate_dashboard_artifact_data_key';
 import { migrateRuleQueryShape } from './migrate_rule_query_shape';
 import { toActor } from './to_actor';
-import { fromBuilderManifest } from './from_builder_manifest';
+import { fromBuilderFieldsManifest } from './from_builder_fields_manifest';
 
 export const ruleModelVersions: SavedObjectsModelVersionMap = {
   '1': {
@@ -245,22 +241,26 @@ export const ruleModelVersions: SavedObjectsModelVersionMap = {
   //
   // Changes carried by this squashed '10', in migration order:
   //   1. mappings_addition — metadata.builder_fields as flattened (was '10')
-  //   2. fromBuilderManifest(securityDetectionQueryManifest, 1).changes
-  //      — typed sub-fields for security.detection.query v1 (was '11')
-  //   3. fromBuilderManifest(securityDetectionThresholdManifest, 1).changes
-  //      — typed sub-fields for security.detection.threshold v1 (was '12')
-  //   4. mappings_addition — framework field families: signature_id, source,
+  //   2. fromBuilderFieldsManifest(detectionRuleBuilderFieldsManifest, 1, V12).changes
+  //      — typed sub-fields for all detection rule types v1 (was '11' and '12',
+  //        now a single call covering both security.detection.query and
+  //        security.detection.threshold from one shared manifest)
+  //   3. mappings_addition — framework field families: signature_id, source,
   //      ownership, builder_type (was '13')
-  //   5. data_backfill — stamps all four field families on migrating rules (was '13')
+  //   4. data_backfill — stamps all four field families on migrating rules (was '13')
   //   (was '14': changes: [] — no changes; only advanced the schema to V13)
   //
   // Order is load-bearing: every mappings_addition must precede the backfill
-  // that writes into those fields, exactly as the cross-version order had it.
+  // that writes into those fields, and the container's own addition must precede
+  // the sub-fields. Keep this order: container, then the manifest's changes,
+  // then the framework field families' addition, then the ownership backfill.
   //
-  // The fromBuilderManifest() calls must remain actual calls (not inlined data)
-  // because addFoldedVersion() records (type, n) in a global registry that the
-  // registration-time manifest-consistency check (check 6) reads. Spreading
-  // .changes from the call preserves that side effect.
+  // The fromBuilderFieldsManifest() call must remain an actual call (not inlined
+  // data) because addFoldedManifest() records (manifest, n) in a global registry
+  // that the fold-completeness check and the registration-time managed-type
+  // completeness check (check 7) read. Spreading .changes from the call preserves
+  // that side effect while allowing changes from the manifest's version to be
+  // interleaved with the framework's own additions in the correct migration order.
   //
   // The schemas block is '14's, verbatim (ruleSavedObjectAttributesSchemaV13),
   // because that was the last schema step in the POC sequence.
@@ -280,10 +280,14 @@ export const ruleModelVersions: SavedObjectsModelVersionMap = {
           },
         },
       },
-      // was '11': security.detection.query v1 typed sub-fields
-      ...fromBuilderManifest(securityDetectionQueryManifest, 1).changes,
-      // was '12': security.detection.threshold v1 typed sub-fields
-      ...fromBuilderManifest(securityDetectionThresholdManifest, 1).changes,
+      // was '11' and '12': detection rule type v1 typed sub-fields for both
+      // security.detection.query and security.detection.threshold, now folded
+      // from a single shared manifest rather than one call per type.
+      ...fromBuilderFieldsManifest(
+        detectionRuleBuilderFieldsManifest,
+        1,
+        ruleSavedObjectAttributesSchemaV13
+      ).changes,
       // was '13': framework field families (identity, versions, source, ownership, builder_type)
       {
         type: 'mappings_addition',
@@ -317,20 +321,20 @@ export const ruleModelVersions: SavedObjectsModelVersionMap = {
         },
       },
       // was '13': backfill stamps all four field families
+      //
+      // Ownership is no longer derived from a Security-owned type map. The model
+      // version that introduces the container is the same one that introduces
+      // metadata.ownership, so no stored rule can be of a detection rule type and
+      // predate the ownership stamp. A rule that carried a detection-shaped
+      // builder_type string before any of this existed is stamped { managed: false },
+      // and the write gate still refuses it through its second half, which reads the
+      // registration for the requested builder type rather than the stored stamp alone.
+      //
+      // Ref: builder-type-registration-redesign.md "What changes from the current design"
+      //      alerting_v2/server/lib/rules_client/utils.ts getManagedWriteOwner
       {
         type: 'data_backfill',
         backfillFn: (doc) => {
-          const builderType = doc.attributes.metadata?.builder_type;
-          const ownershipEntry =
-            builderType != null ? DETECTION_RULE_TYPE_OWNERSHIP[builderType] : undefined;
-          const derivedOwnership = ownershipEntry
-            ? {
-                managed: true as const,
-                solution: ownershipEntry.solution,
-                domain: ownershipEntry.domain,
-              }
-            : { managed: false as const };
-
           return {
             attributes: {
               metadata: {
@@ -343,8 +347,10 @@ export const ruleModelVersions: SavedObjectsModelVersionMap = {
                   doc.attributes.metadata?.source ?? ({ type: 'internal', version: 1 } as const),
                 // Preserve a non-zero revision; 0 is the "never edited" baseline.
                 revision: doc.attributes.metadata?.revision ?? 0,
-                // Preserve a stamped ownership; derive from the type map for managed types.
-                ownership: doc.attributes.metadata?.ownership ?? derivedOwnership,
+                // Preserve a stamped ownership. Pre-container rules get { managed: false };
+                // the write gate's second half reads the registration and refuses any
+                // managed-type write regardless of the stored stamp.
+                ownership: doc.attributes.metadata?.ownership ?? { managed: false as const },
               },
             },
           };
@@ -411,33 +417,31 @@ export const ruleModelVersions: SavedObjectsModelVersionMap = {
   //   },
   // },
   // ---------------------------------------------------------------------------
-  // Detection-type manifest folds (step 3.5)
+  // Detection-type manifest folds (step 3.5, revised by step B.5)
   //
   // Each line expands one manifest version into an ordinary model version.
   // The global model-version sequence is append-only and totally ordered; both
   // the number and the manifest must stay here permanently once published.
   //
-  // As a side effect, fromBuilderManifest() records each (type, version) pair
-  // in globalFoldedVersions so the registration-time manifest-consistency
-  // check (check 6) can verify every manifest version has been folded.
+  // As a side effect, fromBuilderFieldsManifest() records (manifest, n) in
+  // globalFoldedVersions so that:
+  //   - the fold-completeness check (saved_objects/index.ts) can verify every
+  //     manifest version has been expanded;
+  //   - the registration-time managed-type completeness check (check 7) can
+  //     verify that a managed type is covered by a folded manifest.
   //
-  // Ref: rule-type-registration.md "The fold into the saved-object registration"
-  //      rule-data-migration.md "From manifest version to model version"
+  // Ref: builder-type-registration-redesign.md "Assembling the saved-object type"
+  //      builder-type-registration-redesign.md "How stored builder fields evolve"
   // ---------------------------------------------------------------------------
 
-  // security.detection.query v1: adds the shared detection fragment's typed
-  // sub-fields (risk_score, max_signals as integer; note, setup as text) plus
-  // `query` as a text sub-field for full-text search. Version 1 needs no
-  // backfill — no stored rule carries these fields yet.
-  // '11': fromBuilderManifest(securityDetectionQueryManifest, 1),
-
-  // security.detection.threshold v1: same fragment sub-fields as the query
-  // type (identical declarations merge silently at the mapping assembly) plus
-  // `query` as text. No backfill needed for the same reason.
-  // '12': fromBuilderManifest(securityDetectionThresholdManifest, 1),
+  // Detection rule types v1: all 32 sub-fields for both
+  // security.detection.query and security.detection.threshold, folded from a
+  // single shared manifest. No backfill — no stored rule carries these fields
+  // yet when they first ship.
+  // '11': fromBuilderFieldsManifest(detectionRuleBuilderFieldsManifest, 1, ruleSavedObjectAttributesSchemaV11),
 
   // ---------------------------------------------------------------------------
-  // Framework rule-model fields (step 4.5)
+  // Framework rule-model fields (step 4.5, revised by step B.5)
   //
   // One shared version carrying all four field families added in Phase 4:
   // identity (signature_id), versions (revision), source, and ownership — plus
@@ -450,23 +454,24 @@ export const ruleModelVersions: SavedObjectsModelVersionMap = {
   //   - signature_id  := the rule's own saved-object id (deterministic, unique)
   //   - source        := { type: 'internal', version: 1 } (no lineage to recover)
   //   - revision      := 0 (the "never meaningfully edited" baseline)
-  //   - ownership     := type-aware: managed types from DETECTION_RULE_TYPE_OWNERSHIP,
-  //                      everything else { managed: false }
+  //   - ownership     := { managed: false } on every pre-container rule.
+  //                      The write gate's second half reads the registration for
+  //                      the requested builder type, so a rule stamped
+  //                      { managed: false } whose type is a registered managed
+  //                      type is still refused. No type map is needed.
   //
   // All four use `?? <default>` so that rules already written by the Phase 4
   // write paths (steps 4.1–4.4) keep their live values when this version's
   // backfill runs during migration.
-  //
-  // The type-to-ownership map is a plain package constant, not a runtime
-  // registry query, so the backfill runs even when the owning plugin is disabled.
   //
   // Ref: rule-identity.md "Storage and migration"
   //      rule-versions.md "Storage and migration"
   //      rule-source.md "Storage and migration"
   //      rule-ownership.md "Storage, mapping, and migration"
   //      rule-types.md "The discriminator must be indexed and filterable"
+  //      builder-type-registration-redesign.md "What changes from the current design"
   // ---------------------------------------------------------------------------
-  // '13': {
+  // '12': {
   //   changes: [
   //     {
   //       type: 'mappings_addition',
@@ -502,17 +507,6 @@ export const ruleModelVersions: SavedObjectsModelVersionMap = {
   //     {
   //       type: 'data_backfill',
   //       backfillFn: (doc) => {
-  //         const builderType = doc.attributes.metadata?.builder_type;
-  //         const ownershipEntry =
-  //           builderType != null ? DETECTION_RULE_TYPE_OWNERSHIP[builderType] : undefined;
-  //         const derivedOwnership = ownershipEntry
-  //           ? {
-  //               managed: true as const,
-  //               solution: ownershipEntry.solution,
-  //               domain: ownershipEntry.domain,
-  //             }
-  //           : { managed: false as const };
-  //
   //         return {
   //           attributes: {
   //             metadata: {
@@ -525,8 +519,10 @@ export const ruleModelVersions: SavedObjectsModelVersionMap = {
   //                 doc.attributes.metadata?.source ?? ({ type: 'internal', version: 1 } as const),
   //               // Preserve a non-zero revision; 0 is the "never edited" baseline.
   //               revision: doc.attributes.metadata?.revision ?? 0,
-  //               // Preserve a stamped ownership; derive from the type map for managed types.
-  //               ownership: doc.attributes.metadata?.ownership ?? derivedOwnership,
+  //               // Preserve a stamped ownership; stamp { managed: false } for
+  //               // pre-container rules. The write gate's second half reads the
+  //               // registration, so managed types are still refused.
+  //               ownership: doc.attributes.metadata?.ownership ?? { managed: false as const },
   //             },
   //           },
   //         };
