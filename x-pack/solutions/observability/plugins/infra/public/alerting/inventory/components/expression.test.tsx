@@ -298,6 +298,25 @@ describe('Expression', () => {
       expect(selectedSchema({ nodeType: 'host', schema: 'ecs' })).toBe('ecs');
     });
 
+    it('stores the schema picked in the schema control for a pod rule', () => {
+      mockedUseIsPodSchemaSelectorEnabled.mockReturnValue(true);
+
+      const { wrapper, params } = renderShallow({ nodeType: 'pod', schema: 'semconv' });
+
+      wrapper.find('[data-test-subj="schemaExpressionSelect"]').simulate('change', 'ecs');
+
+      expect(params.schema).toBe('ecs');
+      expect(params.nodeType).toBe('pod');
+    });
+
+    it('stores the schema picked in the schema control for a host rule that has none', () => {
+      const { wrapper, params } = renderShallow({ nodeType: 'host' });
+
+      wrapper.find('[data-test-subj="schemaExpressionSelect"]').simulate('change', 'semconv');
+
+      expect(params.schema).toBe('semconv');
+    });
+
     it('prefills a pod schema from the waffle once the pod flag is on', async () => {
       mockedUseIsPodSchemaSelectorEnabled.mockReturnValue(true);
 

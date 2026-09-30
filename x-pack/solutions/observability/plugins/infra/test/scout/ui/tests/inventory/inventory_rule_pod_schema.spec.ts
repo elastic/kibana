@@ -19,6 +19,8 @@ import {
   ingestInventoryPodsSemconvSynthtraceData,
 } from '../../fixtures/sequential_pods_synthtrace';
 
+const RULE_NAME = 'Inventory pod schema selector rule';
+
 test.describe(
   'Infrastructure Inventory - Rule flyout pod schema selector',
   { tag: [...tags.stateful.classic, ...tags.serverless.observability.complete] },
@@ -49,6 +51,14 @@ test.describe(
     });
 
     test.afterAll(async ({ apiServices, esClient, kbnUrl, log, config }) => {
+      log.info('Sequential suite: cleaning inventory rules created by this suite');
+      const {
+        data: { data: rules },
+      } = await apiServices.alerting.rules.find({ search: RULE_NAME, search_fields: ['name'] });
+      for (const rule of rules) {
+        await apiServices.alerting.rules.delete(rule.id);
+      }
+
       log.info('Sequential suite: cleaning Inventory SemConv pod metrics for rule flyout');
       await cleanInventoryPodsSemconvSynthtraceData({ esClient, kbnUrl, log, config });
       await apiServices.core.settings({
@@ -91,6 +101,36 @@ test.describe(
 
       await expect(inventoryPage.ruleFlyoutForExpressionButton).toContainText('Kubernetes Pods');
       await expect(inventoryPage.ruleFlyoutSchemaExpressionButton).toContainText('OpenTelemetry');
+    });
+
+    test('saves the schema picked in the rule flyout', async ({
+      pageObjects: { inventoryPage },
+      apiServices,
+    }) => {
+      await test.step('switch the prefilled schema to Elastic System Integration', async () => {
+        await inventoryPage.openInventoryRuleFlyoutFromPodWaffleNode(SEMCONV_PODS[0].name);
+        await expect(inventoryPage.ruleFlyoutSchemaExpressionButton).toContainText('OpenTelemetry');
+
+        await inventoryPage.selectRuleSchema('ecs');
+
+        await expect(inventoryPage.ruleFlyoutSchemaExpressionButton).toContainText(
+          'Elastic System Integration'
+        );
+      });
+
+      await test.step('save the rule', async () => {
+        await inventoryPage.setRuleThreshold(50);
+        await inventoryPage.saveRule(RULE_NAME);
+      });
+
+      await test.step('the saved rule keeps the picked schema', async () => {
+        const {
+          data: { data: rules },
+        } = await apiServices.alerting.rules.find({ search: RULE_NAME, search_fields: ['name'] });
+
+        expect(rules).toHaveLength(1);
+        expect(rules[0].params).toMatchObject({ nodeType: 'pod', schema: 'ecs' });
+      });
     });
 
     test('opening the rule flyout from an ECS pod waffle tile prefills Elastic System Integration', async ({
