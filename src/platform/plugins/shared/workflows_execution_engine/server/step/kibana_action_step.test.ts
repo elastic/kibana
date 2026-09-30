@@ -729,6 +729,37 @@ describe('KibanaActionStepImpl', () => {
       );
     });
 
+    it('serializes array query params as repeated keys, not comma-joined', async () => {
+      step = createStep({
+        request: {
+          method: 'GET',
+          path: '/api/cases',
+          query: { status: ['running', 'upcoming'] },
+        },
+      });
+      await (step as any)._run();
+
+      expect(global.fetch).toHaveBeenCalledWith(
+        'https://localhost:5601/api/cases?status=running&status=upcoming',
+        expect.any(Object)
+      );
+    });
+
+    it('includes repeated array query params in _debug.fullUrl', async () => {
+      step = createStep({
+        request: {
+          method: 'GET',
+          path: '/api/cases',
+          query: { status: ['running', 'upcoming'] },
+        },
+        debug: true,
+      });
+      const result = await (step as any)._run();
+      expect(result.output._debug.fullUrl).toBe(
+        'https://localhost:5601/api/cases?status=running&status=upcoming'
+      );
+    });
+
     it('does not forward use_server_info, use_localhost, or debug in the request body', async () => {
       step = createStep({
         request: {
