@@ -28,7 +28,7 @@ export class BuilderTypeRegistry {
   /**
    * Record of (type, version) pairs that have been folded into alerting_v2's
    * model versions. Defaults to the module-level singleton populated by
-   * fromBuilderManifest() calls in rule_model_versions.ts (step 2.3).
+   * fromBuilderFieldsManifest() calls in rule_model_versions.ts (step B.5).
    * Override via withFoldedVersions() in tests to inject a fixture.
    */
   private foldedVersions: FoldedVersionsRecord = globalFoldedVersions;
@@ -50,8 +50,9 @@ export class BuilderTypeRegistry {
       throw new Error(`Builder type "${definition.type}" is already registered`);
     }
 
-    // Checks 2–8 (id format, bounded schema, ignore_above, kind pin,
-    // manifest consistency, managed-type completeness, mode consistency).
+    // Checks 2–8 (id format, bounded schema, top-level key count,
+    // no defaults/transforms, total mapping, managed-type completeness,
+    // compilation-mode consistency).
     assertValidDefinition(definition, this.foldedVersions);
 
     this.types.set(definition.type, Object.freeze({ ...definition }));

@@ -13,11 +13,8 @@ import type {
   PluginInitializerContext,
 } from '@kbn/core/server';
 import { defineBuilderType } from '@kbn/alerting-v2-rule-builders';
-import {
-  securityDetectionQuery,
-  securityDetectionThreshold,
-} from '@kbn/security-detection-rule-schema';
 import type { AlertingServerSetup } from '@kbn/alerting-v2-plugin/server';
+import { securityDetectionQuery, securityDetectionThreshold } from './builder_types';
 import type { ConfigType } from './config';
 import { assertAliasBijectivity } from '../common/api';
 import { registerDetectionFetchRoutes } from './routes/fetch';

@@ -6,7 +6,7 @@
  */
 
 import type { z } from '@kbn/zod/v4';
-import type { Query } from '@kbn/alerting-v2-schemas';
+import type { Query, RuleKind } from '@kbn/alerting-v2-schemas';
 
 export type OpaqueBuilderFields = Record<string, unknown>;
 
@@ -17,59 +17,178 @@ export interface GeneratedQuery {
 }
 
 // ---------------------------------------------------------------------------
-// Manifest types
+// Keyword sub-field ceiling constants
+//
+// Every keyword sub-field under metadata.builder_fields must carry an
+// ignore_above equal to KEYWORD_SUB_FIELD_IGNORE_ABOVE. The derivation is:
+// Lucene refuses a single term that exceeds 32,766 bytes, and one UTF-8
+// character takes at most four bytes, so 32,766 / 4 = 8,191.5 rounded down
+// gives the largest character count that cannot exceed the byte limit whatever
+// the content.
+// ---------------------------------------------------------------------------
+
+/** Lucene's hard limit on a single term, in bytes. A document write fails when any term exceeds it. */
+export const LUCENE_MAX_TERM_BYTES = 32_766;
+
+/** The widest UTF-8 encoding of one character, the figure the Elasticsearch reference uses. */
+export const MAX_UTF8_BYTES_PER_CHAR = 4;
+
+/**
+ * The `ignore_above` value every keyword sub-field of metadata.builder_fields must carry:
+ * the largest character count whose worst-case UTF-8 encoding still fits inside one Lucene
+ * term, so no value the sub-field accepts can cause a document write to fail.
+ * 32,766 / 4 = 8,191.5, rounded down to 8,191.
+ */
+export const KEYWORD_SUB_FIELD_IGNORE_ABOVE = Math.floor(
+  LUCENE_MAX_TERM_BYTES / MAX_UTF8_BYTES_PER_CHAR
+);
+
+// ---------------------------------------------------------------------------
+// Mapping property type
 // ---------------------------------------------------------------------------
 
 /**
- * Narrow union of Elasticsearch field types allowed as typed sub-fields of the
- * `metadata.builder_fields` flattened container.
+ * The leaf field types allowed as typed sub-fields of the metadata.builder_fields
+ * flattened container.
  *
- * The allowlist matches the ES 9.4 set of types known to work reliably as
- * flattened-field sub-fields: keyword, text, the standard numeric types, date,
- * ip, and boolean. `scaled_float` requires a `scaling_factor`.
- *
- * Per the registration design's open question: whether to widen this to accept
- * anything Elasticsearch supports. The narrow allowlist is the safe start.
+ * Keyword sub-fields require ignore_above so that every value the schema accepts
+ * stays under Lucene's 32,766-byte term limit. Text sub-fields carry no such bound;
+ * Elasticsearch imposes none, and the schema's own .max() is the limit that bites.
+ * Numerics, boolean, date, and ip are indexed and sorted by their natural type.
+ * scaled_float requires a scaling_factor.
  */
 export type MappingProperty =
-  | { type: 'keyword' }
+  | { type: 'keyword'; ignore_above: number }
   | { type: 'text' }
-  | { type: 'integer' }
-  | { type: 'long' }
-  | { type: 'short' }
-  | { type: 'byte' }
-  | { type: 'double' }
-  | { type: 'float' }
-  | { type: 'half_float' }
+  | { type: 'integer' | 'long' | 'short' | 'byte' | 'unsigned_long' }
+  | { type: 'double' | 'float' | 'half_float' }
   | { type: 'scaled_float'; scaling_factor: number }
-  | { type: 'unsigned_long' }
+  | { type: 'boolean' }
   | { type: 'date' }
-  | { type: 'ip' }
-  | { type: 'boolean' };
+  | { type: 'ip' };
 
-export interface BuilderTypeVersion {
+// ---------------------------------------------------------------------------
+// Builder-fields manifest types (new storage contract)
+// ---------------------------------------------------------------------------
+
+/**
+ * Declares the storage that one contributing solution owns inside the
+ * metadata.builder_fields flattened container. One manifest covers every
+ * builder type a solution contributes, because the sub-field properties
+ * table is shared across all of them.
+ *
+ * The two halves are intentionally separate. currentMappings is the live
+ * declaration used to build the static mapping. versions is the immutable
+ * history used by the migration machinery. A version's addedMappings are
+ * always literals, never derived from currentMappings, so that a later
+ * change to currentMappings cannot alter what a deployed version recorded.
+ */
+export interface BuilderFieldsManifest {
+  /** The builder types whose rules this manifest declares storage for. */
+  builderTypes: string[];
+
   /**
-   * Typed sub-field mappings added under metadata.builder_fields in this version,
-   * keyed by leaf path (dot notation), e.g. { 'risk_score': { type: 'integer' } }.
+   * Every typed sub-field under metadata.builder_fields that these types index
+   * today, keyed by leaf path in dot notation. Placed directly into the container's
+   * properties. Must equal the merge of every version's addedMappings.
    */
-  addedSubFieldMappings?: Record<string, MappingProperty>;
+  currentMappings: Record<string, MappingProperty>;
 
-  /**
-   * Pure backfill over a stored rule's builder_fields, run once per rule during
-   * the saved-object migration this version folds into.
-   */
-  backfillFn?: (fields: OpaqueBuilderFields) => OpaqueBuilderFields;
-}
-
-export interface BuilderTypeManifest {
-  /** Must equal the BuilderTypeDefinition's type. */
-  type: string;
-
-  /** The type's current version; must equal the highest key of `versions`. */
+  /** The highest key in `versions`. Must equal the key count when versions are dense from 1. */
   currentVersion: number;
 
-  /** Dense from 1. Append-only: published versions are never edited or removed. */
-  versions: Record<number, BuilderTypeVersion>;
+  /**
+   * Dense from 1, append-only. A published version is never edited, because the migration
+   * that folded it has already run on some deployments.
+   */
+  versions: Record<number, BuilderFieldsVersion>;
+}
+
+/**
+ * What one released version of the builder-fields manifest contributes to the
+ * alerting_rule saved-object type. Both properties are optional; a version may
+ * add mappings, rewrite stored builder fields, or both.
+ */
+export interface BuilderFieldsVersion {
+  /**
+   * Typed sub-fields this version adds under metadata.builder_fields, keyed by
+   * leaf path in dot notation. Always literals, never a reference to the
+   * currentMappings object, so that a later edit to currentMappings cannot change
+   * what a deployed version recorded.
+   */
+  addedMappings?: Record<string, MappingProperty>;
+
+  /**
+   * Scoped rewrites of stored builder fields. Each entry names the builder types
+   * it applies to, and a given builder type appears in at most one entry per version.
+   */
+  backfills?: BuilderFieldsBackfill[];
+}
+
+/**
+ * One scoped backfill inside a BuilderFieldsVersion. The framework calls migrate
+ * only for rules whose stored metadata.builder_type matches one of the listed
+ * builderTypes. The function is pure: no I/O, no registry access, no framework
+ * services.
+ */
+export interface BuilderFieldsBackfill {
+  /** Rules of these builder types are rewritten; rules of any other type are not. */
+  builderTypes: string[];
+
+  /** Pure over the rule's builder_fields: takes the container and returns the container. */
+  migrate: (fields: OpaqueBuilderFields) => OpaqueBuilderFields;
+}
+
+// ---------------------------------------------------------------------------
+// mergeBuilderFieldMappings
+// ---------------------------------------------------------------------------
+
+/**
+ * Merges one or more builder-field mapping records into a single record.
+ *
+ * When two sources declare the same leaf path with identical mappings the
+ * declarations merge silently — identical means structurally equal over every
+ * key, ignore_above included. When two sources declare the same path with
+ * differing mappings an error is thrown, naming the conflicting path and both
+ * declarations. This runs when the module loads, so a conflict surfaces in every
+ * test and every boot rather than only on a specific deployment.
+ *
+ * @param sources One or more leaf-path-keyed mapping records to merge.
+ * @returns The merged record; a new object, not a mutation of any source.
+ * @throws {Error} When two sources declare the same path with different mappings.
+ */
+export function mergeBuilderFieldMappings(
+  ...sources: Array<Record<string, MappingProperty>>
+): Record<string, MappingProperty> {
+  const result: Record<string, MappingProperty> = {};
+  for (const source of sources) {
+    for (const [path, mapping] of Object.entries(source)) {
+      if (Object.prototype.hasOwnProperty.call(result, path)) {
+        if (!isMappingPropertyEqual(result[path], mapping)) {
+          throw new Error(
+            `Builder field mapping conflict at path "${path}": ` +
+              `source A declares ${JSON.stringify(sortObjectKeys(result[path]))}, ` +
+              `source B declares ${JSON.stringify(sortObjectKeys(mapping))}. ` +
+              `Identical declarations merge silently; differing declarations do not.`
+          );
+        }
+        // Identical — keep the existing entry, nothing to do.
+      } else {
+        result[path] = mapping;
+      }
+    }
+  }
+  return result;
+}
+
+/** Structural equality over all keys. Serialises with sorted keys so key insertion order is irrelevant. */
+function isMappingPropertyEqual(a: MappingProperty, b: MappingProperty): boolean {
+  return JSON.stringify(sortObjectKeys(a)) === JSON.stringify(sortObjectKeys(b));
+}
+
+/** Returns a new object whose own enumerable entries are sorted by key. Shallow only. */
+function sortObjectKeys(obj: object): object {
+  return Object.fromEntries(Object.entries(obj).sort(([ka], [kb]) => ka.localeCompare(kb)));
 }
 
 // ---------------------------------------------------------------------------
@@ -152,7 +271,7 @@ export interface BuilderTypeDefinition<TFields extends object = OpaqueBuilderFie
   description?: string;
 
   /** If set, rules of this type must use this kind; writes with another kind are rejected. */
-  kind?: 'alert' | 'signal';
+  kind?: RuleKind;
 
   /**
    * If set, the type is managed: every rule of this type is stamped with this ownership
@@ -171,9 +290,6 @@ export interface BuilderTypeDefinition<TFields extends object = OpaqueBuilderFie
 
   /** Optional cross-field validation beyond the schema; pure; runs on writes after the parse. */
   validateFields?: (fields: TFields) => string[];
-
-  /** The static manifest carrying this type's sub-field mappings and version history. */
-  manifest?: BuilderTypeManifest;
 
   /**
    * For execution-time types only: pure; derives the persisted framework fields

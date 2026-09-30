@@ -6,8 +6,15 @@
  */
 
 import { z } from '@kbn/zod/v4';
-import { BuilderQueryGenerationError } from '@kbn/alerting-v2-rule-builders';
-import type { GeneratedQuery, RegisteredBuilderType } from '@kbn/alerting-v2-rule-builders';
+import {
+  BuilderQueryGenerationError,
+  KEYWORD_SUB_FIELD_IGNORE_ABOVE,
+} from '@kbn/alerting-v2-rule-builders';
+import type {
+  BuilderFieldsManifest,
+  GeneratedQuery,
+  RegisteredBuilderType,
+} from '@kbn/alerting-v2-rule-builders';
 import { BuilderTypeRegistry } from './builder_type_registry';
 import { FoldedVersionsSet } from './folded_versions';
 import { ALERTING_ERROR_CODES } from '../errors/error_codes';
@@ -418,22 +425,26 @@ describe('BuilderTypeRegistry.generate — parse-and-call', () => {
 // ---------------------------------------------------------------------------
 
 describe('BuilderTypeRegistry — composite: managed type registration', () => {
+  const TYPE = 'security.detection.mytype';
+
   /**
-   * Build a FoldedVersionsSet with the given type's version 1 recorded.
-   * Mirrors what fromBuilderManifest() does in production (step 2.3).
+   * Build a FoldedVersionsSet that covers the given type via recordManifest().
+   * The manifest includes 'value' in its currentMappings to match simpleSchema
+   * (which has value: string.max(100)), so the total-mapping check passes.
+   * Mirrors what fromBuilderFieldsManifest() does in production (step B.5).
    */
   function makeFoldedFor(type: string): FoldedVersionsSet {
+    const valueMapping = { type: 'keyword' as const, ignore_above: KEYWORD_SUB_FIELD_IGNORE_ABOVE };
+    const manifest: BuilderFieldsManifest = {
+      builderTypes: [type],
+      currentMappings: { value: valueMapping },
+      currentVersion: 1,
+      versions: { 1: { addedMappings: { value: valueMapping } } },
+    };
     const set = new FoldedVersionsSet();
-    set.record(type, 1);
+    set.recordManifest(manifest, 1);
     return set;
   }
-
-  const TYPE = 'security.detection.mytype';
-  const MANIFEST = {
-    type: TYPE,
-    currentVersion: 1,
-    versions: { 1: {} },
-  };
 
   /** A complete, fully-valid managed definition. */
   function fullManagedDefinition(): RegisteredBuilderType {
@@ -444,7 +455,6 @@ describe('BuilderTypeRegistry — composite: managed type registration', () => {
       generateQuery: jest.fn(() => makeQuery()),
       ownership: { solution: 'security', domain: 'detection' },
       compilation: 'execution_time',
-      manifest: MANIFEST,
     };
   }
 
@@ -468,19 +478,15 @@ describe('BuilderTypeRegistry — composite: managed type registration', () => {
     );
   });
 
-  it('fails when manifest is missing (managed-type completeness check)', () => {
-    const registry = new BuilderTypeRegistry().withFoldedVersions(makeFoldedFor(TYPE));
-    expect(() => registry.register({ ...fullManagedDefinition(), manifest: undefined })).toThrow(
-      /managed-type completeness check/
-    );
-  });
-
-  it('fails when the manifest version is unfolded (manifest consistency check)', () => {
-    // No versions folded — simulates a developer who published a manifest change
-    // without adding the fromBuilderManifest() fold line.
+  it('fails when no folded manifest covers the type (managed-type completeness check)', () => {
+    // Empty FoldedVersionsSet: getManifestForType returns undefined. In production
+    // this happens when the type is not in any BuilderFieldsManifest's builderTypes
+    // or the manifest's fromBuilderFieldsManifest() fold line is missing.
     const empty = new FoldedVersionsSet();
     const registry = new BuilderTypeRegistry().withFoldedVersions(empty);
-    expect(() => registry.register(fullManagedDefinition())).toThrow(/manifest consistency check/);
+    expect(() => registry.register(fullManagedDefinition())).toThrow(
+      /managed-type completeness check/
+    );
   });
 
   it('fails when ownership segments do not match the id (managed-type completeness check)', () => {

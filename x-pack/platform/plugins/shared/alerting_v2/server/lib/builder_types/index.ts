@@ -7,8 +7,6 @@
 
 export type {
   BuilderTypeDefinition,
-  BuilderTypeManifest,
-  BuilderTypeVersion,
   DerivedRuleFields,
   GenerateQuery,
   GeneratedQuery,

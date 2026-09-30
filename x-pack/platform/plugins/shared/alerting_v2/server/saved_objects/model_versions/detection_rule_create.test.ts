@@ -12,25 +12,35 @@
  * framework client after the types are registered, without booting Kibana.
  * Uses the same test utilities as rules_client.test.ts.
  *
+ * This file uses synthetic fixture definitions rather than the real
+ * security.detection.* schemas.  The authoritative definitions live in the
+ * security_detections plugin at x-pack/solutions/security/plugins/security_detections.
+ * The fixture pins the same ownership, kind and compilation the real types
+ * declare.  Drift between the fixture and the real definitions surfaces as a
+ * registration failure at the security_detections plugin's setup, not here.
+ *
+ * What this file proves is a framework property: that a managed, execution-time,
+ * kind-pinned type's create path stamps ownership and persists no query.
+ * Security-specific validateFields behavior is tested in the security_detections
+ * plugin (step B.9).
+ *
  * The plugin-level flag-behavior tests live in the security_detections plugin at
  * x-pack/solutions/security/plugins/security_detections/server/__tests__/plugin.test.ts.
  *
  * Ref: implementation-plan.md "Step 8.1: plugin skeleton and type registration"
+ *      implementation-plan.md "Step B.6: cut the framework's dependency on Security behavior"
  */
 
-// Importing ruleModelVersions triggers fromBuilderManifest() calls that
+// Importing ruleModelVersions triggers fromBuilderFieldsManifest() calls that
 // populate globalFoldedVersions as a side effect. This import must appear
 // before any code that consults globalFoldedVersions (i.e., BuilderTypeRegistry).
 import { ruleModelVersions } from './rule_model_versions';
 
+import { z } from '@kbn/zod/v4';
 import { ByteSizeValue } from '@kbn/config-schema';
 import { httpServerMock } from '@kbn/core-http-server-mocks';
 import { coreMock } from '@kbn/core/server/mocks';
 import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
-import {
-  securityDetectionQuery,
-  securityDetectionThreshold,
-} from '@kbn/security-detection-rule-schema';
 import { defineBuilderType } from '@kbn/alerting-v2-rule-builders';
 
 import type { PluginConfig } from '../../config';
@@ -51,23 +61,94 @@ jest.mock('../../lib/rule_executor/schedule', () => {
   };
 });
 
+// ---------------------------------------------------------------------------
+// Synthetic fixture definitions
+//
+// These definitions pin ownership: { solution: 'security', domain: 'detection' },
+// kind: 'alert', and compilation: 'execution_time' — matching the real types
+// exactly.  What this file proves is a framework property: that a managed,
+// execution-time, kind-pinned type's create path stamps ownership and persists
+// no query.  Security-specific validateFields behavior is tested in the
+// security_detections plugin (step B.9).
+// ---------------------------------------------------------------------------
+
+const syntheticQuerySchema = z
+  .object({
+    severity: z.enum(['low', 'medium', 'high', 'critical']),
+    risk_score: z.number().int().min(0).max(100),
+    index: z.array(z.string().min(1).max(256)).min(1).max(32),
+    query: z.string().min(1).max(8192),
+    language: z.enum(['kuery', 'lucene']),
+  })
+  .strict();
+
+const syntheticQueryDefinition = defineBuilderType({
+  type: 'security.detection.query',
+  name: 'Custom Query (fixture)',
+  description: 'Synthetic fixture reproducing the real type for framework property tests.',
+  kind: 'alert',
+  ownership: { solution: 'security', domain: 'detection' },
+  compilation: 'execution_time',
+  builderFieldsSchema: syntheticQuerySchema,
+  generateQuery: () => ({ query: { base: 'FROM "logs-*" | LIMIT 100' } }),
+});
+
+const syntheticThresholdSchema = z
+  .object({
+    severity: z.enum(['low', 'medium', 'high', 'critical']),
+    risk_score: z.number().int().min(0).max(100),
+    index: z.array(z.string().min(1).max(256)).min(1).max(32),
+    query: z.string().max(8192),
+    language: z.enum(['kuery', 'lucene']),
+    threshold: z
+      .object({
+        field: z.array(z.string().min(1).max(256)).max(5),
+        value: z.number().int().min(1),
+        cardinality: z
+          .array(
+            z
+              .object({
+                field: z.string().min(1).max(256),
+                value: z.number().int().min(0),
+              })
+              .strict()
+          )
+          .max(1)
+          .optional(),
+      })
+      .strict(),
+  })
+  .strict();
+
+const syntheticThresholdDefinition = defineBuilderType({
+  type: 'security.detection.threshold',
+  name: 'Threshold (fixture)',
+  description: 'Synthetic fixture reproducing the real type for framework property tests.',
+  kind: 'alert',
+  ownership: { solution: 'security', domain: 'detection' },
+  compilation: 'execution_time',
+  builderFieldsSchema: syntheticThresholdSchema,
+  generateQuery: () => ({ query: { base: 'FROM "logs-*" | LIMIT 100' } }),
+});
+
 // Sanity: confirm the model version import succeeded (if this is 0 the folds
 // won't be registered and every registry.register() call will throw).
 // The POC's five model versions ('8'–'12') were squashed into a single '8';
-// both detection-type folds are part of that squashed entry.
-it('ruleModelVersions carries both detection-type fold contributions in the squashed entry', () => {
+// after step B.5, both detection types share a single manifest, so there is
+// exactly one manifest-fold mappings_addition in the squashed entry.
+it('ruleModelVersions carries the detection-type fold contribution in the squashed entry', () => {
   const v8 = ruleModelVersions['8'] as {
     changes: Array<{ type: string; addedMappings?: unknown }>;
   };
   expect(v8).toBeDefined();
-  // Two mappings_additions come from the manifest folds (query + threshold);
-  // each has addedMappings.metadata.properties.builder_fields.properties.
+  // One mappings_addition from the shared manifest fold (both query and threshold
+  // are covered by a single detectionRuleBuilderFieldsManifest after step B.5).
   const manifestFoldChanges = v8.changes.filter(
     (c) =>
       c.type === 'mappings_addition' &&
       (c.addedMappings as any)?.metadata?.properties?.builder_fields?.properties !== undefined
   );
-  expect(manifestFoldChanges.length).toBe(2); // one per detection builder type
+  expect(manifestFoldChanges.length).toBe(1); // one shared manifest for both detection types
 });
 
 // ---------------------------------------------------------------------------
@@ -146,7 +227,7 @@ describe('security.detection.query — create via RulesClient', () => {
   beforeEach(() => {
     jest.useFakeTimers().setSystemTime(new Date('2025-01-01T00:00:00.000Z'));
     registry = new BuilderTypeRegistry();
-    registry.register(defineBuilderType(securityDetectionQuery));
+    registry.register(syntheticQueryDefinition);
   });
 
   afterEach(() => {
@@ -197,37 +278,6 @@ describe('security.detection.query — create via RulesClient', () => {
       risk_score: 42,
     });
   });
-
-  it('rejects a whitespace-only query (validateFields hook)', async () => {
-    const { client } = createDetectionClient(registry);
-
-    // The kind pin now throws RULE_KIND_MISMATCH before validateFields runs when
-    // kind does not match the pin. Using kind: 'alert' here so the pin passes and
-    // the test confirms the validateFields hook is still the rejection reason.
-    await expect(
-      client.createRule({
-        data: {
-          kind: 'alert',
-          metadata: {
-            name: 'bad-query',
-            builder_type: 'security.detection.query',
-            builder_fields: {
-              index: ['logs-*'],
-              query: '   ', // whitespace only
-              language: 'kuery',
-              risk_score: 10,
-              severity: 'low',
-            },
-          },
-          time_field: '@timestamp',
-          schedule: { every: '5m' },
-          recovery: { strategy: 'manual' },
-          no_data: { strategy: 'ignore' },
-          state_transition: { pending: { count: 0 } },
-        },
-      })
-    ).rejects.toThrow('query must not be blank (only whitespace)');
-  });
 });
 
 describe('security.detection.threshold — create via RulesClient', () => {
@@ -236,7 +286,7 @@ describe('security.detection.threshold — create via RulesClient', () => {
   beforeEach(() => {
     jest.useFakeTimers().setSystemTime(new Date('2025-01-01T00:00:00.000Z'));
     registry = new BuilderTypeRegistry();
-    registry.register(defineBuilderType(securityDetectionThreshold));
+    registry.register(syntheticThresholdDefinition);
   });
 
   afterEach(() => {
@@ -285,41 +335,5 @@ describe('security.detection.threshold — create via RulesClient', () => {
     const { attrs } = rulesSavedObjectService.bulkCreate.mock.calls[0][0][0];
     expect(attrs.query).toBeUndefined();
     expect(attrs.grouping).toBeUndefined();
-  });
-
-  it('rejects overlapping cardinality and threshold fields (validateFields hook)', async () => {
-    const { client } = createDetectionClient(registry);
-
-    // The kind pin now throws RULE_KIND_MISMATCH before validateFields runs when
-    // kind does not match the pin. Using kind: 'alert' here so the pin passes and
-    // the test confirms the validateFields hook is still the rejection reason.
-    await expect(
-      client.createRule({
-        data: {
-          kind: 'alert',
-          metadata: {
-            name: 'bad-threshold',
-            builder_type: 'security.detection.threshold',
-            builder_fields: {
-              index: ['logs-*'],
-              query: 'event.category: process',
-              language: 'kuery',
-              risk_score: 50,
-              severity: 'medium',
-              threshold: {
-                field: ['source.ip'],
-                value: 5,
-                cardinality: [{ field: 'source.ip', value: 3 }], // same as threshold.field
-              },
-            },
-          },
-          time_field: '@timestamp',
-          schedule: { every: '5m' },
-          recovery: { strategy: 'manual' },
-          no_data: { strategy: 'ignore' },
-          state_transition: { pending: { count: 0 } },
-        },
-      })
-    ).rejects.toThrow('cardinality.field "source.ip" is already listed in threshold.field');
   });
 });

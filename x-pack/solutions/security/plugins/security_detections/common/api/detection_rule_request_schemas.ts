@@ -23,16 +23,16 @@
 
 import { z } from '@kbn/zod/v4';
 import {
-  detectionRuleCommonFields,
-  customQueryBuilderFieldsSchema,
-  thresholdBuilderFieldsSchema,
-} from '@kbn/security-detection-rule-schema';
-import {
   MAX_NAME_LENGTH,
   MAX_DESCRIPTION_LENGTH,
   MAX_SIGNATURE_ID_LENGTH,
 } from '@kbn/alerting-v2-schemas';
 import { MAX_TAG_LENGTH, MAX_TAGS } from '@kbn/alerting-v2-constants';
+import {
+  detectionRuleCommonFields,
+  customQueryBuilderFieldsSchema,
+  thresholdBuilderFieldsSchema,
+} from '../detection_rule_fields';
 import { detectionRuleScheduleSchema } from './detection_rule_response_schema';
 
 // ---------------------------------------------------------------------------
