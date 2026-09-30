@@ -6537,6 +6537,57 @@ describe('Package policy service', () => {
       });
     });
 
+    it('should store package_agent_version_condition from the target package version', async () => {
+      const savedObjectsClient = createSavedObjectClientMock();
+      const mockPackagePolicy = createPackagePolicyMock();
+
+      (getPackageInfo as jest.Mock).mockResolvedValue({
+        name: 'endpoint',
+        version: '0.9.0',
+        conditions: { agent: { version: '>=9.3.0' } },
+        policy_templates: [{ name: 'endpoint', inputs: [] }],
+      });
+
+      const policyId = mockPackagePolicy.id;
+      savedObjectsClient.bulkGet.mockResolvedValue({
+        saved_objects: [
+          {
+            id: policyId,
+            type: LEGACY_PACKAGE_POLICY_SAVED_OBJECT_TYPE,
+            references: [],
+            version: 'WzEsMV0=',
+            attributes: { ...mockPackagePolicy, inputs: [] },
+          },
+        ],
+      });
+
+      savedObjectsClient.bulkUpdate.mockImplementation(
+        async (objs: Array<{ type: string; id: string; attributes: any }>) => {
+          const newObjs = objs.map((obj) => ({
+            id: obj.id,
+            type: LEGACY_PACKAGE_POLICY_SAVED_OBJECT_TYPE,
+            references: [],
+            version: 'WzIsMV0=',
+            attributes: obj.attributes,
+          }));
+          savedObjectsClient.bulkGet.mockResolvedValue({ saved_objects: newObjs });
+          return { saved_objects: newObjs };
+        }
+      );
+
+      const elasticsearchClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+
+      await packagePolicyService.bulkUpdate(savedObjectsClient, elasticsearchClient, [
+        { ...mockPackagePolicy, inputs: [] },
+      ]);
+
+      (getPackageInfo as jest.Mock).mockImplementation(mockedGetPackageInfo);
+
+      const updatedAttributes = (savedObjectsClient.bulkUpdate.mock.calls[0][0] as any)[0]
+        .attributes;
+      expect(updatedAttributes.package_agent_version_condition).toBe('>=9.3.0');
+    });
+
     it('should not persist spaceIds in SO attributes', async () => {
       const savedObjectsClient = createSavedObjectClientMock();
       const mockPackagePolicy = createPackagePolicyMock();

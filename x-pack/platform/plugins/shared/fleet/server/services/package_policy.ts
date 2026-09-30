@@ -2353,6 +2353,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
             revision: oldPackagePolicy.revision + 1,
             updated_at: new Date().toISOString(),
             updated_by: options?.user?.username ?? 'system',
+            package_agent_version_condition: pkgInfo?.conditions?.agent?.version,
           },
           version,
         });
