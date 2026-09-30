@@ -19,7 +19,7 @@ export const DownloadNodeBuilds: GlobalTask = {
     const downloads: Array<{ url: string; destination: string; shaChecksum: string }> = [];
     for (const platform of config.getNodePlatforms()) {
       for (const nodeInfo of getNodeDownloadInfo(config, platform)) {
-        const shasums = await getNodeShasums(log, config.getNodeVersion(), nodeInfo.variant);
+        const shasums = await getNodeShasums(log, nodeInfo.version, nodeInfo.variant);
 
         if (!downloads.some((download) => download.url === nodeInfo.url)) {
           downloads.push({

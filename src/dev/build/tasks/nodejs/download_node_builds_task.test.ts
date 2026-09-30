@@ -51,12 +51,14 @@ async function setup({ failOnUrl }: { failOnUrl?: string } = {}) {
     withTestPlugins: true,
   });
 
-  getNodeDownloadInfo.mockImplementation((_: Config, platform: Platform) => {
+  getNodeDownloadInfo.mockImplementation((cfg: Config, platform: Platform) => {
     return [
       {
         url: `${platform.getName()}:url`,
         downloadPath: `${platform.getName()}:downloadPath`,
         downloadName: `${platform.getName()}:downloadName`,
+        version: cfg.getNodeVersion(),
+        variant: 'default',
       },
     ];
   });

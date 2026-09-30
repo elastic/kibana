@@ -19,7 +19,7 @@ export const VerifyExistingNodeBuilds: GlobalTask = {
     const builds: Array<{ downloadPath: string; shaChecksum: string }> = [];
     for (const platform of config.getNodePlatforms()) {
       for (const nodeInfo of getNodeDownloadInfo(config, platform)) {
-        const shasums = await getNodeShasums(log, config.getNodeVersion(), nodeInfo.variant);
+        const shasums = await getNodeShasums(log, nodeInfo.version, nodeInfo.variant);
         if (!builds.some((build) => build.downloadPath === nodeInfo.downloadName)) {
           builds.push({
             downloadPath: nodeInfo.downloadPath,

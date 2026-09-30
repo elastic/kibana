@@ -38,9 +38,14 @@ export const CreateNoticeFile: Task = {
     });
 
     log.info('Generating build notice');
+    // Use a Node tree that this build actually downloaded. Classic linux-x64 is
+    // not extracted for serverless images (those ship 24 + 24 PC + 26 PC).
+    const nodePlatform =
+      config.getNodePlatforms().find((platform) => platform.isLinux()) ??
+      config.getNodePlatforms()[0];
     const [{ extractDir: nodeDir, version: nodeVersion }] = getNodeDownloadInfo(
       config,
-      config.getPlatform('linux', 'x64')
+      nodePlatform
     );
 
     const notice = await generateBuildNoticeText({

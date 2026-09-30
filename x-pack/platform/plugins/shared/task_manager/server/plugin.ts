@@ -53,6 +53,7 @@ import { TaskScheduling } from './task_scheduling';
 import {
   backgroundTaskUtilizationRoute,
   healthRoute,
+  heapProfileExperimentRoutes,
   metricsRoute,
   executionControlRoutes,
 } from './routes';
@@ -88,6 +89,8 @@ import {
   scheduleInvalidateApiKeyTask,
 } from './invalidate_api_keys/invalidate_api_keys_task';
 import { createApiKeyStrategy } from './api_key_strategy';
+import { startHeapProfileLabelsMetrics } from './lib/heap_profile_labels_metrics';
+import type { HeapProfileLabelsMetrics } from './lib/heap_profile_labels_metrics';
 
 export interface TaskManagerSetupContract {
   /**
@@ -174,6 +177,7 @@ export class TaskManagerPlugin
   private taskStore?: TaskStore;
   private startContract?: TaskManagerStartContract;
   private enrichFakeRequest?: FakeRequestEnricher;
+  private heapProfileLabelsMetrics?: HeapProfileLabelsMetrics;
 
   constructor(private readonly initContext: PluginInitializerContext) {
     this.initContext = initContext;
@@ -273,6 +277,7 @@ export class TaskManagerPlugin
       resetMetrics$: this.resetMetrics$,
       taskManagerId: this.taskManagerId,
     });
+    heapProfileExperimentRoutes({ router });
     executionControlRoutes({
       router,
       logger: this.logger,
@@ -553,10 +558,13 @@ export class TaskManagerPlugin
       },
     };
 
+    this.heapProfileLabelsMetrics = startHeapProfileLabelsMetrics(this.logger);
+
     return this.startContract;
   }
 
   public async stop() {
+    this.heapProfileLabelsMetrics?.stop();
     this.licenseSubscriber?.cleanup();
 
     // Stop polling for tasks
