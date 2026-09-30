@@ -138,6 +138,7 @@ export const RuleSummaryFlyout = ({
         type="overlay"
         size="m"
         resizable
+        ownFocus={false}
         session={session}
         onClose={onClose}
         data-test-subj="ruleSummaryFlyout"

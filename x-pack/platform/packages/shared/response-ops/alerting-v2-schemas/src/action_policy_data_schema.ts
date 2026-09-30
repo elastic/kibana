@@ -12,7 +12,6 @@ import {
   ACTION_POLICY_MAX_DESTINATIONS,
   FIND_DEFAULT_PER_PAGE,
   FIND_MAX_RESULT_WINDOW,
-  VERSION_MAX_LENGTH,
   ID_MAX_LENGTH,
   MAX_DESCRIPTION_LENGTH,
   MAX_FIELD_NAME_LENGTH,
@@ -255,23 +254,10 @@ export const updateActionPolicyDataSchema = z
       return;
     }
     validateGroupingModeAndStrategy(payload);
-  });
-
-export type UpdateActionPolicyData = z.infer<typeof updateActionPolicyDataSchema>;
-
-export const updateActionPolicyBodySchema = updateActionPolicyDataSchema
-  .extend({
-    version: z
-      .string()
-      .min(1)
-      .max(VERSION_MAX_LENGTH)
-      .describe(
-        'The current version of the action policy, used for optimistic concurrency control.'
-      ),
   })
   .meta({ id: 'alerting_update_action_policy' });
 
-export type UpdateActionPolicyBody = z.infer<typeof updateActionPolicyBodySchema>;
+export type UpdateActionPolicyData = z.infer<typeof updateActionPolicyDataSchema>;
 
 /** Sort field for the find action policies (list) API. */
 export const findActionPoliciesSortFieldSchema = z

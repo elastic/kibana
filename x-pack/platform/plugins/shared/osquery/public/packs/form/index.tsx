@@ -26,7 +26,7 @@ import { FormProvider, useForm as useHookForm } from 'react-hook-form';
 import { PackShardsField } from './shards/pack_shards_field';
 import { useKibana, useRouterNavigate } from '../../common/lib/kibana';
 import { ExperimentalFeaturesService } from '../../common/experimental_features_service';
-import { PolicyIdComboBoxField } from './policy_id_combobox_field';
+import { PolicyAssignmentList } from './policy_assignment_list';
 import { QueriesField } from './queries_field';
 import { ConfirmDeployAgentPolicyModal } from './confirmation_modal';
 import { useAgentPolicies } from '../../agent_policies';
@@ -495,11 +495,6 @@ const PackFormComponent: React.FC<PackFormProps> = ({
     return false;
   }, [editMode, defaultValue]);
   const euiFieldProps = useMemo(() => ({ isDisabled: isContentDisabled }), [isContentDisabled]);
-  // Scheduled agent policies / shards / Type stay editable for prebuilt packs
-  // (a writePacks user may re-target them) — only a fully read-only user is
-  // blocked. Matches the prebuiltPackModeDescription callout.
-  const policyFieldProps = useMemo(() => ({ isDisabled: isReadOnly }), [isReadOnly]);
-
   const changePackType = useCallback(
     (type: 'global' | 'policy' | 'shards') => {
       setValue('pack_type', type, { shouldDirty: true });
@@ -578,10 +573,10 @@ const PackFormComponent: React.FC<PackFormProps> = ({
           <>
             <EuiFlexGroup>
               <EuiFlexItem css={overflowCss}>
-                <PolicyIdComboBoxField
-                  options={availableOptions}
-                  euiFieldProps={policyFieldProps}
-                />
+                {/* Scheduled agent policies / shards / Type stay editable for prebuilt
+                    packs (a writePacks user may re-target them) — only a fully read-only
+                    user is blocked. Matches the prebuiltPackModeDescription callout. */}
+                <PolicyAssignmentList isReadOnly={isReadOnly} />
               </EuiFlexItem>
             </EuiFlexGroup>
             <EuiSpacer size="m" />

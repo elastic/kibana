@@ -26,7 +26,6 @@ export const RuleSummaryActionPoliciesSection: React.FC = () => {
       title={i18n.translate('xpack.alertingV2.ruleSummary.actionPolicies', {
         defaultMessage: 'Action policies',
       })}
-      icon="tablePlay"
       hasBorder={false}
       initialIsOpen
       data-test-subj="ruleSummaryActionPolicies"
