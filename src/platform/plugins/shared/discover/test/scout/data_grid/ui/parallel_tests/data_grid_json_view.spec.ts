@@ -14,17 +14,18 @@
  */
 
 import { expect } from '@kbn/scout/ui';
-import { spaceTest } from '../fixtures';
+import { spaceTest, tags } from '../fixtures';
 
 const DOC_TABLE_TEST_SUBJ = 'discoverDocTable';
 const DISPLAY_POPOVER_TEST_SUBJ = 'dataGridDisplaySelectorPopover';
 const DENSITY_BUTTON_GROUP_TEST_SUBJ = 'densityButtonGroup';
 const ROW_HEIGHT_BUTTON_GROUP_TEST_SUBJ = 'unifiedDataTableRowHeightSettings_rowHeightButtonGroup';
+const RENDERED_NODES_SETTINGS_TEST_SUBJ = 'unifiedDataTableRenderedNodesSettings';
 const HIDE_NULLS_SETTINGS_TEST_SUBJ = 'unifiedDataTableHideNullsSettings';
 const WRAP_LINES_SETTINGS_TEST_SUBJ = 'unifiedDataTableWrapLinesSettings';
 const FILTER_FOR_EXTENSION_TEST_SUBJ = 'jsonTreeViewerFilterFor-extension';
 
-spaceTest.describe('Discover data grid JSON view', { tag: '@local-stateful-classic' }, () => {
+spaceTest.describe('Discover data grid JSON view', { tag: tags.stateful.classic }, () => {
   spaceTest.beforeAll(async ({ discoverScoutSpace }) => {
     await discoverScoutSpace.setupDiscoverDefaults();
     // Popovers animate in; axe can otherwise scan a half-rendered frame.
@@ -32,9 +33,13 @@ spaceTest.describe('Discover data grid JSON view', { tag: '@local-stateful-class
   });
 
   spaceTest.beforeEach(async ({ browserAuth, pageObjects }) => {
+    const { discover, dataGrid } = pageObjects;
+
     await browserAuth.loginAsViewer();
-    await pageObjects.discover.goto({ queryMode: 'classic' });
-    await pageObjects.dataGrid.waitForDocTableRendered();
+    await discover.goto({ queryMode: 'classic' });
+    await dataGrid.waitForDocTableRendered();
+    await discover.writeAndSubmitKqlQuery('extension : * and bytes : * and machine.os : *');
+    await dataGrid.waitForDocTableRendered();
   });
 
   spaceTest.afterAll(async ({ discoverScoutSpace }) => {
@@ -71,7 +76,7 @@ spaceTest.describe('Discover data grid JSON view', { tag: '@local-stateful-class
         await dataGrid.openGridDisplaySettings();
 
         expect(await dataGrid.getCurrentDocumentsDisplayMode()).toBe('JSON');
-        await expect(page.getByRole('spinbutton', { name: 'Lines shown' })).toBeVisible();
+        await expect(page.getByTestId(RENDERED_NODES_SETTINGS_TEST_SUBJ)).toBeVisible();
         await expect(page.getByTestId(HIDE_NULLS_SETTINGS_TEST_SUBJ)).toBeVisible();
         await expect(page.getByTestId(WRAP_LINES_SETTINGS_TEST_SUBJ)).toBeVisible();
         await expect(page.getByTestId(DENSITY_BUTTON_GROUP_TEST_SUBJ)).toBeHidden();
