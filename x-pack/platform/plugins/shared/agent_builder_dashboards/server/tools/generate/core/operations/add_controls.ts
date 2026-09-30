@@ -17,17 +17,16 @@ import {
 } from '@kbn/controls-constants';
 import type { DashboardPinnedPanel } from '@kbn/as-code-dashboard-schema';
 import type { Logger } from '@kbn/core/server';
-import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import { formatEsqlIdentifier } from '@kbn/esql-utils';
 import { ES_FIELD_TYPES } from '@kbn/field-types';
 import { z } from '@kbn/zod/v4';
 import { DASHBOARD_OPERATION_FAILURE_TYPES } from '../failure_types';
 import { getErrorMessage, type OperationFailure } from '../utils';
-import { defineOperation } from './types';
 import {
-  fetchControlFieldCapabilities,
+  defineOperation,
   type ControlFieldCapabilities,
-} from './control_field_capabilities';
+  type ResolveControlFieldCapabilities,
+} from './types';
 
 const controlWidthSchema = z
   .enum(['small', 'medium', 'large'])
@@ -217,12 +216,12 @@ const recordControlFailure = ({
 
 const loadCapabilitiesByIndex = async ({
   controls,
-  esClient,
+  resolveControlFieldCapabilities,
   projectRouting,
   logger,
 }: {
   controls: DataControlInput[];
-  esClient: ElasticsearchClient;
+  resolveControlFieldCapabilities: ResolveControlFieldCapabilities;
   projectRouting?: string;
   logger: Logger;
 }): Promise<Map<string, ControlFieldCapabilities | undefined>> => {
@@ -240,19 +239,16 @@ const loadCapabilitiesByIndex = async ({
         async ([index, fieldNames]) =>
           [
             index,
-            await fetchControlFieldCapabilities({
-              esClient,
-              index,
-              projectRouting,
-              fieldNames,
-            }).catch((error) => {
-              logger.warn(
-                `Could not load fields for index "${index}", adding its controls unvalidated: ${getErrorMessage(
-                  error
-                )}`
-              );
-              return undefined;
-            }),
+            await resolveControlFieldCapabilities({ index, fieldNames, projectRouting }).catch(
+              (error) => {
+                logger.warn(
+                  `Could not load fields for index "${index}", adding its controls unvalidated: ${getErrorMessage(
+                    error
+                  )}`
+                );
+                return undefined;
+              }
+            ),
           ] as const
       )
     )
@@ -298,18 +294,18 @@ const resolveControlField = (
  */
 const resolveControlFields = async ({
   controls,
-  esClient,
+  resolveControlFieldCapabilities,
   projectRouting,
   logger,
   failures,
 }: {
   controls: ControlInput[];
-  esClient?: ElasticsearchClient;
+  resolveControlFieldCapabilities?: ResolveControlFieldCapabilities;
   projectRouting?: string;
   logger: Logger;
   failures: OperationFailure[];
 }): Promise<ControlInput[]> => {
-  if (!esClient) {
+  if (!resolveControlFieldCapabilities) {
     return controls;
   }
 
@@ -317,7 +313,7 @@ const resolveControlFields = async ({
     controls: controls.filter(
       (control): control is DataControlInput => control.type !== TIME_SLIDER_CONTROL
     ),
-    esClient,
+    resolveControlFieldCapabilities,
     projectRouting,
     logger,
   });
@@ -428,7 +424,7 @@ export const addControlsOperation = defineOperation({
         logger: context.logger,
         failures: context.failures,
       }),
-      esClient: context.esClient,
+      resolveControlFieldCapabilities: context.resolveControlFieldCapabilities,
       projectRouting: dashboardData.project_routing,
       logger: context.logger,
       failures: context.failures,

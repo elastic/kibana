@@ -7,9 +7,12 @@
 
 import type { DashboardAttachmentData } from '@kbn/agent-builder-dashboards-common';
 import type { Logger } from '@kbn/core/server';
-import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import type { ResolvePanelContent } from './operations/panels';
-import type { ResolveAttachmentPanel, ResolveCustomContentTemplate } from './operations/types';
+import type {
+  ResolveAttachmentPanel,
+  ResolveControlFieldCapabilities,
+  ResolveCustomContentTemplate,
+} from './operations/types';
 import type { OperationFailure } from './utils';
 import type { PanelAuthoringNote } from './resolve_panel';
 import {
@@ -29,7 +32,7 @@ interface ExecuteDashboardOperationsParams {
   resolvePanelContent?: ResolvePanelContent;
   resolveCustomContentTemplate?: ResolveCustomContentTemplate;
   resolveAttachmentPanel?: ResolveAttachmentPanel;
-  esClient?: ElasticsearchClient;
+  resolveControlFieldCapabilities?: ResolveControlFieldCapabilities;
 }
 
 /**
@@ -38,7 +41,7 @@ interface ExecuteDashboardOperationsParams {
  * persistence, and result shape belong to the calling tool. Inline panel content
  * is resolved via the injected `resolvePanelContent` callback, so the core never
  * reads any store. Control fields are validated against index mappings when
- * the host provides `esClient`.
+ * the host provides `resolveControlFieldCapabilities`.
  */
 export const executeDashboardOperations = async ({
   dashboardData,
@@ -47,7 +50,7 @@ export const executeDashboardOperations = async ({
   resolvePanelContent,
   resolveCustomContentTemplate,
   resolveAttachmentPanel,
-  esClient,
+  resolveControlFieldCapabilities,
 }: ExecuteDashboardOperationsParams): Promise<{
   dashboardData: DashboardAttachmentData;
   failures: OperationFailure[];
@@ -69,7 +72,7 @@ export const executeDashboardOperations = async ({
     resolvePanelContent,
     resolveCustomContentTemplate,
     resolveAttachmentPanel,
-    esClient,
+    resolveControlFieldCapabilities,
     failures,
     panelAuthoringNotes,
   });

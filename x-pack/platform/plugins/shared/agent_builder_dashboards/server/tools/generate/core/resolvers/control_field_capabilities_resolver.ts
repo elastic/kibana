@@ -7,15 +7,7 @@
 
 import type { FieldCapsFieldCapability } from '@elastic/elasticsearch/lib/api/types';
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
-
-/** Whether a mapped field can back a `STATS BY` across the whole index, and why not. */
-export type ControlFieldCapability =
-  | { status: 'usable'; type: string }
-  | { status: 'conflicting' }
-  | { status: 'not_aggregatable' };
-
-/** Field capabilities keyed by name. Fields not mapped on the index are absent. */
-export type ControlFieldCapabilities = Map<string, ControlFieldCapability>;
+import type { ControlFieldCapability, ResolveControlFieldCapabilities } from '../operations/types';
 
 /**
  * A field is usable only with one ES type across the matching indices that is aggregatable in
@@ -36,30 +28,29 @@ const toControlFieldCapability = ([
     : { status: 'not_aggregatable' };
 };
 
-/** Load the capabilities of the given fields in one `_field_caps` request. */
-export const fetchControlFieldCapabilities = async ({
+/**
+ * Loads the capabilities of the requested fields in one `_field_caps` request. Injected like the
+ * other resolvers so the generate core never talks to Elasticsearch directly.
+ */
+export const createControlFieldCapabilitiesResolver = ({
   esClient,
-  index,
-  projectRouting,
-  fieldNames,
 }: {
   esClient: ElasticsearchClient;
-  index: string;
-  projectRouting?: string;
-  fieldNames: readonly string[];
-}): Promise<ControlFieldCapabilities> => {
-  const response = await esClient.fieldCaps({
-    index,
-    fields: [...new Set(fieldNames)],
-    filters: '-metadata',
-    ignore_unavailable: true,
-    allow_no_indices: true,
-    ...(projectRouting ? { project_routing: projectRouting } : {}),
-  });
-  return new Map(
-    Object.entries(response.fields).map(
-      ([fieldName, capsByType]) =>
-        [fieldName, toControlFieldCapability(Object.values(capsByType))] as const
-    )
-  );
+}): ResolveControlFieldCapabilities => {
+  return async ({ index, fieldNames, projectRouting }) => {
+    const response = await esClient.fieldCaps({
+      index,
+      fields: [...new Set(fieldNames)],
+      filters: '-metadata',
+      ignore_unavailable: true,
+      allow_no_indices: true,
+      ...(projectRouting ? { project_routing: projectRouting } : {}),
+    });
+    return new Map(
+      Object.entries(response.fields).map(
+        ([fieldName, capsByType]) =>
+          [fieldName, toControlFieldCapability(Object.values(capsByType))] as const
+      )
+    );
+  };
 };

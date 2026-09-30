@@ -26,6 +26,7 @@ import {
 import { LENS_EMBEDDABLE_TYPE } from '@kbn/lens-common';
 import { VEGA_VIS_TYPE } from '@kbn/agent-builder-visualizations-common';
 import { DASHBOARD_OPERATION_FAILURE_TYPES } from './failure_types';
+import { createControlFieldCapabilitiesResolver } from './resolvers/control_field_capabilities_resolver';
 
 type FieldCapsMapping = string | { readonly type: string; readonly aggregatable: boolean };
 
@@ -2905,7 +2906,7 @@ describe('add_controls / remove_controls operations', () => {
         dashboardData,
         operations: [{ operation: 'add_controls', controls }],
         logger,
-        esClient,
+        resolveControlFieldCapabilities: createControlFieldCapabilitiesResolver({ esClient }),
       });
 
     const getEsqlQueries = ({ pinned_panels: pinnedPanels = [] }: DashboardAttachmentData) =>

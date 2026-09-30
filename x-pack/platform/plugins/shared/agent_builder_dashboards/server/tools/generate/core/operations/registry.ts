@@ -52,7 +52,7 @@ interface PrepareOperationExecutionParams {
   resolvePanelContent?: OperationExecutionContext['resolvePanelContent'];
   resolveCustomContentTemplate?: OperationExecutionContext['resolveCustomContentTemplate'];
   resolveAttachmentPanel?: OperationExecutionContext['resolveAttachmentPanel'];
-  esClient?: OperationExecutionContext['esClient'];
+  resolveControlFieldCapabilities?: OperationExecutionContext['resolveControlFieldCapabilities'];
 }
 
 export const prepareOperationExecution = async ({
@@ -63,7 +63,7 @@ export const prepareOperationExecution = async ({
   resolvePanelContent,
   resolveCustomContentTemplate,
   resolveAttachmentPanel,
-  esClient,
+  resolveControlFieldCapabilities,
 }: PrepareOperationExecutionParams): Promise<OperationExecutionContext> => {
   const resolvedPanelCreationRequests = await resolvePanelCreationRequests({
     operations,
@@ -79,7 +79,7 @@ export const prepareOperationExecution = async ({
     resolvePanelContent,
     resolveCustomContentTemplate,
     resolveAttachmentPanel,
-    esClient,
+    resolveControlFieldCapabilities,
   };
 };
 
