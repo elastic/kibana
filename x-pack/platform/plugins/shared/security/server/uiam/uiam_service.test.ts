@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import fs from 'fs';
-import undici from 'undici';
+import { readFileSync } from 'fs';
+import { Agent } from 'undici';
 import { vi } from 'vitest';
 import type { Mock, MockInstance } from 'vitest';
 
@@ -31,6 +31,10 @@ import { ES_CLIENT_AUTHENTICATION_HEADER } from '../../common/constants';
 import { ConfigSchema } from '../config';
 import { securityTelemetry } from '../otel/instrumentation';
 
+// Source modules bind `readFileSync` and `Agent` as ESM named imports, so they must be spied on at
+// the module level rather than on the CommonJS export objects.
+vi.mock('fs', { spy: true });
+vi.mock('undici', { spy: true });
 vi.mock('../otel/instrumentation', () => {
   const mocked = {
     securityTelemetry: {
@@ -62,9 +66,9 @@ describe('UiamService', () => {
   let fetchSpy: MockInstance;
   beforeEach(() => {
     readFileSyncSpy = vi
-      .spyOn(fs, 'readFileSync')
+      .mocked(readFileSync)
       .mockImplementation((path) => `mocked file content for ${path}`);
-    agentSpy = vi.spyOn(undici, 'Agent').mockImplementation(() => AGENT_MOCK as any);
+    agentSpy = vi.mocked(Agent).mockImplementation(() => AGENT_MOCK as any);
     fetchSpy = vi.spyOn(window, 'fetch');
 
     uiamService = new UiamService(

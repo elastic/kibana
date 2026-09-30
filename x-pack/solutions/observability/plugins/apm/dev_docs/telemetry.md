@@ -61,8 +61,8 @@ The collection tasks also use the [`APMDataTelemetry` type](../server/lib/apm_te
 
 Running `node scripts/telemetry_check --fix` from the root Kibana directory will update the schemas which should automatically notify the Infra team when a pull request is opened so they can update the mapping in the telemetry clusters.
 
-Running `node scripts/test/jest --updateSnapshot` from the `x-pack/solutions/observability/plugins/apm` directory will update the
-mappings snapshot used in the jest tests.
+Running `node scripts/vitest --config x-pack/solutions/observability/plugins/apm/vitest.config.js --update` from the root Kibana directory will update the
+mappings snapshot used in the unit tests.
 
 ## Behavioral Telemetry
 

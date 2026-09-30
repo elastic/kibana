@@ -42,7 +42,7 @@ describe('installWithTimeout', () => {
         timeoutMs: 10,
       })
     ).rejects.toThrowErrorMatchingInlineSnapshot(
-      `"Failure during installation. Timeout: it took more than 10ms"`
+      `[Error: Failure during installation. Timeout: it took more than 10ms]`
     );
   });
 
@@ -58,7 +58,7 @@ describe('installWithTimeout', () => {
         timeoutMs: 10,
       })
     ).rejects.toThrowErrorMatchingInlineSnapshot(
-      `"Server is stopping; must stop all async operations"`
+      `[Error: Server is stopping; must stop all async operations]`
     );
   });
 });

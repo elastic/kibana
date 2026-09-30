@@ -16,6 +16,10 @@ import { createAppMockRenderer } from '../lib/test_utils';
 import type { CreateMaintenanceWindowFormProps } from './create_maintenance_windows_form';
 import { CreateMaintenanceWindowForm } from './create_maintenance_windows_form';
 import moment from 'moment';
+import { getRuleTypes } from '@kbn/response-ops-rules-apis/apis/get_rule_types';
+import { useKibana, useUiSetting } from '../utils/kibana_react';
+import { useCreateMaintenanceWindow } from '../hooks/use_create_maintenance_window';
+import { useUpdateMaintenanceWindow } from '../hooks/use_update_maintenance_window';
 
 vi.mock('../utils/kibana_react');
 vi.mock('@kbn/response-ops-rules-apis/apis/get_rule_types', () => {
@@ -50,14 +54,6 @@ vi.mock('./episode_matcher_input', () => {
   return { ...mocked, default: mocked };
 });
 
-const { getRuleTypes } = await vi.importMock('@kbn/response-ops-rules-apis/apis/get_rule_types');
-const { useKibana, useUiSetting } = await vi.importMock('../utils/kibana_react');
-const { useCreateMaintenanceWindow } = await vi.importMock(
-  '../hooks/use_create_maintenance_window'
-);
-const { useUpdateMaintenanceWindow } = await vi.importMock(
-  '../hooks/use_update_maintenance_window'
-);
 
 const formProps: CreateMaintenanceWindowFormProps = {
   onCancel: vi.fn(),
@@ -92,16 +88,16 @@ describe('CreateMaintenanceWindowForm', () => {
     vi.clearAllMocks();
     createMutate = vi.fn();
     updateMutate = vi.fn();
-    getRuleTypes.mockResolvedValue([
+    vi.mocked(getRuleTypes).mockResolvedValue([
       { category: 'observability' },
       { category: 'management' },
       { category: 'securitySolution' },
     ]);
 
-    useCreateMaintenanceWindow.mockReturnValue({ mutate: createMutate, isLoading: false });
-    useUpdateMaintenanceWindow.mockReturnValue({ mutate: updateMutate, isLoading: false });
+    vi.mocked(useCreateMaintenanceWindow).mockReturnValue({ mutate: createMutate, isLoading: false });
+    vi.mocked(useUpdateMaintenanceWindow).mockReturnValue({ mutate: updateMutate, isLoading: false });
 
-    useKibana.mockReturnValue({
+    vi.mocked(useKibana).mockReturnValue({
       services: {
         notifications: {
           toasts: {
@@ -124,7 +120,7 @@ describe('CreateMaintenanceWindowForm', () => {
       },
     });
 
-    useUiSetting.mockReturnValue('America/New_York');
+    vi.mocked(useUiSetting).mockReturnValue('America/New_York');
     appMockRenderer = createAppMockRenderer();
   });
 
@@ -145,7 +141,7 @@ describe('CreateMaintenanceWindowForm', () => {
   });
 
   it('renders timezone field when the kibana setting is set to browser', async () => {
-    useUiSetting.mockReturnValue('Browser');
+    vi.mocked(useUiSetting).mockReturnValue('Browser');
 
     const result = appMockRenderer.render(<CreateMaintenanceWindowForm {...formProps} />);
 
@@ -163,7 +159,7 @@ describe('CreateMaintenanceWindowForm', () => {
   });
 
   it('renders the timezone field for any non-"Browser" kibana setting value', async () => {
-    useUiSetting.mockReturnValue('America/Los_Angeles');
+    vi.mocked(useUiSetting).mockReturnValue('America/Los_Angeles');
 
     appMockRenderer.render(<CreateMaintenanceWindowForm {...formProps} />);
 
@@ -175,7 +171,7 @@ describe('CreateMaintenanceWindowForm', () => {
   });
 
   it('should render the guessed timezone when kibana timezone is undefined', async () => {
-    useUiSetting.mockReturnValue(undefined);
+    vi.mocked(useUiSetting).mockReturnValue(undefined);
     vi.spyOn(moment.tz, 'guess').mockReturnValue('America/Los_Angeles');
     appMockRenderer.render(<CreateMaintenanceWindowForm {...formProps} />);
 
@@ -219,7 +215,7 @@ describe('CreateMaintenanceWindowForm', () => {
   });
 
   it('should prefill the form when provided with initialValue', async () => {
-    useUiSetting.mockImplementation((key: string) => {
+    vi.mocked(useUiSetting).mockImplementation((key: string) => {
       if (key === 'dateFormat') return 'YYYY.MM.DD, h:mm:ss';
       return 'America/Los_Angeles';
     });
@@ -265,7 +261,7 @@ describe('CreateMaintenanceWindowForm', () => {
   });
 
   it('should show "Filter alerts" toggle even when no rule types', async () => {
-    getRuleTypes.mockResolvedValue([]);
+    vi.mocked(getRuleTypes).mockResolvedValue([]);
     appMockRenderer.render(<CreateMaintenanceWindowForm {...formProps} />);
 
     expect(await screen.findByTestId('maintenanceWindowScopedQuerySwitch')).toBeInTheDocument();
@@ -377,7 +373,7 @@ describe('CreateMaintenanceWindowForm', () => {
 
     beforeEach(() => {
       // Switch to mockImplementation so we can capture the onError callback.
-      useCreateMaintenanceWindow.mockImplementation(
+      vi.mocked(useCreateMaintenanceWindow).mockImplementation(
         (props?: { onError?: (e: unknown) => void }) => {
           capturedOnError = props?.onError;
           return { mutate: createMutate, isLoading: false };

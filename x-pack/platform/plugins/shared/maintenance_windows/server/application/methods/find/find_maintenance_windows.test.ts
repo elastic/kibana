@@ -59,7 +59,7 @@ describe('MaintenanceWindowClient - find', () => {
       // @ts-expect-error: testing validation of strings
       findMaintenanceWindows(mockContext, { page: 'dfsd', perPage: 10 })
     ).rejects.toThrowErrorMatchingInlineSnapshot(
-      '"Error validating find maintenance windows data - [page]: expected value of type [number] but got [string]"'
+      `[Error: Error validating find maintenance windows data - [page]: expected value of type [number] but got [string]]`
     );
   });
 
@@ -73,7 +73,7 @@ describe('MaintenanceWindowClient - find', () => {
     await expect(
       findMaintenanceWindows(mockContext, { page: 1, perPage: 10 })
     ).rejects.toThrowErrorMatchingInlineSnapshot(
-      '"Failed to find maintenance window, Error: Error: something went wrong!: something went wrong!"'
+      `[Error: Failed to find maintenance window, Error: Error: something went wrong!: something went wrong!]`
     );
   });
 

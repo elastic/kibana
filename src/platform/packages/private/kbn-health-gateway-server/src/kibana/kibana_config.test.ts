@@ -70,11 +70,11 @@ describe('kibana config', () => {
       };
       expect(() => configSchema.validate({ hosts, ssl: invalid }))
         .toThrowErrorMatchingInlineSnapshot(`
-        "[ssl.verificationMode]: types that failed validation:
-        - [ssl.verificationMode.0]: expected value to equal [none]
-        - [ssl.verificationMode.1]: expected value to equal [certificate]
-        - [ssl.verificationMode.2]: expected value to equal [full]"
-      `);
+          [Error: [ssl.verificationMode]: types that failed validation:
+          - [ssl.verificationMode.0]: expected value to equal [none]
+          - [ssl.verificationMode.1]: expected value to equal [certificate]
+          - [ssl.verificationMode.2]: expected value to equal [full]]
+        `);
     });
   });
 });

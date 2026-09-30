@@ -45,13 +45,15 @@ import { PolicyStatusContextProvider } from '../../lib/default_status_context';
 import { mockConfig } from '../__test__/report_listing.test.helpers';
 import { ReportDiagnostic } from './report_diagnostic';
 
-vi.mock('./report_exports_table', () => {
-  return () => <div data-test-subj="reportExportsTable">{'Render Report Exports Table'}</div>;
-});
+vi.mock('./report_exports_table', () => ({
+  default: () => <div data-test-subj="reportExportsTable">{'Render Report Exports Table'}</div>,
+}));
 
-vi.mock('./report_schedules_table', () => {
-  return () => <div data-test-subj="reportSchedulesTable">{'Render Report Schedules Table'}</div>;
-});
+vi.mock('./report_schedules_table', () => ({
+  default: () => (
+    <div data-test-subj="reportSchedulesTable">{'Render Report Schedules Table'}</div>
+  ),
+}));
 
 const queryClient = new QueryClient();
 

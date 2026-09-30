@@ -54,7 +54,6 @@ describe('useFetchOrCreateRuleExceptionList', () => {
   const onSuccess = vi.fn();
   const error = new Error('Something went wrong');
   const ruleId = 'myRuleId';
-  const abortCtrl = new AbortController();
   const detectionListType: ExceptionListType = 'detection';
   const endpointListType: ExceptionListType = 'endpoint';
   const detectionExceptionList = {
@@ -131,7 +130,7 @@ describe('useFetchOrCreateRuleExceptionList', () => {
       expect(fetchRuleById).toHaveBeenCalledTimes(1);
       expect(fetchRuleById).toHaveBeenCalledWith({
         id: ruleId,
-        signal: abortCtrl.signal,
+        signal: expect.any(AbortSignal),
       });
     });
   });

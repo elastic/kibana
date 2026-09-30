@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { logger } from 'elastic-apm-node';
+import apm from 'elastic-apm-node';
 import { vi } from 'vitest';
 
 import type {
@@ -45,7 +45,7 @@ describe('create ESO model version', () => {
     attributesToEncrypt: new Set(['firstAttr', 'secondAttr']),
   };
   const context: SavedObjectModelTransformationContext = {
-    log: logger,
+    log: apm.logger,
     modelVersion: 1,
     namespaceType: 'single',
   };
@@ -78,7 +78,7 @@ describe('create ESO model version', () => {
         },
       })
     ).toThrowErrorMatchingInlineSnapshot(
-      `"An invalid Encrypted Saved Objects Model Version transformation is trying to transform across types (\\"known-type-1\\" => \\"known-type-2\\"), which isn't permitted"`
+      `[Error: An invalid Encrypted Saved Objects Model Version transformation is trying to transform across types ("known-type-1" => "known-type-2"), which isn't permitted]`
     );
   });
 
@@ -95,7 +95,7 @@ describe('create ESO model version', () => {
         outputType,
       })
     ).toThrowErrorMatchingInlineSnapshot(
-      `"No Model Version changes defined. At least one change is required to create an Encrypted Saved Objects Model Version."`
+      `[Error: No Model Version changes defined. At least one change is required to create an Encrypted Saved Objects Model Version.]`
     );
   });
 

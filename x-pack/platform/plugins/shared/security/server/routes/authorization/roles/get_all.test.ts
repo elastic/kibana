@@ -235,7 +235,9 @@ describe('GET all roles', () => {
       }),
       asserts: {
         statusCode: 500,
-        result: new Error("ES returned an application entry without resources, can't process this"),
+        result: Boom.boomify(
+          new Error("ES returned an application entry without resources, can't process this")
+        ),
       },
     });
   });

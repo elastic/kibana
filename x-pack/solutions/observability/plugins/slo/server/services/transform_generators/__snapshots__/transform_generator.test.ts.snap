@@ -71,5 +71,3 @@ Object {
   "sync_field": "my_timestamp_sync_field",
 }
 `;
-
-

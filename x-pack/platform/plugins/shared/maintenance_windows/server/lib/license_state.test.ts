@@ -103,7 +103,7 @@ describe('ensureLicenseForMaintenanceWindow()', () => {
     expect(() =>
       licenseState.ensureLicenseForMaintenanceWindow()
     ).toThrowErrorMatchingInlineSnapshot(
-      `"Maintenance window is disabled because license information is not available at this time."`
+      `[Error: Maintenance window is disabled because license information is not available at this time.]`
     );
   });
 
@@ -112,7 +112,7 @@ describe('ensureLicenseForMaintenanceWindow()', () => {
     expect(() =>
       licenseState.ensureLicenseForMaintenanceWindow()
     ).toThrowErrorMatchingInlineSnapshot(
-      `"Maintenance window is disabled because license information is not available at this time."`
+      `[Error: Maintenance window is disabled because license information is not available at this time.]`
     );
   });
 
@@ -125,7 +125,7 @@ describe('ensureLicenseForMaintenanceWindow()', () => {
     expect(() =>
       licenseState.ensureLicenseForMaintenanceWindow()
     ).toThrowErrorMatchingInlineSnapshot(
-      `"Maintenance window is disabled because it requires a platinum license. Go to License Management to view upgrade options."`
+      `[Error: Maintenance window is disabled because it requires a platinum license. Go to License Management to view upgrade options.]`
     );
   });
 

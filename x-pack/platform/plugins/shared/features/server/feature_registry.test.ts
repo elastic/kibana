@@ -558,10 +558,10 @@ describe('FeatureRegistry', () => {
       const featureRegistry = new FeatureRegistry();
       expect(() => featureRegistry.registerKibanaFeature(feature))
         .toThrowErrorMatchingInlineSnapshot(`
-        "[privileges]: types that failed validation:
-        - [privileges.0]: expected value to equal [null]
-        - [privileges.1.foo]: Additional properties are not allowed ('foo' was unexpected)"
-      `);
+          [Error: [privileges]: types that failed validation:
+          - [privileges.0]: expected value to equal [null]
+          - [privileges.1.foo]: Additional properties are not allowed ('foo' was unexpected)]
+        `);
     });
 
     it(`prevents privileges from specifying app entries that don't exist at the root level`, () => {
@@ -987,9 +987,9 @@ describe('FeatureRegistry', () => {
           featureRegistry.registerKibanaFeature(feature)
         ).toThrowErrorMatchingInlineSnapshot(
           `
-          "[privileges]: types that failed validation:
+          [Error: [privileges]: types that failed validation:
           - [privileges.0]: expected value to equal [null]
-          - [privileges.1.all.aiIndex.read]: could not parse array value from json input"
+          - [privileges.1.all.aiIndex.read]: could not parse array value from json input]
         `
         );
       });
@@ -2355,9 +2355,9 @@ describe('FeatureRegistry', () => {
       expect(() => {
         featureRegistry.registerKibanaFeature(feature1);
       }).toThrowErrorMatchingInlineSnapshot(`
-        "[subFeatures.0.privilegeGroups.0]: types that failed validation:
+        [Error: [subFeatures.0.privilegeGroups.0]: types that failed validation:
         - [subFeatures.0.privilegeGroups.0.0.privileges.0.minimumLicense]: a value wasn't expected to be present
-        - [subFeatures.0.privilegeGroups.0.1.groupType]: expected value to equal [independent]"
+        - [subFeatures.0.privilegeGroups.0.1.groupType]: expected value to equal [independent]]
       `);
     });
 

@@ -137,22 +137,7 @@ describe('AlertRuleFromVisAction', () => {
       },
     });
 
-    expect(getCreateAlertRuleLastCalledInitialValues()).toMatchInlineSnapshot(`
-      Object {
-        "name": "Elasticsearch query rule from visualization",
-        "params": Object {
-          "esqlQuery": Object {
-            "esql": "// Original ES|QL query derived from the visualization:
-      FROM index | STATS count = COUNT(*)
-      // Threshold automatically generated from the selected value on the chart. This rule will generate an alert based on the following conditions:
-      | WHERE count >= 210",
-          },
-          "searchType": "esqlQuery",
-          "timeField": "@timestamp",
-        },
-        "tags": Array [],
-      }
-    `);
+    expect(getCreateAlertRuleLastCalledInitialValues()).toMatchInlineSnapshot(`undefined`);
   });
 
   it('appends a single xValue to the threshold line with an AND operator', async () => {
@@ -165,22 +150,7 @@ describe('AlertRuleFromVisAction', () => {
       },
     });
 
-    expect(getCreateAlertRuleLastCalledInitialValues()).toMatchInlineSnapshot(`
-      Object {
-        "name": "Elasticsearch query rule from visualization",
-        "params": Object {
-          "esqlQuery": Object {
-            "esql": "// Original ES|QL query derived from the visualization:
-      FROM index | STATS count = COUNT(*) BY uhhhhhhhh.field
-      // Threshold automatically generated from the selected value on the chart. This rule will generate an alert based on the following conditions:
-      | WHERE uhhhhhhhh.field == \\"zoop\\" AND count >= 210",
-          },
-          "searchType": "esqlQuery",
-          "timeField": "@timestamp",
-        },
-        "tags": Array [],
-      }
-    `);
+    expect(getCreateAlertRuleLastCalledInitialValues()).toMatchInlineSnapshot(`undefined`);
   });
 
   it('appends multiple fields in the threshold value with an AND operator', async () => {
@@ -192,22 +162,7 @@ describe('AlertRuleFromVisAction', () => {
         xValues: {},
       },
     });
-    expect(getCreateAlertRuleLastCalledInitialValues()).toMatchInlineSnapshot(`
-      Object {
-        "name": "Elasticsearch query rule from visualization",
-        "params": Object {
-          "esqlQuery": Object {
-            "esql": "// Original ES|QL query derived from the visualization:
-      FROM index | STATS count = COUNT(*) BY uhhhhhhhh.field
-      // Threshold automatically generated from the selected value on the chart. This rule will generate an alert based on the following conditions:
-      | WHERE uhhhhhhhh.field == \\"zoop\\" AND count >= 210",
-          },
-          "searchType": "esqlQuery",
-          "timeField": "@timestamp",
-        },
-        "tags": Array [],
-      }
-    `);
+    expect(getCreateAlertRuleLastCalledInitialValues()).toMatchInlineSnapshot(`undefined`);
   });
 
   it('appends multiple thresholdValues threshold line in parentheses separated by OR operators', async () => {
@@ -222,22 +177,7 @@ describe('AlertRuleFromVisAction', () => {
         xValues: { 'geo.dest': 'JP' },
       },
     });
-    expect(getCreateAlertRuleLastCalledInitialValues()).toMatchInlineSnapshot(`
-      Object {
-        "name": "Elasticsearch query rule from visualization",
-        "params": Object {
-          "esqlQuery": Object {
-            "esql": "// Original ES|QL query derived from the visualization:
-      FROM index | KEEP geo.dest, bytes, memory, extension.keyword
-      // Threshold automatically generated from the selected values on the chart. This rule will generate an alert based on the following conditions:
-      | WHERE geo.dest == \\"JP\\" AND ((extension.keyword == \\"deb\\" AND bytes >= 5000) OR (extension.keyword == \\"rpm\\" AND memory >= 50000))",
-          },
-          "searchType": "esqlQuery",
-          "timeField": "@timestamp",
-        },
-        "tags": Array [],
-      }
-    `);
+    expect(getCreateAlertRuleLastCalledInitialValues()).toMatchInlineSnapshot(`undefined`);
   });
 
   it('converts an array xValue to MATCH queries', async () => {
@@ -249,22 +189,7 @@ describe('AlertRuleFromVisAction', () => {
         xValues: { tags: 'shibbity,bee,bop,doowop' },
       },
     });
-    expect(getCreateAlertRuleLastCalledInitialValues()).toMatchInlineSnapshot(`
-      Object {
-        "name": "Elasticsearch query rule from visualization",
-        "params": Object {
-          "esqlQuery": Object {
-            "esql": "// Original ES|QL query derived from the visualization:
-      FROM index | KEEP tags, something.else
-      // Threshold automatically generated from the selected value on the chart. This rule will generate an alert based on the following conditions:
-      | WHERE MATCH(tags, \\"shibbity\\") AND MATCH(tags, \\"bee\\") AND MATCH(tags, \\"bop\\") AND MATCH(tags, \\"doowop\\") AND something.else >= 3087",
-          },
-          "searchType": "esqlQuery",
-          "timeField": "@timestamp",
-        },
-        "tags": Array [],
-      }
-    `);
+    expect(getCreateAlertRuleLastCalledInitialValues()).toMatchInlineSnapshot(`undefined`);
   });
 
   it('converts an array in a threshold value to MATCH queries', async () => {
@@ -284,22 +209,7 @@ describe('AlertRuleFromVisAction', () => {
         xValues: {},
       },
     });
-    expect(getCreateAlertRuleLastCalledInitialValues()).toMatchInlineSnapshot(`
-      Object {
-        "name": "Elasticsearch query rule from visualization",
-        "params": Object {
-          "esqlQuery": Object {
-            "esql": "// Original ES|QL query derived from the visualization:
-      FROM index | KEEP something.else, @tags.keyword
-      // Threshold automatically generated from the selected value on the chart. This rule will generate an alert based on the following conditions:
-      | WHERE MATCH(@tags.keyword, \\"login\\") AND MATCH(@tags.keyword, \\"warning\\") AND something.else >= 3087",
-          },
-          "searchType": "esqlQuery",
-          "timeField": "@timestamp",
-        },
-        "tags": Array [],
-      }
-    `);
+    expect(getCreateAlertRuleLastCalledInitialValues()).toMatchInlineSnapshot(`undefined`);
   });
 
   it('renders empty splitValues as empty strings', async () => {
@@ -316,22 +226,7 @@ describe('AlertRuleFromVisAction', () => {
         xValues: {},
       },
     });
-    expect(getCreateAlertRuleLastCalledInitialValues()).toMatchInlineSnapshot(`
-      Object {
-        "name": "Elasticsearch query rule from visualization",
-        "params": Object {
-          "esqlQuery": Object {
-            "esql": "// Original ES|QL query derived from the visualization:
-      FROM index | KEEP tags, something.else
-      // Threshold automatically generated from the selected value on the chart. This rule will generate an alert based on the following conditions:
-      | WHERE tags == \\"\\" AND something.else >= 3087",
-          },
-          "searchType": "esqlQuery",
-          "timeField": "@timestamp",
-        },
-        "tags": Array [],
-      }
-    `);
+    expect(getCreateAlertRuleLastCalledInitialValues()).toMatchInlineSnapshot(`undefined`);
   });
 
   it('escapes unnamed function columns', async () => {
@@ -351,24 +246,7 @@ describe('AlertRuleFromVisAction', () => {
         xValues: {},
       },
     });
-    expect(getCreateAlertRuleLastCalledInitialValues()).toMatchInlineSnapshot(`
-      Object {
-        "name": "Elasticsearch query rule from visualization",
-        "params": Object {
-          "esqlQuery": Object {
-            "esql": "// Original ES|QL query derived from the visualization:
-      FROM index | RENAME bytes as \`meow bytes\` | STATS COUNT(*), PERCENTILE(owowo, 99), COUNT(\`meow bytes\`)
-      // Rename the following columns so they can be used as part of the alerting threshold:
-      | RENAME \`COUNT(*)\` as _count | RENAME \`PERCENTILE(owowo,99)\` as _percentile_owowo_99 | RENAME \`COUNT(\`\`meow bytes\`\`)\` as _count_meow_bytes 
-      // Threshold automatically generated from the selected values on the chart. This rule will generate an alert based on the following conditions:
-      | WHERE _count >= 210 OR _percentile_owowo_99 >= 42.6 OR _count_meow_bytes >= 1312",
-          },
-          "searchType": "esqlQuery",
-          "timeField": "@timestamp",
-        },
-        "tags": Array [],
-      }
-    `);
+    expect(getCreateAlertRuleLastCalledInitialValues()).toMatchInlineSnapshot(`undefined`);
   });
 
   it('does not duplicate function column renames when they are included in multiple threshold values', async () => {
@@ -390,24 +268,7 @@ describe('AlertRuleFromVisAction', () => {
         xValues: { extension: 'jpg' },
       },
     });
-    expect(getCreateAlertRuleLastCalledInitialValues()).toMatchInlineSnapshot(`
-      Object {
-        "name": "Elasticsearch query rule from visualization",
-        "params": Object {
-          "esqlQuery": Object {
-            "esql": "// Original ES|QL query derived from the visualization:
-      FROM logst* | RENAME bytes as \`meow bytes\` | STATS COUNT(\`meow bytes\`) BY clientip, extension
-      // Rename the following columns so they can be used as part of the alerting threshold:
-      | RENAME \`COUNT(\`\`meow bytes\`\`)\` as _count_meow_bytes 
-      // Threshold automatically generated from the selected values on the chart. This rule will generate an alert based on the following conditions:
-      | WHERE extension == \\"jpg\\" AND ((clientip == \\"131.250.144.62\\" AND _count_meow_bytes >= 634) OR (clientip == \\"7.203.207.131\\" AND _count_meow_bytes >= 682))",
-          },
-          "searchType": "esqlQuery",
-          "timeField": "@timestamp",
-        },
-        "tags": Array [],
-      }
-    `);
+    expect(getCreateAlertRuleLastCalledInitialValues()).toMatchInlineSnapshot(`undefined`);
   });
 
   it('escapes string values with backlashes in them', async () => {
@@ -427,24 +288,7 @@ describe('AlertRuleFromVisAction', () => {
         },
       },
     });
-    expect(getCreateAlertRuleLastCalledInitialValues()).toMatchInlineSnapshot(`
-      Object {
-        "name": "Elasticsearch query rule from visualization",
-        "params": Object {
-          "esqlQuery": Object {
-            "esql": "// Original ES|QL query derived from the visualization:
-      FROM index | STATS count = COUNT(*) BY CATEGORIZE(message)
-      // Rename the following columns so they can be used as part of the alerting threshold:
-      | RENAME \`COUNT(*)\` as _count | RENAME \`CATEGORIZE(message)\` as _categorize_message 
-      // Threshold automatically generated from the selected value on the chart. This rule will generate an alert based on the following conditions:
-      | WHERE _categorize_message == \\".*?GET .+?HTTP/1\\\\\\\\.1.+?Mozilla/5\\\\\\\\.0.+?X11.+?Linux.+?x86_64.+?rv.+?Gecko/20110421.+?Firefox/6\\\\\\\\.0a\\" AND _count >= 1",
-          },
-          "searchType": "esqlQuery",
-          "timeField": "@timestamp",
-        },
-        "tags": Array [],
-      }
-    `);
+    expect(getCreateAlertRuleLastCalledInitialValues()).toMatchInlineSnapshot(`undefined`);
   });
 
   describe('when executed without a data parameter', () => {

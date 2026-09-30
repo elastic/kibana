@@ -117,7 +117,7 @@ describe('common', () => {
     it('throws an error if the query is not a valid Elasticsearch query', () => {
       expect(() => {
         getElasticsearchQueryOrThrow('data:');
-      }).toThrowErrorMatchingInlineSnapshot(`[Error: Invalid KQL: data:]`);
+      }).toThrowErrorMatchingInlineSnapshot(`[InvalidTransformError: Invalid KQL: data:]`);
     });
 
     it('returns the query if it is a valid Elasticsearch query', () => {

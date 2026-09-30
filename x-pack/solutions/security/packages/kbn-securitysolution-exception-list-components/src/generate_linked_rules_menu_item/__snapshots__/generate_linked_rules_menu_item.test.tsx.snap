@@ -44,7 +44,7 @@ exports[`generateLinedRulesMenuItems > should render the first linked rules with
 </div>
 `;
 
-exports[`generateLinedRulesMenuItems should render the second linked rule and apply the css when the length is > 1 1`] = `
+exports[`generateLinedRulesMenuItems > should render the second linked rule and apply the css when the length is > 1 1`] = `
 <div>
   <div
     class="euiListItemLayout euiContextMenuItem e1vodehr0 emotion-euiListItemLayout-euiContextMenuItem-center-LinkedRulesMenuItem"

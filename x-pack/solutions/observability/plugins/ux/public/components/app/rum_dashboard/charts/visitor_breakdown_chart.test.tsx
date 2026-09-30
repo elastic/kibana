@@ -19,7 +19,7 @@ import { useKibanaServices } from '../../../../hooks/use_kibana_services';
 import type { DataView } from '@kbn/data-views-plugin/public';
 
 vi.mock('../../../../hooks/use_kibana_services');
-vi.mock('uuid');
+vi.mock('uuid', () => ({ v4: vi.fn().mockReturnValue('xxxx-xxxxxxxxxxx-xxxx') }));
 
 const mockDataView = {
   id: 'mock-id',
@@ -47,9 +47,7 @@ describe('VisitorBreakdownChart', () => {
     });
   });
 
-  describe('component', async () => {
-    const mockUuid = await vi.importMock('uuid');
-    mockUuid.v4 = vi.fn().mockReturnValue('xxxx-xxxxxxxxxxx-xxxx');
+  describe('component', () => {
     const mockEmbeddableComponent = vi.fn((_) => <></>);
 
     beforeEach(() => {

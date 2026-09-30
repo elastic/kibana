@@ -334,7 +334,7 @@ describe('esql-valid-runtime verifier', () => {
 
       await expect(
         verifier.verify(makeKi(LOGS_QUERY), { ...context, abortSignal: abortController.signal })
-      ).rejects.toThrow('Aborted');
+      ).rejects.toMatchObject({ name: 'AbortError' });
       expect(esClient.esql.query).not.toHaveBeenCalled();
     });
 
@@ -350,7 +350,7 @@ describe('esql-valid-runtime verifier', () => {
           ...context,
           abortSignal: abortController.signal,
         })
-      ).rejects.toThrow('Aborted');
+      ).rejects.toMatchObject({ name: 'AbortError' });
       expect(esClient.esql.query).toHaveBeenCalledTimes(1);
     });
   });

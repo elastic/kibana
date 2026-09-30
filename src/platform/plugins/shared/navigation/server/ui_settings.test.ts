@@ -34,10 +34,10 @@ describe('ui settings', () => {
 
       expect(() => validate('/some-url')).not.toThrow();
       expect(() => validate('http://some-url')).toThrowErrorMatchingInlineSnapshot(
-        `"Must be a relative URL."`
+        `[Error: Must be a relative URL.]`
       );
       expect(() => validate(125)).toThrowErrorMatchingInlineSnapshot(
-        `"expected value of type [string] but got [number]"`
+        `[Error: expected value of type [string] but got [number]]`
       );
     });
 

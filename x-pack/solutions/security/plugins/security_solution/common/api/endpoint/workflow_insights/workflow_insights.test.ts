@@ -90,7 +90,7 @@ describe('Workflow Insights', () => {
       };
 
       expect(() => validateQuery(invalidQuery)).toThrowErrorMatchingInlineSnapshot(
-        '"[query.size]: expected value of type [number] but got [string]"'
+        `[Error: [query.size]: expected value of type [number] but got [string]]`
       );
     });
 
@@ -103,7 +103,7 @@ describe('Workflow Insights', () => {
       };
 
       expect(() => validateQuery(invalidQuery)).toThrowErrorMatchingInlineSnapshot(
-        '"[query.ids.1]: value has length [0] but it must have a minimum length of [1]."'
+        `[Error: [query.ids.1]: value has length [0] but it must have a minimum length of [1].]`
       );
     });
 
@@ -116,7 +116,7 @@ describe('Workflow Insights', () => {
       };
 
       expect(() => validateQuery(invalidQuery)).toThrowErrorMatchingInlineSnapshot(
-        '"[query.sourceIds.1]: sourceId cannot be an empty string"'
+        `[Error: [query.sourceIds.1]: sourceId cannot be an empty string]`
       );
     });
 
@@ -194,7 +194,7 @@ describe('Workflow Insights', () => {
       };
 
       expect(() => validateQuery(invalidQuery)).toThrowErrorMatchingInlineSnapshot(
-        '"[query.categories.0]: expected value to equal [endpoint]"'
+        `[Error: [query.categories.0]: expected value to equal [endpoint]]`
       );
     });
   });
@@ -258,7 +258,7 @@ describe('Workflow Insights', () => {
       };
 
       expect(() => validateRequest(invalidRequest)).toThrowErrorMatchingInlineSnapshot(
-        '"[params.insightId]: expected value of type [string] but got [undefined]"'
+        `[Error: [params.insightId]: expected value of type [string] but got [undefined]]`
       );
     });
 
@@ -271,7 +271,7 @@ describe('Workflow Insights', () => {
       };
 
       expect(() => validateRequest(invalidRequest)).toThrowErrorMatchingInlineSnapshot(
-        '"[params.insightId]: value has length [0] but it must have a minimum length of [1]."'
+        `[Error: [params.insightId]: value has length [0] but it must have a minimum length of [1].]`
       );
     });
 
@@ -288,7 +288,7 @@ describe('Workflow Insights', () => {
       };
 
       expect(() => validateRequest(invalidRequest)).toThrowErrorMatchingInlineSnapshot(
-        '"[body.category]: expected value to equal [endpoint]"'
+        `[Error: [body.category]: expected value to equal [endpoint]]`
       );
     });
 
@@ -304,11 +304,11 @@ describe('Workflow Insights', () => {
       };
 
       expect(() => validateRequest(invalidRequest)).toThrowErrorMatchingInlineSnapshot(`
-    "[body.type]: types that failed validation:
-    - [body.type.0]: expected value to equal [incompatible_antivirus]
-    - [body.type.1]: expected value to equal [policy_response_failure]
-    - [body.type.2]: expected value to equal [custom]"
-    `);
+        [Error: [body.type]: types that failed validation:
+        - [body.type.0]: expected value to equal [incompatible_antivirus]
+        - [body.type.1]: expected value to equal [policy_response_failure]
+        - [body.type.2]: expected value to equal [custom]]
+      `);
     });
 
     describe('policy_response_failure type validation in PUT requests', () => {
@@ -606,7 +606,7 @@ describe('Workflow Insights', () => {
       };
 
       expect(() => validateRequest(invalidRequest)).toThrowErrorMatchingInlineSnapshot(
-        '"[body.target.ids.1]: value has length [0] but it must have a minimum length of [1]."'
+        `[Error: [body.target.ids.1]: value has length [0] but it must have a minimum length of [1].]`
       );
     });
 
@@ -636,12 +636,12 @@ describe('Workflow Insights', () => {
       };
 
       expect(() => validateRequest(invalidRequest)).toThrowErrorMatchingInlineSnapshot(`
-    "[body.action.type]: types that failed validation:
-    - [body.action.type.0]: expected value to equal [refreshed]
-    - [body.action.type.1]: expected value to equal [remediated]
-    - [body.action.type.2]: expected value to equal [suppressed]
-    - [body.action.type.3]: expected value to equal [dismissed]"
-    `);
+        [Error: [body.action.type]: types that failed validation:
+        - [body.action.type.0]: expected value to equal [refreshed]
+        - [body.action.type.1]: expected value to equal [remediated]
+        - [body.action.type.2]: expected value to equal [suppressed]
+        - [body.action.type.3]: expected value to equal [dismissed]]
+      `);
     });
 
     it('should throw an error if remediation list items contain invalid data', () => {
@@ -667,7 +667,7 @@ describe('Workflow Insights', () => {
       };
 
       expect(() => validateRequest(invalidRequest)).toThrowErrorMatchingInlineSnapshot(
-        '"[body.remediation.exception_list_items.0.entries]: could not parse array value from json input"'
+        `[Error: [body.remediation.exception_list_items.0.entries]: could not parse array value from json input]`
       );
     });
   });

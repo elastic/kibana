@@ -311,7 +311,7 @@ describe('convertMetricAggregationToColumn', () => {
       expect(convertMetricAggregationToColumn(...input)).toBeNull();
     } else if (Array.isArray(expected)) {
       expect(convertMetricAggregationToColumn(...input)).toEqual(
-        expected.map(expect.objectContaining)
+        expected.map((item) => expect.objectContaining(item))
       );
     } else {
       expect(convertMetricAggregationToColumn(...input)).toEqual(expect.objectContaining(expected));
@@ -428,7 +428,7 @@ describe('computeParentPipelineColumns', () => {
     if (expected === null) {
       expect(computeParentPipelineColumns(...input)).toBeNull();
     } else if (Array.isArray(expected)) {
-      expect(computeParentPipelineColumns(...input)).toEqual(expected.map(expect.objectContaining));
+      expect(computeParentPipelineColumns(...input)).toEqual(expected.map((item) => expect.objectContaining(item)));
     } else {
       expect(computeParentPipelineColumns(...input)).toEqual(expect.objectContaining(expected));
     }
@@ -535,7 +535,7 @@ describe('convertParentPipelineAggToColumns', () => {
       expect(convertParentPipelineAggToColumns(...input)).toBeNull();
     } else if (Array.isArray(expected)) {
       expect(convertParentPipelineAggToColumns(...input)).toEqual(
-        expected.map(expect.objectContaining)
+        expected.map((item) => expect.objectContaining(item))
       );
     } else {
       expect(convertParentPipelineAggToColumns(...input)).toEqual(
@@ -645,7 +645,7 @@ describe('createParentPipelineAggregationColumn', () => {
       expect(createParentPipelineAggregationColumn(...input)).toBeNull();
     } else if (Array.isArray(expected)) {
       expect(createParentPipelineAggregationColumn(...input)).toEqual(
-        expected.map(expect.objectContaining)
+        expected.map((item) => expect.objectContaining(item))
       );
     } else {
       expect(createParentPipelineAggregationColumn(...input)).toEqual(

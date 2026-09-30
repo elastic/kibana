@@ -63,5 +63,3 @@ exports[`ManageSLO > Enable > enables the slo when disabled 2`] = `
   ],
 }
 `;
-
-

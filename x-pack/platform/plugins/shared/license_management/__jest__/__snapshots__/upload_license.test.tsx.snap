@@ -1085,5 +1085,3 @@ exports[`UploadLicense > should display error when ES returns error 1`] = `
   </section>
 </DocumentFragment>
 `;
-
-

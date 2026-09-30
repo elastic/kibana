@@ -49,7 +49,7 @@ describe('useSubAction', () => {
     await waitFor(() =>
       expect(mockHttpPost).toHaveBeenCalledWith('/api/actions/connector/test-id/_execute', {
         body: '{"params":{"subAction":"test","subActionParams":{"foo":"bar"}}}',
-        signal: new AbortController().signal,
+        signal: expect.any(AbortSignal),
       })
     );
   });

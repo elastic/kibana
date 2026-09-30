@@ -21,7 +21,7 @@ import { MOCK_CURRENT_USER } from '../../mock/conversation';
 import { createMockActionConnector } from '@kbn/alerts-ui-shared/src/common/test_utils/connector.mock';
 
 // Mock dependencies
-vi.mock('react-use/lib/useLocalStorage', () => vi.fn());
+vi.mock('react-use/lib/useLocalStorage', () => ({ default: vi.fn() }));
 vi.mock('../use_conversation');
 vi.mock('../helpers');
 vi.mock('fast-deep-equal');

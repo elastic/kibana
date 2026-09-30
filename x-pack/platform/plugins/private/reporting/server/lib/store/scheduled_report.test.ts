@@ -147,7 +147,7 @@ test('ScheduledReport should throw an error if report payload is malformed', () 
     });
   };
   expect(createInstance).toThrowErrorMatchingInlineSnapshot(
-    `"Unable to parse payload from scheduled_report saved object: SyntaxError: Unexpected token 'a', \\"abc\\" is not valid JSON"`
+    `[Error: Unable to parse payload from scheduled_report saved object: SyntaxError: Unexpected token 'a', "abc" is not valid JSON]`
   );
 });
 
@@ -178,6 +178,6 @@ test('ScheduledReport should throw an error if scheduled_report saved object is 
     });
   };
   expect(createInstance).toThrowErrorMatchingInlineSnapshot(
-    `"Invalid scheduled_report saved object - no id"`
+    `[Error: Invalid scheduled_report saved object - no id]`
   );
 });

@@ -20,13 +20,16 @@ import type { MatchParams } from './home';
 import TriggersActionsUIHome from './home';
 import { hasShowActionsCapability } from './lib/capabilities';
 import { useKibana } from '../common/lib/kibana';
+import { useGetRuleTypesPermissions as useGetRuleTypesPermissionsFn } from '@kbn/alerts-ui-shared/src/common/hooks/use_get_rule_types_permissions';
 
 vi.mock('../common/lib/kibana');
 vi.mock('../common/get_experimental_features');
 vi.mock('./lib/capabilities');
 
 vi.mock('./sections/rules_list/components/rules_list', () => {
-  return () => <div data-test-subj="rulesListComponents">{'Render Rule list component'}</div>;
+  return {
+    default: () => <div data-test-subj="rulesListComponents">{'Render Rule list component'}</div>,
+  };
 });
 
 vi.mock('./components/health_check', () => {
@@ -58,9 +61,7 @@ vi.mock('@kbn/alerts-ui-shared/src/common/hooks/use_get_rule_types_permissions',
   return { ...mocked, default: mocked };
 });
 
-const { useGetRuleTypesPermissions } = await vi.importMock(
-  '@kbn/alerts-ui-shared/src/common/hooks/use_get_rule_types_permissions'
-);
+const useGetRuleTypesPermissions = useGetRuleTypesPermissionsFn as Mock;
 
 const useKibanaMock = useKibana as Mocked<typeof useKibana>;
 

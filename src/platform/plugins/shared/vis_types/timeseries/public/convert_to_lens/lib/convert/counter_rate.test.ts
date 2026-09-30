@@ -44,7 +44,7 @@ describe('convertToCounterRateFormulaColumn', () => {
       expect(convertToCounterRateColumn(input)).toBeNull();
     } else if (Array.isArray(expected)) {
       const results = convertToCounterRateColumn(input);
-      expect(results).toEqual(expected.map(expect.objectContaining));
+      expect(results).toEqual(expected.map((item) => expect.objectContaining(item)));
       expect(results?.[1].references[0]).toEqual(results?.[0].columnId);
     } else {
       expect(convertToCounterRateColumn(input)).toEqual(expect.objectContaining(expected));

@@ -261,7 +261,7 @@ describe('Exception helpers', () => {
         CodeSignature[]
       >;
       const result = getCodeSignatureValue(payload, 'field');
-      expect(result).toEqual([undefined]);
+      expect(result).toEqual([]);
     });
 
     test('it should not return duplicate code signature entries', () => {

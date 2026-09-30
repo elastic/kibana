@@ -139,16 +139,16 @@ describe('createPromptRestApi', () => {
     await expect(async () => {
       await promptApi(params);
     }).rejects.toThrowErrorMatchingInlineSnapshot(`
-      "[
+      [ZodError: [
         {
-          \\"expected\\": \\"string\\",
-          \\"code\\": \\"invalid_type\\",
-          \\"path\\": [
-            \\"question\\"
+          "expected": "string",
+          "code": "invalid_type",
+          "path": [
+            "question"
           ],
-          \\"message\\": \\"Invalid input: expected string, received undefined\\"
+          "message": "Invalid input: expected string, received undefined"
         }
-      ]"
+      ]]
     `);
   });
 

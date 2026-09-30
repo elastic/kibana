@@ -112,7 +112,7 @@ describe('createFormulaColumn', () => {
     if (expected === null) {
       expect(createFormulaColumn(...input)).toBeNull();
     } else if (Array.isArray(expected)) {
-      expect(createFormulaColumn(...input)).toEqual(expected.map(expect.objectContaining));
+      expect(createFormulaColumn(...input)).toEqual(expected.map((item) => expect.objectContaining(item)));
     } else {
       expect(createFormulaColumn(...input)).toEqual(expect.objectContaining(expected));
     }
@@ -295,7 +295,7 @@ describe('convertMathToFormulaColumn', () => {
     if (expected === null) {
       expect(convertMathToFormulaColumn(...input)).toBeNull();
     } else if (Array.isArray(expected)) {
-      expect(convertMathToFormulaColumn(...input)).toEqual(expected.map(expect.objectContaining));
+      expect(convertMathToFormulaColumn(...input)).toEqual(expected.map((item) => expect.objectContaining(item)));
     } else {
       expect(convertMathToFormulaColumn(...input)).toEqual(expect.objectContaining(expected));
     }
@@ -398,7 +398,7 @@ describe('convertOtherAggsToFormulaColumn', () => {
       expect(convertOtherAggsToFormulaColumn(...input)).toBeNull();
     } else if (Array.isArray(expected)) {
       expect(convertOtherAggsToFormulaColumn(...input)).toEqual(
-        expected.map(expect.objectContaining)
+        expected.map((item) => expect.objectContaining(item))
       );
     } else {
       expect(convertOtherAggsToFormulaColumn(...input)).toEqual(expect.objectContaining(expected));

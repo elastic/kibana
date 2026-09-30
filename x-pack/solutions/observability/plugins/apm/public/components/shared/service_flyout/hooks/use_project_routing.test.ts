@@ -18,15 +18,14 @@ interface MockCpsManager {
 
 const mockCpsManager$ = new BehaviorSubject<MockCpsManager | undefined>(undefined);
 
-vi.mock('../../../../plugin', () => {
-  const mocked = {
-    get apmCpsManager$() {
-      return mockCpsManager$;
-    },
-    getApmCpsManager: () => mockCpsManager$.getValue(),
-  };
-  return { ...mocked, default: mocked };
-});
+// Return the getter object as-is: spreading it would read `mockCpsManager$` while it's still in
+// the temporal dead zone (the factory runs during hoisted imports).
+vi.mock('../../../../plugin', () => ({
+  get apmCpsManager$() {
+    return mockCpsManager$;
+  },
+  getApmCpsManager: () => mockCpsManager$.getValue(),
+}));
 
 function createCpsManager(projectRouting$: BehaviorSubject<string | undefined>): MockCpsManager {
   return {

@@ -78,16 +78,16 @@ describe('Key rotation routes', () => {
       expect(queryValidator.validate({})).toEqual({ batch_size: 10000 });
 
       expect(() => queryValidator.validate({ batch_size: 0 })).toThrowErrorMatchingInlineSnapshot(
-        `"[batch_size]: Value must be equal to or greater than [1]."`
+        `[Error: [batch_size]: Value must be equal to or greater than [1].]`
       );
       expect(() =>
         queryValidator.validate({ batch_size: 10001 })
       ).toThrowErrorMatchingInlineSnapshot(
-        `"[batch_size]: Value must be equal to or lower than [10000]."`
+        `[Error: [batch_size]: Value must be equal to or lower than [10000].]`
       );
 
       expect(() => queryValidator.validate({ type: 100 })).toThrowErrorMatchingInlineSnapshot(
-        `"[type]: expected value of type [string] but got [number]"`
+        `[Error: [type]: expected value of type [string] but got [number]]`
       );
     });
 

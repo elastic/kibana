@@ -21,7 +21,6 @@ import {
   renderComponentTemplateEdit,
 } from './helpers/component_template_edit.helpers';
 
-vi.mock('@kbn/code-editor');
 
 describe('<ComponentTemplateEdit />', () => {
   let httpSetup: ReturnType<typeof setupEnvironment>['httpSetup'];

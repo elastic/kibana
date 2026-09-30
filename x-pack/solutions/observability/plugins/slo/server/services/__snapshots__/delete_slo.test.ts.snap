@@ -213,5 +213,3 @@ exports[`DeleteSLO > happy path > removes all resources associated to the slo 7`
   ],
 }
 `;
-
-

@@ -142,7 +142,7 @@ describe('workflowExecutionLoop', () => {
     expect(params.workflowRuntime.saveState).toHaveBeenCalled();
     expect(params.stepIoService.flush).toHaveBeenCalled();
     expect(params.workflowLogger.flushEvents).toHaveBeenCalledWith({
-      signal: params.signal,
+      signal: abortController.signal,
     });
   });
 });

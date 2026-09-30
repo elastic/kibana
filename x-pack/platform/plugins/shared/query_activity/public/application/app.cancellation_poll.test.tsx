@@ -295,6 +295,9 @@ describe('QueryActivityApp - cancellation polling', () => {
       expect(context.notifications.toasts.addSuccess).toHaveBeenCalled();
     });
 
+    // Commit the pending-cancellation state update so the polling interval is registered
+    await act(async () => {});
+
     // Before any interval elapses, polling has not fired yet
     const callsBeforeInterval = fetchQueryActivity.mock.calls.length;
 

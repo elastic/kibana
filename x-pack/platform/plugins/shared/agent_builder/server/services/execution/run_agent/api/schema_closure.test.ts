@@ -34,7 +34,8 @@ vi.mock('@elastic/schemas/es/json/_spec_utils.json', () => {
   if (mockFlakyAttempts === 1) {
     throw new Error('transient load failure');
   }
-  return { $defs: { Ok: { type: 'string' } } };
+  const mocked = { $defs: { Ok: { type: 'string' } } };
+  return { ...mocked, default: mocked };
 });
 
 const durationSchema = () => ({
@@ -87,7 +88,9 @@ describe('loadSchemaClosure', () => {
   it('does not memoize a rejection, so the next call retries', async () => {
     const schema = { properties: { ok: { $ref: './_spec_utils.json#/$defs/Ok' } } };
 
-    await expect(loadSchemaClosure('elasticsearch', schema)).rejects.toThrow(
+    // Vitest wraps errors thrown by a vi.mock factory; the original error is the cause.
+    await expect(loadSchemaClosure('elasticsearch', schema)).rejects.toHaveProperty(
+      'cause.message',
       'transient load failure'
     );
 

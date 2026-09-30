@@ -451,7 +451,7 @@ describe('Perform Rule Upgrade Route Schemas', () => {
         const expected = `${deletedProp}: Invalid input: expected ${
           expectedType[deletedProp as keyof typeof expectedType]
         }, received undefined`;
-        expect(stringifyZodError(result.error)).toMatchInlineSnapshot(`"${expected}"`);
+        expect(stringifyZodError(result.error)).toEqual(expected);
       });
     });
   });

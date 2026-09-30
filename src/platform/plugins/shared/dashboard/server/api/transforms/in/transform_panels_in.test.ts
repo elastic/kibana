@@ -12,6 +12,14 @@ import { vi } from 'vitest';
 import { z } from '@kbn/zod';
 import { transformPanelsIn } from './transform_panels_in';
 
+const mockKibanaServices = vi.hoisted(() => ({ embeddableService: undefined as unknown }));
+vi.mock('../../../kibana_services', async (importOriginal) => ({
+  ...(await importOriginal<Record<string, unknown>>()),
+  get embeddableService() {
+    return mockKibanaServices.embeddableService;
+  },
+}));
+
 vi.mock('uuid', () => {
   const mocked = {
     v4: vi.fn(() => 'mock-uuid'),
@@ -113,9 +121,8 @@ describe('transformPanelsIn', () => {
       lessThan10: z.number().max(10),
     });
 
-    beforeAll(async () => {
-      // eslint-disable-next-line @typescript-eslint/no-var-requires
-      (await import('../../../kibana_services')).embeddableService = {
+    beforeAll(() => {
+      mockKibanaServices.embeddableService = {
         getTransforms: () => ({ schema: TestEmbeddableSchema }),
       };
     });

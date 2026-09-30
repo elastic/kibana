@@ -23,6 +23,12 @@ import { EditConnectorTabs } from '../../../../types';
 import { times } from 'lodash';
 import { useHistory, useParams } from 'react-router-dom';
 import { createMockActionConnector } from '@kbn/alerts-ui-shared/src/common/test_utils/connector.mock';
+import {
+  useConnectorOAuthConnect as useConnectorOAuthConnectFn,
+  useConnectorOAuthDisconnect as useConnectorOAuthDisconnectFn,
+} from '@kbn/response-ops-oauth-hooks';
+import { useConnectorContext as useConnectorContextFn } from '../../../..';
+import { loadActionTypes as loadActionTypesFn } from '../../../lib/action_connector_api';
 
 vi.mock('../../../../common/lib/kibana');
 vi.mock('../../../..', async () => {
@@ -90,7 +96,7 @@ vi.mock('@kbn/response-ops-oauth-hooks', async () => {
 const useKibanaMock = useKibana as Mocked<typeof useKibana>;
 const actionTypeRegistry = actionTypeRegistryMock.create();
 const mocks = coreMock.createSetup();
-const { loadActionTypes } = await vi.importMock('../../../lib/action_connector_api');
+const loadActionTypes = loadActionTypesFn as Mock;
 
 describe('actions_connectors_list', () => {
   describe('component empty', () => {
@@ -962,11 +968,9 @@ describe('actions_connectors_list', () => {
     let useConnectorContext: Mock;
 
     beforeEach(async () => {
-      useConnectorOAuthConnect = (await vi.importMock('@kbn/response-ops-oauth-hooks'))
-        .useConnectorOAuthConnect as Mock;
-      useConnectorOAuthDisconnect = (await vi.importMock('@kbn/response-ops-oauth-hooks'))
-        .useConnectorOAuthDisconnect as Mock;
-      useConnectorContext = (await vi.importMock('../../../..')).useConnectorContext as Mock;
+      useConnectorOAuthConnect = useConnectorOAuthConnectFn as Mock;
+      useConnectorOAuthDisconnect = useConnectorOAuthDisconnectFn as Mock;
+      useConnectorContext = useConnectorContextFn as Mock;
 
       useConnectorContext.mockReturnValue({
         services: {

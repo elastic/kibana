@@ -21,6 +21,7 @@ import {
   useLifecycleFlyoutCoordination,
   useRegisterLifecycleFlyoutOpen,
 } from '../common/hooks/lifecycle_flyout_coordination';
+import { useLifecyclePreview } from '../common/hooks/lifecycle_preview';
 
 let mockFlyoutOpen = false;
 let mockFlyoutHasUnsavedChanges = false;
@@ -185,12 +186,9 @@ vi.mock('./ingestion_rate', () => {
 
 vi.mock('./lifecycle_summary', () => {
   const mocked = {
-    LifecycleSummary: async ({ onAddDeletePhase }: { onAddDeletePhase?: () => void }) => {
+    LifecycleSummary: ({ onAddDeletePhase }: { onAddDeletePhase?: () => void }) => {
       // Keep this unit test focused on StreamDetailGeneralData + unsaved prompt wiring.
       // We emulate the lifecycle flyout updating the shared preview state.
-      const { useLifecyclePreview } = (await vi.importActual(
-        '../common/hooks/lifecycle_preview'
-      )) as typeof import('../common/hooks/lifecycle_preview');
       const preview = useLifecyclePreview();
 
       mockLifecycleSummaryProps = {

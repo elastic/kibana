@@ -22,7 +22,6 @@ vi.mock('lodash', () => {
   };
 });
 
-vi.mock('@kbn/code-editor');
 
 import { LoadMappingsProvider } from './load_mappings_provider';
 

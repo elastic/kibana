@@ -10,12 +10,14 @@ import { vi } from 'vitest';
 let mockShouldThrow = false;
 vi.mock('moment', () => {
   const actualMoment = require('moment');
-  return (...args: unknown[]) => {
-    if (mockShouldThrow) {
-      throw new Error('forced error');
-    }
+  return {
+    default: (...args: unknown[]) => {
+      if (mockShouldThrow) {
+        throw new Error('forced error');
+      }
 
-    return actualMoment(...args);
+      return actualMoment(...args);
+    },
   };
 });
 

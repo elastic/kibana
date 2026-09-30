@@ -61,7 +61,7 @@ describe('convertToPercentileParams', () => {
     if (expected === null) {
       expect(convertToPercentileParams(...input)).toBeNull();
     } else if (Array.isArray(expected)) {
-      expect(convertToPercentileParams(...input)).toEqual(expected.map(expect.objectContaining));
+      expect(convertToPercentileParams(...input)).toEqual(expected.map((item) => expect.objectContaining(item)));
     } else {
       expect(convertToPercentileParams(...input)).toEqual(expect.objectContaining(expected));
     }
@@ -128,7 +128,7 @@ describe('convertToPercentileColumn', () => {
     if (expected === null) {
       expect(convertToPercentileColumn(...input)).toBeNull();
     } else if (Array.isArray(expected)) {
-      expect(convertToPercentileColumn(...input)).toEqual(expected.map(expect.objectContaining));
+      expect(convertToPercentileColumn(...input)).toEqual(expected.map((item) => expect.objectContaining(item)));
     } else {
       expect(convertToPercentileColumn(...input)).toEqual(expect.objectContaining(expected));
     }

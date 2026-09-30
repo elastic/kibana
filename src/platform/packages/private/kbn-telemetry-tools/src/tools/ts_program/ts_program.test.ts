@@ -10,7 +10,8 @@
 import { parseUsageCollection } from '../ts_parser';
 import { loadFixtureProgram } from '../test_utils';
 
-describe('createKibanaProgram', () => {
+// Building a TS program for the repo tsconfig takes several seconds; Jest never timed out sync tests.
+describe('createKibanaProgram', { timeout: 60_000 }, () => {
   it('parses files with @kbn/* imports', () => {
     const { program, sourceFile } = loadFixtureProgram('with_kbn_package_import.ts', __dirname);
     expect([...parseUsageCollection(sourceFile, program)]).toMatchInlineSnapshot(`

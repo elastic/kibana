@@ -16,7 +16,7 @@ import { useAIAssistantAppService } from './use_ai_assistant_app_service';
 vi.mock('./use_kibana');
 vi.mock('./use_ai_assistant_app_service');
 vi.mock('p-retry', () => {
-  return (fn: () => Promise<any>) => fn();
+  return { default: (fn: () => Promise<unknown>) => fn() };
 });
 
 describe('useKnowledgeBase', () => {

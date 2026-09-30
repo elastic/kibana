@@ -6,6 +6,7 @@
  */
 
 // eslint-disable-next-line import/order
+import { mockGetFakeKibanaRequest, mockValidateKibanaPrivileges } from './api_keys.test.mock';
 
 import type { Mocked } from 'vitest';
 
@@ -17,7 +18,6 @@ import {
 import type { Logger } from '@kbn/logging';
 
 import { APIKeys } from './api_keys';
-import { mockGetFakeKibanaRequest, mockValidateKibanaPrivileges } from './api_keys.test.mock';
 import type { SecurityLicense } from '../../../common';
 import { ALL_SPACES_ID } from '../../../common/constants';
 import { licenseMock } from '../../../common/licensing/index.mock';

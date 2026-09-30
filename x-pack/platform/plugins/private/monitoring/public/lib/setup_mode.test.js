@@ -44,7 +44,7 @@ function waitForSetupModeData() {
 
 describe('setup_mode', () => {
   beforeEach(async () => {
-    setModulesAndMocks();
+    await setModulesAndMocks();
   });
 
   describe('setup', () => {
@@ -109,7 +109,7 @@ describe('setup_mode', () => {
         return { ...mocked, default: mocked };
       });
 
-      setModulesAndMocks();
+      await setModulesAndMocks();
       await initSetupModeState(globalState, httpServiceMock, handleErrorsMock, callbackMock);
       toggleSetupMode(true);
       await waitForSetupModeData();

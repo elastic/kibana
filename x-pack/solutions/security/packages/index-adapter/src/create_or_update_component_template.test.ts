@@ -82,7 +82,7 @@ describe('createOrUpdateComponentTemplate', () => {
         template: componentTemplate,
         totalFieldsLimit: 2500,
       })
-    ).rejects.toThrowErrorMatchingInlineSnapshot(`"foo"`);
+    ).rejects.toThrowErrorMatchingInlineSnapshot(`[ConnectionError: foo]`);
 
     expect(logger.error).toHaveBeenCalledWith(
       `Error installing component template test-mappings - foo`
@@ -100,7 +100,7 @@ describe('createOrUpdateComponentTemplate', () => {
         template: componentTemplate,
         totalFieldsLimit: 2500,
       })
-    ).rejects.toThrowErrorMatchingInlineSnapshot(`"generic error"`);
+    ).rejects.toThrowErrorMatchingInlineSnapshot(`[Error: generic error]`);
 
     expect(logger.error).toHaveBeenCalledWith(
       `Error installing component template test-mappings - generic error`

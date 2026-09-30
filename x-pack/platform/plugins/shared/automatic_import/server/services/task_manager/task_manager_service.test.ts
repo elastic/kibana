@@ -20,14 +20,17 @@ import {
 } from './task_manager_service';
 import { TASK_STATUSES } from '../saved_objects/constants';
 import type { AutomaticImportSavedObjectService } from '../saved_objects/saved_objects_service';
+import { AgentService as MockedAgentService } from '../agents/agent_service';
+import { generateFieldMappings as mockedGenerateFieldMappings } from '../build_integration/fields';
+import { validateFieldMappings as mockedValidateFieldMappings } from '../build_integration/validate_fields';
 
 vi.mock('../agents/agent_service');
 vi.mock('../build_integration/fields');
 vi.mock('../build_integration/validate_fields');
 
-const { AgentService } = await vi.importMock('../agents/agent_service');
-const { generateFieldMappings } = await vi.importMock('../build_integration/fields');
-const { validateFieldMappings } = await vi.importMock('../build_integration/validate_fields');
+const AgentService = MockedAgentService as unknown as Mock;
+const generateFieldMappings = mockedGenerateFieldMappings as unknown as Mock;
+const validateFieldMappings = mockedValidateFieldMappings as unknown as Mock;
 
 describe('TaskManagerService', () => {
   it('exports DATA_STREAM_CREATION_TASK_TYPE', () => {

@@ -18,6 +18,14 @@ import type { CopyToDashboardAPI } from './copy_to_dashboard_action';
 import { CopyToDashboardModal } from './copy_to_dashboard_modal';
 import type { DashboardPickerProps } from '@kbn/presentation-util-plugin/public/components/dashboard_picker/dashboard_picker';
 
+const mockKibanaServices = vi.hoisted(() => ({ embeddableService: undefined as unknown }));
+vi.mock('../services/kibana_services', async (importOriginal) => ({
+  ...(await importOriginal<Record<string, unknown>>()),
+  get embeddableService() {
+    return mockKibanaServices.embeddableService;
+  },
+}));
+
 vi.mock('../utils/get_dashboard_capabilities', () => {
   const mocked = {
     getDashboardCapabilities: () => ({
@@ -67,11 +75,10 @@ describe('CopyToDashboardModal', () => {
   const closeModalMock = vi.fn();
   const navigateToWithEmbeddablePackagesMock = vi.fn();
 
-  beforeEach(async () => {
+  beforeEach(() => {
     vi.clearAllMocks();
 
-    // eslint-disable-next-line @typescript-eslint/no-var-requires
-    (await import('../services/kibana_services')).embeddableService = {
+    mockKibanaServices.embeddableService = {
       getStateTransfer: () => ({
         navigateToWithEmbeddablePackages: navigateToWithEmbeddablePackagesMock,
       }),

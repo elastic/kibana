@@ -8,11 +8,21 @@
 import { vi } from 'vitest';
 
 import { getTransactionBreakdown } from '.';
-import * as constants from './constants';
 import noDataResponse from './mock_responses/no_data.json';
 import dataResponse from './mock_responses/data.json';
 import type { APMConfig } from '../../..';
 import { ENVIRONMENT_ALL } from '../../../../common/environment_filter_values';
+
+// ESM namespaces are read-only, so expose `MAX_KPIS` through a mutable hoisted holder.
+const mockConstants = vi.hoisted(() => ({ MAX_KPIS: undefined as number | undefined }));
+vi.mock('./constants', async (importOriginal) => {
+  const actual = await importOriginal<{ MAX_KPIS: number }>();
+  return {
+    get MAX_KPIS() {
+      return mockConstants.MAX_KPIS ?? actual.MAX_KPIS;
+    },
+  };
+});
 
 const mockConfig = new Proxy(
   {},
@@ -79,8 +89,7 @@ describe('getTransactionBreakdown', () => {
 
     it('should not include more KPIs than MAX_KPIs', async () => {
       const { apmEventClient } = getMockApmEventClient(dataResponse);
-      // @ts-expect-error
-      constants.MAX_KPIS = 2;
+      mockConstants.MAX_KPIS = 2;
 
       const response = await getTransactionBreakdown({
         serviceName: 'myServiceName',

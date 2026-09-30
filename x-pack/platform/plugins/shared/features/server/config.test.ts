@@ -175,10 +175,10 @@ describe('config schema', () => {
         { serverless: true }
       )
     ).toThrowErrorMatchingInlineSnapshot(`
-      "[overrides.featureA.subFeatures.privileges.subOne.includeIn]: types that failed validation:
+      [Error: [overrides.featureA.subFeatures.privileges.subOne.includeIn]: types that failed validation:
       - [includeIn.0]: expected value to equal [all]
       - [includeIn.1]: expected value to equal [read]
-      - [includeIn.2]: expected value to equal [none]"
+      - [includeIn.2]: expected value to equal [none]]
     `);
   });
 });

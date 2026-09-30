@@ -12,6 +12,7 @@ import { screen } from '@testing-library/react';
 import type { AppMockRenderer } from '../lib/test_utils';
 import { createAppMockRenderer } from '../lib/test_utils';
 import { MaintenanceWindowScopedQuery } from './maintenance_window_scoped_query';
+import { useKibana } from '../utils/kibana_react';
 
 vi.mock('../utils/kibana_react');
 vi.mock('@kbn/alerts-ui-shared', () => {
@@ -21,14 +22,13 @@ vi.mock('@kbn/alerts-ui-shared', () => {
   return { ...mocked, default: mocked };
 });
 
-const { useKibana } = await vi.importMock('../utils/kibana_react');
 
 describe('MaintenanceWindowScopedQuery', () => {
   let appMockRenderer: AppMockRenderer;
 
   beforeEach(() => {
     vi.clearAllMocks();
-    useKibana.mockReturnValue({
+    vi.mocked(useKibana).mockReturnValue({
       services: {
         notifications: {
           toasts: {

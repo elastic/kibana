@@ -8,8 +8,7 @@
 import { fetchBeatsStats, processResults } from './get_beats_stats';
 import sinon from 'sinon';
 import type { ElasticsearchClient } from '@kbn/core/server';
-// eslint-disable-next-line @typescript-eslint/no-var-requires
-const beatsStatsResultSet = await import('./__mocks__/fixtures/beats_stats_results.json');
+const beatsStatsResultSet = (await import('./__mocks__/fixtures/beats_stats_results.json')).default;
 
 const getBaseOptions = () => ({
   clusters: {},

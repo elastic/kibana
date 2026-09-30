@@ -6,7 +6,6 @@
  */
 
 import { vi } from 'vitest';
-import type { Mock } from 'vitest';
 
 import { loggerMock } from '@kbn/logging-mocks';
 import type { ElasticsearchClient } from '@kbn/core/server';
@@ -31,16 +30,14 @@ import {
   getLegacySecurityMetadataEntitiesDataStreamName,
 } from './metadata_data_stream';
 import { ALL_ENTITY_TYPES } from '../../../common/domain/definitions/entity_schema';
+import {
+  deleteIndex,
+  deleteDataStream,
+  deleteIndexTemplate,
+  deleteComponentTemplate,
+} from '../../infra/elasticsearch';
 
 vi.mock('../../infra/elasticsearch');
-
-const { deleteIndex, deleteDataStream, deleteIndexTemplate, deleteComponentTemplate } =
-  (await vi.importMock('../../infra/elasticsearch')) as {
-    deleteIndex: Mock;
-    deleteDataStream: Mock;
-    deleteIndexTemplate: Mock;
-    deleteComponentTemplate: Mock;
-  };
 
 describe('uninstallElasticsearchAssets', () => {
   const namespace = 'default';
@@ -67,10 +64,10 @@ describe('uninstallElasticsearchAssets', () => {
 
   beforeEach(() => {
     vi.clearAllMocks();
-    deleteIndex.mockResolvedValue(undefined);
-    deleteDataStream.mockResolvedValue(undefined);
-    deleteIndexTemplate.mockResolvedValue(undefined);
-    deleteComponentTemplate.mockResolvedValue(undefined);
+    vi.mocked(deleteIndex).mockResolvedValue(undefined);
+    vi.mocked(deleteDataStream).mockResolvedValue(undefined);
+    vi.mocked(deleteIndexTemplate).mockResolvedValue(undefined);
+    vi.mocked(deleteComponentTemplate).mockResolvedValue(undefined);
   });
 
   it('deletes the latest entities index', async () => {

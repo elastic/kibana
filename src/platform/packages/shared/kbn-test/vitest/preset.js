@@ -59,7 +59,7 @@ const createKbnVitestConfig = ({
 
   return {
     root: REPO_ROOT,
-    plugins: kbnVitestPlugins(environment),
+    plugins: kbnVitestPlugins(),
     // Sources are compiled by the kbn SWC plugin; skip Vite's own TS/JSX transform.
     oxc: false,
     resolve: {
@@ -113,6 +113,9 @@ const createKbnVitestConfig = ({
         ...setupFiles.map(resolveSetupFile),
       ],
       snapshotFormat: { escapeString: true, printBasicPrototype: true },
+      // Vitest truncates `$var` values in `.each` titles (and so snapshot keys) at 40 chars; Jest
+      // never did.
+      taskTitleValueFormatTruncate: Number.MAX_SAFE_INTEGER,
       server: { deps: { inline: inlineDeps } },
     },
   };

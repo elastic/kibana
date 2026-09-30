@@ -19,9 +19,3 @@ exports[`FeatureRegistry > Kibana Features > prevents features from being regist
 exports[`FeatureRegistry > Kibana Features > prevents features from being registered with an ID of "management" 1`] = `[Error: [id]: [management] is not allowed]`;
 
 exports[`FeatureRegistry > Kibana Features > prevents features from being registered with an ID of "navLinks" 1`] = `[Error: [id]: [navLinks] is not allowed]`;
-
-exports[`FeatureRegistry Kibana Features prevents features from being registered with a catalogue entry of "" 1`] = `"[catalogue.0]: Does not satisfy regexp /^[a-zA-Z0-9:_-]+$/"`;
-
-exports[`FeatureRegistry Kibana Features prevents features from being registered with a management id of "" 1`] = `"[management.kibana.0]: Does not satisfy regexp /^[a-zA-Z0-9:_-]+$/"`;
-
-

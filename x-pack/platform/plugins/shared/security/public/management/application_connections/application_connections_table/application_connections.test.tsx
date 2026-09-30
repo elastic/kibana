@@ -18,9 +18,9 @@ import { securityMock } from '../../../mocks';
 import { Providers } from '../application_connections_management_app';
 import { ApplicationConnectionsPage } from '../application_connections_page';
 
-vi.mock('../assets/illustration_empty_state.svg', () => 'illustration-empty-state-mock.svg', {
-  virtual: true,
-});
+vi.mock('../assets/illustration_empty_state.svg', () => ({
+  default: 'illustration-empty-state-mock.svg',
+}));
 
 vi.mock('@kbn/core-user-profile-browser-hooks', async () => {
   const actual = await vi.importActual('@kbn/core-user-profile-browser-hooks');

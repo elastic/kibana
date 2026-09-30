@@ -49,6 +49,14 @@ import {
   ruleTypeFromApi,
 } from './test_helper';
 import userEvent from '@testing-library/user-event';
+import { getRuleTypes as getRuleTypesFn } from '@kbn/response-ops-rules-apis/apis/get_rule_types';
+import { bulkUpdateAPIKey as bulkUpdateAPIKeyFn } from '../../../lib/rule_api/update_api_key';
+import { loadRuleTags as loadRuleTagsFn } from '../../../lib/rule_api/aggregate';
+import { loadRuleAggregationsWithKueryFilter as loadRuleAggregationsWithKueryFilterFn } from '../../../lib/rule_api/aggregate_kuery_filter';
+import { loadRulesWithKueryFilter as loadRulesWithKueryFilterFn } from '../../../lib/rule_api/rules_kuery_filter';
+import { loadActionTypes as loadActionTypesFn, loadAllActions as loadAllActionsFn } from '../../../lib/action_connector_api';
+import { hasExecuteActionsCapability as hasExecuteActionsCapabilityFn } from '../../../lib/capabilities';
+import { hasAllPrivilege as hasAllPrivilegeFn } from '../../../lib/capabilities';
 
 vi.mock('../../../../common/lib/kibana');
 vi.mock('@kbn/kibana-react-plugin/public/ui_settings/use_ui_setting', () => {
@@ -195,7 +203,7 @@ vi.mock('@kbn/kibana-utils-plugin/public', async () => {
   };
 });
 
-vi.mock('react-use/lib/useLocalStorage', () => vi.fn(() => [null, () => null]));
+vi.mock('react-use/lib/useLocalStorage', () => ({ default: vi.fn(() => [null, () => null]) }));
 vi.mock('@kbn/ebt-tools');
 vi.mock('@kbn/cps-utils', async () => {
   const mocked = {
@@ -218,19 +226,14 @@ usePerformanceContextMock.mockReturnValue({ onPageReady: vi.fn() });
 
 const ruleTags = ['a', 'b', 'c', 'd'];
 
-const { getRuleTypes } = await vi.importMock('@kbn/response-ops-rules-apis/apis/get_rule_types');
-const { bulkUpdateAPIKey } = await vi.importMock('../../../lib/rule_api/update_api_key');
-const { loadRuleTags } = await vi.importMock('../../../lib/rule_api/aggregate');
+const getRuleTypes = getRuleTypesFn as Mock;
+const bulkUpdateAPIKey = bulkUpdateAPIKeyFn as Mock;
+const loadRuleTags = loadRuleTagsFn as Mock;
 
-const { loadRuleAggregationsWithKueryFilter } = await vi.importMock(
-  '../../../lib/rule_api/aggregate_kuery_filter'
-);
-const { loadRulesWithKueryFilter } = await vi.importMock(
-  '../../../lib/rule_api/rules_kuery_filter'
-);
-const { loadActionTypes, loadAllActions } = await vi.importMock(
-  '../../../lib/action_connector_api'
-);
+const loadRuleAggregationsWithKueryFilter = loadRuleAggregationsWithKueryFilterFn as Mock;
+const loadRulesWithKueryFilter = loadRulesWithKueryFilterFn as Mock;
+const loadActionTypes = loadActionTypesFn as Mock;
+const loadAllActions = loadAllActionsFn as Mock;
 
 const useKibanaMock = useKibana as Mocked<typeof useKibana>;
 const queryClient = new QueryClient({
@@ -1009,7 +1012,7 @@ describe('rules_list ', () => {
     });
 
     it('rule list items with actions are not editable if canExecuteAction is false', async () => {
-      const { hasExecuteActionsCapability } = await vi.importMock('../../../lib/capabilities');
+      const hasExecuteActionsCapability = hasExecuteActionsCapabilityFn as Mock;
       hasExecuteActionsCapability.mockReturnValue(false);
       renderWithProviders(<RulesList />);
       await waitForElementToBeRemoved(() => screen.queryByTestId('centerJustifiedSpinner'));
@@ -1460,7 +1463,7 @@ describe('rules_list with show only capability', () => {
     });
 
     it('renders table of rules with delete button disabled', async () => {
-      const { hasAllPrivilege } = await vi.importMock('../../../lib/capabilities');
+      const hasAllPrivilege = hasAllPrivilegeFn as Mock;
       hasAllPrivilege.mockReturnValue(false);
       renderWithProviders(<RulesList />);
       await waitForElementToBeRemoved(() => screen.queryByTestId('centerJustifiedSpinner'));

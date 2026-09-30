@@ -21,6 +21,9 @@ vi.mock('@kbn/entity-store/common/euid_helpers', () => {
 });
 
 const mockGetEuidFromObject = euid.getEuidFromObject as Mock;
+const { euid: actualEuid } = await vi.importActual<{ euid: typeof euid }>(
+  '@kbn/entity-store/common/euid_helpers'
+);
 
 const getEuids = (result: {
   results: Array<{ data: { euids: Array<string | string[] | undefined> } }>;
@@ -33,12 +36,8 @@ describe('extractEuidFromMlDataTool handler', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     // Default: delegate to the real implementation
-    mockGetEuidFromObject.mockImplementation(async (entityType: string, doc: unknown) =>
-      (
-        await vi.importActual<typeof import('@kbn/entity-store/common/euid_helpers')>(
-          '@kbn/entity-store/common/euid_helpers'
-        )
-      ).euid.getEuidFromObject(entityType as EntityType, doc)
+    mockGetEuidFromObject.mockImplementation((entityType: string, doc: unknown) =>
+      actualEuid.getEuidFromObject(entityType as EntityType, doc)
     );
   });
 

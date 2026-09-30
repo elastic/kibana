@@ -245,5 +245,3 @@ exports[`purge rollup data > happy path > successfully makes a query to remove S
   ],
 }
 `;
-
-

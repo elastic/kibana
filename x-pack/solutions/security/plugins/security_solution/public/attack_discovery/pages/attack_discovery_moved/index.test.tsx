@@ -31,8 +31,8 @@ vi.mock('../../../common/lib/kibana', () => {
   return { ...mocked, default: mocked };
 });
 
-vi.mock('./assets/simplify.light.svg', () => 'simplify-light-svg-stub');
-vi.mock('./assets/simplify.dark.svg', () => 'simplify-dark-svg-stub');
+vi.mock('./assets/simplify.light.svg', () => ({ default: 'simplify-light-svg-stub' }));
+vi.mock('./assets/simplify.dark.svg', () => ({ default: 'simplify-dark-svg-stub' }));
 
 describe('AttackDiscoveryMovedPage', () => {
   beforeEach(() => {

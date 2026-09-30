@@ -38,7 +38,7 @@ function Providers({ children }: { children: React.ReactNode }) {
 }
 
 describe('getTimelineItemsFromConversation', () => {
-  describe('returns an opening message only', () => {
+  it('returns an opening message only', () => {
     items = getTimelineItemsfromConversation({
       isConversationOwnedByCurrentUser: true,
       chatService: mockChatService,

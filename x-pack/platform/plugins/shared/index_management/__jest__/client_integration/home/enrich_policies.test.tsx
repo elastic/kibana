@@ -19,7 +19,6 @@ import {
 } from '../helpers/actions/enrich_policies_actions';
 import { NotificationService } from '../../../public/application/services/notification';
 
-vi.mock('@kbn/code-editor');
 
 describe('Enrich policies tab', () => {
   let httpSetup: ReturnType<typeof setupEnvironment>['httpSetup'];

@@ -17,6 +17,8 @@ import type { WorkflowExecutionDto, WorkflowStepExecutionDto, WorkflowYaml } fro
 import { WORKFLOW_EXECUTION_STEPS_UI_PAGE_SIZE } from '../../../../../common';
 import { TestWrapper } from '../../../../shared/test_utils/test_wrapper';
 import { WorkflowStepExecutionTree } from '../workflow_step_execution_tree';
+import * as workflowsModule from '@kbn/workflows';
+import * as buildStepExecutionsTreeModule from '../build_step_executions_tree';
 
 // Mock the workflows module functions
 vi.mock('@kbn/workflows', async () => {
@@ -270,17 +272,15 @@ vi.mock('../../../../shared/ui/step_icons/step_icon', () => {
   return { ...mocked, default: mocked };
 });
 
-describe('WorkflowStepExecutionTree', async () => {
+describe('WorkflowStepExecutionTree', () => {
   // Import the mocked functions
-  const { isTerminalStatus, isInProgressStatus, isDangerousStatus } = (await vi.importMock(
-    '@kbn/workflows'
-  )) as {
+  const { isTerminalStatus, isInProgressStatus, isDangerousStatus } = (workflowsModule as unknown) as {
     isTerminalStatus: Mock;
     isInProgressStatus: Mock;
     isDangerousStatus: Mock;
   };
 
-  const { buildStepExecutionsTree } = (await vi.importMock('../build_step_executions_tree')) as {
+  const { buildStepExecutionsTree } = (buildStepExecutionsTreeModule as unknown) as {
     buildStepExecutionsTree: Mock;
   };
 

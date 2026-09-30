@@ -12,6 +12,7 @@ import { renderHook } from '@testing-library/react';
 import type { Location } from 'history';
 import qs from 'query-string';
 import { useDateRangeRedirect } from './use_date_range_redirect';
+import { useLocation as useLocationFn } from 'react-router-dom';
 
 const mockReplace = vi.fn();
 
@@ -57,9 +58,7 @@ vi.mock('../context/apm_plugin/use_apm_plugin_context', () => {
   return { ...mocked, default: mocked };
 });
 
-const { useLocation } = (await vi.importMock('react-router-dom')) as {
-  useLocation: Mock;
-};
+const useLocation = useLocationFn as Mock;
 
 const setLocation = (search: string) => {
   useLocation.mockReturnValue({

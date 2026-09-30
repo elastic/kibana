@@ -22,7 +22,7 @@ describe('throwIfAbsent', () => {
     [undefined, null].forEach((val) => {
       expect(() => {
         throwIfAbsent('OMG no value')(val);
-      }).toThrowErrorMatchingInlineSnapshot(`"OMG no value"`);
+      }).toThrowErrorMatchingInlineSnapshot(`[Error: OMG no value]`);
     });
   });
 
@@ -41,7 +41,7 @@ describe('throwIfIsntContained', () => {
   test('throws if value is absent', () => {
     expect(() => {
       throwIfIsntContained<string>(new Set([uuidv4()]), 'OMG no value', (val) => val)([uuidv4()]);
-    }).toThrowErrorMatchingInlineSnapshot(`"OMG no value"`);
+    }).toThrowErrorMatchingInlineSnapshot(`[Error: OMG no value]`);
   });
 
   test('throws if value is absent using custom message', () => {

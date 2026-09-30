@@ -592,7 +592,7 @@ describe('Run Scheduled Report Task', () => {
     } as unknown as RunContext);
 
     await expect(taskRunner.run()).rejects.toThrowErrorMatchingInlineSnapshot(
-      `"ReportingError(code: missing_authentication_header_error)"`
+      `[Error: ReportingError(code: missing_authentication_header_error)]`
     );
 
     expect(notifyUsage).not.toHaveBeenCalledWith();

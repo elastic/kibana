@@ -111,7 +111,7 @@ describe('createOrUpdateIndexTemplate', () => {
     esClient.indices.putIndexTemplate.mockRejectedValue(new EsErrors.ConnectionError('foo'));
     await expect(() =>
       createOrUpdateIndexTemplate({ logger, esClient, template: getIndexTemplate() })
-    ).rejects.toThrowErrorMatchingInlineSnapshot(`"foo"`);
+    ).rejects.toThrowErrorMatchingInlineSnapshot(`[ConnectionError: foo]`);
 
     expect(logger.error).toHaveBeenCalledWith(
       `Error installing index template .alerts-test.alerts-default-index-template - foo`,
@@ -126,7 +126,7 @@ describe('createOrUpdateIndexTemplate', () => {
 
     await expect(() =>
       createOrUpdateIndexTemplate({ logger, esClient, template: getIndexTemplate() })
-    ).rejects.toThrowErrorMatchingInlineSnapshot(`"generic error"`);
+    ).rejects.toThrowErrorMatchingInlineSnapshot(`[Error: generic error]`);
 
     expect(logger.error).toHaveBeenCalledWith(
       `Error installing index template .alerts-test.alerts-default-index-template - generic error`,
@@ -159,7 +159,7 @@ describe('createOrUpdateIndexTemplate', () => {
     await expect(() =>
       createOrUpdateIndexTemplate({ logger, esClient, template: getIndexTemplate() })
     ).rejects.toThrowErrorMatchingInlineSnapshot(
-      `"No mappings would be generated for .alerts-test.alerts-default-index-template, possibly due to failed/misconfigured bootstrapping"`
+      `[Error: No mappings would be generated for .alerts-test.alerts-default-index-template, possibly due to failed/misconfigured bootstrapping]`
     );
     expect(esClient.indices.putIndexTemplate).not.toHaveBeenCalled();
   });

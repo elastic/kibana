@@ -40,7 +40,7 @@ describe('useFetchRelatedCases', () => {
 
     expect(defaultProps.http.get).toHaveBeenCalledWith('/internal/elastic_assistant/capabilities', {
       version: API_VERSIONS.internal.v1,
-      signal: new AbortController().signal,
+      signal: expect.any(AbortSignal),
     });
     expect(toasts.addError).not.toHaveBeenCalled();
   });

@@ -20,6 +20,7 @@ import {
   RUN_WORKFLOW_PANEL_ID,
   type UseRunAlertWorkflowPanelProps,
 } from './use_run_alert_workflow_panel';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { TestProviders } from '../../../../common/mock';
 import { createStartServicesMock } from '../../../../common/lib/kibana/kibana_react.mock';
 import type { AlertTableContextMenuItem } from '../types';
@@ -107,7 +108,7 @@ vi.mock('../../../../common/components/loader', () => {
   return { ...mocked, default: mocked };
 });
 
-const useKibanaMock = (await vi.importMock('@kbn/kibana-react-plugin/public')).useKibana as Mock;
+const useKibanaMock = useKibana as Mock;
 
 const defaultProps: UseRunAlertWorkflowPanelProps = {
   closePopover: vi.fn(),

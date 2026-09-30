@@ -12,12 +12,12 @@ import type { AppMockRenderer } from '../lib/test_utils';
 import { createAppMockRenderer } from '../lib/test_utils';
 import { UpcomingEventsPopover } from './upcoming_events_popover';
 import { MaintenanceWindowStatus } from '../../common';
+import { useUiSetting } from '../utils/kibana_react';
 
 vi.mock('../utils/kibana_react');
 
-const { useUiSetting } = await vi.importMock('../utils/kibana_react');
 
-useUiSetting.mockReturnValue('YYYY.MM.DD, h:mm:ss');
+vi.mocked(useUiSetting).mockReturnValue('YYYY.MM.DD, h:mm:ss');
 
 describe('rule_actions_popover', () => {
   let appMockRenderer: AppMockRenderer;

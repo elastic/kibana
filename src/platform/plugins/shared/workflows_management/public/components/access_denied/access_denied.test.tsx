@@ -14,7 +14,7 @@ import { vi } from 'vitest';
 import { I18nProvider } from '@kbn/i18n-react';
 import { AccessDenied } from './access_denied';
 
-vi.mock('../../assets/lock_light.svg', () => 'lock_light.svg');
+vi.mock('../../assets/lock_light.svg', () => ({ default: 'lock_light.svg' }));
 
 const renderWithProviders = (component: React.ReactElement) =>
   render(

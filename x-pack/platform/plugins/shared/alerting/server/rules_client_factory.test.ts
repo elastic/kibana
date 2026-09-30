@@ -11,6 +11,7 @@ import type { Mock, Mocked } from 'vitest';
 import Boom from '@hapi/boom';
 import type { RulesClientFactoryOpts } from './rules_client_factory';
 import { RulesClientFactory } from './rules_client_factory';
+import { RulesClient } from './rules_client';
 import { ApiKeyType } from './task_runner/types';
 import { ruleTypeRegistryMock } from './rule_type_registry.mock';
 import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
@@ -182,7 +183,7 @@ describe('RulesClientFactory', () => {
       rulesClientFactoryParams.actions.getActionsAuthorizationWithRequest
     ).toHaveBeenCalledWith(request);
 
-    expect((await vi.importMock('./rules_client')).RulesClient).toHaveBeenCalledWith(
+    expect(RulesClient).toHaveBeenCalledWith(
       expect.objectContaining({
         auditLogger: {
           enabled: true,
@@ -235,7 +236,7 @@ describe('RulesClientFactory', () => {
 
     await factory.create(request, savedObjectsService);
 
-    expect((await vi.importMock('./rules_client')).RulesClient).toHaveBeenCalledWith(
+    expect(RulesClient).toHaveBeenCalledWith(
       expect.objectContaining({
         changeTrackingService: undefined,
       })
@@ -270,7 +271,7 @@ describe('RulesClientFactory', () => {
       'default'
     );
 
-    expect((await vi.importMock('./rules_client')).RulesClient).toHaveBeenCalledWith(
+    expect(RulesClient).toHaveBeenCalledWith(
       expect.objectContaining({
         unsecuredSavedObjectsClient: savedObjectsClient,
         authorization: alertingAuthorization,
@@ -308,7 +309,7 @@ describe('RulesClientFactory', () => {
     const factory = new RulesClientFactory();
     factory.initialize(rulesClientFactoryParams);
     await factory.create(mockRouter.createKibanaRequest(), savedObjectsService);
-    const constructorCall = (await vi.importMock('./rules_client')).RulesClient.mock.calls[0][0];
+    const constructorCall = vi.mocked(RulesClient).mock.calls[0][0];
 
     const userNameResult = await constructorCall.getUserName();
     expect(userNameResult).toEqual(null);
@@ -321,7 +322,7 @@ describe('RulesClientFactory', () => {
       securityService,
     });
     await factory.create(mockRouter.createKibanaRequest(), savedObjectsService);
-    const constructorCall = (await vi.importMock('./rules_client')).RulesClient.mock.calls[0][0];
+    const constructorCall = vi.mocked(RulesClient).mock.calls[0][0];
 
     securityService.authc.getCurrentUser.mockReturnValueOnce({
       username: 'bob',
@@ -334,7 +335,7 @@ describe('RulesClientFactory', () => {
     const factory = new RulesClientFactory();
     factory.initialize(rulesClientFactoryParams);
     await factory.create(mockRouter.createKibanaRequest(), savedObjectsService);
-    const constructorCall = (await vi.importMock('./rules_client')).RulesClient.mock.calls[0][0];
+    const constructorCall = vi.mocked(RulesClient).mock.calls[0][0];
 
     const profileUidResult = await constructorCall.getProfileUid();
     expect(profileUidResult).toEqual(null);
@@ -347,7 +348,7 @@ describe('RulesClientFactory', () => {
       securityService,
     });
     await factory.create(mockRouter.createKibanaRequest(), savedObjectsService);
-    const constructorCall = (await vi.importMock('./rules_client')).RulesClient.mock.calls[0][0];
+    const constructorCall = vi.mocked(RulesClient).mock.calls[0][0];
 
     securityService.authc.getCurrentUser.mockReturnValueOnce({
       username: 'bob',
@@ -361,7 +362,7 @@ describe('RulesClientFactory', () => {
     const factory = new RulesClientFactory();
     factory.initialize(rulesClientFactoryParams);
     await factory.create(mockRouter.createKibanaRequest(), savedObjectsService);
-    const constructorCall = (await vi.importMock('./rules_client')).RulesClient.mock.calls[0][0];
+    const constructorCall = vi.mocked(RulesClient).mock.calls[0][0];
 
     const actionsClient = await constructorCall.getActionsClient();
     expect(actionsClient).not.toBe(null);
@@ -371,7 +372,7 @@ describe('RulesClientFactory', () => {
     const factory = new RulesClientFactory();
     factory.initialize(rulesClientFactoryParams);
     await factory.create(mockRouter.createKibanaRequest(), savedObjectsService);
-    const constructorCall = (await vi.importMock('./rules_client')).RulesClient.mock.calls[0][0];
+    const constructorCall = vi.mocked(RulesClient).mock.calls[0][0];
 
     const createAPIKeyResult = await constructorCall.createAPIKey('test');
     expect(createAPIKeyResult).toEqual({ apiKeysEnabled: false });
@@ -385,7 +386,7 @@ describe('RulesClientFactory', () => {
       securityService,
     });
     await factory.create(mockRouter.createKibanaRequest(), savedObjectsService);
-    const constructorCall = (await vi.importMock('./rules_client')).RulesClient.mock.calls[0][0];
+    const constructorCall = vi.mocked(RulesClient).mock.calls[0][0];
 
     securityService.authc.apiKeys.grantAsInternalUser.mockResolvedValueOnce(null);
     const createAPIKeyResult = await constructorCall.createAPIKey('test');
@@ -405,7 +406,7 @@ describe('RulesClientFactory', () => {
       headers: { authorization: 'ApiKey essu_uiam_api_key' },
     });
     await factory.create(requestWithUiam, savedObjectsService);
-    const constructorCall = (await vi.importMock('./rules_client')).RulesClient.mock.calls[0][0];
+    const constructorCall = vi.mocked(RulesClient).mock.calls[0][0];
 
     const uiamApiKeys = {
       grant: vi.fn().mockResolvedValueOnce({
@@ -442,7 +443,7 @@ describe('RulesClientFactory', () => {
       headers: { authorization: 'ApiKey essu_uiam_api_key' },
     });
     await factory.create(requestWithUiam, savedObjectsService);
-    const constructorCall = (await vi.importMock('./rules_client')).RulesClient.mock.calls[0][0];
+    const constructorCall = vi.mocked(RulesClient).mock.calls[0][0];
 
     const uiamApiKeys = {
       grant: vi.fn().mockResolvedValueOnce(null),
@@ -474,7 +475,7 @@ describe('RulesClientFactory', () => {
       headers: { authorization: 'ApiKey essu_uiam_api_key' },
     });
     await factory.create(requestWithUiam, savedObjectsService);
-    const constructorCall = (await vi.importMock('./rules_client')).RulesClient.mock.calls[0][0];
+    const constructorCall = vi.mocked(RulesClient).mock.calls[0][0];
 
     const uiamApiKeys = {
       grant: vi.fn().mockResolvedValueOnce(null),
@@ -516,7 +517,7 @@ describe('RulesClientFactory', () => {
       headers: { authorization: 'ApiKey essu_uiam_api_key' },
     });
     await factory.create(requestWithUiam, savedObjectsService);
-    const constructorCall = (await vi.importMock('./rules_client')).RulesClient.mock.calls[0][0];
+    const constructorCall = vi.mocked(RulesClient).mock.calls[0][0];
 
     const uiamError = new Error('UIAM service unavailable');
     const uiamApiKeys = {
@@ -560,7 +561,7 @@ describe('RulesClientFactory', () => {
     });
     const requestWithoutAuth = mockRouter.createKibanaRequest();
     await factory.create(requestWithoutAuth, savedObjectsService);
-    const constructorCall = (await vi.importMock('./rules_client')).RulesClient.mock.calls[0][0];
+    const constructorCall = vi.mocked(RulesClient).mock.calls[0][0];
 
     const uiamApiKeys = {
       grant: vi.fn(),
@@ -602,7 +603,7 @@ describe('RulesClientFactory', () => {
       },
     });
     await factory.create(requestWithNonUiamAuth, savedObjectsService);
-    const constructorCall = (await vi.importMock('./rules_client')).RulesClient.mock.calls[0][0];
+    const constructorCall = vi.mocked(RulesClient).mock.calls[0][0];
 
     const uiamApiKeys = {
       grant: vi.fn(),
@@ -643,7 +644,7 @@ describe('RulesClientFactory', () => {
         apiKeyType: ApiKeyType.UIAM,
       });
       await factory.create(request, savedObjectsService);
-      return (await vi.importMock('./rules_client')).RulesClient.mock.calls[0][0];
+      return vi.mocked(RulesClient).mock.calls[0][0];
     };
 
     test('throws when uiam.grant throws a generic error', async () => {
@@ -721,7 +722,7 @@ describe('RulesClientFactory', () => {
       securityPluginStart,
     });
     await factory.create(mockRouter.createKibanaRequest(), savedObjectsService);
-    const constructorCall = (await vi.importMock('./rules_client')).RulesClient.mock.calls[0][0];
+    const constructorCall = vi.mocked(RulesClient).mock.calls[0][0];
 
     securityService.authc.apiKeys.grantAsInternalUser.mockResolvedValueOnce({
       api_key: '123',
@@ -753,7 +754,7 @@ describe('RulesClientFactory', () => {
       securityPluginStart,
     });
     await factory.create(mockRouter.createKibanaRequest(), savedObjectsService);
-    const constructorCall = (await vi.importMock('./rules_client')).RulesClient.mock.calls[0][0];
+    const constructorCall = vi.mocked(RulesClient).mock.calls[0][0];
 
     securityService.authc.apiKeys.grantAsInternalUser.mockResolvedValueOnce({
       api_key: '123',
@@ -781,7 +782,7 @@ describe('RulesClientFactory', () => {
       securityPluginStart,
     });
     await factory.create(mockRouter.createKibanaRequest(), savedObjectsService);
-    const constructorCall = (await vi.importMock('./rules_client')).RulesClient.mock.calls[0][0];
+    const constructorCall = vi.mocked(RulesClient).mock.calls[0][0];
 
     securityService.authc.apiKeys.grantAsInternalUser.mockRejectedValueOnce(
       new Error('TLS disabled')
@@ -804,7 +805,7 @@ describe('RulesClientFactory', () => {
       headers: { authorization: 'ApiKey essu_uiam_api_key' },
     });
     await factory.create(requestWithUiam, savedObjectsService);
-    const constructorCall = (await vi.importMock('./rules_client')).RulesClient.mock.calls[0][0];
+    const constructorCall = vi.mocked(RulesClient).mock.calls[0][0];
 
     const uiamApiKeys = {
       grant: vi.fn().mockResolvedValueOnce({
@@ -876,7 +877,7 @@ describe('RulesClientFactory', () => {
     expect(savedObjectsClient.asScopedToNamespace).toHaveBeenCalledWith('custom-space');
 
     // RulesClient should be created with the custom spaceId
-    expect((await vi.importMock('./rules_client')).RulesClient).toHaveBeenCalledWith(
+    expect(RulesClient).toHaveBeenCalledWith(
       expect.objectContaining({
         spaceId: 'custom-space',
       })
@@ -895,7 +896,7 @@ describe('RulesClientFactory', () => {
 
     await factory.create(request, savedObjectsService);
 
-    const constructorCall = (await vi.importMock('./rules_client')).RulesClient.mock.calls[0][0];
+    const constructorCall = vi.mocked(RulesClient).mock.calls[0][0];
 
     // Call getActionsClient and verify it uses the request-derived method
     await constructorCall.getActionsClient();
@@ -924,7 +925,7 @@ describe('RulesClientFactory', () => {
 
     await factory.createWithSpaceId(request, savedObjectsService, asSpaceId('custom-space'));
 
-    const constructorCall = (await vi.importMock('./rules_client')).RulesClient.mock.calls[0][0];
+    const constructorCall = vi.mocked(RulesClient).mock.calls[0][0];
 
     // Call getActionsClient and verify it uses the space-scoped method
     await constructorCall.getActionsClient();
@@ -959,7 +960,7 @@ describe('RulesClientFactory', () => {
     });
 
     await factory.create(request, savedObjectsService);
-    const constructorCall = (await vi.importMock('./rules_client')).RulesClient.mock.calls[0][0];
+    const constructorCall = vi.mocked(RulesClient).mock.calls[0][0];
 
     expect(() =>
       constructorCall.getAuthenticationAPIKey('test')
@@ -985,7 +986,7 @@ describe('RulesClientFactory', () => {
     });
 
     await factory.create(request, savedObjectsService);
-    const constructorCall = (await vi.importMock('./rules_client')).RulesClient.mock.calls[0][0];
+    const constructorCall = vi.mocked(RulesClient).mock.calls[0][0];
 
     expect(() =>
       constructorCall.getAuthenticationAPIKey('test')
@@ -1012,7 +1013,7 @@ describe('RulesClientFactory', () => {
     });
 
     await factory.create(request, savedObjectsService);
-    const constructorCall = (await vi.importMock('./rules_client')).RulesClient.mock.calls[0][0];
+    const constructorCall = vi.mocked(RulesClient).mock.calls[0][0];
 
     expect(constructorCall.getAuthenticationAPIKey('test')).toEqual({
       apiKeysEnabled: true,
@@ -1046,7 +1047,7 @@ describe('RulesClientFactory', () => {
     });
 
     await factory.create(request, savedObjectsService);
-    const constructorCall = (await vi.importMock('./rules_client')).RulesClient.mock.calls[0][0];
+    const constructorCall = vi.mocked(RulesClient).mock.calls[0][0];
 
     expect(constructorCall.getAuthenticationAPIKey('test')).toEqual({
       apiKeysEnabled: true,
@@ -1075,7 +1076,7 @@ describe('RulesClientFactory', () => {
     });
 
     await factory.create(request, savedObjectsService);
-    const constructorCall = (await vi.importMock('./rules_client')).RulesClient.mock.calls[0][0];
+    const constructorCall = vi.mocked(RulesClient).mock.calls[0][0];
 
     expect(() =>
       constructorCall.getAuthenticationAPIKey('test')
@@ -1111,7 +1112,7 @@ describe('RulesClientFactory', () => {
     });
 
     await factory.create(request, savedObjectsService);
-    const constructorCall = (await vi.importMock('./rules_client')).RulesClient.mock.calls[0][0];
+    const constructorCall = vi.mocked(RulesClient).mock.calls[0][0];
 
     expect(constructorCall.getAuthenticationAPIKey('test')).toEqual({
       apiKeysEnabled: true,
@@ -1134,7 +1135,7 @@ describe('RulesClientFactory', () => {
 
     const request = mockRouter.createKibanaRequest();
     await factory.create(request, savedObjectsService);
-    const constructorCall = (await vi.importMock('./rules_client')).RulesClient.mock.calls[0][0];
+    const constructorCall = vi.mocked(RulesClient).mock.calls[0][0];
 
     expect(constructorCall.cloneAPIKey).toEqual(expect.any(Function));
   });
@@ -1150,7 +1151,7 @@ describe('RulesClientFactory', () => {
 
     const request = mockRouter.createKibanaRequest();
     await factory.create(request, savedObjectsService);
-    const constructorCall = (await vi.importMock('./rules_client')).RulesClient.mock.calls[0][0];
+    const constructorCall = vi.mocked(RulesClient).mock.calls[0][0];
 
     expect(constructorCall.cloneApiKeysOnCreate).toBe(false);
   });
@@ -1166,7 +1167,7 @@ describe('RulesClientFactory', () => {
 
     const request = mockRouter.createKibanaRequest();
     await factory.create(request, savedObjectsService, { cloneApiKeysOnCreate: true });
-    const constructorCall = (await vi.importMock('./rules_client')).RulesClient.mock.calls[0][0];
+    const constructorCall = vi.mocked(RulesClient).mock.calls[0][0];
 
     expect(constructorCall.cloneApiKeysOnCreate).toBe(true);
   });
@@ -1184,7 +1185,7 @@ describe('RulesClientFactory', () => {
       headers: { [ALERTING_CLONE_API_KEY_HEADER]: 'true' },
     });
     await factory.create(request, savedObjectsService);
-    const constructorCall = (await vi.importMock('./rules_client')).RulesClient.mock.calls[0][0];
+    const constructorCall = vi.mocked(RulesClient).mock.calls[0][0];
 
     expect(constructorCall.cloneApiKeysOnCreate).toBe(true);
   });
@@ -1202,7 +1203,7 @@ describe('RulesClientFactory', () => {
       headers: { [ALERTING_CLONE_API_KEY_HEADER]: 'true' },
     });
     await factory.createWithSpaceId(request, savedObjectsService, asSpaceId('other-space'));
-    const constructorCall = (await vi.importMock('./rules_client')).RulesClient.mock.calls[0][0];
+    const constructorCall = vi.mocked(RulesClient).mock.calls[0][0];
 
     expect(constructorCall.cloneApiKeysOnCreate).toBe(true);
   });
@@ -1220,7 +1221,7 @@ describe('RulesClientFactory', () => {
       headers: { [ALERTING_CLONE_API_KEY_HEADER]: 'true' },
     });
     await factory.create(request, savedObjectsService, { cloneApiKeysOnCreate: false });
-    const constructorCall = (await vi.importMock('./rules_client')).RulesClient.mock.calls[0][0];
+    const constructorCall = vi.mocked(RulesClient).mock.calls[0][0];
 
     expect(constructorCall.cloneApiKeysOnCreate).toBe(false);
   });
@@ -1246,7 +1247,7 @@ describe('RulesClientFactory', () => {
       headers: { authorization: `ApiKey ${apiKeyCredentials}` },
     });
     await factory.create(request, savedObjectsService);
-    const constructorCall = (await vi.importMock('./rules_client')).RulesClient.mock.calls[0][0];
+    const constructorCall = vi.mocked(RulesClient).mock.calls[0][0];
 
     const result = await constructorCall.cloneAPIKey('test-rule-key');
 
@@ -1280,7 +1281,7 @@ describe('RulesClientFactory', () => {
       headers: { authorization: 'ApiKey essu_uiam_api_key' },
     });
     await factory.create(requestWithUiam, savedObjectsService);
-    const constructorCall = (await vi.importMock('./rules_client')).RulesClient.mock.calls[0][0];
+    const constructorCall = vi.mocked(RulesClient).mock.calls[0][0];
 
     const uiamApiKeys = {
       grant: vi.fn().mockResolvedValueOnce({
@@ -1317,7 +1318,7 @@ describe('RulesClientFactory', () => {
       headers: { authorization: 'ApiKey essu_uiam_api_key' },
     });
     await factory.create(requestWithUiam, savedObjectsService);
-    const constructorCall = (await vi.importMock('./rules_client')).RulesClient.mock.calls[0][0];
+    const constructorCall = vi.mocked(RulesClient).mock.calls[0][0];
 
     const uiamApiKeys = {
       grant: vi.fn().mockResolvedValueOnce(null),
@@ -1350,7 +1351,7 @@ describe('RulesClientFactory', () => {
     });
 
     await factory.create(request, savedObjectsService);
-    const constructorCall = (await vi.importMock('./rules_client')).RulesClient.mock.calls[0][0];
+    const constructorCall = vi.mocked(RulesClient).mock.calls[0][0];
 
     await expect(constructorCall.cloneAPIKey('test-rule-key')).rejects.toThrow(
       'Clone endpoint not available'
@@ -1375,7 +1376,7 @@ describe('RulesClientFactory', () => {
     });
 
     await factory.create(request, savedObjectsService);
-    const constructorCall = (await vi.importMock('./rules_client')).RulesClient.mock.calls[0][0];
+    const constructorCall = vi.mocked(RulesClient).mock.calls[0][0];
 
     await expect(constructorCall.cloneAPIKey('test-rule-key')).rejects.toThrow(
       'Unable to clone an API key, expected ApiKey authorization scheme but got "Bearer"'
@@ -1396,7 +1397,7 @@ describe('RulesClientFactory', () => {
       headers: { authorization: `ApiKey ${apiKeyCredentials}` },
     });
     await factory.create(request, savedObjectsService);
-    const constructorCall = (await vi.importMock('./rules_client')).RulesClient.mock.calls[0][0];
+    const constructorCall = vi.mocked(RulesClient).mock.calls[0][0];
 
     securityService.authc.getCurrentUser.mockReturnValueOnce(null);
 
@@ -1416,7 +1417,7 @@ describe('RulesClientFactory', () => {
       headers: { authorization: 'Bearer some-token' },
     });
     await factory.create(request, savedObjectsService);
-    const constructorCall = (await vi.importMock('./rules_client')).RulesClient.mock.calls[0][0];
+    const constructorCall = vi.mocked(RulesClient).mock.calls[0][0];
 
     securityService.authc.getCurrentUser.mockReturnValueOnce(null);
 
@@ -1441,7 +1442,7 @@ describe('RulesClientFactory', () => {
         mockRouter.createKibanaRequest({ headers: { authorization: 'Basic non-uiam-caller' } }),
         savedObjectsService
       );
-      return (await vi.importMock('./rules_client')).RulesClient.mock.calls[0][0];
+      return vi.mocked(RulesClient).mock.calls[0][0];
     };
 
     test('invalidates ES API key via invalidateAsInternalUser, not the caller-scoped invalidate', async () => {

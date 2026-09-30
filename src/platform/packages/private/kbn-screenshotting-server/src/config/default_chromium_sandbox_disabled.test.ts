@@ -10,7 +10,7 @@
 import { vi } from 'vitest';
 import type { Mock } from 'vitest';
 
-vi.mock('getos', () => vi.fn());
+vi.mock('getos', () => ({ default: vi.fn() }));
 
 import { getDefaultChromiumSandboxDisabled } from './default_chromium_sandbox_disabled';
 import getos from 'getos';

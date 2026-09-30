@@ -12,7 +12,9 @@ import { vi } from 'vitest';
 import stripANSI from 'strip-ansi';
 import { parseStdout } from './text_processing';
 
-vi.mock('strip-ansi', () => vi.fn((input) => input.replace(/\x1b\[[0-9;]*m/g, '')));
+vi.mock('strip-ansi', () => ({
+  default: vi.fn((input) => input.replace(/\x1b\[[0-9;]*m/g, '')),
+}));
 
 describe('text_processing', () => {
   describe('parseStdout', () => {

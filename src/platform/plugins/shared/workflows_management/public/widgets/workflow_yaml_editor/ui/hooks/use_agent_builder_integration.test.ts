@@ -18,6 +18,7 @@ import { useUiSetting } from '@kbn/kibana-react-plugin/public';
 import { WORKFLOW_YAML_ATTACHMENT_TYPE } from '@kbn/workflows/common/constants';
 import { useAgentBuilderIntegration } from './use_agent_builder_integration';
 import { useKibana } from '../../../../hooks/use_kibana';
+import * as aiIntegrationModule from '../../../../features/ai_integration';
 
 const mockDispatch = vi.fn();
 vi.mock('react-redux-v7', () => {
@@ -84,15 +85,13 @@ const {
   setSidebarOpen: mockSetSidebarOpen,
   consumeSidebarRestoreFor: mockConsumeSidebarRestoreFor,
   hasPersistedConversation: mockHasPersistedConversation,
-} = (await vi.importMock('../../../../features/ai_integration')) as {
+} = (aiIntegrationModule as unknown) as {
   setLastCreateSessionId: MockedFunction<AiIntegrationModule['setLastCreateSessionId']>;
   setSidebarOpen: MockedFunction<AiIntegrationModule['setSidebarOpen']>;
   consumeSidebarRestoreFor: MockedFunction<AiIntegrationModule['consumeSidebarRestoreFor']>;
   hasPersistedConversation: MockedFunction<AiIntegrationModule['hasPersistedConversation']>;
 };
-const { AttachmentBridge: mockAttachmentBridge } = (await vi.importMock(
-  '../../../../features/ai_integration'
-)) as { AttachmentBridge: Mock };
+const { AttachmentBridge: mockAttachmentBridge } = (aiIntegrationModule as unknown) as { AttachmentBridge: Mock };
 vi.mock('../../../../features/ai_integration/proposal_tracker', () => {
   const mocked = {
     ProposalTracker: vi.fn().mockImplementation(() => ({

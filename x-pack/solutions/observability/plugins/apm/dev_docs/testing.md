@@ -12,18 +12,10 @@ API tests are usually preferred. They're stable and reasonably quick, and give a
 E2E testing is suitable for common and vital user journeys. They are however less stable than API tests.
 Unit testing is a good approach if you have a very specific piece of code with lots of possibilities that you want to test.
 
-## Unit Tests (Jest)
+## Unit Tests (Vitest)
 
 ```
-node x-pack/solutions/observability/plugins/apm/scripts/test/jest [--watch] [--updateSnapshot]
-```
-
-#### Coverage
-
-HTML coverage report can be found in target/coverage/jest after tests have run.
-
-```
-open target/coverage/jest/index.html
+node scripts/vitest --config x-pack/solutions/observability/plugins/apm/vitest.config.js [--watch] [--update]
 ```
 
 ---

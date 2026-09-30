@@ -10,6 +10,13 @@ import { vi } from 'vitest';
 import fs from 'fs';
 import { configSchema, createConfig } from './config';
 
+// `vi.spyOn(fs, ...)` doesn't affect ESM named imports of builtins (`import { readFileSync } from 'fs'`)
+vi.mock('fs', () => {
+  const actual = require('fs') as typeof fs;
+  const mocked = { ...actual, readFileSync: vi.fn(actual.readFileSync) };
+  return { ...mocked, default: mocked };
+});
+
 describe('config schema', () => {
   it('generates proper defaults', () => {
     expect(configSchema.validate({})).toMatchInlineSnapshot(`
@@ -121,7 +128,7 @@ describe('createConfig()', () => {
   ];
 
   beforeEach(() => {
-    vi.spyOn(fs, 'readFileSync').mockImplementation((path, enc) => {
+    vi.mocked(fs.readFileSync).mockImplementation((path, enc) => {
       if (typeof path === 'string' && MOCKED_PATHS.includes(path) && enc === 'utf8') {
         return `contents-of-${path}`;
       }

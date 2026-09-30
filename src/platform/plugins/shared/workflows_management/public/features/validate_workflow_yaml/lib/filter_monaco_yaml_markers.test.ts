@@ -12,6 +12,7 @@ import type { Mock } from 'vitest';
 
 import { parseDocument, Scalar } from 'yaml';
 import type { monaco } from '@kbn/monaco';
+import * as workflowsYamlModule from '@kbn/workflows-yaml';
 import { filterMonacoYamlMarkers } from './filter_monaco_yaml_markers';
 
 // Mock getScalarValueAtOffset to control what scalar value is found at a given offset
@@ -23,9 +24,9 @@ vi.mock('@kbn/workflows-yaml', async () => {
   return { ...mocked, default: mocked };
 });
 
-const { getScalarValueAtOffset } = await vi.importMock<{
+const { getScalarValueAtOffset } = workflowsYamlModule as unknown as {
   getScalarValueAtOffset: Mock;
-}>('@kbn/workflows-yaml');
+};
 
 type IMarkerData = monaco.editor.IMarkerData;
 type ITextModel = monaco.editor.ITextModel;

@@ -11,6 +11,10 @@ import type { ElasticsearchClient } from '@kbn/core/server';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { huntCoordinator } from './hunt_coordinator';
 import { SUMMARIZE_HIT_SOURCE_FIELDS } from './common/summarize_hit';
+import { resolveHuntScope } from './common/resolve_index_scope';
+import { loadReportHuntContext } from './common/load_report_context';
+import { huntForThreat } from './tier1/hunt_for_threat';
+import { huntBehavior } from './tier2/hunt_behavior';
 
 vi.mock('./common/resolve_index_scope', () => {
   const mocked = {
@@ -111,7 +115,7 @@ describe('huntCoordinator', () => {
   });
 
   it('returns tier1_only with no_inference when model absent but hits present', async () => {
-    const { huntForThreat: mockT1 } = await vi.importMock('./tier1/hunt_for_threat');
+    const mockT1 = vi.mocked(huntForThreat);
     mockT1.mockResolvedValueOnce({
       status: 'environment_hits_found',
       has_confirmed_hit: true,
@@ -148,7 +152,7 @@ describe('huntCoordinator', () => {
   });
 
   it('returns tier1_only when text is absent', async () => {
-    const { huntForThreat: mockT1 } = await vi.importMock('./tier1/hunt_for_threat');
+    const mockT1 = vi.mocked(huntForThreat);
     mockT1.mockResolvedValueOnce({
       status: 'environment_hits_found',
       has_confirmed_hit: true,
@@ -179,7 +183,7 @@ describe('huntCoordinator', () => {
   });
 
   it('forwards an explicit technology to scope resolution', async () => {
-    const { resolveHuntScope: mockScope } = await vi.importMock('./common/resolve_index_scope');
+    const mockScope = vi.mocked(resolveHuntScope);
     await huntCoordinator({ esClient, reportsEsClient: esClient }, undefined, logger, {
       spaceId: 'default',
       trigger: 'scheduled',
@@ -223,8 +227,8 @@ describe('huntCoordinator', () => {
     let result: Awaited<ReturnType<typeof huntCoordinator>>;
 
     beforeEach(async () => {
-      const { resolveHuntScope: mockScope } = await vi.importMock('./common/resolve_index_scope');
-      const { huntForThreat: mockT1 } = await vi.importMock('./tier1/hunt_for_threat');
+      const mockScope = vi.mocked(resolveHuntScope);
+      const mockT1 = vi.mocked(huntForThreat);
       mockT1.mockClear();
       mockScope.mockResolvedValueOnce({
         technologies: [],
@@ -259,7 +263,7 @@ describe('huntCoordinator', () => {
     });
 
     it('never runs Tier 1', async () => {
-      const { huntForThreat: mockT1 } = await vi.importMock('./tier1/hunt_for_threat');
+      const mockT1 = vi.mocked(huntForThreat);
       expect(mockT1).not.toHaveBeenCalled();
     });
   });
@@ -285,8 +289,8 @@ describe('huntCoordinator', () => {
   });
 
   it('skips Tier 2 on_hits when only optional indices matched (no confirmed hit)', async () => {
-    const { huntForThreat: mockT1 } = await vi.importMock('./tier1/hunt_for_threat');
-    const { huntBehavior: mockT2 } = await vi.importMock('./tier2/hunt_behavior');
+    const mockT1 = vi.mocked(huntForThreat);
+    const mockT2 = vi.mocked(huntBehavior);
     mockT2.mockClear();
     mockT1.mockResolvedValueOnce({
       status: 'environment_hits_found',
@@ -321,8 +325,8 @@ describe('huntCoordinator', () => {
   });
 
   it('fails the run when Tier 2 throws', async () => {
-    const { huntForThreat: mockT1 } = await vi.importMock('./tier1/hunt_for_threat');
-    const { huntBehavior: mockT2 } = await vi.importMock('./tier2/hunt_behavior');
+    const mockT1 = vi.mocked(huntForThreat);
+    const mockT2 = vi.mocked(huntBehavior);
     mockT1.mockResolvedValueOnce({
       status: 'environment_hits_found',
       has_confirmed_hit: true,
@@ -360,16 +364,14 @@ describe('huntCoordinator', () => {
 
   describe('a report-driven run', () => {
     beforeEach(async () => {
-      const { huntForThreat: mockT1 } = await vi.importMock('./tier1/hunt_for_threat');
-      const { loadReportHuntContext: mockLoad } = await vi.importMock(
-        './common/load_report_context'
-      );
+      const mockT1 = vi.mocked(huntForThreat);
+      const mockLoad = vi.mocked(loadReportHuntContext);
       mockT1.mockClear();
       mockLoad.mockClear();
     });
 
     it("hunts the report's own IOCs and techniques when the caller passes only report_id", async () => {
-      const { huntForThreat: mockT1 } = await vi.importMock('./tier1/hunt_for_threat');
+      const mockT1 = vi.mocked(huntForThreat);
       await huntCoordinator({ esClient, reportsEsClient: esClient }, undefined, logger, {
         report_id: 'rpt-1',
         spaceId: 'hunt-a',
@@ -386,10 +388,8 @@ describe('huntCoordinator', () => {
     });
 
     it('loads the report from the acting space through the reports client, not the hunting client', async () => {
-      const { loadReportHuntContext: mockLoad } = await vi.importMock(
-        './common/load_report_context'
-      );
-      const { huntForThreat: mockT1 } = await vi.importMock('./tier1/hunt_for_threat');
+      const mockLoad = vi.mocked(loadReportHuntContext);
+      const mockT1 = vi.mocked(huntForThreat);
       const reportsEsClient = { tag: 'internal' } as unknown as ElasticsearchClient;
       await huntCoordinator({ esClient, reportsEsClient }, undefined, logger, {
         report_id: 'rpt-1',
@@ -406,7 +406,7 @@ describe('huntCoordinator', () => {
     });
 
     it('lets caller-supplied IOCs win over the report', async () => {
-      const { huntForThreat: mockT1 } = await vi.importMock('./tier1/hunt_for_threat');
+      const mockT1 = vi.mocked(huntForThreat);
       await huntCoordinator({ esClient, reportsEsClient: esClient }, undefined, logger, {
         report_id: 'rpt-1',
         spaceId: 'hunt-a',
@@ -421,9 +421,7 @@ describe('huntCoordinator', () => {
     });
 
     it('does not read the report when no report_id is given', async () => {
-      const { loadReportHuntContext: mockLoad } = await vi.importMock(
-        './common/load_report_context'
-      );
+      const mockLoad = vi.mocked(loadReportHuntContext);
       await huntCoordinator({ esClient, reportsEsClient: esClient }, undefined, logger, {
         spaceId: 'hunt-a',
         trigger: 'scheduled',
@@ -433,9 +431,7 @@ describe('huntCoordinator', () => {
     });
 
     it('fails the run, never clean, when the report is not in the space', async () => {
-      const { loadReportHuntContext: mockLoad } = await vi.importMock(
-        './common/load_report_context'
-      );
+      const mockLoad = vi.mocked(loadReportHuntContext);
       mockLoad.mockResolvedValueOnce(null);
       const result = await huntCoordinator(
         { esClient, reportsEsClient: esClient },
@@ -457,10 +453,8 @@ describe('huntCoordinator', () => {
     });
 
     it('still fails the run when the report is not in the space although the caller supplied every input', async () => {
-      const { loadReportHuntContext: mockLoad } = await vi.importMock(
-        './common/load_report_context'
-      );
-      const { huntForThreat: mockT1 } = await vi.importMock('./tier1/hunt_for_threat');
+      const mockLoad = vi.mocked(loadReportHuntContext);
+      const mockT1 = vi.mocked(huntForThreat);
       mockLoad.mockResolvedValueOnce(null);
       const result = await huntCoordinator(
         { esClient, reportsEsClient: esClient },
@@ -493,8 +487,8 @@ describe('huntCoordinator', () => {
   });
 
   it('returns has_confirmed_hit true when Tier 2 alone hits', async () => {
-    const { huntForThreat: mockT1 } = await vi.importMock('./tier1/hunt_for_threat');
-    const { huntBehavior: mockT2 } = await vi.importMock('./tier2/hunt_behavior');
+    const mockT1 = vi.mocked(huntForThreat);
+    const mockT2 = vi.mocked(huntBehavior);
     mockT1.mockResolvedValueOnce({
       status: 'no_environment_hits',
       has_confirmed_hit: false,
@@ -538,9 +532,7 @@ describe('huntCoordinator', () => {
   });
 
   describe('merging caller inputs with the report', async () => {
-    const { loadReportHuntContext: mockLoadReport } = await vi.importMock(
-      './common/load_report_context'
-    );
+    const mockLoadReport = vi.mocked(loadReportHuntContext);
 
     beforeEach(() => {
       mockLoadReport.mockResolvedValue({
@@ -551,7 +543,7 @@ describe('huntCoordinator', () => {
     });
 
     it('falls back to the report when an array is omitted', async () => {
-      const { huntForThreat: mockT1 } = await vi.importMock('./tier1/hunt_for_threat');
+      const mockT1 = vi.mocked(huntForThreat);
 
       await huntCoordinator({ esClient, reportsEsClient: esClient }, undefined, logger, {
         spaceId: 'default',
@@ -579,7 +571,7 @@ describe('huntCoordinator', () => {
     ])(
       'lets an explicitly empty %s override the report rather than silently restoring it',
       async (_label, override, expected) => {
-        const { huntForThreat: mockT1 } = await vi.importMock('./tier1/hunt_for_threat');
+        const mockT1 = vi.mocked(huntForThreat);
 
         await huntCoordinator({ esClient, reportsEsClient: esClient }, undefined, logger, {
           spaceId: 'default',
@@ -595,7 +587,7 @@ describe('huntCoordinator', () => {
   });
 
   it('surfaces a budget-truncated Tier 2 without failing the run', async () => {
-    const { huntBehavior: mockT2 } = await vi.importMock('./tier2/hunt_behavior');
+    const mockT2 = vi.mocked(huntBehavior);
     mockT2.mockResolvedValueOnce({
       status: 'behaviors_proposed',
       behaviors: [{ technique_id: 'T1078.004' }],
@@ -636,8 +628,8 @@ describe('huntCoordinator', () => {
   });
 
   it('forwards the Tier 1 window into huntBehavior for execute', async () => {
-    const { huntForThreat: mockT1 } = await vi.importMock('./tier1/hunt_for_threat');
-    const { huntBehavior: mockT2 } = await vi.importMock('./tier2/hunt_behavior');
+    const mockT1 = vi.mocked(huntForThreat);
+    const mockT2 = vi.mocked(huntBehavior);
     mockT2.mockClear();
     mockT1.mockResolvedValueOnce({
       status: 'no_environment_hits',
@@ -710,8 +702,8 @@ describe('huntCoordinator', () => {
   });
 
   it('forwards Tier 1 sample_event_summaries into Tier 2 article_context', async () => {
-    const { huntForThreat: mockT1 } = await vi.importMock('./tier1/hunt_for_threat');
-    const { huntBehavior: mockT2 } = await vi.importMock('./tier2/hunt_behavior');
+    const mockT1 = vi.mocked(huntForThreat);
+    const mockT2 = vi.mocked(huntBehavior);
     mockT2.mockClear();
     mockT1.mockResolvedValueOnce({
       status: 'environment_hits_found',
@@ -789,12 +781,12 @@ describe('huntCoordinator', () => {
     const mockModel = {} as import('@kbn/agent-builder-server').ScopedModel;
 
     beforeEach(async () => {
-      (await vi.importMock('./tier2/hunt_behavior')).huntBehavior.mockClear();
+      vi.mocked(huntBehavior).mockClear();
     });
 
     it('steers generation only at required-index buckets, never at the alerts index that also matched', async () => {
-      const { huntForThreat: mockT1 } = await vi.importMock('./tier1/hunt_for_threat');
-      const { huntBehavior: mockT2 } = await vi.importMock('./tier2/hunt_behavior');
+      const mockT1 = vi.mocked(huntForThreat);
+      const mockT2 = vi.mocked(huntBehavior);
       mockT1.mockResolvedValueOnce(
         tier1WithBuckets([
           { index: '.internal.alerts-security.alerts-default-000001', required: false },
@@ -822,8 +814,8 @@ describe('huntCoordinator', () => {
     });
 
     it('omits matched_indices when Tier 1 matched only optional indices, so generation falls back to the required patterns', async () => {
-      const { huntForThreat: mockT1 } = await vi.importMock('./tier1/hunt_for_threat');
-      const { huntBehavior: mockT2 } = await vi.importMock('./tier2/hunt_behavior');
+      const mockT1 = vi.mocked(huntForThreat);
+      const mockT2 = vi.mocked(huntBehavior);
       mockT1.mockResolvedValueOnce(
         tier1WithBuckets([
           { index: '.internal.alerts-security.alerts-default-000001', required: false },
@@ -857,8 +849,8 @@ describe('huntCoordinator', () => {
     expect(result).toHaveProperty('completed_successfully');
   });
   describe('completeness', async () => {
-    const { huntForThreat: mockT1 } = await vi.importMock('./tier1/hunt_for_threat');
-    const { huntBehavior: mockT2 } = await vi.importMock('./tier2/hunt_behavior');
+    const mockT1 = vi.mocked(huntForThreat);
+    const mockT2 = vi.mocked(huntBehavior);
     const mockModel = {} as import('@kbn/agent-builder-server').ScopedModel;
 
     const tier1Result = (overrides: Record<string, unknown> = {}) => ({
@@ -1102,9 +1094,7 @@ describe('huntCoordinator', () => {
     });
 
     it('reports a report that was hunted only as a prefix, and says what it missed', async () => {
-      const { loadReportHuntContext: mockLoad } = await vi.importMock(
-        './common/load_report_context'
-      );
+      const mockLoad = vi.mocked(loadReportHuntContext);
       mockLoad.mockResolvedValueOnce({
         iocs: [{ type: 'ip', value: '192.0.2.30' }],
         techniques: ['T1078.004'],
@@ -1135,9 +1125,7 @@ describe('huntCoordinator', () => {
     it('says an IOC value was too long to search for, not that it was beyond a count', async () => {
       // Two different limits lose coverage; the detail has to name the one that applied, or
       // it reads as though the report simply carried more IOCs than a hunt takes.
-      const { loadReportHuntContext: mockLoad } = await vi.importMock(
-        './common/load_report_context'
-      );
+      const mockLoad = vi.mocked(loadReportHuntContext);
       mockLoad.mockResolvedValueOnce({
         iocs: [{ type: 'ip', value: '192.0.2.30' }],
         techniques: ['T1078.004'],
@@ -1167,9 +1155,7 @@ describe('huntCoordinator', () => {
     it('ignores what the report lost when the caller supplied its own IOCs', async () => {
       // The caller's array replaces the report's, so what the loader dropped from the
       // report is not coverage this run lost.
-      const { loadReportHuntContext: mockLoad } = await vi.importMock(
-        './common/load_report_context'
-      );
+      const mockLoad = vi.mocked(loadReportHuntContext);
       mockLoad.mockResolvedValueOnce({
         iocs: [{ type: 'ip', value: '192.0.2.30' }],
         techniques: ['T1078.004'],
@@ -1196,9 +1182,7 @@ describe('huntCoordinator', () => {
     });
 
     it('counts dropped report text against a run that read the text', async () => {
-      const { loadReportHuntContext: mockLoad } = await vi.importMock(
-        './common/load_report_context'
-      );
+      const mockLoad = vi.mocked(loadReportHuntContext);
       mockLoad.mockResolvedValueOnce({
         iocs: [{ type: 'ip', value: '192.0.2.30' }],
         techniques: ['T1078.004'],
@@ -1228,9 +1212,7 @@ describe('huntCoordinator', () => {
       // Tier 2 is the only reader of the text, so on a run where it never ran the dropped
       // suffix cost this run nothing: reporting it makes a skipped Tier 2 look like a hunt
       // that fell short of its input.
-      const { loadReportHuntContext: mockLoad } = await vi.importMock(
-        './common/load_report_context'
-      );
+      const mockLoad = vi.mocked(loadReportHuntContext);
       mockLoad.mockResolvedValueOnce({
         iocs: [{ type: 'ip', value: '192.0.2.30' }],
         techniques: ['T1078.004'],

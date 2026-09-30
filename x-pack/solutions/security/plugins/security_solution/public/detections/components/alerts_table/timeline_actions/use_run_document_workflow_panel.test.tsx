@@ -20,6 +20,7 @@ import {
   type DocumentTableContextMenuItem,
   type UseRunDocumentWorkflowPanelProps,
 } from './use_run_document_workflow_panel';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { TestProviders } from '../../../../common/mock';
 import { createStartServicesMock } from '../../../../common/lib/kibana/kibana_react.mock';
 import * as i18n from '../translations';
@@ -100,7 +101,7 @@ vi.mock('@kbn/workflows-ui', () => {
   return { ...mocked, default: mocked };
 });
 
-const useKibanaMock = (await vi.importMock('@kbn/kibana-react-plugin/public')).useKibana as Mock;
+const useKibanaMock = useKibana as Mock;
 
 const defaultProps: UseRunDocumentWorkflowPanelProps = {
   closePopover: vi.fn(),

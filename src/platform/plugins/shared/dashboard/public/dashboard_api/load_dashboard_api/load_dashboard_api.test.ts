@@ -42,26 +42,31 @@ vi.mock('../../dashboard_client', async () => {
   };
 });
 
+const getDashboardApiMock = vi.hoisted(() => vi.fn());
+vi.mock('../get_dashboard_api', async (importOriginal) => ({
+  ...(await importOriginal<Record<string, unknown>>()),
+  getDashboardApi: getDashboardApiMock,
+}));
+
+vi.mock('../../services/dashboard_api_services', async (importOriginal) => ({
+  ...(await importOriginal<Record<string, unknown>>()),
+  getDashboardBackupService: () => ({
+    getState: () => ({
+      query: lastSavedQuery,
+    }),
+  }),
+}));
+
 const lastSavedQuery = { expression: 'memory:>220000', language: 'kql' as const };
 
 describe('loadDashboardApi', () => {
-  const getDashboardApiMock = vi.fn();
   const userActivity$ = new Subject();
 
-  beforeEach(async () => {
-    // eslint-disable-next-line @typescript-eslint/no-var-requires
-    (await import('../get_dashboard_api')).getDashboardApi = getDashboardApiMock;
+  beforeEach(() => {
     getDashboardApiMock.mockReturnValue({
       api: { userActivity$ },
       cleanUp: vi.fn(),
       internalApi: {},
-    });
-
-    // eslint-disable-next-line @typescript-eslint/no-var-requires
-    (await import('../../services/dashboard_api_services')).getDashboardBackupService = () => ({
-      getState: () => ({
-        query: lastSavedQuery,
-      }),
     });
 
     window.performance.getEntriesByName = vi.fn().mockReturnValue([

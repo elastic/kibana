@@ -90,11 +90,12 @@ vi.mock('../../../../context_awareness/hooks/use_profile_accessor', () => {
 
 vi.mock('lodash', () => {
   const original = require('lodash');
-
-  return {
+  const mocked = {
     ...original,
     debounce: (fn: unknown) => fn,
   };
+
+  return { ...mocked, default: mocked };
 });
 
 vi.mock('@kbn/unified-field-list/src/services/field_stats', () => {

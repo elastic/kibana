@@ -18,7 +18,8 @@ import { parsedStatsCollector } from './__fixture__/parsed_stats_collector';
 import { parsedImportedInterfaceFromExport } from './__fixture__/parsed_imported_interface_from_export';
 import { loadFixtureProgram } from './test_utils';
 
-describe('parseUsageCollection', () => {
+// Building a TS program for the repo tsconfig takes several seconds; Jest never timed out sync tests.
+describe('parseUsageCollection', { timeout: 60_000 }, () => {
   it.todo('throws when a function is returned from fetch');
   it.todo('throws when an object is not returned from fetch');
 

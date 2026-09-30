@@ -104,7 +104,7 @@ describe('retryOnError', () => {
     await expect(
       retryOnError({ operation: operationMock, retries: 3, report, logger })
     ).rejects.toThrowErrorMatchingInlineSnapshot(
-      `"ReportingError(code: kibana_shutting_down_error) \\"shutdown\\""`
+      `[Error: ReportingError(code: kibana_shutting_down_error) "shutdown"]`
     );
     expect(logger.info).not.toHaveBeenCalled();
     expect(logger.warn).not.toHaveBeenCalled();

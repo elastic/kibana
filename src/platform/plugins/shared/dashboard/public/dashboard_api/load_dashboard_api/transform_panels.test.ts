@@ -13,11 +13,18 @@ import type { Reference } from '@kbn/content-management-utils';
 import { transformPanels } from './transform_panels';
 import type { DashboardPanel, DashboardSection } from '@kbn/as-code-dashboard-schema';
 
+const mockKibanaServices = vi.hoisted(() => ({ embeddableService: undefined as unknown }));
+vi.mock('../../services/kibana_services', async (importOriginal) => ({
+  ...(await importOriginal<Record<string, unknown>>()),
+  get embeddableService() {
+    return mockKibanaServices.embeddableService;
+  },
+}));
+
 describe('transformPanels', () => {
   const mockTransformOut = vi.fn();
-  beforeAll(async () => {
-    // eslint-disable-next-line @typescript-eslint/no-var-requires
-    (await import('../../services/kibana_services')).embeddableService = {
+  beforeAll(() => {
+    mockKibanaServices.embeddableService = {
       getLegacyURLTransform: async () => mockTransformOut,
     };
   });

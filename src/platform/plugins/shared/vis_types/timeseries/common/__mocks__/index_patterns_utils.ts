@@ -7,13 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-const mock = jest.requireActual('../index_patterns_utils');
+const actual = jest.requireActual('../index_patterns_utils');
 
-jest.spyOn(mock, 'fetchIndexPattern');
+export const { isStringTypeIndexPattern, getIndexPatternKey, extractIndexPatternValues } = actual;
 
-export const {
-  isStringTypeIndexPattern,
-  getIndexPatternKey,
-  extractIndexPatternValues,
-  fetchIndexPattern,
-} = mock;
+export const fetchIndexPattern = jest.fn(actual.fetchIndexPattern);

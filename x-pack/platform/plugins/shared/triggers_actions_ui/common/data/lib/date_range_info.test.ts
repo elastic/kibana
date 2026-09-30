@@ -151,7 +151,7 @@ describe('getRangeInfo', () => {
       dateEnd: '2000-01-01T00:00:00.000Z',
     };
     expect(() => getDateRangeInfo(params)).toThrowErrorMatchingInlineSnapshot(
-      `"[dateStart]: is greater than [dateEnd]"`
+      `[Error: [dateStart]: is greater than [dateEnd]]`
     );
   });
 
@@ -161,7 +161,7 @@ describe('getRangeInfo', () => {
       dateStart: 'woopsie',
     };
     expect(() => getDateRangeInfo(params)).toThrowErrorMatchingInlineSnapshot(
-      `"invalid date format for dateStart: \\"woopsie\\""`
+      `[Error: invalid date format for dateStart: "woopsie"]`
     );
   });
 
@@ -172,14 +172,14 @@ describe('getRangeInfo', () => {
       dateEnd: 'woopsie',
     };
     expect(() => getDateRangeInfo(params)).toThrowErrorMatchingInlineSnapshot(
-      `"invalid date format for dateEnd: \\"woopsie\\""`
+      `[Error: invalid date format for dateEnd: "woopsie"]`
     );
   });
 
   it('should throw an error if passed an unparseable window', async () => {
     const params = { window: 'woopsie' };
     expect(() => getDateRangeInfo(params)).toThrowErrorMatchingInlineSnapshot(
-      `"invalid duration format for window: \\"woopsie\\""`
+      `[Error: invalid duration format for window: "woopsie"]`
     );
   });
 
@@ -189,7 +189,7 @@ describe('getRangeInfo', () => {
       interval: 'woopsie',
     };
     expect(() => getDateRangeInfo(params)).toThrowErrorMatchingInlineSnapshot(
-      `"invalid duration format for interval: \\"woopsie\\""`
+      `[Error: invalid duration format for interval: "woopsie"]`
     );
   });
 
@@ -201,7 +201,7 @@ describe('getRangeInfo', () => {
       interval: '1s',
     };
     expect(() => getDateRangeInfo(params)).toThrowErrorMatchingInlineSnapshot(
-      `"calculated number of intervals 631152001 is greater than maximum 1000"`
+      `[Error: calculated number of intervals 631152001 is greater than maximum 1000]`
     );
   });
 });

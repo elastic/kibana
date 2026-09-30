@@ -14,10 +14,7 @@ import {
   INDEX_PATTERN_LOGSTASH_STACK_MONITORING_STATE,
 } from '../../common/constants';
 
-// eslint-disable-next-line @typescript-eslint/no-var-requires
-const logstashStatsResultSetOfMetricbeatMonitoring = await import(
-  './__mocks__/fixtures/logstash_stats_metricbeat_monitoring_results.json'
-);
+const logstashStatsResultSetOfMetricbeatMonitoring = (await import('./__mocks__/fixtures/logstash_stats_metricbeat_monitoring_results.json')).default;
 
 const logstashStateResultsMapOfMetricbeatMonitoring = new Map();
 

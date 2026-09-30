@@ -168,6 +168,18 @@ const TRANSFORM_CACHE_KEY = Crypto.createHash('sha256')
   .update(require('@swc/plugin-emotion/package.json').version)
   .digest('hex');
 
+const TEST_FILE = /\.test\.[cm]?[jt]sx?$/;
+/**
+ * Shared mock helpers also run under the Jest integration tests, so they keep `jest.mock()`.
+ * Renames those statements to `vi.mock()` so Vitest hoists them like Jest did; padded so columns
+ * don't move. Test files were codemodded already (and may hold `jest.mock(` in string fixtures).
+ */
+const hoistJestMocks = (code) =>
+  code.replace(
+    /^([ \t]*)jest\.(mock|doMock|unmock|doUnmock)\(/gm,
+    (_, indent, api) => `${indent}  vi.${api}(`
+  );
+
 /**
  * Compiles Kibana sources with the Jest SWC config (decorators, emotion labels) as ESM, after the
  * same source rewrites the Jest transformer applies (JSX string attributes, enums, lazyObject).
@@ -196,24 +208,23 @@ const kbnSwcPlugin = () => ({
 
     const map = prepared.map ? remapping([result.map, prepared.map], () => null) : result.map;
     // makeEmotionLabelsSafe: same fix-up as the Jest transformer so emotion class hashes match.
-    // Shared mock helpers also run under the Jest integration tests, so they keep `jest.mock()`;
-    // rename it to vi.mock() so Vitest hoists it like Jest did (padded: columns don't move).
-    const transformed = makeEmotionLabelsSafe(result.code).replace(
-      /\bjest\.(mock|doMock|unmock|doUnmock)\(/g,
-      (_, api) => `  vi.${api}(`
-    );
-    return { code: transformed, map };
+    const transformed = makeEmotionLabelsSafe(result.code);
+    return { code: TEST_FILE.test(path) ? transformed : hoistJestMocks(transformed), map };
   },
 });
 
 /**
- * Uses the export conditions Jest's environments use (jsdom: `browser`, node: `node`). Vitest adds
- * `development` to the ssr conditions and passes them to workers as `--conditions`, which made
- * native requires in node_modules load dev builds (e.g. emotion) that render differently. User
- * config arrays are concatenated, so the resolved config has to be overwritten.
+ * Resolves package exports with the `node` condition only, in every environment. Jest resolved
+ * bare specifiers through `main` (the `resolve` package ignores `exports`), which is what Node's
+ * conditions pick; `browser` gave natively loaded packages untranspiled ESM builds (e.g.
+ * @aws-sdk/core's dist-es with extensionless imports), and mixing it for Vite-resolved imports
+ * with `node` for native ones duplicates packages like @emotion/react (separate theme contexts).
+ * Vitest also adds `development` to the ssr conditions and passes them to workers as
+ * `--conditions`, which loaded dev builds (e.g. emotion) that render differently. User config
+ * arrays are concatenated, so the resolved config has to be overwritten.
  */
-const kbnConditionsPlugin = (environment) => {
-  const conditions = environment === 'jsdom' ? ['browser'] : ['node'];
+const kbnConditionsPlugin = () => {
+  const conditions = ['node'];
   return {
     name: 'kbn-vitest-conditions',
     enforce: 'post',
@@ -229,10 +240,6 @@ const kbnConditionsPlugin = (environment) => {
   };
 };
 
-const kbnVitestPlugins = (environment) => [
-  kbnResolvePlugin(),
-  kbnSwcPlugin(),
-  kbnConditionsPlugin(environment),
-];
+const kbnVitestPlugins = () => [kbnResolvePlugin(), kbnSwcPlugin(), kbnConditionsPlugin()];
 
 module.exports = { kbnVitestPlugins };

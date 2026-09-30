@@ -21,6 +21,10 @@ import { createRequire, registerHooks } from 'module';
 import { TextDecoder as NodeTextDecoder, TextEncoder as NodeTextEncoder } from 'util';
 import { i18n } from '@kbn/i18n';
 
+// jest-runner raises the limit to 100 for every test file; stack-based checks such as
+// disallow_code_generation.js look for frames beyond the default 10.
+Error.stackTraceLimit = 100;
+
 // Shared Kibana mock factories (coreMock, elasticsearchServiceMock, ...) are also used by the Jest
 // integration tests, so they keep calling `jest.*`; the global routes those calls to `vi`.
 //
@@ -163,8 +167,39 @@ if (typeof window !== 'undefined' && global.jsdom?.window) {
 // jest-environment-jsdom exposed jsdom's (whatwg-url) URL; Vitest leaves Node's, whose error
 // messages and behavior differ ("Invalid URL" vs "Invalid URL: <input>").
 if (typeof window !== 'undefined' && global.jsdom?.window) {
-  global.URL = global.jsdom.window.URL;
-  global.URLSearchParams = global.jsdom.window.URLSearchParams;
+  const { URL: JsdomURL, URLSearchParams: JsdomURLSearchParams } = global.jsdom.window;
+  // core-js (polyfills.jsdom.js) filled in what whatwg-url lacks (URL.parse/canParse,
+  // URLSearchParams#size) in Jest; here it already ran against Node's URL, which has them.
+  JsdomURL.canParse ??= (url, base) => {
+    try {
+      return Boolean(new JsdomURL(url, base));
+    } catch {
+      return false;
+    }
+  };
+  JsdomURL.parse ??= (url, base) => {
+    try {
+      return new JsdomURL(url, base);
+    } catch {
+      return null;
+    }
+  };
+  // polyfills.jsdom.js stubs createObjectURL only when missing, which Node's URL is not
+  if (!Object.hasOwn(JsdomURL, 'createObjectURL')) {
+    Object.defineProperty(JsdomURL, 'createObjectURL', { value: () => '' });
+  }
+  global.URL = JsdomURL;
+  if (!('size' in JsdomURLSearchParams.prototype)) {
+    Object.defineProperty(JsdomURLSearchParams.prototype, 'size', {
+      configurable: true,
+      get() {
+        let size = 0;
+        this.forEach(() => size++);
+        return size;
+      },
+    });
+  }
+  global.URLSearchParams = JsdomURLSearchParams;
 }
 
 configure({ testIdAttribute: 'data-test-subj', asyncUtilTimeout: 4500 });

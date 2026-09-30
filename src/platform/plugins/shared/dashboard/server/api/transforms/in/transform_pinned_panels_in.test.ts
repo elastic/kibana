@@ -13,6 +13,14 @@ import { CONTROL_WIDTH_SMALL } from '@kbn/controls-constants';
 import type { DashboardState } from '@kbn/as-code-dashboard-schema';
 import { transformPinnedPanelsIn } from './transform_pinned_panels_in';
 
+const mockKibanaServices = vi.hoisted(() => ({ embeddableService: undefined as unknown }));
+vi.mock('../../../kibana_services', async (importOriginal) => ({
+  ...(await importOriginal<Record<string, unknown>>()),
+  get embeddableService() {
+    return mockKibanaServices.embeddableService;
+  },
+}));
+
 vi.mock('uuid', () => {
   const mocked = {
     v4: vi.fn(() => 'mock-uuid'),
@@ -21,9 +29,8 @@ vi.mock('uuid', () => {
 });
 
 describe('transformPinnedPanelsIn', () => {
-  beforeAll(async () => {
-    // eslint-disable-next-line @typescript-eslint/no-var-requires
-    (await import('../../../kibana_services')).embeddableService = {
+  beforeAll(() => {
+    mockKibanaServices.embeddableService = {
       getTransforms: vi.fn(),
     };
   });
@@ -73,9 +80,8 @@ describe('transformPinnedPanelsIn', () => {
 });
 
 describe('validation', () => {
-  beforeAll(async () => {
-    // eslint-disable-next-line @typescript-eslint/no-var-requires
-    (await import('../../../kibana_services')).embeddableService = {
+  beforeAll(() => {
+    mockKibanaServices.embeddableService = {
       getTransforms: () => ({
         transformIn: () => {
           throw new Error('Transform in error.');

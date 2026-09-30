@@ -18,7 +18,7 @@ import { useGetAttackDiscoveryGenerations, useInvalidateGetAttackDiscoveryGenera
 import { ATTACK_DISCOVERY_GENERATIONS } from '@kbn/elastic-assistant-common';
 import { ERROR_RETRIEVING_ATTACK_DISCOVERY_GENERATIONS } from './translations';
 
-const mockAddError = vi.fn();
+const mockAddError = vi.hoisted(() => vi.fn());
 const useQueryClientMock = useQueryClient as unknown as MockedFunction<typeof useQueryClient>;
 
 vi.mock('../../../common/hooks/use_app_toasts', () => {

@@ -28,6 +28,22 @@ import { createEmbeddableStateTransferMock } from '@kbn/embeddable-plugin/public
 vi.mock('../dashboard_renderer/dashboard_renderer');
 vi.mock('../dashboard_top_nav');
 
+const mockNoData = vi.hoisted(() => ({
+  overrides: {} as Record<string, unknown>,
+}));
+vi.mock('./no_data/dashboard_app_no_data', async (importOriginal) => {
+  const actual = await importOriginal<Record<string, unknown>>();
+  return {
+    ...actual,
+    get isDashboardAppInNoDataState() {
+      return mockNoData.overrides.isDashboardAppInNoDataState ?? actual.isDashboardAppInNoDataState;
+    },
+    get DashboardAppNoDataPage() {
+      return mockNoData.overrides.DashboardAppNoDataPage ?? actual.DashboardAppNoDataPage;
+    },
+  };
+});
+
 describe('Dashboard App', () => {
   dataService.query.filterManager.getFilters = vi.fn().mockImplementation(() => []);
 
@@ -245,14 +261,9 @@ describe('Dashboard App', () => {
   describe('showNoDataPage', () => {
     const mockIsDashboardAppInNoDataState = vi.fn();
 
-    beforeAll(async () => {
-      // eslint-disable-next-line @typescript-eslint/no-var-requires
-      (await import('./no_data/dashboard_app_no_data')).isDashboardAppInNoDataState =
-        mockIsDashboardAppInNoDataState;
-      // eslint-disable-next-line @typescript-eslint/no-var-requires
-      (await import('./no_data/dashboard_app_no_data')).DashboardAppNoDataPage = () => (
-        <div>Mock no data page</div>
-      );
+    beforeAll(() => {
+      mockNoData.overrides.isDashboardAppInNoDataState = mockIsDashboardAppInNoDataState;
+      mockNoData.overrides.DashboardAppNoDataPage = () => <div>Mock no data page</div>;
 
       /**
        * Mock the DashboardTopNav + LazyDashboardRenderer component to avoid rendering the actual dashboard

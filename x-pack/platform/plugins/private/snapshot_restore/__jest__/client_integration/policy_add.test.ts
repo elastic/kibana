@@ -90,6 +90,10 @@ describe('<PolicyAdd />', () => {
 
     test('should not show repository-not-found warning', async () => {
       await screen.findByTestId('nameInput');
+      // The form selects the first loaded repository in a follow-up render; wait for it to settle.
+      await waitFor(() =>
+        expect(screen.getByTestId('repositorySelect')).toHaveValue(repository.name)
+      );
       expect(screen.queryByTestId('repositoryNotFoundWarning')).not.toBeInTheDocument();
     });
 

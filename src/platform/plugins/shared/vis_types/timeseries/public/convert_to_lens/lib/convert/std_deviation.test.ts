@@ -119,7 +119,7 @@ describe('convertToStandartDeviationColumn', () => {
       expect(convertToStandartDeviationColumn(...input)).toBeNull();
     } else if (Array.isArray(expected)) {
       expect(convertToStandartDeviationColumn(...input)).toEqual(
-        expected.map(expect.objectContaining)
+        expected.map((item) => expect.objectContaining(item))
       );
     } else {
       expect(convertToStandartDeviationColumn(...input)).toEqual(expect.objectContaining(expected));

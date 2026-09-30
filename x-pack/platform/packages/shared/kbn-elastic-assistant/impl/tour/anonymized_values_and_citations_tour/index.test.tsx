@@ -20,7 +20,7 @@ import {
 import type { TourState } from '../knowledge_base';
 import { TestProviders } from '../../mock/test_providers/test_providers';
 
-vi.mock('react-use/lib/useLocalStorage', () => vi.fn());
+vi.mock('react-use/lib/useLocalStorage', () => ({ default: vi.fn() }));
 
 vi.mock('lodash', () => {
   const mocked = {

@@ -993,7 +993,7 @@ describe('AuthenticationService', () => {
   });
 
   describe('onPreResponse handler', () => {
-    async function getService({ runStart = true }: { runStart?: boolean } = {}) {
+    function getService({ runStart = true }: { runStart?: boolean } = {}) {
       service.setup(mockSetupAuthenticationParams);
 
       if (runStart) {

@@ -19,14 +19,12 @@ import { loggerMock } from '@kbn/logging-mocks';
 import type { KibanaConfig } from '../kibana_config';
 import { StatusHandler } from './status';
 
+vi.mock('node-fetch', { spy: true });
+
 describe('StatusHandler', () => {
   let kibanaConfig: KibanaConfig;
   let logger: MockedLogger;
   let server: Server;
-
-  beforeAll(async () => {
-    vi.spyOn(await import('node-fetch'), 'default');
-  });
 
   beforeEach(async () => {
     kibanaConfig = {

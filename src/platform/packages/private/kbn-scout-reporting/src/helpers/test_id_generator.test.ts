@@ -25,7 +25,8 @@ describe('generateTestRunId', () => {
 
 describe('computeTestID', () => {
   it('returns the same output every time if the inputs are the same', () => {
-    const getTestID = () => computeTestID(path.join('some_functionality.spec.ts'), test.name);
+    // Jest's `test.name` was 'test'; Vitest's chainable `test` has a different function name
+    const getTestID = () => computeTestID(path.join('some_functionality.spec.ts'), 'test');
     const expectedTestId = '5895f3c6f599ba8-9f86d081884c7d6'; // hard-coded to detect any changes in hash calculations
     const testID = getTestID();
 

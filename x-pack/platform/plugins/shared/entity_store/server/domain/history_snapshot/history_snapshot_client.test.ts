@@ -19,16 +19,15 @@ import {
   resolveLatestEntitiesIndexName,
 } from '../asset_manager/resolve_entity_store_indices';
 
-vi.mock('../../infra/elasticsearch', async () => {
-  const mocked = {
-    ...jest.createMockFromModule<typeof import('../../infra/elasticsearch')>(
-      '../../infra/elasticsearch'
-    ),
-    chunkByUrlLength: (
-      await vi.importActual<typeof import('../../infra/elasticsearch')>('../../infra/elasticsearch')
-    ).chunkByUrlLength,
-  };
-  return { ...mocked, default: mocked };
+vi.mock('../../infra/elasticsearch', async (importOriginal) => {
+  const actual = await importOriginal<Record<string, unknown>>();
+  const mocked = Object.fromEntries(
+    Object.entries(actual).map(([name, value]) => [
+      name,
+      typeof value === 'function' ? vi.fn() : value,
+    ])
+  );
+  return { ...mocked, chunkByUrlLength: actual.chunkByUrlLength };
 });
 vi.mock('../asset_manager/resolve_entity_store_indices');
 

@@ -23,6 +23,7 @@ import { getIsExperimentalFeatureEnabled } from '../../../common/get_experimenta
 import RulesPage from './rules_page_container';
 import { hasShowActionsCapability } from '../../lib/capabilities';
 import { useKibana } from '../../../common/lib/kibana';
+import { useGetRuleTypesPermissions as useGetRuleTypesPermissionsFn } from '@kbn/alerts-ui-shared/src/common/hooks/use_get_rule_types_permissions';
 
 vi.mock('../../../common/lib/kibana');
 vi.mock('../../../common/get_experimental_features');
@@ -38,11 +39,15 @@ vi.mock('../../locator_context', () => {
 });
 
 vi.mock('../rules_list/components/rules_list', () => {
-  return () => <div data-test-subj="rulesListComponents">{'Render Rule list component'}</div>;
+  return {
+    default: () => <div data-test-subj="rulesListComponents">{'Render Rule list component'}</div>,
+  };
 });
 
 vi.mock('../rule_details/components/global_rule_event_log_list', () => {
-  return () => <div data-test-subj="globalRuleEventLogList">{'Render Logs list component'}</div>;
+  return {
+    default: () => <div data-test-subj="globalRuleEventLogList">{'Render Logs list component'}</div>,
+  };
 });
 
 vi.mock('../../components/rules_setting/rules_settings_flyout', () => {
@@ -79,9 +84,7 @@ vi.mock('@kbn/alerts-ui-shared/src/common/hooks/use_get_rule_types_permissions',
   return { ...mocked, default: mocked };
 });
 
-const { useGetRuleTypesPermissions } = await vi.importMock(
-  '@kbn/alerts-ui-shared/src/common/hooks/use_get_rule_types_permissions'
-);
+const useGetRuleTypesPermissions = useGetRuleTypesPermissionsFn as Mock;
 
 const useKibanaMock = useKibana as Mocked<typeof useKibana>;
 

@@ -72,7 +72,7 @@ describe('createMigration()', () => {
         },
       })
     ).toThrowErrorMatchingInlineSnapshot(
-      `"An Invalid Encrypted Saved Objects migration is trying to migrate across types (\\"known-type-1\\" => \\"known-type-2\\"), which isn't permitted"`
+      `[Error: An Invalid Encrypted Saved Objects migration is trying to migrate across types ("known-type-1" => "known-type-2"), which isn't permitted]`
     );
   });
 

@@ -8,10 +8,7 @@ import sinon from 'sinon';
 import type { ElasticsearchClient } from '@kbn/core/server';
 import { LogstashSelfMonitoring } from './logstash_self_monitoring';
 
-// eslint-disable-next-line @typescript-eslint/no-var-requires
-const logstashStatsResultSetOfSelfMonitoring = await import(
-  './__mocks__/fixtures/logstash_stats_self_monitoring_results.json'
-);
+const logstashStatsResultSetOfSelfMonitoring = (await import('./__mocks__/fixtures/logstash_stats_self_monitoring_results.json')).default;
 
 const logstashStateResultsMapOfSelfMonitoring = new Map();
 

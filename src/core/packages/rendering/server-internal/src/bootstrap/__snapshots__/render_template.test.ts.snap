@@ -327,5 +327,3 @@ if (window.__kbnStrictCsp__ && window.__kbnCspNotEnforced__) {
 }
   "
 `;
-
-

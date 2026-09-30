@@ -6,7 +6,7 @@
  */
 
 import { vi } from 'vitest';
-import type { Mocked } from 'vitest';
+import type { Mock, Mocked } from 'vitest';
 
 import React from 'react';
 import userEvent from '@testing-library/user-event';
@@ -15,6 +15,7 @@ import { FormTestProvider } from '../../components/test_utils';
 import { ConnectorFormFieldsGlobal } from './connector_form_fields_global';
 import { useKibana } from '../../../common/lib/kibana';
 import { httpServiceMock } from '@kbn/core/public/mocks';
+import { checkConnectorIdAvailability as checkConnectorIdAvailabilityFn } from '../../lib/action_connector_api';
 
 vi.mock('../../../common/lib/kibana');
 vi.mock('../../lib/action_connector_api', async () => {
@@ -25,7 +26,7 @@ vi.mock('../../lib/action_connector_api', async () => {
   return { ...mocked, default: mocked };
 });
 
-const { checkConnectorIdAvailability } = await vi.importMock('../../lib/action_connector_api');
+const checkConnectorIdAvailability = checkConnectorIdAvailabilityFn as Mock;
 const useKibanaMock = useKibana as Mocked<typeof useKibana>;
 
 describe('ConnectorFormFieldsGlobal', () => {

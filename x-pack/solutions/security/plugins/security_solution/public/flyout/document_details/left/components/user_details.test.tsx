@@ -61,8 +61,10 @@ vi.mock('react-redux-v7', () => {
   };
 });
 
-const from = '2022-07-20T08:20:18.966Z';
-const to = '2022-07-28T08:20:18.966Z';
+const { from, to } = vi.hoisted(() => ({
+  from: '2022-07-20T08:20:18.966Z',
+  to: '2022-07-28T08:20:18.966Z',
+}));
 vi.mock('../../../../common/containers/use_global_time', async () => {
   const actual = await vi.importActual('../../../../common/containers/use_global_time');
   return {

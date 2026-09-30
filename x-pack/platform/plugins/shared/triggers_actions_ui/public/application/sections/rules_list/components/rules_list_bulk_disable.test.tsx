@@ -31,6 +31,11 @@ import {
   ruleType,
   ruleTypeFromApi,
 } from './test_helper';
+import { loadRuleAggregationsWithKueryFilter as loadRuleAggregationsWithKueryFilterFn } from '../../../lib/rule_api/aggregate_kuery_filter';
+import { getRuleTypes as getRuleTypesFn } from '@kbn/response-ops-rules-apis/apis/get_rule_types';
+import { bulkDisableRules as bulkDisableRulesFn } from '../../../lib/rule_api/bulk_disable';
+import { loadRulesWithKueryFilter as loadRulesWithKueryFilterFn } from '../../../lib/rule_api/rules_kuery_filter';
+import { loadActionTypes as loadActionTypesFn, loadAllActions as loadAllActionsFn } from '../../../lib/action_connector_api';
 
 vi.mock('../../../../common/lib/kibana');
 vi.mock('@kbn/kibana-react-plugin/public/ui_settings/use_ui_setting', () => {
@@ -158,7 +163,7 @@ vi.mock('@kbn/kibana-utils-plugin/public', async () => {
     })),
   };
 });
-vi.mock('react-use/lib/useLocalStorage', () => vi.fn(() => [null, () => null]));
+vi.mock('react-use/lib/useLocalStorage', () => ({ default: vi.fn(() => [null, () => null]) }));
 vi.mock('@kbn/ebt-tools');
 vi.mock('@kbn/cps-utils', async () => {
   const mocked = {
@@ -171,19 +176,14 @@ vi.mock('@kbn/cps-utils', async () => {
 const usePerformanceContextMock = usePerformanceContext as Mock;
 usePerformanceContextMock.mockReturnValue({ onPageReady: vi.fn() });
 
-const { loadRuleAggregationsWithKueryFilter } = await vi.importMock(
-  '../../../lib/rule_api/aggregate_kuery_filter'
-);
+const loadRuleAggregationsWithKueryFilter = loadRuleAggregationsWithKueryFilterFn as Mock;
 
-const { getRuleTypes } = await vi.importMock('@kbn/response-ops-rules-apis/apis/get_rule_types');
-const { bulkDisableRules } = await vi.importMock('../../../lib/rule_api/bulk_disable');
+const getRuleTypes = getRuleTypesFn as Mock;
+const bulkDisableRules = bulkDisableRulesFn as Mock;
 
-const { loadRulesWithKueryFilter } = await vi.importMock(
-  '../../../lib/rule_api/rules_kuery_filter'
-);
-const { loadActionTypes, loadAllActions } = await vi.importMock(
-  '../../../lib/action_connector_api'
-);
+const loadRulesWithKueryFilter = loadRulesWithKueryFilterFn as Mock;
+const loadActionTypes = loadActionTypesFn as Mock;
+const loadAllActions = loadAllActionsFn as Mock;
 
 const actionTypeRegistry = actionTypeRegistryMock.create();
 const ruleTypeRegistry = ruleTypeRegistryMock.create();

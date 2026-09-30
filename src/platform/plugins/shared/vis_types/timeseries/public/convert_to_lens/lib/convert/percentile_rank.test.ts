@@ -64,7 +64,7 @@ describe('convertToPercentileRankParams', () => {
       expect(convertToPercentileRankParams(...input)).toBeNull();
     } else if (Array.isArray(expected)) {
       expect(convertToPercentileRankParams(...input)).toEqual(
-        expected.map(expect.objectContaining)
+        expected.map((item) => expect.objectContaining(item))
       );
     } else {
       expect(convertToPercentileRankParams(...input)).toEqual(expect.objectContaining(expected));
@@ -135,7 +135,7 @@ describe('convertToPercentileRankColumn', () => {
       expect(convertToPercentileRankColumn(...input)).toBeNull();
     } else if (Array.isArray(expected)) {
       expect(convertToPercentileRankColumn(...input)).toEqual(
-        expected.map(expect.objectContaining)
+        expected.map((item) => expect.objectContaining(item))
       );
     } else {
       expect(convertToPercentileRankColumn(...input)).toEqual(expect.objectContaining(expected));

@@ -46,7 +46,6 @@ import {
 import { setupEnvironment, WithAppDependencies } from '../helpers/setup_environment';
 import { renderIndexDetailsPage } from './index_details_page.helpers';
 
-vi.mock('@kbn/code-editor');
 
 const getTypeLabel = (typeValue: string): string => {
   const typeDef = TYPE_DEFINITION[typeValue as keyof typeof TYPE_DEFINITION];

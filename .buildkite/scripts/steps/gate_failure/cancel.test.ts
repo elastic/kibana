@@ -7,38 +7,33 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { vi } from 'vitest';
+const mockGetMetadataKeys = jest.fn();
+const mockGetMetadata = jest.fn();
+const mockCancelStep = jest.fn();
+const mockSetAnnotation = jest.fn();
 
-const mockGetMetadataKeys = vi.fn();
-const mockGetMetadata = vi.fn();
-const mockCancelStep = vi.fn();
-const mockSetAnnotation = vi.fn();
-
-vi.mock('#pipeline-utils', () => {
-  const mocked = {
-    BuildkiteClient: vi.fn().mockImplementation(() => ({
-      getMetadataKeys: mockGetMetadataKeys,
-      getMetadata: mockGetMetadata,
-      cancelStep: mockCancelStep,
-      setAnnotation: mockSetAnnotation,
-    })),
-  };
-  return { ...mocked, default: mocked };
-});
+jest.mock('#pipeline-utils', () => ({
+  BuildkiteClient: jest.fn().mockImplementation(() => ({
+    getMetadataKeys: mockGetMetadataKeys,
+    getMetadata: mockGetMetadata,
+    cancelStep: mockCancelStep,
+    setAnnotation: mockSetAnnotation,
+  })),
+}));
 
 const ORIGINAL_ENV = process.env;
 
 const runCancelModule = () => {
-  jest.isolateModules(async () => {
-    await import('./cancel.ts');
+  jest.isolateModules(() => {
+    require('./cancel.ts');
   });
 };
 
 beforeEach(() => {
-  vi.resetAllMocks();
-  vi.resetModules();
-  vi.spyOn(process, 'exit').mockImplementation((() => {}) as never);
-  vi.spyOn(console, 'error').mockImplementation(() => {});
+  jest.resetAllMocks();
+  jest.resetModules();
+  jest.spyOn(process, 'exit').mockImplementation((() => {}) as never);
+  jest.spyOn(console, 'error').mockImplementation(() => {});
   process.env = {
     ...ORIGINAL_ENV,
     BUILDKITE_STEP_KEY: 'check_oas_snapshot',
@@ -48,7 +43,7 @@ beforeEach(() => {
 });
 
 afterEach(() => {
-  vi.restoreAllMocks();
+  jest.restoreAllMocks();
 });
 
 afterAll(() => {

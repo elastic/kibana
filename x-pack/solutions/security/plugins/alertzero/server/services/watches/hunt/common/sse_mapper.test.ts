@@ -15,6 +15,8 @@ import { significantSecurityEventAttachmentDataSchema } from '../../../../../com
 import { huntCoordinator } from '../hunt_coordinator';
 import type { HuntCoordinatorResult } from '../hunt_coordinator';
 import { buildSseData, buildSseAttachmentId } from './sse_mapper';
+import { huntForThreat } from '../tier1/hunt_for_threat';
+import { huntBehavior } from '../tier2/hunt_behavior';
 
 const huntResultOf = (entry: ReturnType<typeof buildSseData>[number]) => {
   const huntResult = entry.data.hunt_result;
@@ -280,10 +282,8 @@ describe('buildSseData', () => {
   });
 
   it('returns one SSE entry per corroborated technique on a tier1_and_tier2 hit', async () => {
-    const { huntForThreat } = await vi.importMock('../tier1/hunt_for_threat');
-    const { huntBehavior } = await vi.importMock('../tier2/hunt_behavior');
-    huntForThreat.mockResolvedValue(HIT_TIER1_RESULT);
-    huntBehavior.mockResolvedValue(HIT_TIER2_RESULT_TWO_BEHAVIORS);
+    vi.mocked(huntForThreat).mockResolvedValue(HIT_TIER1_RESULT);
+    vi.mocked(huntBehavior).mockResolvedValue(HIT_TIER2_RESULT_TWO_BEHAVIORS);
 
     const coordinatorResult = await runCoordinator({
       report_id: 'tr-aws-iam-assumerole-2026-07-28',
@@ -419,10 +419,8 @@ describe('buildSseData', () => {
   });
 
   it('returns a single report-scoped entry when Tier 2 produced no behaviors', async () => {
-    const { huntForThreat } = await vi.importMock('../tier1/hunt_for_threat');
-    const { huntBehavior } = await vi.importMock('../tier2/hunt_behavior');
-    huntForThreat.mockResolvedValue(HIT_TIER1_RESULT);
-    huntBehavior.mockResolvedValue({
+    vi.mocked(huntForThreat).mockResolvedValue(HIT_TIER1_RESULT);
+    vi.mocked(huntBehavior).mockResolvedValue({
       status: 'no_behaviors_found',
       behaviors: [],
       indexed_behaviors: [],
@@ -451,10 +449,8 @@ describe('buildSseData', () => {
   });
 
   it('emits a Tier 2-only hit with tier2 hit_sources and Tier 2 entities', async () => {
-    const { huntForThreat } = await vi.importMock('../tier1/hunt_for_threat');
-    const { huntBehavior } = await vi.importMock('../tier2/hunt_behavior');
-    huntForThreat.mockResolvedValue(CLEAN_TIER1_RESULT);
-    huntBehavior.mockResolvedValue({
+    vi.mocked(huntForThreat).mockResolvedValue(CLEAN_TIER1_RESULT);
+    vi.mocked(huntBehavior).mockResolvedValue({
       status: 'behaviors_proposed',
       behaviors: [
         {
@@ -512,10 +508,8 @@ describe('buildSseData', () => {
   });
 
   it('returns a single report-scoped entry for a tier1_only clean result', async () => {
-    const { huntForThreat } = await vi.importMock('../tier1/hunt_for_threat');
-    const { huntBehavior } = await vi.importMock('../tier2/hunt_behavior');
-    huntForThreat.mockResolvedValue(CLEAN_TIER1_RESULT);
-    huntBehavior.mockResolvedValue({
+    vi.mocked(huntForThreat).mockResolvedValue(CLEAN_TIER1_RESULT);
+    vi.mocked(huntBehavior).mockResolvedValue({
       status: 'no_behaviors_found',
       behaviors: [],
       indexed_behaviors: [],
@@ -576,10 +570,8 @@ describe('buildSseData publishes an entry only for a corroborated technique', ()
     tier1: RawTier1,
     behaviors: TestBehavior[]
   ): Promise<HuntCoordinatorResult> => {
-    const { huntForThreat } = await vi.importMock('../tier1/hunt_for_threat');
-    const { huntBehavior } = await vi.importMock('../tier2/hunt_behavior');
-    huntForThreat.mockResolvedValue(tier1);
-    huntBehavior.mockResolvedValue({
+    vi.mocked(huntForThreat).mockResolvedValue(tier1);
+    vi.mocked(huntBehavior).mockResolvedValue({
       status: 'behaviors_proposed',
       behaviors,
       indexed_behaviors: [],
@@ -849,10 +841,8 @@ describe('buildSseData publishes an entry only for a corroborated technique', ()
 
 describe('buildSseData output parses against the SSE attachment schema', () => {
   it('validates mapper output as-is (schema-complete, no caller fill)', async () => {
-    const { huntForThreat } = await vi.importMock('../tier1/hunt_for_threat');
-    const { huntBehavior } = await vi.importMock('../tier2/hunt_behavior');
-    huntForThreat.mockResolvedValue(HIT_TIER1_RESULT);
-    huntBehavior.mockResolvedValue(HIT_TIER2_RESULT_TWO_BEHAVIORS);
+    vi.mocked(huntForThreat).mockResolvedValue(HIT_TIER1_RESULT);
+    vi.mocked(huntBehavior).mockResolvedValue(HIT_TIER2_RESULT_TWO_BEHAVIORS);
 
     const coordinatorResult = await runCoordinator({
       report_id: 'tr-aws-iam-assumerole-2026-07-28',

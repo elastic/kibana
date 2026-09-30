@@ -14,6 +14,7 @@ import { openAppMenuOverflow } from '@kbn/app-header/test_helpers';
 import type { AppMockRenderer } from '../lib/test_utils';
 import { createAppMockRenderer } from '../lib/test_utils';
 import { MaintenanceWindowsEditPage } from './edit_page';
+import { useGetMaintenanceWindow } from '../hooks/use_get_maintenance_window';
 
 vi.mock('react-router-dom', () => {
   const mocked = {
@@ -36,9 +37,7 @@ vi.mock('./create_maintenance_windows_form', () => {
   return { ...mocked, default: mocked };
 });
 
-const { useGetMaintenanceWindow: useGetMaintenanceWindowMock } = await vi.importMock(
-  '../hooks/use_get_maintenance_window'
-);
+const useGetMaintenanceWindowMock = vi.mocked(useGetMaintenanceWindow);
 
 describe('MaintenanceWindowsEditPage', () => {
   let appMockRenderer: AppMockRenderer;

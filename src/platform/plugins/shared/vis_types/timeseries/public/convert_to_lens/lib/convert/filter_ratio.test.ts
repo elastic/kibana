@@ -68,7 +68,7 @@ describe('convertFilterRatioToFormulaColumn', () => {
       expect(convertFilterRatioToFormulaColumn(...input)).toBeNull();
     } else if (Array.isArray(expected)) {
       expect(convertFilterRatioToFormulaColumn(...input)).toEqual(
-        expected.map(expect.objectContaining)
+        expected.map((item) => expect.objectContaining(item))
       );
     } else {
       expect(convertFilterRatioToFormulaColumn(...input)).toEqual(

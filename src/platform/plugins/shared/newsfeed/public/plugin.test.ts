@@ -19,7 +19,7 @@ describe('Newsfeed plugin', () => {
   let plugin: NewsfeedPublicPlugin;
 
   beforeAll(() => {
-    vi.useFakeTimers({ legacyFakeTimers: true });
+    vi.useFakeTimers();
   });
 
   afterAll(() => {
@@ -27,7 +27,10 @@ describe('Newsfeed plugin', () => {
   });
 
   beforeEach(() => {
-    plugin = new NewsfeedPublicPlugin(coreMock.createPluginInitializerContext());
+    // A 0ms mainInterval (the empty-config default) makes modern fake timers loop forever
+    plugin = new NewsfeedPublicPlugin(
+      coreMock.createPluginInitializerContext({ mainInterval: 'PT2M', fetchInterval: 'P1D' })
+    );
   });
 
   describe('#start', () => {

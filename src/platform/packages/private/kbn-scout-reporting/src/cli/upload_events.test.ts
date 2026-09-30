@@ -80,7 +80,7 @@ describe('uploadAllEventsFromPath', () => {
         log,
       })
     ).rejects.toThrowErrorMatchingInlineSnapshot(
-      `"The provided event log path 'non_existent_path' does not exist."`
+      `[Error: The provided event log path 'non_existent_path' does not exist.]`
     );
   });
 
@@ -98,7 +98,7 @@ describe('uploadAllEventsFromPath', () => {
         log,
       })
     ).rejects.toThrowErrorMatchingInlineSnapshot(
-      `"The provided event log file 'invalid_event_log.txt' must end with .ndjson."`
+      `[Error: The provided event log file 'invalid_event_log.txt' must end with .ndjson.]`
     );
   });
 

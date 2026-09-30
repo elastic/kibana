@@ -17,6 +17,21 @@ import { createMemoryHistory } from 'history';
 import * as constants from '../common/navigation/constants';
 import type { QueryClientProviderProps } from '@kbn/react-query';
 
+const mockConstants = vi.hoisted(() => ({
+  cloudDefendPages: {} as Record<CloudDefendPage, CloudDefendPageNavigationItem>,
+}));
+
+vi.mock('../common/navigation/constants', async (importOriginal) => {
+  const actual = await importOriginal<typeof constants>();
+  mockConstants.cloudDefendPages = actual.cloudDefendPages;
+  return {
+    ...actual,
+    get cloudDefendPages() {
+      return mockConstants.cloudDefendPages;
+    },
+  };
+});
+
 vi.mock('../pages/policies', () => {
   const mocked = {
     Policies: () => <div data-test-subj="Policies">Policies</div>,
@@ -34,9 +49,6 @@ vi.mock('@tanstack/react-query', () => {
 
 describe('CloudDefendRouter', () => {
   const originalCloudDefendPages = { ...constants.cloudDefendPages };
-  const mockConstants = constants as {
-    cloudDefendPages: Record<CloudDefendPage, CloudDefendPageNavigationItem>;
-  };
 
   const securityContext: CloudDefendSecuritySolutionContext = {
     getFiltersGlobalComponent: vi.fn(),

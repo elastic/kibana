@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://jestjs.io/docs/snapshot-testing
 
-exports[`transform_path_file > transform output matches our expectation > updated_paths_file 1`] = `
+exports[`transform_path_file transform output matches our expectation: updated_paths_file 1`] = `
 "/*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the "Elastic License

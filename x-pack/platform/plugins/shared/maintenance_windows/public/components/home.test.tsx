@@ -17,6 +17,7 @@ import type { AppMockRenderer } from '../lib/test_utils';
 import { createAppMockRenderer } from '../lib/test_utils';
 import { MaintenanceWindowsPage } from './home';
 import { MAINTENANCE_WINDOW_FEATURE_ID } from '../../common';
+import { useFindMaintenanceWindows } from '../hooks/use_find_maintenance_windows';
 
 vi.mock('../hooks/use_find_maintenance_windows');
 vi.mock('../hooks/use_breadcrumbs', () => {
@@ -32,9 +33,7 @@ vi.mock('./maintenance_windows_list', () => {
   return { ...mocked, default: mocked };
 });
 
-const { useFindMaintenanceWindows: useFindMaintenanceWindowsMock } = await vi.importMock(
-  '../hooks/use_find_maintenance_windows'
-);
+const useFindMaintenanceWindowsMock = vi.mocked(useFindMaintenanceWindows);
 
 const platinumLicense = licensingMock.createLicense({
   license: { type: 'platinum' },

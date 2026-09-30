@@ -72,25 +72,25 @@ describe('config schema', () => {
     expect(() =>
       ConfigSchema.validate({ encryptionKey: 'foo' })
     ).toThrowErrorMatchingInlineSnapshot(
-      `"[encryptionKey]: value has length [3] but it must have a minimum length of [32]."`
+      `[Error: [encryptionKey]: value has length [3] but it must have a minimum length of [32].]`
     );
 
     expect(() =>
       ConfigSchema.validate({ encryptionKey: 'foo' }, { dist: true })
     ).toThrowErrorMatchingInlineSnapshot(
-      `"[encryptionKey]: value has length [3] but it must have a minimum length of [32]."`
+      `[Error: [encryptionKey]: value has length [3] but it must have a minimum length of [32].]`
     );
   });
 
   it('should not allow `null` value for the encryption key', () => {
     expect(() => ConfigSchema.validate({ encryptionKey: null })).toThrowErrorMatchingInlineSnapshot(
-      `"[encryptionKey]: expected value of type [string] but got [null]"`
+      `[Error: [encryptionKey]: expected value of type [string] but got [null]]`
     );
 
     expect(() =>
       ConfigSchema.validate({ encryptionKey: null }, { dist: true })
     ).toThrowErrorMatchingInlineSnapshot(
-      `"[encryptionKey]: expected value of type [string] but got [null]"`
+      `[Error: [encryptionKey]: expected value of type [string] but got [null]]`
     );
   });
 
@@ -100,7 +100,7 @@ describe('config schema', () => {
         keyRotation: { decryptionOnlyKeys: ['a'.repeat(32), 'b'.repeat(31)] },
       })
     ).toThrowErrorMatchingInlineSnapshot(
-      `"[keyRotation.decryptionOnlyKeys.1]: value has length [31] but it must have a minimum length of [32]."`
+      `[Error: [keyRotation.decryptionOnlyKeys.1]: value has length [31] but it must have a minimum length of [32].]`
     );
 
     expect(() =>
@@ -109,7 +109,7 @@ describe('config schema', () => {
         { dist: true }
       )
     ).toThrowErrorMatchingInlineSnapshot(
-      `"[keyRotation.decryptionOnlyKeys.1]: value has length [31] but it must have a minimum length of [32]."`
+      `[Error: [keyRotation.decryptionOnlyKeys.1]: value has length [31] but it must have a minimum length of [32].]`
     );
   });
 
@@ -120,7 +120,7 @@ describe('config schema', () => {
         keyRotation: { decryptionOnlyKeys: ['a'.repeat(32)] },
       })
     ).toThrowErrorMatchingInlineSnapshot(
-      `"\`keyRotation.decryptionOnlyKeys\` cannot contain primary encryption key specified in \`encryptionKey\`."`
+      `[Error: \`keyRotation.decryptionOnlyKeys\` cannot contain primary encryption key specified in \`encryptionKey\`.]`
     );
 
     expect(() =>
@@ -132,7 +132,7 @@ describe('config schema', () => {
         { dist: true }
       )
     ).toThrowErrorMatchingInlineSnapshot(
-      `"\`keyRotation.decryptionOnlyKeys\` cannot contain primary encryption key specified in \`encryptionKey\`."`
+      `[Error: \`keyRotation.decryptionOnlyKeys\` cannot contain primary encryption key specified in \`encryptionKey\`.]`
     );
   });
 });

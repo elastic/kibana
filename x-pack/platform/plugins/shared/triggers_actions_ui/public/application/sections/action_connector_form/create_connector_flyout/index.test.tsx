@@ -18,6 +18,7 @@ import type { AppMockRenderer } from '../../test_utils';
 import { createAppMockRenderer } from '../../test_utils';
 import { TECH_PREVIEW_LABEL } from '../../translations';
 import { AgentBuilderConnectorFeatureId } from '@kbn/actions-plugin/common';
+import { loadActionTypes as loadActionTypesFn } from '../../../lib/action_connector_api';
 
 vi.mock('../../../lib/action_connector_api', async () => {
   const mocked = {
@@ -41,7 +42,7 @@ vi.mock('@kbn/connector-specs', async () => {
   };
 });
 
-const { loadActionTypes } = await vi.importMock('../../../lib/action_connector_api');
+const loadActionTypes = loadActionTypesFn as Mock;
 
 const createConnectorResponse = {
   connector_type_id: 'test',

@@ -6,6 +6,7 @@
  */
 
 import { vi } from 'vitest';
+import type { Mock } from 'vitest';
 
 import React from 'react';
 
@@ -15,6 +16,7 @@ import { waitFor, screen } from '@testing-library/react';
 import CreateConnectorFlyout from '.';
 import type { AppMockRenderer } from '../../test_utils';
 import { createAppMockRenderer } from '../../test_utils';
+import { loadActionTypes as loadActionTypesFn } from '../../../lib/action_connector_api';
 
 vi.mock('../../../lib/action_connector_api', async () => {
   const mocked = {
@@ -25,7 +27,7 @@ vi.mock('../../../lib/action_connector_api', async () => {
   return { ...mocked, default: mocked };
 });
 
-const { loadActionTypes } = await vi.importMock('../../../lib/action_connector_api');
+const loadActionTypes = loadActionTypesFn as Mock;
 
 describe('spec connector with API fetch', () => {
   let appMockRenderer: AppMockRenderer;

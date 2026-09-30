@@ -40,7 +40,8 @@ vi.mock('../../../../common/hooks/use_experimental_features');
 vi.mock('../../../../management/hooks/artifacts/use_endpoint_per_policy_opt_in');
 vi.mock('react', () => {
   const r = require('react');
-  return { ...r, useReducer: vi.fn() };
+  const mocked = { ...r, useReducer: vi.fn() };
+  return { ...mocked, default: mocked };
 });
 
 const mockUseIsExperimentalFeatureEnabled = useIsExperimentalFeatureEnabled as Mock;

@@ -7,5 +7,3 @@ exports[`buildCombinedKqlQuery > should generate correct es query for no selecte
 exports[`buildCombinedKqlQuery > should generate correct es query for selected groups, no kql 1`] = `"(slo.tags:\\"production\\" or slo.tags:\\"dev\\")"`;
 
 exports[`buildCombinedKqlQuery > should generate correct es query for selected groups, with kql 1`] = `"(slo.tags:\\"production\\" or slo.tags:\\"dev\\") and status:\\"VIOLATED\\""`;
-
-

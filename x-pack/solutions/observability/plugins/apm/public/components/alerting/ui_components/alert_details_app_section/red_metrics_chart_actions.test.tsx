@@ -6,6 +6,7 @@
  */
 
 import { vi } from 'vitest';
+import type { Mock } from 'vitest';
 
 import React from 'react';
 import { render, fireEvent } from '@testing-library/react';
@@ -16,6 +17,8 @@ import { DISCOVER_APP_LOCATOR } from '@kbn/deeplinks-analytics';
 import { APM_APP_LOCATOR_ID } from '../../../../locator/service_detail_locator';
 import { SERVICE_NAME, TRANSACTION_TYPE } from '@kbn/apm-types';
 import { ML_ANOMALY_SEVERITY } from '@kbn/ml-anomaly-utils/anomaly_severity';
+import { useKibana as useKibanaFn } from '@kbn/kibana-react-plugin/public';
+import { useFetcher as useFetcherFn } from '../../../../hooks/use_fetcher';
 
 vi.mock('@kbn/kibana-react-plugin/public', async () => {
   const mocked = {
@@ -27,8 +30,8 @@ vi.mock('@kbn/kibana-react-plugin/public', async () => {
 
 vi.mock('../../../../hooks/use_fetcher');
 
-const { useKibana } = await vi.importMock('@kbn/kibana-react-plugin/public');
-const { useFetcher } = await vi.importMock('../../../../hooks/use_fetcher');
+const useKibana = useKibanaFn as Mock;
+const useFetcher = useFetcherFn as Mock;
 
 const MOCK_TRACES_INDEX = 'traces-apm-*';
 const MOCK_ERROR_INDEX = 'logs-apm.error-*';

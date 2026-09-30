@@ -6,7 +6,7 @@
  */
 
 import { vi } from 'vitest';
-import type { Mocked } from 'vitest';
+import type { Mock, Mocked } from 'vitest';
 
 import * as React from 'react';
 import { screen } from '@testing-library/react';
@@ -18,6 +18,7 @@ import { coreMock } from '@kbn/core/public/mocks';
 import type { AppMockRenderer } from '../test_utils';
 import { createAppMockRenderer } from '../test_utils';
 import { createMockConnectorType } from '@kbn/actions-plugin/server/application/connector/mocks';
+import { loadActionTypes as loadActionTypesFn } from '../../lib/action_connector_api';
 
 vi.mock('../../../common/lib/kibana');
 vi.mock('../../lib/action_connector_api', async () => {
@@ -28,7 +29,7 @@ vi.mock('../../lib/action_connector_api', async () => {
   return { ...mocked, default: mocked };
 });
 
-const { loadActionTypes } = await vi.importMock('../../lib/action_connector_api');
+const loadActionTypes = loadActionTypesFn as Mock;
 const actionTypeRegistry = actionTypeRegistryMock.create();
 const useKibanaMock = useKibana as Mocked<typeof useKibana>;
 

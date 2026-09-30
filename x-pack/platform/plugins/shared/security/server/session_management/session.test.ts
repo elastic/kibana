@@ -30,6 +30,18 @@ import { userSessionConcurrentLimitLogoutEvent } from '../audit';
 import { auditLoggerMock, auditServiceMock } from '../audit/mocks';
 import { ConfigSchema, createConfig } from '../config';
 
+// `session.ts` binds `randomBytes` as an ESM named import, which `vi.spyOn(crypto, 'randomBytes')`
+// can't reach. Delegate at call time so the spy on the CommonJS export (also used by
+// `@elastic/node-crypto`) drives both.
+vi.mock('crypto', async (importOriginal) => {
+  const actual = await importOriginal<typeof crypto & { default: typeof crypto }>();
+  return {
+    ...actual,
+    randomBytes: (...args: Parameters<typeof actual.randomBytes>) =>
+      actual.default.randomBytes(...args),
+  };
+});
+
 describe('Session', () => {
   const now = 123456;
   const mockEncryptionKey = 'a'.repeat(32);

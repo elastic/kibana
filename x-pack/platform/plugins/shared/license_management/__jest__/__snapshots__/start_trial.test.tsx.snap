@@ -299,5 +299,3 @@ exports[`StartTrial component when trial is allowed > should display for gold li
   </div>
 </DocumentFragment>
 `;
-
-

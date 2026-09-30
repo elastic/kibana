@@ -19,7 +19,6 @@ vi.mock('../common/lib/kibana');
 
 describe('useGetCaseConnectors', () => {
   const caseId = 'test-id';
-  const abortCtrl = new AbortController();
   const addSuccess = vi.fn();
   (useToasts as Mock).mockReturnValue({ addSuccess, addError: vi.fn() });
 
@@ -37,7 +36,7 @@ describe('useGetCaseConnectors', () => {
       expect(spyOnGetCases).toHaveBeenCalled();
     });
 
-    expect(spyOnGetCases).toHaveBeenCalledWith('test-id', abortCtrl.signal);
+    expect(spyOnGetCases).toHaveBeenCalledWith('test-id', expect.any(AbortSignal));
   });
 
   it('shows a toast error message when an error occurs in the response', async () => {

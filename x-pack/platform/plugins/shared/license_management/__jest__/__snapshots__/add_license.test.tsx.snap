@@ -101,5 +101,3 @@ exports[`AddLicense component when license is expired > should display with corr
   </div>
 </DocumentFragment>
 `;
-
-

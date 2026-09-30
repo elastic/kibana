@@ -76,7 +76,7 @@ describe('useAlertPrevalenceFromProcessTree', () => {
     );
 
     expect(useQuery).toHaveBeenCalledWith(
-      ['getAlertPrevalenceFromProcessTree', null, 'index'],
+      ['getAlertPrevalenceFromProcessTree', null, 'index', undefined, undefined],
       expect.any(Function),
       expect.objectContaining({ enabled: false })
     );

@@ -111,6 +111,7 @@ describe('EditConnector ', () => {
     await user.click(screen.getByTestId('dropdown-connector-resilient-2'));
 
     expect(screen.getByTestId('edit-connectors-submit')).toBeInTheDocument();
+    expect(await screen.findByTestId('connector-fields-resilient')).toBeInTheDocument();
 
     await user.click(screen.getByTestId('edit-connectors-submit'));
 

@@ -110,5 +110,3 @@ exports[`CleanUpTempSummary > deletes the duplicated temp documents 1`] = `
   ],
 }
 `;
-
-

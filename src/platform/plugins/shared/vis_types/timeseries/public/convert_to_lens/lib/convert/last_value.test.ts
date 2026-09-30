@@ -37,7 +37,7 @@ describe('convertToLastValueParams', () => {
       expect(convertToLastValueParams(...input)).toBeNull();
     }
     if (Array.isArray(expected)) {
-      expect(convertToLastValueParams(...input)).toEqual(expected.map(expect.objectContaining));
+      expect(convertToLastValueParams(...input)).toEqual(expected.map((item) => expect.objectContaining(item)));
     } else {
       expect(convertToLastValueParams(...input)).toEqual(expect.objectContaining(expected));
     }
@@ -95,7 +95,7 @@ describe('convertToLastValueColumn', () => {
     if (expected === null) {
       expect(convertToLastValueColumn(...input)).toBeNull();
     } else if (Array.isArray(expected)) {
-      expect(convertToLastValueColumn(...input)).toEqual(expected.map(expect.objectContaining));
+      expect(convertToLastValueColumn(...input)).toEqual(expected.map((item) => expect.objectContaining(item)));
     } else {
       expect(convertToLastValueColumn(...input)).toEqual(expect.objectContaining(expected));
     }

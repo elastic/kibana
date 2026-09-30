@@ -655,9 +655,9 @@ describe('MaintenanceWindowClient - update', () => {
         },
       });
     }).rejects.toThrowErrorMatchingInlineSnapshot(`
-      "Error validating update maintenance window data - invalid scope - Expected \\"(\\", \\"{\\", value, whitespace but end of input found.
+      [Error: Error validating update maintenance window data - invalid scope - Expected "(", "{", value, whitespace but end of input found.
       invalid: 
-      ---------^"
+      ---------^]
     `);
   });
 
@@ -781,12 +781,12 @@ describe('MaintenanceWindowClient - update', () => {
         },
       });
     }).rejects.toThrowErrorMatchingInlineSnapshot(`
-      "Error validating update maintenance window data - [data.categoryIds]: types that failed validation:
+      [Error: Error validating update maintenance window data - [data.categoryIds]: types that failed validation:
       - [data.categoryIds.0.0]: types that failed validation:
        - [data.categoryIds.0.0]: expected value to equal [observability]
        - [data.categoryIds.0.1]: expected value to equal [securitySolution]
        - [data.categoryIds.0.2]: expected value to equal [management]
-      - [data.categoryIds.1]: expected value to equal [null]"
+      - [data.categoryIds.1]: expected value to equal [null]]
     `);
   });
 });

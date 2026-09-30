@@ -5,9 +5,6 @@
  * 2.0.
  */
 
-import type { Mock } from 'vitest';
-import { vi } from 'vitest';
-
 /**
  * Combine all shared mock values/actions into a single obj
  *
@@ -19,6 +16,10 @@ import { mockHttpValues } from './http_logic.mock';
 import { mockKibanaValues } from './kibana_logic.mock';
 import { mockLicensingValues } from './licensing_logic.mock';
 import { mockTelemetryActions } from './telemetry_logic.mock';
+
+import { useValues, useActions } from 'kea';
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
 
 export const mockAllValues = {
   ...mockKibanaValues,
@@ -58,8 +59,6 @@ vi.mock('kea', async (importOriginal) => ({
  *   shallow(<SomeComponent />);
  * });
  */
-import { useValues, useActions } from 'kea';
-
 export const setMockValues = (values: object) => {
   (useValues as Mock).mockImplementation(() => ({ ...mockAllValues, ...values }));
 };

@@ -19,7 +19,6 @@ import type { Props as MappingsEditorProps } from '../../../mappings_editor';
 
 export const kibanaVersion = new SemVer(MAJOR_VERSION);
 
-jest.mock('@kbn/code-editor');
 
 const { GlobalFlyoutProvider } = GlobalFlyout;
 

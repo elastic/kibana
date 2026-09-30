@@ -224,5 +224,3 @@ exports[`RevertToBasic component > should display when trial is active 1`] = `
   </div>
 </DocumentFragment>
 `;
-
-

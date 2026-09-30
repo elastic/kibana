@@ -24,7 +24,7 @@ import type { AttackDiscoveryFindResponse } from '@kbn/elastic-assistant-common'
 import { useFindAttackDiscoveries, useInvalidateFindAttackDiscoveries } from '.';
 import { ERROR_FINDING_ATTACK_DISCOVERIES } from './translations';
 
-const mockAddError = vi.fn();
+const mockAddError = vi.hoisted(() => vi.fn());
 const useQueryClientMock = useQueryClient as unknown as MockedFunction<typeof useQueryClient>;
 
 vi.mock('../../../common/hooks/use_app_toasts', () => {

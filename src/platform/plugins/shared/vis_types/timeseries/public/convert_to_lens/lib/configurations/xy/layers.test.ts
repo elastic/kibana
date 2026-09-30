@@ -603,7 +603,7 @@ describe('getLayers', () => {
     ],
   ])('should return %s', async (_, input, expected) => {
     const layers = await getLayers(...input);
-    expect(layers).toEqual(expected.map(expect.objectContaining));
+    expect(layers).toEqual(expected.map((item) => expect.objectContaining(item)));
   });
 
   test('should return multiple annotations with different data views create separate layers', async () => {
@@ -716,7 +716,7 @@ describe('getLayers', () => {
           ],
           indexPatternId: 'test',
         },
-      ].map(expect.objectContaining)
+      ].map((item) => expect.objectContaining(item))
     );
     expect(mockExtractOrGenerateDatasourceInfo).toHaveBeenCalledTimes(3);
   });
@@ -777,7 +777,7 @@ describe('getLayers', () => {
           ],
           indexPatternId: 'default',
         },
-      ].map(expect.objectContaining)
+      ].map((item) => expect.objectContaining(item))
     );
     expect(mockExtractOrGenerateDatasourceInfo).toHaveBeenCalledTimes(1);
   });

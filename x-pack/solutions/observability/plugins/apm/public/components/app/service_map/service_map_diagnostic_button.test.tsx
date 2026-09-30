@@ -6,11 +6,13 @@
  */
 
 import { vi } from 'vitest';
+import type { Mock } from 'vitest';
 
 import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { enableDiagnosticMode } from '@kbn/observability-plugin/common';
 import { ServiceMapDiagnosticButton } from './service_map_diagnostic_button';
+import { useApmPluginContext } from '../../../context/apm_plugin/use_apm_plugin_context';
 
 vi.mock('../../../context/apm_plugin/use_apm_plugin_context');
 vi.mock('./diagnostic_tool/diagnostic_flyout', () => {
@@ -29,9 +31,7 @@ vi.mock('@xyflow/react', () => {
   return { ...mocked, default: mocked };
 });
 
-const mockUseApmPluginContext = (
-  await vi.importMock('../../../context/apm_plugin/use_apm_plugin_context')
-).useApmPluginContext;
+const mockUseApmPluginContext = useApmPluginContext as Mock;
 
 function buildContext(enabled: boolean | undefined) {
   return {

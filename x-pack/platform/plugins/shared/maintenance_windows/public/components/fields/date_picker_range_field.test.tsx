@@ -19,14 +19,12 @@ import type { AppMockRenderer } from '../../lib/test_utils';
 import { createAppMockRenderer } from '../../lib/test_utils';
 import type { FormProps } from '../schema';
 import { DatePickerRangeField } from './date_picker_range_field';
+import { useUiSetting } from '../../utils/kibana_react';
+import { getSelectedForDatePicker } from '../../helpers/get_selected_for_date_picker';
 
 vi.mock('../../utils/kibana_react');
 vi.mock('../../helpers/get_selected_for_date_picker');
 
-const { useUiSetting } = await vi.importMock('../../utils/kibana_react');
-const { getSelectedForDatePicker } = await vi.importMock(
-  '../../helpers/get_selected_for_date_picker'
-);
 
 describe('DatePickerRangeField', () => {
   let appMockRenderer: AppMockRenderer;
@@ -55,8 +53,8 @@ describe('DatePickerRangeField', () => {
     const endDate = '2023-03-26T07:31:00.000Z';
 
     // some random format
-    useUiSetting.mockReturnValue('YYYY.MM.DD, h:mm:ss');
-    getSelectedForDatePicker
+    vi.mocked(useUiSetting).mockReturnValue('YYYY.MM.DD, h:mm:ss');
+    vi.mocked(getSelectedForDatePicker)
       .mockReturnValueOnce({ selected: moment(startDate), utcOffset: 0 })
       .mockReturnValueOnce({ selected: moment(endDate), utcOffset: 0 });
 

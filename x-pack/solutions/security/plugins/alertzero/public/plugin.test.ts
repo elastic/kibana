@@ -201,7 +201,7 @@ describe('AlertZeroPublicPlugin attachment UI registration', () => {
 
   it('registers the Hunt Watch attachment types', async () => {
     const { attachments } = startPlugin();
-    await flushRegistration();
+    await vi.waitFor(() => expect(attachments.addAttachmentType).toHaveBeenCalled());
 
     expect(attachments.addAttachmentType).toHaveBeenCalledTimes(1);
     expect(attachments.addAttachmentType.mock.calls.map(([type]) => type).sort()).toEqual([
@@ -218,7 +218,7 @@ describe('AlertZeroPublicPlugin attachment UI registration', () => {
     } as unknown as SharePluginStart;
 
     const { attachments } = startPlugin({ basePath: '/s/soc', share });
-    await flushRegistration();
+    await vi.waitFor(() => expect(attachments.addAttachmentType).toHaveBeenCalled());
 
     const [, threatDefinition] =
       attachments.addAttachmentType.mock.calls.find(([type]) => type === 'security.threat') ?? [];

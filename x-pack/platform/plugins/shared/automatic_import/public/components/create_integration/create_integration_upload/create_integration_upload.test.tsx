@@ -58,9 +58,9 @@ vi.mock('../../../common/hooks/use_kibana', () => {
   return { ...mocked, default: mocked };
 });
 
-vi.mock('react-use/lib/useObservable', () =>
-  vi.fn(() => ({ isAvailable: true, isActive: true, hasAtLeast: () => true }))
-);
+vi.mock('react-use/lib/useObservable', () => ({
+  default: vi.fn(() => ({ isAvailable: true, isActive: true, hasAtLeast: () => true })),
+}));
 
 vi.mock('../../telemetry_context', () => {
   const mocked = {

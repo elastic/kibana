@@ -186,7 +186,7 @@ describe('Class Report', () => {
     report._index = null;
 
     expect(() => report.updateWithEsDoc(report)).toThrowErrorMatchingInlineSnapshot(
-      `"Report object from ES has missing fields!"`
+      `[Error: Report object from ES has missing fields!]`
     );
   });
 });

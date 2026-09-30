@@ -64,7 +64,7 @@ describe('convertToFiltersParams', () => {
     if (expected === null) {
       expect(convertToFiltersParams(...input)).toBeNull();
     } else if (Array.isArray(expected)) {
-      expect(convertToFiltersParams(...input)).toEqual(expected.map(expect.objectContaining));
+      expect(convertToFiltersParams(...input)).toEqual(expected.map((item) => expect.objectContaining(item)));
     } else {
       expect(convertToFiltersParams(...input)).toEqual(expect.objectContaining(expected));
     }
@@ -121,7 +121,7 @@ describe('convertToFiltersColumn', () => {
     if (expected === null) {
       expect(convertToFiltersColumn(...input)).toBeNull();
     } else if (Array.isArray(expected)) {
-      expect(convertToFiltersColumn(...input)).toEqual(expected.map(expect.objectContaining));
+      expect(convertToFiltersColumn(...input)).toEqual(expected.map((item) => expect.objectContaining(item)));
     } else {
       expect(convertToFiltersColumn(...input)).toEqual(expect.objectContaining(expected));
     }

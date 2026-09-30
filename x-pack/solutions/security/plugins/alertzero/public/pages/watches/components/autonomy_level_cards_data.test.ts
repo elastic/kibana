@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import {
   SYSTEM_SECURITY_WORKER_FLOOR_ALERT_TRIAGE_ID,
   SYSTEM_SECURITY_WORKER_FLOOR_ATTACK_DISCOVERY_ID,
@@ -22,24 +24,20 @@ const AD_WORKER_ID = SYSTEM_SECURITY_WORKER_FLOOR_ATTACK_DISCOVERY_ID;
 
 /**
  * The card copy is resolved from messages when the module is first imported, so a catalog has to be
- * in place before that import — hence the isolated require rather than a top-level one.
+ * in place before that import — hence the fresh dynamic import rather than a top-level one.
  *
- * `jest.isolateModules` sandboxes every module required *inside* its callback into a fresh
- * registry, so `./autonomy_level_cards_data` and the `@kbn/i18n` it imports are both distinct
- * instances from the ones already loaded at the top of this file. Initialising the outer `i18n`
- * import has no effect on that sandboxed instance — the override has to be set on the `i18n`
- * required from inside the same callback.
+ * `vi.resetModules()` clears the module registry, so `./autonomy_level_cards_data` and the
+ * `@kbn/i18n` it imports are both re-imported as distinct instances from the ones already loaded at
+ * the top of this file. Initialising the outer `i18n` import has no effect on that fresh instance —
+ * the override has to be set on the `i18n` imported after the reset.
  */
-const loadCardsWithCatalog = (messages: Record<string, string>): AutonomyLevelCardsCopy | null => {
-  let cards: AutonomyLevelCardsCopy | null = null;
-  jest.isolateModules(async () => {
-    // eslint-disable-next-line @typescript-eslint/no-var-requires
-    const { i18n: isolatedI18n } = await import('@kbn/i18n');
-    isolatedI18n.init({ locale: 'xx', messages });
-    // eslint-disable-next-line @typescript-eslint/no-var-requires
-    cards = (await import('./autonomy_level_cards_data')).getAutonomyLevelCards(AD_WORKER_ID);
-  });
-  return cards;
+const loadCardsWithCatalog = async (
+  messages: Record<string, string>
+): Promise<AutonomyLevelCardsCopy | null> => {
+  vi.resetModules();
+  const { i18n: isolatedI18n } = await import('@kbn/i18n');
+  isolatedI18n.init({ locale: 'xx', messages });
+  return (await import('./autonomy_level_cards_data')).getAutonomyLevelCards(AD_WORKER_ID);
 };
 
 const factValueOf = (workerId: string, level: string, label: string): string | undefined =>
@@ -48,10 +46,10 @@ const factValueOf = (workerId: string, level: string, label: string): string | u
     ?.facts.find((fact) => fact.label === label)?.value;
 
 describe('autonomy level card copy', () => {
-  it('reads every fact value from the message catalog, so the copy is localizable', () => {
+  it('reads every fact value from the message catalog, so the copy is localizable', async () => {
     const id =
       'xpack.alertzero.watches.settings.autonomyCards.attackDiscovery.manual.incidentsValue';
-    const cards = loadCardsWithCatalog({ [id]: '<worker> escalate themselves' });
+    const cards = await loadCardsWithCatalog({ [id]: '<worker> escalate themselves' });
     const value = cards?.levels.find((card) => card.level === 'manual')?.facts[0].value;
 
     expect(value).toBe('<worker> escalate themselves');

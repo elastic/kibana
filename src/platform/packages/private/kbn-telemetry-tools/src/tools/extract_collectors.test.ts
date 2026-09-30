@@ -13,7 +13,8 @@ import { extractCollectors, getProgramPaths } from './extract_collectors';
 import { parseTelemetryRC } from './config';
 import { allExtractedCollectors } from './__fixture__/all_extracted_collectors';
 
-describe('extractCollectors', () => {
+// Building a TS program for the repo tsconfig takes several seconds; Jest never timed out sync tests.
+describe('extractCollectors', { timeout: 60_000 }, () => {
   it('extracts collectors given rc file', async () => {
     const configRoot = path.resolve(__dirname, '__fixture__', 'telemetry_collectors');
     const tsConfig = ts.findConfigFile('./', ts.sys.fileExists, 'tsconfig.json');

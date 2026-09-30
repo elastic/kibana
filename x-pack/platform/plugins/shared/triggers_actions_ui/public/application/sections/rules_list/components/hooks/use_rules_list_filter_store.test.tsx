@@ -9,11 +9,13 @@ import { vi } from 'vitest';
 import type { Mock } from 'vitest';
 
 import { renderHook, act } from '@testing-library/react';
-import * as useLocalStorage from 'react-use/lib/useLocalStorage';
+import useLocalStorageImport from 'react-use/lib/useLocalStorage';
 import { createKbnUrlStateStorage as createKbnUrlStateStorageImport } from '@kbn/kibana-utils-plugin/public';
 import { useRulesListFilterStore } from './use_rules_list_filter_store';
 
 vi.mock('@kbn/kibana-utils-plugin/public');
+vi.mock('react-use/lib/useLocalStorage', () => ({ default: vi.fn() }));
+const useLocalStorage = useLocalStorageImport as unknown as Mock;
 const createKbnUrlStateStorage = createKbnUrlStateStorageImport as unknown as Mock;
 
 const useUrlStateStorageGetMock = vi.fn();
@@ -29,7 +31,7 @@ describe('useRulesListFilterStore', () => {
   });
 
   beforeEach(() => {
-    vi.spyOn(useLocalStorage, 'default').mockImplementation(() => [
+    useLocalStorage.mockImplementation(() => [
       null,
       setRulesListFilterLocalMock,
       () => {},
@@ -90,7 +92,7 @@ describe('useRulesListFilterStore', () => {
   });
 
   it('Should return the local storage params as filter when url query param is empty', () => {
-    vi.spyOn(useLocalStorage, 'default').mockImplementation(() => [
+    useLocalStorage.mockImplementation(() => [
       {
         actionTypes: ['localStorage-actionType-filter'],
         lastResponse: ['localStorage-lastResponse-filter'],
@@ -132,7 +134,7 @@ describe('useRulesListFilterStore', () => {
   });
 
   it('Should return the url params as filter when url query param is empty', () => {
-    vi.spyOn(useLocalStorage, 'default').mockImplementation(() => [
+    useLocalStorage.mockImplementation(() => [
       {
         actionTypes: ['localStorage-actionType-filter'],
         lastResponse: ['localStorage-lastResponse-filter'],

@@ -186,7 +186,7 @@ describe('Vislib Split Function Test Suite', function () {
         newEl.select('.visAxis__splitTitles--x').call(chartTitleSplit);
         newEl.select('.visAxis__splitTitles--y').call(chartTitleSplit);
 
-        fixture = newEl.selectAll(this.childNodes)[0].length;
+        fixture = newEl.selectAll('.chart-title')[0].length;
       });
 
       afterEach(function () {

@@ -195,5 +195,3 @@ exports[`LicenseStatus component > should display normally when license is activ
   />
 </DocumentFragment>
 `;
-
-

@@ -33,11 +33,18 @@ import {
   timeSliderControlSchema,
 } from '@kbn/controls-schemas';
 
+const mockKibanaServices = vi.hoisted(() => ({ embeddableService: undefined as unknown }));
+vi.mock('../../../kibana_services', async (importOriginal) => ({
+  ...(await importOriginal<Record<string, unknown>>()),
+  get embeddableService() {
+    return mockKibanaServices.embeddableService;
+  },
+}));
+
 const mockGetTransforms = vi.fn();
 
-beforeAll(async () => {
-  // eslint-disable-next-line @typescript-eslint/no-var-requires
-  (await import('../../../kibana_services')).embeddableService = {
+beforeAll(() => {
+  mockKibanaServices.embeddableService = {
     getTransforms: mockGetTransforms,
   };
 

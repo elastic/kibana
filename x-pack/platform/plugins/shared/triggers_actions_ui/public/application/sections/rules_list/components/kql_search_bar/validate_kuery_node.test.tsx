@@ -134,6 +134,6 @@ describe('validateFieldsKueryNode', () => {
         astFilter,
         suggestionsAbstraction: TestSuggestionsAbstractions,
       })
-    ).toThrowErrorMatchingInlineSnapshot(`"Filter is not supported on this field \\"foo\\""`);
+    ).toThrowErrorMatchingInlineSnapshot(`[Error: Filter is not supported on this field "foo"]`);
   });
 });

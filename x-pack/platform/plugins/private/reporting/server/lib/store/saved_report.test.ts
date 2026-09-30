@@ -41,6 +41,6 @@ test('SavedReport should throw an error if report is missing ES document fields'
     });
   };
   expect(createInstance).toThrowErrorMatchingInlineSnapshot(
-    `"Report is not editable: Job [undefined/undefined] is not synced with ES!"`
+    `[Error: Report is not editable: Job [undefined/undefined] is not synced with ES!]`
   );
 });

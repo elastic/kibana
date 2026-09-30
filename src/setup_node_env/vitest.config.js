@@ -7,9 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-const { createKbnVitestConfig } = require('@kbn/test/vitest/preset');
-
-module.exports = createKbnVitestConfig({
+module.exports = require('@kbn/test/vitest/preset').createKbnVitestConfig({
   environment: 'jsdom',
   roots: ['src/setup_node_env'],
 });

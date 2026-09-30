@@ -6,6 +6,7 @@
  */
 
 import { vi } from 'vitest';
+import type { Mock } from 'vitest';
 
 import * as React from 'react';
 import { render, screen } from '@testing-library/react';
@@ -20,6 +21,8 @@ import type { MatchParams } from './actions_connectors_home';
 import ActionsConnectorsHome from './actions_connectors_home';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import userEvent from '@testing-library/user-event';
+import { loadAllActions as loadAllActionsFn, loadConnectorAuthStatus as loadConnectorAuthStatusFn } from '../../../lib/action_connector_api';
+import { hasSaveActionsCapability as hasSaveActionsCapabilityFn } from '../../../lib/capabilities';
 
 let lastActionsConnectorsListProps: Record<string, unknown> | undefined;
 
@@ -31,9 +34,8 @@ vi.mock('../../../lib/action_connector_api', () => {
   };
   return { ...mocked, default: mocked };
 });
-const { loadAllActions, loadConnectorAuthStatus } = await vi.importMock(
-  '../../../lib/action_connector_api'
-);
+const loadAllActions = loadAllActionsFn as Mock;
+const loadConnectorAuthStatus = loadConnectorAuthStatusFn as Mock;
 vi.mock('../../../../common/lib/kibana');
 vi.mock('../../../lib/capabilities', () => {
   const mocked = {
@@ -41,7 +43,7 @@ vi.mock('../../../lib/capabilities', () => {
   };
   return { ...mocked, default: mocked };
 });
-const { hasSaveActionsCapability } = await vi.importMock('../../../lib/capabilities');
+const hasSaveActionsCapability = hasSaveActionsCapabilityFn as Mock;
 vi.mock('../../../../common/get_experimental_features');
 vi.mock('../../../components/health_check', () => {
   const mocked = {
@@ -68,11 +70,13 @@ vi.mock('./actions_connectors_list', () => ({
   },
 }));
 vi.mock('./actions_connectors_event_log_list_table', () => {
-  return () => (
-    <div data-test-subj="connectorEventLogListTableComponent">
-      {'Render Connector Event log list table component'}
-    </div>
-  );
+  return {
+    default: () => (
+      <div data-test-subj="connectorEventLogListTableComponent">
+        {'Render Connector Event log list table component'}
+      </div>
+    ),
+  };
 });
 
 const queryClient = new QueryClient();

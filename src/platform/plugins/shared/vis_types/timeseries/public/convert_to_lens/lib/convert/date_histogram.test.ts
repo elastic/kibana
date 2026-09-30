@@ -55,7 +55,7 @@ describe('convertToDateHistogramParams', () => {
     if (expected === null) {
       expect(convertToDateHistogramParams(...input)).toBeNull();
     } else if (Array.isArray(expected)) {
-      expect(convertToDateHistogramParams(...input)).toEqual(expected.map(expect.objectContaining));
+      expect(convertToDateHistogramParams(...input)).toEqual(expected.map((item) => expect.objectContaining(item)));
     } else {
       expect(convertToDateHistogramParams(...input)).toEqual(expect.objectContaining(expected));
     }
@@ -122,7 +122,7 @@ describe('convertToDateHistogramColumn', () => {
     if (expected === null) {
       expect(convertToDateHistogramColumn(...input)).toBeNull();
     } else if (Array.isArray(expected)) {
-      expect(convertToDateHistogramColumn(...input)).toEqual(expected.map(expect.objectContaining));
+      expect(convertToDateHistogramColumn(...input)).toEqual(expected.map((item) => expect.objectContaining(item)));
     } else {
       expect(convertToDateHistogramColumn(...input)).toEqual(expect.objectContaining(expected));
     }

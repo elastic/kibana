@@ -20,6 +20,8 @@ import {
   SOURCE_MAP_API_KEY_PATH,
 } from './get_package_policy_decorators';
 
+import { decoratePackagePolicyWithAgentConfigAndSourceMap as decoratePackagePolicyWithAgentConfigAndSourceMapFn } from './merge_package_policy_with_apm';
+
 vi.mock('./merge_package_policy_with_apm', () => {
   const mocked = {
     decoratePackagePolicyWithAgentConfigAndSourceMap: vi.fn(({ packagePolicy }) =>
@@ -174,9 +176,8 @@ describe('onPackagePolicyCreate', () => {
 
   it('decorates an apm policy with agent configurations and source maps', async () => {
     const { coreStart, soClient, esClient, fleetPluginStart, getApmIndices } = buildMocks();
-    const { decoratePackagePolicyWithAgentConfigAndSourceMap } = await vi.importMock(
-      './merge_package_policy_with_apm'
-    );
+    const decoratePackagePolicyWithAgentConfigAndSourceMap =
+      decoratePackagePolicyWithAgentConfigAndSourceMapFn as Mock;
     const decorated = { ...newApmPackagePolicy, _decorated: true };
     decoratePackagePolicyWithAgentConfigAndSourceMap.mockResolvedValueOnce(decorated);
 

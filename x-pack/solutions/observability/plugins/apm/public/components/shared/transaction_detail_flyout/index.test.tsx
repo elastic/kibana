@@ -11,6 +11,7 @@ import React from 'react';
 import { fireEvent, render, screen } from '@testing-library/react';
 import type { CoreStart } from '@kbn/core/public';
 import { TransactionDetailFlyout } from '.';
+import { useTransactionDetailFlyoutContext } from './transaction_detail_flyout_context';
 
 vi.mock('@elastic/eui', async () => {
   const original = await vi.importActual('@elastic/eui');
@@ -42,10 +43,7 @@ vi.mock('./red_metrics', () => {
 });
 vi.mock('./trace_sample', () => {
   const mocked = {
-    TransactionDetailFlyoutTraceSample: async () => {
-      const { useTransactionDetailFlyoutContext } = await vi.importActual(
-        './transaction_detail_flyout_context'
-      );
+    TransactionDetailFlyoutTraceSample: () => {
       const { openFullTraceFlyout } = useTransactionDetailFlyoutContext();
       return (
         <button
