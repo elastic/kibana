@@ -45,6 +45,11 @@ const toAiIndexDocument = (source: StoredAiIndexDocument, docId: string): AiInde
   space: source.space ?? DEFAULT_SPACE_ID,
 });
 
+const resolveMemoryEnabled = (
+  document: Pick<AiIndexDocument, 'managed' | 'memory_enabled'>
+): boolean =>
+  document.memory_enabled !== undefined ? document.memory_enabled : document.managed !== true;
+
 const toAiIndexItem = (document: AiIndexDocument): AiIndexHttpItem => ({
   id: document.id,
   ...(document.description !== undefined && { description: document.description }),
@@ -52,7 +57,7 @@ const toAiIndexItem = (document: AiIndexDocument): AiIndexHttpItem => ({
     feedback_analysis: document.feedback_analysis,
   }),
   managed: document.managed ?? false,
-  memory_enabled: document.memory_enabled ?? true,
+  memory_enabled: resolveMemoryEnabled(document),
   dest: document.dest,
   automations: document.automations,
   sources: document.sources,
@@ -274,7 +279,11 @@ export class AiIndexService {
     await this.writeDocument(
       aiIndexId,
       spaceId,
-      { ...existing.document, feedback_analysis: feedbackAnalysis },
+      {
+        ...existing.document,
+        memory_enabled: resolveMemoryEnabled(existing.document),
+        feedback_analysis: feedbackAnalysis,
+      },
       existing
     );
 

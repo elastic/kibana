@@ -96,7 +96,11 @@ const aiIndexDocument: AiIndexDocument = {
 
 const toHttpItem = (document: AiIndexDocument) => {
   const { space: _space, ...item } = document;
-  return { ...item, memory_enabled: document.memory_enabled ?? true };
+  return {
+    ...item,
+    memory_enabled:
+      document.memory_enabled !== undefined ? document.memory_enabled : document.managed !== true,
+  };
 };
 
 const storedHit = (
@@ -773,6 +777,15 @@ describe('AiIndexService', () => {
       expect(indexArgs.document?.managed).toBe(true);
     });
 
+    it('preserves the disabled fallback for a legacy managed AI index', async () => {
+      mockStored({ ...aiIndexDocument, managed: true });
+
+      await service.setFeedbackAnalysis('customer_support', DEFAULT_SPACE, feedbackAnalysis);
+
+      const [indexArgs] = storageClient.index.mock.calls[0];
+      expect(indexArgs.document?.memory_enabled).toBe(false);
+    });
+
     it('replaces the previous block rather than merging into it', async () => {
       mockStored({
         ...aiIndexDocument,
@@ -819,11 +832,19 @@ describe('AiIndexService', () => {
       );
     });
 
-    it('defaults memory_enabled to true for legacy documents without the field', async () => {
+    it('defaults memory_enabled to true for legacy user-created documents', async () => {
       mockSearchHits(storedHit(aiIndexDocument));
 
       await expect(service.get('customer_support', DEFAULT_SPACE)).resolves.toEqual(
         expect.objectContaining({ id: 'customer_support', memory_enabled: true })
+      );
+    });
+
+    it('defaults memory_enabled to false for legacy managed documents', async () => {
+      mockSearchHits(storedHit({ ...aiIndexDocument, managed: true }));
+
+      await expect(service.get('customer_support', DEFAULT_SPACE)).resolves.toEqual(
+        expect.objectContaining({ id: 'customer_support', memory_enabled: false })
       );
     });
 
