@@ -14,7 +14,8 @@ import { RuleTemplatesApi } from '../services/rule_templates_api';
 
 /** Opens the create-rule flyout when the URL contains `templateId`. */
 export const useCreateFromTemplateQuery = (
-  openCreateFromTemplateFlyout: (template: RuleTemplateResponse) => void
+  openCreateFromTemplateFlyout: (template: RuleTemplateResponse) => void,
+  { enabled = true }: { enabled?: boolean } = {}
 ): void => {
   const location = useLocation();
   const history = useHistory();
@@ -30,7 +31,7 @@ export const useCreateFromTemplateQuery = (
   useQuery({
     queryKey: ['ruleTemplate', templateId],
     queryFn: () => ruleTemplatesApi.getRuleTemplate(templateId!),
-    enabled: Boolean(templateId),
+    enabled: enabled && Boolean(templateId),
     retry: false,
     refetchOnWindowFocus: false,
     onSuccess: (template) => {

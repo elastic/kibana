@@ -85,6 +85,23 @@ describe('useCreateFromTemplateQuery', () => {
     expect(mockAddError).not.toHaveBeenCalled();
   });
 
+  it('does not fetch a template when disabled, even if templateId is present', async () => {
+    const history = createMemoryHistory({
+      initialEntries: ['/?templateId=template-1'],
+    });
+
+    renderHook(
+      () => useCreateFromTemplateQuery(mockOpenCreateFromTemplateFlyout, { enabled: false }),
+      { wrapper: createWrapper(history) }
+    );
+
+    await waitFor(() => {
+      expect(history.location.search).toBe('?templateId=template-1');
+    });
+    expect(mockGetRuleTemplate).not.toHaveBeenCalled();
+    expect(mockOpenCreateFromTemplateFlyout).not.toHaveBeenCalled();
+  });
+
   it('does not fetch a template when templateId is absent', async () => {
     const history = createMemoryHistory({ initialEntries: ['/'] });
 
