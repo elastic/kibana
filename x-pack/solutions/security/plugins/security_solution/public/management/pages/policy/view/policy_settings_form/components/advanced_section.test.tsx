@@ -222,6 +222,68 @@ describe('Policy Advanced Settings section', () => {
     });
   });
 
+  describe('agent connection_delay', () => {
+    const connectionDelayKeys = [
+      'linux.advanced.agent.connection_delay',
+      'mac.advanced.agent.connection_delay',
+      'windows.advanced.agent.connection_delay',
+    ] as const;
+
+    const updatedPolicyFromLastChange = () =>
+      (formProps.onChange as jest.Mock).mock.calls.at(-1)[0].updatedPolicy;
+
+    const rerenderWithPolicy = (policy: AdvancedSectionProps['policy']) => {
+      formProps.policy = policy;
+      renderResult.rerender(<AdvancedSection {...formProps} />);
+    };
+
+    it('adds connection_delay only when it is set and removes it when cleared', async () => {
+      await render(true);
+
+      const initialLinuxAdvanced = formProps.policy.linux.advanced;
+      const initialMacAdvanced = formProps.policy.mac.advanced;
+      expect(initialLinuxAdvanced).toEqual({
+        capture_env_vars: 'LD_PRELOAD,LD_LIBRARY_PATH',
+      } as typeof initialLinuxAdvanced);
+      expect(initialMacAdvanced).toEqual({
+        capture_env_vars: 'DYLD_INSERT_LIBRARIES,DYLD_FRAMEWORK_PATH,DYLD_LIBRARY_PATH,LD_PRELOAD',
+      } as typeof initialMacAdvanced);
+      expect(formProps.policy.windows.advanced).toBeUndefined();
+
+      let policy = formProps.policy;
+      for (const key of connectionDelayKeys) {
+        (formProps.onChange as jest.Mock).mockClear();
+        await userEvent.click(renderResult.getByTestId(key));
+        await userEvent.paste('66');
+        policy = updatedPolicyFromLastChange();
+        rerenderWithPolicy(policy);
+      }
+
+      expect(policy.linux.advanced).toEqual({
+        ...initialLinuxAdvanced,
+        agent: { connection_delay: '66' },
+      } as typeof policy.linux.advanced);
+      expect(policy.mac.advanced).toEqual({
+        ...initialMacAdvanced,
+        agent: { connection_delay: '66' },
+      } as typeof policy.mac.advanced);
+      expect(policy.windows.advanced).toEqual({
+        agent: { connection_delay: '66' },
+      });
+
+      for (const key of connectionDelayKeys) {
+        (formProps.onChange as jest.Mock).mockClear();
+        await userEvent.clear(renderResult.getByTestId(key));
+        policy = updatedPolicyFromLastChange();
+        rerenderWithPolicy(policy);
+      }
+
+      expect(policy.linux.advanced).toEqual(initialLinuxAdvanced);
+      expect(policy.mac.advanced).toEqual(initialMacAdvanced);
+      expect(policy.windows.advanced).toBeUndefined();
+    });
+  });
+
   describe('custom YARA signatures advanced settings', () => {
     it('should hide custom YARA rescan interval options when the experimental flag is off', async () => {
       await render(true);
