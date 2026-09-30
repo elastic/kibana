@@ -38,6 +38,7 @@ export const TASK_TYPE_CATEGORY: Partial<Record<InferenceTaskType, TaskTypeCateg
   completion: 'LLM',
   text_embedding: 'Embedding',
   sparse_embedding: 'Embedding',
+  embedding: 'Embedding',
   rerank: 'Rerank',
 };
 

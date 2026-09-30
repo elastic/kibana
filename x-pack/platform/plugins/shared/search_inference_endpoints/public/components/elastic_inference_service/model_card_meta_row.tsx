@@ -36,6 +36,7 @@ export const ModelCardMetaRow = ({
       alignItems="center"
       gutterSize="s"
       responsive={false}
+      tabIndex={tooltip ? 0 : undefined}
       data-test-subj={`eisModelCardMeta-${modelName}`}
     >
       <EuiFlexItem component="span" grow={false}>
@@ -51,7 +52,6 @@ export const ModelCardMetaRow = ({
           component="span"
           size="s"
           color={textColor}
-          tabIndex={tooltip ? 0 : undefined}
           data-test-subj={`eisModelCardMetaDate-${modelName}`}
         >
           {message}
