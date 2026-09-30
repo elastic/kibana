@@ -7,13 +7,16 @@
 
 import type { InvestigationStructuredOutput } from '@kbn/nightshift-investigations-plugin/common';
 import {
+  clampDecisionTreeHelpfulnessScore,
   clampGoalScore,
   clampTruthfulnessScore,
   clampUnitScore,
   composeAnswerText,
+  composeDecisionTreesText,
   composeEvidenceText,
   extractReferenceAnswer,
   goalScorePassed,
+  normalizeDecisionTreeHelpfulnessScore,
   normalizeGoalScore,
   normalizeTruthfulnessScore,
 } from './scoring';
@@ -63,6 +66,41 @@ describe('truthfulness score helpers', () => {
     expect(clampTruthfulnessScore(3.4)).toBe(3);
     expect(clampTruthfulnessScore(4.6)).toBe(5);
     expect(clampTruthfulnessScore(NaN)).toBe(1);
+  });
+});
+
+describe('decision tree helpfulness score helpers', () => {
+  it.each([
+    [1, 0],
+    [2, 0.25],
+    [3, 0.5],
+    [4, 0.75],
+    [5, 1],
+  ])('normalizes raw helpfulness score %d to %d', (raw, expected) => {
+    expect(normalizeDecisionTreeHelpfulnessScore(raw)).toBeCloseTo(expected, 5);
+  });
+
+  it('clamps and rounds out-of-range or fractional raw scores', () => {
+    expect(clampDecisionTreeHelpfulnessScore(0)).toBe(1);
+    expect(clampDecisionTreeHelpfulnessScore(9)).toBe(5);
+    expect(clampDecisionTreeHelpfulnessScore(3.4)).toBe(3);
+    expect(clampDecisionTreeHelpfulnessScore(NaN)).toBe(1);
+  });
+});
+
+describe('composeDecisionTreesText', () => {
+  it('returns an empty string when no tree was accessed', () => {
+    expect(composeDecisionTreesText(undefined)).toBe('');
+    expect(composeDecisionTreesText([])).toBe('');
+  });
+
+  it('renders each accessed tree under its id, with a placeholder for missing content', () => {
+    const text = composeDecisionTreesText([
+      { tree_id: 'symptom:kafka-consumer-lag', content: '1. Check consumer group lag.' },
+      { tree_id: 'symptom:high-cpu', content: '' },
+    ]);
+    expect(text).toContain('### symptom:kafka-consumer-lag\n1. Check consumer group lag.');
+    expect(text).toContain('### symptom:high-cpu\n(opened, no readable content captured)');
   });
 });
 

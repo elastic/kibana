@@ -14,6 +14,7 @@ import type {
   GetInvestigationResponse,
 } from '@kbn/nightshift-investigations-plugin/common';
 import type { WorkflowExecutionDto } from '@kbn/workflows';
+import { extractAccessedDecisionTrees } from './decision_tree_evidence';
 import type { InvestigationExample, InvestigationTaskOutput } from './types';
 
 export const INVESTIGATION_TIMEOUT_MS = 20 * 60_000;
@@ -122,6 +123,13 @@ export const runInvestigation = async (
         )
         .filter(Boolean)
         .at(-1);
+      const accessedTrees = extractAccessedDecisionTrees(conversation.rounds);
+      if (accessedTrees.length > 0) {
+        output.decision_trees_accessed = accessedTrees.map(({ tree_id: treeId, content }) => ({
+          tree_id: treeId,
+          content: content.slice(0, MAX_TEXT_LENGTH),
+        }));
+      }
     } else {
       output.execution_error ??= 'Completed investigation has no conversation id';
     }

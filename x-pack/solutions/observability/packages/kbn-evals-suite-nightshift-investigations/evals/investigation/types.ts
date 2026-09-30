@@ -20,6 +20,13 @@ export const investigationExampleSchema = z.object({
 
 export type InvestigationExample = z.infer<typeof investigationExampleSchema>;
 
+/** One decision tree (symptom playbook) the investigation opened, and the content it saw. */
+export interface AccessedDecisionTree {
+  tree_id: string;
+  /** Empty when the tree was opened but no readable file content was captured. */
+  content: string;
+}
+
 export interface InvestigationTaskOutput {
   case_id: string;
   query: string;
@@ -31,4 +38,5 @@ export interface InvestigationTaskOutput {
   conversation_round_count?: number;
   traceId?: string;
   execution_error?: string;
+  decision_trees_accessed?: AccessedDecisionTree[];
 }

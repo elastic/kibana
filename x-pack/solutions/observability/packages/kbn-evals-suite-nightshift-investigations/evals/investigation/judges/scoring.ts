@@ -6,7 +6,7 @@
  */
 
 import type { InvestigationStructuredOutput } from '@kbn/nightshift-investigations-plugin/common';
-import type { InvestigationExample, InvestigationTaskOutput } from '../types';
+import type { AccessedDecisionTree, InvestigationExample, InvestigationTaskOutput } from '../types';
 
 /**
  * Deductive's goal judge scores 1-5 and treats >= 4 as a pass (see
@@ -50,6 +50,28 @@ export const clampTruthfulnessScore = (raw: number): number => {
 export const normalizeTruthfulnessScore = (raw: number): number =>
   (clampTruthfulnessScore(raw) - TRUTHFULNESS_SCORE_MIN) /
   (TRUTHFULNESS_SCORE_MAX - TRUTHFULNESS_SCORE_MIN);
+
+/**
+ * The decision-tree-helpfulness judge scores 1-5: whether the decision tree(s) (curated symptom
+ * playbooks) the agent opened actually shaped its investigation, and how. Same 1-5 -> [0, 1]
+ * normalization as the other reward-style judges above.
+ */
+export const DECISION_TREE_HELPFULNESS_SCORE_MIN = 1;
+export const DECISION_TREE_HELPFULNESS_SCORE_MAX = 5;
+
+/** Clamp a raw 1-5 decision-tree-helpfulness score into range, rounding fractional output. */
+export const clampDecisionTreeHelpfulnessScore = (raw: number): number => {
+  if (!Number.isFinite(raw)) return DECISION_TREE_HELPFULNESS_SCORE_MIN;
+  return Math.max(
+    DECISION_TREE_HELPFULNESS_SCORE_MIN,
+    Math.min(DECISION_TREE_HELPFULNESS_SCORE_MAX, Math.round(raw))
+  );
+};
+
+/** Map a raw 1-5 decision-tree-helpfulness score to a normalized value in [0, 1]. */
+export const normalizeDecisionTreeHelpfulnessScore = (raw: number): number =>
+  (clampDecisionTreeHelpfulnessScore(raw) - DECISION_TREE_HELPFULNESS_SCORE_MIN) /
+  (DECISION_TREE_HELPFULNESS_SCORE_MAX - DECISION_TREE_HELPFULNESS_SCORE_MIN);
 
 /** Clamp an already-normalized [0, 1] judge score, tolerating out-of-range model output. */
 export const clampUnitScore = (raw: number): number => {
@@ -123,6 +145,21 @@ export const composeEvidenceText = (report: InvestigationStructuredOutput | unde
   return lines.join('\n');
 };
 
+/**
+ * Render the decision tree(s) (symptom playbooks) the agent opened for the judge. A tree opened
+ * without readable content (e.g. a read that errored) still surfaces the tree id.
+ */
+export const composeDecisionTreesText = (trees: AccessedDecisionTree[] | undefined): string => {
+  if (!trees || trees.length === 0) return '';
+  return trees
+    .map(({ tree_id: treeId, content }) =>
+      content
+        ? `### ${treeId}\n${content}`
+        : `### ${treeId}\n(opened, no readable content captured)`
+    )
+    .join('\n\n');
+};
+
 /** Everything a judge needs about one investigation run, derived once and shared. */
 export interface JudgeInputs {
   question: string;
@@ -131,6 +168,8 @@ export interface JudgeInputs {
   evidence: string;
   category?: string;
   executionError?: string;
+  decisionTrees: string;
+  hasDecisionTrees: boolean;
 }
 
 export const buildJudgeInputs = (
@@ -145,4 +184,6 @@ export const buildJudgeInputs = (
   evidence: composeEvidenceText(output.structured_report),
   category: typeof metadata?.category === 'string' ? metadata.category : undefined,
   executionError: output.execution_error,
+  decisionTrees: composeDecisionTreesText(output.decision_trees_accessed),
+  hasDecisionTrees: Boolean(output.decision_trees_accessed?.length),
 });

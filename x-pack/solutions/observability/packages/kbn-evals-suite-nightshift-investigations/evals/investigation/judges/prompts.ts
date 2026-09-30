@@ -280,6 +280,111 @@ export const TruthfulnessJudgePrompt = createPrompt({
   } as const)
   .get();
 
+const DECISION_TREE_CONTRIBUTION_TYPES = [
+  'guided_root_cause',
+  'ruled_out_branch',
+  'provided_diagnostic_steps',
+  'confirmed_hypothesis',
+  'contradicted',
+  'ignored',
+] as const;
+
+const DECISION_TREE_HELPFULNESS_SYSTEM = `You are a reward-model evaluator for an AI alert-investigation system.
+Judge whether the decision tree(s) the agent opened during this investigation actually helped it,
+and how. A decision tree is a curated markdown playbook for a specific symptom, encoding prior
+on-call diagnostic knowledge: candidate root causes, the checks that distinguish between them, and
+known false-positive patterns. Opening a tree is not itself helpful — it only helped if its guidance
+is visible in the investigation's actual evidence gathering or reasoning (e.g. the agent ran a check
+the tree recommended, ruled out a branch the tree describes, or the tree's checklist shaped which
+hypothesis it pursued).
+
+## Query (context only)
+{{{question}}}
+
+## Decision tree(s) opened during the investigation
+{{{decisionTrees}}}
+
+## Scoring (1-5 scale)
+- 5 — The tree's guidance is clearly followed and decisive: a specific check, branch, or hypothesis
+  from the tree maps directly onto the evidence gathered and the stated conclusion.
+- 4 — The tree meaningfully shaped the investigation (e.g. ruled out a branch, or suggested a check
+  the agent then ran), even if it was not the sole driver of the final conclusion.
+- 3 — The tree was consulted and loosely related to what the agent did, but its specific guidance is
+  not clearly traceable in the evidence or the conclusion.
+- 2 — The tree was opened but the investigation proceeded largely independently of it; any overlap
+  looks coincidental.
+- 1 — The tree was opened but ignored, or the investigation's conclusion contradicts guidance the
+  tree gives.
+
+### Contribution type
+Pick the single best label for how the tree affected the investigation (${DECISION_TREE_CONTRIBUTION_TYPES.join(
+  ', '
+)}):
+- guided_root_cause: the tree's mapping from symptom to cause matches the stated conclusion
+- ruled_out_branch: the agent used the tree to eliminate a candidate cause
+- provided_diagnostic_steps: the agent ran a check or query the tree recommended
+- confirmed_hypothesis: the tree corroborated a hypothesis reached from other evidence
+- contradicted: the investigation's conclusion conflicts with the tree's guidance
+- ignored: the tree was opened but had no visible effect on the investigation
+
+## Output format
+Call the \`score\` tool with:
+- was_helpful: true if the tree meaningfully influenced the investigation (a score of 3+ implies true)
+- helpfulness_score: integer 1-5 per the scale above
+- contribution_type: one of the labels above
+- reasoning: 1-2 sentences citing which tree step or branch maps to which evidence or conclusion`;
+
+const DECISION_TREE_HELPFULNESS_USER = `## Investigation report (conclusion, hypotheses, recommendations)
+{{{answer}}}
+
+## Evidence gathered during the investigation
+{{{evidence}}}
+
+Judge whether the decision tree(s) above helped this investigation, then call the \`score\` tool.`;
+
+export const DecisionTreeHelpfulnessJudgePrompt = createPrompt({
+  name: 'nightshift_decision_tree_helpfulness_judge',
+  description:
+    'decision_tree_helpfulness judge: did the decision tree(s) the agent opened help the investigation, and how.',
+  input: z.object({
+    question: z.string(),
+    decisionTrees: z.string(),
+    answer: z.string(),
+    evidence: z.string(),
+  }),
+})
+  .version({
+    system: { mustache: { template: DECISION_TREE_HELPFULNESS_SYSTEM } },
+    template: { mustache: { template: DECISION_TREE_HELPFULNESS_USER } },
+    tools: {
+      score: {
+        description: 'Return whether the decision tree(s) helped, how, and the helpfulness score.',
+        schema: {
+          type: 'object',
+          properties: {
+            was_helpful: {
+              type: 'boolean',
+              description: 'True if the tree meaningfully influenced the investigation.',
+            },
+            helpfulness_score: {
+              type: 'number',
+              description:
+                'Helpfulness score on a 1-5 scale (1 = ignored/contradicted, 5 = clearly followed and decisive).',
+            },
+            contribution_type: {
+              type: 'string',
+              enum: DECISION_TREE_CONTRIBUTION_TYPES as unknown as string[],
+              description: 'How the tree affected the investigation.',
+            },
+            reasoning: { type: 'string', description: 'Concise reasoning for the score.' },
+          },
+          required: ['was_helpful', 'helpfulness_score', 'contribution_type', 'reasoning'],
+        },
+      },
+    },
+  } as const)
+  .get();
+
 const ANTI_LEAKAGE_SYSTEM = `You are a reward-model evaluator for an AI alert-investigation system.
 Your job is to decide whether ANY evidence the agent accessed LEAKS the root cause of the incident.
 

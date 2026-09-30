@@ -16,6 +16,7 @@ import type { InvestigationExample, InvestigationTaskOutput } from '../types';
 import {
   AntiLeakageJudgePrompt,
   CauseCompletenessJudgePrompt,
+  DecisionTreeHelpfulnessJudgePrompt,
   GoalPassJudgePrompt,
   TruthfulnessJudgePrompt,
 } from './prompts';
@@ -23,6 +24,7 @@ import {
   buildJudgeInputs,
   clampUnitScore,
   goalScorePassed,
+  normalizeDecisionTreeHelpfulnessScore,
   normalizeGoalScore,
   normalizeTruthfulnessScore,
 } from './scoring';
@@ -31,6 +33,7 @@ export const GOAL_PASS_EVALUATOR = 'goal_pass';
 export const CAUSE_COMPLETENESS_EVALUATOR = 'rca_cause_completeness';
 export const ANTI_LEAKAGE_EVALUATOR = 'rca_anti_leakage';
 export const TRUTHFULNESS_EVALUATOR = 'truthfulness';
+export const DECISION_TREE_HELPFULNESS_EVALUATOR = 'decision_tree_helpfulness';
 
 type InvestigationEvaluator = Evaluator<InvestigationExample, InvestigationTaskOutput>;
 
@@ -238,10 +241,60 @@ export const createTruthfulnessEvaluator = (deps: JudgeDeps): InvestigationEvalu
   },
 });
 
-/** The ported RCA judges plus truthfulness, in stable order for the investigation spec. */
+export const createDecisionTreeHelpfulnessEvaluator = (
+  deps: JudgeDeps
+): InvestigationEvaluator => ({
+  name: DECISION_TREE_HELPFULNESS_EVALUATOR,
+  kind: 'LLM',
+  direction: 'maximize',
+  getModel: getModelFactory(deps.evaluationConnector),
+  evaluate: async ({ input, output, expected, metadata }) => {
+    const judge = buildJudgeInputs(input, output, expected, metadata);
+    if (judge.executionError || !judge.answer) {
+      return {
+        score: judge.executionError ? 0 : null,
+        label: judge.executionError ? 'fail' : 'n/a',
+        explanation: judge.executionError
+          ? `Execution error before decision tree helpfulness evaluation: ${judge.executionError}`
+          : 'Investigation produced no answer to evaluate.',
+      };
+    }
+    if (!judge.hasDecisionTrees) {
+      return {
+        score: null,
+        label: 'n/a',
+        explanation: 'Investigation did not open any decision tree.',
+        metadata: { contribution_type: 'not_used' },
+      };
+    }
+    const result = await invokeJudge<{
+      was_helpful: boolean;
+      helpfulness_score: number;
+      contribution_type: string;
+      reasoning: string;
+    }>(deps, DECISION_TREE_HELPFULNESS_EVALUATOR, DecisionTreeHelpfulnessJudgePrompt, {
+      question: judge.question,
+      decisionTrees: judge.decisionTrees,
+      answer: judge.answer,
+      evidence: judge.evidence,
+    });
+    return {
+      score: normalizeDecisionTreeHelpfulnessScore(result.helpfulness_score),
+      label: result.was_helpful ? 'helpful' : 'not_helpful',
+      explanation: result.reasoning,
+      metadata: {
+        raw_score: result.helpfulness_score,
+        contribution_type: result.contribution_type,
+      },
+    };
+  },
+});
+
+/** The ported RCA judges plus truthfulness and decision-tree helpfulness, in stable order for the investigation spec. */
 export const createInvestigationJudges = (deps: JudgeDeps): InvestigationEvaluator[] => [
   createGoalPassEvaluator(deps),
   createCauseCompletenessEvaluator(deps),
   createAntiLeakageEvaluator(deps),
   createTruthfulnessEvaluator(deps),
+  createDecisionTreeHelpfulnessEvaluator(deps),
 ];

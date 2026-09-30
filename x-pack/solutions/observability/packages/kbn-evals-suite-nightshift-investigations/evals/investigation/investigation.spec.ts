@@ -15,6 +15,7 @@ import { loadInvestigationDataset } from './datasets';
 import {
   ANTI_LEAKAGE_EVALUATOR,
   CAUSE_COMPLETENESS_EVALUATOR,
+  DECISION_TREE_HELPFULNESS_EVALUATOR,
   GOAL_PASS_EVALUATOR,
   TRUTHFULNESS_EVALUATOR,
   createInvestigationJudges,
@@ -175,6 +176,7 @@ evaluate.describe('Nightshift investigations: trace-only', { tag: tags.stateful.
               CAUSE_COMPLETENESS_EVALUATOR,
               ANTI_LEAKAGE_EVALUATOR,
               TRUTHFULNESS_EVALUATOR,
+              DECISION_TREE_HELPFULNESS_EVALUATOR,
             ])
           );
           for (const exampleScore of exampleScores) {
