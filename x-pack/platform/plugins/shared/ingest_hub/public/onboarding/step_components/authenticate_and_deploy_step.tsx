@@ -124,7 +124,7 @@ export function AuthenticateAndDeployStep({ onContinue, onBack }: AuthenticateAn
 
   // ── Drift detection ───────────────────────────────────────────────────────────
   const { onboardingDeploymentId, policyIdsByInstance } = detectAndReviewStep;
-  const { authMethod, connectorId } = authenticateAndDeployStep ?? {};
+  const { connectorId } = authenticateAndDeployStep ?? {};
   const isDirty = detectAndReviewStep.isDirty ?? false;
   const { driftSettled, driftCheckError, retryDriftCheck, handleReplaceFormDirtyChange } =
     useOnboardingDriftDetection({
@@ -132,7 +132,6 @@ export function AuthenticateAndDeployStep({ onContinue, onBack }: AuthenticateAn
       policyIdsByInstance,
       awsServicesMap,
       deploymentMethod,
-      authMethod,
       connectorId,
       agentBasedDeployment: agentBasedDeploymentFromFlow,
       serviceSettings,

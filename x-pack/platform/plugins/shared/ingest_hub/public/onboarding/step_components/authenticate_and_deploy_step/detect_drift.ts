@@ -98,17 +98,14 @@ export function detectServiceVarsDrift(
 }
 
 /**
- * Returns true when the session auth method or connector differs from what was last deployed.
- * A change to either field means the deployed policy credentials are stale.
+ * Returns true when the deployed connector differs from the session connector.
+ * Auth method switching is disabled in edit mode so only a connector swap can produce auth drift.
  */
 export function detectAuthDrift(
-  session: { authMethod?: string; connectorId?: string },
-  so: { authMethod?: string | null; connectorId?: string | null }
+  session: { connectorId?: string },
+  so: { connectorId?: string | null }
 ): boolean {
-  return (
-    session.authMethod !== (so.authMethod ?? undefined) ||
-    session.connectorId !== (so.connectorId ?? undefined)
-  );
+  return session.connectorId !== (so.connectorId ?? undefined);
 }
 
 /**

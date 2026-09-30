@@ -661,6 +661,18 @@ describe('ManagedIntegrationsSection', () => {
       expect(radio.checked).toBe(true);
     });
 
+    it('disables Identity Federation radio in static-keys edit mode', () => {
+      setupMocks({ searchParams: '?deploymentId=dep-123', authMethod: 'static_keys' });
+      renderSection({ showIdentityFederation: true });
+      expect(screen.getByRole('radio', { name: /identity federation/i })).toBeDisabled();
+    });
+
+    it('Access Keys radio is not disabled in static-keys edit mode', () => {
+      setupMocks({ searchParams: '?deploymentId=dep-123', authMethod: 'static_keys' });
+      renderSection({ showIdentityFederation: true });
+      expect(screen.getByRole('radio', { name: /access keys/i })).not.toBeDisabled();
+    });
+
     it('onFieldsChange on StaticKeysReplaceView calls setStaticKeys', () => {
       const setStaticKeys = jest.fn();
       setupMocks({
@@ -705,6 +717,28 @@ describe('ManagedIntegrationsSection', () => {
       expect(onReplaceFormDirtyChange).toHaveBeenLastCalledWith(true);
       fireEvent.click(screen.getByText('replace-cancel'));
       expect(onReplaceFormDirtyChange).toHaveBeenLastCalledWith(false);
+    });
+  });
+
+  describe('identity-federation edit mode (isIfEditMode)', () => {
+    it('disables Access Keys radio when deployed with identity federation', () => {
+      setupMocks({
+        searchParams: '?deploymentId=dep-123',
+        connectorId: 'conn-abc',
+        authMethod: 'identity_federation',
+      });
+      renderSection({ showIdentityFederation: true });
+      expect(screen.getByRole('radio', { name: /access keys/i })).toBeDisabled();
+    });
+
+    it('Identity Federation radio is not disabled in IF edit mode', () => {
+      setupMocks({
+        searchParams: '?deploymentId=dep-123',
+        connectorId: 'conn-abc',
+        authMethod: 'identity_federation',
+      });
+      renderSection({ showIdentityFederation: true });
+      expect(screen.getByRole('radio', { name: /identity federation/i })).not.toBeDisabled();
     });
   });
 });

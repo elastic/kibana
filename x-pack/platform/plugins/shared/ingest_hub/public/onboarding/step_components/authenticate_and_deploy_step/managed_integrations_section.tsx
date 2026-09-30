@@ -94,7 +94,6 @@ export function ManagedIntegrationsSection({
     setStaticKeys,
     clearStagedStaticKeys,
     setPendingIacTemplate,
-    setAuthMethod,
     authenticateAndDeployStep,
   } = useOnboardingFlow();
   const { connectorId: initialConnectorId } = authenticateAndDeployStep;
@@ -118,6 +117,8 @@ export function ManagedIntegrationsSection({
   const location = useLocation();
   const isEditMode = new URLSearchParams(location.search).has('deploymentId');
   const isStaticKeysEditMode = isEditMode && authenticateAndDeployStep.authMethod === 'static_keys';
+  const isIfEditMode =
+    isEditMode && authenticateAndDeployStep.authMethod === 'identity_federation';
   const { euiTheme } = useEuiTheme();
   const contentId = useGeneratedHtmlId({ prefix: 'managedIntegrationsContent' });
   const [isOpen, setIsOpen] = useState(!isDone);
@@ -206,6 +207,7 @@ export function ManagedIntegrationsSection({
   const radioOptions = [
     {
       id: 'identity_federation',
+      disabled: isStaticKeysEditMode,
       label: i18n.translate(
         'xpack.ingestHub.authenticateAndDeployStep.managedIntegrationsSection.preferredMethod.identityFederation',
         { defaultMessage: 'Identity Federation' }
@@ -213,6 +215,7 @@ export function ManagedIntegrationsSection({
     },
     {
       id: 'access_keys',
+      disabled: isIfEditMode,
       label: i18n.translate(
         'xpack.ingestHub.authenticateAndDeployStep.managedIntegrationsSection.preferredMethod.accessKeys',
         { defaultMessage: 'Access Keys' }
@@ -332,17 +335,6 @@ export function ManagedIntegrationsSection({
                       setIsDeployReady(false);
                       if (id === 'access_keys') {
                         setConnectorId(undefined);
-                        // In edit mode, restore authMethod so drift clears and Next re-enables
-                        // if the user reverts to access_keys without deploying. Use isEditMode
-                        // rather than isStaticKeysEditMode: after switching to identity_federation,
-                        // authMethod is 'identity_federation' so isStaticKeysEditMode becomes false,
-                        // which would prevent the revert from clearing isDirty.
-                        if (isEditMode) setAuthMethod('static_keys');
-                      } else if (isStaticKeysEditMode) {
-                        // Switching to identity federation while currently deployed with static keys:
-                        // update authMethod so the drift check detects the pending auth change and
-                        // marks isDirty, blocking Next until the user selects a connector and deploys.
-                        setAuthMethod('identity_federation');
                       }
                     }}
                     data-test-subj="managedIntegrationsSection-preferredMethodRadio"
@@ -359,6 +351,7 @@ export function ManagedIntegrationsSection({
                   cloud={services.cloud}
                   iacTemplateUrl={iacTemplateUrl}
                   integrations={iacIntegrations}
+                  isEditPage={isIfEditMode}
                   onReadyChange={setIsDeployReady}
                   onConnectorIdChange={handleIdentityFedConnectorChange}
                   onIacTemplateRecorded={handleIacTemplateRecorded}

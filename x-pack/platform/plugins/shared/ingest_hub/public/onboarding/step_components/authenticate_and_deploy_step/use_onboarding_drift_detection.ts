@@ -8,21 +8,20 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { sendGetCloudOnboardingDeployment } from '@kbn/fleet-plugin/public';
 
-import type { AwsServiceMatrixEntry } from '../../aws_service_matrix';
-import type { DetectAndReviewStepState } from '../../onboarding_flow_context';
-import type { ServiceSettingsPersistedState } from '../service_settings_step/use_service_settings';
-import { detectServiceVarsDrift, detectAuthDrift, detectAgentPoliciesDrift } from './detect_drift';
 import {
   toSOAuthMethod,
   type AgentCredentialMethod,
 } from './agent_based_section/credential_method_selector';
+import type { AwsServiceMatrixEntry } from '../../aws_service_matrix';
+import type { DetectAndReviewStepState } from '../../onboarding_flow_context';
+import type { ServiceSettingsPersistedState } from '../service_settings_step/use_service_settings';
+import { detectServiceVarsDrift, detectAuthDrift, detectAgentPoliciesDrift } from './detect_drift';
 
 interface UseOnboardingDriftDetectionParams {
   onboardingDeploymentId: string | undefined;
   policyIdsByInstance: Record<string, string> | null | undefined;
   awsServicesMap: Map<string, AwsServiceMatrixEntry> | undefined;
   deploymentMethod: string;
-  authMethod: string | undefined;
   connectorId: string | undefined;
   agentBasedDeployment: {
     agentCredentialMethod: AgentCredentialMethod | undefined;
@@ -47,7 +46,6 @@ export function useOnboardingDriftDetection({
   policyIdsByInstance,
   awsServicesMap,
   deploymentMethod,
-  authMethod,
   connectorId,
   agentBasedDeployment,
   serviceSettings,
@@ -109,21 +107,13 @@ export function useOnboardingDriftDetection({
           awsServicesMap,
           deployedInstanceIds
         );
-        // Agent-based: use agentCredentialMethod (canonical UI state) so an unchanged return
-        // to Step 3 doesn't falsely report auth drift (authMethod not written to session).
-        const sessionAuthMethod =
+        // Agent-based: compare credential method (instance_profile / access_keys / etc.) against
+        // the SO authMethod. MI auth method is locked in edit mode so only connector drift applies.
+        const authDirty =
           deploymentMethod === 'agent_based'
-            ? toSOAuthMethod(agentBasedDeployment.agentCredentialMethod)
-            : authMethod;
-        const authDirty = detectAuthDrift(
-          // Agent-based never uses a connector; exclude connectorId so a stale value retained
-          // from a prior MI selection doesn't trigger false drift on every agent-based return.
-          {
-            authMethod: sessionAuthMethod,
-            connectorId: deploymentMethod === 'agent_based' ? undefined : connectorId,
-          },
-          { authMethod: item.authMethod, connectorId: item.connectorId }
-        );
+            ? toSOAuthMethod(agentBasedDeployment.agentCredentialMethod) !==
+              (item.authMethod ?? undefined)
+            : detectAuthDrift({ connectorId }, { connectorId: item.connectorId });
         const agentPoliciesDirty = detectAgentPoliciesDrift(
           {
             deploymentMethod,
@@ -151,13 +141,12 @@ export function useOnboardingDriftDetection({
       });
     // serviceSettings.serviceVars and globalRegion are intentionally captured from the closure:
     // service-var and region changes come from Step 2 navigation (full remount), not same-step
-    // edits. Auth mutations (connector swap, authMethod, agentCredentialMethod) and agent-based
+    // edits. Auth mutations (MI: connector swap; agent-based: credential method) and agent-based
     // mode changes (agentHostsMode, policy selection) happen in this component's lifetime.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
     onboardingDeploymentId,
     awsServicesMap,
-    authMethod,
     connectorId,
     selectedAgentPoliciesKey,
     driftRetryKey,

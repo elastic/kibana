@@ -118,19 +118,24 @@ describe('detectServiceVarsDrift', () => {
 });
 
 describe('detectAuthDrift', () => {
-  it.each([
-    ['identity_federation', 'conn-a', 'identity_federation', 'conn-a', false],
-    ['static_keys', undefined, 'static_keys', undefined, false],
-    ['identity_federation', 'conn-a', 'identity_federation', 'conn-b', true],
-    ['identity_federation', 'conn-a', 'static_keys', 'conn-a', true],
-    ['static_keys', undefined, 'identity_federation', null, true],
-    [undefined, undefined, undefined, undefined, false],
-  ])('session(%s,%s) vs SO(%s,%s) → %s', (sMethod, sConnector, soMethod, soConnector, expected) => {
-    expect(
-      detectAuthDrift(
-        { authMethod: sMethod ?? undefined, connectorId: sConnector ?? undefined },
-        { authMethod: soMethod ?? undefined, connectorId: soConnector as string | null | undefined }
-      )
-    ).toBe(expected);
+  it('returns false when connectors match', () => {
+    expect(detectAuthDrift({ connectorId: 'conn-a' }, { connectorId: 'conn-a' })).toBe(false);
+  });
+
+  it('returns false when both connectors are absent', () => {
+    expect(detectAuthDrift({}, {})).toBe(false);
+    expect(detectAuthDrift({ connectorId: undefined }, { connectorId: null })).toBe(false);
+  });
+
+  it('returns true when connectors differ', () => {
+    expect(detectAuthDrift({ connectorId: 'conn-a' }, { connectorId: 'conn-b' })).toBe(true);
+  });
+
+  it('returns true when session has connector but SO does not', () => {
+    expect(detectAuthDrift({ connectorId: 'conn-a' }, { connectorId: null })).toBe(true);
+  });
+
+  it('returns true when SO has connector but session does not', () => {
+    expect(detectAuthDrift({}, { connectorId: 'conn-a' })).toBe(true);
   });
 });
