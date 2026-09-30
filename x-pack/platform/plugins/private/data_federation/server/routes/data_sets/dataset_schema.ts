@@ -6,12 +6,14 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { CSV_CHARACTER_NONE, isValidQuoteOrEscapeCharacter } from '../../../common';
+import {
+  CSV_CHARACTER_NONE,
+  isValidDelimiter,
+  isValidQuoteOrEscapeCharacter,
+} from '../../../common';
 
 const optionalString = schema.maybe(schema.string({ maxLength: 4096 }));
 const optionalShortString = schema.maybe(schema.string({ maxLength: 256 }));
-
-const VALID_DELIMITER_SEQUENCES: readonly string[] = ['\\t', '\\\\'];
 
 /**
  * Request body for `PUT .../data_sets/{id}`: {@link Dataset} (no top-level `name`;
@@ -81,8 +83,7 @@ export const datasetSchema = schema.object({
           maxLength: 2,
           minLength: 1,
           validate: (value) => {
-            if (value.length === 1) return;
-            if (VALID_DELIMITER_SEQUENCES.includes(value)) return;
+            if (isValidDelimiter(value)) return;
             return 'Must be a single character, \\t or \\\\.';
           },
         })

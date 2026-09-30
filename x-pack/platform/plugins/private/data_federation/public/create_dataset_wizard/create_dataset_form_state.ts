@@ -13,6 +13,7 @@ import type {
 } from '../../common/dataset_types';
 import {
   getConflictingCsvCharacterSettings,
+  isValidDelimiter,
   isValidQuoteOrEscapeCharacter,
   type CsvCharacterSettingName,
 } from '../../common';
@@ -180,12 +181,6 @@ const parseSkipRows = (value: string): number | undefined => {
   if (parsed === undefined || parsed > 1000) return undefined;
   return parsed;
 };
-
-const VALID_DELIMITER_SEQUENCES: readonly string[] = ['\\t', '\\\\'];
-
-/** Whether `value` is a single character or one of the supported delimiter escape sequences. */
-export const isValidDelimiter = (value: string): boolean =>
-  value.length === 1 || VALID_DELIMITER_SEQUENCES.includes(value);
 
 export const validateDelimiter = (value: string): true | string => {
   if (!value) return true;

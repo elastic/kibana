@@ -64,18 +64,22 @@ export function getDataSetByIdApiPath(id: string): string {
 /** Quote/escape character value Elasticsearch reads (case-insensitively) as "turned off". */
 export const CSV_CHARACTER_NONE = 'none';
 
-const VALID_QUOTE_OR_ESCAPE_SEQUENCES: readonly string[] = ['\\t', '\\\\'];
-
-/** Whether `value` is a single character, a supported escape sequence, or `none` (any case). */
-export const isValidQuoteOrEscapeCharacter = (value: string): boolean =>
-  value.length === 1 ||
-  VALID_QUOTE_OR_ESCAPE_SEQUENCES.includes(value) ||
-  value.toLowerCase() === CSV_CHARACTER_NONE;
-
+/** Escape sequences accepted for delimiter/quote/escape, mapped to the character Elasticsearch reads. */
 const CHARACTER_SEQUENCES: Readonly<Record<string, string>> = {
   '\\t': '\t',
   '\\\\': '\\',
 };
+
+const LINE_TERMINATORS: readonly string[] = ['\n', '\r'];
+
+/** Whether `value` is a single non-line-terminator character or a supported escape sequence. */
+export const isValidDelimiter = (value: string): boolean =>
+  (value.length === 1 && !LINE_TERMINATORS.includes(value)) ||
+  Object.hasOwn(CHARACTER_SEQUENCES, value);
+
+/** Whether `value` is a valid delimiter-style character or `none` (any case). */
+export const isValidQuoteOrEscapeCharacter = (value: string): boolean =>
+  isValidDelimiter(value) || value.toLowerCase() === CSV_CHARACTER_NONE;
 
 export type CsvCharacterSettingName = 'delimiter' | 'quote' | 'escape';
 

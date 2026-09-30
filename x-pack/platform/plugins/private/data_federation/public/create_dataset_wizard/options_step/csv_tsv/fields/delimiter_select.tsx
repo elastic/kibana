@@ -9,7 +9,7 @@ import React, { useMemo } from 'react';
 import { EuiBadge } from '@elastic/eui';
 
 import { createDatasetWizardStrings } from '../../../create_dataset_wizard_i18n';
-import { isValidDelimiter } from '../../../create_dataset_form_state';
+import { isValidDelimiter } from '../../../../../common';
 import {
   EuiComboBoxWithCustomOption,
   type ComboBoxPresetOption,

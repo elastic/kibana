@@ -90,8 +90,31 @@ describe('create_dataset_form_state', () => {
       expect(validateDelimiter(value)).toBe(true);
     });
 
-    it.each(['ab', '\\a', '\\0', '\\n', '\\r', '::', '\\tt'])('rejects %s', (value) => {
+    it.each(['ab', '\\a', '\\0', '::', '\\tt'])('rejects %s', (value) => {
       expect(validateDelimiter(value)).toBe(createDatasetWizardStrings.settingsDelimiterInvalid);
+    });
+  });
+
+  describe.each([
+    ['validateDelimiter', validateDelimiter, createDatasetWizardStrings.settingsDelimiterInvalid],
+    [
+      'validateQuoteCharacter',
+      validateQuoteCharacter,
+      createDatasetWizardStrings.settingsQuoteInvalid,
+    ],
+    [
+      'validateEscapeCharacter',
+      validateEscapeCharacter,
+      createDatasetWizardStrings.settingsEscapeInvalid,
+    ],
+  ])('%s line terminators', (_name, validate, invalidMessage) => {
+    it.each([
+      ['a newline character', '\n'],
+      ['a carriage return character', '\r'],
+      ['the \\n sequence', '\\n'],
+      ['the \\r sequence', '\\r'],
+    ])('rejects %s', (_label, value) => {
+      expect(validate(value)).toBe(invalidMessage);
     });
   });
 
@@ -105,8 +128,6 @@ describe('create_dataset_form_state', () => {
     it('accepts \\t and \\\\ escape sequences', () => {
       expect(validateEscapeCharacter('\\t')).toBe(true);
       expect(validateEscapeCharacter('\\\\')).toBe(true);
-      expect(validateEscapeCharacter('\\n')).toBe(createDatasetWizardStrings.settingsEscapeInvalid);
-      expect(validateEscapeCharacter('\\r')).toBe(createDatasetWizardStrings.settingsEscapeInvalid);
     });
 
     it.each(['none', 'NONE', 'None'])('accepts %s to turn off escaping', (value) => {
@@ -145,10 +166,6 @@ describe('create_dataset_form_state', () => {
 
     it.each(['\\t', '\\\\'])('accepts the escape sequence %s', (value) => {
       expect(validateQuoteCharacter(value)).toBe(true);
-    });
-
-    it.each(['\\n', '\\r'])('rejects the line terminator sequence %s', (value) => {
-      expect(validateQuoteCharacter(value)).toBe(createDatasetWizardStrings.settingsQuoteInvalid);
     });
 
     it('rejects multi-character values', () => {
