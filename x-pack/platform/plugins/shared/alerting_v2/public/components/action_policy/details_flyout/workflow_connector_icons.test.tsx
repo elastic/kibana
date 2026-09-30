@@ -10,13 +10,16 @@ import { render, screen } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
 import type { WorkflowYaml } from '@kbn/workflows';
 import { getWorkflowConnectorTypes, WorkflowConnectorIcons } from './workflow_connector_icons';
+import { MockWorkflowsUiServicesProvider } from '../../../test_utils/test_providers';
 
-// Step helpers are pure functions — no mocking needed.
-
+// `getWorkflowConnectorTypes` is pure. `TypeIcon` reads the step/connector icon
+// registries from context, so the render helper supplies the mock provider.
 const renderIcons = (types: string[]) =>
   render(
     <I18nProvider>
-      <WorkflowConnectorIcons types={types} />
+      <MockWorkflowsUiServicesProvider>
+        <WorkflowConnectorIcons types={types} />
+      </MockWorkflowsUiServicesProvider>
     </I18nProvider>
   );
 

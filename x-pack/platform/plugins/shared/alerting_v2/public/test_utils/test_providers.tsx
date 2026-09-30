@@ -14,6 +14,9 @@ import { MockChromeContextProvider } from '@kbn/core-chrome-browser-context-mock
 import { coreMock } from '@kbn/core/public/mocks';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { sharePluginMock } from '@kbn/share-plugin/public/mocks';
+import { triggersActionsUiMock } from '@kbn/triggers-actions-ui-plugin/public/mocks';
+import { workflowsExtensionsMock } from '@kbn/workflows-extensions/public/mocks';
+import { WorkflowsUiServicesProvider } from '@kbn/workflows-ui';
 import type { SerializableRecord } from '@kbn/utility-types';
 import type { AlertEpisodesKibanaServices } from '../episodes_kibana_services';
 import { LocatorProvider, type AlertingV2Locators } from '../application/locator_context';
@@ -82,6 +85,24 @@ export const createHookTestProviders = ({
     </MockLocatorProvider>
   );
 };
+
+/**
+ * Supplies the step/connector icon registries the `@kbn/workflows-ui` components
+ * read. Both registries are empty, so icons resolve through the static connector
+ * specs — enough for tests that only assert an icon row renders.
+ */
+export function MockWorkflowsUiServicesProvider({ children }: PropsWithChildren) {
+  return (
+    <WorkflowsUiServicesProvider
+      services={{
+        workflowsExtensions: workflowsExtensionsMock.createStart(),
+        triggersActionsUi: triggersActionsUiMock.createStart(),
+      }}
+    >
+      {children}
+    </WorkflowsUiServicesProvider>
+  );
+}
 
 export type TestProvidersProps = PropsWithChildren<{
   services?: AlertEpisodesKibanaServices;

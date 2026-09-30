@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { EuiFlexGroup, EuiFlexItem, EuiIconTip, EuiText, EuiToolTip } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiText, EuiToolTip } from '@elastic/eui';
 import type { WorkflowYaml } from '@kbn/workflows';
 import { collectAllSteps } from '@kbn/workflows';
-import { getBaseConnectorType, getStepIconType } from '@kbn/workflows-ui';
+import { getBaseConnectorType, TypeIcon } from '@kbn/workflows-ui';
 import React from 'react';
 
 const MAX_VISIBLE_CONNECTOR_ICONS = 4;
@@ -74,7 +74,7 @@ export const WorkflowConnectorIcons = ({ types }: WorkflowConnectorIconsProps) =
     >
       {visible.map((type) => (
         <EuiFlexItem grow={false} key={`connector-${type}`}>
-          <EuiIconTip type={getStepIconType(type)} size="m" content={type} aria-label={type} />
+          <TypeIcon type={type} kind="step" size="m" aria-label={type} />
         </EuiFlexItem>
       ))}
       {hidden.length > 0 && (
