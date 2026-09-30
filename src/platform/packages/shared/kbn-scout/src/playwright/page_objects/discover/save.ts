@@ -247,9 +247,10 @@ export abstract class SaveMixin extends NavigationMixin {
 
     // Poll the reporting API by job ID. UI locators are page-global — a stale download button
     // or error toast from a previous test can settle a UI-race before the new job finishes.
-    // Using the API avoids that, and Scout sets no Playwright baseURL so we derive the origin
-    // from the current page URL.
-    const { failed, errorText } = await this.pollJobStatus(job.id, timeout);
+    // Derive the reporting base URL from the generate response URL rather than page.url() so
+    // that a non-root Kibana base path (e.g. /my-kibana) is preserved correctly.
+    const reportingBase = generateResponse.url().replace(/\/internal\/reporting\/.*/, '');
+    const { failed, errorText } = await this.pollJobStatus(job.id, reportingBase, timeout);
 
     if (failed) {
       // version_conflict_engine_exception is a transient error in the reporting/ES write path
@@ -268,8 +269,11 @@ export abstract class SaveMixin extends NavigationMixin {
     return download;
   }
 
-  private async pollJobStatus(jobId: string, timeout: number): Promise<JobPollResult> {
-    const baseUrl = new URL(this.page.url()).origin;
+  private async pollJobStatus(
+    jobId: string,
+    reportingBase: string,
+    timeout: number
+  ): Promise<JobPollResult> {
     let job: { status: string; output?: { warnings?: string[] } } | undefined;
 
     await expect
@@ -277,7 +281,7 @@ export abstract class SaveMixin extends NavigationMixin {
         async () => {
           try {
             const response = await this.page.request.get(
-              `${baseUrl}/internal/reporting/jobs/info/${jobId}`
+              `${reportingBase}/internal/reporting/jobs/info/${jobId}`
             );
             if (!response.ok()) return 'pending';
             job = (await response.json()) as { status: string; output?: { warnings?: string[] } };
