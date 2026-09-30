@@ -11,3 +11,5 @@ export const CONTEXT_ENGINE_SAVE_AUTOMATION_TOOL_ID = contextEngineAutomationToo
 
 export const CONTEXT_ENGINE_INSTALL_AUTOMATION_TEMPLATE_TOOL_ID =
   contextEngineAutomationTools.installAutomationTemplate;
+
+export const CONTEXT_ENGINE_RUN_AUTOMATION_TOOL_ID = contextEngineAutomationTools.runAutomation;
