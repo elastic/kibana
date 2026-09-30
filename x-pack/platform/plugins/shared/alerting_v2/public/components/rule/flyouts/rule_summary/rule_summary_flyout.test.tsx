@@ -149,6 +149,8 @@ describe('RuleSummaryFlyout', () => {
     renderFlyout();
 
     expect(screen.getByTestId('ruleSummaryFlyout')).toBeInTheDocument();
+    // ownFocus={false} omits the overlay mask so the rules list stays visible behind the flyout.
+    expect(document.querySelector('.euiOverlayMask')).not.toBeInTheDocument();
     expect(screen.getByTestId('ruleSummaryFlyoutHeader')).toHaveTextContent('My Rule');
     expect(screen.getByTestId('ruleSummaryAbout')).toBeInTheDocument();
     expect(screen.getByTestId('ruleSummaryAboutCard')).toBeInTheDocument();
