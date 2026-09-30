@@ -5,12 +5,13 @@
  * 2.0.
  */
 
-import React, { Fragment, useCallback, useMemo, useState } from 'react';
+import React, { Fragment, Suspense, useCallback, useMemo, useState } from 'react';
 import type { EuiDataGridColumn, EuiThemeComputed } from '@elastic/eui';
 import {
   EuiButtonEmpty,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiIcon,
   EuiLoadingSpinner,
   EuiScreenReaderOnly,
   EuiSpacer,
@@ -19,6 +20,7 @@ import {
   logicalCSS,
   useEuiTheme,
 } from '@elastic/eui';
+import { ConnectorIconsMap } from '@kbn/connector-specs/icons';
 import { AppHeader } from '@kbn/app-header';
 import type { AppHeaderMenu } from '@kbn/app-header';
 import { CellActionsProvider } from '@kbn/cell-actions';
@@ -114,6 +116,11 @@ const CUSTOM_GRID_COLUMNS_CONFIGURATION: CustomGridColumnsConfiguration = {
   assignees: ({ column }) => ({
     ...column,
     displayAsText: i18n.EPISODES_LIST_COLUMN_ASSIGNEES,
+  }),
+  source: ({ column }) => ({
+    ...column,
+    displayAsText: i18n.EPISODES_LIST_COLUMN_SOURCE,
+    isSortable: false,
   }),
 };
 
@@ -551,6 +558,22 @@ const AlertEpisodesListPageContent = () => {
       'episode.status': (props) => <EpisodeStatusCell {...props} />,
       duration: (props) => <EpisodeDurationCell {...props} />,
       severity: (props) => <EpisodeSeverityCell {...props} />,
+      source: (props) => {
+        const rawSource = props.row.flattened.source;
+        const source = typeof rawSource === 'string' && rawSource ? rawSource : undefined;
+        if (!source) return null;
+        const IconComponent = ConnectorIconsMap.get(`.${source}`);
+        if (IconComponent) {
+          return (
+            <EuiToolTip content={source}>
+              <Suspense fallback={null}>
+                <EuiIcon type={IconComponent} size="l" aria-label={source} />
+              </Suspense>
+            </EuiToolTip>
+          );
+        }
+        return <EuiText size="xs">{source}</EuiText>;
+      },
       tags: (props) => <EpisodeTagsCell {...props} />,
       rule_tags: (props) => (
         <EpisodeRuleTagsCell {...props} rulesCache={rulesCache} isLoadingRules={isLoadingRules} />
