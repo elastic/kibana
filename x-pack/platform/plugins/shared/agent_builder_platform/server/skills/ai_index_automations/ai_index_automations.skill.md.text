@@ -207,15 +207,23 @@ templates use: a model call per record run end to end is the slowest thing these
 takes the same `foreach` expression and the same `steps` body, and swaps `iteration-on-failure` for
 `mode: settled`, which likewise runs every branch to a terminal state instead of stopping at the
 first failure. `concurrency` defaults to 5 and is capped at 20; the fan-out is capped at 100 items,
-so a `const` bounding the batch has to stay under that.
+so corpora larger than 100 records must be split into batches with `chunk: 100` before entering
+`parallel`. The per-record templates do this with an outer `foreach` over the chunks, so they
+handle any corpus size up to the ES|QL row cap:
 
 ```yaml
-- name: loop_documents
-  type: parallel
-  foreach: '{{ steps.discover_documents.output.values | json }}'
-  concurrency: 5
-  mode: settled
-  steps: [] # ...
+- name: loop_batches
+  type: foreach
+  foreach: '{{ steps.discover_documents.output.values | chunk: 100 | json }}'
+  iteration-on-failure:
+    continue: true
+  steps:
+    - name: loop_documents
+      type: parallel
+      foreach: '{{ foreach.item | json }}'
+      concurrency: 5
+      mode: settled
+      steps: [] # ...
 ```
 
 A branch reads `{{ foreach.item }}` and its own earlier steps exactly as a sequential iteration
