@@ -37,6 +37,9 @@ export {
   AnalysisWindowDays,
   FpCountThreshold,
   FpRateThresholdPct,
+  LookbackDays,
+  MaxGapsPerRun,
+  RuleCoverageWorkerExtras,
   RuleTuningWorkerExtras,
 } from './components/detection_watch_settings.gen';
 

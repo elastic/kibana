@@ -79,7 +79,12 @@ const EXPECTED_WORKER_SETTINGS: Record<RegisteredWorkerId, ExpectedWorkerSetting
     extras: { analysisWindowDays: 7, fpCountThreshold: 10, fpRateThresholdPct: 50 },
     triggerTypes: ['scheduled', 'manual'],
   },
-  'system-security-detection-rule-creation': { settingsVersion: 1, triggerTypes: ['manual'] },
+  'system-security-detection-rule-coverage': {
+    settingsVersion: 1,
+    scheduleInterval: '1h',
+    extras: { lookbackDays: 14, maxGapsPerRun: 5 },
+    triggerTypes: ['scheduled', 'manual'],
+  },
 };
 
 const getYamlTemplate = (workerId: RegisteredWorkerId) => {

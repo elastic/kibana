@@ -89,6 +89,25 @@ describe('Discover session API client', () => {
     });
   });
 
+  it('keeps a PUT 404 as a save error without creating a replacement', async () => {
+    const http = httpServiceMock.createStartContract();
+    const client = createDiscoverSessionClient(http);
+    http.put.mockRejectedValue(
+      createHttpFetchError(
+        'Not found',
+        'NotFound',
+        new Request('http://localhost'),
+        new Response(undefined, { status: 404 })
+      )
+    );
+
+    await expect(client.upsert('deleted-session', data)).rejects.toMatchObject({
+      message: 'Not found',
+      cause: { response: { status: 404 } },
+    });
+    expect(http.post).not.toHaveBeenCalled();
+  });
+
   it('preserves GET errors that are not 404 responses', async () => {
     const http = httpServiceMock.createStartContract();
     const client = createDiscoverSessionClient(http);
@@ -127,9 +146,9 @@ describe('Discover session API client', () => {
     const client = createDiscoverSessionClient(http);
     http.get.mockRejectedValue(createBadRequestError());
 
-    await expect(client.get('session-id')).rejects.toThrow(
-      'chart_interval must be a supported value'
-    );
+    await expect(client.get('session-id')).rejects.toMatchObject({
+      message: 'chart_interval must be a supported value',
+    });
   });
 
   it('uses the server message and keeps the original cause when create fails', async () => {
@@ -144,7 +163,7 @@ describe('Discover session API client', () => {
     await expect(result).rejects.toHaveProperty('cause', error);
   });
 
-  it('uses the server message and keeps the original cause when upsert fails', async () => {
+  it('uses the server message and keeps the original cause when the PUT request fails', async () => {
     const http = httpServiceMock.createStartContract();
     const client = createDiscoverSessionClient(http);
     const error = createBadRequestError();
@@ -154,6 +173,23 @@ describe('Discover session API client', () => {
 
     await expect(result).rejects.toThrow('chart_interval must be a supported value');
     await expect(result).rejects.toHaveProperty('cause', error);
+  });
+
+  it('falls back to the HTTP error message when the response has no message body', async () => {
+    const http = httpServiceMock.createStartContract();
+    const client = createDiscoverSessionClient(http);
+    const error = createHttpFetchError(
+      'Internal Server Error',
+      'Error',
+      new Request('http://localhost'),
+      new Response(undefined, { status: 500 })
+    );
+    http.put.mockRejectedValue(error);
+
+    await expect(client.upsert('session-id', data)).rejects.toMatchObject({
+      message: 'Internal Server Error',
+      cause: error,
+    });
   });
 });
 
