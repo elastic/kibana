@@ -60,14 +60,20 @@ export interface DatasetMappings {
 }
 
 export type DatasetFormat = 'parquet' | 'csv' | 'tsv' | 'ndjson';
+export type DatasetErrorMode = 'fail_fast' | 'skip_row' | 'null_field';
+export type DatasetMode = 'quoted' | 'escaped' | 'plain';
+export type DatasetPartitionDetection = 'auto' | 'hive' | 'template' | 'none';
+export type DatasetSchemaResolution = 'first_file_wins' | 'strict' | 'union_by_name';
+/** String form of a boolean dataset setting. */
+export type DatasetBooleanString = 'true' | 'false';
 
 export interface DatasetSettingsFile {
   format?: DatasetFormat;
 
   // Universal
   file_exclusions?: string[];
-  partition_detection?: 'auto' | 'hive' | 'template' | 'none';
-  schema_resolution?: 'first_file_wins' | 'strict' | 'union_by_name';
+  partition_detection?: DatasetPartitionDetection;
+  schema_resolution?: DatasetSchemaResolution;
   partition_path?: string;
   hive_partitioning?: boolean;
 
@@ -76,7 +82,7 @@ export interface DatasetSettingsFile {
 
   // CSV/TSV — commonly changed (core UI)
   delimiter?: string;
-  mode?: 'quoted' | 'escaped' | 'plain';
+  mode?: DatasetMode;
   header_row?: boolean;
   skip_rows?: number;
   datetime_format?: string;
@@ -93,7 +99,7 @@ export interface DatasetSettingsFile {
   max_field_size?: number;
 
   // CSV/TSV — error handling
-  error_mode?: 'fail_fast' | 'skip_row' | 'null_field';
+  error_mode?: DatasetErrorMode;
   max_errors?: number;
   max_error_ratio?: number;
 

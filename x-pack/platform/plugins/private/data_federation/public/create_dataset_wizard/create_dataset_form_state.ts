@@ -10,6 +10,11 @@ import type {
   DatasetSettings,
   DatasetSettingsFile,
   DatasetFormat,
+  DatasetErrorMode,
+  DatasetMode,
+  DatasetPartitionDetection,
+  DatasetSchemaResolution,
+  DatasetBooleanString,
 } from '../../common/dataset_types';
 import {
   getConflictingCsvCharacterSettings,
@@ -22,11 +27,11 @@ import { createDatasetWizardStrings } from './create_dataset_wizard_i18n';
 import type { MappingEditorValue } from './mapping_step/mapping_editor';
 
 export type DatasetFormatFormValue = '' | DatasetFormat;
-export type DatasetErrorModeFormValue = '' | 'fail_fast' | 'skip_row' | 'null_field';
-export type DatasetModeFormValue = '' | 'quoted' | 'escaped' | 'plain';
-export type DatasetPartitionDetectionFormValue = '' | 'auto' | 'hive' | 'template' | 'none';
-export type DatasetSchemaResolutionFormValue = '' | 'first_file_wins' | 'strict' | 'union_by_name';
-export type DatasetBooleanFormValue = '' | 'true' | 'false';
+export type DatasetErrorModeFormValue = '' | DatasetErrorMode;
+export type DatasetModeFormValue = '' | DatasetMode;
+export type DatasetPartitionDetectionFormValue = '' | DatasetPartitionDetection;
+export type DatasetSchemaResolutionFormValue = '' | DatasetSchemaResolution;
+export type DatasetBooleanFormValue = '' | DatasetBooleanString;
 
 export const DEFAULT_FILE_EXCLUSIONS = [
   '**/_*',
