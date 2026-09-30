@@ -42,6 +42,12 @@ if [[ "${KIBANA_SLACK_NOTIFICATIONS_ENABLED:-}" != "true" || -z "$channel" ]]; t
   exit 0
 fi
 
+# The channel goes into generated pipeline YAML, so accept only a plain channel name.
+if [[ ! "$channel" =~ ^#[A-Za-z0-9_-]+$ ]]; then
+  echo "Refusing to post: SLACK_NOTIFICATIONS_CHANNEL is not a plain channel name."
+  exit 1
+fi
+
 echo "--- Post summary to Slack ($channel)"
 notify_file="$(mktemp -t scout-audit-notify.XXXXXX.yml)"
 {
