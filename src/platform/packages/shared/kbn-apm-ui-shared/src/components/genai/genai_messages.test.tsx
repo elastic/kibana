@@ -56,21 +56,13 @@ describe('GenAiMessages', () => {
 
   it('does not duplicate system instructions already present in an input system message', () => {
     const content = 'You are a helpful coding assistant.';
-    renderMessages(
-      [{ role: 'system', parts: [{ type: 'text', content: content }] }],
-      [],
-      content
-    );
+    renderMessages([{ role: 'system', parts: [{ type: 'text', content }] }], [], content);
     expect(screen.getAllByTestId(/genAiMessage-/)).toHaveLength(1);
   });
 
   it('does not duplicate system instructions already present in an input system message with content format', () => {
     const content = 'You are a helpful coding assistant.';
-    renderMessages(
-      [{role: 'system', content: content}],
-      [],
-      content
-    );
+    renderMessages([{ role: 'system', content }], [], content);
     expect(screen.getAllByTestId(/genAiMessage-/)).toHaveLength(1);
   });
 
