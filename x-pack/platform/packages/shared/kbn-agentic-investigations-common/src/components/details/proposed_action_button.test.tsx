@@ -23,6 +23,7 @@ const wrapper: React.FC<{ children: React.ReactNode }> = ({ children }) => (
 );
 
 const mockProposal: ApprovalProposal = {
+  title: 'Isolate cfo-mbp-14 — host isolation',
   comment: 'Isolate the host to cut off the replayed session.',
   impact: 'critical',
   status: 'pending',
@@ -210,6 +211,38 @@ describe('ProposedActionButton', () => {
       renderButton({ proposal: { ...decidedProposal, decidedAt: undefined } });
 
       expect(screen.getByText(/Bonnie Fishel/)).toBeInTheDocument();
+    });
+  });
+
+  describe('an expired proposal', () => {
+    // Nobody decided it — the gate timed out — so it carries no `decision` at all, unlike the
+    // decided cases above.
+    const expiredProposal: ApprovalProposal = { ...mockProposal, expired: true };
+
+    it('shows an Expired badge instead of Needs review, though nobody ever decided it', () => {
+      renderButton({ proposal: expiredProposal });
+
+      // The badge and the caption below it both read "Expired": nobody names a decider, so the
+      // caption falls back to the same label rather than a fabricated "by Unknown".
+      expect(screen.getAllByText('Expired').length).toBeGreaterThanOrEqual(2);
+      expect(screen.queryByText('Needs review')).not.toBeInTheDocument();
+    });
+
+    it('is still clickable, opening a read-only modal with no actions to take', () => {
+      renderButton({ proposal: expiredProposal });
+
+      fireEvent.click(screen.getByTestId('proposedAction'));
+
+      const dialog = screen.getByRole('dialog');
+      expect(within(dialog).getByText('Expired')).toBeInTheDocument();
+      expect(screen.queryByTestId('proposedAction-modal-confirm')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('proposedAction-modal-dismiss')).not.toBeInTheDocument();
+    });
+
+    it('also reads status: expired settled ahead of its deadline, not just a computed expiry', () => {
+      renderButton({ proposal: { ...mockProposal, expired: false, status: 'expired' } });
+
+      expect(screen.getAllByText('Expired').length).toBeGreaterThanOrEqual(2);
     });
   });
 });
