@@ -97,6 +97,81 @@ describe('SpacesManager', () => {
         `"Cannot retrieve the active space for anonymous paths"`
       );
     });
+
+    describe('when the request fails', () => {
+      beforeEach(() => jest.useFakeTimers());
+      afterEach(() => jest.useRealTimers());
+
+      it('retries a transient failure before resolving', async () => {
+        const coreStart = coreMock.createStart();
+        coreStart.http.get
+          .mockRejectedValueOnce({ body: { statusCode: 503 } })
+          .mockResolvedValueOnce({
+            id: 'my-space',
+            name: 'my space',
+          });
+        const spacesManager = new SpacesManager(coreStart.http);
+
+        const activeSpace = expect(spacesManager.getActiveSpace()).resolves.toEqual({
+          id: asSpaceId('my-space'),
+          name: 'my space',
+        });
+        await jest.advanceTimersByTimeAsync(500);
+
+        await activeSpace;
+        expect(coreStart.http.get).toHaveBeenCalledTimes(2);
+      });
+
+      it('gives up once the retries are exhausted', async () => {
+        const coreStart = coreMock.createStart();
+        coreStart.http.get.mockRejectedValue({ body: { statusCode: 503 } });
+        const spacesManager = new SpacesManager(coreStart.http);
+
+        const rejection = expect(spacesManager.getActiveSpace()).rejects.toEqual({
+          body: { statusCode: 503 },
+        });
+        await jest.advanceTimersByTimeAsync(6_000);
+
+        await rejection;
+        expect(coreStart.http.get).toHaveBeenCalledTimes(4);
+      });
+
+      it('does not retry a client error', async () => {
+        const coreStart = coreMock.createStart();
+        coreStart.http.get.mockRejectedValue({ body: { statusCode: 403 } });
+        const spacesManager = new SpacesManager(coreStart.http);
+
+        await expect(spacesManager.getActiveSpace()).rejects.toEqual({
+          body: { statusCode: 403 },
+        });
+        expect(coreStart.http.get).toHaveBeenCalledTimes(1);
+      });
+    });
+  });
+
+  describe('#onActiveSpaceChange$', () => {
+    beforeEach(() => jest.useFakeTimers());
+    afterEach(() => jest.useRealTimers());
+
+    it('emits the active space once a transient failure recovers', async () => {
+      const coreStart = coreMock.createStart();
+      coreStart.http.get
+        .mockRejectedValueOnce({ body: { statusCode: 503 } })
+        .mockResolvedValueOnce({
+          id: 'my-space',
+          name: 'my space',
+        });
+      const spacesManager = new SpacesManager(coreStart.http);
+
+      const onActiveSpace = jest.fn();
+      spacesManager.onActiveSpaceChange$.subscribe(onActiveSpace);
+      await jest.advanceTimersByTimeAsync(500);
+
+      expect(onActiveSpace).toHaveBeenCalledWith({
+        id: asSpaceId('my-space'),
+        name: 'my space',
+      });
+    });
   });
 
   describe('#getShareSavedObjectPermissions', () => {

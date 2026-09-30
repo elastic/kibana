@@ -31,8 +31,21 @@ interface SavedObjectTarget {
   id: string;
 }
 
+interface HttpErrorLike {
+  body?: { statusCode?: number };
+  response?: { status?: number };
+}
+
 const TAG_TYPE = 'tag';
 const version = API_VERSIONS.public.v1;
+const ACTIVE_SPACE_RETRY_DELAYS_MS = [500, 1_500, 4_000];
+
+const isRetryableError = (error: unknown) => {
+  const { body, response } = (error ?? {}) as HttpErrorLike;
+  const status = body?.statusCode ?? response?.status;
+  // An absent status means the request never reached the server; the rest are transient server-side conditions.
+  return status === undefined || status === 408 || status === 429 || status >= 500;
+};
 
 export class SpacesManager {
   private activeSpace$: BehaviorSubject<Space | null> = new BehaviorSubject<Space | null>(null);
@@ -51,7 +64,8 @@ export class SpacesManager {
 
   public get onActiveSpaceChange$() {
     if (!this.activeSpace$.value) {
-      this.refreshActiveSpace();
+      // Nothing awaits this: subscribers only ever observe successful emissions.
+      this.refreshActiveSpace().catch(() => {});
     }
     return this._onActiveSpaceChange$;
   }
@@ -199,8 +213,24 @@ export class SpacesManager {
     if (this.isAnonymousPath()) {
       return;
     }
-    const activeSpace = await this.http.get<Space>('/internal/spaces/_active_space');
+    const activeSpace = await this.fetchActiveSpace();
     this.activeSpace$.next(activeSpace);
+  }
+
+  // `activeSpace$` has a single producer, so giving up on the first transient failure strands every consumer on `null` for the rest of the page load.
+  private async fetchActiveSpace(): Promise<Space> {
+    let attempt = 0;
+    while (true) {
+      try {
+        return await this.http.get<Space>('/internal/spaces/_active_space');
+      } catch (error) {
+        const delay = ACTIVE_SPACE_RETRY_DELAYS_MS[attempt++];
+        if (delay === undefined || !isRetryableError(error)) {
+          throw error;
+        }
+        await new Promise((resolve) => setTimeout(resolve, delay));
+      }
+    }
   }
 
   private isAnonymousPath() {
