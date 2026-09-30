@@ -392,7 +392,7 @@ describe('Chart', () => {
   it('hides Lens edit and save actions when withLensActions is false', async () => {
     await mountComponent({
       isPlainRecord: true,
-      dataView: dataViewMock,
+      dataSource: new DataViewSource(dataViewMock),
       isTransformationalESQL: true,
       withLensActions: false,
     });
