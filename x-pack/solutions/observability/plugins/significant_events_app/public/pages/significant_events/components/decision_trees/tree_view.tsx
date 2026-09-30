@@ -27,7 +27,11 @@ import { LearningsPanel } from './learnings_panel';
 import { MermaidPanel } from './mermaid_panel';
 import { NodesTable } from './nodes_table';
 import { VersionHistory } from './version_history';
-import { useDecisionTree, useDecisionTreeVersions } from './use_decision_trees';
+import {
+  useDecisionTree,
+  useDecisionTreeVersion,
+  useDecisionTreeVersions,
+} from './use_decision_trees';
 
 interface TreeViewProps {
   symptom: string;
@@ -36,17 +40,19 @@ interface TreeViewProps {
 const Section = ({
   id,
   title,
+  initialIsOpen = false,
   children,
 }: {
   id: string;
   title: string;
+  initialIsOpen?: boolean;
   children: React.ReactNode;
 }) => (
   <>
     <EuiSpacer size="l" />
     <EuiAccordion
       id={`nightshiftDecisionTreeSection-${id}`}
-      initialIsOpen
+      initialIsOpen={initialIsOpen}
       paddingSize="s"
       buttonContent={
         <EuiTitle size="xs">
@@ -72,15 +78,25 @@ export function TreeView({ symptom }: TreeViewProps) {
   const tree = treeData?.tree;
   const versions = versionsData?.versions ?? [];
 
+  const activeVersion = selectedVersion ?? tree?.version;
+  const isHeadSelected = activeVersion === tree?.version;
+  const { data: versionData } = useDecisionTreeVersion(
+    symptom,
+    isHeadSelected ? undefined : activeVersion
+  );
+  const displayed = isHeadSelected ? tree : versionData?.version;
+
   const parsed = useMemo(
     () =>
-      tree
-        ? parseStoredDecisionTree(tree.mermaid, tree.tree_id, tree.evidence_gatherer_metadata)
+      tree && displayed
+        ? parseStoredDecisionTree(
+            displayed.mermaid,
+            tree.tree_id,
+            displayed.evidence_gatherer_metadata
+          )
         : undefined,
-    [tree]
+    [tree, displayed]
   );
-
-  const activeVersion = selectedVersion ?? tree?.version;
 
   if (isLoading) {
     return <EuiLoadingSpinner size="l" data-test-subj="nightshiftDecisionTreeLoading" />;
@@ -151,6 +167,24 @@ export function TreeView({ symptom }: TreeViewProps) {
         />
       </Section>
 
+      <Section
+        id="mermaid"
+        initialIsOpen
+        title={i18n.translate('xpack.significantEventsApp.decisionTrees.sections.mermaid', {
+          defaultMessage: 'Decision tree',
+        })}
+      >
+        {displayed ? (
+          <MermaidPanel
+            mermaid={displayed.mermaid}
+            nodes={parsed?.nodes ?? []}
+            edges={parsed?.edges ?? []}
+          />
+        ) : (
+          <EuiLoadingSpinner size="m" />
+        )}
+      </Section>
+
       {activeVersion !== undefined && (
         <Section
           id="changes"
@@ -188,15 +222,6 @@ export function TreeView({ symptom }: TreeViewProps) {
         })}
       >
         <EdgesTable edges={parsed?.edges ?? []} />
-      </Section>
-
-      <Section
-        id="mermaid"
-        title={i18n.translate('xpack.significantEventsApp.decisionTrees.sections.mermaid', {
-          defaultMessage: 'Mermaid source',
-        })}
-      >
-        <MermaidPanel mermaid={tree.mermaid} />
       </Section>
     </div>
   );
