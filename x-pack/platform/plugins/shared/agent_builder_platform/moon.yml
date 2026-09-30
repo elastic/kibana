@@ -52,7 +52,6 @@ dependsOn:
   - '@kbn/agent-builder-plugin'
   - '@kbn/files-plugin'
   - '@kbn/cloud-plugin'
-  - '@kbn/workflows'
 tags:
   - plugin
   - prod

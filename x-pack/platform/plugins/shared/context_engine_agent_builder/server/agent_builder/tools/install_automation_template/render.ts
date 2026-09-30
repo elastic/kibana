@@ -135,9 +135,7 @@ export interface TargetedKiWriterTemplateValues {
   aiIndexId: string;
 }
 
-export const renderTargetedKiWriterTemplate = (
-  values: TargetedKiWriterTemplateValues
-): string => {
+export const renderTargetedKiWriterTemplate = (values: TargetedKiWriterTemplateValues): string => {
   assertSafeIdentifier('aiIndexId', values.aiIndexId);
   return replaceTokens(CONTEXT_ENGINE_TARGETED_KI_WRITER_TEMPLATE, {
     __AI_INDEX_ID__: yamlString(values.aiIndexId),
