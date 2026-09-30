@@ -23,7 +23,7 @@ The connector calls the [Kubernetes Engine API](https://cloud.google.com/kuberne
 
 Every mutating action returns an operation rather than the finished resource. Poll `getOperation` until `done` is true, then check `error`. GKE runs one operation per cluster at a time, so a second change on a busy cluster fails until the first completes.
 
-Cluster provisioning (`createCluster`) and deletion (`deleteCluster`) are available as workflow steps only, not as autonomous agent tools, and `deleteCluster` additionally requires the cluster name to be repeated as a confirmation.
+Cluster provisioning (`createCluster`) and deletion (`deleteCluster`) are not exposed as autonomous agent tools, and are not yet reachable through workflows either since this connector currently supports Agent Builder only (see the note above). `deleteCluster` additionally requires the cluster name to be repeated as a confirmation.
 
 ## Create connectors in {{kib}} [define-google-gke-ui]
 

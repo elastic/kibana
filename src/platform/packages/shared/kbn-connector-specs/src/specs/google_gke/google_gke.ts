@@ -320,15 +320,18 @@ const trimClusterDetail = (cluster: GkeCluster) => {
     },
     // Everything the core Kubernetes connector needs to reach this cluster. The same service
     // account JSON key authenticates there through its "Google Kubernetes Engine (GKE)" auth
-    // type, so no separate credential is minted or returned here.
-    kubernetesConnector: cluster.endpoint
-      ? {
-          apiUrl: `https://${cluster.endpoint}`,
-          dnsApiUrl: dnsEndpoint ? `https://${dnsEndpoint}` : undefined,
-          caCertificatePem,
-          authType: 'kubernetes_gke',
-        }
-      : undefined,
+    // type, so no separate credential is minted or returned here. A DNS-only cluster has no
+    // legacy IP `endpoint`, only the DNS control-plane endpoint, so build the block when either
+    // is present and fall back to the DNS URL as the API URL.
+    kubernetesConnector:
+      cluster.endpoint || dnsEndpoint
+        ? {
+            apiUrl: cluster.endpoint ? `https://${cluster.endpoint}` : `https://${dnsEndpoint}`,
+            dnsApiUrl: dnsEndpoint ? `https://${dnsEndpoint}` : undefined,
+            caCertificatePem,
+            authType: 'kubernetes_gke',
+          }
+        : undefined,
     networkPolicy: {
       enabled: cluster.networkPolicy?.enabled === true,
       provider: cluster.networkPolicy?.provider,

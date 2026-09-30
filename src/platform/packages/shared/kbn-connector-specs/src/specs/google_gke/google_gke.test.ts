@@ -311,6 +311,43 @@ describe('GoogleGke', () => {
       });
     });
 
+    it('getCluster builds the Kubernetes connector hand-off from the DNS endpoint alone when there is no legacy IP endpoint', async () => {
+      mockClient.get.mockResolvedValue({
+        data: {
+          ...sampleCluster,
+          endpoint: undefined,
+          controlPlaneEndpointsConfig: {
+            dnsEndpointConfig: { endpoint: 'gke-abc.us-central1-a.gke.goog' },
+          },
+        },
+      });
+      const result = await run('getCluster', {
+        projectId: PROJECT,
+        location: ZONE,
+        clusterId: 'prod-web',
+      });
+      expect(result).toMatchObject({
+        kubernetesConnector: {
+          apiUrl: 'https://gke-abc.us-central1-a.gke.goog',
+          dnsApiUrl: 'https://gke-abc.us-central1-a.gke.goog',
+          caCertificatePem: CA_PEM,
+          authType: 'kubernetes_gke',
+        },
+      });
+    });
+
+    it('getCluster omits the Kubernetes connector hand-off when neither endpoint is present', async () => {
+      mockClient.get.mockResolvedValue({
+        data: { ...sampleCluster, endpoint: undefined, controlPlaneEndpointsConfig: undefined },
+      });
+      const result = await run('getCluster', {
+        projectId: PROJECT,
+        location: ZONE,
+        clusterId: 'prod-web',
+      });
+      expect(result).toMatchObject({ kubernetesConnector: undefined });
+    });
+
     it('getCluster derives the Binary Authorization mode from the legacy enabled flag', async () => {
       mockClient.get.mockResolvedValue({
         data: { ...sampleCluster, binaryAuthorization: { enabled: true } },
