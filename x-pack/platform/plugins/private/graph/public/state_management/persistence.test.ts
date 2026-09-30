@@ -93,6 +93,7 @@ describe('persistence listeners', () => {
       expect(fieldsSelector(resultingState)[0].name).toEqual('testfield');
       expect(metaDataSelector(resultingState).title).toEqual('my workspace');
       expect(templatesSelector(resultingState)[0].url).toEqual('http://example.org/q={{gquery}}');
+      expect(resultingState.workspace.isInitialized).toBe(true);
     });
 
     it('should warn with a toast and abort if index pattern is not found', async () => {
