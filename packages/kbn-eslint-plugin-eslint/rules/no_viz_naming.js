@@ -36,48 +36,57 @@ module.exports = {
       noVizFile: 'Use "vis" instead of "viz" in filename "{{name}}". Rename to "{{fixed}}".',
     },
   },
-  create: (context) => ({
-    Program(node) {
-      const filename = context.getFilename();
-      const basename = filename.split('/').pop() || '';
-      if (VIZ_PATTERN.test(basename)) {
-        const fixed = fixName(basename);
+  createOnce(context) {
+    let filename;
+    let sourceCode;
+
+    return {
+      before() {
+        filename = context.filename;
+        sourceCode = context.sourceCode;
+      },
+      Program(node) {
+        const basename = filename.split('/').pop() || '';
+        if (VIZ_PATTERN.test(basename)) {
+          const fixed = fixName(basename);
+          context.report({
+            node,
+            messageId: 'noVizFile',
+            data: { name: basename, fixed },
+          });
+        }
+      },
+      Literal(node) {
+        if (typeof node.value !== 'string' || !VIZ_PATTERN.test(node.value)) {
+          return;
+        }
+
+        const fixed = fixName(node.value);
+        const raw = sourceCode.getText(node);
+
         context.report({
           node,
-          messageId: 'noVizFile',
-          data: { name: basename, fixed },
+          messageId: 'noVizLiteral',
+          data: { name: node.value, fixed },
+          fix: (fixer) => fixer.replaceText(node, fixName(raw)),
         });
-      }
-    },
-    Literal(node) {
-      if (typeof node.value !== 'string' || !VIZ_PATTERN.test(node.value)) {
-        return;
-      }
+      },
+      Identifier(node) {
+        const { name } = node;
+        if (!VIZ_PATTERN.test(name)) {
+          return;
+        }
 
-      const fixed = fixName(node.value);
-      const raw = context.getSourceCode().getText(node);
+        const fixed = fixName(name);
 
-      context.report({
-        node,
-        messageId: 'noVizLiteral',
-        data: { name: node.value, fixed },
-        fix: (fixer) => fixer.replaceText(node, fixName(raw)),
-      });
-    },
-    Identifier(node) {
-      const { name } = node;
-      if (!VIZ_PATTERN.test(name)) {
-        return;
-      }
-
-      const fixed = fixName(name);
-
-      context.report({
-        node,
-        messageId: 'noViz',
-        data: { name, fixed },
-        fix: (fixer) => fixer.replaceTextRange([node.range[0], node.range[0] + name.length], fixed),
-      });
-    },
-  }),
+        context.report({
+          node,
+          messageId: 'noViz',
+          data: { name, fixed },
+          fix: (fixer) =>
+            fixer.replaceTextRange([node.range[0], node.range[0] + name.length], fixed),
+        });
+      },
+    };
+  },
 };

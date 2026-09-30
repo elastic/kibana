@@ -15,7 +15,6 @@ import {
   getApprovalOutcomeBadge,
   getProposalCaption,
   getProposalDecision,
-  getProposalTitle,
   ProposedActionStatusBadge,
   type ApprovalPhase,
   type ApprovalProposal,
@@ -122,7 +121,10 @@ export const ProposedActionButton = memo<ProposedActionButtonProps>(
 
     const pendingCaption = getProposalCaption(proposal);
 
-    const caption = decision ? (
+    // A decision with no `actorName` is a terminal state nobody actually decided (expired,
+    // chiefly) — the badge label alone ("Expired") already says what happened, so this only adds
+    // "by {name}" when there is a real actor to name.
+    const caption = decision?.actorName ? (
       decision.decidedAt ? (
         <FormattedMessage
           id="xpack.alertzero.detailsFlyout.proposedAction.decidedByCaption"
@@ -140,6 +142,8 @@ export const ProposedActionButton = memo<ProposedActionButtonProps>(
           values={{ approvalType: badge.label, name: decision.actorName }}
         />
       )
+    ) : decision ? (
+      badge.label
     ) : Boolean(pendingCaption) ? (
       pendingCaption
     ) : (
@@ -154,7 +158,7 @@ export const ProposedActionButton = memo<ProposedActionButtonProps>(
           role="button"
           tabIndex={0}
           aria-label={DETAILS_FLYOUT_LABELS.proposedAction.ariaLabel({
-            title: getProposalTitle(proposal),
+            title: proposal.title,
             status: badge.label,
           })}
           data-test-subj={dataTestSubj}
@@ -183,7 +187,7 @@ export const ProposedActionButton = memo<ProposedActionButtonProps>(
               >
                 <EuiFlexItem grow={false}>
                   <EuiText size="s">
-                    <strong>{getProposalTitle(proposal)}</strong>
+                    <strong>{proposal.title}</strong>
                   </EuiText>
                 </EuiFlexItem>
                 <EuiFlexItem grow={false}>

@@ -53,7 +53,12 @@ export interface ApprovalAction {
  */
 export interface ApprovalDecision {
   status: Exclude<ApprovalPhase, 'pending'>;
-  actorName: string;
+  /**
+   * Omitted when nobody actually decided — an expired gate timed out rather than being approved or
+   * declined by anyone. Callers fall back to their own plain caption rather than rendering a
+   * fabricated "by Unknown" for an outcome no one chose.
+   */
+  actorName?: string;
   /** ISO 8601 timestamp. Optional: the record itself may carry none — see `ApprovalActorTime`. */
   decidedAt?: string;
   /** Shown in the outcome banner, e.g. why a decline was made. */
@@ -63,8 +68,6 @@ export interface ApprovalDecision {
 export interface ApprovalContentProps {
   title: string;
   tone: 'primary' | 'danger';
-  /** Fallback icon for the primary-action button. */
-  iconType: IconType;
   /** The proposal's own markdown, rendered as the body. */
   comment?: string;
   /**
@@ -124,7 +127,6 @@ export const ApprovalContent = memo<ApprovalContentProps>(
   ({
     title,
     tone,
-    iconType,
     comment,
     showHeader = true,
     titleId,
@@ -173,7 +175,7 @@ export const ApprovalContent = memo<ApprovalContentProps>(
     const bannerSuffix = decision?.reason ?? banner?.hint;
     const isSettledOrTransient = approvalPhase !== 'pending';
 
-    const headerCaption = decision ? (
+    const headerCaption = decision?.actorName ? (
       <ApprovalActorTime actorName={decision.actorName} at={decision.decidedAt} />
     ) : isSubmitting && since ? (
       <ApprovalActorTime actorName={actorName} at={since} live />

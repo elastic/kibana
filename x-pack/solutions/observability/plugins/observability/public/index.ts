@@ -38,6 +38,7 @@ export {
   enableInspectEsQueries,
   enableComparisonByDefault,
   apmServiceGroupMaxNumberOfServices,
+  apmMaxNumberOfServices,
   apmEnableTableSearchBar,
 } from '../common/ui_settings_keys';
 export { alertsLocatorID, uptimeOverviewLocatorID } from '../common';
@@ -88,6 +89,7 @@ export { useFetchDataViews } from './hooks/use_fetch_data_views';
 export { useTimeBuckets } from './hooks/use_time_buckets';
 export { createUseRulesLink } from './hooks/create_use_rules_link';
 export { useSummaryTimeRange } from './hooks/use_summary_time_range';
+export { useInvestigateAlert, useInvestigationAvailability } from './hooks/use_investigate_alert';
 
 export { buildEsQuery } from './utils/build_es_query';
 

@@ -226,7 +226,7 @@ describe('AlertZeroPlugin feature-flag gating', () => {
       );
 
       expect(registerAgentType).toHaveBeenCalledWith(agentBuilder);
-      expect(agentBuilder.attachments.registerType).toHaveBeenCalledTimes(1);
+      expect(agentBuilder.attachments.registerType).toHaveBeenCalledTimes(2);
     });
 
     it('registers the inference tiers with the optional searchInferenceEndpoints setup contract', () => {

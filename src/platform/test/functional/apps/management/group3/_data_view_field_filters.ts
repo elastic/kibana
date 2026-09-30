@@ -17,6 +17,12 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const find = getService('find');
   const PageObjects = getPageObjects(['common', 'home', 'settings', 'discover', 'header']);
 
+  // Migration recommendation: MIGRATE TO SCOUT
+  // Tests the Source Filters tab of a data view: creating a field filter and then modifying it.
+  // No existing Scout coverage found. Both tests are standard UI workflows (navigate → interact →
+  // assert) with no special infrastructure constraints. Fixture loading (discover kbn_archiver) is
+  // supported in Scout via kibanaServer.importExport equivalents. The `find.byClassName` call in the
+  // modify test should be rewritten using a Playwright locator instead.
   describe('data view field filters', function describeIndexTests() {
     before(async function () {
       await browser.setWindowSize(1200, 800);
