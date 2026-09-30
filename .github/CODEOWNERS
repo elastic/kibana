@@ -581,6 +581,7 @@ src/platform/packages/shared/kbn-data-service-server @elastic/kibana-discover
 src/platform/packages/shared/kbn-data-source @elastic/kibana-discover
 src/platform/packages/shared/kbn-data-view-utils @elastic/kibana-discover
 src/platform/packages/shared/kbn-data-view-validation @elastic/kibana-discover
+src/platform/packages/shared/kbn-data-views-types @elastic/kibana-data-discovery
 src/platform/packages/shared/kbn-datemath @elastic/kibana-discover
 src/platform/packages/shared/kbn-default-tracer @elastic/kibana-core
 src/platform/packages/shared/kbn-design-tools @elastic/appex-sharedux
@@ -2649,6 +2650,7 @@ src/platform/packages/shared/kbn-connector-specs/src/specs/atlassian/** @elastic
 src/platform/packages/shared/kbn-connector-specs/src/specs/aws_cloudwatch/** @elastic/workflows-eng
 src/platform/packages/shared/kbn-connector-specs/src/specs/aws_lambda/** @elastic/workflows-eng
 src/platform/packages/shared/kbn-connector-specs/src/specs/aws_x_ray/** @elastic/workflows-eng
+src/platform/packages/shared/kbn-connector-specs/src/specs/azure_aks/** @elastic/nightshift-context-and-research-team
 src/platform/packages/shared/kbn-connector-specs/src/specs/azure_blob/** @elastic/workchat-eng
 src/platform/packages/shared/kbn-connector-specs/src/specs/azure_functions/** @elastic/nightshift-context-and-research-team
 src/platform/packages/shared/kbn-connector-specs/src/specs/azure_monitor/** @elastic/nightshift-context-and-research-team
@@ -3517,6 +3519,7 @@ x-pack/platform/plugins/shared/actions/server/lib/token_tracking @elastic/securi
 /x-pack/solutions/security/test/security_solution_api_integration/test_suites/edr_workflows/ @elastic/security-defend-workflows
 /x-pack/solutions/security/plugins/security_solution/test/scout/edr_artifacts/ @elastic/security-defend-workflows
 /x-pack/solutions/security/plugins/security_solution/test/scout/edr_response_actions/ @elastic/security-defend-workflows
+/x-pack/solutions/security/plugins/security_solution/test/scout_edr_real_fleet/ @elastic/security-defend-workflows
 /x-pack/solutions/security/plugins/security_solution_serverless/public/upselling/sections/endpoint_management @elastic/security-defend-workflows
 /x-pack/solutions/security/plugins/security_solution_serverless/server/endpoint @elastic/security-defend-workflows
 /x-pack/solutions/security/plugins/security_solution_serverless/server/ai4soc @elastic/security-defend-workflows
@@ -3908,6 +3911,8 @@ src/platform/packages/shared/kbn-apm-ui-shared/src/components/genai @elastic/obs
 /.buildkite/pipelines/build_pr_and_test_entity_store_performance.yml @elastic/contextual-security
 /.buildkite/scripts/steps/test/scout/ @elastic/appex-qa @elastic/kibana-operations
 /.buildkite/scout_ci_config.yml @elastic/appex-qa
+/.buildkite/pipelines/security_solution/scout_edr_real_fleet.yml @elastic/security-defend-workflows
+/.buildkite/pipeline-resource-definitions/kibana-scout-edr-real-fleet.yml @elastic/security-defend-workflows
 
 # Flaky test report pipeline (kibana / report-flaky-tests)
 /.buildkite/pipeline-resource-definitions/kibana-report-flaky-tests.yml @elastic/appex-qa @elastic/kibana-operations

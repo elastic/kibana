@@ -17,7 +17,7 @@ import {
   EuiTextArea,
 } from '@elastic/eui';
 import type { DismissReason } from '@kbn/proposals-common';
-import { DISMISS_REASON_OPTIONS } from '@kbn/proposals-plugin/public';
+import { DISMISS_REASON_OPTIONS } from '@kbn/proposals-ui';
 import type { InvestigationClosePreviewResponse } from '@kbn/agentic-investigations-plugin/common';
 import { PendingProposalsList } from './pending_proposals_list';
 import * as i18n from './translations';
@@ -74,7 +74,7 @@ export const CloseInvestigationModal: React.FC<CloseInvestigationModalProps> = (
   onConfirm,
   isLoading = false,
 }) => {
-  const [dismissReason, setDismissReason] = useState<DismissReason>('wrong');
+  const [dismissReason, setDismissReason] = useState<DismissReason>('no_reason');
   const [rationale, setRationale] = useState('');
 
   const hasProposals = (preview?.pending_proposal_count ?? 0) > 0;
