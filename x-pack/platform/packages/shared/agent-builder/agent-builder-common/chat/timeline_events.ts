@@ -17,6 +17,7 @@ import type {
 } from './conversation';
 import type { RoundState } from './round_state';
 import type { UserPrincipalType } from '../base/users';
+import type { ExecutionInterruption } from './events';
 
 /**
  * The projection format that new writes are stamped at.
@@ -70,6 +71,15 @@ export interface EventActor {
 }
 
 /**
+ * Whether a chat request executes the agent. `never` appends the user message to the conversation
+ * and returns, leaving the execution options unused.
+ */
+export enum ChatTriggerMode {
+  Always = 'always',
+  Never = 'never',
+}
+
+/**
  * What caused an agent run to start.
  */
 export enum TimelineTriggerType {
@@ -114,7 +124,7 @@ export interface ServerAssignedEventFields {
  * `TType` is open here; `BaseTimelineEventInput` re-adds the `TimelineEventType` constraint so
  * the closed `TimelineEvent` union and all existing narrowing remain unaffected.
  */
-export interface ConversationEventInput<TType extends string = string, TData = unknown>
+export interface ConversationEventInput<TType extends string = string, TData = object>
   extends Partial<ServerAssignedEventFields> {
   /** The event type discriminator. */
   type: TType;
@@ -129,7 +139,7 @@ export interface ConversationEventInput<TType extends string = string, TData = u
 /** A stored conversation event: producer fields plus server-assigned fields made required. */
 export type ConversationEvent<
   TType extends string = string,
-  TData = unknown
+  TData = object
 > = ConversationEventInput<TType, TData> & ServerAssignedEventFields;
 
 /** The fields a producer supplies for a timeline event. */
@@ -229,13 +239,14 @@ export type ExecutionTerminatedEvent = BaseTimelineEvent<
 
 /**
  * The run summary of an execution that did not complete. Same fields as `ExecutionRunSummary`
- * minus `steps` (stored as separate `execution_step` events), `state` (an interrupted execution is
- * never resumed) and `time_to_first_token` (unknown when no answer streamed).
+ * minus `steps` (stored as separate `execution_step` events) and `state` (an interrupted
+ * execution is never resumed). `time_to_first_token` is optional: the interruption writes never
+ * set it (unknown when no answer streamed); it appears only on re-serialisations of a round whose
+ * paused execution had a non-zero value, so that rounds → events → rounds is an identity.
  *
  * Invariants: an execution has at most one terminal event (`execution_terminated`,
  * `execution_failed` or `execution_aborted`), and exactly one whenever the conversation store
- * accepted the terminal write. An execution with no `execution_terminated` never forms a round
- * and never answers a prompt.
+ * accepted the terminal write. An execution with no terminal never forms a round.
  */
 export type ExecutionPartialRunSummary = Pick<
   ExecutionRunSummary,
@@ -243,6 +254,8 @@ export type ExecutionPartialRunSummary = Pick<
 > & {
   /** Model usage; absent when the run failed before the model provider was resolved. */
   model_usage?: RoundModelUsageStats;
+  /** Time to first token, in ms, when known. */
+  time_to_first_token?: number;
 };
 
 /** A run that ended in an error. */
@@ -345,6 +358,63 @@ export const isExecutionTerminalEvent = (event: {
   type: string;
 }): event is ExecutionTerminalEvent => EXECUTION_TERMINAL_EVENT_TYPES.has(event.type);
 
+/**
+ * Ids of the `execution_terminated` (`prompt_requested`) events some `prompt_response` answers.
+ * Raw events only: the folded context timeline carries no `prompt_response`.
+ */
+export const answeredPromptRequestIds = (events: ReadonlyArray<ConversationEvent>): Set<string> => {
+  const ids = new Set<string>();
+  for (const event of events) {
+    if (event.type === TimelineEventType.promptResponse) {
+      ids.add((event as PromptResponseEvent).data.prompt_requested_event_id);
+    }
+  }
+  return ids;
+};
+
+/** The last terminal event of any kind, by array position. */
+export const lastExecutionTerminal = (
+  events: ReadonlyArray<ConversationEvent>
+): ExecutionTerminalEvent | undefined => {
+  for (let index = events.length - 1; index >= 0; index--) {
+    const event = events[index];
+    if (isExecutionTerminalEvent(event)) {
+      return event;
+    }
+  }
+  return undefined;
+};
+
+/**
+ * The pause the next input must answer, or undefined. The single definition of "paused": the
+ * last terminal is an `execution_terminated` with a `prompt_requested` outcome that no
+ * `prompt_response` answers. On the folded context timeline the join is always empty, so this
+ * reduces to "the last terminal is a pause".
+ */
+export const pendingPromptRequest = (
+  events: ReadonlyArray<ConversationEvent>
+): ExecutionTerminatedEvent | undefined => {
+  const terminal = lastExecutionTerminal(events);
+  if (!terminal || terminal.type !== TimelineEventType.executionTerminated) {
+    return undefined;
+  }
+  if (terminal.data.outcome.type !== 'prompt_requested') {
+    return undefined;
+  }
+  return answeredPromptRequestIds(events).has(terminal.id) ? undefined : terminal;
+};
+
+/** How an interrupted execution ended, from its terminal event. */
+export const interruptionOfTerminal = (
+  terminal: ExecutionFailedEvent | ExecutionAbortedEvent
+): ExecutionInterruption =>
+  terminal.type === TimelineEventType.executionFailed
+    ? { type: 'failed', error: terminal.data.error }
+    : {
+        type: 'aborted',
+        ...(terminal.data.aborted_by ? { aborted_by: terminal.data.aborted_by } : {}),
+      };
+
 /** The discriminated union of all stored timeline events. */
 export type TimelineEvent =
   | UserMessageEvent
@@ -401,6 +471,10 @@ export const ROUND_DERIVED_EVENT_ID_SUFFIXES = {
   promptResponse: '::prompt_response',
 } as const;
 
+/** ID of the `user_message` event derived from a round. */
+export const roundUserMessageEventId = (roundId: string): string =>
+  `${roundId}${ROUND_DERIVED_EVENT_ID_SUFFIXES.userMessage}`;
+
 /** ID for a step event. */
 export const roundStepEventId = (roundId: string, sequence: number): string =>
   `${roundId}${ROUND_DERIVED_EVENT_ID_SUFFIXES.stepPrefix}${sequence}`;
@@ -425,6 +499,21 @@ export const executionTerminatedEventId = (roundId: string, executionIndex: numb
     : `${resumeExecutionId(roundId, executionIndex)}${
         ROUND_DERIVED_EVENT_ID_SUFFIXES.executionTerminated
       }`;
+
+/**
+ * ID for a step event of any execution. Step ids are not uniform: the initial run numbers steps
+ * off the round id, a resume numbers them off its own execution id.
+ */
+export const executionStepEventId = (
+  roundId: string,
+  executionIndex: number,
+  sequence: number
+): string =>
+  executionIndex === 0
+    ? roundStepEventId(roundId, sequence)
+    : `${resumeExecutionId(roundId, executionIndex)}${
+        ROUND_DERIVED_EVENT_ID_SUFFIXES.stepPrefix
+      }${sequence}`;
 
 /**
  * Type names that are not covered by a `TimelineEventType` member but would still
@@ -472,6 +561,31 @@ export type ValidConversationEventType<T extends string> =
     : T extends BuiltInConversationEventTypeValue
     ? never
     : T;
+
+/**
+ * Validates a conversation event type name at runtime, throwing a descriptive error if invalid.
+ * Enforces the same three naming rules as the server-side registry:
+ *   1. May not contain the id delimiter (`::`)
+ *   2. May not be a reserved type (`execution`, `step`)
+ *   3. May not shadow a built-in timeline event type
+ *
+ * Pair with the compile-time {@link ValidConversationEventType} guard for full coverage.
+ */
+export const assertValidConversationEventType = (type: string): void => {
+  if (type.includes(CONVERSATION_EVENT_ID_DELIMITER)) {
+    throw new Error(
+      `Conversation event type "${type}" must not contain "${CONVERSATION_EVENT_ID_DELIMITER}"`
+    );
+  }
+  if ((RESERVED_CONVERSATION_EVENT_TYPES as readonly string[]).includes(type)) {
+    throw new Error(`Conversation event type "${type}" is reserved and cannot be registered`);
+  }
+  if (isBuiltInConversationEventType(type)) {
+    throw new Error(
+      `Conversation event type "${type}" is a built-in timeline event type and cannot be registered`
+    );
+  }
+};
 
 /** Input event for adding to a conversation. Server assigns id, created_at, and actor. */
 export interface ConversationAddEventInput {

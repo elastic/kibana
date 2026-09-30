@@ -6,7 +6,6 @@
  */
 
 import React, { memo, useMemo } from 'react';
-import { endpointActionResponseCodes } from '../lib/endpoint_action_response_codes';
 import type {
   ActionDetails,
   KillProcessActionOutputContent,
@@ -51,13 +50,15 @@ export const KillProcessActionResult = memo<
     dataTestSubj: 'killProcess',
   });
 
-  if (actionDetails?.isCompleted && actionDetails.wasSuccessful) {
+  if (actionDetails?.isCompleted) {
     return (
       <ResultComponent
-        title={
-          endpointActionResponseCodes[
-            actionDetails?.outputs?.[actionDetails.agents[0]]?.content.code ?? ''
-          ]
+        showAs={
+          actionDetails?.wasCanceled
+            ? 'canceled'
+            : actionDetails?.wasSuccessful
+            ? 'success'
+            : 'failure'
         }
       >
         <KillSuspendProcessActionResult

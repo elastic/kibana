@@ -46,7 +46,7 @@ const storageSettings = {
       }),
       parent_execution_id: types.keyword({}),
       space_id: types.keyword({}),
-      requester: types.object({
+      owner: types.object({
         dynamic: false,
         properties: {
           id: types.keyword({}),
@@ -85,7 +85,7 @@ export interface AgentExecutionProperties {
   interactivity?: InteractivityConfig;
   parent_execution_id?: string;
   space_id: string;
-  requester?: UserIdAndName;
+  owner?: UserIdAndName;
   agent_params: AgentExecutionParams;
   error?: SerializedExecutionError;
   abort_reason?: ExecutionAbortReason;

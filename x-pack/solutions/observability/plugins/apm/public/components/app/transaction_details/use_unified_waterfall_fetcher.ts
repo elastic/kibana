@@ -35,15 +35,19 @@ export function useUnifiedWaterfallFetcher({
   traceId,
   entryTransactionId,
   serviceName,
+  refreshToken,
 }: {
   start: string;
   end: string;
   traceId?: string;
   entryTransactionId?: string;
   serviceName?: string;
+  /** Host-local refresh signal (e.g. service flyout) — avoids app-wide timeRangeId bumps. */
+  refreshToken?: number;
 }) {
   const { data = INITIAL_DATA, status } = useFetcher(
     (callApmApi) => {
+      void refreshToken;
       if (traceId && start && end) {
         return callApmApi('GET /internal/apm/unified_traces/{traceId}', {
           params: {
@@ -53,7 +57,7 @@ export function useUnifiedWaterfallFetcher({
         });
       }
     },
-    [traceId, start, end, entryTransactionId, serviceName]
+    [traceId, start, end, entryTransactionId, serviceName, refreshToken]
   );
 
   if (traceId === undefined) {

@@ -21,6 +21,7 @@ import { EntityStoreGlobalStateClient } from '../domain/saved_objects';
 import { HistorySnapshotClient } from '../domain/history_snapshot';
 import { wrapTaskRun } from '../telemetry/traces';
 import { shouldDeleteOrphanedEntityStoreTask } from './should_delete_orphaned_task';
+import { buildEaExecutionContext, EA_EXECUTION_CONTEXT_NAMES } from './execution_context';
 
 const config = TasksConfig[EntityStoreTaskType.enum.historySnapshot];
 
@@ -104,22 +105,31 @@ export function registerHistorySnapshotTask({
         },
       },
       createTaskRunner: ({ taskInstance, signal }) => ({
-        run: () =>
-          wrapTaskRun({
-            spanName: 'entityStore.task.history_snapshot.run',
-            namespace: taskInstance.state.namespace,
-            attributes: {
-              'entity_store.task.id': taskInstance.id,
-              'entity_store.task.type': taskType,
-            },
-            run: () =>
-              runHistorySnapshotTask({
-                taskInstance,
-                signal,
-                core,
-                logger,
-              }),
-          }),
+        run: async () => {
+          const [coreStart] = await core.getStartServices();
+          return coreStart.executionContext.withContext(
+            buildEaExecutionContext(
+              EA_EXECUTION_CONTEXT_NAMES.ENTITY_STORE_HISTORY_SNAPSHOT_TASK,
+              taskInstance.id
+            ),
+            () =>
+              wrapTaskRun({
+                spanName: 'entityStore.task.history_snapshot.run',
+                namespace: taskInstance.state.namespace,
+                attributes: {
+                  'entity_store.task.id': taskInstance.id,
+                  'entity_store.task.type': taskType,
+                },
+                run: () =>
+                  runHistorySnapshotTask({
+                    taskInstance,
+                    signal,
+                    core,
+                    logger,
+                  }),
+              })
+          );
+        },
       }),
     },
   });

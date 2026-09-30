@@ -9,8 +9,8 @@ import type { HttpStart } from '@kbn/core-http-browser';
 import {
   DEFAULT_SIGNALS_PAGE_SIZE,
   SIGNALS_INTERNAL_API_VERSION,
-  signalGroupsPath,
-  signalsPath,
+  SIGNAL_GROUPS_PATH,
+  SIGNALS_PATH,
 } from '../../../common/constants';
 import type {
   ListSignalGroupsResponse,
@@ -26,7 +26,7 @@ export const listSignalGroups = (
   http: HttpStart,
   { signal }: ListSignalGroupsArgs = {}
 ): Promise<ListSignalGroupsResponse> =>
-  http.get<ListSignalGroupsResponse>(signalGroupsPath, {
+  http.get<ListSignalGroupsResponse>(SIGNAL_GROUPS_PATH, {
     version: SIGNALS_INTERNAL_API_VERSION,
     ...(signal ? { signal } : {}),
   });
@@ -43,7 +43,7 @@ export const listSignals = (
   http: HttpStart,
   { tag, from = 0, size = DEFAULT_SIGNALS_PAGE_SIZE, signal }: ListSignalsArgs
 ): Promise<ListSignalsResponse> =>
-  http.get<ListSignalsResponse>(signalsPath, {
+  http.get<ListSignalsResponse>(SIGNALS_PATH, {
     version: SIGNALS_INTERNAL_API_VERSION,
     query: { tag, from, size },
     ...(signal ? { signal } : {}),

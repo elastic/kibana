@@ -48,18 +48,38 @@ describe('AgentExecutionClient', () => {
       );
     });
 
-    it('persists the requester', async () => {
-      const requester = {
+    it('stores the owner on the document and returns it', async () => {
+      const owner = { id: 'profile-alice', username: 'alice' };
+
+      const execution = await client.create({ ...createParams, owner });
+
+      expect(mockStorageClient.index).toHaveBeenCalledWith(
+        expect.objectContaining({ document: expect.objectContaining({ owner }) })
+      );
+      expect(execution.owner).toEqual(owner);
+    });
+
+    it('stores a service account owner with its principal type', async () => {
+      const owner = {
         id: 'service_account:kibana/automation',
         username: 'kibana/automation',
         type: 'service_account' as const,
       };
 
-      await client.create({ ...createParams, requester });
+      const execution = await client.create({ ...createParams, owner });
 
       expect(mockStorageClient.index).toHaveBeenCalledWith(
-        expect.objectContaining({ document: expect.objectContaining({ requester }) })
+        expect.objectContaining({ document: expect.objectContaining({ owner }) })
       );
+      expect(execution.owner).toEqual(owner);
+    });
+
+    it('omits the owner when the caller has none', async () => {
+      const execution = await client.create(createParams);
+
+      const [{ document }] = mockStorageClient.index.mock.calls[0];
+      expect(document).not.toHaveProperty('owner');
+      expect(execution.owner).toBeUndefined();
     });
 
     it('propagates document conflicts to the caller', async () => {
