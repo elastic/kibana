@@ -152,13 +152,28 @@ const isSeededWorkspaceRead = ({ tool_id: toolId, params }: InvestigationToolCal
   return SEEDED_WORKSPACE_ROOTS.some((root) => resolved.startsWith(`${root}/`));
 };
 
+const renderToolResultValue = (value: unknown): string =>
+  typeof value === 'string' ? value : JSON.stringify(value, boundToolCallResult) ?? '';
+
+// Top-level string fields (e.g. `stdout`) are rendered raw so command output isn't JSON-escaped.
+const renderToolResultData = (data: unknown): string => {
+  if (typeof data !== 'object' || data === null || Array.isArray(data)) {
+    return renderToolResultValue(data);
+  }
+  return Object.entries(data)
+    .map(([key, value]) => `${key}: ${renderToolResultValue(value)}`)
+    .join('\n');
+};
+
 const renderToolCallResults = (results: unknown[]): string =>
-  JSON.stringify(
-    results.map((result) =>
-      typeof result === 'object' && result !== null && 'data' in result ? result.data : result
-    ),
-    boundToolCallResult
-  ).slice(0, MAX_TOOL_CALL_RESULT_CHARS);
+  results
+    .map((result) =>
+      renderToolResultData(
+        typeof result === 'object' && result !== null && 'data' in result ? result.data : result
+      )
+    )
+    .join('\n')
+    .slice(0, MAX_TOOL_CALL_RESULT_CHARS);
 
 /**
  * Renders tool calls one per line, followed by a bounded result line when the call's results are

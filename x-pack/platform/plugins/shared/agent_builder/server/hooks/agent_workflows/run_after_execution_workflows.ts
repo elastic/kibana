@@ -25,22 +25,35 @@ import { withDeclaredInputs } from './with_declared_inputs';
 
 type WorkflowApi = WorkflowsServerPluginSetup['management'];
 
-/** Tool results can be megabytes (file reads, command output); cap what each workflow execution receives. */
-export const MAX_TOOL_RESULT_DATA_CHARS = 4_000;
+// Tool results can be megabytes (file reads, command output), so long strings and arrays are cut
+// in place, keeping each result's shape, before a workflow execution receives them.
+export const MAX_TOOL_RESULT_STRING_CHARS = 4_000;
+export const MAX_TOOL_RESULT_ARRAY_ITEMS = 50;
+export const MAX_TOOL_RESULT_DATA_CHARS = 32_000;
+
+const boundToolResultValue = (_key: string, value: unknown): unknown => {
+  if (typeof value === 'string') {
+    return value.slice(0, MAX_TOOL_RESULT_STRING_CHARS);
+  }
+  if (Array.isArray(value)) {
+    return value.slice(0, MAX_TOOL_RESULT_ARRAY_ITEMS);
+  }
+  return value;
+};
 
 const boundToolResult = (result: ToolResult): ToolResult => {
-  const serialized = JSON.stringify(result.data) ?? '';
-  if (serialized.length <= MAX_TOOL_RESULT_DATA_CHARS) {
+  const bounded = JSON.stringify(result.data, boundToolResultValue);
+  if (bounded === undefined) {
     return result;
   }
-  return {
-    tool_result_id: result.tool_result_id,
-    type: ToolResultType.other,
-    data: {
-      original_type: result.type,
-      truncated_data: serialized.slice(0, MAX_TOOL_RESULT_DATA_CHARS),
-    },
-  };
+  if (bounded.length > MAX_TOOL_RESULT_DATA_CHARS) {
+    return {
+      tool_result_id: result.tool_result_id,
+      type: ToolResultType.other,
+      data: { omitted: `result data exceeded ${MAX_TOOL_RESULT_DATA_CHARS} characters` },
+    };
+  }
+  return { ...result, data: JSON.parse(bounded) };
 };
 
 export interface RunAfterExecutionWorkflowsParams {

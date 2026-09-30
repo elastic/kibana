@@ -451,8 +451,20 @@ describe('renderToolCalls', () => {
 
     const [callLine, resultLine] = rendered.split('\n');
     expect(callLine).toBe('- nightshift.sandbox_bash {"command":"esql \\"FROM logs-*\\""}');
-    expect(resultLine).toMatch(/^ {2}result: \[\{"stdout":"pool exhausted x+/);
+    expect(resultLine).toMatch(/^ {2}result: stdout: pool exhausted x+$/);
     expect(resultLine.length).toBeLessThan(2_100);
+  });
+
+  it('renders string result fields raw instead of JSON-escaped', () => {
+    const rendered = renderToolCalls([
+      {
+        tool_id: 'nightshift.sandbox_bash',
+        params: { command: 'esql "FROM logs-*"' },
+        results: [{ type: 'other', data: { stdout: '{\n  "values": [["a"]]\n}', exit_code: 0 } }],
+      },
+    ]);
+
+    expect(rendered).toContain('  result: stdout: {\n  "values": [["a"]]\n}\nexit_code: 0');
   });
 
   it('omits results for reads of the Cortex and decision-tree files seeded into the sandbox', () => {
@@ -477,7 +489,7 @@ describe('renderToolCalls', () => {
 
     expect(rendered.match(/result:/g)).toHaveLength(1);
     expect(rendered).toContain(
-      '- nightshift_sandbox_view_file {"file_path":"/workspace/notes/errors.txt"}\n  result: [{"text":"page body"}]'
+      '- nightshift_sandbox_view_file {"file_path":"/workspace/notes/errors.txt"}\n  result: text: page body'
     );
   });
 
