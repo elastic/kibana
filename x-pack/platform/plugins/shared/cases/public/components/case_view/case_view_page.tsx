@@ -19,6 +19,7 @@ import { CaseDetailsAppHeader } from './components/case_details_header';
 import { CaseViewTabContent } from './components/case_view_tab_content';
 import { CaseDetailsTour } from './tour/case_details_tour';
 import { useCaseRefreshRef } from './hooks/use_case_refresh_ref';
+import { useCaseDataWithVisibleConversations } from '../attachments/conversation/use_visible_conversations';
 
 export type CaseViewPageComponentProps = Omit<CaseViewPageProps, 'fetchCase'>;
 
@@ -37,6 +38,7 @@ export const CaseViewPage = React.memo<CaseViewPageComponentProps>(({ caseData, 
 
   const { onUpdateField, isLoading } = useOnUpdateField({ caseData });
   useCaseRefreshRef({ refreshRef, isLoading });
+  const visibleCaseData = useCaseDataWithVisibleConversations(caseData);
 
   return (
     <>
@@ -53,7 +55,7 @@ export const CaseViewPage = React.memo<CaseViewPageComponentProps>(({ caseData, 
           <LensAttachReturnConsumer caseId={caseData.id} />
         )}
         <CaseViewTabContent
-          caseData={caseData}
+          caseData={visibleCaseData}
           searchTerm={searchTerm}
           onSearch={onSearch}
           onUpdateField={onUpdateField}

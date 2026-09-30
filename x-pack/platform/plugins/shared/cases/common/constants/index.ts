@@ -521,6 +521,9 @@ export const CASE_VIEW_ATTACH_BUTTON_CLICKED_EVENT_TYPE =
 export const CASE_VIEW_ATTACH_MENU_ITEM_CLICKED_EVENT_TYPE =
   'case_view_attach_menu_item_clicked' as const;
 
+export const CASE_VIEW_CONVERSATION_ATTACHMENT_OPENED_EVENT_TYPE =
+  'case_view_conversation_attachment_opened' as const;
+
 export const CASE_MARKDOWN_EDITOR_PLUGIN_CLICKED_EVENT_TYPE =
   'case_markdown_editor_plugin_clicked' as const;
 

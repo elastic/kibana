@@ -13,6 +13,7 @@ import {
   CASE_PAGE_VIEW_EVENT_TYPE,
   CASE_VIEW_ATTACH_BUTTON_CLICKED_EVENT_TYPE,
   CASE_VIEW_ATTACH_MENU_ITEM_CLICKED_EVENT_TYPE,
+  CASE_VIEW_CONVERSATION_ATTACHMENT_OPENED_EVENT_TYPE,
   CASE_VIEW_ATTACHMENT_ACCORDION_OPENED_EVENT_TYPE,
   CASE_VIEW_ATTACHMENTS_SUB_TAB_CLICKED_EVENT_TYPE,
   CASE_VIEW_ATTACHMENTS_TAB_CLICKED_EVENT_TYPE,
@@ -151,7 +152,27 @@ export const registerAnalytics = ({
         type: 'keyword',
         _meta: {
           description:
-            'The attach menu option selected, either "file", "timeline" or "saved_object"',
+            'The attach menu option selected: "file", "timeline", "saved_object", or "conversation"',
+          optional: false,
+        },
+      },
+    },
+  });
+
+  analyticsService.registerEventType({
+    eventType: CASE_VIEW_CONVERSATION_ATTACHMENT_OPENED_EVENT_TYPE,
+    schema: {
+      owner: {
+        type: 'keyword',
+        _meta: {
+          description: 'The solution ID (owner) of the case the conversation was opened from',
+          optional: false,
+        },
+      },
+      open_target: {
+        type: 'keyword',
+        _meta: {
+          description: 'Where the conversation opened: "chat" (flyout) or "full_page"',
           optional: false,
         },
       },
