@@ -18,8 +18,14 @@ import { fetchTopNodes } from '../services/fetch_top_nodes';
 import { makeEdgeId, makeNodeId } from '../services/workspace/graph_merge_planner';
 import {
   buildExpandExploreRequest,
+  buildFillConnectionsRequest,
+  buildNodeQuery,
   buildSearchExploreRequest,
 } from '../services/workspace/graph_request_builders';
+import {
+  limitNodesForConnectionSearch,
+  transformFillConnectionsResponse,
+} from '../services/workspace/fill_connections';
 import {
   transformExpandResponse,
   transformSearchResponse,
@@ -497,6 +503,7 @@ export const registerWorkspaceListeners = (
     notifications,
     handleSearchQueryError,
     exploreGraph,
+    searchGraph,
   }: GraphStoreDependencies
 ) => {
   startListening({
@@ -539,7 +546,45 @@ export const registerWorkspaceListeners = (
           }
         }
       } else if (fillWorkspaceConnections.match(action)) {
-        workspace.fillConnections(listenerApi.getState().workspace.selectedNodeIds, action.payload);
+        listenerApi.cancelActiveListeners();
+        const { exploreControls, indexName } = workspace.options;
+        if (!exploreControls || !indexName) return;
+        const selectedNodes = listenerApi
+          .getState()
+          .workspace.selectedNodeIds.map((id) => workspace.nodesMap[id])
+          .filter((node) => node !== undefined);
+        const unpackedNodes =
+          selectedNodes.length > 0
+            ? workspace.returnUnpackedGroupeds(selectedNodes)
+            : workspace.nodes;
+        const nodes = limitNodesForConnectionSearch(
+          unpackedNodes.filter((node) => node.parent === undefined)
+        );
+        const request = buildFillConnectionsRequest(
+          nodes.map((node) => buildNodeQuery(workspace.returnUnpackedGroupeds([node])))
+        );
+        try {
+          const response = await searchGraph(indexName, request);
+          listenerApi.throwIfCancelled();
+          const { graph, existingEdgeDocCounts } = transformFillConnectionsResponse({
+            response,
+            nodes,
+            existingEdgeIds: new Set(Object.keys(workspace.edgesMap)),
+            useSignificance: exploreControls.useSignificance,
+            minDocCount: exploreControls.minDocCount,
+            maxNewEdges: action.payload ?? 10,
+          });
+          Object.entries(existingEdgeDocCounts).forEach(([id, docCount]) => {
+            const edge = workspace.edgesMap[id];
+            edge.doc_count = Math.max(edge.doc_count ?? 0, docCount);
+          });
+          listenerApi.dispatch(workspaceGraphMerged(graph));
+          workspace.mergeGraph(graph);
+        } catch (error) {
+          if (!listenerApi.signal.aborted) {
+            handleSearchQueryError(error as Error);
+          }
+        }
       }
     },
   });

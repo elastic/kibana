@@ -33,6 +33,7 @@ export interface WorkspaceEdge {
   id?: string;
   weight: number;
   width: number;
+  doc_count?: number;
   label: string;
   source: WorkspaceNode;
   target: WorkspaceNode;
