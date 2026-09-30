@@ -94,9 +94,9 @@ export interface Workspace {
   undo: () => void;
   redo: () => void;
   expandNodes: (nodeIds: string[], targetOptions: TargetOptions) => void;
-  deleteSelection: () => void;
-  blocklistSelection: () => void;
-  groupSelections: (node: WorkspaceNode | undefined) => void;
+  deleteNodes: (nodeIds: string[]) => void;
+  blocklistNodes: (nodeIds: string[]) => void;
+  groupNodes: (parentId: string, nodeIds: string[]) => void;
   ungroup: (node: WorkspaceNode | undefined) => void;
   callElasticsearch: (request: any) => void;
   search: (qeury: any, fieldsChoice: WorkspaceField[] | undefined, numHops: number) => void;

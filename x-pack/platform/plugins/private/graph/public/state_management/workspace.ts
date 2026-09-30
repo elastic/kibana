@@ -533,18 +533,19 @@ export const registerWorkspaceListeners = (
 
   startListening({
     predicate: (action) => topologyActionTypes.has(action.type),
-    effect: (action) => {
+    effect: (action, listenerApi) => {
+      const originalSelectedNodeIds = listenerApi.getOriginalState().workspace.selectedNodeIds;
       const workspace = getWorkspace();
       if (!workspace) {
         return;
       }
 
       if (deleteSelectedNodes.match(action)) {
-        workspace.deleteSelection();
+        workspace.deleteNodes(originalSelectedNodeIds);
       } else if (blocklistSelectedNodes.match(action)) {
-        workspace.blocklistSelection();
+        workspace.blocklistNodes(originalSelectedNodeIds);
       } else if (groupSelectedNodes.match(action)) {
-        workspace.groupSelections(workspace.nodesMap[action.payload]);
+        workspace.groupNodes(action.payload, originalSelectedNodeIds);
       } else if (ungroupNode.match(action)) {
         workspace.ungroup(workspace.nodesMap[action.payload]);
       } else if (mergeNodes.match(action)) {
