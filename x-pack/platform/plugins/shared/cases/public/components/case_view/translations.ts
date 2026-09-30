@@ -165,6 +165,10 @@ export const EXTRACT_OBSERVABLES_LC = i18n.translate(
   }
 );
 
+export const AUTO_PUSH_LC = i18n.translate('xpack.cases.caseView.autoPushLowercaseLabel', {
+  defaultMessage: `automatic push to the external incident`,
+});
+
 export const DOES_NOT_EXIST_TITLE = i18n.translate('xpack.cases.caseView.doesNotExist.title', {
   defaultMessage: 'This case does not exist',
 });

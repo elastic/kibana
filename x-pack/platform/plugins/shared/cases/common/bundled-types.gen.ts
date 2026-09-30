@@ -397,6 +397,19 @@ export const Settings = lazySchema(() =>
       .describe(
         "When true, observables (for example, IPs, hashes, and URLs) are automatically extracted from case comments. When omitted on create, the space configuration default is used. Falls back to the owner's default when no space configuration exists: `true` for Security, `false` for Stack and Observability. Precedence: explicit value > template setting > space config > owner default. For owners that do not support observable extraction (currently Observability), an omitted value resolves to `false` regardless of the space configuration.\n"
       ),
+    /**
+      * Technical preview. Controls automatic synchronization between the case and the external incident created by its connector. When `autoPush` is true, changes to the case are pushed to the external system without a manual push. `conflictStrategy` decides which side wins when a field changed on both sides since the last push: `external` applies the external value, `kibana` keeps the case value.
+
+      */
+    externalSync: z
+      .object({
+        autoPush: z.boolean(),
+        conflictStrategy: z.enum(['external', 'kibana']),
+      })
+      .optional()
+      .describe(
+        'Technical preview. Controls automatic synchronization between the case and the external incident created by its connector. When `autoPush` is true, changes to the case are pushed to the external system without a manual push. `conflictStrategy` decides which side wins when a field changed on both sides since the last push: `external` applies the external value, `kibana` keeps the case value.\n'
+      ),
   })
 );
 export type Settings = z.infer<typeof Settings>;

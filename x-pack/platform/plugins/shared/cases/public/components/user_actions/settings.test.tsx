@@ -60,6 +60,27 @@ describe('createSettingsUserActionBuilder ', () => {
     }
   );
 
+  it('renders the automatic push setting', async () => {
+    const userAction = getUserAction('settings', UserActionActions.update, {
+      payload: {
+        settings: {
+          syncAlerts: true,
+          externalSync: { autoPush: true, conflictStrategy: 'external' },
+        },
+      },
+    });
+    const builder = createSettingsUserActionBuilder({
+      ...builderArgs,
+      userAction,
+    });
+
+    renderWithTestingProviders(<EuiCommentList comments={builder.build()} />);
+
+    expect(
+      screen.getByText('enabled sync alerts, enabled automatic push to the external incident')
+    ).toBeTruthy();
+  });
+
   it.each(tests2)(
     'renders correctly when sync alerts is changed and extract observables is not changed',
     async (syncAlerts, syncAlertsLabel) => {

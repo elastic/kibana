@@ -17,3 +17,23 @@ properties:
       value resolves to `false` regardless of the space configuration.
     type: boolean
     example: true
+  externalSync:
+    description: >
+      Technical preview. Controls automatic synchronization between the case and the external incident
+      created by its connector. When `autoPush` is true, changes to the case are pushed to the external
+      system without a manual push. `conflictStrategy` decides which side wins when a field changed on both
+      sides since the last push: `external` applies the external value, `kibana` keeps the case value.
+    type: object
+    required:
+      - autoPush
+      - conflictStrategy
+    properties:
+      autoPush:
+        type: boolean
+        example: true
+      conflictStrategy:
+        type: string
+        enum:
+          - external
+          - kibana
+        example: external

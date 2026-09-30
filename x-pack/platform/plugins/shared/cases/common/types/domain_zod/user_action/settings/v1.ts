@@ -12,6 +12,12 @@ export const SettingsUserActionPayloadSchema = z.object({
   settings: z.object({
     syncAlerts: z.boolean().optional(),
     extractObservables: z.boolean().optional(),
+    externalSync: z
+      .object({
+        autoPush: z.boolean(),
+        conflictStrategy: z.enum(['external', 'kibana']),
+      })
+      .optional(),
   }),
 });
 

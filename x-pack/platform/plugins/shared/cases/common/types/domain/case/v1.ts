@@ -68,6 +68,16 @@ export const CaseSeverityRt = rt.union([
  * Case
  */
 
+export const ExternalSyncConflictStrategyRt = rt.union([
+  rt.literal('external'),
+  rt.literal('kibana'),
+]);
+
+export const ExternalSyncSettingsRt = rt.strict({
+  autoPush: rt.boolean,
+  conflictStrategy: ExternalSyncConflictStrategyRt,
+});
+
 export const CaseSettingsRt = rt.intersection([
   rt.strict({
     syncAlerts: rt.boolean,
@@ -75,6 +85,7 @@ export const CaseSettingsRt = rt.intersection([
   rt.exact(
     rt.partial({
       extractObservables: rt.boolean,
+      externalSync: ExternalSyncSettingsRt,
     })
   ),
 ]);
@@ -228,6 +239,8 @@ export type Case = rt.TypeOf<typeof CaseRt>;
 export type Cases = rt.TypeOf<typeof CasesRt>;
 export type CaseAttributes = rt.TypeOf<typeof CaseAttributesRt>;
 export type CaseSettings = rt.TypeOf<typeof CaseSettingsRt>;
+export type ExternalSyncSettings = rt.TypeOf<typeof ExternalSyncSettingsRt>;
+export type ExternalSyncConflictStrategy = rt.TypeOf<typeof ExternalSyncConflictStrategyRt>;
 export type RelatedCase = rt.TypeOf<typeof RelatedCaseRt>;
 export type AttachmentTotals = rt.TypeOf<typeof AttachmentTotalsRt>;
 export type CaseBaseOptionalFields = rt.TypeOf<typeof CaseBaseOptionalFieldsRt>;
