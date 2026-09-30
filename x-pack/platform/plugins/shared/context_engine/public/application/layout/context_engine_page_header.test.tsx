@@ -22,7 +22,7 @@ const renderHeader = (services: ReturnType<typeof coreMock.createStart>) =>
         <EuiProvider>
           <KibanaContextProvider services={{ ...services, history: scopedHistoryMock.create() }}>
             <ContextEngineSubPageHeader
-              backLabel="Cancel"
+              backDestinationLabel="Context"
               backHref="/app/context_engine/"
               onBackClick={jest.fn()}
               pageTitle="Create AI index"

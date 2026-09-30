@@ -27,7 +27,10 @@ import { useAiIndex } from '../hooks/use_ai_index';
 import { useAiIndexOverviewSections } from '../hooks/use_ai_index_overview_sections';
 import { useKiList } from '../hooks/use_ki_list';
 import { useNavigation } from '../hooks/use_navigation';
-import { ContextEngineSubPageHeader } from '../layout/context_engine_page_header';
+import {
+  ContextEngineSubPageHeader,
+  contextEngineBackDestinationLabel,
+} from '../layout/context_engine_page_header';
 import {
   ContextEnginePageSection,
   ContextEnginePageTemplate,
@@ -35,10 +38,6 @@ import {
 import { CONTEXT_ENGINE_PATHS } from '../paths';
 
 type DetailTabId = 'overview' | 'knowledge_indicators';
-
-const backToContextLabel = i18n.translate('xpack.contextEngine.aiIndexDetail.backToContext', {
-  defaultMessage: 'Back to Context',
-});
 
 const managedBadgeLabel = i18n.translate('xpack.contextEngine.aiIndexDetail.managedBadge', {
   defaultMessage: 'Managed',
@@ -269,7 +268,7 @@ export const AiIndexDetailPage = () => {
       breadcrumbPageName={pageTitle || undefined}
     >
       <ContextEngineSubPageHeader
-        backLabel={backToContextLabel}
+        backDestinationLabel={contextEngineBackDestinationLabel}
         backHref={backHref}
         onBackClick={(event) => {
           event.preventDefault();

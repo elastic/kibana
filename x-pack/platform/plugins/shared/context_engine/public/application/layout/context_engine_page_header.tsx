@@ -12,10 +12,19 @@ import type {
   AppHeaderTab,
 } from '@kbn/app-header';
 import { APP_HEADER_TEST_SUBJECTS, AppHeader } from '@kbn/app-header';
+import { i18n } from '@kbn/i18n';
 import type { MouseEventHandler } from 'react';
 import React, { useCallback } from 'react';
 
 export const CONTEXT_ENGINE_BACK_BUTTON_TEST_SUBJ = APP_HEADER_TEST_SUBJECTS.back;
+
+/** AppHeader back control prefixes this with “Back to” for tooltip and aria-label. */
+export const contextEngineBackDestinationLabel = i18n.translate(
+  'xpack.contextEngine.navigation.backDestination',
+  {
+    defaultMessage: 'Context',
+  }
+);
 
 interface ContextEngineLandingHeaderProps {
   pageTitle: string;
@@ -34,7 +43,7 @@ export const ContextEngineLandingHeader = ({
 );
 
 interface ContextEngineSubPageHeaderProps {
-  backLabel: string;
+  backDestinationLabel: string;
   backHref: string;
   onBackClick?: MouseEventHandler;
   pageTitle: string;
@@ -45,7 +54,7 @@ interface ContextEngineSubPageHeaderProps {
 }
 
 export const ContextEngineSubPageHeader = ({
-  backLabel,
+  backDestinationLabel,
   backHref,
   onBackClick,
   pageTitle,
@@ -68,7 +77,7 @@ export const ContextEngineSubPageHeader = ({
       badges={badges}
       tabs={tabs}
       menu={menu}
-      back={{ href: backHref, label: backLabel, onClick: handleBackClick }}
+      back={{ href: backHref, label: backDestinationLabel, onClick: handleBackClick }}
     />
   );
 };
