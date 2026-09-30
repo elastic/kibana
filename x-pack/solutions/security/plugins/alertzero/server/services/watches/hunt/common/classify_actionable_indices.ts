@@ -19,6 +19,9 @@ import { fitsRequestPath, vendorWildcards } from './scope_bounds';
  */
 const ACTIONABLE_FIELDS = ['process.entity_id', 'process.pid'];
 
+/** The pseudo type `include_unmapped` reports for indices that do not map the field. */
+const UNMAPPED_TYPE = 'unmapped';
+
 const DATA_STREAM_BACKING_PREFIX = '.ds-';
 
 /** `-2026.09.30-000001` (or a bare `-000001`) closing a backing index name. */
@@ -116,12 +119,17 @@ export const classifyActionableIndices = async ({
       ignore_unavailable: true,
       allow_no_indices: true,
       expand_wildcards: 'open',
+      // Without this, Elasticsearch omits `indices` whenever the field has a single type,
+      // even when most indices do not map the field at all (verified live: a request over 25
+      // indices, 3 of them without `process.pid`, returned `long` with no `indices`). With
+      // it, indices that lack the field come back under an `unmapped` type, so a type entry
+      // that still has no `indices` really does cover every index in the request.
+      include_unmapped: true,
     });
-    // Per type, `indices` is present only when the field is not mapped in every index of
-    // the request. Absent means all of `response.indices`.
     const allIndices = [response.indices ?? []].flat();
     for (const typeCaps of Object.values(response.fields ?? {})) {
-      for (const capability of Object.values(typeCaps)) {
+      for (const [type, capability] of Object.entries(typeCaps)) {
+        if (type === UNMAPPED_TYPE) continue;
         const listed = capability.indices === undefined ? allIndices : [capability.indices].flat();
         listed.forEach((name) => named.add(name));
       }

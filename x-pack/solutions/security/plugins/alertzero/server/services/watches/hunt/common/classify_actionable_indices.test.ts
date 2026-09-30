@@ -196,8 +196,59 @@ describe('classifyActionableIndices', () => {
       ignore_unavailable: true,
       allow_no_indices: true,
       expand_wildcards: 'open',
+      include_unmapped: true,
     });
     expect(result.patterns.some((pattern) => pattern.startsWith('-'))).toBe(false);
+  });
+
+  it('leaves out indices reported under the unmapped type, which do not carry the field', async () => {
+    // Shape of a live response over 25 indices where 3 do not map the fields: the mapped type
+    // lists only the indices that have it, and the rest come back as `unmapped`.
+    fieldCapsMock.mockResolvedValue({
+      indices: [
+        '.ds-logs-endpoint.events.process-default-2026.09.30-000001',
+        '.ds-logs-aws.cloudtrail-default-2026.09.30-000001',
+        '.ds-logs-okta.system-default-2026.09.30-000001',
+      ],
+      fields: {
+        'process.pid': {
+          long: capability(['.ds-logs-endpoint.events.process-default-2026.09.30-000001']),
+          unmapped: capability([
+            '.ds-logs-aws.cloudtrail-default-2026.09.30-000001',
+            '.ds-logs-okta.system-default-2026.09.30-000001',
+          ]),
+        },
+        'process.entity_id': {
+          keyword: capability(['.ds-logs-endpoint.events.process-default-2026.09.30-000001']),
+          unmapped: capability([
+            '.ds-logs-aws.cloudtrail-default-2026.09.30-000001',
+            '.ds-logs-okta.system-default-2026.09.30-000001',
+          ]),
+        },
+      },
+    });
+
+    const result = await classifyActionableIndices({ esClient, indexPatterns: UNIVERSE });
+
+    expect(result).toEqual({
+      patterns: ['logs-endpoint.events.process-default*'],
+      degraded: false,
+    });
+  });
+
+  it('returns [] when every index is reported as unmapped', async () => {
+    fieldCapsMock.mockResolvedValue({
+      indices: ['.ds-logs-okta.system-default-2026.09.30-000001'],
+      fields: {
+        'process.pid': {
+          unmapped: capability(['.ds-logs-okta.system-default-2026.09.30-000001']),
+        },
+      },
+    });
+
+    await expect(classifyActionableIndices({ esClient, indexPatterns: UNIVERSE })).resolves.toEqual(
+      { patterns: [], degraded: false }
+    );
   });
 
   it('returns [] when no index maps either field', async () => {
