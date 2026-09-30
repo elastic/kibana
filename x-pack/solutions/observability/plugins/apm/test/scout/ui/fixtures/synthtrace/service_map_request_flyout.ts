@@ -43,7 +43,7 @@ import { apm, timerange } from '@kbn/synthtrace-client';
  *   Expected: [ "POST /dotnet/reserveProduct" ]
  *
  * Edge: cartService → redis            (service→dependency, resource-based join)
- *   Algorithm: exit spans with destination "inventory:i012345:stock" in cartService → tx-D
+ *   Algorithm: exit spans with destination "redis" in cartService → tx-D
  *   Expected: [ "POST /dotnet/reserveProduct" ]
  *
  * Note: "POST /dotnet/reserveProduct" appears in three flyouts (node→cart, cart→node,
@@ -130,7 +130,7 @@ export function serviceMapRequestFlyout({
                             .timestamp(timestamp + 30)
                             .duration(80)
                             .success()
-                            .destination('inventory:i012345:stock'),
+                            .destination('redis'),
 
                           // Exit span: cartService → frontend-node (the reverse call)
                           cartService
