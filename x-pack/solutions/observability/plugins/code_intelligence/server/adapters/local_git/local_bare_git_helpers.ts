@@ -10,6 +10,7 @@ import { type ChildProcess, spawn } from 'node:child_process';
 import { lstat, realpath } from 'node:fs/promises';
 import { isLeft } from 'fp-ts/Either';
 
+import { containsControlCharacter, isSafeRevision } from '../../../common/repository_settings';
 import { repositoryRelativePathRt } from '../../domain';
 import type { LocalBareGitConfiguration } from './local_bare_git_configuration';
 
@@ -149,23 +150,7 @@ export const isUnavailableCommit = (result: GitCommandFailure): boolean =>
     result.diagnostic ?? ''
   );
 
-/** Rejects revision-expression syntax before it reaches Git. */
-export const isSafeRevision = (revision: string): boolean =>
-  revision.length <= 255 &&
-  !revision.startsWith('-') &&
-  !revision.includes('..') &&
-  !revision.includes('@{') &&
-  !revision.endsWith('.') &&
-  !revision.includes('//') &&
-  /^(?:refs\/(?:heads|tags)\/)?[A-Za-z0-9][A-Za-z0-9._/-]*$/.test(revision);
-
-/** Detects control characters unsafe in line-oriented Git output. */
-export const containsControlCharacter = (value: string): boolean =>
-  Array.from(value).some((character) => {
-    /** Holds the character code used for the control check. */
-    const codePoint = character.codePointAt(0);
-    return codePoint !== undefined && (codePoint < 32 || codePoint === 127);
-  });
+export { containsControlCharacter, isSafeRevision };
 
 /** Validates a Git grep regular expression transport value. */
 export const isSafePattern = (pattern: string): boolean =>
