@@ -30,6 +30,7 @@ export interface WorkflowUrlState {
   stepId?: string;
   resume?: boolean;
   replayExecutionId?: string;
+  replayIsTestRun?: boolean;
 }
 
 export interface WorkflowUrlUpdateOptions {
@@ -103,6 +104,7 @@ export function useWorkflowUrlState() {
     stepId: string | undefined;
     shouldAutoResume: boolean;
     replayExecutionId: string | undefined;
+    replayIsTestRun: boolean;
   } => {
     const params = queryString.parse(location.search);
     return {
@@ -122,6 +124,7 @@ export function useWorkflowUrlState() {
       stepId: firstString(params.stepId),
       shouldAutoResume: firstString(params.resume) === 'true',
       replayExecutionId: firstString(params.replayExecutionId),
+      replayIsTestRun: firstString(params.replayIsTestRun) === 'true',
     };
   }, [location.search]);
 
@@ -279,7 +282,7 @@ export function useWorkflowUrlState() {
   }, [updateUrlState]);
 
   const clearReplayExecutionId = useCallback(() => {
-    updateUrlState({ replayExecutionId: undefined });
+    updateUrlState({ replayExecutionId: undefined, replayIsTestRun: undefined });
   }, [updateUrlState]);
 
   const setEditorView = useCallback(
@@ -312,6 +315,7 @@ export function useWorkflowUrlState() {
     selectedStepId: urlState.stepId,
     shouldAutoResume: urlState.shouldAutoResume,
     replayExecutionId: urlState.replayExecutionId,
+    replayIsTestRun: urlState.replayIsTestRun,
 
     // State setters
     setActiveTab,

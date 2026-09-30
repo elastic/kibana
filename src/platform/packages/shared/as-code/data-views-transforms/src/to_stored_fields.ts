@@ -19,7 +19,7 @@
  * Use the three exported helpers together to reconstruct DataViewSpec field state.
  */
 
-import type { DataViewSpec, RuntimePrimitiveTypes } from '@kbn/data-views-plugin/common';
+import type { DataViewSpec, RuntimePrimitiveTypes } from '@kbn/data-views-types';
 import {
   RUNTIME_FIELD_COMPOSITE_TYPE,
   type AsCodeCompositeRuntimeField,
