@@ -232,6 +232,17 @@ describe('FieldInput', () => {
     }
   );
 
+  it('should show the field-incompatibility error, not the empty-field prompt, when an incomplete field is already chosen but no column exists yet', () => {
+    const { container } = renderFieldInput({
+      incompleteOperation: 'terms',
+      incompleteField: 'dest',
+    });
+
+    expect(getErrorElement(container)).toHaveTextContent(
+      'This field does not work with the selected function.'
+    );
+  });
+
   it('should render an error message for invalid fields', () => {
     const { container } = renderFieldInput({
       currentFieldIsInvalid: true,
@@ -396,43 +407,33 @@ describe('FieldInput', () => {
 
 describe('getErrorMessage', () => {
   it.each(['none', 'field', 'fullReference', 'managedReference'] as const)(
-    'should return no error for no column passed for %s type of operation',
+    'should return no error for no field selected for %s type of operation',
     (type) => {
-      expect(getErrorMessage(undefined, false, type, false)).toBeUndefined();
+      expect(getErrorMessage(false, false, type, false)).toBeUndefined();
     }
   );
 
   it('should return the invalid message', () => {
-    expect(getErrorMessage(undefined, false, 'none', true)).toBe(
+    expect(getErrorMessage(false, false, 'none', true)).toBe(
       'Invalid field. Check your data view or pick another field.'
     );
   });
 
   it('should ignore the invalid flag when an incomplete column is passed', () => {
-    expect(
-      getErrorMessage(
-        { operationType: 'terms', label: 'Top values of X', dataType: 'string', isBucketed: true },
-        true,
-        'field',
-        true
-      )
-    ).not.toBe('Invalid field. Check your data view or pick another field.');
+    expect(getErrorMessage(true, true, 'field', true)).not.toBe(
+      'Invalid field. Check your data view or pick another field.'
+    );
   });
 
   it('should tell the user to select a field when a new function needs one and no field is chosen yet', () => {
-    expect(getErrorMessage(undefined, true, undefined, false)).toBe(
+    expect(getErrorMessage(false, true, undefined, false)).toBe(
       'To use this function, select a field.'
     );
   });
 
-  it('should tell the user to change field if incomplete with an incompatible field', () => {
-    expect(
-      getErrorMessage(
-        { operationType: 'terms', label: 'Top values of X', dataType: 'string', isBucketed: true },
-        true,
-        'field',
-        false
-      )
-    ).toBe('This field does not work with the selected function.');
+  it('should tell the user to change field if incomplete with an incompatible field, whether that field came from a committed column or a pending incomplete selection', () => {
+    expect(getErrorMessage(true, true, 'field', false)).toBe(
+      'This field does not work with the selected function.'
+    );
   });
 });
