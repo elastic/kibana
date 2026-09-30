@@ -23,8 +23,6 @@ spec:
         KIBANA_SLACK_NOTIFICATIONS_ENABLED: 'false'
         # Inputs of .buildkite/scripts/steps/report_flaky_tests.sh. Schedules may override
         # them to produce different reports (other pipelines, consistently failing tests, ...).
-        # kibana-on-merge, the Security Solution Cypress suites it triggers, and the Elastic Cloud
-        # FTR and Scout pipelines (MKI and ECH) defined in elastic/qaf-tests
         FLAKY_TESTS_PIPELINES: 'kibana-on-merge,kibana-security-solution-on-merge,appex-qa-serverless-kibana-ftr-tests,appex-qa-serverless-kibana-scout-tests,appex-qa-stateful-kibana-ftr-tests,appex-qa-stateful-kibana-scout-tests'
         FLAKY_TESTS_LOOKBACK_DAYS: '7'
         FLAKY_TESTS_CLASSIFICATIONS: 'flaky'
