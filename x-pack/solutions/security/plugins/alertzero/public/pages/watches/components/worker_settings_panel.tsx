@@ -183,11 +183,17 @@ export const WorkerSettingsPanel = React.memo(function WorkerSettingsPanel({
             min-width: 0;
           `}
         >
-          <EuiFlexItem grow={false} css={{ flexShrink: 0 }}>
+          <EuiFlexItem grow={false} css={{ flexShrink: 0, minWidth: 0 }}>
             <EuiTitle size="xs">
               <TitleTag
                 id={titleId}
-                css={{ margin: 0, whiteSpace: 'nowrap', overflowWrap: 'normal' }}
+                css={{
+                  margin: 0,
+                  whiteSpace: 'nowrap',
+                  overflowWrap: 'normal',
+                  overflow: 'hidden',
+                  textOverflow: 'ellipsis',
+                }}
               >
                 {name}
               </TitleTag>
