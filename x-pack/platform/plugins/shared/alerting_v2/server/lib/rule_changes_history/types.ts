@@ -8,8 +8,8 @@
 import type { ChangeHistoryActionId } from '@kbn/change-history';
 import type { RuleResponse } from '@kbn/alerting-v2-schemas';
 
-/** Domain rule snapshot persisted as `object.snapshot` (API response minus the version counter). */
-export type RuleChangesHistorySnapshot = Omit<RuleResponse, 'version'>;
+/** Domain rule snapshot persisted as `object.snapshot` — the full API response. */
+export type RuleChangesHistorySnapshot = RuleResponse;
 
 /** Scope (module + dataset + object type) used for all rule changes history writes. */
 export interface RuleChangesHistoryScope {

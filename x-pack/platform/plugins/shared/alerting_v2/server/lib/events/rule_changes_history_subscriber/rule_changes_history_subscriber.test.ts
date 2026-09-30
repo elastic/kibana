@@ -42,7 +42,6 @@ const profile = {
 } as UserProfileWithSecurity;
 
 const rule = createRuleResponse({ id: 'rule-1', version: 3 });
-const { version: _sequence, ...ruleSnapshot } = rule;
 
 const payload: RuleEvent['payload'] = {
   ruleId: 'rule-1',
@@ -121,7 +120,7 @@ describe('RuleChangesHistorySubscriber', () => {
         expect(changeHistory.logRuleChanges).toHaveBeenCalledWith({
           spaceId: 'my-space',
           author,
-          entries: [{ id: 'rule-1', snapshot: ruleSnapshot, sequence: 3 }],
+          entries: [{ id: 'rule-1', snapshot: rule, sequence: 3 }],
           action,
           eventType: ecsEventType,
           correlationId: 'corr-1',

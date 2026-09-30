@@ -8,7 +8,6 @@
 import { inject, injectable } from 'inversify';
 import { CoreStart } from '@kbn/core-di-server';
 import type { UserProfileServiceStart } from '@kbn/core-user-profile-server';
-import type { RuleResponse } from '@kbn/alerting-v2-schemas';
 import { ALERTING_LOG_CODES } from '../../errors/error_codes';
 import {
   LoggerServiceToken,
@@ -17,7 +16,6 @@ import {
 import {
   RuleChangesHistoryServiceToken,
   type RuleChangesHistoryServiceContract,
-  type RuleChangesHistorySnapshot,
 } from '../../rule_changes_history';
 import type { RuleEvent } from '../rule_event_publisher/events';
 import {
@@ -27,15 +25,6 @@ import {
 } from '../domain_events';
 import type { EventBus, Subscription } from '../event_bus';
 import { RULE_LIFECYCLE_TO_CHANGES_HISTORY_MAP } from './mappings';
-
-/**
- * Strips the version counter: it is persisted as `object.sequence`, so keeping
- * it in the snapshot too would show up as a spurious change on every diff.
- */
-const toRuleChangesHistorySnapshot = (rule: RuleResponse): RuleChangesHistorySnapshot => {
-  const { version: _version, ...snapshot } = rule;
-  return snapshot;
-};
 
 /**
  * Singleton bus subscriber that logs rule-lifecycle domain events to the rule
@@ -114,7 +103,7 @@ export class RuleChangesHistorySubscriber {
       await this.changeHistory.logRuleChanges({
         spaceId,
         author,
-        entries: [{ id: ruleId, snapshot: toRuleChangesHistorySnapshot(rule), sequence }],
+        entries: [{ id: ruleId, snapshot: rule, sequence }],
         action,
         eventType,
         correlationId,

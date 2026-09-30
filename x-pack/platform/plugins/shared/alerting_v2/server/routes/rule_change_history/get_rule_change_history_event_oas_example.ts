@@ -13,24 +13,20 @@ import { INVALID_SCHEMA_OR_PARAMETERS_DESCRIPTION } from '../route_descriptions'
 import { RULE_RESPONSE } from '../rules/rule_oas_shared_examples';
 import { RULE_CHANGE_HISTORY_UNAVAILABLE_RESPONSE } from './list_rule_change_history_oas_example';
 
-// Snapshots are persisted without the counter — it is recorded as the entry's
-// `object.sequence` and surfaced as the row's `version` — so the example has to
-// drop it too, or the docs advertise a field the API never returns.
-const { version: _ruleVersion, ...RULE_RESPONSE_SNAPSHOT } = RULE_RESPONSE;
-
 export const GET_RULE_CHANGE_HISTORY_EVENT_RESPONSE: RuleChangeHistoryDetail = {
   id: '0194f0c8-aaaa-7bbb-8ccc-ddddeeeeffff',
   created_at: '2026-01-15T12:05:00.000Z',
   actor: { name: 'elastic', profile_id: 'u_profile_1' },
   action: 'rule_update',
   changes: {
-    count: 1,
-    summary: { metadata: { name: 'Host CPU high' } },
+    count: 2,
+    summary: { version: 1, metadata: { name: 'Host CPU high' } },
   },
   is_current: true,
   version: 2,
   snapshot: {
-    ...RULE_RESPONSE_SNAPSHOT,
+    ...RULE_RESPONSE,
+    version: 2,
     metadata: {
       ...RULE_RESPONSE.metadata,
       name: 'Host CPU critical',

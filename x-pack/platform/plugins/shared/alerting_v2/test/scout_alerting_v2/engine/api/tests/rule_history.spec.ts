@@ -32,6 +32,7 @@ const expectSnapshotShape = (doc: ChangeHistoryDocument, expectedRule: RuleRespo
       {
         id: expectedRule.id,
         kind: expectedRule.kind,
+        version: expectedRule.version,
         enabled: expectedRule.enabled,
         time_field: expectedRule.time_field,
         metadata: expectedRule.metadata,
@@ -51,10 +52,7 @@ const expectSnapshotShape = (doc: ChangeHistoryDocument, expectedRule: RuleRespo
     )
   );
 
-  // Cover the full payload shape so significant schema drift fails loudly.
-  // `version` is omitted from the snapshot (it lives in `object.sequence`).
-  const { version: _version, ...expectedRuleWithoutVersion } = expectedRule;
-  expect(snapshot).toMatchObject(expectedRuleWithoutVersion);
+  expect(snapshot).toMatchObject(expectedRule);
 };
 
 const expectSequences = (entries: ChangeHistoryDocument[], expected: number[]): void => {
@@ -455,8 +453,13 @@ apiTest.describe('Rule change history', { tag: tags.stateful.classic }, () => {
         },
       });
 
-      // Snapshot is the pre-delete rule; the bump lives only in the sequence.
-      expectSnapshotShape(deleteEntries[0], beforeDelete);
+      // Delete persists nothing, so the rule the API last returned is the
+      // snapshot's content — but RulesClient stamps the bumped counter onto the
+      // emitted rule, so the snapshot's `version` is one ahead of that read.
+      expectSnapshotShape(deleteEntries[0], {
+        ...beforeDelete,
+        version: expectedDeleteSequence,
+      });
 
       const allEntries = await apiServices.alertingV2.ruleChangesHistory.find({
         ruleId: created.id,
