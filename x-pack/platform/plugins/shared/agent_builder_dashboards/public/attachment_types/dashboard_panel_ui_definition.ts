@@ -13,15 +13,27 @@ import {
 } from '@kbn/agent-builder-dashboards-common';
 
 const CUSTOM_CONTENT_PANEL_TYPE = 'custom_content';
+const LENS_PANEL_TYPE = 'lens';
 
-const getFallbackLabel = (panelType: string | undefined): string =>
-  panelType === CUSTOM_CONTENT_PANEL_TYPE
-    ? i18n.translate('xpack.agentBuilderDashboards.attachments.dashboardPanel.customPanelLabel', {
+const getFallbackLabel = (panelType: string | undefined): string => {
+  if (panelType === CUSTOM_CONTENT_PANEL_TYPE) {
+    return i18n.translate(
+      'xpack.agentBuilderDashboards.attachments.dashboardPanel.customPanelLabel',
+      {
         defaultMessage: 'Custom panel',
-      })
-    : i18n.translate('xpack.agentBuilderDashboards.attachments.dashboardPanel.label', {
-        defaultMessage: 'Dashboard panel',
-      });
+      }
+    );
+  }
+  if (panelType === LENS_PANEL_TYPE) {
+    return i18n.translate(
+      'xpack.agentBuilderDashboards.attachments.dashboardPanel.visualizationLabel',
+      { defaultMessage: 'Visualization' }
+    );
+  }
+  return i18n.translate('xpack.agentBuilderDashboards.attachments.dashboardPanel.label', {
+    defaultMessage: 'Dashboard panel',
+  });
+};
 
 /**
  * Registers the pill-only UI for dashboard panel pointers. The pointer never renders inline or

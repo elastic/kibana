@@ -48,8 +48,12 @@ const formatDashboardPanelAttachment = ({
   label,
   panel_type: panelType,
 }: DashboardPanelAttachmentData): string =>
-  `The user is referring to the panel "${label}" (panelId: "${panelId}", type: ${panelType}) on the dashboard attachment "${dashboardAttachmentId}".
+  `The user is referring to the panel ${
+    label ? `"${label}" ` : ''
+  }(panelId: "${panelId}", type: ${panelType}) on the dashboard attachment "${dashboardAttachmentId}".
 Read the panel's current configuration from that dashboard attachment; this pointer holds none.
-Edit it with \`${dashboardTools.generateDashboard}\` using \`dashboardAttachmentId: "${dashboardAttachmentId}"\` and an \`edit_panels\` operation with \`panelId: "${panelId}"\`.
+Edit it with \`${
+    dashboardTools.generateDashboard
+  }\` using \`dashboardAttachmentId: "${dashboardAttachmentId}"\` and an \`edit_panels\` operation with \`panelId: "${panelId}"\`.
 To copy it anywhere (duplicate, section, another dashboard), pass this attachment's id as a \`source: "attachment"\` panel input; the tool copies the panel verbatim.
 If the panel no longer exists on that dashboard, tell the user instead of recreating it.`;

@@ -72,22 +72,29 @@ const isRefinablePanel = (embeddable: unknown): embeddable is HasUniqueId =>
       apiPublishesEsql(embeddable) &&
       embeddable.esql$.getValue().length > 0));
 
+/**
+ * The panel title when it has one. Untitled Lens panels get no label (Lens reports the generic
+ * "visualization" type name); untitled custom panels keep their "Custom panel" type name.
+ */
 const getPanelLabel = (embeddable: unknown): string => {
   const title = apiPublishesTitle(embeddable) ? getTitle(embeddable) : undefined;
-  const label =
-    title || (embeddable as Partial<HasTypeDisplayName>).getTypeDisplayName?.() || '';
-  return label.slice(0, DASHBOARD_PANEL_LABEL_MAX_LENGTH);
+  const typeDisplayName = apiIsOfType(embeddable, CUSTOM_CONTENT_EMBEDDABLE_TYPE)
+    ? (embeddable as Partial<HasTypeDisplayName>).getTypeDisplayName?.()
+    : undefined;
+  return (title || typeDisplayName || '').slice(0, DASHBOARD_PANEL_LABEL_MAX_LENGTH);
 };
 
+/**
+ * Mirrors the dashboard app integration: the linked attachment is the one whose origin equals the
+ * dashboard's saved object id, including an origin-less attachment for an unsaved dashboard.
+ */
 const findLinkedDashboardAttachmentId = (
   conversation: Conversation | undefined,
   dashboardId: string | undefined
 ): string | undefined =>
-  dashboardId
-    ? conversation?.attachments?.find(
-        (attachment) => isDashboardAttachment(attachment) && attachment.origin === dashboardId
-      )?.id
-    : undefined;
+  conversation?.attachments?.find(
+    (attachment) => isDashboardAttachment(attachment) && attachment.origin === dashboardId
+  )?.id;
 
 export const createRefineWithChatAction = ({
   agentBuilder,
