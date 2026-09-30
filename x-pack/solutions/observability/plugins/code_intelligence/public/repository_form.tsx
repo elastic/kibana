@@ -141,6 +141,8 @@ export const RepositoryForm = ({ http, editing, onSaved, onCancelEdit }: Props) 
   return (
     <EuiForm
       component="form"
+      // `isInvalid` sets a native validity message that would otherwise block the corrected submit.
+      noValidate
       data-test-subj="codeIntelligenceRepositoryForm"
       onSubmit={(event) => {
         event.preventDefault();

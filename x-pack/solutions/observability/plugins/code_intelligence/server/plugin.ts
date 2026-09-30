@@ -31,7 +31,6 @@ import type {
   WorkflowsServerPluginStart,
 } from '@kbn/workflows-management-plugin/server';
 
-import { ensureSettingsIndex } from './adapters/elasticsearch_settings';
 import {
   LocalBareGitRepositoryResolver,
   LocalBareGitSourceReader,
@@ -111,7 +110,7 @@ export class CodeIntelligencePlugin
     });
   }
 
-  public async start(core: CoreStart, plugins: StartDependencies): Promise<void> {
+  public async start(_core: CoreStart, plugins: StartDependencies): Promise<void> {
     if (
       !this.config.enabled ||
       this.workflowsManagement === undefined ||
@@ -119,20 +118,6 @@ export class CodeIntelligencePlugin
       this.config.workflowConnectorId === undefined
     ) {
       return;
-    }
-
-    try {
-      await ensureSettingsIndex(
-        core.elasticsearch.client.asInternalUser,
-        this.config.settingsIndex
-      );
-    } catch (error: unknown) {
-      // Saving repository settings creates the index again, so start continues.
-      this.logger.error(
-        `Code Intelligence could not create the settings index [${this.config.settingsIndex}]: ${
-          error instanceof Error ? error.message : String(error)
-        }`
-      );
     }
 
     const managedClient = await plugins.workflowsExtensions.initManagedWorkflowsClient(

@@ -198,6 +198,24 @@ describe('RepositoriesView', () => {
     expect(saveRepositoryMock).not.toHaveBeenCalled();
   });
 
+  it('saves once an invalid field is corrected', async () => {
+    saveRepositoryMock.mockResolvedValue(repositoryRow('elastic/three'));
+    renderView();
+    const remoteUrl = screen.getByTestId('codeIntelligenceRepositoryFormRemoteUrl');
+
+    fireEvent.change(screen.getByTestId('codeIntelligenceRepositoryFormRepository'), {
+      target: { value: 'elastic/three' },
+    });
+    fireEvent.change(remoteUrl, { target: { value: 'git@github.com:elastic/three.git' } });
+    fireEvent.click(screen.getByTestId('codeIntelligenceRepositoryFormSave'));
+    await screen.findByText(/Use an https:\/\/ URL/);
+    fireEvent.change(remoteUrl, { target: { value: 'https://github.com/elastic/three.git' } });
+    fireEvent.click(screen.getByTestId('codeIntelligenceRepositoryFormSave'));
+
+    expect(screen.getByTestId('codeIntelligenceRepositoryForm')).toHaveAttribute('novalidate');
+    await waitFor(() => expect(saveRepositoryMock).toHaveBeenCalledTimes(1));
+  });
+
   it('keeps the stored connector when a repository is edited', async () => {
     saveRepositoryMock.mockResolvedValue(repositoryRow('elastic/one'));
     renderView([repositoryRow('elastic/one', { githubConnectorId: 'connector' })]);
