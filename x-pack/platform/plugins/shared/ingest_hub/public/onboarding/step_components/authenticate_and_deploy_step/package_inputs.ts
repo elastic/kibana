@@ -117,13 +117,15 @@ function resolveServiceVars(
   service: AwsServiceMatrixEntry,
   instanceId: string = service.id
 ): ServiceVars {
-  return (
-    storedServiceVars[instanceId] ??
-    storedServiceVars[service.id] ?? {
-      enabledDataStreams: service.dataStreams,
-      varsByDataStream: {},
-    }
+  const rawVars = storedServiceVars[instanceId] ?? storedServiceVars[service.id];
+  if (!rawVars) return { enabledDataStreams: service.dataStreams, varsByDataStream: {} };
+  // Guard against stale session state: filter out dsIds the current service no longer has.
+  const enabledDataStreams = rawVars.enabledDataStreams.filter((dsId) =>
+    service.dataStreams.includes(dsId)
   );
+  return enabledDataStreams.length === rawVars.enabledDataStreams.length
+    ? rawVars
+    : { ...rawVars, enabledDataStreams };
 }
 
 const EMPTY_DS_VARS: Readonly<ServiceDataStreamVars> = { enabledInputs: [], varsByInput: {} };
