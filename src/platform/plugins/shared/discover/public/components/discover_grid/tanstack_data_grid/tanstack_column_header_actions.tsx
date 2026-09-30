@@ -7,9 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useImperativeHandle, useState } from 'react';
 import type { EuiListGroupItemProps } from '@elastic/eui';
-import { EuiButtonIcon, EuiListGroup, EuiPopover, EuiToolTip } from '@elastic/eui';
+import { EuiHorizontalRule, EuiListGroup, EuiPopover } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import type { DataTableColumnsMeta } from '@kbn/discover-utils';
@@ -109,7 +109,7 @@ const buildSortActions = ({
           defaultMessage: 'Unsort ascending',
         })
       : i18n.translate('discover.grid.tanStack.sortAscendingButtonLabel', {
-          defaultMessage: 'Sort ascending',
+          defaultMessage: 'Sort A → Z',
         });
 
   const descLabel =
@@ -118,14 +118,14 @@ const buildSortActions = ({
           defaultMessage: 'Unsort descending',
         })
       : i18n.translate('discover.grid.tanStack.sortDescendingButtonLabel', {
-          defaultMessage: 'Sort descending',
+          defaultMessage: 'Sort Z → A',
         });
 
   return [
     wrapAction(
       {
         label: ascLabel,
-        iconType: 'sortUp',
+        iconType: 'sortAscending',
         iconProps: { size: 'm' },
         onClick: () => sortBy('asc'),
         'data-test-subj': 'gridSortAscendingButton',
@@ -135,7 +135,7 @@ const buildSortActions = ({
     wrapAction(
       {
         label: descLabel,
-        iconType: 'sortDown',
+        iconType: 'sortDescending',
         iconProps: { size: 'm' },
         onClick: () => sortBy('desc'),
         'data-test-subj': 'gridSortDescendingButton',
@@ -145,7 +145,13 @@ const buildSortActions = ({
   ];
 };
 
-export const buildTanStackColumnHeaderActions = ({
+const pushGroup = (groups: EuiListGroupItemProps[][], group: EuiListGroupItemProps[]) => {
+  if (group.length > 0) {
+    groups.push(group);
+  }
+};
+
+export const buildTanStackColumnHeaderActionGroups = ({
   columnId,
   columnIndex,
   visibleColumnIds,
@@ -170,7 +176,7 @@ export const buildTanStackColumnHeaderActions = ({
   editField,
   hasEditDataViewPermission,
   onActionComplete,
-}: BuildTanStackColumnHeaderActionsParams): EuiListGroupItemProps[] => {
+}: BuildTanStackColumnHeaderActionsParams): EuiListGroupItemProps[][] => {
   const dataViewField = getDataViewFieldOrCreateFromColumnMeta({
     dataView,
     fieldName: columnId,
@@ -193,29 +199,63 @@ export const buildTanStackColumnHeaderActions = ({
     });
   const columnWidth = columnSizing[columnId] ?? settings?.columns?.[columnId]?.width ?? 0;
 
-  const actions: EuiListGroupItemProps[] = [];
+  const groups: EuiListGroupItemProps[][] = [];
+  const copyGroup: EuiListGroupItemProps[] = [];
 
-  if (!isSummaryMode && columnId !== timeFieldName) {
-    actions.push(
+  if (columnId !== SOURCE_COLUMN) {
+    copyGroup.push(
       wrapAction(
         {
-          label: i18n.translate('discover.grid.tanStack.removeColumnButtonLabel', {
-            defaultMessage: 'Remove column',
+          ...buildCopyColumnNameButton({
+            columnDisplayName,
+            toastNotifications,
           }),
-          iconType: 'cross',
-          iconProps: { size: 'm' },
-          onClick: () => {
-            persistVisibleColumns(visibleColumnIds.filter((col) => col !== columnId));
-          },
-          'data-test-subj': 'unifiedDataTableRemoveColumn',
+          label: i18n.translate('discover.grid.tanStack.copyFieldNameButtonLabel', {
+            defaultMessage: 'Copy field name',
+          }),
         },
         onActionComplete
       )
     );
   }
 
-  actions.push(
-    ...buildSortActions({
+  copyGroup.push(
+    wrapAction(
+      {
+        ...buildCopyColumnValuesButton({
+          columnId,
+          columnDisplayName,
+          toastNotifications,
+          rowsCount,
+          valueToStringConverter,
+        }),
+        label: i18n.translate('discover.grid.tanStack.copyAllValuesButtonLabel', {
+          defaultMessage: 'Copy all values',
+        }),
+      },
+      onActionComplete
+    )
+  );
+
+  const editFieldButton =
+    editField &&
+    dataViewField &&
+    buildEditFieldButton({
+      hasEditDataViewPermission,
+      dataView,
+      field: dataViewField,
+      editField,
+    });
+
+  if (editFieldButton) {
+    copyGroup.push(wrapAction(editFieldButton, onActionComplete));
+  }
+
+  pushGroup(groups, copyGroup);
+
+  pushGroup(
+    groups,
+    buildSortActions({
       columnId,
       sort,
       onSort,
@@ -224,8 +264,10 @@ export const buildTanStackColumnHeaderActions = ({
     })
   );
 
+  const layoutGroup: EuiListGroupItemProps[] = [];
+
   if (onTogglePinColumn) {
-    actions.push(
+    layoutGroup.push(
       wrapAction(
         {
           label: isColumnPinned
@@ -247,9 +289,43 @@ export const buildTanStackColumnHeaderActions = ({
     );
   }
 
+  if (onAutoFitColumn) {
+    layoutGroup.push(
+      wrapAction(
+        {
+          label: i18n.translate('discover.grid.tanStack.fitColumnToDataButtonLabel', {
+            defaultMessage: 'Fit width to data',
+          }),
+          iconType: 'distributeHorizontal',
+          iconProps: { size: 'm' },
+          onClick: () => onAutoFitColumn(columnId),
+          'data-test-subj': 'unifiedDataTableFitToData',
+        },
+        onActionComplete
+      )
+    );
+  }
+
+  if (onResize && columnWidth > 0) {
+    layoutGroup.push(
+      wrapAction(
+        {
+          label: i18n.translate('discover.grid.tanStack.resetColumnWidthButtonLabel', {
+            defaultMessage: 'Reset width',
+          }),
+          iconType: 'refresh',
+          iconProps: { size: 'm' },
+          onClick: () => onResize({ columnId, width: undefined }),
+          'data-test-subj': 'unifiedDataTableResetColumnWidth',
+        },
+        onActionComplete
+      )
+    );
+  }
+
   if (!isSummaryMode) {
     if (columnIndex > 0) {
-      actions.push(
+      layoutGroup.push(
         wrapAction(
           {
             label: i18n.translate('discover.grid.tanStack.moveColumnLeftButtonLabel', {
@@ -273,7 +349,7 @@ export const buildTanStackColumnHeaderActions = ({
     }
 
     if (columnIndex >= 0 && columnIndex < visibleColumnIds.length - 1) {
-      actions.push(
+      layoutGroup.push(
         wrapAction(
           {
             label: i18n.translate('discover.grid.tanStack.moveColumnRightButtonLabel', {
@@ -297,157 +373,100 @@ export const buildTanStackColumnHeaderActions = ({
     }
   }
 
-  if (onAutoFitColumn) {
-    actions.push(
+  pushGroup(groups, layoutGroup);
+
+  const removeGroup: EuiListGroupItemProps[] = [];
+
+  if (!isSummaryMode && columnId !== timeFieldName) {
+    removeGroup.push(
       wrapAction(
         {
-          label: i18n.translate('discover.grid.tanStack.fitColumnToDataButtonLabel', {
-            defaultMessage: 'Fit to data',
+          label: i18n.translate('discover.grid.tanStack.removeColumnButtonLabel', {
+            defaultMessage: 'Remove column',
           }),
-          iconType: 'expand',
+          iconType: 'trash',
           iconProps: { size: 'm' },
-          onClick: () => onAutoFitColumn(columnId),
-          'data-test-subj': 'unifiedDataTableFitToData',
+          onClick: () => {
+            persistVisibleColumns(visibleColumnIds.filter((col) => col !== columnId));
+          },
+          'data-test-subj': 'unifiedDataTableRemoveColumn',
         },
         onActionComplete
       )
     );
   }
 
-  if (onResize && columnWidth > 0) {
-    actions.push(
-      wrapAction(
-        {
-          label: i18n.translate('discover.grid.tanStack.resetColumnWidthButtonLabel', {
-            defaultMessage: 'Reset width',
-          }),
-          iconType: 'refresh',
-          iconProps: { size: 'm' },
-          onClick: () => onResize({ columnId, width: undefined }),
-          'data-test-subj': 'unifiedDataTableResetColumnWidth',
-        },
-        onActionComplete
-      )
-    );
-  }
+  pushGroup(groups, removeGroup);
 
-  if (columnId !== SOURCE_COLUMN) {
-    actions.push(
-      wrapAction(
-        buildCopyColumnNameButton({
-          columnDisplayName,
-          toastNotifications,
-        }),
-        onActionComplete
-      )
-    );
-  }
-
-  actions.push(
-    wrapAction(
-      buildCopyColumnValuesButton({
-        columnId,
-        columnDisplayName,
-        toastNotifications,
-        rowsCount,
-        valueToStringConverter,
-      }),
-      onActionComplete
-    )
-  );
-
-  const editFieldButton =
-    editField &&
-    dataViewField &&
-    buildEditFieldButton({
-      hasEditDataViewPermission,
-      dataView,
-      field: dataViewField,
-      editField,
-    });
-
-  if (editFieldButton) {
-    actions.push(wrapAction(editFieldButton, onActionComplete));
-  }
-
-  return actions;
+  return groups;
 };
+
+export interface TanStackColumnHeaderActionsHandle {
+  toggle: () => void;
+}
 
 export interface TanStackColumnHeaderActionsProps
   extends Omit<BuildTanStackColumnHeaderActionsParams, 'onActionComplete'> {
   columnDisplayName: string;
-  headerActionsCss?: ReturnType<typeof import('@emotion/react').css>;
-  headerActionsWrapperCss?: ReturnType<typeof import('@emotion/react').css>;
-  headerActionsVisibleCss?: ReturnType<typeof import('@emotion/react').css>;
+  headerCellPopoverAnchorCss?: ReturnType<typeof import('@emotion/react').css>;
 }
 
 export const TanStackColumnHeaderActions = React.memo(
-  ({
-    columnId,
-    columnDisplayName,
-    headerActionsCss,
-    headerActionsWrapperCss,
-    headerActionsVisibleCss,
-    ...buildParams
-  }: TanStackColumnHeaderActionsProps) => {
-    const [isOpen, setIsOpen] = useState(false);
-    const closePopover = useCallback(() => setIsOpen(false), []);
+  React.forwardRef<TanStackColumnHeaderActionsHandle, TanStackColumnHeaderActionsProps>(
+    function TanStackColumnHeaderActions(
+      { columnId, columnDisplayName, headerCellPopoverAnchorCss, ...buildParams },
+      ref
+    ) {
+      const [isOpen, setIsOpen] = useState(false);
+      const closePopover = useCallback(() => setIsOpen(false), []);
+      const togglePopover = useCallback(() => setIsOpen((open) => !open), []);
 
-    // Built only while open: the list always contains "Copy column values", so it is never empty.
-    const listItems = isOpen
-      ? buildTanStackColumnHeaderActions({
-          ...buildParams,
-          columnId,
-          onActionComplete: closePopover,
-        })
-      : [];
+      useImperativeHandle(ref, () => ({ toggle: togglePopover }), [togglePopover]);
 
-    const actionsButtonLabel = i18n.translate(
-      'discover.grid.tanStack.columnActionsButtonAriaLabel',
-      {
-        defaultMessage: '{columnName}. Click to view column header actions.',
-        values: { columnName: columnDisplayName },
-      }
-    );
+      const actionGroups = isOpen
+        ? buildTanStackColumnHeaderActionGroups({
+            ...buildParams,
+            columnId,
+            onActionComplete: closePopover,
+          })
+        : [];
 
-    return (
-      <div
-        className="tsg-headerActions"
-        css={[headerActionsWrapperCss, isOpen && headerActionsVisibleCss]}
-      >
+      const actionsButtonLabel = i18n.translate(
+        'discover.grid.tanStack.columnActionsButtonAriaLabel',
+        {
+          defaultMessage: '{columnName}. Click to view column header actions.',
+          values: { columnName: columnDisplayName },
+        }
+      );
+
+      return (
         <EuiPopover
           aria-label={actionsButtonLabel}
+          css={headerCellPopoverAnchorCss}
           display="block"
           panelPaddingSize="s"
           offset={7}
-          anchorPosition="downRight"
+          anchorPosition="downLeft"
           button={
-            <EuiToolTip content={actionsButtonLabel} disableScreenReaderOutput>
-              <EuiButtonIcon
-                iconType="boxesVertical"
-                iconSize="s"
-                color="text"
-                css={headerActionsCss}
-                aria-label={actionsButtonLabel}
-                onClick={(event: React.MouseEvent<HTMLButtonElement>) => {
-                  event.stopPropagation();
-                  setIsOpen((open) => !open);
-                }}
-                data-test-subj={`dataGridHeaderCellActionButton-${columnId}`}
-              />
-            </EuiToolTip>
+            <span aria-hidden data-test-subj={`dataGridHeaderCellActionButton-${columnId}`} />
           }
           isOpen={isOpen}
           closePopover={closePopover}
         >
-          <EuiListGroup
-            listItems={listItems}
-            data-test-subj={`dataGridHeaderCellActionGroup-${columnId}`}
-          />
+          {actionGroups.map((groupItems, groupIndex) => (
+            <React.Fragment key={groupIndex}>
+              {groupIndex > 0 && <EuiHorizontalRule margin="xs" size="full" />}
+              <EuiListGroup
+                listItems={groupItems}
+                gutterSize="none"
+                data-test-subj={`dataGridHeaderCellActionGroup-${columnId}-${groupIndex}`}
+              />
+            </React.Fragment>
+          ))}
         </EuiPopover>
-      </div>
-    );
-  }
+      );
+    }
+  )
 );
 
 TanStackColumnHeaderActions.displayName = 'TanStackColumnHeaderActions';

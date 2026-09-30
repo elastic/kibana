@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import {
   useReactTable,
   getCoreRowModel,
@@ -122,7 +122,11 @@ import {
   type TanStackDataColumnDescriptor,
   type TanStackColumnLayout,
 } from './tanstack_column_layout';
-import { TanStackColumnHeaderActions } from './tanstack_column_header_actions';
+import {
+  TanStackColumnHeaderActions,
+  type TanStackColumnHeaderActionsHandle,
+  type TanStackColumnHeaderActionsProps,
+} from './tanstack_column_header_actions';
 import type { useDiscoverServices } from '../../../hooks/use_discover_services';
 
 declare module '@tanstack/react-table' {
@@ -615,6 +619,179 @@ const parseStatsByColumns = (
   return { byFields, orderedColumns };
 };
 
+const TanStackHeaderCellText = React.memo(
+  ({
+    text,
+    styles,
+    multiline,
+  }: {
+    text: string;
+    styles: ReturnType<typeof getTanStackDataGridStyles>;
+    multiline?: boolean;
+  }) => {
+    const textRef = useRef<HTMLSpanElement>(null);
+    const [isTruncated, setIsTruncated] = useState(false);
+
+    const updateTruncation = useCallback(() => {
+      const el = textRef.current;
+      if (!el) return;
+      setIsTruncated(Math.ceil(el.scrollWidth) > Math.ceil(el.clientWidth));
+    }, []);
+
+    useLayoutEffect(() => {
+      updateTruncation();
+      const frame = requestAnimationFrame(updateTruncation);
+      return () => cancelAnimationFrame(frame);
+    }, [text, updateTruncation]);
+
+    useEffect(() => {
+      const el = textRef.current;
+      if (!el) return;
+      const observer = new ResizeObserver(updateTruncation);
+      observer.observe(el);
+      return () => observer.disconnect();
+    }, [updateTruncation]);
+
+    const label = (
+      <span
+        ref={textRef}
+        css={[styles.headerCellText, multiline && styles.headerCellTextMultiline]}
+      >
+        {text}
+      </span>
+    );
+
+    if (multiline || !isTruncated) {
+      return label;
+    }
+
+    return (
+      <EuiToolTip
+        content={text}
+        disableScreenReaderOutput
+        anchorProps={{ css: styles.headerCellTextTooltipAnchor }}
+      >
+        {label}
+      </EuiToolTip>
+    );
+  }
+);
+
+const TanStackActionsColumnHeader = React.memo(
+  ({ styles }: { styles: ReturnType<typeof getTanStackDataGridStyles> }) => {
+    const label = i18n.translate('discover.grid.tanStack.actionsColumnHeader', {
+      defaultMessage: 'Actions',
+    });
+    const iconTip = i18n.translate('discover.grid.tanStack.actionsColumnTooltip', {
+      defaultMessage: 'Actions',
+    });
+
+    const containerRef = useRef<HTMLDivElement>(null);
+    const measureRef = useRef<HTMLSpanElement>(null);
+    const [showLabel, setShowLabel] = useState(true);
+
+    const updateLayout = useCallback(() => {
+      const container = containerRef.current;
+      const measure = measureRef.current;
+      if (!container || !measure) return;
+      setShowLabel(container.clientWidth >= measure.scrollWidth);
+    }, []);
+
+    useLayoutEffect(() => {
+      updateLayout();
+      const frame = requestAnimationFrame(updateLayout);
+      return () => cancelAnimationFrame(frame);
+    }, [label, updateLayout]);
+
+    useEffect(() => {
+      const container = containerRef.current;
+      if (!container) return;
+      const observer = new ResizeObserver(updateLayout);
+      observer.observe(container);
+      return () => observer.disconnect();
+    }, [updateLayout]);
+
+    return (
+      <div
+        ref={containerRef}
+        css={[
+          styles.controlHeaderCellContent,
+          showLabel && styles.controlHeaderCellContentWithLabel,
+        ]}
+      >
+        <span ref={measureRef} css={styles.controlHeaderCellLabelMeasure} aria-hidden>
+          {label}
+        </span>
+        {showLabel ? (
+          <span css={styles.controlHeaderCellLabel}>{label}</span>
+        ) : (
+          <EuiIconTip
+            type="info"
+            color="subdued"
+            size="m"
+            anchorProps={{ css: styles.headerCellIcon }}
+            content={iconTip}
+          />
+        )}
+      </div>
+    );
+  }
+);
+
+const TanStackHeaderActionsBridge = React.memo(
+  ({
+    children,
+    actionsProps,
+    styles,
+    reserveResizeHandlePadding,
+    isHeaderMultiline,
+  }: {
+    children: React.ReactNode;
+    actionsProps: TanStackColumnHeaderActionsProps;
+    styles: ReturnType<typeof getTanStackDataGridStyles>;
+    reserveResizeHandlePadding?: boolean;
+    isHeaderMultiline?: boolean;
+  }) => {
+    const headerActionsRef = useRef<TanStackColumnHeaderActionsHandle>(null);
+    const openHeaderActions = useCallback((event: React.MouseEvent) => {
+      event.stopPropagation();
+      headerActionsRef.current?.toggle();
+    }, []);
+
+    const actionsButtonLabel = i18n.translate(
+      'discover.grid.tanStack.columnActionsButtonAriaLabel',
+      {
+        defaultMessage: '{columnName}. Click to view column header actions.',
+        values: { columnName: actionsProps.columnDisplayName },
+      }
+    );
+
+    return (
+      <>
+        <button
+          type="button"
+          css={[
+            styles.headerCellInteractive,
+            reserveResizeHandlePadding && styles.headerCellInteractiveWithResize,
+            isHeaderMultiline && styles.headerCellInteractiveMultiline,
+          ]}
+          aria-label={actionsButtonLabel}
+          aria-haspopup="true"
+          data-test-subj={`dataGridHeaderCellActionButton-${actionsProps.columnId}`}
+          onClick={openHeaderActions}
+        >
+          {children}
+        </button>
+        <TanStackColumnHeaderActions
+          ref={headerActionsRef}
+          {...actionsProps}
+          headerCellPopoverAnchorCss={styles.headerCellPopoverAnchor}
+        />
+      </>
+    );
+  }
+);
+
 // ── Cell Actions: filter in/out, copy (clippable), expand (always visible) ──
 const CellActions = React.memo(
   ({
@@ -1034,10 +1211,13 @@ const VirtualRow = React.memo(
           isAutoHeight && styles.rowAutoHeight,
           isExpanded && styles.rowExpanded,
           isSelected && styles.selectedRow,
+          indicatorColor && styles.rowWithIndicator,
         ]}
         style={{
           height: isAutoHeight ? undefined : rowHeight,
-          borderLeft: indicatorColor ? `3px solid ${indicatorColor}` : undefined,
+          ...(indicatorColor
+            ? ({ ['--tsg-row-indicator-color' as string]: indicatorColor } as React.CSSProperties)
+            : undefined),
         }}
         role="row"
         aria-rowindex={rowIndex + 2}
@@ -1860,6 +2040,7 @@ export const TanStackDataGrid: React.FC<TanStackDataGridProps> = React.memo(
         rowHeight: Math.floor(numericLineHeight + cellPadding * 2),
         summaryRowHeight: Math.floor(numericLineHeight * 3 + cellPadding * 2),
         fontSize: numericFontSize,
+        headerFontSize: numericFontSize + 1,
         lineHeight: numericLineHeight,
         headerLineHeight: numericHeaderLineHeight,
         cellPadding,
@@ -1898,6 +2079,21 @@ export const TanStackDataGrid: React.FC<TanStackDataGridProps> = React.memo(
 
     const isAutoRowHeight = rowHeightLines === ROWS_HEIGHT_OPTIONS.auto;
     const isAutoHeaderRowHeight = headerRowHeightLines === ROWS_HEIGHT_OPTIONS.auto;
+    const isHeaderMultiline =
+      !isAutoHeaderRowHeight && headerRowHeightLines > ROWS_HEIGHT_OPTIONS.single;
+
+    const headerCellMinHeightPx = useMemo(() => {
+      if (isAutoHeaderRowHeight) {
+        return undefined;
+      }
+      const lines = Math.max(1, headerRowHeightLines);
+      return Math.ceil(lines * densityCfg.headerLineHeight + densityCfg.cellPadding * 2);
+    }, [
+      densityCfg.cellPadding,
+      densityCfg.headerLineHeight,
+      headerRowHeightLines,
+      isAutoHeaderRowHeight,
+    ]);
 
     // ── Cell popover (state lives in CellPopoverHost to avoid grid re-renders) ──
     const setPopoverStateRef = useRef<SetCellPopoverState>(() => {});
@@ -2141,6 +2337,7 @@ export const TanStackDataGrid: React.FC<TanStackDataGridProps> = React.memo(
     );
 
     const actionsColumnWidth =
+      densityCfg.cellPadding * 2 +
       CONTROL_COL_WIDTH +
       (rowAdditionalLeadingControls?.reduce(
         (width, control) => width + (control.width ?? CONTROL_COL_WIDTH),
@@ -2184,14 +2381,7 @@ export const TanStackDataGrid: React.FC<TanStackDataGridProps> = React.memo(
       // Actions column: details and profile-provided row actions.
       defs.push({
         id: EXPAND_COLUMN_ID,
-        header: () => (
-          <EuiIconTip
-            type="info"
-            content={i18n.translate('discover.grid.tanStack.actionsColumnTooltip', {
-              defaultMessage: 'Actions',
-            })}
-          />
-        ),
+        header: '',
         size: actionsColumnWidth,
         minSize: actionsColumnWidth,
         maxSize: actionsColumnWidth,
@@ -2600,6 +2790,7 @@ export const TanStackDataGrid: React.FC<TanStackDataGridProps> = React.memo(
       () =>
         ({
           '--tsg-font-size': `${densityCfg.fontSize}px`,
+          '--tsg-header-font-size': `${densityCfg.headerFontSize}px`,
           '--tsg-line-height': `${densityCfg.lineHeight}px`,
           '--tsg-header-line-height': `${densityCfg.headerLineHeight}px`,
           '--tsg-cell-padding-v': `${densityCfg.cellPadding}px`,
@@ -3324,10 +3515,14 @@ export const TanStackDataGrid: React.FC<TanStackDataGridProps> = React.memo(
                           className={isPinnedHeader ? 'tsg-pinnedHeaderCell' : undefined}
                           css={[
                             styles.selectHeaderCell,
-                            isPinnedHeader && styles.pinnedHeaderCell,
                             isLastLeftPinnedHeader && styles.pinnedCellShadow,
                           ]}
-                          style={headerColumnStyle}
+                          style={{
+                            ...headerColumnStyle,
+                            ...(headerCellMinHeightPx != null
+                              ? { minHeight: headerCellMinHeightPx }
+                              : undefined),
+                          }}
                           role="columnheader"
                         >
                           <EuiCheckbox
@@ -3347,14 +3542,22 @@ export const TanStackDataGrid: React.FC<TanStackDataGridProps> = React.memo(
                         className={isPinnedHeader ? 'tsg-pinnedHeaderCell' : undefined}
                         css={[
                           isControl ? styles.controlHeaderCell : styles.headerCell,
-                          !isControl && !isSelect && styles.headerCellWithActions,
-                          isPinnedHeader && styles.pinnedHeaderCell,
+                          !isControl && isHeaderMultiline && styles.headerCellMultiline,
+                          !isControl &&
+                            !isSummary &&
+                            header.column.getCanResize() &&
+                            styles.headerCellResizable,
                           isLastLeftPinnedHeader && styles.pinnedCellShadow,
                           isDraggable && styles.headerCellDraggable,
                           isDragging && styles.headerCellDragging,
                           isDragOver && styles.headerCellDragOver,
                         ]}
-                        style={headerColumnStyle}
+                        style={{
+                          ...headerColumnStyle,
+                          ...(headerCellMinHeightPx != null
+                            ? { minHeight: headerCellMinHeightPx }
+                            : undefined),
+                        }}
                         role="columnheader"
                         tabIndex={isDraggable ? 0 : undefined}
                         draggable={isDraggable}
@@ -3371,9 +3574,43 @@ export const TanStackDataGrid: React.FC<TanStackDataGridProps> = React.memo(
                         onDragEnd={handleDragEnd}
                       >
                         {isControl &&
-                          flexRender(header.column.columnDef.header, header.getContext())}
+                          (colId === EXPAND_COLUMN_ID ? (
+                            <TanStackActionsColumnHeader styles={styles} />
+                          ) : (
+                            flexRender(header.column.columnDef.header, header.getContext())
+                          ))}
                         {!isControl && (
-                          <>
+                          <TanStackHeaderActionsBridge
+                            styles={styles}
+                            isHeaderMultiline={isHeaderMultiline}
+                            reserveResizeHandlePadding={!isSummary && header.column.getCanResize()}
+                            actionsProps={{
+                              columnId: colId,
+                              columnDisplayName,
+                              columnIndex,
+                              visibleColumnIds: effectiveColumns,
+                              dataView,
+                              columnsMeta,
+                              settings,
+                              columnSizing,
+                              isSummaryMode,
+                              isSortEnabled: headerSortEnabled,
+                              isPlainRecord,
+                              sort,
+                              onSort,
+                              persistVisibleColumns,
+                              onResize,
+                              onAutoFitColumn: handleAutoFitColumn,
+                              onTogglePinColumn: !isSummary ? handleTogglePinColumn : undefined,
+                              isColumnPinned: pinnedDataColumnIds.includes(colId),
+                              timeFieldName,
+                              toastNotifications,
+                              valueToStringConverter,
+                              rowsCount: displayedRows.length,
+                              editField,
+                              hasEditDataViewPermission,
+                            }}
+                          >
                             {showColumnTokens &&
                               !isSummary &&
                               !header.column.columnDef.meta?.isTimestamp &&
@@ -3386,10 +3623,7 @@ export const TanStackDataGrid: React.FC<TanStackDataGridProps> = React.memo(
                                   );
                                   if (iconType && iconType !== 'unknown') {
                                     return (
-                                      <FieldIcon
-                                        type={iconType}
-                                        css={{ marginRight: 4, flexShrink: 0 }}
-                                      />
+                                      <FieldIcon type={iconType} css={styles.headerCellFieldIcon} />
                                     );
                                   }
                                 } else {
@@ -3398,25 +3632,24 @@ export const TanStackDataGrid: React.FC<TanStackDataGridProps> = React.memo(
                                     return (
                                       <FieldIcon
                                         {...getFieldIconProps(dvField)}
-                                        css={{ marginRight: 4, flexShrink: 0 }}
+                                        css={styles.headerCellFieldIcon}
                                       />
                                     );
                                   }
                                 }
                                 return null;
                               })()}
-                            <span
-                              css={
-                                isAutoHeaderRowHeight
-                                  ? styles.headerCellTextAuto
-                                  : styles.headerCellText
-                              }
-                            >
-                              {flexRender(header.column.columnDef.header, header.getContext())}
-                            </span>
+                            <TanStackHeaderCellText
+                              text={columnDisplayName}
+                              styles={styles}
+                              multiline={isHeaderMultiline}
+                            />
                             {header.column.columnDef.meta?.isTimestamp && (
                               <EuiIconTip
                                 type="clock"
+                                color="subdued"
+                                size="m"
+                                anchorProps={{ css: styles.headerCellIcon }}
                                 content={i18n.translate(
                                   'discover.grid.tanStack.timeFieldIconTooltip',
                                   {
@@ -3430,43 +3663,13 @@ export const TanStackDataGrid: React.FC<TanStackDataGridProps> = React.memo(
                               <span css={styles.sortIndicator}>
                                 <EuiIcon
                                   type={sortDir === 'asc' ? 'sortUp' : 'sortDown'}
-                                  size="s"
+                                  size="m"
+                                  color="subdued"
                                   aria-hidden={true}
                                 />
                               </span>
                             )}
-                            {!isControl && !isSelect && (
-                              <TanStackColumnHeaderActions
-                                columnId={colId}
-                                columnDisplayName={columnDisplayName}
-                                columnIndex={columnIndex}
-                                visibleColumnIds={effectiveColumns}
-                                dataView={dataView}
-                                columnsMeta={columnsMeta}
-                                settings={settings}
-                                columnSizing={columnSizing}
-                                isSummaryMode={isSummaryMode}
-                                isSortEnabled={headerSortEnabled}
-                                isPlainRecord={isPlainRecord}
-                                sort={sort}
-                                onSort={onSort}
-                                persistVisibleColumns={persistVisibleColumns}
-                                onResize={onResize}
-                                onAutoFitColumn={handleAutoFitColumn}
-                                onTogglePinColumn={!isSummary ? handleTogglePinColumn : undefined}
-                                isColumnPinned={pinnedDataColumnIds.includes(colId)}
-                                timeFieldName={timeFieldName}
-                                toastNotifications={toastNotifications}
-                                valueToStringConverter={valueToStringConverter}
-                                rowsCount={displayedRows.length}
-                                editField={editField}
-                                hasEditDataViewPermission={hasEditDataViewPermission}
-                                headerActionsCss={styles.headerActionsButton}
-                                headerActionsWrapperCss={styles.headerActions}
-                                headerActionsVisibleCss={styles.headerActionsVisible}
-                              />
-                            )}
-                          </>
+                          </TanStackHeaderActionsBridge>
                         )}
                         {header.column.getCanResize() && !isControl && !isSummary && (
                           <div
