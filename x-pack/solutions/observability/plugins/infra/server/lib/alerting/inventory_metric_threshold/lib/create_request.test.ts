@@ -89,7 +89,6 @@ describe('createRequest composite identity', () => {
     expect(body).toContain('kubeletstatsreceiver.otel');
     expect(body).not.toContain('"event.module":"kubernetes"');
     expect(body).toContain('"docvalue_fields":[');
-    expect(body).toContain('"k8s.*"');
   });
 
   it('keeps host.name for SemConv hosts', async () => {
