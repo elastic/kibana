@@ -38,7 +38,7 @@ export const createDashboardPanelAttachmentType = (): AttachmentTypeDefinition<
     }),
   }),
   getAgentDescription: () =>
-    `A dashboard panel attachment is a pointer to one panel on a dashboard attachment in this conversation; it means the user is referring to that panel. It carries no configuration: read the panel from the dashboard attachment it names. To change the panel, load the dashboard-management skill and call \`${dashboardTools.generateDashboard}\` with that dashboard attachment id as \`dashboardAttachmentId\` and an \`edit_panels\` operation targeting the panel id. Never create a new visualization attachment to refine a panel that already exists on the dashboard. After editing, render only the dashboard attachment.`,
+    `A dashboard panel attachment is a pointer to one panel on a dashboard attachment in this conversation; it means the user is referring to that panel. It carries no configuration: read the panel from the dashboard attachment it names. To change the panel, load the dashboard-management skill and call \`${dashboardTools.generateDashboard}\` with that dashboard attachment id as \`dashboardAttachmentId\` and an \`edit_panels\` operation targeting the panel id. To duplicate the panel, pass this attachment's id as a \`source: "attachment"\` panel input in \`add_panels\`; the tool copies the panel verbatim. Never create a new visualization attachment to refine a panel that already exists on the dashboard. After editing, render only the dashboard attachment.`,
   getTools: () => [],
 });
 
@@ -51,4 +51,5 @@ const formatDashboardPanelAttachment = ({
   `The user is referring to the panel "${label}" (panelId: "${panelId}", type: ${panelType}) on the dashboard attachment "${dashboardAttachmentId}".
 Read the panel's current configuration from that dashboard attachment; this pointer holds none.
 Edit it with \`${dashboardTools.generateDashboard}\` using \`dashboardAttachmentId: "${dashboardAttachmentId}"\` and an \`edit_panels\` operation with \`panelId: "${panelId}"\`.
+Duplicate it with an \`add_panels\` operation whose panel input is \`source: "attachment"\` with this attachment's id; the tool copies the panel verbatim.
 If the panel no longer exists on that dashboard, tell the user instead of recreating it.`;
