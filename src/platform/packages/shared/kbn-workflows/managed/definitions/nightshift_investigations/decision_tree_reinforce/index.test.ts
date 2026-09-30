@@ -60,7 +60,8 @@ describe('decision tree reinforce workflow', () => {
     expect(reinforce['agent-id']).toBe('significant-events.decision-tree-reinforcement');
     expect(reinforce).toMatchObject({
       'connector-id': '{{ steps.resolve_model.output.connector_id }}',
-      'plugin-id': 'significant_events_decision_tree_reinforce',
+      'plugin-id': 'nightshift_investigation_memory',
+      'aggregate-by': 'nightshift',
       'product-solution': 'observability',
       'product-feature': 'nightshift',
     });

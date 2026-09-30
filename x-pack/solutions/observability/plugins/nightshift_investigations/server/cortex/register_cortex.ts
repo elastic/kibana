@@ -16,10 +16,10 @@ import type { InferenceServerStart } from '@kbn/inference-plugin/server';
 import type { ContextEnginePluginSetup } from '@kbn/context-engine-plugin/server';
 import {
   NightshiftModelBlockedError,
-  SIGNIFICANT_EVENTS_INFERENCE_PARENT_FEATURE_ID,
-  SIGNIFICANT_EVENTS_INFERENCE_PRODUCT_FEATURE,
-  SIGNIFICANT_EVENTS_INFERENCE_PRODUCT_SOLUTION,
-  SIGNIFICANT_EVENTS_INVESTIGATION_INFERENCE_FEATURE_ID,
+  NIGHTSHIFT_USAGE_PARENT_ID,
+  NIGHTSHIFT_USAGE_PRODUCT_FEATURE,
+  NIGHTSHIFT_USAGE_PRODUCT_SOLUTION,
+  NIGHTSHIFT_INVESTIGATION_MEMORY_USAGE_ID,
 } from '@kbn/significant-events-schema';
 import { i18n } from '@kbn/i18n';
 import type { SandboxSession } from '@kbn/sandbox-plugin/server';
@@ -209,10 +209,10 @@ export const runCortexOptimize = async ({
       connectorId,
       metadata: {
         connectorTelemetry: {
-          pluginId: SIGNIFICANT_EVENTS_INVESTIGATION_INFERENCE_FEATURE_ID,
-          aggregateBy: SIGNIFICANT_EVENTS_INFERENCE_PARENT_FEATURE_ID,
-          productSolution: SIGNIFICANT_EVENTS_INFERENCE_PRODUCT_SOLUTION,
-          productFeature: SIGNIFICANT_EVENTS_INFERENCE_PRODUCT_FEATURE,
+          pluginId: NIGHTSHIFT_INVESTIGATION_MEMORY_USAGE_ID,
+          aggregateBy: NIGHTSHIFT_USAGE_PARENT_ID,
+          productSolution: NIGHTSHIFT_USAGE_PRODUCT_SOLUTION,
+          productFeature: NIGHTSHIFT_USAGE_PRODUCT_FEATURE,
           interactionId,
         },
       },

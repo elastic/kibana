@@ -116,7 +116,8 @@ describe('Nightshift investigation workflow', () => {
 
   it('attributes agent calls to Nightshift under the shared investigation id', () => {
     expect(requireStep('investigate')).toMatchObject({
-      'plugin-id': 'significant_events_investigation',
+      'plugin-id': 'nightshift_investigation',
+      'aggregate-by': 'nightshift',
       'product-solution': 'observability',
       'product-feature': 'nightshift',
     });

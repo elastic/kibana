@@ -22,6 +22,8 @@ interface WorkflowStep {
   condition?: string;
   'product-solution'?: string;
   'product-feature'?: string;
+  'plugin-id'?: string;
+  'aggregate-by'?: string;
   'connector-id'?: string;
   'connector-id-by-feature'?: string;
   'on-failure'?: { continue?: boolean };
@@ -162,6 +164,8 @@ describe('significant events persistence workflow contracts', () => {
 
   it('attributes discovery agent calls to Nightshift', () => {
     expect(requireStep(discovery, 'run_discovery_agent')).toMatchObject({
+      'plugin-id': 'nightshift_discovery',
+      'aggregate-by': 'nightshift',
       'product-solution': 'observability',
       'product-feature': 'nightshift',
     });
