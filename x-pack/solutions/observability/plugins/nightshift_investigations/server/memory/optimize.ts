@@ -261,12 +261,15 @@ export const canonicalizeMemoryLabelIds = (raw: readonly string[]): string[] => 
 
 export const createLlmProposeMemoryLabels = ({
   inferenceClient,
+  signal,
 }: {
   inferenceClient: BoundInferenceClient;
+  signal?: AbortSignal;
 }): ProposeMemoryLabels => {
   return async ({ transcript, recalledMemories }) => {
     const response = await inferenceClient.output({
       id: 'nightshift_memory_critique',
+      abortSignal: signal,
       system: MEMORY_CRITIQUE_SYSTEM_PROMPT,
       input: `Evaluate the list of recalled memory per the system instructions.\n\nRecalled memories:\n${formatRecalled(
         recalledMemories
@@ -310,12 +313,15 @@ const looksLikeSecret = (value: string): boolean =>
 
 export const createLlmProposeMemoryExtractions = ({
   inferenceClient,
+  signal,
 }: {
   inferenceClient: BoundInferenceClient;
+  signal?: AbortSignal;
 }): ProposeMemoryExtractions => {
   return async ({ transcript, recalledMemories }) => {
     const response = await inferenceClient.output({
       id: 'nightshift_memory_extract',
+      abortSignal: signal,
       system: MEMORY_EXTRACT_SYSTEM_PROMPT,
       input: `${MEMORY_EXTRACT_GUIDELINES}
 
@@ -458,8 +464,10 @@ export const formatMemoryMergeSources = ({
 
 export const createLlmSynthesizeMemoryGroup = ({
   inferenceClient,
+  signal,
 }: {
   inferenceClient: BoundInferenceClient;
+  signal?: AbortSignal;
 }): SynthesizeMemoryGroup => {
   return async ({ sources, extract, task }) => {
     const taskText = extract && task ? truncateTokens(task, MAX_MERGE_TASK_TOKENS) : '';
@@ -475,6 +483,7 @@ export const createLlmSynthesizeMemoryGroup = ({
     });
     const response = await inferenceClient.output({
       id: 'nightshift_memory_merge',
+      abortSignal: signal,
       system: MEMORY_MERGE_SYSTEM_PROMPT,
       input: `${inputPrefix}${sourceAndExtractBlock}${taskBlock}`,
       schema: {
@@ -1153,6 +1162,7 @@ export const optimizeMemory = async ({
   toolCalls,
   investigation,
   logger,
+  signal,
 }: {
   store: MemoryPageStore;
   recalledIds: string[];
@@ -1166,6 +1176,8 @@ export const optimizeMemory = async ({
   /** The round's steps in order with tool results, when the persisted round could be read. */
   investigation?: TranscriptStep[];
   logger: Logger;
+  /** Aborted on step timeout or workflow cancellation; no later LLM call or write starts. */
+  signal?: AbortSignal;
 }): Promise<MemoryOptimizeSummary> => {
   logger.debug(
     `Memory optimize start recalledIds=${recalledIds.length} ` +
@@ -1216,6 +1228,7 @@ export const optimizeMemory = async ({
   }
 
   // Cold-start rounds have an empty recalled set; still extract or the store never fills.
+  signal?.throwIfAborted();
   const shouldExtract = assistantMessage.trim().length > 0;
   let extractions: MemoryExtractProposal[] = [];
   let mergeTargets: string[][] = [];
@@ -1255,6 +1268,7 @@ export const optimizeMemory = async ({
     };
   }
 
+  signal?.throwIfAborted();
   const editSummary = await applyMemoryEdits({
     store,
     recalledIds,

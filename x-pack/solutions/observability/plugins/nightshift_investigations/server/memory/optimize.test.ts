@@ -15,6 +15,7 @@ import {
   canonicalizeMemoryLabelIds,
   contentOverlap,
   createLlmProposeMemoryExtractions,
+  createLlmProposeMemoryLabels,
   createLlmSynthesizeMemoryGroup,
   formatMemoryMergeSources,
   formatRecalled,
@@ -1312,6 +1313,60 @@ describe('isDuplicateExtraction / contentOverlap', () => {
 });
 
 describe('optimizeMemory', () => {
+  it('passes the abort signal to every LLM call', async () => {
+    const signal = new AbortController().signal;
+    const output = jest.fn().mockResolvedValue({
+      output: { useful: [], harmful: [], extractions: [], merge_targets: [] },
+    });
+    const inferenceClient = { output } as never;
+    await createLlmProposeMemoryLabels({ inferenceClient, signal })({
+      transcript: 't',
+      recalledMemories: [page('memory_a')],
+    });
+    await createLlmProposeMemoryExtractions({ inferenceClient, signal })({
+      transcript: 't',
+      recalledMemories: [],
+    });
+    output.mockResolvedValueOnce({ output: { title: 'T', content: 'C', context: 'k' } });
+    await createLlmSynthesizeMemoryGroup({ inferenceClient, signal })({
+      sources: [page('memory_a'), page('memory_b')],
+    });
+
+    expect(output).toHaveBeenCalledTimes(3);
+    for (const [options] of output.mock.calls) {
+      expect(options.abortSignal).toBe(signal);
+    }
+  });
+
+  it('starts no later LLM call or write once aborted', async () => {
+    const controller = new AbortController();
+    const store = createStore({
+      get: jest.fn().mockImplementation(async (id: string) => page(id)),
+    });
+    const proposeLabels = jest.fn().mockImplementation(async () => {
+      controller.abort();
+      return { useful: ['memory_a'], harmful: [] };
+    });
+    const proposeExtractions = jest.fn();
+
+    await expect(
+      optimizeMemory({
+        store,
+        recalledIds: ['memory_a'],
+        proposeLabels,
+        proposeExtractions,
+        userMessage: 'why?',
+        assistantMessage: 'because',
+        toolCalls: [],
+        logger: loggerMock.create(),
+        signal: controller.signal,
+      })
+    ).rejects.toThrow();
+    expect(proposeExtractions).not.toHaveBeenCalled();
+    expect(store.applyCounterUpdates).not.toHaveBeenCalled();
+    expect(store.upsert).not.toHaveBeenCalled();
+  });
+
   it('gives both LLM calls the round tool calls, not just the user and assistant text', async () => {
     const store = createStore({
       get: jest.fn().mockImplementation(async (id: string) => page(id)),

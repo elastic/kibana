@@ -67,7 +67,7 @@ steps:
   - name: obtain_sandbox
     type: nightshift.obtainSandbox
     if: '${{ inputs.conversation_id != null }}'
-    timeout: 45s
+    timeout: 60s
     with:
       conversation_id: '{{ inputs.conversation_id }}'
       # Optimize still extracts from the transcript when sandbox-api is down.

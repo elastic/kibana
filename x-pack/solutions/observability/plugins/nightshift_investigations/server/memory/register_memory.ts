@@ -195,17 +195,20 @@ export const runMemoryOptimize = async ({
   return optimizeMemory({
     store,
     recalledIds,
-    proposeLabels: createLlmProposeMemoryLabels({ inferenceClient: model.inferenceClient }),
+    proposeLabels: createLlmProposeMemoryLabels({ inferenceClient: model.inferenceClient, signal }),
     proposeExtractions: createLlmProposeMemoryExtractions({
       inferenceClient: model.inferenceClient,
+      signal,
     }),
     synthesizeMemoryGroup: createLlmSynthesizeMemoryGroup({
       inferenceClient: model.inferenceClient,
+      signal,
     }),
     userMessage,
     assistantMessage,
     toolCalls,
     investigation,
     logger,
+    signal,
   });
 };

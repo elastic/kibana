@@ -185,6 +185,7 @@ describe('memoryOptimizeStepDefinition', () => {
         {
           prompt: 'why is checkout slow?',
           response: 'Redis evictions.',
+          agent_id: 'nightshift.investigation',
           sandbox_id: 'marketing__conv-1',
         },
         'marketing'
@@ -211,6 +212,7 @@ describe('memoryOptimizeStepDefinition', () => {
       createContext({
         prompt: 'why is checkout slow?',
         response: 'Redis evictions.',
+        agent_id: 'nightshift.investigation',
         sandbox_id: 'default__conv-1',
       })
     );
@@ -256,7 +258,7 @@ describe('memoryOptimizeStepDefinition', () => {
         createContext({
           prompt: 'why?',
           response: 'because',
-          agent_id: 'agent-1',
+          agent_id: 'nightshift.investigation',
           conversation_id: 'conv-1',
           round_id: 'round-1',
         })
@@ -264,13 +266,33 @@ describe('memoryOptimizeStepDefinition', () => {
     ).rejects.toThrow('model failed');
     expect(telemetry.reportSemanticMemoryOptimized).toHaveBeenCalledTimes(1);
     expect(telemetry.reportSemanticMemoryOptimized).toHaveBeenCalledWith({
-      agent_id: 'agent-1',
+      agent_id: 'nightshift.investigation',
       conversation_id: 'conv-1',
       round_id: 'round-1',
       workflow_execution_id: 'workflow-exec-1',
       outcome: 'failure',
     });
   });
+
+  it.each([undefined, 'agent-1'])(
+    'skips without touching Memory when the agent is %s',
+    async (agentId) => {
+      const definition = memoryOptimizeStepDefinition({
+        getAgentBuilder,
+        getMemoryEsClient,
+        logger: loggerMock.create(),
+        telemetry: telemetry as never,
+      });
+
+      const result = await definition.handler(
+        createContext({ prompt: 'why?', response: 'because', agent_id: agentId })
+      );
+
+      expect(result).toEqual({ output: { status: 'ok', skipped: true } });
+      expect(runMemoryOptimize).not.toHaveBeenCalled();
+      expect(getMemoryEsClient).not.toHaveBeenCalled();
+    }
+  );
 
   it('reports a failure outcome when the target agent cannot resolve a model', async () => {
     runMemoryOptimizeMock.mockResolvedValueOnce(undefined);

@@ -139,7 +139,8 @@ export const memoryMaterializeToSandboxStepDefinition = ({
               logger,
             }),
           MATERIALIZE_TIMEOUT_MS,
-          `Memory materialize to sandbox timed out after ${MATERIALIZE_TIMEOUT_MS}ms`
+          `Memory materialize to sandbox timed out after ${MATERIALIZE_TIMEOUT_MS}ms`,
+          context.abortSignal
         );
       } catch (error) {
         telemetry.reportSemanticMemoryMaterialized({

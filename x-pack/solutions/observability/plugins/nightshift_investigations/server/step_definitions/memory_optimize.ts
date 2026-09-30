@@ -101,6 +101,12 @@ export const memoryOptimizeStepDefinition = ({
         return { output: { status: 'ok' as const, skipped: true } };
       }
 
+      // Same policy as materialize: Memory is only for the Nightshift investigator.
+      if (context.input.agent_id?.trim() !== NIGHTSHIFT_INVESTIGATION_AGENT_ID) {
+        context.logger.info('Skipped memory optimize for missing or unsupported agent');
+        return { output: { status: 'ok' as const, skipped: true } };
+      }
+
       const workflowContext = context.contextManager.getContext();
       // Workflow execution authorization is the capability boundary. Storage tenancy always comes
       // from the trusted execution context; no workflow input can select another Space.
@@ -139,7 +145,8 @@ export const memoryOptimizeStepDefinition = ({
               interactionId: workflowExecutionId,
             }),
           OPTIMIZE_TIMEOUT_MS,
-          `Memory optimize timed out after ${OPTIMIZE_TIMEOUT_MS}ms`
+          `Memory optimize timed out after ${OPTIMIZE_TIMEOUT_MS}ms`,
+          context.abortSignal
         );
       } catch (error) {
         telemetry.reportSemanticMemoryOptimized({
