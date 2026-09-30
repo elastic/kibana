@@ -38,5 +38,4 @@ export interface DownloadSourceBase {
 
 export type DownloadSource = DownloadSourceBase & {
   id: string;
-  is_preconfigured?: boolean;
 };
