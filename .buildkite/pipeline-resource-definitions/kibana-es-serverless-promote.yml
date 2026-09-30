@@ -2,10 +2,10 @@
 apiVersion: backstage.io/v1alpha1
 kind: Resource
 metadata:
-  name: bk-kibana-elasticsearch-serverless-verify-and-promote
-  description: Verify & promote ElasticSearch Serverless images that pass Kibana's test suite
+  name: bk-kibana-elasticsearch-serverless-promote
+  description: Promote ElasticSearch Serverless images verified by kibana-elasticsearch-serverless-verify-and-promote
   links:
-    - url: 'https://buildkite.com/elastic/kibana-elasticsearch-serverless-verify-and-promote'
+    - url: 'https://buildkite.com/elastic/kibana-elasticsearch-serverless-promote'
       title: Pipeline link
 spec:
   type: buildkite-pipeline
@@ -15,25 +15,21 @@ spec:
     apiVersion: buildkite.elastic.dev/v1
     kind: Pipeline
     metadata:
-      name: kibana / elasticsearch serverless verify and promote
-      description: Verify & promote ElasticSearch Serverless images that pass Kibana's test suite
+      name: kibana / elasticsearch serverless promote
+      description: Promote ElasticSearch Serverless images verified by kibana-elasticsearch-serverless-verify-and-promote
     spec:
       env:
         SLACK_NOTIFICATIONS_CHANNEL: '#kibana-operations-alerts'
-        ES_SERVERLESS_IMAGE: docker.elastic.co/elasticsearch-ci/elasticsearch-serverless:latest
         KIBANA_SLACK_NOTIFICATIONS_ENABLED: 'true'
-        SLACK_NOTIFICATIONS_SKIP_FOR_RETRIES: 'true'
-        REPORT_FAILED_TESTS_TO_GITHUB: 'false'
-        SCOUT_REPORTER_ENABLED: 'true'
-      allow_rebuilds: true
+      allow_rebuilds: false
       branch_configuration: main
       default_branch: main
       repository: elastic/kibana
-      pipeline_file: .buildkite/pipelines/es_serverless/verify_es_serverless_image.yml
+      pipeline_file: .buildkite/pipelines/es_serverless/promote_es_serverless_image.yml
       initial_step_plugins:
         - sparse-checkout#v1.6.0:
             paths:
-              - .buildkite/pipelines/es_serverless/verify_es_serverless_image.yml
+              - .buildkite/pipelines/es_serverless/promote_es_serverless_image.yml
             cleanup_sparse_state: true
       provider_settings:
         build_branches: false
@@ -45,20 +41,13 @@ spec:
         skip_pull_request_builds_for_existing_commits: false
       teams:
         everyone:
-          access_level: BUILD_AND_READ
+          access_level: READ_ONLY
         kibana-operations:
           access_level: MANAGE_BUILD_AND_READ
         appex-qa:
           access_level: MANAGE_BUILD_AND_READ
         kibana-tech-leads:
           access_level: MANAGE_BUILD_AND_READ
-      schedules:
-        Daily build:
-          cronline: 0 9 * * * America/New_York
-          message: Daily build
-          env:
-            PUBLISH_DOCKER_TAG: 'true'
-          branch: main
       tags:
         - kibana
         - ':kibana: Kibana release path'
