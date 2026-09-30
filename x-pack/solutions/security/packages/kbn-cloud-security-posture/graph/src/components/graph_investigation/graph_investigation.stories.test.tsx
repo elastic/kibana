@@ -117,23 +117,33 @@ const expandNode = async (container: HTMLElement, nodeId: string) => {
 };
 
 /**
- * Returns the button with the given data-test-subj inside the NodeToolbar portal for `nodeId`,
+ * Returns the button with the given data-test-subj inside the toolbar for `nodeId`,
  * or null if the toolbar or button is absent.  Scoping prevents false positives when multiple
- * entity nodes have the same button test-subject in the DOM simultaneously.
+ * nodes have the same button test-subject in the DOM simultaneously.
  *
- * NodeToolbar portals render inside the ReactFlow viewport container (not at document.body),
- * so `document.querySelector` reliably finds them after nodes have mounted.
+ * Label nodes render toolbar items in a ReactFlow NodeToolbar portal
+ * (`.react-flow__node-toolbar[data-id]`). Entity nodes (single and grouped) render
+ * their toolbar items in an absolutely-positioned div inside the node element itself,
+ * so we fall back to searching within the node element when no portal is found.
  */
 const getNodeToolbarButton = (nodeId: string, testSubjectId: string) => {
-  const toolbar = document.querySelector<HTMLElement>(
+  // Label nodes: toolbar items live in a ReactFlow NodeToolbar portal
+  const portal = document.querySelector<HTMLElement>(
     `.react-flow__node-toolbar[data-id="${nodeId}"]`
   );
-  return toolbar ? within(toolbar).queryByTestId(testSubjectId) : null;
+  if (portal) {
+    return within(portal).queryByTestId(testSubjectId);
+  }
+  // Entity nodes: toolbar items live in an absolutely-positioned div inside the node element
+  const nodeElement = document.querySelector<HTMLElement>(
+    `.react-flow__node[data-id="${nodeId}"]`
+  );
+  return nodeElement ? within(nodeElement).queryByTestId(testSubjectId) : null;
 };
 
 const showActionsByNode = async (container: HTMLElement, nodeId: string) => {
   await expandNode(container, nodeId);
-  // NodeToolbar buttons are always in DOM (isVisible={true}); just find the button directly.
+  // Toolbar buttons are always in DOM (opacity hides them); just find the button directly.
   const btn = getNodeToolbarButton(nodeId, GRAPH_NODE_POPOVER_SHOW_ACTIONS_BY_ITEM_ID);
   expect(btn).not.toBeNull();
   expect(btn).toHaveAttribute('aria-label', "Show this entity's actions");
@@ -149,7 +159,7 @@ const showActionsByNode = async (container: HTMLElement, nodeId: string) => {
 
 const hideActionsByNode = async (container: HTMLElement, nodeId: string) => {
   await expandNode(container, nodeId);
-  // NodeToolbar buttons are always in DOM; wait for the filter-active label from the prior click.
+  // Toolbar buttons are always in DOM; wait for the filter-active label from the prior click.
   await waitFor(() => {
     expect(
       getNodeToolbarButton(nodeId, GRAPH_NODE_POPOVER_SHOW_ACTIONS_BY_ITEM_ID)

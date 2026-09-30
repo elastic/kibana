@@ -117,9 +117,7 @@ describe('RelationshipNode', () => {
   describe('Shape colors', () => {
     const mockEuiTheme = {
       colors: {
-        danger: '#FF0000',
-        backgroundLightDanger: '#FFE5E5',
-        backgroundBasePlain: '#FFFFFF',
+        disabled: '#E3E8F2',
         borderBasePlain: '#D3DAE6',
         textHeading: '#1A1C21',
         textParagraph: '#DDDDDD',
@@ -129,31 +127,29 @@ describe('RelationshipNode', () => {
       },
     };
 
-    it('should return relationship colors with dark background and light text', () => {
+    it('should return relationship colors matching event/label node colors', () => {
       const colors = getRelationshipColors(mockEuiTheme as EuiThemeComputed);
       expect(colors).toEqual({
-        backgroundColor: mockEuiTheme.colors.backgroundLightText,
-        borderColor: mockEuiTheme.colors.borderBaseProminent,
-        textColor: mockEuiTheme.colors.textParagraph,
-      });
-    });
-
-    it('should return label colors for primary color', () => {
-      const colors = getLabelColors('primary', mockEuiTheme as EuiThemeComputed);
-      expect(colors).toEqual({
-        backgroundColor: mockEuiTheme.colors.backgroundBasePlain,
+        backgroundColor: mockEuiTheme.colors.disabled,
         borderColor: mockEuiTheme.colors.borderBasePlain,
         textColor: mockEuiTheme.colors.textHeading,
       });
     });
 
-    it('should return danger colors for label nodes with danger color', () => {
+    const expectedLabelColors = {
+      backgroundColor: mockEuiTheme.colors.disabled,
+      borderColor: mockEuiTheme.colors.borderBasePlain,
+      textColor: mockEuiTheme.colors.textHeading,
+    };
+
+    it('should return gray colors for label nodes with primary color', () => {
+      const colors = getLabelColors('primary', mockEuiTheme as EuiThemeComputed);
+      expect(colors).toEqual(expectedLabelColors);
+    });
+
+    it('should return gray colors for label nodes with danger color', () => {
       const colors = getLabelColors('danger', mockEuiTheme as EuiThemeComputed);
-      expect(colors).toEqual({
-        backgroundColor: mockEuiTheme.colors.backgroundLightDanger,
-        borderColor: mockEuiTheme.colors.danger,
-        textColor: mockEuiTheme.colors.danger,
-      });
+      expect(colors).toEqual(expectedLabelColors);
     });
   });
 });

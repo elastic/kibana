@@ -154,30 +154,26 @@ describe('LabelNode', () => {
   describe('Shape colors', () => {
     const mockEuiTheme = {
       colors: {
-        danger: '#FF0000',
-        backgroundLightDanger: '#FFE5E5',
-        backgroundBasePlain: '#FFFFFF',
+        disabled: '#E3E8F2',
         borderBasePlain: '#D3DAE6',
         textHeading: '#1A1C21',
       },
     };
 
-    it('should return danger colors when color prop is "danger"', () => {
+    const expectedColors = {
+      backgroundColor: mockEuiTheme.colors.disabled,
+      borderColor: mockEuiTheme.colors.borderBasePlain,
+      textColor: mockEuiTheme.colors.textHeading,
+    };
+
+    it('should return gray colors when color prop is "danger"', () => {
       const colors = getLabelColors('danger', mockEuiTheme as EuiThemeComputed);
-      expect(colors).toEqual({
-        backgroundColor: mockEuiTheme.colors.backgroundLightDanger,
-        borderColor: mockEuiTheme.colors.danger,
-        textColor: mockEuiTheme.colors.danger,
-      });
+      expect(colors).toEqual(expectedColors);
     });
 
-    it('should return primary colors when color prop is "primary"', () => {
+    it('should return gray colors when color prop is "primary"', () => {
       const colors = getLabelColors('primary', mockEuiTheme as EuiThemeComputed);
-      expect(colors).toEqual({
-        backgroundColor: mockEuiTheme.colors.backgroundBasePlain,
-        borderColor: mockEuiTheme.colors.borderBasePlain,
-        textColor: mockEuiTheme.colors.textHeading,
-      });
+      expect(colors).toEqual(expectedColors);
     });
   });
 });

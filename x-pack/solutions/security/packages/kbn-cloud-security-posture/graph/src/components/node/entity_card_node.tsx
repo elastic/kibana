@@ -8,7 +8,7 @@
 import React, { memo, useCallback, useMemo, useRef, useState } from 'react';
 import styled from '@emotion/styled';
 import { css } from '@emotion/react';
-import { Handle, NodeToolbar, Position, useViewport } from '@xyflow/react';
+import { Handle, Position } from '@xyflow/react';
 import {
   EuiBadge,
   EuiButtonIcon,
@@ -240,10 +240,7 @@ const CountBadge = ({ children, ...props }: React.ComponentPropsWithoutRef<'span
     size="s"
     color="accent"
     css={css`
-      position: absolute;
-      top: -8px;
-      left: -8px;
-      z-index: 1;
+      flex-shrink: 0;
       height: 20px;
       min-width: 20px;
       border-radius: 10px;
@@ -579,22 +576,222 @@ const SingleEntityMetadataPanel = memo<{
 ));
 SingleEntityMetadataPanel.displayName = 'SingleEntityMetadataPanel';
 
-/** Derives risk badge display value and semantic colors from a raw risk score. */
-const computeRiskBadge = (
+interface RiskBadgeEntry {
+  display: string;
+  colors: ReturnType<typeof getRiskScoreColors> | null;
+}
+
+/** Derives one or two risk badge entries from a raw risk score.
+ * Single nodes return one badge. Grouped nodes (min !== max) return two badges —
+ * one for the min score and one for the max — each with its own severity color.
+ */
+const computeRiskBadges = (
   riskScore: EntityNodeViewModel['riskScore'],
   euiTheme: EuiThemeComputed
-): { colors: ReturnType<typeof getRiskScoreColors> | null; display: string } => {
-  const value = riskScore?.max ?? null;
-  const level = value != null ? getRiskLevel(value) : null;
-  return {
-    colors: level != null ? getRiskScoreColors(euiTheme, level) : null,
-    display: value == null ? 'N/A' : (Math.round(value * 100) / 100).toFixed(2),
-  };
+): RiskBadgeEntry[] => {
+  const max = riskScore?.max ?? null;
+  const min = riskScore?.min ?? null;
+  const fmt = (v: number) => (Math.round(v * 100) / 100).toFixed(2);
+
+  if (max == null) {
+    return [{ display: 'N/A', colors: null }];
+  }
+
+  const maxColors = getRiskScoreColors(euiTheme, getRiskLevel(max));
+
+  if (min != null && min !== max) {
+    const minColors = getRiskScoreColors(euiTheme, getRiskLevel(min));
+    return [
+      { display: fmt(min), colors: minColors },
+      { display: fmt(max), colors: maxColors },
+    ];
+  }
+
+  return [{ display: fmt(max), colors: maxColors }];
 };
 
 /** Returns the display string for a grouped node's entity count badge. */
 const getCountDisplay = (count: number | undefined): string =>
   count != null && count > 99 ? '99+' : String(count ?? '');
+
+interface EntityCardHeaderContentProps {
+  icon?: string;
+  color?: EntityNodeViewModel['color'];
+  label?: string;
+  tag?: string;
+  isGrouped: boolean;
+  countDisplay: string;
+  riskBadges: RiskBadgeEntry[];
+  iconBgColor: string;
+  euiTheme: EuiThemeComputed;
+}
+
+/** Renders the icon, count badge, entity name/tag, and risk score badge(s) inside the header row. */
+const EntityCardHeaderContent: React.FC<EntityCardHeaderContentProps> = ({
+  icon,
+  color,
+  label,
+  tag,
+  isGrouped,
+  countDisplay,
+  riskBadges,
+  iconBgColor,
+  euiTheme,
+}) => (
+  <>
+    <IconBox bgColor={iconBgColor} euiTheme={euiTheme}>
+      {icon && (
+        <EuiIcon
+          type={getSpanIcon(icon) ?? icon}
+          size="m"
+          color={color ?? 'primary'}
+          aria-hidden={true}
+        />
+      )}
+    </IconBox>
+
+    {isGrouped && (
+      <CountBadge data-test-subj={GRAPH_TAG_COUNT_ID}>{countDisplay}</CountBadge>
+    )}
+
+    <EntityInfo data-test-subj={GRAPH_ENTITY_NODE_DETAILS_ID}>
+      {isGrouped ? (
+        <EuiText size="xs">
+          <EuiTextTruncate
+            text={label ?? ''}
+            truncation="end"
+            css={css`
+              font-weight: ${euiTheme.font.weight.bold};
+              line-height: ${euiTheme.size.l};
+            `}
+          >
+            {(truncated) => truncated}
+          </EuiTextTruncate>
+        </EuiText>
+      ) : (
+        <>
+          <EuiText size="xs">
+            <EuiTextTruncate
+              text={label ?? ''}
+              truncation="end"
+              css={css`
+                font-weight: ${euiTheme.font.weight.bold};
+                line-height: ${euiTheme.size.l};
+              `}
+            >
+              {(truncated) => truncated}
+            </EuiTextTruncate>
+          </EuiText>
+          {tag && (
+            <EuiText size="xs" color="subdued">
+              <p
+                data-test-subj={GRAPH_TAG_TEXT_ID}
+                css={css`
+                  overflow: hidden;
+                  text-overflow: ellipsis;
+                  white-space: nowrap;
+                  margin: 0;
+                `}
+              >
+                {tag}
+              </p>
+            </EuiText>
+          )}
+        </>
+      )}
+    </EntityInfo>
+
+    {/* Right: risk score badge(s) — one for single nodes, min+max for grouped */}
+    <EuiFlexItem grow={false}>
+      <EuiFlexGroup gutterSize="xs" responsive={false} alignItems="center" wrap={false}>
+        {riskBadges.map((badge, idx) => (
+          <>
+            {idx > 0 && (
+              <EuiFlexItem key={`sep-${idx}`} grow={false}>
+                <EuiText size="xs" color="subdued">
+                  {'-'}
+                </EuiText>
+              </EuiFlexItem>
+            )}
+            <EuiFlexItem key={idx} grow={false}>
+              <EuiBadge
+                data-test-subj={GRAPH_ENTITY_NODE_RISK_BADGE_ID}
+                color={badge.colors?.background ?? euiTheme.colors.backgroundBaseSubdued}
+                css={css`
+                  flex-shrink: 0;
+                  white-space: nowrap;
+                `}
+              >
+                <EuiText
+                  size="xs"
+                  css={css`
+                    font-weight: ${euiTheme.font.weight.semiBold};
+                    color: ${badge.colors?.text ?? euiTheme.colors.textSubdued};
+                  `}
+                >
+                  {badge.display}
+                </EuiText>
+              </EuiBadge>
+            </EuiFlexItem>
+          </>
+        ))}
+      </EuiFlexGroup>
+    </EuiFlexItem>
+  </>
+);
+
+interface ToolbarButtonRowProps {
+  items: NodeToolbarItem[];
+  isHovered: boolean;
+  onMouseEnter: () => void;
+  onMouseLeave: (e: React.MouseEvent) => void;
+  /** Applied via the `style` prop — use for runtime-computed values (e.g. zoom scale). */
+  style?: React.CSSProperties;
+  /** Additional Emotion CSS merged into the wrapper div (e.g. absolute positioning for grouped nodes). */
+  extraCss?: ReturnType<typeof css>;
+}
+
+/** Shared toolbar button row used by both single and grouped entity nodes. */
+const ToolbarButtonRow: React.FC<ToolbarButtonRowProps> = ({
+  items,
+  isHovered,
+  onMouseEnter,
+  onMouseLeave,
+  style,
+  extraCss,
+}) => (
+  <div
+    onMouseEnter={onMouseEnter}
+    onMouseLeave={onMouseLeave}
+    style={style}
+    css={[
+      css`
+        display: flex;
+        align-items: center;
+        gap: 2px;
+        opacity: ${isHovered ? 1 : 0};
+        pointer-events: ${isHovered ? 'auto' : 'none'};
+        transition: opacity 150ms ease;
+      `,
+      extraCss,
+    ]}
+  >
+    {items.map((item, idx) => (
+      <EuiToolTip key={idx} content={item.label} disableScreenReaderOutput>
+        <EuiButtonIcon
+          data-test-subj={item.testSubject}
+          iconType={item.iconType}
+          iconSize="m"
+          color="text"
+          size="s"
+          aria-label={item.label}
+          disabled={item.disabled}
+          onClick={item.onClick}
+        />
+      </EuiToolTip>
+    ))}
+  </div>
+);
 
 interface EntityMetadataContentProps {
   isGrouped: boolean;
@@ -657,10 +854,9 @@ export const EntityCardNode = memo<NodeProps>((props: NodeProps) => {
 
   const { euiTheme } = useEuiTheme();
   const shadow = useEuiShadow('m');
-  const { zoom } = useViewport();
   const fillColor = useNodeFillColor(color ?? 'primary');
   const iconBgColor = getIconColorByRiskScore(riskScore, fillColor);
-  // Hover state for NodeToolbar visibility.
+  // Hover state for toolbar visibility.
   // A generous hide-delay keeps the toolbar alive while the mouse travels from
   // the card into the toolbar, which lives in a separate DOM subtree (portal).
   const [isHovered, setIsHovered] = useState(false);
@@ -696,12 +892,8 @@ export const EntityCardNode = memo<NodeProps>((props: NodeProps) => {
   const isGrouped = showStackedShape(count);
   const countDisplay = getCountDisplay(count);
 
-  // Risk score: derive display value and severity colors matching Entity Analytics.
-  // For grouped nodes (min !== max) use the max score to determine severity level.
-  const { colors: riskBadgeColors, display: riskScoreDisplay } = computeRiskBadge(
-    riskScore,
-    euiTheme
-  );
+  // Risk score: one badge for single nodes, two badges (min + max) for grouped nodes.
+  const riskBadges = computeRiskBadges(riskScore, euiTheme);
 
   // Sources: aggregate from all documentsData entries (grouped nodes have many), deduped.
   const entitySources = useMemo<string[] | undefined>(() => {
@@ -726,42 +918,6 @@ export const EntityCardNode = memo<NodeProps>((props: NodeProps) => {
       onMouseEnter={showToolbar}
       onMouseLeave={hideToolbar}
     >
-      {/* Floating action toolbar — always in DOM when toolbar items exist so FTR
-          tests can find buttons by data-test-subj without relying on hover state.
-          Opacity controls visual show/hide; WebDriver ignores opacity for
-          interactability checks so FTR can always click the buttons. */}
-      {interactive && toolbarItems.length > 0 && (
-        <NodeToolbar isVisible={true} position={Position.Top} align="center" offset={-8}>
-          <div
-            onMouseEnter={showToolbar}
-            onMouseLeave={handleToolbarMouseLeave}
-            style={{ transform: `scale(${zoom})`, transformOrigin: 'center bottom' }}
-            css={css`
-              display: flex;
-              align-items: center;
-              gap: 2px;
-              opacity: ${isHovered ? 1 : 0};
-              pointer-events: ${isHovered ? 'auto' : 'none'};
-              transition: opacity 150ms ease;
-            `}
-          >
-            {toolbarItems.map((item, idx) => (
-              <EuiToolTip key={idx} content={item.label} disableScreenReaderOutput>
-                <EuiButtonIcon
-                  data-test-subj={item.testSubject}
-                  iconType={item.iconType}
-                  iconSize="m"
-                  color="text"
-                  size="s"
-                  aria-label={item.label}
-                  disabled={item.disabled}
-                  onClick={item.onClick}
-                />
-              </EuiToolTip>
-            ))}
-          </div>
-        </NodeToolbar>
-      )}
 
       {/* The entity card is shorter than the full NODE_HEIGHT reservation.
           justify-content: center vertically centres the card in the container
@@ -780,76 +936,44 @@ export const EntityCardNode = memo<NodeProps>((props: NodeProps) => {
             position: relative;
           `}
         >
+          {/* Toolbar: anchored to the card's own top edge via position:absolute +
+              bottom:100% on this relative wrapper, giving a consistent 4px gap
+              above the card for both single and grouped nodes.  This avoids
+              using ReactFlow's NodeToolbar portal (which positions relative to
+              the full 240px NodeShapeContainer, not the card). */}
+          {interactive && toolbarItems.length > 0 && (
+            <ToolbarButtonRow
+              items={toolbarItems}
+              isHovered={isHovered}
+              onMouseEnter={showToolbar}
+              onMouseLeave={handleToolbarMouseLeave}
+              extraCss={css`
+                position: absolute;
+                bottom: calc(100% + 4px);
+                left: 50%;
+                transform: translateX(-50%);
+                z-index: ${euiTheme.levels.content};
+              `}
+            />
+          )}
           <EntityCardWrapper euiTheme={euiTheme} shadow={shadow}>
-            {/* Header row: icon | name+tag | risk badge */}
+            {/* Header row: icon | [count] | name/tag | risk badge */}
             <EntityCardHeader>
-              <IconBox bgColor={iconBgColor} euiTheme={euiTheme}>
-                {isGrouped && (
-                  <CountBadge data-test-subj={GRAPH_TAG_COUNT_ID}>{countDisplay}</CountBadge>
-                )}
-                {icon && (
-                  <EuiIcon
-                    type={getSpanIcon(icon) ?? icon}
-                    size="m"
-                    color={color ?? 'primary'}
-                    aria-hidden={true}
-                  />
-                )}
-              </IconBox>
-
-              <EntityInfo data-test-subj={GRAPH_ENTITY_NODE_DETAILS_ID}>
-                <EuiText size="xs">
-                  <EuiTextTruncate
-                    text={label ?? ''}
-                    truncation="end"
-                    css={css`
-                      font-weight: ${euiTheme.font.weight.bold};
-                      line-height: ${euiTheme.size.l};
-                    `}
-                  >
-                    {(truncated) => truncated}
-                  </EuiTextTruncate>
-                </EuiText>
-                {tag && (
-                  <EuiText size="xs" color="subdued">
-                    <p
-                      data-test-subj={GRAPH_TAG_TEXT_ID}
-                      css={css`
-                        overflow: hidden;
-                        text-overflow: ellipsis;
-                        white-space: nowrap;
-                        margin: 0;
-                      `}
-                    >
-                      {tag}
-                    </p>
-                  </EuiText>
-                )}
-              </EntityInfo>
-
-              {/* Right: risk score badge — colors match Entity Analytics RiskScoreCell */}
-              <EuiBadge
-                data-test-subj={GRAPH_ENTITY_NODE_RISK_BADGE_ID}
-                color={riskBadgeColors?.background ?? euiTheme.colors.backgroundBaseSubdued}
-                css={css`
-                  flex-shrink: 0;
-                  white-space: nowrap;
-                `}
-              >
-                <EuiText
-                  size="xs"
-                  css={css`
-                    font-weight: ${euiTheme.font.weight.semiBold};
-                    color: ${riskBadgeColors?.text ?? euiTheme.colors.textSubdued};
-                  `}
-                >
-                  {riskScoreDisplay}
-                </EuiText>
-              </EuiBadge>
+              <EntityCardHeaderContent
+                icon={icon}
+                color={color}
+                label={label}
+                tag={tag}
+                isGrouped={isGrouped}
+                countDisplay={countDisplay}
+                riskBadges={riskBadges}
+                iconBgColor={iconBgColor}
+                euiTheme={euiTheme}
+              />
             </EntityCardHeader>
 
-            {/* Metadata panel — hidden in preview (non-interactive) mode */}
-            {interactive && (
+            {/* Metadata panel — hidden in preview (non-interactive) mode and for grouped nodes */}
+            {interactive && !isGrouped && (
               <EntityCardMetadata
                 data-test-subj={GRAPH_ENTITY_NODE_LAYERS_PANEL_ID}
                 euiTheme={euiTheme}
@@ -889,10 +1013,9 @@ export const EntityCardNode = memo<NodeProps>((props: NodeProps) => {
                 height={ENTITY_CARD_HEADER_HEIGHT}
                 onClick={(e) => nodeClick?.(e, props)}
               />
-              {/* Expand button — hidden visually when the NodeToolbar is wired, but always
-                   present in the DOM so that tests can click it to open the popover.
-                   Also inside the card wrapper div so its y offset aligns with the header. */}
-              {/* Hidden when the NodeToolbar is shown; FTR tests use the toolbar items directly. */}
+              {/* Expand button — hidden when toolbar items are wired, but always present in
+                   the DOM so that tests can click it to open the popover.
+                   FTR tests use the toolbar items directly when available. */}
               {toolbarItems.length === 0 && (
                 <NodeExpandButton
                   color={color}

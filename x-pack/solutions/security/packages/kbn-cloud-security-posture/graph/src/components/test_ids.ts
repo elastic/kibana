@@ -127,3 +127,5 @@ export const GRAPH_RELATIONSHIP_NODE_HOVER_OUTLINE_ID =
   `${GRAPH_INVESTIGATION_TEST_ID}RelationshipNodeHoverOutline` as const;
 export const GRAPH_RELATIONSHIP_NODE_LABEL_TEXT_ID =
   `${GRAPH_INVESTIGATION_TEST_ID}RelationshipNodeLabelText` as const;
+export const GRAPH_RELATIONSHIP_NODE_ICON_BADGE_ID =
+  `${GRAPH_INVESTIGATION_TEST_ID}RelationshipNodeIconBadge` as const;

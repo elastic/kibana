@@ -211,30 +211,30 @@ export const getLabelColors = (
 ): { backgroundColor: string; borderColor: string; textColor: string } => {
   if (color === 'danger') {
     return {
-      backgroundColor: euiTheme.colors.backgroundLightDanger,
-      borderColor: euiTheme.colors.danger,
-      textColor: euiTheme.colors.danger,
+      backgroundColor: euiTheme.colors.disabled,
+      borderColor: euiTheme.colors.borderBasePlain,
+      textColor: euiTheme.colors.textHeading,
     };
   }
 
   return {
-    backgroundColor: euiTheme.colors.backgroundBasePlain,
+    backgroundColor: euiTheme.colors.disabled,
     borderColor: euiTheme.colors.borderBasePlain,
     textColor: euiTheme.colors.textHeading,
   };
 };
 
 /**
- * Gets the background, border and text colors for relationship nodes
- * Relationship nodes have fixed colors (dark background with light text)
+ * Gets the background, border and text colors for relationship nodes.
+ * Uses the same colors as event/label nodes for visual consistency.
  */
 export const getRelationshipColors = (
   euiTheme: EuiThemeComputed
 ): { backgroundColor: string; borderColor: string; textColor: string } => {
   return {
-    backgroundColor: euiTheme.colors.backgroundLightText,
-    borderColor: euiTheme.colors.borderBaseProminent,
-    textColor: euiTheme.colors.textParagraph,
+    backgroundColor: euiTheme.colors.disabled,
+    borderColor: euiTheme.colors.borderBasePlain,
+    textColor: euiTheme.colors.textHeading,
   };
 };
 
