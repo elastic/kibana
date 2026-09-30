@@ -190,6 +190,51 @@ export const computeWorkflowLayout = (
     containerDescendants
   );
 
+  // Post-dagre pass 3b: re-centre join nodes over their branch exits.
+  // enforceForkLaneOrder re-centres the fork source (if/switch/parallel gate)
+  // over its branch head positions, but the join node — which sits below the
+  // branch exits and is shared by all of them — is not in any exclusive lane
+  // set and is therefore not moved. After the lane-order swap the join node's
+  // dagre-computed position is stale; fix it here so the merge-bus convergence
+  // point and any terminal stub land at the visual centre.
+  if (transformed.forkNodeToJoinId.size > 0) {
+    const nodePositions = new Map(repairedNodes.map((n) => [n.id, n]));
+    // Build predecessor map from branch edges (all edges, including join edges).
+    const predecessors = new Map<string, string[]>();
+    for (const e of transformed.edges) {
+      const existing = predecessors.get(e.target);
+      if (existing) {
+        existing.push(e.source);
+      } else {
+        predecessors.set(e.target, [e.source]);
+      }
+    }
+    const updatedPositions = new Map<string, { x: number; y: number }>();
+    for (const [, joinId] of transformed.forkNodeToJoinId) {
+      const joinNode = nodePositions.get(joinId);
+      if (!joinNode) continue;
+      const preds = predecessors.get(joinId) ?? [];
+      const predCenters = preds.flatMap((pid) => {
+        const n = nodePositions.get(pid);
+        return n ? [n.x + n.width / 2] : [];
+      });
+      if (predCenters.length === 0) continue;
+      const midpoint = (Math.min(...predCenters) + Math.max(...predCenters)) / 2;
+      const newX = midpoint - joinNode.width / 2;
+      if (Math.abs(newX - joinNode.x) >= 0.001) {
+        updatedPositions.set(joinId, { x: newX, y: joinNode.y });
+      }
+    }
+    if (updatedPositions.size > 0) {
+      for (let i = 0; i < repairedNodes.length; i++) {
+        const updated = updatedPositions.get(repairedNodes[i].id);
+        if (updated) {
+          repairedNodes[i] = { ...repairedNodes[i], ...updated };
+        }
+      }
+    }
+  }
+
   // Post-dagre pass 4: reconcile edge waypoints.
   // Translate-or-clear based on how much each endpoint moved since dagLayout.
   // NOTE: dagLayout now moves spine nodes on the main axis (spine push for

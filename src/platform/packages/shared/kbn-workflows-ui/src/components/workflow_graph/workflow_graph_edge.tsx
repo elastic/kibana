@@ -115,7 +115,10 @@ function WorkflowGraphEdgeInner(props: EdgeProps) {
   const strokeDasharray = isFailure ? '6 3' : undefined;
   const strokeWidth = 1;
 
-  const fullLabel = displayEdgeLabel(edgeData?.label ?? '');
+  // Only call displayEdgeLabel when label is explicitly set — undefined means
+  // "no label" and must not render the '""' empty-string chip.
+  const rawLabel = edgeData?.label;
+  const fullLabel = rawLabel !== undefined ? displayEdgeLabel(rawLabel) : '';
   const truncated =
     fullLabel.length > LABEL_TRUNCATE ? `${fullLabel.slice(0, LABEL_TRUNCATE - 1)}…` : fullLabel;
   const showLabel = Boolean(fullLabel);

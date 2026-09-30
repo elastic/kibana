@@ -332,7 +332,7 @@ function transformInternal(
         // Both branches empty — synthesize bypass nodes for both so labeled
         // dangling edges appear on the canvas.
         const thenBypassId = ids.allocate(`${step.name}-then-bypass`);
-        bypassLaneNodes.push({ id: thenBypassId, style: { width: 1, height: 1 } });
+        bypassLaneNodes.push({ id: thenBypassId, style: { width: 80, height: 1 } });
         edges.push({
           id: `${id}:${thenBypassId}-then`,
           source: id,
@@ -380,7 +380,7 @@ function transformInternal(
       } else {
         // Both branches empty — synthesize a bypass for the false path too.
         const elseBypassId = ids.allocate(`${step.name}-else-bypass`);
-        bypassLaneNodes.push({ id: elseBypassId, style: { width: 1, height: 1 } });
+        bypassLaneNodes.push({ id: elseBypassId, style: { width: 80, height: 1 } });
         edges.push({
           id: `${id}:${elseBypassId}-else`,
           source: id,

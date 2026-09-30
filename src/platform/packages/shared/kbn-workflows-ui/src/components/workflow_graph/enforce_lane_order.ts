@@ -233,6 +233,8 @@ const enforceForkLaneOrderForGraph = (
 
   // Group out-edges by source, preserving declaration order.
   const outEdges = new Map<string, string[]>(); // source → targets in order
+  // Build in-edge map for ancestor propagation after fork re-centering.
+  const inEdges = new Map<string, string[]>(); // target → sources
   for (const e of spineEdges) {
     if (mutableNodes.has(e.source)) {
       const existing = outEdges.get(e.source);
@@ -242,10 +244,16 @@ const enforceForkLaneOrderForGraph = (
         outEdges.set(e.source, [e.target]);
       }
     }
+    const existingIn = inEdges.get(e.target);
+    if (existingIn) {
+      existingIn.push(e.source);
+    } else {
+      inEdges.set(e.target, [e.source]);
+    }
   }
 
   // Process each fork in declaration order.
-  for (const [, heads] of outEdges) {
+  for (const [source, heads] of outEdges) {
     if (heads.length >= 2) {
       const laneSets = buildLaneSets(heads, spineEdges);
       if (laneSets) {
@@ -302,6 +310,59 @@ const enforceForkLaneOrderForGraph = (
               }
 
               placedSets.push(laneNodes);
+            }
+
+            // Re-center the fork source over its placed branch heads, then propagate
+            // the same delta up through any straight-chain ancestors (single out-edge).
+            // dagre centres the fork source over its branches, but when lane order is
+            // swapped by this pass the source position is stale — correct it here so
+            // the fork node does not appear visually off-centre.
+            const forkNode = mutableNodes.get(source);
+            if (forkNode) {
+              const branchCenters = orderedHeads.flatMap((h) => {
+                const n = mutableNodes.get(h);
+                if (!n) return [];
+                return [n[crossAxis] + (crossAxis === 'x' ? n.width : n.height) / 2];
+              });
+              if (branchCenters.length > 0) {
+                const minCenter = Math.min(...branchCenters);
+                const maxCenter = Math.max(...branchCenters);
+                const midpoint = (minCenter + maxCenter) / 2;
+                const forkSpan = crossAxis === 'x' ? forkNode.width : forkNode.height;
+                const newForkCross = midpoint - forkSpan / 2;
+                const forkDelta = newForkCross - forkNode[crossAxis];
+
+                if (Math.abs(forkDelta) >= 0.001) {
+                  // Move the fork source.
+                  mutableNodes.set(source, {
+                    ...forkNode,
+                    x: crossAxis === 'x' ? newForkCross : forkNode.x,
+                    y: crossAxis === 'y' ? newForkCross : forkNode.y,
+                  });
+
+                  // Propagate upward through straight-chain ancestors (single out-edge)
+                  // so that, e.g., a trigger directly above an if-gate stays aligned.
+                  let cur = source;
+                  const visited = new Set<string>([cur]);
+                  for (;;) {
+                    const parents = inEdges.get(cur) ?? [];
+                    if (parents.length !== 1) break; // only straight-chain (one parent)
+                    const parent = parents[0];
+                    if (visited.has(parent)) break;
+                    const parentOuts = outEdges.get(parent);
+                    if (!parentOuts || parentOuts.length !== 1) break; // parent is itself a fork
+                    const parentNode = mutableNodes.get(parent);
+                    if (!parentNode) break;
+                    mutableNodes.set(parent, {
+                      ...parentNode,
+                      x: crossAxis === 'x' ? parentNode.x + forkDelta : parentNode.x,
+                      y: crossAxis === 'y' ? parentNode.y + forkDelta : parentNode.y,
+                    });
+                    visited.add(parent);
+                    cur = parent;
+                  }
+                }
+              }
             }
           }
         }
