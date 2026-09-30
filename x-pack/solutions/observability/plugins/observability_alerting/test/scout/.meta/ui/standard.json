@@ -122,7 +122,7 @@
     },
     {
       "id": "648c81c97fb0579-c98c179092568db",
-      "title": "Observability Alerting URLs returns app not found for Inbox (/inbox) when alerting v2 is disabled",
+      "title": "Observability Alerting URLs returns app not found for Alerts (/alerts) when alerting v2 is disabled",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -138,7 +138,7 @@
     },
     {
       "id": "648c81c97fb0579-99c04cee2e65cb7",
-      "title": "Observability Alerting URLs loads Inbox (/inbox) when alerting v2 is enabled",
+      "title": "Observability Alerting URLs loads Alerts (/alerts) when alerting v2 is enabled",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",

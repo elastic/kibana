@@ -80,7 +80,8 @@ export const AGENT_BUILDER_TRACING_REAL_IDS_SETTING_ID = 'agentBuilder:tracing:i
 export const AGENT_BUILDER_TRACING_USER_DATA_SETTING_ID = 'agentBuilder:tracing:includeUserData';
 
 // Alerting settings
-export const ALERTING_V2_ENABLED_SETTING_ID = 'alerting:v2:enabled';
+export const ALERTING_V2_SHOW_STANDARD_ALERTS_PAGE_SETTING_ID =
+  'alerting:v1:showStandardObservabilityAlertsPage';
 
 // Context engine settings
 export const CONTEXT_ENGINE_ENABLED_SETTING_ID = 'contextEngine:enabled';

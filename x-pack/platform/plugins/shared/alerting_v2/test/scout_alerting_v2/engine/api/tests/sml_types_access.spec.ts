@@ -119,9 +119,9 @@ const runSmlCrawlerSoon = async (kbnClient: KbnClient, typeId: string): Promise<
  * `platform.core.sml_search` tool. `POST /api/agent_builder/tools/_execute`
  * runs that same handler without a conversation, LLM, or connector.
  *
- * This suite lives under `scout_alerting_v2` so `alerting:v2:enabled` stays
- * pinned on. The generic Scout config leaves that setting unpinned, and
- * `rule_management_skill_gating.spec.ts` toggles it at runtime.
+ * This suite lives under `scout_alerting_v2` so `xpack.alerting_v2.enabled`
+ * stays pinned on. See `alerting_v2_skill_registration.spec.ts` for the
+ * Agent Builder experimental-features gating this suite doesn't cover.
  */
 // Failing: See https://github.com/elastic/kibana/issues/289954
 apiTest.describe.skip(

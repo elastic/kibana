@@ -19,7 +19,6 @@ const getStackManagementSectionLinks = async (
   const coreStart = coreMock.createStart();
   coreStart.featureFlags.getBooleanValue$ = jest.fn().mockReturnValue(of(false));
   coreStart.settings.client.get$ = jest.fn().mockReturnValue(of(AIChatExperience.Classic));
-  coreStart.settings.globalClient.get.mockReturnValue(false);
 
   const definition = createDefinition(coreStart, {
     streams: { navigationStatus$: of({ status: 'disabled' as const }) },
@@ -37,13 +36,13 @@ const getStackManagementSectionLinks = async (
 };
 
 describe('Observability solution navigation tree', () => {
-  it('does not include Stack Alerts in Stack Management > Alerts and Insights', async () => {
+  it('hides Stack Alerts and Stack Rules', async () => {
     const alertsLinks = await getStackManagementSectionLinks('alerts_and_insights');
 
     expect(alertsLinks).not.toContain('management:triggersActionsAlerts');
+    expect(alertsLinks).not.toContain('management:triggersActions');
     expect(alertsLinks).toEqual(
       expect.arrayContaining([
-        'management:triggersActions',
         'management:triggersActionsConnectors',
         'management:maintenanceWindows',
       ])

@@ -8,10 +8,6 @@
 import type { KibanaRole } from '@kbn/scout-oblt';
 import { expect } from '@kbn/scout-oblt/ui';
 import { test } from '../fixtures';
-import {
-  setAlertingV2EnabledSetting,
-  unsetAlertingV2EnabledSetting,
-} from '../fixtures/alerting_v2_setting';
 import type { ObservabilityAlertingPage } from '../fixtures/page_objects';
 import {
   createV1ThresholdSourceIndex,
@@ -28,7 +24,7 @@ import {
   V2_EPISODE_TAG,
   waitForV1RuleAlert,
 } from '../fixtures/privilege_test_data';
-import { OBSERVABILITY_ALERTING_INBOX_PATH } from '../../../../public/constants';
+import { OBSERVABILITY_ALERTING_ALERTS_PATH } from '../../../../public/constants';
 
 type ElasticsearchPrivileges = KibanaRole['elasticsearch'];
 
@@ -199,7 +195,6 @@ test.describe(
 
     test.beforeAll(async ({ apiServices, esClient, kbnClient }) => {
       test.setTimeout(180_000);
-      await setAlertingV2EnabledSetting(kbnClient, true);
       await createV1ThresholdSourceIndex(esClient);
       await apiServices.dataViews.create({
         id: THRESHOLD_DATA_VIEW_ID,
@@ -251,7 +246,6 @@ test.describe(
       if (v2RuleId) {
         await deleteV2PrivilegeRule(esClient, kbnClient, v2RuleId);
       }
-      await unsetAlertingV2EnabledSetting(kbnClient);
     });
 
     test('user with logs read privilege sees the full inbox page', async ({
@@ -259,7 +253,7 @@ test.describe(
       pageObjects,
     }) => {
       await browserAuth.loginWithCustomRole(LOGS_READ_ROLE);
-      await pageObjects.observabilityAlerting.goto(OBSERVABILITY_ALERTING_INBOX_PATH);
+      await pageObjects.observabilityAlerting.goto(OBSERVABILITY_ALERTING_ALERTS_PATH);
       await assertEpisodesInboxHappyPath(pageObjects.observabilityAlerting, {
         expectedTags: [V1_EPISODE_TAG],
         unexpectedTags: [V2_EPISODE_TAG],
@@ -272,7 +266,7 @@ test.describe(
       pageObjects,
     }) => {
       await browserAuth.loginWithCustomRole(LOGS_READ_CLASSIC_INDICES_ROLE);
-      await pageObjects.observabilityAlerting.goto(OBSERVABILITY_ALERTING_INBOX_PATH);
+      await pageObjects.observabilityAlerting.goto(OBSERVABILITY_ALERTING_ALERTS_PATH);
       await assertEpisodesInboxHappyPath(pageObjects.observabilityAlerting, {
         expectedTags: [V1_EPISODE_TAG],
         unexpectedTags: [V2_EPISODE_TAG],
@@ -285,7 +279,7 @@ test.describe(
       pageObjects,
     }) => {
       await browserAuth.loginWithCustomRole(ALERTING_V2_ALERTS_READ_ROLE);
-      await pageObjects.observabilityAlerting.goto(OBSERVABILITY_ALERTING_INBOX_PATH);
+      await pageObjects.observabilityAlerting.goto(OBSERVABILITY_ALERTING_ALERTS_PATH);
       await assertEpisodesInboxHappyPath(pageObjects.observabilityAlerting, {
         expectedTags: [V2_EPISODE_TAG],
         unexpectedTags: [V1_EPISODE_TAG],
@@ -294,7 +288,7 @@ test.describe(
 
     test('user with no alerting privileges is blocked', async ({ browserAuth, pageObjects }) => {
       await browserAuth.loginWithCustomRole(NO_ALERTING_ROLE);
-      await pageObjects.observabilityAlerting.goto(OBSERVABILITY_ALERTING_INBOX_PATH);
+      await pageObjects.observabilityAlerting.goto(OBSERVABILITY_ALERTING_ALERTS_PATH);
 
       await expect(pageObjects.observabilityAlerting.requiredPrivilegesPrompt).toBeVisible({
         timeout: 60_000,

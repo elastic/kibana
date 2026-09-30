@@ -14,7 +14,15 @@ import type { RuleSummaryFlyoutProps } from './rule_summary_flyout';
 import type { RuleApiResponse } from '../../../../services/rules_api';
 import { useRuleAutoAttach } from '@kbn/alerting-v2-browser-shared';
 import { createMockLocators, MockLocatorProvider } from '../../../../test_utils/test_providers';
-import { AlertingV2RulesLocatorDefinition } from '../../../../locators';
+import { AlertingV2RulesLocatorDefinition, createAlertingV2HostApp } from '../../../../locators';
+
+const TEST_HOST = createAlertingV2HostApp('test-app', {
+  rules: '/alerting/rules',
+  ruleLibrary: '/alerting/library',
+  episodes: '/alerting/inbox',
+  actionPolicies: '/alerting/action-policies',
+  executionHistory: '/alerting/execution-history',
+});
 
 const mockLocators = createMockLocators();
 
@@ -316,7 +324,7 @@ describe('RuleSummaryFlyout', () => {
       );
     });
 
-    it('View details params resolve to management rule details URL', async () => {
+    it('View details params resolve to rule details URL for the bound host', async () => {
       renderFlyout();
       openMenu();
 
@@ -324,10 +332,13 @@ describe('RuleSummaryFlyout', () => {
       const useUrlCall = jest
         .mocked(rulesLocators.useUrl)
         .mock.calls.find(([p]) => p.ruleId === 'rule-1');
-      const location = await AlertingV2RulesLocatorDefinition.getLocation(useUrlCall![0]);
+      const location = await AlertingV2RulesLocatorDefinition.getLocation({
+        ...useUrlCall![0],
+        host: TEST_HOST.rules,
+      });
       expect(location).toMatchObject({
-        app: 'management',
-        path: '/alertingV2/rules/rule-1',
+        app: 'test-app',
+        path: '/alerting/rules/rule-1',
       });
     });
 
@@ -351,7 +362,7 @@ describe('RuleSummaryFlyout', () => {
       );
     });
 
-    it('rule id with special characters resolves to a properly encoded management URL', async () => {
+    it('rule id with special characters resolves to a properly encoded URL', async () => {
       renderFlyout({
         rule: { ...baseRule, id: 'rule with spaces/and slash' } as RuleApiResponse,
       });
@@ -361,10 +372,13 @@ describe('RuleSummaryFlyout', () => {
       const useUrlCall = jest
         .mocked(rulesLocators.useUrl)
         .mock.calls.find(([p]) => p.ruleId === 'rule with spaces/and slash');
-      const location = await AlertingV2RulesLocatorDefinition.getLocation(useUrlCall![0]);
+      const location = await AlertingV2RulesLocatorDefinition.getLocation({
+        ...useUrlCall![0],
+        host: TEST_HOST.rules,
+      });
       expect(location).toMatchObject({
-        app: 'management',
-        path: '/alertingV2/rules/rule%20with%20spaces%2Fand%20slash',
+        app: 'test-app',
+        path: '/alerting/rules/rule%20with%20spaces%2Fand%20slash',
       });
     });
 

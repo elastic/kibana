@@ -27,7 +27,15 @@ test.describe('Stack Management — nav link access', { tag: tags.stateful.class
       expect(navLinks).toContain('Stack Management');
 
       const sections = await pageObjects.management.readSidebarSections();
-      expect(sections).toHaveLength(7);
+      expect(sections).toHaveLength(8);
+      const alertingV2Section = sections.find((s) => s.sectionId === 'alertingV2');
+      expect(alertingV2Section?.sectionLinks).toStrictEqual([
+        'rules',
+        'rule_library',
+        'episodes',
+        'action_policies',
+        'execution_history',
+      ]);
       const dataSection = sections.find((s) => s.sectionId === 'data');
       expect(dataSection?.sectionLinks).toStrictEqual(['data_quality']);
       const insightsSection = sections.find((s) => s.sectionId === 'insightsAndAlerting');

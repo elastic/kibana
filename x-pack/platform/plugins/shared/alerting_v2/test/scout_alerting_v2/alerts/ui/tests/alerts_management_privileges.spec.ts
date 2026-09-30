@@ -61,7 +61,7 @@ const assertEpisodesManagementHappyPath = async ({
  */
 test.describe(
   'Alerts management page - privilege-based access',
-  { tag: '@local-stateful-classic' },
+  { tag: ['@local-stateful-classic', '@local-serverless-observability_complete'] },
   () => {
     test.beforeAll(async ({ apiServices }) => {
       test.setTimeout(180_000);

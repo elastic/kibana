@@ -56,18 +56,18 @@ describe('registerFeaturePrivileges', () => {
     });
   });
 
-  it('describes access for every experimental feature', () => {
+  it('describes access for every feature', () => {
     expect(getRegisteredFeature(ALERTING_V2_FEATURES.rules.id).description).toBe(
-      'Experimental. Controls access to rules in the experimental alerting system.'
+      'Controls access to rules in the alerting system.'
     );
     expect(getRegisteredFeature(ALERTING_V2_FEATURES.alerts.id).description).toBe(
-      'Experimental. Controls access to alerts in the experimental alerting system.'
+      'Controls access to alerts in the alerting system.'
     );
     expect(getRegisteredFeature(ALERTING_V2_FEATURES.actionPolicies.id).description).toBe(
-      'Experimental. Controls access to action policies in the experimental alerting system.'
+      'Controls access to action policies in the alerting system.'
     );
     expect(getRegisteredFeature(ALERTING_V2_FEATURES.executionHistory.id).description).toBe(
-      'Experimental. Controls access to execution history in the experimental alerting system.'
+      'Controls access to execution history in the alerting system.'
     );
 
     for (const feature of Object.values(ALERTING_V2_FEATURES)) {
@@ -139,11 +139,12 @@ describe('registerFeaturePrivileges', () => {
       [ALERTING_V2_FEATURES.executionHistory.id, [ALERTING_V2_EXECUTION_HISTORY_APP_ID]],
     ])('gates the "%s" feature behind the %j management app(s)', (featureId, expectedApps) => {
       const registered = getRegisteredFeature(featureId);
-      const expectedManagement = { [ALERTING_V2_SECTION_ID]: expectedApps };
+      const ownedManagement = { [ALERTING_V2_SECTION_ID]: expectedApps };
+      const readManagement = { [ALERTING_V2_SECTION_ID]: [expectedApps[0]] };
 
-      expect(registered.management).toEqual(expectedManagement);
-      expect(registered.privileges?.all.management).toEqual(expectedManagement);
-      expect(registered.privileges?.read.management).toEqual(expectedManagement);
+      expect(registered.management).toEqual(ownedManagement);
+      expect(registered.privileges?.all.management).toEqual(ownedManagement);
+      expect(registered.privileges?.read.management).toEqual(readManagement);
     });
 
     it.each(Object.values(ALERTING_V2_FEATURES).map((f) => [f.id, f.managementApp]))(

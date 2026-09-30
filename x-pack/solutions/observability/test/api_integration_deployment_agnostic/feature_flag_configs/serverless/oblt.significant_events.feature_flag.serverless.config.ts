@@ -13,10 +13,12 @@ export default createServerlessFeatureFlagTestConfig<typeof services>({
   services,
   serverlessProject: 'oblt',
   testFiles: [require.resolve('./oblt.significant_events.feature_flag.index.ts')],
+  // Production serverless regions enable the engine via deployment overrides. Keep the explicit
+  // engine override here until config/serverless.yml no longer disables it — it exposes the
+  // Alerting v2 HTTP API used by these suites for rule lifecycle assertions.
   kbnServerArgs: [
     `--feature_flags.overrides.${NIGHTSHIFT_ENABLED_FLAG}=true`,
     '--xpack.alerting_v2.enabled=true',
-    '--uiSettings.globalOverrides.alerting:v2:enabled=true',
   ],
   junit: {
     reportName: 'Serverless Observability - Significant Events API Integration Tests',

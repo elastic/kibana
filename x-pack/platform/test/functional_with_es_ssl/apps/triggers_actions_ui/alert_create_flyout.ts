@@ -196,7 +196,6 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       await pageObjects.common.navigateToApp('management', {
         path: 'insightsAndAlerting/triggersActions',
       });
-      await testSubjects.click('rulesTab');
     });
 
     it('should delete the right action when the same action has been added twice', async () => {
@@ -317,7 +316,6 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       await pageObjects.common.navigateToApp('management', {
         path: 'insightsAndAlerting/triggersActions',
       });
-      await testSubjects.click('rulesTab');
       await pageObjects.triggersActionsUI.searchAlerts(alertName);
       const searchResultsAfterSave = await pageObjects.triggersActionsUI.getAlertsList();
       const searchResultAfterSave = searchResultsAfterSave[0];
@@ -399,7 +397,6 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       await pageObjects.common.navigateToApp('management', {
         path: 'insightsAndAlerting/triggersActions',
       });
-      await testSubjects.click('rulesTab');
       await pageObjects.triggersActionsUI.searchAlerts(alertName);
       const searchResultsAfterSave = await pageObjects.triggersActionsUI.getAlertsList();
       const searchResultAfterSave = searchResultsAfterSave[0];
@@ -489,7 +486,6 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       await pageObjects.common.navigateToApp('management', {
         path: 'insightsAndAlerting/triggersActions',
       });
-      await testSubjects.click('rulesTab');
 
       await pageObjects.triggersActionsUI.searchAlerts(alertName);
       const searchResultsAfterSave = await pageObjects.triggersActionsUI.getAlertsList();
@@ -523,7 +519,6 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       await pageObjects.common.navigateToApp('management', {
         path: 'insightsAndAlerting/triggersActions',
       });
-      await testSubjects.click('rulesTab');
 
       await retry.waitForWithTimeout(`rule "${alertName}" to appear in list`, 15000, async () => {
         await pageObjects.triggersActionsUI.searchAlerts(alertName);

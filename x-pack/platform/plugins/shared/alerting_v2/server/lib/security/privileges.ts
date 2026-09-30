@@ -32,18 +32,16 @@ const category: AppCategory = {
 
 const featureDescriptions: Record<AlertingV2Feature, string> = {
   rules: i18n.translate('xpack.alertingV2.privileges.rulesDescription', {
-    defaultMessage: 'Experimental. Controls access to rules in the experimental alerting system.',
+    defaultMessage: 'Controls access to rules in the alerting system.',
   }),
   alerts: i18n.translate('xpack.alertingV2.privileges.alertsDescription', {
-    defaultMessage: 'Experimental. Controls access to alerts in the experimental alerting system.',
+    defaultMessage: 'Controls access to alerts in the alerting system.',
   }),
   actionPolicies: i18n.translate('xpack.alertingV2.privileges.actionPoliciesDescription', {
-    defaultMessage:
-      'Experimental. Controls access to action policies in the experimental alerting system.',
+    defaultMessage: 'Controls access to action policies in the alerting system.',
   }),
   executionHistory: i18n.translate('xpack.alertingV2.privileges.executionHistoryDescription', {
-    defaultMessage:
-      'Experimental. Controls access to execution history in the experimental alerting system.',
+    defaultMessage: 'Controls access to execution history in the alerting system.',
   }),
 };
 
@@ -51,7 +49,8 @@ const buildKibanaFeature = (
   feature: AlertingV2FeatureDefinition,
   description: string
 ): KibanaFeatureConfig => {
-  const managementApps = [...getFeatureManagementApps(feature)];
+  const ownedManagementApps = [...getFeatureManagementApps(feature)];
+  const readManagementApps = [feature.managementApp];
   const app = [APP_ID];
 
   return {
@@ -61,13 +60,13 @@ const buildKibanaFeature = (
     category,
     app,
     management: {
-      [ALERTING_V2_SECTION_ID]: managementApps,
+      [ALERTING_V2_SECTION_ID]: ownedManagementApps,
     },
     privileges: {
       all: {
         app,
         management: {
-          [ALERTING_V2_SECTION_ID]: managementApps,
+          [ALERTING_V2_SECTION_ID]: ownedManagementApps,
         },
         ...(feature.privileges.all.aiIndex
           ? { aiIndex: { ...feature.privileges.all.aiIndex } }
@@ -83,7 +82,7 @@ const buildKibanaFeature = (
       read: {
         app,
         management: {
-          [ALERTING_V2_SECTION_ID]: managementApps,
+          [ALERTING_V2_SECTION_ID]: readManagementApps,
         },
         ...(feature.privileges.read.aiIndex
           ? { aiIndex: { ...feature.privileges.read.aiIndex } }

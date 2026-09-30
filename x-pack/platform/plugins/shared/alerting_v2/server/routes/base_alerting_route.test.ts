@@ -17,7 +17,6 @@ import { errorResponseSchema } from '@kbn/alerting-v2-schemas';
 import { z } from '@kbn/zod/v4';
 import { BaseAlertingRoute, type AlertingRouteSchemas } from './base_alerting_route';
 import { ALERTING_ERROR_CODES, ALERTING_LOG_CODES } from '../lib/errors/error_codes';
-import type { MockUiSettingsClient } from '../lib/services/settings_service/settings_service.mock';
 import { deriveErrorCodeFromStatus } from './derive_error_code';
 import { createRouteDependencies } from './test_utils';
 import type { computeRouteValidate } from './compute_route_validate';
@@ -67,14 +66,12 @@ class TestRoute extends BaseAlertingRoute {
 describe('BaseAlertingRoute', () => {
   let response: jest.Mocked<KibanaResponseFactory>;
   let mockLogger: jest.Mocked<Logger>;
-  let mockUiSettingsClient: MockUiSettingsClient;
   let route: TestRoute;
 
   beforeEach(() => {
     const deps = createRouteDependencies();
     response = deps.response;
     mockLogger = deps.mockLogger;
-    mockUiSettingsClient = deps.mockUiSettingsClient;
     route = new TestRoute(deps.ctx);
   });
 
@@ -86,36 +83,6 @@ describe('BaseAlertingRoute', () => {
 
     expect(result).toBe(expectedResponse);
     expect(route.executeFn).toHaveBeenCalledTimes(1);
-  });
-
-  describe('alerting kill switch', () => {
-    it('short-circuits with a 503 ALERTING_DISABLED error when the setting is off', async () => {
-      mockUiSettingsClient.get.mockResolvedValue(false);
-
-      await route.handle();
-
-      expect(route.executeFn).not.toHaveBeenCalled();
-      expect(response.customError).toHaveBeenCalledWith({
-        statusCode: 503,
-        body: {
-          code: ALERTING_ERROR_CODES.ALERTING_DISABLED,
-          error: 'Service Unavailable',
-          message: 'Alerting is disabled.',
-        },
-        bypassErrorFormat: true,
-      });
-    });
-
-    it('runs execute() when the setting is on', async () => {
-      mockUiSettingsClient.get.mockResolvedValue(true);
-      const expectedResponse = response.ok({ body: { id: '123' } });
-      route.executeFn.mockResolvedValue(expectedResponse);
-
-      const result = await route.handle();
-
-      expect(result).toBe(expectedResponse);
-      expect(route.executeFn).toHaveBeenCalledTimes(1);
-    });
   });
 
   describe('onError', () => {
@@ -378,11 +345,9 @@ describe('BaseAlertingRoute', () => {
           }),
         })
       );
-      expect(jsonExamples(oas.responses?.[503])?.alertingDisabled).toEqual(
+      expect(jsonExamples(oas.responses?.[503])?.serviceUnavailable).toEqual(
         expect.objectContaining({
-          value: expect.objectContaining({
-            code: ALERTING_ERROR_CODES.ALERTING_DISABLED,
-          }),
+          value: expect.objectContaining({ code: 'SERVICE_UNAVAILABLE' }),
         })
       );
     });
@@ -428,7 +393,7 @@ describe('BaseAlertingRoute', () => {
       expect(jsonExamples(oas.requestBody)?.createRuleRequest).toBeDefined();
       expect(jsonExamples(oas.responses?.[200])?.createRuleResponse).toBeDefined();
       expect(jsonExamples(oas.responses?.[401])?.unauthorized).toBeDefined();
-      expect(jsonExamples(oas.responses?.[503])?.alertingDisabled).toBeDefined();
+      expect(jsonExamples(oas.responses?.[503])?.serviceUnavailable).toBeDefined();
     });
   });
 

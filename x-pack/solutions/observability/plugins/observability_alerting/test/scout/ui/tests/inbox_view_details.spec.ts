@@ -8,16 +8,12 @@
 import { tags } from '@kbn/scout-oblt';
 import { expect } from '@kbn/scout-oblt/ui';
 import { test } from '../fixtures';
-import {
-  setAlertingV2EnabledSetting,
-  unsetAlertingV2EnabledSetting,
-} from '../fixtures/alerting_v2_setting';
 import { deleteInboxEpisode, seedInboxEpisode } from '../fixtures/inbox_episode';
 import {
   MANAGEMENT_ALERTING_V2_EPISODES_URL_RE,
   MANAGEMENT_ALERTING_V2_RULES_URL_RE,
   MANAGEMENT_ALERTING_V2_URL_RE,
-  OBSERVABILITY_ALERTING_INBOX_EPISODE_URL_RE,
+  OBSERVABILITY_ALERTING_ALERTS_EPISODE_URL_RE,
   OBSERVABILITY_ALERTING_RULE_DETAILS_URL_RE,
 } from '../fixtures/page_objects';
 
@@ -29,7 +25,6 @@ test.describe(
     let episodeId: string;
 
     test.beforeAll(async ({ esClient, kbnClient }) => {
-      await setAlertingV2EnabledSetting(kbnClient, true);
       ({ ruleId, episodeId } = await seedInboxEpisode(esClient, kbnClient));
     });
 
@@ -39,7 +34,6 @@ test.describe(
 
     test.afterAll(async ({ esClient, kbnClient }) => {
       await deleteInboxEpisode(esClient, kbnClient, { ruleId });
-      await unsetAlertingV2EnabledSetting(kbnClient);
     });
 
     test('View details from the inbox flyout stays on observability alerting', async ({
@@ -63,9 +57,9 @@ test.describe(
         );
 
         await alerting.clickViewDetails();
-        await expect(page).toHaveURL(OBSERVABILITY_ALERTING_INBOX_EPISODE_URL_RE);
+        await expect(page).toHaveURL(OBSERVABILITY_ALERTING_ALERTS_EPISODE_URL_RE);
         await expect(page).not.toHaveURL(MANAGEMENT_ALERTING_V2_EPISODES_URL_RE);
-        await expect(page).toHaveURL(new RegExp(`/inbox/${episodeId}(/|$|\\?|#)`));
+        await expect(page).toHaveURL(new RegExp(`/alerts/${episodeId}(/|$|\\?|#)`));
         await expect(alerting.episodeDetailsPage).toBeVisible();
       });
     });
@@ -106,9 +100,9 @@ test.describe(
 
       await test.step('open the seeded episode details page', async () => {
         await alerting.gotoEpisodeDetails(episodeId);
-        await expect(page).toHaveURL(OBSERVABILITY_ALERTING_INBOX_EPISODE_URL_RE);
+        await expect(page).toHaveURL(OBSERVABILITY_ALERTING_ALERTS_EPISODE_URL_RE);
         await expect(page).not.toHaveURL(MANAGEMENT_ALERTING_V2_EPISODES_URL_RE);
-        await expect(page).toHaveURL(new RegExp(`/inbox/${episodeId}(/|$|\\?|#)`));
+        await expect(page).toHaveURL(new RegExp(`/alerts/${episodeId}(/|$|\\?|#)`));
         await expect(alerting.episodeDetailsPage).toBeVisible();
       });
 

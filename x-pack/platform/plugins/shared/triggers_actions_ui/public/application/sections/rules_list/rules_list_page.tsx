@@ -16,7 +16,6 @@ import { useKibana } from '../../../common/lib/kibana';
 import { getAlertingSectionBreadcrumb } from '../../lib/breadcrumb';
 import { getCurrentDocTitle } from '../../lib/doc_title';
 import { RulesPageHeader } from '../rules_page/rules_page_header';
-import { getClassicTabs } from '../rules_page/get_classic_tabs';
 import { getV1RulesPageTabs } from '../rules_page/get_v1_rules_page_tabs';
 import { getRulesPageMenu } from '../rules_page/get_rules_page_menu';
 import { useRulesPageActions } from '../rules_page/rules_page_actions';
@@ -80,29 +79,24 @@ export const RulesListContainer = () => {
       });
     }
 
-    if (mode === RULES_PAGE_MODE.noTabs) {
-      return [];
-    }
-
-    return getClassicTabs('rules', authorizedToReadAnyRules, history);
-  }, [hostTabs, mode, authorizedToReadAnyRules, history, http.basePath, v1ListHref]);
+    return [];
+  }, [hostTabs, mode, http.basePath, v1ListHref]);
 
   const rulesListMenu = useMemo<AppMenuConfig>(() => {
-    const extraItems: NonNullable<AppMenuConfig['items']> =
-      mode !== RULES_PAGE_MODE.triggersActionsTabs && authorizedToReadAnyRules
-        ? [
-            {
-              id: 'rulesLogs',
-              order: 200,
-              label: i18n.translate('xpack.triggersActionsUI.rulesPage.logsLink.title', {
-                defaultMessage: 'Logs',
-              }),
-              iconType: 'table' as const,
-              run: () => history.push('/logs'),
-              testId: 'rulesLogsLink',
-            },
-          ]
-        : [];
+    const extraItems: NonNullable<AppMenuConfig['items']> = authorizedToReadAnyRules
+      ? [
+          {
+            id: 'rulesLogs',
+            order: 200,
+            label: i18n.translate('xpack.triggersActionsUI.rulesPage.logsLink.title', {
+              defaultMessage: 'Logs',
+            }),
+            iconType: 'table' as const,
+            run: () => history.push('/logs'),
+            testId: 'rulesLogsLink',
+          },
+        ]
+      : [];
 
     return getRulesPageMenu({
       authorizedToCreateAnyRules,
@@ -112,7 +106,6 @@ export const RulesListContainer = () => {
       onOpenSettings: openSettingsFlyout,
     });
   }, [
-    mode,
     authorizedToCreateAnyRules,
     authorizedToReadAnyRules,
     canShowSettings,
