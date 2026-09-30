@@ -5,11 +5,16 @@
  * 2.0.
  */
 
+import type { IScopedClusterClient } from '@kbn/core-elasticsearch-server';
 import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
+import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks';
+import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
 import type { RuleAttachmentData } from '@kbn/alerting-v2-schemas';
+import { RUNBOOK_CONTENT_LIMIT } from '@kbn/alerting-v2-constants';
 import {
-  executeRuleOperations,
+  executeRuleOperations as executeRuleOperationsImpl,
   RuleOperationValidationError,
+  ruleOperationSchema,
   type RuleOperation,
 } from './operations';
 import { AGENT_BUILDER_TAG } from '../../common/constants';
@@ -22,6 +27,36 @@ const createMockEsClient = () => {
   } as never);
   return esClient;
 };
+
+const createMockSoClient = (existingIds?: string[]): jest.Mocked<SavedObjectsClientContract> => {
+  const soClient = savedObjectsClientMock.create();
+  soClient.bulkGet.mockImplementation(async (objects) => ({
+    saved_objects: objects.map((obj) =>
+      existingIds === undefined || existingIds.includes(obj.id)
+        ? { id: obj.id, type: obj.type, attributes: {}, references: [] }
+        : {
+            id: obj.id,
+            type: obj.type,
+            error: {
+              statusCode: 404,
+              error: 'Not Found',
+              message: `Saved object [dashboard/${obj.id}] not found`,
+            },
+            attributes: {},
+            references: [],
+          }
+    ),
+  }));
+  return soClient;
+};
+
+const executeRuleOperations = (
+  data: Partial<RuleAttachmentData>,
+  operations: RuleOperation[],
+  esClient?: IScopedClusterClient,
+  savedObjectsClient: SavedObjectsClientContract = createMockSoClient(),
+  options: { isNew?: boolean } = {}
+) => executeRuleOperationsImpl(data, operations, esClient, savedObjectsClient, options);
 
 describe('executeRuleOperations', () => {
   describe('set_query with ES|QL validation', () => {
@@ -38,10 +73,7 @@ describe('executeRuleOperations', () => {
       const ops: RuleOperation[] = [
         {
           operation: 'set_query',
-          query: {
-            format: 'standalone',
-            breach: { query: 'FROM metrics-* | STATS avg(cpu) BY host.name' },
-          },
+          query: { base: 'FROM metrics-* | STATS avg(cpu) BY host.name' },
         },
       ];
 
@@ -52,8 +84,7 @@ describe('executeRuleOperations', () => {
         format: 'json',
       });
       expect(result.data.query).toEqual({
-        breach: { query: 'FROM metrics-* | STATS avg(cpu) BY host.name' },
-        format: 'standalone',
+        base: 'FROM metrics-* | STATS avg(cpu) BY host.name',
       });
       expect(result.queryColumns).toEqual([
         { name: 'host.name', type: 'keyword' },
@@ -74,10 +105,7 @@ describe('executeRuleOperations', () => {
       const ops: RuleOperation[] = [
         {
           operation: 'set_query',
-          query: {
-            format: 'standalone',
-            breach: { query: 'FROM kibana_sample_data_flights | STATS COUNT(*)' },
-          },
+          query: { base: 'FROM kibana_sample_data_flights | STATS COUNT(*)' },
         },
       ];
 
@@ -99,10 +127,7 @@ describe('executeRuleOperations', () => {
       const ops: RuleOperation[] = [
         {
           operation: 'set_query',
-          query: {
-            format: 'standalone',
-            breach: { query: 'FROM kibana_sample_data_flights | STATS COUNT(*)' },
-          },
+          query: { base: 'FROM kibana_sample_data_flights | STATS COUNT(*)' },
         },
       ];
 
@@ -124,7 +149,7 @@ describe('executeRuleOperations', () => {
       const ops: RuleOperation[] = [
         {
           operation: 'set_query',
-          query: { format: 'standalone', breach: { query: 'FROM metrics-* | STATS avg(cpu)' } },
+          query: { base: 'FROM metrics-* | STATS avg(cpu)' },
         },
       ];
 
@@ -148,7 +173,7 @@ describe('executeRuleOperations', () => {
       const ops: RuleOperation[] = [
         {
           operation: 'set_query',
-          query: { format: 'standalone', breach: { query: 'FROM metrics-* | STATS avg(cpu)' } },
+          query: { base: 'FROM metrics-* | STATS avg(cpu)' },
         },
       ];
 
@@ -171,7 +196,7 @@ describe('executeRuleOperations', () => {
       const ops: RuleOperation[] = [
         {
           operation: 'set_query',
-          query: { format: 'standalone', breach: { query: 'FROM metrics-* | STATS avg(cpu)' } },
+          query: { base: 'FROM metrics-* | STATS avg(cpu)' },
         },
       ];
 
@@ -189,10 +214,7 @@ describe('executeRuleOperations', () => {
       const ops: RuleOperation[] = [
         {
           operation: 'set_query',
-          query: {
-            format: 'standalone',
-            breach: { query: 'FROM nonexistent-* | STATS COUNT(*)' },
-          },
+          query: { base: 'FROM nonexistent-* | STATS COUNT(*)' },
         },
       ];
 
@@ -205,109 +227,129 @@ describe('executeRuleOperations', () => {
       const ops: RuleOperation[] = [
         {
           operation: 'set_query',
-          query: {
-            format: 'standalone',
-            breach: { query: 'FROM metrics-* | STATS COUNT(*)' },
-          },
+          query: { base: 'FROM metrics-* | STATS COUNT(*)' },
         },
       ];
 
       const result = await executeRuleOperations({}, ops);
 
-      expect(result.data.query).toEqual({
-        breach: { query: 'FROM metrics-* | STATS COUNT(*)' },
-        format: 'standalone',
-      });
+      expect(result.data.query).toEqual({ base: 'FROM metrics-* | STATS COUNT(*)' });
       expect(result.queryColumns).toBeUndefined();
     });
 
-    it('stores recovery_strategy: "no_breach" on the rule data', async () => {
+    it('stores a no_breach recovery on the rule data', async () => {
       const ops: RuleOperation[] = [
         {
           operation: 'set_query',
-          query: { format: 'standalone', breach: { query: 'FROM metrics-* | STATS COUNT(*)' } },
-          recovery_strategy: 'no_breach',
+          query: { base: 'FROM metrics-* | STATS COUNT(*)' },
+          recovery: { strategy: 'no_breach' },
         },
       ];
 
       const result = await executeRuleOperations({}, ops);
 
-      expect(result.data.recovery_strategy).toBe('no_breach');
+      expect(result.data.recovery).toEqual({ strategy: 'no_breach' });
     });
 
-    it('stores recovery_strategy: "query" and recovery block on the rule data', async () => {
+    it('stores a query recovery with its own ES|QL', async () => {
       const ops: RuleOperation[] = [
         {
           operation: 'set_query',
-          query: {
-            format: 'standalone',
-            breach: { query: 'FROM metrics-* | WHERE cpu > 0.9' },
-            recovery: { query: 'FROM metrics-* | WHERE cpu < 0.5' },
-          },
-          recovery_strategy: 'query',
+          query: { base: 'FROM metrics-* | WHERE cpu > 0.9' },
+          recovery: { strategy: 'query', query: 'FROM metrics-* | WHERE cpu < 0.5' },
         },
       ];
 
       const result = await executeRuleOperations({}, ops);
 
-      expect(result.data.recovery_strategy).toBe('query');
-      expect((result.data.query as { recovery?: { query: string } }).recovery).toEqual({
+      expect(result.data.recovery).toEqual({
+        strategy: 'query',
         query: 'FROM metrics-* | WHERE cpu < 0.5',
       });
     });
 
-    it('stores no_data_strategy and no_data block on the rule data', async () => {
+    it('stores a condition recovery with its segment', async () => {
       const ops: RuleOperation[] = [
         {
           operation: 'set_query',
-          query: {
-            format: 'standalone',
-            breach: { query: 'FROM metrics-* | WHERE cpu > 0.9' },
-            no_data: { query: 'FROM heartbeat-* | STATS COUNT(*) BY host.name' },
-          },
-          no_data_strategy: 'last_known_status',
+          query: { base: 'FROM metrics-*', breach: { segment: 'WHERE cpu > 0.9' } },
+          recovery: { strategy: 'condition', segment: 'WHERE cpu < 0.5' },
         },
       ];
 
       const result = await executeRuleOperations({}, ops);
 
-      expect(result.data.no_data_strategy).toBe('last_known_status');
-      expect((result.data.query as { no_data?: { query: string } }).no_data).toEqual({
+      expect(result.data.recovery).toEqual({
+        strategy: 'condition',
+        segment: 'WHERE cpu < 0.5',
+      });
+    });
+
+    it('stores a no_data object with its presence query', async () => {
+      const ops: RuleOperation[] = [
+        {
+          operation: 'set_query',
+          query: { base: 'FROM metrics-* | WHERE cpu > 0.9' },
+          no_data: {
+            strategy: 'keep_last',
+            query: 'FROM heartbeat-* | STATS COUNT(*) BY host.name',
+          },
+        },
+      ];
+
+      const result = await executeRuleOperations({}, ops);
+
+      expect(result.data.no_data).toEqual({
+        strategy: 'keep_last',
         query: 'FROM heartbeat-* | STATS COUNT(*) BY host.name',
       });
     });
 
-    it('does not set recovery_strategy when omitted from set_query', async () => {
+    it('stores the alert no-data strategy', async () => {
       const ops: RuleOperation[] = [
         {
           operation: 'set_query',
-          query: { format: 'standalone', breach: { query: 'FROM metrics-* | STATS COUNT(*)' } },
+          query: { base: 'FROM metrics-*', breach: { segment: 'WHERE cpu > 0.9' } },
+          no_data: { strategy: 'alert' },
         },
       ];
 
       const result = await executeRuleOperations({}, ops);
 
-      expect(result.data.recovery_strategy).toBeUndefined();
-      expect(result.data.no_data_strategy).toBeUndefined();
+      expect(result.data.no_data).toEqual({ strategy: 'alert' });
     });
 
-    it('preserves existing recovery_strategy when a subsequent set_query omits it', async () => {
-      const existing: Partial<RuleAttachmentData> = { recovery_strategy: 'no_breach' };
+    it('does not set recovery or no_data when omitted from set_query', async () => {
       const ops: RuleOperation[] = [
         {
           operation: 'set_query',
-          query: { format: 'standalone', breach: { query: 'FROM metrics-* | STATS COUNT(*)' } },
+          query: { base: 'FROM metrics-* | STATS COUNT(*)' },
+        },
+      ];
+
+      const result = await executeRuleOperations({}, ops);
+
+      expect(result.data.recovery).toBeUndefined();
+      expect(result.data.no_data).toBeUndefined();
+    });
+
+    it('preserves an existing recovery when a subsequent set_query omits it', async () => {
+      const existing: Partial<RuleAttachmentData> = { recovery: { strategy: 'no_breach' } };
+      const ops: RuleOperation[] = [
+        {
+          operation: 'set_query',
+          query: { base: 'FROM metrics-* | STATS COUNT(*)' },
         },
       ];
 
       const result = await executeRuleOperations(existing, ops);
 
-      expect(result.data.recovery_strategy).toBe('no_breach');
+      expect(result.data.recovery).toEqual({ strategy: 'no_breach' });
     });
   });
 
-  describe('set_query with composed format', () => {
-    it('validates composed query using base for the LIMIT 0 call', async () => {
+  describe('set_query with a breach segment', () => {
+    it('validates the base query alone in the LIMIT 0 call', async () => {
       const esClient = createMockEsClient();
       esClient.asCurrentUser.esql.query.mockResolvedValueOnce({
         columns: [
@@ -321,7 +363,6 @@ describe('executeRuleOperations', () => {
         {
           operation: 'set_query',
           query: {
-            format: 'composed',
             base: 'FROM metrics-* | STATS avg_cpu = AVG(cpu) BY host.name',
             breach: { segment: 'WHERE avg_cpu > 0.9' },
           },
@@ -335,7 +376,6 @@ describe('executeRuleOperations', () => {
         format: 'json',
       });
       expect(result.data.query).toEqual({
-        format: 'composed',
         base: 'FROM metrics-* | STATS avg_cpu = AVG(cpu) BY host.name',
         breach: { segment: 'WHERE avg_cpu > 0.9' },
       });
@@ -345,100 +385,158 @@ describe('executeRuleOperations', () => {
       ]);
     });
 
-    it('stores composed query with recovery segment and recovery_strategy', async () => {
+    it('stores a breach segment alongside a condition recovery segment', async () => {
       const ops: RuleOperation[] = [
         {
           operation: 'set_query',
           query: {
-            format: 'composed',
             base: 'FROM metrics-* | STATS avg_cpu = AVG(cpu) BY host.name',
             breach: { segment: 'WHERE avg_cpu > 0.9' },
-            recovery: { segment: 'WHERE avg_cpu < 0.5' },
           },
-          recovery_strategy: 'query',
+          recovery: { strategy: 'condition', segment: 'WHERE avg_cpu < 0.5' },
         },
       ];
 
       const result = await executeRuleOperations({}, ops);
 
-      expect(result.data.recovery_strategy).toBe('query');
-      expect((result.data.query as { recovery?: { segment: string } }).recovery).toEqual({
+      expect(result.data.query).toEqual({
+        base: 'FROM metrics-* | STATS avg_cpu = AVG(cpu) BY host.name',
+        breach: { segment: 'WHERE avg_cpu > 0.9' },
+      });
+      expect(result.data.recovery).toEqual({
+        strategy: 'condition',
         segment: 'WHERE avg_cpu < 0.5',
       });
     });
   });
 
   describe('set_query recovery cross-field validation', () => {
-    it('throws when recovery block is present but recovery_strategy is not "query"', async () => {
+    it('throws when a condition recovery has no breach segment to contrast with', async () => {
       const ops: RuleOperation[] = [
         {
           operation: 'set_query',
-          query: {
-            format: 'standalone',
-            breach: { query: 'FROM metrics-* | WHERE cpu > 0.9' },
-            recovery: { query: 'FROM metrics-* | WHERE cpu < 0.5' },
-          },
-          recovery_strategy: 'no_breach',
+          query: { base: 'FROM metrics-* | WHERE cpu > 0.9' },
+          recovery: { strategy: 'condition', segment: 'WHERE cpu < 0.5' },
         },
       ];
 
       await expect(executeRuleOperations({}, ops)).rejects.toThrow(
-        'query.recovery is only allowed when recovery_strategy is "query"'
+        'recovery.strategy "condition" requires query.breach'
       );
     });
 
-    it('throws when recovery block is present with no recovery_strategy on existing rule', async () => {
-      const existing: Partial<RuleAttachmentData> = { recovery_strategy: 'no_breach' };
+    it('throws when a later set_query drops the breach a stored condition recovery needs', async () => {
+      const existing: Partial<RuleAttachmentData> = {
+        recovery: { strategy: 'condition', segment: 'WHERE cpu < 0.5' },
+      };
       const ops: RuleOperation[] = [
         {
           operation: 'set_query',
-          query: {
-            format: 'standalone',
-            breach: { query: 'FROM metrics-* | WHERE cpu > 0.9' },
-            recovery: { query: 'FROM metrics-* | WHERE cpu < 0.5' },
-          },
+          query: { base: 'FROM metrics-* | WHERE cpu > 0.9' },
         },
       ];
 
       await expect(executeRuleOperations(existing, ops)).rejects.toThrow(
-        'query.recovery is only allowed when recovery_strategy is "query"'
+        'recovery.strategy "condition" requires query.breach'
       );
-    });
-
-    it('throws when recovery_strategy is "query" but no recovery block is provided', async () => {
-      const ops: RuleOperation[] = [
-        {
-          operation: 'set_query',
-          query: {
-            format: 'standalone',
-            breach: { query: 'FROM metrics-* | WHERE cpu > 0.9' },
-          },
-          recovery_strategy: 'query',
-        },
-      ];
-
-      const promise = executeRuleOperations({}, ops);
-      await expect(promise).rejects.toThrow('recovery_strategy "query" requires a recovery block');
-      await expect(executeRuleOperations({}, ops)).rejects.toBeInstanceOf(
+      await expect(executeRuleOperations(existing, ops)).rejects.toBeInstanceOf(
         RuleOperationValidationError
       );
     });
 
-    it('passes when recovery_strategy is "query" and recovery block is provided', async () => {
+    it('rejects a query recovery with no ES|QL at the operation schema', () => {
+      const result = ruleOperationSchema.safeParse({
+        operation: 'set_query',
+        query: { base: 'FROM metrics-* | WHERE cpu > 0.9' },
+        recovery: { strategy: 'query' },
+      });
+
+      expect(result.success).toBe(false);
+    });
+
+    it('rejects a condition recovery with no segment at the operation schema', () => {
+      const result = ruleOperationSchema.safeParse({
+        operation: 'set_query',
+        query: { base: 'FROM metrics-*', breach: { segment: 'WHERE cpu > 0.9' } },
+        recovery: { strategy: 'condition' },
+      });
+
+      expect(result.success).toBe(false);
+    });
+
+    it('passes when a condition recovery accompanies a breach segment', async () => {
       const ops: RuleOperation[] = [
         {
           operation: 'set_query',
-          query: {
-            format: 'standalone',
-            breach: { query: 'FROM metrics-* | WHERE cpu > 0.9' },
-            recovery: { query: 'FROM metrics-* | WHERE cpu < 0.5' },
-          },
-          recovery_strategy: 'query',
+          query: { base: 'FROM metrics-*', breach: { segment: 'WHERE cpu > 0.9' } },
+          recovery: { strategy: 'condition', segment: 'WHERE cpu < 0.5' },
         },
       ];
 
       const result = await executeRuleOperations({}, ops);
-      expect(result.data.recovery_strategy).toBe('query');
+      expect(result.data.recovery).toEqual({
+        strategy: 'condition',
+        segment: 'WHERE cpu < 0.5',
+      });
+    });
+  });
+
+  describe('set_query no_data cross-field validation', () => {
+    it('rejects a presence query on the ignore strategy at the operation schema', () => {
+      const result = ruleOperationSchema.safeParse({
+        operation: 'set_query',
+        query: { base: 'FROM metrics-* | WHERE cpu > 0.9' },
+        no_data: { strategy: 'ignore', query: 'FROM heartbeat-*' },
+      });
+
+      expect(result.success).toBe(false);
+    });
+
+    it('accepts a classifying strategy with no presence query when the query has a breach segment', async () => {
+      const ops: RuleOperation[] = [
+        {
+          operation: 'set_query',
+          query: { base: 'FROM metrics-*', breach: { segment: 'WHERE cpu > 0.9' } },
+          no_data: { strategy: 'keep_last' },
+        },
+      ];
+
+      const result = await executeRuleOperations({}, ops);
+
+      expect(result.data.no_data).toEqual({ strategy: 'keep_last' });
+    });
+
+    it('rejects a classifying strategy when neither a breach segment nor a presence query is set', async () => {
+      const ops: RuleOperation[] = [
+        {
+          operation: 'set_query',
+          query: { base: 'FROM metrics-* | WHERE cpu > 0.9' },
+          no_data: { strategy: 'keep_last' },
+        },
+      ];
+
+      await expect(executeRuleOperations({}, ops)).rejects.toThrow(
+        'requires query.breach or no_data.query'
+      );
+    });
+
+    it('passes when a classifying strategy carries its own presence query', async () => {
+      const ops: RuleOperation[] = [
+        {
+          operation: 'set_query',
+          query: { base: 'FROM metrics-* | WHERE cpu > 0.9' },
+          no_data: {
+            strategy: 'keep_last',
+            query: 'FROM heartbeat-* | STATS COUNT(*) BY host.name',
+          },
+        },
+      ];
+
+      const result = await executeRuleOperations({}, ops);
+      expect(result.data.no_data).toEqual({
+        strategy: 'keep_last',
+        query: 'FROM heartbeat-* | STATS COUNT(*) BY host.name',
+      });
     });
   });
 
@@ -456,10 +554,7 @@ describe('executeRuleOperations', () => {
       const ops: RuleOperation[] = [
         {
           operation: 'set_query',
-          query: {
-            format: 'standalone',
-            breach: { query: 'FROM metrics-* | STATS avg(cpu) BY host.name' },
-          },
+          query: { base: 'FROM metrics-* | STATS avg(cpu) BY host.name' },
         },
         { operation: 'set_grouping', fields: ['host.name'] },
       ];
@@ -482,10 +577,7 @@ describe('executeRuleOperations', () => {
       const ops: RuleOperation[] = [
         {
           operation: 'set_query',
-          query: {
-            format: 'standalone',
-            breach: { query: 'FROM metrics-* | STATS avg(cpu) BY host.name' },
-          },
+          query: { base: 'FROM metrics-* | STATS avg(cpu) BY host.name' },
         },
         { operation: 'set_grouping', fields: ['service.name'] },
       ];
@@ -505,10 +597,30 @@ describe('executeRuleOperations', () => {
   });
 
   describe('cross-field validation', () => {
+    it('clears the alert-only fields when an existing alert becomes a signal', async () => {
+      const existing: Partial<RuleAttachmentData> = {
+        kind: 'alert',
+        metadata: { name: 'Existing Rule' },
+        query: { base: 'FROM metrics-*', breach: { segment: 'WHERE cpu > 90' } },
+        recovery: { strategy: 'no_breach' },
+        no_data: { strategy: 'ignore' },
+        state_transition: { pending: { count: 3, timeframe: '5m' } },
+      };
+      const ops: RuleOperation[] = [{ operation: 'set_kind', kind: 'signal' }];
+
+      const result = await executeRuleOperations(existing, ops, undefined, createMockSoClient());
+
+      expect(result.data).not.toHaveProperty('recovery');
+      expect(result.data).not.toHaveProperty('no_data');
+      expect(result.data).not.toHaveProperty('state_transition');
+    });
+
     it('throws when isNew is true and no name is provided', async () => {
       const ops: RuleOperation[] = [{ operation: 'set_kind', kind: 'alert' }];
 
-      await expect(executeRuleOperations({}, ops, undefined, { isNew: true })).rejects.toThrow(
+      await expect(
+        executeRuleOperations({}, ops, undefined, createMockSoClient(), { isNew: true })
+      ).rejects.toThrow(
         'A rule name is required when creating a new rule. Use a set_metadata operation with a name.'
       );
     });
@@ -516,7 +628,9 @@ describe('executeRuleOperations', () => {
     it('does not throw when isNew is true and a name is provided', async () => {
       const ops: RuleOperation[] = [{ operation: 'set_metadata', name: 'My Rule' }];
 
-      const result = await executeRuleOperations({}, ops, undefined, { isNew: true });
+      const result = await executeRuleOperations({}, ops, undefined, createMockSoClient(), {
+        isNew: true,
+      });
 
       expect(result.data.metadata?.name).toBe('My Rule');
     });
@@ -526,7 +640,9 @@ describe('executeRuleOperations', () => {
     it('stamps the agent-builder tag on a newly created rule', async () => {
       const ops: RuleOperation[] = [{ operation: 'set_metadata', name: 'My Rule' }];
 
-      const result = await executeRuleOperations({}, ops, undefined, { isNew: true });
+      const result = await executeRuleOperations({}, ops, undefined, createMockSoClient(), {
+        isNew: true,
+      });
 
       expect(result.data.metadata?.tags).toEqual([AGENT_BUILDER_TAG]);
     });
@@ -536,7 +652,9 @@ describe('executeRuleOperations', () => {
         { operation: 'set_metadata', name: 'My Rule', tags: ['production', 'cpu'] },
       ];
 
-      const result = await executeRuleOperations({}, ops, undefined, { isNew: true });
+      const result = await executeRuleOperations({}, ops, undefined, createMockSoClient(), {
+        isNew: true,
+      });
 
       expect(result.data.metadata?.tags).toEqual(['production', 'cpu', AGENT_BUILDER_TAG]);
     });
@@ -546,7 +664,9 @@ describe('executeRuleOperations', () => {
         { operation: 'set_metadata', name: 'My Rule', tags: [AGENT_BUILDER_TAG] },
       ];
 
-      const result = await executeRuleOperations({}, ops, undefined, { isNew: true });
+      const result = await executeRuleOperations({}, ops, undefined, createMockSoClient(), {
+        isNew: true,
+      });
 
       expect(result.data.metadata?.tags).toEqual([AGENT_BUILDER_TAG]);
     });
@@ -555,7 +675,9 @@ describe('executeRuleOperations', () => {
       const maxTags = Array.from({ length: 20 }, (_, i) => `tag-${i}`);
       const ops: RuleOperation[] = [{ operation: 'set_metadata', name: 'My Rule', tags: maxTags }];
 
-      const result = await executeRuleOperations({}, ops, undefined, { isNew: true });
+      const result = await executeRuleOperations({}, ops, undefined, createMockSoClient(), {
+        isNew: true,
+      });
 
       expect(result.data.metadata?.tags).toEqual(maxTags);
       expect(result.data.metadata?.tags).toHaveLength(20);
@@ -567,7 +689,9 @@ describe('executeRuleOperations', () => {
       };
       const ops: RuleOperation[] = [{ operation: 'set_metadata', description: 'updated' }];
 
-      const result = await executeRuleOperations(existing, ops, undefined, { isNew: false });
+      const result = await executeRuleOperations(existing, ops, undefined, createMockSoClient(), {
+        isNew: false,
+      });
 
       expect(result.data.metadata?.tags).toEqual(['cpu', AGENT_BUILDER_TAG]);
     });
@@ -578,7 +702,9 @@ describe('executeRuleOperations', () => {
       };
       const ops: RuleOperation[] = [{ operation: 'set_metadata', tags: ['cpu'] }];
 
-      const result = await executeRuleOperations(existing, ops, undefined, { isNew: false });
+      const result = await executeRuleOperations(existing, ops, undefined, createMockSoClient(), {
+        isNew: false,
+      });
 
       expect(result.data.metadata?.tags).toEqual(['cpu', AGENT_BUILDER_TAG]);
     });
@@ -588,10 +714,8 @@ describe('executeRuleOperations', () => {
         { operation: 'set_kind', kind: 'signal' },
         {
           operation: 'set_state_transition',
-          pending_count: 3,
-          pending_timeframe: '5m',
-          recovering_count: 2,
-          recovering_timeframe: '5m',
+          pending: { count: 3, timeframe: '5m' },
+          recovering: { count: 2, timeframe: '5m' },
         },
       ];
 
@@ -600,33 +724,135 @@ describe('executeRuleOperations', () => {
       );
     });
 
-    it('throws when signal rule uses composed query format', async () => {
+    it('throws when a recovering delay is set under manual recovery', async () => {
       const ops: RuleOperation[] = [
-        { operation: 'set_kind', kind: 'signal' },
+        { operation: 'set_kind', kind: 'alert' },
         {
           operation: 'set_query',
-          query: {
-            format: 'composed',
-            base: 'FROM logs-*',
-            breach: { segment: 'WHERE error == true' },
-          },
+          query: { base: 'FROM metrics-* | STATS COUNT(*)' },
+          recovery: { strategy: 'manual' },
+        },
+        {
+          operation: 'set_state_transition',
+          pending: { count: 0 },
+          recovering: { count: 2 },
         },
       ];
 
       await expect(executeRuleOperations({}, ops)).rejects.toThrow(
-        'kind "signal" requires query.format "standalone"'
+        'state_transition.recovering has no effect when recovery.strategy is "manual"'
+      );
+      await expect(executeRuleOperations({}, ops)).rejects.toBeInstanceOf(
+        RuleOperationValidationError
       );
     });
 
-    it('throws when signal rule has recovery_strategy set', async () => {
-      const ops: RuleOperation[] = [{ operation: 'set_kind', kind: 'signal' }];
-      const initial: Partial<RuleAttachmentData> = {
-        recovery_strategy: 'query',
-        query: { format: 'standalone', breach: { query: 'FROM logs-* | LIMIT 1' } },
-      };
+    it('throws when a recovering count of 0 is set under manual recovery', async () => {
+      const ops: RuleOperation[] = [
+        { operation: 'set_kind', kind: 'alert' },
+        {
+          operation: 'set_query',
+          query: { base: 'FROM metrics-* | STATS COUNT(*)' },
+          recovery: { strategy: 'manual' },
+        },
+        {
+          operation: 'set_state_transition',
+          pending: { count: 0 },
+          recovering: { count: 0 },
+        },
+      ];
 
-      await expect(executeRuleOperations(initial, ops)).rejects.toThrow(
-        'Signal rules cannot set recovery_strategy or no_data_strategy'
+      await expect(executeRuleOperations({}, ops)).rejects.toThrow(
+        'state_transition.recovering has no effect when recovery.strategy is "manual"'
+      );
+      await expect(executeRuleOperations({}, ops)).rejects.toBeInstanceOf(
+        RuleOperationValidationError
+      );
+    });
+
+    it('clears a stored recovering delay when the query switches to manual recovery', async () => {
+      const existing: Partial<RuleAttachmentData> = {
+        kind: 'alert',
+        query: { base: 'FROM metrics-* | STATS COUNT(*)' },
+        recovery: { strategy: 'no_breach' },
+        state_transition: { pending: { count: 3 }, recovering: { count: 0 } },
+      };
+      const ops: RuleOperation[] = [
+        {
+          operation: 'set_query',
+          query: { base: 'FROM metrics-* | STATS COUNT(*)' },
+          recovery: { strategy: 'manual' },
+        },
+      ];
+
+      const result = await executeRuleOperations(existing, ops);
+
+      expect(result.data.state_transition).toEqual({ pending: { count: 3 } });
+    });
+
+    it('drops state_transition when the recovering delay was its only phase', async () => {
+      const existing: Partial<RuleAttachmentData> = {
+        kind: 'alert',
+        query: { base: 'FROM metrics-* | STATS COUNT(*)' },
+        recovery: { strategy: 'no_breach' },
+        state_transition: { recovering: { count: 2 } },
+      };
+      const ops: RuleOperation[] = [
+        {
+          operation: 'set_query',
+          query: { base: 'FROM metrics-* | STATS COUNT(*)' },
+          recovery: { strategy: 'manual' },
+        },
+      ];
+
+      const result = await executeRuleOperations(existing, ops);
+
+      expect(result.data.state_transition).toBeUndefined();
+    });
+
+    it('allows a pending delay under manual recovery', async () => {
+      const ops: RuleOperation[] = [
+        { operation: 'set_kind', kind: 'alert' },
+        {
+          operation: 'set_query',
+          query: { base: 'FROM metrics-* | STATS COUNT(*)' },
+          recovery: { strategy: 'manual' },
+        },
+        { operation: 'set_state_transition', pending: { count: 2 } },
+      ];
+
+      const result = await executeRuleOperations({}, ops);
+
+      expect(result.data.state_transition).toEqual({ pending: { count: 2 } });
+    });
+
+    it('throws when a signal rule sets no_data', async () => {
+      const ops: RuleOperation[] = [
+        { operation: 'set_kind', kind: 'signal' },
+        {
+          operation: 'set_query',
+          query: { base: 'FROM logs-*' },
+          no_data: { strategy: 'alert' },
+        },
+      ];
+
+      await expect(executeRuleOperations({}, ops)).rejects.toThrow(
+        'Signal rules cannot set recovery or no_data'
+      );
+    });
+
+    it('throws when a signal rule has recovery set', async () => {
+      const ops: RuleOperation[] = [
+        { operation: 'set_kind', kind: 'signal' },
+        {
+          operation: 'set_query',
+          query: { base: 'FROM logs-* | LIMIT 1' },
+          recovery: { strategy: 'query', query: 'FROM logs-* | WHERE ok' },
+        },
+      ];
+
+      await expect(executeRuleOperations({}, ops)).rejects.toThrow(
+        'Signal rules cannot set recovery or no_data'
       );
     });
   });
@@ -645,7 +871,7 @@ describe('executeRuleOperations', () => {
           [
             {
               operation: 'set_query',
-              query: { format: 'standalone', breach: { query: 'FROM x' } },
+              query: { base: 'FROM x' },
             },
           ],
           esClient
@@ -665,7 +891,7 @@ describe('executeRuleOperations', () => {
           [
             {
               operation: 'set_query',
-              query: { format: 'standalone', breach: { query: 'FROM x' } },
+              query: { base: 'FROM x' },
             },
             { operation: 'set_grouping', fields: ['bar'] },
           ],
@@ -676,9 +902,13 @@ describe('executeRuleOperations', () => {
 
     it('wraps missing-name error on new rule', async () => {
       await expectValidationError(
-        executeRuleOperations({}, [{ operation: 'set_kind', kind: 'alert' }], undefined, {
-          isNew: true,
-        })
+        executeRuleOperations(
+          {},
+          [{ operation: 'set_kind', kind: 'alert' }],
+          undefined,
+          createMockSoClient(),
+          { isNew: true }
+        )
       );
     });
 
@@ -686,36 +916,32 @@ describe('executeRuleOperations', () => {
       await expectValidationError(
         executeRuleOperations({}, [
           { operation: 'set_kind', kind: 'signal' },
-          { operation: 'set_state_transition', pending_count: 1 },
+          { operation: 'set_state_transition', pending: { count: 1 } },
         ])
       );
     });
 
-    it('wraps composed query on signal kind', async () => {
+    it('wraps a condition recovery without a breach segment', async () => {
       await expectValidationError(
         executeRuleOperations({}, [
-          { operation: 'set_kind', kind: 'signal' },
           {
             operation: 'set_query',
-            query: {
-              format: 'composed',
-              base: 'FROM logs-*',
-              breach: { segment: 'WHERE error == true' },
-            },
+            query: { base: 'FROM logs-*' },
+            recovery: { strategy: 'condition', segment: 'WHERE error == false' },
           },
         ])
       );
     });
 
-    it('wraps recovery_strategy error on signal kind', async () => {
+    it('wraps a lifecycle object on signal kind', async () => {
       await expectValidationError(
-        executeRuleOperations(
+        executeRuleOperations({ kind: 'signal' }, [
           {
-            recovery_strategy: 'query',
-            query: { format: 'standalone', breach: { query: 'FROM logs-* | LIMIT 1' } },
+            operation: 'set_query',
+            query: { base: 'FROM logs-* | LIMIT 1' },
+            recovery: { strategy: 'query', query: 'FROM logs-* | WHERE ok' },
           },
-          [{ operation: 'set_kind', kind: 'signal' }]
-        )
+        ])
       );
     });
   });
@@ -725,9 +951,8 @@ describe('executeRuleOperations', () => {
       kind: 'alert',
       metadata: { name: 'Test Rule', description: 'A test rule' },
       schedule: { every: '5m', lookback: '10m' },
-      query: { format: 'standalone', breach: { query: 'FROM metrics-* | STATS COUNT(*)' } },
+      query: { base: 'FROM metrics-* | STATS COUNT(*)' },
       time_field: '@timestamp',
-      state_transition: null,
     };
 
     it('passes validation for a complete rule', async () => {
@@ -745,7 +970,7 @@ describe('executeRuleOperations', () => {
         { operation: 'set_schedule', every: '1m', lookback: '5m' },
         {
           operation: 'set_query',
-          query: { format: 'standalone', breach: { query: 'FROM logs-* | STATS COUNT(*)' } },
+          query: { base: 'FROM logs-* | STATS COUNT(*)' },
         },
         { operation: 'validate' },
       ];
@@ -753,6 +978,40 @@ describe('executeRuleOperations', () => {
       const result = await executeRuleOperations({}, ops);
 
       expect(result.data.metadata?.name).toBe('My Rule');
+    });
+
+    it('passes validation for a complete rule with dashboard artifacts', async () => {
+      const ops: RuleOperation[] = [
+        { operation: 'set_dashboards', dashboard_ids: ['dash-1'] },
+        { operation: 'validate' },
+      ];
+
+      const result = await executeRuleOperations(validRule, ops);
+
+      expect(result.data.artifacts).toEqual([
+        {
+          id: expect.stringMatching(/^dashboard-/),
+          type: 'dashboard',
+          data: { dashboard_id: 'dash-1' },
+        },
+      ]);
+    });
+
+    it('passes validation for a complete rule with a runbook artifact', async () => {
+      const ops: RuleOperation[] = [
+        { operation: 'set_runbook', content: '# Restart the service\n\n1. Check logs' },
+        { operation: 'validate' },
+      ];
+
+      const result = await executeRuleOperations(validRule, ops);
+
+      expect(result.data.artifacts).toEqual([
+        {
+          id: expect.stringMatching(/^runbook-/),
+          type: 'runbook',
+          data: { content: '# Restart the service\n\n1. Check logs' },
+        },
+      ]);
     });
 
     it('throws RuleOperationValidationError when kind is missing', async () => {
@@ -786,42 +1045,49 @@ describe('executeRuleOperations', () => {
       await expect(executeRuleOperations({}, ops)).rejects.toThrow(RuleOperationValidationError);
     });
 
-    it('passes validation for a rule with recovery_strategy: "query"', async () => {
+    it('passes validation for a rule with a query recovery', async () => {
       const ops: RuleOperation[] = [{ operation: 'validate' }];
 
       const result = await executeRuleOperations(
         {
           ...validRule,
-          recovery_strategy: 'query',
-          query: {
-            format: 'standalone',
-            breach: { query: 'FROM metrics-* | STATS COUNT(*)' },
-            recovery: { query: 'FROM metrics-* | WHERE ok == true' },
-          },
+          recovery: { strategy: 'query', query: 'FROM metrics-* | WHERE ok == true' },
         },
         ops
       );
 
-      expect(result.data.recovery_strategy).toBe('query');
+      expect(result.data.recovery).toEqual({
+        strategy: 'query',
+        query: 'FROM metrics-* | WHERE ok == true',
+      });
     });
 
-    it('passes validation for a rule with a no_data_strategy', async () => {
+    it('passes validation for a rule with a classifying no_data strategy', async () => {
       const ops: RuleOperation[] = [{ operation: 'validate' }];
 
       const result = await executeRuleOperations(
         {
           ...validRule,
-          no_data_strategy: 'last_known_status',
-          query: {
-            format: 'standalone',
-            breach: { query: 'FROM metrics-* | STATS COUNT(*)' },
-            no_data: { query: 'FROM heartbeat-* | STATS COUNT(*) BY host.name' },
+          no_data: {
+            strategy: 'keep_last',
+            query: 'FROM heartbeat-* | STATS COUNT(*) BY host.name',
           },
         },
         ops
       );
 
-      expect(result.data.no_data_strategy).toBe('last_known_status');
+      expect(result.data.no_data).toEqual({
+        strategy: 'keep_last',
+        query: 'FROM heartbeat-* | STATS COUNT(*) BY host.name',
+      });
+    });
+
+    it('fails validation for a rule that alerts on no data', async () => {
+      const ops: RuleOperation[] = [{ operation: 'validate' }];
+
+      await expect(
+        executeRuleOperations({ ...validRule, no_data: { strategy: 'alert' } }, ops)
+      ).rejects.toThrow('no_data.strategy "alert" is not currently supported.');
     });
   });
 
@@ -866,6 +1132,275 @@ describe('executeRuleOperations', () => {
       const result = await executeRuleOperations({}, ops);
 
       expect(result.data.schedule).toEqual({ every: '1m', lookback: '5m' });
+    });
+  });
+
+  describe('set_dashboards', () => {
+    it('stores dashboard IDs as dashboard artifacts matching the create/update API', async () => {
+      const ops: RuleOperation[] = [
+        { operation: 'set_dashboards', dashboard_ids: ['dash-1', 'dash-2'] },
+      ];
+
+      const result = await executeRuleOperations({}, ops);
+
+      expect(result.data.artifacts).toEqual([
+        {
+          id: expect.stringMatching(/^dashboard-/),
+          type: 'dashboard',
+          data: { dashboard_id: 'dash-1' },
+        },
+        {
+          id: expect.stringMatching(/^dashboard-/),
+          type: 'dashboard',
+          data: { dashboard_id: 'dash-2' },
+        },
+      ]);
+      expect(result.data.artifacts?.[0].id).not.toBe(result.data.artifacts?.[1].id);
+    });
+
+    it('replaces previously linked dashboards and preserves other artifacts', async () => {
+      const existing: Partial<RuleAttachmentData> = {
+        artifacts: [
+          { id: 'runbook-1', type: 'runbook', data: { content: 'Restart the service' } },
+          { id: 'dashboard-old', type: 'dashboard', data: { dashboard_id: 'old-dash' } },
+        ],
+      };
+      const ops: RuleOperation[] = [{ operation: 'set_dashboards', dashboard_ids: ['new-dash'] }];
+
+      const result = await executeRuleOperations(existing, ops);
+
+      expect(result.data.artifacts).toEqual([
+        { id: 'runbook-1', type: 'runbook', data: { content: 'Restart the service' } },
+        {
+          id: expect.stringMatching(/^dashboard-/),
+          type: 'dashboard',
+          data: { dashboard_id: 'new-dash' },
+        },
+      ]);
+    });
+
+    it('reuses the existing artifact id when the same dashboard is already attached', async () => {
+      const existing: Partial<RuleAttachmentData> = {
+        artifacts: [{ id: 'dashboard-keep', type: 'dashboard', data: { dashboard_id: 'dash-1' } }],
+      };
+      const ops: RuleOperation[] = [
+        { operation: 'set_dashboards', dashboard_ids: ['dash-1', 'dash-2'] },
+      ];
+
+      const result = await executeRuleOperations(existing, ops);
+
+      expect(result.data.artifacts).toEqual([
+        { id: 'dashboard-keep', type: 'dashboard', data: { dashboard_id: 'dash-1' } },
+        {
+          id: expect.stringMatching(/^dashboard-/),
+          type: 'dashboard',
+          data: { dashboard_id: 'dash-2' },
+        },
+      ]);
+    });
+
+    it('deduplicates dashboard IDs', async () => {
+      const ops: RuleOperation[] = [
+        { operation: 'set_dashboards', dashboard_ids: ['dash-1', 'dash-1'] },
+      ];
+
+      const result = await executeRuleOperations({}, ops);
+
+      expect(result.data.artifacts).toHaveLength(1);
+      expect(result.data.artifacts?.[0].data).toEqual({ dashboard_id: 'dash-1' });
+    });
+
+    it('unlinks all dashboards when passed an empty array', async () => {
+      const existing: Partial<RuleAttachmentData> = {
+        artifacts: [
+          { id: 'runbook-1', type: 'runbook', data: { content: 'Restart the service' } },
+          { id: 'dashboard-old', type: 'dashboard', data: { dashboard_id: 'old-dash' } },
+        ],
+      };
+      const ops: RuleOperation[] = [{ operation: 'set_dashboards', dashboard_ids: [] }];
+
+      const result = await executeRuleOperations(existing, ops);
+
+      expect(result.data.artifacts).toEqual([
+        { id: 'runbook-1', type: 'runbook', data: { content: 'Restart the service' } },
+      ]);
+    });
+
+    it('throws when merged artifacts would exceed the API cap', async () => {
+      const existing: Partial<RuleAttachmentData> = {
+        artifacts: Array.from({ length: 99 }, (_, index) => ({
+          id: `runbook-${index}`,
+          type: 'runbook',
+          data: { content: `step ${index}` },
+        })),
+      };
+      const ops: RuleOperation[] = [
+        { operation: 'set_dashboards', dashboard_ids: ['dash-1', 'dash-2'] },
+      ];
+
+      await expect(executeRuleOperations(existing, ops)).rejects.toThrow(
+        RuleOperationValidationError
+      );
+      await expect(executeRuleOperations(existing, ops)).rejects.toThrow(/at most 100 artifacts/);
+    });
+
+    it('rejects dashboard IDs that are not dashboard saved objects', async () => {
+      const soClient = createMockSoClient(['dash-1']);
+      const ops: RuleOperation[] = [
+        { operation: 'set_dashboards', dashboard_ids: ['dash-1', 'missing-dash'] },
+      ];
+
+      await expect(executeRuleOperations({}, ops, undefined, soClient)).rejects.toThrow(
+        RuleOperationValidationError
+      );
+      await expect(executeRuleOperations({}, ops, undefined, soClient)).rejects.toThrow(
+        /Dashboard saved object\(s\) not found: missing-dash/
+      );
+      expect(soClient.bulkGet).toHaveBeenCalledWith([
+        { type: 'dashboard', id: 'dash-1' },
+        { type: 'dashboard', id: 'missing-dash' },
+      ]);
+    });
+
+    it('accepts dashboard IDs that resolve to dashboard saved objects', async () => {
+      const soClient = createMockSoClient(['dash-1', 'dash-2']);
+      const ops: RuleOperation[] = [
+        { operation: 'set_dashboards', dashboard_ids: ['dash-1', 'dash-2'] },
+      ];
+
+      const result = await executeRuleOperations({}, ops, undefined, soClient);
+
+      expect(result.data.artifacts).toHaveLength(2);
+      expect(soClient.bulkGet).toHaveBeenCalledWith([
+        { type: 'dashboard', id: 'dash-1' },
+        { type: 'dashboard', id: 'dash-2' },
+      ]);
+    });
+
+    it('does not look up saved objects when unlinking all dashboards', async () => {
+      const soClient = createMockSoClient([]);
+      const ops: RuleOperation[] = [{ operation: 'set_dashboards', dashboard_ids: [] }];
+
+      const result = await executeRuleOperations({}, ops, undefined, soClient);
+
+      expect(soClient.bulkGet).not.toHaveBeenCalled();
+      expect(result.data.artifacts).toEqual([]);
+    });
+  });
+
+  describe('set_runbook', () => {
+    it('stores markdown as a runbook artifact matching the create/update API', async () => {
+      const ops: RuleOperation[] = [
+        { operation: 'set_runbook', content: '# Restart the service\n\n1. Check logs' },
+      ];
+
+      const result = await executeRuleOperations({}, ops);
+
+      expect(result.data.artifacts).toEqual([
+        {
+          id: expect.stringMatching(/^runbook-/),
+          type: 'runbook',
+          data: { content: '# Restart the service\n\n1. Check logs' },
+        },
+      ]);
+    });
+
+    it('replaces an existing runbook and reuses its artifact id', async () => {
+      const existing: Partial<RuleAttachmentData> = {
+        artifacts: [{ id: 'runbook-keep', type: 'runbook', data: { content: 'Old steps' } }],
+      };
+      const ops: RuleOperation[] = [{ operation: 'set_runbook', content: 'New steps' }];
+
+      const result = await executeRuleOperations(existing, ops);
+
+      expect(result.data.artifacts).toEqual([
+        { id: 'runbook-keep', type: 'runbook', data: { content: 'New steps' } },
+      ]);
+    });
+
+    it('replaces previously attached runbooks and preserves dashboard artifacts', async () => {
+      const existing: Partial<RuleAttachmentData> = {
+        artifacts: [
+          { id: 'runbook-old', type: 'runbook', data: { content: 'Old steps' } },
+          { id: 'dashboard-1', type: 'dashboard', data: { dashboard_id: 'dash-1' } },
+        ],
+      };
+      const ops: RuleOperation[] = [{ operation: 'set_runbook', content: 'New steps' }];
+
+      const result = await executeRuleOperations(existing, ops);
+
+      expect(result.data.artifacts).toEqual([
+        { id: 'dashboard-1', type: 'dashboard', data: { dashboard_id: 'dash-1' } },
+        { id: 'runbook-old', type: 'runbook', data: { content: 'New steps' } },
+      ]);
+    });
+
+    it('replaces multiple existing runbooks with a single artifact', async () => {
+      const existing: Partial<RuleAttachmentData> = {
+        artifacts: [
+          { id: 'runbook-1', type: 'runbook', data: { content: 'First' } },
+          { id: 'runbook-2', type: 'runbook', data: { content: 'Second' } },
+          { id: 'dashboard-1', type: 'dashboard', data: { dashboard_id: 'dash-1' } },
+        ],
+      };
+      const ops: RuleOperation[] = [{ operation: 'set_runbook', content: 'Only runbook' }];
+
+      const result = await executeRuleOperations(existing, ops);
+
+      expect(result.data.artifacts).toEqual([
+        { id: 'dashboard-1', type: 'dashboard', data: { dashboard_id: 'dash-1' } },
+        { id: 'runbook-1', type: 'runbook', data: { content: 'Only runbook' } },
+      ]);
+    });
+
+    it.each([null, '', '   '])('unlinks the runbook when content is %j', async (content) => {
+      const existing: Partial<RuleAttachmentData> = {
+        artifacts: [
+          { id: 'runbook-1', type: 'runbook', data: { content: 'Restart the service' } },
+          { id: 'dashboard-1', type: 'dashboard', data: { dashboard_id: 'dash-1' } },
+        ],
+      };
+      const ops: RuleOperation[] = [{ operation: 'set_runbook', content }];
+
+      const result = await executeRuleOperations(existing, ops);
+
+      expect(result.data.artifacts).toEqual([
+        { id: 'dashboard-1', type: 'dashboard', data: { dashboard_id: 'dash-1' } },
+      ]);
+    });
+
+    it('throws when merged artifacts would exceed the API cap', async () => {
+      const existing: Partial<RuleAttachmentData> = {
+        artifacts: Array.from({ length: 100 }, (_, index) => ({
+          id: `dashboard-${index}`,
+          type: 'dashboard',
+          data: { dashboard_id: `dash-${index}` },
+        })),
+      };
+      const ops: RuleOperation[] = [{ operation: 'set_runbook', content: 'Steps' }];
+
+      await expect(executeRuleOperations(existing, ops)).rejects.toThrow(
+        RuleOperationValidationError
+      );
+      await expect(executeRuleOperations(existing, ops)).rejects.toThrow(/at most 100 artifacts/);
+    });
+
+    it('rejects content over the runbook limit at the operation schema', () => {
+      const result = ruleOperationSchema.safeParse({
+        operation: 'set_runbook',
+        content: 'a'.repeat(RUNBOOK_CONTENT_LIMIT + 1),
+      });
+
+      expect(result.success).toBe(false);
+    });
+
+    it('accepts content at the runbook limit', () => {
+      const result = ruleOperationSchema.safeParse({
+        operation: 'set_runbook',
+        content: 'a'.repeat(RUNBOOK_CONTENT_LIMIT),
+      });
+
+      expect(result.success).toBe(true);
     });
   });
 });

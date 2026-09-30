@@ -2,7 +2,7 @@
 
 This directory contains UI components used by the stream lifecycle data tiers flow.
 
-Run `yarn storybook streams_app` from the Kibana root to preview these components locally.
+Run `pnpm storybook streams_app` from the Kibana root to preview these components locally.
 
 ## `EditDeletePhaseFlyout`
 

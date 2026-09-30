@@ -117,18 +117,18 @@ The director writes one of these episode statuses:
 | `recovering` | `breached` | `active` |
 | `recovering` | `recovered` | `inactive` |
 
-`no_data` transitions depend on `rule.no_data_strategy`:
+`no_data` transitions depend on `rule.no_data.strategy`:
 
-| Current episode status | `no_data_strategy` | Next episode status |
+| Current episode status | `no_data.strategy` | Next episode status |
 | --- | --- | --- |
-| any | `'emit'` | `active` |
-| any | `'last_known_status'` | (unchanged — preserve current status) |
-| `inactive` | `'recover'` | `inactive` |
-| `pending` | `'recover'` | `inactive` |
-| `active` | `'recover'` | `recovering` |
-| `recovering` | `'recover'` | `inactive` |
+| any | `'alert'` | `active` |
+| any | `'keep_last'` | (unchanged — preserve current status) |
+| `inactive` | `'resolve'` | `inactive` |
+| `pending` | `'resolve'` | `inactive` |
+| `active` | `'resolve'` | `inactive` |
+| `recovering` | `'resolve'` | `inactive` |
 
-For `'recover'`, the director applies the same FSM transitions as a `recovered` event would. No prior episode (null) always returns `pending`.
+For `'resolve'`, the episode resolves directly to `inactive` on the first no-data run. `'ignore'` never produces a `no_data` event to begin with.
 
 ### `CountTimeframeStrategy`
 
@@ -137,13 +137,15 @@ For `'recover'`, the director applies the same FSM transitions as a `recovered` 
 - `pending -> active`
 - `recovering -> inactive`
 
+A `no_data` event on a rule with `no_data.strategy: 'resolve'` always bypasses this gating and resolves directly to `inactive`, regardless of `state_transition.recovering.count` / `state_transition.recovering.timeframe`.
+
 It supports:
 
 - count only
 - timeframe only
 - count + timeframe with `AND` / `OR`
 
-For timeframe evaluation, it compares the current alert event timestamp with the last stored episode timestamp.
+For timeframe evaluation, it compares the director run time (`evaluatedAt`) with the last stored episode timestamp; the current event has no `@timestamp` yet, since ES sets it at ingest.
 
 ## When to add a new strategy
 
@@ -215,6 +217,7 @@ Example:
 ```typescript
 import { CountTimeframeStrategy } from './count_timeframe_strategy';
 import { alertEpisodeStatus, alertEventStatus } from '../../../resources/datastreams/alert_events';
+import { createLoggerService } from '../../services/logger_service/logger_service.mock';
 import {
   buildLatestAlertEvent,
   buildStrategyStateTransitionContext,
@@ -222,7 +225,8 @@ import {
 
 describe('CountTimeframeStrategy', () => {
   it('transitions pending to active when threshold is met', () => {
-    const strategy = new CountTimeframeStrategy();
+    const { loggerService } = createLoggerService();
+    const strategy = new CountTimeframeStrategy(loggerService);
 
     const result = strategy.getNextState(
       buildStrategyStateTransitionContext({

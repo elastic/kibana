@@ -10,8 +10,8 @@ import type { TransformPutTransformRequest } from '@elastic/elasticsearch/lib/ap
 import type { SyntheticsAvailabilityIndicator } from '@kbn/slo-schema';
 import {
   ALL_VALUE,
-  occurrencesBudgetingMethodSchema,
   syntheticsAvailabilityIndicatorSchema,
+  timeslicesBudgetingMethodSchema,
 } from '@kbn/slo-schema';
 import { getElasticsearchQueryOrThrow, TransformGenerator } from '.';
 import {
@@ -24,7 +24,7 @@ import {
 import { getSLOTransformTemplate } from '../../assets/transform_templates/slo_transform_template';
 import type { SLODefinition } from '../../domain/models';
 import { InvalidTransformError } from '../../errors';
-import { getFilterRange } from './common';
+import { getFilterRange, getTimesliceTargetComparator } from './common';
 
 export class SyntheticsAvailabilityTransformGenerator extends TransformGenerator {
   public async getTransformParams(slo: SLODefinition): Promise<TransformPutTransformRequest> {
@@ -41,7 +41,7 @@ export class SyntheticsAvailabilityTransformGenerator extends TransformGenerator
       this.buildAggregations(slo),
       this.buildSettings(slo, this.isServerless ? '@timestamp' : 'event.ingested'),
       slo,
-      this.isServerless && this.isCpsEnabled
+      this.getProjectRouting(slo)
     );
   }
 
@@ -163,12 +163,6 @@ export class SyntheticsAvailabilityTransformGenerator extends TransformGenerator
   }
 
   private buildAggregations(slo: SLODefinition) {
-    if (!occurrencesBudgetingMethodSchema.is(slo.budgetingMethod)) {
-      throw new Error(
-        "The sli.synthetics.availability indicator MUST have an 'Occurrences' budgeting method."
-      );
-    }
-
     return {
       'slo.numerator': {
         filter: {
@@ -184,6 +178,19 @@ export class SyntheticsAvailabilityTransformGenerator extends TransformGenerator
           },
         },
       },
+      ...(timeslicesBudgetingMethodSchema.is(slo.budgetingMethod) && {
+        'slo.isGoodSlice': {
+          bucket_script: {
+            buckets_path: {
+              goodEvents: 'slo.numerator>_count',
+              totalEvents: 'slo.denominator>_count',
+            },
+            script: `if (params.totalEvents == 0) { return 1 } else { return params.goodEvents / params.totalEvents ${getTimesliceTargetComparator(
+              slo.objective.timesliceTarget!
+            )} ${slo.objective.timesliceTarget} ? 1 : 0 }`,
+          },
+        },
+      }),
     };
   }
 }

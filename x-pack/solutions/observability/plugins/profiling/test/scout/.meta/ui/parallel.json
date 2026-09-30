@@ -1,24 +1,9 @@
 {
-  "sha1": "0d31cac65bd430e8eae53abc1b2e9d0e1701549e",
+  "sha1": "93b9f64fbcbc79d16291b3925e7e017ed8cb14a3",
   "testChannels": [
-    "ci-on-commit",
-    "ci-batch-3h"
+    "ci-on-commit"
   ],
   "tests": [
-    {
-      "id": "12b5169bc361214-95d4bf5100c0857",
-      "title": "Reset profiling state after UI parallel tests",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic"
-      ],
-      "location": {
-        "file": "x-pack/solutions/observability/plugins/profiling/test/scout/ui/parallel_tests/global.teardown.ts",
-        "line": 6,
-        "column": 1
-      }
-    },
     {
       "id": "01827b5a57152a5-eaaf5032684392c",
       "title": "Set up Profiling Resources and Data",
@@ -225,7 +210,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/profiling/test/scout/ui/parallel_tests/home/home.spec.ts",
-        "line": 13,
+        "line": 14,
         "column": 25
       }
     },
@@ -239,8 +224,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/profiling/test/scout/ui/parallel_tests/home/home.spec.ts",
-        "line": 21,
-        "column": 20
+        "line": 19,
+        "column": 5
       }
     },
     {
@@ -281,7 +266,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/profiling/test/scout/ui/parallel_tests/storage_explorer/storage_explorer.spec.ts",
-        "line": 13,
+        "line": 14,
         "column": 20
       }
     },
@@ -295,7 +280,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/profiling/test/scout/ui/parallel_tests/storage_explorer/storage_explorer.spec.ts",
-        "line": 15,
+        "line": 16,
         "column": 28
       }
     },
@@ -309,7 +294,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/profiling/test/scout/ui/parallel_tests/storage_explorer/storage_explorer.spec.ts",
-        "line": 20,
+        "line": 21,
         "column": 49
       }
     },
@@ -323,8 +308,22 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/profiling/test/scout/ui/parallel_tests/storage_explorer/storage_explorer.spec.ts",
-        "line": 28,
+        "line": 29,
         "column": 5
+      }
+    },
+    {
+      "id": "12b5169bc361214-95d4bf5100c0857",
+      "title": "Reset profiling state after UI parallel tests",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/profiling/test/scout/ui/parallel_tests/global.teardown.ts",
+        "line": 6,
+        "column": 1
       }
     }
   ]

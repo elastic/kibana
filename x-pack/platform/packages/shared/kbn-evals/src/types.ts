@@ -7,9 +7,9 @@
 
 import type { BoundInferenceClient, Model } from '@kbn/inference-common';
 import type { HttpHandler } from '@kbn/core/public';
-import type { AvailableConnectorWithId } from '@kbn/gen-ai-functional-testing';
-import type { DatasetMaturity } from '@kbn/evals-common';
+import type { DatasetMaturity, Direction, Model as ScoreModel } from '@kbn/evals-common';
 import type { EsClient, ScoutWorkerFixtures } from '@kbn/scout';
+import type { EvalConnector } from './utils/eval_connector';
 import type { EvaluationCriterion } from './evaluators/criteria';
 import { type EvaluationReporter } from './utils/reporting/evaluation_reporter';
 import type {
@@ -105,6 +105,20 @@ export interface Evaluator<
   name: string;
   kind: EvaluatorKind;
   evaluate: EvaluatorCallback<TExample, TTaskOutput>;
+  /**
+   * Whether a higher score is an improvement (`maximize`), a lower score is
+   * an improvement (`minimize`), or the score cannot be compared across arms
+   * at all (`neutral`).
+   */
+  direction: Direction;
+  /**
+   * Model this evaluator judges with, used to attribute its scores. Read after
+   * `evaluate` resolves because evaluators backed by `POST /_evaluate` only learn
+   * their model from the response. Undefined for CODE evaluators.
+   */
+  getModel?: () => ScoreModel | undefined;
+  /** Resolved evaluator version, read after `evaluate` for API-backed evaluators. */
+  getVersion?: () => string | undefined;
 }
 export interface DefaultEvaluators {
   criteria: (criteria: EvaluationCriterion[]) => Evaluator;
@@ -171,10 +185,15 @@ export interface TaskRun {
 
 export interface EvaluationRun {
   name: string;
+  version?: string;
   result?: EvaluationResult;
   experimentRunId: string;
   traceId?: string | null;
   exampleId?: string;
+  direction: Direction;
+  kind?: EvaluatorKind;
+  /** Model the evaluator judged with; absent for CODE evaluators. */
+  model?: ScoreModel;
 }
 
 export interface DatasetRunResult {
@@ -257,16 +276,16 @@ export interface EvaluationSpecificWorkerFixtures {
   fetch: HttpHandler;
   workerExperimentId: WorkerExperimentIdRef;
   workerExecutionId: WorkerExecutionIdRef;
-  connector: AvailableConnectorWithId;
-  evaluationConnector: AvailableConnectorWithId;
+  connector: EvalConnector;
+  evaluationConnector: EvalConnector;
   /**
    * User-selected connector descriptors set per-project in the Playwright config.
    * These are Playwright options (`{ option: true }`) consumed by the `connector` /
    * `evaluationConnector` fixtures, which create/resolve the actual connectors.
    * They default to `undefined` and must be set per-project (see createPlaywrightEvalsConfig).
    */
-  connectorParam: AvailableConnectorWithId | undefined;
-  evaluationConnectorParam: AvailableConnectorWithId | undefined;
+  connectorParam: EvalConnector | undefined;
+  evaluationConnectorParam: EvalConnector | undefined;
   repetitions: number;
   reportDisplayOptions: ReportDisplayOptions;
   reportModelScore: EvaluationReporter;
@@ -282,7 +301,7 @@ export interface EvaluationWorkerFixtures extends ScoutWorkerFixtures {
   executorClient: EvalsExecutorClient;
   evaluators: DefaultEvaluators;
   fetch: HttpHandler;
-  connector: AvailableConnectorWithId;
-  evaluationConnector: AvailableConnectorWithId;
+  connector: EvalConnector;
+  evaluationConnector: EvalConnector;
   repetitions: number;
 }

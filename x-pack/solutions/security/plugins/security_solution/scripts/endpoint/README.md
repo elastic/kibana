@@ -7,12 +7,12 @@ Use the `-d` option if you want to delete and remake the indices, otherwise it w
 
 Example command sequence to get ES and kibana running with sample data after installing ts-node:
 
-`yarn es snapshot` -> starts ES
+`pnpm es snapshot` -> starts ES
 
-`npx yarn start --no-base-path` -> starts kibana. Note: you may need other configurations steps to start the security solution with endpoint support.
+`npx pnpm start --no-base-path` -> starts kibana. Note: you may need other configurations steps to start the security solution with endpoint support.
 
 `cd x-pack/solutions/security/plugins/security_solution/scripts/endpoint`
 
-`yarn test:generate` -> run the resolver_generator.ts script
+`pnpm test:generate` -> run the resolver_generator.ts script
 
-To see Resolver generator CLI options, run `yarn test:generate --help`.
+To see Resolver generator CLI options, run `pnpm test:generate --help`.

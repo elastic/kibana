@@ -50,6 +50,17 @@ Files that test multiple roles or unrelated flows and should become separate spe
 
 - `<file>`: blocked by <specific missing capability with detail>
 
+### Scenario parity map
+
+Include one row for every FTR `it(...)` block. Do not group away or omit individual blocks.
+
+| FTR file | FTR `it()` title | Behavior and assertions | Scout destination | Disposition | Rationale |
+|----------|------------------|-------------------------|-------------------|-------------|-----------|
+| `layers.ts` | `adds a layer` | Creates a layer and verifies its label | `ui/tests/layers.spec.ts` → `test.step('adds a layer')` | `test.step` | Preserves one step in the original sequential journey |
+| `data_counts.ts` | `shows document count` | Verifies the exact document count | `api/tests/data_counts.spec.ts` → `test('returns document count')` | API test | Data correctness does not require browser coverage |
+
+Allowed dispositions: Scout `test`, `test.step`, API test, RTL/Jest test, drop, or defer. Justify every move, drop, or defer in the rationale column.
+
 ---
 
 ## 2. Test type routing

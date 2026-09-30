@@ -57,12 +57,13 @@ const TITLE_TEXT = EXPANDABLE_PANEL_HEADER_TITLE_TEXT_TEST_ID(
   CORRELATIONS_DETAILS_BY_ANCESTRY_SECTION_TEST_ID
 );
 
-const renderRelatedAlertsByAncestry = () =>
+const renderRelatedAlertsByAncestry = (documentIndex?: string) =>
   render(
     <TestProviders>
       <DocumentDetailsContext.Provider value={mockContextValue}>
         <RelatedAlertsByAncestry
           documentId={documentId}
+          documentIndex={documentIndex}
           scopeId={scopeId}
           onShowAlert={mockOnShowAlert}
           useLegacyExpandableFlyout={false}
@@ -185,6 +186,48 @@ describe('<RelatedAlertsByAncestry />', () => {
     expect(
       getByTestId(CORRELATIONS_DETAILS_BY_ANCESTRY_SECTION_DATE_PICKER_TEST_ID)
     ).toBeInTheDocument();
+  });
+
+  it('passes the default patterns unchanged when no document index is provided', () => {
+    (useFetchRelatedAlertsByAncestry as jest.Mock).mockReturnValue({
+      loading: false,
+      error: false,
+      data: [],
+      dataCount: 0,
+    });
+    (usePaginatedAlerts as jest.Mock).mockReturnValue({
+      loading: false,
+      error: false,
+      data: [],
+    });
+
+    renderRelatedAlertsByAncestry();
+
+    expect(useFetchRelatedAlertsByAncestry).toHaveBeenCalledWith(
+      expect.objectContaining({ indices: ['index1'] })
+    );
+  });
+
+  it('prepends the project-qualified document index to the ancestry search indices', () => {
+    (useFetchRelatedAlertsByAncestry as jest.Mock).mockReturnValue({
+      loading: false,
+      error: false,
+      data: [],
+      dataCount: 0,
+    });
+    (usePaginatedAlerts as jest.Mock).mockReturnValue({
+      loading: false,
+      error: false,
+      data: [],
+    });
+
+    renderRelatedAlertsByAncestry('linked_local_project:.ds-logs-endpoint.events-default');
+
+    expect(useFetchRelatedAlertsByAncestry).toHaveBeenCalledWith(
+      expect.objectContaining({
+        indices: ['linked_local_project:.ds-logs-endpoint.events-default', 'index1'],
+      })
+    );
   });
 
   it('should use the default time range when nothing is persisted in local storage', () => {

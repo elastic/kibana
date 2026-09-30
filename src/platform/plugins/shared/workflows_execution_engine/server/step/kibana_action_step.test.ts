@@ -8,358 +8,542 @@
  */
 
 import type { KibanaRequest } from '@kbn/core/server';
-import { UIAM_INTERNAL_CALLER_ATTESTATION_HEADER } from '@kbn/core-security-server';
+import {
+  markExternalUiamCredential,
+  UIAM_INTERNAL_CALLER_ATTESTATION_HEADER,
+} from '@kbn/core-security-server';
 import type { KibanaGraphNode } from '@kbn/workflows/graph/types';
-
 import { KibanaActionStepImpl } from './kibana_action_step';
-import type { RunStepResult } from './node_implementation';
-import { EVENT_CHAIN_DEPTH_HEADER } from '../trigger_events/event_context/event_chain_context';
+import type { CallKibanaApiParams } from '../lib/call_kibana_api';
+import { callKibanaApi, CallKibanaApiResponseTooLargeError } from '../lib/call_kibana_api';
+import { WorkflowTemplatingEngine } from '../templating_engine';
+import {
+  EVENT_CHAIN_DEPTH_HEADER,
+  EVENT_CHAIN_EMITTER_EXECUTION_ID_HEADER,
+  X_ELASTIC_INTERNAL_ORIGIN_REQUEST,
+} from '../trigger_events/event_context/event_chain_context';
 import type { StepExecutionRuntime } from '../workflow_context_manager/step_execution_runtime';
-import type { WorkflowContextManager } from '../workflow_context_manager/workflow_context_manager';
 import type { WorkflowExecutionRuntimeManager } from '../workflow_context_manager/workflow_execution_runtime_manager';
 import type { IWorkflowEventLogger } from '../workflow_event_logger';
 
-// Mock fetch globally
-global.fetch = jest.fn();
-const mockedFetch = global.fetch as jest.MockedFunction<typeof fetch>;
-const mockGetInternalCallerAttestationHeaders = jest.fn();
-
-const runStep = (
-  step: KibanaActionStepImpl,
-  input?: Record<string, unknown>
-): Promise<RunStepResult> =>
-  (step as unknown as { _run(i?: Record<string, unknown>): Promise<RunStepResult> })._run(input);
-
-function createMockReadableStream(data: string) {
-  const encoder = new TextEncoder();
-  const encoded = encoder.encode(data);
-  let consumed = false;
-  return {
-    getReader: () => ({
-      read: async () => {
-        if (consumed) return { done: true, value: undefined };
-        consumed = true;
-        return { done: false, value: encoded };
-      },
-      releaseLock: () => {},
-      cancel: jest.fn(),
-    }),
-  };
-}
-
-function createMockBinaryStream(data: Uint8Array) {
-  let consumed = false;
-  return {
-    getReader: () => ({
-      read: async () => {
-        if (consumed) return { done: true, value: undefined };
-        consumed = true;
-        return { done: false, value: data };
-      },
-      releaseLock: () => {},
-      cancel: jest.fn(),
-    }),
-  };
-}
-
-function createMockResponse(body: object, status = 200) {
-  const json = JSON.stringify(body);
-  return {
-    ok: status >= 200 && status < 300,
-    status,
-    json: jest.fn().mockResolvedValue(body),
-    text: jest.fn().mockResolvedValue(json),
-    body: createMockReadableStream(json),
-    headers: new Headers({ 'content-type': 'application/json' }),
-  } as any;
-}
-
-function createMockBinaryResponse(data: Uint8Array, contentType: string, status = 200) {
-  return {
-    ok: status >= 200 && status < 300,
-    status,
-    body: createMockBinaryStream(data),
-    headers: new Headers({ 'content-type': contentType }),
-  } as any;
-}
-
-// Mock undici
 jest.mock('undici', () => ({
   Agent: jest.fn().mockImplementation((options) => ({
-    _options: options, // Store options for testing
+    _options: options,
   })),
 }));
 
-describe('KibanaActionStepImpl - Fetcher Configuration', () => {
-  let mockStepExecutionRuntime: jest.Mocked<StepExecutionRuntime>;
-  let mockWorkflowRuntime: jest.Mocked<WorkflowExecutionRuntimeManager>;
-  let mockWorkflowLogger: jest.Mocked<IWorkflowEventLogger>;
-  let mockContextManager: jest.Mocked<WorkflowContextManager>;
+describe('KibanaActionStepImpl', () => {
+  const originalFetch = global.fetch;
+  let contextManager: any;
+  let runtime: StepExecutionRuntime;
+  let step: KibanaActionStepImpl;
+  let workflowLogger: { logInfo: jest.Mock; logError: jest.Mock; logWarn: jest.Mock };
+  const mockGetBooleanValue = jest.fn().mockResolvedValue(true);
+
+  const createStep = (withValue: any, stepType = 'kibana.request', maxStepSize = 1000) => {
+    const node = {
+      stepId: 'request',
+      stepType,
+      configuration: { type: stepType, with: withValue, 'max-step-size': maxStepSize },
+    } as unknown as KibanaGraphNode;
+    return new KibanaActionStepImpl(
+      node,
+      runtime,
+      {} as WorkflowExecutionRuntimeManager,
+      workflowLogger as unknown as IWorkflowEventLogger
+    );
+  };
+
+  const streamResponse = (
+    body: string | Uint8Array,
+    {
+      status = 200,
+      contentType = 'application/json',
+      cancel = jest.fn(),
+    }: { status?: number; contentType?: string | null; cancel?: jest.Mock } = {}
+  ): Response => {
+    const bytes = typeof body === 'string' ? new TextEncoder().encode(body) : body;
+    return {
+      ok: status >= 200 && status < 300,
+      status,
+      headers: {
+        get: (name: string) => (name.toLowerCase() === 'content-type' ? contentType : null),
+      },
+      body: {
+        getReader: () => {
+          let done = false;
+          return {
+            read: async () => {
+              if (done) {
+                return { done: true, value: undefined };
+              }
+              done = true;
+              return { done: false, value: bytes };
+            },
+            cancel,
+            releaseLock: jest.fn(),
+          };
+        },
+      },
+    } as unknown as Response;
+  };
+
+  const jsonResponse = (body: unknown, status = 200): Response =>
+    streamResponse(typeof body === 'string' ? body : JSON.stringify(body), { status });
 
   beforeEach(() => {
-    mockContextManager = {
+    global.fetch = jest
+      .fn()
+      .mockImplementation(() => Promise.resolve(jsonResponse({ ok: true, success: true })));
+    mockGetBooleanValue.mockResolvedValue(true);
+    workflowLogger = {
+      logInfo: jest.fn(),
+      logError: jest.fn(),
+      logWarn: jest.fn(),
+    };
+    contextManager = {
       renderValueAccordingToContext: jest.fn((value) => value),
       getWorkflowSpaceId: jest.fn().mockReturnValue('default'),
+      callKibanaApi: jest.fn().mockResolvedValue({
+        status: 200,
+        headers: {},
+        body: { ok: true, success: true },
+        url: 'http://localhost:5601/api/test',
+      }),
       getCoreStart: jest.fn().mockReturnValue({
+        featureFlags: { getBooleanValue: mockGetBooleanValue },
+        security: { authc: { apiKeys: {} } },
         http: {
-          basePath: { publicBaseUrl: 'https://localhost:5601' },
-        },
-        security: {
-          authc: {
-            apiKeys: {
-              uiam: {
-                getInternalCallerAttestationHeaders: mockGetInternalCallerAttestationHeaders,
-              },
-            },
+          basePath: {
+            publicBaseUrl: 'https://localhost:5601',
+            prepend: jest.fn((path: string) => `/base${path}`),
           },
+          getServerInfo: jest.fn(() => ({
+            protocol: 'https',
+            hostname: 'internal-host',
+            port: 5601,
+          })),
         },
       }),
+      getDependencies: jest.fn().mockReturnValue({ cloudSetup: undefined, config: {} }),
       getFakeRequest: jest.fn().mockReturnValue({
         headers: { authorization: 'ApiKey test-key' },
       }),
-      getDependencies: jest.fn().mockReturnValue({}),
-    } as any;
-
-    mockStepExecutionRuntime = {
-      contextManager: mockContextManager,
-      startStep: jest.fn().mockResolvedValue(undefined),
-      finishStep: jest.fn().mockResolvedValue(undefined),
-      failStep: jest.fn().mockResolvedValue(undefined),
-      setInput: jest.fn().mockResolvedValue(undefined),
-      stepExecutionId: 'test-step-exec-id',
-      node: {},
-    } as any;
-
-    mockWorkflowRuntime = {
-      navigateToNextNode: jest.fn(),
-    } as any;
-
-    mockWorkflowLogger = {
-      logInfo: jest.fn(),
-      logError: jest.fn(),
-      logDebug: jest.fn(),
-    } as any;
-
-    // Mock successful fetch response with readable body stream
-    mockedFetch.mockResolvedValue(createMockResponse({ success: true }));
-
-    jest.clearAllMocks();
+    };
+    runtime = {
+      contextManager,
+      abortController: new AbortController(),
+    } as unknown as StepExecutionRuntime;
   });
 
   afterEach(() => {
-    jest.resetAllMocks();
+    global.fetch = originalFetch;
+    jest.clearAllMocks();
   });
 
-  it('attaches the UIAM internal-caller attestation to loopback requests', async () => {
-    mockGetInternalCallerAttestationHeaders.mockReturnValue({
-      [UIAM_INTERNAL_CALLER_ATTESTATION_HEADER]: 'valid-attestation',
+  describe('Core self-client (kibana.request flag on)', () => {
+    beforeEach(() => {
+      mockGetBooleanValue.mockResolvedValue(true);
     });
-    mockContextManager.getFakeRequest.mockReturnValue({
-      headers: { authorization: 'ApiKey essu_internal_key' },
-    } as unknown as KibanaRequest);
 
-    const stepWith = {
-      request: {
-        method: 'GET',
-        path: '/api/status',
-        headers: {
-          Authorization: 'ApiKey another_key',
-          'X-Kbn-Uiam-Internal-Caller-Attestation': 'forged-attestation',
-          'X-Kibana-Event-Chain-Depth': '999',
+    it('calls the context manager adapter and never global fetch', async () => {
+      step = createStep({ request: { method: 'POST', path: '/api/test', body: '{"x":1}' } });
+      await (step as any)._run();
+      expect(contextManager.callKibanaApi).toHaveBeenCalledWith(
+        expect.objectContaining({ method: 'POST', path: '/api/test', body: '{"x":1}' })
+      );
+      expect(global.fetch).not.toHaveBeenCalled();
+    });
+
+    it('JSON-encodes a scalar string body when the request is JSON', async () => {
+      step = createStep({ request: { method: 'POST', path: '/api/test', body: 'hello' } });
+      await (step as any)._run();
+      expect(contextManager.callKibanaApi).toHaveBeenCalledWith(
+        expect.objectContaining({ body: '"hello"' })
+      );
+    });
+
+    it.each([
+      ['application/vnd.api+json; charset=utf-8', '"hello"'],
+      ['application/jsonl', 'hello'],
+    ])('encodes a scalar string body sent as %s to %s', async (contentType, expectedBody) => {
+      step = createStep({
+        request: {
+          method: 'POST',
+          path: '/api/test',
+          body: 'hello',
+          headers: { 'Content-Type': contentType },
         },
-      },
-    };
-    const step = {
-      id: 'test_step',
-      type: 'kibana.request',
-      stepId: 'test_step',
-      stepType: 'kibana.request',
-      configuration: { name: 'test_step', type: 'kibana.request', with: stepWith },
-    } as unknown as KibanaGraphNode;
+      });
+      await (step as any)._run();
+      expect(contextManager.callKibanaApi).toHaveBeenCalledWith(
+        expect.objectContaining({ body: expectedBody })
+      );
+    });
 
-    await runStep(
-      new KibanaActionStepImpl(
-        step,
-        mockStepExecutionRuntime,
-        mockWorkflowRuntime,
-        mockWorkflowLogger
-      ),
-      stepWith
-    );
+    it('bounds the call by the step abort signal and the legacy headers timeout', async () => {
+      step = createStep({ request: { method: 'GET', path: '/api/test' } });
+      await (step as any)._run();
+      expect(contextManager.callKibanaApi).toHaveBeenCalledWith(
+        expect.objectContaining({
+          signal: runtime.abortController.signal,
+          timeout: 300_000,
+        })
+      );
+    });
 
-    const fetchOptions = mockedFetch.mock.calls[0][1] as RequestInit;
-    const headers = new Headers(fetchOptions.headers);
-    expect(headers.get('authorization')).toBe('ApiKey essu_internal_key');
-    expect(headers.get(UIAM_INTERNAL_CALLER_ATTESTATION_HEADER)).toBe('valid-attestation');
-    expect(headers.get(EVENT_CHAIN_DEPTH_HEADER)).toBeNull();
-    expect(mockGetInternalCallerAttestationHeaders).toHaveBeenCalledTimes(1);
+    it('preserves JSON strings and caller content type', async () => {
+      step = createStep({
+        request: {
+          method: 'POST',
+          path: '/api/test',
+          body: '{"x":1}',
+          headers: { 'Content-Type': 'text/plain' },
+        },
+      });
+      await (step as any)._run();
+      expect(contextManager.callKibanaApi).toHaveBeenCalledWith(
+        expect.objectContaining({ body: '{"x":1}', headers: { 'Content-Type': 'text/plain' } })
+      );
+    });
 
-    mockedFetch.mockClear();
-    mockGetInternalCallerAttestationHeaders.mockClear();
-    mockContextManager.getFakeRequest.mockReturnValue({
-      headers: { authorization: 'ApiKey regular_key' },
-    } as unknown as KibanaRequest);
+    it('uses raw buffered FormData for form_data requests', async () => {
+      step = createStep({ form_data: { file: { content: 'hello', filename: 'a.txt' } } });
+      await (step as any)._run();
+      const call = contextManager.callKibanaApi.mock.calls[0][0];
+      expect(call.rawBody).toBeInstanceOf(FormData);
+      expect(call.body).toBeUndefined();
+    });
 
-    await runStep(
-      new KibanaActionStepImpl(
-        step,
-        mockStepExecutionRuntime,
-        mockWorkflowRuntime,
-        mockWorkflowLogger
-      ),
-      stepWith
-    );
+    it('rejects body together with form_data, including falsy bodies', async () => {
+      for (const body of ['', false, 0, null, { title: 'kept' }]) {
+        contextManager.callKibanaApi.mockClear();
+        step = createStep({
+          body,
+          path: '/api/saved_objects/_import',
+          form_data: { file: { content: 'hello', filename: 'a.ndjson' } },
+        });
+        const result = await (step as any)._run();
+        expect(result.error.message).toContain('Cannot set both body and form_data');
+        expect(contextManager.callKibanaApi).not.toHaveBeenCalled();
+      }
+    });
 
-    const unattestedFetchOptions = mockedFetch.mock.calls[0][1] as RequestInit;
-    const unattestedHeaders = new Headers(unattestedFetchOptions.headers);
-    expect(unattestedHeaders.get(UIAM_INTERNAL_CALLER_ATTESTATION_HEADER)).toBeNull();
-    expect(mockGetInternalCallerAttestationHeaders).not.toHaveBeenCalled();
+    it('converts adapter response-size failures to the step error', async () => {
+      contextManager.callKibanaApi.mockRejectedValue(new CallKibanaApiResponseTooLargeError(1000));
+      step = createStep({ request: { method: 'GET', path: '/api/test' } });
+      const result = await (step as any)._run();
+      expect(result.error).toBeDefined();
+      expect(result.error.message).toContain('size limit');
+    });
+
+    it('encodes binary form_data content as a Blob', async () => {
+      step = createStep({
+        form_data: { file: { content: new Uint8Array([1, 2, 3]), filename: 'a.bin' } },
+      });
+      await (step as any)._run();
+      const call = contextManager.callKibanaApi.mock.calls[0][0];
+      expect(call.rawBody).toBeInstanceOf(FormData);
+      expect(call.body).toBeUndefined();
+    });
+
+    it('warns when YAML fetcher is present and still calls the adapter', async () => {
+      step = createStep({
+        request: { method: 'GET', path: '/api/test' },
+        fetcher: { skip_ssl_verification: true },
+      });
+      await (step as any)._run();
+      expect(workflowLogger.logWarn).toHaveBeenCalledWith(
+        expect.stringContaining('fetcher'),
+        expect.objectContaining({ tags: expect.arrayContaining(['deprecated']) })
+      );
+      expect(contextManager.callKibanaApi).toHaveBeenCalled();
+      expect(global.fetch).not.toHaveBeenCalled();
+    });
+
+    it('includes the outbound URL in debug output', async () => {
+      step = createStep({
+        request: { method: 'GET', path: '/api/test' },
+        debug: true,
+      });
+      const result = await (step as any)._run();
+      expect(result.output._debug).toEqual({
+        method: 'GET',
+        fullUrl: 'http://localhost:5601/api/test',
+      });
+    });
+
+    it('warns that use_localhost uses the listener, not hardcoded localhost:5601', async () => {
+      step = createStep({
+        request: { method: 'GET', path: '/api/test' },
+        use_localhost: true,
+      });
+      await (step as any)._run();
+      expect(workflowLogger.logWarn).toHaveBeenCalledWith(
+        expect.stringContaining('use_localhost'),
+        expect.objectContaining({ tags: expect.arrayContaining(['kibana']) })
+      );
+      expect(contextManager.callKibanaApi).toHaveBeenCalledWith(
+        expect.objectContaining({ target: 'local' })
+      );
+    });
   });
 
-  describe('fetcher options extraction', () => {
-    it('should extract fetcher options and not include them in request body', async () => {
-      const stepWith = {
-        title: 'Test Case',
-        description: 'Test Description',
-        owner: 'securitySolution',
-        fetcher: {
-          skip_ssl_verification: true,
-        },
-      };
-      const step = {
-        id: 'test_step',
-        type: 'kibana.createCase',
-        stepId: 'test_step',
-        stepType: 'kibana.createCase',
-        configuration: { name: 'test_step', type: 'kibana.createCase', with: stepWith },
-      } as unknown as KibanaGraphNode;
+  describe('Core self-client through callKibanaApi', () => {
+    const selfFetch = jest.fn();
 
-      const kibanaStep = new KibanaActionStepImpl(
-        step,
-        mockStepExecutionRuntime,
-        mockWorkflowRuntime,
-        mockWorkflowLogger
+    beforeEach(() => {
+      contextManager.getWorkflowSpaceId.mockReturnValue('custom');
+      selfFetch.mockImplementation(async () => ({
+        request: { url: 'http://localhost:5601/api/test' },
+        response: new Response(JSON.stringify({ ok: true }), {
+          headers: { 'content-type': 'application/json' },
+        }),
+      }));
+      const coreStart = contextManager.getCoreStart();
+      coreStart.http.selfClient = { asScoped: jest.fn(() => ({ fetch: selfFetch })) };
+      contextManager.callKibanaApi.mockImplementation((params: CallKibanaApiParams) =>
+        callKibanaApi(
+          { fakeRequest: contextManager.getFakeRequest(), coreStart, spaceId: 'custom' },
+          params
+        )
+      );
+    });
+
+    it.each([
+      [
+        'a raw path',
+        { request: { method: 'GET', path: '/api/cases' } },
+        'kibana.request',
+        '/api/cases',
+      ],
+      [
+        'a raw path in another space',
+        { request: { method: 'GET', path: '/s/other/api/cases' } },
+        'kibana.request',
+        '/s/other/api/cases',
+      ],
+      [
+        'a raw path in the workflow space',
+        { request: { method: 'GET', path: '/s/custom/api/cases' } },
+        'kibana.request',
+        '/s/custom/api/cases',
+      ],
+      [
+        'a form_data path in another space',
+        {
+          path: '/s/other/api/saved_objects/_import',
+          form_data: { file: { content: 'hello', filename: 'a.ndjson' } },
+        },
+        'kibana.request',
+        '/s/other/api/saved_objects/_import',
+      ],
+      [
+        'a generated connector path',
+        { title: 'Test Case', description: 'Test Description', owner: 'securitySolution' },
+        'kibana.createCase',
+        '/s/custom/api/cases',
+      ],
+    ])('sends %s to the same route as legacy fetch', async (_, withValue, stepType, routePath) => {
+      mockGetBooleanValue.mockResolvedValue(false);
+      await (createStep(withValue, stepType) as any)._run();
+      expect(global.fetch).toHaveBeenCalledWith(
+        `https://localhost:5601${routePath}`,
+        expect.any(Object)
       );
 
-      await runStep(kibanaStep, stepWith);
+      mockGetBooleanValue.mockResolvedValue(true);
+      const result = await (createStep(withValue, stepType) as any)._run();
+      expect(result.error).toBeUndefined();
+      expect(selfFetch).toHaveBeenCalledTimes(1);
+      expect(selfFetch.mock.calls[0][0]).toBe(`/base${routePath}`);
+    });
 
-      // Verify fetch was called
-      expect(mockedFetch).toHaveBeenCalled();
+    it('passes the step abort signal and the legacy headers timeout to Core', async () => {
+      await (createStep({ request: { method: 'GET', path: '/api/test' } }) as any)._run();
+      const options = selfFetch.mock.calls[0][1];
+      expect(options.timeout).toBe(300_000);
+      expect(options.signal).toBe(runtime.abortController.signal);
+    });
 
-      // Get the request body from the fetch call
-      const fetchCall = mockedFetch.mock.calls[0];
-      const fetchOptions = fetchCall[1] as RequestInit;
+    it('warns about and drops headers that Kibana sets', async () => {
+      const result = await (
+        createStep({
+          request: {
+            method: 'GET',
+            path: '/api/test',
+            headers: { 'kbn-version': '9.0.0', Cookie: 'sid=1', 'x-custom': 'kept' },
+          },
+        }) as any
+      )._run();
+      expect(result.error).toBeUndefined();
+      expect(workflowLogger.logWarn).toHaveBeenCalledWith(
+        'Ignoring headers that Kibana sets for Kibana steps: kbn-version, Cookie.',
+        expect.objectContaining({ tags: ['kibana'] })
+      );
+      const { headers } = selfFetch.mock.calls[0][1];
+      expect(headers).not.toHaveProperty('kbn-version');
+      expect(headers).not.toHaveProperty('Cookie');
+      expect(headers['x-custom']).toBe('kept');
+    });
+
+    it('fails with the HTTP status and a truncated message when an error body exceeds max-step-size', async () => {
+      const chunks = ['E'.repeat(1024), 'E'.repeat(2 * 1024 * 1024)].map((chunk) =>
+        new TextEncoder().encode(chunk)
+      );
+      selfFetch.mockImplementation(async () => ({
+        request: { url: 'http://localhost:5601/api/broken' },
+        response: {
+          ok: false,
+          status: 500,
+          headers: new Headers({ 'content-type': 'text/plain' }),
+          body: {
+            getReader: () => ({
+              read: async () =>
+                chunks.length > 0 ? { done: false, value: chunks.shift() } : { done: true },
+              cancel: jest.fn(),
+              releaseLock: jest.fn(),
+            }),
+          },
+        },
+      }));
+      const result = await (
+        createStep({ request: { method: 'GET', path: '/api/broken' } }) as any
+      )._run();
+      expect(result.error.type).toBe('KibanaApiCallError');
+      expect(result.error.message).toBe(`HTTP 500: ${'E'.repeat(1024)}... [truncated]`);
+    });
+  });
+
+  describe('legacy fetch (kibana.request flag off)', () => {
+    beforeEach(() => {
+      mockGetBooleanValue.mockResolvedValue(false);
+    });
+
+    it('forwards only Core-generated UIAM attestation headers', async () => {
+      const getInternalCallerAttestationHeaders = jest.fn().mockReturnValue({
+        [UIAM_INTERNAL_CALLER_ATTESTATION_HEADER]: 'valid-attestation',
+      });
+      contextManager.getCoreStart().security.authc.apiKeys.uiam = {
+        getInternalCallerAttestationHeaders,
+      };
+      contextManager.getFakeRequest.mockReturnValue({
+        headers: { authorization: 'ApiKey essu_internal_key' },
+      } as unknown as KibanaRequest);
+      step = createStep({
+        request: {
+          method: 'GET',
+          path: '/api/status',
+          headers: {
+            Authorization: 'ApiKey forged_key',
+            [UIAM_INTERNAL_CALLER_ATTESTATION_HEADER]: 'forged-attestation',
+            [EVENT_CHAIN_DEPTH_HEADER]: '999',
+          },
+        },
+      });
+
+      await (step as any)._run();
+
+      const headers = new Headers((global.fetch as jest.Mock).mock.calls[0][1].headers);
+      expect(headers.get('authorization')).toBe('ApiKey essu_internal_key');
+      expect(headers.get(UIAM_INTERNAL_CALLER_ATTESTATION_HEADER)).toBe('valid-attestation');
+      expect(headers.get(EVENT_CHAIN_DEPTH_HEADER)).toBeNull();
+      expect(getInternalCallerAttestationHeaders).toHaveBeenCalledTimes(1);
+
+      (global.fetch as jest.Mock).mockClear();
+      getInternalCallerAttestationHeaders.mockClear();
+      const externalRequest = {
+        headers: { authorization: 'ApiKey essu_user_created_key' },
+        isFakeRequest: true,
+      } as unknown as KibanaRequest;
+      markExternalUiamCredential(externalRequest);
+      contextManager.getFakeRequest.mockReturnValue(externalRequest);
+
+      await (step as any)._run();
+
+      const externalHeaders = new Headers((global.fetch as jest.Mock).mock.calls[0][1].headers);
+      expect(externalHeaders.get(UIAM_INTERNAL_CALLER_ATTESTATION_HEADER)).toBeNull();
+      expect(getInternalCallerAttestationHeaders).not.toHaveBeenCalled();
+    });
+
+    it('uses global fetch and never the self-client adapter', async () => {
+      step = createStep({ request: { method: 'POST', path: '/api/test', body: { x: 1 } } });
+      await (step as any)._run();
+      expect(contextManager.callKibanaApi).not.toHaveBeenCalled();
+      expect(global.fetch).toHaveBeenCalledWith(
+        'https://localhost:5601/api/test',
+        expect.objectContaining({ method: 'POST' })
+      );
+    });
+
+    it('handles the top-level kibana.request method/path format', async () => {
+      step = createStep({ method: 'GET', path: '/api/status' });
+      await (step as any)._run();
+      expect(global.fetch).toHaveBeenCalledWith(
+        'https://localhost:5601/api/status',
+        expect.objectContaining({ method: 'GET' })
+      );
+      expect(contextManager.callKibanaApi).not.toHaveBeenCalled();
+    });
+
+    it('rejects invalid HTTP methods before calling fetch', async () => {
+      step = createStep({ method: 'POSTs', path: '/api/status' });
+      const result = await (step as any)._run();
+      expect(result.error.message).toContain('Invalid HTTP method "POSTs"');
+      expect(global.fetch).not.toHaveBeenCalled();
+    });
+
+    it('rejects body together with form_data, including falsy bodies', async () => {
+      for (const body of ['', false, 0, null, { title: 'kept' }]) {
+        (global.fetch as jest.Mock).mockClear();
+        step = createStep({
+          body,
+          path: '/api/saved_objects/_import',
+          form_data: { file: { content: 'hello', filename: 'a.ndjson' } },
+        });
+        const result = await (step as any)._run();
+        expect(result.error.message).toContain('Cannot set both body and form_data');
+        expect(global.fetch).not.toHaveBeenCalled();
+      }
+    });
+
+    it('extracts fetcher options and does not include them in the request body', async () => {
+      step = createStep({
+        request: {
+          method: 'POST',
+          path: '/api/cases',
+          body: { title: 'Test', description: 'Test Description', owner: 'securitySolution' },
+        },
+        fetcher: { skip_ssl_verification: true },
+      });
+      await (step as any)._run();
+
+      const fetchOptions = (global.fetch as jest.Mock).mock.calls[0][1] as RequestInit;
       const requestBody = fetchOptions.body ? JSON.parse(fetchOptions.body as string) : {};
-
-      // Verify fetcher is NOT in the request body
       expect(requestBody.fetcher).toBeUndefined();
-
-      // Verify actual case parameters are in the body
-      expect(requestBody.title).toBe('Test Case');
+      expect(requestBody.title).toBe('Test');
       expect(requestBody.description).toBe('Test Description');
       expect(requestBody.owner).toBe('securitySolution');
     });
 
-    it('should handle raw API format and extract fetcher', async () => {
-      const stepWith = {
-        request: {
-          method: 'POST',
-          path: '/api/cases',
-          body: { title: 'Test' },
-        },
-        fetcher: {
-          skip_ssl_verification: true,
-        },
-      };
-      const step = {
-        id: 'test_step',
-        type: 'kibana.api',
-        stepId: 'test_step',
-        stepType: 'kibana.api',
-        configuration: { name: 'test_step', type: 'kibana.api', with: stepWith },
-      } as unknown as KibanaGraphNode;
-
-      const kibanaStep = new KibanaActionStepImpl(
-        step,
-        mockStepExecutionRuntime,
-        mockWorkflowRuntime,
-        mockWorkflowLogger
-      );
-
-      await runStep(kibanaStep, stepWith);
-
-      expect(mockedFetch).toHaveBeenCalled();
-
-      const fetchCall = mockedFetch.mock.calls[0];
-      const fetchOptions = fetchCall[1] as RequestInit;
-      const requestBody = fetchOptions.body ? JSON.parse(fetchOptions.body as string) : {};
-
-      // Verify fetcher is NOT in the request body
-      expect(requestBody.fetcher).toBeUndefined();
-      expect(requestBody.title).toBe('Test');
-    });
-
-    it('should work without fetcher options', async () => {
-      const stepWith = {
-        title: 'Test Case',
-      };
-      const step = {
-        id: 'test_step',
-        type: 'kibana.createCase',
-        stepId: 'test_step',
-        stepType: 'kibana.createCase',
-        configuration: { name: 'test_step', type: 'kibana.createCase', with: stepWith },
-      } as unknown as KibanaGraphNode;
-
-      const kibanaStep = new KibanaActionStepImpl(
-        step,
-        mockStepExecutionRuntime,
-        mockWorkflowRuntime,
-        mockWorkflowLogger
-      );
-
-      await runStep(kibanaStep, stepWith);
-
-      expect(mockedFetch).toHaveBeenCalled();
-
-      const fetchCall = mockedFetch.mock.calls[0];
-      const fetchOptions = fetchCall[1] as RequestInit;
-
-      // Should not have dispatcher (Agent) when no fetcher options
+    it('works without fetcher options and does not attach a dispatcher', async () => {
+      step = createStep({ request: { method: 'GET', path: '/api/status' } });
+      await (step as any)._run();
+      const fetchOptions = (global.fetch as jest.Mock).mock.calls[0][1] as RequestInit;
       expect((fetchOptions as any).dispatcher).toBeUndefined();
     });
-  });
 
-  describe('SSL verification', () => {
-    it('should create undici Agent with rejectUnauthorized: false when skip_ssl_verification is true', async () => {
+    it('creates an undici Agent with rejectUnauthorized: false when skip_ssl_verification is true', async () => {
       const { Agent } = await import('undici');
       const MockedAgent = Agent as jest.MockedClass<typeof Agent>;
       MockedAgent.mockClear();
 
-      const stepWith = {
-        title: 'Test',
-        fetcher: {
-          skip_ssl_verification: true,
-        },
-      };
-      const step = {
-        id: 'test_step',
-        type: 'kibana.createCase',
-        stepId: 'test_step',
-        stepType: 'kibana.createCase',
-        configuration: { name: 'test_step', type: 'kibana.createCase', with: stepWith },
-      } as unknown as KibanaGraphNode;
+      step = createStep({
+        request: { method: 'GET', path: '/api/test' },
+        fetcher: { skip_ssl_verification: true },
+      });
+      await (step as any)._run();
 
-      const kibanaStep = new KibanaActionStepImpl(
-        step,
-        mockStepExecutionRuntime,
-        mockWorkflowRuntime,
-        mockWorkflowLogger
-      );
-
-      await runStep(kibanaStep, stepWith);
-
-      // Verify Agent was created with correct options
       expect(MockedAgent).toHaveBeenCalledWith(
         expect.objectContaining({
           connect: expect.objectContaining({
@@ -369,64 +553,26 @@ describe('KibanaActionStepImpl - Fetcher Configuration', () => {
       );
     });
 
-    it('should not create Agent when skip_ssl_verification is false or undefined', async () => {
+    it('does not create an Agent when skip_ssl_verification is absent', async () => {
       const { Agent } = await import('undici');
       const MockedAgent = Agent as jest.MockedClass<typeof Agent>;
       MockedAgent.mockClear();
 
-      const stepWith = {
-        title: 'Test',
-      };
-      const step = {
-        id: 'test_step',
-        type: 'kibana.createCase',
-        stepId: 'test_step',
-        stepType: 'kibana.createCase',
-        configuration: { name: 'test_step', type: 'kibana.createCase', with: stepWith },
-      } as unknown as KibanaGraphNode;
-
-      const kibanaStep = new KibanaActionStepImpl(
-        step,
-        mockStepExecutionRuntime,
-        mockWorkflowRuntime,
-        mockWorkflowLogger
-      );
-
-      await runStep(kibanaStep, stepWith);
-
-      // Agent should not be created
+      step = createStep({ request: { method: 'GET', path: '/api/test' } });
+      await (step as any)._run();
       expect(MockedAgent).not.toHaveBeenCalled();
     });
-  });
 
-  describe('other fetcher options', () => {
-    it('should pass keep_alive option to Agent', async () => {
+    it('passes keep_alive to the Agent', async () => {
       const { Agent } = await import('undici');
       const MockedAgent = Agent as jest.MockedClass<typeof Agent>;
       MockedAgent.mockClear();
 
-      const stepWith = {
-        title: 'Test',
-        fetcher: {
-          keep_alive: true,
-        },
-      };
-      const step = {
-        id: 'test_step',
-        type: 'kibana.createCase',
-        stepId: 'test_step',
-        stepType: 'kibana.createCase',
-        configuration: { name: 'test_step', type: 'kibana.createCase', with: stepWith },
-      } as unknown as KibanaGraphNode;
-
-      const kibanaStep = new KibanaActionStepImpl(
-        step,
-        mockStepExecutionRuntime,
-        mockWorkflowRuntime,
-        mockWorkflowLogger
-      );
-
-      await runStep(kibanaStep, stepWith);
+      step = createStep({
+        request: { method: 'GET', path: '/api/test' },
+        fetcher: { keep_alive: true },
+      });
+      await (step as any)._run();
 
       expect(MockedAgent).toHaveBeenCalledWith(
         expect.objectContaining({
@@ -436,67 +582,27 @@ describe('KibanaActionStepImpl - Fetcher Configuration', () => {
       );
     });
 
-    it('should set redirect mode when follow_redirects is false', async () => {
-      const { Agent } = await import('undici');
-      const MockedAgent = Agent as jest.MockedClass<typeof Agent>;
-      MockedAgent.mockClear();
+    it('sets redirect mode when follow_redirects is false', async () => {
+      step = createStep({
+        request: { method: 'GET', path: '/api/test' },
+        fetcher: { follow_redirects: false },
+      });
+      await (step as any)._run();
 
-      const stepWith = {
-        title: 'Test',
-        fetcher: {
-          follow_redirects: false,
-        },
-      };
-      const step = {
-        id: 'test_step',
-        type: 'kibana.createCase',
-        stepId: 'test_step',
-        stepType: 'kibana.createCase',
-        configuration: { name: 'test_step', type: 'kibana.createCase', with: stepWith },
-      } as unknown as KibanaGraphNode;
-
-      const kibanaStep = new KibanaActionStepImpl(
-        step,
-        mockStepExecutionRuntime,
-        mockWorkflowRuntime,
-        mockWorkflowLogger
-      );
-
-      await runStep(kibanaStep, stepWith);
-
-      const fetchCall = mockedFetch.mock.calls[0];
-      const fetchOptions = fetchCall[1] as RequestInit;
-
+      const fetchOptions = (global.fetch as jest.Mock).mock.calls[0][1] as RequestInit;
       expect(fetchOptions.redirect).toBe('manual');
     });
 
-    it('should pass max_redirects to Agent', async () => {
+    it('passes max_redirects to the Agent', async () => {
       const { Agent } = await import('undici');
       const MockedAgent = Agent as jest.MockedClass<typeof Agent>;
       MockedAgent.mockClear();
 
-      const stepWith = {
-        title: 'Test',
-        fetcher: {
-          max_redirects: 10,
-        },
-      };
-      const step = {
-        id: 'test_step',
-        type: 'kibana.createCase',
-        stepId: 'test_step',
-        stepType: 'kibana.createCase',
-        configuration: { name: 'test_step', type: 'kibana.createCase', with: stepWith },
-      } as unknown as KibanaGraphNode;
-
-      const kibanaStep = new KibanaActionStepImpl(
-        step,
-        mockStepExecutionRuntime,
-        mockWorkflowRuntime,
-        mockWorkflowLogger
-      );
-
-      await runStep(kibanaStep, stepWith);
+      step = createStep({
+        request: { method: 'GET', path: '/api/test' },
+        fetcher: { max_redirects: 10 },
+      });
+      await (step as any)._run();
 
       expect(MockedAgent).toHaveBeenCalledWith(
         expect.objectContaining({
@@ -505,34 +611,16 @@ describe('KibanaActionStepImpl - Fetcher Configuration', () => {
       );
     });
 
-    it('should pass through custom undici options', async () => {
+    it('passes through custom undici options', async () => {
       const { Agent } = await import('undici');
       const MockedAgent = Agent as jest.MockedClass<typeof Agent>;
       MockedAgent.mockClear();
 
-      const stepWith = {
-        title: 'Test',
-        fetcher: {
-          connections: 100,
-          pipelining: 10,
-        } as Record<string, unknown>,
-      };
-      const step = {
-        id: 'test_step',
-        type: 'kibana.createCase',
-        stepId: 'test_step',
-        stepType: 'kibana.createCase',
-        configuration: { name: 'test_step', type: 'kibana.createCase', with: stepWith },
-      } as unknown as KibanaGraphNode;
-
-      const kibanaStep = new KibanaActionStepImpl(
-        step,
-        mockStepExecutionRuntime,
-        mockWorkflowRuntime,
-        mockWorkflowLogger
-      );
-
-      await runStep(kibanaStep, stepWith);
+      step = createStep({
+        request: { method: 'GET', path: '/api/test' },
+        fetcher: { connections: 100, pipelining: 10 },
+      });
+      await (step as any)._run();
 
       expect(MockedAgent).toHaveBeenCalledWith(
         expect.objectContaining({
@@ -541,328 +629,290 @@ describe('KibanaActionStepImpl - Fetcher Configuration', () => {
         })
       );
     });
-  });
 
-  describe('use_server_info option', () => {
-    it('should use server info URL when use_server_info is true', async () => {
-      mockContextManager.getCoreStart.mockReturnValue({
-        http: {
-          basePath: {
-            publicBaseUrl: 'https://public.kibana.example.com',
-            prepend: jest.fn((path: string) => `/base${path}`),
-          },
-          getServerInfo: jest.fn(() => ({
-            protocol: 'https',
-            hostname: 'internal-host',
-            port: 5601,
-          })),
-        },
-      } as any);
+    it('applies YAML fetcher without an ignore warning', async () => {
+      step = createStep({
+        request: { method: 'GET', path: '/api/test' },
+        fetcher: { skip_ssl_verification: true, follow_redirects: false },
+      });
+      await (step as any)._run();
+      expect(workflowLogger.logWarn).not.toHaveBeenCalled();
+      expect(global.fetch).toHaveBeenCalledWith(
+        'https://localhost:5601/api/test',
+        expect.objectContaining({
+          redirect: 'manual',
+          dispatcher: expect.any(Object),
+        })
+      );
+    });
 
-      const stepWith = {
-        method: 'GET',
-        path: '/api/status',
+    it('uses server info URL when use_server_info is true', async () => {
+      step = createStep({
+        request: { method: 'GET', path: '/api/status' },
         use_server_info: true,
-      };
-      const step = {
-        id: 'test_step',
-        type: 'kibana.request',
-        stepId: 'test_step',
-        stepType: 'kibana.request',
-        configuration: { name: 'test_step', type: 'kibana.request', with: stepWith },
-      } as unknown as KibanaGraphNode;
+      });
+      await (step as any)._run();
 
-      const kibanaStep = new KibanaActionStepImpl(
-        step,
-        mockStepExecutionRuntime,
-        mockWorkflowRuntime,
-        mockWorkflowLogger
+      expect(global.fetch).toHaveBeenCalledWith(
+        'https://internal-host:5601/base/api/status',
+        expect.any(Object)
       );
-
-      await runStep(kibanaStep, stepWith);
-
-      const fetchCall = mockedFetch.mock.calls[0];
-      const fetchedUrl = fetchCall[0] as string;
-      expect(fetchedUrl).toBe('https://internal-host:5601/base/api/status');
-      expect(fetchedUrl).not.toContain('public.kibana.example.com');
+      expect((global.fetch as jest.Mock).mock.calls[0][0]).not.toContain(
+        'public.kibana.example.com'
+      );
     });
-  });
 
-  describe('use_localhost option', () => {
-    it('should use localhost URL when use_localhost is true', async () => {
-      const stepWith = {
-        method: 'GET',
-        path: '/api/status',
+    it('uses hardcoded localhost when use_localhost is true', async () => {
+      step = createStep({
+        request: { method: 'GET', path: '/api/status' },
         use_localhost: true,
-      };
-      const step = {
-        id: 'test_step',
-        type: 'kibana.request',
-        stepId: 'test_step',
-        stepType: 'kibana.request',
-        configuration: { name: 'test_step', type: 'kibana.request', with: stepWith },
-      } as unknown as KibanaGraphNode;
-
-      const kibanaStep = new KibanaActionStepImpl(
-        step,
-        mockStepExecutionRuntime,
-        mockWorkflowRuntime,
-        mockWorkflowLogger
+      });
+      await (step as any)._run();
+      expect(workflowLogger.logWarn).not.toHaveBeenCalled();
+      expect(global.fetch).toHaveBeenCalledWith(
+        'http://localhost:5601/api/status',
+        expect.any(Object)
       );
-
-      await runStep(kibanaStep, stepWith);
-
-      const fetchCall = mockedFetch.mock.calls[0];
-      const fetchedUrl = fetchCall[0] as string;
-      expect(fetchedUrl).toBe('http://localhost:5601/api/status');
     });
-  });
 
-  describe('use_server_info and use_localhost mutual exclusion', () => {
-    it('should throw an error when both use_server_info and use_localhost are true', async () => {
-      const stepWith = {
-        method: 'GET',
-        path: '/api/status',
+    it('throws when both use_server_info and use_localhost are true', async () => {
+      step = createStep({
+        request: { method: 'GET', path: '/api/status' },
         use_server_info: true,
         use_localhost: true,
-      };
-      const step = {
-        id: 'test_step',
-        type: 'kibana.request',
-        stepId: 'test_step',
-        stepType: 'kibana.request',
-        configuration: { name: 'test_step', type: 'kibana.request', with: stepWith },
-      } as unknown as KibanaGraphNode;
-
-      const kibanaStep = new KibanaActionStepImpl(
-        step,
-        mockStepExecutionRuntime,
-        mockWorkflowRuntime,
-        mockWorkflowLogger
-      );
-
-      await expect(runStep(kibanaStep, stepWith)).rejects.toThrow(
+      });
+      await expect((step as any)._run()).rejects.toThrow(
         'Cannot set both use_server_info and use_localhost'
       );
-      expect(mockedFetch).not.toHaveBeenCalled();
+      expect(global.fetch).not.toHaveBeenCalled();
     });
-  });
 
-  it('should reject invalid HTTP method without calling fetch', async () => {
-    const stepWith = {
-      method: 'POSTs',
-      path: '/api/status',
-    };
-    const step = {
-      id: 'test_step',
-      type: 'kibana.request',
-      stepId: 'test_step',
-      stepType: 'kibana.request',
-      configuration: { name: 'test_step', type: 'kibana.request', with: stepWith },
-    } as unknown as KibanaGraphNode;
-
-    const kibanaStep = new KibanaActionStepImpl(
-      step,
-      mockStepExecutionRuntime,
-      mockWorkflowRuntime,
-      mockWorkflowLogger
-    );
-
-    const result = await runStep(kibanaStep, stepWith);
-
-    expect(result.error).toBeDefined();
-    expect(result.error!.message).toContain('Invalid HTTP method "POSTs"');
-    expect(mockedFetch).not.toHaveBeenCalled();
-  });
-
-  describe('debug option', () => {
-    it('should include _debug with fullUrl in output when debug is true', async () => {
-      const stepWith = {
-        method: 'POST',
-        path: '/api/cases',
-        body: { title: 'Test' },
+    it('includes _debug with fullUrl when debug is true', async () => {
+      step = createStep({
+        request: { method: 'POST', path: '/api/cases', body: { title: 'Test' } },
         debug: true,
-      };
-      const step = {
-        id: 'test_step',
-        type: 'kibana.request',
-        stepId: 'test_step',
-        stepType: 'kibana.request',
-        configuration: { name: 'test_step', type: 'kibana.request', with: stepWith },
-      } as unknown as KibanaGraphNode;
-
-      const kibanaStep = new KibanaActionStepImpl(
-        step,
-        mockStepExecutionRuntime,
-        mockWorkflowRuntime,
-        mockWorkflowLogger
-      );
-
-      const result = await runStep(kibanaStep, stepWith);
-      const output = result.output as Record<string, any>;
-
-      expect(output._debug).toBeDefined();
-      expect(output._debug.fullUrl).toBe('https://localhost:5601/api/cases');
-      expect(output._debug.method).toBe('POST');
-    });
-
-    it('should not include _debug when debug is false or absent', async () => {
-      const stepWith = {
-        method: 'GET',
-        path: '/api/status',
-      };
-      const step = {
-        id: 'test_step',
-        type: 'kibana.request',
-        stepId: 'test_step',
-        stepType: 'kibana.request',
-        configuration: { name: 'test_step', type: 'kibana.request', with: stepWith },
-      } as unknown as KibanaGraphNode;
-
-      const kibanaStep = new KibanaActionStepImpl(
-        step,
-        mockStepExecutionRuntime,
-        mockWorkflowRuntime,
-        mockWorkflowLogger
-      );
-
-      const result = await runStep(kibanaStep, stepWith);
-      const output = result.output as Record<string, any>;
-
-      expect(output._debug).toBeUndefined();
-    });
-
-    it('should include _debug in error details when debug is true and request fails', async () => {
-      mockedFetch.mockResolvedValue(createMockResponse({}, 500));
-
-      const stepWith = {
+      });
+      const result = await (step as any)._run();
+      expect(result.output._debug).toEqual({
+        fullUrl: 'https://localhost:5601/api/cases',
         method: 'POST',
-        path: '/api/bad-endpoint',
-        debug: true,
-      };
-      const step = {
-        id: 'test_step',
-        type: 'kibana.request',
-        stepId: 'test_step',
-        stepType: 'kibana.request',
-        configuration: { name: 'test_step', type: 'kibana.request', with: stepWith },
-      } as unknown as KibanaGraphNode;
+      });
+    });
 
-      const kibanaStep = new KibanaActionStepImpl(
-        step,
-        mockStepExecutionRuntime,
-        mockWorkflowRuntime,
-        mockWorkflowLogger
+    it('does not include _debug when debug is absent', async () => {
+      step = createStep({ request: { method: 'GET', path: '/api/status' } });
+      const result = await (step as any)._run();
+      expect(result.output._debug).toBeUndefined();
+    });
+
+    it('includes _debug.kibanaUrl in error details when debug is true and the request fails', async () => {
+      (global.fetch as jest.Mock).mockResolvedValue(
+        new Response('Internal Server Error', { status: 500 })
       );
-
-      const result = await runStep(kibanaStep, stepWith);
-
+      step = createStep({
+        request: { method: 'POST', path: '/api/bad-endpoint' },
+        debug: true,
+      });
+      const result = await (step as any)._run();
       expect(result.error).toBeDefined();
-      const details = result.error!.details as Record<string, any>;
-      expect(details._debug).toBeDefined();
-      expect(details._debug.kibanaUrl).toBe('https://localhost:5601');
+      expect(result.error.details._debug.kibanaUrl).toBe('https://localhost:5601');
     });
 
-    it('should include fullUrl with query params in _debug output', async () => {
-      const stepWith = {
-        method: 'GET',
-        path: '/api/cases',
-        query: { page: '1', perPage: '10' },
+    it('includes query params in _debug.fullUrl', async () => {
+      step = createStep({
+        request: { method: 'GET', path: '/api/cases', query: { page: '1', perPage: '10' } },
         debug: true,
-      };
-      const step = {
-        id: 'test_step',
-        type: 'kibana.request',
-        stepId: 'test_step',
-        stepType: 'kibana.request',
-        configuration: { name: 'test_step', type: 'kibana.request', with: stepWith },
-      } as unknown as KibanaGraphNode;
-
-      const kibanaStep = new KibanaActionStepImpl(
-        step,
-        mockStepExecutionRuntime,
-        mockWorkflowRuntime,
-        mockWorkflowLogger
+      });
+      const result = await (step as any)._run();
+      expect(result.output._debug.fullUrl).toBe(
+        'https://localhost:5601/api/cases?page=1&perPage=10'
       );
-
-      const result = await runStep(kibanaStep, stepWith);
-
-      const output = result.output as Record<string, any>;
-      expect(output._debug.fullUrl).toBe('https://localhost:5601/api/cases?page=1&perPage=10');
     });
-  });
 
-  describe('meta params not forwarded to HTTP request', () => {
-    it('should not include use_server_info, use_localhost, or debug in request body', async () => {
-      const stepWith = {
-        title: 'Test Case',
-        description: 'Test Description',
-        owner: 'securitySolution',
+    it('does not forward use_server_info, use_localhost, or debug in the request body', async () => {
+      step = createStep({
+        request: {
+          method: 'POST',
+          path: '/api/cases',
+          body: { title: 'Test Case', description: 'Test Description', owner: 'securitySolution' },
+        },
         use_server_info: false,
         use_localhost: false,
         debug: true,
-      };
-      const step = {
-        id: 'test_step',
-        type: 'kibana.createCase',
-        stepId: 'test_step',
-        stepType: 'kibana.createCase',
-        configuration: { name: 'test_step', type: 'kibana.createCase', with: stepWith },
-      } as unknown as KibanaGraphNode;
+      });
+      await (step as any)._run();
 
-      const kibanaStep = new KibanaActionStepImpl(
-        step,
-        mockStepExecutionRuntime,
-        mockWorkflowRuntime,
-        mockWorkflowLogger
-      );
-
-      await runStep(kibanaStep, stepWith);
-
-      const fetchCall = mockedFetch.mock.calls[0];
-      const fetchOptions = fetchCall[1] as RequestInit;
+      const fetchOptions = (global.fetch as jest.Mock).mock.calls[0][1] as RequestInit;
       const requestBody = fetchOptions.body ? JSON.parse(fetchOptions.body as string) : {};
-
       expect(requestBody.use_server_info).toBeUndefined();
       expect(requestBody.use_localhost).toBeUndefined();
       expect(requestBody.debug).toBeUndefined();
       expect(requestBody.title).toBe('Test Case');
     });
-  });
 
-  describe('combined fetcher options', () => {
-    it('should handle multiple fetcher options together', async () => {
+    it('forwards authentication, origin, and workflow execution headers on the outbound request', async () => {
+      (runtime as any).workflowExecution = { id: 'workflow-run-helper' };
+      step = createStep({ request: { method: 'GET', path: '/api/status' } });
+      await (step as any)._run();
+      const headers = (global.fetch as jest.Mock).mock.calls[0][1].headers as Record<
+        string,
+        string
+      >;
+      expect(headers.Authorization).toBe('ApiKey test-key');
+      expect(headers['kbn-xsrf']).toBe('true');
+      expect(headers[X_ELASTIC_INTERNAL_ORIGIN_REQUEST]).toBe('Kibana');
+      expect(headers[EVENT_CHAIN_EMITTER_EXECUTION_ID_HEADER]).toBe('workflow-run-helper');
+    });
+
+    it('always sends x-kbn-alerting-clone-api-key: true, even if the step tries to set it', async () => {
+      step = createStep({
+        request: {
+          method: 'POST',
+          path: '/api/detection_engine/rules',
+          body: { name: 'r' },
+          headers: { 'x-kbn-alerting-clone-api-key': 'false' },
+        },
+      });
+      await (step as any)._run();
+      const headers = new Headers((global.fetch as jest.Mock).mock.calls[0][1].headers);
+      expect(headers.get('authorization')).toBe('ApiKey test-key');
+      expect(headers.get('x-kbn-alerting-clone-api-key')).toBe('true');
+    });
+
+    it('sends form_data as multipart FormData', async () => {
+      step = createStep({
+        path: '/api/saved_objects/_import',
+        form_data: { file: { content: 'hello', filename: 'a.ndjson' } },
+      });
+      await (step as any)._run();
+      const fetchOptions = (global.fetch as jest.Mock).mock.calls[0][1] as RequestInit;
+      expect(fetchOptions.body).toBeInstanceOf(FormData);
+      expect(fetchOptions.method).toBe('POST');
+    });
+
+    it('preserves binary multipart content and its MIME type', async () => {
+      const content = Buffer.from([0x89, 0x50, 0x4e, 0x47, 0xff, 0xfe]);
+      const input = new WorkflowTemplatingEngine().render(
+        {
+          path: '/api/cases/case-id/files',
+          form_data: {
+            file: {
+              content: '${{ screenshot | base64_decode_bytes }}',
+              filename: 'screenshot.png',
+              content_type: 'image/png',
+            },
+          },
+        },
+        { screenshot: content.toString('base64') }
+      );
+      step = createStep(input);
+      await (step as any)._run();
+
+      const formData = (global.fetch as jest.Mock).mock.calls[0][1].body as FormData;
+      const file = formData.get('file') as Blob;
+      expect(file.type).toBe('image/png');
+      expect(Buffer.from(await file.arrayBuffer())).toEqual(content);
+    });
+
+    it('returns empty output with and without debug details for 204 responses', async () => {
+      (global.fetch as jest.Mock).mockResolvedValue({
+        ok: true,
+        status: 204,
+        headers: { get: () => null },
+        body: null,
+      });
+      const withoutDebugStep = createStep({
+        request: { method: 'DELETE', path: '/api/cases/1' },
+      });
+      expect((await (withoutDebugStep as any)._run()).output).toEqual({});
+
+      const withDebugStep = createStep({
+        request: { method: 'DELETE', path: '/api/cases/1' },
+        debug: true,
+      });
+      const result = await (withDebugStep as any)._run();
+      expect(result.error).toBeUndefined();
+      expect(result.output).toEqual({
+        _debug: { fullUrl: 'https://localhost:5601/api/cases/1', method: 'DELETE' },
+      });
+    });
+
+    it.each([
+      ['application/json', '{"id":"case-1","title":"Test"}', { id: 'case-1', title: 'Test' }],
+      ['text/plain', 'Hello plain text', 'Hello plain text'],
+    ])(
+      'parses %s responses without changing their body shape',
+      async (contentType, body, expected) => {
+        (global.fetch as jest.Mock).mockResolvedValue(streamResponse(body, { contentType }));
+        const responseStep = createStep({ request: { method: 'GET', path: '/api/response' } });
+        const result = await (responseStep as any)._run();
+        expect(result.error).toBeUndefined();
+        expect(result.output).toEqual(expected);
+        expect(Buffer.isBuffer(result.output)).toBe(false);
+      }
+    );
+
+    it.each([
+      'image/png',
+      'application/pdf',
+      'application/octet-stream',
+      'image/png; charset=binary',
+      'application/x-custom-format',
+      null,
+    ])('returns exact bytes for binary response content type %s', async (contentType) => {
+      const bytes = new Uint8Array([0x89, 0x50, 0x4e, 0x47, 0xff, 0xfe]);
+      (global.fetch as jest.Mock).mockResolvedValue(streamResponse(bytes, { contentType }));
+      const binaryResponseStep = createStep({ request: { method: 'GET', path: '/api/export' } });
+      const result = await (binaryResponseStep as any)._run();
+      expect(result.error).toBeUndefined();
+      expect(Buffer.isBuffer(result.output)).toBe(true);
+      expect(result.output).toEqual(Buffer.from(bytes));
+    });
+
+    it.each(['application/json', 'image/png'])(
+      'enforces max-step-size and cancels oversized %s responses',
+      async (contentType) => {
+        const cancel = jest.fn();
+        (global.fetch as jest.Mock).mockResolvedValue(
+          streamResponse(new Uint8Array(2000), { contentType, cancel })
+        );
+        const oversizedResponseStep = createStep(
+          { request: { method: 'GET', path: '/api/large' } },
+          'kibana.request',
+          100
+        );
+        const result = await (oversizedResponseStep as any)._run();
+        expect(result.error.type).toBe('StepSizeLimitExceeded');
+        expect(cancel).toHaveBeenCalled();
+      }
+    );
+
+    it('truncates oversized error response bodies', async () => {
+      (global.fetch as jest.Mock).mockResolvedValue(
+        streamResponse('E'.repeat(2 * 1024 * 1024), { status: 500 })
+      );
+      step = createStep({ request: { method: 'GET', path: '/api/broken' } });
+      const result = await (step as any)._run();
+      expect(result.error.message.length).toBeLessThan(1.5 * 1024 * 1024);
+      expect(result.error.message).toContain('... [truncated]');
+    });
+
+    it('handles multiple fetcher options together', async () => {
       const { Agent } = await import('undici');
       const MockedAgent = Agent as jest.MockedClass<typeof Agent>;
       MockedAgent.mockClear();
 
-      const stepWith = {
-        title: 'Test',
+      step = createStep({
+        request: { method: 'GET', path: '/api/test' },
         fetcher: {
           skip_ssl_verification: true,
           keep_alive: true,
           max_redirects: 5,
           follow_redirects: false,
         },
-      };
-      const step = {
-        id: 'test_step',
-        type: 'kibana.createCase',
-        stepId: 'test_step',
-        stepType: 'kibana.createCase',
-        configuration: { name: 'test_step', type: 'kibana.createCase', with: stepWith },
-      } as unknown as KibanaGraphNode;
+      });
+      await (step as any)._run();
 
-      const kibanaStep = new KibanaActionStepImpl(
-        step,
-        mockStepExecutionRuntime,
-        mockWorkflowRuntime,
-        mockWorkflowLogger
-      );
-
-      await runStep(kibanaStep, stepWith);
-
-      // Verify Agent was created with all options
       expect(MockedAgent).toHaveBeenCalledWith(
         expect.objectContaining({
           connect: expect.objectContaining({
@@ -873,497 +923,100 @@ describe('KibanaActionStepImpl - Fetcher Configuration', () => {
           maxRedirections: 5,
         })
       );
-
-      // Verify fetch options
-      const fetchCall = mockedFetch.mock.calls[0];
-      const fetchOptions = fetchCall[1] as RequestInit;
-
+      const fetchOptions = (global.fetch as jest.Mock).mock.calls[0][1] as RequestInit;
       expect(fetchOptions.redirect).toBe('manual');
     });
   });
 
-  describe('response size limit enforcement (Layer 1)', () => {
-    it('should abort fetch mid-stream when body exceeds max-step-size', async () => {
-      const largeBody = JSON.stringify({ data: 'x'.repeat(500) });
-      const cancelFn = jest.fn();
-      mockedFetch.mockResolvedValue({
-        ok: true,
-        status: 200,
-        headers: new Headers({ 'content-type': 'application/json' }),
-        body: {
-          getReader: () => {
-            let consumed = false;
-            return {
-              read: async () => {
-                if (consumed) return { done: true, value: undefined };
-                consumed = true;
-                return { done: false, value: new TextEncoder().encode(largeBody) };
-              },
-              releaseLock: () => {},
-              cancel: cancelFn,
-            };
-          },
+  describe('other kibana.* step types', () => {
+    it('uses legacy fetch and applies YAML fetcher when the flag is off', async () => {
+      mockGetBooleanValue.mockResolvedValue(false);
+      step = createStep(
+        {
+          title: 'Test Case',
+          description: 'Test Description',
+          owner: 'securitySolution',
+          fetcher: { follow_redirects: false },
         },
-      } as any);
-
-      const stepWith = {
-        request: { method: 'GET', path: '/api/status' },
-      };
-      const step = {
-        id: 'size_limit_step',
-        type: 'kibana.request',
-        stepId: 'size_limit_step',
-        stepType: 'kibana.request',
-        configuration: {
-          name: 'size_limit_step',
-          type: 'kibana.request',
-          'max-step-size': '100b',
-          with: stepWith,
-        },
-      } as unknown as KibanaGraphNode;
-
-      const kibanaStep = new KibanaActionStepImpl(
-        step,
-        mockStepExecutionRuntime,
-        mockWorkflowRuntime,
-        mockWorkflowLogger
+        'kibana.createCase'
       );
-
-      const result = await runStep(kibanaStep, stepWith);
-
-      expect(result.error).toBeDefined();
-      expect(result.error!.type).toBe('StepSizeLimitExceeded');
-      expect(cancelFn).toHaveBeenCalled();
+      await (step as any)._run();
+      expect(contextManager.callKibanaApi).not.toHaveBeenCalled();
+      expect(workflowLogger.logWarn).not.toHaveBeenCalled();
+      expect(global.fetch).toHaveBeenCalledWith(
+        'https://localhost:5601/api/cases',
+        expect.objectContaining({ method: 'POST', redirect: 'manual' })
+      );
+      expect(mockGetBooleanValue).toHaveBeenCalled();
     });
 
-    it('should truncate large error response bodies', async () => {
-      const largeErrorBody = 'E'.repeat(2 * 1024 * 1024); // 2MB error
-      mockedFetch.mockResolvedValue({
-        ok: false,
-        status: 500,
-        body: {
-          getReader: () => {
-            let consumed = false;
-            return {
-              read: async () => {
-                if (consumed) return { done: true, value: undefined };
-                consumed = true;
-                return { done: false, value: new TextEncoder().encode(largeErrorBody) };
-              },
-              releaseLock: () => {},
-              cancel: jest.fn(),
-            };
-          },
-        },
-      } as any);
-
-      const stepWith = {
-        request: { method: 'GET', path: '/api/broken' },
-      };
-      const step = {
-        id: 'error_truncation_step',
-        type: 'kibana.request',
-        stepId: 'error_truncation_step',
-        stepType: 'kibana.request',
-        configuration: { name: 'error_truncation_step', type: 'kibana.request', with: stepWith },
-      } as unknown as KibanaGraphNode;
-
-      const kibanaStep = new KibanaActionStepImpl(
-        step,
-        mockStepExecutionRuntime,
-        mockWorkflowRuntime,
-        mockWorkflowLogger
-      );
-
-      const result = await runStep(kibanaStep, stepWith);
-
-      expect(result.error).toBeDefined();
-      expect(result.error!.message.length).toBeLessThan(1.5 * 1024 * 1024);
-      expect(result.error!.message).toContain('... [truncated]');
-    });
-  });
-
-  describe('empty response body handling (204 No Content)', () => {
-    it('should succeed with empty output when response is 204 No Content', async () => {
-      mockedFetch.mockResolvedValue({
-        ok: true,
-        status: 204,
-      } as any);
-
-      const stepWith = {
-        request: { method: 'DELETE', path: '/api/alerting/rule/some-rule-id' },
-      };
-      const step = {
-        id: 'delete_rule',
-        type: 'kibana.request',
-        stepId: 'delete_rule',
-        stepType: 'kibana.request',
-        configuration: { name: 'delete_rule', type: 'kibana.request', with: stepWith },
-      } as unknown as KibanaGraphNode;
-
-      const kibanaStep = new KibanaActionStepImpl(
-        step,
-        mockStepExecutionRuntime,
-        mockWorkflowRuntime,
-        mockWorkflowLogger
-      );
-
-      const result = await runStep(kibanaStep, stepWith);
-
-      expect(result.error).toBeUndefined();
-      expect(result.output).toEqual({});
+    it('uses Core self-client when the flag is on', async () => {
+      mockGetBooleanValue.mockResolvedValue(true);
+      step = createStep({ request: { method: 'GET', path: '/api/status' } }, 'kibana.getCase');
+      await (step as any)._run();
+      expect(contextManager.callKibanaApi).toHaveBeenCalled();
+      expect(global.fetch).not.toHaveBeenCalled();
+      expect(mockGetBooleanValue).toHaveBeenCalled();
     });
 
-    it('should include _debug info for empty responses when debug is true', async () => {
-      mockedFetch.mockResolvedValue({
-        ok: true,
-        status: 204,
-      } as any);
-
-      const stepWith = {
-        request: {
-          method: 'DELETE',
-          path: '/api/alerting/rule/some-rule-id',
-        },
-        debug: true,
-      };
-      const step = {
-        id: 'delete_rule',
-        type: 'kibana.request',
-        stepId: 'delete_rule',
-        stepType: 'kibana.request',
-        configuration: { name: 'delete_rule', type: 'kibana.request', with: stepWith },
-      } as unknown as KibanaGraphNode;
-
-      const kibanaStep = new KibanaActionStepImpl(
-        step,
-        mockStepExecutionRuntime,
-        mockWorkflowRuntime,
-        mockWorkflowLogger
+    it('builds generated connector requests through the self-client adapter', async () => {
+      mockGetBooleanValue.mockResolvedValue(true);
+      step = createStep(
+        { title: 'Test Case', description: 'Test Description', owner: 'securitySolution' },
+        'kibana.createCase'
       );
-
-      const result = await runStep(kibanaStep, stepWith);
-
-      expect(result.error).toBeUndefined();
-      const output = result.output as Record<string, any>;
-      expect(output._debug).toBeDefined();
-      expect(output._debug.method).toBe('DELETE');
-    });
-
-    it('should still parse JSON normally when response body is non-empty', async () => {
-      const jsonBody = JSON.stringify({ id: 'case-1', title: 'Test' });
-      mockedFetch.mockResolvedValue({
-        ok: true,
-        status: 200,
-        headers: new Headers({ 'content-type': 'application/json' }),
-        body: {
-          getReader: () => {
-            let consumed = false;
-            return {
-              read: async () => {
-                if (consumed) return { done: true, value: undefined };
-                consumed = true;
-                return { done: false, value: new TextEncoder().encode(jsonBody) };
-              },
-              releaseLock: () => {},
-              cancel: jest.fn(),
-            };
-          },
-        },
-      } as any);
-
-      const stepWith = {
-        request: {
+      await (step as any)._run();
+      expect(contextManager.callKibanaApi).toHaveBeenCalledWith(
+        expect.objectContaining({
           method: 'POST',
           path: '/api/cases',
-          body: { title: 'Test' },
+          body: expect.objectContaining({
+            title: 'Test Case',
+            description: 'Test Description',
+            owner: 'securitySolution',
+          }),
+        })
+      );
+      expect(global.fetch).not.toHaveBeenCalled();
+    });
+
+    it('does not forward use_server_info, use_localhost, or debug on generated connectors', async () => {
+      mockGetBooleanValue.mockResolvedValue(true);
+      step = createStep(
+        {
+          title: 'Test Case',
+          description: 'Test Description',
+          owner: 'securitySolution',
+          use_server_info: false,
+          use_localhost: false,
+          debug: true,
         },
-      };
-      const step = {
-        id: 'create_case',
-        type: 'kibana.request',
-        stepId: 'create_case',
-        stepType: 'kibana.request',
-        configuration: { name: 'create_case', type: 'kibana.request', with: stepWith },
-      } as unknown as KibanaGraphNode;
-
-      const kibanaStep = new KibanaActionStepImpl(
-        step,
-        mockStepExecutionRuntime,
-        mockWorkflowRuntime,
-        mockWorkflowLogger
+        'kibana.createCase'
       );
-
-      const result = await runStep(kibanaStep, stepWith);
-
-      expect(result.error).toBeUndefined();
-      expect(result.output).toEqual({ id: 'case-1', title: 'Test' });
-    });
-  });
-
-  describe('binary response handling', () => {
-    const pngBytes = new Uint8Array([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a, 0xff, 0xfe]);
-
-    const createKibanaRequestStep = (stepWith: Record<string, unknown>) => {
-      const step = {
-        id: 'binary_step',
-        type: 'kibana.request',
-        stepId: 'binary_step',
-        stepType: 'kibana.request',
-        configuration: { name: 'binary_step', type: 'kibana.request', with: stepWith },
-      } as unknown as KibanaGraphNode;
-      return new KibanaActionStepImpl(
-        step,
-        mockStepExecutionRuntime,
-        mockWorkflowRuntime,
-        mockWorkflowLogger
-      );
-    };
-
-    it('should return a Buffer for image/png responses', async () => {
-      mockedFetch.mockResolvedValue(createMockBinaryResponse(pngBytes, 'image/png'));
-
-      const kibanaStep = createKibanaRequestStep({
-        request: { method: 'GET', path: '/api/reporting/jobs/download/abc' },
-      });
-      const result = await runStep(kibanaStep, {
-        request: { method: 'GET', path: '/api/reporting/jobs/download/abc' },
-      });
-
-      expect(result.error).toBeUndefined();
-      expect(Buffer.isBuffer(result.output)).toBe(true);
-      expect(result.output).toEqual(Buffer.from(pngBytes));
+      await (step as any)._run();
+      const call = contextManager.callKibanaApi.mock.calls[0][0];
+      expect(call.body.use_server_info).toBeUndefined();
+      expect(call.body.use_localhost).toBeUndefined();
+      expect(call.body.debug).toBeUndefined();
+      expect(call.body.title).toBe('Test Case');
     });
 
-    it('should preserve exact bytes for binary content (no UTF-8 corruption)', async () => {
-      mockedFetch.mockResolvedValue(createMockBinaryResponse(pngBytes, 'image/png'));
-
-      const kibanaStep = createKibanaRequestStep({
-        request: { method: 'GET', path: '/api/reporting/jobs/download/abc' },
-      });
-      const result = await runStep(kibanaStep, {
-        request: { method: 'GET', path: '/api/reporting/jobs/download/abc' },
-      });
-
-      const outputBuffer = result.output as Buffer;
-      expect(outputBuffer[0]).toBe(0x89);
-      expect(outputBuffer[3]).toBe(0x47);
-      expect(outputBuffer[8]).toBe(0xff);
-      expect(outputBuffer[9]).toBe(0xfe);
-      expect(outputBuffer.toString('base64')).toBe(Buffer.from(pngBytes).toString('base64'));
-    });
-
-    it('should return a Buffer for application/pdf responses', async () => {
-      const pdfBytes = new Uint8Array([0x25, 0x50, 0x44, 0x46, 0x2d, 0xff]);
-      mockedFetch.mockResolvedValue(createMockBinaryResponse(pdfBytes, 'application/pdf'));
-
-      const kibanaStep = createKibanaRequestStep({
-        request: { method: 'GET', path: '/api/reporting/jobs/download/def' },
-      });
-      const result = await runStep(kibanaStep, {
-        request: { method: 'GET', path: '/api/reporting/jobs/download/def' },
-      });
-
-      expect(result.error).toBeUndefined();
-      expect(Buffer.isBuffer(result.output)).toBe(true);
-      expect(result.output).toEqual(Buffer.from(pdfBytes));
-    });
-
-    it('should return a Buffer for application/octet-stream responses', async () => {
-      mockedFetch.mockResolvedValue(createMockBinaryResponse(pngBytes, 'application/octet-stream'));
-
-      const kibanaStep = createKibanaRequestStep({
-        request: { method: 'GET', path: '/api/some-binary-endpoint' },
-      });
-      const result = await runStep(kibanaStep, {
-        request: { method: 'GET', path: '/api/some-binary-endpoint' },
-      });
-
-      expect(result.error).toBeUndefined();
-      expect(Buffer.isBuffer(result.output)).toBe(true);
-    });
-
-    it('should handle content-type with charset parameter', async () => {
-      mockedFetch.mockResolvedValue(
-        createMockBinaryResponse(pngBytes, 'image/png; charset=binary')
-      );
-
-      const kibanaStep = createKibanaRequestStep({
-        request: { method: 'GET', path: '/api/reporting/jobs/download/abc' },
-      });
-      const result = await runStep(kibanaStep, {
-        request: { method: 'GET', path: '/api/reporting/jobs/download/abc' },
-      });
-
-      expect(result.error).toBeUndefined();
-      expect(Buffer.isBuffer(result.output)).toBe(true);
-    });
-
-    it('should still parse JSON for application/json responses', async () => {
-      mockedFetch.mockResolvedValue(createMockResponse({ id: 'test' }));
-
-      const kibanaStep = createKibanaRequestStep({
-        request: { method: 'GET', path: '/api/cases/test' },
-      });
-      const result = await runStep(kibanaStep, {
-        request: { method: 'GET', path: '/api/cases/test' },
-      });
-
-      expect(result.error).toBeUndefined();
-      expect(Buffer.isBuffer(result.output)).toBe(false);
-      expect(result.output).toEqual({ id: 'test' });
-    });
-
-    it('should treat unknown content types as binary', async () => {
-      mockedFetch.mockResolvedValue(
-        createMockBinaryResponse(pngBytes, 'application/x-custom-format')
-      );
-
-      const kibanaStep = createKibanaRequestStep({
-        request: { method: 'GET', path: '/api/some-custom-endpoint' },
-      });
-      const result = await runStep(kibanaStep, {
-        request: { method: 'GET', path: '/api/some-custom-endpoint' },
-      });
-
-      expect(result.error).toBeUndefined();
-      expect(Buffer.isBuffer(result.output)).toBe(true);
-    });
-
-    it('should parse text/plain as text, not binary', async () => {
-      const textBody = 'Hello plain text';
-      mockedFetch.mockResolvedValue({
-        ok: true,
-        status: 200,
-        headers: new Headers({ 'content-type': 'text/plain' }),
-        body: createMockReadableStream(textBody),
-      } as any);
-
-      const kibanaStep = createKibanaRequestStep({
-        request: { method: 'GET', path: '/api/some-text-endpoint' },
-      });
-      const result = await runStep(kibanaStep, {
-        request: { method: 'GET', path: '/api/some-text-endpoint' },
-      });
-
-      expect(result.error).toBeUndefined();
-      expect(Buffer.isBuffer(result.output)).toBe(false);
-      expect(result.output).toBe('Hello plain text');
-    });
-
-    it('should return a Buffer when Content-Type header is missing', async () => {
-      mockedFetch.mockResolvedValue({
-        ok: true,
-        status: 200,
-        body: createMockBinaryStream(pngBytes),
-        headers: new Headers(),
-      } as any);
-
-      const kibanaStep = createKibanaRequestStep({
-        request: { method: 'GET', path: '/api/reporting/jobs/download/abc' },
-      });
-      const result = await runStep(kibanaStep, {
-        request: { method: 'GET', path: '/api/reporting/jobs/download/abc' },
-      });
-
-      expect(result.error).toBeUndefined();
-      expect(Buffer.isBuffer(result.output)).toBe(true);
-      expect(result.output).toEqual(Buffer.from(pngBytes));
-    });
-
-    it('should enforce size limits on binary responses', async () => {
-      const largeBytes = new Uint8Array(500);
-      largeBytes.fill(0xff);
-      mockedFetch.mockResolvedValue(createMockBinaryResponse(largeBytes, 'image/png'));
-
-      const step = {
-        id: 'binary_size_step',
-        type: 'kibana.request',
-        stepId: 'binary_size_step',
-        stepType: 'kibana.request',
-        configuration: {
-          name: 'binary_size_step',
-          type: 'kibana.request',
-          'max-step-size': '100b',
-          with: { request: { method: 'GET', path: '/api/reporting/jobs/download/big' } },
+    it('warns and ignores YAML fetcher when the flag is on', async () => {
+      mockGetBooleanValue.mockResolvedValue(true);
+      step = createStep(
+        {
+          request: { method: 'GET', path: '/api/status' },
+          fetcher: { skip_ssl_verification: true },
         },
-      } as unknown as KibanaGraphNode;
-
-      const kibanaStep = new KibanaActionStepImpl(
-        step,
-        mockStepExecutionRuntime,
-        mockWorkflowRuntime,
-        mockWorkflowLogger
+        'kibana.getCase'
       );
-
-      const result = await runStep(kibanaStep, {
-        request: { method: 'GET', path: '/api/reporting/jobs/download/big' },
-      });
-
-      expect(result.error).toBeDefined();
-      expect(result.error!.type).toBe('StepSizeLimitExceeded');
-    });
-  });
-
-  describe('JSON-body path integration', () => {
-    it('propagates x-kibana-workflow-execution-id header on the JSON-body path', async () => {
-      (mockStepExecutionRuntime as any).workflowExecution = { id: 'workflow-run-helper' };
-
-      const stepWith = {
-        request: { method: 'GET', path: '/api/status' },
-      };
-      const step = {
-        id: 'status_step',
-        type: 'kibana.request',
-        stepId: 'status_step',
-        stepType: 'kibana.request',
-        configuration: { name: 'status_step', type: 'kibana.request', with: stepWith },
-      } as unknown as KibanaGraphNode;
-
-      const kibanaStep = new KibanaActionStepImpl(
-        step,
-        mockStepExecutionRuntime,
-        mockWorkflowRuntime,
-        mockWorkflowLogger
+      await (step as any)._run();
+      expect(workflowLogger.logWarn).toHaveBeenCalledWith(
+        expect.stringContaining('fetcher'),
+        expect.objectContaining({ tags: expect.arrayContaining(['deprecated']) })
       );
-
-      await runStep(kibanaStep, stepWith);
-
-      const fetchCall = mockedFetch.mock.calls[0];
-      const fetchOptions = fetchCall[1] as RequestInit;
-      const headers = fetchOptions.headers as Record<string, string>;
-      expect(headers['x-kibana-workflow-execution-id']).toBe('workflow-run-helper');
-      expect(headers.Authorization).toBe('ApiKey test-key');
-      expect(headers['x-elastic-internal-origin']).toBe('Kibana');
-      expect(headers['kbn-xsrf']).toBe('true');
-    });
-
-    it('preserves the raw body return shape on the JSON-body path (no envelope leak)', async () => {
-      mockedFetch.mockResolvedValue(createMockResponse({ id: 'case-1', title: 'Helper Test' }));
-
-      const stepWith = {
-        request: { method: 'POST', path: '/api/cases', body: { title: 'Helper Test' } },
-      };
-      const step = {
-        id: 'create_case',
-        type: 'kibana.request',
-        stepId: 'create_case',
-        stepType: 'kibana.request',
-        configuration: { name: 'create_case', type: 'kibana.request', with: stepWith },
-      } as unknown as KibanaGraphNode;
-
-      const kibanaStep = new KibanaActionStepImpl(
-        step,
-        mockStepExecutionRuntime,
-        mockWorkflowRuntime,
-        mockWorkflowLogger
-      );
-
-      const result = await runStep(kibanaStep, stepWith);
-
-      expect(result.error).toBeUndefined();
-      // Body returned directly, not as { status, headers, body }.
-      expect(result.output).toEqual({ id: 'case-1', title: 'Helper Test' });
+      expect(contextManager.callKibanaApi).toHaveBeenCalled();
+      expect(global.fetch).not.toHaveBeenCalled();
     });
   });
 });

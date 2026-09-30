@@ -15,13 +15,12 @@ import type { ManageRuleToolDeps } from '../tools/manage_rule';
 import { ALERTING_LOG_CODES } from '../../lib/errors/error_codes';
 import { createActionPolicyManagementSkill } from './action_policy_management_skill';
 import { createRuleManagementSkill } from './rule_management_skill';
-import { SchemaTranslationError } from './schema_to_skill_docs';
 
 export type RegisterSkillsDeps = ManageRuleToolDeps & ManageActionPolicyToolDeps;
 
 /**
- * Registers Alerting v2 Agent Builder skills independently so a failure in one
- * does not block the other, and each error is labeled with `skill_id`.
+ * Registers Alerting v2 Agent Builder skills. Unexpected register failures are
+ * logged and skipped so one skill cannot block the other.
  */
 export const registerSkills = (
   agentBuilder: AgentBuilderPluginSetup,
@@ -44,22 +43,17 @@ export const registerSkills = (
     try {
       agentBuilder.skills.register(create());
       registered++;
+      logger.debug({
+        message: () => `${id} agent builder skill registered`,
+        labels: { skill_id: id },
+      });
     } catch (e) {
-      if (e instanceof SchemaTranslationError) {
-        logger.error({
-          message: 'Failed to generate agent builder skill schema docs',
-          code: ALERTING_LOG_CODES.AGENT_BUILDER_SKILL_SCHEMA_DOCS_FAILED,
-          labels: { skill_id: id },
-          error: e,
-        });
-      } else {
-        logger.error({
-          message: 'Failed to register agent builder skill',
-          code: ALERTING_LOG_CODES.AGENT_BUILDER_SKILL_REGISTER_FAILED,
-          labels: { skill_id: id },
-          error: e,
-        });
-      }
+      logger.error({
+        message: `Failed to register agent builder skill. Id: ${id}`,
+        code: ALERTING_LOG_CODES.AGENT_BUILDER_SKILL_REGISTER_FAILED,
+        labels: { skill_id: id },
+        error: e,
+      });
     }
   }
 

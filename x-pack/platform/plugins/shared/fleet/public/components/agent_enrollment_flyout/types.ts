@@ -70,6 +70,10 @@ export interface FlyOutProps extends BaseProps {
   onClose: () => void;
   defaultMode?: FlyoutMode;
   selectedAgentPolicies?: AgentPolicy[];
+  hideIncomingDataStep?: boolean;
+  onAgentPolicyCreated?: (policy: AgentPolicy) => void;
+  defaultAgentPolicyName?: string;
+  forceCreatePolicy?: boolean;
 }
 
 export interface InstructionProps extends BaseProps {
@@ -91,4 +95,8 @@ export interface InstructionProps extends BaseProps {
   fleetProxy?: EnrollmentSettingsProxy;
   downloadSource?: DownloadSource;
   downloadSourceProxy?: EnrollmentSettingsProxy;
+  hideIncomingDataStep?: boolean;
+  onAgentPolicyCreated?: (policy: AgentPolicy) => void;
+  defaultAgentPolicyName?: string;
+  forceCreatePolicy?: boolean;
 }

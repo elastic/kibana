@@ -210,15 +210,18 @@ test.describe('Discover app', { tag: '@local-stateful-classic' }, () => {
       .toBe(true);
   });
 
-  test('click Field Stats button and validate Document Stats is present', async ({ page }) => {
-    await page.testSubj.click('dscViewModeFieldStatsButton');
+  test('click Field Stats button and validate Document Stats is present', async ({
+    page,
+    pageObjects,
+  }) => {
+    await pageObjects.discover.selectFieldStatisticsView();
     await expect(page.testSubj.locator('dataVisualizerTable-loaded')).toBeVisible();
     await page.testSubj.click('dataVisualizerDetailsToggle-bytes-chevronSingleRight');
     await expect(page.testSubj.locator('dataVisualizerDocumentStatsContent')).toBeVisible();
   });
 
   test('navigate to Lens from field statistics', async ({ page, pageObjects }) => {
-    await page.testSubj.click('dscViewModeFieldStatsButton');
+    await pageObjects.discover.selectFieldStatisticsView();
     await expect(page.testSubj.locator('dataVisualizerTable-loaded')).toBeVisible();
     const viewLensButton = await pageObjects.discover.getFirstViewLensButtonFromFieldStatistics();
     await viewLensButton.click();

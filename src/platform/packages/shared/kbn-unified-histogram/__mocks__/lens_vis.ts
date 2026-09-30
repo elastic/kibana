@@ -16,6 +16,35 @@ import { LensVisService } from '../services/lens_vis_service';
 import { type QueryParams } from '../utils/external_vis_context';
 import { unifiedHistogramServicesMock } from './services';
 import { histogramESQLSuggestionMock } from './suggestions';
+
+/**
+ * Mirrors the real suggestions API behavior: the generated text-based layers
+ * carry the context query (see `getDatasourceSuggestionsForVisualizeField`).
+ */
+const withContextQuery = (suggestion: Suggestion, contextQuery: unknown): Suggestion => {
+  if (
+    !contextQuery ||
+    typeof contextQuery !== 'object' ||
+    !('esql' in contextQuery) ||
+    !suggestion.datasourceState ||
+    typeof suggestion.datasourceState !== 'object' ||
+    !('layers' in suggestion.datasourceState)
+  ) {
+    return suggestion;
+  }
+  const { layers } = suggestion.datasourceState as {
+    layers: Record<string, { query?: unknown }>;
+  };
+  return {
+    ...suggestion,
+    datasourceState: {
+      ...suggestion.datasourceState,
+      layers: Object.fromEntries(
+        Object.entries(layers).map(([id, layer]) => [id, { ...layer, query: contextQuery }])
+      ),
+    },
+  };
+};
 import type { UnifiedHistogramSuggestionContext, UnifiedHistogramVisContext } from '../types';
 
 const TIME_RANGE: TimeRange = {
@@ -70,7 +99,12 @@ export const getLensVisMock = async ({
             return allSuggestions;
           }
           return !isTransformationalESQL && dataView.isTimeBased()
-            ? [histogramESQLSuggestionMock]
+            ? [
+                withContextQuery(
+                  histogramESQLSuggestionMock,
+                  'query' in context ? context.query : undefined
+                ),
+              ]
             : [];
         }
       : lensApi.suggestions,

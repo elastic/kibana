@@ -12,6 +12,7 @@
 // rest of the workflow engine is `any`-free; this module is the chokepoint
 // where the upstream typing gaps are absorbed so they don't bleed elsewhere.
 
+import { INVALID_SPANID, INVALID_TRACEID, trace } from '@opentelemetry/api';
 import type agent from 'elastic-apm-node';
 
 type ApmAgentInternals = typeof agent & {
@@ -35,9 +36,11 @@ export function getAlertingRuleId(transaction: agent.Transaction | null): string
 }
 
 /**
- * Resolves the trace ID for a transaction. Tries the documented `ids` field
- * first, then falls back to the private `traceId` / `trace.id` shapes that
- * older builds of `elastic-apm-node` expose.
+ * Resolves the trace ID for a transaction: the documented `ids` field first,
+ * then the private `traceId` / `trace.id` shapes older builds expose. Returns
+ * `undefined` when the transaction carries no APM-shaped trace id; whether to
+ * fall back to the active OTEL span context (`getActiveOtelTraceId`) is the
+ * caller's decision, as that id may be unrelated to this transaction.
  */
 export function getTraceId(transaction: agent.Transaction): string | undefined {
   const fromIds = transaction.ids?.['trace.id'];
@@ -45,6 +48,36 @@ export function getTraceId(transaction: agent.Transaction): string | undefined {
   const t = transaction as TransactionInternals;
   if (typeof t.traceId === 'string') return t.traceId;
   if (typeof t.trace?.id === 'string') return t.trace.id;
+
+  return undefined;
+}
+
+/**
+ * Reads the trace ID from the active OTEL span context, or `undefined` when no
+ * span is active (or the context carries the all-zero invalid trace id).
+ *
+ * Exported separately because the helpers above require an `agent.Transaction`,
+ * which does not exist under EDOT-only instrumentation.
+ */
+export function getActiveOtelTraceId(): string | undefined {
+  const spanContext = trace.getActiveSpan()?.spanContext();
+  if (spanContext?.traceId && spanContext.traceId !== INVALID_TRACEID) {
+    return spanContext.traceId;
+  }
+
+  return undefined;
+}
+
+/**
+ * Reads the span ID from the active OTEL span context, or `undefined` when no
+ * span is active (or the context carries the all-zero invalid span id). Used
+ * as the `entryTransactionId` fallback under EDOT-only instrumentation.
+ */
+export function getActiveOtelSpanId(): string | undefined {
+  const spanContext = trace.getActiveSpan()?.spanContext();
+  if (spanContext?.spanId && spanContext.spanId !== INVALID_SPANID) {
+    return spanContext.spanId;
+  }
   return undefined;
 }
 

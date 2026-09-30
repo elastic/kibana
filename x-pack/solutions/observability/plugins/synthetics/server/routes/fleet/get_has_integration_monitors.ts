@@ -16,6 +16,7 @@ export const getHasIntegrationMonitorsRoute: SyntheticsRestApiRouteFactory = () 
       kuery:
         'ingest-package-policies.package.name:synthetics and not ingest-package-policies.is_managed:true',
       perPage: 1,
+      fields: ['name'],
     });
     return {
       hasIntegrationMonitors: monitors.total > 0,

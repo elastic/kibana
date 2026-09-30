@@ -11,6 +11,7 @@ import { getExpressionRendererProps } from './get_expression_renderer_props';
 import type { Vis } from '../vis';
 import type { VisParams } from '../types';
 import { PersistedState } from '../persisted_state';
+import type { ExecutionContextSearch } from '@kbn/es-query';
 
 jest.mock('./to_ast', () => ({
   toExpressionAst: jest.fn().mockResolvedValue('mock expression'),
@@ -190,6 +191,41 @@ describe('getExpressionRendererProps', () => {
       expect(result.params?.searchContext).toEqual(
         expect.objectContaining({
           isApproximate: false,
+        })
+      );
+    });
+  });
+
+  describe('esqlVariables handling', () => {
+    it('should include esqlVariables in search context when provided', async () => {
+      const vis = createMockVis();
+      const esqlVariables = [
+        { key: 'fizzbuzz', value: 'ios', type: 'values' },
+      ] as ExecutionContextSearch['esqlVariables'];
+      const result = await getExpressionRendererProps({
+        unifiedSearch: {
+          query: { query: '', language: 'kuery' },
+          filters: [],
+        },
+        isApproximate: false,
+        esqlVariables,
+        timeRange: { from: 'now-15m', to: 'now' },
+        disableTriggers: false,
+        settings: {
+          syncColors: true,
+          syncCursor: true,
+          syncTooltips: false,
+        },
+        vis,
+        onRender: jest.fn(),
+        onEvent: jest.fn(),
+        onData: jest.fn(),
+      });
+
+      expect(result.params).toBeDefined();
+      expect(result.params?.searchContext).toEqual(
+        expect.objectContaining({
+          esqlVariables,
         })
       );
     });

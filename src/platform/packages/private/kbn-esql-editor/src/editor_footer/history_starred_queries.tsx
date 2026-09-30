@@ -160,7 +160,7 @@ export const getTableColumns = (
             );
         }
       },
-      width: isOnReducedSpaceLayout ? 'auto' : '40px',
+      width: isOnReducedSpaceLayout ? 'auto' : '55px',
       css: { height: '100%' }, // Vertically align icon
     },
     {

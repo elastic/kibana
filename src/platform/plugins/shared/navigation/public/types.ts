@@ -15,6 +15,7 @@ import type {
   NavigationTreeDefinition,
   SolutionId,
   SolutionNavigationDefinition,
+  ProjectNavigationLinks,
 } from '@kbn/core-chrome-browser';
 import type { CloudSetup, CloudStart } from '@kbn/cloud-plugin/public';
 import type { SpacesPluginSetup, SpacesPluginStart } from '@kbn/spaces-plugin/public';
@@ -68,6 +69,12 @@ export interface NavigationPublicStart {
     id: SolutionId,
     navigationTree$: Observable<NavigationTreeDefinition<LinkId>>
   ) => void;
+  /**
+   * Attach hover lists to an existing project-nav deep link.
+   * Plugins provide data; chrome renders it. One registration per target.
+   * Primary and footer hover only; not attached in More.
+   */
+  registerNavigationLinks: (links: ProjectNavigationLinks) => void;
 }
 
 export interface NavigationPublicSetupDependencies {

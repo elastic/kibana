@@ -103,6 +103,13 @@ export const generateLeadsTool = (
       'Lead generation is asynchronous — this tool starts the job and returns immediately; use list_leads to check for new results after it completes.',
     schema,
     tags: ['security', 'entity-analytics', 'leads'],
+    annotations: {
+      title: 'Generate Leads',
+      readOnlyHint: false,
+      destructiveHint: false,
+      idempotentHint: false,
+      openWorldHint: false,
+    },
     availability: {
       cacheMode: 'space',
       handler: ({ request }) =>
@@ -124,7 +131,7 @@ export const generateLeadsTool = (
       try {
         const [, { security }] = await core.getStartServices();
         const privileges = await getUserLeadPrivileges(request, security, spaceId);
-        if (!privileges.adhoc.has_write_permissions) {
+        if (!privileges.has_write_permissions) {
           const errorMessage = 'You do not have permission to generate leads in this space.';
           telemetryTracker.recordFailure(errorMessage);
           return {
@@ -213,6 +220,10 @@ export const generateLeadsTool = (
 
         const currentEsClient = esClient.asCurrentUser;
         const crudClient = startPlugins.entityStore.createCRUDClient(currentEsClient, spaceId);
+        const relationshipsClient = startPlugins.entityStore.createRelationshipsClient(
+          currentEsClient,
+          spaceId
+        );
         const riskScoreDataClient = new RiskScoreDataClient({
           logger,
           kibanaVersion: RISK_SCORE_CLIENT_KIBANA_VERSION,
@@ -248,6 +259,7 @@ export const generateLeadsTool = (
             ml,
             request,
             soClient: savedObjectsClient,
+            relationshipsClient,
           },
         });
 

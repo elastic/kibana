@@ -15,6 +15,7 @@ import type {
   VisualizationContextHelper,
   LensInternalApi,
 } from '@kbn/lens-common';
+import { getRepresentativeQuery, EMPTY_KQL_QUERY } from '@kbn/lens-common';
 import type { LensApi } from '@kbn/lens-common-2';
 import {
   filterAndSortUserMessages,
@@ -104,7 +105,7 @@ export function buildUserMessagesHelpers(
   addUserMessages: (messages: UserMessage[]) => void;
   updateWarnings: () => void;
   updateMessages: (messages: UserMessage[]) => void;
-  resetMessages: () => void;
+  discardRuntimeMessages: () => void;
   updateBlockingErrors: (blockingMessages: UserMessage[] | Error) => void;
   updateValidationErrors: (messages: UserMessage[]) => void;
 } {
@@ -118,9 +119,8 @@ export function buildUserMessagesHelpers(
     }
   };
 
-  const resetMessages = () => {
+  const discardRuntimeMessages = () => {
     runtimeUserMessages = {};
-    internalApi.resetAllMessages();
   };
 
   const getUserMessages: UserMessagesGetter = (locationId, filters) => {
@@ -171,9 +171,10 @@ export function buildUserMessagesHelpers(
           },
         },
         datasourceMap,
-        dataViewObject.indexPatterns
+        dataViewObject.indexPatterns,
+        activeData
       ),
-      query: activeAttributes.state.query,
+      query: getRepresentativeQuery(activeAttributes) ?? EMPTY_KQL_QUERY,
       filters: mergedSearchContext.filters ?? [],
       dateRange: {
         fromDate: mergedSearchContext.timeRange?.from ?? '',
@@ -235,7 +236,7 @@ export function buildUserMessagesHelpers(
 
   return {
     addUserMessages,
-    resetMessages,
+    discardRuntimeMessages,
     getUserMessages,
     /**
      * Here pass all the messages that comes directly from the Lens validation/info system

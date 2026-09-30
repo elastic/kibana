@@ -8,13 +8,31 @@
  */
 
 import { parse } from 'yaml';
-import { SIGNIFICANT_EVENTS_DISCOVERY_WORKFLOW } from '.';
+import {
+  SIGNIFICANT_EVENTS_DISCOVERY_WORKFLOW,
+  SIGNIFICANT_EVENTS_INVESTIGATION_COMPLETED_WORKFLOW,
+} from '.';
+import { SIGNIFICANT_EVENTS_KI_QUERIES_GENERATION_WORKFLOW } from './knowledge_indicators';
+import { createWorkflowLiquidEngine } from '../../../common/utils';
 
 interface WorkflowStep {
   name: string;
+  type?: string;
   condition?: string;
+  'product-solution'?: string;
+  'product-feature'?: string;
+  'on-failure'?: { continue?: boolean };
   steps?: WorkflowStep[];
-  with?: Record<string, string>;
+  with?: {
+    path?: string;
+    body?: Record<string, unknown> & { runId?: string };
+    subject_type?: string;
+    subject_id?: string;
+    trigger_type?: string;
+    message?: string;
+    stream_names?: string;
+    written_rule_uuids?: string;
+  };
   foreach?: string;
 }
 
@@ -37,10 +55,84 @@ const requireStep = (workflow: ParsedWorkflow, name: string): WorkflowStep => {
 };
 
 const discovery = parse(SIGNIFICANT_EVENTS_DISCOVERY_WORKFLOW.yaml) as ParsedWorkflow;
+const queriesGeneration = parse(
+  SIGNIFICANT_EVENTS_KI_QUERIES_GENERATION_WORKFLOW.yaml
+) as ParsedWorkflow;
+const investigationCompleted = parse(SIGNIFICANT_EVENTS_INVESTIGATION_COMPLETED_WORKFLOW.yaml) as
+  | ParsedWorkflow & {
+      triggers: Array<{ type: string; on?: { condition?: string } }>;
+    };
 
 describe('significant events persistence workflow contracts', () => {
   it('bumps managed workflow versions for the bulk persistence contract', () => {
-    expect(SIGNIFICANT_EVENTS_DISCOVERY_WORKFLOW.version).toBe(15);
+    expect(SIGNIFICANT_EVENTS_DISCOVERY_WORKFLOW.version).toBe(22);
+  });
+
+  it('bootstraps per-space cleanup before discovery work', () => {
+    expect(discovery.steps[0]).toMatchObject({
+      name: 'bootstrap_cleanup_workflow',
+      type: 'kibana.request',
+      with: {
+        path: '/s/{{ workflow.spaceId }}/internal/significant_events/maintenance/cleanup/_bootstrap',
+      },
+      'on-failure': { continue: true },
+    });
+  });
+
+  it('marks discovery-triggered investigations as automatic', () => {
+    const triggerStep = requireStep(discovery, 'trigger_investigation');
+    expect(triggerStep).toMatchObject({
+      type: 'nightshift.triggerInvestigation',
+      with: {
+        subject_type: 'significant_event',
+        subject_id: '{{ foreach.item.event_id }}',
+        trigger_type: 'automatic',
+      },
+      'on-failure': { continue: true },
+    });
+    expect(triggerStep.with?.message).toContain('Probable cause:');
+    expect(triggerStep.with?.stream_names).toContain('stream_names');
+  });
+
+  it('bounds the discovery investigation message below the trigger input limit', () => {
+    const message = requireStep(discovery, 'trigger_investigation').with?.message;
+    if (!message) throw new Error('Expected trigger_investigation message');
+
+    const renderedMessage = createWorkflowLiquidEngine().parseAndRenderSync(message, {
+      steps: {
+        resolve_open_event: {
+          output: {
+            hits: [
+              {
+                title: 'T'.repeat(512),
+                summary: 'S'.repeat(10_000),
+                symptom_hypothesis: 'H'.repeat(10_000),
+              },
+            ],
+          },
+        },
+      },
+    });
+
+    expect(renderedMessage.length).toBeLessThanOrEqual(10_000);
+    expect(renderedMessage).toContain('T'.repeat(512));
+    expect(renderedMessage).toContain('S'.repeat(7000));
+    expect(renderedMessage).not.toContain('S'.repeat(7001));
+    expect(renderedMessage).toContain(`Probable cause: ${'H'.repeat(2000)}`);
+    expect(renderedMessage).not.toContain('...');
+  });
+
+  it('attributes discovery agent calls to Nightshift', () => {
+    expect(requireStep(discovery, 'run_discovery_agent')).toMatchObject({
+      'product-solution': 'observability',
+      'product-feature': 'nightshift',
+    });
+  });
+
+  it('sends the workflow execution id when generating KI queries', () => {
+    expect(requireStep(queriesGeneration, 'generate_queries').with?.body?.runId).toBe(
+      '${{ execution.id }}'
+    );
   });
 
   it('stamps discovery detections only from confirmed write outcomes', () => {
@@ -54,7 +146,45 @@ describe('significant events persistence workflow contracts', () => {
 
   it('does not launch investigations without resolved event details', () => {
     expect(requireStep(discovery, 'guard_resolved_event').condition).toContain(
-      'steps.resolve_open_event.output.hits.hits[0] != null'
+      'steps.resolve_open_event.output.hits[0] != null'
     );
+  });
+
+  it('skips investigation when the event already has investigations', () => {
+    const guard = requireStep(discovery, 'guard_missing_investigation');
+    // Condition must gate on the absence of prior investigations.
+    expect(guard.condition).toContain('investigations');
+    expect(guard.condition).toContain('== 0');
+
+    // Evaluate the Liquid expression for both shapes of the Kibana response.
+    const engine = createWorkflowLiquidEngine();
+    // Strip the ${{ }} wrapper so the expression can be used inside a Liquid {% if %} tag.
+    const inner = (guard.condition as string).replace(/^\s*\$\{\{(.+)\}\}\s*$/, '$1').trim();
+    const template = `{% if ${inner} %}true{% else %}false{% endif %}`;
+
+    const makeContext = (investigations: unknown[]) => ({
+      steps: { resolve_open_event: { output: { hits: [{ investigations }] } } },
+    });
+
+    // Empty investigations → condition is true → investigation should be triggered.
+    expect(engine.parseAndRenderSync(template, makeContext([]))).toBe('true');
+    // Populated investigations → condition is false → investigation should be skipped.
+    expect(engine.parseAndRenderSync(template, makeContext([{ id: 'inv-1' }]))).toBe('false');
+  });
+
+  it('attaches completed investigations only to Significant Events', () => {
+    expect(investigationCompleted.triggers).toEqual([
+      {
+        type: 'nightshift-investigations.completed',
+        on: { condition: 'event.subject.type: "significant_event"' },
+      },
+    ]);
+    const attach = requireStep(investigationCompleted, 'attach_completed_investigation');
+    expect(attach.with?.path).toContain('/internal/significant_events/events/');
+    expect(attach.with?.body).toEqual({
+      workflow_execution_id: '{{ event.investigation_id }}',
+      started_at: '{{ event.started_at }}',
+      completed_at: '{{ event.completed_at }}',
+    });
   });
 });

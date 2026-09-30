@@ -32,6 +32,30 @@ export function CasesTableServiceProvider(
     }
   };
 
+  const FILTER_OPTION_SELECTION_TIMEOUT = 5000;
+
+  // The filter popovers render each option as a `role="option"` item whose `aria-checked` reflects
+  // the current selection.
+  const isFilterOptionSelected = async (optionSubj: string) => {
+    const option = await testSubjects.find(optionSubj, FILTER_OPTION_SELECTION_TIMEOUT);
+    return (await option.getAttribute('aria-checked')) === 'true';
+  };
+
+  // Clicks a filter option until the popover reports it as selected
+  const selectFilterOption = async (optionSubj: string) => {
+    await retry.try(async () => {
+      if (!(await isFilterOptionSelected(optionSubj))) {
+        await testSubjects.click(optionSubj);
+      }
+
+      await retry.waitForWithTimeout(
+        `the filter option ${optionSubj} to be selected`,
+        FILTER_OPTION_SELECTION_TIMEOUT,
+        () => isFilterOptionSelected(optionSubj)
+      );
+    });
+  };
+
   // Matches a single element per case in both the legacy table (`cases-table-row-{id}`) and the
   // redesign card list (`cases-list-item-clickable-{id}`), so row counts work in either design.
   const CASE_ROWS_SELECTOR =
@@ -139,6 +163,15 @@ export function CasesTableServiceProvider(
       await header.waitUntilLoadingHasFinished();
     },
 
+    async waitForCaseToBeListed(caseId: string) {
+      await this.ensureTableView();
+      await retry.waitFor(`case ${caseId} to appear in the cases table`, async () => {
+        return await find.existsByCssSelector(`[data-test-subj*="cases-table-row-${caseId}"]`);
+      });
+
+      await header.waitUntilLoadingHasFinished();
+    },
+
     async waitForCasesToBeListed() {
       await retry.waitFor('cases to appear on the all cases list', async () => {
         await this.refreshTable();
@@ -172,6 +205,8 @@ export function CasesTableServiceProvider(
     },
 
     async getCaseById(caseId: string) {
+      await this.ensureTableView();
+
       const targetCase = await find.allByCssSelector(
         `[data-test-subj*="cases-table-row-${caseId}"`,
         100
@@ -185,6 +220,8 @@ export function CasesTableServiceProvider(
     },
 
     async getCaseByIndex(index: number) {
+      await this.ensureTableView();
+
       const rows = await find.allByCssSelector('[data-test-subj*="cases-table-row-"', 100);
 
       assertCaseExists(index, rows.length);
@@ -246,20 +283,14 @@ export function CasesTableServiceProvider(
     },
 
     async filterByOwner(owner: string) {
-      const isAlreadyOpen = await testSubjects.exists('options-filter-popover-panel-owner');
-
-      if (isAlreadyOpen) {
-        await testSubjects.click(`options-filter-popover-item-${owner}`);
-        await header.waitUntilLoadingHasFinished();
-        return;
+      if (!(await testSubjects.exists('options-filter-popover-panel-owner'))) {
+        await testSubjects.click('options-filter-popover-button-owner');
+        await retry.waitFor('the solution filter popover to open', async () => {
+          return await testSubjects.exists('options-filter-popover-panel-owner');
+        });
       }
 
-      await testSubjects.click('options-filter-popover-button-owner');
-      await retry.waitFor(`filterByOwner popover opened`, async () => {
-        return await testSubjects.exists('options-filter-popover-panel-owner');
-      });
-
-      await testSubjects.click(`options-filter-popover-item-${owner}`);
+      await selectFilterOption(`options-filter-popover-item-${owner}`);
       await header.waitUntilLoadingHasFinished();
     },
 
@@ -334,6 +365,7 @@ export function CasesTableServiceProvider(
       await testSubjects.click(`cases-bulk-action-severity-${severity}`);
       await header.waitUntilLoadingHasFinished();
       await this.waitForTableToFinishLoading();
+      await testSubjects.existOrFail(`case-severity-badge-${severity}`);
     },
 
     async bulkChangeStatusCases(status: CaseStatuses) {
@@ -375,6 +407,8 @@ export function CasesTableServiceProvider(
 
       await testSubjects.click('cases-edit-tags-flyout-submit');
       await testSubjects.missingOrFail('cases-edit-tags-flyout');
+      await header.waitUntilLoadingHasFinished();
+      await this.waitForTableToFinishLoading();
     },
 
     async bulkAddNewTag(selectedCases: number[], tag: string) {
@@ -403,6 +437,8 @@ export function CasesTableServiceProvider(
 
       await testSubjects.click('cases-edit-tags-flyout-submit');
       await testSubjects.missingOrFail('cases-edit-tags-flyout');
+      await header.waitUntilLoadingHasFinished();
+      await this.waitForTableToFinishLoading();
     },
 
     async bulkEditAssignees(selectedCases: number[], assigneesToClick: string[]) {

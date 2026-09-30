@@ -16,17 +16,15 @@ const baseRule: RuleApiResponse = {
   id: 'rule-1',
   kind: 'signal',
   enabled: true,
-  metadata: { name: 'Test Rule', version: 1 },
+  version: 1,
+  metadata: { name: 'Test Rule' },
   time_field: '@timestamp',
   schedule: { every: '5m', lookback: '10m' },
-  query: {
-    format: 'standalone',
-    breach: { query: 'FROM logs-* | STATS count() BY host.name' },
-  },
-  createdBy: 'alice@example.com',
-  createdAt: '2026-03-01T12:00:00.000Z',
-  updatedBy: 'bob@example.com',
-  updatedAt: '2026-03-04T12:00:00.000Z',
+  query: { base: 'FROM logs-* | STATS count() BY host.name' },
+  created_by: { profile_uid: 'alice@example.com' },
+  created_at: '2026-03-01T12:00:00.000Z',
+  updated_by: { profile_uid: 'bob@example.com' },
+  updated_at: '2026-03-04T12:00:00.000Z',
 };
 
 const renderRunbookTab = (rule: RuleApiResponse) =>
@@ -73,7 +71,7 @@ describe('RuleSidebarRunbookTab', () => {
     renderRunbookTab({
       ...baseRule,
       artifacts: [
-        { id: 'other-1', type: 'dashboard', data: { dashboardId: 'some-dashboard-id' } },
+        { id: 'other-1', type: 'dashboard', data: { dashboard_id: 'some-dashboard-id' } },
         { id: 'runbook-1', type: 'runbook', data: { content: '# First Runbook' } },
         { id: 'runbook-2', type: 'runbook', data: { content: '# Second Runbook' } },
       ],

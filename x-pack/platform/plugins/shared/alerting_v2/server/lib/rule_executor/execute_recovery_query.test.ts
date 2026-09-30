@@ -6,6 +6,7 @@
  */
 
 import type { DiagnosticResult } from '@elastic/elasticsearch';
+import { QueryResponseSizeExceededError } from '../errors/query_response_size_exceeded_error';
 import { errors } from '@elastic/elasticsearch';
 import { TaskErrorSource } from '@kbn/task-manager-plugin/server';
 import { getErrorSource } from '@kbn/task-manager-plugin/server/task_running';
@@ -13,7 +14,7 @@ import { createRuleExecutionInput, createRuleResponse, createEsqlResponse } from
 import { createLoggerService } from '../services/logger_service/logger_service.mock';
 import { createQueryService } from '../services/query_service/query_service.mock';
 import { buildGroupHash } from './build_alert_events';
-import type { AlertEvent } from '../../resources/datastreams/alert_events';
+import type { AlertEventDocument } from '../../resources/datastreams/alert_events';
 import type { ActiveAlertGroupHash } from './queries';
 import { executeRecoveryQuery } from './execute_recovery_query';
 
@@ -42,13 +43,9 @@ describe('executeRecoveryQuery', () => {
 
     const rule = createRuleResponse({
       kind: 'alert',
-      recovery_strategy: 'query',
+      recovery: { strategy: 'query', query: 'FROM logs-* | WHERE recovered = true' },
       grouping: { fields: ['host.name'] },
-      query: {
-        format: 'standalone',
-        breach: { query: 'FROM logs-* | LIMIT 10' },
-        recovery: { query: 'FROM logs-* | WHERE recovered = true' },
-      },
+      query: { base: 'FROM logs-* | LIMIT 10' },
     });
 
     const recoveredHash = buildGroupHash({
@@ -70,7 +67,7 @@ describe('executeRecoveryQuery', () => {
 
     expect(scopedEsClient.esql.query).toHaveBeenCalledWith(
       expect.objectContaining({ query: 'FROM logs-* | WHERE recovered = true' }),
-      expect.any(Object)
+      expect.objectContaining({ signal: input.executionContext.signal })
     );
     expect(events).toHaveLength(1);
     expect(events[0].status).toBe('recovered');
@@ -94,7 +91,10 @@ describe('executeRecoveryQuery', () => {
     const events = await executeRecoveryQuery({
       queryService,
       logger: loggerService,
-      rule: createRuleResponse({ kind: 'alert', recovery_strategy: 'query' }),
+      rule: createRuleResponse({
+        kind: 'alert',
+        recovery: { strategy: 'query', query: 'FROM logs-* | WHERE recovered = true' },
+      }),
       effectiveQuery: 'FROM logs-* | WHERE recovered = true',
       input: createRuleExecutionInput(),
       activeGroupHashes: toActive(['hash-1', 'hash-2']),
@@ -128,7 +128,7 @@ describe('executeRecoveryQuery', () => {
       logger: loggerService,
       rule: createRuleResponse({
         kind: 'alert',
-        recovery_strategy: 'query',
+        recovery: { strategy: 'query', query: 'FROM logs-* | STATS count(*) BY host.name' },
         grouping: { fields: groupingFields },
       }),
       effectiveQuery: 'FROM logs-* | STATS count(*) BY host.name',
@@ -137,7 +137,9 @@ describe('executeRecoveryQuery', () => {
       breachedGroupHashes: new Set([hashX]),
     });
 
-    const byGroup = Object.fromEntries(events.map((e: AlertEvent) => [e.group_hash, e.status]));
+    const byGroup = Object.fromEntries(
+      events.map((e: AlertEventDocument) => [e.group_hash, e.status])
+    );
     expect(byGroup[hashX]).toBeUndefined();
     expect(byGroup[hashY]).toBe('recovered');
     expect(events.filter((e) => e.status === 'recovered')).toHaveLength(1);
@@ -154,7 +156,10 @@ describe('executeRecoveryQuery', () => {
     const error = await executeRecoveryQuery({
       queryService,
       logger: loggerService,
-      rule: createRuleResponse({ kind: 'alert', recovery_strategy: 'query' }),
+      rule: createRuleResponse({
+        kind: 'alert',
+        recovery: { strategy: 'query', query: 'FROM logs-* | WHERE recovered = true' },
+      }),
       effectiveQuery: 'FROM logs-* | WHERE invalid syntax',
       input: createRuleExecutionInput(),
       activeGroupHashes: toActive(['hash-1']),
@@ -163,6 +168,31 @@ describe('executeRecoveryQuery', () => {
 
     expect(error).toBeInstanceOf(Error);
     expect(getErrorSource(error as Error)).toBe(TaskErrorSource.USER);
+  });
+
+  it('marks content-length-exceeded recovery query errors as TaskErrorSource.USER', async () => {
+    const { queryService, scopedEsClient } = setup();
+
+    scopedEsClient.esql.query.mockRejectedValue(
+      new errors.RequestAbortedError('Response size exceeded the limit (content length: 52428800)')
+    );
+
+    const error = await executeRecoveryQuery({
+      queryService,
+      logger: loggerService,
+      rule: createRuleResponse({
+        kind: 'alert',
+        recovery: { strategy: 'query', query: 'FROM logs-* | WHERE recovered = true' },
+      }),
+      effectiveQuery: 'FROM logs-*',
+      input: createRuleExecutionInput(),
+      activeGroupHashes: toActive(['hash-1']),
+      breachedGroupHashes: new Set(),
+    }).catch((e: Error) => e);
+
+    expect(error).toBeInstanceOf(QueryResponseSizeExceededError);
+    expect(getErrorSource(error as Error)).toBe(TaskErrorSource.USER);
+    expect((error as QueryResponseSizeExceededError).queryType).toBe('recovery');
   });
 
   it('does not mark ResponseError(503) recovery query errors as TaskErrorSource.USER', async () => {
@@ -175,7 +205,10 @@ describe('executeRecoveryQuery', () => {
     const error = await executeRecoveryQuery({
       queryService,
       logger: loggerService,
-      rule: createRuleResponse({ kind: 'alert', recovery_strategy: 'query' }),
+      rule: createRuleResponse({
+        kind: 'alert',
+        recovery: { strategy: 'query', query: 'FROM logs-* | WHERE recovered = true' },
+      }),
       effectiveQuery: 'FROM logs-*',
       input: createRuleExecutionInput(),
       activeGroupHashes: toActive(['hash-1']),
@@ -194,7 +227,10 @@ describe('executeRecoveryQuery', () => {
     const error = await executeRecoveryQuery({
       queryService,
       logger: loggerService,
-      rule: createRuleResponse({ kind: 'alert', recovery_strategy: 'query' }),
+      rule: createRuleResponse({
+        kind: 'alert',
+        recovery: { strategy: 'query', query: 'FROM logs-* | WHERE recovered = true' },
+      }),
       effectiveQuery: 'FROM logs-*',
       input: createRuleExecutionInput(),
       activeGroupHashes: toActive(['hash-1']),
@@ -216,7 +252,10 @@ describe('executeRecoveryQuery', () => {
     await executeRecoveryQuery({
       queryService,
       logger: loggerService,
-      rule: createRuleResponse({ kind: 'alert', recovery_strategy: 'query' }),
+      rule: createRuleResponse({
+        kind: 'alert',
+        recovery: { strategy: 'query', query: 'FROM logs-* | WHERE recovered = true' },
+      }),
       effectiveQuery: 'FROM logs-*',
       input,
       activeGroupHashes: toActive(['hash-1']),

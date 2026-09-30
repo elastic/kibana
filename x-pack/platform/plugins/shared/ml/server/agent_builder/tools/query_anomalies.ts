@@ -9,7 +9,7 @@ import type { FieldValue } from '@elastic/elasticsearch/lib/api/types';
 import { z } from '@kbn/zod/v4';
 import { ToolType } from '@kbn/agent-builder-common';
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
-import type { BuiltinToolDefinition } from '@kbn/agent-builder-server';
+import type { BuiltinSkillBoundedTool } from '@kbn/agent-builder-server/skills';
 import { createErrorResult, getToolResultId } from '@kbn/agent-builder-server';
 import { getIndexPatternFromESQLQuery, getLookupIndicesFromQuery } from '@kbn/esql-utils';
 import type { ResolveMlCapabilities } from '@kbn/ml-common-types/capabilities';
@@ -134,10 +134,9 @@ export const createQueryAnomaliesTool = (
   authorization?: MlAuthorizationService,
   mlLicense?: MlLicense,
   enabledFeatures?: MlFeatures
-): BuiltinToolDefinition<typeof schema> => ({
+): BuiltinSkillBoundedTool<typeof schema> => ({
   id: QUERY_ANOMALIES_TOOL_ID,
   type: ToolType.builtin,
-  tags: ['ml', 'anomaly-detection'],
   description: `## Before calling this tool — required
 
 Read one of the referenced ES|QL content files and copy a complete query into \`query\`:
@@ -165,7 +164,12 @@ Example (with placeholders — bind every ?name):
 }
 
 Allowed indices (internal user): \`.ml-anomalies-*\`, \`.ml-config\`, \`.ml-notifications-*\`, \`.ml-annotations-*\`.
-For source-data indices use \`platform.core.execute_esql\` instead.`,
+For source-data indices use \`platform.core.execute_esql\` instead.
+
+## API documentation
+- ES|QL reference: https://www.elastic.co/docs/reference/query-languages/esql
+- Anomaly detection guide: https://www.elastic.co/docs/explore-analyze/machine-learning/anomaly-detection
+- Anomaly detection APIs: https://www.elastic.co/docs/api/doc/elasticsearch/group/endpoint-ml-anomaly`,
   experimental: true,
   schema,
   handler: async (

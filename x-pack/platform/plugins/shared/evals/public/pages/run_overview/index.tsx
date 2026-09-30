@@ -19,7 +19,6 @@ import {
   EuiText,
   EuiTitle,
   EuiToolTip,
-  useEuiTheme,
   type EuiBadgeProps,
 } from '@elastic/eui';
 import { useHistory, useLocation } from 'react-router-dom';
@@ -67,7 +66,6 @@ const statusColor = (status: string): EuiBadgeProps['color'] => {
  */
 export const RunOverviewPage: React.FC = () => {
   const history = useHistory();
-  const { euiTheme } = useEuiTheme();
   const { search, state } = useLocation<RunOverviewLocationState | undefined>();
 
   const params = useMemo(() => new URLSearchParams(search), [search]);
@@ -145,9 +143,9 @@ export const RunOverviewPage: React.FC = () => {
 
   if (models.length === 0) {
     return (
-      <EuiPageSection paddingSize="none" css={{ paddingTop: euiTheme.size.l }}>
+      <EuiPageSection paddingSize="none">
         <EuiEmptyPrompt
-          iconType="iInCircle"
+          iconType="info"
           title={<h2>{i18n.EMPTY_TITLE}</h2>}
           body={<p>{i18n.EMPTY_BODY}</p>}
           actions={
@@ -161,7 +159,7 @@ export const RunOverviewPage: React.FC = () => {
   }
 
   return (
-    <EuiPageSection paddingSize="none" css={{ paddingTop: euiTheme.size.l }}>
+    <EuiPageSection paddingSize="none">
       <EuiFlexGroup alignItems="flexStart" justifyContent="spaceBetween" responsive={false}>
         <EuiFlexItem>
           <EuiTitle size="l">

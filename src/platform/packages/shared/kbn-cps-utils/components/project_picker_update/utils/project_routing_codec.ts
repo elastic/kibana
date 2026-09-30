@@ -7,7 +7,15 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { Parser, isColumn, isFunctionExpression, isLiteral } from '@elastic/esql';
+import {
+  Parser,
+  Walker,
+  isBinaryExpression,
+  isColumn,
+  isFunctionExpression,
+  isLiteral,
+  isUnaryExpression,
+} from '@elastic/esql';
 import type { ESQLAstExpression } from '@elastic/esql/types';
 import type { ProjectRouting } from '@kbn/es-query';
 import { uniq } from 'lodash';
@@ -23,9 +31,9 @@ const projectRoutingClausePattern = /([^:\s()]+):([^()\s]+)/g;
 export const ROUTING_WILDCARD = '*';
 
 /** Reserved routing dimension for project selection/exclusion — never a filter badge. */
-export const PROJECT_SELECTION_DIMENSION = '_id';
+export const PROJECT_SELECTION_DIMENSION = '_id' as const;
 
-export const ProjectRoutingStrategySchema = z.enum(['dynamic', 'snapshot']);
+export const ProjectRoutingStrategySchema = z.enum(['dynamic', 'snapshot', 'unknown']);
 export type ProjectRoutingStrategy = z.output<typeof ProjectRoutingStrategySchema>;
 
 export const ProjectRoutingExpressionSchema = z.strictObject({
@@ -64,13 +72,13 @@ const encodeTagFilterClause = ({ operator, tagName, tagValue }: FilterExpression
     case FilterOperator.EQUALS:
       return `${tagName}:${tagValue}`;
     case FilterOperator.NOT_EQUALS:
-      return `${tagName}:* AND NOT ${tagName}:${tagValue}`;
+      return `(${tagName}:* AND NOT ${tagName}:${tagValue})`;
     case FilterOperator.ONE_OF:
       return `(${tagValue.map((value) => `${tagName}:${value}`).join(' OR ')})`;
     case FilterOperator.NOT_ONE_OF:
-      return `${tagName}:* AND NOT (${tagValue
+      return `(${tagName}:* AND NOT (${tagValue
         .map((value) => `${tagName}:${value}`)
-        .join(' OR ')})`;
+        .join(' OR ')}))`;
     case FilterOperator.EXISTS:
       return `${tagName}:*`;
     case FilterOperator.NOT_EXISTS:
@@ -113,25 +121,34 @@ const decodeTagFilterClause = (value: string): FilterExpressionValue => {
   return filterExpressionFromRoutingAst(root);
 };
 
-const readTagEquality = (node: unknown): TagEquality => {
-  if (!isFunctionExpression(node) || node.name !== '==') {
-    throw new Error('Expected project routing equality expression');
+/** Reads a `tag == "value"` binary expression; returns null for any other node shape. */
+const readTagEqualityNode = (node: unknown): TagEquality | null => {
+  if (!isBinaryExpression(node) || node.name !== '==') {
+    return null;
   }
 
   const [columnNode, valueNode] = node.args;
   if (!isColumn(columnNode) || !isLiteral(valueNode) || valueNode.literalType !== 'keyword') {
-    throw new Error('Expected project routing column == string literal');
+    return null;
   }
 
   const tagValue = valueNode.valueUnquoted;
   if (tagValue === undefined) {
-    throw new Error('Expected project routing literal value');
+    return null;
   }
 
   return {
     tagName: columnNode.name,
     tagValue,
   };
+};
+
+const readTagEquality = (node: unknown): TagEquality => {
+  const equality = readTagEqualityNode(node);
+  if (!equality) {
+    throw new Error('Expected project routing column == string literal');
+  }
+  return equality;
 };
 
 const readSameTagEqualities = (nodes: unknown[]): TagEquality[] => {
@@ -237,132 +254,429 @@ const filterExpressionFromRoutingAst = (node: ESQLAstExpression): FilterExpressi
   throw new Error('Cannot decode project routing clause');
 };
 
-const flattenTopLevelAndArgs = (root: ESQLAstExpression): ESQLAstExpression[] => {
-  if (isFunctionExpression(root) && root.name === 'and') {
-    return root.args.flatMap((arg) => flattenTopLevelAndArgs(arg as ESQLAstExpression));
+const unknownRoutingExpression = (
+  filterExpressions: FilterExpressionValue[] = []
+): ProjectRoutingExpression => ({
+  filterExpressions,
+  excludedProjectIds: [],
+  selectedProjectIds: [],
+  projectRoutingStrategy: 'unknown',
+});
+
+/**
+ * Flattens a left-associative chain of the given binary operator into its operand list in
+ * source order. Iterative on purpose: routing strings are not schema-bounded before decode,
+ * so a very long `a AND b AND c AND …` chain must not overflow the call stack.
+ */
+const collectBinaryChainOperands = (
+  root: ESQLAstExpression,
+  operatorName: 'and' | 'or'
+): ESQLAstExpression[] => {
+  const operands: ESQLAstExpression[] = [];
+  const stack: ESQLAstExpression[] = [root];
+
+  while (stack.length > 0) {
+    const node = stack.pop()!;
+
+    if (isBinaryExpression(node) && node.name === operatorName) {
+      for (let index = node.args.length - 1; index >= 0; index--) {
+        stack.push(node.args[index] as ESQLAstExpression);
+      }
+      continue;
+    }
+
+    operands.push(node);
   }
 
-  return [root];
+  return operands;
 };
 
-const createSyntheticAndNode = (nodes: readonly ESQLAstExpression[]): ESQLAstExpression => {
-  if (nodes.length === 1) {
-    return nodes[0];
+const collectAndConjuncts = (root: ESQLAstExpression): ESQLAstExpression[] =>
+  collectBinaryChainOperands(root, 'and');
+
+const collectOrDisjuncts = (root: ESQLAstExpression): ESQLAstExpression[] =>
+  collectBinaryChainOperands(root, 'or');
+
+/**
+ * Reads a `_id == value` equality on the reserved project selection dimension;
+ * returns null when the node targets any other column or is not an equality.
+ */
+const readSelectionDimensionEquality = (
+  node: ESQLAstExpression
+): { projectId: string; isWildcard: boolean } | null => {
+  const equality = readTagEqualityNode(node);
+
+  if (!equality || equality.tagName !== PROJECT_SELECTION_DIMENSION) {
+    return null;
   }
 
   return {
-    type: 'function',
-    name: 'and',
-    args: [...nodes],
-  } as ESQLAstExpression;
+    projectId: equality.tagValue,
+    isWildcard: equality.tagValue === ROUTING_WILDCARD,
+  };
 };
 
-const readIdEquality = (
-  node: ESQLAstExpression
-): { projectId: string; isWildcard: boolean } | null => {
-  if (!isFunctionExpression(node) || node.name !== '==') {
+/**
+ * Reads the excluded project ids from a `NOT _id:x` / `NOT (_id:a OR _id:b)` negation.
+ * Returns null for any other shape, including wildcard ids or non-selection columns.
+ */
+const readExcludedProjectIds = (node: ESQLAstExpression): string[] | null => {
+  if (!isUnaryExpression(node) || node.name !== 'not') {
     return null;
   }
 
-  try {
-    const { tagName, tagValue } = readTagEquality(node);
+  const negated = node.args[0] as ESQLAstExpression;
 
-    if (tagName !== PROJECT_SELECTION_DIMENSION) {
+  const single = readSelectionDimensionEquality(negated);
+  if (single) {
+    return single.isWildcard ? null : [single.projectId];
+  }
+
+  if (!isBinaryExpression(negated) || negated.name !== 'or') {
+    return null;
+  }
+
+  const projectIds: string[] = [];
+  for (const disjunct of collectOrDisjuncts(negated)) {
+    const equality = readSelectionDimensionEquality(disjunct);
+    if (!equality || equality.isWildcard) {
       return null;
     }
-
-    return {
-      projectId: tagValue,
-      isWildcard: tagValue === ROUTING_WILDCARD,
-    };
-  } catch {
-    return null;
+    projectIds.push(equality.projectId);
   }
+
+  return projectIds;
 };
 
-const readIdExclusion = (node: ESQLAstExpression): string | null => {
-  if (!isFunctionExpression(node) || node.name !== 'not') {
+/**
+ * Reads the selected project ids from a `_id:x` equality or a `(_id:a OR _id:b …)` OR group.
+ * Returns null for any other shape, including wildcard ids or non-selection columns.
+ */
+const readSelectedProjectIds = (node: ESQLAstExpression): string[] | null => {
+  const single = readSelectionDimensionEquality(node);
+  if (single) {
+    return single.isWildcard ? null : [single.projectId];
+  }
+
+  if (!isBinaryExpression(node) || node.name !== 'or') {
     return null;
   }
 
-  const inner = node.args[0];
-  if (!isFunctionExpression(inner) || inner.name !== '==') {
-    return null;
-  }
-
-  try {
-    const { tagName, tagValue } = readTagEquality(inner);
-
-    if (tagName !== PROJECT_SELECTION_DIMENSION || tagValue === ROUTING_WILDCARD) {
+  const projectIds: string[] = [];
+  for (const disjunct of collectOrDisjuncts(node)) {
+    const equality = readSelectionDimensionEquality(disjunct);
+    if (!equality || equality.isWildcard) {
       return null;
     }
+    projectIds.push(equality.projectId);
+  }
 
-    return tagValue;
-  } catch {
-    return null;
+  return projectIds;
+};
+
+/**
+ * Guards that a filter subtree never references the reserved project selection dimension,
+ * so `_id` clauses can never leak into decoded filter expressions.
+ */
+const assertSelectionDimensionFree = (node: ESQLAstExpression): void => {
+  const selectionColumn = Walker.find(
+    node,
+    (child) => isColumn(child) && child.name === PROJECT_SELECTION_DIMENSION
+  );
+
+  if (selectionColumn) {
+    throw new Error('Project selection dimension is not a valid filter tag');
   }
 };
 
 /**
- * Decodes a run of top-level AND nodes (with `_id` clauses already stripped out) into the
- * filter expressions it represents. A single filter can itself span two adjacent nodes — the
- * `tag:* AND NOT tag:value` / `tag:* AND NOT (a OR b)` shape produced by {@link encodeTagFilterClause}
- * for `NOT_EQUALS`/`NOT_ONE_OF` — so pairs are tried greedily before falling back to decoding a
- * node on its own, which keeps independent filters that happen to be ANDed together from being
- * discarded as a single unrecognized group.
+ * Reads a NOT_EQUALS / NOT_ONE_OF filter spanning two adjacent conjuncts — `tag:*` followed
+ * by `NOT tag:value` or `NOT (tag:a OR tag:b)` — as produced by {@link encodeTagFilterClause}.
+ * Returns null when the pair is not that shape.
  */
-const decodeFilterNodeGroup = (nodes: readonly ESQLAstExpression[]): FilterExpressionValue[] => {
+const readCompoundFilterPair = (
+  existsNode: ESQLAstExpression,
+  negationNode: ESQLAstExpression
+): FilterExpressionValue | null => {
+  const existsEquality = readTagEqualityNode(existsNode);
+  if (!existsEquality || existsEquality.tagValue !== ROUTING_WILDCARD) {
+    return null;
+  }
+
+  if (!isUnaryExpression(negationNode) || negationNode.name !== 'not') {
+    return null;
+  }
+
+  const negated = negationNode.args[0] as ESQLAstExpression;
+
+  const single = readTagEqualityNode(negated);
+  if (single) {
+    if (single.tagName !== existsEquality.tagName || single.tagValue === ROUTING_WILDCARD) {
+      return null;
+    }
+
+    return {
+      operator: FilterOperator.NOT_EQUALS,
+      tagName: existsEquality.tagName,
+      tagValue: single.tagValue,
+    };
+  }
+
+  if (!isBinaryExpression(negated) || negated.name !== 'or') {
+    return null;
+  }
+
+  const tagValues: string[] = [];
+  for (const disjunct of collectOrDisjuncts(negated)) {
+    const equality = readTagEqualityNode(disjunct);
+    if (
+      !equality ||
+      equality.tagName !== existsEquality.tagName ||
+      equality.tagValue === ROUTING_WILDCARD
+    ) {
+      return null;
+    }
+    tagValues.push(equality.tagValue);
+  }
+
+  return {
+    operator: FilterOperator.NOT_ONE_OF,
+    tagName: existsEquality.tagName,
+    tagValue: tagValues,
+  };
+};
+
+/**
+ * Decodes a run of conjuncts (selection clauses already partitioned out) into the filter
+ * expressions it represents. A single filter can span two adjacent conjuncts — the
+ * `tag:* AND NOT tag:value` / `tag:* AND NOT (a OR b)` shape produced by
+ * {@link encodeTagFilterClause} — so pairs are read before single nodes. Strict: throws when
+ * any conjunct is unrecognized or references the reserved selection dimension, so malformed
+ * strings surface as an unknown strategy instead of silently dropping clauses.
+ */
+const decodeFilterConjuncts = (nodes: readonly ESQLAstExpression[]): FilterExpressionValue[] => {
+  for (const node of nodes) {
+    assertSelectionDimensionFree(node);
+  }
+
   const expressions: FilterExpressionValue[] = [];
   let index = 0;
 
   while (index < nodes.length) {
-    const pairCandidate = nodes[index + 1];
+    const compound =
+      index + 1 < nodes.length ? readCompoundFilterPair(nodes[index], nodes[index + 1]) : null;
 
-    if (pairCandidate) {
-      try {
-        expressions.push(
-          filterExpressionFromRoutingAst(createSyntheticAndNode([nodes[index], pairCandidate]))
-        );
-        index += 2;
-        continue;
-      } catch {
-        // not a recognized two-node pattern — fall through and try the node on its own.
-      }
+    if (compound) {
+      expressions.push(compound);
+      index += 2;
+      continue;
     }
 
-    try {
-      expressions.push(filterExpressionFromRoutingAst(nodes[index]));
-    } catch {
-      // unrecognized clause — skip it rather than losing the rest of the group.
-    }
+    expressions.push(filterExpressionFromRoutingAst(nodes[index]));
     index += 1;
   }
 
   return expressions;
 };
 
+interface RoutingConjunctPartition {
+  /** Ids collected from `_id:x` / `(_id:a OR _id:b)` selection conjuncts, in source order. */
+  selectedProjectIds: string[];
+  /** Number of selection conjuncts the ids above came from. */
+  selectionConjunctCount: number;
+  /** Number of `_id:*` wildcard equalities. */
+  wildcardCount: number;
+  /** Ids collected from `NOT _id:…` exclusion negations, in source order. */
+  excludedProjectIds: string[];
+  /** Number of exclusion negation conjuncts the ids above came from. */
+  exclusionCount: number;
+  /** Every other conjunct (free tag filters and compound tails). */
+  freeNodes: ESQLAstExpression[];
+}
+
+/** Classifies each top-level conjunct exactly once into the buckets strategy detection needs. */
+const partitionRoutingConjuncts = (
+  conjuncts: readonly ESQLAstExpression[]
+): RoutingConjunctPartition => {
+  const partition: RoutingConjunctPartition = {
+    selectedProjectIds: [],
+    selectionConjunctCount: 0,
+    wildcardCount: 0,
+    excludedProjectIds: [],
+    exclusionCount: 0,
+    freeNodes: [],
+  };
+
+  for (const conjunct of conjuncts) {
+    const equality = readSelectionDimensionEquality(conjunct);
+    if (equality?.isWildcard) {
+      partition.wildcardCount += 1;
+      continue;
+    }
+
+    const selections = readSelectedProjectIds(conjunct);
+    if (selections) {
+      partition.selectedProjectIds.push(...selections);
+      partition.selectionConjunctCount += 1;
+      continue;
+    }
+
+    const exclusions = readExcludedProjectIds(conjunct);
+    if (exclusions) {
+      partition.excludedProjectIds.push(...exclusions);
+      partition.exclusionCount += 1;
+      continue;
+    }
+
+    partition.freeNodes.push(conjunct);
+  }
+
+  return partition;
+};
+
+/**
+ * Detects the routing strategy from the shape of the top-level AND conjuncts, then reads the
+ * matching tail. `_id` is the reserved project selection dimension.
+ *
+ * snapshot
+ * 1.1 a single `(_id:a OR _id:b …)` OR group of non-wildcard `_id:value` equalities →
+ *     selected ids
+ * 1.2 a single `_id:value` equality → selected id
+ * 1.3 shape 1.1/1.2 beside free tag-filter conjuncts (columns other than `_id`) → filters +
+ *     selected ids; every free conjunct must decode strictly
+ *
+ * dynamic
+ * 2.1 a lone `_id:*` wildcard → all projects, no exclusions
+ * 2.2 one `_id:*` plus one `NOT _id:x` / `NOT (_id:a OR _id:b)` negation → excluded ids
+ * 2.3 shape 2.2 preceded by free tag-filter conjuncts (columns other than `_id`) → filters +
+ *     excluded ids; every free conjunct must decode strictly
+ *
+ * unknown
+ * 3.1 blank, `@named`, or unparseable input (handled before this function)
+ * 3.2 conjuncts that are only tag filters, with no `_id` clauses — filters are still recovered
+ * 3.3 any other mix: `_id:*` without its negation, extra wildcards/negations, more than one
+ *     selection conjunct, `_id` appearing inside a filter subtree, or a free conjunct that
+ *     fails strict decoding
+ */
+const decodeRoutingExpressionAst = (root: ESQLAstExpression): ProjectRoutingExpression => {
+  const conjuncts = collectAndConjuncts(root);
+  const {
+    selectedProjectIds,
+    selectionConjunctCount,
+    wildcardCount,
+    excludedProjectIds,
+    exclusionCount,
+    freeNodes,
+  } = partitionRoutingConjuncts(conjuncts);
+
+  const hasSingleSelectionConjunct =
+    selectionConjunctCount === 1 && wildcardCount === 0 && exclusionCount === 0;
+
+  if (hasSingleSelectionConjunct) {
+    try {
+      return {
+        filterExpressions: decodeFilterConjuncts(freeNodes),
+        excludedProjectIds: [],
+        selectedProjectIds: uniq(selectedProjectIds),
+        projectRoutingStrategy: 'snapshot',
+      };
+    } catch {
+      return unknownRoutingExpression();
+    }
+  }
+
+  if (conjuncts.length === 1 && wildcardCount === 1) {
+    return {
+      filterExpressions: [],
+      excludedProjectIds: [],
+      selectedProjectIds: [],
+      projectRoutingStrategy: 'dynamic',
+    };
+  }
+
+  if (wildcardCount === 1 && exclusionCount === 1 && selectionConjunctCount === 0) {
+    try {
+      return {
+        filterExpressions: decodeFilterConjuncts(freeNodes),
+        excludedProjectIds: uniq(excludedProjectIds),
+        selectedProjectIds: [],
+        projectRoutingStrategy: 'dynamic',
+      };
+    } catch {
+      return unknownRoutingExpression();
+    }
+  }
+
+  const hasNoSelectionClauses =
+    selectionConjunctCount === 0 && wildcardCount === 0 && exclusionCount === 0;
+
+  if (hasNoSelectionClauses && freeNodes.length > 0) {
+    try {
+      return unknownRoutingExpression(decodeFilterConjuncts(freeNodes));
+    } catch {
+      return unknownRoutingExpression();
+    }
+  }
+
+  return unknownRoutingExpression();
+};
+
+/**
+ * Builds the `_id` selection clause. The clause is only parenthesized when filter clauses
+ * precede it in the encoded output — standalone it is the whole expression, so grouping
+ * parentheses add nothing.
+ */
 const buildProjectSelectionClauses = ({
   excludedProjectIds,
   selectedProjectIds,
   projectRoutingStrategy,
+  hasFilterClauses,
 }: Pick<
   z.infer<typeof ProjectRoutingExpressionSchema>,
-  'excludedProjectIds' | 'selectedProjectIds' | 'projectRoutingStrategy'
->): string[] => {
+  'excludedProjectIds' | 'selectedProjectIds'
+> & {
+  projectRoutingStrategy: Exclude<ProjectRoutingStrategy, 'unknown'>;
+  hasFilterClauses: boolean;
+}): string => {
   if (projectRoutingStrategy === 'dynamic') {
-    return excludedProjectIds.length === 0
-      ? []
-      : [
-          `${PROJECT_SELECTION_DIMENSION}:${ROUTING_WILDCARD}`,
-          ...excludedProjectIds.map((override) => `NOT ${PROJECT_SELECTION_DIMENSION}:${override}`),
-        ];
+    if (excludedProjectIds.length === 0) {
+      return '';
+    }
+
+    const excludedProjectsSelection = excludedProjectIds
+      .map((override) => `${PROJECT_SELECTION_DIMENSION}:${override}`)
+      .join(' OR ');
+
+    const dynamicSelection = [
+      `${PROJECT_SELECTION_DIMENSION}:${ROUTING_WILDCARD}`,
+      excludedProjectIds.length > 1
+        ? `NOT (${excludedProjectsSelection})`
+        : `NOT ${excludedProjectsSelection}`,
+    ].join(' AND ');
+
+    return hasFilterClauses ? `(${dynamicSelection})` : dynamicSelection;
   }
 
-  return selectedProjectIds.map((id) => `${PROJECT_SELECTION_DIMENSION}:${id}`);
+  if (selectedProjectIds.length === 0) {
+    return '';
+  }
+
+  const selectedProjectsSelection = selectedProjectIds
+    .map((id) => `${PROJECT_SELECTION_DIMENSION}:${id}`)
+    .join(' OR ');
+
+  return selectedProjectIds.length > 1 && hasFilterClauses
+    ? `(${selectedProjectsSelection})`
+    : selectedProjectsSelection;
 };
 
 /**
- * Codec for project routing, leverages zod for validation and transforms.
+ * Project routing codec, leverages zod for validation and transforms.
+ *
+ * @note This codec only supports parsing direct project routing expressions,
+ * named project routing expressions if ever provided will return empty values on all fields
+ * as we are unable to infer what expressions the named project routing expression represents
+ * without asking a server.
  */
 export const projectRoutingCodec = z.codec(z.optional(z.string()), ProjectRoutingExpressionSchema, {
   encode: (input) => {
@@ -370,27 +684,24 @@ export const projectRoutingCodec = z.codec(z.optional(z.string()), ProjectRoutin
       encodeTagFilterClause(expression)
     );
 
-    return [
-      ...filterClauses,
-      ...buildProjectSelectionClauses({
-        excludedProjectIds: input.excludedProjectIds,
-        selectedProjectIds: input.selectedProjectIds,
-        projectRoutingStrategy: input.projectRoutingStrategy,
-      }),
-    ]
-      .filter(Boolean)
-      .join(' AND ');
+    if (input.projectRoutingStrategy === 'unknown') {
+      throw new Error('project routing strategy unknown is not valid for encoding');
+    }
+
+    const projectSelectionClauses = buildProjectSelectionClauses({
+      excludedProjectIds: input.excludedProjectIds,
+      selectedProjectIds: input.selectedProjectIds,
+      projectRoutingStrategy: input.projectRoutingStrategy,
+      hasFilterClauses: filterClauses.length > 0,
+    });
+
+    return filterClauses.concat(projectSelectionClauses).filter(Boolean).join(' AND ');
   },
   decode: (value) => {
     const trimmed = value?.trim();
 
     if (!trimmed || trimmed.startsWith('@')) {
-      return {
-        filterExpressions: [],
-        excludedProjectIds: [],
-        selectedProjectIds: [],
-        projectRoutingStrategy: 'dynamic' as const,
-      };
+      return unknownRoutingExpression();
     }
 
     let root: ESQLAstExpression;
@@ -398,58 +709,10 @@ export const projectRoutingCodec = z.codec(z.optional(z.string()), ProjectRoutin
     try {
       ({ root } = Parser.parseExpression(luceneQuerySyntaxToEsqlExpression(trimmed)));
     } catch {
-      return {
-        filterExpressions: [],
-        excludedProjectIds: [],
-        selectedProjectIds: [],
-        projectRoutingStrategy: 'dynamic' as const,
-      };
+      return unknownRoutingExpression();
     }
 
-    const filterExpressions: FilterExpressionValue[] = [];
-    const excludedProjectIds: string[] = [];
-    const selectedProjectIds: string[] = [];
-    let pendingFilterNodes: ESQLAstExpression[] = [];
-
-    const flushFilterGroup = () => {
-      filterExpressions.push(...decodeFilterNodeGroup(pendingFilterNodes));
-      pendingFilterNodes = [];
-    };
-
-    for (const node of flattenTopLevelAndArgs(root)) {
-      const idEquality = readIdEquality(node);
-
-      if (idEquality) {
-        flushFilterGroup();
-
-        if (!idEquality.isWildcard) {
-          selectedProjectIds.push(idEquality.projectId);
-        }
-
-        continue;
-      }
-
-      const excludedId = readIdExclusion(node);
-
-      if (excludedId) {
-        flushFilterGroup();
-        excludedProjectIds.push(excludedId);
-        continue;
-      }
-
-      pendingFilterNodes.push(node);
-    }
-
-    flushFilterGroup();
-
-    return {
-      filterExpressions,
-      excludedProjectIds: uniq(excludedProjectIds),
-      selectedProjectIds: uniq(selectedProjectIds),
-      projectRoutingStrategy: (excludedProjectIds.length > 0
-        ? 'dynamic'
-        : 'snapshot') as ProjectRoutingStrategy,
-    };
+    return decodeRoutingExpressionAst(root);
   },
 });
 
@@ -458,3 +721,19 @@ export const decodeTagFilterRoutingClause = decodeTagFilterClause;
 
 /** Encode a single Lucene tag-filter routing clause (for tests and internal round-trips). */
 export const encodeTagFilterRoutingClause = encodeTagFilterClause;
+
+/**
+ * Encodes enabled tag filter expressions into a project routing string with no `_id`
+ * selection/exclusion clauses. Used for server-side filter search.
+ * Returns `undefined` when there are no filter expressions to encode.
+ */
+export const encodeFilterOnlyRouting = (
+  filterExpressions: readonly FilterExpressionValue[]
+): ProjectRouting | undefined => {
+  if (filterExpressions.length === 0) {
+    return undefined;
+  }
+
+  const encoded = filterExpressions.map(encodeTagFilterClause).filter(Boolean).join(' AND ');
+  return encoded.length > 0 ? encoded : undefined;
+};

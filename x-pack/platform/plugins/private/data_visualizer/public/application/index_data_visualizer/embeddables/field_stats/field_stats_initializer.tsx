@@ -20,8 +20,8 @@ import {
   EuiTitle,
   EuiSpacer,
   EuiIconTip,
-  EuiCallOut,
 } from '@elastic/eui';
+import { KbnInfoCallout } from '@kbn/ui-callout';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { FC } from 'react';
@@ -214,10 +214,9 @@ export const FieldStatisticsInitializer: FC<FieldStatsInitializerProps> = ({
           gutterSize="none"
         >
           {isNewPanel ? (
-            <EuiCallOut
+            <KbnInfoCallout
               announceOnMount={false}
               size="s"
-              iconType="info"
               title={
                 <FormattedMessage
                   id="xpack.dataVisualizer.fieldStatisticsDashboardPanel.config.description"

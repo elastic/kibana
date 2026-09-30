@@ -36,7 +36,7 @@ export const createActionPolicyAttachmentDefinition = ({
   container,
 }: ActionPolicyAttachmentDefinitionServices): AttachmentUIDefinition<ActionPolicyAttachment> => ({
   getLabel: (attachment) => attachment.data.name ?? 'Action Policy',
-  getIcon: () => 'pagesSelect',
+  getIcon: () => 'workflow',
 
   canvasWidth: '40vw',
 

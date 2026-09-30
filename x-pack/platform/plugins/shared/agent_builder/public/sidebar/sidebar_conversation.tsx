@@ -39,13 +39,12 @@ export function SidebarConversation({ onClose }: SidebarComponentProps): React.R
     return null;
   }
 
-  const { options, onRegisterCallbacks, onClose: contextOnClose } = runtimeContext;
+  const { options, onRegisterCallbacks } = runtimeContext;
   const { onClose: externalOnClose, ...restOptions } = options;
 
   const handleOnClose = () => {
     onClose(); // closes the sidebar panel
     externalOnClose?.(); // calls the consumer's optionally defined onClose callback
-    contextOnClose?.(); // clears up internal implementation in plugin and context
   };
 
   return (

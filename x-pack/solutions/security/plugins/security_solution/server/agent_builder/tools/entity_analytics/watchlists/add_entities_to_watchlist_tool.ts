@@ -58,6 +58,13 @@ Use when the user asks to add entities to a named or known watchlist (e.g. "add 
 Entities not present in the entity store are reported as \`not_found\` in the result — the call as a whole still succeeds.`,
     schema,
     tags: ['security', 'entity-analytics', 'watchlists'],
+    annotations: {
+      title: 'Add Entities to Watchlist',
+      readOnlyHint: false,
+      destructiveHint: false,
+      idempotentHint: false,
+      openWorldHint: false,
+    },
     availability: {
       cacheMode: 'space',
       handler: ({ request }) =>

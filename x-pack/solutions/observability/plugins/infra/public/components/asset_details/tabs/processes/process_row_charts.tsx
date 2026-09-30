@@ -25,7 +25,10 @@ import { css } from '@emotion/react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { decodeOrThrow } from '@kbn/io-ts-utils';
 import { isPending, useFetcher } from '../../../../hooks/use_fetcher';
-import { calculateDomain } from '../../../../pages/metrics/metrics_explorer/components/helpers/calculate_domain';
+import {
+  applyHeadroomToDomain,
+  calculateDomain,
+} from '../../../../pages/metrics/metrics_explorer/components/helpers/calculate_domain';
 import { useTimelineChartTheme } from '../../../../hooks/use_timeline_chart_theme';
 import { MetricExplorerSeriesChart } from '../../../../pages/metrics/metrics_explorer/components/series_chart';
 import { Color } from '../../../../../common/color_palette';
@@ -161,12 +164,7 @@ const ProcessChart = ({ timeseries, color, label }: ProcessChartProps) => {
   const yAxisFormatter = createFormatter('percent');
 
   const dataDomain = calculateDomain(timeseries, [chartMetric], false);
-  const domain = dataDomain
-    ? {
-        max: dataDomain.max * 1.1, // add 10% headroom.
-        min: dataDomain.min,
-      }
-    : { max: 0, min: 0 };
+  const domain = dataDomain ? applyHeadroomToDomain(dataDomain) : { max: 0, min: 0 };
 
   return (
     <Chart

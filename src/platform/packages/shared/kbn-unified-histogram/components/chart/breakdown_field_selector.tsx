@@ -9,7 +9,7 @@
 
 import React, { useCallback, useMemo } from 'react';
 import type { FieldsMetadataPublicStart } from '@kbn/fields-metadata-plugin/public';
-import type { EuiSelectableOption } from '@elastic/eui';
+import { EuiTextTruncate, type EuiSelectableOption } from '@elastic/eui';
 import {
   FieldIcon,
   getFieldIconProps,
@@ -22,6 +22,7 @@ import { type DataView, DataViewField } from '@kbn/data-views-plugin/common';
 import type { DatatableColumn } from '@kbn/expressions-plugin/common';
 import { convertDatatableColumnToDataViewFieldSpec } from '@kbn/data-view-utils';
 import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
 import {
   EMPTY_OPTION,
   ToolbarSelector,
@@ -41,6 +42,43 @@ const BREAKDOWN_EBT_BASE = {
   action: EBT_CLICK_ACTIONS.SET_BREAKDOWN,
   element: CHARTS_TOOLBAR_EBT_ELEMENT,
 } as const;
+
+// Caps how wide the field name can render within the button,
+// so a long name doesn't grow the button unbounded
+const FIELD_NAME_MAX_WIDTH = 300;
+
+const fieldNameWrapperCss = css`
+  position: relative;
+  max-width: ${FIELD_NAME_MAX_WIDTH}px;
+  overflow: hidden;
+  pointer-events: none;
+  text-align: left;
+`;
+
+const fieldNameGhostCss = css`
+  visibility: hidden;
+  white-space: nowrap;
+`;
+
+const fieldNameVisibleCss = css`
+  position: absolute;
+  inset: 0;
+`;
+
+/**
+ * A hidden "ghost" copy of the field name sizes the wrapper via normal flow,
+ * giving EuiTextTruncate a real, non-circular width to truncate against.
+ */
+const FieldNameTruncate = ({ text }: { text: string }) => (
+  <span css={fieldNameWrapperCss}>
+    <span aria-hidden="true" css={fieldNameGhostCss}>
+      {text}
+    </span>
+    <span css={fieldNameVisibleCss}>
+      <EuiTextTruncate text={text} truncation="middle" />
+    </span>
+  </span>
+);
 
 export interface BreakdownFieldSelectorProps {
   dataView: DataView;
@@ -173,16 +211,19 @@ export const BreakdownFieldSelector = ({
       data-selected-value={breakdown?.field?.name}
       searchable
       buttonLabel={
-        breakdown?.field?.displayName
-          ? i18n.translate('unifiedHistogram.breakdownFieldSelector.breakdownByButtonLabel', {
-              defaultMessage: 'Breakdown by {fieldName}',
-              values: {
-                fieldName: breakdown?.field?.displayName,
-              },
-            })
-          : i18n.translate('unifiedHistogram.breakdownFieldSelector.noBreakdownButtonLabel', {
-              defaultMessage: 'No breakdown',
-            })
+        breakdown?.field?.displayName ? (
+          <FormattedMessage
+            id="unifiedHistogram.breakdownFieldSelector.breakdownByButtonLabel"
+            defaultMessage="Breakdown by {fieldName}"
+            values={{
+              fieldName: <FieldNameTruncate text={breakdown.field.displayName} />,
+            }}
+          />
+        ) : (
+          i18n.translate('unifiedHistogram.breakdownFieldSelector.noBreakdownButtonLabel', {
+            defaultMessage: 'No breakdown',
+          })
+        )
       }
       popoverTitle={i18n.translate(
         'unifiedHistogram.breakdownFieldSelector.breakdownFieldPopoverTitle',

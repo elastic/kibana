@@ -13,6 +13,10 @@ import { EditDslStepsFlyout } from './edit_dsl_steps_flyout';
 
 const DATA_TEST_SUBJ = 'streamsEditDslStepsFlyout';
 
+jest.mock('../../../../../../hooks/use_streams_privileges', () => ({
+  useStreamsPrivileges: jest.fn(() => ({ features: { canvas: { enabled: false } } })),
+}));
+
 const tick = async () => {
   await act(async () => {
     await new Promise((r) => setTimeout(r, 0));
