@@ -1459,12 +1459,14 @@ const SummaryCellContent = React.memo(
     shouldShowFieldHandler,
     fieldFormats,
     columnsMeta,
+    isCompressed,
   }: {
     row: DataTableRecord;
     dataView: DataView;
     shouldShowFieldHandler: (fieldName: string) => boolean;
     fieldFormats: ReturnType<typeof useDiscoverServices>['fieldFormats'];
     columnsMeta: DataTableColumnsMeta | undefined;
+    isCompressed: boolean;
   }) => {
     const filteredRow = useMemo(() => filterNullFields(row), [row]);
     return (
@@ -1477,7 +1479,7 @@ const SummaryCellContent = React.memo(
         maxEntries={MAX_SUMMARY_FIELDS}
         fieldFormats={fieldFormats}
         columnsMeta={columnsMeta}
-        isCompressed
+        isCompressed={isCompressed}
       />
     );
   }
@@ -1818,25 +1820,25 @@ export const TanStackDataGrid: React.FC<TanStackDataGridProps> = React.memo(
       const isCompact = dataGridDensity === DataGridDensity.COMPACT;
       const padding = getDataGridDensityPadding(euiTheme, dataGridDensity);
       const typographyScale = isCompact ? 'xs' : 's';
-      const { fontSize, lineHeight: headerLineHeight } = euiFontSize(
-        euiThemeContext,
-        typographyScale,
-        { unit: 'px' }
-      );
+      const { fontSize } = euiFontSize(euiThemeContext, typographyScale, { unit: 'px' });
       const cellPadding = parseFloat(padding);
       const fontSizeValue = String(fontSize ?? (isCompact ? '12px' : '14px'));
       const numericFontSize = parseFloat(fontSizeValue);
-      const numericHeaderLineHeight = parseFloat(String(headerLineHeight));
       // Unified data table values use the code typography line height rather than
       // the tighter header typography line height.
       const numericLineHeight = numericFontSize * 1.6;
+      // Mirrors EuiDataGrid's lineCount height, which truncates the computed line height and padding.
+      const getRowHeightForLines = (lines: number) =>
+        Math.ceil(lines * Math.trunc(numericLineHeight)) + Math.trunc(cellPadding) * 2;
 
       return {
-        rowHeight: Math.floor(numericLineHeight + cellPadding * 2),
-        summaryRowHeight: Math.floor(numericLineHeight * 3 + cellPadding * 2),
+        getRowHeightForLines,
+        rowHeight: getRowHeightForLines(1),
+        summaryRowHeight: getRowHeightForLines(3),
         fontSize: numericFontSize,
         lineHeight: numericLineHeight,
-        headerLineHeight: numericHeaderLineHeight,
+        // Unified data table column headers use a fixed line height regardless of density.
+        headerLineHeight: parseFloat(euiTheme.size.base),
         cellPadding,
         icon: DENSITY_ICONS[dataGridDensity],
       };
@@ -2197,6 +2199,7 @@ export const TanStackDataGrid: React.FC<TanStackDataGridProps> = React.memo(
             shouldShowFieldHandler={shouldShowFieldHandler}
             fieldFormats={fieldFormats}
             columnsMeta={columnsMeta}
+            isCompressed={dataGridDensity === DataGridDensity.COMPACT}
           />
         ),
       };
@@ -2305,6 +2308,7 @@ export const TanStackDataGrid: React.FC<TanStackDataGridProps> = React.memo(
       headerRowHeightLines,
       actionsColumnWidth,
       onToggleExpandDoc,
+      dataGridDensity,
     ]);
 
     const dataColumns = useMemo<TanStackDataColumnDescriptor[]>(() => {
@@ -2455,7 +2459,7 @@ export const TanStackDataGrid: React.FC<TanStackDataGridProps> = React.memo(
       if (rowHeightLines <= 1) {
         return densityCfg.rowHeight;
       }
-      return Math.floor(densityCfg.cellPadding * 2 + densityCfg.lineHeight * rowHeightLines);
+      return densityCfg.getRowHeightForLines(rowHeightLines);
     }, [rowHeightLines, densityCfg, isAutoRowHeight, isSummaryMode]);
     const totalColCount = table.getVisibleLeafColumns().length;
 

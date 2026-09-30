@@ -20,6 +20,7 @@ import {
 } from '@kbn/shared-ux-document-data-cascade';
 import type { UnifiedDataTableProps } from '@kbn/unified-data-table';
 import { getESQLStatsQueryMeta } from '@kbn/esql-utils';
+import type { DiscoverGridImplementation } from '../../../../../components/discover_grid/discover_grid_implementation';
 import { EsqlQuery } from '@elastic/esql';
 import { type ESQLStatsQueryMeta } from '@kbn/esql-utils';
 import { getStatsCommandToOperateOn } from '@kbn/esql-utils/src/utils/cascaded_documents_helpers/utils';
@@ -52,6 +53,7 @@ export interface ESQLDataCascadeProps
   > {
   togglePopover: ReturnType<typeof useEsqlDataCascadeRowActionHelpers>['togglePopover'];
   queryMeta: ESQLStatsQueryMeta;
+  gridImplementation?: DiscoverGridImplementation;
 }
 
 type EsqlDataCascade = typeof DataCascade<ESQLDataGroupNode>;

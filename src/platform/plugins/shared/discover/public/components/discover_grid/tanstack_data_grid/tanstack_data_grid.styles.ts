@@ -85,9 +85,9 @@ export const getTanStackDataGridStyles = (euiTheme: UseEuiTheme['euiTheme']) => 
     padding: 'var(--tsg-cell-padding-v, 4px) var(--tsg-cell-padding-h, 8px)',
     // Leave room for the absolute resize handle on the trailing edge.
     paddingInlineEnd: `calc(var(--tsg-cell-padding-h, 8px) + ${RESIZE_HANDLE_WIDTH * 2}px)`,
-    fontWeight: euiTheme.font.weight.semiBold,
+    fontWeight: euiTheme.font.weight.bold,
     fontSize: 'var(--tsg-font-size, 14px)',
-    lineHeight: 'var(--tsg-header-line-height, 21px)',
+    lineHeight: 'var(--tsg-header-line-height, 16px)',
     overflow: 'hidden',
     borderRight: `${euiTheme.border.width.thin} solid ${euiTheme.components.dataGridVerticalLineBorderColor}`,
     boxSizing: 'border-box',
@@ -488,6 +488,8 @@ export const getTanStackDataGridStyles = (euiTheme: UseEuiTheme['euiTheme']) => 
     display: 'flex',
     flexShrink: 0,
     alignItems: 'center',
+    // Like EuiDataGrid's header button, keep the actions from adding to the header height.
+    marginBlock: 'calc(-1 * var(--tsg-cell-padding-v, 4px))',
     opacity: 0,
     pointerEvents: 'none',
     transition: `opacity ${euiTheme.animation.fast} ease-in`,

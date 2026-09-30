@@ -193,6 +193,7 @@ export const DiscoverGrid: React.FC<DiscoverGridProps> = React.memo(
             showKeyboardShortcuts={props.showKeyboardShortcuts}
             externalCustomRenderers={props.externalCustomRenderers}
             onUpdateDataGridDensity={props.onUpdateDataGridDensity}
+            gridImplementation={resolvedGridImplementation}
           />
         </CascadedDocumentsProvider>
       );
