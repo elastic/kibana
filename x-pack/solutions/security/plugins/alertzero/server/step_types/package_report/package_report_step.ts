@@ -104,11 +104,28 @@ export const createCoverageWriter = ({
     const subjectLabel = (subject: CoverageSubject) =>
       buildCoverageSubject({ reportId: subject.reportId, techniqueId: subject.technique });
 
-    if (!(await isContextEngineEnabled())) {
+    const skipEvery = (reason: CoverageWriteResult['skipped'][number]['reason']) => {
       for (const subject of subjects) {
-        skipped.push({ kiId: subject.kiId, subject: subjectLabel(subject), reason: 'disabled' });
+        skipped.push({ kiId: subject.kiId, subject: subjectLabel(subject), reason });
       }
       return { written, skipped };
+    };
+
+    // Reading the gate goes through the saved objects client, so it can fail on its own.
+    // That must not sink the run: minting proposals does not depend on the Context Engine,
+    // and this gate exists to protect the Context Engine's index, not to decide whether a
+    // confirmed hit reaches an analyst. An unreadable setting is also not a disabled one --
+    // the deployment's intent is unknown, which is reason enough not to write, but not
+    // reason to claim the feature is off.
+    let contextEngineEnabled: boolean;
+    try {
+      contextEngineEnabled = await isContextEngineEnabled();
+    } catch {
+      return skipEvery('storage_failure');
+    }
+
+    if (!contextEngineEnabled) {
+      return skipEvery('disabled');
     }
 
     const esClient = getEsClient();

@@ -449,4 +449,26 @@ describe('createCoverageWriter', () => {
     expect(result.written[0].kiId).toBe(coverageSubject.kiId);
     expect(index).toHaveBeenCalledTimes(1);
   });
+
+  // The gate is a saved objects read, so it can fail on its own. Throwing out of here would
+  // fail the whole packaging step and mint no proposals, for a coverage-only concern.
+  it('treats an unreadable gate as a storage failure instead of failing the run', async () => {
+    const index = jest.fn();
+    const write = createCoverageWriter({
+      spaceId: 'default',
+      isContextEngineEnabled: async () => {
+        throw new Error('saved objects client unavailable');
+      },
+      getEsClient: () => ({ get: jest.fn(), index }),
+    });
+
+    const result = await write([coverageSubject]);
+
+    // Not `disabled`: an unread setting does not tell us the feature is off.
+    expect(result.skipped).toEqual([
+      { kiId: coverageSubject.kiId, subject: expect.any(String), reason: 'storage_failure' },
+    ]);
+    expect(result.written).toEqual([]);
+    expect(index).not.toHaveBeenCalled();
+  });
 });
