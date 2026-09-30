@@ -47,7 +47,6 @@ type WorkspaceLayoutProps = Pick<
   | 'spaces'
   | 'inspect'
 > & {
-  renderCounter: number;
   workspace?: Workspace;
   loading: boolean;
   savedWorkspace: GraphWorkspaceSavedObject;
@@ -62,7 +61,6 @@ interface WorkspaceLayoutStateProps {
 }
 
 export const WorkspaceLayoutComponent = ({
-  renderCounter,
   workspace,
   loading,
   savedWorkspace,
@@ -223,7 +221,6 @@ export const WorkspaceLayoutComponent = ({
           </div>
 
           <ControlPanel
-            renderCounter={renderCounter}
             workspace={workspace}
             control={control}
             selectedNode={selectedNode.current}

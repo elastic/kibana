@@ -6,7 +6,7 @@
  */
 
 import React, { useRef } from 'react';
-import { useDispatch } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import type { ZoomEvent } from 'd3';
 import d3 from 'd3';
 import { css } from '@emotion/react';
@@ -25,6 +25,7 @@ import {
   toggleEdgeSelection,
   toggleNodeSelection,
   type GraphDispatch,
+  workspaceSelector,
 } from '../../state_management';
 
 export interface GraphVisualizationProps {
@@ -324,6 +325,7 @@ const svgTextStyles = ({ euiTheme }: UseEuiTheme) =>
 
 export const ReduxGraphVisualization = (props: GraphVisualizationProps) => {
   const dispatch = useDispatch<GraphDispatch>();
+  useSelector(workspaceSelector);
 
   return (
     <GraphVisualization

@@ -48,19 +48,9 @@ export const WorkspaceRoute = ({
     contentManagement,
   },
 }: WorkspaceRouteProps) => {
-  /**
-   * It's temporary workaround, which should be removed after migration `workspace` to redux.
-   * Ref holds mutable `workspace` object. After each `workspace.methodName(...)` call
-   * (which might mutate `workspace` somehow), react state needs to be updated using
-   * `workspace.changeHandler()`.
-   */
+  // D3 continues to own a mutable runtime workspace while serializable graph state lives in Redux.
   const workspaceRef = useRef<Workspace>();
   const storeRef = useRef<GraphStore>();
-  /**
-   * Providing `workspaceRef.current` to the hook dependencies or components itself
-   * will not leads to updates, therefore `renderCounter` is used to update react state.
-   */
-  const [renderCounter, setRenderCounter] = useState(0);
   const history = useHistory();
 
   const indexPatternProvider = useMemo(
@@ -92,7 +82,6 @@ export const WorkspaceRoute = ({
     if (workspace) {
       storeRef.current?.dispatch(workspaceChanged(createWorkspaceState(workspace)));
     }
-    setRenderCounter((cur) => cur + 1);
   };
 
   const [store] = useState(() =>
@@ -148,7 +137,6 @@ export const WorkspaceRoute = ({
         <WorkspaceLayout
           spaces={spaces}
           sharingSavedObjectProps={sharingSavedObjectProps}
-          renderCounter={renderCounter}
           workspace={workspaceRef.current}
           loading={loading}
           graphSavePolicy={graphSavePolicy}
