@@ -582,7 +582,7 @@ describe('CountTimeframeStrategy', () => {
           buildStrategyStateTransitionContext({
             eventStatus: on,
             stateTransition,
-            eventTimestamp: minute(evaluation - 1),
+            evaluatedAt: minute(evaluation - 1),
             previousEpisode,
           })
         );
