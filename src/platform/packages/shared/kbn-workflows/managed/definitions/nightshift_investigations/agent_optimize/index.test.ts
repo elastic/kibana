@@ -43,6 +43,7 @@ describe('nightshift agent optimize workflow', () => {
         'round_connector_id',
         'round_id',
         'tool_calls',
+        'tool_results',
         'workflow_context',
       ].sort()
     );
@@ -83,6 +84,7 @@ describe('nightshift agent optimize workflow', () => {
                   round_id: '{{ inputs.round_id }}',
                   // Liquid `{{ }}` would stringify the array, leaving the optimizer with no tool calls to read.
                   tool_calls: '${{ inputs.tool_calls }}',
+                  tool_results: '${{ inputs.tool_results }}',
                 }),
               }),
             ],

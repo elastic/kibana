@@ -61,6 +61,14 @@ triggers:
           items:
             type: object
             additionalProperties: true
+        tool_results:
+          type: array
+          description: >
+            Results of the completed round's tool calls, keyed by tool_call_id.
+            Shows the Cortex optimizer what each query returned.
+          items:
+            type: object
+            additionalProperties: true
       additionalProperties: false
 
 steps:
@@ -92,6 +100,7 @@ steps:
               sandbox_id: '{{ steps.obtain_sandbox.output.sandbox_id }}'
               # ${{ }} keeps the array. Liquid `{{ }}` stringifies it as "[object Object]…".
               tool_calls: '${{ inputs.tool_calls }}'
+              tool_results: '${{ inputs.tool_results }}'
       - name: memory
         steps:
           - name: optimize_memory
