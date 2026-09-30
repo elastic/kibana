@@ -162,8 +162,8 @@ describe('Memory dump response action', () => {
       await render();
       await enterConsoleCommand(renderResult, user, `memory-dump --process`);
 
-      expect(renderResult.getByTestId('test-validationError-message').textContent).toEqual(
-        '"pid" or "entityId argument is required for "process" memory dumps'
+      expect(renderResult.getByTestId('test-badArgument-message').textContent).toEqual(
+        'Argument --process requires (only) one of the following arguments: --entityId, --pid'
       );
     });
 
@@ -226,6 +226,83 @@ describe('Memory dump response action', () => {
       expect(renderResult.getByTestId('test-helpOutput')).toHaveTextContent(
         '--process - Generates memory dump for a process (NOTE: not currently supported for this host type)'
       );
+    });
+
+    describe('and --raw argument', () => {
+      beforeEach(() => {
+        mockedContext.setExperimentalFlag({ responseActionsEndpointMemoryDumpRaw: true });
+        (ExperimentalFeaturesServiceMock.get as jest.Mock).mockReturnValue({
+          responseActionsEndpointMemoryDump: true,
+          responseActionsEndpointMemoryDumpRaw: true,
+        });
+      });
+
+      it('should treat --raw as an unsupported argument when feature flag is disabled', async () => {
+        (ExperimentalFeaturesServiceMock.get as jest.Mock).mockReturnValue({
+          responseActionsEndpointMemoryDump: true,
+          responseActionsEndpointMemoryDumpRaw: false,
+        });
+        mockedContext.setExperimentalFlag({ responseActionsEndpointMemoryDumpRaw: false });
+        await render();
+        await enterConsoleCommand(renderResult, user, 'memory-dump --raw');
+
+        expect(renderResult.getByTestId('test-badArgument-message').textContent).toEqual(
+          'The following memory-dump argument is not supported by this command: --raw'
+        );
+      });
+
+      it('should call memory dump api with raw type payload', async () => {
+        await render();
+        await enterConsoleCommand(renderResult, user, 'memory-dump --raw');
+
+        await waitFor(() => {
+          expect(apiMocks.responseProvider.memoryDump).toHaveBeenCalledWith({
+            body: '{"agent_type":"endpoint","endpoint_ids":["a.b.c"],"parameters":{"type":"raw"}}',
+            path: MEMORY_DUMP_ROUTE,
+            version: '2023-10-31',
+          });
+        });
+      });
+
+      it.each`
+        arg           | value
+        ${'pid'}      | ${234}
+        ${'entityId'} | ${'some-entity-id'}
+      `('should error when $arg is used with --raw', async ({ arg, value }) => {
+        await render();
+        await enterConsoleCommand(renderResult, user, `memory-dump --raw --${arg}=${value}`);
+
+        expect(renderResult.getByTestId('test-validationError-message').textContent).toEqual(
+          '"pid" and "entityId" arguments are not supported for "raw" memory dumps'
+        );
+      });
+
+      it('should show --raw in help when memdump_raw capability is present', async () => {
+        await render();
+        await enterConsoleCommand(renderResult, user, 'memory-dump --help');
+
+        expect(renderResult.getByTestId('test-helpOutput')).toHaveTextContent(
+          '--raw - Generates a raw memory dump'
+        );
+      });
+
+      it('should not show --raw in help when memdump_raw capability is absent', async () => {
+        capabilities = capabilities.filter((value) => value !== 'memdump_raw');
+        await render();
+        await enterConsoleCommand(renderResult, user, 'memory-dump --help');
+
+        expect(renderResult.getByTestId('test-helpOutput')).not.toHaveTextContent('--raw');
+      });
+
+      it('should treat --raw as an unsupported argument when memdump_raw capability is absent', async () => {
+        capabilities = capabilities.filter((value) => value !== 'memdump_raw');
+        await render();
+        await enterConsoleCommand(renderResult, user, 'memory-dump --raw');
+
+        expect(renderResult.getByTestId('test-badArgument-message').textContent).toEqual(
+          'The following memory-dump argument is not supported by this command: --raw'
+        );
+      });
     });
   });
 });

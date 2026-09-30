@@ -67,7 +67,7 @@ const mockRegisteredTriggerActions: CreateControlTypeAction[] = [
   {
     id: 'alphabeticalFirst',
     type: 'alphabeticalFirst',
-    getIconType: () => 'lettering',
+    getIconType: () => 'text',
     getDisplayName: () => 'Alphabetically first',
     isCompatible: () => Promise.resolve(true),
     execute: jest.fn().mockReturnValue({

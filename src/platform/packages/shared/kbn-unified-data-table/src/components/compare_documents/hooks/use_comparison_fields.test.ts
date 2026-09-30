@@ -84,6 +84,17 @@ describe('useComparisonFields', () => {
     expect(totalFields).toBe(3);
   });
 
+  it('should exclude _source from selectedFieldNames when showAllFields is false', () => {
+    const { comparisonFields, totalFields } = renderFields({
+      props: {
+        showAllFields: false,
+        selectedFieldNames: ['message', '_source', 'extension'],
+      },
+    });
+    expect(comparisonFields).toEqual(['message', 'extension']);
+    expect(totalFields).toBe(2);
+  });
+
   it('should include fields with matching values if showMatchingValues is true', () => {
     const { comparisonFields, totalFields } = renderFields({ transformHit: matchValues });
     expect(comparisonFields).toEqual([

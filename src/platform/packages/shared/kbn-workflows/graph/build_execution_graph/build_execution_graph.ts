@@ -10,10 +10,8 @@
 import { graphlib } from '@dagrejs/dagre';
 import { omit } from 'lodash';
 import { GraphBuildError } from './graph_build_error';
-import {
-  DEFAULT_WAIT_FOR_APPROVAL_TIMEOUT,
-  isHitlWaitStepType,
-} from '../../common/wait_for_approval';
+import { isHitlWaitStepType } from '../../common/hitl';
+import { DEFAULT_WAIT_FOR_APPROVAL_TIMEOUT } from '../../common/wait_for_approval';
 import { DEFAULT_LOOP_MAX_ITERATIONS } from '../../spec/schema';
 import type {
   BaseStep,
@@ -1117,7 +1115,7 @@ function buildParallelBranchBody(
       `Parallel step "${stepId}" has a branch body containing unsupported flow-control ` +
         `("${flowControlNode.type}"). A parallel branch body must be a straight-line sequence of ` +
         `atomic steps with no nested flow-control (if/switch/foreach/while), no step-level ` +
-        `"on-failure" handler, and no step-level "timeout".`,
+        `"if", no step-level "on-failure" handler, and no step-level "timeout".`,
       stepId
     );
   }

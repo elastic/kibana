@@ -35,7 +35,7 @@ export function getAlertType(): RuleTypeModel {
   return {
     id: 'example.pattern',
     description: 'Creates alerts on a configurable pattern for testing alert lifecycle states',
-    iconClass: 'visBarVerticalStacked',
+    iconClass: 'chartBarVerticalStack',
     documentationUrl: null,
     ruleParamsExpression: PatternExpression,
     validate: (params: PatternParams) => {
@@ -167,7 +167,7 @@ const PatternExpression: React.FunctionComponent<RuleTypeParamsExpressionProps<P
     <Fragment>
       <EuiCallOut
         title="Pattern rule for alert lifecycle testing"
-        iconType="beaker"
+        iconType="flask"
         size="s"
         color="primary"
       >
@@ -221,7 +221,7 @@ const PatternExpression: React.FunctionComponent<RuleTypeParamsExpressionProps<P
 
       <EuiSpacer size="s" />
 
-      <EuiButton size="s" iconType="plusInCircle" onClick={addInstance}>
+      <EuiButton size="s" iconType="plusCircle" onClick={addInstance}>
         Add alert instance
       </EuiButton>
 

@@ -6,7 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { useCallback, useState } from 'react';
+import { useCallback, useRef, useState } from 'react';
 import useLocalStorage from 'react-use/lib/useLocalStorage';
 import type { IHttpFetchError, ResponseErrorBody } from '@kbn/core-http-browser';
 import { useKibana } from '../../hooks/use_kibana';
@@ -31,11 +31,16 @@ export function useApiKeys(): UseApiKeysResult {
   const [creatingEndpointId, setCreatingEndpointId] = useState<ApiEndpointId | undefined>(
     undefined
   );
+  const isCreatingRef = useRef(false);
   const [createdKeysInStorage, setCreatedKeysInStorage] =
     useLocalStorage<Partial<Record<ApiEndpointId, boolean>>>(CREATED_KEYS_STORAGE_KEY);
 
   const createApiKey = useCallback(
     async (endpointId: ApiEndpointId) => {
+      if (isCreatingRef.current) {
+        return;
+      }
+      isCreatingRef.current = true;
       setCreatingEndpointId(endpointId);
       try {
         const { encodedApiKey } = await callObservabilityOnboardingApi(
@@ -66,6 +71,7 @@ export function useApiKeys(): UseApiKeysResult {
             }),
         });
       } finally {
+        isCreatingRef.current = false;
         setCreatingEndpointId(undefined);
       }
     },

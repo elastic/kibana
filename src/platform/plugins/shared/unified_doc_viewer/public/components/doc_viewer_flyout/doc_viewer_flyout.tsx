@@ -7,12 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { ReactNode } from 'react';
 import React, { useCallback, useMemo, useRef } from 'react';
-import type { DocViewerProps } from '@kbn/unified-doc-viewer';
+import type { DocViewerProps, ElasticRequestState } from '@kbn/unified-doc-viewer';
 import { DOC_VIEWER_FLYOUT_HISTORY_KEY } from '@kbn/unified-doc-viewer';
 import { i18n } from '@kbn/i18n';
 import type { DataView } from '@kbn/data-views-plugin/public';
-import type { EuiFlyoutProps } from '@elastic/eui';
+import type { EuiFlyoutMenuAction, EuiFlyoutProps } from '@elastic/eui';
 import {
   EuiFlexGroup,
   EuiFlexItem,
@@ -38,6 +39,7 @@ import { FlyoutHistoryKeyContext } from './flyout_history_key_context';
 import { OriginDocTypeContext } from './origin_doc_type_context';
 import { UnifiedDocViewer } from '../lazy_doc_viewer';
 import { useFlyoutA11y } from './use_flyout_a11y';
+import { UnresolvedDocument, type RequestStateMeta } from './unresolved_document';
 
 export interface UnifiedDocViewerFlyoutProps
   extends Pick<DocViewerProps, 'initialTabId' | 'onUpdateSelectedTabId'> {
@@ -46,6 +48,7 @@ export interface UnifiedDocViewerFlyoutProps
   flyoutTitle?: string;
   flyoutDefaultWidth?: EuiFlyoutProps['size'];
   flyoutActions?: React.ReactNode;
+  flyoutMenuTrailingActions?: EuiFlyoutMenuAction[];
   flyoutType?: 'push' | 'overlay';
   flyoutWidthLocalStorageKey?: string;
   originDocType?: string;
@@ -57,7 +60,14 @@ export interface UnifiedDocViewerFlyoutProps
   isEsqlQuery: boolean;
   columns: string[];
   columnsMeta?: DataTableColumnsMeta;
-  hit: DataTableRecord;
+  /** The expanded document, or undefined while a shared link resolves. */
+  hit?: DataTableRecord;
+  /** Request state rendered when the document is unavailable. */
+  requestState?: ElasticRequestState;
+  /** Identifies the document behind `requestState`, shown when it can't be resolved. */
+  requestStateMeta?: RequestStateMeta;
+  /** Replaces pagination when the document is absent from the current results. */
+  notice?: ReactNode;
   hits?: DataTableRecord[];
   dataView: DataView;
   hideFilteringOnComputedColumns?: boolean;
@@ -92,6 +102,7 @@ export function UnifiedDocViewerFlyout({
   flyoutTitle,
   flyoutDefaultWidth,
   flyoutActions,
+  flyoutMenuTrailingActions,
   flyoutType,
   flyoutWidthLocalStorageKey,
   originDocType,
@@ -101,6 +112,9 @@ export function UnifiedDocViewerFlyout({
   columns,
   columnsMeta,
   hit,
+  requestState,
+  requestStateMeta,
+  notice,
   hits,
   dataView,
   hideFilteringOnComputedColumns,
@@ -130,19 +144,18 @@ export function UnifiedDocViewerFlyout({
   const minWidth = euiTheme.base * 24;
   const maxWidth = euiTheme.breakpoint.xl;
   // Get actual hit with updated highlighted searches
-  const foundHit = useMemo(() => hits?.find(({ id }) => id === hit.id), [hit, hits]);
+  const foundHit = useMemo(() => hits?.find(({ id }) => id === hit?.id), [hit, hits]);
   const actualHit = useMemo(() => foundHit ?? hit, [foundHit, hit]);
   const pageCount = useMemo<number>(() => (hits && foundHit ? hits.length : 0), [foundHit, hits]);
   const activePage = useMemo<number>(() => {
-    const id = hit.id;
-    if (!hits || pageCount <= 1) {
+    if (!hits || !hit || pageCount <= 1) {
       return -1;
     }
 
-    return getIndexByDocId(hits, id);
+    return getIndexByDocId(hits, hit.id);
   }, [hits, hit, pageCount]);
 
-  const renderSubheader = pageCount > 1 || flyoutActions;
+  const renderSubheader = pageCount > 1 || flyoutActions || notice;
 
   const setPage = useCallback(
     (index: number) => {
@@ -193,22 +206,23 @@ export function UnifiedDocViewerFlyout({
     [activePage, onClose, setPage]
   );
 
-  const docViewRenderProps = useMemo<DocViewRenderProps>(
-    () => ({
-      hit: actualHit,
-      dataView,
-      columns,
-      columnsMeta,
-      textBasedHits: isEsqlQuery ? hits : undefined,
-      filter: onFilter,
-      onAddColumn,
-      onRemoveColumn,
-      docViewsRegistry,
-      decreaseAvailableHeightBy: isProjectStyle
-        ? euiTheme.base + PROJECT_VIEW_MARGIN_BOTTOM
-        : euiTheme.base,
-      hideFilteringOnComputedColumns,
-    }),
+  const docViewRenderProps = useMemo<DocViewRenderProps | undefined>(
+    () =>
+      actualHit && {
+        hit: actualHit,
+        dataView,
+        columns,
+        columnsMeta,
+        textBasedHits: isEsqlQuery ? hits : undefined,
+        filter: onFilter,
+        onAddColumn,
+        onRemoveColumn,
+        docViewsRegistry,
+        decreaseAvailableHeightBy: isProjectStyle
+          ? euiTheme.base + PROJECT_VIEW_MARGIN_BOTTOM
+          : euiTheme.base,
+        hideFilteringOnComputedColumns,
+      },
     [
       actualHit,
       dataView,
@@ -253,6 +267,7 @@ export function UnifiedDocViewerFlyout({
               title: currentFlyoutTitle,
               'data-test-subj': 'docViewerRowDetailsTitle',
               hideTitle: false,
+              trailingActions: flyoutMenuTrailingActions,
             }}
             className="DiscoverFlyout" // used to override the z-index of the flyout from SecuritySolution
             onClose={onClose}
@@ -285,7 +300,7 @@ export function UnifiedDocViewerFlyout({
                   wrap={true}
                   css={{ paddingBlock: euiTheme.size.s, paddingInline: euiTheme.size.m }}
                 >
-                  {activePage !== -1 && (
+                  {activePage !== -1 ? (
                     <EuiFlexItem data-test-subj={`docViewerFlyoutNavigationPage-${activePage}`}>
                       <EuiPagination
                         aria-label={i18n.translate('unifiedDocViewer.flyout.documentNavigation', {
@@ -298,33 +313,46 @@ export function UnifiedDocViewerFlyout({
                         data-test-subj="docViewerFlyoutNavigation"
                       />
                     </EuiFlexItem>
+                  ) : (
+                    notice && (
+                      <EuiFlexItem data-test-subj="docViewerFlyoutNotice">{notice}</EuiFlexItem>
+                    )
                   )}
                   <EuiFlexItem grow={false} css={{ marginLeft: 'auto' }}>
-                    {isEsqlQuery || !flyoutActions ? null : <>{flyoutActions}</>}
+                    {flyoutActions}
                   </EuiFlexItem>
                 </EuiFlexGroup>
                 <EuiHorizontalRule margin="none" />
               </>
             )}
             <EuiFlyoutBody>
-              {renderCustomHeader && (
+              {actualHit && docViewRenderProps ? (
                 <>
-                  {renderCustomHeader(docViewRenderProps)}
-                  <EuiSpacer size="m" />
+                  {renderCustomHeader && (
+                    <>
+                      {renderCustomHeader(docViewRenderProps)}
+                      <EuiSpacer size="m" />
+                    </>
+                  )}
+                  <UnifiedDocViewer
+                    key={actualHit.id}
+                    ref={docViewerRef}
+                    initialTabId={initialTabId}
+                    initialState={initialDocViewerState}
+                    onInitialStateChange={onInitialDocViewerStateChange}
+                    onUpdateSelectedTabId={onUpdateSelectedTabId}
+                    originDocType={originDocType}
+                    {...docViewRenderProps}
+                  />
                 </>
+              ) : (
+                <UnresolvedDocument
+                  requestState={requestState}
+                  requestStateMeta={requestStateMeta}
+                />
               )}
-              <UnifiedDocViewer
-                key={actualHit.id}
-                ref={docViewerRef}
-                initialTabId={initialTabId}
-                initialState={initialDocViewerState}
-                onInitialStateChange={onInitialDocViewerStateChange}
-                onUpdateSelectedTabId={onUpdateSelectedTabId}
-                originDocType={originDocType}
-                {...docViewRenderProps}
-              />
             </EuiFlyoutBody>
-            {renderCustomFooter && (
+            {renderCustomFooter && docViewRenderProps && (
               <EuiFlyoutFooter>{renderCustomFooter(docViewRenderProps)}</EuiFlyoutFooter>
             )}
           </EuiFlyout>

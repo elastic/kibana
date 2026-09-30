@@ -7,58 +7,57 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { schema } from '@kbn/config-schema';
+import { z } from '@kbn/zod';
+import type { Serializable } from '@kbn/utility-types';
 import { FilterStateStore } from '@kbn/es-query-constants';
 
-export const filterStateStoreSchema = schema.oneOf(
-  [schema.literal(FilterStateStore.APP_STATE), schema.literal(FilterStateStore.GLOBAL_STATE)],
-  {
-    meta: {
-      description:
-        "Denote whether a filter is specific to an application's context (e.g. 'appState') or whether it should be applied globally (e.g. 'globalState').",
-    },
-  }
-);
+export const filterStateStoreSchema = z
+  .union([z.literal(FilterStateStore.APP_STATE), z.literal(FilterStateStore.GLOBAL_STATE)])
+  .meta({
+    description:
+      "Denote whether a filter is specific to an application's context (e.g. 'appState') or whether it should be applied globally (e.g. 'globalState').",
+  });
 
-export const storedFilterMetaSchema = schema.object(
-  {
-    alias: schema.maybe(schema.nullable(schema.string())),
-    disabled: schema.maybe(schema.boolean()),
-    negate: schema.maybe(schema.boolean()),
-    controlledBy: schema.maybe(
-      schema.string({ meta: { description: 'Identifies the owner the filter.' } })
-    ),
-    group: schema.maybe(
-      schema.string({ meta: { description: 'The group to which this filter belongs.' } })
-    ),
-    relation: schema.maybe(schema.string()),
+export const storedFilterMetaSchema = z
+  .object({
+    alias: z.string().nullable().optional(),
+    disabled: z.boolean().optional(),
+    negate: z.boolean().optional(),
+    controlledBy: z.string().optional().meta({ description: 'Identifies the owner the filter.' }),
+    group: z.string().optional().meta({ description: 'The group to which this filter belongs.' }),
+    relation: z.string().optional(),
     // field is missing from the Filter type, but is stored in SerializedSearchSourceFields
     // see the todo in src/platform/packages/shared/kbn-es-query/src/filters/helpers/update_filter.ts
-    field: schema.maybe(schema.string()),
-    index: schema.maybe(schema.string()),
-    isMultiIndex: schema.maybe(schema.boolean()),
-    type: schema.maybe(schema.string()),
-    key: schema.maybe(schema.string()),
+    field: z.string().optional(),
+    index: z.string().optional(),
+    isMultiIndex: z.boolean().optional(),
+    type: z.string().optional(),
+    key: z.string().optional(),
     // We could consider creating FilterMetaParams as a schema to match the concrete Filter type.
     // However, this is difficult because FilterMetaParams can be a `storedFilterSchema` which is defined below.
     // This would require a more complex schema definition that can handle recursive types.
-    // For now, we use `schema.any()` to allow flexibility in the params field.
-    params: schema.maybe(schema.any()),
+    // For now, we use `z.any()` to allow flexibility in the params field.
+    params: z.any().optional(),
     // Typing as any since value is undocumented subset of FilterMetaParams
-    value: schema.maybe(schema.any()),
-  },
-  { unknowns: 'allow' }
-);
+    value: z.any().optional(),
+  })
+  .loose();
 
-export const storedFilterSchema = schema.object(
-  {
-    meta: storedFilterMetaSchema,
-    query: schema.maybe(schema.recordOf(schema.string(), schema.any())),
-    $state: schema.maybe(
-      schema.object({
+type StoredFilterMeta = z.output<typeof storedFilterMetaSchema> & {
+  // TODO: getLocation method expects a SerializableRecord not unknown values, see https://github.com/elastic/kibana/issues/269196
+  [key: string]: Serializable;
+};
+
+export const storedFilterSchema = z
+  .object({
+    meta: storedFilterMetaSchema as z.ZodType<StoredFilterMeta>,
+    query: z.record(z.string(), z.any()).optional(),
+    $state: z
+      .object({
         store: filterStateStoreSchema,
       })
-    ),
-  },
-  { meta: { id: 'kbn-es-query-server-storedFilterSchema' } }
-);
+      .strict()
+      .optional(),
+  })
+  .strict()
+  .meta({ id: 'kbn-es-query-server-storedFilterSchema' });

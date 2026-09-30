@@ -28,8 +28,11 @@ const createFeatureFlagsStart = (): jest.Mocked<FeatureFlagsStart> => {
     getNumberValue: jest.fn().mockImplementation((_, fallback) => fallback),
     getStringValue: jest.fn().mockImplementation((_, fallback) => fallback),
     getBooleanValue$: jest.fn().mockImplementation((_, fallback) => of(fallback)),
+    useBooleanValue: jest.fn().mockImplementation((_, fallback) => fallback),
     getStringValue$: jest.fn().mockImplementation((_, fallback) => of(fallback)),
+    useStringValue: jest.fn().mockImplementation((_, fallback) => fallback),
     getNumberValue$: jest.fn().mockImplementation((_, fallback) => of(fallback)),
+    useNumberValue: jest.fn().mockImplementation((_, fallback) => fallback),
   });
 };
 

@@ -98,6 +98,7 @@ export const FirecrawlConnector: ConnectorSpec = {
   actions: {
     scrape: {
       isTool: true,
+      scope: 'read',
       description:
         'Scrape a single URL and extract content (for example, markdown). Markdown is truncated to maxMarkdownLength (default 100000 chars) to avoid context overflow; only set a lower value if a previous scrape returned truncated output and you need to fit within a smaller context.',
       input: ScrapeInputSchema,
@@ -129,6 +130,7 @@ export const FirecrawlConnector: ConnectorSpec = {
 
     search: {
       isTool: true,
+      scope: 'read',
       description:
         'Search the web and get full page content from results. Use when you need to find information across the web by keyword or natural-language query.',
       input: SearchInputSchema,
@@ -143,6 +145,7 @@ export const FirecrawlConnector: ConnectorSpec = {
 
     map: {
       isTool: true,
+      scope: 'read',
       description:
         'Map a website to discover all indexed URLs. Use when you need to list or explore URLs on a site before deciding which pages to scrape or crawl.',
       input: MapInputSchema,
@@ -159,6 +162,7 @@ export const FirecrawlConnector: ConnectorSpec = {
 
     crawl: {
       isTool: true,
+      scope: 'write',
       description:
         'Start an asynchronous crawl of a website; returns a job ID immediately without waiting for results. Use getCrawlStatus with that ID to check progress and retrieve results. Prefer this over crawlAndWait when the site may be large or the crawl duration is unpredictable.',
       input: CrawlInputSchema,
@@ -175,6 +179,7 @@ export const FirecrawlConnector: ConnectorSpec = {
 
     crawlAndWait: {
       isTool: true,
+      scope: 'write',
       description:
         'Synchronously crawl a website and block until the crawl is complete or fails; returns final status and results (url, title, and a markdown snippet per page, up to 30 pages). Use for small or well-known sites where the crawl is expected to finish quickly. For large or unpredictably sized sites, use crawl (async) and getCrawlStatus instead.',
       input: CrawlAndWaitInputSchema,
@@ -215,6 +220,7 @@ export const FirecrawlConnector: ConnectorSpec = {
 
     getCrawlStatus: {
       isTool: true,
+      scope: 'read',
       description:
         'Get the current status and results of an existing crawl job. Pass the job ID returned by a previous crawl call. Returns a slimmed result set (url, title, markdownSnippet per page). Poll this until status is "completed" or "failed".',
       input: GetCrawlStatusInputSchema,
@@ -241,29 +247,15 @@ export const FirecrawlConnector: ConnectorSpec = {
         await ctx.client.post(`${FIRECRAWL_API_BASE}/v2/scrape`, {
           url: 'https://example.com',
         });
-        return {
-          ok: true,
-          message: i18n.translate('core.kibanaConnectorSpecs.firecrawl.test.successMessage', {
-            defaultMessage: 'Successfully connected to Firecrawl API',
-          }),
-        };
       } catch (error) {
-        const err = error as { message?: string; response?: { status?: number; data?: unknown } };
-        const status = err.response?.status;
-        const message =
-          status === 401
-            ? i18n.translate('core.kibanaConnectorSpecs.firecrawl.test.unauthorizedMessage', {
-                defaultMessage: 'Invalid or missing API key',
-              })
-            : err.message ?? 'Unknown error';
-        return {
-          ok: false,
-          message: i18n.translate('core.kibanaConnectorSpecs.firecrawl.test.failureMessage', {
-            defaultMessage: 'Failed to connect to Firecrawl API: {reason}',
-            values: { reason: message },
-          }),
-        };
+        const err = error as { response?: { status?: number } };
+        if (err.response?.status === 401) {
+          throw new Error('Invalid or missing API key');
+        }
+        throw error;
       }
+      return {};
     },
+    enabled: true,
   },
 };

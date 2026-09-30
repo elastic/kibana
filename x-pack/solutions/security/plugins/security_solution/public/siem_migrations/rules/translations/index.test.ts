@@ -22,11 +22,29 @@ const getMessageText = (node: React.ReactNode): string => {
   throw new Error('Unexpected vendor copy message node');
 };
 
+const getDetailsSnapshot = (
+  details: RuleMigrationVendorCopy['copyExportQuery']['details']
+): Record<string, string> | undefined => {
+  if (!details) {
+    return undefined;
+  }
+
+  return Object.fromEntries(
+    Object.entries(details).map(([key, value]) => [key, getMessageText(value)])
+  );
+};
+
 const getSnapshotCopy = (copy: RuleMigrationVendorCopy) => ({
   ...copy,
   missingLookupsList: {
     ...copy.missingLookupsList,
     description: getMessageText(copy.missingLookupsList.description),
+  },
+  copyExportQuery: {
+    description: getMessageText(copy.copyExportQuery.description),
+    ...(copy.copyExportQuery.details
+      ? { details: getDetailsSnapshot(copy.copyExportQuery.details) }
+      : {}),
   },
 });
 
@@ -44,6 +62,12 @@ describe('RULE_MIGRATION_VENDOR_COPY', () => {
           "checkResources": Object {
             "description": "For best translation results, we will review the data for watchlists. If found, we will ask you to upload them next.",
             "title": "Check for watchlists",
+          },
+          "copyExportQuery": Object {
+            "description": "In the Microsoft Azure portal, navigate to Microsoft Sentinel and open your workspace. Go to {analyticsRules}, select the rules you want to migrate, and click {export}. The downloaded JSON file contains your Analytics Rules and can be uploaded here.",
+            "details": Object {
+              "rulesTypeSupportCallout": "As of now only Scheduled & Near Real Time(NRT) rules are supported for migration. Please make sure your export file contains only these types of rules.",
+            },
           },
           "copyrightNotice": "Microsoft, Microsoft Azure, and Microsoft Sentinel are trademarks or registered trademarks of Microsoft Corporation in the United States and other countries.",
           "lookupsFileUpload": Object {
@@ -72,13 +96,25 @@ describe('RULE_MIGRATION_VENDOR_COPY', () => {
             "fileUploadTitle": "Upload your watchlists export",
             "title": "Upload watchlists",
           },
+          "rulesFileUpload": Object {
+            "description": "Upload the Microsoft Sentinel ARM template JSON export containing your Analytics Rules.",
+            "prompt": "Select or drag and drop the exported JSON file",
+          },
         },
         "qradar": Object {
           "checkResources": Object {
             "description": "For best translation results, we will review the data for reference sets. If found, we will ask you to upload them next.",
             "title": "Check for reference sets",
           },
+          "copyExportQuery": Object {
+            "description": "On the Use Case Explorer page, after clicking on the {download} button, select the second option in the Export window. Only the {xmlFileOption} is supported for export rules and dependencies. Leave the default options for the selected checkboxes regarding MITRE mappings and for custom rule attribute mappings.",
+          },
           "copyrightNotice": "IBM® and QRadar® are registered trademarks of International Business Machines Corporation, registered in many jurisdictions worldwide.",
+          "enhancements": Object {
+            "typeOptions": Object {
+              "mitre": "MITRE ATT&CK Mappings",
+            },
+          },
           "lookupsFileUpload": Object {
             "filePickerId": "referenceSetsFilePicker",
             "label": "Upload reference set files",
@@ -105,11 +141,21 @@ describe('RULE_MIGRATION_VENDOR_COPY', () => {
             "fileUploadTitle": "Update your reference sets export",
             "title": "Upload reference sets",
           },
+          "rulesFileUpload": Object {
+            "description": "For best translation results, we will review the data for reference sets. If found, we will ask you to upload them next.",
+            "prompt": "Select or drag and drop the exported XML file",
+          },
         },
         "splunk": Object {
           "checkResources": Object {
             "description": "For best translation results, we will review the data for macros and lookups. If found, we will ask you to upload them next.",
             "title": "Check for macros and lookups",
+          },
+          "copyExportQuery": Object {
+            "description": "Log in to your Splunk admin account, go to the {section} app and run the following query. Export your results as {format}.",
+            "details": Object {
+              "queryLimitDisclaimer": "Note: To avoid exceeding your LLM API rate limit when translating a large number of queries, consider exporting rules in batches, for example by adding {operator} to the query above",
+            },
           },
           "copyrightNotice": "Splunk and related marks are trademarks or registered trademarks of Splunk LLC in the United States and other countries.",
           "lookupsFileUpload": Object {
@@ -137,6 +183,10 @@ describe('RULE_MIGRATION_VENDOR_COPY', () => {
             "description": "We've also found lookups within your rules. To fully translate those rules containing these lookups, follow the step-by-step guide to export and upload them all.",
             "fileUploadTitle": "Update your lookups export",
             "title": "Upload lookups",
+          },
+          "rulesFileUpload": Object {
+            "description": "For best translation results, we will review the data for macros and lookups. If found, we will ask you to upload them next.",
+            "prompt": "Select or drag and drop the exported JSON file",
           },
         },
       }

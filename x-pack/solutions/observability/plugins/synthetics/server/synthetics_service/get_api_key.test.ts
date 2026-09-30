@@ -6,6 +6,7 @@
  */
 
 import {
+  generateAPIKey,
   getAPIKeyForSyntheticsService,
   getServiceApiKeyPrivileges,
   syntheticsIndex,
@@ -136,6 +137,35 @@ describe('getAPIKeyTest', function () {
     expect(getObject).toHaveBeenCalledWith(
       'uptime-synthetics-api-key',
       'ba997842-b0cf-4429-aa9d-578d9bf0d391'
+    );
+  });
+
+  it('marks new service API keys as Kibana-managed', async () => {
+    server.syntheticsEsClient.baseESClient.security.hasPrivileges = jest.fn().mockResolvedValue({
+      cluster: {
+        manage_security: true,
+        monitor: true,
+        read_pipeline: true,
+        read_ilm: true,
+      },
+      index: {
+        [syntheticsIndex]: {
+          auto_configure: true,
+          create_doc: true,
+          view_index_metadata: true,
+          read: true,
+        },
+      },
+    });
+    security.authc.apiKeys.grantAsInternalUser = jest.fn().mockResolvedValue(null);
+
+    await generateAPIKey({ server, request });
+
+    expect(security.authc.apiKeys.grantAsInternalUser).toHaveBeenCalledWith(
+      request,
+      expect.objectContaining({
+        metadata: expect.objectContaining({ managed: true }),
+      })
     );
   });
 });

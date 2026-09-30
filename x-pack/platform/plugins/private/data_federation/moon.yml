@@ -26,6 +26,10 @@ dependsOn:
   - '@kbn/shared-ux-router'
   - '@kbn/features-plugin'
   - '@kbn/kibana-react-plugin'
+  - '@kbn/app-header'
+  - '@kbn/core-doc-links-browser'
+  - '@kbn/ui-callout'
+  - '@kbn/storybook'
 tags:
   - plugin
   - prod
@@ -37,6 +41,7 @@ fileGroups:
     - common/**/*
     - public/**/*
     - server/**/*
+    - .storybook/**/*
     - '!target/**/*'
   jest-config:
     - jest.config.js

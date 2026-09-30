@@ -11,21 +11,23 @@ import type { ReactNode } from 'react';
 import React, { useMemo } from 'react';
 import { css } from '@emotion/react';
 import type { AppMenuConfig, AppMenuItemType } from '@kbn/core-chrome-app-menu-components';
+import type { AppHeaderShareAction } from '@kbn/app-header';
 import { DiscoverAppHeader } from '@kbn/app-header/discover';
 import { AppMenuActionId } from '@kbn/discover-utils';
 import { getChromeHeaderBack, getChromeHeaderTitle } from './utils';
 import { useDiscoverServices } from '../../../../hooks/use_discover_services';
 import { useInternalStateSelector } from '../../state_management/redux';
-import { useIsChromeNextProjectHeader } from './use_is_chrome_next_project_header';
+import { useIsProjectChromeStyle } from './use_is_project_chrome_style';
 
 interface ChromeAppHeaderProps {
   menu?: AppMenuConfig;
+  share?: AppHeaderShareAction;
   tabsBar?: ReactNode;
 }
 
-export const ChromeAppHeader = ({ menu, tabsBar }: ChromeAppHeaderProps) => {
+export const ChromeAppHeader = ({ menu, share, tabsBar }: ChromeAppHeaderProps) => {
   const { embeddableEditor } = useDiscoverServices();
-  const isChromeNextProjectHeader = useIsChromeNextProjectHeader();
+  const isProjectChromeStyle = useIsProjectChromeStyle();
   const persistedDiscoverSession = useInternalStateSelector(
     (state) => state.persistedDiscoverSession
   );
@@ -68,7 +70,7 @@ export const ChromeAppHeader = ({ menu, tabsBar }: ChromeAppHeaderProps) => {
     };
   }, [menu]);
 
-  if (!isChromeNextProjectHeader) {
+  if (!isProjectChromeStyle) {
     return null;
   }
 
@@ -82,6 +84,7 @@ export const ChromeAppHeader = ({ menu, tabsBar }: ChromeAppHeaderProps) => {
         title={title}
         back={back}
         menu={appMenu}
+        share={share}
         sticky={false}
         spacing="compact"
         tabsBar={tabsBar}

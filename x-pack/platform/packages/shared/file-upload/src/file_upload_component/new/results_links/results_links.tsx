@@ -247,7 +247,7 @@ export const ResultsLinks: FC<Props> = ({
         <EuiFlexItem>
           <EuiCard
             hasBorder
-            icon={<EuiIcon aria-hidden={true} size="xxl" type={`productRobot`} />}
+            icon={<EuiIcon aria-hidden={true} size="xxl" type="productAgent" />}
             title={
               <FormattedMessage
                 id="xpack.fileUpload.resultsLinks.agentBuilder"

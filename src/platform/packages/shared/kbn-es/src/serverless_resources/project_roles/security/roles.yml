@@ -1,4 +1,5 @@
 # ----- Copy from internal roles config in elasticsearch-controller
+# Read-tier Dashboard/Discover grants: elastic/elasticsearch-controller#2058
 # modeled after the t1_analyst minus osquery run saved queries privilege, plus endpoint exceptions read
 viewer:
   metadata:
@@ -7,6 +8,19 @@ viewer:
   cluster:
     - 'read_project_routing'
   indices:
+    - names:
+        - .metrics-endpoint.metadata_united_default*
+        - metrics-endpoint.policy-*
+      privileges:
+        - read
+      allow_restricted_indices: false
+    - names:
+        - .logs-osquery_manager.actions-*
+        - .logs-osquery_manager.action.responses-*
+      privileges:
+        - 'read'
+        - 'view_index_metadata'
+      allow_restricted_indices: false
     - names:
         - '.siem-signals*'
         - '.lists-*'
@@ -42,15 +56,23 @@ viewer:
         - '.entities.v1.latest.security_*'
         - '.entities.v1.updates.security_*'
         - '.entities.v1.history.*.security_*'
-        - '.entities.v2.latest.security_*'
-        - '.entities.v2.metadata.security_*'
+        - '.entities.v2.latest.*'
+        - '.entities.v2.metadata.*'
         - 'entities-latest-*'
+        - 'entities-metadata-*'
         - '.ml-anomalies-*'
         - '.entity_analytics.entity-leads*'
         - '.entity_analytics.watchlists.*'
         - security_solution-*.misconfiguration_latest*
       privileges:
         - read
+    # Threat intel indicators. Only the per-space filtered aliases are granted, so the
+    # trailing hyphen is load-bearing: it never matches the bare .threat-intel-indicators index.
+    - names:
+        - '.threat-intel-indicators-*'
+      privileges:
+        - 'read'
+      allow_restricted_indices: false
   applications:
     - application: 'kibana-.kibana'
       privileges:
@@ -68,13 +90,21 @@ viewer:
         - feature_actions.read
         - feature_builtInAlerts.read
         - feature_osquery.read
-        - feature_discover_v2.all
-        - feature_dashboard_v2.all
+        # Dashboard/Discover `.all` was inert while those Kibana features were hidden.
+        # Keep `.read` so unhiding them does not grant write; SIEM `read` already
+        # composes the same read privileges. maps_v2/visualize_v2 stay `.all` because
+        # they remain hidden and Dashboard `read` already composes them.
+        - feature_discover_v2.read
+        - feature_dashboard_v2.read
         - feature_maps_v2.all
         - feature_visualize_v2.all
         - feature_savedQueryManagement.all
         - feature_agentBuilder.read
         - feature_workflowsManagement.read
+        - feature_alertzero.read
+        - feature_agenticInvestigations.read
+        - feature_proposals.read
+        - feature_agenticInvestigations.escalations_read
       resources: '*'
   run_as: []
 
@@ -86,6 +116,29 @@ editor:
   cluster:
     - 'read_project_routing'
   indices:
+    - names:
+        - metrics-endpoint.metadata_current_*
+      privileges:
+        - read
+    - names:
+        - .logs-endpoint.actions-*
+        - .logs-endpoint.action.responses-*
+      privileges:
+        - read
+      allow_restricted_indices: false
+    - names:
+        - .metrics-endpoint.metadata_united_default*
+        - metrics-endpoint.policy-*
+      privileges:
+        - read
+      allow_restricted_indices: false
+    - names:
+        - .logs-osquery_manager.actions-*
+        - .logs-osquery_manager.action.responses-*
+      privileges:
+        - 'read'
+        - 'view_index_metadata'
+      allow_restricted_indices: false
     - names:
         - '.siem-signals*'
         - '.lists-*'
@@ -130,9 +183,12 @@ editor:
         - '.entities.v1.updates.security_*'
         - '.entities.v1.history.*.security_*'
         - '.entities.v1.reset*'
-        - '.entities.v2.latest.security_*'
-        - '.entities.v2.metadata.security_*'
+        - '.entities.v2.latest.*'
+        - '.entities.v2.metadata.*'
         - 'entities-latest-*'
+        - 'entities-metadata-*'
+        - '.entity_analytics.watchlists.*'
+        - '.entity_analytics.entity-leads*'
       privileges:
         - 'read'
         - 'view_index_metadata'
@@ -149,6 +205,13 @@ editor:
         - 'view_index_metadata'
         - 'write'
         - 'manage'
+      allow_restricted_indices: false
+    # Threat intel indicators. Only the per-space filtered aliases are granted, so the
+    # trailing hyphen is load-bearing: it never matches the bare .threat-intel-indicators index.
+    - names:
+        - '.threat-intel-indicators-*'
+      privileges:
+        - 'read'
       allow_restricted_indices: false
   applications:
     - application: 'kibana-.kibana'
@@ -185,6 +248,11 @@ editor:
         - feature_savedQueryManagement.all
         - feature_agentBuilder.all
         - feature_workflowsManagement.all
+        - feature_alertzero.all
+        - feature_agenticInvestigations.all
+        - feature_proposals.all
+        - feature_agenticInvestigations.escalations_read
+        - feature_workflowsManagement.workflow_update_managed
       resources: '*'
   run_as: []
 
@@ -195,6 +263,19 @@ t1_analyst:
   cluster:
     - 'read_project_routing'
   indices:
+    - names:
+        - .metrics-endpoint.metadata_united_default*
+        - metrics-endpoint.policy-*
+      privileges:
+        - read
+      allow_restricted_indices: false
+    - names:
+        - .logs-osquery_manager.actions-*
+        - .logs-osquery_manager.action.responses-*
+      privileges:
+        - 'read'
+        - 'view_index_metadata'
+      allow_restricted_indices: false
     - names:
         - '.alerts-security*'
         - '.siem-signals-*'
@@ -231,14 +312,28 @@ t1_analyst:
         - .entities.v1.updates.security_*
         - '.entities.v1.latest.security_*'
         - '.entities.v1.history.*.security_*'
-        - '.entities.v2.latest.security_*'
-        - '.entities.v2.metadata.security_*'
         - 'entities-latest-*'
+        - 'entities-metadata-*'
         - '.ml-anomalies-*'
         - security_solution-*.misconfiguration_latest*
         - .entity_analytics.monitoring*
+        - '.entity_analytics.watchlists.*'
+        - '.entity_analytics.entity-leads*'
       privileges:
         - read
+    - names:
+        - '.entities.v2.latest.*'
+        - '.entities.v2.metadata.*'
+      privileges:
+        - read
+        - view_index_metadata
+    # Threat intel indicators. Only the per-space filtered aliases are granted, so the
+    # trailing hyphen is load-bearing: it never matches the bare .threat-intel-indicators index.
+    - names:
+        - '.threat-intel-indicators-*'
+      privileges:
+        - 'read'
+      allow_restricted_indices: false
   applications:
     - application: 'kibana-.kibana'
       privileges:
@@ -256,13 +351,19 @@ t1_analyst:
         - feature_builtInAlerts.read
         - feature_osquery.read
         - feature_osquery.run_saved_queries
-        - feature_discover_v2.all
-        - feature_dashboard_v2.all
+        # Same as viewer: Dashboard/Discover stay `.read`; maps_v2/visualize_v2 stay
+        # `.all` because those features remain hidden.
+        - feature_discover_v2.read
+        - feature_dashboard_v2.read
         - feature_maps_v2.all
         - feature_visualize_v2.all
         - feature_savedQueryManagement.all
         - feature_agentBuilder.all
         - feature_workflowsManagement.all
+        - feature_alertzero.read
+        - feature_agenticInvestigations.all
+        - feature_proposals.all
+        - feature_agenticInvestigations.escalations_all
       resources: '*'
 
 t2_analyst:
@@ -272,6 +373,19 @@ t2_analyst:
   cluster:
     - 'read_project_routing'
   indices:
+    - names:
+        - .metrics-endpoint.metadata_united_default*
+        - metrics-endpoint.policy-*
+      privileges:
+        - read
+      allow_restricted_indices: false
+    - names:
+        - .logs-osquery_manager.actions-*
+        - .logs-osquery_manager.action.responses-*
+      privileges:
+        - 'read'
+        - 'view_index_metadata'
+      allow_restricted_indices: false
     - names:
         - .alerts-security*
         - .siem-signals-*
@@ -307,6 +421,7 @@ t2_analyst:
         - .entities.v1.updates.security_*
         - '.entities.v1.history.*.security_*'
         - 'entities-latest-*'
+        - 'entities-metadata-*'
         - '.ml-anomalies-*'
         - security_solution-*.misconfiguration_latest*
         - .entity_analytics.monitoring*
@@ -314,12 +429,22 @@ t2_analyst:
         - read
     - names:
         - .asset-criticality.asset-criticality-*
-        - '.entities.v2.latest.security_*'
-        - '.entities.v2.metadata.security_*'
+        - '.entities.v2.latest.*'
+        - '.entities.v2.metadata.*'
+        - '.entity_analytics.watchlists.*'
+        - '.entity_analytics.entity-leads*'
+        - 'entities-latest-*'
       privileges:
         - read
         - view_index_metadata
         - write
+    # Threat intel indicators. Only the per-space filtered aliases are granted, so the
+    # trailing hyphen is load-bearing: it never matches the bare .threat-intel-indicators index.
+    - names:
+        - '.threat-intel-indicators-*'
+      privileges:
+        - 'read'
+      allow_restricted_indices: false
   applications:
     - application: 'kibana-.kibana'
       privileges:
@@ -337,13 +462,19 @@ t2_analyst:
         - feature_builtInAlerts.read
         - feature_osquery.read
         - feature_osquery.run_saved_queries
-        - feature_discover_v2.all
-        - feature_dashboard_v2.all
+        # Same as viewer: Dashboard/Discover stay `.read`; maps_v2/visualize_v2 stay
+        # `.all` because those features remain hidden.
+        - feature_discover_v2.read
+        - feature_dashboard_v2.read
         - feature_maps_v2.all
         - feature_visualize_v2.all
         - feature_savedQueryManagement.all
         - feature_agentBuilder.all
         - feature_workflowsManagement.all
+        - feature_alertzero.read
+        - feature_agenticInvestigations.all
+        - feature_proposals.all
+        - feature_agenticInvestigations.escalations_all
       resources: '*'
 
 t3_analyst:
@@ -353,6 +484,25 @@ t3_analyst:
   cluster:
     - 'read_project_routing'
   indices:
+    - names:
+        - .logs-endpoint.actions-*
+        - .logs-endpoint.action.responses-*
+      privileges:
+        - read
+      allow_restricted_indices: false
+    - names:
+        - .metrics-endpoint.metadata_united_default*
+        - metrics-endpoint.policy-*
+      privileges:
+        - read
+      allow_restricted_indices: false
+    - names:
+        - .logs-osquery_manager.actions-*
+        - .logs-osquery_manager.action.responses-*
+      privileges:
+        - 'read'
+        - 'view_index_metadata'
+      allow_restricted_indices: false
     - names:
         - apm-*-transaction*
         - traces-apm*
@@ -364,8 +514,11 @@ t3_analyst:
         - winlogbeat-*
         - logstash-*
         - .asset-criticality.asset-criticality-*
-        - '.entities.v2.latest.security_*'
-        - '.entities.v2.metadata.security_*'
+        - '.entities.v2.latest.*'
+        - '.entities.v2.metadata.*'
+        - '.entity_analytics.watchlists.*'
+        - '.entity_analytics.entity-leads*'
+        - 'entities-latest-*'
         - security_solution-*.misconfiguration_latest*
       privileges:
         - read
@@ -402,10 +555,18 @@ t3_analyst:
         - .entities.v1.updates.security_*
         - '.entities.v1.history.*.security_*'
         - 'entities-latest-*'
+        - 'entities-metadata-*'
         - '.ml-anomalies-*'
         - .entity_analytics.monitoring*
       privileges:
         - read
+    # Threat intel indicators. Only the per-space filtered aliases are granted, so the
+    # trailing hyphen is load-bearing: it never matches the bare .threat-intel-indicators index.
+    - names:
+        - '.threat-intel-indicators-*'
+      privileges:
+        - 'read'
+      allow_restricted_indices: false
   applications:
     - application: 'kibana-.kibana'
       privileges:
@@ -444,6 +605,11 @@ t3_analyst:
         - feature_savedQueryManagement.all
         - feature_agentBuilder.all
         - feature_workflowsManagement.all
+        - feature_alertzero.all
+        - feature_agenticInvestigations.all
+        - feature_proposals.all
+        - feature_agenticInvestigations.escalations_read
+        - feature_workflowsManagement.workflow_update_managed
       resources: '*'
 
 threat_intelligence_analyst:
@@ -453,6 +619,19 @@ threat_intelligence_analyst:
   cluster:
     - 'read_project_routing'
   indices:
+    - names:
+        - .metrics-endpoint.metadata_united_default*
+        - metrics-endpoint.policy-*
+      privileges:
+        - read
+      allow_restricted_indices: false
+    - names:
+        - .logs-osquery_manager.actions-*
+        - .logs-osquery_manager.action.responses-*
+      privileges:
+        - 'read'
+        - 'view_index_metadata'
+      allow_restricted_indices: false
     - names:
         - apm-*-transaction*
         - traces-apm*
@@ -468,8 +647,8 @@ threat_intelligence_analyst:
         - read
     - names:
         - .asset-criticality.asset-criticality-*
-        - '.entities.v2.latest.security_*'
-        - '.entities.v2.metadata.security_*'
+        - '.entities.v2.latest.*'
+        - '.entities.v2.metadata.*'
       privileges:
         - read
         - view_index_metadata
@@ -508,6 +687,13 @@ threat_intelligence_analyst:
         - '.ml-anomalies-*'
       privileges:
         - read
+    # Threat intel indicators. Only the per-space filtered aliases are granted, so the
+    # trailing hyphen is load-bearing: it never matches the bare .threat-intel-indicators index.
+    - names:
+        - '.threat-intel-indicators-*'
+      privileges:
+        - 'read'
+      allow_restricted_indices: false
   applications:
     - application: 'kibana-.kibana'
       privileges:
@@ -533,6 +719,10 @@ threat_intelligence_analyst:
         - feature_savedQueryManagement.all
         - feature_agentBuilder.all
         - feature_workflowsManagement.all
+        - feature_alertzero.read
+        - feature_agenticInvestigations.all
+        - feature_proposals.all
+        - feature_agenticInvestigations.escalations_all
       resources: '*'
 
 rule_author:
@@ -542,6 +732,25 @@ rule_author:
   cluster:
     - 'read_project_routing'
   indices:
+    - names:
+        - .logs-endpoint.actions-*
+        - .logs-endpoint.action.responses-*
+      privileges:
+        - read
+      allow_restricted_indices: false
+    - names:
+        - .metrics-endpoint.metadata_united_default*
+        - metrics-endpoint.policy-*
+      privileges:
+        - read
+      allow_restricted_indices: false
+    - names:
+        - .logs-osquery_manager.actions-*
+        - .logs-osquery_manager.action.responses-*
+      privileges:
+        - 'read'
+        - 'view_index_metadata'
+      allow_restricted_indices: false
     - names:
         - apm-*-transaction*
         - traces-apm*
@@ -553,8 +762,8 @@ rule_author:
         - winlogbeat-*
         - logstash-*
         - .asset-criticality.asset-criticality-*
-        - '.entities.v2.latest.security_*'
-        - '.entities.v2.metadata.security_*'
+        - '.entities.v2.latest.*'
+        - '.entities.v2.metadata.*'
         - security_solution-*.misconfiguration_latest*
       privileges:
         - read
@@ -593,6 +802,13 @@ rule_author:
         - .entity_analytics.monitoring*
       privileges:
         - read
+    # Threat intel indicators. Only the per-space filtered aliases are granted, so the
+    # trailing hyphen is load-bearing: it never matches the bare .threat-intel-indicators index.
+    - names:
+        - '.threat-intel-indicators-*'
+      privileges:
+        - 'read'
+      allow_restricted_indices: false
   applications:
     - application: 'kibana-.kibana'
       privileges:
@@ -625,6 +841,11 @@ rule_author:
         - feature_savedQueryManagement.all
         - feature_agentBuilder.all
         - feature_workflowsManagement.all
+        - feature_alertzero.all
+        - feature_agenticInvestigations.all
+        - feature_proposals.all
+        - feature_agenticInvestigations.escalations_read
+        - feature_workflowsManagement.workflow_update_managed
       resources: '*'
 
 soc_manager:
@@ -634,6 +855,25 @@ soc_manager:
   cluster:
     - 'read_project_routing'
   indices:
+    - names:
+        - .logs-endpoint.actions-*
+        - .logs-endpoint.action.responses-*
+      privileges:
+        - read
+      allow_restricted_indices: false
+    - names:
+        - .metrics-endpoint.metadata_united_default*
+        - metrics-endpoint.policy-*
+      privileges:
+        - read
+      allow_restricted_indices: false
+    - names:
+        - .logs-osquery_manager.actions-*
+        - .logs-osquery_manager.action.responses-*
+      privileges:
+        - 'read'
+        - 'view_index_metadata'
+      allow_restricted_indices: false
     - names:
         - apm-*-transaction*
         - traces-apm*
@@ -648,9 +888,12 @@ soc_manager:
         - .entities.v1.latest.security_*
         - .entities.v1.updates.security_*
         - '.entities.v1.history.*.security_*'
-        - '.entities.v2.latest.security_*'
-        - '.entities.v2.metadata.security_*'
+        - '.entities.v2.latest.*'
+        - '.entities.v2.metadata.*'
         - 'entities-latest-*'
+        - 'entities-metadata-*'
+        - '.entity_analytics.watchlists.*'
+        - '.entity_analytics.entity-leads*'
         - security_solution-*.misconfiguration_latest*
       privileges:
         - read
@@ -675,14 +918,25 @@ soc_manager:
         - write
         - view_index_metadata
     - names:
+        - risk-score.risk-score-*
+      privileges:
+        - read
+        - write
+    - names:
         - metrics-endpoint.metadata_current_*
         - .fleet-agents*
         - .fleet-actions*
-        - risk-score.risk-score-*
         - '.ml-anomalies-*'
         - .entity_analytics.monitoring*
       privileges:
         - read
+    # Threat intel indicators. Only the per-space filtered aliases are granted, so the
+    # trailing hyphen is load-bearing: it never matches the bare .threat-intel-indicators index.
+    - names:
+        - '.threat-intel-indicators-*'
+      privileges:
+        - 'read'
+      allow_restricted_indices: false
   applications:
     - application: 'kibana-.kibana'
       privileges:
@@ -724,6 +978,11 @@ soc_manager:
         - feature_savedQueryManagement.all
         - feature_agentBuilder.all
         - feature_workflowsManagement.all
+        - feature_alertzero.all
+        - feature_agenticInvestigations.all
+        - feature_proposals.all
+        - feature_agenticInvestigations.escalations_read
+        - feature_workflowsManagement.workflow_update_managed
       resources: '*'
 
 detections_admin:
@@ -732,6 +991,13 @@ detections_admin:
     reserved: true
   cluster: ['manage_index_templates', 'manage_transform', 'read_project_routing']
   indices:
+    - names:
+        - .logs-osquery_manager.actions-*
+        - .logs-osquery_manager.action.responses-*
+      privileges:
+        - 'read'
+        - 'view_index_metadata'
+      allow_restricted_indices: false
     - names:
         - apm-*-transaction*
         - traces-apm*
@@ -773,12 +1039,19 @@ detections_admin:
         - .entities.v1.latest.security_*
         - .entities.v1.updates.security_*
         - '.entities.v1.history.*.security_*'
-        - '.entities.v2.latest.security_*'
-        - '.entities.v2.metadata.security_*'
+        - '.entities.v2.latest.*'
+        - '.entities.v2.metadata.*'
         - 'entities-latest-*'
       privileges:
         - read
         - write
+    # Threat intel indicators. Only the per-space filtered aliases are granted, so the
+    # trailing hyphen is load-bearing: it never matches the bare .threat-intel-indicators index.
+    - names:
+        - '.threat-intel-indicators-*'
+      privileges:
+        - 'read'
+      allow_restricted_indices: false
   applications:
     - application: 'kibana-.kibana'
       privileges:
@@ -802,6 +1075,11 @@ detections_admin:
         - feature_savedQueryManagement.all
         - feature_agentBuilder.all
         - feature_workflowsManagement.all
+        - feature_alertzero.all
+        - feature_agenticInvestigations.all
+        - feature_proposals.all
+        - feature_agenticInvestigations.escalations_read
+        - feature_workflowsManagement.workflow_update_managed
       resources: '*'
 
 platform_engineer:
@@ -810,7 +1088,31 @@ platform_engineer:
     reserved: true
   cluster:
     - manage
+    - 'read_project_routing'
   indices:
+    - names:
+        - metrics-endpoint.metadata_current_*
+      privileges:
+        - read
+    - names:
+        - .logs-endpoint.actions-*
+        - .logs-endpoint.action.responses-*
+      privileges:
+        - read
+      allow_restricted_indices: false
+    - names:
+        - .metrics-endpoint.metadata_united_default*
+        - metrics-endpoint.policy-*
+      privileges:
+        - read
+      allow_restricted_indices: false
+    - names:
+        - .logs-osquery_manager.actions-*
+        - .logs-osquery_manager.action.responses-*
+      privileges:
+        - 'read'
+        - 'view_index_metadata'
+      allow_restricted_indices: false
     - names:
         - apm-*-transaction*
         - traces-apm*
@@ -824,6 +1126,7 @@ platform_engineer:
         - .lists*
         - .items*
         - .alerts-security*
+        - .internal.alerts-security.alerts-*
         - .siem-signals-*
         - .preview.alerts-security*
         - .internal.preview.alerts-security*
@@ -840,9 +1143,12 @@ platform_engineer:
         - .entities.v1.updates.security_*
         - '.entities.v1.history.*.security_*'
         - '.entities.v1.reset*'
-        - '.entities.v2.latest.security_*'
-        - '.entities.v2.metadata.security_*'
+        - '.entities.v2.latest.*'
+        - '.entities.v2.metadata.*'
         - 'entities-latest-*'
+        - 'entities-metadata-*'
+        - '.entity_analytics.watchlists.*'
+        - '.entity_analytics.entity-leads*'
       privileges:
         - read
         - view_index_metadata
@@ -852,6 +1158,13 @@ platform_engineer:
         - .entity_analytics.monitoring*
       privileges:
         - read
+    # Threat intel indicators. Only the per-space filtered aliases are granted, so the
+    # trailing hyphen is load-bearing: it never matches the bare .threat-intel-indicators index.
+    - names:
+        - '.threat-intel-indicators-*'
+      privileges:
+        - 'read'
+      allow_restricted_indices: false
   applications:
     - application: 'kibana-.kibana'
       privileges:
@@ -888,6 +1201,11 @@ platform_engineer:
         - feature_savedQueryManagement.all
         - feature_agentBuilder.all
         - feature_workflowsManagement.all
+        - feature_alertzero.all
+        - feature_agenticInvestigations.all
+        - feature_proposals.all
+        - feature_agenticInvestigations.escalations_read
+        - feature_workflowsManagement.workflow_update_managed
       resources: '*'
 
 endpoint_operations_analyst:
@@ -897,6 +1215,25 @@ endpoint_operations_analyst:
   cluster:
     - 'read_project_routing'
   indices:
+    - names:
+        - .logs-endpoint.actions-*
+        - .logs-endpoint.action.responses-*
+      privileges:
+        - read
+      allow_restricted_indices: false
+    - names:
+        - .metrics-endpoint.metadata_united_default*
+        - metrics-endpoint.policy-*
+      privileges:
+        - read
+      allow_restricted_indices: false
+    - names:
+        - .logs-osquery_manager.actions-*
+        - .logs-osquery_manager.action.responses-*
+      privileges:
+        - 'read'
+        - 'view_index_metadata'
+      allow_restricted_indices: false
     - names:
         - metrics-endpoint.metadata_current_*
         - .fleet-agents*
@@ -944,12 +1281,19 @@ endpoint_operations_analyst:
         - view_index_metadata
     - names:
         - .asset-criticality.asset-criticality-*
-        - '.entities.v2.latest.security_*'
-        - '.entities.v2.metadata.security_*'
+        - '.entities.v2.latest.*'
+        - '.entities.v2.metadata.*'
       privileges:
         - read
         - view_index_metadata
         - write
+    # Threat intel indicators. Only the per-space filtered aliases are granted, so the
+    # trailing hyphen is load-bearing: it never matches the bare .threat-intel-indicators index.
+    - names:
+        - '.threat-intel-indicators-*'
+      privileges:
+        - 'read'
+      allow_restricted_indices: false
   applications:
     - application: 'kibana-.kibana'
       privileges:
@@ -992,6 +1336,10 @@ endpoint_operations_analyst:
         - feature_savedQueryManagement.all
         - feature_agentBuilder.all
         - feature_workflowsManagement.all
+        - feature_alertzero.read
+        - feature_agenticInvestigations.all
+        - feature_proposals.all
+        - feature_agenticInvestigations.escalations_all
       resources: '*'
 
 endpoint_policy_manager:
@@ -1001,6 +1349,19 @@ endpoint_policy_manager:
   cluster:
     - 'read_project_routing'
   indices:
+    - names:
+        - .metrics-endpoint.metadata_united_default*
+        - metrics-endpoint.policy-*
+      privileges:
+        - read
+      allow_restricted_indices: false
+    - names:
+        - .logs-osquery_manager.actions-*
+        - .logs-osquery_manager.action.responses-*
+      privileges:
+        - 'read'
+        - 'view_index_metadata'
+      allow_restricted_indices: false
     - names:
         - metrics-endpoint.metadata_current_*
         - .fleet-agents*
@@ -1028,8 +1389,8 @@ endpoint_policy_manager:
         - read
     - names:
         - .asset-criticality.asset-criticality-*
-        - '.entities.v2.latest.security_*'
-        - '.entities.v2.metadata.security_*'
+        - '.entities.v2.latest.*'
+        - '.entities.v2.metadata.*'
       privileges:
         - read
         - view_index_metadata
@@ -1053,6 +1414,13 @@ endpoint_policy_manager:
         - read
         - write
         - manage
+    # Threat intel indicators. Only the per-space filtered aliases are granted, so the
+    # trailing hyphen is load-bearing: it never matches the bare .threat-intel-indicators index.
+    - names:
+        - '.threat-intel-indicators-*'
+      privileges:
+        - 'read'
+      allow_restricted_indices: false
   applications:
     - application: 'kibana-.kibana'
       privileges:
@@ -1086,6 +1454,10 @@ endpoint_policy_manager:
         - feature_savedQueryManagement.all
         - feature_agentBuilder.all
         - feature_workflowsManagement.all
+        - feature_alertzero.read
+        - feature_agenticInvestigations.all
+        - feature_proposals.all
+        - feature_agenticInvestigations.escalations_all
       resources: '*'
 
 # admin role defined in elasticsearch controller

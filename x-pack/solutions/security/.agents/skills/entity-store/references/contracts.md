@@ -46,8 +46,10 @@ interface EntityStoreApiRequestHandlerContext {
 
 ## Index Naming
 
-- **Latest**: `.entities.v2.latest.security_{namespace}` (single-shard, `mode: 'lookup'`)
-- **Updates**: `.entities.v2.updates.security_{namespace}` (data stream)
+- **Latest**: `.entities.v2.latest.{namespace}` (single-shard, `mode: 'lookup'`)
+- **Updates**: `.entities.v2.updates.{namespace}` (data stream)
+- **Metadata**: `.entities.v2.metadata.{namespace}` (data stream)
+- **Legacy compatibility aliases** (post-migration / install): `.entities.v2.latest.security_{namespace}` and `.entities.v2.metadata.security_{namespace}` point at the neutral assets so roles granting `security_*` keep matching until elasticsearch-controller / ES reserved roles are updated in a compatible release order.
 
 ## Key Fields
 

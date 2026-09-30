@@ -7,7 +7,8 @@
 
 import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { EuiCodeBlock, EuiCallOut } from '@elastic/eui';
+import { EuiCodeBlock } from '@elastic/eui';
+import { KbnInfoCallout } from '@kbn/ui-callout';
 
 import type { Aliases } from '../../../../../../common';
 
@@ -27,14 +28,13 @@ export const TabAliases: React.FunctionComponent<Props> = ({ aliases }) => {
   }
 
   return (
-    <EuiCallOut
+    <KbnInfoCallout
       title={
         <FormattedMessage
           id="xpack.idxMgmt.aliasesTab.noAliasesTitle"
           defaultMessage="No aliases defined."
         />
       }
-      iconType="pin"
       data-test-subj="noAliasesCallout"
       size="s"
     />

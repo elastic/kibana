@@ -12,7 +12,9 @@ import { UnifiedTabs, type UnifiedTabsProps } from '@kbn/unified-tabs';
 import { i18n } from '@kbn/i18n';
 import { AppMenuComponent } from '@kbn/core-chrome-app-menu-components';
 import { MAX_DISCOVER_SESSION_TABS } from '@kbn/saved-search-plugin/common';
-import { ChromeAppHeader, useIsChromeNextProjectHeader } from '../chrome_app_header';
+import { css } from '@emotion/react';
+import { useEuiTheme } from '@elastic/eui';
+import { ChromeAppHeader, useIsProjectChromeStyle } from '../chrome_app_header';
 import { SingleTabView, type SingleTabViewProps } from '../single_tab_view';
 import {
   createTabItem,
@@ -39,11 +41,13 @@ export const TabsView = (props: SingleTabViewProps) => {
   const unsavedTabIds = useInternalStateSelector((state) => state.tabs.unsavedIds);
   const currentDataView = useCurrentTabRuntimeState((tab) => tab.currentDataView$);
   const scopedEbtManager = useCurrentTabRuntimeState((tab) => tab.scopedEbtManager$);
-  const isChromeNextProjectHeader = useIsChromeNextProjectHeader();
+  const isProjectChromeStyle = useIsProjectChromeStyle();
+  const { euiTheme } = useEuiTheme();
 
-  const { getTopTabMenuItems, getAdditionalTabMenuItems, topNavMenuItems } = useAppMenuData({
-    currentDataView,
-  });
+  const { getTopTabMenuItems, getAdditionalTabMenuItems, topNavMenuItems, shareAction } =
+    useAppMenuData({
+      currentDataView,
+    });
 
   const onEvent: UnifiedTabsProps['onEBTEvent'] = useCallback(
     (event) => {
@@ -73,17 +77,42 @@ export const TabsView = (props: SingleTabViewProps) => {
   );
 
   const wrapTabsBar = useMemo((): UnifiedTabsProps['wrapTabsBar'] => {
-    if (isChromeNextProjectHeader) {
-      return (tabsBar) => <ChromeAppHeader menu={topNavMenuItems} tabsBar={tabsBar} />;
+    if (isProjectChromeStyle) {
+      return (tabsBar) => {
+        // Vertical rule separator.
+        const tabsBarWithDelimiter = (
+          <>
+            {tabsBar}
+            {tabsBar && (
+              <span
+                aria-hidden="true"
+                css={css`
+                  width: ${euiTheme.border.width.thin};
+                  height: ${euiTheme.size.base};
+                  background-color: ${euiTheme.colors.borderBasePlain};
+                  margin-left: ${euiTheme.size.xs};
+                `}
+              />
+            )}
+          </>
+        );
+        return (
+          <ChromeAppHeader
+            menu={topNavMenuItems}
+            share={shareAction}
+            tabsBar={tabsBarWithDelimiter}
+          />
+        );
+      };
     }
-  }, [isChromeNextProjectHeader, topNavMenuItems]);
+  }, [isProjectChromeStyle, topNavMenuItems, shareAction, euiTheme]);
 
   const appendRight = useMemo(() => {
-    if (!isChromeNextProjectHeader) {
+    if (!isProjectChromeStyle) {
       return <AppMenuComponent config={topNavMenuItems} />;
     }
     return undefined;
-  }, [isChromeNextProjectHeader, topNavMenuItems]);
+  }, [isProjectChromeStyle, topNavMenuItems]);
 
   const onTabLimitReached: UnifiedTabsProps['onTabLimitReached'] = useCallback(
     (droppedCount: number) => {

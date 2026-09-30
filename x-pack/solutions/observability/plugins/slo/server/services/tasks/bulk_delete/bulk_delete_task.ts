@@ -71,7 +71,7 @@ export class BulkDeleteTask {
                 signal
               );
               const summaryTransformManager = new DefaultSummaryTransformManager(
-                new DefaultSummaryTransformGenerator(),
+                new DefaultSummaryTransformGenerator(false),
                 scopedClusterClient,
                 this.logger,
                 signal

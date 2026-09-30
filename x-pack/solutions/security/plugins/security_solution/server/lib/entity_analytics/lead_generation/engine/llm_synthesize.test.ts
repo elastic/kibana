@@ -7,8 +7,7 @@
 
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import type { InferenceChatModel } from '@kbn/inference-langchain';
-import type { LeadEntity, Observation } from '../types';
-import type { ScoredEntityInput } from './llm_synthesize';
+import type { LeadEntity, Observation, RelatedEntity, ScoredEntity } from '../types';
 
 let mockChainInvokeResult: unknown;
 
@@ -34,7 +33,8 @@ const { llmSynthesizeBatch, __testables } = jest.requireActual('./llm_synthesize
   llmSynthesizeBatch: typeof import('./llm_synthesize').llmSynthesizeBatch;
   __testables: typeof import('./llm_synthesize').__testables;
 };
-const { formatLeadsPayload, formatRiskEscalation } = __testables;
+const { formatLeadsPayload, formatRiskEscalation, formatRelatedEntities, formatPromotionReason } =
+  __testables;
 
 const createMockEntity = (name: string, type = 'user'): LeadEntity => {
   const id = `${type}:${name}`;
@@ -64,13 +64,15 @@ const createMockObservation = (
 const createScoredEntity = (
   name: string,
   priority: number,
-  obsOverrides?: Partial<Observation>[]
-): ScoredEntityInput => {
+  obsOverrides?: Partial<Observation>[],
+  topRelatedEntities: RelatedEntity[] = [],
+  relatedEntityCounts: Record<string, number> = {}
+): ScoredEntity => {
   const entity = createMockEntity(name);
   const observations = obsOverrides
     ? obsOverrides.map((o) => createMockObservation(entity, o))
     : [createMockObservation(entity)];
-  return { entity, priority, observations };
+  return { entity, priority, observations, topRelatedEntities, relatedEntityCounts };
 };
 
 describe('llmSynthesizeBatch', () => {
@@ -82,16 +84,13 @@ describe('llmSynthesizeBatch', () => {
     mockChainInvokeResult = undefined;
   });
 
-  it('returns empty array for empty groups', async () => {
+  it('returns empty array for empty input', async () => {
     const results = await llmSynthesizeBatch(fakeChatModel, [], logger);
     expect(results).toEqual([]);
   });
 
   it('throws when LLM returns wrong number of items', async () => {
-    const groups: ScoredEntityInput[][] = [
-      [createScoredEntity('alice', 8)],
-      [createScoredEntity('bob', 6)],
-    ];
+    const entities: ScoredEntity[] = [createScoredEntity('alice', 8), createScoredEntity('bob', 6)];
 
     mockChainInvokeResult = [
       {
@@ -102,23 +101,23 @@ describe('llmSynthesizeBatch', () => {
       },
     ];
 
-    await expect(llmSynthesizeBatch(fakeChatModel, groups, logger)).rejects.toThrow(
+    await expect(llmSynthesizeBatch(fakeChatModel, entities, logger)).rejects.toThrow(
       /returned 1 items, expected 2/
     );
   });
 
   it('throws when LLM returns a non-array', async () => {
-    const groups: ScoredEntityInput[][] = [[createScoredEntity('alice', 8)]];
+    const entities: ScoredEntity[] = [createScoredEntity('alice', 8)];
 
     mockChainInvokeResult = { title: 'not an array' };
 
-    await expect(llmSynthesizeBatch(fakeChatModel, groups, logger)).rejects.toThrow(
+    await expect(llmSynthesizeBatch(fakeChatModel, entities, logger)).rejects.toThrow(
       /returned object items, expected 1/
     );
   });
 
   it('throws when LLM returns malformed item with missing title', async () => {
-    const groups: ScoredEntityInput[][] = [[createScoredEntity('alice', 8)]];
+    const entities: ScoredEntity[] = [createScoredEntity('alice', 8)];
 
     mockChainInvokeResult = [
       {
@@ -128,13 +127,13 @@ describe('llmSynthesizeBatch', () => {
       },
     ];
 
-    await expect(llmSynthesizeBatch(fakeChatModel, groups, logger)).rejects.toThrow(
+    await expect(llmSynthesizeBatch(fakeChatModel, entities, logger)).rejects.toThrow(
       /malformed JSON/
     );
   });
 
   it('throws when LLM returns malformed item with non-array tags', async () => {
-    const groups: ScoredEntityInput[][] = [[createScoredEntity('alice', 8)]];
+    const entities: ScoredEntity[] = [createScoredEntity('alice', 8)];
 
     mockChainInvokeResult = [
       {
@@ -145,13 +144,13 @@ describe('llmSynthesizeBatch', () => {
       },
     ];
 
-    await expect(llmSynthesizeBatch(fakeChatModel, groups, logger)).rejects.toThrow(
+    await expect(llmSynthesizeBatch(fakeChatModel, entities, logger)).rejects.toThrow(
       /malformed JSON/
     );
   });
 
   it('truncates titles longer than 10 words', async () => {
-    const groups: ScoredEntityInput[][] = [[createScoredEntity('alice', 8)]];
+    const entities: ScoredEntity[] = [createScoredEntity('alice', 8)];
 
     mockChainInvokeResult = [
       {
@@ -163,14 +162,14 @@ describe('llmSynthesizeBatch', () => {
       },
     ];
 
-    const results = await llmSynthesizeBatch(fakeChatModel, groups, logger);
+    const results = await llmSynthesizeBatch(fakeChatModel, entities, logger);
 
     expect(results[0].title.split(/\s+/).length).toBeLessThanOrEqual(10);
     expect(results[0].title).toBe('This Is A Very Long Title That Should Definitely Be');
   });
 
   it('keeps hypothesis-style titles up to 9 words intact', async () => {
-    const groups: ScoredEntityInput[][] = [[createScoredEntity('alice', 8)]];
+    const entities: ScoredEntity[] = [createScoredEntity('alice', 8)];
 
     mockChainInvokeResult = [
       {
@@ -182,14 +181,14 @@ describe('llmSynthesizeBatch', () => {
       },
     ];
 
-    const results = await llmSynthesizeBatch(fakeChatModel, groups, logger);
+    const results = await llmSynthesizeBatch(fakeChatModel, entities, logger);
 
     expect(results[0].title).toBe('Rapid risk score escalation across privileged admin account');
   });
 
   it('renders peer context in the payload when cohort is provided', async () => {
-    const groups: ScoredEntityInput[][] = [
-      [createScoredEntity('alice', 8, [{ type: 'risk_escalation_24h' }])],
+    const entities: ScoredEntity[] = [
+      createScoredEntity('alice', 8, [{ type: 'risk_escalation_24h' }]),
     ];
 
     mockChainInvokeResult = [
@@ -202,7 +201,7 @@ describe('llmSynthesizeBatch', () => {
       },
     ];
 
-    const results = await llmSynthesizeBatch(fakeChatModel, groups, logger, {
+    const results = await llmSynthesizeBatch(fakeChatModel, entities, logger, {
       totalCandidates: 6,
       entityCountByObservationType: { risk_escalation_24h: 5 },
     });
@@ -213,7 +212,7 @@ describe('llmSynthesizeBatch', () => {
   });
 
   it('throws when LLM returns malformed item with missing byline', async () => {
-    const groups: ScoredEntityInput[][] = [[createScoredEntity('alice', 8)]];
+    const entities: ScoredEntity[] = [createScoredEntity('alice', 8)];
 
     mockChainInvokeResult = [
       {
@@ -224,13 +223,13 @@ describe('llmSynthesizeBatch', () => {
       },
     ];
 
-    await expect(llmSynthesizeBatch(fakeChatModel, groups, logger)).rejects.toThrow(
+    await expect(llmSynthesizeBatch(fakeChatModel, entities, logger)).rejects.toThrow(
       /malformed JSON/
     );
   });
 
   it('returns the byline and strips markdown formatting from it', async () => {
-    const groups: ScoredEntityInput[][] = [[createScoredEntity('alice', 8)]];
+    const entities: ScoredEntity[] = [createScoredEntity('alice', 8)];
 
     mockChainInvokeResult = [
       {
@@ -242,14 +241,14 @@ describe('llmSynthesizeBatch', () => {
       },
     ];
 
-    const results = await llmSynthesizeBatch(fakeChatModel, groups, logger);
+    const results = await llmSynthesizeBatch(fakeChatModel, entities, logger);
 
     expect(results[0].byline).not.toContain('**');
     expect(results[0].byline).toBe('alice accessed 2 unfamiliar hosts in the last 24h');
   });
 
   it('strips markdown formatting from descriptions', async () => {
-    const groups: ScoredEntityInput[][] = [[createScoredEntity('alice', 8)]];
+    const entities: ScoredEntity[] = [createScoredEntity('alice', 8)];
 
     mockChainInvokeResult = [
       {
@@ -261,7 +260,7 @@ describe('llmSynthesizeBatch', () => {
       },
     ];
 
-    const results = await llmSynthesizeBatch(fakeChatModel, groups, logger);
+    const results = await llmSynthesizeBatch(fakeChatModel, entities, logger);
 
     expect(results[0].description).not.toContain('**');
     expect(results[0].description).not.toContain('`');
@@ -271,7 +270,7 @@ describe('llmSynthesizeBatch', () => {
   });
 
   it('filters MITRE ATT&CK IDs from tags', async () => {
-    const groups: ScoredEntityInput[][] = [[createScoredEntity('alice', 8)]];
+    const entities: ScoredEntity[] = [createScoredEntity('alice', 8)];
 
     mockChainInvokeResult = [
       {
@@ -283,7 +282,7 @@ describe('llmSynthesizeBatch', () => {
       },
     ];
 
-    const results = await llmSynthesizeBatch(fakeChatModel, groups, logger);
+    const results = await llmSynthesizeBatch(fakeChatModel, entities, logger);
 
     expect(results[0].tags).toEqual(['Credential Access', 'Brute Force']);
     expect(results[0].tags).not.toContain('T1078');
@@ -291,7 +290,7 @@ describe('llmSynthesizeBatch', () => {
   });
 
   it('caps tags at 6 and recommendations at 5', async () => {
-    const groups: ScoredEntityInput[][] = [[createScoredEntity('alice', 8)]];
+    const entities: ScoredEntity[] = [createScoredEntity('alice', 8)];
 
     mockChainInvokeResult = [
       {
@@ -303,17 +302,17 @@ describe('llmSynthesizeBatch', () => {
       },
     ];
 
-    const results = await llmSynthesizeBatch(fakeChatModel, groups, logger);
+    const results = await llmSynthesizeBatch(fakeChatModel, entities, logger);
 
     expect(results[0].tags).toHaveLength(6);
     expect(results[0].recommendations).toHaveLength(5);
   });
 
   it('handles a multi-lead batch correctly preserving order', async () => {
-    const groups: ScoredEntityInput[][] = [
-      [createScoredEntity('alice', 9)],
-      [createScoredEntity('bob', 7)],
-      [createScoredEntity('carol', 5)],
+    const entities: ScoredEntity[] = [
+      createScoredEntity('alice', 9),
+      createScoredEntity('bob', 7),
+      createScoredEntity('carol', 5),
     ];
 
     mockChainInvokeResult = [
@@ -340,7 +339,7 @@ describe('llmSynthesizeBatch', () => {
       },
     ];
 
-    const results = await llmSynthesizeBatch(fakeChatModel, groups, logger);
+    const results = await llmSynthesizeBatch(fakeChatModel, entities, logger);
 
     expect(results).toHaveLength(3);
     expect(results[0].title).toBe('Alice threat');
@@ -349,7 +348,7 @@ describe('llmSynthesizeBatch', () => {
   });
 
   it('coerces non-string tag values via String()', async () => {
-    const groups: ScoredEntityInput[][] = [[createScoredEntity('alice', 8)]];
+    const entities: ScoredEntity[] = [createScoredEntity('alice', 8)];
 
     mockChainInvokeResult = [
       {
@@ -361,7 +360,7 @@ describe('llmSynthesizeBatch', () => {
       },
     ];
 
-    const results = await llmSynthesizeBatch(fakeChatModel, groups, logger);
+    const results = await llmSynthesizeBatch(fakeChatModel, entities, logger);
 
     expect(results[0].tags).toEqual(['42', 'true', 'valid-tag']);
   });
@@ -369,27 +368,86 @@ describe('llmSynthesizeBatch', () => {
 
 describe('formatLeadsPayload', () => {
   it('renders observation scores as signal_strength, never as a bare score', () => {
-    const groups = [[createScoredEntity('alice', 8)]];
+    const entities = [createScoredEntity('alice', 8)];
 
-    const payload = formatLeadsPayload(groups);
+    const payload = formatLeadsPayload(entities);
 
     expect(payload).toContain('signal_strength=80/100');
     expect(payload).not.toMatch(/[^_]score=\d+\/100/);
+  });
+
+  it('omits the Related entities section entirely when the entity has none', () => {
+    const entities = [createScoredEntity('alice', 8)];
+
+    const payload = formatLeadsPayload(entities);
+
+    expect(payload).not.toContain('Related entities');
+  });
+
+  it('includes the Related entities section when the entity has related entities', () => {
+    const entities = [
+      createScoredEntity('alice', 8, undefined, [
+        { id: 'host:web-01', type: 'host', name: 'web-01', kinds: ['administers'] },
+      ]),
+    ];
+
+    const payload = formatLeadsPayload(entities);
+
+    expect(payload).toContain('Related entities:');
+    expect(payload).toContain('administers host "web-01"');
+  });
+
+  it('includes the Promotion reason line when the candidate was promoted', () => {
+    const entity: ScoredEntity = {
+      ...createScoredEntity('alice', 2),
+      promotionReason: 'administers a Critical-risk host',
+      promotionConfidence: 'high',
+    };
+
+    const payload = formatLeadsPayload([entity]);
+
+    expect(payload).toContain(
+      'Promotion reason (confidence: high): administers a Critical-risk host'
+    );
+  });
+
+  it('omits the Promotion reason line for a normally-scored candidate', () => {
+    const entities = [createScoredEntity('alice', 8)];
+
+    const payload = formatLeadsPayload(entities);
+
+    expect(payload).not.toContain('Promotion reason');
+  });
+});
+
+describe('formatPromotionReason', () => {
+  it('returns an empty string when the candidate has no promotion reason', () => {
+    expect(formatPromotionReason(createScoredEntity('alice', 8))).toBe('');
+  });
+
+  it('renders the reason with confidence when present', () => {
+    const entity: ScoredEntity = {
+      ...createScoredEntity('alice', 2),
+      promotionReason: 'owns a high-criticality database',
+      promotionConfidence: 'medium',
+    };
+
+    expect(formatPromotionReason(entity)).toBe(
+      '  Promotion reason (confidence: medium): owns a high-criticality database'
+    );
   });
 });
 
 describe('formatRiskEscalation', () => {
   it('returns a Risk escalation line with the exact from/to/delta/window for a 24h escalation', () => {
-    const group = [
-      createScoredEntity('alice', 9, [
-        {
-          type: 'risk_escalation_24h',
-          metadata: { previous_score: 22, current_score: 63, delta: 41, window: '24 hours' },
-        },
-      ]),
-    ];
+    const entity = createScoredEntity('alice', 9, [
+      {
+        type: 'risk_escalation_24h',
+        metadata: { previous_score: 22, current_score: 63, delta: 41, window: '24 hours' },
+      },
+    ]);
 
-    const line = formatRiskEscalation(group);
+    const line = formatRiskEscalation(entity);
 
     expect(line).toContain('Risk escalation:');
     expect(line).toContain('rose from 22 to 63');
@@ -398,66 +456,155 @@ describe('formatRiskEscalation', () => {
   });
 
   it('returns a Risk escalation line for a 7d escalation', () => {
-    const group = [
-      createScoredEntity('bob', 7, [
-        {
-          type: 'risk_escalation_7d',
-          metadata: { previous_score: 30, current_score: 55, delta: 25, window: '7 days' },
-        },
-      ]),
-    ];
+    const entity = createScoredEntity('bob', 7, [
+      {
+        type: 'risk_escalation_7d',
+        metadata: { previous_score: 30, current_score: 55, delta: 25, window: '7 days' },
+      },
+    ]);
 
-    const line = formatRiskEscalation(group);
+    const line = formatRiskEscalation(entity);
 
     expect(line).toContain('Risk escalation:');
     expect(line).toContain('rose from 30 to 55');
   });
 
   it('picks the escalation with the largest delta when multiple are present', () => {
-    const group = [
-      createScoredEntity('carol', 9, [
-        {
-          type: 'risk_escalation_7d',
-          metadata: { previous_score: 30, current_score: 55, delta: 25, window: '7 days' },
-        },
-        {
-          type: 'risk_escalation_24h',
-          metadata: { previous_score: 40, current_score: 90, delta: 50, window: '24 hours' },
-        },
-      ]),
-    ];
+    const entity = createScoredEntity('carol', 9, [
+      {
+        type: 'risk_escalation_7d',
+        metadata: { previous_score: 30, current_score: 55, delta: 25, window: '7 days' },
+      },
+      {
+        type: 'risk_escalation_24h',
+        metadata: { previous_score: 40, current_score: 90, delta: 50, window: '24 hours' },
+      },
+    ]);
 
-    const line = formatRiskEscalation(group);
+    const line = formatRiskEscalation(entity);
 
     expect(line).toContain('rose from 40 to 90');
   });
 
   it('returns an empty string when there is no escalation observation', () => {
-    const group = [
-      createScoredEntity('dave', 4, [
-        {
-          type: 'newly_observed_entity',
-          score: 40,
-          severity: 'low',
-          confidence: 0.6,
-          metadata: { days_since_first_seen: 1 },
-        },
-      ]),
-    ];
+    const entity = createScoredEntity('dave', 4, [
+      {
+        type: 'newly_observed_entity',
+        score: 40,
+        severity: 'low',
+        confidence: 0.6,
+        metadata: { days_since_first_seen: 1 },
+      },
+    ]);
 
-    expect(formatRiskEscalation(group)).toBe('');
+    expect(formatRiskEscalation(entity)).toBe('');
   });
 
   it('returns an empty string for a 90-day escalation (not a short window)', () => {
-    const group = [
-      createScoredEntity('erin', 6, [
-        {
-          type: 'risk_escalation_90d',
-          metadata: { previous_score: 20, current_score: 45, delta: 25, window: '90 days' },
-        },
-      ]),
-    ];
+    const entity = createScoredEntity('erin', 6, [
+      {
+        type: 'risk_escalation_90d',
+        metadata: { previous_score: 20, current_score: 45, delta: 25, window: '90 days' },
+      },
+    ]);
 
-    expect(formatRiskEscalation(group)).toBe('');
+    expect(formatRiskEscalation(entity)).toBe('');
+  });
+});
+
+describe('formatRelatedEntities', () => {
+  it('returns an empty string when there are no related entities', () => {
+    const entity = createScoredEntity('alice', 8);
+
+    expect(formatRelatedEntities(entity)).toBe('');
+  });
+
+  it('renders kind, type, name, criticality, risk, and interaction count in a compact line', () => {
+    const entity = createScoredEntity('alice', 8, undefined, [
+      {
+        id: 'host:web-01',
+        type: 'host',
+        name: 'web-01',
+        kinds: ['administers'],
+        criticality: 'extreme_impact',
+        riskLevel: 'High',
+      },
+    ]);
+
+    const section = formatRelatedEntities(entity);
+
+    expect(section).toContain('Related entities:');
+    expect(section).toContain(
+      '  - administers host "web-01" (criticality: extreme_impact, risk: High)'
+    );
+  });
+
+  it('renders interactedWithAtLeast as a lower-bound phrase', () => {
+    const entity = createScoredEntity('alice', 8, undefined, [
+      {
+        id: 'host:build-3',
+        type: 'host',
+        name: 'build-3',
+        kinds: ['accesses_infrequently'],
+        interactedWithAtLeast: 4,
+      },
+    ]);
+
+    const section = formatRelatedEntities(entity);
+
+    expect(section).toContain('interacted with: at least 4 entities');
+  });
+
+  it('joins multiple kinds for the same entity', () => {
+    const entity = createScoredEntity('alice', 8, undefined, [
+      {
+        id: 'host:shared',
+        type: 'host',
+        name: 'shared',
+        kinds: ['administers', 'communicates_with'],
+      },
+    ]);
+
+    const section = formatRelatedEntities(entity);
+
+    expect(section).toContain('  - administers, communicates_with host "shared"');
+  });
+
+  it('omits the parenthetical when there is no criticality, risk, or interaction count', () => {
+    const entity = createScoredEntity('alice', 8, undefined, [
+      { id: 'host:bare', type: 'host', name: 'bare', kinds: ['owns'] },
+    ]);
+
+    const section = formatRelatedEntities(entity);
+
+    expect(section).toBe('  Related entities:\n  - owns host "bare"');
+  });
+
+  it('appends a note when relatedEntityCounts shows more exist for a kind than are shown', () => {
+    const entity = createScoredEntity(
+      'alice',
+      8,
+      undefined,
+      [{ id: 'host:a', type: 'host', name: 'a', kinds: ['accesses_frequently'] }],
+      { accesses_frequently: 22 }
+    );
+
+    const section = formatRelatedEntities(entity);
+
+    expect(section).toBe(
+      '  Related entities:\n  - accesses_frequently host "a"\n  (not shown: 21 more accesses_frequently relationships)'
+    );
+  });
+
+  it('does not append a note when relatedEntityCounts matches what was shown', () => {
+    const entity = createScoredEntity(
+      'alice',
+      8,
+      undefined,
+      [{ id: 'host:a', type: 'host', name: 'a', kinds: ['owns'] }],
+      { owns: 1 }
+    );
+
+    expect(formatRelatedEntities(entity)).not.toContain('not shown');
   });
 });

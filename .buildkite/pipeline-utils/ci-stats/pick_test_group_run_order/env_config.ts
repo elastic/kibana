@@ -7,8 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { MAX_MINUTES, RETRIES, PREVENT_SELECTIVE_TESTS_LABEL } from './const';
+import { MAX_MINUTES, RETRIES, PREVENT_SELECTIVE_TESTS_LABEL, PIPELINES } from './const.ts';
 import { collectEnvFromLabels, getRequiredEnv } from '#pipeline-utils';
+import {
+  ftrTestChannel,
+  ftrTestChannels,
+} from '#pipeline-utils/ci-stats/pick_test_group_run_order/test_channels';
 
 const VALID_SOLUTIONS = ['observability', 'search', 'security', 'workplaceai', 'vectordb'];
 const VALID_LIMIT_CONFIG_TYPES = ['unit', 'integration', 'functional'];
@@ -30,9 +34,12 @@ const DEFAULT_TEST_GROUP_TYPE_FUNCTIONAL = 'Functional Tests';
  * the corresponding type is actually going to be emitted.
  */
 export function loadRunOrderConfig() {
+  const pipelineSlug = getRequiredEnv('BUILDKITE_PIPELINE_SLUG');
+  const isMergeQueue = pipelineSlug === PIPELINES.MERGE_QUEUE;
+
   return {
     ownBranch: getRequiredEnv('BUILDKITE_BRANCH'),
-    pipelineSlug: getRequiredEnv('BUILDKITE_PIPELINE_SLUG'),
+    pipelineSlug,
 
     unitType: process.env.TEST_GROUP_TYPE_UNIT || DEFAULT_TEST_GROUP_TYPE_UNIT,
     integrationType: process.env.TEST_GROUP_TYPE_INTEGRATION || DEFAULT_TEST_GROUP_TYPE_INTEGRATION,
@@ -52,6 +59,9 @@ export function loadRunOrderConfig() {
     limitConfigType: parseLimitConfigType(),
     limitSolutions: parseLimitSolutions(),
     ftrConfigPatterns: parseCsvEnv('FTR_CONFIG_PATTERNS'),
+    ftrTestChannels: new Set(
+      parseCsvEnv('FTR_TEST_CHANNELS')?.map(ftrTestChannel.fromString) || ftrTestChannels.default
+    ),
 
     functionalMinimumIsolationMin: parseOptionalFloatEnv('FUNCTIONAL_MINIMUM_ISOLATION_MIN'),
 
@@ -74,12 +84,23 @@ export function loadRunOrderConfig() {
       : ({} as Record<string, string>),
     envFromLabels: collectEnvFromLabels(),
 
-    // default true on PRs
+    isMergeQueue,
     useSelectiveTesting:
-      Boolean(process.env.GITHUB_PR_NUMBER) &&
+      (Boolean(process.env.GITHUB_PR_NUMBER) || isMergeQueue) &&
       !(parseCsvEnv('GITHUB_PR_LABELS') ?? []).includes(PREVENT_SELECTIVE_TESTS_LABEL),
-    prMergeBase: process.env.GITHUB_PR_MERGE_BASE || undefined,
+    // PRs compare from their common ancestor with the target branch. A merge group
+    // compares from the commit it is built on (HEAD~1 for single-PR squash groups),
+    // so earlier queued PRs are excluded.
+    selectionBase: isMergeQueue
+      ? process.env.BUILDKITE_MERGE_QUEUE_BASE_COMMIT || undefined
+      : process.env.GITHUB_PR_MERGE_BASE || undefined,
+    /** Commit whose past test durations size and balance groups; not used to select tests. */
+    timingBase: process.env.GITHUB_PR_MERGE_BASE || process.env.MERGE_QUEUE_MERGE_BASE || undefined,
     prNumber: process.env.GITHUB_PR_NUMBER || undefined,
+
+    allowZeroConfigMatches: ['true', 'yes', '1'].includes(
+      process.env.ALLOW_ZERO_JEST_OR_FTR_CONFIGS?.toLowerCase() || 'false'
+    ),
   } as const;
 }
 

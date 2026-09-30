@@ -78,7 +78,11 @@ export const MonitorStatusCol = ({
             <BadgeStatus
               monitor={monitor}
               status={displayStatus}
-              isBrowserType={monitor.type === MonitorTypeEnum.BROWSER}
+              // API monitors are script-based like browser; the status badge needs
+              // the same "script error" handling as browser monitors.
+              isBrowserType={
+                monitor.type === MonitorTypeEnum.BROWSER || monitor.type === MonitorTypeEnum.API
+              }
               onClickBadge={() => openFlyout(monitor)}
             />
           </EuiFlexItem>
@@ -128,6 +132,7 @@ export const MonitorStatusCol = ({
                   )}
                 >
                   <EuiText
+                    tabIndex={0}
                     size="xs"
                     color="danger"
                     className="eui-textNoWrap"

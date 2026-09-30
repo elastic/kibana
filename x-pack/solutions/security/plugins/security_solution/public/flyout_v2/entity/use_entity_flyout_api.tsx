@@ -16,8 +16,8 @@ import {
   FLYOUT_TYPE,
 } from '../../common/lib/telemetry';
 import {
-  defaultToolsFlyoutProperties,
   useDefaultDocumentFlyoutProperties,
+  useDefaultToolsFlyoutProperties,
 } from '../shared/hooks/use_default_flyout_properties';
 import { useOpenFlyout } from '../shared/hooks/use_open_flyout';
 import {
@@ -216,6 +216,7 @@ export const useEntityFlyoutApi = (): EntityFlyoutApi => {
   const history = useHistory();
   const { session: sessionMode, historyKey } = useFlyoutSessionContext();
   const defaultDocumentFlyoutProperties = useDefaultDocumentFlyoutProperties();
+  const defaultToolsFlyoutProperties = useDefaultToolsFlyoutProperties();
   const open = useOpenFlyout();
   const urlParamKey = urlParamKeyForHistoryKey(historyKey);
   const { writeOnOpen, buildOnClose } = useFlyoutV2UrlWriter(urlParamKey, historyKey);
@@ -249,7 +250,7 @@ export const useEntityFlyoutApi = (): EntityFlyoutApi => {
       session: FLYOUT_SESSION_KIND.START,
       ...(title !== undefined ? { title } : {}),
     }),
-    [historyKey]
+    [defaultToolsFlyoutProperties, historyKey]
   );
 
   // Main entity flyouts.
@@ -670,12 +671,13 @@ export const useEntityFlyoutApi = (): EntityFlyoutApi => {
   // Entity tool flyouts.
   const openEntityRiskInputs = useCallback(
     ({ title, origin, ...props }: OpenEntityRiskInputsParams) => {
-      const { entityType, entityName, entityId } = props;
+      const { entityType, entityName, entityId, subTab } = props;
       writeOnOpen({
         kind: FLYOUT_DESCRIPTOR_KIND.entityRiskInputs,
         entityType: entityType as string,
         entityName,
         entityId,
+        ...(subTab ? { subTab } : {}),
       });
       // Entity tools open session:'start' (roots): the entity main is not persisted alongside the
       // tool, so closing the tool clears the param rather than reverting to the entity.

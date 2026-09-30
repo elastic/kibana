@@ -7,9 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { BehaviorSubject } from 'rxjs';
+import { waitFor } from '@testing-library/react';
+import { BehaviorSubject, Subject } from 'rxjs';
 import type { App, AppUpdatableFields, AppUpdater } from '@kbn/core/public';
-import { coreMock } from '@kbn/core/public/mocks';
+import { applicationServiceMock, coreMock } from '@kbn/core/public/mocks';
 import { licensingMock } from '@kbn/licensing-plugin/public/mocks';
 import {
   WORKFLOWS_GLOBAL_EXECUTIONS_VIEW_ENABLED_SETTING_ID,
@@ -17,10 +18,14 @@ import {
   WORKFLOWS_UI_SETTING_ID,
 } from '@kbn/workflows/common/constants';
 import { workflowsExtensionsMock } from '@kbn/workflows-extensions/public/mocks';
+import { renderApp } from './application';
+import { createStartServicesMock, workflowsManagementMocks } from './mocks';
 import { WorkflowsPlugin } from './plugin';
 import { triggerSchemas } from './trigger_schemas';
 import { PLUGIN_ID } from '../common';
 import { stepSchemas } from '../common/step_schemas';
+
+jest.mock('./application', () => ({ renderApp: jest.fn(() => jest.fn()) }));
 
 jest.mock('./common/lib/telemetry/telemetry_service', () => {
   return {
@@ -57,7 +62,9 @@ describe('WorkflowsPlugin', () => {
   let coreSetup: ReturnType<typeof coreMock.createSetup>;
   let coreStart: ReturnType<typeof coreMock.createStart>;
   let setupDeps: {
+    actions: { isInboundEventsEnabled: boolean };
     triggersActionsUi: { actionTypeRegistry: { register: jest.Mock } };
+    workflowsExtensions: ReturnType<typeof workflowsExtensionsMock.createSetup>;
   };
   let startDeps: {
     workflowsExtensions: ReturnType<typeof workflowsExtensionsMock.createStart>;
@@ -71,7 +78,9 @@ describe('WorkflowsPlugin', () => {
     coreStart = coreMock.createStart();
     coreSetup.plugins.onStart.mockReturnValue(Promise.resolve({ found: false }));
     setupDeps = {
+      actions: { isInboundEventsEnabled: false },
       triggersActionsUi: { actionTypeRegistry: { register: jest.fn() } },
+      workflowsExtensions: workflowsExtensionsMock.createSetup(),
     };
     startDeps = {
       workflowsExtensions: workflowsExtensionsMock.createStart(),
@@ -80,6 +89,33 @@ describe('WorkflowsPlugin', () => {
   });
 
   describe('setup()', () => {
+    it('keeps Core service accounts when the Security plugin also supplies a contract', async () => {
+      coreSetup.uiSettings.get.mockReturnValue(true);
+      const dependencies = { ...createStartServicesMock(), security: { authc: {} } };
+      coreSetup.getStartServices.mockResolvedValue([
+        coreStart,
+        dependencies,
+        workflowsManagementMocks.createStart(),
+      ]);
+      plugin.setup(coreSetup, {
+        actions: {
+          ...setupDeps.actions,
+          validateEmailAddresses: jest.fn(),
+          enabledEmailServices: ['*'],
+          isEarsEnabled: false,
+          isEarsExperimentalEnabled: false,
+        },
+        triggersActionsUi: dependencies.triggersActionsUi,
+        workflowsExtensions: setupDeps.workflowsExtensions,
+      });
+      const [application] = coreSetup.application.register.mock.calls[0];
+      await application.mount(applicationServiceMock.createAppMountParameters());
+      expect(renderApp).toHaveBeenCalledWith(
+        expect.objectContaining({ security: coreStart.security }),
+        expect.anything()
+      );
+    });
+
     it('should return an empty object when workflows UI is disabled', () => {
       coreSetup.uiSettings.get.mockReturnValue(false);
 
@@ -107,12 +143,35 @@ describe('WorkflowsPlugin', () => {
           // Library is registered by default at bootstrap; the executions link is gated by the
           // global uiSetting (off by default). Both are refined reactively at start().
           deepLinks: [
-            expect.objectContaining({ id: 'workflows', path: '/' }),
+            expect.objectContaining({ id: 'list', path: '/' }),
             expect.objectContaining({ id: 'library', path: '/library' }),
           ],
         })
       );
       expect(result).toEqual({});
+    });
+
+    it('does not register inboundWebhook.received when inbound events are disabled', () => {
+      coreSetup.uiSettings.get.mockReturnValue(true);
+
+      plugin.setup(coreSetup, setupDeps as any);
+
+      expect(setupDeps.workflowsExtensions.registerTriggerDefinition).not.toHaveBeenCalled();
+    });
+
+    it('registers inboundWebhook.received when inbound events are enabled', () => {
+      coreSetup.uiSettings.get.mockReturnValue(true);
+      setupDeps.actions.isInboundEventsEnabled = true;
+
+      plugin.setup(coreSetup, setupDeps as any);
+
+      expect(setupDeps.workflowsExtensions.registerTriggerDefinition).toHaveBeenCalledWith(
+        expect.objectContaining({
+          id: 'inboundWebhook.received',
+          stability: 'tech_preview',
+          requiresConnectorId: true,
+        })
+      );
     });
   });
 
@@ -126,6 +185,69 @@ describe('WorkflowsPlugin', () => {
 
       expect(stepSchemas.initialize).toHaveBeenCalledWith(startDeps.workflowsExtensions);
       expect(triggerSchemas.initialize).toHaveBeenCalledWith(startDeps.workflowsExtensions);
+    });
+
+    describe('disabling workflows from Advanced Settings', () => {
+      let updates$: Subject<{ key: string; oldValue: boolean; newValue: boolean }>;
+
+      beforeEach(() => {
+        updates$ = new Subject();
+        coreStart.settings.client.getUpdate$.mockReturnValue(updates$);
+        plugin.start(coreStart, { ...createStartServicesMock(), ...startDeps });
+      });
+
+      afterEach(() => plugin.stop());
+
+      const disableWorkflows = () =>
+        updates$.next({
+          key: WORKFLOWS_UI_SETTING_ID,
+          oldValue: true,
+          newValue: false,
+        });
+
+      it('warns when a successful HTTP response contains workflow failures', async () => {
+        coreStart.http.post.mockResolvedValue({
+          total: 2,
+          disabled: 1,
+          failures: [{ id: 'shared', error: 'Access denied' }],
+        });
+
+        disableWorkflows();
+
+        await waitFor(() =>
+          expect(coreStart.notifications.toasts.addWarning).toHaveBeenCalledWith({
+            title: 'Some workflows could not be disabled',
+            text: '1 workflow could not be disabled and may still run.',
+          })
+        );
+        expect(coreStart.http.post).toHaveBeenCalledWith('/internal/workflows/disable', {
+          version: '1',
+        });
+        expect(coreStart.notifications.toasts.addDanger).not.toHaveBeenCalled();
+      });
+
+      it('does not warn when all workflows were disabled', async () => {
+        coreStart.http.post.mockResolvedValue({ total: 2, disabled: 2, failures: [] });
+
+        disableWorkflows();
+        await coreStart.http.post.mock.results[0].value;
+
+        expect(coreStart.notifications.toasts.addWarning).not.toHaveBeenCalled();
+        expect(coreStart.notifications.toasts.addDanger).not.toHaveBeenCalled();
+      });
+
+      it('shows an error when the disable request fails', async () => {
+        coreStart.http.post.mockRejectedValue(new Error('Request failed'));
+
+        disableWorkflows();
+
+        await waitFor(() =>
+          expect(coreStart.notifications.toasts.addDanger).toHaveBeenCalledWith({
+            title: 'Could not disable workflows',
+            text: 'Workflows may still run. Try again.',
+          })
+        );
+      });
     });
 
     describe('app visibility (visibleIn)', () => {

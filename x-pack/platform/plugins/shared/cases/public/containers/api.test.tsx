@@ -159,7 +159,6 @@ describe('Cases API', () => {
         method: 'GET',
         query: {
           includeComments: true,
-          mode: 'legacy',
         },
         signal: abortCtrl.signal,
       });
@@ -708,6 +707,28 @@ describe('Cases API', () => {
       await findCaseUserActions(basicCase.id, { ...params, authors: [] }, abortCtrl.signal);
       const [, options] = fetchMock.mock.calls[0];
       expect(options.query).not.toHaveProperty('authors');
+    });
+
+    it('should include the sources param in the query when provided', async () => {
+      await findCaseUserActions(
+        basicCase.id,
+        { ...params, sources: ['agent', 'user'] },
+        abortCtrl.signal
+      );
+      expect(fetchMock).toHaveBeenCalledWith(
+        `${CASES_INTERNAL_URL}/${basicCase.id}/user_actions/_find`,
+        {
+          method: 'GET',
+          signal: abortCtrl.signal,
+          query: {
+            types: [],
+            sortOrder: 'asc',
+            page: 1,
+            perPage: 10,
+            sources: ['agent', 'user'],
+          },
+        }
+      );
     });
   });
 

@@ -10,7 +10,7 @@ import { act, render, screen, waitFor } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
 import type { ElementClickListener } from '@elastic/charts';
 import { ALERT_EPISODE_STATUS } from '@kbn/alerting-v2-schemas';
-import type { EpisodeEventRow } from '../../queries/episode_events_query';
+import type { EpisodeEventRow } from '@kbn/alerting-v2-common-queries';
 import { EpisodeSeverity } from '../severity/severity_utils';
 import { AlertEpisodeSeverityHeatmap } from './severity_heatmap';
 
@@ -85,7 +85,7 @@ describe('AlertEpisodeSeverityHeatmap', () => {
     renderHeatmap([createEventRow()]);
 
     expect(screen.getByTestId('alertingV2EpisodeSeverityHeatmap')).toBeInTheDocument();
-    expect(screen.getByText('Severity Timeline')).toBeInTheDocument();
+    expect(screen.getByText('Severity timeline')).toBeInTheDocument();
     expect(screen.getByTestId('mockSeverityHeatmapChart')).toBeInTheDocument();
   });
 

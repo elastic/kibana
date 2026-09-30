@@ -208,30 +208,28 @@ async function getActions(
   options: ActionStatusOptions,
   namespace?: string
 ): Promise<ActionStatus[]> {
+  const filter: object[] = [];
+
+  if (options.date || options.latest) {
+    filter.push({
+      range: {
+        '@timestamp': {
+          // options.date overrides options.latest
+          gte: options.date ?? `now-${(options.latest ?? 0) / 1000}s/s`,
+          lte: options.date ? moment(options.date).add(1, 'days').toISOString() : 'now/s',
+        },
+      },
+    });
+  }
+
+  if (options.scheduledOnly) {
+    filter.push({ range: { start_time: { gt: 'now' } } });
+  }
+
   const query = {
     bool: {
-      must_not: [
-        {
-          term: {
-            type: 'CANCEL',
-          },
-        },
-      ],
-      ...(options.date || options.latest
-        ? {
-            filter: [
-              {
-                range: {
-                  '@timestamp': {
-                    // options.date overrides options.latest
-                    gte: options.date ?? `now-${(options.latest ?? 0) / 1000}s/s`,
-                    lte: options.date ? moment(options.date).add(1, 'days').toISOString() : 'now/s',
-                  },
-                },
-              },
-            ],
-          }
-        : {}),
+      must_not: [{ term: { type: 'CANCEL' } }],
+      ...(filter.length > 0 ? { filter } : {}),
     },
   };
   const res = await esClient.search<FleetServerAgentAction>({
@@ -357,8 +355,9 @@ async function getPolicyChangeActions(
   options: ActionStatusOptions,
   namespace?: string
 ): Promise<ActionStatus[]> {
-  // option.latest is used to fetch recent errors, which policy change actions do not contain
-  if (options.latest) {
+  // Policy change actions never have start_time, so exclude them from scheduledOnly queries.
+  // option.latest is also skipped because policy change actions do not contain recent errors.
+  if (options.latest || options.scheduledOnly) {
     return [];
   }
 

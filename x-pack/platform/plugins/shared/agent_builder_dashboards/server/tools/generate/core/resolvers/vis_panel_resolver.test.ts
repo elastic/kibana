@@ -77,16 +77,18 @@ describe('createVisPanelResolver', () => {
       },
       authoringNote: 'Created a titleless metric showing total requests.',
     });
-    expect(mockedBuildLensConfig).toHaveBeenCalledWith(
-      expect.objectContaining({
-        includeTimeRange: false,
-      })
-    );
+    expect(mockedBuildLensConfig).toHaveBeenCalledTimes(1);
   });
 
   it('creates panel content when the authoring note is missing', async () => {
     mockedBuildLensConfig.mockResolvedValue({
-      validatedConfig: { type: 'metric' },
+      validatedConfig: {
+        type: 'metric',
+        metrics: [{ column: 'count', type: 'primary' }],
+        data_source: { type: 'esql', query: 'FROM logs-* | STATS count = COUNT(*)' },
+        ignore_global_filters: false,
+        sampling: 100,
+      },
       selectedChartType: SupportedChartType.Metric,
       esqlQuery: 'FROM logs-* | STATS count = COUNT(*)',
     });
@@ -109,7 +111,7 @@ describe('createVisPanelResolver', () => {
       type: 'success',
       panelContent: {
         type: LENS_EMBEDDABLE_TYPE,
-        config: { type: 'metric' },
+        config: expect.objectContaining({ type: 'metric' }),
       },
     });
   });
@@ -129,6 +131,8 @@ describe('createVisPanelResolver', () => {
       operationType: 'edit_panels',
       identifier: 'panel-1',
       nlQuery: 'change the title',
+      preserveESQL: true,
+      applyChartRules: true,
       existingPanel: {
         id: 'panel-1',
         type: LENS_EMBEDDABLE_TYPE,
@@ -141,6 +145,8 @@ describe('createVisPanelResolver', () => {
       expect.objectContaining({
         existingConfig: JSON.stringify({ type: 'xy' }),
         parsedExistingConfig: { type: 'xy' },
+        preserveESQL: true,
+        applyChartRules: true,
       })
     );
   });
@@ -213,6 +219,7 @@ describe('createVisPanelResolver', () => {
       operationType: 'edit_panels',
       identifier: 'panel-1',
       nlQuery: 'make it a line chart',
+      preserveESQL: true,
       // A stale "lens" request must be ignored: edits keep the existing renderer.
       renderer: 'lens',
       existingPanel: {
@@ -231,7 +238,35 @@ describe('createVisPanelResolver', () => {
       },
       authoringNote: 'Changed the panel to a line chart.',
     });
-    expect(mockedBuildVegaConfig).toHaveBeenCalledWith(expect.objectContaining({ existingSpec }));
+    expect(mockedBuildVegaConfig).toHaveBeenCalledWith(
+      expect.objectContaining({ existingSpec, preserveESQL: true })
+    );
+    expect(mockedBuildLensConfig).not.toHaveBeenCalled();
+  });
+
+  it('reports unsupported Vega enhancement instead of ignoring the presentation mode', async () => {
+    const resolveVisPanel = createVisPanelResolver({ logger, modelProvider, events, esClient });
+
+    const result = await resolveVisPanel({
+      type: 'vis',
+      operationType: 'edit_panels',
+      identifier: 'panel-1',
+      nlQuery: 'Enhance this panel',
+      applyChartRules: true,
+      preserveESQL: true,
+      existingPanel: {
+        id: 'panel-1',
+        type: VEGA_VIS_TYPE,
+        config: { spec: '{"mark":"bar"}' },
+        grid: { w: 24, h: 10, x: 0, y: 0 },
+      },
+    });
+
+    expect(result).toMatchObject({
+      type: 'failure',
+      failure: { error: 'Presentation enhancement is only supported for ES|QL Lens panels.' },
+    });
+    expect(mockedBuildVegaConfig).not.toHaveBeenCalled();
     expect(mockedBuildLensConfig).not.toHaveBeenCalled();
   });
 

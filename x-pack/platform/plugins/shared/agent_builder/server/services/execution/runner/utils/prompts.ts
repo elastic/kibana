@@ -5,8 +5,11 @@
  * 2.0.
  */
 
-import type { Conversation, ConverseInput } from '@kbn/agent-builder-common';
-import { ConversationRoundStatus } from '@kbn/agent-builder-common';
+import type {
+  Conversation,
+  ConverseInput,
+  ToolConfirmationPolicyMode,
+} from '@kbn/agent-builder-common';
 import type {
   PromptManager,
   ToolPromptManager,
@@ -30,9 +33,9 @@ import {
   isConfirmationPromptResponse,
 } from '@kbn/agent-builder-common/agents/prompts';
 import type { InternalToolDefinition } from '@kbn/agent-builder-server';
-import type { ToolConfirmationPolicyMode } from '@kbn/agent-builder-server/tools';
 import type { ToolPolicyConfirmationDefinition } from '@kbn/agent-builder-server/tools/builtin';
 import { i18nBundles } from '../i18n';
+import { getPendingResumeRound } from '../../utils/pending_round';
 
 export const createPromptManager = ({
   state,
@@ -136,9 +139,8 @@ export const getAgentPromptStorageState = ({
   input: ConverseInput;
   conversation?: Conversation;
 }): PromptStorageState => {
-  const rounds = conversation?.rounds ?? [];
-  const lastRound = rounds[rounds.length - 1];
-  const isResumingRound = lastRound?.status === ConversationRoundStatus.awaitingPrompt;
+  const isResumingRound =
+    conversation !== undefined && getPendingResumeRound(conversation) !== undefined;
 
   // Create a shallow copy to avoid mutating the original conversation state
   const responses = { ...(conversation?.state?.prompt?.responses ?? {}) };

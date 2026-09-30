@@ -38,7 +38,8 @@ import { openLazyFlyout } from '@kbn/presentation-util';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import { dynamic } from '@kbn/shared-ux-utility';
 import { isDefined } from '@kbn/ml-is-defined';
-import { EuiCallOut, EuiEmptyPrompt, EuiFlexItem } from '@elastic/eui';
+import { EuiEmptyPrompt, EuiFlexItem } from '@elastic/eui';
+import { KbnWarningCallout } from '@kbn/ui-callout';
 import { css } from '@emotion/react';
 import type { ActionExecutionContext } from '@kbn/ui-actions-plugin/public';
 import type { Filter } from '@kbn/es-query';
@@ -400,18 +401,14 @@ export const getFieldStatsChartEmbeddableFactory = (
           if (isEsqlMode && !isEsqlEnabled) {
             return (
               <EuiFlexItem css={statsTableCss} data-test-subj="dashboardFieldStatsEmbeddedContent">
-                <EuiCallOut
+                <KbnWarningCallout
                   announceOnMount
                   title={
-                    <h3>
-                      <FormattedMessage
-                        id="xpack.dataVisualizer.fieldStats.noDataViewSelected"
-                        defaultMessage="ES|QL is disabled"
-                      />
-                    </h3>
+                    <FormattedMessage
+                      id="xpack.dataVisualizer.fieldStats.noDataViewSelected"
+                      defaultMessage="ES|QL is disabled"
+                    />
                   }
-                  color="warning"
-                  iconType="warning"
                 />
               </EuiFlexItem>
             );

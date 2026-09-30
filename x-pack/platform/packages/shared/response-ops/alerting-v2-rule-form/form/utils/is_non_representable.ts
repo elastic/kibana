@@ -5,39 +5,47 @@
  * 2.0.
  */
 
-import type { RecoveryStrategy, RuleResponse } from '@kbn/alerting-v2-schemas';
+import type { RuleKind, RuleResponse } from '@kbn/alerting-v2-schemas';
+import { noDataStrategy, recoveryStrategy } from '@kbn/alerting-v2-schemas';
+import type { FormValues } from '../types';
 
-const REPRESENTABLE_RECOVERY_STRATEGIES: readonly RecoveryStrategy[] = [
-  'no_breach',
-  'query',
-  'none',
-];
+/** The lifecycle blocks read structurally, so a form value and a response both fit. */
+interface LifecycleShape {
+  recovery?: { strategy?: string } | null;
+  no_data?: { strategy?: string; query?: string } | null;
+}
 
 /**
- * Determines whether a rule (from the API response) contains features that
- * the GUI form cannot represent. Such rules must be edited in YAML mode only.
+ * Non-representable rules fall back to the YAML editor, which is the only place
+ * their configuration is visible:
  *
- * Non-representable cases:
- * - `alert` kind with `standalone` query format (form requires composed base+segments)
- * - `recovery_strategy` outside the form's supported set (`no_breach` | `query` | `none`; null/unset is fine)
- * - `no_data_strategy: 'emit'` (temporarily rejected by the write API; dropdown has no option)
- *
- * Note: `query.no_data` is not checked separately because it can only appear on
- * standalone format queries, which the `format === 'standalone'` check already catches.
+ * - `recovery.strategy: 'query'` — the form authors recovery as a condition
+ *   appended to `query.base`, so it has no editor for an independent query.
+ * - `no_data.strategy: 'alert'` — the strategy select omits it because the write
+ *   API rejects it, so the form would show no selection and resubmit a value
+ *   that cannot be saved.
+ * - `no_data.query` — the form has no editor for a presence query, and changing
+ *   the strategy would drop it without the user ever seeing it.
  */
-export const isNonRepresentableRule = (rule: RuleResponse): boolean => {
-  if (rule.kind !== 'alert') return false;
+const isNonRepresentable = (
+  kind: RuleKind,
+  { recovery, no_data: noData }: LifecycleShape
+): boolean => {
+  if (kind !== 'alert') return false;
 
-  if (rule.query.format === 'standalone') return true;
-
-  if (
-    rule.recovery_strategy != null &&
-    !REPRESENTABLE_RECOVERY_STRATEGIES.includes(rule.recovery_strategy)
-  ) {
-    return true;
-  }
-
-  if (rule.no_data_strategy === 'emit') return true;
-
-  return false;
+  return (
+    recovery?.strategy === recoveryStrategy.query ||
+    noData?.strategy === noDataStrategy.alert ||
+    Boolean(noData?.query)
+  );
 };
+
+/** True when the rule can only be edited through the YAML fallback. */
+export const isNonRepresentableRule = (rule: RuleResponse): boolean =>
+  isNonRepresentable(rule.kind, rule);
+
+/** True when the in-progress form state can only be edited through the YAML fallback. */
+export const isNonRepresentableFormState = (
+  values: Pick<FormValues, 'kind' | 'recovery' | 'noData'>
+): boolean =>
+  isNonRepresentable(values.kind, { recovery: values.recovery, no_data: values.noData });

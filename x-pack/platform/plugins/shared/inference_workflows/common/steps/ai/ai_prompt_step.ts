@@ -18,6 +18,12 @@ export const AiPromptStepTypeId = 'ai.prompt';
 
 export const ConfigSchema = z.object({
   'connector-id': z.string().optional(),
+  'reasoning-level': z
+    .enum(['none', 'minimal', 'low', 'medium', 'high', 'xhigh'])
+    .optional()
+    .describe(
+      '[tech preview] Reasoning effort level forwarded to the LLM. One of: none, minimal, low, medium, high, xhigh. Support depends on the underlying model and provider.'
+    ),
 });
 
 // Maybe we can define specific schema for metadata in the future

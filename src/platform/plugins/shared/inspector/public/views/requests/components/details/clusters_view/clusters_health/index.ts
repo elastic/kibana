@@ -8,4 +8,4 @@
  */
 
 export { ClustersHealth } from './clusters_health';
-export { ClusterHealth } from './cluster_health';
+export { ClusterHealth, type ClusterHealthStatus } from './cluster_health';

@@ -116,13 +116,6 @@ export const EntityAnalyticsManagementPage = () => {
   const hasEnablementPrivileges =
     userHasRiskEnginePrivileges && userHasEntityStoreInstallPrivileges;
 
-  const canRunEngine =
-    (!riskEnginePrivileges.isLoading &&
-      (riskEnginePrivileges.hasAllRequiredPrivileges ||
-        (!riskEnginePrivileges.hasAllRequiredPrivileges &&
-          riskEnginePrivileges.missingPrivileges?.clusterPrivileges?.run?.length === 0))) ||
-    false;
-
   const hasReadPermissions = userHasRiskEngineReadPermissions(riskEnginePrivileges);
 
   const shouldDisplayEngineStatusTab =
@@ -231,7 +224,7 @@ export const EntityAnalyticsManagementPage = () => {
               />
             }
             color="danger"
-            iconType="alert"
+            iconType="warning"
           >
             <p>{deleteError}</p>
           </EuiCallOut>
@@ -325,7 +318,6 @@ export const EntityAnalyticsManagementPage = () => {
 
       <div hidden={selectedTabId !== TabId.RiskScore}>
         <RiskScoreTab
-          canRunEngine={canRunEngine}
           hasReadPermissions={hasReadPermissions}
           isPrivilegesLoading={riskEnginePrivileges.isLoading}
           savedRiskEngineSettings={savedRiskEngineSettings}

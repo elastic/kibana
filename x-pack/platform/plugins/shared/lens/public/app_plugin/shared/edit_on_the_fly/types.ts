@@ -8,6 +8,7 @@ import type { CoreStart } from '@kbn/core/public';
 import type { PublishingSubject } from '@kbn/presentation-publishing';
 import type {
   TypedLensSerializedState,
+  DatasourceStates,
   FramePublicAPI,
   UserMessagesGetter,
   LensDocument,
@@ -35,19 +36,24 @@ export interface FlyoutWrapperProps {
   applyButtonDisabledTooltip?: string;
 }
 
+/** Callback for updating the visualization and datasources state. */
+export type LensPanelStateUpdater = (
+  datasourceState: unknown,
+  visualizationState: unknown,
+  visualizationId?: string,
+  /** When restoring state (e.g. on cancel), pass the datasource the state belongs to. */
+  datasourceId?: LensDatasourceId,
+  /** All datasource states from the editor store, so non-active loaded states are preserved. */
+  allDatasourceStates?: DatasourceStates
+) => void;
+
 export interface EditConfigPanelProps {
   coreStart: CoreStart;
   startDependencies: LensPluginStartDependencies;
   /** The attributes of the Lens embeddable */
   attributes: TypedLensSerializedState['attributes'];
   /** Callback for updating the visualization and datasources state. */
-  updatePanelState: (
-    datasourceState: unknown,
-    visualizationState: unknown,
-    visualizationId?: string,
-    /** When restoring state (e.g. on cancel), pass the datasource the state belongs to. */
-    datasourceId?: LensDatasourceId
-  ) => void;
+  updatePanelState: LensPanelStateUpdater;
   updateSuggestion?: (attrs: TypedLensSerializedState['attributes']) => void;
   /** Set the attributes state */
   setCurrentAttributes?: (attrs: TypedLensSerializedState['attributes']) => void;

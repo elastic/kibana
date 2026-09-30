@@ -12,6 +12,7 @@ interface NodeCardStyleOptions {
   width: number;
   selected?: boolean;
   dragging?: boolean;
+  danger?: boolean;
 }
 
 // The selected card's shadow: an on-brand primary ring plus a soft primary glow.
@@ -23,23 +24,31 @@ const raisedShadow = (euiTheme: UseEuiTheme['euiTheme']) =>
 
 export const getNodeCardStyles = (
   euiTheme: UseEuiTheme['euiTheme'],
-  { width, selected, dragging }: NodeCardStyleOptions
-) => css`
-  width: ${width}px;
-  cursor: ${dragging ? 'grabbing' : 'grab'};
-  border-color: ${selected ? euiTheme.colors.primary : euiTheme.colors.borderBaseSubdued};
-  transition: transform 120ms ease-out, box-shadow 120ms ease-out, border-color 120ms ease-out;
-  // Resting depth: every card carries a subtle shadow so it lifts off the canvas
-  // surface, matching the prototype. euiTheme.colors.shadow is EUI's ink base,
-  // so this adapts to light/dark themes.
-  box-shadow: 0 1px 2px 0 color-mix(in srgb, ${euiTheme.colors.shadow} 12%, transparent);
-  // An unmistakable, on-brand primary ring marks the selected node(s).
-  ${selected ? `box-shadow: ${selectedShadow(euiTheme)};` : ''}
-  ${dragging ? `transform: translateY(-2px); box-shadow: ${raisedShadow(euiTheme)};` : ''}
+  { width, selected, dragging, danger }: NodeCardStyleOptions
+) => {
+  const borderColor = danger
+    ? euiTheme.colors.borderStrongDanger
+    : selected
+    ? euiTheme.colors.primary
+    : euiTheme.colors.borderBaseSubdued;
 
-  &:hover {
-    transform: translateY(-2px);
-    box-shadow: ${selected ? selectedShadow(euiTheme) : raisedShadow(euiTheme)};
-    ${!selected ? `border-color: ${euiTheme.colors.borderBasePlain};` : ''}
-  }
-`;
+  return css`
+    width: ${width}px;
+    cursor: ${dragging ? 'grabbing' : 'grab'};
+    border: ${euiTheme.border.width.thin} solid ${borderColor};
+    transition: transform 120ms ease-out, box-shadow 120ms ease-out, border-color 120ms ease-out;
+    // Resting depth: every card carries a subtle shadow so it lifts off the canvas
+    // surface, matching the prototype. euiTheme.colors.shadow is EUI's ink base,
+    // so this adapts to light/dark themes.
+    box-shadow: 0 1px 2px 0 color-mix(in srgb, ${euiTheme.colors.shadow} 12%, transparent);
+    // An unmistakable, on-brand primary ring marks the selected node(s).
+    ${selected ? `box-shadow: ${selectedShadow(euiTheme)};` : ''}
+    ${dragging ? `transform: translateY(-2px); box-shadow: ${raisedShadow(euiTheme)};` : ''}
+
+    &:hover {
+      transform: translateY(-2px);
+      box-shadow: ${selected ? selectedShadow(euiTheme) : raisedShadow(euiTheme)};
+      ${!selected && !danger ? `border-color: ${euiTheme.colors.borderBasePlain};` : ''}
+    }
+  `;
+};

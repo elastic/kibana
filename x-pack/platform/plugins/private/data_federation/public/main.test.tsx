@@ -8,12 +8,13 @@
 import React from 'react';
 import { EuiProvider } from '@elastic/eui';
 import { fireEvent, render, waitFor } from '@testing-library/react';
+import { MemoryRouter } from 'react-router-dom';
 
-import type { ToastsStart } from '@kbn/core/public';
+import { MockAppHeaderProvider } from '@kbn/app-header/mocks';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { mainTranslations } from './main_i18n';
 import { Main } from './main';
-import type { DataFederationKibanaServices } from './types';
+import type { DataSetWithName, DataSource } from '../common';
 
 jest.mock('./datasets_tab_content', () => ({
   DatasetsTabContent: () => <div data-test-subj="datasetsTabContent" />,
@@ -23,28 +24,42 @@ jest.mock('./data_sources_tab_content', () => ({
   DataSourcesTabContent: () => <div data-test-subj="dataSourcesTabContent" />,
 }));
 
-const createToastsMock = (): ToastsStart =>
-  ({
-    addSuccess: jest.fn(),
-    addDanger: jest.fn(),
-  } as unknown as ToastsStart);
+const createToastsMock = () => ({
+  addSuccess: jest.fn(),
+  addDanger: jest.fn(),
+});
 
 const createServicesMock = ({
   dataSources,
   dataSets,
 }: {
-  dataSources: unknown[];
-  dataSets: unknown[];
-}): DataFederationKibanaServices =>
-  ({
-    dataSourcesClient: {
-      get: jest.fn().mockResolvedValue(dataSources),
+  dataSources: DataSource[];
+  dataSets: DataSetWithName[];
+}) => ({
+  dataSourcesClient: {
+    get: jest.fn().mockResolvedValue(dataSources),
+  },
+  datasetsClient: {
+    get: jest.fn().mockResolvedValue(dataSets),
+  },
+  toasts: createToastsMock(),
+  docLinks: {
+    links: {
+      dataFederation: {
+        overview: '',
+        quickstart: '',
+        dataSources: '',
+        datasets: '',
+        datasetSettings: '',
+        authentication: '',
+        staticCredentials: '',
+        federatedIdentity: '',
+        querying: '',
+        security: '',
+      },
     },
-    datasetsClient: {
-      get: jest.fn().mockResolvedValue(dataSets),
-    },
-    toasts: createToastsMock(),
-  } as unknown as DataFederationKibanaServices);
+  },
+});
 
 describe('Main', () => {
   it('defaults to the data sources tab when both lists are empty', async () => {
@@ -52,9 +67,13 @@ describe('Main', () => {
 
     const { getByRole, getByTestId, queryByTestId } = render(
       <EuiProvider>
-        <KibanaContextProvider services={services}>
-          <Main />
-        </KibanaContextProvider>
+        <MockAppHeaderProvider>
+          <KibanaContextProvider services={services}>
+            <MemoryRouter initialEntries={['/datasets']}>
+              <Main />
+            </MemoryRouter>
+          </KibanaContextProvider>
+        </MockAppHeaderProvider>
       </EuiProvider>
     );
 
@@ -80,9 +99,13 @@ describe('Main', () => {
 
     const { getByRole, getByTestId, queryByTestId } = render(
       <EuiProvider>
-        <KibanaContextProvider services={services}>
-          <Main />
-        </KibanaContextProvider>
+        <MockAppHeaderProvider>
+          <KibanaContextProvider services={services}>
+            <MemoryRouter initialEntries={['/datasets']}>
+              <Main />
+            </MemoryRouter>
+          </KibanaContextProvider>
+        </MockAppHeaderProvider>
       </EuiProvider>
     );
 

@@ -13,6 +13,7 @@
   ],
   "kbn_references": [
     "@kbn/core",
+    "@kbn/inference-common",
     "@kbn/actions-plugin",
     "@kbn/triggers-actions-ui-plugin",
     "@kbn/config-schema",
@@ -58,6 +59,7 @@
     "@kbn/actions-utils",
     "@kbn/mcp-client",
     "@kbn/std",
+    "@kbn/ui-callout",
   ],
   "exclude": [
     "target/**/*",

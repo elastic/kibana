@@ -52,8 +52,8 @@ export const openScheduledPackExecutionDetails = (packName: string) => {
     .should('be.visible')
     .click();
 
-  // ScheduledExecutionDetailsPage renders the "View history" back button.
-  cy.contains('View history').should('exist');
+  // Scheduled execution details use the AppHeader back control to History.
+  cy.getBySel('appHeaderBack').should('exist');
 };
 
 export const changePackActiveStatus = (packName: string) => {

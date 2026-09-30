@@ -48,7 +48,7 @@ describe('upgradeManagedPackagePolicies', () => {
 
     await upgradeManagedPackagePolicies(soClient, esClient, 'testpkg');
 
-    expect(packagePolicyService.upgrade).not.toBeCalled();
+    expect(packagePolicyService.upgrade).not.toHaveBeenCalled();
   });
 
   it('should upgrade policies for managed package', async () => {
@@ -93,7 +93,7 @@ describe('upgradeManagedPackagePolicies', () => {
       { packagePolicyId: 'managed-package-id', diff: [{ id: 'foo' }, { id: 'bar' }], errors: [] },
     ]);
 
-    expect(packagePolicyService.upgrade).toBeCalledWith(
+    expect(packagePolicyService.upgrade).toHaveBeenCalledWith(
       soClient,
       esClient,
       'managed-package-id',
@@ -211,7 +211,7 @@ describe('upgradeManagedPackagePolicies', () => {
         },
       ]);
 
-      expect(packagePolicyService.upgrade).not.toBeCalled();
+      expect(packagePolicyService.upgrade).not.toHaveBeenCalled();
     });
   });
 });

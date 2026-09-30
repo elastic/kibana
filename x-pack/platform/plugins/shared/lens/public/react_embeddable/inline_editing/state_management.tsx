@@ -35,15 +35,28 @@ export function getStateManagementForInlineEditing(
     datasourceState: unknown,
     visualizationState: unknown,
     visualizationType?: string,
-    datasourceId?: LensDatasourceId
+    datasourceId?: LensDatasourceId,
+    allDatasourceStates?: DatasourceStates
   ) => {
     const vis = getAttributes();
     const activeDatasourceId = resolveActiveDatasourceId(datasourceId);
+    // drop loading/uninitialized entries so they never get serialized into the attributes
+    const loadedDatasourceStates = Object.fromEntries(
+      Object.entries(allDatasourceStates ?? {}).filter(
+        ([, { isLoading, state }]) => !isLoading && state !== null && state !== undefined
+      )
+    );
+    // the active datasource must be the *first* key: getActiveDatasourceIdFromDoc
+    // resolves the active datasource from the first key of the serialized states
+    const { [activeDatasourceId]: _active, ...otherLoadedDatasourceStates } =
+      loadedDatasourceStates;
     const datasourceStates: DatasourceStates = {
+      // always guarantee the active datasource state is present
       [activeDatasourceId]: {
         isLoading: false,
         state: datasourceState,
       },
+      ...otherLoadedDatasourceStates,
     };
     const newVis = mergeToNewDoc(
       vis,

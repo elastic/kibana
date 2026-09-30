@@ -144,7 +144,7 @@ describe('BedrockConnectorFields renders', () => {
       await userEvent.click(getByTestId('form-test-provide-submit'));
 
       await waitFor(() => {
-        expect(onSubmit).toBeCalledWith({
+        expect(onSubmit).toHaveBeenCalledWith({
           data: bedrockConnector,
           isValid: true,
         });

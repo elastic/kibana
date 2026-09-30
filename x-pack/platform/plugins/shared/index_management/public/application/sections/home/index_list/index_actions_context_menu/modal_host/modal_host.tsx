@@ -8,7 +8,6 @@
 import React, { Fragment, forwardRef, memo, useImperativeHandle, useReducer } from 'react';
 import {
   EuiConfirmModal,
-  EuiCallOut,
   EuiFieldNumber,
   EuiForm,
   EuiFormRow,
@@ -16,6 +15,7 @@ import {
   htmlIdGenerator,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { KbnWarningCallout } from '@kbn/ui-callout';
 import { i18n } from '@kbn/i18n';
 import type { ApplicationStart, ScopedHistory } from '@kbn/core/public';
 import type { ExtensionsService } from '../../../../../../services/extensions_service';
@@ -190,17 +190,14 @@ export const ModalHost = memo(
             ))}
           </ul>
 
-          <EuiCallOut
+          <KbnWarningCallout
             title={i18n.translate(
               'xpack.idxMgmt.indexActionsMenu.forceMerge.proceedWithCautionCallOutTitle',
               {
                 defaultMessage: 'Proceed with caution!',
               }
             )}
-            color="warning"
-            iconType="question"
-          >
-            <p>
+            text={
               <FormattedMessage
                 id="xpack.idxMgmt.indexActionsMenu.forceMerge.forceMergeWarningDescription"
                 defaultMessage="
@@ -210,8 +207,8 @@ export const ModalHost = memo(
                   a force-merged index then its performance may become much worse.
                 "
               />
-            </p>
-          </EuiCallOut>
+            }
+          />
 
           <EuiSpacer size="m" />
 

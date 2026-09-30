@@ -7,7 +7,6 @@
 
 import type { InferenceConnector } from '@kbn/inference-common';
 import { InferenceConnectorType } from '@kbn/inference-common';
-import type { CompactionSummary } from '@kbn/agent-builder-common';
 import { computeContextBudget, shouldTriggerCompaction } from './context_budget';
 
 const createMockConnector = (contextWindowSize?: number): InferenceConnector => ({
@@ -23,14 +22,6 @@ const createMockConnector = (contextWindowSize?: number): InferenceConnector => 
     ...(contextWindowSize !== undefined ? { contextWindowSize } : {}),
   },
 });
-
-const createSummary = (summarizedRoundCount: number, tokenCount: number): CompactionSummary =>
-  ({
-    summarized_round_count: summarizedRoundCount,
-    created_at: new Date().toISOString(),
-    token_count: tokenCount,
-    structured_data: {},
-  } as unknown as CompactionSummary);
 
 describe('computeContextBudget', () => {
   it('should compute budget from connector context window size', () => {
@@ -66,25 +57,19 @@ describe('computeContextBudget', () => {
 describe('shouldTriggerCompaction', () => {
   const budget = computeContextBudget(createMockConnector(128000)); // triggerThreshold 71680
 
-  it('should not trigger when total round tokens are under the threshold', () => {
-    expect(shouldTriggerCompaction([100, 200, 300], budget)).toBe(false);
+  it('should not trigger when the effective tokens are under the threshold', () => {
+    expect(shouldTriggerCompaction(600, budget)).toBe(false);
   });
 
-  it('should trigger when total round tokens exceed the threshold', () => {
-    expect(shouldTriggerCompaction([50_000, 30_000], budget)).toBe(true); // 80_000 > 71_680
+  it('should trigger when the effective tokens exceed the threshold', () => {
+    expect(shouldTriggerCompaction(80_000, budget)).toBe(true); // 80_000 > 71_680
+  });
+
+  it('should not trigger exactly at the threshold', () => {
+    expect(shouldTriggerCompaction(budget.triggerThreshold, budget)).toBe(false);
   });
 
   it('should return false for empty conversations', () => {
-    expect(shouldTriggerCompaction([], budget)).toBe(false);
-  });
-
-  it('should count only rounds beyond an existing summary plus the summary cost', () => {
-    const counts = [60_000, 60_000, 5_000];
-    const existingSummary = createSummary(2, 1_000);
-
-    // effective = 1_000 (summary) + 5_000 (uncovered round) = 6_000 -> under threshold
-    expect(shouldTriggerCompaction(counts, budget, existingSummary)).toBe(false);
-    // without the summary, the raw total (125_000) exceeds the threshold
-    expect(shouldTriggerCompaction(counts, budget)).toBe(true);
+    expect(shouldTriggerCompaction(0, budget)).toBe(false);
   });
 });

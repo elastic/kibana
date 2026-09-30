@@ -38,6 +38,7 @@ describe('disableAlertingManagementUi', () => {
   it('disables every app registered under the section', () => {
     const section = createSectionWithApps([
       'rules',
+      'rule_library',
       'episodes',
       'action_policies',
       'execution_history',

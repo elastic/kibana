@@ -9,7 +9,11 @@ import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
 import type { ElasticsearchClient } from '@kbn/core/server';
 import type { EntityUpdateClient } from '@kbn/entity-store/server';
 import { EntityType } from '../../../../../../common/entity_analytics/types';
-import { calculateBaseEntityScores, scoreBaseEntities } from './score_base_entities';
+import {
+  calculateBaseEntityScores,
+  persistZeroBaseScore,
+  scoreBaseEntities,
+} from './score_base_entities';
 import type { ScopedLogger } from '../utils/with_log_context';
 import type { RiskEngineDataWriter } from '../../risk_engine_data_writer';
 
@@ -73,7 +77,10 @@ describe('score_base_entities', () => {
 
   beforeEach(() => {
     esClient = elasticsearchServiceMock.createScopedClusterClient().asCurrentUser;
-    crudClient = { listEntities: jest.fn() } as unknown as EntityUpdateClient;
+    crudClient = {
+      listEntities: jest.fn(),
+      bulkUpdateEntity: jest.fn().mockResolvedValue([]),
+    } as unknown as EntityUpdateClient;
     logger = buildLogger();
     (crudClient.listEntities as jest.Mock).mockResolvedValue({
       entities: [],
@@ -87,7 +94,15 @@ describe('score_base_entities', () => {
       values: [esqlRow('user:a@okta')],
     });
 
-    await collectPages(calculateBaseEntityScores({ esClient, crudClient, logger, ...baseParams }));
+    await collectPages(
+      calculateBaseEntityScores({
+        esClient,
+        crudClient,
+        logger,
+        createMissingEntities: false,
+        ...baseParams,
+      })
+    );
 
     expect(esClient.search as jest.Mock).toHaveBeenCalledTimes(1);
     expect(esClient.esql.query as jest.Mock).toHaveBeenCalledTimes(1);
@@ -113,7 +128,15 @@ describe('score_base_entities', () => {
       })
       .mockResolvedValueOnce({ values: [esqlRow('user:003@okta')] });
 
-    await collectPages(calculateBaseEntityScores({ esClient, crudClient, logger, ...baseParams }));
+    await collectPages(
+      calculateBaseEntityScores({
+        esClient,
+        crudClient,
+        logger,
+        createMissingEntities: false,
+        ...baseParams,
+      })
+    );
 
     expect(esClient.search as jest.Mock).toHaveBeenCalledTimes(2);
     const secondCompositeCall = (esClient.search as jest.Mock).mock.calls[1][0];
@@ -141,6 +164,7 @@ describe('score_base_entities', () => {
         esClient,
         crudClient,
         logger,
+        createMissingEntities: false,
         ...baseParams,
         abortSignal: controller.signal,
       })
@@ -156,7 +180,15 @@ describe('score_base_entities', () => {
       values: [esqlRow('user:a@okta'), esqlRow('user:b@okta')],
     });
 
-    await collectPages(calculateBaseEntityScores({ esClient, crudClient, logger, ...baseParams }));
+    await collectPages(
+      calculateBaseEntityScores({
+        esClient,
+        crudClient,
+        logger,
+        createMissingEntities: false,
+        ...baseParams,
+      })
+    );
 
     expect(crudClient.listEntities as jest.Mock).toHaveBeenCalledTimes(1);
     const fetchArgs = (crudClient.listEntities as jest.Mock).mock.calls[0][0];
@@ -168,7 +200,15 @@ describe('score_base_entities', () => {
   it('terminates without scoring when the composite agg returns zero buckets', async () => {
     mockCompositeAggPage(esClient, []);
 
-    await collectPages(calculateBaseEntityScores({ esClient, crudClient, logger, ...baseParams }));
+    await collectPages(
+      calculateBaseEntityScores({
+        esClient,
+        crudClient,
+        logger,
+        createMissingEntities: false,
+        ...baseParams,
+      })
+    );
 
     expect(esClient.search as jest.Mock).toHaveBeenCalledTimes(1);
     expect(esClient.esql.query as jest.Mock).not.toHaveBeenCalled();
@@ -215,6 +255,7 @@ describe('score_base_entities', () => {
         logger,
         writer,
         idBasedRiskScoringEnabled: false,
+        createMissingEntities: false,
         ...baseParams,
       });
 
@@ -224,7 +265,51 @@ describe('score_base_entities', () => {
       expect(writtenScores).toHaveLength(1);
       expect(writtenScores[0].id_value).toBe('user:in-store@okta');
 
-      expect(summary.scoresWritten).toBe(1);
+      expect(summary.scoresWrittenRiskIndex).toBe(1);
+      expect(summary.scoresWrittenEntityStore).toBe(0);
+      expect(summary.scoresCalculated).toBe(2);
+      expect(summary.scoresDroppedNotInStore).toBe(1);
+      expect(summary.scoresMissingFromStore).toBe(1);
+      expect(summary.scoresFailed).toBe(0);
+      expect(summary.entitiesCreated).toBe(0);
+      expect(summary.entityCreationsSkipped).toBe(0);
+      expect(summary.entityCreationsFailed).toBe(0);
+    });
+
+    // Root cause of https://github.com/elastic/kibana/issues/280414.
+    //
+    // After an asset criticality change the flyout asks the risk engine to score
+    // that one entity, which comes through here. If the entity has no alert in
+    // the engine's lookback, the composite agg finds nothing, so no score is
+    // written and the old one stays in place with the old criticality on it.
+    // `scoresWrittenRiskIndex: 0` is what `recalculateEntityRiskScore` reads to
+    // decide it needs `persistZeroBaseScore` instead.
+    it('reports a successful run with nothing written when the entity has no alerts in range', async () => {
+      mockCompositeAggPage(esClient, []);
+
+      const writer = buildWriter();
+
+      const summary = await scoreBaseEntities({
+        esClient,
+        crudClient,
+        logger,
+        writer,
+        idBasedRiskScoringEnabled: true,
+        createMissingEntities: false,
+        ...baseParams,
+      });
+
+      expect(esClient.esql.query as jest.Mock).not.toHaveBeenCalled();
+      expect(writer.bulk).not.toHaveBeenCalled();
+      expect(summary).toEqual(
+        expect.objectContaining({
+          pagesProcessed: 0,
+          scoresCalculated: 0,
+          scoresWrittenRiskIndex: 0,
+          scoresWrittenEntityStore: 0,
+          scoresFailed: 0,
+        })
+      );
     });
 
     it('writes no scores when no entity on the page is in the entity store', async () => {
@@ -247,12 +332,346 @@ describe('score_base_entities', () => {
         logger,
         writer,
         idBasedRiskScoringEnabled: false,
+        createMissingEntities: false,
         ...baseParams,
       });
 
       const writtenScores = (writer.bulk as jest.Mock).mock.calls[0][0][EntityType.user];
       expect(writtenScores).toHaveLength(0);
-      expect(summary.scoresWritten).toBe(0);
+      expect(summary.scoresWrittenRiskIndex).toBe(0);
+      expect(summary.scoresWrittenEntityStore).toBe(0);
+      expect(summary.scoresCalculated).toBe(2);
+      expect(summary.scoresDroppedNotInStore).toBe(2);
+      expect(summary.scoresMissingFromStore).toBe(2);
+      expect(summary.scoresFailed).toBe(0);
+      expect(summary.entitiesCreated).toBe(0);
+      expect(summary.entityCreationsSkipped).toBe(0);
+      expect(summary.entityCreationsFailed).toBe(0);
+    });
+  });
+
+  describe('scoreBaseEntities create-if-missing path', () => {
+    const buildWriter = (): RiskEngineDataWriter =>
+      ({
+        bulk: jest
+          .fn<Promise<{ errors: never[]; docs_written: number; took: number }>, [unknown]>()
+          .mockImplementation(async (params) => {
+            const [scoresArr] = Object.values(params as Record<string, unknown[]>);
+            return { errors: [], docs_written: scoresArr.length, took: 1 };
+          }),
+      } as unknown as RiskEngineDataWriter);
+
+    beforeEach(() => {
+      crudClient = {
+        listEntities: jest.fn(),
+        createEntitiesFromSource: jest.fn(),
+        bulkUpdateEntity: jest.fn().mockResolvedValue([]),
+      } as unknown as EntityUpdateClient;
+      (crudClient.listEntities as jest.Mock).mockResolvedValue({
+        entities: [],
+        nextSearchAfter: undefined,
+      });
+    });
+
+    it('creates a missing entity and writes its score to the risk index but not the entity store', async () => {
+      mockCompositeAggPage(esClient, ['user:new@okta']);
+      (esClient.esql.query as jest.Mock).mockResolvedValueOnce({
+        values: [esqlRow('user:new@okta')],
+      });
+      // fetchAlertIdentityDocs's terms+top_hits lookup for the missing EUID.
+      (esClient.search as jest.Mock).mockResolvedValueOnce({
+        aggregations: {
+          by_entity_id: {
+            buckets: [
+              {
+                key: 'user:new@okta',
+                latest: { hits: { hits: [{ _source: { user: { name: 'new' } } }] } },
+                first_seen: { value_as_string: '2026-01-01T00:00:00.000Z' },
+              },
+            ],
+          },
+        },
+      });
+      (crudClient.createEntitiesFromSource as jest.Mock).mockResolvedValue({
+        created: ['user:new@okta'],
+        alreadyExists: [],
+        skipped: [],
+        failed: [],
+      });
+
+      const writer = buildWriter();
+
+      const summary = await scoreBaseEntities({
+        esClient,
+        crudClient,
+        logger,
+        writer,
+        idBasedRiskScoringEnabled: true,
+        createMissingEntities: true,
+        ...baseParams,
+      });
+
+      expect(writer.bulk).toHaveBeenCalledTimes(1);
+      const writtenScores = (writer.bulk as jest.Mock).mock.calls[0][0][EntityType.user];
+      expect(writtenScores).toHaveLength(1);
+      expect(writtenScores[0].id_value).toBe('user:new@okta');
+
+      // Created entities carry entity.risk.* already, so no redundant entity-store update.
+      expect(crudClient.bulkUpdateEntity).not.toHaveBeenCalled();
+
+      expect(summary.scoresWrittenRiskIndex).toBe(1);
+      expect(summary.scoresMissingFromStore).toBe(1);
+      expect(summary.scoresDroppedNotInStore).toBe(0);
+      expect(summary.entitiesCreated).toBe(1);
+      expect(summary.entityCreationsSkipped).toBe(0);
+      expect(summary.entityCreationsFailed).toBe(0);
+    });
+
+    it('routes a 409 race to the entity store update path in addition to the risk index', async () => {
+      mockCompositeAggPage(esClient, ['user:raced@okta']);
+      (esClient.esql.query as jest.Mock).mockResolvedValueOnce({
+        values: [esqlRow('user:raced@okta')],
+      });
+      (esClient.search as jest.Mock).mockResolvedValueOnce({
+        aggregations: {
+          by_entity_id: {
+            buckets: [
+              {
+                key: 'user:raced@okta',
+                latest: { hits: { hits: [{ _source: { user: { name: 'raced' } } }] } },
+                first_seen: { value_as_string: '2026-01-01T00:00:00.000Z' },
+              },
+            ],
+          },
+        },
+      });
+      (crudClient.createEntitiesFromSource as jest.Mock).mockResolvedValue({
+        created: [],
+        alreadyExists: ['user:raced@okta'],
+        skipped: [],
+        failed: [],
+      });
+
+      const writer = buildWriter();
+
+      const summary = await scoreBaseEntities({
+        esClient,
+        crudClient,
+        logger,
+        writer,
+        idBasedRiskScoringEnabled: true,
+        createMissingEntities: true,
+        ...baseParams,
+      });
+
+      const writtenScores = (writer.bulk as jest.Mock).mock.calls[0][0][EntityType.user];
+      expect(writtenScores).toHaveLength(1);
+      expect(crudClient.bulkUpdateEntity).toHaveBeenCalledTimes(1);
+
+      expect(summary.scoresMissingFromStore).toBe(1);
+      expect(summary.scoresDroppedNotInStore).toBe(0);
+      expect(summary.entitiesCreated).toBe(0);
+      expect(summary.entityCreationsSkipped).toBe(0);
+      expect(summary.entityCreationsFailed).toBe(0);
+    });
+
+    it('drops policy-rejected candidates and counts them, without writing anything for them', async () => {
+      mockCompositeAggPage(esClient, ['user:rejected@okta']);
+      (esClient.esql.query as jest.Mock).mockResolvedValueOnce({
+        values: [esqlRow('user:rejected@okta')],
+      });
+      (esClient.search as jest.Mock).mockResolvedValueOnce({
+        aggregations: {
+          by_entity_id: {
+            buckets: [
+              {
+                key: 'user:rejected@okta',
+                latest: { hits: { hits: [{ _source: { user: { name: 'rejected' } } }] } },
+                first_seen: { value_as_string: '2026-01-01T00:00:00.000Z' },
+              },
+            ],
+          },
+        },
+      });
+      (crudClient.createEntitiesFromSource as jest.Mock).mockResolvedValue({
+        created: [],
+        alreadyExists: [],
+        skipped: [{ euid: 'user:rejected@okta', reason: 'user_not_local_namespace' }],
+        failed: [],
+      });
+
+      const writer = buildWriter();
+
+      const summary = await scoreBaseEntities({
+        esClient,
+        crudClient,
+        logger,
+        writer,
+        idBasedRiskScoringEnabled: true,
+        createMissingEntities: true,
+        ...baseParams,
+      });
+
+      const writtenScores = (writer.bulk as jest.Mock).mock.calls[0][0][EntityType.user];
+      expect(writtenScores).toHaveLength(0);
+      expect(summary.scoresMissingFromStore).toBe(1);
+      expect(summary.scoresDroppedNotInStore).toBe(1);
+      expect(summary.entitiesCreated).toBe(0);
+      expect(summary.entityCreationsSkipped).toBe(1);
+      expect(summary.entityCreationsFailed).toBe(0);
+    });
+
+    it('counts a write failure (e.g. euid_mismatch) as failed, not skipped', async () => {
+      mockCompositeAggPage(esClient, ['user:mismatched@okta']);
+      (esClient.esql.query as jest.Mock).mockResolvedValueOnce({
+        values: [esqlRow('user:mismatched@okta')],
+      });
+      (esClient.search as jest.Mock).mockResolvedValueOnce({
+        aggregations: {
+          by_entity_id: {
+            buckets: [
+              {
+                key: 'user:mismatched@okta',
+                latest: { hits: { hits: [{ _source: { user: { name: 'mismatched' } } }] } },
+                first_seen: { value_as_string: '2026-01-01T00:00:00.000Z' },
+              },
+            ],
+          },
+        },
+      });
+      (crudClient.createEntitiesFromSource as jest.Mock).mockResolvedValue({
+        created: [],
+        alreadyExists: [],
+        skipped: [],
+        failed: [{ euid: 'user:mismatched@okta', reason: 'euid_mismatch' }],
+      });
+
+      const writer = buildWriter();
+
+      const summary = await scoreBaseEntities({
+        esClient,
+        crudClient,
+        logger,
+        writer,
+        idBasedRiskScoringEnabled: true,
+        createMissingEntities: true,
+        ...baseParams,
+      });
+
+      const writtenScores = (writer.bulk as jest.Mock).mock.calls[0][0][EntityType.user];
+      expect(writtenScores).toHaveLength(0);
+      expect(summary.scoresMissingFromStore).toBe(1);
+      expect(summary.scoresDroppedNotInStore).toBe(1);
+      expect(summary.entitiesCreated).toBe(0);
+      expect(summary.entityCreationsSkipped).toBe(0);
+      expect(summary.entityCreationsFailed).toBe(1);
+    });
+
+    it('restores the pre-existing drop behaviour when the kill switch is off', async () => {
+      mockCompositeAggPage(esClient, ['user:phantom@okta']);
+      (esClient.esql.query as jest.Mock).mockResolvedValueOnce({
+        values: [esqlRow('user:phantom@okta')],
+      });
+
+      const writer = buildWriter();
+
+      const summary = await scoreBaseEntities({
+        esClient,
+        crudClient,
+        logger,
+        writer,
+        idBasedRiskScoringEnabled: true,
+        createMissingEntities: false,
+        ...baseParams,
+      });
+
+      expect(esClient.search as jest.Mock).toHaveBeenCalledTimes(1); // composite agg page only
+      expect(crudClient.createEntitiesFromSource).not.toHaveBeenCalled();
+      const writtenScores = (writer.bulk as jest.Mock).mock.calls[0][0][EntityType.user];
+      expect(writtenScores).toHaveLength(0);
+      expect(summary.scoresMissingFromStore).toBe(1);
+      expect(summary.scoresDroppedNotInStore).toBe(1);
+      expect(summary.entitiesCreated).toBe(0);
+      expect(summary.entityCreationsSkipped).toBe(0);
+      expect(summary.entityCreationsFailed).toBe(0);
+    });
+  });
+
+  // Second half of the fix for https://github.com/elastic/kibana/issues/280414. When the
+  // alert-driven pass writes nothing, this puts a fresh score in place so the entity's current
+  // criticality lands on it instead of the row keeping the old level.
+  describe('persistZeroBaseScore', () => {
+    const buildWriter = (): RiskEngineDataWriter =>
+      ({
+        bulk: jest.fn().mockImplementation(async (params) => {
+          const [scoresArr] = Object.values(params as Record<string, unknown[]>);
+          return { errors: [], docs_written: scoresArr.length, took: 1 };
+        }),
+      } as unknown as RiskEngineDataWriter);
+
+    const zeroScoreParams = {
+      entityType: EntityType.user,
+      entityId: 'user:a@okta',
+      now: baseParams.now,
+      watchlistConfigs: baseParams.watchlistConfigs,
+      calculationRunId: baseParams.calculationRunId,
+      idBasedRiskScoringEnabled: true,
+    };
+
+    it('writes a zero score carrying the criticality on the entity record', async () => {
+      (crudClient.listEntities as jest.Mock).mockResolvedValue({
+        entities: [
+          {
+            entity: { id: 'user:a@okta', attributes: { watchlists: [] } },
+            asset: { criticality: 'extreme_impact' },
+          },
+        ],
+        nextSearchAfter: undefined,
+      });
+
+      const writer = buildWriter();
+
+      const written = await persistZeroBaseScore({
+        crudClient,
+        logger,
+        writer,
+        ...zeroScoreParams,
+      });
+
+      expect(written).toBe(1);
+      const [score] = (writer.bulk as jest.Mock).mock.calls[0][0][EntityType.user];
+      expect(score.id_field).toBe('entity.id');
+      expect(score.id_value).toBe('user:a@okta');
+      expect(score.calculated_score_norm).toBe(0);
+      expect(score.category_1_count).toBe(0);
+      // The current level, with a contribution of 0 because there are no alerts for it to lift.
+      expect(score.modifiers).toEqual([
+        expect.objectContaining({
+          type: 'asset_criticality',
+          contribution: 0,
+          metadata: expect.objectContaining({ criticality_level: 'extreme_impact' }),
+        }),
+      ]);
+    });
+
+    it('writes nothing when the entity is missing from the store', async () => {
+      // Writing here would replace a score that has modifiers with one that has none.
+      (crudClient.listEntities as jest.Mock).mockResolvedValue({
+        entities: [],
+        nextSearchAfter: undefined,
+      });
+
+      const writer = buildWriter();
+
+      const written = await persistZeroBaseScore({
+        crudClient,
+        logger,
+        writer,
+        ...zeroScoreParams,
+      });
+
+      expect(written).toBe(0);
+      expect(writer.bulk).not.toHaveBeenCalled();
     });
   });
 });

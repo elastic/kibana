@@ -14,6 +14,7 @@ export class ExportPageObject extends FtrService {
   private readonly find = this.ctx.getService('find');
   private readonly log = this.ctx.getService('log');
   private readonly retry = this.ctx.getService('retry');
+  private readonly browser = this.ctx.getService('browser');
 
   async exportButtonExists() {
     return await this.testSubjects.exists('exportTopNavButton');
@@ -24,22 +25,44 @@ export class ExportPageObject extends FtrService {
   }
 
   async clickExportTopNavButton(): Promise<boolean> {
-    // First check if export button is directly visible
-    if (await this.testSubjects.exists('exportTopNavButton')) {
-      await this.testSubjects.click('exportTopNavButton');
+    if (await this.isExportPopoverOpen()) {
       return true;
     }
 
-    // If not visible, try the overflow menu
-    if (await this.testSubjects.exists('app-menu-overflow-button')) {
+    // The export action renders either in the top nav or inside the app menu overflow. The
+    // overflow button can also render next to a visible export button, so list export first.
+    const entry = await this.testSubjects.waitForFirst(
+      ['exportTopNavButton', 'app-menu-overflow-button'],
+      { timeout: 5000 }
+    );
+    if (!entry) {
+      return false;
+    }
+
+    if (entry === 'app-menu-overflow-button') {
       await this.testSubjects.click('app-menu-overflow-button');
-      if (await this.testSubjects.exists('exportTopNavButton')) {
-        await this.testSubjects.click('exportTopNavButton');
+      const overflowEntry = await this.testSubjects.waitForFirst(
+        ['exportPopoverPanel', 'exportTopNavButton'],
+        { timeout: 5000 }
+      );
+      if (!overflowEntry) {
+        return false;
+      }
+      if (overflowEntry === 'exportPopoverPanel') {
         return true;
       }
     }
 
-    return false;
+    try {
+      await this.testSubjects.click('exportTopNavButton');
+    } catch (error) {
+      // In responsive layouts, the action can move into the overflow menu between the readiness
+      // probe and click. Its open export panel is the successful state for this helper.
+      if (!(await this.isExportPopoverOpen())) {
+        throw error;
+      }
+    }
+    return true;
   }
 
   async isExportPopoverOpen() {
@@ -72,6 +95,16 @@ export class ExportPageObject extends FtrService {
     });
 
     await this.testSubjects.click(`exportMenuItem-${label}`);
+  }
+
+  async closeExportPopover() {
+    await this.retry.waitFor('export popover to close', async () => {
+      if (!(await this.isExportPopoverOpen())) {
+        return true; // It was already closed
+      }
+      await this.browser.pressKeys(this.browser.keys.ESCAPE);
+      return !(await this.isExportPopoverOpen());
+    });
   }
 
   async isExportFlyoutOpen() {

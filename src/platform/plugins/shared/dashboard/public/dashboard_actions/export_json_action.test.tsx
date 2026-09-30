@@ -8,7 +8,7 @@
  */
 
 import { render } from '@testing-library/react';
-import { BehaviorSubject } from 'rxjs';
+import { BehaviorSubject, of } from 'rxjs';
 import type { ExportJSONActionApi } from './export_json_action';
 import { ExportJSONAction } from './export_json_action';
 import * as ExportJsonFlyout from '../dashboard_app/top_nav/share/export_json/flyout/export_json_flyout';
@@ -19,7 +19,7 @@ jest.mock('@kbn/presentation-util', () => ({
 }));
 
 const exportJsonFlyoutSpy = jest
-  .spyOn(ExportJsonFlyout, 'ExportJsonFlyout')
+  .spyOn(ExportJsonFlyout, 'DashboardPanelExportJsonFlyout')
   .mockImplementation(() => null as any);
 
 jest.mock('../services/kibana_services', () => ({
@@ -45,6 +45,7 @@ describe('Export JSON action', () => {
         serializeState: jest.fn().mockReturnValue({ rawState: { key: 'value' } }),
         applySerializedState: jest.fn(),
         anyStateChange$: new BehaviorSubject<void>(undefined),
+        latestState$: of({ key: 'value' }),
       },
     };
   });
@@ -88,7 +89,12 @@ describe('Export JSON action', () => {
 
     const renderFlyoutContent = async () => {
       const { loadContent } = mockOpenLazyFlyout.mock.calls[0][0];
-      render(await loadContent({ closeFlyout: jest.fn() }));
+      render(
+        await loadContent({
+          closeFlyout: jest.fn(),
+          ariaLabelledBy: 'dashboardExportJsonFlyoutTitle',
+        })
+      );
       return exportJsonFlyoutSpy.mock.calls[0][0];
     };
 

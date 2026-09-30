@@ -23,14 +23,14 @@ export const ViewModeToggle = ({ viewMode, onChange }: ViewModeToggleProps) => {
       {
         id: 'grouped',
         label: labels.viewMode.grouped,
-        iconType: 'indexMapping',
+        iconType: 'mapping',
         'data-test-subj': 'applicationConnectionsViewModeGrouped',
         iconSide: 'right',
       },
       {
         id: 'list',
         label: labels.viewMode.list,
-        iconType: 'list',
+        iconType: 'listBullet',
         'data-test-subj': 'applicationConnectionsViewModeList',
         iconSide: 'right',
       },

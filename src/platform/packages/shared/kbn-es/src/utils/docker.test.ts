@@ -702,8 +702,6 @@ describe('resolveEsArgs()', () => {
         "--env",
         "xpack.security.authc.realms.saml.cloud-saml-kibana.private_attributes=http://saml.elastic-cloud.com/attributes/uiam/authentication/access_token,http://saml.elastic-cloud.com/attributes/uiam/authentication/access_token_expires_at,http://saml.elastic-cloud.com/attributes/uiam/authentication/refresh_token,http://saml.elastic-cloud.com/attributes/uiam/authentication/refresh_token_expires_at",
         "--env",
-        "serverless.organization_id=org1234567890",
-        "--env",
         "serverless.project_type=elasticsearch_general_purpose",
         "--env",
         "serverless.project_id=abcdef12345678901234567890123456",
@@ -733,7 +731,6 @@ describe('resolveEsArgs()', () => {
     );
 
     expect(findEnvValue(esArgs, 'serverless.project_id')).toBe(overrideId);
-    expect(findEnvValue(esArgs, 'serverless.organization_id')).toBeDefined();
     expect(findEnvValue(esArgs, 'serverless.universal_iam_service.enabled')).toBe('true');
   });
 
@@ -806,9 +803,7 @@ describe('setupServerlessVolumes()', () => {
     });
 
     await volumeCmdTest(volumeCmd);
-    await expect(
-      Fsp.access(`${serverlessObjectStorePath}/cluster_state/lease`)
-    ).rejects.toThrowError();
+    await expect(Fsp.access(`${serverlessObjectStorePath}/cluster_state/lease`)).rejects.toThrow();
   });
 
   test('should add SSL and IDP metadata volumes when ssl is passed', async () => {
@@ -904,6 +899,9 @@ describe('setupServerlessVolumes()', () => {
     expect(readStringSecretsMock).toHaveBeenCalledWith(SERVERLESS_SECRETS_PATH);
     const settings = JSON.parse(
       await Fsp.readFile(join(SERVERLESS_OPERATOR_PATH, 'settings.json'), 'utf-8')
+    );
+    expect(settings.state.project.tags).toEqual(
+      expect.objectContaining({ _csp: 'aws', _region: 'eu-west-1' })
     );
     expect(settings.state.cluster_secrets.string_secrets).toEqual(stringSecretsFixture);
   });
@@ -1088,6 +1086,39 @@ describe('runServerlessCluster()', () => {
       esArgs: ['xpack.security.enabled=false'],
     });
     expect(waitForSecurityIndexMock).not.toHaveBeenCalled();
+  });
+
+  test('should call onReady after the cluster is ready', async () => {
+    waitUntilClusterReadyMock.mockResolvedValue();
+    waitForSecurityIndexMock.mockResolvedValue();
+    mockFs({
+      [baseEsPath]: {},
+    });
+    execa.mockImplementation(() => Promise.resolve({ stdout: '' }));
+
+    const onReady = jest.fn().mockResolvedValue(undefined);
+    await runServerlessCluster(log, {
+      projectType,
+      basePath: baseEsPath,
+      waitForReady: true,
+      onReady,
+    });
+
+    expect(onReady).toHaveBeenCalledTimes(1);
+    expect(waitUntilClusterReadyMock).toHaveBeenCalledTimes(1);
+    expect(waitForSecurityIndexMock).toHaveBeenCalledTimes(1);
+  });
+
+  test('should not call onReady when waitForReady is false', async () => {
+    waitUntilClusterReadyMock.mockResolvedValue();
+    mockFs({
+      [baseEsPath]: {},
+    });
+    execa.mockImplementation(() => Promise.resolve({ stdout: '' }));
+
+    const onReady = jest.fn().mockResolvedValue(undefined);
+    await runServerlessCluster(log, { projectType, basePath: baseEsPath, onReady });
+    expect(onReady).not.toHaveBeenCalled();
   });
 });
 

@@ -40,6 +40,7 @@ import { isTimerangeSame, TIMELINE_NO_SORTING } from '../shared/utils';
 import type { TimelineTabCommonProps } from '../shared/types';
 import { UnifiedTimelineBody } from '../../body/unified_timeline_body';
 import { EqlTabHeader } from './header';
+import { PartialResultsCallout } from './partial_results_callout';
 import { useTimelineColumns } from '../shared/use_timeline_columns';
 import { useTimelineControlColumn } from '../shared/use_timeline_control_columns';
 import { LeftPanelNotesTab } from '../../../../../flyout/document_details/left';
@@ -90,7 +91,7 @@ export const EqlTabContentComponent: React.FC<Props> = ({
   const { setTimelineFullScreen, timelineFullScreen } = useTimelineFullScreen();
 
   const { dataView: experimentalDataView, status } = useDataView(PageScope.timeline);
-  const selectedPatterns = useSelectedPatterns(PageScope.timeline);
+  const selectedPatterns = useSelectedPatterns(experimentalDataView);
   const dataViewId = experimentalDataView.id ?? null;
   const dataViewLoading = useMemo(() => status !== 'ready', [status]);
   const runtimeMappings = useMemo(
@@ -122,7 +123,18 @@ export const EqlTabContentComponent: React.FC<Props> = ({
 
   const [
     dataLoadingState,
-    { events, rawEvents, inspect, totalCount, loadNextBatch, refreshedAt, refetch },
+    {
+      events,
+      rawEvents,
+      inspect,
+      totalCount,
+      loadNextBatch,
+      refreshedAt,
+      refetch,
+      isPartial = false,
+      shardFailures = [],
+      timedOut = false,
+    },
   ] = useTimelineEvents({
     dataViewId,
     endDate: end,
@@ -247,6 +259,9 @@ export const EqlTabContentComponent: React.FC<Props> = ({
   const unifiedHeader = useMemo(
     () => (
       <EuiFlexGroup gutterSize="s" direction="column">
+        {isPartial && !isBlankTimeline ? (
+          <PartialResultsCallout shardFailures={shardFailures} timedOut={timedOut} />
+        ) : null}
         <EqlTabHeader
           activeTab={activeTab}
           setTimelineFullScreen={setTimelineFullScreen}
@@ -255,7 +270,16 @@ export const EqlTabContentComponent: React.FC<Props> = ({
         />
       </EuiFlexGroup>
     ),
-    [activeTab, setTimelineFullScreen, timelineFullScreen, timelineId]
+    [
+      activeTab,
+      isBlankTimeline,
+      isPartial,
+      setTimelineFullScreen,
+      shardFailures,
+      timedOut,
+      timelineFullScreen,
+      timelineId,
+    ]
   );
 
   return (
@@ -325,7 +349,8 @@ const makeMapStateToProps = () => {
   return mapStateToProps;
 };
 
-const connector = connect(makeMapStateToProps);
+type StateProps = ReturnType<ReturnType<typeof makeMapStateToProps>>;
+const connector = connect<StateProps, {}, TimelineTabCommonProps, State>(makeMapStateToProps);
 
 type PropsFromRedux = ConnectedProps<typeof connector>;
 

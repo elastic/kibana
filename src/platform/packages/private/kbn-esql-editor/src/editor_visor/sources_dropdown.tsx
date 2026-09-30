@@ -86,10 +86,11 @@ export function SourcesDropdown({ currentSources, onChangeSources }: SourcesDrop
     }
 
     isFetchingSources.current = true;
+    const abortController = new AbortController();
     let cancelled = false;
 
     const fetchSources = async () => {
-      const sources = await getESQLSources(core, getLicense, enrichSources);
+      const sources = await getESQLSources(core, getLicense, enrichSources, abortController.signal);
       if (cancelled || !isMounted()) {
         return;
       }
@@ -111,6 +112,7 @@ export function SourcesDropdown({ currentSources, onChangeSources }: SourcesDrop
 
     return () => {
       cancelled = true;
+      abortController.abort();
     };
   }, [core, enrichSources, fetchedSources.length, getLicense, isMounted]);
 

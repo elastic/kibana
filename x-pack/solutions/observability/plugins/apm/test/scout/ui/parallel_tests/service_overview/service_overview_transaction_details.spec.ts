@@ -9,6 +9,7 @@ import { tags } from '@kbn/scout-oblt';
 import { expect } from '@kbn/scout-oblt/ui';
 import { test, testData } from '../../fixtures';
 import { EXTENDED_TIMEOUT } from '../../fixtures/constants';
+import { waitForApmAppMenuReady } from '../../fixtures/page_helpers';
 
 test.describe(
   'Service Overview - Transaction Details',
@@ -34,9 +35,7 @@ test.describe(
 
       await test.step('Click on transaction link and wait for page to load', async () => {
         await page.getByRole('link', { name: testData.OTEL_TRANSACTION_NAME }).click();
-        await page
-          .getByTestId('apmSettingsHeaderLink')
-          .waitFor({ state: 'visible', timeout: EXTENDED_TIMEOUT });
+        await waitForApmAppMenuReady(page);
       });
 
       await test.step('Verify transaction detail page shows transaction name', async () => {
@@ -119,9 +118,7 @@ test.describe(
 
       await test.step('Click on transaction link and wait for page to load', async () => {
         await page.getByRole('link', { name: testData.EDOT_TRANSACTION_NAME }).click();
-        await page
-          .getByTestId('apmSettingsHeaderLink')
-          .waitFor({ state: 'visible', timeout: EXTENDED_TIMEOUT });
+        await waitForApmAppMenuReady(page);
       });
 
       await test.step('Verify transaction detail page shows transaction name', async () => {

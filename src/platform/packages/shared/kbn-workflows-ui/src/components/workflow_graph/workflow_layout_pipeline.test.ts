@@ -359,4 +359,50 @@ describe('workflow layout pipeline', () => {
     expect(WORKFLOW_NODE_SEP).toBe(50);
     expect(WORKFLOW_RANK_SEP).toBe(70);
   });
+
+  it('applyDagre returns points.length < 2 for every fan-in edge (cross-package invariant)', () => {
+    // The merge-bus fix rests on this guarantee from @kbn/dag-layout: for any
+    // edge whose target has predecessorCount > 1, applyDagre unconditionally
+    // returns points: []. If that ever changes, isMerge-tagged edges would use
+    // stale dagre waypoints instead of the merge bus, silently regressing.
+    const { result, transformed } = runLayout(
+      minimal({
+        steps: [
+          {
+            name: 'route',
+            type: 'if',
+            condition: 'x',
+            steps: [{ name: 'branch_a', type: 'http' }],
+            else: [{ name: 'branch_b', type: 'http' }],
+          },
+          { name: 'summary', type: 'http' },
+        ] as unknown as WorkflowYaml['steps'],
+      })
+    );
+
+    // Collect all edges that genuinely have multiple predecessors.
+    const incomingByTarget = new Map<string, string[]>();
+    const allEdges = [
+      ...transformed.edges,
+      ...transformed.foreachGroups.flatMap((g) => g.innerEdges),
+    ];
+    for (const e of allEdges) {
+      const arr = incomingByTarget.get(e.target);
+      if (arr) arr.push(e.source);
+      else incomingByTarget.set(e.target, [e.source]);
+    }
+    const fanInTargets = new Set(
+      [...incomingByTarget.entries()]
+        .filter(([, sources]) => sources.length > 1)
+        .map(([target]) => target)
+    );
+    expect(fanInTargets.size).toBeGreaterThan(0);
+
+    for (const posEdge of result.edges) {
+      if (fanInTargets.has(posEdge.target)) {
+        // applyDagre must have blanked these waypoints.
+        expect(posEdge.points.length).toBeLessThan(2);
+      }
+    }
+  });
 });

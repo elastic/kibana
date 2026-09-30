@@ -9,7 +9,7 @@
 
 import React from 'react';
 import { act, renderHook } from '@testing-library/react';
-import { BehaviorSubject } from 'rxjs';
+import { BehaviorSubject, Subject } from 'rxjs';
 import type { IUserStorageClient } from './types';
 import { UserStorageProvider } from './user_storage_provider';
 import { useUserStorage, useUserStorageClient } from './use_user_storage';
@@ -18,12 +18,15 @@ const buildClient = (initial: Record<string, unknown> = {}): IUserStorageClient 
   const cache: Record<string, unknown> = { ...initial };
   const subject$ = new BehaviorSubject<Record<string, unknown>>(cache);
   const client: IUserStorageClient = {
+    isAvailable: () => true,
     peek: ((key: string, defaultValue?: unknown) =>
       (cache[key] !== undefined
         ? cache[key]
         : defaultValue) as never) as IUserStorageClient['peek'],
     get: ((key: string, defaultValue?: unknown) =>
-      (cache[key] !== undefined ? cache[key] : defaultValue) as never) as IUserStorageClient['get'],
+      Promise.resolve(
+        cache[key] !== undefined ? cache[key] : defaultValue
+      )) as unknown as IUserStorageClient['get'],
     get$: ((key: string, defaultValue?: unknown) => {
       // simple "get current value" observable
       return new BehaviorSubject(
@@ -39,8 +42,6 @@ const buildClient = (initial: Record<string, unknown> = {}): IUserStorageClient 
       delete cache[key];
       subject$.next({ ...cache });
     }) as IUserStorageClient['remove'],
-    getUpdate$: () =>
-      new BehaviorSubject({ type: 'remove' as const, key: '', oldValue: undefined }),
     getHttpError$: () => new BehaviorSubject(new Error('noop')),
   };
   return client;
@@ -87,15 +88,26 @@ describe('useUserStorage', () => {
     );
   });
 
-  it('returns the cached value as the initial render', () => {
+  it('returns the cached value on the initial render', () => {
     const client = buildClient({ 'navigation:layout': { hidden: ['discover'] } });
 
     const { result } = renderHook(() => useUserStorage<{ hidden: string[] }>('navigation:layout'), {
       wrapper: wrapper(client),
     });
 
-    const [value] = result.current;
-    expect(value).toEqual({ hidden: ['discover'] });
+    expect(result.current[0]).toEqual({ hidden: ['discover'] });
+  });
+
+  it('uses the peeked value for a preloaded key, without awaiting a subscription emit', () => {
+    const client = buildClient({ 'navigation:layout': { hidden: ['discover'] } });
+    // A get$ that never emits isolates the pre-subscription initial value.
+    client.get$ = jest.fn().mockReturnValue(new Subject()) as IUserStorageClient['get$'];
+
+    const { result } = renderHook(() => useUserStorage<{ hidden: string[] }>('navigation:layout'), {
+      wrapper: wrapper(client),
+    });
+
+    expect(result.current[0]).toEqual({ hidden: ['discover'] });
   });
 
   it('falls back to defaultValue when the key is missing', () => {
@@ -121,5 +133,50 @@ describe('useUserStorage', () => {
     });
 
     expect(client.set).toHaveBeenCalledWith('counter', 7);
+  });
+
+  it('shows the default until a lazy key hydrates, then the fetched value', () => {
+    const client = buildClient();
+    const value$ = new Subject<string>();
+    client.get$ = jest.fn().mockReturnValue(value$) as IUserStorageClient['get$'];
+
+    const { result } = renderHook(() => useUserStorage<string>('lazy', 'default'), {
+      wrapper: wrapper(client),
+    });
+
+    expect(result.current[0]).toBe('default');
+
+    act(() => value$.next('hydrated'));
+
+    expect(result.current[0]).toBe('hydrated');
+  });
+
+  it('does not re-subscribe when re-rendered with a fresh-but-equal defaultValue literal', () => {
+    const client = buildClient();
+    const get$ = jest.spyOn(client, 'get$');
+
+    const { rerender } = renderHook(
+      // A new object literal each render — reference changes, value does not.
+      () => useUserStorage<{ hidden: string[] }>('nav', { hidden: [] }),
+      { wrapper: wrapper(client) }
+    );
+
+    rerender();
+    rerender();
+
+    expect(get$).toHaveBeenCalledTimes(1);
+  });
+
+  it('stays on the default when the lazy fetch fails (get$ neither errors nor completes)', () => {
+    const client = buildClient();
+    const value$ = new Subject<string>();
+    client.get$ = jest.fn().mockReturnValue(value$) as IUserStorageClient['get$'];
+
+    const { result } = renderHook(() => useUserStorage<string>('lazy', 'default'), {
+      wrapper: wrapper(client),
+    });
+
+    // A failed fetch is silent on get$ — no emission at all.
+    expect(result.current[0]).toBe('default');
   });
 });

@@ -57,6 +57,7 @@ const createRulesClientMock = () => {
     bulkEdit: jest.fn(),
     bulkEditRuleParamsWithReadAuth: jest.fn(),
     bulkCreateRules: jest.fn().mockResolvedValue({ successfulIds: [], errors: [], total: 0 }),
+    bulkUpdateRules: jest.fn().mockResolvedValue({ successfulIds: [], errors: [], total: 0 }),
     bulkDeleteRules: jest.fn(),
     bulkEnableRules: jest.fn(),
     bulkDisableRules: jest.fn(),

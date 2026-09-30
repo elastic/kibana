@@ -46,6 +46,7 @@ steps:
       JEST_UNIT_SCRIPT: '.buildkite/scripts/steps/test/jest.sh'
       JEST_INTEGRATION_SCRIPT: '.buildkite/scripts/steps/test/jest_integration.sh'
       FTR_CONFIGS_SCRIPT: '.buildkite/scripts/steps/test/ftr_configs.sh'
+      FTR_TEST_CHANNELS: ci-on-commit
     retry:
       automatic:
         - exit_status: '*'
@@ -84,6 +85,8 @@ steps:
     retry:
       automatic:
         - exit_status: '-1'
+          limit: 3
+        - exit_status: '*'
           limit: 1
 
   - command: .buildkite/scripts/steps/functional/security_serverless_explore.sh
@@ -101,6 +104,8 @@ steps:
     retry:
       automatic:
         - exit_status: '-1'
+          limit: 3
+        - exit_status: '*'
           limit: 1
 
   - command: .buildkite/scripts/steps/functional/security_serverless_investigations.sh
@@ -119,6 +124,8 @@ steps:
     retry:
       automatic:
         - exit_status: '-1'
+          limit: 3
+        - exit_status: '*'
           limit: 1
 
   - command: .buildkite/scripts/steps/functional/security_serverless_rule_management.sh
@@ -137,6 +144,8 @@ steps:
     retry:
       automatic:
         - exit_status: '-1'
+          limit: 3
+        - exit_status: '*'
           limit: 1
 
   - command: .buildkite/scripts/steps/functional/security_serverless_rule_management_prebuilt_rules_customization.sh
@@ -154,6 +163,8 @@ steps:
     retry:
       automatic:
         - exit_status: '-1'
+          limit: 3
+        - exit_status: '*'
           limit: 1
 
   - command: .buildkite/scripts/steps/functional/security_serverless_rule_management_prebuilt_rules_installation.sh
@@ -171,6 +182,8 @@ steps:
     retry:
       automatic:
         - exit_status: '-1'
+          limit: 3
+        - exit_status: '*'
           limit: 1
 
   - command: .buildkite/scripts/steps/functional/security_serverless_rule_management_prebuilt_rules_management.sh
@@ -188,6 +201,8 @@ steps:
     retry:
       automatic:
         - exit_status: '-1'
+          limit: 3
+        - exit_status: '*'
           limit: 1
 
   - command: .buildkite/scripts/steps/functional/security_serverless_rule_management_prebuilt_rules_upgrade.sh
@@ -205,6 +220,8 @@ steps:
     retry:
       automatic:
         - exit_status: '-1'
+          limit: 3
+        - exit_status: '*'
           limit: 1
 
   - command: .buildkite/scripts/steps/functional/security_solution_rule_management.sh
@@ -222,6 +239,8 @@ steps:
     retry:
       automatic:
         - exit_status: '-1'
+          limit: 3
+        - exit_status: '*'
           limit: 1
 
   - command: .buildkite/scripts/steps/functional/security_solution_rule_management_prebuilt_rules_customization.sh
@@ -239,6 +258,8 @@ steps:
     retry:
       automatic:
         - exit_status: '-1'
+          limit: 3
+        - exit_status: '*'
           limit: 1
 
   - command: .buildkite/scripts/steps/functional/security_solution_rule_management_prebuilt_rules_installation.sh
@@ -256,6 +277,8 @@ steps:
     retry:
       automatic:
         - exit_status: '-1'
+          limit: 3
+        - exit_status: '*'
           limit: 1
 
   - command: .buildkite/scripts/steps/functional/security_solution_rule_management_prebuilt_rules_management.sh
@@ -273,6 +296,8 @@ steps:
     retry:
       automatic:
         - exit_status: '-1'
+          limit: 3
+        - exit_status: '*'
           limit: 1
 
   - command: .buildkite/scripts/steps/functional/security_solution_rule_management_prebuilt_rules_upgrade.sh
@@ -290,6 +315,8 @@ steps:
     retry:
       automatic:
         - exit_status: '-1'
+          limit: 3
+        - exit_status: '*'
           limit: 1
 
   - command: .buildkite/scripts/steps/functional/security_serverless_detection_engine.sh
@@ -307,6 +334,8 @@ steps:
     retry:
       automatic:
         - exit_status: '-1'
+          limit: 3
+        - exit_status: '*'
           limit: 1
 
   - command: .buildkite/scripts/steps/functional/security_serverless_detection_engine_exceptions.sh
@@ -324,6 +353,8 @@ steps:
     retry:
       automatic:
         - exit_status: '-1'
+          limit: 3
+        - exit_status: '*'
           limit: 1
 
   - command: .buildkite/scripts/steps/functional/security_solution_detection_engine.sh
@@ -341,6 +372,8 @@ steps:
     retry:
       automatic:
         - exit_status: '-1'
+          limit: 3
+        - exit_status: '*'
           limit: 1
 
   - command: .buildkite/scripts/steps/functional/security_solution_detection_engine_exceptions.sh
@@ -358,6 +391,8 @@ steps:
     retry:
       automatic:
         - exit_status: '-1'
+          limit: 3
+        - exit_status: '*'
           limit: 1
 
   - command: .buildkite/scripts/steps/functional/security_serverless_ai_assistant.sh
@@ -375,6 +410,8 @@ steps:
     retry:
       automatic:
         - exit_status: '-1'
+          limit: 3
+        - exit_status: '*'
           limit: 1
 
   - command: .buildkite/scripts/steps/functional/security_solution_ai_assistant.sh
@@ -392,6 +429,8 @@ steps:
     retry:
       automatic:
         - exit_status: '-1'
+          limit: 3
+        - exit_status: '*'
           limit: 1
 
   - command: .buildkite/scripts/steps/functional/security_solution_entity_analytics.sh
@@ -409,6 +448,8 @@ steps:
     retry:
       automatic:
         - exit_status: '-1'
+          limit: 3
+        - exit_status: '*'
           limit: 1
 
   - command: .buildkite/scripts/steps/functional/security_solution_explore.sh
@@ -426,6 +467,8 @@ steps:
     retry:
       automatic:
         - exit_status: '-1'
+          limit: 3
+        - exit_status: '*'
           limit: 1
 
   - command: .buildkite/scripts/steps/functional/security_solution_investigations.sh
@@ -444,6 +487,8 @@ steps:
     retry:
       automatic:
         - exit_status: '-1'
+          limit: 3
+        - exit_status: '*'
           limit: 1
 
   - command: .buildkite/scripts/steps/functional/osquery_cypress.sh
@@ -462,6 +507,8 @@ steps:
     retry:
       automatic:
         - exit_status: '-1'
+          limit: 3
+        - exit_status: '*'
           limit: 1
 
   - command: .buildkite/scripts/steps/functional/security_serverless_osquery.sh
@@ -480,12 +527,12 @@ steps:
     retry:
       automatic:
         - exit_status: '-1'
+          limit: 3
+        - exit_status: '*'
           limit: 1
 
   - command: .buildkite/scripts/steps/functional/defend_workflows.sh
     label: 'Defend Workflows Cypress Tests'
-    env:
-      CLEAR_YARN_CACHE: '1'
     agents:
       image: family/kibana-ubuntu-2404
       imageProject: elastic-images-prod
@@ -500,12 +547,12 @@ steps:
     retry:
       automatic:
         - exit_status: '-1'
+          limit: 3
+        - exit_status: '*'
           limit: 1
 
   - command: .buildkite/scripts/steps/functional/defend_workflows_serverless.sh
     label: 'Defend Workflows Cypress Tests on Serverless'
-    env:
-      CLEAR_YARN_CACHE: '1'
     agents:
       image: family/kibana-ubuntu-2404
       imageProject: elastic-images-prod
@@ -520,6 +567,8 @@ steps:
     retry:
       automatic:
         - exit_status: '-1'
+          limit: 3
+        - exit_status: '*'
           limit: 1
 
   - wait: ~

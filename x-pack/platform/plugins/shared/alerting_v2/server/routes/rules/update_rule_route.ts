@@ -38,6 +38,7 @@ export class UpdateRuleRoute extends BaseAlertingRoute {
     },
   };
   static routeOptions = {
+    access: 'public' as const,
     summary: 'Update a rule',
     oasOperationObject: updateRuleOasExamples,
   } as const;

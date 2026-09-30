@@ -7,6 +7,7 @@
 
 import { evaluate as base } from '@kbn/evals';
 import { AttackDiscoveryClient } from './clients/attack_discovery_client';
+import { AttackDiscoveryGenerateApiClient } from './clients/attack_discovery_generate_api_client';
 import type { EvaluateAttackDiscoveryDataset } from './evaluate_dataset';
 import { createEvaluateAttackDiscoveryDataset } from './evaluate_dataset';
 
@@ -14,6 +15,7 @@ export const evaluate = base.extend<
   {},
   {
     attackDiscoveryClient: AttackDiscoveryClient;
+    generateApiClient: AttackDiscoveryGenerateApiClient;
     evaluateDataset: EvaluateAttackDiscoveryDataset;
   }
 >({
@@ -23,11 +25,30 @@ export const evaluate = base.extend<
     },
     { scope: 'worker' },
   ],
+  generateApiClient: [
+    async ({ fetch, log }, use) => {
+      await use(new AttackDiscoveryGenerateApiClient(fetch, log));
+    },
+    { scope: 'worker' },
+  ],
   evaluateDataset: [
-    ({ attackDiscoveryClient, executorClient, inferenceClient, evaluationConnector, log }, use) => {
+    (
+      {
+        attackDiscoveryClient,
+        generateApiClient,
+        executorClient,
+        inferenceClient,
+        evaluators,
+        evaluationConnector,
+        log,
+      },
+      use
+    ) => {
       use(
         createEvaluateAttackDiscoveryDataset({
+          evaluators,
           attackDiscoveryClient,
+          generateApiClient,
           executorClient,
           inferenceClient,
           evaluationConnectorId: evaluationConnector.id,

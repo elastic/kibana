@@ -11,27 +11,45 @@ import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { Router } from '@kbn/shared-ux-router';
 import React from 'react';
 import ReactDOM from 'react-dom';
-import type { ContextEngineStartDependencies } from '../types';
+import type { ContextEngineAppChromeAdapter } from '../app_chrome_adapter';
+import type { AgentBuilderIntegration, ChatOpener, ContextEngineStartDependencies } from '../types';
 import type { ContextEngineServices } from './hooks/use_kibana';
 import { ContextEngineRoutes } from './routes';
 
-const queryClient = new QueryClient();
+const queryClient = new QueryClient({
+  // Keep signal groups / group signals fresh for 30s so they don't refetch on every remount or
+  // window refocus.
+  defaultOptions: { queries: { staleTime: 30_000 } },
+});
 
-export const mountApp = ({
+export const mountApp = async ({
   core,
   plugins,
   element,
   history,
+  getChatOpener,
+  appChrome,
+  getAgentBuilderIntegration,
 }: {
   core: CoreStart;
   plugins: ContextEngineStartDependencies;
   element: HTMLElement;
   history: ScopedHistory;
+  getChatOpener?: () => ChatOpener | undefined;
+  appChrome?: ContextEngineAppChromeAdapter;
+  getAgentBuilderIntegration?: () => AgentBuilderIntegration | undefined;
 }) => {
   const services: ContextEngineServices = {
     ...core,
+    data: plugins.data,
     share: plugins.share,
+    triggersActionsUi: plugins.triggersActionsUi,
     console: plugins.console,
+    spaces: plugins.spaces,
+    getChatOpener,
+    appChrome,
+    history,
+    getAgentBuilderIntegration,
   };
 
   ReactDOM.render(

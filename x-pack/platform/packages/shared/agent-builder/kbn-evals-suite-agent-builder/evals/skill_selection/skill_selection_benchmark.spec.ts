@@ -22,6 +22,7 @@ import {
   KI_IDENTIFICATION_MANAGEMENT_EXAMPLES,
   KNOWLEDGE_INDICATORS_MANAGEMENT_EXAMPLES,
   OBSERVABILITY_INVESTIGATION_EXAMPLES,
+  POLICY_MANAGEMENT_EXAMPLES,
   SEARCH_CATALOG_ECOMMERCE_EXAMPLES,
   SEARCH_ELASTICSEARCH_ONBOARDING_EXAMPLES,
   SEARCH_ELASTICSEARCH_TUTORIAL_EXAMPLES,
@@ -32,14 +33,12 @@ import {
   SERVICE_MAP_EXAMPLES,
   SIEM_READINESS_EXAMPLES,
   SIG_EVENTS_MANAGEMENT_EXAMPLES,
-  SIG_EVENTS_MEMORY_EXAMPLES,
   SKILL_AUTHORING_EXAMPLES,
   STREAMS_MANAGEMENT_EXAMPLES,
   THREAT_HUNTING_EXAMPLES,
   VISUALIZATION_CREATION_EXAMPLES,
 } from './benchmark_dataset';
 
-// Use the native kbn-evals executor directly — no Phoenix dependency.
 const base = evalsBase.extend<{}, { chatClient: AgentBuilderEvaluationChatClient }>({
   chatClient: [
     async ({ fetch, log, connector }, use) => {
@@ -131,13 +130,6 @@ evaluate.describe(
   'Skill Selection Benchmark — Streams',
   { tag: [...tags.serverless.security.complete, ...tags.serverless.security.ease] },
   () => {
-    evaluate('sig-events-memory routing', async ({ evaluateBenchmark }) => {
-      await evaluateBenchmark({
-        skillId: 'significant-events-memory',
-        examples: SIG_EVENTS_MEMORY_EXAMPLES,
-      });
-    });
-
     evaluate('streams-management routing', async ({ evaluateBenchmark }) => {
       await evaluateBenchmark({
         skillId: 'streams-management',
@@ -213,6 +205,13 @@ evaluate.describe(
         });
       }
     );
+
+    evaluate('elastic-defend-policy-management routing', async ({ evaluateBenchmark }) => {
+      await evaluateBenchmark({
+        skillId: 'elastic-defend-policy-management',
+        examples: POLICY_MANAGEMENT_EXAMPLES,
+      });
+    });
 
     evaluate('siem-readiness routing', async ({ evaluateBenchmark }) => {
       await evaluateBenchmark({ skillId: 'siem-readiness', examples: SIEM_READINESS_EXAMPLES });

@@ -29,6 +29,8 @@ import { findLiveQueryRequestQuerySchema } from '../../../common/api';
 import { generateTablePaginationOptions } from '../../../common/utils/build_query';
 import { getResultCountsForActions } from '../../lib/get_result_counts_for_actions';
 import { hasConnectedRemoteClusters } from '../../utils/ccs_utils';
+import { getReadEsClient } from '../../utils/get_read_es_client';
+import { getScopedSearch } from '../../utils/get_scoped_search';
 import { OSQUERY_SEARCH_STRATEGY } from '../../search_strategy/constants';
 import { findLiveQueryResponseSchema } from './response_schemas';
 
@@ -68,11 +70,17 @@ export const findLiveQueryRoute = (
         const abortSignal = getRequestAbortedSignal(request.events.aborted$);
 
         try {
+          const cpsActive = await osqueryContext.isCpsActive(request);
           const spaceId = osqueryContext?.service?.getActiveSpace
             ? (await osqueryContext.service.getActiveSpace(request))?.id || DEFAULT_SPACE_ID
             : DEFAULT_SPACE_ID;
 
-          const search = await context.search;
+          const search = await getScopedSearch(
+            context,
+            request,
+            cpsActive,
+            osqueryContext.getStartServices
+          );
           const res = await lastValueFrom(
             search.search<ActionsRequestOptions, ActionsStrategyResponse>(
               {
@@ -97,8 +105,13 @@ export const findLiveQueryRoute = (
           if (request.query.withResultCounts && items.length > 0) {
             try {
               const [coreStartServices] = await osqueryContext.getStartServices();
-              const esClient = coreStartServices.elasticsearch.client.asInternalUser;
-              const ccsEnabled = await hasConnectedRemoteClusters(esClient);
+              const internalEsClient = coreStartServices.elasticsearch.client.asInternalUser;
+              const readEsClient = getReadEsClient(
+                coreStartServices.elasticsearch.client,
+                request,
+                cpsActive
+              );
+              const ccsEnabled = await hasConnectedRemoteClusters(internalEsClient);
               let integrationNamespaces: string[] | undefined;
 
               if (osqueryContext?.service?.getIntegrationNamespaces) {
@@ -132,7 +145,7 @@ export const findLiveQueryRoute = (
               }
 
               const resultCountsMap = await getResultCountsForActions(
-                esClient,
+                readEsClient,
                 allActionIds,
                 spaceId,
                 integrationNamespaces,

@@ -156,7 +156,7 @@ export class ClassicStream extends StreamActiveRecord<Streams.ClassicStream.Defi
 
     this._changes.processing = computeChange({
       isExistingStream,
-      hasMeaningfulValue: (this._definition.ingest.processing.steps || []).length > 0,
+      hasMeaningfulValue: getProcessingItemCount(this._definition.ingest.processing) > 0,
       hasChanged: () =>
         !_.isEqual(
           _.omit(this._definition.ingest.processing, ['updated_at']),
@@ -346,7 +346,10 @@ export class ClassicStream extends StreamActiveRecord<Streams.ClassicStream.Defi
     validateBracketsInFieldNames(this._definition);
 
     // Validate Streamlang processing
-    if (this._definition.ingest.processing.steps.length > 0) {
+    if (
+      !isNativeProcessing(this._definition.ingest.processing) &&
+      this._definition.ingest.processing.steps.length > 0
+    ) {
       const validationResult = validateStreamlang(this._definition.ingest.processing, {
         reservedFields: [],
         streamType: 'classic',
@@ -412,7 +415,7 @@ export class ClassicStream extends StreamActiveRecord<Streams.ClassicStream.Defi
     }
 
     const actions: ElasticsearchAction[] = [];
-    if (this._definition.ingest.processing.steps.length > 0) {
+    if (getProcessingItemCount(this._definition.ingest.processing) > 0) {
       actions.push(...(await this.createUpsertPipelineActions()));
     }
     if (!isInheritLifecycle(this.getLifecycle())) {
@@ -498,11 +501,17 @@ export class ClassicStream extends StreamActiveRecord<Streams.ClassicStream.Defi
     }
 
     const actions: ElasticsearchAction[] = [];
-    if (this._changes.processing && this._definition.ingest.processing.steps.length > 0) {
+    if (
+      this._changes.processing &&
+      getProcessingItemCount(this._definition.ingest.processing) > 0
+    ) {
       actions.push(...(await this.createUpsertPipelineActions()));
     }
 
-    if (this._changes.processing && this._definition.ingest.processing.steps.length === 0) {
+    if (
+      this._changes.processing &&
+      getProcessingItemCount(this._definition.ingest.processing) === 0
+    ) {
       const streamManagedPipelineName = getProcessingPipelineName(this._definition.name);
       actions.push({
         type: 'delete_ingest_pipeline',
@@ -576,7 +585,12 @@ export class ClassicStream extends StreamActiveRecord<Streams.ClassicStream.Defi
       const mappings = getClassicFieldOverrideMappings(
         this._definition.ingest.classic.field_overrides
       );
-      if (mappings) {
+      const previousMappings = getClassicFieldOverrideMappings(
+        startingStateStream.definition.ingest.classic.field_overrides
+      );
+      // Only write or reset when Streams previously wrote an override, or is
+      // writing one now. undefined -> {} must stay a no-op.
+      if (mappings || previousMappings) {
         actions.push({
           type: 'update_data_stream_mappings',
           request: {
@@ -675,7 +689,7 @@ export class ClassicStream extends StreamActiveRecord<Streams.ClassicStream.Defi
       },
     ];
 
-    if (this._definition.ingest.processing.steps.length > 0) {
+    if (getProcessingItemCount(this._definition.ingest.processing) > 0) {
       const streamManagedPipelineName = getProcessingPipelineName(this._definition.name);
       actions.push({
         type: 'delete_ingest_pipeline',
@@ -785,3 +799,18 @@ export class ClassicStream extends StreamActiveRecord<Streams.ClassicStream.Defi
     return this._effectiveSettings;
   }
 }
+
+const isNativeProcessing = (
+  processing: Streams.ClassicStream.Definition['ingest']['processing']
+): processing is Extract<
+  Streams.ClassicStream.Definition['ingest']['processing'],
+  { processors: unknown[] }
+> => {
+  return 'processors' in processing;
+};
+
+const getProcessingItemCount = (
+  processing: Streams.ClassicStream.Definition['ingest']['processing']
+) => {
+  return isNativeProcessing(processing) ? processing.processors.length : processing.steps.length;
+};

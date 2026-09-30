@@ -7,7 +7,7 @@
 
 import { esql } from '@elastic/esql';
 import type { AlertEpisodeStatus } from '@kbn/alerting-v2-schemas';
-import { ALERT_EVENTS_DATA_STREAM } from '@kbn/alerting-v2-episodes-ui/constants';
+import { ALERT_EVENTS_DATA_STREAM } from '@kbn/alerting-v2-constants';
 
 /** Upper bound on phase rows per episode — the four `episode.status` values. */
 const MAX_PHASES_PER_EPISODE = 4;

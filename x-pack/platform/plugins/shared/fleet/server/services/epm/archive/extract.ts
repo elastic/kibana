@@ -20,23 +20,45 @@ export async function untarBuffer(
   shouldReadBuffer?: (path: string) => boolean
 ) {
   const deflatedStream = bufferToStream(buffer);
+  const entryPromises: Array<Promise<void>> = [];
+  // Serialize onEntry calls: tar.list() Parser has no pause() API, so streamToBuffer
+  // reads for adjacent entries can overlap when the archive is memory-backed, but we
+  // chain onEntry invocations so at most one is running at a time.
+  let onEntryChain = Promise.resolve<void>(undefined);
+  const settleChain = () => {};
+
   // use tar.list vs .extract to avoid writing to disk
   const inflateStream = tar.list().on('entry', (entry) => {
     const path = entry.path || '';
     if (!filter({ path })) return;
 
     if (shouldReadBuffer && !shouldReadBuffer(path)) {
-      return onEntry({ path }).catch(() => {});
+      const p = onEntryChain.then(() => onEntry({ path }));
+      onEntryChain = p.then(settleChain, settleChain);
+      entryPromises.push(p);
+      return;
     }
 
-    streamToBuffer(entry as unknown as NodeJS.ReadableStream)
-      .then((entryBuffer) => onEntry({ buffer: entryBuffer, path }))
-      .catch(() => {});
+    // streamToBuffer must be called synchronously here to consume the entry stream
+    // before tar advances to the next entry; the resulting promise is awaited below.
+    const bufferPromise = streamToBuffer(entry as unknown as NodeJS.ReadableStream);
+    const p = onEntryChain
+      .then(() => bufferPromise)
+      .then((entryBuffer) => onEntry({ buffer: entryBuffer, path }));
+    onEntryChain = p.then(settleChain, settleChain);
+    entryPromises.push(p);
   });
 
   deflatedStream.pipe(inflateStream);
 
-  await finished(inflateStream);
+  try {
+    await finished(inflateStream);
+    await Promise.all(entryPromises);
+  } finally {
+    // If the stream errors, entry sub-streams may still be pending. Settle them
+    // silently so they never produce unhandled rejections; the stream error propagates.
+    await Promise.allSettled(entryPromises);
+  }
 }
 
 export async function unzipBuffer(
@@ -44,24 +66,32 @@ export async function unzipBuffer(
   filter = (entry: ArchiveEntry): boolean => true,
   onEntry = async (entry: ArchiveEntry): Promise<void> => {},
   shouldReadBuffer?: (path: string) => boolean
-): Promise<unknown> {
+): Promise<void> {
   const zipfile = await yauzlFromBuffer(buffer, { lazyEntries: true });
   zipfile.readEntry();
-  zipfile.on('entry', async (entry: yauzl.Entry) => {
-    const path = entry.fileName;
-    if (!filter({ path })) return zipfile.readEntry();
-
-    try {
-      if (shouldReadBuffer && !shouldReadBuffer(path)) {
-        return onEntry({ path });
+  return new Promise((resolve, reject) => {
+    zipfile.on('entry', async (entry: yauzl.Entry) => {
+      const path = entry.fileName;
+      if (!filter({ path })) {
+        zipfile.readEntry();
+        return;
       }
-      const entryBuffer = await getZipReadStream(zipfile, entry).then(streamToBuffer);
-      await onEntry({ buffer: entryBuffer, path });
-    } finally {
-      zipfile.readEntry();
-    }
+
+      try {
+        if (shouldReadBuffer && !shouldReadBuffer(path)) {
+          await onEntry({ path });
+        } else {
+          const entryBuffer = await getZipReadStream(zipfile, entry).then(streamToBuffer);
+          await onEntry({ buffer: entryBuffer, path });
+        }
+        zipfile.readEntry();
+      } catch (err) {
+        reject(err);
+      }
+    });
+    zipfile.on('end', resolve);
+    zipfile.on('error', reject);
   });
-  return new Promise((resolve, reject) => zipfile.on('end', resolve).on('error', reject));
 }
 
 type BufferExtractor = typeof unzipBuffer | typeof untarBuffer;

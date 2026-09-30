@@ -56,6 +56,12 @@ export const RULE_SPECS: RuleSpec[] = [
 
 export const FAKE_ALERT_INSTANCE_ID = 'fake-instance-id';
 
+// `setupStackAlertsPrivilegeTests` runs two sequential 120s polls (event-log success, then alert
+// indexing). Scout's default per-hook timeout is 60s (see kbn-scout create_config `timeout`), which
+// aborts the `beforeAll` before either budget can elapse. Specs must lift the hook timeout above the
+// combined poll ceiling so the 120s budgets are actually reachable on slow Cloud/serverless targets.
+export const STACK_ALERTS_PRIVILEGE_SETUP_TIMEOUT_MS = 300_000;
+
 export interface StackAlertsPrivilegeState {
   adminCreds: RoleApiCredentials;
   createdRules: Array<{ ruleTypeId: string; ruleId: string }>;
@@ -137,7 +143,9 @@ export const setupStackAlertsPrivilegeTests = async (
         return Boolean(alertDoc);
       },
       {
-        timeout: 30_000,
+        // Alert indexing after rule execution can lag well past 30s on Cloud serverless; use the
+        // same 120s budget as waitForSuccessfulEventLogEntry to cover task-claim + write latency.
+        timeout: 120_000,
         intervals: [2_000],
         message: 'expected an alert to be generated for the enabled rule',
       }

@@ -8,7 +8,7 @@
  */
 
 import React from 'react';
-import { render, fireEvent } from '@testing-library/react';
+import { render, fireEvent, waitFor } from '@testing-library/react';
 import type { FieldInputProps } from './field_input';
 import { FieldInput } from './field_input';
 import type {
@@ -133,12 +133,18 @@ describe('FieldInput', () => {
     expect(input).toBeInTheDocument();
   });
 
-  it('calls the onChange prop when the value changes', () => {
+  it('calls the onChange prop when the value changes', async () => {
     const props = getDefaultProps('string');
     const { getByTestId } = render(wrap(<FieldInput {...props} />));
     const input = getByTestId(`${TEST_SUBJ_PREFIX_FIELD}-${name}`);
     fireEvent.change(input, { target: { value: 'new value' } });
-    expect(props.onInputChange).toHaveBeenCalledWith({ type: 'string', unsavedValue: 'new value' });
+
+    await waitFor(() =>
+      expect(props.onInputChange).toHaveBeenCalledWith({
+        type: 'string',
+        unsavedValue: 'new value',
+      })
+    );
   });
 
   it('disables the input when isDisabled prop is true', () => {
@@ -171,7 +177,7 @@ describe('FieldInput', () => {
             />
           )
         )
-      ).toThrowError(`Unsaved change for ${type} mismatch: number`);
+      ).toThrow(`Unsaved change for ${type} mismatch: number`);
     });
 
     expect(() =>
@@ -183,7 +189,7 @@ describe('FieldInput', () => {
           />
         )
       )
-    ).toThrowError(`Unsaved change for number mismatch: string`);
+    ).toThrow(`Unsaved change for number mismatch: string`);
 
     consoleMock.mockRestore();
   });
@@ -199,7 +205,7 @@ describe('FieldInput', () => {
       },
     } as unknown as FieldInputProps;
 
-    expect(() => render(wrap(<FieldInput {...props} />))).toThrowError(
+    expect(() => render(wrap(<FieldInput {...props} />))).toThrow(
       'Unknown or incompatible field type: foobar'
     );
 

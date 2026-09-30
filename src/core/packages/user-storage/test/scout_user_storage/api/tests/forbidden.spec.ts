@@ -9,8 +9,7 @@
 
 import { tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/api';
-import { apiTest } from '../fixtures';
-import { createHelpers } from './helpers';
+import { apiTest, createHelpers } from '../fixtures';
 
 apiTest.describe(
   'User Storage - Forbidden (no user profile)',

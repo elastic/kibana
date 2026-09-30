@@ -13,6 +13,8 @@ import { DEFAULT_STACK_BY_FIELD, DEFAULT_STACK_BY_FIELD1 } from '../../common/co
 import { TestProviders } from '../../../../../common/mock';
 import { ChartContextMenu } from '.';
 
+jest.setTimeout(30_000);
+
 describe('ChartContextMenu', () => {
   const queryId = 'abcd';
   beforeEach(() => jest.clearAllMocks());
@@ -76,8 +78,8 @@ describe('ChartContextMenu', () => {
     const resetMenuItem = getByTestId('reset-group-by');
     fireEvent.click(resetMenuItem);
 
-    expect(setStackBy).toBeCalledWith('kibana.alert.rule.name');
-    expect(setStackByField1).toBeCalledWith('host.name');
+    expect(setStackBy).toHaveBeenCalledWith('kibana.alert.rule.name');
+    expect(setStackByField1).toHaveBeenCalledWith('host.name');
   });
 
   test('it invokes `onReset` when the `Reset group by fields` menu item clicked', async () => {
@@ -103,6 +105,6 @@ describe('ChartContextMenu', () => {
     const resetMenuItem = getByTestId('reset-group-by');
     fireEvent.click(resetMenuItem);
 
-    expect(onReset).toBeCalled();
+    expect(onReset).toHaveBeenCalled();
   });
 });

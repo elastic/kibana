@@ -11,7 +11,7 @@ import React, { useState, useEffect, lazy, Suspense } from 'react';
 import { EuiHeaderSectionItemButton, EuiIcon, EuiToolTip, EuiModal } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
-import type { FeedbackFormData, FeedbackRegistryEntry } from '../types';
+import type { AppDetails, FeedbackFormData, FeedbackRegistryEntry } from '../types';
 
 const LazyFeedbackContainer = lazy(() =>
   import('./feedback_container').then((m) => ({ default: m.FeedbackContainer }))
@@ -19,7 +19,7 @@ const LazyFeedbackContainer = lazy(() =>
 
 export interface FeedbackTriggerButtonProps {
   getQuestions: (appId: string) => Promise<FeedbackRegistryEntry[]>;
-  getAppDetails: () => { title: string; id: string; url: string };
+  getAppDetails: () => AppDetails;
   getCurrentUserEmail: () => Promise<string | undefined>;
   sendFeedback: (data: FeedbackFormData) => Promise<void>;
   showToast: (title: string, type: 'success' | 'error') => void;

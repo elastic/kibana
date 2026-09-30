@@ -8,4 +8,6 @@
  */
 
 export { humanizeCategoryId } from './humanize_category_id';
+export { getCategoryLabel } from './category_labels';
+export { getConnectorTypeLabel } from './get_connector_type_label';
 export { getWorkflowTypes } from './get_workflow_types';

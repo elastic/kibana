@@ -64,7 +64,7 @@ export const registerSaveExperimentWorkflowRoute = ({
         if (body.space_ids?.includes(ALL_SPACES_ID)) {
           return response.badRequest({
             body: {
-              message: `Assigning an experiment to all spaces ("${ALL_SPACES_ID}") is not supported yet; provide explicit space ids.`,
+              message: `All spaces ("${ALL_SPACES_ID}") is not a space id; name each space the experiment belongs to.`,
             },
           });
         }
@@ -104,7 +104,8 @@ export const registerSaveExperimentWorkflowRoute = ({
           if (body.workflow_id) {
             const existing = await workflowsManagement.management.getWorkflow(
               body.workflow_id,
-              spaceId
+              spaceId,
+              request
             );
             if (!isEvalsOwnedWorkflow(existing)) {
               return response.notFound({

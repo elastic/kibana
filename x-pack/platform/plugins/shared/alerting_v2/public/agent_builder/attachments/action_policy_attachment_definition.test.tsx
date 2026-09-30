@@ -7,6 +7,7 @@
 
 import React from 'react';
 import { render } from '@testing-library/react';
+import { ACTION_POLICY_ATTACHMENT_TYPE } from '@kbn/alerting-v2-schemas';
 import { createActionPolicyAttachmentDefinition } from './action_policy_attachment_definition';
 
 jest.mock('./action_policy_inline_content', () => ({
@@ -23,7 +24,7 @@ const createMockServices = () => ({
 
 const createAttachment = (overrides: { origin?: string } = {}) => ({
   id: 'att-1',
-  type: 'action_policy' as const,
+  type: ACTION_POLICY_ATTACHMENT_TYPE,
   versions: [],
   current_version: 1,
   origin: overrides.origin,
@@ -50,9 +51,9 @@ describe('createActionPolicyAttachmentDefinition', () => {
   });
 
   describe('getIcon', () => {
-    it('returns pagesSelect', () => {
+    it('returns workflow', () => {
       const definition = createActionPolicyAttachmentDefinition(createMockServices());
-      expect(definition.getIcon!()).toBe('pagesSelect');
+      expect(definition.getIcon!()).toBe('workflow');
     });
   });
 

@@ -466,19 +466,20 @@ ${buildPinnedEsql(['_id', 'actorEntityId', 'targetEntityId'], pinnedIds)}
 // Map host and source values to enriched contextual data
 | EVAL sourceIps = source.ip
 | EVAL sourceCountryCodes = source.geo.country_iso_code
-// Origin event and alerts allow us to identify the start position of graph traversal
+// Origin event and alerts allow us to identify the start position of graph traversal.
+// COALESCE the nullable event.id to "" *before* IN (rather than guarding with CASE/AND):
+// origin IDs are always non-empty, so "" never matches, and this keeps a nullable input out
+// of IN/AND, which trips an ES|QL PropagateNullable planner NPE (elastic/elasticsearch#141579).
 | EVAL isOrigin = ${
     originEventIds.length > 0
-      ? `CASE (event.id IS NOT NULL AND event.id != "", event.id in (${originEventIds
-          .map((_id, idx) => `?og_id${idx}`)
-          .join(', ')}), false)`
+      ? `COALESCE(event.id, "") in (${originEventIds.map((_id, idx) => `?og_id${idx}`).join(', ')})`
       : 'false'
   }
 | EVAL isOriginAlert = ${
     originAlertIds.length > 0
-      ? `CASE (event.id IS NOT NULL AND event.id != "", isOrigin AND event.id in (${originAlertIds
+      ? `isOrigin AND COALESCE(event.id, "") in (${originAlertIds
           .map((_id, idx) => `?og_alrt_id${idx}`)
-          .join(', ')}), false)`
+          .join(', ')})`
       : 'false'
   }
 | EVAL isAlert = _index LIKE "*${SECURITY_ALERTS_PARTIAL_IDENTIFIER}*"
@@ -506,7 +507,7 @@ ${buildPinnedEsql(['_id', 'actorEntityId', 'targetEntityId'], pinnedIds)}
 // are NOT used here as group keys — IDs are collected via VALUES() and type/sub-type
 // are not available (entity-store join is CPS-unsafe). The follow-up enrichment query
 // supplies type/sub-type and regroupEvents performs the final type-level merge in TypeScript.
-| STATS badge = COUNT(*),
+| STATS badge = COUNT_DISTINCT(_id),
   isAlert = MV_MAX(VALUES(isAlert)),
   docs = VALUES(docData),
   docIds = VALUES(_id),

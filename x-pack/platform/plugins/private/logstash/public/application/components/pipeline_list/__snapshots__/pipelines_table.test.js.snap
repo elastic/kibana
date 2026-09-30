@@ -88,17 +88,6 @@ exports[`PipelinesTable component renders component as expected 1`] = `
         },
       ],
       "toolsLeft": null,
-      "toolsRight": <EuiButton
-        data-test-subj="btnAdd"
-        fill={true}
-        isDisabled={false}
-        onClick={[MockFunction]}
-      >
-        <Memo(MemoizedFormattedMessage)
-          defaultMessage="Create pipeline"
-          id="xpack.logstash.pipelinesTable.createPipelineButtonLabel"
-        />
-      </EuiButton>,
     }
   }
   searchFormat="eql"

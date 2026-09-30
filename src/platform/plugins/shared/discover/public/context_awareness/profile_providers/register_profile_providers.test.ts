@@ -8,7 +8,10 @@
  */
 
 import { uniq } from 'lodash';
-import { createEsqlDataSource } from '../../../common/data_sources';
+import type { ApmSourceAccessPluginStart } from '@kbn/apm-sources-access-plugin/public';
+import { createStubIndexPattern } from '@kbn/data-views-plugin/common/data_view.stub';
+import { createApmContextService } from '@kbn/discover-utils';
+import { createDataViewDataSource, createEsqlDataSource } from '../../../common/data_sources';
 import { createContextAwarenessMocks, createProfileProviderSharedServicesMock } from '../__mocks__';
 import { createExampleRootProfileProvider } from './example/example_root_profile';
 import { createExampleDataSourceProfileProvider } from './example/example_data_source_profile/profile';
@@ -17,6 +20,7 @@ import { registerProfileProviders } from './register_profile_providers';
 import type { BaseProfileProvider } from '../profile_service';
 import { SolutionType } from '../profiles';
 import { METRICS_DATA_SOURCE_PROFILE_ID } from './common/metrics_data_source_profile/profile';
+import { OBSERVABILITY_TRACES_DATA_SOURCE_PROFILE_ID } from './observability/traces_data_source_profile/profile';
 
 const levels = ['root', 'data-source', 'document'];
 let mockAllCollectedProfiles: Array<{ level: string; profileId: string }> = [];
@@ -45,6 +49,47 @@ jest.mock('./register_enabled_profile_providers', () => {
 const exampleRootProfileProvider = createExampleRootProfileProvider();
 const exampleDataSourceProfileProvider = createExampleDataSourceProfileProvider();
 const exampleDocumentProfileProvider = createExampleDocumentProfileProvider();
+const DEFAULT_DATA_SOURCE_PROFILE_ID = 'default-data-source-profile';
+const CUSTOM_TRACES_INDEX_PATTERN = 'logs-custom-traces-*';
+const LOG_PROFILE_CASES: Array<[profileId: string, indexPattern: string]> = [
+  ['observability-logs-data-source-profile', 'logs-custom-*'],
+  ['observability-apache-error-logs-data-source-profile', 'logs-apache.error-*'],
+  ['observability-aws-s3access-logs-data-source-profile', 'logs-aws.s3access-*'],
+  [
+    'observability-kubernetes-container-logs-data-source-profile',
+    'logs-kubernetes.container_logs-*',
+  ],
+  ['observability-nginx-access-logs-data-source-profile', 'logs-nginx.access-*'],
+  ['observability-nginx-error-logs-data-source-profile', 'logs-nginx.error-*'],
+  ['observability-system-logs-data-source-profile', 'logs-system.syslog-*'],
+  ['observability-windows-logs-data-source-profile', 'logs-windows.powershell-*'],
+];
+
+const setupObservabilityProfileStack = async () => {
+  const profileProviderServices = createProfileProviderSharedServicesMock();
+  jest.spyOn(profileProviderServices.core.pricing, 'isFeatureAvailable').mockReturnValue(true);
+  const { rootProfileServiceMock, dataSourceProfileServiceMock, documentProfileServiceMock } =
+    createContextAwarenessMocks({
+      shouldRegisterProviders: false,
+    });
+  registerProfileProviders({
+    rootProfileService: rootProfileServiceMock,
+    dataSourceProfileService: dataSourceProfileServiceMock,
+    documentProfileService: documentProfileServiceMock,
+    enabledExperimentalProfileIds: [],
+    sharedServices: profileProviderServices,
+    services: profileProviderServices,
+  });
+  const rootContext = await rootProfileServiceMock.resolve({
+    solutionNavId: SolutionType.Observability,
+  });
+
+  return {
+    dataSourceProfileServiceMock,
+    profileProviderServices,
+    rootContext,
+  };
+};
 
 describe('registerProfileProviders', () => {
   beforeEach(() => {
@@ -146,30 +191,133 @@ describe('registerProfileProviders', () => {
     expect(allCollectedProfileIds).toEqual(uniq(allCollectedProfileIds));
   });
 
-  it('should resolve metrics profile for TS queries against index patterns matching logs base patterns', async () => {
-    const profileProviderServices = createProfileProviderSharedServicesMock();
-    jest.spyOn(profileProviderServices.core.pricing, 'isFeatureAvailable').mockReturnValue(true);
-    const { rootProfileServiceMock, dataSourceProfileServiceMock, documentProfileServiceMock } =
-      createContextAwarenessMocks({
-        shouldRegisterProviders: false,
+  describe('Observability cross-profile resolution', () => {
+    it.each([
+      ['an ordinary metrics pattern', 'TS metrics-*'],
+      ['a logs-shaped pattern', 'TS metrics-logstash.otel-default'],
+      ['a traces-shaped pattern', 'TS traces-apm-default'],
+      ['a deprecation-logs pattern', 'TS .logs-deprecation.elasticsearch-default'],
+      ['a leading line comment', '// metrics query\nTS metrics-*'],
+      ['a leading block comment', '/* metrics query */\nTS metrics-*'],
+      ['a split source command', 'TS\nmetrics-*'],
+      [
+        'a multiline pipeline of supported commands',
+        `TS metrics-*
+          | WHERE host.name == "test-host"
+          | SORT @timestamp DESC
+          | LIMIT 10`,
+      ],
+    ])('resolves the metrics profile for %s', async (_, query) => {
+      const { dataSourceProfileServiceMock, rootContext } = await setupObservabilityProfileStack();
+      const dataSourceContext = await dataSourceProfileServiceMock.resolve({
+        rootContext,
+        dataSource: createEsqlDataSource(),
+        query: { esql: query },
       });
-    registerProfileProviders({
-      rootProfileService: rootProfileServiceMock,
-      dataSourceProfileService: dataSourceProfileServiceMock,
-      documentProfileService: documentProfileServiceMock,
-      enabledExperimentalProfileIds: [],
-      sharedServices: profileProviderServices,
-      services: profileProviderServices,
+
+      expect(dataSourceContext.profileId).toBe(METRICS_DATA_SOURCE_PROFILE_ID);
     });
-    const rootContext = await rootProfileServiceMock.resolve({
-      solutionNavId: SolutionType.Observability,
+
+    it.each([
+      ['an unsupported metrics command', 'TS metrics-* | STATS count()'],
+      ['an invalid metrics query', 'TS metrics-* | WHERE'],
+      ['a transformational traces query', 'FROM traces-* | STATS count()'],
+      ['an invalid traces query', 'FROM traces-* | WHERE'],
+    ])('uses the default profile for %s', async (_, query) => {
+      const { dataSourceProfileServiceMock, rootContext } = await setupObservabilityProfileStack();
+      const dataSourceContext = await dataSourceProfileServiceMock.resolve({
+        rootContext,
+        dataSource: createEsqlDataSource(),
+        query: { esql: query },
+      });
+
+      expect(dataSourceContext.profileId).toBe(DEFAULT_DATA_SOURCE_PROFILE_ID);
     });
-    const dataSourceContext = await dataSourceProfileServiceMock.resolve({
-      rootContext,
-      dataSource: createEsqlDataSource(),
-      query: { esql: 'TS metrics-logstash.otel-default' },
+
+    it('resolves the traces profile for the default traces pattern', async () => {
+      const { dataSourceProfileServiceMock, rootContext } = await setupObservabilityProfileStack();
+      const dataSourceContext = await dataSourceProfileServiceMock.resolve({
+        rootContext,
+        dataSource: createEsqlDataSource(),
+        query: { esql: 'FROM traces-*' },
+      });
+
+      expect(dataSourceContext.profileId).toBe(OBSERVABILITY_TRACES_DATA_SOURCE_PROFILE_ID);
     });
-    expect(dataSourceContext.profileId).toBe(METRICS_DATA_SOURCE_PROFILE_ID);
+
+    it.each([
+      [
+        'an ES|QL query',
+        {
+          dataSource: createEsqlDataSource(),
+          query: { esql: `FROM ${CUSTOM_TRACES_INDEX_PATTERN}` },
+        },
+      ],
+      [
+        'a data view',
+        {
+          dataSource: createDataViewDataSource({ dataViewId: CUSTOM_TRACES_INDEX_PATTERN }),
+          dataView: createStubIndexPattern({ spec: { title: CUSTOM_TRACES_INDEX_PATTERN } }),
+        },
+      ],
+    ])(
+      'resolves the traces profile for a custom traces-shaped pattern in %s',
+      async (_, params) => {
+        const { dataSourceProfileServiceMock, profileProviderServices, rootContext } =
+          await setupObservabilityProfileStack();
+        const apmSourcesAccess = {
+          getApmIndices: jest.fn().mockResolvedValue({
+            transaction: CUSTOM_TRACES_INDEX_PATTERN,
+            span: CUSTOM_TRACES_INDEX_PATTERN,
+            error: '',
+            metric: '',
+            onboarding: '',
+            sourcemap: '',
+          }),
+          getApmIndexSettings: jest.fn(),
+          saveApmIndices: jest.fn(),
+        } as ApmSourceAccessPluginStart;
+        const configuredApmContextService = await createApmContextService({
+          apmSourcesAccess,
+        });
+        profileProviderServices.apmContextService.tracesService =
+          configuredApmContextService.tracesService;
+        const dataSourceContext = await dataSourceProfileServiceMock.resolve({
+          rootContext,
+          ...params,
+        });
+
+        expect(dataSourceContext.profileId).toBe(OBSERVABILITY_TRACES_DATA_SOURCE_PROFILE_ID);
+      }
+    );
+
+    describe.each(LOG_PROFILE_CASES)('%s', (profileId, indexPattern) => {
+      it.each([
+        [
+          'an ES|QL query',
+          {
+            dataSource: createEsqlDataSource(),
+            query: { esql: `FROM ${indexPattern}` },
+          },
+        ],
+        [
+          'a data view',
+          {
+            dataSource: createDataViewDataSource({ dataViewId: indexPattern }),
+            dataView: createStubIndexPattern({ spec: { title: indexPattern } }),
+          },
+        ],
+      ])('wins ahead of less-specific logs profiles for %s', async (_, params) => {
+        const { dataSourceProfileServiceMock, rootContext } =
+          await setupObservabilityProfileStack();
+        const dataSourceContext = await dataSourceProfileServiceMock.resolve({
+          rootContext,
+          ...params,
+        });
+
+        expect(dataSourceContext.profileId).toBe(profileId);
+      });
+    });
   });
 
   it('all profile ids should be named appropriate to their context level', async () => {

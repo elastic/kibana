@@ -10,7 +10,6 @@
 import { parse } from 'yaml';
 import DETECTION_YAML from './detection.yaml';
 import DISCOVERY_YAML from './discovery.yaml';
-import TRIAGE_YAML from './triage.yaml';
 
 interface WorkflowStep {
   name: string;
@@ -21,6 +20,7 @@ interface WorkflowStep {
   with?: {
     query?: string;
     filter?: unknown;
+    params?: unknown;
   };
 }
 
@@ -30,6 +30,24 @@ const getStep = (yaml: string, name: string): WorkflowStep => {
   if (!step) throw new Error(`Step ${name} not found`);
   return step;
 };
+
+const findStepRecursive = (steps: WorkflowStep[], name: string): WorkflowStep | undefined => {
+  for (const step of steps) {
+    if (step.name === name) return step;
+    if (step.steps) {
+      const found = findStepRecursive(step.steps, name);
+      if (found) return found;
+    }
+  }
+  return undefined;
+};
+
+const hasStepLevelIfOnEsql = (steps: WorkflowStep[]): boolean =>
+  steps.some(
+    (step) =>
+      (step.type === 'elasticsearch.esql.query' && Boolean(step.if)) ||
+      (step.steps ? hasStepLevelIfOnEsql(step.steps) : false)
+  );
 
 describe('significant events fair batch selection', () => {
   it('denormalizes the rule severity onto detection documents', () => {
@@ -42,32 +60,43 @@ describe('significant events fair batch selection', () => {
     expect(serializedStep).toContain('foreach.item.severity_score');
   });
 
-  it('selects a bounded detection batch with ES|QL severity-plus-age scoring', () => {
+  it('selects a bounded detection batch with ES|QL severity-plus-age scoring and suppresses flaky rules with an age-based probe', () => {
     const selection = getStep(DISCOVERY_YAML, 'get_detections');
+    const query = selection.with?.query;
     const discovery = parse(DISCOVERY_YAML) as { steps: WorkflowStep[] };
 
     expect(selection.type).toBe('elasticsearch.esql.query');
-    expect(selection.with?.query).toContain('INLINE STATS processed_count');
-    expect(selection.with?.query).toContain('INLINE STATS latest_timestamp');
-    expect(selection.with?.query).toContain('staleness_minutes');
-    expect(selection.with?.query).toContain('LIMIT ?1');
-    expect(selection.with?.query).not.toContain('seen_by');
+    expect(query).toContain('INLINE STATS processed_count');
+    expect(query).toContain('INLINE STATS recent_detection_count');
+    expect(query).toContain('INLINE STATS oldest_unprocessed');
+    expect(query).toContain('latest_timestamp = MAX(@timestamp)');
+    expect(query).toContain('suppressed_age_minutes');
+    expect(query).toContain('staleness_minutes');
+    expect(query).toContain('recent_detection_count < ?2');
+    expect(query).toContain('suppressed_age_minutes >= ?3');
+    expect(query).toContain('severity_score >= ?4');
+    expect(query).toContain(
+      'EVAL flaky_probe = recent_detection_count >= ?2 AND suppressed_age_minutes >= ?3'
+    );
+    expect(query).toContain('KEEP rule_uuid, _source, score, recent_detection_count, flaky_probe');
+
+    const queryLines = query?.split('\n') ?? [];
+    const suppressionLineIdx = queryLines.findIndex((l: string) =>
+      l.includes('recent_detection_count < ?2')
+    );
+    const limitLineIdx = queryLines.findIndex((l: string) => l.includes('LIMIT ?1'));
+    expect(suppressionLineIdx).toBeGreaterThan(-1);
+    expect(limitLineIdx).toBeGreaterThan(-1);
+    expect(suppressionLineIdx).toBeLessThan(limitLineIdx);
+
+    const coalesceLineIdx = queryLines.findIndex((l: string) =>
+      l.includes('COALESCE(severity_score')
+    );
+    expect(coalesceLineIdx).toBeGreaterThan(-1);
+    expect(coalesceLineIdx).toBeLessThan(suppressionLineIdx);
+
+    expect(query).not.toContain('seen_by');
     expect(discovery.steps.some(({ name }) => name === 'count_detection_candidates')).toBe(false);
-  });
-
-  it('selects a bounded triage batch with the same fairness model', () => {
-    const selection = getStep(TRIAGE_YAML, 'get_unassessed_discoveries');
-    const triage = parse(TRIAGE_YAML) as { steps: WorkflowStep[] };
-
-    expect(selection.type).toBe('elasticsearch.esql.query');
-    expect(selection.with?.query).toContain('INLINE STATS latest_timestamp');
-    expect(selection.with?.query).toContain('BY event_id');
-    expect(selection.with?.query).toContain('severity_score');
-    expect(selection.with?.query).toContain('staleness_minutes');
-    expect(selection.with?.query).not.toContain('discovery_slug');
-    expect(selection.with?.query).not.toContain('seen_by');
-    expect(selection.with?.query).toContain('LIMIT ?1');
-    expect(triage.steps.some(({ name }) => name === 'count_unassessed_discoveries')).toBe(false);
   });
 
   it('stamps written-rule backlogs behind a type: if gate, not step-level if on ES|QL', () => {
@@ -82,7 +111,21 @@ describe('significant events fair batch selection', () => {
     expect(backlog?.if).toBeUndefined();
     expect(JSON.stringify(backlog?.with?.filter)).toContain('written_rule_uuids');
     expect(discovery.steps.some(({ name }) => name === 'get_rule_backlog')).toBe(false);
-    expect(discovery.steps.some(({ if: stepIf }) => Boolean(stepIf))).toBe(false);
+    expect(hasStepLevelIfOnEsql(discovery.steps)).toBe(false);
+  });
+
+  it('keeps markers visible to the backlog dedup semijoin (rule filter is a should, not a bare terms)', () => {
+    // Markers carry no rule_uuid; a bare terms filter drops them before the processed_count
+    // join and every backlog detection gets re-stamped each cycle (nightshift-program#961).
+    const gate = getStep(DISCOVERY_YAML, 'maybe_stamp_processed');
+    const backlog = gate.steps?.find(({ name }) => name === 'get_written_rules_backlog');
+    const filter = JSON.stringify(backlog?.with?.filter);
+
+    expect(filter).toContain('"should"');
+    expect(filter).toContain('"exists":{"field":"processed_by"}');
+    expect(filter).toContain('"minimum_should_match":1');
+    expect(backlog?.with?.query).toContain('INLINE STATS processed_count');
+    expect(backlog?.with?.query).toContain('processed_count == 0');
   });
 
   it('reports hasWork from the batch size so the drain loop can continue without a queue count', () => {
@@ -90,18 +133,58 @@ describe('significant events fair batch selection', () => {
       outputs: Array<{ name: string }>;
       steps: Array<WorkflowStep & { with?: Record<string, unknown> }>;
     };
-    const triage = parse(TRIAGE_YAML) as {
-      outputs: Array<{ name: string }>;
-      steps: Array<WorkflowStep & { with?: Record<string, unknown> }>;
-    };
 
-    expect(discovery.outputs.map(({ name }) => name)).toEqual(['processedCount', 'hasWork']);
-    expect(triage.outputs.map(({ name }) => name)).toEqual(['processedCount', 'hasWork']);
+    expect(discovery.outputs.map(({ name }) => name)).toEqual([
+      'processedCount',
+      'hasWork',
+      'suppressedRuleCount',
+    ]);
     expect(discovery.steps.find(({ name }) => name === 'output_result')?.with).toMatchObject({
       hasWork: true,
     });
-    expect(triage.steps.find(({ name }) => name === 'output_result')?.with).toMatchObject({
-      hasWork: true,
-    });
+    expect(discovery.steps.find(({ name }) => name === 'output_result')?.with).toHaveProperty(
+      'suppressedRuleCount'
+    );
+    expect(findStepRecursive(discovery.steps, 'output_no_detections')?.with).toHaveProperty(
+      'suppressedRuleCount'
+    );
+  });
+
+  it('carries the three flaky-rule throttle inputs with documented defaults', () => {
+    const discovery = parse(DISCOVERY_YAML) as {
+      triggers: Array<{
+        type: string;
+        inputs?: Array<{ name: string; default: number; required: boolean }>;
+      }>;
+    };
+
+    const manualTrigger = discovery.triggers.find((t) => t.type === 'manual');
+    const inputs = manualTrigger?.inputs ?? [];
+
+    const threshold = inputs.find((i) => i.name === 'flakyRuleDetectionThreshold');
+    expect(threshold).toBeDefined();
+    expect(threshold?.default).toBe(10);
+    expect(threshold?.required).toBe(false);
+
+    const probe = inputs.find((i) => i.name === 'flakyRuleProbeAfterMinutes');
+    expect(probe).toBeDefined();
+    expect(probe?.default).toBe(360);
+    expect(probe?.required).toBe(false);
+
+    const exempt = inputs.find((i) => i.name === 'flakyRuleExemptSeverityScore');
+    expect(exempt).toBeDefined();
+    expect(exempt?.default).toBe(80);
+    expect(exempt?.required).toBe(false);
+  });
+
+  it('passes the four positional params in the expected order', () => {
+    const selection = getStep(DISCOVERY_YAML, 'get_detections');
+    // params is a YAML array of strings: detectionBatchMax, threshold, probe, exempt
+    const params = selection.with?.params as string[] | undefined;
+    expect(params).toHaveLength(4);
+    expect(params?.[0]).toContain('detectionBatchMax');
+    expect(params?.[1]).toContain('flakyRuleDetectionThreshold');
+    expect(params?.[2]).toContain('flakyRuleProbeAfterMinutes');
+    expect(params?.[3]).toContain('flakyRuleExemptSeverityScore');
   });
 });

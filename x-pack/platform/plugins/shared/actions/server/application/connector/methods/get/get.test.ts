@@ -24,6 +24,20 @@ import type { InMemoryConnector } from '../../../../types';
 import { actionExecutorMock } from '../../../../lib/action_executor.mock';
 import { connectorTokenClientMock } from '../../../../lib/connector_token_client.mock';
 import { encryptedSavedObjectsMock } from '@kbn/encrypted-saved-objects-plugin/server/mocks';
+import { connectorTypeHasInboundEvents, connectorTypeIsDual } from '@kbn/connector-specs';
+
+jest.mock('@kbn/connector-specs', () => {
+  const actual = jest.requireActual('@kbn/connector-specs');
+  return {
+    ...actual,
+    connectorTypeHasInboundEvents: jest.fn((actionTypeId: string) =>
+      actual.connectorTypeHasInboundEvents(actionTypeId)
+    ),
+    connectorTypeIsDual: jest.fn((actionTypeId: string) =>
+      actual.connectorTypeIsDual(actionTypeId)
+    ),
+  };
+});
 
 jest.mock('../../../../data/connector', () => ({
   getConnectorSo: jest.fn(),
@@ -89,6 +103,12 @@ describe('get()', () => {
     jest.clearAllMocks();
     authorization.ensureAuthorized.mockResolvedValue(undefined);
     (actionTypeRegistry.isDeprecated as jest.Mock).mockReturnValue(false);
+    (connectorTypeHasInboundEvents as jest.Mock).mockImplementation((actionTypeId: string) =>
+      jest.requireActual('@kbn/connector-specs').connectorTypeHasInboundEvents(actionTypeId)
+    );
+    (connectorTypeIsDual as jest.Mock).mockImplementation((actionTypeId: string) =>
+      jest.requireActual('@kbn/connector-specs').connectorTypeIsDual(actionTypeId)
+    );
   });
 
   describe('authorization', () => {
@@ -418,6 +438,124 @@ describe('get()', () => {
       });
     });
 
+    test('does not return last-saver identity fields', async () => {
+      getConnectorSoMock.mockResolvedValueOnce({
+        id: '1',
+        type: 'action',
+        attributes: {
+          name: 'Inbound',
+          actionTypeId: '.inboundWebhook',
+          config: {},
+          isMissingSecrets: false,
+          apiKey: 'should-not-leak',
+          uiamApiKey: 'should-not-leak-uiam',
+          uiamApiKeyExternal: false,
+        },
+        references: [],
+      });
+
+      const result = await get({
+        context: mockContext,
+        id: '1',
+      });
+
+      expect(result).not.toHaveProperty('apiKey');
+      expect(result).not.toHaveProperty('uiamApiKey');
+      expect(result).not.toHaveProperty('uiamApiKeyExternal');
+      expect(result.isInboundEventsEnabled).toBe(true);
+      expect(logger.warn).not.toHaveBeenCalled();
+    });
+
+    test('reports inbound events off for a dual connector without identity', async () => {
+      (connectorTypeHasInboundEvents as jest.Mock).mockImplementation(
+        (actionTypeId: string) => actionTypeId === '.dual'
+      );
+      (connectorTypeIsDual as jest.Mock).mockImplementation(
+        (actionTypeId: string) => actionTypeId === '.dual'
+      );
+      getConnectorSoMock.mockResolvedValueOnce({
+        id: '1',
+        type: 'action',
+        attributes: {
+          name: 'Datadog',
+          actionTypeId: '.dual',
+          config: {},
+          isMissingSecrets: false,
+        },
+        references: [],
+      });
+
+      const result = await get({
+        context: mockContext,
+        id: '1',
+      });
+
+      expect(result.isInboundEventsEnabled).toBe(false);
+      expect(logger.warn).not.toHaveBeenCalled();
+      expect(unsecuredSavedObjectsClient.find).not.toHaveBeenCalled();
+    });
+
+    test('reports inbound events on for a dual connector with identity', async () => {
+      (connectorTypeHasInboundEvents as jest.Mock).mockImplementation(
+        (actionTypeId: string) => actionTypeId === '.dual'
+      );
+      (connectorTypeIsDual as jest.Mock).mockImplementation(
+        (actionTypeId: string) => actionTypeId === '.dual'
+      );
+      getConnectorSoMock.mockResolvedValueOnce({
+        id: '1',
+        type: 'action',
+        attributes: {
+          name: 'Datadog',
+          actionTypeId: '.dual',
+          config: {},
+          isMissingSecrets: false,
+          hasInboundEventIdentity: true,
+          apiKey: 'should-not-enable-from-encrypted-key',
+        },
+        references: [],
+      });
+
+      const result = await get({
+        context: mockContext,
+        id: '1',
+      });
+
+      expect(result.isInboundEventsEnabled).toBe(true);
+      expect(result).not.toHaveProperty('apiKey');
+      expect(result).not.toHaveProperty('hasInboundEventIdentity');
+      expect(logger.warn).not.toHaveBeenCalled();
+      expect(unsecuredSavedObjectsClient.find).not.toHaveBeenCalled();
+    });
+
+    test('does not treat a visible apiKey as inbound enabled for dual connectors', async () => {
+      (connectorTypeHasInboundEvents as jest.Mock).mockImplementation(
+        (actionTypeId: string) => actionTypeId === '.dual'
+      );
+      (connectorTypeIsDual as jest.Mock).mockImplementation(
+        (actionTypeId: string) => actionTypeId === '.dual'
+      );
+      getConnectorSoMock.mockResolvedValueOnce({
+        id: '1',
+        type: 'action',
+        attributes: {
+          name: 'Datadog',
+          actionTypeId: '.dual',
+          config: {},
+          isMissingSecrets: false,
+          apiKey: 'stripped-in-production',
+        },
+        references: [],
+      });
+
+      const result = await get({
+        context: mockContext,
+        id: '1',
+      });
+
+      expect(result.isInboundEventsEnabled).toBe(false);
+    });
+
     test('gets a connector with authMode "shared"', async () => {
       getConnectorSoMock.mockResolvedValueOnce({
         id: '1',
@@ -593,6 +731,25 @@ describe('get()', () => {
       expect(logger.warn).toHaveBeenCalledWith(
         expect.stringContaining('Error validating connector: 1')
       );
+    });
+
+    test('does not warn when isInboundEventsEnabled is attached after validation', async () => {
+      getConnectorSoMock.mockResolvedValueOnce({
+        id: '1',
+        type: 'action',
+        attributes: {
+          name: 'Inbound',
+          actionTypeId: '.inboundWebhook',
+          config: {},
+          isMissingSecrets: false,
+        },
+        references: [],
+      });
+
+      const result = await get({ context: mockContext, id: '1' });
+
+      expect(result.isInboundEventsEnabled).toBe(true);
+      expect(logger.warn).not.toHaveBeenCalled();
     });
 
     test('does not log a warning when connector schema validation passes', async () => {

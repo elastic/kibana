@@ -9,15 +9,8 @@ import type { MouseEventHandler } from 'react';
 import { isEqual } from 'lodash';
 
 import styled from 'styled-components';
-import {
-  EuiCallOut,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiSpacer,
-  EuiLink,
-  EuiSideNav,
-  EuiBadge,
-} from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiLink, EuiSideNav, EuiBadge } from '@elastic/eui';
+import { KbnInfoCallout, KbnWarningCallout } from '@kbn/ui-callout';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
@@ -85,14 +78,11 @@ const UnverifiedCallout: React.FC = () => {
 
   return (
     <>
-      <EuiCallOut
+      <KbnWarningCallout
         title={i18n.translate('xpack.fleet.epm.verificationWarningCalloutTitle', {
           defaultMessage: 'Integration not verified',
         })}
-        iconType="warning"
-        color="warning"
-      >
-        <p>
+        text={
           <FormattedMessage
             id="xpack.fleet.epm.verificationWarningCalloutIntroText"
             defaultMessage="This integration contains an unsigned package of unknown authenticity. Learn more about {learnMoreLink}."
@@ -107,8 +97,8 @@ const UnverifiedCallout: React.FC = () => {
               ),
             }}
           />
-        </p>
-      </EuiCallOut>
+        }
+      />
       <EuiSpacer size="l" />
     </>
   );
@@ -117,14 +107,12 @@ const UnverifiedCallout: React.FC = () => {
 const LogsEssentialsCallout: React.FC = () => {
   return (
     <>
-      <EuiCallOut
+      <KbnInfoCallout
         data-test-subj="logsEssentialsCallout"
         title={i18n.translate('xpack.fleet.epm.logsEssentialsCalloutTitle', {
           defaultMessage:
             'As this is a Logs Essentials project, these integrations will only install and configure for logs collection, even if the description mentions metrics.',
         })}
-        iconType="info"
-        color="primary"
       />
       <EuiSpacer size="l" />
     </>

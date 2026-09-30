@@ -41,4 +41,10 @@ export interface MaintenanceWindowsServerStart {
   getMaintenanceWindowClientInternal(request: KibanaRequest): MaintenanceWindowClientApi;
   getMaintenanceWindowClientWithAuth(request: KibanaRequest): MaintenanceWindowClientApi;
   getMaintenanceWindowClientWithoutAuth(request: KibanaRequest): MaintenanceWindowClientApi;
+  /**
+   * Register a Task Manager task instance ID to `runSoon` after maintenance
+   * window mutations (create, update, delete, archive, finish). Returns unsubscribe.
+   * Consumers must keep heavy work inside their own task runner.
+   */
+  registerSyncTask(taskId: string): () => void;
 }

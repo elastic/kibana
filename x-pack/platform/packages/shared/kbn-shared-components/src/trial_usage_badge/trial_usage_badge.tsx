@@ -78,7 +78,7 @@ export const TrialUsageBadge = ({ cloud }: TrialUsageBadgeProps) => {
       onClickAriaLabel={i18n.translate('xpack.sharedComponents.trialUsageBadge.toggleAriaLabel', {
         defaultMessage: 'Toggle trial usage details',
       })}
-      iconType="arrowDown"
+      iconType="chevronSingleDown"
       iconSide="right"
       data-test-subj="trialUsageBadge"
     >
@@ -202,7 +202,7 @@ export const TrialUsageBadge = ({ cloud }: TrialUsageBadgeProps) => {
             target="_blank"
             fullWidth
             color="primary"
-            iconType="popout"
+            iconType="external"
             iconSide="right"
           >
             {i18n.translate('xpack.sharedComponents.trialUsageBadge.manageSubscription', {

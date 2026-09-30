@@ -14,10 +14,11 @@ import { INDEX_PATTERN_TYPE } from '@kbn/data-views-plugin/public';
 import { i18n } from '@kbn/i18n';
 import { DataDriftIndexPatternsEditor } from './data_drift_index_patterns_editor';
 
-import { MlAppHeader } from '../../components/ml_app_header';
+import { MlAppHeader, useDataVisualizerBack } from '../../components/ml_app_header';
 import { useMlKibana } from '../../contexts/kibana';
 
 export const DataDriftIndexPatternsPicker: FC = () => {
+  const dataVisualizerBack = useDataVisualizerBack();
   const { reference, comparison } = parse(location.search, {
     sort: false,
   }) as { reference: string; comparison: string };
@@ -101,6 +102,7 @@ export const DataDriftIndexPatternsPicker: FC = () => {
           title={i18n.translate('xpack.ml.dataDrift.createDataDriftDataViewTitle', {
             defaultMessage: 'Create data view and analyze data drift',
           })}
+          back={dataVisualizerBack}
         />
         <EuiPageSection>
           {dataViewEditorServices ? (

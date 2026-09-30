@@ -13,6 +13,8 @@ import { EXTENDED_TIMEOUT } from '../../fixtures/constants';
 const SPACE_APM_ENABLED = 'apm_features_enabled';
 const SPACE_APM_DISABLED = 'apm_features_disabled';
 
+// Stateful-only: per-space `disabledFeatures` is rejected on serverless, and
+// classic Home nav-link checks do not apply to serverless chrome.
 test.describe('APM feature controls - spaces', { tag: tags.stateful.classic }, () => {
   test.beforeAll(async ({ apiServices }) => {
     await apiServices.spaces.create({

@@ -57,11 +57,6 @@ import { OBSERVABLE_TYPE_IPV4, SECURITY_SOLUTION_OWNER } from '../../common/cons
 import type { SnakeToCamelCase } from '../../common/types';
 import { covertToSnakeCase } from './utils';
 import type {
-  ExternalReferenceAttachmentType,
-  AttachmentViewObject,
-  PersistableStateAttachmentType,
-} from '../client/attachment_framework/types';
-import type {
   CasesSearchResponse,
   CasesSimilarResponse,
   UserActionWithResponse,
@@ -787,6 +782,17 @@ export const getUserAction = (
         ...overrides,
       };
 
+    case UserActionTypes.workflow:
+      return {
+        ...commonProperties,
+        type: UserActionTypes.workflow,
+        payload: {
+          workflow: { id: 'wf-1', name: 'My Workflow', executionId: 'exec-1' },
+          origin: { type: 'cases.case', id: basicCaseId },
+        },
+        ...overrides,
+      };
+
     default:
       return {
         ...commonProperties,
@@ -1028,19 +1034,6 @@ export const getExternalReferenceUserAction = (
   ...overrides,
 });
 
-export const getExternalReferenceAttachment = (
-  viewObject: AttachmentViewObject = {}
-): ExternalReferenceAttachmentType => ({
-  id: '.test',
-  icon: 'casesApp',
-  displayName: 'Test',
-  getAttachmentViewObject: () => ({
-    event: 'added a chart',
-    timelineAvatar: 'casesApp',
-    ...viewObject,
-  }),
-});
-
 export const getPersistableStateUserAction = (
   overrides?: Record<string, unknown>
 ): SnakeToCamelCase<UserActionWithResponse<CommentUserAction>> => ({
@@ -1057,19 +1050,6 @@ export const getPersistableStateUserAction = (
     },
   },
   ...overrides,
-});
-
-export const getPersistableStateAttachment = (
-  viewObject: AttachmentViewObject = {}
-): PersistableStateAttachmentType => ({
-  id: '.test',
-  icon: 'casesApp',
-  displayName: 'Test',
-  getAttachmentViewObject: () => ({
-    event: 'added an embeddable',
-    timelineAvatar: 'casesApp',
-    ...viewObject,
-  }),
 });
 
 export const getCaseUsersMockResponse = (): CaseUsers => {

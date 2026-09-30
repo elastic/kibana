@@ -13,7 +13,7 @@ import { useHistory } from 'react-router-dom';
 import { i18n } from '@kbn/i18n';
 import { DOC_VIEWER_FLYOUT_HISTORY_KEY } from '@kbn/unified-doc-viewer';
 import type { CellActionRenderer } from '../../flyout_v2/shared/components/cell_actions';
-import { defaultToolsFlyoutProperties } from '../../flyout_v2/shared/hooks/use_default_flyout_properties';
+import { useDefaultToolsFlyoutProperties } from '../../flyout_v2/shared/hooks/use_default_flyout_properties';
 import { RemoteDocumentCallout } from '../../flyout_v2/document/main/components/remote_document_callout';
 import type { SecurityAppStore } from '../../common/store/types';
 import type { StartServices } from '../../types';
@@ -95,6 +95,7 @@ export const AlertFlyoutHeader = ({
   const [store, setStore] = useState<SecurityAppStore | null>(null);
   const isSecurityApp = useIsInSecurityApp();
   const historyKey = isSecurityApp ? documentFlyoutHistoryKey : DOC_VIEWER_FLYOUT_HISTORY_KEY;
+  const defaultToolsFlyoutProperties = useDefaultToolsFlyoutProperties();
   const renderCellActions = useCallback<CellActionRenderer>(
     (props) => (
       <DiscoverCellActions
@@ -136,7 +137,7 @@ export const AlertFlyoutHeader = ({
         origin: FLYOUT_ORIGIN.FLYOUT_HEADER,
       });
     }
-  }, [history, historyKey, hit, services, store]);
+  }, [defaultToolsFlyoutProperties, history, historyKey, hit, services, store]);
 
   useEffect(() => {
     if (!services) {

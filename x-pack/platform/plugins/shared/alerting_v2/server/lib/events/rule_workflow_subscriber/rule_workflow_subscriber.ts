@@ -6,7 +6,7 @@
  */
 
 import { inject, injectable } from 'inversify';
-import { ALERTING_V2_LOG_CODES } from '../../errors/error_codes';
+import { ALERTING_LOG_CODES } from '../../errors/error_codes';
 import {
   LoggerServiceToken,
   type LoggerServiceContract,
@@ -30,19 +30,22 @@ import { RULE_WORKFLOW_TRIGGERS, type RuleWorkflowTriggerBinding } from './trigg
 export class RuleWorkflowSubscriber {
   #subscriptions: Subscription[] = [];
 
+  private readonly logger: LoggerServiceContract;
+
   constructor(
     @inject(AlertingDomainEventBusToken)
     private readonly bus: EventBus<AlertingDomainEvent, AlertingPublisherContext>,
     @inject(WorkflowServiceToken)
     private readonly workflows: WorkflowServiceContract,
-    @inject(LoggerServiceToken) private readonly logger: LoggerServiceContract
-  ) {}
+    @inject(LoggerServiceToken) loggerService: LoggerServiceContract
+  ) {
+    this.logger = loggerService.forSubsystem('events');
+  }
 
   public start(): void {
     if (this.#subscriptions.length > 0) {
       this.logger.debug({
-        message: () =>
-          '[RuleWorkflowSubscriber] start() called more than once. Ignoring. Subscriptions already active.',
+        message: () => 'Subscriber start called more than once; ignoring',
       });
 
       return;
@@ -76,8 +79,12 @@ export class RuleWorkflowSubscriber {
     } catch (err) {
       this.logger.error({
         error: err,
-        code: ALERTING_V2_LOG_CODES.RULE_WORKFLOW_SUBSCRIBER_FAILURE,
-        type: `RuleWorkflowSubscriber:${trigger.triggerId}`,
+        code: ALERTING_LOG_CODES.EVENTS_RULE_WORKFLOW_SUBSCRIBER_FAILED,
+        labels: {
+          event_type: trigger.eventType,
+          rule_id: event.payload.ruleId,
+          space_id: event.payload.spaceId,
+        },
       });
     }
   }

@@ -104,6 +104,13 @@ export const createQueryDocumentsTool = ({
     **Formatting aggregations:** Always include the metric value alongside each key (e.g. "host2 — 1,532 docs", "200 — 45.2%"). For terms aggregations, show the doc_count. For metric aggregations, show the computed value with units where known.
   `),
   tags: ['streams'],
+  annotations: {
+    title: 'Query Documents',
+    readOnlyHint: true,
+    destructiveHint: false,
+    idempotentHint: true,
+    openWorldHint: false,
+  },
   schema: queryDocumentsSchema,
   handler: async ({ name, query: nlQuery, source }, { request, modelProvider }) => {
     try {

@@ -6,7 +6,6 @@
  */
 
 import {
-  EuiBadge,
   EuiFlexGroup,
   EuiFlexItem,
   EuiIcon,
@@ -14,12 +13,19 @@ import {
   EuiSpacer,
   EuiTab,
   EuiTabs,
+  EuiTitle,
 } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
+import { getEbtProps } from '@kbn/ebt-click';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React, { useMemo, useState } from 'react';
+import { CONTEXT_ENGINE_UI_EBT } from '../../../../common/telemetry';
+import { useDataConnectors } from '../../hooks/use_data_connectors';
+import { useHasRendered } from '../../hooks/use_has_rendered';
+import { createIndexEsqlQuery, hasSelectedEsqlQuery } from '../../utils/sources';
+import { getSourceDisplay } from '../source_display';
+import { SourceRow } from '../source_row';
 import { ConnectorsTab } from './connectors_tab';
-import { EsqlTab } from './esql_tab';
+import { ElasticsearchSourcesTab } from './elasticsearch_sources_tab';
 import type { SelectedSource } from './types';
 
 type TabId = 'esql' | 'connectors';
@@ -31,17 +37,52 @@ interface SourcePickerProps {
 
 export const SourcePicker = ({ selectedSources, onChange }: SourcePickerProps) => {
   const [selectedTab, setSelectedTab] = useState<TabId>('esql');
+  const hasRendered = useHasRendered();
+
+  const hasSelectedConnectorSources = useMemo(
+    () => selectedSources.some((source) => source.type === 'connector'),
+    [selectedSources]
+  );
+
+  const { connectorNameById, connectorActionTypeById } = useDataConnectors({
+    enabled: hasSelectedConnectorSources,
+  });
 
   const selectedEsqlCount = useMemo(
     () => selectedSources.filter((source) => source.type === 'esql').length,
     [selectedSources]
   );
 
+  const selectedConnectorIds = useMemo(
+    () =>
+      selectedSources.filter((source) => source.type === 'connector').map((source) => source.value),
+    [selectedSources]
+  );
+
   const addEsqlSource = (query: string) => {
-    if (selectedSources.some((current) => current.type === 'esql' && current.id === query)) {
+    if (hasSelectedEsqlQuery(selectedSources, query)) {
       return;
     }
-    onChange([...selectedSources, { type: 'esql', id: query, label: query, value: query }]);
+    onChange([{ type: 'esql', id: query, label: query, value: query }, ...selectedSources]);
+  };
+
+  const addIndexSource = (indexName: string) => {
+    addEsqlSource(createIndexEsqlQuery(indexName));
+  };
+
+  const toggleConnectorSource = ({
+    id,
+    name,
+    checked,
+  }: {
+    id: string;
+    name: string;
+    checked: boolean;
+  }) => {
+    const others = selectedSources.filter(
+      (current) => !(current.type === 'connector' && current.value === id)
+    );
+    onChange(checked ? [{ type: 'connector', id, label: name, value: id }, ...others] : others);
   };
 
   const removeSource = (source: SelectedSource) => {
@@ -54,60 +95,41 @@ export const SourcePicker = ({ selectedSources, onChange }: SourcePickerProps) =
 
   return (
     <div data-test-subj="contextSourcePicker">
-      {selectedSources.length > 0 && (
-        <>
-          <EuiFlexGroup gutterSize="s" wrap responsive={false}>
-            {selectedSources.map((source) => (
-              <EuiFlexItem grow={false} key={`${source.type}-${source.id}`}>
-                <EuiBadge
-                  color="hollow"
-                  iconType="cross"
-                  iconSide="right"
-                  // Cap the width so a long ES|QL query truncates instead of
-                  // stretching the badge across the modal.
-                  css={{ maxWidth: 260 }}
-                  title={source.label}
-                  data-test-subj={`contextSelectedSource-${source.id}`}
-                  iconOnClick={() => removeSource(source)}
-                  iconOnClickAriaLabel={i18n.translate(
-                    'xpack.contextEngine.sourcePicker.removeSourceAriaLabel',
-                    {
-                      defaultMessage: 'Remove {label}',
-                      values: { label: source.label },
-                    }
-                  )}
-                >
-                  {source.label}
-                </EuiBadge>
-              </EuiFlexItem>
-            ))}
-          </EuiFlexGroup>
-          <EuiSpacer size="m" />
-        </>
-      )}
-
       <EuiTabs data-test-subj="contextSourcePickerTabs">
         <EuiTab
           isSelected={selectedTab === 'esql'}
           onClick={() => setSelectedTab('esql')}
-          prepend={<EuiIcon type="console" aria-hidden={true} />}
+          prepend={<EuiIcon type="tablePlus" aria-hidden={true} />}
           append={
             selectedEsqlCount > 0 ? (
               <EuiNotificationBadge>{selectedEsqlCount}</EuiNotificationBadge>
             ) : undefined
           }
           data-test-subj="contextSourcePickerTab-esql"
+          {...getEbtProps({
+            element: CONTEXT_ENGINE_UI_EBT.element.aiIndexEditFlyoutSourcePicker,
+            action: CONTEXT_ENGINE_UI_EBT.action.sources.TAB_ESQL,
+          })}
         >
           <FormattedMessage
-            id="xpack.contextEngine.sourcePicker.tabs.esql"
-            defaultMessage="ES|QL"
+            id="xpack.contextEngine.sourcePicker.tabs.elasticsearch"
+            defaultMessage="Elasticsearch data"
           />
         </EuiTab>
         <EuiTab
           isSelected={selectedTab === 'connectors'}
           onClick={() => setSelectedTab('connectors')}
           prepend={<EuiIcon type="plugs" aria-hidden={true} />}
+          append={
+            selectedConnectorIds.length > 0 ? (
+              <EuiNotificationBadge>{selectedConnectorIds.length}</EuiNotificationBadge>
+            ) : undefined
+          }
           data-test-subj="contextSourcePickerTab-connectors"
+          {...getEbtProps({
+            element: CONTEXT_ENGINE_UI_EBT.element.aiIndexEditFlyoutSourcePicker,
+            action: CONTEXT_ENGINE_UI_EBT.action.sources.TAB_CONNECTORS,
+          })}
         >
           <FormattedMessage
             id="xpack.contextEngine.sourcePicker.tabs.connectors"
@@ -118,8 +140,63 @@ export const SourcePicker = ({ selectedSources, onChange }: SourcePickerProps) =
 
       <EuiSpacer size="m" />
 
-      {selectedTab === 'esql' && <EsqlTab onAdd={addEsqlSource} />}
-      {selectedTab === 'connectors' && <ConnectorsTab />}
+      {selectedTab === 'esql' && (
+        <ElasticsearchSourcesTab
+          selectedSources={selectedSources}
+          onAddIndex={addIndexSource}
+          onAddEsql={addEsqlSource}
+        />
+      )}
+      {selectedTab === 'connectors' && (
+        <ConnectorsTab
+          selectedConnectorIds={selectedConnectorIds}
+          onToggle={toggleConnectorSource}
+        />
+      )}
+
+      {selectedSources.length > 0 && (
+        <>
+          <EuiSpacer size="l" />
+          <EuiTitle size="xxs">
+            <h3>
+              <FormattedMessage
+                id="xpack.contextEngine.sourcePicker.selectedTitle"
+                defaultMessage="Selected sources ({count})"
+                values={{ count: selectedSources.length }}
+              />
+            </h3>
+          </EuiTitle>
+          <EuiSpacer size="s" />
+          <EuiFlexGroup direction="column" gutterSize="s">
+            {selectedSources.map((source, index) => {
+              const { label, typeLabel, icon, content } = getSourceDisplay(
+                source.type,
+                source.value,
+                {
+                  connectorNameById,
+                  connectorActionTypeById,
+                }
+              );
+
+              return (
+                <EuiFlexItem key={`${source.type}-${source.id}`}>
+                  <SourceRow
+                    animateOnMount={hasRendered}
+                    label={label}
+                    typeLabel={typeLabel}
+                    icon={icon}
+                    sourceType={source.type}
+                    onRemove={() => removeSource(source)}
+                    data-test-subj={`contextSelectedSource-${source.type}-${index}`}
+                  >
+                    {content}
+                  </SourceRow>
+                </EuiFlexItem>
+              );
+            })}
+          </EuiFlexGroup>
+        </>
+      )}
     </div>
   );
 };

@@ -9,18 +9,19 @@
 
 import type { UseEuiTheme } from '@elastic/eui';
 import {
+  EuiBadge,
   EuiButton,
   EuiButtonIcon,
   EuiFlexGroup,
   EuiFlexItem,
   EuiLoadingSpinner,
   EuiToolTip,
+  useEuiShadow,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import type { Viewport } from '@xyflow/react';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux-v7';
-import useLocalStorage from 'react-use/lib/useLocalStorage';
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 import { i18n } from '@kbn/i18n';
 import type { monaco } from '@kbn/monaco';
@@ -45,6 +46,7 @@ import {
   selectIsExecutionsTab,
   selectIsSavingYaml,
   selectIsYamlSyntaxValid,
+  selectWorkflow,
   selectWorkflowId,
   selectYamlString,
 } from '../../../entities/workflows/store/workflow_detail/selectors';
@@ -55,10 +57,19 @@ import {
 } from '../../../entities/workflows/store/workflow_detail/slice';
 import { ExecutionGraph } from '../../../features/debug_graph/execution_graph';
 import { useKibana } from '../../../hooks/use_kibana';
+import { useWorkflowEditorReadOnly } from '../../../hooks/use_workflow_editor_read_only';
 import { useWorkflowUrlState } from '../../../hooks/use_workflow_url_state';
 import { useWorkflowsExperimentalUiSetting } from '../../../hooks/use_workflows_experimental_ui_setting';
+import {
+  getStoredHideControlsMenu,
+  setStoredHideControlsMenu,
+} from '../../../lib/workflow_editor_preferences';
 import { getTestRunTooltipContent } from '../../../shared/ui';
 import { EditorSettingsPopover } from '../../../widgets/workflow_yaml_editor/ui/editor_settings_popover';
+import {
+  type ExtraAction,
+  ExtraActionsBar,
+} from '../../../widgets/workflow_yaml_editor/ui/extra_actions_bar';
 import { KeyboardShortcutsPopover } from '../../../widgets/workflow_yaml_editor/ui/keyboard_shortcuts_popover';
 
 const WorkflowYAMLEditor = React.lazy(() =>
@@ -79,6 +90,7 @@ interface WorkflowDetailEditorProps {
 
 export const WorkflowDetailEditor = React.memo<WorkflowDetailEditorProps>(({ highlightDiff }) => {
   const styles = useMemoCss(componentStyles);
+  const readOnlyBadgeShadow = useEuiShadow('xl');
   const editorRef = useRef<monaco.editor.IStandaloneCodeEditor | null>(null);
   const openActionsRef = useRef<(() => void) | null>(null);
   // Saved graph viewport — survives the YAML↔graph remount because this
@@ -90,28 +102,33 @@ export const WorkflowDetailEditor = React.memo<WorkflowDetailEditorProps>(({ hig
     graphViewportRef.current = viewport;
   }, []);
 
-  // "Hide controls menu" toggle (settings popover). When OFF the bottom bar
-  // stays expanded indefinitely; when ON (default) it auto-collapses to the
-  // small pill after 5s. Persisted in localStorage so the choice sticks
-  // across reloads.
-  const HIDE_CONTROLS_MENU_KEY = 'workflowsUi.bottomBar.hideControlsMenu';
-  const [hideControlsMenu, handleHideControlsMenuChange] = useLocalStorage<boolean>(
-    HIDE_CONTROLS_MENU_KEY,
-    true
+  // "Hide controls menu" toggle (settings popover). When ON the bottom bar
+  // auto-collapses to the small pill after 5s; when OFF it stays expanded.
+  // Persisted in localStorage so the choice sticks across reloads.
+  const [hideControlsMenu, setHideControlsMenu] = useState<boolean>(
+    () => getStoredHideControlsMenu() ?? false
   );
+  const handleHideControlsMenuChange = useCallback((next: boolean) => {
+    setStoredHideControlsMenu(next);
+    setHideControlsMenu(next);
+  }, []);
 
   const dispatch = useDispatch();
 
   const workflowYaml = useSelector(selectYamlString) ?? '';
   const workflowId = useSelector(selectWorkflowId);
+  const workflow = useSelector(selectWorkflow);
   const isExecutionsTab = useSelector(selectIsExecutionsTab);
+  const isReadOnly = useWorkflowEditorReadOnly();
   const isSyntaxValid = useSelector(selectIsYamlSyntaxValid);
   const isSaving = useSelector(selectIsSavingYaml);
   const getContextOverrideData = useContextOverrideData();
   const { runIndividualStep } = useWorkflowActions();
   const { notifications } = useKibana().services;
   const { setSelectedExecution } = useWorkflowUrlState();
-  const { canExecuteWorkflow } = useWorkflowsCapabilities();
+  const { canExecuteWorkflow: hasExecutePrivilege } = useWorkflowsCapabilities();
+  const canExecuteWorkflow = hasExecutePrivilege && workflow?.permissions?.execute !== false;
+  const canTestStep = canExecuteWorkflow && workflow?.permissions?.edit !== false;
 
   const handleStepRun = useCallback(
     async (params: { stepId: string; actionType: string }) => {
@@ -126,7 +143,7 @@ export const WorkflowDetailEditor = React.memo<WorkflowDetailEditorProps>(({ hig
         return;
       }
 
-      if (!canExecuteWorkflow) {
+      if (!canTestStep) {
         return;
       }
 
@@ -169,7 +186,7 @@ export const WorkflowDetailEditor = React.memo<WorkflowDetailEditorProps>(({ hig
       setSelectedExecution,
       dispatch,
       notifications.toasts,
-      canExecuteWorkflow,
+      canTestStep,
     ]
   );
 
@@ -216,10 +233,11 @@ export const WorkflowDetailEditor = React.memo<WorkflowDetailEditorProps>(({ hig
       getTestRunTooltipContent({
         isExecutionsTab,
         isValid: Boolean(isSyntaxValid),
-        canRunWorkflow: canExecuteWorkflow,
+        canRunWorkflow: hasExecutePrivilege,
+        hasWorkflowAccess: workflow?.permissions?.execute !== false,
         isSaving: Boolean(isSaving),
       }),
-    [isExecutionsTab, isSyntaxValid, canExecuteWorkflow, isSaving]
+    [isExecutionsTab, isSyntaxValid, hasExecutePrivilege, workflow, isSaving]
   );
 
   const runDisabled = isExecutionsTab || !canExecuteWorkflow || !isSyntaxValid || isSaving;
@@ -278,9 +296,10 @@ export const WorkflowDetailEditor = React.memo<WorkflowDetailEditorProps>(({ hig
     const actionsMenuLabel = i18n.translate('workflows.workflowDetailEditor.tools.actionsMenu', {
       defaultMessage: 'Actions menu',
     });
-    return (
-      <EuiFlexGroup alignItems="center" gutterSize="none" responsive={false} wrap={false}>
-        <EuiFlexItem grow={false}>
+    const actions: ExtraAction[] = [
+      {
+        id: 'actions-menu',
+        content: (
           <EuiToolTip content={`${actionsMenuLabel} (${commandKey}+K)`}>
             <EuiButtonIcon
               iconType="plus"
@@ -291,8 +310,12 @@ export const WorkflowDetailEditor = React.memo<WorkflowDetailEditorProps>(({ hig
               data-test-subj="workflowBottomBarActionsMenu"
             />
           </EuiToolTip>
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
+        ),
+        showInReadOnly: false,
+      },
+      {
+        id: 'documentation',
+        content: (
           <EuiToolTip content={documentationLabel} disableScreenReaderOutput>
             <EuiButtonIcon
               iconType="documentation"
@@ -304,16 +327,19 @@ export const WorkflowDetailEditor = React.memo<WorkflowDetailEditorProps>(({ hig
               data-test-subj="workflowBottomBarDocumentation"
             />
           </EuiToolTip>
-        </EuiFlexItem>
-      </EuiFlexGroup>
-    );
-  }, []);
+        ),
+        showInReadOnly: true,
+      },
+    ];
+
+    return <ExtraActionsBar actions={actions} isReadOnly={isReadOnly} />;
+  }, [isReadOnly]);
 
   const toolsSlot = useMemo(
     () => (
       <EuiFlexGroup alignItems="center" gutterSize="none" responsive={false} wrap={false}>
         <EuiFlexItem grow={false}>
-          <KeyboardShortcutsPopover />
+          <KeyboardShortcutsPopover isReadOnly={isReadOnly} />
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EditorSettingsPopover
@@ -326,7 +352,7 @@ export const WorkflowDetailEditor = React.memo<WorkflowDetailEditorProps>(({ hig
         </EuiFlexItem>
       </EuiFlexGroup>
     ),
-    [graphDirection, handleHideControlsMenuChange, hideControlsMenu, setGraphDirection]
+    [graphDirection, handleHideControlsMenuChange, hideControlsMenu, isReadOnly, setGraphDirection]
   );
 
   // Keep the graph mounted for a moment after switching to YAML so the
@@ -384,6 +410,17 @@ export const WorkflowDetailEditor = React.memo<WorkflowDetailEditorProps>(({ hig
               </React.Suspense>
             </div>
           )}
+          {isReadOnly && (
+            <EuiBadge
+              color="warning"
+              css={[styles.readOnlyBadge, css(readOnlyBadgeShadow)]}
+              data-test-subj="workflowEditorReadOnlyBadge"
+            >
+              {i18n.translate('workflows.workflowDetailEditor.readOnlyBadge', {
+                defaultMessage: 'Read only',
+              })}
+            </EuiBadge>
+          )}
           {isVisualEditorEnabled && (
             <WorkflowDetailBottomBar
               editorView={editorView}
@@ -440,6 +477,15 @@ const componentStyles = {
     transform: 'scale(0.985)',
     pointerEvents: 'none',
   }),
+  readOnlyBadge: ({ euiTheme }: UseEuiTheme) =>
+    css({
+      position: 'absolute',
+      insetBlockStart: euiTheme.size.base,
+      insetInlineStart: '50%',
+      transform: 'translateX(-50%)',
+      zIndex: 2,
+      paddingInline: euiTheme.size.l,
+    }),
   visualEditor: ({ euiTheme }: UseEuiTheme) =>
     css({
       flex: 1,

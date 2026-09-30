@@ -7,35 +7,19 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { schema } from '@kbn/config-schema';
+import { z } from '@kbn/zod';
 
-export const serializedTitlesSchema = schema.object({
-  description: schema.maybe(
-    schema.string({
-      meta: {
-        description: 'A short description of the panel.',
-      },
-    })
-  ),
-  hide_title: schema.maybe(
-    schema.boolean({
-      meta: {
-        description: 'When true, the panel title is hidden. Defaults to false.',
-      },
-    })
-  ),
-  title: schema.maybe(
-    schema.string({
-      meta: {
-        description: 'The panel title.',
-      },
-    })
-  ),
-  hide_border: schema.maybe(
-    schema.boolean({
-      meta: {
-        description: 'When true, the panel border is hidden. Defaults to false.',
-      },
-    })
-  ),
-});
+export const serializedTitlesSchema = z
+  .object({
+    description: z.string().optional().meta({ description: 'A short description of the panel.' }),
+    hide_title: z
+      .boolean()
+      .optional()
+      .meta({ description: 'When true, the panel title is hidden. Defaults to false.' }),
+    title: z.string().optional().meta({ description: 'The panel title.' }),
+    hide_border: z
+      .boolean()
+      .optional()
+      .meta({ description: 'When true, the panel border is hidden. Defaults to false.' }),
+  })
+  .strict();

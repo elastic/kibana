@@ -12,8 +12,8 @@ import { act, fireEvent, render, screen, waitFor } from '@testing-library/react'
 import React from 'react';
 import { monaco } from '@kbn/code-editor';
 import { I18nProvider } from '@kbn/i18n-react';
+import type { YamlValidationResult } from '@kbn/workflows-yaml';
 import { WorkflowChangeHistoryMonacoPreview } from './workflow_change_history_monaco_preview';
-import type { YamlValidationResult } from '../validate_workflow_yaml/model/types';
 
 jest.mock('@kbn/workflows-ui', () => ({
   ...jest.requireActual('@kbn/workflows-ui'),
@@ -28,6 +28,7 @@ jest.mock('./use_workflow_change_history_preview_validation', () => ({
   useWorkflowChangeHistoryPreviewValidation: jest.fn(() => ({
     validationResults: mockValidationResults,
     isValidationLoading: mockIsValidationLoading,
+    validationError: null,
     handleValidationErrorClick: mockHandleValidationErrorClick,
   })),
 }));
@@ -139,6 +140,7 @@ const sampleValidationError: YamlValidationResult = {
   severity: 'error',
   message: 'Invalid workflow step',
   owner: 'step-name-validation',
+  ruleId: 'duplicateStepName',
   startLineNumber: 3,
   startColumn: 5,
   endLineNumber: 3,

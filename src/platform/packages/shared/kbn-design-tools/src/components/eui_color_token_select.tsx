@@ -179,7 +179,7 @@ const EuiColorTokenSelectInner = ({
   const renderOption = useCallback(
     (option: EuiComboBoxOptionOption<string>) => (
       <span css={optionCss}>
-        <EuiIcon type="stopFilled" color={option.value ?? ''} size="s" aria-hidden />
+        <EuiIcon type="stopFill" color={option.value ?? ''} size="s" aria-hidden />
         <span css={labelCss}>{option.label}</span>
       </span>
     ),

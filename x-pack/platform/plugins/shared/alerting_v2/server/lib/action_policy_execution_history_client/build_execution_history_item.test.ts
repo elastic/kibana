@@ -12,7 +12,6 @@ import { ACTION_POLICY_EVENT_ACTIONS } from '../dispatcher/steps/constants';
 import {
   collectIdsFromEvents,
   buildExecutionHistoryItem,
-  isPolicyOutcome,
   isString,
   type NameMaps,
 } from './build_execution_history_item';
@@ -45,24 +44,6 @@ describe('isString', () => {
     expect(isString(null)).toBe(false);
     expect(isString(42)).toBe(false);
     expect(isString({})).toBe(false);
-  });
-});
-
-describe('isPolicyOutcome', () => {
-  it('accepts dispatched and throttled', () => {
-    expect(isPolicyOutcome('dispatched')).toBe(true);
-    expect(isPolicyOutcome('throttled')).toBe(true);
-  });
-
-  it('rejects unmatched and other strings', () => {
-    expect(isPolicyOutcome('unmatched')).toBe(false);
-    expect(isPolicyOutcome('foo')).toBe(false);
-  });
-
-  it('rejects non-strings', () => {
-    expect(isPolicyOutcome(undefined)).toBe(false);
-    expect(isPolicyOutcome(null)).toBe(false);
-    expect(isPolicyOutcome(42)).toBe(false);
   });
 });
 
@@ -187,14 +168,34 @@ describe('buildExecutionHistoryItem', () => {
     expect(buildExecutionHistoryItem(event, EMPTY_NAME_MAPS)).toEqual(null);
   });
 
-  it('returns null when policy has no rules referenced', () => {
+  it('returns an item with empty rules when policy has no rules referenced and no narrowing filter is active', () => {
     const event = buildEvent({
       kibana: {
         saved_objects: [{ type: ACTION_POLICY_SAVED_OBJECT_TYPE, id: 'policy-1' }],
         alerting_v2: { dispatcher: {} },
       },
     });
-    expect(buildExecutionHistoryItem(event, EMPTY_NAME_MAPS)).toEqual(null);
+    expect(buildExecutionHistoryItem(event, EMPTY_NAME_MAPS)).toMatchObject({
+      policy: { id: 'policy-1' },
+      rules: [],
+      total_rule_count: 0,
+    });
+  });
+
+  it('returns null when policy has no rules referenced and a narrowing filter is active', () => {
+    const event = buildEvent({
+      kibana: {
+        saved_objects: [{ type: ACTION_POLICY_SAVED_OBJECT_TYPE, id: 'policy-1' }],
+        alerting_v2: { dispatcher: {} },
+      },
+    });
+    const narrowingSearch = {
+      policyIds: [],
+      ruleIds: ['rule-other'],
+      hasMatches: true,
+      matches: null,
+    };
+    expect(buildExecutionHistoryItem(event, EMPTY_NAME_MAPS, narrowingSearch)).toEqual(null);
   });
 
   it('combines ref-based rule ids with spillover dispatcher.rule_ids', () => {
@@ -253,7 +254,7 @@ describe('buildExecutionHistoryItem', () => {
     expect(historyItem?.workflows[0]?.name).toBeNull();
   });
 
-  it('preserves the outcome verbatim', () => {
+  it('projects the stored event action onto the API outcome', () => {
     const dispatchedItem = buildExecutionHistoryItem(
       buildEvent({
         event: { action: ACTION_POLICY_EVENT_ACTIONS.DISPATCHED, provider: 'alerting_v2' },
@@ -281,7 +282,7 @@ describe('buildExecutionHistoryItem', () => {
       EMPTY_NAME_MAPS
     );
 
-    expect(dispatchedItem?.outcome).toBe('dispatched');
+    expect(dispatchedItem?.outcome).toBe('success');
     expect(throttledItem?.outcome).toBe('throttled');
   });
 
@@ -399,7 +400,7 @@ describe('buildExecutionHistoryItem', () => {
     it('sets totalRuleCount = relevant rules and does not truncate below the cap', () => {
       const event = eventWithNRules(5);
       const historyItem = buildExecutionHistoryItem(event, EMPTY_NAME_MAPS);
-      expect(historyItem?.totalRuleCount).toBe(5);
+      expect(historyItem?.total_rule_count).toBe(5);
       expect(historyItem?.rules).toHaveLength(5);
     });
 
@@ -407,7 +408,7 @@ describe('buildExecutionHistoryItem', () => {
       const total = MAX_EMBEDDED_RULES_PER_ITEM + 15;
       const event = eventWithNRules(total);
       const historyItem = buildExecutionHistoryItem(event, EMPTY_NAME_MAPS);
-      expect(historyItem?.totalRuleCount).toBe(total);
+      expect(historyItem?.total_rule_count).toBe(total);
       expect(historyItem?.rules).toHaveLength(MAX_EMBEDDED_RULES_PER_ITEM);
       expect(historyItem?.rules[0]?.id).toBe('rule-0');
     });
@@ -430,7 +431,7 @@ describe('buildExecutionHistoryItem', () => {
         hasMatches: true,
         matches: null,
       });
-      expect(historyItem?.totalRuleCount).toBe(2);
+      expect(historyItem?.total_rule_count).toBe(2);
       expect(historyItem?.rules.map((r) => r.id)).toEqual(['rule-a', 'rule-c']);
     });
   });
@@ -455,7 +456,7 @@ describe('buildExecutionHistoryItem', () => {
         'rule-nonexistent',
       ]);
       expect(historyItem?.rules.map((r) => r.id)).toEqual(['rule-b', 'rule-d']);
-      expect(historyItem?.totalRuleCount).toBe(2);
+      expect(historyItem?.total_rule_count).toBe(2);
     });
 
     it('returns null when no event rule matches mandatoryRuleIds', () => {
@@ -494,7 +495,7 @@ describe('buildExecutionHistoryItem', () => {
       );
       // Union of search-scoped {a,b,c} with mandatory {b,d} = {a,b,c,d}
       expect(historyItem?.rules.map((r) => r.id)).toEqual(['rule-a', 'rule-b', 'rule-c', 'rule-d']);
-      expect(historyItem?.totalRuleCount).toBe(4);
+      expect(historyItem?.total_rule_count).toBe(4);
     });
   });
 
@@ -514,7 +515,7 @@ describe('buildExecutionHistoryItem', () => {
       const event = eventWithRules(['rule-a', 'rule-b', 'rule-c']);
       const historyItem = buildExecutionHistoryItem(event, EMPTY_NAME_MAPS, undefined, ['rule-b']);
       expect(historyItem?.rules.map((r) => r.id)).toEqual(['rule-b']);
-      expect(historyItem?.totalRuleCount).toBe(1);
+      expect(historyItem?.total_rule_count).toBe(1);
     });
 
     it('narrows to mandatoryRuleIds when search matches the policy but not any rules', () => {
@@ -526,7 +527,7 @@ describe('buildExecutionHistoryItem', () => {
         ['rule-b']
       );
       expect(historyItem?.rules.map((r) => r.id)).toEqual(['rule-b']);
-      expect(historyItem?.totalRuleCount).toBe(1);
+      expect(historyItem?.total_rule_count).toBe(1);
     });
 
     it('returns all rules when policy is search-matched and no mandatoryRuleIds is provided', () => {

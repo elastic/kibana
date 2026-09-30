@@ -7,7 +7,10 @@
 
 import type { CustomRequestHandlerContext, KibanaRequest } from '@kbn/core/server';
 import type { AlertingApiRequestHandlerContext } from '@kbn/alerting-plugin/server';
-import type { LicensingApiRequestHandlerContext } from '@kbn/licensing-plugin/server';
+import type {
+  LicensingApiRequestHandlerContext,
+  LicensingPluginStart,
+} from '@kbn/licensing-plugin/server';
 import type { ActionsApiRequestHandlerContext } from '@kbn/actions-plugin/server';
 import type { FleetStartContract } from '@kbn/fleet-plugin/server';
 import type {
@@ -42,9 +45,11 @@ import type {
   MaintenanceWindowsServerStart,
 } from '@kbn/maintenance-windows-plugin/server';
 import type { ObservabilityAgentBuilderPluginSetup } from '@kbn/observability-agent-builder-plugin/server';
+import type { CPSServerSetup } from '@kbn/cps/server';
 import type { TelemetryEventsSender } from './telemetry/sender';
 import type { UptimeConfig } from './config';
 import type { SyntheticsEsClient } from './lib';
+import type { SyntheticsIndicesCache } from './services/synthetics_indices_cache';
 
 export interface SyntheticsServerSetup {
   router: UptimeRouter;
@@ -67,9 +72,12 @@ export interface SyntheticsServerSetup {
   alerting: AlertingServerSetup;
   pluginsStart: SyntheticsPluginsStartDependencies;
   isElasticsearchServerless: boolean;
+  /** Platform `cps.cpsEnabled` — serverless only. */
+  isCpsEnabled?: boolean;
   getMaintenanceWindowClientInternal: (
     request: KibanaRequest
   ) => MaintenanceWindowClient | undefined;
+  syntheticsIndicesCache: SyntheticsIndicesCache;
 }
 
 export interface SyntheticsPluginsSetupDependencies {
@@ -86,6 +94,7 @@ export interface SyntheticsPluginsSetupDependencies {
   share: SharePluginSetup;
   embeddable: EmbeddableSetup;
   observabilityAgentBuilder?: ObservabilityAgentBuilderPluginSetup;
+  cps?: CPSServerSetup;
 }
 
 export interface SyntheticsPluginsStartDependencies {
@@ -97,6 +106,7 @@ export interface SyntheticsPluginsStartDependencies {
   telemetry: TelemetryPluginStart;
   spaces?: SpacesPluginStart;
   alerting: AlertingServerStart;
+  licensing: LicensingPluginStart;
   maintenanceWindows?: MaintenanceWindowsServerStart;
 }
 

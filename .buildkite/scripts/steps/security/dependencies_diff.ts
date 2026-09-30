@@ -7,40 +7,25 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { execSync } from 'child_process';
+import { execFileSync, execSync } from 'child_process';
 import { appendFile, readFile, writeFile } from 'fs/promises';
 import Path from 'path';
-import { getGithubClient } from '#pipeline-utils';
-
-const octokit = getGithubClient();
 
 const INTERNAL_PACKAGE_PREFIX_REGEX = /^(@kbn|@elastic)\//;
 
-async function getFileContent(path: string, ref: string) {
-  console.info(`Fetching content for ${path} at ref ${ref}`);
+function getFileContent(path: string, ref: string) {
+  console.info(`Reading content for ${path} at ref ${ref}`);
 
-  const response = await octokit.repos.getContent({
-    owner: process.env.GITHUB_PR_BASE_OWNER!,
-    repo: process.env.GITHUB_PR_BASE_REPO!,
-    path,
-    ref,
-  });
-
-  if (Array.isArray(response.data) || response.data.type !== 'file') {
-    throw new Error(`Expected file at ${path}`);
-  }
-
-  // @ts-ignore ts-node doesn't infer the type of response.data.content
-  const content = Buffer.from(response.data.content, 'base64').toString('utf8');
+  const content = execFileSync('git', ['show', `${ref}:${path}`], { encoding: 'utf8' });
 
   return JSON.parse(content);
 }
 
-async function getDependenciesDiff() {
-  const oldPackageJson = await getFileContent('package.json', process.env.GITHUB_PR_MERGE_BASE!);
+function getDependenciesDiff() {
+  const oldPackageJson = getFileContent('package.json', process.env.GITHUB_PR_MERGE_BASE!);
   const headSha =
     process.env.GITHUB_PR_HEAD_SHA || execSync('git rev-parse HEAD').toString().trim();
-  const newPackageJson = await getFileContent('package.json', headSha);
+  const newPackageJson = getFileContent('package.json', headSha);
 
   const oldDeps = { ...oldPackageJson.dependencies, ...oldPackageJson.devDependencies };
   const newDeps = { ...newPackageJson.dependencies, ...newPackageJson.devDependencies };
@@ -71,8 +56,8 @@ async function main() {
     return;
   }
 
-  const packageJsonPath = Path.join(__dirname, '../../../../package.json');
-  const thirdPartyPackagesPath = Path.join(__dirname, './third_party_packages.txt');
+  const packageJsonPath = Path.join(import.meta.dirname, '../../../../package.json');
+  const thirdPartyPackagesPath = Path.join(import.meta.dirname, 'third_party_packages.txt');
 
   const diffOutput = execSync(
     `git diff --name-only --diff-filter=M ${process.env.GITHUB_PR_MERGE_BASE} HEAD -- ${packageJsonPath} ${thirdPartyPackagesPath}`
@@ -103,7 +88,7 @@ async function main() {
     return;
   }
 
-  const { added, removed } = await getDependenciesDiff();
+  const { added, removed } = getDependenciesDiff();
 
   if (!added.length && !removed.length) {
     console.info('No third party packages added or removed');

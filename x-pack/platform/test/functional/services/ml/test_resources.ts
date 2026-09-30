@@ -229,20 +229,33 @@ export function MachineLearningTestResourcesProvider(
         );
       }
 
-      // inject index pattern id
-      const updatedBody = JSON.parse(JSON.stringify(body), (_key, value) => {
-        if (value === 'INDEX_PATTERN_ID_PLACEHOLDER') {
-          return dataViewId;
-        } else {
-          return value;
-        }
-      });
+      // Inject data view id into references and into searchSourceJSON strings.
+      // A JSON.parse reviver alone does not replace placeholders inside stringified JSON
+      // (e.g. filter.meta.index in ft_farequote_filter_and_kuery).
+      const withIds = JSON.parse(
+        JSON.stringify(body).split('INDEX_PATTERN_ID_PLACEHOLDER').join(dataViewId)
+      ) as {
+        attributes: {
+          title: string;
+          description?: string;
+          tabs: unknown;
+        };
+        references: unknown;
+      };
 
-      return updatedBody;
+      // Discover model version 13 create schema only allows title/description/tabs.
+      return {
+        attributes: {
+          title: withIds.attributes.title,
+          description: withIds.attributes.description ?? '',
+          tabs: withIds.attributes.tabs,
+        },
+        references: withIds.references,
+      };
     },
 
     async createSavedSearchFarequoteFilterIfNeeded(dataViewTitle: string = 'ft_farequote') {
-      await this.createSavedSearchIfNeeded(savedSearches.farequoteFilter, dataViewTitle);
+      return await this.createSavedSearchIfNeeded(savedSearches.farequoteFilter, dataViewTitle);
     },
 
     async createMLTestDashboardIfNeeded(): Promise<string> {

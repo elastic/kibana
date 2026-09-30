@@ -66,6 +66,7 @@ export function getMigrationStatusStep(product) {
       status: 'incomplete',
       children: (
         <EuiCallOut
+          announceOnMount
           size="s"
           color="warning"
           title={i18n.translate(
@@ -83,6 +84,7 @@ export function getMigrationStatusStep(product) {
       status: 'complete',
       children: (
         <EuiCallOut
+          announceOnMount
           size="s"
           color="success"
           title={i18n.translate('xpack.monitoring.metricbeatMigration.fullyMigratedStatusTitle', {
@@ -132,6 +134,7 @@ export function getDisableStatusStep(product, meta) {
       status: 'incomplete',
       children: (
         <EuiCallOut
+          announceOnMount
           size="s"
           color="warning"
           title={i18n.translate(
@@ -163,6 +166,7 @@ export function getDisableStatusStep(product, meta) {
     status: 'complete',
     children: (
       <EuiCallOut
+        announceOnMount
         size="s"
         color="success"
         title={i18n.translate(

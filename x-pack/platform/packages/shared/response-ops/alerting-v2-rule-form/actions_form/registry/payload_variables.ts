@@ -53,6 +53,16 @@ export const ALERT_EPISODE_FIELDS: readonly PayloadVariable[] = [
     documentation: 'ID of the rule that produced this episode.',
   },
   {
+    path: 'source',
+    detail: 'string',
+    documentation: 'Origin of the alert events for this episode (e.g. `internal`).',
+  },
+  {
+    path: 'space_id',
+    detail: 'string',
+    documentation: 'ID of the space the episode belongs to.',
+  },
+  {
     path: 'group_hash',
     detail: 'string',
     documentation: 'Hash identifying the alert group.',

@@ -45,7 +45,7 @@ export interface TestDependencies {
   toasts: NotificationsSetup['toasts'];
   ilmLocator: LocatorPublic<SerializableRecord>;
   uiSettings: ReturnType<typeof coreMock.createSetup>['uiSettings'];
-  reportDiagnostic: typeof ReportDiagnostic;
+  reportDiagnostic: () => React.JSX.Element;
   data: DataPublicPluginStart;
   share: SharePluginStart;
 }

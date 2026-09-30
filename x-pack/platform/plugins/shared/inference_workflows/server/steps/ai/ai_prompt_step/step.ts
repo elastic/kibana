@@ -25,12 +25,14 @@ export const aiPromptStepDefinition = (coreSetup: CoreSetup<InferenceWorkflowsSt
         { featureId: AI_PROMPT_FEATURE_ID, searchInferenceEndpoints }
       );
 
+      const reasoningLevel = context.config['reasoning-level'];
       const chatModel = await inference.getChatModel({
         connectorId: resolvedConnectorId,
         request: context.contextManager.getFakeRequest(),
         chatModelOptions: {
           temperature: context.input.temperature,
           maxRetries: 0,
+          ...(reasoningLevel !== undefined ? { reasoning: { effort: reasoningLevel } } : {}),
         },
       });
       const modelInput = [

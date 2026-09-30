@@ -131,6 +131,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       it('disables save to library button without visualize save permissions', async () => {
         await dashboard.waitForRenderComplete();
         await dashboardPanelActions.navigateToEditorFromFlyout();
+        await lens.openSaveOptionsIfNeeded();
         const saveButton = await testSubjects.find('lnsApp_saveButton');
         expect(await saveButton.getAttribute('disabled')).to.equal('true');
         await lens.saveAndReturn();
@@ -151,7 +152,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await lens.switchToVisualization('lnsLegacyMetric');
 
         await lens.waitForVisualization('legacyMtrVis');
-        await lens.assertLegacyMetric('Average of bytes', '5,727.322');
+        await lens.assertLegacyMetric('Average of bytes', '5,727.314');
 
         await header.waitUntilLoadingHasFinished();
         await testSubjects.click('lnsApp_saveButton');
@@ -166,7 +167,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
         await dashboard.waitForRenderComplete();
 
-        await lens.assertLegacyMetric('Average of bytes', '5,727.322');
+        await lens.assertLegacyMetric('Average of bytes', '5,727.314');
 
         const panelCount = await dashboard.getPanelCount();
         expect(panelCount).to.eql(1);
@@ -239,7 +240,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         });
 
         await dashboard.waitForRenderComplete();
-        await dashboardExpect.metricValuesExist(['14,005']);
+        await dashboardExpect.metricValuesExist(['14,004']);
         const panelCount = await dashboard.getPanelCount();
         expect(panelCount).to.eql(1);
       });

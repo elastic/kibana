@@ -8,31 +8,29 @@
  */
 
 import { getMeta } from '@kbn/as-code-shared-schemas';
-import { SavedObjectsErrorHelpers, type RequestHandlerContext } from '@kbn/core/server';
-import { SavedSearchType } from '@kbn/saved-search-plugin/common';
-import type { DiscoverSessionAttributes } from '@kbn/saved-search-plugin/server';
-import type { DiscoverSessionApiResponse } from './schema';
+import type { RequestHandlerContext } from '@kbn/core/server';
+import type { DiscoverSessionGetResponse } from './schema';
+import { resolveStoredDiscoverSession } from './stored_session';
 import { transformDiscoverSessionOut } from './transforms';
 
+/** Returns the session and the resolution headers needed for alias redirects and conflicts. */
 export const getDiscoverSession = async (
   requestContext: RequestHandlerContext,
   id: string
-): Promise<DiscoverSessionApiResponse> => {
-  const { core } = await requestContext.resolve(['core']);
-  const result = await core.savedObjects.client.resolve<DiscoverSessionAttributes>(
-    SavedSearchType,
-    id
+): Promise<{ body: DiscoverSessionGetResponse; resolveHeaders: Record<string, string> }> => {
+  const { savedObject, resolveHeaders } = await resolveStoredDiscoverSession(requestContext, id);
+  const { sessionState, warnings } = transformDiscoverSessionOut(
+    savedObject.attributes,
+    savedObject.references
   );
 
-  if (result.outcome === 'conflict') {
-    throw SavedObjectsErrorHelpers.createConflictError(SavedSearchType, id);
-  }
-
-  const savedObject = result.saved_object;
-
   return {
-    id: savedObject.id,
-    data: transformDiscoverSessionOut(savedObject.attributes, savedObject.references),
-    meta: getMeta(savedObject),
+    body: {
+      id: savedObject.id,
+      data: sessionState,
+      meta: getMeta(savedObject),
+      ...(warnings.length > 0 && { warnings }),
+    },
+    resolveHeaders,
   };
 };

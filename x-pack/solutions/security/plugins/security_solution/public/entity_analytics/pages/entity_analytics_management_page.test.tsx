@@ -62,12 +62,6 @@ jest.mock('../api/hooks/use_risk_engine_status', () => ({
   }),
 }));
 
-jest.mock('../api/hooks/use_schedule_now_risk_engine_mutation', () => ({
-  useScheduleNowRiskEngineMutation: () => ({
-    mutate: () => {},
-  }),
-}));
-
 jest.mock('../../common/lib/kibana', () => ({
   useKibana: () => ({
     services: {
@@ -95,7 +89,10 @@ jest.mock('../../helper_hooks', () => ({
 jest.mock('../components/asset_criticality/use_asset_criticality', () => ({
   useAssetCriticalityPrivileges: () => ({
     isLoading: false,
-    data: { has_write_permissions: true },
+    data: {
+      has_write_permissions: true,
+      privileges: { elasticsearch: { index: {} } },
+    },
   }),
 }));
 

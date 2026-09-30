@@ -14,6 +14,13 @@ import {
 } from '../common/constants/incremental_id';
 
 export const ConfigSchema = schema.object({
+  /**
+   * Gates server-side population of assignee identity fields (`username`,
+   * `full_name`, `email`) on the cases saved object at write time.
+   */
+  assigneeIdentity: schema.object({
+    enabled: schema.boolean({ defaultValue: true }),
+  }),
   analytics: schema.object({
     index: schema.object({
       enabled: offeringBasedSchema({
@@ -163,12 +170,9 @@ export const ConfigSchema = schema.object({
     enabled: schema.boolean({ defaultValue: true }),
   }),
   // NOTE: exposed to the Browser via `exposeToBrowser` setting in cases/server/index.ts
-  // Temporary feature flag for the Cases UX redesign (elastic/security-team#17398).
-  // Once the redesigned UI fully replaces the current one, this config block will be removed.
-  casesRedesign: schema.object({
-    list: schema.boolean({ defaultValue: true }),
-    details: schema.boolean({ defaultValue: true }),
-    settings: schema.boolean({ defaultValue: true }),
+  // Temporary feature flag for running workflows from Cases.
+  runWorkflows: schema.object({
+    enabled: schema.boolean({ defaultValue: false }),
   }),
   enabled: schema.boolean({ defaultValue: true }),
 });

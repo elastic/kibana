@@ -9,7 +9,7 @@ import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
 import type { UserProfileWithAvatar } from '@kbn/user-profile-components';
-import type { EpisodeActionHistoryEntry } from '../../../queries/episode_actions_history_query';
+import type { EpisodeActionHistoryEntry } from '@kbn/alerting-v2-common-queries';
 import { AlertEpisodeTimelineActionComment } from './timeline_action_comment';
 
 const makeEntry = (
@@ -21,7 +21,7 @@ const makeEntry = (
   actor: 'user-1',
   episode_id: 'episode-1',
   group_hash: 'group-1',
-  tags: null,
+  tags: [],
   assignee_uid: null,
   expiry: null,
   reason: null,

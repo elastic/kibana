@@ -51,6 +51,11 @@ const defaultActionsConfig: ActionsConfig = {
     },
     ears: { enabled: false, enableExperimental: false },
   },
+  inboundEvents: {
+    enabled: false,
+    maxBodyBytes: new ByteSizeValue(1024 * 1024),
+    maxEmitted: 25,
+  },
 };
 
 describe('ensureUriAllowed', () => {
@@ -968,12 +973,15 @@ describe('getEarsUrl()', () => {
 });
 
 describe('isEarsEnabled()', () => {
-  test('returns false when neither config key is set', () => {
-    const acu = getActionsConfigurationUtilities(defaultActionsConfig);
+  test('returns false when ears is not configured at all', () => {
+    const acu = getActionsConfigurationUtilities({
+      ...defaultActionsConfig,
+      auth: { ...defaultActionsConfig.auth, ears: undefined },
+    });
     expect(acu.isEarsEnabled()).toBe(false);
   });
 
-  test('returns true when auth.ears.enabled is true', () => {
+  test('returns false when ears.url is not set even if enabled is true', () => {
     const acu = getActionsConfigurationUtilities({
       ...defaultActionsConfig,
       auth: {
@@ -981,7 +989,29 @@ describe('isEarsEnabled()', () => {
         ears: { enabled: true, enableExperimental: false },
       },
     });
+    expect(acu.isEarsEnabled()).toBe(false);
+  });
+
+  test('returns true when ears.url is set and enabled is not specified', () => {
+    const acu = getActionsConfigurationUtilities({
+      ...defaultActionsConfig,
+      auth: {
+        ...defaultActionsConfig.auth,
+        ears: { enabled: true, enableExperimental: false, url: 'https://ears.example.com' },
+      },
+    });
     expect(acu.isEarsEnabled()).toBe(true);
+  });
+
+  test('returns false when ears.url is set but enabled is false', () => {
+    const acu = getActionsConfigurationUtilities({
+      ...defaultActionsConfig,
+      auth: {
+        ...defaultActionsConfig.auth,
+        ears: { enabled: false, enableExperimental: false, url: 'https://ears.example.com' },
+      },
+    });
+    expect(acu.isEarsEnabled()).toBe(false);
   });
 });
 
@@ -1000,6 +1030,61 @@ describe('isEarsExperimentalEnabled()', () => {
       },
     });
     expect(acu.isEarsExperimentalEnabled()).toBe(true);
+  });
+});
+
+describe('isInboundEventsEnabled()', () => {
+  test('returns false by default', () => {
+    const acu = getActionsConfigurationUtilities(defaultActionsConfig);
+    expect(acu.isInboundEventsEnabled()).toBe(false);
+  });
+
+  test('returns true when inboundEvents.enabled is true', () => {
+    const acu = getActionsConfigurationUtilities({
+      ...defaultActionsConfig,
+      inboundEvents: {
+        ...defaultActionsConfig.inboundEvents,
+        enabled: true,
+      },
+    });
+    expect(acu.isInboundEventsEnabled()).toBe(true);
+  });
+});
+
+describe('getInboundEventsMaxBodyBytes()', () => {
+  test('returns 1mb by default', () => {
+    const acu = getActionsConfigurationUtilities(defaultActionsConfig);
+    expect(acu.getInboundEventsMaxBodyBytes()).toBe(1024 * 1024);
+  });
+
+  test('returns configured maxBodyBytes in bytes', () => {
+    const acu = getActionsConfigurationUtilities({
+      ...defaultActionsConfig,
+      inboundEvents: {
+        enabled: false,
+        maxBodyBytes: new ByteSizeValue(512 * 1024),
+        maxEmitted: 25,
+      },
+    });
+    expect(acu.getInboundEventsMaxBodyBytes()).toBe(512 * 1024);
+  });
+});
+
+describe('getInboundEventsMaxEmitted()', () => {
+  test('returns 25 by default', () => {
+    const acu = getActionsConfigurationUtilities(defaultActionsConfig);
+    expect(acu.getInboundEventsMaxEmitted()).toBe(25);
+  });
+
+  test('returns configured maxEmitted', () => {
+    const acu = getActionsConfigurationUtilities({
+      ...defaultActionsConfig,
+      inboundEvents: {
+        ...defaultActionsConfig.inboundEvents,
+        maxEmitted: 100,
+      },
+    });
+    expect(acu.getInboundEventsMaxEmitted()).toBe(100);
   });
 });
 

@@ -149,9 +149,9 @@ EOF
     fi
 
     # Eval suites require this for the LLM-as-a-judge connector selection
-    export EVALUATION_CONNECTOR_ID="${EVALUATION_CONNECTOR_ID:-"$(jq -r '.evaluationConnectorId // empty' <<<"$KBN_EVALS_CONFIG_JSON")"}"
+    export EVAL_CONNECTOR_ID="${EVAL_CONNECTOR_ID:-"$(jq -r '.evaluationConnectorId // empty' <<<"$KBN_EVALS_CONFIG_JSON")"}"
 
-    # Export the vault config so eval-owned scripts can extract LiteLLM / connector
+    # Export the vault config so eval-owned scripts can extract OpenRouter / connector
     # settings without needing vault access themselves.
     # Connector generation happens in .buildkite/scripts/steps/evals/setup_connectors.sh.
     export KBN_EVALS_CONFIG_B64
@@ -168,10 +168,10 @@ EOF
     fi
 
     # Optional: Remote Kibana for managed dataset operations (golden cluster)
-    EVALUATIONS_KBN_URL="$(jq -r '.evaluationsKbn.url // empty' <<<"$KBN_EVALS_CONFIG_JSON")"
-    if [[ -n "$EVALUATIONS_KBN_URL" ]]; then
-      export EVALUATIONS_KBN_URL
-      export EVALUATIONS_KBN_API_KEY="$(jq -r '.evaluationsKbn.apiKey // empty' <<<"$KBN_EVALS_CONFIG_JSON")"
+    EVAL_KBN_URL="$(jq -r '.evaluationsKbn.url // empty' <<<"$KBN_EVALS_CONFIG_JSON")"
+    if [[ -n "$EVAL_KBN_URL" ]]; then
+      export EVAL_KBN_URL
+      export EVAL_KBN_API_KEY="$(jq -r '.evaluationsKbn.apiKey // empty' <<<"$KBN_EVALS_CONFIG_JSON")"
     fi
 
     # Optional: GCS service account credentials for snapshot restoration (e.g. AI Insights)
@@ -181,9 +181,6 @@ EOF
 
 # Set up GCS Service Account for CDN
 {
-  GCS_SA_CDN_KEY="$(vault_get gcs-sa-cdn-prod key)"
-  export GCS_SA_CDN_KEY
-
   GCS_SA_CDN_EMAIL="$(vault_get gcs-sa-cdn-prod email)"
   export GCS_SA_CDN_EMAIL
 
@@ -192,6 +189,9 @@ EOF
 
   GCS_SA_CDN_URL="$(vault_get gcs-sa-cdn-prod cdn)"
   export GCS_SA_CDN_URL
+
+  GCS_SA_CDN_AUDIENCE="$(vault_get gcs-sa-cdn-prod audience)"
+  export GCS_SA_CDN_AUDIENCE
 }
 
 # Setup Failed Test Reporter Elasticsearch credentials
@@ -219,9 +219,9 @@ EOF
 
 # Setup GCS Service Account Proxy for CI
 {
-  KIBANA_SERVICE_ACCOUNT_PROXY_KEY="$(mktemp -d)/kibana-gcloud-service-account.json"
-  export KIBANA_SERVICE_ACCOUNT_PROXY_KEY
-  vault_get kibana-ci-sa-proxy-key key | base64 -d > "$KIBANA_SERVICE_ACCOUNT_PROXY_KEY"
+  KIBANA_WIF_CREDENTIALS_DIR="$(mktemp -d)"
+  export KIBANA_WIF_CREDENTIALS_DIR
+  export GOOGLE_EXTERNAL_ACCOUNT_ALLOW_EXECUTABLES=1
 }
 
 # Acquire credentials for legacy vault if needed

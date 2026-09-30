@@ -82,7 +82,7 @@ describe('useDocumentFlyoutTitle', () => {
     const { result } = renderHook(() => useDocumentFlyoutTitle({ hit: alertHit }));
 
     act(() => {
-      result.current.onTitleClick();
+      result.current.onTitleClick?.();
     });
 
     expect(openDocumentFlyoutFromIndexAsChild).toHaveBeenCalledTimes(1);
@@ -100,7 +100,7 @@ describe('useDocumentFlyoutTitle', () => {
     const { result } = renderHook(() => useDocumentFlyoutTitle({ hit: attackHit }));
 
     act(() => {
-      result.current.onTitleClick();
+      result.current.onTitleClick?.();
     });
 
     expect(openAttackFlyoutAsChild).toHaveBeenCalledTimes(1);
