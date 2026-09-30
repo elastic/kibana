@@ -27,13 +27,13 @@ export type ResolveCustomContentTemplate = (params: {
 }) => Promise<ResolvedCustomContentTemplate>;
 
 const resolveCustomContentState = async (
-  { nlQuery, esql, existingPanel }: CustomContentPanelResolutionRequest,
+  request: CustomContentPanelResolutionRequest,
   resolveTemplate: ResolveCustomContentTemplate
 ): Promise<CustomContentState> => {
+  const { nlQuery, esql, existingPanel } = request;
   if (!existingPanel) {
-    const esqlQuery = esql ?? undefined;
-    const { template } = await resolveTemplate({ prompt: nlQuery ?? '', esqlQuery });
-    return { esql_query: toEsqlQueryState(esqlQuery), template };
+    const { template } = await resolveTemplate({ prompt: nlQuery, esqlQuery: esql });
+    return { esql_query: toEsqlQueryState(esql), template };
   }
 
   const existing = existingPanel.config as CustomContentState;

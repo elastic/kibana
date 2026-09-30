@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { panelGridSchema } from '@kbn/agent-builder-dashboards-common';
+import { panelGridSchema, type AttachmentPanel } from '@kbn/agent-builder-dashboards-common';
 import {
   CUSTOM_CONTENT_MAX_PROMPT_LENGTH,
   CUSTOM_CONTENT_MAX_ESQL_QUERY_LENGTH,
@@ -22,14 +22,30 @@ import type { PanelResolutionRequestBase } from '../../../resolve_panel';
  * `core/resolvers/custom_content_panel_resolver.ts`.
  */
 
-/** Request to generate or refine a custom content panel's template. */
-export interface CustomContentPanelResolutionRequest extends PanelResolutionRequestBase {
+/** Request to generate a new custom content panel's template. */
+export interface CustomContentPanelAddRequest extends PanelResolutionRequestBase {
   renderer: 'custom_content';
-  /** What to display (add) or what to change (edit). */
+  /** What to display. */
+  nlQuery: string;
+  /** ES|QL query feeding the template. Omit for static content. */
+  esql?: string;
+  existingPanel?: undefined;
+}
+
+/** Request to refine an existing custom content panel's template. */
+export interface CustomContentPanelEditRequest extends PanelResolutionRequestBase {
+  renderer: 'custom_content';
+  existingPanel: AttachmentPanel;
+  /** What to change. Omitted when the edit only changes the query. */
   nlQuery?: string;
-  /** ES|QL query feeding the template. On edits, omit to keep the existing query and pass `null` to remove it. */
+  /** New ES|QL query. Omit to keep the existing query; pass `null` to remove it. */
   esql?: string | null;
 }
+
+/** Request to generate or refine a custom content panel's template; `existingPanel` tells them apart. */
+export type CustomContentPanelResolutionRequest =
+  | CustomContentPanelAddRequest
+  | CustomContentPanelEditRequest;
 
 /** Adds a new custom content panel. */
 export const customContentPanelRequestSchema = z.object({

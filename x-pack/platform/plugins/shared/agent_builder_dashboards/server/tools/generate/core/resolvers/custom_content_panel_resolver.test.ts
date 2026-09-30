@@ -7,7 +7,10 @@
 
 import type { AttachmentPanel } from '@kbn/agent-builder-dashboards-common';
 import { CUSTOM_CONTENT_EMBEDDABLE_TYPE } from '@kbn/custom-content-common';
-import type { CustomContentPanelResolutionRequest } from '../operations/panels';
+import type {
+  CustomContentPanelAddRequest,
+  CustomContentPanelEditRequest,
+} from '../operations/panels';
 import { createCustomContentPanelResolver } from './custom_content_panel_resolver';
 
 const grid = { x: 0, y: 0, w: 12, h: 5 };
@@ -20,8 +23,8 @@ const customContentPanel = (config: Record<string, unknown>): AttachmentPanel =>
 });
 
 const addRequest = (
-  overrides: Partial<CustomContentPanelResolutionRequest> = {}
-): CustomContentPanelResolutionRequest => ({
+  overrides: Partial<CustomContentPanelAddRequest> = {}
+): CustomContentPanelAddRequest => ({
   renderer: 'custom_content',
   operationType: 'add_panels',
   identifier: 'Show KPI',
@@ -31,8 +34,8 @@ const addRequest = (
 
 const editRequest = (
   existingPanel: AttachmentPanel,
-  overrides: Partial<CustomContentPanelResolutionRequest> = {}
-): CustomContentPanelResolutionRequest => ({
+  overrides: Partial<CustomContentPanelEditRequest> = {}
+): CustomContentPanelEditRequest => ({
   renderer: 'custom_content',
   operationType: 'edit_panels',
   identifier: existingPanel.id,

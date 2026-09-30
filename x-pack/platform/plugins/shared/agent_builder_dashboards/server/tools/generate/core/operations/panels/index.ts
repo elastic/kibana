@@ -58,7 +58,11 @@ import { attachmentPanelInputSchema } from './attachment_source';
 export { attachmentPanelInputSchema } from './attachment_source';
 export type { AttachmentPanelInput } from './attachment_source';
 export type { VisPanelResolutionRequest } from './vis';
-export type { CustomContentPanelResolutionRequest } from './custom_content';
+export type {
+  CustomContentPanelAddRequest,
+  CustomContentPanelEditRequest,
+  CustomContentPanelResolutionRequest,
+} from './custom_content';
 
 const sectionIdField = z
   .string()

@@ -48,7 +48,7 @@ export interface PanelResolutionRequestBase {
   operationType: InlinePanelOperationType;
   /** Human-facing identifier for failure attribution (panelId or the query). */
   identifier: string;
-  /** Present when editing an existing panel; resolvers validate compatibility. */
+  /** Present when editing an existing panel; `edit_panels` has checked it matches the renderer. */
   existingPanel?: AttachmentPanel;
 }
 
