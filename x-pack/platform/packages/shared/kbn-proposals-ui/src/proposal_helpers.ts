@@ -10,6 +10,7 @@ import type { ApprovalProposal } from './types';
 import type { ApprovalDecision } from './approval_content';
 import type { ApprovalPhase } from './approval_outcome';
 import { APPROVAL_MODAL_TRANSLATIONS } from './translations';
+import { formatDismissReason } from './dismiss_reason';
 
 /** Stored lowercase (`configure`, `respond`, ...); the caption reads it in sentence case. */
 const toSentenceCase = (value: string): string =>
@@ -100,7 +101,12 @@ export const getProposalDecision = (proposal: ApprovalProposal): ApprovalDecisio
     status: approvedStatusFor(proposal),
     actorName,
     decidedAt: proposal.decidedAt,
-    reason: proposal.rationale,
+    // A decline's reason is structured (`dismissReason`), with the free-text rationale folded in
+    // when the decliner left one; an approval has no `dismissReason` at all, so it falls back to
+    // `rationale` alone, same as before.
+    reason: proposal.dismissReason
+      ? formatDismissReason(proposal.dismissReason, proposal.rationale)
+      : proposal.rationale,
   };
 };
 
