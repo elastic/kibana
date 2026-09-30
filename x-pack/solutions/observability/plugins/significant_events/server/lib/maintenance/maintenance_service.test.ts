@@ -1057,6 +1057,40 @@ describe('SignificantEventsMaintenanceService', () => {
       );
     });
 
+    it('does not restore continuous onboarding when its document was enabled by drift', async () => {
+      // Document is enabled by drift (e.g. the toggle ON route enabled the
+      // document but its setting write failed), while the setting itself reads
+      // false. Pause sweeps and disables the document; Resume must not write the
+      // setting to true.
+      const { api, updateWorkflow } = makeManagementApi();
+      const { service, spaceUiSettingsClient } = makeService({
+        management: api,
+        continuousOnboardingEnabled: false,
+        scheduledDiscoveryEnabled: false,
+      });
+
+      await service.pause({ request: REQUEST });
+      spaceUiSettingsClient.set.mockClear();
+      updateWorkflow.mockClear();
+
+      const summary = await service.resume({ request: REQUEST });
+
+      expect(summary.state).toBe('enabled');
+      expect(spaceUiSettingsClient.set).not.toHaveBeenCalledWith(
+        OBSERVABILITY_NIGHTSHIFT_CONTINUOUS_ONBOARDING_ENABLED,
+        true
+      );
+      // The document itself is not re-enabled.
+      const reEnabledIds = updateWorkflow.mock.calls
+        .filter((call) => call[1]?.enabled === true)
+        .map((call) => call[0] as string);
+      expect(
+        reEnabledIds.some((id) =>
+          id.startsWith(SIGNIFICANT_EVENTS_KI_CONTINUOUS_ONBOARDING_WORKFLOW_ID)
+        )
+      ).toBe(false);
+    });
+
     it('restores continuous onboarding when pause could not disable its document', async () => {
       const { api } = makeManagementApi({ failUpdateFor: continuousDocumentId('default') });
       const { service, soClient, spaceUiSettingsClient } = makeService({
