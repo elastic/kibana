@@ -132,7 +132,7 @@ test.describe('Workflow access dialog', { tag: tags.stateful.classic }, () => {
       await editor.gotoWorkflow(workflowId);
       await expect(editor.saveButton).toBeDisabled();
       await editor.hoverDisabledAccessButton();
-      await expect(page.testSubj.locator('workflowAccessButton')).toBeDisabled();
+      await expect(page.testSubj.locator('shareTopNavButton')).toBeDisabled();
       await expect(
         page.getByText('Only the workflow owner can manage access.', { exact: true })
       ).toBeVisible();

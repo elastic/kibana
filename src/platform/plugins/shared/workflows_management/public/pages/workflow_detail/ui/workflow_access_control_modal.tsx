@@ -127,13 +127,19 @@ export const WorkflowAccessControlModal = ({
     <EuiModal
       onClose={onClose}
       aria-labelledby="workflowAccessTitle"
-      css={css({ width: euiTheme.breakpoint.m })}
+      maxWidth={`${euiTheme.breakpoint.s}px`}
+      css={css({
+        '.euiModal__closeIcon': {
+          insetBlockStart: euiTheme.size.base,
+          insetInlineEnd: euiTheme.size.base,
+        },
+      })}
     >
       <EuiModalHeader>
         <EuiFlexGroup alignItems="center" gutterSize="m" wrap>
           <EuiFlexItem grow={false}>
             <EuiModalHeaderTitle id="workflowAccessTitle">
-              {i18n.translate('workflows.access.modalTitle', { defaultMessage: 'Workflow access' })}
+              {i18n.translate('workflows.access.sharingModalTitle', { defaultMessage: 'Sharing' })}
             </EuiModalHeaderTitle>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
@@ -190,12 +196,15 @@ export const WorkflowAccessControlModal = ({
           })}
         />
         {value.access_mode === 'private' && (
-          <EuiText size="s">
-            {i18n.translate('workflows.access.rolesDescription', {
-              defaultMessage:
-                'Viewers can view. Executors can view and run. Editors can view, run, and edit. Feature privileges still apply.',
-            })}
-          </EuiText>
+          <>
+            <EuiSpacer size="m" />
+            <EuiText size="xs">
+              {i18n.translate('workflows.access.rolesDescription', {
+                defaultMessage:
+                  'Viewers can view. Executors can view and run. Editors can view, run, and edit. Feature privileges still apply.',
+              })}
+            </EuiText>
+          </>
         )}
       </EuiModalBody>
       <EuiModalFooter>
