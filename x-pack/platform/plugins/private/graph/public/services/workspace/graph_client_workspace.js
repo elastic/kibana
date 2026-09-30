@@ -7,6 +7,7 @@
 
 // Kibana wrapper
 import { getIcon } from '../../helpers/style_choices';
+import { makeEdgeId, makeNodeId, prepareIncomingNodes } from './graph_merge_planner';
 import {
   buildExpandExploreRequest,
   buildExploreControls,
@@ -407,17 +408,9 @@ function GraphWorkspace(options) {
     return buildExploreControls(self.options.exploreControls);
   };
 
-  this.makeNodeId = function (field, term) {
-    return field + '..' + term;
-  };
+  this.makeNodeId = makeNodeId;
 
-  this.makeEdgeId = function (srcId, targetId) {
-    let id = srcId + '->' + targetId;
-    if (srcId > targetId) {
-      id = targetId + '->' + srcId;
-    }
-    return id;
-  };
+  this.makeEdgeId = makeEdgeId;
 
   //=======  Adds new nodes retrieved from an elasticsearch search ========
   this.mergeGraph = function (newData) {
@@ -438,24 +431,17 @@ function GraphWorkspace(options) {
     //   .range([minCircleSize, maxCircleSize]);
 
     //Remove nodes we already have
-    const dedupedNodes = [];
-    newData.nodes.forEach((node) => {
-      //Assign an ID
-      node.id = self.makeNodeId(node.field, node.term);
-      if (!this.nodesMap[node.id]) {
-        //Default the label
-        if (!node.label) {
-          node.label = node.term;
-        }
-        dedupedNodes.push(node);
-      }
-    });
-    if (dedupedNodes.length > 0 && this.options.nodeLabeller) {
+    const { normalizedNodes, newNodes } = prepareIncomingNodes(
+      newData.nodes,
+      new Set(Object.keys(this.nodesMap))
+    );
+    newData.nodes = normalizedNodes;
+    if (newNodes.length > 0 && this.options.nodeLabeller) {
       // A hook for client code to attach labels etc to newly introduced nodes.
-      this.options.nodeLabeller(dedupedNodes);
+      this.options.nodeLabeller(newNodes);
     }
 
-    dedupedNodes.forEach((dedupedNode) => {
+    newNodes.forEach((dedupedNode) => {
       let label = dedupedNode.term;
       if (dedupedNode.label) {
         label = dedupedNode.label;
