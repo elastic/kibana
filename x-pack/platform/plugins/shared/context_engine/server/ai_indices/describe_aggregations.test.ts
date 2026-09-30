@@ -93,6 +93,7 @@ describe('describeAiIndexAggregations', () => {
         `| LIMIT ${MAX_AI_INDEX_DESCRIBE_TYPE_COUNTS}`,
       ].join('\n'),
       filter: buildAiIndexSpaceFilter('team-a'),
+      allow_partial_results: false,
     });
     expect(esqlQuery).toHaveBeenCalledWith({
       query: [
@@ -105,6 +106,7 @@ describe('describeAiIndexAggregations', () => {
         `| LIMIT ${MAX_AI_INDEX_DESCRIBE_TAG_COUNTS}`,
       ].join('\n'),
       filter: buildAiIndexSpaceFilter('team-a'),
+      allow_partial_results: false,
     });
     for (const query of queries()) {
       expect(Parser.parse(query).errors).toEqual([]);

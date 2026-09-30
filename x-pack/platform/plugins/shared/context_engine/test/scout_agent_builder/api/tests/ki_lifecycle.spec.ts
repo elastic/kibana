@@ -166,14 +166,13 @@ apiTest.describe('context engine KI lifecycle filter', { tag: tags.stateful.clas
     expect(kept.values).toStrictEqual([['deleted', 'workflow://scout']]);
   });
 
-  apiTest('applies the filter through a pattern and keeps the score', async ({ apiClient }) => {
+  apiTest('applies the filter through a pattern', async ({ apiClient }) => {
     const body = await run(
       apiClient,
-      `FROM ai-index-idx-scout-lifecycle-${RUN_ID}* METADATA _score | WHERE title:"active" | KEEP id, _score`
+      `FROM ai-index-idx-scout-lifecycle-${RUN_ID}* | KEEP id | SORT id`
     );
 
-    expect(columnValues(body, 'id')).toStrictEqual(['active']);
-    expect(typeof columnValues(body, '_score')[0]).toBe('number');
+    expect(columnValues(body, 'id')).toStrictEqual(['active', 'single', 'unexpired']);
   });
 
   apiTest(
@@ -197,6 +196,12 @@ apiTest.describe('context engine KI lifecycle filter', { tag: tags.stateful.clas
 
     expect(columnValues(body, 'id')).toStrictEqual(['revised']);
     expect(typeof columnValues(body, '_score')[0]).toBe('number');
+
+    const superseded = await run(
+      apiClient,
+      `FROM ${DS_DEST} METADATA _score | WHERE title:"v1" | KEEP id`
+    );
+    expect(superseded.values).toStrictEqual([]);
   });
 
   apiTest('describe counts only the newest active revisions', async ({ apiClient }) => {

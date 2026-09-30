@@ -61,6 +61,7 @@ const runCounts = async (
   const { columns, values } = (await esClient.esql.query({
     query,
     filter: buildAiIndexSpaceFilter(spaceId),
+    allow_partial_results: false,
   })) as unknown as ESQLSearchResponse;
   return values.map((row) => Object.fromEntries(columns.map((column, i) => [column.name, row[i]])));
 };
