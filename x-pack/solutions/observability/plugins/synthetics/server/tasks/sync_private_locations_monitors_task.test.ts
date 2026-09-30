@@ -11,6 +11,7 @@ import {
   runSynPrivateLocationMonitorsTaskSoon,
   DEFAULT_TASK_SCHEDULE,
   FAILED_RUN_RETRY_DELAY_MS,
+  MAX_FAILED_RUN_RETRIES,
 } from './sync_private_locations_monitors_task';
 import type { SyntheticsServerSetup } from '../types';
 import type { SyntheticsMonitorClient } from '../synthetics_service/synthetics_monitor/synthetics_monitor_client';
@@ -251,6 +252,7 @@ describe('SyncPrivateLocationMonitorsTask', () => {
       expect(result.state).toEqual({
         disableAutoSync: false,
         lastStartedAt: expect.anything(),
+        failedRunCount: 1,
       });
     });
 
@@ -275,8 +277,32 @@ describe('SyncPrivateLocationMonitorsTask', () => {
       const result = await task.runTask({ taskInstance });
 
       expect(result.state.lastStartedAt).toBe(initialLastStartedAt);
+      expect(result.state.failedRunCount).toBe(1);
       expect(scheduleOf(result)).toBeUndefined();
       expect(runAtOf(result)?.getTime()).toBeGreaterThanOrEqual(before + FAILED_RUN_RETRY_DELAY_MS);
+    });
+
+    it('stops retrying once the retry budget is spent and falls back to the safety net', async () => {
+      const taskInstance = {
+        ...getMockTaskInstance({ failedRunCount: MAX_FAILED_RUN_RETRIES }),
+        startedAt: new Date(),
+      };
+      jest.spyOn(task, 'fetchMonitorMwsIds').mockResolvedValue(['mw-1']);
+      jest.spyOn(task, 'hasMWsChanged').mockRejectedValue(new Error('Sync failed'));
+      jest.spyOn(getPrivateLocationsModule, 'getPrivateLocations').mockResolvedValue([
+        {
+          id: 'pl-1',
+          label: 'Private Location 1',
+          isServiceManaged: false,
+          agentPolicyId: 'policy-1',
+        },
+      ]);
+
+      const result = await task.runTask({ taskInstance });
+
+      expect(scheduleOf(result)).toEqual({ interval: DEFAULT_TASK_SCHEDULE });
+      expect(runAtOf(result)).toBeUndefined();
+      expect(result.state.failedRunCount).toBeUndefined();
     });
 
     it('should update lastStartedAt to the current startedAt value', async () => {
