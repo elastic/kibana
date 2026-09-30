@@ -381,11 +381,15 @@ export const ClassicAlertDetailsFlyout = ({
           borderRadius="none"
           color="transparent"
         >
-          <EuiFlexGroup justifyContent="spaceBetween" alignItems="center" responsive={false}>
+          <EuiFlexGroup
+            justifyContent="flexEnd"
+            gutterSize="s"
+            alignItems="center"
+            responsive={false}
+          >
             <EuiFlexItem grow={false}>
               <EuiButtonEmpty
                 onClick={onClose}
-                flush="left"
                 data-test-subj="classicAlertEpisodeDetailsCloseButton"
               >
                 {i18n.CLASSIC_ALERT_DETAILS_CLOSE}
@@ -397,7 +401,7 @@ export const ClassicAlertDetailsFlyout = ({
                   buttonRef={menuAnchorRef}
                   fill
                   iconSide="right"
-                  iconType="chevronSingleDown"
+                  iconType={isMenuOpen ? 'chevronSingleUp' : 'chevronSingleDown'}
                   data-test-subj="alertingV2EpisodeFlyoutTakeActionButton"
                   onClick={() => setIsMenuOpen((open) => !open)}
                 >
@@ -412,6 +416,7 @@ export const ClassicAlertDetailsFlyout = ({
                   target="_blank"
                   rel="noopener noreferrer"
                   iconType="eye"
+                  iconSide="right"
                   data-test-subj="classicAlertEpisodeDetailsViewDetailsButton"
                 >
                   {i18n.CLASSIC_ALERT_DETAILS_VIEW_DETAILS}

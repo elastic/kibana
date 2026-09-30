@@ -539,7 +539,8 @@ export const AlertEpisodeDetailsFlyout = ({
           />
           <FlyoutTemplate.Footer.PrimaryAction
             label={i18n.FLYOUT_TAKE_ACTION}
-            iconType="chevronSingleDown"
+            iconType={isMenuOpen ? 'chevronSingleUp' : 'chevronSingleDown'}
+            iconSide="right"
             data-test-subj="alertingV2EpisodeFlyoutTakeActionButton"
             onClick={(event) => {
               menuAnchorRef.current = event.currentTarget as HTMLButtonElement;
