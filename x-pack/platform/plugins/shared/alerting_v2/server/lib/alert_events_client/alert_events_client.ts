@@ -15,8 +15,13 @@ import {
   alertEventStatus,
   alertEpisodeStatus,
   alertEventType,
-  type AlertEvent,
+  ALERT_EVENTS_RESOURCE_KEY,
+  type AlertEventDocument,
 } from '../../resources/datastreams/alert_events';
+import {
+  ResourceManager,
+  type ResourceManagerContract,
+} from '../services/resource_service/resource_manager';
 import type { QueryServiceContract } from '../services/query_service/query_service';
 import { QueryServiceInternalToken } from '../services/query_service/tokens';
 import type { StorageServiceContract } from '../services/storage_service/storage_service';
@@ -75,7 +80,8 @@ export class AlertEventsClient {
   constructor(
     @inject(StorageServiceInternalToken) private readonly storageService: StorageServiceContract,
     @inject(QueryServiceInternalToken) private readonly queryService: QueryServiceContract,
-    @inject(RequestSpaceIdToken) private readonly spaceId: string
+    @inject(RequestSpaceIdToken) private readonly spaceId: string,
+    @inject(ResourceManager) private readonly resourceManager: ResourceManagerContract
   ) {}
 
   public async createAlertEvent(
@@ -87,8 +93,6 @@ export class AlertEventsClient {
 
     const episodeStatus = event.alert_status ?? alertEpisodeStatus.active;
     const episodeId = await this.resolveEpisodeId(groupHash, episodeStatus, abortSignal);
-
-    const atTimestamp = event.timestamp ?? new Date().toISOString();
 
     const status =
       episodeStatus === alertEpisodeStatus.inactive ||
@@ -102,10 +106,11 @@ export class AlertEventsClient {
         ? 1
         : undefined;
 
-    // No `rule` object — no backing rule saved object.
-    const doc: AlertEvent = {
-      '@timestamp': atTimestamp,
-      scheduled_timestamp: atTimestamp,
+    // No `rule` object — no backing rule saved object. A caller-supplied timestamp is
+    // honored as `@timestamp`; otherwise ES sets it at ingest.
+    const doc: AlertEventDocument = {
+      ...(event.timestamp != null ? { '@timestamp': event.timestamp } : {}),
+      scheduled_timestamp: event.timestamp ?? new Date().toISOString(),
       group_hash: groupHash,
       data: event.data ?? {},
       status,
@@ -119,6 +124,9 @@ export class AlertEventsClient {
       space_id: this.spaceId,
       ...(event.severity != null ? { severity: event.severity } : {}),
     };
+
+    // The doc may omit `@timestamp`, so the ingest pipeline must be in place before writing.
+    await this.resourceManager.ensureResourceReady(ALERT_EVENTS_RESOURCE_KEY);
 
     // `refresh: 'wait_for'` ensures the written doc is visible to the next
     // resolveEpisodeId query when events for the same series arrive back-to-back.

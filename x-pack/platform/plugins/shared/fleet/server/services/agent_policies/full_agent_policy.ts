@@ -17,6 +17,7 @@ import {
   isOtlpOutput,
   outputTypeSupportPresets,
 } from '../../../common/services/output_helpers';
+import { isManagedOtlpEndpoint } from '../utils/managed_otlp';
 
 import type {
   FullAgentPolicy,
@@ -69,9 +70,13 @@ import {
 import { fetchRelatedSavedObjects } from './related_saved_objects';
 import { generateOtelcolConfig } from './otel_collector';
 
-async function fetchAgentPolicy(soClient: SavedObjectsClientContract, id: string) {
+async function fetchAgentPolicy(
+  soClient: SavedObjectsClientContract,
+  id: string,
+  options?: { spaceId?: string }
+) {
   try {
-    return await agentPolicyService.get(soClient, id);
+    return await agentPolicyService.get(soClient, id, true, { spaceId: options?.spaceId });
   } catch (err) {
     if (!err.isBoom || err.output.statusCode !== 404) {
       throw err;
@@ -89,6 +94,7 @@ export async function getFullAgentPolicy(
     agentVersion?: string;
     /** When true, redact proxy_headers and ssl.key from all proxy references in the response */
     redactProxySecrets?: boolean;
+    spaceId?: string;
   }
 ): Promise<FullAgentPolicy | null> {
   const logger = appContextService.getLogger().get('getFullAgentPolicy');
@@ -108,7 +114,11 @@ export async function getFullAgentPolicy(
     agentPolicy = options.agentPolicy;
   } else {
     logger.debug(`Fetching agent policy doc for [${id}]`);
-    agentPolicy = await fetchAgentPolicy(soClient, id);
+    agentPolicy = await fetchAgentPolicy(
+      soClient,
+      id,
+      options?.spaceId ? { spaceId: options.spaceId } : {}
+    );
   }
 
   if (!agentPolicy) {
@@ -163,6 +173,17 @@ export async function getFullAgentPolicy(
 
   logger.debug(() => `Fetching agent inputs for policy [${id}]`);
 
+  // For cross-space callers (spaceId '*'), derive the actual SO namespace from the policy's
+  // own space_ids so that package-policy reads/writes are scoped to the right namespace.
+  // When space_ids[0] is '*' (policy shared to all spaces), pass undefined: shared-policy
+  // package policies are accessible from any namespace and soClient.get rejects '*' as a namespace.
+  const packagePoliciesNamespace =
+    options?.spaceId === '*'
+      ? agentPolicy.space_ids?.[0] === '*'
+        ? undefined
+        : agentPolicy.space_ids?.[0]
+      : options?.spaceId;
+
   const agentInputs = await storedPackagePoliciesToAgentInputs(
     agentPolicy.package_policies as PackagePolicy[],
     packageInfoCache,
@@ -171,7 +192,8 @@ export async function getFullAgentPolicy(
     agentPolicy.global_data_tags,
     options?.agentVersion,
     soClient,
-    agentPolicy.has_agent_version_conditions
+    agentPolicy.has_agent_version_conditions,
+    packagePoliciesNamespace
   );
 
   let otelcolConfig;
@@ -397,12 +419,12 @@ export async function getFullAgentPolicy(
     NonNullable<FullAgentPolicy['output_permissions']>
   >((outputPermissions, outputId) => {
     const output = fullAgentPolicy.outputs[outputId];
+    const originalOutput = outputs.find((o) => getOutputIdForAgentPolicy(o) === outputId);
+
     if (
       output &&
       (output.type === outputType.Elasticsearch || output.type === outputType.RemoteElasticsearch)
     ) {
-      const originalOutput = outputs.find((o) => getOutputIdForAgentPolicy(o) === outputId);
-
       if (agentPolicy.supports_agentless && originalOutput && isManagedBulkOutput(originalOutput)) {
         outputPermissions[outputId] = {
           _managed_bulk_apm: {
@@ -442,7 +464,21 @@ export async function getFullAgentPolicy(
       }
 
       outputPermissions[outputId] = permissions;
+    } else if (
+      agentPolicy.supports_agentless &&
+      originalOutput &&
+      isOtlpOutput(originalOutput) &&
+      isManagedOtlpEndpoint(originalOutput.otlp_exporter.endpoint)
+    ) {
+      outputPermissions[outputId] = {
+        _managed_otlp_apm: {
+          applications: [
+            { application: 'apm', privileges: [PrivilegeType.EVENT], resources: ['*'] },
+          ],
+        },
+      };
     }
+
     return outputPermissions;
   }, {});
 
@@ -618,10 +654,8 @@ export function transformOutputToFullPolicyOutput(
   redactProxySecrets = false
 ): FullAgentPolicyOutput {
   if (isOtlpOutput(output)) {
-    // OTLP policy compilation is not yet implemented — tracked separately.
-    throw new Error(
-      `OTLP output "${output.id}" cannot be compiled into an agent policy output: compilation is not yet implemented`
-    );
+    // otlp_exporter config and secrets are compiled into the OTel collector block by generateOtelcolExporter.
+    return { type: output.type };
   }
 
   const {

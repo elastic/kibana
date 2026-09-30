@@ -7,14 +7,12 @@
 
 import { useMutation, useQueryClient } from '@kbn/react-query';
 import { useCallback, useMemo, useRef } from 'react';
-import { i18n } from '@kbn/i18n';
 import { toToolMetadata } from '@kbn/agent-builder-browser/tools/browser_api_tool';
 import type { BrowserApiToolDefinition } from '@kbn/agent-builder-browser/tools/browser_api_tool';
 import { firstValueFrom, tap } from 'rxjs';
 import { isEqual } from 'lodash';
 import { v4 as uuidv4 } from 'uuid';
-import type { ConversationRoundStep, Conversation } from '@kbn/agent-builder-common';
-import { ConversationRoundStatus, isConversationCreatedEvent } from '@kbn/agent-builder-common';
+import { isExecutionStartedEvent, isExecutionTerminalEvent } from '@kbn/agent-builder-common';
 import type {
   Attachment,
   ConversationAttachment,
@@ -23,7 +21,10 @@ import type {
 } from '@kbn/agent-builder-common/attachments';
 import { AttachmentType, getLatestVersion } from '@kbn/agent-builder-common/attachments';
 import { flattenAttachments } from '../conversation/flatten_attachments';
-import { queryKeys } from '../../query_keys';
+import {
+  buildOptimisticAttachments,
+  type OptimisticAttachments,
+} from '../../utils/build_optimistic_attachments';
 import { useKibana } from '../../hooks/use_kibana';
 import type { StartServices } from '../../hooks/use_kibana';
 import { useAgentBuilderServices } from '../../hooks/use_agent_builder_service';
@@ -31,17 +32,11 @@ import { mutationKeys } from '../../mutation_keys';
 import { subscribeToChatEvents } from './use_subscribe_to_chat_events';
 import { BrowserToolExecutor } from '../../services/browser_tool_executor';
 import { createConversationActions } from '../conversation/use_conversation_actions';
-import {
-  insertSidebarConversationListRow,
-  removeSidebarConversationListRow,
-} from '../../utils/conversation_sidebar_list_cache';
+import type { ConversationStreamService } from '../../../services/events';
+import { releaseLocalContent } from './release_local_content';
+import { isStreamCancelled, requestAbort, type StreamHandle } from './stream_handle';
 
 const SCREEN_CONTEXT_ATTACHMENT_ID = 'screen-context';
-
-const optimisticConversationListTitle = i18n.translate(
-  'xpack.agentBuilder.conversationList.optimisticNewConversationTitle',
-  { defaultMessage: 'New conversation' }
-);
 
 export interface SendMessageVars {
   message: string;
@@ -52,15 +47,18 @@ export interface SendMessageVars {
   conversationAttachments?: VersionedAttachment[];
   resetAttachments?: () => void;
   browserApiTools?: Array<BrowserApiToolDefinition<any>>;
-  onResetToNewConversation?: (message: string, attachments?: ConversationAttachment[]) => void;
 }
 
 export interface SendMessageMutationBindings {
-  setPendingMessage: (conversationId: string, message: string) => void;
+  conversationStreamService: ConversationStreamService;
+  setPendingMessage: (
+    conversationId: string,
+    message: string,
+    attachments?: OptimisticAttachments
+  ) => void;
   clearPendingMessage: (conversationId: string) => void;
-  setError: (conversationId: string, error: unknown, errorSteps: ConversationRoundStep[]) => void;
-  clearError: (conversationId: string) => void;
   clearActiveStream: (conversationId: string) => void;
+  markStreamStarted: (conversationId: string) => void;
 }
 
 type UseSendMessageMutationProps = SendMessageMutationBindings;
@@ -127,15 +125,15 @@ const withScreenContextAttachment = async ({
  *
  * Single-scope `mutationFn` (setup → try → catch → finally) — no `onMutate` / `onSettled`
  * lifecycle methods, no refs to bridge phases. Each invocation builds its own
- * `streamActions` instance targeting `vars.conversationId`, so stream events keep writing
- * to the right cache regardless of where the user has navigated.
+ * `streamActions` instance targeting `vars.conversationId`, so refetches target the right
+ * conversation regardless of where the user has navigated.
  */
 export const useSendMessageMutation = ({
+  conversationStreamService,
   setPendingMessage,
   clearPendingMessage,
-  setError,
-  clearError,
   clearActiveStream,
+  markStreamStarted,
 }: UseSendMessageMutationProps) => {
   const { chatService, conversationsService } = useAgentBuilderServices();
   const { services } = useKibana();
@@ -143,9 +141,7 @@ export const useSendMessageMutation = ({
   // One controller + executionId per in-flight conversation. Concurrent streams need
   // independent cancel; the executionId is what the abort endpoint uses to stop server-side.
   // `useSendMessageMutation` is called exactly once — by  the `StreamingProvider`.
-  const controllersRef = useRef<Map<string, { controller: AbortController; executionId: string }>>(
-    new Map()
-  );
+  const controllersRef = useRef<Map<string, StreamHandle>>(new Map());
 
   const browserToolExecutor = useMemo(() => {
     return new BrowserToolExecutor(services.notifications?.toasts);
@@ -154,19 +150,6 @@ export const useSendMessageMutation = ({
   const { mutate, isLoading } = useMutation({
     mutationKey: mutationKeys.sendMessage,
     mutationFn: async (vars: SendMessageVars) => {
-      // Clear any previous error for this conversation before starting the new mutation.
-      // Covers retry and fresh-send-after-error uniformly —
-      // otherwise `useConversationRounds` would render the stale error round alongside
-      // the new optimistic round.
-      clearError(vars.conversationId);
-      const isNewConversation = !queryClient.getQueryData<Conversation>(
-        queryKeys.conversations.byId(vars.conversationId)
-      );
-      let conversationPersisted = false;
-
-      // Each conversation owns its streaming lifecycle. The streamActions instance built
-      // here is closure-bound to vars.conversationId for the duration of this mutation —
-      // stream events target that conversation regardless of navigation.
       const streamActions = createConversationActions({
         conversationId: vars.conversationId,
         queryClient,
@@ -180,26 +163,29 @@ export const useSendMessageMutation = ({
       }
       const controller = new AbortController();
       const executionId = uuidv4();
-      controllersRef.current.set(vars.conversationId, { controller, executionId });
+      const handle: StreamHandle = { controller, executionId, abortRequested: false };
+      controllersRef.current.set(vars.conversationId, handle);
 
       if (!vars.message) {
         throw new Error('Message is required');
       }
-      setPendingMessage(vars.conversationId, vars.message);
-      const hasInsertedOptimisticListRow = await insertSidebarConversationListRow({
-        queryClient,
-        conversationsService,
-        agentId: vars.agentId,
-        conversationId: vars.conversationId,
-        title: optimisticConversationListTitle,
-      });
-      await streamActions.addOptimisticRound({
-        userMessage: vars.message,
-        attachments: flattenAttachments(vars.attachments ?? []),
-        agentId: vars.agentId,
-      });
+      setPendingMessage(
+        vars.conversationId,
+        vars.message,
+        buildOptimisticAttachments({
+          attachments: flattenAttachments(vars.attachments ?? []),
+          conversationAttachments: vars.conversationAttachments,
+        })
+      );
 
-      let succeeded = false;
+      // The run owns its live events: hold the stream for its whole lifetime so it is not reclaimed
+      // while the user is looking at another conversation, before or after `execution_started`.
+      const retainedStream = conversationStreamService
+        .getActiveStream$(vars.conversationId)
+        .subscribe();
+      let timelineExecutionId: string | undefined;
+      let triggerEventId: string | undefined;
+
       try {
         const browserApiToolsMetadata = vars.browserApiTools?.map(toToolMetadata);
         const projectRouting = services.plugins.cps?.cpsManager?.getProjectRouting();
@@ -224,83 +210,42 @@ export const useSendMessageMutation = ({
 
         const events$ = rawEvents$.pipe(
           tap((event) => {
-            if (isConversationCreatedEvent(event)) {
-              conversationPersisted = true;
+            if (isExecutionStartedEvent(event)) {
+              markStreamStarted(vars.conversationId);
+            }
+            if (isExecutionStartedEvent(event) || isExecutionTerminalEvent(event)) {
+              timelineExecutionId ??= event.execution_id;
+              triggerEventId ??= event.trigger_event_id;
             }
           })
         );
 
+        // Failures are persisted by the server and arrive through the refetch below, so a stream
+        // that errors ends the same way as one that completed or was stopped.
         await subscribeToChatEvents({
           events$,
           conversationActions: streamActions,
           browserApiTools: vars.browserApiTools,
           browserToolExecutor,
-          isAborted: () => controller.signal.aborted,
+          isAborted: () => isStreamCancelled(handle),
+        }).catch(() => {});
+
+        // The message and its attachments are persisted whether the run completed or was stopped, so reset the composer.
+        vars.resetAttachments?.();
+        clearActiveStream(vars.conversationId);
+        await releaseLocalContent({
+          refetch: streamActions.refetchConversation,
+          triggerEventId,
+          executionId: timelineExecutionId,
+          clearPendingMessage: () => clearPendingMessage(vars.conversationId),
+          clearExecution: (persistedExecutionId) =>
+            conversationStreamService.clearPersistedExecution(
+              vars.conversationId,
+              persistedExecutionId
+            ),
         });
-
-        // Skip on cancel: the editor restores the pending message's image chips, so clearing attachments here would break them.
-        if (!controller.signal.aborted) {
-          clearPendingMessage(vars.conversationId);
-          vars.resetAttachments?.();
-        }
-        succeeded = true;
-      } catch (err) {
-        // Snapshot the failing round's accumulated steps from the cache BEFORE
-        // we tear down the optimistic round below. Without this, the in-progress
-        // steps (reasoning + any successful tool calls before the failure) are
-        // lost and the error panel renders with no context.
-        const cached = queryClient.getQueryData<Conversation>(
-          queryKeys.conversations.byId(vars.conversationId)
-        );
-        const inProgressSteps = cached?.rounds?.at(-1)?.steps ?? [];
-        setError(vars.conversationId, err, inProgressSteps);
-        // Remove the optimistic round immediately so the error round and the optimistic
-        // round are not both visible.
-        streamActions.removeOptimisticRound();
-        throw err;
       } finally {
-        // Only invalidate on success. On error: refetching a fresh conversation that
-        // never persisted server-side would 404 and replace the in-round error UI with
-        // the "Conversation not found" page. The cache already holds the right state
-        // for `useConversationRounds` to render the synthetic error round.
-        // Also skip when paused on a HITL prompt (cache is canonical there too).
-        const cached = queryClient.getQueryData<Conversation>(
-          queryKeys.conversations.byId(vars.conversationId)
-        );
-        const endedInAwaitingPrompt =
-          cached?.rounds?.at(-1)?.status === ConversationRoundStatus.awaitingPrompt;
-
-        const abortedNewUnpersisted =
-          controller.signal.aborted &&
-          isNewConversation &&
-          !conversationPersisted &&
-          Boolean(vars.onResetToNewConversation);
-
-        if (abortedNewUnpersisted) {
-          queryClient.removeQueries({
-            queryKey: queryKeys.conversations.byId(vars.conversationId),
-          });
-          if (hasInsertedOptimisticListRow) {
-            removeSidebarConversationListRow({
-              queryClient,
-              agentId: vars.agentId,
-              conversationId: vars.conversationId,
-            });
-          }
-          clearPendingMessage(vars.conversationId);
-          vars.onResetToNewConversation!(vars.message, vars.attachments);
-        } else {
-          if (succeeded && !endedInAwaitingPrompt) {
-            streamActions.invalidateConversation();
-          }
-          if (!succeeded && hasInsertedOptimisticListRow && !conversationPersisted) {
-            removeSidebarConversationListRow({
-              queryClient,
-              agentId: vars.agentId,
-              conversationId: vars.conversationId,
-            });
-          }
-        }
+        retainedStream.unsubscribe();
         clearActiveStream(vars.conversationId);
         if (controllersRef.current.get(vars.conversationId)?.controller === controller) {
           controllersRef.current.delete(vars.conversationId);
@@ -311,10 +256,9 @@ export const useSendMessageMutation = ({
 
   const cancel = useCallback(
     (conversationId: string) => {
-      const entry = controllersRef.current.get(conversationId);
-      if (entry) {
-        chatService.abort(entry.executionId).catch(() => {});
-        entry.controller.abort();
+      const handle = controllersRef.current.get(conversationId);
+      if (handle) {
+        requestAbort(handle, chatService);
       }
     },
     [chatService]

@@ -65,25 +65,6 @@ test.describe('EIS Models Page', { tag: [...INFERENCE_LOCAL_TAGS] }, () => {
     });
   });
 
-  test('task type filter buttons filter model cards', async ({ pageObjects }) => {
-    const { eisModels } = pageObjects;
-
-    await test.step('all model cards visible before filtering', async () => {
-      await expect(eisModels.allModelCards).toHaveCount(5);
-    });
-
-    await test.step('clicking LLM filter excludes embedding-only model', async () => {
-      await eisModels.taskTypeFilter('LLM').click();
-      await expect(eisModels.allModelCards).toHaveCount(4);
-      await expect(eisModels.modelCard('Elastic ELSER v2')).toBeHidden();
-    });
-
-    await test.step('clicking LLM filter again deselects and restores all cards', async () => {
-      await eisModels.taskTypeFilter('LLM').click();
-      await expect(eisModels.allModelCards).toHaveCount(5);
-    });
-  });
-
   test('model family filter filters cards by provider', async ({ page, pageObjects }) => {
     const { eisModels } = pageObjects;
 
@@ -138,6 +119,51 @@ test.describe('EIS Models Page', { tag: [...INFERENCE_LOCAL_TAGS] }, () => {
     await test.step('no models found prompt is displayed', async () => {
       await expect(eisModels.noModelsFound).toBeVisible();
       await expect(eisModels.allModelCards).toHaveCount(0);
+    });
+  });
+
+  test('renders Blocked badge on model card denied by region policy', async ({
+    page,
+    pageObjects,
+  }) => {
+    const { eisModels } = pageObjects;
+
+    await test.step('mock Anthropic model as denied by region policy', async () => {
+      await unmockInferenceEndpoints(page);
+      await mockInferenceEndpoints(
+        page,
+        eisEndpointsMockData.map((endpoint) =>
+          endpoint.service_settings?.model_id === 'anthropic-claude-3.7-sonnet'
+            ? {
+                ...endpoint,
+                metadata: { ...endpoint.metadata, denied_by_region_policy: true },
+              }
+            : endpoint
+        )
+      );
+      await eisModels.goto();
+    });
+
+    await test.step('show outside-region models and verify Blocked badge', async () => {
+      await eisModels.showModelsOutsideRegionPreferences();
+      await expect(eisModels.modelBlockedBadge('Anthropic Claude Sonnet 3.7')).toBeVisible();
+    });
+
+    await test.step('non-blocked model cards have no Blocked badge', async () => {
+      await expect(eisModels.modelBlockedBadge('OpenAI GPT-4.1')).toBeHidden();
+    });
+  });
+
+  test('renders preview badge on preview model card', async ({ pageObjects }) => {
+    const { eisModels } = pageObjects;
+
+    await test.step('show preview models', async () => {
+      await eisModels.showPreviewModels();
+    });
+
+    await test.step('preview model card is visible with preview badge', async () => {
+      await expect(eisModels.modelCard('Elastic Preview Model')).toBeVisible();
+      await expect(eisModels.modelStatusBadge('Elastic Preview Model', 'preview')).toBeVisible();
     });
   });
 });

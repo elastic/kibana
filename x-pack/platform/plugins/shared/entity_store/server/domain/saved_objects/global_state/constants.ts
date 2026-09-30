@@ -8,6 +8,8 @@
 import { z } from '@kbn/zod/v4';
 
 export const DEFAULT_HISTORY_SNAPSHOT_FREQUENCY = '24h';
+export const DEFAULT_HISTORY_SNAPSHOT_RETENTION_DAYS = 60;
+export const MAX_HISTORY_SNAPSHOT_RETENTION_DAYS = 3650; // 10 years
 
 export const LOG_EXTRACTION_DELAY_DEFAULT = '1m';
 export const LOG_EXTRACTION_LOOKBACK_PERIOD_DEFAULT = '3h';
@@ -79,6 +81,34 @@ export const LogExtractionTypeOverride = z.object(
   nullishFields(LogExtractionObj.omit({ timeout: true, fieldHistoryLength: true }).shape)
 );
 
+/** Minimum allowed sampling rate: 10 % of documents. Zero is excluded to prevent accidentally
+ * silencing non-priority extraction entirely via a misconfigured override. */
+export const MIN_SAMPLING_RATE = 0.1;
+
+export type NonPriorityLogExtractionTypeOverride = z.infer<
+  typeof NonPriorityLogExtractionTypeOverride
+>;
+/**
+ * Non-priority-specific per entity-type override layer. Separate from LogExtractionTypeOverride
+ * so non-priority fields never appear in the shared config schema.
+ *
+ * Excludes `additionalIndexPatterns` and `excludedIndexPatterns` (shared with all modes via
+ * logExtractionConfig), `timeout` and `fieldHistoryLength` (never read at runtime).
+ *
+ * Not yet wired to any saved-object field or API - reserved for a future step.
+ */
+export const NonPriorityLogExtractionTypeOverride = z.object({
+  ...nullishFields(
+    LogExtractionObj.omit({
+      timeout: true,
+      fieldHistoryLength: true,
+      additionalIndexPatterns: true,
+      excludedIndexPatterns: true,
+    }).shape
+  ),
+  samplingRate: z.number().min(MIN_SAMPLING_RATE).max(1).nullable().optional(),
+});
+
 const base = LogExtractionObj.shape;
 
 export type LogExtractionConfig = z.infer<typeof LogExtractionConfig>;
@@ -110,6 +140,12 @@ export type HistorySnapshotState = z.infer<typeof HistorySnapshotState>;
 export const HistorySnapshotState = z.object({
   status: HistorySnapshotStatus.default('started'),
   frequency: durationString.default(DEFAULT_HISTORY_SNAPSHOT_FREQUENCY),
+  retentionDays: z
+    .number()
+    .int()
+    .min(1)
+    .max(MAX_HISTORY_SNAPSHOT_RETENTION_DAYS)
+    .default(DEFAULT_HISTORY_SNAPSHOT_RETENTION_DAYS),
   lastExecutionTimestamp: z.string().max(MAX_TIMESTAMP_STRING_LENGTH).optional(),
   lastError: z
     .object({

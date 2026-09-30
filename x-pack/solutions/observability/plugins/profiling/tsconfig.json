@@ -23,7 +23,6 @@
     "@kbn/data-views-plugin",
     "@kbn/charts-plugin",
     "@kbn/typed-react-router-config",
-    "@kbn/shared-ux-link-redirect-app",
     "@kbn/io-ts-utils",
     "@kbn/unified-search-plugin",
     "@kbn/es-query",
@@ -62,7 +61,9 @@
     "@kbn/licensing-types",
     "@kbn/kql",
     "@kbn/core-spaces-common",
-    "@kbn/app-header"
+    "@kbn/app-header",
+    "@kbn/ui-callout",
+    "@kbn/core-http-browser"
     // add references to other TypeScript projects the plugin depends on
 
     // requiredPlugins from ./kibana.json

@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { JsonObject } from '@kbn/utility-types';
 import type { UserIdAndName } from '../base/users';
 import type { ToolOrigin, ToolType } from '../tools/definition';
 import type { ToolResult } from '../tools/tool_result';
@@ -26,11 +27,28 @@ import type { RuntimeAgentConfigurationOverrides } from '../agents/definition';
 import type { ConversationAccessControl } from './access_control';
 import type { RoundState } from './round_state';
 import type { ConversationEvent } from './timeline_events';
+import type { ExecutionInterruption } from './events';
 import type { MetadataFieldValue } from '../templates';
 
 /**
  * Represents the input that initiated a conversation round.
  */
+export const MODEL_CONTEXT_MAX_LENGTH = 100_000;
+export const WORKFLOW_CONTEXT_MAX_NAMESPACES = 16;
+export const WORKFLOW_CONTEXT_NAMESPACE_MAX_LENGTH = 256;
+export const WORKFLOW_CONTEXT_MAX_BYTES = 64 * 1024;
+export const WORKFLOW_CONTEXT_MAX_DEPTH = 8;
+
+export interface WorkflowContextEnvelope {
+  /** Schema version owned by the namespace producer and consumer. */
+  version: number;
+  /** Opaque JSON interpreted only by workflows that understand the namespace. */
+  data: JsonObject;
+}
+
+/** Immutable round-local contexts passed from pre-execution to post-execution workflows. */
+export type WorkflowContext = Record<string, WorkflowContextEnvelope>;
+
 export interface RoundInput {
   /**
    * A text message from the user.
@@ -94,6 +112,7 @@ export enum ConversationRoundStepType {
   updateTodos = 'update_todos',
   askUserQuestion = 'ask_user_question',
   relevantSkills = 'relevant_skills',
+  preExecutionWorkflow = 'pre_execution_workflow',
   subagentRosterUpdated = 'subagent_roster_updated',
 }
 
@@ -147,6 +166,11 @@ export interface ToolCallWithResult {
   tool_call_group_id?: string;
   tool_origin?: ToolOrigin;
   tool_type?: ToolType;
+  /**
+   * Set when the run was interrupted while this call was in flight: `results` then carries no
+   * outcome (usually `[]`). An empty `results` without this flag is a real empty return.
+   */
+  interrupted?: true;
 }
 
 export type ToolCallStep = ConversationRoundStepMixin<
@@ -306,6 +330,31 @@ export const isRelevantSkillsStep = (step: ConversationRoundStep): step is Relev
   return step.type === ConversationRoundStepType.relevantSkills;
 };
 
+export interface PreExecutionWorkflowStepData {
+  /** Pre-rendered context from before-agent workflows, rendered to the model after the user message. */
+  model_context?: string;
+  /** State forwarded to after-execution workflows. Never rendered to the model. */
+  workflow_context?: WorkflowContext;
+}
+
+export type PreExecutionWorkflowStep = ConversationRoundStepMixin<
+  ConversationRoundStepType.preExecutionWorkflow,
+  PreExecutionWorkflowStepData
+>;
+
+export const createPreExecutionWorkflowStep = (
+  data: PreExecutionWorkflowStepData
+): PreExecutionWorkflowStep => ({
+  type: ConversationRoundStepType.preExecutionWorkflow,
+  ...data,
+});
+
+export const isPreExecutionWorkflowStep = (
+  step: ConversationRoundStep
+): step is PreExecutionWorkflowStep => {
+  return step.type === ConversationRoundStepType.preExecutionWorkflow;
+};
+
 /**
  * Returns the (single) todos step from a list of steps, if present.
  * A round only ever has at most one todos step, which is updated in place.
@@ -335,6 +384,7 @@ export type ConversationRoundStep =
   | TodosStep
   | AskUserQuestionStep
   | RelevantSkillsStep
+  | PreExecutionWorkflowStep
   | SubagentRosterUpdatedStep;
 
 /**
@@ -480,6 +530,12 @@ export interface ConversationRound {
   configuration_overrides?: RuntimeAgentConfigurationOverrides;
   /** User feedback for this round, if submitted. */
   feedback?: ConversationRoundFeedback;
+  /**
+   * Set when the round's last execution ended without an outcome (failed or aborted). The round
+   * is `completed` with an empty `response.message`; the steps completed before the interruption
+   * are kept.
+   */
+  interruption?: ExecutionInterruption;
 }
 
 export interface ConversationOrigin {
@@ -564,6 +620,26 @@ export interface RoundModelUsageStats {
    */
   model?: string;
 }
+
+/**
+ * Model usage of an execution whose usage is unknown (an interrupted run that never resolved its
+ * provider). Exactly these four keys: `isZeroModelUsage` is a structural equality check.
+ */
+export const ZERO_MODEL_USAGE: RoundModelUsageStats = {
+  connector_id: '',
+  llm_calls: 0,
+  input_tokens: 0,
+  output_tokens: 0,
+};
+
+/** True when `usage` is structurally the {@link ZERO_MODEL_USAGE} sentinel. */
+export const isZeroModelUsage = (usage: RoundModelUsageStats): boolean =>
+  usage.connector_id === '' &&
+  usage.llm_calls === 0 &&
+  usage.input_tokens === 0 &&
+  usage.output_tokens === 0 &&
+  usage.cached_input_tokens === undefined &&
+  usage.model === undefined;
 
 /** Placeholder title assigned to a new conversation */
 export const DEFAULT_CONVERSATION_TITLE = 'New conversation';
@@ -791,4 +867,10 @@ export interface CompactionSummary {
   token_count: number;
   /** Structured summary data */
   structured_data: CompactionStructuredData;
+  /**
+   * Ids of the rounds this summary covers, in round order. Absent on summaries written before
+   * coverage became a set; those are interpreted through `summarized_round_count` with the
+   * pre-change fold's membership rule (see `coveredRoundIds`).
+   */
+  covered_round_ids?: string[];
 }

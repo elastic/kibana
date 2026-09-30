@@ -37,6 +37,7 @@ describe('Use get all case configurations hook', () => {
         closureType: 'close-by-user',
         connector: { fields: null, id: 'none', name: 'none', type: '.none' },
         customFields: [],
+        extractObservables: false,
         templates: [],
         id: '',
         mappings: [],
@@ -57,7 +58,7 @@ describe('Use get all case configurations hook', () => {
 
   it('returns the initial configuration if none is available', async () => {
     const spy = jest.spyOn(api, 'getCaseConfigure');
-    spy.mockResolvedValue([]);
+    spy.mockResolvedValue(null);
 
     const { result } = renderHook(() => useGetAllCaseConfigurations(), {
       wrapper: TestProviders,
@@ -69,6 +70,7 @@ describe('Use get all case configurations hook', () => {
           closureType: 'close-by-user',
           connector: { fields: null, id: 'none', name: 'none', type: '.none' },
           customFields: [],
+          extractObservables: false,
           templates: [],
           id: '',
           mappings: [],

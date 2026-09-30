@@ -1,5 +1,5 @@
 {
-  "sha1": "4fee04a41c2367d9c02fc70592ea04a5cc3dc085",
+  "sha1": "2472087d09462fc920fe253c883c6335bf303370",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -708,7 +708,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/monitor_crud/api/tests/monitor_validation.spec.ts",
-        "line": 59,
+        "line": 57,
         "column": 31
       }
     },
@@ -722,7 +722,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/monitor_crud/api/tests/monitor_validation.spec.ts",
-        "line": 61,
+        "line": 59,
         "column": 7
       }
     },
@@ -736,7 +736,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/monitor_crud/api/tests/monitor_validation.spec.ts",
-        "line": 64,
+        "line": 62,
         "column": 89
       }
     },
@@ -750,7 +750,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/monitor_crud/api/tests/monitor_validation.spec.ts",
-        "line": 68,
+        "line": 66,
         "column": 61
       }
     },
@@ -764,7 +764,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/monitor_crud/api/tests/monitor_validation.spec.ts",
-        "line": 71,
+        "line": 69,
         "column": 77
       }
     },
@@ -778,7 +778,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/monitor_crud/api/tests/monitor_validation.spec.ts",
-        "line": 75,
+        "line": 73,
         "column": 13
       }
     },
