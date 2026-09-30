@@ -140,9 +140,17 @@ export class DashboardApp {
     this.drilldownWizardSubmit = this.page.testSubj.locator('drilldownWizardSubmit');
 
     // Customize panel flyout
-    this.customizePanelFlyout = this.page.testSubj.locator('customizePanel');
-    this.customizePanelSaveButton = this.page.testSubj.locator('saveCustomizePanelButton');
-    this.customizePanelCancelButton = this.page.testSubj.locator('cancelCustomizePanelButton');
+    // The panel settings are in the customize panel flyout, or in the edit flyout of panels that
+    // edit their settings as part of their edit flow (e.g. Lens, maps, markdown, links, image)
+    this.customizePanelFlyout = this.page.locator(
+      '[data-test-subj="customizePanel"], [data-test-subj="customizeLens"], [data-test-subj="panelEditFlyout"], [data-test-subj="links--panelEditor--flyout"], [data-test-subj="createImageEmbeddableFlyout"]'
+    );
+    this.customizePanelSaveButton = this.page.locator(
+      '[data-test-subj="saveCustomizePanelButton"], [data-test-subj="panelEditFlyoutApplyButton"], [data-test-subj="applyFlyoutButton"], [data-test-subj="links--panelEditor--saveBtn"], [data-test-subj="imageEmbeddableEditorSave"]'
+    );
+    this.customizePanelCancelButton = this.page.locator(
+      '[data-test-subj="cancelCustomizePanelButton"], [data-test-subj="panelEditFlyoutCancelButton"], [data-test-subj="cancelFlyoutButton"], [data-test-subj="links--panelEditor--closeBtn"], [data-test-subj="imageEmbeddableEditorCancel"]'
+    );
     this.customizePanelTimeRangeQuickMenuButton = this.page.testSubj.locator(
       'customizePanelTimeRangeDatePicker > superDatePickerToggleQuickMenuButton'
     );
@@ -475,8 +483,7 @@ export class DashboardApp {
       value: CommonlyUsedTimeRange;
     };
   }) {
-    await this.page.testSubj.hover(`embeddablePanelHeading-${options.name.replace(/ /g, '')}`);
-    await this.page.testSubj.click('embeddablePanelAction-ACTION_CUSTOMIZE_PANEL');
+    await this.openCustomizePanel(options.name);
     if (options.customTimeRageCommonlyUsed) {
       await this.page.testSubj.click('customizePanelShowCustomTimeRange');
       await this.customizePanelTimeRangeQuickMenuButton.click();
@@ -724,8 +731,51 @@ export class DashboardApp {
   }
 
   async openCustomizePanel(title?: string) {
-    await this.clickPanelAction('embeddablePanelAction-ACTION_CUSTOMIZE_PANEL', title);
+    const customizeActionTestSubj = 'embeddablePanelAction-ACTION_CUSTOMIZE_PANEL';
+    const panelWrapper = this.getPanelHoverActionsLocator(title);
+    await panelWrapper.scrollIntoViewIfNeeded();
+    await panelWrapper.hover();
+
+    if (await this.panelActionExistsInWrapper(customizeActionTestSubj, panelWrapper)) {
+      await panelWrapper.locator(`[data-test-subj="${customizeActionTestSubj}"]`).click();
+    } else {
+      await this.openPanelContextMenu(title);
+      const menuAction = this.page.testSubj
+        .locator(customizeActionTestSubj)
+        .filter({ visible: true });
+      if ((await menuAction.count()) > 0) {
+        await menuAction.click();
+      } else {
+        // panels that edit their settings as part of their edit flow (e.g. Lens, maps, markdown, links, image)
+        // don't have the customize panel action in edit mode
+        await this.page.keyboard.press('Escape');
+        await expect(this.page.testSubj.locator('embeddablePanelContextMenuOpen')).toBeHidden();
+        await this.openPanelSettingsFromEditFlyout(title);
+      }
+    }
     await expect(this.customizePanelFlyout).toBeVisible();
+  }
+
+  private async openPanelSettingsFromEditFlyout(title?: string) {
+    await this.clickPanelAction('embeddablePanelAction-editPanel', title);
+    // markdown is edited in place, its settings flyout opens from the editor toolbar
+    const markdownSettingsButton = this.page.testSubj.locator('markdownEditorSettingsButton');
+    try {
+      await markdownSettingsButton.waitFor({ state: 'visible', timeout: 1000 });
+      await markdownSettingsButton.click();
+    } catch {
+      // not a markdown panel
+    }
+    // expand the panel settings sections so their fields can be used
+    await this.page.testSubj
+      .locator('customEmbeddablePanelTitleInput')
+      .waitFor({ state: 'attached' });
+    const collapsedSections = this.page.locator(
+      '[data-test-subj^="panelSettings-"] .euiAccordion__button[aria-expanded="false"]'
+    );
+    for (const section of await collapsedSections.all()) {
+      await section.click();
+    }
   }
 
   async closeCustomizePanel() {

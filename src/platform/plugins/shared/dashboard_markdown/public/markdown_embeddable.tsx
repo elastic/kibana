@@ -23,6 +23,8 @@ import {
 import React from 'react';
 import { BehaviorSubject, map, merge, skip } from 'rxjs';
 import { IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
+import { openLazyFlyout } from '@kbn/presentation-util';
+import { coreServices } from './services/kibana_services';
 import type {
   MarkdownEmbeddableState,
   MarkdownByValueState,
@@ -99,6 +101,52 @@ export const markdownEmbeddableFactory: EmbeddablePublicDefinition<
       }
     };
 
+    /** By reference markdown content and settings are saved to the library on apply */
+    const updateLibraryItem = async () => {
+      if (!libraryId) return;
+      await markdownClient.update(libraryId, {
+        content: content$.getValue(),
+        title: titleManager.api.title$.getValue() ?? initialLibraryState?.title ?? 'new markdown',
+        description: titleManager.api.description$.getValue() ?? initialLibraryState?.description,
+        settings: settings$.getValue(),
+      });
+    };
+
+    const applySettings = async (nextSettings: Partial<MarkdownSettingsState>) => {
+      settings$.next({ ...settings$.getValue(), ...nextSettings } as MarkdownSettingsState);
+      await updateLibraryItem();
+    };
+
+    const openSettingsFlyout = () => {
+      const flyoutRef = openLazyFlyout({
+        core: coreServices,
+        parentApi,
+        loadContent: async ({ closeFlyout, ariaLabelledBy }) => {
+          const { MarkdownSettingsFlyout } = await import('./components/markdown_settings_flyout');
+          return (
+            <MarkdownSettingsFlyout
+              api={{ ...titleManager.api, defaultTitle$, defaultDescription$ }}
+              settings={settings$.getValue()}
+              onApplySettings={applySettings}
+              closeFlyout={closeFlyout}
+              ariaLabelledBy={ariaLabelledBy}
+            />
+          );
+        },
+        flyoutProps: {
+          'data-test-subj': 'panelEditFlyout',
+          focusedPanelId: uuid,
+        },
+      });
+      // closing a dashboard flyout clears the focused panel, so focus the panel again if the
+      // markdown is still being edited
+      flyoutRef.onClose.then(() => {
+        if (isEditing$.getValue() && apiCanFocusPanel(parentApi)) {
+          parentApi.setFocusedPanelId(uuid);
+        }
+      });
+    };
+
     const stateApi = initializeStateApi<MarkdownEmbeddableState>({
       uuid,
       parentApi,
@@ -150,6 +198,8 @@ export const markdownEmbeddableFactory: EmbeddablePublicDefinition<
         }
       },
       isEditingEnabled: () => true,
+      // the panel settings are edited from the settings button of the inline markdown editor
+      hasPanelSettingsInEditFlyout: () => apiCanAddNewPanel(parentApi),
       getTypeDisplayName: () => APP_NAME,
       overrideHoverActions$,
       OverriddenHoverActionsComponent: () => (
@@ -230,7 +280,7 @@ export const markdownEmbeddableFactory: EmbeddablePublicDefinition<
               parsingPluginList={parsingPluginList}
               processingPluginList={processingPluginList}
               content={content}
-              settings$={settings$}
+              onOpenSettings={openSettingsFlyout}
               onCancel={() => {
                 if (isNewPanel$.getValue() && apiIsPresentationContainer(parentApi)) {
                   parentApi.removePanel(api.uuid);
@@ -240,18 +290,7 @@ export const markdownEmbeddableFactory: EmbeddablePublicDefinition<
               onSave={async (value: string): Promise<void> => {
                 resetEditingState();
                 content$.next(value);
-                if (libraryId) {
-                  await markdownClient.update(libraryId, {
-                    content: value,
-                    title:
-                      titleManager.api.title$.getValue() ??
-                      initialLibraryState?.title ??
-                      'new markdown',
-                    description:
-                      titleManager.api.description$.getValue() ?? initialLibraryState?.description,
-                    settings: settings$.getValue(),
-                  });
-                }
+                await updateLibraryItem();
                 if (isNewPanel$.getValue()) {
                   isNewPanel$.next(false);
                 }

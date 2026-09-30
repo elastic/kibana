@@ -28750,7 +28750,6 @@
     "xpack.lens.config.readOnly": "Somente leitura: as mudanças serão revertidas ao fechar",
     "xpack.lens.config.referenceLineDescription": "{count, plural, one {Reference line} other {Linhas de referência}}",
     "xpack.lens.config.selectLayerAriaLabel": "Selecione {layerName} para conversão para o modo de consulta",
-    "xpack.lens.config.showVisualizationLabel": "Configuração",
     "xpack.lens.config.switchToQueryModeAriaLabel": "Alternar para o modo de consulta",
     "xpack.lens.config.switchToQueryModeButtonLabel": "Alternar para o modo de consulta",
     "xpack.lens.config.switchToQueryModeTitle": "Alternar para o modo de consulta",

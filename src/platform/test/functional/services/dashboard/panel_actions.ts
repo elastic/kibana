@@ -15,6 +15,9 @@ const ACTION_SHOW_CONFIG_PANEL_SUBJ = 'embeddablePanelAction-ACTION_SHOW_CONFIG_
 const REMOVE_PANEL_DATA_TEST_SUBJ = 'embeddablePanelAction-deletePanel';
 const EDIT_PANEL_DATA_TEST_SUBJ = 'embeddablePanelAction-editPanel';
 const EDIT_IN_LENS_EDITOR_DATA_TEST_SUBJ = 'navigateToLensEditorLink';
+const PANEL_EDIT_FLYOUT_DATA_TEST_SUBJ = 'panelEditFlyout';
+const MARKDOWN_SETTINGS_BUTTON_DATA_TEST_SUBJ = 'markdownEditorSettingsButton';
+const PANEL_EDIT_FLYOUT_EDITOR_LINK_DATA_TEST_SUBJ = 'panelEditFlyoutEditorLink';
 const CLONE_PANEL_DATA_TEST_SUBJ = 'embeddablePanelAction-clonePanel';
 const TOGGLE_EXPAND_PANEL_DATA_TEST_SUBJ = 'embeddablePanelAction-togglePanel';
 const CUSTOMIZE_PANEL_DATA_TEST_SUBJ = 'embeddablePanelAction-ACTION_CUSTOMIZE_PANEL';
@@ -176,6 +179,11 @@ export class DashboardPanelActionsService extends FtrService {
     if (await this.testSubjects.descendantExists(EDIT_PANEL_DATA_TEST_SUBJ, wrapper)) {
       // navigate to the editor
       await this.clickPanelAction(EDIT_PANEL_DATA_TEST_SUBJ, wrapper);
+      // some panels (e.g. maps, Vega) open an edit flyout that links to their editor. The flyout
+      // opens right away (before its content loads), so a short timeout is enough to tell the cases apart
+      if (await this.testSubjects.exists(PANEL_EDIT_FLYOUT_DATA_TEST_SUBJ, { timeout: 500 })) {
+        await this.testSubjects.click(PANEL_EDIT_FLYOUT_EDITOR_LINK_DATA_TEST_SUBJ);
+      }
     } else {
       // open the flyout and then navigate to the editor
       await this.navigateToEditorFromFlyout(wrapper);
@@ -210,9 +218,43 @@ export class DashboardPanelActionsService extends FtrService {
     await this.removePanel(wrapper);
   }
 
+  /**
+   * Opens the panel settings (title, description, border, time range). Panels that edit their
+   * settings as part of their edit flow (e.g. Lens, maps, markdown, links, image) don't have the customize panel
+   * action in edit mode, so their settings are opened from the edit flyout instead.
+   */
   async customizePanel(title = '') {
     this.log.debug(`customizePanel(${title})`);
-    await this.clickPanelActionByTitle(CUSTOMIZE_PANEL_DATA_TEST_SUBJ, title);
+    const wrapper = await this.getPanelWrapper(title);
+    await this.scrollPanelIntoView(wrapper);
+    if (!(await this.testSubjects.descendantExists(CUSTOMIZE_PANEL_DATA_TEST_SUBJ, wrapper))) {
+      await this.openContextMenu(wrapper);
+    }
+    if (await this.testSubjects.exists(CUSTOMIZE_PANEL_DATA_TEST_SUBJ)) {
+      await this.clickPanelAction(CUSTOMIZE_PANEL_DATA_TEST_SUBJ, wrapper);
+      return;
+    }
+
+    if (await this.testSubjects.exists('embeddablePanelContextMenuOpen')) {
+      await this.toggleContextMenu(wrapper);
+    }
+    await this.clickPanelAction(EDIT_PANEL_DATA_TEST_SUBJ, wrapper);
+    // markdown is edited in place, its settings flyout opens from the editor toolbar
+    if (
+      await this.testSubjects.exists(MARKDOWN_SETTINGS_BUTTON_DATA_TEST_SUBJ, { timeout: 1000 })
+    ) {
+      await this.testSubjects.click(MARKDOWN_SETTINGS_BUTTON_DATA_TEST_SUBJ);
+    }
+    // expand the panel settings sections so their fields can be used
+    await this.retry.try(async () => {
+      const collapsedSections = await this.find.allByCssSelector(
+        '[data-test-subj^="panelSettings-"] .euiAccordion__button[aria-expanded="false"]'
+      );
+      for (const section of collapsedSections) {
+        await section.click();
+      }
+      await this.testSubjects.existOrFail('customEmbeddablePanelTitleInput');
+    });
   }
 
   async clonePanel(title = '') {

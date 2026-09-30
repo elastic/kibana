@@ -13,6 +13,23 @@ import { useGridLayoutContext } from '../../use_grid_layout_context';
 import { useGridLayoutPanelEvents } from '../../use_grid_layout_events';
 import type { UserInteractionEvent } from '../../use_grid_layout_events/types';
 
+/** Add this attribute to an element inside a drag handle to prevent it from starting a drag */
+const NO_DRAG_ATTRIBUTE = 'data-kbn-grid-no-drag';
+
+const TEXT_INPUT_SELECTOR = `input, textarea, select, [contenteditable="true"], [${NO_DRAG_ATTRIBUTE}]`;
+const INTERACTIVE_SELECTOR = `${TEXT_INPUT_SELECTOR}, button, a`;
+
+/**
+ * Drag handles can contain interactive elements (e.g. an inline editable panel title).
+ * Interacting with a form field should never start a drag, and keyboard events on nested
+ * buttons or links should activate them rather than start a keyboard drag.
+ */
+const isFromNestedInteractiveElement = (e: Event) => {
+  const target = e.target;
+  if (!(target instanceof Element) || target === e.currentTarget) return false;
+  return Boolean(target.closest(e.type === 'keydown' ? INTERACTIVE_SELECTOR : TEXT_INPUT_SELECTOR));
+};
+
 export interface DragHandleApi {
   startDrag: (e: UserInteractionEvent) => void;
   setDragHandles?: (refs: Array<HTMLElement | null>) => void;
@@ -43,19 +60,24 @@ export const useDragHandleApi = ({
        */
       removeEventListenersRef.current?.();
 
+      const onDragStart = (e: Event) => {
+        if (isFromNestedInteractiveElement(e)) return;
+        startDrag(e as UserInteractionEvent);
+      };
+
       for (const handle of dragHandles) {
         if (handle === null) return;
-        handle.addEventListener('mousedown', startDrag, { passive: true });
-        handle.addEventListener('touchstart', startDrag, { passive: true });
-        handle.addEventListener('keydown', startDrag);
+        handle.addEventListener('mousedown', onDragStart, { passive: true });
+        handle.addEventListener('touchstart', onDragStart, { passive: true });
+        handle.addEventListener('keydown', onDragStart);
         handle.classList.add('kbnGridPanel--dragHandle');
       }
       removeEventListenersRef.current = () => {
         for (const handle of dragHandles) {
           if (handle === null) return;
-          handle.removeEventListener('mousedown', startDrag);
-          handle.removeEventListener('touchstart', startDrag);
-          handle.removeEventListener('keydown', startDrag);
+          handle.removeEventListener('mousedown', onDragStart);
+          handle.removeEventListener('touchstart', onDragStart);
+          handle.removeEventListener('keydown', onDragStart);
         }
       };
     },

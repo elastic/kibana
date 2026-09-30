@@ -10,20 +10,105 @@
 import {
   EuiHighlight,
   EuiIcon,
+  EuiInlineEditText,
   EuiLink,
   EuiScreenReaderOnly,
   EuiToolTip,
   euiTextTruncate,
   useEuiTheme,
 } from '@elastic/eui';
-import React, { useCallback, useMemo } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
-import type { ViewMode } from '@kbn/presentation-publishing';
+import type { PublishesWritableTitle, ViewMode } from '@kbn/presentation-publishing';
+import { apiPublishesWritableTitle } from '@kbn/presentation-publishing';
 import type { CustomizePanelActionApi } from '../../../ui_actions/customize_panel_action';
 import { isApiCompatibleWithCustomizePanelAction } from '../../../ui_actions/customize_panel_action';
 import { openCustomizePanelFlyout } from '../../../ui_actions/customize_panel_action/open_customize_panel';
+
+const InlineEditablePanelTitle = ({
+  api,
+  panelTitle,
+}: {
+  api: PublishesWritableTitle;
+  panelTitle: string;
+}) => {
+  const { euiTheme } = useEuiTheme();
+  /** Width of the full, untruncated title in read mode. Only set while editing. */
+  const [titleWidth, setTitleWidth] = useState<number | undefined>();
+  const isEditing = titleWidth !== undefined;
+
+  const onStartEditing = useCallback((e: React.MouseEvent<HTMLButtonElement>) => {
+    const button = e.currentTarget;
+    const text = button.querySelector('.euiButtonEmpty__text');
+    // account for the part of the title hidden by truncation
+    const hiddenWidth = text ? text.scrollWidth - text.clientWidth : 0;
+    setTitleWidth(button.offsetWidth + hiddenWidth);
+  }, []);
+  const onStopEditing = useCallback(() => setTitleWidth(undefined), []);
+
+  const onSave = useCallback(
+    (value: string) => {
+      const newTitle = value.trim();
+      // An empty title or one matching the default title is stored as undefined, so the panel
+      // keeps in sync with the title of the saved object
+      api.setTitle(!newTitle || newTitle === api.defaultTitle$?.value ? undefined : newTitle);
+      onStopEditing();
+    },
+    [api, onStopEditing]
+  );
+
+  return (
+    <span
+      // prevents the dashboard grid from starting a panel drag while editing the title
+      data-kbn-grid-no-drag={isEditing || undefined}
+      css={css`
+        display: block;
+        min-width: 0;
+        ${isEditing
+          ? // size the input to fit the whole title plus the save and cancel buttons,
+            // without growing past the space available in the header
+            `
+              width: calc(${titleWidth}px + ${euiTheme.size.xl} * 2 + ${euiTheme.size.s} * 2);
+              min-width: calc(${euiTheme.size.base} * 12);
+              max-width: 100%;
+            `
+          : ''}
+
+        .kbnGridPanel--active & {
+          pointer-events: none; // prevent drag event from triggering edit mode
+        }
+        [data-test-subj='embeddablePanelTitle'] .euiText {
+          font-weight: ${euiTheme.font.weight.medium};
+        }
+      `}
+    >
+      <EuiInlineEditText
+        // remount when the title changes elsewhere (e.g. the settings flyout)
+        key={panelTitle}
+        size="s"
+        defaultValue={panelTitle}
+        inputAriaLabel={i18n.translate('embeddableApi.header.titleInputAriaLabel', {
+          defaultMessage: 'Edit panel title',
+        })}
+        onSave={onSave}
+        onCancel={onStopEditing}
+        readModeProps={{
+          'data-test-subj': 'embeddablePanelTitle',
+          'aria-label': i18n.translate('embeddableApi.header.titleAriaLabel', {
+            defaultMessage: 'Click to edit title: {title}',
+            values: { title: panelTitle },
+          }),
+          onClick: onStartEditing,
+        }}
+        editModeProps={{
+          inputProps: { 'data-test-subj': 'embeddablePanelTitleInput' },
+        }}
+      />
+    </span>
+  );
+};
 
 export const PresentationPanelTitle = ({
   api,
@@ -87,6 +172,10 @@ export const PresentationPanelTitle = ({
         panelTitle
       );
 
+    if (isEditableTitle && panelTitle && !titleHighlight && apiPublishesWritableTitle(api)) {
+      return <InlineEditablePanelTitle api={api} panelTitle={panelTitle} />;
+    }
+
     if (!isEditableTitle) {
       return (
         <span data-test-subj="embeddablePanelTitle" css={titleStyles}>
@@ -111,6 +200,7 @@ export const PresentationPanelTitle = ({
       </EuiLink>
     );
   }, [
+    api,
     onClick,
     onKeyDown,
     hideTitle,

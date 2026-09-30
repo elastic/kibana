@@ -8,7 +8,7 @@
  */
 
 import React from 'react';
-import { fireEvent, render, screen } from '@testing-library/react';
+import { render, screen } from '@testing-library/react';
 import { BehaviorSubject } from 'rxjs';
 import type { MarkdownEditorProps } from './markdown_editor';
 import { MarkdownEditor } from './markdown_editor';
@@ -27,9 +27,6 @@ const contentLength = testedContent.length;
 const renderMarkdownEditor = (overrideProps?: Partial<MarkdownEditorProps>) => {
   const isEditing$ = new BehaviorSubject(true);
   const isPreview$ = new BehaviorSubject(false);
-  const settings$ = new BehaviorSubject({
-    open_links_in_new_tab: true,
-  }) as MarkdownEditorProps['settings$'];
   return render(
     <>
       <MarkdownEditorPreviewSwitch
@@ -45,7 +42,7 @@ const renderMarkdownEditor = (overrideProps?: Partial<MarkdownEditorProps>) => {
         onCancel={jest.fn()}
         onSave={jest.fn()}
         isPreview$={isPreview$}
-        settings$={settings$}
+        onOpenSettings={jest.fn()}
         {...overrideProps}
       />
     </>
@@ -73,17 +70,15 @@ it('calls onSave with current value when Apply clicked', async () => {
   expect(onSave).toHaveBeenCalledWith(testedContent + ' Added Paragraph');
 });
 
-it('enables Apply when only the open links in new tab setting changes', async () => {
-  renderMarkdownEditor();
-
-  expect(screen.getByRole('button', { name: /Apply/i })).toBeDisabled();
+it('opens the settings flyout from the settings button', async () => {
+  const onOpenSettings = jest.fn();
+  renderMarkdownEditor({ onOpenSettings });
 
   await userEvent.click(screen.getByRole('button', { name: /Settings/i }));
-  // Use fireEvent instead of userEvent to bypass pointer events check. Waiting
-  // for the EUI CSS animation to end before continuing the test is potentially flaky.
-  fireEvent.click(await screen.findByTestId('openLinksInNewTabSwitch'));
 
-  expect(screen.getByRole('button', { name: /Apply/i })).toBeEnabled();
+  expect(onOpenSettings).toHaveBeenCalled();
+  // settings are applied from the flyout, so they don't enable the editor's Apply button
+  expect(screen.getByRole('button', { name: /Apply/i })).toBeDisabled();
 });
 
 // this is a guard to not accidentally change the implementation so we can keep the scroll position for editor when switching between editor/preview mode

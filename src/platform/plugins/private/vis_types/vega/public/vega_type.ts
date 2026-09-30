@@ -44,6 +44,7 @@ export const vegaVisType: VisTypeDefinition<VisParams> = {
     defaultSize: DefaultEditorSize.MEDIUM,
   },
   toExpressionAst,
+  editInFlyout: true,
   options: {
     showIndexSelection: false,
     showFilterBar: true,

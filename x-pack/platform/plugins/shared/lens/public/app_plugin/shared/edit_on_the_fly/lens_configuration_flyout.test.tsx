@@ -253,7 +253,7 @@ describe('LensEditConfigurationFlyout', () => {
       displayFlyoutHeader: true,
       isNewPanel: true,
     });
-    expect(screen.getByTestId('inlineEditingFlyoutLabel').textContent).toBe('Configuration');
+    expect(screen.getByTestId('inlineEditingFlyoutLabel').textContent).toBe('Edit visualization');
   });
 
   it('should call the closeFlyout callback if cancel button is clicked', async () => {
@@ -436,7 +436,7 @@ describe('LensEditConfigurationFlyout', () => {
     expect(screen.queryByTestId('InlineEditingSuggestions')).toBeNull();
   });
 
-  it('should display the suggestions if query is ES|QL', async () => {
+  it('should not display the suggestions if query is ES|QL', async () => {
     await renderConfigFlyout(
       { attributes: esqlLensAttributes },
       { esql: 'from index1 | limit 10' },
@@ -449,7 +449,7 @@ describe('LensEditConfigurationFlyout', () => {
       }
     );
     expect(screen.getByTestId('InlineEditingESQLEditor')).toBeInTheDocument();
-    expect(screen.getByTestId('InlineEditingSuggestions')).toBeInTheDocument();
+    expect(screen.queryByTestId('InlineEditingSuggestions')).toBeNull();
   });
 
   it('should display the ES|QL results table if hideTextBasedEditor is false and query is ES|QL', async () => {
