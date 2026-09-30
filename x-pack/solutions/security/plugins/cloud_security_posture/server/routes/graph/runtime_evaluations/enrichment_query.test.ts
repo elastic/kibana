@@ -85,6 +85,11 @@ describe('buildIntegrationRuntimeEvals — integration actor and target fields',
             'data_stream.dataset == "aws.cloudtrail.otel" AND rpc.method == "AttachUserPolicy" AND aws.request.parameters.userName IS NOT NULL',
           value: 'aws.request.parameters.userName',
         },
+        {
+          condition:
+            'data_stream.dataset == "aws.cloudtrail.otel" AND rpc.service == "iam.amazonaws.com" AND rpc.method IN ("DetachUserPolicy", "CreateUser", "DeleteUser", "UpdateUser", "PutUserPolicy", "DeleteUserPolicy", "CreateAccessKey", "DeleteAccessKey", "UpdateAccessKey") AND aws.request.parameters.userName IS NOT NULL',
+          value: 'aws.request.parameters.userName',
+        },
       ],
     },
     {
