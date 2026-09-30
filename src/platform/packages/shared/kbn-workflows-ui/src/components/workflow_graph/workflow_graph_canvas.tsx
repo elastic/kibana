@@ -38,6 +38,7 @@ import React, {
   type ReactNode,
   useCallback,
   useEffect,
+  useLayoutEffect,
   useMemo,
   useRef,
   useState,
@@ -59,7 +60,7 @@ import {
 import { computeInsertionPoints } from './compute_insertion_points';
 import { computePendingErrorBranchPlacement, type PendingInsertVisual } from './pending_insert';
 import { resolveAppendInsertTarget } from './resolve_append_insert_target';
-import { WORKFLOWS_SURFACE_RADIUS } from './surface_radius';
+import { WORKFLOWS_CANVAS_CHROME_INSET, WORKFLOWS_SURFACE_RADIUS } from './surface_radius';
 import { useInsertLayoutAnimation } from './use_insert_layout_animation';
 import { useWorkflowLayout } from './use_workflow_layout';
 import {
@@ -218,8 +219,6 @@ const getHomeFrameBounds = (
   const leading = nodes.filter((n) => n.type === 'trigger' || n.type === 'settingsGroup');
   return boundsFromNodes(leading.length > 0 ? leading : nodes) ?? fallback;
 };
-
-const CORNER_CONTROLS_INSET = 12;
 
 function CanvasZoomControls({
   onResetView,
@@ -765,8 +764,17 @@ function WorkflowGraphCanvasInner(props: WorkflowGraphCanvasProps) {
   const nodesInitialized = useNodesInitialized();
   const hasCenteredInitialViewRef = useRef(false);
   const [instanceReady, setInstanceReady] = useState(false);
-  /** Tracks empty → structure so the first trigger/step can animate into home frame. */
-  const prevNodeCountRef = useRef(nodes.length);
+  /**
+   * When true, keep applying the home frame through panel-close / canvas resize
+   * after the first trigger or step is added to an empty workflow.
+   */
+  const homeAfterFirstStructureRef = useRef(false);
+  const hadWorkflowStructureRef = useRef(
+    (workflow?.triggers?.length ?? 0) > 0 || (workflow?.steps?.length ?? 0) > 0
+  );
+
+  const hasWorkflowStructure =
+    (workflow?.triggers?.length ?? 0) > 0 || (workflow?.steps?.length ?? 0) > 0;
 
   // Single home-viewport implementation shared by initial centering, direction
   // changes, and the Reset zoom button. Frames the trigger rank at center-top
@@ -783,6 +791,22 @@ function WorkflowGraphCanvasInner(props: WorkflowGraphCanvasProps) {
       instance.setCenter(target.x, target.y, { zoom: INITIAL_ZOOM, duration });
     },
     [nodes, graphBounds, direction, measuredWidth, measuredHeight]
+  );
+
+  /**
+   * True viewport center on the leading nodes — matches the empty-canvas draft
+   * placement so the first saved trigger does not jump up to the home-frame top.
+   */
+  const applyCenteredViewport = useCallback(
+    (instance: ReactFlowInstance, duration: number) => {
+      if (nodes.length === 0) return;
+      const homeBounds = getHomeFrameBounds(nodes, graphBounds);
+      instance.setCenter(homeBounds.centerX, homeBounds.centerY, {
+        zoom: INITIAL_ZOOM,
+        duration,
+      });
+    },
+    [nodes, graphBounds]
   );
 
   const handleResetView = useCallback(() => {
@@ -842,27 +866,93 @@ function WorkflowGraphCanvasInner(props: WorkflowGraphCanvasProps) {
     [defaultViewport, fitViewProp, onReady]
   );
 
-  // Creation state can return to empty (delete last trigger). Allow home
-  // framing again when the next structure appears.
-  useEffect(() => {
-    if (nodes.length === 0) {
-      hasCenteredInitialViewRef.current = false;
-      prevNodeCountRef.current = 0;
-    }
-  }, [nodes.length]);
+  // Tracks whether we've ever seen an empty canvas this mount. Used so page-load
+  // with existing structure still uses the Reset-zoom home frame, while empty →
+  // first trigger uses true-center (matching the draft card).
+  const sawEmptyCanvasRef = useRef(false);
 
-  // Perform the one-time initial centering, but only once React Flow has
-  // measured the canvas. Centering during the 0-dimension window computes a
-  // wrong transform that pins a small graph to the top of the view until the
-  // first pan. Waiting for measured dimensions (and node measurement) also
-  // handles nodes that arrive after the canvas mounts. The ref keeps this to a
-  // single centering for the component's lifetime, so later resizes never yank
-  // the viewport away from the user.
-  //
-  // Empty → first structure (creation-panel trigger/step): wait two animation
-  // frames so dagre positions commit, then animate into the home frame — same
-  // cadence as a direction change.
+  // Empty ↔ first trigger/step: arm a short centering window so we keep the
+  // node where the draft sat (viewport center) after the config panel closes.
   useEffect(() => {
+    if (!hasWorkflowStructure) {
+      hasCenteredInitialViewRef.current = false;
+      homeAfterFirstStructureRef.current = false;
+      hadWorkflowStructureRef.current = false;
+      sawEmptyCanvasRef.current = true;
+      return;
+    }
+    if (sawEmptyCanvasRef.current && !hadWorkflowStructureRef.current) {
+      homeAfterFirstStructureRef.current = true;
+    }
+  }, [hasWorkflowStructure]);
+
+  // Empty → first structure: keep the node in the viewport center (same place as
+  // the draft card). Do not use the Reset-zoom home frame here — that anchors
+  // near the top and makes the first trigger jump up on save.
+  useLayoutEffect(() => {
+    if (!homeAfterFirstStructureRef.current || !instanceReady) {
+      return;
+    }
+    if (selectedNodePanelInset && selectedNodePanelInset > 0) {
+      return;
+    }
+    const instance = flowInstanceRef.current;
+    if (!instance || nodes.length === 0) {
+      return;
+    }
+    if (measuredWidth <= 0 || measuredHeight <= 0) {
+      return;
+    }
+
+    hadWorkflowStructureRef.current = true;
+    hasCenteredInitialViewRef.current = true;
+    applyCenteredViewport(instance, 0);
+    onReady?.();
+  }, [
+    instanceReady,
+    measuredWidth,
+    measuredHeight,
+    nodes.length,
+    nodes,
+    selectedNodePanelInset,
+    applyCenteredViewport,
+    onReady,
+    hasWorkflowStructure,
+  ]);
+
+  // Re-center briefly after first structure so a late canvas resize (config panel
+  // closing) does not shift the node away from where the draft was.
+  useEffect(() => {
+    if (!homeAfterFirstStructureRef.current) return undefined;
+    if (selectedNodePanelInset && selectedNodePanelInset > 0) return undefined;
+    if (!instanceReady || nodes.length === 0 || measuredWidth <= 0 || measuredHeight <= 0) {
+      return undefined;
+    }
+    const instance = flowInstanceRef.current;
+    if (!instance) return undefined;
+
+    applyCenteredViewport(instance, 0);
+    const settleTimer = setTimeout(() => {
+      applyCenteredViewport(instance, 0);
+      homeAfterFirstStructureRef.current = false;
+    }, 400);
+    return () => clearTimeout(settleTimer);
+  }, [
+    instanceReady,
+    measuredWidth,
+    measuredHeight,
+    nodes.length,
+    selectedNodePanelInset,
+    applyCenteredViewport,
+    hasWorkflowStructure,
+  ]);
+
+  // Perform the one-time initial centering when the page loads with structure
+  // already present. Empty → first structure is handled above.
+  useEffect(() => {
+    if (homeAfterFirstStructureRef.current) {
+      return;
+    }
     if (hasCenteredInitialViewRef.current || !instanceReady) {
       return;
     }
@@ -874,31 +964,8 @@ function WorkflowGraphCanvasInner(props: WorkflowGraphCanvasProps) {
       return;
     }
 
-    const fromEmpty = prevNodeCountRef.current === 0;
-
-    if (fromEmpty) {
-      let cancelled = false;
-      let raf2: number | undefined;
-      const raf1 = requestAnimationFrame(() => {
-        raf2 = requestAnimationFrame(() => {
-          if (cancelled || hasCenteredInitialViewRef.current) return;
-          hasCenteredInitialViewRef.current = true;
-          prevNodeCountRef.current = nodes.length;
-          applyHomeViewport(instance, 200);
-          onReady?.();
-        });
-      });
-      return () => {
-        cancelled = true;
-        cancelAnimationFrame(raf1);
-        if (raf2 !== undefined) {
-          cancelAnimationFrame(raf2);
-        }
-      };
-    }
-
     hasCenteredInitialViewRef.current = true;
-    prevNodeCountRef.current = nodes.length;
+    hadWorkflowStructureRef.current = hasWorkflowStructure;
     applyHomeViewport(instance, 0);
     onReady?.();
   }, [
@@ -909,6 +976,7 @@ function WorkflowGraphCanvasInner(props: WorkflowGraphCanvasProps) {
     nodes.length,
     applyHomeViewport,
     onReady,
+    hasWorkflowStructure,
   ]);
 
   // ⌘K / Ctrl+K appends to the selected sequence (trunk when nothing selected).
@@ -1011,12 +1079,12 @@ function WorkflowGraphCanvasInner(props: WorkflowGraphCanvasProps) {
   );
 
   const dimmed = !isYamlValid;
-  // Structure (not edit mode) drives navigation chrome: empty creation has
-  // nothing to navigate, so zoom/minimap/pan stay absent until a trigger or
-  // step exists. Recomputed every render so emptying the workflow later stays correct.
-  const hasStructure = (workflow?.triggers?.length ?? 0) > 0 || (workflow?.steps?.length ?? 0) > 0;
-  const isEmptyWorkflow = edit !== undefined && !hasStructure;
-  const showNavChrome = hasStructure;
+  // Zoom / minimap chrome stays available on the default empty canvas; pan waits
+  // until the workflow has structure. Hide chrome entirely for the prototype
+  // creation empty-state overlay, which owns the full viewport.
+  const isEmptyWorkflow = edit !== undefined && !hasWorkflowStructure;
+  const showNavChrome = hasWorkflowStructure || emptyState == null;
+  const canPan = hasWorkflowStructure;
   const showZoomCluster = showNavChrome && showZoomControls;
   const showMinimapPanel = showNavChrome && showMinimap;
 
@@ -1029,8 +1097,8 @@ function WorkflowGraphCanvasInner(props: WorkflowGraphCanvasProps) {
           width: '100%',
           height: '100%',
           background: showBackground ? euiTheme.colors.backgroundBaseSubdued : 'transparent',
-          // Creation state: static backdrop — no grab affordance on the pane.
-          ...(!showNavChrome
+          // Empty canvas: static backdrop — no grab affordance until structure exists.
+          ...(!canPan
             ? {
                 '& .react-flow__pane': {
                   cursor: 'default',
@@ -1096,8 +1164,8 @@ function WorkflowGraphCanvasInner(props: WorkflowGraphCanvasProps) {
               elevateNodesOnSelect={false}
               elevateEdgesOnSelect={false}
               elementsSelectable
-              panOnScroll={showNavChrome}
-              panOnDrag={showNavChrome}
+              panOnScroll={canPan}
+              panOnDrag={canPan}
               zoomOnScroll={false}
               zoomOnPinch={showNavChrome}
               zoomOnDoubleClick={false}
@@ -1113,14 +1181,14 @@ function WorkflowGraphCanvasInner(props: WorkflowGraphCanvasProps) {
               )}
               {toolbar}
               {showZoomCluster && (
-                <Panel position="bottom-left" style={{ margin: CORNER_CONTROLS_INSET }}>
+                <Panel position="bottom-left" style={{ margin: WORKFLOWS_CANVAS_CHROME_INSET }}>
                   <div css={chromeAppearCss} data-test-subj="workflowCanvas-navChrome-zoom">
                     <CanvasZoomControls onResetView={handleResetView} onFitView={handleFitView} />
                   </div>
                 </Panel>
               )}
               {showMinimapPanel && (
-                <Panel position="bottom-right" style={{ margin: CORNER_CONTROLS_INSET }}>
+                <Panel position="bottom-right" style={{ margin: WORKFLOWS_CANVAS_CHROME_INSET }}>
                   <div css={chromeAppearCss} data-test-subj="workflowCanvas-navChrome-minimap">
                     <CanvasMinimap nodeColor={minimapNodeColor} />
                   </div>

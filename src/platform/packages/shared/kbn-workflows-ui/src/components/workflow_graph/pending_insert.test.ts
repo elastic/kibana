@@ -93,6 +93,22 @@ describe('computePendingInsertOrigin', () => {
     );
     expect(origin).toBeUndefined();
   });
+
+  it('returns undefined for an empty-canvas trigger draft so the UI can center it', () => {
+    const workflow = wf([]);
+    const points = computeInsertionPoints(workflow, transformWorkflowToGraph(workflow));
+    expect(computePendingInsertOrigin({ mode: 'trigger' }, [], points, 'TB')).toBeUndefined();
+  });
+
+  it('places a trigger draft beside the last existing trigger (TB)', () => {
+    const workflow = wf([]);
+    const points = computeInsertionPoints(workflow, transformWorkflowToGraph(workflow));
+    const nodes = layoutNodes([{ id: 'manual', x: 0, y: 0, type: 'trigger' }]);
+    expect(computePendingInsertOrigin({ mode: 'trigger' }, nodes, points, 'TB')).toEqual({
+      x: PENDING_NODE_WIDTH + WORKFLOW_NODE_SEP,
+      y: (0 + PENDING_NODE_HEIGHT) / 2 - PENDING_NODE_HEIGHT / 2,
+    });
+  });
 });
 
 describe('computePendingInsertConnector', () => {

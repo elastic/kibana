@@ -7,8 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { EuiBadge, EuiIcon, EuiText, useEuiTheme } from '@elastic/eui';
-import React from 'react';
+import { EuiBadge, EuiIcon, EuiText, EuiToolTip, useEuiTheme } from '@elastic/eui';
+import type { EuiToolTipRef } from '@elastic/eui';
+import React, { useEffect, useRef, useState } from 'react';
 import { FieldIcon } from '@kbn/react-field';
 import { ensureWorkflowGraphEuiIcons, resolveNodeChipStyle } from '@kbn/workflows-ui';
 import { StepIcon } from '../../../shared/ui/step_icons/step_icon';
@@ -19,6 +20,70 @@ import {
 } from '../lib/build_data_reference_catalog';
 
 ensureWorkflowGraphEuiIcons();
+
+const LABEL_TOOLTIP_DELAY_MS = 500;
+
+/** Shows the full label in an EuiToolTip after a 0.5s hover (no native `title`). */
+function DelayedLabelTooltip({
+  label,
+  children,
+}: {
+  readonly label: string;
+  readonly children: React.ReactElement;
+}) {
+  const tipRef = useRef<EuiToolTipRef>(null);
+  const timerRef = useRef<number | null>(null);
+  const [tipContent, setTipContent] = useState<string | undefined>(undefined);
+
+  useEffect(() => {
+    if (tipContent) {
+      tipRef.current?.showToolTip();
+    } else {
+      tipRef.current?.hideToolTip();
+    }
+  }, [tipContent]);
+
+  useEffect(
+    () => () => {
+      if (timerRef.current != null) window.clearTimeout(timerRef.current);
+    },
+    []
+  );
+
+  return (
+    <EuiToolTip
+      ref={tipRef}
+      content={tipContent}
+      position="top"
+      display="block"
+      disableScreenReaderOutput
+      repositionOnScroll
+      anchorProps={{
+        css: {
+          display: 'block',
+          minWidth: 0,
+          maxWidth: '100%',
+          overflow: 'hidden',
+        },
+        onMouseEnter: () => {
+          if (timerRef.current != null) window.clearTimeout(timerRef.current);
+          timerRef.current = window.setTimeout(() => {
+            setTipContent(label);
+          }, LABEL_TOOLTIP_DELAY_MS);
+        },
+        onMouseLeave: () => {
+          if (timerRef.current != null) {
+            window.clearTimeout(timerRef.current);
+            timerRef.current = null;
+          }
+          setTipContent(undefined);
+        },
+      }}
+    >
+      {children}
+    </EuiToolTip>
+  );
+}
 
 export function DataReferenceEntityIcon({
   stepType,
@@ -86,21 +151,18 @@ export function DataReferenceItemRowContent({
     return (
       <>
         {item.iconStepType ? <DataReferenceEntityIcon stepType={item.iconStepType} /> : null}
-        <span css={{ minWidth: 0, flex: '1 1 auto' }}>
-          <EuiText size="s" css={{ fontWeight: euiTheme.font.weight.medium }}>
-            <span
-              css={{
-                display: 'block',
-                overflow: 'hidden',
-                textOverflow: 'ellipsis',
-                whiteSpace: 'nowrap',
-              }}
-            >
-              {item.label}
-            </span>
-          </EuiText>
-          {item.subtitle ? (
-            <EuiText size="xs" color="subdued">
+        <span
+          css={{
+            minWidth: 0,
+            flex: '1 1 auto',
+            display: 'flex',
+            flexDirection: 'column',
+            gap: 2,
+            justifyContent: 'center',
+          }}
+        >
+          <EuiText size="xs" css={{ fontWeight: euiTheme.font.weight.medium }}>
+            <DelayedLabelTooltip label={item.label}>
               <span
                 css={{
                   display: 'block',
@@ -109,8 +171,24 @@ export function DataReferenceItemRowContent({
                   whiteSpace: 'nowrap',
                 }}
               >
-                {item.subtitle}
+                {item.label}
               </span>
+            </DelayedLabelTooltip>
+          </EuiText>
+          {item.subtitle ? (
+            <EuiText size="xs" color="subdued">
+              <DelayedLabelTooltip label={item.subtitle}>
+                <span
+                  css={{
+                    display: 'block',
+                    overflow: 'hidden',
+                    textOverflow: 'ellipsis',
+                    whiteSpace: 'nowrap',
+                  }}
+                >
+                  {item.subtitle}
+                </span>
+              </DelayedLabelTooltip>
             </EuiText>
           ) : null}
         </span>
@@ -129,34 +207,44 @@ export function DataReferenceItemRowContent({
 
   return (
     <>
-      <FieldIcon type={item.typeLabel} size="s" shape="square" />
-      <span css={{ minWidth: 0, flex: '1 1 auto' }}>
+      <span
+        css={{
+          display: 'inline-flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          // Match DataReferenceEntityIcon footprint so token glyphs line up
+          // with step chips in the same tree.
+          width: 24,
+          height: 24,
+          flex: '0 0 auto',
+        }}
+        aria-hidden
+      >
+        <FieldIcon type={item.typeLabel} size="s" shape="square" />
+      </span>
+      <span
+        css={{
+          minWidth: 0,
+          flex: '1 1 auto',
+          display: 'flex',
+          flexDirection: 'column',
+          gap: 2,
+          justifyContent: 'center',
+        }}
+      >
         {showOrigin ? (
           <EuiText size="xs" color="subdued">
             {item.originLabel}
           </EuiText>
         ) : null}
         <EuiText
-          size="s"
+          size="xs"
           css={{
             fontWeight: euiTheme.font.weight.medium,
             fontFamily: euiTheme.font.familyCode,
           }}
         >
-          <span
-            title={item.note ? `${item.path}\n${item.note}` : item.path}
-            css={{
-              display: 'block',
-              overflow: 'hidden',
-              textOverflow: 'ellipsis',
-              whiteSpace: 'nowrap',
-            }}
-          >
-            {item.label}
-          </span>
-        </EuiText>
-        {item.subtitle ? (
-          <EuiText size="xs" color="subdued">
+          <DelayedLabelTooltip label={item.label}>
             <span
               css={{
                 display: 'block',
@@ -165,14 +253,32 @@ export function DataReferenceItemRowContent({
                 whiteSpace: 'nowrap',
               }}
             >
-              {item.subtitle}
+              {item.label}
             </span>
+          </DelayedLabelTooltip>
+        </EuiText>
+        {item.subtitle ? (
+          <EuiText size="xs" color="subdued">
+            <DelayedLabelTooltip label={item.subtitle}>
+              <span
+                css={{
+                  display: 'block',
+                  overflow: 'hidden',
+                  textOverflow: 'ellipsis',
+                  whiteSpace: 'nowrap',
+                }}
+              >
+                {item.subtitle}
+              </span>
+            </DelayedLabelTooltip>
           </EuiText>
         ) : null}
       </span>
-      <EuiBadge color="hollow" css={{ flexShrink: 0 }} data-drag-preview-hide>
-        {item.typeLabel}
-      </EuiBadge>
+      {isDataReferenceInsertable(item) ? (
+        <EuiBadge color="hollow" css={{ flexShrink: 0 }} data-drag-preview-hide>
+          {item.typeLabel}
+        </EuiBadge>
+      ) : null}
       {!hideChevron && item.drillable ? (
         <EuiIcon
           type="chevronSingleRight"

@@ -44,6 +44,15 @@ const debouncedCompute = debounce(
   COMPUTATION_DEBOUNCE_MS
 );
 
+/**
+ * Flush a pending graph recompute immediately. Visual-editor mutations call
+ * this after `setYamlString` so the canvas does not sit on the empty/stale
+ * graph for the typing debounce window.
+ */
+export const flushWorkflowComputation = (): void => {
+  debouncedCompute.flush();
+};
+
 // Side effects middleware - computes derived data when yamlString changes (debounced)
 const workflowComputationMiddleware: Middleware =
   (store: MiddlewareAPI<Dispatch<AnyAction>, RootState>) => (next) => (action) => {

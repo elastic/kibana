@@ -520,8 +520,8 @@ export function StepConfigPanel({
     {
       id: 'form',
       iconType: 'workflow',
-      label: i18n.translate('workflows.stepConfigPanel.builderTab', {
-        defaultMessage: 'Visual builder',
+      label: i18n.translate('workflows.stepConfigPanel.formTab', {
+        defaultMessage: 'Form',
       }),
     },
     {
@@ -565,7 +565,7 @@ export function StepConfigPanel({
         css={{
           flex: '0 0 auto',
           borderBottom: `${euiTheme.border.width.thin} solid ${euiTheme.colors.borderBaseSubdued}`,
-          // Keep Visual builder / YAML tabs flush on the header border.
+          // Keep Form / YAML tabs flush on the header border.
           paddingBottom: 0,
         }}
       >

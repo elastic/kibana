@@ -111,7 +111,7 @@ const readScheduledEvery = (fragment: string): string => {
 
 /**
  * Edit-mode panel for a workflow trigger — same canvas-bounded shell as
- * {@link StepConfigPanel} (Visual builder / YAML tabs). Manual triggers expose
+ * {@link StepConfigPanel} (Form / YAML tabs). Manual triggers expose
  * an Inputs builder; scheduled triggers expose the interval field. Alert
  * triggers are read-only (event fields come from the detection rule).
  */
@@ -247,8 +247,8 @@ export function TriggerConfigPanel({
     {
       id: 'form',
       iconType: 'workflow',
-      label: i18n.translate('workflows.triggerConfigPanel.builderTab', {
-        defaultMessage: 'Visual builder',
+      label: i18n.translate('workflows.triggerConfigPanel.formTab', {
+        defaultMessage: 'Form',
       }),
     },
     {

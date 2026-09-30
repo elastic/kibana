@@ -9,7 +9,7 @@
 
 export { isStructurallyEmptyWorkflowYaml } from '../../../entities/workflows/store/workflow_detail/utils/is_structurally_empty_workflow_yaml';
 
-/** Seed YAML for `/create` — empty structure so the visual builder shows the creation state. */
+/** Seed YAML for `/create` — empty structure for the visual builder canvas. */
 export const workflowDefaultYaml = `version: "1"
 name: New workflow
 enabled: false

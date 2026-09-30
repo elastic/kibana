@@ -41,7 +41,6 @@ import { WorkflowDetailConnectorFlyout } from './workflow_detail_connector_flyou
 import { WORKFLOWS_DOCUMENTATION_URL } from '../../../../common';
 import { useWorkflowActions } from '../../../entities/workflows/model/use_workflow_actions';
 import {
-  selectEditorWorkflowDefinition,
   selectFocusedStepId,
   selectFocusedTriggerId,
   selectIsExecutionsTab,
@@ -113,12 +112,6 @@ export const WorkflowDetailEditor = React.memo<WorkflowDetailEditorProps>(({ hig
   const isReadOnly = useWorkflowEditorReadOnly();
   const isSyntaxValid = useSelector(selectIsYamlSyntaxValid);
   const isSaving = useSelector(selectIsSavingYaml);
-  const workflowDefinition = useSelector(selectEditorWorkflowDefinition);
-  const hasStructure = useMemo(() => {
-    const triggers = workflowDefinition?.triggers?.length ?? 0;
-    const steps = workflowDefinition?.steps?.length ?? 0;
-    return triggers > 0 || steps > 0;
-  }, [workflowDefinition]);
   const getContextOverrideData = useContextOverrideData();
   const { runIndividualStep } = useWorkflowActions();
   const { notifications } = useKibana().services;
@@ -196,7 +189,7 @@ export const WorkflowDetailEditor = React.memo<WorkflowDetailEditorProps>(({ hig
   const showGraph = isVisualEditorEnabled && editorView === 'graph';
   // Creation state: hide the floating bottom bar until the workflow has
   // structure or the user is in YAML (reached via "Edit as YAML").
-  const showBottomBar = isVisualEditorEnabled && (editorView === 'yaml' || hasStructure);
+  const showBottomBar = isVisualEditorEnabled;
 
   const focusedStepId = useSelector(selectFocusedStepId);
   const focusedTriggerId = useSelector(selectFocusedTriggerId);

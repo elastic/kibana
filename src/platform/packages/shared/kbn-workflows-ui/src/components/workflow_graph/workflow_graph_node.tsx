@@ -130,6 +130,10 @@ function getStepHasFallback(step: WorkflowGraphNodeData['step']): boolean {
 }
 
 const CHIP_SIZE = 32;
+/** Outer step/trigger card corner radius. */
+const NODE_BORDER_RADIUS = 8;
+/** Icon tile corner radius inside the card. */
+const CHIP_BORDER_RADIUS = 4;
 
 type EuiTheme = ReturnType<typeof useEuiTheme>['euiTheme'];
 
@@ -236,12 +240,15 @@ function NodeIconChip({
   borderRadius,
   children,
   useAiGradient,
+  /** Stretch to the row content height (matches pending draft chip). Fixed 32px otherwise. */
+  fillRow = false,
 }: {
   background: string;
   border: string;
   borderRadius: string | number;
   children: React.ReactNode;
   useAiGradient?: boolean;
+  fillRow?: boolean;
 }) {
   const euiThemeContext = useEuiTheme();
   return (
@@ -249,8 +256,19 @@ function NodeIconChip({
       css={[
         {
           flex: '0 0 auto',
-          width: CHIP_SIZE,
-          height: CHIP_SIZE,
+          ...(fillRow
+            ? {
+                // Same sizing as WorkflowGraphPendingNode: content height under
+                // 56px card − padding − border ≈ 30px. Hardcoded 32px made the
+                // chip jump up 2px when the draft became a committed node.
+                alignSelf: 'stretch',
+                aspectRatio: '1 / 1',
+                width: 'auto',
+              }
+            : {
+                width: CHIP_SIZE,
+                height: CHIP_SIZE,
+              }),
           ...(useAiGradient
             ? {}
             : { background, border: `1px solid ${border}` }),
@@ -279,6 +297,7 @@ function NodePreviewCard({
   chipUseAiGradient,
   panelBorder,
   borderRadius,
+  chipBorderRadius,
   nodeShadow,
   renderStepIcon,
   targetHandlePos,
@@ -294,6 +313,7 @@ function NodePreviewCard({
   chipUseAiGradient?: boolean;
   panelBorder: string;
   borderRadius: string | number;
+  chipBorderRadius: string | number;
   nodeShadow: string;
   renderStepIcon?: RenderStepIcon;
   targetHandlePos: Position;
@@ -322,7 +342,7 @@ function NodePreviewCard({
         <NodeIconChip
           background={chipBackground}
           border={chipBorder}
-          borderRadius={borderRadius}
+          borderRadius={chipBorderRadius}
           useAiGradient={chipUseAiGradient}
         >
           <NodeStepIcon
@@ -790,7 +810,8 @@ function WorkflowGraphNodeInner(node: NodeProps<Node<WorkflowGraphNodeData>>) {
 
   const execState = resolveExecutionState(stepExecution?.status);
   const colors = resolveNodeColors(euiTheme, stepType, isTriggerNode, execState);
-  const borderRadius = euiTheme.border.radius.small ?? 4;
+  const borderRadius = NODE_BORDER_RADIUS;
+  const chipBorderRadius = CHIP_BORDER_RADIUS;
 
   const canShowRun =
     Boolean(canRunSteps && onStepRun) && !isTrigger && !colors.hasStatusIcon;
@@ -818,6 +839,7 @@ function WorkflowGraphNodeInner(node: NodeProps<Node<WorkflowGraphNodeData>>) {
         chipUseAiGradient={colors.chipUseAiGradient}
         panelBorder={colors.panelBorder}
         borderRadius={borderRadius}
+        chipBorderRadius={chipBorderRadius}
         nodeShadow={nodeShadow}
         renderStepIcon={renderStepIcon}
         targetHandlePos={targetHandlePos}
@@ -910,8 +932,9 @@ function WorkflowGraphNodeInner(node: NodeProps<Node<WorkflowGraphNodeData>>) {
         <NodeIconChip
           background={colors.chipBackground}
           border={colors.chipBorder}
-          borderRadius={borderRadius}
+          borderRadius={chipBorderRadius}
           useAiGradient={colors.chipUseAiGradient}
+          fillRow
         >
           <NodeStepIcon
             iconType={iconType}

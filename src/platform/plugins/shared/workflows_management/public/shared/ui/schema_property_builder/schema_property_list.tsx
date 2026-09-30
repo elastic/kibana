@@ -122,13 +122,10 @@ const PropertyEditor = ({
             cursor: 'grab',
             display: 'inline-flex',
             alignItems: 'center',
-            width: 0,
-            minWidth: 0,
-            opacity: 0,
-            overflow: 'hidden',
-            marginInlineEnd: 0,
-            transition: 'width 140ms ease, opacity 140ms ease, margin 140ms ease',
-            '@media (prefers-reduced-motion: reduce)': { transition: 'none' },
+            width: 16,
+            minWidth: 16,
+            opacity: 1,
+            marginInlineEnd: 6,
           }}
         >
           <EuiIcon type="drag" color="subdued" size="s" />
@@ -188,12 +185,6 @@ const PropertyEditor = ({
           '.euiAccordion__triggerWrapper': {
             alignItems: 'center',
             paddingInline: euiTheme.size.m, // 16px
-            '&:hover [data-drag-grip], &:focus-within [data-drag-grip]': {
-              width: 16,
-              minWidth: 16,
-              opacity: 1,
-              marginInlineEnd: 6,
-            },
           },
           '.euiAccordion__button': {
             paddingInline: 0,

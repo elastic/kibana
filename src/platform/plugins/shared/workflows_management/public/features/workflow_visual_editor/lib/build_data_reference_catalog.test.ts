@@ -108,22 +108,28 @@ describe('buildDataReferenceCatalog', () => {
     expect(stepsGroup?.description).toMatch(/evaluated after the run finishes/);
   });
 
-  it('merges consts into workflow context and drops a standalone constants group', () => {
+  it('lists consts in their own Constants group', () => {
     const catalog = buildDataReferenceCatalog({
       definition,
       currentStepName: 'second',
       connectors: [],
     });
-    expect(catalog.groups.map((g) => g.id)).toEqual(['triggers', 'steps', 'context']);
-    expect(catalog.groups.find((g) => g.id === 'consts')).toBeUndefined();
+    expect(catalog.groups.map((g) => g.id)).toEqual(['triggers', 'steps', 'consts', 'context']);
 
-    const context = catalog.groups.find((g) => g.id === 'context');
-    const region = context?.items.find((i) => i.path === 'consts.region');
+    const consts = catalog.groups.find((g) => g.id === 'consts');
+    expect(consts).toMatchObject({
+      title: 'Constants',
+    });
+    expect(consts?.iconType).toBeUndefined();
+    const region = consts?.items.find((i) => i.path === 'consts.region');
     expect(region).toMatchObject({
-      label: 'consts.region',
+      label: 'region',
       subtitle: 'us-east-1',
       typeLabel: 'string',
     });
+
+    const context = catalog.groups.find((g) => g.id === 'context');
+    expect(context?.items.find((i) => i.path === 'consts.region')).toBeUndefined();
     expect(context?.items.find((i) => i.path === 'kibanaUrl')).toMatchObject({
       label: 'kibanaUrl',
       typeLabel: 'string',

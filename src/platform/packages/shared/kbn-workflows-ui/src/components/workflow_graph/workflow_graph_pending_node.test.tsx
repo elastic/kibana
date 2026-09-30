@@ -135,4 +135,26 @@ describe('WorkflowGraphPendingNode', () => {
       `translate(${1000 / 2 - PENDING_NODE_WIDTH / 2}px, ${800 / 2 - PENDING_NODE_HEIGHT / 2}px)`
     );
   });
+
+  it('centers a trigger draft on an empty canvas without a connector edge', () => {
+    renderPending(
+      {
+        phase: 'configuring',
+        context: { mode: 'trigger' },
+        stepType: 'manual',
+        label: 'Manual',
+      },
+      {
+        nodes: [],
+        insertionPoints: { byNodeId: new Map(), topLevelStepNodeIds: [] },
+      }
+    );
+    const card = screen.getByTestId('workflowGraphPendingNode');
+    expect(screen.queryByTestId('workflowGraphPendingNodeEdge')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('workflowGraphPendingPort-error')).not.toBeInTheDocument();
+    expect(screen.getByTestId('workflowGraphPendingNodeLabel')).toHaveTextContent('Manual');
+    expect(card.style.transform).toBe(
+      `translate(${1000 / 2 - PENDING_NODE_WIDTH / 2}px, ${800 / 2 - PENDING_NODE_HEIGHT / 2}px)`
+    );
+  });
 });

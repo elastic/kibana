@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { euiCanAnimate, euiFocusRing, EuiIcon, EuiToolTip, useEuiTheme } from '@elastic/eui';
+import { euiCanAnimate, euiFocusRing, EuiIcon, EuiToolTip, useEuiFontSize, useEuiTheme } from '@elastic/eui';
 import { ViewportPortal } from '@xyflow/react';
 import type { Edge, Node } from '@xyflow/react';
 import React, { useCallback, useMemo } from 'react';
@@ -239,6 +239,7 @@ export function WorkflowGraphEditOverlays({
 export function WorkflowGraphEmptyAddTrigger({ edit }: { edit: WorkflowGraphEditActions }) {
   const { euiTheme } = useEuiTheme();
   const euiThemeContext = useEuiTheme();
+  const welcomeFont = useEuiFontSize('xs');
   const label = i18n.translate('workflowsUi.graph.addTrigger', { defaultMessage: 'Add trigger' });
   return (
     <div
@@ -246,8 +247,10 @@ export function WorkflowGraphEmptyAddTrigger({ edit }: { edit: WorkflowGraphEdit
         position: 'absolute',
         inset: 0,
         display: 'flex',
+        flexDirection: 'column',
         alignItems: 'center',
         justifyContent: 'center',
+        gap: euiTheme.size.l,
         pointerEvents: 'none',
         zIndex: 1,
       }}
@@ -283,6 +286,21 @@ export function WorkflowGraphEmptyAddTrigger({ edit }: { edit: WorkflowGraphEdit
         <EuiIcon type="plus" size="s" aria-hidden={true} />
         {label}
       </button>
+      <p
+        data-test-subj="workflowGraphEmptyWelcome"
+        css={{
+          margin: 0,
+          maxWidth: 360,
+          textAlign: 'center',
+          ...welcomeFont,
+          color: euiTheme.colors.textSubdued,
+        }}
+      >
+        {i18n.translate('workflowsUi.graph.emptyWelcomeBody', {
+          defaultMessage:
+            'Add a trigger to decide how this workflow begins — an alert, a schedule, or a run on demand. Then keep building from there.',
+        })}
+      </p>
     </div>
   );
 }

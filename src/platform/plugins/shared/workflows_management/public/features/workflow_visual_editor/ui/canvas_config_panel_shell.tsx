@@ -10,14 +10,15 @@
 import { useEuiShadow, useEuiTheme } from '@elastic/eui';
 import React, { useCallback, useState } from 'react';
 import { i18n } from '@kbn/i18n';
-import { WORKFLOWS_SURFACE_RADIUS } from '@kbn/workflows-ui';
+import { WORKFLOWS_CANVAS_CHROME_INSET, WORKFLOWS_SURFACE_RADIUS } from '@kbn/workflows-ui';
 
 /** Floating-panel inset from the canvas edges (top, right, bottom). */
-export const CANVAS_CONFIG_PANEL_MARGIN = 16;
+export const CANVAS_CONFIG_PANEL_MARGIN = WORKFLOWS_CANVAS_CHROME_INSET;
 /** Minimum canvas remaining beside the panel (px). */
 export const MIN_VISIBLE_CANVAS_PX = 320;
-export const DEFAULT_CONFIG_PANEL_WIDTH = 560;
-export const MIN_CONFIG_PANEL_WIDTH = 420;
+/** Default step/trigger config panel width — keep canvas readable beside it. */
+export const DEFAULT_CONFIG_PANEL_WIDTH = 400;
+export const MIN_CONFIG_PANEL_WIDTH = 360;
 /** Expanded field editor: catalog tree (~340) + value pane — not full-bleed. */
 export const FIELD_EDITOR_EXPANDED_PANEL_WIDTH = 900;
 

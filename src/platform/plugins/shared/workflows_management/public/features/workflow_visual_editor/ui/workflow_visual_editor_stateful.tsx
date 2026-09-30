@@ -17,7 +17,7 @@ import {
   useEuiTheme,
 } from '@elastic/eui';
 import type { ColorMode, Viewport } from '@xyflow/react';
-import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux-v7';
 import useLocalStorage from 'react-use/lib/useLocalStorage';
 import { Document, isSeq, parseDocument, stringify as stringifyYaml } from 'yaml';
@@ -57,6 +57,10 @@ import { TriggerConfigPanel } from './trigger_config_panel';
 import { useCreationAgentChat } from './use_creation_agent_chat';
 import { WorkflowCreationPanel } from './workflow_creation_panel';
 import {
+  getShowCreationEmptyState,
+  subscribeShowCreationEmptyState,
+} from './workflow_creation_empty_state_prototype';
+import {
   WorkflowSettingsBPanel,
   type WorkflowSettingsBPanelKind,
 } from './workflow_settings_b_panel';
@@ -85,8 +89,8 @@ import {
   selectWorkflowName,
   selectYamlString,
 } from '../../../entities/workflows/store/workflow_detail/selectors';
+import { flushWorkflowComputation } from '../../../entities/workflows/store/workflow_detail/middleware';
 import {
-  applyYamlEdit,
   HIGHLIGHTED_STEP_TRIGGER,
   setHighlightedStepId,
   setYamlString,
@@ -159,7 +163,7 @@ const TRIGGER_LABEL: Record<string, string> = {
 
 /** Floating read-only flyout inset from the canvas edges (top, right, bottom). */
 const PANEL_MARGIN = CANVAS_CONFIG_PANEL_MARGIN;
-const CONFIG_PANEL_WIDTH_STORAGE_KEY = 'workflows:configPanelWidth';
+const CONFIG_PANEL_WIDTH_STORAGE_KEY = 'workflows:configPanelWidth.v3';
 const FLASH_MS = 900;
 const INSERT_LAYOUT_MS = 300;
 /** Slide subsequent nodes, then flash the inserted node border. */
@@ -329,6 +333,8 @@ export const WorkflowVisualEditorStateful: React.FC<WorkflowVisualEditorStateful
   const [flashNodeId, setFlashNodeId] = useState<string | undefined>(undefined);
   const [pendingInsert, setPendingInsert] = useState<PendingInsertVisual | null>(null);
   const [liveFragment, setLiveFragment] = useState<string | null>(null);
+  /** After insert Done: clear the draft on the next definition update (not eagerly). */
+  const clearPendingAfterDefinitionRef = useRef(false);
   const [settingsSurfaceVariant, setSettingsSurfaceVariantState] =
     useState<WorkflowSettingsSurfaceVariant>(() => getWorkflowSettingsSurfaceVariant());
   const [settingsBNodeLayout, setSettingsBNodeLayoutState] = useState<WorkflowSettingsBNodeLayout>(
@@ -341,12 +347,23 @@ export const WorkflowVisualEditorStateful: React.FC<WorkflowVisualEditorStateful
   const [pendingStepSelection, setPendingStepSelection] = useState<string | null | undefined>(
     undefined
   );
+  const [showCreationEmptyState, setShowCreationEmptyStateLocal] = useState(() =>
+    getShowCreationEmptyState()
+  );
 
   useEffect(
     () =>
       subscribeWorkflowSettingsSurfaceVariant(() => {
         setSettingsSurfaceVariantState(getWorkflowSettingsSurfaceVariant());
         setSettingsBNodeLayoutState(getWorkflowSettingsBNodeLayout());
+      }),
+    []
+  );
+
+  useEffect(
+    () =>
+      subscribeShowCreationEmptyState(() => {
+        setShowCreationEmptyStateLocal(getShowCreationEmptyState());
       }),
     []
   );
@@ -383,6 +400,14 @@ export const WorkflowVisualEditorStateful: React.FC<WorkflowVisualEditorStateful
       lastValidRef.current = definition;
     }
   }, [definition, isYamlValid]);
+
+  // Drop the insert draft only after the computed definition has updated, so
+  // Done never briefly shows the empty-canvas CTA between clear and commit.
+  useLayoutEffect(() => {
+    if (!clearPendingAfterDefinitionRef.current) return;
+    clearPendingAfterDefinitionRef.current = false;
+    setPendingInsert(null);
+  }, [definition]);
 
   // Focus the flyout panel when a step becomes selected so keyboard users
   // land inside the panel rather than remaining on the canvas node.
@@ -575,7 +600,11 @@ export const WorkflowVisualEditorStateful: React.FC<WorkflowVisualEditorStateful
         });
         return false;
       }
-      dispatch(applyYamlEdit(result.yaml));
+      dispatch(setYamlString(result.yaml));
+      // Visual mutations must update the graph in the same tick as the YAML
+      // write — the middleware's typing debounce would otherwise leave the
+      // canvas empty for ~250ms after Done (draft cleared, structure not yet).
+      flushWorkflowComputation();
       return true;
     },
     [dispatch, notifications.toasts]
@@ -583,7 +612,11 @@ export const WorkflowVisualEditorStateful: React.FC<WorkflowVisualEditorStateful
 
   /** Inserts a step fragment per the insertion context and flashes the new node. */
   const insertFragment = useCallback(
-    (context: WorkflowGraphInsertionContext, fragment: string, newName: string | undefined) => {
+    (
+      context: WorkflowGraphInsertionContext,
+      fragment: string,
+      newName: string | undefined
+    ): boolean => {
       let result: MutationResult;
       switch (context.mode) {
         case 'trigger':
@@ -602,10 +635,12 @@ export const WorkflowVisualEditorStateful: React.FC<WorkflowVisualEditorStateful
           result = setStepFallback(yamlString, context.stepName, fragment);
           break;
       }
-      if (applyMutation(result) && newName) {
+      const ok = applyMutation(result);
+      if (ok && newName) {
         // Node ids follow step names for non-colliding names.
         setFlashNodeId(newName);
       }
+      return ok;
     },
     [yamlString, applyMutation]
   );
@@ -630,14 +665,20 @@ export const WorkflowVisualEditorStateful: React.FC<WorkflowVisualEditorStateful
       if (!insertion) return;
       if (insertion.context.mode === 'trigger') {
         const fragment = triggerFragmentFor(action.id);
+        const triggerLabel = TRIGGER_LABEL[action.id] ?? action.label;
+        setPendingInsert({
+          phase: 'configuring',
+          context: { mode: 'trigger' },
+          stepType: action.id,
+          label: triggerLabel,
+        });
         setPanel({
           mode: 'insert-trigger',
           triggerType: action.id,
-          triggerLabel: TRIGGER_LABEL[action.id] ?? action.label,
+          triggerLabel,
           fragment,
         });
         setInsertion(null);
-        setPendingInsert(null);
         return;
       }
       const pendingContext = toPendingContext(insertion.context, nodeIdForStepName);
@@ -665,43 +706,52 @@ export const WorkflowVisualEditorStateful: React.FC<WorkflowVisualEditorStateful
   const handlePanelSave = useCallback(
     (fragment: string) => {
       if (!panel) return;
-      setPendingInsert(null);
+      const isInsert = panel.mode === 'insert' || panel.mode === 'insert-trigger';
+      // Keep the configuring draft visible until the computed graph includes the
+      // new node — clearing it eagerly opens a window where the empty-state CTA
+      // flashes (even with a sync flush, an extra render can land in between).
+      if (isInsert) {
+        clearPendingAfterDefinitionRef.current = true;
+      } else {
+        setPendingInsert(null);
+      }
+
+      let applied = true;
       if (panel.mode === 'insert') {
         const parsedName = parseDocument(fragment).get('name');
         const newName = typeof parsedName === 'string' ? parsedName : undefined;
-        insertFragment(panel.context, fragment, newName);
+        applied = insertFragment(panel.context, fragment, newName);
       } else if (panel.mode === 'edit') {
         const parsedName = parseDocument(fragment).get('name');
         const newName = typeof parsedName === 'string' ? parsedName : undefined;
-        if (applyMutation(replaceStepFragment(yamlString, panel.stepName, fragment))) {
-          if (newName && newName !== panel.stepName) setSelectedStep(newName);
-        }
+        applied = applyMutation(replaceStepFragment(editorYaml, panel.stepName, fragment));
+        if (applied && newName && newName !== panel.stepName) setSelectedStep(newName);
       } else if (panel.mode === 'insert-trigger') {
-        applyMutation(appendTrigger(yamlString, fragment));
+        applied = applyMutation(appendTrigger(editorYaml, fragment));
       } else if (panel.mode === 'edit-trigger') {
-        applyMutation(replaceTriggerFragment(yamlString, panel.triggerIndex, fragment));
+        applied = applyMutation(replaceTriggerFragment(editorYaml, panel.triggerIndex, fragment));
+      }
+
+      if (isInsert && !applied) {
+        clearPendingAfterDefinitionRef.current = false;
+        setPendingInsert(null);
       }
       setPanel(null);
     },
-    [panel, insertFragment, applyMutation, yamlString, setSelectedStep]
+    [panel, insertFragment, applyMutation, editorYaml, setSelectedStep]
   );
 
-  const { keepNodeOnCancel } = useWorkflowGraphPocToggles();
+  useWorkflowGraphPocToggles();
 
   const handlePanelCancel = useCallback(() => {
-    if (keepNodeOnCancel && panel?.mode === 'insert') {
-      const fragment = liveFragment ?? panel.fragment;
-      const parsedName = parseDocument(fragment).get('name');
-      const newName = typeof parsedName === 'string' ? parsedName : undefined;
-      insertFragment(panel.context, fragment, newName);
-    }
+    clearPendingAfterDefinitionRef.current = false;
     setPanel(null);
     setSettingsBKind(null);
     setPendingInsert(null);
     setConfigPanelDirty(false);
     setPendingStepSelection(undefined);
     setSelectedStep(null);
-  }, [keepNodeOnCancel, panel, liveFragment, insertFragment, setSelectedStep]);
+  }, [setSelectedStep]);
 
   const isConfigPanelOpen =
     panel?.mode === 'edit' ||
@@ -735,6 +785,7 @@ export const WorkflowVisualEditorStateful: React.FC<WorkflowVisualEditorStateful
     const next = pendingStepSelection;
     setPendingStepSelection(undefined);
     setConfigPanelDirty(false);
+    clearPendingAfterDefinitionRef.current = false;
     setPendingInsert(null);
     setSettingsBKind(null);
     if (next == null) {
@@ -1044,17 +1095,21 @@ export const WorkflowVisualEditorStateful: React.FC<WorkflowVisualEditorStateful
     return () => window.removeEventListener('keydown', onKeyDown);
   }, [editorRef]);
 
-  const handleCreationPickTrigger = useCallback(
-    (triggerType: 'manual' | 'alert' | 'scheduled') => {
-      setPanel({
-        mode: 'insert-trigger',
-        triggerType,
-        triggerLabel: TRIGGER_LABEL[triggerType] ?? triggerType,
-        fragment: triggerFragmentFor(triggerType),
-      });
-    },
-    []
-  );
+  const handleCreationPickTrigger = useCallback((triggerType: 'manual' | 'alert' | 'scheduled') => {
+    const triggerLabel = TRIGGER_LABEL[triggerType] ?? triggerType;
+    setPendingInsert({
+      phase: 'configuring',
+      context: { mode: 'trigger' },
+      stepType: triggerType,
+      label: triggerLabel,
+    });
+    setPanel({
+      mode: 'insert-trigger',
+      triggerType,
+      triggerLabel,
+      fragment: triggerFragmentFor(triggerType),
+    });
+  }, []);
 
   const handleCreationPickAction = useCallback((anchor: DOMRect) => {
     const context = { mode: 'step' as const, index: 0 };
@@ -1089,7 +1144,7 @@ export const WorkflowVisualEditorStateful: React.FC<WorkflowVisualEditorStateful
 
   const creationEmptyState = useMemo(
     () =>
-      canEdit ? (
+      canEdit && showCreationEmptyState ? (
         <WorkflowCreationPanel
           isAiAvailable={isAgentBuilderAvailable}
           onGenerateWithAi={handleGenerateWithAi}
@@ -1101,6 +1156,7 @@ export const WorkflowVisualEditorStateful: React.FC<WorkflowVisualEditorStateful
       ) : undefined,
     [
       canEdit,
+      showCreationEmptyState,
       isAgentBuilderAvailable,
       handleGenerateWithAi,
       handleCreationPickTrigger,

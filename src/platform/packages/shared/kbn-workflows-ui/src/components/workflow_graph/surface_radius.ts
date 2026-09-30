@@ -14,3 +14,9 @@
  * Kibana upgrades past EUI 122.0.
  */
 export const WORKFLOWS_SURFACE_RADIUS = 12;
+
+/**
+ * Inset from the canvas edge for floating chrome (zoom, minimap, bottom bar,
+ * settings launcher / config panels).
+ */
+export const WORKFLOWS_CANVAS_CHROME_INSET = 16;

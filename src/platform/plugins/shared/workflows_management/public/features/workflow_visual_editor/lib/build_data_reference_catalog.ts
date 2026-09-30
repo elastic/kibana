@@ -31,14 +31,14 @@ import {
   type PrecedingStepRef,
 } from './get_document_order_predecessors';
 
-export type DataReferenceGroupId = 'triggers' | 'steps' | 'context';
+export type DataReferenceGroupId = 'triggers' | 'steps' | 'consts' | 'context';
 
 export interface DataReferenceItem {
   /** Liquid path without braces, e.g. `steps.a.output.status`. */
   readonly path: string;
   /**
    * Primary label. Entities use the trigger/step name; leaves use the
-   * reference path (shown in code font).
+   * trailing path segment (shown in code font).
    */
   readonly label: string;
   /**
@@ -69,6 +69,8 @@ export interface DataReferenceGroup {
   readonly title: string;
   /** Keyboard-accessible info-icon tooltip on the group header. */
   readonly description: string;
+  /** Optional leading icon on the group header (e.g. gear for Constants). */
+  readonly iconType?: string;
   readonly items: readonly DataReferenceItem[];
   /** Shown when `items` is empty (Steps on the first step). */
   readonly emptyMessage?: string;
@@ -165,7 +167,8 @@ const formatConstValue = (value: unknown): string => {
   }
 };
 
-/** Leaf / nested object row — primary label is the reference path; no path echo. */
+/** Leaf / nested object row — primary label is the trailing segment (matches
+ * Outputs tab names like `errors`); Liquid `path` stays fully qualified. */
 const pathLeafItem = ({
   path,
   typeLabel,
@@ -182,16 +185,19 @@ const pathLeafItem = ({
   children?: readonly DataReferenceItem[];
   subtitle?: string;
   note?: string;
-}): DataReferenceItem => ({
-  path,
-  label: path,
-  typeLabel,
-  drillable,
-  originLabel,
-  ...(subtitle !== undefined ? { subtitle } : {}),
-  ...(note !== undefined ? { note } : {}),
-  ...(children !== undefined ? { children } : {}),
-});
+}): DataReferenceItem => {
+  const segment = path.includes('.') ? path.slice(path.lastIndexOf('.') + 1) : path;
+  return {
+    path,
+    label: segment,
+    typeLabel,
+    drillable,
+    originLabel,
+    ...(subtitle !== undefined ? { subtitle } : {}),
+    ...(note !== undefined ? { note } : {}),
+    ...(children !== undefined ? { children } : {}),
+  };
+};
 
 const schemaToItems = (
   schema: z.ZodType,
@@ -418,9 +424,9 @@ const buildStepEntities = (
   });
 };
 
-const buildContextGroup = (definition: WorkflowYaml | undefined): DataReferenceGroup => {
-  const originContext = i18n.translate('workflows.dataReferencePicker.originContext', {
-    defaultMessage: 'Workflow context',
+const buildConstsGroup = (definition: WorkflowYaml | undefined): DataReferenceGroup => {
+  const originConsts = i18n.translate('workflows.dataReferencePicker.originConsts', {
+    defaultMessage: 'Constants',
   });
   const items: DataReferenceItem[] = [];
 
@@ -429,11 +435,29 @@ const buildContextGroup = (definition: WorkflowYaml | undefined): DataReferenceG
       pathLeafItem({
         path: `consts.${key}`,
         typeLabel: typeof value,
-        originLabel: originContext,
+        originLabel: originConsts,
         subtitle: formatConstValue(value),
       })
     );
   }
+
+  return {
+    id: 'consts',
+    title: i18n.translate('workflows.dataReferencePicker.constants', {
+      defaultMessage: 'Constants',
+    }),
+    description: i18n.translate('workflows.dataReferencePicker.constantsDescription', {
+      defaultMessage: "Named values defined on this workflow — shared across every step.",
+    }),
+    items,
+  };
+};
+
+const buildContextGroup = (definition: WorkflowYaml | undefined): DataReferenceGroup => {
+  const originContext = i18n.translate('workflows.dataReferencePicker.originContext', {
+    defaultMessage: 'Workflow context',
+  });
+  const items: DataReferenceItem[] = [];
 
   const workflowChildren = schemaToItems(WorkflowDataContextSchema, 'workflow', originContext);
   items.push(
@@ -480,8 +504,7 @@ const buildContextGroup = (definition: WorkflowYaml | undefined): DataReferenceG
       defaultMessage: 'Workflow context',
     }),
     description: i18n.translate('workflows.dataReferencePicker.workflowContextDescription', {
-      defaultMessage:
-        "This workflow's constants, plus execution metadata and Kibana URLs available at run time.",
+      defaultMessage: 'Execution metadata and Kibana URLs available at run time.',
     }),
     items,
   };
@@ -556,6 +579,7 @@ export const buildDataReferenceCatalog = ({
           }),
   });
 
+  groups.push(buildConstsGroup(definition));
   groups.push(buildContextGroup(definition));
 
   return { groups };
