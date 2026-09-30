@@ -5,38 +5,36 @@
  * 2.0.
  */
 
-import type { OperationResult } from './operation_result';
+/** Separates usable classification results from submitted candidates that still need a decision. */
+export interface ClassificationPartition<Result> {
+  /** Holds exactly one result per resolved candidate, in candidate order. */
+  readonly results: readonly Result[];
+  /** Lists candidates the workflow omitted or answered more than once, in candidate order. */
+  readonly unresolvedIds: readonly string[];
+}
 
-/** Enforces exactly one known classification result for every submitted candidate. */
-export const validateClassificationCompleteness = <
+/** Matches workflow results to submitted candidates, ignoring unknown IDs and treating duplicates as unresolved. */
+export const partitionClassificationResults = <
   Candidate extends { readonly id: string },
   Result extends { readonly id: string }
 >(
   candidates: readonly Candidate[],
   results: readonly Result[]
-): OperationResult<readonly Result[]> => {
-  /** Tracks submitted IDs as the trusted classification membership set. */
-  const expected = new Set(candidates.map((candidate) => candidate.id));
-  /** Tracks returned IDs for duplicate, missing, and unknown-ID checks. */
-  const actual = new Set(results.map((result) => result.id));
-  if (actual.size !== results.length || results.length !== candidates.length) {
-    return {
-      error: {
-        code: 'incomplete_classification',
-        message: 'Workflow must return exactly 1 result per candidate.',
-        retryable: false,
-      },
-      status: 'failure',
-    };
+): ClassificationPartition<Result> => {
+  /** Groups returned results by ID so omissions and duplicates are both visible. */
+  const byId = new Map<string, Result[]>();
+  for (const result of results) {
+    byId.set(result.id, [...(byId.get(result.id) ?? []), result]);
   }
-  return [...actual].every((id) => expected.has(id))
-    ? { status: 'success', value: results }
-    : {
-        error: {
-          code: 'unknown_classification_id',
-          message: 'Workflow returned a result for an unknown candidate.',
-          retryable: false,
-        },
-        status: 'failure',
-      };
+  const resolved: Result[] = [];
+  const unresolvedIds: string[] = [];
+  for (const { id } of candidates) {
+    const matches = byId.get(id) ?? [];
+    if (matches.length === 1 && matches[0] !== undefined) {
+      resolved.push(matches[0]);
+    } else {
+      unresolvedIds.push(id);
+    }
+  }
+  return { results: resolved, unresolvedIds };
 };

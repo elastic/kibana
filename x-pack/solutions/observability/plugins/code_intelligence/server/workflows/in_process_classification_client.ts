@@ -28,7 +28,6 @@ import {
   type OtelClassification,
   type OtelClassificationRequest,
 } from '../domain/models/classification_codec';
-import { validateClassificationCompleteness } from '../domain/models/classification_completeness';
 import type { OperationResult } from '../domain/models/operation_result';
 import type { ClassificationWorkflowClient } from '../domain/ports/workflows';
 
@@ -168,14 +167,9 @@ export class InProcessClassificationWorkflowClient implements ClassificationWork
       validated.value,
       t.readonlyArray(loggingClassificationRt)
     );
-    if (result.status === 'failure') return result;
-    const complete = validateClassificationCompleteness(validated.value.candidates, result.value);
-    return complete.status === 'failure'
-      ? complete
-      : {
-          status: 'success',
-          value: sourceBackedLoggingResults(validated.value, complete.value),
-        };
+    return result.status === 'failure'
+      ? result
+      : { status: 'success', value: sourceBackedLoggingResults(validated.value, result.value) };
   }
 
   public async classifyOtel(
@@ -188,13 +182,8 @@ export class InProcessClassificationWorkflowClient implements ClassificationWork
       validated.value,
       t.readonlyArray(otelClassificationRt)
     );
-    if (result.status === 'failure') return result;
-    const complete = validateClassificationCompleteness(validated.value.candidates, result.value);
-    return complete.status === 'failure'
-      ? complete
-      : {
-          status: 'success',
-          value: sourceBackedOtelResults(validated.value, complete.value),
-        };
+    return result.status === 'failure'
+      ? result
+      : { status: 'success', value: sourceBackedOtelResults(validated.value, result.value) };
   }
 }
