@@ -75,7 +75,7 @@ import {
 import type { DiscoverSessionApiClassicTab } from '@kbn/as-code-discover-schema';
 import type { DiscoverSessionApiResponse, DiscoverSessionWarning } from '../../../../server';
 import { fromDiscoverSessionApiResponse } from '../../../session/session_conversions';
-import { createSessionService } from '../../../session/session_service';
+import { createDiscoverSessionService } from '../../../session/session_service';
 import type {
   DiscoverSessionClient,
   DiscoverSessionClientRequestData,
@@ -376,14 +376,16 @@ describe('Discover state', () => {
       async ({ warnings, toastCount }) => {
         const { internalState, services } = getDiscoverInternalStateMock();
         const session = createDiscoverSessionMock({ id: 'test-session' });
-        jest.spyOn(services.sessionService, 'get').mockResolvedValueOnce({ session, warnings });
+        jest
+          .spyOn(services.discoverSessionService, 'get')
+          .mockResolvedValueOnce({ session, warnings });
 
         await internalState.dispatch(internalStateActions.loadDataViewList()).unwrap();
         await internalState
           .dispatch(internalStateActions.initializeTabs({ discoverSessionId: session.id }))
           .unwrap();
 
-        expect(services.sessionService.get).toHaveBeenCalledWith(session.id);
+        expect(services.discoverSessionService.get).toHaveBeenCalledWith(session.id);
         expect(internalState.getState().persistedDiscoverSession).toEqual(session);
         expect(services.core.notifications.toasts.addWarning).toHaveBeenCalledTimes(toastCount);
       }
@@ -726,12 +728,14 @@ describe('Discover state', () => {
         ),
         get: jest.fn(async (_id: string) => ({ ...cloneDeep(savedResponse), resolve: {} })),
       };
-      const sessionService = createSessionService({
+      const discoverSessionService = createDiscoverSessionService({
         apiClient,
         legacyClient: services.savedSearch,
         useHttpApi: true,
       });
-      jest.spyOn(services.sessionService, 'save').mockImplementation(sessionService.save);
+      jest
+        .spyOn(services.discoverSessionService, 'save')
+        .mockImplementation(discoverSessionService.save);
 
       await firstLoad.saveDiscoverSession({ newCopyOnSave: copyOnSave });
 
@@ -774,7 +778,7 @@ describe('Discover state', () => {
       reloadedServices.storage = services.storage;
       reloadedServices.history = createMemoryHistory({ initialEntries: [url] });
       const reloaded = createState(reloadedServices);
-      const loadedSession = await sessionService.get(savedId);
+      const loadedSession = await discoverSessionService.get(savedId);
       await reloaded.initializeTabs({ persistedDiscoverSession: loadedSession.session });
       const reloadedTabId = reloaded.getCurrentTab().id;
       await reloaded.initializeSingleTab({ tabId: reloadedTabId });
@@ -1697,7 +1701,7 @@ describe('Discover state', () => {
       testServices.data.search.searchSource.create = jest
         .fn()
         .mockReturnValue(savedSearchWithTimeField.searchSource);
-      jest.spyOn(testServices.sessionService, 'get').mockResolvedValueOnce({
+      jest.spyOn(testServices.discoverSessionService, 'get').mockResolvedValueOnce({
         session: {
           ...savedSearchWithTimeField,
           id: savedSearchWithTimeField.id ?? '',
@@ -1745,7 +1749,7 @@ describe('Discover state', () => {
       testServices.data.search.searchSource.create = jest
         .fn()
         .mockReturnValue(savedSearchMock.searchSource);
-      jest.spyOn(testServices.sessionService, 'get').mockResolvedValueOnce({
+      jest.spyOn(testServices.discoverSessionService, 'get').mockResolvedValueOnce({
         session: {
           ...savedSearchMock,
           id: savedSearchMock.id ?? '',

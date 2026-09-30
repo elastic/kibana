@@ -55,7 +55,7 @@ import { discoverSharedPluginMock } from '@kbn/discover-shared-plugin/public/moc
 import { createUrlTrackerMock } from './url_tracker.mock';
 import { createBrowserHistory } from 'history';
 import { cpsPluginMock } from '@kbn/cps/public/mocks';
-import type { SessionService } from '../session';
+import type { DiscoverSessionService } from '../session';
 
 export function createDiscoverServicesMock(): DiscoverServices {
   const dataPlugin = dataPluginMock.createStartContract();
@@ -197,7 +197,7 @@ export function createDiscoverServicesMock(): DiscoverServices {
 
   const { profilesManagerMock } = createContextAwarenessMocks();
   const savedSearch = savedSearchPluginMock.createStartContract();
-  const sessionService: SessionService = {
+  const discoverSessionService: DiscoverSessionService = {
     get: jest.fn(async (id: string) => ({
       session: await savedSearch.getDiscoverSession(id),
       warnings: [],
@@ -305,7 +305,7 @@ export function createDiscoverServicesMock(): DiscoverServices {
       },
     },
     savedSearch,
-    sessionService,
+    discoverSessionService,
     dataViews: dataPlugin.dataViews,
     timefilter: dataPlugin.query.timefilter.timefilter,
     lens: {

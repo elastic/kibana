@@ -417,7 +417,7 @@ export const initializeTabs = createInternalStateAsyncThunk(
         return undefined;
       }
       try {
-        const { session, warnings } = await services.sessionService.get(discoverSessionId);
+        const { session, warnings } = await services.discoverSessionService.get(discoverSessionId);
 
         if (warnings.length) {
           showSessionWarnings({ session, warnings, core: services.core });

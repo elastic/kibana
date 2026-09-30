@@ -136,7 +136,7 @@ describe('DiscoverMainRoute', () => {
 
   test('loads a Discover session when its URL is ambiguous', async () => {
     const services = getServicesMock();
-    jest.spyOn(services.sessionService, 'get').mockResolvedValueOnce({
+    jest.spyOn(services.discoverSessionService, 'get').mockResolvedValueOnce({
       session: createDiscoverSessionMock({
         id: 'conflicting-session',
         sharingSavedObjectProps: {
@@ -165,7 +165,7 @@ describe('DiscoverMainRoute', () => {
 
     await waitForLoad();
 
-    expect(services.sessionService.get).toHaveBeenCalledWith('conflicting-session');
+    expect(services.discoverSessionService.get).toHaveBeenCalledWith('conflicting-session');
     expect(screen.queryByText('Cannot load this page')).not.toBeInTheDocument();
     expect(screen.getByTestId('discover-main-app')).toBeVisible();
   });
@@ -175,7 +175,7 @@ describe('DiscoverMainRoute', () => {
     const services = getServicesMock();
     const replaceHistory = jest.spyOn(services.history, 'replace');
     jest
-      .spyOn(services.sessionService, 'get')
+      .spyOn(services.discoverSessionService, 'get')
       .mockRejectedValueOnce(new SavedObjectNotFound({ type: 'search', id }));
     const props: MainRouteProps = {
       customizationCallbacks: [],
@@ -202,7 +202,7 @@ describe('DiscoverMainRoute', () => {
       );
     });
 
-    expect(services.sessionService.get).toHaveBeenCalledWith(id);
+    expect(services.discoverSessionService.get).toHaveBeenCalledWith(id);
     expect(services.urlTracker.setTrackedUrl).toHaveBeenCalledWith('/');
     expect(replaceHistory).toHaveBeenCalledWith(
       `/?notFound=search&notFoundMessage=Could not locate that search (id: ${id})`

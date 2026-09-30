@@ -16,7 +16,7 @@ import { dataViewMock, dataViewMockWithTimeField } from '@kbn/discover-utils/src
 import type { DiscoverServices } from '../../../../../build_services';
 import type { SaveDiscoverSessionParams } from '@kbn/saved-search-plugin/public';
 import { internalStateActions, selectHasUnsavedChanges } from '..';
-import { createSessionService, type DiscoverSessionClient } from '../../../../../session';
+import { createDiscoverSessionService, type DiscoverSessionClient } from '../../../../../session';
 import { ESQL_TYPE } from '@kbn/data-view-utils';
 import type { DataViewSpec } from '@kbn/data-views-plugin/common';
 import { internalStateSlice } from '../internal_state';
@@ -48,7 +48,7 @@ const setup = async ({
 } = {}) => {
   const services = createDiscoverServicesMock();
   const saveDiscoverSessionSpy = jest
-    .spyOn(services.sessionService, 'save')
+    .spyOn(services.discoverSessionService, 'save')
     .mockImplementation((discoverSession) =>
       Promise.resolve({
         ...discoverSession,
@@ -236,12 +236,12 @@ describe('saveDiscoverSession', () => {
       };
       const saveError = new Error('Save failed');
       apiClient[method].mockRejectedValueOnce(saveError);
-      const sessionService = createSessionService({
+      const discoverSessionService = createDiscoverSessionService({
         apiClient,
         legacyClient: services.savedSearch,
         useHttpApi: true,
       });
-      saveDiscoverSessionSpy.mockImplementation(sessionService.save);
+      saveDiscoverSessionSpy.mockImplementation(discoverSessionService.save);
 
       toolkit.internalState.dispatch(
         internalStateActions.updateAppState({ tabId, appState: { columns: ['message'] } })

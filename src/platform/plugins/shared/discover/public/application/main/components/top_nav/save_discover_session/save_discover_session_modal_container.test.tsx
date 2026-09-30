@@ -14,7 +14,7 @@ import { DiscoverSessionSaveDashboardModal } from './discover_session_save_dashb
 import { DiscoverSessionSaveModalContainer } from './save_discover_session_modal_container';
 import { getDiscoverInternalStateMock } from '../../../../../__mocks__/discover_state.mock';
 import { createDiscoverServicesMock } from '../../../../../__mocks__/services';
-import type { SessionService } from '../../../../../session';
+import type { DiscoverSessionService } from '../../../../../session';
 import type { DiscoverServices } from '../../../../../build_services';
 import {
   fromTabStateToSavedObjectTab,
@@ -89,7 +89,7 @@ const setup = async ({
   initialCopyOnSave?: boolean;
   initialTabDataView?: DataView;
   isEmbedded?: boolean;
-  mockSaveDiscoverSession?: SessionService['save'];
+  mockSaveDiscoverSession?: DiscoverSessionService['save'];
   onSaveCb?: () => void;
   persistedDiscoverSession?: DiscoverSession | false;
   services?: DiscoverServices;
@@ -124,7 +124,7 @@ const setup = async ({
     persistedDataViews: uniqueDataViews,
   });
 
-  jest.spyOn(services.sessionService, 'save').mockImplementation(mockSaveDiscoverSession);
+  jest.spyOn(services.discoverSessionService, 'save').mockImplementation(mockSaveDiscoverSession);
 
   await toolkit.initializeTabs({ persistedDiscoverSession: finalPersistedSession });
   await toolkit.initializeSingleTab({ tabId: toolkit.getCurrentTab().id });

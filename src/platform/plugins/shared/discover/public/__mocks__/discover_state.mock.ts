@@ -227,7 +227,7 @@ export function getDiscoverInternalStateMock({
     }: { persistedDiscoverSession?: DiscoverSession } = {}) => {
       if (persistedDiscoverSession) {
         jest
-          .spyOn(services.sessionService, 'get')
+          .spyOn(services.discoverSessionService, 'get')
           .mockResolvedValueOnce({ session: persistedDiscoverSession, warnings: [] });
       }
 

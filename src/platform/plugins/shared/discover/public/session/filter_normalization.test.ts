@@ -20,7 +20,7 @@ import {
   selectHasUnsavedChanges,
 } from '../application/main/state_management/redux';
 import type { DiscoverSessionClient, DiscoverSessionClientGetResult } from './api_client';
-import { createSessionService } from './session_service';
+import { createDiscoverSessionService } from './session_service';
 
 describe('filter normalization when loading a Discover session', () => {
   it.each([
@@ -104,12 +104,12 @@ describe('filter normalization when loading a Discover session', () => {
       const legacyGet = jest
         .spyOn(services.savedSearch, 'getDiscoverSession')
         .mockResolvedValue(legacySession);
-      const sessionService = createSessionService({
+      const discoverSessionService = createDiscoverSessionService({
         apiClient,
         legacyClient: services.savedSearch,
         useHttpApi,
       });
-      services.sessionService = sessionService;
+      services.discoverSessionService = discoverSessionService;
       const toolkit = getDiscoverInternalStateMock({
         services,
         persistedDataViews: [dataViewMock],

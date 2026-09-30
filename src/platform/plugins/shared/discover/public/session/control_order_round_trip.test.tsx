@@ -33,7 +33,7 @@ import {
   selectHasUnsavedChanges,
 } from '../application/main/state_management/redux';
 import type { DiscoverSessionClient } from './api_client';
-import { createSessionService } from './session_service';
+import { createDiscoverSessionService } from './session_service';
 import { fromDiscoverSessionApiResponse } from './session_conversions';
 
 describe('control order after saving a Discover session', () => {
@@ -97,12 +97,14 @@ describe('control order after saving a Discover session', () => {
     const legacySave = jest
       .spyOn(services.savedSearch, 'saveDiscoverSession')
       .mockImplementation(async (session) => ({ ...session, id: 'session-id', managed: false }));
-    const sessionService = createSessionService({
+    const discoverSessionService = createDiscoverSessionService({
       apiClient,
       legacyClient: services.savedSearch,
       useHttpApi,
     });
-    jest.spyOn(services.sessionService, 'save').mockImplementation(sessionService.save);
+    jest
+      .spyOn(services.discoverSessionService, 'save')
+      .mockImplementation(discoverSessionService.save);
 
     const onApiAvailable = jest.fn<void, [ControlGroupRendererApi]>();
     render(
