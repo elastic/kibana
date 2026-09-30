@@ -467,6 +467,7 @@ export function AgentBasedSection({
 
           <AgentPolicyPanel
             agentHostsMode={agentHostsMode}
+            isEditMode={isEditMode}
             isPolicyCreated={isPolicyCreated}
             isCredentialReady={isCredentialReady}
             isPolicyNameLoading={isPolicyNameLoading}
