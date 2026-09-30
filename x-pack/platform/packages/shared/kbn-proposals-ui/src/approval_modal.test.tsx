@@ -51,6 +51,21 @@ describe('ApprovalModal', () => {
     expect(screen.getByText('Needs review')).toBeInTheDocument();
   });
 
+  it('explains a previous execution failure, same as the Agent Builder chat card', () => {
+    renderModal({
+      proposal: { ...mockProposal, previousExecutionError: 'HTTP 400: invalid query' },
+    });
+    expect(screen.getByText('A previous attempt at this action failed')).toBeInTheDocument();
+    expect(screen.getByText('HTTP 400: invalid query')).toBeInTheDocument();
+  });
+
+  it('explains an expired deadline, same as the Agent Builder chat card', () => {
+    renderModal({ proposal: { ...mockProposal, expired: true } });
+    expect(
+      screen.getByText('The decision deadline has passed. This proposal can no longer be actioned.')
+    ).toBeInTheDocument();
+  });
+
   it('builds the header caption from category, reversibility and impact, unlike the flyout row which omits impact', () => {
     renderModal({
       proposal: {

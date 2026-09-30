@@ -6,51 +6,22 @@
  */
 
 import React, { memo, useCallback, useEffect, useState } from 'react';
-import { css } from '@emotion/react';
-import {
-  EuiButton,
-  EuiButtonEmpty,
-  EuiCallOut,
-  EuiLoadingSpinner,
-  EuiMarkdownFormat,
-  useEuiTheme,
-  type EuiButtonColor,
-} from '@elastic/eui';
-import type { IconType } from '@elastic/eui';
+import { type EuiButtonColor, useGeneratedHtmlId } from '@elastic/eui';
 import type { DismissReason } from '@kbn/proposals-common';
-import { ApprovalModalHeader } from './approval_modal_header';
+import { ApprovalContentHeader } from './approval_content_header';
 import { ApprovalActorTime } from './approval_actor_time';
 import { AlwaysAllowCheckbox } from './always_allow_checkbox';
 import { DeclineReasonForm } from './decline_reason_form';
+import { ApprovalContentBody } from './approval_content_body';
+import { ApprovalStatusCallouts } from './approval_status_callouts';
+import { ApprovalContentFooter } from './approval_content_footer';
 import {
   getApprovalOutcomeBadge,
   getApprovalOutcomeBanner,
   type ApprovalPhase,
 } from './approval_outcome';
 import { APPROVAL_MODAL_TRANSLATIONS } from './translations';
-
-export interface DeclineParams {
-  dismissReason: DismissReason;
-  rationale?: string;
-}
-
-export interface AlwaysAllowOption {
-  id: string;
-  label: React.ReactNode;
-  checked: boolean;
-  onChange: (checked: boolean) => void;
-}
-
-export interface ApprovalAction {
-  label: string;
-  onClick: () => void | Promise<void>;
-  /** Overrides the component-level {@link ApprovalContentProps.iconType} on the button. */
-  iconType?: IconType;
-  color?: EuiButtonColor;
-  isDisabled?: boolean;
-  isLoading?: boolean;
-  'data-test-subj'?: string;
-}
+import type { ApprovalAction, AlwaysAllowOption, DeclineParams } from './types';
 
 /**
  * A proposal already decided, read from the real record rather than assumed from a click.
@@ -109,13 +80,21 @@ export interface ApprovalContentProps {
    * placed inside a modal or an Agent Builder chat card. Disabled whenever `primaryAction` is.
    */
   onDismiss?: (params: DeclineParams) => Promise<void>;
-  /** Extra content inserted between the body and the footer — use for host-specific inline content. */
-  children?: React.ReactNode;
+  /**
+   * Error from a prior run of this proposal's action, shown as a warning explaining why the
+   * proposal is being offered again. Only rendered while still pending — a decided proposal's
+   * outcome banner already covers it.
+   */
+  previousExecutionError?: string;
+  /**
+   * Whether the decision deadline has passed. `ApprovalContent`'s own badge already says
+   * "Expired"; this adds the explanation the badge alone has no room for. Passed explicitly
+   * rather than derived from `decision` here, since a caller may compute it against a proposal
+   * shape this component never sees.
+   */
+  isExpired?: boolean;
   'data-test-subj'?: string;
 }
-
-const bannerIconFor = (color: 'success' | 'primary' | 'danger'): IconType =>
-  color === 'success' ? 'check' : color === 'danger' ? 'warning' : 'clock';
 
 /**
  * Layout-agnostic approval UI.
@@ -151,10 +130,11 @@ export const ApprovalContent = memo<ApprovalContentProps>(
     primaryAction,
     secondaryActions,
     onDismiss,
-    children,
+    previousExecutionError,
+    isExpired,
     'data-test-subj': dataTestSubj,
   }) => {
-    const { euiTheme } = useEuiTheme();
+    const generatedTitleId = useGeneratedHtmlId({ prefix: 'ApprovalContent' });
     const [actionError, setActionError] = useState<string | undefined>(undefined);
     const [mode, setMode] = useState<'view' | 'declining'>('view');
     const [dismissReason, setDismissReason] = useState<DismissReason>('no_reason');
@@ -275,74 +255,21 @@ export const ApprovalContent = memo<ApprovalContentProps>(
 
     return (
       <>
-        <ApprovalModalHeader
+        <ApprovalContentHeader
           badge={badge}
           caption={headerCaption}
           title={title}
-          titleId={titleId ?? ''}
+          titleId={titleId ?? generatedTitleId}
         />
 
-        <div
-          css={css({
-            padding: `0 ${euiTheme.size.base} ${euiTheme.size.base} ${euiTheme.size.base}`,
-            maxBlockSize: '50vh',
-            overflowY: 'auto',
-          })}
-        >
-          {/* A comment is as long as the worker made it, so the body scrolls and the footer stays
-            reachable without the modal growing past the viewport. Hidden while declining: the
-            reason form below takes its place rather than sitting alongside it. */}
-          {mode === 'view' && comment !== undefined && (
-            <div css={css({ marginBottom: euiTheme.size.m })}>
-              <EuiMarkdownFormat
-                textSize="s"
-                data-test-subj={dataTestSubj ? `${dataTestSubj}-comment` : undefined}
-              >
-                {comment}
-              </EuiMarkdownFormat>
-            </div>
-          )}
-
-          {banner && (
-            // eslint-disable-next-line @kbn/kbn-ui/prefer_kbn_ui_callout
-            <EuiCallOut
-              announceOnMount
-              size="s"
-              color={banner.color}
-              iconType={banner.isLoading ? EuiLoadingSpinner : bannerIconFor(banner.color)}
-              title={
-                // The reason/hint suffix reads as detail, not part of the state word itself — the
-                // callout's own title styling would otherwise bold all of it.
-                bannerSuffix ? (
-                  <>
-                    {banner.title}
-                    <span css={css({ fontWeight: euiTheme.font.weight.regular })}>
-                      {' • '}
-                      {bannerSuffix}
-                    </span>
-                  </>
-                ) : (
-                  banner.title
-                )
-              }
-              data-test-subj={dataTestSubj ? `${dataTestSubj}-outcome` : undefined}
-            />
-          )}
-
-          {actionError && (
-            <>
-              <div css={css({ marginTop: euiTheme.size.s })} />
-              {/* eslint-disable-next-line @kbn/kbn-ui/prefer_kbn_ui_callout */}
-              <EuiCallOut
-                announceOnMount
-                size="s"
-                color="danger"
-                title={actionError}
-                data-test-subj={dataTestSubj ? `${dataTestSubj}-error` : undefined}
-              />
-            </>
-          )}
-        </div>
+        <ApprovalContentBody
+          mode={mode}
+          comment={comment}
+          banner={banner}
+          bannerSuffix={bannerSuffix}
+          actionError={actionError}
+          data-test-subj={dataTestSubj}
+        />
 
         {mode === 'view' && alwaysAllow && (
           <AlwaysAllowCheckbox
@@ -351,7 +278,12 @@ export const ApprovalContent = memo<ApprovalContentProps>(
           />
         )}
 
-        {children}
+        <ApprovalStatusCallouts
+          isPending={approvalPhase === 'pending'}
+          previousExecutionError={previousExecutionError}
+          isExpired={isExpired}
+          data-test-subj={dataTestSubj}
+        />
 
         {showDeclineForm && (
           <DeclineReasonForm
@@ -366,44 +298,12 @@ export const ApprovalContent = memo<ApprovalContentProps>(
         {/* Decided/transient states name their actor in the header caption already — no need
             to repeat it here, so there is nothing left in the footer to show. */}
         {!isSettledOrTransient && hasFooter && (
-          <div
-            css={css({
-              display: 'flex',
-              gap: euiTheme.size.s,
-              justifyContent: 'flex-end',
-              padding: `0 ${euiTheme.size.base} ${euiTheme.size.base}`,
-            })}
-          >
-            {/* Secondaries first so the decision that commits something sits rightmost. */}
-            {resolvedSecondaryActions?.map((action, i) => (
-              <EuiButtonEmpty
-                key={i}
-                size="s"
-                color={action.color ?? 'primary'}
-                iconType={action.iconType}
-                isDisabled={action.isDisabled}
-                isLoading={action.isLoading}
-                onClick={action.onClick}
-                data-test-subj={action['data-test-subj']}
-              >
-                {action.label}
-              </EuiButtonEmpty>
-            ))}
-            {resolvedPrimaryAction && (
-              <EuiButton
-                fill
-                size="s"
-                color={resolvedPrimaryAction.color ?? defaultButtonColor}
-                iconType={resolvedPrimaryAction.iconType ?? 'play'}
-                isDisabled={resolvedPrimaryAction.isDisabled}
-                isLoading={resolvedPrimaryAction.isLoading}
-                onClick={() => handlePrimaryClick(resolvedPrimaryAction)}
-                data-test-subj={resolvedPrimaryAction['data-test-subj']}
-              >
-                {resolvedPrimaryAction.label}
-              </EuiButton>
-            )}
-          </div>
+          <ApprovalContentFooter
+            secondaryActions={resolvedSecondaryActions}
+            primaryAction={resolvedPrimaryAction}
+            defaultButtonColor={defaultButtonColor}
+            onPrimaryClick={handlePrimaryClick}
+          />
         )}
       </>
     );

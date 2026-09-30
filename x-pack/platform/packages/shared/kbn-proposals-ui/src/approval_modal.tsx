@@ -8,7 +8,7 @@
 import React, { memo } from 'react';
 import { css } from '@emotion/react';
 import { EuiModal, useEuiTheme, useGeneratedHtmlId } from '@elastic/eui';
-import type { ApprovalAction, DeclineParams } from './approval_content';
+import type { ApprovalAction, DeclineParams, AlwaysAllowOption } from './types';
 import { ApprovalContent } from './approval_content';
 import {
   getProposalCaption,
@@ -20,12 +20,7 @@ import { APPROVAL_MODAL_TRANSLATIONS } from './translations';
 import type { ApprovalProposal } from './types';
 
 export interface ApprovalModalProps {
-  alwaysAllow?: {
-    id: string;
-    label: React.ReactNode;
-    checked: boolean;
-    onChange: (checked: boolean) => void;
-  };
+  alwaysAllow?: AlwaysAllowOption;
   proposal: ApprovalProposal;
   onConfirm: () => Promise<void>;
   onClose: () => void;
@@ -73,7 +68,7 @@ export const ApprovalModal = memo<ApprovalModalProps>(
     'data-test-subj': dataTestSubj,
   }) => {
     const { euiTheme } = useEuiTheme();
-    const titleId = useGeneratedHtmlId({ prefix: 'approvalModalHeader' });
+    const titleId = useGeneratedHtmlId({ prefix: 'ApprovalModal' });
 
     const { title } = proposal;
     const isExpired = isProposalExpired(proposal);
@@ -96,7 +91,6 @@ export const ApprovalModal = memo<ApprovalModalProps>(
           title={title}
           tone={getProposalTone(proposal)}
           comment={proposal.comment}
-          titleId={titleId}
           caption={getProposalCaption(proposal, { includeRiskDetails: true })}
           decision={getProposalDecision(proposal)}
           isSubmitting={isSubmitting}
@@ -105,6 +99,8 @@ export const ApprovalModal = memo<ApprovalModalProps>(
           data-test-subj={dataTestSubj}
           primaryAction={primaryAction}
           onDismiss={onDismiss}
+          previousExecutionError={proposal.previousExecutionError}
+          isExpired={isExpired}
         />
       </EuiModal>
     );

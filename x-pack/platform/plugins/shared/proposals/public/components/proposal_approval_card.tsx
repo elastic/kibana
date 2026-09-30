@@ -7,7 +7,7 @@
 
 import React, { memo, useCallback } from 'react';
 import { css } from '@emotion/react';
-import { EuiLoadingSpinner, EuiSpacer, useEuiTheme, useGeneratedHtmlId } from '@elastic/eui';
+import { EuiLoadingSpinner, useEuiTheme, useGeneratedHtmlId } from '@elastic/eui';
 import { KbnDangerCallout, KbnWarningCallout } from '@kbn/ui-callout';
 import { i18n } from '@kbn/i18n';
 import { isHttpFetchError } from '@kbn/core-http-browser';
@@ -95,7 +95,7 @@ const MAX_SUPERSEDE_HOPS = 50;
 export const ProposalApprovalCard = memo<ProposalApprovalCardProps>(
   ({ proposalId, chainHops = 0 }) => {
     const { euiTheme } = useEuiTheme();
-    const titleId = useGeneratedHtmlId({ prefix: 'approvalChatHeader' });
+    const titleId = useGeneratedHtmlId({ prefix: 'ApprovalChatCard' });
 
     const proposalQuery = useProposal(proposalId);
     const approveMutation = useApproveProposal();
@@ -204,47 +204,10 @@ export const ProposalApprovalCard = memo<ProposalApprovalCardProps>(
           currentActorName={currentActorName}
           primaryAction={primaryAction}
           onDismiss={isPending ? handleDismiss : undefined}
+          previousExecutionError={liveProposal.previousExecutionError}
+          isExpired={isExpired}
           data-test-subj={`proposalCard-${proposalId}`}
-        >
-          {/* Why this proposal is being offered again, when it is a retry. */}
-          {isPending && liveProposal.previousExecutionError && (
-            <>
-              <EuiSpacer size="m" />
-              <div css={css({ padding: `0 ${euiTheme.size.m}` })}>
-                <KbnWarningCallout
-                  announceOnMount
-                  size="s"
-                  title={i18n.translate('xpack.proposals.proposalCard.previousFailureCallout', {
-                    defaultMessage: 'A previous attempt at this action failed',
-                  })}
-                >
-                  {liveProposal.previousExecutionError}
-                </KbnWarningCallout>
-              </div>
-              <EuiSpacer size="m" />
-            </>
-          )}
-
-          {/* `ApprovalContent`'s own badge already says "Expired"; this callout adds the
-              explanation the badge alone has no room for. `getProposalDecision` reports a
-              gate timeout as a real (actor-less) decision, so `decision` is set here too —
-              gating on `isExpired` alone, not on `decision`'s absence. */}
-          {isExpired && (
-            <>
-              <EuiSpacer size="m" />
-              <div css={css({ padding: `0 ${euiTheme.size.m}` })}>
-                <KbnWarningCallout
-                  announceOnMount
-                  size="s"
-                  title={i18n.translate('xpack.proposals.proposalCard.expiredCallout', {
-                    defaultMessage:
-                      'The decision deadline has passed. This proposal can no longer be actioned.',
-                  })}
-                />
-              </div>
-            </>
-          )}
-        </ApprovalContent>
+        />
       </div>
     );
   }

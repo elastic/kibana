@@ -51,7 +51,6 @@ let latestOnDismiss: ((params: DeclineParams) => Promise<void>) | undefined;
 jest.mock('@kbn/proposals-ui', () => ({
   ...jest.requireActual('@kbn/proposals-ui'),
   ApprovalContent: ({
-    children,
     primaryAction,
     onDismiss,
     tone,
@@ -59,13 +58,16 @@ jest.mock('@kbn/proposals-ui', () => ({
     decision,
     isSubmitting,
     currentActorName,
+    previousExecutionError,
+    isExpired,
   }: {
-    children?: React.ReactNode;
     tone?: string;
     comment?: string;
     decision?: ApprovalDecision;
     isSubmitting?: 'applying' | 'declining';
     currentActorName?: string;
+    previousExecutionError?: string;
+    isExpired?: boolean;
     primaryAction?: {
       label: string;
       onClick: () => void | Promise<void>;
@@ -98,7 +100,15 @@ jest.mock('@kbn/proposals-ui', () => ({
         )}
         {currentActorName && <div data-test-subj="approval-current-actor">{currentActorName}</div>}
         {isSubmitting && <div data-test-subj="approval-is-submitting">{isSubmitting}</div>}
-        {children}
+        {/* Mirrors the real `ApprovalContent`'s own gating: only while still pending, i.e. no
+            `decision` yet. */}
+        {!decision && previousExecutionError && (
+          <div data-test-subj="warning-callout">
+            A previous attempt at this action failed
+            {previousExecutionError}
+          </div>
+        )}
+        {isExpired && <div data-test-subj="warning-callout">Expired</div>}
       </div>
     );
   },

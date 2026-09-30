@@ -138,11 +138,31 @@ describe('ApprovalContent', () => {
     expect(screen.queryByTestId('content-cancel')).not.toBeInTheDocument();
   });
 
-  it('renders children between the body and the footer', () => {
-    renderContent({ children: <div data-test-subj="inline-form">dismiss form</div> });
-    expect(isBefore(screen.getByTestId('inline-form'), screen.getByTestId('content-confirm'))).toBe(
-      true
-    );
+  it('renders the previous-execution-error callout between the body and the footer while pending', () => {
+    renderContent({ previousExecutionError: 'HTTP 400: something went wrong' });
+    expect(screen.getByText('A previous attempt at this action failed')).toBeInTheDocument();
+    expect(screen.getByText('HTTP 400: something went wrong')).toBeInTheDocument();
+    expect(
+      isBefore(
+        screen.getByText('A previous attempt at this action failed'),
+        screen.getByTestId('content-confirm')
+      )
+    ).toBe(true);
+  });
+
+  it('hides the previous-execution-error callout once the proposal is decided', () => {
+    renderContent({
+      previousExecutionError: 'HTTP 400: something went wrong',
+      decision: { status: 'applied' },
+    });
+    expect(screen.queryByText('A previous attempt at this action failed')).not.toBeInTheDocument();
+  });
+
+  it('renders an expiry explanation when isExpired is set', () => {
+    renderContent({ isExpired: true });
+    expect(
+      screen.getByText('The decision deadline has passed. This proposal can no longer be actioned.')
+    ).toBeInTheDocument();
   });
 
   it('renders always-allow checkbox when alwaysAllow is supplied', () => {

@@ -91,4 +91,11 @@ export const APPROVAL_MODAL_TRANSLATIONS = Object.freeze({
   unknownActorFallback: i18n.translate('xpack.proposals.approvalModal.outcome.unknownActor', {
     defaultMessage: 'Someone',
   }),
+  previousFailureCalloutTitle: i18n.translate(
+    'xpack.proposals.approvalModal.previousFailureCallout',
+    { defaultMessage: 'A previous attempt at this action failed' }
+  ),
+  expiredCalloutTitle: i18n.translate('xpack.proposals.approvalModal.expiredCallout', {
+    defaultMessage: 'The decision deadline has passed. This proposal can no longer be actioned.',
+  }),
 });
