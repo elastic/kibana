@@ -1548,6 +1548,31 @@ describe('applyMemoryEdits entries: new, update, merge', () => {
     );
   });
 
+  it('writes an entry that overlaps a harmful memory it does not name', async () => {
+    const wrong = page(
+      'memory_pdt-skew',
+      'Host clock lag',
+      'The host clock is 7 hours behind UTC.'
+    );
+    const store = storeWith([wrong]);
+    const synthesizeMemoryGroup = jest.fn();
+
+    await applyMemoryEdits({
+      store,
+      recalledIds: [wrong.id],
+      recalledMemories: [wrong],
+      labels: { useful: [], harmful: [wrong.id] },
+      extractions: [entry({})],
+      context: 'clock',
+      synthesizeMemoryGroup,
+      logger: loggerMock.create(),
+    });
+
+    expect(store.archive).toHaveBeenCalledWith(wrong.id, 'harmful');
+    expect(synthesizeMemoryGroup).not.toHaveBeenCalled();
+    expect(store.create).toHaveBeenCalledWith(expect.objectContaining({ slug: 'host-clock-lag' }));
+  });
+
   it('merges only the live memories when an entry also replaces a harmful one', async () => {
     const wrong = page('memory_pdt-skew', 'PDT skew', 'The host clock is 7 hours behind UTC.');
     const right = page('memory_x509-errors', 'x509 errors', 'x509 not yet valid errors on TLS.');

@@ -791,8 +791,8 @@ export const applyMemoryEdits = async ({
   );
 
   const harmful = new Set(harmfulIds);
-  // A harmful memory never reaches the writer, even when an entry replaces it; that entry is
-  // written from this run alone.
+  // A harmful memory never reaches the writer, even when an entry replaces or overlaps it; that
+  // entry is written without it.
   for (const id of archiveIds) {
     await store.archive(id, 'harmful');
     summary.harmfulArchiveCount += 1;
@@ -866,19 +866,12 @@ export const applyMemoryEdits = async ({
       recalledIds,
       recalledMemories,
       catalogHits: exactPage ? [exactPage, ...catalogHits] : catalogHits,
-    }).filter((page) => !extra.replaces.includes(page.id));
+    }).filter((page) => !extra.replaces.includes(page.id) && !harmful.has(page.id));
     const live = [...named, ...unnamedOverlaps];
     if (live.some((page) => consumedIds.has(page.id))) {
       // A prior entry already replaces this source. Consuming later proposals avoids
       // publishing another live page for the same fact.
       logger.debug(`Skipped extraction "${extra.slug}" — a source already belongs to an entry`);
-      consumedExtracts.add(index);
-      continue;
-    }
-    if (unnamedOverlaps.some((page) => harmful.has(page.id))) {
-      logger.debug(
-        `Skipped extraction "${extra.slug}" — it overlaps a harmful memory it does not replace`
-      );
       consumedExtracts.add(index);
       continue;
     }
