@@ -4255,6 +4255,160 @@ describe('Output Service', () => {
       });
       expect(soClient.delete).toHaveBeenCalled();
     });
+
+    describe('cross-space authorization', () => {
+      const mockRequest = {} as any;
+      const mockAtSpaces = jest.fn();
+
+      function mockSecurity(hasAllRequested = true) {
+        mockAtSpaces.mockResolvedValue({ hasAllRequested });
+        mockedAppContextService.getSecurity.mockReturnValue({
+          authz: {
+            mode: { useRbacForRequest: jest.fn().mockReturnValue(true) },
+            actions: { api: { get: (name: string) => `api:${name}` } },
+            checkPrivilegesWithRequest: jest.fn().mockReturnValue({ atSpaces: mockAtSpaces }),
+          },
+        } as any);
+      }
+
+      beforeEach(() => {
+        mockAtSpaces.mockReset();
+        mockedAgentPolicyService.getSpacesForPoliciesUsingOutput.mockResolvedValue({
+          spaceIds: new Set(['default']),
+          truncated: false,
+        });
+        mockedPackagePolicyService.getSpacesForPoliciesUsingOutput.mockResolvedValue({
+          spaceIds: new Set<string>(),
+          truncated: false,
+        });
+      });
+
+      it('skips authz check when request is not provided (preconfiguration path)', async () => {
+        mockSecurity(false); // would reject if called
+        getMockedSoClient();
+
+        await outputService.delete('output-test');
+
+        expect(mockAtSpaces).not.toHaveBeenCalled();
+      });
+
+      it('skips space collection and authz check when RBAC is inactive', async () => {
+        mockedAppContextService.getSecurity.mockReturnValue({
+          authz: {
+            mode: { useRbacForRequest: jest.fn().mockReturnValue(false) },
+            actions: { api: { get: (name: string) => `api:${name}` } },
+            checkPrivilegesWithRequest: jest.fn().mockReturnValue({ atSpaces: mockAtSpaces }),
+          },
+        } as any);
+        getMockedSoClient();
+
+        await outputService.delete('output-test', { request: mockRequest });
+
+        expect(mockedAgentPolicyService.getSpacesForPoliciesUsingOutput).not.toHaveBeenCalled();
+        expect(mockAtSpaces).not.toHaveBeenCalled();
+        expect(mockedAgentPolicyService.removeOutputFromAll).toHaveBeenCalled();
+      });
+
+      it('allows delete when caller holds required privileges in all affected spaces', async () => {
+        mockSecurity(true);
+        getMockedSoClient();
+
+        await expect(
+          outputService.delete('output-test', { request: mockRequest })
+        ).resolves.not.toThrow();
+        expect(mockAtSpaces).toHaveBeenCalled();
+        expect(mockedAgentPolicyService.removeOutputFromAll).toHaveBeenCalled();
+      });
+
+      it('blocks delete and does not call removeOutputFromAll when caller lacks privileges', async () => {
+        mockSecurity(false);
+        getMockedSoClient();
+
+        await expect(outputService.delete('output-test', { request: mockRequest })).rejects.toThrow(
+          'Insufficient privileges to delete output output-test'
+        );
+        expect(mockedAgentPolicyService.removeOutputFromAll).not.toHaveBeenCalled();
+        expect(mockedPackagePolicyService.removeOutputFromAll).not.toHaveBeenCalled();
+      });
+
+      it('throws when agent-policy list is truncated and does not mutate', async () => {
+        mockSecurity(true);
+        mockedAgentPolicyService.getSpacesForPoliciesUsingOutput.mockResolvedValue({
+          spaceIds: new Set(['default']),
+          truncated: true,
+        });
+        getMockedSoClient();
+
+        await expect(outputService.delete('output-test', { request: mockRequest })).rejects.toThrow(
+          /too many agent policies/
+        );
+        expect(mockedAgentPolicyService.removeOutputFromAll).not.toHaveBeenCalled();
+      });
+
+      it('checks integrations-all only on package-policy spaces, not on agent-only spaces', async () => {
+        mockSecurity(true);
+        mockedAgentPolicyService.getSpacesForPoliciesUsingOutput.mockResolvedValue({
+          spaceIds: new Set(['space-a']),
+          truncated: false,
+        });
+        mockedPackagePolicyService.getSpacesForPoliciesUsingOutput.mockResolvedValue({
+          spaceIds: new Set(['space-b']),
+          truncated: false,
+        });
+        getMockedSoClient();
+
+        await outputService.delete('output-test', { request: mockRequest });
+
+        // First call: agent-policy spaces only — no integrations-all required
+        expect(mockAtSpaces).toHaveBeenNthCalledWith(
+          1,
+          ['space-a'],
+          expect.objectContaining({
+            kibana: expect.arrayContaining([expect.stringContaining('fleet-agent-policies-all')]),
+          })
+        );
+        expect(mockAtSpaces).not.toHaveBeenNthCalledWith(
+          1,
+          expect.any(Array),
+          expect.objectContaining({
+            kibana: expect.arrayContaining([expect.stringContaining('integrations-all')]),
+          })
+        );
+        // Second call: package-policy spaces — both privileges required
+        expect(mockAtSpaces).toHaveBeenNthCalledWith(
+          2,
+          ['space-b'],
+          expect.objectContaining({
+            kibana: expect.arrayContaining([
+              expect.stringContaining('integrations-all'),
+              expect.stringContaining('fleet-agent-policies-all'),
+            ]),
+          })
+        );
+      });
+
+      it('calls atSpaces only once (agent check) when no package policies are affected', async () => {
+        mockSecurity(true);
+        getMockedSoClient(); // packagePolicies spaceIds is empty by default in this block
+
+        await outputService.delete('output-test', { request: mockRequest });
+
+        // Only the agent-policy check fires; the package-policy check is a no-op (empty set)
+        expect(mockAtSpaces).toHaveBeenCalledTimes(1);
+        expect(mockAtSpaces).toHaveBeenCalledWith(
+          expect.any(Array),
+          expect.objectContaining({
+            kibana: expect.arrayContaining([expect.stringContaining('fleet-agent-policies-all')]),
+          })
+        );
+        expect(mockAtSpaces).not.toHaveBeenCalledWith(
+          expect.any(Array),
+          expect.objectContaining({
+            kibana: expect.arrayContaining([expect.stringContaining('integrations-all')]),
+          })
+        );
+      });
+    });
   });
 
   describe('get', () => {
