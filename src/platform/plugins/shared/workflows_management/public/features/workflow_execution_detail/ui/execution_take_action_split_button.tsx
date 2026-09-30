@@ -54,19 +54,34 @@ export const ExecutionTakeActionSplitButton = React.memo<ExecutionTakeActionSpli
     const handleRerun = useCallback(() => {
       if (!canExecuteWorkflow || !execution.workflowId) return;
 
+      const replayIsTestRun = execution.isTestRun === true;
+
       // Stay on this execution so the flyout does not close behind the modal.
       if (routeWorkflowId === execution.workflowId) {
-        updateUrlState({ replayExecutionId: execution.id });
+        updateUrlState({
+          replayExecutionId: execution.id,
+          ...(replayIsTestRun ? { replayIsTestRun: true } : {}),
+        });
         return;
       }
 
+      const params = new URLSearchParams({
+        tab: 'executions',
+        executionId: execution.id,
+        replayExecutionId: execution.id,
+      });
+      if (replayIsTestRun) {
+        params.set('replayIsTestRun', 'true');
+      }
+
       application.navigateToApp('workflows', {
-        path: `/${execution.workflowId}?tab=executions&executionId=${execution.id}&replayExecutionId=${execution.id}`,
+        path: `/${execution.workflowId}?${params.toString()}`,
       });
     }, [
       application,
       canExecuteWorkflow,
       execution.id,
+      execution.isTestRun,
       execution.workflowId,
       routeWorkflowId,
       updateUrlState,

@@ -13,9 +13,9 @@ import { i18n } from '@kbn/i18n';
 import { useRunWorkflow, useTestWorkflow, useWorkflowsCapabilities } from '@kbn/workflows-ui';
 import {
   selectEditorYaml,
-  selectExecution,
   selectIsTestModalOpen,
   selectReplayExecutionId,
+  selectReplayIsTestRun,
   selectWorkflow,
   selectWorkflowDefinition,
   selectWorkflowId,
@@ -42,7 +42,7 @@ export const WorkflowDetailTestModal = () => {
 
   const isTestModalOpen = useSelector(selectIsTestModalOpen);
   const replayExecutionId = useSelector(selectReplayExecutionId);
-  const execution = useSelector(selectExecution);
+  const replayIsTestRun = useSelector(selectReplayIsTestRun);
   const definition = useSelector(selectWorkflowDefinition);
   const workflowId = useSelector(selectWorkflowId);
   const yamlString = useSelector(selectEditorYaml);
@@ -51,9 +51,8 @@ export const WorkflowDetailTestModal = () => {
   const { mutateAsync: runWorkflow } = useRunWorkflow();
   const { mutateAsync: testSavedWorkflow } = useTestWorkflow();
   const isReplay = Boolean(replayExecutionId);
-  // The flyout keeps this execution loaded. Match its run mode, same as bulk re-run.
-  const replayIsTestRun =
-    isReplay && execution?.id === replayExecutionId && execution.isTestRun === true;
+  // Stored with the replay id at click time. The page store is empty until the
+  // execution loads, which is after a no-input workflow auto-submits.
   const isProductionReplay = isReplay && !replayIsTestRun;
 
   const handleRunWorkflow = useCallback(

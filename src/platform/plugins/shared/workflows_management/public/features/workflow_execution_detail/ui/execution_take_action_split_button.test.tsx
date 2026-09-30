@@ -76,6 +76,39 @@ describe('ExecutionTakeActionSplitButton', () => {
     const search = screen.getByTestId('location-search').textContent ?? '';
     expect(search).toContain('executionId=exec-1');
     expect(search).toContain('replayExecutionId=exec-1');
+    expect(search).not.toContain('replayIsTestRun');
+    expect(navigateToApp).not.toHaveBeenCalled();
+  });
+
+  it('keeps a test re-run as a test run when staying on the workflow', () => {
+    const services = createStartServicesMock();
+    const navigateToApp = jest.fn();
+    services.application.navigateToApp = navigateToApp;
+
+    render(
+      <Route path="/:id">
+        <ExecutionTakeActionSplitButton
+          execution={createMockWorkflowExecutionDto({
+            id: 'exec-1',
+            workflowId: 'wf-1',
+            isTestRun: true,
+          })}
+        />
+        <LocationSearch />
+      </Route>,
+      {
+        wrapper: getTestProvider({
+          services,
+          initialEntries: ['/wf-1?tab=executions&executionId=exec-1'],
+        }),
+      }
+    );
+
+    fireEvent.click(screen.getByRole('button', { name: 'Re-run' }));
+
+    const search = screen.getByTestId('location-search').textContent ?? '';
+    expect(search).toContain('replayExecutionId=exec-1');
+    expect(search).toContain('replayIsTestRun=true');
     expect(navigateToApp).not.toHaveBeenCalled();
   });
 
@@ -100,6 +133,36 @@ describe('ExecutionTakeActionSplitButton', () => {
 
     expect(navigateToApp).toHaveBeenCalledWith('workflows', {
       path: '/wf-1?tab=executions&executionId=exec-1&replayExecutionId=exec-1',
+    });
+  });
+
+  it('navigates a test re-run with the test-run flag', () => {
+    const services = createStartServicesMock();
+    const navigateToApp = jest.fn();
+    services.application.navigateToApp = navigateToApp;
+
+    render(
+      <Route path="/:id">
+        <ExecutionTakeActionSplitButton
+          execution={createMockWorkflowExecutionDto({
+            id: 'exec-1',
+            workflowId: 'wf-1',
+            isTestRun: true,
+          })}
+        />
+      </Route>,
+      {
+        wrapper: getTestProvider({
+          services,
+          initialEntries: ['/executions?executionId=exec-1'],
+        }),
+      }
+    );
+
+    fireEvent.click(screen.getByRole('button', { name: 'Re-run' }));
+
+    expect(navigateToApp).toHaveBeenCalledWith('workflows', {
+      path: '/wf-1?tab=executions&executionId=exec-1&replayExecutionId=exec-1&replayIsTestRun=true',
     });
   });
 

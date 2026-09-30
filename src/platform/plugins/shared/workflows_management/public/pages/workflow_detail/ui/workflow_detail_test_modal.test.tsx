@@ -14,9 +14,9 @@ import { createMockWorkflowsCapabilities } from '@kbn/workflows-ui/mocks';
 import { WorkflowDetailTestModal } from './workflow_detail_test_modal';
 import {
   selectEditorYaml,
-  selectExecution,
   selectIsTestModalOpen,
   selectReplayExecutionId,
+  selectReplayIsTestRun,
   selectWorkflow,
   selectWorkflowDefinition,
   selectWorkflowId,
@@ -55,8 +55,8 @@ jest.mock('../../../hooks/use_async_thunk', () => ({
 
 jest.mock('../../../entities/workflows/store/workflow_detail/selectors', () => ({
   selectIsTestModalOpen: jest.fn(),
-  selectExecution: jest.fn(),
   selectReplayExecutionId: jest.fn(),
+  selectReplayIsTestRun: jest.fn(),
   selectWorkflowDefinition: jest.fn(),
   selectWorkflowId: jest.fn(),
   selectWorkflow: jest.fn(),
@@ -134,8 +134,8 @@ describe('WorkflowDetailTestModal', () => {
     jest.mocked(selectWorkflow).mockReturnValue(undefined);
 
     (selectIsTestModalOpen as unknown as jest.Mock).mockReturnValue(true);
-    (selectExecution as unknown as jest.Mock).mockReturnValue(undefined);
     (selectReplayExecutionId as unknown as jest.Mock).mockReturnValue(null);
+    (selectReplayIsTestRun as unknown as jest.Mock).mockReturnValue(false);
     (selectWorkflowDefinition as unknown as jest.Mock).mockReturnValue(mockDefinition);
     (selectWorkflowId as unknown as jest.Mock).mockReturnValue(null);
     (selectEditorYaml as unknown as jest.Mock).mockReturnValue('');
@@ -274,7 +274,7 @@ describe('WorkflowDetailTestModal', () => {
   it('re-runs a test execution through useTestWorkflow', async () => {
     mockTestSavedWorkflow.mockResolvedValue({ workflowExecutionId: 'new-test-exec' });
     (selectReplayExecutionId as unknown as jest.Mock).mockReturnValue('exec-1');
-    (selectExecution as unknown as jest.Mock).mockReturnValue({ id: 'exec-1', isTestRun: true });
+    (selectReplayIsTestRun as unknown as jest.Mock).mockReturnValue(true);
     (selectWorkflowId as unknown as jest.Mock).mockReturnValue('wf-1');
 
     const mockSetSelectedExecution = jest.fn();
