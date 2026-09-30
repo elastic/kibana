@@ -608,12 +608,18 @@ export default function ({ getService }: FtrProviderContext) {
       });
 
       await retry.try(async () => {
-        const task = await currentTask<{ count: number }, { phase?: string }>(originalTask.id);
+        const task = await currentTask<{ count: number }, { originalParams?: { phase?: string } }>(
+          originalTask.id
+        );
         expect(task.id).to.eql(originalTask.id);
         expect(task.attempts).to.eql(0);
         expect(task.status).to.eql('waiting');
         expect(task.state.count).to.eql(1);
-        expect(task.params.phase).to.eql('resumed');
+        // yielded params go through the sample plugin's beforeSave middleware, like scheduled params
+        expect(task.params).to.eql({
+          superFly: 'My middleware param!',
+          originalParams: { phase: 'resumed' },
+        });
       });
 
       await runTaskSoon({ id: originalTask.id });
