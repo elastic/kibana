@@ -19,6 +19,7 @@ import { httpServerMock } from '@kbn/core/server/mocks';
 import { actionsMock } from '@kbn/actions-plugin/server/mocks';
 import {
   type ChatCompleteAPI,
+  type AnonymizationRule,
   type ChatCompletionChunkEvent,
   MessageRole,
   isChatCompletionChunkEvent,
@@ -34,6 +35,7 @@ import {
   chunkEvent,
   tokensEvent,
 } from '../test_utils';
+import { executeRegexRulesTask } from './anonymization/execute_regex_rule_task';
 import { createChatCompleteApi } from './api';
 import { createChatCompleteCallbackApi } from './callback_api';
 import { InferenceEndpointIdCache } from '../util/inference_endpoint_id_cache';
@@ -1069,63 +1071,96 @@ describe('createChatCompleteApi', () => {
   });
 
   describe('anonymization instructions', () => {
-    it('injects the anonymization instruction even when the request has no system prompt', async () => {
-      inferenceAdapter.chatComplete.mockReturnValue(of(chunkEvent('chunk-1')));
+    const emailRule: AnonymizationRule = {
+      type: 'RegExp',
+      entityClass: 'EMAIL',
+      pattern: '([a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,})',
+      enabled: true,
+    };
 
-      // A field policy anonymizes `content` without needing the (mocked, no-op) regex worker
-      // or an ML NER model, so this stays a self-contained unit test of the wiring in
-      // callback_api.ts rather than the full detection pipeline.
-      const callbackApiWithPolicy = createChatCompleteCallbackApi({
+    // Runs the live anonymization path: enabled rules (as read from the `ai:anonymizationSettings`
+    // uiSetting) detected by the regex worker, with no policy-service inputs.
+    const createChatCompleteWithEmailRule = () => {
+      jest
+        .mocked(regexWorker.run)
+        .mockImplementation(async (payload) => executeRegexRulesTask(payload));
+
+      const callbackApiWithRules = createChatCompleteCallbackApi({
         request,
         namespace: 'default',
         actions,
         logger,
-        anonymizationRulesPromise: Promise.resolve([]),
+        anonymizationRulesPromise: Promise.resolve([emailRule]),
         regexWorker,
         esClient: mockEsClient,
         endpointIdCache,
-        anonymization: {
-          resolveEffectivePolicy: async () => ({
-            content: { action: 'anonymize', entityClass: 'HOST_NAME' },
-          }),
-        },
       });
-      const chatCompleteWithPolicy = createChatCompleteApi({ callbackApi: callbackApiWithPolicy });
+      return createChatCompleteApi({ callbackApi: callbackApiWithRules });
+    };
 
-      await chatCompleteWithPolicy({
+    beforeEach(() => {
+      inferenceAdapter.chatComplete.mockReturnValue(of(chunkEvent('chunk-1')));
+    });
+
+    it('injects the anonymization instruction even when the request has no system prompt', async () => {
+      await createChatCompleteWithEmailRule()({
         connectorId: 'connectorId',
         // Deliberately no `system` prompt.
-        messages: [{ role: MessageRole.User, content: 'echo back 10.0.0.1 to me' }],
+        messages: [{ role: MessageRole.User, content: 'echo back claudia@example.com to me' }],
         maxRetries: 0,
       });
 
-      // The *actual* outbound payload sent to the model must include the injected instruction —
-      // asserting on the real `chatComplete` call args (rather than a debug log of the payload)
-      // keeps this test agnostic to what gets logged.
+      // Assert on the real outbound payload sent to the model.
       expect(inferenceAdapter.chatComplete).toHaveBeenCalledWith(
         expect.objectContaining({
           system: expect.stringContaining('### Anonymization'),
           messages: [
             expect.objectContaining({
               role: MessageRole.User,
-              content: expect.stringMatching(/^HOST_NAME_/),
+              content: expect.stringMatching(/^echo back EMAIL_\w+ to me$/),
             }),
           ],
         })
       );
     });
 
-    it('does not add a system prompt when nothing was anonymized', async () => {
-      inferenceAdapter.chatComplete.mockReturnValue(of(chunkEvent('chunk-1')));
-
-      await chatComplete({
+    it('appends the instruction to an existing system prompt when something was anonymized', async () => {
+      await createChatCompleteWithEmailRule()({
         connectorId: 'connectorId',
-        messages: [{ role: MessageRole.User, content: 'question' }],
+        system: 'You are a helpful assistant.',
+        messages: [{ role: MessageRole.User, content: 'echo back claudia@example.com to me' }],
+        maxRetries: 0,
+      });
+
+      expect(inferenceAdapter.chatComplete).toHaveBeenCalledWith(
+        expect.objectContaining({
+          system: expect.stringMatching(/^You are a helpful assistant\.[\s\S]*### Anonymization/),
+        })
+      );
+    });
+
+    it('does not add a system prompt when rules are enabled but nothing was anonymized', async () => {
+      await createChatCompleteWithEmailRule()({
+        connectorId: 'connectorId',
+        messages: [{ role: MessageRole.User, content: 'question without any email address' }],
         maxRetries: 0,
       });
 
       expect(inferenceAdapter.chatComplete).toHaveBeenCalledWith(
         expect.objectContaining({ system: undefined })
+      );
+    });
+
+    it('leaves an existing system prompt untouched when nothing was anonymized', async () => {
+      await createChatCompleteWithEmailRule()({
+        connectorId: 'connectorId',
+        system: 'You are a helpful assistant.',
+        messages: [{ role: MessageRole.User, content: 'question without any email address' }],
+        maxRetries: 0,
+      });
+
+      expect(inferenceAdapter.chatComplete).toHaveBeenCalledWith(
+        expect.objectContaining({ system: 'You are a helpful assistant.' })
       );
     });
   });
