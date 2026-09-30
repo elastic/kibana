@@ -152,6 +152,82 @@ describe('useWaitingStepResume', () => {
     expect(result.current.approvalLabels).toBeUndefined();
   });
 
+  it('surfaces definition message and labels while a waitForApproval step input is still loading', () => {
+    mockUseStepExecution.mockReturnValue({ data: undefined, isLoading: true } as ReturnType<
+      typeof useStepExecution
+    >);
+
+    const execution = createMockWorkflowExecutionDto({
+      status: ExecutionStatus.WAITING_FOR_INPUT,
+      workflowDefinition: {
+        version: '1',
+        name: 'Test Workflow',
+        enabled: true,
+        triggers: [],
+        steps: [
+          {
+            name: 'wait_for_input',
+            type: 'waitForApproval',
+            with: {
+              message: 'Your approval is required to cont...',
+              approveLabel: 'JDI',
+            },
+          },
+        ],
+      },
+      stepExecutions: [
+        createMockStepExecutionDto({
+          id: 'step-wait',
+          stepId: 'wait_for_input',
+          stepType: 'waitForApproval',
+          status: ExecutionStatus.WAITING_FOR_INPUT,
+          startedAt: '2024-01-01T00:00:01Z',
+        }),
+      ],
+    });
+
+    const { result } = renderHook(() => useWaitingStepResume('exec-1', execution));
+
+    expect(result.current).toEqual(
+      expect.objectContaining({
+        waitingStepExecutionId: 'step-wait',
+        waitingStepStartedAt: '2024-01-01T00:00:01Z',
+        resumeMessage: 'Your approval is required to cont...',
+        approvalLabels: { approveLabel: 'JDI', rejectLabel: 'Decline' },
+      })
+    );
+  });
+
+  it('defaults a missing approval label when only one is present in step input', () => {
+    mockUseStepExecution.mockReturnValue({
+      data: {
+        id: 'step-wait',
+        stepType: 'waitForApproval',
+        status: ExecutionStatus.WAITING_FOR_INPUT,
+        input: { approveLabel: 'Ship' },
+      },
+      isLoading: false,
+    } as unknown as ReturnType<typeof useStepExecution>);
+
+    const execution = createMockWorkflowExecutionDto({
+      status: ExecutionStatus.WAITING_FOR_INPUT,
+      stepExecutions: [
+        createMockStepExecutionDto({
+          id: 'step-wait',
+          stepType: 'waitForApproval',
+          status: ExecutionStatus.WAITING_FOR_INPUT,
+        }),
+      ],
+    });
+
+    const { result } = renderHook(() => useWaitingStepResume('exec-1', execution));
+
+    expect(result.current.approvalLabels).toEqual({
+      approveLabel: 'Ship',
+      rejectLabel: 'Decline',
+    });
+  });
+
   it('does not return a waiting step when getStepExecution fails (data undefined, isLoading false)', () => {
     mockUseStepExecution.mockReturnValue({ data: undefined, isLoading: false } as ReturnType<
       typeof useStepExecution

@@ -32,6 +32,7 @@ export const dispatchFailureReasonSchema = z.enum([
   'workflow_not_found',
   'workflow_disabled',
   'schedule_error',
+  'license_not_supported',
 ]);
 export type DispatchFailureReason = z.infer<typeof dispatchFailureReasonSchema>;
 

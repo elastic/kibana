@@ -17,15 +17,22 @@ import {
   type EuiButtonColor,
 } from '@elastic/eui';
 import type { IconType } from '@elastic/eui';
+import type { DismissReason } from '@kbn/proposals-common';
 import { ApprovalModalHeader } from './approval_modal_header';
 import { ApprovalActorTime } from './approval_actor_time';
 import { AlwaysAllowCheckbox } from './always_allow_checkbox';
+import { DeclineReasonForm } from './decline_reason_form';
 import {
   getApprovalOutcomeBadge,
   getApprovalOutcomeBanner,
   type ApprovalPhase,
 } from './approval_outcome';
 import { APPROVAL_MODAL_TRANSLATIONS } from './translations';
+
+export interface DeclineParams {
+  dismissReason: DismissReason;
+  rationale?: string;
+}
 
 export interface AlwaysAllowOption {
   id: string;
@@ -53,7 +60,12 @@ export interface ApprovalAction {
  */
 export interface ApprovalDecision {
   status: Exclude<ApprovalPhase, 'pending'>;
-  actorName: string;
+  /**
+   * Omitted when nobody actually decided — an expired gate timed out rather than being approved or
+   * declined by anyone. Callers fall back to their own plain caption rather than rendering a
+   * fabricated "by Unknown" for an outcome no one chose.
+   */
+  actorName?: string;
   /** ISO 8601 timestamp. Optional: the record itself may carry none — see `ApprovalActorTime`. */
   decidedAt?: string;
   /** Shown in the outcome banner, e.g. why a decline was made. */
@@ -63,16 +75,8 @@ export interface ApprovalDecision {
 export interface ApprovalContentProps {
   title: string;
   tone: 'primary' | 'danger';
-  /** Fallback icon for the primary-action button. */
-  iconType: IconType;
   /** The proposal's own markdown, rendered as the body. */
   comment?: string;
-  /**
-   * Show the badge + title header.
-   * Set to `false` when a host (e.g. Agent Builder attachment framework) already draws its own header.
-   * @default true
-   */
-  showHeader?: boolean;
   titleId?: string;
   /** Header caption below the badge, e.g. a category/reversibility line. Omitted when there is none. */
   caption?: React.ReactNode;
@@ -97,7 +101,15 @@ export interface ApprovalContentProps {
   primaryAction?: ApprovalAction;
   /** Each entry rendered as an `EuiButtonEmpty`. */
   secondaryActions?: ApprovalAction[];
-  /** Extra content inserted between the body and the footer — use for inline forms (e.g. dismiss reason). */
+  /**
+   * Enables the built-in decline flow. When set, a "Decline" trigger appears next to
+   * `primaryAction`; clicking it swaps the body for `DeclineReasonForm` and the footer for
+   * Cancel/Decline, entirely within this component — so a host never renders `DeclineReasonForm`
+   * itself or tracks its own declining mode. The same flow renders identically whether this is
+   * placed inside a modal or an Agent Builder chat card. Disabled whenever `primaryAction` is.
+   */
+  onDismiss?: (params: DeclineParams) => Promise<void>;
+  /** Extra content inserted between the body and the footer — use for host-specific inline content. */
   children?: React.ReactNode;
   'data-test-subj'?: string;
 }
@@ -112,6 +124,11 @@ const bannerIconFor = (color: 'success' | 'primary' | 'danger'): IconType =>
  * {@link ApprovalModal}) or directly into a div/card (by the Agent Builder
  * proposal attachment) without adding an extra wrapping element.
  *
+ * Declining is built in, driven entirely by `onDismiss`: this owns its own "view"/"declining"
+ * mode, swapping the comment for `DeclineReasonForm` and the footer for Cancel/Decline, so both
+ * hosts get the identical inline decline UX rather than each tracking its own mode and rendering
+ * the form itself.
+ *
  * The decision's async lifecycle is the host's, not this component's: `isSubmitting` and
  * `decision` together are the whole phase this renders — the badge, the header's actor/time
  * caption, and the outcome banner. This only wraps `primaryAction.onClick` to surface a
@@ -124,9 +141,7 @@ export const ApprovalContent = memo<ApprovalContentProps>(
   ({
     title,
     tone,
-    iconType,
     comment,
-    showHeader = true,
     titleId,
     caption,
     decision,
@@ -135,11 +150,15 @@ export const ApprovalContent = memo<ApprovalContentProps>(
     alwaysAllow,
     primaryAction,
     secondaryActions,
+    onDismiss,
     children,
     'data-test-subj': dataTestSubj,
   }) => {
     const { euiTheme } = useEuiTheme();
     const [actionError, setActionError] = useState<string | undefined>(undefined);
+    const [mode, setMode] = useState<'view' | 'declining'>('view');
+    const [dismissReason, setDismissReason] = useState<DismissReason>('no_reason');
+    const [rationale, setRationale] = useState('');
     // Only for the live "Xs ago" caption below — not for the phase itself, which reads `isSubmitting`
     // directly. Resets whenever this component (re)mounts while already submitting, so a modal
     // reopened mid-submission restarts the counter rather than reading the true elapsed time; the
@@ -152,19 +171,80 @@ export const ApprovalContent = memo<ApprovalContentProps>(
 
     const actorName = currentActorName ?? APPROVAL_MODAL_TRANSLATIONS.currentActorFallback;
 
-    const handlePrimaryClick = useCallback(async () => {
-      if (!primaryAction) {
+    const startDeclining = useCallback(() => {
+      setActionError(undefined);
+      setMode('declining');
+    }, []);
+
+    const cancelDeclining = useCallback(() => {
+      setMode('view');
+      setDismissReason('no_reason');
+      setRationale('');
+      setActionError(undefined);
+    }, []);
+
+    const declineConfirmAction = useCallback(async () => {
+      if (!onDismiss) {
         return;
       }
+      await onDismiss({ dismissReason, rationale: rationale.trim() || undefined });
+      setMode('view');
+      setDismissReason('no_reason');
+      setRationale('');
+    }, [onDismiss, dismissReason, rationale]);
+
+    // `no_reason` — the default — already counts as an explicit selection; only `other` needs
+    // the free-text field, since it is the sole detail that reason carries.
+    const isDeclineDisabled = dismissReason === 'other' && rationale.trim() === '';
+
+    const resolvedPrimaryAction: ApprovalAction | undefined =
+      mode === 'declining'
+        ? {
+            label: APPROVAL_MODAL_TRANSLATIONS.dismiss,
+            color: 'danger',
+            iconType: 'cross',
+            onClick: declineConfirmAction,
+            isDisabled: isDeclineDisabled,
+            'data-test-subj': dataTestSubj ? `${dataTestSubj}-confirm-decline` : undefined,
+          }
+        : primaryAction;
+
+    const resolvedSecondaryActions: ApprovalAction[] | undefined =
+      mode === 'declining'
+        ? [
+            {
+              label: APPROVAL_MODAL_TRANSLATIONS.cancelDecline,
+              color: 'text',
+              onClick: cancelDeclining,
+              'data-test-subj': dataTestSubj ? `${dataTestSubj}-cancel-decline` : undefined,
+            },
+          ]
+        : [
+            ...(secondaryActions ?? []),
+            ...(onDismiss
+              ? [
+                  {
+                    label: APPROVAL_MODAL_TRANSLATIONS.dismiss,
+                    color: 'text' as const,
+                    iconType: 'cross' as const,
+                    onClick: startDeclining,
+                    isDisabled: primaryAction?.isDisabled,
+                    'data-test-subj': dataTestSubj ? `${dataTestSubj}-dismiss` : undefined,
+                  },
+                ]
+              : []),
+          ];
+
+    const handlePrimaryClick = useCallback(async (action: ApprovalAction) => {
       setActionError(undefined);
       try {
-        await primaryAction.onClick();
+        await action.onClick();
       } catch (err) {
         setActionError(
           err instanceof Error ? err.message : APPROVAL_MODAL_TRANSLATIONS.actionErrorTitle
         );
       }
-    }, [primaryAction]);
+    }, []);
 
     const approvalPhase: ApprovalPhase = decision ? decision.status : isSubmitting ?? 'pending';
 
@@ -173,7 +253,7 @@ export const ApprovalContent = memo<ApprovalContentProps>(
     const bannerSuffix = decision?.reason ?? banner?.hint;
     const isSettledOrTransient = approvalPhase !== 'pending';
 
-    const headerCaption = decision ? (
+    const headerCaption = decision?.actorName ? (
       <ApprovalActorTime actorName={decision.actorName} at={decision.decidedAt} />
     ) : isSubmitting && since ? (
       <ApprovalActorTime actorName={actorName} at={since} live />
@@ -184,19 +264,23 @@ export const ApprovalContent = memo<ApprovalContentProps>(
     const defaultButtonColor: EuiButtonColor = tone === 'danger' ? 'danger' : 'primary';
 
     const hasFooter =
-      primaryAction !== undefined ||
-      (secondaryActions !== undefined && secondaryActions.length > 0);
+      resolvedPrimaryAction !== undefined ||
+      (resolvedSecondaryActions !== undefined && resolvedSecondaryActions.length > 0);
+
+    // Hidden once the decline is actually submitting: the banner above already reads
+    // "Declining", and the footer with Cancel/Decline is gone too (via `isSettledOrTransient`) —
+    // showing the form alongside a banner that says the decision is already in flight would be
+    // confusing.
+    const showDeclineForm = mode === 'declining' && isSubmitting !== 'declining';
 
     return (
       <>
-        {showHeader && (
-          <ApprovalModalHeader
-            badge={badge}
-            caption={headerCaption}
-            title={title}
-            titleId={titleId ?? ''}
-          />
-        )}
+        <ApprovalModalHeader
+          badge={badge}
+          caption={headerCaption}
+          title={title}
+          titleId={titleId ?? ''}
+        />
 
         <div
           css={css({
@@ -206,8 +290,9 @@ export const ApprovalContent = memo<ApprovalContentProps>(
           })}
         >
           {/* A comment is as long as the worker made it, so the body scrolls and the footer stays
-            reachable without the modal growing past the viewport. */}
-          {comment !== undefined && (
+            reachable without the modal growing past the viewport. Hidden while declining: the
+            reason form below takes its place rather than sitting alongside it. */}
+          {mode === 'view' && comment !== undefined && (
             <div css={css({ marginBottom: euiTheme.size.m })}>
               <EuiMarkdownFormat
                 textSize="s"
@@ -259,7 +344,7 @@ export const ApprovalContent = memo<ApprovalContentProps>(
           )}
         </div>
 
-        {alwaysAllow && (
+        {mode === 'view' && alwaysAllow && (
           <AlwaysAllowCheckbox
             option={alwaysAllow}
             data-test-subj={dataTestSubj ? `${dataTestSubj}-always-allow` : undefined}
@@ -267,6 +352,16 @@ export const ApprovalContent = memo<ApprovalContentProps>(
         )}
 
         {children}
+
+        {showDeclineForm && (
+          <DeclineReasonForm
+            dismissReason={dismissReason}
+            rationale={rationale}
+            onDismissReasonChange={setDismissReason}
+            onRationaleChange={setRationale}
+            data-test-subj={dataTestSubj ? `${dataTestSubj}-decline-form` : undefined}
+          />
+        )}
 
         {/* Decided/transient states name their actor in the header caption already — no need
             to repeat it here, so there is nothing left in the footer to show. */}
@@ -280,7 +375,7 @@ export const ApprovalContent = memo<ApprovalContentProps>(
             })}
           >
             {/* Secondaries first so the decision that commits something sits rightmost. */}
-            {secondaryActions?.map((action, i) => (
+            {resolvedSecondaryActions?.map((action, i) => (
               <EuiButtonEmpty
                 key={i}
                 size="s"
@@ -294,18 +389,18 @@ export const ApprovalContent = memo<ApprovalContentProps>(
                 {action.label}
               </EuiButtonEmpty>
             ))}
-            {primaryAction && (
+            {resolvedPrimaryAction && (
               <EuiButton
                 fill
                 size="s"
-                color={primaryAction.color ?? defaultButtonColor}
-                iconType={primaryAction.iconType ?? iconType}
-                isDisabled={primaryAction.isDisabled}
-                isLoading={primaryAction.isLoading}
-                onClick={handlePrimaryClick}
-                data-test-subj={primaryAction['data-test-subj']}
+                color={resolvedPrimaryAction.color ?? defaultButtonColor}
+                iconType={resolvedPrimaryAction.iconType ?? 'play'}
+                isDisabled={resolvedPrimaryAction.isDisabled}
+                isLoading={resolvedPrimaryAction.isLoading}
+                onClick={() => handlePrimaryClick(resolvedPrimaryAction)}
+                data-test-subj={resolvedPrimaryAction['data-test-subj']}
               >
-                {primaryAction.label}
+                {resolvedPrimaryAction.label}
               </EuiButton>
             )}
           </div>

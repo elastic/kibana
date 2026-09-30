@@ -14,6 +14,7 @@ import {
   NIGHTSHIFT_DECISION_TREE_HYDRATE_WORKFLOW_ID,
   NIGHTSHIFT_DECISION_TREE_REINFORCE_WORKFLOW_ID,
 } from '@kbn/workflows/managed';
+import { NIGHTSHIFT_INVESTIGATION_AGENT_ID } from '../../../common';
 import instructions from './instructions/investigator.md.text';
 import decisionTreesSection from './instructions/decision_trees.text';
 import { SANDBOX_BASH_TOOL_ID } from '../../tools/sandbox_bash/tool';
@@ -21,10 +22,10 @@ import { SANDBOX_VIEW_FILE_TOOL_ID } from '../../tools/sandbox_bash/view_file_to
 import { SANDBOX_STR_REPLACE_TOOL_ID } from '../../tools/sandbox_bash/str_replace_tool';
 import { SANDBOX_WRITE_FILE_TOOL_ID } from '../../tools/sandbox_bash/write_file_tool';
 
-export const NIGHTSHIFT_INVESTIGATION_AGENT_ID = 'nightshift.investigation';
+export { NIGHTSHIFT_INVESTIGATION_AGENT_ID };
 export const NIGHTSHIFT_INVESTIGATION_AGENT_TYPE_ID = 'platform.nightshift.investigation-type';
 
-const SANDBOX_TOOL_IDS = [
+export const SANDBOX_TOOL_IDS = [
   SANDBOX_BASH_TOOL_ID,
   SANDBOX_VIEW_FILE_TOOL_ID,
   SANDBOX_STR_REPLACE_TOOL_ID,
