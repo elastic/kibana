@@ -215,7 +215,7 @@ describe('GET all roles', () => {
       if (queryResponses) {
         expect(getRole).not.toHaveBeenCalled();
         expect(queryRole.mock.calls.map(([params]) => params)).toEqual(
-          queryRequests ?? [{ size: 1000, sort: [{ name: 'asc' }] }]
+          queryRequests ?? [{ size: 1000, sort: [{ name: { order: 'asc' } }] }]
         );
       } else {
         expect(queryRole).not.toHaveBeenCalled();
@@ -285,8 +285,8 @@ describe('GET all roles', () => {
     const builtinRole = { ...customRole, name: 'viewer', metadata: { _reserved: true } };
     const firstPage = () => ({ total: 2, count: 1, roles: [customRole] });
     const queryRequests = [
-      { size: 1000, sort: [{ name: 'asc' as const }] },
-      { size: 1000, sort: [{ name: 'asc' as const }], search_after: ['custom'] },
+      { size: 1000, sort: [{ name: { order: 'asc' as const } }] },
+      { size: 1000, sort: [{ name: { order: 'asc' as const } }], search_after: ['custom'] },
     ];
     const returnedRole = {
       elasticsearch: { cluster: [], indices: [], run_as: [] },

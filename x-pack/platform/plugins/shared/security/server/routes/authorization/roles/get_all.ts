@@ -27,7 +27,7 @@ const queryAllRoles = async (
   while (true) {
     const page = await client.security.queryRole({
       size: 1000,
-      sort: [{ name: 'asc' }],
+      sort: [{ name: { order: 'asc' } }],
       ...(searchAfter ? { search_after: searchAfter } : {}),
     });
     roles.push(...page.roles);
