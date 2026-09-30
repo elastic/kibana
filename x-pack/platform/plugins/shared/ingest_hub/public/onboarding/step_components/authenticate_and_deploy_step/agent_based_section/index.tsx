@@ -215,6 +215,18 @@ export function AgentBasedSection({
   // ── New-policy mode: policy form state ───────────────────────────────────
   const isPolicyCreated = !!agentPolicyId;
 
+  // Once a new policy is created, switch to 'existing' mode with the created policy selected.
+  // This keeps the credential section visible and shows the policy in a consistent locked state,
+  // whether the user goes Back after a fresh deploy or returns in edit mode.
+  useEffect(() => {
+    if (isPolicyCreated && agentHostsMode === 'new' && agentPolicyId) {
+      setAgentBasedDeployment({
+        agentHostsMode: 'existing',
+        selectedAgentPolicyIds: [agentPolicyId],
+      });
+    }
+  }, [isPolicyCreated, agentHostsMode, agentPolicyId, setAgentBasedDeployment]);
+
   const [newAgentPolicy, setNewAgentPolicy] = useState<Partial<NewAgentPolicy>>({
     name: persistedAgentPolicyName ?? '',
     namespace: 'default',
