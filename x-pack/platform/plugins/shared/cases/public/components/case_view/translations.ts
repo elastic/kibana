@@ -489,3 +489,28 @@ export const CHANGE_TEMPLATE_HINT_ARIA = i18n.translate(
     defaultMessage: 'What happens to saved values',
   }
 );
+
+export const SYNCED_FROM_EXTERNAL = i18n.translate(
+  'xpack.cases.caseView.actionLabel.syncedFromExternal',
+  {
+    defaultMessage: 'synced from external incident',
+  }
+);
+
+export const SYNCED_FIELDS_FROM = (fields: string, connectorName: string) =>
+  i18n.translate('xpack.cases.caseView.actionLabel.syncedFieldsFrom', {
+    values: { fields, connectorName },
+    defaultMessage: 'updated {fields} from {connectorName}',
+  });
+
+export const SYNCED_NO_CHANGES_FROM = (connectorName: string) =>
+  i18n.translate('xpack.cases.caseView.actionLabel.syncedNoChangesFrom', {
+    values: { connectorName },
+    defaultMessage: 'checked {connectorName}, nothing to update',
+  });
+
+export const SYNC_KEPT_FIELDS = (fields: string) =>
+  i18n.translate('xpack.cases.caseView.actionLabel.syncKeptFields', {
+    values: { fields },
+    defaultMessage: 'kept {fields} changed in Kibana',
+  });

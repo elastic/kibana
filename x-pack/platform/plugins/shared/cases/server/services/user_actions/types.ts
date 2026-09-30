@@ -139,6 +139,9 @@ export interface BuilderParameters {
   workflow: {
     parameters: { payload: WorkflowUserActionPayload };
   };
+  sync: {
+    parameters: { payload: SyncUserActionPayload };
+  };
 }
 
 export interface CreateUserAction<T extends keyof BuilderParameters> {

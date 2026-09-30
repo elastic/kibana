@@ -2696,6 +2696,40 @@ export const PayloadStatus = lazySchema(() =>
 );
 export type PayloadStatus = z.infer<typeof PayloadStatus>;
 
+export const PayloadSync = lazySchema(() =>
+  z.object({
+    /**
+     * Technical preview. The case was reconciled from its external incident.
+     */
+    sync: z
+      .object({
+        connector_name: z.string(),
+        external_id: z.string(),
+        external_title: z.string(),
+        external_url: z.string(),
+        /**
+         * Case fields updated from the external incident.
+         */
+        updated_fields: z
+          .array(z.string())
+          .describe('Case fields updated from the external incident.'),
+        /**
+         * Case fields kept because they changed in Kibana and the conflict strategy is `kibana`.
+         */
+        conflicted_fields: z
+          .array(z.string())
+          .describe(
+            'Case fields kept because they changed in Kibana and the conflict strategy is `kibana`.'
+          ),
+        external_updated_at: z.string().optional(),
+        external_updated_by: z.string().optional(),
+      })
+      .optional()
+      .describe('Technical preview. The case was reconciled from its external incident.'),
+  })
+);
+export type PayloadSync = z.infer<typeof PayloadSync>;
+
 export const PayloadTags = lazySchema(() =>
   z.object({
     tags: z.array(z.string()).optional(),
@@ -2849,6 +2883,7 @@ export const UserActionsFindResponseProperties = lazySchema(() =>
       PayloadSettings,
       PayloadSeverity,
       PayloadStatus,
+      PayloadSync,
       PayloadTags,
       PayloadTitle,
       PayloadUserComment,

@@ -465,6 +465,63 @@ describe('UserActionBuilder', () => {
       `);
     });
 
+    it('builds a sync user action correctly', () => {
+      const builder = builderFactory.getBuilder(UserActionTypes.sync)!;
+      const userAction = builder.build({
+        payload: {
+          sync: {
+            connector_name: externalService.connector_name,
+            external_id: externalService.external_id,
+            external_title: externalService.external_title,
+            external_url: externalService.external_url,
+            updated_fields: ['title', 'status'],
+            conflicted_fields: ['description'],
+            external_updated_by: 'admin',
+          },
+        },
+        ...commonArgs,
+      });
+
+      expect(userAction!.parameters).toMatchInlineSnapshot(`
+        Object {
+          "attributes": Object {
+            "action": "update",
+            "created_at": "2022-01-09T22:00:00.000Z",
+            "created_by": Object {
+              "email": "elastic@elastic.co",
+              "full_name": "Elastic User",
+              "username": "elastic",
+            },
+            "owner": "securitySolution",
+            "payload": Object {
+              "sync": Object {
+                "conflicted_fields": Array [
+                  "description",
+                ],
+                "connector_name": "ServiceNow SN",
+                "external_id": "external-id",
+                "external_title": "SIR0010037",
+                "external_updated_by": "admin",
+                "external_url": "https://dev92273.service-now.com/nav_to.do?uri=sn_si_incident.do?sys_id=external-id",
+                "updated_fields": Array [
+                  "title",
+                  "status",
+                ],
+              },
+            },
+            "type": "sync",
+          },
+          "references": Array [
+            Object {
+              "id": "123",
+              "name": "associated-cases",
+              "type": "cases",
+            },
+          ],
+        }
+      `);
+    });
+
     it('builds a tags user action correctly', () => {
       const builder = builderFactory.getBuilder(UserActionTypes.tags)!;
       const userAction = builder.build({
