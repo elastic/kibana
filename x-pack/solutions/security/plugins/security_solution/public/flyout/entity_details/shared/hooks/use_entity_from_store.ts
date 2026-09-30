@@ -9,7 +9,7 @@ import { useMemo } from 'react';
 import { useQuery, type QueryClient } from '@kbn/react-query';
 import type { IHttpFetchError } from '@kbn/core/public';
 import type { EntityType, SearchEntitiesFromEntityStoreResponse } from '@kbn/entity-store/public';
-import { FF_ENABLE_ENTITY_STORE_V2, useEntityStoreEuidApi } from '@kbn/entity-store/public';
+import { useEntityStoreEuidApi } from '@kbn/entity-store/public';
 import type {
   HostEntity,
   UserEntity,
@@ -17,7 +17,6 @@ import type {
 } from '../../../../../common/api/entity_analytics';
 import type { HostItem, UserItem } from '../../../../../common/search_strategy';
 import { useEntityAnalyticsRoutes } from '../../../../entity_analytics/api/api';
-import { useUiSetting } from '../../../../common/lib/kibana';
 
 export const ENTITY_FROM_STORE_QUERY_KEY = 'ENTITY_FROM_STORE';
 
@@ -115,11 +114,11 @@ export function mapUserEntityToUserItem(entity: UserEntity): UserItem {
 
 export interface UseEntityFromStoreParams {
   /**
-   * Canonical entity store v2 id (`entity.id` on unified latest index). When set, the hook queries by this id.
+   * Canonical entity store id (`entity.id` on unified latest index). When set, the hook queries by this id.
    */
   entityId?: string;
   /**
-   * When `entityId` is not set, identity field–value pairs for legacy EUID / v1 resolution (e.g. `host.name`, `user.name`, `service.name`).
+   * When `entityId` is not set, identity field–value pairs for EUID resolution (e.g. `host.name`, `user.name`, `service.name`).
    */
   identityFields?: Record<string, string> | null;
   entityType?: string;
@@ -135,6 +134,13 @@ export interface EntityFromStoreResult<T> {
   firstSeen: string | null;
   lastSeen: string | null;
   isLoading: boolean;
+  /**
+   * True only while an initial fetch is actually in flight (react-query v4 `isLoading && isFetching`).
+   * Unlike `isLoading`, this is `false` for idle/disabled queries — in react-query v4 a disabled query
+   * with no cached data reports `isLoading: true` indefinitely, so callers gating side effects on "still
+   * resolving" must use this flag to avoid hanging forever.
+   */
+  isInitialLoading: boolean;
   error: IHttpFetchError | null;
   inspect?: { dsl: string[]; response: string[] };
   refetch: () => void;
@@ -145,8 +151,7 @@ export function useEntityFromStore(
 ): EntityFromStoreResult<HostItem | UserItem> {
   const { entityId, identityFields, entityType, skip } = params;
   const euidApi = useEntityStoreEuidApi();
-  const { fetchEntitiesList, fetchEntitiesListV2 } = useEntityAnalyticsRoutes();
-  const entityStoreV2Enabled = useUiSetting<boolean>(FF_ENABLE_ENTITY_STORE_V2);
+  const { fetchEntitiesListV2 } = useEntityAnalyticsRoutes();
 
   const identityDocument = useMemo(() => {
     if (identityFields == null || Object.keys(identityFields).length === 0) {
@@ -155,10 +160,21 @@ export function useEntityFromStore(
     return { ...identityFields };
   }, [identityFields]);
 
+  /**
+   * Partial-identity lookup: unlike the default partition semantics used by extraction, the
+   * stored entity carries the higher-ranked identity fields (e.g. `host.id`), so requiring their
+   * absence would never match. See https://github.com/elastic/kibana/issues/278276.
+   */
   const documentFilter = useMemo(
     () =>
       euidApi?.euid
-        ? euidApi.euid.dsl.getEuidFilterBasedOnDocument(entityType as EntityType, identityDocument)
+        ? euidApi.euid.dsl.getEuidFilterBasedOnDocument(
+            entityType as EntityType,
+            identityDocument,
+            {
+              excludeHigherRankedFields: false,
+            }
+          )
         : undefined,
     [euidApi?.euid, entityType, identityDocument]
   );
@@ -210,43 +226,33 @@ export function useEntityFromStore(
       stableQueryKey,
       entityStoreFilterKey,
       skip,
-      entityStoreV2Enabled,
       entityId ?? '',
     ],
     queryFn: async ({ signal }) => {
-      if (entityStoreV2Enabled) {
-        let filterQuery: string | undefined;
-        if (entityId) {
-          filterQuery = entityIdFilter(entityId);
-        } else if (storeFilter) {
-          filterQuery = JSON.stringify(storeFilter);
-        }
-        return fetchEntitiesListV2({
-          signal,
-          params: {
-            entityTypes: [entityType as EntityType],
-            filterQuery,
-            page: 1,
-            perPage: 1,
-            sortField: '@timestamp',
-            sortOrder: 'desc',
-          },
-        });
+      let filterQuery: string | undefined;
+      if (entityId) {
+        filterQuery = entityIdFilter(entityId);
+      } else if (storeFilter) {
+        filterQuery = JSON.stringify(storeFilter);
       }
-      return fetchEntitiesList({
+      return fetchEntitiesListV2({
         signal,
         params: {
           entityTypes: [entityType as EntityType],
-          filterQuery: storeFilter ? JSON.stringify(storeFilter) : undefined,
+          filterQuery,
           page: 1,
           perPage: 1,
+          sortField: '@timestamp',
+          sortOrder: 'desc',
+          // The AI summary is loaded separately from the metadata datastream via
+          // useFetchPersistedAiSummary, not from the entity store record.
         },
       });
     },
     enabled: !skip && (Boolean(entityId) || Boolean(storeFilter)),
   });
 
-  const { data, isLoading, error, refetch } = queryResult;
+  const { data, isLoading, isInitialLoading, error, refetch } = queryResult;
   const record = data?.records?.[0] as HostEntity | UserEntity | undefined;
   const entityField = record?.entity;
 
@@ -274,10 +280,21 @@ export function useEntityFromStore(
       firstSeen,
       lastSeen,
       isLoading,
+      isInitialLoading,
       error: error as IHttpFetchError | null,
       inspect: data?.inspect,
       refetch,
     }),
-    [mappedDetails, record, firstSeen, lastSeen, isLoading, error, data?.inspect, refetch]
+    [
+      mappedDetails,
+      record,
+      firstSeen,
+      lastSeen,
+      isLoading,
+      isInitialLoading,
+      error,
+      data?.inspect,
+      refetch,
+    ]
   );
 }

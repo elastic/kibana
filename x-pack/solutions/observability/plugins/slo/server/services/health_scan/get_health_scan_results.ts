@@ -6,32 +6,33 @@
  */
 
 import type { IScopedClusterClient } from '@kbn/core/server';
+import type { SortResults } from '@elastic/elasticsearch/lib/api/types';
 import type { GetHealthScanResultsResponse, HealthScanResultResponse } from '@kbn/slo-schema';
 import type { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
 import { HEALTH_DATA_STREAM_NAME } from '../../../common/constants';
 import { IllegalArgumentError } from '../../errors';
 import type { HealthDocument } from '../tasks/health_scan_task/types';
+import { decodeSearchAfter, encodeSearchAfter } from '../utils/search_after';
 
 interface Dependencies {
   scopedClusterClient: IScopedClusterClient;
   taskManager: TaskManagerStartContract;
-  spaceId: string;
+  spaceIds: string[];
 }
 
 interface Params {
   scanId: string;
   size?: number;
   problematic?: boolean;
-  allSpaces?: boolean;
   searchAfter?: string;
 }
 
 export async function getHealthScanResults(
   params: Params,
-  { scopedClusterClient, taskManager, spaceId }: Dependencies
+  { scopedClusterClient, taskManager, spaceIds }: Dependencies
 ): Promise<GetHealthScanResultsResponse> {
-  const { scanId, size = 100, problematic, allSpaces, searchAfter: searchAfterStr } = params;
-  const searchAfter = parseSearchAfter(searchAfterStr);
+  const { scanId, size = 100, problematic, searchAfter: searchAfterStr } = params;
+  const searchAfter = searchAfterStr ? decodeSearchAfter<SortResults>(searchAfterStr) : undefined;
   if (size <= 0 || size > 100) {
     throw new IllegalArgumentError('Size must be between 1 and 100');
   }
@@ -41,12 +42,11 @@ export async function getHealthScanResults(
     getScanResults(scopedClusterClient, {
       size,
       scanId,
-      allSpaces,
-      spaceId,
+      spaceIds,
       problematic,
       searchAfter,
     }),
-    getGlobalScanSummary(scopedClusterClient, scanId),
+    getScanSummary(scopedClusterClient, scanId, spaceIds),
   ]);
 
   const isScanScheduledSoon = !scanTask && total === 0;
@@ -65,7 +65,7 @@ export async function getHealthScanResults(
         : 'completed',
     },
     total,
-    searchAfter: nextSearchAfter,
+    searchAfter: nextSearchAfter ? encodeSearchAfter(nextSearchAfter) : undefined,
   };
 }
 
@@ -74,17 +74,15 @@ async function getScanResults(
   {
     size,
     scanId,
-    allSpaces,
-    spaceId,
+    spaceIds,
     problematic,
     searchAfter,
   }: {
-    spaceId: string;
+    spaceIds: string[];
     scanId: string;
     size: number;
-    allSpaces?: boolean;
     problematic?: boolean;
-    searchAfter?: any[];
+    searchAfter?: SortResults;
   }
 ) {
   const result = await scopedClusterClient.asInternalUser.search<HealthDocument>({
@@ -94,7 +92,7 @@ async function getScanResults(
       bool: {
         filter: [
           { term: { scanId } },
-          ...(allSpaces ? [] : [{ term: { spaceId } }]),
+          { terms: { spaceId: spaceIds } },
           ...(problematic ? [{ term: { 'health.isProblematic': problematic } }] : []),
         ],
       },
@@ -125,7 +123,11 @@ async function getScanTask(taskManager: TaskManagerStartContract, scanId: string
   return await taskManager.get(scanId).catch(() => null);
 }
 
-async function getGlobalScanSummary(scopedClusterClient: IScopedClusterClient, scanId: string) {
+async function getScanSummary(
+  scopedClusterClient: IScopedClusterClient,
+  scanId: string,
+  spaceIds: string[]
+) {
   interface SummaryAgg {
     latest_timestamp: { value: number; value_as_string: string };
     processed: { value: number };
@@ -135,7 +137,7 @@ async function getGlobalScanSummary(scopedClusterClient: IScopedClusterClient, s
   const summary = await scopedClusterClient.asInternalUser.search<unknown, SummaryAgg>({
     index: HEALTH_DATA_STREAM_NAME,
     size: 0,
-    query: { bool: { filter: [{ term: { scanId } }] } },
+    query: { bool: { filter: [{ term: { scanId } }, { terms: { spaceId: spaceIds } }] } },
     aggs: {
       latest_timestamp: {
         max: {
@@ -158,19 +160,4 @@ async function getGlobalScanSummary(scopedClusterClient: IScopedClusterClient, s
   });
 
   return summary.aggregations;
-}
-
-function parseSearchAfter(searchAfterStr: string | undefined) {
-  let searchAfter;
-  if (searchAfterStr) {
-    try {
-      const decoded = JSON.parse(searchAfterStr);
-      if (Array.isArray(decoded)) {
-        searchAfter = decoded;
-      }
-    } catch (e) {
-      // ignore invalid searchAfterStr
-    }
-  }
-  return searchAfter;
 }

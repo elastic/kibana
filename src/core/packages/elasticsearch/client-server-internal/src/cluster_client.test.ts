@@ -33,6 +33,12 @@ import {
 import { AgentManager } from './agent_manager';
 import { duration } from 'moment';
 import { securityServiceMock } from '@kbn/core-security-server-mocks';
+import {
+  HTTPAuthorizationHeader,
+  UIAM_INTERNAL_CALLER_ATTESTATION_HEADER,
+  markExternalUiamCredential,
+  deriveInternalCallerAttestation,
+} from '@kbn/core-security-server';
 
 const createConfig = (
   parts: Partial<ElasticsearchClientConfig> = {}
@@ -333,7 +339,7 @@ describe('ClusterClient', () => {
           onRequestHandlerFactory: mockOnRequestHandlerFactory,
         });
 
-        const request = httpServerMock.createKibanaRequest({ path: '/s/my-space/app/discover' });
+        const request = httpServerMock.createKibanaRequest({ spaceId: 'my-space' });
         client = clusterClient.asScoped(request, { projectRouting: 'space' }).asCurrentUser;
 
         const params = makeSearchParams();
@@ -876,10 +882,8 @@ describe('ClusterClient', () => {
           },
         })
       );
-      expect(scopedClient.child).toHaveBeenCalledWith(
-        expect.not.objectContaining({
-          headers: { [ES_CLIENT_AUTHENTICATION_HEADER]: 'some-shared-secret' },
-        })
+      expect(scopedClient.child.mock.calls[0][0].headers).not.toHaveProperty(
+        ES_CLIENT_AUTHENTICATION_HEADER
       );
     });
 
@@ -917,10 +921,423 @@ describe('ClusterClient', () => {
           },
         })
       );
+      expect(scopedClient.child.mock.calls[0][0].headers).not.toHaveProperty(
+        ES_CLIENT_AUTHENTICATION_HEADER
+      );
+    });
+
+    it('specifies client authentication for UIAM credentials in real requests with a valid attestation', () => {
+      const config = createConfig({ requestHeadersWhitelist: ['authorization'] });
+      authHeaders.get.mockReturnValue({ [AUTHORIZATION_HEADER]: 'ApiKey essu_dev_yes' });
+
+      const clusterClient = new ClusterClient({
+        config,
+        logger,
+        type: 'custom-type',
+        authHeaders,
+        security: securityServiceMock.createInternalSetup(),
+        agentFactoryProvider,
+        kibanaVersion,
+        onRequestHandlerFactory: mockOnRequestHandlerFactory,
+      });
+      const request = httpServerMock.createKibanaRequest({
+        headers: {
+          [AUTHORIZATION_HEADER]: 'Bearer override',
+          // The attestation is bound to the effective (post-authentication) credential, not to the
+          // one that came in on the wire.
+          [UIAM_INTERNAL_CALLER_ATTESTATION_HEADER]: deriveInternalCallerAttestation(
+            'some-shared-secret',
+            new HTTPAuthorizationHeader('ApiKey', 'essu_dev_yes')
+          ),
+        },
+      });
+
+      const scopedClusterClient = clusterClient.asScoped(request);
+      // trigger client instantiation via getter
+      client = scopedClusterClient.asCurrentUser;
+
+      expect(scopedClient.child).toHaveBeenCalledTimes(1);
       expect(scopedClient.child).toHaveBeenCalledWith(
-        expect.not.objectContaining({
-          headers: { [ES_CLIENT_AUTHENTICATION_HEADER]: 'some-shared-secret' },
+        expect.objectContaining({
+          headers: {
+            ...defaultHeaders,
+            [AUTHORIZATION_HEADER]: 'ApiKey essu_dev_yes',
+            [ES_CLIENT_AUTHENTICATION_HEADER]: 'some-shared-secret',
+            'x-opaque-id': expect.any(String),
+          },
         })
+      );
+      // The attestation itself must never be forwarded to Elasticsearch.
+      const forwardedHeaders = scopedClient.child.mock.calls[0][0].headers;
+      expect(forwardedHeaders).not.toHaveProperty(UIAM_INTERNAL_CALLER_ATTESTATION_HEADER);
+    });
+
+    it('does not specify client authentication for UIAM credentials in real requests with an attestation bound to another credential', () => {
+      const config = createConfig({ requestHeadersWhitelist: ['authorization'] });
+      authHeaders.get.mockReturnValue({ [AUTHORIZATION_HEADER]: 'Bearer essu_dev_yes' });
+
+      const clusterClient = new ClusterClient({
+        config,
+        logger,
+        type: 'custom-type',
+        authHeaders,
+        security: securityServiceMock.createInternalSetup(),
+        agentFactoryProvider,
+        kibanaVersion,
+        onRequestHandlerFactory: mockOnRequestHandlerFactory,
+      });
+      const request = httpServerMock.createKibanaRequest({
+        headers: {
+          [AUTHORIZATION_HEADER]: 'Bearer override',
+          // Genuinely minted with the shared secret, but for a different credential, so replaying it
+          // here must not authorize the shared secret.
+          [UIAM_INTERNAL_CALLER_ATTESTATION_HEADER]: deriveInternalCallerAttestation(
+            'some-shared-secret',
+            new HTTPAuthorizationHeader('Bearer', 'essu_dev_other')
+          ),
+        },
+      });
+
+      const scopedClusterClient = clusterClient.asScoped(request);
+      // trigger client instantiation via getter
+      client = scopedClusterClient.asCurrentUser;
+
+      expect(scopedClient.child).toHaveBeenCalledTimes(1);
+      expect(scopedClient.child.mock.calls[0][0].headers).not.toHaveProperty(
+        ES_CLIENT_AUTHENTICATION_HEADER
+      );
+    });
+
+    it('does not specify client authentication for UIAM credentials in real requests with an invalid attestation', () => {
+      const config = createConfig({ requestHeadersWhitelist: ['authorization'] });
+      authHeaders.get.mockReturnValue({ [AUTHORIZATION_HEADER]: 'Bearer essu_dev_yes' });
+
+      const clusterClient = new ClusterClient({
+        config,
+        logger,
+        type: 'custom-type',
+        authHeaders,
+        security: securityServiceMock.createInternalSetup(),
+        agentFactoryProvider,
+        kibanaVersion,
+        onRequestHandlerFactory: mockOnRequestHandlerFactory,
+      });
+      const request = httpServerMock.createKibanaRequest({
+        headers: {
+          [AUTHORIZATION_HEADER]: 'Bearer override',
+          [UIAM_INTERNAL_CALLER_ATTESTATION_HEADER]: 'forged-attestation',
+        },
+      });
+
+      const scopedClusterClient = clusterClient.asScoped(request);
+      // trigger client instantiation via getter
+      client = scopedClusterClient.asCurrentUser;
+
+      expect(scopedClient.child).toHaveBeenCalledTimes(1);
+      expect(scopedClient.child.mock.calls[0][0].headers).not.toHaveProperty(
+        ES_CLIENT_AUTHENTICATION_HEADER
+      );
+    });
+
+    it('does not specify client authentication for non-UIAM credentials in real requests even with a valid attestation', () => {
+      const config = createConfig({ requestHeadersWhitelist: ['authorization'] });
+      authHeaders.get.mockReturnValue({ [AUTHORIZATION_HEADER]: 'Bearer not-uiam' });
+
+      const clusterClient = new ClusterClient({
+        config,
+        logger,
+        type: 'custom-type',
+        authHeaders,
+        security: securityServiceMock.createInternalSetup(),
+        agentFactoryProvider,
+        kibanaVersion,
+        onRequestHandlerFactory: mockOnRequestHandlerFactory,
+      });
+      const request = httpServerMock.createKibanaRequest({
+        headers: {
+          [AUTHORIZATION_HEADER]: 'Bearer override',
+          [UIAM_INTERNAL_CALLER_ATTESTATION_HEADER]: deriveInternalCallerAttestation(
+            'some-shared-secret',
+            new HTTPAuthorizationHeader('Bearer', 'not-uiam')
+          ),
+        },
+      });
+
+      const scopedClusterClient = clusterClient.asScoped(request);
+      // trigger client instantiation via getter
+      client = scopedClusterClient.asCurrentUser;
+
+      expect(scopedClient.child).toHaveBeenCalledTimes(1);
+      expect(scopedClient.child.mock.calls[0][0].headers).not.toHaveProperty(
+        ES_CLIENT_AUTHENTICATION_HEADER
+      );
+    });
+
+    it.each(['upstream-shared-secret', ''])(
+      'preserves inbound client authentication %j for UIAM credentials in real requests',
+      (clientAuthentication) => {
+        const config = createConfig({ requestHeadersWhitelist: ['authorization'] });
+        const authenticationHeaders = {
+          [AUTHORIZATION_HEADER]: 'Bearer essu_ephemeral_token',
+          [ES_CLIENT_AUTHENTICATION_HEADER]: clientAuthentication,
+        };
+        authHeaders.get.mockReturnValue(authenticationHeaders);
+        const security = securityServiceMock.createInternalSetup();
+
+        const clusterClient = new ClusterClient({
+          config,
+          logger,
+          type: 'custom-type',
+          authHeaders,
+          security,
+          agentFactoryProvider,
+          kibanaVersion,
+          onRequestHandlerFactory: mockOnRequestHandlerFactory,
+        });
+        const request = httpServerMock.createKibanaRequest({ headers: authenticationHeaders });
+
+        const scopedClusterClient = clusterClient.asScoped(request);
+        // trigger client instantiation via getter
+        client = scopedClusterClient.asCurrentUser;
+
+        expect(security.uiam!.getElasticsearchClientAuthentication).toHaveBeenCalledWith(
+          expect.objectContaining({
+            credentialSource: 'inbound',
+            relayedClientAuthentication: clientAuthentication,
+          })
+        );
+        expect(scopedClient.child).toHaveBeenCalledTimes(1);
+        expect(scopedClient.child).toHaveBeenCalledWith(
+          expect.objectContaining({
+            headers: {
+              ...defaultHeaders,
+              ...authenticationHeaders,
+              'x-opaque-id': expect.any(String),
+            },
+          })
+        );
+      }
+    );
+
+    it("attaches Kibana's shared secret for a UIAM OAuth ephemeral token", () => {
+      // `UiamService.getAuthenticationHeaders` hands the ephemeral token to the auth service
+      // together with Kibana's own secret, so the passthrough carries it to Elasticsearch.
+      const authenticationHeaders = {
+        [AUTHORIZATION_HEADER]: 'Bearer essu_ephemeral_token',
+        [ES_CLIENT_AUTHENTICATION_HEADER]: 'some-shared-secret',
+      };
+      authHeaders.get.mockReturnValue(authenticationHeaders);
+
+      const clusterClient = new ClusterClient({
+        config: createConfig({ requestHeadersWhitelist: ['authorization'] }),
+        logger,
+        type: 'custom-type',
+        authHeaders,
+        security: securityServiceMock.createInternalSetup(),
+        agentFactoryProvider,
+        kibanaVersion,
+        onRequestHandlerFactory: mockOnRequestHandlerFactory,
+      });
+      const request = httpServerMock.createKibanaRequest({
+        headers: { [AUTHORIZATION_HEADER]: 'Bearer oauth-access-token' },
+      });
+
+      const scopedClusterClient = clusterClient.asScoped(request);
+      // trigger client instantiation via getter
+      client = scopedClusterClient.asCurrentUser;
+
+      expect(scopedClient.child).toHaveBeenCalledWith(
+        expect.objectContaining({
+          headers: {
+            ...defaultHeaders,
+            ...authenticationHeaders,
+            'x-opaque-id': expect.any(String),
+          },
+        })
+      );
+
+      client = scopedClusterClient.asSecondaryAuthUser;
+
+      expect(internalClient.child).toHaveBeenCalledWith(
+        expect.objectContaining({
+          headers: {
+            ...defaultHeaders,
+            [ES_SECONDARY_AUTH_HEADER]: 'Bearer essu_ephemeral_token',
+            [ES_SECONDARY_CLIENT_AUTH_HEADER]: 'some-shared-secret',
+          },
+        })
+      );
+    });
+
+    it.each([
+      {
+        label: "forwards a non-empty inbound client authentication instead of Kibana's secret",
+        inbound: 'upstream-shared-secret',
+      },
+      {
+        label: "forwards an empty inbound client authentication instead of Kibana's secret",
+        inbound: '',
+      },
+    ])('$label', ({ inbound }) => {
+      const authorization = new HTTPAuthorizationHeader('Bearer', 'essu_ephemeral_token');
+      const authenticationHeaders = {
+        [AUTHORIZATION_HEADER]: authorization.toString(),
+        [ES_CLIENT_AUTHENTICATION_HEADER]: inbound,
+      };
+      authHeaders.get.mockReturnValue(authenticationHeaders);
+      const security = securityServiceMock.createInternalSetup();
+
+      const clusterClient = new ClusterClient({
+        config: createConfig({ requestHeadersWhitelist: ['authorization'] }),
+        logger,
+        type: 'custom-type',
+        authHeaders,
+        security,
+        agentFactoryProvider,
+        kibanaVersion,
+        onRequestHandlerFactory: mockOnRequestHandlerFactory,
+      });
+      const request = httpServerMock.createKibanaRequest({
+        headers: {
+          ...authenticationHeaders,
+          [UIAM_INTERNAL_CALLER_ATTESTATION_HEADER]: deriveInternalCallerAttestation(
+            'some-shared-secret',
+            authorization
+          ),
+        },
+      });
+
+      const scopedClusterClient = clusterClient.asScoped(request);
+      // trigger client instantiation via getter
+      client = scopedClusterClient.asCurrentUser;
+
+      // Client authentication that rode in with the token speaks for it, so a valid attestation
+      // changes nothing.
+      expect(security.uiam!.getElasticsearchClientAuthentication).toHaveBeenCalledWith(
+        expect.objectContaining({
+          credentialSource: 'inbound',
+          relayedClientAuthentication: inbound,
+        })
+      );
+      expect(scopedClient.child).toHaveBeenCalledTimes(1);
+      expect(scopedClient.child).toHaveBeenCalledWith(
+        expect.objectContaining({
+          headers: {
+            ...defaultHeaders,
+            ...authenticationHeaders,
+            'x-opaque-id': expect.any(String),
+          },
+        })
+      );
+    });
+
+    it("attaches Kibana's secret for an attested UIAM bearer token that carried none", () => {
+      const authorization = new HTTPAuthorizationHeader('Bearer', 'essu_ephemeral_token');
+      const authenticationHeaders = { [AUTHORIZATION_HEADER]: authorization.toString() };
+      authHeaders.get.mockReturnValue(authenticationHeaders);
+      const security = securityServiceMock.createInternalSetup();
+
+      const clusterClient = new ClusterClient({
+        config: createConfig({ requestHeadersWhitelist: ['authorization'] }),
+        logger,
+        type: 'custom-type',
+        authHeaders,
+        security,
+        agentFactoryProvider,
+        kibanaVersion,
+        onRequestHandlerFactory: mockOnRequestHandlerFactory,
+      });
+      const request = httpServerMock.createKibanaRequest({
+        headers: {
+          ...authenticationHeaders,
+          [UIAM_INTERNAL_CALLER_ATTESTATION_HEADER]: deriveInternalCallerAttestation(
+            'some-shared-secret',
+            authorization
+          ),
+        },
+      });
+
+      const scopedClusterClient = clusterClient.asScoped(request);
+      // trigger client instantiation via getter
+      client = scopedClusterClient.asCurrentUser;
+
+      // Nothing else resolved the client authentication, so the attestation is what decides. Only
+      // a caller holding Kibana's shared secret can mint one, which is what tells a Kibana
+      // loopback call apart from a token relayed by some other client.
+      expect(security.uiam!.getElasticsearchClientAuthentication).toHaveBeenCalledWith(
+        expect.objectContaining({ credentialSource: 'inbound' })
+      );
+      expect(scopedClient.child).toHaveBeenCalledWith(
+        expect.objectContaining({
+          headers: {
+            ...defaultHeaders,
+            ...authenticationHeaders,
+            [ES_CLIENT_AUTHENTICATION_HEADER]: 'some-shared-secret',
+            'x-opaque-id': expect.any(String),
+          },
+        })
+      );
+    });
+
+    it('attaches no client authentication for an unattested UIAM bearer token that carried none', () => {
+      const authenticationHeaders = { [AUTHORIZATION_HEADER]: 'Bearer essu_ephemeral_token' };
+      authHeaders.get.mockReturnValue(authenticationHeaders);
+      const security = securityServiceMock.createInternalSetup();
+
+      const clusterClient = new ClusterClient({
+        config: createConfig({ requestHeadersWhitelist: ['authorization'] }),
+        logger,
+        type: 'custom-type',
+        authHeaders,
+        security,
+        agentFactoryProvider,
+        kibanaVersion,
+        onRequestHandlerFactory: mockOnRequestHandlerFactory,
+      });
+
+      const scopedClusterClient = clusterClient.asScoped(
+        httpServerMock.createKibanaRequest({ headers: authenticationHeaders })
+      );
+      // trigger client instantiation via getter
+      client = scopedClusterClient.asCurrentUser;
+
+      expect(scopedClient.child).toHaveBeenCalledWith(
+        expect.objectContaining({
+          headers: {
+            ...defaultHeaders,
+            ...authenticationHeaders,
+            'x-opaque-id': expect.any(String),
+          },
+        })
+      );
+    });
+
+    it('does not consult the UIAM service at all when the request carries no credential', () => {
+      const config = createConfig({ requestHeadersWhitelist: ['authorization'] });
+      authHeaders.get.mockReturnValue({});
+      const security = securityServiceMock.createInternalSetup();
+
+      const clusterClient = new ClusterClient({
+        config,
+        logger,
+        type: 'custom-type',
+        authHeaders,
+        security,
+        agentFactoryProvider,
+        kibanaVersion,
+        onRequestHandlerFactory: mockOnRequestHandlerFactory,
+      });
+
+      const scopedClusterClient = clusterClient.asScoped(
+        httpServerMock.createKibanaRequest({ headers: {} })
+      );
+      // trigger client instantiation via getter
+      client = scopedClusterClient.asCurrentUser;
+
+      // Nothing to authenticate, so there is no question for the UIAM service to answer.
+      expect(security.uiam!.getElasticsearchClientAuthentication).not.toHaveBeenCalled();
+      expect(scopedClient.child.mock.calls[0][0].headers).not.toHaveProperty(
+        ES_CLIENT_AUTHENTICATION_HEADER
       );
     });
 
@@ -953,6 +1370,126 @@ describe('ClusterClient', () => {
             [AUTHORIZATION_HEADER]: 'Bearer essu_dev_yes',
             [ES_CLIENT_AUTHENTICATION_HEADER]: 'some-shared-secret',
           },
+        })
+      );
+    });
+
+    it("replaces client authentication copied onto a fake request with Kibana's own", () => {
+      // Reporting replays a job's stored headers with a Kibana-granted API key swapped in, so a
+      // secret the job's creator sent rides along with a credential it was never issued for.
+      const security = securityServiceMock.createInternalSetup();
+      const clusterClient = new ClusterClient({
+        config: createConfig({
+          requestHeadersWhitelist: ['authorization', ES_CLIENT_AUTHENTICATION_HEADER],
+        }),
+        logger,
+        type: 'custom-type',
+        authHeaders,
+        security,
+        agentFactoryProvider,
+        kibanaVersion,
+        onRequestHandlerFactory: mockOnRequestHandlerFactory,
+      });
+      const fakeRequest = httpServerMock.createFakeKibanaRequest({
+        headers: {
+          [AUTHORIZATION_HEADER]: 'ApiKey essu_granted_key',
+          [ES_CLIENT_AUTHENTICATION_HEADER]: 'upstream-shared-secret',
+        },
+      });
+
+      client = clusterClient.asScoped(fakeRequest).asCurrentUser;
+
+      expect(security.uiam!.getElasticsearchClientAuthentication).toHaveBeenCalledWith(
+        expect.objectContaining({ credentialSource: 'internal' })
+      );
+      expect(scopedClient.child).toHaveBeenCalledWith(
+        expect.objectContaining({
+          headers: {
+            ...defaultHeaders,
+            [AUTHORIZATION_HEADER]: 'ApiKey essu_granted_key',
+            [ES_CLIENT_AUTHENTICATION_HEADER]: 'some-shared-secret',
+          },
+        })
+      );
+
+      client = clusterClient.asScoped(fakeRequest).asSecondaryAuthUser;
+
+      expect(internalClient.child).toHaveBeenCalledWith(
+        expect.objectContaining({
+          headers: {
+            ...defaultHeaders,
+            [ES_SECONDARY_AUTH_HEADER]: 'ApiKey essu_granted_key',
+            [ES_SECONDARY_CLIENT_AUTH_HEADER]: 'some-shared-secret',
+          },
+        })
+      );
+    });
+
+    it('does not specify client authentication for UIAM credentials in fake requests marked as carrying an external credential', () => {
+      const clusterClient = new ClusterClient({
+        config: createConfig(),
+        logger,
+        type: 'custom-type',
+        authHeaders,
+        security: securityServiceMock.createInternalSetup(),
+        agentFactoryProvider,
+        kibanaVersion,
+        onRequestHandlerFactory: mockOnRequestHandlerFactory,
+      });
+      const fakeRequest = httpServerMock.createFakeKibanaRequest({
+        headers: { [AUTHORIZATION_HEADER]: 'ApiKey essu_user_created_key' },
+      });
+      markExternalUiamCredential(fakeRequest);
+
+      const scopedClusterClient = clusterClient.asScoped(fakeRequest);
+      // trigger client instantiation via getter
+      client = scopedClusterClient.asCurrentUser;
+
+      expect(scopedClient.child).toHaveBeenCalledTimes(1);
+      expect(scopedClient.child).toHaveBeenCalledWith(
+        expect.objectContaining({
+          headers: {
+            ...defaultHeaders,
+            [AUTHORIZATION_HEADER]: 'ApiKey essu_user_created_key',
+          },
+        })
+      );
+      expect(scopedClient.child.mock.calls[0][0].headers).not.toHaveProperty(
+        ES_CLIENT_AUTHENTICATION_HEADER
+      );
+    });
+
+    it('specifies client authentication for an unmarked fake request carrying a UIAM credential', () => {
+      const clusterClient = new ClusterClient({
+        config: createConfig(),
+        logger,
+        type: 'custom-type',
+        authHeaders,
+        security: securityServiceMock.createInternalSetup(),
+        agentFactoryProvider,
+        kibanaVersion,
+        onRequestHandlerFactory: mockOnRequestHandlerFactory,
+      });
+      // A separate request object with the very same headers must not inherit the verdict: the
+      // marker is bound to the request instance, not to its credential.
+      markExternalUiamCredential(
+        httpServerMock.createFakeKibanaRequest({
+          headers: { [AUTHORIZATION_HEADER]: 'ApiKey essu_user_created_key' },
+        })
+      );
+      const fakeRequest = httpServerMock.createFakeKibanaRequest({
+        headers: { [AUTHORIZATION_HEADER]: 'ApiKey essu_user_created_key' },
+      });
+
+      const scopedClusterClient = clusterClient.asScoped(fakeRequest);
+      // trigger client instantiation via getter
+      client = scopedClusterClient.asCurrentUser;
+
+      expect(scopedClient.child).toHaveBeenCalledWith(
+        expect.objectContaining({
+          headers: expect.objectContaining({
+            [ES_CLIENT_AUTHENTICATION_HEADER]: 'some-shared-secret',
+          }),
         })
       );
     });
@@ -1304,9 +1841,11 @@ describe('ClusterClient', () => {
       );
     });
 
-    it('specifies secondary client authentication for UIAM credentials if in UIAM mode', () => {
+    it('specifies secondary client authentication for UIAM API keys if in UIAM mode', () => {
       const config = createConfig({ requestHeadersWhitelist: ['foo'] });
-      authHeaders.get.mockReturnValue({ [AUTHORIZATION_HEADER]: 'Bearer essu_dev_yes' });
+      authHeaders.get.mockReturnValue({
+        [AUTHORIZATION_HEADER]: 'ApiKey essu_dev_yes',
+      });
 
       const clusterClient = new ClusterClient({
         config,
@@ -1329,15 +1868,151 @@ describe('ClusterClient', () => {
         expect.objectContaining({
           headers: {
             ...defaultHeaders,
-            [ES_SECONDARY_AUTH_HEADER]: 'Bearer essu_dev_yes',
+            [ES_SECONDARY_AUTH_HEADER]: 'ApiKey essu_dev_yes',
             [ES_SECONDARY_CLIENT_AUTH_HEADER]: 'some-shared-secret',
           },
         })
       );
       expect(internalClient.child).toHaveBeenCalledWith(
         expect.not.objectContaining({
-          headers: { [AUTHORIZATION_HEADER]: 'Bearer essu_dev_yes' },
+          headers: { [AUTHORIZATION_HEADER]: 'ApiKey essu_dev_yes' },
         })
+      );
+    });
+
+    it('does not specify secondary client authentication for a UIAM bearer token that carried none', () => {
+      authHeaders.get.mockReturnValue({ [AUTHORIZATION_HEADER]: 'Bearer essu_dev_yes' });
+      const security = securityServiceMock.createInternalSetup();
+
+      const clusterClient = new ClusterClient({
+        config: createConfig(),
+        logger,
+        type: 'custom-type',
+        authHeaders,
+        security,
+        agentFactoryProvider,
+        kibanaVersion,
+        onRequestHandlerFactory: mockOnRequestHandlerFactory,
+      });
+
+      client = clusterClient.asScoped(httpServerMock.createKibanaRequest()).asSecondaryAuthUser;
+
+      // The service is consulted and declines: without an attestation there is nothing to vouch
+      // for a bearer token Kibana did not mint.
+      expect(security.uiam!.getElasticsearchClientAuthentication).toHaveBeenCalledWith(
+        expect.objectContaining({ credentialSource: 'inbound' })
+      );
+      expect(internalClient.child).toHaveBeenCalledWith(
+        expect.objectContaining({
+          headers: {
+            ...defaultHeaders,
+            [ES_SECONDARY_AUTH_HEADER]: 'Bearer essu_dev_yes',
+          },
+        })
+      );
+    });
+
+    it('specifies secondary client authentication for a Kibana-minted bearer token on a fake request', () => {
+      // Service account requests bind a Kibana-minted ephemeral token to a fake request without
+      // any client authentication of their own, so Kibana still has to vouch for it.
+      const security = securityServiceMock.createInternalSetup();
+      const clusterClient = new ClusterClient({
+        config: createConfig(),
+        logger,
+        type: 'custom-type',
+        authHeaders,
+        security,
+        agentFactoryProvider,
+        kibanaVersion,
+        onRequestHandlerFactory: mockOnRequestHandlerFactory,
+      });
+      const fakeRequest = httpServerMock.createFakeKibanaRequest({
+        headers: { [AUTHORIZATION_HEADER]: 'Bearer essu_service_account_token' },
+      });
+
+      client = clusterClient.asScoped(fakeRequest).asSecondaryAuthUser;
+
+      expect(security.uiam!.getElasticsearchClientAuthentication).toHaveBeenCalledWith(
+        expect.objectContaining({ credentialSource: 'internal' })
+      );
+      expect(internalClient.child).toHaveBeenCalledWith(
+        expect.objectContaining({
+          headers: {
+            ...defaultHeaders,
+            [ES_SECONDARY_AUTH_HEADER]: 'Bearer essu_service_account_token',
+            [ES_SECONDARY_CLIENT_AUTH_HEADER]: 'some-shared-secret',
+          },
+        })
+      );
+    });
+
+    it('reattaches secondary client authentication for an attested loopback request', () => {
+      const authorization = new HTTPAuthorizationHeader('Bearer', 'essu_internal_token');
+      const headers = { authorization: authorization.toString() };
+      authHeaders.get.mockReturnValue(headers);
+      const clusterClient = new ClusterClient({
+        config: createConfig(),
+        logger,
+        type: 'custom-type',
+        authHeaders,
+        security: securityServiceMock.createInternalSetup(),
+        agentFactoryProvider,
+        kibanaVersion,
+        onRequestHandlerFactory: mockOnRequestHandlerFactory,
+      });
+      const request = httpServerMock.createKibanaRequest({
+        headers: {
+          ...headers,
+          [UIAM_INTERNAL_CALLER_ATTESTATION_HEADER]: deriveInternalCallerAttestation(
+            'some-shared-secret',
+            authorization
+          ),
+        },
+      });
+
+      client = clusterClient.asScoped(request).asSecondaryAuthUser;
+
+      expect(internalClient.child).toHaveBeenCalledWith(
+        expect.objectContaining({
+          headers: {
+            ...defaultHeaders,
+            [ES_SECONDARY_AUTH_HEADER]: headers.authorization,
+            [ES_SECONDARY_CLIENT_AUTH_HEADER]: 'some-shared-secret',
+          },
+        })
+      );
+    });
+
+    it('does not specify secondary client authentication for UIAM credentials in fake requests marked as carrying an external credential', () => {
+      const clusterClient = new ClusterClient({
+        config: createConfig(),
+        logger,
+        type: 'custom-type',
+        authHeaders,
+        security: securityServiceMock.createInternalSetup(),
+        agentFactoryProvider,
+        kibanaVersion,
+        onRequestHandlerFactory: mockOnRequestHandlerFactory,
+      });
+      const fakeRequest = httpServerMock.createFakeKibanaRequest({
+        headers: { [AUTHORIZATION_HEADER]: 'ApiKey essu_user_created_key' },
+      });
+      markExternalUiamCredential(fakeRequest);
+
+      const scopedClusterClient = clusterClient.asScoped(fakeRequest);
+      // trigger client instantiation via getter
+      client = scopedClusterClient.asSecondaryAuthUser;
+
+      expect(internalClient.child).toHaveBeenCalledTimes(1);
+      expect(internalClient.child).toHaveBeenCalledWith(
+        expect.objectContaining({
+          headers: expect.objectContaining({
+            [ES_SECONDARY_AUTH_HEADER]: 'ApiKey essu_user_created_key',
+          }),
+        })
+      );
+      expect(internalClient.child.mock.calls[0][0].headers).not.toHaveProperty(
+        ES_SECONDARY_CLIENT_AUTH_HEADER
       );
     });
 
@@ -1357,7 +2032,7 @@ describe('ClusterClient', () => {
 
         // Even when the scoped client is created with 'space' routing, asSecondaryAuthUser
         // is always a child of asInternalUser, which uses origin-only routing.
-        const request = httpServerMock.createKibanaRequest({ path: '/s/my-space/app/discover' });
+        const request = httpServerMock.createKibanaRequest({ spaceId: 'my-space' });
         client = clusterClient.asScoped(request, {
           projectRouting: 'space',
         }).asSecondaryAuthUser;

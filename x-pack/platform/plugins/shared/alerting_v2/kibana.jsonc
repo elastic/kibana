@@ -31,10 +31,12 @@
       "share",
       "unifiedDocViewer",
       "maintenanceWindows",
-      "eventLog"
+      "eventLog",
+      "triggersActionsUi",
+      "licensing"
     ],
-    "optionalPlugins": ["usageCollection", "agentBuilder", "agentContextLayer"],
-    "requiredBundles": ["alerting", "kibanaReact"],
+    "optionalPlugins": ["usageCollection", "agentBuilder", "agentBuilderSml", "dashboard", "cps"],
+    "requiredBundles": ["alerting", "kibanaReact", "agentBuilder", "esql"],
     "extraPublicDirs": []
   }
 }

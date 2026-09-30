@@ -11,11 +11,15 @@ import semverValid from 'semver/functions/valid';
 import { FleetError, FleetNotFoundError, PackagePolicyRequestError } from '../../errors';
 import { appContextService, packagePolicyService } from '../../services';
 import { getPackageInfo } from '../../services/epm/packages/get';
-import type { DeletePackageDatastreamAssetsRequestSchema, FleetRequestHandler } from '../../types';
+import type {
+  DeletePackageDatastreamAssetsRequestSchema,
+  FleetRequestHandler,
+  PackagePolicy,
+} from '../../types';
 import {
   checkExistingDataStreamsAreFromDifferentPackage,
   findDataStreamsFromDifferentPackages,
-  getDatasetName,
+  getCustomDatasetStreams,
   isInputPackageDatasetUsedByMultiplePolicies,
   removeAssetsForInputPackagePolicy,
 } from '../../services/epm/packages/input_type_packages';
@@ -46,59 +50,67 @@ export const deletePackageDatastreamAssetsHandler: FleetRequestHandler<
     if (!packageInfo || packageInfo.version !== pkgVersion) {
       throw new FleetNotFoundError('Version is not installed');
     }
-    if (packageInfo?.type !== 'input') {
-      throw new PackagePolicyRequestError(
-        `Requested package ${pkgName}-${pkgVersion} is not an input package`
-      );
-    }
-
-    const allSpacesSoClient = appContextService.getInternalUserSOClientWithoutSpaceExtension();
-    const { items: allPackagePolicies } = await packagePolicyService.list(allSpacesSoClient, {
-      kuery: `${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.package.name:${pkgName}`,
-      spaceId: '*',
-    });
-
-    const packagePolicy = allPackagePolicies.find((policy) => policy.id === packagePolicyId);
-    if (!packagePolicy) {
+    // Resolve the target policy using the request-space scoped client first to enforce the
+    // authorization boundary.
+    const packagePolicy = await packagePolicyService.get(savedObjectsClient, packagePolicyId);
+    if (
+      !packagePolicy ||
+      packagePolicy.package?.name !== pkgName ||
+      packagePolicy.package?.version !== pkgVersion
+    ) {
       throw new FleetNotFoundError(`Package policy with id ${packagePolicyId} not found`);
     }
 
-    const datasetName = getDatasetName(packagePolicy?.inputs);
-    const datasetNameUsedByMultiplePolicies = isInputPackageDatasetUsedByMultiplePolicies(
-      allPackagePolicies,
-      datasetName,
-      pkgName
-    );
-
-    if (datasetNameUsedByMultiplePolicies) {
-      throw new FleetError(
-        `Datastreams matching ${datasetName} are in use by other package policies and cannot be removed`
-      );
+    const allSpacesSoClient = appContextService.getInternalUserSOClientWithoutSpaceExtension();
+    const allPackagePolicies: PackagePolicy[] = [];
+    for await (const page of await packagePolicyService.fetchAllItems(allSpacesSoClient, {
+      kuery: `${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.package.name:${pkgName}`,
+      spaceIds: ['*'],
+    })) {
+      allPackagePolicies.push(...page);
     }
 
-    const { existingDataStreams } = await findDataStreamsFromDifferentPackages(
-      datasetName,
-      packageInfo,
-      esClient
-    );
+    const customDatasetStreams = getCustomDatasetStreams(packagePolicy, packageInfo);
 
-    const existingDataStreamsAreFromDifferentPackage =
-      checkExistingDataStreamsAreFromDifferentPackage(packageInfo, existingDataStreams);
-
-    if (existingDataStreamsAreFromDifferentPackage) {
-      throw new FleetError(
-        `Datastreams matching ${datasetName} exist on other packages and cannot be removed`
+    for (const { datasetName } of customDatasetStreams) {
+      const datasetNameUsedByMultiplePolicies = isInputPackageDatasetUsedByMultiplePolicies(
+        allPackagePolicies,
+        datasetName,
+        pkgName,
+        packagePolicyId
       );
-    }
 
-    logger.info(`Removing datastreams matching ${datasetName}`);
-    await removeAssetsForInputPackagePolicy({
-      packageInfo,
-      logger,
-      datasetName,
-      esClient,
-      savedObjectsClient,
-    });
+      if (datasetNameUsedByMultiplePolicies) {
+        logger.info(
+          `Datastreams matching ${datasetName} are in use by other package policies, skipping removal`
+        );
+        continue;
+      }
+
+      const { existingDataStreams } = await findDataStreamsFromDifferentPackages(
+        datasetName,
+        packageInfo,
+        esClient
+      );
+
+      const existingDataStreamsAreFromDifferentPackage =
+        checkExistingDataStreamsAreFromDifferentPackage(packageInfo, existingDataStreams);
+
+      if (existingDataStreamsAreFromDifferentPackage) {
+        throw new FleetError(
+          `Datastreams matching ${datasetName} exist on other packages and cannot be removed`
+        );
+      }
+
+      logger.info(`Removing datastreams matching ${datasetName}`);
+      await removeAssetsForInputPackagePolicy({
+        packageInfo,
+        logger,
+        datasetName,
+        esClient,
+        savedObjectsClient,
+      });
+    }
 
     return response.ok({ body: { success: true } });
   } catch (error) {

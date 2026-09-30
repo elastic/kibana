@@ -9,7 +9,7 @@
 
 import type { PluginStartContract as ActionsPluginStartContract } from '@kbn/actions-plugin/server';
 import type { CloudSetup, CloudStart } from '@kbn/cloud-plugin/server';
-import type { KibanaRequest } from '@kbn/core/server';
+import type { CoreStart, KibanaRequest } from '@kbn/core/server';
 import type { LicensingPluginStart } from '@kbn/licensing-plugin/server';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import type {
@@ -22,8 +22,24 @@ import type {
   WorkflowsExtensionsServerPluginSetup,
   WorkflowsExtensionsServerPluginStart,
 } from '@kbn/workflows-extensions/server';
+import type {
+  StepExecutionsDataClient,
+  WorkflowExecutionsDataClient,
+} from './repositories/data_access_layer';
+import type {
+  SearchTriggerEventLogParams,
+  SearchTriggerEventLogResult,
+} from './trigger_events/event_logs/trigger_event_log_query';
 import type { EmitEvent } from './trigger_events/trigger_event_handler';
 import type { IWorkflowEventLoggerService } from './workflow_event_logger';
+
+export type {
+  DataClient,
+  GetStepExecutionsByIdsOptions,
+  GetWorkflowExecutionsByIdsOptions,
+  StepExecutionsDataClient,
+  WorkflowExecutionsDataClient,
+} from './repositories/data_access_layer';
 
 export interface ExecuteWorkflowResponse {
   workflowExecutionId: string;
@@ -48,9 +64,20 @@ export interface TriggerEventsContract {
   isEnabled: boolean;
   isLogEventsEnabled: boolean;
   maxEventChainDepth: number;
+  searchTriggerEventLog: (
+    params: SearchTriggerEventLogParams
+  ) => Promise<SearchTriggerEventLogResult>;
 }
 
 export interface WorkflowsExecutionEnginePluginStart {
+  serviceAccountBindings: Pick<
+    CoreStart['security']['serviceAccounts'],
+    'isEnabled' | 'bindWorkload' | 'unbindWorkload' | 'getWorkloadBinding'
+  >;
+  __internalStorage: {
+    workflowExecutionsDataClient: WorkflowExecutionsDataClient;
+    stepExecutionsDataClient: StepExecutionsDataClient;
+  };
   executeWorkflow: ExecuteWorkflow;
   executeWorkflowStep: ExecuteWorkflowStep;
   cancelWorkflowExecution: CancelWorkflowExecution;
@@ -95,26 +122,36 @@ export type ExecuteWorkflowStep = (
 export type CancelWorkflowExecution = (
   workflowExecutionId: string,
   spaceId: string,
-  schedulingRequest?: KibanaRequest
+  schedulingRequest: KibanaRequest
 ) => Promise<void>;
 
 export type CancelAllActiveWorkflowExecutions = (params: {
   spaceId: string;
   workflowId: string;
+  schedulingRequest: KibanaRequest;
+  /**
+   * Invoked for each successfully cancelled execution as paging proceeds.
+   * Prefer this over accumulating ids so callers (e.g. per-execution audit)
+   * never retain an unbounded list in memory.
+   */
+  onCancelled?: (executionId: string) => void;
 }) => Promise<void>;
 
 export type ResumeWorkflowExecution = (
   executionId: string,
   spaceId: string,
   input: Record<string, unknown>,
-  request: KibanaRequest
+  request?: KibanaRequest,
+  options?: {
+    resumedBy?: string;
+  }
 ) => Promise<ResumeWorkflowExecutionResponse>;
 
 export type InternalResumeWorkflowExecution = (
   executionId: string,
   spaceId: string,
   context: Record<string, unknown> | undefined,
-  request: KibanaRequest
+  request?: KibanaRequest
 ) => Promise<void>;
 
 export type ScheduleWorkflow = (

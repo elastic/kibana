@@ -4,6 +4,9 @@ set -euo pipefail
 
 source .buildkite/scripts/common/util.sh
 
+echo "--- Cleaning up cached images"
+clean_cached_images
+
 echo "--- Cloning Elasticsearch and preparing workspace"
 
 cd ..
@@ -119,7 +122,7 @@ cd "$destination"
 find ./* -exec bash -c "shasum -a 512 {} > {}.sha512" \;
 
 cd "$BUILDKITE_BUILD_CHECKOUT_PATH"
-ts-node "$(dirname "${0}")/create_manifest.ts" "$destination"
+node "$(dirname "${0}")/create_manifest.ts" "$destination"
 
 ES_SNAPSHOT_MANIFEST="$(buildkite-agent meta-data get ES_SNAPSHOT_MANIFEST)"
 

@@ -98,6 +98,7 @@ export async function validateBucketSpan(client, job, duration) {
       query: wrapQuery(job.datafeed_config.query),
       splitField: undefined,
       timeField: job.data_description.time_field,
+      projectRouting: job.datafeed_config.project_routing,
     };
   };
 

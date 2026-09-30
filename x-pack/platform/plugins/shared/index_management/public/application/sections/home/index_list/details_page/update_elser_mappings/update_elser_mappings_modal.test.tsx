@@ -59,6 +59,13 @@ const isElserOnMlNodeSemanticFieldMock = jest.mocked(isElserOnMlNodeSemanticFiel
 const mappingsContextMock = jest.mocked(mappingsContext);
 const updateIndexMappingsMock = jest.mocked(apiService.updateIndexMappings);
 
+// The accessible name of a selectable option is built from its content, which
+// includes the appended inference id badge.
+const getMappingOption = (container: HTMLElement, fieldName: string) =>
+  within(container).getByRole('option', {
+    name: new RegExp(`^${fieldName}\\b`),
+  });
+
 let notificationService: NotificationService;
 let showSuccessToastSpy: jest.SpyInstance;
 let showDangerToastSpy: jest.SpyInstance;
@@ -113,10 +120,12 @@ describe('UpdateElserMappingsModal', () => {
     renderEisUpdateCallout();
 
     expect(screen.getByTestId('updateElserMappingsModal')).toBeInTheDocument();
-    expect(screen.getByTestId('updateElserMappingsSelect')).toBeInTheDocument();
 
-    expect(screen.getByRole('option', { name: 'name' })).toBeInTheDocument();
-    expect(screen.getByRole('option', { name: 'text' })).toBeInTheDocument();
+    const selectable = screen.getByTestId('updateElserMappingsSelect');
+    expect(selectable).toBeInTheDocument();
+
+    expect(getMappingOption(selectable, 'name')).toBeInTheDocument();
+    expect(getMappingOption(selectable, 'text')).toBeInTheDocument();
 
     const badges = screen.getAllByText('.elser-2-elasticsearch');
     expect(badges).toHaveLength(2);
@@ -131,7 +140,7 @@ describe('UpdateElserMappingsModal', () => {
   it('should enable Apply button when at least one option is checked', async () => {
     renderEisUpdateCallout();
     const selectable = screen.getByTestId('updateElserMappingsSelect');
-    const firstOption = within(selectable).getByRole('option', { name: 'name' });
+    const firstOption = getMappingOption(selectable, 'name');
     await userEvent.click(firstOption);
 
     const applyBtn = screen.getByTestId('UpdateElserMappingsModalApplyBtn');
@@ -148,7 +157,7 @@ describe('UpdateElserMappingsModal', () => {
     renderEisUpdateCallout();
 
     const selectable = screen.getByTestId('updateElserMappingsSelect');
-    const firstOption = within(selectable).getByRole('option', { name: 'name' });
+    const firstOption = getMappingOption(selectable, 'name');
     await userEvent.click(firstOption);
 
     updateIndexMappingsMock.mockResolvedValue({ error: null, data: null });
@@ -166,7 +175,7 @@ describe('UpdateElserMappingsModal', () => {
     renderEisUpdateCallout();
 
     const selectable = screen.getByTestId('updateElserMappingsSelect');
-    const firstOption = within(selectable).getByRole('option', { name: 'name' });
+    const firstOption = getMappingOption(selectable, 'name');
     await userEvent.click(firstOption);
 
     const errorMessage = 'Something has gone wrong';

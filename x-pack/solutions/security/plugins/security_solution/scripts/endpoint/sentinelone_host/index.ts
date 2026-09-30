@@ -8,7 +8,7 @@
 import type { RunFn } from '@kbn/dev-cli-runner';
 import { run } from '@kbn/dev-cli-runner';
 import { ok } from 'assert';
-import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
+import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import { ensureSpaceIdExists, fetchActiveSpace } from '../common/spaces';
 import {
   isFleetServerRunning,

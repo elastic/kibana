@@ -5,60 +5,39 @@
  * 2.0.
  */
 
-import { agentBuilderDefaultAgentId } from '@kbn/agent-builder-common';
-import { isInternalTool } from '@kbn/agent-builder-common/tools';
+import { isInternalTool, ToolType } from '@kbn/agent-builder-common/tools';
 import type {
   SkillInvocationOrigin,
   SkillSolutionArea,
 } from '@kbn/agent-builder-common/telemetry/agent_builder_events';
-import {
-  AGENT_BUILDER_BUILTIN_AGENTS,
-  AGENT_BUILDER_BUILTIN_TOOLS,
-} from '@kbn/agent-builder-server/allow_lists';
+import { AGENT_BUILDER_BUILTIN_TOOLS } from '@kbn/agent-builder-server/allow_lists';
 import type { InternalSkillDefinition } from '@kbn/agent-builder-server/skills';
-import { createHash } from 'crypto';
+import {
+  toCustomHashedId,
+  toHashedId,
+  normalizeAgentIdForTelemetry,
+} from '@kbn/agent-builder-server/telemetry';
 
-const BUILTIN_AGENT_IDS = new Set([agentBuilderDefaultAgentId, ...AGENT_BUILDER_BUILTIN_AGENTS]);
 const BUILTIN_TOOL_IDS = new Set(AGENT_BUILDER_BUILTIN_TOOLS);
 
-const CUSTOM = 'custom';
-const CUSTOM_HASH_PREFIX = `${CUSTOM}-`;
 const PLUGIN_HASH_PREFIX = 'plugin-';
-const CUSTOM_HASH_HEX_LENGTH = 16;
-
-function sha256Hex(value: string): string {
-  return createHash('sha256').update(value).digest('hex');
-}
-
-function toCustomHashedId(value: string): string {
-  return `${CUSTOM_HASH_PREFIX}${sha256Hex(value).slice(0, CUSTOM_HASH_HEX_LENGTH)}`;
-}
+export { toCustomHashedId, normalizeAgentIdForTelemetry };
 
 function toPluginHashedId(value: string): string {
-  return `${PLUGIN_HASH_PREFIX}${sha256Hex(value).slice(0, CUSTOM_HASH_HEX_LENGTH)}`;
-}
-
-/**
- * Normalizes agent IDs for telemetry to protect user privacy.
- * Built-in agents are reported with their actual ID, custom agents are reported as a stable hashed
- * label (CUSTOM-<sha256_prefix>).
- */
-export function normalizeAgentIdForTelemetry(agentId?: string): string | undefined {
-  if (!agentId) {
-    return undefined;
-  }
-  return BUILTIN_AGENT_IDS.has(agentId) ? agentId : toCustomHashedId(agentId);
+  return `${PLUGIN_HASH_PREFIX}${toHashedId(value)}`;
 }
 
 /**
  * Normalizes tool IDs for telemetry to protect user privacy.
- * Built-in tools (from AGENT_BUILDER_BUILTIN_TOOLS) are reported with their actual ID,
  * custom/user-created tools are reported as a stable hashed label (CUSTOM-<sha256_prefix>).
+ * Pass `toolType` when available; falls back to allow-list for legacy callers that only have a tool ID string.
  */
-export function normalizeToolIdForTelemetry(toolId: string): string {
-  return (BUILTIN_TOOL_IDS as Set<string>).has(toolId) || isInternalTool(toolId)
-    ? toolId
-    : toCustomHashedId(toolId);
+export function normalizeToolIdForTelemetry(toolId: string, toolType?: ToolType | string): string {
+  const isBuiltin =
+    toolType === ToolType.builtin ||
+    (BUILTIN_TOOL_IDS as Set<string>).has(toolId) ||
+    isInternalTool(toolId);
+  return isBuiltin ? toolId : toCustomHashedId(toolId);
 }
 
 /**
@@ -90,7 +69,7 @@ export function normalizeSkillIdForTelemetry(skill: {
   }
   if (skill.plugin_id) {
     const pluginHash = toPluginHashedId(skill.plugin_id);
-    const skillHash = sha256Hex(skill.id).slice(0, CUSTOM_HASH_HEX_LENGTH);
+    const skillHash = toHashedId(skill.id);
     return `${pluginHash}-${skillHash}`;
   }
   return toCustomHashedId(skill.id);
@@ -103,8 +82,9 @@ export function normalizeSkillIdForTelemetry(skill: {
  *   it's a read-only built-in skill, otherwise `custom`.
  * - `solution_area`: derived from `basePath` for built-ins
  *   (`skills/security/...` → `security`, `skills/observability/...` →
- *   `observability`, `skills/search/...` → `search`, `skills/platform/...` →
- *   `platform`); literal `custom` for user-created; `plugin` for plugin-backed.
+ *   `observability`, `skills/ml/...` → `ml`, `skills/search/...` → `search`,
+ *   `skills/platform/...` → `platform`); literal `custom` for user-created;
+ *   `plugin` for plugin-backed.
  */
 export function classifySkill(
   skill: Pick<InternalSkillDefinition, 'readonly' | 'plugin_id' | 'basePath'>
@@ -128,6 +108,9 @@ function solutionAreaFromBasePath(basePath: string): SkillSolutionArea {
   }
   if (normalized.startsWith('skills/observability')) {
     return 'observability';
+  }
+  if (normalized.startsWith('skills/ml')) {
+    return 'ml';
   }
   if (normalized.startsWith('skills/search')) {
     return 'search';

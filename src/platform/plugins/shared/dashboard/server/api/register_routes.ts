@@ -16,6 +16,7 @@ import { registerDeleteRoute } from './delete';
 import { registerSearchRoute } from './search';
 import { registerReadRoute } from './read';
 import { registerSanitizeRoute } from './sanitize';
+import { registerTrackUserActivityRoute } from '../user_activity/register_routes';
 
 export function registerRoutes(
   http: HttpServiceSetup,
@@ -47,4 +48,7 @@ export function registerRoutes(
   registerCreateRoute(versionedRouter, undefined, true, logger);
   registerReadRoute(versionedRouter, undefined, true, logger);
   registerUpdateRoute(versionedRouter, undefined, true, logger);
+
+  const unversionedRouter = http.createRouter<RequestHandlerContext>();
+  registerTrackUserActivityRoute(unversionedRouter);
 }

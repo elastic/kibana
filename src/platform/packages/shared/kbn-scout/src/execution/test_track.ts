@@ -236,7 +236,10 @@ export class TestTrack {
       stats: {
         lane: {
           count: this.laneCount,
-          saturationPercent: parseFloat(((expectedRuntime / provisionedRuntime) * 100).toFixed(2)),
+          saturationPercent:
+            provisionedRuntime !== 0
+              ? parseFloat(((expectedRuntime / provisionedRuntime) * 100).toFixed(2))
+              : 0,
           longestEstimate: longestLaneEstimate,
           shortestEstimate: shortestLaneEstimate,
         },

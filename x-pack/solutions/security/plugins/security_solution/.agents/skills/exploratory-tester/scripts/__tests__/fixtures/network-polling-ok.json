@@ -1,0 +1,8 @@
+[
+  {"method": "GET", "url": "https://localhost:5620/api/status"},
+  {"method": "GET", "url": "https://localhost:5620/api/status"},
+  {"method": "GET", "url": "https://localhost:5620/api/status"},
+  {"method": "GET", "url": "https://localhost:5620/api/fleet-setup"},
+  {"method": "GET", "url": "https://localhost:5620/api/fleet-setup"},
+  {"method": "GET", "url": "https://localhost:5620/api/security/me"}
+]

@@ -10,6 +10,7 @@
 import { i18n } from '@kbn/i18n';
 import { z, lazySchema } from '@kbn/zod/v4';
 import type { ActionContext, ConnectorSpec } from '../../connector_spec';
+import { BIGQUERY_READ_ONLY_PREFIXES, isReadOnlySql } from '../../lib/generic_db_connector';
 import type {
   ExecuteQueryInput,
   GetQueryResultsInput,
@@ -27,8 +28,6 @@ const BIGQUERY_API_BASE = 'https://bigquery.googleapis.com/bigquery/v2';
 const DEFAULT_LOCATION = 'US';
 const DEFAULT_MAX_RESULTS = 1000;
 const BIGQUERY_USER_AGENT = 'Kibana-BigQuery-Connector/1.0';
-
-const READ_ONLY_QUERY_PREFIXES = /^(SELECT|WITH|EXPLAIN)\b/i;
 
 interface BigQueryJobReference {
   projectId?: string;
@@ -68,30 +67,6 @@ interface BigQueryQueryResponse {
   cacheHit?: boolean;
   errors?: Array<{ message?: string; reason?: string; location?: string }>;
 }
-
-const stripLeadingCommentsAndWhitespace = (sql: string): string => {
-  let remaining = sql;
-  while (true) {
-    const before = remaining;
-    remaining = remaining.replace(/^\s+/, '');
-    remaining = remaining.replace(/^--[^\n]*(?:\n|$)/, '');
-    remaining = remaining.replace(/^\/\*[\s\S]*?\*\//, '');
-    if (remaining === before) return remaining;
-  }
-};
-
-const hasTrailingStatement = (sql: string): boolean => {
-  const semicolonIndex = sql.indexOf(';');
-  if (semicolonIndex === -1) return false;
-  const trailing = stripLeadingCommentsAndWhitespace(sql.slice(semicolonIndex + 1));
-  return trailing.length > 0;
-};
-
-const isReadOnlyQuery = (sql: string): boolean => {
-  if (hasTrailingStatement(sql)) return false;
-  const head = stripLeadingCommentsAndWhitespace(sql);
-  return READ_ONLY_QUERY_PREFIXES.test(head);
-};
 
 const throwBigQueryError = (error: unknown): never => {
   const err = error as {
@@ -219,7 +194,7 @@ export const BigQuery: ConnectorSpec = {
     }),
     minimumLicense: 'enterprise',
     isTechnicalPreview: true,
-    supportedFeatureIds: ['workflows', 'agentBuilder'],
+    supportedFeatureIds: ['workflows', 'agentBuilder', 'contextEngine'],
   },
 
   auth: {
@@ -280,11 +255,12 @@ export const BigQuery: ConnectorSpec = {
   actions: {
     runQuery: {
       isTool: true,
+      scope: 'read',
       description:
         'Run a read-only GoogleSQL query in BigQuery. Accepts SELECT, WITH (CTE), and EXPLAIN statements only; rejects DML, DDL, scripts, stored procedures, and semicolon-delimited multi-statement submissions before the request is sent. Returns normalized rows as objects plus the BigQuery job reference and pagination token when more rows are available.',
       input: RunQueryInputSchema,
       handler: async (ctx, input: RunQueryInput) => {
-        if (!isReadOnlyQuery(input.query)) {
+        if (!isReadOnlySql(input.query, BIGQUERY_READ_ONLY_PREFIXES)) {
           throw new Error(
             'runQuery only accepts read-only BigQuery GoogleSQL statements (SELECT, WITH, EXPLAIN) and rejects semicolon-delimited multi-statement submissions. Use executeQuery from a workflow for non-read-only statements.'
           );
@@ -295,6 +271,7 @@ export const BigQuery: ConnectorSpec = {
 
     executeQuery: {
       isTool: false,
+      scope: 'destroy',
       description:
         'Run any GoogleSQL query in BigQuery from a workflow or direct connector execution. This action is intentionally hidden from agents because it can run DML, DDL, scripts, stored procedures, or expensive queries. Returns normalized rows as objects plus the BigQuery job reference and pagination token when more rows are available.',
       input: ExecuteQueryInputSchema,
@@ -303,6 +280,7 @@ export const BigQuery: ConnectorSpec = {
 
     getQueryResults: {
       isTool: true,
+      scope: 'read',
       description:
         'Poll or page through results for a BigQuery job returned by runQuery. Use this when runQuery returns jobComplete=false or a pageToken. Returns normalized rows as objects plus raw row arrays, schema, job status, and the next page token when available.',
       input: GetQueryResultsInputSchema,
@@ -332,6 +310,7 @@ export const BigQuery: ConnectorSpec = {
 
     listDatasets: {
       isTool: true,
+      scope: 'read',
       description:
         'List BigQuery datasets visible to the configured service account in a project. Use this for discovery before writing fully-qualified table references. Returns BigQuery dataset metadata and pagination tokens.',
       input: ListDatasetsInputSchema,
@@ -361,25 +340,13 @@ export const BigQuery: ConnectorSpec = {
         'Verifies BigQuery API access by running a lightweight SELECT 1 query in the configured project.',
     }),
     handler: async (ctx) => {
-      try {
-        const result = await submitQuery(ctx, {
-          query: 'SELECT 1 AS ok',
-          maxResults: 1,
-        });
-        return {
-          ok: true,
-          message: `Successfully connected to BigQuery${
-            result.jobReference?.jobId ? ` (job ${result.jobReference.jobId})` : ''
-          }`,
-        };
-      } catch (error) {
-        const errorMessage = error instanceof Error ? error.message : String(error);
-        return {
-          ok: false,
-          message: `Failed to connect to BigQuery: ${errorMessage}`,
-        };
-      }
+      await submitQuery(ctx, {
+        query: 'SELECT 1 AS ok',
+        maxResults: 1,
+      });
+      return {};
     },
+    enabled: true,
   },
 
   skill: [

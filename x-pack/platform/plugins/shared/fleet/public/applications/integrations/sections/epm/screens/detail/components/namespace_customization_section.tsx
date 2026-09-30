@@ -19,6 +19,7 @@ import {
   EuiText,
   EuiTitle,
 } from '@elastic/eui';
+import { KbnWarningCallout } from '@kbn/ui-callout';
 import type { EuiComboBoxOptionOption } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -32,6 +33,7 @@ import { useStartServices } from '../../../../../hooks';
 interface Props {
   savedNamespaces: string[];
   allowedNamespacePrefixes: string[];
+  namespaceCustomizationSettings?: { [namespace: string]: { ilm_policy?: string } };
   disabled?: boolean;
   isSubmitting?: boolean;
   onSave: (next: string[]) => void;
@@ -46,6 +48,7 @@ const setsEqual = (a: string[], b: string[]): boolean => {
 export const NamespaceCustomizationSection: React.FC<Props> = ({
   savedNamespaces,
   allowedNamespacePrefixes,
+  namespaceCustomizationSettings,
   disabled = false,
   isSubmitting = false,
   onSave,
@@ -66,6 +69,15 @@ export const NamespaceCustomizationSection: React.FC<Props> = ({
     () => !setsEqual(draftNamespaces, savedNamespaces),
     [draftNamespaces, savedNamespaces]
   );
+
+  // Namespaces being removed that have an ILM policy — warn the user those policies will be cleared.
+  const removedNamespacesWithIlm = useMemo(() => {
+    if (!namespaceCustomizationSettings || !isDirty) return [];
+    const draftSet = new Set(draftNamespaces);
+    return savedNamespaces.filter(
+      (ns) => !draftSet.has(ns) && !!namespaceCustomizationSettings[ns]?.ilm_policy
+    );
+  }, [draftNamespaces, savedNamespaces, namespaceCustomizationSettings, isDirty]);
 
   const selectedOptions = useMemo(
     () =>
@@ -142,7 +154,7 @@ export const NamespaceCustomizationSection: React.FC<Props> = ({
       <EuiText>
         <FormattedMessage
           id="xpack.fleet.integrations.settings.namespaceCustomization.description"
-          defaultMessage="Select which namespaces use a dedicated index template for this integration. This enables independent settings and mappings per namespace. {learnMoreLink}"
+          defaultMessage="Select which namespaces use dedicated index templates for this integration. This enables independent settings and mappings per namespace. {learnMoreLink}"
           values={{
             learnMoreLink: (
               <EuiLink href={docLinks.links.fleet.datastreams} external={true} target="_blank">
@@ -160,7 +172,7 @@ export const NamespaceCustomizationSection: React.FC<Props> = ({
         isInvalid={hasValidationError}
         error={validationErrors}
         label={i18n.translate('xpack.fleet.integrations.settings.namespaceCustomization.label', {
-          defaultMessage: 'Namespaces with a dedicated index template',
+          defaultMessage: 'Namespaces with dedicated index templates',
         })}
         helpText={
           allowedNamespacePrefixes.length > 0 && (
@@ -186,6 +198,30 @@ export const NamespaceCustomizationSection: React.FC<Props> = ({
           onChange={handleChange}
         />
       </EuiFormRow>
+      {removedNamespacesWithIlm.length > 0 && (
+        <>
+          <EuiSpacer size="s" />
+          <KbnWarningCallout
+            announceOnMount
+            size="s"
+            title={i18n.translate(
+              'xpack.fleet.integrations.settings.namespaceCustomization.ilmWillBeRemovedTitle',
+              { defaultMessage: 'ILM policy will be removed' }
+            )}
+            text={
+              <FormattedMessage
+                id="xpack.fleet.integrations.settings.namespaceCustomization.ilmWillBeRemovedBody"
+                defaultMessage="Removing {namespaces} will also clear the ILM policy assigned to {count, plural, one {that namespace} other {those namespaces}}."
+                values={{
+                  namespaces: <strong>{removedNamespacesWithIlm.join(', ')}</strong>,
+                  count: removedNamespacesWithIlm.length,
+                }}
+              />
+            }
+          />
+        </>
+      )}
+
       {(isDirty || isSubmitting) && (
         <>
           <EuiSpacer size="s" />
@@ -202,7 +238,7 @@ export const NamespaceCustomizationSection: React.FC<Props> = ({
                 <EuiFlexItem grow={false}>
                   <FormattedMessage
                     id="xpack.fleet.integrations.settings.namespaceCustomization.applying"
-                    defaultMessage="Applying namespace index template changes…"
+                    defaultMessage="Applying changes to namespace index templates…"
                   />
                 </EuiFlexItem>
               </EuiFlexGroup>

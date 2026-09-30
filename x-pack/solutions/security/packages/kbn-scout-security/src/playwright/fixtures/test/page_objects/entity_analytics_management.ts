@@ -41,6 +41,7 @@ export class EntityAnalyticsManagementPage {
   // Asset Criticality tab
   public assetCriticalityInfoPanel: Locator;
   public assetCriticalityFileUploadSection: Locator;
+  public assetCriticalityFilePicker: Locator;
   public assetCriticalityDocLink: Locator;
   public assetCriticalityInsufficientPrivilegesCallout: Locator;
   public assetCriticalityIssueCallout: Locator;
@@ -83,6 +84,7 @@ export class EntityAnalyticsManagementPage {
     this.assetCriticalityFileUploadSection = this.page.testSubj.locator(
       'asset-criticality-file-upload-section'
     );
+    this.assetCriticalityFilePicker = this.page.testSubj.locator('asset-criticality-file-picker');
     this.assetCriticalityDocLink = this.page.testSubj.locator('asset-criticality-doc-link');
     this.assetCriticalityInsufficientPrivilegesCallout = this.page.testSubj.locator(
       'asset-criticality-insufficient-privileges'
@@ -142,5 +144,13 @@ export class EntityAnalyticsManagementPage {
   async waitForStatusLoaded() {
     await this.statusLoading.waitFor({ state: 'detached', timeout: 30000 });
     await this.entityAnalyticsHealth.waitFor({ state: 'visible', timeout: 30000 });
+  }
+
+  async clearEntityData() {
+    const modal = this.page.testSubj.locator('clear-entity-data-modal');
+    await this.page.testSubj.locator('clear-entity-data-button').click();
+    await modal.waitFor({ state: 'visible' });
+    await this.page.testSubj.locator('confirmModalConfirmButton').click();
+    await modal.waitFor({ state: 'detached' });
   }
 }

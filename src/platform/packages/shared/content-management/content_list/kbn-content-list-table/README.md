@@ -79,6 +79,8 @@ There is no DOM, accessibility, or clipboard impact: the rendered table has exac
 
 On viewports ≥ `2560px` (common 4K external displays), `ContentListTable` widens `Column.Name` from `64em` to `90em` via a media-query CSS override (`cssWideViewportNameWidth` in `content_list_table.tsx`). The trailing pseudo-cell still absorbs whatever horizontal slack remains, so populated sibling columns (`UpdatedAt`, `CreatedBy`, `Actions`, etc.) stay at their preferred footprints; only the Name column / spacer ratio shifts. Because EUI applies `width` / `max-width` as inline styles, the rule uses `!important` and so applies regardless of consumer-supplied `width` overrides — the wide-viewport bump is a cross-cutting layout decision rather than a per-instance default.
 
+At the same breakpoint, `NameCell` flips its in-cell title / description / tags from a column stack to a wrapping flex row (`flex-direction: row; flex-wrap: wrap`). Sparse rows (short title, short description, few tags) collapse onto a single line so the populated cells stay close to the next column; rich rows (long title or long description) wrap back to additional lines instead of being squeezed in-place. See `cssWideViewportNameWidth` and `NameCell` for the rationale.
+
 #### Overriding defaults
 
 There are two ways to opt out of a baked-in default:

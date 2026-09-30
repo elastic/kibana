@@ -14,6 +14,7 @@ import { decompressFromEncodedURIComponent } from 'lz-string';
 import { i18n } from '@kbn/i18n';
 import { useEffect, useRef } from 'react';
 import { DEFAULT_INPUT_VALUE } from '../../../../../common/constants';
+import { removeLoadFromParameter } from '../../../lib/load_from';
 import { useEditorActionContext } from '../../../contexts';
 
 const httpsProtocol = 'https:';
@@ -30,6 +31,8 @@ interface SetInitialValueParams {
   setValue: (value: string) => void;
   /** The toasts service. */
   toasts: IToasts;
+  /** Optional override for the default editor content shown when no saved buffer exists. */
+  defaultEditorContent?: string;
 }
 
 /**
@@ -49,7 +52,7 @@ export const readLoadFromParam = () => {
  * @param params The {@link SetInitialValueParams} to use.
  */
 export const useSetInitialValue = (params: SetInitialValueParams) => {
-  const { localStorageValue, setValue, toasts } = params;
+  const { localStorageValue, setValue, toasts, defaultEditorContent } = params;
   const isInitialValueSet = useRef<boolean>(false);
   const editorDispatch = useEditorActionContext();
 
@@ -115,7 +118,16 @@ export const useSetInitialValue = (params: SetInitialValueParams) => {
       if (!url) {
         return;
       }
-      await loadBufferFromRemote(url);
+      try {
+        await loadBufferFromRemote(url);
+      } catch (e) {
+        // Nothing was appended, so leave the parameter in place and let a reload retry it.
+        return;
+      }
+      // The parameter is a one-shot instruction. Leaving it in the URL would re-append the
+      // request on every later page load, resurrecting requests the user has since cleared.
+      // Replace rather than push, so Back cannot return to the URL and re-consume it.
+      removeLoadFromParameter({ replace: true });
     }, 200);
 
     window.addEventListener('hashchange', loadFromUrl);
@@ -123,13 +135,14 @@ export const useSetInitialValue = (params: SetInitialValueParams) => {
     // Only set the value in the editor if an initial value hasn't been set yet
     if (!isInitialValueSet.current) {
       // Only set to default input value if the localstorage value is undefined
-      setValue(localStorageValue ?? DEFAULT_INPUT_VALUE);
+      setValue(localStorageValue ?? defaultEditorContent ?? DEFAULT_INPUT_VALUE);
       loadFromUrl();
       isInitialValueSet.current = true;
     }
 
     return () => {
       window.removeEventListener('hashchange', loadFromUrl);
+      loadFromUrl.cancel();
     };
-  }, [localStorageValue, setValue, toasts, editorDispatch]);
+  }, [localStorageValue, setValue, toasts, editorDispatch, defaultEditorContent]);
 };

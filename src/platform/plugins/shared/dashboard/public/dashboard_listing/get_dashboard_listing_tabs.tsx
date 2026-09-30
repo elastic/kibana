@@ -9,10 +9,7 @@
 
 import React, { useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
-import type {
-  TableListTab,
-  TableListTabParentProps,
-} from '@kbn/content-management-tabbed-table-list-view';
+import type { TableListTabParentProps } from '@kbn/content-management-tabbed-table-list-view';
 import {
   TableListViewTable,
   TableListViewKibanaProvider,
@@ -29,12 +26,20 @@ import {
 } from '../services/kibana_services';
 import { DashboardUnsavedListing } from './dashboard_unsaved_listing';
 import { useDashboardListingTable } from './hooks/use_dashboard_listing_table';
-import type { DashboardListingProps, DashboardSavedObjectUserContent } from './types';
+import { confirmCreateWithUnsaved } from './confirm_overlays';
+import { getDashboardBackupService } from '../services/dashboard_api_services';
+import type {
+  DashboardListingProps,
+  DashboardListingTab,
+  DashboardSavedObjectUserContent,
+} from './types';
 
 type GetDashboardListingTabsParams = Pick<
   DashboardListingProps,
   'goToDashboard' | 'getDashboardUrl' | 'useSessionStorageIntegration' | 'initialFilter' | 'getTabs'
->;
+> & {
+  refreshListBouncer?: boolean;
+};
 
 type TabContentProps = Omit<GetDashboardListingTabsParams, 'getTabs'> & {
   parentProps: TableListTabParentProps<DashboardSavedObjectUserContent>;
@@ -52,6 +57,7 @@ const DashboardsTabContent = ({
   getDashboardUrl,
   useSessionStorageIntegration,
   initialFilter,
+  refreshListBouncer,
   parentProps,
 }: TabContentProps) => {
   const {
@@ -64,6 +70,7 @@ const DashboardsTabContent = ({
     getDashboardUrl,
     useSessionStorageIntegration,
     initialFilter,
+    showCreateDashboardButton: parentProps.showCreateButton,
   });
 
   const dashboardFavoritesClient = useMemo(() => {
@@ -90,6 +97,7 @@ const DashboardsTabContent = ({
         {...tableListViewTableProps}
         onFetchSuccess={parentProps.onFetchSuccess}
         setPageDataTestSubject={parentProps.setPageDataTestSubject}
+        refreshListBouncer={refreshListBouncer}
       />
     </TableListViewKibanaProvider>
   );
@@ -101,15 +109,17 @@ export const getDashboardListingTabs = ({
   useSessionStorageIntegration,
   initialFilter,
   getTabs,
-}: GetDashboardListingTabsParams): TableListTab<DashboardSavedObjectUserContent>[] => {
+  refreshListBouncer,
+}: GetDashboardListingTabsParams): DashboardListingTab[] => {
   const commonProps = {
     goToDashboard,
     getDashboardUrl,
     useSessionStorageIntegration,
     initialFilter,
+    refreshListBouncer,
   };
 
-  const dashboardsTab: TableListTab<DashboardSavedObjectUserContent> = {
+  const dashboardsTab: DashboardListingTab = {
     title: i18n.translate('dashboard.listing.tabs.dashboards.title', {
       defaultMessage: 'Dashboards',
     }),
@@ -117,6 +127,16 @@ export const getDashboardListingTabs = ({
     getTableList: (parentProps) => (
       <DashboardsTabContent {...commonProps} parentProps={parentProps} />
     ),
+    createAction: () => {
+      if (useSessionStorageIntegration && getDashboardBackupService().dashboardHasUnsavedEdits()) {
+        confirmCreateWithUnsaved(() => {
+          getDashboardBackupService().clearState();
+          goToDashboard();
+        }, goToDashboard);
+        return;
+      }
+      goToDashboard();
+    },
   };
 
   // Additional tabs (e.g., visualizations and annotation groups)

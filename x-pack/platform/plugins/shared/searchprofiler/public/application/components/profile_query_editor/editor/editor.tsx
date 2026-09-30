@@ -23,6 +23,7 @@ const EDITOR_INPUT_ID = 'SearchProfilerTextArea';
 
 export interface EditorProps {
   focus: () => void;
+  setValue: (value: string) => void;
 }
 
 export const Editor = memo(
@@ -32,6 +33,9 @@ export const Editor = memo(
         onEditorReady({
           focus: () => {
             editor.focus();
+          },
+          setValue: (value: string) => {
+            editor.setValue(value);
           },
         } as EditorProps);
       },

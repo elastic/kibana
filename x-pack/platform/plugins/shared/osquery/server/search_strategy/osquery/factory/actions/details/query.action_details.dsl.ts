@@ -7,7 +7,6 @@
 
 import type { ISearchRequestParams } from '@kbn/search-types';
 import { AGENT_ACTIONS_INDEX } from '@kbn/fleet-plugin/common';
-import { isEmpty } from 'lodash';
 import { getQueryFilter } from '../../../../../utils/build_query';
 import { ACTIONS_INDEX } from '../../../../../../common/constants';
 import type { ActionDetailsRequestOptions } from '../../../../../../common/search_strategy';
@@ -16,43 +15,15 @@ export const buildActionDetailsQuery = ({
   actionId,
   kuery,
   componentTemplateExists,
-  spaceId,
 }: ActionDetailsRequestOptions): ISearchRequestParams => {
-  const actionIdQuery = `action_id: ${actionId}`;
-  let filter = actionIdQuery;
-  if (!isEmpty(kuery)) {
-    filter = filter + ` AND ${kuery}`;
-  }
+  const kueryFilter = kuery ? [getQueryFilter({ filter: kuery })] : [];
 
-  const {
-    bool: { filter: baseFilter },
-  } = getQueryFilter({ filter });
-
-  let extendedFilter = baseFilter;
-
-  if (spaceId === 'default') {
-    // For default space, include docs where space_id matches 'default' OR where space_id field does not exist
-    extendedFilter = [
-      {
-        bool: {
-          should: [
-            { term: { space_id: 'default' } },
-            { bool: { must_not: { exists: { field: 'space_id' } } } },
-          ],
-        },
-      },
-      ...baseFilter,
-    ];
-  } else {
-    // For other spaces, only include docs where space_id matches the current spaceId
-    extendedFilter = [...baseFilter, { term: { space_id: spaceId } }];
-  }
-
+  // Space scoping is enforced centrally in the search strategy (enforceSpaceScope).
   const dslQuery = {
     allow_no_indices: true,
-    index: componentTemplateExists ? `${ACTIONS_INDEX}*` : AGENT_ACTIONS_INDEX,
+    index: [componentTemplateExists ? `${ACTIONS_INDEX}*` : AGENT_ACTIONS_INDEX],
     ignore_unavailable: true,
-    query: { bool: { filter: extendedFilter } },
+    query: { bool: { filter: [{ term: { action_id: actionId } }, ...kueryFilter] } },
     size: 1,
     fields: ['*'],
   };

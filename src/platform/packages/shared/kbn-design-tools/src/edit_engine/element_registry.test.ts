@@ -10,7 +10,8 @@
 import { ElementRegistry, applyEditChanges, revertEdits } from './element_registry';
 import type { StyleEdit, TextEdit, MediaEdit } from './element_registry';
 import { DEVTOOL_HIDDEN_ATTR, DEVTOOL_MANAGED_ATTR } from '../lib/constants';
-import { softHideElement, setImportant } from './clone_element';
+import { softHideElement } from './clone_element';
+import { setImportant } from '../lib/dom/set_important';
 import { makeSession } from '../lib/tests/helpers';
 
 describe('ElementRegistry', () => {
@@ -296,5 +297,120 @@ describe('applyEditChanges', () => {
 
     expect(parent.style.getPropertyValue('width')).toBe('');
     expect(child.style.getPropertyValue('width')).toBe('50px');
+  });
+
+  it('should not capture style reflow dimensions outside managed root', () => {
+    const wrapper = document.createElement('div');
+    const managed = document.createElement('div');
+    managed.setAttribute(DEVTOOL_MANAGED_ATTR, '');
+    const parent = document.createElement('div');
+    wrapper.appendChild(managed);
+    managed.appendChild(parent);
+
+    setImportant(wrapper, 'width', '600px');
+
+    const styleEdits: StyleEdit[] = [];
+    applyEditChanges(
+      [{ element: parent, property: 'width', value: '400px' }],
+      [],
+      [],
+      styleEdits,
+      [],
+      []
+    );
+
+    const wrapperWidthUndo = styleEdits.find(
+      (e) => e.element === wrapper && e.property === 'width'
+    );
+    expect(wrapperWidthUndo).toBeUndefined();
+  });
+
+  it('should not capture text reflow dimensions outside managed root', () => {
+    const wrapper = document.createElement('div');
+    const managed = document.createElement('div');
+    managed.setAttribute(DEVTOOL_MANAGED_ATTR, '');
+    const parent = document.createElement('span');
+    const textNode = document.createTextNode('old');
+
+    parent.appendChild(textNode);
+    managed.appendChild(parent);
+    wrapper.appendChild(managed);
+
+    setImportant(wrapper, 'width', '700px');
+
+    const styleEdits: StyleEdit[] = [];
+    const textEdits: TextEdit[] = [];
+
+    applyEditChanges([], [{ node: textNode, text: 'new text' }], [], styleEdits, textEdits, []);
+
+    const wrapperWidthUndo = styleEdits.find(
+      (e) => e.element === wrapper && e.property === 'width'
+    );
+    expect(wrapperWidthUndo).toBeUndefined();
+  });
+
+  it('should unfreeze managed root height on text edits and restore it on revert', () => {
+    const managed = document.createElement('div');
+    managed.setAttribute(DEVTOOL_MANAGED_ATTR, '');
+    setImportant(managed, 'width', '300px');
+    setImportant(managed, 'height', '200px');
+
+    const parent = document.createElement('div');
+    const textNode = document.createTextNode('old');
+    parent.appendChild(textNode);
+    managed.appendChild(parent);
+
+    const styleEdits: StyleEdit[] = [];
+    const textEdits: TextEdit[] = [];
+
+    applyEditChanges(
+      [],
+      [{ node: textNode, text: 'much longer text that should force vertical growth' }],
+      [],
+      styleEdits,
+      textEdits,
+      []
+    );
+
+    // Width stays fixed for wrapping stability, height is unfrozen for growth.
+    expect(managed.style.getPropertyValue('width')).toBe('300px');
+    expect(managed.style.getPropertyValue('height')).toBe('');
+
+    revertEdits(styleEdits, textEdits, []);
+
+    expect(managed.style.getPropertyValue('width')).toBe('300px');
+    expect(managed.style.getPropertyValue('height')).toBe('200px');
+    expect(textNode.textContent).toBe('old');
+  });
+
+  it('should unfreeze managed root width for no-wrap text edits and restore it on revert', () => {
+    const managed = document.createElement('div');
+    managed.setAttribute(DEVTOOL_MANAGED_ATTR, '');
+    setImportant(managed, 'width', '123px');
+
+    const parent = document.createElement('span');
+    setImportant(parent, 'white-space', 'nowrap');
+    const textNode = document.createTextNode('Saved 6 hr. ago');
+    parent.appendChild(textNode);
+    managed.appendChild(parent);
+
+    const styleEdits: StyleEdit[] = [];
+    const textEdits: TextEdit[] = [];
+
+    applyEditChanges(
+      [],
+      [{ node: textNode, text: 'Saved 6 hr. ago aaaaaaaaa' }],
+      [],
+      styleEdits,
+      textEdits,
+      []
+    );
+
+    expect(managed.style.getPropertyValue('width')).toBe('');
+
+    revertEdits(styleEdits, textEdits, []);
+
+    expect(managed.style.getPropertyValue('width')).toBe('123px');
+    expect(textNode.textContent).toBe('Saved 6 hr. ago');
   });
 });

@@ -28,7 +28,7 @@ import {
   DataSourceType,
   isDataSourceType,
 } from '../../../../../common/data_sources';
-import { sendLoadingMsg } from '../../hooks/use_saved_search_messages';
+import { sendLoadingMsg, sendResetMsg } from '../../hooks/use_saved_search_messages';
 
 /**
  * Builds a subscribe function for the app state, that is executed when the app state changes in URL
@@ -54,6 +54,12 @@ export const buildStateSubscribe =
     const prevState = getCurrentTab().previousAppState;
     const isEsqlMode = isDataSourceType(nextState.dataSource, DataSourceType.Esql);
     const queryChanged = !isEqual(nextState.query, prevState.query);
+    const queryLanguageChanged =
+      isEsqlMode !== isDataSourceType(prevState.dataSource, DataSourceType.Esql);
+    // Capture before reset() so a later ES|QL transition does not look uninitialized
+    // just because skipInitialFetch still forces getInitialFetchStatus() back to UNINITIALIZED.
+    const isUninitialized =
+      dataState.data$.main$.getValue().fetchStatus === FetchStatus.UNINITIALIZED;
 
     if (isEsqlMode && prevState.viewMode !== nextState.viewMode && !queryChanged) {
       addLog('[appstate] subscribe $fetch ignored for es|ql', { prevState, nextState });
@@ -81,12 +87,14 @@ export const buildStateSubscribe =
       }
     }
 
-    const { sampleSize, sort, dataSource } = prevState;
+    const { sampleSize, sort, dataSource, esqlApproximation } = prevState;
     // Cast to boolean to avoid false positives when comparing
     // undefined and false, which would trigger a refetch
     const sampleSizeChanged = nextState.sampleSize !== sampleSize;
     const docTableSortChanged = !isEqual(nextState.sort, sort) && !isEsqlMode;
     const dataSourceChanged = !isEqual(nextState.dataSource, dataSource) && !isEsqlMode;
+    const approximationChanged =
+      (nextState.esqlApproximation ?? false) !== (esqlApproximation ?? false) && isEsqlMode;
 
     // NOTE: this is also called when navigating from discover app to context app
     if (nextState.dataSource && dataSourceChanged) {
@@ -137,7 +145,27 @@ export const buildStateSubscribe =
       return;
     }
 
-    if (sampleSizeChanged || docTableSortChanged || dataSourceChanged || queryChanged) {
+    if (queryLanguageChanged && isUninitialized) {
+      addLog('[appstate] subscribe fetch skipped for query language switch while uninitialized', {
+        prevState,
+        nextState,
+      });
+      // reset() uses getInitialFetchStatus() for the new language. After refresh,
+      // skipInitialFetch is gone and empty ES|QL is no longer the current query,
+      // so reset() can flip UNINITIALIZED → LOADING without starting a fetch.
+      if (dataState.data$.main$.getValue().fetchStatus !== FetchStatus.UNINITIALIZED) {
+        sendResetMsg(dataState.data$, FetchStatus.UNINITIALIZED);
+      }
+      return;
+    }
+
+    if (
+      sampleSizeChanged ||
+      docTableSortChanged ||
+      dataSourceChanged ||
+      queryChanged ||
+      approximationChanged
+    ) {
       const logData = {
         docTableSortChanged: logEntry(docTableSortChanged, sort, nextState.sort),
         dataSourceChanged: logEntry(dataSourceChanged, dataSource, nextState.dataSource),

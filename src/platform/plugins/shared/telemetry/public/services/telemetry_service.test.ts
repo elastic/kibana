@@ -10,7 +10,9 @@
 // ESLint disabled dot-notation we can access the private key telemetryService['http']
 /* eslint-disable dot-notation */
 
+import { firstValueFrom, take, toArray } from 'rxjs';
 import { mockTelemetryService } from '../mocks';
+import type { TelemetryPluginConfig } from '../plugin';
 import {
   FetchSnapshotTelemetry,
   INTERNAL_VERSION,
@@ -25,7 +27,7 @@ describe('TelemetryService', () => {
       const telemetryService = mockTelemetryService();
 
       await telemetryService.fetchTelemetry();
-      expect(telemetryService['http'].post).toBeCalledWith(FetchSnapshotTelemetry, {
+      expect(telemetryService['http'].post).toHaveBeenCalledWith(FetchSnapshotTelemetry, {
         ...INTERNAL_VERSION,
         body: JSON.stringify({ unencrypted: false, refreshCache: false }),
       });
@@ -37,7 +39,7 @@ describe('TelemetryService', () => {
       const telemetryService = mockTelemetryService();
       telemetryService.fetchTelemetry = jest.fn();
       await telemetryService.fetchExample();
-      expect(telemetryService.fetchTelemetry).toBeCalledWith({
+      expect(telemetryService.fetchTelemetry).toHaveBeenCalledWith({
         unencrypted: true,
         refreshCache: true,
       });
@@ -52,7 +54,7 @@ describe('TelemetryService', () => {
       });
       expect(await telemetryService.setOptIn(true)).toBe(false);
 
-      expect(telemetryService['http'].post).toBeCalledTimes(0);
+      expect(telemetryService['http'].post).toHaveBeenCalledTimes(0);
     });
 
     it('calls api if canChangeOptInStatus', async () => {
@@ -62,7 +64,7 @@ describe('TelemetryService', () => {
       });
       await telemetryService.setOptIn(true);
 
-      expect(telemetryService['http'].post).toBeCalledTimes(1);
+      expect(telemetryService['http'].post).toHaveBeenCalledTimes(1);
     });
 
     it('sends enabled true if optedIn: true', async () => {
@@ -73,7 +75,7 @@ describe('TelemetryService', () => {
       const optedIn = true;
       await telemetryService.setOptIn(optedIn);
 
-      expect(telemetryService['http'].post).toBeCalledWith(OptInRoute, {
+      expect(telemetryService['http'].post).toHaveBeenCalledWith(OptInRoute, {
         ...INTERNAL_VERSION,
         body: JSON.stringify({ enabled: optedIn }),
       });
@@ -87,7 +89,7 @@ describe('TelemetryService', () => {
       const optedIn = false;
       await telemetryService.setOptIn(optedIn);
 
-      expect(telemetryService['http'].post).toBeCalledWith(OptInRoute, {
+      expect(telemetryService['http'].post).toHaveBeenCalledWith(OptInRoute, {
         ...INTERNAL_VERSION,
         body: JSON.stringify({ enabled: optedIn }),
       });
@@ -100,8 +102,8 @@ describe('TelemetryService', () => {
       });
       await telemetryService.setOptIn(true);
 
-      expect(telemetryService['reportOptInStatus']).toBeCalledTimes(0);
-      expect(telemetryService['http'].post).toBeCalledTimes(1);
+      expect(telemetryService['reportOptInStatus']).toHaveBeenCalledTimes(0);
+      expect(telemetryService['http'].post).toHaveBeenCalledTimes(1);
     });
 
     it('calls reportOptInStatus if reportOptInStatusChange is true', async () => {
@@ -111,8 +113,8 @@ describe('TelemetryService', () => {
       });
       await telemetryService.setOptIn(true);
 
-      expect(telemetryService['reportOptInStatus']).toBeCalledTimes(1);
-      expect(telemetryService['http'].post).toBeCalledTimes(1);
+      expect(telemetryService['reportOptInStatus']).toHaveBeenCalledTimes(1);
+      expect(telemetryService['http'].post).toHaveBeenCalledTimes(1);
     });
 
     it('adds an error toast on api error', async () => {
@@ -127,9 +129,9 @@ describe('TelemetryService', () => {
       });
 
       await telemetryService.setOptIn(true);
-      expect(telemetryService['http'].post).toBeCalledTimes(1);
-      expect(telemetryService['reportOptInStatus']).toBeCalledTimes(0);
-      expect(telemetryService['notifications'].toasts.addError).toBeCalledTimes(1);
+      expect(telemetryService['http'].post).toHaveBeenCalledTimes(1);
+      expect(telemetryService['reportOptInStatus']).toHaveBeenCalledTimes(0);
+      expect(telemetryService['notifications'].toasts.addError).toHaveBeenCalledTimes(1);
     });
 
     // This one should not happen because the entire method is fully caught but hey! :)
@@ -144,9 +146,9 @@ describe('TelemetryService', () => {
       });
 
       await telemetryService.setOptIn(true);
-      expect(telemetryService['http'].post).toBeCalledTimes(1);
-      expect(telemetryService['reportOptInStatus']).toBeCalledTimes(1);
-      expect(telemetryService['notifications'].toasts.addError).toBeCalledTimes(1);
+      expect(telemetryService['http'].post).toHaveBeenCalledTimes(1);
+      expect(telemetryService['reportOptInStatus']).toHaveBeenCalledTimes(1);
+      expect(telemetryService['notifications'].toasts.addError).toHaveBeenCalledTimes(1);
     });
   });
 
@@ -203,7 +205,7 @@ describe('TelemetryService', () => {
       expect(telemetryService.userHasSeenOptedInNotice).toBe(undefined);
       expect(telemetryService.getUserShouldSeeOptInNotice()).toBe(false);
       await telemetryService.setUserHasSeenNotice();
-      expect(telemetryService['http'].put).toBeCalledTimes(1);
+      expect(telemetryService['http'].put).toHaveBeenCalledTimes(1);
       expect(telemetryService.userHasSeenOptedInNotice).toBe(true);
       expect(telemetryService.getUserShouldSeeOptInNotice()).toBe(true);
     });
@@ -222,8 +224,8 @@ describe('TelemetryService', () => {
       expect(telemetryService.userHasSeenOptedInNotice).toBe(undefined);
       expect(telemetryService.getUserShouldSeeOptInNotice()).toBe(false);
       await telemetryService.setUserHasSeenNotice();
-      expect(telemetryService['http'].put).toBeCalledTimes(1);
-      expect(telemetryService['notifications'].toasts.addError).toBeCalledTimes(1);
+      expect(telemetryService['http'].put).toHaveBeenCalledTimes(1);
+      expect(telemetryService['notifications'].toasts.addError).toHaveBeenCalledTimes(1);
       expect(telemetryService.userHasSeenOptedInNotice).toBe(false);
       expect(telemetryService.getUserShouldSeeOptInNotice()).toBe(false);
     });
@@ -298,8 +300,8 @@ describe('TelemetryService', () => {
       telemetryService.getOptInStatusUrl = mockGetOptInStatusUrl;
       const result = await telemetryService['reportOptInStatus'](mockPayload);
       expect(result).toBeUndefined();
-      expect(mockGetOptInStatusUrl).toBeCalledTimes(1);
-      expect(mockFetch).toBeCalledTimes(1);
+      expect(mockGetOptInStatusUrl).toHaveBeenCalledTimes(1);
+      expect(mockFetch).toHaveBeenCalledTimes(1);
 
       expect(mockFetch.mock.calls[0]).toMatchInlineSnapshot(`
         Array [
@@ -357,6 +359,253 @@ describe('TelemetryService', () => {
     });
   });
 
+  describe('isOptedIn$', () => {
+    const serverConfig = (optIn: boolean | null): TelemetryPluginConfig =>
+      ({ optIn } as TelemetryPluginConfig);
+
+    it('withholds the injected default and emits the first value resolved from the server', async () => {
+      // Default injected at page render says opted-in...
+      const telemetryService = mockTelemetryService({ config: { optIn: true } });
+
+      const firstEmission = firstValueFrom(telemetryService.isOptedIn$);
+
+      // ...but the server resolves to opted-out. The observable must emit the server value, not the default.
+      telemetryService.config = serverConfig(false);
+
+      expect(await firstEmission).toBe(false);
+    });
+
+    it('does not emit synchronously before the config is resolved from the server', () => {
+      const telemetryService = mockTelemetryService({ config: { optIn: true } });
+
+      const emissions: boolean[] = [];
+      const subscription = telemetryService.isOptedIn$.subscribe((v) => emissions.push(v));
+
+      expect(emissions).toEqual([]);
+      subscription.unsubscribe();
+    });
+
+    it('emits again whenever the opt-in preference changes', async () => {
+      const telemetryService = mockTelemetryService({
+        reportOptInStatusChange: false,
+        config: { optIn: false, allowChangingOptInStatus: true },
+      });
+
+      const emissionsPromise = firstValueFrom(telemetryService.isOptedIn$.pipe(take(2), toArray()));
+
+      // First resolved value from the server.
+      telemetryService.config = serverConfig(false);
+      // User opts in.
+      await telemetryService.setOptIn(true);
+
+      expect(await emissionsPromise).toEqual([false, true]);
+    });
+
+    it('replays the latest value to late subscribers', async () => {
+      const telemetryService = mockTelemetryService({ config: { optIn: true } });
+
+      telemetryService.config = serverConfig(false);
+
+      // Subscribing after the value has resolved still yields the latest value.
+      expect(await firstValueFrom(telemetryService.isOptedIn$)).toBe(false);
+    });
+
+    it('does not re-emit when an unrelated config update leaves the opt-in unchanged', async () => {
+      const telemetryService = mockTelemetryService({ config: { optIn: true } });
+
+      const emissions: boolean[] = [];
+      const subscription = telemetryService.isOptedIn$.subscribe((v) => emissions.push(v));
+
+      telemetryService.config = serverConfig(true);
+      // An unrelated setting changes but the opt-in stays the same.
+      telemetryService.userCanChangeSettings = false;
+
+      expect(emissions).toEqual([true]);
+      subscription.unsubscribe();
+    });
+  });
+
+  describe('canSendTelemetry$', () => {
+    const serverConfig = (optIn: boolean | null): TelemetryPluginConfig =>
+      ({ optIn } as TelemetryPluginConfig);
+
+    it('emits true when opted in and not in screenshot mode', async () => {
+      const telemetryService = mockTelemetryService({ isScreenshotMode: false });
+
+      const firstEmission = firstValueFrom(telemetryService.canSendTelemetry$);
+      telemetryService.config = serverConfig(true);
+
+      expect(await firstEmission).toBe(true);
+    });
+
+    it('emits false when opted out', async () => {
+      const telemetryService = mockTelemetryService({ isScreenshotMode: false });
+
+      const firstEmission = firstValueFrom(telemetryService.canSendTelemetry$);
+      telemetryService.config = serverConfig(false);
+
+      expect(await firstEmission).toBe(false);
+    });
+
+    it('emits false in screenshot mode even when opted in', async () => {
+      const telemetryService = mockTelemetryService({ isScreenshotMode: true });
+
+      const firstEmission = firstValueFrom(telemetryService.canSendTelemetry$);
+      telemetryService.config = serverConfig(true);
+
+      expect(await firstEmission).toBe(false);
+    });
+
+    it('withholds the injected default and only emits once the config is resolved from the server', () => {
+      const telemetryService = mockTelemetryService({
+        isScreenshotMode: false,
+        config: { optIn: true },
+      });
+
+      const emissions: boolean[] = [];
+      const subscription = telemetryService.canSendTelemetry$.subscribe((v) => emissions.push(v));
+
+      expect(emissions).toEqual([]);
+      subscription.unsubscribe();
+    });
+
+    it('re-emits when the opt-in preference changes', async () => {
+      const telemetryService = mockTelemetryService({
+        isScreenshotMode: false,
+        reportOptInStatusChange: false,
+        config: { optIn: false, allowChangingOptInStatus: true },
+      });
+
+      const emissionsPromise = firstValueFrom(
+        telemetryService.canSendTelemetry$.pipe(take(2), toArray())
+      );
+
+      telemetryService.config = serverConfig(false);
+      await telemetryService.setOptIn(true);
+
+      expect(await emissionsPromise).toEqual([false, true]);
+    });
+  });
+
+  describe('refreshConfig concurrency', () => {
+    /**
+     * A deferred so a test can control exactly when the config `http.get` resolves, letting a
+     * `setOptIn` land while the refresh is "in flight".
+     */
+    const deferred = <T>() => {
+      let resolve!: (value: T) => void;
+      let reject!: (reason?: unknown) => void;
+      const promise = new Promise<T>((res, rej) => {
+        resolve = res;
+        reject = rej;
+      });
+      return { promise, resolve, reject };
+    };
+
+    const serverConfigResponse = (optIn: boolean | null, labels = {}) => ({
+      allowChangingOptInStatus: true,
+      optIn,
+      sendUsageFrom: 'browser',
+      telemetryNotifyUserAboutOptInDefault: true,
+      labels,
+    });
+
+    const mockAbortableConfigRequest = (
+      telemetryService: ReturnType<typeof mockTelemetryService>,
+      response = deferred<ReturnType<typeof serverConfigResponse>>()
+    ) => {
+      let receivedSignal: AbortSignal | undefined;
+      telemetryService['http'].get = jest.fn().mockImplementation((_path, { signal }) => {
+        receivedSignal = signal;
+        signal.addEventListener('abort', () => response.reject(new Error('aborted')));
+        return response.promise;
+      });
+
+      return { response, getSignal: () => receivedSignal };
+    };
+
+    it('does not let an aborted refresh overwrite a setOptIn that landed while it was in flight', async () => {
+      const telemetryService = mockTelemetryService({
+        reportOptInStatusChange: false,
+        config: { optIn: false, allowChangingOptInStatus: true },
+      });
+      const { getSignal } = mockAbortableConfigRequest(telemetryService);
+
+      // A refresh starts but its server fetch hasn't resolved yet.
+      const refreshPromise = telemetryService.refreshConfig();
+      expect(getSignal()?.aborted).toBe(false);
+
+      // While the refresh is in flight, the user opts in (e.g. "start trial" / "upload license").
+      await telemetryService.setOptIn(true);
+      expect(getSignal()?.aborted).toBe(true);
+
+      await refreshPromise;
+
+      // The user's newer preference must win.
+      expect(telemetryService.getIsOptedIn()).toBe(true);
+      expect(await firstValueFrom(telemetryService.isOptedIn$)).toBe(true);
+    });
+
+    it('never emits the stale value on isOptedIn$ during the race', async () => {
+      const telemetryService = mockTelemetryService({
+        reportOptInStatusChange: false,
+        config: { optIn: false, allowChangingOptInStatus: true },
+      });
+      mockAbortableConfigRequest(telemetryService);
+
+      const emissions: boolean[] = [];
+      const subscription = telemetryService.isOptedIn$.subscribe((v) => emissions.push(v));
+
+      const refreshPromise = telemetryService.refreshConfig();
+      await telemetryService.setOptIn(true);
+      await refreshPromise;
+
+      // Only the real opt-in transition is observed; no transient flip back to false.
+      expect(emissions).toEqual([true]);
+      subscription.unsubscribe();
+    });
+
+    it('applies the fetched opt-in when no write raced with the refresh', async () => {
+      const telemetryService = mockTelemetryService({ config: { optIn: false } });
+      telemetryService['http'].get = jest.fn().mockResolvedValue(serverConfigResponse(true));
+
+      await telemetryService.refreshConfig();
+
+      expect(telemetryService.getIsOptedIn()).toBe(true);
+      expect(await firstValueFrom(telemetryService.isOptedIn$)).toBe(true);
+    });
+
+    it('shares the in-flight refresh result instead of starting another request', async () => {
+      const telemetryService = mockTelemetryService({ config: { optIn: false } });
+      const fetched = deferred<ReturnType<typeof serverConfigResponse>>();
+      telemetryService['http'].get = jest.fn().mockReturnValue(fetched.promise);
+
+      const firstRefresh = telemetryService.refreshConfig();
+      const secondRefresh = telemetryService.refreshConfig();
+
+      expect(telemetryService['http'].get).toHaveBeenCalledTimes(1);
+
+      fetched.resolve(serverConfigResponse(true));
+      await Promise.all([firstRefresh, secondRefresh]);
+
+      expect(telemetryService.getIsOptedIn()).toBe(true);
+    });
+
+    it('starts a new request after the previous refresh completes', async () => {
+      const telemetryService = mockTelemetryService({ config: { optIn: false } });
+      telemetryService['http'].get = jest
+        .fn()
+        .mockResolvedValueOnce(serverConfigResponse(false))
+        .mockResolvedValueOnce(serverConfigResponse(true));
+
+      await telemetryService.refreshConfig();
+      await telemetryService.refreshConfig();
+
+      expect(telemetryService['http'].get).toHaveBeenCalledTimes(2);
+      expect(telemetryService.getIsOptedIn()).toBe(true);
+    });
+  });
+
   describe('updateLastReported', () => {
     let telemetryService: ReturnType<typeof mockTelemetryService>;
 
@@ -366,7 +615,10 @@ describe('TelemetryService', () => {
 
     it('calls expected URL with expected headers', async () => {
       await telemetryService.updateLastReported();
-      expect(telemetryService['http'].put).toBeCalledWith(LastReportedRoute, INTERNAL_VERSION);
+      expect(telemetryService['http'].put).toHaveBeenCalledWith(
+        LastReportedRoute,
+        INTERNAL_VERSION
+      );
     });
   });
 });

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { createReducer } from '@reduxjs/toolkit';
+import { createReducer } from 'redux-toolkit-v1';
 import type {
   PrivateLocation,
   SyntheticsPrivateLocations,
@@ -80,7 +80,6 @@ export const privateLocationsStateReducer = createReducer(initialState, (builder
     })
     .addCase(editPrivateLocationAction.fail, (state, action) => {
       state.editLoading = false;
-      state.privateLocationToEdit = undefined;
       state.error = action.payload;
     })
     .addCase(deletePrivateLocationAction.get, (state) => {

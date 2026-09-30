@@ -5,14 +5,26 @@
  * 2.0.
  */
 
-import React, { useMemo } from 'react';
-import { EuiButtonIcon, EuiFlexGroup, EuiFlexItem, EuiTitle } from '@elastic/eui';
+import React, { useCallback, useMemo, useState } from 'react';
 import {
+  EuiButtonIcon,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiTitle,
+  EuiToolTip,
+  useEuiTheme,
+} from '@elastic/eui';
+import {
+  ATTACK_DISCOVERY_AD_HOC_RULE_ID,
   replaceAnonymizedValuesWithOriginalValues,
   type AttackDiscoveryAlert,
 } from '@kbn/elastic-assistant-common';
 import { i18n } from '@kbn/i18n';
 
+import { useKibana } from '../../../../../common/lib/kibana';
+import { AttacksEventTypes } from '../../../../../common/lib/telemetry';
+import { DetailsFlyout } from '../../../../../attack_discovery/pages/settings_flyout/schedule/details_flyout';
+import { ScheduleDetailsButton } from '../../schedule_details_button/schedule_details_button';
 import { RuleStatus } from '../../../../../timelines/components/timeline/body/renderers/rule_status';
 import { Subtitle } from './subtitle';
 import { TagsBadge } from './tags_badge';
@@ -45,6 +57,29 @@ export interface AttackGroupContentProps {
 
 export const AttackGroupContent = React.memo<AttackGroupContentProps>(
   ({ attack, dataTestSubj, showAnonymized = false, openAttackDetailsFlyout }) => {
+    const {
+      services: { telemetry },
+    } = useKibana();
+    const { euiTheme } = useEuiTheme();
+
+    const [scheduleDetailsId, setScheduleDetailsId] = useState<string | undefined>(undefined);
+
+    const alertRuleUuid = attack.alertRuleUuid;
+
+    const isScheduled = useMemo(
+      () => alertRuleUuid != null && alertRuleUuid !== ATTACK_DISCOVERY_AD_HOC_RULE_ID,
+      [alertRuleUuid]
+    );
+
+    const openScheduleDetails = useCallback(() => {
+      setScheduleDetailsId(alertRuleUuid);
+      telemetry.reportEvent(AttacksEventTypes.ScheduleDetailsFlyoutOpened, {
+        source: 'attacks_page_table',
+      });
+    }, [alertRuleUuid, telemetry]);
+
+    const onCloseScheduleDetails = useCallback(() => setScheduleDetailsId(undefined), []);
+
     const title = useMemo(
       () =>
         showAnonymized
@@ -57,21 +92,32 @@ export const AttackGroupContent = React.memo<AttackGroupContentProps>(
     );
 
     return (
-      <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false} wrap={false}>
+      <EuiFlexGroup
+        alignItems="center"
+        gutterSize="s"
+        responsive={false}
+        wrap={false}
+        css={{
+          paddingTop: euiTheme.size.base,
+          paddingBottom: euiTheme.size.base,
+        }}
+      >
         <EuiFlexItem grow={false}>
-          <EuiButtonIcon
-            aria-label={EXPAND_BUTTON_ARIAL_LABEL}
-            color="text"
-            data-test-subj={EXPAND_ATTACK_BUTTON_TEST_ID}
-            iconType="maximize"
-            onClick={(event: React.MouseEvent<HTMLButtonElement>) => {
-              event.stopPropagation();
-              openAttackDetailsFlyout();
-            }}
-            size="s"
-          />
+          <EuiToolTip content={EXPAND_BUTTON_ARIAL_LABEL} disableScreenReaderOutput>
+            <EuiButtonIcon
+              aria-label={EXPAND_BUTTON_ARIAL_LABEL}
+              color="text"
+              data-test-subj={EXPAND_ATTACK_BUTTON_TEST_ID}
+              iconType="maximize"
+              onClick={(event: React.MouseEvent<HTMLButtonElement>) => {
+                event.stopPropagation();
+                openAttackDetailsFlyout();
+              }}
+              size="s"
+            />
+          </EuiToolTip>
         </EuiFlexItem>
-        <EuiFlexItem>
+        <EuiFlexItem css={{ minWidth: 0 }}>
           <EuiFlexGroup
             data-test-subj={`${dataTestSubj}${ATTACK_GROUP_TEST_ID_SUFFIX}`}
             direction="column"
@@ -87,6 +133,7 @@ export const AttackGroupContent = React.memo<AttackGroupContentProps>(
                     <h5>{title}</h5>
                   </EuiTitle>
                 </EuiFlexItem>
+                {isScheduled && <ScheduleDetailsButton onClick={openScheduleDetails} />}
                 <EuiFlexItem
                   grow={false}
                   data-test-subj={`${dataTestSubj}${ATTACK_STATUS_TEST_ID_SUFFIX}`}
@@ -110,12 +157,16 @@ export const AttackGroupContent = React.memo<AttackGroupContentProps>(
             </EuiFlexItem>
             <EuiFlexItem
               grow={false}
+              css={{ minWidth: 0 }}
               data-test-subj={`${dataTestSubj}${ATTACK_DESCRIPTION_TEST_ID_SUFFIX}`}
             >
               <Subtitle attack={attack} showAnonymized={showAnonymized} />
             </EuiFlexItem>
           </EuiFlexGroup>
         </EuiFlexItem>
+        {scheduleDetailsId && (
+          <DetailsFlyout scheduleId={scheduleDetailsId} onClose={onCloseScheduleDetails} />
+        )}
       </EuiFlexGroup>
     );
   }

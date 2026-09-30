@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { APP_HEADER_TEST_SUBJECTS } from '@kbn/app-header';
 import { adminTestUser } from '@kbn/test';
 import type {
   AuthenticatedUser,
@@ -44,6 +45,14 @@ export class SecurityPageObject extends FtrService {
   private readonly header = this.ctx.getPageObject('header');
   private readonly monacoEditor = this.ctx.getService('monacoEditor');
   private readonly es = this.ctx.getService('es');
+  // cookieAuth / browserAuth are only registered in stateful functional configs.
+  // Use hasService guards so SecurityPageObject remains safe in serverless configs too.
+  private readonly cookieAuth = this.ctx.hasService('cookieAuth')
+    ? this.ctx.getService('cookieAuth')
+    : undefined;
+  private readonly browserAuth = this.ctx.hasService('browserAuth')
+    ? this.ctx.getService('browserAuth')
+    : undefined;
 
   delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
@@ -264,6 +273,22 @@ export class SecurityPageObject extends FtrService {
   }
 
   async login(username?: string, password?: string, options: LoginOptions = {}) {
+    // When the cookie-login flag is on and we're not testing edge cases that require the
+    // real login form (space-selector or forbidden redirects), bypass form fill entirely.
+    if (
+      this.config.get('security.cookieLogin') &&
+      this.cookieAuth &&
+      this.browserAuth &&
+      !options.expectSpaceSelector &&
+      !options.expectForbidden
+    ) {
+      const resolvedUsername = username || adminTestUser.username;
+      const resolvedPassword = password || adminTestUser.password;
+      const cookie = await this.cookieAuth.getCookieForUser(resolvedUsername, resolvedPassword);
+      await this.browserAuth.loginByCookie(cookie, { expectedUsername: resolvedUsername });
+      return;
+    }
+
     await this.loginPage.login(username, password, options);
 
     if (options.expectSpaceSelector || options.expectForbidden) {
@@ -309,6 +334,37 @@ export class SecurityPageObject extends FtrService {
     this.log.debug('SecurityPage.forceLogout');
     if (await this.isLoginFormVisible()) {
       this.log.debug('Already on the login page, not forcing anything');
+      return;
+    }
+
+    // When cookie-login is active, skip the /logout server round-trip entirely.
+    // Clearing browser state is sufficient for test isolation — the next navigateToApp
+    // will redirect to /login and loginIfPrompted will inject a fresh cookie.
+    const { browserAuth } = this;
+    if (this.config.get('security.cookieLogin') && browserAuth) {
+      this.log.debug(
+        '[security] cookieLogin: clearing browser state instead of navigating to /logout'
+      );
+      // Unload the app first. Requests that outlive the page (e.g. keepalive) can still
+      // re-set the session cookie after it is deleted, so clear until it stays cleared.
+      const hostPort = this.deployment.getHostPort();
+      await this.browser.get(hostPort + '/bootstrap-anonymous.js');
+      const alert = await this.browser.getAlert();
+      if (alert) await alert.accept();
+      await browserAuth.cleanBrowserState();
+      let clearedChecks = 0;
+      await this.retry.waitFor('session cookie to stay cleared', async () => {
+        if ((await this.browser.getCookies()).length > 0) {
+          clearedChecks = 0;
+          await browserAuth.cleanBrowserState();
+          return false;
+        }
+        clearedChecks++;
+        return clearedChecks >= 2;
+      });
+      // Land on a plain login page, which callers rely on. Returning to the previous app URL
+      // would add a `next` target that sends the next form login past the space selector.
+      await this.browser.get(hostPort + '/login');
       return;
     }
 
@@ -464,11 +520,14 @@ export class SecurityPageObject extends FtrService {
 
   async getElasticsearchRoles() {
     const roles = [];
-    await this.testSubjects.exists('rolesTable');
+    await this.testSubjects.existOrFail('rolesTable');
     await this.testSubjects.click('tablePaginationPopoverButton');
     await this.testSubjects.click('tablePagination-100-rows');
-    await this.testSubjects.exists('rolesTableLoading');
-    await this.testSubjects.exists('rolesTable');
+    // the roles grid is paginated server-side, so the click above starts a fresh request
+    await this.retry.waitFor('roles table to reload at 100 rows per page', async () => {
+      const rowsPerPage = await this.testSubjects.getVisibleText('tablePaginationPopoverButton');
+      return rowsPerPage.includes('100') && (await this.testSubjects.exists('rolesTable'));
+    });
 
     for (const role of await this.testSubjects.findAll('roleRow')) {
       const [rolename, reserved, deprecated] = await Promise.all([
@@ -540,7 +599,7 @@ export class SecurityPageObject extends FtrService {
   }
 
   async backToUsersList() {
-    await this.find.clickByButtonText('Back to users');
+    await this.testSubjects.click(APP_HEADER_TEST_SUBJECTS.back);
   }
 
   async createUser(user: UserFormValues) {

@@ -11,3 +11,5 @@ export {
   generateUpdatePackagePolicyDevToolsRequest,
   generateUpdateAgentPolicyDevToolsRequest,
 } from './devtools_request';
+
+export { fetchAgentlessPolicyAsPackagePolicy } from './fetch_agentless_policy';

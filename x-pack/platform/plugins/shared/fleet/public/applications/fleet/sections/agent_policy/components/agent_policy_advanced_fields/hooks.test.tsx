@@ -204,7 +204,7 @@ describe('useOutputOptions', () => {
     const { result } = testRenderer.renderHook(() => useOutputOptions({} as AgentPolicy));
     expect(result.current.isLoading).toBeTruthy();
 
-    await waitFor(() => new Promise((resolve) => resolve(null)));
+    await waitFor(() => expect(result.current.isLoading).toBeFalsy());
     expect(result.current.dataOutputOptions).toMatchInlineSnapshot(`
       Array [
         Object {
@@ -274,7 +274,7 @@ describe('useOutputOptions', () => {
     const { result } = testRenderer.renderHook(() => useOutputOptions({} as AgentPolicy));
     expect(result.current.isLoading).toBeTruthy();
 
-    await waitFor(() => new Promise((resolve) => resolve(null)));
+    await waitFor(() => expect(result.current.isLoading).toBeFalsy());
     expect(result.current.dataOutputOptions).toMatchInlineSnapshot(`
       Array [
         Object {
@@ -344,7 +344,7 @@ describe('useOutputOptions', () => {
     const { result } = testRenderer.renderHook(() => useOutputOptions({} as AgentPolicy));
     expect(result.current.isLoading).toBeTruthy();
 
-    await waitFor(() => new Promise((resolve) => resolve(null)));
+    await waitFor(() => expect(result.current.isLoading).toBeFalsy());
     expect(result.current.dataOutputOptions).toMatchInlineSnapshot(`
       Array [
         Object {
@@ -404,7 +404,7 @@ describe('useOutputOptions', () => {
     );
     expect(result.current.isLoading).toBeTruthy();
 
-    await waitFor(() => new Promise((resolve) => resolve(null)));
+    await waitFor(() => expect(result.current.isLoading).toBeFalsy());
     expect(result.current.dataOutputOptions).toMatchInlineSnapshot(`
       Array [
         Object {
@@ -498,7 +498,7 @@ describe('useOutputOptions', () => {
     const { result } = testRenderer.renderHook(() => useOutputOptions({} as AgentPolicy));
     expect(result.current.isLoading).toBeTruthy();
 
-    await waitFor(() => new Promise((resolve) => resolve(null)));
+    await waitFor(() => expect(result.current.isLoading).toBeFalsy());
     expect(result.current.dataOutputOptions.length).toEqual(2);
     expect(result.current.dataOutputOptions[1].value).toEqual('remote1');
     expect(result.current.monitoringOutputOptions.length).toEqual(2);
@@ -514,7 +514,7 @@ describe('useOutputOptions', () => {
     const { result } = testRenderer.renderHook(() => useOutputOptions({} as AgentPolicy));
     expect(result.current.isLoading).toBeTruthy();
 
-    await waitFor(() => new Promise((resolve) => resolve(null)));
+    await waitFor(() => expect(result.current.isLoading).toBeFalsy());
     expect(result.current.dataOutputOptions).toMatchInlineSnapshot(`
       Array [
         Object {
@@ -557,7 +557,7 @@ describe('useOutputOptions', () => {
       } as AgentPolicy)
     );
     expect(result.current.isLoading).toBeTruthy();
-    await waitFor(() => new Promise((resolve) => resolve(null)));
+    await waitFor(() => expect(result.current.isLoading).toBeFalsy());
     expect(result.current.dataOutputOptions).toMatchInlineSnapshot(`
       Array [
         Object {
@@ -663,7 +663,7 @@ describe('useFleetServerHostsOptions', () => {
     const { result } = testRenderer.renderHook(() => useFleetServerHostsOptions({} as AgentPolicy));
     expect(result.current.isLoading).toBeTruthy();
 
-    await waitFor(() => new Promise((resolve) => resolve(null)));
+    await waitFor(() => expect(result.current.isLoading).toBeFalsy());
     expect(result.current.fleetServerHostsOptions).toMatchInlineSnapshot(`
       Array [
         Object {
@@ -677,5 +677,239 @@ describe('useFleetServerHostsOptions', () => {
         },
       ]
     `);
+  });
+
+  it('should include internal fleet server hosts for an agentless policy but not the PrivateLink host', async () => {
+    const testRenderer = createFleetTestRendererMock();
+    testRenderer.startServices.cloud!.isCloudEnabled = true;
+    (testRenderer.config as any).agentless = { enabled: true };
+    testRenderer.startServices.http.get.mockImplementation(async (path: any) => {
+      if (path === '/api/fleet/fleet_server_hosts') {
+        return {
+          data: {
+            items: [
+              { id: 'default-fleet-server', name: 'Default', is_default: true },
+              {
+                id: 'default-fleet-server-internal',
+                name: 'Agentless Internal',
+                is_default: false,
+                is_internal: true,
+              },
+              {
+                id: 'private-fleet-server',
+                name: 'Private Fleet Server',
+                is_default: false,
+                is_internal: true,
+              },
+            ],
+          },
+        };
+      }
+      throw new Error(`Unmocked path: ${path}`);
+    });
+
+    const { result } = testRenderer.renderHook(() =>
+      useFleetServerHostsOptions({ supports_agentless: true } as AgentPolicy)
+    );
+
+    await waitFor(() => expect(result.current.isLoading).toBeFalsy());
+
+    const values = result.current.fleetServerHostsOptions.map((o) => o.value);
+    // Agentless-internal host should be visible for agentless policies
+    expect(values).toContain('default-fleet-server-internal');
+    // PrivateLink host should NOT be visible for agentless policies (runs on Elastic infra)
+    expect(values).not.toContain('private-fleet-server');
+  });
+
+  it('should include the PrivateLink Fleet Server host in serverless even though it is internal', async () => {
+    const testRenderer = createFleetTestRendererMock();
+    testRenderer.startServices.cloud!.isServerlessEnabled = true;
+    testRenderer.startServices.http.get.mockImplementation(async (path: any) => {
+      if (path === '/api/fleet/fleet_server_hosts') {
+        return {
+          data: {
+            items: [
+              { id: 'default-fleet-server', name: 'Default', is_default: true },
+              {
+                id: 'default-fleet-server-internal',
+                name: 'Agentless Internal',
+                is_default: false,
+                is_internal: true,
+              },
+              {
+                id: 'private-fleet-server',
+                name: 'Private Fleet Server',
+                is_default: false,
+                is_internal: true,
+              },
+            ],
+          },
+        };
+      }
+      throw new Error(`Unmocked path: ${path}`);
+    });
+
+    const { result } = testRenderer.renderHook(() => useFleetServerHostsOptions({} as AgentPolicy));
+
+    await waitFor(() => expect(result.current.isLoading).toBeFalsy());
+
+    const values = result.current.fleetServerHostsOptions.map((o) => o.value);
+    // PrivateLink host should be present
+    expect(values).toContain('private-fleet-server');
+    // Agentless-internal host should be absent
+    expect(values).not.toContain('default-fleet-server-internal');
+  });
+});
+
+describe('useOutputOptions — serverless PrivateLink', () => {
+  it('should include the PrivateLink output in serverless even though it is internal', async () => {
+    const testRenderer = createFleetTestRendererMock();
+    testRenderer.startServices.cloud!.isServerlessEnabled = true;
+    mockedUseLicence.mockReturnValue({ hasAtLeast: () => true } as unknown as LicenseService);
+    testRenderer.startServices.http.get.mockImplementation(async (path: any) => {
+      if (path === '/api/fleet/outputs') {
+        return {
+          data: {
+            items: [
+              {
+                id: 'es-default-output',
+                name: 'Default',
+                is_default: true,
+                is_default_monitoring: true,
+                type: 'elasticsearch',
+              },
+              {
+                id: 'es-default-output-internal',
+                name: 'Agentless Internal',
+                is_default: false,
+                is_default_monitoring: false,
+                type: 'elasticsearch',
+                is_internal: true,
+              },
+              {
+                id: 'es-private-output',
+                name: 'Private ES Output',
+                is_default: false,
+                is_default_monitoring: false,
+                type: 'elasticsearch',
+                is_internal: true,
+              },
+            ],
+          },
+        };
+      }
+      throw new Error(`Unmocked path: ${path}`);
+    });
+
+    const { result } = testRenderer.renderHook(() => useOutputOptions({} as AgentPolicy));
+
+    await waitFor(() => expect(result.current.isLoading).toBeFalsy());
+
+    const dataValues = result.current.dataOutputOptions.map((o) => o.value);
+    const monitoringValues = result.current.monitoringOutputOptions.map((o) => o.value);
+
+    // PrivateLink output should appear in both selectors
+    expect(dataValues).toContain('es-private-output');
+    expect(monitoringValues).toContain('es-private-output');
+
+    // Agentless-internal output should be absent from both
+    expect(dataValues).not.toContain('es-default-output-internal');
+    expect(monitoringValues).not.toContain('es-default-output-internal');
+  });
+
+  it('should not include internal outputs in non-serverless', async () => {
+    const testRenderer = createFleetTestRendererMock();
+    testRenderer.startServices.cloud!.isServerlessEnabled = false;
+    mockedUseLicence.mockReturnValue({ hasAtLeast: () => true } as unknown as LicenseService);
+    testRenderer.startServices.http.get.mockImplementation(async (path: any) => {
+      if (path === '/api/fleet/outputs') {
+        return {
+          data: {
+            items: [
+              {
+                id: 'default-output',
+                name: 'Default',
+                is_default: true,
+                is_default_monitoring: true,
+                type: 'elasticsearch',
+              },
+              {
+                id: 'some-internal-output',
+                name: 'Internal',
+                is_default: false,
+                is_default_monitoring: false,
+                type: 'elasticsearch',
+                is_internal: true,
+              },
+            ],
+          },
+        };
+      }
+      throw new Error(`Unmocked path: ${path}`);
+    });
+
+    const { result } = testRenderer.renderHook(() => useOutputOptions({} as AgentPolicy));
+
+    await waitFor(() => expect(result.current.isLoading).toBeFalsy());
+
+    const dataValues = result.current.dataOutputOptions.map((o) => o.value);
+    expect(dataValues).not.toContain('some-internal-output');
+  });
+
+  it('should include internal outputs for agentless but not the PrivateLink output', async () => {
+    const testRenderer = createFleetTestRendererMock();
+    testRenderer.startServices.cloud!.isCloudEnabled = true;
+    (testRenderer.config as any).agentless = { enabled: true };
+    mockedUseLicence.mockReturnValue({ hasAtLeast: () => true } as unknown as LicenseService);
+    testRenderer.startServices.http.get.mockImplementation(async (path: any) => {
+      if (path === '/api/fleet/outputs') {
+        return {
+          data: {
+            items: [
+              {
+                id: 'es-default-output',
+                name: 'Default',
+                is_default: true,
+                is_default_monitoring: true,
+                type: 'elasticsearch',
+              },
+              {
+                id: 'es-default-output-internal',
+                name: 'Agentless Internal',
+                is_default: false,
+                is_default_monitoring: false,
+                type: 'elasticsearch',
+                is_internal: true,
+              },
+              {
+                id: 'es-private-output',
+                name: 'Private ES Output',
+                is_default: false,
+                is_default_monitoring: false,
+                type: 'elasticsearch',
+                is_internal: true,
+              },
+            ],
+          },
+        };
+      }
+      throw new Error(`Unmocked path: ${path}`);
+    });
+
+    const { result } = testRenderer.renderHook(() =>
+      useOutputOptions({ supports_agentless: true } as AgentPolicy)
+    );
+
+    await waitFor(() => expect(result.current.isLoading).toBeFalsy());
+
+    const dataValues = result.current.dataOutputOptions.map((o) => o.value);
+    const monitoringValues = result.current.monitoringOutputOptions.map((o) => o.value);
+
+    // Agentless-internal output should be visible for agentless policies
+    expect(dataValues).toContain('es-default-output-internal');
+    expect(monitoringValues).toContain('es-default-output-internal');
+    // PrivateLink output should NOT be visible for agentless policies (runs on Elastic infra)
+    expect(dataValues).not.toContain('es-private-output');
+    expect(monitoringValues).not.toContain('es-private-output');
   });
 });

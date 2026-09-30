@@ -37,7 +37,7 @@ import { useUserPrivileges as _useUserPrivileges } from '../../../../common/comp
 import { responseActionsHttpMocks } from '../../../mocks/response_actions_http_mocks';
 import { getEndpointAuthzInitialStateMock } from '../../../../../common/endpoint/service/authz/mocks';
 import { useGetEndpointActionList as _useGetEndpointActionList } from '../../../hooks/response_actions/use_get_endpoint_action_list';
-import { OUTPUT_MESSAGES } from '../translations';
+import { OUTPUT_MESSAGES, TABLE_COLUMN_NAMES, UX_MESSAGES } from '../translations';
 import { EndpointActionGenerator } from '../../../../../common/endpoint/data_generators/endpoint_action_generator';
 import type { ExperimentalFeatures } from '../../../../../common';
 
@@ -221,6 +221,8 @@ describe('Response actions history', () => {
         <ResponseActionsLog data-test-subj={testPrefix} {...(props ?? {})} />
       ));
 
+    mockedContext.setExperimentalFlag({ responseActionsEndpointCancel: true });
+
     useGetEndpointActionListMock.mockReturnValue({
       ...getBaseMockedActionList(),
       data: await getActionListMock({ actionCount: 13 }),
@@ -352,20 +354,37 @@ describe('Response actions history', () => {
       render({ agentIds: 'agent-a' });
 
       expect(
-        Array.from(renderResult.getByTestId(`${testPrefix}`).querySelectorAll('thead th'))
-          .slice(0, 6)
+        Array.from(renderResult.getByTestId(testPrefix).querySelectorAll('thead th'))
+          .slice(0)
           .map((col) => col.textContent)
-      ).toEqual(['Time', 'Command', 'User', 'Comments', 'Status', 'Expand rows']);
+      ).toEqual([
+        UX_MESSAGES.screenReaderExpand,
+        TABLE_COLUMN_NAMES.time,
+        TABLE_COLUMN_NAMES.command,
+        TABLE_COLUMN_NAMES.user,
+        TABLE_COLUMN_NAMES.comments,
+        TABLE_COLUMN_NAMES.status,
+        TABLE_COLUMN_NAMES.actions,
+      ]);
     });
 
     it('should show `Hosts` column when `showHostNames` is TRUE', async () => {
       render({ showHostNames: true });
 
       expect(
-        Array.from(renderResult.getByTestId(`${testPrefix}`).querySelectorAll('thead th'))
-          .slice(0, 7)
+        Array.from(renderResult.getByTestId(testPrefix).querySelectorAll('thead th'))
+          .slice(0)
           .map((col) => col.textContent)
-      ).toEqual(['Time', 'Command', 'User', 'Hosts', 'Comments', 'Status', 'Expand rows']);
+      ).toEqual([
+        UX_MESSAGES.screenReaderExpand,
+        TABLE_COLUMN_NAMES.time,
+        TABLE_COLUMN_NAMES.command,
+        TABLE_COLUMN_NAMES.user,
+        TABLE_COLUMN_NAMES.hosts,
+        TABLE_COLUMN_NAMES.comments,
+        TABLE_COLUMN_NAMES.status,
+        TABLE_COLUMN_NAMES.actions,
+      ]);
     });
 
     it('should show multiple hostnames correctly', async () => {
@@ -975,6 +994,7 @@ describe('Response actions history', () => {
         action.agentState['agent-b'] = {
           errors: undefined,
           wasSuccessful: true,
+          wasCanceled: false,
           isCompleted: true,
           completedAt: '2023-05-10T20:09:25.824Z',
         };
@@ -1037,12 +1057,14 @@ describe('Response actions history', () => {
               'agent-a': {
                 errors: undefined,
                 wasSuccessful: true,
+                wasCanceled: false,
                 isCompleted: true,
                 completedAt: '2023-05-10T20:09:25.824Z',
               },
               'agent-b': {
                 errors: undefined,
                 wasSuccessful: true,
+                wasCanceled: false,
                 isCompleted: true,
                 completedAt: '2023-05-10T20:09:25.824Z',
               },
@@ -1125,29 +1147,50 @@ describe('Response actions history', () => {
 
         const outputCommand = RESPONSE_ACTION_API_COMMAND_TO_CONSOLE_COMMAND_MAP[command];
         const outputs = await expandRows();
+        const expectedResult =
+          command === 'kill-process'
+            ? [
+                expect.stringMatching(
+                  new RegExp(
+                    `Host-agent-a: ${outputCommand} failed` +
+                      'Execution completed .*' +
+                      `Host-agent-b: ${outputCommand} failed` +
+                      'Execution completed .*'
+                  )
+                ),
+                expect.stringMatching(
+                  new RegExp(
+                    `Host-agent-a: ${outputCommand} failed` +
+                      'Execution completed .*' +
+                      `Host-agent-b: ${outputCommand} failed` +
+                      'Execution completed .*'
+                  )
+                ),
+              ]
+            : [
+                expect.stringMatching(
+                  new RegExp(
+                    `Host-agent-a: ${outputCommand} failed` +
+                      'Execution completed .*' +
+                      'The following errors were encountered:An unknown error occurred' +
+                      `Host-agent-b: ${outputCommand} failed` +
+                      'Execution completed .*' +
+                      'The following errors were encountered:An unknown error occurred'
+                  )
+                ),
+                expect.stringMatching(
+                  new RegExp(
+                    `Host-agent-a: ${outputCommand} failed` +
+                      'Execution completed .*' +
+                      'The following errors were encountered:An unknown error occurred' +
+                      `Host-agent-b: ${outputCommand} failed` +
+                      'Execution completed .*' +
+                      'The following errors were encountered:An unknown error occurred'
+                  )
+                ),
+              ];
 
-        expect(outputs.map((n) => n.textContent)).toEqual([
-          expect.stringMatching(
-            new RegExp(
-              `Host-agent-a: ${outputCommand} failed` +
-                'Execution completed .*' +
-                'The following errors were encountered:An unknown error occurred' +
-                `Host-agent-b: ${outputCommand} failed` +
-                'Execution completed .*' +
-                'The following errors were encountered:An unknown error occurred'
-            )
-          ),
-          expect.stringMatching(
-            new RegExp(
-              `Host-agent-a: ${outputCommand} failed` +
-                'Execution completed .*' +
-                'The following errors were encountered:An unknown error occurred' +
-                `Host-agent-b: ${outputCommand} failed` +
-                'Execution completed .*' +
-                'The following errors were encountered:An unknown error occurred'
-            )
-          ),
-        ]);
+        expect(outputs.map((n) => n.textContent)).toEqual(expectedResult);
         expect(
           renderResult.getAllByTestId(`${testPrefix}-column-status`).map((n) => n.textContent)
         ).toEqual(['Failed', 'Failed']);
@@ -1229,6 +1272,7 @@ describe('Response actions history', () => {
             'agent-a': {
               errors: [],
               wasSuccessful: true,
+              wasCanceled: false,
               isCompleted: true,
               completedAt: '2023-05-10T20:09:25.824Z',
             },
@@ -1267,6 +1311,7 @@ describe('Response actions history', () => {
                 'agent-a': {
                   errors: ['Error here!'],
                   wasSuccessful: false,
+                  wasCanceled: false,
                   isCompleted: true,
                   completedAt: '2023-05-10T20:09:25.824Z',
                 },
@@ -1332,6 +1377,7 @@ describe('Response actions history', () => {
                   'agent-a': {
                     errors: ['Error message w/o output'],
                     wasSuccessful: false,
+                    wasCanceled: false,
                     isCompleted: true,
                     completedAt: '2023-05-10T20:09:25.824Z',
                   },
@@ -1368,18 +1414,21 @@ describe('Response actions history', () => {
             'agent-a': {
               errors: [''],
               wasSuccessful: true,
+              wasCanceled: false,
               isCompleted: true,
               completedAt: '2023-05-10T20:09:25.824Z',
             },
             'agent-b': {
               errors: [''],
               wasSuccessful: false,
+              wasCanceled: false,
               isCompleted: true,
               completedAt: '2023-05-10T20:09:25.824Z',
             },
             'agent-c': {
               errors: [''],
               wasSuccessful: false,
+              wasCanceled: false,
               isCompleted: true,
               completedAt: '2023-05-10T20:09:25.824Z',
             },
@@ -1421,12 +1470,14 @@ describe('Response actions history', () => {
                 'agent-a': {
                   errors: ['Error with agent-a!'],
                   wasSuccessful: false,
+                  wasCanceled: false,
                   isCompleted: true,
                   completedAt: '2023-05-10T20:09:25.824Z',
                 },
                 'agent-b': {
                   errors: ['Error with agent-b!'],
                   wasSuccessful: false,
+                  wasCanceled: false,
                   isCompleted: true,
                   completedAt: '2023-05-10T20:09:25.824Z',
                 },
@@ -1485,6 +1536,13 @@ describe('Response actions history', () => {
                   'Execution completed 2023-05-10T20:09:25.824Z' +
                   'The following errors were encountered:Invalid absolute file path provided | Error with agent-b!',
               ]);
+            } else if (command === 'kill-process') {
+              expect(outputs.map((n) => n.textContent)).toEqual([
+                `Host-agent-a: ${outputCommand} failed` +
+                  'Execution completed 2023-05-10T20:09:25.824ZKilled' +
+                  `Host-agent-b: ${outputCommand} failed` +
+                  'Execution completed 2023-05-10T20:09:25.824ZKilled',
+              ]);
             } else {
               expect(outputs.map((n) => n.textContent)).toEqual([
                 `Host-agent-a: ${outputCommand} failed` +
@@ -1515,12 +1573,14 @@ describe('Response actions history', () => {
                 'agent-a': {
                   errors: ['Error with agent-a!'],
                   wasSuccessful: false,
+                  wasCanceled: false,
                   isCompleted: true,
                   completedAt: '2023-05-10T20:09:25.824Z',
                 },
                 'agent-b': {
                   errors: ['Error with agent-b!'],
                   wasSuccessful: false,
+                  wasCanceled: false,
                   isCompleted: true,
                   completedAt: '2023-05-10T20:09:25.824Z',
                 },
@@ -1676,11 +1736,12 @@ describe('Response actions history', () => {
       await user.click(getByTestId(`${testPrefix}-${filterPrefix}-popoverButton`));
       const filterList = getByTestId(`${testPrefix}-${filterPrefix}-popoverList`);
       expect(filterList).toBeTruthy();
-      expect(getAllByTestId(`${filterPrefix}-option`).length).toEqual(3);
+      expect(getAllByTestId(`${filterPrefix}-option`).length).toEqual(4);
       expect(getAllByTestId(`${filterPrefix}-option`).map((option) => option.textContent)).toEqual([
         'Failed',
         'Pending',
         'Successful',
+        'Canceled',
       ]);
     });
 
@@ -1974,6 +2035,225 @@ describe('Response actions history', () => {
       await user.click(getByTestId(`${testPrefix}-${filterPrefix}-popoverButton`));
       const clearAllButton = getByTestId(`${testPrefix}-${filterPrefix}-clearAllButton`);
       expect(clearAllButton.hasAttribute('disabled')).toBeTruthy();
+    });
+  });
+
+  describe('Row actions', () => {
+    beforeEach(() => {
+      apiMocks = responseActionsHttpMocks(mockedContext.coreStart.http);
+    });
+
+    it('should not render a cancel button for completed actions', async () => {
+      // Default mock has isCompleted: true for all actions
+      render();
+      expect(renderResult.queryAllByTestId('responseActionRowActions')).toHaveLength(0);
+    });
+
+    it('should render a cancel button for pending actions', async () => {
+      useGetEndpointActionListMock.mockReturnValue({
+        ...getBaseMockedActionList(),
+        data: await getActionListMock({
+          actionCount: 1,
+          commands: ['get-file'],
+          isCompleted: false,
+          status: 'pending',
+        }),
+      });
+      render();
+      expect(renderResult.getByTestId('responseActionRowActions')).toBeTruthy();
+    });
+
+    it('should render a disabled cancel button when the action command is not cancelable for the agent type', async () => {
+      // `isolate` is not cancelable for the default `endpoint` agent type
+      useGetEndpointActionListMock.mockReturnValue({
+        ...getBaseMockedActionList(),
+        data: await getActionListMock({
+          actionCount: 1,
+          commands: ['isolate'],
+          isCompleted: false,
+          status: 'pending',
+        }),
+      });
+      render();
+      expect(renderResult.getByTestId('responseActionRowActions')).toBeDisabled();
+    });
+
+    it('should render a disabled cancel button when user lacks the required permission to cancel the command', async () => {
+      // `get-file` requires `canWriteFileOperations` to cancel
+      useUserPrivilegesMock.mockReturnValue({
+        endpointPrivileges: getEndpointAuthzInitialStateMock({
+          canWriteFileOperations: false,
+        }),
+      });
+      useGetEndpointActionListMock.mockReturnValue({
+        ...getBaseMockedActionList(),
+        data: await getActionListMock({
+          actionCount: 1,
+          commands: ['get-file'],
+          isCompleted: false,
+          status: 'pending',
+        }),
+      });
+      render();
+      expect(renderResult.getByTestId('responseActionRowActions')).toBeDisabled();
+    });
+
+    it('should render an enabled cancel button for a pending cancelable action when user has required permissions', async () => {
+      useGetEndpointActionListMock.mockReturnValue({
+        ...getBaseMockedActionList(),
+        data: await getActionListMock({
+          actionCount: 1,
+          commands: ['get-file'],
+          isCompleted: false,
+          status: 'pending',
+        }),
+      });
+      render();
+      expect(renderResult.getByTestId('responseActionRowActions')).not.toBeDisabled();
+    });
+
+    it('should show cancel action modal when cancel button is clicked', async () => {
+      useGetEndpointActionListMock.mockReturnValue({
+        ...getBaseMockedActionList(),
+        data: await getActionListMock({
+          actionCount: 1,
+          commands: ['get-file'],
+          isCompleted: false,
+          status: 'pending',
+        }),
+      });
+      render();
+      await user.click(renderResult.getByTestId('responseActionRowActions'));
+      expect(renderResult.getByRole('dialog')).toBeTruthy();
+    });
+
+    it('should dismiss cancel action modal when it is closed', async () => {
+      useGetEndpointActionListMock.mockReturnValue({
+        ...getBaseMockedActionList(),
+        data: await getActionListMock({
+          actionCount: 1,
+          commands: ['get-file'],
+          isCompleted: false,
+          status: 'pending',
+        }),
+      });
+      render();
+      await user.click(renderResult.getByTestId('responseActionRowActions'));
+      expect(renderResult.getByRole('dialog')).toBeTruthy();
+      await user.click(renderResult.getByLabelText('Closes this modal window'));
+      await waitFor(() => {
+        expect(renderResult.queryByRole('dialog')).toBeNull();
+      });
+    });
+
+    it('should disable all row cancel buttons when a cancel action modal is open', async () => {
+      useGetEndpointActionListMock.mockReturnValue({
+        ...getBaseMockedActionList(),
+        data: await getActionListMock({
+          actionCount: 2,
+          commands: ['get-file'],
+          isCompleted: false,
+          status: 'pending',
+        }),
+      });
+      render();
+      const cancelButtons = renderResult.getAllByTestId('responseActionRowActions');
+      expect(cancelButtons).toHaveLength(2);
+      expect(cancelButtons[0]).not.toBeDisabled();
+      expect(cancelButtons[1]).not.toBeDisabled();
+
+      await user.click(cancelButtons[0]);
+
+      await waitFor(() => {
+        const updatedButtons = renderResult.getAllByTestId('responseActionRowActions');
+        expect(updatedButtons[0]).toBeDisabled();
+        expect(updatedButtons[1]).toBeDisabled();
+      });
+    });
+
+    it('should not display the actions column when `responseActionsEndpointCancel` feature flag is disabled', async () => {
+      mockedContext.setExperimentalFlag({ responseActionsEndpointCancel: false });
+      useGetEndpointActionListMock.mockReturnValue({
+        ...getBaseMockedActionList(),
+        data: await getActionListMock({
+          actionCount: 1,
+          commands: ['get-file'],
+          isCompleted: false,
+          status: 'pending',
+        }),
+      });
+      render();
+      const columnHeaders = Array.from(
+        renderResult.getByTestId(testPrefix).querySelectorAll('thead th')
+      ).map((col) => col.textContent);
+      expect(columnHeaders).not.toContain(TABLE_COLUMN_NAMES.actions);
+      expect(renderResult.queryAllByTestId('responseActionRowActions')).toHaveLength(0);
+    });
+
+    it('should display the actions column when user has `canWriteActionsLogManagement` privilege', async () => {
+      useUserPrivilegesMock.mockReturnValue({
+        endpointPrivileges: getEndpointAuthzInitialStateMock({
+          canWriteActionsLogManagement: true,
+        }),
+      });
+      useGetEndpointActionListMock.mockReturnValue({
+        ...getBaseMockedActionList(),
+        data: await getActionListMock({
+          actionCount: 1,
+          commands: ['get-file'],
+          isCompleted: false,
+          status: 'pending',
+        }),
+      });
+      render();
+      const columnHeaders = Array.from(
+        renderResult.getByTestId(testPrefix).querySelectorAll('thead th')
+      ).map((col) => col.textContent);
+      expect(columnHeaders).toContain(TABLE_COLUMN_NAMES.actions);
+      expect(renderResult.getByTestId('responseActionRowActions')).toBeTruthy();
+    });
+
+    it('should not display the actions column when user lacks `canWriteActionsLogManagement` privilege', async () => {
+      useUserPrivilegesMock.mockReturnValue({
+        endpointPrivileges: getEndpointAuthzInitialStateMock({
+          canWriteActionsLogManagement: false,
+        }),
+      });
+      useGetEndpointActionListMock.mockReturnValue({
+        ...getBaseMockedActionList(),
+        data: await getActionListMock({
+          actionCount: 1,
+          commands: ['get-file'],
+          isCompleted: false,
+          status: 'pending',
+        }),
+      });
+      render();
+      const columnHeaders = Array.from(
+        renderResult.getByTestId(testPrefix).querySelectorAll('thead th')
+      ).map((col) => col.textContent);
+      expect(columnHeaders).not.toContain(TABLE_COLUMN_NAMES.actions);
+      expect(renderResult.queryAllByTestId('responseActionRowActions')).toHaveLength(0);
+    });
+  });
+
+  describe('Rule-triggered actions', () => {
+    it('should link "Triggered by rule" to the rule details page', async () => {
+      const data = await getActionListMock({ actionCount: 1 });
+      data.data[0].createdBy = 'unknown';
+      data.data[0].ruleId = 'rule-123';
+
+      useGetEndpointActionListMock.mockReturnValue({
+        ...getBaseMockedActionList(),
+        data,
+      });
+
+      render();
+
+      expect(renderResult.getByTestId(`${testPrefix}-column-ruleName`)).toHaveAttribute(
+        'href',
+        expect.stringContaining('/id/rule-123')
+      );
     });
   });
 });

@@ -75,7 +75,7 @@ export const getXSeriesPoint = (
     if (xAccessor) {
       if (formattedDatatables[layer.layerId]?.formattedColumns[xAccessor]) {
         // stringify the value to compare with the chart value
-        return currentXFormatter.convert(row[xAccessor]) === value;
+        return currentXFormatter.convertToText(row[xAccessor]) === value;
       }
       return row[xAccessor] === value;
     }
@@ -123,7 +123,7 @@ export const getTooltipActions = (
   if (!isEnabled) return;
   const hasSplitAccessors = dataLayers.some((l) => l.splitAccessors?.length);
   const hasXAxis = dataLayers.every((l) => l.xAccessor);
-  const isTimeViz = isTimeChart(dataLayers);
+  const isTimeVis = isTimeChart(dataLayers);
 
   const xSeriesActions: Array<TooltipAction<Datum, XYChartSeriesIdentifier>> =
     !isEsqlMode && hasXAxis
@@ -131,7 +131,7 @@ export const getTooltipActions = (
           {
             disabled: () => !hasXAxis,
             label: (_, [firstSeries]: XYTooltipValue[]) => {
-              if (isTimeViz) {
+              if (isTimeVis) {
                 return i18n.translate('expressionXY.tooltipActions.filterByTime', {
                   defaultMessage: 'Filter by time',
                 });
@@ -142,7 +142,7 @@ export const getTooltipActions = (
               return i18n.translate('expressionXY.tooltipActions.filterForXSeries', {
                 defaultMessage: 'Filter for {value}',
                 values: {
-                  value: xAxisFormatter.convert(value) || value,
+                  value: xAxisFormatter.convertToText(value) || value,
                 },
               });
             },
@@ -258,7 +258,7 @@ export const getTooltipActions = (
 
               // For non-time vizzes, report the X axis
               const xValues =
-                isTimeViz || !hasXAxis
+                isTimeVis || !hasXAxis
                   ? {}
                   : {
                       // If there is no sourceField, wrap the X axis label in [brackets] to let the user set the field name manually

@@ -11,9 +11,26 @@ import { fireEvent, render, screen } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
 import { RuleCreateOptionsFlyout } from './rule_create_options_flyout';
 
+let mockAreAgentBuilderSkillsAvailable = true;
+let mockAlertingV2ExperimentalFeaturesEnabled = true;
+let mockAgentBuilderSkillsRequirements = {
+  hasAgentBuilderCapability: true,
+  isExperimentalFeaturesEnabled: true,
+};
+
+jest.mock('../../hooks/use_are_agent_builder_skills_available', () => ({
+  useAreAgentBuilderSkillsAvailable: () => mockAreAgentBuilderSkillsAvailable,
+  useAgentBuilderSkillsRequirements: () => mockAgentBuilderSkillsRequirements,
+}));
+
+jest.mock('../../hooks/use_alerting_v2_experimental_features', () => ({
+  useAlertingV2ExperimentalFeatures: () => mockAlertingV2ExperimentalFeaturesEnabled,
+}));
+
 const onClose = jest.fn();
 const onCreateEsqlRule = jest.fn();
 const onCreateWithAgent = jest.fn();
+const onCreateThresholdRule = jest.fn();
 
 const renderFlyout = () =>
   render(
@@ -22,6 +39,7 @@ const renderFlyout = () =>
         onClose={onClose}
         onCreateEsqlRule={onCreateEsqlRule}
         onCreateWithAgent={onCreateWithAgent}
+        onCreateThresholdRule={onCreateThresholdRule}
       />
     </I18nProvider>
   );
@@ -29,6 +47,12 @@ const renderFlyout = () =>
 describe('RuleCreateOptionsFlyout', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    mockAreAgentBuilderSkillsAvailable = true;
+    mockAlertingV2ExperimentalFeaturesEnabled = true;
+    mockAgentBuilderSkillsRequirements = {
+      hasAgentBuilderCapability: true,
+      isExperimentalFeaturesEnabled: true,
+    };
   });
 
   it('renders the flyout with create rule options', () => {
@@ -36,9 +60,9 @@ describe('RuleCreateOptionsFlyout', () => {
 
     expect(screen.getByTestId('ruleCreateOptionsFlyout')).toBeInTheDocument();
     expect(screen.getByRole('heading', { level: 2, name: 'Create rule' })).toBeInTheDocument();
-    expect(screen.getByText('Create ES|QL rule')).toBeInTheDocument();
-    expect(screen.getByText('Create with AI Agent')).toBeInTheDocument();
-    expect(screen.getByText('Threshold Alert')).toBeInTheDocument();
+    expect(screen.getByText('ES|QL rule')).toBeInTheDocument();
+    expect(screen.getByText('With AI Agent')).toBeInTheDocument();
+    expect(screen.getByText('Threshold rule')).toBeInTheDocument();
     expect(screen.queryByText(/welcome to the new alerting experience/i)).not.toBeInTheDocument();
   });
 
@@ -53,7 +77,7 @@ describe('RuleCreateOptionsFlyout', () => {
   it('calls onCreateEsqlRule when the ES|QL option is selected', () => {
     renderFlyout();
 
-    fireEvent.click(screen.getByRole('button', { name: /create es\|ql rule/i }));
+    fireEvent.click(screen.getByTestId('createEsqlRuleCard'));
 
     expect(onCreateEsqlRule).toHaveBeenCalledTimes(1);
   });
@@ -61,8 +85,49 @@ describe('RuleCreateOptionsFlyout', () => {
   it('calls onCreateWithAgent when the AI Agent option is selected', () => {
     renderFlyout();
 
-    fireEvent.click(screen.getByRole('button', { name: /create with ai agent/i }));
+    fireEvent.click(screen.getByTestId('createWithAgentCard'));
 
     expect(onCreateWithAgent).toHaveBeenCalledTimes(1);
+  });
+
+  it('renders the builder divider before the Threshold rule option', () => {
+    renderFlyout();
+
+    expect(screen.getByText('or start from a builder')).toBeInTheDocument();
+    expect(screen.queryByText('Start from a rule builder')).not.toBeInTheDocument();
+  });
+
+  it('calls onCreateThresholdRule when the Threshold rule option is selected', () => {
+    renderFlyout();
+
+    fireEvent.click(screen.getByRole('button', { name: /threshold rule/i }));
+
+    expect(onCreateThresholdRule).toHaveBeenCalledTimes(1);
+  });
+
+  it('renders the AI Agent option disabled and does not fire onCreateWithAgent when agent builder is unavailable', () => {
+    mockAreAgentBuilderSkillsAvailable = false;
+    mockAgentBuilderSkillsRequirements = {
+      hasAgentBuilderCapability: false,
+      isExperimentalFeaturesEnabled: true,
+    };
+    render(
+      <I18nProvider>
+        <RuleCreateOptionsFlyout
+          onClose={onClose}
+          onCreateEsqlRule={onCreateEsqlRule}
+          onCreateWithAgent={onCreateWithAgent}
+          onCreateThresholdRule={onCreateThresholdRule}
+        />
+      </I18nProvider>
+    );
+
+    const agentCard = screen.getByTestId('createWithAgentCard');
+    expect(agentCard).toBeInTheDocument();
+    // Kept focusable (aria-disabled) rather than natively disabled so the tooltip stays reachable.
+    expect(agentCard).toHaveAttribute('aria-disabled', 'true');
+
+    fireEvent.click(screen.getByTestId('createWithAgentCard'));
+    expect(onCreateWithAgent).not.toHaveBeenCalled();
   });
 });

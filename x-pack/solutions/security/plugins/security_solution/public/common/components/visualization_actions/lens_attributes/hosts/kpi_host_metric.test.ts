@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { ENTITY_LATEST, getEntitiesAlias } from '@kbn/entity-store/common';
 import { renderHook } from '@testing-library/react';
 import { wrapper } from '../../mocks';
 
@@ -13,15 +14,6 @@ import { useLensAttributes } from '../../use_lens_attributes';
 import { buildKpiHostMetricLensAttributes, kpiHostMetricLensAttributes } from './kpi_host_metric';
 import { useDataView } from '../../../../../data_view_manager/hooks/use_data_view';
 import { withIndices } from '../../../../../data_view_manager/hooks/__mocks__/use_data_view';
-
-jest.mock('../../../../../sourcerer/containers', () => ({
-  useSourcererDataView: jest.fn().mockReturnValue({
-    selectedPatterns: ['auditbeat-mytest-*'],
-    dataViewId: 'security-solution-my-test',
-    indicesExist: true,
-    sourcererDataView: {},
-  }),
-}));
 
 jest.mock('../../../../utils/route/use_route_spy', () => ({
   useRouteSpy: jest.fn().mockReturnValue([
@@ -53,7 +45,7 @@ describe('kpiHostMetricLensAttributes', () => {
     expect(result?.current).toMatchSnapshot();
   });
 
-  it('uses Entity Store v2 latest index when entityStoreV2Enabled', () => {
+  it('uses Entity Store v2 latest alias when entityStoreV2Enabled', () => {
     const { result } = renderHook(
       () =>
         useLensAttributes({
@@ -70,7 +62,7 @@ describe('kpiHostMetricLensAttributes', () => {
     expect(attrs?.references).toEqual([]);
     expect(attrs?.state.internalReferences).toHaveLength(2);
     const spec = Object.values(attrs?.state.adHocDataViews ?? {})[0];
-    expect(spec?.title).toBe('.entities.v2.latest.security_custom_space-00001');
+    expect(spec?.title).toBe(getEntitiesAlias(ENTITY_LATEST, 'custom_space'));
     const hostTypeFilter = attrs?.state.filters?.find(
       (f) => f.meta?.key === 'entity.EngineMetadata.Type'
     );

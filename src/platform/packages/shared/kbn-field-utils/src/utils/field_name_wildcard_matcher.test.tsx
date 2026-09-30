@@ -122,15 +122,36 @@ describe('fieldNameWildcardMatcher', function () {
 
   describe('getFieldSearchMatchingHighlight()', function () {
     it('should correctly return only partial match', async () => {
-      expect(getFieldSearchMatchingHighlight('test this', 'test')).toBe('test');
-      expect(getFieldSearchMatchingHighlight('test this', 'this')).toBe('this');
-      expect(getFieldSearchMatchingHighlight('test this')).toBe('');
+      expect(getFieldSearchMatchingHighlight('test this', 'test')).toEqual(['test']);
+      expect(getFieldSearchMatchingHighlight('test this', 'this')).toEqual(['this']);
+      expect(getFieldSearchMatchingHighlight('test this')).toEqual([]);
     });
 
-    it('should correctly return a match for a wildcard search', async () => {
-      expect(getFieldSearchMatchingHighlight('Test this', 'test*')).toBe('test');
-      expect(getFieldSearchMatchingHighlight('test this', '*this')).toBe(' this');
-      expect(getFieldSearchMatchingHighlight('test this', ' te th')).toBe('t th');
+    it('should return each matched part of wildcard and multi-word searches', async () => {
+      expect(getFieldSearchMatchingHighlight('Test this', 'test*')).toEqual(['test']);
+      expect(getFieldSearchMatchingHighlight('test this', '*this')).toEqual(['this']);
+      expect(getFieldSearchMatchingHighlight('test this', ' te th')).toEqual(['te', 'th']);
+      expect(
+        getFieldSearchMatchingHighlight(
+          'metrics.container.memory.major_page_faults',
+          'memory page faults'
+        )
+      ).toEqual(['memory', 'page', 'faults']);
+      expect(getFieldSearchMatchingHighlight('system.memory.usage', 'memory*usage')).toEqual([
+        'memory',
+        'usage',
+      ]);
+    });
+
+    it('should return the closest part for a supported fuzzy search', async () => {
+      expect(getFieldSearchMatchingHighlight('system.memory.utilization', 'utilizaton')).toEqual([
+        'utilization',
+      ]);
+    });
+
+    it('should not fall back to highlighting the whole display name', async () => {
+      expect(getFieldSearchMatchingHighlight('system.memory.usage', 'not-a-match')).toEqual([]);
+      expect(getFieldSearchMatchingHighlight('system.memory.usage', '***')).toEqual([]);
     });
   });
 });

@@ -5,11 +5,13 @@
  * 2.0.
  */
 
-import { EuiButton, EuiText } from '@elastic/eui';
+import { EuiBetaBadge, EuiButton, EuiText } from '@elastic/eui';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
+import { getEbtProps } from '@kbn/ebt-click';
+import { AGENT_BUILDER_UI_EBT } from '@kbn/agent-builder-common';
 import React from 'react';
 import { useConnectorsActions } from '../../context/connectors_provider';
-import { labels } from '../../utils/i18n';
+import { connectorsTechPreviewBadgeProps, labels } from '../../utils/i18n';
 import { AgentBuilderConnectorsTable } from './table/connectors_table';
 import { useHasConnectorsAllPrivileges } from '../../hooks/use_has_connectors_all_privileges';
 
@@ -27,9 +29,19 @@ export const AgentBuilderConnectors = () => {
           borderBlockEnd: 'none',
         })}
         rightSideItems={[
+          <EuiBetaBadge key="tech-preview" {...connectorsTechPreviewBadgeProps} />,
           ...(hasAllPrivileges
             ? [
-                <EuiButton key="create" fill iconType="plusInCircle" onClick={openCreateFlyout}>
+                <EuiButton
+                  key="create"
+                  fill
+                  iconType="plusCircle"
+                  onClick={openCreateFlyout}
+                  {...getEbtProps({
+                    element: AGENT_BUILDER_UI_EBT.element.pageContent,
+                    action: AGENT_BUILDER_UI_EBT.action.connectors.CREATE_CONNECTOR,
+                  })}
+                >
                   <EuiText size="s">{labels.connectors.createButton}</EuiText>
                 </EuiButton>,
               ]

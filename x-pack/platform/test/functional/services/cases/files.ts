@@ -21,16 +21,21 @@ export function CasesFilesTableServiceProvider({ getService, getPageObject }: Ft
 
   return {
     async addFile(fileInputPath: string) {
-      // click the AddFile button
-      await testSubjects.click('cases-files-add');
+      // open the Attach popover and choose the file option
+      await testSubjects.click('case-view-attach-button');
+      await testSubjects.click('case-view-attach-menu-file');
       await find.byCssSelector('[aria-label="Upload a file"]');
 
       // upload a file
       await common.setFileInputPath(fileInputPath);
       await testSubjects.click('uploadButton');
 
-      // hide the upload notification
-      await (await find.byCssSelector('[data-test-subj="toastCloseButton"]')).click();
+      // wait for the toast that confirms createAttachments() resolved; if this times out instead of
+      // the modal check below, it indicates the API call failed (not just slow)
+      await testSubjects.existOrFail('toastCloseButton', { timeout: 10000 });
+      await testSubjects.click('toastCloseButton');
+
+      await testSubjects.missingOrFail('cases-files-add-modal', { timeout: 10000 });
     },
 
     async searchByFileName(fileName: string) {
@@ -61,6 +66,9 @@ export function CasesFilesTableServiceProvider({ getService, getPageObject }: Ft
       await (await testSubjects.find('cases-files-delete-button', 1000)).click();
 
       await testSubjects.click('confirmModalConfirmButton');
+
+      // wait for the confirm modal (and its overlay mask) to be removed so the next test's click isn't intercepted
+      await testSubjects.missingOrFail('confirmModalConfirmButton');
     },
 
     async openFilePreview(index: number = 0) {
@@ -70,7 +78,10 @@ export function CasesFilesTableServiceProvider({ getService, getPageObject }: Ft
     },
 
     async emptyOrFail() {
-      await testSubjects.existOrFail('cases-files-table-empty');
+      // The files accordion only renders when the case has at least one file
+      // (or one file matching the active search), so "no files" now means the
+      // accordion is missing rather than the table showing its empty state.
+      await testSubjects.missingOrFail('case-view-attachment-accordion-file');
     },
 
     async getFileByIndex(index: number) {

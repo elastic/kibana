@@ -36,7 +36,7 @@ export const createESQLControlAction = (): ActionDefinition<EmbeddableApiContext
   grouping: [ADD_PANEL_CONTROL_GROUP],
   getIconType: () => 'controls',
   isCompatible: async ({ embeddable }) => apiCanAddNewPanel(embeddable),
-  execute: async ({ embeddable }) => {
+  execute: async ({ embeddable, returnFocus }) => {
     if (!apiCanAddNewPanel(embeddable)) throw new IncompatibleActionError();
     const variablesInParent = apiPublishesESQLVariables(embeddable)
       ? embeddable.esqlVariables$.value
@@ -64,6 +64,7 @@ export const createESQLControlAction = (): ActionDefinition<EmbeddableApiContext
           );
         },
         triggerSource: ControlTriggerSource.ADD_CONTROL_BTN,
+        returnFocus,
       });
     } catch (e) {
       // eslint-disable-next-line no-console

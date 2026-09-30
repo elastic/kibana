@@ -34,7 +34,12 @@ export const TopMessagesSection = memo(function TopMessagesSection({
       <EuiFlexItem>
         <SectionPanel title={i18n.TOP_ERRORS_TITLE}>
           {topErrors.length > 0 ? (
-            <EuiBasicTable items={topErrors} columns={TOP_MSG_COLUMNS} compressed />
+            <EuiBasicTable
+              tableCaption={i18n.TOP_ERRORS_TABLE_CAPTION}
+              items={topErrors}
+              columns={TOP_MSG_COLUMNS}
+              compressed
+            />
           ) : (
             <EuiText size="s" color="subdued">
               {i18n.NO_ERRORS_RECORDED}
@@ -45,7 +50,12 @@ export const TopMessagesSection = memo(function TopMessagesSection({
       <EuiFlexItem>
         <SectionPanel title={i18n.TOP_WARNINGS_TITLE}>
           {topWarnings.length > 0 ? (
-            <EuiBasicTable items={topWarnings} columns={TOP_MSG_COLUMNS} compressed />
+            <EuiBasicTable
+              tableCaption={i18n.TOP_WARNINGS_TABLE_CAPTION}
+              items={topWarnings}
+              columns={TOP_MSG_COLUMNS}
+              compressed
+            />
           ) : (
             <EuiText size="s" color="subdued">
               {i18n.NO_WARNINGS_RECORDED}

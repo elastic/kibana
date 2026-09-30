@@ -6,13 +6,17 @@
  */
 
 import type { ReactElement } from 'react';
-import React from 'react';
+import React, { memo, useMemo } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
+import type { EsHitRecord } from '@kbn/discover-utils';
+import { buildDataTableRecord } from '@kbn/discover-utils';
 import type { AttackDetailsPanelPaths } from '.';
-import { OVERVIEW_TAB_TEST_ID, TABLE_TAB_TEST_ID, JSON_TAB_TEST_ID } from './constants/test_ids';
-import { TableTab } from './tabs/table_tab';
-import { JsonTab } from './tabs/json_tab';
+import { JSON_TAB_TEST_ID, OVERVIEW_TAB_TEST_ID, TABLE_TAB_TEST_ID } from './constants/test_ids';
+import { cellActionRenderer } from '../../flyout_v2/shared/components/cell_actions';
+import { JsonTab as SharedJsonTab } from '../../flyout_v2/shared/components/json_tab';
+import { TableTab } from '../../flyout_v2/attack/main/tabs/table_tab';
 import { OverviewTab } from './tabs/overview_tab';
+import { useAttackDetailsContext } from './context';
 
 export interface AttackDetailsPanelTabType {
   id: AttackDetailsPanelPaths;
@@ -20,6 +24,38 @@ export interface AttackDetailsPanelTabType {
   content: React.ReactElement;
   'data-test-subj': string;
 }
+
+/**
+ * Adapter that bridges the attack details flyout context to the prop-based `TableTab` that now
+ * lives in `flyout_v2`. Reads the `searchHit` from the context, builds a `DataTableRecord`, and
+ * forwards it (plus the shared cell-action renderer) so the table view has a single source of
+ * truth in `flyout_v2`.
+ */
+const TableTabContent = memo(() => {
+  const { searchHit } = useAttackDetailsContext();
+  const hit = useMemo(() => buildDataTableRecord(searchHit as EsHitRecord), [searchHit]);
+
+  return <TableTab hit={hit} renderCellActions={cellActionRenderer} />;
+});
+TableTabContent.displayName = 'TableTabContent';
+
+/**
+ * Adapter that bridges the attack details flyout context to the shared `JsonTab`. Reads the
+ * `searchHit` from the context and forwards it as a prop so the JSON view has a single source
+ * of truth in `flyout_v2`.
+ */
+const JsonTabContent = memo(() => {
+  const { searchHit } = useAttackDetailsContext();
+
+  return (
+    <SharedJsonTab
+      value={searchHit as unknown as Record<string, unknown>}
+      showFooterOffset={false}
+      data-test-subj={JSON_TAB_TEST_ID}
+    />
+  );
+});
+JsonTabContent.displayName = 'JsonTabContent';
 
 export const overviewTab: AttackDetailsPanelTabType = {
   id: 'overview',
@@ -42,7 +78,7 @@ export const tableTab: AttackDetailsPanelTabType = {
       defaultMessage="Table"
     />
   ),
-  content: <TableTab />,
+  content: <TableTabContent />,
 };
 
 export const jsonTab: AttackDetailsPanelTabType = {
@@ -54,5 +90,7 @@ export const jsonTab: AttackDetailsPanelTabType = {
       defaultMessage="JSON"
     />
   ),
-  content: <JsonTab />,
+  content: <JsonTabContent />,
 };
+
+export const allTabs: AttackDetailsPanelTabType[] = [overviewTab, tableTab, jsonTab];

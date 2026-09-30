@@ -8,6 +8,7 @@
  */
 
 import type { WorkflowDetailDto } from '@kbn/workflows';
+import { pickWorkflowDocumentVersion, storedWorkflowAccessControlSchema } from '@kbn/workflows';
 import type { WorkflowPartialDetailDto } from '@kbn/workflows/types/v1';
 
 import type { WorkflowProperties } from '../../storage/workflow_storage';
@@ -23,15 +24,20 @@ export const transformStorageDocumentToWorkflowDto = (
   if (!id || !source) {
     throw new Error('Invalid document, id or source is undefined');
   }
+  const accessControl = storedWorkflowAccessControlSchema.parse(source.access_control);
   return {
     id,
+    ...(source.owner_id ? { owner_id: source.owner_id } : {}),
+    ...(accessControl ? { access_control: accessControl } : {}),
     name: source.name,
     description: source.description,
     enabled: source.enabled,
+    tags: source.tags,
     managed: source.managed,
     managedBy: source.managedBy,
     definitionHash: source.definitionHash,
     originManagedWorkflowId: source.originManagedWorkflowId,
+    managedVersion: source.managedVersion,
     lifecycle: source.lifecycle,
     yaml: source.yaml,
     definition: source.definition,
@@ -40,6 +46,7 @@ export const transformStorageDocumentToWorkflowDto = (
     valid: source.valid,
     createdAt: source.created_at,
     lastUpdatedAt: source.updated_at,
+    ...pickWorkflowDocumentVersion(source),
   };
 };
 
@@ -67,11 +74,13 @@ export const transformStoragePartialToWorkflowDto = (
   if ('name' in source) dto.name = source.name;
   if ('description' in source) dto.description = source.description;
   if ('enabled' in source) dto.enabled = source.enabled;
+  if ('tags' in source) dto.tags = source.tags;
   if ('managed' in source) dto.managed = source.managed;
   if ('managedBy' in source) dto.managedBy = source.managedBy;
   if ('definitionHash' in source) dto.definitionHash = source.definitionHash;
   if ('originManagedWorkflowId' in source)
     dto.originManagedWorkflowId = source.originManagedWorkflowId;
+  if ('managedVersion' in source) dto.managedVersion = source.managedVersion;
   if ('lifecycle' in source) dto.lifecycle = source.lifecycle;
   if ('yaml' in source) dto.yaml = source.yaml;
   if ('definition' in source) dto.definition = source.definition;
@@ -80,5 +89,8 @@ export const transformStoragePartialToWorkflowDto = (
   if ('valid' in source) dto.valid = source.valid;
   if ('created_at' in source) dto.createdAt = source.created_at;
   if ('updated_at' in source) dto.lastUpdatedAt = source.updated_at;
+  if ('version' in source) {
+    Object.assign(dto, pickWorkflowDocumentVersion(source));
+  }
   return dto;
 };

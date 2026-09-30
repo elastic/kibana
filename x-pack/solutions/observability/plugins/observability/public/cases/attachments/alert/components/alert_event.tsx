@@ -9,7 +9,7 @@ import React, { useCallback, useMemo } from 'react';
 import { isEmpty } from 'lodash';
 import { EuiLoadingSpinner } from '@elastic/eui';
 import { UserActionTitle } from '@kbn/cases-components';
-import { getRuleInfo } from '@kbn/cases-plugin/common';
+import { getRuleInfo, type AlertAttachmentMetadata } from '@kbn/cases-plugin/common';
 import { getRulesAppDetailsRoute, rulesAppRoute } from '@kbn/rule-data-utils';
 import { useKibana } from '../../../../utils/kibana_react';
 import {
@@ -23,7 +23,12 @@ export interface AlertEventProps {
   alertId: string;
   totalAlerts: number;
   savedObjectId: string;
-  rule: { id: string | null; name: string | null } | null | undefined;
+  /**
+   * Schema-inferred `metadata.rule` from `ObservabilityAlertAttachmentPayloadSchema`.
+   * The component reads `id` / `name` defensively so callers can pass it
+   * through without coercion.
+   */
+  rule: AlertAttachmentMetadata['rule'];
 }
 
 export function AlertEvent({ alertId, totalAlerts, savedObjectId, rule }: AlertEventProps) {

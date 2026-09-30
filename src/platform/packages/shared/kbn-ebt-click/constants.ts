@@ -42,4 +42,40 @@ export const EBT_CLICK_ACTIONS = {
   VIEW_ERROR: 'viewError',
   /** Navigates to the APM app. Use when the user explicitly chooses to open something in APM. */
   OPEN_IN_APM: 'openInApm',
+  /** User sets a breakdown field on a chart. */
+  SET_BREAKDOWN: 'setBreakdown',
+  /** User intends to view active alerts for an entity. */
+  VIEW_ALERTS: 'viewAlerts',
+  /** User intends to view SLOs for a service or resource. */
+  VIEW_SLOS: 'viewSlos',
+  /** User intends to view anomaly details for an entity. */
+  VIEW_ANOMALIES: 'viewAnomalies',
+  /** User intends to open an actions menu to explore available actions. */
+  OPEN_ACTIONS: 'openActions',
+  /** User intends to add data to their (empty) cluster. Commonly used from empty data prompts and similar components */
+  ADD_DATA: 'addData',
+  /** User sets the option a chart or grid is sorted by. */
+  SET_SORT_OPTION: 'setSortOption',
+  /** User sets the direction a chart or grid is sorted in. */
+  SET_SORT_DIRECTION: 'setSortDirection',
 } as const;
+
+/** EBT click `element` for the charts toolbar, shared by the unified histogram and metrics grid toolbars. */
+export const CHARTS_TOOLBAR_EBT_ELEMENT = 'chartsToolbar';
+
+/**
+ * Sentinel value for `data-ebt-detail` when a field is not found in the ECS fields
+ * metadata registry. This covers truly custom fields but also legitimate standard fields
+ * from other schemas (e.g. APM-specific `span.name`, OTel `k8s.pod.name`) that are not
+ * ECS-registered. Analysts should read this as "field not in ECS registry" rather than
+ * "unknown or custom field". ECS fields send their name directly as the detail value.
+ *
+ * @see https://github.com/elastic/kibana/blob/main/src/platform/plugins/shared/discover/public/ebt_manager/scoped_discover_ebt_manager.ts
+ */
+export const NON_ECS_FIELD_EBT_DETAIL = '<non-ecs>';
+
+/**
+ * Sentinel value for `data-ebt-detail` when the user deliberately selects "none" or clears
+ * a selection. Distinguishes an intentional empty choice from a missing or unknown value.
+ */
+export const NONE_EBT_DETAIL = '<none>';

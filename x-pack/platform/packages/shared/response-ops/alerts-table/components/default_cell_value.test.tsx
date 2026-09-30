@@ -12,6 +12,7 @@ import {
   ALERT_RULE_CONSUMER,
   ALERT_RULE_NAME,
   ALERT_RULE_PRODUCER,
+  ALERT_RULE_TYPE_ID,
   ALERT_START,
   TIMESTAMP,
 } from '@kbn/rule-data-utils';
@@ -21,6 +22,12 @@ import { createPartialObjectMock } from '../utils/test';
 import type { CellComponentProps } from '../types';
 import { mockRenderContext } from '../mocks/context.mock';
 import { AlertsTableContextProvider } from '../contexts/alerts_table_context';
+
+jest.mock('@kbn/alerts-ui-shared/src/common/hooks/use_get_rule_types_permissions');
+
+const { useGetRuleTypesPermissions } = jest.requireMock(
+  '@kbn/alerts-ui-shared/src/common/hooks/use_get_rule_types_permissions'
+);
 
 const props = createPartialObjectMock<CellComponentProps>({
   ...mockRenderContext,
@@ -34,6 +41,12 @@ const TestComponent = (_props: ComponentProps<typeof DefaultCellValue>) => (
 );
 
 describe('DefaultCellValue', () => {
+  beforeEach(() => {
+    useGetRuleTypesPermissions.mockReturnValue({
+      authorizedToReadRuleType: () => true,
+      authorizedToReadRuleForAlert: () => true,
+    });
+  });
   it.each([TIMESTAMP, ALERT_START])('should format date fields', (columnId) => {
     render(<TestComponent {...props} columnId={columnId} />);
     expect(mockRenderContext.services.fieldFormats.deserialize).toHaveBeenCalledWith(
@@ -43,9 +56,32 @@ describe('DefaultCellValue', () => {
     );
   });
 
-  it('should render the rule name as a link', () => {
-    render(<TestComponent {...props} columnId={ALERT_RULE_NAME} />);
-    expect(screen.queryByRole('link')).toBeInTheDocument();
+  describe('in the rule name column', () => {
+    const ruleNameAlert = {
+      ...props.alert,
+      [ALERT_RULE_TYPE_ID]: ['.es-query'],
+      [ALERT_RULE_CONSUMER]: ['stackAlerts'],
+    };
+
+    it('renders the rule name as a link when the user can read the rule', () => {
+      useGetRuleTypesPermissions.mockReturnValue({
+        authorizedToReadRuleType: () => true,
+        authorizedToReadRuleForAlert: () => true,
+      });
+      render(<TestComponent {...props} columnId={ALERT_RULE_NAME} alert={ruleNameAlert} />);
+      expect(screen.getByTestId('alertRuleNameLink')).toBeInTheDocument();
+      expect(screen.queryByRole('link')).toBeInTheDocument();
+    });
+
+    it('renders the rule name as plain text when the user cannot read the rule', () => {
+      useGetRuleTypesPermissions.mockReturnValue({
+        authorizedToReadRuleType: () => false,
+        authorizedToReadRuleForAlert: () => false,
+      });
+      render(<TestComponent {...props} columnId={ALERT_RULE_NAME} alert={ruleNameAlert} />);
+      expect(screen.getByTestId('alertRuleName')).toBeInTheDocument();
+      expect(screen.queryByRole('link')).not.toBeInTheDocument();
+    });
   });
 
   it('should render the alert duration in milliseconds', () => {

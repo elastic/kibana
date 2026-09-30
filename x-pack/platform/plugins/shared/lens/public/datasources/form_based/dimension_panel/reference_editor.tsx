@@ -26,6 +26,7 @@ import type {
 } from '@kbn/lens-common';
 import type { KqlPluginStart } from '@kbn/kql/public';
 import type { OperationSupportMatrix } from './operation_support';
+import { getSingleValue } from '../pure_utils';
 import type { OperationType } from '../form_based';
 import type { RequiredReference, GenericOperationDefinition } from '../operations';
 import { getOperationDisplay, isOperationAllowedAsReference } from '../operations';
@@ -275,14 +276,28 @@ export const ReferenceEditor = (props: ReferenceEditorProps) => {
                 const possibleFieldNames =
                   operationSupportMatrix.fieldByOperation.get(operationType);
 
-                const field =
-                  column && 'sourceField' in column && possibleFieldNames?.has(column.sourceField)
-                    ? currentIndexPattern.getFieldByName(column.sourceField)
-                    : possibleFieldNames?.size === 1 // @ts-expect-error upgrade typescript v5.9.3
-                    ? currentIndexPattern.getFieldByName(possibleFieldNames.values().next().value)
-                    : undefined;
+                if (
+                  column &&
+                  'sourceField' in column &&
+                  possibleFieldNames?.has(column.sourceField)
+                ) {
+                  onChooseFunction(
+                    operationType,
+                    currentIndexPattern.getFieldByName(column.sourceField)
+                  );
+                  return;
+                }
 
-                onChooseFunction(operationType, field);
+                const singleFieldName = getSingleValue(possibleFieldNames);
+                if (singleFieldName) {
+                  onChooseFunction(
+                    operationType,
+                    currentIndexPattern.getFieldByName(singleFieldName)
+                  );
+                  return;
+                }
+
+                onChooseFunction(operationType, undefined);
                 return;
               }}
             />

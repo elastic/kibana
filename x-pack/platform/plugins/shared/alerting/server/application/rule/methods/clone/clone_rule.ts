@@ -14,7 +14,7 @@ import { withSpan } from '@kbn/apm-utils';
 import type { SanitizedRule, RawRule } from '../../../../types';
 import { getDefaultMonitoring } from '../../../../lib';
 import { WriteOperations, AlertingAuthorizationEntity } from '../../../../authorization';
-import { parseDuration } from '../../../../../common/parse_duration';
+import { parseDuration, getRuleCircuitBreakerErrorMessage } from '../../../../../common';
 import { ruleAuditEvent, RuleAuditAction } from '../../../../rules_client/common/audit_events';
 import { getRuleExecutionStatusPendingAttributes } from '../../../../lib/rule_execution_status';
 import { isDetectionEngineAADRuleType } from '../../../../saved_objects/migrations/utils';
@@ -27,6 +27,8 @@ import { getDecryptedRuleSo, getRuleSo } from '../../../../data/rule';
 import { transformRuleAttributesToRuleDomain, transformRuleDomainToRule } from '../../transforms';
 import { ruleDomainSchema } from '../../schemas';
 import { cloneRuleParamsSchema } from './schemas';
+import type { ValidateScheduleLimitResult } from '../get_schedule_frequency';
+import { validateScheduleLimit } from '../get_schedule_frequency';
 
 export async function cloneRule<Params extends RuleParams = never>(
   context: RulesClientContext,
@@ -72,6 +74,24 @@ export async function cloneRule<Params extends RuleParams = never>(
     );
   }
 
+  let validationPayload: ValidateScheduleLimitResult = null;
+  if (ruleSavedObject.attributes.enabled) {
+    validationPayload = await validateScheduleLimit({
+      context,
+      updatedInterval: ruleSavedObject.attributes.schedule.interval,
+    });
+  }
+  if (validationPayload) {
+    throw Boom.badRequest(
+      getRuleCircuitBreakerErrorMessage({
+        name: ruleSavedObject.attributes.name,
+        interval: validationPayload.interval,
+        intervalAvailable: validationPayload.intervalAvailable,
+        action: 'clone',
+      })
+    );
+  }
+
   /*
    * As the time of the creation of this PR, security solution already have a clone/duplicate API
    * with some specific business logic so to avoid weird bugs, I prefer to exclude them from this
@@ -114,6 +134,7 @@ export async function cloneRule<Params extends RuleParams = never>(
   // Throws an error if alert type isn't registered
   const ruleType = context.ruleTypeRegistry.get(ruleSavedObject.attributes.alertTypeId);
   const username = await context.getUserName();
+  const profileUid = await context.getProfileUid();
   const createTime = Date.now();
   const lastRunTimestamp = new Date();
   const legacyId = Semver.lt(context.kibanaVersion, '8.0.0') ? id : null;
@@ -121,6 +142,7 @@ export async function cloneRule<Params extends RuleParams = never>(
     id: ruleType.id,
     ruleName,
     username,
+    profileUid,
     shouldUpdateApiKey: ruleSavedObject.attributes.enabled,
     errorMessage: 'Error creating rule: could not create API key',
     apiKeyOwnership: { apiKeyCreatedByUser: ruleSavedObject.attributes.apiKeyCreatedByUser },
@@ -142,6 +164,8 @@ export async function cloneRule<Params extends RuleParams = never>(
     legacyId,
     createdBy: username,
     updatedBy: username,
+    createdByProfileUid: profileUid,
+    updatedByProfileUid: profileUid,
     createdAt: new Date(createTime).toISOString(),
     updatedAt: new Date(createTime).toISOString(),
     snoozeSchedule: [],
@@ -194,7 +218,7 @@ export async function cloneRule<Params extends RuleParams = never>(
   }
 
   // Convert domain rule to rule (Remove certain properties)
-  const rule = transformRuleDomainToRule<Params>(ruleDomain, { isPublic: false });
+  const rule = transformRuleDomainToRule<Params>(ruleDomain);
 
   // TODO (http-versioning): Remove this cast, this enables us to move forward
   // without fixing all of other solution types

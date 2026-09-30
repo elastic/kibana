@@ -58,10 +58,6 @@ async function muteInstanceWithOCC(
       operation: WriteOperations.MuteAlert,
       entity: AlertingAuthorizationEntity.Rule,
     });
-
-    if (attributes.actions.length) {
-      await context.actionsAuthorization.ensureAuthorized({ operation: 'execute' });
-    }
   } catch (error) {
     context.auditLogger?.log(
       ruleAuditEvent({
@@ -103,6 +99,8 @@ async function muteInstanceWithOCC(
     mutedInstanceIds.push(alertInstanceId);
 
     const indices = context.getAlertIndicesAlias([attributes.alertTypeId], context.spaceId);
+    const username = await context.getUserName();
+    const profileUid = await context.getProfileUid();
 
     await updateRuleSo({
       savedObjectsClient: context.unsecuredSavedObjectsClient,
@@ -110,7 +108,8 @@ async function muteInstanceWithOCC(
       id: ruleId,
       updateRuleAttributes: updateMeta(context, {
         mutedInstanceIds,
-        updatedBy: await context.getUserName(),
+        updatedBy: username,
+        updatedByProfileUid: profileUid,
         updatedAt: new Date().toISOString(),
       }),
     });

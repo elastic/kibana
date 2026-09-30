@@ -5,13 +5,25 @@
  * 2.0.
  */
 
+import { httpServerMock } from '@kbn/core/server/mocks';
+import type { KibanaRequest } from '@kbn/core/server';
 import { registerWorkflowYamlAttachment } from './workflow_yaml_attachment';
+import { platformCoreTools } from '@kbn/agent-builder-common/tools';
+import type { VersionedAttachment } from '@kbn/agent-builder-common/attachments';
 import { WORKFLOW_YAML_ATTACHMENT_TYPE } from '@kbn/workflows/common/constants';
 import { workflowTools } from '../../common/constants';
 import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
 import type { AgentBuilderPluginSetup } from '@kbn/agent-builder-server';
+import type { SecurityPluginStart } from '@kbn/security-plugin-types-server';
+import { WorkflowsManagementApiActions } from '@kbn/workflows';
 
 type WorkflowsManagementApi = WorkflowsServerPluginSetup['management'];
+
+interface WorkflowYamlAttachmentData {
+  yaml: string;
+  workflowId?: string;
+  name?: string;
+}
 
 interface RegisteredAttachmentType {
   id: string;
@@ -22,8 +34,15 @@ interface RegisteredAttachmentType {
   ) => { valid: true; data: unknown } | { valid: false; error: string };
   resolve: (
     origin: string,
-    context: { spaceId: string }
+    context: { spaceId: string; request: KibanaRequest }
   ) => Promise<{ yaml: string; workflowId: string; name: string } | undefined>;
+  isStale: (
+    attachment: VersionedAttachment<
+      typeof WORKFLOW_YAML_ATTACHMENT_TYPE,
+      WorkflowYamlAttachmentData
+    >,
+    context: { spaceId: string; request: KibanaRequest }
+  ) => Promise<boolean>;
   format: (
     attachment: {
       data: {
@@ -39,7 +58,10 @@ interface RegisteredAttachmentType {
   getAgentDescription: () => string;
 }
 
-const registerAndCapture = (api: Partial<WorkflowsManagementApi> = {}) => {
+const registerAndCapture = (
+  api: Partial<WorkflowsManagementApi> = {},
+  security?: SecurityPluginStart
+) => {
   let registeredType: RegisteredAttachmentType | undefined;
   const mockAgentBuilder = {
     attachments: {
@@ -49,15 +71,96 @@ const registerAndCapture = (api: Partial<WorkflowsManagementApi> = {}) => {
     },
   } as unknown as AgentBuilderPluginSetup;
 
-  registerWorkflowYamlAttachment(mockAgentBuilder, api as WorkflowsManagementApi);
+  registerWorkflowYamlAttachment(mockAgentBuilder, api as WorkflowsManagementApi, () => security);
   return registeredType!;
 };
 
+const createWorkflowAttachment = (
+  yaml: string,
+  overrides: Partial<
+    VersionedAttachment<typeof WORKFLOW_YAML_ATTACHMENT_TYPE, WorkflowYamlAttachmentData>
+  > = {}
+): VersionedAttachment<typeof WORKFLOW_YAML_ATTACHMENT_TYPE, WorkflowYamlAttachmentData> => ({
+  id: 'attachment-1',
+  type: WORKFLOW_YAML_ATTACHMENT_TYPE,
+  origin: 'workflow-1',
+  origin_snapshot_at: '2025-01-01T00:00:00.000Z',
+  versions: [
+    {
+      version: 1,
+      data: { yaml },
+      created_at: '2025-01-01T00:00:00.000Z',
+      content_hash: 'hash',
+    },
+  ],
+  current_version: 1,
+  ...overrides,
+});
+
 describe('workflow_yaml_attachment', () => {
+  describe('authorization', () => {
+    it.each([true, false])('checks read access before resolving (allowed=%s)', async (allowed) => {
+      const atSpace = jest.fn().mockResolvedValue({ hasAllRequested: allowed });
+      const security = {
+        authz: {
+          actions: { api: { get: (action: string) => `api:${action}` } },
+          checkPrivilegesWithRequest: jest.fn().mockReturnValue({ atSpace }),
+        },
+      } as unknown as SecurityPluginStart;
+      const workflow = { id: 'workflow-1', yaml: 'name: Workflow', name: 'Workflow' };
+      const getWorkflow = jest.fn().mockResolvedValue(workflow);
+      const type = registerAndCapture({ getWorkflow }, security);
+      const request = httpServerMock.createKibanaRequest();
+
+      const result = await type.resolve('workflow-1', { spaceId: 'another-space', request });
+
+      expect(security.authz.checkPrivilegesWithRequest).toHaveBeenCalledWith(request);
+      expect(atSpace).toHaveBeenCalledWith('another-space', {
+        kibana: [`api:${WorkflowsManagementApiActions.read}`],
+      });
+      if (allowed) {
+        expect(result).toEqual({
+          yaml: workflow.yaml,
+          workflowId: workflow.id,
+          name: workflow.name,
+        });
+        expect(getWorkflow).toHaveBeenCalledWith('workflow-1', 'another-space', request);
+      } else {
+        expect(result).toBeUndefined();
+        expect(getWorkflow).not.toHaveBeenCalled();
+      }
+    });
+
+    it('does not fetch the workflow for a stale check when read access is denied', async () => {
+      const security = {
+        authz: {
+          actions: { api: { get: (action: string) => action } },
+          checkPrivilegesWithRequest: () => ({
+            atSpace: async () => ({ hasAllRequested: false }),
+          }),
+        },
+      } as unknown as SecurityPluginStart;
+      const getWorkflow = jest.fn();
+      const type = registerAndCapture({ getWorkflow }, security);
+
+      await expect(
+        type.isStale(createWorkflowAttachment('name: Workflow'), {
+          spaceId: 'default',
+          request: httpServerMock.createKibanaRequest(),
+        })
+      ).resolves.toBe(false);
+      expect(getWorkflow).not.toHaveBeenCalled();
+    });
+  });
+
   describe('getTools', () => {
-    it('includes all workflow tools', () => {
+    it('includes all workflow tools, generate_workflow, and execute_workflow', () => {
       const type = registerAndCapture();
-      expect(type.getTools()).toEqual(Object.values(workflowTools));
+      expect(type.getTools()).toEqual([
+        ...Object.values(workflowTools),
+        platformCoreTools.generateWorkflow,
+        platformCoreTools.executeWorkflow,
+      ]);
     });
   });
 
@@ -91,16 +194,86 @@ describe('workflow_yaml_attachment', () => {
       const type = registerAndCapture({ getWorkflow });
 
       getWorkflow.mockResolvedValueOnce({ id: 'w1', yaml: 'version: "1"', name: 'My Workflow' });
-      await expect(type.resolve('w1', { spaceId: 'default' })).resolves.toEqual({
+      await expect(
+        type.resolve('w1', { spaceId: 'default', request: httpServerMock.createKibanaRequest() })
+      ).resolves.toEqual({
         yaml: 'version: "1"',
         workflowId: 'w1',
         name: 'My Workflow',
       });
-      expect(getWorkflow).toHaveBeenCalledWith('w1', 'default');
+      expect(getWorkflow).toHaveBeenCalledWith('w1', 'default', expect.any(Object));
 
       getWorkflow.mockResolvedValueOnce(undefined);
-      await expect(type.resolve('missing', { spaceId: 'default' })).resolves.toBeUndefined();
-      expect(getWorkflow).toHaveBeenCalledWith('missing', 'default');
+      await expect(
+        type.resolve('missing', {
+          spaceId: 'default',
+          request: httpServerMock.createKibanaRequest(),
+        })
+      ).resolves.toBeUndefined();
+      expect(getWorkflow).toHaveBeenCalledWith('missing', 'default', expect.any(Object));
+    });
+  });
+
+  describe('isStale', () => {
+    it('returns false before the workflow has changed', async () => {
+      const getWorkflow = jest.fn().mockResolvedValue({
+        id: 'workflow-1',
+        name: 'Workflow',
+        yaml: 'name: Workflow',
+        lastUpdatedAt: '2025-01-01T00:00:00.000Z',
+      });
+      const type = registerAndCapture({ getWorkflow });
+
+      await expect(
+        type.isStale(createWorkflowAttachment('name: Old workflow'), {
+          spaceId: 'default',
+          request: httpServerMock.createKibanaRequest(),
+        })
+      ).resolves.toBe(false);
+    });
+
+    it('returns false when only YAML formatting has changed', async () => {
+      const getWorkflow = jest.fn().mockResolvedValue({
+        id: 'workflow-1',
+        name: 'Workflow',
+        yaml: `# Current persisted workflow
+name: Workflow
+version: '1'
+steps: [{ type: console, name: first, with: { message: hello } }]`,
+        lastUpdatedAt: '2025-01-02T00:00:00.000Z',
+      });
+      const type = registerAndCapture({ getWorkflow });
+      const attachment = createWorkflowAttachment(`version: "1"
+name: Workflow
+steps:
+  - name: first
+    type: console
+    with:
+      message: hello`);
+
+      await expect(
+        type.isStale(attachment, {
+          spaceId: 'default',
+          request: httpServerMock.createKibanaRequest(),
+        })
+      ).resolves.toBe(false);
+    });
+
+    it('returns true when the persisted workflow YAML has changed', async () => {
+      const getWorkflow = jest.fn().mockResolvedValue({
+        id: 'workflow-1',
+        name: 'Workflow',
+        yaml: 'name: Updated workflow',
+        lastUpdatedAt: '2025-01-02T00:00:00.000Z',
+      });
+      const type = registerAndCapture({ getWorkflow });
+
+      await expect(
+        type.isStale(createWorkflowAttachment('name: Original workflow'), {
+          spaceId: 'default',
+          request: httpServerMock.createKibanaRequest(),
+        })
+      ).resolves.toBe(true);
     });
   });
 
@@ -177,20 +350,17 @@ describe('workflow_yaml_attachment', () => {
       expect(result.type).toBe('text');
       expect(result.value).toContain('```yaml\nversion: "1"\n```');
       expect(result.value).not.toContain('Validation: valid');
-      expect(result.value).toContain(
-        `Use the workflow edit tools (${workflowTools.insertStep}, ${workflowTools.modifyStep}, ${workflowTools.modifyStepProperty}, ${workflowTools.modifyProperty}, ${workflowTools.deleteStep}, ${workflowTools.setYaml})`
-      );
+      expect(result.value).toContain(platformCoreTools.generateWorkflow);
     });
   });
 
   describe('getAgentDescription', () => {
-    it('references the attachment type and edit tools', () => {
+    it('references the attachment type and generate_workflow tool', () => {
       const type = registerAndCapture();
       const description = type.getAgentDescription();
 
       expect(description).toContain(WORKFLOW_YAML_ATTACHMENT_TYPE);
-      expect(description).toContain(workflowTools.setYaml);
-      expect(description).toContain(workflowTools.modifyStep);
+      expect(description).toContain(platformCoreTools.generateWorkflow);
       expect(description).toContain(workflowTools.getStepDefinitions);
     });
   });

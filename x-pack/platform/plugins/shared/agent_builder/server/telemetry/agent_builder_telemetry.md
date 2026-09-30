@@ -229,7 +229,9 @@ Fired at the end of each successful conversation round.
 | `attachments` | keyword[] | no | Attachment types (e.g. `file`, `screenshot`), if any. |
 | `conversation_id` | keyword | no | Conversation ID. |
 | `execution_id` | keyword | no | Agent execution ID. |
+| `origin` | keyword | no | External system the conversation came from. See [Conversation origin](#conversation-origin). |
 | `input_tokens` | integer | yes | Input tokens consumed in this round. |
+| `cached_input_tokens` | integer | no | Input tokens served from cache in this round (subset of `input_tokens`), when reported by the provider. |
 | `llm_calls` | integer | yes | Number of LLM calls made during the round. |
 | `message_length` | integer | yes | Character length of the user's input message. |
 | `model` | keyword | no | LLM model identifier. |
@@ -255,6 +257,7 @@ Fired when a round fails with an unrecoverable error.
 | `agent_id` | keyword | yes | Normalized agent ID. |
 | `conversation_id` | keyword | no | Conversation ID. |
 | `execution_id` | keyword | no | Agent execution ID. |
+| `origin` | keyword | no | External system the conversation came from. See [Conversation origin](#conversation-origin). |
 | `round_id` | keyword | no | Round ID, if available. |
 | `model_provider` | keyword | no | LLM provider identifier. |
 | `error_type` | keyword | yes | Sanitized/normalized error type or code. |
@@ -268,10 +271,11 @@ Fired after a tool call completes successfully.
 |-------|------|----------|-------------|
 | `tool_id` | keyword | yes | Normalized tool ID. |
 | `tool_call_id` | keyword | yes | Unique tool call identifier. |
-| `source` | keyword | yes | Origin of the tool call (e.g. `default_agent`, `custom_agent`, `mcp`). |
+| `source` | keyword | yes | Where the tool call itself came from (e.g. `agent`, `user`, `mcp`). Distinct from `origin`. |
 | `agent_id` | keyword | no | Normalized agent ID. |
 | `conversation_id` | keyword | no | Conversation ID. |
 | `execution_id` | keyword | no | Agent execution ID. |
+| `origin` | keyword | no | External system the conversation came from. See [Conversation origin](#conversation-origin). |
 | `model` | keyword | no | LLM model that requested the tool call. |
 | `result_types` | keyword[] | yes | Types of result entries returned by the tool. |
 | `duration_ms` | integer | yes | Tool execution time in milliseconds. |
@@ -284,19 +288,32 @@ Fired when a tool call fails.
 |-------|------|----------|-------------|
 | `tool_id` | keyword | yes | Normalized tool ID. |
 | `tool_call_id` | keyword | yes | Unique tool call identifier. |
-| `source` | keyword | yes | Origin of the tool call. |
+| `source` | keyword | yes | Where the tool call itself came from. Distinct from `origin`. |
 | `agent_id` | keyword | no | Normalized agent ID. |
 | `conversation_id` | keyword | no | Conversation ID. |
 | `execution_id` | keyword | no | Agent execution ID. |
+| `origin` | keyword | no | External system the conversation came from. See [Conversation origin](#conversation-origin). |
 | `model` | keyword | no | LLM model that requested the tool call. |
 | `error_type` | keyword | yes | Sanitized/normalized error type or code. |
 | `error_message` | keyword | yes | Error message (truncated to 500 chars). |
 | `duration_ms` | integer | yes | Tool execution time in milliseconds. |
 
+### Conversation origin
+
+`agent_builder_round_complete`, `agent_builder_round_error`, `agent_builder_tool_call_success`
+and `agent_builder_tool_call_error` carry an optional `origin` field naming the external system
+that initiated the conversation. It mirrors `ConversationOriginType`, so `slack` is currently the
+only value.
+
+`origin` is **omitted entirely** when the round is not attributed to an external system. Rounds
+started from the Agent Builder UI or a direct call to the converse API carry no `origin`, and
+neither do rounds and tool calls from sub-agent runs, since a sub-agent opens its own execution
+without inheriting the parent's origin.
+
 ### Skill CRUD events
 
-These three events share the same schema. They fire on skill create/update/delete via the
-public API or during plugin import.
+Skill create/update/delete events fire on skill CRUD via the public API. Created and Updated
+include `tool_ids`; Deleted does not.
 
 | Event type | Constant |
 |------------|----------|
@@ -304,10 +321,11 @@ public API or during plugin import.
 | `agent_builder_skill_updated` | `AGENT_BUILDER_EVENT_TYPES.SkillUpdated` |
 | `agent_builder_skill_deleted` | `AGENT_BUILDER_EVENT_TYPES.SkillDeleted` |
 
-| Field | Type | Required | Description |
-|-------|------|----------|-------------|
-| `skill_id` | keyword | yes | Normalized skill ID. Custom → `custom-<hash>`, plugin-bundled → `plugin-<plugin_hash>-<skill_hash>`. |
-| `origin` | keyword | no | `custom` (direct API) or `plugin` (plugin-bundled). |
+| Field | Type | Required | Events | Description |
+|-------|------|----------|--------|-------------|
+| `skill_id` | keyword | yes | all | Normalized skill ID. Custom → `custom-<hash>`, plugin-bundled → `plugin-<plugin_hash>-<skill_hash>`. |
+| `origin` | keyword | no | all | `custom` (direct API) or `plugin` (plugin-bundled). |
+| `tool_ids` | keyword[] | yes | created, updated | Deduplicated, normalized tool IDs included in the skill after create/update. |
 
 ### `agent_builder_skill_invoked`
 

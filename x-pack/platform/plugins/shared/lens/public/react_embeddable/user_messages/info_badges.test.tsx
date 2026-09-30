@@ -42,6 +42,24 @@ describe('EmbeddableFeatureBadge', () => {
     expect(await screen.findByText('Long text')).toBeInTheDocument();
   });
 
+  it('should have an accessible label describing the badge', () => {
+    render(
+      <EmbeddableFeatureBadge
+        messages={[
+          {
+            uniqueId: 'unique_id',
+            shortMessage: 'Short message',
+            longMessage: 'Long text',
+            severity: 'info',
+            fixableInEditor: false,
+            displayLocations: [],
+          },
+        ]}
+      />
+    );
+    expect(screen.getByLabelText('1 visualization modifier')).toBeInTheDocument();
+  });
+
   it('should render a description of the badge in a tooltip on hover', async () => {
     await renderPopup([
       {

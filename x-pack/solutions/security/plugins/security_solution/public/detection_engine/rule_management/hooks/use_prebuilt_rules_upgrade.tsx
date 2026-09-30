@@ -9,8 +9,12 @@ import React, { useCallback, useMemo, useState } from 'react';
 import { EuiButton, EuiToolTip } from '@elastic/eui';
 import { useUserPrivileges } from '../../../common/components/user_privileges';
 import { RuleUpgradeEventTypes } from '../../../common/lib/telemetry/events/rule_upgrade/types';
-import type { ReviewPrebuiltRuleUpgradeFilter } from '../../../../common/api/detection_engine/prebuilt_rules/common/review_prebuilt_rules_upgrade_filter';
-import { FieldUpgradeStateEnum, type RuleUpgradeState } from '../model/prebuilt_rule_upgrade';
+import { isRuleCustomized } from '../../../../common/detection_engine/rule_management/utils';
+import {
+  FieldUpgradeStateEnum,
+  type RuleUpgradeCustomizationCounts,
+  type RuleUpgradeState,
+} from '../model/prebuilt_rule_upgrade';
 import { PerFieldRuleDiffTab } from '../components/rule_details/per_field_rule_diff_tab';
 import { useIsInitializingPrebuiltRulesPackage } from '../logic/prebuilt_rules/use_is_initializing_prebuilt_rules_package';
 import { usePrebuiltRulesCustomizationStatus } from '../logic/prebuilt_rules/use_prebuilt_rules_customization_status';
@@ -18,11 +22,15 @@ import { usePerformUpgradeRules } from '../logic/prebuilt_rules/use_perform_rule
 import { usePrebuiltRulesUpgradeReview } from '../logic/prebuilt_rules/use_prebuilt_rules_upgrade_review';
 import {
   type FindRulesSortField,
+  type PrebuiltRulesFilter,
+  type RuleCustomizationStatus,
   type RuleFieldsToUpgrade,
   type RuleResponse,
   type RuleSignatureId,
   type RuleUpgradeSpecifier,
   type PerformRuleUpgradeRequestBody,
+  type ReviewRuleUpgradeResponseBody,
+  type UpgradeConflictSkipReason,
   ThreeWayDiffConflict,
   SkipRuleUpgradeReasonEnum,
   UpgradeConflictResolutionEnum,
@@ -54,27 +62,60 @@ const RULE_UPGRADE_FLYOUT_OPEN_EVENT_VERSION = 2;
 
 export const PREBUILT_RULE_UPDATE_FLYOUT_ANCHOR = 'updatePrebuiltRulePreview';
 
+export interface UsePrebuiltRulesUpgradeFilterOptions {
+  tags?: string[];
+  customizationStatus?: RuleCustomizationStatus;
+  ruleIds?: string[];
+}
+
 export interface UsePrebuiltRulesUpgradeParams {
   pagination?: {
     page: number;
     perPage: number;
   };
   sort?: { order: UpgradePrebuiltRulesSortingOptions['order']; field: FindRulesSortField };
-  filter: ReviewPrebuiltRuleUpgradeFilter;
+  filterOptions?: UsePrebuiltRulesUpgradeFilterOptions;
+  searchTerm?: string;
   onUpgrade?: () => void;
+  /**
+   * Requests the `isCustomized` facet from the upgrade review so customized-rule counts can be
+   * derived for the whole filtered set. Off by default because the facet costs an extra
+   * aggregation pass on the server.
+   */
+  withCustomizationCounts?: boolean;
 }
 
 export function usePrebuiltRulesUpgrade({
   pagination = { page: 1, perPage: RULES_TABLE_INITIAL_PAGE_SIZE },
   sort,
-  filter,
+  filterOptions,
+  searchTerm,
   onUpgrade,
+  withCustomizationCounts = false,
 }: UsePrebuiltRulesUpgradeParams) {
   const { isRulesCustomizationEnabled } = usePrebuiltRulesCustomizationStatus();
+  // Force-upgrading to the Elastic version is only offered when customization is enabled, so the
+  // facet is pointless otherwise.
+  const shouldFetchCustomizationCounts = withCustomizationCounts && isRulesCustomizationEnabled;
   const isInitializingPrebuiltRulesPackage = useIsInitializingPrebuiltRulesPackage();
   const [loadingRules, setLoadingRules] = useState<RuleSignatureId[]>([]);
   const { telemetry } = useKibana().services;
   const canEditRules = useUserPrivileges().rulesPrivileges.rules.edit;
+
+  const performUpgradeFilter: PrebuiltRulesFilter | undefined = useMemo(() => {
+    const nameTerm = searchTerm?.trim();
+    const entries: PrebuiltRulesFilter = {};
+    if (nameTerm) {
+      entries.name = nameTerm;
+    }
+    if (filterOptions?.tags?.length) {
+      entries.tags = filterOptions.tags;
+    }
+    if (filterOptions?.customizationStatus) {
+      entries.customization_status = filterOptions.customizationStatus;
+    }
+    return Object.keys(entries).length > 0 ? entries : undefined;
+  }, [searchTerm, filterOptions]);
 
   const {
     data: upgradeReviewResponse,
@@ -87,9 +128,15 @@ export function usePrebuiltRulesUpgrade({
   } = usePrebuiltRulesUpgradeReview(
     {
       page: pagination.page,
-      per_page: pagination.perPage,
-      sort,
-      filter,
+      perPage: pagination.perPage,
+      sortingOptions: sort,
+      filterOptions: {
+        tags: filterOptions?.tags,
+        customizationStatus: filterOptions?.customizationStatus,
+        ruleIds: filterOptions?.ruleIds,
+      },
+      searchTerm,
+      aggregations: shouldFetchCustomizationCounts ? { counts: ['isCustomized'] } : undefined,
     },
     {
       refetchInterval: REVIEW_PREBUILT_RULES_UPGRADE_REFRESH_INTERVAL,
@@ -118,12 +165,14 @@ export function usePrebuiltRulesUpgrade({
 
   const upgradeRulesToResolved = useCallback(
     async (ruleIds: RuleSignatureId[]) => {
-      const ruleUpgradeSpecifiers: RuleUpgradeSpecifier[] = ruleIds.map((ruleId) => ({
-        rule_id: ruleId,
-        version: rulesUpgradeState[ruleId].target_rule.version,
-        revision: rulesUpgradeState[ruleId].revision,
-        fields: constructRuleFieldsToUpgrade(rulesUpgradeState[ruleId]),
-      }));
+      const ruleUpgradeSpecifiers: RuleUpgradeSpecifier[] = ruleIds
+        .filter((ruleId) => rulesUpgradeState[ruleId] !== undefined)
+        .map((ruleId) => ({
+          rule_id: ruleId,
+          version: rulesUpgradeState[ruleId].target_rule.version,
+          revision: rulesUpgradeState[ruleId].revision,
+          fields: constructRuleFieldsToUpgrade(rulesUpgradeState[ruleId]),
+        }));
 
       setLoadingRules((prev) => [...prev, ...ruleIds]);
 
@@ -155,11 +204,13 @@ export function usePrebuiltRulesUpgrade({
 
   const upgradeRulesToTarget = useCallback(
     async (ruleIds: RuleSignatureId[]) => {
-      const ruleUpgradeSpecifiers: RuleUpgradeSpecifier[] = ruleIds.map((ruleId) => ({
-        rule_id: ruleId,
-        version: rulesUpgradeState[ruleId].target_rule.version,
-        revision: rulesUpgradeState[ruleId].revision,
-      }));
+      const ruleUpgradeSpecifiers: RuleUpgradeSpecifier[] = ruleIds
+        .filter((ruleId) => rulesUpgradeState[ruleId] !== undefined)
+        .map((ruleId) => ({
+          rule_id: ruleId,
+          version: rulesUpgradeState[ruleId].target_rule.version,
+          revision: rulesUpgradeState[ruleId].revision,
+        }));
 
       setLoadingRules((prev) => [...prev, ...ruleIds]);
 
@@ -201,6 +252,11 @@ export function usePrebuiltRulesUpgrade({
   );
 
   const upgradeAllRules = useCallback(async () => {
+    if (filterOptions?.ruleIds?.length) {
+      await upgradeRules(upgradeableRules.map((rule) => rule.rule_id));
+      return;
+    }
+
     setLoadingRules((prev) => [...prev, ...upgradeableRules.map((rule) => rule.rule_id)]);
 
     try {
@@ -213,7 +269,7 @@ export function usePrebuiltRulesUpgrade({
         await upgradeRulesWithDryRun({
           mode: 'ALL_RULES',
           pick_version: 'MERGED',
-          filter,
+          filter: performUpgradeFilter,
         });
       } else {
         // Upgrading prebuilt rules to TARGET version will erase any rule customizations.
@@ -221,7 +277,7 @@ export function usePrebuiltRulesUpgrade({
         await upgradeRulesRequest({
           mode: 'ALL_RULES',
           pick_version: 'TARGET',
-          filter,
+          filter: performUpgradeFilter,
         });
       }
     } catch {
@@ -230,13 +286,86 @@ export function usePrebuiltRulesUpgrade({
       setLoadingRules([]);
     }
   }, [
+    filterOptions?.ruleIds,
+    upgradeRules,
     upgradeableRules,
     upgradeRulesWithDryRun,
     upgradeRulesRequest,
     confirmLegacyMLJobs,
     isRulesCustomizationEnabled,
-    filter,
+    performUpgradeFilter,
   ]);
+
+  const upgradeAllRulesToTarget = useCallback(async () => {
+    if (filterOptions?.ruleIds?.length) {
+      await upgradeRulesToTarget(upgradeableRules.map((rule) => rule.rule_id));
+      return;
+    }
+
+    setLoadingRules((prev) => [...prev, ...upgradeableRules.map((rule) => rule.rule_id)]);
+
+    try {
+      // Handle MLJobs modal
+      if (!(await confirmLegacyMLJobs())) {
+        return;
+      }
+
+      await upgradeRulesRequest({
+        mode: 'ALL_RULES',
+        pick_version: 'TARGET',
+        filter: performUpgradeFilter,
+      });
+
+      if (onUpgrade) {
+        onUpgrade();
+      }
+    } catch {
+      // Error is handled by the mutation's onError callback, so no need to do anything here
+    } finally {
+      setLoadingRules([]);
+    }
+  }, [
+    confirmLegacyMLJobs,
+    filterOptions?.ruleIds,
+    onUpgrade,
+    performUpgradeFilter,
+    upgradeableRules,
+    upgradeRulesRequest,
+    upgradeRulesToTarget,
+  ]);
+
+  const getSelectedRulesCustomizationCounts = useCallback(
+    (ruleIds: RuleSignatureId[]): RuleUpgradeCustomizationCounts => {
+      const selectedRuleUpgradeStates = ruleIds
+        .map((ruleId) => rulesUpgradeState[ruleId])
+        .filter((state): state is RuleUpgradeState => state !== undefined);
+
+      return {
+        total: selectedRuleUpgradeStates.length,
+        customizedCount: selectedRuleUpgradeStates.filter((state) =>
+          isRuleCustomized(state.current_rule)
+        ).length,
+        ruleTypeChangeCount: selectedRuleUpgradeStates.filter(hasRuleTypeChange).length,
+      };
+    },
+    [rulesUpgradeState]
+  );
+
+  /**
+   * Re-fetches the upgrade review and derives the counts from the fresh response so that the
+   * "Update all" confirmation reflects customizations made since the cached review loaded.
+   */
+  const fetchAllRulesCustomizationCounts = useCallback(async () => {
+    const result = await refetch();
+
+    // A failed refetch keeps the previously cached `data`, so the status has to be checked
+    // explicitly or stale counts would be mistaken for fresh ones.
+    if (!result.isSuccess) {
+      return null;
+    }
+
+    return toAllRulesCustomizationCounts(result.data);
+  }, [refetch]);
 
   const subHeaderFactory = useCallback(
     (rule: RuleResponse) =>
@@ -252,7 +381,7 @@ export function usePrebuiltRulesUpgrade({
         return null;
       }
 
-      const hasRuleTypeChange = ruleUpgradeState.diff.fields.type?.has_update ?? false;
+      const isRuleTypeChanging = hasRuleTypeChange(ruleUpgradeState);
       return (
         <EuiButton
           disabled={
@@ -260,11 +389,11 @@ export function usePrebuiltRulesUpgrade({
             loadingRules.includes(rule.rule_id) ||
             isRefetching ||
             isInitializingPrebuiltRulesPackage ||
-            (ruleUpgradeState.hasUnresolvedConflicts && !hasRuleTypeChange) ||
+            (ruleUpgradeState.hasUnresolvedConflicts && !isRuleTypeChanging) ||
             isEditingRule
           }
           onClick={() => {
-            if (hasRuleTypeChange || isRulesCustomizationEnabled === false) {
+            if (isRuleTypeChanging || isRulesCustomizationEnabled === false) {
               // If there is a rule type change, we can't resolve conflicts, only accept the target rule
               upgradeRulesToTarget([rule.rule_id]);
             } else {
@@ -298,7 +427,7 @@ export function usePrebuiltRulesUpgrade({
         return [];
       }
 
-      const hasRuleTypeChange = ruleUpgradeState.diff.fields.type?.has_update ?? false;
+      const isRuleTypeChanging = hasRuleTypeChange(ruleUpgradeState);
       const hasCustomizations =
         ruleUpgradeState.current_rule.rule_source.type === 'external' &&
         ruleUpgradeState.current_rule.rule_source.is_customized;
@@ -306,7 +435,7 @@ export function usePrebuiltRulesUpgrade({
       let headerCallout = null;
       if (hasCustomizations && !isRulesCustomizationEnabled) {
         headerCallout = <CustomizationDisabledCallout />;
-      } else if (hasRuleTypeChange && isRulesCustomizationEnabled) {
+      } else if (isRuleTypeChanging && isRulesCustomizationEnabled) {
         headerCallout = <RuleTypeChangeCallout hasCustomizations={hasCustomizations} />;
       }
 
@@ -324,7 +453,7 @@ export function usePrebuiltRulesUpgrade({
       // Show the resolver tab only if rule customization is enabled and there
       // is no rule type change. In case of rule type change users can't resolve
       // conflicts, only accept the target rule.
-      if (isRulesCustomizationEnabled && !hasRuleTypeChange) {
+      if (isRulesCustomizationEnabled && !isRuleTypeChanging) {
         updateTabContent = (
           <RuleUpgradeTab
             ruleUpgradeState={ruleUpgradeState}
@@ -428,6 +557,36 @@ export function usePrebuiltRulesUpgrade({
     reFetchRules: refetch,
     upgradeRules,
     upgradeAllRules,
+    upgradeRulesToTarget,
+    upgradeAllRulesToTarget,
+    getSelectedRulesCustomizationCounts,
+    fetchAllRulesCustomizationCounts,
+  };
+}
+
+/**
+ * Upgrading to the target version always applies the target rule type, so the type changes
+ * whenever it differs from the current one. `diff.fields.type.has_update` is not usable here
+ * because it is false for `CustomizedValueNoUpdate` (BASE=A, CURRENT=B, TARGET=A) although the
+ * upgrade resets the type, matching `hasRuleTypeChanged` on the server.
+ */
+function hasRuleTypeChange(ruleUpgradeState: RuleUpgradeState): boolean {
+  return ruleUpgradeState.current_rule.type !== ruleUpgradeState.target_rule.type;
+}
+
+function toAllRulesCustomizationCounts(
+  upgradeReviewResponse: ReviewRuleUpgradeResponseBody | undefined
+): RuleUpgradeCustomizationCounts | null {
+  if (!upgradeReviewResponse) {
+    return null;
+  }
+
+  return {
+    total: upgradeReviewResponse.total,
+    customizedCount: upgradeReviewResponse.counts?.isCustomized?.true ?? 0,
+    // Rule type changes are a current-vs-target diff, not a stored attribute, so they cannot
+    // be counted for the whole filtered set without a dry run.
+    ruleTypeChangeCount: undefined,
   };
 }
 
@@ -452,10 +611,14 @@ function useRulesUpgradeWithDryRun(
         on_conflict: UpgradeConflictResolutionEnum.SKIP,
       });
 
-      const numOfRulesWithSolvableConflicts = dryRunResults.results.skipped.filter(
-        (x) =>
+      const rulesWithSolvableConflicts = dryRunResults.results.skipped.filter(
+        (x): x is UpgradeConflictSkipReason =>
           x.reason === SkipRuleUpgradeReasonEnum.CONFLICT &&
           x.conflict === ThreeWayDiffConflict.SOLVABLE
+      );
+      const numOfRulesWithSolvableConflicts = rulesWithSolvableConflicts.length;
+      const numOfRulesWithRuleTypeChange = rulesWithSolvableConflicts.filter(
+        (x) => x.rule_type_change !== undefined
       ).length;
       const numOfRulesWithNonSolvableConflicts = dryRunResults.results.skipped.filter(
         (x) =>
@@ -474,6 +637,7 @@ function useRulesUpgradeWithDryRun(
           numOfRulesWithoutConflicts: dryRunResults.results.updated.length,
           numOfRulesWithSolvableConflicts,
           numOfRulesWithNonSolvableConflicts,
+          numOfRulesWithRuleTypeChange,
         });
 
         if (!result) {

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -25,6 +25,7 @@ import {
 import type { AlertStatus } from '@kbn/rule-data-utils';
 import {
   ALERT_RULE_CATEGORY,
+  ALERT_RULE_CONSUMER,
   ALERT_RULE_NAME,
   ALERT_RULE_TYPE_ID,
   ALERT_RULE_UUID,
@@ -40,6 +41,7 @@ import { omit } from 'lodash';
 import { usePageReady } from '@kbn/ebt-tools';
 import moment from 'moment';
 import { OBSERVABILITY_ALERT_ATTACHMENT_TYPE_ID } from '@kbn/observability-agent-builder-plugin/public';
+import { ProjectRoutingAccess, useRouteBasedCpsPickerAccess } from '@kbn/cps-utils';
 import { ObsCasesContext } from './components/obs_cases_context';
 import { RelatedAlerts } from './components/related_alerts/related_alerts';
 import type { AlertDetailsSource, TabId } from './types';
@@ -49,6 +51,7 @@ import { InvestigationGuide } from './components/investigation_guide';
 import { StatusBar } from './components/status_bar';
 import { useKibana } from '../../utils/kibana_react';
 import { useFetchRule } from '../../hooks/use_fetch_rule';
+import { useAuthorizedToReadRuleType } from '../../hooks/use_authorized_to_read_rule_type';
 import { usePluginContext } from '../../hooks/use_plugin_context';
 import type { AlertData } from '../../hooks/use_fetch_alert_detail';
 import { useFetchAlertDetail } from '../../hooks/use_fetch_alert_detail';
@@ -92,6 +95,8 @@ export function AlertDetails() {
   const { services } = useKibana();
   const {
     http,
+    application,
+    cps,
     triggersActionsUi: { ruleTypeRegistry },
     observabilityAIAssistant,
     agentBuilder,
@@ -100,18 +105,19 @@ export function AlertDetails() {
     observabilityAgentBuilder,
   } = services;
 
-  const AlertAiInsight = observabilityAgentBuilder?.getAlertAIInsight();
+  const AlertAskAiAgentButtonRef = useRef(observabilityAgentBuilder?.getAlertAskAiAgentButton());
+  const AlertAskAiAgentButton = AlertAskAiAgentButtonRef.current;
 
   const { ObservabilityPageTemplate, config } = usePluginContext();
   const { alertId } = useParams<AlertDetailsPathParams>();
   const { getUrlTabId, setUrlTabId } = useTabId();
   const urlTabId = getUrlTabId();
-  const {
-    isLoadingRelatedDashboards,
-    suggestedDashboards,
-    linkedDashboards,
-    refetchRelatedDashboards,
-  } = useRelatedDashboards(alertId);
+
+  // Without this, the observability app has no CPS resolver, access resolves to DISABLED, and
+  // APM chart / service-map requests go out without `x-project-routing` — Core then fills in
+  // `_alias:_origin`, making data in linked projects invisible. READONLY pins routing to the
+  // space NPRE, which is the same scope the alerting framework uses when the rule fires.
+  useRouteBasedCpsPickerAccess(ProjectRoutingAccess.READONLY, { application, cps });
 
   const [isLoading, alertDetail] = useFetchAlertDetail(alertId);
   const [ruleTypeModel, setRuleTypeModel] = useState<RuleTypeModel | null>(null);
@@ -122,9 +128,40 @@ export function AlertDetails() {
     ? getAlertSubtitle(alertDetail.formatted.fields[ALERT_RULE_CATEGORY])
     : undefined;
 
-  const { rule, refetch } = useFetchRule({
+  const { authorizedToReadRuleType } = useAuthorizedToReadRuleType();
+
+  const canReadAlertRule = authorizedToReadRuleType(
+    alertDetail?.formatted.fields[ALERT_RULE_TYPE_ID],
+    alertDetail?.formatted.fields[ALERT_RULE_CONSUMER]
+  );
+
+  // Related dashboards are derived from the rule (a rule-read operation), so
+  // gate the fetch on the same per-rule-type authorization used elsewhere.
+  const {
+    isLoadingRelatedDashboards,
+    suggestedDashboards,
+    linkedDashboards,
+    refetchRelatedDashboards,
+  } = useRelatedDashboards(alertId, { enabled: canReadAlertRule });
+
+  const {
+    rule,
+    isLoading: isLoadingRule,
+    isRuleNotFound,
+    refetch,
+  } = useFetchRule({
     ruleId: ruleId || '',
+    enabled: canReadAlertRule,
   });
+
+  const ruleStatus =
+    !canReadAlertRule || isLoadingRule
+      ? 'unknown'
+      : isRuleNotFound
+      ? 'deleted'
+      : rule?.enabled === false
+      ? 'disabled'
+      : 'ok';
 
   useAlertDetailsPageViewEbt({ ruleType: rule?.ruleTypeId });
 
@@ -291,6 +328,7 @@ export function AlertDetails() {
 
   const overviewTab = alertDetail ? (
     AlertDetailsAppSection &&
+    canReadAlertRule &&
     /*
     when feature flag is enabled, show alert details page with customized overview tab,
     otherwise show default overview tab
@@ -300,6 +338,7 @@ export function AlertDetails() {
         <EuiSpacer size="m" />
         <StaleAlert
           alert={alertDetail.formatted}
+          alertIndex={alertDetail.raw._index}
           alertStatus={alertStatus}
           rule={rule}
           onUntrackAlert={onUntrackAlert}
@@ -314,12 +353,6 @@ export function AlertDetails() {
           />
           <SourceBar alert={alertDetail.formatted} sources={sources} />
           <AlertDetailContextualInsights alert={alertDetail} />
-          {AlertAiInsight && (
-            <AlertAiInsight
-              alertId={alertDetail.formatted.fields['kibana.alert.uuid']}
-              alertTitle={ruleTypeBreached}
-            />
-          )}
           {rule && alertDetail.formatted && (
             <>
               <AlertDetailsAppSection
@@ -345,14 +378,12 @@ export function AlertDetails() {
         />
         <EuiSpacer size="l" />
         <AlertDetailContextualInsights alert={alertDetail} />
-        {AlertAiInsight && (
-          <AlertAiInsight
-            alertId={alertDetail.formatted.fields['kibana.alert.uuid']}
-            alertTitle={ruleTypeBreached}
-          />
-        )}
         <EuiSpacer size="l" />
-        <AlertOverview alert={alertDetail.formatted} alertStatus={alertStatus} />
+        <AlertOverview
+          alert={alertDetail.formatted}
+          alertStatus={alertStatus}
+          ruleStatus={ruleStatus}
+        />
       </EuiPanel>
     )
   ) : (
@@ -457,6 +488,13 @@ export function AlertDetails() {
     },
   ];
 
+  // The investigation guide and related dashboards tabs depend on rule data,
+  // which requires rule read. Hide them when the user cannot read any rules.
+  const ruleReadDependentTabIds: TabId[] = ['investigation_guide', 'related_dashboards'];
+  const visibleTabs = canReadAlertRule
+    ? tabs
+    : tabs.filter((tab) => !ruleReadDependentTabIds.includes(tab.id));
+
   return (
     <ObservabilityPageTemplate
       pageHeader={{
@@ -480,7 +518,7 @@ export function AlertDetails() {
                 </span>
               </EuiToolTip>
               <EuiSpacer size="xs" />
-              <AlertSubtitle alert={alertDetail.formatted} />
+              <AlertSubtitle alert={alertDetail.formatted} ruleStatus={ruleStatus} />
             </>
           ) : (
             <EuiLoadingSpinner />
@@ -495,6 +533,14 @@ export function AlertDetails() {
             rule={rule}
             refetch={refetch}
           />,
+          ...(AlertAskAiAgentButton && alertDetail?.formatted.fields['kibana.alert.uuid']
+            ? [
+                <AlertAskAiAgentButton
+                  alertId={alertDetail.formatted.fields['kibana.alert.uuid'] as string}
+                  alertTitle={ruleTypeBreached}
+                />,
+              ]
+            : []),
         ],
         bottomBorder: false,
         'data-test-subj': rule?.ruleTypeId || 'alertDetailsPageTitle',
@@ -513,8 +559,8 @@ export function AlertDetails() {
         <HeaderMenu />
         <EuiTabbedContent
           data-test-subj="alertDetailsTabbedContent"
-          tabs={tabs}
-          selectedTab={tabs.find((tab) => tab.id === activeTabId)}
+          tabs={visibleTabs}
+          selectedTab={visibleTabs.find((tab) => tab.id === activeTabId)}
           onTabClick={(tab) => handleSetTabId(tab.id as TabId)}
         />
       </ObsCasesContext>

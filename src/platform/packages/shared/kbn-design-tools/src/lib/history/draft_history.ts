@@ -37,6 +37,8 @@ export interface DraftStyleEdit {
   readonly before: string;
   /** Value after this edit. */
   readonly after: string;
+  /** Preview boundary to use when re-running style reflow during redo. */
+  readonly reflowRoot?: HTMLElement | null;
 }
 
 /**

@@ -12,34 +12,43 @@ import type { ActionPolicyFormState } from './types';
 export const GROUPING_MODE_OPTIONS: Array<{ id: GroupingMode; label: string }> = [
   {
     id: 'per_episode',
-    label: i18n.translate('xpack.alertingV2.actionPolicy.form.dispatch.mode.perEpisode', {
-      defaultMessage: 'Episode',
-    }),
+    label: i18n.translate(
+      'xpack.alertingV2.actionPolicy.form.notificationControls.mode.perEpisode',
+      {
+        defaultMessage: 'Episode',
+      }
+    ),
   },
   {
     id: 'per_field',
-    label: i18n.translate('xpack.alertingV2.actionPolicy.form.dispatch.mode.perGroup', {
+    label: i18n.translate('xpack.alertingV2.actionPolicy.form.notificationControls.mode.perGroup', {
       defaultMessage: 'Group',
     }),
   },
   {
     id: 'all',
-    label: i18n.translate('xpack.alertingV2.actionPolicy.form.dispatch.mode.digest', {
+    label: i18n.translate('xpack.alertingV2.actionPolicy.form.notificationControls.mode.digest', {
       defaultMessage: 'Digest',
     }),
   },
 ];
 
 export const GROUPING_MODE_HELP_TEXT: Record<GroupingMode, string> = {
-  per_episode: i18n.translate('xpack.alertingV2.actionPolicy.form.dispatch.mode.perEpisode.help', {
-    defaultMessage:
-      'Each matching episode triggers its own notification. Best for when you need individual visibility into each issue.',
-  }),
-  per_field: i18n.translate('xpack.alertingV2.actionPolicy.form.dispatch.mode.perGroup.help', {
-    defaultMessage:
-      'Bundles episodes that share the same field value into one notification per unique value. Best for reducing noise when a rule produces many related episodes, such as one per service or host.',
-  }),
-  all: i18n.translate('xpack.alertingV2.actionPolicy.form.dispatch.mode.digest.help', {
+  per_episode: i18n.translate(
+    'xpack.alertingV2.actionPolicy.form.notificationControls.mode.perEpisode.help',
+    {
+      defaultMessage:
+        'Each matching episode triggers its own notification. Best for when you need individual visibility into each issue.',
+    }
+  ),
+  per_field: i18n.translate(
+    'xpack.alertingV2.actionPolicy.form.notificationControls.mode.perGroup.help',
+    {
+      defaultMessage:
+        'Bundles episodes that share the same field value into one notification per unique value. Best for reducing noise when a rule produces many related episodes, such as one per service or host.',
+    }
+  ),
+  all: i18n.translate('xpack.alertingV2.actionPolicy.form.notificationControls.mode.digest.help', {
     defaultMessage:
       "Combines all matching episodes into one notification on a set schedule. Best for periodic summaries when individual alerts aren't necessary.",
   }),
@@ -48,35 +57,47 @@ export const GROUPING_MODE_HELP_TEXT: Record<GroupingMode, string> = {
 export const PER_EPISODE_STRATEGY_OPTIONS: Array<{ value: ThrottleStrategy; text: string }> = [
   {
     value: 'on_status_change',
-    text: i18n.translate('xpack.alertingV2.actionPolicy.form.dispatch.strategy.onStatusChange', {
-      defaultMessage: 'On status change',
-    }),
+    text: i18n.translate(
+      'xpack.alertingV2.actionPolicy.form.notificationControls.strategy.onStatusChange',
+      {
+        defaultMessage: 'On status change',
+      }
+    ),
   },
   {
     value: 'per_status_interval',
-    text: i18n.translate('xpack.alertingV2.actionPolicy.form.dispatch.strategy.perStatusInterval', {
-      defaultMessage: 'On status change + repeat at interval',
-    }),
+    text: i18n.translate(
+      'xpack.alertingV2.actionPolicy.form.notificationControls.strategy.perStatusInterval',
+      {
+        defaultMessage: 'On status change + repeat at interval',
+      }
+    ),
   },
   {
     value: 'every_time',
-    text: i18n.translate('xpack.alertingV2.actionPolicy.form.dispatch.strategy.everyTime', {
-      defaultMessage: 'Every evaluation',
-    }),
+    text: i18n.translate(
+      'xpack.alertingV2.actionPolicy.form.notificationControls.strategy.everyTime',
+      {
+        defaultMessage: 'Every evaluation',
+      }
+    ),
   },
 ];
 
 export const AGGREGATE_STRATEGY_OPTIONS: Array<{ value: ThrottleStrategy; text: string }> = [
   {
     value: 'time_interval',
-    text: i18n.translate('xpack.alertingV2.actionPolicy.form.dispatch.strategy.timeInterval', {
-      defaultMessage: 'At most once every...',
-    }),
+    text: i18n.translate(
+      'xpack.alertingV2.actionPolicy.form.notificationControls.strategy.timeInterval',
+      {
+        defaultMessage: 'At most once every...',
+      }
+    ),
   },
   {
     value: 'every_time',
     text: i18n.translate(
-      'xpack.alertingV2.actionPolicy.form.dispatch.strategy.everyTimeAggregate',
+      'xpack.alertingV2.actionPolicy.form.notificationControls.strategy.everyTimeAggregate',
       { defaultMessage: 'Every evaluation' }
     ),
   },
@@ -90,21 +111,21 @@ export const DEFAULT_STRATEGY_FOR_MODE: Record<GroupingMode, ThrottleStrategy> =
 
 export const PER_EPISODE_STRATEGY_HELP_TEXT: Partial<Record<ThrottleStrategy, string>> = {
   on_status_change: i18n.translate(
-    'xpack.alertingV2.actionPolicy.form.dispatch.strategy.onStatusChange.help',
+    'xpack.alertingV2.actionPolicy.form.notificationControls.strategy.onStatusChange.help',
     {
       defaultMessage:
         'Notifies once when an episode opens and once when it recovers. No repeat notifications while it remains active.',
     }
   ),
   per_status_interval: i18n.translate(
-    'xpack.alertingV2.actionPolicy.form.dispatch.strategy.perStatusInterval.help',
+    'xpack.alertingV2.actionPolicy.form.notificationControls.strategy.perStatusInterval.help',
     {
       defaultMessage:
         'Notifies on status change, then resends at a regular interval while the episode remains active. Use this when issues can stay open for long periods and you want ongoing notifications until they resolve.',
     }
   ),
   every_time: i18n.translate(
-    'xpack.alertingV2.actionPolicy.form.dispatch.strategy.everyTime.help',
+    'xpack.alertingV2.actionPolicy.form.notificationControls.strategy.everyTime.help',
     {
       defaultMessage:
         'Sends a notification on every rule evaluation per episode. Use only for infrequent rule schedules or when you need a full audit trail.',
@@ -114,14 +135,14 @@ export const PER_EPISODE_STRATEGY_HELP_TEXT: Partial<Record<ThrottleStrategy, st
 
 export const AGGREGATE_STRATEGY_HELP_TEXT: Partial<Record<ThrottleStrategy, string>> = {
   time_interval: i18n.translate(
-    'xpack.alertingV2.actionPolicy.form.dispatch.strategy.timeInterval.help',
+    'xpack.alertingV2.actionPolicy.form.notificationControls.strategy.timeInterval.help',
     {
       defaultMessage:
         'Sends at most one notification per group within the specified interval, regardless of how often the rule runs. Use this to limit notification volume for noisy rules.',
     }
   ),
   every_time: i18n.translate(
-    'xpack.alertingV2.actionPolicy.form.dispatch.strategy.everyTimeAggregate.help',
+    'xpack.alertingV2.actionPolicy.form.notificationControls.strategy.everyTimeAggregate.help',
     {
       defaultMessage:
         'Sends a notification for each group on every rule evaluation. Use only for infrequent rule schedules or when you need a full audit trail.',
@@ -206,11 +227,11 @@ export const EPISODE_STATUS_FILTER_OPTIONS: EpisodeStatusFilterOption[] = [
 export const DEFAULT_FORM_STATE: ActionPolicyFormState = {
   name: '',
   description: '',
-  tags: [],
-  matcher: '',
+  matcher: null,
   groupingMode: 'per_episode',
   groupBy: [],
   throttleStrategy: 'on_status_change',
   throttleInterval: '',
   destinations: [],
+  inlineActions: [],
 };

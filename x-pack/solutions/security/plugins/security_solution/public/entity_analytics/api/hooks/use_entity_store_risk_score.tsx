@@ -11,8 +11,8 @@ import { i18n } from '@kbn/i18n';
 import { useQuery } from '@kbn/react-query';
 import type { IHttpFetchError } from '@kbn/core/public';
 
+import type { ListEntitiesResponse } from '@kbn/entity-store/common';
 import type { EntityType } from '../../../../common/search_strategy';
-import type { ListEntitiesResponse } from '../../../../common/api/entity_analytics/entity_store/entities/list_entities.gen';
 import type { InspectResponse } from '../../../types';
 import type { inputsModel } from '../../../common/store';
 import { useErrorToast } from '../../../common/hooks/use_error_toast';
@@ -55,6 +55,7 @@ export function useEntityStoreRiskScore({
   skip = false,
   pagination,
   riskEntity,
+  executionContext,
 }: UseEntityStoreRiskScoreParams):
   | RiskScoreState<EntityType.host>
   | RiskScoreState<EntityType.user> {
@@ -63,7 +64,7 @@ export function useEntityStoreRiskScore({
     data: riskEngineStatus,
     isFetching: isStatusLoading,
     refetch: refetchEngineStatus,
-  } = useRiskEngineStatus();
+  } = useRiskEngineStatus({}, { executionContext });
   const { isPlatinumOrTrialLicense } = useMlCapabilities();
   const hasEntityAnalyticsCapability = useHasSecurityCapability('entity-analytics');
   const isAuthorized = isPlatinumOrTrialLicense && hasEntityAnalyticsCapability;
@@ -137,6 +138,7 @@ export function useEntityStoreRiskScore({
           sortField,
           sortOrder,
         },
+        context: executionContext,
       }),
     enabled: queryEnabled,
     cacheTime: 0,

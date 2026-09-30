@@ -54,7 +54,7 @@ export const RulePreviewLogs = lazySchema(() =>
     /**
      * Execution duration in milliseconds
      */
-    duration: z.number().int(),
+    duration: z.number().int().describe('Execution duration in milliseconds'),
     startedAt: NonEmptyString.optional(),
     requests: z.array(RulePreviewLoggedRequest).optional(),
   })
@@ -66,7 +66,9 @@ export const RulePreviewRequestQuery = lazySchema(() =>
     /**
      * Enables logging and returning in response ES queries, performed during rule execution
      */
-    enable_logged_requests: BooleanFromString.optional(),
+    enable_logged_requests: BooleanFromString.optional().describe(
+      'Enables logging and returning in response ES queries, performed during rule execution'
+    ),
   })
 );
 export type RulePreviewRequestQuery = z.infer<typeof RulePreviewRequestQuery>;

@@ -5,23 +5,17 @@
  * 2.0.
  */
 
-import {
-  EuiButtonIcon,
-  EuiContextMenuItem,
-  EuiContextMenuPanel,
-  EuiPopover,
-  EuiToolTip,
-} from '@elastic/eui';
+import { EuiButtonIcon, EuiContextMenuItem, EuiPopover, EuiToolTip } from '@elastic/eui';
 import React, { useCallback, useMemo, useState } from 'react';
 import { i18n } from '@kbn/i18n';
-import type { CaseAttachmentsWithoutOwner } from '@kbn/cases-plugin/public';
-import { AttachmentType, APP_ID as CASE_APP_ID } from '@kbn/cases-plugin/common';
+import { buildAlertCaseAttachment, APP_ID as CASE_APP_ID } from '@kbn/cases-plugin/common';
 import { ALERT_RULE_NAME, ALERT_RULE_UUID, ALERT_UUID } from '@kbn/rule-data-utils';
 import type { GetAlertsTableProp } from '@kbn/response-ops-alerts-table/types';
 import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
 import { DefaultAlertActions } from '@kbn/response-ops-alerts-table/components/default_alert_actions';
+import { ExpandableContextMenuPanel } from '@kbn/response-ops-alerts-table/components/expandable_context_menu_panel';
 import { STACK_MANAGEMENT_RULE_PAGE_URL_PREFIX } from '@kbn/response-ops-alerts-table/constants';
-import { PLUGIN_ID } from '../../../common/constants/app';
+
 import { useMlKibana } from '../../application/contexts/kibana';
 
 export const AlertActions: GetAlertsTableProp<'renderActionsCell'> = (props) => {
@@ -42,22 +36,22 @@ export const AlertActions: GetAlertsTableProp<'renderActionsCell'> = (props) => 
     [alert._id, alert._index]
   );
 
-  const caseAttachments: CaseAttachmentsWithoutOwner = useMemo(() => {
-    return ecsData?._id
-      ? [
-          {
-            alertId: alertId ?? '',
-            index: ecsData?._index ?? '',
-            type: AttachmentType.alert,
-            rule: {
-              id: ruleId,
-              name: alert[ALERT_RULE_NAME]![0] as string,
-            },
-            owner: PLUGIN_ID,
+  const getAlertAttachments = useCallback(
+    (owner: string) => {
+      if (!ecsData?._id) return [];
+      return [
+        buildAlertCaseAttachment(owner, {
+          alertId: alertId ?? '',
+          index: ecsData?._index ?? '',
+          rule: {
+            id: ruleId,
+            name: (alert[ALERT_RULE_NAME]?.[0] as string) ?? null,
           },
-        ]
-      : [];
-  }, [alert, alertId, ecsData?._id, ecsData?._index, ruleId]);
+        }),
+      ];
+    },
+    [alert, alertId, ecsData?._id, ecsData?._index, ruleId]
+  );
 
   const onSuccess = useCallback(() => {
     refresh();
@@ -75,12 +69,14 @@ export const AlertActions: GetAlertsTableProp<'renderActionsCell'> = (props) => 
   };
 
   const handleAddToNewCaseClick = () => {
-    createCaseFlyout?.open({ attachments: caseAttachments });
+    createCaseFlyout?.open({ getAttachments: getAlertAttachments });
     closeActionsPopover();
   };
 
   const handleAddToExistingCaseClick = () => {
-    selectCaseModal?.open({ getAttachments: () => caseAttachments });
+    selectCaseModal?.open({
+      getAttachments: ({ theCase }) => (theCase ? getAlertAttachments(theCase.owner) : []),
+    });
     closeActionsPopover();
   };
 
@@ -139,7 +135,7 @@ export const AlertActions: GetAlertsTableProp<'renderActionsCell'> = (props) => 
   return (
     <>
       <EuiPopover
-        anchorPosition="downLeft"
+        anchorPosition="rightCenter"
         aria-label={i18n.translate('xpack.ml.alertsTable.actionsPopoverAriaLabel', {
           defaultMessage: 'Alert actions',
         })}
@@ -159,8 +155,9 @@ export const AlertActions: GetAlertsTableProp<'renderActionsCell'> = (props) => 
         closePopover={closeActionsPopover}
         isOpen={isPopoverOpen}
         panelPaddingSize="none"
+        panelStyle={{ maxHeight: '80vh', overflowY: 'auto' }}
       >
-        <EuiContextMenuPanel items={actionsMenuItems} data-test-subj="alertsTableActionsMenu" />
+        <ExpandableContextMenuPanel items={actionsMenuItems} />
       </EuiPopover>
     </>
   );

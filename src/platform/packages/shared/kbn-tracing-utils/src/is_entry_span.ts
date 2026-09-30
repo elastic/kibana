@@ -8,7 +8,7 @@
  */
 
 import { SpanKind } from '@opentelemetry/api';
-import type { ReadableSpan } from '@opentelemetry/sdk-trace-base';
+import type { ReadableSpan } from '@opentelemetry/sdk-trace';
 
 /**
  * Determines whether a Span is an entry span. See:

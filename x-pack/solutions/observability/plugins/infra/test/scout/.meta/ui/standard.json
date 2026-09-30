@@ -1,9 +1,12 @@
 {
-  "sha1": "3b01c42b94a90b513f5c2d5c0aa9a40b495501c4",
+  "sha1": "bf73d004f0e82503727653f7cef76e3742a0e18c",
+  "testChannels": [
+    "ci-on-commit"
+  ],
   "tests": [
     {
-      "id": "f4c048e25988cb5-605d7a7bf19c60f",
-      "title": "Hosts Page - Flyout Overview Tab - KPI charts and collapsible sections",
+      "id": "f4c048e25988cb5-93d4b0ec1a07451",
+      "title": "Hosts Page - Flyout opens the host flyout with overview KPIs",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -13,88 +16,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/infra/test/scout/ui/tests/hosts/hosts_flyout.spec.ts",
-        "line": 62,
-        "column": 9
-      }
-    },
-    {
-      "id": "f4c048e25988cb5-35a9aa41665f195",
-      "title": "Hosts Page - Flyout Overview Tab - Services section",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic",
-        "@local-serverless-observability_complete",
-        "@cloud-serverless-observability_complete"
-      ],
-      "location": {
-        "file": "x-pack/solutions/observability/plugins/infra/test/scout/ui/tests/hosts/hosts_flyout.spec.ts",
-        "line": 102,
-        "column": 9
-      }
-    },
-    {
-      "id": "f4c048e25988cb5-d9d5a1fb8867828",
-      "title": "Hosts Page - Flyout Metadata Tab",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic",
-        "@local-serverless-observability_complete",
-        "@cloud-serverless-observability_complete"
-      ],
-      "location": {
-        "file": "x-pack/solutions/observability/plugins/infra/test/scout/ui/tests/hosts/hosts_flyout.spec.ts",
-        "line": 116,
-        "column": 9
-      }
-    },
-    {
-      "id": "f4c048e25988cb5-45117973f50ff3b",
-      "title": "Hosts Page - Flyout Metrics Tab",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic",
-        "@local-serverless-observability_complete",
-        "@cloud-serverless-observability_complete"
-      ],
-      "location": {
-        "file": "x-pack/solutions/observability/plugins/infra/test/scout/ui/tests/hosts/hosts_flyout.spec.ts",
-        "line": 130,
-        "column": 9
-      }
-    },
-    {
-      "id": "f4c048e25988cb5-f6e05596318ee58",
-      "title": "Hosts Page - Flyout Processes Tab",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic",
-        "@local-serverless-observability_complete",
-        "@cloud-serverless-observability_complete"
-      ],
-      "location": {
-        "file": "x-pack/solutions/observability/plugins/infra/test/scout/ui/tests/hosts/hosts_flyout.spec.ts",
-        "line": 145,
-        "column": 9
-      }
-    },
-    {
-      "id": "f4c048e25988cb5-da68e3d67e89a90",
-      "title": "Hosts Page - Flyout Logs Tab",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic",
-        "@local-serverless-observability_complete",
-        "@cloud-serverless-observability_complete"
-      ],
-      "location": {
-        "file": "x-pack/solutions/observability/plugins/infra/test/scout/ui/tests/hosts/hosts_flyout.spec.ts",
-        "line": 160,
-        "column": 9
+        "line": 80,
+        "column": 16
       }
     },
     {
@@ -109,45 +32,13 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/infra/test/scout/ui/tests/hosts/hosts_flyout.spec.ts",
-        "line": 173,
-        "column": 9
+        "line": 82,
+        "column": 16
       }
     },
     {
-      "id": "f4c048e25988cb5-58869cff261d35c",
-      "title": "Hosts Page - Flyout Dashboards Tab",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic",
-        "@local-serverless-observability_complete",
-        "@cloud-serverless-observability_complete"
-      ],
-      "location": {
-        "file": "x-pack/solutions/observability/plugins/infra/test/scout/ui/tests/hosts/hosts_flyout.spec.ts",
-        "line": 200,
-        "column": 9
-      }
-    },
-    {
-      "id": "429b26b1a93be7d-b4cd1ee38b3f8ad",
-      "title": "Hosts Page - Empty State should show onboarding page when no data is present",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic",
-        "@local-serverless-observability_complete",
-        "@cloud-serverless-observability_complete"
-      ],
-      "location": {
-        "file": "x-pack/solutions/observability/plugins/infra/test/scout/ui/tests/hosts/hosts_page_empty_state.spec.ts",
-        "line": 22,
-        "column": 9
-      }
-    },
-    {
-      "id": "be1aecc053c50f1-611d1ff7855fd31",
-      "title": "Hosts Page - OTel Semconv Data should display semconv hosts in the table",
+      "id": "be1aecc053c50f1-de674fb9518c5e2",
+      "title": "Hosts Page - OTel Semconv Data lists semconv hosts and opens the flyout",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -157,13 +48,45 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/infra/test/scout/ui/tests/hosts/hosts_page_semconv.spec.ts",
+        "line": 40,
+        "column": 9
+      }
+    },
+    {
+      "id": "8704529b6902d2d-c06c6d3bffff2ca",
+      "title": "Infrastructure Inventory - Kubernetes Pods OpenTelemetry schema OTel-only pods hydrate OpenTelemetry and render tiles",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/infra/test/scout/ui/tests/inventory/inventory_pods_semconv.spec.ts",
+        "line": 53,
+        "column": 57
+      }
+    },
+    {
+      "id": "8704529b6902d2d-90fd6df5d4a784f",
+      "title": "Infrastructure Inventory - Kubernetes Pods OpenTelemetry schema mixed schemas default to OpenTelemetry pods and persist preferredSchema",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/infra/test/scout/ui/tests/inventory/inventory_pods_semconv.spec.ts",
         "line": 57,
         "column": 9
       }
     },
     {
-      "id": "be1aecc053c50f1-ff02499a61ea52d",
-      "title": "Hosts Page - OTel Semconv Data should display KPI metrics for semconv data",
+      "id": "8704529b6902d2d-83453eb29a65f58",
+      "title": "Infrastructure Inventory - Kubernetes Pods OpenTelemetry schema switching schema shows ECS pods and persists across reload",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -172,14 +95,14 @@
         "@cloud-serverless-observability_complete"
       ],
       "location": {
-        "file": "x-pack/solutions/observability/plugins/infra/test/scout/ui/tests/hosts/hosts_page_semconv.spec.ts",
+        "file": "x-pack/solutions/observability/plugins/infra/test/scout/ui/tests/inventory/inventory_pods_semconv.spec.ts",
         "line": 71,
         "column": 9
       }
     },
     {
-      "id": "be1aecc053c50f1-def058930f8255d",
-      "title": "Hosts Page - OTel Semconv Data should show metric values in table rows (not N/A)",
+      "id": "8704529b6902d2d-9b165ec598d4ddc",
+      "title": "Infrastructure Inventory - Kubernetes Pods OpenTelemetry schema Hosts OpenTelemetry selection is kept when switching to Pods",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -188,14 +111,14 @@
         "@cloud-serverless-observability_complete"
       ],
       "location": {
-        "file": "x-pack/solutions/observability/plugins/infra/test/scout/ui/tests/hosts/hosts_page_semconv.spec.ts",
-        "line": 86,
-        "column": 9
+        "file": "x-pack/solutions/observability/plugins/infra/test/scout/ui/tests/inventory/inventory_pods_semconv.spec.ts",
+        "line": 103,
+        "column": 22
       }
     },
     {
-      "id": "be1aecc053c50f1-08e4dfc9f56760e",
-      "title": "Hosts Page - OTel Semconv Data should hide rx and tx columns for semconv data",
+      "id": "8704529b6902d2d-06292d95bf0eb51",
+      "title": "Infrastructure Inventory - Kubernetes Pods OpenTelemetry schema tile menu identity uses k8s.pod.uid on OpenTelemetry",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -204,14 +127,14 @@
         "@cloud-serverless-observability_complete"
       ],
       "location": {
-        "file": "x-pack/solutions/observability/plugins/infra/test/scout/ui/tests/hosts/hosts_page_semconv.spec.ts",
-        "line": 110,
-        "column": 9
+        "file": "x-pack/solutions/observability/plugins/infra/test/scout/ui/tests/inventory/inventory_pods_semconv.spec.ts",
+        "line": 120,
+        "column": 22
       }
     },
     {
-      "id": "be1aecc053c50f1-c52ff07e6919ab7",
-      "title": "Hosts Page - OTel Semconv Data should open flyout for a semconv host",
+      "id": "8704529b6902d2d-3ce61b0ced37c84",
+      "title": "Infrastructure Inventory - Kubernetes Pods OpenTelemetry schema tooltip on OpenTelemetry shows a CPU value",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -220,9 +143,57 @@
         "@cloud-serverless-observability_complete"
       ],
       "location": {
-        "file": "x-pack/solutions/observability/plugins/infra/test/scout/ui/tests/hosts/hosts_page_semconv.spec.ts",
-        "line": 115,
-        "column": 9
+        "file": "x-pack/solutions/observability/plugins/infra/test/scout/ui/tests/inventory/inventory_pods_semconv.spec.ts",
+        "line": 139,
+        "column": 20
+      }
+    },
+    {
+      "id": "8704529b6902d2d-865abb588026166",
+      "title": "Infrastructure Inventory - Kubernetes Pods OpenTelemetry schema group by k8s.node.name splits OpenTelemetry pods into two groups",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/infra/test/scout/ui/tests/inventory/inventory_pods_semconv.spec.ts",
+        "line": 154,
+        "column": 25
+      }
+    },
+    {
+      "id": "8704529b6902d2d-6439f8aaceb7fd2",
+      "title": "Infrastructure Inventory - Kubernetes Pods OpenTelemetry schema table view lists OpenTelemetry pods",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/infra/test/scout/ui/tests/inventory/inventory_pods_semconv.spec.ts",
+        "line": 177,
+        "column": 7
+      }
+    },
+    {
+      "id": "8704529b6902d2d-8a3638ca43991fa",
+      "title": "Infrastructure Inventory - Kubernetes Pods OpenTelemetry schema timeline on OpenTelemetry does not show the anomaly legend",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/infra/test/scout/ui/tests/inventory/inventory_pods_semconv.spec.ts",
+        "line": 196,
+        "column": 18
       }
     },
     {
@@ -237,8 +208,212 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/infra/test/scout/ui/tests/inventory/no_data_inventory.spec.ts",
-        "line": 22,
-        "column": 9
+        "line": 40,
+        "column": 15
+      }
+    },
+    {
+      "id": "cae0fa4f91bcd16-9e427e0b61a751f",
+      "title": "Pod Metric Detail - schema selector flag off ignores a leftover OpenTelemetry URL",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/infra/test/scout/ui/tests/inventory/node_details.pod_semconv_flag_off.spec.ts",
+        "line": 29,
+        "column": 30
+      }
+    },
+    {
+      "id": "bc1c963cd55d152-9ff361d381da54d",
+      "title": "Pod Metric Detail - OpenTelemetry kubeletstats opens kubeletstats charts from an OpenTelemetry tile",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/infra/test/scout/ui/tests/inventory/node_details.pod_semconv.spec.ts",
+        "line": 49,
+        "column": 57
+      }
+    },
+    {
+      "id": "bc1c963cd55d152-a5d3326a44a1949",
+      "title": "Pod Metric Detail - OpenTelemetry kubeletstats keeps an Elastic Common Schema tile off the kubeletstats request",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/infra/test/scout/ui/tests/inventory/node_details.pod_semconv.spec.ts",
+        "line": 76,
+        "column": 13
+      }
+    },
+    {
+      "id": "25ea4843af6f22b-15e3b46b8c1be75",
+      "title": "Logs link-to redirects redirects /link-to to Discover with the parsed query and time range",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/infra/test/scout/ui/tests/logs_link_to.spec.ts",
+        "line": 27,
+        "column": 30
+      }
+    },
+    {
+      "id": "25ea4843af6f22b-8e73eecd198b40c",
+      "title": "Logs link-to redirects redirects node /link-to to Discover with the pod and trace query",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/infra/test/scout/ui/tests/logs_link_to.spec.ts",
+        "line": 43,
+        "column": 24
+      }
+    },
+    {
+      "id": "a4872f4d1d8cdd8-20a206532367023",
+      "title": "Infrastructure source configuration renders the waffle map with the default metric indices",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/infra/test/scout/ui/tests/metrics_source_configuration.spec.ts",
+        "line": 84,
+        "column": 21
+      }
+    },
+    {
+      "id": "a4872f4d1d8cdd8-d80426ca6f02c40",
+      "title": "Infrastructure source configuration persists a changed source name",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/infra/test/scout/ui/tests/metrics_source_configuration.spec.ts",
+        "line": 88,
+        "column": 7
+      }
+    },
+    {
+      "id": "a4872f4d1d8cdd8-7467e2dbdfde0a6",
+      "title": "Infrastructure source configuration reflects a non-matching metric index pattern across settings and the inventory",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/infra/test/scout/ui/tests/metrics_source_configuration.spec.ts",
+        "line": 92,
+        "column": 52
+      }
+    },
+    {
+      "id": "a4872f4d1d8cdd8-43d99d512722dde",
+      "title": "Infrastructure source configuration resets unsaved changes when discarding",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/infra/test/scout/ui/tests/metrics_source_configuration.spec.ts",
+        "line": 109,
+        "column": 27
+      }
+    },
+    {
+      "id": "a4872f4d1d8cdd8-328d867a0fbf5e5",
+      "title": "Infrastructure source configuration reflects a remote-cluster metric index pattern across settings and the inventory",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/infra/test/scout/ui/tests/metrics_source_configuration.spec.ts",
+        "line": 122,
+        "column": 27
+      }
+    },
+    {
+      "id": "a4872f4d1d8cdd8-1cf2ef5666231a9",
+      "title": "Infrastructure source configuration warns when editing an index pattern used by an alerting rule",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/infra/test/scout/ui/tests/metrics_source_configuration.spec.ts",
+        "line": 135,
+        "column": 90
+      }
+    },
+    {
+      "id": "1386c73831872dc-dd263064bd88283",
+      "title": "Infra Not Found page Logs app renders the not-found page only for unknown routes",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/infra/test/scout/ui/tests/page_not_found.spec.ts",
+        "line": 30,
+        "column": 13
+      }
+    },
+    {
+      "id": "1386c73831872dc-e30bbe2d49ea67c",
+      "title": "Infra Not Found page Metrics app renders the not-found page only for unknown routes",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/infra/test/scout/ui/tests/page_not_found.spec.ts",
+        "line": 45,
+        "column": 20
       }
     }
   ]

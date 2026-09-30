@@ -26,7 +26,7 @@ export function createStatusOverviewPanelAction(
     id: ADD_SYNTHETICS_OVERVIEW_ACTION_ID,
     grouping: COMMON_OBSERVABILITY_GROUPING,
     order: 5,
-    getIconType: () => 'online',
+    getIconType: () => 'wifi',
     isCompatible: async ({ embeddable }) => {
       return apiIsPresentationContainer(embeddable);
     },

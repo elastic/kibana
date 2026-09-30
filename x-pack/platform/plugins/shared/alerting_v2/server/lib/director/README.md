@@ -110,16 +110,25 @@ The director writes one of these episode statuses:
 | --- | --- | --- |
 | `inactive` | `breached` | `pending` |
 | `inactive` | `recovered` | `inactive` |
-| `inactive` | `no_data` | `inactive` |
 | `pending` | `breached` | `active` |
 | `pending` | `recovered` | `inactive` |
-| `pending` | `no_data` | `pending` |
 | `active` | `breached` | `active` |
 | `active` | `recovered` | `recovering` |
-| `active` | `no_data` | `active` |
 | `recovering` | `breached` | `active` |
 | `recovering` | `recovered` | `inactive` |
-| `recovering` | `no_data` | `recovering` |
+
+`no_data` transitions depend on `rule.no_data.strategy`:
+
+| Current episode status | `no_data.strategy` | Next episode status |
+| --- | --- | --- |
+| any | `'alert'` | `active` |
+| any | `'keep_last'` | (unchanged — preserve current status) |
+| `inactive` | `'resolve'` | `inactive` |
+| `pending` | `'resolve'` | `inactive` |
+| `active` | `'resolve'` | `inactive` |
+| `recovering` | `'resolve'` | `inactive` |
+
+For `'resolve'`, the episode resolves directly to `inactive` on the first no-data run. `'ignore'` never produces a `no_data` event to begin with.
 
 ### `CountTimeframeStrategy`
 
@@ -128,13 +137,15 @@ The director writes one of these episode statuses:
 - `pending -> active`
 - `recovering -> inactive`
 
+A `no_data` event on a rule with `no_data.strategy: 'resolve'` always bypasses this gating and resolves directly to `inactive`, regardless of `state_transition.recovering.count` / `state_transition.recovering.timeframe`.
+
 It supports:
 
 - count only
 - timeframe only
 - count + timeframe with `AND` / `OR`
 
-For timeframe evaluation, it compares the current alert event timestamp with the last stored episode timestamp.
+For timeframe evaluation, it compares the director run time (`evaluatedAt`) with the last stored episode timestamp; the current event has no `@timestamp` yet, since ES sets it at ingest.
 
 ## When to add a new strategy
 
@@ -206,6 +217,7 @@ Example:
 ```typescript
 import { CountTimeframeStrategy } from './count_timeframe_strategy';
 import { alertEpisodeStatus, alertEventStatus } from '../../../resources/datastreams/alert_events';
+import { createLoggerService } from '../../services/logger_service/logger_service.mock';
 import {
   buildLatestAlertEvent,
   buildStrategyStateTransitionContext,
@@ -213,7 +225,8 @@ import {
 
 describe('CountTimeframeStrategy', () => {
   it('transitions pending to active when threshold is met', () => {
-    const strategy = new CountTimeframeStrategy();
+    const { loggerService } = createLoggerService();
+    const strategy = new CountTimeframeStrategy(loggerService);
 
     const result = strategy.getNextState(
       buildStrategyStateTransitionContext({

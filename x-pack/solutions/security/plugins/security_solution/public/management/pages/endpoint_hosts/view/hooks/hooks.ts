@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { useSelector } from 'react-redux';
+import { useSelector } from 'react-redux-v7';
 import type { EndpointState } from '../../types';
 import type { State } from '../../../../../common/store';
 import {

@@ -16,7 +16,12 @@ export const EntityStoreMissingPrivilegesCallout = ({
   privileges: EntityAnalyticsPrivileges;
 }) => (
   <MissingPrivilegesCallout
-    privileges={privileges}
+    // Enabling the Entity Store enforces the install privilege set (manage/cluster/SO/source),
+    // not entity-index read+write, so surface that breakdown when the server provides it.
+    privileges={{
+      ...privileges,
+      privileges: privileges.install_privileges ?? privileges.privileges,
+    }}
     title={
       <FormattedMessage
         id="xpack.securitySolution.riskEngine.missingPrivilegesCallOut.title"

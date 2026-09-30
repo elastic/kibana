@@ -22,12 +22,14 @@ import {
   ALERT_RULE_TAGS,
   ALERT_RULE_UUID,
   ALERT_STATUS,
+  ALERT_TRACKED,
   ALERT_WORKFLOW_STATUS,
   SPACE_IDS,
   TAGS,
   ALERT_PREVIOUS_ACTION_GROUP,
   ALERT_PENDING_RECOVERED_COUNT,
   ALERT_MUTED,
+  ALERT_SNOOZED,
 } from '@kbn/rule-data-utils';
 import { omit, padStart } from 'lodash';
 import type { FtrProviderContext } from '../../ftr_provider_context';
@@ -40,6 +42,16 @@ export default function ({ getService }: FtrProviderContext) {
   const svlUserManager = getService('svlUserManager');
   const alertingApi = getService('alertingApi');
   let roleAdmin: RoleCredentials;
+
+  const getRuleTags = async (ruleId: string): Promise<string[]> => {
+    const { body } = await supertest
+      .get(`/api/alerting/rule/${ruleId}`)
+      .set('kbn-xsrf', 'foo')
+      .set('x-elastic-internal-origin', 'foo')
+      .expect(200);
+
+    return body.tags;
+  };
 
   describe('Summary actions', function () {
     const RULE_TYPE_ID = '.es-query';
@@ -170,6 +182,7 @@ export default function ({ getService }: FtrProviderContext) {
         },
       });
       expect(resp2.hits.hits.length).to.be(1);
+      const ruleTags = await getRuleTags(ruleId);
 
       const document = resp.hits.hits[0];
       expect(omit(document, '_source.date')._source).to.eql({
@@ -195,7 +208,9 @@ export default function ({ getService }: FtrProviderContext) {
         [ALERT_MUTED]: false,
         [ALERT_INSTANCE_ID]: 'query matched',
         [ALERT_SEVERITY_IMPROVING]: false,
+        [ALERT_SNOOZED]: false,
         [ALERT_STATUS]: 'active',
+        [ALERT_TRACKED]: true,
         [ALERT_WORKFLOW_STATUS]: 'open',
         [ALERT_RULE_CATEGORY]: 'Elasticsearch query',
         [ALERT_RULE_CONSUMER]: 'alerts',
@@ -217,10 +232,10 @@ export default function ({ getService }: FtrProviderContext) {
         [ALERT_RULE_PRODUCER]: alertDocument[ALERT_RULE_PRODUCER],
         [ALERT_RULE_REVISION]: 0,
         [ALERT_RULE_TYPE_ID]: '.es-query',
-        [ALERT_RULE_TAGS]: [],
+        [ALERT_RULE_TAGS]: ruleTags,
         [ALERT_RULE_UUID]: ruleId,
         [SPACE_IDS]: ['default'],
-        [TAGS]: [],
+        [TAGS]: ruleTags,
         [ALERT_PENDING_RECOVERED_COUNT]: 0,
       });
     });
@@ -306,6 +321,7 @@ export default function ({ getService }: FtrProviderContext) {
         },
       });
       expect(resp2.hits.hits.length).to.be(1);
+      const ruleTags = await getRuleTags(ruleId);
 
       const document = resp.hits.hits[0];
       expect(omit(document, '_source.date')._source).to.eql({
@@ -331,7 +347,9 @@ export default function ({ getService }: FtrProviderContext) {
         [ALERT_MUTED]: false,
         [ALERT_INSTANCE_ID]: 'query matched',
         [ALERT_SEVERITY_IMPROVING]: false,
+        [ALERT_SNOOZED]: false,
         [ALERT_STATUS]: 'active',
+        [ALERT_TRACKED]: true,
         [ALERT_WORKFLOW_STATUS]: 'open',
         [ALERT_RULE_CATEGORY]: 'Elasticsearch query',
         [ALERT_RULE_CONSUMER]: 'alerts',
@@ -353,10 +371,10 @@ export default function ({ getService }: FtrProviderContext) {
         [ALERT_RULE_PRODUCER]: alertDocument[ALERT_RULE_PRODUCER],
         [ALERT_RULE_REVISION]: 0,
         [ALERT_RULE_TYPE_ID]: '.es-query',
-        [ALERT_RULE_TAGS]: [],
+        [ALERT_RULE_TAGS]: ruleTags,
         [ALERT_RULE_UUID]: ruleId,
         [SPACE_IDS]: ['default'],
-        [TAGS]: [],
+        [TAGS]: ruleTags,
         [ALERT_PENDING_RECOVERED_COUNT]: 0,
       });
     });
@@ -519,6 +537,7 @@ export default function ({ getService }: FtrProviderContext) {
         },
       });
       expect(resp2.hits.hits.length).to.be(1);
+      const ruleTags = await getRuleTags(ruleId);
 
       const document = resp.hits.hits[0];
       expect(omit(document, '_source.date')._source).to.eql({
@@ -555,8 +574,10 @@ export default function ({ getService }: FtrProviderContext) {
         [ALERT_PREVIOUS_ACTION_GROUP]: 'query matched',
         [ALERT_FLAPPING]: false,
         [ALERT_MUTED]: false,
+        [ALERT_SNOOZED]: false,
         [ALERT_INSTANCE_ID]: 'query matched',
         [ALERT_STATUS]: 'active',
+        [ALERT_TRACKED]: true,
         [ALERT_WORKFLOW_STATUS]: 'open',
         [ALERT_RULE_CATEGORY]: 'Elasticsearch query',
         [ALERT_RULE_CONSUMER]: 'alerts',
@@ -578,10 +599,10 @@ export default function ({ getService }: FtrProviderContext) {
         [ALERT_RULE_PRODUCER]: alertDocument[ALERT_RULE_PRODUCER],
         [ALERT_RULE_REVISION]: 0,
         [ALERT_RULE_TYPE_ID]: '.es-query',
-        [ALERT_RULE_TAGS]: [],
+        [ALERT_RULE_TAGS]: ruleTags,
         [ALERT_RULE_UUID]: ruleId,
         [SPACE_IDS]: ['default'],
-        [TAGS]: [],
+        [TAGS]: ruleTags,
         [ALERT_PENDING_RECOVERED_COUNT]: 0,
       });
     });

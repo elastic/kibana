@@ -9,7 +9,6 @@
 import React, { useState } from 'react';
 import {
   EuiButton,
-  EuiCallOut,
   EuiFieldText,
   EuiModal,
   EuiModalBody,
@@ -22,6 +21,7 @@ import {
 import type { CoreStart } from '@kbn/core-lifecycle-browser';
 import { toMountPoint } from '@kbn/react-kibana-mount';
 import { i18n } from '@kbn/i18n';
+import { KbnWarningCallout } from '@kbn/ui-callout';
 
 const PanelIdModal = ({
   suggestion,
@@ -45,8 +45,7 @@ const PanelIdModal = ({
         </EuiModalHeaderTitle>
       </EuiModalHeader>
       <EuiModalBody>
-        <EuiCallOut
-          color="warning"
+        <KbnWarningCallout
           title={i18n.translate('examples.gridExample.getPanelIdWarning', {
             defaultMessage: 'Ensure the panel ID is unique, or you may get unexpected behaviour.',
           })}

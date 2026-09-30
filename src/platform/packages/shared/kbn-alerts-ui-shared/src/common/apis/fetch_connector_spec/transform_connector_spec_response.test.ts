@@ -23,6 +23,7 @@ describe('transformConnectorSpecResponse', () => {
         is_technical_preview: true,
       },
       schema: { type: 'object', properties: {} },
+      is_testable: true,
     });
 
     expect(result.metadata).toEqual({
@@ -36,6 +37,7 @@ describe('transformConnectorSpecResponse', () => {
       isTechnicalPreview: true,
     });
     expect(result.schema).toEqual({ type: 'object', properties: {} });
+    expect(result.isTestable).toBe(true);
   });
 
   it('omits optional metadata fields when absent on the wire', () => {
@@ -48,6 +50,7 @@ describe('transformConnectorSpecResponse', () => {
         supported_feature_ids: ['cases'],
       },
       schema: {},
+      is_testable: false,
     });
 
     expect(result.metadata).toEqual({
@@ -57,5 +60,6 @@ describe('transformConnectorSpecResponse', () => {
       minimumLicense: 'gold',
       supportedFeatureIds: ['cases'],
     });
+    expect(result.isTestable).toBe(false);
   });
 });

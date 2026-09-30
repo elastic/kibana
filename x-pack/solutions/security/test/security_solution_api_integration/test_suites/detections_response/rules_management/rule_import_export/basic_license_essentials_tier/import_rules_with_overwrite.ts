@@ -9,11 +9,12 @@ import expect from 'expect';
 
 import { DETECTION_ENGINE_RULES_IMPORT_URL } from '@kbn/security-solution-plugin/common/constants';
 import { createRule, deleteAllRules } from '@kbn/detections-response-ftr-services';
-import { combineToNdJson, getCustomQueryRuleParams, fetchRule } from '../../../utils';
+import { combineToNdJson, getCustomQueryRuleParams, fetchRule, importRules } from '../../../utils';
 import type { FtrProviderContext } from '../../../../../ftr_provider_context';
 
 export default ({ getService }: FtrProviderContext): void => {
   const supertest = getService('supertest');
+  const detectionsApi = getService('detectionsApi');
   const log = getService('log');
 
   describe('@ess @serverless @skipInServerlessMKI import_rules with rule overwrite set to "true"', () => {
@@ -186,6 +187,94 @@ export default ({ getService }: FtrProviderContext): void => {
           throttle: expect.anything(),
         })
       );
+    });
+
+    it('reports partial success when overwriting a batch with one schema-invalid rule', async () => {
+      const first = await createRule(
+        supertest,
+        log,
+        getCustomQueryRuleParams({
+          rule_id: 'overwrite-partial-ok-1',
+          name: 'Existing one',
+          enabled: false,
+        })
+      );
+      const second = await createRule(
+        supertest,
+        log,
+        getCustomQueryRuleParams({
+          rule_id: 'overwrite-partial-ok-2',
+          name: 'Existing two',
+          enabled: false,
+        })
+      );
+      const failed = await createRule(
+        supertest,
+        log,
+        getCustomQueryRuleParams({
+          rule_id: 'overwrite-partial-bad',
+          name: 'Existing bad',
+          enabled: false,
+        })
+      );
+
+      const importResponse = await importRules({
+        getService,
+        rules: [
+          getCustomQueryRuleParams({
+            rule_id: 'overwrite-partial-ok-1',
+            name: 'Updated one',
+            enabled: false,
+          }),
+          getCustomQueryRuleParams({
+            rule_id: 'overwrite-partial-ok-2',
+            name: 'Updated two',
+            enabled: false,
+          }),
+          {
+            ...getCustomQueryRuleParams({
+              rule_id: 'overwrite-partial-bad',
+              name: 'Should not update',
+              enabled: false,
+            }),
+            risk_score: 101,
+          },
+        ],
+        overwrite: true,
+      });
+
+      expect(importResponse).toMatchObject({
+        success: false,
+        success_count: 2,
+        rules_count: 3,
+        errors: [
+          {
+            error: {
+              message: 'risk_score: Too big: expected number to be <=100',
+              status_code: 400,
+            },
+          },
+        ],
+      });
+      // Schema validation failures currently omit rule_id on the error object.
+      expect(importResponse.errors[0].rule_id).toBeUndefined();
+
+      const { body: updatedFirst } = await detectionsApi
+        .readRule({ query: { rule_id: 'overwrite-partial-ok-1' } })
+        .expect(200);
+      const { body: updatedSecond } = await detectionsApi
+        .readRule({ query: { rule_id: 'overwrite-partial-ok-2' } })
+        .expect(200);
+      const { body: unchanged } = await detectionsApi
+        .readRule({ query: { rule_id: 'overwrite-partial-bad' } })
+        .expect(200);
+
+      expect(updatedFirst.id).toBe(first.id);
+      expect(updatedFirst.name).toBe('Updated one');
+      expect(updatedSecond.id).toBe(second.id);
+      expect(updatedSecond.name).toBe('Updated two');
+      expect(unchanged.id).toBe(failed.id);
+      expect(unchanged.name).toBe('Existing bad');
     });
   });
 };

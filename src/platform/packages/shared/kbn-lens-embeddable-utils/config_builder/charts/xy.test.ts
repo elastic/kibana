@@ -300,6 +300,71 @@ test('it generates xy chart with multiple reference lines', async () => {
   });
 });
 
+describe('y-axis title', () => {
+  const baseConfig = {
+    chartType: 'xy' as const,
+    title: 'test',
+    dataset: {
+      esql: 'from test | count=count() by @timestamp',
+    },
+    layers: [
+      {
+        type: 'series' as const,
+        seriesType: 'line' as const,
+        xAxis: '@timestamp',
+        yAxis: [
+          {
+            label: 'test',
+            value: 'count',
+          },
+        ],
+      },
+    ],
+  };
+
+  it('sets a custom y-axis title in the visualization state when yTitle is provided', async () => {
+    const result = await buildXY(
+      { ...baseConfig, yTitle: 'Avg' },
+      {
+        dataViewsAPI: mockDataViewsService() as any,
+      }
+    );
+
+    const visualization = result.state.visualization as XYVisualizationState;
+    expect(visualization.yTitle).toBe('Avg');
+  });
+
+  it('omits yTitle from the visualization state when yTitle is not provided', async () => {
+    const result = await buildXY(baseConfig, {
+      dataViewsAPI: mockDataViewsService() as any,
+    });
+
+    const visualization = result.state.visualization as XYVisualizationState;
+    expect(visualization.yTitle).toBeUndefined();
+  });
+
+  it('sets a custom x-axis title in the visualization state when xTitle is provided', async () => {
+    const result = await buildXY(
+      { ...baseConfig, xTitle: 'Time' },
+      {
+        dataViewsAPI: mockDataViewsService() as any,
+      }
+    );
+
+    const visualization = result.state.visualization as XYVisualizationState;
+    expect(visualization.xTitle).toBe('Time');
+  });
+
+  it('omits xTitle from the visualization state when xTitle is not provided', async () => {
+    const result = await buildXY(baseConfig, {
+      dataViewsAPI: mockDataViewsService() as any,
+    });
+
+    const visualization = result.state.visualization as XYVisualizationState;
+    expect(visualization.xTitle).toBeUndefined();
+  });
+});
+
 describe('breakdown handling', () => {
   it('should not include splitAccessors when breakdown is undefined', async () => {
     const result = await buildXY(
@@ -489,5 +554,44 @@ describe('breakdown handling', () => {
       'metric_formula_accessor1_breakdown_0',
       'metric_formula_accessor1_breakdown_1',
     ]);
+  });
+});
+
+describe('annotation layer handling', () => {
+  it('does not create a datasource entry or spurious references for a manual annotation layer', async () => {
+    const result = await buildXY(
+      {
+        chartType: 'xy',
+        title: 'test',
+        dataset: { esql: 'from main_index | limit 10' },
+        layers: [
+          {
+            type: 'series',
+            seriesType: 'line',
+            xAxis: '@timestamp',
+            yAxis: [{ label: 'count', value: 'count' }],
+          },
+          {
+            type: 'annotation',
+            yAxis: [],
+            events: [{ name: 'deploy', datetime: '2024-01-15T00:00:00.000Z' }],
+          },
+        ],
+      },
+      { dataViewsAPI: mockDataViewsService() as any }
+    );
+
+    const xyState = result.state.visualization as XYVisualizationState;
+    const annotationLayer = xyState.layers[1] as any;
+
+    // manual annotations do not require an index pattern
+    expect(annotationLayer.indexPatternId).toBeUndefined();
+
+    // no datasource entry is created for the annotation layer
+    expect(Object.keys(result.state.datasourceStates.textBased?.layers ?? {})).toEqual(['layer_0']);
+
+    // no spurious datasource-style reference for the annotation layer
+    const allRefs = [...result.references, ...(result.state.internalReferences ?? [])];
+    expect(allRefs.some((r) => r.name === 'indexpattern-datasource-layer-layer_1')).toBe(false);
   });
 });

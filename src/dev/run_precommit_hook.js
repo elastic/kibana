@@ -13,12 +13,13 @@ import { run } from '@kbn/dev-cli-runner';
 import { createFlagError } from '@kbn/dev-cli-errors';
 import { REPO_ROOT } from '@kbn/repo-info';
 import * as Eslint from './eslint';
+import * as Oxlint from './oxlint';
 import * as Stylelint from './stylelint';
 import { extname } from 'path';
 
 import { getFilesForCommit, runFileCasingCheck } from './precommit_hook';
 import { checkSemverRanges } from './no_pkg_semver_ranges';
-import { parse as yamlParse } from 'yaml';
+import { parseAllDocuments as yamlParseAllDocuments } from 'yaml';
 import { readFile } from 'fs/promises';
 
 class CheckResult {
@@ -125,7 +126,11 @@ class YamlLintCheck extends PrecommitCheck {
     for (const file of yamlFiles) {
       try {
         const content = await readFile(file.getAbsolutePath(), 'utf8');
-        yamlParse(content);
+        const docs = yamlParseAllDocuments(content);
+        const parseErrors = docs.flatMap((doc) => doc.errors);
+        if (parseErrors.length > 0) {
+          throw new Error(parseErrors.map((e) => e.message).join('\n'));
+        }
       } catch (error) {
         errors.push(`Error in ${file.getRelativePath()}:\n${error.message}`);
       }
@@ -156,6 +161,10 @@ class SemverRangesCheck extends PrecommitCheck {
   }
 }
 
+// oxlint and ESLint both autofix the same JS/TS files, so oxlint runs alone before the
+// parallel checks (matching the CI order in .buildkite/scripts/steps/lint.sh).
+const OXLINT_CHECK = new LinterCheck('oxlint', Oxlint);
+
 const PRECOMMIT_CHECKS = [
   new FileCasingCheck(),
   new LinterCheck('ESLint', Eslint),
@@ -163,6 +172,13 @@ const PRECOMMIT_CHECKS = [
   new YamlLintCheck(),
   new SemverRangesCheck(),
 ];
+
+async function runTimed(check, log, files, options) {
+  const startTime = Date.now();
+  const result = await check.runSafely(log, files, options);
+  log.verbose(`${check.name} completed in ${Date.now() - startTime}ms`);
+  return result;
+}
 
 run(
   async ({ log, flags }) => {
@@ -187,18 +203,12 @@ run(
     }
 
     log.verbose('Running pre-commit checks...');
-    const results = await Promise.all(
-      PRECOMMIT_CHECKS.map(async (check) => {
-        const startTime = Date.now();
-        const result = await check.runSafely(log, files, {
-          fix: flags.fix,
-          stage: flags.stage,
-        });
-        const duration = Date.now() - startTime;
-        log.verbose(`${check.name} completed in ${duration}ms`);
-        return result;
-      })
-    );
+    const options = { fix: flags.fix, stage: flags.stage };
+    const oxlintResult = await runTimed(OXLINT_CHECK, log, files, options);
+    const results = [
+      oxlintResult,
+      ...(await Promise.all(PRECOMMIT_CHECKS.map((check) => runTimed(check, log, files, options)))),
+    ];
 
     const failedChecks = results.filter((result) => !result.succeeded);
 

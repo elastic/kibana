@@ -15,6 +15,7 @@ import type { NotificationsStart } from '@kbn/core/public';
 import { ContextMenu } from './context_menu';
 import { ServicesContextProvider } from '../../../../contexts';
 import type { ContextValue } from '../../../../contexts/services_context';
+import { copyTextToClipboard } from '../../../../lib/copy_text_to_clipboard';
 
 jest.mock('./language_selector_modal', () => ({
   LanguageSelectorModal: () => <div>Language Selector Modal</div>,
@@ -28,6 +29,14 @@ jest.mock('../../../../../services', () => ({
     DEFAULT_LANGUAGE: 'default_language',
   },
 }));
+
+jest.mock('../../../../lib/copy_text_to_clipboard', () => ({
+  copyTextToClipboard: jest.fn(),
+}));
+
+const mockCopyTextToClipboard = copyTextToClipboard as jest.MockedFunction<
+  typeof copyTextToClipboard
+>;
 
 const mockNotifications: Pick<NotificationsStart, 'toasts'> = {
   toasts: {
@@ -88,6 +97,47 @@ const defaultProps = {
 describe('ContextMenu', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    mockCopyTextToClipboard.mockResolvedValue(true);
+  });
+
+  describe('Copy to language', () => {
+    it('shows a success toast after copying the converted request', async () => {
+      const contextValue = createMockContextValue();
+
+      render(
+        <I18nProvider>
+          <ServicesContextProvider value={contextValue}>
+            <ContextMenu {...defaultProps} />
+          </ServicesContextProvider>
+        </I18nProvider>
+      );
+
+      await userEvent.click(screen.getByTestId('toggleConsoleMenu'));
+      await userEvent.click(await screen.findByTestId('consoleMenuCopyAsButton'));
+
+      await waitFor(() => expect(mockNotifications.toasts.addSuccess).toHaveBeenCalled());
+      expect(mockCopyTextToClipboard).toHaveBeenCalledWith('mocked request code');
+      expect(mockNotifications.toasts.addDanger).not.toHaveBeenCalled();
+    });
+
+    it('shows an error toast when copying the converted request fails', async () => {
+      mockCopyTextToClipboard.mockResolvedValue(false);
+      const contextValue = createMockContextValue();
+
+      render(
+        <I18nProvider>
+          <ServicesContextProvider value={contextValue}>
+            <ContextMenu {...defaultProps} />
+          </ServicesContextProvider>
+        </I18nProvider>
+      );
+
+      await userEvent.click(screen.getByTestId('toggleConsoleMenu'));
+      await userEvent.click(await screen.findByTestId('consoleMenuCopyAsButton'));
+
+      await waitFor(() => expect(mockNotifications.toasts.addDanger).toHaveBeenCalled());
+      expect(mockNotifications.toasts.addSuccess).not.toHaveBeenCalled();
+    });
   });
 
   describe('Copy to language menu item visibility', () => {

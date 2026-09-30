@@ -15,6 +15,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const retry = getService('retry');
 
   describe('lens layer actions tests', () => {
+    afterEach(async () => {
+      // A failed test can leave the layer settings flyout open, covering the buttons the next test clicks.
+      await lens.closeFlyoutWithBackButton();
+    });
+
     it('should allow creation of lens xy chart', async () => {
       await visualize.navigateToNewVisualization();
       await visualize.clickVisType('lens');
@@ -68,9 +73,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await testSubjects.click('lnsLayerSettings');
       // annotations settings have only ignore filters
       await testSubjects.click('lns-layerSettings-ignoreGlobalFilters');
-      expect(
-        await testSubjects.exists('lns-layerPanel-0 > lnsChangeIndexPatternIgnoringFilters')
-      ).to.be(true);
+      await testSubjects.existOrFail('lns-layerPanel-0 > lnsChangeIndexPatternIgnoringFilters');
       await testSubjects.click('lns-indexPattern-dimensionContainerBack');
     });
 
@@ -90,9 +93,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       // add annotation layer
       await lens.createLayer('annotations');
 
-      expect(
-        await testSubjects.exists('lns-layerPanel-1 > lnsChangeIndexPatternIgnoringFilters')
-      ).to.be(true);
+      await testSubjects.existOrFail('lns-layerPanel-1 > lnsChangeIndexPatternIgnoringFilters', {
+        timeout: 5000,
+      });
 
       await lens.ensureLayerTabIsActive(1);
       await testSubjects.click('lnsLayerSettings');
@@ -164,19 +167,14 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       expect(
         await testSubjects.getVisibleText('lns-layerPanel-3 > lnsChangeIndexPatternSamplingInfo')
       ).to.be('1%');
-      expect(
-        await testSubjects.exists('lns-layerPanel-3 > lnsChangeIndexPatternIgnoringFilters')
-      ).to.be(true);
+      await testSubjects.existOrFail('lns-layerPanel-3 > lnsChangeIndexPatternIgnoringFilters', {
+        timeout: 5000,
+      });
     });
 
     it('should switch to pie chart and have layer settings available', async () => {
-      await retry.try(async () => {
-        // click on the tab navigation left button 10 times to make the first tab visible
-        for (let i = 0; i < 10; i++) {
-          await testSubjects.click('unifiedTabs_tabsBar_scrollLeftBtn');
-        }
-        await lens.ensureLayerTabIsActive(0);
-      });
+      await lens.ensureLayerTabIsActive(0);
+
       await lens.switchToVisualization('pie');
       // layer settings still available
       // open the panel

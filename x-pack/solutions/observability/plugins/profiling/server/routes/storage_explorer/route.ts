@@ -5,9 +5,10 @@
  * 2.0.
  */
 import { schema } from '@kbn/config-schema';
+import { getRequestAbortedSignal } from '@kbn/data-plugin/server';
 import { sumBy, values } from 'lodash';
 import type { RouteRegisterParameters } from '..';
-import { getRoutePaths } from '../../../common';
+import { getRoutePaths, MAX_KUERY_LENGTH } from '../../../common';
 import type { StorageExplorerSummaryAPIResponse } from '../../../common/storage_explorer';
 import { IndexLifecyclePhaseSelectOption } from '../../../common/storage_explorer';
 import { getClient } from '../compat';
@@ -43,14 +44,17 @@ export function registerStorageExplorerRoute({
           ]),
           timeFrom: schema.number(),
           timeTo: schema.number(),
-          kuery: schema.string(),
+          kuery: schema.string({ maxLength: MAX_KUERY_LENGTH }),
         }),
       },
     },
     async (context, request, response) => {
       const { timeFrom, timeTo, kuery, indexLifecyclePhase } = request.query;
       const client = await getClient(context);
-      const profilingClient = createProfilingEsClient({ request, esClient: client });
+      const profilingClient = createProfilingEsClient({
+        esClient: client,
+        abortSignal: getRequestAbortedSignal(request.events.aborted$),
+      });
       const profilingEsClient = profilingClient.getEsClient();
 
       const [
@@ -130,13 +134,16 @@ export function registerStorageExplorerRoute({
           ]),
           timeFrom: schema.number(),
           timeTo: schema.number(),
-          kuery: schema.string(),
+          kuery: schema.string({ maxLength: MAX_KUERY_LENGTH }),
         }),
       },
     },
     async (context, request, response) => {
       const client = await getClient(context);
-      const profilingClient = createProfilingEsClient({ request, esClient: client });
+      const profilingClient = createProfilingEsClient({
+        esClient: client,
+        abortSignal: getRequestAbortedSignal(request.events.aborted$),
+      });
 
       const { timeFrom, timeTo, kuery, indexLifecyclePhase } = request.query;
       const [hostDetailsTimeseries, hostDetails] = await Promise.all([
@@ -181,7 +188,10 @@ export function registerStorageExplorerRoute({
     },
     async (context, request, response) => {
       const client = await getClient(context);
-      const profilingClient = createProfilingEsClient({ request, esClient: client });
+      const profilingClient = createProfilingEsClient({
+        esClient: client,
+        abortSignal: getRequestAbortedSignal(request.events.aborted$),
+      });
       const profilingEsClient = profilingClient.getEsClient();
       const { indexLifecyclePhase } = request.query;
 

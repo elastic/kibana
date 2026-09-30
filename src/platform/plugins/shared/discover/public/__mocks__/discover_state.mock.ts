@@ -45,7 +45,7 @@ import { createCustomizationService } from '../customizations/customization_serv
 import { createTabsStorageManager } from '../application/main/state_management/tabs_storage_manager';
 import type { DiscoverSession, DiscoverSessionTab } from '@kbn/saved-search-plugin/common';
 import { DiscoverSearchSessionManager } from '../application/main/state_management/discover_search_session';
-import type { DataView, DataViewListItem } from '@kbn/data-views-plugin/common';
+import type { DataView, DataViewListItem, DataViewSpec } from '@kbn/data-views-plugin/common';
 import { createSearchSourceMock } from '@kbn/data-plugin/public/mocks';
 import { isObject, omit } from 'lodash';
 import { getCurrentUrlState } from '../application/main/state_management/utils/cleanup_url_state';
@@ -54,10 +54,12 @@ import { buildDataViewMock } from '@kbn/discover-utils/src/__mocks__';
 import type { SaveDiscoverSessionThunkParams } from '../application/main/state_management/redux/actions';
 import { filter, firstValueFrom, timeout } from 'rxjs';
 import { FetchStatus } from '../application/types';
+import type { ProfileStateMap } from '../../common/context_awareness';
 
 interface CreateInternalStateStoreMockOptions {
   runtimeStateManager?: RuntimeStateManager;
   stateStorageContainer?: IKbnUrlStateStorage;
+  tabsStorageEnabled?: boolean;
   customizationContext?: DiscoverCustomizationContext;
   services?: DiscoverServices;
 }
@@ -79,6 +81,7 @@ export interface DiscoverStateMockParams {
 function createInternalStateStoreMock({
   runtimeStateManager,
   stateStorageContainer,
+  tabsStorageEnabled = false,
   customizationContext = mockCustomizationContext,
   services = createDiscoverServicesMock(),
 }: CreateInternalStateStoreMockOptions = {}) {
@@ -94,6 +97,8 @@ function createInternalStateStoreMock({
   const tabsStorageManager = createTabsStorageManager({
     urlStateStorage: stateStorageContainer,
     storage: services.storage,
+    profileStateRegistry: services.profileStateRegistry,
+    enabled: tabsStorageEnabled,
   });
   const searchSessionManager = new DiscoverSearchSessionManager({
     history: services.history,
@@ -235,7 +240,7 @@ export function getDiscoverInternalStateMock({
       }
 
       internalState.dispatch(
-        internalStateActions.setInitializationState({ hasESData: true, hasUserDataView: true })
+        internalStateActions.setInitializationState({ hasESData: true, hasDataView: true })
       );
 
       // Populate savedDataViews before initializing tabs,
@@ -254,9 +259,13 @@ export function getDiscoverInternalStateMock({
       async ({
         tabId,
         skipWaitForDataFetching,
+        profileState,
+        dataViewSpec,
       }: {
         tabId: string;
         skipWaitForDataFetching?: boolean;
+        profileState?: ProfileStateMap;
+        dataViewSpec?: DataViewSpec;
       }) => {
         await toolkit.switchToTab({ tabId });
 
@@ -283,6 +292,7 @@ export function getDiscoverInternalStateMock({
           searchSessionManager,
           internalState,
           runtimeStateManager,
+          urlStateStorage: stateStorageContainer,
           injectCurrentTab,
           getCurrentTab,
         });
@@ -293,9 +303,10 @@ export function getDiscoverInternalStateMock({
             initializeSingleTabParams: {
               customizationService,
               dataStateContainer,
-              dataViewSpec: undefined,
+              dataViewSpec,
               esqlControls: undefined,
               defaultUrlState: undefined,
+              profileState,
             },
           })
         );
@@ -523,16 +534,18 @@ export function getDiscoverStateMock({
   );
 
   const currentTabId = internalState.getState().tabs.unsafeCurrentId;
+  const currentTab = selectTab(internalState.getState(), currentTabId);
 
   internalState.dispatch(
-    internalStateActions.resetAppState({
+    internalStateActions.initializeTabState({
       tabId: currentTabId,
-      appState: getInitialAppState({
+      initialAppState: getInitialAppState({
         initialUrlState: getCurrentUrlState(stateStorageContainer, services),
         persistedTab: persistedDiscoverSession?.tabs[0],
         dataView: finalSavedSearch?.searchSource.getField('index'),
         services,
       }),
+      initialProfileState: currentTab.profileState,
     })
   );
 
@@ -597,6 +610,7 @@ export function createDataStateContainer(
     services,
     searchSessionManager: stateContainer.searchSessionManager,
     runtimeStateManager: stateContainer.runtimeStateManager,
+    urlStateStorage: stateContainer.stateStorage,
     injectCurrentTab: stateContainer.injectCurrentTab,
     getCurrentTab: stateContainer.getCurrentTab,
   });

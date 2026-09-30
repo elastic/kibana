@@ -58,10 +58,10 @@ export async function validateDestinations(
       const correctId = attachmentToWorkflowId.get(dest.id);
       const hint = correctId
         ? ` The correct workflow ID for this attachment is "${correctId}".`
-        : ` This workflow attachment has no workflowId — pass a \`workflowId\` when calling \`workflow_set_yaml\`.`;
+        : ` This workflow attachment has no workflowId — pass a \`workflowId\` when calling \`platform.core.generate_workflow\`.`;
       throw new ActionPolicyOperationValidationError(
         `Destination ID "${dest.id}" is a workflow attachment ID, not a workflow ID. ` +
-          `Use the \`workflowId\` value from the \`workflow_set_yaml\` tool result instead of the \`attachmentId\`.` +
+          `Use the \`workflowId\` you passed to \`platform.core.generate_workflow\` instead of the \`attachmentId\`.` +
           hint
       );
     }
@@ -76,17 +76,17 @@ export async function validateDestinations(
       throw new ActionPolicyOperationValidationError(
         `Destination ID "${dest.id}" is a connector ("${connector.name}"), not a workflow. ` +
           `Action policy destinations must reference workflow IDs. ` +
-          `To fix this: create a workflow that uses this connector via the workflow_set_yaml ` +
-          `tool, then use the workflow's \`workflowId\` as the destination.`
+          `To fix this: create a workflow that uses this connector via the \`platform.core.generate_workflow\` ` +
+          `tool (passing a \`workflowId\`), then use that \`workflowId\` as the destination.`
       );
     }
 
     throw new ActionPolicyOperationValidationError(
       `Destination ID "${dest.id}" is not a valid workflow in this space or conversation. ` +
         `Each destination must reference either a persisted workflow ID from this Kibana space, ` +
-        `or a \`workflowId\` from the \`workflow_set_yaml\` tool result. ` +
-        `To create a workflow, use the workflow_set_yaml tool first, then use the returned ` +
-        `\`workflowId\` as the destination.`
+        `or a \`workflowId\` passed to the \`platform.core.generate_workflow\` tool. ` +
+        `To create a workflow, call \`platform.core.generate_workflow\` first (passing a \`workflowId\`), ` +
+        `then use that \`workflowId\` as the destination.`
     );
   }
 }

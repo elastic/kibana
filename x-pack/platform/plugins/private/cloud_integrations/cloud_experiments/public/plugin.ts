@@ -87,7 +87,7 @@ export class CloudExperimentsPlugin
    */
   public start(core: CoreStart, { dataViews }: CloudExperimentsPluginStartDeps) {
     this.metadataService.start({
-      hasDataFetcher: async () => ({ has_data: await dataViews.hasData.hasUserDataView() }),
+      hasDataFetcher: async () => ({ has_data: await dataViews.hasData.hasDataView() }),
     });
   }
 
@@ -124,6 +124,8 @@ export class CloudExperimentsPlugin
             : this.initializerContext.env.packageInfo.version,
       },
       bootstrap,
+      // Remove the query params from the URL
+      eventUrlTransformer: (url) => url.split('?')[0],
     });
   }
 }

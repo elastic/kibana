@@ -7,8 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { TypeOf } from '@kbn/config-schema';
-import type { searchRequestQuerySchema, searchResponseBodySchema } from './schemas';
+import type { z } from '@kbn/zod';
+import type { asCodeSearchRequestSchema } from '@kbn/as-code-shared-schemas';
+import type { searchResponseBodySchema } from './schemas';
 
-export type MarkdownSearchRequestQuery = TypeOf<typeof searchRequestQuerySchema>;
-export type MarkdownSearchResponseBody = TypeOf<typeof searchResponseBodySchema>;
+export type MarkdownSearchRequestQuery = Partial<z.output<typeof asCodeSearchRequestSchema>>;
+export type MarkdownSearchResponseBody = z.output<typeof searchResponseBodySchema>;

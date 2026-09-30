@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { expectPrettyError } from '@kbn/zod-helpers/v4';
 import { AS_CODE_DATA_VIEW_REFERENCE_TYPE } from '@kbn/as-code-data-views-schema';
 import type { WaffleConfigNoESQL, WaffleConfigESQL } from './waffle';
 import { waffleConfigSchema } from './waffle';
@@ -34,7 +35,7 @@ describe('Waffle Schema', () => {
         ],
       };
 
-      const validated = waffleConfigSchema.validate(input);
+      const validated = waffleConfigSchema.parse(input);
       expect(validated.type).toBe('waffle');
       expect(validated.metrics).toHaveLength(1);
       expect(validated.metrics[0]).toHaveProperty('operation', 'count');
@@ -58,7 +59,7 @@ describe('Waffle Schema', () => {
         ],
       };
 
-      const validated = waffleConfigSchema.validate(input);
+      const validated = waffleConfigSchema.parse(input);
       expect(validated.metrics).toHaveLength(1);
       expect(validated.group_by).toHaveLength(1);
     });
@@ -101,7 +102,7 @@ describe('Waffle Schema', () => {
         },
       };
 
-      const validated = waffleConfigSchema.validate(input);
+      const validated = waffleConfigSchema.parse(input);
       expect(validated.title).toBe('Sales Waffle');
       expect(validated.legend?.values).toEqual(['absolute']);
       expect(validated.styling?.values?.mode).toBe('percentage');
@@ -124,7 +125,7 @@ describe('Waffle Schema', () => {
         ],
       };
 
-      const validated = waffleConfigSchema.validate(input);
+      const validated = waffleConfigSchema.parse(input);
       expect(validated.metrics).toHaveLength(2);
     });
 
@@ -185,7 +186,7 @@ describe('Waffle Schema', () => {
         ],
       };
 
-      const validated = waffleConfigSchema.validate(input);
+      const validated = waffleConfigSchema.parse(input);
       expect(validated.group_by?.[0].color).toHaveProperty('mode', 'categorical');
     });
 
@@ -213,7 +214,7 @@ describe('Waffle Schema', () => {
         ],
       };
 
-      const validated = waffleConfigSchema.validate(input);
+      const validated = waffleConfigSchema.parse(input);
       expect(validated.group_by).toHaveLength(2);
       expect(validated.group_by?.[0].collapse_by).toBe('sum');
     });
@@ -224,7 +225,11 @@ describe('Waffle Schema', () => {
         metrics: [],
       };
 
-      expect(() => waffleConfigSchema.validate(input)).toThrow();
+      const result = waffleConfigSchema.safeParse(input);
+      expectPrettyError(result).toMatchInlineSnapshot(`
+        "✖ Too small: expected array to have >=1 items
+          → at metrics"
+      `);
     });
 
     it('throws on empty group_by array', () => {
@@ -239,7 +244,11 @@ describe('Waffle Schema', () => {
         group_by: [],
       };
 
-      expect(() => waffleConfigSchema.validate(input)).toThrow();
+      const result = waffleConfigSchema.safeParse(input);
+      expectPrettyError(result).toMatchInlineSnapshot(`
+        "✖ Too small: expected array to have >=1 items
+          → at group_by"
+      `);
     });
 
     describe('Grouping Validation', () => {
@@ -261,7 +270,7 @@ describe('Waffle Schema', () => {
           ],
         };
 
-        expect(() => waffleConfigSchema.validate(input)).not.toThrow();
+        expect(() => waffleConfigSchema.parse(input)).not.toThrow();
       });
 
       it('allows single metric with multiple collapsed breakdowns and one non-collapsed', () => {
@@ -294,7 +303,7 @@ describe('Waffle Schema', () => {
           ],
         };
 
-        expect(() => waffleConfigSchema.validate(input)).not.toThrow();
+        expect(() => waffleConfigSchema.parse(input)).not.toThrow();
       });
 
       it('throws when single metric has multiple non-collapsed breakdowns', () => {
@@ -320,8 +329,9 @@ describe('Waffle Schema', () => {
           ],
         };
 
-        expect(() => waffleConfigSchema.validate(input)).toThrow(
-          /Only a single non-collapsed dimension is allowed for group_by/i
+        const result = waffleConfigSchema.safeParse(input);
+        expectPrettyError(result).toMatchInlineSnapshot(
+          `"✖ Only a single non-collapsed dimension is allowed for group_by"`
         );
       });
 
@@ -341,7 +351,7 @@ describe('Waffle Schema', () => {
           ],
         };
 
-        expect(() => waffleConfigSchema.validate(input)).not.toThrow();
+        expect(() => waffleConfigSchema.parse(input)).not.toThrow();
       });
 
       it('throws with multiple metrics and a single non-collapsed breakdown', () => {
@@ -367,7 +377,10 @@ describe('Waffle Schema', () => {
           ],
         };
 
-        expect(() => waffleConfigSchema.validate(input)).toThrow();
+        const result = waffleConfigSchema.safeParse(input);
+        expectPrettyError(result).toMatchInlineSnapshot(
+          `"✖ When multiple metrics are defined, only collapsed group_by dimensions are allowed."`
+        );
       });
 
       it('allows multiple metrics with multiple collapsed breakdowns', () => {
@@ -402,7 +415,7 @@ describe('Waffle Schema', () => {
           ],
         };
 
-        expect(() => waffleConfigSchema.validate(input)).not.toThrow();
+        expect(() => waffleConfigSchema.parse(input)).not.toThrow();
       });
 
       it('throws when multiple metrics have one collapsed and multiple non-collapsed breakdowns', () => {
@@ -441,8 +454,9 @@ describe('Waffle Schema', () => {
           ],
         };
 
-        expect(() => waffleConfigSchema.validate(input)).toThrow(
-          /only collapsed group_by dimensions are allowed/i
+        const result = waffleConfigSchema.safeParse(input);
+        expectPrettyError(result).toMatchInlineSnapshot(
+          `"✖ When multiple metrics are defined, only collapsed group_by dimensions are allowed."`
         );
       });
     });
@@ -469,7 +483,7 @@ describe('Waffle Schema', () => {
         ],
       };
 
-      const validated = waffleConfigSchema.validate(input);
+      const validated = waffleConfigSchema.parse(input);
       expect(validated.data_source.type).toBe('esql');
       expect(validated.metrics[0]).toHaveProperty('column', 'count');
     });
@@ -489,7 +503,7 @@ describe('Waffle Schema', () => {
         ],
       };
 
-      const validated = waffleConfigSchema.validate(input);
+      const validated = waffleConfigSchema.parse(input);
       expect(validated.group_by).toHaveLength(1);
       if (validated.group_by?.[0] && 'column' in validated.group_by?.[0]) {
         expect(validated.group_by?.[0]?.column).toBe('category');
@@ -509,7 +523,7 @@ describe('Waffle Schema', () => {
         ],
       };
 
-      const validated = waffleConfigSchema.validate(input);
+      const validated = waffleConfigSchema.parse(input);
       expect(validated.metrics).toHaveLength(2);
     });
   });

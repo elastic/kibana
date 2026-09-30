@@ -19,7 +19,8 @@ project:
 dependsOn:
   - '@kbn/core-mount-utils-browser'
   - '@kbn/core-application-common'
-  - '@kbn/core-chrome-app-menu-components'
+  - '@kbn/app-menu'
+  - '@kbn/ui-app-header'
   - '@kbn/deeplinks-devtools'
   - '@kbn/deeplinks-analytics'
   - '@kbn/deeplinks-ml'
@@ -35,6 +36,8 @@ dependsOn:
   - '@kbn/projects-solutions-groups'
   - '@kbn/deeplinks-workflows'
   - '@kbn/deeplinks-agent-builder'
+  - '@kbn/deeplinks-context-engine'
+  - '@kbn/deeplinks-evals'
   - '@kbn/ui-side-navigation'
   - '@kbn/core-chrome-sidebar'
 tags:

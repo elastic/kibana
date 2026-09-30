@@ -51,7 +51,7 @@ export function MachineLearningCasesProvider(
 
     async assertCaseWithAnomalySwimLaneAttachment(
       params: CaseParams,
-      attachment: AnomalySwimLaneEmbeddableState,
+      attachment: AnomalySwimLaneEmbeddableState & { id: string },
       expectedSwimLaneState: {
         yAxisLabelCount: number;
       }

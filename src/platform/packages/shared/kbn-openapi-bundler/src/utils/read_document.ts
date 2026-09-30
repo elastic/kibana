@@ -9,7 +9,7 @@
 
 import fs from 'fs/promises';
 import { basename, extname } from 'path';
-import { load } from 'js-yaml';
+import { parseDocument } from 'yaml';
 import chalk from 'chalk';
 import { logger } from '../logger';
 import { isPlainObjectType } from './is_plain_object_type';
@@ -44,7 +44,16 @@ async function readFile(filePath: string): Promise<unknown> {
 
 async function readYamlFile(filePath: string): Promise<Record<string, unknown>> {
   const fileContent = await fs.readFile(filePath, { encoding: 'utf8' });
-  const maybeObject = load(fileContent);
+
+  // Use the 'core' schema so that unquoted extended boolean literals
+  // (yes/no/on/off/…) are read as plain strings rather than booleans, and
+  // ISO timestamp strings are preserved as strings (not Date objects).
+  //
+  // Use parseDocument + toJS (rather than parse) to avoid a
+  // "Maximum call stack size exceeded" crash that parse's reviver triggers
+  // when yaml builds circular JS objects for recursive YAML anchors.
+  const doc = parseDocument(fileContent, { schema: 'core', strict: false });
+  const maybeObject = doc.toJS();
 
   if (!isPlainObjectType(maybeObject)) {
     throw new Error(

@@ -6,13 +6,14 @@
  */
 
 import { ToolResultType, attachmentTools } from '@kbn/agent-builder-common';
+import { VISUALIZATION_ATTACHMENT_TYPE } from '@kbn/agent-builder-visualizations-common';
 import type { Attachment } from '@kbn/agent-builder-common/attachments';
-import { AttachmentType } from '@kbn/agent-builder-common/attachments';
 import type { AttachmentTypeDefinition } from '@kbn/agent-builder-server/attachments';
 import { createAttachmentStateManager } from '@kbn/agent-builder-server/attachments';
 import type { AttachmentStateManager } from '@kbn/agent-builder-server/attachments';
 import type { ToolHandlerStandardReturn } from '@kbn/agent-builder-server/tools';
 import { httpServerMock } from '@kbn/core-http-server-mocks';
+import { createResolveContextMock } from '../../../../test_utils';
 import { createAttachmentTools } from '.';
 
 describe('attachment tools', () => {
@@ -111,6 +112,38 @@ describe('attachment tools', () => {
       expect((result.results[0] as any).data.type).toBe('text');
     });
 
+    it('rejects unknown type at schema level when registered types are provided', () => {
+      const typedAttachmentsService = {
+        getTypeDefinition: () => ({ isReadonly: false }),
+        getRegisteredTypeIds: () => ['text', 'esql'],
+      } as any;
+
+      const tool = createAttachmentTools({
+        attachmentManager,
+        attachmentsService: typedAttachmentsService,
+        formatContext,
+      }).find((t) => t.id === attachmentTools.add)!;
+
+      expect(tool.schema.safeParse({ type: 'text', data: {} }).success).toBe(true);
+      expect(tool.schema.safeParse({ type: 'json', data: {} }).success).toBe(false);
+    });
+
+    it('excludes readonly types from the schema enum', () => {
+      const typedAttachmentsService = {
+        getTypeDefinition: (type: string) => ({ isReadonly: type === 'screen_context' }),
+        getRegisteredTypeIds: () => ['text', 'esql', 'screen_context'],
+      } as any;
+
+      const tool = createAttachmentTools({
+        attachmentManager,
+        attachmentsService: typedAttachmentsService,
+        formatContext,
+      }).find((t) => t.id === attachmentTools.add)!;
+
+      expect(tool.schema.safeParse({ type: 'text', data: {} }).success).toBe(true);
+      expect(tool.schema.safeParse({ type: 'screen_context', data: {} }).success).toBe(false);
+    });
+
     it('returns error for unknown attachment type with list of valid types', async () => {
       const typedAttachmentsService = {
         getTypeDefinition: (type: string) =>
@@ -198,7 +231,7 @@ describe('attachment tools', () => {
       const customAttachmentsService = {
         getTypeDefinition: () =>
           ({
-            id: AttachmentType.visualization,
+            id: VISUALIZATION_ATTACHMENT_TYPE,
             validate: (input: unknown) => ({ valid: true, data: input }),
             format: (formattedAttachment: Attachment) => ({
               getRepresentation: () => ({
@@ -215,14 +248,10 @@ describe('attachment tools', () => {
       });
 
       // Add the attachment with origin — content is resolved during add()
-      const resolveContext = {
-        request: httpServerMock.createKibanaRequest(),
-        spaceId: 'default',
-        savedObjectsClient: {} as any,
-      };
+      const resolveContext = createResolveContextMock();
       const attachment = await resolveAttachmentManager.add(
         {
-          type: AttachmentType.visualization,
+          type: VISUALIZATION_ATTACHMENT_TYPE,
           origin: 'so-123',
           description: 'Lens ref',
         },
@@ -245,7 +274,7 @@ describe('attachment tools', () => {
         {} as any
       )) as ToolHandlerStandardReturn;
 
-      expect((result.results[0] as any).data.type).toBe(AttachmentType.visualization);
+      expect((result.results[0] as any).data.type).toBe(VISUALIZATION_ATTACHMENT_TYPE);
       // Data is the resolved content stored directly
       expect((result.results[0] as any).data.data).toEqual(resolvedData);
       // No raw_data field in the response
@@ -279,6 +308,53 @@ describe('attachment tools', () => {
 
       expect(result.results).toHaveLength(1);
       expect(result.results[0].type).toBe(ToolResultType.error);
+    });
+
+    it('returns a small image marker (not base64) for image attachments', async () => {
+      const getBase64 = jest.fn(async () => 'BASE64_SHOULD_NOT_APPEAR');
+      const imageAttachmentsService = {
+        getTypeDefinition: () => ({
+          id: 'image',
+          validate: (input: unknown) => ({ valid: true, data: input }),
+          format: () => ({
+            getRepresentation: () => ({
+              type: 'image',
+              mimeType: 'image/png',
+              getBase64,
+            }),
+          }),
+          isReadonly: true,
+        }),
+      } as any;
+
+      const imageManager = createAttachmentStateManager([], {
+        getTypeDefinition: imageAttachmentsService.getTypeDefinition,
+      });
+      const attachment = await imageManager.add({
+        type: 'image',
+        data: { file_id: 'file-1', name: 'screenshot.png', mime_type: 'image/png' },
+        description: 'a screenshot',
+      });
+
+      const tool = createAttachmentTools({
+        attachmentManager: imageManager,
+        attachmentsService: imageAttachmentsService,
+        formatContext,
+      }).find((t) => t.id === attachmentTools.read)!;
+
+      const result = (await tool.handler(
+        { attachment_id: attachment.id },
+        {} as any
+      )) as ToolHandlerStandardReturn;
+
+      expect(result.results[0].type).toBe(ToolResultType.image);
+      const data = (result.results[0] as any).data;
+      expect(data.attachment_id).toBe(attachment.id);
+      expect(data.mime_type).toBe('image/png');
+      expect(data.name).toBe('screenshot.png');
+      expect(JSON.stringify(result.results[0])).not.toContain('BASE64_SHOULD_NOT_APPEAR');
+      // getBase64 must NOT be called on the tool-result path — the prompt builder pulls bytes later.
+      expect(getBase64).not.toHaveBeenCalled();
     });
   });
 

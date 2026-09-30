@@ -13,10 +13,11 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiFormRow,
-  EuiIconTip,
   EuiHealth,
+  EuiIconTip,
   EuiSpacer,
   EuiText,
+  EuiToolTip,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
@@ -47,6 +48,9 @@ import { convertToBuiltInComparators } from '@kbn/observability-plugin/common';
 import useAsync from 'react-use/lib/useAsync';
 import type { Query } from '@kbn/es-query';
 import { DEFAULT_SCHEMA } from '../../../../common/constants';
+import { getInventoryRuleSchema } from '../../../../common/inventory/get_inventory_rule_schema';
+import { useIsPodSchemaSelectorEnabled } from '../../../hooks/use_is_pod_schema_selector_enabled';
+import { isSchemaSelectableForInventoryRule } from '../is_schema_selectable_for_inventory_rule';
 import { schemaTranslationMap } from '../../../components/schema_selector';
 import { UnifiedSearchBar } from '../../../components/shared/unified_search_bar';
 import type { SnapshotCustomMetricInput } from '../../../../common/http_api';
@@ -114,6 +118,7 @@ export const defaultExpression = {
 export const Expressions: React.FC<ExpressionsProps> = (props) => {
   const { setRuleParams, ruleParams, errors, metadata } = props;
   const { source } = useSourceContext();
+  const isPodSchemaSelectorEnabled = useIsPodSchemaSelectorEnabled();
 
   const [timeSize, setTimeSize] = useState<number | undefined>(1);
   const [timeUnit, setTimeUnit] = useState<TimeUnitChar>('m');
@@ -201,8 +206,12 @@ export const Expressions: React.FC<ExpressionsProps> = (props) => {
   const updateNodeType = useCallback(
     (nt: InventoryItemType) => {
       setRuleParams('nodeType', nt);
+
+      if (!isSchemaSelectableForInventoryRule(nt, isPodSchemaSelectorEnabled)) {
+        setRuleParams('schema', undefined);
+      }
     },
-    [setRuleParams]
+    [isPodSchemaSelectorEnabled, setRuleParams]
   );
 
   const updateSchema = useCallback(
@@ -248,7 +257,10 @@ export const Expressions: React.FC<ExpressionsProps> = (props) => {
 
   useEffect(() => {
     const md = metadata;
-    const isHost = ruleParams.nodeType === 'host' || (md && md.nodeType === 'host');
+    const canSelectSchema = isSchemaSelectableForInventoryRule(
+      ruleParams.nodeType ?? md?.nodeType,
+      isPodSchemaSelectorEnabled
+    );
 
     if (!ruleParams.nodeType) {
       if (md && md.nodeType) {
@@ -259,7 +271,7 @@ export const Expressions: React.FC<ExpressionsProps> = (props) => {
     }
 
     if (!ruleParams.schema) {
-      if (md && md.schema && isHost) {
+      if (md && md.schema && canSelectSchema) {
         setRuleParams('schema', md.schema);
       }
     }
@@ -278,7 +290,26 @@ export const Expressions: React.FC<ExpressionsProps> = (props) => {
     if (!ruleParams.sourceId) {
       setRuleParams('sourceId', source?.id || 'default');
     }
-  }, [metadata, metricsView?.dataViewReference, defaultExpression, source]); // eslint-disable-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [
+    metadata,
+    metricsView?.dataViewReference,
+    defaultExpression,
+    source,
+    isPodSchemaSelectorEnabled,
+  ]);
+
+  const nodeType = ruleParams.nodeType || 'host';
+  const schemaSelectionEnabled = isSchemaSelectableForInventoryRule(
+    nodeType,
+    isPodSchemaSelectorEnabled
+  );
+
+  const effectiveSchema = getInventoryRuleSchema(
+    nodeType,
+    ruleParams.schema,
+    isPodSchemaSelectorEnabled
+  );
 
   return (
     <>
@@ -322,7 +353,7 @@ export const Expressions: React.FC<ExpressionsProps> = (props) => {
           <SupportedDataTooltipLink nodeType={ruleParams.nodeType} isAlertUI />
         </EuiFlexGroup>
       </div>
-      {ruleParams.nodeType === 'host' && (
+      {schemaSelectionEnabled && (
         <div css={StyledExpressionCss}>
           <EuiFlexGroup css={StyledExpressionRowCss} gutterSize="xs">
             <div css={NonCollapsibleExpressionCss}>
@@ -342,9 +373,9 @@ export const Expressions: React.FC<ExpressionsProps> = (props) => {
                     defaultMessage: 'Schema',
                   }
                 )}
-                data-test-subj="forExpressionSelect"
+                data-test-subj="schemaExpressionSelect"
                 aria-label={i18n.translate(
-                  'xpack.infra.metrics.alertFlyout.expression.for.ariaLabel',
+                  'xpack.infra.metrics.alertFlyout.expression.schema.ariaLabel',
                   {
                     defaultMessage: 'Select a schema',
                   }
@@ -377,7 +408,7 @@ export const Expressions: React.FC<ExpressionsProps> = (props) => {
                 sourceId={ruleParams.sourceId}
                 accountId={ruleParams.accountId}
                 region={ruleParams.region}
-                schema={ruleParams.schema}
+                schema={effectiveSchema}
                 data-test-subj="preview-chart"
               />
             </ExpressionRow>
@@ -633,14 +664,21 @@ export const ExpressionRow = (props: PropsWithChildren<ExpressionRowProps>) => {
     <>
       <EuiFlexGroup gutterSize="xs">
         <EuiFlexItem grow={false}>
-          <EuiButtonIcon
-            data-test-subj="infraExpressionRowButton"
-            iconType={isExpanded ? 'chevronSingleDown' : 'chevronSingleRight'}
-            onClick={toggle}
-            aria-label={i18n.translate('xpack.infra.metrics.alertFlyout.expandRowLabel', {
+          <EuiToolTip
+            content={i18n.translate('xpack.infra.metrics.alertFlyout.expandRowLabel', {
               defaultMessage: 'Expand row.',
             })}
-          />
+            disableScreenReaderOutput
+          >
+            <EuiButtonIcon
+              data-test-subj="infraExpressionRowButton"
+              iconType={isExpanded ? 'chevronSingleDown' : 'chevronSingleRight'}
+              onClick={toggle}
+              aria-label={i18n.translate('xpack.infra.metrics.alertFlyout.expandRowLabel', {
+                defaultMessage: 'Expand row.',
+              })}
+            />
+          </EuiToolTip>
         </EuiFlexItem>
 
         <EuiFlexItem grow>
@@ -685,19 +723,29 @@ export const ExpressionRow = (props: PropsWithChildren<ExpressionRowProps>) => {
                     defaultMessage="Warning"
                   />
                 </EuiHealth>
-                <EuiButtonIcon
-                  data-test-subj="infraExpressionRowButton"
-                  aria-label={i18n.translate(
+                <EuiToolTip
+                  content={i18n.translate(
                     'xpack.infra.metrics.alertFlyout.removeWarningThreshold',
                     {
                       defaultMessage: 'Remove warningThreshold',
                     }
                   )}
-                  iconSize="s"
-                  color="text"
-                  iconType="minusCircle"
-                  onClick={toggleWarningThreshold}
-                />
+                  disableScreenReaderOutput
+                >
+                  <EuiButtonIcon
+                    data-test-subj="infraExpressionRowButton"
+                    aria-label={i18n.translate(
+                      'xpack.infra.metrics.alertFlyout.removeWarningThreshold',
+                      {
+                        defaultMessage: 'Remove warningThreshold',
+                      }
+                    )}
+                    iconSize="s"
+                    color="text"
+                    iconType="minusCircle"
+                    onClick={toggleWarningThreshold}
+                  />
+                </EuiToolTip>
               </EuiFlexGroup>
             </>
           )}
@@ -729,15 +777,22 @@ export const ExpressionRow = (props: PropsWithChildren<ExpressionRowProps>) => {
         </EuiFlexItem>
         {canDelete && (
           <EuiFlexItem grow={false}>
-            <EuiButtonIcon
-              data-test-subj="infraExpressionRowButton"
-              aria-label={i18n.translate('xpack.infra.metrics.alertFlyout.removeCondition', {
+            <EuiToolTip
+              content={i18n.translate('xpack.infra.metrics.alertFlyout.removeCondition', {
                 defaultMessage: 'Remove condition',
               })}
-              color="danger"
-              iconType="trash"
-              onClick={() => remove(expressionId)}
-            />
+              disableScreenReaderOutput
+            >
+              <EuiButtonIcon
+                data-test-subj="infraExpressionRowButton"
+                aria-label={i18n.translate('xpack.infra.metrics.alertFlyout.removeCondition', {
+                  defaultMessage: 'Remove condition',
+                })}
+                color="danger"
+                iconType="trash"
+                onClick={() => remove(expressionId)}
+              />
+            </EuiToolTip>
           </EuiFlexItem>
         )}
       </EuiFlexGroup>

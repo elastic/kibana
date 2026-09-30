@@ -9,15 +9,22 @@
 
 import type { ActionsClient, IUnsecuredActionsClient } from '@kbn/actions-plugin/server';
 import type {
+  CoreStart,
   ElasticsearchClient,
   KibanaRequest,
   Logger,
   SecurityServiceStart,
 } from '@kbn/core/server';
 import type { PublicMethodsOf } from '@kbn/utility-types';
-import type { IWorkflowEventLoggerService } from '@kbn/workflows-execution-engine/server';
+import type {
+  IWorkflowEventLoggerService,
+  StepExecutionsDataClient,
+  WorkflowExecutionsDataClient,
+  WorkflowsExecutionEnginePluginStart,
+} from '@kbn/workflows-execution-engine/server';
 import type { WorkflowsExtensionsServerPluginStart } from '@kbn/workflows-extensions/server';
 
+import type { IWorkflowChangeHistoryService } from './workflow_change_history_types';
 import type { WorkflowExecutionQueryService } from './workflow_execution_query_service';
 import type { WorkflowValidationService } from './workflow_validation_service';
 import type { WorkflowStorage } from '../storage/workflow_storage';
@@ -31,29 +38,39 @@ export interface WorkflowStorageDeps {
 
 /** Deps for WorkflowCrudService (CRUD + deletion + disable-all). */
 export interface WorkflowCrudDeps extends WorkflowStorageDeps {
-  esClient: ElasticsearchClient;
+  getSpaceId: (request: KibanaRequest) => string;
+  getServiceAccountBindings: () => WorkflowsExecutionEnginePluginStart['serviceAccountBindings'];
   getSecurity: () => SecurityServiceStart | undefined;
   workflowsExtensions: WorkflowsExtensionsServerPluginStart | undefined;
   getTaskScheduler: () => WorkflowTaskScheduler | null;
   executionQueryService: WorkflowExecutionQueryService;
   validationService: WorkflowValidationService;
+  getCoreStart: () => CoreStart;
+  changeHistoryService: IWorkflowChangeHistoryService;
+  workflowExecutionsDataClient: WorkflowExecutionsDataClient;
+  stepExecutionsDataClient: StepExecutionsDataClient;
 }
 
 /** Deps for WorkflowSearchService. */
 export interface WorkflowSearchDeps extends WorkflowStorageDeps {
   esClient: ElasticsearchClient;
+  workflowExecutionsDataClient: WorkflowExecutionsDataClient;
 }
 
 /** Deps for WorkflowExecutionQueryService. */
 export interface WorkflowExecutionQueryDeps {
   logger: Logger;
   esClient: ElasticsearchClient;
+  workflowExecutionsDataClient: WorkflowExecutionsDataClient;
+  stepExecutionsDataClient: StepExecutionsDataClient;
   workflowEventLoggerService: IWorkflowEventLoggerService;
 }
 
 /** Deps for WorkflowValidationService. */
 export interface WorkflowValidationDeps {
-  workflowsExtensions: WorkflowsExtensionsServerPluginStart | undefined;
+  /** Required plugin dependency, so it is always present once start has run. */
+  workflowsExtensions: WorkflowsExtensionsServerPluginStart;
   getActionsClient: () => Promise<IUnsecuredActionsClient>;
   getActionsClientWithRequest: (request: KibanaRequest) => Promise<PublicMethodsOf<ActionsClient>>;
+  getCoreStart: () => CoreStart;
 }

@@ -5,19 +5,16 @@
  * 2.0.
  */
 
-import { schema } from '@kbn/config-schema';
+import { z } from '@kbn/zod';
 
 import { lensResponseItemSchema } from './common';
 
-export const lensGetRequestParamsSchema = schema.object(
-  {
-    id: schema.string({
-      meta: {
-        description: 'The visualization identifier, as returned by the create or search endpoints.',
-      },
+export const lensGetRequestParamsSchema = z
+  .object({
+    id: z.string().meta({
+      description: 'The visualization identifier, as returned by the create or search endpoints.',
     }),
-  },
-  { unknowns: 'forbid' }
-);
+  })
+  .strict();
 
 export const lensGetResponseBodySchema = lensResponseItemSchema;

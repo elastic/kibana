@@ -5,13 +5,13 @@
  * 2.0.
  */
 import { ProcessorEvent } from '@kbn/apm-types-shared';
-import * as t from 'io-ts';
+import { z } from '@kbn/zod/v4';
 
-export const processorEventRt = t.union([
-  t.literal(ProcessorEvent.transaction),
-  t.literal(ProcessorEvent.error),
-  t.literal(ProcessorEvent.metric),
-  t.literal(ProcessorEvent.span),
+export const processorEventSchema = z.union([
+  z.literal(ProcessorEvent.transaction),
+  z.literal(ProcessorEvent.error),
+  z.literal(ProcessorEvent.metric),
+  z.literal(ProcessorEvent.span),
 ]);
 
 /**

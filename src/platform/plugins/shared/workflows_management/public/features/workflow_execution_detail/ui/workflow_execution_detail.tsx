@@ -9,7 +9,7 @@
 
 import { EuiPanel } from '@elastic/eui';
 import React, { useCallback, useEffect, useMemo } from 'react';
-import { useDispatch } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux-v7';
 import useLocalStorage from 'react-use/lib/useLocalStorage';
 
 import { useQueryClient } from '@kbn/react-query';
@@ -21,7 +21,6 @@ import {
 } from '@kbn/resizable-layout';
 import type { WorkflowStepExecutionDto } from '@kbn/workflows';
 import { ExecutionStatus, isTerminalStatus } from '@kbn/workflows';
-import type { JsonModelSchemaType } from '@kbn/workflows/spec/schema/common/json_model_schema';
 import { WorkflowExecutionPanel } from './workflow_execution_panel';
 import {
   buildOverviewStepExecutionFromContext,
@@ -29,13 +28,18 @@ import {
 } from './workflow_pseudo_step_context';
 import { WorkflowStepExecutionDetails } from './workflow_step_execution_details';
 import { useWorkflowExecutionPolling } from '../../../entities/workflows/model/use_workflow_execution_polling';
+import { selectStepExecutionsTotal } from '../../../entities/workflows/store/workflow_detail/selectors';
 import {
   HIGHLIGHTED_STEP_TRIGGER,
   setHighlightedStepId,
 } from '../../../entities/workflows/store/workflow_detail/slice';
+import type { WorkflowUrlSelectionSetter } from '../../../hooks/use_workflow_url_state';
 import { useWorkflowUrlState } from '../../../hooks/use_workflow_url_state';
+import type { RerunWorkflowExecutionParams } from '../../../pages/executions/build_replay_inputs_from_execution_context';
+import { resolveSelectedStepExecution } from '../model/resolve_selected_step_execution';
 import { useChildWorkflowExecutions } from '../model/use_child_workflow_executions';
 import { useStepExecution } from '../model/use_step_execution';
+import { useWaitingStepResume } from '../model/use_waiting_step_resume';
 
 const WidthStorageKey = 'WORKFLOWS_EXECUTION_DETAILS_WIDTH';
 const DefaultSidebarWidth = 300;
@@ -46,6 +50,10 @@ const PSEUDO_STEP_TRIGGER = 'trigger';
 export interface WorkflowExecutionDetailProps {
   executionId: string;
   onClose: () => void;
+  onReRunExecution?: (params: RerunWorkflowExecutionParams) => Promise<void>;
+  showBackButton?: boolean;
+  selectedStepExecutionId?: string | null;
+  onSelectedStepExecutionChange?: WorkflowUrlSelectionSetter;
 }
 
 function assignSelectedStepId(
@@ -62,18 +70,33 @@ function assignSelectedStepId(
 }
 
 export const WorkflowExecutionDetail: React.FC<WorkflowExecutionDetailProps> = React.memo(
-  ({ executionId, onClose }) => {
+  ({
+    executionId,
+    onClose,
+    onReRunExecution,
+    showBackButton: showBackButtonOverride,
+    selectedStepExecutionId: controlledSelectedStepExecutionId,
+    onSelectedStepExecutionChange,
+  }) => {
     const dispatch = useDispatch();
+    const stepExecutionsTotal = useSelector(selectStepExecutionsTotal);
     const { workflowExecution, error } = useWorkflowExecutionPolling(executionId);
     const queryClient = useQueryClient();
 
-    const { activeTab, setSelectedStepExecution, selectedStepExecutionId, shouldAutoResume } =
-      useWorkflowUrlState();
+    const urlState = useWorkflowUrlState();
     const [sidebarWidth = DefaultSidebarWidth, setSidebarWidth] = useLocalStorage(
       WidthStorageKey,
       DefaultSidebarWidth
     );
-    const showBackButton = activeTab === 'executions';
+    const isStepSelectionControlled = onSelectedStepExecutionChange !== undefined;
+    const selectedStepExecutionId = isStepSelectionControlled
+      ? controlledSelectedStepExecutionId ?? undefined
+      : urlState.selectedStepExecutionId;
+    const setSelectedStepExecution = isStepSelectionControlled
+      ? onSelectedStepExecutionChange
+      : urlState.setSelectedStepExecution;
+    const showBackButton = showBackButtonOverride ?? urlState.activeTab === 'executions';
+    const { shouldAutoResume } = urlState;
 
     // Clear cached step I/O data when switching to a different execution
     useEffect(() => {
@@ -86,9 +109,11 @@ export const WorkflowExecutionDetail: React.FC<WorkflowExecutionDetailProps> = R
       if (
         !selectedStepExecutionId &&
         executionId === workflowExecution?.id &&
-        (workflowExecution?.stepExecutions?.length || isTerminalStatus(workflowExecution?.status))
+        (workflowExecution?.stepExecutions?.length ||
+          isTerminalStatus(workflowExecution?.status) ||
+          workflowExecution?.status === ExecutionStatus.QUEUED)
       ) {
-        setSelectedStepExecution(PSEUDO_STEP_OVERVIEW);
+        setSelectedStepExecution(PSEUDO_STEP_TRIGGER, { replace: true });
       }
     }, [workflowExecution, selectedStepExecutionId, setSelectedStepExecution, executionId]);
 
@@ -109,34 +134,14 @@ export const WorkflowExecutionDetail: React.FC<WorkflowExecutionDetailProps> = R
     const { childExecutions, isLoading: isLoadingChildExecutions } =
       useChildWorkflowExecutions(workflowExecution);
 
-    // Step execution row id for the active waitForInput pause (polling uses includeInput: false)
-    const waitingStepExecutionId = useMemo(() => {
-      if (!workflowExecution || workflowExecution.status !== ExecutionStatus.WAITING_FOR_INPUT) {
-        return undefined;
-      }
-      return workflowExecution.stepExecutions?.find(
-        (s) => s.status === ExecutionStatus.WAITING_FOR_INPUT
-      )?.id;
-    }, [workflowExecution]);
-
-    // Fetch the paused step's full data (with input) independently of the selected step
-    // waitForInput stores its `with` config as stepExecution.input on pause entry
-    // consistent with every other step types
-    const { data: pausedStepFullData } = useStepExecution(
-      executionId,
+    const {
       waitingStepExecutionId,
-      ExecutionStatus.WAITING_FOR_INPUT
-    );
-
-    const { resumeMessage, resumeSchema } = useMemo<{
-      resumeMessage: string | undefined;
-      resumeSchema: JsonModelSchemaType | undefined;
-    }>(() => {
-      const stepInput = pausedStepFullData?.input as
-        | { message?: string; schema?: JsonModelSchemaType }
-        | undefined;
-      return { resumeMessage: stepInput?.message, resumeSchema: stepInput?.schema };
-    }, [pausedStepFullData]);
+      resumeMessage,
+      resumeSchema,
+      approvalLabels,
+      hasResumeError,
+      retryResume,
+    } = useWaitingStepResume(executionId, workflowExecution);
 
     // For pseudo-steps (overview, trigger), build from execution context directly
     const isPseudoStep =
@@ -168,57 +173,27 @@ export const WorkflowExecutionDetail: React.FC<WorkflowExecutionDetailProps> = R
       };
     }, [dispatch]);
 
-    // Find the lightweight step from the polled execution (has status/duration but no I/O).
-    // If not found in root steps, check child workflow execution steps.
     const {
       lightweightStep,
-      stepExecutionId: resolvedExecutionId,
+      resolvedExecutionId,
+      childWorkflowExecution: selectedStepChildExecution,
       parentWorkflowExecution,
-    } = useMemo(() => {
-      if (!selectedStepExecutionId || isPseudoStep) {
-        return {
-          lightweightStep: undefined,
-          stepExecutionId: executionId,
-          parentWorkflowExecution: undefined,
-        };
-      }
-
-      const parentStep = workflowExecution?.stepExecutions?.find(
-        (step) => step.id === selectedStepExecutionId
-      );
-      if (parentStep) {
-        return {
-          lightweightStep: parentStep,
-          stepExecutionId: executionId,
-          parentWorkflowExecution: undefined,
-        };
-      }
-
-      for (const childWorkflowExecution of childExecutions.values()) {
-        const childStep = childWorkflowExecution.stepExecutions.find(
-          (step) => step.id === selectedStepExecutionId
-        );
-        if (childStep) {
-          return {
-            lightweightStep: childStep,
-            stepExecutionId: childWorkflowExecution.executionId,
-            parentWorkflowExecution: childWorkflowExecution,
-          };
-        }
-      }
-
-      return {
-        lightweightStep: undefined,
-        stepExecutionId: executionId,
-        parentWorkflowExecution: undefined,
-      };
-    }, [
-      workflowExecution?.stepExecutions,
-      selectedStepExecutionId,
-      isPseudoStep,
-      executionId,
-      childExecutions,
-    ]);
+    } = useMemo(
+      () =>
+        resolveSelectedStepExecution({
+          selectedStepExecutionId: isPseudoStep ? undefined : selectedStepExecutionId,
+          parentExecutionId: executionId,
+          parentStepExecutions: workflowExecution?.stepExecutions,
+          childExecutions,
+        }),
+      [
+        selectedStepExecutionId,
+        isPseudoStep,
+        executionId,
+        workflowExecution?.stepExecutions,
+        childExecutions,
+      ]
+    );
 
     // Lazy-load full step data (with input/output) for real steps
     const { data: fullStepData, isLoading: isLoadingStepData } = useStepExecution(
@@ -226,11 +201,6 @@ export const WorkflowExecutionDetail: React.FC<WorkflowExecutionDetailProps> = R
       isPseudoStep ? undefined : selectedStepExecutionId ?? undefined,
       lightweightStep?.status
     );
-
-    const selectedStepChildExecution = useMemo(() => {
-      if (!selectedStepExecutionId || isPseudoStep) return undefined;
-      return childExecutions.get(selectedStepExecutionId);
-    }, [selectedStepExecutionId, isPseudoStep, childExecutions]);
 
     const selectedStepExecution = useMemo<WorkflowStepExecutionDto | undefined>(() => {
       if (!selectedStepExecutionId) {
@@ -258,19 +228,29 @@ export const WorkflowExecutionDetail: React.FC<WorkflowExecutionDetailProps> = R
     }, [workflowExecution, selectedStepExecutionId, lightweightStep, fullStepData]);
 
     return (
-      <EuiPanel paddingSize="none" color="plain" hasShadow={false} style={{ height: '100%' }}>
+      <EuiPanel
+        paddingSize="none"
+        color="plain"
+        hasShadow={false}
+        hasBorder={false}
+        borderRadius="none"
+        style={{ height: '100%' }}
+      >
         <ResizableLayout
           fixedPanel={
             <WorkflowExecutionPanel
               definition={workflowDefinition}
               execution={workflowExecution ?? null}
+              stepExecutionsTotal={stepExecutionsTotal}
               showBackButton={showBackButton}
               error={error}
               onClose={onClose}
+              onReRunExecution={onReRunExecution}
               onStepExecutionClick={setSelectedStepExecutionId}
               selectedId={selectedStepExecutionId ?? null}
               childExecutionsMap={childExecutions}
               isLoadingChildExecutions={isLoadingChildExecutions}
+              onBeforeDiagnose={() => setSelectedStepExecutionId(null)}
             />
           }
           fixedPanelSize={sidebarWidth}
@@ -281,13 +261,19 @@ export const WorkflowExecutionDetail: React.FC<WorkflowExecutionDetailProps> = R
             <WorkflowStepExecutionDetails
               workflowExecutionId={executionId}
               stepExecution={selectedStepExecution}
+              allStepExecutions={workflowExecution?.stepExecutions ?? []}
+              onSelectStepExecution={setSelectedStepExecutionId}
               workflowExecutionDuration={workflowExecution?.duration ?? undefined}
+              workflowExecutionUsage={workflowExecution?.usage}
               isLoadingStepData={isLoadingStepData && !isPseudoStep}
               workflowExecutionStatus={workflowExecution?.status}
               resumeMessage={resumeMessage}
               resumeSchema={resumeSchema}
+              approvalLabels={approvalLabels}
               shouldAutoResume={shouldAutoResume}
               waitingStepExecutionId={waitingStepExecutionId}
+              hasResumeError={hasResumeError}
+              onRetryResume={retryResume}
               childWorkflowExecution={selectedStepChildExecution}
               parentWorkflowExecution={parentWorkflowExecution}
             />

@@ -75,6 +75,13 @@ export const getBreakdownColumn = ({
         field,
         options: {
           size: topValuesOptions.size || DEFAULT_BREAKDOWN_SIZE,
+          ...(topValuesOptions.secondaryFields?.length
+            ? { secondaryFields: topValuesOptions.secondaryFields }
+            : {}),
+          ...(topValuesOptions.accuracyMode !== undefined
+            ? { accuracyMode: topValuesOptions.accuracyMode }
+            : {}),
+          ...topValuesOptions.orderBy,
         },
       });
     case 'intervals':

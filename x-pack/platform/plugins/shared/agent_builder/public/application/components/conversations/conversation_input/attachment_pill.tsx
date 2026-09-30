@@ -5,20 +5,24 @@
  * 2.0.
  */
 
-import { css } from '@emotion/css';
+import { css } from '@emotion/react';
 import {
-  EuiPanel,
+  EuiButtonIcon,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiText,
-  EuiButtonIcon,
   EuiIcon,
+  EuiPanel,
+  EuiText,
+  EuiToolTip,
   useEuiTheme,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { useState } from 'react';
 import type { Attachment } from '@kbn/agent-builder-common/attachments';
+import { AGENT_BUILDER_UI_EBT } from '@kbn/agent-builder-common';
+import { getEbtProps } from '@kbn/ebt-click';
 import { useAgentBuilderServices } from '../../../hooks/use_agent_builder_service';
+import { ThumbnailAttachmentPill } from './thumbnail_attachment_pill';
 
 const removeAriaLabel = i18n.translate('xpack.agentBuilder.attachmentPill.removeAriaLabel', {
   defaultMessage: 'Remove attachment',
@@ -27,6 +31,7 @@ const removeAriaLabel = i18n.translate('xpack.agentBuilder.attachmentPill.remove
 export interface AttachmentPillProps {
   attachment: Attachment;
   onRemoveAttachment?: () => void;
+  isHighlighted?: boolean;
 }
 
 const DEFAULT_ICON = 'document';
@@ -34,14 +39,30 @@ const DEFAULT_ICON = 'document';
 export const AttachmentPill: React.FC<AttachmentPillProps> = ({
   attachment,
   onRemoveAttachment,
+  isHighlighted = false,
 }) => {
   const { attachmentsService } = useAgentBuilderServices();
   const { euiTheme } = useEuiTheme();
   const uiDefinition = attachmentsService.getAttachmentUiDefinition(attachment.type);
   const [isHovered, setIsHovered] = useState(false);
 
-  const displayName = uiDefinition?.getLabel(attachment) ?? attachment.type;
   const canRemoveAttachment = Boolean(onRemoveAttachment);
+  const label = uiDefinition?.getLabel(attachment) ?? attachment.type;
+  const thumbnailUrl = uiDefinition?.getThumbnail?.(attachment);
+
+  if (thumbnailUrl) {
+    return (
+      <ThumbnailAttachmentPill
+        attachmentId={attachment.id}
+        thumbnailUrl={thumbnailUrl}
+        label={label}
+        onRemoveAttachment={onRemoveAttachment}
+        isHighlighted={isHighlighted}
+      />
+    );
+  }
+
+  const displayName = label;
   const iconType = uiDefinition?.getIcon?.() ?? DEFAULT_ICON;
 
   const iconContainerStyles = css`
@@ -52,6 +73,7 @@ export const AttachmentPill: React.FC<AttachmentPillProps> = ({
     height: ${euiTheme.size.xl};
     border-radius: ${euiTheme.border.radius.small};
     background-color: ${euiTheme.colors.backgroundBasePrimary};
+    overflow: hidden;
   `;
 
   const titleStyles = css`
@@ -71,7 +93,7 @@ export const AttachmentPill: React.FC<AttachmentPillProps> = ({
       paddingSize="s"
       css={css`
         max-width: 200px;
-        border: ${euiTheme.border.width.thin} solid ${euiTheme.colors.darkShade};
+        border: ${euiTheme.border.width.thin} solid ${euiTheme.colors.borderBaseSubdued};
       `}
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
@@ -79,24 +101,31 @@ export const AttachmentPill: React.FC<AttachmentPillProps> = ({
     >
       <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
         <EuiFlexItem grow={false}>
-          <div className={iconContainerStyles}>
-            <EuiIcon type={iconType} size="m" color="primary" />
+          <div css={iconContainerStyles}>
+            <EuiIcon type={iconType} size="m" color="primary" aria-hidden={true} />
           </div>
         </EuiFlexItem>
         <EuiFlexItem style={{ minWidth: 0 }}>
-          <EuiText size="xs" className={titleStyles}>
+          <EuiText size="xs" css={titleStyles}>
             <strong>{displayName}</strong>
           </EuiText>
         </EuiFlexItem>
         {canRemoveAttachment && isHovered && (
           <EuiFlexItem grow={false}>
-            <EuiButtonIcon
-              iconType="cross"
-              size="xs"
-              color="text"
-              aria-label={removeAriaLabel}
-              onClick={onRemoveAttachment}
-            />
+            <EuiToolTip content={removeAriaLabel} disableScreenReaderOutput>
+              <EuiButtonIcon
+                iconType="cross"
+                size="xs"
+                color="text"
+                aria-label={removeAriaLabel}
+                onClick={onRemoveAttachment}
+                {...getEbtProps({
+                  element: AGENT_BUILDER_UI_EBT.element.pageContent,
+                  action: AGENT_BUILDER_UI_EBT.action.conversation.REMOVE_ATTACHMENT,
+                  detail: 'conversation',
+                })}
+              />
+            </EuiToolTip>
           </EuiFlexItem>
         )}
       </EuiFlexGroup>

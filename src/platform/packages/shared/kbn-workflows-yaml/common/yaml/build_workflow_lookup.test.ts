@@ -522,6 +522,62 @@ steps:
   });
 });
 
+describe('buildWorkflowLookup trigger line positions', () => {
+  it('sets triggersLineStart and triggersLineEnd for a single trigger', () => {
+    const yaml = `
+name: test
+triggers:
+  - type: manual
+steps:
+  - name: step1
+    type: console
+`;
+    const lineCounter = new LineCounter();
+    const yamlDocument = parseDocument(yaml, { lineCounter, keepSourceTokens: true });
+    const result = buildWorkflowLookup(yamlDocument, lineCounter);
+
+    // triggersNode starts at line 4 (the "  - type: manual" line)
+    expect(result.triggersLineStart).toBe(4);
+    // single-line trigger — start and end are the same line
+    expect(result.triggersLineEnd).toBe(4);
+  });
+
+  it('sets triggersLineEnd to the last line of a multi-trigger block', () => {
+    const yaml = `
+name: test
+triggers:
+  - type: manual
+  - type: scheduled
+    every: 1h
+steps:
+  - name: step1
+    type: console
+`;
+    const lineCounter = new LineCounter();
+    const yamlDocument = parseDocument(yaml, { lineCounter, keepSourceTokens: true });
+    const result = buildWorkflowLookup(yamlDocument, lineCounter);
+
+    expect(result.triggersLineStart).toBe(4);
+    // multi-line block — triggersLineEnd must cover all trigger items
+    expect(result.triggersLineEnd).toBeGreaterThan(result.triggersLineStart!);
+  });
+
+  it('leaves triggersLineStart and triggersLineEnd undefined when there are no triggers', () => {
+    const yaml = `
+name: test
+steps:
+  - name: step1
+    type: console
+`;
+    const lineCounter = new LineCounter();
+    const yamlDocument = parseDocument(yaml, { lineCounter, keepSourceTokens: true });
+    const result = buildWorkflowLookup(yamlDocument, lineCounter);
+
+    expect(result.triggersLineStart).toBeUndefined();
+    expect(result.triggersLineEnd).toBeUndefined();
+  });
+});
+
 describe('buildWorkflowLookup', () => {
   it('should build a workflow lookup from a yaml string', () => {
     const yaml = `

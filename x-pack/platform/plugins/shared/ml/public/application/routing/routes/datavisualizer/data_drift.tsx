@@ -9,57 +9,15 @@ import { i18n } from '@kbn/i18n';
 import type { FC } from 'react';
 import React from 'react';
 import { ML_PAGES } from '@kbn/ml-common-types/locator_ml_pages';
-import {
-  DataDriftIndexOrSearchRedirect,
-  DataDriftIndexPatternsPicker,
-} from '../../../datavisualizer/data_drift/index_patterns_picker';
+import { DataDriftIndexPatternsPicker } from '../../../datavisualizer/data_drift/index_patterns_picker';
 import type { NavigateToPath } from '../../../contexts/kibana';
 import type { MlRoute } from '../..';
 import type { PageProps } from '../../router';
 import { createPath, PageLoader } from '../../router';
-import {
-  breadcrumbOnClickFactory,
-  DATA_DRIFT_INDEX_SELECT_BREADCRUMB,
-  DATA_VISUALIZER_BREADCRUMB,
-  DATA_DRIFT_BREADCRUMB,
-  getBreadcrumbWithUrlForApp,
-} from '../../breadcrumbs';
+import { getBreadcrumbWithUrlForApp } from '../../breadcrumbs';
 import { useRouteResolver } from '../../use_resolver';
 import { basicResolvers } from '../../resolvers';
 import { DataSourceContextProvider } from '../../../contexts/ml';
-
-export const dataDriftRouteIndexOrSearchFactory = (
-  navigateToPath: NavigateToPath,
-  basePath: string
-): MlRoute => ({
-  id: 'dataDrift',
-  path: createPath(ML_PAGES.DATA_DRIFT_INDEX_SELECT),
-  title: i18n.translate('xpack.ml.dataVisualizer.dataDrift.docTitle', {
-    defaultMessage: 'Data Drift',
-  }),
-  render: (props, deps) => (
-    <PageWrapper {...props} deps={deps} mode={ML_PAGES.DATA_DRIFT_INDEX_SELECT} />
-  ),
-  breadcrumbs: [
-    getBreadcrumbWithUrlForApp('ML_BREADCRUMB', navigateToPath, basePath),
-    getBreadcrumbWithUrlForApp('DATA_VISUALIZER_BREADCRUMB', navigateToPath, basePath),
-    {
-      text: DATA_DRIFT_BREADCRUMB.text,
-      ...(navigateToPath
-        ? {
-            href: `${basePath}/app/ml${DATA_DRIFT_BREADCRUMB.href}`,
-            onClick: breadcrumbOnClickFactory(DATA_DRIFT_BREADCRUMB.href, navigateToPath),
-          }
-        : {}),
-    },
-    {
-      text: i18n.translate('xpack.ml.trainedModelsBreadcrumbs.dataDriftLabel', {
-        defaultMessage: 'Select Data View',
-      }),
-    },
-  ],
-  'data-test-subj': 'mlPageDataDrift',
-});
 
 export const dataDriftRouteIndexPatternFactory = (
   navigateToPath: NavigateToPath,
@@ -70,21 +28,10 @@ export const dataDriftRouteIndexPatternFactory = (
   title: i18n.translate('xpack.ml.dataVisualizer.dataDriftCustomIndexPatterns.docTitle', {
     defaultMessage: 'Data Drift Custom Index Patterns',
   }),
-  render: (props, deps) => <PageWrapper {...props} deps={deps} mode={ML_PAGES.DATA_DRIFT_CUSTOM} />,
+  render: (props, deps) => <PageWrapper {...props} deps={deps} />,
   breadcrumbs: [
     getBreadcrumbWithUrlForApp('ML_BREADCRUMB', navigateToPath, basePath),
-    {
-      text: DATA_VISUALIZER_BREADCRUMB.text,
-      ...(navigateToPath
-        ? {
-            href: `${basePath}/app/ml${DATA_DRIFT_INDEX_SELECT_BREADCRUMB.href}`,
-            onClick: breadcrumbOnClickFactory(
-              DATA_DRIFT_INDEX_SELECT_BREADCRUMB.href,
-              navigateToPath
-            ),
-          }
-        : {}),
-    },
+    getBreadcrumbWithUrlForApp('DATA_VISUALIZER_BREADCRUMB', navigateToPath, basePath),
     {
       text: i18n.translate('xpack.ml.trainedModelsBreadcrumbs.dataDriftLabel', {
         defaultMessage: 'Data Drift',
@@ -94,20 +41,14 @@ export const dataDriftRouteIndexPatternFactory = (
   'data-test-subj': 'mlPageDataDriftCustomIndexPatterns',
 });
 
-interface DataDriftPageProps extends PageProps {
-  mode: 'data_drift_index_select' | 'data_drift_custom';
-}
-const PageWrapper: FC<DataDriftPageProps> = ({ mode }) => {
+type DataDriftPageProps = PageProps;
+const PageWrapper: FC<DataDriftPageProps> = () => {
   const { context } = useRouteResolver('full', [], basicResolvers());
 
   return (
     <PageLoader context={context}>
       <DataSourceContextProvider>
-        {mode === ML_PAGES.DATA_DRIFT_INDEX_SELECT ? (
-          <DataDriftIndexOrSearchRedirect />
-        ) : (
-          <DataDriftIndexPatternsPicker />
-        )}
+        <DataDriftIndexPatternsPicker />
       </DataSourceContextProvider>
     </PageLoader>
   );

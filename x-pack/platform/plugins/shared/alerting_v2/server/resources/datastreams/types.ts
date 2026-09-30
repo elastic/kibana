@@ -5,16 +5,23 @@
  * 2.0.
  */
 
-import type { IlmPolicy } from '@elastic/elasticsearch/lib/api/types';
+import type {
+  IndicesDataStreamLifecycleWithRollover,
+  IngestProcessorContainer,
+} from '@elastic/elasticsearch/lib/api/types';
 import type { MappingsDefinition } from '@kbn/es-mappings';
+
+export interface IngestPipelineDefinition {
+  id: string;
+  version: number;
+  processors: IngestProcessorContainer[];
+}
 
 export interface ResourceDefinition {
   key: string;
   dataStreamName: string;
   version: number;
   mappings: MappingsDefinition;
-  ilmPolicy: {
-    name: string;
-    policy: IlmPolicy;
-  };
+  lifecycle: IndicesDataStreamLifecycleWithRollover;
+  finalPipeline: IngestPipelineDefinition;
 }

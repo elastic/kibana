@@ -182,6 +182,9 @@ export default function createAlertTests({ getService }: FtrProviderContext) {
                 consumer: 'alertsFixture',
                 params: {},
                 created_by: user.username,
+                created_by_profile_uid: null,
+                updated_by_profile_uid: null,
+                api_key_owner_profile_uid: null,
                 schedule: { interval: '1m' },
                 scheduled_task_id: response.body.scheduled_task_id,
                 created_at: response.body.created_at,
@@ -208,6 +211,7 @@ export default function createAlertTests({ getService }: FtrProviderContext) {
                   warning: null,
                 },
                 next_run: response.body.next_run,
+                is_snoozed_until: response.body.is_snoozed_until,
               });
               expect(typeof response.body.scheduled_task_id).to.be('string');
               expect(Date.parse(response.body.created_at)).to.be.greaterThan(0);

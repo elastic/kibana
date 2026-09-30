@@ -10,6 +10,7 @@ import { elasticsearchServiceMock, loggingSystemMock } from '@kbn/core/server/mo
 import { registerAuthenticateRoute } from './authenticate';
 import { CloudConnectClient } from '../services/cloud_connect_client';
 import type { CloudConnectApiKey } from '../types';
+import { CLOUD_CONNECT_READ_SECURITY, CLOUD_CONNECT_MANAGE_SECURITY } from './route_security';
 
 jest.mock('../services/cloud_connect_client');
 jest.mock('../lib/create_storage_service');
@@ -94,6 +95,13 @@ describe('Authentication Routes', () => {
         (call) => call[0].path === '/internal/cloud_connect/config'
       );
       routeHandler = getCall![1];
+    });
+
+    it('should require the cloudConnect read privilege', () => {
+      const getCall = mockRouter.get.mock.calls.find(
+        (call) => call[0].path === '/internal/cloud_connect/config'
+      );
+      expect(getCall![0].security).toEqual(CLOUD_CONNECT_READ_SECURITY);
     });
 
     it('should return config with license and cluster info on happy path', async () => {
@@ -191,6 +199,13 @@ describe('Authentication Routes', () => {
         (call) => call[0].path === '/internal/cloud_connect/authenticate'
       );
       routeHandler = postCall![1];
+    });
+
+    it('should require the cloudConnect manage privilege', () => {
+      const postCall = mockRouter.post.mock.calls.find(
+        (call) => call[0].path === '/internal/cloud_connect/authenticate'
+      );
+      expect(postCall![0].security).toEqual(CLOUD_CONNECT_MANAGE_SECURITY);
     });
 
     it('should authenticate with cluster-scoped key (happy path)', async () => {

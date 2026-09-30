@@ -410,6 +410,18 @@ describe('Group Selector Hooks', () => {
       });
     });
 
+    it('Still returns GroupSelector when hideGroupSelector is true', () => {
+      const { result } = renderHook(() =>
+        useGetGroupSelector({
+          ...defaultArgs,
+          settings: { hideGroupSelector: true },
+        })
+      );
+
+      expect(result.current).not.toBeNull();
+      expect(result.current.props['data-test-subj']).toEqual('alerts-table-group-selector');
+    });
+
     describe('enforced groups', () => {
       it('throws error when "none" is in enforcedGroups', () => {
         const settings = {

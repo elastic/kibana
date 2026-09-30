@@ -106,10 +106,6 @@ export class SearchInferenceEndpointsPlugin
         },
       });
 
-    this.registerInferenceEndpoints.disable();
-    this.registerModelSettings.disable();
-    this.registerElasticInferenceService.disable();
-
     return {};
   }
 

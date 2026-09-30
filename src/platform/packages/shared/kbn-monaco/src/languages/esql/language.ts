@@ -8,7 +8,7 @@
  */
 
 import { esqlFunctionNames } from '@kbn/esql-language/src/commands/definitions/generated/function_names';
-import { monarch } from '@elastic/monaco-esql';
+import { create as monarchCreate } from '@elastic/monaco-esql';
 import * as monarchDefinitions from '@elastic/monaco-esql/lib/definitions';
 import { PromQLLang } from '../promql';
 import { monaco } from '../../monaco_imports';
@@ -37,7 +37,7 @@ export const ESQLLang: CustomLangModuleType<ESQLDependencies, MonacoMessage> = {
     // We need to manually trigger its language loading for it to work.
     await PromQLLang.onLanguage?.();
 
-    const language = monarch.create({
+    const language = monarchCreate({
       ...monarchDefinitions,
       functions: esqlFunctionNames,
     });

@@ -13,9 +13,11 @@ import { BehaviorSubject, combineLatest, debounceTime, map, merge, of, skip } fr
 import {
   apiHasPinnedPanels,
   apiHasSections,
+  panelIsRelatedByGlobalFilters,
   apiPublishesViewMode,
   fetch$,
-  initializeUnsavedChanges,
+  initializeRelatedPanels,
+  initializeStateApi,
   useBatchedPublishingSubjects,
 } from '@kbn/presentation-publishing';
 import { DEFAULT_RANGE_SLIDER_STATE, RANGE_SLIDER_CONTROL } from '@kbn/controls-constants';
@@ -71,18 +73,14 @@ export const getRangesliderControlFactory = (): EmbeddablePublicDefinition<
         dataControlManager.internalApi.onSelectionChange
       );
 
-      function serializeState() {
-        return {
+      const stateApi = initializeStateApi<RangeSliderControlState>({
+        uuid,
+        parentApi,
+        serializeState: () => ({
           ...dataControlManager.getLatestState(),
           ...editorStateManager.getLatestState(),
           value: selections.value$.getValue(),
-        };
-      }
-
-      const unsavedChangesApi = initializeUnsavedChanges<RangeSliderControlState>({
-        uuid,
-        parentApi,
-        serializeState,
+        }),
         anyStateChange$: merge(
           dataControlManager.anyStateChange$,
           selections.value$.pipe(
@@ -98,22 +96,58 @@ export const getRangesliderControlFactory = (): EmbeddablePublicDefinition<
             value: 'deepEquality',
           };
         },
-        onReset: (lastSaved) => {
-          dataControlManager.reinitializeState(lastSaved);
-          editorStateManager.reinitializeState(lastSaved);
-          selections.setValue(lastSaved?.value);
+        applySerializedState: (nextState) => {
+          dataControlManager.reinitializeState(nextState);
+          editorStateManager.reinitializeState(nextState);
+          selections.setValue(nextState.value);
         },
       });
 
+      const relatedPanelsApi = initializeRelatedPanels({
+        uuid,
+        parentApi,
+        ...panelIsRelatedByGlobalFilters(dataControlManager.api.useGlobalFilters$),
+      });
+
+      const controlFetch$ = fetch$({ uuid, parentApi });
+      const { minMax$: minMaxObservable$, cancelRequests: cancelMinMaxRequests } = minMax$({
+        controlFetch$,
+        dataViews$: dataControlManager.api.dataViews$,
+        fieldName$: dataControlManager.api.fieldName$,
+        esqlQuery$: dataControlManager.api.esqlQuery$,
+        valuesSource$: dataControlManager.api.valuesSource$,
+        useGlobalFilters$: dataControlManager.api.useGlobalFilters$,
+        setIsLoading: (isLoading: boolean) => {
+          // clear previous loading error on next loading start
+          if (isLoading && dataControlManager.api.blockingError$.value) {
+            dataControlManager.api.setBlockingError(undefined);
+          }
+          loadingMinMax$.next(isLoading);
+        },
+      });
+      const { hasNoResults$: hasNoResultsObservable$, cancelRequests: cancelHasNoResultsRequests } =
+        hasNoResults$({
+          api: dataControlManager.api,
+          controlFetch$,
+          setIsLoading: (isLoading: boolean) => {
+            loadingHasNoResults$.next(isLoading);
+          },
+        });
+
       const api = finalizeApi({
-        ...unsavedChangesApi,
+        ...stateApi,
         ...dataControlManager.api,
+        ...relatedPanelsApi,
         dataLoading$,
-        serializeState,
         clearSelections: () => {
           selections.setValue(undefined);
         },
         hasSelections$: selections.hasRangeSelection$,
+        supportsJsonExport: true,
+        cancelRequests: () => {
+          cancelMinMaxRequests();
+          cancelHasNoResultsRequests();
+        },
       });
 
       const dataLoadingSubscription = combineLatest([
@@ -140,22 +174,9 @@ export const getRangesliderControlFactory = (): EmbeddablePublicDefinition<
           selections.setValue(undefined);
         });
 
-      const controlFetch$ = fetch$({ uuid, parentApi });
       const max$ = new BehaviorSubject<number | undefined>(undefined);
       const min$ = new BehaviorSubject<number | undefined>(undefined);
-      const minMaxSubscription = minMax$({
-        controlFetch$,
-        dataViews$: dataControlManager.api.dataViews$,
-        fieldName$: dataControlManager.api.fieldName$,
-        useGlobalFilters$: dataControlManager.api.useGlobalFilters$,
-        setIsLoading: (isLoading: boolean) => {
-          // clear previous loading error on next loading start
-          if (isLoading && dataControlManager.api.blockingError$.value) {
-            dataControlManager.api.setBlockingError(undefined);
-          }
-          loadingMinMax$.next(isLoading);
-        },
-      }).subscribe(
+      const minMaxSubscription = minMaxObservable$.subscribe(
         ({
           error,
           min,
@@ -202,13 +223,7 @@ export const getRangesliderControlFactory = (): EmbeddablePublicDefinition<
         });
 
       const selectionHasNoResults$ = new BehaviorSubject(false);
-      const hasNotResultsSubscription = hasNoResults$({
-        api: dataControlManager.api,
-        controlFetch$,
-        setIsLoading: (isLoading: boolean) => {
-          loadingHasNoResults$.next(isLoading);
-        },
-      }).subscribe((hasNoResults) => {
+      const hasNotResultsSubscription = hasNoResultsObservable$.subscribe((hasNoResults) => {
         selectionHasNoResults$.next(hasNoResults);
       });
 
@@ -259,7 +274,7 @@ export const getRangesliderControlFactory = (): EmbeddablePublicDefinition<
 
           return (
             <RangeSliderControl
-              fieldName={fieldName}
+              fieldName={fieldName ?? ''}
               fieldFormatter={fieldFormatter}
               isInvalid={Boolean(value) && selectionHasNoResults}
               isLoading={typeof dataLoading === 'boolean' ? dataLoading : false}

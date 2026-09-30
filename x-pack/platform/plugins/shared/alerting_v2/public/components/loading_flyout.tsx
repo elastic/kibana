@@ -10,33 +10,30 @@ import {
   EuiEmptyPrompt,
   EuiFlyout,
   EuiFlyoutBody,
-  EuiFlyoutHeader,
   EuiLoadingSpinner,
-  EuiTitle,
+  type EuiFlyoutProps,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
 const FLYOUT_TITLE_ID = 'loadingFlyoutTitle';
 
 interface Props {
-  title: string;
   onClose: () => void;
+  type?: EuiFlyoutProps['type'];
+  session?: EuiFlyoutProps['session'];
+  ownFocus?: EuiFlyoutProps['ownFocus'];
 }
 
-export const LoadingFlyout = ({ title, onClose }: Props) => (
+export const LoadingFlyout = ({ onClose, type = 'push', session, ownFocus }: Props) => (
   <EuiFlyout
-    type="push"
+    type={type}
+    session={session}
+    ownFocus={ownFocus}
     size="s"
-    ownFocus
     onClose={onClose}
     aria-labelledby={FLYOUT_TITLE_ID}
     data-test-subj="loadingFlyout"
   >
-    <EuiFlyoutHeader hasBorder>
-      <EuiTitle size="s">
-        <h2 id={FLYOUT_TITLE_ID}>{title}</h2>
-      </EuiTitle>
-    </EuiFlyoutHeader>
     <EuiFlyoutBody>
       <EuiEmptyPrompt
         icon={<EuiLoadingSpinner size="xl" />}

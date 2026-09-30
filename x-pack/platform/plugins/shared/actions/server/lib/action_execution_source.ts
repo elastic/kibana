@@ -14,6 +14,9 @@ export enum ActionExecutionSourceType {
   BACKGROUND_TASK = 'BACKGROUND_TASK',
 }
 
+export const NOTIFICATIONS_REQUESTER_ID = 'notifications';
+export const WORKFLOWS_NOTIFICATION_REQUESTER_ID = 'workflows';
+
 export interface ActionExecutionSource<T> {
   type: ActionExecutionSourceType;
   source: T;

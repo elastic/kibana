@@ -67,7 +67,10 @@ export async function bulkEditRules<Params extends RuleParams>(
     auditAction,
     requiredAuthOperation,
     shouldInvalidateApiKeys,
-    changeTrackingAction: RuleChangeTrackingAction.ruleUpdate,
+    changeTracking: {
+      action: deriveChangeTrackingAction(options.operations),
+      ...options.changeTracking,
+    },
     shouldValidateSchedule: options.operations.some((operation) => operation.field === 'schedule'),
     updateFn: (opts: UpdateOperationOpts) =>
       updateRuleAttributesAndParamsInMemory<Params>({
@@ -131,6 +134,7 @@ async function updateRuleAttributesAndParamsInMemory<Params extends RuleParams>(
   skipped,
   errors,
   username,
+  profileUid,
   shouldInvalidateApiKeys,
   shouldIncrementRevision = () => true,
 }: UpdateOperationOpts & {
@@ -150,6 +154,7 @@ async function updateRuleAttributesAndParamsInMemory<Params extends RuleParams>(
       skipped,
       errors,
       username,
+      profileUid,
       paramsModifier,
       shouldInvalidateApiKeys,
       shouldIncrementRevision,
@@ -468,4 +473,19 @@ async function attemptToMigrateLegacyFrequency<Params extends RuleParams>(
     actions,
   });
   return rule;
+}
+
+// Only emit a specific action when the batch is unambiguous (single operation); mixed batches fall back to ruleUpdate.
+function deriveChangeTrackingAction(operations: BulkEditOperation[]): RuleChangeTrackingAction {
+  if (operations.length === 1 && operations[0].field === 'apiKey') {
+    return RuleChangeTrackingAction.ruleUpdateApiKey;
+  }
+
+  if (operations.length === 1 && operations[0].field === 'snoozeSchedule') {
+    return operations[0].operation === 'set'
+      ? RuleChangeTrackingAction.ruleSnooze
+      : RuleChangeTrackingAction.ruleUnsnooze;
+  }
+
+  return RuleChangeTrackingAction.ruleUpdate;
 }

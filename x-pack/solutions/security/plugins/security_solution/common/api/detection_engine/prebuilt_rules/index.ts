@@ -10,7 +10,7 @@ export type * from './get_prebuilt_rules_status/get_prebuilt_rules_status_route'
 export type * from './install_prebuilt_rules_and_timelines/install_prebuilt_rules_and_timelines_route.gen';
 export * from './perform_rule_installation/perform_rule_installation_route';
 export * from './perform_rule_upgrade/perform_rule_upgrade_route';
-export type * from './review_rule_installation/review_rule_installation_route';
+export * from './review_rule_installation/review_rule_installation_route.gen';
 export * from './review_rule_upgrade/review_rule_upgrade_route';
 export * from './urls';
 export type * from './model/aggregated_prebuilt_rules_error';

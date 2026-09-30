@@ -72,6 +72,11 @@ export class VisualizationListingPlugin
         }),
         visibleIn: ['globalSearch'],
       },
+      createAction: async () => {
+        const [coreStart, pluginsStart] = await core.getStartServices();
+        const { showNewVisModalFromDashboard } = await import('./get_table_list');
+        showNewVisModalFromDashboard(coreStart, pluginsStart, tabTitle);
+      },
     };
 
     if (dependencies.dashboard) {

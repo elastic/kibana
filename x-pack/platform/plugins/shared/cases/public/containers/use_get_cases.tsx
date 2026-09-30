@@ -23,6 +23,7 @@ export const initialData: CasesFindResponseUI = {
   countClosedCases: 0,
   countInProgressCases: 0,
   countOpenCases: 0,
+  mttr: null,
   page: 0,
   perPage: 0,
   total: 0,
@@ -55,11 +56,28 @@ export const useGetCases = (
     if (Object.keys(overrides).length > 0) {
       return {};
     }
-    const { extendedFieldFilters, freeText } = parseExtendedFieldSearch(rawSearch);
-    if (extendedFieldFilters.length === 0) {
+    const { extendedFieldFilters: parsedSearchFilters, freeText } =
+      parseExtendedFieldSearch(rawSearch);
+    if (parsedSearchFilters.length === 0) {
       return {};
     }
-    return { search: freeText, extendedFieldFilters };
+    const searchFilters = parsedSearchFilters.filter(({ value }) => value.length > 0);
+    const pickerFilters = params.filterOptions?.extendedFieldFilters ?? [];
+    const seen = new Set(
+      pickerFilters.map((entry) => `${entry.label.toLowerCase()}\0${entry.value}`)
+    );
+    const merged = [
+      ...pickerFilters,
+      ...searchFilters.filter((entry) => {
+        const key = `${entry.label.toLowerCase()}\0${entry.value}`;
+        if (seen.has(key)) {
+          return false;
+        }
+        seen.add(key);
+        return true;
+      }),
+    ];
+    return { search: freeText, extendedFieldFilters: merged };
   })();
 
   return useQuery(

@@ -18,7 +18,7 @@ import type {
 } from '@kbn/encrypted-saved-objects-plugin/server';
 import type { SecurityPluginStart, SecurityPluginSetup } from '@kbn/security-plugin/server';
 import type { CloudSetup } from '@kbn/cloud-plugin/server';
-import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
+import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import type { SavedObjectTaggingStart } from '@kbn/saved-objects-tagging-plugin/server';
 import type { SavedObjectsServiceStart } from '@kbn/core-saved-objects-server';
 import { SPACES_EXTENSION_ID } from '@kbn/core-saved-objects-server';
@@ -26,6 +26,7 @@ import type { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import type { SecurityServiceStart } from '@kbn/core-security-server';
 import type { Logger } from '@kbn/logging';
+import type { FeatureFlagsStart } from '@kbn/core-feature-flags-server';
 import type { LockManagerService } from '@kbn/lock-manager';
 import type { AlertingServerStart } from '@kbn/alerting-plugin/server';
 import type { ReportingStart } from '@kbn/reporting-plugin/server';
@@ -84,7 +85,7 @@ class AppContextService {
   private messageSigningService: MessageSigningServiceInterface | undefined;
   private uninstallTokenService: UninstallTokenServiceInterface | undefined;
   private taskManagerStart: TaskManagerStartContract | undefined;
-  private fetchUsage?: (abortController: AbortController) => Promise<FleetUsage | undefined>;
+  private fetchUsage?: (signal: AbortSignal) => Promise<FleetUsage | undefined>;
   private lockManagerService: LockManagerService | undefined;
   private alertingStart: AlertingServerStart | undefined;
   private includedHiddenTypes: string[] = [
@@ -93,6 +94,7 @@ class AppContextService {
     KibanaSavedObjectType.sloTemplate,
   ];
   private reportingStart: ReportingStart | undefined;
+  private featureFlags: FeatureFlagsStart | undefined;
 
   public start(appContext: FleetAppContext) {
     this.data = appContext.data;
@@ -122,6 +124,7 @@ class AppContextService {
     this.lockManagerService = appContext.lockManagerService;
     this.alertingStart = appContext.alertingStart;
     this.reportingStart = appContext.reportingStart;
+    this.featureFlags = appContext.featureFlags;
 
     if (appContext.config$) {
       this.config$ = appContext.config$;
@@ -352,6 +355,10 @@ class AppContextService {
 
   public getReportingStart() {
     return this.reportingStart;
+  }
+
+  public getFeatureFlags() {
+    return this.featureFlags;
   }
 }
 

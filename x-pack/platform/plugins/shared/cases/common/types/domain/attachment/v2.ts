@@ -12,6 +12,7 @@ import {
   SECURITY_ALERT_ATTACHMENT_TYPE,
   OBSERVABILITY_ALERT_ATTACHMENT_TYPE,
   STACK_ALERT_ATTACHMENT_TYPE,
+  SECURITY_ENTITY_ATTACHMENT_TYPE,
 } from '../../../constants/attachments';
 import {
   AlertAttachmentAttributesRt,
@@ -132,6 +133,7 @@ const UnifiedDocumentAttachmentAttributesRt = rt.intersection([
       rt.literal(SECURITY_ALERT_ATTACHMENT_TYPE),
       rt.literal(OBSERVABILITY_ALERT_ATTACHMENT_TYPE),
       rt.literal(STACK_ALERT_ATTACHMENT_TYPE),
+      rt.literal(SECURITY_ENTITY_ATTACHMENT_TYPE),
     ]),
     attachmentId: rt.union([rt.string, rt.array(rt.string)]),
     owner: rt.string,
@@ -164,11 +166,6 @@ export const DocumentAttachmentAttributesRtV2 = rt.union([
   UnifiedDocumentAttachmentAttributesRt,
 ]);
 export type DocumentAttachmentAttributesV2 = rt.TypeOf<typeof DocumentAttachmentAttributesRtV2>;
-
-/**
- * Transitional read-shape mode while v1/v2 attachments coexist.
- */
-export type AttachmentMode = 'legacy' | 'unified';
 
 /**
  * Combined v1 legacy and v2 unified attachment types

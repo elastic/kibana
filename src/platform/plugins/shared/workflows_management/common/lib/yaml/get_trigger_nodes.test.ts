@@ -87,4 +87,21 @@ steps:
     expect(nodes).toHaveLength(1);
     expect(nodes[0].triggerType).toBe('manual');
   });
+
+  it("does not pick up type fields from a trigger's nested inputs", () => {
+    const doc = parseDocument(`
+triggers:
+  - type: manual
+    inputs:
+      - name: message
+        type: string
+        default: "hello world"
+steps:
+  - name: s1
+    type: noop
+`);
+    const nodes = getTriggerNodes(doc);
+    expect(nodes).toHaveLength(1);
+    expect(nodes[0].triggerType).toBe('manual');
+  });
 });

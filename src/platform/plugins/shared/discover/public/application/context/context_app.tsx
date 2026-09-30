@@ -7,29 +7,22 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { Fragment, memo, useEffect, useRef, useMemo, useCallback } from 'react';
-import { FormattedMessage } from '@kbn/i18n-react';
-import {
-  EuiText,
-  EuiPage,
-  EuiPageBody,
-  EuiSpacer,
-  euiPaddingSize,
-  type UseEuiTheme,
-} from '@elastic/eui';
+import React, { Fragment, memo, useEffect, useRef, useMemo, useCallback, useState } from 'react';
+import { EuiPage, EuiPageBody } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { cloneDeep } from 'lodash';
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
-import type { DataView, DataViewField } from '@kbn/data-views-plugin/public';
+import type { DataView } from '@kbn/data-views-plugin/public';
 import { useExecutionContext } from '@kbn/kibana-react-plugin/public';
-import { generateFilters } from '@kbn/data-plugin/public';
 import { i18n } from '@kbn/i18n';
 import { SORT_DEFAULT_ORDER_SETTING } from '@kbn/discover-utils';
 import type { UseColumnsProps } from '@kbn/unified-data-table';
-import { popularizeField, useColumns } from '@kbn/unified-data-table';
+import { useColumns } from '@kbn/unified-data-table';
 import type { DocViewFilterFn } from '@kbn/unified-doc-viewer/types';
 import type { DiscoverGridSettings } from '@kbn/saved-search-plugin/common';
-import { kbnFullBodyHeightCss } from '@kbn/css-utils/public/full_body_height_css';
+import { AppHeader, type AppHeaderBack } from '@kbn/app-header';
+import type { DataTableRecord } from '@kbn/discover-utils/types';
+import type { DocViewerApi } from '@kbn/unified-doc-viewer';
 import { ContextErrorMessage } from './components/context_error_message';
 import { LoadingStatus } from './services/context_query_state';
 import type { AppState, GlobalState } from './services/context_state';
@@ -48,23 +41,29 @@ export interface ContextAppProps {
   dataView: DataView;
   anchorId: string;
   referrer?: string;
+  addFilter: DocViewFilterFn;
+  expandedDoc: DataTableRecord | undefined;
+  initialDocViewerTabId: string | undefined;
+  docViewerRef: React.RefObject<DocViewerApi>;
+  setExpandedDoc: (doc: DataTableRecord | undefined, options?: { initialTabId?: string }) => void;
 }
 
-export const ContextApp = ({ dataView, anchorId, referrer }: ContextAppProps) => {
+export const ContextApp = ({
+  dataView,
+  anchorId,
+  referrer,
+  addFilter,
+  expandedDoc,
+  initialDocViewerTabId,
+  docViewerRef,
+  setExpandedDoc,
+}: ContextAppProps) => {
   const styles = useMemoCss(componentStyles);
 
   const services = useDiscoverServices();
   const { scopedEBTManager } = useScopedServices();
-  const {
-    locator,
-    uiSettings,
-    capabilities,
-    dataViews,
-    navigation,
-    filterManager,
-    core,
-    fieldsMetadata,
-  } = services;
+  const { locator, uiSettings, capabilities, dataViews, navigation, core, fieldsMetadata } =
+    services;
 
   /**
    * Context app state
@@ -75,6 +74,10 @@ export const ContextApp = ({ dataView, anchorId, referrer }: ContextAppProps) =>
   });
   const prevAppState = useRef<AppState>();
   const prevGlobalState = useRef<GlobalState>({ filters: [] });
+  const [isWarningCalloutDismissed, setIsWarningCalloutDismissed] = useState(false);
+  const onDismissWarningCallout = useCallback(() => {
+    setIsWarningCalloutDismissed(true);
+  }, []);
 
   const setAppState = useCallback<UseColumnsProps['setAppState']>(
     ({ settings, ...rest }) => {
@@ -159,6 +162,7 @@ export const ContextApp = ({ dataView, anchorId, referrer }: ContextAppProps) =>
 
       if (fetchType) {
         surroundingDocsFetchTracker.reportEvent({ meta: { fetchType } });
+        setIsWarningCalloutDismissed(false);
       }
     };
 
@@ -199,23 +203,6 @@ export const ContextApp = ({ dataView, anchorId, referrer }: ContextAppProps) =>
     ]
   );
 
-  const addFilter = useCallback(
-    async (field: DataViewField | string, values: unknown, operation: '+' | '-') => {
-      const newFilters = generateFilters(filterManager, field, values, operation, dataView);
-      filterManager.addFilters(newFilters);
-      if (dataViews) {
-        const fieldName = typeof field === 'string' ? field : field.name;
-        await popularizeField(dataView, fieldName, dataViews, capabilities);
-        void scopedEBTManager.trackFilterAddition({
-          fieldName: fieldName === '_exists_' ? String(values) : fieldName,
-          filterOperation: fieldName === '_exists_' ? '_exists_' : operation,
-          fieldsMetadata,
-        });
-      }
-    },
-    [filterManager, dataView, dataViews, capabilities, scopedEBTManager, fieldsMetadata]
-  );
-
   const onAddColumnWithTracking = useCallback(
     (columnName: string) => {
       onAddColumn(columnName);
@@ -245,8 +232,18 @@ export const ContextApp = ({ dataView, anchorId, referrer }: ContextAppProps) =>
     };
   };
 
+  const title = i18n.translate('discover.context.pageTitle', {
+    defaultMessage: 'Documents surrounding #{anchorId}',
+    values: { anchorId },
+  });
+  const back: AppHeaderBack = {
+    href: referrer ?? '#/',
+    label: i18n.translate('discover.context.backButtonLabel', { defaultMessage: 'Discover' }),
+  };
+
   return (
     <Fragment>
+      <AppHeader title={title} back={back} spacing="compact" />
       {fetchedState.anchorStatus.value === LoadingStatus.FAILED ? (
         <ContextErrorMessage status={fetchedState.anchorStatus} />
       ) : (
@@ -256,29 +253,16 @@ export const ContextApp = ({ dataView, anchorId, referrer }: ContextAppProps) =>
             className="euiScreenReaderOnly"
             data-test-subj="discoverContextAppTitle"
           >
-            {i18n.translate('discover.context.pageTitle', {
-              defaultMessage: 'Documents surrounding #{anchorId}',
-              values: { anchorId },
-            })}
+            {title}
           </h1>
           <TopNavMenu {...getNavBarProps()} />
-          <EuiPage css={styles.docsPage}>
+          <EuiPage>
             <EuiPageBody
               panelled
               paddingSize="none"
               css={styles.docsContent}
-              panelProps={{ role: 'main' }}
+              panelProps={{ role: 'main', hasShadow: false }}
             >
-              <EuiText data-test-subj="contextDocumentSurroundingHeader" css={styles.title}>
-                <FormattedMessage
-                  id="discover.context.contextOfTitle"
-                  defaultMessage="Documents surrounding {anchorId}"
-                  values={{
-                    anchorId: <span css={styles.documentId}>#{anchorId}</span>,
-                  }}
-                />
-              </EuiText>
-              <EuiSpacer size="s" />
               <ContextAppContentMemoized
                 dataView={dataView}
                 columns={columns}
@@ -289,7 +273,11 @@ export const ContextApp = ({ dataView, anchorId, referrer }: ContextAppProps) =>
                 predecessorCount={appState.predecessorCount}
                 successorCount={appState.successorCount}
                 setAppState={stateContainer.setAppState}
-                addFilter={addFilter as DocViewFilterFn}
+                addFilter={addFilter}
+                expandedDoc={expandedDoc}
+                initialDocViewerTabId={initialDocViewerTabId}
+                docViewerRef={docViewerRef}
+                setExpandedDoc={setExpandedDoc}
                 rows={rows}
                 predecessors={fetchedState.predecessors}
                 successors={fetchedState.successors}
@@ -297,6 +285,8 @@ export const ContextApp = ({ dataView, anchorId, referrer }: ContextAppProps) =>
                 predecessorsStatus={fetchedState.predecessorsStatus.value}
                 successorsStatus={fetchedState.successorsStatus.value}
                 interceptedWarnings={interceptedWarnings}
+                isWarningCalloutDismissed={isWarningCalloutDismissed}
+                onDismissWarningCallout={onDismissWarningCallout}
               />
             </EuiPageBody>
           </EuiPage>
@@ -312,20 +302,4 @@ const componentStyles = {
     flexDirection: 'column',
     height: '100%',
   }),
-  docsPage: kbnFullBodyHeightCss('54px'), // 54px is the action bar height
-  title: (themeContext: UseEuiTheme) => {
-    const { euiTheme } = themeContext;
-    const titlePadding = euiPaddingSize(themeContext, 's');
-
-    return css({
-      padding: `${titlePadding} ${titlePadding} 0`,
-      fontWeight: euiTheme.font.weight.bold,
-    });
-  },
-  documentId: ({ euiTheme }: UseEuiTheme) =>
-    css({
-      backgroundColor: euiTheme.colors.backgroundBaseWarning,
-      color: euiTheme.colors.textWarning,
-      padding: `0 ${euiTheme.size.xs}`,
-    }),
 };

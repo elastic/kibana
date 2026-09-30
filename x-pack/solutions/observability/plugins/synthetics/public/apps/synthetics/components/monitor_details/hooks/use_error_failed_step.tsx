@@ -5,24 +5,29 @@
  * 2.0.
  */
 
-import { useEsSearch } from '@kbn/observability-shared-plugin/public';
 import { useParams } from 'react-router-dom';
 import { useMemo } from 'react';
 import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
+import { useSyntheticsEsSearch } from '../../../hooks/use_synthetics_es_search';
 import { STEP_END_FILTER } from '../../../../../../common/constants/data_filters';
 import { asMutableArray } from '../../../../../../common/utils/as_mutable_array';
 import type { Ping } from '../../../../../../common/runtime_types';
-import { SYNTHETICS_INDEX_PATTERN } from '../../../../../../common/constants';
+import { getSyntheticsCcsIndex } from '../../../../../../common/get_synthetics_indices';
 import { useSyntheticsRefreshContext } from '../../../contexts';
+import { useGetUrlParams } from '../../../hooks';
 
 export function useErrorFailedStep(checkGroups: string[]) {
   const { lastRefresh } = useSyntheticsRefreshContext();
 
   const { monitorId } = useParams<{ monitorId: string }>();
 
-  const { data, loading } = useEsSearch(
+  const { remoteName } = useGetUrlParams();
+
+  const indexPattern = getSyntheticsCcsIndex(remoteName);
+
+  const { data, loading } = useSyntheticsEsSearch(
     {
-      index: checkGroups?.length > 0 ? SYNTHETICS_INDEX_PATTERN : '',
+      index: checkGroups?.length > 0 ? indexPattern : '',
       size: checkGroups.length,
       query: {
         bool: {
@@ -47,7 +52,7 @@ export function useErrorFailedStep(checkGroups: string[]) {
       ] as const),
       _source: ['synthetics.step', 'synthetics.error', 'monitor.check_group'],
     },
-    [lastRefresh, monitorId, checkGroups],
+    [lastRefresh, monitorId, checkGroups, remoteName],
     { name: 'getMonitorErrorFailedStep' }
   );
 

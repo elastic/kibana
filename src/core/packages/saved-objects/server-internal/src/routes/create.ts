@@ -11,6 +11,15 @@ import path from 'node:path';
 import { schema, type TypeOf } from '@kbn/config-schema';
 import type { KibanaRequest, RouteAccess, RouteDeprecationInfo } from '@kbn/core-http-server';
 import type { SavedObjectConfig } from '@kbn/core-saved-objects-base-server-internal';
+import {
+  MAX_SAVED_OBJECT_ID_LENGTH,
+  MAX_SAVED_OBJECT_NAME_LENGTH,
+  MAX_SAVED_OBJECT_NAMESPACE_LENGTH,
+  MAX_SAVED_OBJECT_REFERENCES_PER_OBJECT,
+  MAX_SAVED_OBJECT_TYPE_LENGTH,
+  MAX_SAVED_OBJECT_VERSION_LENGTH,
+  MAX_SAVED_OBJECTS_PER_QUERY,
+} from '@kbn/core-saved-objects-server';
 import type { InternalCoreUsageDataSetup } from '@kbn/core-usage-data-base-server-internal';
 import type { Logger } from '@kbn/logging';
 import type {
@@ -45,21 +54,38 @@ export const registerCreateRoute = (
   });
 
   const createBodySchema = schema.object({
-    attributes: schema.recordOf(schema.string(), schema.any()),
-    migrationVersion: schema.maybe(schema.recordOf(schema.string(), schema.string())),
-    coreMigrationVersion: schema.maybe(schema.string()),
-    typeMigrationVersion: schema.maybe(schema.string()),
+    attributes: schema.recordOf(
+      schema.string({ maxLength: MAX_SAVED_OBJECT_NAME_LENGTH }),
+      schema.any()
+    ),
+    migrationVersion: schema.maybe(
+      schema.recordOf(
+        schema.string({ maxLength: MAX_SAVED_OBJECT_TYPE_LENGTH }),
+        schema.string({ maxLength: MAX_SAVED_OBJECT_VERSION_LENGTH })
+      )
+    ),
+    coreMigrationVersion: schema.maybe(
+      schema.string({ maxLength: MAX_SAVED_OBJECT_VERSION_LENGTH })
+    ),
+    typeMigrationVersion: schema.maybe(
+      schema.string({ maxLength: MAX_SAVED_OBJECT_VERSION_LENGTH })
+    ),
     references: schema.maybe(
       schema.arrayOf(
         schema.object({
-          name: schema.string(),
-          type: schema.string(),
-          id: schema.string(),
+          name: schema.string({ maxLength: MAX_SAVED_OBJECT_NAME_LENGTH }),
+          type: schema.string({ maxLength: MAX_SAVED_OBJECT_TYPE_LENGTH }),
+          id: schema.string({ maxLength: MAX_SAVED_OBJECT_ID_LENGTH }),
         }),
-        { maxSize: 1000 }
+        { maxSize: MAX_SAVED_OBJECT_REFERENCES_PER_OBJECT }
       )
     ),
-    initialNamespaces: schema.maybe(schema.arrayOf(schema.string(), { minSize: 1, maxSize: 100 })),
+    initialNamespaces: schema.maybe(
+      schema.arrayOf(schema.string({ maxLength: MAX_SAVED_OBJECT_NAMESPACE_LENGTH }), {
+        minSize: 1,
+        maxSize: MAX_SAVED_OBJECTS_PER_QUERY,
+      })
+    ),
   });
 
   type CreateBody = TypeOf<typeof createBodySchema>;
@@ -133,7 +159,10 @@ For transferring or backing up saved objects, prefer the import and export APIs 
       validate: {
         ...validateBase,
         params: schema.object({
-          type: schema.string({ meta: { description: 'The saved object type.' } }),
+          type: schema.string({
+            maxLength: MAX_SAVED_OBJECT_TYPE_LENGTH,
+            meta: { description: 'The saved object type.' },
+          }),
         }),
       },
     },
@@ -166,8 +195,14 @@ For transferring or backing up saved objects, prefer the import and export APIs 
       validate: {
         ...validateBase,
         params: schema.object({
-          type: schema.string({ meta: { description: 'The saved object type.' } }),
-          id: schema.string({ meta: { description: 'The saved object identifier.' } }),
+          type: schema.string({
+            maxLength: MAX_SAVED_OBJECT_TYPE_LENGTH,
+            meta: { description: 'The saved object type.' },
+          }),
+          id: schema.string({
+            maxLength: MAX_SAVED_OBJECT_ID_LENGTH,
+            meta: { description: 'The saved object identifier.' },
+          }),
         }),
       },
     },

@@ -757,6 +757,60 @@ describe('Session', () => {
       });
     });
 
+    it.each([now + 50, null])(
+      'persists refreshed state without extending the cookie idle deadline (%s)',
+      async (idleTimeoutExpiration) => {
+        const cookie = sessionCookieMock.createValue({
+          aad: mockAAD,
+          idleTimeoutExpiration,
+          lifespanExpiration: now + 100,
+        });
+        mockSessionCookie.get.mockResolvedValue(cookie);
+        mockSessionIndex.update.mockImplementation(async (value) => value);
+        const state = {
+          accessToken: 'refreshed-access-token',
+          refreshToken: 'refreshed-refresh-token',
+        };
+        const previousValue = sessionMock.createValue({
+          idleTimeoutExpiration: now + 1,
+          lifespanExpiration: now + 2,
+        });
+        const request = httpServerMock.createKibanaRequest();
+
+        const updated = await session.update(
+          request,
+          { ...previousValue, state },
+          { extend: false }
+        );
+
+        expect(updated).toEqual(
+          expect.objectContaining({
+            sid: previousValue.sid,
+            state,
+            idleTimeoutExpiration,
+            lifespanExpiration: cookie.lifespanExpiration,
+          })
+        );
+        expect(mockSessionIndex.update).toHaveBeenCalledTimes(1);
+        const stored = mockSessionIndex.update.mock.calls[0][0];
+        expect(stored).toEqual(
+          expect.objectContaining({
+            idleTimeoutExpiration,
+            lifespanExpiration: cookie.lifespanExpiration,
+          })
+        );
+        const decrypted = await nodeCrypto({ encryptionKey: mockEncryptionKey }).decrypt(
+          stored.content,
+          mockAAD
+        );
+        expect(JSON.parse(decrypted as string).state).toEqual(state);
+        expect(mockSessionCookie.set).toHaveBeenCalledTimes(1);
+        expect(mockSessionCookie.set).toHaveBeenCalledWith(request, cookie);
+        expect(mockSessionCookie.clear).not.toHaveBeenCalled();
+        expect(mockSessionIndex.invalidate).not.toHaveBeenCalled();
+      }
+    );
+
     it('properly extends session expiration if idle timeout is defined.', async () => {
       mockSessionCookie.get.mockResolvedValue(
         sessionCookieMock.createValue({ aad: mockAAD, idleTimeoutExpiration: now + 1 })

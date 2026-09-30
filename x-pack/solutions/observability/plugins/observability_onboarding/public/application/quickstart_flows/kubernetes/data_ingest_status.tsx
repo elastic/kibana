@@ -26,7 +26,6 @@ interface Props {
   integration: string;
   actionLinks: ActionLink[];
   onDataReceived?: () => void;
-  respectPreExistingData?: boolean;
 }
 
 const FETCH_INTERVAL = 2000;
@@ -39,7 +38,6 @@ export function DataIngestStatus({
   integration,
   actionLinks,
   onDataReceived,
-  respectPreExistingData = true,
 }: Props) {
   const [checkDataStartTime] = useState(Date.now());
   const [dataReceivedTelemetrySent, setDataReceivedTelemetrySent] = useState(false);
@@ -48,21 +46,20 @@ export function DataIngestStatus({
     services: { analytics },
   } = useKibana<ObservabilityOnboardingContextValue>();
 
-  const startIso = new Date(checkDataStartTime).toISOString();
-
   const { data, status, refetch } = useFetcher(
     (callApi) => {
       return callApi('GET /internal/observability_onboarding/kubernetes/{onboardingId}/has-data', {
-        params: { path: { onboardingId }, query: { start: startIso } },
+        params: {
+          path: { onboardingId },
+        },
       });
     },
-    [onboardingId, startIso]
+    [onboardingId]
   );
 
   const hasData = data?.hasData ?? false;
   const hasLogs = data?.hasLogs ?? hasData;
   const hasMetrics = data?.hasMetrics ?? hasData;
-  const hasPreExistingData = respectPreExistingData ? data?.hasPreExistingData ?? false : false;
 
   const needsMetrics = actionLinks.some((actionLink) => actionLink.requires === 'metrics');
   const needsLogs = actionLinks.some((actionLink) => actionLink.requires === 'logs');
@@ -75,7 +72,7 @@ export function DataIngestStatus({
   useEffect(() => {
     const pendingStatusList = [FETCH_STATUS.LOADING, FETCH_STATUS.NOT_INITIATED];
 
-    if (pendingStatusList.includes(status) || isReady || hasPreExistingData) {
+    if (pendingStatusList.includes(status) || isReady) {
       return;
     }
 
@@ -84,7 +81,7 @@ export function DataIngestStatus({
     }, FETCH_INTERVAL);
 
     return () => clearTimeout(timeout);
-  }, [isReady, hasPreExistingData, refetch, status]);
+  }, [isReady, refetch, status]);
 
   useEffect(() => {
     if (dataReceivedTelemetrySent) return;
@@ -97,51 +94,32 @@ export function DataIngestStatus({
         step: 'logs-ingest',
         step_status: 'complete',
       });
-    } else if (hasPreExistingData) {
-      setDataReceivedTelemetrySent(true);
-      analytics.reportEvent(OBSERVABILITY_ONBOARDING_TELEMETRY_EVENT.eventType, {
-        flow_type: onboardingFlowType,
-        flow_id: onboardingId,
-        step: 'logs-ingest',
-        step_status: 'pre_existing_data',
-      });
     }
-  }, [
-    analytics,
-    hasData,
-    hasPreExistingData,
-    dataReceivedTelemetrySent,
-    onboardingFlowType,
-    onboardingId,
-  ]);
+  }, [analytics, hasData, dataReceivedTelemetrySent, onboardingFlowType, onboardingId]);
 
   useEffect(() => {
-    if ((isReady || hasPreExistingData) && !dataReceivedNotified) {
+    if (isReady && !dataReceivedNotified) {
       onDataReceived?.();
       setDataReceivedNotified(true);
     }
-  }, [isReady, hasPreExistingData, onDataReceived, dataReceivedNotified]);
+  }, [isReady, onDataReceived, dataReceivedNotified]);
 
   const isTroubleshootingVisible =
-    hasData === false &&
-    !hasPreExistingData &&
-    Date.now() - checkDataStartTime > SHOW_TROUBLESHOOTING_DELAY;
+    hasData === false && Date.now() - checkDataStartTime > SHOW_TROUBLESHOOTING_DELAY;
 
-  const filteredActionLinks = hasPreExistingData
-    ? actionLinks
-    : actionLinks.filter((actionLink) => {
-        const requires = actionLink.requires ?? 'any';
+  const filteredActionLinks = actionLinks.filter((actionLink) => {
+    const requires = actionLink.requires ?? 'any';
 
-        if (requires === 'logs') {
-          return hasLogs;
-        }
+    if (requires === 'logs') {
+      return hasLogs;
+    }
 
-        if (requires === 'metrics') {
-          return hasMetrics;
-        }
+    if (requires === 'metrics') {
+      return hasMetrics;
+    }
 
-        return hasData;
-      });
+    return hasData;
+  });
 
   const filteredActionLinksWithHref = filteredActionLinks.filter((actionLink) =>
     Boolean(actionLink.href)
@@ -171,17 +149,15 @@ export function DataIngestStatus({
 
   return (
     <>
-      {!(hasPreExistingData && !hasData) && (
-        <ProgressIndicator
-          title={progressTitle}
-          iconType="checkCircleFill"
-          isLoading={needsMetrics ? !hasMetrics : !hasData}
-          css={css`
-            max-width: 40%;
-          `}
-          data-test-subj="observabilityOnboardingKubernetesPanelDataProgressIndicator"
-        />
-      )}
+      <ProgressIndicator
+        title={progressTitle}
+        iconType="checkCircleFill"
+        isLoading={needsMetrics ? !hasMetrics : !hasData}
+        css={css`
+          max-width: 40%;
+        `}
+        data-test-subj="observabilityOnboardingKubernetesPanelDataProgressIndicator"
+      />
 
       {isTroubleshootingVisible && (
         <>
@@ -212,7 +188,7 @@ export function DataIngestStatus({
         </>
       )}
 
-      {(hasData === true || hasPreExistingData) && filteredActionLinksWithHref.length > 0 && (
+      {hasData === true && filteredActionLinksWithHref.length > 0 && (
         <>
           <EuiSpacer />
 

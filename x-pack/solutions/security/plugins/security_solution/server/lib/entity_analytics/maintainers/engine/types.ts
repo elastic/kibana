@@ -94,7 +94,7 @@ export interface CustomActorBinding {
  * whether the config uses the default ES|QL builder or supplies its own
  * override (Step 1 composite-agg discovery always uses these).
  */
-interface BaseRelationshipIntegrationFields {
+interface RelationshipIntegrationBase {
   /** Unique machine-readable identifier, e.g. 'elastic_defend'. */
   id: string;
   /** Human-readable name used in log messages. */
@@ -135,6 +135,74 @@ interface BaseRelationshipIntegrationFields {
    * and Step 2 EUID expression describe the same actor — they cannot drift.
    */
   customActor?: CustomActorBinding;
+  /**
+   * When true, the engine validates each derived target EUID against the entity
+   * index before writing, filtering out any IDs that have no matching entity
+   * document. Use this for `kind: 'override'` raw_identifiers-based maintainers
+   * (e.g. administers) whose targets are inferred from free-text fields like
+   * `raw_identifiers.host.name` — a field value does not guarantee an entity
+   * exists. Log-based maintainers (accesses, communicates_with) derive targets
+   * from real ECS host/user identity fields that extraction already indexed, so
+   * the extra round-trip is unnecessary for them.
+   *
+   * Default (false/undefined): no validation, existing behavior preserved.
+   */
+  validateTargetIds?: boolean;
+  /**
+   * When true, the engine omits its default `@timestamp >= now-30d` lookback
+   * filter from both Step 1 (composite agg) and Step 2 (ES|QL wrapper).
+   *
+   * The lookback is a *log-index* assumption: log-based maintainers only care
+   * about recent events, and a 30-day window bounds the scan. But configs whose
+   * `indexPattern` targets the **entity index** (`.entities.v2.latest`) read
+   * one snapshot doc per entity, whose `@timestamp` tracks the transform's
+   * write time, not event recency — applying the lookback there silently drops
+   * entities the maintainer must process. Such configs set this flag and rely
+   * on their own freshness gate instead (e.g. an `entity.lifecycle.last_seen`
+   * watermark in `compositeAggAdditionalFilters` / the override query).
+   *
+   * Default (false/undefined): the lookback is applied, preserving existing
+   * log-based maintainer behavior.
+   */
+  disableLookbackWindow?: boolean;
+  /**
+   * Clear this config's `relationshipKey` on all entities from `entitySource`
+   * before processing any page, so the run repopulates from a clean slate.
+   *
+   * ONLY for sources that emit a COMPLETE snapshot of the relationship set each
+   * cycle (e.g. Workday's 24h user inventory). On an event-stream source
+   * (`accesses`, `communicates_with`) absence means "not seen in this window",
+   * never "no longer true" — clearing there would erase real observations.
+   *
+   * Safe only while a source's actors are namespace-partitioned into their own
+   * entity documents; otherwise this would delete another source's contribution
+   * to the same `ids` array.
+   */
+  resetRelationshipsBeforeRun?: { entitySource: string };
+  /**
+   * Declares that every document this integration reads describes a *host-scoped*
+   * (non-IDP) user — an identity meaningful only within one host, keyed by
+   * `user.name` + `host.id` — and always carries `host.id`. This is an assertion
+   * about the *data*, not a build directive, but it lets Step 2 skip work that
+   * only exists to handle the general case:
+   *
+   * - the actor EUID comes from `euid.experimental.getHostScopedUserEuidEsql()`, which emits
+   *   the namespace directly instead of deriving `entity.namespace` (a 7-arm
+   *   CASE/COALESCE tree over `event.module`, `event.dataset`,
+   *   `data_stream.dataset`, `cloud.provider` and `event.kind`);
+   * - the target EUID and its existence gate read `host.id` alone, skipping the
+   *   `host.name` / `host.hostname` fallback chain.
+   *
+   * Net effect is ~2 EVAL columns per row instead of ~35 — measured ~26× faster
+   * on logs-system.auth (~700M docs, 30d lookback).
+   *
+   * Both claims must hold. `system_auth` and `system_security` qualify (SSH and
+   * Windows logon events are host-scoped and always carry `host.id`). Setting
+   * this where IDP-issued users can appear silently produces EUIDs that do not
+   * match the entity store, 404-ing every write; setting it where `host.id` can
+   * be absent silently drops those documents.
+   */
+  hostScopedUsersOnly?: true;
 }
 
 /**
@@ -182,7 +250,7 @@ interface StandardBuilderFields {
  * is also the entity.relationships key the parser writes to.
  */
 export interface StandardRelationshipIntegrationConfig
-  extends BaseRelationshipIntegrationFields,
+  extends RelationshipIntegrationBase,
     StandardBuilderFields {
   kind: 'standard';
   relationshipKey: EntityRelationshipKey;
@@ -195,7 +263,7 @@ export interface StandardRelationshipIntegrationConfig
  * `relationshipKey` is required.
  */
 export interface BucketedRelationshipIntegrationConfig
-  extends BaseRelationshipIntegrationFields,
+  extends RelationshipIntegrationBase,
     StandardBuilderFields {
   kind: 'bucketed';
   bucketTargetByThreshold: BucketTargetByThresholdConfig;
@@ -222,10 +290,26 @@ export interface BucketedRelationshipIntegrationConfig
  * described at the top of this file (backticks for dotted-numeric or
  * reserved-word segments — see the Azure override for an example).
  */
-export interface OverrideRelationshipIntegrationConfig extends BaseRelationshipIntegrationFields {
+export interface OverrideRelationshipIntegrationConfig extends RelationshipIntegrationBase {
   kind: 'override';
   relationshipKey: EntityRelationshipKey;
-  esqlQueryOverride: (namespace: string) => string;
+  /**
+   * `pageActorValues` is passed only when `scopeToPageActorValues` is set; the
+   * query must then reference exactly one positional `?` param per value.
+   */
+  esqlQueryOverride: (namespace: string, pageActorValues?: readonly string[]) => string;
+  /**
+   * When true, the engine passes the page's distinct actor values (every non-null
+   * `customActor.fields` value across the page's buckets, see `getPageActorValues`)
+   * to `esqlQueryOverride` and binds the same array, in order, as ES|QL positional
+   * params.
+   *
+   * For overrides whose Step 2 can emit actors that are not page buckets: the
+   * page filter is an OR across actor fields, so a document matched through one
+   * field also contributes its other fields' values. Filtering the grouped rows
+   * to the page's values bounds the row count by the page instead of by the data.
+   */
+  scopeToPageActorValues?: true;
 }
 
 /**
@@ -273,13 +357,29 @@ export type RelationshipIntegrationConfig =
  * Step 1 of the customActor presence-gate fix already derives actor *fields*
  * from `customActor.fields`; #266748 is what derives the actor *entity type*.
  */
+export function entityTypeFromEuid(euid: string | null): 'user' | 'host' | 'service' {
+  return euid?.split(':')[0] as 'user' | 'host' | 'service';
+}
+
 export interface EntityRelationshipRecord {
   /** Full EUID with type prefix, e.g. "user:alice@okta". Null if actor eval failed. */
   entityId: string | null;
-  entityType: 'user';
+  entityType: 'user' | 'host' | 'service';
   /**
    * relType → euid[]
    * e.g. { communicates_with: ['host:D3F5C9B9-...', 'user:bob@corp'] }
    */
   relationships: Record<string, string[]>;
 }
+
+/**
+ * Union of all known relationship maintainer identifiers. Passed into
+ * `runRelationshipMaintainer` as a required `maintainerName` field so that
+ * per-integration completion logs carry an unambiguous maintainer label.
+ */
+export type RelationshipMaintainerName =
+  | 'communicates_with'
+  | 'accesses_frequently_and_infrequently'
+  | 'administers'
+  | 'supervises'
+  | 'owns';

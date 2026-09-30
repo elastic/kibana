@@ -24,7 +24,7 @@ const fieldType = 'number';
 
 const format = createFieldFormatMock({
   getParamDefaults: jest.fn().mockImplementation(() => ({ pattern: '0,0.[000]b' })),
-  reactConvert: jest.fn().mockImplementation((input: number) => input * 2),
+  convertToReact: jest.fn().mockImplementation((input: number) => input * 2),
 });
 
 const formatParams = {

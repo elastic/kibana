@@ -57,25 +57,25 @@ describe('connector attachment type', () => {
 
   describe('validate', () => {
     it('accepts valid connector data', () => {
-      const result = connectorType.validate(validData);
+      const result = connectorType.validate(validData, formatContext);
       expect(result).toEqual({ valid: true, data: validData });
     });
 
     it('rejects data missing connector_id', () => {
       const { connector_id: _, ...data } = validData;
-      const result = connectorType.validate(data);
+      const result = connectorType.validate(data, formatContext);
       expect(result).toEqual({ valid: false, error: expect.any(String) });
     });
 
     it('rejects data missing connector_name', () => {
       const { connector_name: _, ...data } = validData;
-      const result = connectorType.validate(data);
+      const result = connectorType.validate(data, formatContext);
       expect(result).toEqual({ valid: false, error: expect.any(String) });
     });
 
     it('rejects data missing connector_type', () => {
       const { connector_type: _, ...data } = validData;
-      const result = connectorType.validate(data);
+      const result = connectorType.validate(data, formatContext);
       expect(result).toEqual({ valid: false, error: expect.any(String) });
     });
   });
@@ -114,6 +114,7 @@ describe('connector attachment type', () => {
             supportedFeatureIds: [],
           },
           actions: {},
+          test: { handler: jest.fn(), enabled: false },
         });
 
         const attachment = createAttachment(validData);
@@ -156,23 +157,27 @@ describe('connector attachment type', () => {
           actions: {
             searchMessages: {
               isTool: true,
+              scope: 'read' as const,
               description: 'Search Slack messages',
               input: inputSchema,
               handler: jest.fn(),
             },
             sendMessage: {
               isTool: true,
+              scope: 'read' as const,
               description: 'Send a message to a channel',
               input: inputSchema,
               handler: jest.fn(),
             },
             internalAction: {
               isTool: false,
+              scope: 'read' as const,
               description: 'Internal only',
               input: inputSchema,
               handler: jest.fn(),
             },
           },
+          test: { handler: jest.fn(), enabled: false },
         });
         formatSchemaForLlmMock.mockReturnValue('query (string, required): Search query');
 
@@ -210,11 +215,13 @@ describe('connector attachment type', () => {
           actions: {
             sendMessage: {
               isTool: true,
+              scope: 'read' as const,
               description: 'Send a message',
               input: inputSchema,
               handler: jest.fn(),
             },
           },
+          test: { handler: jest.fn(), enabled: false },
           skill: 'Always resolve channel ID before sending a message.',
         });
         formatSchemaForLlmMock.mockReturnValue('No parameters');
@@ -232,6 +239,119 @@ describe('connector attachment type', () => {
         expect(representation.value).toContain(
           'Always resolve channel ID before sending a message.'
         );
+      });
+
+      describe('annotation hints', () => {
+        const inputSchema = z.object({ channel: z.string().describe('Channel name') });
+
+        beforeEach(() => {
+          formatSchemaForLlmMock.mockReturnValue('channel (string, required): Channel name');
+        });
+
+        it('shows [WRITE] for a write-scoped action', () => {
+          getConnectorSpecMock.mockReturnValue({
+            metadata: {
+              id: '.slack2',
+              displayName: 'Slack',
+              description: 'Slack connector',
+              minimumLicense: 'enterprise',
+              supportedFeatureIds: [],
+            },
+            actions: {
+              sendMessage: {
+                isTool: true,
+                scope: 'write',
+                description: 'Send a message to a channel',
+                input: inputSchema,
+                handler: jest.fn(),
+              },
+              searchMessages: {
+                isTool: true,
+                scope: 'read' as const,
+                description: 'Search messages',
+                input: inputSchema,
+                handler: jest.fn(),
+              },
+            },
+            test: { handler: jest.fn(), enabled: false },
+          });
+
+          const attachment = createAttachment({ ...validData, connector_type: '.slack2' });
+          const formatted = connectorType.format(
+            attachment,
+            formatContext
+          ) as AgentFormattedAttachment;
+          const representation = formatted.getRepresentation!() as { value: string };
+
+          expect(representation.value).toContain(
+            'sendMessage [WRITE]: Send a message to a channel'
+          );
+          expect(representation.value).toMatch(/- searchMessages: Search messages/);
+          expect(representation.value).not.toContain('searchMessages [');
+        });
+
+        it('shows [DESTROY] for a destroy-scoped action', () => {
+          getConnectorSpecMock.mockReturnValue({
+            metadata: {
+              id: '.slack2',
+              displayName: 'Slack',
+              description: 'Slack connector',
+              minimumLicense: 'enterprise',
+              supportedFeatureIds: [],
+            },
+            actions: {
+              deleteMessage: {
+                isTool: true,
+                scope: 'destroy',
+                description: 'Delete a message',
+                input: inputSchema,
+                handler: jest.fn(),
+              },
+            },
+            test: { handler: jest.fn(), enabled: false },
+          });
+
+          const attachment = createAttachment({ ...validData, connector_type: '.slack2' });
+          const formatted = connectorType.format(
+            attachment,
+            formatContext
+          ) as AgentFormattedAttachment;
+          const representation = formatted.getRepresentation!() as { value: string };
+
+          expect(representation.value).toContain('deleteMessage [DESTROY]: Delete a message');
+        });
+
+        it('shows no hint tag for a read-only action with no annotations', () => {
+          getConnectorSpecMock.mockReturnValue({
+            metadata: {
+              id: '.slack2',
+              displayName: 'Slack',
+              description: 'Slack connector',
+              minimumLicense: 'enterprise',
+              supportedFeatureIds: [],
+            },
+            actions: {
+              searchMessages: {
+                isTool: true,
+                scope: 'read' as const,
+                description: 'Search messages',
+                input: inputSchema,
+                handler: jest.fn(),
+              },
+            },
+            test: { handler: jest.fn(), enabled: false },
+          });
+
+          const attachment = createAttachment({ ...validData, connector_type: '.slack2' });
+          const formatted = connectorType.format(
+            attachment,
+            formatContext
+          ) as AgentFormattedAttachment;
+          const representation = formatted.getRepresentation!() as { value: string };
+
+          expect(representation.value).toMatch(/- searchMessages: Search messages/);
+          expect(representation.value).not.toContain('searchMessages [');
+        });
       });
     });
 
@@ -262,11 +382,13 @@ describe('connector attachment type', () => {
           actions: {
             searchMessages: {
               isTool: true,
+              scope: 'read' as const,
               description: 'Search messages',
               input: inputSchema,
               handler: jest.fn(),
             },
           },
+          test: { handler: jest.fn(), enabled: false },
         });
 
         const attachment = createAttachment(validData);

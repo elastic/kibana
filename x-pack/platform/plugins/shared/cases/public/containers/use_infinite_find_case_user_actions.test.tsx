@@ -94,6 +94,41 @@ describe('UseInfiniteFindCaseUserActions', () => {
     );
   });
 
+  it('calls the API with search and authors parameters', async () => {
+    const spy = jest.spyOn(api, 'findCaseUserActions').mockRejectedValue(initialData);
+
+    renderHook(
+      () =>
+        useInfiniteFindCaseUserActions(
+          basicCase.id,
+          {
+            type: 'user',
+            sortOrder: 'desc',
+            perPage: 5,
+            search: 'hello world',
+            authors: ['elastic', 'other'],
+          },
+          isEnabled
+        ),
+      { wrapper: TestProviders }
+    );
+
+    await waitFor(() =>
+      expect(spy).toHaveBeenCalledWith(
+        basicCase.id,
+        {
+          type: 'user',
+          sortOrder: 'desc',
+          page: 1,
+          perPage: 5,
+          search: 'hello world',
+          authors: ['elastic', 'other'],
+        },
+        expect.any(AbortSignal)
+      )
+    );
+  });
+
   it('does not call API when not enabled', async () => {
     const spy = jest.spyOn(api, 'findCaseUserActions').mockRejectedValue(initialData);
 
@@ -157,6 +192,89 @@ describe('UseInfiniteFindCaseUserActions', () => {
       );
     });
     await waitFor(() => expect(result.current.data?.pages).toHaveLength(2));
+  });
+
+  it('fetches through the last page as well when a search term is active', async () => {
+    // Unlike the default (unfiltered) flow -- where the infinite query stops
+    // one page short and a separate `useFindCaseUserActions` call fetches the
+    // last page -- `shouldFetchAllPages` should make the infinite query keep
+    // going all the way to the actual last page when `search`/`authors` is set.
+    const spy = jest
+      .spyOn(api, 'findCaseUserActions')
+      .mockImplementation(async (_caseId, requestParams) => ({
+        ...findCaseUserActionsResponse,
+        page: requestParams.page,
+      }));
+
+    const { result } = renderHook(
+      () => useInfiniteFindCaseUserActions(basicCase.id, { ...params, search: 'foo' }, isEnabled),
+      { wrapper: TestProviders }
+    );
+
+    // total: 30, perPage: 10 => 3 total pages
+    await waitFor(() => expect(result.current.isSuccess).toBe(true));
+    expect(result.current.hasNextPage).toBe(true);
+
+    act(() => {
+      result.current.fetchNextPage();
+    });
+    await waitFor(() => expect(result.current.data?.pages).toHaveLength(2));
+    // With search active, page 2 isn't treated as the last fetchable page.
+    expect(result.current.hasNextPage).toBe(true);
+
+    act(() => {
+      result.current.fetchNextPage();
+    });
+    await waitFor(() => expect(result.current.data?.pages).toHaveLength(3));
+
+    expect(spy).toHaveBeenCalledWith(
+      basicCase.id,
+      expect.objectContaining({ page: 3, search: 'foo' }),
+      expect.any(AbortSignal)
+    );
+    expect(result.current.hasNextPage).toBe(false);
+  });
+
+  it('fetches through the last page as well when an authors filter is active', async () => {
+    const spy = jest
+      .spyOn(api, 'findCaseUserActions')
+      .mockImplementation(async (_caseId, requestParams) => ({
+        ...findCaseUserActionsResponse,
+        page: requestParams.page,
+      }));
+
+    const { result } = renderHook(
+      () =>
+        useInfiniteFindCaseUserActions(
+          basicCase.id,
+          { ...params, authors: ['elastic'] },
+          isEnabled
+        ),
+      { wrapper: TestProviders }
+    );
+
+    // total: 30, perPage: 10 => 3 total pages
+    await waitFor(() => expect(result.current.isSuccess).toBe(true));
+    expect(result.current.hasNextPage).toBe(true);
+
+    act(() => {
+      result.current.fetchNextPage();
+    });
+    await waitFor(() => expect(result.current.data?.pages).toHaveLength(2));
+    // With an authors filter active, page 2 isn't treated as the last fetchable page.
+    expect(result.current.hasNextPage).toBe(true);
+
+    act(() => {
+      result.current.fetchNextPage();
+    });
+    await waitFor(() => expect(result.current.data?.pages).toHaveLength(3));
+
+    expect(spy).toHaveBeenCalledWith(
+      basicCase.id,
+      expect.objectContaining({ page: 3, authors: ['elastic'] }),
+      expect.any(AbortSignal)
+    );
+    expect(result.current.hasNextPage).toBe(false);
   });
 
   it('returns hasNextPage correctly', async () => {

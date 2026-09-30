@@ -5,7 +5,14 @@
  * 2.0.
  */
 import React, { useCallback } from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiButtonIcon, EuiPopover, EuiListGroup } from '@elastic/eui';
+import {
+  EuiButtonIcon,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiListGroup,
+  EuiPopover,
+  EuiToolTip,
+} from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { IndexManagementLocatorParams } from '@kbn/index-management-shared-types';
 import { DatasetQualityLink } from './dataset_quality_link';
@@ -60,12 +67,14 @@ export const LegendAction: React.FC<LegendActionProps> = React.memo(
           button={
             <EuiFlexGroup gutterSize="s" alignItems="center">
               <EuiFlexItem grow={false}>
-                <EuiButtonIcon
-                  iconType="boxesVertical"
-                  aria-label={UX_LABELS.dataQualityPopup.open}
-                  onClick={() => togglePopover(uniqueStreamName)}
-                  data-test-subj="legendActionButton"
-                />
+                <EuiToolTip content={UX_LABELS.dataQualityPopup.open} disableScreenReaderOutput>
+                  <EuiButtonIcon
+                    iconType="boxesVertical"
+                    aria-label={UX_LABELS.dataQualityPopup.open}
+                    onClick={() => togglePopover(uniqueStreamName)}
+                    data-test-subj="legendActionButton"
+                  />
+                </EuiToolTip>
               </EuiFlexItem>
             </EuiFlexGroup>
           }

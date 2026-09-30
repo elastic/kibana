@@ -20,9 +20,10 @@ import {
   type ToolOptionsOfPrompt,
   type UnboundPromptOptions,
 } from '@kbn/inference-common';
-import { trace } from '@opentelemetry/api';
+
 import {
   ElasticGenAIAttributes,
+  markToolSpanAsError,
   withActiveInferenceSpan,
   withExecuteToolSpan,
 } from '@kbn/inference-tracing';
@@ -80,13 +81,16 @@ export async function executeUntilValid(
               toolCallId: toolCall.toolCallId,
             },
           },
-          () => callback(toolCall)
-        ).catch((error): ToolCallbackResult => {
-          trace.getActiveSpan()?.recordException(error);
-          return {
-            response: { error, data: undefined },
-          };
-        });
+          (span) =>
+            callback(toolCall).catch((error): ToolCallbackResult => {
+              if (span) {
+                markToolSpanAsError(span, { error });
+              }
+              return {
+                response: { error, data: undefined },
+              };
+            })
+        );
 
         return {
           response: response.response,

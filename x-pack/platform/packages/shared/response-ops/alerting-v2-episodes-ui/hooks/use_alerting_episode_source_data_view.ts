@@ -12,10 +12,8 @@ import type { DataViewsContract } from '@kbn/data-views-plugin/public';
 
 export interface UseAlertingEpisodeSourceDataViewOptions {
   query?: string;
-  services: {
-    dataViews: DataViewsContract;
-    http: HttpStart;
-  };
+  dataViews: DataViewsContract;
+  http: HttpStart;
 }
 
 /**
@@ -25,11 +23,12 @@ export interface UseAlertingEpisodeSourceDataViewOptions {
  */
 export const useAlertingEpisodeSourceDataView = ({
   query,
-  services,
+  dataViews,
+  http,
 }: UseAlertingEpisodeSourceDataViewOptions) => {
   return useAsync(async () => {
     if (!query) return undefined;
 
-    return await getEsqlDataView({ esql: query }, undefined, services);
-  }, [services, query]);
+    return await getEsqlDataView({ esql: query }, undefined, { dataViews, http });
+  }, [dataViews, http, query]);
 };

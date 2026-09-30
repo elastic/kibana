@@ -5,6 +5,7 @@ Open the guide that matches the component(s) you are writing or refactoring. Rea
 | Guide | Topic | EUI components |
 |-------|-------|----------------|
 | `callouts.md` | Callouts (announce when conditional) | `EuiCallOut` |
+| `copy_tooltip.md` | Copy-to-clipboard tooltip (`beforeMessage`, no nested tooltip) | `EuiCopy`, `EuiToolTip`, `EuiButtonIcon` |
 | `data_tables.md` | Data tables (caption) | `EuiBasicTable`, `EuiInMemoryTable` |
 | `focus_and_keyboard.md` | Focus & keyboard (tab order, tooltip anchors) | `EuiButton`, `EuiButtonIcon`, `EuiLink`, `EuiToolTip` |
 | `form_layout.md` | Form row + invalid state | `EuiFormRow`, `EuiFieldText`, `EuiFieldNumber`, `EuiFilePicker`, `EuiComboBox`, `EuiTextArea`, `EuiSelect` |
@@ -12,4 +13,5 @@ Open the guide that matches the component(s) you are writing or refactoring. Rea
 | `interactive_components.md` | Names for interactive controls | `EuiBetaBadge`, `EuiButtonIcon`, `EuiComboBox`, `EuiSelect`, `EuiSuperSelect`, `EuiPagination`, `EuiTreeView`, `EuiBreadcrumbs` |
 | `overlays.md` | Modals, flyouts, popovers | `EuiModal`, `EuiFlyout`, `EuiFlyoutResizable`, `EuiConfirmModal`, `EuiPopover` |
 | `radio_groups.md` | Radio groups (`name` grouping) | `EuiRadio`, `EuiRadioGroup` |
-| `tooltip_icon.md` | Tooltip on icon button (no duplicate SR text) | `EuiToolTip`, `EuiButtonIcon` |
+| `tooltip_content.md` | No interactive elements in tooltip `content` / `title` | `EuiToolTip`, `EuiIconTip` |
+| `tooltip_icon.md` | Tooltip on icon button (wrap + no duplicate SR text, no native `title`) | `EuiToolTip`, `EuiButtonIcon` |

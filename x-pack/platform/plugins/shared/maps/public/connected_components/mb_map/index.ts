@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import type { AnyAction } from 'redux';
-import type { ThunkDispatch } from 'redux-thunk';
-import { connect } from 'react-redux';
+import type { AnyAction } from 'redux-v4';
+import type { ThunkDispatch } from 'redux-thunk-v2';
+import { connect } from 'react-redux-v7';
+import type { Map as MapApi } from '@kbn/mapbox-gl';
 import { MbMap } from './mb_map';
 import {
-  clearGoto,
   clearMouseCoordinates,
   mapDestroyed,
   mapExtentChanged,
@@ -20,27 +20,35 @@ import {
 } from '../../actions';
 import {
   getCustomIcons,
-  getGoto,
   getLayerList,
-  getMapReady,
   getMapSettings,
   getSpatialFiltersLayer,
   getTimeslice,
+  getMapCenter,
+  getMapZoom,
 } from '../../selectors/map_selectors';
 import { getDrawMode, getIsFullScreen } from '../../selectors/ui_selectors';
-import { getInspectorAdapters, getOnMapMove } from '../../reducers/non_serializable_instances';
+import {
+  getInspectorAdapters,
+  getMapApi,
+  getOnMapMove,
+  setMapApi,
+} from '../../reducers/non_serializable_instances';
 import type { MapStoreState } from '../../reducers/store';
 import { DRAW_MODE } from '../../../common/constants';
 import type { MapExtentState } from '../../reducers/map/types';
 
 function mapStateToProps(state: MapStoreState) {
+  const mapApi = getMapApi(state);
   return {
-    isMapReady: getMapReady(state),
+    mapApi: getMapApi(state),
+    initialMapCenter: mapApi ? null : getMapCenter(state),
+    initialMapZoom: mapApi ? null : getMapZoom(state),
+    zoom: getMapZoom(state),
     settings: getMapSettings(state),
     customIcons: getCustomIcons(state),
     layerList: getLayerList(state),
     spatialFiltersLayer: getSpatialFiltersLayer(state),
-    goto: getGoto(state),
     inspectorAdapters: getInspectorAdapters(state),
     isFullScreen: getIsFullScreen(state),
     timeslice: getTimeslice(state),
@@ -57,21 +65,20 @@ function mapDispatchToProps(dispatch: ThunkDispatch<MapStoreState, void, AnyActi
       dispatch(mapExtentChanged(mapExtentState));
     },
     onMapReady: (mapExtentState: MapExtentState) => {
-      dispatch(clearGoto());
       dispatch(mapExtentChanged(mapExtentState));
       dispatch(mapReady());
     },
     onMapDestroyed: () => {
       dispatch(mapDestroyed());
     },
+    setMapApi: (mapApi?: MapApi) => {
+      dispatch(setMapApi(mapApi));
+    },
     setMouseCoordinates: ({ lat, lon }: { lat: number; lon: number }) => {
       dispatch(setMouseCoordinates({ lat, lon }));
     },
     clearMouseCoordinates: () => {
       dispatch(clearMouseCoordinates());
-    },
-    clearGoto: () => {
-      dispatch(clearGoto());
     },
     setMapInitError(errorMessage: string) {
       dispatch(setMapInitError(errorMessage));

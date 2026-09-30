@@ -13,11 +13,16 @@ import { getAxiosConfig } from './get_axios_config';
 import type { GetAxiosConfigParams, GetAxiosConfigResponse } from './get_axios_config';
 import type { AxiosRequestConfig, AxiosResponse } from 'axios';
 import { getOAuthClientCredentialsAccessToken } from '@kbn/actions-plugin/server/lib/get_oauth_client_credentials_access_token';
+import { getOAuthPasswordAccessToken } from '@kbn/actions-plugin/server/lib/get_oauth_password_access_token';
 import { elasticsearchServiceMock, savedObjectsClientMock } from '@kbn/core/server/mocks';
 import { AuthType } from '@kbn/connector-schemas/common/auth';
 
 jest.mock('@kbn/actions-plugin/server/lib/get_oauth_client_credentials_access_token', () => ({
   getOAuthClientCredentialsAccessToken: jest.fn(),
+}));
+
+jest.mock('@kbn/actions-plugin/server/lib/get_oauth_password_access_token', () => ({
+  getOAuthPasswordAccessToken: jest.fn(),
 }));
 
 const createServicesMock = () => {
@@ -125,6 +130,81 @@ describe('getAxiosConfig', () => {
 
     expect(((await getAxiosConfig(params))[1] as Error).message).toBe(
       'Unable to retrieve/refresh the access token: Failed to retrieve access token'
+    );
+  });
+});
+
+describe('getAxiosConfig with OAuth2 password grant', () => {
+  const mockedLogger: jest.Mocked<Logger> = loggerMock.create();
+  const services: Services = createServicesMock();
+
+  const params: GetAxiosConfigParams = {
+    connectorId: 'test-action-id',
+    config: {
+      authType: AuthType.OAuth2Password,
+      accessTokenUrl: 'https://example.com/oauth/token',
+      clientId: undefined,
+      scope: undefined,
+      additionalFields: null,
+      headers: { 'Content-Type': 'application/json' },
+      url: 'https://http.example.com',
+      hasAuth: true,
+      hasProxyAuth: false,
+      proxyUrl: null,
+    },
+    secrets: {
+      clientSecret: null,
+      key: null,
+      user: 'test-user',
+      password: 'test-password',
+      crt: null,
+      pfx: null,
+      secretHeaders: null,
+      secretQueryParams: null,
+      proxyUsername: null,
+      proxyPassword: null,
+    },
+    services,
+    configurationUtilities: actionsConfigMock.create(),
+    logger: mockedLogger,
+  };
+
+  afterEach(() => {
+    jest.clearAllMocks();
+  });
+
+  it('should request the access token using the username and password secrets', async () => {
+    (getOAuthPasswordAccessToken as jest.Mock).mockResolvedValueOnce('Bearer fakeToken');
+
+    const [config, error] = await getAxiosConfig(params);
+
+    expect(error).toBeNull();
+    expect(getOAuthPasswordAccessToken).toHaveBeenCalledWith(
+      expect.objectContaining({
+        connectorId: 'test-action-id',
+        username: 'test-user',
+        password: 'test-password',
+        tokenUrl: 'https://example.com/oauth/token',
+      })
+    );
+    expect((config as GetAxiosConfigResponse).headers?.Authorization).toBe('Bearer fakeToken');
+  });
+
+  it('should return an error when access token retrieval fails', async () => {
+    (getOAuthPasswordAccessToken as jest.Mock).mockRejectedValueOnce(
+      new Error('Failed to retrieve access token')
+    );
+
+    expect(((await getAxiosConfig(params))[1] as Error).message).toBe(
+      'Unable to retrieve/refresh the access token: Failed to retrieve access token'
+    );
+  });
+
+  it('should return an error when no access token is returned', async () => {
+    (getOAuthPasswordAccessToken as jest.Mock).mockResolvedValueOnce(null);
+
+    expect(((await getAxiosConfig(params))[1] as Error).message).toBe(
+      'Unable to retrieve new access token'
     );
   });
 });

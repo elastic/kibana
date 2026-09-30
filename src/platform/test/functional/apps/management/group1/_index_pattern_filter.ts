@@ -10,20 +10,29 @@
 import expect from '@kbn/expect';
 import type { FtrProviderContext } from '../../../ftr_provider_context';
 
+/**
+ * Migration recommendation: MIXED. Move type and text filter control behavior to Jest. Retain
+ * the runtime-field and mapping-conflict flows in Scout because they integrate the editor with
+ * real Elasticsearch data. The nearly identical serverless FTR suite at
+ * x-pack/platform/test/serverless/functional/test_suites/management/data_views/
+ * _index_pattern_filter.ts should be deleted after the behaviors are covered at these layers.
+ */
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const kibanaServer = getService('kibanaServer');
   const retry = getService('retry');
   const testSubjects = getService('testSubjects');
-  const PageObjects = getPageObjects(['settings']);
+  const PageObjects = getPageObjects(['settings', 'header']);
   const es = getService('es');
 
   describe('index pattern filter', function describeIndexTests() {
+    let logstashDataViewId: string;
+
     before(async function () {
       await kibanaServer.savedObjects.cleanStandardList();
       await kibanaServer.uiSettings.replace({});
       await PageObjects.settings.navigateTo();
       await PageObjects.settings.clickKibanaIndexPatterns();
-      await PageObjects.settings.createIndexPattern('logstash-*');
+      logstashDataViewId = await PageObjects.settings.createIndexPattern('logstash-*');
     });
 
     after(async function () {
@@ -31,10 +40,13 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.settings.removeIndexPattern();
     });
 
+    /**
+     * Migration recommendation: MIGRATE TO JEST. The table test verifies the filtered result, but
+     * not the filter control that sets it. Add interactions for keyword and long to a new
+     * tabs.test.tsx beside edit_index_pattern/tabs/tabs.tsx with deterministic fields.
+     */
     it('should filter indexed fields by type', async function () {
-      await PageObjects.settings.navigateTo();
-      await PageObjects.settings.clickKibanaIndexPatterns();
-      await PageObjects.settings.clickIndexPatternLogstash();
+      await PageObjects.settings.navigateToDataViewById(logstashDataViewId);
       await PageObjects.settings.getFieldTypes();
       await PageObjects.settings.setFieldTypeFilter('keyword');
 
@@ -59,10 +71,13 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.settings.clearFieldTypeFilter('long');
     });
 
+    /**
+     * Migration recommendation: MIGRATE TO SCOUT. This creates a runtime field through the UI,
+     * then proves it reaches the indexed-fields list and runtime schema filter. The component Jest
+     * test uses prebuilt fields, so it cannot cover that editor-to-list integration.
+     */
     it('should filter indexed fields by schema type', async function () {
-      await PageObjects.settings.navigateTo();
-      await PageObjects.settings.clickKibanaIndexPatterns();
-      await PageObjects.settings.clickIndexPatternLogstash();
+      await PageObjects.settings.navigateToDataViewById(logstashDataViewId);
 
       await PageObjects.settings.addRuntimeField('_test', 'keyword', "emit('hi')");
 
@@ -90,10 +105,13 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       expect(await PageObjects.settings.getFieldNames()).to.eql(unfilteredFields);
     });
 
+    /**
+     * Migration recommendation: MIGRATE TO JEST. The table test verifies the filtered result, but
+     * not typing and clearing the Tabs search control. Add those interactions to the new
+     * edit_index_pattern/tabs/tabs.test.tsx with deterministic fields.
+     */
     it('should filter indexed fields when searched', async function () {
-      await PageObjects.settings.navigateTo();
-      await PageObjects.settings.clickKibanaIndexPatterns();
-      await PageObjects.settings.clickIndexPatternLogstash();
+      await PageObjects.settings.navigateToDataViewById(logstashDataViewId);
 
       const unfilteredFields = [
         '@message',
@@ -133,10 +151,13 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       expect(await PageObjects.settings.getFieldNames()).to.eql(unfilteredFields);
     });
 
+    /**
+     * Migration recommendation: MIGRATE TO SCOUT. This creates an actual Elasticsearch mapping
+     * conflict, refreshes the data view, and surfaces the View conflicts action. A Jest test can
+     * cover the filter reset separately, but mocked conflicting fields cannot replace this flow.
+     */
     it('should set "conflict" filter when "View conflicts" button is pressed', async function () {
       const additionalIndexWithWrongMapping = 'logstash-wrong';
-      await PageObjects.settings.navigateTo();
-      await PageObjects.settings.clickKibanaIndexPatterns();
 
       if (await es.indices.exists({ index: additionalIndexWithWrongMapping })) {
         await es.indices.delete({ index: additionalIndexWithWrongMapping });
@@ -161,7 +182,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         refresh: 'wait_for',
       });
 
-      await PageObjects.settings.clickIndexPatternLogstash();
+      await PageObjects.settings.navigateToDataViewById(logstashDataViewId);
 
       await PageObjects.settings.refreshDataViewFieldList();
 

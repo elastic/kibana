@@ -13,6 +13,10 @@ import {
   ALERT_REASON,
   ALERT_GROUP,
   ALERT_GROUPING,
+  ALERT_SEVERITY,
+  ALERT_SEVERITY_CRITICAL,
+  ALERT_SEVERITY_WARNING,
+  type AlertSeverity,
 } from '@kbn/rule-data-utils';
 import type { LocatorPublic } from '@kbn/share-plugin/common';
 import { RecoveredActionGroup } from '@kbn/alerting-plugin/common';
@@ -29,7 +33,12 @@ import { getAlertDetailsUrl } from '../../../../common';
 import { getViewInAppUrl } from '../../../../common/custom_threshold_rule/get_view_in_app_url';
 import type { ObservabilityConfig } from '../../..';
 import { getEvaluationValues, getThreshold } from './lib/get_values';
-import { FIRED_ACTIONS_ID, NO_DATA_ACTIONS_ID, UNGROUPED_FACTORY_KEY } from './constants';
+import {
+  FIRED_ACTIONS_ID,
+  WARNING_ACTIONS_ID,
+  NO_DATA_ACTIONS_ID,
+  UNGROUPED_FACTORY_KEY,
+} from './constants';
 import type {
   CustomThresholdRuleTypeParams,
   CustomThresholdRuleTypeState,
@@ -53,11 +62,19 @@ import { formatAlertResult, getLabel } from './lib/format_alert_result';
 import type { EvaluatedRuleParams } from './lib/evaluate_rule';
 import { evaluateRule } from './lib/evaluate_rule';
 import type { MissingGroupsRecord } from './lib/check_missing_group';
+import { shouldTrackMissingGroups } from './lib/should_track_missing_groups';
 
 export interface CustomThresholdLocators {
   alertsLocator?: LocatorPublic<AlertsLocatorParams>;
   logsLocator?: LocatorPublic<DiscoverAppLocatorParams>;
 }
+
+// NO_DATA has no entry: it's an availability state, not a severity tier, so
+// `kibana.alert.severity` is left unset for those alerts.
+const ACTION_GROUP_TO_SEVERITY: Record<string, AlertSeverity | undefined> = {
+  [FIRED_ACTIONS_ID]: ALERT_SEVERITY_CRITICAL,
+  [WARNING_ACTIONS_ID]: ALERT_SEVERITY_WARNING,
+};
 
 export const createCustomThresholdExecutor = ({
   basePath,
@@ -113,9 +130,10 @@ export const createCustomThresholdExecutor = ({
       alertOnGroupDisappear: boolean | undefined;
     };
 
-    // For backwards-compatibility, interpret undefined alertOnGroupDisappear as true
-    const alertOnGroupDisappear =
-      _alertOnGroupDisappear !== false && params.noDataBehavior !== 'recover';
+    const alertOnGroupDisappear = shouldTrackMissingGroups(
+      params.noDataBehavior,
+      _alertOnGroupDisappear
+    );
     const compositeSize = config.customThresholdRule.groupByPageSize;
     const queryIsSame = isEqual(
       state.searchConfiguration?.query.query,
@@ -201,6 +219,7 @@ export const createCustomThresholdExecutor = ({
 
       // AND logic; all criteria must be across the threshold
       const shouldAlertFire = alertResults.every((result) => result[group]?.shouldFire);
+      const shouldAlertWarn = alertResults.every((result) => result[group]?.shouldWarn);
       // AND logic; because we need to evaluate all criteria, if one of them reports no data then the
       // whole alert is in a No Data/Error state
       const isNoDataFound = alertResults.some((result) => result[group]?.isNoData);
@@ -225,11 +244,21 @@ export const createCustomThresholdExecutor = ({
           ? AlertStates.ALERT
           : shouldAlertFire
           ? AlertStates.ALERT
+          : shouldAlertWarn
+          ? AlertStates.WARNING
           : AlertStates.OK;
 
       let reason;
-      if (nextState === AlertStates.ALERT && !isIndeterminateState) {
-        reason = buildFiredAlertReason(alertResults, group, dataViewName);
+      if (
+        (nextState === AlertStates.ALERT || nextState === AlertStates.WARNING) &&
+        !isIndeterminateState
+      ) {
+        reason = buildFiredAlertReason(
+          alertResults,
+          group,
+          dataViewName,
+          nextState === AlertStates.WARNING
+        );
       }
 
       /* NO DATA STATE HANDLING
@@ -275,6 +304,8 @@ export const createCustomThresholdExecutor = ({
             ? RecoveredActionGroup.id
             : nextState === AlertStates.NO_DATA
             ? NO_DATA_ACTIONS_ID
+            : nextState === AlertStates.WARNING
+            ? WARNING_ACTIONS_ID
             : FIRED_ACTIONS_ID;
 
         const additionalContext = hasAdditionalContext(params.groupBy, validGroupByForContext)
@@ -298,6 +329,7 @@ export const createCustomThresholdExecutor = ({
             [ALERT_GROUP]: groups,
             // Object, example: { host: { name: 'host-0' } }
             [ALERT_GROUPING]: grouping,
+            [ALERT_SEVERITY]: ACTION_GROUP_TO_SEVERITY[actionGroupId],
             ...flattenAdditionalContext(additionalContext),
             ...getEcsGroups(groups),
           },
@@ -309,6 +341,7 @@ export const createCustomThresholdExecutor = ({
           typeof params.searchConfiguration?.index === 'string'
             ? params.searchConfiguration?.index
             : params.searchConfiguration?.index?.title;
+        const singleCriterion = alertResults.length === 1 ? alertResults[0][group] : undefined;
         alertsClient.setAlertData({
           id: `${group}`,
           context: {
@@ -330,10 +363,12 @@ export const createCustomThresholdExecutor = ({
               dataViewId: dataViewIdTitle ?? dataViewId,
               groups,
               logsLocator,
-              metrics: alertResults.length === 1 ? alertResults[0][group].metrics : [],
+              metrics: singleCriterion?.metrics ?? [],
               searchConfiguration: params.searchConfiguration,
               startedAt: indexedStartedAt,
               spaceId,
+              timeSize: singleCriterion?.timeSize,
+              timeUnit: singleCriterion?.timeUnit,
             }),
             ...additionalContext,
           },
@@ -365,6 +400,8 @@ export const createCustomThresholdExecutor = ({
           metrics: params.criteria[0]?.metrics,
           searchConfiguration: params.searchConfiguration,
           startedAt: indexedStartedAt,
+          timeSize: params.criteria[0]?.timeSize,
+          timeUnit: params.criteria[0]?.timeUnit,
         }),
         reason: alertHits?.[ALERT_REASON],
         ...additionalContext,

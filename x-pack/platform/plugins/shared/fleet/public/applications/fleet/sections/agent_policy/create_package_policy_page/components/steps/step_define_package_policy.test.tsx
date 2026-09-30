@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { waitFor, act } from '@testing-library/react';
+import { waitFor, act, fireEvent } from '@testing-library/react';
 import { userEvent } from '@testing-library/user-event';
 
 import { useSpaceSettingsContext } from '../../../../../../../hooks/use_space_settings_context';
@@ -16,7 +16,9 @@ import type { TestRenderer } from '../../../../../../../mock';
 import { createFleetTestRendererMock } from '../../../../../../../mock';
 import type { AgentPolicy, NewPackagePolicy, PackageInfo } from '../../../../../types';
 
-import { useGetPackagePoliciesQuery } from '../../../../../hooks';
+import { useGetPackagePoliciesQuery, useGetIlmPoliciesQuery } from '../../../../../hooks';
+
+import { useOutputs } from './components/hooks';
 
 import { StepDefinePackagePolicy } from './step_define_package_policy';
 
@@ -32,6 +34,10 @@ jest.mock('./components/hooks', () => ({
 jest.mock('../../../../../hooks', () => ({
   ...jest.requireActual('../../../../../hooks'),
   useGetPackagePoliciesQuery: jest.fn().mockReturnValue({ data: { items: [] } }),
+  useGetIlmPoliciesQuery: jest.fn().mockReturnValue({
+    data: { has_manage_ilm: true, items: ['policy-a', 'policy-b'] },
+    isLoading: false,
+  }),
 }));
 
 jest.mock('../../../../../../../hooks/use_space_settings_context', () => ({
@@ -100,6 +106,7 @@ describe('StepDefinePackagePolicy', () => {
     description: null,
     additional_datastreams_permissions: null,
     namespace: null,
+    condition: null,
     inputs: {},
     vars: {
       'Required var': ['Required var is required'],
@@ -317,6 +324,71 @@ describe('StepDefinePackagePolicy', () => {
       expect(renderResult.getByTestId('packagePolicyOutputInput')).toBeDisabled();
     });
 
+    describe('inherit option label', () => {
+      const mockUseOutputs = jest.mocked(useOutputs);
+      const renderWithOutput = () =>
+        testRenderer.render(
+          <StepDefinePackagePolicy
+            namespacePlaceholder={getInheritedNamespace(agentPolicies)}
+            packageInfo={packageInfo}
+            packagePolicy={{ ...packagePolicy, output_id: null }}
+            updatePackagePolicy={mockUpdatePackagePolicy}
+            validationResults={validationResults}
+            submitAttempted={false}
+            noAdvancedToggle={true}
+            agentPolicies={agentPolicies}
+          />
+        );
+
+      const getInheritOption = () => {
+        const select = renderResult.getByTestId('packagePolicyOutputInput') as HTMLSelectElement;
+        return {
+          select,
+          option: [...select.options].find((option) => option.value === ''),
+        };
+      };
+
+      beforeEach(() => {
+        mockUseOutputs.mockReturnValue({
+          isLoading: false,
+          canUseOutputPerIntegration: true,
+          allowedOutputs: [
+            { id: 'output-1', name: 'Default output', type: 'elasticsearch' },
+          ] as any,
+          inheritedOutputName: undefined,
+        });
+      });
+
+      it('should label the inherit option instead of rendering it as an empty row', () => {
+        // An unset output_id means "inherit from the parent agent policy"; EuiSelect represents
+        // that with an empty value, which must still carry a label.
+        renderResult = renderWithOutput();
+
+        const { select, option } = getInheritOption();
+
+        expect(option?.text).toEqual('Inherited from agent policy');
+        expect([...select.options].every((o) => o.text !== '')).toBe(true);
+        expect(select.value).toEqual('');
+      });
+
+      it('should name the effective output on the inherit option when it is resolvable', () => {
+        mockUseOutputs.mockReturnValue({
+          isLoading: false,
+          canUseOutputPerIntegration: true,
+          allowedOutputs: [
+            { id: 'output-1', name: 'Default output', type: 'elasticsearch' },
+          ] as any,
+          inheritedOutputName: 'Default output',
+        });
+
+        renderResult = renderWithOutput();
+
+        expect(getInheritOption().option?.text).toEqual(
+          'Inherited from agent policy (currently Default output)'
+        );
+      });
+    });
+
     it('should disable output selector when parent agent policy is managed', () => {
       const managedAgentPolicies: AgentPolicy[] = [{ ...agentPolicies[0], is_managed: true }];
       renderResult = testRenderer.render(
@@ -369,6 +441,82 @@ describe('StepDefinePackagePolicy', () => {
       await waitFor(() => {
         expect(renderResult.getByText('Invalid permission format')).toBeInTheDocument();
       });
+    });
+  });
+
+  describe('integration-level condition field', () => {
+    const renderWithCondition = (
+      policyOverrides: Record<string, unknown> = {},
+      propOverrides: Record<string, unknown> = {}
+    ) =>
+      (renderResult = testRenderer.render(
+        <StepDefinePackagePolicy
+          namespacePlaceholder={getInheritedNamespace(agentPolicies)}
+          packageInfo={packageInfo}
+          packagePolicy={{ ...packagePolicy, ...policyOverrides }}
+          updatePackagePolicy={mockUpdatePackagePolicy}
+          validationResults={validationResults}
+          submitAttempted={false}
+          {...propOverrides}
+        />
+      ));
+
+    it('shows condition field in advanced options for a normal integration', async () => {
+      act(() => {
+        renderWithCondition();
+      });
+      await userEvent.click(renderResult.getByText('Advanced options').closest('button')!);
+      await waitFor(() => {
+        expect(renderResult.getByTestId('packagePolicyConditionInput')).toBeInTheDocument();
+      });
+    });
+
+    it('hides condition field for agentless policy', async () => {
+      act(() => {
+        renderWithCondition({ supports_agentless: true }, { isAgentlessSelected: true });
+      });
+      await userEvent.click(renderResult.getByText('Advanced options').closest('button')!);
+      await waitFor(() => {
+        expect(renderResult.queryByTestId('packagePolicyConditionInput')).not.toBeInTheDocument();
+      });
+    });
+
+    it('hides condition field on edit page of an agentless policy', async () => {
+      act(() => {
+        renderWithCondition({ supports_agentless: true }, { isEditPage: true });
+      });
+      await userEvent.click(renderResult.getByText('Advanced options').closest('button')!);
+      await waitFor(() => {
+        expect(renderResult.queryByTestId('packagePolicyConditionInput')).not.toBeInTheDocument();
+      });
+    });
+
+    it('hides condition field when all inputs are otelcol', async () => {
+      act(() => {
+        renderWithCondition({
+          inputs: [{ enabled: true, type: 'otelcol', streams: [], policy_template: 'test' }],
+        });
+      });
+      await userEvent.click(renderResult.getByText('Advanced options').closest('button')!);
+      await waitFor(() => {
+        expect(renderResult.queryByTestId('packagePolicyConditionInput')).not.toBeInTheDocument();
+      });
+    });
+
+    it('calls updatePackagePolicy with condition value on change', async () => {
+      act(() => {
+        renderWithCondition();
+      });
+      await userEvent.click(renderResult.getByText('Advanced options').closest('button')!);
+      await waitFor(() => {
+        expect(renderResult.getByTestId('packagePolicyConditionInput')).toBeInTheDocument();
+      });
+      fireEvent.change(renderResult.getByTestId('packagePolicyConditionInput'), {
+        target: { value: "host.os.type == 'linux'" },
+      });
+      expect(mockUpdatePackagePolicy).toHaveBeenCalledWith(
+        expect.objectContaining({ condition: "host.os.type == 'linux'" })
+      );
     });
   });
 
@@ -637,6 +785,30 @@ describe('StepDefinePackagePolicy', () => {
         });
       });
 
+      it('does not enable the other-policies query before initialization, preventing a spurious warning flash', () => {
+        // Regression test for a race between the async packageInfo load and the init effect:
+        // on the first render, initialized=false and namespaceCustomizationEnabled=false while
+        // isOptedIn is already true (packageInfo available synchronously in tests, or warm cache
+        // in production). Without the `initialized` guard the query fires immediately, and with a
+        // warm React Query cache the opt-out warning flashes on screen before the init effect
+        // corrects the state.
+        mockUseGetPackagePoliciesQuery.mockClear();
+        mockUseGetPackagePoliciesQuery.mockReturnValue({
+          data: { items: [{ id: 'other-policy-1' }] },
+        });
+        renderResult = renderWithToggle({
+          packagePolicyOverride: { namespace: 'staging' },
+          packageInfoOverride: {
+            installationInfo: {
+              namespace_customization_enabled_for: ['staging'],
+            } as any,
+          },
+        });
+        // The first render call must have enabled: false so the query never fires during
+        // the initialization window.
+        expect(mockUseGetPackagePoliciesQuery.mock.calls[0][1]).toMatchObject({ enabled: false });
+      });
+
       it('shows no warning when toggle is turned on but there are no other policies', async () => {
         mockUseGetPackagePoliciesQuery.mockReturnValue({ data: { items: [] } });
         renderResult = renderWithToggle({
@@ -668,6 +840,125 @@ describe('StepDefinePackagePolicy', () => {
             renderResult.queryByTestId('packagePolicyNamespaceCustomizationOptInImpactWarning')
           ).not.toBeInTheDocument();
         });
+      });
+    });
+
+    describe('ILM policy picker', () => {
+      const mockUseGetIlmPoliciesQuery = useGetIlmPoliciesQuery as jest.Mock;
+
+      afterEach(() => {
+        mockUseGetIlmPoliciesQuery.mockReturnValue({
+          data: { has_manage_ilm: true, items: ['policy-a', 'policy-b'] },
+          isLoading: false,
+        });
+      });
+
+      it('is disabled with a tooltip when namespace customization is not enabled', async () => {
+        renderResult = renderWithToggle({
+          packagePolicyOverride: { namespace: 'staging' },
+        });
+        await userEvent.click(renderResult.getByText('Advanced options').closest('button')!);
+        await waitFor(() => {
+          expect(renderResult.getByTestId('packagePolicyIlmPolicySelect')).toBeDisabled();
+        });
+      });
+
+      it('becomes enabled as soon as the toggle is switched on, before the policy is saved', async () => {
+        // Regression test: the picker must not wait for the server-confirmed opt-in
+        // (installationInfo.namespace_customization_enabled_for), which is only updated after
+        // save — otherwise it's impossible to pick an ILM policy while creating a new policy.
+        renderResult = renderWithToggle({
+          packagePolicyOverride: { namespace: 'staging' },
+        });
+        await userEvent.click(renderResult.getByText('Advanced options').closest('button')!);
+        const toggle = await renderResult.findByTestId('packagePolicyNamespaceCustomizationToggle');
+        await userEvent.click(toggle); // turn ON, not yet saved/opted in on the server
+        await waitFor(() => {
+          expect(renderResult.getByTestId('packagePolicyIlmPolicySelect')).not.toBeDisabled();
+        });
+      });
+
+      it('is disabled when the caller lacks the manage_ilm privilege, even if enabled', async () => {
+        mockUseGetIlmPoliciesQuery.mockReturnValue({
+          data: { has_manage_ilm: false, items: [] },
+          isLoading: false,
+        });
+        renderResult = renderWithToggle({
+          packagePolicyOverride: { namespace: 'staging' },
+          packageInfoOverride: {
+            installationInfo: {
+              namespace_customization_enabled_for: ['staging'],
+            } as any,
+          },
+        });
+        await userEvent.click(renderResult.getByText('Advanced options').closest('button')!);
+        await waitFor(() => {
+          expect(renderResult.getByTestId('packagePolicyIlmPolicySelect')).toBeDisabled();
+        });
+      });
+
+      it('calls onIlmPolicyChange when a policy is selected', async () => {
+        const onIlmPolicyChange = jest.fn();
+        renderResult = testRenderer.render(
+          <StepDefinePackagePolicy
+            namespacePlaceholder={getInheritedNamespace(agentPolicies)}
+            packageInfo={packageInfo}
+            packagePolicy={{ ...packagePolicy, namespace: 'staging' }}
+            updatePackagePolicy={mockUpdatePackagePolicy}
+            validationResults={validationResults}
+            submitAttempted={true}
+            onNamespaceCustomizationEnabledChange={jest.fn()}
+            onIlmPolicyChange={onIlmPolicyChange}
+          />
+        );
+        await userEvent.click(renderResult.getByText('Advanced options').closest('button')!);
+        const toggle = await renderResult.findByTestId('packagePolicyNamespaceCustomizationToggle');
+        await userEvent.click(toggle);
+        const select = await renderResult.findByTestId('packagePolicyIlmPolicySelect');
+        await waitFor(() => expect(select).not.toBeDisabled());
+        fireEvent.change(select, { target: { value: 'policy-a' } });
+        expect(onIlmPolicyChange).toHaveBeenLastCalledWith('policy-a');
+      });
+
+      it('resets the selected ILM policy and calls onIlmPolicyChange(undefined) when toggle is turned off', async () => {
+        const onIlmPolicyChange = jest.fn();
+        renderResult = testRenderer.render(
+          <StepDefinePackagePolicy
+            namespacePlaceholder={getInheritedNamespace(agentPolicies)}
+            packageInfo={packageInfo}
+            packagePolicy={{ ...packagePolicy, namespace: 'staging' }}
+            updatePackagePolicy={mockUpdatePackagePolicy}
+            validationResults={validationResults}
+            submitAttempted={true}
+            onNamespaceCustomizationEnabledChange={jest.fn()}
+            onIlmPolicyChange={onIlmPolicyChange}
+          />
+        );
+        await userEvent.click(renderResult.getByText('Advanced options').closest('button')!);
+        const toggle = await renderResult.findByTestId('packagePolicyNamespaceCustomizationToggle');
+        await userEvent.click(toggle); // turn ON
+        const select = await renderResult.findByTestId('packagePolicyIlmPolicySelect');
+        await waitFor(() => expect(select).not.toBeDisabled());
+        fireEvent.change(select, { target: { value: 'policy-a' } });
+        expect(onIlmPolicyChange).toHaveBeenLastCalledWith('policy-a');
+        await userEvent.click(toggle); // turn OFF
+        expect(onIlmPolicyChange).toHaveBeenLastCalledWith(undefined);
+        await waitFor(() => expect(select).toHaveValue(''));
+      });
+
+      it('keeps the currently assigned ilm_policy selectable even if excluded from the fetched list', async () => {
+        renderResult = renderWithToggle({
+          packagePolicyOverride: { namespace: 'staging' },
+          packageInfoOverride: {
+            installationInfo: {
+              namespace_customization_enabled_for: ['staging'],
+              namespace_customization_settings: { staging: { ilm_policy: 'deleted-policy' } },
+            } as any,
+          },
+        });
+        await userEvent.click(renderResult.getByText('Advanced options').closest('button')!);
+        const select = await renderResult.findByTestId('packagePolicyIlmPolicySelect');
+        await waitFor(() => expect(select).toHaveValue('deleted-policy'));
       });
     });
   });

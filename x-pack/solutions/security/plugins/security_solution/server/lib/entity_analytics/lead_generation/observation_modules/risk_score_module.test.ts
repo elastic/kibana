@@ -63,7 +63,7 @@ describe('RiskScoreModule', () => {
       riskScoreDataClient: riskScoreDataClient as unknown as RiskScoreDataClient,
       logger,
     });
-    expect(module.config.weight).toBe(0.35);
+    expect(module.config.weight).toBe(0.9);
   });
 
   describe('current risk level observations', () => {

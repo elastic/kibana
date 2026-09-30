@@ -34,7 +34,6 @@ import { useInvestigateInTimeline } from '../../../../detections/components/aler
 import { useGraphPreview } from '../../../../flyout_v2/document/main/hooks/use_graph_preview';
 import { useNavigateToGraphVisualization } from '../../shared/hooks/use_navigate_to_graph_visualization';
 import { useUpsellingComponent } from '../../../../common/hooks/use_upselling';
-import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 import { useSelectedPatterns } from '../../../../data_view_manager/hooks/use_selected_patterns';
 import { useNavigateToSessionView } from '../../shared/hooks/use_navigate_to_session_view';
 
@@ -54,8 +53,8 @@ jest.mock('../../../../data_view_manager/hooks/use_selected_patterns');
 jest.mock('../../shared/hooks/use_navigate_to_session_view');
 jest.mock('../../shared/hooks/use_navigate_to_graph_visualization');
 
-jest.mock('react-redux', () => {
-  const original = jest.requireActual('react-redux');
+jest.mock('react-redux-v7', () => {
+  const original = jest.requireActual('react-redux-v7');
 
   return {
     ...original,
@@ -114,7 +113,6 @@ describe('<VisualizationsSection />', () => {
       navigateToGraphVisualization: jest.fn(),
     });
     (useSelectedPatterns as jest.Mock).mockReturnValue(['index']);
-    (useIsExperimentalFeatureEnabled as jest.Mock).mockReturnValue(true);
     mockUseAlertPrevalenceFromProcessTree.mockReturnValue({
       loading: false,
       error: false,

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { ActionsClientLlm } from '@kbn/langchain/server';
+import type { BaseLLM } from '@langchain/core/language_models/llms';
 import { z as z4 } from '@kbn/zod/v4';
 import type { ZodType } from '@kbn/zod/v4';
 import { ChatPromptTemplate } from '@langchain/core/prompts';
@@ -97,7 +97,7 @@ export const getChainWithFormatInstructions = <T extends GraphInsightTypes>({
   llm,
   generationSchema,
 }: {
-  llm: ActionsClientLlm;
+  llm: BaseLLM;
   generationSchema: ZodType<{ insights: T[] }>;
 }): GetChainWithFormatInstructions => {
   // StructuredOutputParser.fromZodSchema() only supports Zod v3 — it calls

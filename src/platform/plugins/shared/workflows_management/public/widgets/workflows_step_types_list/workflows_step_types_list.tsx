@@ -13,7 +13,7 @@ import React, { useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import type { Step } from '@kbn/workflows';
 import { collectAllSteps, getBuiltInStepDefinition } from '@kbn/workflows';
-import { getBaseConnectorType } from '../../shared/ui/step_icons/get_base_connector_type';
+import { getBaseConnectorType } from '@kbn/workflows-ui';
 import { StepIcon } from '../../shared/ui/step_icons/step_icon';
 import { PopoverItems } from '../worflows_triggers_list/popover_items';
 

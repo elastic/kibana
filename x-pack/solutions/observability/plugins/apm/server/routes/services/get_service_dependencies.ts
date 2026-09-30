@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { ConnectionStatsItemWithImpact } from '../../../common/connections';
+import type { ServiceDependenciesResponse } from '@kbn/apm-api-shared';
 import { SERVICE_NAME } from '../../../common/es_fields/apm';
 import { environmentQuery } from '../../../common/utils/environment_query';
 import { getConnectionStats } from '../../lib/connections/get_connection_stats';
@@ -47,13 +47,6 @@ async function getServiceDependenciesForTimeRange({
 
   return getConnectionStatsItemsWithRelativeImpact(statsItems);
 }
-
-export type ServiceDependenciesResponse = Array<
-  Omit<ConnectionStatsItemWithImpact, 'stats'> & {
-    currentStats: ConnectionStatsItemWithImpact['stats'];
-    previousStats: ConnectionStatsItemWithImpact['stats'] | null;
-  }
->;
 
 export async function getServiceDependencies(opts: Options): Promise<ServiceDependenciesResponse> {
   const { offset, ...sharedOptions } = opts;

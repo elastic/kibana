@@ -14,14 +14,19 @@ export const isUserName = (fieldName: string) => fieldName === 'user.name';
 export const getUserFlyoutPanelProps = ({
   contextId,
   userName,
+  entityId,
+  scopeId = TableId.alertsOnAlertsPage,
 }: {
   contextId: string;
   userName: string;
+  entityId?: string;
+  scopeId?: string;
 }): FlyoutPanelProps => ({
   id: UserPanelKey,
   params: {
     userName,
     contextID: contextId,
-    scopeId: TableId.alertsOnAlertsPage,
+    scopeId,
+    entityId,
   },
 });

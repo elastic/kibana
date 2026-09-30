@@ -7,15 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { EuiButton, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { merge } from 'lodash';
-import React, { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import useObservable from 'react-use/lib/useObservable';
 
+import type { UserProfileData } from '@kbn/core-user-profile-common';
 import { i18n } from '@kbn/i18n';
 
 import { useUserProfiles } from '../services';
-import type { UserProfileData } from '../types';
 
 interface Props {
   notificationSuccess?: {
@@ -75,28 +74,18 @@ export const useUpdateUserProfile = ({
         notifySuccess(
           {
             title: notificationTitle,
-            text: (
-              <>
-                <p>{pageReloadText}</p>
-                <EuiFlexGroup justifyContent="flexEnd" gutterSize="s">
-                  <EuiFlexItem grow={false}>
-                    <EuiButton
-                      size="s"
-                      onClick={() => window.location.reload()}
-                      data-test-subj="windowReloadButton"
-                      autoFocus
-                    >
-                      {i18n.translate(
-                        'userProfileComponents.updateUserProfile.notification.requiresPageReloadButtonLabel',
-                        {
-                          defaultMessage: 'Reload page',
-                        }
-                      )}
-                    </EuiButton>
-                  </EuiFlexItem>
-                </EuiFlexGroup>
-              </>
-            ),
+            text: pageReloadText,
+            actionProps: {
+              primary: {
+                onClick: () => window.location.reload(),
+                'data-test-subj': 'windowReloadButton',
+                autoFocus: true,
+                children: i18n.translate(
+                  'userProfileComponents.updateUserProfile.notification.requiresPageReloadButtonLabel',
+                  { defaultMessage: 'Reload page' }
+                ),
+              },
+            },
           },
           {
             durationMs: 1000 * 60 * 5,
@@ -110,7 +99,7 @@ export const useUpdateUserProfile = ({
   );
 
   const onUserProfileUpdate = useCallback(
-    (updatedData: UserProfileData) => {
+    (updatedData: NonNullable<UserProfileData>) => {
       if (isMounted.current) {
         setIsLoading(false);
       }
@@ -124,7 +113,7 @@ export const useUpdateUserProfile = ({
   );
 
   const update = useCallback(
-    <D extends Partial<UserProfileData>>(updatedData: D) => {
+    <D extends Partial<NonNullable<UserProfileData>>>(updatedData: D) => {
       userProfileSnapshot.current = merge({}, userProfileData);
       setIsLoading(true);
       return userProfileApiClient.partialUpdate(updatedData).then(() => {

@@ -11,12 +11,12 @@ This is a UI component. It's a date range picker with a "smart input".
 ## Commands
 
 Run from Kibana root directory.
-Before running `node`/`yarn` commands in agent shells, load nvm in the same command:
+Before running `node`/`pnpm` commands in agent shells, load nvm in the same command:
 - `[ -s "$HOME/.nvm/nvm.sh" ] && source "$HOME/.nvm/nvm.sh" && nvm use --silent`
 
 ```bash
 # Unit tests
-yarn test:jest src/platform/packages/shared/shared-ux/datetime/kbn-date-range-picker
+pnpm test:jest src/platform/packages/shared/shared-ux/datetime/kbn-date-range-picker
 
 # Lint (ESLint) — check
 node scripts/eslint.js src/platform/packages/shared/shared-ux/datetime/kbn-date-range-picker
@@ -25,10 +25,10 @@ node scripts/eslint.js src/platform/packages/shared/shared-ux/datetime/kbn-date-
 node scripts/eslint.js --fix src/platform/packages/shared/shared-ux/datetime/kbn-date-range-picker
 
 # Check types
-yarn test:type_check --project src/platform/packages/shared/shared-ux/datetime/kbn-date-range-picker/tsconfig.json
+pnpm test:type_check --project src/platform/packages/shared/shared-ux/datetime/kbn-date-range-picker/tsconfig.json
 
 # Storybook
-yarn storybook shared_ux
+pnpm storybook shared_ux
 ```
 
 ## Rules

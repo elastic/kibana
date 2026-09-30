@@ -42,17 +42,19 @@ const evaluate = baseEvaluate.extend<{
     await use(async ({ example, datasetName, datasetDescription, exampleLabel }) => {
       await executorClient.runExperiment(
         {
-          dataset: {
-            name: `${datasetName} - ${exampleLabel}`,
-            description: datasetDescription,
-            examples: [
-              {
-                input: example.input as unknown as Record<string, unknown>,
-                output: example.output as unknown as Record<string, unknown>,
-                metadata: example.metadata,
-              },
-            ],
-          },
+          datasets: [
+            {
+              name: `${datasetName} - ${exampleLabel}`,
+              description: datasetDescription,
+              examples: [
+                {
+                  input: example.input as unknown as Record<string, unknown>,
+                  output: example.output as unknown as Record<string, unknown>,
+                  metadata: example.metadata,
+                },
+              ],
+            },
+          ],
           task: () => runPartitionSuggestion(example, kbnClient, esClient, connector),
         },
         selectEvaluators([

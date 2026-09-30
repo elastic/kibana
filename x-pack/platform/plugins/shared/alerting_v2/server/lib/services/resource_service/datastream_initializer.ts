@@ -7,29 +7,34 @@
 
 import type { ElasticsearchClient } from '@kbn/core/server';
 import { DataStreamClient, type DataStreamDefinition } from '@kbn/data-streams';
-import { Logger as LoggerToken } from '@kbn/core-di';
 import type { Logger } from '@kbn/logging';
-import { inject, injectable } from 'inversify';
 import { isResponseError } from '@kbn/es-errors';
 import type { ResourceDefinition } from '../../../resources/datastreams/types';
+import { EsUnacknowledgedError } from '../retry_service/es_unacknowledged_error';
 import type { IResourceInitializer } from './resource_manager';
-import { EsServiceInternalToken } from '../es_service/tokens';
 
 const TOTAL_FIELDS_LIMIT = 2500;
 
-@injectable()
+// Expand to zero replicas on single-node clusters, where a replica can never
+// be allocated and would leave the cluster health permanently yellow.
+const AUTO_EXPAND_REPLICAS = '0-1';
+
+// Max Java long. Installing at the highest priority keeps our managed template
+// from being rejected for tying with a user template whose patterns overlap
+// `.rule-events*` / `.alert-actions*` (ES only rejects overlapping templates at
+// equal priority). Stringified to avoid JS number precision loss.
+const INDEX_TEMPLATE_PRIORITY = `${9223372036854775807n}` as unknown as number;
+
 export class DatastreamInitializer implements IResourceInitializer {
   constructor(
-    @inject(LoggerToken) private readonly logger: Logger,
-    @inject(EsServiceInternalToken) private readonly esClient: ElasticsearchClient,
+    private readonly logger: Logger,
+    private readonly esClient: ElasticsearchClient,
     private readonly resourceDefinition: ResourceDefinition
   ) {}
 
   public async initialize(): Promise<void> {
-    await this.esClient.ilm.putLifecycle({
-      name: this.resourceDefinition.ilmPolicy.name,
-      policy: this.resourceDefinition.ilmPolicy.policy,
-    });
+    // The template references the pipeline, so it must exist first.
+    await this.installIngestPipeline();
 
     const dataStreamDefinition: DataStreamDefinition<typeof this.resourceDefinition.mappings> = {
       name: this.resourceDefinition.dataStreamName,
@@ -37,12 +42,15 @@ export class DatastreamInitializer implements IResourceInitializer {
       version: this.resourceDefinition.version,
       template: {
         aliases: {},
-        priority: 500,
+        priority: INDEX_TEMPLATE_PRIORITY,
         mappings: this.resourceDefinition.mappings,
+        lifecycle: this.resourceDefinition.lifecycle,
         settings: {
-          'index.lifecycle.name': this.resourceDefinition.ilmPolicy.name,
+          'index.auto_expand_replicas': AUTO_EXPAND_REPLICAS,
           'index.mapping.total_fields.limit': TOTAL_FIELDS_LIMIT,
           'index.mapping.total_fields.ignore_dynamic_beyond_limit': true,
+          'index.lifecycle.prefer_ilm': false,
+          'index.final_pipeline': this.resourceDefinition.finalPipeline.id,
         },
         _meta: {
           managed: true,
@@ -58,16 +66,89 @@ export class DatastreamInitializer implements IResourceInitializer {
         elasticsearchClient: this.esClient,
       });
     } catch (error) {
-      if (!isResponseError(error)) {
+      if (!isResponseError(error) || error.statusCode !== 409) {
         throw error;
       }
 
-      if (error.statusCode === 409) {
-        this.logger.debug(`Data stream already exists: ${this.resourceDefinition.dataStreamName}.`);
-        return;
-      }
+      this.logger.debug(`Data stream already exists: ${this.resourceDefinition.dataStreamName}.`);
+    }
 
+    await this.updateExistingIndicesFinalPipeline();
+    await this.updateExistingIndicesReplicaSettings();
+  }
+
+  /**
+   * Installs or upgrades the ingest pipeline, gated on the deployed `version` the same way
+   * `@kbn/data-streams` gates index template upgrades.
+   */
+  private async installIngestPipeline(): Promise<void> {
+    const { id, version, processors } = this.resourceDefinition.finalPipeline;
+
+    const deployedVersion = await this.getDeployedPipelineVersion(id);
+    if (deployedVersion !== undefined && deployedVersion >= version) {
+      this.logger.debug(`Ingest pipeline ${id} v${deployedVersion} already applied and updated.`);
+      return;
+    }
+
+    const { acknowledged } = await this.esClient.ingest.putPipeline({
+      id,
+      version,
+      processors,
+      _meta: { managed: true },
+    });
+    if (!acknowledged) {
+      throw new EsUnacknowledgedError(`install ingest pipeline ${id} v${version}`);
+    }
+  }
+
+  private async getDeployedPipelineVersion(id: string): Promise<number | undefined> {
+    try {
+      const response = await this.esClient.ingest.getPipeline({ id });
+      return response[id]?.version;
+    } catch (error) {
+      if (isResponseError(error) && error.statusCode === 404) {
+        return undefined;
+      }
       throw error;
+    }
+  }
+
+  /**
+   * Applies `index.final_pipeline` to existing backing indices. Producers do not set
+   * `@timestamp`, so a backing index without the pipeline would reject every write; unlike
+   * the replica patch this failure must block initialization.
+   */
+  private async updateExistingIndicesFinalPipeline(): Promise<void> {
+    const { dataStreamName, finalPipeline } = this.resourceDefinition;
+    const { acknowledged } = await this.esClient.indices.putSettings({
+      index: dataStreamName,
+      settings: { 'index.final_pipeline': finalPipeline.id },
+    });
+    if (!acknowledged) {
+      throw new EsUnacknowledgedError(
+        `apply index.final_pipeline to existing ${dataStreamName} indices`
+      );
+    }
+  }
+
+  /**
+   * Applies `auto_expand_replicas` to the data stream's existing backing indices: the index
+   * template only affects indices created after it was installed, so without this, deployments
+   * that created the data stream before the setting was added would keep an unallocatable
+   * replica shard until the next rollover.
+   */
+  private async updateExistingIndicesReplicaSettings(): Promise<void> {
+    try {
+      await this.esClient.indices.putSettings({
+        index: this.resourceDefinition.dataStreamName,
+        settings: { 'index.auto_expand_replicas': AUTO_EXPAND_REPLICAS },
+      });
+    } catch (error) {
+      // Best effort: replica expansion only affects cluster health reporting and
+      // must not block the initialization of alerting resources.
+      this.logger.warn(
+        `Failed to update auto_expand_replicas for ${this.resourceDefinition.dataStreamName}: ${error.message}`
+      );
     }
   }
 }

@@ -149,14 +149,15 @@ test.describe(
       // Open actions menu
       await pageObjects.ruleDetailsPage.openActionsMenu();
 
-      // Verify edit button is visible (popover is open)
-      await expect(pageObjects.ruleDetailsPage.editRuleButton).toBeVisible();
+      // Verify an overflow-only action is visible (popover is open). `Edit rule` is a primary
+      // action rendered inline, so use `Delete rule` to assert the popover state.
+      await expect(pageObjects.ruleDetailsPage.deleteRuleButton).toBeVisible();
 
       // Close actions menu
       await pageObjects.ruleDetailsPage.closeActionsMenu();
 
-      // Verify edit button is no longer visible (popover is closed)
-      await expect(pageObjects.ruleDetailsPage.editRuleButton).toBeHidden();
+      // Verify the overflow action is no longer visible (popover is closed)
+      await expect(pageObjects.ruleDetailsPage.deleteRuleButton).toBeHidden();
     });
 
     test('should display dashboard options in related dashboards dropdown when editing rule', async ({

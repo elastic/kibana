@@ -80,7 +80,6 @@ export class ReportingPlugin
     reportingCore.pluginSetup({
       logger: this.logger,
       status,
-      basePath: http.basePath,
       router: http.createRouter<ReportingRequestHandlerContext>(),
       usageCounter,
       docLinks: core.docLinks,

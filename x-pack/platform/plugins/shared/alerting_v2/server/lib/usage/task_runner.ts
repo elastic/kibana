@@ -5,59 +5,87 @@
  * 2.0.
  */
 
-import type { ElasticsearchClient, Logger } from '@kbn/core/server';
-import type { RunContext, IntervalSchedule } from '@kbn/task-manager-plugin/server';
-import { emptyState, type LatestTaskStateSchema } from './task_state';
-import { getRuleStats } from './lib/get_rule_stats';
-import { getExecutionStats } from './lib/get_execution_stats';
+import type { ElasticsearchClient } from '@kbn/core/server';
+import type { RunContext, RunResult } from '@kbn/task-manager-plugin/server/task';
+import { inject, injectable } from 'inversify';
+import { EsServiceInternalToken } from '../services/es_service/tokens';
+import {
+  LoggerServiceToken,
+  type LoggerServiceContract,
+} from '../services/logger_service/logger_service';
+import { ALERTING_LOG_CODES } from '../errors/error_codes';
+import type { AlertingTaskRunner } from '../services/task_run_scope_service/create_task_runner';
+import { SCHEDULE } from './constants';
 import { getActionPolicyStats } from './lib/get_action_policy_stats';
 import { getAlertStats } from './lib/get_alert_stats';
+import { getExecutionStats } from './lib/get_execution_stats';
+import { getRuleStats } from './lib/get_rule_stats';
+import { type LatestTaskStateSchema } from './task_state';
 
-export function telemetryTaskRunner(
-  logger: Logger,
-  schedule: IntervalSchedule,
-  getEsClient: () => ElasticsearchClient
-) {
-  return ({ taskInstance }: RunContext) => {
+type TaskRunParams = Pick<RunContext, 'taskInstance' | 'signal'>;
+
+const runStat = async <T>(
+  name: string,
+  logger: LoggerServiceContract,
+  fn: () => Promise<T>
+): Promise<T | undefined> => {
+  try {
+    return await fn();
+  } catch (error) {
+    logger.warn({
+      message: 'Telemetry stat collection failed',
+      error,
+      code: ALERTING_LOG_CODES.TASKS_TELEMETRY_RUN_FAILED,
+      labels: { resource: name },
+    });
+    return undefined;
+  }
+};
+
+@injectable()
+export class TelemetryTaskRunner implements AlertingTaskRunner {
+  private readonly logger: LoggerServiceContract;
+
+  constructor(
+    @inject(LoggerServiceToken) loggerService: LoggerServiceContract,
+    @inject(EsServiceInternalToken) private readonly esClient: ElasticsearchClient
+  ) {
+    this.logger = loggerService.forSubsystem('tasks');
+  }
+
+  public async run({ taskInstance }: TaskRunParams): Promise<RunResult> {
     const state = taskInstance.state as LatestTaskStateSchema;
+    const logger = this.logger;
 
-    return {
-      async run() {
-        try {
-          const esClient = getEsClient();
-          const [stats, executionStats, actionPolicyStats, alertStats] = await Promise.all([
-            getRuleStats(esClient),
-            getExecutionStats(esClient),
-            getActionPolicyStats(esClient),
-            getAlertStats(esClient),
-          ]);
+    const [stats, executionStats, actionPolicyStats, alertStats] = await Promise.all([
+      runStat('rule_stats', logger, () => getRuleStats(this.esClient)),
+      runStat('execution_stats', logger, () => getExecutionStats(this.esClient)),
+      runStat('action_policy_stats', logger, () => getActionPolicyStats(this.esClient)),
+      runStat('alert_stats', logger, () => getAlertStats(this.esClient)),
+    ]);
 
-          const updatedState: LatestTaskStateSchema = {
-            has_errors: false,
-            error_messages: undefined,
-            runs: (state.runs ?? 0) + 1,
-            ...stats,
-            ...executionStats,
-            ...actionPolicyStats,
-            ...alertStats,
-          };
+    const statResults: Array<[string, unknown]> = [
+      ['rule_stats', stats],
+      ['execution_stats', executionStats],
+      ['action_policy_stats', actionPolicyStats],
+      ['alert_stats', alertStats],
+    ];
+    const failedStats = statResults
+      .filter(([, result]) => result === undefined)
+      .map(([name]) => name);
 
-          return { state: updatedState, schedule };
-        } catch (err) {
-          const errorMessage = err && err.message ? err.message : String(err);
-          logger.warn(`Error executing alerting v2 telemetry task: ${errorMessage}`);
-
-          return {
-            state: {
-              ...emptyState,
-              runs: (state.runs ?? 0) + 1,
-              has_errors: true,
-              error_messages: [errorMessage],
-            },
-            schedule,
-          };
-        }
-      },
+    const updatedState: LatestTaskStateSchema = {
+      has_errors: failedStats.length > 0,
+      error_messages: failedStats.length
+        ? failedStats.map((name) => `Telemetry stat collection failed: ${name}`)
+        : undefined,
+      runs: (state.runs ?? 0) + 1,
+      ...(stats ?? {}),
+      ...(executionStats ?? {}),
+      ...(actionPolicyStats ?? {}),
+      ...(alertStats ?? {}),
     };
-  };
+
+    return { state: updatedState, schedule: SCHEDULE };
+  }
 }

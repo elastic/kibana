@@ -11,8 +11,9 @@ import React from 'react';
 import useObservable from 'react-use/lib/useObservable';
 import { type Observable, distinctUntilChanged, of, scan } from 'rxjs';
 import { css } from '@emotion/react';
-import { EuiCallOut, EuiText, EuiPanel, useEuiTheme } from '@elastic/eui';
+import { EuiPanel, useEuiTheme } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { KbnInfoCallout } from '@kbn/ui-callout';
 import { SearchSessionState } from '@kbn/data-plugin/public';
 
 const STICKY_SESSION_STATES = new Set<SearchSessionState>([
@@ -68,14 +69,21 @@ export function BackgroundSearchRestoredCallout(props: BackgroundSearchRestoredC
       hasShadow={false}
       paddingSize={isESQLQuery ? 's' : 'none'}
     >
-      <EuiCallOut size="s">
-        <EuiText size="xs">
+      <KbnInfoCallout
+        size="s"
+        title={
+          <FormattedMessage
+            id="backgroundSearch.backgroundSearchRestoredCallout.title"
+            defaultMessage="You are viewing cached data from a specific time range from a background search."
+          />
+        }
+        text={
           <FormattedMessage
             id="backgroundSearch.backgroundSearchRestoredCallout.message"
-            defaultMessage="You are viewing cached data from a specific time range from a background search. Changing the time range or query will re-run the session."
+            defaultMessage="Changing the time range or query will re-run the session."
           />
-        </EuiText>
-      </EuiCallOut>
+        }
+      />
     </EuiPanel>
   );
 }

@@ -5,11 +5,7 @@
  * 2.0.
  */
 
-import type { LensDatasourceId } from '@kbn/lens-common';
-
-import React, { useState, useEffect, useMemo, useCallback, useRef } from 'react';
-import { EMPTY } from 'rxjs';
-import { useObservable } from '@kbn/use-observable';
+import { css } from '@emotion/react';
 import {
   EuiSpacer,
   EuiFlexGroup,
@@ -21,43 +17,56 @@ import {
   EuiToolTip,
   useEuiTheme,
 } from '@elastic/eui';
-import { BehaviorSubject } from 'rxjs';
-import { i18n } from '@kbn/i18n';
-import { css } from '@emotion/react';
 import type { DragDropIdentifier, DropType } from '@kbn/dom-drag-drop';
 import { ReorderProvider } from '@kbn/dom-drag-drop';
 import { DimensionButton } from '@kbn/visualization-ui-components';
-import { useStateFromPublishingSubject } from '@kbn/presentation-publishing';
-import { isOfAggregateQueryType } from '@kbn/es-query';
+import type { AggregateQuery } from '@kbn/es-query';
+import type { DatatableColumn } from '@kbn/expressions-plugin/public';
+import type { DataView } from '@kbn/data-views-plugin/public';
 import { apiPublishesESQLVariables } from '@kbn/esql-types';
-import type { VisualizationDimensionGroupConfig } from '@kbn/lens-common';
+import { isTextBasedAttributes, LENS_LAYER_TYPES } from '@kbn/lens-common';
 import { getTabIdAttribute } from '@kbn/unified-tabs';
-import { isOperation } from '../../../types_guards';
-import { LayerHeader } from './layer_header';
-import type { LayerPanelProps } from './types';
-import { DimensionContainer } from './dimension_container';
-import { EmptyDimensionButton } from './buttons/empty_dimension_button';
-import { DraggableDimensionButton } from './buttons/draggable_dimension_button';
-import { useFocusUpdate } from './use_focus_update';
+import { i18n } from '@kbn/i18n';
+import type {
+  LensDatasourceId,
+  TextBasedPrivateState,
+  VisualizationDimensionGroupConfig,
+} from '@kbn/lens-common';
 import {
-  useLensSelector,
-  useLensDispatch,
+  apiPublishesApproximation,
+  useStateFromPublishingSubject,
+} from '@kbn/presentation-publishing';
+import { useObservable } from '@kbn/use-observable';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { BehaviorSubject, EMPTY } from 'rxjs';
+import { LENS_LAYER_TABS_CONTENT_ID } from '../../../app_plugin/shared/edit_on_the_fly/layer_tabs';
+import { FlyoutContainer } from '../../../shared_components/flyout_container';
+import {
   onActiveDataChange,
   selectCanEditTextBasedQuery,
+  selectDatasourceStates,
   selectIsFullscreenDatasource,
   selectResolvedDateRange,
-  selectDatasourceStates,
+  useLensDispatch,
+  useLensSelector,
 } from '../../../state_management';
 import { getActiveDataFromDatatable } from '../../../state_management/shared_logic';
-import { FlyoutContainer } from '../../../shared_components/flyout_container';
-import { LENS_LAYER_TABS_CONTENT_ID } from '../../../app_plugin/shared/edit_on_the_fly/layer_tabs';
-import { FakeDimensionButton } from './buttons/fake_dimension_button';
+import { reconcileQueryColumns } from '../../../datasources/text_based/utils';
+import { isOperation } from '../../../types_guards';
+import { isEsqlChart } from '../../../utils';
 import { getLongMessage } from '../../../user_messages_utils';
-import { ESQLEditor } from './esql_editor';
 import { useEditorFrameService } from '../../editor_frame_service_context';
+import { DraggableDimensionButton } from './buttons/draggable_dimension_button';
+import { EmptyDimensionButton } from './buttons/empty_dimension_button';
+import { FakeDimensionButton } from './buttons/fake_dimension_button';
+import { DimensionContainer } from './dimension_container';
+import { ESQLEditor } from './esql_editor';
+import { getCloneLayerAction } from './layer_actions/clone_layer_action';
 import { getOpenLayerSettingsAction } from './layer_actions/open_layer_settings';
 import { getRemoveLayerAction } from './layer_actions/remove_layer_action';
-import { getCloneLayerAction } from './layer_actions/clone_layer_action';
+import { LayerHeader } from './layer_header';
+import type { LayerPanelProps } from './types';
+import { useFocusUpdate } from './use_focus_update';
 
 export function LayerPanel(props: LayerPanelProps) {
   const { datasourceMap } = useEditorFrameService();
@@ -99,6 +108,9 @@ export function LayerPanel(props: LayerPanelProps) {
     apiPublishesESQLVariables(parentApi)
       ? parentApi?.esqlVariables$
       : new BehaviorSubject(undefined)
+  );
+  const isApproximate = useStateFromPublishingSubject(
+    apiPublishesApproximation(parentApi) ? parentApi?.isApproximate$ : new BehaviorSubject(false)
   );
 
   const isInlineEditing = Boolean(props?.setIsInlineFlyoutVisible);
@@ -319,15 +331,86 @@ export function LayerPanel(props: LayerPanelProps) {
   );
 
   const { dataViews } = props.framePublicAPI;
-  const [datasource] = Object.values(framePublicAPI.datasourceLayers);
+  const isSelectedDatasourceTextBased = datasourcePublicAPI?.isTextBasedLanguage() ?? false;
+  const layerType = activeVisualization.getLayerType(layerId, visualizationState);
+  const isDataLayer = !layerType || layerType === 'data';
   const isTextBasedLanguage =
-    datasource?.isTextBasedLanguage() ||
-    isOfAggregateQueryType(editorProps.attributes?.state.query) ||
-    false;
+    isSelectedDatasourceTextBased ||
+    (isDataLayer && !datasourcePublicAPI && isTextBasedAttributes(editorProps.attributes));
+  // On ES|QL charts, form-based helper layers (e.g. reference lines) must not expose the data view switcher
+  const hideLayerDataViewPicker =
+    layerType === LENS_LAYER_TYPES.REFERENCELINE &&
+    isEsqlChart(props.framePublicAPI.datasourceLayers);
+  const textBasedDatasourceState = isSelectedDatasourceTextBased
+    ? (layerDatasourceState as TextBasedPrivateState | undefined)
+    : undefined;
+  const layerQuery = textBasedDatasourceState?.layers?.[layerId]?.query;
+  const usesLayerScopedQuery = textBasedDatasourceState !== undefined && !isOnlyLayer;
   const shouldRenderESQLEditor =
-    isTextBasedLanguage &&
-    canEditTextBasedQuery &&
-    isOfAggregateQueryType(editorProps.attributes?.state.query);
+    isTextBasedLanguage && canEditTextBasedQuery && isTextBasedAttributes(editorProps.attributes);
+
+  const updateLayerQuery = useCallback(
+    async (newQuery: AggregateQuery, columns: DatatableColumn[], dataView: DataView) => {
+      const layer = textBasedDatasourceState?.layers?.[layerId];
+      if (!textBasedDatasourceState || !layer) {
+        return;
+      }
+
+      const reconciledColumns = reconcileQueryColumns(
+        layer.columns,
+        columns,
+        new Set(allAccessors)
+      );
+      const reconciledColumnIds = new Set(reconciledColumns.map(({ columnId }) => columnId));
+      const hasMissingDimension = allAccessors.some(
+        (columnId) => !reconciledColumnIds.has(columnId)
+      );
+      if (hasMissingDimension) {
+        throw new Error(
+          i18n.translate('xpack.lens.config.invalidLayerQueryColumns', {
+            defaultMessage:
+              'The query result does not contain compatible fields for every configured dimension. Remove the incompatible dimensions before submitting this query.',
+          })
+        );
+      }
+
+      const dataViewSpec = dataView.toSpec();
+      const index = dataViewSpec.id ?? dataViewSpec.title;
+      const updatedLayers = {
+        ...textBasedDatasourceState.layers,
+        [layerId]: {
+          ...layer,
+          index,
+          timeField: dataViewSpec.timeFieldName,
+          query: newQuery,
+          columns: reconciledColumns,
+          errors: undefined,
+        },
+      };
+      const referencedIndexIds = new Set(
+        Object.values(updatedLayers).map(({ index: currentIndex }) => currentIndex)
+      );
+      const indexPatternRefs = dataViewSpec.id
+        ? [
+            ...(textBasedDatasourceState.indexPatternRefs ?? []).filter(
+              ({ id }) => id !== dataViewSpec.id && referencedIndexIds.has(id)
+            ),
+            {
+              id: dataViewSpec.id,
+              title: dataViewSpec.title ?? '',
+              timeField: dataViewSpec.timeFieldName,
+            },
+          ]
+        : textBasedDatasourceState.indexPatternRefs;
+
+      updateDatasource(datasourceId, {
+        ...textBasedDatasourceState,
+        indexPatternRefs,
+        layers: updatedLayers,
+      });
+    },
+    [allAccessors, datasourceId, layerId, textBasedDatasourceState, updateDatasource]
+  );
 
   const visualizationLayerSettings = useMemo(
     () =>
@@ -361,12 +444,12 @@ export function LayerPanel(props: LayerPanelProps) {
       return null;
     }
 
-    const layerType = activeVisualization.getLayerType(layerId, visualizationState);
+    const currentLayerType = activeVisualization.getLayerType(layerId, visualizationState);
 
     const removeLayerAction = getRemoveLayerAction({
       execute: () => onRemoveLayer(layerId),
       layerIndex,
-      layerType,
+      layerType: currentLayerType,
       isOnlyLayer: true,
       core,
       customModalText: activeVisualization.getCustomRemoveLayerText?.(layerId, visualizationState),
@@ -376,7 +459,6 @@ export function LayerPanel(props: LayerPanelProps) {
       execute: onCloneLayer,
       layerIndex,
       activeVisualization,
-      isTextBasedLanguage,
     });
 
     return { removeLayerAction, cloneLayerAction };
@@ -389,7 +471,6 @@ export function LayerPanel(props: LayerPanelProps) {
     core,
     onRemoveLayer,
     onCloneLayer,
-    isTextBasedLanguage,
   ]);
 
   const supportsMultipleLayers = useMemo(
@@ -496,28 +577,35 @@ export function LayerPanel(props: LayerPanelProps) {
             </EuiFlexGroup>
             {props.indexPatternService &&
               !isTextBasedLanguage &&
+              !hideLayerDataViewPicker &&
               (layerDatasource || activeVisualization.LayerPanelComponent) && (
                 <EuiSpacer size="s" />
               )}
-            {layerDatasource && props.indexPatternService && !isTextBasedLanguage && (
-              <layerDatasource.LayerPanelComponent
-                {...{
-                  layerId,
-                  state: layerDatasourceState,
-                  activeData: props.framePublicAPI.activeData,
-                  dataViews,
-                  onChangeIndexPattern: (indexPatternId) =>
-                    onChangeIndexPattern({ indexPatternId, layerId, datasourceId }),
-                }}
-              />
-            )}
+            {layerDatasource &&
+              props.indexPatternService &&
+              !isTextBasedLanguage &&
+              !hideLayerDataViewPicker && (
+                <layerDatasource.LayerPanelComponent
+                  {...{
+                    layerId,
+                    state: layerDatasourceState,
+                    activeData: props.framePublicAPI.activeData,
+                    dataViews,
+                    onChangeIndexPattern: (indexPatternId) =>
+                      onChangeIndexPattern({ indexPatternId, layerId, datasourceId }),
+                  }}
+                />
+              )}
             {shouldRenderESQLEditor ? (
               <ESQLEditor
+                key={layerId}
                 uiSettings={core.uiSettings}
                 http={core.http}
                 isTextBasedLanguage={isTextBasedLanguage}
                 framePublicAPI={framePublicAPI}
                 layerId={layerId}
+                layerQuery={layerQuery}
+                onLayerQuerySubmit={usesLayerScopedQuery ? updateLayerQuery : undefined}
                 {...editorProps}
               />
             ) : null}
@@ -689,6 +777,7 @@ export function LayerPanel(props: LayerPanelProps) {
                               state={layerDatasourceState}
                               layerDatasource={layerDatasource}
                               datasourceLayers={framePublicAPI.datasourceLayers}
+                              activeData={framePublicAPI.activeData}
                               onDrop={onDrop}
                               indexPatterns={dataViews.indexPatterns}
                             >
@@ -772,6 +861,7 @@ export function LayerPanel(props: LayerPanelProps) {
                         layerDatasource={layerDatasource}
                         state={layerDatasourceState}
                         datasourceLayers={framePublicAPI.datasourceLayers}
+                        activeData={framePublicAPI.activeData}
                         onClick={(id) => {
                           props.onEmptyDimensionAdd(id, group);
                           setOpenDimension({
@@ -878,6 +968,10 @@ export function LayerPanel(props: LayerPanelProps) {
                 columnId: openColumnId,
                 groupId: openColumnGroup.groupId,
                 hideGrouping: openColumnGroup.hideGrouping,
+                activeVisualizationTypeId: activeVisualization?.getVisualizationTypeId?.(
+                  visualizationState,
+                  layerId
+                ),
                 filterOperations: openColumnGroup.filterOperations,
                 isMetricDimension: openColumnGroup?.isMetricDimension,
                 dimensionGroups,
@@ -885,12 +979,14 @@ export function LayerPanel(props: LayerPanelProps) {
                 isFullscreen,
                 setState: updateDataLayerState,
                 supportStaticValue: Boolean(openColumnGroup.supportStaticValue),
+                staticValueOnly: Boolean(openColumnGroup.staticValueOnly),
                 paramEditorCustomProps: openColumnGroup.paramEditorCustomProps,
                 enableFormatSelector: openColumnGroup.enableFormatSelector !== false,
                 layerType: activeVisualization.getLayerType(layerId, visualizationState),
                 indexPatterns: dataViews.indexPatterns,
                 activeData: layerVisualizationConfigProps.activeData,
                 esqlVariables,
+                isApproximate,
                 dataSectionExtra: !isFullscreen &&
                   openDimension.isComplete &&
                   activeVisualization.DimensionEditorDataExtraComponent && (
@@ -899,7 +995,7 @@ export function LayerPanel(props: LayerPanelProps) {
                         ...layerVisualizationConfigProps,
                         groupId: openColumnGroup.groupId,
                         accessor: openColumnId,
-                        datasource,
+                        datasource: datasourcePublicAPI,
                         setState: props.updateVisualization,
                         addLayer: props.addLayer,
                         removeLayer: props.onRemoveLayer,
@@ -920,7 +1016,7 @@ export function LayerPanel(props: LayerPanelProps) {
                       ...layerVisualizationConfigProps,
                       groupId: openColumnGroup.groupId,
                       accessor: openColumnId,
-                      datasource,
+                      datasource: datasourcePublicAPI,
                       setState: props.updateVisualization,
                       addLayer: props.addLayer,
                       removeLayer: props.onRemoveLayer,
@@ -934,7 +1030,7 @@ export function LayerPanel(props: LayerPanelProps) {
                         ...layerVisualizationConfigProps,
                         groupId: openColumnGroup.groupId,
                         accessor: openColumnId,
-                        datasource,
+                        datasource: datasourcePublicAPI,
                         setState: props.updateVisualization,
                         addLayer: props.addLayer,
                         removeLayer: props.onRemoveLayer,

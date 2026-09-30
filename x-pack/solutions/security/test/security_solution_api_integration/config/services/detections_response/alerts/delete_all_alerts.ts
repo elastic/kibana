@@ -23,6 +23,7 @@ export const deleteAllAlerts = async (
     | '.alerts-security.alerts-*'
     | '.preview.alerts-security.alerts-*'
     | '.alerts-security.attack.discovery.alerts-*'
+    | '.adhoc.alerts-security.attack.discovery.alerts-*'
   > = ['.alerts-security.alerts-*']
 ): Promise<void> => {
   await countDownTest(

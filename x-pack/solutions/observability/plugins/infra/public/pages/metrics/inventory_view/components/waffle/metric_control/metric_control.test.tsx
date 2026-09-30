@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { render, screen } from '@testing-library/react';
-import { faker } from '@faker-js/faker/.';
+import { faker } from '@faker-js/faker';
 import {
   SNAPSHOT_CUSTOM_AGGREGATIONS,
   type SnapshotCustomMetricInput,
@@ -15,6 +15,11 @@ import {
 import { SNAPSHOT_API_MAX_METRICS } from '../../../../../../../common/constants';
 import { WaffleMetricControls } from '.';
 import userEvent from '@testing-library/user-event';
+
+jest.mock('./metrics_context_menu', () => ({
+  MetricsContextMenu: () => null,
+}));
+
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 
 const renderWithProviders = (children: React.ReactNode) =>

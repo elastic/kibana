@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { DEFAULT_DASHBOARD_STATE } from './default_dashboard_state';
+import { DEFAULT_DASHBOARD_STATE } from '../../common/default_dashboard_state';
 import { getDashboardApi } from './get_dashboard_api';
 
 describe('initializeSettingsManager', () => {

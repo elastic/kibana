@@ -47,6 +47,9 @@ interface UseCommentToEsqlParams {
   // "Generating..." decoration during the LLM call. Populated by useGhostLineHint.
   clearGhostHintRef?: MutableRefObject<() => void>;
   telemetryService?: ESQLEditorTelemetryService;
+  // When set, generation auto-accepts: removes the comment line, keeps generated code, and calls this callback with the final query instead of showing the review UI.
+  autoAcceptCallbackRef?: MutableRefObject<((finalQuery: string) => void) | undefined>;
+  onAfterInsert?: () => void;
 }
 
 export const useCommentToEsql = ({
@@ -57,6 +60,8 @@ export const useCommentToEsql = ({
   isEnabled,
   clearGhostHintRef,
   telemetryService,
+  autoAcceptCallbackRef,
+  onAfterInsert,
 }: UseCommentToEsqlParams) => {
   const { euiTheme } = useEuiTheme();
   const reviewStateRef = useRef<CommentReviewState | null>(null);
@@ -415,11 +420,28 @@ export const useCommentToEsql = ({
         currentCommentLine,
         result.content
       );
+      onAfterInsert?.();
 
       const replacedLineNumber =
         result.replacesNext && generatedLineEnd + 1 <= liveModel.getLineCount()
           ? generatedLineEnd + 1
           : null;
+
+      if (autoAcceptCallbackRef?.current) {
+        const cb = autoAcceptCallbackRef.current;
+        autoAcceptCallbackRef.current = undefined;
+        const currentEditor = editorRef.current;
+        if (currentEditor && liveModel) {
+          currentEditor.executeEdits('nl-to-esql-auto-accept', [
+            {
+              range: new monaco.Range(currentCommentLine, 1, generatedLineStart, 1),
+              text: null,
+            },
+          ]);
+          cb(liveModel.getValue());
+        }
+        return;
+      }
 
       showReview({
         commentLineNumber: currentCommentLine,
@@ -431,17 +453,19 @@ export const useCommentToEsql = ({
       clearGeneratingDecoration();
     }
   }, [
+    isEnabled,
     editorRef,
     editorModel,
-    cleanup,
-    clearCommentAnchor,
-    showGeneratingDecoration,
-    clearGeneratingDecoration,
     clearGhostHintRef,
+    autoAcceptCallbackRef,
+    showGeneratingDecoration,
+    cleanup,
     generateESQL,
-    showReview,
-    isEnabled,
     trackCommentResult,
+    clearCommentAnchor,
+    onAfterInsert,
+    showReview,
+    clearGeneratingDecoration,
   ]);
 
   return {

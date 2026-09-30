@@ -50,7 +50,7 @@ jest.mock('@kbn/security-solution-navigation', () => ({
   ),
 }));
 
-jest.mock('react-redux', () => ({
+jest.mock('react-redux-v7', () => ({
   Provider: ({ children }: { children: React.ReactNode }) => (
     <div data-test-subj="reduxProviderMock">{children}</div>
   ),

@@ -22,7 +22,7 @@ import {
   DiscoverCustomizationProvider,
   type DiscoverCustomizationService,
 } from '../customizations';
-import { type ScopedProfilesManager } from '../context_awareness';
+import { EMPTY_CONTEXT_AWARENESS_TOOLKIT, type ScopedProfilesManager } from '../context_awareness';
 import type { DiscoverServices } from '../build_services';
 import { createDiscoverServicesMock } from './services';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
@@ -121,7 +121,10 @@ export const DiscoverTestProvider = ({
   const scopedProfilesManager = useMemo(
     () =>
       originalScopedProfilesManager ??
-      services.profilesManager.createScopedProfilesManager({ scopedEbtManager }),
+      services.profilesManager.createScopedProfilesManager({
+        scopedEbtManager,
+        toolkit: EMPTY_CONTEXT_AWARENESS_TOOLKIT,
+      }),
     [originalScopedProfilesManager, scopedEbtManager, services.profilesManager]
   );
 

@@ -9,60 +9,27 @@ import type { SavedObjectsTypeMappingDefinition } from '@kbn/core-saved-objects-
 
 /**
  * Mappings for the rule saved object.
+ * For the full list of mappings, see:
+ * https://github.com/elastic/kibana/blob/main/x-pack/plugins/alerting_v2/server/saved_objects/schemas/rule_saved_object_attributes/v1.ts
  */
 export const ruleMappings: SavedObjectsTypeMappingDefinition = {
   dynamic: false,
   properties: {
-    kind: { type: 'keyword' },
+    kind: { type: 'keyword', ignore_above: 256 },
     metadata: {
       properties: {
-        name: { type: 'text', fields: { keyword: { type: 'keyword' } } },
+        name: { type: 'text', fields: { keyword: { type: 'keyword', ignore_above: 256 } } },
         description: { type: 'text' },
-        owner: { type: 'keyword' },
-        tags: { type: 'keyword' },
-      },
-    },
-    time_field: { type: 'keyword' },
-    schedule: {
-      properties: {
-        every: { type: 'keyword' },
-        lookback: { type: 'keyword' },
-      },
-    },
-    evaluation: {
-      properties: {
-        query: {
-          properties: {
-            base: { type: 'text' },
-          },
-        },
-      },
-    },
-    recovery_policy: {
-      properties: {
-        type: { type: 'keyword' },
-        query: {
-          properties: {
-            base: { type: 'text' },
-          },
-        },
-      },
-    },
-    grouping: {
-      properties: {
-        fields: { type: 'keyword' },
-      },
-    },
-    no_data: {
-      properties: {
-        behavior: { type: 'keyword' },
-        timeframe: { type: 'keyword' },
+        tags: { type: 'keyword', ignore_above: 128 },
       },
     },
     enabled: { type: 'boolean' },
-    createdBy: { type: 'keyword' },
-    createdAt: { type: 'date' },
-    updatedBy: { type: 'keyword' },
-    updatedAt: { type: 'date' },
+    schedule: {
+      properties: {
+        // Indexed so the maxScheduledPerMinute guardrail can aggregate the
+        // scheduled frequency of enabled rules instead of scanning every rule.
+        every: { type: 'keyword', ignore_above: 256 },
+      },
+    },
   },
 };

@@ -8,6 +8,7 @@
  */
 
 import type { Locator } from 'playwright/test';
+import { euiSelectors } from '../eui_components';
 import type { ScoutPage } from '..';
 
 export class ListingTable {
@@ -24,7 +25,7 @@ export class ListingTable {
   }
 
   async getAllItemsNames(): Promise<string[]> {
-    const links = this.table.locator('.euiTableRow .euiLink');
+    const links = this.table.locator(`${euiSelectors.basicTable.ROW_SELECTOR} .euiLink`);
     return links.allTextContents();
   }
 
@@ -40,6 +41,20 @@ export class ListingTable {
       await this.page.testSubj.click(`tag-searchbar-option-${tagName.replace(' ', '_')}`);
     }
     await this.searchBox.click();
+    await this.waitUntilTableIsLoaded();
+  }
+
+  /**
+   * Filters the listing by the given title. Wraps `title` in quotes so that
+   * names containing special characters (e.g. `"(1)"`) are matched literally rather
+   * than tokenized by the saved-object search syntax.
+   */
+  async searchForItemTitle(title: string) {
+    await this.searchFor(`"${title}"`);
+  }
+
+  async clearSearchFilter() {
+    await this.page.testSubj.click('clearSearchButton');
     await this.waitUntilTableIsLoaded();
   }
 }

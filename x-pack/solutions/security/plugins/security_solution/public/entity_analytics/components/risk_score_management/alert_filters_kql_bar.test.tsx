@@ -5,24 +5,19 @@
  * 2.0.
  */
 
-import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import React from 'react';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
-import type { DataView, DataViewSpec } from '@kbn/data-views-plugin/public';
-import type { BrowserFields } from '@kbn/timelines-plugin/common';
+import type { DataView } from '@kbn/data-views-plugin/public';
 import { AlertFiltersKqlBar } from './alert_filters_kql_bar';
 import type { UIAlertFilter } from './common';
-import { useSourcererDataView } from '../../../sourcerer/containers';
 import { useKibana } from '../../../common/lib/kibana';
 import { TestProviders } from '../../../common/mock';
-import type { SelectedDataView } from '../../../sourcerer/store/model';
+import { useDataView } from '../../../data_view_manager/hooks/use_data_view';
 
-jest.mock('../../../sourcerer/containers');
 jest.mock('../../../common/lib/kibana');
+jest.mock('../../../data_view_manager/hooks/use_data_view');
 
-const mockUseSourcererDataView = useSourcererDataView as jest.MockedFunction<
-  typeof useSourcererDataView
->;
 const mockUseKibana = useKibana as jest.MockedFunction<typeof useKibana>;
 
 const mockDataView: Partial<DataView> = {
@@ -31,23 +26,9 @@ const mockDataView: Partial<DataView> = {
   fields: [] as unknown as DataView['fields'],
 };
 
-const mockSourcererDataViewSpec: DataViewSpec = {
-  id: 'test-data-view-id',
-  title: 'test-index',
-  fields: {} as DataViewSpec['fields'],
-};
-
-const createMockSelectedDataView = (): SelectedDataView => ({
-  browserFields: {} as BrowserFields,
-  dataViewId: mockSourcererDataViewSpec.id ?? null,
-  indicesExist: true,
-  loading: false,
-  selectedPatterns: [mockSourcererDataViewSpec.title ?? 'test-index'],
-  sourcererDataView: mockSourcererDataViewSpec,
-});
-
-const mockCreateDataView = jest.fn().mockResolvedValue(mockDataView);
-const mockClearInstanceCache = jest.fn();
+jest.mock('../../../common/components/page_loader', () => ({
+  PageLoader: (props: Record<string, unknown>) => <div data-test-subj="page-loader" {...props} />,
+}));
 
 describe('AlertFiltersKqlBar', () => {
   let queryClient: QueryClient;
@@ -63,8 +44,6 @@ describe('AlertFiltersKqlBar', () => {
         },
       },
     });
-
-    mockUseSourcererDataView.mockReturnValue(createMockSelectedDataView());
 
     const submitButtonText = 'Submit';
     mockUseKibana.mockReturnValue({
@@ -97,14 +76,13 @@ describe('AlertFiltersKqlBar', () => {
             )),
           },
         },
-        data: {
-          dataViews: {
-            create: mockCreateDataView,
-            clearInstanceCache: mockClearInstanceCache,
-          },
-        },
       },
     } as unknown as ReturnType<typeof useKibana>);
+
+    (useDataView as jest.Mock).mockReturnValue({
+      dataView: mockDataView,
+      status: 'ready',
+    });
   });
 
   afterEach(() => {
@@ -143,10 +121,13 @@ describe('AlertFiltersKqlBar', () => {
       });
     });
 
-    it('does not render when dataView is not available', () => {
-      mockCreateDataView.mockResolvedValueOnce(null);
-      const { container } = renderComponent();
-      expect(container.firstChild).toBeNull();
+    it('does render page loaded if dataView is pristine', () => {
+      (useDataView as jest.Mock).mockReturnValue({
+        dataView: mockDataView,
+        status: 'pristine',
+      });
+      const { getByTestId } = renderComponent();
+      expect(getByTestId('page-loader')).toBeInTheDocument();
     });
 
     it('renders filters when provided', async () => {
@@ -470,28 +451,6 @@ describe('AlertFiltersKqlBar', () => {
           expect(screen.getByText('host.name: "test-host"')).toBeInTheDocument();
         });
       }
-    });
-  });
-
-  describe('DataView Lifecycle', () => {
-    it('creates DataView on mount', async () => {
-      renderComponent();
-      await waitFor(() => {
-        expect(mockCreateDataView).toHaveBeenCalled();
-      });
-    });
-
-    it('clears DataView cache on unmount', async () => {
-      const { unmount } = renderComponent();
-      await waitFor(() => {
-        expect(mockCreateDataView).toHaveBeenCalled();
-      });
-
-      unmount();
-
-      await waitFor(() => {
-        expect(mockClearInstanceCache).toHaveBeenCalledWith('test-data-view-id');
-      });
     });
   });
 

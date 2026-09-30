@@ -351,6 +351,14 @@ const workflowEnabledStateChangedSchema: RootSchema<ReportWorkflowEnabledStateCh
         optional: true,
       },
     },
+    hasCustomEventTrigger: {
+      type: 'boolean',
+      _meta: {
+        description:
+          'Whether the workflow defines extension (event-driven) triggers when enabled state changed',
+        optional: true,
+      },
+    },
   };
 
 export const workflowLifecycleEventSchemas = {

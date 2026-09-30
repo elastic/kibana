@@ -1,0 +1,41 @@
+# Significant Events cleanup workflow.
+#
+# One instance is installed per Kibana space on the first discovery execution
+# in that space. It then runs daily to close open events whose backing rules no
+# longer exist.
+
+version: '1'
+name: 'Significant Events Cleanup'
+enabled: false
+description: 'Daily stale event cleanup managed by Significant Events.'
+tags:
+  - observability
+  - streams
+  - significant-events
+  - cleanup
+settings:
+  # Max duration of one sweep — independent of the schedule interval below.
+  timeout: '60m'
+  # Only one instance of this workflow runs at a time; overlapping triggers are dropped.
+  concurrency:
+    key: significant-events-cleanup
+    strategy: drop
+    max: 1
+triggers:
+  - type: scheduled
+    with:
+      every: '24h'
+  - type: manual
+steps:
+  - name: cleanup_stale_events
+    type: kibana.request
+    with:
+      method: POST
+      path: '/s/{{ workflow.spaceId }}/internal/significant_events/events/_cleanup'
+      headers:
+        x-elastic-internal-origin: 'kibana'
+    on-failure:
+      retry:
+        max-attempts: 3
+        delay: '5s'
+        strategy: exponential

@@ -22,8 +22,8 @@ const CaseUserAvatarComponent: React.FC<CaseUserAvatarProps> = ({ size, userInfo
 
   return userInfo?.user !== undefined ? (
     <UserAvatar
-      user={userInfo?.user}
-      avatar={userInfo?.data?.avatar}
+      user={userInfo.user}
+      avatar={userInfo.data?.avatar}
       data-test-subj={`case-user-profile-avatar-${dataTestSubjName}`}
       size={size}
     />

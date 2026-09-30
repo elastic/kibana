@@ -5,8 +5,9 @@
  * 2.0.
  */
 
-// Import and re-export RuleKind and RecoveryPolicyType from schema
-import type { RuleKind, RecoveryPolicyType } from '@kbn/alerting-v2-schemas';
+import type { RuleKind, RecoveryStrategy, NoDataStrategy } from '@kbn/alerting-v2-schemas';
+
+export type { RuleKind, RecoveryStrategy, NoDataStrategy };
 
 /** Alert / recovery delay segment control (matches `AlertDelayField` / `RecoveryDelayField`). */
 export const DELAY_MODE = {
@@ -18,14 +19,41 @@ export const DELAY_MODE = {
 
 export type StateTransitionDelayMode = (typeof DELAY_MODE)[keyof typeof DELAY_MODE];
 
+// ---------------------------------------------------------------------------
+// Query / recovery / no-data — form mirrors of the API blocks.
+// ---------------------------------------------------------------------------
+
+/** Form state mirrors the API shape but keeps `breach.segment` always present; '' means "no breach condition". */
+export interface RuleQuery {
+  base: string;
+  breach: { segment: string };
+}
+
 /**
- * Rule metadata containing identification and categorization info.
+ * Widened form state for the API's `recovery` discriminated union: RHF cannot
+ * narrow a union in place, so every member's field is kept and the mapper
+ * projects the one the strategy needs.
  */
+export interface RuleRecovery {
+  strategy: RecoveryStrategy;
+  segment?: string;
+  query?: string;
+}
+
+/** Widened form state for the API's `no_data` discriminated union. */
+export interface RuleNoData {
+  strategy: NoDataStrategy;
+  query?: string;
+}
+
+// ---------------------------------------------------------------------------
+// Shared sub-types
+// ---------------------------------------------------------------------------
+
 export interface RuleMetadata {
   name: string;
   enabled: boolean;
   description?: string;
-  owner?: string;
   tags?: string[];
 }
 
@@ -33,32 +61,17 @@ export interface RuleSchedule {
   every: string;
   lookback: string;
 }
-export interface RuleEvaluation {
-  query: {
-    base: string;
-  };
-}
 
 export interface RuleGrouping {
   fields: string[];
 }
 
-export interface RecoveryPolicy {
-  type: RecoveryPolicyType;
-  query?: {
-    base?: string | null;
-  };
-}
-
 export interface RuleArtifact {
   id: string;
   type: string;
-  value: string;
+  data: Record<string, any>;
 }
 
-/**
- * State transition configuration for alert-type rules.
- */
 export interface StateTransition {
   pendingCount?: number | null;
   pendingTimeframe?: string | null;
@@ -66,21 +79,28 @@ export interface StateTransition {
   recoveringTimeframe?: string | null;
 }
 
-/**
- * Form values for creating a new alerting rule.
- * This interface defines the contract for the rule creation form,
- * independent of the API schema to allow for controlled evolution.
- */
+// ---------------------------------------------------------------------------
+// FormValues — the single canonical form type for rule creation/editing.
+//
+// Matches the API schema structurally (same blocks, same field semantics).
+// Only diverges in casing (camelCase for RHF), in widening the `recovery` and
+// `no_data` unions so RHF can hold a partially-filled member, and in UI-only
+// fields (delay modes, metadata.enabled, split artifact arrays).
+// ---------------------------------------------------------------------------
+
 export interface FormValues {
   kind: RuleKind;
   metadata: RuleMetadata;
   timeField: string;
   schedule: RuleSchedule;
-  evaluation: RuleEvaluation;
+  query: RuleQuery;
+  recovery?: RuleRecovery;
+  noData?: RuleNoData;
   grouping?: RuleGrouping;
-  recoveryPolicy?: RecoveryPolicy;
   stateTransition?: StateTransition;
   stateTransitionAlertDelayMode: StateTransitionDelayMode;
   stateTransitionRecoveryDelayMode: StateTransitionDelayMode;
   artifacts?: RuleArtifact[];
+  runbookArtifacts?: RuleArtifact[];
+  dashboardArtifacts?: RuleArtifact[];
 }

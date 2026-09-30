@@ -6,7 +6,10 @@
  */
 
 import expect from '@kbn/expect';
-import { PACKAGE_POLICY_SAVED_OBJECT_TYPE } from '@kbn/fleet-plugin/common';
+import {
+  DEFAULT_DOWNLOAD_SOURCE_REFERENCE,
+  PACKAGE_POLICY_SAVED_OBJECT_TYPE,
+} from '@kbn/fleet-plugin/common';
 import type { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
 import { skipIfNoDockerRegistry } from '../../helpers';
 import { testUsers } from '../test_users';
@@ -43,8 +46,16 @@ export default function (providerContext: FtrProviderContext) {
       attributes: {
         policy_ids: [id],
         name: 'Fleet Server',
+        enabled: true,
+        inputs: [],
+        revision: 1,
+        created_at: new Date().toISOString(),
+        created_by: 'system',
+        updated_at: new Date().toISOString(),
+        updated_by: 'system',
         package: {
           name: 'fleet_server',
+          version: '1.0.0',
         },
         latest_revision: true,
       },
@@ -1308,6 +1319,100 @@ export default function (providerContext: FtrProviderContext) {
       });
     });
 
+    describe('download source ID immutability', () => {
+      let targetSourceId: string;
+
+      beforeEach(async () => {
+        const { body } = await supertest
+          .post(`/api/fleet/agent_download_sources`)
+          .set('kbn-xsrf', 'xxxx')
+          .send({
+            name: 'id-immutability-test',
+            host: 'https://artifacts.test.co:443',
+            is_default: false,
+          })
+          .expect(200);
+        targetSourceId = body.item.id;
+      });
+
+      afterEach(async () => {
+        if (!targetSourceId) return;
+        await supertest
+          .delete(`/api/fleet/agent_download_sources/${targetSourceId}`)
+          .set('kbn-xsrf', 'xxxx')
+          .expect(200);
+      });
+
+      it('should return 400 when body id is a payload that does not match path sourceId', async function () {
+        const { body } = await supertest
+          .put(`/api/fleet/agent_download_sources/${targetSourceId}`)
+          .set('kbn-xsrf', 'xxxx')
+          .send({
+            id: 'mismatch',
+            name: 'id-immutability-test',
+            host: 'https://artifacts.test.co:443',
+          })
+          .expect(400);
+
+        expect(body.message).to.contain('Cannot change download source ID');
+
+        // Source unchanged and still retrievable by canonical id
+        const { body: getBody } = await supertest
+          .get(`/api/fleet/agent_download_sources/${targetSourceId}`)
+          .expect(200);
+        expect(getBody.item.id).to.equal(targetSourceId);
+        expect(getBody.item.host).to.equal('https://artifacts.test.co:443');
+      });
+
+      it('should return 200 and preserve canonical id when body id matches path sourceId', async function () {
+        const { body } = await supertest
+          .put(`/api/fleet/agent_download_sources/${targetSourceId}`)
+          .set('kbn-xsrf', 'xxxx')
+          .send({
+            id: targetSourceId,
+            name: 'id-immutability-test',
+            host: 'https://updated.test.co:443',
+          })
+          .expect(200);
+
+        expect(body.item.id).to.equal(targetSourceId);
+
+        const { body: getBody } = await supertest
+          .get(`/api/fleet/agent_download_sources/${targetSourceId}`)
+          .expect(200);
+        expect(getBody.item.id).to.equal(targetSourceId);
+      });
+
+      it('should return canonical id in list and still be deletable after rejected PUT', async function () {
+        // Rejected update
+        await supertest
+          .put(`/api/fleet/agent_download_sources/${targetSourceId}`)
+          .set('kbn-xsrf', 'xxxx')
+          .send({
+            id: 'poisoned-id',
+            name: 'id-immutability-test',
+            host: 'https://artifacts.test.co:443',
+          })
+          .expect(400);
+
+        // List returns canonical id
+        const { body: listBody } = await supertest
+          .get(`/api/fleet/agent_download_sources`)
+          .expect(200);
+        const found = listBody.items.find((s: any) => s.id === targetSourceId);
+        expect(found).to.be.ok();
+        expect(found.id).to.equal(targetSourceId);
+
+        // Delete by canonical id succeeds
+        await supertest
+          .delete(`/api/fleet/agent_download_sources/${targetSourceId}`)
+          .set('kbn-xsrf', 'xxxx')
+          .expect(200);
+
+        targetSourceId = '';
+      });
+    });
+
     describe('proxy_id behaviour', () => {
       const PROXY_ID = 'download-source-proxy-id';
       before(async () => {
@@ -1519,6 +1624,188 @@ export default function (providerContext: FtrProviderContext) {
           .expect(200);
 
         expect(getAgentPolicyNullResponse.item.agent.download.proxy_url).to.eql(undefined);
+      });
+    });
+
+    describe('download_source_ids behaviour', () => {
+      // One case promotes a new default, so hand the flag back to the original source
+      after(async () => {
+        const { body: currentDefault } = await supertest
+          .get(`/api/fleet/agent_download_sources/${defaultDownloadSourceId}`)
+          .expect(200);
+
+        await supertest
+          .put(`/api/fleet/agent_download_sources/${defaultDownloadSourceId}`)
+          .set('kbn-xsrf', 'xxxx')
+          .send({
+            name: currentDefault.item.name,
+            host: currentDefault.item.host,
+            is_default: true,
+          })
+          .expect(200);
+      });
+
+      const createDownloadSource = async (name: string, host: string) => {
+        const { body: postResponse } = await supertest
+          .post(`/api/fleet/agent_download_sources`)
+          .set('kbn-xsrf', 'xxxx')
+          .send({ name, host, is_default: false })
+          .expect(200);
+
+        return postResponse.item.id as string;
+      };
+
+      const createAgentPolicy = async (name: string, attributes: object) => {
+        const { body: postResponse } = await supertest
+          .post(`/api/fleet/agent_policies`)
+          .set('kbn-xsrf', 'xxxx')
+          .send({ name, namespace: 'default', description: '', is_default: false, ...attributes })
+          .expect(200);
+
+        return postResponse.item.id as string;
+      };
+
+      it('should set agent.download.sources and keep sourceURI on the full agent policy', async function () {
+        const primaryId = await createDownloadSource(
+          `Primary source ${Date.now()}`,
+          'http://primary.co:443'
+        );
+        const secondaryId = await createDownloadSource(
+          `Secondary source ${Date.now()}`,
+          'http://secondary.co:443'
+        );
+
+        const agentPolicyId = await createAgentPolicy('agent policy with multiple sources', {
+          download_source_ids: [primaryId, secondaryId],
+        });
+
+        const { body: getAgentPolicyResponse } = await supertest
+          .get(`/api/fleet/agent_policies/${agentPolicyId}/full`)
+          .set('kbn-xsrf', 'xxxx')
+          .send()
+          .expect(200);
+
+        const { download } = getAgentPolicyResponse.item.agent;
+        expect(download.sources).to.eql(['http://primary.co:443', 'http://secondary.co:443']);
+        // sourceURI is retained for agents that do not yet understand `sources`
+        expect(download.sourceURI).to.eql('http://primary.co:443');
+      });
+
+      it('should fall back to download_source_id when download_source_ids is not set', async function () {
+        const sourceId = await createDownloadSource(
+          `Single source ${Date.now()}`,
+          'http://single.co:443'
+        );
+
+        const agentPolicyId = await createAgentPolicy('agent policy with a single source', {
+          download_source_id: sourceId,
+        });
+
+        const { body: getAgentPolicyResponse } = await supertest
+          .get(`/api/fleet/agent_policies/${agentPolicyId}/full`)
+          .set('kbn-xsrf', 'xxxx')
+          .send()
+          .expect(200);
+
+        const { download } = getAgentPolicyResponse.item.agent;
+        expect(download.sources).to.eql(['http://single.co:443']);
+        expect(download.sourceURI).to.eql('http://single.co:443');
+      });
+
+      it('should keep a slot for the default source and follow it when the default changes', async function () {
+        const pinnedId = await createDownloadSource(
+          `Pinned source ${Date.now()}`,
+          'http://pinned.co:443'
+        );
+
+        const agentPolicyId = await createAgentPolicy('agent policy with a default slot', {
+          download_source_ids: [DEFAULT_DOWNLOAD_SOURCE_REFERENCE, pinnedId],
+        });
+
+        const { body: beforeResponse } = await supertest
+          .get(`/api/fleet/agent_policies/${agentPolicyId}/full`)
+          .set('kbn-xsrf', 'xxxx')
+          .send()
+          .expect(200);
+
+        // The default slot resolves to the download source currently marked as default
+        const { body: defaultSourceResponse } = await supertest
+          .get(`/api/fleet/agent_download_sources/${defaultDownloadSourceId}`)
+          .expect(200);
+        expect(beforeResponse.item.agent.download.sources).to.eql([
+          defaultSourceResponse.item.host,
+          'http://pinned.co:443',
+        ]);
+
+        // Promoting another source to default must update the reference in place
+        const newDefaultId = await createDownloadSource(
+          `New default source ${Date.now()}`,
+          'http://new-default.co:443'
+        );
+        await supertest
+          .put(`/api/fleet/agent_download_sources/${newDefaultId}`)
+          .set('kbn-xsrf', 'xxxx')
+          .send({
+            name: `New default source updated ${Date.now()}`,
+            host: 'http://new-default.co:443',
+            is_default: true,
+          })
+          .expect(200);
+
+        const { body: afterResponse } = await supertest
+          .get(`/api/fleet/agent_policies/${agentPolicyId}/full`)
+          .set('kbn-xsrf', 'xxxx')
+          .send()
+          .expect(200);
+
+        expect(afterResponse.item.agent.download.sources).to.eql([
+          'http://new-default.co:443',
+          'http://pinned.co:443',
+        ]);
+      });
+
+      it('should return a 400 when passing more than three download source ids', async function () {
+        await supertest
+          .post(`/api/fleet/agent_policies`)
+          .set('kbn-xsrf', 'xxxx')
+          .send({
+            name: 'agent policy with too many sources',
+            namespace: 'default',
+            description: '',
+            is_default: false,
+            download_source_ids: ['ds-1', 'ds-2', 'ds-3', 'ds-4'],
+          })
+          .expect(400);
+      });
+
+      it('should strip a deleted download source host from download_source_ids', async function () {
+        const primaryId = await createDownloadSource(
+          `Source to delete ${Date.now()}`,
+          'http://to-delete.co:443'
+        );
+        const secondaryId = await createDownloadSource(
+          `Source to keep ${Date.now()}`,
+          'http://to-keep.co:443'
+        );
+
+        const agentPolicyId = await createAgentPolicy('agent policy with a source to delete', {
+          download_source_id: primaryId,
+          download_source_ids: [primaryId, secondaryId],
+        });
+
+        await supertest
+          .delete(`/api/fleet/agent_download_sources/${primaryId}`)
+          .set('kbn-xsrf', 'xxxx')
+          .expect(200);
+
+        const { body: getAgentPolicyResponse } = await supertest
+          .get(`/api/fleet/agent_policies/${agentPolicyId}`)
+          .set('kbn-xsrf', 'xxxx')
+          .send()
+          .expect(200);
+
+        expect(getAgentPolicyResponse.item.download_source_ids).to.eql([secondaryId]);
+        expect(getAgentPolicyResponse.item.download_source_id).to.eql(secondaryId);
       });
     });
 

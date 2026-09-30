@@ -36,7 +36,7 @@ export const ActorsRow = ({ actor, target }: ActorsRowProps) => {
         </EuiBadge>
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
-        <EuiIcon type="sortRight" size="m" color="subdued" />
+        <EuiIcon type="sortRight" size="m" color="subdued" aria-hidden={true} />
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
         <EuiBadge

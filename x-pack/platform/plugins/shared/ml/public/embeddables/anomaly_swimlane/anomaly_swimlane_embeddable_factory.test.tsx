@@ -12,7 +12,7 @@ import { render, waitFor, screen } from '@testing-library/react';
 import React from 'react';
 import { of } from 'rxjs';
 import type { AnomalySwimLaneEmbeddableState } from '@kbn/ml-server-schemas/embeddables/anomaly_swimlane';
-import { ANOMALY_SWIMLANE_EMBEDDABLE_TYPE } from '../constants';
+import { ANOMALY_SWIMLANE_EMBEDDABLE_TYPE } from '@kbn/ml-common-types/embeddables/anomaly_swimlane';
 import { getAnomalySwimLaneEmbeddableFactory } from './anomaly_swimlane_embeddable_factory';
 import type { AnomalySwimLaneEmbeddableApi } from './types';
 
@@ -96,9 +96,9 @@ describe('getAnomalySwimLaneEmbeddableFactory', () => {
     const { api, Component } = await factory.buildEmbeddable({
       initializeDrilldownsManager: jest.fn(),
       initialState: {
-        swimlaneType: 'viewBy',
-        jobIds: ['my-job'],
-        viewBy: 'overall',
+        swimlane_type: 'viewBy',
+        job_ids: ['my-job'],
+        view_by: 'overall',
       } satisfies AnomalySwimLaneEmbeddableState,
       finalizeApi: (preFinalizeApi) => {
         return {

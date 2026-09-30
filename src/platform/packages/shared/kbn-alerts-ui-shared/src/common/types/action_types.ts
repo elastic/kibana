@@ -56,6 +56,7 @@ export interface ActionConnectorProps<Config, Secrets> {
   source?: ActionTypeSource;
   authMode?: 'shared' | 'per-user';
   userAuthStatus?: ConnectorUserAuthStatus;
+  isInboundEventsEnabled?: boolean;
 }
 
 export type SystemAction = Omit<ActionConnectorProps<never, never>, 'config' | 'secrets'> & {
@@ -96,7 +97,12 @@ export type ConnectorFormSchema<
   UserConfiguredActionConnector<Config, Secrets>,
   'actionTypeId' | 'isDeprecated' | 'config' | 'secrets'
 > &
-  Partial<Pick<UserConfiguredActionConnector<Config, Secrets>, 'id' | 'name' | 'authMode'>>;
+  Partial<
+    Pick<
+      UserConfiguredActionConnector<Config, Secrets>,
+      'id' | 'name' | 'authMode' | 'isInboundEventsEnabled'
+    >
+  >;
 
 export type InternalConnectorForm = ConnectorFormSchema & {
   __internal__?: {
@@ -157,13 +163,14 @@ export interface ActionTypeModel<ActionConfig = any, ActionSecrets = any, Action
   defaultRecoveredActionParams?: RecursivePartial<ActionParams>;
   customConnectorSelectItem?: CustomConnectorSelectionItem;
   isExperimental?: boolean;
+  docsUrl?: string;
   subtype?: Array<{ id: string; name: string }>;
   convertParamsBetweenGroups?: (params: ActionParams) => ActionParams | {};
   getHideInUi?: (actionTypes: ActionType[]) => boolean;
-  source?: ActionTypeSource;
   modalWidth?: number;
   isSystemActionType?: boolean;
   subFeature?: SubFeature;
+  isTestable?: boolean;
   /**
    * Connector form config
    */

@@ -43,7 +43,6 @@ import { FormProvider, useController, useForm } from 'react-hook-form';
 import { getTimelineFieldsDataFromHit } from '@kbn/timelines-plugin/common';
 import { PageScope } from '../../../../../data_view_manager/constants';
 import { useDataView } from '../../../../../data_view_manager/hooks/use_data_view';
-import { useIsExperimentalFeatureEnabled } from '../../../../hooks/use_experimental_features';
 import { useUpsellingMessage } from '../../../../hooks/use_upselling';
 import { useAppToasts } from '../../../../hooks/use_app_toasts';
 import { useKibana } from '../../../../lib/kibana';
@@ -51,6 +50,8 @@ import { useInsightQuery } from './use_insight_query';
 import { type Provider, useInsightDataProviders } from './use_insight_data_providers';
 import { AlertDataContext } from '../../../../../flyout_v2/document/tools/investigation_guide/components/investigation_guide_view';
 import { InvestigateInTimelineButton } from '../../../event_details/investigate_in_timeline_button';
+import { useIsInSecurityApp } from '../../../../hooks/is_in_security_app';
+import { useOpenTimelineInNewTab } from '../../../../hooks/timeline/use_open_timeline_in_new_tab';
 import {
   DEFAULT_FROM_MOMENT,
   DEFAULT_TO_MOMENT,
@@ -59,12 +60,10 @@ import {
 } from '../../../../utils/default_date_settings';
 import type { TimeRange } from '../../../../store/inputs/model';
 import { DEFAULT_TIMEPICKER_QUICK_RANGES } from '../../../../../../common/constants';
-import { useSourcererDataView } from '../../../../../sourcerer/containers';
 import { filtersToInsightProviders } from './provider';
 import { useLicense } from '../../../../hooks/use_license';
 import { isProviderValid } from './helpers';
 import * as i18n from './translations';
-import { useGetScopedSourcererDataView } from '../../../../../sourcerer/components/use_get_sourcerer_data_view';
 
 interface InsightComponentProps {
   label?: string;
@@ -198,6 +197,8 @@ const LicensedInsightComponent = ({
     }
   }, [hit, relativeFrom, relativeTo]);
 
+  const isInSecurityApp = useIsInSecurityApp();
+  const { openAdHocTimelineInNewTab } = useOpenTimelineInNewTab();
   const { totalCount, isQueryLoading, oldestTimestamp, hasError } = useInsightQuery({
     dataProviders,
     filters,
@@ -223,11 +224,24 @@ const LicensedInsightComponent = ({
       };
     }
   }, [oldestTimestamp, relativeTimerange]);
+  const onOpenInNewTab = useCallback(() => {
+    openAdHocTimelineInNewTab({ dataProviders, filters, timeRange: timerange });
+  }, [openAdHocTimelineInNewTab, dataProviders, filters, timerange]);
+
   if (isQueryLoading) {
     return <EuiLoadingSpinner />;
-  } else {
-    return (
-      <>
+  }
+
+  const buttonContent = (
+    <>
+      <EuiIcon type="timeline" aria-hidden={true} />
+      {` ${label} (${numeral(totalCount).format(resultFormat)})`}
+    </>
+  );
+
+  return (
+    <>
+      {isInSecurityApp ? (
         <InvestigateInTimelineButton
           asEmptyButton={false}
           isDisabled={hasError}
@@ -237,13 +251,22 @@ const LicensedInsightComponent = ({
           keepDataView={true}
           data-test-subj="insight-investigate-in-timeline-button"
         >
-          <EuiIcon type="timeline" aria-hidden={true} />
-          {` ${label} (${numeral(totalCount).format(resultFormat)})`}
+          {buttonContent}
         </InvestigateInTimelineButton>
-        <div>{description}</div>
-      </>
-    );
-  }
+      ) : (
+        // Outside of the Security Solution app (e.g. in Discover) the in-app timeline is not mounted,
+        // so open the timeline in a new Security Solution tab instead.
+        <EuiButton
+          isDisabled={hasError}
+          onClick={onOpenInNewTab}
+          data-test-subj="insight-investigate-in-timeline-button"
+        >
+          {buttonContent}
+        </EuiButton>
+      )}
+      <div>{description}</div>
+    </>
+  );
 };
 
 // receives the configuration from the parser and renders
@@ -294,14 +317,7 @@ const InsightEditorComponent = ({
 }: EuiMarkdownEditorUiPluginEditorProps<InsightComponentProps & { relativeTimerange: string }>) => {
   const isEditMode = node != null;
 
-  const { sourcererDataView: oldSourcererDataView } = useSourcererDataView(PageScope.default);
-
-  const newDataViewPickerEnabled = useIsExperimentalFeatureEnabled('newDataViewPickerEnabled');
-
-  const { dataView: experimentalDataView } = useDataView(PageScope.default);
-  const dataViewName = newDataViewPickerEnabled
-    ? experimentalDataView.name
-    : oldSourcererDataView.name;
+  const { dataView, status: dataViewStatus } = useDataView(PageScope.default);
 
   const {
     unifiedSearch: {
@@ -309,12 +325,6 @@ const InsightEditorComponent = ({
     },
     uiSettings,
   } = useKibana().services;
-
-  const oldDataView = useGetScopedSourcererDataView({
-    sourcererScope: PageScope.default,
-  });
-
-  const dataView = newDataViewPickerEnabled ? experimentalDataView : oldDataView;
 
   const [providers, setProviders] = useState<Provider[][]>([[]]);
   const dateRangeChoices = useMemo(() => {
@@ -423,7 +433,7 @@ const InsightEditorComponent = ({
     );
   }, [labelController.field.value, providers, dataView]);
   const filtersStub = useMemo(() => {
-    const index = dataViewName ?? '*';
+    const index = dataView.name ?? '*';
     return [
       {
         $state: {
@@ -437,7 +447,7 @@ const InsightEditorComponent = ({
         },
       },
     ];
-  }, [dataViewName]);
+  }, [dataView.name]);
   const isPlatinum = useLicense().isAtLeast('platinum');
 
   return (
@@ -508,7 +518,7 @@ const InsightEditorComponent = ({
               />
             </EuiFormRow>
             <EuiFormRow label={i18n.FILTER_BUILDER} helpText={i18n.FILTER_BUILDER_TEXT} fullWidth>
-              {dataView ? (
+              {dataViewStatus === 'ready' ? (
                 <FiltersBuilderLazy
                   filters={filtersStub}
                   onChange={onChange}

@@ -36,11 +36,14 @@ describe('ExportResultsModal', () => {
       expect(screen.getByTestId('osqueryExportConfirmButton')).toBeInTheDocument();
     });
 
-    it('disables the Export button until a format is picked (no default selection)', () => {
+    it('preselects CSV and enables the Export button on open', () => {
       renderModal();
 
       const confirm = screen.getByTestId('osqueryExportConfirmButton');
-      expect(confirm).toBeDisabled();
+      expect(confirm).not.toBeDisabled();
+
+      const select = screen.getByTestId('osqueryExportFormatSelect');
+      expect(select).toHaveTextContent('CSV');
     });
   });
 
@@ -50,16 +53,18 @@ describe('ExportResultsModal', () => {
 
       fireEvent.click(screen.getByTestId('osqueryExportFormatSelect'));
 
-      expect(screen.getByText('CSV')).toBeInTheDocument();
-      expect(screen.getByText('NDJSON')).toBeInTheDocument();
-      expect(screen.getByText('JSON')).toBeInTheDocument();
+      // Scope to role=option so the trigger button's own "CSV" label (the
+      // preselected value) does not collide with the listbox option.
+      expect(screen.getByRole('option', { name: 'CSV' })).toBeInTheDocument();
+      expect(screen.getByRole('option', { name: 'NDJSON' })).toBeInTheDocument();
+      expect(screen.getByRole('option', { name: 'JSON' })).toBeInTheDocument();
     });
 
     it('enables Export and emits the picked format on confirm', () => {
       const { onExport } = renderModal();
 
       fireEvent.click(screen.getByTestId('osqueryExportFormatSelect'));
-      fireEvent.click(screen.getByText('CSV'));
+      fireEvent.click(screen.getByRole('option', { name: 'CSV' }));
 
       const confirm = screen.getByTestId('osqueryExportConfirmButton');
       expect(confirm).not.toBeDisabled();
@@ -67,6 +72,24 @@ describe('ExportResultsModal', () => {
       fireEvent.click(confirm);
 
       expect(onExport).toHaveBeenCalledWith('csv', { filtered: false });
+    });
+
+    it('emits ("csv", { filtered: false }) when Export is clicked on mount without dropdown interaction', () => {
+      // Regression contract for https://github.com/elastic/kibana/issues/269479:
+      // opening the modal and clicking Export immediately must emit a CSV export.
+      const { onExport } = renderModal();
+
+      fireEvent.click(screen.getByTestId('osqueryExportConfirmButton'));
+
+      expect(onExport).toHaveBeenCalledWith('csv', { filtered: false });
+    });
+
+    it('emits ("csv", { filtered: true }) when filters are active and Export is clicked on mount', () => {
+      const { onExport } = renderModal({ hasActiveFilters: true });
+
+      fireEvent.click(screen.getByTestId('osqueryExportConfirmButton'));
+
+      expect(onExport).toHaveBeenCalledWith('csv', { filtered: true });
     });
   });
 
@@ -91,7 +114,7 @@ describe('ExportResultsModal', () => {
       const { onExport } = renderModal({ hasActiveFilters: true });
 
       fireEvent.click(screen.getByTestId('osqueryExportFormatSelect'));
-      fireEvent.click(screen.getByText('NDJSON'));
+      fireEvent.click(screen.getByRole('option', { name: 'NDJSON' }));
 
       fireEvent.click(screen.getByTestId('osqueryExportConfirmButton'));
 
@@ -104,7 +127,7 @@ describe('ExportResultsModal', () => {
       fireEvent.click(screen.getByTestId('osqueryExportFilteredCheckbox'));
 
       fireEvent.click(screen.getByTestId('osqueryExportFormatSelect'));
-      fireEvent.click(screen.getByText('CSV'));
+      fireEvent.click(screen.getByRole('option', { name: 'CSV' }));
       fireEvent.click(screen.getByTestId('osqueryExportConfirmButton'));
 
       expect(onExport).toHaveBeenCalledWith('csv', { filtered: false });
@@ -166,7 +189,7 @@ describe('ExportResultsModal', () => {
 
       fireEvent.click(screen.getByTestId('osqueryExportFilteredCheckbox'));
       fireEvent.click(screen.getByTestId('osqueryExportFormatSelect'));
-      fireEvent.click(screen.getByText('CSV'));
+      fireEvent.click(screen.getByRole('option', { name: 'CSV' }));
 
       expect(screen.getByTestId('osqueryExportConfirmButton')).toHaveTextContent('Export 999');
     });
@@ -175,7 +198,7 @@ describe('ExportResultsModal', () => {
       renderModal({ hasActiveFilters: true, filteredTotal: 12, total: 999 });
 
       fireEvent.click(screen.getByTestId('osqueryExportFormatSelect'));
-      fireEvent.click(screen.getByText('CSV'));
+      fireEvent.click(screen.getByRole('option', { name: 'CSV' }));
 
       expect(screen.getByTestId('osqueryExportConfirmButton')).toHaveTextContent('Export 12');
     });
@@ -189,7 +212,7 @@ describe('ExportResultsModal', () => {
 
       fireEvent.click(screen.getByTestId('osqueryExportFilteredCheckbox'));
       fireEvent.click(screen.getByTestId('osqueryExportFormatSelect'));
-      fireEvent.click(screen.getByText('CSV'));
+      fireEvent.click(screen.getByRole('option', { name: 'CSV' }));
 
       const confirm = screen.getByTestId('osqueryExportConfirmButton');
       expect(confirm).toHaveTextContent('Export');

@@ -42,7 +42,7 @@ describe('reassignAgent', () => {
       await reassignAgent(soClient, esClient, agentInRegularDoc._id, regularAgentPolicySO.id);
 
       // calls ES update with correct values
-      expect(esClient.update).toBeCalledTimes(1);
+      expect(esClient.update).toHaveBeenCalledTimes(1);
       const calledWith = esClient.update.mock.calls[0];
       expect(calledWith[0]?.id).toBe(agentInRegularDoc._id);
       expect((calledWith[0] as estypes.UpdateRequest)?.doc).toHaveProperty(
@@ -55,10 +55,10 @@ describe('reassignAgent', () => {
       const { soClient, esClient, agentInRegularDoc, hostedAgentPolicySO } = mocks;
       await expect(
         reassignAgent(soClient, esClient, agentInRegularDoc._id, hostedAgentPolicySO.id)
-      ).rejects.toThrowError(HostedAgentPolicyRestrictionRelatedError);
+      ).rejects.toThrow(HostedAgentPolicyRestrictionRelatedError);
 
       // does not call ES update
-      expect(esClient.update).toBeCalledTimes(0);
+      expect(esClient.update).toHaveBeenCalledTimes(0);
     });
 
     it('cannot reassign from hosted agent policy', async () => {
@@ -66,15 +66,15 @@ describe('reassignAgent', () => {
         mocks;
       await expect(
         reassignAgent(soClient, esClient, agentInHostedDoc._id, regularAgentPolicySO.id)
-      ).rejects.toThrowError(HostedAgentPolicyRestrictionRelatedError);
+      ).rejects.toThrow(HostedAgentPolicyRestrictionRelatedError);
       // does not call ES update
-      expect(esClient.update).toBeCalledTimes(0);
+      expect(esClient.update).toHaveBeenCalledTimes(0);
 
       await expect(
         reassignAgent(soClient, esClient, agentInHostedDoc._id, hostedAgentPolicySO.id)
-      ).rejects.toThrowError(HostedAgentPolicyRestrictionRelatedError);
+      ).rejects.toThrow(HostedAgentPolicyRestrictionRelatedError);
       // does not call ES update
-      expect(esClient.update).toBeCalledTimes(0);
+      expect(esClient.update).toHaveBeenCalledTimes(0);
     });
 
     it('update namespaces with reassign', async () => {
@@ -83,7 +83,7 @@ describe('reassignAgent', () => {
       await reassignAgent(soClient, esClient, agentInRegularDoc._id, regularAgentPolicySO.id);
 
       // calls ES update with correct values
-      expect(esClient.update).toBeCalledTimes(1);
+      expect(esClient.update).toHaveBeenCalledTimes(1);
       const calledWith = esClient.update.mock.calls[0];
       expect(calledWith[0]?.id).toBe(agentInRegularDoc._id);
       expect((calledWith[0] as estypes.UpdateRequest)?.doc).toHaveProperty('namespaces', [
@@ -222,5 +222,270 @@ describe('reassignAgents kuery construction', () => {
         kuery: `(namespaces:custom_space) AND (${kuery})`,
       })
     );
+  });
+
+  it('skips namespace filter for cross-space kuery (spaceId "*") so non-default-space agents are matched', async () => {
+    const { soClient, esClient, regularAgentPolicySO2 } = createClientMock();
+    // simulate an unscoped internal client by overriding getCurrentNamespace to return undefined
+    soClient.getCurrentNamespace = jest.fn().mockReturnValue(undefined);
+    const unscopedClient = soClient;
+
+    // make the filter return an empty string for undefined so buildFilterWithNamespace is a no-op
+    mockAgentsKueryNamespaceFilter.mockResolvedValueOnce(undefined);
+
+    await reassignAgents(
+      unscopedClient,
+      esClient,
+      { kuery: 'status:online', spaceId: '*', _internalCrossSpace: true },
+      regularAgentPolicySO2.id
+    );
+
+    // The key regression guard: agentsKueryNamespaceFilter must receive undefined,
+    // meaning no space restriction is applied. If the default-space filter were applied
+    // instead, non-default-space agents would be invisible to this query.
+    expect(mockAgentsKueryNamespaceFilter).toHaveBeenCalledWith(undefined);
+    // buildFilterWithNamespace wraps the single kuery in parens even without a namespace prefix
+    expect(mockGetAgentsByKuery).toHaveBeenCalledWith(
+      esClient,
+      unscopedClient,
+      expect.objectContaining({ kuery: '(status:online)' })
+    );
+  });
+});
+
+describe('reassignAgents kuery path — cheap count and sync/async branching', () => {
+  let mockGetAgentsByKuery: jest.SpyInstance;
+  let mockOpenPointInTime: jest.SpyInstance;
+  let mockReassignBatch: jest.SpyInstance;
+  let mockReassignActionRunner: jest.SpyInstance;
+
+  beforeEach(async () => {
+    const { soClient } = createClientMock();
+    appContextService.start(
+      createAppContextStartContractMock({}, false, {
+        internal: soClient,
+        withoutSpaceExtensions: soClient,
+      })
+    );
+    mockGetAgentsByKuery = jest.spyOn(crud, 'getAgentsByKuery');
+    mockOpenPointInTime = jest.spyOn(crud, 'openPointInTime').mockResolvedValue('pit-id');
+    mockReassignBatch = jest
+      .spyOn(reassignActionRunner, 'reassignBatch')
+      .mockResolvedValue({ actionId: 'test-action-id' });
+    mockReassignActionRunner = jest
+      .spyOn(reassignActionRunner, 'ReassignActionRunner')
+      .mockImplementation(
+        () =>
+          ({
+            runActionAsyncTask: jest.fn().mockResolvedValue({ actionId: 'async-action-id' }),
+          } as any)
+      );
+  });
+
+  afterEach(() => {
+    mockGetAgentsByKuery.mockRestore();
+    mockOpenPointInTime.mockRestore();
+    mockReassignBatch.mockRestore();
+    mockReassignActionRunner.mockRestore();
+    appContextService.stop();
+  });
+
+  it('uses perPage:0 for the initial count query', async () => {
+    const { soClient, esClient, regularAgentPolicySO2 } = createClientMock();
+    mockGetAgentsByKuery.mockResolvedValue({ agents: [], total: 0, page: 1, perPage: 0 });
+
+    await reassignAgents(soClient, esClient, { kuery: 'status:online' }, regularAgentPolicySO2.id);
+
+    expect(mockGetAgentsByKuery).toHaveBeenNthCalledWith(
+      1,
+      esClient,
+      soClient,
+      expect.objectContaining({ perPage: 0 })
+    );
+  });
+
+  it('runs inline and fetches agents when total <= batchSize', async () => {
+    const { soClient, esClient, regularAgentPolicySO2 } = createClientMock();
+    const agents = [{ id: 'agent-1' } as any];
+    mockGetAgentsByKuery
+      .mockResolvedValueOnce({ agents: [], total: 5, page: 1, perPage: 0 }) // count
+      .mockResolvedValueOnce({ agents, total: 5, page: 1, perPage: SO_SEARCH_LIMIT }); // fetch
+
+    await reassignAgents(soClient, esClient, { kuery: 'status:online' }, regularAgentPolicySO2.id);
+
+    // second call fetches up to batchSize docs
+    expect(mockGetAgentsByKuery).toHaveBeenNthCalledWith(
+      2,
+      esClient,
+      soClient,
+      expect.objectContaining({ perPage: SO_SEARCH_LIMIT })
+    );
+    expect(mockReassignBatch).toHaveBeenCalledWith(
+      esClient,
+      expect.anything(),
+      agents,
+      expect.anything()
+    );
+    expect(mockReassignActionRunner).not.toHaveBeenCalled();
+  });
+
+  it('schedules async task and returns actionId immediately when total > batchSize', async () => {
+    const { soClient, esClient, regularAgentPolicySO2 } = createClientMock();
+    const batchSize = 100;
+    mockGetAgentsByKuery.mockResolvedValueOnce({
+      agents: [],
+      total: 500,
+      page: 1,
+      perPage: 0,
+    });
+
+    const result = await reassignAgents(
+      soClient,
+      esClient,
+      { kuery: 'status:online', batchSize },
+      regularAgentPolicySO2.id
+    );
+
+    expect(result).toEqual({ actionId: 'async-action-id' });
+    // only the count call — no second full-doc fetch
+    expect(mockGetAgentsByKuery).toHaveBeenCalledTimes(1);
+    expect(mockReassignActionRunner).toHaveBeenCalledWith(
+      esClient,
+      soClient,
+      expect.objectContaining({ batchSize, total: 500 }),
+      expect.anything()
+    );
+    expect(mockReassignBatch).not.toHaveBeenCalled();
+  });
+
+  it('uses caller-supplied batchSize as the async threshold', async () => {
+    const { soClient, esClient, regularAgentPolicySO2 } = createClientMock();
+    const batchSize = 50;
+    // total (60) > batchSize (50) → async
+    mockGetAgentsByKuery.mockResolvedValueOnce({ agents: [], total: 60, page: 1, perPage: 0 });
+
+    const result = await reassignAgents(
+      soClient,
+      esClient,
+      { kuery: 'status:online', batchSize },
+      regularAgentPolicySO2.id
+    );
+
+    expect(result).toEqual({ actionId: 'async-action-id' });
+    expect(mockReassignActionRunner).toHaveBeenCalledWith(
+      esClient,
+      soClient,
+      expect.objectContaining({ batchSize, total: 60 }),
+      expect.anything()
+    );
+  });
+
+  it('runs inline when total equals batchSize (boundary)', async () => {
+    const { soClient, esClient, regularAgentPolicySO2 } = createClientMock();
+    const batchSize = 100;
+    mockGetAgentsByKuery
+      .mockResolvedValueOnce({ agents: [], total: 100, page: 1, perPage: 0 }) // count
+      .mockResolvedValueOnce({ agents: [], total: 100, page: 1, perPage: batchSize }); // fetch
+
+    await reassignAgents(
+      soClient,
+      esClient,
+      { kuery: 'status:online', batchSize },
+      regularAgentPolicySO2.id
+    );
+
+    expect(mockReassignBatch).toHaveBeenCalled();
+    expect(mockReassignActionRunner).not.toHaveBeenCalled();
+  });
+
+  it('dry run (kuery) returns count without writing', async () => {
+    const { soClient, esClient, regularAgentPolicySO2 } = createClientMock();
+    mockGetAgentsByKuery.mockResolvedValue({ agents: [], total: 25, page: 1, perPage: 0 });
+
+    const result = await reassignAgents(
+      soClient,
+      esClient,
+      { kuery: 'status:online', dryRun: true },
+      regularAgentPolicySO2.id
+    );
+
+    expect(result).toEqual({ count: 25 });
+    expect(mockReassignBatch).not.toHaveBeenCalled();
+    expect(mockReassignActionRunner).not.toHaveBeenCalled();
+  });
+
+  it('dry run (agentIds) returns count of found agents only', async () => {
+    const { soClient, esClient, regularAgentPolicySO2 } = createClientMock();
+    const mockGetAgentsById = jest
+      .spyOn(crud, 'getAgentsById')
+      .mockResolvedValue([
+        { id: 'agent-1' } as any,
+        { notFound: true, id: 'missing-1' },
+        { id: 'agent-2' } as any,
+      ] as any);
+
+    const result = await reassignAgents(
+      soClient,
+      esClient,
+      { agentIds: ['agent-1', 'missing-1', 'agent-2'], dryRun: true },
+      regularAgentPolicySO2.id
+    );
+
+    expect(result).toEqual({ count: 2 });
+    expect(mockReassignBatch).not.toHaveBeenCalled();
+    mockGetAgentsById.mockRestore();
+  });
+
+  it('throws when spaceId "*" is used without _internalCrossSpace flag', async () => {
+    const { esClient, regularAgentPolicySO2 } = createClientMock();
+    const scopedClient = { getCurrentNamespace: jest.fn().mockReturnValue(undefined) } as any;
+
+    await expect(
+      reassignAgents(
+        scopedClient,
+        esClient,
+        { agentIds: ['agent-1'], spaceId: '*' },
+        regularAgentPolicySO2.id
+      )
+    ).rejects.toThrow(`spaceId '*' requires _internalCrossSpace: true`);
+  });
+
+  it('throws when spaceId "*" with _internalCrossSpace is used with a custom-space scoped soClient', async () => {
+    const { esClient, regularAgentPolicySO2 } = createClientMock();
+    const scopedClient = { getCurrentNamespace: jest.fn().mockReturnValue('space-a') } as any;
+
+    await expect(
+      reassignAgents(
+        scopedClient,
+        esClient,
+        { agentIds: ['agent-1'], spaceId: '*', _internalCrossSpace: true },
+        regularAgentPolicySO2.id
+      )
+    ).rejects.toThrow(`spaceId '*' requires an unscoped SO client`);
+  });
+
+  it('with spaceId "*", passes skipNamespaceFilter to getAgentsById and spaceId to reassignBatch', async () => {
+    const { soClient, esClient, regularAgentPolicySO2 } = createClientMock();
+    const mockGetAgentsById = jest
+      .spyOn(crud, 'getAgentsById')
+      .mockResolvedValue([{ id: 'agent-1', policy_id: 'other-policy' } as any]);
+
+    await reassignAgents(
+      soClient,
+      esClient,
+      { agentIds: ['agent-1'], spaceId: '*', _internalCrossSpace: true },
+      regularAgentPolicySO2.id
+    );
+
+    expect(mockGetAgentsById).toHaveBeenCalledWith(esClient, soClient, ['agent-1'], {
+      skipNamespaceFilter: true,
+    });
+    expect(mockReassignBatch).toHaveBeenCalledWith(
+      esClient,
+      expect.objectContaining({ spaceId: '*' }),
+      expect.anything(),
+      expect.anything()
+    );
+    mockGetAgentsById.mockRestore();
   });
 });

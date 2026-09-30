@@ -151,6 +151,107 @@ describe('enrollment api keys', () => {
         })
       );
     });
+
+    it('should pass expiration to the Security API and persist expire_at when expiration is provided', async () => {
+      const soClient = savedObjectsClientMock.create();
+      const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+
+      // The Security API returns expiration as epoch-ms
+      const expirationEpochMs = new Date('2030-01-01T00:00:00.000Z').getTime();
+
+      esClient.create.mockResolvedValue({
+        _id: 'test-enrollment-api-key-id',
+      } as any);
+
+      esClient.security.createApiKey.mockResolvedValue({
+        api_key: 'test-api-key-value',
+        id: 'test-api-key-id',
+        expiration: expirationEpochMs,
+      } as any);
+
+      mockedAgentPolicyService.get.mockResolvedValue({
+        id: 'test-agent-policy',
+      } as any);
+
+      const result = await generateEnrollmentAPIKey(soClient, esClient, {
+        name: 'test-api-key',
+        expiration: '7d',
+        agentPolicyId: 'test-agent-policy',
+        forceRecreate: true,
+      });
+
+      expect(esClient.security.createApiKey).toHaveBeenCalledWith(
+        expect.objectContaining({ expiration: '7d' })
+      );
+
+      expect(esClient.create).toHaveBeenCalledWith(
+        expect.objectContaining({
+          body: expect.objectContaining({
+            expire_at: new Date(expirationEpochMs).toISOString(),
+          }),
+        })
+      );
+
+      expect(result.expire_at).toBe(new Date(expirationEpochMs).toISOString());
+    });
+
+    it('should not pass expiration to the Security API when expiration is not provided', async () => {
+      const soClient = savedObjectsClientMock.create();
+      const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+
+      esClient.create.mockResolvedValue({
+        _id: 'test-enrollment-api-key-id',
+      } as any);
+
+      esClient.security.createApiKey.mockResolvedValue({
+        api_key: 'test-api-key-value',
+        id: 'test-api-key-id',
+      } as any);
+
+      mockedAgentPolicyService.get.mockResolvedValue({
+        id: 'test-agent-policy',
+      } as any);
+
+      const result = await generateEnrollmentAPIKey(soClient, esClient, {
+        name: 'test-api-key',
+        agentPolicyId: 'test-agent-policy',
+        forceRecreate: true,
+      });
+
+      expect(esClient.security.createApiKey).toHaveBeenCalledWith(
+        expect.not.objectContaining({ expiration: expect.anything() })
+      );
+
+      expect(result.expire_at).toBeUndefined();
+    });
+
+    it('should throw FleetError for an invalid expiration format', async () => {
+      const soClient = savedObjectsClientMock.create();
+      const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+
+      await expect(
+        generateEnrollmentAPIKey(soClient, esClient, {
+          name: 'test-api-key',
+          agentPolicyId: 'test-agent-policy',
+          expiration: 'notaduration',
+        })
+      ).rejects.toThrow(
+        'Invalid expiration value "notaduration". Must be a positive duration (for example'
+      );
+    });
+
+    it('should throw FleetError for an expiration value exceeding the ES maximum', async () => {
+      const soClient = savedObjectsClientMock.create();
+      const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+
+      await expect(
+        generateEnrollmentAPIKey(soClient, esClient, {
+          name: 'test-api-key',
+          agentPolicyId: 'test-agent-policy',
+          expiration: '106752d',
+        })
+      ).rejects.toThrow('Invalid expiration value "106752d"');
+    });
   });
 
   describe('deleteEnrollmentApiKeys', () => {
@@ -291,9 +392,7 @@ describe('enrollment api keys', () => {
 
       await expect(
         getEnrollmentAPIKey(esClient, 'test-enrollment-api-key-id', 'test')
-      ).rejects.toThrowError(
-        'Enrollment api key test-enrollment-api-key-id not found in namespace'
-      );
+      ).rejects.toThrow('Enrollment api key test-enrollment-api-key-id not found in namespace');
     });
   });
 });

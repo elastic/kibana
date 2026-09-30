@@ -33,7 +33,7 @@ export const removeAllArtifacts = () => {
   }
 };
 
-export const removeAllArtifactsPromise = () =>
+export const removeAllArtifactsPromise = (): PromiseLike<number> =>
   Cypress.Promise.all(ENDPOINT_ARTIFACT_LIST_IDS.map(removeExceptionsListPromise)).then(
     (result) => result.filter(Boolean).length
   );
@@ -69,6 +69,8 @@ const ENDPOINT_ARTIFACT_LIST_TYPES = {
   [ENDPOINT_ARTIFACT_LISTS.hostIsolationExceptions.id]:
     ExceptionListTypeEnum.ENDPOINT_HOST_ISOLATION_EXCEPTIONS,
   [ENDPOINT_ARTIFACT_LISTS.blocklists.id]: ExceptionListTypeEnum.ENDPOINT_BLOCKLISTS,
+  [ENDPOINT_ARTIFACT_LISTS.customYaraSignatures.id]:
+    ExceptionListTypeEnum.ENDPOINT_CUSTOM_YARA_SIGNATURES,
 };
 
 export const createArtifactList = (listId: keyof typeof ENDPOINT_ARTIFACT_LIST_TYPES) => {
@@ -153,31 +155,6 @@ export const trustedAppsFormSelectors = {
     cy.getByTestSubj('trustedApps-form-descriptionField').type('Test Description');
   },
 
-  expectedFieldOptions: (fields = ['Path', 'Hash', 'Signature']) => {
-    if (fields.length) {
-      fields.forEach((field) => {
-        cy.getByTestSubj(
-          `trustedApps-form-conditionsBuilder-group1-entry0-field-type-${field}`
-        ).contains(field);
-      });
-    } else {
-      const fields2 = ['Path', 'Hash', 'Signature'];
-      fields2.forEach((field) => {
-        cy.getByTestSubj(
-          `trustedApps-form-conditionsBuilder-group1-entry0-field-type-${field}`
-        ).should('not.exist');
-      });
-    }
-  },
-
-  expectAllFieldOptionsRendered: () => {
-    trustedAppsFormSelectors.expectedFieldOptions();
-  },
-
-  expectFieldOptionsNotRendered: () => {
-    trustedAppsFormSelectors.expectedFieldOptions([]);
-  },
-
   openTrustedApps: ({ create, itemId }: { create?: boolean; itemId?: string } = {}) => {
     if (!create && !itemId) {
       loadPage(APP_TRUSTED_APPS_PATH);
@@ -247,19 +224,19 @@ export const trustedDevicesFormSelectors = {
   },
 
   selectField: (field: 'Username' | 'Host' | 'Device ID' | 'Manufacturer' | 'Product ID') => {
-    cy.getByTestSubj('trustedDevices-form-fieldSelect').click();
+    cy.getByTestSubj('trustedDevices-form-entry0fieldSelect').click();
     cy.get('[role="option"]').contains(field).click();
   },
 
   selectOperator: (operator: 'is' | 'matches') => {
-    cy.getByTestSubj('trustedDevices-form-operatorSelect').click();
+    cy.getByTestSubj('trustedDevices-form-entry0operatorSelect').click();
     cy.get('[role="option"]')
       .contains(operator === 'is' ? 'is' : 'matches')
       .click();
   },
 
   fillValue: (value: string) => {
-    cy.getByTestSubj('trustedDevices-form-valueField').within(() => {
+    cy.getByTestSubj('trustedDevices-form-entry0valueField').within(() => {
       cy.get('input[role="combobox"]').click();
       cy.get('input[role="combobox"]').should('be.focused');
       cy.get('input[role="combobox"]').type(`{selectall}{backspace}`);
@@ -321,40 +298,14 @@ export const trustedDevicesFormSelectors = {
 };
 
 export const blocklistFormSelectors = {
-  expectSingleOperator: (field: 'Path' | 'Signature' | 'Hash') => {
-    cy.getByTestSubj('blocklist-form-field-select').contains(field);
-    cy.getByTestSubj('blocklist-form-operator-select-single').should('have.value', 'is one of');
-    cy.getByTestSubj('blocklist-form-operator-select-single').should('have.attr', 'readonly');
-    cy.getByTestSubj('blocklist-form-operator-select-multi').should('not.exist');
-  },
-  expectMultiOperator: (field: 'Path' | 'Signature' | 'Hash', type = 'is one of') => {
-    cy.getByTestSubj('blocklist-form-field-select').contains(field);
-    cy.getByTestSubj('blocklist-form-operator-select-multi').contains(type);
-    cy.getByTestSubj('blocklist-form-operator-select-multi').should('not.have.attr', 'readonly');
-    cy.getByTestSubj('blocklist-form-operator-select-single').should('not.exist');
-  },
-  selectPathField: (caseless = true) => {
-    cy.getByTestSubj('blocklist-form-field-select').click();
-    cy.getByTestSubj(
-      caseless ? 'blocklist-form-file.path.caseless' : 'blocklist-form-file.path'
-    ).click();
-  },
   selectSignatureField: () => {
     cy.getByTestSubj('blocklist-form-field-select').click();
     cy.getByTestSubj('blocklist-form-file.Ext.code_signature').click();
-  },
-  selectOs: (os: 'windows' | 'macos' | 'linux') => {
-    cy.getByTestSubj('blocklist-form-os-select').click();
-    cy.get(`button[role="option"][id="${os}"]`).click();
   },
   selectOperator: (operator: 'is one of' | 'is') => {
     const matchOperator = operator === 'is' ? 'match' : 'match_any';
     cy.getByTestSubj('blocklist-form-operator-select-multi').click();
     cy.get(`button[role="option"][id="${matchOperator}"]`).click();
-  },
-  selectHashField: () => {
-    cy.getByTestSubj('blocklist-form-field-select').click();
-    cy.getByTestSubj('blocklist-form-file.hash.*').click();
   },
   openBlocklist: ({ create, itemId }: { create?: boolean; itemId?: string } = {}) => {
     if (!create && !itemId) {
@@ -377,33 +328,8 @@ export const blocklistFormSelectors = {
   setSingleValue: () => {
     cy.getByTestSubj('blocklist-form-value-input').type('Elastic, Inc.');
   },
-  validateMultiValue: ({ empty } = { empty: false }) => {
-    if (!empty) {
-      cy.getByTestSubj('blocklist-form-values-input').within(() => {
-        cy.getByTestSubj('comboBoxInput').within(() => {
-          cy.getByTestSubj('blocklist-form-values-input-Elastic');
-          cy.getByTestSubj('blocklist-form-values-input- Inc.');
-        });
-      });
-    } else {
-      cy.getByTestSubj('blocklist-form-values-input').within(() => {
-        cy.getByTestSubj('comboBoxInput').children('span').should('not.exist');
-      });
-    }
-  },
-  validateSingleValue: (value = 'Elastic, Inc.') => {
-    cy.getByTestSubj('blocklist-form-value-input').should('have.value', value);
-  },
   submitBlocklist: () => {
     cy.getByTestSubj('blocklistPage-flyout-submitButton').click();
-  },
-  expectSubmitButtonToBe: (state: 'disabled' | 'enabled') => {
-    cy.getByTestSubj('blocklistPage-flyout-submitButton').should(
-      state === 'disabled' ? 'be.disabled' : 'not.be.disabled'
-    );
-  },
-  clearMultiValueInput: () => {
-    cy.getByTestSubj('comboBoxClearButton').click();
   },
   validateSuccessPopup: (type: 'create' | 'update' | 'delete') => {
     let expectedTitle: string | RegExp = '';

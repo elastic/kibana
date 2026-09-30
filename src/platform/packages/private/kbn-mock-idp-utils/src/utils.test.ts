@@ -251,13 +251,17 @@ describe('mock-idp-utils', () => {
         expect(payload.given_name).toBe('Test');
         expect(payload.family_name).toBe('User');
         expect(payload.ras).toBeDefined();
-        expect(payload.ras.project).toHaveLength(1);
-        expect(payload.ras.project[0].role_id).toBe('cloud-role-id');
-        expect(payload.ras.project[0].organization_id).toBe(
-          serverlessOptions.serverless.organizationId
-        );
-        expect(payload.ras.project[0].project_type).toBe(serverlessOptions.serverless.projectType);
-        expect(payload.ras.project[0].application_roles).toEqual(serverlessOptions.roles);
+        // One grant per canonical project type — origin project type first — so the session can
+        // reach cross-project (CPS) linked projects of any type.
+        expect(
+          payload.ras.project.map((grant: { project_type: string }) => grant.project_type)
+        ).toEqual(['observability', 'elasticsearch', 'security', 'workplaceai', 'vectordb']);
+        for (const grant of payload.ras.project) {
+          expect(grant.role_id).toBe('cloud-role-id');
+          expect(grant.organization_id).toBe(serverlessOptions.serverless.organizationId);
+          expect(grant.application_roles).toEqual(serverlessOptions.roles);
+          expect(grant.project_scope).toEqual({ scope: 'all' });
+        }
 
         // Verify signature
         const signature = parts[2];
@@ -266,6 +270,29 @@ describe('mock-idp-utils', () => {
           .digest('base64url');
 
         expect(signature).toBe(expectedSignature);
+      });
+
+      it('should normalize aliased project types without duplicating grants', async () => {
+        const samlResponse = await createSAMLResponse({
+          ...serverlessOptions,
+          serverless: { ...serverlessOptions.serverless, projectType: 'oblt' },
+        });
+        const decoded = Buffer.from(samlResponse, 'base64').toString('utf-8');
+
+        const accessTokenMatch = decoded.match(
+          new RegExp(
+            `${MOCK_IDP_ATTRIBUTE_UIAM_ACCESS_TOKEN}.*?<saml:AttributeValue[^>]*>([^<]+)</saml:AttributeValue>`,
+            's'
+          )
+        );
+        const jwt = decodeWithChecksum(removePrefixEssuDev(accessTokenMatch![1]));
+        const payload = JSON.parse(Buffer.from(jwt.split('.')[1], 'base64url').toString());
+
+        // The `oblt` alias normalizes to `observability`, which must not produce a second
+        // `observability` grant.
+        expect(
+          payload.ras.project.map((grant: { project_type: string }) => grant.project_type)
+        ).toEqual(['observability', 'elasticsearch', 'security', 'workplaceai', 'vectordb']);
       });
 
       it('should generate refresh token with valid JWT structure', async () => {

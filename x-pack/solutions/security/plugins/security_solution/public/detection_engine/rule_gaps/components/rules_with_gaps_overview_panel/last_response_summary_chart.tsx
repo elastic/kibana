@@ -144,6 +144,7 @@ export const LastResponseSummaryChart: React.FC<LastResponseSummaryChartProps> =
         </EuiText>
         <EuiSpacer size="m" />
         <EuiCallOut
+          announceOnMount
           title={i18n.ERROR_LOADING_DATA}
           color="danger"
           iconType="error"
@@ -177,6 +178,7 @@ export const LastResponseSummaryChart: React.FC<LastResponseSummaryChartProps> =
             items={tableData}
             columns={columns}
             tableLayout="auto"
+            tableCaption={i18n.LAST_RESPONSE_SUMMARY_TABLE_CAPTION}
             data-test-subj="last-response-summary-table"
           />
         </EuiFlexItem>

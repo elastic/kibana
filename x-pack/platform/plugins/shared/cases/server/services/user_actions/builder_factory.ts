@@ -17,8 +17,6 @@ import { TagsUserActionBuilder } from './builders/tags';
 import { SettingsUserActionBuilder } from './builders/settings';
 import type { UserActionBuilder } from './abstract_builder';
 import { SeverityUserActionBuilder } from './builders/severity';
-import type { PersistableStateAttachmentTypeRegistry } from '../../attachment_framework/persistable_state_registry';
-import type { BuilderDeps } from './types';
 import { AssigneesUserActionBuilder } from './builders/assignees';
 import { NoopUserActionBuilder } from './builders/noop';
 import { CategoryUserActionBuilder } from './builders/category';
@@ -26,6 +24,7 @@ import { CustomFieldsUserActionBuilder } from './builders/custom_fields';
 import { ObservablesUserActionBuilder } from './builders/observables';
 import { ExtendedFieldsUserActionBuilder } from './builders/extended_fields';
 import { TemplateUserActionBuilder } from './builders/template';
+import { WorkflowUserActionBuilder } from './builders/workflow';
 
 const builderMap = {
   assignees: AssigneesUserActionBuilder,
@@ -45,18 +44,11 @@ const builderMap = {
   observables: ObservablesUserActionBuilder,
   extended_fields: ExtendedFieldsUserActionBuilder,
   template: TemplateUserActionBuilder,
+  workflow: WorkflowUserActionBuilder,
 };
 
 export class BuilderFactory {
-  private readonly persistableStateAttachmentTypeRegistry: PersistableStateAttachmentTypeRegistry;
-
-  constructor(deps: BuilderDeps) {
-    this.persistableStateAttachmentTypeRegistry = deps.persistableStateAttachmentTypeRegistry;
-  }
-
   getBuilder<T extends UserActionType>(type: T): UserActionBuilder | undefined {
-    return new builderMap[type]({
-      persistableStateAttachmentTypeRegistry: this.persistableStateAttachmentTypeRegistry,
-    });
+    return new builderMap[type]();
   }
 }

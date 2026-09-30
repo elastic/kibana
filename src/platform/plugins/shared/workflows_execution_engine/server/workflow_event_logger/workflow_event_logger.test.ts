@@ -12,6 +12,7 @@ import { loggerMock } from '@kbn/logging-mocks';
 import { WorkflowEventLogger } from './workflow_event_logger';
 import { createCircuitBreakerError } from '../__fixtures__/circuit_breaker_error';
 import type { LogsRepository, WorkflowLogEvent } from '../repositories/logs_repository';
+import { WorkflowTaskManagerAbortError } from '../workflow_task_shutdown';
 
 const createLogsRepositoryMock = () =>
   ({
@@ -83,6 +84,44 @@ describe('WorkflowEventLogger', () => {
       expect.objectContaining({
         message: 'boom',
       })
+    );
+  });
+
+  it('suppresses and drops indexing errors during best-effort Task Manager abort flushes', async () => {
+    const logsRepository = createLogsRepositoryMock();
+    const logger = loggerMock.create();
+    logsRepository.createLogs.mockRejectedValueOnce(new Error('task-aborted'));
+    const workflowLogger = new WorkflowEventLogger(logsRepository, logger);
+    const signal = AbortSignal.abort(new WorkflowTaskManagerAbortError());
+
+    workflowLogger.logInfo('best effort');
+    await workflowLogger.flushEvents({ signal });
+    await workflowLogger.flushEvents();
+
+    expect(logsRepository.createLogs).toHaveBeenCalledTimes(1);
+    expect(logger.error).not.toHaveBeenCalled();
+    expect(logger.debug).toHaveBeenCalledWith(
+      'Failed to index workflow events during best-effort flush',
+      expect.objectContaining({ eventsCount: 1, error: { message: 'task-aborted' } })
+    );
+  });
+
+  it('does not suppress indexing errors for non-Task Manager abort signals', async () => {
+    const logsRepository = createLogsRepositoryMock();
+    const logger = loggerMock.create();
+    logsRepository.createLogs.mockRejectedValueOnce(new Error('cancelled'));
+    const workflowLogger = new WorkflowEventLogger(logsRepository, logger);
+    const controller = new AbortController();
+    controller.abort(new Error('user cancellation'));
+
+    workflowLogger.logInfo('retryable');
+    await workflowLogger.flushEvents({ signal: controller.signal });
+    await workflowLogger.flushEvents();
+
+    expect(logsRepository.createLogs).toHaveBeenCalledTimes(2);
+    expect(logger.error).toHaveBeenCalledWith(
+      'Failed to index workflow events: cancelled',
+      expect.objectContaining({ eventsCount: 1 })
     );
   });
 

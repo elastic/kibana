@@ -22,6 +22,7 @@ export const getAttackDiscoveryGenerations = async ({
   eventLogIndex,
   generationsQuery,
   getAttackDiscoveryGenerationsParams,
+  ignoreDismissed = false,
   logger,
   spaceId,
 }: {
@@ -34,6 +35,11 @@ export const getAttackDiscoveryGenerations = async ({
     end?: string;
   };
   generationsQuery: estypes.SearchRequest;
+  /**
+   * When `true`, dismissed generations resolve to their underlying terminal
+   * status instead of `dismissed`. See `getGenerationStatusOrThrow`.
+   */
+  ignoreDismissed?: boolean;
   logger: Logger;
   spaceId: string;
 }): Promise<GetAttackDiscoveryGenerationsResponse> => {
@@ -88,6 +94,7 @@ export const getAttackDiscoveryGenerations = async ({
     aggregations: get('aggregations', generationsResponse),
   };
   const transformedGenerations = transformGetAttackDiscoveryGenerationsSearchResult({
+    ignoreDismissed,
     logger,
     rawResponse: rawGenerationsResponse,
   });

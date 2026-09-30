@@ -188,25 +188,41 @@ describe('route_config', () => {
     const findMcpRoute = (routes: ReturnType<typeof getEnabledRoutes>) =>
       routes.find((r) => r.path === mcpClientsPath);
 
-    const config = (experimental: boolean, isUIAMEnabled: boolean): RouteAccessConfig => ({
-      featureFlags: { experimental },
+    const config = (isUIAMEnabled: boolean): RouteAccessConfig => ({
+      featureFlags: { experimental: true },
       capabilities: { isUIAMEnabled },
     });
 
-    it('includes MCP clients route when both experimental and UIAM are enabled', () => {
-      expect(findMcpRoute(getEnabledRoutes(config(true, true)))).toBeDefined();
+    it('includes MCP clients route when UIAM is enabled', () => {
+      expect(findMcpRoute(getEnabledRoutes(config(true)))).toBeDefined();
     });
 
     it('excludes MCP clients route when UIAM is disabled', () => {
-      expect(findMcpRoute(getEnabledRoutes(config(true, false)))).toBeUndefined();
+      expect(findMcpRoute(getEnabledRoutes(config(false)))).toBeUndefined();
+    });
+  });
+
+  describe('connectors route gating', () => {
+    const agentConnectorsPath = '/agents/:agentId/connectors';
+    const manageConnectorsPath = '/manage/connectors';
+    const findRoute = (routes: ReturnType<typeof getEnabledRoutes>, path: string) =>
+      routes.find((r) => r.path === path);
+
+    const config = (experimental: boolean): RouteAccessConfig => ({
+      featureFlags: { experimental },
+      capabilities: { isUIAMEnabled: true },
     });
 
-    it('excludes MCP clients route when experimental is disabled', () => {
-      expect(findMcpRoute(getEnabledRoutes(config(false, true)))).toBeUndefined();
+    it('includes both connectors routes when experimental features are enabled', () => {
+      const routes = getEnabledRoutes(config(true));
+      expect(findRoute(routes, agentConnectorsPath)).toBeDefined();
+      expect(findRoute(routes, manageConnectorsPath)).toBeDefined();
     });
 
-    it('excludes MCP clients route when both are disabled', () => {
-      expect(findMcpRoute(getEnabledRoutes(config(false, false)))).toBeUndefined();
+    it('includes both connectors routes when experimental features are disabled', () => {
+      const routes = getEnabledRoutes(config(false));
+      expect(findRoute(routes, agentConnectorsPath)).toBeDefined();
+      expect(findRoute(routes, manageConnectorsPath)).toBeDefined();
     });
   });
 

@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { userProfileServiceMock } from '@kbn/core-user-profile-server-mocks';
 import { rulesClientMock } from '@kbn/alerting-plugin/server/rules_client.mock';
 import type { ActionsClient } from '@kbn/actions-plugin/server';
 
@@ -53,6 +54,7 @@ describe('DetectionRulesClient.updateRule', () => {
     detectionRulesClient = createDetectionRulesClient({
       actionsClient,
       rulesClient,
+      userProfile: userProfileServiceMock.createStart(),
       mlAuthz,
       rulesAuthz,
       savedObjectsClient,
@@ -539,6 +541,7 @@ describe('DetectionRulesClient.updateRule', () => {
       return createDetectionRulesClient({
         actionsClient,
         rulesClient,
+        userProfile: userProfileServiceMock.createStart(),
         mlAuthz,
         rulesAuthz: {
           ...getMockRulesAuthz(),
@@ -608,6 +611,25 @@ describe('DetectionRulesClient.updateRule', () => {
           await expect(detectionRulesClient.updateRule({ ruleUpdate })).rejects.toThrow(
             expect.objectContaining({ statusCode: 403 })
           );
+        });
+
+        it('throws 403 when unsetting an existing note', async () => {
+          const existingRule = getRulesSchemaMock();
+          existingRule.note = 'Existing investigation guide';
+          (getRuleByRuleId as jest.Mock).mockResolvedValueOnce(existingRule);
+
+          const ruleUpdate = {
+            ...existingRule,
+            id: undefined,
+            note: undefined,
+          };
+
+          await expect(detectionRulesClient.updateRule({ ruleUpdate })).rejects.toThrow(
+            expect.objectContaining({ statusCode: 403 })
+          );
+
+          expect(rulesClient.bulkEditRuleParamsWithReadAuth).not.toHaveBeenCalled();
+          expect(rulesClient.update).not.toHaveBeenCalled();
         });
       });
     });

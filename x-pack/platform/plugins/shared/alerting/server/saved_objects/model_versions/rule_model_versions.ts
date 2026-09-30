@@ -20,6 +20,9 @@ import {
   rawRuleSchemaV11,
   rawRuleSchemaV12,
   rawRuleSchemaV13,
+  rawRuleSchemaV14,
+  rawRuleSchemaV15,
+  rawRuleSchemaV16,
 } from '../schemas/raw_rule';
 
 export const ruleModelVersions: SavedObjectsModelVersionMap = {
@@ -183,6 +186,27 @@ export const ruleModelVersions: SavedObjectsModelVersionMap = {
     schemas: {
       forwardCompatibility: rawRuleSchemaV13.extends({}, { unknowns: 'ignore' }),
       create: rawRuleSchemaV13,
+    },
+  },
+  '14': {
+    changes: [],
+    schemas: {
+      forwardCompatibility: rawRuleSchemaV14.extends({}, { unknowns: 'ignore' }),
+      create: rawRuleSchemaV14,
+    },
+  },
+  '15': {
+    changes: [],
+    schemas: {
+      forwardCompatibility: rawRuleSchemaV15.extends({}, { unknowns: 'ignore' }),
+      create: rawRuleSchemaV15,
+    },
+  },
+  '16': {
+    changes: [],
+    schemas: {
+      forwardCompatibility: rawRuleSchemaV16.extends({}, { unknowns: 'ignore' }),
+      create: rawRuleSchemaV16,
     },
   },
 };

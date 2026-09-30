@@ -7,20 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-// @ts-ignore
-import regenerate from 'regenerate';
 import stripAnsi from 'strip-ansi';
 
-// create a regular expression using regenerate() that selects any character that is explicitly allowed by https://www.w3.org/TR/xml/#NT-Char
-const validXmlCharsRE = new RegExp(
-  `(?:${regenerate()
-    .add(0x9, 0xa, 0xd)
-    .addRange(0x20, 0xd7ff)
-    .addRange(0xe000, 0xfffd)
-    .addRange(0x10000, 0x10ffff)
-    .toString()})*`,
-  'g'
-);
+// create a regular expression that selects any character that is explicitly allowed by https://www.w3.org/TR/xml/#NT-Char
+const validXmlCharsRE =
+  /(?:[\x09\x0A\x0D\x20-\uD7FF\uE000-\uFFFD]|[\uD800-\uDBFF][\uDC00-\uDFFF])*/g;
 
 export function escapeCdata(input: string) {
   const match = stripAnsi(input).match(validXmlCharsRE) || [];

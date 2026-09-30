@@ -5,14 +5,17 @@
  * 2.0.
  */
 
+import { CHROME_HEADER_TEST_SUBJECTS } from '@kbn/core-chrome-browser-components';
 import type { ScoutPage, Locator } from '@kbn/scout';
+
+const SEARCH_MODAL = 'globalSearchModal';
 
 export class GlobalSearch {
   constructor(private readonly page: ScoutPage) {}
 
   public get resultLabels(): Locator {
-    return this.page
-      .locator('.navSearch__panel')
+    return this.page.testSubj
+      .locator(SEARCH_MODAL)
       .locator('.euiSelectableTemplateSitewide__listItemTitle');
   }
 
@@ -20,18 +23,27 @@ export class GlobalSearch {
     await this.page.gotoApp('home');
   }
 
+  async openSearch() {
+    const modal = this.page.testSubj.locator(SEARCH_MODAL);
+    if (await modal.isVisible()) {
+      return;
+    }
+    await this.page.testSubj.click(CHROME_HEADER_TEST_SUBJECTS.searchButton);
+    await modal.waitFor({ state: 'visible' });
+  }
+
   async focus() {
+    await this.openSearch();
     await this.page.testSubj.click('nav-search-input');
   }
 
   async blur() {
-    // Click help menu button twice to close the search popover
-    await this.page.testSubj.click('helpMenuButton');
-    await this.page.testSubj.click('helpMenuButton');
-    await this.page.locator('.navSearch__panel').waitFor({ state: 'hidden', timeout: 5000 });
+    await this.page.keyboard.press('Escape');
+    await this.page.testSubj.locator(SEARCH_MODAL).waitFor({ state: 'hidden' });
   }
 
   async searchFor(term: string, { clear = true }: { clear?: boolean } = {}) {
+    await this.openSearch();
     if (clear) {
       await this.clearField();
     }
@@ -47,12 +59,38 @@ export class GlobalSearch {
   }
 
   async isPopoverDisplayed() {
-    return await this.page.locator('.navSearch__panel').isVisible();
+    return await this.page.testSubj.locator(SEARCH_MODAL).isVisible();
   }
 
   async clickOnOption(index: number) {
     const options = await this.page.testSubj.locator('nav-search-option').all();
     await options[index].click();
+  }
+
+  async scrollToResult(label: string): Promise<Locator> {
+    const item = this.resultLabels.filter({ hasText: label });
+    const list = this.page.testSubj.locator(SEARCH_MODAL).locator('.euiSelectableList__list');
+
+    // EuiSelectable virtualizes rows, so off-screen labels are not in the DOM.
+    // scrollIntoViewIfNeeded is a no-op until this windowing container scrolls.
+    await list.waitFor({ state: 'visible' });
+    await list.evaluate((element) => {
+      element.scrollTop = 0;
+    });
+
+    const deadline = Date.now() + 15_000;
+    while ((await item.count()) === 0 && Date.now() < deadline) {
+      const canScrollFurther = await list.evaluate((element) => {
+        const previousTop = element.scrollTop;
+        element.scrollTop += element.clientHeight;
+        return element.scrollTop !== previousTop;
+      });
+      if (!canScrollFurther) {
+        break;
+      }
+    }
+
+    return item;
   }
 
   async isNoResultsPlaceholderDisplayed() {

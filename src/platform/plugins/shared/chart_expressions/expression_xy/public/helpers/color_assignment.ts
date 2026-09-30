@@ -46,7 +46,7 @@ function getSplitName(
     const splitFormatterObj = fieldFormats.splitSeriesAccessors[splitAccessor];
     const name = formattedDatatable.formattedColumns[splitAccessor]
       ? row[splitAccessor]
-      : splitFormatterObj.formatter.convert(row[splitAccessor]);
+      : splitFormatterObj.formatter.convertToText(row[splitAccessor]);
     if (splitName) {
       return `${splitName}${MULTI_FIELD_KEY_SEPARATOR}${name}`;
     } else {

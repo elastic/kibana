@@ -15,6 +15,9 @@ export const executeConnectorRequestParamsSchema = schema.object({
   }),
 });
 
-export const executeConnectorRequestBodySchema = schema.object({
-  params: schema.recordOf(schema.string(), schema.any()),
-});
+export const executeConnectorRequestBodySchema = schema.object(
+  {
+    params: schema.recordOf(schema.string(), schema.any()),
+  },
+  { meta: { id: 'connector_execute_request' } }
+);

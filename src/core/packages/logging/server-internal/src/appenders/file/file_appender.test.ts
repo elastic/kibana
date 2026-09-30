@@ -9,6 +9,9 @@
 
 import { mockCreateWriteStream, mockMkdirSync } from './file_appender.test.mocks';
 
+import { EventEmitter } from 'events';
+
+import type { LogFileWriteErrorHandler } from '@kbn/core-logging-server';
 import type { LogRecord } from '@kbn/logging';
 import { LogLevel } from '@kbn/logging';
 import { FileAppender } from './file_appender';
@@ -175,4 +178,182 @@ test('`dispose()` closes stream.', async () => {
 
   // Consequent `dispose` calls should not fail even if stream has been disposed.
   await appender.dispose();
+});
+
+describe('write failures', () => {
+  const record: LogRecord = {
+    context: 'context-1',
+    level: LogLevel.All,
+    message: 'message-1',
+    timestamp: new Date(),
+    pid: 5355,
+  };
+
+  const createMockStream = () => {
+    const stream = Object.assign(new EventEmitter(), {
+      write: jest.fn(),
+      destroyed: false,
+      destroy: jest.fn(),
+      end: jest.fn((cb?: () => void) => cb?.()),
+    });
+    stream.destroy.mockImplementation(() => {
+      stream.destroyed = true;
+    });
+    return stream;
+  };
+
+  const enospc = () =>
+    Object.assign(new Error("ENOSPC: no space left on device, write 'mock://path/file.log'"), {
+      code: 'ENOSPC',
+    });
+
+  describe('when no `onWriteError` handler is configured', () => {
+    it('keeps letting a synchronous failure escape, so the process still crashes', () => {
+      mockMkdirSync.mockImplementation(() => {
+        throw enospc();
+      });
+
+      const appender = new FileAppender({ format: () => '' }, 'mock://path/file.log');
+
+      expect(() => appender.append(record)).toThrow('ENOSPC');
+    });
+
+    it.each(['not-a-function', 42, true, null])(
+      'ignores a non-function %p, leaving stream errors unhandled',
+      (onWriteError) => {
+        const stream = createMockStream();
+        const onSpy = jest.spyOn(stream, 'on');
+        mockCreateWriteStream.mockReturnValue(stream);
+
+        new FileAppender(
+          { format: () => '' },
+          'mock://path/file.log',
+          onWriteError as unknown as LogFileWriteErrorHandler
+        ).append(record);
+
+        expect(onSpy).not.toHaveBeenCalledWith('error', expect.any(Function));
+      }
+    );
+
+    it('does not subscribe to stream errors, leaving them unhandled as before', () => {
+      const stream = createMockStream();
+      const onSpy = jest.spyOn(stream, 'on');
+      mockCreateWriteStream.mockReturnValue(stream);
+
+      new FileAppender({ format: () => '' }, 'mock://path/file.log').append(record);
+
+      expect(onSpy).not.toHaveBeenCalledWith('error', expect.any(Function));
+    });
+  });
+
+  describe('when an `onWriteError` handler is configured', () => {
+    it('still lets a synchronous failure escape, since only stream errors are reported', () => {
+      mockMkdirSync.mockImplementation(() => {
+        throw enospc();
+      });
+      const onWriteError = jest.fn();
+
+      const appender = new FileAppender({ format: () => '' }, 'mock://path/file.log', onWriteError);
+
+      expect(() => appender.append(record)).toThrow('ENOSPC');
+      expect(onWriteError).not.toHaveBeenCalled();
+    });
+
+    it('reports an asynchronous stream failure instead of crashing the process', () => {
+      const stream = createMockStream();
+      mockCreateWriteStream.mockReturnValue(stream);
+      const onWriteError = jest.fn();
+
+      const appender = new FileAppender({ format: () => '' }, 'mock://path/file.log', onWriteError);
+      appender.append(record);
+
+      expect(() => stream.emit('error', enospc())).not.toThrow();
+      expect(onWriteError).toHaveBeenCalledWith(
+        expect.objectContaining({ code: 'ENOSPC', path: 'mock://path/file.log' })
+      );
+    });
+
+    it('discards the errored stream and reopens the file on the next `append()`', () => {
+      const failed = createMockStream();
+      const reopened = createMockStream();
+      mockCreateWriteStream.mockReturnValueOnce(failed).mockReturnValue(reopened);
+      const onWriteError = jest.fn();
+
+      const appender = new FileAppender(
+        { format: () => 'formatted' },
+        'mock://path/file.log',
+        onWriteError
+      );
+      appender.append(record);
+      failed.emit('error', enospc());
+
+      expect(failed.destroy).toHaveBeenCalledTimes(1);
+
+      appender.append(record);
+
+      expect(mockCreateWriteStream).toHaveBeenCalledTimes(2);
+      expect(reopened.write).toHaveBeenCalledWith('formatted\n');
+      expect(failed.write).toHaveBeenCalledTimes(1);
+    });
+
+    it('reports errors from a reopened stream too', () => {
+      const failed = createMockStream();
+      const reopened = createMockStream();
+      mockCreateWriteStream.mockReturnValueOnce(failed).mockReturnValue(reopened);
+      const onWriteError = jest.fn();
+
+      const appender = new FileAppender({ format: () => '' }, 'mock://path/file.log', onWriteError);
+      appender.append(record);
+      failed.emit('error', enospc());
+      appender.append(record);
+
+      expect(() => reopened.emit('error', enospc())).not.toThrow();
+      expect(onWriteError).toHaveBeenCalledTimes(2);
+    });
+
+    it('lets a layout failure through instead of blaming the file', () => {
+      const stream = createMockStream();
+      mockCreateWriteStream.mockReturnValue(stream);
+      const onWriteError = jest.fn();
+      const boom = new Error('Converting circular structure to JSON');
+
+      const appender = new FileAppender(
+        {
+          format: () => {
+            throw boom;
+          },
+        },
+        'mock://path/file.log',
+        onWriteError
+      );
+
+      expect(() => appender.append(record)).toThrow(boom);
+      expect(onWriteError).not.toHaveBeenCalled();
+    });
+
+    it('keeps accepting records after a layout failure', () => {
+      const stream = createMockStream();
+      mockCreateWriteStream.mockReturnValue(stream);
+      let shouldThrow = true;
+
+      const appender = new FileAppender(
+        {
+          format: () => {
+            if (shouldThrow) {
+              throw new Error('Converting circular structure to JSON');
+            }
+            return 'formatted';
+          },
+        },
+        'mock://path/file.log',
+        jest.fn()
+      );
+
+      expect(() => appender.append(record)).toThrow();
+      shouldThrow = false;
+      appender.append(record);
+
+      expect(stream.write).toHaveBeenCalledWith('formatted\n');
+    });
+  });
 });

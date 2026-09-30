@@ -17,7 +17,7 @@ You can create connectors in **{{stack-manage-app}} > {{connectors-ui}}**.
 
 ### Connector configuration [sharepoint-online-connector-configuration]
 
-SharePoint Online connectors support two authentication methods:
+SharePoint Online connectors support three Microsoft Entra ID authentication types:
 
 #### OAuth client credentials (app-only auth)
 
@@ -29,6 +29,23 @@ Client ID
 
 Client Secret
 :   The client secret generated for your Microsoft Entra application.
+
+#### OAuth Client Certificate (Microsoft Entra) — app-only auth [sharepoint-online-connector-cert-config]
+
+Token URL
+:   The OAuth 2.0 token endpoint URL. Use the format: `https://login.microsoftonline.com/{tenant-id}/oauth2/v2.0/token`.
+
+Client ID
+:   The application (client) ID from your Microsoft Entra app registration.
+
+Certificate
+:   The PEM-encoded public X.509 certificate uploaded to the app registration. Must begin with `-----BEGIN CERTIFICATE-----`.
+
+Private Key
+:   The PEM-encoded RSA private key matching the uploaded certificate. Must begin with `-----BEGIN PRIVATE KEY-----` (PKCS#8), `-----BEGIN RSA PRIVATE KEY-----` (PKCS#1), or `-----BEGIN ENCRYPTED PRIVATE KEY-----` (encrypted PKCS#8). Stored encrypted at rest.
+
+Passphrase
+:   (Optional) Only required if the private key is encrypted.
 
 #### OAuth authorization code (delegated auth)
 
@@ -48,12 +65,12 @@ Search
 :   Search for content across SharePoint sites, lists, and drives using the Microsoft Graph Search API.
     - `query` (required): The search query string.
     - `entityTypes` (optional): Array of entity types to search. Valid values: `site`, `list`, `listItem`, `drive`, `driveItem`. Defaults to `site`.
-    - `region` (optional): Search region (`NAM`, `EUR`, `APC`, `LAM`, `MEA`). Only used with app-only (client credentials) auth; omit when using delegated (authorization code) auth to avoid errors.
+    - `region` (optional): Search region (`NAM`, `EUR`, `APC`, `LAM`, `MEA`). Only used with app-only (client credentials or certificate) auth; omit when using delegated (authorization code) auth to avoid errors.
     - `from` (optional): Offset for pagination.
     - `size` (optional): Number of results to return.
 
 Get all sites
-:   List all SharePoint sites. With app-only (client credentials) auth, returns all sites the app can access. With delegated (authorization code) auth, searches accessible sites — pass a keyword or omit for a wildcard search.
+:   List all SharePoint sites. With app-only (client credentials or certificate) auth, returns all sites the app can access. With delegated (authorization code) auth, searches accessible sites — pass a keyword or omit for a wildcard search.
     - `search` (optional): Keyword to filter sites by name. Only used with delegated auth; ignored with app-only auth.
 
 Get site
@@ -139,6 +156,39 @@ To use app-only authentication, register an application in Microsoft Entra (form
     - **Token URL**: `https://login.microsoftonline.com/{your-tenant-id}/oauth2/v2.0/token` (find your tenant ID in the **Overview** section of your app registration).
     - **Client ID**: Found in the **Overview** section (also called Application ID).
     - **Client Secret**: The value you copied in step 15.
+
+### OAuth Client Certificate (Microsoft Entra) — recommended for production [sharepoint-online-cert-credentials]
+
+To use certificate-based app-only authentication, register an application in Microsoft Entra:
+
+1. Go to the [Azure Portal](https://portal.azure.com/).
+2. Go to **Microsoft Entra ID** > **App registrations**.
+3. Select **New registration**.
+4. Enter a name for your application.
+5. Select **Accounts in this organizational directory only**.
+6. Select **Register**.
+7. In your app registration, go to **API permissions**.
+8. Select **Add a permission** > **Microsoft Graph** > **Application permissions**.
+9. Add the following permissions:
+   - `Sites.Selected` — Read items in selected site collections.
+   - `Files.Read.All` — Read files in all site collections.
+10. Select **Grant admin consent** for your organization.
+11. Generate a certificate and matching private key. For example, with OpenSSL:
+    ```bash
+    openssl req -x509 -newkey rsa:2048 -nodes \
+      -keyout private_key.pem \
+      -out certificate.pem \
+      -days 365 \
+      -subj "/CN=kibana-sharepoint-connector"
+    ```
+12. In your app registration, go to **Certificates & secrets** > **Certificates** > **Upload certificate**.
+13. Upload the `.pem` public certificate from the previous step.
+14. Enter the following values when configuring the connector in {{kib}}:
+    - **Token URL**: `https://login.microsoftonline.com/{your-tenant-id}/oauth2/v2.0/token`
+    - **Client ID**: Found in the **Overview** section (also called Application ID).
+    - **Certificate**: paste the full contents of `certificate.pem` (including the `-----BEGIN CERTIFICATE-----` / `-----END CERTIFICATE-----` markers).
+    - **Private Key**: paste the full contents of `private_key.pem` (including the BEGIN/END markers).
+    - **Passphrase**: only if you generated an encrypted private key.
 
 ### OAuth authorization code (delegated auth)
 

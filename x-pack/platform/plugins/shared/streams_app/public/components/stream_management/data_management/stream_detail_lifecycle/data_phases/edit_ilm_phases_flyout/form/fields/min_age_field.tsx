@@ -5,13 +5,18 @@
  * 2.0.
  */
 
-import React, { useEffect, useRef, useState } from 'react';
+import React from 'react';
 import { i18n } from '@kbn/i18n';
 import type { PhaseName } from '@kbn/streams-schema';
 import { EuiFieldNumber, EuiFlexGroup, EuiFlexItem, EuiFormRow, EuiSelect } from '@elastic/eui';
 import { useController, useFormContext, useWatch } from 'react-hook-form';
 
-import { getBoundsHelpTextValues, getUnitSelectOptions } from '../../../shared';
+import {
+  BOUNDARY_VALIDATION_ERROR,
+  getTimingBoundHelpText,
+  type HelpTextBound,
+} from '@kbn/data-lifecycle-phases';
+import { formatDuration, getUnitSelectOptions, useBlurCommitDraft } from '../../../shared';
 import { getRelativeBoundsInMs } from '../utils';
 import { getPhaseDurationMs } from '../get_phase_duration_ms';
 import { getMinAgeFieldsToValidateOnChange } from '../schema';
@@ -56,14 +61,20 @@ const MinAgeFieldControl = ({
 
   const committedValue = String(minAgeValueField.value ?? '');
   const currentUnit = String(minAgeUnitField.value ?? 'd') as PreservedTimeUnit;
-
-  const isEditingRef = useRef(false);
-  const [draftValue, setDraftValue] = useState<string>(committedValue);
-
-  useEffect(() => {
-    if (isEditingRef.current) return;
-    setDraftValue(committedValue);
-  }, [committedValue]);
+  const { draftValue, onChange, onBlur } = useBlurCommitDraft({
+    committedValue,
+    onFieldBlur: () => {
+      minAgeValueField.onBlur();
+    },
+    onCommit: (next) => {
+      minAgeValueField.onChange(next);
+    },
+    onAfterCommit: () => {
+      setTimeout(() => {
+        void trigger(getMinAgeFieldsToValidateOnChange(phaseName));
+      }, 0);
+    },
+  });
 
   const getPhaseMinAgeMs = (phase: 'warm' | 'cold' | 'frozen' | 'delete'): number | null =>
     getPhaseDurationMs(getValues, phase, {
@@ -73,35 +84,40 @@ const MinAgeFieldControl = ({
 
   const minAgePhases = ['warm', 'cold', 'frozen', 'delete'] as const;
   type MinAgePhase = (typeof minAgePhases)[number];
-  const { lowerBoundMs, upperBoundMs } = getRelativeBoundsInMs(
+  // The nearest configured phase in each direction acts as a boundary. The hot phase is not
+  // configurable (min age 0), so a phase with no earlier configured phase shows only the upper
+  // bound (or nothing when it is also the last enabled phase).
+  const { lowerBoundPhase, upperBoundPhase } = getRelativeBoundsInMs(
     minAgePhases,
     phaseName as MinAgePhase,
     getPhaseMinAgeMs
   );
 
-  const { min, max } = getBoundsHelpTextValues({
-    lowerBoundMs,
-    upperBoundMs,
-    unit: currentUnit,
+  const toPhaseBound = (phase: MinAgePhase | undefined): HelpTextBound | undefined => {
+    if (!phase) return undefined;
+    const value = formatDuration(
+      getValues(`_meta.${phase}.minAgeValue`),
+      getValues(`_meta.${phase}.minAgeUnit`),
+      { integerOnly: true, minExclusive: 0 }
+    );
+    if (!value) return undefined;
+    return { neighbor: { type: 'phase', phase }, value };
+  };
+
+  const helpText = getTimingBoundHelpText({
+    lower: toPhaseBound(lowerBoundPhase),
+    upper: toPhaseBound(upperBoundPhase),
   });
 
-  const helpText =
-    upperBoundMs === undefined
-      ? i18n.translate('xpack.streams.editIlmPhasesFlyout.minAgeHelpLowerBound', {
-          defaultMessage: 'Must be larger than {min} based on current configuration.',
-          values: { min },
-        })
-      : i18n.translate('xpack.streams.editIlmPhasesFlyout.minAgeHelpRange', {
-          defaultMessage:
-            'Must be larger than {min} and smaller than {max} based on current configuration.',
-          values: {
-            min,
-            max,
-          },
-        });
+  const isBoundaryError = isInvalid && errorMessage === BOUNDARY_VALIDATION_ERROR;
 
   return (
-    <EuiFormRow label={fieldLabel} helpText={helpText} isInvalid={isInvalid} error={errorMessage}>
+    <EuiFormRow
+      label={fieldLabel}
+      helpText={isBoundaryError ? undefined : helpText}
+      isInvalid={isInvalid}
+      error={isBoundaryError ? helpText : isInvalid ? errorMessage : null}
+    >
       <EuiFlexGroup gutterSize="s" responsive={false}>
         <EuiFlexItem>
           <EuiFieldNumber
@@ -114,27 +130,10 @@ const MinAgeFieldControl = ({
             data-test-subj={`${dataTestSubj}MoveAfterValue`}
             inputRef={minAgeValueField.ref}
             onChange={(e) => {
-              isEditingRef.current = true;
-              const nextValue = e.target.value;
-              setDraftValue(nextValue);
+              onChange(e.target.value);
             }}
             onBlur={() => {
-              isEditingRef.current = false;
-              minAgeValueField.onBlur();
-              const nextValue = draftValue.trim();
-              if (nextValue === '') {
-                setDraftValue(committedValue);
-                return;
-              }
-
-              // Commit only on blur.
-              if (nextValue !== committedValue.trim()) {
-                minAgeValueField.onChange(nextValue);
-              }
-
-              setTimeout(() => {
-                void trigger(getMinAgeFieldsToValidateOnChange(phaseName));
-              }, 0);
+              onBlur();
             }}
           />
         </EuiFlexItem>
@@ -190,7 +189,7 @@ export const MinAgeField = ({ phaseName, dataTestSubj, timeUnitOptions }: MinAge
 
   const fieldLabel = isDeletePhase
     ? i18n.translate('xpack.streams.editIlmPhasesFlyout.deleteAfterLabel', {
-        defaultMessage: 'Delete after data stored',
+        defaultMessage: 'Delete after',
       })
     : i18n.translate('xpack.streams.editIlmPhasesFlyout.moveAfterLabel', {
         defaultMessage: 'Move data after',

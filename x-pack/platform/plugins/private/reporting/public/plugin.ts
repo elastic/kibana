@@ -20,10 +20,12 @@ import type {
   SharePluginStart,
   ExportShare,
   ExportShareDerivatives,
+  ShareContext,
+  RegisterShareIntegrationArgs,
 } from '@kbn/share-plugin/public';
 import type { UiActionsSetup, UiActionsStart } from '@kbn/ui-actions-plugin/public';
 
-import { durationToNumber } from '@kbn/reporting-common';
+import { durationToNumber, SCHEDULED_REPORT_VALID_LICENSES } from '@kbn/reporting-common';
 import type { ClientConfigType } from '@kbn/reporting-public';
 import { ReportingAPIClient } from '@kbn/reporting-public';
 import {
@@ -40,6 +42,8 @@ import { ReportingNotifierStreamHandler as StreamHandler } from './lib/stream_ha
 import type { StartServices } from './types';
 import { APP_DESC, APP_TITLE } from './translations';
 import { APP_PATH } from './constants';
+import { getScheduledReportObjectTypes } from './management/integrations/get_scheduled_report_object_types';
+import { shouldRegisterReportingIntegration } from './management/integrations/should_register_reporting_integration';
 
 export interface ReportingPublicPluginSetupDependencies {
   home: HomePublicPluginSetup;
@@ -242,22 +246,54 @@ export class ReportingPublicPlugin
       );
     }
 
-    import('./management/integrations/scheduled_report_share_integration').then(
-      async ({
-        shouldRegisterScheduledReportShareIntegration,
-        createScheduledReportShareIntegration,
-      }) => {
-        const [coreStart, startDeps] = await getStartServices();
-        if (await shouldRegisterScheduledReportShareIntegration(core.http)) {
-          shareSetup.registerShareIntegration<ExportShareDerivatives>(
-            createScheduledReportShareIntegration({
-              apiClient,
-              services: { ...coreStart, ...startDeps, actions: actionsSetup },
-            })
+    const scheduledReportObjectTypes = getScheduledReportObjectTypes(this.config.export_types);
+
+    if (scheduledReportObjectTypes.length > 0) {
+      shouldRegisterReportingIntegration(core.http)
+        .then((shouldRegister) => {
+          if (!shouldRegister) {
+            return;
+          }
+
+          const scheduledReportsShareIntegration: RegisterShareIntegrationArgs<ExportShareDerivatives> =
+            {
+              id: 'scheduledReports',
+              groupId: 'exportDerivatives',
+              getShareIntegrationConfig: async (shareOpts: ShareContext) => {
+                const [[coreStart, startDeps], { getReportingShareIntegrationConfig }] =
+                  await Promise.all([
+                    getStartServices(),
+                    import('./management/integrations/scheduled_report_share_integration'),
+                  ]);
+                return getReportingShareIntegrationConfig(
+                  apiClient,
+                  { ...coreStart, ...startDeps, actions: actionsSetup },
+                  shareOpts
+                );
+              },
+              prerequisiteCheck: ({ license }) => {
+                if (!license || !license.type) {
+                  return false;
+                }
+                return SCHEDULED_REPORT_VALID_LICENSES.includes(license.type);
+              },
+            };
+
+          for (const objectType of scheduledReportObjectTypes) {
+            shareSetup.registerShareIntegration<ExportShareDerivatives>(
+              objectType,
+              scheduledReportsShareIntegration
+            );
+          }
+        })
+        .catch((e) => {
+          // eslint-disable-next-line no-console
+          console.warn(
+            `Could not register 'scheduledReports' share integration. 'shouldRegisterReportingIntegration' threw error:`,
+            e
           );
-        }
-      }
-    );
+        });
+    }
 
     this.startServices$ = startServices$;
     return this.getContract(apiClient, startServices$);

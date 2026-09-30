@@ -42,8 +42,9 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           },
         ],
       });
-      // login with custom role
-      await pageObjects.svlCommonPage.loginWithCustomRole();
+      // Discover-only users cannot open the Observability default route after login.
+      await pageObjects.svlCommonPage.loginWithCustomRole({ initialPath: '/app/discover' });
+      await pageObjects.header.waitUntilLoadingHasFinished();
       await pageObjects.svlCommonPage.assertUserAvatarExists();
     });
 
@@ -88,8 +89,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await pageObjects.common.navigateToApp('discover');
       await pageObjects.timePicker.setDefaultAbsoluteRange();
       await pageObjects.header.waitUntilLoadingHasFinished();
-      expect(await testSubjects.exists('unifiedHistogramChart')).to.be(true);
-      expect(await testSubjects.exists('discoverQueryHits')).to.be(true);
+      await testSubjects.existOrFail('unifiedHistogramChart', { timeout: 5000 });
+      await testSubjects.existOrFail('discoverQueryHits', { timeout: 5000 });
     });
 
     it('should access console with API key', async () => {

@@ -6,7 +6,6 @@
  */
 
 import Boom from '@hapi/boom';
-import * as t from 'io-ts';
 import type {
   Logger,
   KibanaRequest,
@@ -18,17 +17,14 @@ import { errors } from '@elastic/elasticsearch';
 import agent from 'elastic-apm-node';
 import type {
   DefaultRouteCreateOptions,
-  IoTsParamsObject,
   ServerRouteRepository,
+  ZodParamsObject,
 } from '@kbn/server-route-repository';
 import { stripNullishRequestParameters } from '@kbn/server-route-repository';
 import { merge } from 'lodash';
-import {
-  decodeRequestParams,
-  parseEndpoint,
-  passThroughValidationObject,
-} from '@kbn/server-route-repository';
-import { jsonRt, mergeRt } from '@kbn/io-ts-utils';
+import { makeZodValidationObject, parseEndpoint } from '@kbn/server-route-repository';
+import { isZod, z } from '@kbn/zod/v4';
+import { BooleanFromString } from '@kbn/zod-helpers/v4';
 import type { InspectResponse } from '@kbn/observability-plugin/typings/common';
 import apm from 'elastic-apm-node';
 import type { VersionedRouteRegistrar } from '@kbn/core-http-server';
@@ -46,11 +42,22 @@ import type { ApmPluginRequestHandlerContext } from '../typings';
 import type { APMConfig } from '../..';
 import type { APMPluginSetupDependencies, APMPluginStartDependencies } from '../../types';
 
-const inspectRt = t.exact(
-  t.partial({
-    query: t.exact(t.partial({ _inspect: jsonRt.pipe(t.boolean) })),
-  })
-);
+// Merged into every route's `query` schema so the `?_inspect` debug query param
+// is accepted (and coerced) by Core on every route.
+const inspectQueryShape = { _inspect: BooleanFromString.optional() };
+
+function withInspectQueryParam(params: ZodParamsObject): ZodParamsObject {
+  const query = params.shape.query;
+
+  const queryWithInspect =
+    query instanceof z.ZodObject
+      ? query.extend(inspectQueryShape)
+      : query
+      ? z.intersection(query, z.object(inspectQueryShape))
+      : z.object(inspectQueryShape);
+
+  return params.extend({ query: queryWithInspect }) as ZodParamsObject;
+}
 
 const CLIENT_CLOSED_REQUEST = {
   statusCode: 499,
@@ -110,16 +117,13 @@ export function registerRoutes({
       inspectableEsQueriesMap.set(request, []);
 
       try {
-        const runtimeType = params ? mergeRt(params as IoTsParamsObject, inspectRt) : inspectRt;
-
-        const validatedParams = decodeRequestParams(
-          stripNullishRequestParameters({
-            params: request.params,
-            body: request.body,
-            query: request.query,
-          }),
-          runtimeType
-        );
+        // Core already validated (and coerced) the request against `validate`
+        // above, so there's nothing left to decode here.
+        const validatedParams = stripNullishRequestParameters({
+          params: request.params,
+          body: request.body,
+          query: request.query,
+        });
 
         const getApmIndices = async () => {
           const coreContext = await context.core;
@@ -227,12 +231,31 @@ export function registerRoutes({
       }
     };
 
+    // Wrapped in a thunk so that schema construction is deferred to the first
+    // request rather than happening at plugin.setup() time. Route params defined
+    // with lazySchema() return a Proxy whose factory is triggered on the first
+    // property access — both the `isZod` check (via the `has` trap) and
+    // `makeZodValidationObject` (via the `get` trap on `.shape.*`) would
+    // materialize all ~300 schemas synchronously at startup if called eagerly.
+    // Core wraps this function with `lodash.once`, so the result is built once
+    // on the first request and cached for all subsequent requests.
+    const makeValidate = () => {
+      if (params !== undefined && !isZod(params)) {
+        throw new Error(
+          `Route ${endpoint} has non-zod params; io-ts route params are no longer supported.`
+        );
+      }
+      return makeZodValidationObject(
+        withInspectQueryParam((params as ZodParamsObject) ?? (z.object({}) as ZodParamsObject))
+      );
+    };
+
     if (!version) {
       (router[method] as RouteRegistrar<typeof method, ApmPluginRequestHandlerContext>)(
         {
           path: pathname,
           options,
-          validate: passThroughValidationObject,
+          validate: makeValidate,
           security: security as RouteSecurity,
         },
         wrappedHandler
@@ -248,15 +271,7 @@ export function registerRoutes({
         access: pathname.includes('/internal/apm') ? 'internal' : 'public',
         options,
         security: security as RouteSecurity,
-      }).addVersion(
-        {
-          version,
-          validate: {
-            request: passThroughValidationObject,
-          },
-        },
-        wrappedHandler
-      );
+      }).addVersion({ version, validate: () => ({ request: makeValidate() }) }, wrappedHandler);
     }
   });
 }

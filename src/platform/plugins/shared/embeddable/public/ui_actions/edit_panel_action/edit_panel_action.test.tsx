@@ -14,7 +14,7 @@ import { EditPanelAction } from './edit_panel_action';
 
 describe('Edit panel action', () => {
   let action: EditPanelAction;
-  let context: { embeddable: EditPanelActionApi };
+  let context: { embeddable: EditPanelActionApi; returnFocus?: () => void };
   let setViewMode: (viewMode: ViewMode) => void;
 
   beforeEach(() => {
@@ -54,8 +54,11 @@ describe('Edit panel action', () => {
   });
 
   it('calls the onEdit method on execute', async () => {
-    action.execute(context);
-    expect(context.embeddable.onEdit).toHaveBeenCalled();
+    const returnFocus = jest.fn();
+    context.returnFocus = returnFocus;
+
+    await action.execute(context);
+    expect(context.embeddable.onEdit).toHaveBeenCalledWith({ returnFocus });
   });
 
   it('returns an href if one is available', async () => {

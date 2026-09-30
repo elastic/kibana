@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { SecurityServiceStart } from '@kbn/core/server';
 import {
   savedObjectsClientMock,
   elasticsearchServiceMock,
@@ -12,9 +13,20 @@ import {
 } from '@kbn/core/server/mocks';
 import { WatchlistConfigClient } from './watchlist_config';
 import { getIndexForWatchlist } from '../entities/utils';
+import { watchlistEntitySourceTypeName } from '../entity_sources/infra';
 
 jest.mock('../entities/utils', () => ({
   getIndexForWatchlist: jest.fn().mockReturnValue('mock-watchlist-index'),
+}));
+
+const mockInvalidateEntitySourceApiKey = jest.fn();
+jest.mock('../entity_sources/entity_source_api_key', () => ({
+  invalidateEntitySourceApiKey: (...args: unknown[]) => mockInvalidateEntitySourceApiKey(...args),
+}));
+
+const mockCreateOrUpdateIndex = jest.fn();
+jest.mock('../../utils/create_or_update_index', () => ({
+  createOrUpdateIndex: (...args: unknown[]) => mockCreateOrUpdateIndex(...args),
 }));
 
 describe('WatchlistConfigClient', () => {
@@ -45,6 +57,42 @@ describe('WatchlistConfigClient', () => {
     jest.clearAllMocks();
   });
 
+  describe('create', () => {
+    const SO_ID = 'new-watchlist-id';
+    const attrs = { name: 'Test Watchlist', riskModifier: 0 };
+    const savedObjectResult = {
+      id: SO_ID,
+      type: 'watchlist-config',
+      references: [],
+      attributes: attrs,
+    };
+
+    beforeEach(() => {
+      soClientMock.create.mockResolvedValue(savedObjectResult);
+      mockCreateOrUpdateIndex.mockResolvedValue(undefined);
+    });
+
+    it('creates the saved object and index, then returns the watchlist', async () => {
+      const result = await client.create(attrs);
+
+      expect(soClientMock.create).toHaveBeenCalledTimes(1);
+      expect(mockCreateOrUpdateIndex).toHaveBeenCalledTimes(1);
+      expect(result).toMatchObject({ id: SO_ID, name: 'Test Watchlist' });
+    });
+
+    it('deletes the saved object when index creation fails', async () => {
+      const indexError = new Error('Index creation failed');
+      mockCreateOrUpdateIndex.mockRejectedValueOnce(indexError);
+      soClientMock.delete.mockResolvedValue({});
+
+      await expect(client.create(attrs)).rejects.toThrow('Index creation failed');
+
+      expect(soClientMock.delete).toHaveBeenCalledWith('watchlist-config', SO_ID, {
+        refresh: 'wait_for',
+      });
+    });
+  });
+
   describe('getEntityCounts', () => {
     it('should return a map of entity counts for given watchlist IDs', async () => {
       // Mock the ES search response
@@ -52,8 +100,8 @@ describe('WatchlistConfigClient', () => {
         aggregations: {
           watchlist_counts: {
             buckets: [
-              { key: 'watchlist-1', doc_count: 5 },
-              { key: 'watchlist-3', doc_count: 12 },
+              { key: 'watchlist-1', doc_count: 5, manual_entities: { doc_count: 0 } },
+              { key: 'watchlist-3', doc_count: 12, manual_entities: { doc_count: 0 } },
             ],
           },
         },
@@ -82,6 +130,15 @@ describe('WatchlistConfigClient', () => {
             terms: {
               field: 'watchlist.id',
               size: ids.length,
+            },
+            aggs: {
+              manual_entities: {
+                filter: {
+                  term: {
+                    'labels.source_ids': 'manual',
+                  },
+                },
+              },
             },
           },
         },
@@ -119,7 +176,7 @@ describe('WatchlistConfigClient', () => {
         'watchlist-2': 0,
       });
       expect(loggerMock.warn).toHaveBeenCalledWith(
-        'Failed to fetch watchlist entity counts: ES failure'
+        'Failed to fetch watchlist entity metadata: ES failure'
       );
     });
   });
@@ -134,7 +191,7 @@ describe('WatchlistConfigClient', () => {
   });
 
   describe('list', () => {
-    it('should return watchlists enriched with entityCounts', async () => {
+    it('should return watchlists enriched with entity counts and manual assignment state', async () => {
       soClientMock.find.mockResolvedValue({
         saved_objects: [
           {
@@ -157,10 +214,24 @@ describe('WatchlistConfigClient', () => {
         per_page: 20,
       });
 
-      jest.spyOn(client, 'getEntityCounts').mockResolvedValue({
-        'wl-1': 42,
-        'wl-2': 7,
-      });
+      esClientMock.search.mockResolvedValue({
+        aggregations: {
+          watchlist_counts: {
+            buckets: [
+              {
+                key: 'wl-1',
+                doc_count: 42,
+                manual_entities: { doc_count: 2 },
+              },
+              {
+                key: 'wl-2',
+                doc_count: 7,
+                manual_entities: { doc_count: 0 },
+              },
+            ],
+          },
+        },
+      } as unknown as Awaited<ReturnType<typeof esClientMock.search>>);
 
       const result = await client.list();
 
@@ -169,6 +240,7 @@ describe('WatchlistConfigClient', () => {
           id: 'wl-1',
           name: 'Watchlist 1',
           entityCount: 42,
+          hasManualEntities: true,
           createdAt: undefined,
           updatedAt: undefined,
           entitySourceIds: [],
@@ -177,12 +249,39 @@ describe('WatchlistConfigClient', () => {
           id: 'wl-2',
           name: 'Watchlist 2',
           entityCount: 7,
+          hasManualEntities: false,
           createdAt: undefined,
           updatedAt: undefined,
           entitySourceIds: [],
         },
       ]);
-      expect(client.getEntityCounts).toHaveBeenCalledWith(['wl-1', 'wl-2']);
+      expect(esClientMock.search).toHaveBeenCalledWith({
+        index: 'mock-watchlist-index',
+        size: 0,
+        query: {
+          terms: {
+            'watchlist.id': ['wl-1', 'wl-2'],
+          },
+        },
+        aggs: {
+          watchlist_counts: {
+            terms: {
+              field: 'watchlist.id',
+              size: 2,
+            },
+            aggs: {
+              manual_entities: {
+                filter: {
+                  term: {
+                    'labels.source_ids': 'manual',
+                  },
+                },
+              },
+            },
+          },
+        },
+        ignore_unavailable: true,
+      });
     });
 
     it('should not call getEntityCounts if no watchlists are found', async () => {
@@ -224,6 +323,107 @@ describe('WatchlistConfigClient', () => {
         entitySourceIds: [],
       });
       expect(client.getEntityCount).toHaveBeenCalledWith('wl-1');
+    });
+  });
+
+  describe('delete', () => {
+    const WATCHLIST_ID = 'wl-1';
+    const SOURCE_REF = (id: string) => ({
+      name: `entity-source_${id}`,
+      type: watchlistEntitySourceTypeName,
+      id,
+    });
+
+    beforeEach(() => {
+      mockInvalidateEntitySourceApiKey.mockReset().mockResolvedValue(undefined);
+      soClientMock.delete.mockResolvedValue({});
+    });
+
+    it('invalidates API keys for index-type sources with stored keys', async () => {
+      const securityServiceStart = {} as unknown as SecurityServiceStart;
+
+      const clientWithSecurity = new WatchlistConfigClient({
+        soClient: soClientMock,
+        esClient: esClientMock,
+        namespace: 'default',
+        logger: loggerMock,
+        securityServiceStart,
+      });
+
+      soClientMock.get.mockResolvedValue({
+        id: WATCHLIST_ID,
+        type: 'watchlist_config',
+        references: [SOURCE_REF('src-1'), SOURCE_REF('src-2'), SOURCE_REF('src-3')],
+        attributes: {},
+      });
+
+      soClientMock.bulkGet.mockResolvedValue({
+        saved_objects: [
+          {
+            id: 'src-1',
+            type: watchlistEntitySourceTypeName,
+            references: [],
+            attributes: { type: 'index', apiKeyId: 'kid-1' },
+          },
+          {
+            id: 'src-2',
+            type: watchlistEntitySourceTypeName,
+            references: [],
+            attributes: { type: 'index', apiKeyId: 'kid-2' },
+          },
+          {
+            id: 'src-3',
+            type: watchlistEntitySourceTypeName,
+            references: [],
+            attributes: { type: 'store' },
+          },
+        ],
+      });
+
+      await clientWithSecurity.delete(WATCHLIST_ID);
+
+      expect(mockInvalidateEntitySourceApiKey).toHaveBeenCalledTimes(2);
+      expect(mockInvalidateEntitySourceApiKey).toHaveBeenCalledWith(
+        securityServiceStart,
+        'kid-1',
+        loggerMock
+      );
+      expect(mockInvalidateEntitySourceApiKey).toHaveBeenCalledWith(
+        securityServiceStart,
+        'kid-2',
+        loggerMock
+      );
+    });
+
+    it('skips API key invalidation when securityServiceStart is not provided', async () => {
+      soClientMock.get.mockResolvedValue({
+        id: WATCHLIST_ID,
+        type: 'watchlist_config',
+        references: [SOURCE_REF('src-1')],
+        attributes: {},
+      });
+
+      await client.delete(WATCHLIST_ID);
+
+      expect(mockInvalidateEntitySourceApiKey).not.toHaveBeenCalled();
+    });
+
+    it('cascade-deletes all linked entity sources', async () => {
+      soClientMock.get.mockResolvedValue({
+        id: WATCHLIST_ID,
+        type: 'watchlist_config',
+        references: [SOURCE_REF('src-1'), SOURCE_REF('src-2')],
+        attributes: {},
+      });
+
+      await client.delete(WATCHLIST_ID);
+
+      expect(soClientMock.delete).toHaveBeenCalledWith(watchlistEntitySourceTypeName, 'src-1', {
+        refresh: 'wait_for',
+      });
+      expect(soClientMock.delete).toHaveBeenCalledWith(watchlistEntitySourceTypeName, 'src-2', {
+        refresh: 'wait_for',
+      });
     });
   });
 });

@@ -7,15 +7,26 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { fromSavedSearchAttributes, toSavedSearchAttributes } from './saved_searches_utils';
-
+import {
+  fromDiscoverSessionAttributesToSavedSearch,
+  toSavedSearchAttributes,
+} from './saved_searches_utils';
 import { createSearchSourceMock } from '@kbn/data-plugin/public/mocks';
+import { DiscoverTabType } from '@kbn/discover-session-constants';
+import type { DiscoverSessionTabTypeState, SavedSearch } from '../types';
+import type { DiscoverSessionAttributes, DiscoverSessionTab } from '../../server';
 
-import type { SavedSearch, SavedSearchAttributes } from '../types';
-import type { DiscoverSessionTab } from '../../server';
+const metricsTabTypeState: DiscoverSessionTabTypeState = {
+  type: DiscoverTabType.Metrics,
+  dimensions: ['host.name'],
+  searchTerm: 'cpu',
+  counterAggregation: 'max',
+  gaugeAggregation: 'avg',
+  histogramPercentile: 'p99',
+};
 
 describe('saved_searches_utils', () => {
-  describe('fromSavedSearchAttributes', () => {
+  describe('fromDiscoverSessionAttributesToSavedSearch', () => {
     test('should convert attributes into SavedSearch', () => {
       const tabs: DiscoverSessionTab[] = [
         {
@@ -37,33 +48,18 @@ describe('saved_searches_utils', () => {
           },
         },
       ];
-      const attributes: SavedSearchAttributes = {
-        kibanaSavedObjectMeta: { searchSourceJSON: '{}' },
+      const attributes: DiscoverSessionAttributes = {
         title: 'saved search',
-        sort: [],
-        columns: ['a', 'b'],
         description: 'foo',
-        grid: {},
-        hideChart: true,
-        hideTable: false,
-        isTextBasedQuery: false,
-        usesAdHocDataView: false,
-        rowsPerPage: 250,
-        sampleSize: 1000,
-        breakdownField: 'extension.keyword',
-        chartInterval: 'm',
-        controlGroupJson: undefined,
         tabs,
       };
 
       expect(
-        fromSavedSearchAttributes(
+        fromDiscoverSessionAttributesToSavedSearch(
           'id',
           attributes,
           ['tags-1', 'tags-2'],
-          [],
           createSearchSourceMock(),
-          {},
           false
         )
       ).toMatchInlineSnapshot(`
@@ -77,6 +73,7 @@ describe('saved_searches_utils', () => {
           "controlGroupJson": undefined,
           "density": undefined,
           "description": "foo",
+          "documentsDisplayMode": undefined,
           "grid": Object {},
           "headerRowHeight": undefined,
           "hideAggregatedPreview": undefined,
@@ -84,8 +81,9 @@ describe('saved_searches_utils', () => {
           "hideTable": false,
           "id": "id",
           "isTextBasedQuery": false,
+          "jsonModeSettings": undefined,
           "managed": false,
-          "references": Array [],
+          "references": undefined,
           "refreshInterval": undefined,
           "rowHeight": undefined,
           "rowsPerPage": 250,
@@ -114,8 +112,9 @@ describe('saved_searches_utils', () => {
             "requestStartHandlers": Array [],
             "shouldOverwriteDataViewType": false,
           },
-          "sharingSavedObjectProps": Object {},
+          "sharingSavedObjectProps": undefined,
           "sort": Array [],
+          "tabTypeState": undefined,
           "tabs": Array [
             Object {
               "attributes": Object {
@@ -153,6 +152,35 @@ describe('saved_searches_utils', () => {
           "visContext": undefined,
         }
       `);
+    });
+
+    test('should preserve tab type state', () => {
+      const tabs: DiscoverSessionTab[] = [
+        {
+          id: 'tab-1',
+          label: 'Tab 1',
+          attributes: {
+            kibanaSavedObjectMeta: { searchSourceJSON: '{}' },
+            sort: [],
+            columns: [],
+            grid: {},
+            hideChart: false,
+            hideTable: false,
+            isTextBasedQuery: true,
+            tabTypeState: metricsTabTypeState,
+          },
+        },
+      ];
+
+      const savedSearch = fromDiscoverSessionAttributesToSavedSearch(
+        'id',
+        { title: 'saved search', description: '', tabs },
+        undefined,
+        createSearchSourceMock(),
+        false
+      );
+
+      expect(savedSearch.tabTypeState).toEqual(metricsTabTypeState);
     });
   });
 
@@ -207,6 +235,19 @@ describe('saved_searches_utils', () => {
           },
         ],
       });
+    });
+
+    test('should serialize tab type state only inside the synthetic tab', () => {
+      const savedSearch: SavedSearch = {
+        searchSource: createSearchSourceMock(),
+        managed: false,
+        tabTypeState: metricsTabTypeState,
+      };
+
+      const result = toSavedSearchAttributes(savedSearch, '{}');
+
+      expect(result).not.toHaveProperty('tabTypeState');
+      expect(result.tabs[0].attributes.tabTypeState).toEqual(metricsTabTypeState);
     });
   });
 });

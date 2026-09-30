@@ -40,7 +40,7 @@ In addition, it is typically needed to set up a Fleet Server and enroll Elastic 
 Prerequisites:
 
 - Fork the Kibana repository and clone it locally
-- Install the `node` and `yarn` versions required by `.nvmrc`
+- Install the `node` and `pnpm` versions required by `.nvmrc` / `package.json` `engines`
 
 Once that is set up, the high level steps are:
 
@@ -57,7 +57,7 @@ As detailed in [Running Elasticsearch during development](https://www.elastic.co
 To do this, run the following from the Kibana root folder:
 
 ```sh
-yarn es snapshot --license trial
+pnpm es snapshot --license trial
 ```
 
 The `--license trial` flag provides the equivalent of a Platinum license (defaults to Basic).
@@ -74,7 +74,7 @@ Finally, setting up a Fleet Server requires setting the HTTP host to Fleet Serve
 The complete command usually looks like:
 
 ```sh
-yarn es snapshot --license trial -E path.data=../data -E http.host=0.0.0.0
+pnpm es snapshot --license trial -E path.data=../data -E http.host=0.0.0.0
 ```
 
 #### Configure Kibana settings
@@ -114,16 +114,16 @@ You can find these settings along with others required to run a Fleet Server and
 From the Kibana root folder, bootstrap (install dependencies) and run Kibana with:
 
 ```sh
-yarn kbn bootstrap && yarn start
+pnpm kbn bootstrap && pnpm start
 ```
 
 Once the line "Kibana is now availabe" is logged, you can access Kibana in the browser at localhost:5601/your-base-path and log with the default `elastic` username and the password `changeme`.
 
-As a general rule, it is recommended to run `yarn kbn bootstrap` on branch change. Because merges to `main` are frequent, it is a good idea to run `yarn kbn bootstrap && yarn start` instead of just `yarn start` when frequently pulling latest `main`.
+As a general rule, it is recommended to run `pnpm kbn bootstrap` on branch change. Because merges to `main` are frequent, it is a good idea to run `pnpm kbn bootstrap && pnpm start` instead of just `pnpm start` when frequently pulling latest `main`.
 
-If Kibana fails to start after switching branch or pulling the latest, try clearing caches with `yarn kbn clean` before bootstraping again.
+If Kibana fails to start after switching branch or pulling the latest, try clearing caches with `pnpm kbn clean` before bootstraping again.
 
-If you are still encountering errors after `yarn kbn clean`, you can try a more aggressive reset with `yarn kbn reset`.
+If you are still encountering errors after `pnpm kbn clean`, you can try a more aggressive reset with `pnpm kbn reset`.
 
 #### Set up a Fleet Server and enroll Elastic Agents
 
@@ -140,19 +140,19 @@ Note: if you need to do simultaneous Kibana and Fleet Server development, refer 
 Kibana primarily uses Jest for unit testing. Each plugin or package defines a `jest.config.js` that extends a preset provided by the `@kbn/test` package. Unless you intend to run all unit tests within the project, you should provide the Jest configuration for Fleet. The following command runs all Fleet unit tests:
 
 ```sh
-yarn jest --config x-pack/platform/plugins/shared/fleet/jest.config.dev.js
+pnpm exec jest --config x-pack/platform/plugins/shared/fleet/jest.config.dev.js
 ```
 
 You can also run a specific test by passing the filepath as an argument, e.g.:
 
 ```sh
-yarn jest --config x-pack/platform/plugins/shared/fleet/jest.config.dev.js x-pack/platform/plugins/shared/fleet/common/services/validate_package_policy.test.ts
+pnpm exec jest --config x-pack/platform/plugins/shared/fleet/jest.config.dev.js x-pack/platform/plugins/shared/fleet/common/services/validate_package_policy.test.ts
 ```
 
 Or alternatively:
 
 ```sh
-yarn test:jest x-pack/platform/plugins/shared/fleet/common/services/validate_package_policy.test.ts
+pnpm test:jest x-pack/platform/plugins/shared/fleet/common/services/validate_package_policy.test.ts
 ```
 
 #### API integration tests (stateful)
@@ -164,7 +164,7 @@ Note: Docker needs to be running to run these tests.
 1\. In one terminal, run the server from the Kibana root folder with
 
 ```sh
-FLEET_PACKAGE_REGISTRY_PORT=12345 yarn test:ftr:server --config x-pack/platform/test/fleet_api_integration/<configFile>
+FLEET_PACKAGE_REGISTRY_PORT=12345 pnpm test:ftr:server --config x-pack/platform/test/fleet_api_integration/<configFile>
 ```
 
 where `configFile` is the relevant config file relevant from the following:
@@ -178,25 +178,25 @@ where `configFile` is the relevant config file relevant from the following:
 2\. In a second terminal, run the tests from the Kibana root folder with
 
 ```sh
-FLEET_PACKAGE_REGISTRY_PORT=12345 yarn test:ftr:runner --config x-pack/platform/test/fleet_api_integration/<configFile>
+FLEET_PACKAGE_REGISTRY_PORT=12345 pnpm test:ftr:runner --config x-pack/platform/test/fleet_api_integration/<configFile>
 ```
 
 Optionally, you can filter which tests you want to run using `--grep`
 
 ```sh
-FLEET_PACKAGE_REGISTRY_PORT=12345 yarn test:ftr:runner --config x-pack/platform/test/fleet_api_integration/<configFile> --grep='my filter string'
+FLEET_PACKAGE_REGISTRY_PORT=12345 pnpm test:ftr:runner --config x-pack/platform/test/fleet_api_integration/<configFile> --grep='my filter string'
 ```
 
 Note: you can supply which Docker image to use for the Package Registry via the `FLEET_PACKAGE_REGISTRY_DOCKER_IMAGE` env variable. For example,
 
 ```sh
-FLEET_PACKAGE_REGISTRY_DOCKER_IMAGE='docker.elastic.co/package-registry/distribution:production' FLEET_PACKAGE_REGISTRY_PORT=12345 yarn test:ftr:runner
+FLEET_PACKAGE_REGISTRY_DOCKER_IMAGE='docker.elastic.co/package-registry/distribution:production' FLEET_PACKAGE_REGISTRY_PORT=12345 pnpm test:ftr:runner
 ```
 
 You can also speed up the tests execution with the `FLEET_SKIP_RUNNING_PACKAGE_REGISTRY=true` flag, which avoids rerunning the package registry each time. Running the tests the first time will output the Docker command for running the package registry.
 
 ```bash
-FLEET_SKIP_RUNNING_PACKAGE_REGISTRY=true FLEET_PACKAGE_REGISTRY_PORT=12345 yarn test:ftr:runner
+FLEET_SKIP_RUNNING_PACKAGE_REGISTRY=true FLEET_PACKAGE_REGISTRY_PORT=12345 pnpm test:ftr:runner
 ```
 
 #### API integration tests (serverless)
@@ -206,15 +206,15 @@ The process for running serverless API integration tests is similar to above. Se
 Security:
 
 ```sh
-FLEET_PACKAGE_REGISTRY_PORT=12345 yarn test:ftr:server --config x-pack/solutions/security/test/serverless/api_integration/test_suites/fleet/config.ts
-FLEET_PACKAGE_REGISTRY_PORT=12345 yarn test:ftr:runner --config  x-pack/solutions/security/test/serverless/api_integration/test_suites/fleet/config.ts
+FLEET_PACKAGE_REGISTRY_PORT=12345 pnpm test:ftr:server --config x-pack/solutions/security/test/serverless/api_integration/test_suites/fleet/config.ts
+FLEET_PACKAGE_REGISTRY_PORT=12345 pnpm test:ftr:runner --config  x-pack/solutions/security/test/serverless/api_integration/test_suites/fleet/config.ts
 ```
 
 Observability:
 
 ```sh
-FLEET_PACKAGE_REGISTRY_PORT=12345 yarn test:ftr:server --config x-pack/solutions/observability/test/serverless/api_integration/test_suites/fleet/config.ts
-FLEET_PACKAGE_REGISTRY_PORT=12345 yarn test:ftr:runner --config  x-pack/solutions/observability/test/serverless/api_integration/test_suites/fleet/config.ts
+FLEET_PACKAGE_REGISTRY_PORT=12345 pnpm test:ftr:server --config x-pack/solutions/observability/test/serverless/api_integration/test_suites/fleet/config.ts
+FLEET_PACKAGE_REGISTRY_PORT=12345 pnpm test:ftr:runner --config  x-pack/solutions/observability/test/serverless/api_integration/test_suites/fleet/config.ts
 ```
 #### UI Tests
 
@@ -229,7 +229,7 @@ We support UI end to end test with `kbn-scout`
 node scripts/scout.js start-server --arch stateful --domain classic
 
 # Run tests
-npx playwright test --project local --grep stateful-classic --config x-pack/platform/plugins/shared/fleet/test/scout/ui/  --ui
+node scripts/playwright test --project local --grep stateful-classic --config x-pack/platform/plugins/shared/fleet/test/scout/ui/  --ui
 ```
 
 ##### Cypress tests
@@ -274,7 +274,7 @@ Instructions for running the test can be found in the [observability onboarding 
 Fleet contains [Storybook](https://storybook.js.org/) stories for developing UI components in isolation. To start the Storybook environment for Fleet, run the following from your `kibana` project root:
 
 ```sh
-yarn storybook fleet
+pnpm storybook fleet
 ```
 
 Write stories by creating `.stories.tsx` files colocated with the components you're working on. Consult the [Storybook docs](https://storybook.js.org/docs/react/get-started/introduction) for more information.

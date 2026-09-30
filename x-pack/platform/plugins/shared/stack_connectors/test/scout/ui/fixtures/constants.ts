@@ -8,3 +8,8 @@
 export const CONNECTORS_APP_PATH = 'management/insightsAndAlerting/triggersActionsConnectors';
 
 export const TIMEOUT = 10000 as const;
+
+export const CONNECTORS_LIST_SELECTORS = {
+  TABLE_LOADED: '.euiBasicTable[data-test-subj="actionsTable"]',
+  SEARCH_INPUT: '[data-test-subj="actionsList"] .euiFieldSearch',
+} as const;

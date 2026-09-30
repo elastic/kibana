@@ -1,0 +1,29 @@
+{
+  "extends": "@kbn/tsconfig-base/tsconfig.json",
+  "compilerOptions": {
+    "outDir": "target/types"
+  },
+  "include": ["common/**/*", "public/**/*", "scripts/**/*", "server/**/*"],
+  // The scripts/*.js entry points are `require` shims; checking them pulls in @kbn/setup-node-env.
+  "exclude": ["target/**/*", "scripts/*.js"],
+  "kbn_references": [
+    "@kbn/core",
+    "@kbn/dev-cli-errors",
+    "@kbn/dev-cli-runner",
+    "@kbn/config-schema",
+    "@kbn/zod",
+    "@kbn/zod-helpers",
+    "@kbn/std",
+    "@kbn/core-data-streams-server",
+    "@kbn/core-data-streams-server-mocks",
+    "@kbn/core-user-storage-server",
+    "@kbn/core-user-storage-server-mocks",
+    "@kbn/core-user-storage-common",
+    "@kbn/data-streams",
+    "@kbn/es-mappings",
+    "@kbn/task-manager-plugin",
+    "@kbn/core-logging-server-mocks",
+    "@kbn/test",
+    "@kbn/tooling-log"
+  ]
+}

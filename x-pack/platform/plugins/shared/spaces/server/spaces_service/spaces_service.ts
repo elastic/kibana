@@ -5,11 +5,10 @@
  * 2.0.
  */
 
-import type { IBasePath, KibanaRequest } from '@kbn/core/server';
+import type { KibanaRequest } from '@kbn/core/server';
+import { DEFAULT_SPACE_ID, type SpaceId } from '@kbn/core-spaces-common';
 
 import type { Space } from '../../common';
-import { getSpaceIdFromPath } from '../../common';
-import { DEFAULT_SPACE_ID } from '../../common/constants';
 import { namespaceToSpaceId, spaceIdToNamespace } from '../lib/utils/namespace';
 import type { ISpacesClient, SpacesClientServiceStart } from '../spaces_client';
 
@@ -21,7 +20,7 @@ export interface SpacesServiceSetup {
    * Retrieves the space id associated with the provided request.
    * @param request the request.
    */
-  getSpaceId(request: KibanaRequest): string;
+  getSpaceId(request: KibanaRequest): SpaceId;
 
   /**
    * Converts the provided space id into the corresponding Saved Objects `namespace` id.
@@ -50,7 +49,7 @@ export interface SpacesServiceStart {
    * Retrieves the space id associated with the provided request.
    * @param request the request.
    */
-  getSpaceId(request: KibanaRequest): string;
+  getSpaceId(request: KibanaRequest): SpaceId;
 
   /**
    * Indicates if the provided request is executing within the context of the `default` space.
@@ -77,12 +76,7 @@ export interface SpacesServiceStart {
   namespaceToSpaceId(namespace: string | undefined): string;
 }
 
-interface SpacesServiceSetupDeps {
-  basePath: IBasePath;
-}
-
 interface SpacesServiceStartDeps {
-  basePath: IBasePath;
   spacesClientService: SpacesClientServiceStart;
 }
 
@@ -90,32 +84,23 @@ interface SpacesServiceStartDeps {
  * Service for interacting with spaces.
  */
 export class SpacesService {
-  public setup({ basePath }: SpacesServiceSetupDeps): SpacesServiceSetup {
+  public setup(): SpacesServiceSetup {
     return {
-      getSpaceId: (request: KibanaRequest) => {
-        return this.getSpaceId(request, basePath);
-      },
+      getSpaceId: (request: KibanaRequest) => request.spaceId ?? DEFAULT_SPACE_ID,
       spaceIdToNamespace,
       namespaceToSpaceId,
     };
   }
 
-  public start({ basePath, spacesClientService }: SpacesServiceStartDeps): SpacesServiceStart {
+  public start({ spacesClientService }: SpacesServiceStartDeps): SpacesServiceStart {
     return {
-      getSpaceId: (request: KibanaRequest) => {
-        return this.getSpaceId(request, basePath);
-      },
+      getSpaceId: (request: KibanaRequest) => request.spaceId ?? DEFAULT_SPACE_ID,
 
-      getActiveSpace: (request: KibanaRequest) => {
-        const spaceId = this.getSpaceId(request, basePath);
-        return spacesClientService.createSpacesClient(request).get(spaceId);
-      },
+      getActiveSpace: (request: KibanaRequest) =>
+        spacesClientService.createSpacesClient(request).get(request.spaceId ?? DEFAULT_SPACE_ID),
 
-      isInDefaultSpace: (request: KibanaRequest) => {
-        const spaceId = this.getSpaceId(request, basePath);
-
-        return spaceId === DEFAULT_SPACE_ID;
-      },
+      isInDefaultSpace: (request: KibanaRequest) =>
+        (request.spaceId ?? DEFAULT_SPACE_ID) === DEFAULT_SPACE_ID,
 
       createSpacesClient: (request: KibanaRequest) =>
         spacesClientService.createSpacesClient(request),
@@ -126,12 +111,4 @@ export class SpacesService {
   }
 
   public stop() {}
-
-  private getSpaceId(request: KibanaRequest, basePathService: IBasePath) {
-    const basePath = basePathService.get(request);
-
-    const { spaceId } = getSpaceIdFromPath(basePath, basePathService.serverBasePath);
-
-    return spaceId;
-  }
 }

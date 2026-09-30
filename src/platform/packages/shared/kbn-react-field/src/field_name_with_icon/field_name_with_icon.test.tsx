@@ -8,15 +8,21 @@
  */
 
 import React from 'react';
-import { shallow } from 'enzyme';
 import { FieldNameWithIcon } from './field_name_with_icon';
+import { render, screen } from '@testing-library/react';
 
-test('FieldNameWithIcon renders an icon when type is passed', () => {
-  const component = shallow(<FieldNameWithIcon name="agent.name" type="keyword" />);
-  expect(component).toMatchSnapshot();
-});
+describe('FieldNameWithIcon', () => {
+  it('FieldNameWithIcon renders an icon when type is passed', () => {
+    render(<FieldNameWithIcon name="agent.name" type="keyword" />);
 
-test('FieldNameWithIcon renders only the name when the type is not passed', () => {
-  const component = shallow(<FieldNameWithIcon name="agent.name" />);
-  expect(component).toMatchSnapshot();
+    expect(screen.getByText('agent.name')).toBeVisible();
+    expect(screen.getByText('keyword')).toHaveAttribute('data-euiicon-type', 'tokenKeyword');
+  });
+
+  it('FieldNameWithIcon renders only the name when the type is not passed', () => {
+    render(<FieldNameWithIcon name="agent.name" />);
+
+    expect(screen.getByText('agent.name')).toBeVisible();
+    expect(screen.queryByText('keyword')).not.toBeInTheDocument();
+  });
 });

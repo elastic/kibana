@@ -226,18 +226,15 @@ export default ({ getService }: FtrProviderContext): void => {
         );
         const expectedNotes = [
           'This is a cool comment\n\nAdded by elastic.',
-          'Isolated host host-name with comment: comment text\n\nAdded by elastic.',
-          'Released host host-name with comment: comment text\n\nAdded by elastic.',
           `Elastic Alerts attached to the case: 3\n\nFor more details, view the alerts in Kibana\nAlerts URL: https://localhost:5601/app/management/insightsAndAlerting/cases/${patchedCase.id}/?tabId=alerts`,
         ];
 
         /**
          * For each of these comments a request is made:
-         * postCommentUserReq, postCommentActionsReq, postCommentActionsReleaseReq, and a comment with the
-         * total alerts attach to a case. All other type of comments should be filtered. Specifically,
-         * postCommentAlertReq, postCommentAlertMultipleIdsReq, postExternalReferenceESReq, and persistableStateAttachment
+         * postCommentUserReq and a comment with the total alerts attached to a case.
+         * All other type of comments should be filtered.
          */
-        expect(allCommentRequests.length).be(4);
+        expect(allCommentRequests.length).be(2);
 
         // since we're using a bulk create we can't guarantee the ordering so we'll check that the values exist but not
         // there specific order in the results
@@ -518,21 +515,17 @@ export default ({ getService }: FtrProviderContext): void => {
         });
       });
 
-      // FLAKY: https://github.com/elastic/kibana/issues/157588
-      describe.skip('user profile uid', () => {
+      describe('user profile uid', () => {
         let headers: Record<string, string>;
         let superUserWithProfile: User;
-        let superUserInfo: User;
 
         before(async () => {
-          ({ headers, superUserInfo, superUserWithProfile } = await setupSuperUserProfile(
-            getService
-          ));
+          ({ headers, superUserWithProfile } = await setupSuperUserProfile(getService));
         });
 
         it('sets the closed by profile uid in the case and comment', async () => {
           const { postedCase, connector } = await createCaseWithConnector({
-            supertest: supertestWithoutAuth,
+            supertest,
             serviceNowSimulatorURL,
             actionsRemover,
             auth: null,
@@ -563,11 +556,12 @@ export default ({ getService }: FtrProviderContext): void => {
           expect(pushedComment.pushed_by).to.eql(superUserWithProfile);
         });
 
-        it('falls back to authc to get the user information when the profile uid is not available', async () => {
+        it('sets the pushed by profile uid when authenticating without a session', async () => {
           const { postedCase, connector } = await createCaseWithConnector({
-            supertest: supertestWithoutAuth,
+            supertest,
             serviceNowSimulatorURL,
             actionsRemover,
+            auth: { user: superUser, space: null },
           });
 
           const patchedCase = await createComment({
@@ -588,8 +582,8 @@ export default ({ getService }: FtrProviderContext): void => {
             commentId: patchedCase.comments![0].id,
           });
 
-          expect(theCase.external_service?.pushed_by).to.eql(superUserInfo);
-          expect(pushedComment.pushed_by).to.eql(superUserInfo);
+          expect(theCase.external_service?.pushed_by).to.eql(superUserWithProfile);
+          expect(pushedComment.pushed_by).to.eql(superUserWithProfile);
         });
       });
 
