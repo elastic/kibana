@@ -17,7 +17,8 @@ import { TAG_FILTER_ID } from '@kbn/content-list-provider';
 import { getCreateActionPolicyWithAgentTooltipText } from '../../../components/action_policy/create_options/action_policy_create_options_panel';
 import { ActionPoliciesEmptyState } from './action_policies_empty_state';
 import { DeleteActionPolicyConfirmModal } from '../../../components/action_policy/delete_confirmation_modal';
-import { CREATE_ACTION_POLICY_WITH_AGENT_INITIAL_PROMPT, paths } from '../../../constants';
+import { CREATE_ACTION_POLICY_WITH_AGENT_INITIAL_PROMPT } from '../../../constants';
+import { useAlertingLocators } from '../../../application/locator_context';
 import { useBulkActionActionPolicies } from '../../../hooks/use_bulk_action_action_policies';
 import { useCreateActionPolicy } from '../../../hooks/use_create_action_policy';
 import { useDeleteActionPolicy } from '../../../hooks/use_delete_action_policy';
@@ -70,8 +71,7 @@ export const ActionPoliciesTable = () => {
   const [policyToDelete, setPolicyToDelete] = useState<ActionPolicyResponse | null>(null);
   const [policyToUpdateApiKey, setPolicyToUpdateApiKey] = useState<string | null>(null);
 
-  const { navigateToUrl } = useService(CoreStart('application'));
-  const { basePath } = useService(CoreStart('http'));
+  const { actionPolicyLocators } = useAlertingLocators();
   const documentationHref = useService(CoreStart('docLinks')).links.alerting.actionPolicies;
   const canWrite = useService(UserCapabilities).canWrite('actionPolicies');
   const navigateToAgentBuilder = useNavigateToAgentBuilder(
@@ -82,8 +82,8 @@ export const ActionPoliciesTable = () => {
   const createWithAgentTooltipText = getCreateActionPolicyWithAgentTooltipText(abSkillRequirements);
 
   const navigateToCreate = useCallback(() => {
-    navigateToUrl(basePath.prepend(paths.actionPolicyCreate));
-  }, [navigateToUrl, basePath]);
+    actionPolicyLocators.navigateSync({ page: 'create' });
+  }, [actionPolicyLocators]);
 
   const { mutate: createActionPolicy } = useCreateActionPolicy();
   const { mutate: deleteActionPolicy, isLoading: isDeleting } = useDeleteActionPolicy();
@@ -131,8 +131,8 @@ export const ActionPoliciesTable = () => {
   const { mutate: bulkAction, isLoading: isBulkActionInProgress } = useBulkActionActionPolicies();
 
   const navigateToEdit = useCallback(
-    (id: string) => navigateToUrl(basePath.prepend(paths.actionPolicyEdit(id))),
-    [navigateToUrl, basePath]
+    (id: string) => actionPolicyLocators.navigateSync({ page: 'edit', actionPolicyId: id }),
+    [actionPolicyLocators]
   );
 
   const clonePolicy = useCallback(
@@ -239,8 +239,6 @@ export const ActionPoliciesTable = () => {
           canWrite={canWrite}
           onCreatePolicy={navigateToCreate}
           onCreateWithAgent={navigateToAgentBuilder}
-          createWithAgentDisabled={!areAgentBuilderSkillsAvailable}
-          createWithAgentTooltipText={createWithAgentTooltipText}
         />
         <ContentList emptyState={emptyState}>
           <ActionPoliciesTableContent

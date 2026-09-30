@@ -23,6 +23,7 @@ const mockNavigateToUrl = jest.fn();
 const mockAddSuccess = jest.fn();
 const mockAddDanger = jest.fn();
 const mockPrepend = (path: string) => `/base${path}`;
+let mockAlertingV2ExperimentalFeaturesEnabled = true;
 
 jest.mock('../../services/action_policies_api', () => ({
   ActionPoliciesApi: 'ActionPoliciesApi',
@@ -57,6 +58,10 @@ jest.mock('@kbn/core-di-browser', () => ({
       application: mockApplicationService,
       http: mockHttpService,
       notifications: mockNotificationsService,
+      uiSettings: {
+        get: (id: string) =>
+          id === 'alerting:v2:experimentalFeatures' && mockAlertingV2ExperimentalFeaturesEnabled,
+      },
       WorkflowApi: mockWorkflowApiService,
       RulesApi: mockRulesApiService,
       ActionPoliciesApi: mockActionPoliciesApiService,
@@ -75,10 +80,9 @@ const defaultData = {
   name: 'My Policy',
   description: 'A test policy',
   destinations: [{ type: 'workflow' as const, id: 'wf-1' }],
-  matcher: 'rule.id: "abc"',
+  matcher: { tags: ['abc'] },
   groupingMode: 'per_episode' as const,
   throttle: { strategy: 'on_status_change' as const },
-  tags: ['tag1'],
 };
 
 const createAttachment = ({
@@ -139,6 +143,7 @@ describe('ActionPolicyCanvasContent', () => {
     jest.clearAllMocks();
     mockGetWorkflow.mockResolvedValue({ id: 'wf-1', name: 'Test Workflow' });
     mockGetRule.mockResolvedValue({ id: 'abc', name: 'Test Rule' });
+    mockAlertingV2ExperimentalFeaturesEnabled = true;
   });
 
   describe('rendering', () => {
@@ -154,6 +159,14 @@ describe('ActionPolicyCanvasContent', () => {
   });
 
   describe('action buttons for proposed (unsaved) policies', () => {
+    it('hides save actions when Alerting V2 experimental features are disabled', async () => {
+      mockAlertingV2ExperimentalFeaturesEnabled = false;
+
+      const { registerActionButtons } = await renderCanvas();
+
+      expect(getLastRegisteredButtons(registerActionButtons)).toEqual([]);
+    });
+
     it('registers Create policy button', async () => {
       const { registerActionButtons } = await renderCanvas();
       const buttons = getLastRegisteredButtons(registerActionButtons);
@@ -294,17 +307,6 @@ describe('ActionPolicyCanvasContent', () => {
       expect(createButton.disabledReason).toBeDefined();
     });
 
-    it('disables the save button when the matched rule does not exist', async () => {
-      mockGetWorkflow.mockResolvedValue({ id: 'wf-1', name: 'Workflow' });
-      mockGetRule.mockRejectedValue(new Error('Not found'));
-
-      const { registerActionButtons } = await renderCanvas();
-      const buttons = getLastRegisteredButtons(registerActionButtons);
-      const createButton = buttons.find((b) => b.label === 'Create policy')!;
-      expect(createButton.disabled).toBe(true);
-      expect(createButton.disabledReason).toBeDefined();
-    });
-
     it('enables the save button when there are no workflow destinations and no matcher rule', async () => {
       const { registerActionButtons } = await renderCanvas({
         data: { destinations: [], matcher: null },
@@ -329,28 +331,6 @@ describe('ActionPolicyCanvasContent', () => {
       expect(mockGetWorkflow).toHaveBeenCalledWith('wf-1');
       expect(mockGetWorkflow).toHaveBeenCalledWith('wf-2');
       expect(mockGetWorkflow).toHaveBeenCalledTimes(2);
-    });
-
-    it('checks the rule referenced in the matcher via RulesApi.getRule', async () => {
-      await renderCanvas({ data: { matcher: 'rule.id: "my-rule-id"' } });
-
-      expect(mockGetRule).toHaveBeenCalledWith('my-rule-id', expect.any(AbortSignal));
-      expect(mockGetRule).toHaveBeenCalledTimes(1);
-    });
-
-    it('does not check a rule when the matcher has no rule.id clause', async () => {
-      await renderCanvas({ data: { matcher: 'rule.tags: "production"' } });
-
-      expect(mockGetRule).not.toHaveBeenCalled();
-    });
-
-    it('extracts the rule id from the matcher rule.id clause', async () => {
-      await renderCanvas({
-        data: { matcher: 'rule.id: "from-matcher"' },
-      });
-
-      expect(mockGetRule).toHaveBeenCalledWith('from-matcher', expect.any(AbortSignal));
-      expect(mockGetRule).toHaveBeenCalledTimes(1);
     });
   });
 

@@ -9,6 +9,7 @@ import { renderHook } from '@testing-library/react';
 import { ESQLLang, monaco } from '@kbn/code-editor';
 import type { ESQLCallbacks } from '@kbn/esql-types';
 import { useSplitQueryValidation } from './use_split_query_validation';
+import { getModelDependencies } from './esql_editor_messages_registry';
 
 jest.mock('@kbn/code-editor', () => ({
   ESQLLang: {
@@ -31,7 +32,7 @@ const flushDebounce = async () => {
 describe('useSplitQueryValidation', () => {
   const callbacks = {} as ESQLCallbacks;
   let contentListener: () => void;
-  let model: { getValue: jest.Mock; isDisposed: jest.Mock };
+  let model: { getValue: jest.Mock; isDisposed: jest.Mock; uri: { toString: () => string } };
   let editor: { getModel: jest.Mock; onDidChangeModelContent: jest.Mock };
 
   beforeEach(() => {
@@ -41,6 +42,7 @@ describe('useSplitQueryValidation', () => {
     model = {
       getValue: jest.fn(() => '| WHERE cpu > 0.8'),
       isDisposed: jest.fn(() => false),
+      uri: { toString: () => 'model-uri-1' },
     };
     editor = {
       getModel: jest.fn(() => model),
@@ -90,6 +92,56 @@ describe('useSplitQueryValidation', () => {
     expect(markers).toEqual([
       expect.objectContaining({ startLineNumber: 1, endLineNumber: 1, code: undefined }),
     ]);
+  });
+
+  it('publishes fragment-space messages (with code) to the registry for code actions', async () => {
+    jest.mocked(ESQLLang.validate).mockResolvedValue({
+      errors: [
+        {
+          message: 'bad',
+          startLineNumber: 3,
+          endLineNumber: 3,
+          startColumn: 1,
+          endColumn: 5,
+          severity: 8,
+          code: 'invalidUnquotedIdentifier',
+        },
+      ],
+      warnings: [],
+    } as Awaited<ReturnType<typeof ESQLLang.validate>>);
+
+    const { result } = renderHook(() =>
+      useSplitQueryValidation({ baseQuery: 'FROM logs-*\n| STATS c = COUNT()', callbacks })
+    );
+
+    result.current.onEditorMount(editor as unknown as monaco.editor.IStandaloneCodeEditor);
+    await flushDebounce();
+
+    const deps = getModelDependencies(model as unknown as monaco.editor.ITextModel);
+    expect(deps?.getEditorMessages?.()).toEqual({
+      errors: [
+        expect.objectContaining({
+          startLineNumber: 1,
+          endLineNumber: 1,
+          // code is kept on messages (unlike markers) so quick fixes can be resolved.
+          code: 'invalidUnquotedIdentifier',
+        }),
+      ],
+      warnings: [],
+    });
+  });
+
+  it('unregisters its messages from the registry on unmount', async () => {
+    const { result, unmount } = renderHook(() =>
+      useSplitQueryValidation({ baseQuery: '', callbacks })
+    );
+
+    result.current.onEditorMount(editor as unknown as monaco.editor.IStandaloneCodeEditor);
+    await flushDebounce();
+    expect(getModelDependencies(model as unknown as monaco.editor.ITextModel)).toBeDefined();
+
+    unmount();
+    expect(getModelDependencies(model as unknown as monaco.editor.ITextModel)).toBeUndefined();
   });
 
   it('drops markers that fall inside the locked base', async () => {

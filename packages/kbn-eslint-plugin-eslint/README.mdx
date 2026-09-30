@@ -7,8 +7,25 @@ date: 2022-05-17
 tags: ['kibana', 'dev', 'contributor', 'operations', 'eslint', 'plugin']
 ---
 
-An ESLint plugin exposing custom rules used and built specifically for development within Kibana. 
-Next you can find information on each on.
+An ESLint and Oxlint plugin exposing custom rules used and built specifically for development within Kibana. Rules registered in `oxlint_plugin.js` run in Oxlint using its `createOnce` alternative API and are wrapped with `eslintCompatPlugin` so existing ESLint configuration remains compatible. Rules that are only registered in `index.js` run in ESLint only.
+
+Oxlint loads the plugin from `.oxlintrc.json` with the existing rule namespace preserved:
+
+```json
+{
+  "jsPlugins": [
+    { "name": "@kbn/eslint", "specifier": "./packages/kbn-eslint-plugin-eslint/oxlint_plugin.js" }
+  ]
+}
+```
+
+Rule configuration uses the existing `@kbn/eslint/<rule>` names in both linters.
+
+To move a rule to Oxlint:
+
+1. Implement it with `createOnce` and register it in `oxlint_plugin.js`.
+2. Add its test file to `parityTests` in `rules/__fixtures__/run_oxlint_rule_tests.mjs`.
+3. Move its configuration from `.eslintrc.js` to `.oxlintrc.json`.
 
 ## disallow-license-headers
 

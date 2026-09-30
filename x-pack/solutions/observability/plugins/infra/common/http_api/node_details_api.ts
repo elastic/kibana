@@ -7,6 +7,7 @@
 
 import * as rt from 'io-ts';
 import { InventoryTsvbTypeKeysRT, ItemTypeRT } from '@kbn/metrics-data-access-plugin/common';
+import { DataSchemaFormatRT } from './shared/data_schema_format';
 import { InfraTimerangeInputRT } from './snapshot_api';
 
 const NodeDetailsDataPointRT = rt.intersection([
@@ -49,6 +50,7 @@ export const NodeDetailsRequestRT = rt.intersection([
   }),
   rt.partial({
     cloudId: rt.union([rt.string, rt.null]),
+    schema: DataSchemaFormatRT,
   }),
 ]);
 

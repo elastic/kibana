@@ -14,7 +14,7 @@ import { AIChatExperience } from '@kbn/ai-assistant-common';
 import { AI_CHAT_EXPERIENCE_TYPE } from '@kbn/management-settings-ids';
 import { getWorkflowsNavPanel } from '@kbn/deeplinks-workflows';
 import { EVALS_APP_ID } from '@kbn/deeplinks-evals';
-import { STREAMS_SIGNIFICANT_EVENTS_AVAILABLE_FLAG } from '@kbn/significant-events-plugin/common';
+import { NIGHTSHIFT_ENABLED_FLAG } from '@kbn/nightshift-shared';
 import type { Location } from 'history';
 import { NightshiftNavigationIcon } from '@kbn/observability-shared-plugin/public';
 import { ALERTING_V1_ENABLED_SETTING_ID } from '@kbn/alerting-v2-constants';
@@ -294,7 +294,7 @@ function createNavTree({
             },
           ]),
       {
-        icon: 'sparkles',
+        icon: 'tableSparkles',
         link: 'context_engine' as const,
       },
       {
@@ -536,6 +536,9 @@ function createNavTree({
                 link: 'management:data_federation',
               },
               {
+                link: 'management:esql_views',
+              },
+              {
                 link: 'management:data_quality',
               },
             ],
@@ -659,6 +662,9 @@ function createNavTree({
               {
                 link: 'management:role_mappings',
               },
+              {
+                link: 'management:service_accounts',
+              },
             ],
           },
           {
@@ -716,11 +722,6 @@ export const createDefinition = (
   coreStart: CoreStart,
   pluginsStart: ObservabilityPublicPluginsStart
 ): AddSolutionNavigationArg => {
-  const significantEventsAvailable = coreStart.featureFlags.getBooleanValue(
-    STREAMS_SIGNIFICANT_EVENTS_AVAILABLE_FLAG,
-    false
-  );
-
   return {
     id: 'oblt',
     title,
@@ -729,8 +730,9 @@ export const createDefinition = (
       pluginsStart.streams?.navigationStatus$ || of({ status: 'disabled' as const }),
       coreStart.settings.client.get$<AIChatExperience>(AI_CHAT_EXPERIENCE_TYPE),
       pluginsStart.ingestHub?.navigationAvailable$ || of(false),
+      coreStart.featureFlags.getBooleanValue$(NIGHTSHIFT_ENABLED_FLAG, false),
     ]).pipe(
-      map(([{ status }, chatExperience, ingestHubAvailable]) =>
+      map(([{ status }, chatExperience, ingestHubAvailable, significantEventsAvailable]) =>
         createNavTree({
           coreStart,
           significantEventsAvailable,

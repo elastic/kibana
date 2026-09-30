@@ -8,9 +8,11 @@
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import type { ISavedObjectsRepository, Logger } from '@kbn/core/server';
 import type { MitreEntity, MitreListParams } from '@kbn/security-mitre-attack-common';
-import { DEFAULT_MITRE_FRAMEWORK } from '@kbn/security-mitre-attack-common';
-import { MITRE_ATTACK_ENTITY_SO_TYPE } from '../../../saved_objects';
-import { buildSoId } from '../../utils';
+import {
+  DEFAULT_MITRE_FRAMEWORK,
+  MITRE_ATTACK_ENTITY_SO_TYPE,
+  buildSoId,
+} from '@kbn/security-mitre-attack-common';
 import { resolveLatestVersion } from '../resolve_latest_version';
 import { validateMitreEntity } from '../../mitre_entity_validation';
 

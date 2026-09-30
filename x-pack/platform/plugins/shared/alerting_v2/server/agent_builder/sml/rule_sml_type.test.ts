@@ -22,21 +22,18 @@ const baseRuleAttrs: RuleSavedObjectAttributes = {
     name: 'High CPU',
     description: 'CPU breach detection',
     tags: ['ops', 'cpu'],
-    owner: 'observability',
   },
   time_field: '@timestamp',
   schedule: { every: '5m', lookback: '15m' },
-  query: {
-    format: 'standalone',
-    breach: { query: 'FROM metrics-* | STATS avg_cpu = AVG(cpu) BY host.name' },
-  },
-  state_transition: null,
+  query: { base: 'FROM metrics-* | STATS avg_cpu = AVG(cpu) BY host.name' },
+  recovery: { strategy: 'no_breach' },
+  no_data: { strategy: 'ignore' },
   enabled: true,
-  createdBy: 'elastic',
+  createdBy: { profile_uid: 'elastic' },
   createdAt: '2026-04-01T00:00:00.000Z',
-  updatedBy: 'elastic',
+  updatedBy: { profile_uid: 'elastic' },
   updatedAt: '2026-04-10T00:00:00.000Z',
-} as RuleSavedObjectAttributes;
+};
 
 // `getRule` returns the snake_case API response, not the saved object attributes.
 const { createdBy, createdAt, updatedBy, updatedAt, ...restRuleAttrs } = baseRuleAttrs;
@@ -204,7 +201,7 @@ describe('createRuleSmlType', () => {
           'CPU breach detection',
           'alert',
           'ops, cpu',
-          (baseRuleAttrs.query as { breach: { query: string } }).breach.query,
+          baseRuleAttrs.query.base,
         ].join('\n'),
       });
       expect(result).not.toHaveProperty('permissions');
@@ -261,17 +258,26 @@ describe('createRuleSmlType', () => {
     const buildSmlDocument = (overrides: Partial<{ origin_id: string }> = {}) => {
       const originId = overrides.origin_id ?? 'rule-1';
       return {
-        id: 'sml-1',
         type: RULE_KI_TYPE,
         title: 'High CPU',
-        origin_id: originId,
-        origin: { uri: `${RULE_KI_TYPE}://${originId}` },
         content: '',
-        created_at: '2026-04-10T00:00:00.000Z',
-        updated_at: '2026-04-10T00:00:00.000Z',
-        spaces: ['default'],
         permissions: { kibana: { privileges: [] } },
-        ingestion_method: 'crawled' as const,
+        id: 'sml-1',
+        '@timestamp': '2026-04-10T00:00:00.000Z',
+        updated_at: '2026-04-10T00:00:00.000Z',
+        references: [{ uri: `${RULE_KI_TYPE}://${originId}`, relation: 'derived_from' as const }],
+        governance: {
+          provenance: {
+            created_by: {
+              uri: 'crawler://sml',
+              metadata: { ingestion_method: 'crawled' as const },
+            },
+            updated_by: {
+              uri: 'crawler://sml',
+              metadata: { ingestion_method: 'crawled' as const },
+            },
+          },
+        },
       };
     };
 

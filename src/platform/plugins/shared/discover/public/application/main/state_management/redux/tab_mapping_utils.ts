@@ -11,7 +11,7 @@ import type { DataView } from '@kbn/data-views-plugin/common';
 import type { ISearchSource } from '@kbn/data-plugin/common';
 import type { DiscoverSession, DiscoverSessionTab } from '@kbn/saved-search-plugin/common';
 import type { SavedSearch, SortOrder } from '@kbn/saved-search-plugin/public';
-import type { DiscoverTabType } from '@kbn/discover-utils';
+import type { DiscoverTabType } from '@kbn/discover-session-constants';
 import { isOfAggregateQueryType } from '@kbn/es-query';
 import { isObject, isUndefined, omitBy } from 'lodash';
 import { createDataSource } from '../../../../../common/data_sources';
@@ -160,6 +160,7 @@ export const fromSavedObjectTabToSavedSearch = async ({
   jsonModeSettings: tab.jsonModeSettings,
   visContext: tab.visContext, // managed via Redux state now
   controlGroupJson: tab.controlGroupJson, // managed via Redux state now
+  tabTypeState: tab.tabTypeState,
 });
 
 export const fromTabStateToSavedObjectTab = ({
@@ -290,5 +291,6 @@ export const fromSavedSearchToSavedObjectTab = ({
         ? JSON.stringify(tab.attributes.controlGroupState)
         : undefined
       : savedSearch.controlGroupJson,
+    tabTypeState: savedSearch.tabTypeState,
   };
 };

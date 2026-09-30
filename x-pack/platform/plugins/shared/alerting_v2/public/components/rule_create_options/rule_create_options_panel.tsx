@@ -5,13 +5,15 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useMemo } from 'react';
 import {
   EuiCard,
+  EuiBadge,
   EuiFlexGroup,
   EuiFlexItem,
   EuiHorizontalRule,
   EuiIcon,
+  EuiImage,
   EuiPanel,
   EuiSpacer,
   EuiText,
@@ -21,7 +23,16 @@ import {
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import type { AgentBuilderSkillsRequirements } from '../../hooks/use_are_agent_builder_skills_available';
+import type { CreateOptionItem } from '../create_options';
+import { CreateOptionsPanel } from '../create_options';
+import {
+  type AgentBuilderSkillsRequirements,
+  useAreAgentBuilderSkillsAvailable,
+  useAgentBuilderSkillsRequirements,
+} from '../../hooks/use_are_agent_builder_skills_available';
+import { useAlertingV2ExperimentalFeatures } from '../../hooks/use_alerting_v2_experimental_features';
+import { experimentalBadgeLabel } from '../experimental_badge';
+import rulesListEmptyIllustration from '../../assets/illustration-results-128.svg';
 
 export interface LegacyRuleTypeItem {
   id: string;
@@ -34,17 +45,6 @@ interface RuleCreateOptionsPanelProps {
   onCreateEsqlRule: () => void;
   layout?: 'vertical' | 'horizontal';
   onCreateWithAgent: () => void;
-  /**
-   * When `true`, the "With AI Agent" option is rendered disabled (click is a no-op). Independent
-   * of `createWithAgentTooltipText` — a disabled option need not have a tooltip, and a tooltip can be
-   * shown without disabling.
-   */
-  createWithAgentDisabled?: boolean;
-  /**
-   * Optional tooltip text for the "With AI Agent" option (e.g. explaining a missing
-   * prerequisite). Shown on hover/focus regardless of whether the option is disabled.
-   */
-  createWithAgentTooltipText?: string;
   onCreateThresholdRule?: () => void;
   legacyRuleTypes?: LegacyRuleTypeItem[];
 }
@@ -121,11 +121,112 @@ const THRESHOLD_RULE_DESCRIPTION = i18n.translate(
 
 const noop = () => undefined;
 
+const AgentTitleWithBadge = () => (
+  <EuiFlexGroup gutterSize="s" responsive={false}>
+    <EuiFlexItem grow={false}>{AI_AGENT_TITLE}</EuiFlexItem>
+    <EuiFlexItem grow={false}>
+      <EuiBadge color="hollow" data-test-subj="createWithAgentExperimentalBadge">
+        {experimentalBadgeLabel}
+      </EuiBadge>
+    </EuiFlexItem>
+  </EuiFlexGroup>
+);
+
 /** Applied to the EuiCard in the flyout layout when the option is disabled. */
 const flyoutCardDisabledStyle = css({
   cursor: 'not-allowed',
   opacity: 0.5,
 });
+
+/** Rules list empty state — delegates to generic CreateOptionsPanel. */
+const RuleCreateOptionsListEmptyState: React.FC<RuleCreateOptionsPanelProps> = ({
+  onCreateEsqlRule,
+  onCreateWithAgent,
+  onCreateThresholdRule,
+}) => {
+  const areAgentBuilderSkillsAvailable = useAreAgentBuilderSkillsAvailable();
+  const showCreateWithAgent = useAlertingV2ExperimentalFeatures();
+  const createWithAgentTooltipText = getCreateWithAgentTooltipText(
+    useAgentBuilderSkillsRequirements()
+  );
+  const primaryItems = useMemo<CreateOptionItem[]>(
+    () => [
+      {
+        id: 'create-esql-rule',
+        iconType: 'productDiscover',
+        title: ESQL_RULE_TITLE,
+        description: ESQL_RULE_DESCRIPTION,
+        onClick: onCreateEsqlRule,
+        'data-test-subj': 'createEsqlRuleCard',
+      },
+      ...(showCreateWithAgent
+        ? [
+            {
+              id: 'create-with-agent',
+              iconType: 'productAgent',
+              title: <AgentTitleWithBadge />,
+              description: AI_AGENT_DESCRIPTION,
+              onClick: onCreateWithAgent,
+              disabled: !areAgentBuilderSkillsAvailable,
+              tooltipText: createWithAgentTooltipText,
+              'data-test-subj': 'createWithAgentCard',
+            },
+          ]
+        : []),
+    ],
+    [
+      onCreateEsqlRule,
+      onCreateWithAgent,
+      areAgentBuilderSkillsAvailable,
+      createWithAgentTooltipText,
+      showCreateWithAgent,
+    ]
+  );
+
+  const secondaryItems = useMemo<CreateOptionItem[]>(
+    () => [
+      {
+        id: 'create-threshold-rule',
+        iconType: 'chartThreshold',
+        title: THRESHOLD_RULE_TITLE,
+        description: THRESHOLD_RULE_DESCRIPTION,
+        onClick: onCreateThresholdRule ?? noop,
+        'data-test-subj': 'createThresholdRuleCard',
+      },
+    ],
+    [onCreateThresholdRule]
+  );
+
+  return (
+    <CreateOptionsPanel
+      title={
+        <h2>
+          <FormattedMessage
+            id="xpack.alertingV2.ruleCreateOptionsPanel.emptyStateTitle"
+            defaultMessage="No rules yet. Let's get started!"
+          />
+        </h2>
+      }
+      icon={
+        <EuiImage
+          size="fullWidth"
+          src={rulesListEmptyIllustration}
+          alt=""
+          data-test-subj="rulesListEmptyIllustration"
+        />
+      }
+      items={primaryItems}
+      secondaryItems={secondaryItems}
+      secondaryLabel={
+        <FormattedMessage
+          id="xpack.alertingV2.ruleCreateOptionsPanel.orStartFromBuilderLabel"
+          defaultMessage="or start from a builder"
+        />
+      }
+      data-test-subj="ruleCreateOptionsPanel"
+    />
+  );
+};
 
 const RuleBuilderSectionDivider: React.FC = () => (
   <>
@@ -197,12 +298,15 @@ const LegacyRuleTypesSection: React.FC<{ items: LegacyRuleTypeItem[] }> = ({ ite
 const RuleCreateOptionsFlyoutPanel: React.FC<RuleCreateOptionsPanelProps> = ({
   onCreateEsqlRule,
   onCreateWithAgent,
-  createWithAgentDisabled,
-  createWithAgentTooltipText,
   onCreateThresholdRule,
   legacyRuleTypes,
 }) => {
-  const isAgentDisabled = createWithAgentDisabled === true;
+  const areAgentBuilderSkillsAvailable = useAreAgentBuilderSkillsAvailable();
+  const showCreateWithAgent = useAlertingV2ExperimentalFeatures();
+  const createWithAgentTooltipText = getCreateWithAgentTooltipText(
+    useAgentBuilderSkillsRequirements()
+  );
+  const isAgentDisabled = !areAgentBuilderSkillsAvailable;
   const hasAgentTooltip = createWithAgentTooltipText !== undefined;
   const agentCard = (
     <EuiCard
@@ -213,7 +317,7 @@ const RuleCreateOptionsFlyoutPanel: React.FC<RuleCreateOptionsPanelProps> = ({
       hasBorder={true}
       aria-disabled={isAgentDisabled || undefined}
       css={isAgentDisabled ? flyoutCardDisabledStyle : undefined}
-      title={AI_AGENT_TITLE}
+      title={<AgentTitleWithBadge />}
       description={AI_AGENT_DESCRIPTION}
       onClick={isAgentDisabled ? noop : onCreateWithAgent}
       icon={<EuiIcon type="productAgent" color="text" size="l" aria-hidden={true} />}
@@ -238,15 +342,17 @@ const RuleCreateOptionsFlyoutPanel: React.FC<RuleCreateOptionsPanelProps> = ({
             data-test-subj="createEsqlRuleCard"
           />
         </EuiFlexItem>
-        <EuiFlexItem>
-          {hasAgentTooltip ? (
-            <EuiToolTip content={createWithAgentTooltipText} display="block">
-              {agentCard}
-            </EuiToolTip>
-          ) : (
-            agentCard
-          )}
-        </EuiFlexItem>
+        {showCreateWithAgent && (
+          <EuiFlexItem>
+            {hasAgentTooltip ? (
+              <EuiToolTip content={createWithAgentTooltipText} display="block">
+                {agentCard}
+              </EuiToolTip>
+            ) : (
+              agentCard
+            )}
+          </EuiFlexItem>
+        )}
       </EuiFlexGroup>
       <RuleBuilderSectionDivider />
       <EuiCard
@@ -266,5 +372,12 @@ const RuleCreateOptionsFlyoutPanel: React.FC<RuleCreateOptionsPanelProps> = ({
 };
 
 export const RuleCreateOptionsPanel: React.FC<RuleCreateOptionsPanelProps> = (props) => {
+  const { layout = 'horizontal' } = props;
+  const isVerticalLayout = layout === 'vertical';
+
+  if (!isVerticalLayout) {
+    return <RuleCreateOptionsListEmptyState {...props} />;
+  }
+
   return <RuleCreateOptionsFlyoutPanel {...props} />;
 };

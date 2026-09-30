@@ -230,6 +230,21 @@ describe('Navigation Tree', () => {
     ]);
   });
 
+  it('includes Rules under Admin and Settings > Alerts and insights', () => {
+    const adminSettingsNode = getAdminSettingsNode({ core });
+    const alertsSection = adminSettingsNode.children?.find(
+      (item) => item.id === 'alerts_and_insights'
+    );
+    const alertsLinks = alertsSection?.children?.map((item) => item.link) ?? [];
+
+    expect(alertsLinks).toEqual(
+      expect.arrayContaining([
+        'management:triggersActionsAlerts',
+        'management:triggersActionsConnectors',
+      ])
+    );
+  });
+
   it('includes Data Federation under Data management > Indices and data streams', () => {
     const { footer } = createNavigationTree({ core }) as NavigationTreeDefinition;
     const dataManagement = footer?.find((item: any) => item.title === 'Data management');

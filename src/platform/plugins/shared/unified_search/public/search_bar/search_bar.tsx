@@ -153,6 +153,11 @@ export interface SearchBarOwnProps<QT extends AggregateQuery | Query = Query> {
    * Disables all inputs and interactive elements,
    */
   isDisabled?: boolean;
+  /**
+   * Disables only the submit / Search button, unlike `isDisabled` which
+   * greys out the entire query bar.
+   */
+  disableSubmitAction?: boolean;
 
   submitOnBlur?: boolean;
 
@@ -509,13 +514,16 @@ export class SearchBarUI<QT extends (Query | AggregateQuery) | Query = Query> ex
       return;
     }
 
-    let source: QuerySource.SEARCH_BUTTON | QuerySource.TIME_FILTER;
+    let source: QuerySource.SEARCH_BUTTON | QuerySource.TIME_FILTER | QuerySource.QUICK_SEARCH;
     switch (trigger) {
       case QuerySubmitTrigger.QUERY_BAR_SUBMIT:
         source = QuerySource.SEARCH_BUTTON;
         break;
       case QuerySubmitTrigger.TIME_FILTER:
         source = QuerySource.TIME_FILTER;
+        break;
+      case QuerySubmitTrigger.QUICK_SEARCH:
+        source = QuerySource.QUICK_SEARCH;
         break;
       default:
         return;
@@ -799,6 +807,7 @@ export class SearchBarUI<QT extends (Query | AggregateQuery) | Query = Query> ex
           showQueryInput={this.props.showQueryInput}
           showAddFilter={this.props.showFilterBar}
           isDisabled={this.props.isDisabled}
+          disableSubmitAction={this.props.disableSubmitAction}
           onRefresh={this.props.onRefresh}
           onRefreshChange={this.props.onRefreshChange}
           onCancel={this.props.onCancel}

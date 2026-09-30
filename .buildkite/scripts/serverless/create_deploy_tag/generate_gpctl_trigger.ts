@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { buildkite } from './shared';
-import { getSelectedCommitHash } from './info_sections/commit_info';
+import { buildkite } from './shared.ts';
+import { getSelectedCommitHash } from './info_sections/commit_info.ts';
 import type { BuildkiteTriggerStep } from '#pipeline-utils';
 
 const IS_DRY_RUN = process.env.DRY_RUN?.match(/(1|true)/i);

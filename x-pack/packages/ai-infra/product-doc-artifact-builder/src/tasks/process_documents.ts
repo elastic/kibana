@@ -37,10 +37,11 @@ const EMPTY_DOC_TOKEN_LIMIT = 120;
 
 /**
  * Filter "this content has moved" or "deleted pages" type of documents, just based on token count.
+ * Allow special tokens (e.g. `<|endoftext|>` in LLM docs) so token counting does not abort the build.
  */
 const filterEmptyDocs = (documents: ExtractedDocument[]): ExtractedDocument[] => {
   return documents.filter((doc) => {
-    const tokenCount = encode(doc.content_body).length;
+    const tokenCount = encode(doc.content_body, { allowedSpecial: 'all' }).length;
     if (tokenCount < EMPTY_DOC_TOKEN_LIMIT) {
       return false;
     }

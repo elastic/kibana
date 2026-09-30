@@ -298,17 +298,14 @@ export default function (program) {
         'Prevents setting default values for `elasticsearch.username` and `elasticsearch.password` in --dev mode'
       )
       .option(
-        '--extended-stack-trace',
-        'Collect more complete stack traces. See src/cli/dev.js for explanation.'
-      )
-      .option(
         '--no-uiam',
         'Prevents configuring Kibana with Universal Identity and Access Management (UIAM) support when running in serverless project mode.'
       )
       .option(
         '--eis',
         'Auto-discover EIS inference endpoints and configure preconfigured connectors (requires ES running with --eis). ' +
-          'Override ES credentials via KBN_EIS_ES_USERNAME (default: elastic) and KBN_EIS_ES_PASSWORD (default: changeme).'
+          'Override ES connection via KBN_EIS_ES_HOST, KBN_EIS_ES_USERNAME, and KBN_EIS_ES_PASSWORD. ' +
+          'In serverless mode, defaults to https://localhost:9200 as elastic_serverless/changeme.'
       );
   }
 
@@ -339,7 +336,7 @@ export default function (program) {
       runExamples: !!opts.runExamples,
       // We want to run without base path when the `--run-examples` flag is given so that we can use local
       // links in other documentation sources, like "View this tutorial [here](http://localhost:5601/app/tutorial/xyz)".
-      // We can tell users they only have to run with `yarn start --run-examples` to get those
+      // We can tell users they only have to run with `pnpm start --run-examples` to get those
       // local links to work.  Similar to what we do for "View in Console" links in our
       // elastic.co links.
       // Serverless Kibana does not support a custom `server.basePath`, so we also disable the

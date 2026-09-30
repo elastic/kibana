@@ -13,7 +13,7 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useBoolean } from '@kbn/react-hooks';
 import { UserCapabilities } from '../../services/user_capabilities';
-import { RULES_CONTENT_LIST_ID, paths } from '../../constants';
+import { RULES_CONTENT_LIST_ID } from '../../constants';
 import { useBreadcrumbs } from '../../hooks/use_breadcrumbs';
 import { useComposeDiscoverFlyout } from '../../hooks/use_compose_discover_flyout';
 import { useCreateFromTemplateQuery } from '../../hooks/use_create_from_template_query';
@@ -24,6 +24,7 @@ import {
 import { useNavigateToAgentBuilder } from '../../hooks/use_navigate_to_agent_builder';
 import { getCreateWithAgentTooltipText } from '../../components/rule_create_options/rule_create_options_panel';
 import { RuleCreateOptionsFlyout } from '../../components/rule_create_options/rule_create_options_flyout';
+import { useAlertingLocators } from '../../application/locator_context';
 import {
   KindFilter,
   RULES_LIST_FEATURES_FIELDS,
@@ -72,12 +73,11 @@ export const RulesListPage = () => {
   const navigateToAgentBuilder = useNavigateToAgentBuilder();
   const areAgentBuilderSkillsAvailable = useAreAgentBuilderSkillsAvailable();
   const abSkillRequirements = useAgentBuilderSkillsRequirements();
-  const { navigateToUrl } = useService(CoreStart('application'));
-  const basePath = useService(CoreStart('http')).basePath;
   const documentationHref = useService(CoreStart('docLinks')).links.alerting.guide;
+  const { rulesLocators } = useAlertingLocators();
   const navigateToSequenceBuilder = useCallback(() => {
-    navigateToUrl(basePath.prepend(paths.sequenceRuleCreate));
-  }, [navigateToUrl, basePath]);
+    rulesLocators.navigateSync({ page: 'sequence_create' });
+  }, [rulesLocators]);
   // We always render the "Create with agent" entry points; when the skill is unavailable they
   // are shown disabled with a tooltip naming the missing prerequisite rather than hidden.
   const createWithAgentTooltipText = getCreateWithAgentTooltipText(abSkillRequirements);
@@ -186,8 +186,6 @@ export const RulesListPage = () => {
           onCreateEsqlRule={openCreateFlyout}
           onCreateWithAgent={navigateToAgentBuilder}
           onBuildSequence={navigateToSequenceBuilder}
-          createWithAgentDisabled={!areAgentBuilderSkillsAvailable}
-          createWithAgentTooltipText={createWithAgentTooltipText}
         />
         <EsqlRulesIntroBanner />
         <ContentList emptyState={emptyState} data-test-subj="rulesList">

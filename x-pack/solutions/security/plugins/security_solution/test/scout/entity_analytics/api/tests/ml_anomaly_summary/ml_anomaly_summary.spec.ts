@@ -135,12 +135,10 @@ apiTest.describe(
 
       // The pad-ml module registers asynchronously after the PAD integration install, so retry
       // until it is recognized instead of firing a setup that fails silently before it exists.
-      // NOTE: job/datafeed *creation* succeeding here is not sufficient — see
-      // `waitForDatafeedReady` below for why we still have to wait after this returns.
       const setupMlModuleWithRetry = async (
         module: string,
         body: Record<string, unknown>
-      ): Promise<{ jobIds: string[]; datafeedIds: string[] }> => {
+      ): Promise<void> => {
         const maxAttempts = 10;
         for (let attempt = 1; attempt <= maxAttempts; attempt++) {
           const response = await apiClient.post(`/internal/ml/modules/setup/${module}`, {
@@ -148,22 +146,14 @@ apiTest.describe(
             responseType: 'json',
             body,
           });
-          const jobs: Array<{ id?: string; success?: boolean; error?: { status?: number } }> =
+          const jobs: Array<{ success?: boolean; error?: { status?: number } }> =
             response.body?.jobs ?? [];
-          const datafeeds: Array<{ id?: string; success?: boolean; error?: { status?: number } }> =
-            response.body?.datafeeds ?? [];
-
-          const jobsCreated =
-            jobs.length > 0 && jobs.every((job) => job.success || (job.error?.status ?? 500) < 500);
-          const datafeedsCreated =
-            datafeeds.length > 0 &&
-            datafeeds.every((df) => df.success || (df.error?.status ?? 500) < 500);
-
-          if (response.statusCode === 200 && jobsCreated && datafeedsCreated) {
-            return {
-              jobIds: jobs.map((job) => job.id).filter((id): id is string => Boolean(id)),
-              datafeedIds: datafeeds.map((df) => df.id).filter((id): id is string => Boolean(id)),
-            };
+          const succeeded =
+            response.statusCode === 200 &&
+            jobs.length > 0 &&
+            jobs.every((job) => job.success || (job.error?.status ?? 500) < 500);
+          if (succeeded) {
+            return;
           }
           if (attempt < maxAttempts) {
             await setTimeoutAsync(3000);
@@ -172,70 +162,9 @@ apiTest.describe(
         throw new Error(`Failed to set up ML module "${module}" after ${maxAttempts} attempts`);
       };
 
-      // Job/datafeed *creation* succeeding (checked above) does not mean the datafeed is
-      // actually running. Elasticsearch can accept the start request while ML compute is
-      // still scaling up from zero — normal on a project without a currently-running ML
-      // node, which is exactly the state a serverless project's ML tier starts in (ML node
-      // autoscaling is always-on there; see
-      // https://www.elastic.co/docs/explore-analyze/machine-learning/anomaly-detection/anomaly-detection-scale).
-      // Until the datafeed is actually assigned, the job's live `datafeed_config` (what
-      // get_job_config.ts reads to build `sourceIndex` for baseline enrichment) stays empty,
-      // and enrichment silently returns the anomaly unenriched — no error, just
-      // `baselineValues: []`. Re-posting module setup doesn't help at that point (starting an
-      // already-started datafeed 409s), so poll the live job/datafeed state directly instead
-      // of trusting the setup response alone.
-      const waitForDatafeedReady = async (
-        jobIds: string[],
-        datafeedIds: string[]
-      ): Promise<void> => {
-        const maxAttempts = 30;
-        for (let attempt = 1; attempt <= maxAttempts; attempt++) {
-          const jobsRes = await esClient.ml.getJobs({ job_id: jobIds.join(',') });
-          const jobsById = new Map((jobsRes.jobs ?? []).map((job) => [job.job_id, job]));
-          const notReady = jobIds.filter(
-            (id) => (jobsById.get(id)?.datafeed_config?.indices ?? []).length === 0
-          );
-
-          if (notReady.length === 0) {
-            return;
-          }
-
-          // DIAGNOSTIC: log the live datafeed state/assignment on every attempt, so a future
-          // MKI failure shows exactly what ML is doing instead of a bare
-          // `datafeed_config: undefined`.
-          try {
-            const statsRes = await esClient.ml.getDatafeedStats({
-              datafeed_id: datafeedIds.join(','),
-            });
-            log.info(
-              `Waiting for ML datafeed allocation (attempt ${attempt}/${maxAttempts}, ` +
-                `not ready: ${notReady.join(', ')}): ` +
-                `${JSON.stringify(
-                  (statsRes.datafeeds ?? []).map((df) => ({
-                    datafeed_id: df.datafeed_id,
-                    state: df.state,
-                    // Not populated on Elastic Cloud Serverless, but useful on stateful.
-                    node: df.node?.name,
-                    assignment_explanation: df.assignment_explanation,
-                  }))
-                )}`
-            );
-          } catch (err) {
-            log.debug(`[DIAG] Failed to fetch datafeed stats while waiting: ${err}`);
-          }
-
-          if (attempt < maxAttempts) {
-            await setTimeoutAsync(5000);
-          }
-        }
-        throw new Error(
-          `ML job(s) ${jobIds.join(', ')} did not receive an assigned datafeed_config in time`
-        );
-      };
-
       // Create PAD ML jobs
       log.debug(`Setting up PAD ML jobs...`);
-      const padSetup = await setupMlModuleWithRetry('pad-ml', {
+      await setupMlModuleWithRetry('pad-ml', {
         prefix: '',
         groups: ['security', 'ftr'],
         indexPatternName: 'logs-*',
@@ -243,46 +172,10 @@ apiTest.describe(
         startDatafeed: true,
         start: startMs,
       });
-      await waitForDatafeedReady(padSetup.jobIds, padSetup.datafeedIds);
-
-      // DIAGNOSTIC (theory 1): verify the PAD ML job was created with a non-empty config.
-      // `waitForDatafeedReady` above already guarantees `datafeed_config` is populated by
-      // this point — if this ever logs "missing entirely" or an empty `indices` again, the
-      // wait itself (not just this one-off check) has a gap worth investigating.
-      try {
-        const padJobRes = await esClient.ml.getJobs({
-          job_id: 'pad_windows_rare_region_name_by_user_ea',
-        });
-        const padJob = padJobRes.jobs?.[0];
-        if (!padJob) {
-          log.info(`[DIAG] PAD job not found — job config is missing entirely`);
-        } else {
-          const analysisConfig = padJob.analysis_config;
-          const detectorCount = analysisConfig?.detectors?.length ?? 0;
-          log.info(
-            `[DIAG] PAD job config: detectors=${detectorCount}, ` +
-              `analysisConfig=${JSON.stringify(analysisConfig)}`
-          );
-          if (detectorCount === 0) {
-            log.info(
-              `[DIAG] WARNING: PAD job analysis_config.detectors is empty — theory 1 confirmed`
-            );
-          }
-          // Log the datafeed query so we can see exactly which events it includes.
-          // If the datafeed excludes event codes 4672/4673 (privilege events), the
-          // New York baseline events would not be found, producing baselineValues=[].
-          log.info(
-            `[DIAG] PAD datafeed: indices=${JSON.stringify(padJob.datafeed_config?.indices)}, ` +
-              `query=${JSON.stringify(padJob.datafeed_config?.query)}`
-          );
-        }
-      } catch (err) {
-        log.info(`[DIAG] Failed to fetch PAD job config: ${err}`);
-      }
 
       // Create Security: Authentication ML jobs
       log.debug(`Setting up Security: Authentication ML jobs...`);
-      const authSetup = await setupMlModuleWithRetry('security_auth', {
+      await setupMlModuleWithRetry('security_auth', {
         prefix: '',
         groups: ['security', 'authentication', 'ftr'],
         indexPatternName: 'logs-*',
@@ -290,7 +183,6 @@ apiTest.describe(
         startDatafeed: true,
         start: startMs,
       });
-      await waitForDatafeedReady(authSetup.jobIds, authSetup.datafeedIds);
 
       // Index source events that determine baseline behavior for the rare detector.
       log.debug(`Indexing test source events...`);
@@ -302,73 +194,6 @@ apiTest.describe(
         ]),
         refresh: true,
       });
-
-      // DIAGNOSTIC (theory 2): verify the source index mappings applied the right types for
-      // the fields the PAD rare detector queries.  If dynamic mapping mapped
-      // source.geo.region_name or user.name as non-keyword the baseline lookup will
-      // return nothing and baselineValues will be empty.
-      try {
-        const mappingRes = await esClient.indices.getMapping({ index: SOURCE_EVENTS_INDEX });
-        const indexNames = Object.keys(mappingRes);
-        for (const indexName of indexNames) {
-          const props = (mappingRes[indexName]?.mappings?.properties ?? {}) as Record<
-            string,
-            unknown
-          >;
-          const sourceGeo = (props.source as Record<string, unknown> | undefined)?.properties as
-            | Record<string, unknown>
-            | undefined;
-          const regionNameMapping = (sourceGeo?.geo as Record<string, unknown> | undefined)
-            ?.properties as Record<string, unknown> | undefined;
-          const regionNameType = (
-            regionNameMapping?.region_name as Record<string, unknown> | undefined
-          )?.type;
-          const userProps = (props.user as Record<string, unknown> | undefined)?.properties as
-            | Record<string, unknown>
-            | undefined;
-          const userNameType = (userProps?.name as Record<string, unknown> | undefined)?.type;
-          log.info(
-            `[DIAG] ${indexName} mappings: source.geo.region_name.type=${regionNameType}, user.name.type=${userNameType}`
-          );
-          if (regionNameType !== 'keyword' && regionNameType !== undefined) {
-            log.info(
-              `[DIAG] WARNING: source.geo.region_name mapped as "${regionNameType}" not keyword — theory 2 confirmed`
-            );
-          }
-        }
-      } catch (err) {
-        log.info(`[DIAG] Failed to fetch source index mappings: ${err}`);
-      }
-
-      // DIAGNOSTIC (theory 2 continued): confirm the source events were actually indexed with
-      // the expected geo data so we can tell mapping issues apart from indexing failures.
-      try {
-        const searchRes = await esClient.search({
-          index: SOURCE_EVENTS_INDEX,
-          query: {
-            bool: {
-              must: [
-                { term: { 'user.name': 'carol.davis' } },
-                { exists: { field: 'source.geo.region_name' } },
-              ],
-            },
-          },
-          _source: ['user.name', 'source.geo.region_name', '@timestamp'],
-          size: 10,
-        });
-        const hits = searchRes.hits?.hits ?? [];
-        log.info(
-          `[DIAG] Source events for carol.davis with source.geo.region_name: count=${hits.length}, ` +
-            `docs=${JSON.stringify(hits.map((h) => h._source))}`
-        );
-        if (hits.length === 0) {
-          log.info(
-            `[DIAG] WARNING: no carol.davis source events with geo region found — baseline enrichment will return empty`
-          );
-        }
-      } catch (err) {
-        log.info(`[DIAG] Failed to search source events: ${err}`);
-      }
 
       // Index anomaly records for the test entities.
       log.debug(`Indexing test anomaly records...`);
@@ -619,7 +444,11 @@ apiTest.describe(
 
     apiTest(
       'Anomaly summary API: enriches anomalies with baseline values from source index',
-      async ({ apiClient, log }) => {
+      async ({ apiClient, log, config }) => {
+        apiTest.skip(
+          config.isCloud && config.serverless,
+          'Skipped on serverless MKI — ML datafeed setup is not properly supported'
+        );
         const response = await apiClient.post(buildUrl(CAROL_EUID, 'user'), {
           headers: { ...defaultHeaders, ...INTERNAL_API_HEADERS },
           responseType: 'json',

@@ -11,9 +11,10 @@ import userEvent from '@testing-library/user-event';
 import type { ActionPolicyResponse } from '@kbn/alerting-v2-schemas';
 import { APP_HEADER_TEST_SUBJECTS } from '@kbn/app-header';
 import { CREATE_ACTION_POLICY_WITH_AGENT_INITIAL_PROMPT } from '../../../constants';
-import { ListPageTestProviders } from '../../../test_utils/test_providers';
+import { createMockLocators, ListPageTestProviders } from '../../../test_utils/test_providers';
 import { ActionPoliciesTable } from './action_policies_table';
 
+const mockLocators = createMockLocators();
 const mockNavigateToUrl = jest.fn();
 const mockNavigateToApp = jest.fn();
 const mockGetUrlForApp = jest.fn();
@@ -33,6 +34,12 @@ const READ_ONLY_CAPABILITIES = { alerting_v2_action_policies: { read: true, all:
 let mockCapabilities: Record<string, Record<string, boolean>> = WRITE_CAPABILITIES;
 let mockAgentBuilderShow = true;
 let mockExperimentalFeaturesEnabled = true;
+let mockAlertingV2ExperimentalFeaturesEnabled = true;
+let mockIsLicenseValid = true;
+
+jest.mock('../../../hooks/use_is_action_policies_license_valid', () => ({
+  useIsActionPoliciesLicenseValid: () => mockIsLicenseValid,
+}));
 
 jest.mock('@kbn/core-di-browser', () => {
   const { UserCapabilities: ActualUserCapabilities } = jest.requireActual(
@@ -67,11 +74,22 @@ jest.mock('@kbn/core-di-browser', () => {
           get: (id: string) =>
             id === 'agentBuilder:experimentalFeatures'
               ? mockExperimentalFeaturesEnabled
+              : id === 'alerting:v2:experimentalFeatures'
+              ? mockAlertingV2ExperimentalFeaturesEnabled
               : undefined,
         };
       }
       if (token === 'userProfile') {
         return { bulkGet: mockBulkGet };
+      }
+      if (token === 'docLinks') {
+        return {
+          links: {
+            alerting: {
+              actionPolicies: 'https://docs.test/action-policies',
+            },
+          },
+        };
       }
       return {};
     },
@@ -196,7 +214,7 @@ const createPolicy = (overrides: Partial<ActionPolicyResponse> = {}): ActionPoli
 
 const renderTable = () =>
   render(
-    <ListPageTestProviders>
+    <ListPageTestProviders locators={mockLocators}>
       <ActionPoliciesTable />
     </ListPageTestProviders>
   );
@@ -207,6 +225,8 @@ describe('ActionPoliciesTable', () => {
     mockCapabilities = WRITE_CAPABILITIES;
     mockAgentBuilderShow = true;
     mockExperimentalFeaturesEnabled = true;
+    mockAlertingV2ExperimentalFeaturesEnabled = true;
+    mockIsLicenseValid = true;
     mockTagNames = [];
 
     mockBulkGet.mockResolvedValue([]);
@@ -257,9 +277,7 @@ describe('ActionPoliciesTable', () => {
     await waitFor(() => expect(screen.getByTestId('createActionPolicyButton')).toBeInTheDocument());
     await user.click(screen.getByTestId('createActionPolicyButton'));
 
-    expect(mockNavigateToUrl).toHaveBeenCalledWith(
-      '/app/management/alertingV2/action_policies/create'
-    );
+    expect(mockLocators.actionPolicyLocators.navigateSync).toHaveBeenCalledWith({ page: 'create' });
   });
 
   it('opens agent chat from the header create split button', async () => {
@@ -703,9 +721,9 @@ describe('ActionPoliciesTable', () => {
       );
       await user.click(screen.getByTestId('actionPoliciesEmptyStateCreateButton'));
 
-      expect(mockNavigateToUrl).toHaveBeenCalledWith(
-        '/app/management/alertingV2/action_policies/create'
-      );
+      expect(mockLocators.actionPolicyLocators.navigateSync).toHaveBeenCalledWith({
+        page: 'create',
+      });
     });
 
     it('opens agent chat from the empty state create-with-agent button', async () => {

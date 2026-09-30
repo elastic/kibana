@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { MitreEntitySummaryBuckets } from '@kbn/security-mitre-attack-common';
 import type {
   CoverageOverviewResponse,
   CoverageOverviewRuleAttributes,
@@ -18,22 +19,11 @@ import type {
 import type { CoverageOverviewRule } from '../../model/coverage_overview/rule';
 import { buildCoverageOverviewMitreGraph } from './build_coverage_overview_mitre_graph';
 
-const lazyMitreConfiguration = () => {
-  /**
-   * The specially formatted comment in the `import` expression causes the corresponding webpack chunk to be named. This aids us in debugging chunk size issues.
-   * See https://webpack.js.org/api/module-methods/#magic-comments
-   */
-  return import(
-    /* webpackChunkName: "lazy_mitre_configuration" */
-    '../../../../../common/detection_engine/mitre/mitre_tactics_techniques'
-  );
-};
-
-export async function buildCoverageOverviewDashboardModel(
-  apiResponse: CoverageOverviewResponse
-): Promise<CoverageOverviewDashboard> {
-  const mitreConfig = await lazyMitreConfiguration();
-  const { tactics, techniques, subtechniques } = mitreConfig;
+export function buildCoverageOverviewDashboardModel(
+  apiResponse: CoverageOverviewResponse,
+  mitreData: MitreEntitySummaryBuckets
+): CoverageOverviewDashboard {
+  const { tactics, techniques, subtechniques } = mitreData;
   const mitreTactics = buildCoverageOverviewMitreGraph(tactics, techniques, subtechniques);
 
   for (const tactic of mitreTactics) {

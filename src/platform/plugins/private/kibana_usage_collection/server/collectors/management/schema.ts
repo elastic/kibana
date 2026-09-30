@@ -553,6 +553,10 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
     type: 'text',
     _meta: { description: 'Non-default value of setting.' },
   },
+  'alerting:v2:experimentalFeatures': {
+    type: 'boolean',
+    _meta: { description: 'Enables experimental features in Alerting v2 when true.' },
+  },
   'observability:logSources': {
     type: 'array',
     items: {
@@ -575,6 +579,25 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
   'agentBuilder:bashSupport': {
     type: 'boolean',
     _meta: { description: 'Non-default value of setting.' },
+  },
+  'agentBuilder:apiDiscovery': {
+    type: 'boolean',
+    _meta: {
+      description:
+        'Whether the agent can browse the full Elasticsearch and Kibana API surface to discover operations.',
+    },
+  },
+  'agentBuilder:deductiveEnabled': {
+    type: 'boolean',
+    _meta: { description: 'Whether the external Deductive AI agent execution path is enabled.' },
+  },
+  'agentBuilder:deductiveEndpoint': {
+    type: 'keyword',
+    _meta: { description: 'Base URL of the external Deductive backend.' },
+  },
+  'agentBuilder:deductiveApiKey': {
+    type: 'keyword',
+    _meta: { description: 'API key for the external Deductive backend (redacted from telemetry).' },
   },
   'contextEngine:enabled': {
     type: 'boolean',
@@ -642,6 +665,12 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
     type: 'boolean',
     _meta: { description: 'Whether managed workflows are visible in workflow experiences.' },
   },
+  'workflows:executionFlyout:aiDiagnose:enabled': {
+    type: 'boolean',
+    _meta: {
+      description: 'Whether the Diagnose with AI action is enabled on failed-step error panels.',
+    },
+  },
   'banners:placement': {
     type: 'keyword',
     _meta: { description: 'Non-default value of setting.' },
@@ -697,6 +726,10 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
   'observability:apmServiceGroupMaxNumberOfServices': {
     type: 'long',
     _meta: { description: 'Non-default value of setting.' },
+  },
+  'observability:apmMaxNumberOfServices': {
+    type: 'long',
+    _meta: { description: 'Maximum number of services shown in the APM Services Inventory.' },
   },
   'observability:apmEnableTransactionProfiling': {
     type: 'boolean',
@@ -919,6 +952,12 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
       description: 'Enable diagnostic mode',
     },
   },
+  'observability:nightshiftDeveloperMode': {
+    type: 'boolean',
+    _meta: {
+      description: 'Non-default value of whether Nightshift developer mode is enabled.',
+    },
+  },
   'genAiSettings:defaultAIConnector': {
     type: 'keyword',
     _meta: {
@@ -996,6 +1035,13 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
     _meta: {
       description:
         'Enables integration-specific entity enrichment in the Security graph (actor sub-type, target identity, display names).',
+    },
+  },
+  'cloudSecurityPosture:graphShowUnknownTargetEnabled': {
+    type: 'boolean',
+    _meta: {
+      description:
+        'Enables displaying nodes whose target entity is unknown or unresolved in the Security graph.',
     },
   },
   'elasticRamen:enabled': {

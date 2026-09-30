@@ -33,16 +33,6 @@ export interface RuleCreateOptionsFlyoutProps {
   onClose: () => void;
   onCreateEsqlRule: () => void;
   onCreateWithAgent: () => void;
-  /**
-   * When `true`, the "With AI Agent" option is rendered disabled. Independent of
-   * `createWithAgentTooltipText`.
-   */
-  createWithAgentDisabled?: boolean;
-  /**
-   * Optional tooltip text for the "With AI Agent" option (e.g. explaining a missing
-   * prerequisite). Shown on hover/focus regardless of whether the option is disabled.
-   */
-  createWithAgentTooltipText?: string;
   onCreateThresholdRule?: () => void;
   legacyRuleTypes?: LegacyRuleTypeItem[];
   /** Opens the v2 Rules page. When set, a footer with a Manage rules action is shown. */
@@ -59,8 +49,6 @@ export const RuleCreateOptionsFlyout = ({
   onClose,
   onCreateEsqlRule,
   onCreateWithAgent,
-  createWithAgentDisabled,
-  createWithAgentTooltipText,
   onCreateThresholdRule,
   legacyRuleTypes,
   onManageRules,
@@ -125,8 +113,6 @@ export const RuleCreateOptionsFlyout = ({
           layout="vertical"
           onCreateEsqlRule={onCreateEsqlRule}
           onCreateWithAgent={onCreateWithAgent}
-          createWithAgentDisabled={createWithAgentDisabled}
-          createWithAgentTooltipText={createWithAgentTooltipText}
           onCreateThresholdRule={onCreateThresholdRule}
           legacyRuleTypes={legacyRuleTypes}
         />

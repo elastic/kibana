@@ -54,6 +54,7 @@ import {
   deleteAllAlerts,
   getRuleForAlertTesting,
   getLuceneRuleForTesting,
+  waitFor,
 } from '@kbn/detections-response-ftr-services';
 import { deleteAllExceptions } from '../../../../../lists_and_exception_lists/utils';
 import {
@@ -109,9 +110,26 @@ export default ({ getService }: FtrProviderContext) => {
   const dataPathBuilder = new EsArchivePathBuilder(isServerless);
   const auditbeatPath = dataPathBuilder.getPath('auditbeat/hosts');
 
-  // Failing: See https://github.com/elastic/kibana/issues/266815
-  describe.skip('@ess @serverless @serverlessQA Query type rules', () => {
+  describe('@ess @serverless @serverlessQA Query type rules', () => {
     before(async () => {
+      // Wait for the alerts-as-data write target to be installed before loading the alerts archive.
+      // The framework installs `.alerts-security.alerts-default` asynchronously at startup (a write
+      // alias on ESS, a data stream on serverless). The archive docs target that name, so if `docsOnly`
+      // loading runs first it auto-creates a plain concrete index with the same name, which then
+      // collides with the alias/data stream and fails every rule execution in this suite (see
+      // https://github.com/elastic/kibana/issues/266815).
+      await waitFor(
+        async () => {
+          const resolved = await es.indices
+            .resolveIndex({ name: '.alerts-security.alerts-default' })
+            .catch(() => undefined);
+          return Boolean(
+            resolved && (resolved.aliases.length > 0 || resolved.data_streams.length > 0)
+          );
+        },
+        'waitForAlertsIndexToExist',
+        log
+      );
       await esArchiver.load(auditbeatPath);
       await esArchiver.load(
         'x-pack/solutions/security/test/fixtures/es_archives/security_solution/alerts/8.8.0',

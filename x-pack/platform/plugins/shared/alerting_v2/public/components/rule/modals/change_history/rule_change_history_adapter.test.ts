@@ -11,7 +11,13 @@ import { createRuleChangeHistoryAdapter } from './rule_change_history_adapter';
 const createApiMock = () =>
   ({
     listRuleChanges: jest.fn().mockResolvedValue({ items: [], total: 0 }),
-    getRuleChangeEvent: jest.fn().mockResolvedValue({ id: 'evt-1', snapshot: {} }),
+    getRuleChangeEvent: jest.fn().mockResolvedValue({
+      id: 'evt-1',
+      created_at: '2026-01-01T00:00:00.000Z',
+      actor: { name: 'elastic' },
+      action: 'rule_update',
+      snapshot: {},
+    }),
   } as unknown as jest.Mocked<RuleChangeHistoryApi>);
 
 describe('createRuleChangeHistoryAdapter', () => {
@@ -46,25 +52,88 @@ describe('createRuleChangeHistoryAdapter', () => {
       );
     });
 
-    it('returns only items and total (drops other response fields)', async () => {
+    it('returns only the mapped items and the total', async () => {
       const api = createApiMock();
-      const response = {
+      api.listRuleChanges.mockResolvedValueOnce({
+        items: [
+          {
+            id: 'evt-1',
+            created_at: '2026-01-01T00:00:00.000Z',
+            actor: { name: 'elastic' },
+            action: 'rule_update',
+          },
+        ],
+        total: 1,
+      });
+      const adapter = createRuleChangeHistoryAdapter(api);
+
+      await expect(
+        adapter.listChanges({ objectId: 'rule-1', page: { index: 0, size: 20 } })
+      ).resolves.toEqual({
         items: [
           {
             id: 'evt-1',
             timestamp: '2026-01-01T00:00:00.000Z',
             actor: { name: 'elastic' },
-            action: 'update',
+            action: 'rule_update',
           },
         ],
         total: 1,
-      };
-      api.listRuleChanges.mockResolvedValueOnce(response);
+      });
+    });
+
+    it('maps the response from the API to the UI contract', async () => {
+      const api = createApiMock();
+      api.listRuleChanges.mockResolvedValueOnce({
+        items: [
+          {
+            id: 'evt-1',
+            created_at: '2026-01-01T00:00:00.000Z',
+            actor: { name: 'elastic', profile_id: 'u_1' },
+            action: 'rule_update',
+            is_current: true,
+          },
+        ],
+        total: 1,
+      });
       const adapter = createRuleChangeHistoryAdapter(api);
 
-      await expect(
-        adapter.listChanges({ objectId: 'rule-1', page: { index: 0, size: 20 } })
-      ).resolves.toEqual(response);
+      const { items } = await adapter.listChanges({
+        objectId: 'rule-1',
+        page: { index: 0, size: 20 },
+      });
+
+      expect(items[0]).toEqual({
+        id: 'evt-1',
+        timestamp: '2026-01-01T00:00:00.000Z',
+        actor: { name: 'elastic', profileId: 'u_1' },
+        action: 'rule_update',
+        isCurrent: true,
+      });
+    });
+
+    it('rebuilds the metadata bag the package reads for version-distance telemetry', async () => {
+      const api = createApiMock();
+      api.listRuleChanges.mockResolvedValueOnce({
+        items: [
+          {
+            id: 'evt-1',
+            created_at: '2026-01-01T00:00:00.000Z',
+            actor: { name: 'elastic' },
+            action: 'rule_update',
+            version: 7,
+          },
+        ],
+        total: 1,
+      });
+      const adapter = createRuleChangeHistoryAdapter(api);
+
+      const { items } = await adapter.listChanges({
+        objectId: 'rule-1',
+        page: { index: 0, size: 20 },
+      });
+
+      expect(items[0].metadata).toEqual({ version: 7 });
     });
 
     it('propagates errors', async () => {
@@ -93,21 +162,28 @@ describe('createRuleChangeHistoryAdapter', () => {
       });
     });
 
-    it('returns the detail from the API', async () => {
+    it('maps the snake_case wire keys and keeps the snapshot and reason', async () => {
       const api = createApiMock();
-      const detail = {
+      api.getRuleChangeEvent.mockResolvedValueOnce({
         id: 'evt-1',
-        timestamp: '2026-01-01T00:00:00.000Z',
-        actor: { name: 'elastic' },
-        action: 'update',
+        created_at: '2026-01-01T00:00:00.000Z',
+        actor: { name: 'elastic', profile_id: 'u_1' },
+        action: 'rule_update',
+        is_current: true,
+        reason: 'renamed',
         snapshot: { name: 'rule' },
-      };
-      api.getRuleChangeEvent.mockResolvedValueOnce(detail);
+      });
       const adapter = createRuleChangeHistoryAdapter(api);
 
-      await expect(adapter.getChange({ objectId: 'rule-1', changeId: 'evt-1' })).resolves.toEqual(
-        detail
-      );
+      await expect(adapter.getChange({ objectId: 'rule-1', changeId: 'evt-1' })).resolves.toEqual({
+        id: 'evt-1',
+        timestamp: '2026-01-01T00:00:00.000Z',
+        actor: { name: 'elastic', profileId: 'u_1' },
+        action: 'rule_update',
+        isCurrent: true,
+        reason: 'renamed',
+        snapshot: { name: 'rule' },
+      });
     });
 
     it('propagates errors', async () => {

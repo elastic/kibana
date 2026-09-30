@@ -8,7 +8,7 @@
 import type { ComposerQuery } from '@elastic/esql';
 import { esql } from '@elastic/esql';
 import { i18n } from '@kbn/i18n';
-import { DURATION, KIND, STATUS_CODE } from '@kbn/apm-types/es_fields';
+import { DURATION, KIND, SPAN_NAME, STATUS_CODE } from '@kbn/apm-types/es_fields';
 import { TIME_BUCKET_BY, TIME_BUCKET_FIELD, applyServiceFilters } from './shared';
 import type { ServiceScope } from './shared';
 
@@ -20,6 +20,9 @@ function createOtelBaseQuery({
   scope: ServiceScope;
 }): ComposerQuery {
   const query = esql.from(indices).where`${esql.col(KIND)} IN ("Server", "Consumer")`;
+  if (scope.transactionName) {
+    query.where`${esql.col(SPAN_NAME)} == ${scope.transactionName}`;
+  }
   applyServiceFilters(query, scope);
   return query;
 }
