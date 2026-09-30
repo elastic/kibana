@@ -10,8 +10,8 @@ import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 import { agentBuilderMocks } from '@kbn/agent-builder-plugin/server/mocks';
 import type { ToolHandlerContext } from '@kbn/agent-builder-server';
 import type { AiIndexService } from '@kbn/context-engine-plugin/server/ai_indices/service';
+import { coreMock } from '@kbn/core/server/mocks';
 import { assertContextEngineWriteAccess } from '../../assert_context_engine_write_access';
-import { aiIndexToolsAvailability } from '../ai_index_tools_availability';
 import { createForgetTool } from './tool';
 
 jest.mock('../../assert_context_engine_write_access', () => ({
@@ -29,7 +29,11 @@ describe('forget tool', () => {
     createForgetTool({
       getAiIndexService: async () => ({ get } as unknown as AiIndexService),
       getCoreStart: async () => {
-        throw new Error('not used');
+        const coreStart = coreMock.createStart();
+        coreStart.uiSettings.globalAsScopedToClient = jest
+          .fn()
+          .mockReturnValue({ get: jest.fn().mockResolvedValue(true) });
+        return coreStart;
       },
       getSecurityStart: async () => undefined,
     });
@@ -121,7 +125,7 @@ describe('forget tool', () => {
     const tool = createTool();
 
     expect(tool.id).toBe(contextEngineMemoryTools.forget);
-    expect(tool.availability).toBe(aiIndexToolsAvailability);
+    expect(tool.availability?.cacheMode).toBe('none');
     expect(tool.schema.safeParse(params).success).toBe(true);
     expect(tool.schema.safeParse({ aiIndexId: 'support' }).success).toBe(false);
     expect(tool.schema.shape.aiIndexId.description).toContain(

@@ -11,7 +11,6 @@ import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 import type { BuiltinToolDefinition } from '@kbn/agent-builder-server';
 import { getAgentFromRunContext } from '@kbn/agent-builder-server';
 import { aiIndexIdFieldSchema } from '@kbn/context-engine-plugin/common/ai_index_schemas';
-import { isIndexPattern } from '@kbn/context-engine-plugin/common/ai_index_dest';
 import { MAX_KI_ID_LENGTH } from '@kbn/context-engine-plugin/common/step_types/ki';
 import type { AiIndexService } from '@kbn/context-engine-plugin/server/ai_indices/service';
 import type { CoreStart } from '@kbn/core/server';
@@ -19,7 +18,8 @@ import type { SecurityPluginStart } from '@kbn/security-plugin/server';
 import { z } from '@kbn/zod/v4';
 import dedent from 'dedent';
 import { assertContextEngineWriteAccess } from '../../assert_context_engine_write_access';
-import { aiIndexToolsAvailability } from '../ai_index_tools_availability';
+import { createMemoryToolsAvailability } from '../ai_index_tools_availability';
+import { getWritableMemoryAiIndex } from '../get_writable_memory_ai_index';
 import {
   createMemoryWriter,
   type StoredMemoryDocument,
@@ -48,7 +48,7 @@ export const createForgetTool = ({
 }): BuiltinToolDefinition<typeof forgetSchema> => ({
   id: contextEngineMemoryTools.forget,
   type: ToolType.builtin,
-  availability: aiIndexToolsAvailability,
+  availability: createMemoryToolsAvailability(getCoreStart),
   tags: ['context_engine', 'memory'],
   annotations: {
     title: 'Forget',
@@ -74,15 +74,13 @@ export const createForgetTool = ({
         getSecurityStart,
       });
 
-      const aiIndex = await (await getAiIndexService()).get(params.aiIndexId, spaceId);
-      if (!aiIndex.memory_enabled) {
-        throw new Error(`AI index '${params.aiIndexId}' does not have memory enabled.`);
-      }
-      if (isIndexPattern(aiIndex.dest.value)) {
-        throw new Error(
-          `AI index '${params.aiIndexId}' uses an index pattern and cannot accept memory writes.`
-        );
-      }
+      const aiIndex = await getWritableMemoryAiIndex({
+        aiIndexId: params.aiIndexId,
+        spaceId,
+        request,
+        getAiIndexService,
+        getCoreStart,
+      });
 
       const currentUserClient = esClient.asCurrentUser;
       const searchResponse = await currentUserClient.search<StoredMemoryDocument>({

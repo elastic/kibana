@@ -11,7 +11,6 @@ import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 import type { BuiltinToolDefinition } from '@kbn/agent-builder-server';
 import { getAgentFromRunContext } from '@kbn/agent-builder-server';
 import { randomUUID } from 'crypto';
-import { isIndexPattern } from '@kbn/context-engine-plugin/common/ai_index_dest';
 import { aiIndexIdFieldSchema } from '@kbn/context-engine-plugin/common/ai_index_schemas';
 import { MEMORY_KI_TYPES } from '@kbn/context-engine-plugin/common/memory';
 import {
@@ -28,7 +27,8 @@ import type { SecurityPluginStart } from '@kbn/security-plugin/server';
 import { z } from '@kbn/zod/v4';
 import dedent from 'dedent';
 import { assertContextEngineWriteAccess } from '../../assert_context_engine_write_access';
-import { aiIndexToolsAvailability } from '../ai_index_tools_availability';
+import { createMemoryToolsAvailability } from '../ai_index_tools_availability';
+import { getWritableMemoryAiIndex } from '../get_writable_memory_ai_index';
 import {
   createConversationReferences,
   createMemoryWriter,
@@ -104,7 +104,7 @@ export const createRememberTool = ({
 }): BuiltinToolDefinition<typeof rememberSchema> => ({
   id: contextEngineMemoryTools.remember,
   type: ToolType.builtin,
-  availability: aiIndexToolsAvailability,
+  availability: createMemoryToolsAvailability(getCoreStart),
   tags: ['context_engine', 'memory'],
   annotations: {
     title: 'Remember',
@@ -154,15 +154,13 @@ export const createRememberTool = ({
         getSecurityStart,
       });
 
-      const aiIndex = await (await getAiIndexService()).get(params.aiIndexId, spaceId);
-      if (!aiIndex.memory_enabled) {
-        throw new Error(`AI index '${params.aiIndexId}' does not have memory enabled.`);
-      }
-      if (isIndexPattern(aiIndex.dest.value)) {
-        throw new Error(
-          `AI index '${params.aiIndexId}' uses an index pattern and cannot accept memory writes.`
-        );
-      }
+      const aiIndex = await getWritableMemoryAiIndex({
+        aiIndexId: params.aiIndexId,
+        spaceId,
+        request,
+        getAiIndexService,
+        getCoreStart,
+      });
 
       const currentUserClient = esClient.asCurrentUser;
       const currentDate = getCurrentDate();
