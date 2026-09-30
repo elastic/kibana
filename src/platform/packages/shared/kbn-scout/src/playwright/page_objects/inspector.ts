@@ -108,6 +108,7 @@ export class InspectorPage {
     if (!(await this.viewChooser.isVisible())) {
       return;
     }
+    await this.viewChooser.click();
     const item = this.page.testSubj.locator(`inspectorViewChooser${viewId}`);
     await item.waitFor({ state: 'visible' });
     await item.click();

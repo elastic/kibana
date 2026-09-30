@@ -292,7 +292,7 @@ export class MapsPage {
   async getHits(): Promise<string> {
     await this.inspector.open();
     await this.inspector.openInspectorRequestsView();
-    await this.inspector.getOpenRequestStatisticButton().click();
+    await this.inspector.openRequestsStatisticsTab();
 
     const rows = await this.inspector.getTableData();
     const hitsRow = rows.find((row) => row[0] === 'Hits');
