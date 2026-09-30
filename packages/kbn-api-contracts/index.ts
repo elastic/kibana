@@ -14,6 +14,7 @@ export {
   applyAllowlist,
   OASDIFF_RULE_POLICY,
   getRulePolicy,
+  isIgnoredRule,
   isReportOnlyRule,
 } from './src/diff';
 export type {

@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export type RuleDisposition = 'blocking' | 'report_only';
+export type RuleDisposition = 'blocking' | 'report_only' | 'ignore';
 
 export interface RulePolicyEntry {
   disposition: RuleDisposition;
@@ -55,3 +55,6 @@ export const isPromotedRule = (id: string): boolean =>
 /** True when an oasdiff rule is reported but does not gate the build. */
 export const isReportOnlyRule = (id: string): boolean =>
   getRulePolicy(id)?.disposition === 'report_only';
+
+/** True when an oasdiff rule is dropped entirely, whatever level oasdiff assigns. */
+export const isIgnoredRule = (id: string): boolean => getRulePolicy(id)?.disposition === 'ignore';

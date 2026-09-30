@@ -9,6 +9,7 @@
 
 import { parseOasdiff } from './parse_oasdiff';
 import type { OasdiffEntry } from './parse_oasdiff';
+import { OASDIFF_RULE_POLICY } from './rule_policy';
 
 const entry = (overrides: Partial<OasdiffEntry> = {}): OasdiffEntry => ({
   id: 'request-parameter-removed',
@@ -217,15 +218,6 @@ describe('parseOasdiff', () => {
     ]);
   });
 
-  it('keeps a report-only rule when oasdiff reports it as a warning', () => {
-    const [change] = parseOasdiff([
-      entry({ id: 'response-property-one-of-added', text: 'added variant', level: 2 }),
-    ]);
-
-    expect(change.reportOnly).toBe(true);
-    expect(change.policyReason).toEqual(expect.any(String));
-  });
-
   it('includes promoted warning IDs at level 2', () => {
     const result = parseOasdiff([
       entry({ id: 'request-property-removed', level: 2 }),
@@ -256,73 +248,77 @@ describe('parseOasdiff', () => {
     expect(result[0].path).toBe('/api/a');
   });
 
-  describe('report-only rules', () => {
-    it('keeps response-property-one-of-added and marks it report-only', () => {
-      const result = parseOasdiff([
+  describe('rule policy', () => {
+    it('marks a response oneOf addition report-only and keeps the change details', () => {
+      const [change] = parseOasdiff([
         entry({
           id: 'response-property-one-of-added',
           text: "added '#/components/schemas/WorkflowUserAction' to the response property 'payload' oneOf list",
-          operation: 'GET',
           path: '/api/cases/{caseId}/user_actions/_find',
-          level: 3,
         }),
       ]);
 
-      expect(result).toHaveLength(1);
-      expect(result[0]).toMatchObject({
+      expect(change).toMatchObject({
         type: 'operation_breaking',
         path: '/api/cases/{caseId}/user_actions/_find',
         method: 'GET',
         oasdiffId: 'response-property-one-of-added',
         reportOnly: true,
       });
-      expect(result[0].policyReason).toContain('additive');
+      expect(change.policyReason).toContain('additive');
     });
 
-    it('marks response-body-one-of-added as report-only', () => {
-      const [change] = parseOasdiff([
-        entry({ id: 'response-body-one-of-added', text: 'added variant', level: 3 }),
-      ]);
+    it.each([
+      ['response-property-one-of-added', 2],
+      ['response-property-one-of-added', 3],
+      ['response-body-one-of-added', 3],
+      ['response-property-enum-value-added', 2],
+      ['response-property-enum-value-added', 3],
+    ])('keeps %s at oasdiff level %i as report-only', (id, level) => {
+      const [change] = parseOasdiff([entry({ id, level })]);
 
       expect(change.reportOnly).toBe(true);
       expect(change.policyReason).toEqual(expect.any(String));
     });
 
-    it('keeps response-property-enum-value-added when oasdiff warns or errors', () => {
-      for (const level of [2, 3]) {
-        const [change] = parseOasdiff([
-          entry({
-            id: 'response-property-enum-value-added',
-            text: 'added the new `api_contracts_probe` enum value',
-            operation: 'GET',
-            path: '/api/cases/{caseId}/user_actions/_find',
-            level,
-          }),
+    it.each(['api-removed-without-deprecation', 'request-body-one-of-removed'])(
+      'does not mark %s report-only',
+      (id) => {
+        const [change] = parseOasdiff([entry({ id })]);
+
+        expect(change.reportOnly).toBeUndefined();
+        expect(change.policyReason).toBeUndefined();
+      }
+    );
+
+    describe('ignored rules', () => {
+      const IGNORED_ID = 'test-only-ignored-rule';
+
+      beforeAll(() => {
+        Object.assign(OASDIFF_RULE_POLICY, {
+          [IGNORED_ID]: {
+            disposition: 'ignore',
+            reason: 'Additive change with no consumer impact for Kibana.',
+          },
+        });
+      });
+
+      afterAll(() => {
+        Reflect.deleteProperty(OASDIFF_RULE_POLICY, IGNORED_ID);
+      });
+
+      it.each([2, 3])('drops an ignored rule at oasdiff level %i', (level) => {
+        expect(parseOasdiff([entry({ id: IGNORED_ID, level })])).toEqual([]);
+      });
+
+      it('keeps neighboring changes when one is ignored', () => {
+        const result = parseOasdiff([
+          entry({ id: IGNORED_ID, path: '/api/ignored' }),
+          entry({ id: 'api-removed-without-deprecation', path: '/api/kept' }),
         ]);
 
-        expect(change).toMatchObject({
-          path: '/api/cases/{caseId}/user_actions/_find',
-          method: 'GET',
-          oasdiffId: 'response-property-enum-value-added',
-          reportOnly: true,
-        });
-        expect(change.policyReason).toContain('response enum');
-      }
-    });
-
-    it('leaves blocking changes without report-only fields', () => {
-      const [change] = parseOasdiff([entry({ id: 'api-removed-without-deprecation', level: 3 })]);
-
-      expect(change.reportOnly).toBeUndefined();
-      expect(change.policyReason).toBeUndefined();
-    });
-
-    it('does not demote request-side one-of rules', () => {
-      const [change] = parseOasdiff([
-        entry({ id: 'request-body-one-of-removed', text: 'removed variant', level: 3 }),
-      ]);
-
-      expect(change.reportOnly).toBeUndefined();
+        expect(result.map(({ path }) => path)).toEqual(['/api/kept']);
+      });
     });
   });
 });

@@ -10,45 +10,77 @@
 import {
   OASDIFF_RULE_POLICY,
   getRulePolicy,
+  isIgnoredRule,
   isPromotedRule,
   isReportOnlyRule,
 } from './rule_policy';
+import type { RuleDisposition } from './rule_policy';
+
+const predicates: Record<RuleDisposition, (id: string) => boolean> = {
+  blocking: isPromotedRule,
+  report_only: isReportOnlyRule,
+  ignore: isIgnoredRule,
+};
+
+// Exactly one predicate matches a listed rule's disposition, and none match an unlisted rule.
+const expectOnly = (id: string, disposition?: RuleDisposition) => {
+  Object.entries(predicates).forEach(([name, predicate]) => {
+    expect(predicate(id)).toBe(name === disposition);
+  });
+};
 
 describe('OASDIFF_RULE_POLICY', () => {
-  it('gives every rule a reason', () => {
-    Object.entries(OASDIFF_RULE_POLICY).forEach(([id, { reason }]) => {
-      expect(reason.length).toBeGreaterThan(0);
-      expect(id).not.toHaveLength(0);
-    });
+  it.each<[string, RuleDisposition]>([
+    ['request-property-removed', 'blocking'],
+    ['request-parameter-removed', 'blocking'],
+    ['response-optional-property-removed', 'blocking'],
+    ['response-property-one-of-added', 'report_only'],
+    ['response-body-one-of-added', 'report_only'],
+    ['response-property-enum-value-added', 'report_only'],
+  ])('declares %s as %s', (id, disposition) => {
+    expect(getRulePolicy(id)?.disposition).toBe(disposition);
+    expectOnly(id, disposition);
   });
 
-  it('keeps the request side strict', () => {
-    const demotedRequestRules = Object.keys(OASDIFF_RULE_POLICY).filter(
-      (id) => id.startsWith('request-') && isReportOnlyRule(id)
-    );
+  it('gives every entry a reason', () => {
+    const withoutReason = Object.entries(OASDIFF_RULE_POLICY)
+      .filter(([, { reason }]) => reason.length === 0)
+      .map(([id]) => id);
 
-    expect(demotedRequestRules).toEqual([]);
+    expect(withoutReason).toEqual([]);
   });
 
-  it('promotes the request and response removal warnings', () => {
-    expect(isPromotedRule('request-property-removed')).toBe(true);
-    expect(isPromotedRule('request-parameter-removed')).toBe(true);
-    expect(isPromotedRule('response-optional-property-removed')).toBe(true);
-  });
+  it('keeps every request-side entry blocking', () => {
+    const notBlocking = Object.entries(OASDIFF_RULE_POLICY)
+      .filter(([id, { disposition }]) => id.startsWith('request-') && disposition !== 'blocking')
+      .map(([id]) => id);
 
-  it('demotes additive response oneOf rules to report-only', () => {
-    expect(isReportOnlyRule('response-property-one-of-added')).toBe(true);
-    expect(isReportOnlyRule('response-body-one-of-added')).toBe(true);
-  });
-
-  it('demotes an added response enum value to report-only', () => {
-    expect(isReportOnlyRule('response-property-enum-value-added')).toBe(true);
-    expect(isPromotedRule('response-property-enum-value-added')).toBe(false);
+    expect(notBlocking).toEqual([]);
   });
 
   it('leaves unlisted rules to oasdiff', () => {
     expect(getRulePolicy('api-removed-without-deprecation')).toBeUndefined();
-    expect(isPromotedRule('api-removed-without-deprecation')).toBe(false);
-    expect(isReportOnlyRule('api-removed-without-deprecation')).toBe(false);
+    expectOnly('api-removed-without-deprecation');
+  });
+
+  describe('ignore disposition', () => {
+    const IGNORED_ID = 'test-only-ignored-rule';
+
+    beforeAll(() => {
+      Object.assign(OASDIFF_RULE_POLICY, {
+        [IGNORED_ID]: {
+          disposition: 'ignore',
+          reason: 'Additive change with no consumer impact for Kibana.',
+        },
+      });
+    });
+
+    afterAll(() => {
+      Reflect.deleteProperty(OASDIFF_RULE_POLICY, IGNORED_ID);
+    });
+
+    it('is ignored and neither blocking nor report-only', () => {
+      expectOnly(IGNORED_ID, 'ignore');
+    });
   });
 });

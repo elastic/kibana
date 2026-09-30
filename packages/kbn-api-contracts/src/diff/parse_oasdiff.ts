@@ -8,7 +8,7 @@
  */
 
 import type { BreakingChange } from './breaking_rules';
-import { getRulePolicy, isPromotedRule, isReportOnlyRule } from './rule_policy';
+import { getRulePolicy, isIgnoredRule, isPromotedRule, isReportOnlyRule } from './rule_policy';
 
 export interface OasdiffEntry {
   id: string;
@@ -33,9 +33,10 @@ const ID_TO_TYPE: Readonly<Record<string, BreakingChange['type']>> = {
 };
 
 // Errors are included on oasdiff's own level. Warnings are included only when the
-// declared policy promotes them or keeps them as report-only.
+// declared policy promotes them or keeps them as report-only. A rule the policy
+// ignores is dropped at either level.
 const isIncluded = ({ id, level }: OasdiffEntry): boolean =>
-  level >= 3 || isPromotedRule(id) || isReportOnlyRule(id);
+  !isIgnoredRule(id) && (level >= 3 || isPromotedRule(id) || isReportOnlyRule(id));
 
 const mapEntryToBreakingChange = ({
   id,

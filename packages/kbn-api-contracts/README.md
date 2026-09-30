@@ -67,10 +67,11 @@ oasdiff detects these as breaking:
 
 oasdiff decides what changed. `src/diff/rule_policy.ts` decides what that means for Kibana, so the call is declared once instead of being re-argued per PR. Every entry carries a reason. A report-only reason is rendered with the change in the CI log and the PR comment. The reasons for blocking rules are in the table below.
 
-Two dispositions:
+Dispositions:
 
 - **`blocking`** — a warning-level oasdiff rule treated as a breaking change. These are the ⚠️ rows above.
 - **`report_only`** — stays in the report and does not gate the check, whatever level oasdiff assigned. A warning listed here is kept instead of dropped. An error listed here does not gate.
+- **`ignore`** — dropped entirely, whatever level oasdiff assigned. It does not gate and does not appear in the report or the PR comment. Use it for a rule that is never a change worth a reviewer's attention. No rule uses it today; prefer `report_only` unless the change should not be visible at all.
 
 Rules that are not in the table keep oasdiff's own level: error gates, warning is dropped.
 

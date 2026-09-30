@@ -14,6 +14,7 @@ export type { OasdiffEntry } from './parse_oasdiff';
 export {
   OASDIFF_RULE_POLICY,
   getRulePolicy,
+  isIgnoredRule,
   isPromotedRule,
   isReportOnlyRule,
 } from './rule_policy';
