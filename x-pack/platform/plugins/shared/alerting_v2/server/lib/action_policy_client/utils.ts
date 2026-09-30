@@ -131,16 +131,13 @@ export const buildUpdateActionPolicyAttributes = ({
 
 export const transformActionPolicySoAttributesToApiResponse = ({
   id,
-  version,
   attributes,
 }: {
   id: string;
-  version?: string;
   attributes: ActionPolicySavedObjectAttributes;
 }): ActionPolicyResponse => {
   return {
     id,
-    version,
     name: attributes.name,
     description: attributes.description,
     enabled: attributes.enabled,

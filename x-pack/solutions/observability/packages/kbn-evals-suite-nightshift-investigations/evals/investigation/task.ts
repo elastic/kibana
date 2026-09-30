@@ -14,10 +14,25 @@ import type {
   GetInvestigationResponse,
 } from '@kbn/nightshift-investigations-plugin/common';
 import type { WorkflowExecutionDto } from '@kbn/workflows';
-import type { InvestigationExample, InvestigationTaskOutput } from './types';
+import { extractAccessedDecisionTrees } from './decision_tree_evidence';
+import { extractToolCallTrajectory } from './tool_call_trajectory';
+import type { InvestigationExample, InvestigationTaskOutput, TrajectoryStep } from './types';
 
 export const INVESTIGATION_TIMEOUT_MS = 20 * 60_000;
 const MAX_PERSISTED_REPORT_BYTES = 512 * 1024;
+
+/** Keeps as many (already per-field-bounded) trajectory steps, in order, as fit the byte budget. */
+const boundTrajectory = (trajectory: TrajectoryStep[]): TrajectoryStep[] => {
+  const bounded: TrajectoryStep[] = [];
+  let bytes = 0;
+  for (const step of trajectory) {
+    const size = Buffer.byteLength(JSON.stringify(step), 'utf8');
+    if (bytes + size > MAX_PERSISTED_REPORT_BYTES) break;
+    bounded.push(step);
+    bytes += size;
+  }
+  return bounded;
+};
 
 const boundOutput = (output: InvestigationTaskOutput): InvestigationTaskOutput => {
   const { structured_report: report, execution_error: executionError } = output;
@@ -113,6 +128,20 @@ export const runInvestigation = async (
         )
         .filter(Boolean)
         .at(-1);
+      const accessedTrees = extractAccessedDecisionTrees(conversation.rounds);
+      if (accessedTrees.length > 0) {
+        output.decision_trees_accessed = accessedTrees.map(({ tree_id: treeId, content }) => ({
+          tree_id: treeId,
+          content: content.slice(0, MAX_TEXT_LENGTH),
+        }));
+      }
+      const trajectory = extractToolCallTrajectory(conversation.rounds).map((step) => ({
+        ...step,
+        result: step.result.slice(0, MAX_TEXT_LENGTH),
+      }));
+      if (trajectory.length > 0) {
+        output.tool_call_trajectory = boundTrajectory(trajectory);
+      }
     } else {
       output.execution_error ??= 'Completed investigation has no conversation id';
     }
