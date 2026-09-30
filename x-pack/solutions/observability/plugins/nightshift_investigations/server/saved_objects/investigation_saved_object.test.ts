@@ -76,3 +76,26 @@ describe('nightshift investigation saved object model version 4', () => {
     ).toThrow();
   });
 });
+
+describe('nightshift investigation saved object model version 5', () => {
+  const modelVersions = nightshiftInvestigationSavedObjectType.modelVersions as unknown as Record<
+    number,
+    SavedObjectsFullModelVersion
+  >;
+  const modelVersion5 = modelVersions[5];
+
+  it("accepts the latest run's execution without data changes", () => {
+    expect(modelVersion5?.changes).toEqual([]);
+    expect(() =>
+      modelVersion5?.schemas?.create?.validate({
+        title: 'Checkout errors',
+        status: 'running',
+        subject_type: 'alert',
+        subject_id: 'alert-1534',
+        trigger_type: 'manual',
+        created_at: '2026-09-28T00:00:00.000Z',
+        execution_id: 'exec-follow-up',
+      })
+    ).not.toThrow();
+  });
+});

@@ -112,6 +112,10 @@ const investigationAttributesSchemaV4 = investigationAttributesSchemaV3.extends(
   ),
 });
 
+const investigationAttributesSchemaV5 = investigationAttributesSchemaV4.extends({
+  execution_id: optionalKeyword,
+});
+
 export const nightshiftInvestigationSavedObjectType: SavedObjectsType<InvestigationAttributes> = {
   name: NIGHTSHIFT_INVESTIGATION_SO_TYPE,
   hidden: true,
@@ -164,6 +168,13 @@ export const nightshiftInvestigationSavedObjectType: SavedObjectsType<Investigat
       schemas: {
         create: investigationAttributesSchemaV4,
         forwardCompatibility: investigationAttributesSchemaV4.extends({}, { unknowns: 'ignore' }),
+      },
+    },
+    5: {
+      changes: [],
+      schemas: {
+        create: investigationAttributesSchemaV5,
+        forwardCompatibility: investigationAttributesSchemaV5.extends({}, { unknowns: 'ignore' }),
       },
     },
   },

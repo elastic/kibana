@@ -26,10 +26,10 @@ it('returns the conversation of a continued investigation', async () => {
     handler({
       request: {},
       getInvestigationsClient,
-      params: { path: { id: 'inv-1' }, body: { continue: true } },
+      params: { path: { id: 'inv-1' }, body: { execution_id: 'exec-2' } },
     } as never)
   ).resolves.toEqual({ acknowledged: true, conversation_id: 'conv-1' });
-  expect(ensureOrCreate).toHaveBeenCalledWith('inv-1', { continues: true });
+  expect(ensureOrCreate).toHaveBeenCalledWith('inv-1', 'exec-2');
 });
 
 it('returns no conversation for a new investigation', async () => {
@@ -39,8 +39,7 @@ it('returns no conversation for a new investigation', async () => {
     handler({
       request: {},
       getInvestigationsClient,
-      params: { path: { id: 'exec-1' }, body: { continue: false } },
+      params: { path: { id: 'exec-1' }, body: { execution_id: 'exec-1' } },
     } as never)
   ).resolves.toEqual({ acknowledged: true });
-  expect(ensureOrCreate).toHaveBeenCalledWith('exec-1', { continues: false });
 });

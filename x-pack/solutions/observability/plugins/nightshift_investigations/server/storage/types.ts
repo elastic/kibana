@@ -29,6 +29,8 @@ export interface InvestigationAttributes extends InvestigationStructuredOutput {
   executed_by?: string;
   error?: string | null;
   conversation_id?: string;
+  /** The workflow execution of the latest run, when it is not the one the investigation is named after. */
+  execution_id?: string;
 }
 
 export interface InvestigationRecord extends InvestigationAttributes {
@@ -54,6 +56,7 @@ export interface InvestigationPatch extends InvestigationStructuredOutput {
   executed_by?: string;
   error?: string | null;
   conversation_id?: string;
+  execution_id?: string;
 }
 
 export interface FindInvestigationsQuery<
