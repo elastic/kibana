@@ -1,16 +1,9 @@
 version: "1"
 name: Hunt Watch - find or create Investigation
 description: >
-  Untagged child invoked by PR 4's tagged Worker (registered id
-  system-security-hunt-find-or-create-investigation; kept in sync with
-  kbn-workflows/managed/definitions/alertzero/hunt_continuous_threat_hunt.yaml).
-  Wraps the native hunt.findOrCreateInvestigation step, which mints the
-  deterministic Investigation id (uuidv5(hunt:report:{reportId})), creates the
-  conversation, or verifies an existing one on a conflict. Never throws past
-  its own on-failure fallback; a partial run is reported through the typed
-  output, not an exception. No kibana.request: PR 3b never shipped an
-  Investigation-write route, and the id is minted server-side because Liquid
-  cannot compute the uuidv5 hash.
+  Creates the Investigation for a report, or reuses the existing one if this
+  report has already been hunted before, so there's somewhere to record
+  findings. Reports a partial run rather than failing outright.
 enabled: true
 tags: []
 triggers:

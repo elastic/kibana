@@ -1,20 +1,11 @@
 version: "1"
 name: Hunt Watch - proposal gate
 description: >
-  Child dispatched by PR 4's packaging child (`hunt_package_report.yaml`) via
-  `workflow.executeAsync`, one per minted Proposal (registered id
-  system-security-hunt-proposal-gate). Wraps `system-create-alertzero-proposal`
-  (the AlertZero bridge, which stamps `origin: alertzero` and forwards to
-  `system-create-proposal`'s single `waitForApproval`, no second gate here);
-  that path creates the Proposal idempotently, parks on the decision, records
-  it, and settles expiry. After the wrap returns, re-queries every Proposal on
-  the Investigation's conversation and closes it (`close_reason: resolved`)
-  only when the section C settlement predicate holds: created >=
-  expectedProposalCount, zero pending, zero executing. Never throws past its
-  own on-failure fallbacks; a requery or close failure continues rather than
-  aborting, since the Investigation staying open with its pending state
-  visible is the accepted unrecoverable case (section H) -- recovery is
-  manual.
+  Creates one Proposal and waits for an analyst to approve or reject it. Once
+  every Proposal on the Investigation has been decided, closes the
+  Investigation. Continues rather than failing if it can't confirm the
+  Investigation's state afterward, since leaving the Investigation open for
+  someone to check is safer than closing it incorrectly.
 enabled: true
 tags:
   - security

@@ -1,22 +1,12 @@
 version: "1"
 name: Hunt Watch - package report
 description: >
-  Child invoked by PR 4's tagged Worker (registered id
-  system-security-hunt-package-report; kept in sync with
-  kbn-workflows/managed/definitions/alertzero/hunt_continuous_threat_hunt.yaml).
-  Wraps the native hunt.packageReport step, which owns the mint-versus-dismiss
-  decision table, writes pending coverage KIs, resolves every fillable
-  category:respond catalog action, and returns expectedProposalCount, the
-  settlement barrier below threads into each gate as a plain input (never
-  persisted to conversation metadata). This child fans the returned mint
-  payloads out to per-Proposal gate
-  children (workflow.executeAsync, fire-and-forget: it does not join them),
-  then closes the Investigation benignly when the run was clean. Never throws
-  past its own on-failure fallback; a partial run (including a partial gate
-  dispatch) is reported through the typed output, not an exception. Skips the
-  real packaging call entirely when the Worker's own find_or_create_investigation
-  failed upstream (empty investigationConversationId), same guard as hunt.yaml's
-  run_hunt_coordinator.
+  Reviews a completed hunt's results and decides which findings warrant a
+  Proposal versus which should be dismissed. Resolves every respond action it
+  can actually fill (for example isolating a host), then hands each Proposal
+  off to its own approval workflow. Closes the Investigation when the run was
+  clean. Reports a partial run rather than failing outright, and skips
+  packaging entirely if the Investigation was never created.
 enabled: true
 # security + continuous-threat-hunt: the per-feature child-grouping pair every
 # other Watch's children carry (detection-rule-creation/detection-rule-tuning/

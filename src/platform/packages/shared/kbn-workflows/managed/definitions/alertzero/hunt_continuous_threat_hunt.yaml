@@ -1,11 +1,11 @@
 version: "1"
 name: Continuous Threat Hunt
 description: >
-  Hunt Watch's per-space sweep: gates on index scope, selects candidate
-  reports, fans out one Investigation per candidate (find-or-create, hunt,
-  package), and always resolves to a run conclusion regardless of which stage
-  failed inside a candidate's branch. R.7: no correlation step here (3B
-  inserts it between hunt and packaging).
+  Hunt Watch's per-space sweep: checks which telemetry is available, selects
+  candidate reports, and for each one creates or finds its Investigation,
+  runs the hunt, and packages the results into findings. Always reaches a
+  final outcome for the sweep, even if an individual report's run fails
+  partway through.
 enabled: false
 tags:
   - watch
