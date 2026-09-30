@@ -13,7 +13,13 @@ import { z, lazySchema } from '@kbn/zod/v4';
  * EKS bounds these identifiers itself (see the EKS API reference); mirroring them keeps an
  * LLM- or workflow-supplied value from reaching a URL path segment as something unexpected.
  */
-const REGION_PATTERN = /^[a-z]{2}(-[a-z]+)+-\d$/;
+/**
+ * Commercial and GovCloud Regions only. China (`cn-*`) and ISO (`*-iso*`) Regions serve EKS and
+ * STS from other domains than `amazonaws.com`, which the connector and the token mint assume.
+ */
+export const REGION_PATTERN = /^(?!cn-)(?![a-z]{2}-iso)[a-z]{2}(-[a-z]+)+-\d$/;
+export const REGION_PATTERN_MESSAGE =
+  'Must be an AWS commercial or GovCloud Region such as us-east-1; China and ISO Regions are not supported';
 /** Cluster names: 1-100 characters, alphanumeric start, then alphanumerics, `-` and `_`. */
 const CLUSTER_NAME_PATTERN = /^[0-9A-Za-z][A-Za-z0-9\-_]{0,99}$/;
 /** Node group names: 1-63 characters, same charset as cluster names. */
@@ -38,7 +44,7 @@ const region = () =>
   z
     .string()
     .max(32)
-    .regex(REGION_PATTERN, { message: 'Must be an AWS Region such as us-east-1 or eu-north-1' })
+    .regex(REGION_PATTERN, { message: REGION_PATTERN_MESSAGE })
     .optional()
     .describe(
       'AWS Region of the cluster, for example "us-east-1". Optional: defaults to the region configured on the connector.'
@@ -127,7 +133,7 @@ const kubernetesGroups = () =>
     )
     .max(20)
     .describe(
-      'Kubernetes group names the principal is mapped to inside the cluster, for example ["system:masters"] or ["viewers"]. RBAC bindings on these groups (or an associated access policy) decide what the principal can do.'
+      'Kubernetes group names the principal is mapped to inside the cluster, for example ["viewers"] or ["platform-admins"]. RBAC bindings on these groups (or an associated access policy) decide what the principal can do.'
     );
 
 const kubernetesUsername = () =>
@@ -135,9 +141,12 @@ const kubernetesUsername = () =>
     .string()
     .min(1)
     .max(253)
-    .regex(/^[^\s]+$/, { message: 'The username must not contain whitespace' })
+    .regex(/^(?!(system|eks|aws|amazon|iam):)[^\s]+$/, {
+      message:
+        'The username must not contain whitespace or start with system:, eks:, aws:, amazon:, or iam:',
+    })
     .describe(
-      'Kubernetes username the principal appears as in audit logs and RBAC. Leave unset to let EKS derive it from the ARN (the default and recommended choice).'
+      'Kubernetes username the principal appears as in audit logs and RBAC. Must not start with system:, eks:, aws:, amazon:, or iam:. Leave unset to let EKS derive it from the ARN (the default and recommended choice).'
     );
 
 const labelsMap = () =>
@@ -397,11 +406,15 @@ export const UpdateClusterConfigInputSchema = lazySchema(() =>
       endpointPublicAccess: z
         .boolean()
         .optional()
-        .describe('Whether the Kubernetes API server is reachable from the public internet.'),
+        .describe(
+          'Whether the Kubernetes API server is reachable from the public internet. Omit to keep the current setting.'
+        ),
       endpointPrivateAccess: z
         .boolean()
         .optional()
-        .describe('Whether the Kubernetes API server is reachable from inside the VPC.'),
+        .describe(
+          'Whether the Kubernetes API server is reachable from inside the VPC. Omit to keep the current setting.'
+        ),
       publicAccessCidrs: z
         .array(
           z
@@ -413,7 +426,7 @@ export const UpdateClusterConfigInputSchema = lazySchema(() =>
         .max(40)
         .optional()
         .describe(
-          'IPv4 CIDRs allowed to reach the public API server endpoint. REPLACES the current list; read it from getCluster first and include every range to keep. Requires endpointPublicAccess true.'
+          'IPv4 CIDRs allowed to reach the public API server endpoint. REPLACES the current list when given; read it from getCluster first and include every range to keep. Omit to keep the current list. Requires public endpoint access.'
         ),
       supportType: z
         .enum(['STANDARD', 'EXTENDED'])
@@ -500,10 +513,18 @@ export const CreateAccessEntryInputSchema = lazySchema(() =>
     kubernetesGroups: kubernetesGroups().optional(),
     username: kubernetesUsername().optional(),
     type: z
-      .enum(['STANDARD', 'EC2_LINUX', 'EC2_WINDOWS', 'FARGATE_LINUX', 'HYBRID_LINUX'])
+      .enum([
+        'STANDARD',
+        'EC2',
+        'EC2_LINUX',
+        'EC2_WINDOWS',
+        'FARGATE_LINUX',
+        'HYBRID_LINUX',
+        'HYPERPOD_LINUX',
+      ])
       .optional()
       .describe(
-        'Access entry type. "STANDARD" (default) for humans and automation such as this connector; the EC2/FARGATE/HYBRID types are for node roles and cannot carry kubernetesGroups or policies.'
+        'Access entry type. "STANDARD" (default) for humans and automation such as this connector; the node types ("EC2" for EKS Auto Mode node classes, "EC2_LINUX", "EC2_WINDOWS", "FARGATE_LINUX", "HYBRID_LINUX", "HYPERPOD_LINUX") are for node roles and cannot carry kubernetesGroups or policies.'
       ),
     tags: tagsMap()
       .optional()
@@ -642,6 +663,20 @@ export interface EksCluster {
   tags?: Record<string, string>;
 }
 
+export interface EksNodeRepairConfig {
+  enabled?: boolean;
+  maxUnhealthyNodeThresholdCount?: number;
+  maxUnhealthyNodeThresholdPercentage?: number;
+  maxParallelNodesRepairedCount?: number;
+  maxParallelNodesRepairedPercentage?: number;
+  nodeRepairConfigOverrides?: Array<{
+    nodeMonitoringCondition?: string;
+    nodeUnhealthyReason?: string;
+    minRepairWaitTimeMins?: number;
+    repairAction?: string;
+  }>;
+}
+
 export interface EksNodegroup {
   nodegroupName?: string;
   nodegroupArn?: string;
@@ -667,7 +702,7 @@ export interface EksNodegroup {
     maxUnavailablePercentage?: number;
     updateStrategy?: string;
   };
-  nodeRepairConfig?: { enabled?: boolean };
+  nodeRepairConfig?: EksNodeRepairConfig;
   launchTemplate?: { name?: string; version?: string; id?: string };
   tags?: Record<string, string>;
 }

@@ -9,7 +9,9 @@ applies_to:
 
 # Amazon EKS connector [aws-eks-action-type]
 
-The Amazon EKS connector gives a workflow or agent the AWS control-plane side of managed Kubernetes: it discovers clusters, reads cluster and node group state, scales node groups to add or drain capacity, manages who can reach a cluster through EKS access entries and access policies, and mints the short-lived Kubernetes bearer token that EKS requires so a later step can act on the cluster's Kubernetes API without an interactive `aws eks get-token`.
+The Amazon EKS connector gives an agent the AWS control-plane side of managed Kubernetes: it discovers clusters, reads cluster and node group state, scales node groups to add or drain capacity, and audits who can reach a cluster through EKS access entries and access policies. Through the connector execute API, it also manages access entries and mints the short-lived Kubernetes bearer token that EKS requires, without an interactive `aws eks get-token`.
+
+This connector is currently available in **Agent Builder** only. Workflow support is planned for a future release.
 
 It does not touch workloads. Pods, deployments, logs, and `kubectl`-style apply, scale, and rollout belong to the [Kubernetes connector](/reference/connectors-kibana/kubernetes-action-type.md), which accepts the same AWS access key through its **Amazon EKS** authentication type. The `getCluster` action returns the endpoint and CA certificate that connector needs.
 
@@ -17,9 +19,9 @@ It does not touch workloads. Pods, deployments, logs, and `kubectl`-style apply,
 
 The connector calls the [Amazon EKS API](https://docs.aws.amazon.com/eks/latest/APIReference/Welcome.html) in the configured Region, signing every request with AWS Signature Version 4 using the access key you provide. `getToken` additionally presigns an AWS STS `GetCallerIdentity` request with the same key, which is how EKS bearer tokens work.
 
-Node group and cluster configuration changes are asynchronous updates. Poll `describeUpdate` with the returned update ID until `done` is true, then check `succeeded` and `errors`. Access entry and policy changes apply immediately.
+Node group and cluster configuration changes are asynchronous updates. Poll `describeUpdate` with the returned update ID, cluster name, and Region until `done` is true, then check `succeeded` and `errors`. Access entry and policy changes apply immediately.
 
-Access entry management (`createAccessEntry`, `updateAccessEntry`, `deleteAccessEntry`, `associateAccessPolicy`, `disassociateAccessPolicy`) and `getToken` are available as workflow steps only, not as autonomous agent tools, because they grant cluster access or return a live credential.
+Access entry management (`createAccessEntry`, `updateAccessEntry`, `deleteAccessEntry`, `associateAccessPolicy`, `disassociateAccessPolicy`) and `getToken` are not available to agents, because they grant cluster access or return a live credential. You can call them only through the [connector execute API](https://www.elastic.co/docs/api/doc/kibana/operation/operation-post-actions-connector-id-execute).
 
 ## Create connectors in {{kib}} [define-aws-eks-ui]
 
@@ -30,7 +32,7 @@ You can create connectors in **{{stack-manage-app}} > {{connectors-ui}}**.
 Amazon EKS connectors have the following configuration properties:
 
 AWS Region
-:   The AWS Region the clusters live in, for example `us-east-1`. Every action can override it with a `region` parameter.
+:   The AWS Region the clusters live in, for example `us-east-1` or `us-gov-west-1`. Every action can override it with a `region` parameter. China and ISO Regions are not supported.
 
 ### Authentication [aws-eks-connector-authentication]
 
@@ -56,10 +58,10 @@ Every action accepts an optional `region` that overrides the connector setting.
 :   Lists the cluster names in a Region. Parameters: `maxResults`, `nextToken`, `includeConnectedClusters`.
 
 `getCluster`
-:   Describes a cluster: status, Kubernetes and platform version, API server endpoint, CA certificate, authentication mode, enabled control-plane log types, VPC and endpoint access settings, health issues, and tags. Also returns `kubernetesConnector` with the API URL and PEM CA certificate for wiring the Kubernetes connector to the cluster. Parameters: `clusterName`.
+:   Describes a cluster: status, Kubernetes and platform version, API server endpoint, CA certificate, authentication mode, enabled control-plane log types, VPC and endpoint access settings, health issues, and tags. Also returns `kubernetesConnector` with the API URL and PEM CA certificate for wiring the Kubernetes connector to the cluster. Clusters registered through the EKS Connector have no endpoint, so `kubernetesConnector` is absent for them. When `vpc.endpointPublicAccess` is `false`, the endpoint is reachable only from inside the cluster's VPC. Parameters: `clusterName`.
 
 `getToken`
-:   Mints a short-lived Kubernetes bearer token for the cluster and, by default, returns the endpoint and CA certificate with it, ready for a step that calls the Kubernetes API. Tokens are valid for about 15 minutes. The connector's IAM identity must already have an access entry on the cluster. Parameters: `clusterName`, `includeClusterDetails`. Workflow steps only.
+:   Mints a short-lived Kubernetes bearer token for the cluster and, by default, returns the endpoint and CA certificate with it, ready for a call to the Kubernetes API. Tokens are reported as valid for 14 minutes, one minute less than EKS accepts them. The connector's IAM identity must already have an access entry on the cluster. Fails for a cluster without an API server endpoint. Parameters: `clusterName`, `includeClusterDetails`. Execute API only.
 
 ### Node groups
 
@@ -70,7 +72,7 @@ Every action accepts an optional `region` that overrides the connector setting.
 :   Describes a managed node group: status, scaling configuration (`minSize`, `maxSize`, `desiredSize`), capacity type, instance types, AMI type, version, labels, taints, update strategy, node repair, Auto Scaling groups, and health issues. Parameters: `clusterName`, `nodegroupName`.
 
 `updateNodegroupConfig`
-:   Scales a node group or changes its labels, taints, rolling-update settings, or node auto repair. Parameters: `clusterName`, `nodegroupName`, and at least one of `minSize`, `maxSize`, `desiredSize`, `labelsToAdd`, `labelsToRemove`, `taintsToAdd`, `taintsToRemove`, `maxUnavailable`, `maxUnavailablePercentage`, `updateStrategy`, `nodeRepairEnabled`. Returns an update to poll.
+:   Scales a node group or changes its labels, taints, rolling-update settings, or node auto repair. Parameters: `clusterName`, `nodegroupName`, and at least one of `minSize`, `maxSize`, `desiredSize`, `labelsToAdd`, `labelsToRemove`, `taintsToAdd`, `taintsToRemove`, `maxUnavailable`, `maxUnavailablePercentage`, `updateStrategy`, `nodeRepairEnabled`. Settings you omit keep their current values. Returns an update, with the cluster name and Region to poll it with.
 
 ### Updates
 
@@ -83,7 +85,7 @@ Every action accepts an optional `region` that overrides the connector setting.
 ### Cluster configuration and tags
 
 `updateClusterConfig`
-:   Changes control-plane settings: `enableLogTypes` and `disableLogTypes`, `authenticationMode` (forward only: `CONFIG_MAP` to `API_AND_CONFIG_MAP` to `API`), `endpointPublicAccess`, `endpointPrivateAccess`, `publicAccessCidrs`, `supportType`, `deletionProtection`. Change one category per call. Returns an update to poll.
+:   Changes control-plane settings: `enableLogTypes` and `disableLogTypes`, `authenticationMode` (forward only: `CONFIG_MAP` to `API_AND_CONFIG_MAP` to `API`), `endpointPublicAccess`, `endpointPrivateAccess`, `publicAccessCidrs`, `supportType`, `deletionProtection`. Change one category per call. Endpoint settings you omit keep their current values. Returns an update, with the cluster name and Region to poll it with.
 
 `listTagsForResource`
 :   Reads the AWS tags on a cluster or node group. Parameters: `resourceArn`.
@@ -103,27 +105,27 @@ Every action accepts an optional `region` that overrides the connector setting.
 :   Lists the access policies bound to a principal's access entry with their scope. Parameters: `clusterName`, `principalArn`.
 
 `createAccessEntry`
-:   Creates an access entry so an IAM user or role can authenticate to the cluster. Parameters: `clusterName`, `principalArn`, and optional `kubernetesGroups`, `username`, `type`, `tags`. Workflow steps only.
+:   Creates an access entry so an IAM user or role can authenticate to the cluster. Parameters: `clusterName`, `principalArn`, and optional `kubernetesGroups`, `username`, `type`, `tags`. Execute API only.
 
 `updateAccessEntry`
-:   Replaces the Kubernetes groups or username of an access entry. Parameters: `clusterName`, `principalArn`, and `kubernetesGroups` or `username`. Workflow steps only.
+:   Replaces the Kubernetes groups or username of an access entry. The one you omit keeps its current value. Parameters: `clusterName`, `principalArn`, and `kubernetesGroups` or `username`. Execute API only.
 
 `deleteAccessEntry`
-:   Deletes an access entry, revoking the principal's cluster access. Parameters: `clusterName`, `principalArn`. Workflow steps only.
+:   Deletes an access entry, revoking the principal's cluster access. Parameters: `clusterName`, `principalArn`. Execute API only.
 
 `associateAccessPolicy`
-:   Binds an access policy to an access entry, cluster-wide or scoped to namespaces. Parameters: `clusterName`, `principalArn`, `policyArn`, `accessScopeType`, `namespaces`. Workflow steps only.
+:   Binds an access policy to an access entry, cluster-wide or scoped to namespaces. Parameters: `clusterName`, `principalArn`, `policyArn`, `accessScopeType`, `namespaces`. Execute API only.
 
 `disassociateAccessPolicy`
-:   Removes an access policy from an access entry. Parameters: `clusterName`, `principalArn`, `policyArn`. Workflow steps only.
+:   Removes an access policy from an access entry. Parameters: `clusterName`, `principalArn`, `policyArn`. Execute API only.
 
 ## Usage notes [aws-eks-usage-notes]
 
 * Node group sizes are totals across the group's subnets, not per zone. `desiredSize` must stay within `minSize` and `maxSize`, so widen `maxSize` in the same call when scaling past the current maximum. If the Cluster Autoscaler or Karpenter manages the group, change the bounds instead of `desiredSize`.
-* Updates are slow. Node group scaling takes 1 to 5 minutes; control-plane changes such as logging or endpoint access take 5 to 25 minutes. Do not wait for an update inside a single step: keep the update ID and poll `describeUpdate` from later steps, with a wait between polls, so the calling agent turn or workflow step does not time out. EKS runs one update per node group and one cluster-level update at a time.
-* To let the connector's IAM identity (or any other principal) reach the Kubernetes API, create an access entry with `createAccessEntry`, then bind a policy with `associateAccessPolicy`. Access entries require the cluster authentication mode `API` or `API_AND_CONFIG_MAP`.
+* Updates are slow. Node group scaling takes 1 to 5 minutes; control-plane changes such as logging or endpoint access take 5 to 25 minutes. Do not wait for an update in a single call: keep the update ID and poll `describeUpdate` later, with a wait between polls, so the calling agent turn does not time out. EKS runs one update per node group and one cluster-level update at a time.
+* To let the connector's IAM identity (or any other principal) reach the Kubernetes API, create an access entry, then bind an access policy to it, with `createAccessEntry` and `associateAccessPolicy` through the execute API or in the EKS console. Access entries require the cluster authentication mode `API` or `API_AND_CONFIG_MAP`.
 * To manage workloads from {{kib}}, create a Kubernetes connector with the **Amazon EKS** authentication type, the same access key, the Region and cluster name, and the `kubernetesConnector.apiUrl` and `caCertificatePem` returned by `getCluster`. That connector mints its own token on every call, so `getToken` is only needed when another system consumes the token.
-* `updateAccessEntry` replaces the Kubernetes group list and `updateClusterConfig` replaces the public CIDR allowlist. Read the current values first and include everything you want to keep.
+* `updateAccessEntry` replaces the Kubernetes group list, and `updateClusterConfig` replaces the public CIDR allowlist when you pass `publicAccessCidrs`. Read the current values first and include everything you want to keep.
 
 ## Connector networking configuration [aws-eks-connector-networking-configuration]
 
@@ -132,11 +134,13 @@ Use the [Action configuration settings](/reference/configuration-reference/alert
 ## Get API credentials [aws-eks-api-credentials]
 
 1. Sign in to the [AWS IAM console](https://console.aws.amazon.com/iam/).
-2. Create (or choose) an IAM user or role dedicated to this connector.
-3. Attach a policy granting at least the following actions, scoped to the clusters you want the connector to manage:
-   - `eks:ListClusters`, `eks:DescribeCluster`, `eks:ListNodegroups`, `eks:DescribeNodegroup`, `eks:DescribeUpdate`, `eks:ListUpdates`, `eks:ListTagsForResource`, `eks:ListAccessPolicies`, `eks:ListAccessEntries`, `eks:DescribeAccessEntry`, `eks:ListAssociatedAccessPolicies` for the read actions
-   - `eks:UpdateNodegroupConfig` and `eks:UpdateClusterConfig` for scaling and configuration changes
-   - `eks:CreateAccessEntry`, `eks:UpdateAccessEntry`, `eks:DeleteAccessEntry`, `eks:AssociateAccessPolicy`, `eks:DisassociateAccessPolicy` for access management
-   - `sts:GetCallerIdentity` is implied for `getToken`; no extra IAM permission is needed, but the identity must have an access entry on the cluster for the token to be accepted.
+2. Create (or choose) an IAM user dedicated to this connector. The connector signs requests with a static access key, and only IAM users have access keys.
+3. Attach a policy granting the actions below. EKS grants each action on a different resource, so scope every statement to the resource type the action requires. An action scoped to the wrong resource type is denied.
+   - **All resources (`"Resource": "*"`)**: `eks:ListClusters` and `eks:ListAccessPolicies`. These actions don't support resource-level permissions. The connector test calls `ListClusters`, so a policy that scopes it to cluster ARNs fails the test.
+   - **Clusters** (`arn:aws:eks:<region>:<account-id>:cluster/<cluster-name>`): `eks:DescribeCluster`, `eks:ListNodegroups`, `eks:ListUpdates`, `eks:DescribeUpdate`, `eks:ListTagsForResource`, `eks:ListAccessEntries`, `eks:UpdateClusterConfig`, `eks:CreateAccessEntry`.
+   - **Node groups** (`arn:aws:eks:<region>:<account-id>:nodegroup/<cluster-name>/*`): `eks:DescribeNodegroup`, `eks:UpdateNodegroupConfig`, and `eks:ListTagsForResource`, `eks:ListUpdates`, `eks:DescribeUpdate` for node group tags and updates.
+   - **Access entries** (`arn:aws:eks:<region>:<account-id>:access-entry/<cluster-name>/*`): `eks:DescribeAccessEntry`, `eks:ListAssociatedAccessPolicies`, `eks:UpdateAccessEntry`, `eks:DeleteAccessEntry`, `eks:AssociateAccessPolicy`, `eks:DisassociateAccessPolicy`.
+
+   Leave out the write actions you don't want the connector to perform. `updateNodegroupConfig` and `updateClusterConfig` also read the current node group or cluster first, so they need `eks:DescribeNodegroup` or `eks:DescribeCluster`. `getToken` needs no extra IAM permission (`sts:GetCallerIdentity` is always allowed), but the identity must have an access entry on the cluster for the token to be accepted.
 4. Create an access key for that user (**Security credentials** → **Access keys** → **Create access key**).
 5. Copy the **Access key ID** and **Secret access key**, and enter them along with the AWS Region when configuring the connector in {{kib}}.

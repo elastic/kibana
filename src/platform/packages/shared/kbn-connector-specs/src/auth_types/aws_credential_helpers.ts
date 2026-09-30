@@ -67,14 +67,6 @@ export function escapeSigV4ReservedChars(value: string): string {
 }
 
 /**
- * Builds the query string used both to compute the SigV4 signature and as
- * the literal query string sent on the wire. AWS rejects a request whose
- * live query string differs, byte-for-byte, from the one that was signed —
- * so signing and the outgoing request must always derive from this single
- * function rather than two independently-encoded copies (see `signRequest`
- * callers in aws_credentials.ts, which reuse this to rewrite `config.url`).
- */
-/**
  * The SigV4 canonical URI for every AWS service except S3 is the request path
  * URI-encoded a *second* time: a path segment the caller already percent-encoded
  * (e.g. an ARN's `:` and `/` as `%3A`/`%2F`) must appear in the string-to-sign
@@ -93,6 +85,14 @@ export function canonicalizeUriPath(path: string): string {
     .join('/');
 }
 
+/**
+ * Builds the query string used both to compute the SigV4 signature and as
+ * the literal query string sent on the wire. AWS rejects a request whose
+ * live query string differs, byte-for-byte, from the one that was signed —
+ * so signing and the outgoing request must always derive from this single
+ * function rather than two independently-encoded copies (see `signRequest`
+ * callers in aws_credentials.ts, which reuse this to rewrite `config.url`).
+ */
 export function buildCanonicalQueryString(queryParams: Record<string, string>): string {
   return Object.keys(queryParams)
     .sort()

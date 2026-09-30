@@ -172,10 +172,15 @@ describe('AwsEks', () => {
       ]);
     });
 
-    it('documents the async update model and the hand-off to the Kubernetes connector', () => {
+    it('documents the async update model and only points agents at actions they can call', () => {
       expect(AwsEks.skill).toContain('describeUpdate');
-      expect(AwsEks.skill).toContain('getToken');
-      expect(AwsEks.skill).toContain('createAccessEntry');
+      expect(AwsEks.skill).toContain('listAssociatedAccessPolicies');
+      const hidden = Object.entries(AwsEks.actions)
+        .filter(([, action]) => action.isTool === false)
+        .map(([name]) => name);
+      for (const name of hidden) {
+        expect(AwsEks.skill).not.toContain(name);
+      }
     });
   });
 
@@ -214,6 +219,24 @@ describe('AwsEks', () => {
         parse('describeUpdate', { clusterName: 'ok', updateId: 'not-a-uuid' })
       ).toThrow();
       expect(mockClient.get).not.toHaveBeenCalled();
+    });
+
+    it.each([
+      ['us-east-1', true],
+      ['eu-north-1', true],
+      ['us-gov-west-1', true],
+      ['cn-north-1', false],
+      ['cn-northwest-1', false],
+      ['us-iso-east-1', false],
+      ['us-isob-east-1', false],
+      ['eu-isoe-west-1', false],
+    ])('accepts only Regions served from amazonaws.com: %s -> %s', (region, accepted) => {
+      const attempt = () => parse('getCluster', { clusterName: 'ok', region });
+      if (accepted) {
+        expect(attempt).not.toThrow();
+      } else {
+        expect(attempt).toThrow('China and ISO Regions are not supported');
+      }
     });
   });
 
@@ -272,12 +295,25 @@ describe('AwsEks', () => {
         region: REGION,
         tokenType: 'Bearer',
         token: 'k8s-aws-v1.dGVzdA',
-        tokenLifetimeSeconds: 900,
+        tokenLifetimeSeconds: 840,
         endpoint: sampleCluster.endpoint,
         caCertificatePem: CA_PEM,
         clusterStatus: 'ACTIVE',
       });
-      expect(new Date(result.expiresAt as string).getTime()).toBeGreaterThan(Date.now());
+      const expiresIn = new Date(result.expiresAt as string).getTime() - Date.now();
+      expect(expiresIn).toBeGreaterThan(830 * 1000);
+      expect(expiresIn).toBeLessThanOrEqual(840 * 1000);
+    });
+
+    it('getCluster and getToken handle a cluster without an endpoint (EKS Connector)', async () => {
+      const connected = { ...sampleCluster, endpoint: undefined, certificateAuthority: undefined };
+      mockClient.get.mockResolvedValue({ data: { cluster: connected } });
+      const described = await run('getCluster', { clusterName: 'prod-eu' });
+      expect(described).toMatchObject({ endpoint: undefined, kubernetesConnector: undefined });
+      await expect(run('getToken', { clusterName: 'prod-eu' })).rejects.toThrow(
+        'has no Kubernetes API server endpoint'
+      );
+      expect(buildEksBearerTokenMock).not.toHaveBeenCalled();
     });
 
     it('getToken skips the describe call when cluster details are not wanted', async () => {
@@ -326,17 +362,21 @@ describe('AwsEks', () => {
       });
     });
 
-    it('updateNodegroupConfig sends only the requested sections and returns the update', async () => {
+    it('updateNodegroupConfig merges the scaling config with the current one and returns a pollable update', async () => {
+      mockClient.get.mockResolvedValue({ data: { nodegroup: sampleNodegroup } });
       mockClient.post.mockResolvedValue({ data: { update: sampleUpdate } });
       const result = await run('updateNodegroupConfig', { ...ref, desiredSize: 3, maxSize: 6 });
+      expect(mockClient.get).toHaveBeenCalledWith(NODEGROUP);
       expect(mockClient.post).toHaveBeenCalledWith(`${NODEGROUP}/update-config`, {
-        scalingConfig: { minSize: undefined, maxSize: 6, desiredSize: 3 },
+        scalingConfig: { minSize: 1, maxSize: 6, desiredSize: 3 },
         labels: undefined,
         taints: undefined,
         updateConfig: undefined,
         nodeRepairConfig: undefined,
       });
       expect(result).toMatchObject({
+        clusterName: 'prod-eu',
+        region: REGION,
         nodegroupName: 'workers-general',
         id: UPDATE_ID,
         status: 'InProgress',
@@ -346,7 +386,21 @@ describe('AwsEks', () => {
       });
     });
 
+    it('updateNodegroupConfig maps labels and taints without reading the node group', async () => {
+      mockClient.post.mockResolvedValue({ data: { update: sampleUpdate } });
+      await run('updateNodegroupConfig', { ...ref, labelsToRemove: ['old'] });
+      expect(mockClient.get).not.toHaveBeenCalled();
+      expect(mockClient.post).toHaveBeenCalledWith(`${NODEGROUP}/update-config`, {
+        scalingConfig: undefined,
+        labels: { addOrUpdateLabels: undefined, removeLabels: ['old'] },
+        taints: undefined,
+        updateConfig: undefined,
+        nodeRepairConfig: undefined,
+      });
+    });
+
     it('updateNodegroupConfig maps labels, taints, update settings and node repair', async () => {
+      mockClient.get.mockResolvedValue({ data: { nodegroup: sampleNodegroup } });
       mockClient.post.mockResolvedValue({ data: { update: sampleUpdate } });
       await run('updateNodegroupConfig', {
         ...ref,
@@ -364,13 +418,49 @@ describe('AwsEks', () => {
           addOrUpdateTaints: [{ key: 'dedicated', value: 'batch', effect: 'NO_SCHEDULE' }],
           removeTaints: undefined,
         },
-        updateConfig: {
-          maxUnavailable: undefined,
-          maxUnavailablePercentage: 25,
-          updateStrategy: 'MINIMAL',
-        },
+        updateConfig: { maxUnavailablePercentage: 25, updateStrategy: 'MINIMAL' },
         nodeRepairConfig: { enabled: true },
       });
+    });
+
+    it('updateNodegroupConfig keeps the node repair thresholds and update limit it was not asked to change', async () => {
+      const nodeRepairConfig = {
+        enabled: false,
+        maxUnhealthyNodeThresholdPercentage: 20,
+        maxParallelNodesRepairedCount: 2,
+        nodeRepairConfigOverrides: [
+          {
+            nodeMonitoringCondition: 'AcceleratedHardwareReady',
+            nodeUnhealthyReason: 'NvidiaXID13Error',
+            minRepairWaitTimeMins: 10,
+            repairAction: 'Reboot',
+          },
+        ],
+      };
+      mockClient.get.mockResolvedValue({
+        data: { nodegroup: { ...sampleNodegroup, nodeRepairConfig } },
+      });
+      mockClient.post.mockResolvedValue({ data: { update: sampleUpdate } });
+      await run('updateNodegroupConfig', {
+        ...ref,
+        nodeRepairEnabled: true,
+        updateStrategy: 'MINIMAL',
+      });
+      expect(mockClient.post).toHaveBeenCalledWith(
+        `${NODEGROUP}/update-config`,
+        expect.objectContaining({
+          updateConfig: { maxUnavailable: 1, updateStrategy: 'MINIMAL' },
+          nodeRepairConfig: { ...nodeRepairConfig, enabled: true },
+        })
+      );
+    });
+
+    it('updateNodegroupConfig rejects a scaling change that the current bounds make invalid', async () => {
+      mockClient.get.mockResolvedValue({ data: { nodegroup: sampleNodegroup } });
+      await expect(run('updateNodegroupConfig', { ...ref, desiredSize: 8 })).rejects.toThrow(
+        'desiredSize 8 is outside minSize 1 and maxSize 5'
+      );
+      expect(mockClient.post).not.toHaveBeenCalled();
     });
 
     it('updateNodegroupConfig validates the scaling bounds', () => {
@@ -455,11 +545,13 @@ describe('AwsEks', () => {
       mockClient.post.mockResolvedValue({
         data: { update: { ...sampleUpdate, type: 'LoggingUpdate' } },
       });
-      await run('updateClusterConfig', {
+      const result = await run('updateClusterConfig', {
         clusterName: 'prod-eu',
         enableLogTypes: ['audit'],
         disableLogTypes: ['scheduler'],
       });
+      expect(mockClient.get).not.toHaveBeenCalled();
+      expect(result).toMatchObject({ clusterName: 'prod-eu', region: REGION, id: UPDATE_ID });
       expect(mockClient.post).toHaveBeenCalledWith(`${CLUSTER}/update-config`, {
         logging: {
           clusterLogging: [
@@ -473,23 +565,51 @@ describe('AwsEks', () => {
         deletionProtection: undefined,
       });
 
+      mockClient.get.mockResolvedValue({ data: { cluster: sampleCluster } });
       await run('updateClusterConfig', {
         clusterName: 'prod-eu',
         authenticationMode: 'API',
         endpointPublicAccess: true,
         publicAccessCidrs: ['203.0.113.0/24'],
       });
+      expect(mockClient.get).toHaveBeenCalledWith(CLUSTER);
       expect(mockClient.post).toHaveBeenLastCalledWith(`${CLUSTER}/update-config`, {
         logging: undefined,
         accessConfig: { authenticationMode: 'API' },
         resourcesVpcConfig: {
           endpointPublicAccess: true,
-          endpointPrivateAccess: undefined,
+          endpointPrivateAccess: false,
           publicAccessCidrs: ['203.0.113.0/24'],
         },
         upgradePolicy: undefined,
         deletionProtection: undefined,
       });
+    });
+
+    it('updateClusterConfig keeps the public endpoint and its allowlist when only private access changes', async () => {
+      mockClient.get.mockResolvedValue({
+        data: {
+          cluster: {
+            ...sampleCluster,
+            resourcesVpcConfig: {
+              ...sampleCluster.resourcesVpcConfig,
+              publicAccessCidrs: ['198.51.100.0/24'],
+            },
+          },
+        },
+      });
+      mockClient.post.mockResolvedValue({ data: { update: sampleUpdate } });
+      await run('updateClusterConfig', { clusterName: 'prod-eu', endpointPrivateAccess: true });
+      expect(mockClient.post).toHaveBeenCalledWith(
+        `${CLUSTER}/update-config`,
+        expect.objectContaining({
+          resourcesVpcConfig: {
+            endpointPublicAccess: true,
+            endpointPrivateAccess: true,
+            publicAccessCidrs: ['198.51.100.0/24'],
+          },
+        })
+      );
     });
 
     it('updateClusterConfig requires a change and rejects contradictory log types', () => {
@@ -586,17 +706,48 @@ describe('AwsEks', () => {
       expect(result).toMatchObject({ principalArn: PRINCIPAL, kubernetesGroups: ['viewers'] });
     });
 
-    it('updateAccessEntry requires a change and posts to the entry path', async () => {
+    it('validates access entry usernames and types against the EKS rules', () => {
+      for (const username of ['system:admin', 'eks:ops', 'aws:x', 'amazon:x', 'iam:x']) {
+        expect(() => parse('createAccessEntry', { ...ref, username })).toThrow(
+          'must not contain whitespace or start with'
+        );
+      }
+      expect(() =>
+        parse('createAccessEntry', { ...ref, username: 'automation:{{SessionName}}' })
+      ).not.toThrow();
+      expect(() => parse('createAccessEntry', { ...ref, type: 'EC2' })).not.toThrow();
+      expect(() => parse('createAccessEntry', { ...ref, type: 'HYPERPOD_LINUX' })).not.toThrow();
+    });
+
+    it('updateAccessEntry requires a change and keeps the username it was not asked to change', async () => {
       expect(() => parse('updateAccessEntry', ref)).toThrow('Provide kubernetesGroups');
+      mockClient.get.mockResolvedValue({ data: { accessEntry: sampleAccessEntry } });
       mockClient.post.mockResolvedValue({
         data: { accessEntry: { ...sampleAccessEntry, kubernetesGroups: [] } },
       });
       const result = await run('updateAccessEntry', { ...ref, kubernetesGroups: [] });
+      expect(mockClient.get).toHaveBeenCalledWith(ACCESS_ENTRY);
       expect(mockClient.post).toHaveBeenCalledWith(ACCESS_ENTRY, {
         kubernetesGroups: [],
-        username: undefined,
+        username: sampleAccessEntry.username,
       });
       expect(result).toMatchObject({ kubernetesGroups: [] });
+    });
+
+    it('updateAccessEntry keeps the groups when only the username changes', async () => {
+      mockClient.get.mockResolvedValue({ data: { accessEntry: sampleAccessEntry } });
+      mockClient.post.mockResolvedValue({ data: { accessEntry: sampleAccessEntry } });
+      await run('updateAccessEntry', { ...ref, username: 'auditor' });
+      expect(mockClient.post).toHaveBeenCalledWith(ACCESS_ENTRY, {
+        kubernetesGroups: ['viewers'],
+        username: 'auditor',
+      });
+    });
+
+    it('updateAccessEntry skips the read when both fields are given', async () => {
+      mockClient.post.mockResolvedValue({ data: { accessEntry: sampleAccessEntry } });
+      await run('updateAccessEntry', { ...ref, username: 'auditor', kubernetesGroups: ['a'] });
+      expect(mockClient.get).not.toHaveBeenCalled();
     });
 
     it('deleteAccessEntry issues a DELETE on the entry', async () => {
@@ -702,6 +853,7 @@ describe('AwsEks', () => {
     });
 
     it('falls back to the body __type and rethrows network errors', async () => {
+      mockClient.get.mockResolvedValue({ data: { nodegroup: sampleNodegroup } });
       mockClient.post.mockRejectedValue({
         response: {
           status: 409,
@@ -742,6 +894,15 @@ describe('AwsEks', () => {
       });
       expect(mockClient.get).toHaveBeenCalledWith(`${API}/clusters`, {
         params: { maxResults: 100 },
+      });
+    });
+
+    it('marks the count as a lower bound when more clusters exist', async () => {
+      mockClient.get.mockResolvedValue({
+        data: { clusters: Array.from({ length: 100 }, (_, i) => `c${i}`), nextToken: 'more' },
+      });
+      expect(await runTest()).toEqual({
+        message: `Connected to Amazon EKS: 100+ cluster(s) visible in ${REGION}.`,
       });
     });
 
