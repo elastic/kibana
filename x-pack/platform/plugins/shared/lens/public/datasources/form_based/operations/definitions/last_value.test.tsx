@@ -575,7 +575,7 @@ describe('last_value', () => {
           layer: localLayer,
           field: scriptedField!,
         }).params.showArrayValues
-      ).toBeTruthy();
+      ).toBe(true);
 
       expect(
         lastValueOperation.buildColumn({
@@ -583,7 +583,7 @@ describe('last_value', () => {
           layer: localLayer,
           field: runtimeKeywordField!,
         }).params.showArrayValues
-      ).toBeTruthy();
+      ).toBe(true);
 
       expect(
         lastValueOperation.buildColumn({
@@ -591,7 +591,7 @@ describe('last_value', () => {
           layer: localLayer,
           field: runtimeNumericField!,
         }).params.showArrayValues
-      ).toBeFalsy();
+      ).toBe(false);
 
       expect(
         lastValueOperation.buildColumn(
@@ -602,7 +602,7 @@ describe('last_value', () => {
           },
           { showArrayValues: true }
         ).params.showArrayValues
-      ).toBeTruthy();
+      ).toBe(true);
 
       expect(
         lastValueOperation.buildColumn({
@@ -610,7 +610,25 @@ describe('last_value', () => {
           layer: localLayer,
           field: nonScriptedField!,
         }).params.showArrayValues
-      ).toBeFalsy();
+      ).toBe(false);
+    });
+
+    it('should set showArrayValues to false for a new regular-field column with no prior params', () => {
+      const indexPattern = createMockedIndexPattern();
+      const regularField = indexPattern.fields.find((field) => !field.scripted && !field.runtime)!;
+      const localLayer = {
+        columns: {},
+        columnOrder: [],
+        indexPatternId: '',
+      } as FormBasedLayer;
+
+      expect(
+        lastValueOperation.buildColumn({
+          indexPattern,
+          layer: localLayer,
+          field: regularField,
+        }).params.showArrayValues
+      ).toBe(false);
     });
   });
 

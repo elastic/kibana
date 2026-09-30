@@ -17,6 +17,7 @@ export type ApprovalProposalImpact = NonNullable<ProposalWithMetadata['impact']>
  */
 export type ApprovalProposal = Pick<
   ProposalWithMetadata,
+  | 'title'
   | 'comment'
   | 'impact'
   | 'status'
@@ -25,4 +26,8 @@ export type ApprovalProposal = Pick<
   | 'expiresAt'
   | 'actionWorkflowId'
   | 'action'
+  | 'decision'
+  | 'decidedBy'
+  | 'decidedAt'
+  | 'rationale'
 >;

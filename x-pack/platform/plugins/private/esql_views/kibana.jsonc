@@ -16,8 +16,10 @@
       "esqlViews"
     ],
     "requiredPlugins": [
+      "esql",
       "features",
-      "management"
+      "management",
+      "share"
     ]
   }
 }

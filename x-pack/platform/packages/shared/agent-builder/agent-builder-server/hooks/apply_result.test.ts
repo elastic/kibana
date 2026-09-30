@@ -42,6 +42,20 @@ describe('apply_result', () => {
       expect(result).not.toBe(baseContext);
       expect(result.nextInput).toEqual(newInput);
     });
+
+    it('returns new context with pre-execution workflow data when provided', () => {
+      const preExecutionWorkflow = {
+        model_context: 'model context',
+        workflow_context: {
+          'nightshift.semantic_memory.recall': { version: 1, data: { recalled_ids: ['memory-1'] } },
+        },
+      };
+      const result = applyBeforeAgentResult(baseContext, { preExecutionWorkflow });
+
+      expect(result).not.toBe(baseContext);
+      expect(result.preExecutionWorkflow).toEqual(preExecutionWorkflow);
+      expect(result.nextInput).toBe(baseContext.nextInput);
+    });
   });
 
   describe('applyBeforeToolCallResult', () => {

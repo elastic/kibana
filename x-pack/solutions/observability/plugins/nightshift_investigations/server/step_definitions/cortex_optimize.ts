@@ -8,10 +8,12 @@
 import { z } from '@kbn/zod/v4';
 import { StepCategory } from '@kbn/workflows';
 import { createServerStepDefinition } from '@kbn/workflows-extensions/server';
-import type { Logger } from '@kbn/core/server';
+import type { AnalyticsServiceSetup, Logger } from '@kbn/core/server';
 import type { InferenceServerStart } from '@kbn/inference-plugin/server';
 import type { SearchInferenceEndpointsPluginStart } from '@kbn/search-inference-endpoints/server';
+import type { InvestigationToolCall } from '../decision_trees/accessed_trees';
 import { runCortexOptimize } from '../cortex/register_cortex';
+import { toolCallsSchema } from './tool_calls_schema';
 import { withTimeout } from './with_timeout';
 
 const MAX_ROUND_TEXT_LENGTH = 65_536;
@@ -25,10 +27,12 @@ const OPTIMIZE_TIMEOUT_MS = 120_000;
 export const cortexOptimizeStepDefinition = ({
   getInference,
   getSearchInferenceEndpoints,
+  analytics,
   logger,
 }: {
   getInference: () => InferenceServerStart | undefined;
   getSearchInferenceEndpoints: () => SearchInferenceEndpointsPluginStart | undefined;
+  analytics: AnalyticsServiceSetup;
   logger: Logger;
 }) =>
   createServerStepDefinition({
@@ -48,11 +52,25 @@ export const cortexOptimizeStepDefinition = ({
         .max(MAX_ROUND_TEXT_LENGTH)
         .describe("The assistant's final response for the round."),
       agent_id: z.string().max(1024).optional().describe('Agent id that produced the round.'),
+      conversation_id: z
+        .string()
+        .max(1024)
+        .optional()
+        .describe('Conversation the round belongs to. Recorded on the edit telemetry events.'),
+      round_id: z
+        .string()
+        .max(1024)
+        .optional()
+        .describe('Id of the completed round. Recorded on the edit telemetry events.'),
+      tool_calls: toolCallsSchema.describe(
+        'Investigator tool calls from this round. Shows the optimizer what the investigator queried.'
+      ),
     }),
     outputSchema: z.object({
       status: z.literal('ok').describe('The optimizer finished without throwing.'),
     }),
     handler: async (context) => {
+      const { workflow, execution } = context.contextManager.getContext();
       await withTimeout(
         (signal) =>
           runCortexOptimize({
@@ -60,9 +78,14 @@ export const cortexOptimizeStepDefinition = ({
             agentId: context.input.agent_id,
             userMessage: context.input.prompt,
             assistantMessage: context.input.response,
+            toolCalls: (context.input.tool_calls ?? []) as InvestigationToolCall[],
             esClient: context.contextManager.getScopedEsClient(),
-            spaceId: context.contextManager.getContext().workflow.spaceId,
+            spaceId: workflow.spaceId,
+            interactionId: execution.id,
             signal,
+            analytics,
+            conversationId: context.input.conversation_id,
+            roundId: context.input.round_id,
             logger,
             getInference,
             getSearchInferenceEndpoints,
