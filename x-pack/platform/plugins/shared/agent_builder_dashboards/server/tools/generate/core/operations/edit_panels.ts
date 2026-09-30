@@ -56,9 +56,11 @@ const getUneditablePanelError = ({ id, type }: AttachmentPanel): string => {
 };
 
 /**
- * Builds the resolution request for a request edit. The existing panel decides
- * the renderer, so an edit may omit it; an explicit renderer that disagrees
- * with the panel fails instead of being rewritten.
+ * Builds the resolution request for a request edit. Lens and Vega edits may
+ * omit the renderer, which the existing panel then decides. Custom content
+ * edits must name it: without it the edit is parsed as a Lens edit, which lacks
+ * custom content's fields. An explicit renderer that disagrees with the panel
+ * fails instead of being rewritten.
  */
 const toPanelResolutionRequest = (
   panelInput: EditPanelRequestInput,
@@ -80,10 +82,14 @@ const toPanelResolutionRequest = (
     existingPanel,
   };
 
-  // The second check only narrows `panelInput`: a matching explicit renderer implies the first.
-  if (renderer === 'custom_content' || panelInput.renderer === 'custom_content') {
+  if (panelInput.renderer === 'custom_content') {
     const { query, esql } = panelInput;
-    return { request: { ...base, renderer: 'custom_content', nlQuery: query, esql } };
+    return { request: { ...base, renderer: panelInput.renderer, nlQuery: query, esql } };
+  }
+  if (renderer === 'custom_content') {
+    return {
+      error: `Panel "${existingPanel.id}" is a custom content panel. Edit it with source: "request", renderer: "custom_content".`,
+    };
   }
 
   const { query, esql, chartType, preserveESQL } = panelInput;

@@ -60,7 +60,9 @@ export const customContentPanelRequestSchema = z.object({
 export const customContentEditPanelRequestSchema = z
   .object({
     source: z.literal('request'),
-    renderer: z.literal('custom_content').describe('The panel is a custom content panel.'),
+    renderer: z
+      .literal('custom_content')
+      .describe('Required to edit a custom content panel; it is not inferred from the panel.'),
     panelId: z.string().max(256).describe('Existing custom content panel id to update.'),
     query: z
       .string()

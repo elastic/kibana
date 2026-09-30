@@ -1723,8 +1723,24 @@ describe('executeDashboardOperations', () => {
         grid: { x: 0, y: 0, w: 24, h: 9 },
       };
 
-      it('infers custom_content from the existing panel when renderer is omitted', async () => {
+      it('fails without calling the resolver when a custom_content edit omits renderer', async () => {
         const { result, resolvePanelContent } = await editWith(customContentPanel, {});
+
+        expect(resolvePanelContent).not.toHaveBeenCalled();
+        expect(result.failures).toEqual([
+          {
+            type: DASHBOARD_OPERATION_FAILURE_TYPES.editPanels,
+            identifier: 'cc-1',
+            error:
+              'Panel "cc-1" is a custom content panel. Edit it with source: "request", renderer: "custom_content".',
+          },
+        ]);
+      });
+
+      it('resolves a custom_content edit that names its renderer', async () => {
+        const { result, resolvePanelContent } = await editWith(customContentPanel, {
+          renderer: 'custom_content',
+        });
 
         expect(resolvePanelContent).toHaveBeenCalledWith(
           expect.objectContaining({ renderer: 'custom_content', nlQuery: 'change the title' })
