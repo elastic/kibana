@@ -10,6 +10,7 @@ import type { ESQLSearchResponse } from '@kbn/es-types';
 import type { Logger } from '@kbn/logging';
 import { getErrorMessage } from '../../../../../common';
 import { ENTITY_ID_FIELD } from '../../../../../common/domain/definitions/common_fields';
+import { USER_ENTITY_NAMESPACE } from '../../../../../common/domain/definitions/user_entity_constants';
 import { getFieldValue } from '../../../../../common/domain/euid/commons';
 import { executeEsqlQuery } from '../../../../infra/elasticsearch/esql';
 import { searchEntitiesByIds } from '../../../../infra/elasticsearch/resolution';
@@ -55,6 +56,7 @@ interface MatchGroupRow {
   unresolvedNamespaces: string[];
   existingTargetIds: string[];
   unresolvedCount: number;
+  unresolvedLocalCount: number;
   groupSize: number;
 }
 
@@ -253,6 +255,16 @@ async function readWatermarkCandidate(
   return toTimestamp(response.values[0][maxTsIndex]);
 }
 
+// A `local` user id is `user:<name>@<host.id>@local`, so several `local`
+// entities sharing a value are one user seen on several hosts, not a collision.
+// Only duplicates outside `local` count.
+function hasSameNamespaceDuplicates(row: MatchGroupRow): boolean {
+  const nonLocalNamespaces = row.unresolvedNamespaces.filter(
+    (namespace) => namespace !== USER_ENTITY_NAMESPACE.Local
+  ).length;
+  return nonLocalNamespaces < row.unresolvedCount - row.unresolvedLocalCount;
+}
+
 async function resolveMatchGroup(
   row: MatchGroupRow,
   deps: {
@@ -282,7 +294,7 @@ async function resolveMatchGroup(
   // must not make Okta the target). SID rules set this false: a SID names one
   // account, so duplicates are identifier drift, not a collision. Well-known
   // SIDs are excluded at query time so LocalSystem never reaches this path.
-  if (declineSameNamespaceDuplicates && row.unresolvedNamespaces.length < row.unresolvedCount) {
+  if (declineSameNamespaceDuplicates && hasSameNamespaceDuplicates(row)) {
     stats.skippedAmbiguousBuckets++;
     logger.warn(
       `${ruleId}: declining ambiguous bucket '${row.matchValue}': ${row.unresolvedCount} unresolved entities across ${row.unresolvedNamespaces.length} namespaces`
@@ -405,6 +417,7 @@ function parseMatchGroupRows(response: ESQLSearchResponse): MatchGroupRow[] {
   const nsIdx = requireColumn(response, MATCH_GROUP_COLUMNS.unresolvedNs);
   const targetsIdx = requireColumn(response, MATCH_GROUP_COLUMNS.existingTargets);
   const unresolvedNIdx = requireColumn(response, MATCH_GROUP_COLUMNS.unresolvedN);
+  const unresolvedLocalNIdx = requireColumn(response, MATCH_GROUP_COLUMNS.unresolvedLocalN);
   const nIdx = requireColumn(response, MATCH_GROUP_COLUMNS.totalN);
 
   return response.values.flatMap((row) => {
@@ -419,6 +432,7 @@ function parseMatchGroupRows(response: ESQLSearchResponse): MatchGroupRow[] {
         unresolvedNamespaces: toStringArray(row[nsIdx]),
         existingTargetIds: toStringArray(row[targetsIdx]),
         unresolvedCount: toNumber(row[unresolvedNIdx]),
+        unresolvedLocalCount: toNumber(row[unresolvedLocalNIdx]),
         groupSize: toNumber(row[nIdx]),
       },
     ];

@@ -52,8 +52,10 @@ export type EsqlMatchSpec = {
   exclusionPattern?: string;
   /**
    * When true (the default), decline a group that has more unresolved entities
-   * than distinct unresolved namespaces. Set false only when the match value
-   * identifies one account, so same-namespace duplicates are identifier drift.
+   * than distinct unresolved namespaces. `local` entities do not count: there is
+   * one per host, so several of them are one user on several hosts. Set false
+   * only when the match value identifies one account, so same-namespace
+   * duplicates are identifier drift.
    */
   declineSameNamespaceDuplicates?: boolean;
 } & (

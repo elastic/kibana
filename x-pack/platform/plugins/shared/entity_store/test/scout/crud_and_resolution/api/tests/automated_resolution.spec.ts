@@ -485,6 +485,117 @@ apiTest.describe('Automated resolution integration tests', { tag: ENTITY_STORE_T
   });
 
   apiTest(
+    'Email links local entities on several hosts together with Okta onto the Active Directory user',
+    async ({ apiClient, esClient }) => {
+      const email = 'john.smith@email-local.example';
+      const localA = 'user:john.smith@host-a@local';
+      const localB = 'user:john.smith@host-b@local';
+      const adEntity = 'user:john.smith@active_directory';
+      const oktaEntity = 'user:john.smith@okta';
+
+      for (const [entityId, namespace] of [
+        [localA, 'local'],
+        [localB, 'local'],
+        [adEntity, 'active_directory'],
+        [oktaEntity, 'okta'],
+      ]) {
+        await seedUserEntity(esClient, { entityId, namespace, email, userName: 'john.smith' });
+      }
+
+      await triggerMaintainerRun(apiClient, internalHeaders);
+      await waitForResolution(esClient, localA, adEntity);
+      await waitForResolution(esClient, localB, adEntity);
+      await waitForResolution(esClient, oktaEntity, adEntity);
+
+      const groupResponse = await apiClient.get(
+        `${ENTITY_STORE_ROUTES.public.RESOLUTION_GROUP}?entity_id=${adEntity}&apiVersion=2`,
+        { headers: defaultHeaders, responseType: 'json' }
+      );
+      expect(groupResponse.statusCode).toBe(200);
+      expect(groupResponse.body.group_size).toBe(4);
+      expect(groupResponse.body.target.entity.id).toBe(adEntity);
+    }
+  );
+
+  apiTest(
+    'Email declines two Active Directory users sharing a mailbox',
+    async ({ apiClient, esClient }) => {
+      const sharedEmail = 'helpdesk@email-ambiguous.example';
+      const adA = 'test-ambiguous-ad-a';
+      const adB = 'test-ambiguous-ad-b';
+      const oktaEntity = 'test-ambiguous-okta';
+      const controlOkta = 'test-ambiguous-control-okta';
+      const controlEntra = 'test-ambiguous-control-entra';
+
+      await seedUserEntity(esClient, {
+        entityId: adA,
+        namespace: 'active_directory',
+        email: sharedEmail,
+      });
+      await seedUserEntity(esClient, {
+        entityId: adB,
+        namespace: 'active_directory',
+        email: sharedEmail,
+      });
+      await seedUserEntity(esClient, {
+        entityId: oktaEntity,
+        namespace: 'okta',
+        email: sharedEmail,
+      });
+      const controlEmail = 'control@email-ambiguous.example';
+      await seedUserEntity(esClient, {
+        entityId: controlOkta,
+        namespace: 'okta',
+        email: controlEmail,
+      });
+      await seedUserEntity(esClient, {
+        entityId: controlEntra,
+        namespace: 'entra_id',
+        email: controlEmail,
+      });
+
+      await triggerMaintainerRun(apiClient, internalHeaders, 'automated-resolution', {
+        sync: true,
+      });
+      await waitForResolution(esClient, controlEntra, controlOkta);
+
+      await assertNotResolved(esClient, adA);
+      await assertNotResolved(esClient, adB, 1_000);
+      await assertNotResolved(esClient, oktaEntity, 1_000);
+    }
+  );
+
+  apiTest(
+    'Email links local entities before the Active Directory user arrives, then retargets onto it',
+    async ({ apiClient, esClient }) => {
+      const email = 'jane.pre-ad@email-local.example';
+      const localA = 'user:jane.pre-ad@host-a@local';
+      const localB = 'user:jane.pre-ad@host-b@local';
+      const adEntity = 'user:jane.pre-ad@active_directory';
+
+      await seedUserEntity(esClient, { entityId: localA, namespace: 'local', email });
+      await seedUserEntity(esClient, { entityId: localB, namespace: 'local', email });
+
+      await triggerMaintainerRun(apiClient, internalHeaders);
+      await waitForResolution(esClient, localB, localA);
+
+      await seedUserEntity(esClient, { entityId: adEntity, namespace: 'active_directory', email });
+
+      await triggerMaintainerRun(apiClient, internalHeaders);
+      await waitForResolution(esClient, localA, adEntity);
+      await waitForResolution(esClient, localB, adEntity);
+
+      const adGroup = await apiClient.get(
+        `${ENTITY_STORE_ROUTES.public.RESOLUTION_GROUP}?entity_id=${adEntity}&apiVersion=2`,
+        { headers: defaultHeaders, responseType: 'json' }
+      );
+      expect(adGroup.statusCode).toBe(200);
+      expect(adGroup.body.group_size).toBe(3);
+      expect(adGroup.body.target.entity.id).toBe(adEntity);
+    }
+  );
+
+  apiTest(
     'Windows SID bridge links system account-management (IAM) entities to Active Directory',
     async ({ apiClient, esClient }) => {
       const sid = 'S-1-5-21-111-222-333-1001';
