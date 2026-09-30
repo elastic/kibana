@@ -65,7 +65,7 @@ const investigationCompleted = parse(SIGNIFICANT_EVENTS_INVESTIGATION_COMPLETED_
 
 describe('significant events persistence workflow contracts', () => {
   it('bumps managed workflow versions for the bulk persistence contract', () => {
-    expect(SIGNIFICANT_EVENTS_DISCOVERY_WORKFLOW.version).toBe(21);
+    expect(SIGNIFICANT_EVENTS_DISCOVERY_WORKFLOW.version).toBe(22);
   });
 
   it('bootstraps per-space cleanup before discovery work', () => {
@@ -102,17 +102,13 @@ describe('significant events persistence workflow contracts', () => {
       steps: {
         resolve_open_event: {
           output: {
-            hits: {
-              hits: [
-                {
-                  _source: {
-                    title: 'T'.repeat(512),
-                    summary: 'S'.repeat(10_000),
-                    symptom_hypothesis: 'H'.repeat(10_000),
-                  },
-                },
-              ],
-            },
+            hits: [
+              {
+                title: 'T'.repeat(512),
+                summary: 'S'.repeat(10_000),
+                symptom_hypothesis: 'H'.repeat(10_000),
+              },
+            ],
           },
         },
       },
@@ -150,8 +146,30 @@ describe('significant events persistence workflow contracts', () => {
 
   it('does not launch investigations without resolved event details', () => {
     expect(requireStep(discovery, 'guard_resolved_event').condition).toContain(
-      'steps.resolve_open_event.output.hits.hits[0] != null'
+      'steps.resolve_open_event.output.hits[0] != null'
     );
+  });
+
+  it('skips investigation when the event already has investigations', () => {
+    const guard = requireStep(discovery, 'guard_missing_investigation');
+    // Condition must gate on the absence of prior investigations.
+    expect(guard.condition).toContain('investigations');
+    expect(guard.condition).toContain('== 0');
+
+    // Evaluate the Liquid expression for both shapes of the Kibana response.
+    const engine = createWorkflowLiquidEngine();
+    // Strip the ${{ }} wrapper so the expression can be used inside a Liquid {% if %} tag.
+    const inner = (guard.condition as string).replace(/^\s*\$\{\{(.+)\}\}\s*$/, '$1').trim();
+    const template = `{% if ${inner} %}true{% else %}false{% endif %}`;
+
+    const makeContext = (investigations: unknown[]) => ({
+      steps: { resolve_open_event: { output: { hits: [{ investigations }] } } },
+    });
+
+    // Empty investigations → condition is true → investigation should be triggered.
+    expect(engine.parseAndRenderSync(template, makeContext([]))).toBe('true');
+    // Populated investigations → condition is false → investigation should be skipped.
+    expect(engine.parseAndRenderSync(template, makeContext([{ id: 'inv-1' }]))).toBe('false');
   });
 
   it('attaches completed investigations only to Significant Events', () => {
