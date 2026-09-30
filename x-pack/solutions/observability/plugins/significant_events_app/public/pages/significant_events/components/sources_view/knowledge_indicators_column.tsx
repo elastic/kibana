@@ -7,21 +7,20 @@
 
 import { EuiI18nNumber, EuiText } from '@elastic/eui';
 import { css } from '@emotion/css';
-import type { Streams } from '@kbn/streams-schema';
 import type { SignificantEventsWorkflowStatusResult } from '@kbn/significant-events-schema';
 import React from 'react';
 import { useStreamFeatures } from '../../../../hooks/use_stream_features';
 
 interface KnowledgeIndicatorsColumnProps {
-  stream: Streams.all.Definition;
+  sourceId: string;
   streamOnboardingResult?: SignificantEventsWorkflowStatusResult;
 }
 
 export function KnowledgeIndicatorsColumn({
-  stream,
+  sourceId,
   streamOnboardingResult,
 }: KnowledgeIndicatorsColumnProps) {
-  const { features } = useStreamFeatures(stream.name, [streamOnboardingResult]);
+  const { features } = useStreamFeatures(sourceId, [streamOnboardingResult]);
 
   return (
     <EuiText

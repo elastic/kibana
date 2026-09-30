@@ -25,7 +25,7 @@ import { css } from '@emotion/react';
 import { capitalize } from 'lodash';
 import useInterval from 'react-use/lib/useInterval';
 import { i18n } from '@kbn/i18n';
-import { getNightshiftCapabilities } from '@kbn/nightshift-shared';
+import { getNightshiftCapabilities, type NightshiftSource } from '@kbn/nightshift-shared';
 import {
   getSeverityLabel,
   severitySchema,
@@ -43,10 +43,10 @@ import { RUNNING_POLL_INTERVAL_MS } from '../../../../constants';
 import { useFetchSignificantEvents } from '../../../../hooks/use_fetch_significant_events';
 import { useTimefilter } from '../../../../hooks/use_timefilter';
 import { useTimeRangeUpdate } from '../../../../hooks/use_time_range_update';
-import { useFetchStreams } from '../../hooks/use_fetch_streams';
+import { useSourcesById } from '../../../../hooks/use_sources_by_id';
 import { useSignificantEventsPageContext } from '../../context/significant_events_page_context';
 import { SignificantEventFlyout } from './significant_event_flyout';
-import { FindSignificantEventsButton } from '../streams_view/find_significant_events_button';
+import { FindSignificantEventsButton } from '../shared/find_significant_events_button';
 import type { SignificantEventsSearchBarProps } from '../../../../components/search_bar';
 import { SignificantEventsSearchBar } from '../../../../components/search_bar';
 import { formatTimestamp } from '../../../../util/formatters';
@@ -243,9 +243,12 @@ const RESET_FILTERS_LABEL = i18n.translate(
 export const getSignificantEventTableColumns = ({
   selectedEventId,
   onToggleEvent,
+  sourcesById,
 }: {
   selectedEventId?: string;
   onToggleEvent: (eventId: string) => void;
+  /** Resolves `stream_names` (source ids) to titles; unknown values are shown as-is. */
+  sourcesById: Map<string, NightshiftSource>;
 }): Array<EuiBasicTableColumn<SignificantEventResponse>> => [
   {
     name: '',
@@ -298,15 +301,15 @@ export const getSignificantEventTableColumns = ({
   },
   {
     field: 'stream_names',
-    name: i18n.translate('xpack.significantEventsApp.significantEventsTab.streamsColumn', {
-      defaultMessage: 'Streams',
+    name: i18n.translate('xpack.significantEventsApp.sources.significantEventsTab.sourcesColumn', {
+      defaultMessage: 'Sources',
     }),
     width: '160px',
     // Required for the column's `width` to actually constrain the cell — EUI's
     // `truncateText` only kicks in when the cell is bounded (see tableLayout="fixed" below).
     truncateText: true,
     render: (streamNames: string[]) => {
-      const names = streamNames ?? [];
+      const names = (streamNames ?? []).map((name) => sourcesById.get(name)?.title ?? name);
       const [first, ...rest] = names;
       if (!first) return null;
       const overflowCount = rest.length;
@@ -411,7 +414,7 @@ export const SignificantEventsTab = () => {
   const { timeState } = useTimefilter();
   const { updateTimeRange } = useTimeRangeUpdate();
 
-  const { data: streamsData } = useFetchStreams();
+  const { sourcesById } = useSourcesById();
   // Closed events are hidden by default; users can opt back in via the Status filter.
   const [statusFilter, setStatusFilter] = useState<SignificantEventStatus[]>(() =>
     SIGNIFICANT_EVENT_STATUS_OPTIONS.filter((status) => status === 'open')
@@ -442,10 +445,7 @@ export const SignificantEventsTab = () => {
     }
   }, [selectedEventId]);
 
-  const streamOptions = useMemo(
-    () => (streamsData?.streams ?? []).map((s) => s.stream.name).sort(),
-    [streamsData]
-  );
+  const streamOptions = useMemo(() => [...sourcesById.keys()], [sourcesById]);
 
   const { isRunning, isCanceling, handleRun, handleCancel } = useSignificantEventsPageContext();
   const { blocksActivity, activityBlockTooltip } = useBlocksNewActivity();
@@ -538,8 +538,9 @@ export const SignificantEventsTab = () => {
       getSignificantEventTableColumns({
         selectedEventId: openEventId,
         onToggleEvent: toggleEvent,
+        sourcesById,
       }),
-    [openEventId, toggleEvent]
+    [openEventId, toggleEvent, sourcesById]
   );
 
   const handleResetFilters = useCallback(() => {
@@ -627,19 +628,19 @@ export const SignificantEventsTab = () => {
         onChange: onSeverityChange,
       },
       {
-        label: i18n.translate('xpack.significantEventsApp.significantEventsTab.filter.stream', {
-          defaultMessage: 'Stream',
+        label: i18n.translate('xpack.significantEventsApp.sources.significantEventsTab.filter', {
+          defaultMessage: 'Source',
         }),
         ariaLabel: i18n.translate(
-          'xpack.significantEventsApp.significantEventsTab.filter.streamAriaLabel',
+          'xpack.significantEventsApp.sources.significantEventsTab.filterAriaLabel',
           {
-            defaultMessage: 'Filter by stream',
+            defaultMessage: 'Filter by source',
           }
         ),
         options: buildSelectableOptions({
           values: streamOptions,
           selected: streamFilter,
-          getLabel: (s) => s,
+          getLabel: (sourceId) => sourcesById.get(sourceId)?.title ?? sourceId,
         }),
         numFilters: streamOptions.length,
         numActiveFilters: streamFilter.length,
@@ -651,6 +652,7 @@ export const SignificantEventsTab = () => {
       severityFilter,
       streamFilter,
       streamOptions,
+      sourcesById,
       onStatusChange,
       onSeverityChange,
       onStreamChange,

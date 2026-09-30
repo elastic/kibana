@@ -14,7 +14,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useSignificantEventsAppParams } from '../../../../hooks/use_significant_events_app_params';
 import { useSignificantEventsAppRouter } from '../../../../hooks/use_significant_events_app_router';
 import { getKnowledgeIndicatorItemId } from '../../../../components/knowledge_indicators/utils/get_knowledge_indicator_item_id';
-import { getKnowledgeIndicatorStreamName } from '../../../../components/knowledge_indicators/utils/get_knowledge_indicator_stream_name';
+import { getKnowledgeIndicatorSourceId } from '../../../../components/knowledge_indicators/utils/get_knowledge_indicator_source_id';
 import { getKnowledgeIndicatorSubtype } from '../../../../components/knowledge_indicators/utils/get_knowledge_indicator_subtype';
 import { matchesKnowledgeIndicatorFilters } from '../../../../components/knowledge_indicators/utils/matches_knowledge_indicator_filters';
 import { getKnowledgeIndicatorType } from '../../../../components/knowledge_indicators/utils/get_knowledge_indicator_type';
@@ -58,9 +58,9 @@ export function useKnowledgeIndicatorsUrlState({
     query?.subtype ? castArray(query.subtype) : []
   );
   const [selectedStreams, setSelectedStreams] = useState<string[]>(() =>
-    query?.stream ? castArray(query.stream) : []
+    query?.source ? castArray(query.source) : []
   );
-  const initialUrlStreamsRef = useRef<string[]>(query?.stream ? castArray(query.stream) : []);
+  const initialUrlStreamsRef = useRef<string[]>(query?.source ? castArray(query.source) : []);
   const [hideComputedTypes, setHideComputedTypes] = useState(() =>
     query?.showComputed === 'true' ? false : true
   );
@@ -133,7 +133,7 @@ export function useKnowledgeIndicatorsUrlState({
           hideComputedTypes,
         })
       ) {
-        availableStreams.add(getKnowledgeIndicatorStreamName(ki));
+        availableStreams.add(getKnowledgeIndicatorSourceId(ki));
       }
     }
 
@@ -172,7 +172,7 @@ export function useKnowledgeIndicatorsUrlState({
         ...(statusFilter !== 'active' ? { status: statusFilter } : {}),
         ...(selectedTypes.length ? { type: selectedTypes } : {}),
         ...(selectedSubtypes.length ? { subtype: selectedSubtypes } : {}),
-        ...(selectedStreams.length ? { stream: selectedStreams } : {}),
+        ...(selectedStreams.length ? { source: selectedStreams } : {}),
         ...(!hideComputedTypes ? { showComputed: 'true' } : {}),
         ...(selectedItem ? { selectedItem } : {}),
       },
@@ -197,7 +197,7 @@ export function useKnowledgeIndicatorsUrlState({
       ...(p.statusFilter !== 'active' ? { status: p.statusFilter } : {}),
       ...(p.selectedTypes.length ? { type: p.selectedTypes } : {}),
       ...(p.selectedSubtypes.length ? { subtype: p.selectedSubtypes } : {}),
-      ...(p.selectedStreams.length ? { stream: p.selectedStreams } : {}),
+      ...(p.selectedStreams.length ? { source: p.selectedStreams } : {}),
       ...(!p.hideComputedTypes ? { showComputed: 'true' } : {}),
       ...(selectedItem ? { selectedItem } : {}),
     };

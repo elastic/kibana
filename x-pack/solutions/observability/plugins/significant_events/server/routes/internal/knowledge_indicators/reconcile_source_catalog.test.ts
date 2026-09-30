@@ -9,7 +9,13 @@ import type { KibanaRequest } from '@kbn/core/server';
 import type { NightshiftSource } from '@kbn/nightshift-shared';
 import type { SourcesClient } from '@kbn/nightshift-sources-plugin/server';
 import { ExecutionStatus } from '@kbn/workflows';
-import { reconcileSourceCatalog } from './reconcile_source_catalog';
+import type { SourceChangeEvent } from '@kbn/nightshift-sources-plugin/server';
+import type { GetScopedClients } from '../../types';
+import {
+  createSourceDeletionListener,
+  reconcileSourceCatalog,
+  resetSourceKnowledge,
+} from './reconcile_source_catalog';
 
 const request = { spaceId: 'default' } as KibanaRequest;
 
@@ -229,5 +235,94 @@ describe('reconcileSourceCatalog', () => {
       sourceSlug: 'gone-source-slug',
       request: otherRequest,
     });
+  });
+});
+
+describe('resetSourceKnowledge', () => {
+  const makeKiClient = () => ({
+    deleteOwnedRules: jest.fn().mockResolvedValue(undefined),
+    deleteAllQueries: jest.fn().mockResolvedValue(undefined),
+    deleteIndicators: jest.fn().mockResolvedValue(undefined),
+  });
+
+  it('cancels the onboarding run by slug before dropping rules, queries and indicators', async () => {
+    const kiClient = makeKiClient();
+    const cancelBySourceSlug = jest.fn().mockResolvedValue(null);
+
+    await resetSourceKnowledge({
+      source: { id: 'source-1', slug: 'nginx-errors' },
+      kiClient,
+      onboardingClient: { cancelBySourceSlug },
+      request,
+    });
+
+    expect(cancelBySourceSlug).toHaveBeenCalledWith({ sourceSlug: 'nginx-errors', request });
+    expect(kiClient.deleteOwnedRules).toHaveBeenCalledWith('source-1');
+    expect(kiClient.deleteAllQueries).toHaveBeenCalledWith('source-1');
+    expect(kiClient.deleteIndicators).toHaveBeenCalledWith('source-1');
+    expect(cancelBySourceSlug.mock.invocationCallOrder[0]).toBeLessThan(
+      kiClient.deleteOwnedRules.mock.invocationCallOrder[0]
+    );
+  });
+
+  it('still drops the knowledge when workflows are unavailable', async () => {
+    const kiClient = makeKiClient();
+
+    await resetSourceKnowledge({
+      source: { id: 'source-1', slug: 'nginx-errors' },
+      kiClient,
+      request,
+    });
+
+    expect(kiClient.deleteIndicators).toHaveBeenCalledWith('source-1');
+  });
+});
+
+describe('createSourceDeletionListener', () => {
+  const setup = () => {
+    const kiClient = {
+      deleteOwnedRules: jest.fn().mockResolvedValue(undefined),
+      deleteAllQueries: jest.fn().mockResolvedValue(undefined),
+      deleteIndicators: jest.fn().mockResolvedValue(undefined),
+    };
+    const getScopedClients = jest.fn().mockResolvedValue({
+      getKnowledgeIndicatorClient: jest.fn().mockResolvedValue(kiClient),
+    });
+    const cancelBySourceSlug = jest.fn().mockResolvedValue(null);
+    const listener = createSourceDeletionListener({
+      getScopedClients: getScopedClients as unknown as GetScopedClients,
+      onboardingClient: { cancelBySourceSlug },
+    });
+    return { listener, kiClient, getScopedClients, cancelBySourceSlug };
+  };
+
+  const source = makeSource({ id: 'gone-source' });
+
+  it('resets the knowledge of a deleted source in the space of the deleting request', async () => {
+    const { listener, kiClient, getScopedClients, cancelBySourceSlug } = setup();
+    const otherRequest = { spaceId: 'other' } as KibanaRequest;
+
+    await listener({ type: 'deleted', source, request: otherRequest, spaceId: 'other' });
+
+    expect(getScopedClients).toHaveBeenCalledWith({ request: otherRequest });
+    expect(cancelBySourceSlug).toHaveBeenCalledWith({
+      sourceSlug: 'gone-source-slug',
+      request: otherRequest,
+    });
+    expect(kiClient.deleteIndicators).toHaveBeenCalledWith('gone-source');
+  });
+
+  it('ignores created and updated sources', async () => {
+    const { listener, getScopedClients } = setup();
+    const events: SourceChangeEvent[] = [
+      { type: 'created', source, request, spaceId: 'default' },
+      { type: 'updated', source, previous: source, request, spaceId: 'default' },
+    ];
+
+    for (const event of events) {
+      await listener(event);
+    }
+
+    expect(getScopedClients).not.toHaveBeenCalled();
   });
 });

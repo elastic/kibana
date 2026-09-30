@@ -6,11 +6,20 @@
  */
 
 import type { KibanaRequest } from '@kbn/core/server';
+import type { SourceChangeListener } from './lib/source_change_emitter';
 import type { SourcesClient } from './lib/sources_client';
 
 export type GetSourcesClient = (params: { request: KibanaRequest }) => Promise<SourcesClient>;
 
-export type NightshiftSourcesServerSetup = void;
+export interface NightshiftSourcesServerSetup {
+  /**
+   * Subscribes to every committed create, update (including enable/disable) and delete, from
+   * the HTTP routes and from `getSourcesClient()` alike. The write awaits every listener before
+   * it returns, so a listener's side effects are visible to the caller. A listener that throws
+   * is logged and cannot undo the write. Returns the unsubscribe function.
+   */
+  onSourceChange: (listener: SourceChangeListener) => () => void;
+}
 
 export interface NightshiftSourcesServerStart {
   /**

@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-import type { ListStreamDetail } from '@kbn/streams-plugin/server/routes/internal/streams/crud/route';
-import { Streams, streamMatchesIndexPatterns } from '@kbn/streams-schema';
+import type { NightshiftSource } from '@kbn/nightshift-shared';
 import {
   KIsOnboardingStep,
   SignificantEventsWorkflowStatus,
@@ -24,11 +23,10 @@ import React, {
   useRef,
   useState,
 } from 'react';
+import { useFetchSources } from '../../../../hooks/use_fetch_sources';
 import { useInferenceFeatureConnectors } from '../../../../hooks/use_inference_feature_connectors';
-import { useIndexPatternsConfig } from '../../../../hooks/use_index_patterns_config';
 import type { ScheduleOnboardingOptions } from '../../../../hooks/use_onboarding_api';
 import { useBulkOnboarding } from '../../hooks/use_bulk_onboarding';
-import { useFetchStreams } from '../../hooks/use_fetch_streams';
 import type { OnboardingConfig } from '../shared/types';
 
 interface ConnectorState {
@@ -36,9 +34,12 @@ interface ConnectorState {
   loading: boolean;
 }
 
+const NO_SOURCES: NightshiftSource[] = [];
+
 interface KiGenerationContextValue {
-  filteredStreams: ListStreamDetail[] | undefined;
-  isStreamsLoading: boolean;
+  /** Every source of the space, disabled ones included; only enabled sources can be onboarded. */
+  sources: NightshiftSource[];
+  isSourcesLoading: boolean;
   isInitialGenerationStatusLoading: boolean;
   generatingStreamNames: string[];
   isGenerating: boolean;
@@ -76,13 +77,10 @@ export function KiGenerationProvider({
     Record<string, SignificantEventsWorkflowStatusResult>
   >({});
   const initialStatusFetchDoneRef = useRef(false);
-  // Dedup guard: filteredStreams gets a new array reference on every render
-  // (due to the select transform), which re-fires the status-fetch effect.
-  // This ref tracks already-enqueued names so only truly new streams trigger
-  // network calls.
+  // Dedup guard: every refetch of the source list returns a new array, which
+  // re-fires the status-fetch effect. This ref tracks already-enqueued source ids
+  // so only new sources trigger network calls.
   const enqueuedStreamNamesRef = useRef<Set<string>>(new Set());
-
-  const { indexPatterns } = useIndexPatternsConfig();
 
   const featuresConnectors = useInferenceFeatureConnectors(
     SIGNIFICANT_EVENTS_KI_EXTRACTION_INFERENCE_FEATURE_ID
@@ -107,19 +105,9 @@ export function KiGenerationProvider({
     });
   }, [featuresConnectors.resolvedConnectorId, queriesConnectors.resolvedConnectorId]);
 
-  const streamsListFetch = useFetchStreams({
-    select: (result) => ({
-      ...result,
-      // Query streams are always included; other stream types are filtered by index patterns.
-      streams: result.streams.filter(
-        (item) =>
-          Streams.QueryStream.Definition.is(item.stream) ||
-          streamMatchesIndexPatterns(item.stream.name, indexPatterns)
-      ),
-    }),
-  });
-  const filteredStreams = streamsListFetch.data?.streams;
-  const isStreamsLoading = streamsListFetch.isLoading;
+  const sourcesFetch = useFetchSources();
+  const fetchedSources = sourcesFetch.data;
+  const isSourcesLoading = sourcesFetch.isLoading;
 
   // Adds streams discovered as InProgress (e.g. on initial status fetch after
   // page refresh) and removes streams that reach a terminal state. Callback
@@ -166,13 +154,13 @@ export function KiGenerationProvider({
   } = bulkOnboarding;
 
   useEffect(() => {
-    if (!filteredStreams) return;
+    if (!fetchedSources) return;
 
     let hasNew = false;
-    filteredStreams.forEach((item) => {
-      if (!enqueuedStreamNamesRef.current.has(item.stream.name)) {
-        enqueuedStreamNamesRef.current.add(item.stream.name);
-        onboardingStatusUpdateQueue.add(item.stream.name);
+    fetchedSources.forEach(({ id }) => {
+      if (!enqueuedStreamNamesRef.current.has(id)) {
+        enqueuedStreamNamesRef.current.add(id);
+        onboardingStatusUpdateQueue.add(id);
         hasNew = true;
       }
     });
@@ -181,20 +169,20 @@ export function KiGenerationProvider({
         initialStatusFetchDoneRef.current = true;
       });
     }
-  }, [filteredStreams, onboardingStatusUpdateQueue, processStatusUpdateQueue]);
+  }, [fetchedSources, onboardingStatusUpdateQueue, processStatusUpdateQueue]);
 
   const isGenerating = generatingStreams.size > 0;
   const generatingStreamNames = useMemo(() => Array.from(generatingStreams), [generatingStreams]);
 
-  // True until we've received at least one status result for every filtered
-  // stream, so consumers can defer rendering empty/generating UI until the
-  // generating set is known. Once false, stays false — transient refetches of
-  // the streams list must not flash the loading panel again.
+  // True until we've received at least one status result for every source, so
+  // consumers can defer rendering empty/generating UI until the generating set
+  // is known. Once false, stays false — transient refetches of the source list
+  // must not flash the loading panel again.
   const isInitialGenerationStatusLoading = useMemo(() => {
     if (initialStatusFetchDoneRef.current) return false;
-    if (isStreamsLoading || !filteredStreams) return true;
-    return filteredStreams.some((item) => !(item.stream.name in streamStatusMap));
-  }, [isStreamsLoading, filteredStreams, streamStatusMap]);
+    if (isSourcesLoading || !fetchedSources) return true;
+    return fetchedSources.some(({ id }) => !(id in streamStatusMap));
+  }, [isSourcesLoading, fetchedSources, streamStatusMap]);
 
   const withGeneratingTracking = useCallback(
     (action: (streamNames: string[]) => Promise<string[]>) =>
@@ -239,8 +227,8 @@ export function KiGenerationProvider({
     () => ({
       isScheduling: bulkOnboarding.isScheduling,
       cancelOnboarding: bulkOnboarding.cancelOnboarding,
-      filteredStreams,
-      isStreamsLoading,
+      sources: fetchedSources ?? NO_SOURCES,
+      isSourcesLoading,
       isInitialGenerationStatusLoading,
       generatingStreamNames,
       isGenerating,
@@ -257,8 +245,8 @@ export function KiGenerationProvider({
     [
       bulkOnboarding.isScheduling,
       bulkOnboarding.cancelOnboarding,
-      filteredStreams,
-      isStreamsLoading,
+      fetchedSources,
+      isSourcesLoading,
       isInitialGenerationStatusLoading,
       generatingStreamNames,
       isGenerating,

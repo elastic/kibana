@@ -7,12 +7,13 @@
 
 import type { KibanaRequest } from '@kbn/core/server';
 import type { NightshiftSource } from '@kbn/nightshift-shared';
-import type { SourcesClient } from '@kbn/nightshift-sources-plugin/server';
+import type { SourceChangeListener, SourcesClient } from '@kbn/nightshift-sources-plugin/server';
 import type { WorkflowExecutionListItemDto } from '@kbn/workflows';
 import type { SignificantEventsMaintenanceService } from '../../../lib/maintenance/maintenance_service';
 import type { KnowledgeIndicatorClient } from '../../../lib/knowledge_indicators/knowledge_indicator_client/knowledge_indicator_client';
 import { parseSourceSlugFromConcurrencyKey } from '../../../lib/workflows/onboarding_workflow_client';
 import { listAllSources } from '../../utils/list_all_sources';
+import type { GetScopedClients } from '../../types';
 
 interface OnboardingClient {
   cancelBySourceSlug: (args: { sourceSlug: string; request: KibanaRequest }) => Promise<unknown>;
@@ -46,6 +47,52 @@ export async function retireSourceKnowledge({
   await kiClient.deleteAllQueries(sourceId);
   await kiClient.deleteIndicators(sourceId);
 }
+
+/**
+ * Cancels the source's onboarding run, then drops its owned rules, queries and knowledge
+ * indicators. Runs when a source is deleted and when its knowledge is reset; the view and the
+ * saved object are left to the caller.
+ */
+export async function resetSourceKnowledge({
+  source,
+  kiClient,
+  onboardingClient,
+  request,
+}: {
+  source: Pick<NightshiftSource, 'id' | 'slug'>;
+  kiClient: Pick<CatalogKiClient, 'deleteOwnedRules' | 'deleteAllQueries' | 'deleteIndicators'>;
+  onboardingClient?: Pick<OnboardingClient, 'cancelBySourceSlug'>;
+  request: KibanaRequest;
+}): Promise<void> {
+  // Cancel before retiring: a run left going could write indicators or rules back.
+  await onboardingClient?.cancelBySourceSlug({ sourceSlug: source.slug, request });
+  await retireSourceKnowledge({ sourceId: source.id, kiClient });
+}
+
+/**
+ * Resets the knowledge of every deleted source in the space of the request that deleted it,
+ * so its rules stop firing without waiting for the next catalog reconcile.
+ */
+export const createSourceDeletionListener =
+  ({
+    getScopedClients,
+    onboardingClient,
+  }: {
+    getScopedClients: GetScopedClients;
+    onboardingClient?: Pick<OnboardingClient, 'cancelBySourceSlug'>;
+  }): SourceChangeListener =>
+  async (event) => {
+    if (event.type !== 'deleted') {
+      return;
+    }
+    const { getKnowledgeIndicatorClient } = await getScopedClients({ request: event.request });
+    await resetSourceKnowledge({
+      source: event.source,
+      kiClient: await getKnowledgeIndicatorClient(),
+      onboardingClient,
+      request: event.request,
+    });
+  };
 
 /**
  * Aligns owned rules and onboarding with the source catalog of the request space.

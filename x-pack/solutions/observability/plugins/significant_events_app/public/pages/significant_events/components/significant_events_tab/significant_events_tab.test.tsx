@@ -99,8 +99,11 @@ jest.mock('../../../../hooks/use_timefilter', () => ({
 jest.mock('../../../../hooks/use_time_range_update', () => ({
   useTimeRangeUpdate: jest.fn(() => ({ updateTimeRange: mockUpdateTimeRange })),
 }));
-jest.mock('../../hooks/use_fetch_streams', () => ({
-  useFetchStreams: jest.fn(() => ({ data: { streams: [] } })),
+jest.mock('../../../../hooks/use_sources_by_id', () => ({
+  useSourcesById: jest.fn(() => ({
+    sourcesById: new Map(),
+    getSourceTitle: (sourceId: string) => sourceId,
+  })),
 }));
 jest.mock('../../context/significant_events_page_context', () => ({
   useSignificantEventsPageContext: jest.fn(() => ({
@@ -115,7 +118,7 @@ jest.mock('../../../../components/search_bar', () => ({
     <div data-test-subj="searchBarQuery">{query?.query}</div>
   ),
 }));
-jest.mock('../streams_view/find_significant_events_button', () => ({
+jest.mock('../shared/find_significant_events_button', () => ({
   FindSignificantEventsButton: () => null,
 }));
 jest.mock('./filter_popover', () => ({
@@ -139,6 +142,7 @@ describe('Significant Events timestamp rendering', () => {
   it('sorts the Timestamp column by the lineage creation timestamp', () => {
     const columns = getSignificantEventTableColumns({
       onToggleEvent: jest.fn(),
+      sourcesById: new Map(),
     });
     expect(columns.find((column) => 'field' in column && column.field === 'created_at')).toEqual(
       expect.objectContaining({ field: 'created_at' })

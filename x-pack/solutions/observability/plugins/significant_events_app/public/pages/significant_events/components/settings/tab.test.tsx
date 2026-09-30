@@ -26,16 +26,15 @@ jest.mock('../../../../hooks/use_significant_events_maintenance', () => ({
     activityBlockTooltip: undefined,
   }),
 }));
-jest.mock('../../hooks/use_fetch_streams', () => ({
-  useFetchStreams: () => ({ data: { streams: [] } }),
-}));
+// Lets a test start from unsaved continuous onboarding changes.
+const mockContinuousExtraction = { hasChanged: false, save: jest.fn() };
 jest.mock('./use_continuous_extraction_settings', () => ({
   useContinuousExtractionSettings: () => ({
     draft: { enabled: false, intervalHours: 24 },
     setDraft: jest.fn(),
-    hasChanged: false,
+    hasChanged: mockContinuousExtraction.hasChanged,
     reset: jest.fn(),
-    save: jest.fn(),
+    save: mockContinuousExtraction.save,
   }),
 }));
 jest.mock('./use_scheduled_discovery_settings', () => ({
@@ -160,6 +159,8 @@ describe('SettingsTab developer mode', () => {
     jest.clearAllMocks();
     settingsClientSet.mockResolvedValue(true);
     settingsGlobalClientSet.mockResolvedValue(true);
+    mockContinuousExtraction.hasChanged = false;
+    mockContinuousExtraction.save.mockResolvedValue(undefined);
   });
 
   it('persists the developer mode switch immediately', () => {
@@ -293,11 +294,9 @@ describe('SettingsTab developer mode', () => {
   });
 
   it('hides the tuning panel and disables save while developer mode is saving', () => {
+    mockContinuousExtraction.hasChanged = true;
     const { rerender } = setup({ isDeveloperMode: true });
 
-    fireEvent.change(screen.getByTestId('streams-settings-index-patterns'), {
-      target: { value: 'metrics-*' },
-    });
     expect(screen.getByTestId('streams-settings-save-button')).toBeEnabled();
 
     mockUseDeveloperMode.mockReturnValue({
@@ -316,20 +315,17 @@ describe('SettingsTab developer mode', () => {
   });
 
   it('disables the developer mode switch while settings are saving', async () => {
+    mockContinuousExtraction.hasChanged = true;
     setup({ isDeveloperMode: true });
 
     let resolveSet: () => void = () => undefined;
-    settingsClientSet.mockReturnValue(
-      new Promise<boolean>((resolve) => {
-        resolveSet = () => resolve(true);
+    mockContinuousExtraction.save.mockReturnValue(
+      new Promise<void>((resolve) => {
+        resolveSet = () => resolve();
       })
     );
 
-    fireEvent.change(screen.getByTestId('streams-settings-index-patterns'), {
-      target: { value: 'metrics-*' },
-    });
     fireEvent.click(screen.getByTestId('streams-settings-save-button'));
-    fireEvent.click(screen.getByRole('button', { name: 'Save anyway' }));
 
     await waitFor(() => {
       expect(screen.getByTestId('nightshiftDeveloperModeSwitch')).toBeDisabled();

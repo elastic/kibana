@@ -58,14 +58,14 @@ Example success output:
   "slug": "nginx-errors",
   "title": "Nginx errors",
   "view_name": "$.nightshift.sources.default.nginx-errors",
-  "kibanaPath": "/app/significant_events/knowledge_indicators?stream=3f2a1c0e-1111-2222-3333-444444444444"
+  "kibanaPath": "/app/significant_events/knowledge_indicators?source=3f2a1c0e-1111-2222-3333-444444444444"
 }
 
 The `kibanaPath` query value is the source id. The argument you pass back to these tools is the slug.
 
 Example chat response after start:
-- [Open KI identification progress](/app/significant_events/knowledge_indicators?stream=3f2a1c0e-1111-2222-3333-444444444444)
-- /app/significant_events/knowledge_indicators?stream=3f2a1c0e-1111-2222-3333-444444444444
+- [Open KI identification progress](/app/significant_events/knowledge_indicators?source=3f2a1c0e-1111-2222-3333-444444444444)
+- /app/significant_events/knowledge_indicators?source=3f2a1c0e-1111-2222-3333-444444444444
 
 Example: check KI identification status
 Tool: `ki_identification_status`
