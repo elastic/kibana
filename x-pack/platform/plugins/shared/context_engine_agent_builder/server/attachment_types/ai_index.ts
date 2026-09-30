@@ -102,7 +102,7 @@ export const createAiIndexAttachmentType = (): AttachmentTypeDefinition<
       'system-context-engine-document-summary and is not attached to this index. Calling the tool',
       'again replaces the automation that template already attached, keeping the same workflow id,',
       'rather than adding a second one. The result has `replaced: true` when that happened. It does',
-      'not open a confirmation dialog.',
+      'not open a confirmation dialog. Do not look for `run.started` on it.',
       'For every other strategy, build a new automation through a subagent rather than in this conversation: it drafts the',
       'workflow, pilots it against this index, checks the knowledge indicators it produced, removes',
       `them and returns the finished YAML. \`${AI_INDEX_AUTOMATIONS_SKILL_ID}\` describes the brief it`,
