@@ -124,9 +124,56 @@ describe('EsqlCreateFlow', () => {
     expect(mockStartDatafeed).toHaveBeenCalledWith({
       datafeedId: 'datafeed-esql-job-1',
       start: 'now-15m',
+    });
+    expect(mockStartDatafeed.mock.calls[0][0]).not.toHaveProperty('end');
+    expect(mockNavigateToManagement).toHaveBeenCalledWith('', { jobId: 'esql-job-1' });
+  });
+
+  it('starts the datafeed lookback-only with the wizard end when real time is switched off', async () => {
+    const DisableRealTime = () => {
+      const { setContinueInRealTime } = useEsqlWizardContext();
+
+      useEffect(() => {
+        setContinueInRealTime(false);
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+      }, []);
+
+      return null;
+    };
+
+    renderWithI18n(
+      <EsqlWizardProvider>
+        <ValidWizardState />
+        <DisableRealTime />
+        <EsqlCreateFlow />
+      </EsqlWizardProvider>
+    );
+
+    const createButton = screen.getByTestId('mlEsqlCreateJobButton');
+    await waitFor(() => expect(createButton).toBeEnabled());
+    fireEvent.click(createButton);
+
+    await waitFor(() => expect(mockStartDatafeed).toHaveBeenCalledTimes(1));
+    expect(mockStartDatafeed).toHaveBeenCalledWith({
+      datafeedId: 'datafeed-esql-job-1',
+      start: 'now-15m',
       end: 'now',
     });
-    expect(mockNavigateToManagement).toHaveBeenCalledWith('', { jobId: 'esql-job-1' });
+  });
+
+  it('defaults continueInRealTime to true', () => {
+    let seen: boolean | undefined;
+    const Probe = () => {
+      seen = useEsqlWizardContext().state.continueInRealTime;
+      return null;
+    };
+    renderWithI18n(
+      <EsqlWizardProvider>
+        <Probe />
+      </EsqlWizardProvider>
+    );
+
+    expect(seen).toBe(true);
   });
 
   it('does not call the API without a valid job ID', () => {

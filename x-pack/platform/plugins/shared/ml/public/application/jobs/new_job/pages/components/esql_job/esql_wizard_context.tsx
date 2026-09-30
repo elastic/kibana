@@ -32,6 +32,12 @@ export interface EsqlWizardState extends EsqlQueryStepState {
   columnsErrorMessage?: string;
   wizardStart: string;
   wizardEnd: string;
+  /**
+   * When true (default) the datafeed is started at `wizardStart` with no end
+   * (lookback over the picked range, then real time). When false it is started
+   * with `end: wizardEnd` (lookback only; the job closes when done).
+   */
+  continueInRealTime: boolean;
   /** Row-count-per-bucket histogram for the Query & time range step (LEAD DECISION, g2sz.10). */
   histogramStatus: EsqlHistogramStatus;
   histogramTotalRows: number;
@@ -48,6 +54,7 @@ export interface EsqlWizardContextValue {
   setQueryProbeState: (queryProbeState: EsqlWizardState['queryProbeState']) => void;
   setColumnsErrorMessage: (columnsErrorMessage: string | undefined) => void;
   setTimeRange: (range: { start: string; end: string }) => void;
+  setContinueInRealTime: (continueInRealTime: boolean) => void;
   setHistogramState: (
     next: Partial<
       Pick<
@@ -76,6 +83,7 @@ const initialState: EsqlWizardState = {
   delayedDataCheckEnabled: false,
   wizardStart: 'now-15m',
   wizardEnd: 'now',
+  continueInRealTime: true,
   histogramStatus: 'idle',
   histogramTotalRows: 0,
   histogramErrorMessage: undefined,
@@ -109,6 +117,9 @@ export const EsqlWizardProvider = ({ children }: PropsWithChildren) => {
 
     setState((current) => ({ ...current, wizardStart: start, wizardEnd: end }));
   }, []);
+  const setContinueInRealTime = useCallback((continueInRealTime: boolean) => {
+    setState((current) => ({ ...current, continueInRealTime }));
+  }, []);
   const setHistogramState = useCallback(
     (
       next: Partial<
@@ -132,10 +143,12 @@ export const EsqlWizardProvider = ({ children }: PropsWithChildren) => {
       setQueryProbeState,
       setColumnsErrorMessage,
       setTimeRange,
+      setContinueInRealTime,
       setHistogramState,
     }),
     [
       setColumnsErrorMessage,
+      setContinueInRealTime,
       setHistogramState,
       setJobDescription,
       setJobGroups,

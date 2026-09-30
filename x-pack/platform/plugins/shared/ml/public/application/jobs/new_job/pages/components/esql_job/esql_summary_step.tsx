@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { EuiDescriptionList, EuiSpacer, EuiTitle } from '@elastic/eui';
+import { EuiDescriptionList, EuiFormRow, EuiSpacer, EuiSwitch, EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { EsqlDetectorConfig } from '../../../common/job_creator/esql_job_creator';
 import { useEsqlWizardContext } from './esql_wizard_context';
@@ -53,7 +53,7 @@ const describeDetectorRow = (detector: EsqlDetectorConfig): string => {
  * create/open/start-in-real-time action (`EsqlCreateFlow`).
  */
 export const EsqlSummaryStep = () => {
-  const { state } = useEsqlWizardContext();
+  const { state, setContinueInRealTime } = useEsqlWizardContext();
 
   const listItems = [
     {
@@ -105,6 +105,23 @@ export const EsqlSummaryStep = () => {
       <EuiDescriptionList listItems={listItems} type="column" data-test-subj="mlEsqlSummaryList" />
       <EuiSpacer size="l" />
       <EsqlPreviewPanel />
+      <EuiSpacer size="l" />
+      <EuiFormRow
+        helpText={i18n.translate('xpack.ml.esqlJob.summary.continueInRealTimeHelp', {
+          defaultMessage:
+            'When on, the datafeed analyzes the selected range and then keeps running on new data. When off, it only analyzes the selected range and the job closes when that is done.',
+        })}
+        fullWidth
+      >
+        <EuiSwitch
+          label={i18n.translate('xpack.ml.esqlJob.summary.continueInRealTimeLabel', {
+            defaultMessage: 'Continue in real time after the selected range',
+          })}
+          checked={state.continueInRealTime}
+          onChange={(event) => setContinueInRealTime(event.target.checked)}
+          data-test-subj="mlEsqlContinueInRealTimeSwitch"
+        />
+      </EuiFormRow>
       <EsqlCreateFlow />
     </div>
   );

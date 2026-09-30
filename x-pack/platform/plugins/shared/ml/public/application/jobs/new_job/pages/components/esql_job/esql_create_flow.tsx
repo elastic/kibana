@@ -104,7 +104,8 @@ export const EsqlCreateFlow = () => {
       await mlApi.startDatafeed({
         datafeedId: nextDatafeedId,
         start: state.wizardStart,
-        end: state.wizardEnd,
+        // Omit `end` entirely to continue in real time after the lookback.
+        ...(state.continueInRealTime ? {} : { end: state.wizardEnd }),
       });
       setPhase('success');
       await navigateToManagement(ML_PAGES.ANOMALY_DETECTION_JOBS_MANAGE, { jobId });

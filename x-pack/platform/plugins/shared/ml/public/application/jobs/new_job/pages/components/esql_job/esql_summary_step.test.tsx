@@ -6,7 +6,7 @@
  */
 
 import React, { useEffect } from 'react';
-import { screen } from '@testing-library/react';
+import { fireEvent, screen } from '@testing-library/react';
 import { renderWithI18n } from '../../../../../test_utils/render_with_ml_context';
 import { EsqlSummaryStep } from './esql_summary_step';
 import { EsqlWizardProvider, useEsqlWizardContext } from './esql_wizard_context';
@@ -53,5 +53,29 @@ describe('EsqlSummaryStep', () => {
     expect(summary).toHaveTextContent('host');
     expect(screen.getByTestId('mlEsqlPreviewPanelStub')).toBeInTheDocument();
     expect(screen.getByTestId('mlEsqlCreateFlowStub')).toBeInTheDocument();
+  });
+
+  it('renders the real-time switch on by default and toggles the wizard state', () => {
+    let continueInRealTime: boolean | undefined;
+    const Probe = () => {
+      continueInRealTime = useEsqlWizardContext().state.continueInRealTime;
+      return null;
+    };
+    renderWithI18n(
+      <EsqlWizardProvider>
+        <Probe />
+        <EsqlSummaryStep />
+      </EsqlWizardProvider>
+    );
+
+    const toggle = screen.getByTestId('mlEsqlContinueInRealTimeSwitch');
+    expect(toggle).toBeChecked();
+    expect(screen.getByText('Continue in real time after the selected range')).toBeInTheDocument();
+    expect(continueInRealTime).toBe(true);
+
+    fireEvent.click(toggle);
+
+    expect(screen.getByTestId('mlEsqlContinueInRealTimeSwitch')).not.toBeChecked();
+    expect(continueInRealTime).toBe(false);
   });
 });

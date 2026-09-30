@@ -36,6 +36,7 @@ const baseState: EsqlWizardState = {
   delayedDataCheckEnabled: false,
   wizardStart: 'now-15m',
   wizardEnd: 'now',
+  continueInRealTime: true,
   histogramStatus: 'success',
   histogramTotalRows: 42,
   histogramErrorMessage: undefined,
