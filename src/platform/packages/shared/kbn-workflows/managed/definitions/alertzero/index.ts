@@ -189,20 +189,20 @@ export const ALERTZERO_FORENSICS_WORKFLOW_IDS = [
 /**
  * Hunt Watch's children invoked via `workflow.execute`/`workflow.executeAsync`
  * from the tagged Worker (`hunt_continuous_threat_hunt.yaml`) or from each
- * other: the hunt child (former 3D, now on PR 4, `system-security-hunt-execute`),
- * the find-or-create-Investigation child (added Phase 0 task 7: the deterministic
- * id it mints needs a uuidv5 hash Liquid cannot compute, so it cannot live inline
- * in the Worker's `parallel` branch), the packaging child (Phase 5: wraps
- * `hunt.packageReport`, fans mint payloads out to the proposal-gate child, closes
- * the Investigation on a clean run), and the proposal-gate child (Phase 6: wraps
- * `system-create-proposal`'s single `waitForApproval`, closes the Investigation
- * on settlement). Own no trigger, so — like `journal_note` above — all four must
- * be installed globally for the calling `workflow.execute`/`workflow.executeAsync`
- * steps to resolve them. Correlation (`system-security-hunt-correlation`) lands
- * with 3B under R.7. `find_or_create_investigation` and `hunt` stay untagged
+ * other: the hunt child (`system-security-hunt-execute`), the
+ * find-or-create-Investigation child (the deterministic id it mints needs a
+ * uuidv5 hash Liquid cannot compute, so it cannot live inline in the Worker's
+ * `parallel` branch), the packaging child (wraps `hunt.packageReport`, fans mint
+ * payloads out to the proposal-gate child, closes the Investigation on a clean
+ * run), and the proposal-gate child (wraps `system-create-proposal`'s single
+ * `waitForApproval`, closes the Investigation on settlement). Own no trigger,
+ * so — like `journal_note` above — all four must be installed globally for the
+ * calling `workflow.execute`/`workflow.executeAsync` steps to resolve them.
+ * Cross-report correlation (`system-security-hunt-correlation`) is not part of
+ * this set yet. `find_or_create_investigation` and `hunt` stay untagged
  * (Worker-branch-internal plumbing); `package_report` and `proposal_gate` carry
- * `security` + `continuous-threat-hunt` (feature children, per the plan's
- * tag convention) for Workflows-list findability.
+ * `security` + `continuous-threat-hunt` as feature children, for Workflows-list
+ * findability.
  */
 export const ALERTZERO_HUNT_CHILD_WORKFLOW_IDS = [
   ALERTZERO_HUNT_WORKFLOW_ID,

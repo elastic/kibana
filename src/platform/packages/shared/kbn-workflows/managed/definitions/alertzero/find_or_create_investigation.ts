@@ -18,7 +18,7 @@ export const ALERTZERO_HUNT_FIND_OR_CREATE_INVESTIGATION_WORKFLOW_ID =
   'system-security-hunt-find-or-create-investigation';
 
 /**
- * Untagged child invoked by PR 4's tagged Worker
+ * Untagged child invoked by Hunt Watch's tagged Worker
  * (`hunt_continuous_threat_hunt.yaml`) via `workflow.execute`. Wraps the native
  * `hunt.findOrCreateInvestigation` step type (the deterministic id it mints
  * requires a uuidv5 hash Liquid cannot compute, so this cannot be a pure-YAML

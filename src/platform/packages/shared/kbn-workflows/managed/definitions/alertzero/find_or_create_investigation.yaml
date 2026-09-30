@@ -51,8 +51,8 @@ steps:
   # `triggerAttachmentId` (trigger-{sha256(space|reportId)}, computed by the
   # native step alongside the deterministic conversation id) is fixed per
   # (space, reportId), so a rerun against the same conversation 409s rather
-  # than appending a second copy, and packaging's documented fallback lookup
-  # (section B: `conversations.search({ filter: 'attachment_id: <this id>' })`)
+  # than appending a second copy, and packaging's fallback lookup
+  # (`conversations.search({ filter: 'attachment_id: <this id>' })`)
   # resolves to it. `on-failure: continue: true` because losing this pill is
   # not a reason to fail an otherwise-successful find-or-create. Skipped when
   # find_or_create itself failed: there is no conversation id to attach to.
@@ -74,9 +74,9 @@ steps:
   # journal_note call rather than one converse call carrying both, since this
   # message type does not depend on the attachment landing to be useful on its
   # own. Same skip guard; a rerun gets its own trigger message on the same
-  # Investigation (section B: a manual rerun appends a new run cycle, it does
-  # not create a second Investigation), and says so: `created` distinguishes
-  # the first run from a rerun.
+  # Investigation, because a manual rerun appends a new run cycle rather than
+  # creating a second Investigation, and says so: `created` distinguishes the
+  # first run from a rerun.
   #
   # The message is the first line of the Investigation's story, so it names
   # the report (title, source, publication time, severity), what the report

@@ -48,8 +48,8 @@ outputs:
 steps:
   # No Investigation to package against (the Worker's find_or_create failed)
   # means there is nothing to decide: skip the real packaging call rather than
-  # run it against a nonexistent Investigation (Phase 5 task 2; same guard as
-  # hunt.yaml's run_hunt_coordinator).
+  # run it against a nonexistent Investigation. Same guard as hunt.yaml's
+  # run_hunt_coordinator.
   - name: decide_and_package
     type: hunt.packageReport
     if: "${{ inputs.investigationConversationId != nil and inputs.investigationConversationId != empty }}"
@@ -72,12 +72,11 @@ steps:
   # checks `!= nil`/`!= empty` rather than a `| default: []` filter chain: a
   # bracket array literal is not a valid filter argument in this engine (it
   # silently drops the field) and `foreach` itself hard-fails on a nil
-  # predecessor rather than treating it as empty (Phase 0 task 7 finding,
-  # section A item 8 — same reasoning as the Worker's own report_fan_out).
-  # Fire-and-forget: this child does not join the gates (Phase 5 task 4), so
-  # `mode: settled` plus the failed count read below is how a launch failure
-  # is observed without an on-failure inside the branch body (illegal there
-  # per Phase 0 task 7 finding 1).
+  # predecessor rather than treating it as empty. Same reasoning as the Worker's
+  # own report_fan_out.
+  # Fire-and-forget: this child does not join the gates, so `mode: settled` plus
+  # the failed count read below is how a launch failure is observed without an
+  # on-failure inside the branch body, which the engine rejects there.
   - name: start_proposal_gates
     type: parallel
     if: "${{ steps.decide_and_package.output.status == 'packaged' and steps.decide_and_package.output.proposals != nil and steps.decide_and_package.output.proposals != empty }}"
@@ -104,16 +103,16 @@ steps:
             closureSummary: "{{ steps.decide_and_package.output.closureSummary }}"
             expectedProposalCount: "${{ steps.decide_and_package.output.expectedProposalCount }}"
 
-  # A scalar `default: 0` (not a bracket array literal) is fine in this engine
-  # (Phase 0 task 7 only flagged `default: []`); safe when start_proposal_gates
-  # was itself skipped (no proposals) or never ran.
+  # A scalar `default: 0` is fine in this engine; it is only a bracket array
+  # literal that gets silently dropped. Safe when start_proposal_gates was
+  # itself skipped (no proposals) or never ran.
   - name: resolve_dispatch_status
     type: data.set
     with:
       dispatch_failed_count: "${{ steps.start_proposal_gates.output.failed | default: 0 }}"
 
-  # Section C item 5: a partial gate launch (k of N dispatched) marks the
-  # packaging stage `partial`, same as a `run_incomplete` native result — the
+  # A partial gate launch (k of N dispatched) marks the packaging stage
+  # `partial`, same as a `run_incomplete` native result — the
   # Worker's own outcome derivation only checks this child's status for
   # equality to `run_incomplete`, so both collapse to the one literal it reads.
   - name: resolve_package_status

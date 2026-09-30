@@ -17,7 +17,7 @@ import type { ManagedWorkflowDefinition } from '../../types';
 export const ALERTZERO_HUNT_WORKFLOW_ID = 'system-security-hunt-execute';
 
 /**
- * Untagged child invoked by PR 4's tagged Worker
+ * Untagged child invoked by Hunt Watch's tagged Worker
  * (`hunt_continuous_threat_hunt.yaml`) via `workflow.execute`. Runs the
  * two-tier hunt coordinator for one report, stages the SSE attachment on a
  * confirmed hit, writes the hunt-results message, and writes the per-space

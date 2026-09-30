@@ -33,8 +33,8 @@ export const buildHuntInvestigationConversationId = (reportId: string): string =
  * reportId) so a rerun's find-or-create 409s on the existing attachment rather
  * than appending a second copy, and so packaging can resolve the Investigation
  * for a report id outside the current run via
- * `conversations.search({ filter: 'attachment_id: <this id>' })` (section B's
- * documented fallback) without a stored side index.
+ * `conversations.search({ filter: 'attachment_id: <this id>' })` without a
+ * stored side index.
  */
 export const buildHuntTriggerAttachmentId = ({
   spaceId,

@@ -66,9 +66,9 @@ export const summarizeReportForTrigger = (
 /**
  * Mints the deterministic Investigation id for a report and creates the conversation.
  * A verified 409 (the Investigation already exists for this subject key) is success:
- * per section C's retry-then-verify rule, the existing conversation is read back to
- * confirm it is reachable before the conflict is treated as success, rather than
- * trusting the create-time race alone. `created` tells the caller which path ran,
+ * the existing conversation is read back to confirm it is reachable before the
+ * conflict is treated as success, rather than trusting the create-time race
+ * alone. `created` tells the caller which path ran,
  * so a rerun's trigger message can say so instead of claiming to have opened the
  * Investigation again.
  */

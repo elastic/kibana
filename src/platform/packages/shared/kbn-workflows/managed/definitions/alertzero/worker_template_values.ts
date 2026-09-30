@@ -78,7 +78,7 @@ const HUNT_WORKER_DEFAULTS = {
 };
 
 /**
- * The manual trigger's optional `reportIds` input (Phase 3 task 2): a manual-bypass
+ * The manual trigger's optional `reportIds` input: a manual-bypass
  * fan-out over named reports, capped at 10 to match `create_proposal.yaml`'s
  * trigger-input shape and the candidates route's own `report_ids` bound. Present on
  * every autonomy level's manual trigger, scheduled or not.

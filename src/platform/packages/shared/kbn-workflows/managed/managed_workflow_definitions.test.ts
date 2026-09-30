@@ -202,7 +202,7 @@ it.each([
   [
     ALERTZERO_WORKER_HUNT_CONTINUOUS_THREAT_HUNT_WORKFLOW_ID,
     HUNT_CONTINUOUS_THREAT_HUNT_YAML,
-    '1:3b9875f9',
+    '1:8ef62036',
   ],
   [ALERTZERO_WORKER_DETECTION_RULE_TUNING_WORKFLOW_ID, DETECTION_RULE_TUNING_YAML, '7:f3649616'],
   [
@@ -390,8 +390,8 @@ describe('managedWorkflowDefinitions', () => {
       }
     });
 
-    // Section A / the plan's tag convention: the tagged Worker is the only `watch-hunt`
-    // definition in the whole registry, not just among the four hunt children -- a second
+    // The tagged Worker is the only `watch-hunt` definition in the whole
+    // registry, not just among the four hunt children -- a second
     // definition carrying it would make the Watch UI list two Workers for one feature.
     it('tags only the tagged Worker as watch-hunt', () => {
       const taggedWatchHunt = parsedDefinitions.filter((definition) =>

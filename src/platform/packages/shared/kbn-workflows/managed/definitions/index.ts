@@ -231,10 +231,9 @@ export const managedWorkflowDefinitions = [
   ALERTZERO_ATTACK_DISCOVERY_REVIEW_WORKFLOW,
   ALERTZERO_ATTACK_DISCOVERY_FP_TP_ANALYSIS_WORKFLOW,
   ALERTZERO_JOURNAL_NOTE_WORKFLOW,
-  // Hunt Watch's children (PR 4 / R.7 / Phase 0 task 7 / Phase 5 / Phase 6).
-  // Own no trigger, so — like the journal-note child above — all four must
-  // be registered/installed globally for the calling `workflow.execute`/
-  // `workflow.executeAsync` steps to resolve them. Correlation lands with 3B.
+  // Hunt Watch's children. Own no trigger, so — like the journal-note child
+  // above — all four must be registered/installed globally for the calling
+  // `workflow.execute`/`workflow.executeAsync` steps to resolve them.
   ALERTZERO_HUNT_WORKFLOW,
   ALERTZERO_HUNT_FIND_OR_CREATE_INVESTIGATION_WORKFLOW,
   ALERTZERO_HUNT_PACKAGE_REPORT_WORKFLOW,
