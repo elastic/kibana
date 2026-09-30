@@ -812,7 +812,7 @@ describe('#create', () => {
     await expect(
       client.create({ ...spaceToCreate, solution: 'es' })
     ).rejects.toThrowErrorMatchingInlineSnapshot(
-      `"Unable to create Space, solution property is forbidden in serverless"`
+      `[Error: Unable to create Space, solution property is forbidden in serverless]`
     );
 
     expect(mockCallWithRequestRepository.find).toHaveBeenCalledWith({
@@ -1199,7 +1199,7 @@ describe('#update', () => {
     await expect(
       client.update(id, { ...spaceToUpdate, solution: 'es' })
     ).rejects.toThrowErrorMatchingInlineSnapshot(
-      `"Unable to update Space, solution property is forbidden in serverless"`
+      `[Error: Unable to update Space, solution property is forbidden in serverless]`
     );
 
     expect(mockCallWithRequestRepository.update).not.toHaveBeenCalled();

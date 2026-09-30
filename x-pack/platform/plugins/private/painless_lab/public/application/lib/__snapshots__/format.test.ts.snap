@@ -1,6 +1,6 @@
 // Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`formatRequestPayload pretty formats a complex multi-line script 1`] = `
+exports[`formatRequestPayload > pretty formats > a complex multi-line script 1`] = `
 "{
   \\"script\\": {
     \\"source\\": \\"\\"\\"// Here's a comment and a variable, then a loop.
@@ -14,7 +14,7 @@ exports[`formatRequestPayload pretty formats a complex multi-line script 1`] = `
 }"
 `;
 
-exports[`formatRequestPayload pretty formats a single-line script 1`] = `
+exports[`formatRequestPayload > pretty formats > a single-line script 1`] = `
 "{
   \\"script\\": {
     \\"source\\": \\"\\"\\"return \\"ok\\";\\"\\"\\"
@@ -22,7 +22,7 @@ exports[`formatRequestPayload pretty formats a single-line script 1`] = `
 }"
 `;
 
-exports[`formatRequestPayload pretty formats code and parameters 1`] = `
+exports[`formatRequestPayload > pretty formats > code and parameters 1`] = `
 "{
   \\"script\\": {
     \\"source\\": \\"\\"\\"return \\"ok\\";\\"\\"\\",
@@ -36,7 +36,7 @@ exports[`formatRequestPayload pretty formats code and parameters 1`] = `
 }"
 `;
 
-exports[`formatRequestPayload pretty formats code, context, index, and document 1`] = `
+exports[`formatRequestPayload > pretty formats > code, context, index, and document 1`] = `
 "{
   \\"script\\": {
     \\"source\\": \\"\\"\\"return \\"ok\\";\\"\\"\\"
@@ -54,7 +54,7 @@ exports[`formatRequestPayload pretty formats code, context, index, and document 
 }"
 `;
 
-exports[`formatRequestPayload pretty formats code, parameters, and context 1`] = `
+exports[`formatRequestPayload > pretty formats > code, parameters, and context 1`] = `
 "{
   \\"script\\": {
     \\"source\\": \\"\\"\\"return \\"ok\\";\\"\\"\\",
@@ -73,7 +73,7 @@ exports[`formatRequestPayload pretty formats code, parameters, and context 1`] =
 }"
 `;
 
-exports[`formatRequestPayload pretty formats code, parameters, context, index, and document 1`] = `
+exports[`formatRequestPayload > pretty formats > code, parameters, context, index, and document 1`] = `
 "{
   \\"script\\": {
     \\"source\\": \\"\\"\\"return \\"ok\\";\\"\\"\\",
@@ -97,7 +97,7 @@ exports[`formatRequestPayload pretty formats code, parameters, context, index, a
 }"
 `;
 
-exports[`formatRequestPayload pretty formats no script 1`] = `
+exports[`formatRequestPayload > pretty formats > no script 1`] = `
 "{
   \\"script\\": {
     \\"source\\": \\"\\"\\"\\"\\"\\"
@@ -105,7 +105,7 @@ exports[`formatRequestPayload pretty formats no script 1`] = `
 }"
 `;
 
-exports[`formatRequestPayload ugly formats a complex multi-line script 1`] = `
+exports[`formatRequestPayload > ugly formats > a complex multi-line script 1`] = `
 "{
   \\"script\\": {
     \\"source\\": \\"// Here's a comment and a variable, then a loop.\\\\ndouble halfWidth = Math.floor(width * 0.5);\\\\nfor (int y = 0; y < height; y++) {\\\\n  return \\\\\\"results here\\\\\\\\\\\\\\\\n\\\\\\";\\\\n}\\\\n\\\\nreturn result;\\"
@@ -113,7 +113,7 @@ exports[`formatRequestPayload ugly formats a complex multi-line script 1`] = `
 }"
 `;
 
-exports[`formatRequestPayload ugly formats a single-line script 1`] = `
+exports[`formatRequestPayload > ugly formats > a single-line script 1`] = `
 "{
   \\"script\\": {
     \\"source\\": \\"return \\\\\\"ok\\\\\\";\\"
@@ -121,7 +121,7 @@ exports[`formatRequestPayload ugly formats a single-line script 1`] = `
 }"
 `;
 
-exports[`formatRequestPayload ugly formats code and parameters 1`] = `
+exports[`formatRequestPayload > ugly formats > code and parameters 1`] = `
 "{
   \\"script\\": {
     \\"source\\": \\"return \\\\\\"ok\\\\\\";\\",
@@ -135,7 +135,7 @@ exports[`formatRequestPayload ugly formats code and parameters 1`] = `
 }"
 `;
 
-exports[`formatRequestPayload ugly formats code, context, index, and document 1`] = `
+exports[`formatRequestPayload > ugly formats > code, context, index, and document 1`] = `
 "{
   \\"script\\": {
     \\"source\\": \\"return \\\\\\"ok\\\\\\";\\"
@@ -153,7 +153,7 @@ exports[`formatRequestPayload ugly formats code, context, index, and document 1`
 }"
 `;
 
-exports[`formatRequestPayload ugly formats code, parameters, and context 1`] = `
+exports[`formatRequestPayload > ugly formats > code, parameters, and context 1`] = `
 "{
   \\"script\\": {
     \\"source\\": \\"return \\\\\\"ok\\\\\\";\\",
@@ -172,7 +172,7 @@ exports[`formatRequestPayload ugly formats code, parameters, and context 1`] = `
 }"
 `;
 
-exports[`formatRequestPayload ugly formats code, parameters, context, index, and document 1`] = `
+exports[`formatRequestPayload > ugly formats > code, parameters, context, index, and document 1`] = `
 "{
   \\"script\\": {
     \\"source\\": \\"return \\\\\\"ok\\\\\\";\\",
@@ -196,7 +196,7 @@ exports[`formatRequestPayload ugly formats code, parameters, context, index, and
 }"
 `;
 
-exports[`formatRequestPayload ugly formats no script 1`] = `
+exports[`formatRequestPayload > ugly formats > no script 1`] = `
 "{
   \\"script\\": {
     \\"source\\": undefined

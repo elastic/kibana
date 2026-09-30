@@ -38,6 +38,9 @@ import { create } from './create';
 import { Logger } from '../logger';
 import * as prompt from './lib/utils/prompt';
 
+// sinon can't stub the getter-based exports of an ES module namespace; expose plain properties instead
+vi.mock('./lib/utils/prompt', async (importOriginal) => ({ ...(await importOriginal()) }));
+
 describe('Kibana keystore', () => {
   describe('create', () => {
     const sandbox = sinon.createSandbox();

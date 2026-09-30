@@ -1,6 +1,6 @@
 // Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`AddRoleAlert component renders expected component 1`] = `
+exports[`AddRoleAlert component > renders expected component 1`] = `
 <p>
   <strong>
     <MemoizedFormattedMessage

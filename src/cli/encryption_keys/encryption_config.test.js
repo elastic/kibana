@@ -13,6 +13,18 @@ import { EncryptionConfig } from './encryption_config';
 import crypto from 'crypto';
 import fs from 'fs';
 
+// `encryption_config.js` imports `readFileSync` by name; forward it to the default export so stubs on `fs.readFileSync` apply
+vi.mock('fs', async (importOriginal) => {
+  const { default: actualFs } = await importOriginal();
+  return {
+    ...actualFs,
+    default: actualFs,
+    get readFileSync() {
+      return actualFs.readFileSync;
+    },
+  };
+});
+
 describe('encryption key configuration', () => {
   let encryptionConfig = null;
 

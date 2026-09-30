@@ -15,6 +15,18 @@ import { generate } from './generate';
 import { Logger } from '../logger';
 import * as prompt from '../keystore/lib/utils/prompt';
 import fs from 'fs';
+
+// `interactive.js` imports `writeFileSync` by name; forward it to the default export so stubs on `fs.writeFileSync` apply
+vi.mock('fs', async (importOriginal) => {
+  const { default: actualFs } = await importOriginal();
+  return {
+    ...actualFs,
+    default: actualFs,
+    get writeFileSync() {
+      return actualFs.writeFileSync;
+    },
+  };
+});
 import crypto from 'crypto';
 
 describe('encryption key generation interactive', () => {

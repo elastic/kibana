@@ -277,7 +277,7 @@ describe('DocumentMigratorPipeline', () => {
     });
 
     expect(() => pipeline.run()).toThrowErrorMatchingInlineSnapshot(
-      `"Trying to transform down to a higher version: 8.7.0 to 8.8.0"`
+      `[Error: Trying to transform down to a higher version: 8.7.0 to 8.8.0]`
     );
   });
 

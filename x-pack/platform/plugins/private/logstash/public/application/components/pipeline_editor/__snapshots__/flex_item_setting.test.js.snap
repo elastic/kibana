@@ -1,6 +1,6 @@
 // Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`FlexItemSetting component renders a null label if label/tooltip text not supplied 1`] = `
+exports[`FlexItemSetting component > renders a null label if label/tooltip text not supplied 1`] = `
 <EuiFlexItem
   grow={false}
 >
@@ -15,7 +15,7 @@ exports[`FlexItemSetting component renders a null label if label/tooltip text no
 </EuiFlexItem>
 `;
 
-exports[`FlexItemSetting component renders component and children as expected 1`] = `
+exports[`FlexItemSetting component > renders component and children as expected 1`] = `
 <EuiFlexItem
   grow={false}
 >

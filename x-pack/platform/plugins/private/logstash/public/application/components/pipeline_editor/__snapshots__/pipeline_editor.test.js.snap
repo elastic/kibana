@@ -1,6 +1,6 @@
 // Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`PipelineEditor component includes required error message for falsy pipeline id 1`] = `
+exports[`PipelineEditor component > includes required error message for falsy pipeline id 1`] = `
 <EuiPageSection
   data-test-subj="pipelineEdit pipelineEdit-"
   restrictWidth={true}
@@ -259,7 +259,7 @@ Default value: 1024"
 </EuiPageSection>
 `;
 
-exports[`PipelineEditor component invalidates form for invalid pipeline id input 1`] = `
+exports[`PipelineEditor component > invalidates form for invalid pipeline id input 1`] = `
 <EuiPageSection
   data-test-subj="pipelineEdit pipelineEdit-$invalid-pipeline-name"
   restrictWidth={true}
@@ -517,7 +517,7 @@ Default value: 1024"
 </EuiPageSection>
 `;
 
-exports[`PipelineEditor component invalidates form for pipeline id with spaces 1`] = `
+exports[`PipelineEditor component > invalidates form for pipeline id with spaces 1`] = `
 <EuiPageSection
   data-test-subj="pipelineEdit pipelineEdit-pipeline id with spaces"
   restrictWidth={true}
@@ -775,7 +775,7 @@ Default value: 1024"
 </EuiPageSection>
 `;
 
-exports[`PipelineEditor component matches snapshot for clone pipeline 1`] = `
+exports[`PipelineEditor component > matches snapshot for clone pipeline 1`] = `
 <EuiPageSection
   data-test-subj="pipelineEdit pipelineEdit-pipelineId"
   restrictWidth={true}
@@ -1024,7 +1024,7 @@ Default value: 1024"
 </EuiPageSection>
 `;
 
-exports[`PipelineEditor component matches snapshot for create pipeline 1`] = `
+exports[`PipelineEditor component > matches snapshot for create pipeline 1`] = `
 <EuiPageSection
   data-test-subj="pipelineEdit pipelineEdit-pipelineId"
   restrictWidth={true}
@@ -1278,7 +1278,7 @@ Default value: 1024"
 </EuiPageSection>
 `;
 
-exports[`PipelineEditor component matches snapshot for edit pipeline 1`] = `
+exports[`PipelineEditor component > matches snapshot for edit pipeline 1`] = `
 <EuiPageSection
   data-test-subj="pipelineEdit pipelineEdit-pipelineId"
   restrictWidth={true}

@@ -361,7 +361,7 @@ describe('DocumentMigrator', () => {
           coreMigrationVersion: 'not-a-semver',
         })
       ).toThrowErrorMatchingInlineSnapshot(
-        `"Document \\"happy\\" has an invalid \\"coreMigrationVersion\\" [not-a-semver]. This must be a semver value."`
+        `[Error: Document "happy" has an invalid "coreMigrationVersion" [not-a-semver]. This must be a semver value.]`
       );
     });
 
@@ -379,7 +379,7 @@ describe('DocumentMigrator', () => {
           coreMigrationVersion: '8.0.2',
         })
       ).toThrowErrorMatchingInlineSnapshot(
-        `"Document \\"wet\\" has a \\"coreMigrationVersion\\" which belongs to a more recent version of Kibana [8.0.2]. The current version is [8.0.1]."`
+        `[Error: Document "wet" has a "coreMigrationVersion" which belongs to a more recent version of Kibana [8.0.2]. The current version is [8.0.1].]`
       );
     });
 
@@ -498,7 +498,7 @@ describe('DocumentMigrator', () => {
           coreMigrationVersion: '8.8.0',
         })
       ).toThrowErrorMatchingInlineSnapshot(
-        `"Changing a document's type during a migration is not supported."`
+        `[Error: Changing a document's type during a migration is not supported.]`
       );
     });
 
@@ -1494,7 +1494,7 @@ describe('DocumentMigrator', () => {
       expect(() =>
         migrator.migrate(document, { allowDowngrade: false })
       ).toThrowErrorMatchingInlineSnapshot(
-        `"Document \\"smelly\\" belongs to a more recent version of Kibana [10.2.0] when the last known version is [10.1.0]."`
+        `[Error: Document "smelly" belongs to a more recent version of Kibana [10.2.0] when the last known version is [10.1.0].]`
       );
     });
   });

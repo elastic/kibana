@@ -7,9 +7,23 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { getKeystore } from './get_keystore';
 import { Logger } from '../../logger';
 import fs from 'fs';
+
+// `get_keystore.js` imports `existsSync` by name; forward it to the default export so stubs on `fs.existsSync` apply
+vi.mock('fs', async (importOriginal) => {
+  const { default: actualFs } = await importOriginal();
+  return {
+    ...actualFs,
+    default: actualFs,
+    get existsSync() {
+      return actualFs.existsSync;
+    },
+  };
+});
 import sinon from 'sinon';
 
 describe('get_keystore', () => {

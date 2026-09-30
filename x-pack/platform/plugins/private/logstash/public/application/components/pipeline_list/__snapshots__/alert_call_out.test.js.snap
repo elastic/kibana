@@ -1,6 +1,6 @@
 // Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`AlertCallOut component renders expected component 1`] = `
+exports[`AlertCallOut component > renders expected component 1`] = `
 <EuiCallOut
   color="warning"
   iconType="question"

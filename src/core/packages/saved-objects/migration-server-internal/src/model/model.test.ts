@@ -1278,7 +1278,7 @@ describe('migrations v2 model', () => {
         });
 
         expect(() => model(state, res)).toThrowErrorMatchingInlineSnapshot(
-          `"PREPARE_COMPATIBLE_MIGRATION received unexpected action response: {\\"type\\":\\"remove_index_not_a_concrete_index\\"}"`
+          `[Error: PREPARE_COMPATIBLE_MIGRATION received unexpected action response: {"type":"remove_index_not_a_concrete_index"}]`
         );
       });
     });
@@ -1788,7 +1788,7 @@ describe('migrations v2 model', () => {
         expect(() =>
           model(transformedDocumentsBulkIndexState, res)
         ).toThrowErrorMatchingInlineSnapshot(
-          `"TRANSFORMED_DOCUMENTS_BULK_INDEX received unexpected action response: {\\"type\\":\\"index_not_found_exception\\",\\"index\\":\\"the_target_index\\"}"`
+          `[Error: TRANSFORMED_DOCUMENTS_BULK_INDEX received unexpected action response: {"type":"index_not_found_exception","index":"the_target_index"}]`
         );
       });
 
@@ -1799,7 +1799,7 @@ describe('migrations v2 model', () => {
         expect(() =>
           model(transformedDocumentsBulkIndexState, res)
         ).toThrowErrorMatchingInlineSnapshot(
-          `"TRANSFORMED_DOCUMENTS_BULK_INDEX received unexpected action response: {\\"type\\":\\"target_index_had_write_block\\"}"`
+          `[Error: TRANSFORMED_DOCUMENTS_BULK_INDEX received unexpected action response: {"type":"target_index_had_write_block"}]`
         );
       });
 

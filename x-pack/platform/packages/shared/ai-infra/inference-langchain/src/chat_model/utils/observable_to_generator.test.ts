@@ -63,7 +63,7 @@ describe('toAsyncIterator', () => {
       for await (const event of iterator) {
         output.push(event);
       }
-    }).rejects.toThrowErrorMatchingInlineSnapshot(`"something went wrong"`);
+    }).rejects.toThrowErrorMatchingInlineSnapshot(`[Error: something went wrong]`);
 
     // Fail-fast behavior: queued values are discarded when error occurs
     expect(output).toEqual([]);
@@ -87,7 +87,7 @@ describe('toAsyncIterator', () => {
       for await (const event of iterator) {
         output.push(event);
       }
-    }).rejects.toThrowErrorMatchingInlineSnapshot(`"delayed error"`);
+    }).rejects.toThrowErrorMatchingInlineSnapshot(`[Error: delayed error]`);
 
     expect(output).toEqual([1, 2]);
   });

@@ -1,22 +1,22 @@
 // Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`InfoAlerts component renders AddRoleAlert and EnableMonitoringAlert if both flags are true 1`] = `
+exports[`InfoAlerts component > renders AddRoleAlert and EnableMonitoringAlert if both flags are true 1`] = `
 <AlertCallOut>
   <AddRoleAlert />
   <EnableMonitoringAlert />
 </AlertCallOut>
 `;
 
-exports[`InfoAlerts component renders AddRoleAlert if flag is true 1`] = `
+exports[`InfoAlerts component > renders AddRoleAlert if flag is true 1`] = `
 <AlertCallOut>
   <AddRoleAlert />
 </AlertCallOut>
 `;
 
-exports[`InfoAlerts component renders EnableMonitoringAlert if flag is true 1`] = `
+exports[`InfoAlerts component > renders EnableMonitoringAlert if flag is true 1`] = `
 <AlertCallOut>
   <EnableMonitoringAlert />
 </AlertCallOut>
 `;
 
-exports[`InfoAlerts component renders null if both alert flags are false 1`] = `""`;
+exports[`InfoAlerts component > renders null if both alert flags are false 1`] = `""`;

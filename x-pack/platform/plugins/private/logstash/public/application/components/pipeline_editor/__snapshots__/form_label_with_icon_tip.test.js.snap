@@ -1,6 +1,6 @@
 // Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`FormLabelWithIconTip component renders as expected 1`] = `
+exports[`FormLabelWithIconTip component > renders as expected 1`] = `
 <div>
   <span>
     label text

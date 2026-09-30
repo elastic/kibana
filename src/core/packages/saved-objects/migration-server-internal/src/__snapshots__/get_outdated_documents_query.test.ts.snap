@@ -1,4 +1,178 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`getOutdatedDocumentsQuery > should not select documents if there ar… 1`] = `
+Object {
+  "bool": Object {
+    "should": Array [],
+  },
+}
+`;
+
+exports[`getOutdatedDocumentsQuery > should select documents with outdated b… 1`] = `
+Object {
+  "bool": Object {
+    "should": Array [
+      Object {
+        "bool": Object {
+          "must": Array [
+            Object {
+              "term": Object {
+                "type": "dashboard",
+              },
+            },
+            Object {
+              "bool": Object {
+                "should": Array [
+                  Object {
+                    "range": Object {
+                      "coreMigrationVersion": Object {
+                        "lt": "8.8.0",
+                      },
+                    },
+                  },
+                  Object {
+                    "bool": Object {
+                      "must_not": Array [
+                        Object {
+                          "exists": Object {
+                            "field": "typeMigrationVersion",
+                          },
+                        },
+                        Object {
+                          "exists": Object {
+                            "field": "migrationVersion.dashboard",
+                          },
+                        },
+                      ],
+                    },
+                  },
+                  Object {
+                    "bool": Object {
+                      "must": Object {
+                        "exists": Object {
+                          "field": "migrationVersion",
+                        },
+                      },
+                      "must_not": Object {
+                        "term": Object {
+                          "migrationVersion.dashboard": "7.7.0",
+                        },
+                      },
+                    },
+                  },
+                  Object {
+                    "range": Object {
+                      "typeMigrationVersion": Object {
+                        "lt": "7.7.0",
+                      },
+                    },
+                  },
+                ],
+              },
+            },
+          ],
+        },
+      },
+    ],
+  },
+}
+`;
+
+exports[`getOutdatedDocumentsQuery > should select documents with outdated c… 1`] = `
+Object {
+  "bool": Object {
+    "should": Array [
+      Object {
+        "bool": Object {
+          "must": Array [
+            Object {
+              "term": Object {
+                "type": "dashboard",
+              },
+            },
+            Object {
+              "bool": Object {
+                "should": Array [
+                  Object {
+                    "range": Object {
+                      "coreMigrationVersion": Object {
+                        "lt": "8.8.0",
+                      },
+                    },
+                  },
+                ],
+              },
+            },
+          ],
+        },
+      },
+    ],
+  },
+}
+`;
+
+exports[`getOutdatedDocumentsQuery > should select documents with outdated t… 1`] = `
+Object {
+  "bool": Object {
+    "should": Array [
+      Object {
+        "bool": Object {
+          "must": Array [
+            Object {
+              "term": Object {
+                "type": "dashboard",
+              },
+            },
+            Object {
+              "bool": Object {
+                "should": Array [
+                  Object {
+                    "bool": Object {
+                      "must_not": Array [
+                        Object {
+                          "exists": Object {
+                            "field": "typeMigrationVersion",
+                          },
+                        },
+                        Object {
+                          "exists": Object {
+                            "field": "migrationVersion.dashboard",
+                          },
+                        },
+                      ],
+                    },
+                  },
+                  Object {
+                    "bool": Object {
+                      "must": Object {
+                        "exists": Object {
+                          "field": "migrationVersion",
+                        },
+                      },
+                      "must_not": Object {
+                        "term": Object {
+                          "migrationVersion.dashboard": "7.7.0",
+                        },
+                      },
+                    },
+                  },
+                  Object {
+                    "range": Object {
+                      "typeMigrationVersion": Object {
+                        "lt": "7.7.0",
+                      },
+                    },
+                  },
+                ],
+              },
+            },
+          ],
+        },
+      },
+    ],
+  },
+}
+`;
 
 exports[`getOutdatedDocumentsQuery should not select documents if there are no migrations 1`] = `
 Object {

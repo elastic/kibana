@@ -7,7 +7,21 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import fs from 'fs';
+
+// `rename.js` imports `rename` by name; forward it to the default export so stubs on `fs.rename` apply
+vi.mock('fs', async (importOriginal) => {
+  const { default: actualFs } = await importOriginal();
+  return {
+    ...actualFs,
+    default: actualFs,
+    get rename() {
+      return actualFs.rename;
+    },
+  };
+});
 
 import sinon from 'sinon';
 

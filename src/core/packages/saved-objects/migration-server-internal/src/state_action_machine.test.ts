@@ -81,7 +81,7 @@ describe('state action machine', () => {
   test('rejects if an exception is throw from inside an action', async () => {
     await expect(
       stateActionMachine({ ...state, controlState: 'THROW' }, next, countUntilThree)
-    ).rejects.toThrowErrorMatchingInlineSnapshot(`"Invalid control state"`);
+    ).rejects.toThrowErrorMatchingInlineSnapshot(`[Error: Invalid control state]`);
   });
 
   test('resolve with the final state once all steps are completed', async () => {

@@ -14,12 +14,12 @@ import fs from 'fs';
 
 // `kibana.js` imports `statSync` by name; forward it to the default export so stubs on `fs.statSync` apply
 vi.mock('fs', async (importOriginal) => {
-  const { default: fs } = await importOriginal();
+  const { default: actualFs } = await importOriginal();
   return {
-    ...fs,
-    default: fs,
+    ...actualFs,
+    default: actualFs,
     get statSync() {
-      return fs.statSync;
+      return actualFs.statSync;
     },
   };
 });

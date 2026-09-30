@@ -159,7 +159,7 @@ describe('migrateRawDocs', () => {
       migrateRawDocs(new SavedObjectsSerializer(new SavedObjectTypeRegistry()), transform, [
         { _id: 'a:b', _source: { type: 'a', a: { name: 'AAA' } } },
       ])
-    ).rejects.toThrowErrorMatchingInlineSnapshot(`"error during transform"`);
+    ).rejects.toThrowErrorMatchingInlineSnapshot(`[Error: error during transform]`);
   });
 });
 

@@ -1,6 +1,6 @@
 // Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`ConfirmDeleteModal component confirms delete for multiple pipelines 1`] = `
+exports[`ConfirmDeleteModal component > confirms delete for multiple pipelines 1`] = `
 <EuiConfirmModal
   aria-labelledby="generated-id"
   buttonColor="danger"
@@ -50,7 +50,7 @@ exports[`ConfirmDeleteModal component confirms delete for multiple pipelines 1`]
 </EuiConfirmModal>
 `;
 
-exports[`ConfirmDeleteModal component confirms delete for single pipeline 1`] = `
+exports[`ConfirmDeleteModal component > confirms delete for single pipeline 1`] = `
 <EuiConfirmModal
   aria-labelledby="generated-id"
   buttonColor="danger"

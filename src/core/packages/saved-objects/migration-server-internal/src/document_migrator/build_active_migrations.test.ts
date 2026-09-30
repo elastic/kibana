@@ -121,7 +121,7 @@ describe('buildActiveMigrations', () => {
         },
       });
 
-      expect(() => buildMigrations()).toThrowErrorMatchingInlineSnapshot(`"woups"`);
+      expect(() => buildMigrations()).toThrowErrorMatchingInlineSnapshot(`[Error: woups]`);
     });
   });
 

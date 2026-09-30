@@ -740,7 +740,7 @@ describe('InferenceChatModel', () => {
 
       await expect(() =>
         chatModel.invoke('Some question')
-      ).rejects.toThrowErrorMatchingInlineSnapshot(`"something went wrong"`);
+      ).rejects.toThrowErrorMatchingInlineSnapshot(`[Error: something went wrong]`);
     });
 
     it('respects the maxRetries parameter', async () => {
@@ -779,7 +779,7 @@ describe('InferenceChatModel', () => {
 
       await expect(() =>
         chatModel.invoke('Some question')
-      ).rejects.toThrowErrorMatchingInlineSnapshot(`"bad parameter"`);
+      ).rejects.toThrowErrorMatchingInlineSnapshot(`[Error: bad parameter]`);
 
       expect(chatComplete).toHaveBeenCalledTimes(1);
     });
@@ -929,7 +929,7 @@ describe('InferenceChatModel', () => {
 
       await expect(() =>
         chatModel.stream('Some question')
-      ).rejects.toThrowErrorMatchingInlineSnapshot(`"something went wrong"`);
+      ).rejects.toThrowErrorMatchingInlineSnapshot(`[Error: something went wrong]`);
     });
 
     it('throws when the underlying observable errors', async () => {
@@ -951,7 +951,7 @@ describe('InferenceChatModel', () => {
         for await (const chunk of output) {
           allChunks.push(chunk);
         }
-      }).rejects.toThrowErrorMatchingInlineSnapshot(`"something went wrong"`);
+      }).rejects.toThrowErrorMatchingInlineSnapshot(`[Error: something went wrong]`);
 
       expect(allChunks.length).toBe(0);
     });

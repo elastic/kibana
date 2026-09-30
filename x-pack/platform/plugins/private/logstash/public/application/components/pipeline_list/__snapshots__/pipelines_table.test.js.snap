@@ -1,6 +1,6 @@
 // Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`PipelinesTable component renders component as expected 1`] = `
+exports[`PipelinesTable component > renders component as expected 1`] = `
 <EuiInMemoryTable
   columns={
     Array [

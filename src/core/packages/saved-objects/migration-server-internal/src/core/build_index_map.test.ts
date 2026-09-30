@@ -164,6 +164,6 @@ test('throws when two scripts are defined for an index pattern', () => {
       indexMap,
     })
   ).toThrowErrorMatchingInlineSnapshot(
-    `"convertToAliasScript has been defined more than once for index pattern \\".kibana\\""`
+    `[Error: convertToAliasScript has been defined more than once for index pattern ".kibana"]`
   );
 });
