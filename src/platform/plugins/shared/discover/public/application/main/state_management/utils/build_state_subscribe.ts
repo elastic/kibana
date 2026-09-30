@@ -89,7 +89,12 @@ export const buildStateSubscribe =
       }
     }
 
-    if (isEsqlMode && queryChanged && isOfAggregateQueryType(nextState.query)) {
+    if (
+      isEsqlMode &&
+      queryChanged &&
+      isOfAggregateQueryType(nextState.query) &&
+      nextState.query.esql.trim() !== ''
+    ) {
       const tabId = getCurrentTab().id;
       const { currentDataSource$ } = selectTabRuntimeState(runtimeStateManager, tabId);
       const previousSource = currentDataSource$.getValue();

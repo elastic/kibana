@@ -290,7 +290,7 @@ export const useDiscoverHistogram = (
         ...collectedFetchParams,
         abortController: latestFetchDetails?.abortController ?? getAbortController(),
         columns: dataSourceForColumns ? esqlQueryColumns : undefined,
-        table: dataSourceForColumns ? table : undefined,
+        table: dataSourceForColumns && !latestFetchDetails ? table : undefined,
       };
       previousFetchParamsRef.current = nextFetchParams;
       unifiedHistogramApi?.fetch(nextFetchParams);

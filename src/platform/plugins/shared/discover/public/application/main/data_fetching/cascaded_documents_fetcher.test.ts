@@ -57,6 +57,13 @@ const columnsMeta: DataTableColumnsMeta = {
   },
 };
 
+const leafColumnsMeta: DataTableColumnsMeta = {
+  message: {
+    type: 'string',
+    isComputedColumn: false,
+  },
+};
+
 const createStateManager = (
   initialColumnsMeta: DataTableColumnsMeta = {}
 ): CascadedDocumentsStateManager => {
@@ -148,9 +155,14 @@ describe('CascadedDocumentsFetcher', () => {
     );
     const records = [buildDataTableRecord({ _id: '1', _index: 'logs' }, dataViewWithTimefieldMock)];
     const cascadeQuery: AggregateQuery = { esql: 'from logs' };
+    const leafSource = createMockEsqlSource(
+      [{ name: 'message', type: 'string', source: 'index' }],
+      [],
+      '@timestamp'
+    );
 
     mockConstructCascadeQuery.mockReturnValueOnce(cascadeQuery);
-    mockFetchEsql.mockResolvedValue({ records });
+    mockFetchEsql.mockResolvedValue({ records, dataSource: leafSource });
 
     const params = createFetchParams({ nodeId: 'node-2' });
     const result = await fetcher.fetchCascadedDocuments(params);
@@ -183,7 +195,7 @@ describe('CascadedDocumentsFetcher', () => {
         },
       })
     );
-    expect(stateManager.setColumnsMeta).toHaveBeenCalledWith(columnsMeta);
+    expect(stateManager.setColumnsMeta).toHaveBeenCalledWith(leafColumnsMeta);
     expect(stateManager.setCascadedDocuments).toHaveBeenCalledWith(params.nodeId, records);
   });
 
@@ -216,7 +228,7 @@ describe('CascadedDocumentsFetcher', () => {
     const cascadeQuery: AggregateQuery = { esql: 'from logs' };
 
     mockConstructCascadeQuery.mockReturnValueOnce(cascadeQuery);
-    mockFetchEsql.mockResolvedValue({ records });
+    mockFetchEsql.mockResolvedValue({ records, dataSource: extensionSource });
 
     await fetcher.fetchCascadedDocuments(createFetchParams({ nodeId: 'node-same-meta' }));
 

@@ -8,6 +8,7 @@
  */
 
 import { buildStateSubscribe } from './build_state_subscribe';
+import * as resolveEsqlSourceModule from '../../data_fetching/resolve_esql_source';
 import { FetchStatus } from '../../../types';
 import { dataViewComplexMock } from '../../../../__mocks__/data_view_complex';
 import { getDiscoverInternalStateMock } from '../../../../__mocks__/discover_state.mock';
@@ -177,6 +178,26 @@ describe('buildStateSubscribe', () => {
     );
 
     expect(dataState.refetch$.next).not.toHaveBeenCalled();
+  });
+
+  it('should not resolve an empty ES|QL query', async () => {
+    const resolveSpy = jest
+      .spyOn(resolveEsqlSourceModule, 'resolveEsqlSource')
+      .mockResolvedValue(
+        {} as Awaited<ReturnType<typeof resolveEsqlSourceModule.resolveEsqlSource>>
+      );
+
+    await getSubscribeFn()(
+      getNextState({
+        appState: {
+          dataSource: { type: DataSourceType.Esql },
+          query: { esql: '' },
+        },
+      })
+    );
+
+    expect(resolveSpy).not.toHaveBeenCalled();
+    resolveSpy.mockRestore();
   });
 
   it('should fetch when switching to ES|QL after data has been loaded', async () => {

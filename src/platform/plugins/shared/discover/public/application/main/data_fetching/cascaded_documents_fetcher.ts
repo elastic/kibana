@@ -16,7 +16,7 @@ import { i18n } from '@kbn/i18n';
 import { isEqual } from 'lodash';
 import type { DataTableColumnsMeta, DataTableRecord } from '@kbn/discover-utils';
 import { RequestAdapter } from '@kbn/inspector-plugin/public';
-import type { DataSource, EsqlSource } from '@kbn/data-source';
+import type { DataSource } from '@kbn/data-source';
 import type { DiscoverServices } from '../../../build_services';
 import { fetchEsql } from './fetch_esql';
 import type { ScopedProfilesManager } from '../../../context_awareness';
@@ -98,7 +98,7 @@ export class CascadedDocumentsFetcher {
         return [];
       }
 
-      const { records: fetchedRecords } = await fetchEsql({
+      const { records: fetchedRecords, dataSource: leafDataSource } = await fetchEsql({
         query: cascadeQuery,
         esqlVariables,
         esqlSource: currentEsqlSource,
@@ -123,10 +123,14 @@ export class CascadedDocumentsFetcher {
       records = fetchedRecords;
       this.stateManager.setCascadedDocuments(nodeId, records);
 
-      const columnsMeta = columnsToColumnsMeta((currentEsqlSource as EsqlSource).getColumns());
-      const previousColumnsMeta = this.stateManager.getColumnsMeta();
-      if (!isEqual(previousColumnsMeta, columnsMeta)) {
-        this.stateManager.setColumnsMeta(columnsMeta);
+      // The leaf query drops STATS, so its columns differ from the parent source.
+      // That source keeps the parent id and must not be published.
+      if (leafDataSource) {
+        const columnsMeta = columnsToColumnsMeta(leafDataSource.getColumns());
+        const previousColumnsMeta = this.stateManager.getColumnsMeta();
+        if (!isEqual(previousColumnsMeta, columnsMeta)) {
+          this.stateManager.setColumnsMeta(columnsMeta);
+        }
       }
     } finally {
       this.abortControllers.delete(nodeId);
