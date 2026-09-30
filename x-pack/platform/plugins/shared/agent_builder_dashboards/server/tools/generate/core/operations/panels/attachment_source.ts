@@ -18,7 +18,7 @@ export const attachmentPanelInputSchema = z.object({
     .string()
     .max(256)
     .describe(
-      "ID of a visualization attachment in this conversation (as returned by create_visualization), or of a dashboard panel pointer attachment (platform.dashboard.panel) to duplicate the panel it names. The panel is built from the attachment's latest version: a visualization's renderer (Lens, Vega or custom content) determines the panel type; a pointer copies the existing panel's type and config verbatim. Prefer this over source: \"config\" whenever you have an attachment id — it avoids copying the payload through the conversation."
+      "ID of a visualization attachment in this conversation (as returned by create_visualization), or of a dashboard panel pointer attachment (platform.dashboard.panel) to copy the panel it names. The panel is built from the attachment's latest version: a visualization's renderer (Lens, Vega or custom content) determines the panel type; a pointer copies the existing panel's type and config verbatim. Prefer this over source: \"config\" whenever you have an attachment id — it avoids copying the payload through the conversation."
     ),
   grid: panelGridSchema,
 });

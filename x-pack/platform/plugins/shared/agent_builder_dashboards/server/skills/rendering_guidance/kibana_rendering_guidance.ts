@@ -32,7 +32,7 @@ In Kibana, a dashboard request follows three stages: resolve inputs, generate (w
 - A \`${DASHBOARD_PANEL_ATTACHMENT_TYPE}\` attachment means the user is referring to that one panel. It names a \`dashboard_attachment_id\` and a \`panel_id\` and carries no configuration.
 - Resolve it through the dashboard attachment it names: that attachment is the working copy, and the panel's current config lives there. Edit the panel with ${dashboardTools.generateDashboard}, passing that \`dashboard_attachment_id\` as \`dashboardAttachmentId\` and an \`edit_panels\` operation with the pointer's \`panel_id\` as \`panelId\`.
 - Never call \`platform.core.create_visualization\` or add a new panel to refine a panel that already exists on the dashboard.
-- To duplicate the panel, use \`add_panels\` with \`source: "attachment"\` and the pointer's own attachment id; the tool copies the panel verbatim.
+- The pointer's own attachment id is a valid \`source: "attachment"\` panel input wherever one is accepted; the tool copies the panel verbatim. Use it for any copy of the panel (duplicate, move into a section, add to another dashboard).
 - After the edit, render only the dashboard attachment. Do not render the pointer or any visualization attachment.
 - If the named panel is missing from the dashboard attachment, tell the user instead of recreating it.
 
