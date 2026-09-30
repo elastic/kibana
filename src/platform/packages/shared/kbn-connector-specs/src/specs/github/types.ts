@@ -51,7 +51,7 @@ export const SearchIssuesInputSchema = lazySchema(() =>
       .optional()
       .default('created')
       .describe(
-        'Field to sort results by: "comments", "reactions", "interactions", "created", or "updated" (default "created")'
+        'Field to sort results by: "comments", "reactions", "reactions-+1", "reactions--1", "reactions-smile", "reactions-thinking_face", "reactions-heart", "reactions-tada", "interactions", "created", or "updated" (default "created")'
       ),
     page: z.number().optional().default(1).describe('Page number (1-based)'),
     perPage: z.number().optional().default(10).describe('Results per page (max 100)'),
@@ -73,7 +73,7 @@ export const SearchPullRequestsInputSchema = lazySchema(() =>
       .optional()
       .default('created')
       .describe(
-        'Field to sort results by: "comments", "reactions", "interactions", "created", or "updated" (default "created")'
+        'Field to sort results by: "comments", "reactions", "reactions-+1", "reactions--1", "reactions-smile", "reactions-thinking_face", "reactions-heart", "reactions-tada", "interactions", "created", or "updated" (default "created")'
       ),
     page: z.number().optional().default(1).describe('Page number (1-based)'),
     perPage: z.number().optional().default(10).describe('Results per page (max 100)'),

@@ -13,7 +13,10 @@ import { z, lazySchema } from '@kbn/zod/v4';
 // characters by default.
 const SHAREPOINT_MAX_LIST_TITLE_LENGTH = 255;
 const SHAREPOINT_MAX_PATH_LENGTH = 1024;
-const SHAREPOINT_MAX_KQL_LENGTH = 4096;
+// Raw `_api/` paths can carry an OData query string ($filter, $select, ...).
+const SHAREPOINT_MAX_API_PATH_LENGTH = 4096;
+// Search sends KQL as a GET query parameter; ASP.NET rejects query strings over 2048 by default.
+const SHAREPOINT_MAX_KQL_LENGTH = 1500;
 
 export const ODataCollectionOutputSchema = lazySchema(() =>
   z.object({
@@ -98,7 +101,7 @@ export const CallRestApiInputSchema = lazySchema(() =>
     method: z.enum(['GET', 'POST']).describe('HTTP method'),
     path: z
       .string()
-      .max(SHAREPOINT_MAX_PATH_LENGTH)
+      .max(SHAREPOINT_MAX_API_PATH_LENGTH)
       .describe("API path starting with '_api/' (for example, '_api/web/title')")
       .refine((value) => value.startsWith('_api/'), {
         message: "Path must start with '_api/'",

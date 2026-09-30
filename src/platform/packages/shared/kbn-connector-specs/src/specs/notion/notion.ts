@@ -14,7 +14,7 @@ import type * as Notion from './types';
 const ID_MAX_LENGTH = 200;
 const QUERY_MAX_LENGTH = 2000;
 const CURSOR_MAX_LENGTH = 2048;
-const FILTER_MAX_LENGTH = 10000;
+const FILTER_MAX_LENGTH = 100000;
 
 export const NotionConnector: ConnectorSpec = {
   metadata: {
