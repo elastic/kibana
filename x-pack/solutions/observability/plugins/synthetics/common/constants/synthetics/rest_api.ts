@@ -77,6 +77,7 @@ export enum SYNTHETICS_API_URLS {
 
   DYNAMIC_SETTINGS = `/api/synthetics/settings`,
   MULTI_SPACE_SETTINGS = `/internal/synthetics/settings_multi_space`,
+  CLUSTER_SETTINGS_PRIVILEGES = `/internal/synthetics/settings/cluster_privileges`,
 
   INSPECT_STATUS_RULE = '/internal/synthetics/inspect_status_rule',
   INSPECT_TLS_RULE = '/internal/synthetics/inspect_tls_rule',

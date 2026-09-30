@@ -20,6 +20,7 @@ import type {
   IWorkflowEventLoggerService,
   StepExecutionsDataClient,
   WorkflowExecutionsDataClient,
+  WorkflowsExecutionEnginePluginStart,
 } from '@kbn/workflows-execution-engine/server';
 import type { WorkflowsExtensionsServerPluginStart } from '@kbn/workflows-extensions/server';
 
@@ -37,6 +38,8 @@ export interface WorkflowStorageDeps {
 
 /** Deps for WorkflowCrudService (CRUD + deletion + disable-all). */
 export interface WorkflowCrudDeps extends WorkflowStorageDeps {
+  getSpaceId: (request: KibanaRequest) => string;
+  getServiceAccountBindings: () => WorkflowsExecutionEnginePluginStart['serviceAccountBindings'];
   getSecurity: () => SecurityServiceStart | undefined;
   workflowsExtensions: WorkflowsExtensionsServerPluginStart | undefined;
   getTaskScheduler: () => WorkflowTaskScheduler | null;
@@ -65,7 +68,9 @@ export interface WorkflowExecutionQueryDeps {
 
 /** Deps for WorkflowValidationService. */
 export interface WorkflowValidationDeps {
-  workflowsExtensions: WorkflowsExtensionsServerPluginStart | undefined;
+  /** Required plugin dependency, so it is always present once start has run. */
+  workflowsExtensions: WorkflowsExtensionsServerPluginStart;
   getActionsClient: () => Promise<IUnsecuredActionsClient>;
   getActionsClientWithRequest: (request: KibanaRequest) => Promise<PublicMethodsOf<ActionsClient>>;
+  getCoreStart: () => CoreStart;
 }

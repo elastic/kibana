@@ -27,7 +27,7 @@ const setup = ({ isAddDataPageV2Enabled = false }: { isAddDataPageV2Enabled?: bo
     services: {
       http: { get },
       application: { navigateToApp, getUrlForApp },
-      featureFlags: { getBooleanValue: jest.fn().mockReturnValue(isAddDataPageV2Enabled) },
+      featureFlags: { useBooleanValue: jest.fn().mockReturnValue(isAddDataPageV2Enabled) },
     },
   } as unknown as ReturnType<typeof useKibana<ObservabilityOnboardingAppServices>>);
 

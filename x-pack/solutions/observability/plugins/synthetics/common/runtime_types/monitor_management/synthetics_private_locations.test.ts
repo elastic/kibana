@@ -5,31 +5,22 @@
  * 2.0.
  */
 
-import { isRight } from 'fp-ts/Either';
 import { PrivateLocationCodec } from './synthetics_private_locations';
 
-const classic = {
+const location = {
   label: 'Loc',
   id: 'loc-1',
   agentPolicyId: 'ap-1',
 };
 
-describe('PrivateLocationCodec isAgentSharding', () => {
-  it('decodes a classic location without the flag', () => {
-    expect(isRight(PrivateLocationCodec.decode(classic))).toBe(true);
+describe('PrivateLocationCodec', () => {
+  it('decodes a location', () => {
+    expect(PrivateLocationCodec.safeParse(location).success).toBe(true);
   });
 
-  it('decodes a scalable location with the flag', () => {
-    const result = PrivateLocationCodec.decode({ ...classic, isAgentSharding: true });
-    expect(isRight(result)).toBe(true);
-    if (isRight(result)) {
-      expect(result.right.isAgentSharding).toBe(true);
-    }
-  });
-
-  it('rejects a non-boolean flag', () => {
-    expect(isRight(PrivateLocationCodec.decode({ ...classic, isAgentSharding: 'yes' }))).toBe(
-      false
+  it('still decodes locations carrying the removed isAgentSharding attribute', () => {
+    expect(PrivateLocationCodec.safeParse({ ...location, isAgentSharding: true }).success).toBe(
+      true
     );
   });
 });

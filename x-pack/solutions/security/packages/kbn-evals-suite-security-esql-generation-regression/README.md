@@ -166,7 +166,7 @@ This writes `config/evals.json` with the Elasticsearch URL, API key, and default
 # Discover EIS chat-completion endpoints and emit the connectors payload
 export KIBANA_EIS_CCM_API_KEY="$(vault read -field=key secret/kibana-issues/dev/inference/kibana-eis-ccm)"
 node scripts/discover_eis_models.js
-export KIBANA_TESTING_AI_CONNECTORS="$(node x-pack/platform/packages/shared/kbn-evals/scripts/ci/generate_eis_connectors.js)"
+export KIBANA_TESTING_INFERENCE_ENDPOINTS="$(node x-pack/platform/packages/shared/kbn-evals/scripts/ci/generate_eis_connectors.js)"
 
 # Start the full stack (EDOT + Scout + EIS CCM) and run the suite
 EVAL_CONNECTOR_ID=eis-google-gemini-3-1-pro \
@@ -177,7 +177,7 @@ node scripts/evals start \
   --model eis-anthropic-claude-4-5-sonnet
 ```
 
-`evals start` detects the `eis-` prefix and enables EIS CCM on Scout automatically. If Scout is already running with a different `KIBANA_TESTING_AI_CONNECTORS` payload it is detected as stale and restarted with the new one.
+`evals start` detects the `eis-` prefix and enables EIS CCM on Scout automatically. If Scout is already running with a different `KIBANA_TESTING_INFERENCE_ENDPOINTS` payload it is detected as stale and restarted with the new one.
 
 ### 3) Run with a non-EIS connector (OpenRouter / kibana.dev.yml entries)
 

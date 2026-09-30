@@ -212,8 +212,8 @@ export class ServiceManager {
       elasticsearch,
       spaces,
       agents,
-      attachments,
       eventBus: conversationEventBus,
+      conversationEvents,
     });
 
     const runnerFactory = new RunnerFactoryImpl({
@@ -231,6 +231,7 @@ export class ServiceManager {
       conversationService: conversations,
       attachmentsService: attachments,
       renderersService: renderers,
+      conversationEventsService: conversationEvents,
       skillServiceStart: skillsServiceStart,
       pluginsServiceStart: plugins,
       trackingService,

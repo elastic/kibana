@@ -50,8 +50,14 @@ jest.mock('@kbn/exploratory-view-plugin/public', () => ({
   createExploratoryViewUrl: () => '/app/exploratory-view',
 }));
 
+const settings = { canManagePrivateLocations: true };
+
 jest.mock('../../../contexts', () => ({
-  useSyntheticsSettingsContext: () => ({ basePath: '', isDev: false }),
+  useSyntheticsSettingsContext: () => ({
+    basePath: '',
+    isDev: false,
+    canManagePrivateLocations: settings.canManagePrivateLocations,
+  }),
 }));
 
 jest.mock('../../../hooks', () => ({
@@ -110,6 +116,7 @@ describe('useSyntheticsAppHeaderMenu', () => {
     mockMonitorList.data.absoluteTotal = 2;
     mockOverviewStatus.allConfigs = [{ origin: 'ui' }];
     mockUiSettingsGet.mockReturnValue(true);
+    settings.canManagePrivateLocations = true;
   });
 
   it('puts Alerts first and forces Inspect, Explore data, and Settings into overflow by default', () => {
@@ -140,11 +147,11 @@ describe('useSyntheticsAppHeaderMenu', () => {
     expect(menu.primaryActionItem).toBeUndefined();
   });
 
-  it('omits Settings and shows Create monitor when the page asks for it and monitors exist', () => {
-    const { result } = renderMenuHook({ showSettings: false, showCreateMonitor: true });
+  it('shows Settings and Create monitor when the page asks for it and monitors exist', () => {
+    const { result } = renderMenuHook({ showCreateMonitor: true });
     const { menu } = result.current;
 
-    expect(findItem(menu.items, 'settings')).toBeUndefined();
+    expect(findItem(menu.items, 'settings')).toBeDefined();
     expect(findItem(menu.items, 'alerts')).toBeDefined();
     expect(menu.primaryActionItem).toEqual(
       expect.objectContaining({
@@ -158,15 +165,15 @@ describe('useSyntheticsAppHeaderMenu', () => {
     mockMonitorList.data.absoluteTotal = 0;
     mockOverviewStatus.allConfigs = [];
 
-    const { result } = renderMenuHook({ showSettings: false, showCreateMonitor: true });
+    const { result } = renderMenuHook({ showCreateMonitor: true });
     expect(result.current.menu.primaryActionItem).toBeUndefined();
   });
 
-  it('omits Settings and surfaces Diagnostics when the page asks for it', () => {
-    const { result } = renderMenuHook({ showSettings: false, showDiagnostics: true });
+  it('surfaces Diagnostics alongside Settings when the page asks for it', () => {
+    const { result } = renderMenuHook({ showDiagnostics: true });
     const { menu } = result.current;
 
-    expect(findItem(menu.items, 'settings')).toBeUndefined();
+    expect(findItem(menu.items, 'settings')).toBeDefined();
     expect(findItem(menu.items, 'diagnostics')).toEqual(
       expect.objectContaining({
         overflow: true,
@@ -174,6 +181,17 @@ describe('useSyntheticsAppHeaderMenu', () => {
       })
     );
     expect(menu.primaryActionItem).toBeUndefined();
+  });
+
+  it('disables Diagnostics without the private-location manage privilege', () => {
+    settings.canManagePrivateLocations = false;
+    const { result } = renderMenuHook({ showDiagnostics: true });
+
+    expect(findItem(result.current.menu.items, 'diagnostics')).toEqual(
+      expect.objectContaining({
+        disableButton: true,
+      })
+    );
   });
 
   it('uses a page-provided primary action instead of Create monitor', () => {

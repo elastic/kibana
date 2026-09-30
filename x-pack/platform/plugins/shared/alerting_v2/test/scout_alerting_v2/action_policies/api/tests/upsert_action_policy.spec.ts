@@ -60,7 +60,8 @@ apiTest.describe('Upsert action policy API', { tag: '@local-stateful-classic' },
       expect(response.body.snoozed_until).toBeNull();
       // On create, updatedAt equals createdAt — there has been no replace yet.
       expect(response.body.updated_at).toBe(response.body.created_at);
-      expect(response.body.auth.apiKey).toBeUndefined();
+      // API key ownership is server-side only and must never be exposed over the wire.
+      expect(response.body.auth).toBeUndefined();
     }
   );
 
@@ -109,7 +110,7 @@ apiTest.describe('Upsert action policy API', { tag: '@local-stateful-classic' },
       expect(replaced.body.description).toBe('after replace');
       expect(replaced.body.destinations).toStrictEqual([{ type: 'workflow', id: 'wf-2' }]);
 
-      expect(replaced.body.created_by).toBe(created.created_by);
+      expect(replaced.body.created_by).toStrictEqual(created.created_by);
       expect(replaced.body.created_at).toBe(created.created_at);
 
       expect(replaced.body.updated_at).not.toBe(created.created_at);

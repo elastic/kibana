@@ -30,6 +30,12 @@ import type { PluginStartDependencies } from '.';
 
 export const SESSION_INDEX_CLEANUP_TASK_NAME = 'session_cleanup';
 
+const SELF_CLIENT_ES_TARGET = '/internal/test_endpoints/self_client/fake_request';
+const SELF_CLIENT_OAUTH_TARGET = '/internal/test_endpoints/self_client/oauth_me';
+const SELF_CLIENT_TARGET_PATH = schema.maybe(
+  schema.oneOf([schema.literal(SELF_CLIENT_ES_TARGET), schema.literal(SELF_CLIENT_OAUTH_TARGET)])
+);
+
 export function initRoutes(
   initializerContext: PluginInitializerContext,
   core: CoreSetup<PluginStartDependencies>
@@ -759,7 +765,7 @@ export function initRoutes(
 
   router.get(
     {
-      path: '/internal/test_endpoints/self_client/fake_request',
+      path: SELF_CLIENT_ES_TARGET,
       security: {
         authz: {
           enabled: false,
@@ -804,10 +810,9 @@ export function initRoutes(
       try {
         const body = await coreStart.http.selfClient
           .asScoped(fakeRequest)
-          .fetch<{ username?: string; hasManage: boolean }>(
-            '/internal/test_endpoints/self_client/fake_request',
-            { access: 'internal' }
-          );
+          .fetch<{ username?: string; hasManage: boolean }>(SELF_CLIENT_ES_TARGET, {
+            access: 'internal',
+          });
         return response.ok({ body });
       } catch (error) {
         if (error instanceof Error && 'response' in error) {
@@ -823,6 +828,78 @@ export function initRoutes(
       }
     }
   );
+
+  router.get(
+    {
+      path: SELF_CLIENT_OAUTH_TARGET,
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'Security test endpoint verifies UIAM self-call authentication.',
+        },
+      },
+      validate: false,
+      options: { access: 'internal', tags: ['security:acceptUiamOAuth'] },
+    },
+    async (context, _request, response) => {
+      const { elasticsearch, security } = await context.core;
+      const { has_all_requested: hasManage } =
+        await elasticsearch.client.asCurrentUser.security.hasPrivileges({ cluster: ['manage'] });
+
+      return response.ok({
+        body: {
+          username: security.authc.getCurrentUser()?.username,
+          hasManage,
+        },
+      });
+    }
+  );
+
+  const asScopedSelfCallRoutes: Array<{ path: string; tags?: string[] }> = [
+    { path: '/test_endpoints/self_client/as_scoped' },
+    {
+      path: '/test_endpoints/self_client/as_scoped_oauth',
+      tags: ['security:acceptUiamOAuth'],
+    },
+  ];
+
+  for (const { path: routePath, tags } of asScopedSelfCallRoutes) {
+    router.post(
+      {
+        path: routePath,
+        security: {
+          authz: {
+            enabled: false,
+            reason: 'Security test endpoint verifies self-call attestation on the inbound request.',
+          },
+        },
+        validate: { body: schema.object({ path: SELF_CLIENT_TARGET_PATH }) },
+        ...(tags ? { options: { tags } } : {}),
+      },
+      async (_context, request, response) => {
+        const [coreStart] = await core.getStartServices();
+        const path = request.body.path ?? SELF_CLIENT_ES_TARGET;
+
+        try {
+          const body = await coreStart.http.selfClient
+            .asScoped(request)
+            .fetch<{ username?: string; hasManage: boolean }>(path, { access: 'internal' });
+          return response.ok({ body });
+        } catch (error) {
+          if (error instanceof Error && 'response' in error) {
+            const { response: targetResponse } = error as Error & { response?: Response };
+            if (targetResponse) {
+              return response.custom({
+                statusCode: targetResponse.status,
+                body: targetResponse.statusText,
+              });
+            }
+          }
+          throw error;
+        }
+      }
+    );
+  }
 
   router.post(
     {

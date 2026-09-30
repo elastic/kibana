@@ -152,10 +152,19 @@ describe('createConversationPublicClient', () => {
     });
   });
 
-  it('does not expose update, delete, upsertRound, or exists methods', () => {
+  it('does not expose delete, upsertRound, or exists methods', () => {
     const clientKeys = Object.keys(publicClient);
-    expect(clientKeys).toEqual(expect.arrayContaining(['get', 'list', 'search', 'create']));
-    expect(clientKeys).not.toContain('update');
+    expect(clientKeys).toEqual(
+      expect.arrayContaining([
+        'get',
+        'bulkGet',
+        'list',
+        'search',
+        'create',
+        'patchMetadata',
+        'update',
+      ])
+    );
     expect(clientKeys).not.toContain('delete');
     expect(clientKeys).not.toContain('upsertRound');
     expect(clientKeys).not.toContain('exists');

@@ -38,9 +38,11 @@ dependsOn:
   - '@kbn/share-plugin'
   - '@kbn/css-utils'
   - '@kbn/logging'
+  - '@kbn/ml-server-schemas'
   - '@kbn/core-elasticsearch-server'
   - '@kbn/lens-common'
   - '@kbn/esql-utils'
+  - '@kbn/field-types'
   - '@kbn/core-saved-objects-api-server'
   - '@kbn/es-query'
   - '@kbn/data-plugin'
@@ -54,8 +56,6 @@ dependsOn:
   - '@kbn/ui-actions-plugin'
   - '@kbn/ftr-llm-proxy'
   - '@kbn/ui-callout'
-  - '@kbn/files-plugin'
-  - '@kbn/react-kibana-mount'
 tags:
   - plugin
   - prod

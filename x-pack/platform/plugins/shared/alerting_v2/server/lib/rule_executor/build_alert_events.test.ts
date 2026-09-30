@@ -90,7 +90,7 @@ describe('createAlertEventsBatchBuilder', () => {
     const doc1 = docs[0];
     const doc2 = docs[1];
 
-    expect(doc1['@timestamp']).toBe('2025-01-01T00:00:00.000Z');
+    expect(doc1).not.toHaveProperty('@timestamp');
     expect(doc1.scheduled_timestamp).toBe('2024-12-31T23:59:00.000Z');
     expect(doc1.rule).toEqual({ id: 'rule-123', version: 1 });
     expect(doc1.group_hash).toEqual(expect.any(String));
@@ -107,7 +107,7 @@ describe('createAlertEventsBatchBuilder', () => {
     expect(doc1.group_hash).not.toEqual(doc2.group_hash);
   });
 
-  it('stamps @timestamp per batch, not once per run', () => {
+  it('leaves @timestamp unset so the ingest pipeline sets it at index time', () => {
     const { buildBatch } = createAlertEventsBatchBuilder({
       ruleId: 'rule-123',
       ruleVersion: 1,
@@ -124,9 +124,8 @@ describe('createAlertEventsBatchBuilder', () => {
 
     const [secondBatchDoc] = buildBatch([{ 'host.name': 'host-b' }]);
 
-    expect(firstBatchDoc['@timestamp']).toBe('2025-01-01T00:00:00.000Z');
-    expect(secondBatchDoc['@timestamp']).toBe('2025-01-01T00:00:30.000Z');
-    expect(secondBatchDoc['@timestamp'] > firstBatchDoc['@timestamp']).toBe(true);
+    expect(firstBatchDoc).not.toHaveProperty('@timestamp');
+    expect(secondBatchDoc).not.toHaveProperty('@timestamp');
   });
 
   it('sets space_id on breached alert events from the provided spaceId', () => {
@@ -388,7 +387,6 @@ describe('buildRecoveryAlertEvents', () => {
 
     expect(events).toHaveLength(1);
     expect(events[0]).toEqual({
-      '@timestamp': '2025-01-01T00:00:00.000Z',
       scheduled_timestamp: '2024-12-31T23:59:00.000Z',
       rule: { id: 'rule-123', version: 1 },
       group_hash: 'hash-b',
@@ -522,7 +520,6 @@ describe('buildContinuedBreachAlertEvents', () => {
 
     expect(events).toHaveLength(2);
     expect(events[0]).toEqual({
-      '@timestamp': '2025-01-01T00:00:00.000Z',
       scheduled_timestamp: '2024-12-31T23:59:00.000Z',
       rule: { id: 'rule-123', version: 1 },
       group_hash: 'hash-a',
@@ -571,7 +568,6 @@ describe('buildNoDataAlertEvents', () => {
 
     expect(events).toHaveLength(2);
     expect(events[0]).toEqual({
-      '@timestamp': '2025-01-01T00:00:00.000Z',
       scheduled_timestamp: '2024-12-31T23:59:00.000Z',
       rule: { id: 'rule-123', version: 1 },
       group_hash: 'hash-a',
@@ -662,7 +658,6 @@ describe('buildQueryRecoveryAlertEvents', () => {
 
     expect(events).toHaveLength(1);
     expect(events[0]).toEqual({
-      '@timestamp': '2025-01-01T00:00:00.000Z',
       scheduled_timestamp: '2024-12-31T23:59:00.000Z',
       rule: { id: 'rule-123', version: 1 },
       group_hash: activeGroupHash,

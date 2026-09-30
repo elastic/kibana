@@ -453,7 +453,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
         await cases.casesFilesTable.emptyOrFail();
       });
 
-      describe('Files User Activity', () => {
+      describe('Files User Activity', function () {
         it('file user action is displayed correctly', async () => {
           await cases.casesFilesTable.addFile(require.resolve('./note.txt'));
 

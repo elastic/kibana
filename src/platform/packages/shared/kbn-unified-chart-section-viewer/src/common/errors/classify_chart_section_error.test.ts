@@ -144,9 +144,9 @@ describe('classifyChartSectionError', () => {
       expect(classifyChartSectionError(error)).toBe(ERROR_CATEGORY.APPLICATION);
     });
 
-    it('classifies a 429 circuit-breaker status as an application error', () => {
+    it('classifies a 429 rate-limit status with no resource-limit cause as an application error', () => {
       const error = new EsqlResponseError(
-        { type: 'circuit_breaking_exception', reason: 'data too large' },
+        { type: 'too_many_requests', reason: 'rate limit exceeded' },
         { status: 429 }
       );
 
@@ -161,14 +161,107 @@ describe('classifyChartSectionError', () => {
 
       expect(classifyChartSectionError(error)).toBe(ERROR_CATEGORY.APPLICATION);
     });
+  });
 
-    it('classifies a search-interceptor error carrying a 429 circuit-breaker status as an application error', () => {
+  describe('resource_limit', () => {
+    it('classifies a 429 circuit-breaker status as a resource limit', () => {
+      const error = new EsqlResponseError(
+        { type: 'circuit_breaking_exception', reason: 'data too large' },
+        { status: 429 }
+      );
+
+      expect(classifyChartSectionError(error)).toBe(ERROR_CATEGORY.RESOURCE_LIMIT);
+    });
+
+    it('classifies a status-less circuit-breaker type as a resource limit', () => {
+      const error = new EsqlResponseError({ type: 'circuit_breaking_exception' });
+
+      expect(classifyChartSectionError(error)).toBe(ERROR_CATEGORY.RESOURCE_LIMIT);
+    });
+
+    it('classifies a search-interceptor error carrying a 429 circuit-breaker status as a resource limit', () => {
       const error = createEsErrorLike(
         { type: 'circuit_breaking_exception', reason: 'data too large' },
         { status: 429 }
       );
 
-      expect(classifyChartSectionError(error)).toBe(ERROR_CATEGORY.APPLICATION);
+      expect(classifyChartSectionError(error)).toBe(ERROR_CATEGORY.RESOURCE_LIMIT);
+    });
+
+    it('classifies a status-less search-interceptor circuit-breaker error as a resource limit', () => {
+      const error = createEsErrorLike({ type: 'circuit_breaking_exception' });
+
+      expect(classifyChartSectionError(error)).toBe(ERROR_CATEGORY.RESOURCE_LIMIT);
+    });
+
+    it('classifies a circuit breaker nested under a generic wrapper as a resource limit', () => {
+      const error = createEsErrorLike({
+        type: 'search_phase_execution_exception',
+        reason: 'all shards failed',
+        root_cause: [
+          { type: 'circuit_breaking_exception', reason: 'data too large' },
+        ] as estypes.ErrorCause[],
+      });
+
+      expect(classifyChartSectionError(error)).toBe(ERROR_CATEGORY.RESOURCE_LIMIT);
+    });
+
+    it('classifies a 429 rejected-execution status as a resource limit', () => {
+      const error = new EsqlResponseError(
+        { type: 'es_rejected_execution_exception', reason: 'queue capacity reached' },
+        { status: 429 }
+      );
+
+      expect(classifyChartSectionError(error)).toBe(ERROR_CATEGORY.RESOURCE_LIMIT);
+    });
+
+    it('classifies a status-less rejected-execution type as a resource limit', () => {
+      const error = new EsqlResponseError({ type: 'es_rejected_execution_exception' });
+
+      expect(classifyChartSectionError(error)).toBe(ERROR_CATEGORY.RESOURCE_LIMIT);
+    });
+
+    it('classifies a search-interceptor error carrying a 429 rejected-execution status as a resource limit', () => {
+      const error = createEsErrorLike(
+        { type: 'es_rejected_execution_exception', reason: 'queue capacity reached' },
+        { status: 429 }
+      );
+
+      expect(classifyChartSectionError(error)).toBe(ERROR_CATEGORY.RESOURCE_LIMIT);
+    });
+
+    it('classifies a status-less search-interceptor rejected-execution error as a resource limit', () => {
+      const error = createEsErrorLike({ type: 'es_rejected_execution_exception' });
+
+      expect(classifyChartSectionError(error)).toBe(ERROR_CATEGORY.RESOURCE_LIMIT);
+    });
+
+    it('classifies a rejected execution nested under a generic wrapper as a resource limit', () => {
+      const error = createEsErrorLike({
+        type: 'search_phase_execution_exception',
+        reason: 'all shards failed',
+        root_cause: [
+          { type: 'es_rejected_execution_exception', reason: 'queue capacity reached' },
+        ] as estypes.ErrorCause[],
+      });
+
+      expect(classifyChartSectionError(error)).toBe(ERROR_CATEGORY.RESOURCE_LIMIT);
+    });
+
+    it('classifies a circuit breaker nested under an embedded-error wrapper as a resource limit', () => {
+      const error = new EsqlResponseError(
+        {
+          type: 'search_phase_execution_exception',
+          reason: 'all shards failed',
+          caused_by: {
+            type: 'circuit_breaking_exception',
+            reason: 'data too large',
+          } as estypes.ErrorCause,
+        },
+        { status: 429 }
+      );
+
+      expect(classifyChartSectionError(error)).toBe(ERROR_CATEGORY.RESOURCE_LIMIT);
     });
   });
 
@@ -180,7 +273,7 @@ describe('classifyChartSectionError', () => {
     });
 
     it('classifies an unrecognized error type carrying no status as unknown', () => {
-      const error = new EsqlResponseError({ type: 'circuit_breaking_exception' });
+      const error = new EsqlResponseError({ type: 'illegal_state_exception' });
 
       expect(classifyChartSectionError(error)).toBe(ERROR_CATEGORY.UNKNOWN);
     });
@@ -195,7 +288,7 @@ describe('classifyChartSectionError', () => {
     });
 
     it('classifies a status-less search-interceptor error with no known cause type as unknown', () => {
-      const error = createEsErrorLike({ type: 'circuit_breaking_exception' });
+      const error = createEsErrorLike({ type: 'illegal_state_exception' });
 
       expect(classifyChartSectionError(error)).toBe(ERROR_CATEGORY.UNKNOWN);
     });
@@ -225,6 +318,78 @@ describe('getChartSectionErrorMeta', () => {
     });
 
     expect(getChartSectionErrorMeta(error)).toEqual({ type: 'parsing_exception', status: 400 });
+  });
+
+  it('reports the resource-limit cause nested under a generic wrapper', () => {
+    const error = createEsErrorLike(
+      {
+        type: 'search_phase_execution_exception',
+        reason: 'all shards failed',
+        root_cause: [
+          { type: 'circuit_breaking_exception', reason: 'data too large' },
+        ] as estypes.ErrorCause[],
+      },
+      { status: 429 }
+    );
+
+    expect(getChartSectionErrorMeta(error)).toEqual({
+      type: 'circuit_breaking_exception',
+      status: 429,
+    });
+  });
+
+  it('reports the user-input cause nested under a generic wrapper', () => {
+    const error = createEsErrorLike({
+      type: 'illegal_argument_exception',
+      reason: 'remote cluster rejected the query',
+      caused_by: {
+        type: 'parsing_exception',
+        reason: "line 1:1: mismatched input ':'",
+      } as estypes.ErrorCause,
+    });
+
+    expect(getChartSectionErrorMeta(error)).toEqual({ type: 'parsing_exception' });
+  });
+
+  it('reports the resource-limit cause nested under an EsqlResponseError root cause', () => {
+    const error = new EsqlResponseError({
+      type: 'search_phase_execution_exception',
+      reason: 'all shards failed',
+      root_cause: [
+        { type: 'es_rejected_execution_exception', reason: 'queue capacity reached' },
+      ] as estypes.ErrorCause[],
+    });
+
+    expect(getChartSectionErrorMeta(error)).toEqual({ type: 'es_rejected_execution_exception' });
+  });
+
+  it('reports the resource-limit cause nested under an EsqlResponseError caused_by', () => {
+    const error = new EsqlResponseError(
+      {
+        type: 'search_phase_execution_exception',
+        reason: 'all shards failed',
+        caused_by: {
+          type: 'circuit_breaking_exception',
+          reason: 'data too large',
+        } as estypes.ErrorCause,
+      },
+      { status: 429 }
+    );
+
+    expect(getChartSectionErrorMeta(error)).toEqual({
+      type: 'circuit_breaking_exception',
+      status: 429,
+    });
+  });
+
+  it('falls back to the outermost type when no nested cause is recognized', () => {
+    const error = createEsErrorLike({
+      type: 'search_phase_execution_exception',
+      reason: 'all shards failed',
+      root_cause: [{ type: 'illegal_state_exception' }] as estypes.ErrorCause[],
+    });
+
+    expect(getChartSectionErrorMeta(error)).toEqual({ type: 'search_phase_execution_exception' });
   });
 
   it('returns no metadata for errors that carry no Elasticsearch attributes', () => {

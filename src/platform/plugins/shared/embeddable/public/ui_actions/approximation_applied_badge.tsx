@@ -7,11 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { i18n } from '@kbn/i18n';
+import React from 'react';
 import type { EmbeddableApiContext, PublishesEsql } from '@kbn/presentation-publishing';
 import { apiPublishesEsql } from '@kbn/presentation-publishing';
 import type { ActionDefinition } from '@kbn/ui-actions-plugin/public/actions';
 import { map } from 'rxjs';
+import { ApproximationBadge } from '@kbn/esql-browser';
 import { APPROXIMATION_APPLIED_BADGE } from './constants';
 
 export type ApproximationAppliedBadgeApi = Pick<PublishesEsql, 'approximationApplied$'>;
@@ -24,15 +25,7 @@ export const approximationAppliedBadge: ActionDefinition<EmbeddableApiContext> =
   type: APPROXIMATION_APPLIED_BADGE,
   order: 10,
   getIconType: () => 'bolt',
-  getDisplayName: ({ embeddable }: EmbeddableApiContext) => {
-    return '';
-  },
-  getDisplayNameTooltip: ({ embeddable }: EmbeddableApiContext) => {
-    return i18n.translate('embeddableApi.badge.approximationApplied.displayNameTooltip', {
-      defaultMessage:
-        'This panel shows approximate results because fast mode is enabled on the page or the ES|QL query that powers the panel enables approximation.',
-    });
-  },
+  getDisplayName: () => '',
   isCompatible: async ({ embeddable }: EmbeddableApiContext) => {
     if (!isApiCompatible(embeddable)) return false;
     return embeddable.approximationApplied$.getValue() ?? false;
@@ -45,10 +38,10 @@ export const approximationAppliedBadge: ActionDefinition<EmbeddableApiContext> =
       ? embeddable.approximationApplied$.pipe(map(() => undefined))
       : undefined;
   },
+  MenuItem: ({ dataTestSubj }: { context: EmbeddableApiContext; dataTestSubj?: string }) => (
+    <ApproximationBadge isApproximationApplied data-test-subj={dataTestSubj} />
+  ),
   execute: async ({ embeddable }: EmbeddableApiContext) => {
     return;
-  },
-  extension: {
-    color: 'success',
   },
 };

@@ -11,7 +11,7 @@ import { verifyApiAccess } from '../../../../../lib/license_api_access';
 import { mockHandlerArguments } from '../../../../_mock_handler_arguments';
 import { maintenanceWindowClientMock } from '../../../../../maintenance_window_client.mock';
 import { getActiveMaintenanceWindowsRoute } from './get_active_maintenance_windows_route';
-import { getMockMaintenanceWindow } from '../../../../../data/test_helpers';
+import { getMockMaintenanceWindowDomain } from '../../../../../data/test_helpers';
 import { MaintenanceWindowStatus } from '../../../../../../common';
 import { rewritePartialMaintenanceBodyRes } from '../../../../lib';
 
@@ -23,14 +23,14 @@ jest.mock('../../../../../lib/license_api_access', () => ({
 
 const mockMaintenanceWindows = [
   {
-    ...getMockMaintenanceWindow(),
+    ...getMockMaintenanceWindowDomain(),
     eventStartTime: new Date().toISOString(),
     eventEndTime: new Date().toISOString(),
     status: MaintenanceWindowStatus.Running,
     id: 'test-id1',
   },
   {
-    ...getMockMaintenanceWindow(),
+    ...getMockMaintenanceWindowDomain(),
     eventStartTime: new Date().toISOString(),
     eventEndTime: new Date().toISOString(),
     status: MaintenanceWindowStatus.Running,

@@ -44,6 +44,7 @@ import { canvasEdgeTypes, canvasNodeTypes } from './registry';
 // selected or clicked. Module-level so the object/function identity stays stable
 // across renders.
 const NON_SELECTABLE_EDGE_OPTIONS = { selectable: false };
+const FIT_VIEW_OPTIONS = { padding: FIT_VIEW_PADDING } as const;
 const noop = () => {};
 
 export const getCanvasContainerStyles = (euiTheme: UseEuiTheme['euiTheme']) => css`
@@ -227,10 +228,7 @@ export function CanvasShell<NodeType extends Node = Node, EdgeType extends Edge 
           edgesFocusable={edgesFocusable}
           defaultEdgeOptions={NON_SELECTABLE_EDGE_OPTIONS}
           fitView
-          fitViewOptions={{ padding: FIT_VIEW_PADDING }}
-          onInit={(instance) => {
-            instance.fitView({ padding: FIT_VIEW_PADDING });
-          }}
+          fitViewOptions={FIT_VIEW_OPTIONS}
           minZoom={MIN_ZOOM}
           maxZoom={MAX_ZOOM}
           translateExtent={translateExtent}

@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { getInstalledPackages, getAllIntegrations, type RequestDeps } from './api';
+import { getInstalledPackages, getAllIntegrationNames, type RequestDeps } from './api';
 import { normalizeTitleName } from './helper_functions';
 
 export const fetchTakenPackageNames = async (deps: RequestDeps): Promise<Set<string>> => {
   const [packagesResponse, aiv2Integrations] = await Promise.all([
     getInstalledPackages(deps),
-    getAllIntegrations(deps),
+    getAllIntegrationNames(deps),
   ]);
 
   const existingPackages = new Set<string>();

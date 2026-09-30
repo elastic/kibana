@@ -73,6 +73,30 @@ describe('computeNextWatermark', () => {
     });
   });
 
+  describe('inline_stats_too_large halt', () => {
+    it('does not advance the watermark', () => {
+      const result = computeNextWatermark({
+        input: BASE_INPUT,
+        result: makeResult({ completed: false, haltReason: 'inline_stats_too_large' }),
+      });
+
+      expect(result.toISOString()).toBe('2026-01-22T07:30:00.000Z');
+    });
+
+    it('holds even when scan is empty (no episodes fetched)', () => {
+      const result = computeNextWatermark({
+        input: BASE_INPUT,
+        result: makeResult({
+          completed: false,
+          haltReason: 'inline_stats_too_large',
+          finalState: { input: BASE_INPUT },
+        }),
+      });
+
+      expect(result.toISOString()).toBe('2026-01-22T07:30:00.000Z');
+    });
+  });
+
   describe('no_episodes halt', () => {
     it('advances to windowEnd', () => {
       const result = computeNextWatermark({

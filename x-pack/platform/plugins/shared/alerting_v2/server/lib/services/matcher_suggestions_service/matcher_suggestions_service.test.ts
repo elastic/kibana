@@ -27,7 +27,7 @@ const buildSearchResponse = (
   },
 });
 
-describe('MatcherSuggestionsService.getDataFieldNames', () => {
+describe('MatcherSuggestionsService.getRuleEventFieldNames', () => {
   let esClient: ReturnType<typeof createMockEsClient>;
   let service: MatcherSuggestionsService;
 
@@ -49,7 +49,7 @@ describe('MatcherSuggestionsService.getDataFieldNames', () => {
   it('queries with the original four filter clauses when no matcher is provided', async () => {
     esClient.search.mockResolvedValue(buildSearchResponse([{ data: { 'host.name': 'a' } }]));
 
-    await service.getDataFieldNames();
+    await service.getRuleEventFieldNames();
 
     const filters = getSearchFilters();
     expect(filters).toHaveLength(4);
@@ -62,7 +62,7 @@ describe('MatcherSuggestionsService.getDataFieldNames', () => {
   it('appends matcher-derived filters to bool.filter when a valid matcher is provided', async () => {
     esClient.search.mockResolvedValue(buildSearchResponse([]));
 
-    await service.getDataFieldNames('episode_id: "abc"');
+    await service.getRuleEventFieldNames('episode_id: "abc"');
 
     const filters = getSearchFilters();
     expect(filters.length).toBeGreaterThan(4);
@@ -71,7 +71,7 @@ describe('MatcherSuggestionsService.getDataFieldNames', () => {
   it('falls back to the original four filters when the matcher is malformed', async () => {
     esClient.search.mockResolvedValue(buildSearchResponse([]));
 
-    await service.getDataFieldNames('not valid kql (((');
+    await service.getRuleEventFieldNames('not valid kql (((');
 
     const filters = getSearchFilters();
     expect(filters).toHaveLength(4);
@@ -80,7 +80,7 @@ describe('MatcherSuggestionsService.getDataFieldNames', () => {
   it('falls back to the original four filters when every matcher clause is unsupported', async () => {
     esClient.search.mockResolvedValue(buildSearchResponse([]));
 
-    await service.getDataFieldNames('unknown_field: "x"');
+    await service.getRuleEventFieldNames('unknown_field: "x"');
 
     const filters = getSearchFilters();
     expect(filters).toHaveLength(4);
@@ -95,7 +95,7 @@ describe('MatcherSuggestionsService.getDataFieldNames', () => {
       ])
     );
 
-    const result = await service.getDataFieldNames();
+    const result = await service.getRuleEventFieldNames();
 
     expect(result).toEqual(['data.count', 'data.host.name']);
   });
@@ -105,7 +105,7 @@ describe('MatcherSuggestionsService.getDataFieldNames', () => {
       meta: { body: { error: { type: 'index_not_found_exception' } } },
     });
 
-    const result = await service.getDataFieldNames();
+    const result = await service.getRuleEventFieldNames();
 
     expect(result).toEqual([]);
   });
@@ -114,6 +114,6 @@ describe('MatcherSuggestionsService.getDataFieldNames', () => {
     const error = new Error('boom');
     esClient.search.mockRejectedValue(error);
 
-    await expect(service.getDataFieldNames()).rejects.toBe(error);
+    await expect(service.getRuleEventFieldNames()).rejects.toBe(error);
   });
 });
