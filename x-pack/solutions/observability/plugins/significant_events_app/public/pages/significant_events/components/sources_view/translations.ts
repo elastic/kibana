@@ -116,6 +116,28 @@ export const EMPTY_STATE_TITLE = i18n.translate(
   { defaultMessage: 'Create your first source' }
 );
 
+export const READ_ONLY_EMPTY_STATE_TITLE = i18n.translate(
+  'xpack.significantEventsApp.sources.readOnlyEmptyStateTitle',
+  { defaultMessage: 'No sources yet' }
+);
+
+export const SOURCES_LOAD_ERROR_TITLE = i18n.translate(
+  'xpack.significantEventsApp.sources.loadErrorTitle',
+  { defaultMessage: 'Could not load sources' }
+);
+
+export const SOURCES_LOAD_ERROR_BODY = i18n.translate(
+  'xpack.significantEventsApp.sources.loadErrorBody',
+  {
+    defaultMessage:
+      'The source list did not load. Try again, or check that you can read Nightshift sources in this space.',
+  }
+);
+
+export const RETRY_LABEL = i18n.translate('xpack.significantEventsApp.sources.retryLabel', {
+  defaultMessage: 'Try again',
+});
+
 export const EMPTY_STATE_BODY = i18n.translate(
   'xpack.significantEventsApp.sources.emptyStateBody',
   {

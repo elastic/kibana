@@ -50053,7 +50053,6 @@
     "xpack.significantEvents.sigEventsTuningConfigName": "Anpassung signifikanter Ereignisse",
     "xpack.significantEventsApp.appTitle": "Wichtige Ereignisse",
     "xpack.significantEventsApp.breadcrumb": "Wichtige Ereignisse",
-    "xpack.significantEventsApp.bulkOnboarding.schedulingErrorSummary": "Das Onboarding für {count, plural, one {# stream} other {# Streams}} konnte nicht geplant werden",
     "xpack.significantEventsApp.cancelDiscoveryLabel": "Abbrechen",
     "xpack.significantEventsApp.changeType.dip": "Dip",
     "xpack.significantEventsApp.changeType.distributionChange": "Verteilungsänderung",

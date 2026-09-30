@@ -14,8 +14,11 @@ import { esqlResultToRows } from '../../../../../util/esql_result_to_rows';
 // A preview only needs a sample; the default ES|QL limit would ship up to 1000 rows.
 const PREVIEW_ROW_LIMIT = 100;
 
-/** Sample rows of a source query over the app time range. Idle while the query is empty. */
-export function useSourcePreview(esql: string) {
+/**
+ * Sample rows of a source query over the app time range. Idle while the query is empty. `runId`
+ * is part of the cache key, so each run of the same query fetches again.
+ */
+export function useSourcePreview({ esql, runId }: { esql: string; runId: number }) {
   const {
     dependencies: {
       start: { data },
@@ -26,7 +29,7 @@ export function useSourcePreview(esql: string) {
   } = useTimefilter();
 
   return useQuery({
-    queryKey: ['sourcePreview', esql, start, end],
+    queryKey: ['sourcePreview', esql, start, end, runId],
     queryFn: async ({ signal }) => {
       const { response } = await getESQLResults({
         esqlQuery: appendLimitToQuery(esql, PREVIEW_ROW_LIMIT),

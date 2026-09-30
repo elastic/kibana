@@ -33,13 +33,16 @@ const createCoreSetup = () => {
 
 const createSetupDeps = ({
   registerInvestigationQuota,
+  onSourceChange = jest.fn(),
 }: {
   registerInvestigationQuota?: jest.Mock;
+  onSourceChange?: jest.Mock;
 } = {}) =>
   ({
     streams: {
       registerKnowledgeIndicatorClientProvider: jest.fn(),
     },
+    nightshiftSources: { onSourceChange },
     ...(registerInvestigationQuota
       ? { nightshiftInvestigations: { registerInvestigationQuota } }
       : {}),
@@ -55,6 +58,14 @@ describe('SignificantEventsPlugin setup', () => {
     const plugin = createPlugin();
 
     expect(() => plugin.setup(createCoreSetup(), createSetupDeps())).not.toThrow();
+  });
+
+  it('subscribes to source changes so deletes and toggles reach knowledge right away', () => {
+    const onSourceChange = jest.fn();
+
+    createPlugin().setup(createCoreSetup(), createSetupDeps({ onSourceChange }));
+
+    expect(onSourceChange).toHaveBeenCalledWith(expect.any(Function));
   });
 
   it('registers all Core data streams', () => {

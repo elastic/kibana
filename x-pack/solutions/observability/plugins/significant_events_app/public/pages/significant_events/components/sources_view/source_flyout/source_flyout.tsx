@@ -70,7 +70,9 @@ export function SourceFlyout({ source, readOnly = false, onClose }: SourceFlyout
   const { createSource, updateSource } = useSourcesApi();
   const titleId = useGeneratedHtmlId();
   // Only the query the user ran is previewed, so typing does not search on every keystroke.
-  const [previewEsql, setPreviewEsql] = useState(source?.esql ?? '');
+  // `runId` changes on every run, so running an unchanged query still refetches it.
+  const [preview, setPreview] = useState({ esql: source?.esql ?? '', runId: 0 });
+  const runPreview = (esql: string) => setPreview(({ runId }) => ({ esql, runId: runId + 1 }));
 
   const { control, getValues, handleSubmit, setError, formState } = useForm<SourceFormValues>({
     defaultValues: {
@@ -240,7 +242,7 @@ export function SourceFlyout({ source, readOnly = false, onClose }: SourceFlyout
                         onTextLangQueryChange={({ esql }) => field.onChange(esql)}
                         onTextLangQuerySubmit={async (query) => {
                           if (query) {
-                            setPreviewEsql(query.esql);
+                            runPreview(query.esql);
                           }
                         }}
                         disableAutoFocus
@@ -260,7 +262,7 @@ export function SourceFlyout({ source, readOnly = false, onClose }: SourceFlyout
                       data-test-subj="significantEventsAppSourceFlyoutRunQueryButton"
                       size="s"
                       iconType="play"
-                      onClick={() => setPreviewEsql(getValues('esql'))}
+                      onClick={() => runPreview(getValues('esql'))}
                     >
                       {RUN_QUERY_LABEL}
                     </EuiButton>
@@ -270,7 +272,7 @@ export function SourceFlyout({ source, readOnly = false, onClose }: SourceFlyout
             </EuiResizablePanel>
             <EuiResizableButton indicator="border" />
             <EuiResizablePanel initialSize={60} minSize="300px" paddingSize="l" tabIndex={0}>
-              <SourcePreview esql={previewEsql} />
+              <SourcePreview esql={preview.esql} runId={preview.runId} />
             </EuiResizablePanel>
           </>
         )}

@@ -26,6 +26,7 @@ const resetSourceKnowledgeRoute = createServerRoute({
     },
   },
   params: z.object({
+    // A source id. The param keeps the name of the other `/internal/streams/{streamName}` KI routes.
     path: z.object({ streamName: z.string().max(MAX_STREAM_NAME_LENGTH) }),
   }),
   handler: async ({

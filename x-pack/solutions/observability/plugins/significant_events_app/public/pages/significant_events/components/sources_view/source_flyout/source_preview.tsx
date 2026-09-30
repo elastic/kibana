@@ -24,9 +24,11 @@ import { useSourcePreview } from './use_source_preview';
 interface SourcePreviewProps {
   /** Last query the user ran; typing alone does not refresh the preview. */
   esql: string;
+  /** Changes on every run, so running the same query again refetches it. */
+  runId: number;
 }
 
-export function SourcePreview({ esql }: SourcePreviewProps) {
+export function SourcePreview({ esql, runId }: SourcePreviewProps) {
   return (
     <EuiFlexGroup
       direction="column"
@@ -46,14 +48,14 @@ export function SourcePreview({ esql }: SourcePreviewProps) {
       </EuiFlexItem>
       <EuiSpacer size="m" />
       <EuiFlexItem grow>
-        <SourcePreviewContent esql={esql} />
+        <SourcePreviewContent esql={esql} runId={runId} />
       </EuiFlexItem>
     </EuiFlexGroup>
   );
 }
 
-function SourcePreviewContent({ esql }: SourcePreviewProps) {
-  const { data, error, isFetching } = useSourcePreview(esql);
+function SourcePreviewContent({ esql, runId }: SourcePreviewProps) {
+  const { data, error, isFetching } = useSourcePreview({ esql, runId });
 
   if (esql.trim() === '') {
     return <EuiEmptyPrompt titleSize="xxs" title={<h4>{PREVIEW_IDLE_TITLE}</h4>} />;

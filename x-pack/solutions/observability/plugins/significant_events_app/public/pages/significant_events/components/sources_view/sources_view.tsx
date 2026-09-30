@@ -28,6 +28,10 @@ import {
   CREATE_SOURCE_BUTTON_LABEL,
   EMPTY_STATE_BODY,
   EMPTY_STATE_TITLE,
+  READ_ONLY_EMPTY_STATE_TITLE,
+  RETRY_LABEL,
+  SOURCES_LOAD_ERROR_BODY,
+  SOURCES_LOAD_ERROR_TITLE,
   getSourcesCountLabel,
   SOURCES_TABLE_SEARCH_PLACEHOLDER,
 } from './translations';
@@ -47,6 +51,8 @@ export function SourcesView() {
   const {
     sources,
     isSourcesLoading,
+    isSourcesError,
+    refetchSources,
     isScheduling,
     onboardingConfig,
     setOnboardingConfig,
@@ -114,7 +120,9 @@ export function SourcesView() {
   };
 
   const openCreateFlyout = () => setFlyout({});
-  const hasNoSources = !isSourcesLoading && sources.length === 0;
+  // With cached sources, a failed refetch keeps the table; the toast already reports it.
+  const hasSourcesLoadFailed = isSourcesError && sources.length === 0;
+  const hasNoSources = !isSourcesLoading && !isSourcesError && sources.length === 0;
 
   return (
     <>
@@ -192,12 +200,30 @@ export function SourcesView() {
           </EuiFlexGroup>
         </EuiFlexItem>
 
-        {hasNoSources ? (
+        {hasSourcesLoadFailed ? (
+          <EuiFlexItem>
+            <EuiEmptyPrompt
+              data-test-subj="significantEventsAppSourcesLoadErrorPrompt"
+              color="danger"
+              iconType="error"
+              title={<h2>{SOURCES_LOAD_ERROR_TITLE}</h2>}
+              body={<p>{SOURCES_LOAD_ERROR_BODY}</p>}
+              actions={
+                <EuiButton
+                  data-test-subj="significantEventsAppSourcesLoadErrorRetryButton"
+                  onClick={() => refetchSources()}
+                >
+                  {RETRY_LABEL}
+                </EuiButton>
+              }
+            />
+          </EuiFlexItem>
+        ) : hasNoSources ? (
           <EuiFlexItem>
             <EuiEmptyPrompt
               data-test-subj="significantEventsAppSourcesEmptyPrompt"
               iconType="database"
-              title={<h2>{EMPTY_STATE_TITLE}</h2>}
+              title={<h2>{canManage ? EMPTY_STATE_TITLE : READ_ONLY_EMPTY_STATE_TITLE}</h2>}
               body={<p>{EMPTY_STATE_BODY}</p>}
               actions={
                 canManage && (

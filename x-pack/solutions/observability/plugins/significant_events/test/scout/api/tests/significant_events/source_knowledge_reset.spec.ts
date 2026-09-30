@@ -36,7 +36,10 @@ apiTest.describe(
     });
 
     apiTest.afterAll(async ({ apiClient }) => {
-      await apiClient.delete(`${SOURCES_PATH}/${sourceId}`, { headers, responseType: 'json' });
+      // Unset when beforeAll failed; a DELETE on `sources/undefined` would only add noise.
+      if (sourceId) {
+        await apiClient.delete(`${SOURCES_PATH}/${sourceId}`, { headers, responseType: 'json' });
+      }
     });
 
     apiTest(

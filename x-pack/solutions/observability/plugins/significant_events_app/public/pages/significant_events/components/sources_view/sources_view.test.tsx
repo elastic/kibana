@@ -77,26 +77,54 @@ const nginxSource: NightshiftSource = {
   esql_updated_at: '2026-09-01T00:00:00.000Z',
 };
 
-const setup = ({ sources, canManage }: { sources: NightshiftSource[]; canManage: boolean }) => {
+const makeSource = (
+  overrides: Partial<NightshiftSource> & Pick<NightshiftSource, 'id'>
+): NightshiftSource => ({ ...nginxSource, ...overrides });
+
+const makeKiGeneration = ({
+  sources,
+  isSourcesError = false,
+  refetchSources = jest.fn(),
+}: {
+  sources: NightshiftSource[];
+  isSourcesError?: boolean;
+  refetchSources?: jest.Mock;
+}): ReturnType<typeof useKiGeneration> => ({
+  sources,
+  isSourcesLoading: false,
+  isSourcesError,
+  refetchSources,
+  isInitialGenerationStatusLoading: false,
+  generatingStreamNames: [],
+  isGenerating: false,
+  isScheduling: false,
+  streamStatusMap: {},
+  onboardingConfig: { steps: [], connectors: {} },
+  setOnboardingConfig: jest.fn(),
+  featuresConnectors: { resolvedConnectorId: undefined, loading: false },
+  queriesConnectors: { resolvedConnectorId: undefined, loading: false },
+  bulkOnboardAll: jest.fn(),
+  bulkOnboardFeaturesOnly: jest.fn(),
+  bulkOnboardQueriesOnly: jest.fn(),
+  bulkScheduleOnboarding: jest.fn(),
+  cancelOnboarding: jest.fn(),
+});
+
+const setup = ({
+  sources,
+  canManage,
+  isSourcesError,
+  refetchSources,
+}: {
+  sources: NightshiftSource[];
+  canManage: boolean;
+  isSourcesError?: boolean;
+  refetchSources?: jest.Mock;
+}) => {
   mockCapabilities.nightshift.manage = canManage;
-  mockUseKiGeneration.mockReturnValue({
-    sources,
-    isSourcesLoading: false,
-    isInitialGenerationStatusLoading: false,
-    generatingStreamNames: [],
-    isGenerating: false,
-    isScheduling: false,
-    streamStatusMap: {},
-    onboardingConfig: { steps: [], connectors: {} },
-    setOnboardingConfig: jest.fn(),
-    featuresConnectors: { resolvedConnectorId: undefined, loading: false },
-    queriesConnectors: { resolvedConnectorId: undefined, loading: false },
-    bulkOnboardAll: jest.fn(),
-    bulkOnboardFeaturesOnly: jest.fn(),
-    bulkOnboardQueriesOnly: jest.fn(),
-    bulkScheduleOnboarding: jest.fn(),
-    cancelOnboarding: jest.fn(),
-  });
+  mockUseKiGeneration.mockReturnValue(
+    makeKiGeneration({ sources, isSourcesError, refetchSources })
+  );
 
   return render(
     <I18nProvider>
@@ -121,10 +149,42 @@ describe('SourcesView', () => {
   it('shows the empty state without a create button to read-only users', () => {
     setup({ sources: [], canManage: false });
 
-    expect(screen.getByTestId('significantEventsAppSourcesEmptyPrompt')).toBeInTheDocument();
+    expect(screen.getByTestId('significantEventsAppSourcesEmptyPrompt')).toHaveTextContent(
+      'No sources yet'
+    );
     expect(
       screen.queryByTestId('significantEventsAppSourcesEmptyPromptCreateButton')
     ).not.toBeInTheDocument();
+  });
+
+  it('offers a retry instead of the empty state when the source list fails to load', () => {
+    const refetchSources = jest.fn();
+    setup({ sources: [], canManage: true, isSourcesError: true, refetchSources });
+
+    expect(screen.queryByTestId('significantEventsAppSourcesEmptyPrompt')).not.toBeInTheDocument();
+    fireEvent.click(screen.getByTestId('significantEventsAppSourcesLoadErrorRetryButton'));
+
+    expect(refetchSources).toHaveBeenCalled();
+  });
+
+  it('stays on the current page when the source list refreshes', () => {
+    const sources = Array.from({ length: 30 }, (_, index) =>
+      makeSource({ id: `source-${index}`, title: `Source ${String(index).padStart(2, '0')}` })
+    );
+    const { rerender } = setup({ sources, canManage: false });
+
+    fireEvent.click(screen.getByTestId('pagination-button-1'));
+    expect(screen.getByText('Source 29')).toBeInTheDocument();
+
+    mockUseKiGeneration.mockReturnValue(makeKiGeneration({ sources: [...sources] }));
+    rerender(
+      <I18nProvider>
+        <SourcesView />
+      </I18nProvider>
+    );
+
+    expect(screen.getByText('Source 29')).toBeInTheDocument();
+    expect(screen.queryByText('Source 00')).not.toBeInTheDocument();
   });
 
   it('keeps the enable switch read-only and hides row actions without manage', () => {

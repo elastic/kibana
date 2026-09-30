@@ -40,6 +40,9 @@ interface KiGenerationContextValue {
   /** Every source of the space, disabled ones included; only enabled sources can be onboarded. */
   sources: NightshiftSource[];
   isSourcesLoading: boolean;
+  /** The last source list request failed; `sources` then holds what was cached, if anything. */
+  isSourcesError: boolean;
+  refetchSources: () => void;
   isInitialGenerationStatusLoading: boolean;
   generatingStreamNames: string[];
   isGenerating: boolean;
@@ -108,6 +111,8 @@ export function KiGenerationProvider({
   const sourcesFetch = useFetchSources();
   const fetchedSources = sourcesFetch.data;
   const isSourcesLoading = sourcesFetch.isLoading;
+  const isSourcesError = sourcesFetch.isError;
+  const refetchSources = sourcesFetch.refetch;
 
   // Adds streams discovered as InProgress (e.g. on initial status fetch after
   // page refresh) and removes streams that reach a terminal state. Callback
@@ -180,7 +185,9 @@ export function KiGenerationProvider({
   // must not flash the loading panel again.
   const isInitialGenerationStatusLoading = useMemo(() => {
     if (initialStatusFetchDoneRef.current) return false;
-    if (isSourcesLoading || !fetchedSources) return true;
+    if (isSourcesLoading) return true;
+    // A failed source list leaves nothing to wait for; the loading panel would never clear.
+    if (!fetchedSources) return false;
     return fetchedSources.some(({ id }) => !(id in streamStatusMap));
   }, [isSourcesLoading, fetchedSources, streamStatusMap]);
 
@@ -229,6 +236,8 @@ export function KiGenerationProvider({
       cancelOnboarding: bulkOnboarding.cancelOnboarding,
       sources: fetchedSources ?? NO_SOURCES,
       isSourcesLoading,
+      isSourcesError,
+      refetchSources,
       isInitialGenerationStatusLoading,
       generatingStreamNames,
       isGenerating,
@@ -247,6 +256,8 @@ export function KiGenerationProvider({
       bulkOnboarding.cancelOnboarding,
       fetchedSources,
       isSourcesLoading,
+      isSourcesError,
+      refetchSources,
       isInitialGenerationStatusLoading,
       generatingStreamNames,
       isGenerating,

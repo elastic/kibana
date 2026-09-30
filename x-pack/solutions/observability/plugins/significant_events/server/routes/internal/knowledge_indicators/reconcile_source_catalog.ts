@@ -34,8 +34,9 @@ type CatalogKiClient = Pick<
 >;
 
 /**
- * Drops owned rules, queries, and knowledge indicators for a source id that is
- * no longer in the catalog. The view and the saved object are kept.
+ * Drops the owned rules, queries and knowledge indicators of a source id. Onboarding runs, the view
+ * and the saved object are left alone. The reconcile calls it for ids that left the catalog, and
+ * `resetSourceKnowledge` for a live or just-deleted source after cancelling its run.
  */
 export async function retireSourceKnowledge({
   sourceId,
@@ -50,9 +51,38 @@ export async function retireSourceKnowledge({
 }
 
 /**
+ * Cancels the source's onboarding run, then runs `cleanup` even when the cancel fails: skipping it
+ * would leave a deleted or disabled source's rules firing. A cancel error is rethrown after the
+ * cleanup, so callers still log it.
+ */
+async function cancelOnboardingThen({
+  onboardingClient,
+  sourceSlug,
+  request,
+  cleanup,
+}: {
+  onboardingClient?: Pick<OnboardingClient, 'cancelBySourceSlug'>;
+  sourceSlug: string;
+  request: KibanaRequest;
+  cleanup: () => Promise<void>;
+}): Promise<void> {
+  let cancelError: unknown;
+  try {
+    // Cancel first: a run left going could write indicators or rules back after the cleanup.
+    await onboardingClient?.cancelBySourceSlug({ sourceSlug, request });
+  } catch (error) {
+    cancelError = error;
+  }
+  await cleanup();
+  if (cancelError !== undefined) {
+    throw cancelError;
+  }
+}
+
+/**
  * Cancels the source's onboarding run, then drops its owned rules, queries and knowledge
- * indicators. Runs when a source is deleted and when its knowledge is reset; the view and the
- * saved object are left to the caller.
+ * indicators, even when the cancel fails. Runs when a source is deleted and when its knowledge is
+ * reset; the view and the saved object are left to the caller.
  */
 export async function resetSourceKnowledge({
   source,
@@ -65,16 +95,18 @@ export async function resetSourceKnowledge({
   onboardingClient?: Pick<OnboardingClient, 'cancelBySourceSlug'>;
   request: KibanaRequest;
 }): Promise<void> {
-  // Cancel before retiring: a run left going could write indicators or rules back.
-  await onboardingClient?.cancelBySourceSlug({ sourceSlug: source.slug, request });
-  await retireSourceKnowledge({ sourceId: source.id, kiClient });
+  await cancelOnboardingThen({
+    onboardingClient,
+    sourceSlug: source.slug,
+    request,
+    cleanup: () => retireSourceKnowledge({ sourceId: source.id, kiClient }),
+  });
 }
 
 /**
  * Applies the enabled flag of one source to its onboarding and owned rules. A disabled source has
- * its run cancelled before its rules are disabled; an enabled one gets its rules back unless
- * maintenance is paused. The guards let the catalog reconcile skip calls it already knows are
- * no-ops; the change listener leaves them on, since it has not looked.
+ * its run cancelled, then its rules disabled even when the cancel fails; an enabled one gets its
+ * rules back unless maintenance is paused.
  */
 async function applySourceEnabled({
   source,
@@ -82,29 +114,35 @@ async function applySourceEnabled({
   onboardingClient,
   maintenanceState,
   request,
-  hasRunningOnboarding = true,
-  ownsRules = true,
+  mayHaveRunningOnboarding = true,
+  mayOwnRules = true,
 }: {
   source: Pick<NightshiftSource, 'id' | 'slug' | 'enabled'>;
   kiClient: Pick<CatalogKiClient, 'setSourceRulesEnabled'>;
   onboardingClient?: Pick<OnboardingClient, 'cancelBySourceSlug'>;
   maintenanceState: SignificantEventsMaintenanceState;
   request: KibanaRequest;
-  hasRunningOnboarding?: boolean;
-  ownsRules?: boolean;
+  /** `false` skips the cancel. The reconcile knows which runs are going; the listener does not. */
+  mayHaveRunningOnboarding?: boolean;
+  /** `false` skips the rule toggle. The reconcile knows which sources own rules; the listener does not. */
+  mayOwnRules?: boolean;
 }): Promise<void> {
   if (!source.enabled) {
-    if (hasRunningOnboarding) {
-      await onboardingClient?.cancelBySourceSlug({ sourceSlug: source.slug, request });
-    }
-    if (ownsRules) {
-      await kiClient.setSourceRulesEnabled(source.id, false);
-    }
+    await cancelOnboardingThen({
+      onboardingClient: mayHaveRunningOnboarding ? onboardingClient : undefined,
+      sourceSlug: source.slug,
+      request,
+      cleanup: async () => {
+        if (mayOwnRules) {
+          await kiClient.setSourceRulesEnabled(source.id, false);
+        }
+      },
+    });
     return;
   }
   // A pause keeps rules off. Resume only restores the rules the pause disabled, so a source
   // enabled meanwhile gets its rules back from the next catalog reconcile.
-  if (maintenanceState !== 'paused' && ownsRules) {
+  if (maintenanceState !== 'paused' && mayOwnRules) {
     await kiClient.setSourceRulesEnabled(source.id, true);
   }
 }
@@ -191,8 +229,8 @@ export async function reconcileSourceCatalog({
       onboardingClient,
       maintenanceState,
       request,
-      hasRunningOnboarding: runningSourceSlugs.has(source.slug),
-      ownsRules: ownedRuleSourceIds.has(source.id),
+      mayHaveRunningOnboarding: runningSourceSlugs.has(source.slug),
+      mayOwnRules: ownedRuleSourceIds.has(source.id),
     });
   }
 

@@ -271,6 +271,23 @@ describe('resetSourceKnowledge', () => {
 
     expect(kiClient.deleteIndicators).toHaveBeenCalledWith('source-1');
   });
+
+  it('drops the knowledge even when cancelling the run fails, then reports the failure', async () => {
+    const kiClient = makeKiClient();
+    const cancelBySourceSlug = jest.fn().mockRejectedValue(new Error('no workflows privilege'));
+
+    await expect(
+      resetSourceKnowledge({
+        source: { id: 'source-1', slug: 'nginx-errors' },
+        kiClient,
+        onboardingClient: { cancelBySourceSlug },
+        request,
+      })
+    ).rejects.toThrow('no workflows privilege');
+
+    expect(kiClient.deleteOwnedRules).toHaveBeenCalledWith('source-1');
+    expect(kiClient.deleteIndicators).toHaveBeenCalledWith('source-1');
+  });
 });
 
 describe('createSourceChangeListener', () => {
@@ -328,6 +345,17 @@ describe('createSourceChangeListener', () => {
       kiClient.setSourceRulesEnabled.mock.invocationCallOrder[0]
     );
     expect(kiClient.deleteIndicators).not.toHaveBeenCalled();
+  });
+
+  it('disables the rules of a disabled source even when cancelling its run fails', async () => {
+    const { listener, kiClient, cancelBySourceSlug } = setup();
+    cancelBySourceSlug.mockRejectedValue(new Error('no workflows privilege'));
+
+    await expect(
+      listener({ type: 'updated', source: disabledSource, previous: enabledSource, request })
+    ).rejects.toThrow('no workflows privilege');
+
+    expect(kiClient.setSourceRulesEnabled).toHaveBeenCalledWith('toggled-source', false);
   });
 
   it('enables the owned rules of a re-enabled source without touching onboarding', async () => {

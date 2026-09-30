@@ -15,6 +15,7 @@ import { useCallback, useState } from 'react';
 import type { ScheduleOnboardingOptions } from '../../../hooks/use_onboarding_api';
 import { useOnboardingApi } from '../../../hooks/use_onboarding_api';
 import { useKibana } from '../../../hooks/use_kibana';
+import { useSourcesById } from '../../../hooks/use_sources_by_id';
 import { getFormattedError } from '../../../util/errors';
 import type { OnboardingConfig } from '../components/shared/types';
 import { useOnboardingStatusUpdateQueue } from './use_onboarding_status_update_queue';
@@ -40,6 +41,7 @@ export function useBulkOnboarding({
   } = useKibana();
 
   const { scheduleOnboarding, cancelOnboarding } = useOnboardingApi();
+  const { getSourceTitle } = useSourcesById();
   const { onboardingStatusUpdateQueue, processStatusUpdateQueue } =
     useOnboardingStatusUpdateQueue(onStreamStatusUpdate);
 
@@ -71,15 +73,18 @@ export function useBulkOnboarding({
         toasts.addError(
           new Error(
             failures
-              .map(({ streamName, error }) => `${streamName}: ${getFormattedError(error).message}`)
+              .map(
+                ({ streamName, error }) =>
+                  `${getSourceTitle(streamName)}: ${getFormattedError(error).message}`
+              )
               .join('\n')
           ),
           {
             title: i18n.translate(
-              'xpack.significantEventsApp.bulkOnboarding.schedulingErrorSummary',
+              'xpack.significantEventsApp.bulkOnboarding.sourceSchedulingErrorSummary',
               {
                 defaultMessage:
-                  'Failed to schedule onboarding for {count, plural, one {# stream} other {# streams}}',
+                  'Failed to schedule onboarding for {count, plural, one {# source} other {# sources}}',
                 values: { count: failures.length },
               }
             ),
@@ -96,7 +101,13 @@ export function useBulkOnboarding({
 
       return succeeded;
     },
-    [scheduleOnboarding, toasts, onboardingStatusUpdateQueue, processStatusUpdateQueue]
+    [
+      scheduleOnboarding,
+      toasts,
+      getSourceTitle,
+      onboardingStatusUpdateQueue,
+      processStatusUpdateQueue,
+    ]
   );
 
   const bulkOnboardAll = useCallback(

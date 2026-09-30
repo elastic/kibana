@@ -240,7 +240,7 @@ export class SourcesClient {
     await this.deps.onChange({ type: 'deleted', source: toSource(id, attributes) });
   }
 
-  /** Flips the flag only; engines reconcile their rules and onboarding from it. */
+  /** Flips the flag, then waits for the `onSourceChange` listeners, which align rules and onboarding. */
   async setEnabled(id: string, enabled: boolean): Promise<NightshiftSource> {
     const so = await this.getSavedObject(id);
     if (so.attributes.enabled === enabled) {

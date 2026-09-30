@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { EuiBasicTableColumn, EuiTableSelectionType } from '@elastic/eui';
+import type { Criteria, EuiBasicTableColumn, EuiTableSelectionType } from '@elastic/eui';
 import {
   EuiCode,
   EuiFlexGroup,
@@ -23,7 +23,7 @@ import {
   SignificantEventsWorkflowStatus,
   type SignificantEventsWorkflowStatusResult,
 } from '@kbn/significant-events-schema';
-import React, { useMemo } from 'react';
+import React, { useState } from 'react';
 import { useIsCpsMultiProject } from '@kbn/cps-utils';
 import { useKibana } from '../../../../hooks/use_kibana';
 import { KnowledgeIndicatorsColumn } from './knowledge_indicators_column';
@@ -44,6 +44,8 @@ import {
   TITLE_COLUMN_HEADER,
 } from './translations';
 import { filterSourcesByQuery, getOnboardSourceTooltip } from './utils';
+
+const PAGE_SIZE_OPTIONS = [25, 50, 100];
 
 export function SourcesTable({
   loading,
@@ -88,9 +90,12 @@ export function SourcesTable({
     },
   } = useKibana();
   const isCpsMultiProject = useIsCpsMultiProject(cps?.cpsManager);
-  // EuiInMemoryTable goes back to page 1 whenever `items` is a new array, so a filtered list
-  // rebuilt on every render (onboarding status polling) would reset the page while searching.
-  const items = useMemo(() => filterSourcesByQuery(sources, searchText), [sources, searchText]);
+  const items = filterSourcesByQuery(sources, searchText);
+  // Controlled: EuiInMemoryTable goes back to page 1 whenever `items` is a new array, which happens
+  // after every toggle, save, delete or status poll. A new search still starts from page 1.
+  const [page, setPage] = useState({ index: 0, size: PAGE_SIZE_OPTIONS[0], searchText });
+  const lastPageIndex = Math.max(0, Math.ceil(items.length / page.size) - 1);
+  const pageIndex = page.searchText === searchText ? Math.min(page.index, lastPageIndex) : 0;
 
   const onboardTooltip = getOnboardSourceTooltip({ activityBlockTooltip, isCpsMultiProject });
 
@@ -237,7 +242,12 @@ export function SourcesTable({
       selection={selection}
       noItemsMessage={NO_SOURCES_MESSAGE}
       sorting={{ sort: { field: 'title', direction: 'asc' } }}
-      pagination={{ initialPageSize: 25, pageSizeOptions: [25, 50, 100] }}
+      pagination={{ pageIndex, pageSize: page.size, pageSizeOptions: PAGE_SIZE_OPTIONS }}
+      onTableChange={({ page: nextPage }: Criteria<NightshiftSource>) => {
+        if (nextPage) {
+          setPage({ index: nextPage.index, size: nextPage.size, searchText });
+        }
+      }}
     />
   );
 }

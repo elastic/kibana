@@ -252,6 +252,24 @@ describe('KnowledgeIndicatorSelectableFilter', () => {
       });
       expect(screen.queryByText('my_type')).not.toBeInTheDocument();
     });
+
+    it('orders the options by label, not by value', async () => {
+      const titles: Record<string, string> = { 'id-1': 'Zeta logs', 'id-2': 'Alpha logs' };
+      const kis = [
+        makeFeatureKI({ type: 'id-1', id: 'f1' }),
+        makeFeatureKI({ type: 'id-2', id: 'f2' }),
+      ];
+
+      await renderFilter({ knowledgeIndicators: kis, getLabel: (value) => titles[value] });
+
+      fireEvent.click(screen.getByRole('button', { name: /Test Filter/ }));
+
+      const options = await screen.findAllByRole('option');
+      expect(options.map((option) => option.textContent)).toEqual([
+        expect.stringContaining('Alpha logs'),
+        expect.stringContaining('Zeta logs'),
+      ]);
+    });
   });
 
   describe('labels', () => {

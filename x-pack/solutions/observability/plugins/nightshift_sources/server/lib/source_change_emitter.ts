@@ -37,7 +37,11 @@ export const createSourceChangeEmitter = (logger: Logger): SourceChangeEmitter =
       };
     },
     emit: async (event) => {
-      const results = await Promise.allSettled([...listeners].map((listener) => listener(event)));
+      // `async` turns a listener that throws synchronously into a rejection, so it is logged like
+      // the others instead of failing a write that already committed.
+      const results = await Promise.allSettled(
+        [...listeners].map(async (listener) => listener(event))
+      );
       results.forEach((result) => {
         if (result.status === 'rejected') {
           logger.error(

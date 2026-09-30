@@ -42,14 +42,21 @@ export function useSourcesApi() {
   const queryClient = useQueryClient();
 
   const invalidateSources = () => queryClient.invalidateQueries({ queryKey: SOURCES_QUERY_KEY });
-  // Every knowledge query goes stale, since lists across sources include this one, but only this
-  // source's queries refetch now: each Sources table row holds its own, one request per row.
-  const invalidateSourceKnowledge = ({ id }: NightshiftSource) =>
+  // Lists that span sources include the changed one: mark every knowledge query stale without
+  // refetching, so each reloads the next time it is shown.
+  const markKnowledgeStale = () =>
     Promise.all(
-      SOURCE_KNOWLEDGE_QUERY_KEYS.flatMap((queryKey) => [
-        queryClient.invalidateQueries({ queryKey, refetchType: 'none' }),
-        queryClient.invalidateQueries({ queryKey: [...queryKey, id] }),
-      ])
+      SOURCE_KNOWLEDGE_QUERY_KEYS.map((queryKey) =>
+        queryClient.invalidateQueries({ queryKey, refetchType: 'none' })
+      )
+    );
+  // Refetch one source's queries only. Each Sources table row holds its own, so refetching whole
+  // prefixes would send a request per row.
+  const refetchSourceKnowledge = (sourceId: string) =>
+    Promise.all(
+      SOURCE_KNOWLEDGE_QUERY_KEYS.map((queryKey) =>
+        queryClient.invalidateQueries({ queryKey: [...queryKey, sourceId] })
+      )
     );
 
   const createSource = useMutation<NightshiftSource, Error, CreateSourceRequest>({
@@ -121,14 +128,15 @@ export function useSourcesApi() {
     onError: (error) => {
       toasts.addError(getFormattedError(error), { title: DELETE_ERROR_TOAST_TITLE });
     },
-    onSettled: (_, __, source) =>
-      Promise.all([invalidateSources(), invalidateSourceKnowledge(source)]),
+    // The deleted source's own queries are not refetched: its row is going away, and they would 404.
+    onSettled: () => Promise.all([invalidateSources(), markKnowledgeStale()]),
   });
 
   const resetSourceKnowledge = useMutation<void, Error, NightshiftSource>({
     mutationFn: async ({ id }) => {
       await significantEventsRepositoryClient.fetch(
         'POST /internal/streams/{streamName}/knowledge_indicators/_reset',
+        // The KI routes still name their path param `streamName`; it takes the source id.
         { params: { path: { streamName: id } }, signal: null }
       );
     },
@@ -138,7 +146,8 @@ export function useSourcesApi() {
     onError: (error) => {
       toasts.addError(getFormattedError(error), { title: RESET_ERROR_TOAST_TITLE });
     },
-    onSettled: (_, __, source) => invalidateSourceKnowledge(source),
+    onSettled: (_, __, source) =>
+      Promise.all([markKnowledgeStale(), refetchSourceKnowledge(source.id)]),
   });
 
   return { createSource, updateSource, setSourceEnabled, deleteSource, resetSourceKnowledge };

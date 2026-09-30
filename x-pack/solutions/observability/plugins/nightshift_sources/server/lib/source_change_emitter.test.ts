@@ -61,6 +61,20 @@ describe('createSourceChangeEmitter', () => {
     );
   });
 
+  it('logs a listener that throws synchronously instead of rejecting the write', async () => {
+    const logger = loggingSystemMock.createLogger();
+    const emitter = createSourceChangeEmitter(logger);
+    emitter.subscribe(() => {
+      throw new Error('not async');
+    });
+
+    await expect(emitter.emit(deletedEvent)).resolves.toBeUndefined();
+
+    expect(logger.error).toHaveBeenCalledWith(
+      'A listener failed to handle the deleted event of source source-1: Error: not async'
+    );
+  });
+
   it('stops calling a listener once it unsubscribes', async () => {
     const emitter = createSourceChangeEmitter(loggingSystemMock.createLogger());
     const listener = jest.fn().mockResolvedValue(undefined);

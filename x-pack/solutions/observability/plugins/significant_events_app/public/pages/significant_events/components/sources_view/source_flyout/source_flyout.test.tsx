@@ -22,8 +22,10 @@ jest.mock('../../../../../hooks/use_sources_api', () => ({
   useSourcesApi: () => ({ createSource: mockCreateSource, updateSource: mockUpdateSource }),
 }));
 jest.mock('./source_preview', () => ({
-  SourcePreview: ({ esql }: { esql: string }) => (
-    <div data-test-subj="sourcePreviewMock">{esql}</div>
+  SourcePreview: ({ esql, runId }: { esql: string; runId: number }) => (
+    <div data-test-subj="sourcePreviewMock" data-run-id={runId}>
+      {esql}
+    </div>
   ),
 }));
 jest.mock('@kbn/esql/public', () => ({
@@ -161,6 +163,18 @@ describe('SourceFlyout', () => {
     fireEvent.click(screen.getByTestId('significantEventsAppSourceFlyoutRunQueryButton'));
 
     expect(screen.getByTestId('sourcePreviewMock')).toHaveTextContent('FROM logs-nginx-*');
+  });
+
+  it('runs the preview again when the same query is run twice', () => {
+    setup(nginxSource);
+    const runQuery = screen.getByTestId('significantEventsAppSourceFlyoutRunQueryButton');
+
+    fireEvent.click(runQuery);
+    const firstRunId = screen.getByTestId('sourcePreviewMock').getAttribute('data-run-id');
+    fireEvent.click(runQuery);
+
+    expect(screen.getByTestId('sourcePreviewMock')).not.toHaveAttribute('data-run-id', firstRunId);
+    expect(screen.getByTestId('sourcePreviewMock')).toHaveTextContent(nginxSource.esql);
   });
 
   it('shows a source read-only, without a way to save it', () => {

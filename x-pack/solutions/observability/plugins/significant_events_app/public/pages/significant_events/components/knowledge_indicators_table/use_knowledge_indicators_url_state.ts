@@ -57,10 +57,13 @@ export function useKnowledgeIndicatorsUrlState({
   const [selectedSubtypes, setSelectedSubtypes] = useState<string[]>(() =>
     query?.subtype ? castArray(query.subtype) : []
   );
+  // `stream` is the name this param had before sources; agent links and bookmarks still carry it.
+  // Writes below always use `source`, so the old name leaves the URL on the first update.
+  const urlSources = query?.source ?? query?.stream;
   const [selectedStreams, setSelectedStreams] = useState<string[]>(() =>
-    query?.source ? castArray(query.source) : []
+    urlSources ? castArray(urlSources) : []
   );
-  const initialUrlStreamsRef = useRef<string[]>(query?.source ? castArray(query.source) : []);
+  const initialUrlStreamsRef = useRef<string[]>(urlSources ? castArray(urlSources) : []);
   const [hideComputedTypes, setHideComputedTypes] = useState(() =>
     query?.showComputed === 'true' ? false : true
   );
