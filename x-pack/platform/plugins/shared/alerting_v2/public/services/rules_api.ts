@@ -99,15 +99,19 @@ export class RulesApi {
   }
 
   public async enableRule(id: string) {
-    return this.http.post<RuleResponse>(`${buildRulePath(id)}/_enable`);
+    return this.http.post<RuleResponse>(
+      buildPath(`${ALERTING_V2_RULE_API_PATH}/{id}/_enable`, { id })
+    );
   }
 
   public async disableRule(id: string) {
-    return this.http.post<RuleResponse>(`${buildRulePath(id)}/_disable`);
+    return this.http.post<RuleResponse>(
+      buildPath(`${ALERTING_V2_RULE_API_PATH}/{id}/_disable`, { id })
+    );
   }
 
   public async runRule(id: string) {
-    return this.http.post<void>(`${buildRulePath(id)}/_run`);
+    return this.http.post<void>(buildPath(`${ALERTING_V2_RULE_API_PATH}/{id}/_run`, { id }));
   }
 
   public async bulkDeleteRules(params: BulkByIdsParams) {

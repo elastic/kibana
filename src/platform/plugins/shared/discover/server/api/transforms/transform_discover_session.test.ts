@@ -31,8 +31,18 @@ import {
   fromStoredSessionSearchAndTable,
   fromStoredSessionSettings,
 } from '../../../common/session/session_tab_mapping';
-import { transformDiscoverSessionIn } from './transform_discover_session_in';
-import { transformDiscoverSessionOut } from './transform_discover_session_out';
+import {
+  transformDiscoverSessionIn,
+  transformInternalDiscoverSessionIn,
+} from './transform_discover_session_in';
+import {
+  transformDiscoverSessionOut,
+  transformInternalDiscoverSessionOut,
+} from './transform_discover_session_out';
+import {
+  discoverSessionInternalDataSchema,
+  type DiscoverSessionInternalData,
+} from '../internal_schema';
 import {
   discoverSessionApiData,
   discoverSessionAttributes,
@@ -118,6 +128,131 @@ describe('discover session API transforms', () => {
       single_select: true,
     },
   };
+
+  it('preserves inline identity, filter references and the chart fingerprint internally', () => {
+    const data: DiscoverSessionInternalData = {
+      ...apiData,
+      tabs: [
+        {
+          ...classicApiTab,
+          column_order: [],
+          data_source: {
+            type: 'data_view_spec',
+            id: 'inline-id',
+            index_pattern: 'logs-*',
+            time_field: '@timestamp',
+          },
+          filters: [
+            {
+              type: 'condition',
+              condition: { field: 'host.name', operator: 'exists' },
+              data_view_id: 'inline-id',
+            },
+            {
+              type: 'condition',
+              condition: { field: 'service.name', operator: 'exists' },
+              data_view_id: 'foreign-id',
+            },
+          ],
+        },
+      ],
+    };
+    const original = cloneDeep(data);
+    const { attributes, references } = transformInternalDiscoverSessionIn(data);
+    const searchSource = injectReferences(
+      parseSearchSourceJSON(attributes.tabs[0].attributes.kibanaSavedObjectMeta.searchSourceJSON),
+      references
+    );
+
+    expect(searchSource.index).toStrictEqual({
+      id: 'inline-id',
+      title: 'logs-*',
+      timeFieldName: '@timestamp',
+    });
+    expect(searchSource.filter?.map(({ meta }) => meta.index)).toStrictEqual([
+      'inline-id',
+      'foreign-id',
+    ]);
+    expect(attributes.tabs[0].attributes.visContext).toStrictEqual({
+      suggestionType: UnifiedHistogramSuggestionType.histogramForDataView,
+      attributes: classicApiTab.vis_context?.attributes,
+      requestData: {
+        dataViewId: 'inline-id',
+        timeField: '@timestamp',
+        timeInterval: 'h',
+        breakdownField: 'host.name',
+      },
+    });
+
+    const storedBeforeRead = cloneDeep({ attributes, references });
+    const internal = transformInternalDiscoverSessionOut(attributes, references);
+
+    expect(internal).toStrictEqual({ sessionState: data, warnings: [] });
+    expect(discoverSessionInternalDataSchema.parse(internal.sessionState)).toStrictEqual(data);
+    expect(transformDiscoverSessionOut(attributes, references).sessionState.tabs[0]).toStrictEqual({
+      ...classicApiTab,
+      column_order: [],
+      data_source: {
+        type: 'data_view_spec',
+        index_pattern: 'logs-*',
+        time_field: '@timestamp',
+      },
+      filters: [
+        { type: 'condition', condition: { field: 'host.name', operator: 'exists' } },
+        {
+          type: 'condition',
+          condition: { field: 'service.name', operator: 'exists' },
+          data_view_id: 'foreign-id',
+        },
+      ],
+    });
+    expect(data).toStrictEqual(original);
+    expect({ attributes, references }).toStrictEqual(storedBeforeRead);
+  });
+
+  it.each([
+    { name: 'public', transform: transformDiscoverSessionOut },
+    { name: 'internal', transform: transformInternalDiscoverSessionOut },
+  ])('keeps the other fields and warning order in the $name response', ({ transform }) => {
+    const { attributes, references } = transformDiscoverSessionIn(discoverSessionApiData);
+    const session = {
+      ...attributes,
+      tabs: attributes.tabs.map((tab) => ({
+        ...tab,
+        attributes: { ...tab.attributes, controlGroupJson: '{' },
+      })),
+    };
+    const original = cloneDeep(session);
+
+    const result = transform(session, references);
+
+    expect(result).toStrictEqual({
+      sessionState: {
+        ...discoverSessionApiData,
+        tabs: discoverSessionApiData.tabs.map(({ control_panels: _controls, ...tab }) => tab),
+      },
+      warnings: discoverSessionApiData.tabs.map(({ id }) => ({
+        type: 'dropped_property',
+        tab_id: id,
+        key: 'control_panels',
+        message: 'Unable to transform control panels. Error: controlGroupJson is not valid JSON',
+      })),
+    });
+    expect(session).toStrictEqual(original);
+  });
+
+  it('does not expose an ES|QL runtime Data View as an inline source internally', () => {
+    const [, esqlTab] = discoverSessionAttributes.tabs;
+    const attributes = { ...discoverSessionAttributes, tabs: [esqlTab] };
+
+    const { sessionState, warnings } = transformInternalDiscoverSessionOut(attributes);
+
+    expect(warnings).toStrictEqual([]);
+    expect(sessionState.tabs[0].data_source).toStrictEqual({
+      type: 'esql',
+      query: 'FROM logs*,-logstash*,filebeat-* | WHERE ??field_name == ?field_value',
+    });
+  });
 
   it('converts shared tab fields without handling type settings, vis_context, or controls', () => {
     const [classicTab, metricsTab] = discoverSessionAttributes.tabs;
