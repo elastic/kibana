@@ -1263,4 +1263,39 @@ describe('Endpoint analysis run', () => {
       );
     });
   });
+
+  describe('decision tree', () => {
+    const names = () => allSteps.map(({ name }) => name);
+
+    it('loads the symptom tree before the agent and continues when the index is missing', () => {
+      expect(names().indexOf('resolve_symptom')).toBeLessThan(names().indexOf('mark_attempted'));
+      expect(names().indexOf('load_decision_tree')).toBeLessThan(names().indexOf('forensic_analysis'));
+      expect(stepByName('resolve_symptom')?.type).toBe('alertzero.resolveDecisionTreeSymptom');
+      expect(stepByName('load_decision_tree')?.['on-failure']).toEqual({ continue: true });
+      expect(stepByName('load_decision_tree')?.with?.index).toBe(
+        'ai-index-idx-{{ consts.decision_tree_ai_index }}'
+      );
+      expect(String(stepByName('forensic_analysis')?.with?.message)).toContain(
+        'steps.resolve_decision_tree.output.content'
+      );
+    });
+
+    it('reinforces after the agent and does not fail the analysis when that write fails', () => {
+      const reinforce = stepByName('reinforce_decision_tree');
+
+      expect(names().indexOf('forensic_analysis')).toBeLessThan(
+        names().indexOf('reinforce_decision_tree')
+      );
+      expect(names().indexOf('reinforce_decision_tree')).toBeLessThan(
+        names().indexOf('resolve_finding_presence')
+      );
+      expect(reinforce?.type).toBe('workflow.execute');
+      expect(reinforce?.['on-failure']).toEqual({ continue: true });
+      expect(reinforce?.with).toMatchObject({
+        'workflow-id': '{{ consts.decision_tree_reinforce }}',
+      });
+      expect(String(reinforce?.if)).toContain('steps.resolve_symptom.output.skipped == false');
+      expect(String(reinforce?.if)).toContain('steps.forensic_analysis.error == null');
+    });
+  });
 });

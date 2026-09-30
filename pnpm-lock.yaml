@@ -2796,7 +2796,7 @@ importers:
         version: link:x-pack/platform/packages/shared/kbn-nightshift-ai
       '@kbn/nightshift-decision-trees':
         specifier: workspace:*
-        version: link:x-pack/solutions/observability/packages/kbn-nightshift-decision-trees
+        version: link:x-pack/platform/packages/shared/kbn-nightshift-decision-trees
       '@kbn/nightshift-investigations-plugin':
         specifier: workspace:*
         version: link:x-pack/solutions/observability/plugins/nightshift_investigations
@@ -9069,6 +9069,8 @@ importers:
 
   x-pack/platform/packages/shared/kbn-nightshift-ai: {}
 
+  x-pack/platform/packages/shared/kbn-nightshift-decision-trees: {}
+
   x-pack/platform/packages/shared/kbn-profiler-cli: {}
 
   x-pack/platform/packages/shared/kbn-proposals-common: {}
@@ -9542,8 +9544,6 @@ importers:
   x-pack/solutions/observability/packages/kbn-genai-cli: {}
 
   x-pack/solutions/observability/packages/kbn-investigation-output: {}
-
-  x-pack/solutions/observability/packages/kbn-nightshift-decision-trees: {}
 
   x-pack/solutions/observability/packages/kbn-nightshift-shared: {}
 

@@ -61,6 +61,9 @@ consts:
   # produces about itself — what it could not do and why
   # Installed in the same global set as this workflow, so it is always resolvable.
   journal_note: system-alertzero-journal-note
+  # Installed in the same global set as this workflow. A failed reinforce continues.
+  decision_tree_reinforce: system-security-decision-tree-reinforce
+  decision_tree_ai_index: security-decision-trees
   # Cap on the number of containment actions this run can propose.
   max_recommended_actions: 8
   # Fallback when the KI carries no `attributes.autonomy`.
@@ -185,6 +188,9 @@ steps:
           _source:
             - host.name
             - kibana.alert.attack_discovery.alert_ids
+            - kibana.alert.rule.name
+            - kibana.alert.rule.threat.technique.id
+            - kibana.alert.rule.threat.technique.subtechnique.id
           query:
             bool:
               should:
@@ -238,6 +244,42 @@ steps:
         type: if
         condition: "${{ steps.resolve_host.output.host_name != blank }}"
         steps:
+          # The symptom is the technique or rule, never the host. A missing slug leaves
+          # the content blank and the analysis runs without a playbook.
+          - name: resolve_symptom
+            type: alertzero.resolveDecisionTreeSymptom
+            with:
+              subtechnique_id: "{{ steps.fetch_attack_discovery_alert.output.hits.hits[0]._source['kibana.alert.rule.threat.technique.subtechnique.id'] | default: '' }}"
+              technique_id: "{{ steps.fetch_attack_discovery_alert.output.hits.hits[0]._source['kibana.alert.rule.threat.technique.id'] | default: '' }}"
+              rule_name: "{{ steps.fetch_attack_discovery_alert.output.hits.hits[0]._source['kibana.alert.rule.name'] | default: '' }}"
+              space_id: "{{ workflow.spaceId }}"
+
+          # A missing index is the first run in this space. Continue so analysis still starts.
+          - name: load_decision_tree
+            type: elasticsearch.search
+            if: "${{ steps.resolve_symptom.output.skipped == false }}"
+            on-failure:
+              continue: true
+            with:
+              index: "ai-index-idx-{{ consts.decision_tree_ai_index }}"
+              ignore_unavailable: true
+              size: 1
+              query:
+                bool:
+                  filter:
+                    - term:
+                        type: security.decision_tree
+                    - term:
+                        attributes.symptom: "{{ steps.resolve_symptom.output.symptom }}"
+                    - term:
+                        attributes.space_id: "{{ workflow.spaceId }}"
+
+          - name: resolve_decision_tree
+            type: data.set
+            with:
+              content: "{{ steps.load_decision_tree.output.hits.hits[0]._source.content | default: '' }}"
+              version: "${{ steps.load_decision_tree.output.hits.hits[0]._source.attributes.version | default: 0 }}"
+
           # Record the attempt before the agent. A later run reads it back from the
           # indicator and does not start another analysis. `attributes` merges, so
           # this does not change `status`. A failed write fails the run here, before
@@ -301,6 +343,13 @@ steps:
               message: >
                 I have an alert on {{ steps.resolve_host.output.host_name }}.
                 Perform forensic analysis and extract all IoCs.
+                {%- if steps.resolve_decision_tree.output.content != blank %}
+
+                An existing decision tree for this symptom is below. Treat it as a playbook
+                for what to check. It is not evidence about this host.
+
+                {{ steps.resolve_decision_tree.output.content }}
+                {%- endif %}
                 Write the reconstruction to `timeline.events` and the indicators to `iocs`,
                 matching this step's schema. Use `rationale` only for the assessment:
                 - Whether this is a real incident, which other hosts are affected, what the
@@ -564,6 +613,28 @@ steps:
                           description: >
                             Input for the catalog action, shaped to satisfy that entry's
                             `inputSchema.properties.actionInput`. Do not wrap it in another `actionInput`.
+
+          # Distill the assessment into the symptom's tree. Continues on failure so a
+          # bad draft cannot block findings or containment. The tree stays tentative:
+          # this run does not wait for the analyst gate.
+          - name: reinforce_decision_tree
+            type: workflow.execute
+            if: >-
+              ${{ steps.resolve_symptom.output.skipped == false
+                and steps.forensic_analysis.error == null
+                and steps.forensic_analysis.output.structured_output.rationale != blank }}
+            on-failure:
+              continue: true
+            with:
+              workflow-id: "{{ consts.decision_tree_reinforce }}"
+              inputs:
+                symptom: "{{ steps.resolve_symptom.output.symptom }}"
+                ki_id: "{{ steps.resolve_symptom.output.ki_id }}"
+                prior_mermaid: "{{ steps.resolve_decision_tree.output.content }}"
+                prior_version: "${{ steps.resolve_decision_tree.output.version }}"
+                rationale: "{{ steps.forensic_analysis.output.structured_output.rationale }}"
+                propose: "${{ steps.forensic_analysis.output.structured_output.propose }}"
+                actions_summary: "{{ steps.forensic_analysis.output.structured_output.recommendedActions | map: 'actionId' | join: ', ' | default: '' }}"
 
           # Timeline and IoCs are attached to the investigation; the assessment is a
           # journal note rather than an attachment. The forensic agent run itself is
