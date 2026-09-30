@@ -10,7 +10,9 @@ The workflow's `ai.agent` step runs `alertzero-thin-agent` with no tools and res
 
 ## Dataset
 
-The dataset is every example of every scenario registered in `src/scenarios/index.ts`. Today that is one scenario, `encoded-powershell` (encoded PowerShell on a workstation vs. an Intune/SCCM box; see [its README](src/scenarios/encoded_powershell/README.md)):
+The dataset is every example of every scenario registered in `src/scenarios/index.ts`. Two scenarios are registered:
+
+`encoded-powershell` is authored: encoded PowerShell on a workstation vs. an Intune/SCCM box (see [its README](src/scenarios/encoded_powershell/README.md)):
 
 | Example | Situation | World | Gold outcome |
 | --- | --- | --- | --- |
@@ -22,6 +24,8 @@ The dataset is every example of every scenario registered in `src/scenarios/inde
 | `encoded-powershell.mixed-world` | U1 | FP entities + TP events | `inconclusive` |
 | `encoded-powershell.failed-missing-ad` | U6 | No Attack Discovery document | `failed` |
 | `encoded-powershell.failed-missing-cited-alert` | U6 | The discovery cites an alert that is not seeded | `failed` |
+
+`mimicrat-clickfix` replays the MIMICRAT ClickFix chain from [Elastic Security Labs](https://www.elastic.co/security-labs/threat-command/mimicrat-custom-rat-mimics-c2-frameworks). Its examples cover the replay and a benign mimic plus evidence-state variants; see [its README](src/scenarios/mimicrat_clickfix/README.md) for the full table.
 
 A missing source is one-sided: it blocks `false_positive` (missing evidence cannot clear an alert) but not `true_positive`, which needs a supporting raw-event check (`process_parent` or `network_destination`). `entity_role` alone never escalates, so `tp-events-missing` stays `inconclusive`.
 
