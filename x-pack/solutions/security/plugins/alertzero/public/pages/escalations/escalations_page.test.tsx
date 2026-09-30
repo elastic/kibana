@@ -21,10 +21,9 @@ import {
   useSuggestUserProfiles,
 } from '@kbn/agentic-investigations-plugin/public';
 import { useOpenInChat } from '../../hooks/use_open_in_chat';
-import { EscalationsPage } from './escalations_page';
 import { useAgenticInvestigationsCapabilities } from '../../hooks/use_agentic_investigations_capabilities';
-import { useInvestigationDetails } from '../conversations/use_investigation_details';
 import { useConversationsUrlParams } from '../conversations/conversations_url_params';
+import { useInvestigationDetails } from '../conversations/use_investigation_details';
 import { EscalationsPage } from './escalations_page';
 
 jest.mock('../../hooks/use_agentic_investigations_capabilities');
@@ -92,6 +91,10 @@ const mockUseListEscalations = useListEscalations as jest.Mock;
 const mockUseUserProfiles = useUserProfiles as jest.Mock;
 const mockUseSuggestUserProfiles = useSuggestUserProfiles as jest.Mock;
 const mockUseOpenInChat = useOpenInChat as jest.Mock;
+const mockUseConversationsUrlParams = useConversationsUrlParams as jest.Mock;
+const mockUseInvestigationDetails = useInvestigationDetails as jest.Mock;
+let selectConversation: jest.Mock;
+let clearSelectedConversation: jest.Mock;
 
 let openChat: jest.Mock;
 
