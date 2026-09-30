@@ -20,7 +20,7 @@
  * 4. The backfill preserves an existing source object.
  * 5. The backfill sets revision to 0 when absent.
  * 6. The backfill preserves an existing non-zero revision.
- * 7. The backfill stamps managed ownership for a managed builder_type.
+ * 7. The backfill stamps { managed: false } for any builder_type with no existing stamp.
  * 8. The backfill stamps { managed: false } for an unknown builder_type.
  * 9. The backfill stamps { managed: false } when builder_type is absent.
  * 10. The backfill preserves an already-stamped ownership object.
@@ -132,26 +132,23 @@ describe('squashed model version 8 backfill — revision', () => {
 // ---------------------------------------------------------------------------
 
 describe('squashed model version 8 backfill — ownership', () => {
-  it('stamps managed ownership for security.detection.query', () => {
+  // After step B.5, the backfill stamps { managed: false } on every rule that has
+  // no existing ownership object, regardless of builder type. The managed-type write
+  // gate reads the live registration (not the stored stamp), so managed types are
+  // still refused at the write path regardless of what this backfill stores.
+  // Ref: builder-type-registration-redesign.md "What changes from the current design"
+  it('stamps { managed: false } for security.detection.query (no existing stamp)', () => {
     const meta = runBackfill('rule-uuid-007', {
       builder_type: 'security.detection.query',
     });
-    expect(meta.ownership).toEqual({
-      managed: true,
-      solution: 'security',
-      domain: 'detection',
-    });
+    expect(meta.ownership).toEqual({ managed: false });
   });
 
-  it('stamps managed ownership for security.detection.threshold', () => {
+  it('stamps { managed: false } for security.detection.threshold (no existing stamp)', () => {
     const meta = runBackfill('rule-uuid-008', {
       builder_type: 'security.detection.threshold',
     });
-    expect(meta.ownership).toEqual({
-      managed: true,
-      solution: 'security',
-      domain: 'detection',
-    });
+    expect(meta.ownership).toEqual({ managed: false });
   });
 
   it('stamps { managed: false } for an unknown builder_type', () => {
@@ -189,13 +186,16 @@ describe('squashed model version 8 backfill — full document migration', () => 
       builder_type: 'security.detection.query',
     });
 
+    // After step B.5, ownership is always { managed: false } from the backfill
+    // for any rule with no existing stamp. The write gate enforces managed-type
+    // restrictions via the live registration, not the stored stamp.
     expect(meta).toMatchObject({
       name: 'My detection rule',
       builder_type: 'security.detection.query',
       signature_id: 'legacy-rule-id',
       source: { type: 'internal', version: 1 },
       revision: 0,
-      ownership: { managed: true, solution: 'security', domain: 'detection' },
+      ownership: { managed: false },
     });
   });
 

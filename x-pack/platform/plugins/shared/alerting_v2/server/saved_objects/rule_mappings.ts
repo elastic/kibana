@@ -6,35 +6,21 @@
  */
 
 import type { SavedObjectsTypeMappingDefinition } from '@kbn/core-saved-objects-server';
-import type { BuilderTypeManifest } from '@kbn/alerting-v2-rule-builders';
 import { BUILDER_FIELDS_IGNORE_ABOVE } from '@kbn/alerting-v2-constants';
-import {
-  securityDetectionQueryManifest,
-  securityDetectionThresholdManifest,
-} from '@kbn/security-detection-rule-schema';
-import { assembleBuilderFieldsMappings } from './assemble_builder_fields_mappings';
+import { mergeBuilderFieldMappings } from '@kbn/alerting-v2-rule-builders';
+import { BUILDER_FIELDS_MANIFESTS } from './builder_fields_manifests';
 
 /**
- * The list of builder type manifests whose sub-field mappings are assembled
- * into `metadata.builder_fields.properties` in the static mapping.
+ * The merged sub-field mappings for metadata.builder_fields, assembled from every
+ * contributing solution's manifest. Used both in the static mapping below and by
+ * the rules-client's sort and search derivations, so it is exported rather than
+ * computed inline in the mapping definition.
  *
- * Each manifest listed here must have a corresponding fold line in
- * rule_model_versions.ts. The two sources — static mappings and model versions
- * — are deliberately coupled: both import the same manifest objects, so the
- * mappings and the version history cannot disagree, and core's startup
- * consistency check passes by construction.
- *
- * Identical sub-field declarations across manifests (e.g. the shared detection
- * fragment's risk_score/max_signals/note/setup) merge silently.
- * Conflicting declarations (same path, different field type) fail alerting_v2's
- * setup immediately.
- *
- * Ref: rule-type-registration.md "The fold into the saved-object registration"
+ * Ref: builder-type-registration-redesign.md "Assembling the saved-object type"
  */
-const BUILDER_MANIFESTS: BuilderTypeManifest[] = [
-  securityDetectionQueryManifest,
-  securityDetectionThresholdManifest,
-];
+export const mergedBuilderFieldMappings = mergeBuilderFieldMappings(
+  ...BUILDER_FIELDS_MANIFESTS.map((manifest) => manifest.currentMappings)
+);
 
 /**
  * Mappings for the rule saved object.
@@ -50,26 +36,20 @@ export const ruleMappings: SavedObjectsTypeMappingDefinition = {
         name: { type: 'text', fields: { keyword: { type: 'keyword', ignore_above: 256 } } },
         description: { type: 'text' },
         tags: { type: 'keyword', ignore_above: 128 },
+
+        // Ref: rule-types.md "The discriminator must be indexed and filterable"
+        builder_type: { type: 'keyword', ignore_above: 256 },
+
+        // Both sides of core's startup check (validateAddedMappings) come from one source:
+        // every mappings_addition a folded version declares is in the static mapping because
+        // both came from the same manifest. The check passes by construction.
+        // Ref: builder-type-registration-redesign.md "Assembling the saved-object type"
         builder_fields: {
           type: 'flattened',
           ignore_above: BUILDER_FIELDS_IGNORE_ABOVE,
-          properties: assembleBuilderFieldsMappings(BUILDER_MANIFESTS),
+          properties: mergedBuilderFieldMappings,
         },
-        // Mirrors the squashed model version '7' framework-fields mappings_addition verbatim.
-        // (Originally designed as a standalone model version '10' on this POC branch;
-        // see the commented block in rule_model_versions.ts for the per-version story.)
-        // Kibana core validates at startup that every addition declared in
-        // a model version is present verbatim in the static mappings.
-        // Ref: rule-identity.md "Storage and migration"
-        signature_id: { type: 'keyword', ignore_above: 256 },
-        // Ref: rule-source.md "Storage and migration"
-        source: {
-          properties: {
-            type: { type: 'keyword', ignore_above: 256 },
-            id: { type: 'keyword', ignore_above: 256 },
-            version: { type: 'integer' },
-          },
-        },
+
         // Ref: rule-ownership.md "Storage, mapping, and migration"
         ownership: {
           properties: {
@@ -79,8 +59,23 @@ export const ruleMappings: SavedObjectsTypeMappingDefinition = {
             app: { type: 'keyword', ignore_above: 128 },
           },
         },
-        // Ref: rule-types.md "The discriminator must be indexed and filterable"
-        builder_type: { type: 'keyword', ignore_above: 256 },
+
+        // Ref: rule-source.md "Storage and migration"
+        source: {
+          properties: {
+            type: { type: 'keyword', ignore_above: 256 },
+            id: { type: 'keyword', ignore_above: 256 },
+            version: { type: 'integer' },
+          },
+        },
+
+        // Mirrors the squashed model version '7' framework-fields mappings_addition verbatim.
+        // (Originally designed as a standalone model version '10' on this POC branch;
+        // see the commented block in rule_model_versions.ts for the per-version story.)
+        // Kibana core validates at startup that every addition declared in
+        // a model version is present verbatim in the static mappings.
+        // Ref: rule-identity.md "Storage and migration"
+        signature_id: { type: 'keyword', ignore_above: 256 },
       },
     },
     enabled: { type: 'boolean' },

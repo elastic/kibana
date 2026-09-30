@@ -65,3 +65,15 @@ export type { FindActionPoliciesArgs } from './lib/action_policy_client';
 export { ALERTING_ERROR_CODES } from './lib/errors/error_codes';
 export type { AlertingV2ErrorCode } from './lib/errors/error_codes';
 export { deriveErrorCodeFromStatus } from './routes/derive_error_code';
+
+/**
+ * Test-only exports: the real registration validator and the FoldedVersionsSet
+ * fixture class. Solutions import these in jest tests to prove their builder
+ * type definitions pass the framework's registration checks end-to-end.
+ *
+ * These are not part of the runtime plugin contract and must not be called
+ * outside jest test files (import them from '@kbn/alerting-v2-plugin/server').
+ */
+export { assertValidDefinition } from './lib/builder_types';
+export { FoldedVersionsSet } from './lib/builder_types';
+export type { FoldedVersionsRecord } from './lib/builder_types';

@@ -137,7 +137,20 @@ export interface FindRulesArgs {
   perPage?: number;
   filter?: string;
   search?: string;
-  sortField?: FindRulesSortField;
+  /**
+   * The field to sort rules by. Accepts the closed enum values from the generic
+   * Alerting v2 HTTP API (`FindRulesSortField`) and, additionally, any
+   * `builder_fields.<path>` string for sub-fields declared by a registered
+   * builder-fields manifest. The rules client resolves the path against the
+   * merged registered sub-fields and rejects unknown paths and `text` leaves
+   * with a 400.
+   *
+   * The generic HTTP API's `findRulesSortFieldSchema` stays a closed enum; this
+   * widened server contract is what the Detections API calls directly.
+   *
+   * Ref: builder-type-registration-redesign.md "What this design needs from the framework"
+   */
+  sortField?: FindRulesSortField | string;
   sortOrder?: 'asc' | 'desc';
 }
 

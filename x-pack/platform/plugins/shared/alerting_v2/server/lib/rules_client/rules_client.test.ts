@@ -2556,7 +2556,16 @@ describe('RulesClient', () => {
           page: 2,
           perPage: 10,
           search: 'prod* alerts*',
-          searchFields: ['metadata.name', 'metadata.description'],
+          // Step B.11: RULE_SEARCH_FIELDS now includes the text sub-fields derived from
+          // the registered builder-fields manifests (setup, note, query) in addition to
+          // the two framework-owned text fields.
+          searchFields: [
+            'metadata.name',
+            'metadata.description',
+            'metadata.builder_fields.setup',
+            'metadata.builder_fields.note',
+            'metadata.builder_fields.query',
+          ],
         })
       );
     });
@@ -2580,7 +2589,13 @@ describe('RulesClient', () => {
         expect.objectContaining({
           filter: `${RULE_SAVED_OBJECT_TYPE}.attributes.enabled: true`,
           search: 'prod*',
-          searchFields: ['metadata.name', 'metadata.description'],
+          searchFields: [
+            'metadata.name',
+            'metadata.description',
+            'metadata.builder_fields.setup',
+            'metadata.builder_fields.note',
+            'metadata.builder_fields.query',
+          ],
         })
       );
     });
@@ -2669,6 +2684,110 @@ describe('RulesClient', () => {
           sortOrder: 'desc',
         })
       );
+    });
+
+    // Step B.11 — sort and search over registered sub-fields
+
+    it('maps name sort to the keyword sub-field SO path', async () => {
+      const client = createClient();
+
+      await client.findRules({ sortField: 'name', sortOrder: 'asc' });
+
+      expect(rulesSavedObjectService.find).toHaveBeenCalledWith(
+        expect.objectContaining({
+          sortField: 'metadata.name.keyword',
+          sortOrder: 'asc',
+        })
+      );
+    });
+
+    it('resolves a keyword builder sub-field sort (severity) to its SO path', async () => {
+      const client = createClient();
+
+      await client.findRules({ sortField: 'builder_fields.severity', sortOrder: 'asc' });
+
+      expect(rulesSavedObjectService.find).toHaveBeenCalledWith(
+        expect.objectContaining({
+          sortField: 'metadata.builder_fields.severity',
+          sortOrder: 'asc',
+        })
+      );
+    });
+
+    it('resolves an integer builder sub-field sort (max_signals) to its SO path', async () => {
+      const client = createClient();
+
+      await client.findRules({ sortField: 'builder_fields.max_signals', sortOrder: 'desc' });
+
+      expect(rulesSavedObjectService.find).toHaveBeenCalledWith(
+        expect.objectContaining({
+          sortField: 'metadata.builder_fields.max_signals',
+          sortOrder: 'desc',
+        })
+      );
+    });
+
+    it('rejects a text builder sub-field sort (note) with a 400', async () => {
+      const client = createClient();
+
+      await expect(
+        client.findRules({ sortField: 'builder_fields.note', sortOrder: 'asc' })
+      ).rejects.toMatchObject({
+        isBoom: true,
+        output: { statusCode: 400 },
+        message: expect.stringContaining('analyzed field'),
+      });
+    });
+
+    it('rejects an unknown builder_fields.* sort path with a 400', async () => {
+      const client = createClient();
+
+      await expect(
+        client.findRules({ sortField: 'builder_fields.nonexistent_field', sortOrder: 'asc' })
+      ).rejects.toMatchObject({
+        isBoom: true,
+        output: { statusCode: 400 },
+        message: expect.stringContaining('Unknown sort field'),
+      });
+    });
+
+    // Prototype-chain guard: Object.hasOwn must be used instead of `in` so
+    // that inherited keys like toString, constructor, valueOf do not bypass the
+    // unknown-field check and reach the SO service as sort fields.
+    it('rejects sortField=toString with a 400 (prototype-chain guard)', async () => {
+      const client = createClient();
+
+      await expect(
+        client.findRules({ sortField: 'toString', sortOrder: 'asc' })
+      ).rejects.toMatchObject({
+        isBoom: true,
+        output: { statusCode: 400 },
+        message: expect.stringContaining('Unknown sort field'),
+      });
+    });
+
+    it('rejects sortField=constructor with a 400 (prototype-chain guard)', async () => {
+      const client = createClient();
+
+      await expect(
+        client.findRules({ sortField: 'constructor', sortOrder: 'asc' })
+      ).rejects.toMatchObject({
+        isBoom: true,
+        output: { statusCode: 400 },
+        message: expect.stringContaining('Unknown sort field'),
+      });
+    });
+
+    it('rejects sortField=builder_fields.toString with a 400 (prototype-chain guard)', async () => {
+      const client = createClient();
+
+      await expect(
+        client.findRules({ sortField: 'builder_fields.toString', sortOrder: 'asc' })
+      ).rejects.toMatchObject({
+        isBoom: true,
+        output: { statusCode: 400 },
+        message: expect.stringContaining('Unknown sort field'),
+      });
     });
   });
 
@@ -3842,7 +3961,13 @@ describe('RulesClient', () => {
         const expectedQuery = expect.objectContaining({
           filter: `(${RULE_SAVED_OBJECT_TYPE}.attributes.enabled: true) AND NOT ${RULE_SAVED_OBJECT_TYPE}.attributes.metadata.ownership.managed: true`,
           search: 'prod*',
-          searchFields: ['metadata.name', 'metadata.description'],
+          searchFields: [
+            'metadata.name',
+            'metadata.description',
+            'metadata.builder_fields.setup',
+            'metadata.builder_fields.note',
+            'metadata.builder_fields.query',
+          ],
         });
         expect(rulesSavedObjectService.countByQuery).toHaveBeenCalledWith(expectedQuery);
         expect(rulesSavedObjectService.getRuleIdsByQuery).toHaveBeenCalledWith(expectedQuery);
