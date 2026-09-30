@@ -10,7 +10,7 @@ import { useDispatch } from 'react-redux';
 import { i18n } from '@kbn/i18n';
 import { EuiButtonEmpty, EuiToolTip, useEuiTheme } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import type { Workspace, WorkspaceNode } from '../../types';
+import type { WorkspaceNode } from '../../types';
 import { IconRenderer } from '../icon_renderer';
 import { gphSidebarHeaderStyles, gphSidebarPanelStyles } from '../../styles';
 import { gphFormGroupSmallStyles } from './control_plane.styles';
@@ -22,11 +22,11 @@ import {
 } from '../../state_management';
 
 interface SelectedNodeEditorProps {
-  workspace: Workspace;
+  selectedNodes: WorkspaceNode[];
   selectedNode: WorkspaceNode;
 }
 
-export const SelectedNodeEditor = ({ workspace, selectedNode }: SelectedNodeEditorProps) => {
+export const SelectedNodeEditor = ({ selectedNodes, selectedNode }: SelectedNodeEditorProps) => {
   const dispatch = useDispatch<GraphDispatch>();
   const { euiTheme } = useEuiTheme();
   const groupButtonMsg = i18n.translate('xpack.graph.sidebar.groupButtonTooltip', {
@@ -55,8 +55,8 @@ export const SelectedNodeEditor = ({ workspace, selectedNode }: SelectedNodeEdit
         {selectedNode.data.field} {selectedNode.data.term}
       </div>
 
-      {(workspace.selectedNodes.length > 1 ||
-        (workspace.selectedNodes.length > 0 && workspace.selectedNodes[0] !== selectedNode)) && (
+      {(selectedNodes.length > 1 ||
+        (selectedNodes.length > 0 && selectedNodes[0] !== selectedNode)) && (
         <EuiToolTip content={groupButtonMsg}>
           <EuiButtonEmpty
             data-test-subj="graphGroupSelection"

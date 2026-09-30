@@ -328,21 +328,21 @@ const svgTextStyles = ({ euiTheme }: UseEuiTheme) =>
 
 export const ReduxGraphVisualization = (props: GraphVisualizationProps) => {
   const dispatch = useDispatch<GraphDispatch>();
-  useSelector(workspaceSelector);
+  const { selectedEdgeIds, selectedNodeIds } = useSelector(workspaceSelector);
 
   return (
     <GraphVisualization
       {...props}
       onToggleNodeSelection={(node, replace) => {
-        const willBeSelected = replace
-          ? !node.isSelected || props.workspace.selectedNodes.length > 1
-          : !node.isSelected;
+        const isSelected = selectedNodeIds.includes(node.id);
+        const willBeSelected = replace ? !isSelected || selectedNodeIds.length > 1 : !isSelected;
         dispatch(toggleNodeSelection({ nodeId: node.id, replace }));
         return willBeSelected;
       }}
       onToggleEdgeSelection={(edge) => {
-        const willBeSelected = !edge.isSelected;
-        dispatch(toggleEdgeSelection(edge.id ?? makeEdgeId(edge)));
+        const edgeId = edge.id ?? makeEdgeId(edge);
+        const willBeSelected = !selectedEdgeIds.includes(edgeId);
+        dispatch(toggleEdgeSelection(edgeId));
         return willBeSelected;
       }}
     />

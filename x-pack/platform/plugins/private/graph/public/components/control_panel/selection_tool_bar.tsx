@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { useDispatch } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import { i18n } from '@kbn/i18n';
 import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiToolTip } from '@elastic/eui';
 import { css } from '@emotion/react';
@@ -17,6 +17,7 @@ import {
   selectAllNodes,
   selectNeighborNodes,
   type GraphDispatch,
+  workspaceSelector,
 } from '../../state_management';
 
 interface SelectionToolBarProps {
@@ -26,6 +27,7 @@ interface SelectionToolBarProps {
 
 export const SelectionToolBar = ({ workspace, onSetControl }: SelectionToolBarProps) => {
   const dispatch = useDispatch<GraphDispatch>();
+  const { selectedNodeIds } = useSelector(workspaceSelector);
   const haveNodes = workspace.nodes.length === 0;
 
   const selectAllButtonMsg = i18n.translate(
@@ -131,7 +133,7 @@ export const SelectionToolBar = ({ workspace, onSetControl }: SelectionToolBarPr
           <EuiButtonEmpty
             data-test-subj="graphLinkedSelection"
             size="s"
-            isDisabled={workspace.selectedNodes.length === 0}
+            isDisabled={selectedNodeIds.length === 0}
             color="text"
             onClick={onSelectNeighboursClick}
           >
