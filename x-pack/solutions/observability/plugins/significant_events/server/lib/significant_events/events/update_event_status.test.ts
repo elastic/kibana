@@ -78,6 +78,7 @@ describe('updateSignificantEventStatus', () => {
     });
 
     expect(result).toEqual({
+      found: true,
       updated: 1,
       ignored: 0,
       status: 'inactive',
@@ -162,6 +163,7 @@ describe('updateSignificantEventStatus', () => {
     });
 
     expect(result).toEqual({
+      found: false,
       updated: 0,
       ignored: 1,
       status: 'inactive',
@@ -181,7 +183,7 @@ describe('updateSignificantEventStatus', () => {
       logger: makeLogger(),
     });
 
-    expect(result).toEqual({ updated: 0, ignored: 1, status: 'inactive' });
+    expect(result).toEqual({ found: true, updated: 0, ignored: 1, status: 'inactive' });
     expect(dataStreamClient.create).not.toHaveBeenCalled();
   });
 

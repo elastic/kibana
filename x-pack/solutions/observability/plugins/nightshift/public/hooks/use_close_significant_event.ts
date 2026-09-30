@@ -22,6 +22,13 @@ const CLOSE_ERROR_TOAST_TITLE = i18n.translate('xpack.nightshift.closeEvent.erro
   defaultMessage: 'Failed to mark significant event inactive',
 });
 
+const EVENT_NOT_FOUND_ERROR_MESSAGE = i18n.translate(
+  'xpack.nightshift.closeEvent.eventNotFoundErrorMessage',
+  {
+    defaultMessage: 'The significant event no longer exists.',
+  }
+);
+
 const toError = (error: unknown): Error =>
   error instanceof Error ? error : new Error(String(error));
 
@@ -54,7 +61,14 @@ export const useCloseSignificantEvent = (): UseCloseSignificantEventResult => {
     onMutate: ({ eventId }) => {
       setClosingEventId(eventId);
     },
-    onSuccess: (_, { eventId }) => {
+    onSuccess: ({ found }, { eventId }) => {
+      if (!found) {
+        notifications.toasts.addError(new Error(EVENT_NOT_FOUND_ERROR_MESSAGE), {
+          title: CLOSE_ERROR_TOAST_TITLE,
+        });
+        return;
+      }
+
       queryClient.setQueryData<NightshiftSignificantEventsQueryData>(
         NIGHTSHIFT_SIGNIFICANT_EVENTS_QUERY_KEY,
         (current) =>

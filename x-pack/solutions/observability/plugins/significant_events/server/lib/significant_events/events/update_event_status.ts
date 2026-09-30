@@ -28,6 +28,7 @@ export const updateSignificantEventStatus = async ({
   alertEventsClient?: AlertEventsClientApi;
   logger?: Logger;
 }): Promise<{
+  found: boolean;
   updated: number;
   ignored: number;
   status: SignificantEventStatus;
@@ -35,11 +36,11 @@ export const updateSignificantEventStatus = async ({
   const latest = await eventClient.findLatestByEventId(eventId);
 
   if (!latest) {
-    return { updated: 0, ignored: 1, status };
+    return { found: false, updated: 0, ignored: 1, status };
   }
 
   if (latest.status === status) {
-    return { updated: 0, ignored: 1, status };
+    return { found: true, updated: 0, ignored: 1, status };
   }
 
   const now = new Date().toISOString();
@@ -66,5 +67,5 @@ export const updateSignificantEventStatus = async ({
     priorSignificantEvent: latest,
   });
 
-  return { updated: 1, ignored: 0, status };
+  return { found: true, updated: 1, ignored: 0, status };
 };

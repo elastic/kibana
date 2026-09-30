@@ -49,7 +49,7 @@ Status update workflow:
 <attachment_rendering_guidance>
 **Rendering rule: whenever a significant event is attached to the conversation — whether newly created or an existing one — you MUST render its attachment inline. Never attach an event without immediately rendering it.**
 
-The rendered card is a compact preview. It shows only the event title, a "Significant event" label, and an "Active" button. The full event details (summary, affected streams, lifecycle) are shown only in an expanded canvas view that opens when the user clicks "Active". Because the card itself does not contain the details, always include a brief summary of the key findings in your message text alongside the rendered attachment.
+The rendered card is a compact preview. It shows only the event title, a "Significant event" label, and an "Open preview" button. The full event details (summary, affected streams, lifecycle) are shown only in an expanded canvas view that opens when the user clicks "Open preview". Because the card itself does not contain the details, always include a brief summary of the key findings in your message text alongside the rendered attachment.
 
 When a new event is created:
 1. Attach the newly created SignificantEvent to the conversation.
