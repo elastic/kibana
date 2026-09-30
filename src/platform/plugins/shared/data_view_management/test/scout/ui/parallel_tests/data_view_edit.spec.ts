@@ -1,0 +1,192 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+
+import { tags } from '@kbn/scout';
+import { expect } from '@kbn/scout/ui';
+import { APP_HEADER_TEST_SUBJECTS } from '@kbn/app-header';
+import { spaceTest } from '../fixtures';
+
+// Migrated from: src/platform/test/functional/apps/management/group1/_data_view_create_delete.ts
+// Serverless mirror: x-pack/platform/test/serverless/functional/test_suites/management/data_views/_data_view_create_delete.ts
+// ES archives are loaded once in parallel_tests/global.setup.ts.
+
+spaceTest.describe(
+  'Data view editing — edit flows and field list updates',
+  { tag: tags.deploymentAgnostic },
+  () => {
+    let dataViewId: string;
+
+    spaceTest.beforeAll(async ({ scoutSpace }) => {
+      await scoutSpace.savedObjects.cleanStandardList();
+      await scoutSpace.uiSettings.set({});
+    });
+
+    spaceTest.beforeEach(async ({ browserAuth, apiServices, scoutSpace }) => {
+      await browserAuth.loginAsAdmin();
+      // Reset the data view before each test so edits from one test don't affect the next
+      if (dataViewId) {
+        await apiServices.dataViews.delete(dataViewId, scoutSpace.id).catch(() => {});
+      }
+      const { data } = await apiServices.dataViews.create({
+        title: 'logstash-*',
+        timeFieldName: '@timestamp',
+        spaceId: scoutSpace.id,
+      });
+      dataViewId = data.id;
+    });
+
+    spaceTest.afterAll(async ({ scoutSpace }) => {
+      await scoutSpace.savedObjects.cleanStandardList();
+    });
+
+    spaceTest(
+      'editing a data view updates the display name shown in the page header',
+      async ({ pageObjects, page }) => {
+        await spaceTest.step('navigate to the data view detail page', async () => {
+          await pageObjects.dataViewDetail.goto(dataViewId);
+        });
+
+        await spaceTest.step('open the editor flyout and rename the data view', async () => {
+          await pageObjects.dataViewDetail.openEditFlyout();
+          await pageObjects.dataViewEditorFlyout.setTitle('logstash-*');
+          await pageObjects.dataViewEditorFlyout.setName('Logstash Star');
+          // Renaming only (same pattern) does not trigger the pattern-change confirm modal.
+          await pageObjects.dataViewEditorFlyout.save();
+        });
+
+        await spaceTest.step('verify the new name appears in the page header', async () => {
+          await expect(page.testSubj.locator(APP_HEADER_TEST_SUBJECTS.title)).toContainText(
+            'Logstash Star'
+          );
+        });
+      }
+    );
+
+    spaceTest(
+      'editing updates field list when the index expression is changed',
+      async ({ pageObjects, page }) => {
+        await spaceTest.step('navigate to data view detail and open edit flyout', async () => {
+          await pageObjects.dataViewDetail.goto(dataViewId);
+          await pageObjects.dataViewDetail.openEditFlyout();
+        });
+
+        await spaceTest.step(
+          'change to with-different-timefield index and verify different-timefield field appears',
+          async () => {
+            await pageObjects.dataViewEditorFlyout.setTitle('with-different-timefield');
+            await pageObjects.dataViewEditorFlyout.selectTimestampField('different-timefield');
+            await pageObjects.dataViewEditorFlyout.save({ withConfirmation: true });
+            await expect(page.testSubj.locator('field-name-different-timefield')).toBeVisible({
+              timeout: 15_000,
+            });
+          }
+        );
+
+        await spaceTest.step(
+          'change back to logstash and verify message field appears',
+          async () => {
+            await pageObjects.dataViewDetail.openEditFlyout();
+            await pageObjects.dataViewEditorFlyout.setTitle('logstash-*');
+            await pageObjects.dataViewEditorFlyout.selectTimestampField('@timestamp');
+            await pageObjects.dataViewEditorFlyout.save({ withConfirmation: true });
+            await expect(page.testSubj.locator('field-name-@message')).toBeVisible({
+              timeout: 15_000,
+            });
+          }
+        );
+      }
+    );
+
+    spaceTest(
+      'save button becomes disabled immediately after clicking to prevent double submission',
+      async ({ pageObjects, page }) => {
+        await spaceTest.step('navigate to data view detail and open edit flyout', async () => {
+          await pageObjects.dataViewDetail.goto(dataViewId);
+          await pageObjects.dataViewDetail.openEditFlyout();
+        });
+
+        await spaceTest.step('update the title and click Save', async () => {
+          await pageObjects.dataViewEditorFlyout.setTitle('logs*');
+          await pageObjects.dataViewEditorFlyout.selectTimestampField('@timestamp');
+          const saveButton = page.testSubj.locator('saveIndexPatternButton');
+          await saveButton.click();
+
+          const confirmModal = page.testSubj.locator('confirmModalConfirmButton');
+          await confirmModal.waitFor({ state: 'visible' });
+          await expect(saveButton).toBeDisabled();
+          await confirmModal.click();
+        });
+
+        await spaceTest.step('verify the flyout closes after confirmation', async () => {
+          await page.testSubj.locator('indexPatternEditorFlyout').waitFor({ state: 'hidden' });
+        });
+      }
+    );
+
+    spaceTest(
+      'editor is prefilled with previously saved title, index pattern, and time field',
+      async ({ pageObjects, page }) => {
+        await spaceTest.step('edit data view to set name and timestamp field', async () => {
+          await pageObjects.dataViewDetail.goto(dataViewId);
+          await pageObjects.dataViewDetail.openEditFlyout();
+          await pageObjects.dataViewEditorFlyout.setTitle('logs*');
+          await pageObjects.dataViewEditorFlyout.selectTimestampField('utc_time');
+          await pageObjects.dataViewEditorFlyout.setName('Logs UTC');
+          await pageObjects.dataViewEditorFlyout.save({ withConfirmation: true });
+        });
+
+        await spaceTest.step('reopen editor and verify it prefills with saved values', async () => {
+          await pageObjects.dataViewDetail.openEditFlyout();
+
+          await expect
+            .poll(() => pageObjects.dataViewEditorFlyout.getTimestampFieldValue())
+            .toBe('utc_time');
+          await expect(page.testSubj.locator('createIndexPatternNameInput')).toHaveValue(
+            'Logs UTC'
+          );
+          await expect(page.testSubj.locator('createIndexPatternTitleInput')).toHaveValue('logs*');
+
+          await pageObjects.dataViewEditorFlyout.close();
+        });
+
+        await spaceTest.step('verify time field shown on detail page', async () => {
+          await expect(page.testSubj.locator('currentIndexPatternTimeField')).toContainText(
+            'utc_time'
+          );
+        });
+      }
+    );
+
+    spaceTest(
+      'allow-hidden setting persists through page reload',
+      async ({ pageObjects, page }) => {
+        await spaceTest.step('open the existing data view and enable allow-hidden', async () => {
+          await pageObjects.dataViewDetail.goto(dataViewId);
+          await pageObjects.dataViewDetail.openEditFlyout();
+          await pageObjects.dataViewEditorFlyout.enableAllowHidden();
+          await pageObjects.dataViewEditorFlyout.save();
+        });
+
+        await spaceTest.step(
+          'reload the page and verify allow-hidden is still enabled in the editor',
+          async () => {
+            await page.reload();
+            await page.testSubj.click('editIndexPatternButton');
+            await page.testSubj.locator('indexPatternEditorFlyout').waitFor({ state: 'visible' });
+            await page.testSubj.click('toggleAdvancedSetting');
+            const allowHiddenField = page.testSubj.locator('allowHiddenField');
+            const button = allowHiddenField.locator('button');
+            await expect(button).toHaveAttribute('aria-checked', 'true');
+            await page.keyboard.press('Escape');
+          }
+        );
+      }
+    );
+  }
+);
