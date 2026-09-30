@@ -137,4 +137,47 @@ describe('resolveKibanaInboundRequest', () => {
     await expect(resolve(undefined, client)).resolves.toBeUndefined();
     expect(authenticate(client)).not.toHaveBeenCalled();
   });
+
+  it('accepts an exchange bearer with Kibana client authentication', async () => {
+    const client = createClient();
+    const request = await resolve('Bearer essu_exchange_token', client);
+
+    expect(request?.headers.authorization).toBe('Bearer essu_exchange_token');
+    expect(request && isExternalUiamCredential(request)).toBe(false);
+    expect(authenticate(client)).toHaveBeenCalledTimes(1);
+  });
+
+  it('does not retry an exchange bearer Elasticsearch rejects', async () => {
+    const client = createClient();
+    authenticate(client).mockRejectedValue(unauthorized(401));
+
+    await expect(resolve('Bearer essu_exchange_token', client)).resolves.toBeUndefined();
+    expect(authenticate(client)).toHaveBeenCalledTimes(1);
+  });
+
+  it('does not retry an exchange bearer Elasticsearch accepts when the space check fails', async () => {
+    const client = createClient();
+
+    await expect(
+      resolve('Bearer essu_exchange_token', client, async () => false)
+    ).resolves.toBeUndefined();
+    expect(authenticate(client)).toHaveBeenCalledTimes(1);
+  });
+
+  it('rethrows when Elasticsearch fails for a reason other than 401 on an exchange bearer', async () => {
+    const client = createClient();
+    const failure = unauthorized(503);
+    authenticate(client).mockRejectedValue(failure);
+
+    await expect(resolve('Bearer essu_exchange_token', client)).rejects.toBe(failure);
+    expect(authenticate(client)).toHaveBeenCalledTimes(1);
+  });
+
+  it('does not call Elasticsearch for an oversize exchange bearer', async () => {
+    const client = createClient();
+    const token = `essu_${'a'.repeat(8192)}`;
+
+    await expect(resolve(`Bearer ${token}`, client)).resolves.toBeUndefined();
+    expect(authenticate(client)).not.toHaveBeenCalled();
+  });
 });

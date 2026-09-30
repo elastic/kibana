@@ -409,6 +409,87 @@ describe('ingestInboundEvent', () => {
     expectOutcome('debug', 'auth_fail');
   });
 
+  it('emits a UIAM exchange bearer to consumers', async () => {
+    (connectorTypeIsDual as jest.Mock).mockReturnValue(true);
+    const eventId = buildEventId('.myConnector', 'received');
+    const handleEvents = jest.fn().mockResolvedValue({
+      type: 'emit',
+      events: [{ eventId, correlationKey: 'corr-1', payload: { body: { hello: 'world' } } }],
+    });
+    getConnectorSpecMock.mockReturnValue(
+      createFakeSpec(handleEvents) as ReturnType<typeof getConnectorSpec>
+    );
+    const { response: res } = await run({
+      query: {},
+      headers: { authorization: 'Bearer essu_exchange_token' },
+      inMemoryConnectors: [memoryConnector(true)],
+    });
+    expect(res.accepted).toHaveBeenCalledWith({ body: { ok: true } });
+    expect(handleEvents).toHaveBeenCalled();
+    expect(getDecryptedConnectorAttributes).not.toHaveBeenCalled();
+    expect(emitConnectorEvents).toHaveBeenCalledWith(
+      expect.objectContaining({
+        eventId,
+        request: expect.objectContaining({
+          headers: expect.objectContaining({ authorization: 'Bearer essu_exchange_token' }),
+        }),
+      })
+    );
+  });
+
+  it('keeps an in-memory ApiKey essu_ on the API key door', async () => {
+    (connectorTypeIsDual as jest.Mock).mockReturnValue(true);
+    const eventId = buildEventId('.myConnector', 'received');
+    const handleEvents = jest.fn().mockResolvedValue({
+      type: 'emit',
+      events: [{ eventId, correlationKey: 'corr-1', payload: { body: { hello: 'world' } } }],
+    });
+    getConnectorSpecMock.mockReturnValue(
+      createFakeSpec(handleEvents) as ReturnType<typeof getConnectorSpec>
+    );
+    const { response: res } = await run({
+      query: {},
+      headers: { authorization: 'ApiKey essu_install_key' },
+      inMemoryConnectors: [memoryConnector(true)],
+    });
+    expect(res.accepted).toHaveBeenCalledWith({ body: { ok: true } });
+    expect(emitConnectorEvents).toHaveBeenCalledWith(
+      expect.objectContaining({
+        request: expect.objectContaining({
+          headers: expect.objectContaining({ authorization: 'ApiKey essu_install_key' }),
+        }),
+      })
+    );
+  });
+
+  it('keeps a saved connector Bearer essu_ on the ingest token path', async () => {
+    (connectorTypeIsDual as jest.Mock).mockReturnValue(true);
+    const handleEvents = jest.fn();
+    getConnectorSpecMock.mockReturnValue(
+      createFakeSpec(handleEvents) as ReturnType<typeof getConnectorSpec>
+    );
+    unsecuredSavedObjectsClient.get.mockImplementation(async () => {
+      return {
+        ...mockConnectorGet(),
+        attributes: {
+          ...mockConnectorGet().attributes,
+          hasInboundEventIdentity: true,
+        },
+      } as never;
+    });
+    const { response: res } = await run({
+      query: {},
+      headers: { authorization: 'Bearer essu_exchange_token' },
+    });
+    expect(res.notFound).toHaveBeenCalled();
+    expect(handleEvents).not.toHaveBeenCalled();
+    expect(getDecryptedConnectorAttributes).not.toHaveBeenCalled();
+    expect(
+      elasticsearchClient.asScoped().asCurrentUser.security.authenticate
+    ).not.toHaveBeenCalled();
+    expectOutcome('debug', 'auth_fail');
+  });
+
   it('returns 404 when events are enabled and the caller has no ApiKey', async () => {
     (connectorTypeIsDual as jest.Mock).mockReturnValue(true);
     const handleEvents = jest.fn();
