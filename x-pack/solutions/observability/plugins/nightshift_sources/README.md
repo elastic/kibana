@@ -43,7 +43,7 @@ blank title still 400s.
 
 `setup.onSourceChange(listener)` subscribes an engine to every committed write: `created`,
 `updated` (with `previous`, which covers `_enable` and `_disable`) and `deleted`, each with the
-request and its space. The write awaits every listener before it returns, so an engine can
+request that made it. The write awaits every listener before it returns, so an engine can
 clean up after a deleted source before the caller refetches. A listener that throws is logged;
 the write already happened and is not undone. Rolled-back writes are not reported.
 

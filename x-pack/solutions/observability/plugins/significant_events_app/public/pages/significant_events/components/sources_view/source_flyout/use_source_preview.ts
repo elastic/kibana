@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { getESQLResults } from '@kbn/esql-utils';
+import { appendLimitToQuery, getESQLResults } from '@kbn/esql-utils';
 import { useQuery } from '@kbn/react-query';
 import { useKibana } from '../../../../../hooks/use_kibana';
 import { useTimefilter } from '../../../../../hooks/use_timefilter';
@@ -29,7 +29,7 @@ export function useSourcePreview(esql: string) {
     queryKey: ['sourcePreview', esql, start, end],
     queryFn: async ({ signal }) => {
       const { response } = await getESQLResults({
-        esqlQuery: `${esql}\n| LIMIT ${PREVIEW_ROW_LIMIT}`,
+        esqlQuery: appendLimitToQuery(esql, PREVIEW_ROW_LIMIT),
         search: data.search.search,
         signal,
         dropNullColumns: true,

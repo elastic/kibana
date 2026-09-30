@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { EuiBasicTableColumn, EuiTableSelectionType, Query } from '@elastic/eui';
+import type { EuiBasicTableColumn, EuiTableSelectionType } from '@elastic/eui';
 import {
   EuiCode,
   EuiFlexGroup,
@@ -23,7 +23,7 @@ import {
   SignificantEventsWorkflowStatus,
   type SignificantEventsWorkflowStatusResult,
 } from '@kbn/significant-events-schema';
-import React from 'react';
+import React, { useMemo } from 'react';
 import { useIsCpsMultiProject } from '@kbn/cps-utils';
 import { useKibana } from '../../../../hooks/use_kibana';
 import { KnowledgeIndicatorsColumn } from './knowledge_indicators_column';
@@ -49,7 +49,7 @@ export function SourcesTable({
   loading,
   sources,
   onboardingResultMap,
-  searchQuery,
+  searchText,
   selection,
   blocksActivity = false,
   activityBlockTooltip,
@@ -65,7 +65,7 @@ export function SourcesTable({
   sources: NightshiftSource[];
   onboardingResultMap: Record<string, SignificantEventsWorkflowStatusResult>;
   loading?: boolean;
-  searchQuery: Query;
+  searchText: string;
   selection?: EuiTableSelectionType<NightshiftSource>;
   /** When true, per-row onboard actions are disabled (global pause / status loading). */
   blocksActivity?: boolean;
@@ -88,6 +88,9 @@ export function SourcesTable({
     },
   } = useKibana();
   const isCpsMultiProject = useIsCpsMultiProject(cps?.cpsManager);
+  // EuiInMemoryTable goes back to page 1 whenever `items` is a new array, so a filtered list
+  // rebuilt on every render (onboarding status polling) would reset the page while searching.
+  const items = useMemo(() => filterSourcesByQuery(sources, searchText), [sources, searchText]);
 
   const onboardTooltip = getOnboardSourceTooltip({ activityBlockTooltip, isCpsMultiProject });
 
@@ -118,7 +121,7 @@ export function SourcesTable({
           data-test-subj={`significantEventsAppSourcesTableTitleLink-${source.id}`}
           onClick={() => onOpenSource(source)}
         >
-          <EuiHighlight search={searchQuery.text}>{title}</EuiHighlight>
+          <EuiHighlight search={searchText}>{title}</EuiHighlight>
         </EuiLink>
       ),
     },
@@ -228,7 +231,7 @@ export function SourcesTable({
       data-test-subj="significantEventsAppSourcesTable"
       tableCaption={SOURCES_TABLE_CAPTION}
       itemId="id"
-      items={filterSourcesByQuery(sources, searchQuery.text)}
+      items={items}
       columns={columns}
       loading={loading}
       selection={selection}

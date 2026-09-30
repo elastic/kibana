@@ -8,9 +8,8 @@
 import { EuiButton, EuiEmptyPrompt, EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
 import type { NightshiftSource } from '@kbn/nightshift-shared';
 import { KIS_ONBOARDING_IN_PROGRESS_STATUSES } from '@kbn/significant-events-schema';
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { useCallback, useState } from 'react';
 import { getNightshiftCapabilities } from '@kbn/nightshift-shared';
-import { parseSearchQuery } from './utils';
 import { useAIFeatures } from '../../../../hooks/use_ai_features';
 import { useKibana } from '../../../../hooks/use_kibana';
 import { useSourcesApi } from '../../../../hooks/use_sources_api';
@@ -44,8 +43,6 @@ export function SourcesView() {
   const { canManage } = getNightshiftCapabilities(nightshift);
   const { blocksActivity, activityBlockTooltip } = useBlocksNewActivity();
   const [searchText, setSearchText] = useState('');
-
-  const searchQuery = useMemo(() => parseSearchQuery(searchText), [searchText]);
 
   const {
     sources,
@@ -92,30 +89,16 @@ export function SourcesView() {
     [generatingStreamNames, streamStatusMap]
   );
 
-  const [selectedSources, setSelectedSources] = useState<NightshiftSource[]>([]);
+  // Ids, not objects: the selection then follows refetches, and a deleted source drops out.
+  const [selectedSourceIds, setSelectedSourceIds] = useState<string[]>([]);
+  const selectedSources = sources.filter(({ id }) => selectedSourceIds.includes(id));
 
-  const getActionableSourceIds = useCallback(
-    () => selectedSources.filter(isSourceActionable).map(({ id }) => id),
-    [selectedSources, isSourceActionable]
-  );
-
-  const onBulkOnboardSourcesClick = useCallback(async () => {
-    const sourceIds = getActionableSourceIds();
-    setSelectedSources([]);
-    await bulkOnboardAll(sourceIds);
-  }, [getActionableSourceIds, bulkOnboardAll]);
-
-  const onBulkOnboardFeaturesOnly = useCallback(async () => {
-    const sourceIds = getActionableSourceIds();
-    setSelectedSources([]);
-    await bulkOnboardFeaturesOnly(sourceIds);
-  }, [getActionableSourceIds, bulkOnboardFeaturesOnly]);
-
-  const onBulkOnboardQueriesOnly = useCallback(async () => {
-    const sourceIds = getActionableSourceIds();
-    setSelectedSources([]);
-    await bulkOnboardQueriesOnly(sourceIds);
-  }, [getActionableSourceIds, bulkOnboardQueriesOnly]);
+  const onboardSelectedSources =
+    (onboard: (sourceIds: string[]) => Promise<unknown>) => async () => {
+      const sourceIds = selectedSources.filter(isSourceActionable).map(({ id }) => id);
+      setSelectedSourceIds([]);
+      await onboard(sourceIds);
+    };
 
   const onConfirmPendingAction = () => {
     if (!pendingAction) {
@@ -123,14 +106,7 @@ export function SourcesView() {
     }
     const { action, source } = pendingAction;
     const mutation = action === 'delete' ? deleteSource : resetSourceKnowledge;
-    mutation.mutate(source, {
-      onSuccess: () => {
-        if (action === 'delete') {
-          setSelectedSources((selected) => selected.filter(({ id }) => id !== source.id));
-        }
-      },
-      onSettled: () => setPendingAction(undefined),
-    });
+    mutation.mutate(source, { onSettled: () => setPendingAction(undefined) });
   };
 
   const handleQueryChange: SignificantEventsSearchBarProps['onQueryChange'] = (queryPayload) => {
@@ -183,9 +159,9 @@ export function SourcesView() {
                   featuresResolvedConnectorId={featuresConnectors.resolvedConnectorId}
                   queriesResolvedConnectorId={queriesConnectors.resolvedConnectorId}
                   onConfigChange={setOnboardingConfig}
-                  onRun={onBulkOnboardSourcesClick}
-                  onRunFeaturesOnly={onBulkOnboardFeaturesOnly}
-                  onRunQueriesOnly={onBulkOnboardQueriesOnly}
+                  onRun={onboardSelectedSources(bulkOnboardAll)}
+                  onRunFeaturesOnly={onboardSelectedSources(bulkOnboardFeaturesOnly)}
+                  onRunQueriesOnly={onboardSelectedSources(bulkOnboardQueriesOnly)}
                   isRunDisabled={
                     blocksActivity ||
                     selectedSources.length === 0 ||
@@ -247,7 +223,7 @@ export function SourcesView() {
                 sources={sources}
                 onboardingResultMap={streamStatusMap}
                 loading={isSourcesLoading}
-                searchQuery={searchQuery}
+                searchText={searchText}
                 blocksActivity={blocksActivity}
                 activityBlockTooltip={activityBlockTooltip}
                 canManage={canManage}
@@ -255,7 +231,8 @@ export function SourcesView() {
                   canManage
                     ? {
                         selected: selectedSources,
-                        onSelectionChange: setSelectedSources,
+                        onSelectionChange: (selected) =>
+                          setSelectedSourceIds(selected.map(({ id }) => id)),
                         selectable: isSourceActionable,
                       }
                     : undefined

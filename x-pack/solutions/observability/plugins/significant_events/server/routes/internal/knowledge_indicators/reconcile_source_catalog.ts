@@ -9,6 +9,7 @@ import type { KibanaRequest } from '@kbn/core/server';
 import type { NightshiftSource } from '@kbn/nightshift-shared';
 import type { SourceChangeListener, SourcesClient } from '@kbn/nightshift-sources-plugin/server';
 import type { WorkflowExecutionListItemDto } from '@kbn/workflows';
+import type { SignificantEventsMaintenanceState } from '../../../../common/maintenance/state_machine';
 import type { SignificantEventsMaintenanceService } from '../../../lib/maintenance/maintenance_service';
 import type { KnowledgeIndicatorClient } from '../../../lib/knowledge_indicators/knowledge_indicator_client/knowledge_indicator_client';
 import { parseSourceSlugFromConcurrencyKey } from '../../../lib/workflows/onboarding_workflow_client';
@@ -70,31 +71,40 @@ export async function resetSourceKnowledge({
 }
 
 /**
- * Applies the enabled flag of one source to its onboarding and owned rules, the way
- * `reconcileSourceCatalog` does for every source of the catalog.
+ * Applies the enabled flag of one source to its onboarding and owned rules. A disabled source has
+ * its run cancelled before its rules are disabled; an enabled one gets its rules back unless
+ * maintenance is paused. The guards let the catalog reconcile skip calls it already knows are
+ * no-ops; the change listener leaves them on, since it has not looked.
  */
-export async function applySourceEnabled({
+async function applySourceEnabled({
   source,
   kiClient,
   onboardingClient,
-  maintenanceService,
+  maintenanceState,
   request,
+  hasRunningOnboarding = true,
+  ownsRules = true,
 }: {
   source: Pick<NightshiftSource, 'id' | 'slug' | 'enabled'>;
   kiClient: Pick<CatalogKiClient, 'setSourceRulesEnabled'>;
   onboardingClient?: Pick<OnboardingClient, 'cancelBySourceSlug'>;
-  maintenanceService: Pick<SignificantEventsMaintenanceService, 'getState'>;
+  maintenanceState: SignificantEventsMaintenanceState;
   request: KibanaRequest;
+  hasRunningOnboarding?: boolean;
+  ownsRules?: boolean;
 }): Promise<void> {
   if (!source.enabled) {
-    // Same order as the reconcile: cancel the run before its source's rules are disabled.
-    await onboardingClient?.cancelBySourceSlug({ sourceSlug: source.slug, request });
-    await kiClient.setSourceRulesEnabled(source.id, false);
+    if (hasRunningOnboarding) {
+      await onboardingClient?.cancelBySourceSlug({ sourceSlug: source.slug, request });
+    }
+    if (ownsRules) {
+      await kiClient.setSourceRulesEnabled(source.id, false);
+    }
     return;
   }
   // A pause keeps rules off. Resume only restores the rules the pause disabled, so a source
   // enabled meanwhile gets its rules back from the next catalog reconcile.
-  if ((await maintenanceService.getState({ request })) !== 'paused') {
+  if (maintenanceState !== 'paused' && ownsRules) {
     await kiClient.setSourceRulesEnabled(source.id, true);
   }
 }
@@ -138,7 +148,7 @@ export const createSourceChangeListener =
       source: event.source,
       kiClient,
       onboardingClient,
-      maintenanceService,
+      maintenanceState: await maintenanceService.getState({ request: event.request }),
       request: event.request,
     });
   };
@@ -175,18 +185,15 @@ export async function reconcileSourceCatalog({
   const runningSourceSlugs = await loadRunningSourceSlugs(onboardingClient, request);
 
   for (const source of sources) {
-    if (!source.enabled) {
-      if (onboardingClient && runningSourceSlugs.has(source.slug)) {
-        await onboardingClient.cancelBySourceSlug({ sourceSlug: source.slug, request });
-      }
-      if (ownedRuleSourceIds.has(source.id)) {
-        await kiClient.setSourceRulesEnabled(source.id, false);
-      }
-      continue;
-    }
-    if (maintenanceState !== 'paused' && ownedRuleSourceIds.has(source.id)) {
-      await kiClient.setSourceRulesEnabled(source.id, true);
-    }
+    await applySourceEnabled({
+      source,
+      kiClient,
+      onboardingClient,
+      maintenanceState,
+      request,
+      hasRunningOnboarding: runningSourceSlugs.has(source.slug),
+      ownsRules: ownedRuleSourceIds.has(source.id),
+    });
   }
 
   // Cancel before retiring: a run left going could write indicators or rules back for a

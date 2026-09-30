@@ -24,6 +24,7 @@ import {
   EuiTitle,
   useGeneratedHtmlId,
 } from '@elastic/eui';
+import { isHttpFetchError } from '@kbn/core-http-browser';
 import { ESQLLangEditor } from '@kbn/esql/public';
 import { i18n } from '@kbn/i18n';
 import {
@@ -34,7 +35,6 @@ import {
   validateSourceQuery,
   type NightshiftSource,
 } from '@kbn/nightshift-shared';
-import { isRecord } from '@kbn/streams-schema';
 import React, { useState } from 'react';
 import { Controller, useForm } from 'react-hook-form';
 import { useKibana } from '../../../../../hooks/use_kibana';
@@ -59,8 +59,7 @@ interface SourceFlyoutProps {
 
 // Title, description and tags limits are checked before sending, so a 400 from the sources
 // API is about the query (parse, allowed commands, or the `LIMIT 0` probe).
-const isBadRequest = (error: unknown) =>
-  isRecord(error) && isRecord(error.body) && error.body.statusCode === 400;
+const isBadRequest = (error: unknown) => isHttpFetchError(error) && error.response?.status === 400;
 
 export function SourceFlyout({ source, readOnly = false, onClose }: SourceFlyoutProps) {
   const {

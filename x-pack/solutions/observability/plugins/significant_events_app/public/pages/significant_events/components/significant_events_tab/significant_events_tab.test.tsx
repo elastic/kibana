@@ -142,7 +142,7 @@ describe('Significant Events timestamp rendering', () => {
   it('sorts the Timestamp column by the lineage creation timestamp', () => {
     const columns = getSignificantEventTableColumns({
       onToggleEvent: jest.fn(),
-      sourcesById: new Map(),
+      getSourceTitle: (sourceId) => sourceId,
     });
     expect(columns.find((column) => 'field' in column && column.field === 'created_at')).toEqual(
       expect.objectContaining({ field: 'created_at' })

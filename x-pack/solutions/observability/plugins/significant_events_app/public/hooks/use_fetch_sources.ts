@@ -7,14 +7,11 @@
 
 import type { QueryFunctionContext } from '@kbn/react-query';
 import { useQuery } from '@kbn/react-query';
-import type { NightshiftSource } from '@kbn/nightshift-shared';
+import { MAX_SOURCES_PER_PAGE, type NightshiftSource } from '@kbn/nightshift-shared';
 import { useFetchErrorToast } from './use_fetch_error_toast';
 import { useKibana } from './use_kibana';
 
 export const SOURCES_QUERY_KEY = ['nightshiftSources'] as const;
-
-// The list API caps a page at 100 sources.
-const SOURCES_PAGE_SIZE = 100;
 
 /** Every source of the current space, sorted by title, in one cache entry. */
 export function useFetchSources<T = NightshiftSource[]>({
@@ -39,11 +36,11 @@ export function useFetchSources<T = NightshiftSource[]>({
     // already reached `total`.
     for (let page = 1; ; page++) {
       const response = await client.fetch('GET /internal/nightshift/sources', {
-        params: { query: { page, per_page: SOURCES_PAGE_SIZE } },
+        params: { query: { page, per_page: MAX_SOURCES_PER_PAGE } },
         signal: signal ?? null,
       });
       sources.push(...response.sources);
-      if (response.sources.length < SOURCES_PAGE_SIZE || sources.length >= response.total) {
+      if (response.sources.length < MAX_SOURCES_PER_PAGE || sources.length >= response.total) {
         return sources;
       }
     }

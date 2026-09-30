@@ -5,13 +5,12 @@
  * 2.0.
  */
 
-import { Query } from '@elastic/eui';
 import {
   RUN_SOURCE_ONBOARDING_BUTTON_LABEL,
   RUN_SOURCE_ONBOARDING_CROSS_PROJECT_TOOLTIP,
 } from './translations';
 import type { NightshiftSource } from '@kbn/nightshift-shared';
-import { filterSourcesByQuery, getOnboardSourceTooltip, parseSearchQuery } from './utils';
+import { filterSourcesByQuery, getOnboardSourceTooltip } from './utils';
 
 const makeSource = (overrides: Partial<NightshiftSource>): NightshiftSource => ({
   id: 'source-1',
@@ -26,35 +25,6 @@ const makeSource = (overrides: Partial<NightshiftSource>): NightshiftSource => (
   updated_at: '2026-09-01T00:00:00.000Z',
   esql_updated_at: '2026-09-01T00:00:00.000Z',
   ...overrides,
-});
-
-describe('parseSearchQuery', () => {
-  it('returns an empty query for empty input', () => {
-    expect(parseSearchQuery('').ast.clauses).toEqual([]);
-  });
-
-  it('preserves the raw text for plain-text input', () => {
-    expect(parseSearchQuery('logs').text).toBe('logs');
-  });
-
-  it('parses field clauses', () => {
-    const query = parseSearchQuery('status:open');
-
-    expect(query.ast.getFieldClauses('status')).toEqual([
-      expect.objectContaining({ field: 'status', value: 'open' }),
-    ]);
-  });
-
-  it('does not crash on input that is invalid EUI query syntax', () => {
-    // The raw parser rejects a leading comma...
-    expect(() => Query.parse(',')).toThrow();
-
-    // ...while the wrapper keeps the raw text as a plain-text filter with no clauses.
-    const query = parseSearchQuery(',');
-
-    expect(query.text).toBe(',');
-    expect(query.ast.clauses).toEqual([]);
-  });
 });
 
 describe('filterSourcesByQuery', () => {

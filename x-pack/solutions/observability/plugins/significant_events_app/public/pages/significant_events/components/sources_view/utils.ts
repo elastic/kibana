@@ -5,25 +5,11 @@
  * 2.0.
  */
 
-import { Ast, Query } from '@elastic/eui';
 import type { NightshiftSource } from '@kbn/nightshift-shared';
 import {
   RUN_SOURCE_ONBOARDING_BUTTON_LABEL,
   RUN_SOURCE_ONBOARDING_CROSS_PROJECT_TOOLTIP,
 } from './translations';
-
-// Builds an EUI Query from the free-text search bar input. The search bar runs in
-// `text` mode and accepts arbitrary input, but `Query.parse` only understands EUI
-// query syntax and throws on characters such as a leading comma. When parsing fails
-// we keep the raw input as a plain-text filter with no clauses, so the table still
-// filters by name instead of the page crashing.
-export function parseSearchQuery(searchText: string): Query {
-  try {
-    return Query.parse(searchText);
-  } catch {
-    return new Query(Ast.create([]), undefined, searchText);
-  }
-}
 
 /** Keeps the sources whose title, tags or query contain the text, ignoring case. */
 export function filterSourcesByQuery(

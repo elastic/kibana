@@ -25,7 +25,7 @@ import { css } from '@emotion/react';
 import { capitalize } from 'lodash';
 import useInterval from 'react-use/lib/useInterval';
 import { i18n } from '@kbn/i18n';
-import { getNightshiftCapabilities, type NightshiftSource } from '@kbn/nightshift-shared';
+import { getNightshiftCapabilities } from '@kbn/nightshift-shared';
 import {
   getSeverityLabel,
   severitySchema,
@@ -243,12 +243,12 @@ const RESET_FILTERS_LABEL = i18n.translate(
 export const getSignificantEventTableColumns = ({
   selectedEventId,
   onToggleEvent,
-  sourcesById,
+  getSourceTitle,
 }: {
   selectedEventId?: string;
   onToggleEvent: (eventId: string) => void;
   /** Resolves `stream_names` (source ids) to titles; unknown values are shown as-is. */
-  sourcesById: Map<string, NightshiftSource>;
+  getSourceTitle: (sourceId: string) => string;
 }): Array<EuiBasicTableColumn<SignificantEventResponse>> => [
   {
     name: '',
@@ -309,7 +309,7 @@ export const getSignificantEventTableColumns = ({
     // `truncateText` only kicks in when the cell is bounded (see tableLayout="fixed" below).
     truncateText: true,
     render: (streamNames: string[]) => {
-      const names = (streamNames ?? []).map((name) => sourcesById.get(name)?.title ?? name);
+      const names = (streamNames ?? []).map(getSourceTitle);
       const [first, ...rest] = names;
       if (!first) return null;
       const overflowCount = rest.length;
@@ -414,7 +414,7 @@ export const SignificantEventsTab = () => {
   const { timeState } = useTimefilter();
   const { updateTimeRange } = useTimeRangeUpdate();
 
-  const { sourcesById } = useSourcesById();
+  const { sourcesById, getSourceTitle } = useSourcesById();
   // Closed events are hidden by default; users can opt back in via the Status filter.
   const [statusFilter, setStatusFilter] = useState<SignificantEventStatus[]>(() =>
     SIGNIFICANT_EVENT_STATUS_OPTIONS.filter((status) => status === 'open')
@@ -538,9 +538,9 @@ export const SignificantEventsTab = () => {
       getSignificantEventTableColumns({
         selectedEventId: openEventId,
         onToggleEvent: toggleEvent,
-        sourcesById,
+        getSourceTitle,
       }),
-    [openEventId, toggleEvent, sourcesById]
+    [openEventId, toggleEvent, getSourceTitle]
   );
 
   const handleResetFilters = useCallback(() => {
@@ -640,7 +640,7 @@ export const SignificantEventsTab = () => {
         options: buildSelectableOptions({
           values: streamOptions,
           selected: streamFilter,
-          getLabel: (sourceId) => sourcesById.get(sourceId)?.title ?? sourceId,
+          getLabel: getSourceTitle,
         }),
         numFilters: streamOptions.length,
         numActiveFilters: streamFilter.length,
@@ -652,7 +652,7 @@ export const SignificantEventsTab = () => {
       severityFilter,
       streamFilter,
       streamOptions,
-      sourcesById,
+      getSourceTitle,
       onStatusChange,
       onSeverityChange,
       onStreamChange,

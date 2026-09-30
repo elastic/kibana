@@ -14,8 +14,17 @@ import type {
 import { useMutation, useQueryClient } from '@kbn/react-query';
 import { getFormattedError } from '../util/errors';
 import { DISCOVERY_QUERIES_QUERY_KEY } from './use_fetch_discovery_queries';
+import { DISCOVERY_QUERIES_OCCURRENCES_QUERY_KEY } from './use_fetch_discovery_queries_occurrences';
 import { SOURCES_QUERY_KEY } from './use_fetch_sources';
 import { useKibana } from './use_kibana';
+
+// Query key prefixes of everything a source's knowledge feeds. The source id follows each prefix.
+const SOURCE_KNOWLEDGE_QUERY_KEYS = [
+  ['features'],
+  DISCOVERY_QUERIES_QUERY_KEY,
+  DISCOVERY_QUERIES_OCCURRENCES_QUERY_KEY,
+  ['queryOccurrenceStats'],
+];
 
 /** Source writes. Create and update errors are left to the caller, which shows them inline. */
 export function useSourcesApi() {
@@ -33,12 +42,15 @@ export function useSourcesApi() {
   const queryClient = useQueryClient();
 
   const invalidateSources = () => queryClient.invalidateQueries({ queryKey: SOURCES_QUERY_KEY });
-  const invalidateKnowledge = () =>
-    Promise.all([
-      queryClient.invalidateQueries({ queryKey: ['features'], exact: false }),
-      queryClient.invalidateQueries({ queryKey: DISCOVERY_QUERIES_QUERY_KEY }),
-      queryClient.invalidateQueries({ queryKey: ['queryOccurrenceStats'], exact: false }),
-    ]);
+  // Every knowledge query goes stale, since lists across sources include this one, but only this
+  // source's queries refetch now: each Sources table row holds its own, one request per row.
+  const invalidateSourceKnowledge = ({ id }: NightshiftSource) =>
+    Promise.all(
+      SOURCE_KNOWLEDGE_QUERY_KEYS.flatMap((queryKey) => [
+        queryClient.invalidateQueries({ queryKey, refetchType: 'none' }),
+        queryClient.invalidateQueries({ queryKey: [...queryKey, id] }),
+      ])
+    );
 
   const createSource = useMutation<NightshiftSource, Error, CreateSourceRequest>({
     mutationFn: async (body) => {
@@ -109,7 +121,8 @@ export function useSourcesApi() {
     onError: (error) => {
       toasts.addError(getFormattedError(error), { title: DELETE_ERROR_TOAST_TITLE });
     },
-    onSettled: () => Promise.all([invalidateSources(), invalidateKnowledge()]),
+    onSettled: (_, __, source) =>
+      Promise.all([invalidateSources(), invalidateSourceKnowledge(source)]),
   });
 
   const resetSourceKnowledge = useMutation<void, Error, NightshiftSource>({
@@ -125,7 +138,7 @@ export function useSourcesApi() {
     onError: (error) => {
       toasts.addError(getFormattedError(error), { title: RESET_ERROR_TOAST_TITLE });
     },
-    onSettled: invalidateKnowledge,
+    onSettled: (_, __, source) => invalidateSourceKnowledge(source),
   });
 
   return { createSource, updateSource, setSourceEnabled, deleteSource, resetSourceKnowledge };

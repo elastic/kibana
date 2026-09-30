@@ -110,12 +110,16 @@ describe('SourceFlyout', () => {
   });
 
   it('shows a validation error from the sources API under the query', async () => {
-    mockCreateSource.mutateAsync.mockRejectedValue({
-      body: {
-        statusCode: 400,
-        message: 'ES|QL query cannot be executed: Unknown column [status]',
-      },
-    });
+    mockCreateSource.mutateAsync.mockRejectedValue(
+      Object.assign(new Error('Bad Request'), {
+        request: {},
+        response: { status: 400 },
+        body: {
+          statusCode: 400,
+          message: 'ES|QL query cannot be executed: Unknown column [status]',
+        },
+      })
+    );
     setup();
     fillNewSource({ title: 'Nginx errors', esql: 'FROM logs-nginx-* | WHERE status >= 500' });
 

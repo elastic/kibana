@@ -52,20 +52,20 @@ const makeSourcesClient = (sources: NightshiftSource[]): SourcesClient =>
     }),
   } as unknown as SourcesClient);
 
+const makeKiClient = (reconcileIds: string[] = [], ownedRuleIds: string[] = reconcileIds) => ({
+  setSourceRulesEnabled: jest.fn().mockResolvedValue(undefined),
+  findStreamNamesWithOwnedRules: jest.fn().mockResolvedValue(ownedRuleIds),
+  getStreamNamesToReconcile: jest.fn().mockResolvedValue(reconcileIds),
+  deleteOwnedRules: jest.fn().mockResolvedValue(undefined),
+  deleteAllQueries: jest.fn().mockResolvedValue(undefined),
+  deleteIndicators: jest.fn().mockResolvedValue(undefined),
+});
+
 describe('reconcileSourceCatalog', () => {
   const cancelBySourceSlug = jest.fn().mockResolvedValue(null);
   const onboardingWithRuns = (sourceSlugs: string[]) => ({
     cancelBySourceSlug,
     getNonTerminalExecutions: jest.fn().mockResolvedValue(sourceSlugs.map(runningExecution)),
-  });
-
-  const makeKiClient = (reconcileIds: string[], ownedRuleIds: string[] = reconcileIds) => ({
-    setSourceRulesEnabled: jest.fn().mockResolvedValue(undefined),
-    findStreamNamesWithOwnedRules: jest.fn().mockResolvedValue(ownedRuleIds),
-    getStreamNamesToReconcile: jest.fn().mockResolvedValue(reconcileIds),
-    deleteOwnedRules: jest.fn().mockResolvedValue(undefined),
-    deleteAllQueries: jest.fn().mockResolvedValue(undefined),
-    deleteIndicators: jest.fn().mockResolvedValue(undefined),
   });
 
   beforeEach(() => {
@@ -240,12 +240,6 @@ describe('reconcileSourceCatalog', () => {
 });
 
 describe('resetSourceKnowledge', () => {
-  const makeKiClient = () => ({
-    deleteOwnedRules: jest.fn().mockResolvedValue(undefined),
-    deleteAllQueries: jest.fn().mockResolvedValue(undefined),
-    deleteIndicators: jest.fn().mockResolvedValue(undefined),
-  });
-
   it('cancels the onboarding run by slug before dropping rules, queries and indicators', async () => {
     const kiClient = makeKiClient();
     const cancelBySourceSlug = jest.fn().mockResolvedValue(null);
@@ -283,12 +277,7 @@ describe('createSourceChangeListener', () => {
   const setup = ({
     maintenanceState = 'enabled',
   }: { maintenanceState?: SignificantEventsMaintenanceState } = {}) => {
-    const kiClient = {
-      deleteOwnedRules: jest.fn().mockResolvedValue(undefined),
-      deleteAllQueries: jest.fn().mockResolvedValue(undefined),
-      deleteIndicators: jest.fn().mockResolvedValue(undefined),
-      setSourceRulesEnabled: jest.fn().mockResolvedValue(undefined),
-    };
+    const kiClient = makeKiClient();
     const getScopedClients = jest.fn().mockResolvedValue({
       getKnowledgeIndicatorClient: jest.fn().mockResolvedValue(kiClient),
     });
@@ -310,7 +299,7 @@ describe('createSourceChangeListener', () => {
     const { listener, kiClient, getScopedClients, cancelBySourceSlug } = setup();
     const otherRequest = { spaceId: 'other' } as KibanaRequest;
 
-    await listener({ type: 'deleted', source, request: otherRequest, spaceId: 'other' });
+    await listener({ type: 'deleted', source, request: otherRequest });
 
     expect(getScopedClients).toHaveBeenCalledWith({ request: otherRequest });
     expect(cancelBySourceSlug).toHaveBeenCalledWith({
@@ -328,7 +317,6 @@ describe('createSourceChangeListener', () => {
       source: disabledSource,
       previous: enabledSource,
       request,
-      spaceId: 'default',
     });
 
     expect(cancelBySourceSlug).toHaveBeenCalledWith({
@@ -350,7 +338,6 @@ describe('createSourceChangeListener', () => {
       source: enabledSource,
       previous: disabledSource,
       request,
-      spaceId: 'default',
     });
 
     expect(kiClient.setSourceRulesEnabled).toHaveBeenCalledWith('toggled-source', true);
@@ -365,7 +352,6 @@ describe('createSourceChangeListener', () => {
       source: enabledSource,
       previous: disabledSource,
       request,
-      spaceId: 'default',
     });
 
     expect(kiClient.setSourceRulesEnabled).not.toHaveBeenCalled();
@@ -374,13 +360,12 @@ describe('createSourceChangeListener', () => {
   it('ignores created sources and updates that keep the enabled flag', async () => {
     const { listener, getScopedClients } = setup();
     const events: SourceChangeEvent[] = [
-      { type: 'created', source, request, spaceId: 'default' },
+      { type: 'created', source, request },
       {
         type: 'updated',
         source: { ...enabledSource, title: 'Renamed' },
         previous: enabledSource,
         request,
-        spaceId: 'default',
       },
     ];
 

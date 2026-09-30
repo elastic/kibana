@@ -168,7 +168,7 @@ export function SettingsTab() {
     setParsedTuningConfig(null);
   }, [savedConfigYamlState, continuousExtraction, scheduledDiscovery]);
 
-  const performSave = useCallback(async () => {
+  const handleSave = useCallback(async () => {
     setIsSaving(true);
     try {
       if (canEditSettings && continuousExtraction.hasChanged) {
@@ -217,10 +217,6 @@ export function SettingsTab() {
     isDeveloperMode,
     isDeveloperModeSaving,
   ]);
-
-  const handleSave = useCallback(() => {
-    void performSave();
-  }, [performSave]);
 
   return (
     <>

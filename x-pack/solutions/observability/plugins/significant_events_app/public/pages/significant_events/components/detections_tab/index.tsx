@@ -97,7 +97,7 @@ export const DetectionsTab = () => {
     pageSizeOptions: [10, 25, 50],
   };
 
-  const { sourcesById } = useSourcesById();
+  const { getSourceTitle } = useSourcesById();
   const columns: Array<EuiBasicTableColumn<Detection>> = useMemo(
     () => [
       {
@@ -165,9 +165,7 @@ export const DetectionsTab = () => {
         }),
         width: '140px',
         render: (sourceId?: string) =>
-          sourceId ? (
-            <EuiBadge color="hollow">{sourcesById.get(sourceId)?.title ?? sourceId}</EuiBadge>
-          ) : null,
+          sourceId ? <EuiBadge color="hollow">{getSourceTitle(sourceId)}</EuiBadge> : null,
       },
       {
         name: (
@@ -188,7 +186,7 @@ export const DetectionsTab = () => {
         },
       },
     ],
-    [selectedDetectionId, toggleSelectedDetection, sourcesById]
+    [selectedDetectionId, toggleSelectedDetection, getSourceTitle]
   );
 
   return (

@@ -82,7 +82,7 @@ export const useKnowledgeIndicatorsColumns = ({
   setKnowledgeIndicatorsToDelete,
   canManage,
 }: UseKnowledgeIndicatorsColumnsParams) => {
-  const { sourcesById } = useSourcesById();
+  const { getSourceTitle } = useSourcesById();
 
   return useMemo(() => {
     const columns: Array<EuiBasicTableColumn<KnowledgeIndicator>> = [
@@ -179,7 +179,7 @@ export const useKnowledgeIndicatorsColumns = ({
         width: '192px',
         render: (ki: KnowledgeIndicator) => {
           const sourceId = getKnowledgeIndicatorSourceId(ki);
-          return <EuiBadge color="hollow">{sourcesById.get(sourceId)?.title ?? sourceId}</EuiBadge>;
+          return <EuiBadge color="hollow">{getSourceTitle(sourceId)}</EuiBadge>;
         },
       },
       {
@@ -210,7 +210,7 @@ export const useKnowledgeIndicatorsColumns = ({
     return columns;
   }, [
     canManage,
-    sourcesById,
+    getSourceTitle,
     occurrencesByQueryId,
     selectedKnowledgeIndicatorId,
     toggleSelectedKnowledgeIndicator,

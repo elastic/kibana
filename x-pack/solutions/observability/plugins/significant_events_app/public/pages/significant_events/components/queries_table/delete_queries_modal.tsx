@@ -44,7 +44,7 @@ export function DeleteQueriesModal({
   onCancel,
   isLoading = false,
 }: DeleteQueriesModalProps) {
-  const { sourcesById } = useSourcesById();
+  const { getSourceTitle } = useSourcesById();
   const columns = useMemo<Array<EuiBasicTableColumn<SignificantEventQueryRow>>>(
     () => [
       {
@@ -73,13 +73,11 @@ export function DeleteQueriesModal({
         name: STREAM_COLUMN_LABEL,
         width: '130px',
         render: (_: unknown, item: SignificantEventQueryRow) => (
-          <EuiBadge color="hollow">
-            {sourcesById.get(item.stream_name)?.title ?? item.stream_name}
-          </EuiBadge>
+          <EuiBadge color="hollow">{getSourceTitle(item.stream_name)}</EuiBadge>
         ),
       },
     ],
-    [sourcesById]
+    [getSourceTitle]
   );
 
   return (

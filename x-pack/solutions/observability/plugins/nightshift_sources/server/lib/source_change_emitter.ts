@@ -15,7 +15,7 @@ export type SourceChange =
   | { type: 'deleted'; source: NightshiftSource };
 
 /** A committed catalog write plus the request that made it, so listeners act in its space. */
-export type SourceChangeEvent = SourceChange & { request: KibanaRequest; spaceId: string };
+export type SourceChangeEvent = SourceChange & { request: KibanaRequest };
 
 export type SourceChangeListener = (event: SourceChangeEvent) => Promise<void>;
 

@@ -27,7 +27,6 @@ const deletedEvent: SourceChangeEvent = {
   type: 'deleted',
   source,
   request: httpServerMock.createKibanaRequest(),
-  spaceId: 'default',
 };
 
 describe('createSourceChangeEmitter', () => {

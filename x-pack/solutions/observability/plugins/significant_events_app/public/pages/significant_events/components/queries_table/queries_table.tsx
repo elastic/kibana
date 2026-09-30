@@ -109,7 +109,7 @@ export function QueriesTable() {
   const canManage = getNightshiftCapabilities(nightshift).canManage;
   const { timeState } = useTimefilter();
   const isCpsMultiProject = useIsCpsMultiProject(cps?.cpsManager);
-  const { sourcesById } = useSourcesById();
+  const { getSourceTitle } = useSourcesById();
   const [searchQuery, setSearchQuery] = useState('');
 
   const [pagination, setPagination] = useState<{
@@ -327,9 +327,7 @@ export function QueriesTable() {
         name: STREAM_COLUMN,
         width: '130px',
         render: (_: unknown, item: SignificantEventQueryRow) => (
-          <EuiBadge color="hollow">
-            {sourcesById.get(item.stream_name)?.title ?? item.stream_name}
-          </EuiBadge>
+          <EuiBadge color="hollow">{getSourceTitle(item.stream_name)}</EuiBadge>
         ),
       },
       {
@@ -353,7 +351,7 @@ export function QueriesTable() {
         ],
       },
     ];
-  }, [share.url.locators, timeState, selectedQuery, handleSelectQuery, sourcesById]);
+  }, [share.url.locators, timeState, selectedQuery, handleSelectQuery, getSourceTitle]);
 
   const isLoading = queriesLoading;
   if (isLoading) {

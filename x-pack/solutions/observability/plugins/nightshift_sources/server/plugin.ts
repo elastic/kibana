@@ -59,8 +59,7 @@ const createSourcesClient = (
     logger,
     username: core.security.authc.getCurrentUser(request)?.username ?? '<system>',
     spaceId: request.spaceId,
-    onChange: (change) =>
-      sourceChangeEmitter.emit({ ...change, request, spaceId: request.spaceId }),
+    onChange: (change) => sourceChangeEmitter.emit({ ...change, request }),
   });
 };
 
