@@ -7,8 +7,11 @@
 
 import type { Logger } from '@kbn/logging';
 import type { KibanaRequest } from '@kbn/core-http-server';
+import type { SecurityServiceStart } from '@kbn/core-security-server';
+import type { ElasticsearchServiceStart } from '@kbn/core-elasticsearch-server';
 import type { InferenceServerStart } from '@kbn/inference-plugin/server';
 import type { SearchInferenceEndpointsPluginStart } from '@kbn/search-inference-endpoints/server';
+import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import type { ConnectorTelemetryMetadata } from '@kbn/inference-common';
 import { createAgentNotFoundError } from '@kbn/agent-builder-common';
 import { AGENT_BUILDER_INFERENCE_FEATURE_ID } from '@kbn/agent-builder-common/constants';
@@ -24,6 +27,9 @@ export const resolveServices = async ({
   inference,
   agentService,
   searchInferenceEndpoints,
+  spaces,
+  security,
+  elasticsearch,
 }: {
   agentId: string;
   connectorId?: string;
@@ -33,6 +39,9 @@ export const resolveServices = async ({
   inference: InferenceServerStart;
   agentService: AgentsServiceStart;
   searchInferenceEndpoints: SearchInferenceEndpointsPluginStart;
+  spaces?: SpacesPluginStart;
+  security: SecurityServiceStart;
+  elasticsearch: ElasticsearchServiceStart;
 }) => {
   const selectedConnectorId =
     connectorId ??
@@ -65,6 +74,9 @@ export const resolveServices = async ({
     telemetryMetadata,
     logger,
     searchInferenceEndpoints,
+    spaces,
+    security,
+    elasticsearch,
   });
 
   return {

@@ -412,6 +412,9 @@ export class AgentBuilderPlugin
       trackingService: this.trackingService,
       searchInferenceEndpoints,
       logger: this.logger.get('model-provider'),
+      spaces,
+      security,
+      elasticsearch,
     });
 
     this.recommendedEndpointsPoller = new RecommendedEndpointsPoller({

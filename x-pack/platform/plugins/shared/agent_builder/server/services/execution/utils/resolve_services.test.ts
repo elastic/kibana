@@ -50,6 +50,8 @@ const createDeps = ({
         features: {},
         endpoints: { getForFeature },
       } as unknown as SearchInferenceEndpointsPluginStart,
+      security: {} as any,
+      elasticsearch: {} as any,
     },
   };
 };
