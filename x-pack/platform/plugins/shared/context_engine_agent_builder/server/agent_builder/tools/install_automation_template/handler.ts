@@ -182,7 +182,13 @@ export const installAutomationTemplateHandler = async ({
   });
 
   if (params.template === 'targeted_ki_writer' && existingWorkflowId !== undefined) {
-    return { aiIndexId, workflowId: existingWorkflowId, status: 'already_attached', replaced: false, skipped: true };
+    return {
+      aiIndexId,
+      workflowId: existingWorkflowId,
+      status: 'already_attached',
+      replaced: false,
+      skipped: true,
+    };
   }
 
   const result = await saveAutomationHandler({

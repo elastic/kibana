@@ -15,12 +15,9 @@ import { internalNamespaces } from '@kbn/agent-builder-common/base/namespaces';
 import {
   KI_SHAPES_REFERENCE_NAME,
   STRATEGY_CATALOG_REFERENCE_NAME,
-  kiShapesReference,
-  strategyCatalogReference,
 } from '../context_engine_shared';
 import { contextEngineSkillAvailability } from '../context_engine_skill_availability';
 import { aiIndexAutomationsSkill } from './ai_index_automations_skill';
-
 
 describe('aiIndexAutomationsSkill', () => {
   it('registers with stable id, name, and context-engine base path', () => {
@@ -56,9 +53,6 @@ describe('aiIndexAutomationsSkill', () => {
       /verifiers skip an indicator without it\.\s+Never write an empty list or an empty string there/
     );
   });
-
-
-
 
   it('documents the escape as LiquidJS reads it, with backslashes escaped first', () => {
     const { content } = aiIndexAutomationsSkill;
