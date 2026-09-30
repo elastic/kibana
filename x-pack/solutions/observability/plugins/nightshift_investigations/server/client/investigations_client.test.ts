@@ -1750,10 +1750,10 @@ describe('NightshiftInvestigationsClient.findOrCreateSlackThread()', () => {
       trigger_type: 'manual',
       slack_channel: 'C1',
       slack_thread_ts: '1700.0001',
+      conversation_id: expect.any(String),
     });
     expect(result).toEqual({
       investigation_id: id,
-      conversation_id: attributes.conversation_id,
       title: attributes.title,
       slack_message_ts: undefined,
     });
@@ -1766,6 +1766,23 @@ describe('NightshiftInvestigationsClient.findOrCreateSlackThread()', () => {
     expect(again?.investigation_id).toBe(id);
   });
 
+  it("resumes the thread's conversation when the investigation workflow runs on it", async () => {
+    const created = await makeClient().findOrCreateSlackThread({ ...THREAD, create: true });
+    const { id, attributes } = repository.create.mock.calls[0][0];
+    repository.get.mockResolvedValue(makeRecord(attributes, { id }));
+    mockManagement.getWorkflowExecution.mockResolvedValue({
+      id: 'exec-slack',
+      workflowId: NIGHTSHIFT_INVESTIGATION_WORKFLOW_ID,
+      status: ExecutionStatus.RUNNING,
+      startedAt: '2024-01-02T00:00:00Z',
+      context: { inputs: { investigation_id: created?.investigation_id } },
+    });
+
+    await expect(makeClient().ensureOrCreate(id, 'exec-slack')).resolves.toBe(
+      attributes.conversation_id
+    );
+  });
+
   it('returns the existing investigation and its findings message', async () => {
     repository.get.mockResolvedValue(
       makeRecord({ conversation_id: 'conv-1', slack_message_ts: '1700.0002' }, { id: 'inv-9' })
@@ -1775,7 +1792,6 @@ describe('NightshiftInvestigationsClient.findOrCreateSlackThread()', () => {
       makeClient().findOrCreateSlackThread({ ...THREAD, create: false })
     ).resolves.toEqual({
       investigation_id: 'inv-9',
-      conversation_id: 'conv-1',
       title: 'Latency is too high',
       slack_message_ts: '1700.0002',
     });
