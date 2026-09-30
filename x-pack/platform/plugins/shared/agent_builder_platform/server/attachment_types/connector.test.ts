@@ -293,6 +293,51 @@ describe('connector attachment type', () => {
         expect(representation.value).toContain(
           'Always resolve channel ID before sending a message.'
         );
+        expect(representation.value).not.toContain('Note: not every action may be available');
+      });
+
+      it('prepends a cross-reference note before skill content when selected_actions is restricted', () => {
+        const inputSchema = z.object({});
+        getConnectorSpecMock.mockReturnValue({
+          metadata: {
+            id: '.slack2',
+            displayName: 'Slack',
+            description: 'Slack connector',
+            minimumLicense: 'enterprise',
+            supportedFeatureIds: [],
+          },
+          actions: {
+            sendMessage: {
+              isTool: true,
+              scope: 'read' as const,
+              description: 'Send a message',
+              input: inputSchema,
+              handler: jest.fn(),
+            },
+          },
+          test: { handler: jest.fn(), enabled: false },
+          skill: 'Always resolve channel ID before sending a message.',
+        });
+        formatSchemaForLlmMock.mockReturnValue('No parameters');
+
+        const attachment = createAttachment({
+          ...validData,
+          connector_type: '.slack2',
+          selected_actions: ['sendMessage'],
+        });
+        const formatted = connectorType.format(
+          attachment,
+          formatContext
+        ) as AgentFormattedAttachment;
+        const representation = formatted.getRepresentation!() as { value: string };
+
+        expect(representation.value).toContain(
+          'Note: not every action may be available on this instance.'
+        );
+        expect(representation.value).toContain('verify it appears in the list above');
+        expect(representation.value).toContain(
+          'Always resolve channel ID before sending a message.'
+        );
       });
 
       describe('annotation hints', () => {

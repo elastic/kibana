@@ -110,7 +110,7 @@ describe('generateConfigSchema', () => {
       ).toThrow('selectedActions must include at least one action when set.');
     });
 
-    it('rejects unknown action names', () => {
+    it('tolerates unknown action names (stale names after spec rename must not break execution)', () => {
       const validator = generateConfigSchema(z.object({ apiUrl: z.string() }), [
         'search',
         'sendMessage',
@@ -121,7 +121,7 @@ describe('generateConfigSchema', () => {
           { apiUrl: 'https://example.com', selectedActions: ['search', 'typoAction'] },
           validatorServices
         )
-      ).toThrow('selectedActions contains unknown action names: typoAction.');
+      ).not.toThrow();
     });
 
     it('allows a valid non-empty selectedActions allowlist', () => {

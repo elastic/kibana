@@ -43,12 +43,6 @@ export const generateConfigSchema = (
       if (knownActionNames.size === 0) {
         return;
       }
-      const unknown = selected.filter((name) => !knownActionNames.has(name));
-      if (unknown.length > 0) {
-        throw new Error(
-          `selectedActions contains unknown action names: ${unknown.sort().join(', ')}.`
-        );
-      }
     },
   };
 };

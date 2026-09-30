@@ -90,6 +90,13 @@ export const createConnectorAttachmentType = (): AttachmentTypeDefinition<
 
             if (spec?.skill) {
               parts.push('');
+              if (Array.isArray(selectedActions)) {
+                parts.push(
+                  'Note: not every action may be available on this instance. ' +
+                    'Before calling any action, verify it appears in the list above.'
+                );
+                parts.push('');
+              }
               parts.push(spec.skill);
             }
           }

@@ -358,6 +358,23 @@ describe('createExecuteConnectorSubActionTool', () => {
     expect(mockExecute).not.toHaveBeenCalled();
   });
 
+  it('returns error when sub-action is not in selectedActions allowlist', async () => {
+    isSelectedActionEnabledMock.mockReturnValueOnce(false);
+
+    const tool = createExecuteConnectorSubActionTool({ getActions, getInference });
+    const result = await tool.handler(
+      { connectorId: 'conn-123', subAction: 'sendMessage', params: {} },
+      mockContext
+    );
+
+    expect((result as ToolHandlerStandardReturn).results).toHaveLength(1);
+    expect((result as ToolHandlerStandardReturn).results[0].type).toBe(ToolResultType.error);
+    expect(
+      ((result as ToolHandlerStandardReturn).results[0] as ErrorResult).data.message
+    ).toContain('is not enabled');
+    expect(mockExecute).not.toHaveBeenCalled();
+  });
+
   it('returns error when connector resolution fails', async () => {
     mockGet.mockRejectedValue(new Error('Saved object not found'));
 

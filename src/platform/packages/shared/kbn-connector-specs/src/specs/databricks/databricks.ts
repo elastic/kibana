@@ -221,7 +221,7 @@ export const Databricks: ConnectorSpec = {
 
     // ── Escape hatches ────────────────────────────────────────────────────────
     listTools: {
-      isTool: true,
+      isTool: false,
       scope: 'read',
       description:
         'List all tools available on the Databricks MCP server. Use this to discover server capabilities ' +
@@ -236,7 +236,7 @@ export const Databricks: ConnectorSpec = {
     },
 
     callTool: {
-      isTool: true,
+      isTool: false,
       scope: 'destroy',
       description:
         'Call any tool on the Databricks MCP server directly by name. Workflow-only. Use this as an escape hatch for tools ' +

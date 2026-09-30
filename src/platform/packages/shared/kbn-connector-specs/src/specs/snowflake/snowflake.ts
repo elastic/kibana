@@ -19,7 +19,7 @@
  *  - Read-only SQL (agent-facing): runQuery, getStatementStatus, cancelStatement.
  *  - Full SQL (workflow-only): executeStatement — retained for write / DDL /
  *    privilege / procedure / multi-statement use cases and blocked from agents
- *    only accessible when explicitly listed in the connector's selectedActions allowlist.
+ *    by the framework's isToolAction guard.
  *  - Data discovery (agent-facing): listDatabases, listSchemas, listTables,
  *    listViews, describeTable, describeView.
  *  - Semantic search (agent-facing): listCortexSearchServices, cortexSearch.
