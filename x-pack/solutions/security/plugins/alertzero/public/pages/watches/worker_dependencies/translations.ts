@@ -5,11 +5,6 @@
  * 2.0.
  */
 
-/**
- * Copy shared by every Worker dependency. Each dependency's own sentences live on its entry in
- * `WORKER_DEPENDENCIES`, so adding a dependency touches one place.
- */
-
 import { i18n } from '@kbn/i18n';
 
 export const disableWorkerTitle = (workerName: string): string =>

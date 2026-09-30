@@ -13,11 +13,9 @@ import { WorkerWarningContent, type WorkerWarningReason } from './worker_warning
 interface WorkerWarningIconProps {
   workerId: string;
   workerName: string;
-  /** Non-empty; the header renders no icon at all when there is nothing to explain. */
   reasons: WorkerWarningReason[];
 }
 
-/** The single warning icon on a Worker header. */
 export const WorkerWarningIcon: React.FC<WorkerWarningIconProps> = ({
   workerId,
   workerName,

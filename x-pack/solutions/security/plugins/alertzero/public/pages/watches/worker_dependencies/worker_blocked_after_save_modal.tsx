@@ -28,7 +28,6 @@ interface WorkerBlockedAfterSaveModalProps {
   onAcknowledge: () => void;
 }
 
-/** Acknowledge-only: the save has already gone through; this only says why nothing will happen. */
 export const WorkerBlockedAfterSaveModal: React.FC<WorkerBlockedAfterSaveModalProps> = ({
   workerName,
   reasons,

@@ -64,8 +64,7 @@ export const WatchDetailPage: React.FC = () => {
   );
   const { discard, isDirty, isSaving, resolve, save, updateEnabled, updateSettings } =
     useWatchSettingsDraft(members);
-  // Dependencies cross Watches, so this spans every Worker: saved state, with this page's draft
-  // on top for the Workers it holds.
+  // Dependencies cross Watches, so this spans every Worker.
   const enabledById: WorkerEnabledById = useMemo(
     () =>
       new Map((workersData?.workers ?? []).map((worker) => [worker.id, resolve(worker).enabled])),
@@ -107,8 +106,6 @@ export const WatchDetailPage: React.FC = () => {
       setSaveBlockedByInvalidDraft(true);
       return;
     }
-    // The notice judges against the state the user saved from, taken before `save()` clears the
-    // drafts, not against the refetch the save triggers.
     const enabledSavedFrom = enabledById;
     const storedEnabledById = new Map(
       (workersData?.workers ?? []).map((worker) => [worker.id, worker.enabled])
@@ -124,7 +121,6 @@ export const WatchDetailPage: React.FC = () => {
       }
       throw saveError;
     }
-    // A Worker whose write failed is still at its stored value.
     const savedIds = new Set(savedWorkerIds);
     const enabledAfterSave: WorkerEnabledById = new Map(
       [...enabledSavedFrom].map(([workerId, enabled]) => [

@@ -1180,7 +1180,6 @@ describe('WatchDetailPage', () => {
     const ATTACK_DISCOVERY = SYSTEM_SECURITY_WORKER_FLOOR_ATTACK_DISCOVERY_ID;
     const ENDPOINT_ANALYSIS = SYSTEM_SECURITY_WORKER_FORENSICS_ENDPOINT_ANALYSIS_ID;
 
-    /** Every Worker across all Watches, with the given ones enabled. */
     const allWorkers = (enabledIds: string[]): Worker[] =>
       [...floorWorkers, huntWorker, ...detectionWorkers, forensicsWorker].map((worker) => ({
         ...worker,
@@ -1219,7 +1218,6 @@ describe('WatchDetailPage', () => {
       expect(enabledSwitch(HUNT)).not.toBeChecked();
       expect(screen.getByTestId('alertZeroWatchSettingsSave')).toBeEnabled();
       expect(mutateAsync).not.toHaveBeenCalled();
-      // Off in the draft with an enabled dependent: the provider's own icon appears.
       expect(warningIcon(HUNT)).toBeInTheDocument();
     });
 

@@ -27,24 +27,19 @@ const strong = (chunks: React.ReactNode) => <strong>{chunks}</strong>;
 
 /**
  * A hard dependency: the dependent Worker only acts on records the provider writes, so while the
- * provider is off the dependent has nothing to do. Soft ("fewer inputs") dependencies do not
- * belong here.
+ * provider is off the dependent has nothing to do.
  */
 export interface WorkerDependency {
   providerId: string;
   dependentId: string;
-  /** Disable-dialog body shown when turning the provider off while the dependent is enabled. */
   disableBody: (names: WorkerDependencyNames) => React.ReactNode;
-  /** Provider header, while the provider is off and the dependent is enabled. */
-  providerReason: (names: WorkerDependencyNames) => string;
-  /** Dependent header, while the provider is off. */
-  dependentReason: (names: WorkerDependencyNames) => string;
+  providerHeaderReason: (names: WorkerDependencyNames) => string;
+  dependentHeaderReason: (names: WorkerDependencyNames) => string;
 }
 
 export const WORKER_DEPENDENCIES: readonly WorkerDependency[] = [
   {
-    // Hunt is the only writer of the `security.coverage` records Rule Coverage works on. Rule
-    // Coverage's id and name still read "Rule Creation" until that Worker is renamed.
+    // Hunt is the only writer of the `security.coverage` records Rule Coverage works on.
     providerId: SYSTEM_SECURITY_WORKER_HUNT_CONTINUOUS_THREAT_HUNT_ID,
     dependentId: SYSTEM_SECURITY_WORKER_DETECTION_RULE_CREATION_ID,
     disableBody: ({ providerName, dependentName }) => (
@@ -54,7 +49,7 @@ export const WORKER_DEPENDENCIES: readonly WorkerDependency[] = [
         values={{ providerName, dependentName, strong }}
       />
     ),
-    providerReason: ({ dependentName }) =>
+    providerHeaderReason: ({ dependentName }) =>
       i18n.translate(
         'xpack.alertzero.watches.workerDependencies.huntToRuleCoverage.providerReason',
         {
@@ -63,7 +58,7 @@ export const WORKER_DEPENDENCIES: readonly WorkerDependency[] = [
           values: { dependentName },
         }
       ),
-    dependentReason: ({ providerName }) =>
+    dependentHeaderReason: ({ providerName }) =>
       i18n.translate(
         'xpack.alertzero.watches.workerDependencies.huntToRuleCoverage.dependentReason',
         {
@@ -83,7 +78,7 @@ export const WORKER_DEPENDENCIES: readonly WorkerDependency[] = [
         values={{ providerName, dependentName, strong }}
       />
     ),
-    providerReason: ({ dependentName }) =>
+    providerHeaderReason: ({ dependentName }) =>
       i18n.translate(
         'xpack.alertzero.watches.workerDependencies.attackDiscoveryToEndpointAnalysis.providerReason',
         {
@@ -92,7 +87,7 @@ export const WORKER_DEPENDENCIES: readonly WorkerDependency[] = [
           values: { dependentName },
         }
       ),
-    dependentReason: ({ providerName }) =>
+    dependentHeaderReason: ({ providerName }) =>
       i18n.translate(
         'xpack.alertzero.watches.workerDependencies.attackDiscoveryToEndpointAnalysis.dependentReason',
         {
@@ -103,13 +98,8 @@ export const WORKER_DEPENDENCIES: readonly WorkerDependency[] = [
   },
 ];
 
-/**
- * Enabled state of every Worker the list returned, across all Watches. A Worker missing from the
- * map is either not registered or hidden by its skill gate; no dependency involving it applies.
- */
 export type WorkerEnabledById = ReadonlyMap<string, boolean>;
 
-/** One paragraph of the disable dialog, one per enabled dependent. */
 export interface WorkerDependencyMessage {
   id: string;
   message: React.ReactNode;
@@ -130,10 +120,6 @@ const dependencyNames = (dependency: WorkerDependency): WorkerDependencyNames =>
   dependentName: workerName(dependency.dependentId),
 });
 
-/**
- * The dialog to show before turning `workerId` off, or `undefined` when no enabled Worker depends
- * on it. Turning a Worker on never needs one, so callers only ask on the way off.
- */
 export const getDisableConfirmation = (
   workerId: string,
   enabledById: WorkerEnabledById
@@ -154,49 +140,41 @@ export const getDisableConfirmation = (
   };
 };
 
-/**
- * Everything the Worker's header warning icon explains, most serious first: reasons this Worker
- * has nothing to do come before the impact its being off has on others.
- */
-export const getWorkerWarningReasons = (
+const getBlockedByReasons = (
   workerId: string,
   enabledById: WorkerEnabledById
-): WorkerWarningReason[] => {
-  const reasons: WorkerWarningReason[] = [];
+): WorkerWarningReason[] =>
+  WORKER_DEPENDENCIES.filter(
+    (dependency) =>
+      dependency.dependentId === workerId && enabledById.get(dependency.providerId) === false
+  ).map((dependency) => ({
+    id: `blockedBy:${dependency.providerId}`,
+    message: dependency.dependentHeaderReason(dependencyNames(dependency)),
+  }));
 
-  for (const dependency of WORKER_DEPENDENCIES) {
-    if (dependency.dependentId === workerId && enabledById.get(dependency.providerId) === false) {
-      reasons.push({
-        id: `blockedBy:${dependency.providerId}`,
-        message: dependency.dependentReason(dependencyNames(dependency)),
-      });
-    }
-  }
-
-  for (const dependency of WORKER_DEPENDENCIES) {
-    if (
+const getBlockingReasons = (
+  workerId: string,
+  enabledById: WorkerEnabledById
+): WorkerWarningReason[] =>
+  WORKER_DEPENDENCIES.filter(
+    (dependency) =>
       dependency.providerId === workerId &&
       enabledById.get(workerId) === false &&
       enabledById.get(dependency.dependentId) === true
-    ) {
-      reasons.push({
-        id: `blocking:${dependency.dependentId}`,
-        message: dependency.providerReason(dependencyNames(dependency)),
-      });
-    }
-  }
+  ).map((dependency) => ({
+    id: `blocking:${dependency.dependentId}`,
+    message: dependency.providerHeaderReason(dependencyNames(dependency)),
+  }));
 
-  return reasons;
-};
+export const getWorkerWarningReasons = (
+  workerId: string,
+  enabledById: WorkerEnabledById
+): WorkerWarningReason[] => [
+  ...getBlockedByReasons(workerId, enabledById),
+  ...getBlockingReasons(workerId, enabledById),
+];
 
-/**
- * Post-save notices for the Workers the save just turned on that still can't do anything. A
- * settings-only save of an already enabled Worker gets none; its header icon already says it. A
- * Worker saved as off gets none either: the disable dialog already confirmed that, and the Worker
- * that actually loses its input keeps its header icon. Being on is also what keeps the "blocking"
- * reasons out, since they only arise while this Worker is off; a new reason kind must hold the
- * same property or be filtered here.
- */
+/** A notice only for a Worker the save turned from off to on that is still blocked. */
 export const getBlockedAfterSaveNotices = (
   enabledBeforeSave: WorkerEnabledById,
   enabledAfterSave: WorkerEnabledById,
@@ -209,6 +187,6 @@ export const getBlockedAfterSaveNotices = (
     )
     .map((workerId) => ({
       workerId,
-      reasons: getWorkerWarningReasons(workerId, enabledAfterSave),
+      reasons: getBlockedByReasons(workerId, enabledAfterSave),
     }))
     .filter((notice) => notice.reasons.length > 0);

@@ -16,7 +16,6 @@ interface WorkerDisableConfirmModalProps {
   onCancel: () => void;
 }
 
-/** Asked before a Worker that an enabled Worker depends on is turned off in the draft. */
 export const WorkerDisableConfirmModal: React.FC<WorkerDisableConfirmModalProps> = ({
   confirmation,
   onConfirm,

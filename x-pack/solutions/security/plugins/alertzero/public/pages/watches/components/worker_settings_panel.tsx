@@ -49,7 +49,6 @@ interface WorkerSettingsPanelProps {
   enabled: boolean;
   settings: WorkerSettings;
   error?: string;
-  /** Why this Worker has nothing to do, or what its being off costs others; one header icon. */
   warningReasons: WorkerWarningReason[];
   /** Settings could not be read for this Worker; controls are locked and the subtitle says why. */
   settingsLocked: boolean;
