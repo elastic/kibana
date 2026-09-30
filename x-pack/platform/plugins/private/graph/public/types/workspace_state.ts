@@ -62,8 +62,18 @@ export interface ServerResultEdge {
   doc_count?: number;
 }
 
+export interface IncomingGraphNode {
+  field: string;
+  term: string;
+  id?: string;
+  label?: string;
+  color?: string;
+  icon?: GenericIcon;
+  data?: { field: string; term: string };
+}
+
 export interface GraphData {
-  nodes: ServerResultNode[];
+  nodes: IncomingGraphNode[];
   edges: ServerResultEdge[];
 }
 export interface TermIntersect {

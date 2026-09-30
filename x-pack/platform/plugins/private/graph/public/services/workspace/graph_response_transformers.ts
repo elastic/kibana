@@ -6,12 +6,8 @@
  */
 
 import type { WorkspaceField } from '../../types/app_state';
+import type { GraphData, IncomingGraphNode } from '../../types/workspace_state';
 import { getIcon } from '../../helpers/style_choices';
-
-interface ExploreVertex {
-  field: string;
-  [key: string]: unknown;
-}
 
 interface ExploreConnection {
   source: number;
@@ -21,11 +17,14 @@ interface ExploreConnection {
 }
 
 interface ExploreResponse {
-  vertices: ExploreVertex[];
+  vertices: IncomingGraphNode[];
   connections: ExploreConnection[];
 }
 
-const styleVertices = (vertices: ExploreVertex[], fields: WorkspaceField[]): ExploreVertex[] =>
+const styleVertices = (
+  vertices: IncomingGraphNode[],
+  fields: WorkspaceField[]
+): IncomingGraphNode[] =>
   vertices.map((vertex) => {
     const field = fields.find(({ name }) => name === vertex.field);
     if (!field) {
@@ -47,7 +46,10 @@ const createEdge = (connection: ExploreConnection, maxEdgeWeight: number) => ({
   width: Math.max(2, (connection.weight / maxEdgeWeight) * 10),
 });
 
-export const transformSearchResponse = (data: ExploreResponse, fields: WorkspaceField[]) => {
+export const transformSearchResponse = (
+  data: ExploreResponse,
+  fields: WorkspaceField[]
+): GraphData => {
   const maxEdgeWeight = data.connections.reduce(
     (maximum, connection) => Math.max(maximum, connection.weight),
     0.00000001
@@ -58,7 +60,10 @@ export const transformSearchResponse = (data: ExploreResponse, fields: Workspace
   };
 };
 
-export const transformExpandResponse = (data: ExploreResponse, fields: WorkspaceField[]) => {
+export const transformExpandResponse = (
+  data: ExploreResponse,
+  fields: WorkspaceField[]
+): GraphData => {
   let maxEdgeWeight = 0.00000001;
   return {
     nodes: styleVertices(data.vertices, fields),
