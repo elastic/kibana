@@ -10,3 +10,4 @@ export { listAutomationsRoute } from './list_automations';
 export { getAutomationRoute } from './get_automation';
 export { updateAutomationRoute } from './update_automation';
 export { deleteAutomationRoute } from './delete_automation';
+export { listAutomationRunsRoute } from './list_automation_runs';
