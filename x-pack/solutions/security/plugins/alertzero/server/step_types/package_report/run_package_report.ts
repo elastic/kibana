@@ -42,32 +42,10 @@ export interface RunPackageReportDeps {
 }
 
 /**
- * Closure prose for a run with no findings. Absence of a hit is only a clean verdict when the
- * run actually covered what it was asked to, so the three hunt statuses must not collapse into
- * one sentence: an analyst reading a closed Investigation has to be able to tell "we looked and
- * the environment is clean" from "we could not look".
- */
-const noFindingsClosureSummary = (
-  huntStatus: PackageReportInput['huntStatus'],
-  reportId: string
-): string => {
-  if (huntStatus === 'success') {
-    return `Hunt for report ${reportId} found no confirmed hits. Closing: nothing in this environment matched the report at the confirming-index bar.`;
-  }
-  if (huntStatus === 'partial') {
-    // Deliberately silent on whether the report stays eligible: `partial` covers both a
-    // transient gap that a later sweep retries and a deterministic one that retires the
-    // report, and this summary cannot tell them apart.
-    return `Hunt for report ${reportId} found no confirmed hits, but did not cover everything it was asked to, so this is not a clean verdict.`;
-  }
-  return `Hunt for report ${reportId} did not run, so nothing was searched and no finding can be reported.`;
-};
-
-/**
  * Orchestrates packaging for one Investigation run. Throws
  * {@link PackageReportIdentityError} when the conversation id does not match the report
- * binding; returns typed `run_incomplete` only when the run claimed a hit whose current-run
- * SSE state cannot be read.
+ * binding; returns typed `run_incomplete` when the run claimed a hit whose current-run SSE
+ * state cannot be read, and when a hunt that did not complete left nothing to package.
  */
 export const runPackageReport = async ({
   spaceId,
@@ -110,19 +88,27 @@ export const runPackageReport = async ({
     // dismissal. Reaching here with a confirmed hit means the state really is missing
     // (a rerun colliding on the attachment id, or a failed attach), which stays
     // `run_incomplete` so the Worker reports the sweep as partial.
-    if (!hasConfirmedHit) {
+    //
+    // Only a hunt that completed may close, though. The hunt-once gate keys on
+    // `evidence.last_hunted_at`, which the hunt writes only for a run it considers
+    // recorded, so a retryable-incomplete or failed run leaves its report eligible and a
+    // later sweep hunts it again. Closing here would have that sweep write its findings --
+    // a real hit included -- into an Investigation this run had already closed.
+    if (!hasConfirmedHit && huntStatus === 'success') {
       return {
         status: 'packaged',
         coverage: { written: [], skipped: [] },
         proposals: [],
         dismiss: true,
-        closureSummary: noFindingsClosureSummary(huntStatus, reportId),
+        closureSummary: `Hunt for report ${reportId} found no confirmed hits. Closing: nothing in this environment matched the report at the confirming-index bar.`,
         expectedProposalCount: 0,
       };
     }
     return {
       status: 'run_incomplete',
-      reason: `No current-run SSE attachment for runId=${runId}`,
+      reason: hasConfirmedHit
+        ? `No current-run SSE attachment for runId=${runId}`
+        : `Hunt did not complete (status=${huntStatus}), so there is no verdict to record for runId=${runId}`,
     };
   }
 

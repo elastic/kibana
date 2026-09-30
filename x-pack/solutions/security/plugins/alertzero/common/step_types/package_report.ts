@@ -116,9 +116,10 @@ export const packageReportStepCommonDefinition: CommonStepDefinition<
         'writes pending security.coverage KIs (no-reset), resolves every fillable category:respond catalog ' +
         'action, and returns mint payloads (including expectedProposalCount, the settlement barrier the ' +
         'packaging child threads into each gate) for the packaging child to dispatch as gate executions. ' +
-        'A hunt that confirmed no hit leaves no current-run SSE attachment, so it packages as a dismissal ' +
-        'off huntStatus and hasConfirmedHit; run_incomplete is reserved for a run whose state is genuinely ' +
-        'missing. Does not close the Investigation; dismiss is a boolean the child applies.',
+        'A completed hunt that confirmed no hit leaves no current-run SSE attachment, so it packages as a ' +
+        'dismissal off huntStatus and hasConfirmedHit. A hunt that did not complete returns run_incomplete ' +
+        'instead, because its report may still be hunted again into this same Investigation. ' +
+        'Does not close the Investigation; dismiss is a boolean the child applies.',
     }),
     examples: [
       `## Package a hunt run

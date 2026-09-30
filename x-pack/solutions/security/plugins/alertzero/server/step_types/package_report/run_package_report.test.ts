@@ -177,17 +177,13 @@ describe('runPackageReport', () => {
 
   // A hunt that confirmed no hit writes no SSE attachment at all, so this is the shape of
   // every no-hit run in production, not an edge case. It must close the Investigation.
-  it.each([
-    ['success', 'no confirmed hits'],
-    ['partial', 'not a clean verdict'],
-    ['failed', 'did not run'],
-  ] as const)('packages a no-hit %s run as a dismissal', async (huntStatus, expectedPhrase) => {
+  it('packages a completed no-hit run as a dismissal', async () => {
     const result = await runPackageReport({
       spaceId: 'default',
       reportId,
       investigationConversationId: conversationId,
       runId,
-      huntStatus,
+      huntStatus: 'success',
       hasConfirmedHit: false,
       attachments: [],
       deps: deps(),
@@ -200,8 +196,32 @@ describe('runPackageReport', () => {
     expect(result.dismiss).toBe(true);
     expect(result.proposals).toEqual([]);
     expect(result.expectedProposalCount).toBe(0);
-    expect(result.closureSummary).toContain(expectedPhrase);
+    expect(result.closureSummary).toContain('no confirmed hits');
   });
+
+  // A hunt that did not complete may leave its report eligible, in which case a later sweep
+  // hunts it again — into this same Investigation. Closing it here would mean those findings
+  // land in a conversation already closed, so an unfinished run must not dismiss.
+  it.each(['partial', 'failed'] as const)(
+    'leaves the Investigation open when a no-hit run was %s',
+    async (huntStatus) => {
+      const result = await runPackageReport({
+        spaceId: 'default',
+        reportId,
+        investigationConversationId: conversationId,
+        runId,
+        huntStatus,
+        hasConfirmedHit: false,
+        attachments: [],
+        deps: deps(),
+      });
+
+      expect(result).toEqual({
+        status: 'run_incomplete',
+        reason: expect.stringContaining(huntStatus),
+      });
+    }
+  );
 
   // Only reachable when the run said it confirmed a hit: the attachment should exist and
   // does not, so the sweep has to report itself partial rather than close the Investigation.
