@@ -249,6 +249,16 @@ describe('NightshiftInvestigationsClient.get()', () => {
     expect(result.severity).toBe('high');
   });
 
+  it('normalizes a legacy stored severity', async () => {
+    repository.get.mockResolvedValue(
+      makeRecord({ severity: '80-critical' } as unknown as Partial<InvestigationAttributes>)
+    );
+
+    const result = await makeClient().get('inv-1');
+
+    expect(result.severity).toBe('critical');
+  });
+
   it('leaves severity unset when the record has none', async () => {
     repository.get.mockResolvedValue(makeRecord());
     const result = await makeClient().get('inv-1');
@@ -369,6 +379,20 @@ describe('NightshiftInvestigationsClient.list()', () => {
 
     const result = await makeClient().list({});
     expect(result.results[0].severity).toBe('critical');
+  });
+
+  it('normalizes legacy severity on list items', async () => {
+    repository.find.mockResolvedValue(
+      findResult([
+        makeRecord({ severity: '60-high' } as unknown as Partial<InvestigationAttributes>, {
+          id: 'inv-42',
+        }),
+      ])
+    );
+
+    const result = await makeClient().list({});
+
+    expect(result.results[0].severity).toBe('high');
   });
 });
 
