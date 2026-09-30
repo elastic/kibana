@@ -28,6 +28,10 @@ const sandboxSecretsLabel = i18n.translate('xpack.nightshift.sandboxSecretsLinkL
   defaultMessage: 'Sandbox secrets',
 });
 
+const automationsLabel = i18n.translate('xpack.nightshift.automations.menuLabel', {
+  defaultMessage: 'Automations',
+});
+
 const settingsEbtProps = getEbtProps({
   action: NIGHTSHIFT_EBT_ACTIONS.VIEW_SETTINGS,
   element: NIGHTSHIFT_EBT_ELEMENTS.PAGE_HEADER,
@@ -59,6 +63,8 @@ export function NightshiftAppHeader({
   onSettingsClick,
   settingsHref,
   onSandboxSecretsClick,
+  onAutomationsClick,
+  automationsHref,
 }: {
   onManagementClick: () => void | Promise<void>;
   managementHref: string;
@@ -66,10 +72,25 @@ export function NightshiftAppHeader({
   settingsHref?: string;
   /** Shows the sandbox secrets menu item when set. */
   onSandboxSecretsClick?: () => void;
+  onAutomationsClick?: () => void | Promise<void>;
+  automationsHref?: string;
 }): React.ReactElement {
   const menu = useMemo<AppMenuConfig>(
     () => ({
       items: [
+        ...(onAutomationsClick && automationsHref
+          ? [
+              {
+                id: 'nightshiftAutomations',
+                label: automationsLabel,
+                iconType: 'workflowsApp',
+                href: automationsHref,
+                run: () => void onAutomationsClick(),
+                testId: 'nightshiftAutomationsLink',
+                overflow: true,
+              },
+            ]
+          : []),
         ...(onSandboxSecretsClick
           ? [
               {
@@ -111,7 +132,15 @@ export function NightshiftAppHeader({
           : []),
       ],
     }),
-    [managementHref, onManagementClick, onSandboxSecretsClick, onSettingsClick, settingsHref]
+    [
+      automationsHref,
+      managementHref,
+      onAutomationsClick,
+      onManagementClick,
+      onSandboxSecretsClick,
+      onSettingsClick,
+      settingsHref,
+    ]
   );
 
   return <AppHeader title={nightshiftPageTitle} menu={menu} spacing="compact" />;
