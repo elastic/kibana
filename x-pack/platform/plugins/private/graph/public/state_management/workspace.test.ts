@@ -539,6 +539,32 @@ describe('workspace listeners', () => {
       expect(environment.workspace.mergeGraph).toHaveBeenCalledWith({ nodes: [], edges: [] });
     });
 
+    it('ignores stale fill-connection responses', async () => {
+      const environment = createWorkspaceListenerEnvironment();
+      const resolvers: Array<
+        (response: {
+          hits: { total: { value: number } };
+          aggregations: { matrix: { buckets: [] } };
+        }) => void
+      > = [];
+      environment.mockedDeps.searchGraph.mockImplementation(
+        () => new Promise((resolve) => resolvers.push(resolve))
+      );
+
+      environment.store.dispatch(fillWorkspaceConnections(10));
+      environment.store.dispatch(fillWorkspaceConnections(10));
+      const response = {
+        hits: { total: { value: 0 } },
+        aggregations: { matrix: { buckets: [] as [] } },
+      };
+      resolvers[1](response);
+      await flushPromises();
+      resolvers[0](response);
+      await flushPromises();
+
+      expect(environment.workspace.mergeGraph).toHaveBeenCalledTimes(1);
+    });
+
     it('ignores stale expand responses', async () => {
       const environment = createWorkspaceListenerEnvironment();
       const fields = [{ name: 'field' }] as WorkspaceField[];
