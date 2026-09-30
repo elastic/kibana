@@ -80,7 +80,7 @@ export function TreeView({ symptom }: TreeViewProps) {
 
   const activeVersion = selectedVersion ?? tree?.version;
   const isHeadSelected = activeVersion === tree?.version;
-  const { data: versionData } = useDecisionTreeVersion(
+  const { data: versionData, isError: isVersionError } = useDecisionTreeVersion(
     symptom,
     isHeadSelected ? undefined : activeVersion
   );
@@ -139,7 +139,7 @@ export function TreeView({ symptom }: TreeViewProps) {
           </EuiBadge>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <EuiBadge color="hollow">{`v${tree.version}`}</EuiBadge>
+          <EuiBadge color="hollow">{`v${activeVersion ?? tree.version}`}</EuiBadge>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EuiText size="xs" color="subdued">
@@ -180,6 +180,13 @@ export function TreeView({ symptom }: TreeViewProps) {
             nodes={parsed?.nodes ?? []}
             edges={parsed?.edges ?? []}
           />
+        ) : isVersionError ? (
+          <EuiText color="danger" size="s" data-test-subj="nightshiftDecisionTreeVersionError">
+            {i18n.translate('xpack.significantEventsApp.decisionTrees.versionLoadError', {
+              defaultMessage: 'Version {version} could not be loaded.',
+              values: { version: activeVersion },
+            })}
+          </EuiText>
         ) : (
           <EuiLoadingSpinner size="m" />
         )}
