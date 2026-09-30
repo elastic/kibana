@@ -17,6 +17,7 @@ import {
   isRecoveryTransitionConsistentWithStrategy,
   isStateTransitionAllowed,
   updateRuleDataSchema,
+  ruleOwnershipSchema,
   IMMUTABLE_RULE_FIELDS,
   getBreachEsqlQuery,
   getRecoverEsqlQuery,
@@ -1318,6 +1319,24 @@ describe('updateRuleDataSchema', () => {
       expect(result.success).toBe(false);
     });
 
+    it('accepts schedule.lookback set to null (clear a stored lookback)', () => {
+      const result = updateRuleDataSchema.safeParse({ schedule: { lookback: null } });
+      expect(result.success).toBe(true);
+      if (result.success) {
+        expect(result.data.schedule?.lookback).toBeNull();
+      }
+    });
+
+    it('does not allow schedule.lookback: null on the create schema', () => {
+      const result = createRuleDataSchema.safeParse({
+        kind: 'signal',
+        metadata: { name: 'test rule' },
+        schedule: { every: '5m', lookback: null },
+        query: { base: 'FROM logs-* | LIMIT 1' },
+      });
+      expect(result.success).toBe(false);
+    });
+
     it('rejects an invalid ES|QL base query', () => {
       const result = updateRuleDataSchema.safeParse({ query: { base: 'FROM |' } });
       expect(result.success).toBe(false);
@@ -1771,12 +1790,96 @@ describe('findRulesRequestSchema', () => {
   });
 });
 
+// ---------------------------------------------------------------------------
+// Step 4.4: ruleOwnershipSchema — response-only discriminated union
+// ---------------------------------------------------------------------------
+
+describe('ruleOwnershipSchema (step 4.4)', () => {
+  it('accepts a managed ownership object', () => {
+    const result = ruleOwnershipSchema.parse({
+      managed: true,
+      solution: 'security',
+      domain: 'detection',
+    });
+    expect(result).toEqual({ managed: true, solution: 'security', domain: 'detection' });
+  });
+
+  it('accepts an unmanaged ownership object without app', () => {
+    const result = ruleOwnershipSchema.parse({ managed: false });
+    expect(result).toEqual({ managed: false });
+  });
+
+  it('accepts an unmanaged ownership object with app', () => {
+    const result = ruleOwnershipSchema.parse({ managed: false, app: 'significantEvents' });
+    expect(result).toEqual({ managed: false, app: 'significantEvents' });
+  });
+
+  it('rejects an unmanaged ownership with app exceeding 128 chars', () => {
+    const result = ruleOwnershipSchema.safeParse({ managed: false, app: 'a'.repeat(129) });
+    expect(result.success).toBe(false);
+  });
+
+  it('rejects a managed ownership without solution', () => {
+    const result = ruleOwnershipSchema.safeParse({ managed: true, domain: 'detection' });
+    expect(result.success).toBe(false);
+  });
+
+  it('rejects a managed ownership without domain', () => {
+    const result = ruleOwnershipSchema.safeParse({ managed: true, solution: 'security' });
+    expect(result.success).toBe(false);
+  });
+
+  it('createRuleDataSchema rejects ownership in metadata (response-only, strict schema)', () => {
+    const result = createRuleDataSchema.safeParse({
+      kind: 'signal',
+      metadata: { name: 'r', ownership: { managed: false } },
+      schedule: { every: '5m' },
+      query: { base: 'FROM logs-* | LIMIT 1' },
+    });
+    expect(result.success).toBe(false);
+  });
+
+  it('updateRuleDataSchema rejects ownership in metadata (response-only, strict schema)', () => {
+    const result = updateRuleDataSchema.safeParse({
+      metadata: { name: 'r', ownership: { managed: false } },
+    });
+    expect(result.success).toBe(false);
+  });
+
+  // Step 4.2: metadata.revision is server-managed and response-only. No create or
+  // update body may carry it. These tests pin that the strict metadataSchema rejects
+  // it, the same guarantee ownership gets above.
+  it('createRuleDataSchema rejects revision in metadata (response-only, strict schema)', () => {
+    const result = createRuleDataSchema.safeParse({
+      kind: 'signal',
+      metadata: { name: 'r', revision: 0 },
+      schedule: { every: '5m' },
+      query: { base: 'FROM logs-* | LIMIT 1' },
+    });
+    expect(result.success).toBe(false);
+  });
+
+  it('updateRuleDataSchema rejects revision in metadata (response-only, strict schema)', () => {
+    const result = updateRuleDataSchema.safeParse({
+      metadata: { name: 'r', revision: 0 },
+    });
+    expect(result.success).toBe(false);
+  });
+});
+
 describe('bulkGetRulesResponseSchema', () => {
   const sampleRule = {
     id: 'rule-1',
     version: 1,
     kind: 'alert' as const,
-    metadata: { name: 'r' },
+    metadata: {
+      name: 'r',
+      signature_id: 'sample-sig-id',
+      revision: 0,
+      source: { type: 'internal' as const, version: 1 },
+      // Step 4.4: ownership is now required in the response schema.
+      ownership: { managed: false },
+    },
     time_field: '@timestamp',
     schedule: { every: '5m' },
     query: { base: 'FROM logs-* | LIMIT 1' },
@@ -1874,7 +1977,13 @@ describe('bulkCreateRulesResponseSchema', () => {
     id: 'rule-1',
     version: 1,
     kind: 'alert' as const,
-    metadata: { name: 'r' },
+    metadata: {
+      name: 'r',
+      signature_id: 'sample-sig-id',
+      revision: 0,
+      source: { type: 'internal' as const, version: 1 },
+      ownership: { managed: false },
+    },
     time_field: '@timestamp',
     schedule: { every: '5m' },
     query: { base: 'FROM logs-* | LIMIT 1' },
@@ -1934,8 +2043,18 @@ describe('ruleTagsParamsSchema', () => {
     expect(() => ruleTagsParamsSchema.parse({ kind: 'unknown' })).toThrow();
   });
 
-  it('rejects the removed filter key', () => {
-    expect(() => ruleTagsParamsSchema.parse({ filter: 'kind:alert' })).toThrow();
+  it('accepts a KQL filter string', () => {
+    expect(ruleTagsParamsSchema.parse({ filter: 'kind:alert' })).toEqual({ filter: 'kind:alert' });
+  });
+
+  it('accepts all three parameters together', () => {
+    expect(
+      ruleTagsParamsSchema.parse({ search: 'cpu', kind: 'alert', filter: 'enabled:true' })
+    ).toEqual({ search: 'cpu', kind: 'alert', filter: 'enabled:true' });
+  });
+
+  it('rejects a filter longer than the KQL length limit', () => {
+    expect(() => ruleTagsParamsSchema.parse({ filter: 'kind:alert'.padEnd(10001, ' ') })).toThrow();
   });
 
   it('rejects unknown keys', () => {

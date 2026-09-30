@@ -6,6 +6,7 @@
  */
 
 import type { SavedObjectsModelVersionMap } from '@kbn/core-saved-objects-server';
+import { detectionRuleBuilderFieldsManifest } from '@kbn/security-detection-rule-builder-fields';
 import {
   ruleSavedObjectAttributesSchemaV1,
   ruleSavedObjectAttributesSchemaV2,
@@ -13,11 +14,13 @@ import {
   ruleSavedObjectAttributesSchemaV4,
   ruleSavedObjectAttributesSchemaV5,
   ruleSavedObjectAttributesSchemaV6,
+  ruleSavedObjectAttributesSchemaV12,
 } from '../schemas/rule_saved_object_attributes';
 import { migrateRuleArtifactsToData } from './migrate_rule_artifacts_to_data';
 import { migrateDashboardArtifactDataKey } from './migrate_dashboard_artifact_data_key';
 import { migrateRuleQueryShape } from './migrate_rule_query_shape';
 import { toActor } from './to_actor';
+import { fromBuilderFieldsManifest } from './from_builder_fields_manifest';
 
 export const ruleModelVersions: SavedObjectsModelVersionMap = {
   '1': {
@@ -144,9 +147,8 @@ export const ruleModelVersions: SavedObjectsModelVersionMap = {
     //
     // Additive only. Model version 6's schema requires `query.format` and a
     // present `query.breach`, so the pre-collapse keys stay on disk for the
-    // rollback window and a later model version removes them. Rules created
-    // after the upgrade carry only the new shape, matching the model version 4
-    // precedent.
+    // rollback window and model version 8 removes them. Rules created after the
+    // upgrade carry only the new shape, matching the model version 4 precedent.
     //
     // An `unsafe_transform` rather than a `data_backfill` because `query` has to
     // merge the two shapes key by key; `data_backfill` deep-merges its result,
@@ -189,4 +191,338 @@ export const ruleModelVersions: SavedObjectsModelVersionMap = {
       create: ruleSavedObjectAttributesSchemaV6,
     },
   },
+
+  // ---------------------------------------------------------------------------
+  // SQUASHED POC MODEL VERSION
+  //
+  // The five entries below ('9' through '13') were individually designed on this
+  // POC branch, each carrying its own mappings or backfill and a schema step
+  // ('13' was the exception: changes: [] — schema step only, no migration changes).
+  // They are squashed here into a single '9' purely to satisfy the saved-objects
+  // checker's one-new-version-per-PR rule. The five original entries — with their
+  // per-version explanatory comments and Ref: pointers — are preserved verbatim
+  // in the commented block further below. An engineer splitting this POC into
+  // production PRs should restore the individual versions from that block, remove
+  // this squashed entry, re-introduce the matching schema imports (V7, V11) that
+  // were removed from the import list above, and rename the checker fixture:
+  //   packages/kbn-check-saved-objects-cli/src/migrations/__fixtures__/alerting_rule/
+  //     10.9.0.json (keys '10.8.0'/'10.9.0') must become 10.13.0.json with keys
+  //     '10.12.0'/'10.13.0', because the fixture is addressed by the highest model
+  //     version in the PR ('13' in production, '9' in this squashed form).
+  //
+  // Changes carried by this squashed '9', in migration order:
+  //   1. mappings_addition — metadata.builder_fields as flattened (was '9')
+  //   2. fromBuilderFieldsManifest(detectionRuleBuilderFieldsManifest, 1, V11).changes
+  //      — typed sub-fields for all detection rule types v1 (was '10' and '11',
+  //        now a single call covering both security.detection.query and
+  //        security.detection.threshold from one shared manifest)
+  //   3. mappings_addition — framework field families: signature_id, source,
+  //      ownership, builder_type (was '12')
+  //   4. data_backfill — stamps all four field families on migrating rules (was '12')
+  //   (was '13': changes: [] — no changes; only advanced the schema to V12)
+  //
+  // Order is load-bearing: every mappings_addition must precede the backfill
+  // that writes into those fields, and the container's own addition must precede
+  // the sub-fields. Keep this order: container, then the manifest's changes,
+  // then the framework field families' addition, then the ownership backfill.
+  //
+  // The fromBuilderFieldsManifest() call must remain an actual call (not inlined
+  // data) because addFoldedManifest() records (manifest, n) in a global registry
+  // that the fold-completeness check and the registration-time managed-type
+  // completeness check (check 7) read. Spreading .changes from the call preserves
+  // that side effect while allowing changes from the manifest's version to be
+  // interleaved with the framework's own additions in the correct migration order.
+  //
+  // The schemas block is '13's, verbatim (ruleSavedObjectAttributesSchemaV12),
+  // because that was the last schema step in the POC sequence.
+  //
+  // Ref: (all original Ref: pointers are in the commented block below)
+  // ---------------------------------------------------------------------------
+  '9': {
+    changes: [
+      // was '9': introduce metadata.builder_fields as flattened
+      {
+        type: 'mappings_addition',
+        addedMappings: {
+          metadata: {
+            properties: {
+              builder_fields: { type: 'flattened', ignore_above: 4096 },
+            },
+          },
+        },
+      },
+      // was '10' and '11': detection rule type v1 typed sub-fields for both
+      // security.detection.query and security.detection.threshold, now folded
+      // from a single shared manifest rather than one call per type.
+      ...fromBuilderFieldsManifest(
+        detectionRuleBuilderFieldsManifest,
+        1,
+        ruleSavedObjectAttributesSchemaV12
+      ).changes,
+      // was '12': framework field families (identity, versions, source, ownership, builder_type)
+      {
+        type: 'mappings_addition',
+        addedMappings: {
+          metadata: {
+            properties: {
+              // rule-identity.md: keyword-indexed so find can filter on it
+              signature_id: { type: 'keyword', ignore_above: 256 },
+              // rule-source.md: type/id as keyword, version as integer
+              source: {
+                properties: {
+                  type: { type: 'keyword', ignore_above: 256 },
+                  id: { type: 'keyword', ignore_above: 256 },
+                  version: { type: 'integer' },
+                },
+              },
+              // rule-ownership.md: managed/solution/domain for filter + exclusion;
+              // app is attribution-only (128-char cap matches SO schema bound)
+              ownership: {
+                properties: {
+                  managed: { type: 'boolean' },
+                  solution: { type: 'keyword', ignore_above: 256 },
+                  domain: { type: 'keyword', ignore_above: 256 },
+                  app: { type: 'keyword', ignore_above: 128 },
+                },
+              },
+              // rule-types.md: builder_type must be keyword-indexed and filterable
+              builder_type: { type: 'keyword', ignore_above: 256 },
+            },
+          },
+        },
+      },
+      // was '12': backfill stamps all four field families
+      //
+      // Ownership is no longer derived from a Security-owned type map. The model
+      // version that introduces the container is the same one that introduces
+      // metadata.ownership, so no stored rule can be of a detection rule type and
+      // predate the ownership stamp. A rule that carried a detection-shaped
+      // builder_type string before any of this existed is stamped { managed: false },
+      // and the write gate still refuses it through its second half, which reads the
+      // registration for the requested builder type rather than the stored stamp alone.
+      //
+      // Ref: builder-type-registration-redesign.md "What changes from the current design"
+      //      alerting_v2/server/lib/rules_client/utils.ts getManagedWriteOwner
+      {
+        type: 'data_backfill',
+        backfillFn: (doc) => {
+          return {
+            attributes: {
+              metadata: {
+                ...doc.attributes.metadata,
+                // Preserve an already-set signature_id (set by the 4.1 write path);
+                // fall back to the object id for unmigrated rules.
+                signature_id: doc.attributes.metadata?.signature_id ?? (doc.id as string),
+                // Preserve a declared source; default to internal for unmigrated rules.
+                source:
+                  doc.attributes.metadata?.source ?? ({ type: 'internal', version: 1 } as const),
+                // Preserve a non-zero revision; 0 is the "never edited" baseline.
+                revision: doc.attributes.metadata?.revision ?? 0,
+                // Preserve a stamped ownership. Pre-container rules get { managed: false };
+                // the write gate's second half reads the registration and refuses any
+                // managed-type write regardless of the stored stamp.
+                ownership: doc.attributes.metadata?.ownership ?? { managed: false as const },
+              },
+            },
+          };
+        },
+      },
+    ],
+    // schemas from '13' (the final schema step in the POC sequence)
+    schemas: {
+      forwardCompatibility: ruleSavedObjectAttributesSchemaV12.extends({}, { unknowns: 'ignore' }),
+      create: ruleSavedObjectAttributesSchemaV12,
+    },
+  },
+
+  // ---------------------------------------------------------------------------
+  // ORIGINAL POC MODEL VERSIONS — kept verbatim for reference
+  //
+  // These are the five individually designed model versions from this POC branch.
+  // They were squashed into the single '9' above only to satisfy the saved-objects
+  // checker's one-new-version-per-PR rule. An engineer splitting this work into
+  // production PRs should:
+  //   1. Restore these entries as live code.
+  //   2. Remove the squashed '9' above.
+  //   3. Re-add the imports for ruleSavedObjectAttributesSchemaV7 and
+  //      ruleSavedObjectAttributesSchemaV11 (removed from the import list above
+  //      because they were only referenced by the now-squashed entries).
+  //   4. Rename the checker fixture back: the file
+  //        packages/kbn-check-saved-objects-cli/src/migrations/__fixtures__/
+  //        alerting_rule/10.9.0.json (keys '10.8.0'/'10.9.0')
+  //      must become 10.13.0.json with top-level keys '10.12.0'/'10.13.0'.
+  //      The checker resolves the fixture by the PR's highest model version
+  //      (10.13.0 in production, 10.9.0 in this squashed form) and requires
+  //      the two keys to match the current and previous version exactly.
+  // ---------------------------------------------------------------------------
+
+  // '9': {
+  //   // Introduce `metadata.builder_fields`, the structured parameters a rule
+  //   // builder was configured with. Purely additive and optional, so there is
+  //   // nothing to backfill: rules created before this version keep only their
+  //   // `builder_type` and stay readable.
+  //   //
+  //   // Mapped as `flattened` so leaf values are searchable as keywords (term,
+  //   // exists, prefix queries). Typed sub-fields for numeric range queries can
+  //   // be added per builder type in a future model version.
+  //   //
+  //   // Rolling back to model version 7 is safe: that schema ignores unknown
+  //   // attributes on read, so a rule carrying builder fields still loads, with
+  //   // the query it was already storing. The flattened mapping is ignored by
+  //   // older code — unmapped fields in `_source` are harmless.
+  //   changes: [
+  //     {
+  //       type: 'mappings_addition',
+  //       addedMappings: {
+  //         metadata: {
+  //           properties: {
+  //             builder_fields: { type: 'flattened', ignore_above: 4096 },
+  //           },
+  //         },
+  //       },
+  //     },
+  //   ],
+  //   schemas: {
+  //     forwardCompatibility: ruleSavedObjectAttributesSchemaV7.extends({}, { unknowns: 'ignore' }),
+  //     create: ruleSavedObjectAttributesSchemaV7,
+  //   },
+  // },
+  // ---------------------------------------------------------------------------
+  // Detection-type manifest folds (step 3.5, revised by step B.5)
+  //
+  // Each line expands one manifest version into an ordinary model version.
+  // The global model-version sequence is append-only and totally ordered; both
+  // the number and the manifest must stay here permanently once published.
+  //
+  // As a side effect, fromBuilderFieldsManifest() records (manifest, n) in
+  // globalFoldedVersions so that:
+  //   - the fold-completeness check (saved_objects/index.ts) can verify every
+  //     manifest version has been expanded;
+  //   - the registration-time managed-type completeness check (check 7) can
+  //     verify that a managed type is covered by a folded manifest.
+  //
+  // Ref: builder-type-registration-redesign.md "Assembling the saved-object type"
+  //      builder-type-registration-redesign.md "How stored builder fields evolve"
+  // ---------------------------------------------------------------------------
+
+  // Detection rule types v1: all 32 sub-fields for both
+  // security.detection.query and security.detection.threshold, folded from a
+  // single shared manifest. No backfill — no stored rule carries these fields
+  // yet when they first ship.
+  // '10': fromBuilderFieldsManifest(detectionRuleBuilderFieldsManifest, 1, ruleSavedObjectAttributesSchemaV10),
+
+  // ---------------------------------------------------------------------------
+  // Framework rule-model fields (step 4.5, revised by step B.5)
+  //
+  // One shared version carrying all four field families added in Phase 4:
+  // identity (signature_id), versions (revision), source, and ownership — plus
+  // the builder_type keyword mapping that the Detections API filter depends on.
+  //
+  // The mappings_addition mirrors every field into the static rule_mappings.ts;
+  // Kibana core validates at startup that every addition is present verbatim.
+  //
+  // The data_backfill stamps:
+  //   - signature_id  := the rule's own saved-object id (deterministic, unique)
+  //   - source        := { type: 'internal', version: 1 } (no lineage to recover)
+  //   - revision      := 0 (the "never meaningfully edited" baseline)
+  //   - ownership     := { managed: false } on every pre-container rule.
+  //                      The write gate's second half reads the registration for
+  //                      the requested builder type, so a rule stamped
+  //                      { managed: false } whose type is a registered managed
+  //                      type is still refused. No type map is needed.
+  //
+  // All four use `?? <default>` so that rules already written by the Phase 4
+  // write paths (steps 4.1–4.4) keep their live values when this version's
+  // backfill runs during migration.
+  //
+  // Ref: rule-identity.md "Storage and migration"
+  //      rule-versions.md "Storage and migration"
+  //      rule-source.md "Storage and migration"
+  //      rule-ownership.md "Storage, mapping, and migration"
+  //      rule-types.md "The discriminator must be indexed and filterable"
+  //      builder-type-registration-redesign.md "What changes from the current design"
+  // ---------------------------------------------------------------------------
+  // '11': {
+  //   changes: [
+  //     {
+  //       type: 'mappings_addition',
+  //       addedMappings: {
+  //         metadata: {
+  //           properties: {
+  //             // rule-identity.md: keyword-indexed so find can filter on it
+  //             signature_id: { type: 'keyword', ignore_above: 256 },
+  //             // rule-source.md: type/id as keyword, version as integer
+  //             source: {
+  //               properties: {
+  //                 type: { type: 'keyword', ignore_above: 256 },
+  //                 id: { type: 'keyword', ignore_above: 256 },
+  //                 version: { type: 'integer' },
+  //               },
+  //             },
+  //             // rule-ownership.md: managed/solution/domain for filter + exclusion;
+  //             // app is attribution-only (128-char cap matches SO schema bound)
+  //             ownership: {
+  //               properties: {
+  //                 managed: { type: 'boolean' },
+  //                 solution: { type: 'keyword', ignore_above: 256 },
+  //                 domain: { type: 'keyword', ignore_above: 256 },
+  //                 app: { type: 'keyword', ignore_above: 128 },
+  //               },
+  //             },
+  //             // rule-types.md: builder_type must be keyword-indexed and filterable
+  //             builder_type: { type: 'keyword', ignore_above: 256 },
+  //           },
+  //         },
+  //       },
+  //     },
+  //     {
+  //       type: 'data_backfill',
+  //       backfillFn: (doc) => {
+  //         return {
+  //           attributes: {
+  //             metadata: {
+  //               ...doc.attributes.metadata,
+  //               // Preserve an already-set signature_id (set by the 4.1 write path);
+  //               // fall back to the object id for unmigrated rules.
+  //               signature_id: doc.attributes.metadata?.signature_id ?? (doc.id as string),
+  //               // Preserve a declared source; default to internal for unmigrated rules.
+  //               source:
+  //                 doc.attributes.metadata?.source ?? ({ type: 'internal', version: 1 } as const),
+  //               // Preserve a non-zero revision; 0 is the "never edited" baseline.
+  //               revision: doc.attributes.metadata?.revision ?? 0,
+  //               // Preserve a stamped ownership; stamp { managed: false } for
+  //               // pre-container rules. The write gate's second half reads the
+  //               // registration, so managed types are still refused.
+  //               ownership: doc.attributes.metadata?.ownership ?? { managed: false as const },
+  //             },
+  //           },
+  //         };
+  //       },
+  //     },
+  //   ],
+  //   schemas: {
+  //     forwardCompatibility: ruleSavedObjectAttributesSchemaV11.extends({}, { unknowns: 'ignore' }),
+  //     create: ruleSavedObjectAttributesSchemaV11,
+  //   },
+  // },
+  // ---------------------------------------------------------------------------
+  // Step 6.4: execution-time builder types (query optional)
+  //
+  // Makes `query` optional on the stored rule. Execution-time builder rules
+  // compile their query fresh on every run and persist nothing in the `query`
+  // field. Write-time builder rules and plain ES|QL rules keep their stored
+  // query unchanged.
+  //
+  // No backfill needed: existing rules already have a stored query; new
+  // execution-time rules simply omit the field.
+  //
+  // Ref: rule-execution-logic.md "A rule without a persisted query"
+  // ---------------------------------------------------------------------------
+  // '13': {
+  //   changes: [],
+  //   schemas: {
+  //     forwardCompatibility: ruleSavedObjectAttributesSchemaV12.extends({}, { unknowns: 'ignore' }),
+  //     create: ruleSavedObjectAttributesSchemaV12,
+  //   },
+  // },
 };

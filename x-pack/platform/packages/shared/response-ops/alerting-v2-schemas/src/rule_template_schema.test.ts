@@ -302,9 +302,20 @@ describe('rule template create-rule schema coupling', () => {
               "additionalProperties": false,
               "description": "Rule metadata.",
               "properties": Object {
+                "builder_fields": Object {
+                  "additionalProperties": Object {},
+                  "description": "Structured parameters for the rule builder identified by \`builder_type\`. The server generates the rule query from these fields.",
+                  "propertyNames": Object {
+                    "maxLength": 256,
+                    "minLength": 1,
+                    "type": "string",
+                  },
+                  "type": "object",
+                },
                 "builder_type": Object {
                   "description": "Identifies the rule builder that authored this rule (e.g. \\"threshold\\"). Absent for rules authored directly in ES|QL.",
                   "maxLength": 64,
+                  "minLength": 1,
                   "type": "string",
                 },
                 "description": Object {
@@ -317,6 +328,90 @@ describe('rule template create-rule schema coupling', () => {
                   "maxLength": 256,
                   "minLength": 1,
                   "type": "string",
+                },
+                "signature_id": Object {
+                  "description": "Stable logical-rule identifier. Optional at creation — generated when absent. Immutable after creation.",
+                  "maxLength": 256,
+                  "minLength": 1,
+                  "type": "string",
+                },
+                "source": Object {
+                  "oneOf": Array [
+                    Object {
+                      "additionalProperties": false,
+                      "properties": Object {
+                        "type": Object {
+                          "const": "internal",
+                          "type": "string",
+                        },
+                        "version": Object {
+                          "description": "Content version. Starts at 1.",
+                          "maximum": 9007199254740991,
+                          "minimum": 1,
+                          "type": "integer",
+                        },
+                      },
+                      "required": Array [
+                        "type",
+                        "version",
+                      ],
+                      "type": "object",
+                    },
+                    Object {
+                      "additionalProperties": false,
+                      "properties": Object {
+                        "id": Object {
+                          "description": "The id of the template the rule was created from.",
+                          "maxLength": 150,
+                          "minLength": 1,
+                          "type": "string",
+                        },
+                        "type": Object {
+                          "const": "template",
+                          "type": "string",
+                        },
+                        "version": Object {
+                          "description": "Content version. Starts at 1.",
+                          "maximum": 9007199254740991,
+                          "minimum": 1,
+                          "type": "integer",
+                        },
+                      },
+                      "required": Array [
+                        "type",
+                        "version",
+                        "id",
+                      ],
+                      "type": "object",
+                    },
+                    Object {
+                      "additionalProperties": false,
+                      "properties": Object {
+                        "id": Object {
+                          "description": "The stable id of the external asset.",
+                          "maxLength": 150,
+                          "minLength": 1,
+                          "type": "string",
+                        },
+                        "type": Object {
+                          "const": "external",
+                          "type": "string",
+                        },
+                        "version": Object {
+                          "description": "Asset version the rule is synced to.",
+                          "maximum": 9007199254740991,
+                          "minimum": 1,
+                          "type": "integer",
+                        },
+                      },
+                      "required": Array [
+                        "type",
+                        "version",
+                        "id",
+                      ],
+                      "type": "object",
+                    },
+                  ],
                 },
                 "tags": Object {
                   "description": "Tags for categorization, e.g. [\\"production\\", \\"infra\\"].",
@@ -672,7 +767,11 @@ describe('rule template create-rule schema coupling', () => {
               ],
             },
             "query": Object {
-              "$ref": "#/definitions/alerting_rule_query",
+              "allOf": Array [
+                Object {
+                  "$ref": "#/definitions/alerting_rule_query",
+                },
+              ],
             },
             "recovery": Object {
               "allOf": Array [
@@ -711,7 +810,6 @@ describe('rule template create-rule schema coupling', () => {
             "metadata",
             "time_field",
             "schedule",
-            "query",
           ],
           "type": "object",
         },

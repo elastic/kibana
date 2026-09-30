@@ -39,6 +39,7 @@ import { BreadcrumbProvider } from './breadcrumb_context';
 import { LocatorProvider } from './locator_context';
 import { bindLocatorsToHost, getAlertingV2Locators } from './bind_locators_to_host';
 import { MANAGEMENT_HOST } from '../locators';
+import { applyRuleBuilderRegistrations } from '../lib/rule_builder_registrations';
 import type { AlertEpisodesKibanaServices } from '../episodes_kibana_services';
 
 const locatorsForManagementHost = (container: Container) => {
@@ -65,6 +66,10 @@ export const mountAlertingV2App = async ({
 
   const queryClient = new QueryClient();
   const locators = locatorsForManagementHost(container);
+
+  // Builders contributed by other plugins must be in the registry before the create and edit
+  // flows read it.
+  await applyRuleBuilderRegistrations();
 
   ReactDOM.render(
     coreStart.rendering.addContext(
@@ -101,6 +106,8 @@ export const mountRuleLibraryApp = async ({
 
   const queryClient = new QueryClient();
   const locators = locatorsForManagementHost(container);
+
+  await applyRuleBuilderRegistrations();
 
   ReactDOM.render(
     coreStart.rendering.addContext(
@@ -242,6 +249,8 @@ export const mountExecutionHistoryApp = async ({
 
   const queryClient = new QueryClient();
   const locators = locatorsForManagementHost(container);
+
+  await applyRuleBuilderRegistrations();
 
   ReactDOM.render(
     coreStart.rendering.addContext(

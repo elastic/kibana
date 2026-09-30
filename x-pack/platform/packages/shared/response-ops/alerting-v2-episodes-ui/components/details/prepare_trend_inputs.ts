@@ -16,10 +16,11 @@ import type { TrendMetricGroup } from './trend_types';
  * threshold conditions that check it.
  *
  * Returns null when the rule is not a parseable threshold rule — the caller then
- * renders nothing.
+ * renders nothing. A rule with no persisted query (execution-compiled) also returns
+ * null, because there is no stored query to parse.
  */
 export const prepareTrendInputs = (rule: RuleResponse | undefined): TrendMetricGroup[] | null => {
-  if (!rule) return null;
+  if (!rule || !rule.query) return null;
 
   const parsed = parseThresholdEsql(getBreachEsqlQuery(rule.query));
   if (!parsed || parsed.stats.length === 0) return null;

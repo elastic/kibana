@@ -41,8 +41,12 @@ const isNonRepresentable = (
 };
 
 /** True when the rule can only be edited through the YAML fallback. */
-export const isNonRepresentableRule = (rule: RuleResponse): boolean =>
-  isNonRepresentable(rule.kind, rule);
+export const isNonRepresentableRule = (rule: RuleResponse): boolean => {
+  // A rule with no persisted query is builder-authored; it is represented by its
+  // builder form, not by a query editor, so it is not non-representable.
+  if (rule.query == null) return false;
+  return isNonRepresentable(rule.kind, rule);
+};
 
 /** True when the in-progress form state can only be edited through the YAML fallback. */
 export const isNonRepresentableFormState = (
