@@ -10,6 +10,7 @@ import { getIcon } from '../../helpers/style_choices';
 import {
   buildExpandExploreRequest,
   buildExploreControls,
+  buildFillConnectionsRequest,
   buildSearchExploreRequest,
 } from './graph_request_builders';
 
@@ -753,31 +754,9 @@ function GraphWorkspace(options) {
     // Filters are named after the index of the node in the nodesForLinking
     // array. The result bucket describing the relationship between
     // the first 2 nodes in the array will therefore be labelled "0|1"
-    const shoulds = [];
-    const filterMap = {};
-    nodesForLinking.forEach(function (node, nodeNum) {
-      const nodeQuery = self.buildNodeQuery(node);
-      shoulds.push(nodeQuery);
-      filterMap[nodeNum] = nodeQuery;
-    });
-    const searchReq = {
-      size: 0,
-      query: {
-        bool: {
-          // Only match docs that share 2 nodes so can help describe their relationship
-          minimum_should_match: 2,
-          should: shoulds,
-        },
-      },
-      aggs: {
-        matrix: {
-          adjacency_matrix: {
-            separator: '|',
-            filters: filterMap,
-          },
-        },
-      },
-    };
+    const searchReq = buildFillConnectionsRequest(
+      nodesForLinking.map((node) => self.buildNodeQuery(node))
+    );
 
     // Search for connections between the selected nodes.
     searcher(self.options.indexName, searchReq, function (data) {
