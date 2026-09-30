@@ -21,6 +21,7 @@ import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import { useQuery } from '@kbn/react-query';
 import { createEsTraceFetcher, TraceWaterfall, useTraceSpans } from '@kbn/llm-trace-waterfall';
+import type { Conversation, ConversationRound } from '@kbn/agent-builder-common';
 import { isHttpClientError } from '../common/http_error';
 import { useKibana } from '../hooks/use_kibana';
 
@@ -38,16 +39,8 @@ const buildTracesIndexPattern = (spaceId: string): string => `traces-agent_build
 
 const DEFAULT_SPACE_ID = 'default';
 
-/** Minimal shape of the conversation response — only the round trace ids are needed here. */
-interface ConversationRoundTrace {
-  trace_id?: string | string[];
-}
-interface ConversationTraceResponse {
-  rounds?: ConversationRoundTrace[];
-}
-
 /** The trace id is recorded per round (only when tracing is enabled); use the most recent one. */
-const resolveTraceId = (rounds: ConversationRoundTrace[] | undefined): string | null => {
+const resolveTraceId = (rounds: ConversationRound[] | undefined): string | null => {
   if (!rounds) {
     return null;
   }
@@ -109,10 +102,10 @@ export function InvestigationTraceFlyout({
     data: conversation,
     isLoading: isConversationLoading,
     error: conversationError,
-  } = useQuery<ConversationTraceResponse, Error>({
+  } = useQuery<Conversation, Error>({
     queryKey: ['nightshift.investigationTraceConversation', conversationId],
     queryFn: ({ signal }) =>
-      http.get<ConversationTraceResponse>(buildConversationApiPath(conversationId), {
+      http.get<Conversation>(buildConversationApiPath(conversationId), {
         signal: signal ?? undefined,
       }),
     // Match the rest of Nightshift: don't retry client (4xx) errors.
