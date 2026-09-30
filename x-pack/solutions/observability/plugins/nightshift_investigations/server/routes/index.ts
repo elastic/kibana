@@ -29,6 +29,7 @@ import {
   getAutomationRoute,
   updateAutomationRoute,
   deleteAutomationRoute,
+  listAutomationRunsRoute,
 } from './automations';
 
 export const nightshiftInvestigationsRouteRepository = {
@@ -56,6 +57,7 @@ export const nightshiftInvestigationsRouteRepository = {
   ...getAutomationRoute,
   ...updateAutomationRoute,
   ...deleteAutomationRoute,
+  ...listAutomationRunsRoute,
 };
 
 export type NightshiftInvestigationsRouteRepository =
