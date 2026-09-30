@@ -74,6 +74,10 @@ import {
 } from '../../../../common/context_awareness';
 import type { DiscoverSessionApiClassicTab } from '@kbn/as-code-discover-schema';
 import type { DiscoverSessionApiResponse } from '../../../../server';
+import {
+  discoverSessionInternalDataSchema,
+  type DiscoverSessionInternalResponse,
+} from '../../../../server/api/internal_schema';
 import { fromDiscoverSessionApiResponse } from '../../../session/session_conversions';
 import { createSessionService } from '../../../session/session_service';
 import type {
@@ -667,7 +671,7 @@ describe('Discover state', () => {
     it.each([
       { action: 'Save', copyOnSave: false, savedId: response.id, method: 'upsert' as const },
       { action: 'Save As', copyOnSave: true, savedId: 'copied-session', method: 'create' as const },
-    ])('keeps inline IDs after $action and refresh', async ({ copyOnSave, savedId, method }) => {
+    ])('restores inline IDs after $action', async ({ copyOnSave, savedId, method }) => {
       const services = createDiscoverServicesMock();
       services.storage = new Storage(localStorage);
       services.history = createMemoryHistory();
@@ -676,17 +680,19 @@ describe('Discover state', () => {
       const tabId = firstLoad.getCurrentTab().id;
       await firstLoad.initializeSingleTab({ tabId });
 
-      const savedResponse = cloneDeep(response);
+      const savedResponse: DiscoverSessionInternalResponse = cloneDeep(response);
       savedResponse.id = savedId;
       const respondToSave = async (data: DiscoverSessionClientRequestData) => {
         expect(data.tabs).toHaveLength(1);
         expect(data.tabs[0]).toMatchObject({
-          data_source: { type: 'data_view_spec', index_pattern: 'logs-*' },
-          filters: apiFilters,
+          data_source: {
+            type: 'data_view_spec',
+            index_pattern: 'logs-*',
+            id: expect.any(String),
+          },
+          filters: [{ ...apiFilters[0], data_view_id: expect.any(String) }, apiFilters[1]],
         });
-        expect(data.tabs[0].data_source).not.toHaveProperty('id');
-        // Save As assigns a new tab ID; the API still returns the inline spec without its ID.
-        savedResponse.data.tabs[0].id = data.tabs[0].id;
+        savedResponse.data = discoverSessionInternalDataSchema.parse(data);
         return cloneDeep(savedResponse);
       };
       const apiClient: jest.Mocked<DiscoverSessionClient> = {
@@ -743,8 +749,8 @@ describe('Discover state', () => {
         internalStateActions.disconnectTab({ tabId: firstLoad.getCurrentTab().id })
       );
 
+      // No local tab state: the response must supply the saved identity.
       const reloadedServices = createDiscoverServicesMock();
-      reloadedServices.storage = services.storage;
       reloadedServices.history = createMemoryHistory({ initialEntries: [url] });
       const reloaded = createState(reloadedServices);
       const loadedSession = await sessionService.get(savedId);
