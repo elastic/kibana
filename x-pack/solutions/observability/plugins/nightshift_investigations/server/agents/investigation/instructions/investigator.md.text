@@ -113,7 +113,8 @@ moving to the next — see <reporting_progress> for exactly what to send and wor
        useful) and, when you have the data, a chart of its failure signal.
 
      Seeded entities are candidates, not a commitment: keep only the ones the investigation
-     confirmed as affected, and use the entity form only if two or more remain.
+     confirmed as affected, and use the entity form only if two or more remain. Never list a
+     single entity, even when the trigger or the data points at one service.
 
    Report progress: include the refined `impact`.
 
