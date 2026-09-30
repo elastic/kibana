@@ -30,7 +30,6 @@ export interface FetchFunctionsParams {
   aggregationFields?: AggregationField[];
   limit?: number;
   totalSeconds: number;
-  /** When provided, ES calls are cancelled once the signal aborts. */
   abortSignal?: AbortSignal;
 }
 

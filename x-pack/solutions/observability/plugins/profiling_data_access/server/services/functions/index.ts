@@ -31,7 +31,6 @@ export interface FetchFunctionsParams {
   stacktraceIdsField?: string;
   query: QueryDslQueryContainer;
   totalSeconds: number;
-  /** When provided, ES calls are cancelled once the signal aborts. */
   abortSignal?: AbortSignal;
 }
 

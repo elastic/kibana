@@ -73,7 +73,6 @@ export interface ProfilingESClient {
 
 export interface CreateProfilingEsClientParams {
   esClient: ElasticsearchClient;
-  /** When provided, ES calls are cancelled once the signal aborts. */
   abortSignal?: AbortSignal;
 }
 

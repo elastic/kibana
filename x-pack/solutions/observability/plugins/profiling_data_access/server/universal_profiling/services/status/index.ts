@@ -17,7 +17,6 @@ export interface HasSetupParams {
   soClient: SavedObjectsClientContract;
   esClient: IScopedClusterClient;
   spaceId?: string;
-  /** When provided, ES calls are cancelled once the signal aborts. */
   abortSignal?: AbortSignal;
 }
 
