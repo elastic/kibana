@@ -8,6 +8,7 @@
 import type { GraphWorkspaceSavedObject, Workspace } from '../../types';
 import { migrateLegacyIndexPatternRef, savedWorkspaceToAppState, mapFields } from './deserialize';
 import { createWorkspace } from '../workspace/graph_client_workspace';
+import { GraphLayoutController } from '../workspace/graph_layout_controller';
 import { outlinkEncoders } from '../../helpers/outlink_encoders';
 import type { DataView, DataViewListItem } from '@kbn/data-views-plugin/public';
 
@@ -112,7 +113,11 @@ describe('deserialize', () => {
         },
       }),
     } as GraphWorkspaceSavedObject;
-    workspace = createWorkspace({});
+    const layoutController = new GraphLayoutController({
+      getNodes: () => workspace?.nodes ?? [],
+      getEdges: () => workspace?.edges ?? [],
+    });
+    workspace = createWorkspace({ layoutController });
   });
 
   function callSavedWorkspaceToAppState() {
