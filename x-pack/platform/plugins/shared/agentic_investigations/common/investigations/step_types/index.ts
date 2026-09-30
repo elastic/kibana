@@ -5,6 +5,9 @@
  * 2.0.
  */
 
-export * from './constants';
-export * from './status';
-export * from './step_types';
+export {
+  ReopenInvestigationStepId,
+  reopenInvestigationStepCommonDefinition,
+  reopenInvestigationStepInputSchema,
+  reopenInvestigationStepOutputSchema,
+} from './reopen_investigation_step';
