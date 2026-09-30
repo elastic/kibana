@@ -6,9 +6,10 @@
  */
 
 export type {
+  BuilderFieldsBackfill,
+  BuilderFieldsManifest,
+  BuilderFieldsVersion,
   BuilderTypeDefinition,
-  BuilderTypeManifest,
-  BuilderTypeVersion,
   DerivedRuleFields,
   GenerateQuery,
   GeneratedQuery,
@@ -19,6 +20,12 @@ export type {
   RuleEventEnrichment,
   RuleEventEnrichmentInput,
 } from './types';
-export { defineBuilderType } from './types';
+export {
+  defineBuilderType,
+  KEYWORD_SUB_FIELD_IGNORE_ABOVE,
+  LUCENE_MAX_TERM_BYTES,
+  MAX_UTF8_BYTES_PER_CHAR,
+  mergeBuilderFieldMappings,
+} from './types';
 
 export { BuilderQueryGenerationError } from './errors';

@@ -11,7 +11,7 @@
  * Drives the compile → execute → enrich → store path end to end using a
  * **fixture** execution-time builder type, not the real detection types.
  * The fixture proves the framework machinery works; the Security schemas are
- * tested in the `@kbn/security-detection-rule-schema` package.
+ * tested in the security_detections plugin at x-pack/solutions/security/plugins/security_detections.
  *
  * Test levels:
  * - Unit-level (this file): mocked Elasticsearch. Chains all four pipeline

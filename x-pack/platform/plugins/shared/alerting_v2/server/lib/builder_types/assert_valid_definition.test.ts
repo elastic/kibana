@@ -6,6 +6,11 @@
  */
 
 import { z } from '@kbn/zod/v4';
+import {
+  KEYWORD_SUB_FIELD_IGNORE_ABOVE,
+  type BuilderFieldsManifest,
+} from '@kbn/alerting-v2-rule-builders';
+import { detectionRuleBuilderFieldsManifest } from '@kbn/security-detection-rule-builder-fields';
 import type { RegisteredBuilderType } from '@kbn/alerting-v2-rule-builders';
 import { assertValidDefinition } from './assert_valid_definition';
 import { FoldedVersionsSet } from './folded_versions';
@@ -21,8 +26,15 @@ const makeQuery = (): import('@kbn/alerting-v2-rule-builders').GeneratedQuery =>
   query: { base: 'FROM logs-* | LIMIT 10' },
 });
 
-/** A FoldedVersionsRecord that considers every (type, version) pair as folded. */
-const allFolded: FoldedVersionsRecord = { has: () => true };
+/**
+ * A FoldedVersionsRecord that considers every (type, version) pair as folded
+ * but returns no manifest for any type (total-mapping check is skipped).
+ */
+const allFolded: FoldedVersionsRecord = {
+  has: () => true,
+  hasManifestVersion: () => true,
+  getManifestForType: () => undefined,
+};
 
 /** Builds a minimal valid definition; overrides narrow specific properties. */
 function makeDefinition(overrides: Partial<RegisteredBuilderType> = {}): RegisteredBuilderType {
@@ -53,7 +65,36 @@ function rejects(
 }
 
 // ---------------------------------------------------------------------------
-// Prerequisites (unchanged from the original three trivial checks)
+// Helper: build a FoldedVersionsRecord with a manifest that covers a type.
+// The manifest's currentMappings must include every leaf that simpleSchema
+// produces (i.e. 'value' as keyword) so that the total-mapping check passes
+// for tests that focus on other checks.
+// ---------------------------------------------------------------------------
+
+function makeManifestFor(
+  type: string,
+  extraMappings: Record<string, BuilderFieldsManifest['currentMappings'][string]> = {}
+): BuilderFieldsManifest {
+  const valueMapping = { type: 'keyword' as const, ignore_above: KEYWORD_SUB_FIELD_IGNORE_ABOVE };
+  return {
+    builderTypes: [type],
+    currentMappings: { value: valueMapping, ...extraMappings },
+    currentVersion: 1,
+    versions: { 1: { addedMappings: { value: valueMapping, ...extraMappings } } },
+  };
+}
+
+function makeManifestFolded(
+  type: string,
+  extraMappings: Record<string, BuilderFieldsManifest['currentMappings'][string]> = {}
+): FoldedVersionsRecord {
+  const set = new FoldedVersionsSet();
+  set.recordManifest(makeManifestFor(type, extraMappings), 1);
+  return set;
+}
+
+// ---------------------------------------------------------------------------
+// Prerequisites (structural guards — not one of the eight designed checks)
 // ---------------------------------------------------------------------------
 
 describe('assertValidDefinition — prerequisites', () => {
@@ -71,6 +112,23 @@ describe('assertValidDefinition — prerequisites', () => {
 
   it('rejects a non-function generateQuery', () => {
     rejects({ generateQuery: 'not-a-function' as never }, 'requires a generateQuery function');
+  });
+
+  // Kind-pin value check is a structural guard (not one of the eight).
+  it('accepts a definition with no kind (absent = any kind allowed)', () => {
+    passes({});
+  });
+
+  it('accepts kind: "alert"', () => {
+    passes({ kind: 'alert' });
+  });
+
+  it('accepts kind: "signal"', () => {
+    passes({ kind: 'signal' });
+  });
+
+  it('rejects an unrecognised kind value', () => {
+    rejects({ kind: 'unknown' as never }, /kind pin validity check/);
   });
 });
 
@@ -176,281 +234,492 @@ describe('assertValidDefinition — check 3: bounded schema (delegation smoke te
 });
 
 // ---------------------------------------------------------------------------
-// Check 4: ignore_above consistency
+// Check 6: total mapping
 // ---------------------------------------------------------------------------
 
-describe('assertValidDefinition — check 4: ignore_above consistency', () => {
-  const shortStringSchema = z.object({ query: z.string().max(100) }).strict();
-  const longStringSchema = z.object({ note: z.string().max(8192) }).strict();
-
-  it('accepts a schema whose strings are all <= 4096 with no manifest', () => {
-    passes({
-      builderFieldsSchema:
-        shortStringSchema as unknown as RegisteredBuilderType['builderFieldsSchema'],
-    });
-  });
-
-  it('accepts a schema with a long string when the manifest declares the sub-field', () => {
-    const manifest = {
-      type: 'test.my_type',
-      currentVersion: 1,
-      versions: {
-        1: { addedSubFieldMappings: { note: { type: 'text' as const } } },
-      },
-    };
-    passes({
-      builderFieldsSchema:
-        longStringSchema as unknown as RegisteredBuilderType['builderFieldsSchema'],
-      manifest,
-    });
-  });
-
-  it('rejects a schema with a string > 4096 when no manifest sub-field is declared', () => {
-    rejects(
-      {
-        builderFieldsSchema:
-          longStringSchema as unknown as RegisteredBuilderType['builderFieldsSchema'],
-      },
-      /ignore_above consistency check/
-    );
-  });
-
-  it('rejects when the manifest exists but does not declare the long field', () => {
-    const manifest = {
-      type: 'test.my_type',
-      currentVersion: 1,
-      versions: { 1: { addedSubFieldMappings: { other_field: { type: 'text' as const } } } },
-    };
-    rejects(
-      {
-        builderFieldsSchema:
-          longStringSchema as unknown as RegisteredBuilderType['builderFieldsSchema'],
-        manifest,
-      },
-      /ignore_above consistency check/
-    );
-  });
-
-  it('accepts when the long string is declared in a later manifest version', () => {
-    const manifest = {
-      type: 'test.my_type',
-      currentVersion: 2,
-      versions: {
-        1: {},
-        2: { addedSubFieldMappings: { note: { type: 'text' as const } } },
-      },
-    };
-    passes({
-      builderFieldsSchema:
-        longStringSchema as unknown as RegisteredBuilderType['builderFieldsSchema'],
-      manifest,
-    });
-  });
-});
-
-// ---------------------------------------------------------------------------
-// Check 5: kind pin validity
-// ---------------------------------------------------------------------------
-
-describe('assertValidDefinition — check 5: kind pin validity', () => {
-  it('accepts a definition with no kind (absent = any kind allowed)', () => {
-    passes({});
-  });
-
-  it('accepts kind: "alert"', () => {
-    passes({ kind: 'alert' });
-  });
-
-  it('accepts kind: "signal"', () => {
-    passes({ kind: 'signal' });
-  });
-
-  it('rejects an unrecognised kind value', () => {
-    rejects({ kind: 'unknown' as never }, /kind pin validity check/);
-  });
-});
-
-// ---------------------------------------------------------------------------
-// Check 6: manifest consistency
-// ---------------------------------------------------------------------------
-
-describe('assertValidDefinition — check 6: manifest consistency', () => {
-  /** A FoldedVersionsSet with specific versions pre-recorded. */
-  function makeFolded(...pairs: Array<[string, number]>): FoldedVersionsRecord {
-    const set = new FoldedVersionsSet();
-    for (const [type, version] of pairs) {
-      set.record(type, version);
-    }
-    return set;
+describe('assertValidDefinition — check 6: total mapping', () => {
+  // Helper: make a FoldedVersionsRecord with a manifest covering 'test.my_type'
+  // and the given currentMappings (value is always included to satisfy simpleSchema).
+  function withMappings(
+    mappings: Record<string, BuilderFieldsManifest['currentMappings'][string]>
+  ): FoldedVersionsRecord {
+    return makeManifestFolded('test.my_type', mappings);
   }
 
-  it('accepts a valid manifest with all versions folded', () => {
-    const folded = makeFolded(['test.my_type', 1]);
-    passes(
-      {
-        manifest: {
-          type: 'test.my_type',
-          currentVersion: 1,
-          versions: { 1: {} },
-        },
-      },
-      folded
-    );
-  });
+  // ---------------------------------------------------------------------------
+  // Unmapped leaf / extra mapped leaf (the one-way check)
+  // ---------------------------------------------------------------------------
 
-  it('accepts a manifest with multiple versions when all are folded', () => {
-    const folded = makeFolded(['test.my_type', 1], ['test.my_type', 2]);
-    passes(
-      {
-        manifest: {
-          type: 'test.my_type',
-          currentVersion: 2,
-          versions: { 1: {}, 2: {} },
-        },
+  it('rejects a type when a schema leaf has no sub-field declaration', () => {
+    // simpleSchema has 'value' (string). The manifest covers 'test.my_type' but
+    // omits 'value' from its currentMappings — should fail.
+    const set = new FoldedVersionsSet();
+    const manifest: BuilderFieldsManifest = {
+      builderTypes: ['test.my_type'],
+      currentMappings: {
+        other_field: { type: 'keyword', ignore_above: KEYWORD_SUB_FIELD_IGNORE_ABOVE },
       },
-      folded
-    );
-  });
-
-  it('rejects when manifest.type does not match definition.type', () => {
-    rejects(
-      {
-        manifest: {
-          type: 'other.type',
-          currentVersion: 1,
-          versions: { 1: {} },
-        },
-      },
-      /manifest consistency check/
-    );
-  });
-
-  it('rejects when manifest versions are not dense from 1 (gap at version 2)', () => {
-    const folded = makeFolded(['test.my_type', 1], ['test.my_type', 3]);
-    rejects(
-      {
-        manifest: {
-          type: 'test.my_type',
-          currentVersion: 3,
-          versions: { 1: {}, 3: {} },
-        },
-      },
-      /manifest consistency check/,
-      folded
-    );
-  });
-
-  it('rejects when currentVersion does not equal the highest version key', () => {
-    const folded = makeFolded(['test.my_type', 1], ['test.my_type', 2]);
-    rejects(
-      {
-        manifest: {
-          type: 'test.my_type',
-          currentVersion: 1,
-          versions: { 1: {}, 2: {} },
-        },
-      },
-      /manifest consistency check/,
-      folded
-    );
-  });
-
-  it('rejects when a manifest version is not folded into model versions', () => {
-    const folded = makeFolded(); // nothing folded
-    rejects(
-      {
-        manifest: {
-          type: 'test.my_type',
-          currentVersion: 1,
-          versions: { 1: {} },
-        },
-      },
-      /manifest consistency check/,
-      folded
-    );
-  });
-
-  it('error message names the missing fromBuilderManifest call', () => {
-    const folded = makeFolded(['test.my_type', 1]); // v1 folded but not v2
-    expect(() =>
-      assertValidDefinition(
-        makeDefinition({
-          manifest: {
-            type: 'test.my_type',
-            currentVersion: 2,
-            versions: { 1: {}, 2: {} },
+      currentVersion: 1,
+      versions: {
+        1: {
+          addedMappings: {
+            other_field: { type: 'keyword', ignore_above: KEYWORD_SUB_FIELD_IGNORE_ABOVE },
           },
-        }),
-        folded
-      )
-    ).toThrow(/fromBuilderManifest/);
+        },
+      },
+    };
+    set.recordManifest(manifest, 1);
+    rejects({}, /total mapping check/, set);
   });
 
-  it('accepts a definition with no manifest (manifest is optional)', () => {
-    passes({ manifest: undefined });
+  it('accepts when a manifest sub-field has no schema leaf behind it (abandoned field)', () => {
+    // simpleSchema produces 'value'. Manifest declares 'value' AND 'old_field'.
+    // 'old_field' has no schema leaf — that is fine (it is an abandoned field).
+    const folded = withMappings({
+      old_field: { type: 'keyword', ignore_above: KEYWORD_SUB_FIELD_IGNORE_ABOVE },
+    });
+    passes({}, folded);
+  });
+
+  it('skips total mapping when no manifest covers the type (unmanaged type)', () => {
+    // allFolded.getManifestForType returns undefined, so the check is skipped.
+    passes({}, allFolded);
+  });
+
+  // ---------------------------------------------------------------------------
+  // Compatibility table — string leaf
+  // ---------------------------------------------------------------------------
+
+  it('accepts string leaf against keyword sub-field', () => {
+    const schema = z.object({ f: z.string().max(100) }).strict();
+    const folded = withMappings({
+      f: { type: 'keyword', ignore_above: KEYWORD_SUB_FIELD_IGNORE_ABOVE },
+    });
+    passes(
+      { builderFieldsSchema: schema as unknown as RegisteredBuilderType['builderFieldsSchema'] },
+      folded
+    );
+  });
+
+  it('accepts string leaf against text sub-field', () => {
+    const schema = z.object({ f: z.string().max(100) }).strict();
+    const folded = withMappings({ f: { type: 'text' } });
+    passes(
+      { builderFieldsSchema: schema as unknown as RegisteredBuilderType['builderFieldsSchema'] },
+      folded
+    );
+  });
+
+  it('accepts string leaf against ip sub-field', () => {
+    const schema = z.object({ f: z.string().max(100) }).strict();
+    const folded = withMappings({ f: { type: 'ip' } });
+    passes(
+      { builderFieldsSchema: schema as unknown as RegisteredBuilderType['builderFieldsSchema'] },
+      folded
+    );
+  });
+
+  it('accepts string leaf against date sub-field', () => {
+    const schema = z.object({ f: z.string().max(100) }).strict();
+    const folded = withMappings({ f: { type: 'date' } });
+    passes(
+      { builderFieldsSchema: schema as unknown as RegisteredBuilderType['builderFieldsSchema'] },
+      folded
+    );
+  });
+
+  it('rejects string leaf against integer sub-field', () => {
+    const schema = z.object({ f: z.string().max(100) }).strict();
+    const folded = withMappings({ f: { type: 'integer' } });
+    rejects(
+      { builderFieldsSchema: schema as unknown as RegisteredBuilderType['builderFieldsSchema'] },
+      /total mapping check/,
+      folded
+    );
+  });
+
+  // ---------------------------------------------------------------------------
+  // Compatibility table — integer leaf
+  // ---------------------------------------------------------------------------
+
+  it('accepts integer leaf against integer sub-field', () => {
+    const schema = z.object({ f: z.number().int() }).strict();
+    const folded = withMappings({ f: { type: 'integer' } });
+    passes(
+      { builderFieldsSchema: schema as unknown as RegisteredBuilderType['builderFieldsSchema'] },
+      folded
+    );
+  });
+
+  it('accepts integer leaf against long sub-field', () => {
+    const schema = z.object({ f: z.number().int() }).strict();
+    const folded = withMappings({ f: { type: 'long' } });
+    passes(
+      { builderFieldsSchema: schema as unknown as RegisteredBuilderType['builderFieldsSchema'] },
+      folded
+    );
+  });
+
+  it('accepts integer leaf against short sub-field', () => {
+    const schema = z.object({ f: z.number().int() }).strict();
+    const folded = withMappings({ f: { type: 'short' } });
+    passes(
+      { builderFieldsSchema: schema as unknown as RegisteredBuilderType['builderFieldsSchema'] },
+      folded
+    );
+  });
+
+  it('accepts integer leaf against byte sub-field', () => {
+    const schema = z.object({ f: z.number().int() }).strict();
+    const folded = withMappings({ f: { type: 'byte' } });
+    passes(
+      { builderFieldsSchema: schema as unknown as RegisteredBuilderType['builderFieldsSchema'] },
+      folded
+    );
+  });
+
+  it('accepts integer leaf against unsigned_long sub-field', () => {
+    const schema = z.object({ f: z.number().int() }).strict();
+    const folded = withMappings({ f: { type: 'unsigned_long' } });
+    passes(
+      { builderFieldsSchema: schema as unknown as RegisteredBuilderType['builderFieldsSchema'] },
+      folded
+    );
+  });
+
+  it('rejects integer leaf against keyword sub-field', () => {
+    const schema = z.object({ f: z.number().int() }).strict();
+    const folded = withMappings({
+      f: { type: 'keyword', ignore_above: KEYWORD_SUB_FIELD_IGNORE_ABOVE },
+    });
+    rejects(
+      { builderFieldsSchema: schema as unknown as RegisteredBuilderType['builderFieldsSchema'] },
+      /total mapping check/,
+      folded
+    );
+  });
+
+  // ---------------------------------------------------------------------------
+  // Compatibility table — number leaf
+  // ---------------------------------------------------------------------------
+
+  it('accepts number leaf against double sub-field', () => {
+    const schema = z.object({ f: z.number() }).strict();
+    const folded = withMappings({ f: { type: 'double' } });
+    passes(
+      { builderFieldsSchema: schema as unknown as RegisteredBuilderType['builderFieldsSchema'] },
+      folded
+    );
+  });
+
+  it('accepts number leaf against float sub-field', () => {
+    const schema = z.object({ f: z.number() }).strict();
+    const folded = withMappings({ f: { type: 'float' } });
+    passes(
+      { builderFieldsSchema: schema as unknown as RegisteredBuilderType['builderFieldsSchema'] },
+      folded
+    );
+  });
+
+  it('accepts number leaf against half_float sub-field', () => {
+    const schema = z.object({ f: z.number() }).strict();
+    const folded = withMappings({ f: { type: 'half_float' } });
+    passes(
+      { builderFieldsSchema: schema as unknown as RegisteredBuilderType['builderFieldsSchema'] },
+      folded
+    );
+  });
+
+  it('accepts number leaf against scaled_float sub-field', () => {
+    const schema = z.object({ f: z.number() }).strict();
+    const folded = withMappings({ f: { type: 'scaled_float', scaling_factor: 100 } });
+    passes(
+      { builderFieldsSchema: schema as unknown as RegisteredBuilderType['builderFieldsSchema'] },
+      folded
+    );
+  });
+
+  it('rejects number leaf against keyword sub-field', () => {
+    const schema = z.object({ f: z.number() }).strict();
+    const folded = withMappings({
+      f: { type: 'keyword', ignore_above: KEYWORD_SUB_FIELD_IGNORE_ABOVE },
+    });
+    rejects(
+      { builderFieldsSchema: schema as unknown as RegisteredBuilderType['builderFieldsSchema'] },
+      /total mapping check/,
+      folded
+    );
+  });
+
+  // ---------------------------------------------------------------------------
+  // Compatibility table — boolean leaf
+  // ---------------------------------------------------------------------------
+
+  it('accepts boolean leaf against boolean sub-field', () => {
+    const schema = z.object({ f: z.boolean() }).strict();
+    const folded = withMappings({ f: { type: 'boolean' } });
+    passes(
+      { builderFieldsSchema: schema as unknown as RegisteredBuilderType['builderFieldsSchema'] },
+      folded
+    );
+  });
+
+  it('rejects boolean leaf against keyword sub-field', () => {
+    const schema = z.object({ f: z.boolean() }).strict();
+    const folded = withMappings({
+      f: { type: 'keyword', ignore_above: KEYWORD_SUB_FIELD_IGNORE_ABOVE },
+    });
+    rejects(
+      { builderFieldsSchema: schema as unknown as RegisteredBuilderType['builderFieldsSchema'] },
+      /total mapping check/,
+      folded
+    );
+  });
+
+  // ---------------------------------------------------------------------------
+  // Keyword bound check
+  // ---------------------------------------------------------------------------
+
+  it('rejects a keyword-mapped string whose schema bound exceeds ignore_above', () => {
+    // max(200) > ignore_above(100)
+    const schema = z.object({ f: z.string().max(200) }).strict();
+    const folded = withMappings({ f: { type: 'keyword', ignore_above: 100 } });
+    rejects(
+      { builderFieldsSchema: schema as unknown as RegisteredBuilderType['builderFieldsSchema'] },
+      /total mapping check/,
+      folded
+    );
+  });
+
+  it('accepts a keyword-mapped string whose schema bound equals ignore_above', () => {
+    const schema = z.object({ f: z.string().max(100) }).strict();
+    const folded = withMappings({ f: { type: 'keyword', ignore_above: 100 } });
+    passes(
+      { builderFieldsSchema: schema as unknown as RegisteredBuilderType['builderFieldsSchema'] },
+      folded
+    );
+  });
+
+  it('does not check the bound for a text-mapped string (text has no length limit)', () => {
+    // max(65000) is above any keyword ignore_above but well under the absolute
+    // bounded-schema ceiling (MAX_BUILDER_FIELDS_STRING_LENGTH = 65536). The
+    // text sub-field gets no bound comparison, so the check passes.
+    const schemaUnderCeiling = z.object({ f: z.string().max(65000) }).strict();
+    const folded = withMappings({ f: { type: 'text' } });
+    passes(
+      {
+        builderFieldsSchema:
+          schemaUnderCeiling as unknown as RegisteredBuilderType['builderFieldsSchema'],
+      },
+      folded
+    );
+  });
+
+  // ---------------------------------------------------------------------------
+  // Enum leaf: bound is read from the longest enum value
+  // ---------------------------------------------------------------------------
+
+  it('reads the bound of an enum string from its longest value', () => {
+    // z.enum emits { type: 'string', enum: [...] } with no maxLength.
+    // The longest value is 'critical' (8 chars), well under ignore_above.
+    const schema = z
+      .object({ severity: z.enum(['info', 'low', 'medium', 'high', 'critical']) })
+      .strict();
+    const folded = withMappings({
+      severity: { type: 'keyword', ignore_above: KEYWORD_SUB_FIELD_IGNORE_ABOVE },
+    });
+    passes(
+      { builderFieldsSchema: schema as unknown as RegisteredBuilderType['builderFieldsSchema'] },
+      folded
+    );
+  });
+
+  it('rejects an enum string when its longest value exceeds the keyword ignore_above', () => {
+    // 'long_value_here' is 15 chars; ignore_above is set to 10 to trigger failure.
+    const schema = z.object({ f: z.enum(['short', 'long_value_here']) }).strict();
+    const folded = withMappings({ f: { type: 'keyword', ignore_above: 10 } });
+    rejects(
+      { builderFieldsSchema: schema as unknown as RegisteredBuilderType['builderFieldsSchema'] },
+      /total mapping check/,
+      folded
+    );
+  });
+
+  // ---------------------------------------------------------------------------
+  // Nested structures: objects, arrays, optional fields
+  // ---------------------------------------------------------------------------
+
+  it('checks leaves inside nested objects', () => {
+    const schema = z.object({ outer: z.object({ inner: z.string().max(50) }).strict() }).strict();
+    // Missing 'outer.inner' from manifest — should fail.
+    const folded = withMappings({});
+    rejects(
+      { builderFieldsSchema: schema as unknown as RegisteredBuilderType['builderFieldsSchema'] },
+      /total mapping check/,
+      folded
+    );
+  });
+
+  it('checks leaves inside arrays (path uses dot notation, no index bracket)', () => {
+    const schema = z
+      .object({ items: z.array(z.object({ name: z.string().max(50) }).strict()).max(10) })
+      .strict();
+    // 'items.name' must be in the manifest.
+    const setWithName = withMappings({
+      'items.name': { type: 'keyword', ignore_above: KEYWORD_SUB_FIELD_IGNORE_ABOVE },
+    });
+    passes(
+      { builderFieldsSchema: schema as unknown as RegisteredBuilderType['builderFieldsSchema'] },
+      setWithName
+    );
+  });
+
+  it('checks leaves inside optional fields (anyOf branches)', () => {
+    const schema = z.object({ f: z.string().max(50).optional() }).strict();
+    const folded = withMappings({
+      f: { type: 'keyword', ignore_above: KEYWORD_SUB_FIELD_IGNORE_ABOVE },
+    });
+    passes(
+      { builderFieldsSchema: schema as unknown as RegisteredBuilderType['builderFieldsSchema'] },
+      folded
+    );
+  });
+
+  // ---------------------------------------------------------------------------
+  // Real manifest: both detection schemas pass total mapping against the shipped manifest.
+  // Importing the real detection definitions into tests under alerting_v2 is
+  // forbidden (platform may not import from solutions), so we assert the other
+  // way round: walk the shipped manifest's currentMappings and verify its 32
+  // leaf paths and their expected types. The registration check itself (run at
+  // plugin setup by the security_detections plugin) is the authoritative proof
+  // that the real definitions pass; this test proves the manifest is complete.
+  // ---------------------------------------------------------------------------
+
+  describe('real manifest — detectionRuleBuilderFieldsManifest', () => {
+    const { currentMappings } = detectionRuleBuilderFieldsManifest;
+
+    it('has exactly 32 leaf paths', () => {
+      expect(Object.keys(currentMappings)).toHaveLength(32);
+    });
+
+    it('covers the expected common leaves', () => {
+      const expected: Array<[string, string]> = [
+        ['severity', 'keyword'],
+        ['risk_score', 'integer'],
+        ['max_signals', 'integer'],
+        ['threat.framework', 'keyword'],
+        ['threat.tactic.id', 'keyword'],
+        ['threat.tactic.name', 'keyword'],
+        ['threat.tactic.reference', 'keyword'],
+        ['threat.technique.id', 'keyword'],
+        ['threat.technique.name', 'keyword'],
+        ['threat.technique.reference', 'keyword'],
+        ['threat.technique.subtechnique.id', 'keyword'],
+        ['threat.technique.subtechnique.name', 'keyword'],
+        ['threat.technique.subtechnique.reference', 'keyword'],
+        ['setup', 'text'],
+        ['note', 'text'],
+        ['references', 'keyword'],
+        ['false_positives', 'keyword'],
+        ['author', 'keyword'],
+        ['license', 'keyword'],
+        ['related_integrations.package', 'keyword'],
+        ['related_integrations.version', 'keyword'],
+        ['related_integrations.integration', 'keyword'],
+        ['required_fields.name', 'keyword'],
+        ['required_fields.type', 'keyword'],
+        ['required_fields.ecs', 'boolean'],
+      ];
+      for (const [path, expectedType] of expected) {
+        expect(currentMappings[path]).toBeDefined();
+        expect(currentMappings[path].type).toBe(expectedType);
+      }
+    });
+
+    it('covers the shared query/threshold leaves', () => {
+      expect(currentMappings['index'].type).toBe('keyword');
+      expect(currentMappings['query'].type).toBe('text');
+      expect(currentMappings['language'].type).toBe('keyword');
+    });
+
+    it('covers the threshold-specific leaves', () => {
+      expect(currentMappings['threshold.field'].type).toBe('keyword');
+      expect(currentMappings['threshold.value'].type).toBe('integer');
+      expect(currentMappings['threshold.cardinality.field'].type).toBe('keyword');
+      expect(currentMappings['threshold.cardinality.value'].type).toBe('integer');
+    });
+
+    it('every keyword sub-field carries ignore_above equal to KEYWORD_SUB_FIELD_IGNORE_ABOVE', () => {
+      for (const mapping of Object.values(currentMappings)) {
+        if (mapping.type === 'keyword') {
+          expect((mapping as { type: 'keyword'; ignore_above: number }).ignore_above).toBe(
+            KEYWORD_SUB_FIELD_IGNORE_ABOVE
+          );
+        }
+      }
+    });
   });
 });
 
 // ---------------------------------------------------------------------------
-// Check 7: managed-type completeness
+// Check 7: managed-type completeness (changed in step B.7)
 // ---------------------------------------------------------------------------
 
 describe('assertValidDefinition — check 7: managed-type completeness', () => {
-  const validManagedManifest = (type: string) => ({
-    type,
-    currentVersion: 1,
-    versions: { 1: {} },
-  });
+  /**
+   * A FoldedVersionsRecord that covers 'type' with a manifest containing the
+   * 'value' leaf (to match simpleSchema and pass total mapping).
+   */
+  function managedFolded(type: string): FoldedVersionsRecord {
+    return makeManifestFolded(type);
+  }
 
-  it('accepts a fully-declared managed type', () => {
-    const folded = new FoldedVersionsSet();
-    folded.record('security.detection.mytype', 1);
-
+  it('accepts a fully-declared managed type covered by a folded manifest', () => {
+    const folded = managedFolded('security.detection.mytype');
     passes(
       {
         type: 'security.detection.mytype',
         ownership: { solution: 'security', domain: 'detection' },
         compilation: 'execution_time',
-        manifest: validManagedManifest('security.detection.mytype'),
       },
       folded
     );
   });
 
   it('rejects a managed type that does not declare compilation', () => {
+    const folded = managedFolded('security.detection.mytype');
     rejects(
       {
         type: 'security.detection.mytype',
         ownership: { solution: 'security', domain: 'detection' },
         compilation: undefined,
-        manifest: validManagedManifest('security.detection.mytype'),
       },
-      /managed-type completeness check/
+      /managed-type completeness check/,
+      folded
     );
   });
 
-  it('rejects a managed type that has no manifest', () => {
+  it('rejects a managed type that no folded manifest covers', () => {
+    // Nothing is recorded in this set, so getManifestForType returns undefined.
+    const empty = new FoldedVersionsSet();
     rejects(
       {
         type: 'security.detection.mytype',
         ownership: { solution: 'security', domain: 'detection' },
         compilation: 'execution_time',
-        manifest: undefined,
       },
-      /managed-type completeness check/
+      /managed-type completeness check/,
+      empty
     );
   });
 
   it('rejects when the id first two segments do not match ownership', () => {
-    const folded = new FoldedVersionsSet();
-    folded.record('other.thing.mytype', 1);
-
+    const folded = managedFolded('other.thing.mytype');
     rejects(
       {
         type: 'other.thing.mytype',
         ownership: { solution: 'security', domain: 'detection' },
         compilation: 'execution_time',
-        manifest: validManagedManifest('other.thing.mytype'),
       },
       /managed-type completeness check/,
       folded
@@ -460,21 +729,12 @@ describe('assertValidDefinition — check 7: managed-type completeness', () => {
   it('rejects when the id has exactly two segments matching solution and domain (missing <name>)', () => {
     // 'security.detection' has the right solution and domain segments but no
     // <name> segment, so only the segments.length < 3 clause rejects it.
-    // The first two segments match ownership, so neither the format check
-    // (check 2) nor the solution/domain mismatch clause fires — this test
-    // can only pass if the length clause is present.
-    //
-    // Ref: rule-ownership.md "Managed rule types"
-    //      rule-type-registration.md "Registration-time checks" item 7
-    const folded = new FoldedVersionsSet();
-    folded.record('security.detection', 1);
-
+    const folded = managedFolded('security.detection');
     rejects(
       {
         type: 'security.detection',
         ownership: { solution: 'security', domain: 'detection' },
         compilation: 'execution_time',
-        manifest: validManagedManifest('security.detection'),
       },
       /managed-type completeness check/,
       folded
@@ -487,10 +747,9 @@ describe('assertValidDefinition — check 7: managed-type completeness', () => {
         type: 'security',
         ownership: { solution: 'security', domain: 'detection' },
         compilation: 'execution_time',
-        manifest: validManagedManifest('security'),
       },
-      // 'security' has one segment: segments[1] is undefined, so both the
-      // length clause and the domain-mismatch clause fire simultaneously.
+      // 'security' has one segment: segments[1] is undefined, so the length
+      // clause fires first (before any domain mismatch clause).
       /check/
     );
   });
