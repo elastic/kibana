@@ -6,11 +6,20 @@
  */
 
 import { fromByteArray } from 'base64-js';
-import mime from 'mime-types';
 
 const dataurlRegex = /^data:([a-z]+\/[a-z0-9-+.]+)(;[a-z-]+=[a-z0-9-]+)?(;([a-z0-9]+))?,/;
 
 export const imageTypes = ['image/svg+xml', 'image/jpeg', 'image/png', 'image/gif'];
+
+// Cover supported image uploads and plain text without bundling the full MIME database.
+// Other MIME types in imported assets have no inferred filename extension.
+const mimeToExtension: Readonly<Record<string, string>> = {
+  'image/svg+xml': 'svg',
+  'image/jpeg': 'jpeg',
+  'image/png': 'png',
+  'image/gif': 'gif',
+  'text/plain': 'txt',
+};
 
 export function parseDataUrl(str: string, withData = false) {
   if (typeof str !== 'string') {
@@ -37,7 +46,7 @@ export function parseDataUrl(str: string, withData = false) {
     charset: charset && charset.split('=')[1],
     data: !withData ? null : str.split(',')[1],
     isImage: imageTypeIndex >= 0,
-    extension: mime.extension(mimetype) || null,
+    extension: mimeToExtension[mimetype] ?? null,
   };
 }
 

@@ -40,22 +40,37 @@ describe('dataurl', () => {
   });
 
   describe('dataurl.parseDataUrl', () => {
+    it.each([
+      ['image/svg+xml', 'svg'],
+      ['image/jpeg', 'jpeg'],
+      ['image/png', 'png'],
+      ['image/gif', 'gif'],
+      ['text/plain', 'txt'],
+    ])('returns the filename extension for %s', (mimetype, extension) => {
+      expect(parseDataUrl(`data:${mimetype};base64,VGhpcyBpcyBhIHRlc3Q=`)).toHaveProperty(
+        'extension',
+        extension
+      );
+    });
     it('returns null for an invalid data url', () => {
       expect(parseDataUrl('somestring')).toBeNull();
     });
     it('returns null for an invalid base64 image', () => {
       expect(parseDataUrl(INVALID_BASE64_PIXEL)).toBeNull();
     });
-    it('returns a null extension for an unknown MIME type', () => {
-      expect(parseDataUrl('data:application/x-unknown;base64,VGhpcyBpcyBhIHRlc3Q=')).toEqual({
-        charset: undefined,
-        data: null,
-        encoding: 'base64',
-        extension: null,
-        isImage: false,
-        mimetype: 'application/x-unknown',
-      });
-    });
+    it.each(['application/x-unknown', 'image/webp'])(
+      'returns a null extension for unmapped MIME type %s',
+      (mimetype) => {
+        expect(parseDataUrl(`data:${mimetype};base64,VGhpcyBpcyBhIHRlc3Q=`)).toEqual({
+          charset: undefined,
+          data: null,
+          encoding: 'base64',
+          extension: null,
+          isImage: false,
+          mimetype,
+        });
+      }
+    );
     it('returns correct values for text data urls', () => {
       expect(parseDataUrl(BASE64_TEXT)).toEqual({
         charset: 'utf-8',
