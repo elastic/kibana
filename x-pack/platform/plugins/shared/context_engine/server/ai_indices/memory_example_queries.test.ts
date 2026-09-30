@@ -15,7 +15,6 @@ describe('buildMemoryExampleQueries', () => {
     expect(
       queries.crossSession.startsWith('FROM ai-index-idx-support METADATA _id, _index, _score')
     ).toBe(true);
-    expect(queries.currentConversation.startsWith('FROM ai-index-idx-support')).toBe(true);
   });
 
   it('parses as valid ES|QL', () => {

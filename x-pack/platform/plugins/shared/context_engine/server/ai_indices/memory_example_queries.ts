@@ -7,7 +7,6 @@
 
 export interface MemoryExampleQueries {
   crossSession: string;
-  currentConversation: string;
 }
 
 /** ES|QL examples for recalling current memory revisions from an AI-index backing target. */
@@ -26,19 +25,5 @@ export const buildMemoryExampleQueries = (target: string): MemoryExampleQueries 
     '| SORT _score DESC, _id ASC',
     '| KEEP id, title, description, content, type, tags, updated_at, references.uri, references.relation, references.description',
     '| LIMIT 10',
-  ].join('\n'),
-  currentConversation: [
-    `FROM ${target}`,
-    '| WHERE type IN ("memory.session", "memory.session_fact")',
-    '| INLINE STATS latest_at = MAX(@timestamp) BY id',
-    '| WHERE @timestamp == latest_at',
-    '  AND (governance.lifecycle.status IS NULL OR governance.lifecycle.status != "deleted")',
-    '  AND (expires_at IS NULL OR expires_at > NOW())',
-    '| EVAL session_id = FIELD_EXTRACT(attributes, "memory.session_id")',
-    '| WHERE session_id == "<conversation-id>"',
-    '| SORT updated_at DESC, id ASC',
-    '| LIMIT 10',
-    '| SORT updated_at ASC, id ASC',
-    '| KEEP id, title, description, content, type, tags, updated_at, references.uri, references.relation, references.description',
   ].join('\n'),
 });

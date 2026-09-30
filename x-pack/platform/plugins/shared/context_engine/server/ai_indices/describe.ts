@@ -74,7 +74,7 @@ const memorySection = (
     return [];
   }
 
-  const { crossSession, currentConversation } = buildMemoryExampleQueries(target);
+  const { crossSession } = buildMemoryExampleQueries(target);
 
   return [
     'Memory',
@@ -88,10 +88,8 @@ const memorySection = (
     EXCLUDE_MEMORY_KI_TYPES_FILTER,
     'For cross-session recall, search granular facts with hybrid retrieval:',
     crossSession,
-    'For recall from the current Agent Builder conversation:',
-    currentConversation,
     'Select the latest revision before filtering deleted or expired memories, or an older active data-stream revision can reappear.',
-    'The second session sort presents the selected recent window chronologically. References identify the source conversations.',
+    'References identify the source conversations.',
   ];
 };
 
