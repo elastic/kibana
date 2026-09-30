@@ -826,13 +826,20 @@ function GraphWorkspace(options) {
 
   //======= Expand functions to request new additions to the graph
 
+  this.expandNodes = function (nodeIds, targetOptions = {}) {
+    const selectedNodes = nodeIds
+      .map((nodeId) => self.nodesMap[nodeId])
+      .filter((node) => node !== undefined);
+    const startNodes =
+      selectedNodes.length > 0 ? self.returnUnpackedGroupeds(selectedNodes) : self.nodes;
+    self.expand(startNodes.slice(), targetOptions);
+  };
+
   this.expandSelecteds = function (targetOptions = {}) {
-    let startNodes = self.getAllSelectedNodes();
-    if (startNodes.length === 0) {
-      startNodes = self.nodes;
-    }
-    const clone = startNodes.slice();
-    self.expand(clone, targetOptions);
+    self.expandNodes(
+      self.selectedNodes.map(({ id }) => id),
+      targetOptions
+    );
   };
 
   this.expandGraph = function () {
