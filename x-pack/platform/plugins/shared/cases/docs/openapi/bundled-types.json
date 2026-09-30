@@ -266,7 +266,19 @@
                       "type": "array",
                       "maxItems": 10000,
                       "items": {
-                        "$ref": "#/components/schemas/case_response_properties"
+                        "allOf": [
+                          {
+                            "$ref": "#/components/schemas/case_response_properties"
+                          },
+                          {
+                            "type": "object",
+                            "properties": {
+                              "extended_fields_labels": {
+                                "$ref": "#/components/schemas/case_extended_fields_labels"
+                              }
+                            }
+                          }
+                        ]
                       }
                     },
                     "count_closed_cases": {
@@ -4173,7 +4185,7 @@
         "title": "Case extended fields",
         "type": "object",
         "x-state": "Technical preview; added in 9.5.0",
-        "description": "Case field values keyed by storage key (for example, `priority_as_keyword`). Keys are validated against the fields exposed by the case's active template and global field library. On update, provided keys are merged into the stored map; unlisted keys are left untouched. Requires the `xpack.cases.templates.enabled` setting (enabled by default). Use the get case fields API to discover valid keys.\n",
+        "description": "Case field values keyed by storage key (for example, `priority_as_keyword`). Keys are validated against the fields exposed by the case's active template and global field library. On update, provided keys are merged into the stored map; unlisted keys are left untouched. Template-linked fields require the `xpack.cases.templates.enabled` setting (enabled by default); global fields are always available. Use the get case fields API to discover valid keys.\n",
         "maxProperties": 500,
         "additionalProperties": {
           "type": "string",
@@ -4725,16 +4737,6 @@
           }
         }
       },
-      "case_extended_fields_labels": {
-        "type": "object",
-        "additionalProperties": {
-          "type": "string"
-        },
-        "description": "A read-only, response-only map from active field definition storage keys to their human-readable labels. Entries reflect currently applicable global and template field definitions — not every stored `extended_fields` key is guaranteed a label, because values retained after switching templates may have no matching current definition. Only populated by the get case and search cases endpoints; absent on create, update, push, and comment responses. Including this field in a write request returns a 400 error.\n",
-        "example": {
-          "priority_as_keyword": "Priority"
-        }
-      },
       "external_service": {
         "type": "object",
         "nullable": true,
@@ -4996,9 +4998,6 @@
                 }
               }
             }
-          },
-          "extended_fields_labels": {
-            "$ref": "#/components/schemas/case_extended_fields_labels"
           },
           "description": {
             "type": "string",
@@ -5320,6 +5319,16 @@
         "type": "array",
         "items": {
           "$ref": "#/components/schemas/searchFieldsType"
+        }
+      },
+      "case_extended_fields_labels": {
+        "type": "object",
+        "additionalProperties": {
+          "type": "string"
+        },
+        "description": "A read-only, response-only map from active field definition storage keys to their human-readable labels. Entries reflect currently applicable global and template field definitions — not every stored `extended_fields` key is guaranteed a label, because values retained after switching templates may have no matching current definition. Only populated by the get case and search cases endpoints; absent on create, update, push, and comment responses. Including this field in a write request returns a 400 error.\n",
+        "example": {
+          "priority_as_keyword": "Priority"
         }
       },
       "attachment_totals": {

@@ -42,7 +42,9 @@ describe('create_case common step definition', () => {
       ...createCaseRequestFixture,
       extended_fields: { priority_as_keyword: 'high' },
     };
-    expect(InputSchema.safeParse(inputWithExtendedFields).success).toBe(true);
+    expect(InputSchema.parse(inputWithExtendedFields)).toMatchObject({
+      extended_fields: inputWithExtendedFields.extended_fields,
+    });
   });
 
   it('rejects create case input with non-string extended_fields values', () => {

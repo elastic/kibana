@@ -36,7 +36,12 @@ get:
                 type: array
                 maxItems: 10000
                 items:
-                  $ref: '../components/schemas/case_response_properties.yaml'
+                  allOf:
+                    - $ref: '../components/schemas/case_response_properties.yaml'
+                    - type: object
+                      properties:
+                        extended_fields_labels:
+                          $ref: '../components/schemas/case_extended_fields_labels.yaml'
               count_closed_cases:
                 type: integer
               count_in_progress_cases:

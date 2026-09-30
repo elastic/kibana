@@ -1077,6 +1077,32 @@ describe('CasePatchRequestRt', () => {
     expect(result.success).toBe(true);
     expect(result.data).toStrictEqual(defaultRequest);
   });
+
+  it('accepts a valid template on update', () => {
+    const request = { ...defaultRequest, template: { id: 'tmpl-1', version: 1 } };
+    expect(PathReporter.report(CasePatchRequestRt.decode(request))).toContain('No errors!');
+  });
+
+  it.each([0, -1, 1.5])(
+    'rejects a template with non-positive-integer version (%p) via CasePatchRequestRt',
+    (version) => {
+      expect(
+        PathReporter.report(
+          CasePatchRequestRt.decode({ ...defaultRequest, template: { id: 'tmpl-1', version } })
+        )
+      ).toContain('The template version must be a positive integer.');
+    }
+  );
+
+  it.each([0, -1, 1.5])(
+    'rejects a template with non-positive-integer version (%p) via CasePatchRequestSchema',
+    (version) => {
+      expect(
+        CasePatchRequestSchema.safeParse({ ...defaultRequest, template: { id: 'tmpl-1', version } })
+          .success
+      ).toBe(false);
+    }
+  );
 });
 
 describe('CaseUpdateRequestTemplateRt', () => {

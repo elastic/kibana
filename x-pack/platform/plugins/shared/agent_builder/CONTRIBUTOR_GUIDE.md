@@ -380,6 +380,12 @@ const myAttachmentType: AttachmentTypeDefinition = {
 Do **not** include guidance on *when* to render inline — that is the responsibility of the
 skill that owns the relevant task. See [Inline rendering guidance in skills](#inline-rendering-guidance-in-skills).
 
+#### Real example: the built-in image attachment
+
+Agent Builder already ships a built-in `image` attachment type, so agents can see images pasted into the chat input. It's a real, file-backed attachment type and a good reference to copy from — the placeholder above just reuses the same `id` to illustrate `getAgentDescription`. See `x-pack/platform/plugins/shared/agent_builder_platform/server/attachment_types/image.ts`.
+
+It validates by looking up the file through a request-scoped Files client, so a user can never read another user's file. `format` downloads and base64-encodes the file lazily, only when the agent actually reads the attachment, so the bytes never end up in a tool result. The binary itself lives in the Files plugin under the `chat-attachment-images` file kind (registered in `agent_builder/server/plugin.ts`); the attachment only carries a `file_id` pointer. Limits — PNG/JPEG only, 3.5 MB max, 10 images per message — are defined in `agent-builder-common/attachments/attachment_types.ts`; the count limit is enforced client-side only.
+
 ### Browser-side registration
 
 Register a UI definition for your attachment type using the `attachments.addAttachmentType` API from the `agentBuilder` plugin's start contract:

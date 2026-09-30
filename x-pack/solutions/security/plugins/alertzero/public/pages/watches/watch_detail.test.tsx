@@ -56,17 +56,24 @@ jest.mock('./components/watches_section_layout', () => ({
       testId?: string;
       disableButton?: boolean | (() => boolean);
       isLoading?: boolean;
+      tooltipContent?: string | (() => string | undefined);
       run: () => void;
     };
     headerItems?: Array<{
       label: string;
       testId?: string;
       disableButton?: boolean | (() => boolean);
+      tooltipContent?: string | (() => string | undefined);
       run: () => void;
     }>;
   }) => {
     const resolveDisabled = (disableButton?: boolean | (() => boolean)) =>
       typeof disableButton === 'function' ? disableButton() : Boolean(disableButton);
+    // Real AppMenu buttons wrap in an EuiToolTip and expose its content via the button's
+    // accessible `title`. Reading `tooltipContent` here (rather than dropping it like the real
+    // header items list) is what makes the read-only tooltip contract observable in this test.
+    const resolveTooltip = (tooltipContent?: string | (() => string | undefined)) =>
+      typeof tooltipContent === 'function' ? tooltipContent() : tooltipContent;
     return (
       <div>
         <h1>{title}</h1>
@@ -81,6 +88,7 @@ jest.mock('./components/watches_section_layout', () => ({
             type="button"
             data-test-subj={item.testId}
             disabled={resolveDisabled(item.disableButton)}
+            title={resolveTooltip(item.tooltipContent)}
             onClick={() => item.run()}
           >
             {item.label}
@@ -91,6 +99,7 @@ jest.mock('./components/watches_section_layout', () => ({
             type="button"
             data-test-subj={headerPrimaryActionItem.testId}
             disabled={resolveDisabled(headerPrimaryActionItem.disableButton)}
+            title={resolveTooltip(headerPrimaryActionItem.tooltipContent)}
             onClick={() => headerPrimaryActionItem.run()}
           >
             {headerPrimaryActionItem.label}
@@ -890,12 +899,21 @@ describe('WatchDetailPage', () => {
     });
   });
 
-  it('locks worker settings and hides save when the user cannot write', () => {
+  it('locks worker settings and disables save/discard with a tooltip when the user cannot write', () => {
     mockUseCanWriteAlertZero.mockReturnValue(false);
     renderWatch(SYSTEM_SECURITY_WATCH_DETECTION_ID, detectionWorkers);
 
-    expect(screen.queryByTestId('alertZeroWatchSettingsSave')).not.toBeInTheDocument();
-    expect(screen.queryByTestId('alertZeroWatchSettingsDiscard')).not.toBeInTheDocument();
+    expect(screen.getByTestId('alertZeroReadOnlyCallout')).toBeInTheDocument();
+    expect(screen.getByTestId('alertZeroWatchSettingsSave')).toBeDisabled();
+    expect(screen.getByTestId('alertZeroWatchSettingsSave')).toHaveAttribute(
+      'title',
+      settingsI18n.READ_ONLY_TOOLTIP
+    );
+    expect(screen.getByTestId('alertZeroWatchSettingsDiscard')).toBeDisabled();
+    expect(screen.getByTestId('alertZeroWatchSettingsDiscard')).toHaveAttribute(
+      'title',
+      settingsI18n.READ_ONLY_TOOLTIP
+    );
     expect(
       screen.getByTestId(
         `alertZeroWorkerEnabledSwitch-${SYSTEM_SECURITY_WORKER_DETECTION_RULE_TUNING_ID}`

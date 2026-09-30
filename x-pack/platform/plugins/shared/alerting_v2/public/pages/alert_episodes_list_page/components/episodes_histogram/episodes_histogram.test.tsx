@@ -136,6 +136,13 @@ describe('EpisodesHistogram', () => {
     expect(screen.getByTestId('unifiedHistogramChart')).toBeInTheDocument();
   });
 
+  it('hides Lens chart actions', () => {
+    render(<EpisodesHistogram {...defaultProps} />);
+    expect(mockUseUnifiedHistogram).toHaveBeenCalledWith(
+      expect.objectContaining({ withLensActions: false })
+    );
+  });
+
   it('fetches the chart with an AbortController', () => {
     const fetch = jest.fn();
     mockUseUnifiedHistogram.mockReturnValue({
