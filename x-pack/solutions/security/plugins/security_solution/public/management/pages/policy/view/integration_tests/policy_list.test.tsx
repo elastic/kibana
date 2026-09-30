@@ -350,8 +350,8 @@ describe('When on the policy list page', () => {
     const formatManifestDate = (version: string) =>
       moment.utc(version, 'YYYY-MM-DD').format('MMMM DD, YYYY');
 
-    // Same ages as the removed Cypress policy list spec: one month ago counts as
-    // outdated, three days ago does not, and 18 months ago plus one day still counts.
+    // Same manifest ages as the deleted Cypress spec. This test checks the rendered
+    // date text only. The outdated count for these ages is asserted in the search strategy test.
     const manifestAges = () => {
       const monthAgo = moment.utc().subtract(1, 'months').format('YYYY-MM-DD');
       const threeDaysAgo = moment.utc().subtract(3, 'days').format('YYYY-MM-DD');
