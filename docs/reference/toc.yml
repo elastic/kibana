@@ -83,6 +83,7 @@ toc:
           - file: connectors-kibana/argocd-action-type.md
           - file: connectors-kibana/aws-cloudwatch-action-type.md
           - file: connectors-kibana/aws-x-ray-action-type.md
+          - file: connectors-kibana/azure-aks-action-type.md
           - file: connectors-kibana/azure-blob-action-type.md
           - file: connectors-kibana/azure-functions-action-type.md
           - file: connectors-kibana/azure-monitor-action-type.md

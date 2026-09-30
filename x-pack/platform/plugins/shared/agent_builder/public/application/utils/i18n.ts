@@ -2198,6 +2198,16 @@ export const labels = {
     title: i18n.translate('xpack.agentBuilder.connectors.title', {
       defaultMessage: 'Connectors',
     }),
+    techPreviewBadgeLabel: i18n.translate('xpack.agentBuilder.connectors.techPreviewBadgeLabel', {
+      defaultMessage: 'Technical preview',
+    }),
+    techPreviewBadgeDescription: i18n.translate(
+      'xpack.agentBuilder.connectors.techPreviewBadgeDescription',
+      {
+        defaultMessage:
+          'This functionality is in technical preview and may be changed or removed completely in a future release. Elastic will work to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.',
+      }
+    ),
     pageDescription: i18n.translate('xpack.agentBuilder.connectors.pageDescription', {
       defaultMessage:
         'Manage connectors for your agents. Connectors with workflow definitions will automatically create tools when configured.',
@@ -3020,4 +3030,13 @@ export const labels = {
       defaultMessage: 'AI Indices',
     }),
   },
+};
+
+// Shared badge config for the Connectors "Technical preview" label, reused across the
+// manage/agent connectors page headers, the connectors capability card, and the agent
+// connectors empty state — kept as one constant so wording/size stay in sync.
+export const connectorsTechPreviewBadgeProps = {
+  label: labels.connectors.techPreviewBadgeLabel,
+  tooltipContent: labels.connectors.techPreviewBadgeDescription,
+  size: 'm' as const,
 };
