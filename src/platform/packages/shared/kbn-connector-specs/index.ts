@@ -116,9 +116,9 @@ export type {
   ConnectorNetworkSettings,
   ConnectorResponseSettings,
   CredentialAccessor,
+  HostTarget,
+  PlatformServices,
   ClientRegistry,
   ClientTypeId,
   ClientTypeSpecs,
-  HostTarget,
-  PlatformServices,
 } from './src/lib/clients';

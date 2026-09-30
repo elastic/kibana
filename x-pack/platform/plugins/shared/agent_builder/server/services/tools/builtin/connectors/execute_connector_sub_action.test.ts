@@ -119,6 +119,13 @@ describe('createExecuteConnectorSubActionTool', () => {
     expect(tool.tags).toEqual(['connector', 'sub-action']);
   });
 
+  it('is not gated behind an availability check (graduated from experimental)', () => {
+    // Regression guard: this tool used to be unavailable unless
+    // agentBuilder:experimentalFeatures was enabled. It must stay ungated.
+    const tool = createExecuteConnectorSubActionTool({ getActions, getInference });
+    expect(tool.availability).toBeUndefined();
+  });
+
   describe('schema (strict, no structural normalization)', () => {
     it('rejects flattened sub-action fields at the root (unknown keys)', () => {
       const tool = createExecuteConnectorSubActionTool({ getActions, getInference });
@@ -227,7 +234,7 @@ describe('createExecuteConnectorSubActionTool', () => {
       expect((result as ToolHandlerStandardReturn).results[0].type).toBe(ToolResultType.error);
     });
 
-    it('allows all connectors when agentConfiguration.connector_ids is not set', async () => {
+    it('allows all connectors when there is no agent context at all (agentConfiguration is undefined)', async () => {
       mockExecute.mockResolvedValue({ status: 'ok', data: { ok: true } });
 
       const tool = createExecuteConnectorSubActionTool({ getActions, getInference });
@@ -238,6 +245,26 @@ describe('createExecuteConnectorSubActionTool', () => {
 
       expect(mockGet).toHaveBeenCalledWith({ id: 'conn-123' });
       expect((result as ToolHandlerStandardReturn).results[0].type).toBe(ToolResultType.other);
+    });
+
+    it('blocks all connectors when agentConfiguration is present but connector_ids is not set', async () => {
+      const context = {
+        ...mockContext,
+        agentConfiguration: {},
+      } as unknown as ToolHandlerContext;
+
+      const tool = createExecuteConnectorSubActionTool({ getActions, getInference });
+      const result = await tool.handler(
+        { connectorId: 'conn-123', subAction: 'searchMessages', params: {} },
+        context
+      );
+
+      expect(mockGet).not.toHaveBeenCalled();
+      expect(mockExecute).not.toHaveBeenCalled();
+      expect((result as ToolHandlerStandardReturn).results[0].type).toBe(ToolResultType.error);
+      expect(
+        ((result as ToolHandlerStandardReturn).results[0] as ErrorResult).data.message
+      ).toContain("Connector 'conn-123' is not available to this agent");
     });
   });
 

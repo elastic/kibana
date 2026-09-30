@@ -83,29 +83,24 @@ export const createExecuteConnectorSubActionTool = ({
     idempotentHint: false,
     openWorldHint: true,
   },
-  availability: {
-    cacheMode: 'global',
-    handler: async ({ uiSettings }) => {
-      const enabled = await uiSettings.get<boolean>(AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID);
-      return enabled
-        ? { status: 'available' }
-        : {
-            status: 'unavailable',
-            reason: 'Connector tools require Agent Builder experimental features to be enabled',
-          };
-    },
-  },
   handler: async ({ connectorId, subAction, params }, context) => {
-    const allowedIds = context.agentConfiguration?.connector_ids;
-    if (allowedIds !== undefined && !allowedIds.includes(connectorId)) {
-      return {
-        results: [
-          createErrorResult({
-            message: `Connector '${connectorId}' is not available to this agent. Use list_connectors to see available connectors.`,
-            metadata: { connectorId, subAction },
-          }),
-        ],
-      };
+    const { agentConfiguration } = context;
+    // Runtime-imposed scoping: the connector allow-list comes from the resolved agent
+    // configuration. When an agent configuration is present, undefined/null connector_ids
+    // means no connectors are assigned; scoping is skipped only when there is no agent
+    // context at all (mirrors sml_search.ts).
+    if (agentConfiguration) {
+      const allowedIds = agentConfiguration.connector_ids ?? [];
+      if (!allowedIds.includes(connectorId)) {
+        return {
+          results: [
+            createErrorResult({
+              message: `Connector '${connectorId}' is not available to this agent. Use list_connectors to see available connectors.`,
+              metadata: { connectorId, subAction },
+            }),
+          ],
+        };
+      }
     }
 
     const actions = await getActions();

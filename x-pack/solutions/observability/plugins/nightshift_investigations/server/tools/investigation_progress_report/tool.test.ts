@@ -87,4 +87,29 @@ describe('investigation_progress_report tool', () => {
       throw new Error('Expected a standard tool result');
     }
   });
+
+  it('warns the agent when more than one hypothesis is confirmed', async () => {
+    const tool = createTool();
+    const context = agentBuilderMocks.tools.createHandlerContext();
+
+    const state = {
+      summary: 'Two candidates look confirmed.',
+      hypotheses: [
+        { candidate: 'Expired license', confidence: 0.97, status: 'confirmed' as const },
+        { candidate: 'Task Manager saturation', confidence: 0.92, status: 'confirmed' as const },
+      ],
+    };
+
+    const result = await tool.handler(state, context);
+
+    expect(context.events.sendUiEvent).toHaveBeenCalledWith(INVESTIGATION_PROGRESS_UI_EVENT, state);
+    if ('results' in result) {
+      expect(result.results[0].data).toEqual({
+        acknowledged: true,
+        warning: expect.stringContaining('More than one hypothesis is "confirmed"'),
+      });
+    } else {
+      throw new Error('Expected a standard tool result');
+    }
+  });
 });
