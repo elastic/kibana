@@ -119,7 +119,7 @@ describe('useSuggestAutomation', () => {
     });
   });
 
-  it('does not call suggestAutomation until the active space id is resolved', async () => {
+  it('does not call suggestAutomation when there is no spaces plugin', async () => {
     const { result, suggestAutomationMock } = renderSuggestHook({ spaceId: undefined });
 
     act(() => {
