@@ -4,6 +4,8 @@ set -euo pipefail
 
 source .buildkite/scripts/common/util.sh
 
+ALLOWED_ES_BRANCH_PATTERN="^(main|[0-9]+\.[0-9]+)$"
+
 echo "--- Cleaning up cached images"
 clean_cached_images
 
@@ -17,7 +19,7 @@ mkdir -p "$destination"
 mkdir -p elasticsearch && cd elasticsearch
 
 export ELASTICSEARCH_BRANCH="${ELASTICSEARCH_BRANCH:-$BUILDKITE_BRANCH}"
-if [[ ! "$ELASTICSEARCH_BRANCH" =~ ^(main|[0-9]+\.[0-9]+)$ ]]; then
+if [[ ! "$ELASTICSEARCH_BRANCH" =~ $ALLOWED_ES_BRANCH_PATTERN ]]; then
   echo "ELASTICSEARCH_BRANCH must be main or a release branch (X.Y), got: $ELASTICSEARCH_BRANCH"
   exit 1
 fi

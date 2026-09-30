@@ -11,6 +11,24 @@ import fs from 'fs';
 import { execSync } from 'child_process';
 import { BASE_BUCKET_DAILY, BASE_BUCKET_PERMANENT } from './bucket_config.ts';
 
+const GCS_BASE_URL = 'https://storage.googleapis.com';
+const ALLOWED_MANIFEST_URL_PREFIX = `${GCS_BASE_URL}/${BASE_BUCKET_DAILY}/`;
+const ES_CLOUD_IMAGE_PREFIX = 'docker.elastic.co/kibana-ci/elasticsearch-cloud-ess:';
+
+const VERSION_PATTERN = /^\d+\.\d+\.\d+(-SNAPSHOT)?$/;
+const SHA_PATTERN = /^[0-9a-f]{40}$/;
+const SNAPSHOT_ID_PATTERN = /^[\w-]+$/;
+const ES_BRANCH_PATTERN = /^(main|\d+\.\d+)$/;
+
+/** e.g. kibana-ci-es-snapshots-daily/9.6.0/archives/20260930-022144_09876e4a */
+function getExpectedSnapshotBucket(version: string, id: string) {
+  return `${BASE_BUCKET_DAILY}/${version}/archives/${id}`;
+}
+
+function isAllowedArchiveUrl(url: string, bucket: string) {
+  return url.startsWith(`${GCS_BASE_URL}/${bucket}/`) || url.startsWith(ES_CLOUD_IMAGE_PREFIX);
+}
+
 (async () => {
   try {
     const MANIFEST_URL = process.argv[2];
@@ -19,9 +37,8 @@ import { BASE_BUCKET_DAILY, BASE_BUCKET_PERMANENT } from './bucket_config.ts';
       throw Error('Manifest URL missing');
     }
 
-    const allowedManifestUrlPrefix = `https://storage.googleapis.com/${BASE_BUCKET_DAILY}/`;
-    if (!new URL(MANIFEST_URL).href.startsWith(allowedManifestUrlPrefix)) {
-      throw Error(`Manifest URL must start with ${allowedManifestUrlPrefix}: ${MANIFEST_URL}`);
+    if (!new URL(MANIFEST_URL).href.startsWith(ALLOWED_MANIFEST_URL_PREFIX)) {
+      throw Error(`Manifest URL must start with ${ALLOWED_MANIFEST_URL_PREFIX}: ${MANIFEST_URL}`);
     }
 
     const projectRoot = process.cwd();
@@ -36,26 +53,23 @@ import { BASE_BUCKET_DAILY, BASE_BUCKET_PERMANENT } from './bucket_config.ts';
     fs.writeFileSync('manifest.json', manifestJson);
     const manifest = JSON.parse(manifestJson);
     const { id, bucket, branch, version, sha, archives } = manifest;
-    if (!/^\d+\.\d+\.\d+(-SNAPSHOT)?$/.test(version)) {
+    if (!VERSION_PATTERN.test(version)) {
       throw Error(`Invalid version format: ${version}`);
     }
-    if (!/^[0-9a-f]{40}$/.test(sha)) {
+    if (!SHA_PATTERN.test(sha)) {
       throw Error(`Invalid sha format: ${sha}`);
     }
-    if (!/^[\w-]+$/.test(id)) {
+    if (!SNAPSHOT_ID_PATTERN.test(id)) {
       throw Error(`Invalid id format: ${id}`);
     }
-    if (bucket !== `${BASE_BUCKET_DAILY}/${version}/archives/${id}`) {
+    if (bucket !== getExpectedSnapshotBucket(version, id)) {
       throw Error(`Unexpected bucket: ${bucket}`);
     }
-    if (!/^(main|\d+\.\d+)$/.test(branch)) {
+    if (!ES_BRANCH_PATTERN.test(branch)) {
       throw Error(`Invalid branch: ${branch}`);
     }
     for (const { url } of archives) {
-      if (
-        !url.startsWith(`https://storage.googleapis.com/${bucket}/`) &&
-        !url.startsWith('docker.elastic.co/kibana-ci/elasticsearch-cloud-ess:')
-      ) {
+      if (!isAllowedArchiveUrl(url, bucket)) {
         throw Error(`Unexpected archive url: ${url}`);
       }
     }
