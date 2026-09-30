@@ -69,6 +69,7 @@ export const ConnectorLibraryPanel: React.FC<ConnectorLibraryPanelProps> = ({
       libraryLabels={libraryLabels}
       manageLibraryPath={appPaths.manage.connectors}
       getItemName={getConnectorName}
+      dataTestSubj="agentConnectorLibraryFlyout"
     />
   );
 };

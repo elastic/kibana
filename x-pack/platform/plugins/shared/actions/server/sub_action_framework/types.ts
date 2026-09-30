@@ -36,6 +36,8 @@ export interface ServiceParams<Config, Secrets> {
   secrets: Secrets;
   services: Services;
   request?: KibanaRequest;
+  /** Saved-object version of the connector, or IN_MEMORY_CONNECTOR_REVISION for preconfigured connectors. */
+  connectorVersion?: string;
 }
 
 export type SubActionRequestParams<R> = {
