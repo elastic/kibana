@@ -56,10 +56,16 @@ export interface ExtractionRunResult {
   readonly write: CatalogWriteResult;
 }
 
+/** Receives operational warnings that do not change the extraction result. */
+export interface ExtractionLogger {
+  warn(message: string): void;
+}
+
 /** Supplies every environment port and immutable metadata required by one extraction run. */
 export interface ExtractRepositoryDependencies {
   readonly catalogWriter: CatalogWriter;
   readonly extractorVersion: string;
+  readonly logger: ExtractionLogger;
   readonly now: () => string;
   readonly reader: SourceReader;
   readonly repositoryRequest: RepositoryRevisionRequest;
@@ -183,16 +189,54 @@ interface ClassifiedBatch<Decision> {
   readonly unclassifiedIds: readonly string[];
 }
 
+/** Candidate fields used to describe a skipped candidate and its neighbours in the batch. */
+interface DescribableCandidate {
+  readonly evidence: readonly SourceLocation[];
+  readonly id: string;
+}
+
+/** Describes one skipped candidate so a merge with a look-alike neighbour is visible in the log. */
+const describeSkippedCandidate = (
+  candidates: readonly DescribableCandidate[],
+  answerCounts: ReadonlyMap<string, number>,
+  id: string
+): string => {
+  const index = candidates.findIndex((candidate) => candidate.id === id);
+  const candidate = candidates[index];
+  const answers = answerCounts.get(id) ?? 0;
+  const location = candidate?.evidence[0];
+  const excerpts = new Set(candidate?.evidence.map(({ excerpt }) => excerpt));
+  const neighbour = (label: string, other: DescribableCandidate | undefined): string =>
+    other === undefined
+      ? `${label} none`
+      : `${label} ${other.id}${
+          other.evidence.some(({ excerpt }) => excerpts.has(excerpt)) ? ' (same excerpt)' : ''
+        }`;
+  return [
+    `${id} ${answers === 0 ? 'omitted' : `answered ${answers} times`}`,
+    `at ${index + 1}/${candidates.length}`,
+    ...(location === undefined ? [] : [`${location.path}:${location.line}`]),
+    neighbour('previous', candidates[index - 1]),
+    neighbour('next', candidates[index + 1]),
+  ].join(', ');
+};
+
 /** Runs a classification batch, retrying transient failures and then only the candidates the model skipped. */
 const classifyWorkflowBatch = async <
-  Candidate extends { readonly id: string },
+  Candidate extends DescribableCandidate,
   Decision extends { readonly id: string }
 >({
   candidates,
+  logger,
+  repository,
   run,
+  workflow,
 }: {
   readonly candidates: readonly Candidate[];
+  readonly logger: ExtractionLogger;
+  readonly repository: string;
   readonly run: (candidates: readonly Candidate[]) => Promise<OperationResult<readonly Decision[]>>;
+  readonly workflow: string;
 }): Promise<OperationResult<ClassifiedBatch<Decision>>> => {
   let classification: OperationResult<readonly Decision[]> | undefined;
   for (let attempt = 1; attempt <= workflowBatchAttempts; attempt += 1) {
@@ -211,11 +255,28 @@ const classifyWorkflowBatch = async <
     const pending = new Set(unclassifiedIds);
     const retryCandidates = candidates.filter(({ id }) => pending.has(id));
     const retry = await run(retryCandidates);
+    let retryOutcome: string;
     if (retry.status === 'success') {
       const second = partitionClassificationResults(retryCandidates, retry.value);
       decisions = [...decisions, ...second.results];
       unclassifiedIds = second.unresolvedIds;
+      retryOutcome = `The retry recovered ${pending.size - unclassifiedIds.length}; ${
+        unclassifiedIds.length
+      } still unclassified.`;
+    } else {
+      retryOutcome = `The retry failed: ${retry.error.message}`;
     }
+    const answerCounts = new Map<string, number>();
+    for (const { id } of classification.value) {
+      answerCounts.set(id, (answerCounts.get(id) ?? 0) + 1);
+    }
+    logger.warn(
+      `The ${workflow} classification workflow for ${repository} skipped ${pending.size} of ${
+        candidates.length
+      } candidates on the first try. ${retryOutcome} ${[...pending]
+        .map((id) => describeSkippedCandidate(candidates, answerCounts, id))
+        .join('; ')}`
+    );
   }
   /** A large gap signals a broken workflow rather than an occasional skipped ID. */
   const allowed = Math.min(
@@ -341,10 +402,13 @@ export const extractRepository = async (
   for (const candidates of loggingBatches.value) {
     const classified = await classifyWorkflowBatch({
       candidates,
+      logger: dependencies.logger,
+      repository: repository.repository,
       run: (batch) =>
         dependencies.workflows.classifyLogging({
           candidates: batch.map(({ source: _source, ...candidate }) => candidate),
         }),
+      workflow: 'logging',
     });
     if (classified.status === 'failure') return classified;
     unclassifiedLogging += classified.value.unclassifiedIds.length;
@@ -405,10 +469,13 @@ export const extractRepository = async (
   for (const candidates of otelBatches.value) {
     const classified = await classifyWorkflowBatch({
       candidates,
+      logger: dependencies.logger,
+      repository: repository.repository,
       run: (batch) =>
         dependencies.workflows.classifyOtel({
           candidates: batch.map(({ source: _source, ...candidate }) => candidate),
         }),
+      workflow: 'OTel',
     });
     if (classified.status === 'failure') return classified;
     unclassifiedOtel += classified.value.unclassifiedIds.length;

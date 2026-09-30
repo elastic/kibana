@@ -13,7 +13,7 @@ import type {
   SourceReader,
 } from './domain';
 import { loggingIdiomPatterns } from './domain/logging/idiom_patterns';
-import { extractRepository } from './extract_repository';
+import { extractRepository, type ExtractionLogger } from './extract_repository';
 
 const repositoryResolver: RepositoryResolver = {
   resolve: async (request) => ({
@@ -123,11 +123,13 @@ const skippingWorkflows = (
 const run = (
   catalogWriter: CatalogWriter,
   reader: SourceReader = oneLogReader,
-  classificationWorkflows: ClassificationWorkflowClient = workflows
+  classificationWorkflows: ClassificationWorkflowClient = workflows,
+  logger: ExtractionLogger = { warn: jest.fn() }
 ) =>
   extractRepository({
     catalogWriter,
     extractorVersion: 'test',
+    logger,
     now: () => '2026-09-28T00:00:00.000Z',
     reader,
     repositoryRequest: { repository: 'elastic/example', revision: 'main' },
@@ -210,10 +212,15 @@ describe('extractRepository', () => {
   it('retries only the skipped candidate and prunes when the retry classifies it', async () => {
     const catalogWriter = successfulWriter();
     const classification = skippingWorkflows([1]);
+    const logger = { warn: jest.fn() };
 
-    const result = await run(catalogWriter, threeLogReader, classification);
+    const result = await run(catalogWriter, threeLogReader, classification, logger);
 
     expect(result.status).toBe('success');
+    expect(logger.warn).toHaveBeenCalledTimes(1);
+    expect(logger.warn.mock.calls[0]?.[0]).toMatch(
+      /^The logging classification workflow for elastic\/example skipped 1 of 3 candidates on the first try\. The retry recovered 1; 0 still unclassified\. \S+ omitted, at 1\/3, src\/a\.ts:1, previous none, next \S+$/
+    );
     expect(classification.classifyLogging).toHaveBeenCalledTimes(2);
     const [first, retry] = classification.classifyLogging.mock.calls.map(
       ([request]) => request.candidates
@@ -225,11 +232,51 @@ describe('extractRepository', () => {
     expect(catalogWriter.prune).toHaveBeenCalledTimes(1);
   });
 
+  it('logs a merge of 2 candidates that share an excerpt', async () => {
+    const sameExcerptReader: SourceReader = {
+      ...oneLogReader,
+      grep: async ({ pattern }) =>
+        pattern === loggingIdiomPatterns[0]
+          ? {
+              items: ['a', 'b'].map((name) => ({
+                line: 1,
+                path: `src/${name}.ts`,
+                text: 'logger.info("started")',
+              })),
+              status: 'complete',
+            }
+          : { items: [], status: 'complete' },
+    };
+    let call = 0;
+    const merging: ClassificationWorkflowClient = {
+      ...workflows,
+      classifyLogging: async ({ candidates }) => {
+        call += 1;
+        const [first] = candidates;
+        const answered = call === 1 && first !== undefined ? [first, first] : candidates;
+        return { status: 'success', value: answered.map(({ id }) => ({ id, keep: true })) };
+      },
+    };
+    const logger = { warn: jest.fn() };
+
+    const result = await run(successfulWriter(), sameExcerptReader, merging, logger);
+
+    expect(result.status).toBe('success');
+    expect(logger.warn.mock.calls[0]?.[0]).toMatch(
+      /skipped 2 of 2 candidates on the first try\. The retry recovered 2; 0 still unclassified\. \S+ answered 2 times, at 1\/2, src\/a\.ts:1, previous none, next \S+ \(same excerpt\); \S+ omitted, at 2\/2, src\/b\.ts:1, previous \S+ \(same excerpt\), next none$/
+    );
+  });
+
   it('leaves out a candidate skipped twice, warns, and keeps earlier documents', async () => {
     const catalogWriter = successfulWriter();
 
-    const result = await run(catalogWriter, threeLogReader, skippingWorkflows([1, 2]));
+    const logger = { warn: jest.fn() };
 
+    const result = await run(catalogWriter, threeLogReader, skippingWorkflows([1, 2]), logger);
+
+    expect(logger.warn).toHaveBeenCalledWith(
+      expect.stringContaining('The retry recovered 0; 1 still unclassified.')
+    );
     expect(result).toMatchObject({
       status: 'success',
       value: {

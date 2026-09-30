@@ -145,6 +145,7 @@ export class CodeIntelligencePlugin
     this.services = {
       extractionService: new ExtractionService({
         lockManager: this.lockManager,
+        logger: this.logger.get('extraction'),
         managedWorkflows: managedClient,
         management: this.workflowsManagement,
         createSourceSession,

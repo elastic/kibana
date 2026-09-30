@@ -21,7 +21,7 @@ import { EXTRACTION_BATCH_LOCK_ID } from '../common/extraction_lock_id';
 import type { CatalogWriter } from './domain/ports/catalog_writer';
 import type { QueryValidator } from './domain/ports/query_validator';
 import type { RepositoryResolver } from './domain/ports/repository_resolver';
-import { extractRepository } from './extract_repository';
+import { extractRepository, type ExtractionLogger } from './extract_repository';
 import { ExtractionAlreadyRunningError } from './extraction_already_running_error';
 import { ExtractionCapacityExhaustedError } from './extraction_capacity_exhausted_error';
 import type { SourceSession, SourceSessionFactory } from './source_session';
@@ -71,6 +71,7 @@ export class ExtractionService {
     private readonly dependencies: {
       /** Serializes batches across Kibana instances, since each repository run prunes the catalog. */
       readonly lockManager: Pick<LockManagerService, 'withLock'>;
+      readonly logger: ExtractionLogger;
       readonly managedWorkflows: PluginScopedManagedWorkflowsApi;
       readonly management: WorkflowsManagementApi;
       readonly createSourceSession: SourceSessionFactory;
@@ -210,6 +211,7 @@ export class ExtractionService {
       const result = await extractRepository({
         catalogWriter,
         extractorVersion: '0.1.0',
+        logger: this.dependencies.logger,
         now: () => new Date().toISOString(),
         reader: source.reader,
         repositoryRequest: { repository: status.repository, revision: status.revision },
