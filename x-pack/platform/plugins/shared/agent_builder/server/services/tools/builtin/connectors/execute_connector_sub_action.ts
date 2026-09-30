@@ -11,7 +11,6 @@ import { AuthorizationStatus, isAuthorizationMethod } from '@kbn/agent-builder-c
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 import type { BuiltinToolDefinition } from '@kbn/agent-builder-server';
 import { getToolResultId, createErrorResult } from '@kbn/agent-builder-server';
-import { AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID } from '@kbn/management-settings-ids';
 import {
   getConnectorSpec,
   isSelectedActionEnabled,
