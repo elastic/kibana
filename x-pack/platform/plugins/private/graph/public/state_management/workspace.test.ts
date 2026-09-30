@@ -24,6 +24,8 @@ import {
   submitSearch,
   toggleEdgeSelection,
   toggleNodeSelection,
+  unblockAllNodes,
+  unblockNode,
   ungroupNode,
   workspaceChanged,
   workspaceInitializedSelector,
@@ -266,6 +268,24 @@ describe('workspace state', () => {
 
     environment.store.dispatch(ungroupNode('parent'));
     expect(environment.store.getState().workspace.nodesById.child.parentId).toBeUndefined();
+  });
+
+  it('removes individual and all blocklisted nodes', () => {
+    const environment = createMockGraphStore({});
+    const state = {
+      ...environment.store.getState().workspace,
+      blocklistedNodesById: { first: { id: 'first' }, second: { id: 'second' } },
+      blocklistedNodeIds: ['first', 'second'],
+    } as unknown as ReturnType<typeof environment.store.getState>['workspace'];
+    environment.store.dispatch(workspaceChanged(state));
+
+    environment.store.dispatch(unblockNode('first'));
+    expect(environment.store.getState().workspace.blocklistedNodeIds).toEqual(['second']);
+    expect(environment.store.getState().workspace.blocklistedNodesById.first).toBeUndefined();
+
+    environment.store.dispatch(unblockAllNodes());
+    expect(environment.store.getState().workspace.blocklistedNodeIds).toEqual([]);
+    expect(environment.store.getState().workspace.blocklistedNodesById).toEqual({});
   });
 
   it('keeps edge selection single-valued', () => {
