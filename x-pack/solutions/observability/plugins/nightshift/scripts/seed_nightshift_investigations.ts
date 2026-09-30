@@ -685,7 +685,7 @@ const INVESTIGATIONS: InvestigationAttributes[] = [
           'logs.web-frontend',
           'web-frontend',
           evidence(
-            'Checkout error rate crosses the 5% alert threshold after each restart.',
+            'Shoppers get a payment error on the last step; their carts are kept, so most retry.',
             timeChart({
               title: 'Checkout error rate',
               yLabel: 'Error rate',
