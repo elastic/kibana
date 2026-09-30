@@ -204,15 +204,6 @@ export class MapsPage {
     }
   }
 
-  private async closeSetViewPopover() {
-    // timeout: 0 prevents waiting for the element to appear — the form only exists in
-    // the DOM when the popover is open, so without it Playwright retries for 10s and throws.
-    if (await this.setViewForm.isVisible({ timeout: 1_000 })) {
-      await this.page.testSubj.click('toggleSetViewVisibilityButton');
-      await this.setViewForm.waitFor({ state: 'hidden', timeout: DEFAULT_MAP_LOADING_TIMEOUT });
-    }
-  }
-
   async setView(lat: number, lon: number, zoom: number) {
     await this.openSetViewPopover();
     await this.page.testSubj.locator('latitudeInput').fill(lat.toString());
