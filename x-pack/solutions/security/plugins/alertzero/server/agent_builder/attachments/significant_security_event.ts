@@ -9,6 +9,7 @@ import type { AttachmentTypeDefinition } from '@kbn/agent-builder-server/attachm
 import { ALERTZERO_ATTACHMENT_TYPES } from '../../../common/constants';
 import {
   significantSecurityEventAttachmentDataSchema,
+  significantSecurityEventAttachmentReadSchema,
   type SignificantSecurityEventAttachmentData,
 } from '../../../common/significant_security_event_schema';
 import { createReadonlyAttachmentType } from './create_readonly_attachment_type';
@@ -282,6 +283,7 @@ export const createSignificantSecurityEventAttachmentType = (): AttachmentTypeDe
   createReadonlyAttachmentType({
     id: SIGNIFICANT_SECURITY_EVENT_ATTACHMENT_ID,
     schema: significantSecurityEventAttachmentDataSchema,
+    readSchema: significantSecurityEventAttachmentReadSchema,
     formatForAgent: formatSignificantSecurityEventForAgent,
     describePayload,
     renderNoun: 'event card',

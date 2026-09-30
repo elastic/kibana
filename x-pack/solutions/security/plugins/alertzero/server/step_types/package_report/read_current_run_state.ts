@@ -6,7 +6,7 @@
  */
 
 import type { VersionedAttachment } from '@kbn/agent-builder-common';
-import { significantSecurityEventAttachmentDataSchema } from '../../../common/significant_security_event_schema';
+import { significantSecurityEventAttachmentReadSchema } from '../../../common/significant_security_event_schema';
 import { DEFAULT_BASELINE_TELEMETRY } from '../../services/watches/hunt/common/resolve_index_scope';
 import { buildMatchesRequired } from '../../services/watches/hunt/common/matches_required';
 import type { CurrentRunHost, CurrentRunState, ProcessSelector } from './types';
@@ -63,12 +63,12 @@ export const readCurrentRunState = async ({
   rehydrateProcessSelectors: RehydrateProcessSelectors;
 }): Promise<CurrentRunState | undefined> => {
   const sseAttachments = (attachments ?? []).filter((a) => a.type === SSE_ATTACHMENT_TYPE);
-  const currentRun: Array<ReturnType<typeof significantSecurityEventAttachmentDataSchema.parse>> =
+  const currentRun: Array<ReturnType<typeof significantSecurityEventAttachmentReadSchema.parse>> =
     [];
 
   for (const attachment of sseAttachments) {
     const raw = currentVersionData(attachment);
-    const parsed = significantSecurityEventAttachmentDataSchema.safeParse(raw);
+    const parsed = significantSecurityEventAttachmentReadSchema.safeParse(raw);
     if (!parsed.success) {
       continue;
     }
