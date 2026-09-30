@@ -91,7 +91,7 @@ const ImpactEntityRow: React.FC<{ entity: InvestigationImpactEntity; isLast: boo
 export const ImpactSection: React.FC<ImpactSectionProps> = ({ impact }) => {
   const { summary, evidence, entities = [] } = impact;
   const [isExpanded, setIsExpanded] = useState(false);
-  const hasSummary = Boolean(summary?.trim());
+  const hasSummary = summary !== undefined && summary.trim() !== '';
   if (!hasSummary && !evidence && entities.length === 0) {
     return null;
   }
@@ -107,7 +107,7 @@ export const ImpactSection: React.FC<ImpactSectionProps> = ({ impact }) => {
     <div data-test-subj="investigationOutputImpact">
       {hasSummary && (
         <EuiMarkdownFormat textSize="s" color="default">
-          {summary ?? ''}
+          {summary}
         </EuiMarkdownFormat>
       )}
       {evidence && showEvidence && (
