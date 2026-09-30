@@ -655,6 +655,7 @@ const CellActions = React.memo(
   }) => {
     const { euiTheme } = useEuiTheme();
     const bubbleRef = useRef<HTMLDivElement>(null);
+    const triggerRef = useRef<HTMLButtonElement>(null);
     const openTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
     const [isOpen, setIsOpen] = useState(false);
     const [useFixedLayer, setUseFixedLayer] = useState(false);
@@ -729,15 +730,34 @@ const CellActions = React.memo(
       return needsFixedLayer;
     }, [actionCount, actionInsetPx, anchorCellRef]);
 
+    const openBubble = useCallback(() => {
+      if (isOpen) return;
+      clearOpenTimer();
+      refreshFixedLayer();
+      playMorph(true);
+    }, [clearOpenTimer, isOpen, playMorph, refreshFixedLayer]);
+
+    const closeBubble = useCallback(
+      (returnFocusToTrigger = false) => {
+        clearOpenTimer();
+        if (!isOpen) return;
+        setUseFixedLayer(false);
+        playMorph(false);
+        if (returnFocusToTrigger) {
+          requestAnimationFrame(() => triggerRef.current?.focus());
+        }
+      },
+      [clearOpenTimer, isOpen, playMorph]
+    );
+
     const scheduleOpen = useCallback(() => {
       if (isOpen) return;
       clearOpenTimer();
       openTimerRef.current = setTimeout(() => {
         openTimerRef.current = null;
-        refreshFixedLayer();
-        playMorph(true);
+        openBubble();
       }, CELL_ACTIONS_HOVER_OPEN_DELAY_MS);
-    }, [clearOpenTimer, isOpen, playMorph, refreshFixedLayer]);
+    }, [clearOpenTimer, isOpen, openBubble]);
 
     useEffect(() => {
       if (!isOpen || !useFixedLayer) return;
@@ -761,33 +781,88 @@ const CellActions = React.memo(
     const handleBubbleMouseLeave = useCallback(() => {
       clearOpenTimer();
       if (isOpen) {
-        setUseFixedLayer(false);
-        playMorph(false);
+        closeBubble(false);
       }
-    }, [clearOpenTimer, isOpen, playMorph]);
+    }, [clearOpenTimer, closeBubble, isOpen]);
 
     useEffect(() => {
       if (!isOpen) return;
 
+      const focusFirstAction = () => {
+        bubbleRef.current?.querySelector<HTMLElement>('button')?.focus();
+      };
+      const focusFrame = requestAnimationFrame(focusFirstAction);
+
       const onPointerDown = (event: PointerEvent) => {
         if (!bubbleRef.current?.contains(event.target as Node)) {
-          onDismiss();
+          closeBubble(true);
         }
       };
       const onKeyDown = (event: KeyboardEvent) => {
         if (event.key === keys.ESCAPE) {
           event.stopPropagation();
-          onDismiss();
+          closeBubble(true);
         }
       };
 
       document.addEventListener('pointerdown', onPointerDown);
       document.addEventListener('keydown', onKeyDown, true);
       return () => {
+        cancelAnimationFrame(focusFrame);
         document.removeEventListener('pointerdown', onPointerDown);
         document.removeEventListener('keydown', onKeyDown, true);
       };
-    }, [isOpen, onDismiss]);
+    }, [closeBubble, isOpen]);
+
+    const handleTriggerClick = useCallback(
+      (event: React.MouseEvent) => {
+        event.stopPropagation();
+        if (isOpen) {
+          closeBubble(true);
+        } else {
+          openBubble();
+        }
+      },
+      [closeBubble, isOpen, openBubble]
+    );
+
+    const handleTriggerKeyDown = useCallback(
+      (event: React.KeyboardEvent) => {
+        event.stopPropagation();
+        if (event.key === keys.ENTER || event.key === keys.SPACE) {
+          event.preventDefault();
+          if (isOpen) {
+            closeBubble(true);
+          } else {
+            openBubble();
+          }
+        }
+      },
+      [closeBubble, isOpen, openBubble]
+    );
+
+    const handleToolbarKeyDown = useCallback((event: React.KeyboardEvent<HTMLDivElement>) => {
+      if (event.key !== keys.ARROW_LEFT && event.key !== keys.ARROW_RIGHT) {
+        return;
+      }
+      const toolbar = bubbleRef.current?.querySelector<HTMLElement>('[role="toolbar"]');
+      const actionButtons = toolbar
+        ? Array.from(toolbar.querySelectorAll<HTMLButtonElement>('button'))
+        : [];
+      if (actionButtons.length === 0) return;
+
+      event.preventDefault();
+      event.stopPropagation();
+      const currentIndex = actionButtons.indexOf(document.activeElement as HTMLButtonElement);
+      const delta = event.key === keys.ARROW_RIGHT ? 1 : -1;
+      const nextIndex =
+        currentIndex >= 0
+          ? (currentIndex + delta + actionButtons.length) % actionButtons.length
+          : delta > 0
+          ? 0
+          : actionButtons.length - 1;
+      actionButtons[nextIndex]?.focus();
+    }, []);
 
     const handleFilterIn = useCallback(
       (e: React.MouseEvent) => {
@@ -825,14 +900,26 @@ const CellActions = React.memo(
     const cellActionsLabel = i18n.translate('discover.grid.tanStack.cellActionsButtonAriaLabel', {
       defaultMessage: 'Cell actions',
     });
+    const filterForLabel = i18n.translate('discover.grid.tanStack.filterForValueAriaLabel', {
+      defaultMessage: 'Filter for value',
+    });
+    const filterOutLabel = i18n.translate('discover.grid.tanStack.filterOutValueAriaLabel', {
+      defaultMessage: 'Filter out value',
+    });
+    const copyValueLabel = i18n.translate('discover.grid.tanStack.copyCellValueAriaLabel', {
+      defaultMessage: 'Copy value',
+    });
+    const expandCellLabel = i18n.translate('discover.grid.tanStack.expandCellValueAriaLabel', {
+      defaultMessage: 'Expand cell',
+    });
 
     const actionButtons = [
       onFilter ? (
-        <EuiToolTip key="filterIn" content="Filter for value" disableScreenReaderOutput>
+        <EuiToolTip key="filterIn" content={filterForLabel} disableScreenReaderOutput>
           <EuiButtonIcon
             css={styles.cellActionButton}
             iconType="plusCircle"
-            aria-label="Filter for value"
+            aria-label={filterForLabel}
             size="xs"
             iconSize="s"
             color="text"
@@ -843,11 +930,11 @@ const CellActions = React.memo(
         </EuiToolTip>
       ) : null,
       onFilter ? (
-        <EuiToolTip key="filterOut" content="Filter out value" disableScreenReaderOutput>
+        <EuiToolTip key="filterOut" content={filterOutLabel} disableScreenReaderOutput>
           <EuiButtonIcon
             css={styles.cellActionButton}
             iconType="minusCircle"
-            aria-label="Filter out value"
+            aria-label={filterOutLabel}
             size="xs"
             iconSize="s"
             color="text"
@@ -857,11 +944,11 @@ const CellActions = React.memo(
           />
         </EuiToolTip>
       ) : null,
-      <EuiToolTip key="copy" content="Copy value" disableScreenReaderOutput>
+      <EuiToolTip key="copy" content={copyValueLabel} disableScreenReaderOutput>
         <EuiButtonIcon
           css={styles.cellActionButton}
           iconType="copy"
-          aria-label="Copy value"
+          aria-label={copyValueLabel}
           size="xs"
           iconSize="s"
           color="text"
@@ -870,11 +957,11 @@ const CellActions = React.memo(
           data-test-subj="copyCellValue"
         />
       </EuiToolTip>,
-      <EuiToolTip key="expand" content="Expand cell" disableScreenReaderOutput>
+      <EuiToolTip key="expand" content={expandCellLabel} disableScreenReaderOutput>
         <EuiButtonIcon
           css={styles.cellActionButton}
           iconType="maximize"
-          aria-label="Expand cell"
+          aria-label={expandCellLabel}
           size="xs"
           iconSize="s"
           color="text"
@@ -897,31 +984,45 @@ const CellActions = React.memo(
         style={isOpen && useFixedLayer ? fixedLayerStyle : undefined}
         onMouseEnter={handleBubbleMouseEnter}
         onMouseLeave={handleBubbleMouseLeave}
-        onClick={(event) => event.stopPropagation()}
-        onKeyDown={(event) => event.stopPropagation()}
       >
         {isOpen ? (
-          actionButtons.map((button, index) => (
-            <span
-              key={button.key}
-              css={styles.cellActionPop}
-              style={{ animationDelay: `${index * 45}ms` }}
-            >
-              {button}
-            </span>
-          ))
-        ) : (
-          <EuiButtonIcon
-            color="text"
-            display="base"
-            iconType="ellipsis"
-            size="xs"
-            iconSize="s"
+          <div
+            role="toolbar"
             aria-label={cellActionsLabel}
-            aria-expanded={isOpen}
-            data-test-subj="tanStackCellActionsButton"
-            onClick={(event) => event.stopPropagation()}
-          />
+            css={styles.cellActionsToolbar}
+            onKeyDown={handleToolbarKeyDown}
+          >
+            {actionButtons.map((button, index) => (
+              <span
+                key={button.key}
+                css={styles.cellActionPop}
+                style={{ animationDelay: `${index * 45}ms` }}
+              >
+                {button}
+              </span>
+            ))}
+          </div>
+        ) : (
+          <EuiToolTip
+            content={cellActionsLabel}
+            disableScreenReaderOutput
+            anchorProps={{ css: { display: 'inline-flex' } }}
+          >
+            <EuiButtonIcon
+              buttonRef={triggerRef}
+              color="text"
+              display="empty"
+              iconType="ellipsis"
+              size="xs"
+              iconSize="s"
+              aria-label={cellActionsLabel}
+              aria-haspopup="toolbar"
+              aria-expanded={isOpen}
+              data-test-subj="tanStackCellActionsButton"
+              onClick={handleTriggerClick}
+              onKeyDown={handleTriggerKeyDown}
+            />
+          </EuiToolTip>
         )}
       </div>
     );
@@ -1478,6 +1579,9 @@ const VirtualCell = React.memo(
         onClick={(e) => openCellPopover(e.currentTarget)}
         onKeyDown={(e) => {
           if (e.key === keys.ENTER || e.key === keys.SPACE) {
+            if ((e.target as HTMLElement).closest('.tsg-cellActions')) {
+              return;
+            }
             e.preventDefault();
             openCellPopover(e.currentTarget);
           }

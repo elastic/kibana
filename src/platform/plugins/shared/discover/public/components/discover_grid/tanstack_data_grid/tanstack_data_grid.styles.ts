@@ -402,6 +402,12 @@ export const getTanStackDataGridStyles = (euiTheme: UseEuiTheme['euiTheme']) => 
     flexShrink: 0,
   }),
 
+  cellActionsToolbar: css({
+    display: 'flex',
+    alignItems: 'center',
+    gap: euiTheme.size.xxs,
+  }),
+
   // -- Cell popover (portaled; max size matches EuiDataGrid) --
   cellPopoverBackdrop: css({
     position: 'fixed',
