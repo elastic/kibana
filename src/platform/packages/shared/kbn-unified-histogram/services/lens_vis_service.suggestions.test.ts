@@ -126,7 +126,7 @@ describe('LensVisService suggestions', () => {
 
     const histogramQuery = {
       esql: `from the-data-view | limit 100
-| STATS results = COUNT(*) BY timestamp = BUCKET(@timestamp, 5 minute)
+| STATS results = COUNT(*) BY timestamp = BUCKET(@timestamp, 10 minute)
 | LIMIT 10000`,
     };
 
@@ -165,7 +165,7 @@ describe('LensVisService suggestions', () => {
 
     const histogramQuery = {
       esql: `from the-data-view | limit 100
-| STATS results = COUNT(*) BY timestamp = BUCKET(@timestamp, 5 minute)
+| STATS results = COUNT(*) BY timestamp = BUCKET(@timestamp, 10 minute)
 | LIMIT 10000`,
     };
 
@@ -204,7 +204,7 @@ describe('LensVisService suggestions', () => {
 
     const histogramQuery = {
       esql: `FROM metrics*
-| STATS results = COUNT(*) BY timestamp = BUCKET(@timestamp, 5 minute)
+| STATS results = COUNT(*) BY timestamp = BUCKET(@timestamp, 10 minute)
 | LIMIT 10000`,
     };
 
@@ -348,7 +348,7 @@ describe('LensVisService suggestions', () => {
 
     const histogramQuery = {
       esql: `from the-data-view | limit 100
-| STATS results = COUNT(*) BY \`var0\`, timestamp = BUCKET(@timestamp, 5 minute) | sort \`var0\` asc
+| STATS results = COUNT(*) BY \`var0\`, timestamp = BUCKET(@timestamp, 10 minute) | sort \`var0\` asc
 | LIMIT 10000`,
     };
 
@@ -430,7 +430,7 @@ describe('LensVisService suggestions', () => {
 
     const histogramQuery = {
       esql: `from the-data-view | limit 100
-| STATS results = COUNT(*) BY \`coordinates\`, timestamp = BUCKET(@timestamp, 5 minute)
+| STATS results = COUNT(*) BY \`coordinates\`, timestamp = BUCKET(@timestamp, 10 minute)
 | LIMIT 10000`,
     };
 

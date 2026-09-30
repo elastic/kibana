@@ -89,7 +89,7 @@ describe('computeInterval', () => {
         },
         dataMock
       )
-    ).toEqual('5 minute');
+    ).toEqual('10 minute');
   });
 
   it('should return correct interval for 7 days timerange', () => {
@@ -113,7 +113,7 @@ describe('computeInterval', () => {
         },
         dataMock
       )
-    ).toEqual('3 hour');
+    ).toEqual('12 hour');
   });
 
   it('should return correct interval for 1 year timerange', () => {
