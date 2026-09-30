@@ -19,6 +19,7 @@ export {
   platformCoreCasesTools,
   platformSignificantEventsTools,
   contextEngineAiIndexTools,
+  contextEngineMemoryTools,
   contextEngineAutomationTools,
   attachmentTools,
   internalTools,

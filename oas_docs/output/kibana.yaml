@@ -23328,7 +23328,8 @@ paths:
                   minLength: 1
                   type: string
                 memory_enabled:
-                  description: Whether this AI index accepts memory writes. Defaults to true when omitted.
+                  default: true
+                  description: Whether this AI index accepts memory writes.
                   type: boolean
                 sources:
                   default: []
@@ -24472,7 +24473,8 @@ paths:
                   required:
                     - enabled
                 memory_enabled:
-                  description: Whether this AI index accepts memory writes. Defaults to true when omitted.
+                  default: true
+                  description: Whether this AI index accepts memory writes.
                   type: boolean
                 sources:
                   default: []
