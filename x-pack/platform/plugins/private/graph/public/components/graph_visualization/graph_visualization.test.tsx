@@ -119,6 +119,13 @@ describe('graph_visualization', () => {
     clearEdgeSelection: jest.fn(),
   } as unknown as jest.Mocked<Workspace>;
 
+  const defaultSelectionProps = {
+    selectedNodeIds: ['1'],
+    selectedEdgeIds: ['A..1-B..2', 'B..2-C..3'],
+    onToggleNodeSelection: jest.fn(() => true),
+    onToggleEdgeSelection: jest.fn(() => true),
+  };
+
   beforeEach(() => {
     jest.clearAllMocks();
   });
@@ -127,6 +134,7 @@ describe('graph_visualization', () => {
     expect(
       shallow(
         <GraphVisualization
+          {...defaultSelectionProps}
           workspace={{} as unknown as Workspace}
           selectSelected={() => {}}
           onSetControl={() => {}}
@@ -153,6 +161,7 @@ describe('graph_visualization', () => {
     expect(
       shallow(
         <GraphVisualization
+          {...defaultSelectionProps}
           workspace={workspace}
           selectSelected={() => {}}
           onSetControl={() => {}}
@@ -167,6 +176,7 @@ describe('graph_visualization', () => {
 
     const instance = shallow(
       <GraphVisualization
+        {...defaultSelectionProps}
         workspace={workspace}
         selectSelected={selectSelectedMock}
         onSetControl={() => {}}
@@ -176,15 +186,16 @@ describe('graph_visualization', () => {
 
     instance.find('.gphNode').last().simulate('click', {});
 
-    expect(workspace.toggleNodeSelection).toHaveBeenCalledWith(nodes[2]);
+    expect(defaultSelectionProps.onToggleNodeSelection).toHaveBeenCalledWith(nodes[2], true);
     expect(selectSelectedMock).toHaveBeenCalledWith(nodes[2]);
-    expect(workspace.changeHandler).toHaveBeenCalled();
   });
 
   it('should react to node deselection', () => {
     const onSetControlMock = jest.fn();
     const instance = shallow(
       <GraphVisualization
+        {...defaultSelectionProps}
+        onToggleNodeSelection={() => false}
         workspace={workspace}
         selectSelected={() => {}}
         onSetControl={onSetControlMock}
@@ -194,14 +205,13 @@ describe('graph_visualization', () => {
 
     instance.find('.gphNode').first().simulate('click', {});
 
-    expect(workspace.toggleNodeSelection).toHaveBeenCalledWith(nodes[0]);
     expect(onSetControlMock).toHaveBeenCalledWith('none');
-    expect(workspace.changeHandler).toHaveBeenCalled();
   });
 
   it('should react to edge click', () => {
     const instance = shallow(
       <GraphVisualization
+        {...defaultSelectionProps}
         workspace={workspace}
         selectSelected={() => {}}
         onSetControl={() => {}}
@@ -214,6 +224,6 @@ describe('graph_visualization', () => {
     expect(workspace.getAllIntersections).toHaveBeenCalled();
     expect(edges[0].topSrc).toEqual(workspace.getAllIntersections.mock.calls[0][1][0]);
     expect(edges[0].topTarget).toEqual(workspace.getAllIntersections.mock.calls[0][1][1]);
-    expect(workspace.removeEdgeFromSelection).toHaveBeenCalled();
+    expect(defaultSelectionProps.onToggleEdgeSelection).toHaveBeenCalledWith(edges[0]);
   });
 });
