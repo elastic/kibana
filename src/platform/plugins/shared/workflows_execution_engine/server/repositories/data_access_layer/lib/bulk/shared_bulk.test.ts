@@ -230,6 +230,15 @@ describe('sharedBulk', () => {
     });
 
     expect(result.items[0].result).toBe('updated');
+    expect(esClient.mget).toHaveBeenCalledWith({
+      docs: [
+        {
+          _id: 'a',
+          _index: INDEX,
+          _source: { includes: ['status'] },
+        },
+      ],
+    });
     expect(esClient.bulk).toHaveBeenCalledTimes(1);
     expect(esClient.bulk.mock.calls[0][0].refresh).toBe('wait_for');
     expect(esClient.indices.refresh).not.toHaveBeenCalled();
