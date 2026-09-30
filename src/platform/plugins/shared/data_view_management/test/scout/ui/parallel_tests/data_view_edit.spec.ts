@@ -27,7 +27,7 @@ spaceTest.describe(
     });
 
     spaceTest.beforeEach(async ({ browserAuth, apiServices, scoutSpace }) => {
-      await browserAuth.loginAsPrivilegedUser();
+      await browserAuth.loginAsAdmin();
       // Reset the data view before each test so edits from one test don't affect the next
       if (dataViewId) {
         await apiServices.dataViews.delete(dataViewId, scoutSpace.id).catch(() => {});

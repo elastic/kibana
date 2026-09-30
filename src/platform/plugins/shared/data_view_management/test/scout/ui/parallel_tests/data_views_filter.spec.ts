@@ -32,7 +32,7 @@ spaceTest.describe('Data view field list filters', { tag: tags.deploymentAgnosti
   });
 
   spaceTest.beforeEach(async ({ browserAuth }) => {
-    await browserAuth.loginAsPrivilegedUser();
+    await browserAuth.loginAsAdmin();
   });
 
   spaceTest.afterAll(async ({ esClient, scoutSpace }) => {

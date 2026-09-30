@@ -30,7 +30,7 @@ spaceTest.describe('Create data view from index alias', { tag: tags.deploymentAg
   });
 
   spaceTest.beforeEach(async ({ browserAuth }) => {
-    await browserAuth.loginAsPrivilegedUser();
+    await browserAuth.loginAsAdmin();
   });
 
   spaceTest.afterAll(async ({ esClient, scoutSpace }) => {

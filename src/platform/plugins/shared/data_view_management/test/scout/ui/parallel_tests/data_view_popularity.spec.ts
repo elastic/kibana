@@ -29,7 +29,7 @@ spaceTest.describe(
         spaceId: scoutSpace.id,
       });
       dataViewId = data.id;
-      await browserAuth.loginAsPrivilegedUser();
+      await browserAuth.loginAsAdmin();
     });
 
     spaceTest.afterAll(async ({ scoutSpace }) => {

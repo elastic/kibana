@@ -26,7 +26,7 @@ spaceTest.describe(
   () => {
     spaceTest.beforeEach(async ({ scoutSpace, browserAuth }) => {
       await scoutSpace.savedObjects.cleanStandardList();
-      await browserAuth.loginAsPrivilegedUser();
+      await browserAuth.loginAsAdmin();
     });
 
     spaceTest.afterAll(async ({ scoutSpace, esClient }) => {
@@ -81,23 +81,26 @@ spaceTest.describe(
     spaceTest(
       'can create a logstash data view and verify page heading, URL, and field count',
       async ({ pageObjects, page }) => {
+        // makelogs indices only: the scope the FTR field count (86) was measured against.
+        const pattern = 'logstash-2015.09.1*';
+
         await spaceTest.step('navigate to data views and create logstash data view', async () => {
           await pageObjects.dataViewsManagement.goto();
           await pageObjects.dataViewsManagement.openCreateWizard();
-          // Scoped to the archive-owned indices so the exact field count is stable.
-          await pageObjects.dataViewEditorFlyout.setTitle('logstash-2015.09.*');
+          await pageObjects.dataViewEditorFlyout.setTitle(pattern);
           await pageObjects.dataViewEditorFlyout.selectTimestampField('@timestamp');
           await pageObjects.dataViewEditorFlyout.save();
         });
 
         await spaceTest.step('verify page heading and URL', async () => {
-          await expect(page.testSubj.locator('headerGlobalNav')).toBeAttached();
+          await expect(page.testSubj.locator(APP_HEADER_TEST_SUBJECTS.title)).toContainText(
+            pattern
+          );
           await expect(page).toHaveURL(/\/management\/kibana\/dataViews\/dataView\/.+/);
         });
 
-        await spaceTest.step('verify field count matches real logstash data', async () => {
-          const fieldCount = await pageObjects.dataViewDetail.getFieldsTabCount();
-          expect(fieldCount).toBe(86);
+        await spaceTest.step('verify field count matches the makelogs mapping', async () => {
+          expect(await pageObjects.dataViewDetail.getFieldsTabCount()).toBe(86);
         });
       }
     );
