@@ -46,6 +46,20 @@ export const panelStyles = {
     width: '100%',
     overflow: 'hidden',
   }),
+  // One outer card; rows only add a bottom divider (last row omits it to avoid doubling the panel edge).
+  fieldList: css({
+    width: '100%',
+    overflow: 'hidden',
+    borderRadius: 12,
+  }),
+  fieldRow: ({ euiTheme }: UseEuiTheme) =>
+    css({
+      borderRadius: 0,
+      borderBottom: `${euiTheme.border.width.thin} solid ${euiTheme.colors.borderBaseSubdued}`,
+    }),
+  fieldRowLast: css({
+    borderBottom: 'none',
+  }),
   resourceInset: ({ euiTheme }: UseEuiTheme) =>
     css({
       margin: euiTheme.size.base,

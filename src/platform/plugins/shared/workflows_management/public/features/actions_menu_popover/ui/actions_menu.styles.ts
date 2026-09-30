@@ -8,7 +8,6 @@
  */
 
 import type { UseEuiTheme } from '@elastic/eui';
-import { euiFontSize } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { actionIconTileStyles } from './action_icon_tile.styles';
 import { kbdStyles } from '../../../widgets/workflow_yaml_editor/ui/kbd_styles';
@@ -59,33 +58,11 @@ export const componentStyles = {
         flex: 1,
         minHeight: 0,
       },
-      // Align group labels with optionPad / icon tiles (size.base).
-      // Keep bottom divider; drop EUI's ::before top rule and the 3× top padding
-      // that existed to clear that rule above "Commands" / other section labels.
-      '.euiSelectableList__groupLabel': {
-        paddingInline: euiTheme.size.base,
-        borderBottom: `${euiTheme.border.width.thin} solid ${euiTheme.colors.borderBaseSubdued}`,
-        '&::before': {
-          content: 'none',
-        },
-        '&:not(:first-child)': {
-          paddingBlockStart: euiTheme.size.s,
-        },
-      },
-      // Square rows; own padding lives on optionPad (EUI list items add their own).
-      '.euiSelectableListItem': {
+      // Own className on options (EUI merges it onto the list item).
+      '.actionsMenuOption': {
         borderRadius: 0,
         padding: 0,
         borderBottom: `${euiTheme.border.width.thin} solid ${euiTheme.colors.borderBaseSubdued}`,
-      },
-      // Override EUI list-item interactive hover (backgroundBaseInteractiveHover),
-      // which reads as a semi-white wash on dark theme. Match preview-panel subdued fill.
-      '.euiSelectableListItem:hover, .euiSelectableListItem:has(.actionsMenu-keyboardActive), .euiSelectableListItem-isFocused, .euiSelectableListItem:hover .euiListItemLayout, .euiSelectableListItem:has(.actionsMenu-keyboardActive) .euiListItemLayout, .euiSelectableListItem-isFocused .euiListItemLayout':
-        {
-          backgroundColor: euiTheme.colors.backgroundBaseSubdued,
-        },
-      '.euiSelectableListItem__text': {
-        padding: 0,
       },
     }),
   optionInfo: css({
@@ -100,19 +77,13 @@ export const componentStyles = {
     textOverflow: 'ellipsis',
     whiteSpace: 'nowrap',
   }),
-  breadcrumbRow: (euiThemeContext: UseEuiTheme) => {
-    const { euiTheme } = euiThemeContext;
-    return css({
+  breadcrumbRow: ({ euiTheme }: UseEuiTheme) =>
+    css({
       flexShrink: 0,
       marginTop: -1,
       padding: `${euiTheme.size.s} ${euiTheme.size.base}`,
       borderBottom: `${euiTheme.border.width.thin} solid ${euiTheme.colors.borderBaseSubdued}`,
-      // EuiBreadcrumbs has no size prop; shrink to xs for denser menu chrome.
-      '.euiBreadcrumbs__list, .euiBreadcrumb, .euiBreadcrumb__content': {
-        ...euiFontSize(euiThemeContext, 'xs'),
-      },
-    });
-  },
+    }),
   rightColumn: ({ euiTheme }: UseEuiTheme) =>
     css({
       flex: 1,
@@ -124,8 +95,31 @@ export const componentStyles = {
   optionPad: ({ euiTheme }: UseEuiTheme) =>
     css({
       width: '100%',
-      padding: euiTheme.size.base,
+      // Cancel EUI list-item text vertical padding (xs + xxs); horizontal is cleared via
+      // actionsMenuOption padding: 0. Intentional inset stays on this pad.
+      marginBlock: `calc(-1 * (${euiTheme.size.xs} + ${euiTheme.size.xxs}))`,
+      paddingBlock: euiTheme.size.m,
+      paddingInline: euiTheme.size.base,
       boxSizing: 'border-box',
+      // Opaque fill covers EUI list-item interactive hover; hover/keyboard use subdued.
+      backgroundColor: euiTheme.colors.backgroundBasePlain,
+      '&:hover, &.actionsMenu-keyboardActive': {
+        backgroundColor: euiTheme.colors.backgroundBaseSubdued,
+      },
+    }),
+  // Applied via EuiSelectable option `css` (public API).
+  groupLabel: ({ euiTheme }: UseEuiTheme) =>
+    css({
+      paddingInline: euiTheme.size.base,
+      borderBottom: `${euiTheme.border.width.thin} solid ${euiTheme.colors.borderBaseSubdued}`,
+      // Match EUI's &:not(:first-child)::before specificity so the top rule is removed.
+      '&:not(:first-child)': {
+        paddingBlockStart: euiTheme.size.s,
+        '&::before': {
+          content: 'none',
+          borderTop: 'none',
+        },
+      },
     }),
   shortcutContainer: (euiThemeContext: UseEuiTheme) => {
     const { euiTheme } = euiThemeContext;

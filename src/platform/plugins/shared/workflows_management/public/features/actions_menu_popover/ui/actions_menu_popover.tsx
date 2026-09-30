@@ -32,7 +32,7 @@ export const ActionsMenuPopover = React.memo(function ActionsMenuPopover({
 
   if (!isOpen) return null;
 
-  // Match header padding (size.base) so the close control lines up with "Actions menu"
+  // EuiModal hardcodes close inset at size.xs with no public prop; match header padding.
   const panelCss = css({
     width: 'min(920px, calc(100vw - 48px))',
     overflow: 'hidden',

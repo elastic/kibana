@@ -19,7 +19,6 @@ import {
   EuiIcon,
   EuiImage,
   EuiLink,
-  EuiMarkdownFormat,
   EuiNotificationBadge,
   EuiPanel,
   EuiSpacer,
@@ -55,6 +54,21 @@ import {
 } from '../types';
 
 type TabId = 'inputs' | 'outputs' | 'examples';
+
+/** Split documentation example markdown into a title + fenced code for EUI props. */
+function parseExampleSnippet(example: string): {
+  title: string | null;
+  language: string;
+  code: string | null;
+} {
+  const titleMatch = /^##\s+(.+)$/m.exec(example);
+  const fenceMatch = /```(\w*)\n([\s\S]*?)```/.exec(example);
+  return {
+    title: titleMatch?.[1]?.trim() ?? null,
+    language: fenceMatch?.[1] || 'yaml',
+    code: fenceMatch?.[2]?.replace(/\n$/, '') ?? null,
+  };
+}
 
 interface ActionsMenuPreviewPanelProps {
   hoveredOption: ActionOptionData | null;
@@ -478,10 +492,22 @@ function StepDetailPanel({
       </EuiTabs>
 
       <EuiSpacer size="s" />
-      <EuiPanel hasBorder hasShadow={false} paddingSize="none" borderRadius="m">
+      <EuiPanel
+        hasBorder
+        hasShadow={false}
+        paddingSize="none"
+        borderRadius="none"
+        css={styles.fieldList}
+      >
         {activeTab === 'examples' ? (
           examples.length === 0 ? (
-            <EuiPanel hasShadow={false} paddingSize="m" color="transparent" borderRadius="none">
+            <EuiPanel
+              hasBorder={false}
+              hasShadow={false}
+              paddingSize="m"
+              color="transparent"
+              borderRadius="none"
+            >
               <EuiText size="xs" color="subdued">
                 <FormattedMessage
                   id="workflows.actionsMenu.preview.noExamples"
@@ -490,17 +516,49 @@ function StepDetailPanel({
               </EuiText>
             </EuiPanel>
           ) : (
-            examples.map((example, idx) => (
-              <React.Fragment key={idx}>
-                {idx > 0 && <EuiHorizontalRule margin="none" />}
-                <EuiPanel hasShadow={false} paddingSize="m" color="transparent" borderRadius="none">
-                  <EuiMarkdownFormat textSize="xs">{example}</EuiMarkdownFormat>
+            examples.map((example, idx) => {
+              const isLast = idx === examples.length - 1;
+              const { title, language, code } = parseExampleSnippet(example);
+              return (
+                <EuiPanel
+                  key={idx}
+                  hasBorder={false}
+                  hasShadow={false}
+                  paddingSize="m"
+                  color="transparent"
+                  borderRadius="none"
+                  css={[styles.fieldRow, isLast && styles.fieldRowLast]}
+                >
+                  {title && (
+                    <EuiTitle size="xxxs">
+                      <h4>{title}</h4>
+                    </EuiTitle>
+                  )}
+                  {code != null && (
+                    <>
+                      {title && <EuiSpacer size="s" />}
+                      <EuiCodeBlock
+                        language={language}
+                        fontSize="s"
+                        paddingSize="s"
+                        isCopyable
+                      >
+                        {code}
+                      </EuiCodeBlock>
+                    </>
+                  )}
                 </EuiPanel>
-              </React.Fragment>
-            ))
+              );
+            })
           )
         ) : fields.length === 0 ? (
-          <EuiPanel hasShadow={false} paddingSize="m" color="transparent" borderRadius="none">
+          <EuiPanel
+            hasBorder={false}
+            hasShadow={false}
+            paddingSize="m"
+            color="transparent"
+            borderRadius="none"
+          >
             <EuiText size="xs" color="subdued">
               <FormattedMessage
                 id="workflows.actionsMenu.preview.noFields"
@@ -509,10 +567,18 @@ function StepDetailPanel({
             </EuiText>
           </EuiPanel>
         ) : (
-          fields.map((field, idx) => (
-            <React.Fragment key={field.name}>
-              {idx > 0 && <EuiHorizontalRule margin="none" />}
-              <EuiPanel hasShadow={false} paddingSize="m" color="transparent" borderRadius="none">
+          fields.map((field, idx) => {
+            const isLast = idx === fields.length - 1;
+            return (
+              <EuiPanel
+                key={field.name}
+                hasBorder={false}
+                hasShadow={false}
+                paddingSize="m"
+                color="transparent"
+                borderRadius="none"
+                css={[styles.fieldRow, isLast && styles.fieldRowLast]}
+              >
                 <EuiFlexGroup
                   alignItems="center"
                   justifyContent="spaceBetween"
@@ -553,8 +619,8 @@ function StepDetailPanel({
                   </>
                 )}
               </EuiPanel>
-            </React.Fragment>
-          ))
+            );
+          })
         )}
       </EuiPanel>
     </EuiPanel>
