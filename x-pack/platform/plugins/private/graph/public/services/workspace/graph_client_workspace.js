@@ -124,11 +124,13 @@ function GraphWorkspace(options) {
   this.lastResponse = null;
   this.changeHandler = options.changeHandler;
   this.topologyChangeHandler = options.topologyChangeHandler;
-  const layoutController = new GraphLayoutController({
-    getNodes: () => self.nodes,
-    getEdges: () => self.edges,
-    onTick: self.changeHandler,
-  });
+  const layoutController =
+    options.layoutController ??
+    new GraphLayoutController({
+      getNodes: () => self.nodes,
+      getEdges: () => self.edges,
+      onTick: self.changeHandler,
+    });
   if (options.graphExploreProxy) {
     graphExplorer = options.graphExploreProxy;
   }

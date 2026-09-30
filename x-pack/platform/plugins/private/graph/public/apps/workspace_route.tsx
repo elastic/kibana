@@ -18,6 +18,7 @@ import {
   type GraphStore,
 } from '../state_management';
 import { createWorkspace } from '../services/workspace/graph_client_workspace';
+import { GraphLayoutController } from '../services/workspace/graph_layout_controller';
 import { WorkspaceLayout } from '../components/workspace_layout';
 import type { GraphServices } from '../application';
 import { useWorkspaceLoader } from '../helpers/use_workspace_loader';
@@ -93,6 +94,15 @@ export const WorkspaceRoute = ({
       addBasePath,
       indexPatternProvider,
       createWorkspace: (indexPattern, exploreControls) => {
+        workspaceRef.current?.stopLayout();
+        const layoutController = new GraphLayoutController({
+          getNodes: () => workspaceRef.current?.nodes ?? [],
+          getEdges: () => workspaceRef.current?.edges ?? [],
+          onTick: () =>
+            storeRef.current?.dispatch(
+              workspaceLayoutChanged(Boolean(workspaceRef.current?.isLayoutRunning()))
+            ),
+        });
         const options = {
           indexName: indexPattern,
           vertex_fields: [],
@@ -106,6 +116,7 @@ export const WorkspaceRoute = ({
           graphExploreProxy: callNodeProxy,
           searchProxy: callSearchNodeProxy,
           exploreControls,
+          layoutController,
         };
         const createdWorkspace = (workspaceRef.current = createWorkspace(options));
         return createdWorkspace;

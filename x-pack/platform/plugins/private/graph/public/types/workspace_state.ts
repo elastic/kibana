@@ -157,6 +157,12 @@ export type ExploreRequest = any;
 export type SearchRequest = any;
 export type ExploreResults = any;
 export type SearchResults = any;
+export interface WorkspaceLayoutController {
+  start(): void;
+  stop(): void;
+  isRunning(): boolean;
+}
+
 export type GraphExploreCallback = (data: ExploreResults) => void;
 export type GraphSearchCallback = (data: SearchResults) => void;
 
@@ -177,6 +183,7 @@ export type WorkspaceOptions = Partial<{
     callback: GraphSearchCallback
   ) => void;
   exploreControls: AdvancedSettings;
+  layoutController: WorkspaceLayoutController;
 }>;
 
 export type ControlType =
