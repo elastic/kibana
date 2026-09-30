@@ -9,7 +9,7 @@ description: >
 
   Started by the Worker with `workflow.executeAsync` after the batch has been
   classified, tagged and noted, so the Worker never waits for a human. At most
-  5 reviews per rule wait at once; further ones are skipped and the alerts stay
+  10 reviews per rule wait at once; further ones are skipped and the alerts stay
   open and tagged `az:false_positive`.
 enabled: true
 tags:
@@ -25,8 +25,8 @@ settings:
   # Manual autonomy, and a failed or unauthorized attempt re-parks within the same deadline, so
   # the Worker Investigation lifecycle contract puts the ceiling at 168 h. Keep this above it.
   timeout: "170h"
-  # At most 5 reviews per rule wait for a decision at once (the engine counts pending, waiting and
-  # running executions of the group, and a review parked on its proposal is one of them). A sixth
+  # At most 10 reviews per rule wait for a decision at once (the engine counts pending, waiting and
+  # running executions of the group, and a review parked on its proposal is one of them). An eleventh
   # is SKIPPED at dispatch, before any step runs, and the Worker sees that on the execution record
   # and says so in the Investigation.
   #
@@ -41,7 +41,7 @@ settings:
   concurrency:
     key: "alert-triage-review-{{ inputs.rule_id }}"
     strategy: drop
-    max: 5
+    max: 10
 
 triggers:
   # Started by the Alert Triage Worker. Manual so it owns no schedule of its own.

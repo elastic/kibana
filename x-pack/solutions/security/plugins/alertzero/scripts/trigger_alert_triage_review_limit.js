@@ -10,11 +10,11 @@
  * Drives one detection rule past the Alert Triage per-rule closure proposal limit.
  *
  * The Worker hands each batch's closure proposal to `system-security-floor-alert-triage-review`,
- * which allows at most 5 reviews waiting for a decision per rule. This script indexes several
+ * which allows at most 10 reviews waiting for a decision per rule. This script indexes several
  * batches of clear false positives that all carry the SAME rule uuid, runs the Worker once per
  * batch, then reads back what each review did:
  *
- *   - the first 5 reviews park on their proposal (`waiting_for_child`)
+ *   - the first 10 reviews park on their proposal (`waiting_for_child`)
  *   - every further review is `skipped`, and its Investigation says no proposal was created
  *
  * Needs a running stack with Alert Analysis and the Alert Triage Worker enabled (Manual autonomy,
@@ -27,7 +27,7 @@
  *   --es          Elasticsearch base URL (default: http://localhost:9200)
  *   --kibana      Kibana base URL (default: http://localhost:5601)
  *   --space       Kibana space id (default: default)
- *   --runs        Worker runs to start (default: 7, the limit of 5 plus 2)
+ *   --runs        Worker runs to start (default: 12, the limit of 10 plus 2)
  *   --stagger-ms  Delay between starting runs (default: 1500)
  *   --timeout-s   How long to wait for the Worker runs to finish (default: 900)
  *   --no-wait     Start the runs and print the execution ids without waiting
@@ -48,7 +48,7 @@ const flag = (name, def) => {
 const ES_URL = flag('--es', 'http://localhost:9200');
 const KB_URL = flag('--kibana', 'http://localhost:5601');
 const SPACE = flag('--space', 'default');
-const RUNS = Number(flag('--runs', '7'));
+const RUNS = Number(flag('--runs', '12'));
 const STAGGER_MS = Number(flag('--stagger-ms', '1500'));
 const TIMEOUT_S = Number(flag('--timeout-s', '900'));
 const NO_WAIT = args.includes('--no-wait');
@@ -58,7 +58,7 @@ const AUTH = `${process.env.ES_USERNAME ?? 'elastic'}:${process.env.ES_PASSWORD 
 const AUTH_HEADER = 'Basic ' + Buffer.from(AUTH).toString('base64');
 
 // The value in floor_alert_triage_review.yaml `settings.concurrency.max`.
-const REVIEW_LIMIT = 5;
+const REVIEW_LIMIT = 10;
 const FIXTURE_TAG = 'alert-triage-limit-fixture';
 // Workers install per space as `${workerId}-${spaceId}`; the bare id 404s.
 const WORKER_ID = `system-security-floor-alert-triage-${SPACE}`;

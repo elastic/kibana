@@ -19,7 +19,7 @@ export const ALERTZERO_FLOOR_ALERT_TRIAGE_REVIEW_WORKFLOW_ID =
 
 /**
  * The closure proposal of one Alert Triage batch and the handling of its outcome, installed once
- * globally and started per batch by the per-space Alert Triage Worker. At most 5 wait for a
+ * globally and started per batch by the per-space Alert Triage Worker. At most 10 wait for a
  * decision per rule.
  */
 export const ALERTZERO_FLOOR_ALERT_TRIAGE_REVIEW_WORKFLOW = {

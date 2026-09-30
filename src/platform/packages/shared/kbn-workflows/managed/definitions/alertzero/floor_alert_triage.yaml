@@ -451,7 +451,7 @@ steps:
   #    with `workflow.executeAsync`. This run finishes in minutes. The review raises the
   #    proposal, applies the outcome (re-tag on dismissal) and closes the Investigation.
   #
-  #    The review drops a batch when the rule already has 5 reviews waiting for a decision. The
+  #    The review drops a batch when the rule already has 10 reviews waiting for a decision. The
   #    engine decides that while starting the child, so the dispatch itself still succeeds and
   #    only the child's execution record says `skipped`. That record is read back below, because
   #    nothing else closes the Investigation of a batch whose review never ran.
@@ -534,7 +534,7 @@ steps:
                 {% if consts.worker_settings.autonomy == 'supervised' %}The closure is approved automatically at this autonomy level; reopen any alert you disagree with.{% else %}A human decision is required.{% endif %}
                 The outcome is posted here and this Investigation is closed when it is decided.
 
-      # The rule already has 5 closure proposals waiting for a decision, so this one is not
+      # The rule already has 10 closure proposals waiting for a decision, so this one is not
       # raised. Same end state as a false positive below the confidence floor: the alerts stay
       # open and tagged az:false_positive, and the Investigation closes.
       - name: handle_review_limit
@@ -565,7 +565,7 @@ steps:
             with:
               conversation_id: "{{ steps.create_investigation.output.conversation_id }}"
               message: >-
-                No closure proposal was created. Rule "{{ event.rule.name }}" already has 5 closure proposals waiting for a decision, the most that wait at once for one rule.
+                No closure proposal was created. Rule "{{ event.rule.name }}" already has 10 closure proposals waiting for a decision, the most that wait at once for one rule.
                 {{ variables.fp_candidate_count }} alert{% if variables.fp_candidate_count != 1 %}s{% endif %} classified as false positive at or above the {{ consts.worker_settings.autoCloseConfidenceScoreMinThreshold }} confidence floor {% if variables.fp_candidate_count == 1 %}stays{% else %}stay{% endif %} open and tagged az:false_positive.
                 Decide the pending proposals for this rule to let new ones through.
 
@@ -581,7 +581,7 @@ steps:
               conversation_id: "{{ steps.create_investigation.output.conversation_id }}"
               message: >-
                 ⚠️ The closure review was started, but its state could not be read after retries ({{ steps.read_review_execution.error.message }}).
-                If a closure proposal exists for this rule it is in the decision queue and posts its outcome here. If the rule was already at its limit of 5 waiting proposals, none was created and {{ variables.fp_candidate_count }} alert{% if variables.fp_candidate_count != 1 %}s{% endif %} {% if variables.fp_candidate_count == 1 %}stays{% else %}stay{% endif %} open and tagged az:false_positive.
+                If a closure proposal exists for this rule it is in the decision queue and posts its outcome here. If the rule was already at its limit of 10 waiting proposals, none was created and {{ variables.fp_candidate_count }} alert{% if variables.fp_candidate_count != 1 %}s{% endif %} {% if variables.fp_candidate_count == 1 %}stays{% else %}stay{% endif %} open and tagged az:false_positive.
                 This Investigation stays open for review.
 
       - name: handle_review_failed

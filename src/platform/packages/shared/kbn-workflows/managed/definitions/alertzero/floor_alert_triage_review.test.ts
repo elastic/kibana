@@ -94,8 +94,8 @@ describe('floor_alert_triage_review — inputs', () => {
 describe('floor_alert_triage_review — per-rule concurrency', () => {
   const { concurrency } = parsed.settings;
 
-  it('allows 5 reviews waiting for a decision per rule', () => {
-    expect(concurrency.max).toBe(5);
+  it('allows 10 reviews waiting for a decision per rule', () => {
+    expect(concurrency.max).toBe(10);
   });
 
   // `queue` holds a batch behind analyst decisions and expires it after 24h. `cancel-in-progress`
