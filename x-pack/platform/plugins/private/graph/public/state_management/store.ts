@@ -23,7 +23,14 @@ import { advancedSettingsReducer, registerAdvancedSettingsListeners } from './ad
 import type { DatasourceState } from './datasource';
 import { datasourceReducer } from './datasource';
 import { registerDatasourceListeners } from './datasource_listeners';
-import type { IndexPatternProvider, Workspace, GraphSavePolicy, AdvancedSettings } from '../types';
+import type {
+  AdvancedSettings,
+  ExploreRequest,
+  ExploreResults,
+  GraphSavePolicy,
+  IndexPatternProvider,
+  Workspace,
+} from '../types';
 import { registerPersistenceListeners } from './persistence';
 import type { MetaDataState } from './meta_data';
 import { metaDataReducer, registerMetaDataListeners } from './meta_data';
@@ -54,6 +61,7 @@ export interface GraphStoreDependencies
   chrome: ChromeStart;
   basePath: string;
   handleSearchQueryError: (err: Error | string) => void;
+  exploreGraph: (index: string, request: ExploreRequest) => Promise<ExploreResults>;
 }
 
 export type StartGraphListening = TypedStartListening<GraphState, GraphDispatch>;
