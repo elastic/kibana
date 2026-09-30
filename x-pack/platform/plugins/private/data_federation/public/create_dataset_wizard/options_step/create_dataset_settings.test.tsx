@@ -16,7 +16,11 @@ import {
   CreateDatasetAdditionalSettings,
   CreateDatasetFormatField,
 } from './create_dataset_settings';
-import type { CreateDatasetFormValues, DatasetFormatFormValue } from '../create_dataset_form_state';
+import type {
+  CreateDatasetFormValues,
+  DatasetErrorModeFormValue,
+  DatasetFormatFormValue,
+} from '../create_dataset_form_state';
 import { emptyCreateDatasetSettingsFormValues } from '../create_dataset_form_state';
 import { createDatasetWizardStrings } from '../create_dataset_wizard_i18n';
 
@@ -39,7 +43,7 @@ const docLinksMock = {
 
 const renderSettings = () => {
   const Wrapper = () => {
-    const { control } = useForm<CreateDatasetFormValues>({
+    const methods = useForm<CreateDatasetFormValues>({
       defaultValues: {
         name: '',
         description: '',
@@ -53,6 +57,7 @@ const renderSettings = () => {
         },
       },
     });
+    const { control } = methods;
 
     const settings = useWatch({ control, name: 'settings' });
 
@@ -60,9 +65,11 @@ const renderSettings = () => {
       <I18nProvider>
         <EuiProvider>
           <KibanaContextProvider services={{ docLinks: docLinksMock }}>
-            <CreateDatasetFormatField control={control} />
-            <CreateDatasetAdditionalSettings control={control} />
-            <div data-test-subj="settingsValue">{JSON.stringify(settings)}</div>
+            <FormProvider {...methods}>
+              <CreateDatasetFormatField control={control} />
+              <CreateDatasetAdditionalSettings control={control} />
+              <div data-test-subj="settingsValue">{JSON.stringify(settings)}</div>
+            </FormProvider>
           </KibanaContextProvider>
         </EuiProvider>
       </I18nProvider>
@@ -267,7 +274,10 @@ describe('CreateDatasetSettings', () => {
   });
 });
 
-const renderAdditionalSettings = (format: DatasetFormatFormValue = '') => {
+const renderAdditionalSettings = (
+  format: DatasetFormatFormValue = '',
+  errorMode: DatasetErrorModeFormValue = ''
+) => {
   const Wrapper = () => {
     const methods = useForm<CreateDatasetFormValues>({
       defaultValues: {
@@ -275,7 +285,7 @@ const renderAdditionalSettings = (format: DatasetFormatFormValue = '') => {
         description: '',
         data_source: '',
         resource: '',
-        settings: { ...emptyCreateDatasetSettingsFormValues(), format },
+        settings: { ...emptyCreateDatasetSettingsFormValues(), format, error_mode: errorMode },
         ui: {
           formatWasAutoDetected: false,
           additionalCommonSettingsIsOpen: true,
@@ -313,8 +323,8 @@ describe('CreateDatasetAdditionalSettings', () => {
     expect(getByTestId('createDatasetSettingsPartitionDetection')).toBeInTheDocument();
     expect(queryByTestId('createDatasetSettingsPartitionPath')).toBeNull();
     expect(getByTestId('createDatasetSettingsErrorMode')).toBeInTheDocument();
-    expect(getByTestId('createDatasetSettingsMaxErrors')).toBeInTheDocument();
-    expect(getByTestId('createDatasetSettingsMaxErrorRatio')).toBeInTheDocument();
+    expect(queryByTestId('createDatasetSettingsMaxErrors')).toBeNull();
+    expect(queryByTestId('createDatasetSettingsMaxErrorRatio')).toBeNull();
     expect(queryByTestId('createDatasetParquetAdvancedSettings')).toBeNull();
   });
 
@@ -328,9 +338,24 @@ describe('CreateDatasetAdditionalSettings', () => {
     expect(getByTestId('createDatasetWizardAdvancedSettings')).toBeInTheDocument();
     expect(getByTestId('createDatasetSharedAdvancedSettings')).toBeInTheDocument();
     expect(getByTestId('createDatasetSettingsErrorMode')).toBeInTheDocument();
-    expect(getByTestId('createDatasetSettingsMaxErrors')).toBeInTheDocument();
-    expect(getByTestId('createDatasetSettingsMaxErrorRatio')).toBeInTheDocument();
     expect(queryByTestId('createDatasetParquetAdvancedSettings')).toBeNull();
+  });
+
+  it.each<DatasetErrorModeFormValue>(['skip_row', 'null_field'])(
+    'shows max errors and max error ratio when the error mode is %s',
+    (errorMode) => {
+      const { getByTestId } = renderAdditionalSettings('', errorMode);
+
+      expect(getByTestId('createDatasetSettingsMaxErrors')).toBeInTheDocument();
+      expect(getByTestId('createDatasetSettingsMaxErrorRatio')).toBeInTheDocument();
+    }
+  );
+
+  it('hides max errors and max error ratio when the error mode is fail_fast', () => {
+    const { queryByTestId } = renderAdditionalSettings('', 'fail_fast');
+
+    expect(queryByTestId('createDatasetSettingsMaxErrors')).toBeNull();
+    expect(queryByTestId('createDatasetSettingsMaxErrorRatio')).toBeNull();
   });
 
   it('shows csv/tsv common and advanced settings when csv is selected', () => {
@@ -532,7 +557,7 @@ describe('CreateDatasetAdditionalSettings', () => {
   });
 
   it('shows an error message when max errors is not a whole number', () => {
-    const { getByTestId, getByText } = renderAdditionalSettings();
+    const { getByTestId, getByText } = renderAdditionalSettings('', 'skip_row');
 
     fireEvent.change(getByTestId('createDatasetSettingsMaxErrors'), {
       target: { value: '1.5' },
@@ -543,7 +568,7 @@ describe('CreateDatasetAdditionalSettings', () => {
   });
 
   it('shows an error message when max error ratio is out of range', () => {
-    const { getByTestId, getByText } = renderAdditionalSettings();
+    const { getByTestId, getByText } = renderAdditionalSettings('', 'skip_row');
 
     fireEvent.change(getByTestId('createDatasetSettingsMaxErrorRatio'), {
       target: { value: '2' },

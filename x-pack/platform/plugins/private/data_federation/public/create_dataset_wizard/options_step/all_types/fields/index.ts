@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+export * from './error_config';
 export * from './error_mode_select';
 export * from './file_exclusions_select';
 export * from './max_error_ratio_field';

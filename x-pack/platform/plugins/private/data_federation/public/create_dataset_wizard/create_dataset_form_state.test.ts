@@ -354,26 +354,49 @@ describe('create_dataset_form_state', () => {
       ).toEqual({ format: 'csv' });
     });
 
+    const skipRow = () => ({ ...empty(), format: 'csv' as const, error_mode: 'skip_row' as const });
+
     it('includes max_errors of 0', () => {
-      expect(
-        buildDatasetSettingsFromFormValues({ ...empty(), format: 'csv', max_errors: '0' })
-      ).toEqual({ format: 'csv', max_errors: 0 });
+      expect(buildDatasetSettingsFromFormValues({ ...skipRow(), max_errors: '0' })).toEqual({
+        format: 'csv',
+        error_mode: 'skip_row',
+        max_errors: 0,
+      });
     });
 
     it('omits max_errors when it is not a whole number of 0 or more', () => {
-      expect(
-        buildDatasetSettingsFromFormValues({ ...empty(), format: 'csv', max_errors: '-1' })
-      ).toEqual({ format: 'csv' });
-      expect(
-        buildDatasetSettingsFromFormValues({ ...empty(), format: 'csv', max_errors: '1.5' })
-      ).toEqual({ format: 'csv' });
+      expect(buildDatasetSettingsFromFormValues({ ...skipRow(), max_errors: '-1' })).toEqual({
+        format: 'csv',
+        error_mode: 'skip_row',
+      });
+      expect(buildDatasetSettingsFromFormValues({ ...skipRow(), max_errors: '1.5' })).toEqual({
+        format: 'csv',
+        error_mode: 'skip_row',
+      });
     });
 
     it('includes max_error_ratio as a float', () => {
-      expect(
-        buildDatasetSettingsFromFormValues({ ...empty(), format: 'csv', max_error_ratio: '0.5' })
-      ).toEqual({ format: 'csv', max_error_ratio: 0.5 });
+      expect(buildDatasetSettingsFromFormValues({ ...skipRow(), max_error_ratio: '0.5' })).toEqual({
+        format: 'csv',
+        error_mode: 'skip_row',
+        max_error_ratio: 0.5,
+      });
     });
+
+    it.each(['', 'fail_fast'] as const)(
+      'omits max_errors and max_error_ratio when the error mode is "%s"',
+      (errorMode) => {
+        expect(
+          buildDatasetSettingsFromFormValues({
+            ...empty(),
+            format: 'csv',
+            error_mode: errorMode,
+            max_errors: '5',
+            max_error_ratio: '0.5',
+          })
+        ).toEqual(errorMode ? { format: 'csv', error_mode: errorMode } : { format: 'csv' });
+      }
+    );
 
     it('includes skip_rows for csv when in range', () => {
       expect(

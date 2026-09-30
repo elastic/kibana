@@ -164,6 +164,10 @@ export const validateMaxErrors = (value: string): true | string => {
   return true;
 };
 
+/** Whether `max_errors` / `max_error_ratio` apply; they are rejected with the default and `fail_fast` modes. */
+export const errorModeAllowsBudget = (errorMode: DatasetErrorModeFormValue): boolean =>
+  errorMode === 'skip_row' || errorMode === 'null_field';
+
 export const validateMaxErrorRatio = (value: string): true | string => {
   if (!value?.trim()) return true;
   const parsed = parseRatio(value);
@@ -251,10 +255,12 @@ export const buildDatasetSettingsFromFormValues = (
   }
 
   if (settings.error_mode) applied.error_mode = settings.error_mode;
-  const maxErrors = parseNonNegativeInteger(settings.max_errors);
-  if (maxErrors !== undefined) applied.max_errors = maxErrors;
-  const maxErrorRatio = parseRatio(settings.max_error_ratio);
-  if (maxErrorRatio !== undefined) applied.max_error_ratio = maxErrorRatio;
+  if (errorModeAllowsBudget(settings.error_mode)) {
+    const maxErrors = parseNonNegativeInteger(settings.max_errors);
+    if (maxErrors !== undefined) applied.max_errors = maxErrors;
+    const maxErrorRatio = parseRatio(settings.max_error_ratio);
+    if (maxErrorRatio !== undefined) applied.max_error_ratio = maxErrorRatio;
+  }
 
   const { format } = settings;
   const isCsvTsv = format === 'csv' || format === 'tsv';

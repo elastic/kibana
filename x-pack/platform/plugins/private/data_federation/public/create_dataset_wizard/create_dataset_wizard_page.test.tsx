@@ -759,8 +759,15 @@ describe('CreateDatasetWizardPage', () => {
       await waitFor(() => getByTestId('createDatasetWizardAdditionalStep'))
     ).toBeInTheDocument();
 
-    // Parquet shows advanced settings as plain content, so the field is visible here.
-    fireEvent.change(getByTestId('createDatasetSettingsMaxErrorRatio'), {
+    // Parquet shows advanced settings as plain content; the ratio field appears once a budgeted error mode is chosen.
+    const errorModeCombo = getByTestId('createDatasetSettingsErrorMode');
+    await act(async () => {
+      fireEvent.click(errorModeCombo.querySelector('input') ?? errorModeCombo);
+    });
+    await act(async () => {
+      fireEvent.click(await findByTestId('createDatasetSettingsErrorModeOption-skip_row'));
+    });
+    fireEvent.change(await findByTestId('createDatasetSettingsMaxErrorRatio'), {
       target: { value: '2' },
     });
 

@@ -17,11 +17,9 @@ import {
   validatePartitionPath,
   type CreateDatasetFormValues,
 } from '../../create_dataset_form_state';
-import { ErrorModeSelect } from './fields/error_mode_select';
+import { ErrorConfig } from './fields/error_config';
 import { FormRowLabelWithInfo } from '../../components/form_row_label_with_info';
 import { FileExclusionsSelect } from './fields/file_exclusions_select';
-import { MaxErrorRatioField } from './fields/max_error_ratio_field';
-import { MaxErrorsField } from './fields/max_errors_field';
 import { PartitionDetectionSelect } from '../../components/fields/partition_detection_select';
 
 const DEFAULT_FILE_EXCLUSIONS_DISPLAY = `[${DEFAULT_FILE_EXCLUSIONS.map(
@@ -35,8 +33,6 @@ export function SharedAdvancedSettings({ control }: { control: Control<CreateDat
     control,
     rules: { validate: validatePartitionPath },
   });
-  const { field: errorModeField } = useController({ name: 'settings.error_mode', control });
-
   return (
     <div data-test-subj="createDatasetSharedAdvancedSettings">
       <EuiFormRow
@@ -102,32 +98,7 @@ export function SharedAdvancedSettings({ control }: { control: Control<CreateDat
         </EuiFormRow>
       ) : null}
 
-      <EuiFormRow
-        label={
-          <FormRowLabelWithInfo
-            label={createDatasetWizardStrings.settingsErrorModeLabel}
-            infoText={createDatasetWizardStrings.settingsErrorModeDescription}
-          />
-        }
-        helpText={
-          <FormattedMessage
-            id="xpack.dataFederation.createDatasetForm.settingsErrorModeHelpText"
-            defaultMessage="{defaultValue} by default"
-            values={{ defaultValue: <EuiCode>fail fast</EuiCode> }}
-          />
-        }
-        fullWidth
-      >
-        <ErrorModeSelect
-          value={errorModeField.value}
-          onChange={errorModeField.onChange}
-          onBlur={errorModeField.onBlur}
-        />
-      </EuiFormRow>
-
-      <MaxErrorsField control={control} />
-
-      <MaxErrorRatioField control={control} />
+      <ErrorConfig control={control} />
     </div>
   );
 }
