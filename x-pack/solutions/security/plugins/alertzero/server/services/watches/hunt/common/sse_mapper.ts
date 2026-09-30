@@ -14,7 +14,9 @@
  * computed `attachment_id`. The caller attaches every entry to the
  * Investigation with `ai.attachment.add`. The payload is schema-complete
  * (title, severity, evidence, …) so attach validates without a second fill
- * step; `maps_to_proposal` stays unset until packaging mints.
+ * step. `maps_to_proposal.manual_remediation` is filled here from the
+ * coordinator's own recommendations; every other `maps_to_proposal` field
+ * stays unset until packaging mints.
  */
 
 import { createHash } from 'crypto';
@@ -29,9 +31,13 @@ import type { HuntCoordinatorCoreResult } from '../hunt_coordinator';
 /**
  * Full SSE attachment payload produced by this mapper. Derived from the
  * schema so a required-field change fails here at compile time.
- * `maps_to_proposal` is intentionally omitted: packaging fills it after mint.
+ * `maps_to_proposal` is narrowed to `manual_remediation` only: every other
+ * field on it (the minted proposal's category, impact, action, …) stays
+ * unset until packaging mints.
  */
-export type SseAttachmentData = Omit<SignificantSecurityEventAttachmentData, 'maps_to_proposal'>;
+export type SseAttachmentData = Omit<SignificantSecurityEventAttachmentData, 'maps_to_proposal'> & {
+  maps_to_proposal?: { manual_remediation?: string[] };
+};
 
 type SseEntityRef = SseAttachmentData['entities'][number];
 type SseSecurityKnowledgeIndicator = SseAttachmentData['security_knowledge_indicators'][number];
@@ -814,6 +820,9 @@ const buildEntry = ({
       alerts,
       events,
       hunt_result: huntResult,
+      ...(result.recommendations && result.recommendations.length > 0
+        ? { maps_to_proposal: { manual_remediation: result.recommendations } }
+        : {}),
       ...(truncated ? { truncated: true, truncated_original_count: originalCount } : {}),
     },
   };

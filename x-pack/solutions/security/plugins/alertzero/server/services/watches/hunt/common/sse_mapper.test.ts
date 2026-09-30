@@ -362,8 +362,11 @@ describe('buildSseData', () => {
     expect(entry.data.severity).toBe('high');
     expect(entry.data.status).toBe('open');
     expect(entry.data.evaluation_record_ref).toContain('eval:hunt:');
-    // Packaging fills maps_to_proposal after mint; mapper must leave it unset.
-    expect('maps_to_proposal' in entry.data).toBe(false);
+    // The coordinator's own recommendations land in manual_remediation; every other
+    // maps_to_proposal field (category, actionWorkflowId, …) stays unset until packaging mints.
+    expect(entry.data.maps_to_proposal).toEqual({
+      manual_remediation: expect.arrayContaining([expect.any(String)]),
+    });
 
     expect(entry.data.entities).toEqual(
       expect.arrayContaining([
@@ -901,7 +904,11 @@ describe('buildSseData output parses against the SSE attachment schema', () => {
       // is filtered to this entry's own technique alone, so length 1, not 2.
       expect(parsed.data.hunt_result?.tier2?.behaviors).toHaveLength(1);
       expect(parsed.data.hunt_result?.tier2?.behaviors?.[0]?.technique_id).toBe('T1078.004');
-      expect(parsed.data.maps_to_proposal).toBeUndefined();
+      // A confirmed hit gets the coordinator's own recommendations in manual_remediation;
+      // everything else on maps_to_proposal (category, actionWorkflowId, …) stays unset.
+      expect(parsed.data.maps_to_proposal).toEqual({
+        manual_remediation: expect.arrayContaining([expect.any(String)]),
+      });
     }
   });
 });

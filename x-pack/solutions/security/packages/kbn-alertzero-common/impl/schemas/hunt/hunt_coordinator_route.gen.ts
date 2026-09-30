@@ -271,6 +271,16 @@ export const HuntCoordinatorResponse = lazySchema(() =>
         'Whether the report should stay eligible for a later run. Derived from `completeness`: false only for `incomplete_retryable`, where repeating the run could cover what this one missed. True for `incomplete_final` as well as `complete`, because a deterministic gap returns identically every run, so retrying only re-spends the budget. A caller that writes "clean" off this flag alone will record a clean environment for a run that could not search it — use `completeness` for that.'
       ),
     /**
+     * Up to 8 analyst next-step lines for a confirmed hit, grounded to this run's own SSE-visible entities. Absent when there is no confirmed hit or the run stopped before Tier 2.
+     */
+    recommendations: z
+      .array(z.string().min(1).max(2000))
+      .max(8)
+      .optional()
+      .describe(
+        "Up to 8 analyst next-step lines for a confirmed hit, grounded to this run's own SSE-visible entities. Absent when there is no confirmed hit or the run stopped before Tier 2."
+      ),
+    /**
      * One clause for the run conclusion message: the outcome (confirmed hit or not) plus what each tier did.
      */
     headline: z

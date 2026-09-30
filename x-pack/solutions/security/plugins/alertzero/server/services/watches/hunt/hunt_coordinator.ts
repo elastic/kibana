@@ -22,6 +22,7 @@ import {
   huntCompletenessOf,
 } from './common/completeness';
 import { resolveHuntScope } from './common/resolve_index_scope';
+import { generateRecommendations } from './common/build_recommendations';
 import { buildHuntHeadline, buildHuntNarrative } from './common/build_hunt_narrative';
 import type { HuntNarrativeContext } from './common/build_hunt_narrative';
 import { isTier1SearchableIoc } from './tier1/attribute_hits';
@@ -134,6 +135,11 @@ export interface HuntCoordinatorCoreResult {
    * it; that is what `completeness` is for.
    */
   completed_successfully: boolean;
+  /**
+   * Up to 8 analyst next-step lines for a confirmed hit, grounded to this run's own SSE-visible
+   * entities. Absent when there is no confirmed hit or the run stopped before Tier 2.
+   */
+  recommendations?: string[];
 }
 
 export interface HuntCoordinatorResult extends HuntCoordinatorCoreResult {
@@ -920,7 +926,7 @@ const huntCoordinatorCore = async (
     nothingGroundable ? { treatAsFinal: FINAL_WHEN_NOTHING_SEARCHABLE } : {}
   );
 
-  return {
+  const coreResult: HuntCoordinatorCoreResult = {
     status: 'tier1_and_tier2',
     report_id: reportId,
     run_id,
@@ -946,6 +952,35 @@ const huntCoordinatorCore = async (
     completeness,
     completed_successfully: completedSuccessfully(completeness),
   };
+
+  if (!hasConfirmedHit) {
+    return coreResult;
+  }
+
+  const recommendationContext = [
+    narrativeContext.reportTitle ? `Report: ${narrativeContext.reportTitle}` : undefined,
+    ...tier2Raw.behaviors.map((b) => `${b.technique_id} ${b.technique_name}: ${b.evidence_quote}`),
+    tier1Raw.affected_assets.hosts.length > 0
+      ? `Hosts: ${tier1Raw.affected_assets.hosts.map((h) => h.name).join(', ')}`
+      : undefined,
+    tier1Raw.affected_assets.users.length > 0
+      ? `Users: ${tier1Raw.affected_assets.users.map((u) => u.name).join(', ')}`
+      : undefined,
+    tier1Raw.affected_assets.services.length > 0
+      ? `Services: ${tier1Raw.affected_assets.services.map((s) => s.name).join(', ')}`
+      : undefined,
+  ]
+    .filter((line): line is string => Boolean(line))
+    .join('\n');
+
+  const recommendations = await generateRecommendations({
+    model,
+    logger,
+    result: coreResult,
+    context: recommendationContext,
+  });
+
+  return { ...coreResult, recommendations };
 };
 
 /**

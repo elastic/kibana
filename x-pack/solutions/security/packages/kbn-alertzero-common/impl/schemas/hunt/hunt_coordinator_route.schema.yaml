@@ -365,6 +365,18 @@ paths:
                       that writes "clean" off this flag alone will record a clean
                       environment for a run that could not search it — use
                       `completeness` for that.
+                  recommendations:
+                    type: array
+                    maxItems: 8
+                    description: >-
+                      Up to 8 analyst next-step lines for a confirmed hit,
+                      grounded to this run's own SSE-visible entities. Absent
+                      when there is no confirmed hit or the run stopped before
+                      Tier 2.
+                    items:
+                      type: string
+                      minLength: 1
+                      maxLength: 2000
                   headline:
                     type: string
                     description: >-
