@@ -8,7 +8,7 @@
 import type { ESQLAstExpression } from '@elastic/esql';
 import { esql, exp } from '@elastic/esql';
 import { PROPOSAL_UNCATEGORIZED } from '@kbn/proposals-common';
-import type { ProposalStatus } from '@kbn/proposals-common';
+import type { ProposalOrigin, ProposalStatus } from '@kbn/proposals-common';
 
 /**
  * Elasticsearch's `esql.query.result_truncation_max_size` default. A LIMIT above
@@ -22,7 +22,22 @@ export interface ChartsWindow {
   spaceId: string;
   windowStartIso: string;
   bucketMinutes: number;
+  /** Absent counts every producer in the space. */
+  origin?: ProposalOrigin;
 }
+
+/**
+ * Narrows every chart query to one producing feature, so a queue that filters
+ * on `origin` cannot disagree with the counts above it once another feature
+ * writes into the same space. Absent means count them all.
+ *
+ * Interpolated as a literal rather than a bound parameter — the same shape
+ * `status != ${PENDING}` uses below — because `exp` composes AST fragments and
+ * takes no parameter bindings. Safe: the value is a closed enum, never free
+ * text.
+ */
+const originFilter = ({ origin }: ChartsWindow): ESQLAstExpression =>
+  origin === undefined ? exp`true` : exp`origin == ${origin}`;
 
 /** Open is exactly `pending`: every other status is a settled proposal. */
 const PENDING: ProposalStatus = 'pending';
@@ -58,12 +73,11 @@ const EVENT_STREAMS: Record<EventStream, { at: ESQLAstExpression; where: ESQLAst
  * drop it, and under `drop_null_columns` would drop the column outright when no
  * row has one, zeroing the whole chart.
  */
-export const bucketedEventQuery = (
-  stream: EventStream,
-  { spaceId, windowStartIso, bucketMinutes }: ChartsWindow
-) => {
+export const bucketedEventQuery = (stream: EventStream, window: ChartsWindow) => {
+  const { windowStartIso, bucketMinutes } = window;
   const { at, where } = EVENT_STREAMS[stream];
-  return esql`WHERE spaceId == ${{ spaceId }}
+  return esql`WHERE spaceId == ${{ spaceId: window.spaceId }}
+      AND ${originFilter(window)}
       AND ${where}
       AND ${at} >= TO_DATETIME(${{ from: windowStartIso }})
     | EVAL idx = FLOOR(DATE_DIFF("minutes", TO_DATETIME(${{
@@ -76,18 +90,22 @@ export const bucketedEventQuery = (
 };
 
 /** Seeds the running sum: open at the window start, so no event stream covers it. */
-export const anchorQuery = ({ spaceId, windowStartIso }: ChartsWindow) =>
-  esql`WHERE spaceId == ${{ spaceId }}
+export const anchorQuery = (window: ChartsWindow) => {
+  const { spaceId, windowStartIso } = window;
+  return esql`WHERE spaceId == ${{ spaceId }}
+      AND ${originFilter(window)}
       AND ${NOT_SUPERSEDED}
       AND createdAt < TO_DATETIME(${{ created: windowStartIso }})
       AND (status == ${PENDING} OR ${CLOSED_AT} >= TO_DATETIME(${{ closed: windowStartIso }}))
     | EVAL category = COALESCE(category, ${{ uncategorized: PROPOSAL_UNCATEGORIZED }})
     | STATS anchor = COUNT(*) BY category
     | LIMIT ${ESQL_CATEGORY_ROW_LIMIT}`;
+};
 
 /** Open right now, across every category. */
-export const currentOpenQuery = ({ spaceId }: ChartsWindow) =>
-  esql`WHERE spaceId == ${{ spaceId }}
+export const currentOpenQuery = (window: ChartsWindow) =>
+  esql`WHERE spaceId == ${{ spaceId: window.spaceId }}
+      AND ${originFilter(window)}
       AND ${NOT_SUPERSEDED}
       AND status == ${PENDING}
     | STATS currentOpen = COUNT(*)`;

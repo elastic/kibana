@@ -195,6 +195,9 @@ function makeService(overrides: Partial<AwsServiceMatrixEntry> = {}): AwsService
     defaultEnabled: false,
     defaultEnabledInputs: [],
     showInUI: true,
+    isManifestLoaded: true,
+    isManifestError: false,
+    isStaticAgentBasedOnly: false,
     ...overrides,
   };
 }
@@ -1766,6 +1769,9 @@ describe('toSOServiceVars', () => {
       defaultEnabled: false,
       defaultEnabledInputs: [],
       showInUI: true,
+      isManifestLoaded: true,
+      isManifestError: false,
+      isStaticAgentBasedOnly: false,
       varDefsByInput: {
         'aws-s3': {
           regions: makeVarDef('regions', 'text', { multi: true }),

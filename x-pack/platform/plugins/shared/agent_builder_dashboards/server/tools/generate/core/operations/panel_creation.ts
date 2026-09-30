@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { PanelFailure } from '../utils';
+import type { OperationFailure } from '../utils';
 import type { InlinePanelOperationType, PanelContent } from '../resolve_panel';
 import type { DashboardOperation } from './registry';
 import type { ResolveAttachmentPanel } from './types';
@@ -143,7 +143,7 @@ export const createPanelInputMaterializer = ({
   resolvedPanelCreationRequests: Map<number, ResolvedPanelCreationRequest[]>;
   operationIndex: number;
   operationType: InlinePanelOperationType;
-  failures: PanelFailure[];
+  failures: OperationFailure[];
   resolveAttachmentPanel?: ResolveAttachmentPanel;
 }): ((item: NewPanelInput, panelInputIndex: number) => MaterializedPanelInput | undefined) => {
   const resolvedRequestByInputIndex = new Map(

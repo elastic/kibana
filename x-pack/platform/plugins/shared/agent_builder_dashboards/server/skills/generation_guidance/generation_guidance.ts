@@ -107,6 +107,8 @@ Controls are interactive filters pinned above the dashboard that let users explo
 
 Do not add controls to dashboards already scoped to a single entity (one host, one service, etc.).
 
+Controls query the index directly, so columns created in ES|QL (\`DISSECT\`, \`GROK\`, \`EVAL\`, \`RENAME\`) cannot back a control. Controls are optional: when no mapped field fits, add fewer controls or none.
+
 **Control types:**
 - \`options_list_control\` — dropdown for categorical / keyword fields. The most common type (95% of cases).
 - \`range_slider_control\` — numeric range slider. Add sparingly, only when filtering by a numeric threshold is useful across multiple panels (e.g. \`latency\`, \`bytes\`, \`duration\`).
@@ -114,9 +116,10 @@ Do not add controls to dashboards already scoped to a single entity (one host, o
 
 **Required fields per control:**
 - \`type\`: one of the three above.
-- \`field_name\` (not for \`time_slider_control\`): exact field name as it appears in the panel queries (e.g. \`"service.name"\`).
+- \`field_name\` (not for \`time_slider_control\`): exact name of a field mapped on \`index\` (e.g. \`"service.name"\`).
 - \`index\` (not for \`time_slider_control\`): same index as the dashboard panels (e.g. \`"logs-*"\`).
 - \`title\` (optional, \`options_list_control\` and \`range_slider_control\` only): human-readable label shown above the control (e.g. \`"Service"\`).
+- \`user_requested\` (optional): \`true\` only when the user asked explicitly for the controls.
 
 **Defaults applied by the server:** \`width: "medium"\`, \`grow: true\` (fills available horizontal space). Override only if the user asks.
 
