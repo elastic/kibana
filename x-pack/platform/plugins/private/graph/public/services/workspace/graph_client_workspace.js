@@ -6,12 +6,7 @@
  */
 
 // Kibana wrapper
-import {
-  materializeRuntimeEdge,
-  materializeRuntimeNode,
-  planIncomingEdges,
-  prepareIncomingNodes,
-} from './graph_merge_planner';
+import { mergeRuntimeGraph } from './runtime_graph_merge';
 
 // The main constructor for our GraphWorkspace
 function GraphWorkspace(options) {
@@ -92,59 +87,8 @@ function GraphWorkspace(options) {
     return layoutController.isRunning();
   };
 
-  //=======  Adds new nodes retrieved from an elasticsearch search ========
   this.mergeGraph = function (newData) {
-    this.stopLayout();
-
-    if (!newData.nodes) {
-      newData.nodes = [];
-    }
-
-    // === Commented out - not sure it was obvious to users what various circle sizes meant
-    // var minCircleSize = 5;
-    // var maxCircleSize = 25;
-    // var sizeScale = d3.scale.pow().exponent(0.15)
-    //   .domain([0, d3.max(newData.nodes, function(d) {
-    //     return d.weight;
-    //   })])
-    //   .range([minCircleSize, maxCircleSize]);
-
-    //Remove nodes we already have
-    const { normalizedNodes, newNodes } = prepareIncomingNodes(
-      newData.nodes,
-      new Set(Object.keys(this.nodesMap))
-    );
-    newData.nodes = normalizedNodes;
-    if (newNodes.length > 0 && this.options.nodeLabeller) {
-      // A hook for client code to attach labels etc to newly introduced nodes.
-      this.options.nodeLabeller(newNodes);
-    }
-
-    newNodes.forEach((dedupedNode) => {
-      const node = materializeRuntimeNode(dedupedNode, this.seqNumber++);
-      this.nodes.push(node);
-      this.nodesMap[node.id] = node;
-    });
-
-    planIncomingEdges({
-      edges: newData.edges,
-      nodes: normalizedNodes,
-      existingEdges: this.edgesMap,
-    }).forEach((operation) => {
-      if (operation.type === 'update') {
-        const existingEdge = this.edgesMap[operation.id];
-        existingEdge.weight = operation.weight;
-        //TODO update width too?
-        existingEdge.doc_count = operation.docCount;
-        return;
-      }
-
-      const newEdge = materializeRuntimeEdge(operation, this.nodesMap);
-      this.edgesMap[newEdge.id] = newEdge;
-      this.edges.push(newEdge);
-    });
-
-    this.runLayout();
+    this.seqNumber = mergeRuntimeGraph(this, newData, this.seqNumber);
   };
 }
 //=====================
