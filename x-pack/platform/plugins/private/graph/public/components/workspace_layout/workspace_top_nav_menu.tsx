@@ -63,7 +63,7 @@ export const WorkspaceTopNavMenu = (props: WorkspaceTopNavMenuProps) => {
   const hasFields = useSelector(hasFieldsSelector);
   const datasource = useSelector(datasourceSelector);
   const allSavingDisabled = props.graphSavePolicy === 'none';
-  const isInspectDisabled = !props.workspace?.lastRequest;
+  const isInspectDisabled = props.requestAdapter.getRequests().length === 0;
   const canSave = Boolean(props.capabilities.graph.save);
 
   const { confirmWipeWorkspace, savedWorkspace, workspace } = props;
