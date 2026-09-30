@@ -120,4 +120,21 @@ describe('EscalationQueue', () => {
     );
     expect(screen.queryByTestId('escalationQueueLoadMore-open')).not.toBeInTheDocument();
   });
+
+  it('passes the href from getHref to each card', () => {
+    const getHref = jest.fn((e: EscalationQueueItem) => `/chat/${e.id}`);
+    renderWithKibanaRenderContext(
+      <EscalationQueue
+        status="open"
+        escalations={[openItem]}
+        onClickCard={jest.fn()}
+        getHref={getHref}
+        renderAssignees={() => <span />}
+      />
+    );
+
+    expect(getHref).toHaveBeenCalledWith(openItem);
+    const link = screen.getByTestId(`escalationCardLink-${openItem.id}`);
+    expect(link).toHaveAttribute('href', `/chat/${openItem.id}`);
+  });
 });

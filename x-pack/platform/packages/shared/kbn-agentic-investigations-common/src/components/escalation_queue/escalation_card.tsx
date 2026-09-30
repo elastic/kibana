@@ -11,6 +11,7 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiIcon,
+  EuiLink,
   EuiPanel,
   EuiText,
   EuiTextTruncate,
@@ -21,6 +22,7 @@ import type { EscalationQueueItem } from './types';
 import { EscalationMetaInfo } from './escalation_meta_info';
 import { LinkedInvestigationsBadge } from './linked_investigations_badge';
 import { ESCALATION_QUEUE_LABELS } from './translations';
+import { createCardLinkClickHandler } from '../actions/card_link_click';
 
 interface EscalationCardProps {
   escalation: EscalationQueueItem;
@@ -35,16 +37,27 @@ interface EscalationCardProps {
   onClickCard?: (escalation: EscalationQueueItem) => void;
   /** Renders with a highlighted background when true (e.g. the flyout for this row is open). */
   isSelected?: boolean;
+  /**
+   * When provided, the title becomes a real `<a>` link pointing at this URL.
+   * This enables Cmd/Ctrl-click (new tab), URL preview on hover, and correct link
+   * semantics for assistive technology. The link's click is intercepted so that a
+   * plain click still calls `onClickCard` for in-app navigation instead of a full
+   * page load.
+   */
+  href?: string;
 }
 
 /**
  * One row in the escalation queue.
  */
 export const EscalationCard = memo<EscalationCardProps>(
-  ({ escalation, hasBorder, renderAssignees, onClickCard, isSelected = false }) => {
+  ({ escalation, hasBorder, renderAssignees, onClickCard, isSelected = false, href }) => {
     const { euiTheme } = useEuiTheme();
     const isClosed = escalation.status === 'closed';
     const isClickable = onClickCard !== undefined;
+    // A link href promotes the row to a real navigable element; without it, fall back to the
+    // button pattern so the card still works for callers that don't supply an href.
+    const hasLink = href !== undefined;
 
     const handleClick = useCallback(() => {
       onClickCard?.(escalation);
@@ -60,19 +73,30 @@ export const EscalationCard = memo<EscalationCardProps>(
       [onClickCard, escalation]
     );
 
+    // Link-mode: createCardLinkClickHandler stops propagation (so the panel's onClick does not
+    // fire for the link click) and lets modified/middle clicks reach the browser for new-tab
+    // support; a plain click calls onClickCard for in-app navigation.
+    const handleLinkClick = useCallback(
+      createCardLinkClickHandler(() => onClickCard?.(escalation)),
+      // eslint-disable-next-line react-hooks/exhaustive-deps
+      [onClickCard, escalation]
+    );
+
     return (
       <EuiPanel
         paddingSize="l"
         borderRadius="none"
         hasBorder={false}
         hasShadow={false}
-        // Interactive mode: add pointer cursor and keyboard/hover affordances.
-        role={isClickable ? 'button' : undefined}
-        tabIndex={isClickable ? 0 : undefined}
-        aria-label={isClickable ? escalation.title : undefined}
+        // Button mode (no href): expose as a keyboard-focusable button.
+        // Link mode (href present): the title link is the keyboard/a11y control; the panel's
+        // onClick is a convenience for mouse clicks outside the link.
+        role={isClickable && !hasLink ? 'button' : undefined}
+        tabIndex={isClickable && !hasLink ? 0 : undefined}
+        aria-label={isClickable && !hasLink ? escalation.title : undefined}
         aria-current={isSelected || undefined}
         onClick={isClickable ? handleClick : undefined}
-        onKeyDown={isClickable ? handleKeyDown : undefined}
+        onKeyDown={isClickable && !hasLink ? handleKeyDown : undefined}
         css={{
           borderBottom: hasBorder ? `1px solid ${euiTheme.colors.disabled}` : 'none',
           borderRadius: hasBorder ? 'none' : `0 0 ${euiTheme.size.s} ${euiTheme.size.s}`,
@@ -86,9 +110,11 @@ export const EscalationCard = memo<EscalationCardProps>(
                 ? euiTheme.colors.backgroundBaseInteractiveSelect
                 : euiTheme.colors.backgroundBaseSubdued,
             },
-            '&:focus-visible': {
-              outline: `${euiTheme.focus.width} solid ${euiTheme.colors.primary}`,
-            },
+            ...(!hasLink && {
+              '&:focus-visible': {
+                outline: `${euiTheme.focus.width} solid ${euiTheme.colors.primary}`,
+              },
+            }),
           }),
         }}
         data-test-subj={`escalationCard-${escalation.id}`}
@@ -120,9 +146,20 @@ export const EscalationCard = memo<EscalationCardProps>(
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
                 <EuiTitle size="xxs">
-                  <span css={{ color: isClosed ? euiTheme.colors.subduedText : undefined }}>
-                    <EuiTextTruncate text={escalation.title} />
-                  </span>
+                  {hasLink ? (
+                    <EuiLink
+                      href={href}
+                      onClick={handleLinkClick}
+                      color={isClosed ? 'subdued' : 'text'}
+                      data-test-subj={`escalationCardLink-${escalation.id}`}
+                    >
+                      <EuiTextTruncate text={escalation.title} />
+                    </EuiLink>
+                  ) : (
+                    <span css={{ color: isClosed ? euiTheme.colors.subduedText : undefined }}>
+                      <EuiTextTruncate text={escalation.title} />
+                    </span>
+                  )}
                 </EuiTitle>
               </EuiFlexItem>
             </EuiFlexGroup>

@@ -38,7 +38,8 @@ export const EscalationsPage: React.FC = () => {
   const { manageEscalations: canManage } = useAgenticInvestigationsCapabilities();
 
   // Clicking a row navigates to Agent Builder with the conversation details flyout open.
-  const { openChat } = useOpenInChat();
+  // getChatHref is also forwarded so cards render as real links (Cmd-click, URL on hover).
+  const { getChatHref, openChat } = useOpenInChat();
 
   // ---------------------------------------------------------------------------
   // Per-bucket current page (1-based). Incremented by "Show more"; never reset here.
@@ -159,6 +160,7 @@ export const EscalationsPage: React.FC = () => {
                 error={openQuery.error as Error | null}
                 renderAssignees={renderAssignees}
                 onClickCard={(item) => openChat(item.id, item.agentId)}
+                getHref={(item) => getChatHref(item.id, item.agentId)}
               />
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
@@ -170,6 +172,7 @@ export const EscalationsPage: React.FC = () => {
                 error={closedQuery.error as Error | null}
                 renderAssignees={renderAssignees}
                 onClickCard={(item) => openChat(item.id, item.agentId)}
+                getHref={(item) => getChatHref(item.id, item.agentId)}
               />
             </EuiFlexItem>
           </>

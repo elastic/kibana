@@ -133,9 +133,14 @@ const renderPage = (overrides: { capabilities?: object } = {}) => {
   return { core, rerender };
 };
 
+let getChatHref: jest.Mock;
+
 beforeEach(() => {
   openChat = jest.fn();
-  mockUseOpenInChat.mockReturnValue({ getChatHref: jest.fn(), openChat });
+  getChatHref = jest.fn(
+    (id?: string, agentId?: string) => (id ? `/mock-chat/${agentId}/${id}` : undefined)
+  );
+  mockUseOpenInChat.mockReturnValue({ getChatHref, openChat });
   mockUseAssignEscalation.mockReturnValue({ mutateAsync: assignMutate });
   mockUseUserProfiles.mockReturnValue({ data: [], isLoading: false });
   mockUseSuggestUserProfiles.mockReturnValue({ data: [], isLoading: false });
@@ -347,6 +352,15 @@ describe('EscalationsPage', () => {
     fireEvent.click(screen.getByTestId('escalationCard-esc-open-1'));
 
     expect(openChat).toHaveBeenCalledWith('esc-open-1', 'agent-1');
+  });
+
+  it('renders card titles as links with hrefs from getChatHref', () => {
+    mockBothQueues([openEscalation], []);
+    renderPage();
+
+    expect(getChatHref).toHaveBeenCalledWith('esc-open-1', 'agent-1');
+    const link = screen.getByTestId('escalationCardLink-esc-open-1');
+    expect(link).toHaveAttribute('href', '/mock-chat/agent-1/esc-open-1');
   });
 
   it('does not duplicate rows when the same page 2 data is re-delivered (refetch regression)', async () => {

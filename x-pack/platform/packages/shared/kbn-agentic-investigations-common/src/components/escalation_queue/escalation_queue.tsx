@@ -49,6 +49,11 @@ interface EscalationQueueProps {
   onClickCard?: (escalation: EscalationQueueItem) => void;
   /** Highlights the row whose id matches this value (e.g. the flyout is open for it). */
   selectedConversationId?: string;
+  /**
+   * When provided, called per card to produce an href for the title link, enabling
+   * Cmd/middle-click to open in a new tab and showing the URL on hover.
+   */
+  getHref?: (escalation: EscalationQueueItem) => string | undefined;
 }
 
 const StyledAccordion = styled(EuiAccordion)`
@@ -81,6 +86,7 @@ export const EscalationQueue = memo<EscalationQueueProps>(
     error,
     onClickCard,
     selectedConversationId,
+    getHref,
   }) => {
     const { euiTheme } = useEuiTheme();
     const serverTotal = totalItemCount ?? escalations.length;
@@ -131,6 +137,7 @@ export const EscalationQueue = memo<EscalationQueueProps>(
                     renderAssignees={renderAssignees}
                     onClickCard={onClickCard}
                     isSelected={escalation.id === selectedConversationId}
+                    href={getHref?.(escalation)}
                   />
                 </EuiFlexItem>
               ))}
