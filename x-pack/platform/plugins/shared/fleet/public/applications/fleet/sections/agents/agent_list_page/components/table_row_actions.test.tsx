@@ -15,6 +15,7 @@ import type { Agent, AgentPolicy } from '../../../../types';
 import { useAuthz } from '../../../../../../hooks/use_authz';
 import { useAgentVersion } from '../../../../../../hooks/use_agent_version';
 import { useLicense } from '../../../../../../hooks/use_license';
+import { useRestartAgentAction } from '../../../../../../hooks/use_restart_agent_action';
 
 import { TableRowActions } from './table_row_actions';
 
@@ -22,11 +23,13 @@ jest.mock('../../../../../../services/experimental_features');
 jest.mock('../../../../../../hooks/use_authz');
 jest.mock('../../../../../../hooks/use_agent_version');
 jest.mock('../../../../../../hooks/use_license');
+jest.mock('../../../../../../hooks/use_restart_agent_action');
 
 const mockedExperimentalFeaturesService = jest.mocked(ExperimentalFeaturesService);
 const mockedUseAuthz = jest.mocked(useAuthz);
 const mockedUseAgentVersion = jest.mocked(useAgentVersion);
 const mockedUseLicense = useLicense as jest.MockedFunction<typeof useLicense>;
+const mockedUseRestartAgentAction = jest.mocked(useRestartAgentAction);
 
 function renderTableRowActions({
   agent,
@@ -106,6 +109,7 @@ describe('TableRowActions', () => {
       integrations: {},
     } as any);
     mockedUseAgentVersion.mockReturnValue('8.10.2');
+    mockedUseRestartAgentAction.mockReturnValue({ isRestartAgentActionEnabled: true });
   });
 
   describe('Menu structure', () => {
