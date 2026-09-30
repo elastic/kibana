@@ -10,11 +10,11 @@ import {
 } from '@kbn/significant-events-schema';
 import { z } from '@kbn/zod/v4';
 import { NIGHTSHIFT_API_PRIVILEGES } from '@kbn/nightshift-shared';
+import { resolveNightshiftModelForRequest } from '@kbn/nightshift-ai';
 import { FeatureNotEnabledError } from '../../../lib/errors/feature_not_enabled_error';
 import { createServerRoute } from '../../create_server_route';
 import { assertSignificantEventsAccess } from '../../utils/assert_significant_events_access';
 import { assertNotPaused } from '../../utils/assert_not_paused';
-import { resolveSignificantEventsModelForRequest } from '../../../model_resolution';
 
 const discoveryExecuteRoute = createServerRoute({
   endpoint: 'POST /internal/streams/significant_events/discovery/_execute',
@@ -74,7 +74,7 @@ const discoveryExecuteRoute = createServerRoute({
         agentBuilder: server.agentBuilder,
         connectorId: body.connector_id,
         resolveModel: (requestedId) =>
-          resolveSignificantEventsModelForRequest({
+          resolveNightshiftModelForRequest({
             request,
             inference: server.inference,
             savedObjects: server.core.savedObjects,

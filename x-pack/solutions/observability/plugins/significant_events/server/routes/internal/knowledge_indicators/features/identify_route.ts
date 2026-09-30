@@ -8,7 +8,7 @@
 import { v4 as uuidv4 } from 'uuid';
 import { z } from '@kbn/zod/v4';
 import { getStreamSamplingSource, getStreamTypeFromDefinition } from '@kbn/streams-schema';
-import type { InferenceDocument } from '@kbn/nightshift-ai';
+import { resolveNightshiftModelForRequest, type InferenceDocument } from '@kbn/nightshift-ai';
 import { MAX_ID_LENGTH } from '@kbn/significant-events-schema';
 import { isInferenceProviderError } from '@kbn/inference-common';
 import { NIGHTSHIFT_API_PRIVILEGES } from '@kbn/nightshift-shared';
@@ -33,7 +33,6 @@ import { isSignificantEventsSemanticCodeSearchGroundingEnabled } from '../../../
 import type { SyncWorkflowService } from '../../../../lib/workflows/sync_workflow';
 import type { SignificantEventsMaintenanceService } from '../../../../lib/maintenance/maintenance_service';
 import { stateBlocksNewActivity } from '../../../../../common/maintenance/state_machine';
-import { resolveSignificantEventsModelForRequest } from '../../../../model_resolution';
 
 const getSerializedByteLength = (value: unknown) =>
   Buffer.byteLength(JSON.stringify(value), 'utf8');
@@ -230,7 +229,7 @@ const identifyInferredFeaturesRoute = createServerRoute({
     const { totalFilters, filtersCapped, hasFilteredDocuments } = samplingTelemetry;
 
     const [connectorId, stream, kiClient] = await Promise.all([
-      resolveSignificantEventsModelForRequest({
+      resolveNightshiftModelForRequest({
         request,
         inference: server.inference,
         savedObjects: server.core.savedObjects,

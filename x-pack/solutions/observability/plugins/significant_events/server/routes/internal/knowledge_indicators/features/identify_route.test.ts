@@ -24,7 +24,7 @@ const mockGetStreamTypeFromDefinition = jest.fn();
 const mockIdentifyInferredFeatures = jest.fn();
 const mockIdentifyComputedFeatures = jest.fn();
 const mockShouldIdentifyFeatures = jest.fn();
-const mockResolveSignificantEventsModelForRequest = jest.fn(
+const mockResolveNightshiftModelForRequest = jest.fn(
   async ({ requestedId }: { requestedId?: string }) => requestedId ?? 'default-connector'
 );
 
@@ -49,9 +49,10 @@ jest.mock('../../../../lib/significant_events/features/should_identify_features'
   shouldIdentifyFeatures: (...args: unknown[]) => mockShouldIdentifyFeatures(...args),
 }));
 
-jest.mock('../../../../model_resolution', () => ({
-  resolveSignificantEventsModelForRequest: (options: { requestedId?: string }) =>
-    mockResolveSignificantEventsModelForRequest(options),
+jest.mock('@kbn/nightshift-ai', () => ({
+  ...jest.requireActual('@kbn/nightshift-ai'),
+  resolveNightshiftModelForRequest: (options: { requestedId?: string }) =>
+    mockResolveNightshiftModelForRequest(options),
 }));
 
 jest.mock(
@@ -429,7 +430,7 @@ describe('inferred feature identification route', () => {
 
   it('maps an unknown connector override to a 400 response', async () => {
     const { handlerParams } = makeInferredHandlerParams();
-    mockResolveSignificantEventsModelForRequest.mockRejectedValueOnce(
+    mockResolveNightshiftModelForRequest.mockRejectedValueOnce(
       new NightshiftModelNotFoundError('missing-model')
     );
     handlerParams.params.body.connectorId = 'missing-model';
