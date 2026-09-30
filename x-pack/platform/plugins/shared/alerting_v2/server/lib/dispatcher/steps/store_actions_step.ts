@@ -7,7 +7,7 @@
 
 import { inject, injectable } from 'inversify';
 import { ALERT_ACTIONS_DATA_STREAM } from '@kbn/alerting-v2-constants';
-import type { AlertAction } from '../../../resources/datastreams/alert_actions';
+import type { AlertActionDocument } from '../../../resources/datastreams/alert_actions';
 import type {
   AlertEpisode,
   DispatcherStep,
@@ -46,12 +46,11 @@ export class StoreActionsStep implements DispatcherStep {
     const now = new Date();
 
     // One doc per episode-scoped outcome; their count gates watermark advancement.
-    const episodeActions: AlertAction[] = [
+    const episodeActions: AlertActionDocument[] = [
       ...suppressed.map((episode) =>
         toAction({
           episode,
           actionType: 'suppress',
-          now,
           reason: episode.reason,
           spaceId: episode.space_id,
         })
@@ -61,7 +60,6 @@ export class StoreActionsStep implements DispatcherStep {
           toAction({
             episode,
             actionType: 'suppress',
-            now,
             reason: `suppressed by throttled policy ${group.policyId}`,
             spaceId: episode.space_id,
           })
@@ -72,7 +70,6 @@ export class StoreActionsStep implements DispatcherStep {
           toAction({
             episode,
             actionType: 'fire',
-            now,
             reason: `dispatched by policy ${group.policyId}`,
             spaceId: episode.space_id,
           })
@@ -82,7 +79,6 @@ export class StoreActionsStep implements DispatcherStep {
         toAction({
           episode,
           actionType: 'unmatched',
-          now,
           reason: 'no matching action policy',
           spaceId: episode.space_id,
         })
@@ -91,12 +87,11 @@ export class StoreActionsStep implements DispatcherStep {
 
     // One `notified` doc per dispatched group — group-scoped, so excluded from
     // the recordedEpisodes tally.
-    const notifiedActions: AlertAction[] = toDispatch.map((group) => {
+    const notifiedActions: AlertActionDocument[] = toDispatch.map((group) => {
       const groupingMode = policies.groupingModeOf(group.policyId);
       const firstEpisode = group.episodes[0];
       const spaceId = firstEpisode?.space_id ?? 'default';
-      const action: AlertAction = {
-        '@timestamp': now.toISOString(),
+      const action: AlertActionDocument = {
         actor: 'system',
         action_type: 'notified',
         rule_id: firstEpisode?.rule_id ?? null,
@@ -113,7 +108,7 @@ export class StoreActionsStep implements DispatcherStep {
       return action;
     });
 
-    await this.storageService.bulkIndexDocs<AlertAction>({
+    await this.storageService.bulkIndexDocs<AlertActionDocument>({
       index: ALERT_ACTIONS_DATA_STREAM,
       docs: [...episodeActions, ...notifiedActions],
     });
@@ -125,18 +120,15 @@ export class StoreActionsStep implements DispatcherStep {
 export function toAction({
   episode,
   actionType,
-  now,
   reason,
   spaceId,
 }: {
   episode: AlertEpisode;
   actionType: 'suppress' | 'fire' | 'notified' | 'unmatched';
-  now: Date;
   reason?: string;
   spaceId: string;
-}): AlertAction {
+}): AlertActionDocument {
   return {
-    '@timestamp': now.toISOString(),
     group_hash: episode.group_hash,
     last_series_event_timestamp: episode.last_event_timestamp,
     actor: 'system',

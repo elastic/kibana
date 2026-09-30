@@ -209,61 +209,6 @@ export const groupTimelineRounds = <E extends AnyTimelineEvent>(
   return rounds;
 };
 
-/**
- * The timeline minus the events of the given rounds, as a filter over the timeline so stored
- * order — which grouping and compaction rely on — is preserved.
- */
-export const dropTimelineRounds = <E extends AnyTimelineEvent>(
-  timeline: E[],
-  roundIds: ReadonlySet<string>
-): E[] => {
-  if (roundIds.size === 0) {
-    return timeline;
-  }
-  const dropped = new Set<string>(
-    groupTimelineRounds(timeline)
-      .filter((round) => roundIds.has(round.id))
-      .flatMap((round) => round.events.map((event) => event.id))
-  );
-  return timeline.filter((event) => !dropped.has(event.id));
-};
-
-/**
- * The events of the rounds at positions `[start, end)` of the round order, plus the non-round
- * events — standalone user messages, custom events — that fall inside that range (by their
- * timestamp). Non-round events older than the cut are dropped. Implemented as a filter over the
- * timeline so stored order is preserved.
- */
-export const sliceTimelineRounds = <E extends AnyTimelineEvent>(
-  timeline: E[],
-  start: number,
-  end?: number
-): E[] => {
-  const rounds = groupTimelineRounds(timeline);
-  const kept = rounds.slice(start, end);
-  const upperBound = end !== undefined ? rounds[end]?.userMessage.created_at : undefined;
-  const afterLower = (at: string): boolean => {
-    if (start <= 0) {
-      return true;
-    }
-    const firstKept = rounds[start];
-    if (firstKept) {
-      return at >= firstKept.userMessage.created_at;
-    }
-    const lastCut = rounds[Math.min(start, rounds.length) - 1];
-    return lastCut ? at > lastCut.terminal.created_at : true;
-  };
-  const inRange = (at: string): boolean =>
-    afterLower(at) && (upperBound === undefined || at < upperBound);
-  const roundEventIds = new Set<string>(
-    rounds.flatMap((round) => round.events.map((event) => event.id))
-  );
-  const keptIds = new Set<string>(kept.flatMap((round) => round.events.map((event) => event.id)));
-  return timeline.filter(
-    (event) => keptIds.has(event.id) || (!roundEventIds.has(event.id) && inRange(event.created_at))
-  );
-};
-
 /** True when the round is paused on a prompt (on the folded timeline: its terminal is a pause). */
 export const isAwaitingPrompt = (round: TimelineRound<AnyTimelineEvent>): boolean =>
   pendingPromptRequest(round.events as ConversationEvent[]) !== undefined;
