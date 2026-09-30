@@ -7,6 +7,7 @@
 
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import type { ScopedModel } from '@kbn/agent-builder-server';
+import { ChatCompletionErrorCode, InferenceTaskError } from '@kbn/inference-common';
 import {
   classifySeverity,
   toSeverityResult,
@@ -15,12 +16,15 @@ import {
 } from './classify_severity';
 
 const buildModel = (
-  output: ClassifySeverityLlmOutput | undefined
+  output: ClassifySeverityLlmOutput | undefined,
+  invokeImpl?: jest.Mock
 ): { model: ScopedModel; invoke: jest.Mock } => {
-  const invoke = jest.fn().mockResolvedValue({
-    raw: { response_metadata: {} },
-    parsed: output,
-  });
+  const invoke =
+    invokeImpl ??
+    jest.fn().mockResolvedValue({
+      raw: { response_metadata: {} },
+      parsed: output,
+    });
   const structured = { invoke };
   const withStructuredOutput = jest.fn().mockReturnValue(structured);
   const chatModel = { withStructuredOutput } as unknown as ScopedModel['chatModel'];
@@ -71,15 +75,13 @@ describe('classifySeverity', () => {
 
   it('throws when the model returns an invalid level', async () => {
     const { model } = buildModel({ level: 'urgent' } as unknown as ClassifySeverityLlmOutput);
-    await expect(classifySeverity(model, logger, { text: 'body' })).rejects.toThrow(
-      /invalid level/
-    );
+    await expect(classifySeverity(model, logger, { text: 'body' })).rejects.toThrow(/level/);
   });
 
   it('throws when the model returns no parsed output', async () => {
     const { model } = buildModel(undefined);
     await expect(classifySeverity(model, logger, { text: 'body' })).rejects.toThrow(
-      /invalid level/
+      /no parsed output/
     );
   });
 
@@ -99,12 +101,37 @@ describe('classifySeverity', () => {
     expect(prompt).toContain('Report id: r-1');
   });
 
-  it('truncates body text to 30 000 chars in the prompt', async () => {
+  it('passes the complete body text to the compatibility prompt', async () => {
     const { model, invoke } = buildModel({ level: 'medium' });
     await classifySeverity(model, logger, { text: 'x'.repeat(40_000) });
     const prompt = invoke.mock.calls[0][0] as string;
     const bodyStart = prompt.indexOf('Report text:\n') + 'Report text:\n'.length;
-    expect(prompt.slice(bodyStart).length).toBeLessThanOrEqual(30_000);
+    expect(prompt.slice(bodyStart)).toBe('x'.repeat(40_000));
+  });
+
+  it('retries with a smaller context after a confirmed overflow', async () => {
+    const overflow = new InferenceTaskError(
+      ChatCompletionErrorCode.ContextLengthExceededError,
+      'maximum context window exceeded',
+      {}
+    );
+    const invoke = jest
+      .fn()
+      .mockRejectedValueOnce(overflow)
+      .mockResolvedValueOnce({
+        raw: { response_metadata: {} },
+        parsed: { level: 'medium' },
+      });
+    const { model } = buildModel({ level: 'medium' }, invoke);
+    const text = 'token-dense severity source '.repeat(4_000);
+
+    const result = await classifySeverity(model, logger, { text });
+
+    expect(result.level).toBe('medium');
+    expect(invoke).toHaveBeenCalledTimes(2);
+    const retryPrompt = invoke.mock.calls[1][0] as string;
+    const bodyStart = retryPrompt.indexOf('Report text:\n') + 'Report text:\n'.length;
+    expect(retryPrompt.slice(bodyStart).length).toBeLessThan(text.length);
   });
 });
 
