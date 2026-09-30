@@ -358,6 +358,23 @@ describe('WatchDetailPage', () => {
     }
   });
 
+  it('clicking the enable switch does not collapse the accordion', () => {
+    renderWatch(SYSTEM_SECURITY_WATCH_FLOOR_ID, floorWorkers);
+
+    for (const worker of floorWorkers) {
+      const accordion = screen.getByTestId(`alertZeroWatchWorkerAccordion-${worker.id}`);
+      // Workers start expanded; the accordion trigger carries aria-expanded.
+      // EUI renders aria-expanded on the arrow <button> inside the trigger wrapper.
+      const trigger = accordion.querySelector('button[aria-expanded]');
+      expect(trigger).not.toBeNull();
+      expect(trigger?.getAttribute('aria-expanded')).toBe('true');
+
+      fireEvent.click(screen.getByTestId(`alertZeroWorkerEnabledSwitch-${worker.id}`));
+
+      expect(trigger?.getAttribute('aria-expanded')).toBe('true');
+    }
+  });
+
   it('exposes each Worker name in a multi-Worker Watch as a real h2 for screen-reader heading navigation', () => {
     renderWatch(SYSTEM_SECURITY_WATCH_FLOOR_ID, floorWorkers);
 
