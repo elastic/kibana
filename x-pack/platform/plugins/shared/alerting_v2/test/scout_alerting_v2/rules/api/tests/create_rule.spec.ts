@@ -54,6 +54,7 @@ apiTest.describe('Create rule API', { tag: '@local-stateful-classic' }, () => {
       expect(response.body.metadata).toStrictEqual(body.metadata);
       expect(response.body.schedule).toStrictEqual(body.schedule);
       expect(response.body.query).toStrictEqual(body.query);
+      expect(response.body.version).toBe(1);
       // Actors are structured objects, not the legacy bare profile-UID string.
       expect(typeof response.body.created_by.profile_uid).toBe('string');
       expect(typeof response.body.updated_by.profile_uid).toBe('string');

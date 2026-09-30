@@ -15,7 +15,7 @@ import type { LoggerService } from '../../services/logger_service/logger_service
 import { createLoggerService } from '../../services/logger_service/logger_service.mock';
 import { RuleChangesHistoryAction } from '../../rule_changes_history';
 import { createRuleChangesHistoryServiceMock } from '../../rule_changes_history/rule_changes_history_service.mock';
-import { createInternalRule } from '../../test_utils';
+import { createRuleResponse } from '../../test_utils';
 import {
   RULE_CREATED_EVENT_TYPE,
   RULE_DELETED_EVENT_TYPE,
@@ -41,7 +41,7 @@ const profile = {
   user: { username: author.username },
 } as UserProfileWithSecurity;
 
-const rule = createInternalRule({ id: 'rule-1', version: 3 });
+const rule = createRuleResponse({ id: 'rule-1', version: 3 });
 const { version: _sequence, ...ruleSnapshot } = rule;
 
 const payload: RuleEvent['payload'] = {

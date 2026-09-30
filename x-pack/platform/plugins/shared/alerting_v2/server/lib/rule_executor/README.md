@@ -425,7 +425,7 @@ import {
   collectStreamResults,
   createPipelineStream,
   createRulePipelineState,
-  createInternalRule,
+  createRuleResponse,
 } from '../test_utils';
 
 describe('MyNewStep', () => {
@@ -433,7 +433,7 @@ describe('MyNewStep', () => {
     const step = new MyNewStep();
 
     const stream = step.executeStream(
-      createPipelineStream([createRulePipelineState({ rule: createInternalRule() })])
+      createPipelineStream([createRulePipelineState({ rule: createRuleResponse() })])
     );
 
     const [result] = await collectStreamResults(stream);

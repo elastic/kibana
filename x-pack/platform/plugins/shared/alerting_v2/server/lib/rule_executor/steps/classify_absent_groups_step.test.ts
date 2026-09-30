@@ -13,7 +13,7 @@ import {
   createRuleExecutionInput,
   createRulePipelineState,
   createAlertEvent,
-  createInternalRule,
+  createRuleResponse,
   createEsqlResponse,
 } from '../test_utils';
 import { createQueryService } from '../../services/query_service/query_service.mock';
@@ -84,7 +84,7 @@ describe('ClassifyAbsentGroupsStep', () => {
       const { step, internalEsClient } = createStep();
       mockActiveGroups(internalEsClient, ['host-a', 'host-b', 'host-c', 'host-d']);
 
-      const rule = createInternalRule({ kind: 'alert', recovery: { strategy: 'no_breach' } });
+      const rule = createRuleResponse({ kind: 'alert', recovery: { strategy: 'no_breach' } });
 
       const batch1 = createRulePipelineState({
         rule,
@@ -117,7 +117,7 @@ describe('ClassifyAbsentGroupsStep', () => {
     it('propagates an upstream halt and emits no final batch', async () => {
       const { step, internalEsClient } = createStep();
 
-      const rule = createInternalRule({ kind: 'alert', recovery: { strategy: 'no_breach' } });
+      const rule = createRuleResponse({ kind: 'alert', recovery: { strategy: 'no_breach' } });
       const continueState = createRulePipelineState({ rule, alertEventsBatch: [] });
       const haltState = createRulePipelineState({ rule, alertEventsBatch: [] });
 
@@ -150,7 +150,7 @@ describe('ClassifyAbsentGroupsStep', () => {
       const { step, internalEsClient, scopedEsClient } = createStep();
 
       const state = createRulePipelineState({
-        rule: createInternalRule({ kind: 'signal' }),
+        rule: createRuleResponse({ kind: 'signal' }),
         alertEventsBatch: [createAlertEvent({ group_hash: 'host-a', status: 'breached' })],
       });
 
@@ -165,7 +165,7 @@ describe('ClassifyAbsentGroupsStep', () => {
       const { step, internalEsClient } = createStep();
 
       const state = createRulePipelineState({
-        rule: createInternalRule({
+        rule: createRuleResponse({
           kind: 'alert',
           recovery: { strategy: 'manual' },
           no_data: { strategy: 'ignore' },
@@ -184,7 +184,7 @@ describe('ClassifyAbsentGroupsStep', () => {
       mockActiveGroups(internalEsClient, []);
 
       const state = createRulePipelineState({
-        rule: createInternalRule({ kind: 'alert', recovery: { strategy: 'no_breach' } }),
+        rule: createRuleResponse({ kind: 'alert', recovery: { strategy: 'no_breach' } }),
         alertEventsBatch: [createAlertEvent({ group_hash: 'host-a', status: 'breached' })],
       });
 
@@ -200,7 +200,7 @@ describe('ClassifyAbsentGroupsStep', () => {
       const { step, internalEsClient } = createStep();
       const hashRec = hashFor('host-rec');
 
-      const rule = createInternalRule({
+      const rule = createRuleResponse({
         kind: 'alert',
         recovery: { strategy: 'no_breach' },
         grouping: { fields: ['host.name'] },
@@ -235,7 +235,7 @@ describe('ClassifyAbsentGroupsStep', () => {
         )
       );
 
-      const rule = createInternalRule({
+      const rule = createRuleResponse({
         kind: 'alert',
         recovery: { strategy: 'query', query: 'FROM m | STATS c BY host.name' },
         grouping: { fields: ['host.name'] },
@@ -261,7 +261,7 @@ describe('ClassifyAbsentGroupsStep', () => {
       const hashRec = hashFor('host-rec');
       mockActiveGroups(internalEsClient, [hashRec]);
 
-      const rule = createInternalRule({
+      const rule = createRuleResponse({
         kind: 'alert',
         recovery: { strategy: 'no_breach' },
         version: 9,
@@ -297,7 +297,7 @@ describe('ClassifyAbsentGroupsStep', () => {
         return createEsqlResponse([{ name: 'host.name', type: 'keyword' }], [['host-present']]);
       });
 
-      const rule = createInternalRule({
+      const rule = createRuleResponse({
         kind: 'alert',
         recovery: { strategy: 'query', query: 'FROM m | WHERE recovery_match' },
         no_data: { strategy: 'alert', query: 'FROM m | STATS c BY host.name' },
@@ -343,7 +343,7 @@ describe('ClassifyAbsentGroupsStep', () => {
         return createEsqlResponse([{ name: 'host.name', type: 'keyword' }], [['host-gap']]);
       });
 
-      const rule = createInternalRule({
+      const rule = createRuleResponse({
         kind: 'alert',
         recovery: { strategy: 'query', query: 'FROM m | WHERE recovery_match' },
         no_data: { strategy: 'alert', query: 'FROM m | STATS c BY host.name' },
@@ -385,7 +385,7 @@ describe('ClassifyAbsentGroupsStep', () => {
       mockActiveGroups(internalEsClient, [hashFor('host-a')]);
       scopedEsClient.esql.query.mockResolvedValue(createEsqlResponse([], []));
 
-      const rule = createInternalRule({
+      const rule = createRuleResponse({
         kind: 'alert',
         recovery: { strategy: 'no_breach' },
         no_data: { strategy: 'alert', query: 'FROM m | STATS c BY host.name' },
@@ -416,7 +416,7 @@ describe('ClassifyAbsentGroupsStep', () => {
 
       const abortController = new AbortController();
       const input = createRuleExecutionInput({ abortSignal: abortController.signal });
-      const rule = createInternalRule({
+      const rule = createRuleResponse({
         kind: 'alert',
         recovery: { strategy: 'no_breach' },
         no_data: { strategy: 'alert', query: 'FROM m | STATS c BY host.name' },

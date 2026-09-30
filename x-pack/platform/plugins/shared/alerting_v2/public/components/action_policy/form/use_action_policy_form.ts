@@ -81,13 +81,13 @@ export const useActionPolicyForm = ({
 
   const onSubmitValid = useCallback(
     (values: ActionPolicyFormState) => {
-      if (isEditMode) {
-        onSubmitUpdate(initialValues!.id, values);
+      if (initialValues) {
+        onSubmitUpdate(initialValues.id, values);
       } else {
         onSubmitCreate(values);
       }
     },
-    [isEditMode, initialValues, onSubmitCreate, onSubmitUpdate]
+    [initialValues, onSubmitCreate, onSubmitUpdate]
   );
 
   const handleSubmit = useMemo(() => methods.handleSubmit(onSubmitValid), [methods, onSubmitValid]);

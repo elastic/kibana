@@ -53,11 +53,16 @@ apiTest.describe('Bulk update rule API key by IDs API', { tag: '@local-stateful-
       expect(response.body).toStrictEqual({ affected_count: 2, errors: [] });
 
       // The API key rotation is not observable directly (Task Manager stores it
-      // encrypted), so assert the side effect via the audit metadata the
-      // rotation stamps on the rule.
+      // encrypted). `affected_count` above is the real signal: a rule is only
+      // counted once both the task rotation and the saved-object write succeeded.
+      // The audit stamp is a weaker sanity check — `updated_at` has millisecond
+      // resolution, so create and rotation can share a millisecond and the
+      // comparison has to be non-strict.
       for (const created of [ruleA, ruleB]) {
         const fetched = await apiServices.alertingV2.rules.get(created.id);
-        expect(Date.parse(fetched.updated_at)).toBeGreaterThan(Date.parse(created.updated_at));
+        expect(Date.parse(fetched.updated_at)).toBeGreaterThanOrEqual(
+          Date.parse(created.updated_at)
+        );
       }
     }
   );
@@ -85,7 +90,8 @@ apiTest.describe('Bulk update rule API key by IDs API', { tag: '@local-stateful-
         updated_at: fetched.updated_at,
         updated_by: fetched.updated_by,
       });
-      expect(Date.parse(fetched.updated_at)).toBeGreaterThan(Date.parse(created.updated_at));
+      // Non-strict for the same reason as above: millisecond-resolution stamps.
+      expect(Date.parse(fetched.updated_at)).toBeGreaterThanOrEqual(Date.parse(created.updated_at));
     }
   );
 

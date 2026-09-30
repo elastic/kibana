@@ -10,7 +10,7 @@ import { QueryResponseSizeExceededError } from '../errors/query_response_size_ex
 import { errors } from '@elastic/elasticsearch';
 import { TaskErrorSource } from '@kbn/task-manager-plugin/server';
 import { getErrorSource } from '@kbn/task-manager-plugin/server/task_running';
-import { createRuleExecutionInput, createInternalRule, createEsqlResponse } from './test_utils';
+import { createRuleExecutionInput, createRuleResponse, createEsqlResponse } from './test_utils';
 import { createLoggerService } from '../services/logger_service/logger_service.mock';
 import { createQueryService } from '../services/query_service/query_service.mock';
 import { buildGroupHash } from './build_alert_events';
@@ -41,7 +41,7 @@ describe('executeRecoveryQuery', () => {
       createEsqlResponse([{ name: 'host.name', type: 'keyword' }], [['recovery-host-1']])
     );
 
-    const rule = createInternalRule({
+    const rule = createRuleResponse({
       kind: 'alert',
       recovery: { strategy: 'query', query: 'FROM logs-* | WHERE recovered = true' },
       grouping: { fields: ['host.name'] },
@@ -91,7 +91,7 @@ describe('executeRecoveryQuery', () => {
     const events = await executeRecoveryQuery({
       queryService,
       logger: loggerService,
-      rule: createInternalRule({
+      rule: createRuleResponse({
         kind: 'alert',
         recovery: { strategy: 'query', query: 'FROM logs-* | WHERE recovered = true' },
       }),
@@ -126,7 +126,7 @@ describe('executeRecoveryQuery', () => {
     const events = await executeRecoveryQuery({
       queryService,
       logger: loggerService,
-      rule: createInternalRule({
+      rule: createRuleResponse({
         kind: 'alert',
         recovery: { strategy: 'query', query: 'FROM logs-* | STATS count(*) BY host.name' },
         grouping: { fields: groupingFields },
@@ -156,7 +156,7 @@ describe('executeRecoveryQuery', () => {
     const error = await executeRecoveryQuery({
       queryService,
       logger: loggerService,
-      rule: createInternalRule({
+      rule: createRuleResponse({
         kind: 'alert',
         recovery: { strategy: 'query', query: 'FROM logs-* | WHERE recovered = true' },
       }),
@@ -180,7 +180,7 @@ describe('executeRecoveryQuery', () => {
     const error = await executeRecoveryQuery({
       queryService,
       logger: loggerService,
-      rule: createInternalRule({
+      rule: createRuleResponse({
         kind: 'alert',
         recovery: { strategy: 'query', query: 'FROM logs-* | WHERE recovered = true' },
       }),
@@ -205,7 +205,7 @@ describe('executeRecoveryQuery', () => {
     const error = await executeRecoveryQuery({
       queryService,
       logger: loggerService,
-      rule: createInternalRule({
+      rule: createRuleResponse({
         kind: 'alert',
         recovery: { strategy: 'query', query: 'FROM logs-* | WHERE recovered = true' },
       }),
@@ -227,7 +227,7 @@ describe('executeRecoveryQuery', () => {
     const error = await executeRecoveryQuery({
       queryService,
       logger: loggerService,
-      rule: createInternalRule({
+      rule: createRuleResponse({
         kind: 'alert',
         recovery: { strategy: 'query', query: 'FROM logs-* | WHERE recovered = true' },
       }),
@@ -252,7 +252,7 @@ describe('executeRecoveryQuery', () => {
     await executeRecoveryQuery({
       queryService,
       logger: loggerService,
-      rule: createInternalRule({
+      rule: createRuleResponse({
         kind: 'alert',
         recovery: { strategy: 'query', query: 'FROM logs-* | WHERE recovered = true' },
       }),

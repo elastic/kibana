@@ -10,7 +10,7 @@ import { QueryResponseSizeExceededError } from '../errors/query_response_size_ex
 import { errors } from '@elastic/elasticsearch';
 import { TaskErrorSource } from '@kbn/task-manager-plugin/server';
 import { getErrorSource } from '@kbn/task-manager-plugin/server/task_running';
-import { createRuleExecutionInput, createInternalRule, createEsqlResponse } from './test_utils';
+import { createRuleExecutionInput, createRuleResponse, createEsqlResponse } from './test_utils';
 import { createLoggerService } from '../services/logger_service/logger_service.mock';
 import { createQueryService } from '../services/query_service/query_service.mock';
 import { buildGroupHash } from './build_alert_events';
@@ -39,7 +39,7 @@ describe('detectDataPresence', () => {
   }
 
   function buildRule(overrides: Partial<RuleResponse> = {}): RuleResponse {
-    return createInternalRule({
+    return createRuleResponse({
       kind: 'alert',
       grouping: { fields: groupingFields },
       no_data: {
@@ -148,7 +148,7 @@ describe('detectDataPresence', () => {
     const input = createRuleExecutionInput();
     const result = await detectDataPresence({
       queryService,
-      rule: createInternalRule({
+      rule: createRuleResponse({
         kind: 'alert',
         no_data: { strategy: 'alert' },
         grouping: { fields: groupingFields },

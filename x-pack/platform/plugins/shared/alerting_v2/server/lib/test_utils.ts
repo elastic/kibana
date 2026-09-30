@@ -78,9 +78,6 @@ export function createRuleResponse(
   };
 }
 
-/** @deprecated Use `createRuleResponse` with a `version` override instead. */
-export const createInternalRule = createRuleResponse;
-
 /**
  * Creates standard RuleSavedObjectAttributes for testing.
  */
