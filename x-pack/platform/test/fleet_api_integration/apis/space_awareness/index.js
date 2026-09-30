@@ -23,5 +23,6 @@ export default function loadTests({ loadTestFile }) {
     loadTestFile(require.resolve('./outputs'));
     loadTestFile(require.resolve('./package_policies'));
     loadTestFile(require.resolve('./package_rollback'));
+    loadTestFile(require.resolve('./global_settings_delete'));
   });
 }

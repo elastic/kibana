@@ -8,7 +8,9 @@
 import { httpServerMock } from '@kbn/core-http-server-mocks';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import type { ScopedModel } from '@kbn/agent-builder-server';
+import type { HuntCoordinatorResponse } from '@kbn/alertzero-common';
 import type { RouteDependencies } from '../register_routes';
+import { buildSseAttachmentId } from '../../services/watches/hunt/common/sse_mapper';
 import { registerHuntCoordinatorRoute } from './hunt_coordinator';
 import { resolveScopedModel } from './lib/scoped_model';
 import { huntCoordinator } from '../../services/watches/hunt/hunt_coordinator';
@@ -28,6 +30,7 @@ const coordinatorResult: HuntCoordinatorResult = {
   report_id: 'report-1',
   run_id: 'run-1',
   technologies: ['aws_iam'],
+  index_patterns: ['logs-aws.cloudtrail-*'],
   tier1: {
     tier: 1,
     ...emptyHuntForThreatResult('no_environment_hits', [], [], { from: 'now-7d', to: 'now' }, ''),
@@ -139,7 +142,7 @@ describe('registerHuntCoordinatorRoute', () => {
     });
   });
 
-  it('skips model resolution entirely when Tier 2 is never going to run', async () => {
+  it('still resolves the model when Tier 2 is never going to run, so scope resolution can use it', async () => {
     const { handler, context } = makeDeps();
 
     await handler(
@@ -148,8 +151,39 @@ describe('registerHuntCoordinatorRoute', () => {
       httpServerMock.createResponseFactory()
     );
 
-    expect(resolveScopedModelMock).not.toHaveBeenCalled();
+    expect(resolveScopedModelMock).toHaveBeenCalledTimes(1);
+    expect(huntCoordinatorMock.mock.calls[0][1]).toBe(model);
+    expect(paramsOf().tier2_when).toBe('never');
+  });
+
+  it('passes no model on a never run without a connector, and the request still succeeds', async () => {
+    resolveScopedModelMock.mockResolvedValue({
+      ok: false,
+      reason: 'no_connector',
+      message: 'no connector configured',
+    });
+    const { handler, context } = makeDeps();
+    const response = httpServerMock.createResponseFactory();
+
+    await handler(context, requestFor({ tier2_when: 'never' }), response);
+
     expect(huntCoordinatorMock.mock.calls[0][1]).toBeUndefined();
+    expect(response.ok).toHaveBeenCalled();
+  });
+
+  it('passes no model when resolution throws, logging at debug rather than failing the request', async () => {
+    resolveScopedModelMock.mockRejectedValue(new Error('connector store unavailable'));
+    const { handler, context, logger } = makeDeps();
+    const response = httpServerMock.createResponseFactory();
+
+    await handler(context, requestFor(), response);
+
+    expect(huntCoordinatorMock.mock.calls[0][1]).toBeUndefined();
+    expect(logger.debug).toHaveBeenCalledWith(
+      expect.stringContaining('connector store unavailable')
+    );
+    expect(logger.error).not.toHaveBeenCalled();
+    expect(response.ok).toHaveBeenCalled();
   });
 
   it('passes no model when resolution fails, leaving the coordinator to degrade', async () => {
@@ -185,6 +219,115 @@ describe('registerHuntCoordinatorRoute', () => {
     await handler(context, requestFor(), httpServerMock.createResponseFactory());
 
     expect(paramsOf().run_id).toEqual(expect.stringMatching(/^[0-9a-f-]{36}$/));
+  });
+
+  /**
+   * The gate that puts `sse` on the response is three conditions wide (confirmed hit,
+   * a named report, the request's space) and the mapper it calls is real here. A
+   * regression in any of them removes or mis-scopes every attachment the hunt writes.
+   */
+  describe('SSE entries on the response', () => {
+    const confirmedResult: HuntCoordinatorResult = {
+      ...coordinatorResult,
+      status: 'tier1_and_tier2',
+      message: 'behaviors proposed',
+      has_confirmed_hit: true,
+      tier2: {
+        tier: 2,
+        status: 'behaviors_proposed',
+        behaviors: [
+          {
+            technique_id: 'T1078.004',
+            evidence_quote: 'AssumeRole into OrgAdminBoundary',
+            llm_confidence: 0.9,
+            confidence: 0.9,
+            technique_name: 'Valid Accounts: Cloud Accounts',
+            reference: 'https://attack.mitre.org/techniques/T1078/004/',
+            tactic_ids: ['TA0001'],
+            proposed_esql_rule: 'FROM logs-aws.cloudtrail-default | WHERE true',
+            rule_name: 'AssumeRole into high-risk policy boundary',
+            severity: 'high',
+            risk_score: 73,
+            execution: { executed: true, row_count: 2, hit: true },
+          },
+        ],
+        indexed_behaviors: [],
+        has_hit: true,
+        next_step: 'Review the proposed rule.',
+      },
+    };
+
+    const sseOf = (response: ReturnType<typeof httpServerMock.createResponseFactory>) => {
+      const [options] = response.ok.mock.calls[0];
+      if (!options) throw new Error('expected an ok response carrying a body');
+      return (options.body as HuntCoordinatorResponse).sse;
+    };
+
+    it('attaches one entry per corroborated technique on a confirmed hit', async () => {
+      huntCoordinatorMock.mockResolvedValue(confirmedResult);
+      const { handler, context } = makeDeps();
+      const response = httpServerMock.createResponseFactory();
+
+      await handler(context, requestFor(), response);
+
+      expect(sseOf(response)).toHaveLength(1);
+      expect(sseOf(response)?.[0].attachment_id).toBe(
+        buildSseAttachmentId({
+          spaceId: 'default',
+          reportId: 'report-1',
+          techniqueId: 'T1078.004',
+        })
+      );
+    });
+
+    it('scopes attachment ids to the request space', async () => {
+      huntCoordinatorMock.mockResolvedValue(confirmedResult);
+      const { handler, context } = makeDeps({ spaceId: 'hunt-space' });
+      const response = httpServerMock.createResponseFactory();
+
+      await handler(context, requestFor(), response);
+
+      // Re-hunts are idempotent on this id, so a default-space id in another space
+      // would overwrite that space's attachment.
+      expect(sseOf(response)?.[0].attachment_id).toBe(
+        buildSseAttachmentId({
+          spaceId: 'hunt-space',
+          reportId: 'report-1',
+          techniqueId: 'T1078.004',
+        })
+      );
+      expect(sseOf(response)?.[0].attachment_id).not.toBe(
+        buildSseAttachmentId({
+          spaceId: 'default',
+          reportId: 'report-1',
+          techniqueId: 'T1078.004',
+        })
+      );
+    });
+
+    it('sends no entries for a run that confirmed nothing', async () => {
+      const { handler, context } = makeDeps();
+      const response = httpServerMock.createResponseFactory();
+
+      await handler(context, requestFor(), response);
+
+      expect(sseOf(response)).toBeUndefined();
+    });
+
+    it('sends no entries for a hit on an ad hoc hunt, which has no report to attach to', async () => {
+      huntCoordinatorMock.mockResolvedValue(confirmedResult);
+      const { handler, context } = makeDeps();
+      const response = httpServerMock.createResponseFactory();
+
+      await handler(
+        context,
+        httpServerMock.createKibanaRequest({ body: { text: 'ad hoc hunt' } }),
+        response
+      );
+
+      expect(response.ok).toHaveBeenCalled();
+      expect(sseOf(response)).toBeUndefined();
+    });
   });
 
   it('logs and returns a generic 500 when the coordinator throws', async () => {

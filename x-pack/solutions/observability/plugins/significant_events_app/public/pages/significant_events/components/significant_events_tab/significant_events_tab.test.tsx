@@ -154,7 +154,30 @@ describe('Significant Events timestamp rendering', () => {
 });
 
 describe('SignificantEventFlyout actions menu', () => {
+  const { useFetchSignificantEventLifecycle: lifecycleMock } = jest.requireMock(
+    '../../../../hooks/use_fetch_significant_event_lifecycle'
+  ) as { useFetchSignificantEventLifecycle: jest.Mock };
+
+  afterEach(() => {
+    // Restore the default (no lifecycle) so other describe blocks are unaffected.
+    lifecycleMock.mockReturnValue({
+      data: undefined,
+      isLoading: false,
+      isSuccess: false,
+      isError: false,
+      refetch: jest.fn(),
+    });
+  });
+
   it('shows Dismiss and Close for an open event and opens the dismiss modal', () => {
+    // Use mockReturnValue (not Once) so re-renders triggered by fireEvent keep the same value.
+    lifecycleMock.mockReturnValue({
+      data: { events: [event], detections: [] },
+      isLoading: false,
+      isSuccess: true,
+      isError: false,
+      refetch: jest.fn(),
+    });
     render(<SignificantEventFlyout event={event} onClose={jest.fn()} />);
 
     fireEvent.click(screen.getByTestId('sigEventFlyoutActionsButton'));
@@ -164,6 +187,31 @@ describe('SignificantEventFlyout actions menu', () => {
 
     fireEvent.click(screen.getByText('Dismiss significant event'));
 
+    expect(screen.getByTestId('sigEventDismissModal')).toBeInTheDocument();
+  });
+
+  it('keeps Dismiss and Close enabled even when lifecycle returns empty events (event_id is always known)', () => {
+    // The update route resolves via event_id (findLatestByEventId), not event_uuid —
+    // lifecycle data is not required for close/dismiss to work correctly.
+    lifecycleMock.mockReturnValue({
+      data: { events: [], detections: [] },
+      isLoading: false,
+      isSuccess: true,
+      isError: false,
+      refetch: jest.fn(),
+    });
+    render(<SignificantEventFlyout event={event} onClose={jest.fn()} />);
+
+    fireEvent.click(screen.getByTestId('sigEventFlyoutActionsButton'));
+
+    const dismissItem = screen.getByText('Dismiss significant event').closest('button');
+    const closeItem = screen.getByTestId('sigEventCloseButton');
+
+    expect(dismissItem).not.toBeDisabled();
+    expect(closeItem).not.toBeDisabled();
+
+    // Clicking dismiss must open the modal since the action is enabled.
+    fireEvent.click(screen.getByText('Dismiss significant event'));
     expect(screen.getByTestId('sigEventDismissModal')).toBeInTheDocument();
   });
 
