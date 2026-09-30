@@ -357,16 +357,39 @@ const executeValidatedEsql = async ({
 };
 
 /**
- * Wildcard patterns for the integrations that produced Tier 1 hits, derived
- * from concrete backing indices (`.ds-logs-okta.system-default-2026.09.01-000001`
- * → `logs-okta.system-default*`). A confirmed hit only says WHICH integration
- * to target, never a dated index name.
+ * Strip a concrete backing index to the integration stream the hit came from
+ * (`.ds-logs-okta.system-default-2026.09.01-000001` → `logs-okta.system-default`).
+ * A discovered scope already hands over wildcard patterns; those stay as-is.
  */
-const matchedIndexPatterns = (articleContext: HuntBehaviorArticleContext | undefined): string[] => [
+const matchedIndexBase = (index: string): string => {
+  const base = index.replace(/^\.ds-/, '').replace(/[-.]\d{4}[.-]\d{2}[.-]\d{2}.*$/, '');
+  return base;
+};
+
+/**
+ * Wildcard patterns for the integrations that produced Tier 1 hits. Prefer the
+ * stream wildcard (`logs-okta.system-default*`) so generation covers every
+ * generation of that stream, but keep the exact allowed name when adding `*`
+ * would cross an exclusion (`logs-elastic` is searchable under `logs-*` with
+ * `-logs-elastic_agent*`, while `logs-elastic*` is not).
+ */
+const matchedIndexPatterns = (
+  articleContext: HuntBehaviorArticleContext | undefined,
+  allowlist: string[]
+): string[] => [
   ...new Set(
-    (articleContext?.matched_indices ?? []).map(
-      (index) => `${index.replace(/^\.ds-/, '').replace(/[-.]\d{4}[.-]\d{2}[.-]\d{2}.*$/, '')}*`
-    )
+    (articleContext?.matched_indices ?? [])
+      .map((index) => {
+        const base = matchedIndexBase(index);
+        if (base.endsWith('*')) {
+          return isIndexPatternAllowed(base, allowlist) ? base : null;
+        }
+        const wildcarded = `${base}*`;
+        if (isIndexPatternAllowed(wildcarded, allowlist)) return wildcarded;
+        if (isIndexPatternAllowed(base, allowlist)) return base;
+        return null;
+      })
+      .filter((pattern): pattern is string => pattern !== null)
   ),
 ];
 
@@ -382,11 +405,15 @@ const resolveGenerationIndex = (
   requiredIndices: string[]
 ): string => {
   const allowlist = requiredIndices.length > 0 ? requiredIndices : getKnownHuntIndexPatterns();
-  const matched = matchedIndexPatterns(articleContext).filter((pattern) =>
-    isIndexPatternAllowed(pattern, allowlist)
-  );
+  const matched = matchedIndexPatterns(articleContext, allowlist);
   if (matched.length > 0) return matched.join(',');
-  if (requiredIndices.length > 0) return requiredIndices.join(',');
+  // Exclusion entries (`-logs-elastic_agent*`) belong to the search, not to a FROM.
+  // Filter positives the same way matched indices are filtered: under a broad scope
+  // `logs-*` itself is refused because it overlaps the agent exclusions.
+  const positives = requiredIndices
+    .filter((pattern) => !pattern.startsWith('-'))
+    .filter((pattern) => isIndexPatternAllowed(pattern, allowlist));
+  if (positives.length > 0) return positives.join(',');
   return DEFAULT_GENERATION_INDEX;
 };
 

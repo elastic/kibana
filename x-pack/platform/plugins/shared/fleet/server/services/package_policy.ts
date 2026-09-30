@@ -1663,6 +1663,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
     this.keepPolicyIdInSync(packagePolicyUpdate);
     await preflightCheckPackagePolicy(soClient, packagePolicyUpdate);
 
+    const { version } = packagePolicyUpdate;
     let enrichedPackagePolicy: UpdatePackagePolicy;
     let secretReferences: SecretReference[] | undefined;
     let secretsToDelete: SecretReference[] | undefined;
@@ -1732,7 +1733,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
 
     // spaceIds is a runtime field; strip it so it cannot leak into SO attributes
     const {
-      version,
+      version: _version,
       id: _id,
       spaceIds: _spaceIds,
       ...restOfPackagePolicyInit
@@ -3327,6 +3328,34 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
         }
       );
     }
+  }
+
+  /**
+   * Returns the set of space IDs for package policies that reference the given output ID.
+   * Used for pre-deletion authz checks.
+   */
+  public async getSpacesForPoliciesUsingOutput(outputId: string): Promise<{
+    spaceIds: Set<string>;
+    truncated: boolean;
+  }> {
+    const savedObjectType = await getPackagePolicySavedObjectType();
+    const result = await appContextService
+      .getInternalUserSOClientWithoutSpaceExtension()
+      .find<PackagePolicySOAttributes>({
+        type: savedObjectType,
+        fields: ['spaceIds'],
+        searchFields: ['output_id'],
+        search: escapeSearchQueryPhrase(outputId),
+        perPage: SO_SEARCH_LIMIT,
+        namespaces: ['*'],
+      });
+    const spaceIds = new Set<string>();
+    for (const so of result.saved_objects) {
+      for (const ns of so.namespaces ?? []) {
+        spaceIds.add(ns);
+      }
+    }
+    return { spaceIds, truncated: result.saved_objects.length < result.total };
   }
 
   async fetchAllItemIds(
