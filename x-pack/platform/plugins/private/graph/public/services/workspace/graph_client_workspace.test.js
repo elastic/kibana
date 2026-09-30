@@ -7,6 +7,7 @@
 
 import { createWorkspaceState } from '../../state_management/workspace';
 import { createWorkspace } from './graph_client_workspace';
+import { GraphLayoutController } from './graph_layout_controller';
 
 describe('graphui-workspace', function () {
   describe('createWorkspace()', function () {
@@ -22,7 +23,13 @@ describe('graphui-workspace', function () {
         const callNodeProxy = function (indexName, query, responseHandler) {
           responseHandler(mockedResult);
         };
+        const runtime = { workspace: undefined };
+        const layoutController = new GraphLayoutController({
+          getNodes: () => runtime.workspace?.nodes ?? [],
+          getEdges: () => runtime.workspace?.edges ?? [],
+        });
         const options = {
+          layoutController,
           indexName: 'indexName',
           vertex_fields: [
             {
@@ -45,6 +52,7 @@ describe('graphui-workspace', function () {
           },
         };
         const workspace = createWorkspace(options);
+        runtime.workspace = workspace;
         return {
           workspace,
           changeHandler,
