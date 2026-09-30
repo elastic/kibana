@@ -12,9 +12,9 @@ import {
   ALERTZERO_FORENSICS_RUN_ENDPOINT_ANALYSIS_WORKFLOW,
   ALERTZERO_FORENSICS_RUN_ENDPOINT_ANALYSIS_WORKFLOW_ID,
 } from '.';
+import { ALERTZERO_CREATE_PROPOSAL_WORKFLOW_ID } from './create_proposal';
 import FORENSICS_ENDPOINT_ANALYSIS_YAML from './forensics_endpoint_analysis.yaml';
 import { createWorkflowLiquidEngine } from '../../../common/utils';
-import { CREATE_PROPOSAL_WORKFLOW_ID } from '../proposals';
 
 interface YamlStep {
   name: string;
@@ -1031,7 +1031,9 @@ describe('Endpoint analysis run', () => {
       };
       const inputs = proposeAction?.inputs;
 
-      expect(proposeAction?.['workflow-id']).toBe(CREATE_PROPOSAL_WORKFLOW_ID);
+      // The bridge, not the gate: it owns `origin`, so containment proposals
+      // land in the queue AlertZero actually reads.
+      expect(proposeAction?.['workflow-id']).toBe(ALERTZERO_CREATE_PROPOSAL_WORKFLOW_ID);
       expect(inputs?.confidence).toBe("{{ foreach.item.confidence | default: '' }}");
       expect(inputs?.impact).toBeUndefined();
       expect(inputs?.category).toBeUndefined();
