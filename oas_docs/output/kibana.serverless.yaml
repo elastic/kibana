@@ -22221,11 +22221,10 @@ paths:
                       - message: Agent running in non-interactive mode, user input not available - execution was declined
                         tool_id: reindex-logs
                 messageResponseExample:
-                  description: The agent's answer and the ID of the conversation it was stored in
+                  description: The agent's answer and the ID of the conversation it was stored in. `declined_prompts` is absent because the agent asked for nothing.
                   value:
                     answer: Elasticsearch is a distributed, RESTful search and analytics engine capable of addressing a growing number of use cases. As the heart of the Elastic Stack, it centrally stores your data for lightning fast search, fine‑tuned relevancy, and powerful analytics that scale with ease.
                     conversation_id: 696ccd6d-4bff-4b26-a62e-522ccf2dcd16
-                    declined_prompts: []
               schema:
                 additionalProperties: false
                 type: object
@@ -22237,7 +22236,7 @@ paths:
                     description: 'The conversation the message was added to: the one requested, or the one created for it.'
                     type: string
                   declined_prompts:
-                    description: Prompts the agent raised that would have paused an interactive conversation (tool confirmations, questions to the user, destructive API approvals). This endpoint has no user to answer them, so each was declined and the agent told why; the list is empty when the agent asked for none.
+                    description: Prompts the agent raised that would have paused an interactive conversation (tool confirmations, questions to the user, destructive API approvals). This endpoint has no user to answer them, so each was declined and the agent told why. Omitted when the agent asked for none.
                     items:
                       additionalProperties: false
                       type: object
@@ -22251,11 +22250,11 @@ paths:
                       required:
                         - tool_id
                         - message
+                    minItems: 1
                     type: array
                 required:
                   - conversation_id
                   - answer
-                  - declined_prompts
           description: Indicates a successful response
         '400':
           content:
