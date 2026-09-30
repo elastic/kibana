@@ -79,7 +79,11 @@ export function MermaidPanel({ mermaid, nodes, edges }: MermaidPanelProps) {
         data-test-subj="nightshiftDecisionTreeMermaidViewToggle"
       />
       <EuiSpacer size="s" />
-      {view === 'diagram' ? <DecisionTreeGraph nodes={nodes} edges={edges} /> : source}
+      {view === 'diagram' ? (
+        <DecisionTreeGraph key={mermaid} nodes={nodes} edges={edges} />
+      ) : (
+        source
+      )}
     </>
   );
 }
