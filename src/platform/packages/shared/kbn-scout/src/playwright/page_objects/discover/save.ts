@@ -12,11 +12,6 @@ import { expect } from '../..';
 import { DEFAULT_SAVE_MODAL_TIMEOUT, type TimeoutOptions } from './base';
 import { NavigationMixin } from './navigation';
 
-interface JobPollResult {
-  failed: boolean;
-  errorText?: string;
-}
-
 /**
  * Save, load, revert and share/export actions for Discover.
  */
@@ -214,9 +209,7 @@ export abstract class SaveMixin extends NavigationMixin {
     }
   }
 
-  async exportAsCsv(
-    options?: TimeoutOptions & { _retried?: boolean }
-  ): Promise<import('playwright-core').Download> {
+  async exportAsCsv(options?: TimeoutOptions): Promise<import('playwright-core').Download> {
     const timeout = options?.timeout ?? 30_000;
 
     // Arm the response interceptor before clicking so we never miss it.
@@ -243,66 +236,17 @@ export abstract class SaveMixin extends NavigationMixin {
         `CSV report generate request failed with status ${generateResponse.status()}`
       );
     }
-    const { job } = (await generateResponse.json()) as { job: { id: string } };
 
-    // Poll the reporting API by job ID. UI locators are page-global — a stale download button
-    // or error toast from a previous test can settle a UI-race before the new job finishes.
-    // Derive the reporting base URL from the generate response URL rather than page.url() so
-    // that a non-root Kibana base path (e.g. /my-kibana) is preserved correctly.
-    const reportingBase = generateResponse.url().replace(/\/internal\/reporting\/.*/, '');
-    const { failed, errorText } = await this.pollJobStatus(job.id, reportingBase, timeout);
+    const downloadBtn = this.page.testSubj.locator('downloadCompletedReportButton');
+    const reportFailure = this.page.locator('[data-test-errorText]');
+    await downloadBtn.or(reportFailure).waitFor({ state: 'visible', timeout });
 
-    if (failed) {
-      // version_conflict_engine_exception is a transient error in the reporting/ES write path
-      // (tracked in https://github.com/elastic/kibana/issues/290053). Retry once with a fresh
-      // generate request — the new job gets a new UUID so there is no conflict possibility.
-      if (errorText?.includes('version_conflict_engine_exception') && !options?._retried) {
-        return this.exportAsCsv({ ...options, _retried: true });
-      }
+    if (await reportFailure.isVisible()) {
+      const errorText = await reportFailure.getAttribute('data-test-errorText');
       throw new Error(`CSV report generation failed: ${errorText ?? 'Unknown error'}`);
     }
 
-    const downloadBtn = this.page.testSubj.locator('downloadCompletedReportButton');
-    await downloadBtn.waitFor({ state: 'visible', timeout });
-
     const [download] = await Promise.all([this.page.waitForEvent('download'), downloadBtn.click()]);
     return download;
-  }
-
-  private async pollJobStatus(
-    jobId: string,
-    reportingBase: string,
-    timeout: number
-  ): Promise<JobPollResult> {
-    let job: { status: string; output?: { warnings?: string[] } } | undefined;
-
-    // Use page.evaluate so the fetch runs inside the browser context, which carries the full
-    // session (cookies, auth tokens). page.request.get() uses a separate Playwright API context
-    // that can miss session state and receive 403 on Kibana internal endpoints.
-    await expect
-      .poll(
-        async () => {
-          try {
-            job = await this.page.evaluate(async (url) => {
-              const res = await fetch(url, { credentials: 'same-origin' });
-              if (!res.ok) return undefined;
-              return res.json() as Promise<{ status: string; output?: { warnings?: string[] } }>;
-            }, `${reportingBase}/internal/reporting/jobs/info/${jobId}`);
-            return job?.status ?? 'pending';
-          } catch {
-            return 'pending';
-          }
-        },
-        { timeout, message: `CSV report ${jobId} did not reach a terminal status` }
-      )
-      .toMatch(/completed|warnings|failed/);
-
-    const failed = job?.status === 'failed';
-    // Failed reports surface their error via output.warnings[0] — the jobs/info endpoint
-    // serialises via Report.toApiJSON() which does not expose the raw `error` field.
-    return {
-      failed,
-      errorText: failed ? job?.output?.warnings?.[0] : undefined,
-    };
   }
 }
