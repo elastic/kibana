@@ -50,6 +50,8 @@ export interface WorkspaceState {
   edgeIds: string[];
   selectedNodeIds: string[];
   selectedEdgeIds: string[];
+  blocklistedNodesById: Record<string, WorkspaceNodeState>;
+  blocklistedNodeIds: string[];
 }
 
 const initialWorkspaceState: WorkspaceState = {
@@ -60,6 +62,8 @@ const initialWorkspaceState: WorkspaceState = {
   edgeIds: [],
   selectedNodeIds: [],
   selectedEdgeIds: [],
+  blocklistedNodesById: {},
+  blocklistedNodeIds: [],
 };
 
 export const initializeWorkspace = actionCreator('INITIALIZE_WORKSPACE');
@@ -73,6 +77,8 @@ export const toggleNodeSelection = actionCreator<{ nodeId: string; replace: bool
 );
 export const deselectNode = actionCreator<string>('DESELECT_NODE');
 export const toggleEdgeSelection = actionCreator<string>('TOGGLE_EDGE_SELECTION');
+export const deleteSelectedNodes = actionCreator('DELETE_SELECTED_NODES');
+export const blocklistSelectedNodes = actionCreator('BLOCKLIST_SELECTED_NODES');
 export const submitSearch = actionCreator<string>('SUBMIT_SEARCH');
 
 export const workspaceReducer = reducerWithInitialState(initialWorkspaceState)
@@ -109,6 +115,19 @@ export const workspaceReducer = reducerWithInitialState(initialWorkspaceState)
     ...state,
     selectedEdgeIds: state.selectedEdgeIds.includes(edgeId) ? [] : [edgeId],
   }))
+  .case(deleteSelectedNodes, (state) => removeNodes(state, getSelectedNodeIds(state)))
+  .case(blocklistSelectedNodes, (state) => {
+    const nodeIds = getSelectedNodeIds(state, false);
+    const blocklistedNodesById = { ...state.blocklistedNodesById };
+    for (const nodeId of nodeIds) {
+      blocklistedNodesById[nodeId] = state.nodesById[nodeId];
+    }
+    return {
+      ...removeNodes(state, nodeIds),
+      blocklistedNodesById,
+      blocklistedNodeIds: [...state.blocklistedNodeIds, ...nodeIds],
+    };
+  })
   .build();
 
 export const workspaceSelector = (state: GraphState) => state.workspace;
@@ -121,6 +140,46 @@ export const selectedNodeIdsSelector = createSelector(
   workspaceSelector,
   (workspace: WorkspaceState) => workspace.selectedNodeIds
 );
+
+const getSelectedNodeIds = (state: WorkspaceState, defaultToAll = true): string[] => {
+  const selectedNodeIds = state.selectedNodeIds.length
+    ? new Set(state.selectedNodeIds)
+    : new Set(defaultToAll ? state.nodeIds : []);
+
+  for (const nodeId of state.nodeIds) {
+    let parentId = state.nodesById[nodeId].parentId;
+    while (parentId) {
+      if (selectedNodeIds.has(parentId)) {
+        selectedNodeIds.add(nodeId);
+        break;
+      }
+      parentId = state.nodesById[parentId]?.parentId;
+    }
+  }
+  return state.nodeIds.filter((nodeId) => selectedNodeIds.has(nodeId));
+};
+
+const removeNodes = (state: WorkspaceState, nodeIds: string[]): WorkspaceState => {
+  const removedNodeIds = new Set(nodeIds);
+  const nodesById = Object.fromEntries(
+    Object.entries(state.nodesById).filter(([nodeId]) => !removedNodeIds.has(nodeId))
+  );
+  const edgesById = Object.fromEntries(
+    Object.entries(state.edgesById).filter(
+      ([, edge]) => !removedNodeIds.has(edge.sourceId) && !removedNodeIds.has(edge.targetId)
+    )
+  );
+
+  return {
+    ...state,
+    nodesById,
+    nodeIds: state.nodeIds.filter((nodeId) => !removedNodeIds.has(nodeId)),
+    edgesById,
+    edgeIds: state.edgeIds.filter((edgeId) => edgesById[edgeId] !== undefined),
+    selectedNodeIds: [],
+    selectedEdgeIds: state.selectedEdgeIds.filter((edgeId) => edgesById[edgeId] !== undefined),
+  };
+};
 
 const toggleSelectedId = (selectedIds: string[], id: string, replace: boolean): string[] => {
   const isSelected = selectedIds.includes(id);
@@ -146,20 +205,8 @@ const selectNodesAndNeighbors = (state: WorkspaceState): string[] => {
 };
 
 export const createWorkspaceState = (workspace: Workspace): WorkspaceState => {
-  const nodesById = Object.fromEntries(
-    workspace.nodes.map((node) => [
-      node.id,
-      {
-        id: node.id,
-        parentId: node.parent?.id,
-        x: node.x,
-        y: node.y,
-        label: node.label,
-        color: node.color,
-        data: node.data,
-      },
-    ])
-  );
+  const nodesById = Object.fromEntries(workspace.nodes.map((node) => [node.id, toNodeState(node)]));
+  const blocklistedNodes = (workspace.blocklistedNodes ?? []) as WorkspaceNode[];
   const edgesById = Object.fromEntries(
     workspace.edges.map((edge) => {
       const id = getEdgeId(edge);
@@ -186,11 +233,27 @@ export const createWorkspaceState = (workspace: Workspace): WorkspaceState => {
     edgeIds: Object.keys(edgesById),
     selectedNodeIds: workspace.selectedNodes.map(({ id }) => id),
     selectedEdgeIds: workspace.getEdgeSelection().map(getEdgeId),
+    blocklistedNodesById: Object.fromEntries(
+      blocklistedNodes.map((node) => [node.id, toNodeState(node)])
+    ),
+    blocklistedNodeIds: blocklistedNodes.map(({ id }) => id),
   };
 };
 
+const toNodeState = (node: WorkspaceNode): WorkspaceNodeState => ({
+  id: node.id,
+  parentId: node.parent?.id,
+  x: node.x,
+  y: node.y,
+  label: node.label,
+  color: node.color,
+  data: node.data,
+});
+
 const getEdgeId = ({ id, source, target }: Workspace['edges'][number]): string =>
   id ?? `${source.id}-${target.id}`;
+
+const topologyActionTypes = new Set([deleteSelectedNodes.type, blocklistSelectedNodes.type]);
 
 const selectionActionTypes = new Set([
   selectAllNodes.type,
@@ -236,6 +299,23 @@ export const registerWorkspaceListeners = (
       }
 
       synchronizeWorkspaceSelection(workspace, listenerApi.getState().workspace);
+      notifyReact();
+    },
+  });
+
+  startListening({
+    predicate: (action) => topologyActionTypes.has(action.type),
+    effect: (action) => {
+      const workspace = getWorkspace();
+      if (!workspace) {
+        return;
+      }
+
+      if (deleteSelectedNodes.match(action)) {
+        workspace.deleteSelection();
+      } else {
+        workspace.blocklistSelection();
+      }
       notifyReact();
     },
   });
