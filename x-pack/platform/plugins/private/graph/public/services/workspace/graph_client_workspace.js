@@ -7,6 +7,7 @@
 
 // Kibana wrapper
 import { getIcon } from '../../helpers/style_choices';
+import { buildExploreControls, buildSearchExploreRequest } from './graph_request_builders';
 
 // Pluggable function to handle the comms with a server. Default impl here is
 // for use outside of Kibana server with direct access to elasticsearch
@@ -429,88 +430,19 @@ function GraphWorkspace(options) {
     if (!fieldsChoice) {
       fieldsChoice = self.options.vertex_fields;
     }
-    let step = {};
-
-    //Add any blocklisted nodes to exclusion list
-    const excludeNodesByField = {};
-    const nots = [];
-    const avoidNodes = this.blocklistedNodes;
-    for (let i = 0; i < avoidNodes.length; i++) {
-      const n = avoidNodes[i];
-      let arr = excludeNodesByField[n.data.field];
-      if (!arr) {
-        arr = [];
-        excludeNodesByField[n.data.field] = arr;
-      }
-      arr.push(n.data.term);
-      //Add to list of must_nots in guiding query
-      const tq = {};
-      tq[n.data.field] = n.data.term;
-      nots.push({
-        term: tq,
-      });
-    }
-
-    const rootStep = step;
-    for (let hopNum = 0; hopNum < numHops; hopNum++) {
-      const arr = [];
-
-      fieldsChoice.forEach(({ name: field, hopSize }) => {
-        const excludes = excludeNodesByField[field];
-        const stepField = {
-          field: field,
-          size: hopSize,
-          min_doc_count: parseInt(self.options.exploreControls.minDocCount),
-        };
-        if (excludes) {
-          stepField.exclude = excludes;
-        }
-        arr.push(stepField);
-      });
-      step.vertices = arr;
-      if (hopNum < numHops - 1) {
-        // if (s < (stepSizes.length - 1)) {
-        const nextStep = {};
-        step.connections = nextStep;
-        step = nextStep;
-      }
-    }
-
-    if (nots.length > 0) {
-      query = {
-        bool: {
-          must: [query],
-          must_not: nots,
-        },
-      };
-    }
-
-    const request = {
-      query: query,
-      controls: self.buildControls(),
-      connections: rootStep.connections,
-      vertices: rootStep.vertices,
-    };
-    self.callElasticsearch(request);
+    self.callElasticsearch(
+      buildSearchExploreRequest({
+        query,
+        fields: fieldsChoice,
+        numHops,
+        blocklistedNodes: self.blocklistedNodes,
+        settings: self.options.exploreControls,
+      })
+    );
   };
 
   this.buildControls = function () {
-    //This is an object managed by the client that may be subject to change
-    const guiSettingsObj = self.options.exploreControls;
-
-    const controls = {
-      use_significance: guiSettingsObj.useSignificance,
-      sample_size: guiSettingsObj.sampleSize,
-      timeout: parseInt(guiSettingsObj.timeoutMillis),
-    };
-    // console.log("guiSettingsObj",guiSettingsObj);
-    if (guiSettingsObj.sampleDiversityField != null) {
-      controls.sample_diversity = {
-        field: guiSettingsObj.sampleDiversityField.name,
-        max_docs_per_value: guiSettingsObj.maxValuesPerDoc,
-      };
-    }
-    return controls;
+    return buildExploreControls(self.options.exploreControls);
   };
 
   this.makeNodeId = function (field, term) {
