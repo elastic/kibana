@@ -55,7 +55,10 @@ const noFindingsClosureSummary = (
     return `Hunt for report ${reportId} found no confirmed hits. Closing: nothing in this environment matched the report at the confirming-index bar.`;
   }
   if (huntStatus === 'partial') {
-    return `Hunt for report ${reportId} found no confirmed hits, but did not cover everything it was asked to, so this is not a clean verdict. The report stays eligible for a later sweep.`;
+    // Deliberately silent on whether the report stays eligible: `partial` covers both a
+    // transient gap that a later sweep retries and a deterministic one that retires the
+    // report, and this summary cannot tell them apart.
+    return `Hunt for report ${reportId} found no confirmed hits, but did not cover everything it was asked to, so this is not a clean verdict.`;
   }
   return `Hunt for report ${reportId} did not run, so nothing was searched and no finding can be reported.`;
 };

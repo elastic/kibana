@@ -139,7 +139,7 @@ components:
       type: string
       enum: [scope_blocked, no_searchable_terms, no_environment_hits, environment_hits_found]
       description: >-
-        Tier 1 raw hunt statuses. The hit/clean collapse for
+        Tier 1 raw hunt statuses. The collapse to hit/clean/incomplete for
         evidence[].last_hunt_status happens in the managed-workflow evidence step.
         `scope_blocked` means no required index existed, so the hunt never ran; it is
         a failed run, never clean.

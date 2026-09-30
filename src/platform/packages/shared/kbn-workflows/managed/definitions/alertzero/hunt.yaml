@@ -207,19 +207,30 @@ steps:
           ctx._source.evidence.add(el);
         }
 
-  # `last_hunt_status` collapses to `hit` | `clean` off the coordinator's
-  # top-level `has_confirmed_hit` (the same collapse the deleted
-  # `write_hunt_feedback.ts` did via `collapseHuntStatus`), not the
-  # coordinator's own three-way `status` enum (`tier1_only` | `tier1_and_tier2`
-  # | `tier2_only_skipped`), which describes which tiers ran, not whether
-  # either found anything. `HuntCoordinatorResult.has_confirmed_hit`'s own doc
-  # comment is explicit: read the top-level field, not `tier1.has_confirmed_hit`
-  # alone (Tier 2 can confirm a hit Tier 1 alone did not). Field names below are
-  # the coordinator's real snake_case wire shape (`hunt_coordinator.ts`), not
-  # the camelCase this step read before (verified live, 2026-09-25: the
-  # mismatch made `completed_successfully` (same bug, this step's own `if`)
-  # and this hit collapse both always resolve nil/false, so no run -- hit or
-  # clean -- ever reached the SSE attach, results message, or evidence write).
+  # `last_hunt_status` collapses to `hit` | `clean` | `incomplete`, not the
+  # coordinator's own `status` enum (`tier1_only` | `tier1_and_tier2` |
+  # `tier2_only_skipped`), which describes which tiers ran rather than whether
+  # either found anything. A hit wins over everything else: Tier 1 confirming a
+  # hit is a finding even if Tier 2 then hit a deterministic gap. Absent a hit
+  # the value turns on `completeness`, because `clean` is a claim about the
+  # environment and only a run that covered what it was asked to can make it.
+  # `completedSuccessfully` -- this step's own `if` -- is true for
+  # `incomplete_final`, since a report is retired when re-running it cannot
+  # cover more, which is not the same as the run having searched; that
+  # function's doc comment tells callers recording an outcome to read
+  # `completeness` instead. Those runs are stamped `incomplete` so a report
+  # whose telemetry was never searched is not read back as clean. This is a
+  # deliberate third value beyond the two the deleted `write_hunt_feedback.ts`
+  # produced via `collapseHuntStatus`.
+  #
+  # `has_confirmed_hit` is read at the top level, not `tier1.has_confirmed_hit`
+  # alone: that field's own doc comment is explicit, because Tier 2 can confirm
+  # a hit Tier 1 did not. Field names below are the coordinator's real
+  # snake_case wire shape (`hunt_coordinator.ts`), not the camelCase this step
+  # read before (verified live, 2026-09-25: the mismatch made
+  # `completed_successfully` and this collapse both always resolve nil/false, so
+  # no run -- hit or clean -- ever reached the SSE attach, results message, or
+  # evidence write).
   - name: resolve_evidence_values
     type: data.set
     if: "${{ steps.run_hunt_coordinator.output.completed_successfully == true }}"
@@ -227,8 +238,10 @@ steps:
       last_hunt_status: |-
         {%- if steps.run_hunt_coordinator.output.has_confirmed_hit == true -%}
         hit
-        {%- else -%}
+        {%- elsif steps.run_hunt_coordinator.output.completeness == "complete" -%}
         clean
+        {%- else -%}
+        incomplete
         {%- endif -%}
       last_hunt_event_hit_count: "${{ steps.run_hunt_coordinator.output.tier1.counts.total_hits | default: null }}"
 
@@ -259,26 +272,36 @@ steps:
   - name: resolve_result_status
     type: data.set
     with:
-      # `success`: the run covered what it was asked to. `partial`: the
-      # coordinator answered but reports `incomplete_retryable` (a tier could not
-      # finish for a transient reason), so findings were written but no hunt
-      # evidence, and the report stays eligible. `failed`: the coordinator call
-      # itself failed or was skipped.
+      # `success` is reserved for `completeness == complete`: the run covered
+      # what it was asked to. Both incomplete kinds report `partial`, because
+      # packaging reads this field to decide whether the absence of a finding is
+      # a verdict about the environment, and neither kind supports that claim --
+      # `incomplete_retryable` left a transient gap and wrote no hunt evidence,
+      # `incomplete_final` left a gap that reproduces, so the report retires
+      # having never been fully searched. Gating on `completed_successfully`
+      # instead would call that second case a success, which is the same
+      # conflation this file avoids when stamping `last_hunt_status`.
+      # `failed`: the coordinator call itself failed or was skipped.
       result_status: |-
-        {%- if steps.run_hunt_coordinator.output.completed_successfully == true -%}
+        {%- if steps.run_hunt_coordinator.output.completeness == "complete" -%}
         success
         {%- elsif steps.run_hunt_coordinator.output != nil -%}
         partial
         {%- else -%}
         failed
         {%- endif -%}
+      # No `else`: a complete run has nothing to explain and renders empty,
+      # which is what the previous shape produced too (it fell through to a nil
+      # `error.message`).
       result_reason: |-
         {%- if inputs.investigationConversationId == nil or inputs.investigationConversationId == empty -%}
         no Investigation available (find_or_create failed upstream; hunt coordinator was not called)
-        {%- elsif steps.run_hunt_coordinator.output != nil and steps.run_hunt_coordinator.output.completed_successfully != true -%}
-        The hunt was {{ steps.run_hunt_coordinator.output.completeness | replace: "_", " but " }} ({{ steps.run_hunt_coordinator.output.message }}), so no hunt evidence was recorded and the report stays eligible for a later sweep.
-        {%- else -%}
+        {%- elsif steps.run_hunt_coordinator.output == nil -%}
         {{ steps.run_hunt_coordinator.error.message }}
+        {%- elsif steps.run_hunt_coordinator.output.completeness == "incomplete_retryable" -%}
+        The hunt was incomplete but retryable ({{ steps.run_hunt_coordinator.output.message }}), so no hunt evidence was recorded and the report stays eligible for a later sweep.
+        {%- elsif steps.run_hunt_coordinator.output.completeness == "incomplete_final" -%}
+        The hunt left a gap a later run could not close ({{ steps.run_hunt_coordinator.output.message }}), so the report is retired without having been fully searched and its evidence is recorded as incomplete rather than clean.
         {%- endif -%}
       result_headline: |-
         {%- if steps.run_hunt_coordinator.output.headline != nil -%}
