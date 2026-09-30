@@ -668,7 +668,10 @@ a run. Do not look for `run.started`. The document summary workflow is
 **Every other strategy** — call `platform.context_engine.save_automation`. The tool confirms the save
 with the user before writing anything. It returns `workflowId`. Save the YAML the subagent returned.
 
-**Running** — running an installed automation is not part of this skill. To run an automation, use `platform.core.execute_workflow` with the `workflowId` returned by the install or save tool, or open the workflow directly in the Workflows app via its URL.
+**Running** — call `platform.context_engine.run_automation` with the `workflowId` returned by the
+install or save tool. It asks the user for confirmation, enables the workflow if it is disabled, and
+returns immediately with `executionId` and `workflowUrl` — the run continues after the call returns.
+Tell the user it has started and that they can ask for a progress update at any time.
 
 ## Corpora larger than 10,000 documents
 

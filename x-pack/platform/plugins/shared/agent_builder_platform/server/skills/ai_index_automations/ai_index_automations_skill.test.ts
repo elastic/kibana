@@ -91,6 +91,7 @@ describe('aiIndexAutomationsSkill', () => {
       `${internalNamespaces.workflows}.workflow_execute_step`,
       contextEngineAutomationTools.installAutomationTemplate,
       contextEngineAutomationTools.saveAutomation,
+      contextEngineAutomationTools.runAutomation,
     ]);
   });
 
