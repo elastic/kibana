@@ -9,7 +9,11 @@ import Boom from '@hapi/boom';
 import type { SavedObjectsClientContract } from '@kbn/core/server';
 import { SavedObjectsErrorHelpers } from '@kbn/core-saved-objects-server';
 import { inject, injectable } from 'inversify';
-import type { FindRuleTemplatesResponse, RuleTemplateResponse } from '@kbn/alerting-v2-schemas';
+import type {
+  FindRuleTemplatesResponse,
+  RuleTemplateResponse,
+  RuleTemplateTagsParams,
+} from '@kbn/alerting-v2-schemas';
 import { RULE_TEMPLATE_SAVED_OBJECT_TYPE } from '../../../common/saved_object_types';
 import { buildSoSearch } from '../build_so_search';
 import { ALERTING_ERROR_CODES, ALERTING_LOG_CODES } from '../errors/error_codes';
@@ -26,6 +30,8 @@ import type {
 } from './types';
 import {
   buildFindRuleTemplatesFilter,
+  buildEngineV2Filter,
+  buildRuleTemplateTagsAggregation,
   mapSortField,
   RULE_TEMPLATE_SEARCH_FIELDS,
   transformRuleTemplateSoAttributesToApiResponse,
@@ -62,7 +68,7 @@ export class RuleTemplatesClient {
       type: RULE_TEMPLATE_SAVED_OBJECT_TYPE,
       page,
       perPage,
-      filter: buildFindRuleTemplatesFilter(params.tags),
+      filter: buildFindRuleTemplatesFilter(params.tags, params.excludedTags),
       sortField: mapSortField(params.sortField),
       sortOrder: params.sortOrder ?? 'asc',
       ...(search
@@ -96,6 +102,21 @@ export class RuleTemplatesClient {
       throw this.ruleTemplateNotFound(id);
     }
     return item;
+  }
+
+  public async getTags({ search }: RuleTemplateTagsParams = {}): Promise<string[]> {
+    const result = await this.savedObjectsClient.find<RuleTemplateSavedObjectAttributes>({
+      type: RULE_TEMPLATE_SAVED_OBJECT_TYPE,
+      perPage: 0,
+      filter: buildEngineV2Filter(),
+      aggs: buildRuleTemplateTagsAggregation(search),
+    });
+
+    const aggregations = result.aggregations as
+      | { tags?: { buckets: Array<{ key: string }> } }
+      | undefined;
+
+    return aggregations?.tags?.buckets.map(({ key }) => key) ?? [];
   }
 
   private async getRuleTemplateSo(id: string) {
