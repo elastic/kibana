@@ -13,18 +13,31 @@ import { EuiButtonIcon, EuiTitle, EuiToolTip, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 
-import { useMenuHeaderStyle } from '../../hooks/use_menu_header_style';
+import {
+  useMenuHeaderStyle,
+  type SecondaryHeaderSpacing,
+} from '../../hooks/use_menu_header_style';
+import { useSecondaryHeaderSpacing } from '../../hooks/use_secondary_header_spacing';
 import { useNestedMenu } from './use_nested_menu';
 
 export interface HeaderProps {
   title?: string;
   'aria-describedby'?: string;
+  /**
+   * Header spacing. Defaults to Navigation's `secondaryHeaderSpacing`, or `standard`.
+   */
+  spacing?: SecondaryHeaderSpacing;
 }
 
-export const Header: FC<HeaderProps> = ({ title, 'aria-describedby': ariaDescribedBy }) => {
+export const Header: FC<HeaderProps> = ({
+  title,
+  'aria-describedby': ariaDescribedBy,
+  spacing: spacingProp,
+}) => {
   const { goBack } = useNestedMenu();
   const { euiTheme } = useEuiTheme();
-  const headerStyle = useMenuHeaderStyle();
+  const spacing = useSecondaryHeaderSpacing(spacingProp);
+  const headerStyle = useMenuHeaderStyle(spacing);
 
   const titleStyle = css`
     align-items: center;

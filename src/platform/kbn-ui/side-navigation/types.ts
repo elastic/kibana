@@ -87,6 +87,11 @@ export interface MenuItem {
    */
   secondaryMenuTitle?: string;
   /**
+   * (optional) Spacing for this item's secondary menu header when its side panel is open.
+   * Defaults to Navigation's `secondaryHeaderSpacing`, or `standard`.
+   */
+  secondaryHeaderSpacing?: 'standard' | 'compact';
+  /**
    * (optional) `data-test-subj` attribute for testing and tracking purposes.
    */
   'data-test-subj'?: string;

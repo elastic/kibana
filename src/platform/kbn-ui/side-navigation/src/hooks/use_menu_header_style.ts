@@ -11,10 +11,20 @@ import { useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 
 /**
+ * Secondary menu header spacing.
+ * `standard` matches the App Header standard inset; line-height aligns the `xs`
+ * title baseline with the app header's `s` title.
+ * `compact` matches the App Header compact layout (48px floor, 8px inset).
+ */
+export type SecondaryHeaderSpacing = 'standard' | 'compact';
+
+/**
  * Menu header rendered above the scrolling menu body, so it stays in view.
  */
-export function useMenuHeaderStyle() {
+export function useMenuHeaderStyle(spacing: SecondaryHeaderSpacing = 'standard') {
   const { euiTheme } = useEuiTheme();
+
+  const isCompact = spacing === 'compact';
 
   return css`
     --border-width: ${euiTheme.border.width.thin};
@@ -22,9 +32,14 @@ export function useMenuHeaderStyle() {
     --horizontal-padding: calc(20px - var(--border-width));
 
     flex-shrink: 0;
-    padding: ${euiTheme.size.base} var(--horizontal-padding) ${euiTheme.size.xxs}
-      var(--horizontal-padding);
+    padding: ${isCompact ? euiTheme.size.s : euiTheme.size.base} var(--horizontal-padding);
     margin: 0 1px;
-    min-height: 42px;
+    min-height: ${isCompact ? '48px' : '64px'};
+    // Optical: secondary titles stay `xs` while App Header standard uses `s`.
+    // 2.25em lowers the `xs` baseline to match the adjacent app-header title.
+    ${!isCompact &&
+    css`
+      line-height: 2.25em;
+    `}
   `;
 }

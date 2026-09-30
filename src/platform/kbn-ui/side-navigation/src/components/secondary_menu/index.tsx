@@ -16,7 +16,11 @@ import type { BadgeType } from '../../../types';
 import { BetaBadge } from '../beta_badge';
 import { SecondaryMenuItemComponent } from './item';
 import { SecondaryMenuSectionComponent } from './section';
-import { useMenuHeaderStyle } from '../../hooks/use_menu_header_style';
+import {
+  useMenuHeaderStyle,
+  type SecondaryHeaderSpacing,
+} from '../../hooks/use_menu_header_style';
+import { useSecondaryHeaderSpacing } from '../../hooks/use_secondary_header_spacing';
 import { scrollLayoutStyles, useScroll } from '../../hooks/use_scroll';
 
 export interface SecondaryMenuProps {
@@ -25,6 +29,10 @@ export interface SecondaryMenuProps {
   footer?: ReactNode;
   isNew?: boolean;
   isPanel?: boolean;
+  /**
+   * Header spacing. Defaults to Navigation's `secondaryHeaderSpacing`, or `standard`.
+   */
+  spacing?: SecondaryHeaderSpacing;
   title: string;
 }
 
@@ -35,9 +43,10 @@ interface SecondaryMenuComponent
 }
 
 const SecondaryMenuBase = forwardRef<HTMLDivElement, SecondaryMenuProps>(
-  ({ badgeType, children, footer, title, isNew = false }, ref) => {
+  ({ badgeType, children, footer, title, isNew = false, spacing: spacingProp }, ref) => {
     const { euiTheme } = useEuiTheme();
-    const headerStyle = useMenuHeaderStyle();
+    const spacing = useSecondaryHeaderSpacing(spacingProp);
+    const headerStyle = useMenuHeaderStyle(spacing);
     const scrollStyles = useScroll(true);
 
     const titleWithBadgeStyles = css`

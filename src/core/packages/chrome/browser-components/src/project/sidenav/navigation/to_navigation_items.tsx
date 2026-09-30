@@ -222,6 +222,7 @@ export const toNavigationItems = (
       sections: secondarySections,
       'data-test-subj': getTestSubj(navNode),
       badgeType: navNode.badgeType,
+      secondaryHeaderSpacing: navNode.secondaryHeaderSpacing,
     } as MenuItem;
   };
 

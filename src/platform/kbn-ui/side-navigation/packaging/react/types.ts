@@ -70,6 +70,11 @@ export interface MenuItem {
   label: string;
   /** Optional override for the secondary menu/panel header title. Defaults to `label` when omitted. */
   secondaryMenuTitle?: string;
+  /**
+   * Spacing for this item's secondary menu header when its side panel is open.
+   * Defaults to Navigation's `secondaryHeaderSpacing`, or `standard`.
+   */
+  secondaryHeaderSpacing?: 'standard' | 'compact';
   /** Optional test selector for automated testing. */
   'data-test-subj'?: string;
   /** Optional badge to display next to the label. */
@@ -113,6 +118,12 @@ export interface NavigationProps {
    * Pass false for hosts that do not sit under a global header.
    */
   showTopSeparator?: boolean;
+  /**
+   * Spacing for secondary menu headers (side panel and popover titles).
+   * `standard` (default) matches the App Header standard inset and baseline;
+   * `compact` matches the App Header compact layout.
+   */
+  secondaryHeaderSpacing?: 'standard' | 'compact';
   /** Content to display inside the side panel footer. */
   sidePanelFooter?: ReactNode;
   /** Optional `data-test-subj` attribute for testing purposes. */

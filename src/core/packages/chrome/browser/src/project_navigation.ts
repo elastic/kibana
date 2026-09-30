@@ -41,7 +41,7 @@ import type { DeepLinkId as ContextEngineLink } from '@kbn/deeplinks-context-eng
 import type { AppId as WorkflowsApp, DeepLinkId as WorkflowsLink } from '@kbn/deeplinks-workflows';
 import type { DeepLinkId as EvalsLink } from '@kbn/deeplinks-evals';
 import type { KibanaProject } from '@kbn/projects-solutions-groups';
-import type { BadgeType } from '@kbn/ui-side-navigation';
+import type { BadgeType, SecondaryHeaderSpacing } from '@kbn/ui-side-navigation';
 
 import type { ChromeNavLink } from './nav_links';
 
@@ -162,6 +162,11 @@ interface NodeDefinitionCommon<LinkId extends AppDeepLinkId, Id extends string> 
    * (optional) The type of badge shown next to the item (e.g. `beta`, `techPreview`, `new`).
    */
   badgeType?: BadgeType;
+  /**
+   * (optional) Spacing for this node's secondary menu header when rendered as a panel opener.
+   * Defaults to `standard`. Use `compact` to match the App Header compact layout.
+   */
+  secondaryHeaderSpacing?: SecondaryHeaderSpacing;
 }
 
 interface ChromeNavigationNodeCommon
