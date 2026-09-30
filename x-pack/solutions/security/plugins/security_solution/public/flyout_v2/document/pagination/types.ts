@@ -10,10 +10,9 @@ import type { FlyoutOrigin } from '../../../common/lib/telemetry';
 
 /**
  * Per-source-instance pagination slice. Each mounted source (alerts table,
- * timeline data table, etc.) owns exactly one slice, keyed by a UUID that
- * it mints at mount time. The shape is intentionally flat and immutable so
- * that `useSyncExternalStore` consumers get a new reference on every
- * mutation and re-render reliably.
+ * timeline data table, etc.) owns exactly one store. The shape is intentionally
+ * flat and immutable so that `useSyncExternalStore` consumers get a new
+ * reference on every mutation and re-render reliably.
  */
 export interface ScopedPaginationSlice {
   /**
@@ -22,24 +21,16 @@ export interface ScopedPaginationSlice {
    * Drives `activePage` of the in-flyout `EuiPagination`.
    */
   readonly flyoutDocumentIndex: number | null;
-  /** Current page size of the response-ops alerts table (alerts table only). */
-  readonly pageSize: number;
   /**
-   * Total number of documents in the source's loaded set. Drives
-   * `pageCount` of the in-flyout `EuiPagination`.
+   * Total number of documents the pager can reach. Drives `pageCount` of the
+   * in-flyout `EuiPagination`. The alerts table clamps this to the Elasticsearch
+   * result window so the control cannot request a page `from`/`size` cannot fetch.
    */
   readonly totalDocumentCount: number;
   /**
-   * `true` while the document at `flyoutDocumentIndex` belongs to a different page
-   * than the table is currently displaying and is being fetched. Consumers
-   * should render a centered loading spinner instead of stale document content.
-   */
-  readonly isFlyoutDocumentLoading: boolean;
-  /**
-   * `true` when the cross-page query resolving the document at `flyoutDocumentIndex`
-   * has errored. `flyoutDocumentId`/`flyoutDocumentIndexName` are left pointing at
-   * whatever was previously displayed in this case, so consumers must check this
-   * flag and render an error rather than the stale document.
+   * `true` when the source could not resolve the document at `flyoutDocumentIndex`.
+   * `flyoutDocumentId` is cleared in that case; consumers render an error instead
+   * of a document.
    */
   readonly hasFlyoutQueryError: boolean;
   /**
@@ -74,9 +65,7 @@ export interface ScopedPaginationSlice {
  */
 export const absentSlice: ScopedPaginationSlice = {
   flyoutDocumentIndex: null,
-  pageSize: 0,
   totalDocumentCount: 0,
-  isFlyoutDocumentLoading: false,
   hasFlyoutQueryError: false,
   flyoutDocumentId: null,
   flyoutDocumentIndexName: null,
@@ -108,10 +97,9 @@ export interface UsePaginatedFlyoutOptions {
   /**
    * Resolves the document at the given absolute index from the source's
    * current in-memory data. Returns slice fields to update, or `null` when the
-   * document is on a different page and is not yet in memory. The hook writes
-   * `flyoutDocumentIndex`
-   * (showing a loading state) and the source's cross-page resolution effect
-   * should call `openPaginatedFlyout` again once the fetch completes.
+   * document is not yet in memory. The hook writes `flyoutDocumentIndex` and
+   * clears the document id, and the source should `setState` the identity once
+   * the row is available.
    *
    * Returns `false` when the index at that position isn't a document at all
    * (e.g. it routes to a different flyout) and the resolver has already
@@ -130,6 +118,12 @@ export interface UsePaginatedFlyoutOptions {
   readonly historyKey: symbol;
   /** Which top-level UI opened the paginated document flyout. */
   readonly origin: FlyoutOrigin;
+  /**
+   * Called when a pagination step cannot resolve a document yet. The alerts table uses this to
+   * retry following that page: an identical index writes nothing to the store, so the table
+   * would otherwise ignore a second request for the same document.
+   */
+  readonly onDocumentPending?: () => void;
   /** Optional callback invoked when the V2 system flyout is closed externally. */
   readonly onClose?: () => void;
 }
@@ -158,7 +152,9 @@ export interface UsePaginatedFlyoutReturn {
   readonly openDocumentFlyout: (documentIndex: number) => void;
   /**
    * Merge a partial update into this source's pagination slice. Routed through
-   * the hook so the source never touches the store directly.
+   * the hook so the source never touches the store directly. A `flyoutDocumentId`
+   * in the update also refreshes the V2 URL, so a document resolved after the
+   * pager has already moved still refreshes and shares as that document.
    */
   readonly setState: (partial: Partial<ScopedPaginationSlice>) => void;
   /**
@@ -180,11 +176,10 @@ export interface UsePaginatedFlyoutReturn {
   /**
    * Soft-reset this source's pagination slice (clear displayed-document
    * fields: `flyoutDocumentIndex`, `flyoutDocumentId`,
-   * `flyoutDocumentIndexName` and `isFlyoutDocumentLoading`) and close any open V2 system
-   * flyout. The slice itself is NOT removed — `openDocumentFlyoutImpl` and
-   * `pageSize` survive so the source can call `openPaginatedFlyout` again
-   * without re-registering. Full slice removal on unmount is auto-handled by
-   * the hook.
+   * `flyoutDocumentIndexName`, and `hasFlyoutQueryError`) and close any open V2
+   * system flyout. The slice itself is NOT removed — `openDocumentFlyoutImpl`
+   * survives so the source can call `openPaginatedFlyout` again without
+   * re-registering. Full slice removal on unmount is auto-handled by the hook.
    */
   readonly closePaginatedFlyout: () => void;
 }

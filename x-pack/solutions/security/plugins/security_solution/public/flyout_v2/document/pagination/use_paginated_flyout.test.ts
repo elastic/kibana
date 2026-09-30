@@ -128,7 +128,6 @@ describe('usePaginatedFlyout', () => {
     expect(result.current.slice.flyoutDocumentIndex).toBeNull();
     expect(result.current.slice.flyoutDocumentId).toBeNull();
     expect(result.current.slice.flyoutDocumentIndexName).toBeNull();
-    expect(result.current.slice.isFlyoutDocumentLoading).toBe(false);
     // totalDocumentCount is source-level state and survives the soft-reset
     expect(result.current.slice.totalDocumentCount).toBe(10);
     // openDocumentFlyoutImpl is still registered (set by the useEffect)
@@ -335,6 +334,49 @@ describe('usePaginatedFlyout', () => {
       });
 
       expect(mockWriteOnOpen).not.toHaveBeenCalled();
+    });
+
+    it('writes the descriptor when the source fills in the id after the pager has moved', () => {
+      const { result } = renderHook(() =>
+        usePaginatedFlyout(makeOptions({ resolveDocument: jest.fn().mockReturnValue(null) }))
+      );
+
+      act(() => {
+        result.current.openPaginatedFlyout(4);
+      });
+      expect(mockWriteOnOpen).not.toHaveBeenCalled();
+
+      act(() => {
+        result.current.setState({
+          flyoutDocumentId: 'alert-9',
+          flyoutDocumentIndexName: 'index-9',
+        });
+      });
+
+      expect(mockWriteOnOpen).toHaveBeenCalledWith({
+        kind: 'document',
+        documentId: 'alert-9',
+        indexName: 'index-9',
+      });
+    });
+
+    it('tells the source the document is still pending, including a repeat of the same index', () => {
+      const onDocumentPending = jest.fn();
+      const { result } = renderHook(() =>
+        usePaginatedFlyout(
+          makeOptions({
+            resolveDocument: jest.fn().mockReturnValue(null),
+            onDocumentPending,
+          })
+        )
+      );
+
+      act(() => {
+        result.current.openPaginatedFlyout(4);
+        result.current.openPaginatedFlyout(4);
+      });
+
+      expect(onDocumentPending).toHaveBeenCalledTimes(2);
     });
 
     it('builds onClose fresh at close time so it reads the latest write generation', () => {

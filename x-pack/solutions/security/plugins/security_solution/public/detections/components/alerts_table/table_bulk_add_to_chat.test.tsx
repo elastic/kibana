@@ -25,7 +25,6 @@ jest.mock('@kbn/response-ops-alerts-table', () => {
     AlertsTable: forwardRef<unknown, ResponseOpsAlertsTableProps>((props, _ref) =>
       mockResponseOpsAlertsTable(props)
     ),
-    alertsTableQueryClient: { mount: jest.fn(), unmount: jest.fn() },
   };
 });
 jest.mock('../../../agent_builder/hooks/use_report_add_to_chat');

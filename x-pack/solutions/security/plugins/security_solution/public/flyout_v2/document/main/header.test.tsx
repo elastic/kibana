@@ -229,24 +229,6 @@ describe('<DocumentHeader />', () => {
     expect(getByTestId('mockNotes')).toHaveAttribute('data-has-open-notes-tab', 'true');
   });
 
-  it('should hide stale alert actions while a paginated document is loading', () => {
-    const store = createPaginationStore();
-    act(() => {
-      store.setState({ flyoutDocumentIndex: 1, totalDocumentCount: 5 });
-    });
-    const { getByTestId, queryByTestId } = renderHeaderWithStore(
-      { hit: alertHit, isDocumentStale: true },
-      store
-    );
-
-    expect(getByTestId('mockHeaderTitle')).toBeInTheDocument();
-    expect(getByTestId(FLYOUT_V2_DOCUMENT_PAGINATION_TEST_ID)).toBeInTheDocument();
-    expect(queryByTestId(ALERT_SUMMARY_PANEL_TEST_ID)).not.toBeInTheDocument();
-    expect(queryByTestId('mockHeaderStatus')).not.toBeInTheDocument();
-    expect(queryByTestId('mockAssignees')).not.toBeInTheDocument();
-    expect(queryByTestId('mockNotes')).not.toBeInTheDocument();
-  });
-
   it('should not render the alert summary blocks for non-alert events', () => {
     const { queryByTestId } = renderHeader({ hit: eventHit });
 
@@ -313,7 +295,7 @@ describe('<DocumentHeader />', () => {
     it('does not render the pagination control when only one document is in the result set', () => {
       const store = createPaginationStore();
       act(() => {
-        store.setState({ flyoutDocumentIndex: 0, pageSize: 50, totalDocumentCount: 1 });
+        store.setState({ flyoutDocumentIndex: 0, totalDocumentCount: 1 });
       });
       const { queryByTestId } = renderHeaderWithStore({ hit: alertHit }, store);
       expect(queryByTestId(FLYOUT_V2_DOCUMENT_PAGINATION_TEST_ID)).not.toBeInTheDocument();
@@ -322,7 +304,7 @@ describe('<DocumentHeader />', () => {
     it('renders the pagination control with page count equal to the total document count', () => {
       const store = createPaginationStore();
       act(() => {
-        store.setState({ flyoutDocumentIndex: 2, pageSize: 50, totalDocumentCount: 1432 });
+        store.setState({ flyoutDocumentIndex: 2, totalDocumentCount: 1432 });
       });
       const { getByTestId } = renderHeaderWithStore({ hit: alertHit }, store);
       const pagination = getByTestId(FLYOUT_V2_DOCUMENT_PAGINATION_TEST_ID);
@@ -337,7 +319,6 @@ describe('<DocumentHeader />', () => {
         store.setState({
           // 2nd document of the 2nd page (page size 50) → absolute index 51.
           flyoutDocumentIndex: 51,
-          pageSize: 50,
           totalDocumentCount: 1432,
         });
       });
@@ -352,7 +333,6 @@ describe('<DocumentHeader />', () => {
       act(() => {
         store.setState({
           flyoutDocumentIndex: 49,
-          pageSize: 50,
           totalDocumentCount: 1432,
           openDocumentFlyoutImpl,
         });
@@ -379,7 +359,7 @@ describe('<DocumentHeader />', () => {
     it('renders the pagination control even on non-alert documents (the source is the source of truth)', () => {
       const store = createPaginationStore();
       act(() => {
-        store.setState({ flyoutDocumentIndex: 1, pageSize: 50, totalDocumentCount: 5 });
+        store.setState({ flyoutDocumentIndex: 1, totalDocumentCount: 5 });
       });
       const { getByTestId } = renderHeaderWithStore({ hit: eventHit }, store);
       expect(getByTestId(FLYOUT_V2_DOCUMENT_PAGINATION_TEST_ID)).toBeInTheDocument();

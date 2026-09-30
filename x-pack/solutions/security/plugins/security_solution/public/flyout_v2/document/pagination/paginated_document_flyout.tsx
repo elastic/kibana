@@ -6,11 +6,20 @@
  */
 
 import React, { memo } from 'react';
-import { EuiCallOut } from '@elastic/eui';
+import {
+  EuiCallOut,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiFlyoutBody,
+  EuiFlyoutHeader,
+  EuiLoadingSpinner,
+} from '@elastic/eui';
+import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import type { CellActionRenderer } from '../../shared/components/cell_actions';
-import { DocumentFlyoutWrapper } from '../main/document_flyout_wrapper';
+import { DocumentPagination } from '../main/components/document_pagination';
 import { FLYOUT_V2_PAGINATION_QUERY_ERROR_TEST_ID } from '../main/components/test_ids';
+import { DocumentFlyoutWrapper } from '../main/document_flyout_wrapper';
 import { useFlyoutPagination } from './use_flyout_pagination';
 
 const QUERY_ERROR = i18n.translate(
@@ -44,22 +53,20 @@ export interface PaginatedDocumentFlyoutProps {
  */
 export const PaginatedDocumentFlyout = memo(
   ({ renderCellActions, onAlertUpdated }: PaginatedDocumentFlyoutProps) => {
-    const {
-      flyoutDocumentId,
-      flyoutDocumentIndexName,
-      isFlyoutDocumentLoading,
-      hasFlyoutQueryError,
-    } = useFlyoutPagination();
+    const { flyoutDocumentId, flyoutDocumentIndexName, flyoutDocumentIndex, hasFlyoutQueryError } =
+      useFlyoutPagination();
 
-    return (
-      <DocumentFlyoutWrapper
-        documentId={flyoutDocumentId ?? undefined}
-        indexName={flyoutDocumentIndexName ?? undefined}
-        renderCellActions={renderCellActions}
-        onAlertUpdated={onAlertUpdated}
-        isPaginationLoading={isFlyoutDocumentLoading}
-        queryErrorCallout={
-          hasFlyoutQueryError ? (
+    if (hasFlyoutQueryError) {
+      return (
+        <>
+          <EuiFlyoutHeader>
+            <EuiFlexGroup justifyContent="flexEnd" gutterSize="none" responsive={false}>
+              <EuiFlexItem grow={false}>
+                <DocumentPagination />
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          </EuiFlyoutHeader>
+          <EuiFlyoutBody>
             <EuiCallOut
               announceOnMount
               color="danger"
@@ -67,8 +74,44 @@ export const PaginatedDocumentFlyout = memo(
               title={QUERY_ERROR}
               data-test-subj={FLYOUT_V2_PAGINATION_QUERY_ERROR_TEST_ID}
             />
-          ) : undefined
-        }
+          </EuiFlyoutBody>
+        </>
+      );
+    }
+
+    // Index is set but the source has not resolved an id yet (the alerts table is
+    // fetching that page). Keep the pager mounted and wait for the id.
+    if (
+      flyoutDocumentIndex != null &&
+      (flyoutDocumentId == null || flyoutDocumentIndexName == null)
+    ) {
+      return (
+        <>
+          <EuiFlyoutHeader>
+            <EuiFlexGroup justifyContent="flexEnd" gutterSize="none" responsive={false}>
+              <EuiFlexItem grow={false}>
+                <DocumentPagination />
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          </EuiFlyoutHeader>
+          <EuiFlexItem
+            css={css`
+              align-items: center;
+              justify-content: center;
+            `}
+          >
+            <EuiLoadingSpinner size="xxl" data-test-subj="document-overview-wrapper-loading" />
+          </EuiFlexItem>
+        </>
+      );
+    }
+
+    return (
+      <DocumentFlyoutWrapper
+        documentId={flyoutDocumentId ?? undefined}
+        indexName={flyoutDocumentIndexName ?? undefined}
+        renderCellActions={renderCellActions}
+        onAlertUpdated={onAlertUpdated}
       />
     );
   }

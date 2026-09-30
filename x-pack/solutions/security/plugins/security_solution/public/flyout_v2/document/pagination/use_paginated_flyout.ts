@@ -34,8 +34,12 @@ const SOFT_RESET: Partial<ScopedPaginationSlice> = {
   flyoutDocumentIndex: null,
   flyoutDocumentId: null,
   flyoutDocumentIndexName: null,
-  isFlyoutDocumentLoading: false,
   hasFlyoutQueryError: false,
+};
+
+const CLEARED_DOCUMENT_IDENTITY: Partial<ScopedPaginationSlice> = {
+  flyoutDocumentId: null,
+  flyoutDocumentIndexName: null,
 };
 
 /**
@@ -54,9 +58,10 @@ const SOFT_RESET: Partial<ScopedPaginationSlice> = {
  * already open:
  * - `openDocumentFlyout` is the *source* entry point (a table row). It starts a fresh
  *   session, replacing anything the user has stacked on top of the flyout.
- * - `openPaginatedFlyout` is the *in-flyout* entry point (the header `EuiPagination`, and
- *   the source's cross-page resolution effect). It swaps the displayed document into the
- *   open overlay.
+ * - `openPaginatedFlyout` is the *in-flyout* entry point (the header `EuiPagination`).
+ *   It swaps the displayed document into the open overlay. When the source does not
+ *   have that row yet, it clears the document id so the flyout waits instead of
+ *   keeping the previous document.
  */
 export const usePaginatedFlyout = ({
   resolveDocument,
@@ -64,6 +69,7 @@ export const usePaginatedFlyout = ({
   historyKey,
   origin,
   onClose,
+  onDocumentPending,
 }: UsePaginatedFlyoutOptions): UsePaginatedFlyoutReturn => {
   // Per-instance store created once at mount. Lives in a ref so it never
   // changes identity and its subscribe/getSnapshot are stable.
@@ -111,6 +117,8 @@ export const usePaginatedFlyout = ({
   // always call the latest version.
   const resolveDocumentRef = useRef(resolveDocument);
   resolveDocumentRef.current = resolveDocument;
+  const onDocumentPendingRef = useRef(onDocumentPending);
+  onDocumentPendingRef.current = onDocumentPending;
 
   // Bundle mutable infra values so the stable `openPaginatedFlyout` never
   // captures a stale closure.
@@ -135,7 +143,16 @@ export const usePaginatedFlyout = ({
 
   const setState = useCallback((partial: Partial<ScopedPaginationSlice>): void => {
     storeRef.current.setState(partial);
-    // storeRef.current is stable
+    // A cross-page step clears the id first and fills it in later through here, once the
+    // source has the row. `openPaginatedFlyout` only writes the URL for ids it already has.
+    if (partial.flyoutDocumentId) {
+      infraRef.current.writeOnOpen({
+        kind: FLYOUT_DESCRIPTOR_KIND.document,
+        documentId: partial.flyoutDocumentId,
+        indexName: partial.flyoutDocumentIndexName ?? '',
+      });
+    }
+    // storeRef.current is stable. writeOnOpen is read through infraRef.
   }, []);
 
   const closePaginatedFlyout = useCallback((): void => {
@@ -158,9 +175,12 @@ export const usePaginatedFlyout = ({
       }
       const stateUpdate = resolved;
 
+      // An unresolved index clears the previous id so the flyout shows its loading
+      // state instead of the document the pager has already left.
       storeRef.current.setState({
         flyoutDocumentIndex: documentIndex,
-        ...(stateUpdate ?? {}),
+        hasFlyoutQueryError: false,
+        ...(stateUpdate ?? CLEARED_DOCUMENT_IDENTITY),
       });
 
       const { writeOnOpen: infraWriteOnOpen } = infraRef.current;
@@ -172,6 +192,10 @@ export const usePaginatedFlyout = ({
           documentId: stateUpdate.flyoutDocumentId,
           indexName: stateUpdate.flyoutDocumentIndexName ?? '',
         });
+      } else {
+        // Same index twice does not change the store, so the source cannot see the retry
+        // from a subscription. Tell it directly.
+        onDocumentPendingRef.current?.();
       }
 
       if (v2OverlayRef.current) return;

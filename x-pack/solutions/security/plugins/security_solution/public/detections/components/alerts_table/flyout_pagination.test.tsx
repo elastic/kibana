@@ -13,7 +13,6 @@ import type {
 } from '@kbn/response-ops-alerts-table/types';
 import { TableId } from '@kbn/securitysolution-data-table';
 import type { Alert } from '@kbn/alerting-types';
-import { useSearchAlertsQuery } from '@kbn/alerts-ui-shared/src/common/hooks/use_search_alerts_query';
 import { TestProviders } from '../../../common/mock';
 import { useOpenFlyout } from '../../../flyout_v2/shared/hooks/use_open_flyout';
 import type { ScopedPaginationSlice } from '../../../flyout_v2/document/pagination/types';
@@ -133,10 +132,6 @@ jest.mock('../../../agent_builder/hooks/use_agent_builder_availability', () => (
   })),
 }));
 
-jest.mock('@kbn/alerts-ui-shared/src/common/hooks/use_search_alerts_query', () => ({
-  useSearchAlertsQuery: jest.fn(() => ({ data: undefined, isFetching: false, isError: false })),
-}));
-
 const mockOpenFlyout = jest.fn().mockReturnValue({ close: jest.fn() });
 jest.mock('../../../flyout_v2/shared/hooks/use_open_flyout', () => ({
   useOpenFlyout: jest.fn(),
@@ -162,11 +157,6 @@ describe('AlertsTable flyout pagination', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     jest.mocked(useOpenFlyout).mockReturnValue(mockOpenFlyout);
-    jest
-      .mocked(useSearchAlertsQuery)
-      .mockReturnValue({ data: undefined, isFetching: false, isError: false } as ReturnType<
-        typeof useSearchAlertsQuery
-      >);
   });
 
   const renderTable = async () => {
@@ -227,55 +217,124 @@ describe('AlertsTable flyout pagination', () => {
       });
 
       // Must not resolve against the stale page-0 `tableContext` (which would incorrectly
-      // resolve to `page0-0`); it must stay on the previous identity until the parallel
-      // cross-page query delivers the real page-1 alert.
-      expect(getSlice().flyoutDocumentId).not.toBe('page0-0');
-      expect(getSlice().flyoutDocumentId).toBe('page0-1');
+      // resolve to `page0-0`). The previous id is cleared until that page's rows arrive.
+      expect(getSlice().flyoutDocumentId).toBeNull();
+      expect(getProps().pageIndex).toBe(1);
     }
   );
 
-  it('clears a stale cross-page query error once pagination returns to the table\u2019s own page', async () => {
+  it('clears a stale cross-page query error once pagination returns to a loaded page', async () => {
+    const page0Alerts = makeAlerts('page0', ALERTS_TABLE_DEFAULT_ITEMS_PER_PAGE);
     const { getProps, getSlice } = await renderTable();
 
     act(() => {
       getProps().onUpdate!(
         makeRenderContext({
           pageIndex: 0,
-          alerts: makeAlerts('page0', ALERTS_TABLE_DEFAULT_ITEMS_PER_PAGE),
+          alerts: page0Alerts,
           alertsCount: ALERTS_TABLE_DEFAULT_ITEMS_PER_PAGE * 2,
+          isLoadingAlerts: false,
         })
       );
     });
-
-    // The parallel query for the flyout's (different) page errors.
-    jest
-      .mocked(useSearchAlertsQuery)
-      .mockReturnValue({ data: undefined, isFetching: false, isError: true } as ReturnType<
-        typeof useSearchAlertsQuery
-      >);
 
     act(() => {
       getProps().additionalContext!.openDocumentFlyout(ALERTS_TABLE_DEFAULT_ITEMS_PER_PAGE);
     });
 
-    await waitFor(() => {
-      expect(getSlice().hasFlyoutQueryError).toBe(true);
+    // The table follows the flyout onto the next page, then that fetch fails to produce a row.
+    act(() => {
+      getProps().onUpdate!(
+        makeRenderContext({
+          pageIndex: 1,
+          alerts: page0Alerts,
+          alertsCount: ALERTS_TABLE_DEFAULT_ITEMS_PER_PAGE * 2,
+          isLoadingAlerts: true,
+        })
+      );
+    });
+    act(() => {
+      getProps().onUpdate!(
+        makeRenderContext({
+          pageIndex: 1,
+          alerts: page0Alerts,
+          alertsCount: ALERTS_TABLE_DEFAULT_ITEMS_PER_PAGE * 2,
+          isLoadingAlerts: false,
+        })
+      );
     });
 
-    // Back to a query that would succeed, and the user pages the in-flyout pagination back to
-    // the table's own (already loaded) page.
-    jest
-      .mocked(useSearchAlertsQuery)
-      .mockReturnValue({ data: undefined, isFetching: false, isError: false } as ReturnType<
-        typeof useSearchAlertsQuery
-      >);
+    expect(getSlice().hasFlyoutQueryError).toBe(true);
+    expect(getSlice().flyoutDocumentId).toBeNull();
 
     act(() => {
       getProps().additionalContext!.openDocumentFlyout(2);
     });
 
+    expect(getSlice().hasFlyoutQueryError).toBe(false);
+
+    act(() => {
+      getProps().onUpdate!(
+        makeRenderContext({
+          pageIndex: 0,
+          alerts: [...page0Alerts],
+          alertsCount: ALERTS_TABLE_DEFAULT_ITEMS_PER_PAGE * 2,
+          isLoadingAlerts: false,
+        })
+      );
+    });
+
     await waitFor(() => {
-      expect(getSlice().hasFlyoutQueryError).toBe(false);
+      expect(getSlice().flyoutDocumentId).toBe('page0-2');
+    });
+  });
+
+  it('follows the flyout again when the same document is requested after the table moved away', async () => {
+    const pageSize = ALERTS_TABLE_DEFAULT_ITEMS_PER_PAGE;
+    const page0Alerts = makeAlerts('page0', pageSize);
+    const page1Alerts = makeAlerts('page1', pageSize);
+    const { getProps, getSlice } = await renderTable();
+
+    act(() => {
+      getProps().onUpdate!(
+        makeRenderContext({
+          pageIndex: 0,
+          alerts: page0Alerts,
+          alertsCount: pageSize * 2,
+          isLoadingAlerts: false,
+        })
+      );
+    });
+
+    act(() => {
+      getProps().additionalContext!.openDocumentFlyout(pageSize);
+    });
+    expect(getSlice().flyoutDocumentId).toBeNull();
+    expect(getProps().pageIndex).toBe(1);
+
+    act(() => {
+      getProps().onPageIndexChange!(0);
+    });
+    expect(getProps().pageIndex).toBe(0);
+
+    act(() => {
+      getProps().additionalContext!.openDocumentFlyout(pageSize);
+    });
+    expect(getProps().pageIndex).toBe(1);
+
+    act(() => {
+      getProps().onUpdate!(
+        makeRenderContext({
+          pageIndex: 1,
+          alerts: page1Alerts,
+          alertsCount: pageSize * 2,
+          isLoadingAlerts: false,
+        })
+      );
+    });
+
+    await waitFor(() => {
+      expect(getSlice().flyoutDocumentId).toBe('page1-0');
     });
   });
 });

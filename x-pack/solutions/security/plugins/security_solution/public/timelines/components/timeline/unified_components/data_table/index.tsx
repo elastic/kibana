@@ -211,12 +211,10 @@ export const TimelineDataTableComponent: React.FC<DataTableProps> = memo(
     // instance once the hook below has returned it.
     const closePaginatedFlyoutRef = useRef<() => void>(() => {});
 
-    // Resolves the identity of the document at an absolute row index (0-based
-    // across the full result set) from the currently-loaded rows. Returns null
-    // when the row is not in memory — the parallel cross-page query will resolve
-    // it and call openPaginatedFlyout again once the data is available. The
-    // flyout fetches the document itself from `_id`/`_index`, as it did before
-    // pagination was introduced.
+    // Resolves the identity of the document at an absolute row index from the
+    // rows Timeline currently has loaded. The pager's count is that loaded set,
+    // so an index outside it is not reachable. The flyout fetches the document
+    // itself from `_id`/`_index`.
     //
     // Attack-discovery rows are routed to the attack flyout instead, mirroring the direct-click
     // branch in `handleOnEventDetailPanelOpened` below: they have no document identity this

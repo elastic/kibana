@@ -7,7 +7,7 @@
 
 import type { FC } from 'react';
 import React, { memo, useMemo } from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiPagination, EuiSpacer } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { DataTableRecord } from '@kbn/discover-utils';
 import { getFieldValue } from '@kbn/discover-utils';
@@ -32,20 +32,12 @@ import { ShareUrlIconButton } from '../../shared/components/share_url_icon_butto
 import { FlyoutHeaderActions } from '../../shared/components/flyout_header_actions';
 import { useGetFlyoutLink } from '../../../flyout/document_details/right/hooks/use_get_flyout_link';
 import { isRulePreviewDocument } from '../../shared/utils/is_rule_preview_document';
-import { useFlyoutPagination } from '../pagination/use_flyout_pagination';
-import { FLYOUT_V2_DOCUMENT_PAGINATION_TEST_ID } from './components/test_ids';
+import { DocumentPagination, useShowDocumentPagination } from './components/document_pagination';
 
 const SHARE_ALERT_LABEL = i18n.translate(
   'xpack.securitySolution.flyoutV2.document.header.shareAlertLabel',
   {
     defaultMessage: 'Copy link to alert',
-  }
-);
-
-const PAGINATION_ARIA_LABEL = i18n.translate(
-  'xpack.securitySolution.flyoutV2.document.header.paginationAriaLabel',
-  {
-    defaultMessage: 'Navigate between documents',
   }
 );
 
@@ -66,12 +58,6 @@ export interface HeaderProps {
    * Callback that opens the notes details view.
    */
   onShowNotes: () => void;
-  /**
-   * `true` when the rendered hit is no longer the document the flyout is showing — pagination is
-   * still fetching the next one, or the requested one could not be resolved. The hit is kept around
-   * only to preserve non-mutating header context, so alert actions that would mutate it are hidden.
-   */
-  isDocumentStale?: boolean;
 }
 
 /**
@@ -80,13 +66,7 @@ export interface HeaderProps {
  * and alert-only summary blocks (status, risk score assignees, and notes).
  */
 export const Header: FC<HeaderProps> = memo(
-  ({
-    hit,
-    renderCellActions = noopCellActionRenderer,
-    onAlertUpdated,
-    onShowNotes,
-    isDocumentStale = false,
-  }) => {
+  ({ hit, renderCellActions = noopCellActionRenderer, onAlertUpdated, onShowNotes }) => {
     const canReadRules = useUserPrivileges().rulesPrivileges.rules.read;
     const isAlert = useMemo(
       () => (getFieldValue(hit, EVENT_KIND) as string) === EventKind.signal,
@@ -100,9 +80,7 @@ export const Header: FC<HeaderProps> = memo(
       timestamp: String(hit.flattened?.['@timestamp'] ?? ''),
     });
 
-    const { flyoutDocumentIndex, totalDocumentCount, openDocumentFlyout } = useFlyoutPagination();
-    const showPagination =
-      totalDocumentCount > 1 && flyoutDocumentIndex != null && flyoutDocumentIndex >= 0;
+    const showPagination = useShowDocumentPagination();
 
     return (
       <>
@@ -125,14 +103,7 @@ export const Header: FC<HeaderProps> = memo(
           </EuiFlexItem>
           {showPagination && (
             <EuiFlexItem grow={false}>
-              <EuiPagination
-                aria-label={PAGINATION_ARIA_LABEL}
-                pageCount={totalDocumentCount}
-                activePage={flyoutDocumentIndex}
-                onPageClick={openDocumentFlyout}
-                compressed
-                data-test-subj={FLYOUT_V2_DOCUMENT_PAGINATION_TEST_ID}
-              />
+              <DocumentPagination />
             </EuiFlexItem>
           )}
         </EuiFlexGroup>
@@ -141,7 +112,7 @@ export const Header: FC<HeaderProps> = memo(
           <EuiSpacer size="xs" />
         </Timestamp>
         <Title hit={hit} hideLink={!canReadRules || isRulePreview} />
-        {isAlert && !isDocumentStale && (
+        {isAlert && (
           <>
             <EuiSpacer size="m" />
             <EuiFlexGroup

@@ -6,39 +6,38 @@
  */
 
 import React from 'react';
-import type { ReactNode } from 'react';
 import { render } from '@testing-library/react';
 import type { DataTableRecord } from '@kbn/discover-utils';
 import { ElasticRequestState } from '@kbn/unified-doc-viewer';
 import { useEsDocSearch } from '@kbn/unified-doc-viewer-plugin/public';
 import { useDataView } from '../../../data_view_manager/hooks/use_data_view';
 import { useAlertsPrivileges } from '../../../detections/containers/detection_engine/alerts/use_alerts_privileges';
+import { useTimelineEventsDetails } from '../../../timelines/containers/details';
 import { TestProviders } from '../../../common/mock';
 import { DocumentFlyoutWrapper } from './document_flyout_wrapper';
 
 jest.mock('@kbn/unified-doc-viewer-plugin/public');
 jest.mock('../../../data_view_manager/hooks/use_data_view');
 jest.mock('../../../detections/containers/detection_engine/alerts/use_alerts_privileges');
+jest.mock('../../../timelines/containers/details', () => ({
+  useTimelineEventsDetails: jest.fn(() => [false, null, undefined, null, jest.fn()]),
+}));
 
 interface MockDocumentFlyoutProps {
   hit?: DataTableRecord;
   dataTestSubj?: string;
   onAlertUpdated: () => void;
-  isPaginationLoading?: boolean;
-  unavailableDocumentCallout?: ReactNode;
 }
 
-// The stub renders `unavailableDocumentCallout` so tests can assert that the not-found/error
-// state lands inside the mounted flyout body rather than replacing the whole panel.
 const mockDocumentFlyout = jest.fn((props: MockDocumentFlyoutProps) => (
-  <div data-test-subj="documentFlyoutStub">{props.unavailableDocumentCallout}</div>
+  <div data-test-subj="documentFlyoutStub" />
 ));
 jest.mock('.', () => ({
   DocumentFlyout: (props: MockDocumentFlyoutProps) => mockDocumentFlyout(props),
 }));
 
-// `_id` matters: the wrapper tells "still resolving the next document" from "showing the
-// requested one" by comparing the rendered hit's `_id` and `_index` with the requested document's.
+// `_id` and `_index` matter: `useResolvedDocument` tells "still resolving the next document"
+// from "showing the requested one" by comparing the hit with the requested document.
 const createHit = (
   id: string,
   eventKind: string = 'event',
@@ -82,6 +81,13 @@ describe('DocumentFlyoutWrapper', () => {
       dataView: mockDataView,
     });
     (useEsDocSearch as jest.Mock).mockReturnValue([ElasticRequestState.Loading, null, jest.fn()]);
+    (useTimelineEventsDetails as jest.Mock).mockReturnValue([
+      false,
+      null,
+      undefined,
+      null,
+      jest.fn(),
+    ]);
     (useAlertsPrivileges as jest.Mock).mockReturnValue({ hasAlertsRead: true, loading: false });
   });
 
@@ -171,6 +177,35 @@ describe('DocumentFlyoutWrapper', () => {
     expect(refetchDocument).toHaveBeenCalledTimes(1);
   });
 
+  it('renders a document found by index name when the pinned _index search misses', () => {
+    (useEsDocSearch as jest.Mock).mockReturnValue([ElasticRequestState.NotFound, null, jest.fn()]);
+    (useTimelineEventsDetails as jest.Mock).mockReturnValue([
+      false,
+      null,
+      {
+        _id: 'doc-id',
+        _index: '.ds-logs-gcp.audit-default-000001',
+        _source: { event: { kind: 'event' } },
+      },
+      null,
+      jest.fn(),
+    ]);
+
+    const { getByTestId, queryByTestId } = renderDocumentFlyoutWrapper({
+      indexName: 'logs-gcp.audit-default',
+    });
+
+    expect(queryByTestId('document-overview-wrapper-not-found')).not.toBeInTheDocument();
+    expect(getByTestId('documentFlyoutStub')).toBeInTheDocument();
+    expect(mockDocumentFlyout).toHaveBeenCalledWith(
+      expect.objectContaining({
+        hit: expect.objectContaining({
+          raw: expect.objectContaining({ _index: '.ds-logs-gcp.audit-default-000001' }),
+        }),
+      })
+    );
+  });
+
   it('renders a standalone not-found state when no document has ever resolved', () => {
     (useEsDocSearch as jest.Mock).mockReturnValue([ElasticRequestState.NotFound, null, jest.fn()]);
 
@@ -240,22 +275,16 @@ describe('DocumentFlyoutWrapper', () => {
     expect(queryByTestId('document-overview-wrapper-not-found')).not.toBeInTheDocument();
   });
 
-  it('keeps the previously resolved document mounted while a new one is loading', () => {
+  it('shows a loading state instead of the previous document while the next one is fetched', () => {
     const firstHit = createHit('doc-id');
     (useEsDocSearch as jest.Mock).mockReturnValue([ElasticRequestState.Found, firstHit, jest.fn()]);
 
     const { rerender, getByTestId, queryByTestId } = renderDocumentFlyoutWrapper();
 
     expect(getByTestId('documentFlyoutStub')).toBeInTheDocument();
-    expect(mockDocumentFlyout).toHaveBeenLastCalledWith(
-      expect.objectContaining({ hit: firstHit, isPaginationLoading: false })
-    );
 
-    // `useEsDocSearch` doesn't report `Loading` again while it fetches the newly requested
-    // document: it keeps returning `Found` with the document it resolved last. The flyout must
-    // stay mounted (so the header keeps its pagination controls) but be told that what it renders
-    // is no longer the requested document, otherwise the previous one stays fully rendered while
-    // the pagination control already points at the new position.
+    // `useEsDocSearch` keeps returning `Found` with the previous hit until the newly
+    // requested id arrives. That hit must not stay on screen once the pager has moved on.
     rerender(
       <TestProviders>
         <DocumentFlyoutWrapper
@@ -267,22 +296,17 @@ describe('DocumentFlyoutWrapper', () => {
       </TestProviders>
     );
 
-    expect(queryByTestId('document-overview-wrapper-loading')).not.toBeInTheDocument();
-    expect(getByTestId('documentFlyoutStub')).toBeInTheDocument();
-    expect(mockDocumentFlyout).toHaveBeenLastCalledWith(
-      expect.objectContaining({ hit: firstHit, isPaginationLoading: true })
-    );
+    expect(getByTestId('document-overview-wrapper-loading')).toBeInTheDocument();
+    expect(queryByTestId('documentFlyoutStub')).not.toBeInTheDocument();
   });
 
-  it('keeps reporting pagination loading when a stale hit shares `_id` with the next document but lives in a different index', () => {
+  it('shows a loading state when a stale hit shares `_id` with the next document but lives in a different index', () => {
     const firstHit = createHit('doc-id');
     (useEsDocSearch as jest.Mock).mockReturnValue([ElasticRequestState.Found, firstHit, jest.fn()]);
 
-    const { rerender, getByTestId } = renderDocumentFlyoutWrapper();
+    const { rerender, getByTestId, queryByTestId } = renderDocumentFlyoutWrapper();
 
-    expect(mockDocumentFlyout).toHaveBeenLastCalledWith(
-      expect.objectContaining({ hit: firstHit, isPaginationLoading: false })
-    );
+    expect(getByTestId('documentFlyoutStub')).toBeInTheDocument();
 
     // `useEsDocSearch` still returns `firstHit` (same `_id`, different index) while it fetches
     // the newly requested document from `other-index`. Without comparing `_index` too, this would
@@ -298,17 +322,15 @@ describe('DocumentFlyoutWrapper', () => {
       </TestProviders>
     );
 
-    expect(getByTestId('documentFlyoutStub')).toBeInTheDocument();
-    expect(mockDocumentFlyout).toHaveBeenLastCalledWith(
-      expect.objectContaining({ hit: firstHit, isPaginationLoading: true })
-    );
+    expect(getByTestId('document-overview-wrapper-loading')).toBeInTheDocument();
+    expect(queryByTestId('documentFlyoutStub')).not.toBeInTheDocument();
   });
 
-  it('does not report loading while the current document is refetched after a mutation', () => {
+  it('keeps the current document mounted while it is refetched after a mutation', () => {
     const hit = createHit('doc-id');
     (useEsDocSearch as jest.Mock).mockReturnValue([ElasticRequestState.Found, hit, jest.fn()]);
 
-    const { rerender } = renderDocumentFlyoutWrapper();
+    const { rerender, getByTestId } = renderDocumentFlyoutWrapper();
 
     rerender(
       <TestProviders>
@@ -321,54 +343,37 @@ describe('DocumentFlyoutWrapper', () => {
       </TestProviders>
     );
 
-    expect(mockDocumentFlyout).toHaveBeenLastCalledWith(
-      expect.objectContaining({ hit, isPaginationLoading: false })
-    );
+    expect(getByTestId('documentFlyoutStub')).toBeInTheDocument();
+    expect(mockDocumentFlyout).toHaveBeenLastCalledWith(expect.objectContaining({ hit }));
   });
 
   it.each([
     [ElasticRequestState.NotFound, 'document-overview-wrapper-not-found'],
     [ElasticRequestState.Error, 'document-overview-fetch-error'],
-  ])(
-    'keeps the previously resolved document mounted and moves the %s state into its body',
-    (requestState, calloutTestSubj) => {
-      const firstHit = createHit('doc-id');
-      (useEsDocSearch as jest.Mock).mockReturnValue([
-        ElasticRequestState.Found,
-        firstHit,
-        jest.fn(),
-      ]);
+  ])('replaces the previous document with the %s state', (requestState, calloutTestSubj) => {
+    const firstHit = createHit('doc-id');
+    (useEsDocSearch as jest.Mock).mockReturnValue([ElasticRequestState.Found, firstHit, jest.fn()]);
 
-      const { rerender, getByTestId } = renderDocumentFlyoutWrapper();
+    const { rerender, getByTestId, queryByTestId } = renderDocumentFlyoutWrapper();
 
-      expect(getByTestId('documentFlyoutStub')).toBeInTheDocument();
+    expect(getByTestId('documentFlyoutStub')).toBeInTheDocument();
 
-      // Paginating onto a document that no longer resolves (deleted, or moved out of its index)
-      // must not replace the whole panel: the header — and with it the pagination controls the
-      // user needs to step back — stays mounted around the last document that did resolve.
-      (useEsDocSearch as jest.Mock).mockReturnValue([requestState, null, jest.fn()]);
+    (useEsDocSearch as jest.Mock).mockReturnValue([requestState, null, jest.fn()]);
 
-      rerender(
-        <TestProviders>
-          <DocumentFlyoutWrapper
-            documentId="deleted-doc-id"
-            indexName="my-index"
-            renderCellActions={jest.fn()}
-            onAlertUpdated={jest.fn()}
-          />
-        </TestProviders>
-      );
+    rerender(
+      <TestProviders>
+        <DocumentFlyoutWrapper
+          documentId="deleted-doc-id"
+          indexName="my-index"
+          renderCellActions={jest.fn()}
+          onAlertUpdated={jest.fn()}
+        />
+      </TestProviders>
+    );
 
-      expect(getByTestId('documentFlyoutStub')).toBeInTheDocument();
-      expect(getByTestId(calloutTestSubj)).toBeInTheDocument();
-      expect(mockDocumentFlyout).toHaveBeenLastCalledWith(
-        expect.objectContaining({
-          hit: firstHit,
-          unavailableDocumentCallout: expect.anything(),
-        })
-      );
-    }
-  );
+    expect(queryByTestId('documentFlyoutStub')).not.toBeInTheDocument();
+    expect(getByTestId(calloutTestSubj)).toBeInTheDocument();
+  });
 
   it('renders the cold loading state when no document has been resolved yet', () => {
     (useEsDocSearch as jest.Mock).mockReturnValue([ElasticRequestState.Loading, null, jest.fn()]);

@@ -9,10 +9,6 @@ import { PREFIX } from '../../../../flyout/shared/test_ids';
 
 export const FLYOUT_MISSING_ALERTS_PRIVILEGE_TEST_ID = `${PREFIX}MissingAlertsPrivilege` as const;
 
-/* Flyout-level loading state shown while in-flyout pagination is fetching a
- * cross-page alert. */
-export const FLYOUT_V2_LOADING_SPINNER_TEST_ID = `${PREFIX}V2LoadingSpinner` as const;
-
 /* In-flyout EuiPagination that walks the source's document result set. */
 export const FLYOUT_V2_DOCUMENT_PAGINATION_TEST_ID = `${PREFIX}V2DocumentPagination` as const;
 

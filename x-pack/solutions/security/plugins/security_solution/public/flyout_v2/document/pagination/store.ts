@@ -30,6 +30,10 @@ export const createPaginationStore = (): PaginationStore => {
   const getSnapshot = (): ScopedPaginationSlice => state;
 
   const setState = (partial: Partial<ScopedPaginationSlice>): void => {
+    const changed = (Object.keys(partial) as Array<keyof ScopedPaginationSlice>).some(
+      (key) => partial[key] !== state[key]
+    );
+    if (!changed) return;
     state = { ...state, ...partial };
     listeners.forEach((l) => l());
   };

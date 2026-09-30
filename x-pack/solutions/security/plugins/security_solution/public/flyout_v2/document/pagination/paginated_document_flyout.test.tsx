@@ -46,12 +46,11 @@ describe('PaginatedDocumentFlyout', () => {
       expect.objectContaining({
         documentId: 'alert-1',
         indexName: 'index-1',
-        isPaginationLoading: false,
       })
     );
   });
 
-  it('keeps the previously displayed document while a cross-page document is loading', () => {
+  it('shows a loading state instead of the previous document while the next id is unresolved', () => {
     const store = createPaginationStore();
     act(() => {
       store.setState({
@@ -61,19 +60,18 @@ describe('PaginatedDocumentFlyout', () => {
       });
     });
 
-    renderWithStore(store);
+    const { getByTestId, queryByTestId } = renderWithStore(store);
 
     act(() => {
-      store.setState({ flyoutDocumentIndex: 60, isFlyoutDocumentLoading: true });
+      store.setState({
+        flyoutDocumentIndex: 60,
+        flyoutDocumentId: null,
+        flyoutDocumentIndexName: null,
+      });
     });
 
-    expect(mockDocumentFlyoutWrapper).toHaveBeenLastCalledWith(
-      expect.objectContaining({
-        documentId: 'alert-1',
-        indexName: 'index-1',
-        isPaginationLoading: true,
-      })
-    );
+    expect(getByTestId('document-overview-wrapper-loading')).toBeInTheDocument();
+    expect(queryByTestId('documentFlyoutWrapperStub')).not.toBeInTheDocument();
   });
 
   it('passes no document when the slice is empty', () => {
@@ -84,7 +82,7 @@ describe('PaginatedDocumentFlyout', () => {
     );
   });
 
-  it('keeps the flyout mounted and passes an error callout when the cross-page query errors', () => {
+  it('renders an error instead of the previously displayed document when the cross-page query errors', () => {
     const store = createPaginationStore();
     act(() => {
       store.setState({
@@ -94,19 +92,13 @@ describe('PaginatedDocumentFlyout', () => {
       });
     });
 
-    const { getByTestId } = renderWithStore(store);
+    const { getByTestId, queryByTestId } = renderWithStore(store);
 
     act(() => {
       store.setState({ flyoutDocumentIndex: 60, hasFlyoutQueryError: true });
     });
 
-    expect(getByTestId('documentFlyoutWrapperStub')).toBeInTheDocument();
-    expect(mockDocumentFlyoutWrapper).toHaveBeenLastCalledWith(
-      expect.objectContaining({
-        documentId: 'alert-1',
-        indexName: 'index-1',
-        queryErrorCallout: expect.anything(),
-      })
-    );
+    expect(getByTestId('securitySolutionFlyoutV2PaginationQueryError')).toBeInTheDocument();
+    expect(queryByTestId('documentFlyoutWrapperStub')).not.toBeInTheDocument();
   });
 });

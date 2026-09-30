@@ -6,22 +6,27 @@
  */
 
 import React, { memo, useCallback, useMemo } from 'react';
-import type { ReactNode } from 'react';
+import {
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiFlyoutBody,
+  EuiFlyoutHeader,
+  EuiLoadingSpinner,
+} from '@elastic/eui';
+import { css } from '@emotion/react';
 import { KbnDangerCallout } from '@kbn/ui-callout';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { ElasticRequestState } from '@kbn/unified-doc-viewer';
 import { getFieldValue } from '@kbn/discover-utils';
 import { EVENT_KIND } from '@kbn/rule-data-utils';
 import type { CellActionRenderer } from '../../shared/components/cell_actions';
 import { useAlertsPrivileges } from '../../../detections/containers/detection_engine/alerts/use_alerts_privileges';
-import { FlyoutLoading } from '../../shared/components/flyout_loading';
+import { useResolvedDocument } from './hooks/use_resolved_document';
 import { FlyoutMissingAlertsPrivilege } from './components/flyout_missing_alerts_privilege';
-import { DocumentUnavailableCallout } from './components/document_unavailable_callout';
+import { DocumentPagination, useShowDocumentPagination } from './components/document_pagination';
 import { DataViewDegradedCallout } from '../../../data_view_manager/components/data_view_degraded_callout';
 import { PageScope } from '../../../data_view_manager/constants';
 import { useDataView } from '../../../data_view_manager/hooks/use_data_view';
-import { useResolvedDocument } from './hooks/use_resolved_document';
 import { EventKind } from './constants/event_kinds';
 import { DocumentFlyout } from '.';
 
@@ -29,6 +34,20 @@ const DATA_VIEW_ERROR = i18n.translate(
   'xpack.securitySolution.flyout.document.overviewWrapper.dataViewError',
   {
     defaultMessage: 'Unable to retrieve the data view for analyzer.',
+  }
+);
+
+const DOCUMENT_NOT_FOUND = i18n.translate(
+  'xpack.securitySolution.flyout.document.overviewWrapper.documentNotFound',
+  {
+    defaultMessage: 'Cannot find document. No documents match that ID.',
+  }
+);
+
+const FETCH_ERROR = i18n.translate(
+  'xpack.securitySolution.flyout.document.overviewWrapper.fetchError',
+  {
+    defaultMessage: 'Unable to fetch document details.',
   }
 );
 
@@ -53,19 +72,6 @@ export interface DocumentFlyoutWrapperProps {
    * Optional test subject forwarded to the document flyout header without adding a layout wrapper.
    */
   dataTestSubj?: string;
-  /**
-   * `true` while in-flyout pagination is still resolving which document to show (e.g. it navigated
-   * to a page the source hasn't loaded yet). Forwarded to `DocumentFlyout` so the previously
-   * displayed document stays mounted behind a spinner instead of unmounting the whole flyout.
-   */
-  isPaginationLoading?: boolean;
-  /**
-   * Callout to show when the pagination source's own cross-page query (the one that resolves
-   * which document to show next) failed. Takes priority over the resolved document's body so the
-   * error replaces the content while the previously resolved document's header and pagination
-   * controls stay mounted.
-   */
-  queryErrorCallout?: ReactNode;
 }
 
 /**
@@ -80,51 +86,49 @@ export const DocumentFlyoutWrapper = memo(
     renderCellActions,
     onAlertUpdated,
     dataTestSubj,
-    isPaginationLoading,
-    queryErrorCallout,
   }: DocumentFlyoutWrapperProps) => {
-    const { dataView, status } = useDataView(PageScope.default);
+    const { dataView, status: dataViewStatus } = useDataView(PageScope.default);
+    const showPagination = useShowDocumentPagination();
 
-    const isDataViewLoading = status === 'loading' || status === 'pristine';
-    const isDataViewInvalid = status === 'error';
-    const isDataViewDegraded = status === 'ready' && !dataView.hasMatchedIndices();
-
+    const isDataViewLoading = dataViewStatus === 'loading' || dataViewStatus === 'pristine';
+    const isDataViewInvalid = dataViewStatus === 'error';
+    const isDataViewDegraded = dataViewStatus === 'ready' && !dataView.hasMatchedIndices();
     const shouldSkipSearch = useMemo(
       () => isDataViewLoading || isDataViewInvalid || !documentId || !indexName || !dataView,
       [dataView, documentId, indexName, isDataViewInvalid, isDataViewLoading]
     );
 
-    const { requestState, displayedHit, isResolving, isReloading, refetchDocument } =
-      useResolvedDocument({
-        documentId,
-        indexName,
-        dataView,
-        skip: shouldSkipSearch,
-      });
+    const { status, hit, refetch } = useResolvedDocument({
+      documentId,
+      indexName,
+      dataView,
+      skip: shouldSkipSearch,
+    });
 
     const handleAlertUpdated = useCallback(() => {
       onAlertUpdated();
-      refetchDocument();
-    }, [onAlertUpdated, refetchDocument]);
+      refetch();
+    }, [onAlertUpdated, refetch]);
 
     const isAlert = useMemo(
-      () =>
-        displayedHit && (getFieldValue(displayedHit, EVENT_KIND) as string) === EventKind.signal,
-      [displayedHit]
+      () => status === 'found' && (getFieldValue(hit, EVENT_KIND) as string) === EventKind.signal,
+      [hit, status]
     );
 
     const { hasAlertsRead, loading: isAlertsPrivilegesLoading } = useAlertsPrivileges();
     const missingAlertsPrivilege = isAlert && !isAlertsPrivilegesLoading && !hasAlertsRead;
 
-    // Only drop to the bare loading state on a cold load. Once a document has been
-    // resolved, `isReloading` keeps the flyout mounted and lets the body render its own
-    // spinner, so paginating doesn't tear down the header.
     if (
       isDataViewLoading ||
       (isAlert && isAlertsPrivilegesLoading) ||
-      (isResolving && !isReloading)
+      (!shouldSkipSearch && status === 'loading')
     ) {
-      return <FlyoutLoading data-test-subj="document-overview-wrapper-loading" />;
+      return (
+        <LoadingState
+          showPagination={showPagination}
+          data-test-subj="document-overview-wrapper-loading"
+        />
+      );
     }
 
     if (missingAlertsPrivilege) {
@@ -141,7 +145,7 @@ export const DocumentFlyoutWrapper = memo(
       );
     }
 
-    if ((requestState === ElasticRequestState.Found || isReloading) && displayedHit) {
+    if (status === 'found') {
       return (
         <>
           {isDataViewDegraded && (
@@ -157,38 +161,27 @@ export const DocumentFlyoutWrapper = memo(
             </DataViewDegradedCallout>
           )}
           <DocumentFlyout
-            hit={displayedHit}
+            hit={hit}
             renderCellActions={renderCellActions}
             onAlertUpdated={handleAlertUpdated}
             dataTestSubj={dataTestSubj}
-            isPaginationLoading={isPaginationLoading || isReloading}
-            unavailableDocumentCallout={queryErrorCallout}
           />
         </>
       );
     }
 
-    const isDocumentUnavailable =
-      requestState === ElasticRequestState.NotFound || requestState === ElasticRequestState.Error;
-
-    if (isDocumentUnavailable) {
-      // Paginating onto a document that no longer resolves (deleted, or moved out of its index)
-      // must not take the whole panel down with it: keep the last document that did resolve
-      // mounted so the header's pagination controls survive, and surface the failure in the body
-      // instead. Without a previous document there is nothing to keep mounted, so the callout
-      // stands alone.
-      if (!displayedHit) {
-        return <DocumentUnavailableCallout requestState={requestState} />;
-      }
-
+    if (status === 'notFound' || status === 'error') {
+      const isNotFound = status === 'notFound';
       return (
-        <DocumentFlyout
-          hit={displayedHit}
-          renderCellActions={renderCellActions}
-          onAlertUpdated={handleAlertUpdated}
-          dataTestSubj={dataTestSubj}
-          unavailableDocumentCallout={<DocumentUnavailableCallout requestState={requestState} />}
-        />
+        <UnavailableState showPagination={showPagination}>
+          <KbnDangerCallout
+            announceOnMount
+            title={isNotFound ? DOCUMENT_NOT_FOUND : FETCH_ERROR}
+            data-test-subj={
+              isNotFound ? 'document-overview-wrapper-not-found' : 'document-overview-fetch-error'
+            }
+          />
+        </UnavailableState>
       );
     }
 
@@ -197,3 +190,56 @@ export const DocumentFlyoutWrapper = memo(
 );
 
 DocumentFlyoutWrapper.displayName = 'DocumentFlyoutWrapper';
+
+const LoadingState = ({
+  showPagination,
+  'data-test-subj': dataTestSubj,
+}: {
+  showPagination: boolean;
+  'data-test-subj': string;
+}) => (
+  <>
+    {showPagination && (
+      <EuiFlyoutHeader>
+        <EuiFlexGroup justifyContent="flexEnd" gutterSize="none" responsive={false}>
+          <EuiFlexItem grow={false}>
+            <DocumentPagination />
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </EuiFlyoutHeader>
+    )}
+    <EuiFlexItem
+      css={css`
+        align-items: center;
+        justify-content: center;
+      `}
+    >
+      <EuiLoadingSpinner size="xxl" data-test-subj={dataTestSubj} />
+    </EuiFlexItem>
+  </>
+);
+
+const UnavailableState = ({
+  showPagination,
+  children,
+}: {
+  showPagination: boolean;
+  children: React.ReactNode;
+}) => {
+  if (!showPagination) {
+    return <>{children}</>;
+  }
+
+  return (
+    <>
+      <EuiFlyoutHeader>
+        <EuiFlexGroup justifyContent="flexEnd" gutterSize="none" responsive={false}>
+          <EuiFlexItem grow={false}>
+            <DocumentPagination />
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </EuiFlyoutHeader>
+      <EuiFlyoutBody>{children}</EuiFlyoutBody>
+    </>
+  );
+};

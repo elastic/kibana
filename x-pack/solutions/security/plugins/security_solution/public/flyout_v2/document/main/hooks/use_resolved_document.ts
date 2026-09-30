@@ -5,11 +5,14 @@
  * 2.0.
  */
 
-import { useEffect, useRef } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import type { DataView } from '@kbn/data-views-plugin/public';
-import type { DataTableRecord } from '@kbn/discover-utils';
+import { buildDataTableRecord, type DataTableRecord } from '@kbn/discover-utils';
+import type { EsHitRecord } from '@kbn/discover-utils/types';
 import { ElasticRequestState } from '@kbn/unified-doc-viewer';
 import { useEsDocSearch } from '@kbn/unified-doc-viewer-plugin/public';
+import type { RunTimeMappings } from '../../../../../common/api/search_strategy';
+import { useTimelineEventsDetails } from '../../../../timelines/containers/details';
 
 export interface UseResolvedDocumentParams {
   /**
@@ -17,11 +20,11 @@ export interface UseResolvedDocumentParams {
    */
   documentId: string | undefined;
   /**
-   * The concrete index the document lives in.
+   * Index, data stream, or alias the document was opened with.
    */
   indexName: string | undefined;
   /**
-   * Data view the document is resolved against.
+   * Data view the pinned document search runs against.
    */
   dataView: DataView;
   /**
@@ -30,43 +33,16 @@ export interface UseResolvedDocumentParams {
   skip: boolean;
 }
 
-export interface ResolvedDocument {
-  /**
-   * Raw request state of the underlying document search.
-   */
-  requestState: ElasticRequestState;
-  /**
-   * Document to render: the requested one once it has arrived, otherwise the last one that did
-   * resolve. `null` until the very first document resolves.
-   */
-  displayedHit: DataTableRecord | null;
-  /**
-   * `true` while `displayedHit` is not (yet) the requested document.
-   */
-  isResolving: boolean;
-  /**
-   * `true` while resolving a document with an already resolved one still on screen. Callers use it
-   * to keep the flyout mounted — and with it the header's pagination controls — instead of tearing
-   * the whole panel down for a spinner.
-   */
-  isReloading: boolean;
-  /**
-   * Refetches the current document, e.g. after an alert mutation.
-   */
-  refetchDocument: () => void;
-}
+export type ResolvedDocument =
+  | { status: 'loading'; hit: null; refetch: () => void }
+  | { status: 'found'; hit: DataTableRecord; refetch: () => void }
+  | { status: 'notFound'; hit: null; refetch: () => void }
+  | { status: 'error'; hit: null; refetch: () => void };
 
 /**
- * Resolves a single document by id, tracking whether what it returns is the document that was
- * asked for.
- *
- * `useEsDocSearch` never reports `Loading` again once it has resolved something: when its `id`
- * changes it keeps returning `Found` with the previously fetched hit until the new response lands.
- * Comparing the resolved hit's `_id` and `_index` with the requested ones is therefore the only
- * reliable way to tell "showing the requested document" from "still fetching it" — `_id` alone is
- * not enough, since it is only unique within its own index — without it a paginated flyout
- * keeps the previous document fully rendered while its pagination control already points at the
- * new position, which on a slow connection reads as if nothing happened.
+ * Resolves one document. A pinned `_index` search is the fast path; a data stream or alias misses
+ * that filter, so a direct search of `indexName` runs before the document is reported missing.
+ * A hit from a previous id is never returned.
  */
 export const useResolvedDocument = ({
   documentId,
@@ -74,37 +50,78 @@ export const useResolvedDocument = ({
   dataView,
   skip,
 }: UseResolvedDocumentParams): ResolvedDocument => {
-  const [requestState, hit, refetchDocument] = useEsDocSearch({
+  const [requestState, pinnedHit, refetchPinned] = useEsDocSearch({
     id: documentId ?? '',
     index: indexName,
     dataView,
     skip,
   });
 
-  // Last document that resolved. Keeping it around lets callers re-render around it while the next
-  // one is being fetched, instead of unmounting the flyout.
-  const lastResolvedHit = useRef<DataTableRecord | null>(null);
+  const pinnedNotFound = !skip && requestState === ElasticRequestState.NotFound;
+  const runtimeMappings = useMemo(
+    () =>
+      (dataView && 'getRuntimeMappings' in dataView
+        ? dataView.getRuntimeMappings()
+        : {}) as RunTimeMappings,
+    [dataView]
+  );
+  const [indexNameLoading, , indexNameSearchHit, , refetchIndexName] = useTimelineEventsDetails({
+    indexName: indexName ?? '',
+    eventId: documentId ?? '',
+    runtimeMappings,
+    skip: !pinnedNotFound,
+  });
+
+  // The direct search starts in an effect, one render after the pinned search reports not found.
+  // Remember that this id was asked for, so that empty first render is still loading.
+  const requestKey = `${documentId ?? ''}\0${indexName ?? ''}`;
+  const [indexNameAttemptKey, setIndexNameAttemptKey] = useState<string | null>(null);
   useEffect(() => {
-    if (requestState === ElasticRequestState.Found && hit) {
-      lastResolvedHit.current = hit;
+    setIndexNameAttemptKey(pinnedNotFound ? requestKey : null);
+  }, [pinnedNotFound, requestKey]);
+  const indexNameSettled = indexNameAttemptKey === requestKey && !indexNameLoading;
+
+  const indexNameHit = useMemo(() => {
+    if (!indexNameSettled || indexNameSearchHit?._id !== documentId) {
+      return undefined;
     }
-  }, [hit, requestState]);
+    return buildDataTableRecord(indexNameSearchHit as EsHitRecord);
+  }, [documentId, indexNameSearchHit, indexNameSettled]);
 
-  // A terminal outcome is the answer for the requested document, so it must not be read as "still
-  // resolving" even though no hit matches the requested id.
-  const hasSettled =
-    requestState === ElasticRequestState.NotFound ||
-    requestState === ElasticRequestState.Error ||
-    requestState === ElasticRequestState.NotFoundDataView;
-  const isResolving =
+  const refetch = useCallback(() => {
+    refetchPinned();
+    refetchIndexName();
+  }, [refetchIndexName, refetchPinned]);
+
+  const pinnedMatches =
+    pinnedHit != null && pinnedHit.raw._id === documentId && pinnedHit.raw._index === indexName;
+
+  if (
+    skip ||
     requestState === ElasticRequestState.Loading ||
-    (!skip && !hasSettled && (hit?.raw._id !== documentId || hit?.raw._index !== indexName));
+    (requestState === ElasticRequestState.Found && !pinnedMatches)
+  ) {
+    return { status: 'loading', hit: null, refetch };
+  }
 
-  return {
-    requestState,
-    displayedHit: hit ?? lastResolvedHit.current,
-    isResolving,
-    isReloading: isResolving && lastResolvedHit.current != null,
-    refetchDocument,
-  };
+  if (pinnedMatches && pinnedHit) {
+    return { status: 'found', hit: pinnedHit, refetch };
+  }
+
+  if (
+    requestState === ElasticRequestState.Error ||
+    requestState === ElasticRequestState.NotFoundDataView
+  ) {
+    return { status: 'error', hit: null, refetch };
+  }
+
+  if (!indexNameSettled) {
+    return { status: 'loading', hit: null, refetch };
+  }
+
+  if (indexNameHit) {
+    return { status: 'found', hit: indexNameHit, refetch };
+  }
+
+  return { status: 'notFound', hit: null, refetch };
 };

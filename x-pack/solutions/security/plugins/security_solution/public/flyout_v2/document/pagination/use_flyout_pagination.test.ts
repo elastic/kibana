@@ -20,9 +20,7 @@ describe('useFlyoutPagination', () => {
       const { result } = renderHook(() => useFlyoutPagination());
 
       expect(result.current.flyoutDocumentIndex).toBeNull();
-      expect(result.current.pageSize).toBe(0);
       expect(result.current.totalDocumentCount).toBe(0);
-      expect(result.current.isFlyoutDocumentLoading).toBe(false);
       expect(result.current.flyoutDocumentId).toBeNull();
       expect(result.current.flyoutDocumentIndexName).toBeNull();
     });
@@ -47,7 +45,6 @@ describe('useFlyoutPagination', () => {
         store.setState({
           flyoutDocumentIndex: 42,
           totalDocumentCount: 500,
-          pageSize: 50,
           flyoutDocumentId: sampleDocumentId,
           flyoutDocumentIndexName: sampleDocumentIndexName,
         });
@@ -55,7 +52,6 @@ describe('useFlyoutPagination', () => {
 
       expect(result.current.flyoutDocumentIndex).toBe(42);
       expect(result.current.totalDocumentCount).toBe(500);
-      expect(result.current.pageSize).toBe(50);
       expect(result.current.flyoutDocumentId).toBe(sampleDocumentId);
       expect(result.current.flyoutDocumentIndexName).toBe(sampleDocumentIndexName);
     });
