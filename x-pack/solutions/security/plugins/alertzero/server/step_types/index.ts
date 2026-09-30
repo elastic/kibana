@@ -28,7 +28,7 @@ export const registerStepDefinitions = ({
   /** Internal-user client for the hidden `.kibana-threat-reports` index (trigger message report facts). */
   getReportsEsClient?: () => ElasticsearchClient;
   getResolveHostEnrollment?: PackageReportStepDependencies['getResolveHostEnrollment'];
-  isContextEngineEnabled?: (spaceId: string) => Promise<boolean>;
+  isContextEngineEnabled: PackageReportStepDependencies['isContextEngineEnabled'];
   logger?: Logger;
 }) => {
   workflowsExtensions.registerStepDefinition(

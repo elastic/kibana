@@ -50,6 +50,7 @@ import { reviseProposalTool } from './agent_builder_tools/revise_proposal_tool';
 import { agentType, ensureAgent, ensureAgentSafe, registerAgentType } from './agent';
 import { registerAttachments } from './agent_builder/attachments/register_attachments';
 import { registerStepDefinitions } from './step_types';
+import { makeIsContextEngineEnabled } from './step_types/is_context_engine_enabled';
 import { makeScopedResolveHostEnrollment } from './services/fleet/resolve_host_enrollment';
 
 export class AlertZeroPlugin
@@ -76,6 +77,7 @@ export class AlertZeroPlugin
   private huntServices?: HuntServices;
   private reportsEsClient?: ElasticsearchClient;
   private fleetAgentService?: AgentService;
+  private coreStart?: CoreStart;
   private scanFailuresService?: ScanFailuresService;
 
   /**
@@ -131,6 +133,7 @@ export class AlertZeroPlugin
       getConversations: () => this.requireAgentBuilderConversations(),
       getReportsEsClient: () => this.requireReportsEsClient(),
       getResolveHostEnrollment: makeScopedResolveHostEnrollment(() => this.fleetAgentService),
+      isContextEngineEnabled: makeIsContextEngineEnabled(() => this.coreStart),
       logger: this.logger.get('steps'),
     });
     // Registered in setup so the builtin tool is available to Agent Builder before
@@ -185,6 +188,7 @@ export class AlertZeroPlugin
   start(core: CoreStart, plugins: AlertZeroStartDependencies): AlertZeroPluginStart {
     this.spaces = plugins.spaces;
     this.reportsEsClient = core.elasticsearch.client.asInternalUser;
+    this.coreStart = core;
     this.fleetAgentService = plugins.fleet?.agentService;
     this.proposals = plugins.proposals;
     this.agentBuilderConversations = plugins.agentBuilder?.conversations;

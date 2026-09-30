@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { ElasticsearchClient, Logger } from '@kbn/core/server';
+import type { ElasticsearchClient, KibanaRequest, Logger } from '@kbn/core/server';
 import { createServerStepDefinition } from '@kbn/workflows-extensions/server';
 import { ExecutionError } from '@kbn/workflows/server';
 import type { AgentBuilderPluginStart } from '@kbn/agent-builder-server';
@@ -27,10 +27,13 @@ export interface PackageReportStepDependencies {
   getActionsService: () => ActionsService;
   getConversations: () => AgentBuilderPluginStart['conversations'];
   /**
-   * Optional Context Engine gate. When false, every coverage subject is skipped
-   * with reason `disabled` and proposals still mint.
+   * Context Engine gate. When false, every coverage subject is skipped with reason `disabled`
+   * and proposals still mint. Required rather than defaulted: coverage KIs are written into the
+   * Context Engine's own backing index, and its advanced setting ships off, so a missing gate
+   * would have this step writing into a feature the deployment has not turned on. Takes the
+   * request because the setting is space-scoped and resolved from the request's own space.
    */
-  isContextEngineEnabled?: (spaceId: string) => Promise<boolean>;
+  isContextEngineEnabled: (request: KibanaRequest) => Promise<boolean>;
   /**
    * Space-scoped per call: hostnames are not unique across spaces, so the Fleet lookup has to be
    * bound to the space the step runs in. Defaults to treating every host as unenrolled when not
@@ -89,7 +92,8 @@ export const createCoverageWriter = ({
 }: {
   spaceId: string;
   getEsClient: () => EsCoverageClient;
-  isContextEngineEnabled: (spaceId: string) => Promise<boolean>;
+  /** Already bound to this run's request by the caller; see the step's own dependency. */
+  isContextEngineEnabled: () => Promise<boolean>;
 }): ((subjects: CoverageSubject[]) => Promise<CoverageWriteResult>) => {
   const backingIndex = `ai-index-idx-${HUNT_COVERAGE_AI_INDEX_ID}`;
 
@@ -100,7 +104,7 @@ export const createCoverageWriter = ({
     const subjectLabel = (subject: CoverageSubject) =>
       buildCoverageSubject({ reportId: subject.reportId, techniqueId: subject.technique });
 
-    if (!(await isContextEngineEnabled(spaceId))) {
+    if (!(await isContextEngineEnabled())) {
       for (const subject of subjects) {
         skipped.push({ kiId: subject.kiId, subject: subjectLabel(subject), reason: 'disabled' });
       }
@@ -190,7 +194,7 @@ const defaultResolveHostEnrollment: RunPackageReportDeps['resolveHostEnrollment'
 export const getPackageReportStepDefinition = ({
   getActionsService,
   getConversations,
-  isContextEngineEnabled = async () => true,
+  isContextEngineEnabled,
   getResolveHostEnrollment = () => defaultResolveHostEnrollment,
   getRehydrateProcessSelectors = makeRehydrateProcessSelectors,
   logger,
@@ -227,7 +231,7 @@ export const getPackageReportStepDefinition = ({
         const writeCoverageKis = createCoverageWriter({
           spaceId,
           getEsClient: () => context.contextManager.getScopedEsClient() as EsCoverageClient,
-          isContextEngineEnabled,
+          isContextEngineEnabled: () => isContextEngineEnabled(request),
         });
 
         const rehydrateProcessSelectors = getRehydrateProcessSelectors(
