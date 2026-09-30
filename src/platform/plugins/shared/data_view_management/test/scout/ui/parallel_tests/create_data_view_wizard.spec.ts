@@ -13,46 +13,41 @@ import { spaceTest } from '../fixtures';
 
 // Migrated from: src/platform/test/functional/apps/management/group1/_create_index_pattern_wizard.ts
 
+const blogsIndex = (spaceId: string) => `dvm-blogs-${spaceId}`;
+const aliasName = (spaceId: string) => `dvm-alias-${spaceId}`;
+
 spaceTest.describe('Create data view from index alias', { tag: tags.deploymentAgnostic }, () => {
-  spaceTest.beforeAll(async ({ scoutSpace }) => {
+  spaceTest.beforeAll(async ({ esClient, scoutSpace }) => {
     await scoutSpace.savedObjects.cleanStandardList();
-    await scoutSpace.uiSettings.set({});
+    await esClient.index({
+      index: blogsIndex(scoutSpace.id),
+      document: { user: 'matt', message: 20 },
+      refresh: 'wait_for',
+    });
+    await esClient.indices.updateAliases({
+      actions: [{ add: { index: blogsIndex(scoutSpace.id), alias: aliasName(scoutSpace.id) } }],
+    });
   });
 
   spaceTest.beforeEach(async ({ browserAuth }) => {
-    await browserAuth.loginAsAdmin();
+    await browserAuth.loginAsPrivilegedUser();
   });
 
   spaceTest.afterAll(async ({ esClient, scoutSpace }) => {
-    await esClient.indices
-      .updateAliases({
-        actions: [{ remove: { index: 'blogs', alias: 'alias1' } }],
-      })
-      .catch(() => {});
-    await esClient.indices.delete({ index: 'blogs' }).catch(() => {});
+    // Deleting the index also removes its alias.
+    await esClient.indices.delete({ index: blogsIndex(scoutSpace.id) }).catch(() => {});
     await scoutSpace.savedObjects.cleanStandardList();
   });
 
   spaceTest(
     'can create a data view from an index alias and then delete it',
-    async ({ pageObjects, page, esClient }) => {
-      await spaceTest.step('set up the ES alias', async () => {
-        await esClient.index({
-          index: 'blogs',
-          document: { user: 'matt', message: 20 },
-          refresh: 'wait_for',
-        });
-        await esClient.indices.updateAliases({
-          actions: [{ add: { index: 'blogs', alias: 'alias1' } }],
-        });
-      });
-
+    async ({ pageObjects, page, scoutSpace }) => {
       await spaceTest.step(
-        'navigate to data views and create a data view from alias1',
+        'navigate to data views and create a data view from the alias',
         async () => {
           await pageObjects.dataViewsManagement.goto();
           await pageObjects.dataViewsManagement.openCreateWizard();
-          await pageObjects.dataViewEditorFlyout.setTitle('alias1');
+          await pageObjects.dataViewEditorFlyout.setTitle(aliasName(scoutSpace.id));
           await pageObjects.dataViewEditorFlyout.save();
         }
       );

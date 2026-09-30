@@ -7,13 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { FtrConfigProviderContext } from '@kbn/test';
+import type { ScoutPage } from '@kbn/scout';
 
-export default async function ({ readConfigFile }: FtrConfigProviderContext) {
-  const functionalConfig = await readConfigFile(require.resolve('../../../config.base.js'));
+const HAS_ES_DATA_ROUTE = '**/internal/data_views/has_es_data';
 
-  return {
-    ...functionalConfig.getAll(),
-    testFiles: [require.resolve('.')],
-  };
-}
+export const mockNoEsData = async (page: ScoutPage): Promise<void> => {
+  await page.route(HAS_ES_DATA_ROUTE, (route) => route.fulfill({ json: { hasEsData: false } }));
+};
+
+export const unmockNoEsData = async (page: ScoutPage): Promise<void> => {
+  await page.unroute(HAS_ES_DATA_ROUTE);
+};

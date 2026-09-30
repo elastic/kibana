@@ -16,10 +16,11 @@ import {
   getConflictModalContent,
   renderFieldName,
   showDelete,
+  Table as PersistedTable,
   TableWithoutPersist as Table,
 } from './table';
 import { renderWithI18n } from '@kbn/test-jest-helpers';
-import { screen } from '@testing-library/react';
+import { screen, within } from '@testing-library/react';
 
 const coreStart = coreMock.createStart();
 
@@ -309,16 +310,14 @@ describe('Table', () => {
   });
 
   // Migrated from: src/platform/test/functional/apps/management/group1/_index_pattern_results_sort.ts
-  // ('should sort ascending/descending' for Name and Type columns)
   describe('sort order', () => {
-    const renderSorted = (direction: 'asc' | 'desc', field: 'displayName' | 'type') =>
+    beforeEach(() => {
+      window.localStorage.clear();
+    });
+
+    const renderPersistedTable = () =>
       renderWithI18n(
-        <Table
-          euiTablePersist={{
-            onTableChange: jest.fn(),
-            pageSize: 10,
-            sorting: { sort: { direction, field } },
-          }}
+        <PersistedTable
           deleteField={jest.fn()}
           editField={jest.fn()}
           indexPattern={indexPattern}
@@ -328,32 +327,37 @@ describe('Table', () => {
         />
       );
 
-    // Items by displayName: Elastic, conflictingField, customer, noedit, timestamp
-    // 'E' (69) < 'c' (99) in case-sensitive ASCII order.
-    it('should sort ascending by Name — first is Elastic, last is timestamp', async () => {
-      renderSorted('asc', 'displayName');
-      const cells = await screen.findAllByTestId('indexedFieldName');
-      expect(cells[0]).toHaveTextContent('Elastic');
-      expect(cells[cells.length - 1]).toHaveTextContent('timestamp');
+    const clickHeader = async (user: ReturnType<typeof userEvent.setup>, testSubj: string) => {
+      await user.click(within(screen.getByTestId(testSubj)).getByRole('button'));
+    };
+
+    const firstCell = (testSubj: string) => screen.getAllByTestId(testSubj)[0];
+
+    it('sorts by Name ascending by default and toggles to descending on header click', async () => {
+      const user = userEvent.setup();
+      renderPersistedTable();
+
+      const initialCells = await screen.findAllByTestId('indexedFieldName');
+      expect(initialCells[0]).toHaveTextContent('Elastic');
+      expect(initialCells[initialCells.length - 1]).toHaveTextContent('timestamp');
+
+      await clickHeader(user, 'tableHeaderCell_displayName_0');
+
+      const descCells = screen.getAllByTestId('indexedFieldName');
+      expect(descCells[0]).toHaveTextContent('timestamp');
+      expect(descCells[descCells.length - 1]).toHaveTextContent('Elastic');
     });
 
-    it('should sort descending by Name — first is timestamp, last is Elastic', async () => {
-      renderSorted('desc', 'displayName');
-      const cells = await screen.findAllByTestId('indexedFieldName');
-      expect(cells[0]).toHaveTextContent('timestamp');
-      expect(cells[cells.length - 1]).toHaveTextContent('Elastic');
-    });
+    it('sorts by Type ascending then descending on repeated header clicks', async () => {
+      const user = userEvent.setup();
+      renderPersistedTable();
+      await screen.findAllByTestId('indexedFieldType');
 
-    it('should sort ascending by Type — first field has type date', async () => {
-      renderSorted('asc', 'type');
-      const cells = await screen.findAllByTestId('indexedFieldType');
-      expect(cells[0]).toHaveTextContent('date');
-    });
+      await clickHeader(user, 'tableHeaderCell_type_1');
+      expect(firstCell('indexedFieldType')).toHaveTextContent('date');
 
-    it('should sort descending by Type — first field has conflict type', async () => {
-      renderSorted('desc', 'type');
-      const cells = await screen.findAllByTestId('indexedFieldType');
-      expect(cells[0]).toHaveTextContent('text, long');
+      await clickHeader(user, 'tableHeaderCell_type_1');
+      expect(firstCell('indexedFieldType')).toHaveTextContent('text, long');
     });
   });
 });

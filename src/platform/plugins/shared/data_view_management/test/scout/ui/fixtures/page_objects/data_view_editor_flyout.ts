@@ -8,7 +8,6 @@
  */
 
 import type { ScoutPage } from '@kbn/scout';
-import { APP_HEADER_TEST_SUBJECTS } from '@kbn/app-header';
 
 export class DataViewEditorFlyoutPage {
   readonly flyout;
@@ -18,7 +17,6 @@ export class DataViewEditorFlyoutPage {
   readonly timestampField;
   readonly saveButton;
   readonly confirmButton;
-  readonly pageTitle;
   readonly statusMessage;
   readonly advancedToggle;
 
@@ -30,43 +28,27 @@ export class DataViewEditorFlyoutPage {
     this.timestampField = page.testSubj.locator('timestampField');
     this.saveButton = page.testSubj.locator('saveIndexPatternButton');
     this.confirmButton = page.testSubj.locator('confirmModalConfirmButton');
-    this.pageTitle = page.testSubj.locator(APP_HEADER_TEST_SUBJECTS.title);
     this.statusMessage = page.testSubj.locator('createIndexPatternStatusMessage');
     this.advancedToggle = page.testSubj.locator('toggleAdvancedSetting');
   }
 
-  async waitForOpen(): Promise<void> {
-    await this.flyout.waitFor({ state: 'visible' });
-  }
-
-  /** Fills the title (index pattern) field, retrying until validation settles. */
+  /** Fills the title (index pattern) field and waits until it validates as a matching pattern. */
   async setTitle(title: string): Promise<void> {
-    const maxAttempts = 3;
-    for (let attempt = 1; attempt <= maxAttempts; attempt++) {
-      const isLastAttempt = attempt === maxAttempts;
-      if (attempt > 1) {
-        await this.titleInput.fill('');
-      }
-      await this.titleInput.fill(title);
-      try {
-        await this.waitForValidTitle(title, isLastAttempt ? 30_000 : 5_000);
-        return;
-      } catch (error) {
-        if (isLastAttempt) throw error;
-      }
-    }
-  }
-
-  private async waitForValidTitle(title: string, timeout = 30_000): Promise<void> {
-    await this.titleInput
-      .and(this.page.locator(`[value="${title}"]`))
-      .waitFor({ state: 'attached', timeout });
-    await this.titleInput
-      .and(this.page.locator('[data-is-validating="0"]'))
-      .waitFor({ state: 'visible', timeout });
+    await this.fillTitle(title);
     await this.form
       .and(this.page.locator('[data-validation-error="0"]'))
-      .waitFor({ state: 'attached', timeout });
+      .waitFor({ state: 'attached' });
+  }
+
+  /** Fills the title field and waits for validation to settle, without requiring it to pass. */
+  async fillTitle(title: string): Promise<void> {
+    await this.titleInput.fill(title);
+    await this.titleInput
+      .and(this.page.locator(`[value="${title}"]`))
+      .waitFor({ state: 'attached' });
+    await this.titleInput
+      .and(this.page.locator('[data-is-validating="0"]'))
+      .waitFor({ state: 'visible' });
   }
 
   async setName(name: string): Promise<void> {
@@ -84,9 +66,6 @@ export class DataViewEditorFlyoutPage {
     await this.timestampField
       .and(this.page.locator('[data-is-loading="0"]'))
       .waitFor({ state: 'visible' });
-    const input = this.timestampField.locator('input[data-test-subj="comboBoxSearchInput"]');
-    const isEnabled = await input.isEnabled();
-    if (!isEnabled) return;
     await this.page.components.comboBox('timestampField').setSelectedOptions([value]);
   }
 
@@ -113,10 +92,6 @@ export class DataViewEditorFlyoutPage {
     const allowHiddenField = this.page.testSubj.locator('allowHiddenField');
     const button = allowHiddenField.locator('button');
     return (await button.getAttribute('aria-checked')) === 'true';
-  }
-
-  async isSaveButtonEnabled(): Promise<boolean> {
-    return this.saveButton.isEnabled();
   }
 
   async save({ withConfirmation = false }: { withConfirmation?: boolean } = {}): Promise<void> {

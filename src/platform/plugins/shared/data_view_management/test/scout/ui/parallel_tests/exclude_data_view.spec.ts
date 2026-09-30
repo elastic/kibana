@@ -18,33 +18,46 @@ spaceTest.describe(
   'Data view creation with exclusion expression',
   { tag: tags.deploymentAgnostic },
   () => {
+    const indexPrefix = (spaceId: string) => `dvm-exclude-${spaceId}`;
+
     spaceTest.beforeAll(async ({ esClient, scoutSpace }) => {
       await scoutSpace.savedObjects.cleanStandardList();
-      await scoutSpace.uiSettings.set({});
-      await esClient.index({ index: 'index-a', document: { user: 'matt' }, refresh: 'wait_for' });
-      await esClient.index({ index: 'index-b', document: { title: 'hello' }, refresh: 'wait_for' });
+      const prefix = indexPrefix(scoutSpace.id);
+      await esClient.index({
+        index: `${prefix}-a`,
+        document: { user: 'matt' },
+        refresh: 'wait_for',
+      });
+      await esClient.index({
+        index: `${prefix}-b`,
+        document: { title: 'hello' },
+        refresh: 'wait_for',
+      });
     });
 
     spaceTest.beforeEach(async ({ browserAuth }) => {
-      await browserAuth.loginAsAdmin();
+      await browserAuth.loginAsPrivilegedUser();
     });
 
     spaceTest.afterAll(async ({ esClient, scoutSpace }) => {
-      await esClient.indices.delete({ index: 'index-a' }).catch(() => {});
-      await esClient.indices.delete({ index: 'index-b' }).catch(() => {});
+      const prefix = indexPrefix(scoutSpace.id);
+      await esClient.indices
+        .delete({ index: [`${prefix}-a`, `${prefix}-b`], ignore_unavailable: true })
+        .catch(() => {});
       await scoutSpace.savedObjects.cleanStandardList();
     });
 
     spaceTest(
       'data view with exclusion pattern shows only included index fields',
-      async ({ pageObjects }) => {
+      async ({ pageObjects, scoutSpace }) => {
+        const prefix = indexPrefix(scoutSpace.id);
         await spaceTest.step('navigate to data views management', async () => {
           await pageObjects.dataViewsManagement.goto();
         });
 
         await spaceTest.step('create data view with exclusion expression', async () => {
           await pageObjects.dataViewsManagement.openCreateWizard();
-          await pageObjects.dataViewEditorFlyout.setTitle('index-*,-index-b');
+          await pageObjects.dataViewEditorFlyout.setTitle(`${prefix}-*,-${prefix}-b`);
           await pageObjects.dataViewEditorFlyout.save();
         });
 

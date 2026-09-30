@@ -13,15 +13,17 @@ import { spaceTest } from '../fixtures';
 
 // Migrated from: src/platform/test/functional/apps/management/group1/_index_pattern_filter.ts
 // Serverless mirror: x-pack/platform/test/serverless/functional/test_suites/management/data_views/_index_pattern_filter.ts
-// Type filter and text search tests moved to Jest (tabs.test.tsx / table.test.tsx).
+// Type filter and text search control tests moved to Jest (tabs/tabs.test.tsx).
 // ES archives (logstash_functional) are loaded once in parallel_tests/global.setup.ts.
+
+// Named so it matches no other suite's pattern (e.g. `logstash-*`) while it exists.
+const conflictIndex = (spaceId: string) => `dvm-conflict-${spaceId}`;
 
 spaceTest.describe('Data view field list filters', { tag: tags.deploymentAgnostic }, () => {
   let logstashDataViewId: string;
 
   spaceTest.beforeAll(async ({ scoutSpace, apiServices }) => {
     await scoutSpace.savedObjects.cleanStandardList();
-    await scoutSpace.uiSettings.set({});
     const { data } = await apiServices.dataViews.create({
       title: 'logstash-*',
       spaceId: scoutSpace.id,
@@ -30,10 +32,11 @@ spaceTest.describe('Data view field list filters', { tag: tags.deploymentAgnosti
   });
 
   spaceTest.beforeEach(async ({ browserAuth }) => {
-    await browserAuth.loginAsAdmin();
+    await browserAuth.loginAsPrivilegedUser();
   });
 
-  spaceTest.afterAll(async ({ scoutSpace }) => {
+  spaceTest.afterAll(async ({ esClient, scoutSpace }) => {
+    await esClient.indices.delete({ index: conflictIndex(scoutSpace.id) }).catch(() => {});
     await scoutSpace.savedObjects.cleanStandardList();
   });
 
@@ -95,34 +98,34 @@ spaceTest.describe('Data view field list filters', { tag: tags.deploymentAgnosti
 
   spaceTest(
     'conflict filter button resets other filters and shows only the conflicting field',
-    async ({ pageObjects, esClient, scoutSpace }) => {
-      // Worker-unique name to avoid collisions when running in parallel.
-      const conflictIndex = `logstash-wrong-${scoutSpace.id}`;
+    async ({ pageObjects, esClient, apiServices, scoutSpace }) => {
+      let conflictDataViewId = '';
 
       await spaceTest.step(
         'create an index with a conflicting mapping for the bytes field',
         async () => {
-          await esClient.indices.delete({ index: conflictIndex }).catch(() => {});
+          await esClient.indices.delete({ index: conflictIndex(scoutSpace.id) }).catch(() => {});
           await esClient.indices.create({
-            index: conflictIndex,
+            index: conflictIndex(scoutSpace.id),
             mappings: { properties: { bytes: { type: 'keyword' } } },
           });
           await esClient.index({
-            index: conflictIndex,
+            index: conflictIndex(scoutSpace.id),
             document: { bytes: 'wrong_value' },
             refresh: 'wait_for',
           });
+          const { data } = await apiServices.dataViews.create({
+            title: `logstash-*,${conflictIndex(scoutSpace.id)}`,
+            spaceId: scoutSpace.id,
+          });
+          conflictDataViewId = data.id;
         }
       );
 
-      await spaceTest.step(
-        'navigate to data view detail and refresh to detect the conflict',
-        async () => {
-          await pageObjects.dataViewDetail.goto(logstashDataViewId);
-          await pageObjects.dataViewDetail.refreshFieldList();
-          await expect(pageObjects.dataViewDetail.mappingConflictBadge).toBeVisible();
-        }
-      );
+      await spaceTest.step('navigate to the data view and verify the conflict badge', async () => {
+        await pageObjects.dataViewDetail.goto(conflictDataViewId);
+        await expect(pageObjects.dataViewDetail.mappingConflictBadge).toBeVisible();
+      });
 
       await spaceTest.step(
         'set multiple filters so they are all active before pressing View conflicts',
@@ -145,10 +148,6 @@ spaceTest.describe('Data view field list filters', { tag: tags.deploymentAgnosti
           expect(fieldTypes).toStrictEqual(['keyword, long\nConflict']);
         }
       );
-
-      await spaceTest.step('clean up the conflict index', async () => {
-        await esClient.indices.delete({ index: conflictIndex }).catch(() => {});
-      });
     }
   );
 });

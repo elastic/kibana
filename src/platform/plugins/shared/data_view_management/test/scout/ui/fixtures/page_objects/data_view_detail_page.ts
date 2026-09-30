@@ -14,7 +14,6 @@ export class DataViewDetailPage {
   readonly editButton;
   readonly fieldsTab;
   readonly fieldFilter;
-  readonly clearFilterButton;
   readonly refreshButton;
   readonly typeFilterTrigger;
   readonly schemaFilterTrigger;
@@ -32,7 +31,6 @@ export class DataViewDetailPage {
     this.editButton = page.testSubj.locator('editIndexPatternButton');
     this.fieldsTab = page.testSubj.locator('tab-indexedFields');
     this.fieldFilter = page.testSubj.locator('indexPatternFieldFilter');
-    this.clearFilterButton = page.testSubj.locator('clearSearchButton');
     this.refreshButton = page.testSubj.locator('refreshDataViewButton');
     this.typeFilterTrigger = page.testSubj.locator('indexedFieldTypeFilterDropdown');
     this.schemaFilterTrigger = page.testSubj.locator('schemaFieldTypeFilterDropdown');
@@ -41,7 +39,7 @@ export class DataViewDetailPage {
     this.addFieldButton = page.testSubj.locator('addField');
     this.fieldEditorFlyout = page.testSubj.locator('fieldEditor');
     this.fieldEditorSaveButton = page.testSubj.locator('fieldSaveButton');
-    this.fieldEditorCancelButton = page.testSubj.locator('fieldCancelButton');
+    this.fieldEditorCancelButton = this.fieldEditorFlyout.getByTestId('closeFlyoutButton');
     this.popularityInput = page.testSubj.locator('editorFieldCount');
     this.fieldEditorAdvancedToggle = page.testSubj.locator('toggleAdvancedSetting');
   }
@@ -96,14 +94,6 @@ export class DataViewDetailPage {
     await this.page.keyboard.press('Escape');
   }
 
-  async clearFieldTypeFilter(type: string): Promise<void> {
-    await this.typeFilterTrigger.click();
-    const selectable = this.page.testSubj.locator('indexedFieldTypeSelectable');
-    await selectable.waitFor({ state: 'visible' });
-    await this.page.testSubj.locator(`selectable-option-${type}`).click();
-    await this.page.keyboard.press('Escape');
-  }
-
   async setSchemaFieldTypeFilter(type: string): Promise<void> {
     await this.schemaFilterTrigger.click();
     const selectable = this.page.testSubj.locator('schemaTypeSelectable');
@@ -114,10 +104,6 @@ export class DataViewDetailPage {
 
   async filterByText(text: string): Promise<void> {
     await this.fieldFilter.fill(text);
-  }
-
-  async clearTextFilter(): Promise<void> {
-    await this.clearFilterButton.click();
   }
 
   async refreshFieldList(): Promise<void> {
@@ -134,13 +120,9 @@ export class DataViewDetailPage {
     await this.page.testSubj.locator('flyoutTitle').waitFor({ state: 'visible' });
   }
 
+  /** Closes an unmodified field editor flyout. */
   async closeFieldEditor(): Promise<void> {
-    await this.page.keyboard.press('Escape');
-    const confirmModal = this.page.testSubj.locator('runtimeFieldModifiedFieldConfirmModal');
-    const hasConfirmModal = await confirmModal.isVisible().catch(() => false);
-    if (hasConfirmModal) {
-      await this.page.testSubj.click('confirmModalConfirmButton');
-    }
+    await this.fieldEditorCancelButton.click();
     await this.fieldEditorFlyout.waitFor({ state: 'hidden' });
   }
 
@@ -179,10 +161,10 @@ export class DataViewDetailPage {
     const valueRow = this.page.testSubj.locator('valueRow');
     await valueRow.locator('[data-test-subj="toggle"]').click();
     const scriptFieldRow = this.page.testSubj.locator('scriptFieldRow');
-    await scriptFieldRow.waitFor({ state: 'visible', timeout: 15_000 });
+    await scriptFieldRow.waitFor({ state: 'visible' });
     // Focus the Monaco editor and type via keyboard events (fill() on textarea.inputarea is partial)
     const monacoEditor = scriptFieldRow.locator('.monaco-editor');
-    await monacoEditor.waitFor({ state: 'visible', timeout: 10_000 });
+    await monacoEditor.waitFor({ state: 'visible' });
     await monacoEditor.click();
     await this.page.keyboard.press('ControlOrMeta+a');
     await this.page.keyboard.type(script);
@@ -193,14 +175,11 @@ export class DataViewDetailPage {
 
   async delete(): Promise<void> {
     const deleteBtn = this.page.testSubj.locator('deleteIndexPatternButton');
-    const isDirectlyVisible = await deleteBtn.isVisible().catch(() => false);
-    if (!isDirectlyVisible) {
-      const overflowBtn = this.page.locator('[data-test-subj*="overflowButton"]');
-      const hasOverflow = await overflowBtn.isVisible().catch(() => false);
-      if (hasOverflow) {
-        await overflowBtn.click();
-        await deleteBtn.waitFor({ state: 'visible' });
-      }
+    const overflowBtn = this.page.locator('[data-test-subj*="overflowButton"]');
+    // Depending on header width, delete renders inline or inside the overflow menu.
+    await deleteBtn.or(overflowBtn).waitFor({ state: 'visible' });
+    if (!(await deleteBtn.isVisible())) {
+      await overflowBtn.click();
     }
     await deleteBtn.click();
     await this.page.testSubj.locator('deleteDataViewFlyoutHeader').waitFor({ state: 'visible' });

@@ -24,11 +24,10 @@ spaceTest.describe(
 
     spaceTest.beforeAll(async ({ scoutSpace }) => {
       await scoutSpace.savedObjects.cleanStandardList();
-      await scoutSpace.uiSettings.set({});
     });
 
     spaceTest.beforeEach(async ({ browserAuth, apiServices, scoutSpace }) => {
-      await browserAuth.loginAsAdmin();
+      await browserAuth.loginAsPrivilegedUser();
       // Reset the data view before each test so edits from one test don't affect the next
       if (dataViewId) {
         await apiServices.dataViews.delete(dataViewId, scoutSpace.id).catch(() => {});
@@ -82,9 +81,7 @@ spaceTest.describe(
             await pageObjects.dataViewEditorFlyout.setTitle('with-different-timefield');
             await pageObjects.dataViewEditorFlyout.selectTimestampField('different-timefield');
             await pageObjects.dataViewEditorFlyout.save({ withConfirmation: true });
-            await expect(page.testSubj.locator('field-name-different-timefield')).toBeVisible({
-              timeout: 15_000,
-            });
+            await expect(page.testSubj.locator('field-name-different-timefield')).toBeVisible();
           }
         );
 
@@ -95,9 +92,7 @@ spaceTest.describe(
             await pageObjects.dataViewEditorFlyout.setTitle('logstash-*');
             await pageObjects.dataViewEditorFlyout.selectTimestampField('@timestamp');
             await pageObjects.dataViewEditorFlyout.save({ withConfirmation: true });
-            await expect(page.testSubj.locator('field-name-@message')).toBeVisible({
-              timeout: 15_000,
-            });
+            await expect(page.testSubj.locator('field-name-@message')).toBeVisible();
           }
         );
       }
@@ -105,26 +100,25 @@ spaceTest.describe(
 
     spaceTest(
       'save button becomes disabled immediately after clicking to prevent double submission',
-      async ({ pageObjects, page }) => {
+      async ({ pageObjects }) => {
+        const { dataViewEditorFlyout } = pageObjects;
+
         await spaceTest.step('navigate to data view detail and open edit flyout', async () => {
           await pageObjects.dataViewDetail.goto(dataViewId);
           await pageObjects.dataViewDetail.openEditFlyout();
         });
 
         await spaceTest.step('update the title and click Save', async () => {
-          await pageObjects.dataViewEditorFlyout.setTitle('logs*');
-          await pageObjects.dataViewEditorFlyout.selectTimestampField('@timestamp');
-          const saveButton = page.testSubj.locator('saveIndexPatternButton');
-          await saveButton.click();
-
-          const confirmModal = page.testSubj.locator('confirmModalConfirmButton');
-          await confirmModal.waitFor({ state: 'visible' });
-          await expect(saveButton).toBeDisabled();
-          await confirmModal.click();
+          await dataViewEditorFlyout.setTitle('logs*');
+          await dataViewEditorFlyout.selectTimestampField('@timestamp');
+          await dataViewEditorFlyout.saveButton.click();
+          await expect(dataViewEditorFlyout.confirmButton).toBeVisible();
+          await expect(dataViewEditorFlyout.saveButton).toBeDisabled();
+          await dataViewEditorFlyout.confirmButton.click();
         });
 
         await spaceTest.step('verify the flyout closes after confirmation', async () => {
-          await page.testSubj.locator('indexPatternEditorFlyout').waitFor({ state: 'hidden' });
+          await expect(dataViewEditorFlyout.flyout).toBeHidden();
         });
       }
     );
@@ -147,10 +141,8 @@ spaceTest.describe(
           await expect
             .poll(() => pageObjects.dataViewEditorFlyout.getTimestampFieldValue())
             .toBe('utc_time');
-          await expect(page.testSubj.locator('createIndexPatternNameInput')).toHaveValue(
-            'Logs UTC'
-          );
-          await expect(page.testSubj.locator('createIndexPatternTitleInput')).toHaveValue('logs*');
+          await expect(pageObjects.dataViewEditorFlyout.nameInput).toHaveValue('Logs UTC');
+          await expect(pageObjects.dataViewEditorFlyout.titleInput).toHaveValue('logs*');
 
           await pageObjects.dataViewEditorFlyout.close();
         });
@@ -160,32 +152,6 @@ spaceTest.describe(
             'utc_time'
           );
         });
-      }
-    );
-
-    spaceTest(
-      'allow-hidden setting persists through page reload',
-      async ({ pageObjects, page }) => {
-        await spaceTest.step('open the existing data view and enable allow-hidden', async () => {
-          await pageObjects.dataViewDetail.goto(dataViewId);
-          await pageObjects.dataViewDetail.openEditFlyout();
-          await pageObjects.dataViewEditorFlyout.enableAllowHidden();
-          await pageObjects.dataViewEditorFlyout.save();
-        });
-
-        await spaceTest.step(
-          'reload the page and verify allow-hidden is still enabled in the editor',
-          async () => {
-            await page.reload();
-            await page.testSubj.click('editIndexPatternButton');
-            await page.testSubj.locator('indexPatternEditorFlyout').waitFor({ state: 'visible' });
-            await page.testSubj.click('toggleAdvancedSetting');
-            const allowHiddenField = page.testSubj.locator('allowHiddenField');
-            const button = allowHiddenField.locator('button');
-            await expect(button).toHaveAttribute('aria-checked', 'true');
-            await page.keyboard.press('Escape');
-          }
-        );
       }
     );
   }

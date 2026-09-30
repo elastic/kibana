@@ -21,19 +21,15 @@ spaceTest.describe(
   () => {
     let dataViewId: string;
 
-    spaceTest.beforeAll(async ({ apiServices, scoutSpace }) => {
+    spaceTest.beforeEach(async ({ apiServices, browserAuth, scoutSpace }) => {
       await scoutSpace.savedObjects.cleanStandardList();
-      await scoutSpace.uiSettings.set({});
       const { data } = await apiServices.dataViews.create({
         title: 'logstash-*',
         timeFieldName: '@timestamp',
         spaceId: scoutSpace.id,
       });
       dataViewId = data.id;
-    });
-
-    spaceTest.beforeEach(async ({ browserAuth }) => {
-      await browserAuth.loginAsAdmin();
+      await browserAuth.loginAsPrivilegedUser();
     });
 
     spaceTest.afterAll(async ({ scoutSpace }) => {
@@ -49,9 +45,9 @@ spaceTest.describe(
         await pageObjects.dataViewDetail.showFieldEditorAdvancedSettings();
       });
 
-      await spaceTest.step('increase popularity and save', async () => {
-        const current = await pageObjects.dataViewDetail.getPopularity();
-        await pageObjects.dataViewDetail.setPopularity(Number(current) + 1);
+      await spaceTest.step('increase popularity from 0 to 1 and save', async () => {
+        expect(await pageObjects.dataViewDetail.getPopularity()).toBe('0');
+        await pageObjects.dataViewDetail.setPopularity(1);
         await pageObjects.dataViewDetail.saveFieldEditor();
       });
 
