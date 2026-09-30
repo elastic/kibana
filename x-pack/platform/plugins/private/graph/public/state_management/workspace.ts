@@ -180,7 +180,7 @@ export const workspaceReducer = reducerWithInitialState(initialWorkspaceState)
       edgeIds.push(id);
     });
 
-    return { ...state, nodesById, nodeIds, edgesById, edgeIds };
+    return recordUndo(state, { ...state, nodesById, nodeIds, edgesById, edgeIds });
   })
   .case(selectAllNodes, (state) => ({
     ...state,
