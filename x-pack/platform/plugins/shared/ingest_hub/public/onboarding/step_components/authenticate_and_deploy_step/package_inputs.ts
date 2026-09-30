@@ -123,11 +123,9 @@ function resolveServiceVars(
   // If filtering removes every ID from a non-empty original the user hadn't explicitly cleared,
   // fall back to service defaults — an empty list is the "intentional opt-out" sentinel.
   const filtered = rawVars.enabledDataStreams.filter((dsId) => service.dataStreams.includes(dsId));
-  const enabledDataStreams =
-    filtered.length === 0 && rawVars.enabledDataStreams.length > 0 ? service.dataStreams : filtered;
-  return enabledDataStreams === rawVars.enabledDataStreams
+  return filtered.length === rawVars.enabledDataStreams.length
     ? rawVars
-    : { ...rawVars, enabledDataStreams };
+    : { ...rawVars, enabledDataStreams: filtered };
 }
 
 const EMPTY_DS_VARS: Readonly<ServiceDataStreamVars> = { enabledInputs: [], varsByInput: {} };
