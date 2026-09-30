@@ -23,6 +23,7 @@ import {
   groupSelectedNodes,
   initializeWorkspace,
   invertNodeSelection,
+  redoWorkspace,
   registerWorkspaceListeners,
   selectAllNodes,
   selectNeighborNodes,
@@ -32,6 +33,7 @@ import {
   toggleNodeSelection,
   unblockAllNodes,
   unblockNode,
+  undoWorkspace,
   ungroupNode,
   workspaceChanged,
   workspaceInitializedSelector,
@@ -206,6 +208,8 @@ describe('workspace state', () => {
     expect(environment.store.getState().workspace).toEqual({
       ...snapshot,
       isInitialized: false,
+      undoHistory: [],
+      redoHistory: [],
     });
   });
 
@@ -597,6 +601,64 @@ describe('workspace state', () => {
     environment.store.dispatch(unblockAllNodes());
     expect(environment.store.getState().workspace.blocklistedNodeIds).toEqual([]);
     expect(environment.store.getState().workspace.blocklistedNodesById).toEqual({});
+  });
+
+  it('undoes and redoes topology changes using serializable snapshots', () => {
+    const environment = createMockGraphStore({});
+    const state = {
+      ...environment.store.getState().workspace,
+      nodesById: { selected: { id: 'selected' }, remaining: { id: 'remaining' } },
+      nodeIds: ['selected', 'remaining'],
+      selectedNodeIds: ['selected'],
+    } as unknown as ReturnType<typeof environment.store.getState>['workspace'];
+    environment.store.dispatch(workspaceChanged(state));
+    environment.store.dispatch(deleteSelectedNodes());
+
+    expect(environment.store.getState().workspace.nodeIds).toEqual(['remaining']);
+    expect(environment.store.getState().workspace.undoHistory).toHaveLength(1);
+
+    environment.store.dispatch(undoWorkspace());
+    expect(environment.store.getState().workspace.nodeIds).toEqual(['selected', 'remaining']);
+    expect(environment.store.getState().workspace.redoHistory).toHaveLength(1);
+
+    environment.store.dispatch(redoWorkspace());
+    expect(environment.store.getState().workspace.nodeIds).toEqual(['remaining']);
+    expect(environment.store.getState().workspace.undoHistory).toHaveLength(1);
+  });
+
+  it('preserves history across runtime snapshots and initialization across undo and redo', () => {
+    const environment = createMockGraphStore({});
+    const workspace = createWorkspaceMock();
+    Object.assign(workspace, {
+      nodes: [{ id: 'selected', data: { field: 'field', term: 'selected' } }],
+      edges: [],
+    });
+    const initialState = createWorkspaceState(workspace);
+    environment.store.dispatch(workspaceChanged(initialState));
+    environment.store.dispatch(deleteSelectedNodes());
+    const { undoHistory } = environment.store.getState().workspace;
+
+    expect(undoHistory).toHaveLength(1);
+    expect(undoHistory[0]).not.toHaveProperty('isInitialized');
+    expect(undoHistory[0]).not.toHaveProperty('undoHistory');
+    expect(undoHistory[0]).not.toHaveProperty('redoHistory');
+
+    environment.store.dispatch(initializeWorkspace());
+    environment.store.dispatch(workspaceChanged(initialState));
+    expect(environment.store.getState().workspace.undoHistory).toEqual(undoHistory);
+    expect(workspaceInitializedSelector(environment.store.getState())).toBe(true);
+
+    environment.store.dispatch(undoWorkspace());
+    expect(workspaceInitializedSelector(environment.store.getState())).toBe(true);
+    const { redoHistory } = environment.store.getState().workspace;
+    expect(redoHistory).toHaveLength(1);
+
+    environment.store.dispatch(workspaceChanged(initialState));
+    expect(environment.store.getState().workspace.redoHistory).toEqual(redoHistory);
+
+    environment.store.dispatch(redoWorkspace());
+    expect(workspaceInitializedSelector(environment.store.getState())).toBe(true);
+    expect(environment.store.getState().workspace.undoHistory).toHaveLength(1);
   });
 
   it('keeps edge selection single-valued', () => {
