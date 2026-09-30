@@ -6,13 +6,13 @@
  */
 
 import React, { useState } from 'react';
-import type { ProfilingSetupStatus } from '../../../services';
+import type { UniversalProfilingSetupStatus } from '../../../services';
 
 export const ProfilingSetupStatusContext = React.createContext<
   | {
-      profilingSetupStatus: ProfilingSetupStatus | undefined;
+      profilingSetupStatus: UniversalProfilingSetupStatus | undefined;
       setProfilingSetupStatus: React.Dispatch<
-        React.SetStateAction<ProfilingSetupStatus | undefined>
+        React.SetStateAction<UniversalProfilingSetupStatus | undefined>
       >;
     }
   | undefined
@@ -24,7 +24,7 @@ export function ProfilingSetupStatusContextProvider({
   children: React.ReactElement;
 }) {
   const [profilingSetupStatus, setProfilingSetupStatus] = useState<
-    ProfilingSetupStatus | undefined
+    UniversalProfilingSetupStatus | undefined
   >();
 
   return (

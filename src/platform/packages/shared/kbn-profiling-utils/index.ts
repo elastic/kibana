@@ -52,6 +52,12 @@ export type {
   StackTrace,
   StackTraceID,
 } from './common/profiling';
-export type { ProfilingStatus } from './common/profiling_status';
+export type {
+  OtelProfilingSchemaStatus,
+  ProfilingSchemasStatus,
+  ProfilingStatus,
+  UniversalProfilingSchemaStatus,
+  UniversalProfilingStatus,
+} from './common/profiling_status';
 export type { TopNFunctions } from './common/functions';
 export type { AggregationField, ESTopNFunctions } from './common/es_functions';

@@ -10,7 +10,7 @@ import type { Dispatch, SetStateAction } from 'react';
 import { act, renderHook } from '@testing-library/react';
 import { MemoryRouter, useHistory } from 'react-router-dom';
 import type { AppHeaderBack } from '@kbn/app-header';
-import type { ProfilingSetupStatus } from '../../../services';
+import type { UniversalProfilingSetupStatus } from '../../../services';
 import type { ProfilingDependencies } from '../profiling_dependencies/profiling_dependencies_context';
 import { ProfilingDependenciesContextProvider } from '../profiling_dependencies/profiling_dependencies_context';
 import { ProfilingSetupStatusContext } from '../profiling_setup_status/profiling_setup_status_context';
@@ -46,7 +46,9 @@ const CONTENT_ROUTES = ['/stacktraces/threads', '/flamegraphs/flamegraph', '/fun
 const UTILITY_ROUTES = ['/delete_data_instructions', '/profiling-not-enabled'];
 
 // Build a valid ProfilingSetupStatus, overriding only what each test case needs.
-const makeStatus = (overrides: Partial<ProfilingSetupStatus>): ProfilingSetupStatus => ({
+const makeStatus = (
+  overrides: Partial<UniversalProfilingSetupStatus>
+): UniversalProfilingSetupStatus => ({
   profiling_enabled: true,
   has_setup: true,
   has_data: true,
@@ -63,16 +65,16 @@ const renderBackNavigation = ({
   initialStatus,
 }: {
   initialEntry: string;
-  initialStatus?: ProfilingSetupStatus;
+  initialStatus?: UniversalProfilingSetupStatus;
 }) => {
   const renders: Array<AppHeaderBack | undefined> = [];
 
   // Captured during each render of Wrapper; always current after mount.
-  let setStatus: Dispatch<SetStateAction<ProfilingSetupStatus | undefined>> | undefined;
+  let setStatus: Dispatch<SetStateAction<UniversalProfilingSetupStatus | undefined>> | undefined;
 
   const Wrapper = ({ children }: React.PropsWithChildren) => {
     const [profilingSetupStatus, setProfilingSetupStatus] = useState<
-      ProfilingSetupStatus | undefined
+      UniversalProfilingSetupStatus | undefined
     >(initialStatus);
     setStatus = setProfilingSetupStatus;
     return (
@@ -98,7 +100,7 @@ const renderBackNavigation = ({
   );
 
   // setStatus is always defined after the first render; the non-null assertion is safe.
-  const updateStatus = (next: ProfilingSetupStatus | undefined) => {
+  const updateStatus = (next: UniversalProfilingSetupStatus | undefined) => {
     act(() => setStatus!(next));
   };
 

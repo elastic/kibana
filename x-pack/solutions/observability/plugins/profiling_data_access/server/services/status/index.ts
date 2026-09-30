@@ -1,0 +1,86 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import type { IScopedClusterClient, SavedObjectsClientContract } from '@kbn/core/server';
+import type {
+  ProfilingSchemasStatus,
+  UniversalProfilingSchemaStatus,
+  UniversalProfilingStatus,
+} from '@kbn/profiling-utils';
+import { createGetOtelStatusService } from '../../otel/services/status';
+import { createGetStatusService as createGetUniversalProfilingStatusService } from '../../universal_profiling/services/status';
+import type { RegisterServicesParams } from '../register_services';
+
+export interface ProfilingStatusParams {
+  soClient: SavedObjectsClientContract;
+  esClient: IScopedClusterClient;
+  spaceId?: string;
+  /** When provided, ES calls are cancelled once the signal aborts. */
+  abortSignal?: AbortSignal;
+}
+
+const toUniversalProfilingSchemaStatus = ({
+  has_setup: hasSetup,
+  has_data: hasData,
+  pre_8_9_1_data: hasLegacyData,
+}: UniversalProfilingStatus): UniversalProfilingSchemaStatus => ({
+  isAvailable: true,
+  hasSetup,
+  hasData,
+  hasLegacyData,
+});
+
+const createUnavailableUniversalProfilingSchemaStatus = (
+  isAvailable: boolean
+): UniversalProfilingSchemaStatus => ({
+  isAvailable,
+  hasSetup: false,
+  hasData: false,
+  hasLegacyData: false,
+});
+
+/** Creates a service that reports the profiling status for both the OTel and Universal Profiling schemas. */
+export function createGetProfilingStatusService(params: RegisterServicesParams) {
+  const { buildFlavor, createProfilingEsClient, logger } = params;
+  const getOtelStatus = createGetOtelStatusService(params);
+  const getUniversalProfilingStatus = createGetUniversalProfilingStatusService(params);
+  // Universal Profiling needs a setup that is not supported on serverless, which can only use the OTel schema.
+  const isUniversalProfilingAvailable = buildFlavor !== 'serverless';
+
+  return async ({
+    esClient,
+    soClient,
+    spaceId,
+    abortSignal,
+  }: ProfilingStatusParams): Promise<ProfilingSchemasStatus> => {
+    const client = createProfilingEsClient({ esClient: esClient.asInternalUser, abortSignal });
+    const { profiling } = await client.universalProfiling.status();
+
+    if (!profiling.enabled) {
+      return {
+        isEnabled: false,
+        otel: { isAvailable: true, hasData: false },
+        universalProfiling: createUnavailableUniversalProfilingSchemaStatus(
+          isUniversalProfilingAvailable
+        ),
+      };
+    }
+
+    const [otel, universalProfiling] = await Promise.all([
+      getOtelStatus({ esClient, abortSignal }),
+      isUniversalProfilingAvailable
+        ? getUniversalProfilingStatus({ esClient, soClient, spaceId, abortSignal }).then(
+            toUniversalProfilingSchemaStatus
+          )
+        : createUnavailableUniversalProfilingSchemaStatus(false),
+    ]);
+
+    const status = { isEnabled: true, otel, universalProfiling };
+    logger.debug(() => `Profiling status: ${JSON.stringify(status, null, 2)}`);
+    return status;
+  };
+}
