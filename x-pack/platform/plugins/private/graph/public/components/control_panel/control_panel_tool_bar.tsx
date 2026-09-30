@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { useDispatch } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import { i18n } from '@kbn/i18n';
 import { EuiButtonIcon, EuiFlexGroup, EuiFlexItem, EuiToolTip } from '@elastic/eui';
 import type { ControlType, Workspace, WorkspaceField } from '../../types';
@@ -14,8 +14,11 @@ import {
   blocklistSelectedNodes,
   deleteSelectedNodes,
   redoWorkspace,
+  startWorkspaceLayout,
+  stopWorkspaceLayout,
   type GraphDispatch,
   undoWorkspace,
+  workspaceSelector,
 } from '../../state_management';
 
 interface ControlPanelToolBarProps {
@@ -30,6 +33,7 @@ export const ControlPanelToolBar = ({
   liveResponseFields,
 }: ControlPanelToolBarProps) => {
   const dispatch = useDispatch<GraphDispatch>();
+  const { isLayoutRunning } = useSelector(workspaceSelector);
   const haveNodes = workspace.nodes.length === 0;
 
   const undoButtonMsg = i18n.translate('xpack.graph.sidebar.topMenu.undoButtonTooltip', {
@@ -89,11 +93,8 @@ export const ControlPanelToolBar = ({
   const onBlockListClick = () => dispatch(blocklistSelectedNodes());
   const onCustomStyleClick = () => onSetControl('style');
   const onDrillDownClick = () => onSetControl('drillDowns');
-  const onRunLayoutClick = () => workspace.runLayout();
-  const onPauseLayoutClick = () => {
-    workspace.stopLayout();
-    workspace.changeHandler();
-  };
+  const onRunLayoutClick = () => dispatch(startWorkspaceLayout());
+  const onPauseLayoutClick = () => dispatch(stopWorkspaceLayout());
 
   return (
     <EuiFlexGroup gutterSize="xs" responsive={false}>
@@ -201,7 +202,7 @@ export const ControlPanelToolBar = ({
         </EuiToolTip>
       </EuiFlexItem>
 
-      {(workspace.nodes.length === 0 || workspace.force === null) && (
+      {(workspace.nodes.length === 0 || !isLayoutRunning) && (
         <EuiFlexItem grow={false}>
           <EuiToolTip content={runLayoutButtonMsg} disableScreenReaderOutput>
             <EuiButtonIcon
@@ -216,7 +217,7 @@ export const ControlPanelToolBar = ({
         </EuiFlexItem>
       )}
 
-      {workspace.force !== null && workspace.nodes.length > 0 && (
+      {isLayoutRunning && workspace.nodes.length > 0 && (
         <EuiFlexItem grow={false}>
           <EuiToolTip content={pauseLayoutButtonMsg} disableScreenReaderOutput>
             <EuiButtonIcon
