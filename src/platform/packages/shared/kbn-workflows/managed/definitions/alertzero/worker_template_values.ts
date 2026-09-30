@@ -62,28 +62,24 @@ export const renderRuleTuningWorkerYaml = (
     JSON.stringify(values.extras)
   );
 
+export type HuntWorkerTemplateValues = ScheduledWorkerTemplateValues;
+
 /**
- * Hunt Watch Continuous Threat Hunt dials. Shape mirrors
- * `ContinuousThreatHuntWorkerExtras` in `@kbn/alertzero-common`. Individual
- * placeholders (not a whole extras blob) so Phase 3 can drop them into
- * `kibana.request` bodies and child inputs without a nested lookup.
+ * Hunt Watch Continuous Threat Hunt has no configurable dials: enabled/disabled
+ * (autonomy) and the schedule interval are its only settings. tier2When, candidateLimit,
+ * fanOutMax, and technology are fixed implementation constants. Absent `technology`
+ * renders as "" so the coordinator auto-resolves it.
  */
-export interface HuntWorkerTemplateValues extends ScheduledWorkerTemplateValues {
-  extras: {
-    /** Defaults to 'always' for the MVP; `on_hits` stays valid, just not UI-exposed. */
-    tier2When: 'on_hits' | 'always';
-    candidateLimit: number;
-    fanOutMax: number;
-    technology?: 'aws_iam' | 'fortigate';
-  };
-}
+const HUNT_WORKER_DEFAULTS = {
+  tier2When: 'always' as const,
+  candidateLimit: 10,
+  fanOutMax: 10,
+  technology: undefined as 'aws_iam' | 'fortigate' | undefined,
+};
 
 /**
  * Manual autonomy: manual trigger only. Assisted/supervised: 4h (or configured)
- * schedule plus manual. String dials are JSON-escaped so a value with quotes or
- * newlines cannot break the YAML parse. Absent `technology` renders as "" so the
- * child/coordinator treat it as unset. `extras` is also rendered whole (settings
- * contract), matching Rule Tuning.
+ * schedule plus manual.
  */
 /**
  * The manual trigger's optional `reportIds` input (Phase 3 task 2): a manual-bypass
@@ -115,9 +111,8 @@ export const renderHuntWorkerYaml = (yaml: string, values: HuntWorkerTemplateVal
 
   return renderScheduledWorkerYaml(yaml, values)
     .replaceAll('__WORKER_TRIGGERS__', triggers)
-    .replaceAll('__WORKER_EXTRAS__', JSON.stringify(values.extras))
-    .replaceAll('__WORKER_TIER2_WHEN__', JSON.stringify(values.extras.tier2When))
-    .replaceAll('__WORKER_CANDIDATE_LIMIT__', String(values.extras.candidateLimit))
-    .replaceAll('__WORKER_FAN_OUT_MAX__', String(values.extras.fanOutMax))
-    .replaceAll('__WORKER_TECHNOLOGY__', JSON.stringify(values.extras.technology ?? ''));
+    .replaceAll('__WORKER_TIER2_WHEN__', JSON.stringify(HUNT_WORKER_DEFAULTS.tier2When))
+    .replaceAll('__WORKER_CANDIDATE_LIMIT__', String(HUNT_WORKER_DEFAULTS.candidateLimit))
+    .replaceAll('__WORKER_FAN_OUT_MAX__', String(HUNT_WORKER_DEFAULTS.fanOutMax))
+    .replaceAll('__WORKER_TECHNOLOGY__', JSON.stringify(HUNT_WORKER_DEFAULTS.technology ?? ''));
 };

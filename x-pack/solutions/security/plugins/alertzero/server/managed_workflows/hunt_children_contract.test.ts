@@ -192,7 +192,6 @@ describe(ALERTZERO_WORKER_HUNT_CONTINUOUS_THREAT_HUNT_WORKFLOW_ID, () => {
         settingsVersion: 1,
         autonomyLevel: 'manual',
         scheduleInterval: '4h',
-        extras: { tier2When: 'always', candidateLimit: 10, fanOutMax: 10 },
       })
     ) as ParsedWorkflow;
   };
@@ -259,7 +258,6 @@ describe('Hunt Watch public exports (kbn-alertzero-common)', () => {
           settingsVersion: 1,
           autonomyLevel: 'manual',
           scheduleInterval: '4h',
-          extras: { tier2When: 'on_hits', candidateLimit: 10, fanOutMax: 10 },
         })
       ) as ParsedWorkflow;
     };

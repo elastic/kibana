@@ -6,7 +6,6 @@
  */
 
 import {
-  CONTINUOUS_THREAT_HUNT_DEFAULT_EXTRAS,
   RULE_TUNING_DEFAULT_EXTRAS,
   SYSTEM_SECURITY_WORKER_DETECTION_RULE_TUNING_ID,
   SYSTEM_SECURITY_WORKER_FLOOR_ATTACK_DISCOVERY_ID,
@@ -443,79 +442,36 @@ describe('createWorkerSettingsRegistration', () => {
 
   describe('Worker-specific settings — continuous threat hunt', () => {
     const registration = createWorkerSettingsRegistration(HUNT_WORKER_ID);
-    const defaultExtras = CONTINUOUS_THREAT_HUNT_DEFAULT_EXTRAS;
     const storedDefaults = {
       settingsVersion: 1,
       autonomyLevel: 'manual',
       scheduleInterval: '4h',
-      extras: defaultExtras,
     };
 
-    it('stores extras nested and projects them under settings.extras', () => {
+    it('has no extras: only autonomy and the schedule interval are configurable', () => {
       expect(registration.createDefaultValues()).toEqual(storedDefaults);
       expect(registration.toSettings(registration.createDefaultValues())).toEqual({
         workerId: HUNT_WORKER_ID,
         autonomy: 'manual',
         scheduleInterval: '4h',
-        extras: defaultExtras,
       });
     });
 
-    it('fills extras from defaults when a stored document has none', () => {
-      const stored = {
-        settingsVersion: 1,
-        autonomyLevel: 'assisted',
-        scheduleInterval: '4h',
-      };
+    it('drops a stale extras value from a document stored before the dials were retired', () => {
+      const stale = { ...storedDefaults, extras: { tier2When: 'always', candidateLimit: 10 } };
 
-      expect(registration.withMissingDefaults(stored)).toEqual({
-        ...stored,
-        extras: defaultExtras,
-      });
-      expect(registration.toSettings(stored)).toEqual({
+      expect(registration.withMissingDefaults(stale)).toEqual(storedDefaults);
+      expect(registration.toSettings(stale)).toEqual({
         workerId: HUNT_WORKER_ID,
-        autonomy: 'assisted',
+        autonomy: 'manual',
         scheduleInterval: '4h',
-        extras: defaultExtras,
       });
     });
 
-    it('keeps extras when a shared-field patch omits them', () => {
-      expect(registration.applyPatch(storedDefaults, { scheduleInterval: '6h' })).toEqual({
-        values: { ...storedDefaults, scheduleInterval: '6h' },
-      });
-    });
-
-    it('replaces extras whole when the patch supplies them', () => {
+    it('rejects an extras patch, naming the field', () => {
       expect(
-        registration.applyPatch(storedDefaults, {
-          extras: { ...defaultExtras, candidateLimit: 5, technology: 'fortigate' },
-        })
-      ).toEqual({
-        values: {
-          ...storedDefaults,
-          extras: { ...defaultExtras, candidateLimit: 5, technology: 'fortigate' },
-        },
-      });
-    });
-
-    it('rejects an unknown extras key, naming it', () => {
-      expect(
-        expectInvalid(
-          registration.applyPatch(storedDefaults, {
-            extras: { ...defaultExtras, huntCooldownMinutes: 240 },
-          })
-        )
-      ).toMatch(/extras.*huntCooldownMinutes/);
-    });
-
-    it.each([0, 11, 5.5])('rejects a stored candidateLimit of %s', (candidateLimit) => {
-      expect(() =>
-        registration.toSettings({
-          ...storedDefaults,
-          extras: { ...defaultExtras, candidateLimit },
-        })
-      ).toThrow(/extras\.candidateLimit/);
+        expectInvalid(registration.applyPatch(storedDefaults, { extras: { tier2When: 'always' } }))
+      ).toMatch(/extras/);
     });
   });
 

@@ -28,8 +28,8 @@ consts:
     settingsVersion: __WORKER_SETTINGS_VERSION__
     autonomy: "__WORKER_AUTONOMY_LEVEL__"
     scheduleInterval: "__WORKER_SCHEDULE_INTERVAL__"
-    extras: __WORKER_EXTRAS__
-    # Flat dial mirrors for Phase 3 kibana.request / child inputs (same values as extras).
+    # Fixed implementation constants, not user-configurable; see HUNT_WORKER_DEFAULTS
+    # in worker_template_values.ts.
     tier2When: __WORKER_TIER2_WHEN__
     candidateLimit: __WORKER_CANDIDATE_LIMIT__
     fanOutMax: __WORKER_FAN_OUT_MAX__
@@ -117,7 +117,7 @@ steps:
     if: "${{ steps.resolve_index_scope_gate.output.index_scope_blocked != true and steps.select_candidate_reports.output.ids != nil }}"
     foreach: "${{ steps.select_candidate_reports.output.ids }}"
     mode: settled
-    # Throttles branches within one sweep, rendered from extras.fanOutMax; the
+    # Throttles branches within one sweep, rendered from the fixed fanOutMax constant; the
     # engine scopes steps.<name> per branch since kibana#293651 (security-team#19670
     # fixed), so this no longer needs the concurrency.max: 1 mitigation. foreach
     # still processes every selected candidate regardless of this value (the

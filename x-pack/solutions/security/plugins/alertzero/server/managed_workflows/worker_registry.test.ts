@@ -56,7 +56,8 @@ const EXPECTED_WORKER_SETTINGS: Record<RegisteredWorkerId, ExpectedWorkerSetting
   'system-security-hunt-continuous-threat-hunt': {
     settingsVersion: 1,
     scheduleInterval: '4h',
-    extras: { tier2When: 'always', candidateLimit: 10, fanOutMax: 10 },
+    // No extras: tier2When/candidateLimit/fanOutMax/technology are fixed implementation
+    // constants, not settings.
     // Default autonomy is manual, so the scheduled trigger is omitted even though
     // scheduleInterval is a setting (assisted/supervised re-render it in).
     triggerTypes: ['manual'],
@@ -128,7 +129,7 @@ describe('workerRegistry', () => {
         expect(yaml).not.toContain('scheduleInterval');
       }
 
-      // Hunt owns candidateLimit under extras; no other Worker may leak that dial name.
+      // Hunt renders candidateLimit as a fixed constant; no other Worker may leak that dial name.
       if (catalog.id !== 'system-security-hunt-continuous-threat-hunt') {
         expect(yaml).not.toContain('candidateLimit');
       }

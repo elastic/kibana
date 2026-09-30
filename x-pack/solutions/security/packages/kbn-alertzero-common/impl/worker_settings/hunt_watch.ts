@@ -5,50 +5,20 @@
  * 2.0.
  */
 
-/**
- * Hunt Watch Worker settings. Adding a Continuous Threat Hunt dial means: add the field
- * to `ContinuousThreatHuntWorkerExtras`, add its default here, forward it in
- * `renderHuntWorkerYaml`, and (when UI lands) build its control under the Watch page.
- */
-
-import { z } from '@kbn/zod/v4';
 import {
   SYSTEM_SECURITY_WORKER_HUNT_CONTINUOUS_THREAT_HUNT_ID,
   WATCH_AUTONOMY_LEVELS,
 } from '../../constants';
-import { HuntTechnology } from '../schemas';
 import type { WorkerSettingsDeclaration } from './types';
 
-export const ContinuousThreatHuntWorkerExtras = z
-  .object({
-    /**
-     * Defaults to 'always' for the MVP (Steph, 2026-09-29): Tier 2 runs regardless of
-     * Tier 1's result unless explicitly set to `on_hits`. `on_hits` stays a valid value
-     * (kept so this dial means something and isn't a one-value enum in disguise), but
-     * there is no plan to expose a UI control for changing it away from the default.
-     */
-    tier2When: z.enum(['on_hits', 'always']),
-    candidateLimit: z.number().int().min(1).max(10),
-    fanOutMax: z.number().int().min(1).max(10),
-    /** Absent means the coordinator auto-resolves technologies from index scope. */
-    technology: HuntTechnology.optional(),
-  })
-  .strict();
-export type ContinuousThreatHuntWorkerExtras = z.infer<typeof ContinuousThreatHuntWorkerExtras>;
-
-export const CONTINUOUS_THREAT_HUNT_DEFAULT_EXTRAS: ContinuousThreatHuntWorkerExtras = {
-  tier2When: 'always',
-  candidateLimit: 10,
-  fanOutMax: 10,
+/**
+ * Hunt Watch Continuous Threat Hunt has no Worker-specific settings: enabled/disabled
+ * (autonomy) and the schedule interval are its only configurable settings. Its tier2When,
+ * candidateLimit, fanOutMax, and technology dials are fixed implementation constants, not
+ * user-configurable; see `HUNT_WORKER_DEFAULTS` in `worker_template_values.ts`.
+ */
+export const CONTINUOUS_THREAT_HUNT_SETTINGS: WorkerSettingsDeclaration = {
+  workerId: SYSTEM_SECURITY_WORKER_HUNT_CONTINUOUS_THREAT_HUNT_ID,
+  allowedAutonomyLevels: WATCH_AUTONOMY_LEVELS,
+  scheduleInterval: { defaultValue: '4h' },
 };
-
-export const CONTINUOUS_THREAT_HUNT_SETTINGS: WorkerSettingsDeclaration<ContinuousThreatHuntWorkerExtras> =
-  {
-    workerId: SYSTEM_SECURITY_WORKER_HUNT_CONTINUOUS_THREAT_HUNT_ID,
-    allowedAutonomyLevels: WATCH_AUTONOMY_LEVELS,
-    scheduleInterval: { defaultValue: '4h' },
-    extras: {
-      schema: ContinuousThreatHuntWorkerExtras,
-      defaultValue: CONTINUOUS_THREAT_HUNT_DEFAULT_EXTRAS,
-    },
-  };
