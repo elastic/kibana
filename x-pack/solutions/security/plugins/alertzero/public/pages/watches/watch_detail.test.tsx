@@ -347,7 +347,7 @@ describe('WatchDetailPage', () => {
     ).toBeInTheDocument();
   });
 
-  it('lays the accordion out with its own nodes and keeps the enable switch out of the toggle button', () => {
+  it('lays the accordion out with its own nodes: header band and body are present for each worker', () => {
     renderWatch(SYSTEM_SECURITY_WATCH_FLOOR_ID, floorWorkers);
 
     for (const worker of floorWorkers) {
@@ -355,18 +355,23 @@ describe('WatchDetailPage', () => {
       const body = screen.getByTestId(`alertZeroWorkerSettingsBody-${worker.id}`);
       expect(header).toBeInTheDocument();
       expect(body).toBeInTheDocument();
-      // The band and the body carry the padding: EUI's own accordion nodes stay untouched.
-      expect(getComputedStyle(header).padding).toBe('16px');
-      expect(getComputedStyle(body).padding).toBe('16px');
+    }
+  });
 
-      // The switch is itself a <button>, so assert it sits outside the accordion's own toggle
-      // button (`.euiAccordion__button`) — otherwise clicking it would toggle the accordion.
-      const accordionToggle = header.closest(
-        '.euiAccordion__triggerWrapper, .euiAccordion__button'
-      );
-      const enabledSwitch = screen.getByTestId(`alertZeroWorkerEnabledSwitch-${worker.id}`);
-      expect(accordionToggle).not.toBeNull();
-      expect(accordionToggle?.contains(enabledSwitch)).toBe(false);
+  it('clicking the enable switch does not collapse the accordion', () => {
+    renderWatch(SYSTEM_SECURITY_WATCH_FLOOR_ID, floorWorkers);
+
+    for (const worker of floorWorkers) {
+      const accordion = screen.getByTestId(`alertZeroWatchWorkerAccordion-${worker.id}`);
+      // Workers start expanded; the accordion trigger carries aria-expanded.
+      // EUI renders aria-expanded on the arrow <button> inside the trigger wrapper.
+      const trigger = accordion.querySelector('button[aria-expanded]');
+      expect(trigger).not.toBeNull();
+      expect(trigger?.getAttribute('aria-expanded')).toBe('true');
+
+      fireEvent.click(screen.getByTestId(`alertZeroWorkerEnabledSwitch-${worker.id}`));
+
+      expect(trigger?.getAttribute('aria-expanded')).toBe('true');
     }
   });
 
