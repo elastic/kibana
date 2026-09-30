@@ -223,7 +223,7 @@ describe('reconcileInvestigationStatuses', () => {
     expect(investigationSweepRepository.updateInSpace).not.toHaveBeenCalled();
   });
 
-  it('leaves an old investigation alone when its execution has been missing', async () => {
+  it('leaves an old investigation that never started running alone when its execution is missing', async () => {
     const { investigationSweepRepository, run } = setup();
     investigationSweepRepository.findAcrossSpaces.mockResolvedValueOnce(
       page([
@@ -279,8 +279,52 @@ describe('reconcileInvestigationStatuses', () => {
       expect(update.patch).toEqual({
         status: 'failed',
         completed_at: expect.any(String),
-        error: 'Continued investigation did not finish within the workflow timeout',
+        error: 'Investigation did not finish within the workflow timeout',
       });
+    });
+  });
+
+  describe('a running investigation with no execution of its own, such as a Slack thread', () => {
+    const running = (msAgo: number) =>
+      page([
+        investigation({
+          id: 'inv-1',
+          startedAt: new Date(Date.now() - msAgo).toISOString(),
+        }),
+      ]);
+
+    it('is left alone while its run may still be going', async () => {
+      const { investigationSweepRepository, run } = setup();
+      investigationSweepRepository.findAcrossSpaces.mockResolvedValueOnce(running(HOUR_MS));
+
+      const result = await run();
+
+      expect(investigationSweepRepository.updateInSpace).not.toHaveBeenCalled();
+      expect(result).toEqual({ scanned: 1, reconciled: 0 });
+    });
+
+    it('is failed once it outlives the workflow timeout', async () => {
+      const { investigationSweepRepository, run } = setup();
+      investigationSweepRepository.findAcrossSpaces.mockResolvedValueOnce(running(2 * HOUR_MS));
+
+      await run();
+
+      expect(investigationSweepRepository.updateInSpace.mock.calls[0][0].patch).toEqual({
+        status: 'failed',
+        completed_at: expect.any(String),
+        error: 'Investigation did not finish within the workflow timeout',
+      });
+    });
+
+    it('is left alone when its start time cannot be parsed', async () => {
+      const { investigationSweepRepository, run } = setup();
+      investigationSweepRepository.findAcrossSpaces.mockResolvedValueOnce(
+        page([investigation({ id: 'inv-1', startedAt: 'not-a-date' })])
+      );
+
+      await run();
+
+      expect(investigationSweepRepository.updateInSpace).not.toHaveBeenCalled();
     });
   });
 
