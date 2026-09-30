@@ -39,10 +39,12 @@ const runHook = (config: unknown, env: Record<string, string> = {}) => {
   };
 };
 
-// The shared eval sandbox (dev-vault, ci-prod) authenticates certlessly via `apiKey` alone (see
-// elastic/sandbox-service docs/mtls.md#local-dev-credential-auth-optional); `sandbox.ssl.*` is not
-// read from config at all, so a real config never includes it here.
-const SANDBOX = { host: 'sandbox.example.com', port: 9443, apiKey: 'key' };
+const SANDBOX = {
+  host: 'sandbox.example.com',
+  port: 9443,
+  apiKey: 'key',
+  ssl: { certificate: CERT, key: KEY, certificateAuthorities: CA },
+};
 
 describe('nightshift-investigations scout hook', () => {
   afterAll(() => {
@@ -61,23 +63,18 @@ describe('nightshift-investigations scout hook', () => {
         SANDBOX_API_HOST: 'sandbox.example.com',
         SANDBOX_API_PORT: '9443',
         SANDBOX_API_KEY: 'key',
-        SANDBOX_CLIENT_CERT_PATH: '',
-        SANDBOX_CLIENT_KEY_PATH: '',
-        SANDBOX_CA_CERT_PATH: '',
+        SANDBOX_CLIENT_CERT_PATH: CERT,
+        SANDBOX_CLIENT_KEY_PATH: KEY,
+        SANDBOX_CA_CERT_PATH: CA,
         SANDBOX_KIBANA_CONFIG: Path.join(__dirname, 'kibana.sandbox.yml'),
       },
     });
   });
 
-  it('ignores sandbox.ssl in the config entirely, relying only on the environment for mTLS', () => {
-    const { output } = runHook({
-      sandbox: { ...SANDBOX, ssl: { certificate: CERT, key: KEY, certificateAuthorities: CA } },
-    });
-    expect(output.env).toMatchObject({
-      SANDBOX_CLIENT_CERT_PATH: '',
-      SANDBOX_CLIENT_KEY_PATH: '',
-      SANDBOX_CA_CERT_PATH: '',
-    });
+  it('exports an empty CA when the sandbox has no private CA, since kibana.sandbox.yml needs it', () => {
+    const { ssl, ...rest } = SANDBOX;
+    const { output } = runHook({ sandbox: { ...rest, ssl: { certificate: CERT, key: KEY } } });
+    expect(output.env.SANDBOX_CA_CERT_PATH).toBe('');
   });
 
   it('leaves host and port unset so kibana.sandbox.yml defaults them', () => {
@@ -87,40 +84,29 @@ describe('nightshift-investigations scout hook', () => {
     expect(output.env).not.toHaveProperty('SANDBOX_API_PORT');
   });
 
-  it('falls back to SANDBOX_API_KEY exported in the shell, with the config taking precedence', () => {
-    expect(runHook({}, { SANDBOX_API_KEY: 'shell-key' }).output.env).toMatchObject({
-      SANDBOX_API_KEY: 'shell-key',
-    });
-    expect(
-      runHook({ sandbox: SANDBOX }, { SANDBOX_API_KEY: 'shell-key' }).output.env
-    ).toMatchObject({ SANDBOX_API_KEY: 'key' });
-  });
-
-  it('sources the client certificate and key only from the environment (self-hosted mTLS)', () => {
+  it('falls back to SANDBOX_* exported in the shell, with the config taking precedence', () => {
     const shell = {
+      SANDBOX_API_KEY: 'shell-key',
       SANDBOX_CLIENT_CERT_PATH: CERT,
       SANDBOX_CLIENT_KEY_PATH: SHELL_KEY,
-      SANDBOX_CA_CERT_PATH: CA,
     };
-    expect(runHook({ sandbox: SANDBOX }, shell).output.env).toMatchObject(shell);
+    expect(runHook({}, shell).output.env).toMatchObject(shell);
+    expect(runHook({ sandbox: SANDBOX }, shell).output.env).toMatchObject({
+      SANDBOX_API_KEY: 'key',
+      SANDBOX_CLIENT_KEY_PATH: KEY,
+    });
   });
 
   it('rejects PEM file paths that cannot be read', () => {
-    const { status, stderr } = runHook(
-      { sandbox: SANDBOX },
-      { SANDBOX_CLIENT_CERT_PATH: CERT, SANDBOX_CLIENT_KEY_PATH: '/missing/key' }
-    );
+    const { status, stderr } = runHook({
+      sandbox: { ...SANDBOX, ssl: { ...SANDBOX.ssl, key: '/missing/key' } },
+    });
     expect(status).toBe(1);
     expect(stderr).toContain('cannot read sandbox PEM file /missing/key');
     expect(
-      runHook(
-        { sandbox: SANDBOX },
-        {
-          SANDBOX_CLIENT_CERT_PATH: CERT,
-          SANDBOX_CLIENT_KEY_PATH: KEY,
-          SANDBOX_CA_CERT_PATH: '/no/ca',
-        }
-      ).status
+      runHook({
+        sandbox: { ...SANDBOX, ssl: { ...SANDBOX.ssl, certificateAuthorities: '/no/ca' } },
+      }).status
     ).toBe(1);
   });
 
@@ -134,12 +120,6 @@ describe('nightshift-investigations scout hook', () => {
     expect(stderr).toContain('sandbox host set without an API key');
   });
 
-  it('rejects a client cert set via the environment without an API key', () => {
-    const { status, stderr } = runHook({}, { SANDBOX_CLIENT_CERT_PATH: CERT });
-    expect(status).toBe(1);
-    expect(stderr).toContain('sandbox certificate set without an API key');
-  });
-
   it('exports empty PEM paths without a client certificate, so Kibana uses the API key only', () => {
     const { output } = runHook({ sandbox: { apiKey: 'key' } });
     expect(output.env).toMatchObject({
@@ -151,15 +131,10 @@ describe('nightshift-investigations scout hook', () => {
   });
 
   it('requires the client certificate and key as a pair', () => {
-    const { status, stderr } = runHook(
-      { sandbox: { apiKey: 'key' } },
-      { SANDBOX_CLIENT_CERT_PATH: CERT }
-    );
+    const { status, stderr } = runHook({ sandbox: { apiKey: 'key', ssl: { certificate: CERT } } });
     expect(status).toBe(1);
     expect(stderr).toContain('set both sandbox.ssl.certificate and sandbox.ssl.key');
-    expect(runHook({ sandbox: { apiKey: 'key' } }, { SANDBOX_CLIENT_KEY_PATH: KEY }).status).toBe(
-      1
-    );
+    expect(runHook({ sandbox: { apiKey: 'key', ssl: { key: KEY } } }).status).toBe(1);
   });
 
   it('rejects input that is not a JSON object', () => {

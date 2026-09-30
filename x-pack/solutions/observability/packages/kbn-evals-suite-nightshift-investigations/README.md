@@ -65,34 +65,33 @@ process arguments. CI reads the same block from the ci-prod Vault. The hook need
 
 #### Other profiles or a different sandbox
 
-The shared eval sandbox (`dev-vault`, ci-prod) authenticates certlessly, via sandbox-api's
-"local-dev credential auth" (see `elastic/sandbox-service`
-[`docs/mtls.md`](https://github.com/elastic/sandbox-service/blob/main/docs/mtls.md#local-dev-credential-auth-optional)):
-`sandbox.apiKey` holds a `<username>:<password>` pair, and no client certificate is needed or
-available (a real Cloud-issued client cert only exists on Hosted/Serverless Kibana). A profile
-backed by a local config file (for example `--profile local`, reading
+A profile backed by a local config file (for example `--profile local`, reading
 `scripts/vault/config.local.json` in `@kbn/evals`) needs its own `sandbox` block:
 
 ```json
 "sandbox": {
   "host": "sandbox-api.example.com",
   "port": 9090,
-  "apiKey": "..."
+  "apiKey": "...",
+  "ssl": {
+    "certificate": "/path/to/tls.crt",
+    "key": "/path/to/tls.key",
+    "certificateAuthorities": "/path/to/ca.crt"
+  }
 }
 ```
 
-`sandbox.ssl` in the config is **not read** by the hook — only a self-hosted sandbox-api that still
-requires mTLS needs client certificates, and those are read from the environment instead (below),
-never from a profile's config file.
+PEM fields hold absolute **file paths**, which Kibana reads at startup (`xpack.sandbox.ssl.*`).
+All three are optional, but `certificate` and `key` go together. Without them, Kibana connects
+without a client certificate and authenticates with the API key only, which works only if
+sandbox-api does not require mTLS. The hook fails early if a referenced file is not readable.
 
-Export the variables yourself to point at a sandbox you run locally: `SANDBOX_API_KEY`, optionally
-`SANDBOX_CLIENT_CERT_PATH` and `SANDBOX_CLIENT_KEY_PATH` for mTLS (both file **paths**, going
-together), and for a private CA `SANDBOX_CA_CERT_PATH`. The hook fails early if a referenced file
-is not readable. `sandbox.apiKey` in the config takes precedence over `SANDBOX_API_KEY` exported in
-the shell. `SANDBOX_API_HOST` and `SANDBOX_API_PORT` default to `localhost:9090` (the probe port is
-not the gRPC endpoint). A self-hosted sandbox must accept these client certificates and allow
-sandbox-api to reach its containers; leave sandbox-service's `WORKSPACE_SNAPSHOT_*` settings unset
-for isolated conversations.
+Alternatively, export the variables yourself, for example to point at a sandbox you run locally:
+`SANDBOX_API_KEY`, optionally `SANDBOX_CLIENT_CERT_PATH` and `SANDBOX_CLIENT_KEY_PATH` for mTLS,
+and for a private CA `SANDBOX_CA_CERT_PATH`. Profile values take precedence over exported ones. `SANDBOX_API_HOST` and `SANDBOX_API_PORT`
+default to `localhost:9090` (the probe port is not the gRPC endpoint). A self-hosted sandbox must
+accept these client certificates and allow sandbox-api to reach its containers; leave
+sandbox-service's `WORKSPACE_SNAPSHOT_*` settings unset for isolated conversations.
 
 Set `SANDBOX_MAX_CONCURRENT_SESSIONS` on a self-hosted sandbox-api process to support the run
 (for example, 64 for a 61-example, concurrency-16 run). Its default pool holds only ten active
