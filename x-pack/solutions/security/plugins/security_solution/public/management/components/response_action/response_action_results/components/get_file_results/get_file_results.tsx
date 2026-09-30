@@ -20,10 +20,6 @@ export interface GetFileResultsProps {
   'data-test-subj'?: string;
 }
 
-/**
- * DO NOT USE as it is undergoing refactoring. Use `<ResponseActionResults>` component intead
- * @deprecated
- */
 export const GetFileResults = memo<GetFileResultsProps>(
   ({ action, agentId, 'data-test-subj': dataTestSubj }) => {
     // For get-file, we only allow a user to access the files if they have file operations privilage
