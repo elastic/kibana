@@ -58,9 +58,10 @@ export const runSubqueriesValidationSuite = (setup: Setup) => {
         const { expectErrors } = await setup();
 
         // A nonempty source ensures Elasticsearch does not skip RERANK validation.
+        // An empty inference_id is valid, so the query type error is the nested signal.
         await expectErrors(
-          'FROM index, (FROM other_index, (ROW keywordField = "text" | RERANK "query" ON keywordField WITH {}))',
-          ['"inference_id" parameter is required for RERANK.']
+          'FROM index, (FROM other_index, (ROW keywordField = "text" | RERANK 1 ON keywordField WITH {}))',
+          ['RERANK query must be of type text. Found integer']
         );
       });
 
