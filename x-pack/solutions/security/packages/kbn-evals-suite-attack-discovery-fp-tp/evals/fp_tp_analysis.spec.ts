@@ -22,10 +22,7 @@ import type { HttpHandler } from '@kbn/core/public';
 import type { EvalConnector, EvaluationDataset, Example } from '@kbn/evals';
 import type { EsClient } from '@kbn/scout';
 import type { ToolingLog } from '@kbn/tooling-log';
-import {
-  FP_TP_INFERENCE_FEATURE_ID,
-  FP_TP_MANAGED_WORKFLOW_ID,
-} from '../src/constants';
+import { FP_TP_INFERENCE_FEATURE_ID, FP_TP_MANAGED_WORKFLOW_ID } from '../src/constants';
 import { evaluate, selectEvaluators, tags } from '../src/evaluate';
 import {
   createFpTpTrajectoryEvaluator,
