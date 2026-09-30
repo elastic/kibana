@@ -80,7 +80,6 @@ import {
   OPTION_LISTS_LOADING,
   OPTION_SELECTABLE,
 } from '../screens/common/filter_group';
-import { LOADING_SPINNER } from '../screens/common/page';
 import { ALERTS_URL } from '../urls/navigation';
 import { FIELDS_BROWSER_BTN } from '../screens/rule_details';
 import { openFilterGroupContextMenu } from './common/filter_group';
@@ -91,8 +90,7 @@ import { getDataTestSubjectSelector } from '../helpers/common';
 export const addExceptionFromFirstAlert = () => {
   expandFirstAlertActions();
   cy.get(ADD_EXCEPTION_BTN, { timeout: 10000 }).first().click();
-  cy.get(LOADING_SPINNER).should('exist');
-  cy.get(LOADING_SPINNER).should('not.exist');
+  cy.get(FIELD_INPUT).should('be.visible');
 };
 
 export const openAddEndpointExceptionFromFirstAlert = () => {
