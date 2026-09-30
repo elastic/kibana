@@ -682,8 +682,10 @@ steps:
                     alert{% if variables.fp_candidate_count != 1 %}s{% endif %} {% if variables.fp_candidate_count == 1 %}remains{% else %}remain{% endif %} tagged az:false_positive and untouched; this Investigation
                     stays open for manual follow-up.
 
-      # An unanswered deadline is not a dismissal: nobody rejected the verdict, so the alerts
-      # keep their az:false_positive tag and stay open for an analyst to pick up.
+      # Expiry is not a dismissal: nobody rejected the verdict, so the alerts keep their
+      # az:false_positive tag and are not re-tagged. The gate also settles as expired when an
+      # approved close failed and its re-parked retry ran out of time, and that failed attempt
+      # may have closed some alerts, so the comment below does not claim they are all open.
       - name: handle_expired
         type: if
         condition: "${{ variables.proposal_outcome == 'expired' }}"
@@ -713,7 +715,7 @@ steps:
             with:
               conversation_id: "{{ steps.create_investigation.output.conversation_id }}"
               message: >-
-                No decision was made before the proposal expired. {{ variables.fp_candidate_count }} alert{% if variables.fp_candidate_count != 1 %}s{% endif %} {% if variables.fp_candidate_count == 1 %}is{% else %}are{% endif %} tagged az:false_positive. If a closure attempt partially succeeded before the proposal expired, some may already be closed, so check each alert's workflow_status rather than assuming {% if variables.fp_candidate_count == 1 %}it is{% else %}they are{% endif %} still open.
+                The closure proposal expired before a closure was completed. {{ variables.fp_candidate_count }} alert{% if variables.fp_candidate_count != 1 %}s{% endif %} {% if variables.fp_candidate_count == 1 %}is{% else %}are{% endif %} tagged az:false_positive. If a closure attempt partially succeeded before the proposal expired, some may already be closed, so check each alert's workflow_status rather than assuming {% if variables.fp_candidate_count == 1 %}it is{% else %}they are{% endif %} still open.
 
       # Defensive branch. The gate settles as succeeded, dismissed or expired: a failed close
       # action is recorded `failed`, cloned and re-parked for another decision, and an

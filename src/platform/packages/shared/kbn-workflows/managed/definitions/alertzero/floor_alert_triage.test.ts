@@ -811,6 +811,9 @@ describe('floor_alert_triage — proposal outcomes', () => {
       expect(rendered).toContain('may already be closed');
       expect(rendered).toContain(`rather than assuming ${stillOpen}`);
       expect(rendered).not.toContain('remain open');
+      // Expiry also follows an approved close that failed and was re-parked, so the comment
+      // must not claim nobody decided.
+      expect(rendered).not.toContain('No decision was made');
     }
   );
 
