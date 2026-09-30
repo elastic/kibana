@@ -17,8 +17,8 @@ const MAX_ID_LENGTH = 256;
 export const DASHBOARD_PANEL_LABEL_MAX_LENGTH = 512;
 
 /**
- * A dashboard panel attachment is a thin pointer: it names a panel on a dashboard attachment
- * in the same conversation and never carries the panel configuration itself.
+ * A dashboard panel attachment is a thin pointer: it names one item on a dashboard attachment in the
+ * same conversation (a panel, control, or section) and never carries the item configuration itself.
  */
 export const dashboardPanelAttachmentDataSchema = z.object({
   dashboard_attachment_id: z.string().min(1).max(MAX_ID_LENGTH),

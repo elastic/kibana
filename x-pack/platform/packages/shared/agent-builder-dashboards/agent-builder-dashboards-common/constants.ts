@@ -11,6 +11,6 @@
 export const DASHBOARD_ATTACHMENT_TYPE = 'platform.dashboard.dashboard_state';
 
 /**
- * Attachment type identifier for a pointer to a single panel on a dashboard attachment
+ * Attachment type identifier for a pointer to a single item (panel, control, or section) on a dashboard attachment
  */
 export const DASHBOARD_PANEL_ATTACHMENT_TYPE = 'platform.dashboard.panel';
