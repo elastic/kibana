@@ -11,6 +11,7 @@ import {
   runSynPrivateLocationMonitorsTaskSoon,
   runTaskPerPrivateLocation,
   DEFAULT_TASK_SCHEDULE,
+  FAILED_RUN_RETRY_DELAY_MS,
 } from './sync_private_locations_monitors_task';
 import { bumpAgentPolicyRevision } from '../synthetics_service/private_location/package_policy_service';
 import type { SyntheticsServerSetup } from '../types';
@@ -258,6 +259,31 @@ describe('SyncPrivateLocationMonitorsTask', () => {
         disableAutoSync: false,
         lastStartedAt: expect.anything(),
       });
+    });
+
+    it('retries a failed run in 5m and keeps the previous lastStartedAt', async () => {
+      const initialLastStartedAt = new Date(Date.now() - 60 * 60 * 1000).toISOString();
+      const taskInstance = {
+        ...getMockTaskInstance({ lastStartedAt: initialLastStartedAt }),
+        startedAt: new Date(),
+      };
+      jest.spyOn(task, 'fetchMonitorMwsIds').mockResolvedValue(['mw-1']);
+      jest.spyOn(task, 'hasMWsChanged').mockRejectedValue(new Error('Sync failed'));
+      jest.spyOn(getPrivateLocationsModule, 'getPrivateLocations').mockResolvedValue([
+        {
+          id: 'pl-1',
+          label: 'Private Location 1',
+          isServiceManaged: false,
+          agentPolicyId: 'policy-1',
+        },
+      ]);
+
+      const before = Date.now();
+      const result = await task.runTask({ taskInstance });
+
+      expect(result.state.lastStartedAt).toBe(initialLastStartedAt);
+      expect(scheduleOf(result)).toBeUndefined();
+      expect(runAtOf(result)?.getTime()).toBeGreaterThanOrEqual(before + FAILED_RUN_RETRY_DELAY_MS);
     });
 
     it('should update lastStartedAt to the current startedAt value', async () => {
