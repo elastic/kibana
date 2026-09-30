@@ -500,6 +500,65 @@ describe('SignificantEventsMaintenanceService', () => {
       expect(updateWorkflow.mock.calls.length).toBe(callsAfterFirst);
     });
 
+    it('preserves the continuous onboarding restore record across a re-pause', async () => {
+      // First pause: continuous onboarding was on, gets disabled and recorded.
+      // Re-pause: the setting now reads false (it was written off in the first
+      // pause), but the document must stay in disabledWorkflows so Resume can
+      // restore it and the setting.
+      const { api, updateWorkflow } = makeManagementApi();
+      const { service, soClient, spaceUiSettingsClient } = makeService({
+        management: api,
+        continuousOnboardingEnabled: true,
+      });
+
+      await service.pause({ request: REQUEST });
+      const firstWrite = soClient.create.mock.calls.at(-1)?.[1] as {
+        disabledWorkflows: Array<{ id: string; spaceId: string }>;
+      };
+      expect(firstWrite.disabledWorkflows).toContainEqual({
+        id: continuousDocumentId('default'),
+        spaceId: 'default',
+      });
+
+      spaceUiSettingsClient.set.mockClear();
+      updateWorkflow.mockClear();
+
+      await service.pause({ request: REQUEST });
+      const secondWrite = soClient.create.mock.calls.at(-1)?.[1] as {
+        disabledWorkflows: Array<{ id: string; spaceId: string }>;
+      };
+      expect(secondWrite.disabledWorkflows).toContainEqual({
+        id: continuousDocumentId('default'),
+        spaceId: 'default',
+      });
+    });
+
+    it('records continuous onboarding as a restore target when the setting read fails', async () => {
+      // A transient error reading the setting must fall back to recording a
+      // restore intent, same as the scheduled-discovery read failure path.
+      const { api } = makeManagementApi();
+      const { service, soClient, spaceUiSettingsClient } = makeService({
+        management: api,
+        continuousOnboardingEnabled: true,
+      });
+      spaceUiSettingsClient.get.mockImplementation(async (key: string) => {
+        if (key === OBSERVABILITY_NIGHTSHIFT_CONTINUOUS_ONBOARDING_ENABLED) {
+          throw new Error('settings read failed');
+        }
+        return false;
+      });
+
+      await service.pause({ request: REQUEST });
+      const pauseWrite = soClient.create.mock.calls.at(-1)?.[1] as {
+        disabledWorkflows: Array<{ id: string; spaceId: string }>;
+        partialFailures?: unknown[];
+      };
+      expect(pauseWrite.disabledWorkflows).toContainEqual({
+        id: continuousDocumentId('default'),
+        spaceId: 'default',
+      });
+    });
+
     it('records a partial failure but still pauses when one workflow cannot be disabled', async () => {
       const { api } = makeManagementApi({
         failUpdateFor: SIGNIFICANT_EVENTS_KI_ONBOARDING_WORKFLOW_ID,

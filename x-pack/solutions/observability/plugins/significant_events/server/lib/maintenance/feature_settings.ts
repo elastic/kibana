@@ -179,6 +179,9 @@ export const createFeatureSettingsController = ({
             target: continuousSettingTarget(spaceId),
             error: `Failed to pause continuous onboarding setting: ${toMessage(error)}`,
           });
+          // Uncertain read: prefer restore on resume for this space, same as
+          // the analogous scheduled-discovery read failure below.
+          continuousOnboardingTargets.push(continuousOnboardingWorkflowTarget(spaceId));
         }
         let scheduledEnabled = false;
         try {
