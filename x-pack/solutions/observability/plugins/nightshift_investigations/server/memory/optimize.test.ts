@@ -1333,11 +1333,48 @@ describe('optimizeMemory', () => {
 
     for (const propose of [proposeLabels, proposeExtractions]) {
       const { transcript } = propose.mock.calls[0][0];
-      expect(transcript).toContain('## Tool calls (parameters only)');
+      expect(transcript).toContain('## Tool calls (parameters only; results unavailable)');
       expect(transcript).toContain('nightshift_sandbox_bash');
       expect(transcript).toContain('FROM metrics-redis*');
-      expect(transcript.indexOf('## User')).toBeLessThan(transcript.indexOf('## Tool calls'));
-      expect(transcript.indexOf('## Tool calls')).toBeLessThan(transcript.indexOf('## Assistant'));
+      expect(transcript.indexOf('## User task')).toBeLessThan(transcript.indexOf('## Tool calls'));
+      expect(transcript.indexOf('## Tool calls')).toBeLessThan(
+        transcript.indexOf('## Final answer')
+      );
+    }
+  });
+
+  it('gives both LLM calls the tool results when the round could be read', async () => {
+    const store = createStore({
+      get: jest.fn().mockImplementation(async (id: string) => page(id)),
+    });
+    const proposeLabels = jest.fn().mockResolvedValue({ useful: [], harmful: [] });
+    const proposeExtractions = jest.fn().mockResolvedValue({ extractions: [], mergeTargets: [] });
+
+    await optimizeMemory({
+      store,
+      recalledIds: ['memory_a'],
+      proposeLabels,
+      proposeExtractions,
+      userMessage: 'why is checkout slow?',
+      assistantMessage: 'Redis evictions on checkout.',
+      toolCalls: [],
+      investigation: [
+        {
+          kind: 'tool',
+          toolId: 'nightshift_sandbox_bash',
+          params: { command: 'esql "FROM metrics-redis*"' },
+          resultText: 'evicted_keys=4210',
+          isError: false,
+        },
+      ],
+      logger: loggerMock.create(),
+    });
+
+    for (const propose of [proposeLabels, proposeExtractions]) {
+      const { transcript } = propose.mock.calls[0][0];
+      expect(transcript).toContain('## Investigation');
+      expect(transcript).toContain('Result: evicted_keys=4210');
+      expect(transcript).not.toContain('results unavailable');
     }
   });
 
@@ -1357,7 +1394,7 @@ describe('optimizeMemory', () => {
     });
 
     expect(proposeExtractions.mock.calls[0][0].transcript).toContain(
-      '## Tool calls (parameters only)\n(none)'
+      '## Tool calls (parameters only; results unavailable)\n(none)'
     );
   });
   it('labels only recalled pages fetched by id, not store.list()', async () => {

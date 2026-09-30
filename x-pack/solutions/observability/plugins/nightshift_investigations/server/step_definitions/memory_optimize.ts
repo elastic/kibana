@@ -127,6 +127,8 @@ export const memoryOptimizeStepDefinition = ({
               userMessage: context.input.prompt,
               assistantMessage: context.input.response,
               toolCalls: (context.input.tool_calls ?? []) as InvestigationToolCall[],
+              conversationId: context.input.conversation_id,
+              roundId: context.input.round_id,
               recalledIds: context.input.recalled_ids ?? [],
               esClient: await getMemoryEsClient(),
               spaceId,

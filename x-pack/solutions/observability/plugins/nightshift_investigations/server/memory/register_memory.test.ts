@@ -12,7 +12,7 @@ import {
   SIGNIFICANT_EVENTS_INFERENCE_PRODUCT_SOLUTION,
   SIGNIFICANT_EVENTS_INVESTIGATION_INFERENCE_FEATURE_ID,
 } from '@kbn/significant-events-schema';
-import { createMemoryStore, runMemoryOptimize } from './register_memory';
+import { createMemoryStore, loadRoundSteps, runMemoryOptimize } from './register_memory';
 import { optimizeMemory } from './optimize';
 
 jest.mock('./optimize', () => ({
@@ -106,5 +106,163 @@ describe('runMemoryOptimize', () => {
     expect(optimizeMemory).toHaveBeenCalledWith(
       expect.objectContaining({ toolCalls: [sandboxCall] })
     );
+  });
+
+  it('hands the optimizer the round steps it read from the conversation', async () => {
+    const get = jest.fn().mockResolvedValue({
+      rounds: [
+        {
+          id: 'round-1',
+          steps: [
+            {
+              type: 'tool_call',
+              tool_id: 'nightshift_sandbox_bash',
+              params: { command: 'ls' },
+              results: [{ type: 'other', data: { stdout: 'a b' } }],
+            },
+          ],
+        },
+      ],
+    });
+    getAgentBuilder.mockReturnValue({
+      runtime: { createModelProvider },
+      conversations: { getScopedClient: jest.fn().mockResolvedValue({ get }) },
+    });
+
+    await runMemoryOptimize({
+      request,
+      agentId: 'nightshift.investigation',
+      userMessage: 'why?',
+      assistantMessage: 'redis',
+      toolCalls: [],
+      conversationId: 'conversation-1',
+      roundId: 'round-1',
+      recalledIds: [],
+      esClient: {} as never,
+      spaceId: 'default',
+      getAgentBuilder,
+      logger: loggerMock.create(),
+      interactionId: 'execution-1',
+    });
+
+    expect(get).toHaveBeenCalledWith('conversation-1');
+    expect(optimizeMemory).toHaveBeenCalledWith(
+      expect.objectContaining({
+        investigation: [
+          expect.objectContaining({
+            kind: 'tool',
+            toolId: 'nightshift_sandbox_bash',
+            resultText: 'a b',
+          }),
+        ],
+      })
+    );
+  });
+});
+
+describe('loadRoundSteps', () => {
+  const request = { headers: {} } as never;
+  const agentBuilderWith = (get: jest.Mock) =>
+    ({ conversations: { getScopedClient: jest.fn().mockResolvedValue({ get }) } } as never);
+
+  it('does not read anything without a conversation and round id', async () => {
+    const get = jest.fn();
+    for (const ids of [{}, { conversationId: 'c' }, { roundId: 'r' }]) {
+      expect(
+        await loadRoundSteps({
+          agentBuilder: agentBuilderWith(get),
+          request,
+          logger: loggerMock.create(),
+          retryDelaysMs: [],
+          ...ids,
+        })
+      ).toBeUndefined();
+    }
+    expect(get).not.toHaveBeenCalled();
+  });
+
+  it('never falls back to another round when the round is missing', async () => {
+    const logger = loggerMock.create();
+    const get = jest.fn().mockResolvedValue({ rounds: [{ id: 'other', steps: [] }] });
+    expect(
+      await loadRoundSteps({
+        agentBuilder: agentBuilderWith(get),
+        request,
+        conversationId: 'c',
+        roundId: 'r',
+        logger,
+        retryDelaysMs: [],
+      })
+    ).toBeUndefined();
+    expect(logger.warn).toHaveBeenCalled();
+  });
+
+  it('falls back quietly, without leaking the error, when the read fails', async () => {
+    const logger = loggerMock.create();
+    const get = jest.fn().mockRejectedValue(new Error('secret-detail'));
+    expect(
+      await loadRoundSteps({
+        agentBuilder: agentBuilderWith(get),
+        request,
+        conversationId: 'c',
+        roundId: 'r',
+        logger,
+        retryDelaysMs: [],
+      })
+    ).toBeUndefined();
+    expect(logger.warn).toHaveBeenCalledWith(expect.not.stringContaining('secret-detail'));
+  });
+
+  it('waits for a round that is saved after the hook fires', async () => {
+    const logger = loggerMock.create();
+    const get = jest
+      .fn()
+      .mockRejectedValueOnce(new Error('not found'))
+      .mockResolvedValueOnce({ rounds: [{ id: 'other', steps: [] }] })
+      .mockResolvedValue({
+        rounds: [{ id: 'r', steps: [{ type: 'reasoning', reasoning: 'plan' }] }],
+      });
+    expect(
+      await loadRoundSteps({
+        agentBuilder: agentBuilderWith(get),
+        request,
+        conversationId: 'c',
+        roundId: 'r',
+        logger,
+        retryDelaysMs: [0, 0, 0],
+      })
+    ).toEqual([{ kind: 'reasoning', text: 'plan' }]);
+    expect(get).toHaveBeenCalledTimes(3);
+    expect(logger.warn).not.toHaveBeenCalled();
+  });
+
+  it('stops waiting when the run is aborted', async () => {
+    const controller = new AbortController();
+    controller.abort();
+    const get = jest.fn().mockRejectedValue(new Error('not found'));
+    expect(
+      await loadRoundSteps({
+        agentBuilder: agentBuilderWith(get),
+        request,
+        conversationId: 'c',
+        roundId: 'r',
+        logger: loggerMock.create(),
+        signal: controller.signal,
+        retryDelaysMs: [60_000, 60_000],
+      })
+    ).toBeUndefined();
+    expect(get).toHaveBeenCalledTimes(1);
+  });
+
+  it('is unavailable when Agent Builder is not there', async () => {
+    expect(
+      await loadRoundSteps({
+        agentBuilder: undefined,
+        request,
+        conversationId: 'c',
+        roundId: 'r',
+        logger: loggerMock.create(),
+      })
+    ).toBeUndefined();
   });
 });

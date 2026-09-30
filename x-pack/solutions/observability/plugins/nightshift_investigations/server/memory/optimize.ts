@@ -14,7 +14,7 @@ import type { BoundInferenceClient } from '@kbn/inference-common';
 import { isElasticsearchWriteConflict } from '@kbn/occ';
 import { formatPageRefs, previewText } from './log_format';
 import type { InvestigationToolCall } from '../decision_trees/accessed_trees';
-import { renderToolCalls } from '../cortex/optimize';
+import { renderMemoryTranscript, type TranscriptStep } from './transcript';
 import type { MemoryPageStore, VersionedMemoryPage } from './page_store';
 import {
   canonicalizeSlug,
@@ -25,7 +25,6 @@ import {
 import { toCounterUpdates } from './ranking';
 import { type MemoryPage } from '../../common/memory';
 
-const MAX_TRANSCRIPT_CHARS = 12_000;
 const MAX_EXTRACTIONS = 3;
 
 export const MEMORY_CRITIQUE_SYSTEM_PROMPT = `You are an impartial analyst-LLM.
@@ -33,7 +32,7 @@ export const MEMORY_CRITIQUE_SYSTEM_PROMPT = `You are an impartial analyst-LLM.
 **Objective**
 Evaluate how retrieved *memory* affected an agent's work.
 
-The transcript has the user task, the investigator's tool calls (parameters only: the commands and queries it ran, not their output), and its final answer. Use the tool calls to see whether the agent opened, followed, or contradicted a recalled memory.
+The transcript has the user task; the investigation, in order (the agent's notes and each tool call with an excerpt of its result; files the agent loaded from its prior context, including recalled memories, are listed on one line); and the final answer. Use it to see whether the agent opened, followed, or contradicted a recalled memory. If results are unavailable, tool calls show parameters only.
 
 **Definitions**
 - *Positive signal* ("helpful"): memory was quoted, aligned with, or enabled correct decisions.
@@ -50,7 +49,9 @@ Focus strictly on durable, tool-output-verifiable knowledge about the customer's
 
 export const MEMORY_EXTRACT_GUIDELINES = `Review the conversation. Extract only facts that are directly substantiated by the transcript.
 
-The transcript has the user task, the investigator's tool calls (parameters only: the commands and queries it ran, not their output), and its final answer. The answer is the record of what the tools returned. Use the tool calls to confirm the names and structure the answer relies on (indices, services, fields, hosts); never extract a fact from a tool call alone.
+The transcript has the user task; the investigation, in order (the agent's notes and each tool call with an excerpt of its result, where "ERROR" marks a failed call); and the final answer. Files the agent loaded from its own prior context (memories, Cortex, decision trees) are listed on one line: that knowledge is already stored, so never extract it again.
+
+Extract a fact only if a tool result in the investigation shows it. The final answer is a synthesis that can include the agent's inferences, so it is not evidence by itself. A failed call shows nothing about the environment. If results are unavailable (the section says so, and tool calls show parameters only), the final answer is the only source: extract only what it reports as observed (concrete names, values, and structure) and skip its inferences, hypotheses, and recommendations; use the tool-call parameters to confirm that the names it relies on were actually queried.
 
 **EXTRACT** — durable customer-environment knowledge:
 - Organizational context: team ownership, on-call structure, service → team mapping, escalation paths, naming conventions.
@@ -1153,6 +1154,7 @@ export const optimizeMemory = async ({
   userMessage,
   assistantMessage,
   toolCalls,
+  investigation,
   logger,
 }: {
   store: MemoryPageStore;
@@ -1162,14 +1164,17 @@ export const optimizeMemory = async ({
   synthesizeMemoryGroup?: SynthesizeMemoryGroup;
   userMessage: string;
   assistantMessage: string;
-  /** Investigator tool calls for the round; only their parameters are available. */
+  /** Parameters-only fallback for when the round's steps could not be read. */
   toolCalls: InvestigationToolCall[];
+  /** The round's steps in order with tool results, when the persisted round could be read. */
+  investigation?: TranscriptStep[];
   logger: Logger;
 }): Promise<MemoryOptimizeSummary> => {
   logger.debug(
     `Memory optimize start recalledIds=${recalledIds.length} ` +
       `[${recalledIds.join(', ') || '(none)'}] userChars=${userMessage.length} ` +
       `assistantChars=${assistantMessage.length} toolCalls=${toolCalls.length} ` +
+      `transcriptSource=${investigation ? 'round-steps' : 'tool-call-params'} ` +
       `user=${JSON.stringify(previewText(userMessage))}`
   );
   if (recalledIds.length === 0 && assistantMessage.trim().length === 0) {
@@ -1188,16 +1193,12 @@ export const optimizeMemory = async ({
   );
 
   const task = unwrapUserTask(userMessage);
-  const transcript = [
-    '## User',
-    task.slice(0, MAX_TRANSCRIPT_CHARS),
-    '',
-    '## Tool calls (parameters only)',
-    renderToolCalls(toolCalls),
-    '',
-    '## Assistant',
-    assistantMessage.slice(0, MAX_TRANSCRIPT_CHARS),
-  ].join('\n');
+  const transcript = renderMemoryTranscript({
+    task,
+    answer: assistantMessage,
+    investigation,
+    toolCalls,
+  });
 
   let labels: MemoryLabelProposal;
   if (recalledMemories.length === 0) {

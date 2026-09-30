@@ -106,6 +106,8 @@ describe('memoryOptimizeStepDefinition', () => {
       userMessage: 'why is checkout slow?',
       assistantMessage: 'Redis evictions.',
       toolCalls: [{ tool_id: 'nightshift_sandbox_bash', params: { command: 'ls' } }],
+      conversationId: 'conv-1',
+      roundId: 'round-1',
       recalledIds: ['memory_a'],
       esClient,
       spaceId: 'default',
