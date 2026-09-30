@@ -50,7 +50,7 @@ const collectStepsByType = (steps: WorkflowStep[], type: string): WorkflowStep[]
 describe('Nightshift investigation workflow', () => {
   it('persists the shared investigation output without sig-events write-back', () => {
     expect(NIGHTSHIFT_INVESTIGATION_WORKFLOW.id).toBe('system-nightshift-investigation');
-    expect(NIGHTSHIFT_INVESTIGATION_WORKFLOW.version).toBe(1);
+    expect(NIGHTSHIFT_INVESTIGATION_WORKFLOW.version).toBe(2);
     expect(investigation.name).toBe('Nightshift Investigation');
     expect(investigation.steps.map((step) => step.name)).toEqual([
       'ensure_investigation_agent',
