@@ -13,7 +13,7 @@ The Zendesk connector connects directly to the Zendesk API. It enables federated
 
 ## Overview
 
-This is a **custom connector** that uses Zendesk's REST API with Basic authentication (email and API token). You configure your Zendesk subdomain and credentials when creating the connector.
+The Zendesk connector uses Zendesk's REST API with Basic authentication (email and API token). You configure your Zendesk subdomain and credentials when creating the connector.
 
 ## Create connectors in {{kib}} [define-zendesk-ui]
 

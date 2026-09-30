@@ -13,7 +13,7 @@ The Dynatrace connector connects directly to the Dynatrace Environment API v2. I
 
 ## Overview
 
-This is a **custom connector** that uses Dynatrace's REST API with `Authorization: Api-Token` authentication. You configure your environment URL and an API access token when creating the connector.
+The Dynatrace connector uses Dynatrace's REST API with `Authorization: Api-Token` authentication. You configure your environment URL and an API access token when creating the connector.
 
 ## Create connectors in {{kib}} [define-dynatrace-ui]
 

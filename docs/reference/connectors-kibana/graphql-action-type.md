@@ -11,6 +11,10 @@ applies_to:
 
 The GraphQL connector lets AI agents run queries and introspect the schema of any GraphQL API endpoint.
 
+::::{note}
+This connector is currently available in **Agent Builder** only. Workflow support is planned for a future release.
+::::
+
 ## Create connectors in {{kib}} [define-graphql-ui]
 
 You can create connectors in **{{stack-manage-app}} > {{connectors-ui}}**. For example:

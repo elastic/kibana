@@ -13,7 +13,7 @@ The Datadog connector connects directly to the Datadog REST API. It lets a workf
 
 ## Overview
 
-This is a **custom connector** that uses Datadog's regional API hosts with API key and Application key authentication. You configure the Datadog site (region) and both keys when creating the connector.
+The Datadog connector uses Datadog's regional API hosts with API key and Application key authentication. You configure the Datadog site (region) and both keys when creating the connector.
 
 ## Create connectors in {{kib}} [define-datadog-ui]
 

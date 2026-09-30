@@ -13,7 +13,7 @@ The Sentry connector connects directly to the Sentry API. It lets a workflow or 
 
 ## Overview
 
-This is a **custom connector** that uses Sentry's REST API with Bearer token authentication. You configure your Sentry organization slug and an auth token when creating the connector.
+The Sentry connector uses Sentry's REST API with Bearer token authentication. You configure your Sentry organization slug and an auth token when creating the connector.
 
 ## Create connectors in {{kib}} [define-sentry-ui]
 

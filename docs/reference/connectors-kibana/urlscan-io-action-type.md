@@ -13,7 +13,7 @@ The URLScan.io connector gives a workflow or agent a verdict on a suspicious URL
 
 ## Overview
 
-This is a **custom connector** that calls the [URLScan.io API](https://urlscan.io/docs/api/) over HTTPS.
+The URLScan.io connector calls the [URLScan.io API](https://urlscan.io/docs/api/) over HTTPS.
 
 Reads are trimmed on purpose. A raw scan result runs into hundreds of kilobytes, because it embeds every HTTP transaction with its headers and timings; each action returns the verdict, page identity, contacted indicators, and file hashes instead, which is what an analyst or an agent reasons over.
 

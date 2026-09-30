@@ -13,7 +13,7 @@ The New Relic connector connects directly to New Relic's NerdGraph (GraphQL) API
 
 ## Overview
 
-This is a **custom connector** that uses New Relic's NerdGraph GraphQL API with API-key authentication.
+The New Relic connector uses New Relic's NerdGraph GraphQL API with API-key authentication.
 
 ## Create connectors in {{kib}} [define-new-relic-ui]
 

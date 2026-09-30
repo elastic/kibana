@@ -256,7 +256,10 @@ export const PatchResourceInputSchema = lazySchema(() =>
     name: z.string().max(MAX_STRING_LENGTH).describe('The name of the resource to patch.'),
     namespace: z.string().max(MAX_STRING_LENGTH).optional().describe(NAMESPACE_DESCRIPTION),
     patch: z
-      .union([z.record(z.string().max(MAX_STRING_LENGTH), z.unknown()), z.array(z.unknown())])
+      .union([
+        z.record(z.string().max(MAX_STRING_LENGTH), z.unknown()),
+        z.array(z.unknown()).max(100),
+      ])
       .describe(
         'The patch body. A JSON object for strategic-merge/merge patches, or a JSON array of operations ' +
           'for JSON Patch (patchType "json").'

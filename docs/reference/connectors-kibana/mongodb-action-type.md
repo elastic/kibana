@@ -9,7 +9,11 @@ applies_to:
 
 # MongoDB connector [mongodb-action-type]
 
-The MongoDB connector provides access to MongoDB collections using the native MongoDB driver. Use it to query documents, run aggregation pipelines, discover collection structure, and insert, update, or delete documents from workflows. AI agents can only use the read-only actions (find, aggregate, count, listCollections) — write actions (insertOne, updateOne, deleteOne) are workflow-only and never exposed to agents. It supports any MongoDB deployment reachable through a connection URI, using either the `mongodb://` or `mongodb+srv://` (DNS seedlist) scheme: replica sets, sharded clusters, and standalone instances.
+The MongoDB connector provides access to MongoDB collections using the native MongoDB driver. AI agents use it to query documents, run aggregation pipelines, and discover collection structure through the read-only actions (find, aggregate, count, listCollections). The write actions (insertOne, updateOne, deleteOne) are reserved for workflows and are never exposed to agents. It supports any MongoDB deployment reachable through a connection URI, using either the `mongodb://` or `mongodb+srv://` (DNS seedlist) scheme: replica sets, sharded clusters, and standalone instances.
+
+::::{note}
+This connector is currently available in **Agent Builder** only. Workflow support is planned for a future release.
+::::
 
 ## Create connectors in {{kib}} [define-mongodb-ui]
 

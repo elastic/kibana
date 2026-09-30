@@ -9,7 +9,11 @@ applies_to:
 
 # MySQL connector [mysql-action-type]
 
-The MySQL connector connects directly to a MySQL database so you can search, query, and explore schema from chat conversations. Workflow authors can also run write or DDL statements through **Execute SQL**.
+The MySQL connector connects directly to a MySQL database so you can search, query, and explore schema from chat conversations.
+
+::::{note}
+This connector is currently available in **Agent Builder** only. Workflow support is planned for a future release.
+::::
 
 ## Requirements [mysql-requirements]
 

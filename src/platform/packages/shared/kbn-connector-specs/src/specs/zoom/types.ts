@@ -116,6 +116,7 @@ export const ZoomListMeetingsInputSchema = lazySchema(() =>
   z.object({
     userId: z
       .string()
+      .max(320)
       .default('me')
       .describe('User ID or email. Use "me" for the authenticated user.'),
     type: z
@@ -125,28 +126,32 @@ export const ZoomListMeetingsInputSchema = lazySchema(() =>
         'Meeting type filter. Values: scheduled (all scheduled meetings), live (in-progress), upcoming (default, future meetings), upcoming_meetings (similar to upcoming), previous_meetings (past meetings).'
       ),
     pageSize: z.number().min(1).max(300).optional().describe('Number of results per page (1-300)'),
-    nextPageToken: z.string().optional().describe('Pagination token from a previous response'),
+    nextPageToken: z
+      .string()
+      .max(2048)
+      .optional()
+      .describe('Pagination token from a previous response'),
   })
 );
 export type ZoomListMeetingsInput = z.infer<typeof ZoomListMeetingsInputSchema>;
 
 export const ZoomGetMeetingDetailsInputSchema = lazySchema(() =>
   z.object({
-    meetingId: z.string().describe('Meeting ID or UUID'),
+    meetingId: z.string().max(200).describe('Meeting ID or UUID'),
   })
 );
 export type ZoomGetMeetingDetailsInput = z.infer<typeof ZoomGetMeetingDetailsInputSchema>;
 
 export const ZoomGetPastMeetingDetailsInputSchema = lazySchema(() =>
   z.object({
-    meetingId: z.string().describe('Past meeting ID or UUID'),
+    meetingId: z.string().max(200).describe('Past meeting ID or UUID'),
   })
 );
 export type ZoomGetPastMeetingDetailsInput = z.infer<typeof ZoomGetPastMeetingDetailsInputSchema>;
 
 export const ZoomGetMeetingRecordingsInputSchema = lazySchema(() =>
   z.object({
-    meetingId: z.string().describe('Meeting ID or UUID'),
+    meetingId: z.string().max(200).describe('Meeting ID or UUID'),
   })
 );
 export type ZoomGetMeetingRecordingsInput = z.infer<typeof ZoomGetMeetingRecordingsInputSchema>;
@@ -155,12 +160,25 @@ export const ZoomListUserRecordingsInputSchema = lazySchema(() =>
   z.object({
     userId: z
       .string()
+      .max(320)
       .default('me')
       .describe('User ID or email. Use "me" for the authenticated user.'),
-    from: z.string().optional().describe('Start date (YYYY-MM-DD). Defaults to current date.'),
-    to: z.string().optional().describe('End date (YYYY-MM-DD). Range cannot exceed 1 month.'),
+    from: z
+      .string()
+      .max(64)
+      .optional()
+      .describe('Start date (YYYY-MM-DD). Defaults to current date.'),
+    to: z
+      .string()
+      .max(64)
+      .optional()
+      .describe('End date (YYYY-MM-DD). Range cannot exceed 1 month.'),
     pageSize: z.number().min(1).max(300).optional().describe('Number of results per page (1-300)'),
-    nextPageToken: z.string().optional().describe('Pagination token from a previous response'),
+    nextPageToken: z
+      .string()
+      .max(2048)
+      .optional()
+      .describe('Pagination token from a previous response'),
   })
 );
 export type ZoomListUserRecordingsInput = z.infer<typeof ZoomListUserRecordingsInputSchema>;
@@ -170,6 +188,7 @@ export const ZoomDownloadRecordingFileInputSchema = lazySchema(() =>
     downloadUrl: z
       .string()
       .url()
+      .max(2048)
       .describe(
         'The download_url from a recording file object (obtained via getMeetingRecordings or listUserRecordings)'
       ),
@@ -187,22 +206,30 @@ export type ZoomDownloadRecordingFileInput = z.infer<typeof ZoomDownloadRecordin
 
 export const ZoomGetMeetingParticipantsInputSchema = lazySchema(() =>
   z.object({
-    meetingId: z.string().describe('Past meeting ID or UUID'),
+    meetingId: z.string().max(200).describe('Past meeting ID or UUID'),
     pageSize: z.number().min(1).max(300).optional().describe('Number of results per page (1-300)'),
-    nextPageToken: z.string().optional().describe('Pagination token from a previous response'),
+    nextPageToken: z
+      .string()
+      .max(2048)
+      .optional()
+      .describe('Pagination token from a previous response'),
   })
 );
 export type ZoomGetMeetingParticipantsInput = z.infer<typeof ZoomGetMeetingParticipantsInputSchema>;
 
 export const ZoomGetMeetingRegistrantsInputSchema = lazySchema(() =>
   z.object({
-    meetingId: z.string().describe('Meeting ID or UUID'),
+    meetingId: z.string().max(200).describe('Meeting ID or UUID'),
     status: z
       .enum(['pending', 'approved', 'denied'])
       .optional()
       .describe('Filter by registration status. Defaults to approved.'),
     pageSize: z.number().min(1).max(300).optional().describe('Number of results per page (1-300)'),
-    nextPageToken: z.string().optional().describe('Pagination token from a previous response'),
+    nextPageToken: z
+      .string()
+      .max(2048)
+      .optional()
+      .describe('Pagination token from a previous response'),
   })
 );
 export type ZoomGetMeetingRegistrantsInput = z.infer<typeof ZoomGetMeetingRegistrantsInputSchema>;

@@ -9,7 +9,11 @@ applies_to:
 
 # AWS CloudWatch connector [aws-cloudwatch-action-type]
 
-The AWS CloudWatch connector calls the [Amazon CloudWatch](https://docs.aws.amazon.com/AmazonCloudWatch/latest/APIReference/Welcome.html) and [Amazon CloudWatch Logs](https://docs.aws.amazon.com/AmazonCloudWatchLogs/latest/APIReference/Welcome.html) APIs so a workflow or agent can triage alerts: list and suppress noisy alarms, pull the metric data and dashboards behind an alert, and search or query the logs around an incident.
+The AWS CloudWatch connector calls the [Amazon CloudWatch](https://docs.aws.amazon.com/AmazonCloudWatch/latest/APIReference/Welcome.html) and [Amazon CloudWatch Logs](https://docs.aws.amazon.com/AmazonCloudWatchLogs/latest/APIReference/Welcome.html) APIs so an agent can triage alerts: list and suppress noisy alarms, pull the metric data and dashboards behind an alert, and search or query the logs around an incident.
+
+::::{note}
+This connector is currently available in **Agent Builder** only. Workflow support is planned for a future release.
+::::
 
 ## Create connectors in {{kib}} [define-aws-cloudwatch-ui]
 

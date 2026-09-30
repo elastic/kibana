@@ -13,7 +13,7 @@ The UniFi connector reads and controls a Ubiquiti UniFi console — a Dream Mach
 
 ## Overview
 
-This is a **custom connector** that talks to the UniFi Network and UniFi Protect integration APIs. Both applications run on the same console behind separate reverse-proxy prefixes and share one API key, so a single connector covers both:
+The UniFi connector talks to the UniFi Network and UniFi Protect integration APIs. Both applications run on the same console behind separate reverse-proxy prefixes and share one API key, so a single connector covers both:
 
 * `{console URL}/proxy/network/integration/v1/…` — UniFi Network
 * `{console URL}/proxy/protect/integration/v1/…` — UniFi Protect

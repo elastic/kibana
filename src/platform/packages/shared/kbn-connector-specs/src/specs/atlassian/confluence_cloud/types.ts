@@ -9,6 +9,11 @@
 
 import { z, lazySchema } from '@kbn/zod/v4';
 
+const MAX_ID_LENGTH = 200;
+const MAX_CURSOR_LENGTH = 2048;
+const MAX_TOKEN_LENGTH = 100;
+const MAX_FILTER_VALUES = 100;
+
 // =============================================================================
 // Action input schemas & inferred types
 // =============================================================================
@@ -21,28 +26,37 @@ export const ListPagesInputSchema = lazySchema(() =>
       .describe('Maximum number of pages to return per request. Defaults to 25 if omitted.'),
     cursor: z
       .string()
+      .max(MAX_CURSOR_LENGTH)
       .optional()
       .describe(
         'Opaque pagination cursor returned by a previous listPages response. Pass this to retrieve the next page of results.'
       ),
     spaceId: z
-      .union([z.string(), z.array(z.string())])
+      .union([
+        z.string().max(MAX_ID_LENGTH),
+        z.array(z.string().max(MAX_ID_LENGTH)).max(MAX_FILTER_VALUES),
+      ])
       .optional()
       .describe(
         'Numeric space ID or array of space IDs to restrict results to pages in those spaces. Obtain space IDs from listSpaces or getSpace.'
       ),
     title: z
       .string()
+      .max(1000)
       .optional()
       .describe('Filter pages whose title contains this string (partial, case-insensitive match).'),
     status: z
-      .union([z.string(), z.array(z.string())])
+      .union([
+        z.string().max(MAX_TOKEN_LENGTH),
+        z.array(z.string().max(MAX_TOKEN_LENGTH)).max(MAX_FILTER_VALUES),
+      ])
       .optional()
       .describe(
         'Filter by page status. Accepted values: "current" (published), "archived", "draft". Accepts a single value or an array.'
       ),
     bodyFormat: z
       .string()
+      .max(MAX_TOKEN_LENGTH)
       .optional()
       .describe(
         'Format to use for page body content in the response. Common values: "atlas_doc_format" (Atlassian Document Format JSON), "storage" (XML storage format). Omit to exclude body content from the response.'
@@ -57,11 +71,13 @@ export const GetPageInputSchema = lazySchema(() =>
       .string()
       .trim()
       .min(1)
+      .max(MAX_ID_LENGTH)
       .describe(
         'The numeric ID of the Confluence page to retrieve (for example, "123456"). Obtain this from a listPages call or from the page URL.'
       ),
     bodyFormat: z
       .string()
+      .max(MAX_TOKEN_LENGTH)
       .optional()
       .describe(
         'Format to use for page body content in the response. Common values: "atlas_doc_format" (Atlassian Document Format JSON), "storage" (XML storage format). Omit to exclude body content from the response.'
@@ -78,30 +94,39 @@ export const ListSpacesInputSchema = lazySchema(() =>
       .describe('Maximum number of spaces to return per request. Defaults to 25 if omitted.'),
     cursor: z
       .string()
+      .max(MAX_CURSOR_LENGTH)
       .optional()
       .describe(
         'Opaque pagination cursor returned by a previous listSpaces response. Pass this to retrieve the next page of results.'
       ),
     ids: z
-      .union([z.string(), z.array(z.string())])
+      .union([
+        z.string().max(MAX_ID_LENGTH),
+        z.array(z.string().max(MAX_ID_LENGTH)).max(MAX_FILTER_VALUES),
+      ])
       .optional()
       .describe(
         'Numeric space ID or array of space IDs to retrieve specific spaces. Use when you already know the space IDs.'
       ),
     keys: z
-      .union([z.string(), z.array(z.string())])
+      .union([
+        z.string().max(MAX_ID_LENGTH),
+        z.array(z.string().max(MAX_ID_LENGTH)).max(MAX_FILTER_VALUES),
+      ])
       .optional()
       .describe(
         'Space key or array of space keys to filter by (for example, "DEMO" or ["DEMO", "TEAM"]). Space keys are the short uppercase identifiers shown in Confluence URLs.'
       ),
     type: z
       .string()
+      .max(MAX_TOKEN_LENGTH)
       .optional()
       .describe(
         'Filter spaces by type. Accepted values: "global" (team or project spaces), "personal" (user personal spaces).'
       ),
     status: z
       .string()
+      .max(MAX_TOKEN_LENGTH)
       .optional()
       .describe('Filter spaces by status. Accepted values: "current" (active), "archived".'),
   })
@@ -114,6 +139,7 @@ export const GetSpaceInputSchema = lazySchema(() =>
       .string()
       .trim()
       .min(1)
+      .max(MAX_ID_LENGTH)
       .describe(
         'The numeric ID of the Confluence space to retrieve (for example, "98304"). Obtain this from a listSpaces call or from the space URL.'
       ),

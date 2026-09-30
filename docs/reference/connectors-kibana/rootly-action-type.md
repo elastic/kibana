@@ -13,7 +13,7 @@ The Rootly connector connects directly to the Rootly API. It lets a workflow or 
 
 ## Overview
 
-This is a **custom connector** that uses Rootly's JSON:API-based REST API with Bearer token authentication.
+The Rootly connector uses Rootly's JSON:API-based REST API with Bearer token authentication.
 
 ## Create connectors in {{kib}} [define-rootly-ui]
 
