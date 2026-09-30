@@ -1006,17 +1006,39 @@ describe('Bitbucket', () => {
     });
 
     it('explains a repository-scoped bearer token cannot list the whole workspace', async () => {
+      // The real executor (generate_executor_function.ts) puts the auth-type
+      // discriminator on ctx.secrets, not ctx.config - config only ever holds
+      // the connector's own config schema fields (workspace, here). Match that
+      // shape so this test cannot pass against a branch that reads the wrong
+      // property.
       mockClient.get.mockRejectedValue({ response: { status: 403 } });
       const ctx = {
         ...mockContext,
-        config: { workspace: 'my-workspace', authType: 'bearer' },
+        config: { workspace: 'my-workspace' },
+        secrets: { authType: 'bearer' },
       } as unknown as ActionContext;
       await expect(Bitbucket.test.handler(ctx)).rejects.toThrow('scoped to a single repository');
     });
 
     it('does not reinterpret a basic-auth 403 as a repository-scoped token', async () => {
       mockClient.get.mockRejectedValue({ response: { status: 403 } });
-      await expect(Bitbucket.test.handler(mockContext)).rejects.toThrow(
+      const ctx = {
+        ...mockContext,
+        config: { workspace: 'my-workspace' },
+        secrets: { authType: 'basic' },
+      } as unknown as ActionContext;
+      await expect(Bitbucket.test.handler(ctx)).rejects.toThrow(
+        'Bitbucket test failed (status 403)'
+      );
+    });
+
+    it('does not reinterpret a bearer-shaped config without secrets.authType as a scope limitation', async () => {
+      mockClient.get.mockRejectedValue({ response: { status: 403 } });
+      const ctx = {
+        ...mockContext,
+        config: { workspace: 'my-workspace', authType: 'bearer' },
+      } as unknown as ActionContext;
+      await expect(Bitbucket.test.handler(ctx)).rejects.toThrow(
         'Bitbucket test failed (status 403)'
       );
     });
