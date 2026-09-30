@@ -1677,7 +1677,7 @@ export const registerAPIRoutes = (router: FleetAuthzRouter, config: FleetConfigT
         tags: ['oas-tag:Elastic Agent actions'],
         availability: {
           since: '9.6.0',
-          stability: 'stable',
+          stability: 'experimental',
         },
       },
     })
@@ -1748,7 +1748,7 @@ export const registerAPIRoutes = (router: FleetAuthzRouter, config: FleetConfigT
         tags: ['oas-tag:Elastic Agent actions'],
         availability: {
           since: '9.6.0',
-          stability: 'stable',
+          stability: 'experimental',
         },
       },
     })
