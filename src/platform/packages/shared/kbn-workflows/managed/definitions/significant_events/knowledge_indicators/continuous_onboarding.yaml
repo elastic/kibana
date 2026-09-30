@@ -16,8 +16,9 @@
 # continuous_onboarding_workflow.test.ts.
 #
 # This is a per-space managed workflow installed by the significant_events
-# plugin. It is installed when continuous onboarding is enabled in a space and
-# uninstalled when it is disabled. Every request is prefixed with the space the
+# plugin. It is installed when continuous onboarding is first enabled in a space
+# and only disabled when it is turned off, so its execution history is kept.
+# Every request is prefixed with the space the
 # workflow runs in.
 
 version: '1'
