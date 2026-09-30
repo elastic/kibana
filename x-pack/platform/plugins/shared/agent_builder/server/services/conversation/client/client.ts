@@ -44,9 +44,11 @@ import {
   isAttachmentEvent,
   isConversationNotFoundError,
   isExecutionTerminalEvent,
+  TimelineEventType,
 } from '@kbn/agent-builder-common';
 import type {
   ConversationSearchOptions,
+  ExecutionTerminalEvent,
   SerializedMetadataValue,
   MetadataFieldValue,
 } from '@kbn/agent-builder-common';
@@ -877,36 +879,44 @@ class ConversationClientImpl implements ConversationClient {
 
   async updateRoundFeedback(
     conversationId: string,
-    roundId: string,
+    executionId: string,
     feedback: { vote: 'up' | 'down' | null; chips?: FeedbackChipId[]; comment?: string }
   ): Promise<void> {
     await this.writeConversation({
       conversationId,
       access: 'owner',
       fields: (current) => {
-        const round = current.rounds.find((r) => r.id === roundId);
+        const terminalEvent = (current.events ?? []).find(
+          (e): e is ExecutionTerminalEvent =>
+            isExecutionTerminalEvent(e) && e.execution_id === executionId
+        );
 
-        if (!round) {
+        if (!terminalEvent) {
           throw createConversationNotFoundError({ conversationId });
         }
 
         const existing = current.feedback ?? {};
 
         if (feedback.vote === null) {
-          const { [roundId]: _removed, ...rest } = existing;
+          const { [executionId]: _removed, ...rest } = existing;
           return { feedback: Object.keys(rest).length ? rest : undefined };
         }
+
+        const modelUsage =
+          terminalEvent.type === TimelineEventType.executionTerminated
+            ? terminalEvent.data.model_usage
+            : undefined;
 
         return {
           feedback: {
             ...existing,
-            [roundId]: {
+            [executionId]: {
               vote: feedback.vote,
               chips: feedback.chips ?? [],
               comment: feedback.comment ?? '',
               submitted_at: new Date().toISOString(),
-              connector_id: round.model_usage?.connector_id,
-              model: round.model_usage?.model,
+              connector_id: modelUsage?.connector_id,
+              model: modelUsage?.model,
             } satisfies ConversationRoundFeedback,
           },
         };

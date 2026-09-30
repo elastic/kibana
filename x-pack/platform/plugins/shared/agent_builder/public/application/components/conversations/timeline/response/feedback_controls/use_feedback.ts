@@ -78,8 +78,8 @@ const makeEbtPayload = (ctx: FeedbackEbtContext | undefined) => ({
 
 export const useFeedback = (
   conversationId: string,
-  roundId: string,
-  /** The current persisted vote, derived from conversation events. */
+  executionId: string,
+  /** The current persisted vote, derived from the conversation feedback map. */
   serverVote: Vote,
   ebtContext?: FeedbackEbtContext
 ): UseFeedbackReturn => {
@@ -146,11 +146,11 @@ export const useFeedback = (
         isSubmittingRef.current = true;
         setIsSubmitting(true);
         conversationsService
-          .submitRoundFeedback({ conversationId, roundId, vote: null })
+          .submitRoundFeedback({ conversationId, executionId, vote: null })
           .then(() => {
             invalidateConversation();
             services.analytics?.reportEvent(AGENT_BUILDER_EVENT_TYPES.FeedbackRetracted, {
-              round_id: roundId,
+              round_id: executionId,
               conversation_id: conversationId,
               ...makeEbtPayload(ebtContext),
             });
@@ -171,65 +171,36 @@ export const useFeedback = (
       setComment('');
       setSubmittedPhase('idle');
 
-      if (next === 'down') {
-        setVoteState('down');
-        setModalOpen(true);
-        setInviteVisible(false);
-        isSubmittingRef.current = true;
-        setIsSubmitting(true);
-        conversationsService
-          .submitRoundFeedback({ conversationId, roundId, vote: 'down' })
-          .then(() => {
-            invalidateConversation();
-            services.analytics?.reportEvent(AGENT_BUILDER_EVENT_TYPES.FeedbackSubmitted, {
-              round_id: roundId,
-              conversation_id: conversationId,
-              vote: 'down',
-              chips: [],
-              ...makeEbtPayload(ebtContext),
-            });
-          })
-          .catch(() => {
-            addErrorToast({ title: labels.voteError });
-            resetTo(prev);
-          })
-          .finally(() => {
-            isSubmittingRef.current = false;
-            setIsSubmitting(false);
+      setVoteState(next);
+      setModalOpen(next === 'down');
+      setInviteVisible(next === 'up');
+      isSubmittingRef.current = true;
+      setIsSubmitting(true);
+      conversationsService
+        .submitRoundFeedback({ conversationId, executionId, vote: next })
+        .then(() => {
+          invalidateConversation();
+          services.analytics?.reportEvent(AGENT_BUILDER_EVENT_TYPES.FeedbackSubmitted, {
+            round_id: executionId,
+            conversation_id: conversationId,
+            vote: next,
+            chips: [],
+            ...makeEbtPayload(ebtContext),
           });
-      } else {
-        setVoteState('up');
-        setModalOpen(false);
-        setInviteVisible(true);
-        isSubmittingRef.current = true;
-        setIsSubmitting(true);
-        conversationsService
-          .submitRoundFeedback({ conversationId, roundId, vote: 'up' })
-          .then(() => {
-            invalidateConversation();
-            services.analytics?.reportEvent(AGENT_BUILDER_EVENT_TYPES.FeedbackSubmitted, {
-              round_id: roundId,
-              conversation_id: conversationId,
-              vote: 'up',
-              chips: [],
-              ...makeEbtPayload(ebtContext),
-            });
-          })
-          .catch(() => {
-            addErrorToast({ title: labels.voteError });
-            setVoteState(prev);
-            setInviteVisible(false);
-          })
-          .finally(() => {
-            isSubmittingRef.current = false;
-            setIsSubmitting(false);
-          });
-      }
+        })
+        .catch(() => {
+          addErrorToast({ title: labels.voteError });
+          resetTo(prev);
+        })
+        .finally(() => {
+          isSubmittingRef.current = false;
+          setIsSubmitting(false);
+        });
     },
     [
       conversationId,
       conversationsService,
-      roundId,
+      executionId,
       resetTo,
       clearSubmittedTimers,
       invalidateConversation,
@@ -263,11 +234,11 @@ export const useFeedback = (
     setIsSubmitting(true);
 
     conversationsService
-      .submitRoundFeedback({ conversationId, roundId, vote: currentVote, chips, comment })
+      .submitRoundFeedback({ conversationId, executionId, vote: currentVote, chips, comment })
       .then(() => {
         invalidateConversation();
         services.analytics?.reportEvent(AGENT_BUILDER_EVENT_TYPES.FeedbackSubmitted, {
-          round_id: roundId,
+          round_id: executionId,
           conversation_id: conversationId,
           vote: currentVote,
           chips: chips as string[],
@@ -295,7 +266,7 @@ export const useFeedback = (
   }, [
     conversationId,
     conversationsService,
-    roundId,
+    executionId,
     chips,
     comment,
     ebtContext,

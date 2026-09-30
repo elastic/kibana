@@ -8,8 +8,10 @@
 import React, { useEffect, useMemo, useRef } from 'react';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { css } from '@emotion/react';
+import type { ExecutionTerminalEvent } from '@kbn/agent-builder-common';
+import { TimelineEventType, isExecutionTerminalEvent } from '@kbn/agent-builder-common';
 import { useConversationId } from '../../../../context/conversation/use_conversation_id';
-import { useConversation } from '../../../../hooks/use_conversation';
+import { useConversation, useConversationReadOnly } from '../../../../hooks/use_conversation';
 import { useCurrentUser } from '../../../../hooks/use_current_user';
 import { ThumbButton } from './feedback_controls/thumb_button';
 import { FeedbackModal } from './feedback_controls/feedback_modal';
@@ -18,7 +20,7 @@ import { FeedbackSubmitted } from './feedback_controls/feedback_submitted';
 import { useFeedback } from './feedback_controls/use_feedback';
 
 interface FeedbackActionsProps {
-  roundId: string;
+  executionId: string;
 }
 
 const fadingStyle = css`
@@ -31,32 +33,42 @@ const hiddenStyle = css`
   pointer-events: none;
 `;
 
-export const FeedbackActions: React.FC<FeedbackActionsProps> = ({ roundId }) => {
+export const FeedbackActions: React.FC<FeedbackActionsProps> = ({ executionId }) => {
   const conversationId = useConversationId();
   const { conversation } = useConversation();
   const { currentUser } = useCurrentUser();
+  const { isReadOnly } = useConversationReadOnly();
   const inviteRef = useRef<HTMLButtonElement>(null);
 
   const serverVote = useMemo(
-    () => conversation?.feedback?.[roundId]?.vote ?? null,
-    [conversation?.feedback, roundId]
+    () => conversation?.feedback?.[executionId]?.vote ?? null,
+    [conversation?.feedback, executionId]
   );
 
-  const round = useMemo(
-    () => conversation?.rounds.find((r) => r.id === roundId),
-    [conversation?.rounds, roundId]
+  const terminalEvent = useMemo(
+    () =>
+      (conversation?.events ?? []).find(
+        (e): e is ExecutionTerminalEvent =>
+          isExecutionTerminalEvent(e) && e.execution_id === executionId
+      ),
+    [conversation?.events, executionId]
   );
 
-  const ebtContext = useMemo(
-    () => ({
-      connectorId: round?.model_usage?.connector_id,
-      model: round?.model_usage?.model,
-      inputTokens: round?.model_usage?.input_tokens,
-      outputTokens: round?.model_usage?.output_tokens,
-      llmCalls: round?.model_usage?.llm_calls,
-    }),
-    [round]
-  );
+  const isRoundCompleted = terminalEvent !== undefined;
+
+  const ebtContext = useMemo(() => {
+    const usage =
+      terminalEvent?.type === TimelineEventType.executionTerminated
+        ? terminalEvent.data.model_usage
+        : undefined;
+    return {
+      connectorId: usage?.connector_id,
+      model: usage?.model,
+      inputTokens: usage?.input_tokens,
+      outputTokens: usage?.output_tokens,
+      llmCalls: usage?.llm_calls,
+    };
+  }, [terminalEvent]);
 
   const {
     vote,
@@ -74,7 +86,7 @@ export const FeedbackActions: React.FC<FeedbackActionsProps> = ({ roundId }) => 
     closeModal,
     dismissInvite,
     submit,
-  } = useFeedback(conversationId ?? '', roundId, serverVote, ebtContext);
+  } = useFeedback(conversationId ?? '', executionId, serverVote, ebtContext);
 
   useEffect(() => {
     if (inviteVisible) inviteRef.current?.focus();
@@ -87,7 +99,7 @@ export const FeedbackActions: React.FC<FeedbackActionsProps> = ({ roundId }) => 
 
   const showInvite = inviteVisible || (modalOpen && vote === 'up');
 
-  if (!isOwner) return null;
+  if (!isOwner || isReadOnly || !isRoundCompleted) return null;
 
   return (
     <>

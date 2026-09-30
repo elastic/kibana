@@ -49,7 +49,7 @@ interface ResponseActionsProps {
   /** Which side of the exchange `content` comes from, so the copy wording matches it. */
   copyTarget?: keyof typeof copyLabels;
   /** When set, renders the thumbs up/down feedback buttons. */
-  roundId?: string;
+  executionId?: string;
 }
 
 export const ResponseActions: React.FC<ResponseActionsProps> = ({
@@ -58,7 +58,7 @@ export const ResponseActions: React.FC<ResponseActionsProps> = ({
   executionTerminatedEvent,
   steps,
   copyTarget = 'response',
-  roundId,
+  executionId,
 }) => {
   const { addSuccessToast } = useToasts();
   const { euiTheme } = useEuiTheme();
@@ -132,9 +132,9 @@ export const ResponseActions: React.FC<ResponseActionsProps> = ({
           />
         </EuiFlexItem>
       )}
-      {roundId && (
+      {executionId && (
         <EuiFlexItem grow={false}>
-          <FeedbackActions roundId={roundId} />
+          <FeedbackActions executionId={executionId} />
         </EuiFlexItem>
       )}
     </EuiFlexGroup>

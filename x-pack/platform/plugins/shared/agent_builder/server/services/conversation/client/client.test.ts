@@ -1724,15 +1724,44 @@ describe('ConversationClient', () => {
   });
 
   describe('updateRoundFeedback', () => {
-    const round = createRound({ id: 'round-1' });
+    const executionId = 'round-1::execution';
+
+    const makeTerminatedEvent = (overrides?: {
+      model_usage?: {
+        connector_id: string;
+        model: string;
+        input_tokens: number;
+        output_tokens: number;
+        llm_calls: number;
+      };
+    }): TimelineEvent =>
+      ({
+        id: 'round-1::execution_terminated',
+        type: TimelineEventType.executionTerminated,
+        created_at: '2025-01-01T00:00:00.000Z',
+        actor: { type: EventActorType.agent, id: 'agent-1' },
+        execution_id: executionId,
+        trigger_event_id: 'round-1::user_message',
+        data: {
+          model_usage: overrides?.model_usage ?? {
+            connector_id: 'connector-default',
+            model: 'model-default',
+            input_tokens: 1,
+            output_tokens: 1,
+            llm_calls: 1,
+          },
+          time_to_first_token: 1,
+          time_to_last_token: 1,
+          outcome: { type: 'responded', response: { message: 'ok' } },
+        },
+      } as TimelineEvent);
 
     beforeEach(() => {
       mockEsClient.index.mockResolvedValue({ _seq_no: 2, _primary_term: 1 });
     });
 
     it('persists a vote with chips and comment, stamping connector and model from model_usage', async () => {
-      const roundWithModel = createRound({
-        id: 'round-1',
+      const terminatedEvent = makeTerminatedEvent({
         model_usage: {
           connector_id: 'connector-abc',
           model: 'claude-4.6-sonnet',
@@ -1741,9 +1770,14 @@ describe('ConversationClient', () => {
           llm_calls: 1,
         },
       });
-      mockGetDocumentResponse(createConversationDocument({ rounds: [roundWithModel] }));
+      mockGetDocumentResponse(
+        createConversationDocument({
+          schemaVersion: CONVERSATION_SCHEMA_VERSION,
+          events: [terminatedEvent] as ConversationEvent[],
+        })
+      );
 
-      await client.updateRoundFeedback('conversation-1', 'round-1', {
+      await client.updateRoundFeedback('conversation-1', executionId, {
         vote: 'up',
         chips: ['useful'],
         comment: 'great answer',
@@ -1756,7 +1790,7 @@ describe('ConversationClient', () => {
           if_primary_term: 1,
           document: expect.objectContaining({
             feedback: expect.objectContaining({
-              'round-1': expect.objectContaining({
+              [executionId]: expect.objectContaining({
                 vote: 'up',
                 chips: ['useful'],
                 comment: 'great answer',
@@ -1769,35 +1803,54 @@ describe('ConversationClient', () => {
       );
     });
 
-    it('removes the round key from conversation.feedback on retract (vote: null)', async () => {
-      const docWithFeedback = createConversationDocument({ rounds: [round] });
+    it('removes the execution key from conversation.feedback on retract (vote: null)', async () => {
+      const terminatedEvent = makeTerminatedEvent();
+      const docWithFeedback = createConversationDocument({
+        schemaVersion: CONVERSATION_SCHEMA_VERSION,
+        events: [terminatedEvent] as ConversationEvent[],
+      });
       docWithFeedback._source!.feedback = {
-        'round-1': { vote: 'up', chips: [], comment: '', submitted_at: '2025-01-01T00:00:00.000Z' },
+        [executionId]: {
+          vote: 'up',
+          chips: [],
+          comment: '',
+          submitted_at: '2025-01-01T00:00:00.000Z',
+        },
       };
       mockGetDocumentResponse(docWithFeedback);
 
-      await client.updateRoundFeedback('conversation-1', 'round-1', { vote: null });
+      await client.updateRoundFeedback('conversation-1', executionId, { vote: null });
 
       const persistedDoc = mockEsClient.index.mock.calls[0][0].document as Record<string, unknown>;
       expect(persistedDoc.feedback).toBeUndefined();
     });
 
-    it('throws not found when the round does not exist in the conversation', async () => {
-      mockGetDocumentResponse(createConversationDocument({ rounds: [round] }));
+    it('throws not found when no terminal event matches the executionId', async () => {
+      mockGetDocumentResponse(
+        createConversationDocument({
+          schemaVersion: CONVERSATION_SCHEMA_VERSION,
+          events: [makeTerminatedEvent()] as ConversationEvent[],
+        })
+      );
 
       await expect(
-        client.updateRoundFeedback('conversation-1', 'nonexistent-round', { vote: 'up' })
+        client.updateRoundFeedback('conversation-1', 'nonexistent::execution', { vote: 'up' })
       ).rejects.toMatchObject({ message: 'Conversation conversation-1 not found' });
 
       expect(mockEsClient.index).not.toHaveBeenCalled();
     });
 
     it('retries on a 409 conflict, re-reading the document with the updated sequence', async () => {
-      mockGetDocumentResponseOnce(createConversationDocument({ seqNo: 1, rounds: [round] }));
-      mockGetDocumentResponse(createConversationDocument({ seqNo: 2, rounds: [round] }));
+      const events = [makeTerminatedEvent()] as ConversationEvent[];
+      mockGetDocumentResponseOnce(
+        createConversationDocument({ schemaVersion: CONVERSATION_SCHEMA_VERSION, seqNo: 1, events })
+      );
+      mockGetDocumentResponse(
+        createConversationDocument({ schemaVersion: CONVERSATION_SCHEMA_VERSION, seqNo: 2, events })
+      );
       mockEsClient.index.mockRejectedValueOnce(createConflictError()).mockResolvedValue({});
 
-      await client.updateRoundFeedback('conversation-1', 'round-1', { vote: 'down' });
+      await client.updateRoundFeedback('conversation-1', executionId, { vote: 'down' });
 
       expect(mockEsClient.index).toHaveBeenCalledTimes(2);
       expect(mockEsClient.index).toHaveBeenLastCalledWith(
@@ -1806,11 +1859,16 @@ describe('ConversationClient', () => {
     });
 
     it('throws a write conflict error once retries are exhausted', async () => {
-      mockGetDocumentResponse(createConversationDocument({ rounds: [round] }));
+      mockGetDocumentResponse(
+        createConversationDocument({
+          schemaVersion: CONVERSATION_SCHEMA_VERSION,
+          events: [makeTerminatedEvent()] as ConversationEvent[],
+        })
+      );
       mockEsClient.index.mockRejectedValue(createConflictError());
 
       const error = await client
-        .updateRoundFeedback('conversation-1', 'round-1', { vote: 'up' })
+        .updateRoundFeedback('conversation-1', executionId, { vote: 'up' })
         .catch((e) => e);
 
       expect(isConversationWriteConflictError(error)).toBe(true);
@@ -1823,12 +1881,13 @@ describe('ConversationClient', () => {
           userId: 'other-user-id',
           username: 'other-user',
           accessMode: ConversationAccessControlMode.Private,
-          rounds: [round],
+          schemaVersion: CONVERSATION_SCHEMA_VERSION,
+          events: [makeTerminatedEvent()] as ConversationEvent[],
         })
       );
 
       await expect(
-        client.updateRoundFeedback('conversation-1', 'round-1', { vote: 'up' })
+        client.updateRoundFeedback('conversation-1', executionId, { vote: 'up' })
       ).rejects.toMatchObject({ message: 'Conversation conversation-1 not found' });
 
       expect(mockEsClient.index).not.toHaveBeenCalled();
