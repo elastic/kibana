@@ -127,12 +127,12 @@ describe('Nightshift investigation workflow', () => {
     expect(NIGHTSHIFT_INVESTIGATION_WORKFLOW.yaml).not.toMatch(/slack/i);
   });
 
-  it('adds the canvas only when no earlier run created it', () => {
+  it('updates the canvas only on a continued run and adds it when none exists yet', () => {
     expect(requireStep('update_investigation_canvas').if).toBe(
-      '${{ steps.investigate.error == null }}'
+      '${{ steps.investigate.error == null and inputs.investigation_id != null }}'
     );
     expect(requireStep('add_investigation_canvas')).toMatchObject({
-      if: '${{ steps.investigate.error == null and steps.update_investigation_canvas.error != null }}',
+      if: '${{ steps.investigate.error == null and inputs.investigation_id == null or steps.update_investigation_canvas.error != null }}',
       with: { id: '{{ inputs.investigation_id | default: execution.id }}', type: 'text' },
     });
   });
