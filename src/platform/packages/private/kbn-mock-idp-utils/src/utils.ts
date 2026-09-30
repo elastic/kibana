@@ -37,9 +37,9 @@ import {
   MOCK_IDP_UIAM_SIGNING_SECRET,
 } from './constants';
 import { seedTestApiKey, seedTestUser } from './cosmos_db_seeder';
-import { buildMockIdpUiamRoleAssignments } from './uiam_role_assignments';
 import { encodeWithChecksum } from './jwt-codecs/encoder-checksum';
 import { prefixWithEssuDev } from './jwt-codecs/encoder-prefix';
+import { buildMockIdpUiamRoleAssignments } from './uiam_role_assignments';
 
 /**
  * Creates XML metadata for our mock identity provider.
