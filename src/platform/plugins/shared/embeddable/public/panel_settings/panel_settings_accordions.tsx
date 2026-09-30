@@ -126,7 +126,7 @@ export const PanelSettingsAccordions = ({
           defaultMessage: 'Title and description',
         })}
       >
-        <EuiFormRow>
+        <EuiFormRow fullWidth>
           <EuiSwitch
             checked={!state.hideTitle}
             data-test-subj="customEmbeddablePanelHideTitleSwitch"
@@ -137,6 +137,7 @@ export const PanelSettingsAccordions = ({
           />
         </EuiFormRow>
         <EuiFormRow
+          fullWidth
           label={i18n.translate('embeddableApi.panelSettings.titleLabel', {
             defaultMessage: 'Title',
           })}
@@ -160,6 +161,7 @@ export const PanelSettingsAccordions = ({
           }
         >
           <EuiFieldText
+            fullWidth
             data-test-subj="customEmbeddablePanelTitleInput"
             disabled={state.hideTitle}
             value={state.title ?? ''}
@@ -170,6 +172,7 @@ export const PanelSettingsAccordions = ({
           />
         </EuiFormRow>
         <EuiFormRow
+          fullWidth
           label={i18n.translate('embeddableApi.panelSettings.descriptionLabel', {
             defaultMessage: 'Description',
           })}
@@ -193,6 +196,7 @@ export const PanelSettingsAccordions = ({
           }
         >
           <EuiTextArea
+            fullWidth
             data-test-subj="customEmbeddablePanelDescriptionInput"
             value={state.description ?? ''}
             onChange={(e) => updateState({ description: e.target.value })}
@@ -210,7 +214,7 @@ export const PanelSettingsAccordions = ({
           defaultMessage: 'Panel options',
         })}
       >
-        <EuiFormRow>
+        <EuiFormRow fullWidth>
           <EuiSwitch
             checked={!state.hideBorder}
             data-test-subj="customizePanelBorderlessToggle"
@@ -222,7 +226,7 @@ export const PanelSettingsAccordions = ({
         </EuiFormRow>
         {panelOptions}
         {apiSupportsPanelTimeRange(api) ? (
-          <EuiFormRow>
+          <EuiFormRow fullWidth>
             <EuiSwitch
               checked={state.hasOwnTimeRange}
               data-test-subj="customizePanelShowCustomTimeRange"
@@ -235,11 +239,13 @@ export const PanelSettingsAccordions = ({
         ) : null}
         {apiSupportsPanelTimeRange(api) && state.hasOwnTimeRange ? (
           <EuiFormRow
+            fullWidth
             label={i18n.translate('embeddableApi.panelSettings.timeRangeLabel', {
               defaultMessage: 'Time range',
             })}
           >
             <EuiSuperDatePicker
+              width="full"
               start={timeRange?.from}
               end={timeRange?.to}
               onTimeChange={({ start, end }) =>

@@ -18,10 +18,8 @@ import {
   EuiFlyoutBody,
   EuiFlyoutFooter,
   EuiFlyoutHeader,
-  EuiLink,
   EuiPanel,
   EuiSpacer,
-  EuiText,
   EuiTitle,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -104,35 +102,32 @@ export const PanelEditFlyout = ({
       <EuiFlyoutBody>
         {preview ? (
           <>
-            <EuiFlexGroup justifyContent="spaceBetween" alignItems="center" responsive={false}>
-              <EuiFlexItem grow={false}>
-                <EuiTitle size="xxs">
-                  <h3>
-                    {i18n.translate('embeddableApi.panelEditFlyout.previewLabel', {
-                      defaultMessage: 'Preview',
-                    })}
-                  </h3>
-                </EuiTitle>
-              </EuiFlexItem>
-              {onNavigateToEditor ? (
-                <EuiFlexItem grow={false}>
-                  <EuiText size="xs">
-                    <EuiLink onClick={onEditInEditor} data-test-subj="panelEditFlyoutEditorLink">
-                      {editorLinkLabel}
-                    </EuiLink>
-                  </EuiText>
-                </EuiFlexItem>
-              ) : null}
-            </EuiFlexGroup>
-            <EuiSpacer size="s" />
             <EuiPanel
               hasBorder
               paddingSize="none"
               css={styles.preview}
+              role="img"
+              aria-label={i18n.translate('embeddableApi.panelEditFlyout.previewAriaLabel', {
+                defaultMessage: 'Panel preview',
+              })}
               data-test-subj="panelEditFlyoutPreview"
             >
               {preview}
             </EuiPanel>
+            {onNavigateToEditor ? (
+              <>
+                <EuiSpacer size="s" />
+                <EuiButton
+                  fullWidth
+                  size="s"
+                  color="text"
+                  onClick={onEditInEditor}
+                  data-test-subj="panelEditFlyoutEditorLink"
+                >
+                  {editorLinkLabel}
+                </EuiButton>
+              </>
+            ) : null}
             <EuiSpacer size="l" />
           </>
         ) : null}
