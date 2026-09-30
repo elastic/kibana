@@ -49,7 +49,7 @@ notify_file="$(mktemp -t scout-audit-notify.XXXXXX.yml)"
   echo '  - label: ":slack: Scout quality audit"'
   echo "    command: \"echo 'Scout audit summary posted to Slack'\""
   echo '    agents:'
-  echo '      image: family/kibana-ubuntu-2404'
+  echo '      image: family/kibana-minimal-ubuntu-2604'
   echo '      imageProject: elastic-images-prod'
   echo '      provider: gcp'
   echo '      machineType: n2-standard-2'
