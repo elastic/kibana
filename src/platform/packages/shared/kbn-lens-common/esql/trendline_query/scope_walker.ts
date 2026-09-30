@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { Builder, isFunctionExpression, isColumn } from '@elastic/esql';
+import { Builder, esql, isFunctionExpression, isColumn, isOptionNode, Parser } from '@elastic/esql';
 import type { ESQLCommand } from '@elastic/esql/types';
 
 /**
@@ -28,6 +28,8 @@ export interface TrackedColumnState {
 interface TransferContext {
   /** When true, KEEP commands missing the column are extended to retain it. */
   ensureKept: boolean;
+  /** When true, STATS commands are grouped by the tracked column. */
+  ensureGrouped: boolean;
 }
 
 type CommandTransfer = (
@@ -69,11 +71,37 @@ const keepTransfer: CommandTransfer = (command, state, { ensureKept }) => {
   return state;
 };
 
+/**
+ * Carries the tracked column across an aggregation boundary by adding it to
+ * STATS BY. This keeps a time bucket produced upstream available downstream.
+ */
+const statsTransfer: CommandTransfer = (command, state, { ensureGrouped }) => {
+  if (!ensureGrouped) return state;
+
+  const byOption = command.args.find(isOptionNode);
+  const isGrouped = byOption?.args.some((arg) => isColumn(arg) && arg.name === state.name);
+  if (isGrouped) return state;
+
+  if (byOption) {
+    byOption.args.push(Builder.expression.column(state.name));
+    return state;
+  }
+
+  // Parse a helper query to obtain a correctly typed BY option AST node.
+  const { root } = Parser.parse(`FROM _x | STATS _x BY ${esql.col(state.name)}`);
+  const helperStats = root.commands.find((candidate) => candidate.name === 'stats');
+  const helperByOption = helperStats?.args.find(isOptionNode);
+  if (!helperByOption) throw new Error('Expected BY option in helper STATS command');
+  command.args.push(helperByOption);
+  return state;
+};
+
 const identityTransfer: CommandTransfer = (_command, state) => state;
 
 const transferFns: Record<string, CommandTransfer> = {
   rename: renameTransfer,
   keep: keepTransfer,
+  stats: statsTransfer,
 };
 
 /**
@@ -85,11 +113,14 @@ const transferFns: Record<string, CommandTransfer> = {
 const walkColumn = (
   commands: ESQLCommand[],
   columnName: string,
-  ensureKept: boolean
+  { ensureKept, ensureGrouped }: TransferContext
 ): TrackedColumnState =>
   commands.reduce<TrackedColumnState>(
     (state, command) =>
-      (transferFns[command.name] ?? identityTransfer)(command, state, { ensureKept }),
+      (transferFns[command.name] ?? identityTransfer)(command, state, {
+        ensureKept,
+        ensureGrouped,
+      }),
     { name: columnName }
   );
 
@@ -100,7 +131,8 @@ const walkColumn = (
 export const resolveTrackedColumn = (
   commands: ESQLCommand[],
   columnName: string
-): TrackedColumnState => walkColumn(commands, columnName, false);
+): TrackedColumnState =>
+  walkColumn(commands, columnName, { ensureKept: false, ensureGrouped: false });
 
 /**
  * Resolves the final name of a column and mutates KEEP commands along the way
@@ -108,5 +140,6 @@ export const resolveTrackedColumn = (
  */
 export const trackColumnAndEnsureKept = (
   commands: ESQLCommand[],
-  columnName: string
-): TrackedColumnState => walkColumn(commands, columnName, true);
+  columnName: string,
+  { ensureGrouped = false }: { ensureGrouped?: boolean } = {}
+): TrackedColumnState => walkColumn(commands, columnName, { ensureKept: true, ensureGrouped });

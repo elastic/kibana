@@ -60,4 +60,36 @@ describe('trackColumnAndEnsureKept', () => {
       'FROM index | RENAME @timestamp AS time | KEEP bytes, time'
     );
   });
+
+  it('adds a BY clause to STATS when grouping is required', () => {
+    const root = parse('FROM index | STATS total = COUNT(*)');
+    trackColumnAndEnsureKept(root.commands, 'time_bucket', { ensureGrouped: true });
+    expect(BasicPrettyPrinter.print(root)).toBe(
+      'FROM index | STATS total = COUNT(*) BY time_bucket'
+    );
+  });
+
+  it('extends an existing STATS BY clause when grouping is required', () => {
+    const root = parse('FROM index | STATS total = COUNT(*) BY host');
+    trackColumnAndEnsureKept(root.commands, 'time_bucket', { ensureGrouped: true });
+    expect(BasicPrettyPrinter.print(root)).toBe(
+      'FROM index | STATS total = COUNT(*) BY host, time_bucket'
+    );
+  });
+
+  it('does not duplicate an existing STATS grouping', () => {
+    const root = parse('FROM index | STATS total = COUNT(*) BY time_bucket');
+    trackColumnAndEnsureKept(root.commands, 'time_bucket', { ensureGrouped: true });
+    expect(BasicPrettyPrinter.print(root)).toBe(
+      'FROM index | STATS total = COUNT(*) BY time_bucket'
+    );
+  });
+
+  it('groups STATS by the renamed column', () => {
+    const root = parse('FROM index | RENAME bucket AS time_bucket | STATS total = COUNT(*)');
+    trackColumnAndEnsureKept(root.commands, 'bucket', { ensureGrouped: true });
+    expect(BasicPrettyPrinter.print(root)).toBe(
+      'FROM index | RENAME bucket AS time_bucket | STATS total = COUNT(*) BY time_bucket'
+    );
+  });
 });
