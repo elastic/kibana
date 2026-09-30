@@ -130,20 +130,23 @@ apiTest.describe('Endpoint list isolation filter', { tag: tags.stateful.classic 
   });
 
   apiTest.afterAll(async ({ esClient, kbnClient, config }) => {
+    apiTest.setTimeout(INDEXING_TIMEOUT_MS);
     if (indexedHosts.length === 0) {
       return;
     }
 
     const systemEsClient = await createSystemIndicesEsClient(esClient, config);
     try {
-      const results = await Promise.allSettled(
-        indexedHosts.map((indexed) =>
-          deleteIndexedHostsAndAlerts(systemEsClient, kbnClient, indexed)
-        )
-      );
-      const failures = results.flatMap((result) =>
-        result.status === 'rejected' ? [String(result.reason)] : []
-      );
+      // One host at a time. Parallel deleteByQuery calls share the metadata indices and
+      // abort on a version conflict while the united transform is still writing.
+      const failures: string[] = [];
+      for (const indexed of indexedHosts) {
+        try {
+          await deleteIndexedHostsAndAlerts(systemEsClient, kbnClient, indexed);
+        } catch (error) {
+          failures.push(String(error));
+        }
+      }
       expect(failures, failures.join('\n')).toHaveLength(0);
     } finally {
       await systemEsClient.close();
