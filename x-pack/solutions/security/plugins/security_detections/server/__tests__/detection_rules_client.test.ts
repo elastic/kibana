@@ -297,8 +297,6 @@ describe('DetectionRulesClient', () => {
       expect(frameworkClient.updateRule).toHaveBeenCalledTimes(1);
       const [updateArgs] = (frameworkClient.updateRule as jest.Mock).mock.calls[0];
       expect(updateArgs.id).toBe('rule-id-1');
-      // Concurrency token from the existing rule.
-      expect(updateArgs.options?.version).toBe('abc123');
       // The result is the converted public response.
       expect(result.type).toBe('query');
     });
@@ -463,8 +461,6 @@ describe('DetectionRulesClient', () => {
       const [updateArgs] = (frameworkClient.updateRule as jest.Mock).mock.calls[0];
       expect(updateArgs.id).toBe('rule-id-1');
       expect(updateArgs.data.metadata.name).toBe('Patched name');
-      // Concurrency token passed through.
-      expect(updateArgs.options?.version).toBe('abc123');
       expect(result.type).toBe('query');
     });
 

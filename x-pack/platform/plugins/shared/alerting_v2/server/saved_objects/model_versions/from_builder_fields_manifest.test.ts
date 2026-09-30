@@ -10,11 +10,11 @@ import type { BuilderFieldsManifest } from '@kbn/alerting-v2-rule-builders';
 import { KEYWORD_SUB_FIELD_IGNORE_ABOVE } from '@kbn/alerting-v2-rule-builders';
 import { FoldedVersionsSet } from '../../lib/builder_types/folded_versions';
 import {
-  ruleSavedObjectAttributesSchemaV6,
-  ruleSavedObjectAttributesSchemaV11 as latestV11,
+  ruleSavedObjectAttributesSchemaV7,
+  ruleSavedObjectAttributesSchemaV12 as latestV12,
   currentRuleSavedObjectAttributesSchema,
 } from '../schemas/rule_saved_object_attributes';
-import { ruleMetadataSchema as ruleMetadataSchemaV6 } from '../schemas/rule_saved_object_attributes/v6';
+import { ruleMetadataSchema as ruleMetadataSchemaV7 } from '../schemas/rule_saved_object_attributes/v7';
 import {
   fromBuilderFieldsManifest,
   assertBuilderFieldsIsOpenRecord,
@@ -62,7 +62,7 @@ function applyBackfill(
 /**
  * A minimal attributes schema used across tests. Must support .extends().
  */
-const testSchema = latestV11;
+const testSchema = latestV12;
 
 // A manifest with only addedMappings at version 1 (no backfills).
 const manifestMappingsOnly: BuilderFieldsManifest = {
@@ -275,7 +275,7 @@ describe('fromBuilderFieldsManifest', () => {
     it('forwardCompatibility schema ignores unknown attributes', () => {
       const mv = fromBuilderFieldsManifest(manifestMappingsOnly, 1, testSchema);
       const fwd = mv.schemas?.forwardCompatibility as any;
-      // A document with an extra top-level attribute that V11 does not know should
+      // A document with an extra top-level attribute that V12 does not know should
       // be accepted by forwardCompatibility (unknowns: 'ignore') but rejected by create.
       const docWithUnknown = {
         kind: 'alert' as const,
@@ -400,28 +400,28 @@ describe('fromBuilderFieldsManifest', () => {
   // Ref: rule-data-migration.md "Rollback behavior"
   // ---------------------------------------------------------------------------
   describe('open-record assertion: metadata.builder_fields stays an open record', () => {
-    it('currentRuleSavedObjectAttributesSchema is the latest versioned schema (v11)', () => {
-      expect(currentRuleSavedObjectAttributesSchema).toBe(latestV11);
+    it('currentRuleSavedObjectAttributesSchema is the latest versioned schema (v12)', () => {
+      expect(currentRuleSavedObjectAttributesSchema).toBe(latestV12);
     });
 
     it('assertBuilderFieldsIsOpenRecord does not throw with the current schema', () => {
       expect(() => assertBuilderFieldsIsOpenRecord()).not.toThrow();
     });
 
-    // The three tests below cover v6 specifically, because v6 is the version that
+    // The three tests below cover v7 specifically, because v7 is the version that
     // introduced the builder_fields container and therefore the version a rollback
-    // lands on when a deployment that deployed v11 rolls back.
+    // lands on when a deployment that deployed v12 rolls back.
     //
     // The rollback property rests on schema.recordOf(schema.string(), schema.any())
     // preserving every key it sees. The tests above only prove the current schema
-    // (v11) does not throw on an unknown key; they do not prove key preservation
-    // or that v6 carries the open-record declaration at all.
+    // (v12) does not throw on an unknown key; they do not prove key preservation
+    // or that v7 carries the open-record declaration at all.
 
-    it('the v6 ruleMetadataSchema accepts an object with arbitrary unknown keys in builder_fields', () => {
-      // v6 introduced builder_fields: schema.maybe(schema.recordOf(schema.string(), schema.any())).
+    it('the v7 ruleMetadataSchema accepts an object with arbitrary unknown keys in builder_fields', () => {
+      // v7 introduced builder_fields: schema.maybe(schema.recordOf(schema.string(), schema.any())).
       // This must accept any future key a newer manifest version adds.
       expect(() =>
-        ruleMetadataSchemaV6.validate({
+        ruleMetadataSchemaV7.validate({
           name: 'test-rule',
           builder_fields: { __future_field__: 'future_value', another_field: 42 },
         })
@@ -431,9 +431,9 @@ describe('fromBuilderFieldsManifest', () => {
     it('the validated builder_fields value preserves all arbitrary keys', () => {
       // schema.recordOf(schema.string(), schema.any()) must preserve every key
       // it receives, not just ignore unknown ones. A validator that strips keys
-      // would break rollback: a rolled-back build reading a v11 rule would lose
+      // would break rollback: a rolled-back build reading a v12 rule would lose
       // the new builder fields before returning them to the caller.
-      const result = ruleMetadataSchemaV6.validate({
+      const result = ruleMetadataSchemaV7.validate({
         name: 'test-rule',
         builder_fields: { __future_field__: 'future_value', numeric_field: 99 },
       });
@@ -443,12 +443,12 @@ describe('fromBuilderFieldsManifest', () => {
       });
     });
 
-    it('the full v6 attributes schema also keeps builder_fields open', () => {
-      // The full v6 attributes schema must also preserve unknown builder_fields keys,
-      // because forwardCompatibility for v6 fold lines uses this schema with
+    it('the full v7 attributes schema also keeps builder_fields open', () => {
+      // The full v7 attributes schema must also preserve unknown builder_fields keys,
+      // because forwardCompatibility for v7 fold lines uses this schema with
       // unknowns: 'ignore' — unknown *attributes* are dropped, but keys inside
       // the open-record builder_fields container are preserved intact.
-      const minimalV6Doc = {
+      const minimalV7Doc = {
         kind: 'alert',
         metadata: {
           name: 'test-rule',
@@ -465,7 +465,7 @@ describe('fromBuilderFieldsManifest', () => {
         createdAt: '2026-01-01T00:00:00.000Z',
         updatedAt: '2026-01-01T00:00:00.000Z',
       };
-      const validated = ruleSavedObjectAttributesSchemaV6.validate(minimalV6Doc);
+      const validated = ruleSavedObjectAttributesSchemaV7.validate(minimalV7Doc);
       expect((validated as any).metadata.builder_fields).toEqual({
         __future_field__: 'future_value',
       });

@@ -1147,6 +1147,7 @@ export const ruleResponseSchema = createRuleDataBaseSchema
      */
     query: querySchema.optional(),
     id: z.string().describe('Unique rule identifier.'),
+    metadata: ruleResponseMetadataSchema,
     version: z
       .number()
       .int()

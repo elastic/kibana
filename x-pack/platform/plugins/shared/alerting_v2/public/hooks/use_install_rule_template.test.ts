@@ -43,7 +43,7 @@ const mockRuleResponse: RuleResponse = {
   metadata: {
     name: 'CPU usage',
     signature_id: 'test-sig-id',
-    source: { type: 'template', id: 'template-1' },
+    source: { type: 'template', version: 1, id: 'template-1' },
     revision: 0,
     description: '',
     tags: [],

@@ -923,7 +923,7 @@ export class RulesClient {
   }
 
   @withApm
-  public async updateRule({ id, data }: UpdateRuleParams): Promise<RuleResponse> {
+  public async updateRule({ id, data, options }: UpdateRuleParams): Promise<RuleResponse> {
     const { spaceId } = this.getSpaceContext();
     const parsed = this.parseRuleData(updateRuleDataSchema, data, 'update');
     if (parsed.artifacts !== undefined) {

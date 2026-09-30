@@ -11,8 +11,8 @@
  * Tests that:
  * 1. Importing rule_model_versions.ts populates globalFoldedVersions with both
  *    detection-type folds (security.detection.query v1, security.detection.threshold v1).
- * 2. The squashed model-version key '8' is present in ruleModelVersions and carries
- *    both detection-type folds (originally '8' and '9') plus the framework fields.
+ * 2. The squashed model-version key '9' is present in ruleModelVersions and carries
+ *    both detection-type folds (originally '9' and '10') plus the framework fields.
  * 3. The detection rule builder fields manifest's currentMappings produces the expected
  *    32 sub-field leaves (step B.4: static mappings now come from currentMappings).
  *
@@ -57,23 +57,23 @@ describe('detection-type fold registration', () => {
 // ---------------------------------------------------------------------------
 
 describe('ruleModelVersions fold lines', () => {
-  // The POC's five model versions ('8'–'12') were squashed into a single '8'
+  // The POC's five model versions ('9'–'13') were squashed into a single '9'
   // to satisfy the saved-objects checker's one-new-version-per-PR rule.
   // The fold registration tests above already verify globalFoldedVersions;
   // here we only assert that the squashed key exists and carries the right content.
-  it("contains key '8' (squashed — carries both detection-type folds and framework fields)", () => {
-    expect(ruleModelVersions).toHaveProperty('8');
+  it("contains key '9' (squashed — carries both detection-type folds and framework fields)", () => {
+    expect(ruleModelVersions).toHaveProperty('9');
   });
 
-  it("squashed version '8' has exactly one manifest-fold mappings_addition covering all detection v1 sub-fields", () => {
-    const v8 = ruleModelVersions['8'] as {
+  it("squashed version '9' has exactly one manifest-fold mappings_addition covering all detection v1 sub-fields", () => {
+    const v9 = ruleModelVersions['9'] as {
       changes: Array<{ type: string; addedMappings?: unknown }>;
     };
     // After step B.5 there is a single fromBuilderFieldsManifest() call for both
     // security.detection.query and security.detection.threshold (they share one
-    // detectionRuleBuilderFieldsManifest). The squashed '8' therefore has exactly
+    // detectionRuleBuilderFieldsManifest). The squashed '9' therefore has exactly
     // one manifest-fold mappings_addition — not two as under the old per-type design.
-    const manifestFoldChanges = v8.changes.filter(
+    const manifestFoldChanges = v9.changes.filter(
       (c) =>
         c.type === 'mappings_addition' &&
         (c.addedMappings as any)?.metadata?.properties?.builder_fields?.properties !== undefined
@@ -93,13 +93,13 @@ describe('ruleModelVersions fold lines', () => {
     expect(bfProps).toHaveProperty(['threshold.value']);
   });
 
-  it('dense version sequence runs from 1 to 8 with no gaps', () => {
-    // The POC's five model versions ('8'–'12') were squashed into a single '8'
+  it('dense version sequence runs from 1 to 9 with no gaps', () => {
+    // The POC's five model versions ('9'–'13') were squashed into a single '9'
     // to satisfy the saved-objects checker's one-new-version-per-PR rule.
     const keys = Object.keys(ruleModelVersions)
       .map(Number)
       .sort((a, b) => a - b);
-    expect(keys).toEqual([1, 2, 3, 4, 5, 6, 7, 8]);
+    expect(keys).toEqual([1, 2, 3, 4, 5, 6, 7, 8, 9]);
   });
 });
 

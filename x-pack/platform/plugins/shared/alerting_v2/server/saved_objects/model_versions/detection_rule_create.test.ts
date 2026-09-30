@@ -133,17 +133,17 @@ const syntheticThresholdDefinition = defineBuilderType({
 
 // Sanity: confirm the model version import succeeded (if this is 0 the folds
 // won't be registered and every registry.register() call will throw).
-// The POC's five model versions ('8'–'12') were squashed into a single '8';
+// The POC's five model versions ('9'–'13') were squashed into a single '9';
 // after step B.5, both detection types share a single manifest, so there is
 // exactly one manifest-fold mappings_addition in the squashed entry.
 it('ruleModelVersions carries the detection-type fold contribution in the squashed entry', () => {
-  const v8 = ruleModelVersions['8'] as {
+  const v9 = ruleModelVersions['9'] as {
     changes: Array<{ type: string; addedMappings?: unknown }>;
   };
-  expect(v8).toBeDefined();
+  expect(v9).toBeDefined();
   // One mappings_addition from the shared manifest fold (both query and threshold
   // are covered by a single detectionRuleBuilderFieldsManifest after step B.5).
-  const manifestFoldChanges = v8.changes.filter(
+  const manifestFoldChanges = v9.changes.filter(
     (c) =>
       c.type === 'mappings_addition' &&
       (c.addedMappings as any)?.metadata?.properties?.builder_fields?.properties !== undefined

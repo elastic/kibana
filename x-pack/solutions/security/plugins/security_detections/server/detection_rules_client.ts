@@ -431,14 +431,10 @@ export class DetectionRulesClient {
 
     const frameworkData = toFrameworkReplace({ ...withDefaults, version }, storedSource);
 
-    // Grab the concurrency token from the framework result.
-    const occVersion = (existing as RuleResponse & { version?: string }).version;
-
     const result = await this.framework.updateRule({
       id,
       data: frameworkData,
       options: {
-        version: occVersion,
         validateBuilderFields: true,
       },
     });
@@ -551,9 +547,7 @@ export class DetectionRulesClient {
     // Step 5: Convert and write.
     // The merged result has all fields fully resolved; build the patched input.
     const patchedInput = buildPatchedInput(merged, patch, storedSource);
-    const occVersion = (existing as RuleResponse & { version?: string }).version;
 
-    // The concurrency token goes to options.version (not inside the data body).
     // The framework's updateRuleDataSchema is strict and rejects a top-level version key.
     const frameworkData = toFrameworkPatch(patchedInput);
 
@@ -561,7 +555,6 @@ export class DetectionRulesClient {
       id,
       data: frameworkData,
       options: {
-        version: occVersion,
         validateBuilderFields: true,
       },
     });

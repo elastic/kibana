@@ -1360,9 +1360,9 @@ describe('utils', () => {
         ...stored,
         updatedAt: '2099-01-01T00:00:00.000Z',
         updatedBy: { profile_uid: 'some-other-user' },
+        version: 99,
         metadata: {
           ...stored.metadata,
-          version: 99,
           revision: 99,
         },
       };
@@ -1501,7 +1501,8 @@ describe('utils', () => {
 
   describe('buildUpdateRuleAttributes — revision (step 4.2)', () => {
     const baseExisting = createRuleSoAttributes({
-      metadata: { name: 'rule-1', version: 1, revision: 3, signature_id: 'sig-1' },
+      version: 1,
+      metadata: { name: 'rule-1', revision: 3, signature_id: 'sig-1' },
     });
     const baseUpdateServerFields = {
       updatedBy: { profile_uid: 'user-2' },
@@ -1537,10 +1538,10 @@ describe('utils', () => {
       expect(result.metadata.revision).toBe(4);
     });
 
-    it('version (metadata.version) still increments independently of revision', () => {
+    it('the root version still increments independently of revision', () => {
       // No-op update: revision stays, version still moves.
       const noOpResult = buildUpdateRuleAttributes(baseExisting, {}, baseUpdateServerFields);
-      expect(noOpResult.metadata.version).toBe(2);
+      expect(noOpResult.version).toBe(2);
       expect(noOpResult.metadata.revision).toBe(3);
     });
 
