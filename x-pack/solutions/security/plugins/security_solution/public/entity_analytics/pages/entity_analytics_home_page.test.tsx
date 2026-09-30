@@ -17,6 +17,7 @@ import { useEntityEnginePrivileges } from '../components/entity_store/hooks/use_
 import { useLeadGenerationPrivileges } from '../api/hooks/use_lead_generation_privileges';
 import { useHuntingLeads } from '../components/threat_hunting/top_threat_hunting_leads/use_hunting_leads';
 import { useEntityStoreDataView } from '../components/home/use_entity_store_data_view';
+import { setActiveFaceliftVersion } from '../components/home/facelift/active_version';
 
 jest.mock('../../common/components/links/link_props', () => {
   // eslint-disable-next-line @typescript-eslint/no-var-requires
@@ -45,8 +46,12 @@ jest.mock('@kbn/app-header', () => {
     AppHeader: ({
       title,
       menu,
+      docLink,
+      showAddIntegrations,
     }: {
       title: string;
+      docLink?: string;
+      showAddIntegrations?: boolean;
       menu?: {
         primaryActionItem?: {
           label: string;
@@ -54,12 +59,22 @@ jest.mock('@kbn/app-header', () => {
           testId?: string;
           iconType?: string;
         };
-        items?: Array<{ label: string; href?: string; testId?: string; iconType?: string }>;
+        items?: Array<{
+          label: string;
+          href?: string;
+          testId?: string;
+          iconType?: string;
+          overflow?: boolean;
+        }>;
       };
     }) =>
       mockReact.createElement(
         'div',
-        { 'data-test-subj': 'eaFaceliftAppHeader' },
+        {
+          'data-test-subj': 'eaFaceliftAppHeader',
+          'data-doc-link': docLink,
+          'data-show-add-integrations': showAddIntegrations ? 'true' : undefined,
+        },
         mockReact.createElement('h1', null, title),
         menu?.primaryActionItem
           ? mockReact.createElement(
@@ -81,6 +96,7 @@ jest.mock('@kbn/app-header', () => {
               href: item.href,
               'data-test-subj': item.testId,
               'aria-label': item.label,
+              'data-overflow': item.overflow ? 'true' : undefined,
             },
             item.label
           )
@@ -238,6 +254,7 @@ const mockUseHuntingLeads = useHuntingLeads as jest.Mock;
 describe('EntityAnalyticsHomePage', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    setActiveFaceliftVersion('v8');
 
     mockUseEntityStoreDataView.mockReturnValue({
       dataView: { id: 'test-entity-store', fields: [], matchedIndices: ['index-1'] },
@@ -302,7 +319,7 @@ describe('EntityAnalyticsHomePage', () => {
       { wrapper: TestProviders }
     );
 
-    // The SiemSearchBar is in-page under the header for v.5 (default; same as v.2+).
+    // The SiemSearchBar is in-page under the header for v.8 (default; same as v.2+).
     expect(screen.getByTestId('entityAnalyticsHomePage')).toBeInTheDocument();
   });
 
@@ -328,7 +345,7 @@ describe('EntityAnalyticsHomePage', () => {
     expect(screen.getByTestId('entity-analytics-home-entities-table')).toBeInTheDocument();
   });
 
-  it('renders the management secondary action', () => {
+  it('renders Settings in the overflow menu under Add integrations on v.8 (default)', () => {
     render(
       <MemoryRouter>
         <EntityAnalyticsHomePage />
@@ -336,15 +353,18 @@ describe('EntityAnalyticsHomePage', () => {
       { wrapper: TestProviders }
     );
 
-    const managementLink = screen.getByRole('link', { name: 'Management' });
-    expect(managementLink).toBeInTheDocument();
-    expect(managementLink).toHaveAttribute(
-      'href',
-      expect.stringContaining('/risk_score')
-    );
+    const addIntegrations = screen.getByTestId('eaFaceliftAddIntegrationsButton');
+    const settingsLink = screen.getByTestId('eaFaceliftSettingsButton');
+    expect(addIntegrations).toHaveAttribute('data-overflow', 'true');
+    expect(settingsLink).toHaveAttribute('data-overflow', 'true');
+    expect(settingsLink).toHaveAttribute('href', expect.stringContaining('/risk_score'));
+    expect(
+      addIntegrations.compareDocumentPosition(settingsLink) & Node.DOCUMENT_POSITION_FOLLOWING
+    ).toBeTruthy();
+    expect(screen.queryByRole('link', { name: 'Management' })).not.toBeInTheDocument();
   });
 
-  it('does not render the Save view primary action on v.5 (default)', () => {
+  it('does not render the Save view or Create watchlist actions on v.8 (default)', () => {
     render(
       <MemoryRouter>
         <EntityAnalyticsHomePage />
@@ -353,9 +373,33 @@ describe('EntityAnalyticsHomePage', () => {
     );
 
     expect(screen.queryByRole('button', { name: 'Save view' })).not.toBeInTheDocument();
+    expect(screen.queryByTestId('eaFaceliftCreateWatchlistButton')).not.toBeInTheDocument();
   });
 
-  it('renders the Create watchlist primary action on v.5 (default)', () => {
+  it('wires the AppHeader overflow to UEBA integrations and Documentation on v.8', () => {
+    render(
+      <MemoryRouter>
+        <EntityAnalyticsHomePage />
+      </MemoryRouter>,
+      { wrapper: TestProviders }
+    );
+
+    const header = screen.getByTestId('eaFaceliftAppHeader');
+    expect(header).not.toHaveAttribute('data-show-add-integrations');
+    expect(header.getAttribute('data-doc-link')).toEqual(
+      expect.stringContaining('entity-risk-scoring')
+    );
+
+    const addIntegrations = screen.getByTestId('eaFaceliftAddIntegrationsButton');
+    expect(addIntegrations).toHaveAttribute(
+      'href',
+      expect.stringContaining('/app/integrations/browse/security/advanced_analytics_ueba')
+    );
+  });
+
+  it('renders the Create watchlist primary action and Management on v.5', () => {
+    setActiveFaceliftVersion('v5');
+
     render(
       <MemoryRouter>
         <EntityAnalyticsHomePage />
@@ -366,6 +410,11 @@ describe('EntityAnalyticsHomePage', () => {
     const createWatchlistLink = screen.getByTestId('eaFaceliftCreateWatchlistButton');
     expect(createWatchlistLink).toBeInTheDocument();
     expect(createWatchlistLink).toHaveAttribute('href', expect.stringContaining('/watchlists'));
+    expect(screen.getByRole('link', { name: 'Management' })).toBeInTheDocument();
+    expect(screen.queryByRole('link', { name: 'Settings' })).not.toBeInTheDocument();
+    expect(screen.getByTestId('eaFaceliftAppHeader')).not.toHaveAttribute(
+      'data-show-add-integrations'
+    );
   });
 
   it('renders the homepage (not onboarding) when running even if the data view has no matched indices', () => {

@@ -8,7 +8,13 @@
 import React, { useCallback, useMemo } from 'react';
 import { noop } from 'lodash';
 import type { EuiSelectableProps, FilterChecked } from '@elastic/eui';
-import { EuiPopover, EuiFilterButton, EuiSelectable } from '@elastic/eui';
+import {
+  EuiPopover,
+  EuiPopoverFooter,
+  EuiFilterButton,
+  EuiSelectable,
+  useEuiTheme,
+} from '@elastic/eui';
 import { useBoolState } from '../../hooks/use_bool_state';
 
 export interface MultiselectFilterProps<T = unknown> {
@@ -26,6 +32,11 @@ export interface MultiselectFilterProps<T = unknown> {
   width?: number;
   /** When inside a `fullWidth` EuiFilterGroup, set true so the button fills available space. */
   grow?: boolean;
+  /**
+   * Optional action below the selectable list (EUI Selectable + popover footer).
+   * Pass a render callback to close the popover before opening a flyout.
+   */
+  footer?: React.ReactNode | ((closePopover: () => void) => React.ReactNode);
 }
 
 interface MultiselectFilterOption<T> {
@@ -58,11 +69,14 @@ const MultiselectFilterComponent = <T extends unknown>({
   selectedItems,
   width,
   grow = false,
+  footer,
   onSelectionChange = noop,
   renderLabel = String,
   renderItem = renderLabel,
 }: MultiselectFilterProps<T>) => {
+  const { euiTheme } = useEuiTheme();
   const [isPopoverOpen, _unused, closePopover, togglePopover] = useBoolState();
+  const hasFooter = Boolean(footer);
 
   const options: Array<MultiselectFilterOption<T>> = useMemo(() => {
     const checked: FilterChecked = 'on';
@@ -106,7 +120,7 @@ const MultiselectFilterComponent = <T extends unknown>({
       }
       isOpen={isPopoverOpen}
       closePopover={closePopover}
-      panelPaddingSize="s"
+      panelPaddingSize={hasFooter ? 'none' : 's'}
       repositionOnScroll
     >
       <EuiSelectable
@@ -115,7 +129,17 @@ const MultiselectFilterComponent = <T extends unknown>({
         options={options}
         renderOption={({ originalItem }) => renderItem(originalItem)}
       >
-        {(list) => <div style={{ width }}>{list}</div>}
+        {(list) => {
+          const footerNode = typeof footer === 'function' ? footer(closePopover) : footer;
+          return (
+            <div style={{ width }}>
+              {hasFooter ? <div style={{ padding: euiTheme.size.s }}>{list}</div> : list}
+              {footerNode ? (
+                <EuiPopoverFooter paddingSize="s">{footerNode}</EuiPopoverFooter>
+              ) : null}
+            </div>
+          );
+        }}
       </EuiSelectable>
     </EuiPopover>
   );

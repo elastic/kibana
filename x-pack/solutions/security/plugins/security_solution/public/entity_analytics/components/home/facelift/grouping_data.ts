@@ -7,7 +7,7 @@
 
 /**
  * Stable import path for facelift grouping / grid mock helpers.
- * Routes to the active version snapshot under `./v1`–`./v7`.
+ * Routes to the active version snapshot under `./v1`–`./v8`.
  */
 
 import { getActiveFaceliftVersion } from './active_version';
@@ -18,6 +18,7 @@ import * as v4 from './v4/grouping_data';
 import * as v5 from './v5/grouping_data';
 import * as v6 from './v6/grouping_data';
 import * as v7 from './v7/grouping_data';
+import * as v8 from './v8/grouping_data';
 
 const impl = () => {
   switch (getActiveFaceliftVersion()) {
@@ -35,6 +36,8 @@ const impl = () => {
       return v6;
     case 'v7':
       return v7;
+    case 'v8':
+      return v8;
   }
 };
 

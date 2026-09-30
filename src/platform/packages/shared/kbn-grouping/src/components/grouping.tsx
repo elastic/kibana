@@ -87,6 +87,8 @@ export interface GroupingProps<T> {
   emptyGroupingComponent?: React.ReactElement;
   /** Optional function to get additional action buttons to display in group stats before the Take actions button */
   getAdditionalActionButtons?: GetAdditionalActionButtons<T>;
+  /** Optional label for the take-action button. Defaults to "Take actions". */
+  takeActionButtonLabel?: string;
 }
 
 const GroupingComponent = <T,>({
@@ -113,6 +115,7 @@ const GroupingComponent = <T,>({
   multiValueFields,
   emptyGroupingComponent,
   getAdditionalActionButtons,
+  takeActionButtonLabel,
 }: GroupingProps<T>) => {
   const { euiTheme } = useEuiTheme();
   const xsFontSize = useEuiFontSize('xs').fontSize;
@@ -189,6 +192,7 @@ const GroupingComponent = <T,>({
                     getAdditionalActionButtons &&
                     getAdditionalActionButtons(selectedGroup, groupBucket)
                   }
+                  takeActionButtonLabel={takeActionButtonLabel}
                 />
               }
               forceState={(trigger[groupKey] && trigger[groupKey].state) ?? 'closed'}
@@ -237,6 +241,7 @@ const GroupingComponent = <T,>({
       renderChildComponent,
       selectedGroup,
       takeActionItems,
+      takeActionButtonLabel,
       tracker,
       trigger,
       unit,

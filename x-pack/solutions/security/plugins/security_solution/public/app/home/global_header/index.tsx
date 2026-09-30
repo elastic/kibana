@@ -4,29 +4,18 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import {
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiHeaderLink,
-  EuiHeaderLinks,
-  EuiHeaderSection,
-  EuiHeaderSectionItem,
-  useEuiTheme,
-} from '@elastic/eui';
+import { EuiHeaderLinks, EuiHeaderSection, EuiHeaderSectionItem } from '@elastic/eui';
 import React, { useEffect, useMemo } from 'react';
 import { useLocation } from 'react-router-dom';
 import { createHtmlPortalNode, InPortal, OutPortal } from 'react-reverse-portal';
-import { css } from '@emotion/react';
-import { i18n } from '@kbn/i18n';
+import useObservable from 'react-use/lib/useObservable';
 import { toMountPoint } from '@kbn/react-kibana-mount';
 import { PageScope } from '../../../data_view_manager/constants';
-import { SECURITY_FEATURE_ID } from '../../../../common';
 import { MlPopover } from '../../../common/components/ml_popover/ml_popover';
 import { useKibana } from '../../../common/lib/kibana';
 import {
   isDashboardViewPath,
   isDetectionsPath,
-  isEntityAnalyticsHomePagePath,
   isRuleChangesHistoryPath,
 } from '../../../helpers';
 import { TimelineId } from '../../../../common/types/timeline';
@@ -37,32 +26,27 @@ import {
   getScopeFromPath,
   showDataViewPickerByPath,
 } from '../../../sourcerer/containers/sourcerer_paths';
-import { useAddIntegrationsUrl } from '../../../common/hooks/use_add_integrations_url';
 import { DataViewPicker } from '../../../data_view_manager/components/data_view_picker';
-import { useActiveFaceliftVersion } from '../../../entity_analytics/components/home/facelift/active_version';
-import { FaceliftVersionHeaderControl } from './facelift_version_header_control';
-import { MetricsVersionHeaderControl } from './metrics_version_header_control';
-
-const BUTTON_ADD_DATA = i18n.translate('xpack.securitySolution.globalHeader.buttonAddData', {
-  defaultMessage: 'Add integrations',
-});
 
 /**
- * This component uses the reverse portal to add the Add Data, ML job settings, and AI Assistant buttons on the
- * right hand side of the Kibana global header
+ * This component uses the reverse portal to add ML job settings and the data view
+ * picker on the right hand side of the Kibana global header.
+ *
+ * The Security solution view (`project` chrome) does not mount this action-menu bar.
+ * Classic no longer shows Add integrations here; that action lives in the in-page
+ * AppHeader overflow instead.
  */
 export const GlobalHeader = React.memo(() => {
   const portalNode = useMemo(() => createHtmlPortalNode(), []);
-  const { euiTheme } = useEuiTheme();
   const {
     theme,
     setHeaderActionMenu,
     i18n: kibanaServiceI18n,
-    application: { capabilities },
+    chrome,
   } = useKibana().services;
-  const hasSearchAILakeConfigurations = capabilities[SECURITY_FEATURE_ID]?.configurations === true;
-  const canReadFleet = capabilities.fleet.read === true;
-  const canAddData = canReadFleet && !hasSearchAILakeConfigurations;
+  const chromeStyle$ = useMemo(() => chrome.getChromeStyle$(), [chrome]);
+  const chromeStyle = useObservable(chromeStyle$, chrome.getChromeStyle());
+  const isSecuritySolutionView = chromeStyle === 'project';
   const { pathname } = useLocation();
 
   const getTimeline = useMemo(() => timelineSelectors.getTimelineByIdSelector(), []);
@@ -74,19 +58,13 @@ export const GlobalHeader = React.memo(() => {
   const showDataViewPicker = showDataViewPickerByPath(pathname);
   const dashboardViewPath = isDashboardViewPath(pathname);
   const changesHistoryPath = isRuleChangesHistoryPath(pathname);
-  const entityAnalyticsHomePath = isEntityAnalyticsHomePagePath(pathname);
-  const [faceliftVersion] = useActiveFaceliftVersion();
-  const showMetricsVersionControl =
-    entityAnalyticsHomePath && (faceliftVersion === 'v6' || faceliftVersion === 'v7');
-
-  const { href, onClick } = useAddIntegrationsUrl();
 
   useEffect(() => {
     if (!setHeaderActionMenu) {
       return;
     }
 
-    if (changesHistoryPath) {
+    if (changesHistoryPath || isSecuritySolutionView) {
       setHeaderActionMenu(undefined);
       return;
     }
@@ -114,7 +92,12 @@ export const GlobalHeader = React.memo(() => {
     kibanaServiceI18n,
     dashboardViewPath,
     changesHistoryPath,
+    isSecuritySolutionView,
   ]);
+
+  if (isSecuritySolutionView) {
+    return null;
+  }
 
   return (
     <InPortal node={portalNode}>
@@ -126,44 +109,11 @@ export const GlobalHeader = React.memo(() => {
         )}
 
         <EuiHeaderSectionItem>
-          <EuiFlexGroup
-            gutterSize="none"
-            alignItems="center"
-            responsive={false}
-            css={css`
-              /* 16px between Metrics version / Prototype version / Add integrations */
-              gap: ${euiTheme.size.base};
-            `}
-          >
-            {showMetricsVersionControl ? (
-              <EuiFlexItem grow={false}>
-                <MetricsVersionHeaderControl />
-              </EuiFlexItem>
-            ) : null}
-            {entityAnalyticsHomePath ? (
-              <EuiFlexItem grow={false}>
-                <FaceliftVersionHeaderControl />
-              </EuiFlexItem>
-            ) : null}
-            <EuiFlexItem grow={false}>
-              <EuiHeaderLinks>
-                {canAddData && (
-                  <EuiHeaderLink
-                    color="primary"
-                    data-test-subj="add-data"
-                    href={href}
-                    iconType="indexOpen"
-                    onClick={onClick}
-                  >
-                    {BUTTON_ADD_DATA}
-                  </EuiHeaderLink>
-                )}
-                {showDataViewPicker && !showTimeline && (
-                  <DataViewPicker scope={pageScope} disabled={pageScope === PageScope.alerts} />
-                )}
-              </EuiHeaderLinks>
-            </EuiFlexItem>
-          </EuiFlexGroup>
+          <EuiHeaderLinks>
+            {showDataViewPicker && !showTimeline && (
+              <DataViewPicker scope={pageScope} disabled={pageScope === PageScope.alerts} />
+            )}
+          </EuiHeaderLinks>
         </EuiHeaderSectionItem>
       </EuiHeaderSection>
     </InPortal>

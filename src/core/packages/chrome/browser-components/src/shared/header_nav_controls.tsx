@@ -17,12 +17,36 @@ import { HeaderExtension } from './header_extension';
 interface Props {
   position: NavControlPosition;
   append?: JSX.Element | null;
+  /**
+   * Inclusive lower bound on `ChromeNavControl.order`. Controls without an
+   * order are treated as `Infinity`.
+   */
+  minOrder?: number;
+  /**
+   * Exclusive upper bound on `ChromeNavControl.order`.
+   */
+  maxOrder?: number;
 }
 
-export function HeaderNavControls({ position, append = null }: Props) {
+export function HeaderNavControls({
+  position,
+  append = null,
+  minOrder,
+  maxOrder,
+}: Props) {
   const navControls = useNavControls(position);
+  const filtered = navControls?.filter((navControl) => {
+    const order = navControl.order ?? Number.POSITIVE_INFINITY;
+    if (minOrder != null && order < minOrder) {
+      return false;
+    }
+    if (maxOrder != null && order >= maxOrder) {
+      return false;
+    }
+    return true;
+  });
 
-  if (!navControls || navControls.length === 0) {
+  if (!filtered || filtered.length === 0) {
     return null;
   }
 
@@ -30,7 +54,7 @@ export function HeaderNavControls({ position, append = null }: Props) {
   // to change while Kibana is running.
   return (
     <>
-      {navControls.map((navControl: ChromeNavControl, index: number) => (
+      {filtered.map((navControl: ChromeNavControl, index: number) => (
         <EuiHeaderSectionItem
           key={index}
           css={css`

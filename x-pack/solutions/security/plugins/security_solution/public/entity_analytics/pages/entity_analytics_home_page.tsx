@@ -37,7 +37,7 @@ import { FaceliftHome, FaceliftPageDescription } from '../components/home/faceli
 import { useGetSecuritySolutionUrl } from '../../common/components/link_to';
 import { TabId } from './entity_analytics_management_page';
 import { OPEN_CREATE_WATCHLIST_STORAGE_KEY } from '../components/watchlists/watchlists_tab';
-import { useNavigateTo } from '../../common/lib/kibana';
+import { useKibana, useNavigateTo } from '../../common/lib/kibana';
 import { useMissingRiskEnginePrivileges } from '../hooks/use_missing_risk_engine_privileges';
 import { useEntityEnginePrivileges } from '../components/entity_store/hooks/use_entity_engine_privileges';
 import { EntityAnalyticsReadPrivilegesCallout } from '../components/entity_analytics_read_privileges_callout';
@@ -53,6 +53,10 @@ import {
   FACELIFT_V7_DEFAULT_FROM,
   FACELIFT_V7_DEFAULT_TO,
 } from '../components/home/facelift/v7/time_range';
+import {
+  FACELIFT_V8_DEFAULT_FROM,
+  FACELIFT_V8_DEFAULT_TO,
+} from '../components/home/facelift/v8/time_range';
 
 /**
  * Prototypes that open on their own range instead of the app-wide “Today”.
@@ -61,6 +65,7 @@ import {
 const FACELIFT_DEFAULT_RANGES: Partial<Record<FaceliftVersion, { from: string; to: string }>> = {
   v6: { from: FACELIFT_V6_DEFAULT_FROM, to: FACELIFT_V6_DEFAULT_TO },
   v7: { from: FACELIFT_V7_DEFAULT_FROM, to: FACELIFT_V7_DEFAULT_TO },
+  v8: { from: FACELIFT_V8_DEFAULT_FROM, to: FACELIFT_V8_DEFAULT_TO },
 };
 
 const PAGE_TITLE = i18n.translate('xpack.securitySolution.entityAnalytics.homePage.pageTitle', {
@@ -72,6 +77,11 @@ const MANAGEMENT_BUTTON_LABEL = i18n.translate(
   { defaultMessage: 'Management' }
 );
 
+const SETTINGS_BUTTON_LABEL = i18n.translate(
+  'xpack.securitySolution.entityAnalytics.homePage.settingsButtonLabel',
+  { defaultMessage: 'Settings' }
+);
+
 const SAVE_VIEW_BUTTON_LABEL = i18n.translate(
   'xpack.securitySolution.entityAnalytics.homePage.saveViewButtonLabel',
   { defaultMessage: 'Save view' }
@@ -81,6 +91,13 @@ const CREATE_WATCHLIST_BUTTON_LABEL = i18n.translate(
   'xpack.securitySolution.entityAnalytics.homePage.createWatchlistButtonLabel',
   { defaultMessage: 'Create watchlist' }
 );
+
+const ADD_INTEGRATIONS_BUTTON_LABEL = i18n.translate(
+  'xpack.securitySolution.entityAnalytics.homePage.addIntegrationsButtonLabel',
+  { defaultMessage: 'Add integrations' }
+);
+
+const UEBA_INTEGRATIONS_PATH = '/app/integrations/browse/security/advanced_analytics_ueba';
 
 export const EntityAnalyticsHomePage = () => {
   const riskEngineReadPrivileges = useMissingRiskEnginePrivileges({ readonly: true });
@@ -131,6 +148,22 @@ const EntityAnalyticsHomePageContent = () => {
   const spaceId = useSpaceId();
   const { dataView, isLoading: dataViewLoading } = useEntityStoreDataView(spaceId);
   const [faceliftVersion] = useActiveFaceliftVersion();
+  const { chrome, docLinks, http } = useKibana().services;
+  const entityAnalyticsDocLink = docLinks.links.securitySolution.entityAnalytics.entityRiskScoring;
+  const uebaIntegrationsHref = http.basePath.prepend(UEBA_INTEGRATIONS_PATH);
+
+  /**
+   * Native AppHeader overflow includes Feedback only when Chrome has a handler
+   * (the feedback plugin registers one after telemetry opt-in). Register one on
+   * v.8 so the three-dots menu matches Workflows: Add integrations, Feedback,
+   * Documentation.
+   */
+  useEffect(() => {
+    if (faceliftVersion !== 'v8') {
+      return;
+    }
+    return chrome.next.registerFeedbackHandler(() => undefined);
+  }, [chrome, faceliftVersion]);
 
   // Only subscribe to `search` rather than the whole `location` object so this
   // component doesn't re-render (and re-create callbacks) on unrelated URL
@@ -195,6 +228,31 @@ const EntityAnalyticsHomePageContent = () => {
   );
 
   const faceliftAppMenu = useMemo<AppHeaderMenu>(() => {
+    // v.8: Add integrations then Settings in the overflow menu so the native
+    // static items (Feedback, Documentation) render below a divider.
+    if (faceliftVersion === 'v8') {
+      return {
+        items: [
+          {
+            id: 'addIntegrations',
+            label: ADD_INTEGRATIONS_BUTTON_LABEL,
+            iconType: 'indexOpen' as const,
+            href: uebaIntegrationsHref,
+            overflow: true,
+            testId: 'eaFaceliftAddIntegrationsButton',
+          },
+          {
+            id: 'entityAnalyticsSettings',
+            label: SETTINGS_BUTTON_LABEL,
+            iconType: 'gear' as const,
+            href: managementHref,
+            overflow: true,
+            testId: 'eaFaceliftSettingsButton',
+          },
+        ],
+      };
+    }
+
     const items = [
       {
         id: 'entityAnalyticsManagement',
@@ -205,7 +263,7 @@ const EntityAnalyticsHomePageContent = () => {
       },
     ];
 
-    // Save view is v.2 only; Create watchlist is the v.5+ primary header action.
+    // Save view is v.2 only; Create watchlist is the v.5–v.7 primary header action.
     if (faceliftVersion === 'v2') {
       return {
         primaryActionItem: {
@@ -235,7 +293,13 @@ const EntityAnalyticsHomePageContent = () => {
     }
 
     return { items };
-  }, [faceliftVersion, managementHref, openCreateWatchlist, watchlistsManagementHref]);
+  }, [
+    faceliftVersion,
+    managementHref,
+    openCreateWatchlist,
+    uebaIntegrationsHref,
+    watchlistsManagementHref,
+  ]);
 
   // Design prototype: v.6+ open on “Last 30 days”; older versions keep “Today”.
   useEffect(() => {
@@ -288,7 +352,11 @@ const EntityAnalyticsHomePageContent = () => {
       ) : null}
 
       {isFaceliftAppHeaderVersion(faceliftVersion) ? (
-        <AppHeader title={PAGE_TITLE} menu={faceliftAppMenu} />
+        <AppHeader
+          title={PAGE_TITLE}
+          menu={faceliftAppMenu}
+          {...(faceliftVersion === 'v8' ? { docLink: entityAnalyticsDocLink } : {})}
+        />
       ) : (
         <HeaderPage
           title={PAGE_TITLE}

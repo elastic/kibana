@@ -65,8 +65,9 @@ export const ClassicHeader = React.memo(() => {
                   <EuiHideFor sizes={['m', 'l', 'xl']}>
                     <HeaderNavControls position="center" />
                   </EuiHideFor>,
+                  <HeaderNavControls position="right" maxOrder={1000} />,
                   <HeaderHelpMenu />,
-                  <HeaderNavControls position="right" />,
+                  <HeaderNavControls position="right" minOrder={1000} />,
                 ],
               },
             ]}

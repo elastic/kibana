@@ -151,11 +151,13 @@ export const ProjectHeader = React.memo(() => {
                 <HeaderNavControls position="center" />
               </EuiHeaderSectionItem>
 
+              <HeaderNavControls position="right" maxOrder={1000} />
+
               <EuiHeaderSectionItem>
                 <HeaderHelpMenu />
               </EuiHeaderSectionItem>
 
-              <HeaderNavControls position="right" />
+              <HeaderNavControls position="right" minOrder={1000} />
             </EuiHeaderSection>
           </EuiHeader>
         </div>

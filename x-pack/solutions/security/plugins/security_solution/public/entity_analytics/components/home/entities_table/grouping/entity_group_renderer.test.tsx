@@ -121,6 +121,26 @@ describe('createGroupPanelRenderer', () => {
       expect(getByText('Entity ID: user:james@example.com')).toBeInTheDocument();
     });
 
+    it('hides entity id subtitle when hideEntityId is set', () => {
+      const metadata: TargetMetadataMap = new Map([
+        [
+          'user:james@example.com',
+          { name: 'james-hue', type: EntityType.user, riskScore: null, individualRiskScore: null },
+        ],
+      ]);
+      const bucket = createMockBucket({
+        key: 'user:james@example.com',
+        key_as_string: 'user:james@example.com',
+      });
+      const renderer = createGroupPanelRenderer(metadata, undefined, { hideEntityId: true });
+      const element = renderer(ENTITY_GROUPING_OPTIONS.RESOLUTION, bucket);
+
+      const { getByText, queryByText } = render(<>{element}</>);
+
+      expect(getByText('james-hue')).toBeInTheDocument();
+      expect(queryByText(/Entity ID:/)).not.toBeInTheDocument();
+    });
+
     it('does not render entity id subtitle when falling back to entity id as name', () => {
       const bucket = createMockBucket({
         key: 'fallback-entity-id',

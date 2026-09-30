@@ -78,6 +78,7 @@ import { getEndpointUnifiedAttachment } from './cases/attachments/endpoint';
 import { getEventType } from './cases/attachments/event';
 import { getSecurityAlertType } from './cases/attachments/alert';
 import { isSecuritySolutionAccessible } from './helpers_access';
+import { registerPrototypeSettingsNavControl } from './app/home/global_header/register_prototype_settings_nav_control';
 import { getIndicatorAttachment } from './cases/attachments/indicator';
 import { getTimelineAttachment } from './cases/attachments/timeline';
 import { defaultDeepLinks } from './app/links/default_deep_links';
@@ -329,6 +330,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
     this.services.start(core, plugins);
     this.registerFleetExtensions(core, plugins);
     this.registerPluginUpdates(core, plugins); // Not awaiting to prevent blocking start execution
+    registerPrototypeSettingsNavControl(core.chrome);
 
     if (this.experimentalFeatures.aiRuleCreationEnabled) {
       registerAiRuleCreationHandler({

@@ -17,6 +17,11 @@ import {
   METRICS_VERSION_OPTIONS as METRICS_VERSION_OPTIONS_V7,
   useActiveMetricsVersion as useActiveMetricsVersionV7,
 } from '../../../entity_analytics/components/home/facelift/v7/active_metrics_version';
+import {
+  getMetricsVersionOptions as getMetricsVersionOptionsV8,
+  useActiveMetricsVersion as useActiveMetricsVersionV8,
+  useSimplifiedMetrics,
+} from '../../../entity_analytics/components/home/facelift/v8/active_metrics_version';
 import { FaceliftHeaderVersionSelect } from './facelift_header_version_select';
 
 const LABEL = i18n.translate('xpack.securitySolution.globalHeader.faceliftMetricsVersionLabel', {
@@ -44,7 +49,7 @@ const MetricsVersionSelectV6: React.FC = () => {
   );
 };
 
-/** Prototype v.7 metrics state: v.7 is the only chart layout it carries. */
+/** Prototype v.7 metrics state: v.7–v.8 chart layouts. */
 const MetricsVersionSelectV7: React.FC = () => {
   const [metricsVersion, setMetricsVersion] = useActiveMetricsVersionV7();
 
@@ -60,6 +65,23 @@ const MetricsVersionSelectV7: React.FC = () => {
   );
 };
 
+/** Prototype v.8: options follow the Simplified metrics switch track. */
+const MetricsVersionSelectV8: React.FC = () => {
+  const [simplified] = useSimplifiedMetrics();
+  const [metricsVersion, setMetricsVersion] = useActiveMetricsVersionV8();
+
+  return (
+    <FaceliftHeaderVersionSelect
+      label={LABEL}
+      ariaLabel={SELECT_ARIA_LABEL}
+      options={getMetricsVersionOptionsV8(simplified)}
+      value={metricsVersion}
+      onChange={setMetricsVersion}
+      testIdPrefix="eaMetricsVersion"
+    />
+  );
+};
+
 /**
  * Metrics-charts version within the active prototype (chrome header, left of
  * Prototype version). Only mounted for prototypes that ship a metrics switch,
@@ -68,5 +90,11 @@ const MetricsVersionSelectV7: React.FC = () => {
 export const MetricsVersionHeaderControl: React.FC = () => {
   const [faceliftVersion] = useActiveFaceliftVersion();
 
-  return faceliftVersion === 'v7' ? <MetricsVersionSelectV7 /> : <MetricsVersionSelectV6 />;
+  if (faceliftVersion === 'v8') {
+    return <MetricsVersionSelectV8 />;
+  }
+  if (faceliftVersion === 'v7') {
+    return <MetricsVersionSelectV7 />;
+  }
+  return <MetricsVersionSelectV6 />;
 };

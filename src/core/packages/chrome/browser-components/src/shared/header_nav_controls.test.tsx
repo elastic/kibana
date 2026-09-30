@@ -16,7 +16,11 @@ import { chromeServiceMock } from '@kbn/core-chrome-browser-mocks';
 import { TestChromeProviders } from '../test_helpers';
 import { HeaderNavControls } from './header_nav_controls';
 
-const renderWithChrome = (position: 'left' | 'center' | 'right', controls: ChromeNavControl[]) => {
+const renderWithChrome = (
+  position: 'left' | 'center' | 'right',
+  controls: ChromeNavControl[],
+  extraProps: { minOrder?: number; maxOrder?: number } = {}
+) => {
   const chrome = chromeServiceMock.createStartContract();
   const controls$ = new BehaviorSubject<ChromeNavControl[]>(controls);
   const getter =
@@ -28,7 +32,7 @@ const renderWithChrome = (position: 'left' | 'center' | 'right', controls: Chrom
   getter.mockReturnValue(controls$);
   return render(
     <TestChromeProviders chrome={chrome}>
-      <HeaderNavControls position={position} />
+      <HeaderNavControls position={position} {...extraProps} />
     </TestChromeProviders>
   );
 };
@@ -93,5 +97,18 @@ describe('HeaderNavControls', () => {
     expect(screen.getByTestId('react-control')).toBeInTheDocument();
     expect(screen.getByTestId('react-control-2')).toBeInTheDocument();
     expect(mountSpy).toHaveBeenCalledWith(expect.any(HTMLElement));
+  });
+
+  it('filters controls by minOrder and maxOrder', () => {
+    renderWithChrome(
+      'right',
+      [
+        { order: 100, content: <span data-test-subj="low-order">Low</span> },
+        { order: 1000, content: <span data-test-subj="high-order">High</span> },
+      ],
+      { maxOrder: 1000 }
+    );
+    expect(screen.getByTestId('low-order')).toBeInTheDocument();
+    expect(screen.queryByTestId('high-order')).not.toBeInTheDocument();
   });
 });

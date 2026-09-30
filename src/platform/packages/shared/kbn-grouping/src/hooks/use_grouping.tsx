@@ -62,6 +62,7 @@ export type DynamicGroupingProps<T> = Pick<
   | 'onGroupClose'
   | 'selectedGroup'
   | 'takeActionItems'
+  | 'takeActionButtonLabel'
 >;
 
 /** Interface for configuring grouping package where T is the consumer `GroupingAggregation`

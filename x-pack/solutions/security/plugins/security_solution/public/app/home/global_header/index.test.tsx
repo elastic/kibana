@@ -6,14 +6,10 @@
  */
 import React from 'react';
 import { render, waitFor } from '@testing-library/react';
+import { of } from 'rxjs';
 import { useLocation } from 'react-router-dom';
 import { GlobalHeader } from '.';
-import {
-  ADD_DATA_PATH,
-  ADD_THREAT_INTELLIGENCE_DATA_PATH,
-  SECURITY_FEATURE_ID,
-  THREAT_INTELLIGENCE_PATH,
-} from '../../../../common/constants';
+import { SECURITY_FEATURE_ID } from '../../../../common/constants';
 import { createMockStore, mockGlobalState, TestProviders } from '../../../common/mock';
 import { TimelineId } from '../../../../common/types/timeline';
 import { dataViewPickerPaths } from '../../../sourcerer/containers/sourcerer_paths';
@@ -56,6 +52,11 @@ describe('global header', () => {
       ...mockUseKibana(),
       services: {
         ...mockUseKibana().services,
+        chrome: {
+          ...mockUseKibana().services.chrome,
+          getChromeStyle: () => 'classic',
+          getChromeStyle$: () => of('classic'),
+        },
         application: {
           capabilities: {
             ...mockUseKibana().services.application.capabilities,
@@ -68,57 +69,44 @@ describe('global header', () => {
     });
   });
 
-  it('has add data link', () => {
-    const { getByText } = render(
+  it('does not show Add integrations in the Classic space header', () => {
+    const { queryByText, queryByTestId } = render(
       <TestProviders store={store}>
         <GlobalHeader />
       </TestProviders>
     );
-    expect(getByText('Add integrations')).toBeInTheDocument();
+    expect(queryByText('Add integrations')).not.toBeInTheDocument();
+    expect(queryByTestId('add-data')).not.toBeInTheDocument();
   });
 
-  it('points to the default Add data URL', () => {
-    const { queryByTestId } = render(
-      <TestProviders store={store}>
-        <GlobalHeader />
-      </TestProviders>
-    );
-    const link = queryByTestId('add-data');
-    expect(link?.getAttribute('href')).toBe(ADD_DATA_PATH);
-  });
-
-  it('does not show the default Add data URL when hasSearchAILakeConfigurations', () => {
+  it('does not mount the Add integrations header in the Security solution view', () => {
+    const kibana = mockUseKibana();
     (useKibana as jest.Mock).mockReturnValue({
-      ...mockUseKibana(),
+      ...kibana,
       services: {
-        ...mockUseKibana().services,
+        ...kibana.services,
+        chrome: {
+          ...kibana.services.chrome,
+          getChromeStyle: () => 'project',
+          getChromeStyle$: () => of('project'),
+        },
         application: {
           capabilities: {
+            ...kibana.services.application.capabilities,
             [SECURITY_FEATURE_ID]: {
-              configurations: true,
+              configurations: false,
             },
-            fleet: { read: true },
           },
         },
       },
     });
-    const { queryByTestId } = render(
+    const { queryByText, queryByTestId } = render(
       <TestProviders store={store}>
         <GlobalHeader />
       </TestProviders>
     );
+    expect(queryByText('Add integrations')).not.toBeInTheDocument();
     expect(queryByTestId('add-data')).not.toBeInTheDocument();
-  });
-
-  it('points to the threat_intel Add data URL for threat_intelligence url', () => {
-    (useLocation as jest.Mock).mockReturnValue({ pathname: THREAT_INTELLIGENCE_PATH });
-    const { queryByTestId } = render(
-      <TestProviders store={store}>
-        <GlobalHeader />
-      </TestProviders>
-    );
-    const link = queryByTestId('add-data');
-    expect(link?.getAttribute('href')).toBe(ADD_THREAT_INTELLIGENCE_DATA_PATH);
   });
 
   it.each(dataViewPickerPaths)('shows data view manager on %s page', (pathname) => {
@@ -169,23 +157,22 @@ describe('global header', () => {
     expect(queryByTestId(DATA_VIEW_PICKER_TEST_ID)).not.toBeInTheDocument();
   });
 
-  it('shows metrics + prototype version controls left of Add integrations on Entity analytics home (v.6)', () => {
+  it('no longer mounts prototype controls in the app header action menu', () => {
     (useLocation as jest.Mock).mockReturnValue({ pathname: '/entity_analytics_home_page' });
-    const { getByTestId, getByText } = render(
+    const { queryByTestId, queryByText } = render(
       <TestProviders store={store}>
         <GlobalHeader />
       </TestProviders>
     );
-    expect(getByTestId('eaMetricsVersionHeaderControl')).toBeInTheDocument();
-    expect(getByText('Metrics version:')).toBeInTheDocument();
-    expect(getByTestId('eaMetricsVersionSelect')).toBeInTheDocument();
-    expect(getByTestId('eaFaceliftVersionHeaderControl')).toBeInTheDocument();
-    expect(getByText('Prototype version:')).toBeInTheDocument();
-    expect(getByTestId('eaFaceliftVersionSelect')).toBeInTheDocument();
-    expect(getByText('Add integrations')).toBeInTheDocument();
+    expect(queryByTestId('eaFaceliftSimplifiedMetricsSwitch')).not.toBeInTheDocument();
+    expect(queryByTestId('eaMetricsVersionHeaderControl')).not.toBeInTheDocument();
+    expect(queryByText('Metrics version:')).not.toBeInTheDocument();
+    expect(queryByTestId('eaFaceliftVersionHeaderControl')).not.toBeInTheDocument();
+    expect(queryByText('Prototype version:')).not.toBeInTheDocument();
+    expect(queryByText('Add integrations')).not.toBeInTheDocument();
   });
 
-  it('hides the prototype and metrics version controls off Entity analytics home', () => {
+  it('does not mount prototype settings in the app header action menu off Entity analytics home', () => {
     (useLocation as jest.Mock).mockReturnValue({ pathname: '/alerts' });
     const { queryByTestId } = render(
       <TestProviders store={store}>
@@ -194,6 +181,8 @@ describe('global header', () => {
     );
     expect(queryByTestId('eaFaceliftVersionHeaderControl')).not.toBeInTheDocument();
     expect(queryByTestId('eaMetricsVersionHeaderControl')).not.toBeInTheDocument();
+    expect(queryByTestId('eaFaceliftSimplifiedMetricsSwitch')).not.toBeInTheDocument();
+    expect(queryByTestId('eaPrototypeSettingsButton')).not.toBeInTheDocument();
   });
 
   it('shows AI Assistant header link', () => {

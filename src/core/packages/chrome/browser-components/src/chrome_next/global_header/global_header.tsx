@@ -20,6 +20,7 @@ import {
   useUserMenu,
 } from '../../shared/chrome_hooks';
 import { HeaderPageAnnouncer } from '../../shared/header_page_announcer';
+import { HeaderNavControls } from '../../shared/header_nav_controls';
 
 export const ChromeNextGlobalHeader = React.memo(() => {
   const breadcrumbs = useProjectBreadcrumbs();
@@ -30,6 +31,7 @@ export const ChromeNextGlobalHeader = React.memo(() => {
       <ChromeNextGlobalHeaderShell
         logo={<ChromeNextGlobalHeaderLogo />}
         search={<SearchButton />}
+        beforeHelp={<HeaderNavControls position="right" maxOrder={1000} />}
         actions={<AiButtonSlot />}
         help={<HelpButton />}
         switcher={useContextSwitcher()}

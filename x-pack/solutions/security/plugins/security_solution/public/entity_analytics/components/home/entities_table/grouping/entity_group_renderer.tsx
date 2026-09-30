@@ -54,10 +54,12 @@ const ResolutionGroupPanel = ({
   bucket,
   targetMetadata,
   tableId,
+  hideEntityId = false,
 }: {
   bucket: RawBucket<EntitiesGroupingAggregation>;
   targetMetadata: TargetMetadataMap;
   tableId: string;
+  hideEntityId?: boolean;
 }) => {
   const enableNewFlyout = useIsNewFlyoutEnabled();
   const { openFlyout } = useExpandableFlyoutApi();
@@ -117,7 +119,7 @@ const ResolutionGroupPanel = ({
       )}
       <EuiFlexItem grow={false}>
         <EuiText size="s">{displayName}</EuiText>
-        {targetEntityName && (
+        {targetEntityName && !hideEntityId && (
           <EuiText size="xs" color="subdued">
             {i18n.translate('xpack.securitySolution.entityAnalytics.entitiesTable.group.entityId', {
               defaultMessage: 'Entity ID: {entityId}',
@@ -132,7 +134,8 @@ const ResolutionGroupPanel = ({
 
 export const createGroupPanelRenderer = (
   targetMetadata: TargetMetadataMap,
-  tableId: string = ENTITY_ANALYTICS_TABLE_ID
+  tableId: string = ENTITY_ANALYTICS_TABLE_ID,
+  { hideEntityId = false }: { hideEntityId?: boolean } = {}
 ) => {
   const GroupPanelRenderer = (
     selectedGroup: string,
@@ -141,7 +144,12 @@ export const createGroupPanelRenderer = (
   ) => {
     if (selectedGroup === ENTITY_GROUPING_OPTIONS.RESOLUTION) {
       return (
-        <ResolutionGroupPanel bucket={bucket} targetMetadata={targetMetadata} tableId={tableId} />
+        <ResolutionGroupPanel
+          bucket={bucket}
+          targetMetadata={targetMetadata}
+          tableId={tableId}
+          hideEntityId={hideEntityId}
+        />
       );
     }
 

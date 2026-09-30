@@ -32,6 +32,8 @@ interface GroupStatsProps<T> {
   getActionItems?: GetActionItems;
   /** Optional array of additional action buttons to display before the Take actions button */
   additionalActionButtons?: React.ReactElement[];
+  /** Optional label for the take-action button. Defaults to "Take actions". */
+  takeActionButtonLabel?: string;
 }
 
 const Separator = () => {
@@ -55,6 +57,7 @@ const GroupStatsComponent = <T,>({
   stats,
   getActionItems,
   additionalActionButtons,
+  takeActionButtonLabel = TAKE_ACTION,
 }: GroupStatsProps<T>) => {
   const { euiTheme } = useEuiTheme();
   const xsFontSize = useEuiFontSize('xs').fontSize;
@@ -148,7 +151,7 @@ const GroupStatsComponent = <T,>({
                 iconType="chevronSingleDown"
                 iconSide="right"
               >
-                {TAKE_ACTION}
+                {takeActionButtonLabel}
               </EuiButtonEmpty>
             }
             closePopover={() => setPopover(false)}
@@ -159,7 +162,7 @@ const GroupStatsComponent = <T,>({
           </EuiPopover>
         </EuiFlexItem>
       ) : null,
-    [isPopoverOpen, onButtonClick, actionItems]
+    [isPopoverOpen, onButtonClick, actionItems, takeActionButtonLabel]
   );
 
   return (

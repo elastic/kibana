@@ -30,6 +30,7 @@ export interface ChromeNextGlobalHeaderShellProps {
   switcher?: ReactNode;
   projectPicker?: ReactNode;
   search?: ReactNode;
+  beforeHelp?: ReactNode;
   help?: ReactNode;
   actions?: ReactNode;
   userMenu?: ReactNode;
@@ -127,7 +128,7 @@ const useGlobalHeaderStyles = () => {
 };
 
 export const ChromeNextGlobalHeaderShell = React.memo<ChromeNextGlobalHeaderShellProps>(
-  ({ logo, switcher, projectPicker, search, help, actions, userMenu }) => {
+  ({ logo, switcher, projectPicker, search, beforeHelp, help, actions, userMenu }) => {
     const sideNavWidth = useSideNavWidth();
     const styles = useGlobalHeaderStyles();
     const logoWidth = sideNavWidth <= COLLAPSED_WIDTH ? COLLAPSED_WIDTH : EXPANDED_WIDTH;
@@ -158,6 +159,11 @@ export const ChromeNextGlobalHeaderShell = React.memo<ChromeNextGlobalHeaderShel
           {search && (
             <div css={styles.searchSlot} data-test-subj="chromeNextGlobalHeaderSearch">
               {search}
+            </div>
+          )}
+          {beforeHelp && (
+            <div css={styles.actionsSlot} data-test-subj="chromeNextGlobalHeaderNavControls">
+              {beforeHelp}
             </div>
           )}
           {help && (
