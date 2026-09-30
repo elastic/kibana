@@ -6,7 +6,8 @@
  */
 
 import React, { memo, useMemo } from 'react';
-import { EuiText, EuiHorizontalRule, EuiSpacer } from '@elastic/eui';
+import type { EuiTextColorProps } from '@elastic/eui';
+import { EuiText, EuiHorizontalRule, EuiSpacer, EuiTextColor } from '@elastic/eui';
 import { MemoryDumpResponseActionOutputResult } from '../../memory_dump_response_action_output_result';
 import { CancelActionResults } from '../../cancel_action_results';
 import { RunscriptOutput } from './components/runscript_results';
@@ -40,6 +41,7 @@ import {
 export const ResponseActionResults = memo<ResponseActionResultsProps>(
   ({ action, agentId, textSize = 's', 'data-test-subj': dataTestSubj }) => {
     const getTestId = useTestIdGenerator(dataTestSubj);
+
     const agents = useMemo(() => {
       return agentId ? [agentId] : action.agents;
     }, [action.agents, agentId]);
@@ -69,12 +71,22 @@ export const ResponseActionResults = memo<ResponseActionResultsProps>(
             : action.isExpired
             ? OUTPUT_MESSAGES.hasExpired(command)
             : OUTPUT_MESSAGES.hasFailed(command);
+          const hostStatusMessageColor: EuiTextColorProps['color'] = !agentActionState.isCompleted
+            ? 'warning'
+            : agentActionState.wasCanceled
+            ? 'default'
+            : agentActionState.wasSuccessful
+            ? 'success'
+            : 'danger';
+          const hostStatusDisplay = (
+            <EuiTextColor color={hostStatusMessageColor}>{hostStatusMessage}</EuiTextColor>
+          );
 
           return (
             <div data-test-subj={getTestId('hostStatusAndResults')} key={hostAgentId}>
               {isMultiAgent ? (
                 <>
-                  <KeyValueDisplay name={hostName} value={hostStatusMessage} />
+                  <KeyValueDisplay name={hostName} value={hostStatusDisplay} />
                   {agentActionState.isCompleted && (
                     <div>
                       {OUTPUT_MESSAGES.expandSection.completedAt} {agentActionState.completedAt}
@@ -82,7 +94,7 @@ export const ResponseActionResults = memo<ResponseActionResultsProps>(
                   )}
                 </>
               ) : (
-                hostStatusMessage
+                hostStatusDisplay
               )}
 
               {agentActionState.isCompleted && (
