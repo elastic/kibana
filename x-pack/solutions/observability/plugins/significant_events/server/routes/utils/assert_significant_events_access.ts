@@ -24,6 +24,11 @@ interface SignificantEventsAccessContext {
   licensing: LicensingPluginStart;
 }
 
+interface AssertSignificantEventsAccessParams extends SignificantEventsAccessContext {
+  /** Requirements to skip, e.g. `feature_flag` so Pause stays reachable while Nightshift is off. */
+  ignore?: readonly SignificantEventsUnavailableReason[];
+}
+
 /**
  * Resolves to the error to throw when the requirement is unmet, or `undefined`
  * when it is satisfied. The error is built lazily, so the happy path allocates
@@ -106,11 +111,16 @@ const significantEventsRequirements: Record<SignificantEventsUnavailableReason, 
  * to run all checks anyway, so parallel keeps that hot path at the latency of
  * the single slowest check instead of summing them.
  */
-const findFirstUnmetRequirement = async (context: SignificantEventsAccessContext) => {
+const findFirstUnmetRequirement = async (
+  context: SignificantEventsAccessContext,
+  ignore: readonly SignificantEventsUnavailableReason[] = []
+) => {
   // `Object.entries` widens keys to `string`; the keys are exactly the reasons.
-  const entries = Object.entries(significantEventsRequirements) as Array<
-    [SignificantEventsUnavailableReason, RequirementCheck]
-  >;
+  const entries = (
+    Object.entries(significantEventsRequirements) as Array<
+      [SignificantEventsUnavailableReason, RequirementCheck]
+    >
+  ).filter(([reason]) => !ignore.includes(reason));
 
   const results = await Promise.all(
     entries.map(async ([reason, check]) => ({ reason, error: await check(context) }))
@@ -130,10 +140,11 @@ const findFirstUnmetRequirement = async (context: SignificantEventsAccessContext
  * requirement-specific error for the first unmet requirement (preserving its
  * error type/status code).
  */
-export async function assertSignificantEventsAccess(
-  context: SignificantEventsAccessContext
-): Promise<void> {
-  const unmet = await findFirstUnmetRequirement(context);
+export async function assertSignificantEventsAccess({
+  ignore,
+  ...context
+}: AssertSignificantEventsAccessParams): Promise<void> {
+  const unmet = await findFirstUnmetRequirement(context, ignore);
   if (unmet) {
     throw unmet.error;
   }

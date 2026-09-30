@@ -18,7 +18,6 @@ export interface AttachmentSummarySectionProps {
   /** The conversation's attachments, unfiltered. */
   attachments: VersionedAttachment[] | undefined;
   attachmentsService: AttachmentServiceStartContract;
-  collapsedCount?: number;
   title?: string;
 }
 
@@ -27,13 +26,23 @@ export interface AttachmentSummarySectionProps {
  * attachment matches a category, so an empty summary never takes up space in the flyout.
  */
 export const AttachmentSummarySection = memo<AttachmentSummarySectionProps>(
-  ({ attachments, attachmentsService, collapsedCount, title = ATTACHMENT_SUMMARY_TITLE }) => {
+  ({ attachments, attachmentsService, title = ATTACHMENT_SUMMARY_TITLE }) => {
     const summaryAttachments = useMemo(
       () => selectSummaryAttachments(attachments, SUMMARY_ATTACHMENT_TYPES),
       [attachments]
     );
 
-    if (summaryAttachments.length === 0) {
+    const renderableAttachments = useMemo(
+      () =>
+        summaryAttachments.filter((a) =>
+          Boolean(
+            attachmentsService.getAttachmentUiDefinition(a.type)?.renderConversationDetailsContent
+          )
+        ),
+      [summaryAttachments, attachmentsService]
+    );
+
+    if (renderableAttachments.length === 0) {
       return null;
     }
 
@@ -42,7 +51,6 @@ export const AttachmentSummarySection = memo<AttachmentSummarySectionProps>(
         <AttachmentSummaryList
           attachments={summaryAttachments}
           attachmentsService={attachmentsService}
-          collapsedCount={collapsedCount}
         />
       </DetailsBlock>
     );
