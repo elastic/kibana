@@ -154,6 +154,11 @@ const createHandleEventsResultSchema = (limits: ParseHandleEventsLimits = {}) =>
           }, 0);
           return totalBytes <= maxPayloadBytes;
         }, `events payloads must total at most ${maxPayloadBytes} bytes`),
+      /**
+       * When set, the hub still schedules `events` and returns this response
+       * instead of 202. Slack slash commands need HTTP 200 with an empty body.
+       */
+      httpResponse: handleEventsHttpResponseSchema.optional(),
     }),
   ]);
 };

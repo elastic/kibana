@@ -51,8 +51,10 @@ export interface EventDefinition {
 /**
  * Spoke events contract.
  *
- * `handleEvents` returns emit or HTTP ack. The hub must run
- * `parseHandleEventsResult` (and `validateEmittedEvents` on emit).
+ * `handleEvents` returns an HTTP ack, or an emit. An emit may include
+ * `httpResponse` when the vendor must receive that response and the events
+ * must still be scheduled. The hub must run `parseHandleEventsResult`
+ * (and `validateEmittedEvents` on emit).
  */
 export interface ConnectorSpecEvents {
   readonly definitions: Record<string, EventDefinition>;

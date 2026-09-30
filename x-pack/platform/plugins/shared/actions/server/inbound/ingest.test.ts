@@ -845,6 +845,73 @@ describe('ingestInboundEvent', () => {
     );
     expect(JSON.stringify(logger.warn.mock.calls)).not.toContain('es-secret');
   });
+
+  it('returns the emit HTTP ack and still schedules events', async () => {
+    const eventId = buildEventId('.myConnector', 'received');
+    getConnectorSpecMock.mockReturnValue(
+      createFakeSpec(
+        jest.fn().mockResolvedValue({
+          type: 'emit',
+          events: [{ eventId, correlationKey: 'corr-1', payload: { body: {} } }],
+          httpResponse: { status: 200 },
+        })
+      ) as ReturnType<typeof getConnectorSpec>
+    );
+
+    const { response: res } = await run();
+    expect(res.custom).toHaveBeenCalledWith({ statusCode: 200 });
+    expect(res.accepted).not.toHaveBeenCalled();
+    expect(emitConnectorEvents).toHaveBeenCalledTimes(1);
+    expectOutcome('info', 'accepted');
+  });
+
+  it('returns the emit HTTP ack and does not schedule when the connector has no last-saver apiKey', async () => {
+    const eventId = buildEventId('.myConnector', 'received');
+    getDecryptedConnectorAttributes.mockResolvedValueOnce({
+      actionTypeId: '.myConnector',
+      name: 'Test',
+      isMissingSecrets: false,
+      config: {},
+      secrets: {},
+    });
+    getConnectorSpecMock.mockReturnValue(
+      createFakeSpec(
+        jest.fn().mockResolvedValue({
+          type: 'emit',
+          events: [{ eventId, correlationKey: 'corr-1', payload: { body: {} } }],
+          httpResponse: { status: 200 },
+        })
+      ) as ReturnType<typeof getConnectorSpec>
+    );
+
+    const { response: res } = await run();
+    expect(res.custom).toHaveBeenCalledWith({ statusCode: 200 });
+    expect(res.accepted).not.toHaveBeenCalled();
+    expect(emitConnectorEvents).not.toHaveBeenCalled();
+    expectOutcome('warn', 'identity_missing');
+  });
+
+  it('returns 500 and does not emit when an emit HTTP ack includes Location', async () => {
+    const eventId = buildEventId('.myConnector', 'received');
+    getConnectorSpecMock.mockReturnValue(
+      createFakeSpec(
+        jest.fn().mockResolvedValue({
+          type: 'emit',
+          events: [{ eventId, correlationKey: 'corr-1', payload: { body: {} } }],
+          httpResponse: {
+            status: 200,
+            headers: { Location: 'https://evil.example' },
+          },
+        })
+      ) as ReturnType<typeof getConnectorSpec>
+    );
+
+    const { response: res } = await run();
+    expect(res.customError).toHaveBeenCalledWith(expect.objectContaining({ statusCode: 500 }));
+    expect(res.custom).not.toHaveBeenCalled();
+    expect(emitConnectorEvents).not.toHaveBeenCalled();
+    expectOutcome('error', 'handle_fail');
+  });
 });
 
 describe('truncateInboundIngressDetail', () => {
