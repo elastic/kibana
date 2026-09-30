@@ -5,12 +5,7 @@
  * 2.0.
  */
 
-import {
-  hydratedContextPath,
-  renderMemoryTranscript,
-  stepsFromRound,
-  type TranscriptStep,
-} from './transcript';
+import { renderMemoryTranscript, stepsFromRound, type TranscriptStep } from './transcript';
 
 const tool = (
   toolId: string,
@@ -69,47 +64,23 @@ describe('renderMemoryTranscript', () => {
     expect(text).not.toContain('Result: HTTP 401');
   });
 
-  it('collapses loads of prior context onto one line and leaves out their content', () => {
+  it('shows every tool call, including reads of stored knowledge and progress reports', () => {
     const text = render([
-      tool(
-        'nightshift_sandbox_view_file',
-        { file_path: '/workspace/elastic.md' },
-        'ELASTIC-DOC-BODY'
-      ),
       tool(
         'nightshift_sandbox_view_file',
         { file_path: '/workspace/memories/checkout-redis-evictions.md' },
         'MEMORY-BODY'
       ),
-      tool(
-        'nightshift_sandbox_bash',
-        { command: 'cat /workspace/cortex/README.md' },
-        'CORTEX-BODY'
-      ),
+      tool('platform.streams.investigation_progress_report', { summary: 'STATUS-UPDATE' }, '{}'),
       tool('nightshift_sandbox_bash', { command: 'curl $URL/_cluster/health' }, 'status: green'),
     ]);
-    expect(text).toContain(
-      'Loaded from prior context (already known, not new evidence): memories: /workspace/memories/checkout-redis-evictions.md; 2 other file(s) (Cortex pages, decision trees, environment docs)'
-    );
-    expect(text).not.toMatch(/ELASTIC-DOC-BODY|MEMORY-BODY|CORTEX-BODY/);
-    expect(text).toContain('1. nightshift_sandbox_bash: curl $URL/_cluster/health');
-  });
-
-  it('keeps reads of files that are not prior context', () => {
-    const text = render([
-      tool('nightshift_sandbox_view_file', { file_path: '/workspace/scratch/out.json' }, 'SCRATCH'),
-    ]);
-    expect(text).toContain('nightshift_sandbox_view_file');
-    expect(text).toContain('Result: SCRATCH');
-  });
-
-  it("drops the agent's progress reports", () => {
-    const text = render([
-      tool('platform.streams.investigation_progress_report', { summary: 'STATUS-UPDATE' }, '{}'),
-      tool('nightshift_sandbox_bash', { command: 'ls /tmp' }, 'a b'),
-    ]);
-    expect(text).not.toContain('STATUS-UPDATE');
-    expect(text).toContain('nightshift_sandbox_bash');
+    expect(text).toContain('1. nightshift_sandbox_view_file');
+    expect(text).toContain('checkout-redis-evictions.md');
+    expect(text).toContain('Result: MEMORY-BODY');
+    expect(text).toContain('2. platform.streams.investigation_progress_report');
+    expect(text).toContain('STATUS-UPDATE');
+    expect(text).toContain('3. nightshift_sandbox_bash: curl $URL/_cluster/health');
+    expect(text).not.toContain('Loaded from prior context');
   });
 
   it('says so when a round made no tool calls', () => {
@@ -144,12 +115,8 @@ describe('renderMemoryTranscript', () => {
     expect(text).not.toContain('## Investigation');
   });
 
-  it('collapses prior-context loads in the fallback too, and does not repeat "not available"', () => {
+  it('lists every call in the fallback, without a per-call "not available" line', () => {
     const text = render(undefined, [
-      {
-        tool_id: 'nightshift_sandbox_view_file',
-        params: { file_path: '/workspace/cortex/INDEX.md' },
-      },
       {
         tool_id: 'nightshift_sandbox_view_file',
         params: { file_path: '/workspace/memories/a.md' },
@@ -160,43 +127,10 @@ describe('renderMemoryTranscript', () => {
       },
     ] as never);
     expect(text).toContain(
-      'Loaded from prior context (already known, not new evidence): memories: /workspace/memories/a.md; 1 other file(s) (Cortex pages, decision trees, environment docs)'
+      '1. nightshift_sandbox_view_file: {"file_path":"/workspace/memories/a.md"}'
     );
-    expect(text).toContain('1. nightshift_sandbox_bash: curl -sS http://x/_cluster/health');
-    expect(text).not.toContain('view_file');
+    expect(text).toContain('2. nightshift_sandbox_bash: curl -sS http://x/_cluster/health');
     expect(text).not.toContain('not available');
-  });
-});
-
-describe('hydratedContextPath', () => {
-  it.each([
-    [
-      'nightshift_sandbox_view_file',
-      { file_path: '/workspace/decision-trees/monitors.md' },
-      '/workspace/decision-trees/monitors.md',
-    ],
-    [
-      'nightshift_sandbox_view_file',
-      { file_path: '/workspace/connectors.md' },
-      '/workspace/connectors.md',
-    ],
-    [
-      'nightshift_sandbox_bash',
-      { command: 'cat /workspace/connectors.md' },
-      '/workspace/connectors.md',
-    ],
-    ['nightshift_sandbox_bash', { command: 'ls /workspace/memories' }, '/workspace/memories'],
-  ])('%s %j reads prior context', (toolId, params, expected) => {
-    expect(hydratedContextPath(toolId, params)).toBe(expected);
-  });
-
-  it.each([
-    ['nightshift_sandbox_view_file', { file_path: '/workspace/scratch/a.md' }],
-    ['nightshift_sandbox_bash', { command: 'curl $URL/_search' }],
-    ['nightshift_sandbox_bash', { command: 'cat /workspace/memories/a.md | curl -d @- $URL' }],
-    ['nightshift_sandbox_write_file', { file_path: '/workspace/memories/a.md' }],
-  ])('%s %j is not a plain read of prior context', (toolId, params) => {
-    expect(hydratedContextPath(toolId, params)).toBeUndefined();
   });
 });
 

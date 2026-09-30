@@ -32,7 +32,7 @@ export const MEMORY_CRITIQUE_SYSTEM_PROMPT = `You are an impartial analyst-LLM.
 **Objective**
 Evaluate how retrieved *memory* affected an agent's work.
 
-The transcript has the user task; the investigation, in order (the agent's notes and each tool call with an excerpt of its result; files the agent loaded from its prior context, including recalled memories, are listed on one line); and the final answer. Use it to see whether the agent opened, followed, or contradicted a recalled memory. If results are unavailable, tool calls show parameters only.
+The transcript has the user task; the investigation, in order (the agent's notes and every tool call with an excerpt of its result); and the final answer. Use it to see whether the agent opened, followed, or contradicted a recalled memory: reading a memory's file shows it was opened, and what the agent did next shows whether it was followed. If results are unavailable, tool calls show parameters only.
 
 **Definitions**
 - *Positive signal* ("helpful"): memory was quoted, aligned with, or enabled correct decisions.
@@ -49,9 +49,9 @@ Focus strictly on durable, tool-output-verifiable knowledge about the customer's
 
 export const MEMORY_EXTRACT_GUIDELINES = `Review the conversation. Extract only facts that are directly substantiated by the transcript.
 
-The transcript has the user task; the investigation, in order (the agent's notes and each tool call with an excerpt of its result, where "ERROR" marks a failed call); and the final answer. Files the agent loaded from its own prior context (memories, Cortex, decision trees) are listed on one line: that knowledge is already stored, so never extract it again.
+The transcript has the user task; the investigation, in order (the agent's notes and every tool call with an excerpt of its result, where "ERROR" marks a failed call); and the final answer. Some calls only read the agent's own stored knowledge (recalled memories, Cortex wiki pages, decision trees, environment docs): whatever they return is already stored, so it is not new evidence and must not be extracted again.
 
-Extract a fact only if a tool result in the investigation shows it. The final answer is a synthesis that can include the agent's inferences, so it is not evidence by itself. A failed call shows nothing about the environment. If results are unavailable (the section says so, and tool calls show parameters only), the final answer is the only source: extract only what it reports as observed (concrete names, values, and structure) and skip its inferences, hypotheses, and recommendations; use the tool-call parameters to confirm that the names it relies on were actually queried.
+Extract a fact only if a tool result in the investigation shows it. The final answer is a synthesis that can include the agent's inferences, so it is not evidence by itself. A failed call shows nothing about the environment. If results are unavailable (the section says so), you cannot see what any call returned, and the final answer is the only source. The answer often restates what the agent read from its own stored knowledge: anything it attributes to memories, Cortex or wiki pages, decision trees, postmortems, runbooks, or earlier incidents is already stored, so skip it. Extract only what the answer says it observed in this environment during this run, through queries the tool calls show were actually run. Skip its inferences, hypotheses, and recommendations. When unsure, return an empty list.
 
 **EXTRACT** — durable customer-environment knowledge:
 - Organizational context: team ownership, on-call structure, service → team mapping, escalation paths, naming conventions.

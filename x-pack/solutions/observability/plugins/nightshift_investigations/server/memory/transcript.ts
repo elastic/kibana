@@ -13,9 +13,9 @@ import type { InvestigationToolCall } from '../decision_trees/accessed_trees';
  * Layout, in the order the model should weigh it:
  *  1. the user's task;
  *  2. the investigation, in order: the agent's short notes and every tool call with an excerpt of
- *     its result. Files the agent loaded from its own prior context (memories, Cortex, decision
- *     trees) are collapsed to one line: they are already known, so they are not new evidence and
- *     re-reading them must not re-teach memory;
+ *     its result. Nothing is filtered by tool or path: the calls that read recalled memories or
+ *     other stored knowledge show whether that knowledge was used, and the rest are the evidence
+ *     for what is new, what to merge, and what was wrong;
  *  3. the final answer last, next to the instructions. It is a synthesis and can contain the
  *     agent's inferences, so facts should be backed by a result above.
  *
@@ -41,39 +41,10 @@ const MAX_NOTE_CHARS = 400;
 // Tried in order until the investigation fits its budget.
 const RESULT_EXCERPT_CHARS = [1_500, 800, 400, 0];
 
-/** Only the sandbox tools show the environment. The agent's own status reports duplicate its answer. */
-const PROGRESS_REPORT_TOOL_ID = 'platform.streams.investigation_progress_report';
-
-const HYDRATED_CONTEXT_PATH =
-  /^\/workspace\/(?:memories\/|cortex\/|decision-trees\/|elastic\.md$|connectors\.md$)/;
-const SHELL_OPERATORS = /[|;&<>`$()]/;
-// `cat /workspace/cortex/x.md`, `head -50 /workspace/memories/y.md`, `ls /workspace/decision-trees`.
-const HYDRATED_CONTEXT_COMMAND =
-  /^\s*(?:cat|head|tail|ls|sed)\b[^|;&]*?(\/workspace\/(?:memories|cortex|decision-trees)\b[^\s|;&]*|\/workspace\/(?:elastic|connectors)\.md)/;
-
 const clip = (text: string, max: number): string =>
   text.length <= max ? text : `${text.slice(0, max)}… (+${text.length - max} chars)`;
 
 const oneLine = (text: string): string => text.replace(/\s+/g, ' ').trim();
-
-/** The hydrated-context path a call reads, if it only reads one. */
-export const hydratedContextPath = (
-  toolId: string,
-  params: Record<string, unknown>
-): string | undefined => {
-  if (toolId.endsWith('view_file')) {
-    const path = params.file_path;
-    return typeof path === 'string' && HYDRATED_CONTEXT_PATH.test(path) ? path : undefined;
-  }
-  if (toolId.endsWith('bash')) {
-    const command = params.command;
-    // Any pipe, redirect, chaining, or substitution means the command did more than read, so
-    // its result is evidence.
-    if (typeof command !== 'string' || SHELL_OPERATORS.test(command)) return undefined;
-    return HYDRATED_CONTEXT_COMMAND.exec(command)?.[1];
-  }
-  return undefined;
-};
 
 const renderParams = (toolId: string, params: Record<string, unknown>): string => {
   // A bash command is the meaningful part; show it as written rather than as escaped JSON.
@@ -95,7 +66,6 @@ const renderInvestigation = (
   excerptChars: number,
   noteMissingResults = true
 ): Rendered => {
-  const contextPaths: string[] = [];
   const entries: string[] = [];
   let n = 0;
   for (const step of steps) {
@@ -105,12 +75,6 @@ const renderInvestigation = (
         n += 1;
         entries.push(`${n}. Agent note: ${clip(note, MAX_NOTE_CHARS)}`);
       }
-      continue;
-    }
-    if (step.toolId === PROGRESS_REPORT_TOOL_ID) continue;
-    const contextPath = hydratedContextPath(step.toolId, step.params);
-    if (contextPath !== undefined && !step.isError) {
-      if (!contextPaths.includes(contextPath)) contextPaths.push(contextPath);
       continue;
     }
     n += 1;
@@ -129,25 +93,11 @@ const renderInvestigation = (
     entries.push(lines.join('\n'));
   }
 
-  // Memory files are named (the critique needs to know which recalled memories were opened); the
-  // rest of the prior context is only counted: it is already known and irrelevant to memory.
-  const memoryPaths = contextPaths.filter((path) => path.startsWith('/workspace/memories/'));
-  const otherCount = contextPaths.length - memoryPaths.length;
-  const loaded = [
-    ...(memoryPaths.length > 0 ? [`memories: ${memoryPaths.join(', ')}`] : []),
-    ...(otherCount > 0
-      ? [`${otherCount} other file(s) (Cortex pages, decision trees, environment docs)`]
-      : []),
-  ];
-  const header =
-    loaded.length > 0
-      ? [`Loaded from prior context (already known, not new evidence): ${loaded.join('; ')}`, '']
-      : [];
   let kept = entries.length;
-  let text = [...header, ...entries].join('\n');
+  let text = entries.join('\n');
   while (text.length > MAX_INVESTIGATION_CHARS && kept > 0) {
     kept -= 1;
-    text = [...header, ...entries.slice(0, kept)].join('\n');
+    text = entries.slice(0, kept).join('\n');
   }
   const omitted = entries.length - kept;
   if (omitted > 0) text += `\n(${omitted} later steps omitted)`;
@@ -176,8 +126,7 @@ export const renderMemoryTranscript = ({
   /** Parameters-only fallback, used when `investigation` is unavailable. */
   toolCalls: InvestigationToolCall[];
 }): string => {
-  // The parameters-only fallback is rendered the same way, so prior-context loads still collapse
-  // to one line and only the calls that touched the environment stay in the list.
+  // The parameters-only fallback lists the same calls, without results.
   const middle =
     investigation !== undefined
       ? ['## Investigation', fitInvestigation(investigation)]

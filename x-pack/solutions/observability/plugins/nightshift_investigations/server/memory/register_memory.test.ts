@@ -80,21 +80,17 @@ describe('runMemoryOptimize', () => {
     expect(optimizeMemory).toHaveBeenCalled();
   });
 
-  it('passes only sandbox tool calls to the optimizer', async () => {
-    const sandboxCall = {
-      tool_id: 'nightshift_sandbox_bash',
-      params: { command: 'esql "FROM logs-*"' },
-    };
+  it('passes every tool call of the round to the optimizer', async () => {
+    const toolCalls = [
+      { tool_id: 'platform.streams.investigation_progress_report', params: { step: 'triage' } },
+      { tool_id: 'nightshift_sandbox_bash', params: { command: 'esql "FROM logs-*"' } },
+    ];
     await runMemoryOptimize({
       request,
       agentId: 'nightshift.investigation',
       userMessage: 'why?',
       assistantMessage: 'redis',
-      toolCalls: [
-        { tool_id: 'platform.streams.investigation_progress_report', params: { step: 'triage' } },
-        sandboxCall,
-        { params: {} },
-      ],
+      toolCalls,
       recalledIds: [],
       esClient: {} as never,
       spaceId: 'default',
@@ -103,9 +99,7 @@ describe('runMemoryOptimize', () => {
       interactionId: 'execution-1',
     });
 
-    expect(optimizeMemory).toHaveBeenCalledWith(
-      expect.objectContaining({ toolCalls: [sandboxCall] })
-    );
+    expect(optimizeMemory).toHaveBeenCalledWith(expect.objectContaining({ toolCalls }));
   });
 
   it('hands the optimizer the round steps it read from the conversation', async () => {

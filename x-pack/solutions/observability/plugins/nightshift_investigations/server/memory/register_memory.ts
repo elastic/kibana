@@ -12,7 +12,6 @@ import {
   createInvestigationOptimizeTelemetry,
   createOptimizeModel,
 } from '../lib/create_optimize_model';
-import { SANDBOX_TOOL_IDS } from '../agents/investigation';
 import type { InvestigationToolCall } from '../decision_trees/accessed_trees';
 import { previewText } from './log_format';
 import { stepsFromRound, type TranscriptStep } from './transcript';
@@ -63,8 +62,6 @@ export const hydrateMemoryWorkspace = async ({
   );
   return materializeMemory({ session, store, logger, query });
 };
-
-const OPTIMIZER_TOOL_IDS: ReadonlySet<string> = new Set(SANDBOX_TOOL_IDS);
 
 /**
  * Agent Builder fires the after-execution hook before it saves the round, so the workflow can
@@ -207,10 +204,7 @@ export const runMemoryOptimize = async ({
     }),
     userMessage,
     assistantMessage,
-    // Same filter as Cortex: progress reports and other non-sandbox calls carry no environment facts.
-    toolCalls: toolCalls.filter(
-      ({ tool_id: toolId }) => toolId !== undefined && OPTIMIZER_TOOL_IDS.has(toolId)
-    ),
+    toolCalls,
     investigation,
     logger,
   });
