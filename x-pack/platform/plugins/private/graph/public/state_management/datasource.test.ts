@@ -9,19 +9,19 @@ import type { MockedGraphEnvironment } from './mocks';
 import { createMockGraphStore } from './mocks';
 import type { AdvancedSettings, WorkspaceField } from '../types';
 import { datasourceSelector, requestDatasource } from './datasource';
-import { datasourceSaga } from './datasource.sagas';
+import { registerDatasourceListeners } from './datasource_listeners';
 import { fieldsSelector } from './fields';
 import { updateSettings } from './advanced_settings';
 import type { DataView } from '@kbn/data-views-plugin/public';
 
 const waitForPromise = () => new Promise((r) => setTimeout(r));
 
-describe('datasource saga', () => {
+describe('datasource listener', () => {
   let env: MockedGraphEnvironment;
 
   beforeEach(() => {
     env = createMockGraphStore({
-      sagas: [datasourceSaga],
+      listeners: [registerDatasourceListeners],
       mockedDepsOverwrites: {
         indexPatternProvider: {
           get: jest.fn(() =>
