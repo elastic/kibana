@@ -153,19 +153,24 @@ export const getEcfServiceConfigs = (
 const normaliseLogGroupArn = (arn: string): string => (arn.endsWith(':*') ? arn : `${arn}:*`);
 
 /**
- * Ensures the OTLP endpoint URL contains an explicit port, as required by the OTel ECF
- * CloudFormation template's exporter configuration. Appends 443 for https and 80 for http
- * when no port is present; returns the original string for anything else.
+ * Appends the default port (443 for https, 80 for http) to an OTLP endpoint URL when no
+ * explicit port is present. Required by the OTel ECF CloudFormation exporter configuration.
  */
 export const ensureOtlpPort = (endpoint: string): string => {
   try {
     const parsed = new URL(endpoint);
-    if (parsed.port) return endpoint;
+    // URL.port is '' for scheme-default ports, so check the raw string for an explicit port.
+    if (/^https?:\/\/[^/:]+:\d+/.test(endpoint)) return endpoint;
     const port =
       parsed.protocol === 'https:' ? '443' : parsed.protocol === 'http:' ? '80' : null;
     if (!port) return endpoint;
-    // URL.toString() silently drops default ports (80/443), so insert into the original string.
-    return endpoint.replace(`://${parsed.hostname}`, `://${parsed.hostname}:${port}`);
+    // URL.hostname is lowercased; use the original authority string to preserve casing.
+    const schemeEnd = endpoint.indexOf('://') + 3;
+    const pathStart = endpoint.indexOf('/', schemeEnd);
+    const originalAuthority =
+      pathStart === -1 ? endpoint.slice(schemeEnd) : endpoint.slice(schemeEnd, pathStart);
+    const rest = pathStart === -1 ? '' : endpoint.slice(pathStart);
+    return `${endpoint.slice(0, schemeEnd)}${originalAuthority}:${port}${rest}`;
   } catch {
     return endpoint;
   }

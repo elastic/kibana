@@ -465,10 +465,21 @@ describe('ensureOtlpPort()', () => {
     );
   });
 
+  it('does not double-append when the explicit port equals the scheme default', () => {
+    expect(ensureOtlpPort('https://ingest.example.com:443')).toBe(
+      'https://ingest.example.com:443'
+    );
+    expect(ensureOtlpPort('http://ingest.example.com:80')).toBe('http://ingest.example.com:80');
+  });
+
   it('preserves path and query when appending port', () => {
     expect(ensureOtlpPort('https://ingest.example.com/v1/logs')).toBe(
       'https://ingest.example.com:443/v1/logs'
     );
+  });
+
+  it('preserves hostname casing when appending port', () => {
+    expect(ensureOtlpPort('https://INGEST.EXAMPLE.COM')).toBe('https://INGEST.EXAMPLE.COM:443');
   });
 
   it('returns the original string unchanged when URL is invalid', () => {
