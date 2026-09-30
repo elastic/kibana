@@ -15,24 +15,15 @@ import {
 /**
  * Schema an Inventory Threshold rule evaluates, and the flyout preview requests.
  *
- * Without the pod Schema control a stored Hosts `semconv` must not query kubeletstats,
- * so pods coerce to `ecs`. The stored param is left unchanged, so switching For back to
- * Hosts still shows OpenTelemetry. Once the control is enabled pods follow the stored
- * param like every other node type.
- *
- * An omitted schema stays omitted. Do not substitute `DEFAULT_SCHEMA`: that constant is
- * `semconv`, which drops the legacy `cpu`/`tx`/`rx` aggregations and filters the search
- * down to OpenTelemetry documents.
+ * Pods follow the stored schema like Hosts and other schema-aware types. An
+ * omitted schema stays omitted. Do not substitute `DEFAULT_SCHEMA`: that
+ * constant is `semconv`, which drops the legacy `cpu`/`tx`/`rx` aggregations
+ * and filters the search down to OpenTelemetry documents.
  */
 export const getInventoryRuleSchema = (
-  nodeType: InventoryItemType,
-  schema: DataSchemaFormat | null | undefined,
-  isPodSchemaSelectorEnabled: boolean = false
+  _nodeType: InventoryItemType,
+  schema: DataSchemaFormat | null | undefined
 ): DataSchemaFormat | undefined => {
-  if (nodeType === 'pod' && !isPodSchemaSelectorEnabled) {
-    return 'ecs';
-  }
-
   return schema ?? undefined;
 };
 
@@ -44,15 +35,11 @@ export const getInventoryRuleSchema = (
  */
 export const getInventoryAlertGroupingField = (
   nodeType: InventoryItemType,
-  schema: DataSchemaFormat | null | undefined,
-  isPodSchemaSelectorEnabled: boolean = false
+  schema: DataSchemaFormat | null | undefined
 ): string | undefined => {
   if (getFieldByType(nodeType) === undefined) {
     return undefined;
   }
 
-  return findInventoryFields(
-    nodeType,
-    getInventoryRuleSchema(nodeType, schema, isPodSchemaSelectorEnabled)
-  ).id;
+  return findInventoryFields(nodeType, getInventoryRuleSchema(nodeType, schema)).id;
 };
