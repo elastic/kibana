@@ -7,7 +7,10 @@
 
 import React, { memo, useMemo } from 'react';
 import type { EuiTextColorProps } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import { EuiText, EuiHorizontalRule, EuiSpacer, EuiTextColor } from '@elastic/eui';
+import { FormattedDate } from '../../../../common/components/formatted_date';
+import { RESPONSE_ACTION_API_COMMAND_TO_CONSOLE_COMMAND_MAP } from '../../../../../common/endpoint/service/response_actions/constants';
 import { MemoryDumpResponseActionOutputResult } from '../../memory_dump_response_action_output_result';
 import { CancelActionResults } from '../../cancel_action_results';
 import { RunscriptOutput } from './components/runscript_results';
@@ -48,6 +51,7 @@ export const ResponseActionResults = memo<ResponseActionResultsProps>(
 
     const isMultiAgent = agents.length > 1;
     const command = action.command;
+    const consoleCommandName = RESPONSE_ACTION_API_COMMAND_TO_CONSOLE_COMMAND_MAP[command];
 
     if (agentId && !action.agents.includes(agentId)) {
       window.console.warn(
@@ -63,14 +67,14 @@ export const ResponseActionResults = memo<ResponseActionResultsProps>(
           const agentActionState = action.agentState[hostAgentId];
           const hostName = action.hosts[hostAgentId]?.name ?? hostAgentId;
           const hostStatusMessage = !agentActionState.isCompleted
-            ? OUTPUT_MESSAGES.isPending(command)
+            ? OUTPUT_MESSAGES.isPending(consoleCommandName)
             : agentActionState.wasCanceled
-            ? OUTPUT_MESSAGES.wasCanceled(command)
+            ? OUTPUT_MESSAGES.wasCanceled(consoleCommandName)
             : agentActionState.wasSuccessful
-            ? OUTPUT_MESSAGES.wasSuccessful(command)
+            ? OUTPUT_MESSAGES.wasSuccessful(consoleCommandName)
             : action.isExpired
-            ? OUTPUT_MESSAGES.hasExpired(command)
-            : OUTPUT_MESSAGES.hasFailed(command);
+            ? OUTPUT_MESSAGES.hasExpired(consoleCommandName)
+            : OUTPUT_MESSAGES.hasFailed(consoleCommandName);
           const hostStatusMessageColor: EuiTextColorProps['color'] = !agentActionState.isCompleted
             ? 'warning'
             : agentActionState.wasCanceled
@@ -89,7 +93,15 @@ export const ResponseActionResults = memo<ResponseActionResultsProps>(
                   <KeyValueDisplay name={hostName} value={hostStatusDisplay} />
                   {agentActionState.isCompleted && (
                     <div>
-                      {OUTPUT_MESSAGES.expandSection.completedAt} {agentActionState.completedAt}
+                      {OUTPUT_MESSAGES.expandSection.completedAt}
+                      &nbsp;
+                      <FormattedDate
+                        fieldName={i18n.translate(
+                          'xpack.securitySolution.responseAction.responseActionResults.hostCompletedAt',
+                          { defaultMessage: 'Completed' }
+                        )}
+                        value={agentActionState.completedAt}
+                      />
                     </div>
                   )}
                 </>
