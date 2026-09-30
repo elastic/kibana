@@ -7,7 +7,6 @@
 
 // Kibana wrapper
 import { getIcon } from '../../helpers/style_choices';
-import { GraphLayoutController } from './graph_layout_controller';
 
 // Pluggable function to handle the comms with a server. Default impl here is
 // for use outside of Kibana server with direct access to elasticsearch
@@ -123,13 +122,7 @@ function GraphWorkspace(options) {
   this.lastRequest = null;
   this.lastResponse = null;
   this.changeHandler = options.changeHandler;
-  const layoutController =
-    options.layoutController ??
-    new GraphLayoutController({
-      getNodes: () => self.nodes,
-      getEdges: () => self.edges,
-      onTick: self.changeHandler,
-    });
+  const layoutController = options.layoutController;
   if (options.graphExploreProxy) {
     graphExplorer = options.graphExploreProxy;
   }
