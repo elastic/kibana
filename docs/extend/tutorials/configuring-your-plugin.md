@@ -91,7 +91,7 @@ export const config = {
 };
 ```
 
-After you add, change, deprecate, or remove a `kibana.yml` setting, document it in `docs/reference/configuration-reference/`. Follow [`.agents/skills/kibana-settings-docs/SKILL.md`](../../../.agents/skills/kibana-settings-docs/SKILL.md).
+After you add, change, deprecate, or remove a `kibana.yml` setting, document it in `docs/reference/configuration-reference/`. Follow the `docs-kibana-settings` skill in [elastic/elastic-docs-skills](https://github.com/elastic/elastic-docs-skills).
 
 ## Handle plugin configuration deprecations [handle-plugin-configuration-deprecations]
 
