@@ -13,6 +13,7 @@ import type { WorkersService } from '../services/workers/workers_service';
 import type { ConversationProposalsService } from '../services/conversation_proposals/conversation_proposals_service';
 import type { ActionsService } from '../services/actions/actions_service';
 import type { HuntServices } from '../services/watches/hunt';
+import type { ScanFailuresService } from '../services/scan_failures/scan_failures_service';
 import { registerListWatchesRoute } from './watches/list_watches';
 import { registerGetWatchRoute } from './watches/get_watch';
 import { registerListWorkersRoute } from './workers/list_workers';
@@ -21,6 +22,7 @@ import { registerGetProposalsByCategoryRoute } from './proposals/get_proposals_b
 import { registerGetClosedProposalsRoute } from './proposals/get_closed_proposals';
 import { registerListActionsRoute } from './actions/list_actions';
 import { registerGetInvestigationsCountRoute } from './investigations/get_investigations_count';
+import { registerGetScanFailuresRoute } from './scan_failures/get_scan_failures';
 import { registerHuntRoutes } from './hunt/register_hunt_routes';
 
 export interface RouteDependencies {
@@ -33,6 +35,7 @@ export interface RouteDependencies {
   getActionsService: () => ActionsService;
   getAgentBuilderConversations: () => ConversationsStart;
   getHuntServices: () => HuntServices;
+  getScanFailuresService: () => ScanFailuresService;
 }
 
 export const registerRoutes = (deps: RouteDependencies): void => {
@@ -44,5 +47,6 @@ export const registerRoutes = (deps: RouteDependencies): void => {
   registerGetClosedProposalsRoute(deps);
   registerListActionsRoute(deps);
   registerGetInvestigationsCountRoute(deps);
+  registerGetScanFailuresRoute(deps);
   registerHuntRoutes(deps);
 };

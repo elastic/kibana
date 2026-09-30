@@ -19,7 +19,7 @@ Until both are enabled, every route returns `404`.
 
 ## Authentication
 
-All API routes require a valid Kibana session or API key. The easiest way to get started is the **one-click setup** endpoint or UI page (see below).
+All API routes require a valid Kibana session or API key. The easiest way to get started is the setup endpoint or UI page (see below).
 
 ### Setup endpoint
 
@@ -40,10 +40,7 @@ The API key is scoped to the calling user's privileges and expires after 30 days
 
 ### Setup UI
 
-Navigate to `/app/elasticRamen` in Kibana. Click **Generate credentials** to create an API key. The page will:
-
-1. Attempt to auto-deliver credentials to a local agent at `http://localhost:14642/config`
-2. Fall back to displaying the credentials for manual copy if no local agent is found
+Navigate to `/app/elasticRamen` in Kibana. Click **Create credentials** to create an API key. Copy the JSON and paste it into the Elastic Ramen setup dialog.
 
 ## Required headers
 
