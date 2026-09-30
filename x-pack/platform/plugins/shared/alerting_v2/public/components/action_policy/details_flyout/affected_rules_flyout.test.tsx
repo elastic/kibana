@@ -98,10 +98,11 @@ describe('AffectedRulesFlyout', () => {
     expect(within(table).getByText('prod')).toBeInTheDocument();
   });
 
-  it('links each rule to its details page in a new tab', () => {
+  it('links each rule name to its details page in a new tab', () => {
     const { locators } = renderFlyout({ tags: ['cpu'] });
 
-    const link = screen.getByTestId('actionPolicyAffectedRulesOpenRule-rule-1');
+    const link = screen.getByTestId('actionPolicyAffectedRulesRuleNameLink-rule-1');
+    expect(link).toHaveTextContent('CPU usage');
     expect(link).toHaveAttribute('href', '/app/rules/rule-1');
     expect(link).toHaveAttribute('target', '_blank');
     expect(link).toHaveAttribute('rel', expect.stringContaining('noopener'));

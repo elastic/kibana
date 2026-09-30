@@ -5,13 +5,7 @@
  * 2.0.
  */
 
-import {
-  EuiBasicTable,
-  EuiButtonIcon,
-  EuiToolTip,
-  type Criteria,
-  type EuiBasicTableColumn,
-} from '@elastic/eui';
+import { EuiBasicTable, EuiLink, type Criteria, type EuiBasicTableColumn } from '@elastic/eui';
 import type { PolicyMatcher } from '@kbn/alerting-v2-schemas';
 import { i18n } from '@kbn/i18n';
 import React, { useState } from 'react';
@@ -22,10 +16,6 @@ import { EMPTY_VALUE } from '../../../utils/rule_display';
 import { BadgeList } from '../badge_list';
 
 const PAGE_SIZE_OPTIONS = [10, 20, 50];
-
-const OPEN_RULE_LABEL = i18n.translate('xpack.alertingV2.actionPolicy.affectedRules.openRule', {
-  defaultMessage: 'Open rule in a new tab',
-});
 
 interface Props {
   matcher?: PolicyMatcher | null;
@@ -49,6 +39,16 @@ export const AffectedRulesTable = ({ matcher }: Props) => {
         defaultMessage: 'Name',
       }),
       truncateText: true,
+      render: (name: RuleApiResponse['metadata']['name'], { id }: RuleApiResponse) => (
+        <EuiLink
+          href={rulesLocators.getRedirectUrl({ ruleId: id })}
+          target="_blank"
+          rel="noopener noreferrer"
+          data-test-subj={`actionPolicyAffectedRulesRuleNameLink-${id}`}
+        >
+          {name}
+        </EuiLink>
+      ),
     },
     {
       field: 'metadata.tags',
@@ -57,25 +57,6 @@ export const AffectedRulesTable = ({ matcher }: Props) => {
       }),
       render: (tags: RuleApiResponse['metadata']['tags']) =>
         tags?.length ? <BadgeList items={tags} /> : EMPTY_VALUE,
-    },
-    {
-      name: i18n.translate('xpack.alertingV2.actionPolicy.affectedRules.column.actions', {
-        defaultMessage: 'Actions',
-      }),
-      width: '80px',
-      align: 'right',
-      render: ({ id }: RuleApiResponse) => (
-        <EuiToolTip content={OPEN_RULE_LABEL} disableScreenReaderOutput>
-          <EuiButtonIcon
-            iconType="external"
-            href={rulesLocators.getRedirectUrl({ ruleId: id })}
-            target="_blank"
-            rel="noopener noreferrer"
-            aria-label={OPEN_RULE_LABEL}
-            data-test-subj={`actionPolicyAffectedRulesOpenRule-${id}`}
-          />
-        </EuiToolTip>
-      ),
     },
   ];
 

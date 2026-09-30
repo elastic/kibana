@@ -70,6 +70,6 @@ export class ActionPoliciesListPage {
   }
 
   affectedRuleOpenLink(ruleName: string) {
-    return this.affectedRuleRow(ruleName).getByRole('link', { name: 'Open rule in a new tab' });
+    return this.affectedRuleRow(ruleName).getByRole('link', { name: ruleName });
   }
 }
