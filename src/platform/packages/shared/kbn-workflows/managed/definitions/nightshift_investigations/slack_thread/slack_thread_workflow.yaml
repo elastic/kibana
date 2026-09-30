@@ -23,11 +23,12 @@ triggers:
   - type: slack2.app_mention
     connector-id: '*'
   # Only human replies in a thread. The app's own posts and edits come back as message events:
-  # posts carry botId, and edits carry a message_changed subtype that may lack botId.
+  # posts carry botId, and edits carry a message_changed subtype that may lack botId. A reply also
+  # sent to the channel carries the thread_broadcast subtype.
   - type: slack2.message
     connector-id: '*'
     on:
-      condition: 'event.threadId:* and not event.botId:* and not event.subtype:*'
+      condition: 'event.threadId:* and not event.botId:* and (not event.subtype:* or event.subtype:thread_broadcast)'
 
 steps:
   # A mention creates the thread's investigation; a reply only continues an existing one.
@@ -84,6 +85,10 @@ steps:
             create: false
             slack_message_ts: '{{ steps.post_started.output.ts }}'
         on-failure:
+          retry:
+            max-attempts: 3
+            delay: 5s
+            strategy: exponential
           continue: true
 
       # A failed investigation is reported from its record below rather than failing this run.
@@ -110,20 +115,70 @@ steps:
           headers:
             x-elastic-internal-origin: 'kibana'
 
-      # Edits this run's own message on the first run and the recorded one on every later run.
-      # Without either, the thread has no status message yet and this posts one.
+      # The record alone cannot tell this run's result: a run that failed before reopening the
+      # investigation leaves the previous run's completed record in place.
+      - name: set_result
+        type: data.set
+        with:
+          # This run's own message on the first run, the recorded one on every later run.
+          status_message_ts: '${{ steps.post_started.output.ts | default: steps.find_investigation.output.slack_message_ts }}'
+          result_text: |
+            {% if steps.investigate.error == null and steps.get_investigation.output.status == 'completed' %}{% if steps.get_investigation.output.title %}*{{ steps.get_investigation.output.title }}*
+
+            {% endif %}{{ steps.get_investigation.output.summary }}{% else %}Investigation failed.{% endif %}
+
+            <{{ variables.investigation_url }}|View the investigation>
+
+      # Edits the thread's status message, or posts one when the thread has none yet. messageTs
+      # renders empty rather than null then, since the connector accepts only a string.
       - name: post_result
         type: slack2.sendMessage
         connector-id: '{{ event.connectorId }}'
         with:
           channel: '{{ event.channel }}'
           threadTs: '{{ event.threadId | default: event.messageId }}'
-          messageTs: '${{ steps.post_started.output.ts | default: steps.find_investigation.output.slack_message_ts }}'
-          text: |
-            {% if steps.get_investigation.output.status == 'completed' %}{% if steps.get_investigation.output.title %}*{{ steps.get_investigation.output.title }}*
-
-            {% endif %}{{ steps.get_investigation.output.summary }}{% else %}Investigation failed.{% endif %}
-
-            <{{ variables.investigation_url }}|View the investigation>
+          messageTs: '{{ variables.status_message_ts }}'
+          text: '{{ variables.result_text }}'
         on-failure:
+          continue: true
+
+      # The status message could not be edited, for example because someone deleted it, so the
+      # result goes in a new message that later runs edit instead.
+      - name: repost_result
+        type: slack2.sendMessage
+        if: '${{ steps.post_result.error != null and variables.status_message_ts != null }}'
+        connector-id: '{{ event.connectorId }}'
+        with:
+          channel: '{{ event.channel }}'
+          threadTs: '{{ event.threadId | default: event.messageId }}'
+          text: '{{ variables.result_text }}'
+        on-failure:
+          continue: true
+
+      - name: set_result_message
+        type: data.set
+        with:
+          result_message_ts: '${{ steps.repost_result.output.ts | default: steps.post_result.output.ts }}'
+
+      # Records the message now holding the result when it is a new one or when recording the first
+      # run's message failed, so the thread keeps a single status message for later runs to edit.
+      - name: record_result_message
+        type: kibana.request
+        if: '${{ variables.result_message_ts != null and (variables.result_message_ts != variables.status_message_ts or steps.record_status_message.error != null) }}'
+        with:
+          method: POST
+          path: '/s/{{ workflow.spaceId }}/internal/nightshift/investigations/_slack_thread'
+          headers:
+            x-elastic-internal-origin: 'kibana'
+          body:
+            workspace: '${{ event.workspace }}'
+            channel: '{{ event.channel }}'
+            thread_ts: '{{ event.threadId | default: event.messageId }}'
+            create: false
+            slack_message_ts: '{{ variables.result_message_ts }}'
+        on-failure:
+          retry:
+            max-attempts: 3
+            delay: 5s
+            strategy: exponential
           continue: true
