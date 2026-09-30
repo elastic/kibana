@@ -134,10 +134,10 @@ export const ConfigureCasesRedesign: React.FC = React.memo(() => {
               </>
             )}
             <div css={contentWrapperCss}>
-              <EuiPanel hasBorder paddingSize="m" data-test-subj="cases-redesign-settings-panel">
+              <EuiPanel hasBorder paddingSize="m" data-test-subj="cases-settings-panel">
                 {hasMinimumLicensePermissions && (
                   <SettingsSection
-                    data-test-subj="cases-redesign-external-incident-management-section"
+                    data-test-subj="cases-external-incident-management-section"
                     title={configureCasesI18n.INCIDENT_MANAGEMENT_SYSTEM_TITLE}
                     description={configureCasesI18n.INCIDENT_MANAGEMENT_SYSTEM_DESC}
                   >
@@ -163,7 +163,7 @@ export const ConfigureCasesRedesign: React.FC = React.memo(() => {
 
                 {hasMinimumLicensePermissions && (
                   <SettingsSection
-                    data-test-subj="cases-redesign-case-closures-section"
+                    data-test-subj="cases-case-closures-section"
                     title={configureCasesI18n.CASE_CLOSURE_OPTIONS_TITLE}
                     description={configureCasesI18n.CASE_CLOSURE_OPTIONS_DESC}
                   >
@@ -183,7 +183,7 @@ export const ConfigureCasesRedesign: React.FC = React.memo(() => {
 
                 {showExtractObservablesSection && (
                   <SettingsSection
-                    data-test-subj="cases-redesign-extract-observables-section"
+                    data-test-subj="cases-extract-observables-section"
                     title={configureCasesI18n.EXTRACT_OBSERVABLES_DEFAULT_TITLE}
                     description={configureCasesI18n.EXTRACT_OBSERVABLES_DEFAULT_DESC}
                   >
@@ -207,7 +207,7 @@ export const ConfigureCasesRedesign: React.FC = React.memo(() => {
 
                 {showObservableTypesSection && (
                   <SettingsSection
-                    data-test-subj="cases-redesign-observable-types-section"
+                    data-test-subj="cases-observable-types-section"
                     title={observableTypesI18n.TITLE}
                     description={observableTypesI18n.DESCRIPTION}
                   >

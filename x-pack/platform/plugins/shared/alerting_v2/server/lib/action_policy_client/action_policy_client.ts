@@ -245,14 +245,13 @@ export class ActionPolicyClient {
     });
 
     try {
-      const { id, version } = await this.actionPolicySavedObjectService.create({
+      const { id } = await this.actionPolicySavedObjectService.create({
         attrs: attributes,
         id: params.options?.id,
       });
 
       return transformActionPolicySoAttributesToApiResponse({
         id,
-        version,
         attributes,
       });
     } catch (e) {
@@ -269,10 +268,9 @@ export class ActionPolicyClient {
   }
 
   public async getActionPolicy({ id }: { id: string }): Promise<ActionPolicyResponse> {
-    const { attrs, version } = await this.getExistingActionPolicy(id);
+    const { attrs } = await this.getExistingActionPolicy(id);
     return transformActionPolicySoAttributesToApiResponse({
       id,
-      version,
       attributes: attrs,
     });
   }
@@ -304,7 +302,6 @@ export class ActionPolicyClient {
       return [
         transformActionPolicySoAttributesToApiResponse({
           id: doc.id,
-          version: doc.version,
           attributes: doc.attributes,
         }),
       ];
@@ -318,7 +315,9 @@ export class ActionPolicyClient {
     const actor = await this.userService.getCurrentActor();
     const now = new Date().toISOString();
 
-    const { attrs: existingPolicy } = await this.getExistingActionPolicy(params.options.id);
+    const { attrs: existingPolicy, version: existingVersion } = await this.getExistingActionPolicy(
+      params.options.id
+    );
 
     const oldAuth = await this.getDecryptedAuth(params.options.id);
 
@@ -333,12 +332,11 @@ export class ActionPolicyClient {
       updatedAt: now,
     });
 
-    let updated: { id: string; version?: string };
     try {
-      updated = await this.writeActionPolicyAttrs({
+      await this.writeActionPolicyAttrs({
         id: params.options.id,
         attrs: nextAttrs,
-        version: params.options.version,
+        version: existingVersion,
       });
     } catch (e) {
       this.markApiKeysForInvalidation(apiKeyAttrs.apiKey, false, params.options.id);
@@ -349,7 +347,6 @@ export class ActionPolicyClient {
 
     return transformActionPolicySoAttributesToApiResponse({
       id: params.options.id,
-      version: updated.version,
       attributes: nextAttrs,
     });
   }
@@ -378,7 +375,6 @@ export class ActionPolicyClient {
       items: res.saved_objects.map((so) =>
         transformActionPolicySoAttributesToApiResponse({
           id: so.id,
-          version: so.version,
           attributes: so.attributes,
         })
       ),
@@ -924,9 +920,8 @@ export class ActionPolicyClient {
       tags: existingAttrs.tags,
     };
 
-    let updated: { id: string; version?: string };
     try {
-      updated = await this.writeActionPolicyAttrs({
+      await this.writeActionPolicyAttrs({
         id,
         attrs: replacementAttrs,
         version: existingVersion,
@@ -941,7 +936,6 @@ export class ActionPolicyClient {
     return {
       policy: transformActionPolicySoAttributesToApiResponse({
         id,
-        version: updated.version,
         attributes: replacementAttrs,
       }),
       created: false,

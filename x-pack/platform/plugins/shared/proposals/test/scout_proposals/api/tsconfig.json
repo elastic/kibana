@@ -4,6 +4,9 @@
     "outDir": "target/types"
   },
   "include": ["**/*"],
-  "kbn_references": ["@kbn/scout"],
+  "kbn_references": [
+    "@kbn/scout",
+    "@kbn/proposals-common",
+  ],
   "exclude": ["target/**/*"]
 }
