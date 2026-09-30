@@ -27,7 +27,7 @@ import type { CustomHostSettings, ProxySettings, SSLSettings } from '@kbn/action
 import type { LicenseType } from '@kbn/licensing-types';
 import type { AxiosHeaderValue, AxiosInstance } from 'axios';
 import type { ConnectorSpecEvents } from './connector_spec_events';
-import type { ClientRegistry, ClientTypeId } from './lib/clients';
+import type { ClientRegistry, ClientTypeId } from './lib/clients/client_registry';
 
 export { UISchemas } from './connector_spec_ui';
 
