@@ -684,6 +684,44 @@ describe('CreateDatasetWizardPage', () => {
     // Should stay on mapping step and show the error.
     expect(queryByTestId('createDatasetWizardReviewStep')).toBeNull();
     expect(getByTestId('createDatasetWizardDefineSchemaRequiresField')).toBeInTheDocument();
+    expect(getByTestId('nextButton')).toBeDisabled();
+
+    // Fixing the problem clears the error and re-enables Next without clicking it.
+    fireEvent.click(getByTestId('createDatasetWizardInferSchemaCard'));
+    expect(queryByTestId('createDatasetWizardDefineSchemaRequiresField')).toBeNull();
+    expect(getByTestId('nextButton')).toBeEnabled();
+  });
+
+  it('disables Next on the mapping step until the missing timestamp field name is provided', async () => {
+    const { getByTestId, findByTestId } = renderWizard();
+
+    fireEvent.click(getByTestId('createDatasetDataSource'));
+    fireEvent.click(await findByTestId('createDatasetDataSource-source-1'));
+    fireEvent.change(getByTestId('createDatasetName'), { target: { value: 'logs-dataset' } });
+    fireEvent.change(getByTestId('createDatasetResource'), { target: { value: 's3://bucket/*' } });
+    selectFormat(getByTestId, 'csv');
+
+    await clickNext(getByTestId);
+    expect(
+      await waitFor(() => getByTestId('createDatasetWizardAdditionalStep'))
+    ).toBeInTheDocument();
+    await clickNext(getByTestId);
+    expect(await waitFor(() => getByTestId('createDatasetWizardMappingStep'))).toBeInTheDocument();
+
+    expect(getByTestId('nextButton')).toBeEnabled();
+    await clickNext(getByTestId);
+    expect(getByTestId('createDatasetWizardMappingStep')).toBeInTheDocument();
+    expect(getByTestId('createDatasetWizardTimestampPath')).toHaveAttribute('aria-invalid', 'true');
+    expect(getByTestId('nextButton')).toBeDisabled();
+
+    fireEvent.change(getByTestId('createDatasetWizardTimestampPath'), {
+      target: { value: 'event_time' },
+    });
+    expect(getByTestId('createDatasetWizardTimestampPath')).not.toHaveAttribute(
+      'aria-invalid',
+      'true'
+    );
+    expect(getByTestId('nextButton')).toBeEnabled();
   });
 
   it('enables timeseries when @timestamp is added via field mappings', async () => {
