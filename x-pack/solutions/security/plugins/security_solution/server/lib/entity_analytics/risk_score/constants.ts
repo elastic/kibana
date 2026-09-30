@@ -47,6 +47,8 @@ export const RISK_SCORING_NORMALIZATION_MAX = 100;
  */
 export const MAX_INPUTS_COUNT = 10;
 
+export const RISK_SCORING_REQUEST_TIMEOUT = '5m';
+
 /**
  * Aligns maintainer resolution-member fetch bounds with entity_store resolution APIs,
  * which cap resolution search responses at 10k and treat larger groups as truncated.
