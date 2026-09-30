@@ -19,7 +19,7 @@ import {
   internalStateActions,
   selectHasUnsavedChanges,
 } from '../application/main/state_management/redux';
-import type { DiscoverSessionClient, DiscoverSessionGetResult } from './api_client';
+import type { DiscoverSessionClient, DiscoverSessionClientGetResult } from './api_client';
 import { createSessionService } from './session_service';
 
 describe('filter normalization when loading a Discover session', () => {
@@ -65,7 +65,7 @@ describe('filter normalization when loading a Discover session', () => {
       });
       filterManager.setAppFilters([]);
 
-      const apiResponse: DiscoverSessionGetResult = {
+      const apiResponse: DiscoverSessionClientGetResult = {
         id: 'session-id',
         meta: { managed: false },
         resolve: { outcome: 'exactMatch' },

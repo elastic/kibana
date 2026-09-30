@@ -8,7 +8,7 @@
  */
 
 import type { DiscoverSessionApiDataInput } from '@kbn/as-code-discover-schema';
-import { buildPath, isHttpFetchError } from '@kbn/core-http-browser';
+import { buildPath, isHttpFetchError, type IHttpFetchError } from '@kbn/core-http-browser';
 import type { HttpStart } from '@kbn/core/public';
 import { SavedObjectNotFound } from '@kbn/kibana-utils-plugin/public';
 import { SavedSearchType, type DiscoverSession } from '@kbn/saved-search-plugin/common';
@@ -18,8 +18,6 @@ import {
 } from '../../common/constants';
 import type { DiscoverSessionApiResponse, DiscoverSessionGetResponse } from '../../server';
 import type { deserializeEsqlControls } from '../../common/session/control_panels';
-
-export const DISCOVER_SESSION_HTTP_ERROR_NAME = 'DiscoverSessionHttpError';
 
 export interface DiscoverSessionClient {
   create: (data: DiscoverSessionClientRequestData) => Promise<DiscoverSessionApiResponse>;
@@ -96,7 +94,7 @@ export const createDiscoverSessionClient = (http: HttpStart): DiscoverSessionCli
 const buildDiscoverSessionPath = (id: string) =>
   buildPath(`${DISCOVER_SESSION_API_BASE_PATH}/{id}`, { id });
 
-/** Preserves server error details while allowing callers to handle missing sessions separately. */
+/** Preserves the server message through Redux and handles missing sessions separately. */
 const requestWithReadableError = async <T>(
   request: () => Promise<T>,
   getNotFoundError?: () => Error
@@ -110,11 +108,7 @@ const requestWithReadableError = async <T>(
 
     if (isHttpFetchError(error)) {
       const message = getResponseErrorMessage(error) || error.message;
-      // Redux preserves a string code when serializing an error, but not its HTTP response.
-      throw Object.assign(new Error(message, { cause: error }), {
-        name: DISCOVER_SESSION_HTTP_ERROR_NAME,
-        code: error.response?.status.toString(),
-      });
+      throw new Error(message, { cause: error });
     }
 
     throw error;
@@ -122,11 +116,11 @@ const requestWithReadableError = async <T>(
 };
 
 /** Returns the human-readable message included in an HTTP error response. */
-const getResponseErrorMessage = (error: unknown) => {
-  if (!isHttpFetchError(error) || !error.body || typeof error.body !== 'object') {
+const getResponseErrorMessage = ({ body }: IHttpFetchError): string | undefined => {
+  if (!body || typeof body !== 'object' || !('message' in body)) {
     return undefined;
   }
 
-  const { message } = error.body as { message?: unknown };
+  const { message } = body;
   return typeof message === 'string' ? message : undefined;
 };
