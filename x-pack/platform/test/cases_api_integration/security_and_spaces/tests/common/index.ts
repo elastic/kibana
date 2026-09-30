@@ -15,8 +15,11 @@ export default ({ loadTestFile }: FtrProviderContext): void => {
     loadTestFile(require.resolve('./comments/find_comments'));
     loadTestFile(require.resolve('./comments/get_comment'));
     loadTestFile(require.resolve('./comments/patch_comment'));
+    loadTestFile(require.resolve('./attachments/find_attachments'));
+    loadTestFile(require.resolve('./attachments/get_attachment'));
     loadTestFile(require.resolve('./attachments/delete_attachment'));
     loadTestFile(require.resolve('./attachments/delete_attachments'));
+    loadTestFile(require.resolve('./attachments/attachments_crud'));
     loadTestFile(require.resolve('./files/post_file'));
     loadTestFile(require.resolve('./files/post_file_attachment'));
     loadTestFile(require.resolve('./alerts/get_cases'));
@@ -63,11 +66,7 @@ export default ({ loadTestFile }: FtrProviderContext): void => {
     // NOTE: Migrations are not included because they can inadvertently remove the .kibana indices which removes the users and spaces
     // which causes errors in any tests after them that relies on those
 
-    /**
-     * Cases analytics
-     */
-    loadTestFile(require.resolve('./cases/analytics_index/creation'));
-    loadTestFile(require.resolve('./cases/analytics_index/backfill'));
-    loadTestFile(require.resolve('./cases/analytics_index/synchronization'));
+    // NOTE: Cases analytics v1 tests run under their own config (config_analytics_v1.ts)
+    // with attachments.enabled=false, since v1 only reads cases-comments SO type.
   });
 };

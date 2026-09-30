@@ -12,39 +12,97 @@ import { useState } from 'react';
 import useDebounce from 'react-use/lib/useDebounce';
 import {
   AGENTIC_INVESTIGATIONS_API_VERSION,
+  ESCALATION_ASSIGN_URL,
+  ESCALATION_LINKED_INVESTIGATIONS_URL,
   ESCALATIONS_INTERNAL_URL,
   ESCALATION_BY_ID_URL,
+  ESCALATION_STATUS_URL,
+  ESCALATION_CLOSE_PREVIEW_URL,
+  MAX_ESCALATIONS_PAGE_SIZE,
 } from '../../../common';
 import type {
   CreateEscalationRequest,
   EscalationConversation,
+  LinkedInvestigationSummary,
   ListEscalationsResponse,
+  ListLinkedInvestigationsResponse,
+  SetEscalationStatusRequest,
+  SetEscalationStatusResponse,
+  EscalationClosePreviewResponse,
 } from '../../../common';
 import { retryOnTransientError } from '../../retry_on_transient_error';
 import { escalationQueryKeys } from '../query_keys';
 
 /**
  * Invalidates the full escalations list query so any open list view reflects the change.
- * Uses the `all` root key to sweep every search-scoped variant
- * (list keys are `[...all, 'list', search]`).
+ * Uses the `all` root key to sweep every status/search/page variant.
  */
 const invalidateEscalations = (queryClient: ReturnType<typeof useQueryClient>) => {
-  void queryClient.invalidateQueries({ queryKey: escalationQueryKeys.escalations.all });
+  void queryClient.invalidateQueries({ queryKey: escalationQueryKeys.all });
 };
 
-export const useListEscalations = (searchQuery?: string) => {
+/** Lists escalations, optionally filtered by status/page/perPage and with debounced search. */
+export const useListEscalations = ({
+  status,
+  page,
+  perPage,
+  searchQuery,
+  enabled = true,
+}: {
+  status?: 'open' | 'closed' | 'all';
+  page?: number;
+  perPage?: number;
+  searchQuery?: string;
+  /** Set to false to skip fetching (e.g. when the current user lacks escalation read access). */
+  enabled?: boolean;
+} = {}) => {
   const { services } = useKibana<CoreStart>();
   const [debouncedSearch, setDebouncedSearch] = useState(searchQuery);
   useDebounce(() => setDebouncedSearch(searchQuery), 300, [searchQuery]);
 
   return useQuery({
-    queryKey: escalationQueryKeys.escalations.list(debouncedSearch),
+    queryKey: escalationQueryKeys.list(status, page, perPage, debouncedSearch),
     queryFn: async (): Promise<ListEscalationsResponse> =>
       services.http.get<ListEscalationsResponse>(ESCALATIONS_INTERNAL_URL, {
         version: AGENTIC_INVESTIGATIONS_API_VERSION,
-        query: debouncedSearch ? { search: debouncedSearch } : undefined,
+        query: {
+          ...(status !== undefined ? { status } : {}),
+          ...(page !== undefined ? { page } : {}),
+          ...(perPage !== undefined ? { per_page: perPage } : {}),
+          ...(debouncedSearch ? { search: debouncedSearch } : {}),
+        },
       }),
+    enabled,
     keepPreviousData: true,
+    retry: retryOnTransientError,
+  });
+};
+
+/**
+ * Returns the open escalations that already contain the given investigation id in their
+ * `metadata.linked_investigations` array. Used by the escalation creation modal to warn the
+ * user before they open a duplicate escalation.
+ *
+ * Pass `enabled: false` when the current user lacks escalation read access so no request is made.
+ */
+export const useEscalationsForInvestigation = (
+  investigationId: string | undefined,
+  { enabled }: { enabled: boolean }
+) => {
+  const { services } = useKibana<CoreStart>();
+
+  return useQuery({
+    queryKey: escalationQueryKeys.forInvestigation(investigationId ?? ''),
+    queryFn: async (): Promise<ListEscalationsResponse> =>
+      services.http.get<ListEscalationsResponse>(ESCALATIONS_INTERNAL_URL, {
+        version: AGENTIC_INVESTIGATIONS_API_VERSION,
+        query: {
+          status: 'open',
+          linked_investigation_id: investigationId,
+          per_page: MAX_ESCALATIONS_PAGE_SIZE,
+        },
+      }),
+    enabled: enabled && Boolean(investigationId),
     retry: retryOnTransientError,
   });
 };
@@ -63,7 +121,7 @@ export const useCreateEscalation = () => {
   });
 };
 
-export const useAddToEscalation = () => {
+export const useAttachToEscalation = () => {
   const { services } = useKibana<CoreStart>();
   const queryClient = useQueryClient();
 
@@ -83,5 +141,121 @@ export const useAddToEscalation = () => {
         }
       ),
     onSuccess: () => invalidateEscalations(queryClient),
+  });
+};
+
+/** Replaces the assignee list on an escalation (replace-in-full semantics). */
+export const useAssignEscalation = () => {
+  const { services } = useKibana<CoreStart>();
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({ escalationId, assignees }: { escalationId: string; assignees: string[] }) =>
+      services.http.put(ESCALATION_ASSIGN_URL.replace('{id}', encodeURIComponent(escalationId)), {
+        version: AGENTIC_INVESTIGATIONS_API_VERSION,
+        body: JSON.stringify({ assignees }),
+      }),
+    onSuccess: () => invalidateEscalations(queryClient),
+  });
+};
+
+/**
+ * Fetches the linked investigations for an escalation.
+ *
+ * The query key includes the comma-joined list of linked investigation ids read from the
+ * escalation's metadata so that the flyout's 5 s poll triggers a re-fetch when a new
+ * investigation is linked. Pass `linkedInvestigationIds` from the live conversation object
+ * that the flyout already holds.
+ */
+export const useLinkedInvestigations = ({
+  escalationId,
+  linkedInvestigationIds,
+}: {
+  escalationId: string;
+  linkedInvestigationIds: readonly string[];
+}): {
+  data: LinkedInvestigationSummary[] | undefined;
+  isLoading: boolean;
+  isError: boolean;
+  refetch: () => void;
+} => {
+  const { services } = useKibana<CoreStart>();
+  const linkedIds = linkedInvestigationIds.join(',');
+
+  const result = useQuery({
+    queryKey: escalationQueryKeys.linkedInvestigations(escalationId, linkedIds),
+    queryFn: async (): Promise<ListLinkedInvestigationsResponse> =>
+      services.http.get<ListLinkedInvestigationsResponse>(
+        ESCALATION_LINKED_INVESTIGATIONS_URL.replace('{id}', encodeURIComponent(escalationId)),
+        { version: AGENTIC_INVESTIGATIONS_API_VERSION }
+      ),
+    // Poll at the same cadence as the flyout's own conversation poll (5 s) so that
+    // status and title changes on existing linked investigations are reflected without
+    // waiting for the linked-IDs list itself to change.
+    refetchInterval: 5000,
+    // Keep the previous list visible during the brief re-fetch triggered by a linked-id change
+    // (e.g. a new investigation was just added), avoiding a skeleton flash.
+    keepPreviousData: true,
+    retry: retryOnTransientError,
+  });
+
+  return {
+    data: result.data?.results,
+    isLoading: result.isLoading,
+    isError: result.isError,
+    refetch: result.refetch,
+  };
+};
+
+/** Opens or closes an escalation (and its open linked investigations when closing). */
+export const useSetEscalationStatus = () => {
+  const { services } = useKibana<CoreStart>();
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({
+      escalationId,
+      body,
+    }: {
+      escalationId: string;
+      body: SetEscalationStatusRequest;
+    }): Promise<SetEscalationStatusResponse> =>
+      services.http.put<SetEscalationStatusResponse>(
+        ESCALATION_STATUS_URL.replace('{id}', encodeURIComponent(escalationId)),
+        {
+          version: AGENTIC_INVESTIGATIONS_API_VERSION,
+          body: JSON.stringify(body),
+        }
+      ),
+    onSuccess: () => invalidateEscalations(queryClient),
+  });
+};
+
+/**
+ * Fetches a preview of what closing an escalation would affect.
+ *
+ * The query is always fresh: `staleTime` and `cacheTime` are both 0 so every
+ * mount starts a network request, and `refetchInterval` keeps the list current
+ * while the close dialog is open. Pass `enabled: false` to pause polling.
+ */
+export const useEscalationClosePreview = (
+  escalationId: string | undefined,
+  { enabled }: { enabled: boolean }
+) => {
+  const { services } = useKibana<CoreStart>();
+
+  return useQuery({
+    queryKey: [...escalationQueryKeys.all, 'closePreview', escalationId],
+    queryFn: (): Promise<EscalationClosePreviewResponse> =>
+      services.http.get<EscalationClosePreviewResponse>(
+        ESCALATION_CLOSE_PREVIEW_URL.replace('{id}', encodeURIComponent(escalationId!)),
+        { version: AGENTIC_INVESTIGATIONS_API_VERSION }
+      ),
+    enabled: enabled && Boolean(escalationId),
+    // Never serve stale data: every mount triggers a fresh fetch.
+    staleTime: 0,
+    cacheTime: 0,
+    // Keep the list current while the dialog is open.
+    refetchInterval: 10_000,
   });
 };

@@ -22,12 +22,13 @@ const proposal = (overrides: Partial<ProposalWithMetadata> = {}): ProposalWithMe
   id: 'proposal-1',
   spaceId: SPACE_ID,
   conversationId: 'conv-1',
+  title: 'Tune the noisy rule',
   comment: 'Tune the noisy rule',
   status: 'pending',
   impact: 'high',
   confidence: 'high',
   category: 'configure',
-  origin: 'worker',
+  origin: 'alertzero',
   createdAt: '2026-09-01T00:00:00.000Z',
   expired: false,
   ...overrides,
@@ -80,13 +81,12 @@ describe('proposalAttachmentType', () => {
   });
 
   describe('validate', () => {
-    it('should accept a bare proposal id', () => {
+    // The label is rendered synchronously, so an attachment without one has
+    // nothing to show — and `create()` always resolves a title to write here.
+    it('should reject a bare proposal id, with no title to label the card', () => {
       const { type } = createType();
 
-      expect(type.validate({ proposalId: 'proposal-1' })).toEqual({
-        valid: true,
-        data: { proposalId: 'proposal-1' },
-      });
+      expect(type.validate({ proposalId: 'proposal-1' })).toMatchObject({ valid: false });
     });
 
     // The only thing the synchronous card label has to go on, so it is the one
@@ -116,7 +116,7 @@ describe('proposalAttachmentType', () => {
 
       const representation = await represent(type);
 
-      expect(get).toHaveBeenCalledWith('proposal-1', SPACE_ID);
+      expect(get).toHaveBeenCalledWith('proposal-1', SPACE_ID, REQUEST);
       expect(representation).toEqual({
         type: 'text',
         value: expect.stringContaining('Status: no_action'),
@@ -147,9 +147,15 @@ describe('proposalAttachmentType', () => {
     it('should read the id from the payload when the attachment has no origin', async () => {
       const { type, get } = createType();
 
-      await represent(type, attachment({ origin: undefined, data: { proposalId: 'proposal-9' } }));
+      await represent(
+        type,
+        attachment({
+          origin: undefined,
+          data: { proposalId: 'proposal-9', title: 'Tune the noisy rule' },
+        })
+      );
 
-      expect(get).toHaveBeenCalledWith('proposal-9', SPACE_ID);
+      expect(get).toHaveBeenCalledWith('proposal-9', SPACE_ID, REQUEST);
     });
 
     // The service reads as the internal user, and the public attachment API

@@ -6,7 +6,7 @@
  */
 
 import type { BaseMessage } from '@langchain/core/messages';
-import { AIMessage, ToolMessage } from '@langchain/core/messages';
+import { AIMessage, HumanMessage, ToolMessage } from '@langchain/core/messages';
 import type {
   AskUserQuestionStep,
   ConversationRoundStep,
@@ -16,6 +16,7 @@ import type {
 import {
   isAskUserQuestionStep,
   isBackgroundAgentCompleteStep,
+  isPreExecutionWorkflowStep,
   isReasoningStep,
   isRelevantSkillsStep,
   isSubagentRosterUpdatedStep,
@@ -73,6 +74,12 @@ interface CurrentRenderContext extends Omit<CurrentRunRenderOptions, 'resultTran
 }
 
 type RenderContext = HistoryRenderContext | CurrentRenderContext;
+
+export const createPreExecutionWorkflowContextMessage = (modelContext: string): HumanMessage =>
+  new HumanMessage({
+    content: modelContext,
+    name: 'pre_execution_workflow_context',
+  });
 
 /**
  * Groups consecutive tool call steps by `tool_call_group_id`.
@@ -151,6 +158,18 @@ const renderToolResult = async (
   { context, compactThisGroup }: { context: RenderContext; compactThisGroup: boolean }
 ): Promise<BaseMessage> => {
   if (context.type === 'history') {
+    if (call.interrupted) {
+      // Keeps the call/result pairing providers require; the payload says the call never returned.
+      return new ToolMessage({
+        tool_call_id: call.tool_call_id,
+        content: wrapToolResultContent(
+          JSON.stringify({
+            interrupted: true,
+            message: 'The tool call was interrupted before it returned a result.',
+          })
+        ),
+      });
+    }
     const results = context.resultTransformer
       ? await context.resultTransformer(call)
       : call.results;
@@ -368,6 +387,10 @@ const renderSteps = async (
     } else if (isRelevantSkillsStep(step)) {
       if (step.skills.length > 0 && current?.phase !== 'answer') {
         messages.push(createRelevantSkillsNoticeMessage(step.skills));
+      }
+    } else if (isPreExecutionWorkflowStep(step)) {
+      if (step.model_context) {
+        messages.push(createPreExecutionWorkflowContextMessage(step.model_context));
       }
     } else if (isToolCallStep(step)) {
       // Only render when we hit the first tool call of a group; the other calls of the group are

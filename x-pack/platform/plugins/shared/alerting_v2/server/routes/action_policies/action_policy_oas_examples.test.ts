@@ -11,6 +11,7 @@ import {
   bulkResponseSchema,
   bulkSnoozeActionPoliciesBodySchema,
   createActionPolicyDataSchema,
+  errorResponseSchema,
   findActionPoliciesResponseSchema,
   matchActionPoliciesBodySchema,
   matchActionPoliciesResponseSchema,
@@ -19,6 +20,7 @@ import {
   updateActionPolicyBodySchema,
 } from '@kbn/alerting-v2-schemas';
 import {
+  ACTION_POLICY_LICENSE_NOT_SUPPORTED_RESPONSE,
   ACTION_POLICY_RESPONSE,
   BULK_BY_IDS_REQUEST,
   BULK_RESPONSE,
@@ -85,5 +87,11 @@ describe('action policy OAS example payloads', () => {
 
   it('keeps rule event fields example valid against ruleEventFieldsResponseSchema', () => {
     expect(ruleEventFieldsResponseSchema.safeParse(RULE_EVENT_FIELDS_RESPONSE).success).toBe(true);
+  });
+
+  it('keeps license-not-supported example valid against errorResponseSchema', () => {
+    expect(
+      errorResponseSchema.safeParse(ACTION_POLICY_LICENSE_NOT_SUPPORTED_RESPONSE.value).success
+    ).toBe(true);
   });
 });
