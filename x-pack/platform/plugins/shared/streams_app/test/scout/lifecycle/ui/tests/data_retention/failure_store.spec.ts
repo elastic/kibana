@@ -248,11 +248,13 @@ test.describe('Stream data retention - updating failure store', () => {
           ...definition.stream.ingest,
           processing: stripProcessingUpdatedAt(definition.stream.ingest.processing),
           lifecycle: { dsl: {} },
-          failure_store: config.serverless
-            ? { lifecycle: { enabled: {} } }
-            : { lifecycle: { disabled: {} } },
         },
       });
+      await pinFailureStore(
+        apiServices,
+        'logs-generic-default',
+        config.serverless ? { lifecycle: { enabled: {} } } : { lifecycle: { disabled: {} } }
+      );
 
       await pageObjects.streams.gotoDataRetentionTab('logs-generic-default');
 
