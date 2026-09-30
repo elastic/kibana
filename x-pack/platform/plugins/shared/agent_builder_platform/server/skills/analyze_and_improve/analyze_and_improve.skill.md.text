@@ -104,10 +104,10 @@ A **KI** is a structured fact stored in a searchable AI index or datastream (bac
 Agents retrieve through `platform.context_engine.query_ai_indices`, which returns only current,
 active, unexpired KIs: on a data stream the newest revision per `id`, never one whose
 `governance.lifecycle.status` is `deleted` or whose `expires_at` has passed, and with
-`governance` dropped. What that tool returns by default is, for retrieval purposes, the index.
-Naming `governance.lifecycle.status` or `expires_at` in a query switches off that one filter, and
-naming any `governance.*` field keeps it in the result, so diagnosis can read tombstones, expired
-KIs and provenance through the same tool.
+`governance` dropped. Those are the KIs an agent can retrieve. Naming
+`governance.lifecycle.status` or `expires_at` in a query switches off that one filter, and naming
+any `governance.*` field keeps it in the result, so diagnosis can read tombstones, expired KIs and
+provenance through the same tool.
 
 Each KI does two things:
 
