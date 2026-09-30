@@ -68,6 +68,22 @@ const ENTITY_STORE_POLL_INTERVAL_MS = 2_000;
 
 const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
+/**
+ * Refuses to seed when the product Attack Discovery data stream does not exist
+ * yet: `create` on a non-existent dot-prefixed name would auto-create a plain
+ * index under the reserved product stream name and block the product data
+ * stream from being created later.
+ */
+const assertAttackDataStreamExists = async (esClient: EsClient, index: string): Promise<void> => {
+  const response = await esClient.indices.getDataStream({ name: index });
+  if (response.data_streams.length === 0) {
+    throw new Error(
+      `Attack Discovery data stream ${index} does not exist on this stack; ` +
+        'run the Attack Discovery worker once so the product creates it before seeding'
+    );
+  }
+};
+
 const assertBulkOk = (label: string, result: { errors?: boolean; items?: unknown[] }): void => {
   if (result.errors !== true) {
     return;
@@ -444,6 +460,7 @@ export const seedFixture = async ({
   const cleanup = () => cleanupLiveSeedPlan({ esClient, kbnRequest, plan });
 
   try {
+    await assertAttackDataStreamExists(esClient, plan.attackIndex);
     if (plan.alertOperations.length > 0) {
       assertBulkOk(
         'alerts',

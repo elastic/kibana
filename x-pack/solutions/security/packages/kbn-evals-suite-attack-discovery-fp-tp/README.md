@@ -109,11 +109,10 @@ refresh; wait a moment and rerun.
 
 Classic-stack caveats: the seeder writes the Attack Discovery document to the
 `-default` namespace data stream, so on classic it only pairs with workflows
-running in the default space. The AD data stream must already exist on the
-target stack (it is created when the first Attack Discovery alert runs); if it
-does not, the seed write would auto-create a plain index of the same name and
-conflict with the product data stream later — seed after AD has produced at
-least one alert.
+running in the default space. The seeder preflights the Attack Discovery
+data stream and refuses to seed when it does not exist yet (it is created when
+the first Attack Discovery alert runs) — run the Attack Discovery worker once
+before seeding a fresh stack.
 
 ## Reproducibility
 

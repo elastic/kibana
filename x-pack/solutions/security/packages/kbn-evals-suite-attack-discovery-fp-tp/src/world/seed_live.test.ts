@@ -167,6 +167,7 @@ describe('seedFixture', () => {
     deleteByQuery: jest.Mock;
     search: jest.Mock;
     updateByQuery: jest.Mock;
+    indices: { getDataStream: jest.Mock };
   };
   let kbnRequest: jest.MockedFunction<FpTpLiveKbnRequest>;
 
@@ -177,8 +178,21 @@ describe('seedFixture', () => {
       deleteByQuery: jest.fn().mockResolvedValue({}),
       search: jest.fn().mockResolvedValue({ hits: { hits: [] } }),
       updateByQuery: jest.fn().mockResolvedValue({ updated: 1 }),
+      indices: {
+        getDataStream: jest.fn().mockResolvedValue({ data_streams: [{ name: FP_TP_ATTACK_INDEX }] }),
+      },
     };
     kbnRequest = jest.fn().mockResolvedValue({ statusCode: 200, body: {} });
+  });
+
+  it('refuses to seed when the Attack Discovery data stream does not exist', async () => {
+    esClient.indices.getDataStream.mockResolvedValueOnce({ data_streams: [] });
+
+    await expect(
+      seedFixture({ esClient: esClient as unknown as EsClient, kbnRequest, world })
+    ).rejects.toThrow(/data stream .* does not exist/);
+    expect(esClient.create).not.toHaveBeenCalled();
+    expect(esClient.bulk).not.toHaveBeenCalled();
   });
 
   it('returns a cleanup that deletes the seeded Attack Discovery by id', async () => {
