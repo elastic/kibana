@@ -31,6 +31,9 @@ const formatPointer = async (data: DashboardPanelAttachmentData): Promise<string
     data,
   };
   const formatted = await definition.format(attachment, formatContext);
+  if (!formatted.getRepresentation) {
+    throw new Error('Expected a representation getter');
+  }
   const representation = await formatted.getRepresentation();
   if (representation.type !== 'text') {
     throw new Error(`Expected a text representation, got ${representation.type}`);
@@ -44,7 +47,7 @@ describe('createDashboardPanelAttachmentType', () => {
 
     expect(definition.id).toBe(DASHBOARD_PANEL_ATTACHMENT_TYPE);
     expect(definition.isReadonly).toBe(true);
-    expect(definition.getTools?.()).toEqual([]);
+    expect(definition.getTools?.()).toEqual([dashboardTools.panelToVisualization]);
   });
 
   it('validates pointer data against the schema', async () => {
@@ -62,6 +65,8 @@ describe('createDashboardPanelAttachmentType', () => {
     expect(text).toContain(dashboardTools.generateDashboard);
     expect(text).toContain('`edit_panels` operation with `panelId: "panel-1"`');
     expect(text).toContain('`source: "attachment"`');
+    expect(text).toContain(dashboardTools.panelToVisualization);
+    expect(text).toContain('platform.dashboard.panel-panel-1');
   });
 
   it('tells the agent to apply the request to the panel instead of answering in chat', async () => {

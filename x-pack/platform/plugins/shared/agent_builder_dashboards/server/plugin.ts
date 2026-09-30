@@ -24,6 +24,7 @@ import {
   createDashboardPanelAttachmentType,
 } from './attachment_types';
 import { createDashboardSmlType } from './sml_types';
+import { createPanelToVisualizationTool } from './tools/panel_to_visualization';
 
 export class AgentBuilderDashboardsPlugin
   implements
@@ -61,6 +62,11 @@ export class AgentBuilderDashboardsPlugin
     setupDeps.agentBuilder.attachments.registerType(
       createDashboardPanelAttachmentType() as Parameters<
         typeof setupDeps.agentBuilder.attachments.registerType
+      >[0]
+    );
+    setupDeps.agentBuilder.tools.register(
+      createPanelToVisualizationTool() as Parameters<
+        typeof setupDeps.agentBuilder.tools.register
       >[0]
     );
     setupDeps.agentBuilderSml.registerType(createDashboardSmlType({ getDashboardClient }));
