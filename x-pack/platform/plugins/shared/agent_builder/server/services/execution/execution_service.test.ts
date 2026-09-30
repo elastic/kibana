@@ -1021,16 +1021,18 @@ describe('AgentExecutionService', () => {
       expect(results).toEqual([fakeExecution]);
     });
   });
-  describe.each([
-    { useTaskManager: false, triggerMode: undefined },
-    { useTaskManager: true, triggerMode: undefined },
-    { useTaskManager: false, triggerMode: ChatTriggerMode.Never },
-  ])('unknown agent with %j', ({ useTaskManager, triggerMode }) => {
+  describe.each(
+    [
+      { useTaskManager: false, triggerMode: undefined },
+      { useTaskManager: true, triggerMode: undefined },
+      { useTaskManager: false, triggerMode: ChatTriggerMode.Never },
+    ].flatMap((options) => ['unknown-agent', ''].map((agentId) => ({ ...options, agentId })))
+  )('invalid agent with %j', ({ useTaskManager, triggerMode, agentId }) => {
     it.each([undefined, 'new-conversation', 'existing-conversation'])(
       'rejects before persisting conversation %s',
       async (conversationId) => {
         const request = httpServerMock.createKibanaRequest();
-        const error = createAgentNotFoundError({ agentId: 'unknown-agent' });
+        const error = createAgentNotFoundError({ agentId });
         agentRegistry.get.mockRejectedValueOnce(error);
 
         await expect(
@@ -1039,7 +1041,7 @@ describe('AgentExecutionService', () => {
             request,
             useTaskManager,
             params: {
-              agentId: 'unknown-agent',
+              agentId,
               conversationId,
               autoCreateConversationWithId: true,
               triggerMode,
@@ -1049,7 +1051,7 @@ describe('AgentExecutionService', () => {
         ).rejects.toBe(error);
 
         expect(agentService.getRegistry).toHaveBeenCalledWith({ request });
-        expect(agentRegistry.get).toHaveBeenCalledWith('unknown-agent', { access: 'use' });
+        expect(agentRegistry.get).toHaveBeenCalledWith(agentId, { access: 'use' });
         expect(conversationClient.create).not.toHaveBeenCalled();
         expect(conversationClient.appendEvents).not.toHaveBeenCalled();
         expect(mockExecutionClient.create).not.toHaveBeenCalled();
