@@ -121,14 +121,14 @@ export class DataGrid {
   async expandCell({ rowIndex, columnId }: { rowIndex: number; columnId: string }) {
     const cell = this.getCell(rowIndex, columnId);
     const expandButton = cell.locator('[data-test-subj="euiDataGridCellExpandButton"]');
-    // A refetch can remount the cell (e.g. a grid embedded in a dashboard), and the
-    // remounted node gets no mouseenter under a stationary cursor, so hover again until
-    // the button is revealed. Re-hovering has no side effects; the click stays single.
+    // A refetch can remount the cell (e.g. a grid embedded in a dashboard). The remounted
+    // node gets no mouseenter under a stationary cursor, so its expand button stays hidden
+    // and a pending click waits on a detached element. Re-hover and re-click until one lands;
+    // a click that times out on actionability was never dispatched, so retrying it is safe.
     await expect(async () => {
       await cell.hover();
-      await expect(expandButton).toBeVisible({ timeout: 1_000 });
+      await expandButton.click({ timeout: 2_000 });
     }).toPass({ timeout: 20_000 });
-    await expandButton.click();
     await this.page.testSubj.waitForSelector('euiDataGridExpansionPopover', { state: 'visible' });
   }
 
