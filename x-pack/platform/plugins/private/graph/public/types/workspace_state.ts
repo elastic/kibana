@@ -93,7 +93,7 @@ export interface Workspace {
 
   undo: () => void;
   redo: () => void;
-  expandSelecteds: (targetOptions: TargetOptions) => {};
+  expandNodes: (nodeIds: string[], targetOptions: TargetOptions) => void;
   deleteSelection: () => void;
   blocklistSelection: () => void;
   groupSelections: (node: WorkspaceNode | undefined) => void;
