@@ -68,10 +68,22 @@ const makeNativeEpisode = (episodeId = 'v2-ep-1'): AlertEpisode =>
     supports_timeline: true,
   } as unknown as AlertEpisode);
 
+const ebtProps = {
+  investigateEbtProps: {
+    'data-ebt-action': 'startInvestigation',
+    'data-ebt-element': 'alertingV2InboxRowActions',
+  },
+  viewInvestigationEbtProps: {
+    'data-ebt-action': 'viewInvestigation',
+    'data-ebt-element': 'alertingV2InboxRowActions',
+  },
+};
+
 describe('createInvestigateEpisodeAction', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     mockUseInvestigateAlert.mockReturnValue({
+      ...ebtProps,
       showInvestigateAction: true,
       showInvestigateButton: true,
       showViewInvestigation: false,
@@ -116,6 +128,7 @@ describe('createInvestigateEpisodeAction', () => {
     const action = createInvestigateEpisodeAction();
     const handleInvestigate = jest.fn();
     mockUseInvestigateAlert.mockReturnValue({
+      ...ebtProps,
       showInvestigateAction: true,
       showInvestigateButton: true,
       showViewInvestigation: false,
@@ -132,14 +145,16 @@ describe('createInvestigateEpisodeAction', () => {
         {action.renderMenuItem!({
           episodes: [makeClassicEpisode('alert-1')],
           closeMenu: jest.fn(),
+          surface: 'row_menu',
         })}
       </>
     );
 
     const button = screen.getByTestId('investigateAlert');
     expect(mockUseInvestigateAlert).toHaveBeenCalledWith(
-      expect.objectContaining({ alertId: 'alert-1', origin: 'alerting_v2_inbox' })
+      expect.objectContaining({ ebtElement: 'alertingV2InboxRowActions' })
     );
+    expect(button).toHaveAttribute('data-ebt-action', 'startInvestigation');
     expect(button).toBeInTheDocument();
     expect(button).toHaveTextContent('Investigate');
     expect(button).not.toBeDisabled();
@@ -149,9 +164,27 @@ describe('createInvestigateEpisodeAction', () => {
     expect(handleInvestigate).toHaveBeenCalledTimes(1);
   });
 
+  it('uses the flyout EBT element when rendered in the details flyout menu', () => {
+    const action = createInvestigateEpisodeAction();
+
+    render(
+      <>
+        {action.renderMenuItem!({
+          episodes: [makeClassicEpisode('alert-1')],
+          surface: 'details_flyout',
+        })}
+      </>
+    );
+
+    expect(mockUseInvestigateAlert).toHaveBeenCalledWith(
+      expect.objectContaining({ ebtElement: 'alertingV2InboxFlyoutActions' })
+    );
+  });
+
   it('renders disabled button with spinner when isInvestigating is true', () => {
     const action = createInvestigateEpisodeAction();
     mockUseInvestigateAlert.mockReturnValue({
+      ...ebtProps,
       showInvestigateAction: true,
       showInvestigateButton: false,
       showViewInvestigation: false,
@@ -185,6 +218,7 @@ describe('createInvestigateEpisodeAction', () => {
     const closeMenu = jest.fn();
     const markInvestigationViewed = jest.fn();
     mockUseInvestigateAlert.mockReturnValue({
+      ...ebtProps,
       showInvestigateAction: true,
       showInvestigateButton: false,
       showViewInvestigation: true,
@@ -215,6 +249,7 @@ describe('createInvestigateEpisodeAction', () => {
     const closeMenu = jest.fn();
     const markInvestigationViewed = jest.fn();
     mockUseInvestigateAlert.mockReturnValue({
+      ...ebtProps,
       showInvestigateAction: true,
       showInvestigateButton: true,
       showViewInvestigation: true,
@@ -250,6 +285,7 @@ describe('createInvestigateEpisodeAction', () => {
   it('returns null when investigation action is not available', () => {
     const action = createInvestigateEpisodeAction();
     mockUseInvestigateAlert.mockReturnValue({
+      ...ebtProps,
       showInvestigateAction: false,
       showInvestigateButton: false,
       showViewInvestigation: false,

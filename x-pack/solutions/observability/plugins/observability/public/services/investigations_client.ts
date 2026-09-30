@@ -5,22 +5,12 @@
  * 2.0.
  */
 
-import type {
-  InvestigationTelemetry,
-  NightshiftInvestigationsRepositoryClient,
-} from '@kbn/nightshift-investigations-plugin/public';
+import type { NightshiftInvestigationsRepositoryClient } from '@kbn/nightshift-investigations-plugin/public';
 
 let investigationsClient: NightshiftInvestigationsRepositoryClient | undefined;
-let investigationTelemetry: InvestigationTelemetry | undefined;
 
 export const setInvestigationsClient = (client?: NightshiftInvestigationsRepositoryClient) => {
   investigationsClient = client;
 };
 
 export const getInvestigationsClient = () => investigationsClient;
-
-export const setInvestigationTelemetry = (telemetry?: InvestigationTelemetry) => {
-  investigationTelemetry = telemetry;
-};
-
-export const getInvestigationTelemetry = () => investigationTelemetry;

@@ -488,7 +488,11 @@ const AlertEpisodesListPageContent = () => {
           if (action.renderMenuItem) {
             return (
               <Fragment key={action.id}>
-                {action.renderMenuItem({ episodes, onSuccess: invalidateEpisodeQueries })}
+                {action.renderMenuItem({
+                  episodes,
+                  onSuccess: invalidateEpisodeQueries,
+                  surface: 'row_menu',
+                })}
               </Fragment>
             );
           }

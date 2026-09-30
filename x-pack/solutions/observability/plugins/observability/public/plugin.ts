@@ -94,10 +94,7 @@ import {
   RULES_PATH,
 } from '../common/locators/paths';
 import { registerDataHandler } from './context/has_data_context/data_handler';
-import {
-  setInvestigationsClient,
-  setInvestigationTelemetry,
-} from './services/investigations_client';
+import { setInvestigationsClient } from './services/investigations_client';
 import { createUseRulesLink } from './hooks/create_use_rules_link';
 import type { ObservabilityRuleTypeRegistry } from './rules/create_observability_rule_type_registry';
 import { createObservabilityRuleTypeRegistry } from './rules/create_observability_rule_type_registry';
@@ -541,7 +538,6 @@ export class Plugin
     const { application } = coreStart;
     const config = this.initContext.config.get();
     setInvestigationsClient(pluginsStart.nightshiftInvestigations?.investigationsClient);
-    setInvestigationTelemetry(pluginsStart.nightshiftInvestigations?.telemetry);
     pluginsStart.observabilityShared.updateGlobalNavigation({
       capabilities: application.capabilities,
       deepLinks: this.deepLinks,

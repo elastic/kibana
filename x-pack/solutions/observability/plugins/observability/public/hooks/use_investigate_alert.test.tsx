@@ -15,10 +15,7 @@ import type {
 } from '@kbn/nightshift-investigations-plugin/public';
 import { useInvestigateAlert, VIEWED_INVESTIGATIONS_STORAGE_KEY } from './use_investigate_alert';
 import { useKibana } from '../utils/kibana_react';
-import {
-  setInvestigationsClient,
-  setInvestigationTelemetry,
-} from '../services/investigations_client';
+import { setInvestigationsClient } from '../services/investigations_client';
 
 jest.mock('../utils/kibana_react');
 
@@ -26,10 +23,6 @@ const useKibanaMock = useKibana as jest.Mock;
 const fetchMock = jest.fn();
 const addSuccess = jest.fn();
 const addDanger = jest.fn();
-const telemetryMock = {
-  reportInvestigationStarted: jest.fn(),
-  reportInvestigationViewed: jest.fn(),
-};
 const mockLocator = {
   getRedirectUrl: jest.fn(({ investigationId }: { investigationId: string }) =>
     investigationId ? `/app/nightshift?investigationId=${investigationId}` : ''
@@ -65,7 +58,7 @@ const mockInvestigationsApi = ({
 };
 
 const renderInvestigateAlert = (alertId = 'alert-1') =>
-  renderHook(() => useInvestigateAlert({ alertId, origin: 'alerts_table' }), { wrapper });
+  renderHook(() => useInvestigateAlert({ alertId, ebtElement: 'testElement' }), { wrapper });
 
 describe('useInvestigateAlert', () => {
   beforeEach(() => {
@@ -91,7 +84,6 @@ describe('useInvestigateAlert', () => {
     setInvestigationsClient({
       fetch: fetchMock,
     } as unknown as NightshiftInvestigationsRepositoryClient);
-    setInvestigationTelemetry(telemetryMock);
     mockInvestigationsApi();
   });
 
@@ -106,6 +98,10 @@ describe('useInvestigateAlert', () => {
     await waitFor(() => expect(result.current.showInvestigateButton).toBe(true));
     expect(result.current.showViewInvestigation).toBe(false);
     expect(result.current.investigateActionLabel).toBe('Investigate');
+    expect(result.current.investigateEbtProps).toEqual({
+      'data-ebt-action': 'startInvestigation',
+      'data-ebt-element': 'testElement',
+    });
     expect(result.current.isInvestigating).toBe(false);
     expect(fetchMock).toHaveBeenCalledWith(
       'GET /internal/nightshift/investigations',
@@ -219,15 +215,19 @@ describe('useInvestigateAlert', () => {
     expect(result.current.showViewInvestigation).toBe(true);
     expect(result.current.showInvestigateButton).toBe(true);
     expect(result.current.investigateActionLabel).toBe('Re-investigate');
+    expect(result.current.investigateEbtProps).toEqual({
+      'data-ebt-action': 'startInvestigation',
+      'data-ebt-element': 'testElement',
+      'data-ebt-detail': 'reinvestigation',
+    });
+    expect(result.current.viewInvestigationEbtProps).toEqual({
+      'data-ebt-action': 'viewInvestigation',
+      'data-ebt-element': 'testElement',
+      'data-ebt-detail': 'completed',
+    });
     expect(
       JSON.parse(window.localStorage.getItem(VIEWED_INVESTIGATIONS_STORAGE_KEY) || '[]')
     ).toEqual(['inv-completed']);
-    expect(telemetryMock.reportInvestigationViewed).toHaveBeenCalledWith({
-      origin: 'alerts_table',
-      subject_type: 'alert',
-      investigation_id: 'inv-completed',
-      investigation_status: 'completed',
-    });
   });
 
   it('shows View investigation and Re-investigate immediately for a failed investigation', async () => {
@@ -351,33 +351,8 @@ describe('useInvestigateAlert', () => {
       })
     );
     expect(addSuccess).toHaveBeenCalledWith({ title: 'Investigation started' });
-    expect(telemetryMock.reportInvestigationStarted).toHaveBeenCalledWith({
-      origin: 'alerts_table',
-      subject_type: 'alert',
-      investigation_id: 'investigation-1',
-      is_reinvestigation: false,
-    });
     expect(result.current.investigateActionLabel).toBe('Investigating…');
     expect(result.current.isInvestigating).toBe(true);
-  });
-
-  it('reports a re-investigation when the alert already has an investigation', async () => {
-    mockInvestigationsApi({
-      list: {
-        results: [{ investigation_id: 'inv-failed', status: 'failed' }],
-        page: 1,
-        size: 2,
-        total: 1,
-      },
-    });
-    const { result } = renderInvestigateAlert();
-    await waitFor(() => expect(result.current.showInvestigateButton).toBe(true));
-
-    await act(() => result.current.handleInvestigate());
-
-    expect(telemetryMock.reportInvestigationStarted).toHaveBeenCalledWith(
-      expect.objectContaining({ investigation_id: 'investigation-1', is_reinvestigation: true })
-    );
   });
 
   it('reports start failures', async () => {
@@ -396,12 +371,11 @@ describe('useInvestigateAlert', () => {
       title: 'Failed to start investigation',
       text: 'Request failed',
     });
-    expect(telemetryMock.reportInvestigationStarted).not.toHaveBeenCalled();
   });
 
   it('does not fetch alert investigations when enabled is false', async () => {
     renderHook(
-      () => useInvestigateAlert({ alertId: 'alert-1', origin: 'alerts_table', enabled: false }),
+      () => useInvestigateAlert({ alertId: 'alert-1', ebtElement: 'testElement', enabled: false }),
       { wrapper }
     );
 

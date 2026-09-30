@@ -56,7 +56,6 @@ dependsOn:
   - '@kbn/i18n-react'
   - '@kbn/utility-types'
   - '@kbn/es-errors'
-  - '@kbn/core-analytics-browser-mocks'
 tags:
   - plugin
   - prod

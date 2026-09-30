@@ -48,12 +48,14 @@ function InvestigateAlertActionItem({
     handleInvestigate,
     isInvestigating,
     investigateActionLabel,
+    investigateEbtProps,
     viewInvestigationUrl,
     viewInvestigationActionLabel,
+    viewInvestigationEbtProps,
     markInvestigationViewed,
   } = useInvestigateAlert({
     alertId,
-    origin: 'alerts_table',
+    ebtElement: 'observabilityAlertsTableRowActions',
     enabled,
     onInvestigate: onActionExecuted,
   });
@@ -77,6 +79,7 @@ function InvestigateAlertActionItem({
       {showViewInvestigation && (
         <EuiContextMenuItem
           data-test-subj="viewAlertInvestigation"
+          {...viewInvestigationEbtProps}
           href={viewInvestigationUrl}
           icon="eye"
           onClick={() => {
@@ -90,6 +93,7 @@ function InvestigateAlertActionItem({
       {showInvestigateButton && (
         <EuiContextMenuItem
           data-test-subj="investigateAlert"
+          {...investigateEbtProps}
           icon="inspect"
           onClick={handleInvestigate}
         >

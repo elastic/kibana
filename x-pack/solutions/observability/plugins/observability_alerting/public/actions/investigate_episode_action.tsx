@@ -33,12 +33,14 @@ interface InvestigateEpisodeMenuItemProps {
   episode: AlertEpisode;
   onSuccess?: () => void;
   closeMenu?: () => void;
+  surface?: EpisodeActionMenuItemContext['surface'];
 }
 
 export const InvestigateEpisodeMenuItem = ({
   episode,
   onSuccess,
   closeMenu,
+  surface,
 }: InvestigateEpisodeMenuItemProps) => {
   const alertId = getAlertIdFromEpisode(episode);
   const {
@@ -48,12 +50,15 @@ export const InvestigateEpisodeMenuItem = ({
     handleInvestigate,
     isInvestigating,
     investigateActionLabel,
+    investigateEbtProps,
     viewInvestigationUrl,
     viewInvestigationActionLabel,
+    viewInvestigationEbtProps,
     markInvestigationViewed,
   } = useInvestigateAlert({
     alertId,
-    origin: 'alerting_v2_inbox',
+    ebtElement:
+      surface === 'details_flyout' ? 'alertingV2InboxFlyoutActions' : 'alertingV2InboxRowActions',
     enabled: Boolean(alertId),
     onInvestigate: onSuccess,
   });
@@ -83,6 +88,7 @@ export const InvestigateEpisodeMenuItem = ({
       {showViewInvestigation && (
         <EuiContextMenuItem
           data-test-subj="viewAlertInvestigation"
+          {...viewInvestigationEbtProps}
           href={viewInvestigationUrl}
           icon="eye"
           onClick={() => {
@@ -96,6 +102,7 @@ export const InvestigateEpisodeMenuItem = ({
       {showInvestigateButton && (
         <EuiContextMenuItem
           data-test-subj="investigateAlert"
+          {...investigateEbtProps}
           icon="inspect"
           onClick={onInvestigateClick}
         >
@@ -123,13 +130,14 @@ export const createInvestigateEpisodeAction = (): EpisodeAction => ({
     if (episodes.length !== 1) return false;
     return isClassicAlertEpisode(episodes[0]);
   },
-  renderMenuItem: ({ episodes, onSuccess, closeMenu }: EpisodeActionMenuItemContext) => {
+  renderMenuItem: ({ episodes, onSuccess, closeMenu, surface }: EpisodeActionMenuItemContext) => {
     if (episodes.length !== 1) return null;
     return (
       <InvestigateEpisodeMenuItem
         episode={episodes[0]}
         onSuccess={onSuccess}
         closeMenu={closeMenu}
+        surface={surface}
       />
     );
   },

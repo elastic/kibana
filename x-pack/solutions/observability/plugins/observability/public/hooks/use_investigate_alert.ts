@@ -15,16 +15,13 @@ import {
   type InvestigationSubjectType,
 } from '@kbn/nightshift-investigations-plugin/common';
 import { useQuery, useQueryClient } from '@kbn/react-query';
+import { getEbtProps } from '@kbn/ebt-click';
+import { NIGHTSHIFT_EBT_ACTIONS } from '@kbn/nightshift-shared';
 import { useKibana } from '../utils/kibana_react';
-import {
-  getInvestigationsClient,
-  getInvestigationTelemetry,
-} from '../services/investigations_client';
+import { getInvestigationsClient } from '../services/investigations_client';
 
 export const VIEWED_INVESTIGATIONS_STORAGE_KEY = 'xpack.observability.viewedInvestigationIds';
 export const MAX_VIEWED_INVESTIGATIONS = 200;
-
-export type InvestigationOrigin = 'alerts_table' | 'alert_details' | 'alerting_v2_inbox';
 
 const getStatusQuery = (alertId: string) => ({
   concurrency_key: alertId,
@@ -60,19 +57,18 @@ export const useInvestigationAvailability = () => {
 
 export const useInvestigateAlert = ({
   alertId,
-  origin,
+  ebtElement,
   enabled = true,
   onInvestigate,
 }: {
   alertId?: string;
-  origin: InvestigationOrigin;
+  ebtElement: string;
   enabled?: boolean;
   onInvestigate?: () => void;
 }) => {
   const kibana = useKibana();
   const services = kibana?.services;
   const investigationsClient = getInvestigationsClient();
-  const investigationTelemetry = getInvestigationTelemetry();
   const investigationLocator = services?.share?.url?.locators?.get<InvestigationLocatorParams>(
     NIGHTSHIFT_INVESTIGATION_LOCATOR_ID
   );
@@ -113,20 +109,14 @@ export const useInvestigateAlert = ({
   );
 
   const markInvestigationViewed = useCallback(() => {
-    if (!investigationId || !latestStatus) return;
+    if (!investigationId) return;
     setViewedInvestigationIds((prev = []) =>
       [investigationId, ...prev.filter((id) => id !== investigationId)].slice(
         0,
         MAX_VIEWED_INVESTIGATIONS
       )
     );
-    investigationTelemetry?.reportInvestigationViewed({
-      origin,
-      subject_type: 'alert',
-      investigation_id: investigationId,
-      investigation_status: latestStatus,
-    });
-  }, [investigationId, latestStatus, investigationTelemetry, origin, setViewedInvestigationIds]);
+  }, [investigationId, setViewedInvestigationIds]);
 
   const isFinished = latestStatus === 'failed' || latestStatus === 'cancelled';
   const isOpened = Boolean(investigationId && viewedInvestigationIds.includes(investigationId));
@@ -166,20 +156,11 @@ export const useInvestigateAlert = ({
 
     setIsStarting(true);
     try {
-      const { investigation_id: startedInvestigationId } = await investigationsClient.fetch(
-        'POST /internal/nightshift/investigations',
-        {
-          signal: null,
-          params: {
-            body: { subject: { type: 'alert', id: alertId }, concurrency_key: alertId },
-          },
-        }
-      );
-      investigationTelemetry?.reportInvestigationStarted({
-        origin,
-        subject_type: 'alert',
-        investigation_id: startedInvestigationId,
-        is_reinvestigation: Boolean(latestInvestigation),
+      await investigationsClient.fetch('POST /internal/nightshift/investigations', {
+        signal: null,
+        params: {
+          body: { subject: { type: 'alert', id: alertId }, concurrency_key: alertId },
+        },
       });
       services?.notifications?.toasts?.addSuccess({
         title: i18n.translate('xpack.observability.alerts.investigationStarted', {
@@ -207,8 +188,18 @@ export const useInvestigateAlert = ({
     handleInvestigate,
     isInvestigating,
     investigateActionLabel,
+    investigateEbtProps: getEbtProps({
+      action: NIGHTSHIFT_EBT_ACTIONS.START_INVESTIGATION,
+      element: ebtElement,
+      detail: latestInvestigation ? 'reinvestigation' : undefined,
+    }),
     viewInvestigationUrl,
     viewInvestigationActionLabel,
+    viewInvestigationEbtProps: getEbtProps({
+      action: NIGHTSHIFT_EBT_ACTIONS.VIEW_INVESTIGATION,
+      element: ebtElement,
+      detail: latestStatus,
+    }),
     markInvestigationViewed,
   };
 };

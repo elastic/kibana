@@ -204,7 +204,11 @@ describe('EpisodeFooterActionMenu', () => {
 
     const ownEntry = await screen.findByTestId('ownEntry');
     expect(renderMenuItem).toHaveBeenCalledWith(
-      expect.objectContaining({ episodes: mockEpisodes, onSuccess: mockOnSuccess })
+      expect.objectContaining({
+        episodes: mockEpisodes,
+        onSuccess: mockOnSuccess,
+        surface: 'details_flyout',
+      })
     );
     // The default descriptor item is bypassed, so `execute` never fires on click.
     expect(
