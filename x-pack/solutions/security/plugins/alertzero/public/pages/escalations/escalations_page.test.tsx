@@ -137,8 +137,8 @@ let getChatHref: jest.Mock;
 
 beforeEach(() => {
   openChat = jest.fn();
-  getChatHref = jest.fn(
-    (id?: string, agentId?: string) => (id ? `/mock-chat/${agentId}/${id}` : undefined)
+  getChatHref = jest.fn((id?: string, agentId?: string) =>
+    id ? `/mock-chat/${agentId}/${id}` : undefined
   );
   mockUseOpenInChat.mockReturnValue({ getChatHref, openChat });
   mockUseAssignEscalation.mockReturnValue({ mutateAsync: assignMutate });

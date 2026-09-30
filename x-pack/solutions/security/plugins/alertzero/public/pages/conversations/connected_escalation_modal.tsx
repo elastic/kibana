@@ -7,7 +7,6 @@
 
 import React, { memo, useCallback, useState } from 'react';
 import {
-  EuiCallOut,
   EuiCheckableCard,
   EuiFlexGroup,
   EuiFlexItem,
@@ -20,6 +19,7 @@ import {
   EuiTitle,
   useEuiTheme,
 } from '@elastic/eui';
+import { KbnWarningCallout } from '@kbn/ui-callout';
 import { css } from '@emotion/react';
 import { type EscalationModalRenderProps } from '@kbn/agentic-investigations-common';
 import {
@@ -141,11 +141,9 @@ export const ConnectedEscalationModal = memo<EscalationModalRenderProps>(
           {existingEscalations.length > 0 && (
             <>
               <EuiSpacer size="m" />
-              <EuiCallOut
+              <KbnWarningCallout
                 announceOnMount
                 size="s"
-                color="warning"
-                iconType="warning"
                 title={T.alreadyEscalatedCallout.title(existingEscalations.length)}
                 data-test-subj="escalationModalAlreadyEscalatedCallout"
               >
@@ -169,7 +167,7 @@ export const ConnectedEscalationModal = memo<EscalationModalRenderProps>(
                     );
                   })}
                 </ul>
-              </EuiCallOut>
+              </KbnWarningCallout>
             </>
           )}
 

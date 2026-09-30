@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { memo, useCallback } from 'react';
+import React, { memo, useCallback, useMemo } from 'react';
 import {
   EuiBadge,
   EuiFlexGroup,
@@ -76,9 +76,10 @@ export const EscalationCard = memo<EscalationCardProps>(
     // Link-mode: createCardLinkClickHandler stops propagation (so the panel's onClick does not
     // fire for the link click) and lets modified/middle clicks reach the browser for new-tab
     // support; a plain click calls onClickCard for in-app navigation.
-    const handleLinkClick = useCallback(
-      createCardLinkClickHandler(() => onClickCard?.(escalation)),
-      // eslint-disable-next-line react-hooks/exhaustive-deps
+    // useMemo (rather than useCallback) mirrors how ConversationsActionsGroup wraps this helper:
+    // the factory is called inside the memo, so its deps are statically visible to the lint rule.
+    const handleLinkClick = useMemo(
+      () => createCardLinkClickHandler(() => onClickCard?.(escalation)),
       [onClickCard, escalation]
     );
 

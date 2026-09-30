@@ -20,9 +20,7 @@ const navigateToApp = jest.fn();
 let getUrlForApp: jest.Mock;
 
 beforeEach(() => {
-  getUrlForApp = jest.fn(
-    (_appId: string, { path = '' }: { path?: string } = {}) => `/mock${path}`
-  );
+  getUrlForApp = jest.fn((_appId: string, { path = '' }: { path?: string } = {}) => `/mock${path}`);
   mockUseKibana.mockReturnValue({
     services: {
       application: { getUrlForApp, navigateToApp },
